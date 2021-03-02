@@ -27,6 +27,30 @@ class Operations extends CI_Controller {
         echo json_encode($this->operations->getTableData($tableName, $columnName, $searchFilter, $orderBy));
     }
 
+    public function getUploadedFiles()
+    {
+        $data = [];
+        if (is_array($_FILES)) {
+            $fileName = $keyName = "";
+            $fileLength = count($_FILES["tableData"]["name"]["file"]);
+            for($i=0; $i<$fileLength; $i++) {
+                $target_dir = "assets/upload-files/";
+                $keyArr = explode(".", $_FILES["tableData"]["name"]["file"][$i]);
+                $keyName = $keyArr[0];
+                $fileType = pathinfo(basename($_FILES["tableData"]["name"]["file"][$i]),PATHINFO_EXTENSION);
+                $target_file = $target_dir.$i.time().'.'.$fileType;
+    
+                if (move_uploaded_file($_FILES["tableData"]["tmp_name"]["file"][$i], $target_file)) {
+                    $temp = $i.time().'.'.$fileType;
+                    $fileName = $fileName ? $fileName."|".$temp : $temp;
+                    
+                }
+            }
+            $data[$keyName] = $fileName;
+        }
+        return $data;
+    }
+
     public function insertTableData() 
     {
         $tableName = $this->input->post("tableName") ? $this->input->post("tableName") : null;
@@ -34,12 +58,18 @@ class Operations extends CI_Controller {
         $feedback  = $this->input->post("feedback")  ? $this->input->post("feedback") : null;
         $data = array();
 
+        $uploadedFiles = $this->getUploadedFiles();
+        if ($uploadedFiles) {
+            foreach ($uploadedFiles as $fileKey => $fileValue) {
+                $data[$fileKey] = $fileValue;
+            }
+        }
+
         if ($tableData) {
             foreach ($tableData as $key => $value) {
-                // $output = is_array($value) ? implode("|", $value) : $value;
                 $data[$key] = $value;
             }
-            echo json_encode($this->operations->insertTableData($tableName, $tableData, $feedback));
+            echo json_encode($this->operations->insertTableData($tableName, $data, $feedback));
         } else {
             echo json_encode("false|Invalid arguments");
         }
@@ -53,11 +83,18 @@ class Operations extends CI_Controller {
         $feedback    = $this->input->post("feedback")  ? $this->input->post("feedback") : null;
         $data = array();
 
+        $uploadedFiles = $this->getUploadedFiles();
+        if ($uploadedFiles) {
+            foreach ($uploadedFiles as $fileKey => $fileValue) {
+                $data[$fileKey] = $fileValue;
+            }
+        }
+        
         if ($tableName && $tableData && $whereFilter) {
             foreach ($tableData as $key => $value) {
                 $data[$key] = $value;
             }
-            echo json_encode($this->operations->updateTableData($tableName, $tableData, $whereFilter, $feedback));
+            echo json_encode($this->operations->updateTableData($tableName, $data, $whereFilter, $feedback));
         } else {
             echo json_encode("false|Invalid arguments");
         }

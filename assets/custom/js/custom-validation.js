@@ -38,6 +38,7 @@ const initAll = () => {
     initSelect2();
     initDateRangePicker();
     initInputmask();
+    initAmount();
 }
 // ----- END REINITIALIZE ALL FUNCTION -----
 
@@ -83,7 +84,6 @@ initDateRangePicker();
 
 // ----- INITIALIZE INPUTMASK -----
 const initInputmask = (element = null) => {
-
     let elem = getElement(element, '.inputmask');
     $(elem).each(function() {
         let mask = $(this).attr("mask");
@@ -100,6 +100,26 @@ const initInputmask = (element = null) => {
 }
 initInputmask();
 // ----- END INITIALIZE INPUTMASK -----
+
+
+// ----- INITIALIZE AMOUNT FORMAT -----
+const initAmount = (element = null) => {
+    let elem = getElement(element, '.amount');
+    $(elem).inputmask({
+        alias:           'decimal', 
+        groupSeparator:  ',', 
+        autoGroup:       true, 
+        digits:          2, 
+        digitsOptional:  false, 
+        prefix:          ' ', 
+        placeholder:     '0.00', 
+        showMaskOnHover: false, 
+        rightAlign:      true, 
+        showMaskOnFocus: false
+    });
+}
+initAmount();
+// ----- END INITIALIZE AMOUNT FORMAT -----
 
 
 // ----- GET DATABASE TABLE DATA -----
@@ -133,6 +153,7 @@ const getTableData = (tableName = null, columnName = "", searchFilter = "", orde
 // ----- END GET DATABASE TABLE DATA -----
 
 
+// ----- RESET FORM -----
 const resetForm = (formID = null) => {
     if (formID) {
         $("#"+formID).find(differentInputStr).each(function() {
@@ -144,20 +165,23 @@ const resetForm = (formID = null) => {
                     $(elementID).parent().parent().find(".invalid-feedback") : $(elementID).parent().parent().parent().find(".invalid-feedback"));
             
             $(elementID).removeClass("is-invalid").removeClass("is-valid").removeClass("has-error").removeClass("no-error").removeClass("validated");
+            $(elementID).parent().children().next().next().children().children().removeClass("has-error").removeClass("no-error");
+            $(elementID).parent().removeClass("is-invalid").removeClass("is-valid").removeClass("has-error").removeClass("no-error");
             $("select"+elementID).length > 0 ? $("select"+elementID).val("").trigger("change") : $(elementID).val("");
             $(elementID+"[type=checkbox]").prop("checked", false);
             invalidFeedback.text("");
-            $(elementID).parent().removeClass("is-invalid").removeClass("is-valid").removeClass("has-error").removeClass("no-error");
         })
     }
 }
+// ----- END RESET FORM -----
 
 
-// ----- GET MODAL DATA -----
-const getModalData = (formID = null) => {
+// ----- GET FORM DATA -----
+const getFormData = (formID = null) => {
     let result = [], output = {
         tableData: {}
     };
+    let formData = new FormData();
     if (formID) {
         const inputs = $("#"+formID+" .modal-body").find(differentInputStr, item => item);
         for (let i=0; i<inputs.length; i++) {
@@ -172,6 +196,19 @@ const getModalData = (formID = null) => {
                 } else {
                     flag = false;
                 }
+            }
+            if (inputs[i].type == "file") {
+                let file = document.getElementById(id);
+                let fileLength = file.files.length;
+                if (fileLength > 0) {
+                    for(var j=0; j<fileLength; j++) {
+                        let file = $("#"+id)[0].files[j];
+                        let fileType = file.name.split(".");
+                        let fileName = `${name}.${fileType[1]}`;
+                        formData.append(`tableData[${name}][]`, file, fileName);
+                    }
+                }
+                countFlag++;
             }
             if (inputs[i].type == "checkbox") {
                 if ($(`#${id}[name=${name}]`).length > 1) {
@@ -189,22 +226,25 @@ const getModalData = (formID = null) => {
                     value = date.format("YYYY-MM-DD");
                 }
             }
+            if (inputs[i].className.indexOf("amount") != -1) {
+                value = value.replace(",", "");
+            }
             const data = {id, name, value};
             result.length > 0 && result.map(item => {
                 item.name === name && item.id === id && countFlag++;
             })
             if (flag && countFlag == 0) {
                 result.push(data)
-                if (Array.isArray(value)) {
+                if (Array.isArray(value) && inputs[i].type != "file") {
                     value = value.join("|");
                 }
-                output.tableData[name] = value;
+                formData.append(`tableData[${name}]`, value);
             }
         }
     }
-    return output;
+    return formData;
 }
-// ----- END GET MODAL DATA -----
+// ----- END GET FORM DATA -----
 
 
 // ----- VALIDATE INPUT LENGTH -----
@@ -243,16 +283,55 @@ const checkLength = (elementID, invalidFeedback) => {
 
 
 // ----- VALIDATE CURRENCY -----
-const checkCurrency = (elementID, invalidFeedback, value) => {
+const checkAmount = (elementID, invalidFeedback, value) => {
     const validated = $(elementID).hasClass("validated");
+    const min = $(elementID).attr("min") ? +$(elementID).attr("min") : false;
+    const max = $(elementID).attr("max") ? +$(elementID).attr("max") : false;
     let currencyValue = +(value.split(',').join(""));
-    if (currencyValue > 0) {
+
+    if (!min && !max) {
         validated ? $(elementID).removeClass("is-invalid").addClass("is-valid") : $(elementID).removeClass("is-invalid").removeClass("is-valid");
         invalidFeedback.text("");
+    } else if (!min && max) {
+        if (currencyValue > max) {
+            $(elementID).removeClass("is-valid").addClass("is-invalid");
+            invalidFeedback.text(`Please input amount less than ${max}`);
+        } else {
+            validated ? $(elementID).removeClass("is-invalid").addClass("is-valid") : $(elementID).removeClass("is-invalid").removeClass("is-valid");
+            invalidFeedback.text("");
+        }
+    } else if (min && !max) {
+        if (currencyValue < min) {
+            $(elementID).removeClass("is-valid").addClass("is-invalid");
+            invalidFeedback.text(`Please input amount greater than ${min}`);
+        } else {
+            validated ? $(elementID).removeClass("is-invalid").addClass("is-valid") : $(elementID).removeClass("is-invalid").removeClass("is-valid");
+            invalidFeedback.text("");
+        }
+    } else if (min && max) {
+        
+        if (currencyValue >= min && currencyValue > max) {
+            $(elementID).removeClass("is-valid").addClass("is-invalid");
+            invalidFeedback.text(`Please input amount less than ${max}`);
+        } else if (currencyValue >= min && currencyValue <= max) {
+            // DISREGARD
+        } else if (currencyValue < min && currencyValue <= max) {
+            $(elementID).removeClass("is-valid").addClass("is-invalid");
+            invalidFeedback.text(`Please input amount greater than ${min}`);
+        }
+
     } else {
-        $(elementID).removeClass("is-valid").addClass("is-invalid");
-        invalidFeedback.text("This field is required.");
+        validated ? $(elementID).removeClass("is-invalid").addClass("is-valid") : $(elementID).removeClass("is-invalid").removeClass("is-valid");
+        invalidFeedback.text("");
     }
+
+    // if (currencyValue > 0) {
+    //     validated ? $(elementID).removeClass("is-invalid").addClass("is-valid") : $(elementID).removeClass("is-invalid").removeClass("is-valid");
+    //     invalidFeedback.text("");
+    // } else {
+    //     $(elementID).removeClass("is-valid").addClass("is-invalid");
+    //     invalidFeedback.text("This field is required.");
+    // }
 }
 // ----- END VALIDATE CURRENCY -----
 
@@ -330,7 +409,7 @@ const checkURL = (elementID, invalidFeedback, value) => {
 // ----- VALIDATE INPUTS -----
 const validateInput = (elementID) => {
     $(elementID).addClass("validated");
-    let currency  = $(elementID).hasClass("currency");
+    let currency  = $(elementID).hasClass("amount");
     let required  = $(elementID).attr("required");
     let value     = $(`select${elementID}`).length > 0 ? $(elementID).val() : $(elementID).val().trim();
     let valLength = value ? value.length : 0;
@@ -395,7 +474,7 @@ const validateInput = (elementID) => {
                 $(elementID).removeClass("is-invalid").addClass("is-valid");
                 invalidFeedback.text("");
                 checkLength(elementID, invalidFeedback);
-                currency && checkCurrency(elementID, invalidFeedback, value);
+                currency && checkAmount(elementID, invalidFeedback, value);
                 checkEmail(elementID, invalidFeedback, value);
                 checkURL(elementID, invalidFeedback, value);
                 checkExists(elementID, invalidFeedback);
@@ -403,7 +482,7 @@ const validateInput = (elementID) => {
         } else {
             $(elementID).removeClass("is-invalid").addClass("is-valid");
             valLength > 0 && checkLength(elementID, invalidFeedback);
-            currency && checkCurrency(elementID, invalidFeedback, value);
+            currency && checkAmount(elementID, invalidFeedback, value);
             checkEmail(elementID, invalidFeedback, value);
             checkURL(elementID, invalidFeedback, value);
             checkExists(elementID, invalidFeedback);
@@ -434,12 +513,14 @@ const validateForm = (formID = null) => {
 const saveUpdateDeleteTableData = async (data, path) => {
     let flag;
     $.ajax({
-        method: "POST",
-        url: path,
+        method:  "POST",
+        url:      path,
         data,
-        global: false,
-        cache: false,
-        async: false,
+        processData: false,
+        contentType: false,
+        global:   false,
+        cache:    false,
+        async:    false,
         dataType: "json",
         beforeSend: function() {
             $("#loader").show();
@@ -556,7 +637,7 @@ $(function() {
         let minLength = $(this).attr("minlength");
         let maxLength = $(this).attr("maxlength");
         let validated = $(this).hasClass("validated");
-        let currency  = $(this).hasClass("currency");
+        let currency  = $(this).hasClass("amount");
         let value     = $(this).val().trim();
         let valLength = value.length;
         let invalidFeedback = 
@@ -569,23 +650,23 @@ $(function() {
             validated ? $(elementID).removeClass("is-invalid").addClass("is-valid") : $(elementID).removeClass("is-valid").removeClass("is-invalid");
             invalidFeedback.text("");
             valLength > 0 && checkLength(elementID, invalidFeedback);
-            currency && checkCurrency(elementID, invalidFeedback, value);
+            currency && checkAmount(elementID, invalidFeedback, value);
             checkEmail(elementID, invalidFeedback, value);
             checkURL(elementID, invalidFeedback, value);
             checkExists(elementID, invalidFeedback);
-            if ((valLength) <= 0) {
+            if (required && (valLength) <= 0) {
                 $(elementID).removeClass("is-valid").addClass("is-invalid");
                 invalidFeedback.text("This field is required.");
             }
         } else {
-            if ((valLength) <= 0) {
+            if (required && (valLength) <= 0) {
                 $(elementID).removeClass("is-valid").addClass("is-invalid");
                 invalidFeedback.text("This field is required.");
             } else {
                 validated ? $(elementID).removeClass("is-invalid").addClass("is-valid") : $(elementID).removeClass("is-valid").removeClass("is-invalid");
                 invalidFeedback.text("");
                 checkLength(elementID, invalidFeedback);
-                currency && checkCurrency(elementID, invalidFeedback, value);
+                currency && checkAmount(elementID, invalidFeedback, value);
                 checkEmail(elementID, invalidFeedback, value);
                 checkURL(elementID, invalidFeedback, value);
                 checkExists(elementID, invalidFeedback);
@@ -642,4 +723,29 @@ $(function() {
     })
     // ----- END EVERY TIME THE SELECT CHANGES -----
 
+})
+
+
+
+
+
+$(document).on("click", "#btnSaveConfirmationAdd", function() {
+    /**
+     * ----- FORM DATA -----
+     * tableData = {} -> Objects
+     */
+    let data = getFormData("modal_user_account");
+    data.append("tableName", "user_account_tbl");
+    data.append("feedback", "Your choice");
+    /**
+     * ----- DATA -----
+     * 1. tableName
+     * 2. tableData
+     * 3. feedback
+     */
+
+    const saveData = insertTableData(data);
+    if (saveData) {
+       tableContent();
+    }
 })

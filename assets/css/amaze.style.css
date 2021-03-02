@@ -52,6 +52,10 @@
     opacity: 0.4;
 }
 
+.modal {
+    overflow: auto !important;
+}
+
 @media only screen and (max-width: 1280px) {
     .listamenities {
         border:2px solid #ccc !important; 
