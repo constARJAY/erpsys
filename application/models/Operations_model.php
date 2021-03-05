@@ -8,13 +8,14 @@ class Operations_model extends CI_Model {
         parent::__construct();
     }    
 
-    public function getTableData($tableName = null, $columnName = "*", $searchFilter = "", $orderBy = "")
+    public function getTableData($tableName = null, $columnName = "*", $searchFilter = "", $orderBy = "", $groupBy = "")
     {
         if ($tableName) {
             $columnName  = $columnName   ? $columnName : "*";
             $whereFilter = $searchFilter ? "WHERE $searchFilter" : "";
             $orderFilter = $orderBy ? "ORDER BY $orderBy" : "";
-            $sql         = "SELECT $columnName FROM $tableName $whereFilter $orderFilter";
+            $groupFilter = $groupBy ? "GROUP BY $groupBy" : "";
+            $sql         = "SELECT $columnName FROM $tableName $whereFilter $orderFilter $groupFilter";
             $query       = $this->db->query($sql);
             return $query ? $query->result_array() : [];
         }

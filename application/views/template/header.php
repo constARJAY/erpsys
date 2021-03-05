@@ -264,149 +264,54 @@ input:checked + .slider:before {
                 <div class="col-12">
                     <div class="menu">
                         <ul class="list">
-                            <li class="header">MAIN</li>
-                            <li class="active open">
-                                <a href="javascript:void(0);" class="menu-toggle"><i class="zmdi zmdi-home"></i><span>Dashboard</span></a>
-                                <ul class="ml-menu">
-                                    <li class="active"><a href="index.html">Analytics Dashboard</a></li>
-                                    <li><a href="hopital/index.html">Hospital Template</a></li>
-                                    <li><a href="hr/index.html">HRMS Template</a></li>
-                                    <li><a href="university/index.html">University Template</a></li>
-                                    <li><a href="realestate/index.html">RealEstate Template</a></li>
-                                </ul>
-                            </li>
-                            <li><a href="javascript:void(0);" class="menu-toggle"><i class="zmdi zmdi-apps"></i><span>App</span></a>
-                                <ul class="ml-menu">
-                                    <li><a href="mail-inbox.html">Inbox</a></li>
-                                    <li><a href="chat.html">Chat</a></li>
-                                    <li><a href="events.html">Calendar</a></li>
-                                    <li><a href="file-dashboard.html">File Manager</a></li>
-                                    <li><a href="contact.html">Contact list</a></li>
-                                    <li><a href="blog-dashboard.html">Blog</a></li>
-                                    <li><a href="app-ticket.html">Support Ticket</a></li>
-                                    <li><a href="taskboard.html">Taskboard</a></li>
-                                </ul>
-                            </li>
-                            <li>
-                                <a href="javascript:void(0);" class="menu-toggle"><i class="zmdi zmdi-shopping-basket"></i><span>Ecommerce</span></a>
-                                <ul class="ml-menu">
-                                    <li><a href="ec-dashboard.html">Dashboard</a></li>
-                                    <li><a href="ec-product.html">Products</a></li>
-                                    <li><a href="ec-product-detail.html">Product Detail</a></li>
-                                    <li><a href="ec-product-List.html">Product List</a></li>
-                                    <li><a href="ec-product-order.html">Orders page</a></li>
-                                    <li><a href="ec-product-cart.html">Cart page</a></li>
-                                    <li><a href="ec-checkout.html">Checkout</a></li>
-                                </ul>
-                            </li>
-                            <li>
-                                <a href="javascript:void(0);" class="menu-toggle"><i class="zmdi zmdi-layers"></i><span>UI Elements</span></a>
-                                <ul class="ml-menu mega_menu">
-                                    <div class="row">
-                                        <div class="col-md-3 col-sm-12">
-                                            <li><a href="ui-kit.html">UI KIT</a></li>                    
-                                            <li><a href="ui-alerts.html">Alerts</a></li>                    
-                                            <li><a href="ui-collapse.html">Collapse</a></li>
-                                            <li><a href="ui-colors.html">Colors</a></li>
-                                        </div>
-                                        <div class="col-md-3 col-sm-12">
-                                            <li><a href="ui-dialogs.html">Dialogs</a></li>
-                                            <li><a href="ui-icons.html">Icons</a></li>                    
-                                            <li><a href="ui-listgroup.html">List Group</a></li>
-                                            <li><a href="ui-mediaobject.html">Media Object</a></li>
-                                        </div>
-                                        <div class="col-md-3 col-sm-12">
-                                            <li><a href="ui-modals.html">Modals</a></li>
-                                            <li><a href="ui-notifications.html">Notifications</a></li>                    
-                                            <li><a href="ui-progressbars.html">Progress Bars</a></li>
-                                            <li><a href="ui-rangesliders.html">Range Sliders</a></li>
-                                        </div>
-                                        <div class="col-md-3 col-sm-12">
-                                            <li><a href="ui-sortablenestable.html">Sortable & Nestable</a></li>
-                                            <li><a href="ui-tabs.html">Tabs</a></li>
-                                            <li><a href="ui-waves.html">Waves</a></li>
-                                        </div>
-                                    </div>
-                                </ul>
-                            </li>
-                            <li class="header">FORMS, CHARTS, TABLES</li>
-                            <li><a href="javascript:void(0);" class="menu-toggle"><i class="zmdi zmdi-file-text"></i><span>Forms</span></a>
-                                <ul class="ml-menu">
-                                    <li><a href="form-basic.html">Basic Elements</a></li>
-                                    <li><a href="form-advanced.html">Advanced Elements</a></li>
-                                    <li><a href="form-examples.html">Form Examples</a></li>
-                                    <li><a href="form-validation.html">Form Validation</a></li>
-                                    <li><a href="form-wizard.html">Form Wizard</a></li>
-                                    <li><a href="form-editors.html">Editors</a></li>
-                                    <li><a href="form-upload.html">File Upload</a></li>
-                                    <li><a href="form-img-cropper.html">Image Cropper</a></li>
-                                    <li><a href="form-summernote.html">Summernote</a></li>
-                                </ul>
-                            </li>
-                            <li><a href="javascript:void(0);" class="menu-toggle"><i class="zmdi zmdi-format-list-bulleted"></i><span>Tables</span></a>
-                                <ul class="ml-menu">                        
-                                    <li><a href="table-normal.html">Normal Tables</a></li>
-                                    <li><a href="table-jquerydatatable.html">Jquery Datatables</a></li>
-                                    <li><a href="table-editable.html">Editable Tables</a></li>                                
-                                    <li><a href="table-color.html">Tables Color</a></li>
-                                    <li><a href="table-filter.html">Tables Filter</a></li>
-                                </ul>
-                            </li>            
-                            <li><a href="javascript:void(0);" class="menu-toggle"><i class="zmdi zmdi-chart"></i><span>Charts</span></a>
-                                <ul class="ml-menu">
-                                    <li><a href="apex.html">Apex chart</a></li>
-                                    <li><a href="c3.html">C3 chart</a></li>
-                                    <li><a href="echart.html">eCharts</a></li>
-                                    <li><a href="morris.html">Morris chart</a></li>
-                                    <li><a href="flot.html">Flot chart</a></li>
-                                    <li><a href="chartjs.html">ChartJS</a></li>
-                                    <li><a href="jquery-knob.html">Jquery Knob</a></li>
-                                    <li><a href="sparkline.html">Sparkline</a></li>
-                                </ul>
-                            </li>
-                            <li class="header">EXTRA COMPONENTS</li>                    
-                            <li><a href="javascript:void(0);" class="menu-toggle"><i class="zmdi zmdi-widgets"></i><span>Widgets</span></a>
-                                <ul class="ml-menu">
-                                    <li><a href="widgets-app.html">Apps Widgetse</a></li>
-                                    <li><a href="widgets-data.html">Data Widgetse</a></li>
-                                    <li><a href="widgets-chart.html">Chart Widgetse</a></li>
-                                </ul>
-                            </li>
-                            <li><a href="javascript:void(0);" class="menu-toggle"><i class="zmdi zmdi-lock"></i><span>Auth</span></a>
-                                <ul class="ml-menu">
-                                    <li><a href="sign-in.html">Sign In</a></li>
-                                    <li><a href="sign-up.html">Sign Up</a></li>
-                                    <li><a href="forgot-password.html">Forgot Password</a></li>
-                                    <li><a href="404.html">Page 404</a></li>
-                                    <li><a href="403.html">Page 403</a></li>
-                                    <li><a href="500.html">Page 500</a></li>
-                                    <li><a href="503.html">Page 503</a></li>
-                                    <li><a href="page-offline.html">Page Offline</a></li>
-                                    <li><a href="locked.html">Locked Screen</a></li>
-                                </ul>
-                            </li>
-                            <li><a href="javascript:void(0);" class="menu-toggle"><i class="zmdi zmdi-folder"></i><span>Pages</span></a>
-                                <ul class="ml-menu">
-                                    <li><a href="blank.html">Blank Page</a></li>
-                                    <li><a href="profile.html">Profile</a></li>
-                                    <li><a href="teams-board.html">Teams Board</a></li>
-                                    <li><a href="projects.html">Projects List</a></li>
-                                    <li><a href="image-gallery.html">Image Gallery</a></li>
-                                    <li><a href="timeline.html">Timeline</a></li>
-                                    <li><a href="horizontal-timeline.html">Horizontal Timeline</a></li>
-                                    <li><a href="pricing.html">Pricing</a></li>
-                                    <li><a href="invoices.html">Invoices</a></li>
-                                    <li><a href="faqs.html">FAQs</a></li>
-                                    <li><a href="search-results.html">Search Results</a></li>
-                                    <li><a href="helper-class.html">Helper Classes</a></li>
-                                </ul>
-                            </li>
-                            <li><a href="javascript:void(0);" class="menu-toggle"><i class="zmdi zmdi-map"></i><span>Maps</span></a>
-                                <ul class="ml-menu">
-                                    <li><a href="map-yandex.html">YandexMap</a></li>
-                                    <li><a href="map-jvectormap.html">jVectorMap</a></li>
-                                </ul>
-                            </li>                
+                            <?php
+                                $modules = getModuleContent();
+                                $content = "";
+                                foreach ($modules as $key1 => $module) {
+                                    $html = "";
+                                    $flag = false;
+                                    $header  = $module["header"];
+                                    $modules = $module["modules"];
+                                    $html .= '<li class="header">'.$header.'</li>';
+                                    foreach ($modules as $key2 => $module2) {
+                                        $category  = $module2["category"];
+                                        $names     = $module2["names"];
+                                        $icon      = $module2["icon"];
+                                        $liClass   = $key2 == 0 ? "active open" : "";
+
+                                        $flag = count($names) > 0 ? true : false;
+
+                                        if ($category) {
+                                            $html .= '
+                                            <li class="">
+                                                <a href="javascript:void(0);" class="menu-toggle">
+                                                    <img src="'.base_url("assets/upload-files/icons/$icon").'" height="25" width="25">
+                                                    <span class="ml-1">'.$category.'</span>
+                                                </a>
+                                                <ul class="ml-menu">';
+                                            foreach ($names as $key3 => $item) {
+                                                $liClass2 = $key3 == 0 ? "active" : "";
+                                                $html .= '
+                                                <li class="">
+                                                    <a href="'.$item["controller"].'/index">'.$item["name"].'</a>
+                                                </li>';
+                                            }
+                                            $html .= '
+                                                </ul>
+                                            </li>';
+                                        } else {
+                                            $html .= '
+                                            <li class="'.$liClass.'">
+                                                <a href="'.$names[0]["controller"].'/index">'.$names[0]["name"].'</a>
+                                            </li>';
+                                        }
+                                    }
+                                    if ($flag) {
+                                        $content .= $html;
+                                    }
+                                }
+                                echo $content;
+                            ?>
                         </ul>
                     </div>
                 </div>

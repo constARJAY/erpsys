@@ -24,29 +24,39 @@ class Operations extends CI_Controller {
         $columnName   = $this->input->post("columnName"); 
         $searchFilter = $this->input->post("searchFilter");
         $orderBy      = $this->input->post("orderBy");
-        echo json_encode($this->operations->getTableData($tableName, $columnName, $searchFilter, $orderBy));
+        $groupBy      = $this->input->post("groupBy");
+        echo json_encode($this->operations->getTableData($tableName, $columnName, $searchFilter, $orderBy, $groupBy));
     }
 
     public function getUploadedFiles()
     {
         $data = [];
         if (is_array($_FILES)) {
-            $fileName = $keyName = "";
-            $fileLength = count($_FILES["tableData"]["name"]["file"]);
-            for($i=0; $i<$fileLength; $i++) {
-                $target_dir = "assets/upload-files/";
-                $keyArr = explode(".", $_FILES["tableData"]["name"]["file"][$i]);
-                $keyName = $keyArr[0];
-                $fileType = pathinfo(basename($_FILES["tableData"]["name"]["file"][$i]),PATHINFO_EXTENSION);
-                $target_file = $target_dir.$i.time().'.'.$fileType;
-    
-                if (move_uploaded_file($_FILES["tableData"]["tmp_name"]["file"][$i], $target_file)) {
-                    $temp = $i.time().'.'.$fileType;
-                    $fileName = $fileName ? $fileName."|".$temp : $temp;
-                    
+            if (count($_FILES) > 0) {
+                $keys = array_keys($_FILES["tableData"]["name"]);
+                $fileKeyStr = $keys[0];
+                $fileKeyArr = explode("|", $keys[0]);
+                $fileKey    = $fileKeyArr[0];
+                $folder     = $fileKeyArr[1] ? $fileKeyArr[1] : "";
+                $fileName   = "";
+                $fileLength = count($_FILES["tableData"]["name"][$fileKeyStr]);
+                for($i=0; $i<$fileLength; $i++) {
+                    $target_dir = "assets/upload-files/$folder/";
+                    if (!is_dir($target_dir)) {
+                        mkdir($target_dir);
+                    }
+                    $keyArr = explode(".", $_FILES["tableData"]["name"][$fileKeyStr][$i]);
+                    $fileType = pathinfo(basename($_FILES["tableData"]["name"][$fileKeyStr][$i]),PATHINFO_EXTENSION);
+                    $target_file = $target_dir.$i.time().'.'.$fileType;
+        
+                    if (move_uploaded_file($_FILES["tableData"]["tmp_name"][$fileKeyStr][$i], $target_file)) {
+                        $temp = $i.time().'.'.$fileType;
+                        $fileName = $fileName ? $fileName."|".$temp : $temp;
+                        
+                    }
                 }
+                $data[$fileKey] = $fileName;
             }
-            $data[$keyName] = $fileName;
         }
         return $data;
     }
@@ -65,9 +75,11 @@ class Operations extends CI_Controller {
             }
         }
 
-        if ($tableData) {
-            foreach ($tableData as $key => $value) {
-                $data[$key] = $value;
+        if ($tableName) {
+            if ($tableData && count($tableData) > 0) {
+                foreach ($tableData as $key => $value) {
+                    $data[$key] = $value;
+                }
             }
             echo json_encode($this->operations->insertTableData($tableName, $data, $feedback));
         } else {
@@ -90,9 +102,11 @@ class Operations extends CI_Controller {
             }
         }
         
-        if ($tableName && $tableData && $whereFilter) {
-            foreach ($tableData as $key => $value) {
-                $data[$key] = $value;
+        if ($tableName && $whereFilter) {
+            if ($tableData && count($tableData) > 0) {
+                foreach ($tableData as $key => $value) {
+                    $data[$key] = $value;
+                }
             }
             echo json_encode($this->operations->updateTableData($tableName, $data, $whereFilter, $feedback));
         } else {
