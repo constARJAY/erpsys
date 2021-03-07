@@ -287,22 +287,43 @@ input:checked + .slider:before {
                                                 <a href="javascript:void(0);" class="menu-toggle">
                                                     <img src="'.base_url("assets/upload-files/icons/$icon").'" height="25" width="25">
                                                     <span class="ml-1">'.$category.'</span>
-                                                </a>
-                                                <ul class="ml-menu">';
-                                            foreach ($names as $key3 => $item) {
-                                                $liClass2 = $key3 == 0 ? "active" : "";
+                                                </a>';
+
+                                            if (count($names) > 12) {
                                                 $html .= '
-                                                <li class="">
-                                                    <a href="'.$item["controller"].'/index">'.$item["name"].'</a>
-                                                </li>';
+                                                <ul class="ml-menu mega_menu">
+                                                <div class="row">';
+                                                foreach ($names as $key3 => $item) {
+                                                    $html .= '
+                                                    <div class="col-xl-3 col-md-4 col-sm-12">
+                                                    <li class="">
+                                                        <a href="'.$item["controller"].'">'.$item["name"].'</a>
+                                                    </li>
+                                                    </div>';
+                                                }
+                                                $html .= '</div>';
+                                            } else {
+                                                $html .= '
+                                                <ul class="ml-menu">';
+                                                foreach ($names as $key3 => $item) {
+                                                    $liClass2 = $key3 == 0 ? "active" : "";
+                                                    $html .= '
+                                                    <li class="">
+                                                        <a href="'.$item["controller"].'">'.$item["name"].'</a>
+                                                    </li>';
+                                                }
                                             }
+
                                             $html .= '
                                                 </ul>
                                             </li>';
                                         } else {
                                             $html .= '
-                                            <li class="'.$liClass.'">
-                                                <a href="'.$names[0]["controller"].'/index">'.$names[0]["name"].'</a>
+                                            <li class="">
+                                                <a href="'.$names[0]["controller"].'">
+                                                    <img src="'.base_url("assets/upload-files/icons/$icon").'" height="25" width="25">
+                                                    '.$names[0]["name"].'
+                                                </a>
                                             </li>';
                                         }
                                     }

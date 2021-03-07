@@ -19,11 +19,12 @@ class Modules extends CI_Controller {
 
     public function getModuleContent()
     {
-        $moduleContent = $this->modules->getModuleContent();
-        foreach ($moduleContent as $content) {
-            echo json_encode($content);
-            echo "<br><br>";
-        }
+        // $moduleContent = $this->modules->getModuleContent();
+        // foreach ($moduleContent as $content) {
+        //     echo json_encode($content);
+        //     echo "<br><br>";
+        // }
+        echo json_encode(getModuleContent());
         // echo json_encode($moduleContent);
     }
 

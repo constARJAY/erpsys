@@ -241,6 +241,13 @@
 
             $("#modalTitle").text(modalTitle);
 
+            const moduleHeaderList = getTableData("module_list_tbl", "", "moduleStatus = 1", "", "moduleHeader");
+            let moduleHeaderOptions = "";
+            moduleHeaderList.map(item => {
+                let moduleHeader = item.moduleHeader;
+                moduleHeaderOptions += `<option value="${moduleHeader}">`;
+            })
+
             let button = moduleID ? `
             <button 
                 class="btn btn-primary px-5 p-2" 
@@ -274,7 +281,9 @@
                         <div class="form-group">
                             <label>Module Header <code>*</code></label>
                             <input type="text" class="form-control validate titlecase" name="moduleHeader" id="input_moduleHeader" data-allowcharacters="[a-z][A-Z][-][ ]" minlength="2" minlength="12" list="list_moduleHeader" autocomplete="off" required unique="${moduleID}" value="${moduleHeader}">
-                            <datalist id="list_moduleHeader"></datalist>
+                            <datalist id="list_moduleHeader">
+                                ${moduleHeaderOptions}
+                            </datalist>
                             <div class="d-block invalid-feedback" id="invalid-input_moduleHeader"></div>
                         </div>
                     </div>
@@ -349,23 +358,7 @@
         // ----- END MODAL CONTENT -----
 
 
-        // ----- MODULE HEADER SUGGESTION -----
-        $(document).on("focus", "#input_moduleHeader", function() {
-            const projectName = $("#input_projectName").val();
-            if (projectName) {
-                const moduleHeaderList = getTableData("module_list_tbl", "", "projectName = '"+projectName+"' AND moduleStatus = 1", "", "moduleHeader");
-                let html = "";
-                moduleHeaderList.map(item => {
-                    let moduleHeader = item.moduleHeader;
-                    html += `<option value="${moduleHeader}">`;
-                })
-                $("#list_moduleHeader").html(html);
-            }
-        })
-        // ----- END MODULE HEADER SUGGESTION -----
-
-
-        // ----- MODULE HEADER SUGGESTION -----
+        // ----- MODULE CATEGORY SUGGESTION -----
         $(document).on("focus", "#input_moduleCategory", function() {
             const projectName  = $("#input_projectName").val();
             const moduleHeader = $("#input_moduleHeader").val();
@@ -379,7 +372,7 @@
                 $("#list_moduleCategory").html(html);
             }
         })
-        // ----- END MODULE HEADER SUGGESTION -----
+        // ----- END MODULE CATEGORY SUGGESTION -----
 
 
         // ----- CHECK MODULE APPROVER -----

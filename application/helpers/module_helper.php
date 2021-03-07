@@ -41,11 +41,9 @@
                 // ----- END getAllModules -----
 
                 foreach ($allModules as $module) {
-                    $moduleID   = $module["moduleID"];
                     $moduleName = $module["moduleName"];
                     $moduleController = $module["moduleController"];
                     array_push($modules["names"], [
-                        "id"         => $moduleID,
                         "name"       => $moduleName,
                         "controller" => $moduleController
                     ]);
@@ -54,5 +52,5 @@
             }
             array_push($result, $temp);
         }
-        return array_reverse($result);
+        return $result;
     }
