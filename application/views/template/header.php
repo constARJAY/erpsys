@@ -5,7 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=Edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta name="description" content="Web Portal Blackcoders">
-    <title><?=$title?></title>
+    <title><?= $title ?> | BlackBox ERP System</title>
 
     <link rel="icon" href="<?=base_url("assets/images/logo.ico")?>" type="image/x-icon">
     <link rel="stylesheet" href="<?=base_url('assets/plugins/bootstrap/css/bootstrap.min.css')?>">
@@ -23,6 +23,11 @@
     <link rel="stylesheet" href="<?=base_url('assets/css/daterangepicker.css')?>">
     <link rel="stylesheet" href="<?=base_url('assets/plugins/jquery-datatable/dataTables.bootstrap4.min.css')?>">
     <link rel="stylesheet" href="<?=base_url('assets/plugins/bootstrap-datetimepicker/bootstrap-datetimepicker.css')?>">
+    <!-- <link rel="stylesheet" href="<?=base_url('assets/css/amaze.style.min.css')?>"> -->
+    <link rel="stylesheet" href="<?=base_url('assets/css/timeline.css')?>">
+
+    <link rel="stylesheet" href="<?=base_url('assets/font-awesome/css/fontawesome.min.css')?>">
+    <link rel="stylesheet" href="<?=base_url('assets/font-awesome/css/all.min.css')?>">
 
     <script src="<?=base_url('assets/js/jquery-3.2.1.min.js')?>"></script>
     <script src="<?=base_url('assets/js/popper.min.js')?>"></script>
@@ -106,7 +111,7 @@ input:checked + .slider:before {
 
 <input type="hidden" name="base_url" id="base_url" value="<?= base_url() ?>">
 
-<div id="body" class="theme-cyan">
+<div id="body" class="theme-blackbox">
     <!-- Page Loader -->
     <div class="page-loader-wrapper">
         <div class="loader">
@@ -139,91 +144,53 @@ input:checked + .slider:before {
                             <div class="d-flex align-items-center currently_maintain hidden-xs">
                             </div>
                             <ul class="navbar">
+                                <li class="search_bar hidden-sm">
+                                    <div class="input-group">
+                                        <i class="icon-magnifier"></i>
+                                        <input type="text" class="form-control" placeholder="Search module..." id="searchModule" list="moduleList">
+                                    </div>
+                                    <datalist id="moduleList"></datalist>
+                                </li>
                                 <li class="dropdown notifications">
-                                    <a href="javascript:void(0);" class="dropdown-toggle" data-toggle="dropdown" role="button"><i class="icon-bell"></i><span class="label-count">5</span></a>
+                                    <a href="javascript:void(0);" class="dropdown-toggle" data-toggle="dropdown" role="button"><i class="icon-bell"></i><span class="label-count"><?= getCountUnreadNotification() ?></span></a>
                                     <ul class="dropdown-menu">
-                                        <li class="header">New Message</li>
+                                        <li class="header">New Notification</li>
+
                                         <li class="body">
                                             <ul class="menu list-unstyled">
-                                                <li>
-                                                    <a href="javascript:void(0);">
-                                                        <div class="media">
-                                                            <img class="media-object" src="<?= base_url() ?>assets/images/xs/avatar5.jpg" alt="">
-                                                            <div class="media-body">
-                                                                <span class="name">Alexander <span class="time">13min ago</span></span>
-                                                                <span class="message">Meeting with Shawn at Stark Tower by 8 o'clock.</span>
-                                                            </div>
+                                        <?php
+                                            $notifications = getNotificationData();
+                                            if (count($notifications) > 0) {
+                                                foreach ($notifications as $notif) {
+                                        ?>
+                                            <li>
+                                                <a href="<?= $notif["controller"] ?>">
+                                                    <div class="media">
+                                                        <img class="media-object" src="<?= base_url() ?>assets/notification/<?= $notif["icon"] ?>" alt="">
+                                                        <div class="media-body">
+                                                            <span class="name"><?= $notif["title"] ?> <span class="time"><?= $notif["time"] ?></span></span>
+                                                            <span class="message"><?= $notif["description"] ?></span>
                                                         </div>
-                                                    </a>
-                                                </li>
-                                                <li>
-                                                    <a href="javascript:void(0);">
-                                                        <div class="media">
-                                                            <img class="media-object" src="<?= base_url() ?>assets/images/xs/avatar6.jpg" alt="">
-                                                            <div class="media-body">
-                                                                <span class="name">Grayson <span class="time">22min ago</span></span>
-                                                                <span class="message">You have 5 unread emails in your inbox.</span>
-                                                            </div>
-                                                        </div>
-                                                    </a>
-                                                </li>
-                                                <li>
-                                                    <a href="javascript:void(0);">
-                                                        <div class="media">
-                                                            <img class="media-object" src="<?= base_url() ?>assets/images/xs/avatar3.jpg" alt="">
-                                                            <div class="media-body">
-                                                                <span class="name">Sophia <span class="time">31min ago</span></span>
-                                                                <span class="message">OrderPlaced: You received a new oder from Tina.</span>
-                                                            </div>
-                                                        </div>
-                                                    </a>
-                                                </li>                
-                                                <li>
-                                                    <a href="javascript:void(0);">
-                                                        <div class="media">
-                                                            <img class="media-object" src="<?= base_url() ?>assets/images/xs/avatar4.jpg" alt="">
-                                                            <div class="media-body">
-                                                                <span class="name">Isabella <span class="time">35min ago</span></span>
-                                                                <span class="message">Lara added a comment in Blazing Saddles.</span>
-                                                            </div>
-                                                        </div>
-                                                    </a>
-                                                </li>
-                                                <li>
-                                                    <a href="javascript:void(0);">
-                                                        <div class="media">
-                                                            <img class="media-object" src="<?= base_url() ?>assets/images/xs/avatar5.jpg" alt="">
-                                                            <div class="media-body">
-                                                                <span class="name">Alexander <span class="time">13min ago</span></span>
-                                                                <span class="message">Meeting with Shawn at Stark Tower by 8 o'clock.</span>
-                                                            </div>
-                                                        </div>
-                                                    </a>
-                                                </li>
-                                                <li>
-                                                    <a href="javascript:void(0);">
-                                                        <div class="media">
-                                                            <img class="media-object" src="<?= base_url() ?>assets/images/xs/avatar6.jpg" alt="">
-                                                            <div class="media-body">
-                                                                <span class="name">Grayson <span class="time">22min ago</span></span>
-                                                                <span class="message">You have 5 unread emails in your inbox.</span>
-                                                            </div>
-                                                        </div>
-                                                    </a>
-                                                </li>
-                                                <li>
-                                                    <a href="javascript:void(0);">
-                                                        <div class="media">
-                                                            <img class="media-object" src="<?= base_url() ?>assets/images/xs/avatar8.jpg" alt="">
-                                                            <div class="media-body">
-                                                                <span class="name">Sophia <span class="time">48min ago</span></span>
-                                                                <span class="message">OrderPlaced: You received a new oder from Tina.</span>
-                                                            </div>
-                                                        </div>
-                                                    </a>
-                                                </li>
+                                                    </div>
+                                                </a>
+                                            </li>
+                                        <?php          
+                                                }
+                                            } else {
+                                        ?>
+                                            <li class="text-center">
+                                                <a href="javascript:void(0);" class="text-dark py-3">
+                                                    <div class="media">
+                                                        <span>No notification</span>
+                                                    </div>
+                                                </a>
+                                            </li>
+                                        <?php
+                                            }
+                                        ?>
                                             </ul>
                                         </li>
+
                                         <li class="footer"> <a href="javascript:void(0);">View All</a> </li>
                                     </ul>
                                 </li>                        
@@ -297,7 +264,7 @@ input:checked + .slider:before {
                                                     $html .= '
                                                     <div class="col-xl-3 col-md-4 col-sm-12">
                                                     <li class="">
-                                                        <a href="'.$item["controller"].'">'.$item["name"].'</a>
+                                                        <a href="'.strtolower($item["controller"]).'">'.$item["name"].'</a>
                                                     </li>
                                                     </div>';
                                                 }
@@ -309,7 +276,7 @@ input:checked + .slider:before {
                                                     $liClass2 = $key3 == 0 ? "active" : "";
                                                     $html .= '
                                                     <li class="">
-                                                        <a href="'.$item["controller"].'">'.$item["name"].'</a>
+                                                        <a href="'.strtolower($item["controller"]).'">'.$item["name"].'</a>
                                                     </li>';
                                                 }
                                             }
@@ -320,7 +287,7 @@ input:checked + .slider:before {
                                         } else {
                                             $html .= '
                                             <li class="">
-                                                <a href="'.$names[0]["controller"].'">
+                                                <a href="'.strtolower($names[0]["controller"]).'">
                                                     <img src="'.base_url("assets/upload-files/icons/$icon").'" height="25" width="25">
                                                     '.$names[0]["name"].'
                                                 </a>

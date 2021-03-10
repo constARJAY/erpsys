@@ -14,7 +14,7 @@ class Operations extends CI_Controller {
         $data["title"] = "Operations";
 
         $this->load->view("template/header", $data);
-        $this->load->view("operations/index", $data);
+        $this->load->view("gen/operations/index", $data);
         $this->load->view("template/footer", $data);
     }
 

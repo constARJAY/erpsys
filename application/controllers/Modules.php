@@ -13,7 +13,7 @@ class Modules extends CI_Controller {
     {
         $data["title"] = "Modules Masterfile";
         $this->load->view('template/header', $data);
-        $this->load->view('modules/index', $data);
+        $this->load->view('gen/modules/index', $data);
         $this->load->view('template/footer', $data);
     }
 

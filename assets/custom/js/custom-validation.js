@@ -106,16 +106,8 @@ initInputmask();
 const initAmount = (element = null) => {
     let elem = getElement(element, '.amount');
     $(elem).inputmask({
-        alias:           'decimal', 
-        groupSeparator:  ',', 
-        autoGroup:       true, 
-        digits:          2, 
-        digitsOptional:  false, 
-        prefix:          ' ', 
-        placeholder:     '0.00', 
-        showMaskOnHover: false, 
-        rightAlign:      true, 
-        showMaskOnFocus: false
+        alias:           'currency', 
+        prefix:          '', 
     });
 }
 initAmount();
@@ -195,67 +187,74 @@ const clearInputValidation = (elementID = null) => {
 // ----- GET FORM DATA -----
 const getFormData = (formID = null, object = false) => {
     let result = [], output = {
-        tableData: {}
+        tableData: {
+        }
     };
     let formData = new FormData();
     if (formID) {
-        const inputs = $("#"+formID+" .modal-body").find(differentInputStr, item => item);
+        const inputs = $("#"+formID).find(differentInputStr, item => item);
         for (let i=0; i<inputs.length; i++) {
             let flag   = true;
             let countFlag = 0;
             let value  = inputs[i].value; 
             const id   = inputs[i].id;
             const name = inputs[i].name;
-            if (inputs[i].type == "radio") {
-                if (inputs[i].checked) {
-                    value = inputs[i].value;
-                } else {
-                    flag = false;
+            if (id && name) {
+                if ($("#"+id).is("select") && inputs[i].hasAttribute('multiple')) {
+                    let temp = $("#"+id).val();
+                    value = temp.join("|");
                 }
-            }
-            if (inputs[i].type == "file") {
-                let file = document.getElementById(id);
-                let fileLength = file.files.length;
-                if (fileLength > 0) {
-                    for(var j=0; j<fileLength; j++) {
-                        let file = $("#"+id)[0].files[j];
-                        let fileType = file.name.split(".");
-                        let fileName = `${name}.${fileType[1]}`;
-                        formData.append(`tableData[${name}][]`, file, fileName);
+                if (inputs[i].type == "radio") {
+                    if (inputs[i].checked) {
+                        value = inputs[i].value;
+                    } else {
+                        flag = false;
                     }
                 }
-                countFlag++;
-            }
-            if (inputs[i].type == "checkbox") {
-                if ($(`#${id}[name=${name}]`).length > 1) {
-                    value = [];
-                    $(`#${id}:checked`).each(function() {
-                        value.push(this.value);
-                    });
-                } else {
-                    value = inputs[i].checked ? 1 : 0;
+                if (inputs[i].type == "file") {
+                    let file = document.getElementById(id);
+                    let fileLength = file.files.length;
+                    if (fileLength > 0) {
+                        for(var j=0; j<fileLength; j++) {
+                            let file = $("#"+id)[0].files[j];
+                            let fileType = file.name.split(".");
+                            let fileName = `${name}.${fileType[1]}`;
+                            formData.append(`tableData[${name}][]`, file, fileName);
+                        }
+                    }
+                    countFlag++;
                 }
-            }
-            if (inputs[i].type == "button") {
-                let date = moment(value);
-                if (date.isValid()) {
-                    value = date.format("YYYY-MM-DD");
+                if (inputs[i].type == "checkbox") {
+                    if ($(`#${id}[name=${name}]`).length > 1) {
+                        value = [];
+                        $(`#${id}:checked`).each(function() {
+                            value.push(this.value);
+                        });
+                    } else {
+                        value = inputs[i].checked ? 1 : 0;
+                    }
                 }
-            }
-            if (inputs[i].className.indexOf("amount") != -1) {
-                value = value.replace(",", "");
-            }
-            const data = {id, name, value};
-            result.length > 0 && result.map(item => {
-                item.name === name && item.id === id && countFlag++;
-            })
-            if (flag && countFlag == 0) {
-                result.push(data)
-                if (Array.isArray(value) && inputs[i].type != "file") {
-                    value = value.join("|");
+                if (inputs[i].type == "button") {
+                    let date = moment(value);
+                    if (date.isValid()) {
+                        value = date.format("YYYY-MM-DD");
+                    }
                 }
-                output.tableData[name] = value;
-                formData.append(`tableData[${name}]`, value);
+                if (inputs[i].className.indexOf("amount") != -1) {
+                    value = value.replace(",", "");
+                }
+                const data = {id, name, value};
+                result.length > 0 && result.map(item => {
+                    item.name === name && item.id === id && countFlag++;
+                })
+                if (flag && countFlag == 0) {
+                    result.push(data)
+                    if (Array.isArray(value) && inputs[i].type != "file") {
+                        value = value.join("|");
+                    }
+                    output.tableData[name] = value;
+                    formData.append(`tableData[${name}]`, value);
+                }
             }
         }
     }
@@ -432,7 +431,6 @@ const checkExists = (elementID, invalidFeedback) => {
                         keys.map((item, index) => {
                             if (data["multiple"][item] === inputs["multiple"][item]) countKeys--;
                         })
-                        console.log(countKeys);
                         if (countKeys == 0) {
                             flag = true;
                             $(elementID).removeClass("is-valid").addClass("is-invalid");
@@ -618,7 +616,9 @@ const validateForm = (formID = null) => {
     if (formID) {
         const inputs = $("#"+formID).find(differentInputStr, item => item);
         for (let i=0; i<inputs.length; i++) {
-            validateInput("#"+inputs[i].id);
+            if (inputs[i].id) {
+                validateInput("#"+inputs[i].id);
+            }
         }
         if ($(`#${formID}`).find(".is-invalid").length > 0) {
             $(`#${formID}`).find(".is-invalid")[0].focus();
@@ -631,7 +631,7 @@ const validateForm = (formID = null) => {
 
 
 // ----- SAVE/UPDATE/DELETE TABLE DATA -----
-const saveUpdateDeleteTableData = async (data, path) => {
+const saveUpdateDeleteTableData = async (data, path, feedback = false) => {
     let flag;
     $.ajax({
         method:  "POST",
@@ -651,13 +651,26 @@ const saveUpdateDeleteTableData = async (data, path) => {
             let isSuccess = result[0], 
                 message   = result[1], 
                 id        = result[2] ? result[2] : null;
+
             if (isSuccess == "true") {
-                setTimeout(() => {
-                    closeModals();
-                    showNotification("success", message);
-                    flag = true;
-                    $("#loader").hide();
-                }, 500);
+                if (feedback) {
+                    feedback = feedback.split("|");
+                    feedbackClass = feedback[0];
+                    feedbackMsg   = feedback[1];
+                    setTimeout(() => {
+                        closeModals();
+                        showNotification(feedbackClass, feedbackMsg);
+                        flag = true;
+                        $("#loader").hide();
+                    }, 500);
+                } else {
+                    setTimeout(() => {
+                        closeModals();
+                        showNotification("success", message);
+                        flag = true;
+                        $("#loader").hide();
+                    }, 500);
+                }
             } else {
                 flag = false;
                 showNotification("danger", message);
@@ -673,22 +686,73 @@ const saveUpdateDeleteTableData = async (data, path) => {
     return await flag;
 }
 
-const insertTableData = async (data) => {
+const saveObjectUpdateDeleteTableData = async (data, path, feedback = false) => {
+    let flag;
+    $.ajax({
+        method:  "POST",
+        url:      path,
+        data,
+        async:    false,
+        dataType: "json",
+        beforeSend: function() {
+            $("#loader").show();
+        },
+        success: function(data) {
+            let result = data.split("|");
+            let isSuccess = result[0], 
+                message   = result[1], 
+                id        = result[2] ? result[2] : null;
+
+            if (isSuccess == "true") {
+                if (feedback) {
+                    feedback = feedback.split("|");
+                    feedbackClass = feedback[0];
+                    feedbackMsg   = feedback[1];
+                    setTimeout(() => {
+                        closeModals();
+                        showNotification(feedbackClass, feedbackMsg);
+                        flag = true;
+                        $("#loader").hide();
+                    }, 500);
+                } else {
+                    setTimeout(() => {
+                        closeModals();
+                        showNotification("success", message);
+                        flag = true;
+                        $("#loader").hide();
+                    }, 500);
+                }
+            } else {
+                flag = false;
+                showNotification("danger", feedbackMsg);
+                $("#loader").hide();
+            }
+        },
+        error: function(err) {
+            flag = false;
+            showNotification("danger", "System error: Please contact the system administrator for assistance!");
+            $("#loader").hide();
+        }
+    });
+    return await flag;
+}
+
+const insertTableData = async (data, object = false, feedback = false) => {
     $("#loader").show();
     let path = `${base_url}operations/insertTableData`;
-    return await saveUpdateDeleteTableData(data, path);
+    return !object ? await saveUpdateDeleteTableData(data, path, feedback) : await saveObjectUpdateDeleteTableData(data, path, feedback);
 }
 
-const updateTableData = async (data) => {
+const updateTableData = async (data, object = false, feedback = false) => {
     $("#loader").show();
     let path = `${base_url}operations/updateTableData`;
-    return await saveUpdateDeleteTableData(data, path);
+    return !object ? await saveUpdateDeleteTableData(data, path, feedback) : await saveObjectUpdateDeleteTableData(data, path, feedback);
 }
 
-const deleteTableData = async (data) => {
+const deleteTableData = async (data, object = false, feedback = false) => {
     $("#loader").show();
     let path = `${base_url}operations/deleteTableData`;
-    return await saveUpdateDeleteTableData(data, path);
+    return !object ? await saveUpdateDeleteTableData(data, path, feedback) : await saveObjectUpdateDeleteTableData(data, path, feedback);
 }
 // ----- END SAVE/UPDATE/DELETE TABLE DATA -----
 

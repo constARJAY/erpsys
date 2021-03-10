@@ -34,6 +34,9 @@
 .select2 {
 	width: 100%;
 }
+.selection .select2-selection {
+	min-height: calc(1.5em + 0.75rem + 5px);
+}
 
 .listamenities {
 	border: 2px solid #ccc !important;
@@ -9598,22 +9601,31 @@ body::-webkit-scrollbar-thumb,
 	--hc-bg-color: #f0f0f0;
 }
 [data-theme="high-contrast"] {
-	--dark-color: #ffffff;
-	--heading-color: #ffffff;
-	--font-color: #ffffff;
-	--font-white: #ffffff;
-	--font-light: #ffffff;
-	--font-xlight: #000000;
-	--font-ccc: #ffffff;
-	--text-muted: #ffffff;
-	--border-color: #ffffff;
-	--card-color: #000000;
-	--white-color: #000000;
-	--body-color: #000000;
-	--box-shadow: #000000;
-	--box-shadow-light: #000000;
-	--hc-font-color: #ffffff;
-	--hc-bg-color: #f0f0f0;
+  --dark-color: #ffffff;
+  --heading-color: #ffffff;
+  --font-color: #ffffff;
+  --font-white: #ffffff;
+  --font-light: #ffffff;
+  --font-xlight: #000000;
+  --font-ccc: #ffffff;
+  --text-muted: #ffffff;
+  --border-color: #ffffff;
+  --card-color: #000000;
+  --white-color: #000000;
+  --body-color: #000000;
+  --box-shadow: #000000;
+  --box-shadow-light: #000000;
+  --hc-font-color: #ffffff;
+  --hc-bg-color: #f0f0f0;
+}
+[class="theme-blackbox"] {
+  --primary-color: #1a1a1a;
+  --primary-color2: #262626;
+  --primary-color3: #f1f1f1;
+  --secondary-color: #dc3450;
+  --secondary-color2: #dc3454;
+  --link-color: #dc3450;
+  --primary-gradient: linear-gradient(45deg, #1a1a1a, #262626);
 }
 [class="theme-purple"] {
 	--primary-color: #701c92;
@@ -12857,7 +12869,8 @@ a:hover {
 	overflow-y: scroll;
 	scrollbar-width: none;
 	-ms-overflow-style: none;
-	height: 300px;
+	/* height: 300px; */
+	height: auto;
 }
 .navbar .dropdown-menu ul.menu::-webkit-scrollbar {
 	width: 5px;
@@ -13174,8 +13187,8 @@ a:hover {
 	}
 }
 .btn {
-	color: #10948b;
-	font-size: 14px;
+  /* color: #10948b; */
+  font-size: 14px;
 }
 .btn.btn-primary {
 	background-color: var(--primary-color);
@@ -14161,11 +14174,48 @@ a:hover {
 	display: none !important;
 }
 .colorpicker.colorpicker-with-alpha {
-	max-width: max-content;
+  max-width: max-content;
+}
+.badge.badge-outline-primary {
+  color: #1a1a1a;
+  border: 1px solid #1a1a1a;
+}
+.badge.badge-outline-success {
+  color: #28a745;
+  border: 1px solid #28a745;
+}
+.badge.badge-outline-danger {
+  color: #dc3545;
+  border: 1px solid #dc3545;
+}
+.badge.badge-outline-warning {
+  color: #ffbf00;
+  border: 1px solid #ffc107;
+}
+.badge.badge-outline-info {
+  color: #007bff;
+  border: 1px solid #007bff;
 }
 .badge.badge-primary {
-	background-color: var(--primary-color);
+  color: #fff;
+  background-color: #1a1a1a;
 }
+.badge.badge-success {
+  color: #fff;
+  background-color: #28a745;
+}
+.badge.badge-danger {
+  color: #fff;
+  background-color: #dc3545;
+}
+.badge.badge-warning {
+  background-color: #ffc107;
+}
+.badge.badge-info {
+  color: #fff;
+  background-color: #007bff;
+}
+
 .list-group-item {
 	-webkit-border-radius: 0;
 	-moz-border-radius: 0;
@@ -16670,5 +16720,79 @@ a:hover {
 	width: 60px;
 }
 .w100 {
-	width: 100px;
+  width: 100px;
+}
+
+.btn {
+  /* color: #10948b; */
+  font-size: 14px;
+}
+
+.btn.btn-save {
+  color: #fff;
+  background-color: #28a745c2;
+}
+.btn.btn-save:hover {
+  background-color: #28a745;
+}
+
+.btn.btn-add {
+  color: #fff;
+  background-color: #dc3545c2;
+}
+.btn.btn-add:hover {
+  background-color: #dc3545;
+}
+
+.btn.btn-update {
+  color: #fff;
+  background-color: #007bffc2;
+}
+.btn.btn-update:hover {
+  color: #fff;
+  background-color: #007bff;
+}
+
+.btn.btn-cancel {
+  color: #fff;
+  background-color: #1a1a1ac2;
+}
+.btn.btn-cancel:hover {
+  background-color: #1a1a1a;
+}
+
+.btn.btn-edit {
+  color: #007bff;
+  border: 1px solid #007bff;
+}
+.btn.btn-edit:hover {
+  color: #fff;
+  background-color: #007bff;
+}
+
+.btn.btn-view {
+  color: #28a745;
+  border: 1px solid #28a745;
+}
+.btn.btn-view:hover {
+  color: #fff;
+  background-color: #28a745;
+}
+
+.btn.btn-delete {
+  color: #dc3545;
+  border: 1px solid #dc3545;
+}
+.btn.btn-delete:hover {
+  color: #fff;
+  background-color: #dc3545;
+}
+
+.btn.btn-submit {
+  color: #1a1a1a;
+  border: 1px solid #1a1a1a;
+}
+.btn.btn-submit:hover {
+  color: #fff;
+  background-color: #1a1a1a;
 }

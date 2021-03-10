@@ -6,7 +6,7 @@
         $result = [];
 
         // ----- headerModules -----
-        $sql   = "SELECT * FROM module_list_tbl WHERE moduleStatus = 1 GROUP BY moduleHeader";
+        $sql   = "SELECT * FROM gen_module_list_tbl WHERE moduleStatus = 1 GROUP BY moduleHeader ORDER BY createdAt ASC";
         $query = $CI->db->query($sql);
         $headerModules = $query ? $query->result_array() : [];
         // ----- END headerModules -----
@@ -19,7 +19,7 @@
             ];
 
             // ----- getCategoryModules -----
-            $sql   = "SELECT * FROM module_list_tbl WHERE moduleHeader = '$moduleHeader' AND moduleStatus = 1 GROUP BY moduleCategory";
+            $sql   = "SELECT * FROM gen_module_list_tbl WHERE moduleHeader = '$moduleHeader' AND moduleStatus = 1 GROUP BY moduleCategory";
             $query = $CI->db->query($sql);
             $categoryModules = $query ? $query->result_array() : [];
             // ----- END getCategoryModules -----
@@ -35,7 +35,7 @@
 
                 // ----- getAllModules -----
                 $category = !$moduleCategory ? "AND (moduleCategory IS NULL OR moduleCategory = '')" : "AND moduleCategory = '$moduleCategory'";
-                $sql   = "SELECT * FROM module_list_tbl WHERE moduleHeader = '$moduleHeader'  $category AND moduleStatus = 1";
+                $sql   = "SELECT * FROM gen_module_list_tbl WHERE moduleHeader = '$moduleHeader'  $category AND moduleStatus = 1";
                 $query = $CI->db->query($sql);
                 $allModules = $query ? $query->result_array() : [];
                 // ----- END getAllModules -----
