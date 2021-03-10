@@ -113,4 +113,4 @@
 <!-- ----- END CONFIRMATION MODAL ----- -->
 
 
-<script src="<?= base_url('assets/custom/js/roles-permission.js') ?>"></script>
+<script src="<?= base_url('assets/custom/js/gen/roles-permission.js') ?>"></script>

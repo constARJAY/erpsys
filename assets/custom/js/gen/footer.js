@@ -25,4 +25,23 @@ $(document).ready(function() {
         }
     })
 
+    // ----- VIEW NOTIFICATION -----
+    $(document).on("click", ".btnViewNotification", function(e) {
+        e.preventDefault();
+        const notifID    = $(this).attr("id");
+        const controller = $(this).attr("controller");
+
+        $.ajax({
+            method: "POST",
+            url: base_url+"system_notification/updateNotification",
+            data: {notifID},
+            success: function(data) {
+                if (data) {
+                    window.location.href = base_url+controller;
+                }
+            }
+        })
+    })
+    // ----- END VIEW NOTIFICATION -----
+
 })

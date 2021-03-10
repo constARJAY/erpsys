@@ -113,4 +113,4 @@
 <!-- ----- END CONFIRMATION MODAL ----- -->
 
 
-<script src="<?= base_url('assets/custom/js/module-masterfile.js') ?>"></script>
+<script src="<?= base_url('assets/custom/js/gen/module-masterfile.js') ?>"></script>

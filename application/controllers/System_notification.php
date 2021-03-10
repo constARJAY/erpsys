@@ -10,24 +10,35 @@ class System_notification extends CI_Controller {
 
     public function index()
     {
+        $query = $this->db->update("gen_system_notification_tbl", ["markRead" => 1], ["notificationID !=" => 0]);
+
         $data["title"] = "System Notification";
         $this->load->view('template/header', $data);
         $this->load->view('gen/system_notification/index', $data);
         $this->load->view('template/footer', $data);
     }
 
-    public function getAllNotificationData()
+    public function getNotificationData()
     {
-        // insertNotificationData("gen_system_notification_tbl", [
-        //     "moduleID"                => 3,
-        //     "notificationTitle"       => "Charles Verdadero",
-        //     "notificationDescription" => "Extended Contract",
-        //     "notificationType"        => 3,
-        //     "createdBy"               => 1
-        // ]);
+        $projectName = $this->input->post("projectName");
+        $dateFrom    = $this->input->post("dateFrom") ? $this->input->post("dateFrom").' 00:00:00' : "";
+        $dateTo      = $this->input->post("dateTo") ? $this->input->post("dateTo").' 23:59:59' : "";
 
-        $data = getNotificationData("Inventory Management System");
+        $data = getNotificationData($projectName, "", $dateFrom, $dateTo);
         echo json_encode($data);
+    }
+
+    public function updateNotification()
+    {
+        $notifID = $this->input->post("notifID");
+        if ($notifID) {
+            $data = ["markRead" => 1];
+            $query = $this->db->update("gen_system_notification_tbl", $data, ["notificationID" => $notifID]);
+            $result = $query ? true : false;
+            echo $result;
+        } else {
+            echo false;
+        }
     }
 
 }

@@ -11764,7 +11764,8 @@ body.h_menu .sidebar {
 	overflow: visible;
 	padding-top: 1px;
 	padding-bottom: 20px;
-	height: 75px;
+	min-height: 75px;
+	height: auto;
 	width: 100%;
 	top: 74px;
 }

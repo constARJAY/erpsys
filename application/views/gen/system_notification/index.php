@@ -39,7 +39,7 @@
                                         <div class="input-group-prepend">
                                             <span class="input-group-text"><i class="zmdi zmdi-calendar"></i></span>
                                         </div>
-                                        <input type="button" class="form-control daterange text-left" id="datePicker" placeholder="Please choose a date..." data-dtp="dtp_6ITRg" autocomplete="off">
+                                        <input type="button" class="form-control daterange2 text-left" id="daterange2" placeholder="Please choose a date..." data-dtp="dtp_6ITRg" autocomplete="off">
                                     </div>
                                 </div>
                             </div>
@@ -51,114 +51,217 @@
                                     </div>
                                 </div>
 
-                                <div class="row clearfix row-deck" id="allTabNotification">
-
+                                <div class="row clearfix row-deck" id="allTabContent">
                                     <div class="col-12">
                                         <div class="card">
-                                        <div class="body">
-                            <div class="timeline-item green" date-is="March 11, 2021">
-                                <h5 class="font-weight-bold">Inventory Item</h5>
-                                <span>Hammer - Low Stock <a href="javascript:void(0);" title="Fidel Tonn">Fidel Tonn</a></span>
-                            </div>        
-                            <div class="timeline-item warning" date-is="02 Jun 2018">
-                                <h6>Add Team Members</h6>
-                                <span>By: <a href="javascript:void(0);" title="Fidel Tonn">Fidel Tonn</a></span>
-                                <div class="msg">
-                                    <p>web by far While that's mock-ups and this is politics, are they really so different? I think the only card she has is the Lorem card.</p>
-                                    <ul class="list-unstyled team-info">
-                                        <li><img class="avatar sm" src="../assets/images/xs/avatar4.jpg" alt="Avatar"></li>
-                                        <li><img class="avatar sm" src="../assets/images/xs/avatar5.jpg" alt="Avatar"></li>
-                                        <li><img class="avatar sm" src="../assets/images/xs/avatar2.jpg" alt="Avatar"></li>
-                                        <li><img class="avatar sm" src="../assets/images/xs/avatar1.jpg" alt="Avatar"></li>
-                                    </ul>                                        
-                                    <div class="content mt-3">
-                                        <ul class="list-unstyled activity mb-0">
-                                            <li>
-                                                <a href="javascript:void(0)">
-                                                    <i class="zmdi zmdi-file-text bg-blue"></i>                    
-                                                    <div class="info">
-                                                        <h4>iNext project documentation.doc</h4>                    
-                                                        <small>Size: 2.3Mb</small>
+                                            <div class="body">
+                                                <?php
+                                                    $notification = getNotificationData("all");
+                                                    if (count($notification) > 0) {
+                                                        foreach ($notification as $notif) {
+                                                ?>
+                                                    <div class="timeline-item <?= $notif['color'] ?> border-bottom pb-2" date-is="<?= $notif['date'] ?>">
+                                                        <div class="d-flex align-items-center">
+                                                            <div>
+                                                                <img src="<?= base_url('assets/notification/').$notif["icon"] ?>" width="50" height="50">
+                                                            </div>
+                                                            <div class="ml-3">
+                                                                <h6 class="font-weight-bold"><?= $notif["title"] ?></h6>
+                                                                <div><?= $notif["description"] ?></div>
+                                                                <a href="<?= base_url().$notif['controller'] ?>">Details</a>  
+                                                            </div>
+                                                        </div>
+                                                    </div>   
+                                                <?php
+                                                        }
+                                                    } else {
+                                                ?>
+                                                    <div class="w-100 text-center">
+                                                        <img src="<?= base_url('assets/modal/notification.png') ?>" alt="No notification" width="300" height="200">
+                                                        <h4>No notification found.</h4>
                                                     </div>
-                                                </a>
-                                            </li>
-                                        </ul>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="timeline-item warning" date-is="02 Jun 2018">
-                                <h6>Task Assigned</h6>
-                                <span>By: <a href="javascript:void(0);" title="Fidel Tonn">Fidel Tonn</a></span>
-                                <div class="msg">
-                                    <p>It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout. The point of using Lorem Ipsum is that it has a more-or-less normal</p>
-                                    <div class="media">
-                                        <img class="media-object rounded width40 mr-3" src="../assets/images/xs/avatar1.jpg" alt="">
-                                        <div class="media-body">
-                                            <h6 class="mb-0">Folisise Chosielie</h6>
-                                            <p class="mb-0"><strong>Detail:</strong> Ipsum is simply dummy text of the printing and typesetting industry. </p>
-                                        </div>
-                                    </div>
-                                    <div class="media">
-                                        <img class="media-object rounded width40 mr-3" src="../assets/images/xs/avatar5.jpg" alt="">
-                                        <div class="media-body">
-                                            <h6 class="mb-0">Joge Lucky</h6>                                            
-                                            <p class="mb-0"><strong>Detail:</strong> Ipsum is simply dummy text of the printing and typesetting industry. </p>
+                                                <?php
+                                                    }
+                                                ?>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>        
-                            <div class="timeline-item warning" date-is="02 Jun 2018">
-                                <h6>Add new code on GitHub</h6>
-                                <span>By: <a href="javascript:void(0);" title="Fidel Tonn">Folisise Chosielie</a></span>
-                                <div class="msg">
-                                    <div class="alert alert-success mb-3" role="alert">Code Update Successfully in GitHub</div>
-                                        <pre class="prettyprint prettyprinted"><span class="tag">&lt;span</span><span class="pln"> </span><span class="atn">class</span><span class="pun">=</span><span class="atv">"badge badge-default"</span><span class="tag">&gt;</span><span class="pln">Default</span><span class="tag">&lt;/span&gt;</span><span class="pln">
-                                        </span><span class="tag">&lt;span</span><span class="pln"> </span><span class="atn">class</span><span class="pun">=</span><span class="atv">"badge badge-primary"</span><span class="tag">&gt;</span><span class="pln">Primary</span><span class="tag">&lt;/span&gt;</span><span class="pln">
-                                        </span><span class="tag">&lt;span</span><span class="pln"> </span><span class="atn">class</span><span class="pun">=</span><span class="atv">"badge badge-success"</span><span class="tag">&gt;</span><span class="pln">Success</span><span class="tag">&lt;/span&gt;</span><span class="pln">
-                                        </span><span class="tag">&lt;span</span><span class="pln"> </span><span class="atn">class</span><span class="pun">=</span><span class="atv">"badge badge-info"</span><span class="tag">&gt;</span><span class="pln">Info</span><span class="tag">&lt;/span&gt;</span><span class="pln">
-                                        </span><span class="tag">&lt;span</span><span class="pln"> </span><span class="atn">class</span><span class="pun">=</span><span class="atv">"badge badge-warning"</span><span class="tag">&gt;</span><span class="pln">Warning</span><span class="tag">&lt;/span&gt;</span><span class="pln">
-                                        </span><span class="tag">&lt;span</span><span class="pln"> </span><span class="atn">class</span><span class="pun">=</span><span class="atv">"badge badge-danger"</span><span class="tag">&gt;</span><span class="pln">Danger</span><span class="tag">&lt;/span&gt;</span></pre>
-                                </div>
                             </div>
-                            <div class="timeline-item danger" date-is="02 Jun 2018">
-                                <h6>Project Reports</h6>
-                                <span>By: <a href="javascript:void(0);" title="Fidel Tonn">Fidel Tonn</a></span>
-                                <div class="msg">
-                                    <ul class="list-unstyled">
-                                        <li class="mb-3">
-                                            <span>Design Bug</span>
-                                            <div class="progress progress-xs">
-                                                <div class="progress-bar progress-bar-danger" role="progressbar" aria-valuenow="17" aria-valuemin="0" aria-valuemax="100" style="width: 17%;"></div>
-                                            </div>
-                                        </li>
-                                        <li class="mb-3">
-                                            <span>UI UX Design Task</span>
-                                            <div class="progress progress-xs">
-                                                <div class="progress-bar" role="progressbar" aria-valuenow="83" aria-valuemin="0" aria-valuemax="100" style="width: 83%;"></div>
-                                            </div>
-                                        </li>
-                                        <li class="mb-3">
-                                            <span>Developer Task</span>
-                                            <div class="progress progress-xs">
-                                                <div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="49" aria-valuemin="0" aria-valuemax="100" style="width: 49%;"></div>
-                                            </div>
-                                        </li>
-                                        <li>
-                                            <span>QA (Quality Assurance)</span>
-                                            <div class="progress progress-xs">
-                                                <div class="progress-bar progress-bar-warning" role="progressbar" aria-valuenow="33" aria-valuemin="0" aria-valuemax="100" style="width: 33%;"></div>
-                                            </div>
-                                        </li>                                      
-                                    </ul>                                         
-                                </div>
-                            </div>
-                            <div class="timeline-item dark" date-is="05 Jun 2018">
-                                <h6>Project on Goinng</h6>
-                            </div>
-                        </div>
-                                        </div>
+                            <div role="tabpanel" class="tab-pane" id="hrisTab" aria-expanded="false">
+                                <div class="header">
+                                    <div class="row">
+                                        <h5 class="mt-2">LIST OF ALL NOTIFICATIONS</h5>
                                     </div>
+                                </div>
 
+                                <div class="row clearfix row-deck" id="hrisTabContent">
+                                    <div class="col-12">
+                                        <div class="card">
+                                            <div class="body">
+                                                <?php
+                                                    $notification = getNotificationData("Human Resource Information System");
+                                                    if (count($notification) > 0) {
+                                                        foreach ($notification as $notif) {
+                                                ?>
+                                                    <div class="timeline-item <?= $notif['color'] ?> border-bottom pb-2" date-is="<?= $notif['date'] ?>">
+                                                        <div class="d-flex align-items-center">
+                                                            <div>
+                                                                <img src="<?= base_url('assets/notification/').$notif["icon"] ?>" width="50" height="50">
+                                                            </div>
+                                                            <div class="ml-3">
+                                                                <h6 class="font-weight-bold"><?= $notif["title"] ?></h6>
+                                                                <div><?= $notif["description"] ?></div>
+                                                                <a href="<?= base_url().$notif['controller'] ?>">Details</a>  
+                                                            </div>
+                                                        </div>
+                                                    </div>   
+                                                <?php
+                                                        }
+                                                    } else {
+                                                ?>
+                                                    <div class="w-100 text-center">
+                                                        <img src="<?= base_url('assets/modal/notification.png') ?>" alt="No notification" width="300" height="200">
+                                                        <h4>No notification found.</h4>
+                                                    </div>
+                                                <?php
+                                                    }
+                                                ?>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div role="tabpanel" class="tab-pane" id="pmsTab" aria-expanded="false">
+                                <div class="header">
+                                    <div class="row">
+                                        <h5 class="mt-2">LIST OF ALL NOTIFICATIONS</h5>
+                                    </div>
+                                </div>
+
+                                <div class="row clearfix row-deck" id="pmsTabContent">
+                                    <div class="col-12">
+                                        <div class="card">
+                                            <div class="body">
+                                                <?php
+                                                    $notification = getNotificationData("Project Management System");
+                                                    if (count($notification) > 0) {
+                                                        foreach ($notification as $notif) {
+                                                ?>
+                                                    <div class="timeline-item <?= $notif['color'] ?> border-bottom pb-2" date-is="<?= $notif['date'] ?>">
+                                                        <div class="d-flex align-items-center">
+                                                            <div>
+                                                                <img src="<?= base_url('assets/notification/').$notif["icon"] ?>" width="50" height="50">
+                                                            </div>
+                                                            <div class="ml-3">
+                                                                <h6 class="font-weight-bold"><?= $notif["title"] ?></h6>
+                                                                <div><?= $notif["description"] ?></div>
+                                                                <a href="<?= base_url().$notif['controller'] ?>">Details</a>  
+                                                            </div>
+                                                        </div>
+                                                    </div>   
+                                                <?php
+                                                        }
+                                                    } else {
+                                                ?>
+                                                    <div class="w-100 text-center">
+                                                        <img src="<?= base_url('assets/modal/notification.png') ?>" alt="No notification" width="300" height="200">
+                                                        <h4>No notification found.</h4>
+                                                    </div>
+                                                <?php
+                                                    }
+                                                ?>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div role="tabpanel" class="tab-pane" id="fmsTab" aria-expanded="false">
+                                <div class="header">
+                                    <div class="row">
+                                        <h5 class="mt-2">LIST OF ALL NOTIFICATIONS</h5>
+                                    </div>
+                                </div>
+
+                                <div class="row clearfix row-deck" id="fmsTabContent">
+                                    <div class="col-12">
+                                        <div class="card">
+                                            <div class="body">
+                                                <?php
+                                                    $notification = getNotificationData("Finance Management System");
+                                                    if (count($notification) > 0) {
+                                                        foreach ($notification as $notif) {
+                                                ?>
+                                                    <div class="timeline-item <?= $notif['color'] ?> border-bottom pb-2" date-is="<?= $notif['date'] ?>">
+                                                        <div class="d-flex align-items-center">
+                                                            <div>
+                                                                <img src="<?= base_url('assets/notification/').$notif["icon"] ?>" width="50" height="50">
+                                                            </div>
+                                                            <div class="ml-3">
+                                                                <h6 class="font-weight-bold"><?= $notif["title"] ?></h6>
+                                                                <div><?= $notif["description"] ?></div>
+                                                                <a href="<?= base_url().$notif['controller'] ?>">Details</a>  
+                                                            </div>
+                                                        </div>
+                                                    </div>   
+                                                <?php
+                                                        }
+                                                    } else {
+                                                ?>
+                                                    <div class="w-100 text-center">
+                                                        <img src="<?= base_url('assets/modal/notification.png') ?>" alt="No notification" width="300" height="200">
+                                                        <h4>No notification found.</h4>
+                                                    </div>
+                                                <?php
+                                                    }
+                                                ?>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div role="tabpanel" class="tab-pane" id="imsTab" aria-expanded="false">
+                                <div class="header">
+                                    <div class="row">
+                                        <h5 class="mt-2">LIST OF ALL NOTIFICATIONS</h5>
+                                    </div>
+                                </div>
+
+                                <div class="row clearfix row-deck" id="imsTabContent">
+                                    <div class="col-12">
+                                        <div class="card">
+                                            <div class="body">
+                                                <?php
+                                                    $notification = getNotificationData("Inventory Management System");
+                                                    if (count($notification) > 0) {
+                                                        foreach ($notification as $notif) {
+                                                ?>
+                                                    <div class="timeline-item <?= $notif['color'] ?> border-bottom pb-2" date-is="<?= $notif['date'] ?>">
+                                                        <div class="d-flex align-items-center">
+                                                            <div>
+                                                                <img src="<?= base_url('assets/notification/').$notif["icon"] ?>" width="50" height="50">
+                                                            </div>
+                                                            <div class="ml-3">
+                                                                <h6 class="font-weight-bold"><?= $notif["title"] ?></h6>
+                                                                <div><?= $notif["description"] ?></div>
+                                                                <a href="<?= base_url().$notif['controller'] ?>">Details</a>  
+                                                            </div>
+                                                        </div>
+                                                    </div>   
+                                                <?php
+                                                        }
+                                                    } else {
+                                                ?>
+                                                    <div class="w-100 text-center">
+                                                        <img src="<?= base_url('assets/modal/notification.png') ?>" alt="No notification" width="300" height="200">
+                                                        <h4>No notification found.</h4>
+                                                    </div>
+                                                <?php
+                                                    }
+                                                ?>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
 
@@ -169,3 +272,5 @@
         </div>
 	</div>
 </div>
+
+<script src="<?= base_url('assets/custom/js/gen/system-notification.js') ?>"></script>

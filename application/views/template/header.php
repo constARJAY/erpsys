@@ -159,12 +159,12 @@ input:checked + .slider:before {
                                         <li class="body">
                                             <ul class="menu list-unstyled">
                                         <?php
-                                            $notifications = getNotificationData();
+                                            $notifications = getNotificationData("all", "0");
                                             if (count($notifications) > 0) {
                                                 foreach ($notifications as $notif) {
                                         ?>
                                             <li>
-                                                <a href="<?= $notif["controller"] ?>">
+                                                <a href="<?= $notif["controller"] ?>" class="btnViewNotification" controller="<?= $notif["controller"] ?>" id="<?= $notif['id'] ?>">
                                                     <div class="media">
                                                         <img class="media-object" src="<?= base_url() ?>assets/notification/<?= $notif["icon"] ?>" alt="">
                                                         <div class="media-body">
@@ -191,7 +191,7 @@ input:checked + .slider:before {
                                             </ul>
                                         </li>
 
-                                        <li class="footer"> <a href="javascript:void(0);">View All</a> </li>
+                                        <li class="footer"> <a href="<?= base_url('system_notification') ?>" class="btnViewAllNotification">View All</a> </li>
                                     </ul>
                                 </li>                        
                                 <li class="dropdown profile">

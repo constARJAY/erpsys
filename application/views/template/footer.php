@@ -46,7 +46,7 @@
 
 	<!-- ----- CUSTOM VALIDATION ----- -->
 	<script src="<?=base_url('assets/custom/js/custom-validation.js')?>"></script>
-	<script src="<?= base_url('assets/custom/js/footer.js') ?>"></script>
+	<script src="<?=base_url('assets/custom/js/gen/footer.js')?>"></script>
 
 </body>
 </html>

@@ -38,29 +38,35 @@
         return $query ? $query->num_rows() : 0;
     }
 
-    function getNotificationData($projectName = "all")
+    function getNotificationData($projectName = "all", $read = "", $dateFrom = "", $dateTo = "")
     {
         $CI =& get_instance();
-        $sql = "SELECT * FROM gen_system_notification_tbl";
+        $readFilter = $read != "" ? "markRead = $read" : "1=1";
+        if ($dateFrom != "" && $dateTo != "") {
+            $sql = "SELECT * FROM gen_system_notification_tbl WHERE createdAt BETWEEN '$dateFrom' AND '$dateTo' AND $readFilter";
+        } else {
+            $sql = "SELECT * FROM gen_system_notification_tbl WHERE $readFilter";   
+        }
         $query = $CI->db->query($sql);
         $data = $query ? $query->result_array() : [];
         $output = [];
         foreach($data as $notif) {
+            $notifID     = $notif["notificationID"];
             $title       = $notif["notificationTitle"];
             $description = $notif["notificationDescription"];
             $type        = $notif["notificationType"];
             $moduleID    = $notif["moduleID"];
             $createdAt   = date("Y-m-d H:i:s", strtotime($notif["createdAt"]));
 
-            $icon = $controller = $project = $time = "";
+            $icon = $color = $controller = $project = $time = "";
             switch($type) {
-                case "1": $icon = "exclamation-red.svg";    break;
-                case "2": $icon = "exclamation-info.svg";   break;
-                case "3": $icon = "exclamation-gray.svg";   break;
-                case "4": $icon = "information-blue.svg";   break;
-                case "5": $icon = "exclamation-yellow.svg"; break;
-                case "6": $icon = "exclamation-orange.svg"; break;
-                default:  $icon = "exclamation-info.svg";   break;
+                case "1": $icon = "exclamation-red.svg";    $color = "red";    break;
+                case "2": $icon = "exclamation-info.svg";   $color = "info";   break;
+                case "3": $icon = "exclamation-gray.svg";   $color = "gray";   break;
+                case "4": $icon = "information-blue.svg";   $color = "blue";   break;
+                case "5": $icon = "exclamation-yellow.svg"; $color = "yellow"; break;
+                case "6": $icon = "exclamation-orange.svg"; $color = "orange"; break;
+                default:  $icon = "exclamation-info.svg";   $color = "info";   break;
             }
 
             $sql = "SELECT moduleController, projectName FROM gen_module_list_tbl WHERE moduleID = $moduleID";
@@ -96,8 +102,10 @@
             }
 
             $temp = [
+                "id"          => $notifID,
                 "project"     => implode("|", $projectList),
                 "icon"        => $icon,
+                "color"       => $color,
                 "title"       => $title,
                 "description" => $description,
                 "controller"  => $controller,
