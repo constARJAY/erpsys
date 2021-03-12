@@ -113,7 +113,7 @@
 	<script src="<?=base_url('assets/plugins/jquery-inputmask/jquery.inputmask.bundle.js')?>"></script>
 <!--===================================CUSTOM=========================================================-->
 	
-    <script type="text/javascript" src="<?=base_url('assets/custom/js/')?>login.js"></script>
+    <script type="text/javascript" src="<?=base_url('assets/custom/js/gen/')?>login.js"></script>
     <script type="text/javascript" src="<?=base_url('assets/custom/js/')?>custom-validation.js"></script>
 <!--===============================================================================================-->
 

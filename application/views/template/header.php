@@ -1,13 +1,13 @@
 <?php
 
-if($this->session->has_userdata('adminSessionID')){
+// if($this->session->has_userdata('adminSessionID')){
 
- }else{ redirect(base_url("login")); }
+//  }else{ redirect(base_url("login")); }
 
 // $userData = $this->session->userdata('otherSessionID');
 
 // echo $userData;
-$sessionUserAccount = getAdminSessionAccount();
+// $sessionUserAccount = getAdminSessionAccount();
 
 
 ?>
