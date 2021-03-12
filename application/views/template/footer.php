@@ -46,7 +46,94 @@
 
 	<!-- ----- CUSTOM VALIDATION ----- -->
 	<script src="<?=base_url('assets/custom/js/custom-validation.js')?>"></script>
-	<script src="<?=base_url('assets/custom/js/gen/footer.js')?>"></script>
+	<script src="<?= base_url('assets/custom/js/gen/footer.js') ?>"></script>
+	<script>
+			function sweetAlertConfirmation(condition = null , moduleName,  modalID = null, containerID = null, data = null){
+				$("#"+modalID).modal("hide");
 
+				let lowerCase 	= moduleName.toLowerCase();
+				let upperCase	= moduleName.toUpperCase();
+				let capitalCase = moduleName;
+				let title 				=  "";
+				let text 				=  ""
+				let success_title       =  "";
+				let confirmButtonText  	=  ""; 
+				switch(condition) {
+				case "add":
+					title 					+=  "Add " + capitalCase;
+					text 					+=  "Are you sure that you want to add a new "+ lowerCase +" to the system?"
+					success_title        	+=  "Add new "+capitalCase + " successfully saved!";
+					confirmButtonText   	+=  "Yes";
+					break;
+				case "update":
+					title 					+=  "Update " + capitalCase;
+					text 					+=  "Are you sure that you want to update the "+ lowerCase +" to the system?"
+					success_title        	+=  "Update "+ capitalCase + " successfully saved!";
+					confirmButtonText   	+=  "Yes";  
+					break;
+				default:
+					title 					+=  "Cancel " + capitalCase;
+					text 					+=  "Are you sure that you want to cancel this process?"
+					success_title        	+=  "Cancel "+ capitalCase + "!";
+					confirmButtonText   	+=  "Yes discard!";  
+				}
+				Swal.fire({
+						title, 
+						text,
+						imageUrl: `${base_url}assets/custom/isometric_image/save.png`,
+						imageWidth: 200,
+						imageHeight: 200,
+						imageAlt: 'Custom image',
+						showCancelButton: true,
+						confirmButtonColor: '#28a745',
+						cancelButtonColor: '#1A1A1A',
+						confirmButtonText,
+						allowOutsideClick: false
+						}).then((result) => {
+						if (result.isConfirmed) {
+							switch(condition) {
+								case "add":
+										insertTableData(data);
+									break;
+								case "update":
+										updateTableData(data);
+									break;
+								default:
+							}
+							Swal.fire({
+								icon: 'success',
+								title: success_title,
+								showConfirmButton: false,
+								timer: 2000
+							});
+							tableContent();
+								
+							containerID == null ? "" : $("#"+containerID).show();
+						}else{
+							 $("#"+modalID).modal("show");
+						}
+					});
+			}
+	
+			function numberCodeSize(num, size) {
+				num = num.toString();
+				while (num.length < size) num = "0" + num;
+				return num;
+			}
+
+			function emptyFormCondition(formID){
+				const data = getFormData(formID);
+
+				var validate = false;
+					for(var i of data.entries()){
+						const count =+i[1];
+						validate[0] = i[1];
+							if(i[1] !=""){
+								validate = true;
+							}
+					}
+					return validate;
+			}
+	</script>
 </body>
 </html>

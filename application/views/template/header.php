@@ -1,3 +1,17 @@
+<?php
+
+if($this->session->has_userdata('adminSessionID')){
+
+ }else{ redirect(base_url("login")); }
+
+// $userData = $this->session->userdata('otherSessionID');
+
+// echo $userData;
+$sessionUserAccount = getAdminSessionAccount();
+
+
+?>
+
 <!DOCTYPE html>
 <html class="no-js " lang="en">
 <head>
@@ -33,6 +47,23 @@
     <script src="<?=base_url('assets/js/popper.min.js')?>"></script>
     <script src="<?=base_url('assets/bundles/libscripts.bundle.js')?>"></script> 
     <script src="<?=base_url('assets/bundles/vendorscripts.bundle.js')?>"></script> 
+
+    <script src="https://f001.backblazeb2.com/file/buonzz-assets/jquery.ph-locations-v1.0.0.js"></script>
+    <script src="<?=base_url('assets/js/dropzone.js')?>"></script>
+    <script src="<?=base_url('assets/js/dropzone.min.js')?>"></script>
+    <script src="<?=base_url('assets/js/dropzone-amd-module.js')?>"></script>
+    <script src="<?=base_url('assets/js/dropzone-amd-module.min.js')?>"></script>
+    <link rel="stylesheet" href="<?=base_url('assets/css/dropzone.css')?>">
+    <link rel="stylesheet" href="<?=base_url('assets/css/basic.css')?>">
+    <link rel="stylesheet" href="<?=base_url('assets/css/dropzone.min.css')?>">
+    <link rel="stylesheet" href="<?=base_url('assets/css/basic.min.css')?>">
+
+    <link rel="stylesheet" href="<?=base_url('assets/css/sweetalert2.css')?>">
+    <link rel="stylesheet" href="<?=base_url('assets/css/sweetalert2.min.css')?>">
+
+    <script src="<?=base_url('assets/js/sweetalert2.all.min.js')?>"></script>
+    <script src="<?=base_url('assets/js/sweetalert2.min.js')?>"></script>
+
 </head>
 
 <style>
@@ -231,75 +262,107 @@ input:checked + .slider:before {
                 <div class="col-12">
                     <div class="menu">
                         <ul class="list">
-                            <?php
-                                $modules = getModuleContent();
-                                $content = "";
-                                foreach ($modules as $key1 => $module) {
-                                    $html = "";
-                                    $flag = false;
-                                    $header  = $module["header"];
-                                    $modules = $module["modules"];
-                                    $html .= '<li class="header">'.$header.'</li>';
-                                    foreach ($modules as $key2 => $module2) {
-                                        $category  = $module2["category"];
-                                        $names     = $module2["names"];
-                                        $icon      = $module2["icon"];
-                                        $liClass   = $key2 == 0 ? "active open" : "";
+                            
+<?php
+    $modules = getModuleContent();
+    $content = "";
+    if ($modules) {
+        foreach ($modules as $module) {
+            $html = "";
 
-                                        $flag = count($names) > 0 ? true : false;
+            $moduleHeader = $module["header"];
+            $moduleLength = count($module["category"]) + count($module["nocategory"]);
 
-                                        if ($category) {
-                                            $html .= '
-                                            <li class="">
-                                                <a href="javascript:void(0);" class="menu-toggle">
-                                                    <img src="'.base_url("assets/upload-files/icons/$icon").'" height="25" width="25">
-                                                    <span class="ml-1">'.$category.'</span>
-                                                </a>';
+            if ($moduleLength > 0) {
+                $html .= '<li class="header">'.$moduleHeader.'</li>';
+                $moduleCategory   = $module["category"];
+                $moduleNoCategory = $module["nocategory"];
+                
+                
+                if (count($moduleCategory) > 0) {
+                    foreach ($moduleCategory as $category) {
+                        $icon = $category["icon"];
+                        $html .= '
+                        <li class="">
+                            <a href="javascript:void(0);" class="menu-toggle">
+                                <img src="'.base_url("assets/upload-files/icons/$icon").'" height="25" width="25">
+                                <span class="ml-1">'.$category["categoryName"].'</span>
+                            </a>';
 
-                                            if (count($names) > 12) {
-                                                $html .= '
-                                                <ul class="ml-menu mega_menu">
-                                                <div class="row">';
-                                                foreach ($names as $key3 => $item) {
-                                                    $html .= '
-                                                    <div class="col-xl-3 col-md-4 col-sm-12">
-                                                    <li class="">
-                                                        <a href="'.strtolower($item["controller"]).'">'.$item["name"].'</a>
-                                                    </li>
-                                                    </div>';
-                                                }
-                                                $html .= '</div>';
-                                            } else {
-                                                $html .= '
-                                                <ul class="ml-menu">';
-                                                foreach ($names as $key3 => $item) {
-                                                    $liClass2 = $key3 == 0 ? "active" : "";
-                                                    $html .= '
-                                                    <li class="">
-                                                        <a href="'.strtolower($item["controller"]).'">'.$item["name"].'</a>
-                                                    </li>';
-                                                }
-                                            }
+                        $moduleLength = count($category["modules"]);
+                        if ($moduleLength > 12) {
+                        $html .= '
+                        <ul class="ml-menu mega_menu">
+                            <div class="row">';
+                            foreach ($category["modules"] as $item) {
+                                $html .= '
+                                <div class="col-xl-3 col-md-4 col-sm-12">
+                                <li class="">
+                                    <a href="'.base_url().strtolower($item["controller"]).'">'.$item["name"].'</a>
+                                </li>
+                                </div>';
+                            }
+                            $html .= '</div>';
+                        } else {
+                            $html .= '
+                            <ul class="ml-menu">';
+                            foreach ($category["modules"] as $item) {
+                                $html .= '
+                                <li class="">
+                                    <a href="'.base_url().strtolower($item["controller"]).'">'.$item["name"].'</a>
+                                </li>';
+                            }
+                        }
 
-                                            $html .= '
-                                                </ul>
-                                            </li>';
-                                        } else {
-                                            $html .= '
-                                            <li class="">
-                                                <a href="'.strtolower($names[0]["controller"]).'">
-                                                    <img src="'.base_url("assets/upload-files/icons/$icon").'" height="25" width="25">
-                                                    '.$names[0]["name"].'
-                                                </a>
-                                            </li>';
-                                        }
-                                    }
-                                    if ($flag) {
-                                        $content .= $html;
-                                    }
-                                }
-                                echo $content;
-                            ?>
+                        $html .= '
+                            </ul>
+                        </li>';
+                        
+                    }
+                }
+
+                if (count($moduleNoCategory) > 0) {
+                    foreach ($moduleNoCategory as $category) {
+                        $icon = $category["icon"];
+                        $html .= '
+                        <li class="">
+                            <a href="'.strtolower($category["controller"]).'">
+                                <img src="'.base_url("assets/upload-files/icons/$icon").'" height="25" width="25">
+                                '.$category["name"].'
+                            </a>
+                        </li>';
+                    }
+                }
+
+            }
+
+            $content .= $html;
+        }
+    }
+    echo $content;
+?>                            
+
+
+                            <!-- ----- TEMPORARY MENU ----- -->
+                            <!-- <li class="header"></li>
+                            <li>
+                                <a href="javascript:void(0);" class="menu-toggle"><i class="zmdi zmdi-home"></i><span>Temporary Menu</span></a>
+                                <ul class="ml-menu">
+                                    <li><a href="<?= base_url('approval_setup') ?>">Approval Setup</a></li>
+                                    <li><a href="<?= base_url('roles_permission') ?>">Roles and Permission</a></li>
+                                    <li><a href="<?= base_url('system_notification') ?>">System Notification</a></li>
+                                    <li><a href="<?= base_url('fms/bank') ?>">Bank</a></li>
+                                    <li><a href="<?= base_url('ims/inventory_category') ?>">Inventory Category</a></li>
+                                    <li><a href="<?= base_url('ims/inventory_conditions_masterfile') ?>">Inventory Condition Masterfile </a></li>
+                                    <li><a href="<?= base_url('ims/inventory_item') ?>">Inventory Item</a></li>
+                                    <li><a href="<?= base_url('ims/inventory_vendor_masterfile') ?>">Inventory Vendor</a></li>
+                                    <li><a href="<?= base_url('hris/schedule_setup') ?>">Schedule Setup</a></li>
+                                    <li><a href="<?= base_url('hris/leaves') ?>">Leave Request</a></li>
+                                </ul>
+                            </li> -->
+                            <!-- ----- END TEMPORARY MENU ----- -->
+
+
                         </ul>
                     </div>
                 </div>

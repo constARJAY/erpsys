@@ -178,4 +178,4 @@
 </div>
 <!-- ----- END CONFIRMATION MODAL ----- -->
 
-<script src="<?=base_url('assets/custom/js/approval-setup.js')?>"></script>
+<script src="<?=base_url('assets/custom/js/gen/approval-setup.js')?>"></script>

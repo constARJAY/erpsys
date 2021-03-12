@@ -11,7 +11,7 @@ class Login extends CI_Controller {
     }
 
     public function index(){
-        // $data["title"] = "Login | ".$this->db->getTableData("company_setup_tbl", "companyName", "", "");
+        
         $data["title"] = "Login";
         $this->load->view("gen/login/index", $data);
     }
@@ -25,10 +25,11 @@ class Login extends CI_Controller {
     }
 
     public function sign_out(){
-        $condition      =   $this->input->post("userType");
+        $condition      =   $this->input->post("userType") == "" ? "1" : "2";
         $sessionName    =   $condition == "1" ? "adminSessionID" : "otherSessionID";
         $this->session->sess_destroy($sessionName);
-		echo json_encode(true);
+        redirect(base_url("login"));
+		// echo json_encode(true);
     }
 
   

@@ -3,8 +3,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Approval_setup extends CI_Controller {
 
-    public function __construct()
-    {
+    public function __construct(){
         parent::__construct();
         $this->load->model("Operations_model", "operations");
         // $this->load->model("ApprovalSetup_model", "ApprovalSetup_model");
@@ -28,3 +27,5 @@ class Approval_setup extends CI_Controller {
     
 
 }
+?>
+

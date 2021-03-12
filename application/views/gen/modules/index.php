@@ -18,16 +18,16 @@
     <div class="container">
 		<div class="row clearfix row-deck" style='text-align:right;'>
             <div class="col-12">
-                <div class="col-12 header p-0">
+                <!-- <div class="col-12 header p-0">
                     <ul class="header-dropdown">
                         <button type="button" class="btn btn-primary p-2 px-3" id="btnAdd"> <i class="icon-plus"></i> &nbsp;Add Module</button>
                     </ul>
-                </div>
+                </div> -->
             </div>
         </div>
 
 		<div class="row clearfix row-deck">
-            <div class="col-12">
+            <div class="col-12" id="page_content">
                 <div class="table-responsive" id="table_content"></div>
             </div>
         </div>
@@ -36,7 +36,7 @@
 
 
 <!-- ----- MODAL ----- -->
-<div id="modal_module_masterfile" class="modal custom-modal fade" data-backdrop="static" data-keyboard="false" role="dialog">
+<div id="modal_module" class="modal custom-modal fade" data-backdrop="static" data-keyboard="false" role="dialog">
     <div class="modal-dialog modal-dialog-centered modal-md" role="document">
 		<div class="modal-content">
 			<div class="modal-header bg-primary text-light">
@@ -46,7 +46,7 @@
 				</button>
 			</div>
 
-            <div id="modal_module_masterfile_content"></div>
+            <div id="modal_module_content"></div>
         </div>
 	</div>
 </div>

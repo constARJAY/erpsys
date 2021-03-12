@@ -59,7 +59,6 @@ $(document).on("click", "#approvalUpdateBtn", function(){
     let moduleID    =   $(this).data("moduleid");
     let condition   =   validateForm("modal_approval_setup_form");
     
-
         if(condition){
             $("#modal_approval_setup").modal("hide")
               $("#confirmation-modal_approval_setup").modal("show");             
@@ -72,7 +71,7 @@ $(document).on("click", "#approvalUpdateBtn", function(){
 // Updating Confirmation
 $(document).on("click", "#btnSaveConfirmationAdd", function(){
     let moduleID                        =   $("#approvalUpdateBtn").data("moduleid");
-    let condition                       =   getTableData("gen_approval_tbl", "","moduleID = '"+ moduleID +"' ");
+    let condition                       =   getTableData("gen_approval__setup_tbl", "","moduleID = '"+ moduleID +"' ");
     let moduleName                      =   getTableData("gen_module_list_tbl", "moduleName","moduleID = '"+ moduleID +"' ");
     let approverFormValue               =   getApproversForm(modalBody,"1");
     
@@ -81,16 +80,17 @@ $(document).on("click", "#btnSaveConfirmationAdd", function(){
     data.append("tableData[moduleID]", moduleID);
     data.append("tableData[createdBy]", "1");
     data.append("tableData[updatedBy]", "1");
-    data.append("tableName", "gen_approval_tbl");
+    data.append("tableName", "gen_approval__setup_tbl");
     data.append("whereFilter", "moduleID="+ moduleID);
-    data.append("feedback", moduleName[0]["moduleName"]);
 
-    const saveData = condition.length == 0 ? insertTableData(data) : updateTableData(data);
+
+    const saveData = condition.length == 0 ? insertTableData(data, false, "success|"+moduleName[0]["moduleName"]+" setup successfully") : updateTableData(data);
         if(saveData){
             $(".approval-list").html(preloader);
             setTimeout(function(){ getApproval(moduleID);  }, 500);
         }
 });
+
 // Closing Confirmation
 $(document).on("click", ".btnCloseConfirmationAdd", function(){
     $("#confirmation-modal_approval_setup").modal("hide");
@@ -99,8 +99,9 @@ $(document).on("click", ".btnCloseConfirmationAdd", function(){
 
 function getApproval(moduleID){
     
-    let condition       = getTableData("gen_approval_tbl", "", "moduleID = '"+moduleID+"' ");
+    let condition       = getTableData("gen_approval__setup_tbl", "", "moduleID = '"+moduleID+"' ");
     let tableData       = condition.length > 0 ? condition : getTableData("gen_module_list_tbl", "", "moduleID = '"+ moduleID +"' ");
+    console.log(tableData);
     let approvalList    = "";
 
     if(condition.length > 0){
@@ -159,7 +160,7 @@ function approvalModalContent(moduleID){
     let modalBodyContent    =   `<h5 class="text-center text-primary">${moduleName[0]["moduleName"]}</h5>`;
     let modalFooterContent  =   "";
 
-    let condition       = getTableData("gen_approval_tbl", "", "moduleID = '"+moduleID+"' ");
+    let condition       = getTableData("gen_approval__setup_tbl", "", "moduleID = '"+moduleID+"' ");
     let tableData       = condition.length > 0 ? condition : getTableData("gen_module_list_tbl", "", "moduleID = '"+moduleID+"' ");
     
     if(condition.length > 0){
@@ -242,7 +243,7 @@ function getApproversForm(formID, condition = null){
 
 // NEED FOR COLLABORATIONS
 function getApproverList(moduleID){
-    let tableData   = getTableData("gen_approval_tbl", "approvalUserAccounts", "moduleID = '"+moduleID+"' ");
+    let tableData   = getTableData("gen_approval__setup_tbl", "approvalUserAccounts", "moduleID = '"+moduleID+"' ");
     let result      = tableData.length < 1 ? "undefined" : tableData[0]["approvalUserAccounts"];
     return result;
 }

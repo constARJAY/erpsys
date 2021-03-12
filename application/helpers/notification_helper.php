@@ -73,7 +73,7 @@
             $query = $CI->db->query($sql);
             $result = $query ? $query->result_array() : false;
             $controller = $result ? strtolower($result[0]["moduleController"]) : "javascript:void(0)";
-            $projectList = $result ? explode("|", $result[0]["projectName"]) : "";
+            $projectList = $result ? ($result[0]["projectName"] ? explode("|", $result[0]["projectName"]) : "") : "";
 
             $date = date("F d, Y", strtotime($notif["createdAt"]));
 

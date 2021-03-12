@@ -168,13 +168,13 @@ sup {
 }
 
 a {
-	color: #10948b;
+	color: #dc3450;
 	text-decoration: none;
 	background-color: transparent
 }
 
 a:hover {
-	color: #107770;
+	color: #dc3545;
 	text-decoration: underline
 }
 
@@ -2333,9 +2333,8 @@ pre code {
 .form-control:focus {
 	color: #495057;
 	background-color: #fff;
-	border-color: #13e6d8;
 	outline: 0;
-	box-shadow: 0 0 5px #10948b;
+	box-shadow: 0 0 5px #cccccc;
 }
 
 .form-control::-webkit-input-placeholder {
@@ -5563,8 +5562,8 @@ input[type=submit].btn-block {
 .page-item.active .page-link {
 	z-index: 3;
 	color: #fff;
-	background-color: #10948b;
-	border-color: #10948b;
+	background-color: #dc3450;
+	border-color: #dc3450;
 }
 
 .page-item.disabled .page-link {
@@ -5572,7 +5571,7 @@ input[type=submit].btn-block {
 	pointer-events: none;
 	cursor: auto;
 	background-color: #fff;
-	border-color: #dee2e6
+	border-color: #dc3450
 }
 
 .pagination-lg .page-link {

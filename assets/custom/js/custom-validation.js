@@ -427,11 +427,14 @@ const checkExists = (elementID, invalidFeedback) => {
             uniqueData.map(data => {
                 if (keys.length > 0) {
                     if (data.id !== uniqueID && elementID && invalidFeedback) {
-                        let countKeys = keys.length-1;
+                        let countKeys = keys.length;
+                        let countTemp = 0;
                         keys.map((item, index) => {
-                            if (data["multiple"][item] === inputs["multiple"][item]) countKeys--;
+                            if (data["multiple"][item] === inputs["multiple"][item]) {
+                                countTemp++;
+                            }  
                         })
-                        if (countKeys == 0) {
+                        if (countKeys == countTemp) {
                             flag = true;
                             $(elementID).removeClass("is-valid").addClass("is-invalid");
                             invalidFeedback.text(`${title} already exists!`);
@@ -628,6 +631,17 @@ const validateForm = (formID = null) => {
     }
 }
 // ----- END VALIDATE FORMS -----
+
+
+// ----- FORMAT AMOUNT -----
+const formatAmount = (amount = 0, pesoSign = false) => {
+    var currency = new Intl.NumberFormat('tl-PH', {
+        style: 'currency',
+        currency: 'PHP'
+    }).format(amount);
+    return !pesoSign ? currency : `₱${currency}`;
+}
+// ----- END FORMAT AMOUNT -----
 
 
 // ----- SAVE/UPDATE/DELETE TABLE DATA -----

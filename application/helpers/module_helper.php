@@ -5,52 +5,68 @@
         $CI =& get_instance();
         $result = [];
 
-        // ----- headerModules -----
-        $sql   = "SELECT * FROM gen_module_list_tbl WHERE moduleStatus = 1 GROUP BY moduleHeader ORDER BY createdAt ASC";
-        $query = $CI->db->query($sql);
-        $headerModules = $query ? $query->result_array() : [];
-        // ----- END headerModules -----
+        $sqlHeader = "SELECT * FROM gen_module_header_tbl WHERE moduleHeaderStatus = 1 ORDER BY moduleHeaderOrder";
+        $queryHeader = $CI->db->query($sqlHeader);
+        $resultHeader = $queryHeader ? $queryHeader->result_array() : [];
+        if ($resultHeader) {
+            foreach ($resultHeader as $header) {
+                $headerID   = $header["moduleHeaderID"];
+                $headerName = $header["moduleHeaderName"];
 
-        foreach ($headerModules as $headerModule) {
-            $moduleHeader = $headerModule["moduleHeader"];
-            $temp = [
-                "header" => $moduleHeader,
-                "modules" => []
-            ];
-
-            // ----- getCategoryModules -----
-            $sql   = "SELECT * FROM gen_module_list_tbl WHERE moduleHeader = '$moduleHeader' AND moduleStatus = 1 GROUP BY moduleCategory";
-            $query = $CI->db->query($sql);
-            $categoryModules = $query ? $query->result_array() : [];
-            // ----- END getCategoryModules -----
-
-            foreach ($categoryModules as $categoryModule) {
-                $moduleCategory = $categoryModule["moduleCategory"] ? $categoryModule["moduleCategory"] : "";
-                $moduleIcon = $categoryModule["moduleIcon"] ? $categoryModule["moduleIcon"] : "default-icon.svg";
-                $modules = [
-                    "names"    => [],
-                    "category" => $moduleCategory,
-                    "icon"     => $moduleIcon
+                $tempData = [
+                    "header"     => $headerName,
+                    "category"   => [],
+                    "nocategory" => []
                 ];
 
-                // ----- getAllModules -----
-                $category = !$moduleCategory ? "AND (moduleCategory IS NULL OR moduleCategory = '')" : "AND moduleCategory = '$moduleCategory'";
-                $sql   = "SELECT * FROM gen_module_list_tbl WHERE moduleHeader = '$moduleHeader'  $category AND moduleStatus = 1";
-                $query = $CI->db->query($sql);
-                $allModules = $query ? $query->result_array() : [];
-                // ----- END getAllModules -----
+                $sqlCategory = "SELECT * FROM gen_module_category_tbl WHERE moduleCategoryStatus = 1 AND moduleHeaderID = $headerID ORDER BY moduleCategoryOrder";
+                $queryCategory = $CI->db->query($sqlCategory);
+                $resultCategory = $queryCategory ? $queryCategory->result_array() : [];
 
-                foreach ($allModules as $module) {
-                    $moduleName = $module["moduleName"];
-                    $moduleController = $module["moduleController"];
-                    array_push($modules["names"], [
-                        "name"       => $moduleName,
-                        "controller" => $moduleController
-                    ]);
+                if ($resultCategory) {
+                    foreach ($resultCategory as $category) {
+                        $categoryID   = $category["moduleCategoryID"];
+                        $categoryName = $category["moduleCategoryName"];
+
+                        $sqlConnectedModule = "SELECT * FROM gen_module_list_tbl WHERE moduleStatus = 1 AND moduleHeaderID = $headerID AND moduleCategoryID = $categoryID";
+                        $queryConnectedModule = $CI->db->query($sqlConnectedModule);
+                        $resultConnectedModule = $queryConnectedModule ? $queryConnectedModule->result_array() : [];
+
+                        if ($resultConnectedModule) {
+                            $tempModule = [
+                                "categoryName" => $categoryName,
+                                "icon"         => $category["moduleCategoryIcon"],
+                                "modules"      => []
+                            ];
+                            foreach ($resultConnectedModule as $module) {
+                                $temp = [
+                                    "name"       => $module["moduleName"],
+                                    "controller" => $module["moduleController"],
+                                ];
+                                array_push($tempModule["modules"], $temp);
+                            }
+                            array_push($tempData["category"], $tempModule);
+                        }
+                    }
                 }
-                array_push($temp["modules"], $modules);
+
+                $sqlNotConnectedModule = "SELECT * FROM gen_module_list_tbl WHERE moduleStatus = 1 AND moduleHeaderID = $headerID AND (moduleCategoryID IS NULL)";
+                $queryNotConnectedModule = $CI->db->query($sqlNotConnectedModule);
+                $resultNotConnectedModule = $queryNotConnectedModule ? $queryNotConnectedModule->result_array() : [];
+
+                if ($resultNotConnectedModule) {
+                    foreach ($resultNotConnectedModule as $module) {
+                        $temp = [
+                            "name"       => $module["moduleName"],
+                            "controller" => $module["moduleController"],
+                            "icon"       => $module["moduleIcon"],
+                        ];
+                        array_push($tempData["nocategory"], $temp);
+                    }
+                }
+                array_push($result, $tempData);
             }
-            array_push($result, $temp);
         }
+
         return $result;
     }

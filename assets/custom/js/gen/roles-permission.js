@@ -31,7 +31,7 @@ $(document).ready(function() {
                     <div class="d-flex justify-content-between align-items-center">
                         <div style="cursor: pointer;" class="userRole" roleID="${item.roleID}">
                             <span class="badge ${statusClass} rounded-circle" style="height: 10px; width: 10px;">&nbsp;</span>
-                            <span class="ml-2">${item.roleName}</span>
+                            <span class="ml-2 name">${item.roleName}</span>
                         </div>
                         <div style="cursor: pointer;">
                             ${button}
@@ -47,7 +47,7 @@ $(document).ready(function() {
         return html;
     }
 
-    function getModuleAccessContent(roleID = 1) { // Administrator
+    function getModuleAccessContent(roleID = 1, roleName = "Administrator") { 
         let data = getTableData("gen_roles_permission_tbl LEFT JOIN gen_module_list_tbl USING(moduleID)", "", "roleID="+roleID);
 
         let html = `
@@ -64,7 +64,7 @@ $(document).ready(function() {
                 let checkbox = item.roleID != 1 ? `
                 <div class="status-toggle">
                     <label class="switch">
-                        <input type="checkbox" class="moduleStatus" roleID=${roleID} moduleID=${item.moduleID} ${item.permissionStatus == 1 ? "checked" : ""} moduleName="${item.moduleName}" roleName="${item.roleName}">
+                        <input type="checkbox" class="moduleStatus" roleID=${roleID} moduleID=${item.moduleID} ${item.permissionStatus == 1 ? "checked" : ""} moduleName="${item.moduleName}" roleName="${roleName}">
                         <span class="slider round"></span>
                     </label>
                 </div>` : "";
@@ -317,10 +317,11 @@ $(document).ready(function() {
 
     // ----- SELECT USER ROLE -----
     $(document).on("click", ".userRole", function() {
-        const roleID = $(this).attr("roleID");
+        const roleID   = $(this).attr("roleID");
+        const roleName = $(this).find(".name").text();
         $("#user_role_content").find(".active-menu").removeClass("active-menu");
         $("#user_role_content").find(`[roleid=${roleID}]`).parent().parent().parent().addClass("active-menu");
-        const moduleData = getModuleAccessContent(roleID);
+        const moduleData = getModuleAccessContent(roleID, roleName);
         $("#module_access_content").html(preloader);
         setTimeout(() => {
             $("#module_access_content").html(moduleData);
