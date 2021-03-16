@@ -46,4 +46,4 @@
 <!-- ----- END ADD MODAL ----- -->
 
 
-<script src="<?=base_url("assets/custom/js/hris/code_conduct_category.js")?>"></script>
+<script src="<?=base_url("assets/custom/js/hris/code-conduct-category.js")?>"></script>

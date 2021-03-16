@@ -140,7 +140,7 @@ input:checked + .slider:before {
 
 <body class="font-nunito fullwidth h_menu">
 
-<input type="hidden" name="base_url" id="base_url" value="<?= base_url() ?>">
+<input type="hidden" name="base_url" id="base_url" value="<?= base_url() ?>" session="1">
 
 <div id="body" class="theme-blackbox">
     <!-- Page Loader -->
@@ -282,41 +282,44 @@ input:checked + .slider:before {
                 if (count($moduleCategory) > 0) {
                     foreach ($moduleCategory as $category) {
                         $icon = $category["icon"];
-                        $html .= '
-                        <li class="">
-                            <a href="javascript:void(0);" class="menu-toggle">
-                                <img src="'.base_url("assets/upload-files/icons/$icon").'" height="25" width="25">
-                                <span class="ml-1">'.$category["categoryName"].'</span>
-                            </a>';
-
                         $moduleLength = count($category["modules"]);
-                        if ($moduleLength > 12) {
-                        $html .= '
-                        <ul class="ml-menu mega_menu">
-                            <div class="row">';
-                            foreach ($category["modules"] as $item) {
-                                $html .= '
-                                <div class="col-xl-3 col-md-4 col-sm-12">
-                                <li class="">
-                                    <a href="'.base_url().strtolower($item["controller"]).'">'.$item["name"].'</a>
-                                </li>
-                                </div>';
-                            }
-                            $html .= '</div>';
-                        } else {
-                            $html .= '
-                            <ul class="ml-menu">';
-                            foreach ($category["modules"] as $item) {
-                                $html .= '
-                                <li class="">
-                                    <a href="'.base_url().strtolower($item["controller"]).'">'.$item["name"].'</a>
-                                </li>';
-                            }
-                        }
 
-                        $html .= '
-                            </ul>
-                        </li>';
+                        if ($moduleLength > 0) {
+                            $html .= '
+                            <li class="">
+                                <a href="javascript:void(0);" class="menu-toggle">
+                                    <img src="'.base_url("assets/upload-files/icons/$icon").'" height="25" width="25">
+                                    <span class="ml-1">'.$category["categoryName"].'</span>
+                                </a>';
+
+                            if ($moduleLength > 12) {
+                            $html .= '
+                            <ul class="ml-menu mega_menu">
+                                <div class="row">';
+                                foreach ($category["modules"] as $item) {
+                                    $html .= '
+                                    <div class="col-xl-3 col-md-4 col-sm-12">
+                                    <li class="w-100">
+                                        <a href="'.base_url().strtolower($item["controller"]).'">'.$item["name"].'</a>
+                                    </li>
+                                    </div>';
+                                }
+                                $html .= '</div>';
+                            } else {
+                                $html .= '
+                                <ul class="ml-menu">';
+                                foreach ($category["modules"] as $item) {
+                                    $html .= '
+                                    <li class="w-100">
+                                        <a href="'.base_url().strtolower($item["controller"]).'">'.$item["name"].'</a>
+                                    </li>';
+                                }
+                            }
+
+                            $html .= '
+                                </ul>
+                            </li>';
+                        }
                         
                     }
                 }

@@ -1,3 +1,6 @@
+<?php
+// $approval = getApprover("1");
+?>
 <style>
     .module-active{border-left: 5px solid #10948b;}
     .module-list:hover{cursor:pointer}
@@ -42,37 +45,11 @@
                             <h6 class="bg-primary text-light p-3"><strong>APPROVERS</strong></h6>
 
                             <div class="card my-0 p-2 approval-list">
-                                
-                                <div class="row py-2">
-                                    <div class="col-3 col-lg-3 col-xl-1 d-flex align-items-center"><img class="img-fluid rounded-circle" src="assets/images/profile-images/default.jpg" alt="avatar" height="70" width="70"></div>
-                                    <div class="col-5 col-lg-6 col-xl-9 d-flex justify-content-start align-items-center">
-                                        <span>
-                                            Level 1 Name approver  <br>
-                                            <small class="text-primary">Department | Designation</small>    
-                                        </span>
-                                    </div>
-                                    <div class="col-4 col-lg-3 col-xl-2 d-flex justify-content-center align-items-center">
-                                        <h5><small class="text-primary">Level 1</small></h5>
-                                    </div>
-                                </div>
-
-                                <!-- <div class="row py-2">
-                                    <div class="col-1"><img class="img-fluid rounded-circle" src="assets/images/profile-images/default.jpg" alt="avatar" height="70" width="70"></div>
-                                    <div class="col-9  d-flex justify-content-start align-items-center">
-                                        <span>
-                                            Level 1 Name approver  <br>
-                                            <small class="text-primary">Department | Designation</small>    
-                                        </span>
-                                    </div>
-                                    <div class="col-2 col-2 d-flex justify-content-center align-items-center">
-                                        <p>Level 1</p>
-                                    </div>
-                                </div>
-
-                                <div class="py-2 border-top d-flex justify-content-end align-items-end">
-                                        <button class="btn btn-primary" data-approvalid="2" >Update Approver</button>
-                                </div> -->
-
+								<div class="row">
+									<div class="col-4"></div>
+									<div class="col-4"><img class="img-fluid" src="<?=base_url("assets/modal/please-select.gif")?>" alt=""> <h6 class="text-primary text-center font-weight-bold">SELECT APPROVALS</h6></div>
+									<div class="col-4"></div>
+								</div>
                             </div>
                     </div>
                 </div>

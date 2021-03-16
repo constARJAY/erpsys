@@ -1,6 +1,7 @@
 // ----- GLOBAL VARIABLES -----
 let uniqueData          = []; // Store unique data here
 const base_url          = $("#base_url").val();
+const sessionID         = $("#base_url").attr("session");
 const differentInputArr = ["input", "select", "textarea"];
 const differentInputStr = differentInputArr.join(", ");
 // ----- END GLOBAL VARIABLES -----
@@ -168,6 +169,21 @@ const resetForm = (formID = null) => {
 // ----- END RESET FORM -----
 
 
+// ----- CHECK IF THE FORM IS EMPTY -----
+const isFormEmpty = (formID = false) => {
+    if (formID) {
+        let flag = 0;
+        $("#"+formID).find("input[required], select[required], textarea[required]").each(function() {
+            if ($(this).val().length > 0) flag++;
+        }) 
+        return flag > 0 ? false : true;
+    }
+    return true;
+}
+// ----- END CHECK IF THE FORM IS EMPTY -----
+
+
+// ----- CLEAR VALIDATION -----
 const clearInputValidation = (elementID = null) => {
     if (elementID) {
         let elem = "#"+elementID;
@@ -182,6 +198,7 @@ const clearInputValidation = (elementID = null) => {
         invalidFeedback.text("");
     }
 }
+// ----- END CLEAR VALIDATION -----
 
 
 // ----- GET FORM DATA -----
@@ -464,14 +481,26 @@ const checkExists = (elementID, invalidFeedback) => {
 // ----- VALIDATE EMAIL -----
 const checkEmail = (elementID, invalidFeedback, value) => {
     const validated = $(elementID).hasClass("validated");
+    const required  = $(elementID).hasClass("required");
     let emailRegex = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
     if ($(elementID).attr("type") == "email") {
-        if (emailRegex.test(value)) {
-            validated ? $(elementID).removeClass("is-invalid").addClass("is-valid") : $(elementID).removeClass("is-invalid").removeClass("is-valid");
-            invalidFeedback.text("");
-        } else {
-            $(elementID).removeClass("is-valid").addClass("is-invalid");
-            invalidFeedback.text("Invalid email format.");
+        if (required) {
+            if (emailRegex.test(value)) {
+                validated ? $(elementID).removeClass("is-invalid").addClass("is-valid") : $(elementID).removeClass("is-invalid").removeClass("is-valid");
+                invalidFeedback.text("");
+            } else {
+                $(elementID).removeClass("is-valid").addClass("is-invalid");
+                invalidFeedback.text("Invalid email format.");
+            }
+        }
+        if (value.length > 0) {
+            if (emailRegex.test(value)) {
+                validated ? $(elementID).removeClass("is-invalid").addClass("is-valid") : $(elementID).removeClass("is-invalid").removeClass("is-valid");
+                invalidFeedback.text("");
+            } else {
+                $(elementID).removeClass("is-valid").addClass("is-invalid");
+                invalidFeedback.text("Invalid email format.");
+            }
         }
     }
 }
@@ -566,6 +595,7 @@ const validateInput = (elementID) => {
                 
             } else {
                 $(elementID).parent().removeClass("is-invalid").removeClass("is-valid").removeClass("has-error").addClass("no-error");
+                $(elementID).parent().children().next().next().children().children().removeClass("has-error").addClass("no-error");
                 $(elementID).removeClass("is-invalid").addClass("is-valid");
                 invalidFeedback.text("");
             }
@@ -639,13 +669,136 @@ const formatAmount = (amount = 0, pesoSign = false) => {
         style: 'currency',
         currency: 'PHP'
     }).format(amount);
+    currency = currency.replace('₱', '');
     return !pesoSign ? currency : `₱${currency}`;
 }
 // ----- END FORMAT AMOUNT -----
 
 
+// ----- GET LAST CODE -----
+const getTableLastCode = (tableName = false, columnName = false) => {
+    if (tableName && columnName) {
+        let table = getTableData(tableName);
+        let result = 0;
+        
+        if (table.length > 0) {
+            let lastID = getTableData(tableName, "", "", "createdAt DESC");
+            if (lastID) {
+                result = lastID[0][columnName];
+                result = result.split("-");
+                result = +result[2];
+            } else {
+                result = 0;
+            }
+        }
+        
+        return result;
+    }
+    return "Invalid arguments";
+}
+// ----- END GET LAST CODE -----
+
+
+// ----- GENERATE CODE -----
+const generateCode = (firstStr = "STR", lastID = false, tableName = false, columnName = false) => {
+    let id;
+    if (!lastID && tableName && columnName) {
+        id = getTableLastCode(tableName, columnName) + 1;
+    } else {
+        id = lastID ? lastID + 1 : 1;
+    }
+
+    id = id.toString();
+    let lastStr = "00001";
+    if (id.length <= 0) {
+        return `${firstStr}-${moment().format("YY")}-${lastStr}`;
+    } else if (id.length > 0 && id.length < 5) {
+        lastStr = "0".repeat(5-id.length)+id;
+        return `${firstStr}-${moment().format("YY")}-${lastStr}`;
+    } else {
+        return `${firstStr}-${moment().format("YY")}-${id}`;
+    }
+}
+// ----- END GENERATE CODE -----
+
+
 // ----- SAVE/UPDATE/DELETE TABLE DATA -----
-const saveUpdateDeleteTableData = async (data, path, feedback = false) => {
+const saveUpdateDeleteDatabaseFormData = async (data, path, feedback = false, swalTitle) => {
+    let result = await $.ajax({
+        method:  "POST",
+        url:      path,
+        data,
+        processData: false,
+        contentType: false,
+        global:   false,
+        cache:    false,
+        async:    false,
+        dataType: "json",
+        beforeSend: function() {
+            $("#loader").show();
+        },
+        success: function(data) {
+            let result = data.split("|");
+            let isSuccess = result[0], 
+                message   = result[1], 
+                id        = result[2] ? result[2] : null;
+
+            if (isSuccess == "true") {
+                if (feedback) {
+                    feedback = feedback.split("|");
+                    feedbackClass = feedback[0];
+                    feedbackMsg   = feedback[1];
+                    setTimeout(() => {
+                        $("#loader").hide();
+                        closeModals();
+                        if (swalTitle) {
+                            Swal.fire({
+                                icon: feedbackClass,
+                                title: swalTitle,
+                                text: feedbackMsg,
+                                showConfirmButton: false,
+                                timer: 2000
+                            });
+                        } else {
+                            Swal.fire({
+                                icon: feedbackClass,
+                                title: feedbackMsg,
+                                showConfirmButton: false,
+                                timer: 2000
+                            });
+                        }
+                    }, 500);
+                } else {
+                    setTimeout(() => {
+                        $("#loader").hide();
+                        closeModals();
+                        Swal.fire({
+                            icon:  'success',
+                            title: message,
+                            showConfirmButton: false,
+                            timer: 2000
+                        });
+                    }, 500);
+                }
+            } else {
+                $("#loader").hide();
+                Swal.fire({
+                    icon:  'danger',
+                    title: message,
+                    showConfirmButton: false,
+                    timer: 2000
+                });
+            }
+        },
+        error: function(err) {
+            showNotification("danger", "System error: Please contact the system administrator for assistance!");
+            $("#loader").hide();
+        }
+    });
+    return await result ? result : false;
+}
+
+const saveUpdateDeleteDatabaseFormDatav1 = async (data, path, feedback = false, swalTitle) => {
     let flag;
     $.ajax({
         method:  "POST",
@@ -700,7 +853,78 @@ const saveUpdateDeleteTableData = async (data, path, feedback = false) => {
     return await flag;
 }
 
-const saveObjectUpdateDeleteTableData = async (data, path, feedback = false) => {
+const saveUpdateDeleteDatabaseObject = async (data, path, feedback = false, swalTitle) => {
+    let result = await $.ajax({
+        method:  "POST",
+        url:      path,
+        data,
+        async:    false,
+        dataType: "json",
+        beforeSend: function() {
+            $("#loader").show();
+        },
+        success: function(data) {
+            let result = data.split("|");
+            let isSuccess = result[0], 
+                message   = result[1], 
+                id        = result[2] ? result[2] : null;
+
+            if (isSuccess == "true") {
+                if (feedback) {
+                    feedback = feedback.split("|");
+                    feedbackClass = feedback[0];
+                    feedbackMsg   = feedback[1];
+                    setTimeout(() => {
+                        $("#loader").hide();
+                        closeModals();
+                        if (swalTitle) {
+                            Swal.fire({
+                                icon: feedbackClass,
+                                title: swalTitle,
+                                text: feedbackMsg,
+                                showConfirmButton: false,
+                                timer: 2000
+                            });
+                        } else {
+                            Swal.fire({
+                                icon: feedbackClass,
+                                title: feedbackMsg,
+                                showConfirmButton: false,
+                                timer: 2000
+                            });
+                        }
+                    }, 500);
+                } else {
+                    setTimeout(() => {
+                        $("#loader").hide();
+                        closeModals();
+                        Swal.fire({
+                            icon:  'success',
+                            title: message,
+                            showConfirmButton: false,
+                            timer: 2000
+                        });
+                    }, 500);
+                }
+            } else {
+                $("#loader").hide();
+                Swal.fire({
+                    icon:  'danger',
+                    title: message,
+                    showConfirmButton: false,
+                    timer: 2000
+                });
+            }
+        },
+        error: function(err) {
+            showNotification("danger", "System error: Please contact the system administrator for assistance!");
+            $("#loader").hide();
+        }
+    });
+    return await result ? result : false;
+}
+
+const saveUpdateDeleteDatabaseObjectv1 = async (data, path, feedback = false, swalTitle) => {
     let flag;
     $.ajax({
         method:  "POST",
@@ -738,7 +962,7 @@ const saveObjectUpdateDeleteTableData = async (data, path, feedback = false) => 
                 }
             } else {
                 flag = false;
-                showNotification("danger", feedbackMsg);
+                showNotification("danger", "System error: Please contact the system administrator for assistance!");
                 $("#loader").hide();
             }
         },
@@ -751,22 +975,32 @@ const saveObjectUpdateDeleteTableData = async (data, path, feedback = false) => 
     return await flag;
 }
 
-const insertTableData = async (data, object = false, feedback = false) => {
+const insertTableData = async (data, object = false, feedback = false, swalTitle = false) => {
+    let path = `${base_url}operations/insertTableData`;
+    return !object ? await saveUpdateDeleteDatabaseFormData(data, path, feedback, swalTitle) : await saveUpdateDeleteDatabaseObject(data, path, feedback, swalTitle);
+}
+
+const insertTableDatav1 = async (data, object = false, feedback = false, swalTitle = false) => {
     $("#loader").show();
     let path = `${base_url}operations/insertTableData`;
-    return !object ? await saveUpdateDeleteTableData(data, path, feedback) : await saveObjectUpdateDeleteTableData(data, path, feedback);
+    return !object ? await saveUpdateDeleteDatabaseFormDatav1(data, path, feedback, swalTitle) : await saveUpdateDeleteDatabaseObjectv1(data, path, feedback, swalTitle);
 }
 
-const updateTableData = async (data, object = false, feedback = false) => {
+const updateTableData = async (data, object = false, feedback = false, swalTitle = false) => {
+    let path = `${base_url}operations/updateTableData`;
+    return !object ? await saveUpdateDeleteDatabaseFormData(data, path, feedback, swalTitle) : await saveUpdateDeleteDatabaseObject(data, path, feedback, swalTitle);
+}
+
+const updateTableDatav1 = async (data, object = false, feedback = false, swalTitle = false) => {
     $("#loader").show();
     let path = `${base_url}operations/updateTableData`;
-    return !object ? await saveUpdateDeleteTableData(data, path, feedback) : await saveObjectUpdateDeleteTableData(data, path, feedback);
+    return !object ? await saveUpdateDeleteDatabaseFormDatav1(data, path, feedback, swalTitle) : await saveUpdateDeleteDatabaseObjectv1(data, path, feedback, swalTitle);
 }
 
-const deleteTableData = async (data, object = false, feedback = false) => {
+const deleteTableData = async (data, object = false, feedback = false, swalTitle = false) => {
     $("#loader").show();
     let path = `${base_url}operations/deleteTableData`;
-    return !object ? await saveUpdateDeleteTableData(data, path, feedback) : await saveObjectUpdateDeleteTableData(data, path, feedback);
+    return !object ? await saveUpdateDeleteDatabaseFormData(data, path, feedback, swalTitle) : await saveUpdateDeleteDatabaseObject(data, path, feedback, swalTitle);
 }
 // ----- END SAVE/UPDATE/DELETE TABLE DATA -----
 

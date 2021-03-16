@@ -13,35 +13,53 @@ $(document).ready(function(){
             scrollCollapse: true,
             columnDefs: [
                 { targets: 0, width: 100 },
-                { targets: 1, width: 100 },
-                { targets: 2, width: 100 },
-                { targets: 2, width: 100 },
+                { targets: 1, width: 250 },
+                { targets: 2, width: 250 },
                 { targets: 3, width: 50 },
+                { targets: 4, width: 50 },
             ],
         });
     }
     initDataTables();
     // ----- END DATATABLES -----
 
+    // ----- DEPARTMENT CONTENT -----
+    function departmentContent(param = false) {
+    // getTableData(tableName = null, columnName = “”, WHERE = “”, orderBy = “”) 
+    const data = getTableData("hris_department_tbl", 
+        "departmentID  ,departmentName", "", "");
+      
+            let html = ` <option value="" disabled selected ${!param && "selected"}>No Selected</option>`;
+            data.map((item, index, array) => {
+                html += `<option value="${item.departmentID }" ${param && item.departmentID  == param[0].departmentID  && "selected"}>${item.departmentName}</option>`;
+            })
+            $("#input_departmentID").html(html);
+    }
+    departmentContent();
+    // ----- END DEPARTMENT CONTENT -----
+
     // ----- TABLE CONTENT -----
     function tableContent() {
         // Reset the unique datas
         uniqueData = []; 
+        // getTableData(tableName = null, columnName = “”, WHERE = “”, orderBy = “”) 
+        const data = getTableData("hris_designation_tbl as designation INNER JOIN hris_department_tbl as department USING(departmentID)  ", 
+            "*, CONCAT('DES-',SUBSTR(designation.datecreated,3,2),'-',LPAD(designation.designationID, 5, '0')) AS designationCode,department.departmentName", "", "");
 
-        $.ajax({
-            url:      `${base_url}operations/getTableData`,
-            method:   'POST',
-            async:    false,
-            dataType: 'json',
-            data:     {tableName: "user_account_tbl"},
-            beforeSend: function() {
+        // $.ajax({
+        //     url:      `${base_url}operations/getTableData`,
+        //     method:   'POST',
+        //     async:    false,
+        //     dataType: 'json',
+        //     data:     {tableName: "user_account_tbl"},
+        //     beforeSend: function() {
                 $("#table_content").html(preloader);
-                // $("#inv_headerID").text("List of Inventory Item");
-            },
-            success: function(data) {
-                console.log(data);
+        //         // $("#inv_headerID").text("List of Inventory Item");
+        //     },
+        //     success: function(data) {
+        //         console.log(data);
                 let html = `
-                <table class="table table-bordered table-striped table-hover" id="('#tableHRISDesignation'))">
+                <table class="table table-bordered table-striped table-hover" id="tableHRISDesignation">
                     <thead>
                     <tr class="text-center">
                         <th>Designation No.</th>
@@ -56,24 +74,31 @@ $(document).ready(function(){
                 data.map((item, index, array) => {
                     // ----- INSERT UNIQUE DATA TO uniqueData VARIABLE ----
                     let unique = {
-                        id:       item.userAccountID, // Required
-                        username: item.username,
-                        email:    item.email,
+                        id:       item.designationID, // Required
+                        designationName: item.designationName,
+                        // email:    item.email,
                     }
                     uniqueData.push(unique);
                     // ----- END INSERT UNIQUE DATA TO uniqueData VARIABLE ----
+                    
+                    if(item.designationStatus == 1){
+                        var status=`<span class="badge badge-outline-success w-100">Active</span>`;
+                     }   
+                     if(item.designationStatus == 0){
+                        var status=`<span class="badge badge-outline-danger w-100">Inactive</span>`;
+                     }
 
                     html += `
                     <tr>
-                        <td>00001</td>
-                        <td>Assistant</td>
-                        <td>Head Department</td>
-                        <td><span class="badge badge-outline-success w-100">Active</span></td>
+                        <td>${item.designationCode}</td>
+                        <td>${item.designationName}</td>
+                        <td>${item.departmentName}</td>
+                        <td>${status}</td>
                         <td>
                             <button 
                                 class="btn btn-edit btn-block btnEdit" 
-                                id="${item.userAccountID}"
-                                feedback="${item.username}">
+                                id="${item.designationID}"
+                                feedback="${item.designationName}">
                                 <i class="fas fa-edit"></i>
                                 EDIT
                             </button>
@@ -87,28 +112,30 @@ $(document).ready(function(){
                     $("#table_content").html(html);
                     initDataTables();
                 }, 500);
-            },
-            error: function() {
-                let html = `
-                    <div class="w-100 h5 text-center text-danger>
-                        There was an error fetching data.
-                    </div>`;
-                $("#table_content").html(html);
-            }
-        })
+        //     },
+        //     error: function() {
+        //         let html = `
+        //             <div class="w-100 h5 text-center text-danger>
+        //                 There was an error fetching data.
+        //             </div>`;
+        //         $("#table_content").html(html);
+        //     }
+        // })
     }
     tableContent();
     // ----- END TABLE CONTENT -----
 
      // ----- MODAL CONTENT -----
      function modalContent(data = false) {
-    let userAccountID ="1";
-          
-        let button = userAccountID ? `
+        let designationID              = data ? (data[0].designationID            ? data[0].designationID        : "") : "",
+        departmentID             = data ? (data[0].departmentID       ? data[0].departmentID   : "") : "",
+        designationName                = data ? (data[0].designationName          ? data[0].designationName      : "") : "",
+        designationStatus      = data ? (data[0].designationStatus? data[0].designationStatus         : "") : "";
+        let button = designationID ? `
         <button 
             class="btn btn-update px-5 p-2" 
             id="btnUpdate" 
-            accountid="${userAccountID}">
+            rowID="${designationID}">
             <i class="fas fa-save"></i>
             UPDATE
         </button>` : `
@@ -123,45 +150,35 @@ $(document).ready(function(){
             <div class="row">
                 <div class="col-md-12 col-sm-12">
                     <div class="form-group">
-                        <label>Department<span class="text-danger font-weight-bold">*</span></label>
+                        <label>Department Name<span class="text-danger font-weight-bold">*</span></label>
                         <select 
                             class="form-control select2 validate" 
-                            id="input_department" 
-                            name="department"
+                            id="input_departmentID" 
+                            name="departmentID"
                             autocomplete="off"
                             required>
-                            <option 
-                                value="" 
-                                disabled 
-                                selected
-                            >No Selected</option>
-                            <option 
-                                value="1" 
-                            >Head Department</option>
-                            <option 
-                                value="0" 
-                            >Lower Department</option>
                         </select>
-                        <div class="invalid-feedback d-block" id="invalid-input_department"></div>
+                        <div class="invalid-feedback d-block" id="invalid-input_departmentID"></div>
                     </div>
                 </div>
             </div>
             <div class="row">
                 <div class="col-md-12 col-sm-12">
                     <div class="form-group">
-                        <label>Designation<span class="text-danger font-weight-bold">*</span></label>
+                        <label>Designation Name<span class="text-danger font-weight-bold">*</span></label>
                         <input 
                             type="text" 
                             class="form-control validate" 
-                            name="designation" 
-                            id="input_designation" 
-                            data-allowcharacters="[A-Z][a-z][0-9][ ][@]" 
+                            name="designationName" 
+                            id="input_designationName" 
+                            data-allowcharacters="[A-Z][a-z][0-9][ ][.][,][-][(][)]['][/]" 
                             minlength="2" 
-                            maxlength="20" 
+                            maxlength="75" 
                             required 
-                            value=""
+                            unique="${designationID}" 
+                            value="${designationName}"
                             autocomplete="off">
-                        <div class="invalid-feedback d-block" id="invalid-input_designation"></div>
+                        <div class="invalid-feedback d-block" id="invalid-input_designationName"></div>
                     </div>
                 </div>
             </div>
@@ -171,7 +188,6 @@ $(document).ready(function(){
                         <label>Status<span class="text-danger font-weight-bold">*</span></label>
                         <select 
                             class="form-control select2 validate" 
-                            name="role" 
                             id="input_designationStatus" 
                             name="designationStatus"
                             autocomplete="off"
@@ -180,13 +196,13 @@ $(document).ready(function(){
                                 value="" 
                                 disabled 
                                 selected
-                            >No Selected</option>
+                                ${!data && "selected"}>No Selected</option>
                             <option 
                                 value="1" 
-                            >Active</option>
+                                ${data && designationStatus == "1" && "selected"}>Active</option>
                             <option 
                                 value="0" 
-                            >InActive</option>
+                                ${data && designationStatus == "0" && "selected"}>InActive</option>
                         </select>
                         <div class="invalid-feedback d-block" id="invalid-input_designationStatus"></div>
                     </div>
@@ -209,6 +225,7 @@ $(document).ready(function(){
         $("#modal_hris_designation_content").html(preloader);
         const content = modalContent();
         $("#modal_hris_designation_content").html(content);
+        departmentContent();
         initAll();
     });
     // ----- END OPEN ADD MODAL -----
@@ -244,24 +261,24 @@ $(document).ready(function(){
           }).then((result) => {
             if (result.isConfirmed) {
 
-            // /**
-            //  * ----- FORM DATA -----
-            //  * tableData = {} -> Objects
-            //  */
-            // let data = getFormData("modal_user_account");
-            // data.append("tableName", "user_account_tbl");
-            // data.append("feedback", "Your choice");
-            // /**
-            //  * ----- DATA -----
-            //  * 1. tableName
-            //  * 2. tableData
-            //  * 3. feedback
-            //  */
+            /**
+             * ----- FORM DATA -----
+             * tableData = {} -> Objects
+             */
+            let data = getFormData("modal_hris_designation");
+            data.append("tableName", "hris_designation_tbl");
+            data.append("feedback", "Your choice");
+            /**
+             * ----- DATA -----
+             * 1. tableName
+             * 2. tableData
+             * 3. feedback
+             */
 
-            // const saveData = insertTableData(data);
-            // if (saveData) {
-            //     tableContent();
-            // }
+            const saveData = insertTableData(data);
+            if (saveData) {
+                tableContent();
+            }
                 
             Swal.fire({
                 icon: 'success',
@@ -288,12 +305,13 @@ $(document).ready(function(){
         // Display preloader while waiting for the completion of getting the data
         $("#modal_hris_designation_content").html(preloader); 
 
-        const tableData = getTableData("inventory_item_tbl", "*", "userAccountID="+id, "");
+        const tableData = getTableData("hris_designation_tbl", "*", "designationID="+id, "");
         if (tableData) {
             const content = modalContent(tableData);
             setTimeout(() => {
                 $("#modal_hris_designation_content").html(content);
-                $("#btnSaveConfirmationEdit").attr("accountid", id);
+                departmentContent(tableData);
+                $("#btnSaveConfirmationEdit").attr("rowID", id);
                 $("#btnSaveConfirmationEdit").attr("feedback", feedback);
                 initAll();
             }, 500);
@@ -321,26 +339,26 @@ $(document).ready(function(){
               }).then((result) => {
                 if (result.isConfirmed) {
     
-                    // const accountID = $(this).attr("accountid");
-                    // const feedback  = $(this).attr("feedback");
+                    const rowID = $(this).attr("rowID");
+                    const feedback  = $(this).attr("feedback");
         
-                    // let data = getFormData("modal_user_account");
-                    // data.append("tableName", "user_account_tbl");
-                    // data.append("whereFilter", "userAccountID="+accountID);
+                    let data = getFormData("modal_hris_designation");
+                    data.append("tableName", "hris_designation_tbl");
+                    data.append("whereFilter", "designationID="+rowID);
                     // data.append("feedback", feedback);
         
-                    // /**
-                    //  * ----- DATA -----
-                    //  * 1. tableName
-                    //  * 2. tableData
-                    //  * 3. whereFilter
-                    //  * 4. feedback
-                    // */
+                    /**
+                     * ----- DATA -----
+                     * 1. tableName
+                     * 2. tableData
+                     * 3. whereFilter
+                     * 4. feedback
+                    */
         
-                    // const saveData = updateTableData(data);
-                    // if (saveData) {
-                    //    tableContent();
-                    // }
+                    const saveData = updateTableData(data);
+                    if (saveData) {
+                       tableContent();
+                    }
                     
                 Swal.fire({
                     icon: 'success',
@@ -432,7 +450,7 @@ $(document).ready(function(){
 
             // const data = {
             //     tableName:   "user_account_tbl",
-            //     whereFilter: "userAccountID="+accountID,
+            //     whereFilter: "userrowID="+rowID,
             //     feedback
             // };
 

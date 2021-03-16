@@ -19,7 +19,8 @@ $(document).ready(function(){
                 { targets: 4, width: 100 },
                 { targets: 5, width: 100 },
                 { targets: 6, width: 100 },
-                { targets: 7, width: 100 }
+                { targets: 7, width: 100 },
+                { targets: 8, width: 100 },
             ],
         });
     }
@@ -30,19 +31,21 @@ $(document).ready(function(){
     function tableContent() {
         // Reset the unique datas
         uniqueData = []; 
-
-        $.ajax({
-            url:      `${base_url}operations/getTableData`,
-            method:   'POST',
-            async:    false,
-            dataType: 'json',
-            data:     {tableName: "user_account_tbl"},
-            beforeSend: function() {
+        // getTableData(tableName = null, columnName = “”, WHERE = “”, orderBy = “”) 
+        const data = getTableData("fms_chart_of_accounts_tbl INNER JOIN gen_ledger_classification_tbl USING(ledgerClassificationID)", "*,ledgerClassificationName", "", "");
+        console.log(data);
+        // $.ajax({
+        //     url:      `${base_url}operations/getTableData`,
+        //     method:   'POST',
+        //     async:    false,
+        //     dataType: 'json',
+        //     data:     {tableName: "user_account_tbl"},
+        //     beforeSend: function() {
                 $("#table_content").html(preloader);
-                // $("#inv_headerID").text("List of Inventory Item");
-            },
-            success: function(data) {
-                console.log(data);
+        //         // $("#inv_headerID").text("List of Inventory Item");
+        //     },
+        //     success: function(data) {
+        //         console.log(data);
                 let html = `
                 <table class="table table-bordered table-striped table-hover" id="tableHRISChartOfAccounts">
                     <thead>
@@ -54,6 +57,7 @@ $(document).ready(function(){
                         <th>Ledger Classification</th>
                         <th>Groupings</th>
                         <th>Financial Statement Presentation</th>
+                        <th>Status</th>
                         <th>Action</th>
                     </tr>
                     </thead>
@@ -62,26 +66,35 @@ $(document).ready(function(){
                 data.map((item, index, array) => {
                     // ----- INSERT UNIQUE DATA TO uniqueData VARIABLE ----
                     let unique = {
-                        id:       item.userAccountID, // Required
-                        username: item.username,
-                        email:    item.email,
+                        id:       item.chartOfAccountID, // Required
+                        accountCode: item.accountCode,
+                        accountName: item.accountName,
+                        // email:    item.email,
                     }
                     uniqueData.push(unique);
                     // ----- END INSERT UNIQUE DATA TO uniqueData VARIABLE ----
 
+                    if(item.accountStatus == 1){
+                        var status=`<span class="badge badge-outline-success w-100">Active</span>`;
+                     }   
+                     if(item.accountStatus == 0){
+                        var status=`<span class="badge badge-outline-danger w-100">Inactive</span>`;
+                     }
+
                     html += `
                     <tr>
-                        <td>1-1001</td>
-                        <td>Cash on Hand</td>
-                        <td>The total amount of any accessible cash.</td>
-                        <td>1</td>
-                        <td>Cash</td>
-                        <td>Current Asset</td>
-                        <td>Asset</td>
+                        <td>${item.accountCode}</td>
+                        <td>${item.accountName}</td>
+                        <td>${item.accountDescription}</td>
+                        <td>${item.accountLevel}</td>
+                        <td>${item.ledgerClassificationName}</td>
+                        <td>${item.accountGrouping}</td>
+                        <td>${item.financialStatement}</td>
+                        <td>${status}</td>
                         <td>
                             <button 
                                 class="btn btn-edit btn-block btnEdit" 
-                                id="${item.userAccountID}"
+                                id="${item.chartOfAccountID}"
                                 feedback="${item.username}">
                                 <i class="fas fa-edit"></i>
                                 EDIT
@@ -96,28 +109,79 @@ $(document).ready(function(){
                     $("#table_content").html(html);
                     initDataTables();
                 }, 500);
-            },
-            error: function() {
-                let html = `
-                    <div class="w-100 h5 text-center text-danger>
-                        There was an error fetching data.
-                    </div>`;
-                $("#table_content").html(html);
-            }
-        })
+        //     },
+        //     error: function() {
+        //         let html = `
+        //             <div class="w-100 h5 text-center text-danger>
+        //                 There was an error fetching data.
+        //             </div>`;
+        //         $("#table_content").html(html);
+        //     }
+        // })
     }
     tableContent();
     // ----- END TABLE CONTENT -----
 
+    // ----- LEDGERCLASSIFICATION CONTENT -----
+    function ledgerclassificationContent(param = false) {
+    // getTableData(tableName = null, columnName = “”, WHERE = “”, orderBy = “”) 
+    const data = getTableData("gen_ledger_classification_tbl", 
+        "ledgerClassificationID ,ledgerClassificationName", "", "");
+            console.log(data);
+            let html = ` <option value="" disabled selected ${!param && "selected"}>No Selected</option>`;
+            data.map((item, index, array) => {
+                html += `<option value="${item.ledgerClassificationID}" ${param && item.ledgerClassificationID == param[0].ledgerClassificationID && "selected"}>${item.ledgerClassificationName}</option>`;
+            })
+            $("#input_ledgerClassificationID").html(html);
+    }
+    ledgerclassificationContent();
+    // ----- END LEDGERCLASSIFICATION CONTENT -----
+
+     // ----- BANK CONTENT -----
+    function bankContent(param = false) {
+    // getTableData(tableName = null, columnName = “”, WHERE = “”, orderBy = “”) 
+    const data = getTableData("fms_bank_tbl", 
+        "bankID ,bankName,bankNumber", "", "");
+      
+            let html = ` <option value="" disabled selected ${!param && "selected"}>No Selected</option>`;
+            data.map((item, index, array) => {
+                html += `<option value="${item.bankID}" bank_number="${item.bankNumber}" ${param && item.bankID == param[0].bankID && "selected"}>${item.bankName}</option>`;
+                if(param && item.bankID == param[0].bankID){
+                    $("#input_bankNumber").val(item.bankNumber);
+                }
+            })
+            $("#input_bankID").html(html);
+    }
+    bankContent();
+    // ----- END BANK CONTENT -----
+
+    // ----- CHANGE BANK NUMBER -----
+     $(document).on("change", "#input_bankID", function() {
+        var bank_number = $(this).find("option:selected").attr("bank_number");
+        console.log(bank_number)
+        $("#input_bankNumber").val(bank_number);
+    });
+    // ----- END CHANGE BANK NUMBER -----
+
+
      // ----- MODAL CONTENT -----
      function modalContent(data = false) {
-    let userAccountID ="1";
+        let chartOfAccountID = data ? (data[0].chartOfAccountID ? data[0].chartOfAccountID : "") : "",
+        accountCode = data ? (data[0].accountCode   ? data[0].accountCode  : "") : "",
+        accountName  = data ? (data[0].accountName    ? data[0].accountName   : "") : "",
+        accountDescription     = data ? (data[0].accountDescription       ? data[0].accountDescription      : "") : "",
+        accountLevel    = data ? (data[0].accountLevel      ? data[0].accountLevel     : "") : "",
+        accountLedgerClassification = data ? (data[0].accountLedgerClassification   ? data[0].accountLedgerClassification  : "") : "",
+        accountGrouping   = data ? (data[0].accountGrouping     ? data[0].accountGrouping    : "") : "",
+        financialStatement    = data ? (data[0].financialStatement      ? data[0].financialStatement     : "") : "",
+        bankID      = data ? (data[0].bankID        ? data[0].bankID       : "") : "",
+        accountStatus      = data ? (data[0].accountStatus        ? data[0].accountStatus       : "") : "";
           
-        let button = userAccountID ? `
+        let button = chartOfAccountID ? `
         <button 
             class="btn btn-update px-5 p-2" 
             id="btnUpdate" 
-            accountid="${userAccountID}">
+            rowID="${chartOfAccountID}">
             <i class="fas fa-save"></i>
             UPDATE
         </button>` : `
@@ -138,11 +202,12 @@ $(document).ready(function(){
                             class="form-control validate" 
                             name="accountCode" 
                             id="input_accountCode" 
-                            data-allowcharacters="[A-Z][a-z][0-9][ ][@]" 
+                            data-allowcharacters="[A-Z][a-z][0-9][ ][-]" 
                             minlength="2" 
                             maxlength="20" 
                             required 
-                            value=""
+                            unique="${chartOfAccountID}"  
+                            value="${accountCode}"
                             autocomplete="off">
                         <div class="invalid-feedback d-block" id="invalid-input_accountCode"></div>
                     </div>
@@ -156,11 +221,12 @@ $(document).ready(function(){
                             class="form-control validate" 
                             name="accountName" 
                             id="input_accountName" 
-                            data-allowcharacters="[A-Z][a-z][0-9][ ][@]" 
+                            data-allowcharacters="[A-Z][a-z][0-9][ ][-]" 
                             minlength="2" 
                             maxlength="20" 
                             required 
-                            value=""
+                            unique="${chartOfAccountID}"  
+                            value="${accountName}"
                             autocomplete="off">
                         <div class="invalid-feedback d-block" id="invalid-input_accountName"></div>
                     </div>
@@ -172,11 +238,12 @@ $(document).ready(function(){
                         <textarea rows="4" 
                         class="form-control validate no-resize" 
                         placeholder="Please type description..."
-                        id="description"
-                        name="description"
+                        id="input_accountDescription"
+                        name="accountDescription"
+                        data-allowcharacters="[A-Z][a-z][0-9][ ][-][.][,]"
                         required
-                        ></textarea>
-                        <div class="invalid-feedback d-block" id="invalid-input_description"></div>
+                        >${accountDescription}</textarea>
+                        <div class="invalid-feedback d-block" id="invalid-input_accountDescription"></div>
                     </div>
                 </div>
 
@@ -188,11 +255,11 @@ $(document).ready(function(){
                             class="form-control validate" 
                             name="accountLevel" 
                             id="input_accountLevel" 
-                            data-allowcharacters="[A-Z][a-z][0-9][ ][@]" 
+                            data-allowcharacters="[A-Z][a-z][0-9]" 
                             minlength="2" 
                             maxlength="20" 
                             required 
-                            value=""
+                            value="${accountLevel}"
                             autocomplete="off">
                         <div class="invalid-feedback d-block" id="invalid-input_accountLevel"></div>
                     </div>
@@ -203,24 +270,18 @@ $(document).ready(function(){
                         <label>Ledger Classification<span class="text-danger font-weight-bold">*</span></label>
                         <select 
                             class="form-control select2 validate" 
-                            id="input_ledgerClassification" 
-                            name="ledgerClassification"
+                            id="input_ledgerClassificationID" 
+                            name="ledgerClassificationID"
                             autocomplete="off"
                             required>
                             <option 
                                 value="" 
                                 disabled 
                                 selected
-                            >No Selected</option>
-                            <option 
-                                value="1" 
-                            >Active</option>
-                            <option 
-                                value="0" 
-                            >InActive</option>
+                                ${!data && "selected"}>No Selected</option>
                         </select>
                         <span class="fas fa-plus-square fa-lg form-control-feedback mt-2 pr-1" id="ledgerClassAdd" style="float:right"></span>
-                        <div class="invalid-feedback d-block" id="invalid-input_ledgerClassification"></div>
+                        <div class="invalid-feedback d-block" id="invalid-input_ledgerClassificationID"></div>
                     </div>
                 </div>
 
@@ -229,23 +290,28 @@ $(document).ready(function(){
                         <label>Grouping<span class="text-danger font-weight-bold">*</span></label>
                         <select 
                             class="form-control select2 validate" 
-                            id="input_grouping" 
-                            name="grouping"
+                            id="input_accountGrouping" 
+                            name="accountGrouping"
                             autocomplete="off"
                             required>
                             <option 
                                 value="" 
                                 disabled 
                                 selected
-                            >No Selected</option>
-                            <option 
-                                value="1" 
-                            >Active</option>
-                            <option 
-                                value="0" 
-                            >InActive</option>
+                                ${!data && "selected"}>No Selected</option>
+
+                            <option value="Current Asset" ${data && accountGrouping == "Current Asset" && "selected"}>Current Asset</option>
+                            <option value="Non-current Asset" ${data && accountGrouping == "Non-current Asset" && "selected"}>Non-current Asset</option>
+                            <option value="Contra Asset" ${data && accountGrouping == "Contra Asset" && "selected"}>Contra Asset</option>
+                            <option value="Current Liability" ${data && accountGrouping == "Current Liability" && "selected"}>Current Liability</option>
+                            <option value="Non-current Liability" ${data && accountGrouping == "Non-current Liability" && "selected"}>Non-current Liability</option>
+                            <option value="Equity" ${data && accountGrouping == "Equity" && "selected"}>Equity</option>
+                            <option value="Sales" ${data && accountGrouping == "Sales" && "selected"}>Sales</option>
+                            <option value="Contra Sales" ${data && accountGrouping == "Contra Sales" && "selected"}>Contra Sales</option>
+                            <option value="Cost of Sales" ${data && accountGrouping == "Cost of Sales" && "selected"}>Cost of Sales</option>
+                            <option value="G&amp;A Expenses" ${data && accountGrouping == "G&amp;A Expenses" && "selected"}>G&amp;A Expenses</option>
                         </select>
-                        <div class="invalid-feedback d-block" id="invalid-input_grouping"></div>
+                        <div class="invalid-feedback d-block" id="invalid-input_accountGrouping"></div>
                     </div>
                 </div>
 
@@ -262,13 +328,13 @@ $(document).ready(function(){
                                 value="" 
                                 disabled 
                                 selected
-                            >No Selected</option>
-                            <option 
-                                value="1" 
-                            >Active</option>
-                            <option 
-                                value="0" 
-                            >InActive</option>
+                                ${!data && "selected"}>No Selected</option>
+                            <option value="Asset" ${data && financialStatement == "Asset" && "selected"}>Asset</option>
+                            <option value="Liability" ${data && financialStatement == "Liability" && "selected"}>Liability</option>
+                            <option value="Equity" ${data && financialStatement == "Equity" && "selected"}>Equity</option>
+                            <option value="Sales" ${data && financialStatement == "Sales" && "selected"}>Sales</option>
+                            <option value="Cost of Sales" ${data && financialStatement == "Cost of Sales" && "selected"}>Cost of Sales</option>
+                            <option value="G&amp;A Expenses" ${data && financialStatement == "G&amp;A Expenses" && "selected"}>G&amp;A Expenses</option>
                         </select>
                         <div class="invalid-feedback d-block" id="invalid-input_financialStatement"></div>
                     </div>
@@ -279,24 +345,13 @@ $(document).ready(function(){
                         <label>Bank<span class="text-danger font-weight-bold">*</span></label>
                         <select 
                             class="form-control select2 validate" 
-                            id="input_bank" 
-                            name="bank"
+                            id="input_bankID" 
+                            name="bankID"
                             autocomplete="off"
                             required>
-                            <option 
-                                value="" 
-                                disabled 
-                                selected
-                            >No Selected</option>
-                            <option 
-                                value="1" 
-                            >Active</option>
-                            <option 
-                                value="0" 
-                            >InActive</option>
                         </select>
                         
-                        <div class="invalid-feedback d-block" id="invalid-input_bank"></div>
+                        <div class="invalid-feedback d-block" id="invalid-input_bankID"></div>
                     </div>
                 </div>
 
@@ -311,11 +366,35 @@ $(document).ready(function(){
                             data-allowcharacters="[A-Z][a-z][0-9][ ][@]" 
                             minlength="2" 
                             maxlength="20" 
-                            required 
-                            value=""
+                           
                             readonly=""
                             autocomplete="off">
-                        <div class="invalid-feedback d-block" id="invalid-input_bankNumber"></div>
+                       
+                    </div>
+                </div>
+
+                <div class="col-md-6 col-sm-12">
+                    <div class="form-group">
+                        <label>Status<span class="text-danger font-weight-bold">*</span></label>
+                        <select 
+                            class="form-control select2 validate" 
+                            id="input_accountStatus" 
+                            name="accountStatus"
+                            autocomplete="off"
+                            required>
+                            <option 
+                                value="" 
+                                disabled 
+                                selected
+                                ${!data && "selected"} >No Selected</option>
+                            <option 
+                                value="1" 
+                                ${data && accountStatus == "1" && "selected"} >Active</option>
+                            <option 
+                                value="0" 
+                                ${data && accountStatus == "0" && "selected"}>InActive</option>
+                        </select>
+                        <div class="invalid-feedback d-block" id="invalid-input_accountStatus"></div>
                     </div>
                 </div>
 
@@ -329,6 +408,8 @@ $(document).ready(function(){
 } 
     // ----- END MODAL CONTENT -----
 
+
+
     // ----- OPEN ADD LEDGER MODAL -----
     $(document).on("click", "#ledgerClassAdd", function() {
         $("#modal_fms_ledgerClassification").modal("show");
@@ -339,9 +420,9 @@ $(document).ready(function(){
                          <div class="col-md-12 mb-3">
                              <div class="form-group">
                                  <label>Ledger Classification<code>*</code> </label>
-                                 <input type="text" class="form-control validate" name="ledgerClassification"
-                                     id="addledgerClassification" data-allowcharacters="[A-Z][a-z][ ][.][,]" required autocomplete="off">
-                                 <div class="invalid-feedback d-block" id="invalid-input_addledgerClassification"></div>
+                                 <input type="text" class="form-control validate" name="ledgerClassificationName"
+                                     id="ledgerClassificationName" data-allowcharacters="[A-Z][a-z][ ][.][,]" required autocomplete="off">
+                                 <div class="invalid-feedback d-block" id="invalid-input_ledgerClassificationName"></div>
                              </div>
                          </div>
                      </div>
@@ -387,32 +468,51 @@ $(document).ready(function(){
                   }).then((result) => {
                     if (result.isConfirmed) {
         
-                    // /**
-                    //  * ----- FORM DATA -----
-                    //  * tableData = {} -> Objects
-                    //  */
-                    // let data = getFormData("modal_user_account");
-                    // data.append("tableName", "user_account_tbl");
-                    // data.append("feedback", "Your choice");
-                    // /**
-                    //  * ----- DATA -----
-                    //  * 1. tableName
-                    //  * 2. tableData
-                    //  * 3. feedback
-                    //  */
+                    /**
+                     * ----- FORM DATA -----
+                     * tableData = {} -> Objects
+                     */
+                    let data = getFormData("ledgerClassForm");
+                    data.append("tableName", "gen_ledger_classification_tbl");
+                    data.append("feedback", "Your choice");
+                    /**
+                     * ----- DATA -----
+                     * 1. tableName
+                     * 2. tableData
+                     * 3. feedback
+                     */
+
+                    var setNewName = '';
+                    for(var i of data.entries()) {
+                        if(i[1] !=""){
+                            setNewName = i[1];
+                            // console.log(i)
+                        }
+                    }
         
-                    // const saveData = insertTableData(data);
-                    // if (saveData) {
-                    //     tableContent();
-                    // }
-                        
+                    const saveData = insertTableData(data);
+                    if (saveData) {
+                        // tableContent();
+                        let html =``;
+                        const getNewLedgerData = getTableData("gen_ledger_classification_tbl", "*", "", "ledgerClassificationID DESC LIMIT 1");
+                      console.log(getNewLedgerData);
+                      getNewLedgerData.map((item, index, array) => {
+                             html +=`<option value="${item.ledgerClassificationID }" selected>${item.ledgerClassificationName}</option>`;
+                            })
+                            $("#input_ledgerClassificationID").append(html);
                     Swal.fire({
                         icon: 'success',
                         title: 'Successfully saved!',
                         showConfirmButton: false,
                         timer: 2000
                       })
-                      $("#modal_fms_chartofaccts").modal("show");
+
+                      setTimeout(() => {
+                        $("#modal_fms_chartofaccts").modal("show");
+                    }, 500);
+                   
+                    }
+                  
                     }else{
                         $("#modal_fms_chartofaccts").modal("show");
                     }
@@ -480,6 +580,8 @@ $(document).ready(function(){
         $("#modal_fms_chartofaccts_content").html(preloader);
         const content = modalContent();
         $("#modal_fms_chartofaccts_content").html(content);
+        bankContent();
+        ledgerclassificationContent();
         initAll();
     });
     // ----- END OPEN ADD MODAL -----
@@ -515,24 +617,25 @@ $(document).ready(function(){
           }).then((result) => {
             if (result.isConfirmed) {
 
-            // /**
-            //  * ----- FORM DATA -----
-            //  * tableData = {} -> Objects
-            //  */
-            // let data = getFormData("modal_user_account");
-            // data.append("tableName", "user_account_tbl");
-            // data.append("feedback", "Your choice");
-            // /**
-            //  * ----- DATA -----
-            //  * 1. tableName
-            //  * 2. tableData
-            //  * 3. feedback
-            //  */
+            /**
+             * ----- FORM DATA -----
+             * tableData = {} -> Objects
+             */
+            let data = getFormData("modal_fms_chartofaccts", true);
+            delete data["tableData"].bankNumber;
+            data["tableName"] = "fms_chart_of_accounts_tbl";
+            data["feedback"] = "Your choice";
+            /**
+             * ----- DATA -----
+             * 1. tableName
+             * 2. tableData
+             * 3. feedback
+             */
 
-            // const saveData = insertTableData(data);
-            // if (saveData) {
-            //     tableContent();
-            // }
+            const saveData = insertTableData(data, true);
+            if (saveData) {
+                tableContent();
+            }
                 
             Swal.fire({
                 icon: 'success',
@@ -559,12 +662,14 @@ $(document).ready(function(){
         // Display preloader while waiting for the completion of getting the data
         $("#modal_fms_chartofaccts_content").html(preloader); 
 
-        const tableData = getTableData("inventory_item_tbl", "*", "userAccountID="+id, "");
+        const tableData = getTableData("fms_chart_of_accounts_tbl", "*", "chartOfAccountID="+id, "");
         if (tableData) {
             const content = modalContent(tableData);
             setTimeout(() => {
                 $("#modal_fms_chartofaccts_content").html(content);
-                $("#btnSaveConfirmationEdit").attr("accountid", id);
+                ledgerclassificationContent(tableData);
+                bankContent(tableData);
+                $("#btnSaveConfirmationEdit").attr("rowID", id);
                 $("#btnSaveConfirmationEdit").attr("feedback", feedback);
                 initAll();
             }, 500);
@@ -592,26 +697,27 @@ $(document).ready(function(){
               }).then((result) => {
                 if (result.isConfirmed) {
     
-                    // const accountID = $(this).attr("accountid");
-                    // const feedback  = $(this).attr("feedback");
+                    const accountID = $(this).attr("rowID");
+                    const feedback  = $(this).attr("feedback");
         
-                    // let data = getFormData("modal_user_account");
-                    // data.append("tableName", "user_account_tbl");
-                    // data.append("whereFilter", "userAccountID="+accountID);
-                    // data.append("feedback", feedback);
+                    let data = getFormData("modal_fms_chartofaccts",true);
+                    delete data["tableData"].bankNumber;
+                    data["tableName"] = "fms_chart_of_accounts_tbl";
+                    data["whereFilter"] = "chartOfAccountID="+accountID;
+                    // data["feedback"] = feedback;
         
-                    // /**
-                    //  * ----- DATA -----
-                    //  * 1. tableName
-                    //  * 2. tableData
-                    //  * 3. whereFilter
-                    //  * 4. feedback
-                    // */
+                    /**
+                     * ----- DATA -----
+                     * 1. tableName
+                     * 2. tableData
+                     * 3. whereFilter
+                     * 4. feedback
+                    */
         
-                    // const saveData = updateTableData(data);
-                    // if (saveData) {
-                    //    tableContent();
-                    // }
+                    const saveData = updateTableData(data , true);
+                    if (saveData) {
+                       tableContent();
+                    }
                     
                 Swal.fire({
                     icon: 'success',
@@ -703,7 +809,7 @@ $(document).ready(function(){
 
             // const data = {
             //     tableName:   "user_account_tbl",
-            //     whereFilter: "userAccountID="+accountID,
+            //     whereFilter: "chartOfAccountID="+accountID,
             //     feedback
             // };
 
@@ -722,6 +828,6 @@ $(document).ready(function(){
     });
     // ---- END OPEN DELETE MODAL -----
 
-
+ 
       
 });

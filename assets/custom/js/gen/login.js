@@ -1,29 +1,48 @@
 $(document).on("click", "#login-btn", function(e){
-    e.preventDefault();
-    $(".confirmation").show();
-    let username = $("#username").val();
-    let password = $("#password").val();
-    let condition   = getTableData("gen_user_account_tbl","", "username = BINARY '"+username+"' AND password = BINARY '"+password+"' AND status != 0 ");
     
-    if(condition.length < 1){
-       
-            let confirmation = '<div class="alert alert-danger text-center d-flex justify-content-center" role="alert"> <span>Incorrect username or password.</span></div>';
-    		$(".confirmation").html(confirmation);
-            
-    }else{
+    $(".confirmation").show();
+    let username            = $("#username").val();
+    let password            = $("#password").val();
+    let condition           = getTableData("gen_user_account_tbl","", "username = BINARY '"+username+"' AND password = BINARY '"+password+"' ");
+    let usernameCondition   = getTableData("gen_user_account_tbl","username, status", "username = BINARY '"+username+"' ");
+    let confirmation;
+    
+    if(username == "" || password == ""){
         
-        $.ajax({
-            url:"login/set_session",
-            method:"POST",
-            data: condition,
-            dataType:"json",
-            success:function(data){
-                if(data == true) window.location.replace('operations');
-                console.log(data);
-            }
-        });
+    }else{
+        e.preventDefault();
+
+        if(condition.length < 1){
+            $(".validate").val("");
+                confirmation = '<div class="alert alert-danger text-center d-flex justify-content-center" role="alert"> <span>Incorrect username or password.</span></div>';
+                $(".confirmation").html(confirmation);
+                    $("#username").val(username);
+                    $("#username").focus();
+                    $("#password").val("");
+
+        }else if(condition[0]["status"] == "0"){
+                confirmation = '<div class="alert alert-danger text-center d-flex justify-content-center" role="alert"> <span>The account that you are trying to access is inactive <br> Please contact the system administrator for more information</span> </div>';
+                $(".confirmation").html(confirmation);
+                $("#username").val(username);
+                $("#username").focus();
+                $("#password").val("");    
+        }else{
+            let data = {"userType"  : condition[0]["userType"],"userAccountID" : condition[0]["userAccountID"]};
+            $.ajax({
+                url:"login/set_session",
+                method:"POST",
+                data,
+                dataType:"json",
+                success:function(data){
+                    // if(data == true) window.location.replace('operations');
+                    if(data == true) window.location.replace('approval_setup');
+                }
+            });
+        }
+
+        
+
     }
-    setTimeout(function(){  $("form").submit(); }, 550);
 });
 
 $(document).on("click", "#password-field", function(){
@@ -38,22 +57,6 @@ $(document).on("click", "#password-field", function(){
 
 });
 
-$(document).on("click", "#sign-out", function(e){
-    let userType    =   $(this).data("usertype");
-        $.ajax({
-            url:"login/sign_out",
-            method:"POST",
-            data:{userType},
-            dataType:"json",
-            success:function(data){
-                if(data == true) window.location.replace('login');
-            }
-        });
-});
-
 $(document).on("click","#username, #password", function(){
     $(".confirmation").hide(950);$(".confirmation").html("");
-    
-    
-    
 });

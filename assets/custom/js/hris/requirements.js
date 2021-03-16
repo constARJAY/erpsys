@@ -13,9 +13,10 @@ $(document).ready(function(){
             scrollCollapse: true,
             columnDefs: [
                 { targets: 0, width: 100 },
-                { targets: 1, width: 500 },
-                { targets: 2, width: 50 },
+                { targets: 1, width: 100 },
+                { targets: 2, width: 500 },
                 { targets: 3, width: 50 },
+                { targets: 4, width: 50 },
             ],
         });
     }
@@ -27,22 +28,27 @@ $(document).ready(function(){
         // Reset the unique datas
         uniqueData = []; 
 
-        $.ajax({
-            url:      `${base_url}operations/getTableData`,
-            method:   'POST',
-            async:    false,
-            dataType: 'json',
-            data:     {tableName: "user_account_tbl"},
-            beforeSend: function() {
-                $("#table_content").html(preloader);
-                // $("#inv_headerID").text("List of Inventory Item");
-            },
-            success: function(data) {
-                console.log(data);
+        // getTableData(tableName = null, columnName = “”, WHERE = “”, orderBy = “”) 
+        const data = getTableData("hris_requirement_tbl", "*", "", "");
+    
+
+        // $.ajax({
+        //     url:      `${base_url}operations/getTableData`,
+        //     method:   'POST',
+        //     async:    false,
+        //     dataType: 'json',
+        //     data:     {tableName: "user_account_tbl"},
+        //     beforeSend: function() {
+        //         $("#table_content").html(preloader);
+        //         // $("#inv_headerID").text("List of Inventory Item");
+        //     },
+        //     success: function(data) {
+        //         console.log(data);
                 let html = `
                 <table class="table table-bordered table-striped table-hover" id="tableHRISRequirements">
                     <thead>
                     <tr class="text-center">
+                        <th>Requirement Code</th>
                         <th>Requirement Name</th>
                         <th>Description</th>
                         <th>Status</th>
@@ -54,23 +60,24 @@ $(document).ready(function(){
                 data.map((item, index, array) => {
                     // ----- INSERT UNIQUE DATA TO uniqueData VARIABLE ----
                     let unique = {
-                        id:       item.userAccountID, // Required
-                        username: item.username,
-                        email:    item.email,
+                        id:       item.requirementID, // Required
+                        requirementName: item.requirementName,
+                        // email:    item.email,
                     }
                     uniqueData.push(unique);
                     // ----- END INSERT UNIQUE DATA TO uniqueData VARIABLE ----
 
                     html += `
                     <tr>
-                        <td>Passport</td>
-                        <td>For Valid ID</td>
-                        <td><span class="badge badge-outline-success w-100">Active</span></td>
+                    <td>${item.requirementCode}</td>
+                    <td>${item.requirementName}</td>
+                    <td>${item.requirementDescription}</td>
+                    <td><span class="badge badge-outline-success w-100">Active</span></td>
                         <td>
                             <button 
                                 class="btn btn-edit btn-block btnEdit" 
-                                id="${item.userAccountID}"
-                                feedback="${item.username}">
+                                id="${item.requirementID}"
+                                feedback="${item.requirementName}">
                                 <i class="fas fa-edit"></i>
                                 EDIT
                             </button>
@@ -84,28 +91,31 @@ $(document).ready(function(){
                     $("#table_content").html(html);
                     initDataTables();
                 }, 500);
-            },
-            error: function() {
-                let html = `
-                    <div class="w-100 h5 text-center text-danger>
-                        There was an error fetching data.
-                    </div>`;
-                $("#table_content").html(html);
-            }
-        })
+        //     },
+        //     error: function() {
+        //         let html = `
+        //             <div class="w-100 h5 text-center text-danger>
+        //                 There was an error fetching data.
+        //             </div>`;
+        //         $("#table_content").html(html);
+        //     }
+        // })
     }
     tableContent();
     // ----- END TABLE CONTENT -----
 
      // ----- MODAL CONTENT -----
      function modalContent(data = false) {
-    let userAccountID ="1";
+        let requirementID              = data ? (data[0].requirementID            ? data[0].requirementID        : "") : "",
+        requirementName                = data ? (data[0].requirementName          ? data[0].requirementName      : "") : "",
+        requirementDescription      = data ? (data[0].requirementDescription? data[0].requirementDescription         : "") : "",
+        requirementStatus      = data ? (data[0].requirementStatus? data[0].requirementStatus         : "") : "";
           
-        let button = userAccountID ? `
+        let button = requirementID ? `
         <button 
             class="btn btn-update px-5 p-2" 
             id="btnUpdate" 
-            accountid="${userAccountID}">
+            rowID="${requirementID}">
             <i class="fas fa-save"></i>
             UPDATE
         </button>` : `
@@ -126,11 +136,12 @@ $(document).ready(function(){
                             class="form-control validate" 
                             name="requirementName" 
                             id="input_requirementName" 
-                            data-allowcharacters="[A-Z][a-z][0-9][ ][@]" 
+                            data-allowcharacters="[A-Z][a-z][0-9][.][,][-][(][)]['][/]" 
                             minlength="2" 
-                            maxlength="20" 
+                            maxlength="75" 
                             required 
-                            value=""
+                            unique="${requirementID}" 
+                            value="${requirementName}"
                             autocomplete="off">
                         <div class="invalid-feedback d-block" id="invalid-input_requirementName"></div>
                     </div>
@@ -143,11 +154,12 @@ $(document).ready(function(){
                         <textarea rows="4" 
                         class="form-control validate no-resize" 
                         placeholder="Please type description..."
-                        id="description"
-                        name="description"
+                        id="input_requirementDescription"
+                        data-allowcharacters="[A-Z][a-z][0-9][.][,][-][(][)]['][/]" 
+                        name="requirementDescription"
                         required
-                        ></textarea>
-                        <div class="invalid-feedback d-block" id="invalid-input_description"></div>
+                        >${requirementDescription}</textarea>
+                        <div class="invalid-feedback d-block" id="invalid-input_requirementDescription"></div>
                     </div>
                 </div>
             </div>
@@ -157,7 +169,6 @@ $(document).ready(function(){
                         <label>Status<span class="text-danger font-weight-bold">*</span></label>
                         <select 
                             class="form-control select2 validate" 
-                            name="role" 
                             id="input_requirementStatus" 
                             name="requirementStatus"
                             autocomplete="off"
@@ -166,13 +177,13 @@ $(document).ready(function(){
                                 value="" 
                                 disabled 
                                 selected
-                            >No Selected</option>
+                                ${!data && "selected"}>No Selected</option>
                             <option 
                                 value="1" 
-                            >Active</option>
+                                ${data && requirementStatus == "1" && "selected"} >Active</option>
                             <option 
                                 value="0" 
-                            >InActive</option>
+                                ${data && requirementStatus == "0" && "selected"}>InActive</option>
                         </select>
                         <div class="invalid-feedback d-block" id="invalid-input_requirementStatus"></div>
                     </div>
@@ -204,62 +215,25 @@ $(document).ready(function(){
     $(document).on("click", "#btnSave", function() {
     const validate = validateForm("modal_hris_requirements");
     if (validate) {
-        $("#modal_hris_requirements").modal("hide");
-        // Swal.fire({
-        //     title: 'Are you sure?',
-        //     text: "You want to save this?",
-        //     icon: 'warning',
-        //     showCancelButton: true,
-        //     confirmButtonColor: '#3085d6',
-        //     cancelButtonColor: '#d33',
-        //     confirmButtonText: 'Save'
-        // }).
-        
-        Swal.fire({
-            title: 'Are you sure?',
-            text: "You want to save this?",
-            imageUrl: `${base_url}assets/custom/isometric_image/save.png`,
-            imageWidth: 200,
-            imageHeight: 200,
-            imageAlt: 'Custom image',
-            showCancelButton: true,
-            confirmButtonColor: '#28a745',
-            cancelButtonColor: '#1A1A1A',
-            confirmButtonText: 'Save',
-            allowOutsideClick: false
-          }).then((result) => {
-            if (result.isConfirmed) {
 
-            // /**
-            //  * ----- FORM DATA -----
-            //  * tableData = {} -> Objects
-            //  */
-            // let data = getFormData("modal_user_account");
-            // data.append("tableName", "user_account_tbl");
-            // data.append("feedback", "Your choice");
-            // /**
-            //  * ----- DATA -----
-            //  * 1. tableName
-            //  * 2. tableData
-            //  * 3. feedback
-            //  */
+        let tableData           = getTableData("hris_requirement_tbl","","","requirementCode DESC");
+        var currentDate         = new Date();
+        let currentYear         = currentDate.getFullYear();
+        let currentYearStr      = currentYear.toString();
 
-            // const saveData = insertTableData(data);
-            // if (saveData) {
-            //     tableContent();
-            // }
-                
-            Swal.fire({
-                icon: 'success',
-                title: 'Successfully saved!',
-                showConfirmButton: false,
-                timer: 2000
-              })
-            }else{
-                $("#modal_hris_requirements").modal("show");
-            }
-        });
-            
+         // Generate Number
+         let tableDataCode       = tableData.length < 1 ? "" : parseInt(tableData[0]["requirementCode"].slice(6)) + 1;
+
+         let genCode  = tableData.length < 1 ? "RQT-"+currentYearStr.slice(2)+"-00001" : "RQT-"+currentYearStr.slice(2)+"-"+numberCodeSize(tableDataCode, "5");
+
+// genCode("RQT",null,"tablename","columnName");
+         let data = getFormData("modal_hris_requirements",true);
+         data["tableData[requirementCode]"]     = genCode;
+         data["tableData[createdBy]"]     = "1";
+         data["tableData[updatedBy]"]     = "1";
+         data["tableName"]                = "hris_requirement_tbl";
+         data["feedback"]                 = genCode;
+         sweetAlertConfirmation("add", "Requirements Masterfile","modal_hris_requirements", null, data);
         }
     });
     // ----- END SAVE MODAL -----
@@ -274,7 +248,7 @@ $(document).ready(function(){
         // Display preloader while waiting for the completion of getting the data
         $("#modal_hris_requirements_content").html(preloader); 
 
-        const tableData = getTableData("inventory_item_tbl", "*", "userAccountID="+id, "");
+        const tableData = getTableData("hris_requirement_tbl", "*", "requirementID="+id, "");
         if (tableData) {
             const content = modalContent(tableData);
             setTimeout(() => {
@@ -290,153 +264,35 @@ $(document).ready(function(){
     // ----- UPDATE MODAL -----
     $(document).on("click", "#btnUpdate", function() {
         const validate = validateForm("modal_hris_requirements");
+        let rowID           = $(this).attr("rowID");
+        let genCode         = getTableData("hris_requirement_tbl","requirementCode","requirementID="+rowID,"requirementCode DESC");
         if (validate) {
-        $("#modal_hris_requirements").modal("hide");
-            Swal.fire({
-                title: 'Are you sure?',
-                text: "You want to save this?",
-                imageUrl: `${base_url}assets/custom/isometric_image/save.png`,
-                imageWidth: 200,
-                imageHeight: 200,
-                imageAlt: 'Custom image',
-                showCancelButton: true,
-                confirmButtonColor: '#28a745',
-                cancelButtonColor: '#1A1A1A',
-                confirmButtonText: 'Yes, save changes',
-                allowOutsideClick: false
-              }).then((result) => {
-                if (result.isConfirmed) {
-    
-                    // const accountID = $(this).attr("accountid");
-                    // const feedback  = $(this).attr("feedback");
-        
-                    // let data = getFormData("modal_user_account");
-                    // data.append("tableName", "user_account_tbl");
-                    // data.append("whereFilter", "userAccountID="+accountID);
-                    // data.append("feedback", feedback);
-        
-                    // /**
-                    //  * ----- DATA -----
-                    //  * 1. tableName
-                    //  * 2. tableData
-                    //  * 3. whereFilter
-                    //  * 4. feedback
-                    // */
-        
-                    // const saveData = updateTableData(data);
-                    // if (saveData) {
-                    //    tableContent();
-                    // }
-                    
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Successfully saved!',
-                    showConfirmButton: false,
-                    timer: 2000
-                })
-                }else{
-                    $("#modal_hris_requirements").modal("show");
-                }
-            });
-                
+
+            let data = getFormData("modal_hris_requirements", true);
+            data["tableData"]["updatedBy"]   =  "2";
+            data["whereFilter"]              =  "requirementID="+rowID;
+            data["tableName"]                =  "hris_requirement_tbl";
+            data["feedback"]                 =   genCode[0]["requirementCode"];
+            console.log(data);
+            sweetAlertConfirmation("update", "Requirements Masterfile","modal_hris_requirements", null , data);
+
+      
             }
         });
         // ----- END UPDATE MODAL -----
 
     // ------- CANCEl MODAL-------- 
-    $(document).on("click",".btnCancel",function(){
-        $("#modal_hris_requirements").modal("hide");
 
-        const data = getFormData("modal_hris_requirements");
-
-        var validate = false;
-            for(var i of data.entries()) {
-                const count =+i[1];
-               validate[0] = i[1];
-                if(i[1] !=""){
-                    validate = true;
-                }
-            }
-
-            if(validate == true){
-
-                Swal.fire({
-                    title: 'Are you sure?',
-                    text: "You won't be able to revert this!",
-                    imageUrl: `${base_url}assets/custom/isometric_image/questions.png`,
-                    imageWidth: 200,
-                    imageHeight: 200,
-                    imageAlt: 'Custom image',
-                    showCancelButton: true,
-                    confirmButtonColor: '#28a745',
-                    cancelButtonColor: '#1A1A1A',
-                    confirmButtonText: 'Yes, discard!',
-                    allowOutsideClick: false
-                  }).then((result) => {
-                    if (result.isConfirmed) {
-
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Changes successfully discard!',
-                        showConfirmButton: false,
-                        timer: 2000
-                      })
-                    }else{
-                        $("#modal_hris_requirements").modal("show");
-                    }
-                  });
-            }else{
-                $("#modal_hris_requirements").modal("hide");
-            }
-       
+    $(document).on("click",".btnCancel", function(){
+        let condition = emptyFormCondition("modal_hris_requirements");
+        if(condition==true){
+            sweetAlertConfirmation("", "Requirement Masterfile","modal_hris_requirements");
+        }else{
+            $("#modal_hris_requirements").modal("hide");
+        }
+        
     });
+  
     // -------- END CANCEL MODAL-----------
-
-    // ---- OPEN DELETE MODAL -----
-    $(document).on("click", ".btnDelete", function() {
-        const id = $(this).attr("id");
-        const feedback = $(this).attr("feedback");
-
-        Swal.fire({
-            title: 'Are you sure?',
-            text: "You want to delete this!",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#3085d6',
-            cancelButtonColor: '#d33',
-            confirmButtonText: 'Discard',
-            allowOutsideClick: false
-          }).then((result) => {
-            if (result.isConfirmed) {
-
-            // /**
-            //  * ----- DATA -----
-            //  * 1. tableName
-            //  * 2. whereFilter
-            //  * 3. feedback
-            // */
-
-            // const data = {
-            //     tableName:   "user_account_tbl",
-            //     whereFilter: "userAccountID="+accountID,
-            //     feedback
-            // };
-
-            // const saveData = deleteTableData(data);
-            // if (saveData) {
-            //    tableContent();
-            // }
-
-              Swal.fire(
-                'Successfully Deleted!',
-                '',
-                'success'
-              )
-            }
-          });
-    });
-    // ---- END OPEN DELETE MODAL -----
-
-
-      
+ 
 });

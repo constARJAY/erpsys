@@ -71,7 +71,7 @@ $(document).on("click", "#approvalUpdateBtn", function(){
 // Updating Confirmation
 $(document).on("click", "#btnSaveConfirmationAdd", function(){
     let moduleID                        =   $("#approvalUpdateBtn").data("moduleid");
-    let condition                       =   getTableData("gen_approval__setup_tbl", "","moduleID = '"+ moduleID +"' ");
+    let condition                       =   getTableData("gen_approval_setup_tbl", "","moduleID = '"+ moduleID +"' ");
     let moduleName                      =   getTableData("gen_module_list_tbl", "moduleName","moduleID = '"+ moduleID +"' ");
     let approverFormValue               =   getApproversForm(modalBody,"1");
     
@@ -80,7 +80,7 @@ $(document).on("click", "#btnSaveConfirmationAdd", function(){
     data.append("tableData[moduleID]", moduleID);
     data.append("tableData[createdBy]", "1");
     data.append("tableData[updatedBy]", "1");
-    data.append("tableName", "gen_approval__setup_tbl");
+    data.append("tableName", "gen_approval_setup_tbl");
     data.append("whereFilter", "moduleID="+ moduleID);
 
 
@@ -99,7 +99,7 @@ $(document).on("click", ".btnCloseConfirmationAdd", function(){
 
 function getApproval(moduleID){
     
-    let condition       = getTableData("gen_approval__setup_tbl", "", "moduleID = '"+moduleID+"' ");
+    let condition       = getTableData("gen_approval_setup_tbl", "", "moduleID = '"+moduleID+"' ");
     let tableData       = condition.length > 0 ? condition : getTableData("gen_module_list_tbl", "", "moduleID = '"+ moduleID +"' ");
     console.log(tableData);
     let approvalList    = "";
@@ -127,7 +127,7 @@ function getApproval(moduleID){
         });
 
     }else{  
-        for (var i = 0; i < tableData[0]["moduleMaxApprover"]; i++) {
+        for (var i = 0; i < tableData[0]["moduleApprover"]; i++) {
             approvalList    +=   ` <div class="row border rounded m-2 py-1">
                                         <div class="col-3 col-lg-3 col-xl-1 d-flex align-items-center"><img class="img-fluid rounded-circle" src="assets/images/profile-images/default.jpg" alt="avatar" height="70" width="70"></div>
                                         <div class="col-5 col-lg-6 col-xl-9 d-flex justify-content-start align-items-center">
@@ -160,7 +160,7 @@ function approvalModalContent(moduleID){
     let modalBodyContent    =   `<h5 class="text-center text-primary">${moduleName[0]["moduleName"]}</h5>`;
     let modalFooterContent  =   "";
 
-    let condition       = getTableData("gen_approval__setup_tbl", "", "moduleID = '"+moduleID+"' ");
+    let condition       = getTableData("gen_approval_setup_tbl", "", "moduleID = '"+moduleID+"' ");
     let tableData       = condition.length > 0 ? condition : getTableData("gen_module_list_tbl", "", "moduleID = '"+moduleID+"' ");
     
     if(condition.length > 0){
@@ -243,7 +243,7 @@ function getApproversForm(formID, condition = null){
 
 // NEED FOR COLLABORATIONS
 function getApproverList(moduleID){
-    let tableData   = getTableData("gen_approval__setup_tbl", "approvalUserAccounts", "moduleID = '"+moduleID+"' ");
+    let tableData   = getTableData("gen_approval_setup_tbl", "approvalUserAccounts", "moduleID = '"+moduleID+"' ");
     let result      = tableData.length < 1 ? "undefined" : tableData[0]["approvalUserAccounts"];
     return result;
 }

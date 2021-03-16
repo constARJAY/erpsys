@@ -58,8 +58,7 @@ $(document).on("click",".addHoliday", function(){
                                                         <div class="col-md-6 col-sm-6">
                                                             <div class="form-group">
                                                                 <label for="">Holiday Status</label>
-                                                                <select class="form-control select2 validate" name="holidayStatus" id="inputholidayStatus" required>
-                                                                    <option value="" dissabled>No selected</option>
+                                                                <select class="form-control select2 validate" name="holidayStatus" id="inputholidayStatus">
                                                                     <option value="1">Active</option>
                                                                     <option value="0">Inactive</option>
                                                                 </select>
@@ -105,7 +104,7 @@ $(document).on("click",".editHoliday", function(){
                                                         <div class="col-md-12 col-sm-12">
                                                             <div class="form-group">
                                                                 <label for="">Holiday Date</label>
-                                                                <input type="button" class="form-control daterange validate" name="holidayDate" id="inputholidayDate" data-allowcharacters="[A-Z][ ][,][a-z][0-9]" 
+                                                                <input type="button" class="form-control text-left daterange validate" name="holidayDate" id="inputholidayDate" data-allowcharacters="[A-Z][ ][,][a-z][0-9]" 
                                                                     minlength="5"  maxlength="20" unique="${tableData[0]["holidayID"]}" value="${moment(tableData[0]["holidayDate"]).format("MMMM DD, YYYY")}" required >
                                                                 <div class="invalid-feedback d-block" id="invalid-inputholidayDate"></div>
                                                             </div>
@@ -149,51 +148,39 @@ $(document).on("click", "#btnSave", function(){
     let condition = validateForm("modal_holiday_form");
     
     if(condition == true){
-        let tableData           = getTableData("hris_holiday_tbl","","","holidayCode DESC");
-        var currentDate         = new Date();
-        let currentYear         = currentDate.getFullYear();
-        let currentYearStr      = currentYear.toString();
-
-        // Generate Number
-        let tableDataCode       = tableData.length < 1 ? "" : parseInt(tableData[0]["holidayCode"].slice(6)) + 1;
-
-        let holidayCode  = tableData.length < 1 ? "HLD-"+currentYearStr.slice(2)+"-00001" : "HLD-"+currentYearStr.slice(2)+"-"+numberCodeSize(tableDataCode, "5");
-
+        let tableData       = getTableData("hris_holiday_tbl");
+        let codeCondition   = tableData.length < 1 ? "0" : "";
         let data = getFormData("modal_holiday_form", true);
         // console.log(data);
         data["tableData"]["holidayDate"] = moment(data["tableData"]["holidayDate"]).format("YYYY-MM-DD");
-        data["tableData[holidayCode]"]   = holidayCode;
-        data["tableData[createdBy]"]     = "1";
-        data["tableData[updatedBy]"]     = "1";
+        data["tableData[holidayCode]"]   = generateCode("HLD",codeCondition,"hris_holiday_tbl","holidayCode");
+        data["tableData[createdBy]"]     = sessionID;
+        data["tableData[updatedBy]"]     = sessionID;
         data["tableName"]                = "hris_holiday_tbl";
-        data["feedback"]                 = holidayCode;
-        sweetAlertConfirmation("add", "Holiday","modal_holiday", null, data);
-
-
+        data["feedback"]                 = $("#inputholidayName").val();
+        sweetAlertConfirmation("add", "Holiday","modal_holiday", null, data, true, tableContent);
     }
 });
 
 $(document).on("click", "#btnUpdate", function(){
     let condition           = validateForm("modal_holiday_form");
     let holidayID           = $(this).data("holidayid");
-    let holidayCode         = getTableData("hris_holiday_tbl","holidayCode","holidayID="+holidayID,"holidayCode DESC");
     if(condition == true){
         let data = getFormData("modal_holiday_form", true);
         data["tableData"]["holidayDate"] =  moment(data["tableData"]["holidayDate"]).format("YYYY-MM-DD");
         data["tableData"]["updatedBy"]   =  "2";
         data["whereFilter"]              =  "holidayID="+holidayID;
         data["tableName"]                =  "hris_holiday_tbl";
-        data["feedback"]                 =   holidayCode[0]["holidayCode"];
+        data["feedback"]                 =  $("#inputholidayName").val();
         console.log(data);
-        sweetAlertConfirmation("update", "Holiday","modal_holiday", null , data);
+        sweetAlertConfirmation("update", "Holiday","modal_holiday", null , data, true, tableContent);
     }
-    
 });
 
 $(document).on("click","#btnCancel", function(){
-    let condition = emptyFormCondition("modal_holiday_form");
-    if(condition == true){
-        sweetAlertConfirmation("", "Holiday","modal_holiday");
+    let condition = isFormEmpty("modal_holiday_form");
+    if(!condition){
+        sweetAlertConfirmation("cancel", "Holiday","modal_holiday");
     }else{
         $("#modal_holiday").modal("hide");
     }
@@ -220,7 +207,7 @@ function initDataTables() {
                 scrollX:        true,
                 scrollCollapse: true,
                 columnDefs: [
-                    { targets: 0, width: "15%" },
+                    { targets: 0, width: "10%" },
                     { targets: 1, width: "25%" },
                     { targets: 4, width: "10%" },
                     { targets: 5, width: "10%" }
@@ -260,7 +247,7 @@ function tableContent(){
                         let unique = {
                             id:             item.holidayID, // Required
                             holidayName:    item.holidayName, 
-                            holidayDate:    moment(item.holidayDate).format("MMMM DD YYYY")
+                            holidayDate:    moment(item.holidayDate).format("MMMM DD, YYYY")
                         }
                         uniqueData.push(unique);
                         // ----- END INSERT UNIQUE DATA TO uniqueData VARIABLE ----

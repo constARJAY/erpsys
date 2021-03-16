@@ -13,8 +13,8 @@ $(document).ready(function(){
             scrollCollapse: true,
             columnDefs: [
                 { targets: 0, width: 100 },
-                { targets: 1, width: 100 },
-                { targets: 2, width: 100 },
+                { targets: 1, width: 500 },
+                { targets: 2, width: 50 },
                 { targets: 3, width: 50 },
             ],
         });
@@ -38,7 +38,7 @@ $(document).ready(function(){
         //     dataType: 'json',
         //     data:     {tableName: "ims_inventory_category_tbl"},
         //     beforeSend: function() {
-        //         $("#table_content").html(preloader);
+                $("#table_content").html(preloader);
         //         // $("#inv_headerID").text("List of Inventory Item");
         //     },
         //     success: function(data) {
@@ -59,17 +59,24 @@ $(document).ready(function(){
                     // ----- INSERT UNIQUE DATA TO uniqueData VARIABLE ----
                     let unique = {
                         id:       item.categoryID, // Required
-                        username: item.categoryName,
+                        categoryName: item.categoryName,
                         // email:    item.email,
                     }
                     uniqueData.push(unique);
                     // ----- END INSERT UNIQUE DATA TO uniqueData VARIABLE ----
 
+                    if(item.categoryStatus == 1){
+                        var status=`<span class="badge badge-outline-success w-100">Active</span>`;
+                     }   
+                     if(item.categoryStatus == 0){
+                        var status=`<span class="badge badge-outline-danger w-100">Inactive</span>`;
+                     }
+
                     html += `
                     <tr>
                         <td>${item.categoryNo}</td>
                         <td>${item.categoryName}</td>
-                        <td><span class="badge badge-outline-success w-100">Active</span></td>
+                        <td>${status}</td>
                         <td>
                             <button 
                                 class="btn btn-edit btn-block btnEdit" 
@@ -133,10 +140,11 @@ $(document).ready(function(){
                             class="form-control validate" 
                             name="categoryName" 
                             id="input_categoryName" 
-                            data-allowcharacters="[A-Z][a-z][0-9][ ][@]" 
+                            data-allowcharacters="[A-Z][a-z][0-9][ ]['][-]" 
                             minlength="2" 
                             maxlength="20" 
                             required 
+                            unique="${categoryID}" 
                             value="${categoryName}"
                             autocomplete="off">
                         <div class="invalid-feedback d-block" id="invalid-input_categoryName"></div>
@@ -160,10 +168,10 @@ $(document).ready(function(){
                                 ${!data && "selected"} >No Selected</option>
                             <option 
                                 value="1" 
-                                ${data && categoryStatus == "Active" && "selected"} >Active</option>
+                                ${data && categoryStatus == "1" && "selected"} >Active</option>
                             <option 
                                 value="0" 
-                                ${data && categoryStatus == "InActive" && "selected"}>InActive</option>
+                                ${data && categoryStatus == "0" && "selected"}>InActive</option>
                         </select>
                         <div class="invalid-feedback d-block" id="invalid-input_categoryStatus"></div>
                     </div>

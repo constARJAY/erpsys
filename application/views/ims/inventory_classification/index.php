@@ -46,4 +46,4 @@
 <!-- ----- END ADD MODAL ----- -->
 
 
-<script src="<?=base_url("assets/custom/js/ims/inventory_classification.js")?>"></script>
+<script src="<?=base_url("assets/custom/js/ims/inventory-classification.js")?>"></script>

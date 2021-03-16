@@ -31,8 +31,7 @@ $(document).on("click",".addLoan", function(){
                                                         <div class="col-md-12 col-sm-12">
                                                             <div class="form-group">
                                                                 <label for="">Loan Status  <span class="text-danger">*</span></label>
-                                                                <select class="form-control select2 validate" name="loanStatus" id="inputloanStatus" required>
-                                                                    <option value="" dissabled>No selected</option>
+                                                                <select class="form-control select2 validate" name="loanStatus" id="inputloanStatus">
                                                                     <option value="1">Active</option>
                                                                     <option value="0">Inactive</option>
                                                                 </select>
@@ -104,51 +103,41 @@ $(document).on("click", "#btnSave", function(){
     let condition = validateForm("modal_loan_form");
     
     if(condition == true){
-        let tableData           = getTableData("hris_loan_tbl","","","loanCode DESC");
-        var currentDate         = new Date();
-        let currentYear         = currentDate.getFullYear();
-        let currentYearStr      = currentYear.toString();
-
-        // Generate Number
-        let tableDataCode       = tableData.length < 1 ? "" : parseInt(tableData[0]["loanCode"].slice(6)) + 1;
-
-        let loanCode  = tableData.length < 1 ? "LON-"+currentYearStr.slice(2)+"-00001" : "LON-"+currentYearStr.slice(2)+"-"+numberCodeSize(tableDataCode, "5");
-
+        let tableData       = getTableData("hris_loan_tbl");
+        let codeCondition   = tableData.length < 1 ? "0" : "";
         let data = getFormData("modal_loan_form", true);
-        data["tableData[loanCode]"]      = loanCode;
-        data["tableData[createdBy]"]     = "1";
-        data["tableData[updatedBy]"]     = "1";
+        data["tableData[loanCode]"]      = generateCode("LON",codeCondition,"hris_loan_tbl","loanCode");
+        data["tableData[createdBy]"]     = sessionID;
+        data["tableData[updatedBy]"]     = sessionID;
         data["tableName"]                = "hris_loan_tbl";
-        data["feedback"]                 = loanCode;
-        sweetAlertConfirmation("add", "Loan Masterfile","modal_loan", null, data);
-
-
+        data["feedback"]                 = $("#inputloanName").val();
+        sweetAlertConfirmation("add", "Loan","modal_loan", null, data, true, tableContent);
     }
+
 });
 
 $(document).on("click", "#btnUpdate", function(){
-    let condition           = validateForm("modal_loan_form");
+    let condition        = validateForm("modal_loan_form");
     let loanID           = $(this).data("loanid");
     let loanCode         = getTableData("hris_loan_tbl","loanCode","loanID="+loanID,"loanCode DESC");
     if(condition == true){
         let data = getFormData("modal_loan_form", true);
-        data["tableData"]["updatedBy"]   =  "2";
+        data["tableData"]["updatedBy"]   =  sessionID;
         data["whereFilter"]              =  "loanID="+loanID;
         data["tableName"]                =  "hris_loan_tbl";
-        data["feedback"]                 =   loanCode[0]["loanCode"];
-        sweetAlertConfirmation("update", "loan","modal_loan", null , data);
+        data["feedback"]                 =  $("#inputloanName").val();
+        sweetAlertConfirmation("update", "Loan","modal_loan", null , data, true,    );
     }
     
 });
 
 $(document).on("click","#btnCancel", function(){
-    let condition = emptyFormCondition("modal_loan_form");
-    if(condition == true){
-        sweetAlertConfirmation("", "Loan Masterfile","modal_loan");
+    let condition = isFormEmpty("modal_loan_form");
+    if(!condition){
+        sweetAlertConfirmation("cancel", "Loan","modal_loan");
     }else{
         $("#modal_loan").modal("hide");
     }
-    
 });
 
 // FUNCTIONS
@@ -164,7 +153,7 @@ function initDataTables() {
                 scrollX:        true,
                 scrollCollapse: true,
                 columnDefs: [
-                    { targets: 0, width: "15%" },
+                    { targets: 0, width: "10%" },
                     { targets: 1, width: "25%" },
                     { targets: 2, width: "5%" },
                     { targets: 3, width: "5%" }

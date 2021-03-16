@@ -13,11 +13,7 @@
 					<span>This module is used to manage inventory vendor details.</span>
 				</div>
 				<div class="col-lg-6 col-md-12 text-md-right">
-					<!-- <button class="btn btn-default hidden-xs ml-2">Download Report</button>
-                        <button class="btn btn-secondary hidden-xs ml-2">New Report</button> -->
-                        <!-- <button type="button" class="btn btn-danger pr-2" id="btnAdd"> <i class="icon-plus" id="btnIcon"></i> &nbsp;Add Item</button> -->
                         <button class="btn btn-add" id="btnAdd"><i class="fas fa-plus-square"></i> Add Vendor</button>
-                        <!-- <button type="button" class="btn btn-light pr-2" id="btnCancel"> <i class="icon-ban"></i> &nbsp;Cancel</button> -->
                     </ul>
 				</div>
 			</div>
@@ -46,71 +42,10 @@
 			</div>
 		</div>
 	</div>
-
-    <!-- <div class="container" id="container_2"> 
-		<div class="row clearfix">
-			<div class="col-lg-12">
-				<div class="card">
-                <div class="col-12 mt-4 mb-4">
-						<div class="row clearfix">
-						
-								<div class="col-md-4">
-									<div class="form-group">
-										<label>Item Code <strong class="text-red">*</strong></label>
-										<input type="text" class="form-control" placeholder="">
-									</div>
-								</div>
-								<div class="col-md-4">
-									<div class="form-group">
-										<label>Item Name <strong class="text-red">*</strong></label>
-										<input type="text" class="form-control" placeholder="">
-									</div>
-								</div>
-                                <div class="col-md-4">
-									<div class="form-group">
-										<label>Item Group <strong class="text-red">*</strong></label>
-										<input type="text" class="form-control" placeholder="">
-									</div>
-								</div>
-						
-						</div>
-                        <div class="row clearfix">
-						
-								<div class="col-md-4">
-									<div class="form-group">
-										<label>Item Category <strong class="text-red">*</strong></label>
-										<input type="text" class="form-control" placeholder="">
-									</div>
-								</div>
-								<div class="col-md-4">
-									<div class="form-group">
-										<label>Item Size <strong class="text-red">*</strong></label>
-										<input type="text" class="form-control" placeholder="">
-									</div>
-								</div>
-                                <div class="col-md-4">
-									<div class="form-group">
-										<label>Unit Price <strong class="text-red">*</strong></label>
-										<input type="text" class="form-control" placeholder="">
-									</div>
-								</div>
-						
-						</div>
-                        <div class="row clearfix">
-							<div class="col-4"></div>
-                            <div class="col-4 d-flex"><button type="button" class="btn btn-outline-success btn-block  p-2 px-3" id="btnAdd"> <i class="fas fa-save"></i> &nbsp;Save</button></div>
-                            <div class="col-4"></div>
-						</div>
-
-				</div>
-                </div>
-			</div>
-		</div>
-	</div> -->
 </div>
 
 <!-- ----- ADD MODAL ----- -->
-<div id="modalInventoryVendor" class="modal custom-modal fade" data-backdrop="static" data-keyboard="false" role="dialog">
+<div id="modal_inventory_vendor" class="modal custom-modal fade" data-backdrop="static" data-keyboard="false" role="dialog">
     <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
 		<div class="modal-content">
 			<div class="modal-header bg-primary text-light">
@@ -120,7 +55,7 @@
 				</button>
 			</div>
 
-            <div id="modalInventoryVendorContent"></div>
+            <div id="modal_inventory_vendor_content"></div>
         </div>
 	</div>
 </div>

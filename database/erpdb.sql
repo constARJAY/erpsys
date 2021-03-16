@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Mar 12, 2021 at 10:17 AM
+-- Generation Time: Mar 16, 2021 at 05:16 AM
 -- Server version: 10.4.14-MariaDB
 -- PHP Version: 7.4.10
 
@@ -18,8 +18,42 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Database: `erp`
+-- Database: `erpdb`
 --
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `fms_bank_tbl`
+--
+
+CREATE TABLE `fms_bank_tbl` (
+  `bankID` bigint(20) NOT NULL,
+  `bankName` varchar(255) NOT NULL,
+  `bankNumber` varchar(255) NOT NULL,
+  `bankStatus` int(50) NOT NULL,
+  `datecreated` date NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `fms_chart_of_accounts_tbl`
+--
+
+CREATE TABLE `fms_chart_of_accounts_tbl` (
+  `chartOfAccountID` bigint(20) NOT NULL,
+  `bankID` bigint(20) NOT NULL,
+  `accountCode` varchar(255) NOT NULL,
+  `accountName` varchar(255) NOT NULL,
+  `accountDescription` varchar(255) NOT NULL,
+  `accountLevel` varchar(255) NOT NULL,
+  `ledgerClassificationID` bigint(20) NOT NULL,
+  `accountGrouping` varchar(255) NOT NULL,
+  `financialStatement` varchar(255) NOT NULL,
+  `accountStatus` int(50) NOT NULL,
+  `accountDatecreated` date NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -70,7 +104,7 @@ INSERT INTO `gen_module_category_tbl` (`moduleCategoryID`, `moduleHeaderID`, `mo
 (1, 1, 1, '01615537147.svg', 'Dashboard', 1, '2021-03-12 08:19:07', '2021-03-12 08:19:07'),
 (2, 2, 3, '01615538110.svg', 'Masterfiles', 1, '2021-03-12 08:35:10', '2021-03-12 08:43:55'),
 (3, 3, 4, '01615538293.svg', 'System Settings', 1, '2021-03-12 08:38:13', '2021-03-12 08:44:00'),
-(4, 5, 2, '01615538430.svg', 'Management', 1, '2021-03-12 08:40:30', '2021-03-12 08:43:49');
+(4, 5, 2, '01615538430.svg', 'Management', 0, '2021-03-12 08:40:30', '2021-03-15 01:02:09');
 
 -- --------------------------------------------------------
 
@@ -142,7 +176,8 @@ INSERT INTO `gen_module_list_tbl` (`moduleID`, `moduleHeaderID`, `moduleCategory
 (16, 2, 2, 1, 'Inventory Management System', NULL, 'Inventory Condition', 0, 'ims/inventory_condition', 1, '2021-03-12 09:00:41', '2021-03-12 09:00:41'),
 (17, 2, 2, 1, 'Inventory Management System', NULL, 'Inventory Item', 0, 'ims/inventory_item', 1, '2021-03-12 09:01:06', '2021-03-12 09:01:06'),
 (18, 2, 2, 1, 'Inventory Management System', NULL, 'Inventory Vendor', 0, 'ims/inventory_vendor', 1, '2021-03-12 09:02:00', '2021-03-12 09:02:00'),
-(19, 2, 2, 1, 'Project Management System', NULL, 'Project Client', 0, 'pms/project_client', 1, '2021-03-12 09:02:38', '2021-03-12 09:02:38');
+(19, 2, 2, 1, 'Project Management System', NULL, 'Project Client', 0, 'pms/project_client', 1, '2021-03-12 09:02:38', '2021-03-12 09:02:38'),
+(20, 3, 0, 1, 'Human Resources Information System|Project Management System', NULL, 'Mark', 1, 'hris/dashboard', 1, '2021-03-15 01:03:42', '2021-03-15 01:03:42');
 
 -- --------------------------------------------------------
 
@@ -221,13 +256,13 @@ INSERT INTO `gen_roles_permission_tbl` (`permissionID`, `roleID`, `moduleID`, `p
 (17, 1, 18, 1, '2021-03-11 00:22:38', '2021-03-11 00:22:38'),
 (18, 2, 2, 1, '2021-03-11 00:22:38', '2021-03-11 00:22:38'),
 (19, 2, 3, 0, '2021-03-11 00:22:38', '2021-03-11 00:22:38'),
-(20, 2, 4, 0, '2021-03-11 00:22:38', '2021-03-11 00:22:38'),
+(20, 2, 4, 1, '2021-03-11 00:22:38', '2021-03-11 00:22:38'),
 (21, 2, 5, 0, '2021-03-11 00:22:38', '2021-03-11 00:22:38'),
-(22, 2, 6, 0, '2021-03-11 00:22:38', '2021-03-11 00:22:38'),
-(23, 2, 7, 0, '2021-03-11 00:22:38', '2021-03-11 00:22:38'),
+(22, 2, 6, 1, '2021-03-11 00:22:38', '2021-03-11 00:22:38'),
+(23, 2, 7, 1, '2021-03-11 00:22:38', '2021-03-11 00:22:38'),
 (24, 2, 8, 0, '2021-03-11 00:22:38', '2021-03-11 00:22:38'),
 (25, 2, 9, 0, '2021-03-11 00:22:38', '2021-03-11 00:22:38'),
-(26, 2, 10, 0, '2021-03-11 00:22:38', '2021-03-11 00:22:38'),
+(26, 2, 10, 1, '2021-03-11 00:22:38', '2021-03-11 00:22:38'),
 (27, 2, 11, 0, '2021-03-11 00:22:38', '2021-03-11 00:22:38'),
 (28, 2, 12, 0, '2021-03-11 00:22:38', '2021-03-11 00:22:38'),
 (29, 2, 13, 0, '2021-03-11 00:22:38', '2021-03-11 00:22:38'),
@@ -237,7 +272,7 @@ INSERT INTO `gen_roles_permission_tbl` (`permissionID`, `roleID`, `moduleID`, `p
 (33, 2, 17, 0, '2021-03-11 00:22:38', '2021-03-11 00:22:38'),
 (34, 2, 18, 0, '2021-03-11 00:22:38', '2021-03-11 00:22:38'),
 (35, 3, 2, 1, '2021-03-11 00:22:38', '2021-03-11 00:22:38'),
-(36, 3, 3, 0, '2021-03-11 00:22:38', '2021-03-11 00:22:38'),
+(36, 3, 3, 1, '2021-03-11 00:22:38', '2021-03-11 00:22:38'),
 (37, 3, 4, 0, '2021-03-11 00:22:38', '2021-03-11 00:22:38'),
 (38, 3, 5, 0, '2021-03-11 00:22:38', '2021-03-11 00:22:38'),
 (39, 3, 6, 0, '2021-03-11 00:22:38', '2021-03-11 00:22:38'),
@@ -397,7 +432,7 @@ CREATE TABLE `gen_system_notification_tbl` (
 
 INSERT INTO `gen_system_notification_tbl` (`notificationID`, `moduleID`, `notificationTitle`, `notificationDescription`, `notificationType`, `markRead`, `createdBy`, `createdAt`, `updatedAt`) VALUES
 (1, 1, 'Inventory Item', 'Hammer - Low Stock', 1, 1, 1, '2021-03-09 05:31:59', '2021-03-12 08:14:07'),
-(2, 5, 'Arjay Diangzon', 'Passed resignation letter', 2, 1, 1, '2021-03-09 05:33:20', '2021-03-10 06:34:47'),
+(2, 5, 'Arjay Diangzon', 'Passed resignation letter', 2, 0, 1, '2021-03-09 05:33:20', '2021-03-15 00:50:27'),
 (3, 3, 'Charles Verdadero', 'Extended Contract', 3, 1, 1, '2021-03-09 05:40:22', '2021-03-10 06:34:38'),
 (6, 3, 'Joseph Berongoy', 'Extended Contract', 2, 1, 1, '2021-03-09 07:15:05', '2021-03-10 06:34:47');
 
@@ -437,7 +472,7 @@ CREATE TABLE `gen_user_account_tbl` (
 INSERT INTO `gen_user_account_tbl` (`userAccountID`, `role`, `firstname`, `lastname`, `email`, `mobile`, `telephone`, `address`, `gender`, `birthday`, `link`, `username`, `password`, `amount`, `skills`, `file`, `userType`, `status`, `createdAt`, `updatedAt`) VALUES
 (1, 'Admin', 'Ako To Si', 'Natoy', 'rjpinca@gmail.com', '(+63) 099 0908 595', '(32) 1321 423', '1709 Antel Bldg, Julia Vargas', 'Male', '2021-02-03', 'http://theblackcoders.com', 'rjpinca', 'rjpinca', '0.00', '', '01614667776.svg', 0, 0, '2021-02-26 05:19:00', '2021-03-04 00:11:19'),
 (2, 'Operations', 'Akosi', 'RJ', 'hakdog123@gmail.com', '(+63) 545 8987 987', '(54) 6545 646', '1709 Antel Bldg, Julia Vargas', 'Male', '2021-03-05', 'http://theblackcoders.com', 'hakdog123', 'hakdog123', '999.95', 'CSS|JS', '01614668556.svg|11614668556.svg|21614668556.svg|31614668556.svg|41614668556.svg|51614668556.svg', 0, 1, '2021-02-26 05:25:07', '2021-03-04 00:11:21'),
-(9, 'Admin', 'Charles', 'Vincent', 'charlesvincent@gmail.com', '(+63) 123 2141 242', '(53) 2432 423', 'Quezon City', 'Male', '2021-03-09', 'http://theblackcoders.com', 'charles', 'charles', '0.00', 'CSS|HTML|JS', '01614668026.svg|11614668026.svg|21614668026.svg|31614668026.svg|41614668026.svg|51614668026.svg', 1, 1, '2021-03-02 06:52:07', '2021-03-10 01:34:47');
+(3, 'Admin', 'Charles', 'Vincent', 'charlesvincent@gmail.com', '(+63) 123 2141 242', '(53) 2432 423', 'Quezon City', 'Male', '2021-03-09', 'http://theblackcoders.com', 'charles', 'charles', '0.00', 'CSS|HTML|JS', '01614668026.svg|11614668026.svg|21614668026.svg|31614668026.svg|41614668026.svg|51614668026.svg', 1, 1, '2021-03-02 06:52:07', '2021-03-15 00:55:00');
 
 -- --------------------------------------------------------
 
@@ -492,8 +527,33 @@ CREATE TABLE `hris_award_tbl` (
 --
 
 INSERT INTO `hris_award_tbl` (`awardID`, `awardTitle`, `awardDescription`, `awardSignatories`, `awardStatus`, `createdBy`, `updatedBy`, `createdAt`, `updatedAt`) VALUES
-(1, 'Best Employee of the Month', 'Ito ay para sa mga taong malulupit sa buwan na nabanggit', '9|2', 1, 1, 2, '2021-03-12 07:38:07', '2021-03-12 07:53:11'),
-(2, 'Sample date', 'askdljaskldaskd', '2', 0, 1, 2, '2021-03-12 08:01:10', '2021-03-12 08:01:20');
+(1, 'Best Employee of the Month', 'Ito ay para sa mga taong malulupit sa buwan na nabanggit', '1|2', 1, 1, 2, '2021-03-12 07:38:07', '2021-03-15 05:23:55'),
+(2, 'Sample date', 'askdljaskldaskd', '2', 1, 1, 2, '2021-03-12 08:01:10', '2021-03-15 05:24:49');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `hris_branch_tbl`
+--
+
+CREATE TABLE `hris_branch_tbl` (
+  `branchID` bigint(20) NOT NULL,
+  `branchCode` text NOT NULL,
+  `branchName` text NOT NULL,
+  `branchStatus` int(10) NOT NULL,
+  `createdBy` bigint(20) NOT NULL,
+  `updatedBy` bigint(20) NOT NULL,
+  `createdAt` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updatedAt` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Dumping data for table `hris_branch_tbl`
+--
+
+INSERT INTO `hris_branch_tbl` (`branchID`, `branchCode`, `branchName`, `branchStatus`, `createdBy`, `updatedBy`, `createdAt`, `updatedAt`) VALUES
+(1, 'BRC-21-00001', 'Mark lang charot', 1, 1, 2, '2021-03-15 06:10:25', '2021-03-15 06:11:55'),
+(2, 'BRC-21-00002', 'qweqweqwe', 1, 9, 9, '2021-03-15 07:56:37', '2021-03-15 07:56:37');
 
 -- --------------------------------------------------------
 
@@ -516,7 +576,60 @@ CREATE TABLE `hris_code_conduct_category_tbl` (
 --
 
 INSERT INTO `hris_code_conduct_category_tbl` (`codeConductCategoryID`, `codeConductCategoryName`, `codeConductCategoryStatus`, `createdBy`, `updatedBy`, `createdAt`, `updatedAt`) VALUES
-(1, 'Arjay Mahina', 0, 1, 2, '2021-03-12 03:47:10', '2021-03-12 03:46:42');
+(1, 'Sample Category One', 1, 1, 2, '2021-03-15 03:28:09', '2021-03-12 03:46:42'),
+(2, 'Sample Category Two', 1, 1, 2, '2021-03-15 03:28:24', '2021-03-15 03:19:57');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `hris_code_conduct_section_tbl`
+--
+
+CREATE TABLE `hris_code_conduct_section_tbl` (
+  `codeConductSectionID` bigint(20) NOT NULL,
+  `codeConductCategoryID` bigint(20) NOT NULL,
+  `codeConductSection` varchar(10) NOT NULL,
+  `codeConductSectionDescription` text NOT NULL,
+  `codeConductSectionStatus` int(10) NOT NULL,
+  `createdBy` bigint(20) NOT NULL,
+  `updatedBy` bigint(20) NOT NULL,
+  `createdAt` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updatedAt` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Dumping data for table `hris_code_conduct_section_tbl`
+--
+
+INSERT INTO `hris_code_conduct_section_tbl` (`codeConductSectionID`, `codeConductCategoryID`, `codeConductSection`, `codeConductSectionDescription`, `codeConductSectionStatus`, `createdBy`, `updatedBy`, `createdAt`, `updatedAt`) VALUES
+(9, 1, '1.1', 'Sample Code Section', 1, 1, 1, '2021-03-15 07:52:15', '2021-03-15 07:52:15');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `hris_department_tbl`
+--
+
+CREATE TABLE `hris_department_tbl` (
+  `departmentID` bigint(20) NOT NULL,
+  `departmentName` varchar(255) NOT NULL,
+  `departmentStatus` int(50) NOT NULL,
+  `datecreated` text NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `hris_designation_tbl`
+--
+
+CREATE TABLE `hris_designation_tbl` (
+  `designationID` bigint(20) NOT NULL,
+  `departmentID` bigint(20) NOT NULL,
+  `designationName` varchar(255) NOT NULL,
+  `designationStatus` int(50) NOT NULL,
+  `datecreated` date NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -542,8 +655,36 @@ CREATE TABLE `hris_holiday_tbl` (
 --
 
 INSERT INTO `hris_holiday_tbl` (`holidayID`, `holidayCode`, `holidayName`, `holidayDate`, `holidayType`, `holidayStatus`, `createdBy`, `updatedBy`, `createdAt`, `updatedAt`) VALUES
-(18, 'HLD-21-00001', 'Independence Day', '2021-03-11', 'Regular Holiday', 1, 1, 2, '2021-03-12 02:32:12', '2021-03-12 08:13:06'),
+(18, 'HLD-21-00001', 'Independence Dayw', '2021-03-11', 'Regular Holiday', 1, 1, 2, '2021-03-12 02:32:12', '2021-03-15 07:33:23'),
 (19, 'HLD-21-00000', 'Sanal All holiday', '2021-04-02', 'Regular Holiday', 1, 1, 2, '2021-03-12 02:32:57', '2021-03-12 02:37:49');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `hris_job_posting_tbl`
+--
+
+CREATE TABLE `hris_job_posting_tbl` (
+  `jobID` bigint(20) NOT NULL,
+  `jobCode` varchar(255) NOT NULL,
+  `jobCompany` varchar(255) NOT NULL,
+  `jobTitle` varchar(255) NOT NULL,
+  `jobDescription` longtext NOT NULL,
+  `jobResponsibilities` longtext NOT NULL,
+  `jobType` varchar(255) NOT NULL,
+  `jobCategory` varchar(255) NOT NULL,
+  `techSkillsQualification` longtext NOT NULL,
+  `jobBenefits` longtext NOT NULL,
+  `jobLanguage` varchar(255) NOT NULL,
+  `jobSlot` int(50) NOT NULL,
+  `salaryRangeSelect` int(50) NOT NULL,
+  `salaryRange` decimal(10,2) NOT NULL,
+  `datecreated` date NOT NULL DEFAULT current_timestamp(),
+  `createdAt` date NOT NULL DEFAULT current_timestamp(),
+  `updatedAt` date NOT NULL DEFAULT current_timestamp(),
+  `createdBy` int(20) NOT NULL,
+  `updatedBy` bigint(20) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -592,7 +733,9 @@ CREATE TABLE `hris_loan_tbl` (
 
 INSERT INTO `hris_loan_tbl` (`loanID`, `loanCode`, `loanName`, `loanStatus`, `createdBy`, `updatedBy`, `createdAt`, `updatedAt`) VALUES
 (1, 'LON-21-00001', 'Pautan mark loan', 1, 1, 2, '2021-03-12 03:09:40', '2021-03-12 03:10:03'),
-(2, 'LON-21-00000', 'Pautang Arjay', 1, 1, 2, '2021-03-12 03:09:55', '2021-03-12 03:10:09');
+(2, 'LON-21-00000', 'Pautang Arjay', 1, 1, 2, '2021-03-12 03:09:55', '2021-03-12 03:10:09'),
+(3, 'LON-21-00001', 'qweqwe', 1, 9, 9, '2021-03-15 07:45:10', '2021-03-15 07:45:10'),
+(4, 'LON-21-00002', 'qweqweqweqwe', 0, 9, 9, '2021-03-15 07:45:25', '2021-03-15 07:45:53');
 
 -- --------------------------------------------------------
 
@@ -615,6 +758,47 @@ CREATE TABLE `hris_philhealth_table_tbl` (
 
 INSERT INTO `hris_philhealth_table_tbl` (`phID`, `phMinimumRange`, `phMaximumRange`, `phPercentage`, `createdAt`, `updatedAt`) VALUES
 (1, '15000.00', '15000.00', '50.00', '2021-03-10 08:05:10', '2021-03-10 08:05:10');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `hris_qualification_tbl`
+--
+
+CREATE TABLE `hris_qualification_tbl` (
+  `qualificationID` bigint(20) NOT NULL,
+  `qualificationName` text NOT NULL,
+  `qualificationStatus` int(5) NOT NULL,
+  `createdBy` bigint(20) NOT NULL,
+  `updatedBy` bigint(20) NOT NULL,
+  `createdAt` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updatedAt` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Dumping data for table `hris_qualification_tbl`
+--
+
+INSERT INTO `hris_qualification_tbl` (`qualificationID`, `qualificationName`, `qualificationStatus`, `createdBy`, `updatedBy`, `createdAt`, `updatedAt`) VALUES
+(1, 'Smaple Qualifcation Ones', 0, 1, 2, '2021-03-15 06:39:58', '2021-03-15 06:42:35'),
+(2, 'Smaple Qualification Ones', 0, 1, 1, '2021-03-15 06:42:29', '2021-03-15 06:42:29');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `hris_requirement_tbl`
+--
+
+CREATE TABLE `hris_requirement_tbl` (
+  `requirementID` bigint(20) NOT NULL,
+  `requirementCode` varchar(255) NOT NULL,
+  `requirementName` varchar(255) NOT NULL,
+  `requirementDescription` longtext NOT NULL,
+  `requirementStatus` int(50) NOT NULL,
+  `datecreated` date NOT NULL DEFAULT current_timestamp(),
+  `createdBy` text NOT NULL DEFAULT current_timestamp(),
+  `updatedBy` date NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -738,20 +922,30 @@ CREATE TABLE `ims_inventory_classification_tbl` (
   `updatedAt` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+-- --------------------------------------------------------
+
 --
--- Dumping data for table `ims_inventory_classification_tbl`
+-- Table structure for table `ims_inventory_condition_tbl`
 --
 
-INSERT INTO `ims_inventory_classification_tbl` (`classificationID`, `classificationCode`, `classificationName`, `classificationStatus`, `createdBy`, `updatedBy`, `createdAt`, `updatedAt`) VALUES
-(1, 'CFN-2100001', 'Aplha Data', 1, 1, 1, '2021-03-11 07:06:30', '2021-03-11 08:22:16'),
-(2, 'CFN-2100002', 'Bravo Account', 0, 1, 1, '2021-03-11 07:10:01', '2021-03-11 08:28:39'),
-(3, 'CFN-2100002', 'Arjaydasd', 1, 1, 1, '2021-03-11 07:10:34', '2021-03-11 07:10:34'),
-(5, 'CFN-21-00003', 'charlesasdasd ', 0, 1, 2, '2021-03-11 07:27:27', '2021-03-12 08:32:03'),
-(6, 'CFN-21-00003', 'Charles lang po', 0, 1, 2, '2021-03-11 07:33:00', '2021-03-12 03:20:55'),
-(7, 'CFN-21-00003', 'joseph mmalang', 1, 1, 1, '2021-03-12 01:15:44', '2021-03-12 01:15:44'),
-(8, 'CFN-21-00003', 'qweqweqw', 0, 1, 1, '2021-03-12 01:16:10', '2021-03-12 01:16:10'),
-(9, 'CFN-21-00003', 'Arjaytasd ', 1, 1, 1, '2021-03-12 01:16:32', '2021-03-12 01:16:32'),
-(10, 'CFN-21-00003', 'Charles Lang Po', 0, 1, 1, '2021-03-12 03:20:44', '2021-03-12 03:20:44');
+CREATE TABLE `ims_inventory_condition_tbl` (
+  `conditionID` bigint(20) NOT NULL,
+  `conditionCode` varchar(100) NOT NULL,
+  `conditionName` varchar(100) NOT NULL,
+  `conditionDescription` text NOT NULL,
+  `conditionStatus` int(11) NOT NULL,
+  `createdBy` bigint(20) NOT NULL,
+  `updatedBy` bigint(20) NOT NULL,
+  `createdAt` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updatedAt` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Dumping data for table `ims_inventory_condition_tbl`
+--
+
+INSERT INTO `ims_inventory_condition_tbl` (`conditionID`, `conditionCode`, `conditionName`, `conditionDescription`, `conditionStatus`, `createdBy`, `updatedBy`, `createdAt`, `updatedAt`) VALUES
+(1, 'ICO-21-00001', 'Good Condition', 'Good Condition Good Condition Good Condition Good Condition Good Condition ', 1, 0, 0, '2021-03-16 00:55:24', '2021-03-16 00:55:24');
 
 -- --------------------------------------------------------
 
@@ -761,20 +955,102 @@ INSERT INTO `ims_inventory_classification_tbl` (`classificationID`, `classificat
 
 CREATE TABLE `ims_inventory_item_tbl` (
   `itemID` bigint(20) NOT NULL,
-  `storage` varchar(255) NOT NULL,
+  `storageID` bigint(20) NOT NULL,
   `itemName` varchar(255) NOT NULL,
-  `itemClassification` varchar(255) NOT NULL,
-  `itemCategory` varchar(255) NOT NULL,
+  `classificationID` bigint(20) NOT NULL,
+  `categoryID` bigint(20) NOT NULL,
   `itemSize` varchar(255) NOT NULL,
+  `unitOfMeasurementID` varchar(255) NOT NULL,
   `basePrice` decimal(10,2) NOT NULL,
   `reOrderLevel` int(50) NOT NULL,
   `vatType` varchar(255) NOT NULL,
+  `itemStatus` int(50) NOT NULL,
   `datecreated` date NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `ims_inventory_storage_tbl`
+--
+
+CREATE TABLE `ims_inventory_storage_tbl` (
+  `inventoryStorageID` bigint(120) NOT NULL,
+  `inventoryStorageOfficeName` varchar(80) NOT NULL,
+  `inventoryStorageUnitNumber` varchar(80) NOT NULL,
+  `inventoryStorageHouseNumber` varchar(80) NOT NULL,
+  `inventoryStorageStreetName` varchar(80) NOT NULL,
+  `inventoryStorageSubdivisionName` varchar(80) NOT NULL,
+  `inventoryStorageBarangay` varchar(80) NOT NULL,
+  `inventoryStorageMunicipality` varchar(80) NOT NULL,
+  `inventoryStorageProvince` varchar(80) NOT NULL,
+  `inventoryStorageCountry` varchar(80) NOT NULL,
+  `inventoryStorageZipCode` int(80) NOT NULL,
+  `inventoryStorageRoomType` varchar(80) DEFAULT NULL,
+  `inventoryStorageDepartment` varchar(80) DEFAULT NULL,
+  `inventoryStorageStatus` varchar(120) NOT NULL,
+  `createdBy` bigint(80) NOT NULL,
+  `createdAt` timestamp(6) NOT NULL DEFAULT current_timestamp(6),
+  `updatedBy` bigint(80) NOT NULL,
+  `updatedAt` timestamp(6) NOT NULL DEFAULT current_timestamp(6) ON UPDATE current_timestamp(6)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `ims_inventory_vendor_tbl`
+--
+
+CREATE TABLE `ims_inventory_vendor_tbl` (
+  `inventoryVendorID` bigint(20) NOT NULL,
+  `inventoryVendorCode` varchar(100) NOT NULL,
+  `inventoryVendorName` varchar(100) NOT NULL,
+  `inventoryVendorRegion` varchar(100) DEFAULT NULL,
+  `inventoryVendorProvince` varchar(100) DEFAULT NULL,
+  `inventoryVendorCity` varchar(100) DEFAULT NULL,
+  `inventoryVendorBarangay` varchar(100) DEFAULT NULL,
+  `inventoryVendorUnit` varchar(100) DEFAULT NULL,
+  `inventoryVendorBuilding` varchar(100) DEFAULT NULL,
+  `inventoryVendorStreet` varchar(100) DEFAULT NULL,
+  `inventoryVendorSubdivision` varchar(100) DEFAULT NULL,
+  `inventoryVendorCountry` varchar(100) DEFAULT NULL,
+  `inventoryVendorZipCode` varchar(100) DEFAULT NULL,
+  `inventoryVendorPerson` varchar(100) NOT NULL,
+  `inventoryVendorEmail` varchar(100) NOT NULL,
+  `inventoryVendorTIN` varchar(100) NOT NULL,
+  `inventoryVendorMobile` varchar(100) NOT NULL,
+  `inventoryVendorTelephone` varchar(100) NOT NULL,
+  `inventoryVendorBrand` varchar(100) DEFAULT NULL,
+  `inventoryVendorVAT` int(11) NOT NULL,
+  `inventoryVendorStatus` int(11) NOT NULL,
+  `createdBy` bigint(20) NOT NULL,
+  `updatedBy` bigint(20) NOT NULL,
+  `createdAt` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updatedAt` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Dumping data for table `ims_inventory_vendor_tbl`
+--
+
+INSERT INTO `ims_inventory_vendor_tbl` (`inventoryVendorID`, `inventoryVendorCode`, `inventoryVendorName`, `inventoryVendorRegion`, `inventoryVendorProvince`, `inventoryVendorCity`, `inventoryVendorBarangay`, `inventoryVendorUnit`, `inventoryVendorBuilding`, `inventoryVendorStreet`, `inventoryVendorSubdivision`, `inventoryVendorCountry`, `inventoryVendorZipCode`, `inventoryVendorPerson`, `inventoryVendorEmail`, `inventoryVendorTIN`, `inventoryVendorMobile`, `inventoryVendorTelephone`, `inventoryVendorBrand`, `inventoryVendorVAT`, `inventoryVendorStatus`, `createdBy`, `updatedBy`, `createdAt`, `updatedAt`) VALUES
+(1, 'VEN-21-00001', 'National Bookstore', '', '', '', '', '1701', 'Antel', 'Julia Vargas', 'Ortigas', 'Philippines', '1900', 'Arjay Diangzon', 'arjaydiangzon@email.com', '123 421 523 123', '0956 5969 798', '(12) 1234 1233', 'NB', 1, 1, 1, 1, '2021-03-15 06:28:45', '2021-03-16 03:19:38');
 
 --
 -- Indexes for dumped tables
 --
+
+--
+-- Indexes for table `fms_bank_tbl`
+--
+ALTER TABLE `fms_bank_tbl`
+  ADD PRIMARY KEY (`bankID`);
+
+--
+-- Indexes for table `fms_chart_of_accounts_tbl`
+--
+ALTER TABLE `fms_chart_of_accounts_tbl`
+  ADD PRIMARY KEY (`chartOfAccountID`);
 
 --
 -- Indexes for table `gen_approval_setup_tbl`
@@ -837,16 +1113,46 @@ ALTER TABLE `hris_award_tbl`
   ADD PRIMARY KEY (`awardID`);
 
 --
+-- Indexes for table `hris_branch_tbl`
+--
+ALTER TABLE `hris_branch_tbl`
+  ADD PRIMARY KEY (`branchID`);
+
+--
 -- Indexes for table `hris_code_conduct_category_tbl`
 --
 ALTER TABLE `hris_code_conduct_category_tbl`
   ADD PRIMARY KEY (`codeConductCategoryID`);
 
 --
+-- Indexes for table `hris_code_conduct_section_tbl`
+--
+ALTER TABLE `hris_code_conduct_section_tbl`
+  ADD PRIMARY KEY (`codeConductSectionID`);
+
+--
+-- Indexes for table `hris_department_tbl`
+--
+ALTER TABLE `hris_department_tbl`
+  ADD PRIMARY KEY (`departmentID`);
+
+--
+-- Indexes for table `hris_designation_tbl`
+--
+ALTER TABLE `hris_designation_tbl`
+  ADD PRIMARY KEY (`designationID`);
+
+--
 -- Indexes for table `hris_holiday_tbl`
 --
 ALTER TABLE `hris_holiday_tbl`
   ADD PRIMARY KEY (`holidayID`);
+
+--
+-- Indexes for table `hris_job_posting_tbl`
+--
+ALTER TABLE `hris_job_posting_tbl`
+  ADD PRIMARY KEY (`jobID`);
 
 --
 -- Indexes for table `hris_leave_tbl`
@@ -865,6 +1171,18 @@ ALTER TABLE `hris_loan_tbl`
 --
 ALTER TABLE `hris_philhealth_table_tbl`
   ADD PRIMARY KEY (`phID`);
+
+--
+-- Indexes for table `hris_qualification_tbl`
+--
+ALTER TABLE `hris_qualification_tbl`
+  ADD PRIMARY KEY (`qualificationID`);
+
+--
+-- Indexes for table `hris_requirement_tbl`
+--
+ALTER TABLE `hris_requirement_tbl`
+  ADD PRIMARY KEY (`requirementID`);
 
 --
 -- Indexes for table `hris_schedule_setup_tbl`
@@ -897,14 +1215,44 @@ ALTER TABLE `ims_inventory_classification_tbl`
   ADD PRIMARY KEY (`classificationID`);
 
 --
+-- Indexes for table `ims_inventory_condition_tbl`
+--
+ALTER TABLE `ims_inventory_condition_tbl`
+  ADD PRIMARY KEY (`conditionID`);
+
+--
 -- Indexes for table `ims_inventory_item_tbl`
 --
 ALTER TABLE `ims_inventory_item_tbl`
   ADD PRIMARY KEY (`itemID`);
 
 --
+-- Indexes for table `ims_inventory_storage_tbl`
+--
+ALTER TABLE `ims_inventory_storage_tbl`
+  ADD PRIMARY KEY (`inventoryStorageID`);
+
+--
+-- Indexes for table `ims_inventory_vendor_tbl`
+--
+ALTER TABLE `ims_inventory_vendor_tbl`
+  ADD PRIMARY KEY (`inventoryVendorID`);
+
+--
 -- AUTO_INCREMENT for dumped tables
 --
+
+--
+-- AUTO_INCREMENT for table `fms_bank_tbl`
+--
+ALTER TABLE `fms_bank_tbl`
+  MODIFY `bankID` bigint(20) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `fms_chart_of_accounts_tbl`
+--
+ALTER TABLE `fms_chart_of_accounts_tbl`
+  MODIFY `chartOfAccountID` bigint(20) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `gen_approval_setup_tbl`
@@ -928,7 +1276,7 @@ ALTER TABLE `gen_module_header_tbl`
 -- AUTO_INCREMENT for table `gen_module_list_tbl`
 --
 ALTER TABLE `gen_module_list_tbl`
-  MODIFY `moduleID` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
+  MODIFY `moduleID` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
 
 --
 -- AUTO_INCREMENT for table `gen_operations_tbl`
@@ -967,16 +1315,46 @@ ALTER TABLE `hris_award_tbl`
   MODIFY `awardID` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
+-- AUTO_INCREMENT for table `hris_branch_tbl`
+--
+ALTER TABLE `hris_branch_tbl`
+  MODIFY `branchID` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+
+--
 -- AUTO_INCREMENT for table `hris_code_conduct_category_tbl`
 --
 ALTER TABLE `hris_code_conduct_category_tbl`
-  MODIFY `codeConductCategoryID` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `codeConductCategoryID` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+
+--
+-- AUTO_INCREMENT for table `hris_code_conduct_section_tbl`
+--
+ALTER TABLE `hris_code_conduct_section_tbl`
+  MODIFY `codeConductSectionID` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+
+--
+-- AUTO_INCREMENT for table `hris_department_tbl`
+--
+ALTER TABLE `hris_department_tbl`
+  MODIFY `departmentID` bigint(20) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `hris_designation_tbl`
+--
+ALTER TABLE `hris_designation_tbl`
+  MODIFY `designationID` bigint(20) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `hris_holiday_tbl`
 --
 ALTER TABLE `hris_holiday_tbl`
   MODIFY `holidayID` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
+
+--
+-- AUTO_INCREMENT for table `hris_job_posting_tbl`
+--
+ALTER TABLE `hris_job_posting_tbl`
+  MODIFY `jobID` bigint(20) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `hris_leave_tbl`
@@ -988,13 +1366,25 @@ ALTER TABLE `hris_leave_tbl`
 -- AUTO_INCREMENT for table `hris_loan_tbl`
 --
 ALTER TABLE `hris_loan_tbl`
-  MODIFY `loanID` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `loanID` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `hris_philhealth_table_tbl`
 --
 ALTER TABLE `hris_philhealth_table_tbl`
   MODIFY `phID` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
+-- AUTO_INCREMENT for table `hris_qualification_tbl`
+--
+ALTER TABLE `hris_qualification_tbl`
+  MODIFY `qualificationID` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+
+--
+-- AUTO_INCREMENT for table `hris_requirement_tbl`
+--
+ALTER TABLE `hris_requirement_tbl`
+  MODIFY `requirementID` bigint(20) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `hris_schedule_setup_tbl`
@@ -1024,13 +1414,31 @@ ALTER TABLE `ims_inventory_category_tbl`
 -- AUTO_INCREMENT for table `ims_inventory_classification_tbl`
 --
 ALTER TABLE `ims_inventory_classification_tbl`
-  MODIFY `classificationID` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `classificationID` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+
+--
+-- AUTO_INCREMENT for table `ims_inventory_condition_tbl`
+--
+ALTER TABLE `ims_inventory_condition_tbl`
+  MODIFY `conditionID` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `ims_inventory_item_tbl`
 --
 ALTER TABLE `ims_inventory_item_tbl`
   MODIFY `itemID` bigint(20) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `ims_inventory_storage_tbl`
+--
+ALTER TABLE `ims_inventory_storage_tbl`
+  MODIFY `inventoryStorageID` bigint(120) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
+-- AUTO_INCREMENT for table `ims_inventory_vendor_tbl`
+--
+ALTER TABLE `ims_inventory_vendor_tbl`
+  MODIFY `inventoryVendorID` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

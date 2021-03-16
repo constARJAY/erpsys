@@ -31,8 +31,7 @@ $(document).on("click",".addLeave", function(){
                                                         <div class="col-md-12 col-sm-12">
                                                             <div class="form-group">
                                                                 <label for="">Leave Status  <span class="text-danger">*</span></label>
-                                                                <select class="form-control select2 validate" name="leaveStatus" id="inputleaveStatus" required>
-                                                                    <option value="" dissabled>No selected</option>
+                                                                <select class="form-control select2 validate" name="leaveStatus" id="inputleaveStatus">
                                                                     <option value="1">Active</option>
                                                                     <option value="0">Inactive</option>
                                                                 </select>
@@ -105,23 +104,15 @@ $(document).on("click", "#btnSave", function(){
     let condition = validateForm("modal_leave_form");
     
     if(condition == true){
-        let tableData           = getTableData("hris_leave_tbl","","","leaveCode DESC");
-        var currentDate         = new Date();
-        let currentYear         = currentDate.getFullYear();
-        let currentYearStr      = currentYear.toString();
-
-        // Generate Number
-        let tableDataCode       = tableData.length < 1 ? "" : parseInt(tableData[0]["leaveCode"].slice(6)) + 1;
-
-        let leaveCode  = tableData.length < 1 ? "LVE-"+currentYearStr.slice(2)+"-00001" : "LVE-"+currentYearStr.slice(2)+"-"+numberCodeSize(tableDataCode, "5");
-
+        let tableData       = getTableData("hris_leave_tbl");
+        let codeCondition   = tableData.length < 1 ? "0" : "";
         let data = getFormData("modal_leave_form", true);
-        data["tableData[leaveCode]"]     = leaveCode;
-        data["tableData[createdBy]"]     = "1";
-        data["tableData[updatedBy]"]     = "1";
+        data["tableData[leaveCode]"]     = generateCode("LVE",codeCondition,"hris_leave_tbl","leaveCode");;
+        data["tableData[createdBy]"]     = sessionID;
+        data["tableData[updatedBy]"]     = sessionID;
         data["tableName"]                = "hris_leave_tbl";
-        data["feedback"]                 = leaveCode;
-        sweetAlertConfirmation("add", "Leave Masterfile","modal_leave", null, data);
+        data["feedback"]                 = $("#inputleaveName").val();
+        sweetAlertConfirmation("add", "Leave Masterfile","modal_leave", null, data, true, tableContent);
 
 
     }
@@ -133,20 +124,20 @@ $(document).on("click", "#btnUpdate", function(){
     let leaveCode         = getTableData("hris_leave_tbl","leaveCode","leaveID="+leaveID,"leaveCode DESC");
     if(condition == true){
         let data = getFormData("modal_leave_form", true);
-        data["tableData"]["updatedBy"]   =  "2";
+        data["tableData"]["updatedBy"]   =  sessionID;
         data["whereFilter"]              =  "leaveID="+leaveID;
         data["tableName"]                =  "hris_leave_tbl";
-        data["feedback"]                 =   leaveCode[0]["leaveCode"];
+        data["feedback"]                 =  $("#inputleaveName").val();
         console.log(data);
-        sweetAlertConfirmation("update", "leave","modal_leave", null , data);
+        sweetAlertConfirmation("update", "leave","modal_leave", null , data, true, tableContent);
     }
     
 });
 
 $(document).on("click","#btnCancel", function(){
-    let condition = emptyFormCondition("modal_leave_form");
-    if(condition==true){
-        sweetAlertConfirmation("", "Leave Masterfile","modal_leave");
+    let condition = isFormEmpty("modal_leave_form");
+    if(!condition){
+        sweetAlertConfirmation("cancel", "Leave","modal_leave");
     }else{
         $("#modal_leave").modal("hide");
     }
@@ -167,7 +158,7 @@ function initDataTables() {
                 scrollX:        true,
                 scrollCollapse: true,
                 columnDefs: [
-                    { targets: 0, width: "15%" },
+                    { targets: 0, width: "10%" },
                     { targets: 1, width: "25%" },
                     { targets: 2, width: "5%" },
                     { targets: 3, width: "5%" }

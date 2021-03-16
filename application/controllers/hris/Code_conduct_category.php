@@ -9,7 +9,7 @@ class Code_conduct_category extends CI_Controller {
     }
 
     public function index(){
-        $data["title"]              = "Code of Conduct Masterfile";
+        $data["title"]              = "Code of Conduct Category";
         $this->load->view("template/header", $data);
         $this->load->view("hris/code_conduct_category/index");
         $this->load->view("template/footer");

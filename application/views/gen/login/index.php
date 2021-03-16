@@ -1,7 +1,8 @@
+<?php if($this->session->has_userdata('adminSessionID')) redirect(base_url("dashboard")); ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
-	<title><?=$title?> BlackBox ERP System</title>
+	<title><?=$title?></title>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 <!--===============================================================================================-->	
@@ -57,7 +58,7 @@
 						<img src="<?=base_url("assets/")?>images/company-logo/company-logo.png" class="img-fluid" alt="">	
 						<br>
 						<br>
-					<div class="login-form">
+					<div class="login-form" id="login-form">
                         <div class="confirmation"></div>
 						<div class="wrap-input100 validate-input mb-2" data-validate="Please provide a username.">
 							<input class="input100 login-input validate" data-allowcharacters="[a-z][A-Z][0-9][ ][,][.][@][-][_]" minlength="5" maxlength="50" type="text" id="username" placeholder="Username *">

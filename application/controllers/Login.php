@@ -3,8 +3,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Login extends CI_Controller {
 
-    public function __construct()
-    {
+    public function __construct(){
         parent::__construct();
         $this->load->model("Operations_model", "operations");
         // $this->load->model("Login_model", "Login_model");
@@ -29,14 +28,6 @@ class Login extends CI_Controller {
         $sessionName    =   $condition == "1" ? "adminSessionID" : "otherSessionID";
         $this->session->sess_destroy($sessionName);
         redirect(base_url("login"));
-		// echo json_encode(true);
     }
-
-  
-    
-
-    
-
-    
 
 }

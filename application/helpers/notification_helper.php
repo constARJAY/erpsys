@@ -1,11 +1,12 @@
 <?php
     date_default_timezone_set("Asia/Manila");
 
-    function insertNotificationData($tableName = null, $data = [])
+    function insertNotificationData($data = [])
     {
         $CI =& get_instance();
-        if ($tableName && $data) {
-
+        if ($data) {
+            $tableName = "gen_system_notification_tbl";
+            
             /**
              * ----- DATA -----
              * 1. moduleID                  = (int)    e.g. 1

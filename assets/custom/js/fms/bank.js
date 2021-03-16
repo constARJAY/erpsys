@@ -12,11 +12,10 @@ $(document).ready(function(){
             scrollX:        true,
             scrollCollapse: true,
             columnDefs: [
-                { targets: 0, width: 100 },
-                { targets: 1, width: 100 },
-                { targets: 2, width: 150 },
+                { targets: 0, width: 300 },
+                { targets: 1, width: 300 },
+                { targets: 2, width: 50 },
                 { targets: 3, width: 50 },
-                { targets: 4, width: 50 },
             ],
         });
     }
@@ -27,24 +26,25 @@ $(document).ready(function(){
     function tableContent() {
         // Reset the unique datas
         uniqueData = []; 
+          // getTableData(tableName = null, columnName = “”, WHERE = “”, orderBy = “”) 
+          const data = getTableData("fms_bank_tbl","*", "", ""); 
 
-        $.ajax({
-            url:      `${base_url}operations/getTableData`,
-            method:   'POST',
-            async:    false,
-            dataType: 'json',
-            data:     {tableName: "user_account_tbl"},
-            beforeSend: function() {
-                $("#table_content").html(preloader);
-                // $("#inv_headerID").text("List of Inventory Item");
-            },
-            success: function(data) {
-                console.log(data);
+        // $.ajax({
+        //     url:      `${base_url}operations/getTableData`,
+        //     method:   'POST',
+        //     async:    false,
+        //     dataType: 'json',
+        //     data:     {tableName: "user_account_tbl"},
+        //     beforeSend: function() {
+        //         $("#table_content").html(preloader);
+        //         // $("#inv_headerID").text("List of Inventory Item");
+        //     },
+        //     success: function(data) {
+        //         console.log(data);
                 let html = `
                 <table class="table table-bordered table-striped table-hover" id="tableFinanceBank">
                     <thead>
                     <tr class="text-center">
-                        <th>Bank No.</th>
                         <th>Bank Name</th>
                         <th>Account Number</th>
                         <th>Status</th>
@@ -56,23 +56,29 @@ $(document).ready(function(){
                 data.map((item, index, array) => {
                     // ----- INSERT UNIQUE DATA TO uniqueData VARIABLE ----
                     let unique = {
-                        id:       item.userAccountID, // Required
-                        username: item.username,
-                        email:    item.email,
+                        id:       item.bankID, // Required
+                        bankName: item.bankName,
+                        // email:    item.email,
                     }
                     uniqueData.push(unique);
                     // ----- END INSERT UNIQUE DATA TO uniqueData VARIABLE ----
 
+                    if(item.bankStatus == 1){
+                        var status=`<span class="badge badge-outline-success w-100">Active</span>`;
+                     }   
+                     if(item.bankStatus == 0){
+                        var status=`<span class="badge badge-outline-danger w-100">Inactive</span>`;
+                     }
+
                     html += `
                     <tr>
-                        <td>00001</td>
-                        <td>UCPB</td>
-                        <td>0015116516</td>
-                        <td><span class="badge badge-outline-success w-100">Active</span></td>
+                        <td>${item.bankName}</td>
+                        <td>${item.bankNumber}</td>
+                        <td>${status}</td>
                         <td>
                             <button 
                                 class="btn btn-edit btn-block btnEdit" 
-                                id="${item.userAccountID}"
+                                id="${item.bankID}"
                                 feedback="${item.username}">
                                 <i class="fas fa-edit"></i>
                                 EDIT
@@ -87,28 +93,31 @@ $(document).ready(function(){
                     $("#table_content").html(html);
                     initDataTables();
                 }, 500);
-            },
-            error: function() {
-                let html = `
-                    <div class="w-100 h5 text-center text-danger>
-                        There was an error fetching data.
-                    </div>`;
-                $("#table_content").html(html);
-            }
-        })
+            // },
+        //     error: function() {
+        //         let html = `
+        //             <div class="w-100 h5 text-center text-danger>
+        //                 There was an error fetching data.
+        //             </div>`;
+        //         $("#table_content").html(html);
+        //     }
+        // })
     }
     tableContent();
     // ----- END TABLE CONTENT -----
 
      // ----- MODAL CONTENT -----
      function modalContent(data = false) {
-    let userAccountID ="1";
+        let bankID              = data ? (data[0].bankID            ? data[0].bankID        : "") : "",
+        bankName                = data ? (data[0].bankName          ? data[0].bankName      : "") : "",
+        bankNumber      = data ? (data[0].bankNumber? data[0].bankNumber         : "") : "";
+        bankStatus      = data ? (data[0].bankStatus? data[0].bankStatus         : "") : "";
           
-        let button = userAccountID ? `
+        let button = bankID ? `
         <button 
             class="btn btn-update px-5 p-2" 
             id="btnUpdate" 
-            accountid="${userAccountID}">
+            rowID="${bankID}">
             <i class="fas fa-save"></i>
             UPDATE
         </button>` : `
@@ -129,11 +138,12 @@ $(document).ready(function(){
                             class="form-control validate" 
                             name="bankName" 
                             id="input_bankName" 
-                            data-allowcharacters="[A-Z][a-z][0-9][ ][@]" 
+                            data-allowcharacters="[A-Z][a-z][0-9][-]" 
                             minlength="2" 
                             maxlength="20" 
-                            required 
-                            value=""
+                            required
+                            unique="${bankID}"  
+                            value="${bankName}"
                             autocomplete="off">
                         <div class="invalid-feedback d-block" id="invalid-input_bankName"></div>
                     </div>
@@ -148,44 +158,42 @@ $(document).ready(function(){
                             class="form-control validate" 
                             name="bankNumber" 
                             id="input_bankNumber" 
-                            data-allowcharacters="[A-Z][a-z][0-9][ ][@]" 
-                            minlength="2" 
+                            data-allowcharacters="[0-9][-]" 
+                            minlength="10" 
                             maxlength="20" 
                             required 
-                            value=""
+                            value="${bankNumber}"
                             autocomplete="off">
                         <div class="invalid-feedback d-block" id="invalid-input_bankNumber"></div>
                     </div>
                 </div>
             </div>
             <div class="row">
-                <div class="col-md-12 col-sm-12">
-                    <div class="form-group">
-                        <label>Status<span class="text-danger font-weight-bold">*</span></label>
-                        <select 
-                            class="form-control select2 validate" 
-                            name="role" 
-                            id="input_bankStatus" 
-                            name="bankStatus"
-                            autocomplete="off"
-                            required>
-                            <option 
-                                value="" 
-                                disabled 
-                                selected
-                            >No Selected</option>
-                            <option 
-                                value="1" 
-                            >Active</option>
-                            <option 
-                                value="0" 
-                            >InActive</option>
-                        </select>
-                        <div class="invalid-feedback d-block" id="invalid-input_bankStatus"></div>
-                    </div>
+            <div class="col-md-12 col-sm-12">
+                <div class="form-group">
+                    <label>Status<span class="text-danger font-weight-bold">*</span></label>
+                    <select 
+                        class="form-control select2 validate" 
+                        id="input_bankStatus" 
+                        name="bankStatus"
+                        autocomplete="off"
+                        required>
+                        <option 
+                            value="" 
+                            disabled 
+                            selected
+                            ${!data && "selected"} >No Selected</option>
+                        <option 
+                            value="1" 
+                            ${data && bankStatus == "1" && "selected"} >Active</option>
+                        <option 
+                            value="0" 
+                            ${data && bankStatus == "0" && "selected"}>InActive</option>
+                    </select>
+                    <div class="invalid-feedback d-block" id="invalid-input_bankStatus"></div>
                 </div>
             </div>
-
+        </div>
         </div>
         <div class="modal-footer">
             ${button}
@@ -237,24 +245,24 @@ $(document).ready(function(){
           }).then((result) => {
             if (result.isConfirmed) {
 
-            // /**
-            //  * ----- FORM DATA -----
-            //  * tableData = {} -> Objects
-            //  */
-            // let data = getFormData("modal_user_account");
-            // data.append("tableName", "user_account_tbl");
-            // data.append("feedback", "Your choice");
-            // /**
-            //  * ----- DATA -----
-            //  * 1. tableName
-            //  * 2. tableData
-            //  * 3. feedback
-            //  */
+            /**
+             * ----- FORM DATA -----
+             * tableData = {} -> Objects
+             */
+            let data = getFormData("modal_finance_bank");
+            data.append("tableName", "fms_bank_tbl");
+            data.append("feedback", "Your choice");
+            /**
+             * ----- DATA -----
+             * 1. tableName
+             * 2. tableData
+             * 3. feedback
+             */
 
-            // const saveData = insertTableData(data);
-            // if (saveData) {
-            //     tableContent();
-            // }
+            const saveData = insertTableData(data);
+            if (saveData) {
+                tableContent();
+            }
                 
             Swal.fire({
                 icon: 'success',
@@ -281,13 +289,13 @@ $(document).ready(function(){
         // Display preloader while waiting for the completion of getting the data
         $("#modal_finance_bank_content").html(preloader); 
 
-        const tableData = getTableData("inventory_item_tbl", "*", "userAccountID="+id, "");
+        const tableData = getTableData("fms_bank_tbl", "*", "bankID="+id, "");
         if (tableData) {
             const content = modalContent(tableData);
             setTimeout(() => {
                 $("#modal_finance_bank_content").html(content);
-                $("#btnSaveConfirmationEdit").attr("accountid", id);
-                $("#btnSaveConfirmationEdit").attr("feedback", feedback);
+                // $("#btnSaveConfirmationEdit").attr("rowID", id);
+                // $("#btnSaveConfirmationEdit").attr("feedback", feedback);
                 initAll();
             }, 500);
         }
@@ -314,26 +322,26 @@ $(document).ready(function(){
               }).then((result) => {
                 if (result.isConfirmed) {
     
-                    // const accountID = $(this).attr("accountid");
-                    // const feedback  = $(this).attr("feedback");
+                    const rowID = $(this).attr("rowID");
+                    const feedback  = $(this).attr("feedback");
         
-                    // let data = getFormData("modal_user_account");
-                    // data.append("tableName", "user_account_tbl");
-                    // data.append("whereFilter", "userAccountID="+accountID);
-                    // data.append("feedback", feedback);
+                    let data = getFormData("modal_finance_bank");
+                    data.append("tableName", "fms_bank_tbl");
+                    data.append("whereFilter", "bankID="+rowID);
+                    data.append("feedback", feedback);
         
-                    // /**
-                    //  * ----- DATA -----
-                    //  * 1. tableName
-                    //  * 2. tableData
-                    //  * 3. whereFilter
-                    //  * 4. feedback
-                    // */
+                    /**
+                     * ----- DATA -----
+                     * 1. tableName
+                     * 2. tableData
+                     * 3. whereFilter
+                     * 4. feedback
+                    */
         
-                    // const saveData = updateTableData(data);
-                    // if (saveData) {
-                    //    tableContent();
-                    // }
+                    const saveData = updateTableData(data);
+                    if (saveData) {
+                       tableContent();
+                    }
                     
                 Swal.fire({
                     icon: 'success',
@@ -425,7 +433,7 @@ $(document).ready(function(){
 
             // const data = {
             //     tableName:   "user_account_tbl",
-            //     whereFilter: "userAccountID="+accountID,
+            //     whereFilter: "bankID="+rowID,
             //     feedback
             // };
 
