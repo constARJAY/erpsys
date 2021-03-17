@@ -66,7 +66,7 @@ class Modules_model extends CI_Model {
                         $temp = [
                             "name"       => $module["moduleName"],
                             "controller" => $module["moduleController"],
-                            "icon"       => $module["moduleIcon"],
+                            "icon"       => $module["moduleIcon"] ? $module["moduleIcon"] : "default.svg",
                         ];
                         array_push($tempData["nocategory"], $temp);
                     }

@@ -60,12 +60,12 @@ $(document).ready(function(){
                     html += `
                     <tr>
                         <td>${++index}</td>
-                        <td class="text-right">${formatAmount(item.sssMinimumRange)}</td>
-                        <td class="text-right">${formatAmount(item.sssMaximumRange)}</td>
-                        <td class="text-right">${formatAmount(item.sssEmployerContribution)}</td>
-                        <td class="text-right">${formatAmount(item.sssEmployeeContribution)}</td>
-                        <td class="text-right">${formatAmount(item.sssECContribution)}</td>
-                        <td class="text-right">${formatAmount(item.sssTotal)}</td>
+                        <td class="text-right">${formatAmount(item.sssMinimumRange, true)}</td>
+                        <td class="text-right">${formatAmount(item.sssMaximumRange, true)}</td>
+                        <td class="text-right">${formatAmount(item.sssEmployerContribution, true)}</td>
+                        <td class="text-right">${formatAmount(item.sssEmployeeContribution, true)}</td>
+                        <td class="text-right">${formatAmount(item.sssECContribution, true)}</td>
+                        <td class="text-right">${formatAmount(item.sssTotal, true)}</td>
                     </tr>`;
                 })
                 html += `</tbody>

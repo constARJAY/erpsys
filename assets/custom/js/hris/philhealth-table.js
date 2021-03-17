@@ -54,8 +54,8 @@ $(document).ready(function(){
                     html += `
                     <tr>
                         <td>${++index}</td>
-                        <td class="text-right">${formatAmount(item.phMinimumRange)}</td>
-                        <td class="text-right">${formatAmount(item.phMaximumRange)}</td>
+                        <td class="text-right">${formatAmount(item.phMinimumRange, true)}</td>
+                        <td class="text-right">${formatAmount(item.phMaximumRange, true)}</td>
                         <td class="text-right">${item.phPercentage}%</td>
                     </tr>`;
                 })

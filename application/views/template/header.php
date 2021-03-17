@@ -1,13 +1,7 @@
 <?php
 
-// if($this->session->has_userdata('adminSessionID')){
-
-//  }else{ redirect(base_url("login")); }
-
-// $userData = $this->session->userdata('otherSessionID');
-
-// echo $userData;
-// $sessionUserAccount = getAdminSessionAccount();
+    $sessionID  =   $this->session->has_userdata('adminSessionID') ? $this->session->userdata('adminSessionID') : redirect(base_url("login"));
+    $sessionUserAccount = getAdminSessionAccount();
 
 
 ?>
@@ -38,10 +32,11 @@
     <link rel="stylesheet" href="<?=base_url('assets/plugins/jquery-datatable/dataTables.bootstrap4.min.css')?>">
     <link rel="stylesheet" href="<?=base_url('assets/plugins/bootstrap-datetimepicker/bootstrap-datetimepicker.css')?>">
     <!-- <link rel="stylesheet" href="<?=base_url('assets/css/amaze.style.min.css')?>"> -->
-    <link rel="stylesheet" href="<?=base_url('assets/css/timeline.css')?>">
 
+    <link rel="stylesheet" href="<?=base_url('assets/css/timeline.css')?>">
     <link rel="stylesheet" href="<?=base_url('assets/font-awesome/css/fontawesome.min.css')?>">
     <link rel="stylesheet" href="<?=base_url('assets/font-awesome/css/all.min.css')?>">
+    <link rel="stylesheet" href="<?=base_url('assets/custom/css/header.css')?>">
 
     <script src="<?=base_url('assets/js/jquery-3.2.1.min.js')?>"></script>
     <script src="<?=base_url('assets/js/popper.min.js')?>"></script>
@@ -65,78 +60,6 @@
     <script src="<?=base_url('assets/js/sweetalert2.min.js')?>"></script>
 
 </head>
-
-<style>
-/* The switch - the box around the slider */
-.switch {
-  position: relative;
-  display: inline-block;
-  width: 60px;
-  height: 34px;
-}
-
-/* Hide default HTML checkbox */
-.switch input {
-  opacity: 0;
-  width: 0;
-  height: 0;
-}
-
-/* The slider */
-.slider {
-  position: absolute;
-  cursor: pointer;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: #dc3545;
-  -webkit-transition: .4s;
-  transition: .4s;
-}
-
-.slider:before {
-  position: absolute;
-  content: "";
-  height: 26px;
-  width: 26px;
-  left: 4px;
-  bottom: 4px;
-  background-color: white;
-  -webkit-transition: .4s;
-  transition: .4s;
-}
-
-input:checked + .slider {
-  background-color: #10948b;
-}
-
-input:focus + .slider {
-  box-shadow: 0 0 1px #2196F3;
-}
-
-input:checked + .slider:before {
-  -webkit-transform: translateX(26px);
-  -ms-transform: translateX(26px);
-  transform: translateX(26px);
-}
-
-/* Rounded sliders */
-.slider.round {
-  border-radius: 34px;
-}
-
-
-.slider.round:before {
-  border-radius: 50%;
-}
-
-.slider.disabled {
-    background-color: #757575 !important;
-    cursor: no-drop;
-}
-
-</style>
 
 <body class="font-nunito fullwidth h_menu">
 
@@ -245,7 +168,7 @@ input:checked + .slider:before {
                                         <li><a href="profile.html"><i class="icon-user mr-2"></i> <span>My Profile</span> <span class="badge badge-success float-right">80%</span></a></li>
                                         <li><a href="taskboard.html"><i class="icon-notebook mr-2"></i><span>Taskboard</span> <span class="badge badge-info float-right">New</span></a></li>
                                         <li><a href="locked.html"><i class="icon-lock mr-2"></i><span>Locked</span></a></li>
-                                        <li><a href="sign-in.html"><i class="icon-power mr-2"></i><span>Sign Out</span></a></li>
+                                        <li><a href="<?= base_url('login/sign_out') ?>"><i class="icon-power mr-2"></i><span>Sign Out</span></a></li>
                                     </ul>
                                 </li>
                             </ul>
@@ -329,7 +252,7 @@ input:checked + .slider:before {
                         $icon = $category["icon"];
                         $html .= '
                         <li class="">
-                            <a href="'.strtolower($category["controller"]).'">
+                            <a href="'.base_url().strtolower($category["controller"]).'">
                                 <img src="'.base_url("assets/upload-files/icons/$icon").'" height="25" width="25">
                                 '.$category["name"].'
                             </a>

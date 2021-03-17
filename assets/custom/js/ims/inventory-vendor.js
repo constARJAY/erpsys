@@ -54,7 +54,7 @@ $(document).ready(function () {
     }
 
     function getProvinceOptions(provinceKey = false, region = "01", doEmpty = false) {
-        let html = `<option value="" selected>Select Province</option>`;
+        let html = !provinceKey && `<option value="" selected>Select Province</option>`;
         if (!doEmpty) {
             const provinceList = region && Object.keys(address[region].province_list);
             provinceList && provinceList.map(item => {
@@ -65,7 +65,7 @@ $(document).ready(function () {
     }
 
     function getMunicipalityOptions(municipalityKey = false, region = "01", province = "ILOCOS NORTE", doEmpty = false) {
-        let html = `<option value="" selected>Select City/Municipality</option>`;
+        let html = !municipalityKey && `<option value="" selected>Select City/Municipality</option>`;
         if (!doEmpty) {
             const municipalityList = region && province && Object.keys(address[region].province_list[province].municipality_list);
             municipalityList && municipalityList.map(item => {
@@ -76,7 +76,7 @@ $(document).ready(function () {
     }
 
     function getBarangayOptions(barangayKey = false, region = "01", province = "ILOCOS NORTE", city = "ADAMS", doEmpty = false) {
-        let html = `<option value="" selected>Select Barangay</option>`;
+        let html = !barangayKey && `<option value="" selected>Select Barangay</option>`;
         if (!doEmpty) {
             const barangayList = region && region && province && address[region].province_list[province].municipality_list[city].barangay_list;
             barangayList && barangayList.map(item => {
@@ -335,6 +335,7 @@ $(document).ready(function () {
                             <label>Province </label>
                             <select class=" form-control show-tick select2 validate" name="inventoryVendorProvince"
                             id="inventoryVendorProvince">
+                                <option value="" selected>Select Province</option>
                                 ${data && getProvinceOptions(inventoryVendorProvince, inventoryVendorRegion)}
                             </select>
                             <div class="invalid-feedback d-block" id="invalid-inventoryVendorProvince"></div>
@@ -344,6 +345,7 @@ $(document).ready(function () {
                         <div class="form-group">
                             <label>City/Municipality</label>
                             <select class=" form-control show-tick select2" id="inventoryVendorCity" name="inventoryVendorCity">
+                                <option value="" selected>Select City/Municipality</option>
                                 ${data && getMunicipalityOptions(inventoryVendorCity, inventoryVendorRegion, inventoryVendorProvince)}
                             </select> 
                             <div class="invalid-feedback d-block" id="invalid-inventoryVendorCity"></div>
@@ -353,6 +355,7 @@ $(document).ready(function () {
                         <div class="form-group">
                             <label>Barangay</label>
                             <select class=" form-control show-tick select2 validate" name="inventoryVendorBarangay" id="inventoryVendorBarangay">
+                                <option value="" selected>Select Barangay</option>
                                 ${data && getBarangayOptions(inventoryVendorBarangay, inventoryVendorRegion, inventoryVendorProvince, inventoryVendorCity)}
                             </select>
                             <div class="invalid-feedback d-block" id="invalid-inventoryVendorBarangay"></div>

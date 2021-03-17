@@ -56,9 +56,9 @@ $(document).ready(function(){
                     html += `
                     <tr>
                         <td>${++index}</td>
-                        <td class="text-right">${formatAmount(item.taxMinimumRange)}</td>
-                        <td class="text-right">${formatAmount(item.taxMaximumRange)}</td>
-                        <td class="text-right">${formatAmount(item.taxAdditionalTax)}</td>
+                        <td class="text-right">${formatAmount(item.taxMinimumRange, true)}</td>
+                        <td class="text-right">${formatAmount(item.taxMaximumRange, true)}</td>
+                        <td class="text-right">${formatAmount(item.taxAdditionalTax, true)}</td>
                         <td class="text-right">${item.taxPercentage}%</td>
                     </tr>`;
                 })

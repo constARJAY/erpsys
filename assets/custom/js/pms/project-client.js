@@ -1,441 +1,144 @@
+
 $(document).ready(function(){
-    // $("#container_2").hide();
-    // $("#btnCancel").toggle(false);
-
-    // ----- OPEN ADD MODAL -----
-    $(document).on("click", "#btnAdd", function() {
-        $("#modalTitleAddClientHeader").text("ADD CLIENT");
-        $("#modalProjectClient").modal("show");
-        $("#modalProjectClientContent").html(preloader);
-        const content = modalContent();
-        $("#modalProjectClientContent").html(content);
-        initAll();
+    // ----- GET PHILIPPINE ADDRESSES -----
+ const getPhAddresses = () => {
+    let result = [];
+    $.ajax({
+        method: "GET",
+        url: `${base_url}assets/json/ph-address.json`,
+        async: false,
+        dataType: "json",
+        success: function (data) {
+            result = data;
+        },
     });
-    // ----- END OPEN ADD MODAL -----
+    return result;
+};
+const address = getPhAddresses();
 
-     // ----- MODAL CONTENT -----
-     function modalContent(data = false) {
-        let userAccountID = "";   
-        let button = userAccountID ? `
-        <button 
-            class="btn btn-update" 
-            id="btnUpdate" 
-            accountid="${userAccountID}"><i class="fas fa-save"></i>
-            Update
-        </button>` : `
-        <button class="btn btn-save" id="btnSave"><i class="fas fa-save"></i> Save</button>`;
+const phRegion = [
+    { key: "01",    name: "REGION I" },
+    { key: "02",    name: "REGION II" },
+    { key: "03",    name: "REGION III" },
+    { key: "4A",    name: "REGION IV-A" },
+    { key: "4B",    name: "REGION IV-B" },
+    { key: "05",    name: "REGION V" },
+    { key: "06",    name: "REGION VI" },
+    { key: "07",    name: "REGION VII" },
+    { key: "08",    name: "REGION VIII" },
+    { key: "09",    name: "REGION IX" },
+    { key: "10",    name: "REGION X" },
+    { key: "11",    name: "REGION XI" },
+    { key: "12",    name: "REGION XII" },
+    { key: "13",    name: "REGION XIII" },
+    { key: "BARMM", name: "BARMM" },
+    { key: "CAR",   name: "CAR" },
+    { key: "NCR",   name: "NCR" },
+];
 
-        let html = `
-            <div class="modal-body">
-                <div class="row">
-                    <div class="col-xl-3 col-lg-4 col-md-6 col-sm-12">
-                        <div class="form-group">
-                            <label>Client No. <span class="text-danger font-weight-bold">*</span></label>
-                            <input 
-                            type="text" 
-                            class="form-control validate" 
-                            name="clientId" 
-                            id="clientId" 
-                            data-allowcharacters="[A-Z][a-z][0-9][ ][@]" 
-                            minlength="2" 
-                            maxlength="20" 
-                            required 
-                            value=""
-                            autocomplete="off" readonly>
-                            <div class="invalid-feedback d-block" id="invalidInputClientNo"></div>
-                        </div>
-                    </div>
-                    <div class="col-xl-9 col-lg-8 col-md-6 col-sm-12">
-                        <div class="form-group">
-                            <label>Client Name <span class="text-danger font-weight-bold">*</span></label>
-                            <input 
-                                type="text" 
-                                class="form-control validate" 
-                                name="clientName" 
-                                id="clientName" 
-                                data-allowcharacters="[A-Z][a-z][0-9][ ][@]" 
-                                minlength="2" 
-                                maxlength="20" 
-                                required 
-                                value=""
-                                autocomplete="off">
-                            <div class="invalid-feedback d-block" id="invalidInputClientName"></div>
-                        </div>
-                    </div>
-                    <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6">
-                        <div class="form-group">
-                            <label>Region <span
-                                    class="text-danger font-weight-bold">*</span></label>
-                            <select class=" form-control show-tick select2 validate" name="region" required="" oldRegion=""
-                                id="region" readonly=""></select></select>
-                                <div class="invalid-feedback d-block" id="invalid-region"></div>
-                        </div>
-                    </div>
-                    <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6">
-                        <div class="form-group">
-                            <label>Province <span
-                                    class="text-danger font-weight-bold">*</span></label>
-                            <select class=" form-control show-tick select2 validate" name="province" required="" oldProvince=""
-                                id="province" readonly=""></select>
-                                <div class="invalid-feedback d-block" id="invalid-province"></div>
-                        </div>
-                    </div>
-                    <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6">
-                        <div class="form-group">
-                            <label>City <span
-                                    class="text-danger font-weight-bold validate">*</span></label>
-                            <select class=" form-control show-tick select2" required="" id="city" name="city" readonly="" oldCity=""></select> 
-                            <div class="invalid-feedback d-block" id="invalid-city"></div>
-                        </div>
-                    </div>
-                    <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6">
-                        <div class="form-group">
-                            <label>Barangay</label>
-                            <select class=" form-control show-tick select2 validate" name="barangay" required="" oldBarangay=""
-                                id="barangay" readonly=""></select>
-                                <div class="invalid-feedback d-block" id="invalid-barangay"></div>
-                        </div>
-                    </div>
-                    <div class="col-sm-12 col-md-6 col-lg-2 col-xl-2">
-                        <div class="form-group">
-                            <label>Unit Number <span
-                                    class="text-danger font-weight-bold">*</span></label>
-                            <input class="form-control validate" required=""
-                            data-allowcharacters="[a-z][A-Z][.][-][#][0-9][ ]" minlength="1" maxlength="35"  id="unitNumber" name="unitNumber" value="" type="text">
-                            <div class="invalid-feedback d-block" id="invalid-unitNumber"></div>
-                        </div>
-                    </div>
-                    <div class="col-sm-12 col-md-6 col-lg-4 col-xl-4">
-                        <div class="form-group">
-                            <label>Building/House Number <span
-                                    class="text-danger font-weight-bold">*</span></label>
-                            <input class="form-control validate" required=""
-                            data-allowcharacters="[a-z][A-Z][.][,][-]['][#][0-9][ ]" minlength="1" maxlength="35" id="houseNo" name="houseNumber" value="" type="text">
-                            <div class="invalid-feedback d-block" id="invalid-houseNumber"></div>
-                        </div>
-                    </div>
-                    <div class="col-sm-12 col-md-6 col-lg-3 col-xl-3">
-                        <div class="form-group">
-                            <label>Country <span
-                                    class="text-danger font-weight-bold">*</span></label>
-                            <input class="form-control validate" required=""
-                                data-allowcharacters="[a-z][A-Z][ ]" id="country" name="country" minlength="6"
-                                maxlength="50" value="" type="text">
-                        </div>
-                        <div class="invalid-feedback d-block" id="invalid-country"></div>
-                    </div>
-                    <div class="col-sm-12 col-md-6 col-lg-3 col-xl-3">
-                        <div class="form-group">
-                            <label>Zip Code <span
-                                    class="text-danger font-weight-bold">*</span></label>
-                            <input class="form-control validate" required=""
-                                data-allowcharacters="[0-9]" id="postalCode" name="postalCode" minlength="4"
-                                maxlength="4" value="" type="text">
-                        </div>
-                        <div class="invalid-feedback d-block" id="invalid-postalCode"></div>
-                    </div>
-                    <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12">
-                        <div class="form-group">
-                            <label>Contact Person <span class="text-danger font-weight-bold">*</span></label>
-                            <input 
-                                type="text" 
-                                class="form-control validate" 
-                                name="contactPerson" 
-                                id="contactPerson" 
-                                data-allowcharacters="[A-Z][a-z][0-9][ ][@]" 
-                                minlength="2" 
-                                maxlength="30" 
-                                required 
-                                value=""
-                                autocomplete="off">
-                            <div class="invalid-feedback d-block" id="invalidInputContactPerson"></div>
-                        </div>
-                    </div>
-                    <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12">
-                        <div class="form-group">
-                            <label>Email Address <span class="text-danger font-weight-bold">*</span></label>
-                            <input 
-                                type="email" 
-                                class="form-control validate" 
-                                name="emailAddress" 
-                                id="emailAddress" 
-                                data-allowcharacters="[A-Z][a-z][0-9][ ][@]" 
-                                minlength="2" 
-                                maxlength="50" 
-                                value=""
-                                autocomplete="off" unique>
-                            <div class="invalid-feedback d-block" id="invalidInputEmailAddress"></div>
-                        </div>
-                    </div>
-                    <div class="col-xl-4 col-lg-6 col-md-6 col-sm-12">
-                        <div class="form-group">
-                            <label>Tax Identification Number <span class="text-danger font-weight-bold">*</span></label>
-                            <input 
-                                type="text" 
-                                class="form-control validate inputmask" 
-                                name="tin" 
-                                id="tin" 
-                                data-allowcharacters="[0-9][ ]" 
-                                minlength="15" 
-                                maxlength="15" 
-                                value=""
-                                mask="999 999 999 999"
-                                autocomplete="off">
-                            <div class="invalid-feedback d-block" id="invalidInputTIN"></div>
-                        </div>
-                    </div>
-                    <div class="col-xl-4 col-lg-6 col-md-6 col-sm-12">
-                        <div class="form-group">
-                            <label>Mobile No. <span class="text-danger font-weight-bold">*</span></label>
-                                <input 
-                                type="text" 
-                                class="form-control validate inputmask" 
-                                name="mobileNo" 
-                                id="mobileNo" 
-                                data-allowcharacters="[0-9]" 
-                                mask="(+63) 999 9999 999" 
-                                minlength="18" 
-                                maxlength="18" 
-                                required="" value="">
-                            <div class="invalid-feedback d-block" id="invalidInputMobileNo"></div>
-                        </div>
-                    </div>
-                    <div class="col-xl-4 col-lg-6 col-md-6 col-sm-12">
-                        <div class="form-group">
-                            <label>Telephone No. <span class="text-danger font-weight-bold">*</span></label>
-                                <input type="text" 
-                                class="form-control validate inputmask" 
-                                name="telephoneNo" 
-                                id="telephoneNo" 
-                                data-allowcharacters="[0-9]" 
-                                mask="(99) 9999 9999" 
-                                minlength="13" 
-                                maxlength="13" 
-                                required="" 
-                                value="">
-                            <div class="invalid-feedback d-block" id="invalidInputTelephoneNo"></div>
-                        </div>
-                    </div>
-                    <div class="col-xl-10 col-lg-8 col-md-6 col-sm-12">
-                        <div class="form-group">
-                            <label>Website <small class="text-muted">(Optional)</small></label>
-                            <input 
-                                type="text" 
-                                class="form-control validate" 
-                                name="brandName" 
-                                id="brandName" 
-                                data-allowcharacters="[A-Z][a-z][0-9][ ][@]" 
-                                minlength="2" 
-                                maxlength="30" 
-                                required 
-                                value=""
-                                autocomplete="off">
-                            <div class="invalid-feedback d-block" id="invalidInputBrandName"></div>
-                        </div>
-                    </div>
-                    <div class="col-xl-2 col-lg-4 col-md-6 col-sm-12">
-                        <div class="form-group">
-                            <label>Status <span class="text-danger font-weight-bold">*</span></label>
-                            <select class=" form-control show-tick select2 validate" name="status" id="status" autocomplete="off" required>
-                                <option value="0">Active</option>   
-                                <option value="1">Inactive</option>
-                                <div class="invalid-feedback d-block" id="invalidInputStatus"></div>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                ${button}
-                <button class="btn btn-cancel btnCancel"><i class="fas fa-ban"></i> Cancel</button>
-            </div>`;
-        return html;
-    } 
-    // ----- END MODAL CONTENT ----
-
-
-    // ----- SAVE MODAL -----
-    $(document).on("click", "#btnSave", function() {
-    const validate = validateForm("modalProjectClient");
-    if (validate) {
-        $("#modalProjectClient").modal("hide");
-        Swal.fire({
-            title: 'Are you sure?',
-            text: "You want to save this?",
-            imageUrl: `${base_url}assets/custom/isometric_image/save.png`,
-            imageWidth: 200,
-            imageHeight: 200,
-            imageAlt: 'Custom image',
-            showCancelButton: true,
-            confirmButtonColor: '#28a745',
-            cancelButtonColor: '#1A1A1A',
-            confirmButtonText: 'Save'
-          }).then((result) => {
-            if (result.isConfirmed) {
-
-            // /**
-            //  * ----- FORM DATA -----
-            //  * tableData = {} -> Objects
-            //  */
-            // let data = getFormData("modal_user_account");
-            // data.append("tableName", "user_account_tbl");
-            // data.append("feedback", "Your choice");
-            // /**
-            //  * ----- DATA -----
-            //  * 1. tableName
-            //  * 2. tableData
-            //  * 3. feedback
-            //  */
-
-            // const saveData = insertTableData(data);
-            // if (saveData) {
-            //     tableContent();
-            // }
-                
-            Swal.fire({
-                icon: 'success',
-                title: 'Successfully saved!',
-                showConfirmButton: false,
-                timer: 2000
-              })
-            }else{
-                $("#modalProjectClient").modal("show");
-            }
-        });
-            
+const getRegionName = (regionKey = "01") => {
+    let region = phRegion.filter(item => {
+        if (item.key == regionKey) {
+            return item;
         }
     });
-    // ----- END SAVE MODAL -----
+    return region.length > 0 ? region[0].name : "";
+}
 
-    // ----- OPEN EDIT MODAL -----
-    $(document).on("click", ".btnEdit", function() {
-        const id       = $(this).attr("id");
-        const feedback = $(this).attr("feedback");
-        $("#modalTitleAddClientHeader").text("VIEW CLIENT");
-        $("#modalProjectClient").modal("show")
+function getRegionOptions(regionKey = false) {
+    let html = "";
+    phRegion.map(item => {
+        html += `<option value="${item.key}" ${regionKey == item.key && "selected"}>${item.name}</option>`;
+    })
+    return html;
+}
 
-        // Display preloader while waiting for the completion of getting the data
-        $("#modalProjectClientContent").html(preloader); 
+function getProvinceOptions(provinceKey = false, region = "01", doEmpty = false) {
+    let html = `<option value="" selected>Select Province</option>`;
+    if (!doEmpty) {
+        const provinceList = region && Object.keys(address[region].province_list);
+        provinceList && provinceList.map(item => {
+            html += `<option value="${item}" ${provinceKey == item && "selected"}>${item}</option>`;
+        })
+    }
+    return html;
+}
 
-        const tableData = getTableData("inventory_conditions_tbl", "*", "userAccountID="+id, "");
-        if (tableData) {
-            const content = modalContent(tableData);
-            setTimeout(() => {
-                $("#modalProjectClientContent").html(content);
-                // $("#btnSaveConfirmationEdit").attr("accountid", id);
-                // $("#btnSaveConfirmationEdit").attr("feedback", feedback);
-                initAll();
-            }, 500);
-        }
-    });
-    // ----- END OPEN EDIT MODAL -----
+function getMunicipalityOptions(municipalityKey = false, region = "01", province = "ILOCOS NORTE", doEmpty = false) {
+    let html = `<option value="" selected>Select City/Municipality</option>`;
+    if (!doEmpty) {
+        const municipalityList = region && province && Object.keys(address[region].province_list[province].municipality_list);
+        municipalityList && municipalityList.map(item => {
+            html += `<option value="${item}" ${municipalityKey == item && "selected"}>${item}</option>`;
+        })
+    }
+    return html;
+}
 
-    // ----- UPDATE MODAL -----
-    $(document).on("click", "#btnUpdate", function() {
-        const validate = validateForm("modalProjectClient");
-        if (validate) {
-            $("#modalProjectClient").modal("hide");
-            Swal.fire({
-                title: 'Are you sure?',
-                text: "You want to save this?",
-                imageUrl: `${base_url}assets/custom/isometric_image/save.png`,
-                imageWidth: 200,
-                imageHeight: 200,
-                imageAlt: 'Custom image',
-                showCancelButton: true,
-                confirmButtonColor: '#28a745',
-                cancelButtonColor: '#1A1A1A',
-                confirmButtonText: 'Save'
-              }).then((result) => {
-                if (result.isConfirmed) {
+function getBarangayOptions(barangayKey = false, region = "01", province = "ILOCOS NORTE", city = "ADAMS", doEmpty = false) {
+    let html = `<option value="" selected>Select Barangay</option>`;
+    if (!doEmpty) {
+        const barangayList = region && region && province && address[region].province_list[province].municipality_list[city].barangay_list;
+        barangayList && barangayList.map(item => {
+            html += `<option value="${item}" ${barangayKey == item && "selected"}>${item}</option>`;
+        })
+    }
+    return html;
+}
+
+$(document).on("change", "[name=clientRegion]", function() {
+    const region = $(this).val();
+
+    if (region) {
+        const provinceOptions = getProvinceOptions(false, region);
+        $("[name=clientProvince]").html(provinceOptions);
+    } else {
+        const provinceOptions = getProvinceOptions(false, "", true);
+        $("[name=clientProvince]").html(provinceOptions);
+    }
+
+    const municipality = getMunicipalityOptions(false, "", "", true);
+    $("[name=clientCity]").html(municipality); 
+
+    const barangay = getBarangayOptions(false, "", "", "", true);
+    $("[name=clientBarangay]").html(barangay);
+})
+
+$(document).on("change", "[name=clientProvince]", function() {
+    const region   = $("[name=clientRegion]").val();
+    const province = $(this).val();
     
-                // /**
-                //  * ----- FORM DATA -----
-                //  * tableData = {} -> Objects
-                //  */
-                // let data = getFormData("modal_user_account");
-                // data.append("tableName", "user_account_tbl");
-                // data.append("feedback", "Your choice");
-                // /**
-                //  * ----- DATA -----
-                //  * 1. tableName
-                //  * 2. tableData
-                //  * 3. feedback
-                //  */
-    
-                // const saveData = insertTableData(data);
-                // if (saveData) {
-                //     tableContent();
-                // }
-                    
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Successfully saved!',
-                    showConfirmButton: false,
-                    timer: 2000
-                  })
-                }else{
-                    $("#modalProjectClient").modal("show");
-                }
-            });
-                
-            }
-        });
-        // ----- END UPDATE MODAL -----
+    if (province) {
+        const municipalityOptions = getMunicipalityOptions(false, region, province);
+        $("[name=clientCity]").html(municipalityOptions);
+    } else {
+        const municipalityOptions = getMunicipalityOptions(false, "", "", true);
+        $("[name=clientCity]").html(municipalityOptions);
+    }
 
-    // ------- CANCEl MODAL-------- 
-    $(document).on("click",".btnCancel",function(){
-        $("#modalProjectClient").modal("hide");
-          Swal.fire({
-            title: 'Are you sure?',
-            text: "You won't be able to revert this!",
-            imageUrl: `${base_url}assets/custom/isometric_image/questions.png`,
-            imageWidth: 200,
-            imageHeight: 200,
-            imageAlt: 'Custom image',
-            showCancelButton: true,
-            confirmButtonColor: '#28a745',
-            cancelButtonColor: '#1A1A1A',
-            confirmButtonText: 'Yes, discard!'
-          }).then((result) => {
-            if (result.isConfirmed) {
+    const barangay = getBarangayOptions(false, "", "", "", true);
+    $("[name=clientBarangay]").html(barangay);
+})
 
-            // /**
-            //  * ----- FORM DATA -----
-            //  * tableData = {} -> Objects
-            //  */
-            // let data = getFormData("modal_user_account");
-            // data.append("tableName", "user_account_tbl");
-            // data.append("feedback", "Your choice");
-            // /**
-            //  * ----- DATA -----
-            //  * 1. tableName
-            //  * 2. tableData
-            //  * 3. feedback
-            //  */
+$(document).on("change", "[name=clientCity]", function() {
+    const region   = $("[name=clientRegion]").val();
+    const province = $("[name=clientProvince]").val();
+    const city     = $(this).val();
 
-            // const saveData = insertTableData(data);
-            // if (saveData) {
-            //     tableContent();
-            // }
-                
-            Swal.fire({
-                icon: 'success',
-                title: 'Changes successfully discard!',
-                showConfirmButton: false,
-                timer: 2000
-              })
-            }else{
-                $("#modalProjectClient").modal("show");
-            }
-        });
+    if (city) {
+        const barangay = getBarangayOptions(false, region, province, city);
+        $("[name=clientBarangay]").html(barangay);
+    } else {
+        const barangay = getBarangayOptions(false, "", "", "", true);
+        $("[name=clientBarangay]").html(barangay);
+    }
+})
+// ----- END GET PHILIPPINE ADDRESSES -----
 
 
-    });
-    // -------- END CANCEL MODAL-----------
 
 
-      // ----- DATATABLES -----
+          // ----- DATATABLES -----
       function initDataTables() {
         if ($.fn.DataTable.isDataTable('#tableProjectClient')){
             $('#tableProjectClient').DataTable().destroy();
@@ -452,7 +155,7 @@ $(document).ready(function(){
                 { targets: 2, width: 500 },
                 { targets: 3, width: 200 },
                 { targets: 4, width: 200 },
-                { targets: 5, width: 100 },
+                { targets: 5, width: 150 },
                 { targets: 6, width: 100 },
                 { targets: 7, width: 100 },
                 { targets: 8, width: 200 },
@@ -469,12 +172,15 @@ $(document).ready(function(){
         // Reset the unique datas
         uniqueData = []; 
 
+                // getTableData(tableName = null, columnName = “”, WHERE = “”, orderBy = “”) 
+                // const data = getTableData("pms_client_tbl", "*", "", "");
+
         $.ajax({
             url:      `${base_url}operations/getTableData`,
             method:   'POST',
             async:    false,
             dataType: 'json',
-            data:     {tableName: "gen_operations_tbl "},
+            data:     {tableName: "pms_client_tbl "},
             beforeSend: function() {
                 $("#table_content").html(preloader);
                 // $("#inv_headerID").text("List of Inventory Item");
@@ -503,29 +209,34 @@ $(document).ready(function(){
                 data.map((item, index, array) => {
                     // ----- INSERT UNIQUE DATA TO uniqueData VARIABLE ----
                     let unique = {
-                        id:       item.userAccountID, // Required
-                        username: item.username,
+                        id:       item.clientID, // Required
+                        clientName: item.clientName,
                         email:    item.email,
                     }
                     uniqueData.push(unique);
                     // ----- END INSERT UNIQUE DATA TO uniqueData VARIABLE ----
-
+                    if(item.clientStatus == 1){
+                        var status=`<span class="badge badge-outline-success w-100">Active</span>`;
+                     }   
+                     if(item.clientStatus == 0){
+                        var status=`<span class="badge badge-outline-danger w-100">Inactive</span>`;
+                     }
                     html += `
                     <tr>
-                        <td>SPL-00001</td>
-                        <td>Supplier 1</td>
-                        <td>Supplier Test St. Address City</td>
-                        <td>Sup Ply</td>
-                        <td>supplier@email.com</td>
-                        <td>999-999-999</td>
-                        <td>09991234567</td>
-                        <td>01239876</td>
-                        <td>Unknown</td>
-                        <td><span class="badge badge-outline-success w-100">Active</span></td>
+                        <td>${item.clientCode}</td>
+                        <td>${item.clientName}</td>
+                        <td>${getRegionName(item.clientRegion)} ${item.clientProvince} ${item.clientCity} ${item.clientBarangay} ${item.clientHouseNumber} ${item.clientCountry} ${item.clientPostalCode}</td>
+                        <td>${item.clientContactPerson}</td>
+                        <td>${item.clientEmailAddress}</td>
+                        <td>${item.clientTin}</td>
+                        <td>${item.client_MobileNo}</td>
+                        <td>${item.clientTelephoneNo}</td>
+                        <td>${item.clientBrandName}</td>
+                        <td>${status}</td>
                         <td>
                             <button class="btn btn-edit btn-block btnEdit" 
-                            id="${item.userAccountID}"
-                            feedback="${item.username}">
+                            id="${item.clientID}"
+                            feedback="${item.clientName}">
                             <i class="fas fa-edit"></i> Edit</button>
                         </td>
                     </tr>`;
@@ -549,4 +260,348 @@ $(document).ready(function(){
     }
     tableContent();
     // ----- END TABLE CONTENT -----
+
+     // ----- MODAL CONTENT -----
+     function modalContent(data = false) {
+         
+        let {clientID       = "",
+        clientName          ="",
+        clientRegion        =false,
+        clientProvince      =false,
+        clientCity          =false,
+        clientBarangay      =false,
+        clientUnitNumber    ="",
+        clientHouseNumber   ="",
+        clientCountry       ="",
+        clientPostalCode    ="",
+        clientContactPerson ="",
+        clientEmailAddress  ="",
+        clientTin           ="",
+        client_MobileNo     ="",
+        clientTelephoneNo   ="",
+        clientBrandName     = "",
+        clientStatus        ="" }= data && data[0];
+
+        let button = clientID ? `
+        <button 
+            class="btn btn-update" 
+            id="btnUpdate" 
+            rowID="${clientID}"><i class="fas fa-save"></i>
+            Update
+        </button>` : `
+        <button class="btn btn-save" id="btnSave"><i class="fas fa-save"></i> Save</button>`;
+
+        let html = `
+
+            <div class="modal-body">
+                <div class="row" id="pre-loader"></div>
+                <div class="row" id="modal_form">
+                   
+                    <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12">
+                        <div class="form-group">
+                            <label>Client Name <span class="text-danger font-weight-bold">*</span></label>
+                            <input 
+                                type="text" 
+                                class="form-control validate" 
+                                name="clientName" 
+                                id="clientName" 
+                                data-allowcharacters="[A-Z][a-z][0-9][-][(][)][,]" 
+                                minlength="2" 
+                                maxlength="20" 
+                                required 
+                                unique="${clientID}"
+                                value="${clientName}"
+                                autocomplete="off">
+                            <div class="invalid-feedback d-block" id="invalidInputClientName"></div>
+                        </div>
+                    </div>
+                    <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6">
+                        <div class="form-group">
+                            <label>Region <span
+                                    class="text-danger font-weight-bold">*</span></label>
+                            <select class=" form-control show-tick select2 validate" name="clientRegion" required=""
+                                id="input_clientRegion" readonly=""> ${getRegionOptions(clientRegion)}</select>
+                                <div class="invalid-feedback d-block" id="invalid-input_clientRegion"></div>
+                        </div>
+                    </div>
+                    <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6">
+                        <div class="form-group">
+                            <label>Province <span
+                                    class="text-danger font-weight-bold">*</span></label>
+                            <select class=" form-control show-tick select2 validate" name="clientProvince" required=""
+                                id="input_clientProvince" readonly="">${data && getProvinceOptions(clientProvince, clientRegion)}</select>
+                                <div class="invalid-feedback d-block" id="invalid-input_clientProvince"></div>
+                        </div>
+                    </div>
+                    <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6">
+                        <div class="form-group">
+                            <label>City <span
+                                    class="text-danger font-weight-bold validate">*</span></label>
+                            <select class=" form-control show-tick select2" required="" id="input_clientCity" name="clientCity" readonly="">
+                            ${data && getMunicipalityOptions(clientCity, clientRegion, clientProvince)}
+                            </select> 
+                            <div class="invalid-feedback d-block" id="invalid-input_clientCity"></div>
+                        </div>
+                    </div>
+                    <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6">
+                        <div class="form-group">
+                            <label>Barangay</label>
+                            <select class=" form-control show-tick select2 validate" name="clientBarangay" required=""
+                                id="input_clientBarangay" readonly="">${data && getBarangayOptions(clientBarangay, clientRegion, clientProvince, clientCity)}</select>
+                                <div class="invalid-feedback d-block" id="invalid-input_clientBarangay"></div>
+                        </div>
+                    </div>
+                    <div class="col-sm-12 col-md-6 col-lg-2 col-xl-2">
+                        <div class="form-group">
+                            <label>Unit Number <span
+                                    class="text-danger font-weight-bold">*</span></label>
+                            <input class="form-control validate" required=""
+                            data-allowcharacters="[a-z][A-Z][.][-][#][0-9][ ]" minlength="1" maxlength="35"  id="input_clientUnitNumber" name="clientUnitNumber" value="${clientUnitNumber}" type="text">
+                            <div class="invalid-feedback d-block" id="invalid-input_clientUnitNumber"></div>
+                        </div>
+                    </div>
+                    <div class="col-sm-12 col-md-6 col-lg-4 col-xl-4">
+                        <div class="form-group">
+                            <label>Building/House Number <span
+                                    class="text-danger font-weight-bold">*</span></label>
+                            <input class="form-control validate" required=""
+                            data-allowcharacters="[a-z][A-Z][.][,][-]['][#][0-9][ ]" minlength="1" maxlength="35" id="input_clientHouseNumber" name="clientHouseNumber" value="${clientHouseNumber}" type="text">
+                            <div class="invalid-feedback d-block" id="invalid-input_clientHouseNumber"></div>
+                        </div>
+                    </div>
+                    <div class="col-sm-12 col-md-6 col-lg-3 col-xl-3">
+                        <div class="form-group">
+                            <label>Country <span
+                                    class="text-danger font-weight-bold">*</span></label>
+                            <input class="form-control validate" required=""
+                                data-allowcharacters="[a-z][A-Z][ ]" id="input_clientCountry" name="clientCountry" minlength="6"
+                                maxlength="50" value="${clientCountry}" type="text">
+                        </div>
+                        <div class="invalid-feedback d-block" id="invalid-input_clientCountry"></div>
+                    </div>
+                    <div class="col-sm-12 col-md-6 col-lg-3 col-xl-3">
+                        <div class="form-group">
+                            <label>Zip Code <span
+                                    class="text-danger font-weight-bold">*</span></label>
+                            <input class="form-control validate" required=""
+                                data-allowcharacters="[0-9]" id="input_clientPostalCode" name="clientPostalCode" minlength="4"
+                                maxlength="4" value="${clientPostalCode}" type="text">
+                        </div>
+                        <div class="invalid-feedback d-block" id="invalid-input_clientPostalCode"></div>
+                    </div>
+                    <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12">
+                        <div class="form-group">
+                            <label>Contact Person <span class="text-danger font-weight-bold">*</span></label>
+                            <input 
+                                type="text" 
+                                class="form-control validate" 
+                                name="clientContactPerson" 
+                                id="input_clientContactPerson" 
+                                data-allowcharacters="[A-Z][a-z][0-9][ ]" 
+                                minlength="2" 
+                                maxlength="30" 
+                                required 
+                                value="${clientContactPerson}"
+                                autocomplete="off">
+                            <div class="invalid-feedback d-block" id="invalid-input_clientContactPerson"></div>
+                        </div>
+                    </div>
+                    <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12">
+                        <div class="form-group">
+                            <label>Email Address <span class="text-danger font-weight-bold">*</span></label>
+                            <input 
+                                type="email" 
+                                class="form-control validate" 
+                                name="clientEmailAddress" 
+                                id="input_clientEmailAddress" 
+                                data-allowcharacters="[A-Z][a-z][0-9][ ][@][.][-]" 
+                                minlength="2" 
+                                maxlength="50" 
+                                unique="${clientID}"
+                                value="${clientEmailAddress}"
+                                autocomplete="off" unique>
+                            <div class="invalid-feedback d-block" id="invalid-input_clientEmailAddress"></div>
+                        </div>
+                    </div>
+                    <div class="col-xl-4 col-lg-6 col-md-6 col-sm-12">
+                        <div class="form-group">
+                            <label>Tax Identification Number <span class="text-danger font-weight-bold">*</span></label>
+                            <input 
+                                type="text" 
+                                class="form-control validate inputmask" 
+                                name="clientTin" 
+                                id="input_clientTin" 
+                                data-allowcharacters="[0-9][ ]" 
+                                minlength="15" 
+                                maxlength="15" 
+                                value="${clientTin}"
+                                required
+                                mask="999 999 999 999"
+                                autocomplete="off">
+                            <div class="invalid-feedback d-block" id="invalid-input_clientTin"></div>
+                        </div>
+                    </div>
+                    <div class="col-xl-4 col-lg-6 col-md-6 col-sm-12">
+                        <div class="form-group">
+                            <label>Mobile No. <span class="text-danger font-weight-bold">*</span></label>
+                                <input 
+                                type="text" 
+                                class="form-control validate inputmask" 
+                                name="client_MobileNo" 
+                                id="input_clientMobileNo" 
+                                data-allowcharacters="[0-9]" 
+                                mask="9999 9999 999" 
+                                minlength="13" 
+                                maxlength="13" 
+                                value="${client_MobileNo}"
+                                required="">
+                            <div class="invalid-feedback d-block" id="invalid-input_clientMobileNo"></div>
+                        </div>
+                    </div>
+                    <div class="col-xl-4 col-lg-6 col-md-6 col-sm-12">
+                        <div class="form-group">
+                            <label>Telephone No. <span class="text-danger font-weight-bold">*</span></label>
+                                <input type="text" 
+                                class="form-control validate inputmask" 
+                                name="clientTelephoneNo" 
+                                id="input_clientTelephoneNo" 
+                                data-allowcharacters="[0-9]" 
+                                mask="(99) 9999 9999" 
+                                minlength="13" 
+                                maxlength="13" 
+                                required="" 
+                                value="${clientTelephoneNo}">
+                            <div class="invalid-feedback d-block" id="invalid-input_clientTelephoneNo"></div>
+                        </div>
+                    </div>
+                    <div class="col-xl-10 col-lg-8 col-md-6 col-sm-12">
+                        <div class="form-group">
+                            <label>Website <small class="text-muted">(Optional)</small></label>
+                            <input 
+                                type="text" 
+                                class="form-control validate" 
+                                name="clientBrandName" 
+                                id="input_clientBrandName" 
+                                data-allowcharacters="[A-Z][a-z][0-9][/][.][-]" 
+                                minlength="2" 
+                                maxlength="30" 
+                                value="${clientBrandName}"
+                                autocomplete="off">
+                       
+                        </div>
+                    </div>
+                    <div class="col-xl-2 col-lg-4 col-md-6 col-sm-12">
+                        <div class="form-group">
+                            <label>Status <span class="text-danger font-weight-bold">*</span></label>
+                            <select class=" form-control show-tick select2 validate" name="clientStatus" id="input_clientStatus" autocomplete="off" required>
+                                <option ${data && clientStatus == "1" && "selected"} value="1">Active</option>   
+                                <option ${data && clientStatus == "0" && "selected"} value="0">Inactive</option>
+                                <div class="invalid-feedback d-block" id="invalid-input_clientStatus"></div>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                ${button}
+                <button class="btn btn-cancel btnCancel"><i class="fas fa-ban"></i> Cancel</button>
+            </div>`;
+
+    
+        return html;
+    } 
+    // ----- END MODAL CONTENT ----
+
+        // ----- OPEN ADD MODAL -----
+    $(document).on("click", "#btnAdd", function() {
+        $("#modalTitleAddClientHeader").text("ADD CLIENT");
+        $("#modalProjectClient").modal("show");
+        $("#modalProjectClientContent").html(preloader);
+
+        const content = modalContent();
+        $("#modalProjectClientContent").html(content);
+
+        initAll();
+    });
+    // ----- END OPEN ADD MODAL -----
+
+
+    // ----- SAVE MODAL -----
+    $(document).on("click", "#btnSave", function() {
+    const validate = validateForm("modalProjectClient");
+    if (validate) {
+
+
+        let tableData           = getTableData("pms_client_tbl","","","clientCode DESC");
+        var currentDate         = new Date();
+        let currentYear         = currentDate.getFullYear();
+        let currentYearStr      = currentYear.toString();
+
+         // Generate Number
+         let tableDataCode       = tableData.length < 1 ? "" : parseInt(tableData[0]["clientCode"].slice(6)) + 1;
+
+         let genCode  = tableData.length < 1 ? "CLT-"+currentYearStr.slice(2)+"-00001" : "CLT-"+currentYearStr.slice(2)+"-"+numberCodeSize(tableDataCode, "5");
+
+        // genCode("RQT",null,"tablename","columnName");
+         let data = getFormData("modalProjectClient",true);
+         data["tableData[clientCode]"]     = genCode;
+         data["tableData[createdBy]"]     = "1";
+         data["tableData[updatedBy]"]     = "1";
+         data["tableName"]                = "pms_client_tbl";
+         data["feedback"]                 = genCode;
+         sweetAlertConfirmation("add", "Client Masterfile","modalProjectClient", null, data);
+        }
+    });
+    // ----- END SAVE MODAL -----
+
+    // ----- OPEN EDIT MODAL -----
+    $(document).on("click", ".btnEdit", function() {
+        const id       = $(this).attr("id");
+        const feedback = $(this).attr("feedback");
+        $("#modalTitleAddClientHeader").text("VIEW CLIENT");
+        $("#modalProjectClient").modal("show")
+
+        // Display preloader while waiting for the completion of getting the data
+        $("#modalProjectClientContent").html(preloader); 
+
+        const tableData = getTableData("pms_client_tbl", "*", "clientID="+id, "");
+        if (tableData) {
+            const content = modalContent(tableData);
+            $("#modalProjectClientContent").html(content);       
+            initAll(); 
+        }
+    });
+    // ----- END OPEN EDIT MODAL -----
+
+    // ----- UPDATE MODAL -----
+    $(document).on("click", "#btnUpdate", function() {
+        const validate = validateForm("modalProjectClient");
+        let rowID           = $(this).attr("rowID");
+        let genCode         = getTableData("pms_client_tbl","clientCode","clientID="+rowID,"clientCode DESC");
+
+        if (validate) {
+
+            let data = getFormData("modalProjectClient", true);
+            data["tableData"]["updatedBy"]   =  "2";
+            data["whereFilter"]              =  "clientID="+rowID;
+            data["tableName"]                =  "pms_client_tbl";
+            data["feedback"]                 =   genCode[0]["clientCode"];
+            sweetAlertConfirmation("update", "Client Masterfile","modalProjectClient", null , data);
+        }
+        });
+        // ----- END UPDATE MODAL -----
+
+    // ------- CANCEl MODAL-------- 
+
+    $(document).on("click",".btnCancel", function(){
+        let condition = emptyFormCondition("modalProjectClient");
+        if(condition==true){
+            sweetAlertConfirmation("", "Client Masterfile","modalProjectClient");
+        }else{
+            $("#modalProjectClient").modal("hide");
+        }
+        
+    });
+    // -------- END CANCEL MODAL-----------
+
 });

@@ -1,12 +1,20 @@
 <?php
 
-    function isAllowed($moduleID)
+    function isAllowed($moduleID, $displayModule = false)
     {
         $CI =& get_instance();
         $roleID = 1; // Change this based on the current session
         $sql = "SELECT permissionStatus FROM gen_roles_permission_tbl WHERE moduleID = $moduleID AND roleID = $roleID AND permissionStatus = 1";
         $query = $CI->db->query($sql);
-        return $query->num_rows()  > 0 ? true : false;
+
+        if ($displayModule) {
+            return $query->num_rows() > 0 ? true : false;
+        } else {
+            if ($query->num_rows() == 0) {
+                $CI->load->helper('url'); 
+                redirect(base_url('denied')); 
+            }
+        }
     }
 
     function getModuleContent()
@@ -37,7 +45,7 @@
                         $categoryID   = $category["moduleCategoryID"];
                         $categoryName = $category["moduleCategoryName"];
 
-                        $sqlConnectedModule = "SELECT * FROM gen_module_list_tbl WHERE moduleStatus = 1 AND moduleHeaderID = $headerID AND moduleCategoryID = $categoryID ORDER BY moduleOrder";
+                        $sqlConnectedModule = "SELECT * FROM gen_module_list_tbl WHERE moduleStatus = 1 AND moduleHeaderID = $headerID AND moduleCategoryID = $categoryID AND moduleCategoryID <> 0 ORDER BY moduleOrder";
                         $queryConnectedModule = $CI->db->query($sqlConnectedModule);
                         $resultConnectedModule = $queryConnectedModule ? $queryConnectedModule->result_array() : [];
 
@@ -52,7 +60,7 @@
                                     "name"       => $module["moduleName"],
                                     "controller" => $module["moduleController"],
                                 ];
-                                if (isAllowed($module["moduleID"])) {
+                                if (isAllowed($module["moduleID"], true)) {
                                     array_push($tempModule["modules"], $temp);
                                 }
                             }
@@ -61,7 +69,7 @@
                     }
                 }
 
-                $sqlNotConnectedModule = "SELECT * FROM gen_module_list_tbl WHERE moduleStatus = 1 AND moduleHeaderID = $headerID AND (moduleCategoryID IS NULL)";
+                $sqlNotConnectedModule = "SELECT * FROM gen_module_list_tbl WHERE moduleStatus = 1 AND moduleHeaderID = $headerID AND (moduleCategoryID IS NULL OR moduleCategoryID = 0)";
                 $queryNotConnectedModule = $CI->db->query($sqlNotConnectedModule);
                 $resultNotConnectedModule = $queryNotConnectedModule ? $queryNotConnectedModule->result_array() : [];
 
@@ -70,7 +78,7 @@
                         $temp = [
                             "name"       => $module["moduleName"],
                             "controller" => $module["moduleController"],
-                            "icon"       => $module["moduleIcon"],
+                            "icon"       => $module["moduleIcon"] ? $module["moduleIcon"] : "default.svg",
                         ];
                         array_push($tempData["nocategory"], $temp);
                     }

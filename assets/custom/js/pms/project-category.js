@@ -13,9 +13,10 @@ $(document).ready(function(){
             scrollCollapse: true,
             columnDefs: [
                 { targets: 0, width: 100 },
-                { targets: 1, width: 100 },
-                { targets: 2, width: 100 },
+                { targets: 1, width: 300 },
+                { targets: 2, width: 300 },
                 { targets: 3, width: 50 },
+                { targets: 4, width: 50 },
             ],
         });
     }
@@ -27,12 +28,14 @@ $(document).ready(function(){
         // Reset the unique datas
         uniqueData = []; 
 
+           // getTableData(tableName = null, columnName = “”, WHERE = “”, orderBy = “”) 
+        //    const data = getTableData("pms_category_tbl","*", "", "");
         $.ajax({
             url:      `${base_url}operations/getTableData`,
             method:   'POST',
             async:    false,
             dataType: 'json',
-            data:     {tableName: "gen_operations_tbl"},
+            data:     {tableName: "pms_category_tbl"},
             beforeSend: function() {
                 $("#table_content").html(preloader);
                 // $("#inv_headerID").text("List of Inventory Item");
@@ -40,9 +43,10 @@ $(document).ready(function(){
             success: function(data) {
                 console.log(data);
                 let html = `
-                <table class="table table-bordered table-striped table-hover" id="('#tableProjectCategory'))">
+                <table class="table table-bordered table-striped table-hover" id="tableProjectCategory">
                     <thead>
                     <tr class="text-center">
+                        <th>Category Code</th>
                         <th>Category Name</th>
                         <th>Company Name</th>
                         <th>Status</th>
@@ -54,23 +58,29 @@ $(document).ready(function(){
                 data.map((item, index, array) => {
                     // ----- INSERT UNIQUE DATA TO uniqueData VARIABLE ----
                     let unique = {
-                        id:       item.userAccountID, // Required
-                        username: item.username,
-                        email:    item.email,
+                        id:       item.categoryID, // Required
+                        categoryName: item.categoryName,
+                        // email:    item.email,
                     }
                     uniqueData.push(unique);
                     // ----- END INSERT UNIQUE DATA TO uniqueData VARIABLE ----
-
+                    if(item.categoryStatus == 1){
+                        var status=`<span class="badge badge-outline-success w-100">Active</span>`;
+                     }   
+                     if(item.categoryStatus == 0){
+                        var status=`<span class="badge badge-outline-danger w-100">Inactive</span>`;
+                     }
                     html += `
                     <tr>
-                        <td>00001</td>
-                        <td>TV</td>
-                        <td><span class="badge badge-outline-success w-100">Active</span></td>
+                        <td>${item.categoryCode}</td>
+                        <td>${item.categoryName}</td>
+                        <td>${item.companyName}</td>
+                        <td>${status}</td>
                         <td>
                             <button 
                                 class="btn btn-edit btn-block btnEdit" 
-                                id="${item.userAccountID}"
-                                feedback="${item.username}">
+                                id="${item.categoryID}"
+                                feedback="${item.categoryName}">
                                 <i class="fas fa-edit"></i>
                                 Edit
                             </button>
@@ -99,13 +109,16 @@ $(document).ready(function(){
 
      // ----- MODAL CONTENT -----
      function modalContent(data = false) {
-    let userAccountID ="1";
+        let categoryID              = data ? (data[0].categoryID            ? data[0].categoryID        : "") : "",
+        categoryName             = data ? (data[0].categoryName       ? data[0].categoryName   : "") : "",
+        companyName                = data ? (data[0].companyName          ? data[0].companyName      : "") : "",
+        categoryStatus      = data ? (data[0].categoryStatus? data[0].categoryStatus         : "") : "";
           
-        let button = userAccountID ? `
+        let button = categoryID ? `
         <button 
             class="btn btn-update " 
             id="btnUpdate" 
-            accountid="${userAccountID}">
+            rowID="${categoryID}">
             <i class="fas fa-save"></i>
             Update
         </button>` : `
@@ -126,11 +139,12 @@ $(document).ready(function(){
                             class="form-control validate" 
                             name="categoryName" 
                             id="input_categoryName" 
-                            data-allowcharacters="[A-Z][a-z][0-9][ ][@]" 
+                            data-allowcharacters="[A-Z][a-z][ ][-][(][)][,]" 
                             minlength="2" 
                             maxlength="20" 
                             required 
-                            value=""
+                            unique="${categoryID}" 
+                            value="${categoryName}"
                             autocomplete="off">
                         <div class="invalid-feedback d-block" id="invalid-input_categoryName"></div>
                     </div>
@@ -141,15 +155,15 @@ $(document).ready(function(){
                         <input 
                             type="text" 
                             class="form-control validate" 
-                            name="categoryName" 
-                            id="input_categoryName" 
-                            data-allowcharacters="[A-Z][a-z][0-9][ ][@]" 
+                            name="companyName" 
+                            id="input_companyName" 
+                            data-allowcharacters="[A-Z][a-z][ ][-][(][)][,][']"  
                             minlength="2" 
                             maxlength="20" 
                             required 
-                            value=""
+                            value="${companyName}"
                             autocomplete="off">
-                        <div class="invalid-feedback d-block" id="invalid-input_categoryName"></div>
+                        <div class="invalid-feedback d-block" id="invalid-input_companyName"></div>
                     </div>
                 </div>
                 <div class="col-xl-4 col-lg-4 col-md-4 col-sm-12">
@@ -157,17 +171,16 @@ $(document).ready(function(){
                         <label>Status<span class="text-danger font-weight-bold">*</span></label>
                         <select 
                             class="form-control select2 validate" 
-                            name="role" 
                             id="input_categoryStatus" 
                             name="categoryStatus"
                             autocomplete="off"
                             required>
                             <option 
                                 value="1" 
-                            >Active</option>
+                                ${data && categoryStatus == "1" && "selected"}>Active</option>
                             <option 
                                 value="0" 
-                            >InActive</option>
+                                ${data && categoryStatus == "0" && "selected"}>InActive</option>
                         </select>
                         <div class="invalid-feedback d-block" id="invalid-input_categoryStatus"></div>
                     </div>
@@ -198,62 +211,26 @@ $(document).ready(function(){
     $(document).on("click", "#btnSave", function() {
     const validate = validateForm("modalProjectCategory");
     if (validate) {
-        $("#modalProjectCategory").modal("hide");
-        // Swal.fire({
-        //     title: 'Are you sure?',
-        //     text: "You want to save this?",
-        //     icon: 'warning',
-        //     showCancelButton: true,
-        //     confirmButtonColor: '#3085d6',
-        //     cancelButtonColor: '#d33',
-        //     confirmButtonText: 'Save'
-        // }).
-        
-        Swal.fire({
-            title: 'Are you sure?',
-            text: "You want to save this?",
-            imageUrl: `${base_url}assets/custom/isometric_image/save.png`,
-            imageWidth: 200,
-            imageHeight: 200,
-            imageAlt: 'Custom image',
-            showCancelButton: true,
-            confirmButtonColor: '#28a745',
-            cancelButtonColor: '#1A1A1A',
-            confirmButtonText: 'Save',
-            allowOutsideClick: false
-          }).then((result) => {
-            if (result.isConfirmed) {
 
-            // /**
-            //  * ----- FORM DATA -----
-            //  * tableData = {} -> Objects
-            //  */
-            // let data = getFormData("modal_user_account");
-            // data.append("tableName", "user_account_tbl");
-            // data.append("feedback", "Your choice");
-            // /**
-            //  * ----- DATA -----
-            //  * 1. tableName
-            //  * 2. tableData
-            //  * 3. feedback
-            //  */
+        let tableData           = getTableData("pms_category_tbl","","","categoryCode DESC");
+        var currentDate         = new Date();
+        let currentYear         = currentDate.getFullYear();
+        let currentYearStr      = currentYear.toString();
 
-            // const saveData = insertTableData(data);
-            // if (saveData) {
-            //     tableContent();
-            // }
-                
-            Swal.fire({
-                icon: 'success',
-                title: 'Successfully saved!',
-                showConfirmButton: false,
-                timer: 2000
-              })
-            }else{
-                $("#modalProjectCategory").modal("show");
-            }
-        });
-            
+         // Generate Number
+         let tableDataCode       = tableData.length < 1 ? "" : parseInt(tableData[0]["categoryCode"].slice(6)) + 1;
+
+         let genCode  = tableData.length < 1 ? "PCT-"+currentYearStr.slice(2)+"-00001" : "PCT-"+currentYearStr.slice(2)+"-"+numberCodeSize(tableDataCode, "5");
+
+// genCode("RQT",null,"tablename","columnName");
+         let data = getFormData("modalProjectCategory",true);
+         data["tableData[categoryCode]"]     = genCode;
+         data["tableData[createdBy]"]     = "1";
+         data["tableData[updatedBy]"]     = "1";
+         data["tableName"]                = "pms_category_tbl";
+         data["feedback"]                 = genCode;
+         sweetAlertConfirmation("add", "Category Masterfile","modalProjectCategory", null, data);
+
         }
     });
     // ----- END SAVE MODAL -----
@@ -268,12 +245,12 @@ $(document).ready(function(){
         // Display preloader while waiting for the completion of getting the data
         $("#modalProjectCategoryContent").html(preloader); 
 
-        const tableData = getTableData("inventory_item_tbl", "*", "userAccountID="+id, "");
+        const tableData = getTableData("pms_category_tbl", "*", "categoryID="+id, "");
         if (tableData) {
             const content = modalContent(tableData);
             setTimeout(() => {
                 $("#modalProjectCategoryContent").html(content);
-                $("#btnSaveConfirmationEdit").attr("accountid", id);
+                $("#btnSaveConfirmationEdit").attr("rowID", id);
                 $("#btnSaveConfirmationEdit").attr("feedback", feedback);
                 initAll();
             }, 500);
@@ -283,153 +260,34 @@ $(document).ready(function(){
 
     // ----- UPDATE MODAL -----
     $(document).on("click", "#btnUpdate", function() {
+        
         const validate = validateForm("modalProjectCategory");
+        let rowID           = $(this).attr("rowID");
+        let genCode         = getTableData("pms_category_tbl","categoryCode","categoryID="+rowID,"categoryCode DESC");
         if (validate) {
-        $("#modalProjectCategory").modal("hide");
-            Swal.fire({
-                title: 'Are you sure?',
-                text: "You want to save this?",
-                imageUrl: `${base_url}assets/custom/isometric_image/save.png`,
-                imageWidth: 200,
-                imageHeight: 200,
-                imageAlt: 'Custom image',
-                showCancelButton: true,
-                confirmButtonColor: '#28a745',
-                cancelButtonColor: '#1A1A1A',
-                confirmButtonText: 'Yes, save changes',
-                allowOutsideClick: false
-              }).then((result) => {
-                if (result.isConfirmed) {
-    
-                    // const accountID = $(this).attr("accountid");
-                    // const feedback  = $(this).attr("feedback");
-        
-                    // let data = getFormData("modal_user_account");
-                    // data.append("tableName", "user_account_tbl");
-                    // data.append("whereFilter", "userAccountID="+accountID);
-                    // data.append("feedback", feedback);
-        
-                    // /**
-                    //  * ----- DATA -----
-                    //  * 1. tableName
-                    //  * 2. tableData
-                    //  * 3. whereFilter
-                    //  * 4. feedback
-                    // */
-        
-                    // const saveData = updateTableData(data);
-                    // if (saveData) {
-                    //    tableContent();
-                    // }
-                    
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Successfully saved!',
-                    showConfirmButton: false,
-                    timer: 2000
-                })
-                }else{
-                    $("#modalProjectCategory").modal("show");
-                }
-            });
-                
+
+            let data = getFormData("modalProjectCategory", true);
+            data["tableData"]["updatedBy"]   =  "2";
+            data["whereFilter"]              =  "categoryID="+rowID;
+            data["tableName"]                =  "pms_category_tbl";
+            data["feedback"]                 =   genCode[0]["categoryCode"];
+            sweetAlertConfirmation("update", "Category Masterfile","modalProjectCategory", null , data);
             }
         });
         // ----- END UPDATE MODAL -----
 
     // ------- CANCEl MODAL-------- 
-    $(document).on("click",".btnCancel",function(){
-        $("#modalProjectCategory").modal("hide");
 
-        const data = getFormData("modalProjectCategory");
-
-        var validate = false;
-            for(var i of data.entries()) {
-                const count =+i[1];
-               validate[0] = i[1];
-                if(i[1] !=""){
-                    validate = true;
-                }
-            }
-
-            if(validate == true){
-
-                Swal.fire({
-                    title: 'Are you sure?',
-                    text: "You won't be able to revert this!",
-                    imageUrl: `${base_url}assets/custom/isometric_image/questions.png`,
-                    imageWidth: 200,
-                    imageHeight: 200,
-                    imageAlt: 'Custom image',
-                    showCancelButton: true,
-                    confirmButtonColor: '#28a745',
-                    cancelButtonColor: '#1A1A1A',
-                    confirmButtonText: 'Yes, discard!',
-                    allowOutsideClick: false
-                  }).then((result) => {
-                    if (result.isConfirmed) {
-
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Changes successfully discard!',
-                        showConfirmButton: false,
-                        timer: 2000
-                      })
-                    }else{
-                        $("#modalProjectCategory").modal("show");
-                    }
-                  });
-            }else{
-                $("#modalProjectCategory").modal("hide");
-            }
-       
+    $(document).on("click",".btnCancel", function(){
+        let condition = emptyFormCondition("modalProjectCategory");
+        if(condition==true){
+            sweetAlertConfirmation("", "Category Masterfile","modalProjectCategory");
+        }else{
+            $("#modalProjectCategory").modal("hide");
+        }
+        
     });
     // -------- END CANCEL MODAL-----------
-
-    // ---- OPEN DELETE MODAL -----
-    $(document).on("click", ".btnDelete", function() {
-        const id = $(this).attr("id");
-        const feedback = $(this).attr("feedback");
-
-        Swal.fire({
-            title: 'Are you sure?',
-            text: "You want to delete this!",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#3085d6',
-            cancelButtonColor: '#d33',
-            confirmButtonText: 'Discard',
-            allowOutsideClick: false
-          }).then((result) => {
-            if (result.isConfirmed) {
-
-            // /**
-            //  * ----- DATA -----
-            //  * 1. tableName
-            //  * 2. whereFilter
-            //  * 3. feedback
-            // */
-
-            // const data = {
-            //     tableName:   "user_account_tbl",
-            //     whereFilter: "userAccountID="+accountID,
-            //     feedback
-            // };
-
-            // const saveData = deleteTableData(data);
-            // if (saveData) {
-            //    tableContent();
-            // }
-
-              Swal.fire(
-                'Successfully Deleted!',
-                '',
-                'success'
-              )
-            }
-          });
-    });
-    // ---- END OPEN DELETE MODAL -----
 
 
       

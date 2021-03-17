@@ -1,6 +1,89 @@
 $(document).ready(function() {
 
-    
+    // ----- DATATABLES -----
+    function moduleHeaderDatatables() {
+        if ($.fn.DataTable.isDataTable("#tableModuleHeaderTable")) {
+			$("#tableModuleHeaderTable").DataTable().destroy();
+		}
+
+		var table = $("#tableModuleHeaderTable")
+			.css({ "min-width": "100%" })
+			.removeAttr("width")
+			.DataTable({
+				proccessing: false,
+				serverSide: false,
+				scrollX: true,
+				scrollCollapse: true,
+				columnDefs: [
+					{ targets: 0, width: "80px" },
+					{ targets: 1, width: "100%" },
+					{ targets: 2, width: "80px" },
+					{ targets: 3, width: "80px" },
+				],
+			});
+    }
+
+
+    function moduleCategoryDatatables() {
+        if ($.fn.DataTable.isDataTable("#tableModuleCategoryTable")) {
+			$("#tableModuleCategoryTable").DataTable().destroy();
+		}
+
+		var table = $("#tableModuleCategoryTable")
+			.css({ "min-width": "100%" })
+			.removeAttr("width")
+			.DataTable({
+				proccessing: false,
+				serverSide: false,
+				scrollX: true,
+				scrollCollapse: true,
+				columnDefs: [
+					{ targets: 0, width: "80px" },
+					{ targets: 1, width: "50%" },
+					{ targets: 2, width: "50%" },
+					{ targets: 3, width: "80px" },
+					{ targets: 4, width: "80px" },
+				],
+			});
+    }
+
+
+    function moduleListDatatables() {
+        if ($.fn.DataTable.isDataTable("#tableModuleListTable")) {
+			$("#tableModuleListTable").DataTable().destroy();
+		}
+
+		var table = $("#tableModuleListTable")
+			.css({ "min-width": "100%" })
+			.removeAttr("width")
+			.DataTable({
+				proccessing: false,
+				serverSide: false,
+				scrollX: true,
+				scrollCollapse: true,
+				columnDefs: [
+					{ targets: 0, width: "80px" },
+					{ targets: 1, width: "150px" },
+					{ targets: 2, width: "150px" },
+					{ targets: 3, width: "150px" },
+					{ targets: 4, width: "200px" },
+					{ targets: 5, width: "150px" },
+					{ targets: 6, width: "150px" },
+					{ targets: 7, width: "80px" },
+					{ targets: 8, width: "80px" },
+				],
+			});
+    }
+
+
+    function initDataTables() {
+		moduleHeaderDatatables();
+        moduleCategoryDatatables();
+        moduleListDatatables();
+	}
+    // ----- END DATATABLES -----
+
+
     // ----- MODULE HEADER CONTENT -----
     function moduleHeader() {
         uniqueData = [];
@@ -9,7 +92,7 @@ $(document).ready(function() {
         let html = "";
         if (data) {
             html += `
-            <table class="table table-striped">
+            <table class="table table-striped" id="tableModuleHeaderTable">
                 <thead class="text-center">
                     <tr>
                         <th>Order</th>
@@ -32,7 +115,7 @@ $(document).ready(function() {
                 <span class="badge badge-danger w-100">Inctive</span>`;
 
                 html += `
-                <tr>
+                <tr class="text-center">
                     <td>${item.moduleHeaderOrder}</td>
                     <td>${item.moduleHeaderName}</td>
                     <td>${status}</td>
@@ -59,7 +142,7 @@ $(document).ready(function() {
         let html = "";
         if (data) {
             html += `
-            <table class="table table-striped">
+            <table class="table table-striped" id="tableModuleCategoryTable">
                 <thead class="text-center">
                     <tr>
                         <th>Order</th>
@@ -86,7 +169,7 @@ $(document).ready(function() {
                 <span class="badge badge-danger w-100">Inactive</span>`;
 
                 html += `
-                <tr>
+                <tr class="text-center">
                     <td>${item.moduleCategoryOrder}</td>
                     <td>${item.moduleHeaderName}</td>
                     <td>${item.moduleCategoryName}</td>
@@ -114,7 +197,7 @@ $(document).ready(function() {
         let html = "";
         if (data) {
             html += `
-            <table class="table table-striped">
+            <table class="table table-striped" id="tableModuleListTable">
                 <thead class="text-center">
                     <tr>
                         <th>Order</th>
@@ -141,17 +224,19 @@ $(document).ready(function() {
                 }
                 uniqueData.push(unique);
 
+                let projectName = item.projectName.replace("|", "<br>");
+
                 let status = item.moduleStatus == 1 ? `
                 <span class="badge badge-success w-100">Active</span>` : `
                 <span class="badge badge-danger w-100">Inactive</span>`;
 
                 html += `
-                <tr>
+                <tr class="text-center">
                     <td>${item.moduleOrder}</td>
                     <td>${item.moduleHeaderName}</td>
                     <td>${item.moduleCategoryName ? item.moduleCategoryName : "-"}</td>
                     <td>${item.moduleName}</td>
-                    <td>${item.projectName}</td>
+                    <td>${projectName}</td>
                     <td>${item.moduleApprover}</td>
                     <td>${item.moduleController}</td>
                     <td>${status}</td>
@@ -174,29 +259,36 @@ $(document).ready(function() {
     function pageContent() {
         let html = `
         <div class="row w-100">
-            <div class="col-md-5 col-sm-12 my-2 border p-3">
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <span class="font-weight-bold">MODULE HEADER</span>
-                    <button class="btn btn-primary px-5 float-right btnAdd" moduletype="header">Add Header</button>
+            <div class="col-md-12 col-sm-12 my-2">
+                <div class="border p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <span class="font-weight-bolder align-self-start">MODULE HEADER</span>
+                        <button class="btn btn-primary px-5 float-right btnAdd" moduletype="header">Add Header</button>
+                    </div>
+                    <div class="table-responsive" id="tableModuleHeader">${moduleHeader()}</div>
                 </div>
-                <div class="table-responsive" id="tableModuleHeader">${moduleHeader()}</div>
             </div>
-            <div class="col-md-7 col-sm-12 my-2 border p-3">
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <span class="font-weight-bold">MODULE CATEGORY</span>
-                    <button class="btn btn-primary px-5 float-right btnAdd" moduletype="category">Add Category</button>
+            <div class="col-md-12 col-sm-12 my-2">
+                <div class="border p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <span class="font-weight-bolder align-self-start">MODULE CATEGORY</span>
+                        <button class="btn btn-primary px-5 float-right btnAdd" moduletype="category">Add Category</button>
+                    </div>
+                    <div class="table-responsive" id="tableModuleCategory">${moduleCategory()}</div>
                 </div>
-                <div class="table-responsive" id="tableModuleCategory">${moduleCategory()}</div>
             </div>
-            <div class="col-md-12 col-sm-12 my-2 border p-3">
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <span class="font-weight-bold">MODULE LIST</span>
-                    <button class="btn btn-primary px-5 float-right btnAdd" moduletype="list">Add Module</button>
+            <div class="col-md-12 col-sm-12 my-2">
+                <div class="border p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <span class="font-weight-bolder align-self-start">MODULE LIST</span>
+                        <button class="btn btn-primary px-5 float-right btnAdd" moduletype="list">Add Module</button>
+                    </div>
+                    <div class="table-responsive" id="tableModuleList">${moduleList()}</div>
                 </div>
-                <div class="table-responsive" id="tableModuleList">${moduleList()}</div>
             </div>
         </div>`;
         $("#page_content").html(html);
+        initDataTables();
     }
     pageContent();
     // ----- END PAGE CONTENT -----
@@ -719,6 +811,8 @@ $(document).ready(function() {
                 $("#tableModuleList").html(moduleListContent);
             }
         }  
+
+        initDataTables();
     })
     // ----- END SAVE CONFIRMATION ADD -----
 
@@ -771,6 +865,8 @@ $(document).ready(function() {
                 $("#tableModuleList").html(moduleListContent);
             }
         }  
+
+        initDataTables();
     })
     // ----- END SAVE CONFIRMATION ADD -----
 

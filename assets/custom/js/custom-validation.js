@@ -28,7 +28,7 @@ const closeModals = () => {
 
 // ---- GET DOM ELEMENT -----
 const getElement = (element = null, defaultElement = null) => {
-    let elem = element ? (element.indexOf(".") != '-1' ? '.'+element : (element.indexOf("#") != '-1' ? '#'+element : element)) : defaultElement;
+    let elem = element ? (element.indexOf(".") != '-1' ? '.'+element : (element.indexOf("#") != '-1' ? element : '#'+element)) : defaultElement;
     return elem;
 }
 // ---- END GET DOM ELEMENT -----
@@ -54,9 +54,9 @@ initSelect2();
 
 
 // ----- INITIALIZE SINGLE DATERANGEPICKER -----
-const initDateRangePicker = (element = null) => {
+const initDateRangePicker = (element = null, otherOption = false) => {
     let elem = getElement(element, '.daterange');
-    $(elem).daterangepicker({
+    let options = otherOption ? otherOption : {
         autoUpdateInput: false,
         singleDatePicker: true,
         showDropdowns: true,
@@ -65,7 +65,8 @@ const initDateRangePicker = (element = null) => {
             format: "MMMM DD, YYYY"
         },
         // maxDate: moment(new Date).format("MMMM DD, YYYY"),
-    }, function(data) {
+    };
+    $(elem).daterangepicker(options, function(data) {
         if (data) {
             const validated = $(elem).hasClass("validated");
             let invalidFeedback = 

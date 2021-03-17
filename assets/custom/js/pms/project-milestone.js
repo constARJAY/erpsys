@@ -2,25 +2,27 @@ $(document).ready(function(){
 
     // ----- DATATABLES -----
     function initDataTables() {
-        if ($.fn.DataTable.isDataTable('#tableProjectMilestone')){
-            $('#tableProjectMilestone').DataTable().destroy();
+        if ($.fn.DataTable.isDataTable('#tableProjectMilestoneTable')){
+            $('#tableProjectMilestoneTable').DataTable().destroy();
         }
         
-        var table = $("#tableProjectMilestone").css({"min-width": "100%"}).removeAttr('width').DataTable({
+        var table = $("#tableProjectMilestoneTable").css({"min-width": "100%"}).removeAttr('width').DataTable({
             proccessing:    false,
             serverSide:     false,
             scrollX:        true,
             scrollCollapse: true,
             columnDefs: [
-                { targets: 0, width: 100 },
-                { targets: 1, width: 100 },
-                { targets: 2, width: 100 },
-                { targets: 3, width: 50 },
+                { targets: 0, width: "15%" },
+                { targets: 1, width: "15%" },
+                { targets: 2, width: "40%" },
+                { targets: 3, width: "15%" },
+                { targets: 4, width: "15%" },
             ],
         });
     }
     initDataTables();
     // ----- END DATATABLES -----
+
 
     // ----- TABLE CONTENT -----
     function tableContent() {
@@ -32,17 +34,15 @@ $(document).ready(function(){
             method:   'POST',
             async:    false,
             dataType: 'json',
-            data:     {tableName: "gen_operations_tbl"},
+            data:     {tableName: "pms_project_milestone_tbl"},
             beforeSend: function() {
                 $("#table_content").html(preloader);
-                // $("#inv_headerID").text("List of Inventory Item");
             },
             success: function(data) {
-                console.log(data);
                 let html = `
-                <table class="table table-bordered table-striped table-hover" id="('#tableProjectMilestone'))">
+                <table class="table table-bordered table-striped table-hover" id="tableProjectMilestoneTable">
                     <thead>
-                    <tr class="text-center">
+                    <tr>
                         <th>Milestone Code</th>
                         <th>Milestone Name</th>
                         <th>Milestone Description</th>
@@ -55,24 +55,29 @@ $(document).ready(function(){
                 data.map((item, index, array) => {
                     // ----- INSERT UNIQUE DATA TO uniqueData VARIABLE ----
                     let unique = {
-                        id:       item.userAccountID, // Required
-                        username: item.username,
-                        email:    item.email,
+                        id:                   item.projectMilestoneID, // Required
+                        projectMilestoneName: item.projectMilestoneName,
                     }
                     uniqueData.push(unique);
                     // ----- END INSERT UNIQUE DATA TO uniqueData VARIABLE ----
 
+                    let status =
+						item.projectMilestoneStatus == 1
+							? `
+                    <span class="badge badge-outline-success w-100">Active</span>`
+							: `
+                    <span class="badge badge-outline-danger w-100">Inactive</span>`;
+
                     html += `
                     <tr>
-                        <td>00001</td>
-                        <td>TV</td>
-                        <td>samplesamplesamplesamplesamplesamplesamplesamplesample</td>
-                        <td><span class="badge badge-outline-success w-100">Active</span></td>
+                        <td>${item.projectMilestoneCode}</td>
+                        <td>${item.projectMilestoneName}</td>
+                        <td>${item.projectMilestoneDescription}</td>
+                        <td>${status}</td>
                         <td>
                             <button 
                                 class="btn btn-edit btn-block btnEdit" 
-                                id="${item.userAccountID}"
-                                feedback="${item.username}">
+                                id="${item.projectMilestoneID}">
                                 <i class="fas fa-edit"></i>
                                 Edit
                             </button>
@@ -99,15 +104,21 @@ $(document).ready(function(){
     tableContent();
     // ----- END TABLE CONTENT -----
 
-     // ----- MODAL CONTENT -----
-     function modalContent(data = false) {
-    let userAccountID ="1";
+
+    // ----- MODAL CONTENT -----
+    function modalContent(data = false) {
+        let {
+            projectMilestoneID          = "",
+            projectMilestoneName        = "",
+            projectMilestoneDescription = "",
+            projectMilestoneStatus      = "1",
+        } = data && data[0];
           
-        let button = userAccountID ? `
+        let button = projectMilestoneID ? `
         <button 
             class="btn btn-update " 
             id="btnUpdate" 
-            accountid="${userAccountID}">
+            projectMilestoneID="${projectMilestoneID}">
             <i class="fas fa-save"></i>
             Update
         </button>` : `
@@ -120,75 +131,54 @@ $(document).ready(function(){
         let html = `
         <div class="modal-body">
             <div class="row">
-                <div class="col-xl-3 col-lg-4 col-md-4 col-sm-12">
+                <div class="col-md-12 col-sm-12">
                     <div class="form-group">
-                        <label>Milestone Code<span class="text-danger font-weight-bold">*</span></label>
+                        <label>Milestone Name <code>*</code></label>
                         <input 
                             type="text" 
                             class="form-control validate" 
-                            name="milestoneCode" 
-                            id="milestoneCode" 
-                            data-allowcharacters="[A-Z][a-z][0-9][ ][@]" 
+                            name="projectMilestoneName" 
+                            id="projectMilestoneName" 
+                            data-allowcharacters="[A-Z][a-z][0-9][ ][.][,][-][()]['][/]" 
                             minlength="2" 
-                            maxlength="20" 
+                            maxlength="75" 
                             required 
-                            value=""
+                            value="${projectMilestoneName}"
+                            unique="${projectMilestoneID}"
+                            title="Milestone Name"
                             autocomplete="off">
-                        <div class="invalid-feedback d-block" id="invalidInputMilestoneCode"></div>
+                        <div class="invalid-feedback d-block" id="invalid-projectMilestoneName"></div>
                     </div>
                 </div>
-                <div class="col-xl-9 col-lg-8 col-md-8 col-sm-12">
+                <div class="col-md-12 col-sm-12">
                     <div class="form-group">
-                        <label>Milestone Name<span class="text-danger font-weight-bold">*</span></label>
-                        <input 
-                            type="text" 
-                            class="form-control validate" 
-                            name="milestoneName" 
-                            id="milestoneName" 
-                            data-allowcharacters="[A-Z][a-z][0-9][ ][@]" 
-                            minlength="2" 
-                            maxlength="20" 
-                            required 
-                            value=""
-                            autocomplete="off">
-                        <div class="invalid-feedback d-block" id="invalidInputMilestoneName"></div>
-                    </div>
-                </div>
-                <div class="col-xl-9 col-lg-8 col-md-8 col-sm-12">
-                    <div class="form-group">
-                        <label>Milestone Description<span class="text-danger font-weight-bold">*</span></label>
+                        <label>Milestone Description <code>*</code></label>
                         <textarea 
-                        type="text" 
-                        class="form-control validate" 
-                        name="milestoneDescription" 
-                        id="milestoneDescription" 
-                        data-allowcharacters="[A-Z][a-z][0-9][ ][@]" 
-                        minlength="2" 
-                        maxlength="20" 
-                        rows="4"
-                        required 
-                        autocomplete="off"></textarea>
-                        <div class="invalid-feedback d-block" id="invalidInputMilestoneDescription"></div>
+                            type="text" 
+                            class="form-control validate" 
+                            name="projectMilestoneDescription" 
+                            id="projectMilestoneDescription" 
+                            data-allowcharacters="[A-Z][a-z][0-9][ ][.][,][-][()]['][/]" 
+                            minlength="2" 
+                            maxlength="250" 
+                            rows="4"
+                            required 
+                            autocomplete="off">${projectMilestoneDescription}</textarea>
+                        <div class="invalid-feedback d-block" id="invalid-projectMilestoneDescription"></div>
                     </div>
                 </div>
-                <div class="col-xl-3 col-lg-4 col-md-4 col-sm-12">
+                <div class="col-sm-12">
                     <div class="form-group">
-                        <label>Status<span class="text-danger font-weight-bold">*</span></label>
+                        <label>Status <code>*</code></label>
                         <select 
                             class="form-control select2 validate" 
-                            name="role" 
-                            id="milestoneStatus" 
-                            name="milestoneStatus"
-                            autocomplete="off"
+                            id="projectMilestoneStatus" 
+                            name="projectMilestoneStatus"
                             required>
-                            <option 
-                                value="1" 
-                            >Active</option>
-                            <option 
-                                value="0" 
-                            >Inactive</option>
+                            <option value="1" ${projectMilestoneStatus == 1 && "selected"}>Active</option>
+                            <option value="0" ${projectMilestoneStatus == 0 && "selected"}>Inactive</option>
                         </select>
-                        <div class="invalid-feedback d-block" id="invalidInputMilestoneStatus"></div>
+                        <div class="invalid-feedback d-block" id="invalid-projectMilestoneStatus"></div>
                     </div>
                 </div>
             </div>
@@ -197,17 +187,18 @@ $(document).ready(function(){
             ${button}
             <button class="btn btn-cancel btnCancel"><i class="fas fa-ban"></i> Cancel</button>
         </div>`;
-    return html;
-} 
+        return html;
+    } 
     // ----- END MODAL CONTENT -----
+
 
     // ----- OPEN ADD MODAL -----
     $(document).on("click", "#btnAdd", function() {
-        $("#modalProjectMilestoneHeader").text("ADD MILESTONE");
-        $("#modalProjectMilestone").modal("show");
-        $("#modalProjectMilestoneContent").html(preloader);
+        $("#modal_project_milestone .page-title").text("ADD MILESTONE");
+        $("#modal_project_milestone").modal("show");
+        $("#modal_project_milestone_content").html(preloader);
         const content = modalContent();
-        $("#modalProjectMilestoneContent").html(content);
+        $("#modal_project_milestone_content").html(content);
         initAll();
     });
     // ----- END OPEN ADD MODAL -----
@@ -215,241 +206,95 @@ $(document).ready(function(){
 
     // ----- SAVE MODAL -----
     $(document).on("click", "#btnSave", function() {
-    const validate = validateForm("modalProjectMilestone");
-    if (validate) {
-        $("#modalProjectMilestone").modal("hide");
-        // Swal.fire({
-        //     title: 'Are you sure?',
-        //     text: "You want to save this?",
-        //     icon: 'warning',
-        //     showCancelButton: true,
-        //     confirmButtonColor: '#3085d6',
-        //     cancelButtonColor: '#d33',
-        //     confirmButtonText: 'Save'
-        // }).
-        
-        Swal.fire({
-            title: 'Are you sure?',
-            text: "You want to save this?",
-            imageUrl: `${base_url}assets/custom/isometric_image/save.png`,
-            imageWidth: 200,
-            imageHeight: 200,
-            imageAlt: 'Custom image',
-            showCancelButton: true,
-            confirmButtonColor: '#28a745',
-            cancelButtonColor: '#1A1A1A',
-            confirmButtonText: 'Save',
-            allowOutsideClick: false
-          }).then((result) => {
-            if (result.isConfirmed) {
+        const validate = validateForm("modal_project_milestone");
+        if (validate) {
+            let data = getFormData("modal_project_milestone", true);
+			data["tableData[projectMilestoneCode]"] = generateCode(
+				"MIL",
+				false,
+				"pms_project_milestone_tbl",
+				"projectMilestoneCode"
+			);
+			data["tableName"] = "pms_project_milestone_tbl";
+			data["feedback"] = $("[name=projectMilestoneName]").val();
 
-            // /**
-            //  * ----- FORM DATA -----
-            //  * tableData = {} -> Objects
-            //  */
-            // let data = getFormData("modal_user_account");
-            // data.append("tableName", "user_account_tbl");
-            // data.append("feedback", "Your choice");
-            // /**
-            //  * ----- DATA -----
-            //  * 1. tableName
-            //  * 2. tableData
-            //  * 3. feedback
-            //  */
-
-            // const saveData = insertTableData(data);
-            // if (saveData) {
-            //     tableContent();
-            // }
-                
-            Swal.fire({
-                icon: 'success',
-                title: 'Successfully saved!',
-                showConfirmButton: false,
-                timer: 2000
-              })
-            }else{
-                $("#modalProjectMilestone").modal("show");
-            }
-        });
-            
+			sweetAlertConfirmation(
+				"add",
+				"Project Milestone",
+				"modal_project_milestone",
+				"",
+				data,
+				true,
+				tableContent
+			);
         }
     });
     // ----- END SAVE MODAL -----
 
+
     // ----- OPEN EDIT MODAL -----
     $(document).on("click", ".btnEdit", function() {
-        const id       = $(this).attr("id");
-        const feedback = $(this).attr("feedback");
-        $("#modalProjectMilestoneHeader").text("VIEW MILESTONE");
-        $("#modalProjectMilestone").modal("show");
+        const id = $(this).attr("id");
+		$("#modal_project_milestone .page-title").text("EDIT PROJECT MILESTONE");
+		$("#modal_project_milestone").modal("show");
+		$("#modal_project_milestone_content").html(preloader);
 
-        // Display preloader while waiting for the completion of getting the data
-        $("#modalProjectMilestoneContent").html(preloader); 
-
-        const tableData = getTableData("inventory_item_tbl", "*", "userAccountID="+id, "");
-        if (tableData) {
-            const content = modalContent(tableData);
-            setTimeout(() => {
-                $("#modalProjectMilestoneContent").html(content);
-                $("#btnSaveConfirmationEdit").attr("accountid", id);
-                $("#btnSaveConfirmationEdit").attr("feedback", feedback);
-                initAll();
-            }, 500);
-        }
+		const tableData = getTableData(
+			"pms_project_milestone_tbl",
+			"*",
+			"projectMilestoneID=" + id
+		);
+		if (tableData) {
+			const content = modalContent(tableData);
+			setTimeout(() => {
+				$("#modal_project_milestone_content").html(content);
+				initAll();
+			}, 500);
+		}
     });
     // ----- END OPEN EDIT MODAL -----
 
+
     // ----- UPDATE MODAL -----
-    $(document).on("click", "#btnUpdate", function() {
-        const validate = validateForm("modalProjectMilestone");
-        if (validate) {
-        $("#modalProjectMilestone").modal("hide");
-            Swal.fire({
-                title: 'Are you sure?',
-                text: "You want to save this?",
-                imageUrl: `${base_url}assets/custom/isometric_image/save.png`,
-                imageWidth: 200,
-                imageHeight: 200,
-                imageAlt: 'Custom image',
-                showCancelButton: true,
-                confirmButtonColor: '#28a745',
-                cancelButtonColor: '#1A1A1A',
-                confirmButtonText: 'Yes, save changes',
-                allowOutsideClick: false
-              }).then((result) => {
-                if (result.isConfirmed) {
-    
-                    // const accountID = $(this).attr("accountid");
-                    // const feedback  = $(this).attr("feedback");
-        
-                    // let data = getFormData("modal_user_account");
-                    // data.append("tableName", "user_account_tbl");
-                    // data.append("whereFilter", "userAccountID="+accountID);
-                    // data.append("feedback", feedback);
-        
-                    // /**
-                    //  * ----- DATA -----
-                    //  * 1. tableName
-                    //  * 2. tableData
-                    //  * 3. whereFilter
-                    //  * 4. feedback
-                    // */
-        
-                    // const saveData = updateTableData(data);
-                    // if (saveData) {
-                    //    tableContent();
-                    // }
-                    
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Successfully saved!',
-                    showConfirmButton: false,
-                    timer: 2000
-                })
-                }else{
-                    $("#modalProjectMilestone").modal("show");
-                }
-            });
-                
-            }
-        });
-        // ----- END UPDATE MODAL -----
+	$(document).on("click", "#btnUpdate", function () {
+		const id = $(this).attr("projectMilestoneID");
 
-    // ------- CANCEl MODAL-------- 
-    $(document).on("click",".btnCancel",function(){
-        $("#modalProjectMilestone").modal("hide");
+		const validate = validateForm("modal_project_milestone");
+		if (validate) {
+			let data = getFormData("modal_project_milestone", true);
+			data["tableData[updatedBy]"] = sessionID;
+			data["tableName"]            = "pms_project_milestone_tbl";
+			data["whereFilter"]          = "projectMilestoneID=" + id;
+			data["feedback"]             = $("[name=projectMilestoneName]").val();
 
-        const data = getFormData("modalProjectMilestone");
+			sweetAlertConfirmation(
+				"update",
+				"Project Management",
+				"modal_project_milestone",
+				"",
+				data,
+				true,
+				tableContent
+			);
+		}
+	});
+	// ----- END UPDATE MODAL -----
 
-        var validate = false;
-            for(var i of data.entries()) {
-                const count =+i[1];
-               validate[0] = i[1];
-                if(i[1] !=""){
-                    validate = true;
-                }
-            }
 
-            if(validate == true){
-
-                Swal.fire({
-                    title: 'Are you sure?',
-                    text: "You won't be able to revert this!",
-                    imageUrl: `${base_url}assets/custom/isometric_image/questions.png`,
-                    imageWidth: 200,
-                    imageHeight: 200,
-                    imageAlt: 'Custom image',
-                    showCancelButton: true,
-                    confirmButtonColor: '#28a745',
-                    cancelButtonColor: '#1A1A1A',
-                    confirmButtonText: 'Yes, discard!',
-                    allowOutsideClick: false
-                  }).then((result) => {
-                    if (result.isConfirmed) {
-
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Changes successfully discard!',
-                        showConfirmButton: false,
-                        timer: 2000
-                      })
-                    }else{
-                        $("#modalProjectMilestone").modal("show");
-                    }
-                  });
-            }else{
-                $("#modalProjectMilestone").modal("hide");
-            }
-       
-    });
-    // -------- END CANCEL MODAL-----------
-
-    // ---- OPEN DELETE MODAL -----
-    $(document).on("click", ".btnDelete", function() {
-        const id = $(this).attr("id");
-        const feedback = $(this).attr("feedback");
-
-        Swal.fire({
-            title: 'Are you sure?',
-            text: "You want to delete this!",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#3085d6',
-            cancelButtonColor: '#d33',
-            confirmButtonText: 'Discard',
-            allowOutsideClick: false
-          }).then((result) => {
-            if (result.isConfirmed) {
-
-            // /**
-            //  * ----- DATA -----
-            //  * 1. tableName
-            //  * 2. whereFilter
-            //  * 3. feedback
-            // */
-
-            // const data = {
-            //     tableName:   "user_account_tbl",
-            //     whereFilter: "userAccountID="+accountID,
-            //     feedback
-            // };
-
-            // const saveData = deleteTableData(data);
-            // if (saveData) {
-            //    tableContent();
-            // }
-
-              Swal.fire(
-                'Successfully Deleted!',
-                '',
-                'success'
-              )
-            }
-          });
-    });
-    // ---- END OPEN DELETE MODAL -----
-
+    // ------- CANCEL MODAL--------
+	$(document).on("click", ".btnCancel", function () {
+		let formEmpty = isFormEmpty("modal_project_milestone");
+		if (!formEmpty) {
+			sweetAlertConfirmation(
+				"cancel",
+				"Project Milestone",
+				"modal_project_milestone"
+			);
+		} else {
+			$("#modal_project_milestone").modal("hide");
+		}
+	});
+	// -------- END CANCEL MODAL-----------
 
       
 });

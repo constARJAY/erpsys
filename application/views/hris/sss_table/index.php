@@ -9,6 +9,7 @@
                         <li class="breadcrumb-item active">SSS Table</li>
                     </ul>
                     <h1 class="mb-1 mt-1">SSS Table</h1>
+                    <span class="d-block">NOTE: This master file is for viewing purposes and payroll reference only.</span>
                 </div>
             </div>
         </div>

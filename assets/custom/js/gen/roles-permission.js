@@ -51,7 +51,7 @@ $(document).ready(function() {
         let data = getTableData("gen_roles_permission_tbl LEFT JOIN gen_module_list_tbl USING(moduleID)", "", "roleID="+roleID);
 
         let html = `
-        <table class="table table-bordered">
+        <table class="table table-bordered table-hover">
             <thead class="bg-primary text-white">
                 <tr>
                     <th>MODULE ACCESS</th>
@@ -249,7 +249,7 @@ $(document).ready(function() {
          * 3. feedback
          */
 
-        const saveData = insertTableData(data, true, "success|A new role is already added!");
+        const saveData = insertTableDatav1(data, true, "success|A new role is already added!");
         if (saveData) {
             pageContent();
         }
@@ -275,7 +275,7 @@ $(document).ready(function() {
          * 4. feedback
         */
 
-        const saveData = updateTableData(data, true, "success|The role is already updated!");
+        const saveData = updateTableDatav1(data, true, "success|The role is already updated!");
         if (saveData) {
            pageContent();
         }
@@ -299,7 +299,7 @@ $(document).ready(function() {
             feedback: moduleName
         }
         const feedback = status == 1 ? `success|${roleName} - ${moduleName} has been enabled.` : `warning|${roleName} - ${moduleName} has been disabled.`;
-        const saveData = updateTableData(data, true, feedback);
+        const saveData = updateTableDatav1(data, true, feedback);
         if (saveData) {
             // pageContent();
         }

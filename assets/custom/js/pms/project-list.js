@@ -1,384 +1,7 @@
 $(document).ready(function(){
-    // $("#container_2").hide();
-    // $("#btnCancel").toggle(false);
 
-    // ----- OPEN ADD MODAL -----
-    $(document).on("click", "#btnAdd", function() {
-        $("#modalTitleAddListHeader").text("ADD PROJECT");
-        $("#modalProjectList").modal("show");
-        $("#modalProjectListContent").html(preloader);
-        const content = modalContent();
-        $("#modalProjectListContent").html(content);
-        initAll();
-    });
-    // ----- END OPEN ADD MODAL -----
-
-     // ----- MODAL CONTENT -----
-     function modalContent(data = false) {
-        let userAccountID = "";   
-        let button = userAccountID ? `
-        <button 
-            class="btn btn-update" 
-            id="btnUpdate" 
-            accountid="${userAccountID}"><i class="fas fa-save"></i>
-            Update
-        </button>` : `
-        <button class="btn btn-save" id="btnSave"><i class="fas fa-save"></i> Save</button>`;
-
-        let html = `
-            <div class="modal-body">
-                <div class="row">
-                    <div class="col-xl-3 col-lg-4 col-md-6 col-sm-12">
-                        <div class="form-group">
-                            <label>Project Code <span class="text-danger font-weight-bold">*</span></label>
-                            <input 
-                            type="text" 
-                            class="form-control validate" 
-                            name="projectCode" 
-                            id="projectCode" 
-                            data-allowcharacters="[A-Z][a-z][0-9][ ][@]" 
-                            minlength="2" 
-                            maxlength="20" 
-                            required 
-                            value=""
-                            autocomplete="off">
-                            <div class="invalid-feedback d-block" id="invalidInputProjectCode"></div>
-                        </div>
-                    </div>
-                    <div class="col-xl-9 col-lg-8 col-md-6 col-sm-12">
-                        <div class="form-group">
-                            <label>Project Name <span class="text-danger font-weight-bold">*</span></label>
-                            <input 
-                                type="text" 
-                                class="form-control validate" 
-                                name="projectName" 
-                                id="projectName" 
-                                data-allowcharacters="[A-Z][a-z][0-9][ ][@]" 
-                                minlength="2" 
-                                maxlength="20" 
-                                required 
-                                value=""
-                                autocomplete="off">
-                            <div class="invalid-feedback d-block" id="invalidInputProjectName"></div>
-                        </div>
-                    </div>
-                    <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12">
-                        <div class="form-group">
-                            <label>Project Description<span class="text-danger font-weight-bold">*</span></label>
-                            <textarea 
-                                type="text" 
-                                class="form-control validate" 
-                                name="projectDescription" 
-                                id="projectDescription" 
-                                data-allowcharacters="[A-Z][a-z][0-9][ ][@]" 
-                                minlength="2" 
-                                maxlength="20" 
-                                rows="4"
-                                required 
-                                autocomplete="off"></textarea>
-                            <div class="invalid-feedback d-block" id="invalidInputProjectDescription"></div>
-                        </div>
-                    </div>
-                    <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6">
-                        <div class="form-group">
-                            <label>Start Date<span class="text-danger font-weight-bold">*</span></label>
-                                <div class="input-group">
-                                    <div class="input-group-prepend">
-                                        <span class="input-group-text"><i class="zmdi zmdi-calendar"></i></span>
-                                    </div>
-                                    <input type="button" class="form-control daterange validate text-left" name="projectStartDate" id="projectStartDate" required="" value="">
-                                </div>
-                            <div class="invalid-feedback d-block" id="invalidInputProjectStartDate"></div>
-                        </div>
-                    </div>
-                    <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6">
-                        <div class="form-group">
-                            <label>End Date<span class="text-danger font-weight-bold">*</span></label>
-                            <div class="input-group">
-                                <div class="input-group-prepend">
-                                    <span class="input-group-text"><i class="zmdi zmdi-calendar"></i></span>
-                                </div>
-                                <input type="button" class="form-control daterange validate text-left" name="projectEndDate" id="projectEndDate" required="" value="">
-                            </div>
-                            <div class="invalid-feedback d-block" id="invalidInputProjectEndDate"></div>
-                        </div>
-                    </div>
-                    <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6">
-                        <div class="form-group">
-                            <label>Client <span class="text-danger font-weight-bold">*</span></label>
-                            <select class=" form-control show-tick select2 validate" name="projectClient" id="projectClient" autocomplete="off" required>
-                            <optgroup label="Select Client">
-                                <option value="">BlackCoders Group Inc.</option>   
-                                <option value="">Gatchallan Tangalin Co.&CPA's</option>
-                                <option value="">CMTLand Development Inc.</option>   
-                                <option value="">CMTBuilders Inc.</option>
-                                <option value="">MFOX Computer Services</option>   
-                                <option value="">DeltaMike Security</option>
-                            </optgroup>
-                                <div class="invalid-feedback d-block" id="invalidInputProjectClient"></div>
-                            </select>
-                            <span class="fas fa-plus-square fa-lg form-control-feedback mt-2 pr-1" id="projectAddClient" style="float:right"></span>
-                        </div>
-                    </div>
-                    <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6">
-                        <div class="form-group">
-                            <label>Project Manager <span class="text-danger font-weight-bold">*</span></label>
-                            <select class=" form-control show-tick select2 validate" name="projectManager" id="projectManager" autocomplete="off" required>
-                            <optgroup label="Select Project Manager">
-                                <option value="">Robinjamin Gelilio</option>   
-                                <option value="">Nina Geronimo</option>
-                                <option value="">Renz Fabian</option>   
-                                <option value="">Sheryl Antinero</option>
-                                <option value="">Ulysis Ramizares</option>   
-                                <option value="">Jill Macalintal</option>
-                            </optgroup>
-                                <div class="invalid-feedback d-block" id="invalidInputProjectManager"></div>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6">
-                        <div class="form-group">
-                            <label>Priority Level <span class="text-danger font-weight-bold">*</span></label>
-                            <select class=" form-control show-tick select2 validate" name="projectPriorityLevel" id="projectPriorityLevel" autocomplete="off" required>
-                            <optgroup label="Select Priority Level">
-                                <option value="">High</option>   
-                                <option value="">Medium</option>
-                                <option value="">Low</option>      
-                            </optgroup>
-                                <div class="invalid-feedback d-block" id="invalidInputProjectPriorityLevel"></div>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6">
-                        <div class="form-group">
-                            <label>Status <span class="text-danger font-weight-bold">*</span></label>
-                            <select class=" form-control show-tick select2 validate" name="projectStatus" id="projectStatus" autocomplete="off" required>
-                            <optgroup label="Select Priority Level">
-                                <option value="">Active</option>   
-                                <option value="">Inactive</option>
-                                <option value="">Cancelled</option>      
-                                <option value="">Completed</option>
-                            </optgroup>
-                                <div class="invalid-feedback d-block" id="invalidInputProjectStatus"></div>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6">
-                        <div class="form-group">
-                            <label>Team Leader <span class="text-danger font-weight-bold">*</span></label>
-                            <select class=" form-control show-tick select2 validate" name="projectTeamLeader" id="projectTeamLeader" autocomplete="off" required>
-                            <optgroup label="Select Team Leader">
-                                <option value="">(All registered users)</option>   
-                            </optgroup>
-                                <div class="invalid-feedback d-block" id="invalidInputProjectTeamLeader"></div>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6">
-                        <div class="form-group">
-                            <label>Team Members <span class="text-danger font-weight-bold">*</span></label>
-                            <select class=" form-control show-tick select2 validate" name="projectTeamMembers" id="projectTeamMembers" autocomplete="off" multiple required>
-                            <optgroup label="Select Team Members">
-                                <option value="">(All registered employee's except officer's)</option>   
-                            </optgroup>
-                                <div class="invalid-feedback d-block" id="invalidInputProjectTeamMembers"></div>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                ${button}
-                <button class="btn btn-cancel btnCancel"><i class="fas fa-ban"></i> Cancel</button>
-            </div>`;
-        return html;
-    } 
-    // ----- END MODAL CONTENT ----
-
-
-    // ----- SAVE MODAL -----
-    $(document).on("click", "#btnSave", function() {
-    const validate = validateForm("modalProjectList");
-    if (validate) {
-        $("#modalProjectList").modal("hide");
-        Swal.fire({
-            title: 'Are you sure?',
-            text: "You want to save this?",
-            imageUrl: `${base_url}assets/custom/isometric_image/save.png`,
-            imageWidth: 200,
-            imageHeight: 200,
-            imageAlt: 'Custom image',
-            showCancelButton: true,
-            confirmButtonColor: '#28a745',
-            cancelButtonColor: '#1A1A1A',
-            confirmButtonText: 'Save'
-          }).then((result) => {
-            if (result.isConfirmed) {
-
-            // /**
-            //  * ----- FORM DATA -----
-            //  * tableData = {} -> Objects
-            //  */
-            // let data = getFormData("modal_user_account");
-            // data.append("tableName", "user_account_tbl");
-            // data.append("feedback", "Your choice");
-            // /**
-            //  * ----- DATA -----
-            //  * 1. tableName
-            //  * 2. tableData
-            //  * 3. feedback
-            //  */
-
-            // const saveData = insertTableData(data);
-            // if (saveData) {
-            //     tableContent();
-            // }
-                
-            Swal.fire({
-                icon: 'success',
-                title: 'Successfully saved!',
-                showConfirmButton: false,
-                timer: 2000
-              })
-            }else{
-                $("#modalProjectList").modal("show");
-            }
-        });
-            
-        }
-    });
-    // ----- END SAVE MODAL -----
-
-    // ----- OPEN EDIT MODAL -----
-    $(document).on("click", ".btnEdit", function() {
-        const id       = $(this).attr("id");
-        const feedback = $(this).attr("feedback");
-        $("#modalProjectListHeader").text("VIEW PROJECT");
-        $("#modalProjectList").modal("show")
-
-        // Display preloader while waiting for the completion of getting the data
-        $("#modalProjectListContent").html(preloader); 
-
-        const tableData = getTableData("project_list_tbl", "*", "userAccountID="+id, "");
-        if (tableData) {
-            const content = modalContent(tableData);
-            setTimeout(() => {
-                $("#modalProjectListContent").html(content);
-                // $("#btnSaveConfirmationEdit").attr("accountid", id);
-                // $("#btnSaveConfirmationEdit").attr("feedback", feedback);
-                initAll();
-            }, 500);
-        }
-    });
-    // ----- END OPEN EDIT MODAL -----
-
-    // ----- UPDATE MODAL -----
-    $(document).on("click", "#btnUpdate", function() {
-        const validate = validateForm("modalProjectList");
-        if (validate) {
-            $("#modalProjectList").modal("hide");
-            Swal.fire({
-                title: 'Are you sure?',
-                text: "You want to save this?",
-                imageUrl: `${base_url}assets/custom/isometric_image/save.png`,
-                imageWidth: 200,
-                imageHeight: 200,
-                imageAlt: 'Custom image',
-                showCancelButton: true,
-                confirmButtonColor: '#28a745',
-                cancelButtonColor: '#1A1A1A',
-                confirmButtonText: 'Save'
-              }).then((result) => {
-                if (result.isConfirmed) {
-    
-                // /**
-                //  * ----- FORM DATA -----
-                //  * tableData = {} -> Objects
-                //  */
-                // let data = getFormData("modal_user_account");
-                // data.append("tableName", "user_account_tbl");
-                // data.append("feedback", "Your choice");
-                // /**
-                //  * ----- DATA -----
-                //  * 1. tableName
-                //  * 2. tableData
-                //  * 3. feedback
-                //  */
-    
-                // const saveData = insertTableData(data);
-                // if (saveData) {
-                //     tableContent();
-                // }
-                    
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Successfully saved!',
-                    showConfirmButton: false,
-                    timer: 2000
-                  })
-                }else{
-                    $("#modalProjectList").modal("show");
-                }
-            });
-                
-            }
-        });
-        // ----- END UPDATE MODAL -----
-
-    // ------- CANCEl MODAL-------- 
-    $(document).on("click",".btnCancel",function(){
-        $("#modalProjectList").modal("hide");
-          Swal.fire({
-            title: 'Are you sure?',
-            text: "You won't be able to revert this!",
-            imageUrl: `${base_url}assets/custom/isometric_image/questions.png`,
-            imageWidth: 200,
-            imageHeight: 200,
-            imageAlt: 'Custom image',
-            showCancelButton: true,
-            confirmButtonColor: '#28a745',
-            cancelButtonColor: '#1A1A1A',
-            confirmButtonText: 'Yes, discard!'
-          }).then((result) => {
-            if (result.isConfirmed) {
-
-            // /**
-            //  * ----- FORM DATA -----
-            //  * tableData = {} -> Objects
-            //  */
-            // let data = getFormData("modal_user_account");
-            // data.append("tableName", "user_account_tbl");
-            // data.append("feedback", "Your choice");
-            // /**
-            //  * ----- DATA -----
-            //  * 1. tableName
-            //  * 2. tableData
-            //  * 3. feedback
-            //  */
-
-            // const saveData = insertTableData(data);
-            // if (saveData) {
-            //     tableContent();
-            // }
-                
-            Swal.fire({
-                icon: 'success',
-                title: 'Changes successfully discard!',
-                showConfirmButton: false,
-                timer: 2000
-              })
-            }else{
-                $("#modalProjectList").modal("show");
-            }
-        });
-
-
-    });
-    // -------- END CANCEL MODAL-----------
-
-
-      // ----- DATATABLES -----
-      function initDataTables() {
+    // ----- DATATABLES -----
+    function initDataTables() {
         if ($.fn.DataTable.isDataTable('#tableProjectList')){
             $('#tableProjectList').DataTable().destroy();
         }
@@ -407,6 +30,7 @@ $(document).ready(function(){
     initDataTables();
     // ----- END DATATABLES -----
 
+
     // ----- TABLE CONTENT -----
     function tableContent() {
         // Reset the unique datas
@@ -417,17 +41,15 @@ $(document).ready(function(){
             method:   'POST',
             async:    false,
             dataType: 'json',
-            data:     {tableName: "gen_operations_tbl "},
+            data:     {tableName: "pms_project_list_tbl "},
             beforeSend: function() {
                 $("#table_content").html(preloader);
-                // $("#inv_headerID").text("List of Inventory Item");
             },
             success: function(data) {
-                console.log(data);
                 let html = `
                 <table class="table table-bordered table-striped table-hover" id="tableProjectList">
                     <thead>
-                        <tr class="text-center" style="white-space:nowrap">
+                        <tr style="white-space:nowrap">
                             <th>Project Code</th>
                             <th>Project Name</th>
                             <th>Project Description</th>
@@ -447,30 +69,41 @@ $(document).ready(function(){
                 data.map((item, index, array) => {
                     // ----- INSERT UNIQUE DATA TO uniqueData VARIABLE ----
                     let unique = {
-                        id:       item.userAccountID, // Required
-                        username: item.username,
-                        email:    item.email,
+                        id:              item.projectListID, // Required
+                        projectListName: item.projectListName,
                     }
                     uniqueData.push(unique);
                     // ----- END INSERT UNIQUE DATA TO uniqueData VARIABLE ----
 
+                    let status =
+						item.projectListStatus == 1
+							? `
+                    <span class="badge badge-outline-success w-100">Active</span>`
+							: `
+                    <span class="badge badge-outline-danger w-100">Inactive</span>`;
+
+                    let priorityLevel =
+                        item.projectListPriorityLevel == 1 ? 
+                        `High` : (item.projectListPriorityLevel == 2 ? 
+                            `Medium` : `Low`);
+
                     html += `
                     <tr>
-                        <td>PMS-2021-00001</td>
-                        <td>Project Management System</td>
-                        <td>Used for creating and monitoring projects.</td>
-                        <td>March 11, 2021</td>
-                        <td>March 31, 2021</td>
-                        <td>BlackCoders Group Inc.</td>
-                        <td>Robinjamin I. Gelilio</td>
-                        <td>Arjay Diangzon</td>
-                        <td>User Images</td>
-                        <td>High</td>
-                        <td><span class="badge badge-outline-success w-100">Active</span></td>
+                        <td>${item.projectListCode}</td>
+                        <td>${item.projectListName}</td>
+                        <td>${item.projectListDescription}</td>
+                        <td>${moment(item.projectListFrom).format("MMMM DD, YYYY")}</td>
+                        <td>${moment(item.projectListTo).format("MMMM DD, YYYY")}</td>
+                        <td>${item.projectListClientID}</td>
+                        <td>${item.projectListManagerID}</td>
+                        <td>${item.projectListLeaderID}</td>
+                        <td>${item.projectListMemberID}</td>
+                        <td>${priorityLevel}</td>
+
+                        <td>${status}</td>
                         <td>
                             <button class="btn btn-edit btn-block btnEdit" 
-                            id="${item.userAccountID}"
-                            feedback="${item.username}">
+                            id="${item.projectListID}">
                             <i class="fas fa-edit"></i> Edit</button>
                         </td>
                     </tr>`;
@@ -495,348 +128,351 @@ $(document).ready(function(){
     tableContent();
     // ----- END TABLE CONTENT -----
 
-    // ----- OPEN ADD LEDGER MODAL -----
-    $(document).on("click", "#projectAddClient", function() {
-        $("#modalProjectList").modal("hide");
-        $("#modalProjectClient").modal("show");
-        // $("#modalProjectClientContent").html(preloader);
 
-        let html =`
+    // ----- MODAL CONTENT -----
+    function modalContent(data = false) {
+        let {
+            projectListID            = "",
+            projectListName          = "",
+            projectListDescription   = "",
+            projectListFrom          = "",
+            projectListTo            = "",
+            projectListClientID      = "",
+            projectListManagerID     = "",
+            projectListLeaderID      = "",
+            projectListPriorityLevel = "",
+            projectListMemberID      = "",
+            projectListStatus        = "",
+        } = data && data[0];
+
+        let button = projectListID ? `
+        <button 
+            class="btn btn-update" 
+            id="btnUpdate" 
+            projectListID="${projectListID}"><i class="fas fa-save"></i>
+            Update
+        </button>` : `
+        <button class="btn btn-save" id="btnSave"><i class="fas fa-save"></i> Save</button>`;
+
+        let html = `
             <div class="modal-body">
                 <div class="row">
-                    <div class="col-xl-3 col-lg-4 col-md-6 col-sm-12">
+                    <div class="col-sm-12">
                         <div class="form-group">
-                            <label>Client No. <span class="text-danger font-weight-bold">*</span></label>
-                            <input 
-                            type="text" 
-                            class="form-control validate" 
-                            name="clientId" 
-                            id="clientId" 
-                            data-allowcharacters="[A-Z][a-z][0-9][ ][@]" 
-                            minlength="2" 
-                            maxlength="20" 
-                            required 
-                            value=""
-                            autocomplete="off" readonly>
-                            <div class="invalid-feedback d-block" id="invalidInputClientNo"></div>
-                        </div>
-                    </div>
-                    <div class="col-xl-9 col-lg-8 col-md-6 col-sm-12">
-                        <div class="form-group">
-                            <label>Client Name <span class="text-danger font-weight-bold">*</span></label>
+                            <label>Project Name <code>*</code></label>
                             <input 
                                 type="text" 
                                 class="form-control validate" 
-                                name="clientName" 
-                                id="clientName" 
-                                data-allowcharacters="[A-Z][a-z][0-9][ ][@]" 
+                                name="projectListName" 
+                                id="projectListName" 
+                                data-allowcharacters="[A-Z][a-z][0-9][ ][.][,][-][()]['][/]" 
                                 minlength="2" 
-                                maxlength="20" 
+                                maxlength="76" 
                                 required 
-                                value=""
+                                value="${projectListName}"
+                                unique="${projectListID}"
+                                title="Project Name"
                                 autocomplete="off">
-                            <div class="invalid-feedback d-block" id="invalidInputClientName"></div>
+                            <div class="invalid-feedback d-block" id="invalid-projectListName"></div>
                         </div>
                     </div>
-                    <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6">
+                    <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12">
                         <div class="form-group">
-                            <label>Region <span
-                                    class="text-danger font-weight-bold">*</span></label>
-                            <select class=" form-control show-tick select2 validate" name="region" required="" oldRegion=""
-                                id="region" readonly=""></select></select>
-                                <div class="invalid-feedback d-block" id="invalid-region"></div>
-                        </div>
-                    </div>
-                    <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6">
-                        <div class="form-group">
-                            <label>Province <span
-                                    class="text-danger font-weight-bold">*</span></label>
-                            <select class=" form-control show-tick select2 validate" name="province" required="" oldProvince=""
-                                id="province" readonly=""></select>
-                                <div class="invalid-feedback d-block" id="invalid-province"></div>
-                        </div>
-                    </div>
-                    <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6">
-                        <div class="form-group">
-                            <label>City <span
-                                    class="text-danger font-weight-bold validate">*</span></label>
-                            <select class=" form-control show-tick select2" required="" id="city" name="city" readonly="" oldCity=""></select> 
-                            <div class="invalid-feedback d-block" id="invalid-city"></div>
-                        </div>
-                    </div>
-                    <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6">
-                        <div class="form-group">
-                            <label>Barangay</label>
-                            <select class=" form-control show-tick select2 validate" name="barangay" required="" oldBarangay=""
-                                id="barangay" readonly=""></select>
-                                <div class="invalid-feedback d-block" id="invalid-barangay"></div>
-                        </div>
-                    </div>
-                    <div class="col-sm-12 col-md-6 col-lg-2 col-xl-2">
-                        <div class="form-group">
-                            <label>Unit Number <span
-                                    class="text-danger font-weight-bold">*</span></label>
-                            <input class="form-control validate" required=""
-                            data-allowcharacters="[a-z][A-Z][.][-][#][0-9][ ]" minlength="1" maxlength="35"  id="unitNumber" name="unitNumber" value="" type="text">
-                            <div class="invalid-feedback d-block" id="invalid-unitNumber"></div>
-                        </div>
-                    </div>
-                    <div class="col-sm-12 col-md-6 col-lg-4 col-xl-4">
-                        <div class="form-group">
-                            <label>Building/House Number <span
-                                    class="text-danger font-weight-bold">*</span></label>
-                            <input class="form-control validate" required=""
-                            data-allowcharacters="[a-z][A-Z][.][,][-]['][#][0-9][ ]" minlength="1" maxlength="35" id="houseNo" name="houseNumber" value="" type="text">
-                            <div class="invalid-feedback d-block" id="invalid-houseNumber"></div>
-                        </div>
-                    </div>
-                    <div class="col-sm-12 col-md-6 col-lg-3 col-xl-3">
-                        <div class="form-group">
-                            <label>Country <span
-                                    class="text-danger font-weight-bold">*</span></label>
-                            <input class="form-control validate" required=""
-                                data-allowcharacters="[a-z][A-Z][ ]" id="country" name="country" minlength="6"
-                                maxlength="50" value="" type="text">
-                        </div>
-                        <div class="invalid-feedback d-block" id="invalid-country"></div>
-                    </div>
-                    <div class="col-sm-12 col-md-6 col-lg-3 col-xl-3">
-                        <div class="form-group">
-                            <label>Zip Code <span
-                                    class="text-danger font-weight-bold">*</span></label>
-                            <input class="form-control validate" required=""
-                                data-allowcharacters="[0-9]" id="postalCode" name="postalCode" minlength="4"
-                                maxlength="4" value="" type="text">
-                        </div>
-                        <div class="invalid-feedback d-block" id="invalid-postalCode"></div>
-                    </div>
-                    <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12">
-                        <div class="form-group">
-                            <label>Contact Person <span class="text-danger font-weight-bold">*</span></label>
-                            <input 
+                            <label>Project Description </label>
+                            <textarea 
                                 type="text" 
                                 class="form-control validate" 
-                                name="contactPerson" 
-                                id="contactPerson" 
-                                data-allowcharacters="[A-Z][a-z][0-9][ ][@]" 
+                                name="projectListDescription" 
+                                id="projectListDescription" 
+                                data-allowcharacters="[A-Z][a-z][0-9][ ][.][,][-][()]['][/]" 
                                 minlength="2" 
-                                maxlength="30" 
-                                required 
-                                value=""
-                                autocomplete="off">
-                            <div class="invalid-feedback d-block" id="invalidInputContactPerson"></div>
+                                maxlength="100" 
+                                rows="4"
+                                style="resize: none"
+                                autocomplete="off">${projectListDescription}</textarea>
+                            <div class="invalid-feedback d-block" id="invalid-projectListDescription"></div>
                         </div>
                     </div>
-                    <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12">
+                    <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6">
                         <div class="form-group">
-                            <label>Email Address <span class="text-danger font-weight-bold">*</span></label>
-                            <input 
-                                type="email" 
-                                class="form-control validate" 
-                                name="emailAddress" 
-                                id="emailAddress" 
-                                data-allowcharacters="[A-Z][a-z][0-9][ ][@]" 
-                                minlength="2" 
-                                maxlength="50" 
-                                value=""
-                                autocomplete="off" unique>
-                            <div class="invalid-feedback d-block" id="invalidInputEmailAddress"></div>
+                            <label>Start Date <code>*</code></label>
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text"><i class="zmdi zmdi-calendar"></i></span>
+                                    </div>
+                                    <input type="button" class="form-control daterange validate text-left" name="projectListFrom" id="projectListFrom" required value="${projectListFrom && moment(projectListFrom).format("MMMM DD, YYYY")}">
+                                </div>
+                            <div class="invalid-feedback d-block" id="invalid-projectListFrom"></div>
                         </div>
                     </div>
-                    <div class="col-xl-4 col-lg-6 col-md-6 col-sm-12">
+                    <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6">
                         <div class="form-group">
-                            <label>Tax Identification Number <span class="text-danger font-weight-bold">*</span></label>
-                            <input 
-                                type="text" 
-                                class="form-control validate inputmask" 
-                                name="tin" 
-                                id="tin" 
-                                data-allowcharacters="[0-9][ ]" 
-                                minlength="15" 
-                                maxlength="15" 
-                                value=""
-                                mask="999 999 999 999"
-                                autocomplete="off">
-                            <div class="invalid-feedback d-block" id="invalidInputTIN"></div>
+                            <label>End Date <code>*</code></label>
+                            <div class="input-group">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text"><i class="zmdi zmdi-calendar"></i></span>
+                                </div>
+                                <input type="button" class="form-control validate text-left" name="projectListTo" id="projectListTo" required value="${projectListTo && moment(projectListTo).format("MMMM DD, YYYY")}">
+                            </div>
+                            <div class="invalid-feedback d-block" id="invalid-projectListTo"></div>
                         </div>
                     </div>
-                    <div class="col-xl-4 col-lg-6 col-md-6 col-sm-12">
+                    <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6">
                         <div class="form-group">
-                            <label>Mobile No. <span class="text-danger font-weight-bold">*</span></label>
-                                <input 
-                                type="text" 
-                                class="form-control validate inputmask" 
-                                name="mobileNo" 
-                                id="mobileNo" 
-                                data-allowcharacters="[0-9]" 
-                                mask="(+63) 999 9999 999" 
-                                minlength="18" 
-                                maxlength="18" 
-                                required="" value="">
-                            <div class="invalid-feedback d-block" id="invalidInputMobileNo"></div>
-                        </div>
-                    </div>
-                    <div class="col-xl-4 col-lg-6 col-md-6 col-sm-12">
-                        <div class="form-group">
-                            <label>Telephone No. <span class="text-danger font-weight-bold">*</span></label>
-                                <input type="text" 
-                                class="form-control validate inputmask" 
-                                name="telephoneNo" 
-                                id="telephoneNo" 
-                                data-allowcharacters="[0-9]" 
-                                mask="(99) 9999 9999" 
-                                minlength="13" 
-                                maxlength="13" 
-                                required="" 
-                                value="">
-                            <div class="invalid-feedback d-block" id="invalidInputTelephoneNo"></div>
-                        </div>
-                    </div>
-                    <div class="col-xl-10 col-lg-8 col-md-6 col-sm-12">
-                        <div class="form-group">
-                            <label>Website <small class="text-muted">(Optional)</small></label>
-                            <input 
-                                type="text" 
-                                class="form-control validate" 
-                                name="brandName" 
-                                id="brandName" 
-                                data-allowcharacters="[A-Z][a-z][0-9][ ][@]" 
-                                minlength="2" 
-                                maxlength="30" 
-                                required 
-                                value=""
-                                autocomplete="off">
-                            <div class="invalid-feedback d-block" id="invalidInputBrandName"></div>
-                        </div>
-                    </div>
-                    <div class="col-xl-2 col-lg-4 col-md-6 col-sm-12">
-                        <div class="form-group">
-                            <label>Status <span class="text-danger font-weight-bold">*</span></label>
-                            <select class=" form-control show-tick select2 validate" name="status" id="status" autocomplete="off" required>
-                                <option value="0">Active</option>   
-                                <option value="1">Inactive</option>
-                                <div class="invalid-feedback d-block" id="invalidInputStatus"></div>
+                            <label>Client <code>*</code></label>
+                            <select class=" form-control show-tick select2 validate" name="projectListClientID" id="projectListClient" autocomplete="off" required>
+                            <!-- TEMPORARY OPTIONS -->
+                                <option value="" selected>Select Client</option>   
+                                <option value="1" ${projectListClientID == 1 && "selected"}>BlackCoders Group Inc.</option>   
+                                <option value="2" ${projectListClientID == 2 && "selected"}>Gatchallan Tangalin Co.&CPA's</option>
+                                <option value="3" ${projectListClientID == 3 && "selected"}>CMTLand Development Inc.</option>   
+                                <option value="4" ${projectListClientID == 4 && "selected"}>CMTBuilders Inc.</option>
+                                <option value="5" ${projectListClientID == 5 && "selected"}>MFOX Computer Services</option>   
+                                <option value="6" ${projectListClientID == 6 && "selected"}>DeltaMike Security</option>
+                            <!-- END TEMPORARY OPTIONS -->
                             </select>
+                            <div class="invalid-feedback d-block" id="invalidp-rojectListClient"></div>
                         </div>
                     </div>
-                </div>
-                <hr>
-                <div class="row">
-                
+                    <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6">
+                        <div class="form-group">
+                            <label>Project Manager <code>*</code></label>
+                            <select class=" form-control show-tick select2 validate" name="projectListManagerID" id="projectListManagerID" autocomplete="off" required>
+                            <!-- TEMPORARY OPTIONS -->
+                                <option value="" selected>Select Manager</option> 
+                                <option value="1" ${projectListManagerID == 1 && "selected"}>Robinjamin Gelilio</option>   
+                                <option value="2" ${projectListManagerID == 2 && "selected"}>Nina Geronimo</option>
+                                <option value="3" ${projectListManagerID == 3 && "selected"}>Renz Fabian</option>   
+                                <option value="4" ${projectListManagerID == 4 && "selected"}>Sheryl Antinero</option>
+                                <option value="5" ${projectListManagerID == 5 && "selected"}>Ulysis Ramizares</option>   
+                                <option value="6" ${projectListManagerID == 6 && "selected"}>Jill Macalintal</option>
+                            <!-- END TEMPORARY OPTIONS -->
+                            </select>
+                            <div class="invalid-feedback d-block" id="invalid-projectListManagerID"></div>
+                        </div>
+                    </div>
+                    <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6">
+                        <div class="form-group">
+                            <label>Team Leader</label>
+                            <select class=" form-control show-tick select2 validate" name="projectListLeaderID" id="projectListLeaderID" autocomplete="off">
+                            <!-- TEMPORARY OPTIONS -->
+                                <option value="" selected>Select Leader</option> 
+                                <option value="1" ${projectListLeaderID == 1 && "selected"}>Robinjamin Gelilio</option>   
+                                <option value="2" ${projectListLeaderID == 2 && "selected"}>Nina Geronimo</option>
+                                <option value="3" ${projectListLeaderID == 3 && "selected"}>Renz Fabian</option>   
+                                <option value="4" ${projectListLeaderID == 4 && "selected"}>Sheryl Antinero</option>
+                                <option value="5" ${projectListLeaderID == 5 && "selected"}>Ulysis Ramizares</option>   
+                                <option value="6" ${projectListLeaderID == 6 && "selected"}>Jill Macalintal</option>
+                            <!-- END TEMPORARY OPTIONS -->
+                            </select>
+                            <div class="invalid-feedback d-block" id="invalid-projectListLeaderID"></div>
+                        </div>
+                    </div>
+                    <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6">
+                        <div class="form-group">
+                            <label>Priority Level <code>*</code></label>
+                            <select class=" form-control show-tick select2 validate" name="projectListPriorityLevel" id="projectListPriorityLevel" autocomplete="off" required>
+                            <!-- TEMPORARY OPTIONS -->
+                                <option value="" selected>Select Prioriry Level</option>
+                                <option value="3" ${projectListPriorityLevel == 1 && "selected"}>High</option>   
+                                <option value="2" ${projectListPriorityLevel == 2 && "selected"}>Medium</option>
+                                <option value="1" ${projectListPriorityLevel == 3 && "selected"}>Low</option>  
+                            <!-- END TEMPORARY OPTIONS -->
+                            </select>
+                            <div class="invalid-feedback d-block" id="invalid-projectListPriorityLevel"></div>
+                        </div>
+                    </div>
+                    <div class="col-sm-12">
+                        <div class="form-group">
+                            <label>Team Members</label>
+                            <select class=" form-control show-tick select2 validate" name="projectListMemberID" id="projectListMemberID" autocomplete="off" multiple="multiple">
+                            <!-- TEMPORARY OPTIONS -->
+                                <option disabled>Select Team Member</option> 
+                                <option value="1" ${projectListMemberID && projectListMemberID.split("|").includes("1") && "selected"}>Robinjamin Gelilio</option>   
+                                <option value="2" ${projectListMemberID && projectListMemberID.split("|").includes("2") && "selected"}>Nina Geronimo</option>
+                                <option value="3" ${projectListMemberID && projectListMemberID.split("|").includes("3") && "selected"}>Renz Fabian</option>   
+                                <option value="4" ${projectListMemberID && projectListMemberID.split("|").includes("4") && "selected"}>Sheryl Antinero</option>
+                                <option value="5" ${projectListMemberID && projectListMemberID.split("|").includes("5") && "selected"}>Ulysis Ramizares</option>   
+                                <option value="6" ${projectListMemberID && projectListMemberID.split("|").includes("6") && "selected"}>Jill Macalintal</option>
+                            <!-- END TEMPORARY OPTIONS -->
+                            </select>
+                            <div class="invalid-feedback d-block" id="invalid-projectListMemberID"></div>
+                        </div>
+                    </div>
+                    <div class="col-sm-12">
+                        <div class="form-group">
+                            <label>Status <code>*</code></label>
+                            <select class=" form-control show-tick select2 validate" name="projectListStatus" id="projectListStatus" autocomplete="off">
+                                <option value="1" ${projectListStatus == 1 && "selected"}>Active</option>   
+                                <option value="0" ${projectListStatus == 0 && "selected"}>Inactive</option>
+                                <option value="2" ${projectListStatus == 2 && "selected"}>Cancelled</option>      
+                                <option value="3" ${projectListStatus == 3 && "selected"}>Completed</option>
+                            </select>
+                            <div class="invalid-feedback d-block" id="invalid-projectListStatus"></div>
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="modal-footer">
-            <button class="btn btn-save" id="btnSave"><i class="fas fa-save"></i> Save</button>
-                <button class="btn btn-cancel btnCancelClient"><i class="fas fa-ban"></i> Cancel</button>
+                ${button}
+                <button class="btn btn-cancel btnCancel"><i class="fas fa-ban"></i> Cancel</button>
             </div>`;
+        return html;
+    } 
+    // ----- END MODAL CONTENT ----
 
-        $("#modalProjectClientContent").html(html);
-        initAll();       
+
+    // ----- OPEN ADD MODAL -----
+    $(document).on("click", "#btnAdd", function() {
+        $("#modal_project_list .page-title").text("ADD PROJECT");
+        $("#modal_project_list").modal("show");
+        $("#modal_project_list_content").html(preloader);
+        const content = modalContent();
+        $("#modal_project_list_content").html(content);
+        initAll();
+        startDate();
     });
-    // ----- END OPEN ADD LEDGER MODAL -----
-        // ----- SAVE MODAL -----
-        $(document).on("click", "#btnSaveClient", function() {
-            const validate = validateForm("modalProjectClient");
-            if (validate) {
-                $("#modalProjectClient").modal("hide");
-                Swal.fire({
-                    title: 'Are you sure?',
-                    text: "You want to save this?",
-                    imageUrl: `${base_url}assets/custom/isometric_image/save.png`,
-                    imageWidth: 200,
-                    imageHeight: 200,
-                    imageAlt: 'Custom image',
-                    showCancelButton: true,
-                    confirmButtonColor: '#28a745',
-                    cancelButtonColor: '#1A1A1A',
-                    confirmButtonText: 'Save'
-                  }).then((result) => {
-                    if (result.isConfirmed) {
+    // ----- END OPEN ADD MODAL -----
+
+
+    // ----- START DATE -----
+    function startDate() {
+        $("[name=projectListFrom]").daterangepicker({
+            autoUpdateInput: false,
+            singleDatePicker: true,
+            showDropdowns: true,
+            autoApply: true,
+            locale: {
+                format: "MMMM DD, YYYY"
+            },
+        }, function(data) {
+            if (data) {
+                const validated = $("[name=projectListFrom]").hasClass("validated");
+                let invalidFeedback = 
+                $("[name=projectListFrom]").parent().find(".invalid-feedback").length > 0 ? 
+                    $("[name=projectListFrom]").parent().find(".invalid-feedback") : 
+                    ($("[name=projectListFrom]").parent().parent().find(".invalid-feedback").length > 0 ?
+                    $("[name=projectListFrom]").parent().parent().find(".invalid-feedback") : $("[name=projectListFrom]").parent().parent().parent().find(".invalid-feedback"));
+                validated ? $("[name=projectListFrom]").removeClass("is-invalid").addClass("is-valid") : $("[name=projectListFrom]").removeClass("is-invalid").removeClass("is-valid");
+                invalidFeedback.text("");
+                $("[name=projectListFrom]").val(moment(data).format("MMMM DD, YYYY"));
+
+                endDate(data);
+            }
+        })
+    }
+
+    function endDate(data) {
+        initDateRangePicker("#projectListTo", {
+            autoUpdateInput: false,
+            singleDatePicker: true,
+            showDropdowns: true,
+            autoApply: true,
+            locale: {
+                format: "MMMM DD, YYYY"
+            },
+            startDate: moment(data).format("MMMM DD, YYYY"),
+            minDate: moment(data).format("MMMM DD, YYYY")
+        })
         
-                    // /**
-                    //  * ----- FORM DATA -----
-                    //  * tableData = {} -> Objects
-                    //  */
-                    // let data = getFormData("modal_user_account");
-                    // data.append("tableName", "user_account_tbl");
-                    // data.append("feedback", "Your choice");
-                    // /**
-                    //  * ----- DATA -----
-                    //  * 1. tableName
-                    //  * 2. tableData
-                    //  * 3. feedback
-                    //  */
-        
-                    // const saveData = insertTableData(data);
-                    // if (saveData) {
-                    //     tableContent();
-                    // }
-                        
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Successfully saved!',
-                        showConfirmButton: false,
-                        timer: 2000
-                      })
-                    }else{
-                        $("#modalProjectClient").modal("show");
-                    }
-                });
-                    
-                }
-            });
-            // ----- END SAVE MODAL -----
-   // ------- CANCEl MODAL-------- 
-   $(document).on("click",".btnCancelClient",function(){
-    $("#modalProjectClient").modal("hide");
-      Swal.fire({
-        title: 'Are you sure?',
-        text: "You won't be able to revert this!",
-        imageUrl: `${base_url}assets/custom/isometric_image/questions.png`,
-        imageWidth: 200,
-        imageHeight: 200,
-        imageAlt: 'Custom image',
-        showCancelButton: true,
-        confirmButtonColor: '#28a745',
-        cancelButtonColor: '#1A1A1A',
-        confirmButtonText: 'Yes, discard!'
-      }).then((result) => {
-        if (result.isConfirmed) {
+        $("#projectListTo").val(moment(data).format("MMMM DD, YYYY"));
+    }
+    // ----- END START DATE -----
 
-        // /**
-        //  * ----- FORM DATA -----
-        //  * tableData = {} -> Objects
-        //  */
-        // let data = getFormData("modal_user_account");
-        // data.append("tableName", "user_account_tbl");
-        // data.append("feedback", "Your choice");
-        // /**
-        //  * ----- DATA -----
-        //  * 1. tableName
-        //  * 2. tableData
-        //  * 3. feedback
-        //  */
 
-        // const saveData = insertTableData(data);
-        // if (saveData) {
-        //     tableContent();
-        // }
-            
-        Swal.fire({
-            icon: 'success',
-            title: 'Changes successfully discard!',
-            showConfirmButton: false,
-            timer: 2000
-          })
-        $("#modalProjectList").modal("show");
+    // ----- SAVE MODAL -----
+    $(document).on("click", "#btnSave", function() {
+        const validate = validateForm("modal_project_list");
+        if (validate) {
+            let data = getFormData("modal_project_list", true);
+			data["tableData[projectListCode]"] = generateCode(
+				"PRO",
+				false,
+				"pms_project_list_tbl",
+				"projectListCode"
+			);
+			data["tableName"] = "pms_project_list_tbl";
+			data["feedback"] = $("[name=projectListName]").val();
 
-        }else{
-            $("#modalProjectClient").modal("show");
+			sweetAlertConfirmation(
+				"add",
+				"Project",
+				"modal_project_list",
+				"",
+				data,
+				true,
+				tableContent
+			);    
         }
     });
+    // ----- END SAVE MODAL -----
 
 
-});
-// -------- END CANCEL MODAL-----------
+    // ----- OPEN EDIT MODAL -----
+    $(document).on("click", ".btnEdit", function() {
+        const id = $(this).attr("id");
+		$("#modal_project_list .page-title").text("EDIT PROJECT");
+		$("#modal_project_list").modal("show");
+		$("#modal_project_list_content").html(preloader);
+
+		const tableData = getTableData(
+			"pms_project_list_tbl",
+			"*",
+			"projectListID=" + id
+		);
+		if (tableData) {
+			const content = modalContent(tableData);
+			setTimeout(() => {
+				$("#modal_project_list_content").html(content);
+				initAll();
+                startDate();
+                endDate($("[name=projectListTo]").val());
+			}, 500);
+		}
+    });
+    // ----- END OPEN EDIT MODAL -----
+
+
+    // ----- UPDATE MODAL -----
+	$(document).on("click", "#btnUpdate", function () {
+		const id = $(this).attr("projectListID");
+
+		const validate = validateForm("modal_project_list");
+		if (validate) {
+			let data = getFormData("modal_project_list", true);
+			data["tableData[updatedBy]"] = sessionID;
+			data["tableName"]            = "pms_project_list_tbl";
+			data["whereFilter"]          = "projectListID=" + id;
+			data["feedback"]             = $("[name=projectListName]").val();
+
+			sweetAlertConfirmation(
+				"update",
+				"Project",
+				"modal_project_list",
+				"",
+				data,
+				true,
+				tableContent
+			);
+		}
+	});
+	// ----- END UPDATE MODAL -----
+
+
+    // ------- CANCEL MODAL--------
+	$(document).on("click", ".btnCancel", function () {
+		let formEmpty = isFormEmpty("modal_project_list");
+		if (!formEmpty) {
+			sweetAlertConfirmation(
+				"cancel",
+				"Project",
+				"modal_project_list"
+			);
+		} else {
+			$("#modal_project_list").modal("hide");
+		}
+	});
+	// -------- END CANCEL MODAL-----------
+
 
 });

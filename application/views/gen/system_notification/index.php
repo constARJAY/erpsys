@@ -5,8 +5,7 @@
 				<div class="col-lg-6 col-md-12">
 					<ul class="breadcrumb pl-0 pb-0 ">
 						<li class="breadcrumb-item"><a href="#"><i class="zmdi zmdi-home"></i> Dashboard</a></li>
-						<li class="breadcrumb-item"><i class="zmdi zmdi-folder"></i> &nbsp;Masterfiles</li>
-						<li class="breadcrumb-item active"><i class="zmdi zmdi-hotel"></i> &nbsp;Roles and Permission</li>
+						<li class="breadcrumb-item active"><i class="zmdi zmdi-hotel"></i> &nbsp;System Notification</li>
 					</ul>
 					<h1 class="mt-3">System Notification</h1>
 					<span>This module is used to manage Lorem ipsum dolor sit amet..</span>
