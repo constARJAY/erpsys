@@ -212,25 +212,14 @@ $(document).ready(function(){
     const validate = validateForm("modalProjectCategory");
     if (validate) {
 
-        let tableData           = getTableData("pms_category_tbl","","","categoryCode DESC");
-        var currentDate         = new Date();
-        let currentYear         = currentDate.getFullYear();
-        let currentYearStr      = currentYear.toString();
+        let data = getFormData("modalProjectCategory", true);
+            data["tableData[categoryCode]"] = generateCode("PCT", false, "pms_category_tbl", "categoryCode");
+            data["tableData[createdBy]"] = sessionID;
+            data["tableData[updatedBy]"] = sessionID;
+            data["tableName"]            = "pms_category_tbl";
+            data["feedback"]             = $("[name=categoryName]").val();
 
-         // Generate Number
-         let tableDataCode       = tableData.length < 1 ? "" : parseInt(tableData[0]["categoryCode"].slice(6)) + 1;
-
-         let genCode  = tableData.length < 1 ? "PCT-"+currentYearStr.slice(2)+"-00001" : "PCT-"+currentYearStr.slice(2)+"-"+numberCodeSize(tableDataCode, "5");
-
-// genCode("RQT",null,"tablename","columnName");
-         let data = getFormData("modalProjectCategory",true);
-         data["tableData[categoryCode]"]     = genCode;
-         data["tableData[createdBy]"]     = "1";
-         data["tableData[updatedBy]"]     = "1";
-         data["tableName"]                = "pms_category_tbl";
-         data["feedback"]                 = genCode;
-         sweetAlertConfirmation("add", "Category Masterfile","modalProjectCategory", null, data);
-
+            sweetAlertConfirmation("add", "Category Masterfile", "modalProjectCategory", null, data, true, tableContent);
         }
     });
     // ----- END SAVE MODAL -----
@@ -263,30 +252,42 @@ $(document).ready(function(){
         
         const validate = validateForm("modalProjectCategory");
         let rowID           = $(this).attr("rowID");
-        let genCode         = getTableData("pms_category_tbl","categoryCode","categoryID="+rowID,"categoryCode DESC");
         if (validate) {
 
             let data = getFormData("modalProjectCategory", true);
-            data["tableData"]["updatedBy"]   =  "2";
-            data["whereFilter"]              =  "categoryID="+rowID;
-            data["tableName"]                =  "pms_category_tbl";
-            data["feedback"]                 =   genCode[0]["categoryCode"];
-            sweetAlertConfirmation("update", "Category Masterfile","modalProjectCategory", null , data);
+			data["tableData[updatedBy]"] = sessionID;
+			data["tableName"]            = "pms_category_tbl";
+			data["whereFilter"]          = "categoryID="+rowID;
+			data["feedback"]             = $("[name=categoryName]").val();
+
+			sweetAlertConfirmation(
+				"update",
+				"Category Masterfile",
+				"modalProjectCategory",
+				"",
+				data,
+				true,
+				tableContent
+			);
+
             }
         });
         // ----- END UPDATE MODAL -----
 
     // ------- CANCEl MODAL-------- 
 
-    $(document).on("click",".btnCancel", function(){
-        let condition = emptyFormCondition("modalProjectCategory");
-        if(condition==true){
-            sweetAlertConfirmation("", "Category Masterfile","modalProjectCategory");
-        }else{
-            $("#modalProjectCategory").modal("hide");
-        }
-        
-    });
+    $(document).on("click", ".btnCancel", function () {
+		let formEmpty = isFormEmpty("modalProjectCategory");
+		if (!formEmpty) {
+			sweetAlertConfirmation(
+				"cancel",
+				"Category Masterfile",
+				"modalProjectCategory"
+			);
+		} else {
+			$("#modalProjectCategory").modal("hide");
+		}
+	});
     // -------- END CANCEL MODAL-----------
 
 

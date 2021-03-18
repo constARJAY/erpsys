@@ -531,25 +531,14 @@ $(document).on("change", "[name=clientCity]", function() {
     const validate = validateForm("modalProjectClient");
     if (validate) {
 
+        let data = getFormData("modalProjectClient", true);
+        data["tableData[clientCode]"] = generateCode("CLT", false, "pms_client_tbl", "clientCode");
+        data["tableData[createdBy]"] = sessionID;
+        data["tableData[updatedBy]"] = sessionID;
+        data["tableName"]            = "pms_client_tbl";
+        data["feedback"]             = $("[name=clientName]").val();
 
-        let tableData           = getTableData("pms_client_tbl","","","clientCode DESC");
-        var currentDate         = new Date();
-        let currentYear         = currentDate.getFullYear();
-        let currentYearStr      = currentYear.toString();
-
-         // Generate Number
-         let tableDataCode       = tableData.length < 1 ? "" : parseInt(tableData[0]["clientCode"].slice(6)) + 1;
-
-         let genCode  = tableData.length < 1 ? "CLT-"+currentYearStr.slice(2)+"-00001" : "CLT-"+currentYearStr.slice(2)+"-"+numberCodeSize(tableDataCode, "5");
-
-        // genCode("RQT",null,"tablename","columnName");
-         let data = getFormData("modalProjectClient",true);
-         data["tableData[clientCode]"]     = genCode;
-         data["tableData[createdBy]"]     = "1";
-         data["tableData[updatedBy]"]     = "1";
-         data["tableName"]                = "pms_client_tbl";
-         data["feedback"]                 = genCode;
-         sweetAlertConfirmation("add", "Client Masterfile","modalProjectClient", null, data);
+        sweetAlertConfirmation("add", "Client", "modalProjectClient", null, data, true, tableContent);
         }
     });
     // ----- END SAVE MODAL -----
@@ -582,25 +571,36 @@ $(document).on("change", "[name=clientCity]", function() {
         if (validate) {
 
             let data = getFormData("modalProjectClient", true);
-            data["tableData"]["updatedBy"]   =  "2";
-            data["whereFilter"]              =  "clientID="+rowID;
-            data["tableName"]                =  "pms_client_tbl";
-            data["feedback"]                 =   genCode[0]["clientCode"];
-            sweetAlertConfirmation("update", "Client Masterfile","modalProjectClient", null , data);
+			data["tableData[updatedBy]"] = sessionID;
+			data["tableName"]            = "pms_client_tbl";
+			data["whereFilter"]          ="clientID="+rowID;
+			data["feedback"]             = $("[name=clientName]").val();
+
+			sweetAlertConfirmation(
+				"update",
+				"Client Masterfile",
+				"modalProjectClient",
+				"",
+				data,
+				true,
+				tableContent
+			);
         }
         });
         // ----- END UPDATE MODAL -----
 
     // ------- CANCEl MODAL-------- 
-
-    $(document).on("click",".btnCancel", function(){
-        let condition = emptyFormCondition("modalProjectClient");
-        if(condition==true){
-            sweetAlertConfirmation("", "Client Masterfile","modalProjectClient");
-        }else{
-            $("#modalProjectClient").modal("hide");
-        }
-        
+    $(document).on("click", ".btnCancel", function () {
+		let formEmpty = isFormEmpty("modalProjectClient");
+		if (!formEmpty) {
+			sweetAlertConfirmation(
+				"cancel",
+				"Client Masterfile",
+				"modalProjectClient"
+			);
+		} else {
+			$("#modalProjectClient").modal("hide");
+		}
     });
     // -------- END CANCEL MODAL-----------
 

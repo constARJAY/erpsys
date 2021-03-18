@@ -11,20 +11,22 @@
 					<h1 class="mt-3">List of Inventory Storage</h1>
 					<span>This module is used to manage Lorem ipsum dolor sit amet..</span>
 				</div>
+				<div class="col-lg-6 col-md-12 text-md-right">
+						<button type="button" class="btn btn-add p-2 px-3" id="btnAdd"> <i class="icon-plus"></i> &nbsp;Add inventory storage</button>
+				</div>
 			</div>
 		</div>
 	</div>
 
     <div class="container">
-		<div class="row clearfix row-deck" style='text-align:right;'>
+		<!-- <div class="row clearfix row-deck" style='text-align:right;'>
             <div class="col-12">
                 <div class="col-12 header p-0">
                     <ul class="header-dropdown">
-                        <button type="button" class="btn btn-primary p-2 px-3" id="btnAdd"> <i class="icon-plus"></i> &nbsp;Add inventory storage</button>
                     </ul>
                 </div>
             </div>
-        </div>
+        </div> -->
 
 		<div class="row clearfix row-deck">
             <div class="col-12">
@@ -40,7 +42,7 @@
 		<div class="modal-content">
 			<div class="modal-header bg-primary text-light">
 				<h5 class="page-title font-weight-bold">ADD INVENTORY STORAGE</h5>
-				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+				<button type="button" class="close btnCancel" data-dismiss="modal" aria-label="Close">
 					<span class="text-light" aria-hidden="true">&times;</span>
 				</button>
 			</div>

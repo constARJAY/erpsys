@@ -1,9 +1,141 @@
  
  $(document).ready(function() {
 
-   /*  $('.select2').select2({
-      theme: "bootstrap"
-    });*/
+
+    // ----- GET PHILIPPINE ADDRESSES -----
+	const getPhAddresses = () => {
+		let result = [];
+		$.ajax({
+			method: "GET",
+			url: `${base_url}assets/json/ph-address.json`,
+			async: false,
+			dataType: "json",
+			success: function (data) {
+				result = data;
+			},
+		});
+		return result;
+	};
+	const address = getPhAddresses();
+
+	const phRegion = [
+		{ key: "01",    name: "REGION I" },
+		{ key: "02",    name: "REGION II" },
+		{ key: "03",    name: "REGION III" },
+		{ key: "4A",    name: "REGION IV-A" },
+		{ key: "4B",    name: "REGION IV-B" },
+		{ key: "05",    name: "REGION V" },
+		{ key: "06",    name: "REGION VI" },
+		{ key: "07",    name: "REGION VII" },
+		{ key: "08",    name: "REGION VIII" },
+		{ key: "09",    name: "REGION IX" },
+		{ key: "10",    name: "REGION X" },
+		{ key: "11",    name: "REGION XI" },
+		{ key: "12",    name: "REGION XII" },
+		{ key: "13",    name: "REGION XIII" },
+		{ key: "BARMM", name: "BARMM" },
+		{ key: "CAR",   name: "CAR" },
+		{ key: "NCR",   name: "NCR" },
+	];
+
+    const getRegionName = (regionKey = "01") => {
+        let region = phRegion.filter(item => {
+            if (item.key == regionKey) {
+                return item;
+            }
+        });
+        return region.length > 0 ? region[0].name : "";
+    }
+
+    function getRegionOptions(regionKey = false) {
+        let html = "";
+        phRegion.map(item => {
+            html += `<option value="${item.key}" ${regionKey == item.key && "selected"}>${item.name}</option>`;
+        })
+        return html;
+    }
+
+    function getProvinceOptions(provinceKey = false, region = "01", doEmpty = false) {
+        let html = `<option value="" selected>Select Province</option>`;
+        if (!doEmpty) {
+            const provinceList = region && Object.keys(address[region].province_list);
+            provinceList && provinceList.map(item => {
+                html += `<option value="${item}" ${provinceKey == item && "selected"}>${item}</option>`;
+            })
+        }
+        return html;
+    }
+
+    function getMunicipalityOptions(municipalityKey = false, region = "01", province = "ILOCOS NORTE", doEmpty = false) {
+        let html = `<option value="" selected>Select City/Municipality</option>`;
+        if (!doEmpty) {
+            const municipalityList = region && province && Object.keys(address[region].province_list[province].municipality_list);
+            municipalityList && municipalityList.map(item => {
+                html += `<option value="${item}" ${municipalityKey == item && "selected"}>${item}</option>`;
+            })
+        }
+        return html;
+    }
+
+    function getBarangayOptions(barangayKey = false, region = "01", province = "ILOCOS NORTE", city = "ADAMS", doEmpty = false) {
+        let html = `<option value="" selected>Select Barangay</option>`;
+        if (!doEmpty) {
+            const barangayList = region && region && province && address[region].province_list[province].municipality_list[city].barangay_list;
+            barangayList && barangayList.map(item => {
+                html += `<option value="${item}" ${barangayKey == item && "selected"}>${item}</option>`;
+            })
+        }
+        return html;
+    }
+
+    $(document).on("change", "[name=inventoryStorageRegion]", function() {
+        const region = $(this).val();
+
+        if (region) {
+            const provinceOptions = getProvinceOptions(false, region);
+            $("[name=inventoryStorageProvince]").html(provinceOptions);
+        } else {
+            const provinceOptions = getProvinceOptions(false, "", true);
+            $("[name=inventoryStorageProvince]").html(provinceOptions);
+        }
+
+        const municipality = getMunicipalityOptions(false, "", "", true);
+        $("[name=inventoryStorageMunicipality]").html(municipality); 
+
+        const barangay = getBarangayOptions(false, "", "", "", true);
+        $("[name=inventoryStorageBarangay]").html(barangay);
+    })
+
+    $(document).on("change", "[name=inventoryStorageProvince]", function() {
+        const region   = $("[name=inventoryStorageRegion]").val();
+        const province = $(this).val();
+        
+        if (province) {
+            const municipalityOptions = getMunicipalityOptions(false, region, province);
+            $("[name=inventoryStorageMunicipality]").html(municipalityOptions);
+        } else {
+            const municipalityOptions = getMunicipalityOptions(false, "", "", true);
+            $("[name=inventoryStorageMunicipality]").html(municipalityOptions);
+        }
+
+        const barangay = getBarangayOptions(false, "", "", "", true);
+        $("[name=inventoryStorageBarangay]").html(barangay);
+    })
+
+    $(document).on("change", "[name=inventoryStorageMunicipality]", function() {
+        const region   = $("[name=inventoryStorageRegion]").val();
+        const province = $("[name=inventoryStorageProvince]").val();
+        const city     = $(this).val();
+
+        if (city) {
+            const barangay = getBarangayOptions(false, region, province, city);
+            $("[name=inventoryStorageBarangay]").html(barangay);
+        } else {
+            const barangay = getBarangayOptions(false, "", "", "", true);
+            $("[name=inventoryStorageBarangay]").html(barangay);
+        }
+    })
+	// ----- END GET PHILIPPINE ADDRESSES -----
 
                 // ----- DATATABLES -----
         function initDataTables() {
@@ -18,19 +150,12 @@
                 scrollCollapse: true,
                 columnDefs: [
                     { targets: 0, width: 100 },
-                    { targets: 1, width: 200 },
+                    { targets: 1, width: 120 },
                     { targets: 2, width: 100 },
-                    { targets: 3, width: 250 },
+                    { targets: 3, width: 100 },
                     { targets: 4, width: 100 },
-                    { targets: 5, width: 150 }, 
-                    { targets: 6, width: 200 },
-                    { targets: 7, width: 100 },
-                    { targets: 8, width: 100 },
-                    { targets: 9, width: 90 },
-                    { targets: 10, width: 120 },
-                    { targets: 11, width: 100 },
-                    { targets: 13, width: 100 },
-                    { targets: 14, width: 50 },
+                    { targets: 5, width: 50 },
+                    { targets: 6, width: 50 },
                 ],
             });
         }
@@ -57,17 +182,9 @@
                     <table class="table table-bordered table-striped table-hover" id="tableUserAccount">
                         <thead>
                             <tr class="text-center">
-                                <th>Number</th>
+                                <th>Storage Code</th>
                                 <th>Office Name</th>
-                                <th>Unit Number</th>
-                                <th>Building/House Number</th>
-                                <th>Street Name</th>
-                                <th>Subdivision Name</th>
-                                <th>Barangay</th>
-                                <th>City/Municipality</th>
-                                <th>State/Province</th>
-                                <th>Country</th>
-                                <th>Zip Code</th>
+                                <th>Storage Address</th>
                                 <th>Room Type</th>
                                 <th>Department</th>
                                 <th>Status</th>
@@ -76,10 +193,10 @@
                         </thead>
                         <tbody>`;
                          data.map((item, index, array) => {
-                            if(item.inventoryStorageStatus=="0"){
-                                var activestatus ="Active";
+                            if(item.inventoryStorageStatus=="1"){
+                                var activestatus =`<span class="badge badge-outline-success w-100">Active</span>`;
                             }else{
-                                 var activestatus ="Inactive";
+                                 var activestatus =`<span class="badge badge-outline-danger w-100">Inactive</span>`;
                             }
                         // ----- INSERT UNIQUE DATA TO uniqueData VARIABLE ----
                         let unique = {
@@ -94,23 +211,15 @@
 
                         html += `
                         <tr>
-                           <td>${item.inventoryStorageID }</td>
+                           <td>${item.inventoryStorageCode }</td>
                            <td>${item.inventoryStorageOfficeName}</td>
-                           <td>${item.inventoryStorageUnitNumber}</td>
-                           <td>${item.inventoryStorageHouseNumber}</td>
-                           <td>${item.inventoryStorageStreetName}</td>
-                           <td>${item.inventoryStorageSubdivisionName}</td>
-                           <td>${item.inventoryStorageBarangay}</td>
-                           <td>${item.inventoryStorageMunicipality}</td>
-                           <td>${item.inventoryStorageProvince}</td>
-                           <td>${item.inventoryStorageCountry}</td>
-                           <td>${item.inventoryStorageZipCode}</td>
+                           <td>${getRegionName(item.inventoryStorageRegion)} ${item.inventoryStorageProvince} ${item.inventoryStorageMunicipality} ${item.inventoryStorageBarangay} ${item.inventoryStorageStreetName} ${item.inventoryStorageSubdivisionName} ${item.inventoryStorageCountry} ${item.inventoryStorageZipCode}</td>
                            <td>${item.inventoryStorageRoomType}</td>
                            <td>${item.inventoryStorageDepartment}</td>
                            <td>${activestatus}</td>
                            <td>
                            <button 
-                                class="btn btn-primary btnEdit" 
+                                class="btn btn-edit btnEdit w-100" 
                                 id="${item.inventoryStorageID}"
                                 feedback="${item.inventoryStorageOfficeName}">
                                 EDIT
@@ -141,31 +250,33 @@
 
                 // ----- MODAL CONTENT -----
         function modalContent(data = false) {
-            let inventoryStorageID = data ? (data[0].inventoryStorageID ? data[0].inventoryStorageID : "") : "",
-                inventoryStorageOfficeName = data ? (data[0].inventoryStorageOfficeName   ? data[0].inventoryStorageOfficeName  : "") : "",
-                inventoryStorageUnitNumber  = data ? (data[0].inventoryStorageUnitNumber    ? data[0].inventoryStorageUnitNumber   : "") : "",
-                inventoryStorageHouseNumber     = data ? (data[0].inventoryStorageHouseNumber       ? data[0].inventoryStorageHouseNumber      : "") : "",
-                inventoryStorageStreetName    = data ? (data[0].inventoryStorageStreetName      ? data[0].inventoryStorageStreetName     : "") : "",
-                inventoryStorageSubdivisionName = data ? (data[0].inventoryStorageSubdivisionName   ? data[0].inventoryStorageSubdivisionName  : "") : "",
-                inventoryStorageBarangay   = data ? (data[0].inventoryStorageBarangay     ? data[0].inventoryStorageBarangay    : "") : "",
-                inventoryStorageMunicipality    = data ? (data[0].inventoryStorageMunicipality      ? data[0].inventoryStorageMunicipality     : "") : "",
-                inventoryStorageProvince      = data ? (data[0].inventoryStorageProvince        ? data[0].inventoryStorageProvince       : "") : "",
-                inventoryStorageCountry  = data ? (data[0].inventoryStorageCountry    ? data[0].inventoryStorageCountry   : "") : "",
-                inventoryStorageZipCode      = data ? (data[0].inventoryStorageZipCode        ? data[0].inventoryStorageZipCode       : "") : "",
-                inventoryStorageRoomType  = data ? (data[0].inventoryStorageRoomType    ? data[0].inventoryStorageRoomType   : "") : "",
-                inventoryStorageDepartment  = data ? (data[0].inventoryStorageDepartment    ? data[0].inventoryStorageDepartment   : "") : "",
-                inventoryStorageStatus  = data ? (data[0].inventoryStorageStatus    ? data[0].inventoryStorageStatus   : "") : "";
-                let userAccountID = '';
+            let {
+                inventoryStorageID              =  "",
+                inventoryStorageOfficeName      =  "",
+                inventoryStorageUnitNumber      =  "",
+                inventoryStorageHouseNumber     =  "",
+                inventoryStorageStreetName      =  "",
+                inventoryStorageSubdivisionName =  "",
+                inventoryStorageBarangay        =  false,
+                inventoryStorageMunicipality    =  false,
+                inventoryStorageProvince        =  false,
+                inventoryStorageRegion          =  false,
+                inventoryStorageCountry         =  "",
+                inventoryStorageZipCode         =  "",
+                inventoryStorageRoomType        =  "",
+                inventoryStorageDepartment      =  "",
+                inventoryStorageStatus          =  ""
+                } = data && data[0];
 
             let button = inventoryStorageID  ? `
             <button 
-                class="btn btn-primary px-5 p-2" 
+                class="btn btn-update px-5 p-2" 
                 id="btnUpdate" 
                 rowID="${inventoryStorageID}">
                 UPDATE
             </button>` : `
             <button 
-                class="btn btn-primary px-5 p-2" 
+                class="btn btn-save px-5 p-2" 
                 id="btnSave">
                 SAVE
             </button>`;
@@ -173,7 +284,7 @@
             let html = `
                 <div class="modal-body">
                     <div class="row">
-                        <div class="col-md-6 col-lg-6">
+                        <div class="col-md-12 col-lg-12">
                             <div class="form-group">
                                 <label for="">Office Name <span class="text-danger">*</span></label>
                                 <input 
@@ -189,150 +300,101 @@
                                  <div class="invalid-feedback d-block" id="invalid-input_officenamee"></div>
                             </div>
                         </div>
-                        <div class="col-md-6 col-lg-6">
-                            <div class="form-group">
-                                <label for="">Unit Number <span class="text-danger">*</span></label>
-                                <input 
-                                    type="text" 
-                                    class="form-control validate " 
-                                    name="inventoryStorageUnitNumber" 
-                                    id="input_unitnumber"
-                                    minlength="2" 
-                                    minlength="50"
-                                    data-allowcharacters="[a-z][A-Z][0-9][.][,][-][(][)]['][/][ ]"
-                                    value="${inventoryStorageUnitNumber}"unique="${inventoryStorageID}"  
-                                    required>  
-                                 <div class="invalid-feedback d-block" id="invalid-input_unitnumber"></div>
-                            </div>
+
+                        <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6">
+                        <div class="form-group">
+                            <label>Region</label>
+                            <select class=" form-control show-tick select2 validate" name="inventoryStorageRegion" id="input_region" required>
+                            <option value="" selected>Select Region</option>
+                            ${getRegionOptions(inventoryStorageRegion)}
+                            </select>
+                            <div class="invalid-feedback d-block" id="invalid-input_region"></div>
                         </div>
-                        <div class="col-md-6 col-lg-6">
-                            <div class="form-group">
-                                <label for="">Building/House Number <span class="text-danger">*</span></label>
-                                <input 
-                                    type="text" 
-                                    class="form-control validate " 
-                                    name="inventoryStorageHouseNumber" 
-                                    id="input_housenumber"
-                                    minlength="2" 
-                                    minlength="75"
-                                    data-allowcharacters="[a-z][A-Z][0-9][.][,][-][(][)]['][/][ ]"
-                                    value="${inventoryStorageHouseNumber}" 
-                                    required>  
-                                 <div class="invalid-feedback d-block" id="invalid-input_house_Number"></div>
-                            </div>
+                    </div>
+                    <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6">
+                        <div class="form-group">
+                            <label>State/Province <span class="text-danger">*</span></label>
+                            <select class=" form-control show-tick select2 validate" name="inventoryStorageProvince"
+                            id="input_province" required>
+                                ${data && getProvinceOptions(inventoryStorageProvince, inventoryStorageRegion)}
+                            </select>
+                            <div class="invalid-feedback d-block" id="invalid-input_province"></div>
                         </div>
-                        <div class="col-md-6 col-lg-6">
-                            <div class="form-group">
-                                <label for="">Street Name  <span class="text-danger">*</span></label>
-                                <input 
-                                    type="text" 
-                                    class="form-control validate " 
-                                    name="inventoryStorageStreetName" 
-                                    id="input_streetname"
-                                    minlength="2" 
-                                    minlength="75"
-                                    data-allowcharacters="[a-z][A-Z][0-9][.][,][-][(][)]['][/][ ]"
-                                    value="${inventoryStorageStreetName}" 
-                                    required>  
-                                 <div class="invalid-feedback d-block" id="invalid-input_street_Name"></div>
-                            </div>
+                    </div>
+                    <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6">
+                        <div class="form-group">
+                            <label>City/Municipality <span class="text-danger">*</span></label>
+                            <select class=" form-control show-tick select2" id="input_municipality" name="inventoryStorageMunicipality" required>
+                                ${data && getMunicipalityOptions(inventoryStorageMunicipality, inventoryStorageRegion, inventoryStorageProvince)}
+                            </select> 
+                            <div class="invalid-feedback d-block" id="invalid-input_municipality"></div>
                         </div>
-                         <div class="col-md-6 col-lg-6">
-                            <div class="form-group">
-                                <label for="">Subdivision Name <span class="text-danger">*</span></label>
-                                <input 
-                                    type="text" 
-                                    class="form-control validate " 
-                                    name="inventoryStorageSubdivisionName" 
-                                    id="input_subdivisionname"
-                                    minlength="2" 
-                                    minlength="75"
-                                    data-allowcharacters="[a-z][A-Z][0-9][.][,][-][(][)]['][/][ ]"
-                                    value="${inventoryStorageSubdivisionName}" 
-                                    required>  
-                                 <div class="invalid-feedback d-block" id="invalid-input_subdivision_Name"></div>
-                            </div>
+                    </div>
+                    <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6">
+                        <div class="form-group">
+                            <label>Barangay <span class="text-danger">*</span></label>
+                            <select class=" form-control show-tick select2 validate" name="inventoryStorageBarangay" id="input_barangay" required>
+                                ${data && getBarangayOptions(inventoryStorageBarangay, inventoryStorageRegion, inventoryStorageProvince, inventoryStorageMunicipality)}
+                            </select>
+                            <div class="invalid-feedback d-block" id="invalid-input_barangay"></div>
                         </div>
-                         <div class="col-md-6 col-lg-6">
-                            <div class="form-group">
-                                <label for="">Barangay <span class="text-danger">*</span></label>
-                                <input 
-                                    type="text" 
-                                    class="form-control validate " 
-                                    name="inventoryStorageBarangay" 
-                                    id="input_barangay"
-                                    minlength="2" 
-                                    minlength="75"
-                                    data-allowcharacters="[a-z][A-Z][0-9][.][,][-][(][)]['][/][ ]"
-                                    value="${inventoryStorageBarangay}" 
-                                    required>  
-                                 <div class="invalid-feedback d-block" id="invalid-input_barangay"></div>
-                            </div>
+                    </div>
+                    <div class="col-sm-12 col-md-6 col-lg-2 col-xl-2">
+                        <div class="form-group">
+                            <label>Unit Number </label>
+                            <input class="form-control validate"
+                            data-allowcharacters="[A-Z][a-z][0-9][.][,][-][()]['][/]"  minlength="2" maxlength="50"  id="input_unitnumber" value="${inventoryStorageUnitNumber}" unique="${inventoryStorageID}"   name="inventoryStorageUnitNumber" type="text">
+                            <div class="invalid-feedback d-block" id="invalid-input_unitnumber"></div>
                         </div>
-                        <div class="col-md-6 col-lg-6">
-                            <div class="form-group">
-                                <label for="">City/Municipality <span class="text-danger">*</span></label>
-                                <input 
-                                    type="text" 
-                                    class="form-control validate " 
-                                    name="inventoryStorageMunicipality" 
-                                    id="input_municipality"
-                                    minlength="2" 
-                                    minlength="75"
-                                    data-allowcharacters="[a-z][A-Z][ ]"
-                                    value="${inventoryStorageMunicipality}" 
-                                    required>  
-                                 <div class="invalid-feedback d-block" id="invalid-input_municipality"></div>
-                            </div>
+                    </div>
+                    <div class="col-sm-12 col-md-6 col-lg-5 col-xl-5">
+                        <div class="form-group">
+                            <label>Building/House Number <span class="text-danger">*</span></label>
+                            <input class="form-control validate"
+                            required
+                            data-allowcharacters="[A-Z][a-z][0-9][.][,][-][()]['][/][ ]"  minlength="2" maxlength="75" id="input_housenumber" name="inventoryStorageHouseNumber" value="${inventoryStorageHouseNumber}" type="text">
+                            <div class="invalid-feedback d-block" id="invalid-input_house_Number"></div>
                         </div>
-                         <div class="col-md-6 col-lg-6">
-                            <div class="form-group">
-                                <label for="">State/Province <span class="text-danger">*</span></label>
-                                <input 
-                                    type="text" 
-                                    class="form-control validate " 
-                                    name="inventoryStorageProvince" 
-                                    id="input_province"
-                                    minlength="2" 
-                                    minlength="75"
-                                    data-allowcharacters="[a-z][A-Z][ ]" 
-                                    value="${inventoryStorageProvince}"
-                                    required>  
-                                 <div class="invalid-feedback d-block" id="invalid-input_province"></div>
-                            </div>
+                    </div>
+                    <div class="col-sm-12 col-md-6 col-lg-5 col-xl-5">
+                        <div class="form-group">
+                            <label>Street Name <span class="text-danger">*</span></label>
+                            <input class="form-control validate"
+                            required
+                            data-allowcharacters="[A-Z][a-z][0-9][.][,][-][()]['][/][ ]"  minlength="2" maxlength="75" id="input_streetname" name="inventoryStorageStreetName" value="${inventoryStorageStreetName}" type="text">
+                            <div class="invalid-feedback d-block" id="invalid-input_street_Name"></div>
                         </div>
-                         <div class="col-md-6 col-lg-6">
-                            <div class="form-group">
-                                <label for="">Country <span class="text-danger">*</span></label>
-                                <input 
-                                    type="text" 
-                                    class="form-control validate " 
-                                    name="inventoryStorageCountry" 
-                                    id="input_country"
-                                    minlength="2" 
-                                    minlength="75"
-                                    data-allowcharacters="[a-z][A-Z][ ]"
-                                    value="${inventoryStorageCountry}" 
-                                    required>  
-                                 <div class="invalid-feedback d-block" id="invalid-input_country"></div>
-                            </div>
+                    </div>
+                    <div class="col-sm-12 col-md-6 col-lg-5 col-xl-5">
+                        <div class="form-group">
+                            <label>Subdivision Name <span class="text-danger">*</span></label>
+                            <input class="form-control validate"
+                            required
+                            data-allowcharacters="[A-Z][a-z][0-9][.][,][-][()]['][/][ ]"  minlength="2" maxlength="75" id="input_subdivisionname" name="inventoryStorageSubdivisionName" value="${inventoryStorageSubdivisionName}" type="text">
+                            <div class="invalid-feedback d-block" id="invalid-input_subdivision_Name"></div>
                         </div>
-                        <div class="col-md-6 col-lg-6">
-                            <div class="form-group">
-                                <label for="">Zip Code <span class="text-danger">*</span></label>
-                                <input 
-                                    type="text" 
-                                    class="form-control validate " 
-                                    name="inventoryStorageZipCode" 
-                                    id="input_zipcode"
-                                    minlength="2" 
-                                    minlength="75"
-                                    data-allowcharacters="[0-9]" 
-                                    value="${inventoryStorageZipCode}"
-                                    required>  
-                                 <div class="invalid-feedback d-block" id="invalid-input_zipcode"></div>
-                            </div>
+                    </div>
+                    <div class="col-sm-12 col-md-6 col-lg-5 col-xl-5">
+                        <div class="form-group">
+                            <label>Country <span class="text-danger">*</span></label>
+                            <input class="form-control validate"
+                            required
+                                data-allowcharacters="[a-z][A-Z][ ]" id="input_country" name="inventoryStorageCountry" minlength="2"
+                                maxlength="75" value="${inventoryStorageCountry}" type="text">
                         </div>
+                        <div class="invalid-feedback d-block" id="invalid-input_country"></div>
+                    </div>
+                    <div class="col-sm-12 col-md-6 col-lg-2 col-xl-2">
+                        <div class="form-group">
+                            <label>Zip Code <span class="text-danger">*</span></label>
+                            <input class="form-control validate"
+                            required
+                                data-allowcharacters="[0-9]" id="input_zipcode" name="inventoryStorageZipCode" minlength="4"
+                                maxlength="4" value="${inventoryStorageZipCode}" type="text">
+                        </div>
+                        <div class="invalid-feedback d-block" id="invalid-input_zipcode"></div>
+                    </div>
+
                         <div class="col-md-6 col-lg-6">
                             <div class="form-group">
                                 <label for="">Room Type </label>
@@ -364,22 +426,19 @@
                         </div>
                         <div class="col-md-6 col-lg-6">
                         <div class="form-group">
-                         <label for="">Status</label>
+                         <label for="">Status <span class="text-danger">*</span></label>
                         <select
                             class="form-control select2 validate" 
                                     name="inventoryStorageStatus" 
                                     id="input_storage_status" 
                                     required>
-                                <option
-                                    value="" 
-                                    disabled 
-                                    ${!data && "selected"}>Select Status</option>
-                                <option 
-                                    value="0" 
-                                    ${data && inventoryStorageStatus == "0" && "selected"}>Active</option>
+                            
                                 <option 
                                     value="1" 
-                                    ${data && inventoryStorageStatus == "1" && "selected"}>Inactive</option>
+                                    ${data && inventoryStorageStatus == "1" && "selected"}>Active</option>
+                                <option 
+                                    value="0" 
+                                    ${data && inventoryStorageStatus == "0" && "selected"}>Inactive</option>
                                 </select>
                                 <div class="invalid-feedback d-block" id="invalid-input_storage_status"></div>
                              </div>
@@ -388,7 +447,7 @@
                     </div>
                 <div class="modal-footer">
                     ${button}
-                    <button class="btn btn-danger px-5 p-2" data-dismiss="modal">CANCEL</button>
+                    <button class="btn btn-danger btnCancel px-5 p-2" data-dismiss="modal">CANCEL</button>
                 </div>`;
             return html;
         } 
@@ -406,33 +465,22 @@
         $(document).on("click", "#btnSave", function() {
             const validate = validateForm("modal_inventory_storage");
             if (validate) {
-                $("#modal_inventory_storage").modal("hide");
-                $("#confirmation-modal_add_inventory_storage").modal("show");
+
+                let data = getFormData("modal_inventory_storage", true);
+                data["tableData[inventoryStorageCode]"] = generateCode("ISM", false, "ims_inventory_storage_tbl", "inventoryStorageCode");
+                data["tableData[createdBy]"] = sessionID;
+                data["tableData[updatedBy]"] = sessionID;
+                data["tableName"]            = "ims_inventory_storage_tbl";
+                data["feedback"]             = $("[name=inventoryStorageOfficeName]").val();
+    
+                sweetAlertConfirmation("add", "Inventory Storage", "modal_inventory_storage", null, data, true, tableContent);
+
+                // $("#modal_inventory_storage").modal("hide");
+                // $("#confirmation-modal_add_inventory_storage").modal("show");
             }
         });
         // ----- END SAVE ADD -----
 
-        // ----- SAVE CONFIRMATION ADD -----
-        $(document).on("click", "#btnSaveConfirmationAdd", function() {
-            /**
-             * ----- FORM DATA -----
-             * tableData = {} -> Objects
-             */
-            let data = getFormData("modal_inventory_storage");
-            data.append("tableName", "ims_inventory_storage_tbl");
-            data.append("feedback", "Your choice");
-            /**
-             * ----- DATA -----
-             * 1. tableName
-             * 2. tableData
-             * 3. feedback
-             */
-
-            const saveData = insertTableData(data);
-            if (saveData) {
-               tableContent();
-            }
-        })
 
            // ----- OPEN EDIT MODAL -----
         $(document).on("click", ".btnEdit", function() {
@@ -456,34 +504,43 @@
         });
          $(document).on("click", "#btnUpdate", function() {
             const validate = validateForm("modal_inventory_storage");
+
+            const id = $(this).attr("rowID");
+
             if (validate) {
-                $("#modal_inventory_storage").modal("hide");
-                $("#confirmation-modal_edit_inventory_storage").modal("show");
+
+                let data = getFormData("modal_inventory_storage", true);
+                data["tableData[updatedBy]"] = sessionID;
+                data["tableName"]            = "ims_inventory_storage_tbl";
+                data["whereFilter"]          = "inventoryStorageID=" + id;
+                data["feedback"]             = $("[name=inventoryStorageOfficeName]").val();
+
+                sweetAlertConfirmation(
+                    "update",
+                    "Inventory Storage",
+                    "modal_inventory_storage",
+                    "",
+                    data,
+                    true,
+                    tableContent
+                );
+            
+                // $("#modal_inventory_storage").modal("hide");
+                // $("#confirmation-modal_edit_inventory_storage").modal("show");
             }
         }); 
 
-          // ----- SAVE CONFIRMATION EDIT -----
-        $(document).on("click", "#btnSaveConfirmationEdit", function() {
-            const storageID = $(this).attr("storageid");
-            const feedback  = $(this).attr("feedback");
+         // ------- CANCEl MODAL-------- 
+    $(document).on("click",".btnCancel", function(){
+        let condition = emptyFormCondition("modal_inventory_storage");
+        if(condition==true){
+            sweetAlertConfirmation("cancel", "Inventory Storage","modal_inventory_storage");
+        }else{
+            $("#modal_inventory_storage").modal("hide");
+        }
+        
+    });
 
-            let data = getFormData("modal_inventory_storage");
-            data.append("tableName", "ims_inventory_storage_tbl");
-            data.append("whereFilter", "inventoryStorageID="+storageID);
-            data.append("feedback", feedback);
-
-            /**
-             * ----- DATA -----
-             * 1. tableName
-             * 2. tableData
-             * 3. whereFilter
-             * 4. feedback
-            */
-
-            const saveData = updateTableData(data);
-            if (saveData) {
-               tableContent();
-            }
-        })
+  // -------- END CANCEL MODAL-----------
        
     });

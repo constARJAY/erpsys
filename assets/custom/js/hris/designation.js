@@ -43,26 +43,26 @@ $(document).ready(function(){
         // Reset the unique datas
         uniqueData = []; 
         // getTableData(tableName = null, columnName = “”, WHERE = “”, orderBy = “”) 
-        const data = getTableData("hris_designation_tbl as designation INNER JOIN hris_department_tbl as department USING(departmentID)  ", 
-            "*, CONCAT('DES-',SUBSTR(designation.datecreated,3,2),'-',LPAD(designation.designationID, 5, '0')) AS designationCode,department.departmentName", "", "");
+        // const data = getTableData("hris_designation_tbl as designation INNER JOIN hris_department_tbl as department USING(departmentID)  ", 
+        //     "*, CONCAT('DES-',SUBSTR(designation.datecreated,3,2),'-',LPAD(designation.designationID, 5, '0')) AS designationCode,department.departmentName", "", "");
 
-        // $.ajax({
-        //     url:      `${base_url}operations/getTableData`,
-        //     method:   'POST',
-        //     async:    false,
-        //     dataType: 'json',
-        //     data:     {tableName: "user_account_tbl"},
-        //     beforeSend: function() {
+        $.ajax({
+            url:      `${base_url}operations/getTableData`,
+            method:   'POST',
+            async:    false,
+            dataType: 'json',
+            data:     {tableName: "hris_designation_tbl as designation INNER JOIN hris_department_tbl as department USING(departmentID)"},
+            beforeSend: function() {
                 $("#table_content").html(preloader);
-        //         // $("#inv_headerID").text("List of Inventory Item");
-        //     },
-        //     success: function(data) {
-        //         console.log(data);
+                // $("#inv_headerID").text("List of Inventory Item");
+            },
+            success: function(data) {
+                console.log(data);
                 let html = `
                 <table class="table table-bordered table-striped table-hover" id="tableHRISDesignation">
                     <thead>
                     <tr class="text-center">
-                        <th>Designation No.</th>
+                        <th>Designation Code</th>
                         <th>Designation Name</th>
                         <th>Department Name</th>
                         <th>Status</th>
@@ -112,15 +112,15 @@ $(document).ready(function(){
                     $("#table_content").html(html);
                     initDataTables();
                 }, 500);
-        //     },
-        //     error: function() {
-        //         let html = `
-        //             <div class="w-100 h5 text-center text-danger>
-        //                 There was an error fetching data.
-        //             </div>`;
-        //         $("#table_content").html(html);
-        //     }
-        // })
+            },
+            error: function() {
+                let html = `
+                    <div class="w-100 h5 text-center text-danger>
+                        There was an error fetching data.
+                    </div>`;
+                $("#table_content").html(html);
+            }
+        })
     }
     tableContent();
     // ----- END TABLE CONTENT -----
@@ -193,11 +193,6 @@ $(document).ready(function(){
                             autocomplete="off"
                             required>
                             <option 
-                                value="" 
-                                disabled 
-                                selected
-                                ${!data && "selected"}>No Selected</option>
-                            <option 
                                 value="1" 
                                 ${data && designationStatus == "1" && "selected"}>Active</option>
                             <option 
@@ -235,62 +230,14 @@ $(document).ready(function(){
     $(document).on("click", "#btnSave", function() {
     const validate = validateForm("modal_hris_designation");
     if (validate) {
-        $("#modal_hris_designation").modal("hide");
-        // Swal.fire({
-        //     title: 'Are you sure?',
-        //     text: "You want to save this?",
-        //     icon: 'warning',
-        //     showCancelButton: true,
-        //     confirmButtonColor: '#3085d6',
-        //     cancelButtonColor: '#d33',
-        //     confirmButtonText: 'Save'
-        // }).
-        
-        Swal.fire({
-            title: 'Are you sure?',
-            text: "You want to save this?",
-            imageUrl: `${base_url}assets/custom/isometric_image/save.png`,
-            imageWidth: 200,
-            imageHeight: 200,
-            imageAlt: 'Custom image',
-            showCancelButton: true,
-            confirmButtonColor: '#28a745',
-            cancelButtonColor: '#1A1A1A',
-            confirmButtonText: 'Save',
-            allowOutsideClick: false
-          }).then((result) => {
-            if (result.isConfirmed) {
+        let data = getFormData("modal_hris_designation", true);
+        data["tableData[designationCode]"] = generateCode("DSN", false, "hris_designation_tbl", "designationCode");
+        data["tableData[createdBy]"] = sessionID;
+        data["tableData[updatedBy]"] = sessionID;
+        data["tableName"]            = "hris_designation_tbl";
+        data["feedback"]             = $("[name=designationName]").val();
 
-            /**
-             * ----- FORM DATA -----
-             * tableData = {} -> Objects
-             */
-            let data = getFormData("modal_hris_designation");
-            data.append("tableName", "hris_designation_tbl");
-            data.append("feedback", "Your choice");
-            /**
-             * ----- DATA -----
-             * 1. tableName
-             * 2. tableData
-             * 3. feedback
-             */
-
-            const saveData = insertTableData(data);
-            if (saveData) {
-                tableContent();
-            }
-                
-            Swal.fire({
-                icon: 'success',
-                title: 'Successfully saved!',
-                showConfirmButton: false,
-                timer: 2000
-              })
-            }else{
-                $("#modal_hris_designation").modal("show");
-            }
-        });
-            
+        sweetAlertConfirmation("add", "Designation Masterfile", "modal_hris_designation", null, data, true, tableContent);
         }
     });
     // ----- END SAVE MODAL -----
@@ -321,154 +268,44 @@ $(document).ready(function(){
 
     // ----- UPDATE MODAL -----
     $(document).on("click", "#btnUpdate", function() {
+        const rowID = $(this).attr("rowID");
         const validate = validateForm("modal_hris_designation");
         if (validate) {
-        $("#modal_hris_designation").modal("hide");
-            Swal.fire({
-                title: 'Are you sure?',
-                text: "You want to save this?",
-                imageUrl: `${base_url}assets/custom/isometric_image/save.png`,
-                imageWidth: 200,
-                imageHeight: 200,
-                imageAlt: 'Custom image',
-                showCancelButton: true,
-                confirmButtonColor: '#28a745',
-                cancelButtonColor: '#1A1A1A',
-                confirmButtonText: 'Yes, save changes',
-                allowOutsideClick: false
-              }).then((result) => {
-                if (result.isConfirmed) {
-    
-                    const rowID = $(this).attr("rowID");
-                    const feedback  = $(this).attr("feedback");
-        
-                    let data = getFormData("modal_hris_designation");
-                    data.append("tableName", "hris_designation_tbl");
-                    data.append("whereFilter", "designationID="+rowID);
-                    // data.append("feedback", feedback);
-        
-                    /**
-                     * ----- DATA -----
-                     * 1. tableName
-                     * 2. tableData
-                     * 3. whereFilter
-                     * 4. feedback
-                    */
-        
-                    const saveData = updateTableData(data);
-                    if (saveData) {
-                       tableContent();
-                    }
-                    
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Successfully saved!',
-                    showConfirmButton: false,
-                    timer: 2000
-                })
-                }else{
-                    $("#modal_hris_designation").modal("show");
-                }
-            });
+
+            let data = getFormData("modal_hris_designation", true);
+			data["tableData[updatedBy]"] = sessionID;
+			data["tableName"]            = "hris_designation_tbl";
+			data["whereFilter"]          = "designationID="+rowID;
+			data["feedback"]             = $("[name=designationName]").val();
+
+			sweetAlertConfirmation(
+				"update",
+				"Designation Masterfile",
+				"modal_hris_designation",
+				"",
+				data,
+				true,
+				tableContent
+            );
                 
             }
         });
         // ----- END UPDATE MODAL -----
 
     // ------- CANCEl MODAL-------- 
-    $(document).on("click",".btnCancel",function(){
-        $("#modal_hris_designation").modal("hide");
 
-        const data = getFormData("modal_hris_designation");
-
-        var validate = false;
-            for(var i of data.entries()) {
-                const count =+i[1];
-               validate[0] = i[1];
-                if(i[1] !=""){
-                    validate = true;
-                }
-            }
-
-            if(validate == true){
-
-                Swal.fire({
-                    title: 'Are you sure?',
-                    text: "You won't be able to revert this!",
-                    imageUrl: `${base_url}assets/custom/isometric_image/questions.png`,
-                    imageWidth: 200,
-                    imageHeight: 200,
-                    imageAlt: 'Custom image',
-                    showCancelButton: true,
-                    confirmButtonColor: '#28a745',
-                    cancelButtonColor: '#1A1A1A',
-                    confirmButtonText: 'Yes, discard!',
-                    allowOutsideClick: false
-                  }).then((result) => {
-                    if (result.isConfirmed) {
-
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Changes successfully discard!',
-                        showConfirmButton: false,
-                        timer: 2000
-                      })
-                    }else{
-                        $("#modal_hris_designation").modal("show");
-                    }
-                  });
-            }else{
-                $("#modal_hris_designation").modal("hide");
-            }
-       
+    $(document).on("click", ".btnCancel", function () {
+		let formEmpty = isFormEmpty("modal_hris_designation");
+		if (!formEmpty) {
+			sweetAlertConfirmation(
+				"cancel",
+				"Designation Masterfile",
+				"modal_hris_designation"
+			);
+		} else {
+			$("#modal_inventory_vendor").modal("hide");
+		}
     });
     // -------- END CANCEL MODAL-----------
 
-    // ---- OPEN DELETE MODAL -----
-    $(document).on("click", ".btnDelete", function() {
-        const id = $(this).attr("id");
-        const feedback = $(this).attr("feedback");
-
-        Swal.fire({
-            title: 'Are you sure?',
-            text: "You want to delete this!",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#3085d6',
-            cancelButtonColor: '#d33',
-            confirmButtonText: 'Discard',
-            allowOutsideClick: false
-          }).then((result) => {
-            if (result.isConfirmed) {
-
-            // /**
-            //  * ----- DATA -----
-            //  * 1. tableName
-            //  * 2. whereFilter
-            //  * 3. feedback
-            // */
-
-            // const data = {
-            //     tableName:   "user_account_tbl",
-            //     whereFilter: "userrowID="+rowID,
-            //     feedback
-            // };
-
-            // const saveData = deleteTableData(data);
-            // if (saveData) {
-            //    tableContent();
-            // }
-
-              Swal.fire(
-                'Successfully Deleted!',
-                '',
-                'success'
-              )
-            }
-          });
-    });
-    // ---- END OPEN DELETE MODAL -----
-
-
-      
 });

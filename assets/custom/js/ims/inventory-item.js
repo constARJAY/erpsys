@@ -35,21 +35,21 @@ $(document).ready(function(){
         // Reset the unique datas
         uniqueData = []; 
         // getTableData(tableName = null, columnName = “”, WHERE = “”, orderBy = “”) 
-        const data = getTableData("ims_inventory_item_tbl as item INNER JOIN ims_inventory_classification_tbl as classification USING(classificationID) INNER JOIN ims_inventory_category_tbl as category USING(categoryID) INNER JOIN ims_inventory_storage_tbl as storage USING(storageID) ", 
-            "*, CONCAT('ITM-',SUBSTR(item.datecreated,3,2),'-',LPAD(item.itemID, 5, '0')) AS itemCode,classification.classificationName,storage.officeName,category.categoryName","", "");
+        // const data = getTableData("ims_inventory_item_tbl as item INNER JOIN ims_inventory_classification_tbl as classification USING(classificationID) INNER JOIN ims_inventory_category_tbl as category USING(categoryID) INNER JOIN ims_inventory_storage_tbl USING(inventoryStorageID) ", 
+        //     "*, CONCAT('ITM-',SUBSTR(item.datecreated,3,2),'-',LPAD(item.itemID, 5, '0')) AS itemCode,classification.classificationName,inventoryStorageOfficeName,category.categoryName","", "");
 
-        // $.ajax({
-        //     url:      `${base_url}operations/getTableData`,
-        //     method:   'POST',
-        //     async:    false,
-        //     dataType: 'json',
-        //     data:     {tableName: "ims_inventory_item_tbl"},
-        //     beforeSend: function() {
+        $.ajax({
+            url:      `${base_url}operations/getTableData`,
+            method:   'POST',
+            async:    false,
+            dataType: 'json',
+            data:     {tableName: "ims_inventory_item_tbl as item INNER JOIN ims_inventory_classification_tbl as classification USING(classificationID) INNER JOIN ims_inventory_category_tbl as category USING(categoryID) INNER JOIN ims_inventory_storage_tbl USING(inventoryStorageID)"},
+            beforeSend: function() {
                 $("#table_content").html(preloader);
-        //         // $("#inv_headerID").text("List of Inventory Item");
-        //     },
-            // success: function(data) {
-            //     console.log(data);
+                // $("#inv_headerID").text("List of Inventory Item");
+            },
+            success: function(data) {
+                console.log(data);
                 let html = `
                 <table class="table table-bordered table-striped table-hover" id="tableInventoryItem">
                     <thead>
@@ -90,7 +90,7 @@ $(document).ready(function(){
                     html += `
                     <tr>
                         <td>${item.itemCode}</td>
-                        <td>${item.officeName}</td>
+                        <td>${item.inventoryStorageOfficeName}</td>
                         <td>${item.itemName}</td>
                         <td>${item.categoryName}</td>
                         <td>${item.classificationName}</td>
@@ -118,15 +118,15 @@ $(document).ready(function(){
                     $("#table_content").html(html);
                     initDataTables();
                 }, 500);
-            // },
-            // error: function() {
-            //     let html = `
-            //         <div class="w-100 h5 text-center text-danger>
-            //             There was an error fetching data.
-            //         </div>`;
-            //     $("#table_content").html(html);
-            // }
-        // })
+            },
+            error: function() {
+                let html = `
+                    <div class="w-100 h5 text-center text-danger>
+                        There was an error fetching data.
+                    </div>`;
+                $("#table_content").html(html);
+            }
+        })
     }
     tableContent();
     // ----- END TABLE CONTENT -----
@@ -135,13 +135,13 @@ $(document).ready(function(){
     function storageContent(param = false) {
     // getTableData(tableName = null, columnName = “”, WHERE = “”, orderBy = “”) 
     const data = getTableData("ims_inventory_storage_tbl", 
-        "storageID ,officeName", "", "");
+        "inventoryStorageID  ,inventoryStorageOfficeName", "", "");
       
             let html = ` <option value="" disabled selected ${!param && "selected"}>No Selected</option>`;
             data.map((item, index, array) => {
-                html += `<option value="${item.storageID}" ${param && item.storageID == param[0].storageID && "selected"}>${item.officeName}</option>`;
+                html += `<option value="${item.inventoryStorageID}" ${param && item.inventoryStorageID  == param[0].inventoryStorageID  && "selected"}>${item.inventoryStorageOfficeName}</option>`;
             })
-            $("#input_storageID").html(html);
+            $("#input_inventoryStorageID").html(html);
     }
     storageContent();
     // ----- END STORAGE CONTENT -----
@@ -178,17 +178,19 @@ $(document).ready(function(){
 
      // ----- MODAL CONTENT -----
      function modalContent(data = false) {
-        let itemID              = data ? (data[0].itemID            ? data[0].itemID        : "") : "",
-        storageID             = data ? (data[0].storageID       ? data[0].storageID   : "") : "",
-        itemName                = data ? (data[0].itemName          ? data[0].itemName      : "") : "",
-        classificationID      = data ? (data[0].classificationID? data[0].classificationID         : "") : "",
-        categoryID            = data ? (data[0].categoryID      ? data[0].categoryID  : "") : "",
-        itemSize                = data ? (data[0].itemSize          ? data[0].itemSize      : "") : "",
-        vatType                 = data ? (data[0].vatType           ? data[0].vatType       : "") : "",
-        reOrderLevel            = data ? (data[0].reOrderLevel      ? data[0].reOrderLevel  : "") : "",
-        basePrice               = data ? (data[0].basePrice         ? data[0].basePrice     : "") : "",
-        unitOfMeasurementID            = data ? (data[0].unitOfMeasurementID      ? data[0].unitOfMeasurementID  : "") : "",
-        itemStatus            = data ? (data[0].itemStatus      ? data[0].itemStatus  : "") : "";
+        let {
+        itemID              = "",
+        inventoryStorageID  = "",
+        itemName            = "",
+        classificationID    = "",
+        categoryID          = "",
+        itemSize            = "",
+        vatType             = "",
+        reOrderLevel        = "",
+        basePrice           = "",
+        unitOfMeasurementID = "",
+        itemStatus          = ""
+        }= data && data[0];  
         // classificationContent(data);
         let button = itemID ? `
         <button 
@@ -213,12 +215,12 @@ $(document).ready(function(){
                             <label>Storage Code<span class="text-danger font-weight-bold">*</span></label>
                             <select 
                             class="form-control select2 validate" 
-                            id="input_storageID" 
-                            name="storageID"
+                            id="input_inventoryStorageID" 
+                            name="inventoryStorageID"
                             autocomplete="off"
                             required>
                         </select>
-                            <div class="invalid-feedback d-block" id="invalid-input_storageID"></div>
+                            <div class="invalid-feedback d-block" id="invalid-input_inventoryStorageID"></div>
                         </div>
                     </div>
                     <div class="col-md-6 col-sm-12">
@@ -407,7 +409,7 @@ $(document).ready(function(){
                         <label>Unit Price<span class="text-danger font-weight-bold">*</span></label>
                             <input 
                                 type="text" 
-                                class="form-control validate amount" 
+                                class="form-control amount" 
                                 name="basePrice" 
                                 id="input_basePrice" 
                                 data-allowcharacters="[A-Z][a-z][0-9][ ]" 
@@ -452,62 +454,15 @@ $(document).ready(function(){
     $(document).on("click", "#btnSave", function() {
     const validate = validateForm("modal_inventory_item");
     if (validate) {
-        $("#modal_inventory_item").modal("hide");
-        // Swal.fire({
-        //     title: 'Are you sure?',
-        //     text: "You want to save this?",
-        //     icon: 'warning',
-        //     showCancelButton: true,
-        //     confirmButtonColor: '#3085d6',
-        //     cancelButtonColor: '#d33',
-        //     confirmButtonText: 'Save'
-        // }).
-        
-        Swal.fire({
-            title: 'Are you sure?',
-            text: "You want to save this?",
-            imageUrl: `${base_url}assets/custom/isometric_image/save.png`,
-            imageWidth: 200,
-            imageHeight: 200,
-            imageAlt: 'Custom image',
-            showCancelButton: true,
-            confirmButtonColor: '#28a745',
-            cancelButtonColor: '#1A1A1A',
-            confirmButtonText: 'Save',
-            allowOutsideClick: false
-          }).then((result) => {
-            if (result.isConfirmed) {
 
-            /**
-             * ----- FORM DATA -----
-             * tableData = {} -> Objects
-             */
-            let data = getFormData("modal_inventory_item");
-            data.append("tableName", "ims_inventory_item_tbl");
-            data.append("feedback", "Your choice");
-            /**
-             * ----- DATA -----
-             * 1. tableName
-             * 2. tableData
-             * 3. feedback
-             */
+        let data = getFormData("modal_inventory_item", true);
+        data["tableData[itemCode]"] = generateCode("ITM", false, "ims_inventory_item_tbl", "itemCode");
+        data["tableData[createdBy]"] = sessionID;
+        data["tableData[updatedBy]"] = sessionID;
+        data["tableName"]            = "ims_inventory_item_tbl";
+        data["feedback"]             = $("[name=itemName]").val();
 
-            const saveData = insertTableData(data);
-            if (saveData) {
-                tableContent();
-            }
-                
-            Swal.fire({
-                icon: 'success',
-                title: 'Successfully saved!',
-                showConfirmButton: false,
-                timer: 2000
-              })
-            }else{
-                $("#modal_inventory_item").modal("show");
-            }
-        });
-            
+        sweetAlertConfirmation("add", "Inventory Item", "modal_inventory_item", null, data, true, tableContent); 
         }
     });
     // ----- END SAVE MODAL -----
@@ -540,146 +495,44 @@ $(document).ready(function(){
 
     // ----- UPDATE MODAL -----
     $(document).on("click", "#btnUpdate", function() {
+        const rowID = $(this).attr("rowID");
         const validate = validateForm("modal_inventory_item");
         if (validate) {
-            $("#modal_inventory_item").modal("hide");
-            
-            Swal.fire({
-                title: 'Are you sure?',
-                text: "You want to save this?",
-                imageUrl: `${base_url}assets/custom/isometric_image/save.png`,
-                imageWidth: 200,
-                imageHeight: 200,
-                imageAlt: 'Custom image',
-                showCancelButton: true,
-                confirmButtonColor: '#28a745',
-                cancelButtonColor: '#1A1A1A',
-                confirmButtonText: 'Yes, save changes',
-                allowOutsideClick: false
-              }).then((result) => {
-                if (result.isConfirmed) {
-    
-                    const rowID = $(this).attr("rowID");
-                    const feedback  = $(this).attr("feedback");
+
+            let data = getFormData("modal_inventory_item", true);
+			data["tableData[updatedBy]"] = sessionID;
+			data["tableName"]            = "ims_inventory_item_tbl";
+			data["whereFilter"]          = "itemID=" + rowID;
+			data["feedback"]             = $("[name=itemName]").val();
+
+			sweetAlertConfirmation(
+				"update",
+				"Inventory Item",
+				"modal_inventory_item",
+				"",
+				data,
+				true,
+				tableContent
+            );
         
-                    let data = getFormData("modal_inventory_item");
-                    data.append("tableName", "ims_inventory_item_tbl");
-                    data.append("whereFilter", "itemID="+rowID);
-                    data.append("feedback", feedback);
-        
-                    /**
-                     * ----- DATA -----
-                     * 1. tableName
-                     * 2. tableData
-                     * 3. whereFilter
-                     * 4. feedback
-                    */
-        
-                    const saveData = updateTableData(data);
-                    if (saveData) {
-                       tableContent();
-                    }
-                    
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Successfully saved!',
-                    showConfirmButton: false,
-                    timer: 2000
-                })
-                }else{
-                    $("#modal_inventory_item").modal("show");
-                }
-            });
-                
             }
         });
         // ----- END UPDATE MODAL -----
 
     // ------- CANCEl MODAL-------- 
-    $(document).on("click",".btnCancel",function(){
-        $("#modal_inventory_item").modal("hide");
 
-        let validate = checkFormisNUll("modal_inventory_item");
-        
-            if(validate == true){
-
-                Swal.fire({
-                    title: 'Are you sure?',
-                    text: "You won't be able to revert this!",
-                    imageUrl: `${base_url}assets/custom/isometric_image/questions.png`,
-                    imageWidth: 200,
-                    imageHeight: 200,
-                    imageAlt: 'Custom image',
-                    showCancelButton: true,
-                    confirmButtonColor: '#28a745',
-                    cancelButtonColor: '#1A1A1A',
-                    confirmButtonText: 'Yes, discard!',
-                    allowOutsideClick: false
-                  }).then((result) => {
-                    if (result.isConfirmed) {
-
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Changes successfully discard!',
-                        showConfirmButton: false,
-                        timer: 2000
-                      })
-                    }else{
-                        $("#modal_inventory_item").modal("show");
-                    }
-                  });
-            }else{
-                $("#modal_inventory_item").modal("hide");
-            }
-       
+    $(document).on("click", ".btnCancel", function () {
+		let formEmpty = isFormEmpty("modal_inventory_item");
+		if (!formEmpty) {
+			sweetAlertConfirmation(
+				"cancel",
+				"Inventory Item",
+				"modal_inventory_item"
+			);
+		} else {
+			$("#modal_inventory_item").modal("hide");
+		}
     });
     // -------- END CANCEL MODAL-----------
-
-    // ---- OPEN DELETE MODAL -----
-    $(document).on("click", ".btnDelete", function() {
-        const id = $(this).attr("id");
-        const feedback = $(this).attr("feedback");
-
-        Swal.fire({
-            title: 'Are you sure?',
-            text: "You want to delete this!",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#3085d6',
-            cancelButtonColor: '#d33',
-            confirmButtonText: 'Discard',
-            allowOutsideClick: false
-          }).then((result) => {
-            if (result.isConfirmed) {
-
-            // /**
-            //  * ----- DATA -----
-            //  * 1. tableName
-            //  * 2. whereFilter
-            //  * 3. feedback
-            // */
-
-            // const data = {
-            //     tableName:   "user_account_tbl",
-            //     whereFilter: "itemID="+accountID,
-            //     feedback
-            // };
-
-            // const saveData = deleteTableData(data);
-            // if (saveData) {
-            //    tableContent();
-            // }
-
-              Swal.fire(
-                'Successfully Deleted!',
-                '',
-                'success'
-              )
-            }
-          });
-    });
-    // ---- END OPEN DELETE MODAL -----
-
-
-      
+ 
 });

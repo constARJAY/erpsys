@@ -28,12 +28,8 @@ $(document).on("click", ".btn-approval-setup", function(){
     $("#modal_approval_setup").modal("show");
     $(modalBody).html(preloader);
     $(modalFooter).html("");
-    setTimeout(function(){ approvalModalContent(moduleID); }, 500);
-    
-    // let content = modalContent();
-    // $("#modal_approval_setup_content").html(content);
 
-    
+    setTimeout(function(){ approvalModalContent(moduleID); }, 500);
 });
 
 $(document).on("change", ".select2-approvers", function(){
@@ -179,7 +175,7 @@ function approvalModalContent(moduleID){
         });
 
     }else{  
-        for (var i = 0; i < tableData[0]["moduleMaxApprover"]; i++) {
+        for (var i = 0; i < tableData[0]["moduleApprover"]; i++) {
             modalBodyContent    +=   ` <div class="col-12">
                                             <div class="form-group form-group-approvers${i + 1}">
                                                 <label for="approvers${i + 1}">Level ${i + 1} Approver</label>

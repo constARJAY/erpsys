@@ -14,55 +14,55 @@ $(document).on("click",".addAward", function(){
     $("#modal_award_content").html(preloader);
     let modal_award_content    =   ` 
     <div class="modal-body">  
-        <form id="modal_award_form">
-            <div class="row"> 
-                <div class="col-md-12 col-sm-12">
-                    <div class="form-group">
-                        <label for="">Award Title</label>
-                        <input type="text" class="form-control validate" name="awardTitle" id="inputawardTitle" 
-                            data-allowcharacters="[A-Z][ ][a-z][0-9]" minlength="5" maxlength="100" unique="" value="" required >
-                        <div class="invalid-feedback d-block" id="invalid-inputawardTitle"></div>
-                    </div>
-                </div>
-                <div class="col-md-12 col-sm-12">
-                    <div class="form-group">
-                        <label for="">Award Description</label>
-                        <textarea style="resize:none" row="3" class="form-control validate" name="awardDescription" id="inputawardDescription" 
-                            data-allowcharacters="[A-Z][ ][,][.]['][a-z][0-9]" minlength="5" maxlength="200" value="" required ></textarea>
+                                                <form id="modal_award_form">
+                                                    <div class="row"> 
+                                                        <div class="col-md-12 col-sm-12">
+                                                            <div class="form-group">
+                                                                <label for="">Award Title</label>
+                                                                <input type="text" class="form-control validate" name="awardTitle" id="inputawardTitle" 
+                                                                    data-allowcharacters="[A-Z][ ][a-z][0-9]" minlength="5" maxlength="100" unique="" value="" required >
+                                                                <div class="invalid-feedback d-block" id="invalid-inputawardTitle"></div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-12 col-sm-12">
+                                                            <div class="form-group">
+                                                                <label for="">Award Description</label>
+                                                                <textarea style="resize:none" row="3" class="form-control validate" name="awardDescription" id="inputawardDescription" 
+                                                                    data-allowcharacters="[A-Z][ ][,][.]['][a-z][0-9]" minlength="5" maxlength="200" value="" required ></textarea>
 
-                        <div class="invalid-feedback d-block" id="invalid-inputawardDescription"></div>
-                    </div>
-                </div>
+                                                                <div class="invalid-feedback d-block" id="invalid-inputawardDescription"></div>
+                                                            </div>
+                                                        </div>
 
-                <div class="col-md-12 col-sm-12">
-                    <div class="form-group">
-                        <label for="">Signatories</label>
-                        <select class="form-control select2 validate" multiple="multiple" name="awardSignatories" id="awardSignatories">
-                            ${userAccountOption()}
-                        </select>
-                        <div class="invalid-feedback d-block" id="invalid-awardSignatories"></div>
-                    </div>
-                </div>
+                                                        <div class="col-md-12 col-sm-12">
+                                                            <div class="form-group">
+                                                                <label for="">Signatories</label>
+                                                                <select class="form-control select2 validate" multiple="multiple" name="awardSignatories" id="awardSignatories">
+                                                                    ${userAccountOption()}
+                                                                </select>
+                                                                <div class="invalid-feedback d-block" id="invalid-awardSignatories"></div>
+                                                            </div>
+                                                        </div>
 
-                <div class="col-md-12 col-sm-12">
-                    <div class="form-group">
-                        <label for="">Award Status</label>
-                        <select class="form-control select2 validate" name="awardStatus" id="awardStatus">
-                            <option value="" dissabled>No selected</option>
-                            <option value="1">Active</option>
-                            <option value="0">Inactive</option>
-                        </select>
-                        <div class="invalid-feedback d-block" id="invalid-awardStatus"></div>
-                    </div>
-                </div>
+                                                        <div class="col-md-12 col-sm-12">
+                                                            <div class="form-group">
+                                                                <label for="">Award Status</label>
+                                                                <select class="form-control select2 validate" name="awardStatus" id="awardStatus">
+                                                                    <option value="1">Active</option>
+                                                                    <option value="0">Inactive</option>
+                                                                </select>
+                                                                <div class="invalid-feedback d-block" id="invalid-awardStatus"></div>
+                                                            </div>
+                                                        </div>
 
-            </div>
-        </form>
-    </div>
-    <div class="modal-footer">
-        <button class="btn btn-primary px-5 p-2" id="btnSave" data-awardid="">SAVE</button>
-        <button class="btn btn-danger px-5 p-2" id="btnCancel">CANCEL</button>
-    </div>`;
+                                                    </div>
+                                                </form>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button class="btn btn-primary px-5 p-2" id="btnSave" data-awardid="">SAVE</button>
+                                                <button class="btn btn-danger px-5 p-2" id="btnCancel">CANCEL</button>
+                                            </div>
+                                            `;
     setTimeout(function(){
         $("#modal_award_content").html(modal_award_content);
         initAll();
@@ -80,53 +80,55 @@ $(document).on("click",".editAward", function(){
     let statusOption        = tableData[0]["awardStatus"] == "1" ?`<option value="1" selected>Active</option> <option value="0" >Inactive</option>` : `<option value="1" >Active</option> <option value="0" selected>Inactive</option>`;
     let modal_award_content    =   ` 
     <div class="modal-body">  
-        <form id="modal_award_form">
-            <div class="row"> 
-                <div class="col-md-12 col-sm-12">
-                    <div class="form-group">
-                        <label for="">Award Title</label>
-                        <input type="text" class="form-control validate" name="awardTitle" id="inputawardTitle" 
-                            data-allowcharacters="[A-Z][ ][a-z][0-9]" minlength="5" maxlength="100" unique="${tableData[0]["awardID"]}" value="${tableData[0]["awardTitle"]}" required >
-                        <div class="invalid-feedback d-block" id="invalid-inputawardTitle"></div>
-                    </div>
-                </div>
-                <div class="col-md-12 col-sm-12">
-                    <div class="form-group">
-                        <label for="">Award Description</label>
-                        <textarea style="resize:none" row="3" class="form-control validate" name="awardDescription" id="inputawardDescription" 
-                            data-allowcharacters="[A-Z][ ][,][.]['][a-z][0-9]" minlength="5" maxlength="200" required >${tableData[0]["awardDescription"]}</textarea>
+                                                <form id="modal_award_form">
+                                                    <div class="row"> 
+                                                        <div class="col-md-12 col-sm-12">
+                                                            <div class="form-group">
+                                                                <label for="">Award Title</label>
+                                                                <input type="text" class="form-control validate" name="awardTitle" id="inputawardTitle" 
+                                                                    data-allowcharacters="[A-Z][ ][a-z][0-9]" minlength="5" maxlength="100" unique="${tableData[0]["awardID"]}" value="${tableData[0]["awardTitle"]}" required >
+                                                                <div class="invalid-feedback d-block" id="invalid-inputawardTitle"></div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-12 col-sm-12">
+                                                            <div class="form-group">
+                                                                <label for="">Award Description</label>
+                                                                <textarea style="resize:none" row="3" class="form-control validate" name="awardDescription" id="inputawardDescription" 
+                                                                    data-allowcharacters="[A-Z][ ][,][.]['][a-z][0-9]" minlength="5" maxlength="200" required >${tableData[0]["awardDescription"]}</textarea>
 
-                        <div class="invalid-feedback d-block" id="invalid-inputawardDescription"></div>
-                    </div>
-                </div>
+                                                                <div class="invalid-feedback d-block" id="invalid-inputawardDescription"></div>
+                                                            </div>
+                                                        </div>
 
-                <div class="col-md-12 col-sm-12">
-                    <div class="form-group">
-                        <label for="">Signatories</label>
-                        <select class="form-control select2 validate" multiple="multiple" name="awardSignatories" id="awardSignatories">
-                            ${userAccountOption(tableData[0]["awardSignatories"])}
-                        </select>
-                        <div class="invalid-feedback d-block" id="invalid-awardSignatories"></div>
-                    </div>
-                </div>
+                                                        <div class="col-md-12 col-sm-12">
+                                                            <div class="form-group">
+                                                                <label for="">Signatories</label>
+                                                                <select class="form-control select2 validate" multiple="multiple" name="awardSignatories" id="awardSignatories">
+                                                                    ${userAccountOption(tableData[0]["awardSignatories"])}
+                                                                </select>
+                                                                <div class="invalid-feedback d-block" id="invalid-awardSignatories"></div>
+                                                            </div>
+                                                        </div>
 
-                <div class="col-md-12 col-sm-12">
-                    <div class="form-group">
-                        <label for="">Award Status</label>
-                        <select class="form-control select2 validate" name="awardStatus" id="awardStatus">
-                            ${statusOption}
-                        </select>
-                        <div class="invalid-feedback d-block" id="invalid-awardStatus"></div>
-                    </div>
-                </div>
+                                                        <div class="col-md-12 col-sm-12">
+                                                            <div class="form-group">
+                                                                <label for="">Award Status</label>
+                                                                <select class="form-control select2 validate" name="awardStatus" id="awardStatus">
+                                                                    ${statusOption}
+                                                                </select>
+                                                                <div class="invalid-feedback d-block" id="invalid-awardStatus"></div>
+                                                            </div>
+                                                        </div>
 
-            </div>
-        </form>
-    </div>
-    <div class="modal-footer">
-        <button class="btn btn-primary px-5 p-2" id="btnUpdate" data-awardid="${tableData[0]["awardID"]}">UPDATE</button>
-        <button class="btn btn-danger px-5 p-2" id="btnCancel">CANCEL</button>
-    </div>`;
+                                                    </div>
+                                                </form>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button class="btn btn-primary px-5 p-2" id="btnUpdate" data-awardid="${tableData[0]["awardID"]}">UPDATE</button>
+                                                <button class="btn btn-danger px-5 p-2" id="btnCancel">CANCEL</button>
+                                            </div>
+                                            
+                                            `;
     setTimeout(function(){
         $("#modal_award_content").html(modal_award_content);
         initAll();
@@ -143,11 +145,11 @@ $(document).on("click", "#btnSave", function(){
     
     if(condition == true){
         let data = getFormData("modal_award_form", true);
-        data["tableData[createdBy]"]     = "1";
-        data["tableData[updatedBy]"]     = "1";
+        data["tableData[createdBy]"]     = sessionID;
+        data["tableData[updatedBy]"]     = sessionID;
         data["tableName"]                = "hris_award_tbl";
-        data["feedback"]                 = $("#inputawardTitle").val();
-        sweetAlertConfirmation("add", "Award Masterfile","modal_award", null, data);
+        data["feedback"]                 = data["tableData[awardTitle]"];
+        sweetAlertConfirmation("add", "Award","modal_award", null, data, true, tableContent);
     }
 });
 
@@ -156,19 +158,19 @@ $(document).on("click", "#btnUpdate", function(){
     let awardID           = $(this).data("awardid");
     if(condition == true){
         let data = getFormData("modal_award_form", true);
-        data["tableData"]["updatedBy"]   =  "2";
+        data["tableData"]["updatedBy"]   =  sessionID;
         data["whereFilter"]              =  "awardID="+awardID;
         data["tableName"]                =  "hris_award_tbl";
-        data["feedback"]                 =  $("#inputawardTitle").val();
-        sweetAlertConfirmation("update", "Award","modal_award", null , data);
+        data["feedback"]                 =  data["tableData[awardTitle]"];
+        sweetAlertConfirmation("update", "Award","modal_award", null , data, true, tableContent);
     }
     
 });
 
 $(document).on("click","#btnCancel", function(){
-    let condition = emptyFormCondition("modal_award_form");
-    if(condition == true){
-        sweetAlertConfirmation("cancel", "Award Masterfile","modal_award");
+    let condition = isFormEmpty("modal_award_form");
+    if(!condition){ 
+        sweetAlertConfirmation("cancel", "Award","modal_award");
     }else{
         $("#modal_award").modal("hide");
     }

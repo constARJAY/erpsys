@@ -1,95 +1,7 @@
 
 !function($) {
+    const base_url = $("#base_url").val();
     "use strict";
-
-    // ---- UPDATE CALENDAR DATA -----
-    function updateAvailabilityCalendar(data, flag = false) {
-        data.flag = flag;
-        $.ajax({
-            url: "hotel_calendar/updateAvailabilityCalendar",
-            method: "POST",
-            data,
-            dataType: "json",
-            beforeSend: function() {
-                $("#loader").show();
-            },
-            success: function(data) {
-                let result = data.split("|");
-                if (result[0] == "true") {
-                    flag && window.location.reload();
-                    showNotification("success", result[1]);
-                } else {
-                    showNotification("error", result[1]);
-                }
-                // data && window.location.reload();
-            }
-        }).done(function() {
-            setTimeout(() => {
-                $("#loader").hide();
-            }, 500);
-        })
-    }
-    // ---- END UPDATE CALENDAR DATA -----
-
-
-    // ---- DELETE CALENDAR DATA -----
-    function deleteAvailabilityCalendar(data) {
-        $.ajax({
-            url: "hotel_calendar/deleteAvailabilityCalendar",
-            method: "POST",
-            data,
-            dataType: "json",
-            beforeSend: function() {
-                $("#loader").show();
-            },
-            success: function(data) {
-                let result = data.split("|");
-                if (result[0] == "true") {
-                    // window.location.reload();
-                    showNotification("success", result[1]);
-                } else {
-                    showNotification("error", result[1]);
-                }
-                // data && window.location.reload();
-            }
-        }).done(function() {
-            setTimeout(() => {
-                $("#loader").hide();
-            }, 500);
-        })
-    }
-    // ---- END DELETE CALENDAR DATA -----
-
-
-    // ---- SAVE CALENDAR DATA ----
-    function saveAvailabilityCalendar(data) {
-        $.ajax({
-            url: "hotel_calendar/saveAvailabilityCalendar",
-            method: "POST",
-            data,
-            dataType: "json",
-            beforeSend: function() {
-                $("#loader").show();
-            },
-            success: function(data) {
-                // console.log(data);
-                // data && window.location.reload();
-                let result = data.split("|");
-                if (result[0] == "true") {
-                    window.location.reload();
-                } else {
-                    showNotification("error", result[1]);
-                }
-            }
-        }).done(function() {
-            setTimeout(() => {
-                $("#loader").hide();
-            }, 500);
-        })
-    }
-    // ---- END SAVE CALENDAR DATA ----
-
-
     var CalendarApp = function() {
         this.$body = $("body")
         this.$calendar = $('#calendar'),
@@ -100,7 +12,6 @@
         this.$saveCategoryBtn = $('.save-category'),
         this.$calendarObj = null
     };
-
 
     /* on drop */
     CalendarApp.prototype.onDrop = function (eventObj, date) { 
@@ -122,128 +33,105 @@
                 eventObj.remove();
             }
     },
+
     /* on click on event */
     CalendarApp.prototype.onEventClick =  function (calEvent, jsEvent, view) {
-        const calendarID = calEvent.id;
-        const eventName  = calEvent.title;
-        const background = calEvent.className[0];
-        const dateFrom   = moment(new Date(calEvent.start._d)).format("YYYY-MM-DD hh:mm:ss");
-        const dateTo     = moment(new Date(calEvent._end._d)).format("YYYY-MM-DD hh:mm:ss");
-        const eventDate  = moment(new Date(calEvent.start._d)).format("MMMM DD, YYYY")+" - "+moment(new Date(calEvent._end._d)).format("MMMM DD, YYYY");
-        const data = { calendarID, eventName, background, dateFrom, dateTo };
-
+        $(".my_event_header").text("EDIT EVENT");
+        $("#my_event").modal("show");
+        console.log(calEvent);
+        $("#my_event_content").html(preloader);
+            const calendarID =  calEvent.id;
+            const eventName  = calEvent.title;
+            const background = calEvent.className[0];
+            const dateFrom   = moment(new Date(calEvent.start._d));
+            const dateTo     = moment(new Date(calEvent.end._d));
+            const eventDate  = moment(new Date(calEvent.start._d)).format("MMMM DD, YYYY")+" - "+moment(new Date(calEvent.end._d)).format("MMMM DD, YYYY");
+            const modalButtons = `<button type="button" class="btn btn-primary update-event submit-btn" data-calendarid="${calendarID}">UPDATE EVENT</button>
+                                  <button type="button" class="btn btn-danger delete-event submit-btn">DELETE</button>`;
+            // modalButtons = `<button type="button" class="btn btn-primary save-event submit-btn">CREATE EVENT</button>
+            //                 <button type="button" class="btn btn-danger delete-event submit-btn" id="btn-cancel">CANCEL</button>`;
+        const   my_event_content = `<div class="modal-body">
+                                        <div class="form-group">
+                                            <label>Event Name <span class="text-danger">*</span></label>
+                                            <input class="form-control validate" data-allowcharacters="[A-Z][a-z][0-9][ ][.][,][_][-]" name="eventCalendarName" type="text" id="edit-eventname" value="${eventName}" minlength="2" maxlength="30" required autocomplete="off">
+                                            <div class="invalid-feedback d-block" id="invalid-edit-eventname"></div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="">Color <span class="text-danger">*</span></label>
+                                            <select class="form-control validate" name="eventCalendarBackground" id="edit-eventcolor" required>
+                                                <option value="" selected disabled>Select Color</option>
+                                                <option value="bg-red">Red</option>
+                                                <option value="bg-yellow">Yellow</option>
+                                                <option value="bg-green">Green</option>
+                                                <option value="bg-orange">Orange</option>
+                                                <option value="bg-blue">Blue</option>
+                                                <option value="bg-violet">Violet</option>
+                                            </select>
+                                            <div class="invalid-feedback d-block" id="invalid-edit-eventcolor"></div>
+                                        </div>
+                                        <div class="form-group" id="edit-eventdate_parent">
+                                            <label>Event Date <span class="text-danger">*</span></label>
+                                            <input class="form-control validate calendarDateRangerPicker text-left" data-allowcharacters="[A-Z][a-z][0-9][,][ ]" type="button" value="${eventDate}" id="edit-eventdate" required autocomplete="off">
+                                            <div class="invalid-feedback d-block" id="invalid-edit-eventdate"></div>
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <div class="w-100 text-right">
+                                            ${modalButtons}
+                                        </div>
+                                    </div>`;
+        setTimeout(function(){$("#my_event_content").html(my_event_content);calendarDateRangerPicker();$("#edit-eventcolor").val(background).trigger("change");},500)
         var $this = this;
-            $this.$modal.modal({
-                backdrop: 'static',
+        $(document).on("click", ".delete-event", function () {
+            $this.$calendarObj.fullCalendar('removeEvents', function (ev) {
+                return (ev._id == calEvent._id);
             });
-            $this.$modal.find("#edit-eventname").val(eventName);
-            $this.$modal.find("#edit-eventcolor").val(background).trigger("change");
-            $this.$modal.find("#edit-eventdate").val(eventDate);
-            $this.$modal.find('#save-event').hide();
-            $this.$modal.find('#update-event').show();
-            $this.$modal.find('#delete-event').show()
-            $(document).on("click", "#delete-event", function () {
-            // .end().find('#udpdate-event').show().end().find('#save-event').hide().end().find('#delete-event').unbind('click').click(function () {
-                $this.$calendarObj.fullCalendar('removeEvents', function (ev) {
-                    return (ev._id == calEvent._id);
-                });
-                deleteAvailabilityCalendar(data);
-                $this.$modal.modal('hide');
-            });
-            $this.$modal.find('form').on('submit', function (e) {
-                e.preventDefault();
-                calEvent.title        = $this.$modal.find("#edit-eventname").val();
-                calEvent.className[0] = $this.$modal.find("#edit-eventcolor").val();
-
-                $this.$modal.modal('hide');
-                $("#my_event").find("input, select").each(function() {
-                    rjValidateInputs("#"+$(this).attr("id"));
-                })
-
-                if ($("#my_event").find(".is-invalid").length > 0) {
-                    $("#my_event").find(".is-invalid")[0].focus();
-                } else {
-                    $this.$modal.modal('hide');
-
-                    const calendarID = calEvent.id;
-                    const eventName  = calEvent.title;
-                    const background = calEvent.className[0];
-                    const dateFrom   = $this.$modal.find("#save-event").attr("datefrom") ? $this.$modal.find("#save-event").attr("datefrom") : moment(new Date(calEvent.start._d)).format("YYYY-MM-DD")+" 08:00:00";
-                    const dateTo     = $this.$modal.find("#save-event").attr("dateto") ? $this.$modal.find("#save-event").attr("dateto") : moment(new Date(calEvent._end._d)).format("YYYY-MM-DD")+" 19:00:00";
-                    const data = { calendarID, eventName, background, dateFrom, dateTo };
-                    $this.$calendarObj.fullCalendar('updateEvent', calEvent);
-                    updateAvailabilityCalendar(data);
-                }
-
-                return false;
-            });
-
-            $this.$modal.find('.update-event').on('click', function(e) {
+            const data     = getFormData("my_event_content", true);
+            data["tableData"]["updatedBy"]   =  sessionID;
+            data["whereFilter"]              =  "eventCalendarID ="+calendarID;
+            data["tableName"]                =  "hris_event_calendar_tbl";
+            data["feedback"]                 =  eventName;
+            deleteTableData(data, true, false, "Delete "+eventName.toUpperCase()+ " successfully");
+            $this.$modal.modal('hide');
+        });
+        $(document).on("click", ".update-event", function (e) {
+            let condition  = validateForm("my_event_content");
+            if(condition == true){
+                let thisCalendarID    = $(this).data("calendarid");
                 e.preventDefault();
                 calEvent.title        = $this.$modal.find("#edit-eventname").val();
                 calEvent.className[0] = $this.$modal.find("#edit-eventcolor").val();
                 $this.$modal.modal('hide');
 
-                $("#my_event").find("input, select").each(function() {
-                    rjValidateInputs("#"+$(this).attr("id"));
-                })
-
-                if ($("#my_event").find(".is-invalid").length > 0) {
-                    $("#my_event").find(".is-invalid")[0].focus();
-                } else {
-                    $this.$modal.modal('hide');
-
-                    const calendarID = calEvent.id;
-                    const eventName  = calEvent.title;
-                    const background = calEvent.className[0];
-                    let dateFrom   = $this.$modal.find(".update-event").attr("datefrom") ? $this.$modal.find(".update-event").attr("datefrom") : moment(new Date(calEvent.start._d)).format("YYYY-MM-DD")+" 08:00:00";
-                    let dateTo     = $this.$modal.find(".update-event").attr("dateto") ? $this.$modal.find(".update-event").attr("dateto") : moment(new Date(calEvent._end._d)).format("YYYY-MM-DD")+" 19:00:00";
-                    const data = { calendarID, eventName, background, dateFrom, dateTo };
-                    // $this.$calendarObj.fullCalendar('updateEvent', calEvent);
-                    updateAvailabilityCalendar(data, true);
-                }
-
-                return false;
-            });
+                    const eventName  = $("#edit-eventname").val();
+                    const background = $("#edit-eventcolor").val();
+                    const newDate    = $(".calendarDateRangerPicker").val().split("-");
+                    let dateFrom     = moment(new Date(newDate[0])).format("YYYY-MM-DD");
+                    let dateTo       = moment(new Date(newDate[1])).format("YYYY-MM-DD");
+                    const data     = getFormData("my_event_content", true);
+                    data["tableData"]["eventCalendarName"]          = eventName;
+                    data["tableData"]["eventCalendarBackground"]    = background;
+                    data["tableData"]["eventCalendarDateFrom"]      = dateFrom;
+                    data["tableData"]["eventCalendarDateTo"]        = dateTo;
+                    data["tableData"]["updatedBy"]   =  sessionID;
+                    data["whereFilter"]              =  "eventCalendarID ="+thisCalendarID;
+                    data["tableName"]                =  "hris_event_calendar_tbl";
+                    data["feedback"]                 =  eventName;
+                    sweetAlertConfirmation("update", "Award","my_event", null, data, true, callCalendar);
+            }
+        });
             
     },
+
     /* on select */
     CalendarApp.prototype.onSelect = function (start, end, allDay) {
+        $(".my_event_header").text("ADD EVENT");
+        $("#my_event").modal("show");
+        $("#my_event_content").html(preloader);
         const eventDate  = moment(new Date(start)).format("MMMM DD, YYYY")+" - "+moment(new Date(end)).subtract(1, "days").format("MMMM DD, YYYY");
-
-        var $this = this;
-            $this.$modal.modal({
-                backdrop: 'static'
-            });
-            $this.$modal.find("#edit-eventdate").val(eventDate);
-            $this.$modal.find('#delete-event').hide().end().find('.update-event').hide().end().find('#save-event').show().end().find('#save-event').unbind('click').click(function (e) {
-                e.preventDefault();
-                var title = $this.$modal.find("#edit-eventname").val();
-                var categoryClass = $this.$modal.find("#edit-eventcolor").val();
-
-                $("#my_event").find("input, select").each(function() {
-                    rjValidateInputs("#"+$(this).attr("id"));
-                })
-
-                if ($("#my_event").find(".is-invalid").length > 0) {
-                    $("#my_event").find(".is-invalid")[0].focus();
-                } else {
-                    $this.$modal.modal('hide');
-
-                    let dateFrom = moment(new Date(start)).format("YYYY-MM-DD")+" 08:00:00";
-                    let dateTo   = moment(new Date(end)).subtract(1, "days").format("YYYY-MM-DD")+" 19:00:00";
-                    const data   = {
-                        eventName:  title,
-                        background: categoryClass,
-                        dateFrom,
-                        dateTo
-                    };
-                    saveAvailabilityCalendar(data);
-                }
-                return false;
-            });
-            $this.$calendarObj.fullCalendar('unselect');
+        addingEvent(eventDate);
     },
+
     CalendarApp.prototype.enableDrag = function() {
         //init events
         $(this.$event).each(function () {
@@ -261,6 +149,7 @@
             });
         });
     }
+
     /* Initializing */
     CalendarApp.prototype.init = function() {
         this.enableDrag();
@@ -276,31 +165,35 @@
 
         // ----- GETTING DATA FROM DATABASE -----
         const getAvailabilityCalendar = function() {
-            let calendarData = [];
-            $.ajax({
-                async:    false,
-                // type:     "POST",
-                // global:   false,
-                url:      "hotel_calendar/getAvailabilityCalendar",
-                // data:     true,
-                dataType: "json",
-                success: function(data) {
-                    data.map(item => {
-                        const eventName  = item.eventName;
-                        const dateFrom   = new Date((item.dateFrom).toString()).getTime();
-                        const dateTo     = new Date((item.dateTo).toString()).getTime();
-                        const background = item.background;
-                        const temp = {
-                            id:        item.calendarID,
-                            title:     eventName,
-                            start:     dateFrom,
-                            end:       dateTo,
-                            className: background
+            let path = `${base_url}operations/getTableData`;
+            let data = {tableName:"hris_event_calendar_tbl"};
+            let calendarData = [
+                    // {
+                    //     id: 23,
+                    //     title: 'All Day Event',
+                    //     start: '2021-03-05',
+                    //     end: '2021-03-07',
+                    //     className: 'bg-primary'
+                    // }
+                ];
+            $.ajax({async:false,type:"POST",data, url: path, dataType: "json",
+                    success: function(data) {
+                            data.map(item => {
+                                let eventName  = item.eventCalendarName;
+                                let dateFrom   = item.eventCalendarDateFrom;
+                                let dateTo     = moment(item.eventCalendarDateTo).add('days', 1);;
+                                let background = item.eventCalendarBackground;
+                                let tempData   = {
+                                                    id:        item.eventCalendarID,
+                                                    title:     eventName,
+                                                    start:     dateFrom,
+                                                    end:       dateTo,
+                                                    className: background
+                                                }
+                                calendarData.push(tempData);
+                            })
                         }
-                        calendarData.push(temp);
                     })
-                }
-            })
             return calendarData;
         }();
         // ----- END GETTING DATA FROM DATABASE -----
@@ -330,12 +223,22 @@
             eventDrop: function(calEvent, jsEvent, view) {
                 const calendarID = calEvent.id;
                 const eventName  = calEvent.title;
-                const background = calEvent.className[0];
-                let dateFrom   = moment(new Date(calEvent.start._d)).format("YYYY-MM-DD")+" 08:00:00";
-                let dateTo     = moment(new Date(calEvent._end._d)).format("YYYY-MM-DD")+" 19:00:00";
-                const data = { calendarID, eventName, background, dateFrom, dateTo };
+                const background = getTableData("hris_event_calendar_tbl","eventCalendarBackground","eventCalendarID="+calendarID);
+                let dateFrom        = moment(new Date(calEvent.start._d)).format("YYYY-MM-DD");
+                let dateTo          = moment(new Date(calEvent.end._d)).format("YYYY-MM-DD");
+                
+                const data     = getFormData("my_event_content", true);
+
+                data["tableData"]["eventCalendarName"]          = eventName;
+                data["tableData"]["eventCalendarBackground"]    = background[0]["eventCalendarBackground"];
+                data["tableData"]["eventCalendarDateFrom"]      = dateFrom;
+                data["tableData"]["eventCalendarDateTo"]        = dateTo;
+                data["tableData"]["updatedBy"]   =  sessionID;
+                data["whereFilter"]              =  "eventCalendarID ="+calendarID;
+                data["tableName"]                =  "hris_event_calendar_tbl";
+                data["feedback"]                 =  eventName;
+                updateTableData(data, true, false, "Add new "+eventName.toUpperCase()+ " successfully saved!");
                 $this.$calendarObj.fullCalendar('updateEvent', calEvent);
-                updateAvailabilityCalendar(data);
             }
 
         });
@@ -361,5 +264,93 @@
 function($) {
     "use strict";
     $.CalendarApp.init();
-
 }(window.jQuery);
+
+
+$(document).on("click", "#add_event", function(){
+    $(".my_event_header").text("ADD EVENT");
+    $("#my_event").modal("show");
+    $("#my_event_content").html(preloader);
+    addingEvent();
+});
+
+
+
+function callCalendar(){
+    window.location.replace('event_calendar');
+    $.CalendarApp.init();
+}
+
+function calendarDateRangerPicker(){
+    $(".calendarDateRangerPicker").daterangepicker({
+        autoUpdateInput: false,
+        showDropdowns: true,
+        autoApply: true,
+        locale: {
+            format: "MMMM DD, YYYY"
+        },
+        // maxDate: moment(new Date).format("MMMM DD, YYYY"),
+    }, function(start, end) {
+        let thisValue = start.format('MMMM DD, YYYY')+ " - "+end.format('MMMM DD, YYYY');
+        $("#edit-eventdate").val(thisValue);
+    });
+}
+
+function addingEvent(data = null){
+    let eventDate = data == null ? moment().format("MMMM DD, YYYY")+ " - "+ moment().format("MMMM DD, YYYY"): data;  
+    let  modalButtons           = ` <button type="button" class="btn btn-primary save-event submit-btn">CREATE EVENT</button>
+    <button type="button" class="btn btn-danger delete-event submit-btn" id="btn-cancel">CANCEL</button>`;
+    const   my_event_content    = ` <div class="modal-body">
+        <div class="form-group">
+            <label>Event Name <span class="text-danger">*</span></label>
+            <input class="form-control validate" data-allowcharacters="[A-Z][a-z][0-9][ ][.][,][_][-]" name="eventCalendarName" type="text" id="edit-eventname" value="" minlength="2" maxlength="30" required autocomplete="off">
+            <div class="invalid-feedback d-block" id="invalid-edit-eventname"></div>
+        </div>
+        <div class="form-group">
+            <label for="">Color <span class="text-danger">*</span></label>
+            <select class="form-control validate" name="eventCalendarBackground" id="edit-eventcolor" required>
+                <option value="" selected disabled>Select Color</option>
+                <option value="bg-red">Red</option>
+                <option value="bg-yellow">Yellow</option>
+                <option value="bg-green">Green</option>
+                <option value="bg-orange">Orange</option>
+                <option value="bg-blue">Blue</option>
+                <option value="bg-violet">Violet</option>
+            </select>
+            <div class="invalid-feedback d-block" id="invalid-edit-eventcolor"></div>
+        </div>
+        <div class="form-group" id="edit-eventdate_parent">
+            <label>Event Date <span class="text-danger">*</span></label>
+            <input class="form-control validate calendarDateRangerPicker text-left" data-allowcharacters="[A-Z][a-z][0-9][,][ ]" type="button" value="${eventDate}" id="edit-eventdate" required autocomplete="off">
+            <div class="invalid-feedback d-block" id="invalid-edit-eventdate"></div>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <div class="w-100 text-right">
+            ${modalButtons}
+        </div>
+        </div>`;
+    setTimeout(function(){$("#my_event_content").html(my_event_content);calendarDateRangerPicker();},500);
+        
+}
+
+$(document).on("click", ".save-event", function (e) {
+    let condition  = validateForm("my_event_content");
+    if(condition == true){
+        e.preventDefault();
+            const eventName  = $("#edit-eventname").val();
+            const background = $("#edit-eventcolor").val();
+            const newDate    = $(".calendarDateRangerPicker").val().split("-");
+            let dateFrom     = moment(new Date(newDate[0])).format("YYYY-MM-DD");
+            let dateTo       = moment(new Date(newDate[1])).format("YYYY-MM-DD");
+            const data       = getFormData("my_event_content", true);
+            data["tableData"]["eventCalendarName"]          = eventName;
+            data["tableData"]["eventCalendarBackground"]    = background;
+            data["tableData"]["eventCalendarDateFrom"]      = dateFrom;
+            data["tableData"]["eventCalendarDateTo"]        = dateTo;
+            data["tableData"]["updatedBy"]   =  sessionID;
+            data["tableName"]                =  "hris_event_calendar_tbl";
+            data["feedback"]                 =  eventName;
+            sweetAlertConfirmation("add", "Event","my_event", null, data, true, callCalendar);
+    }
+});
