@@ -59,6 +59,7 @@
     <script src="<?=base_url('assets/js/sweetalert2.all.min.js')?>"></script>
     <script src="<?=base_url('assets/js/sweetalert2.min.js')?>"></script>
 
+    <link rel="stylesheet" href="<?=base_url('assets/plugins/fullcalendar/fullcalendar.min.css')?>">
 	<script src="<?=base_url('assets/bundles/vendorscripts.bundle.js')?>"></script>
     <script src="<?=base_url('assets/plugins/momentjs/moment.js')?>"></script>
 
@@ -66,7 +67,7 @@
 
 <body class="font-nunito fullwidth h_menu">
 
-<input type="hidden" name="base_url" id="base_url" value="<?= base_url() ?>" session="1">
+<input type="hidden" name="base_url" id="base_url" value="<?= base_url() ?>" session="<?= $sessionID ?>">
 
 <div id="body" class="theme-blackbox">
     <!-- Page Loader -->
@@ -104,7 +105,7 @@
                                 <li class="search_bar hidden-sm">
                                     <div class="input-group">
                                         <i class="icon-magnifier"></i>
-                                        <input type="text" class="form-control" placeholder="Search module..." id="searchModule" list="moduleList">
+                                        <input type="text" class="form-control" placeholder="Search module..." id="searchModule" list="moduleList" autocomplete="off">
                                     </div>
                                     <datalist id="moduleList"></datalist>
                                 </li>

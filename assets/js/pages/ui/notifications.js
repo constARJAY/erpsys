@@ -64,7 +64,10 @@ function showNotification(msgtype, msg) {
     if(msgtype=='danger'){
         title_type = 'ERROR!';
         icon_type  = 'fa fa-exclamation-circle';
-    }else{
+    } else if (msgtype=='info') {
+        title_type = 'NOTICE!';
+        icon_type  = 'fa fa-exclamation-circle';
+    } else{
         title_type = 'SUCCESS!';
         icon_type  = 'fa fa-check-circle';
     }

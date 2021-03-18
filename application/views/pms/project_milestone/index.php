@@ -1,5 +1,5 @@
-<div class="body_area after_bg sm">
-	<div class="block-header">
+<div class="body_area after_bg">
+	<div class="block-header pb-0">
 		<div class="container">
 			<div class="row clearfix">
 				<div class="col-lg-6 col-md-12">
@@ -12,7 +12,7 @@
 					<span>This module is used to manage project milestone details.</span>
 				</div>
 				<div class="col-lg-6 col-md-12 text-md-right">
-                        <button type="button" class="btn btn-danger pr-2" id="btnAdd"> <i class="fas fa-plus-square"></i> Add Milestone</button>
+                        <button type="button" class="btn btn-default btn-add" id="btnAdd"> <i class="icon-plus"></i> Add Milestone</button>
                     </ul>
 				</div>
 			</div>

@@ -10,7 +10,7 @@ class Tax_table extends CI_Controller {
 
     public function index()
     {
-        $data["title"] = "SSS Table";
+        $data["title"] = "Tax Table";
         $this->load->view('template/header', $data);
         $this->load->view('hris/tax_table/index', $data);
         $this->load->view('template/footer', $data);

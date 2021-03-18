@@ -12,11 +12,11 @@ $(document).ready(function(){
             scrollX:        true,
             scrollCollapse: true,
             columnDefs: [
-                { targets: 0, width: "15%" },
-                { targets: 1, width: "15%" },
-                { targets: 2, width: "40%" },
-                { targets: 3, width: "15%" },
-                { targets: 4, width: "15%" },
+                { targets: 0, width: "120px" },
+                { targets: 1, width: "30%" },
+                { targets: 2, width: "70%" },
+                { targets: 3, width: "80px" },
+                { targets: 4, width: "80px" },
             ],
         });
     }

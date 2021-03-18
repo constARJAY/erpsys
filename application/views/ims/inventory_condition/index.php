@@ -1,19 +1,18 @@
-<div class="body_area after_bg sm">
-	<div class="block-header">
+<div class="body_area after_bg">
+	<div class="block-header pb-0">
 		<div class="container">
 			<div class="row clearfix">
 				<div class="col-lg-6 col-md-12">
 					<ul class="breadcrumb pl-0 pb-0 ">
 						<li class="breadcrumb-item"><a href="#"><i class="zmdi zmdi-home"></i> Dashboard</a></li>
 						<li class="breadcrumb-item"><i class="zmdi zmdi-folder"></i> &nbsp;Masterfiles</li>
-						<li class="breadcrumb-item active"  id="invMainConditionsBreadcrumbs"><i class="fa fas-users"></i> &nbsp;Inventory Conditions</li>
-                        <li class="breadcrumb-item" id="invConditionsBreadcrumbs" style="visibility:hidden;"> Add Status</li>
+						<li class="breadcrumb-item active"  id="invMainConditionsBreadcrumbs"><i class="fa fas-users"></i> &nbsp;Inventory Condition</li>
 					</ul>
-					<h1 class="mt-3" id="invConditionsHeaderID">List of Inventory Conditions</h1>
+					<h1 class="mt-3" id="invConditionsHeaderID">List of Inventory Condition</h1>
 					<span>This module is used to manage inventory status details.</span>
 				</div>
 				<div class="col-lg-6 col-md-12 text-md-right">
-                        <button class="btn btn-add" id="btnAdd"><i class="fas fa-plus-square"></i> Add Condition</button>
+                        <button class="btn btn-default btn-add" id="btnAdd"><i class="icon=plus"></i> Add Condition</button>
                     </ul>
 				</div>
 			</div>

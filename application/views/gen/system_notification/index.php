@@ -1,5 +1,5 @@
-<div class="body_area">
-    <div class="block-header">
+<div class="body_area after_bg">
+    <div class="block-header pb-0">
 		<div class="container">
 			<div class="row clearfix">
 				<div class="col-lg-6 col-md-12">
@@ -76,7 +76,7 @@
                                                     } else {
                                                 ?>
                                                     <div class="w-100 text-center">
-                                                        <img src="<?= base_url('assets/modal/notification.png') ?>" alt="No notification" width="300" height="200">
+                                                        <img src="<?= base_url('assets/modal/no-notification.svg') ?>" alt="No notification" width="300" height="200">
                                                         <h4>No notification found.</h4>
                                                     </div>
                                                 <?php
@@ -120,7 +120,7 @@
                                                     } else {
                                                 ?>
                                                     <div class="w-100 text-center">
-                                                        <img src="<?= base_url('assets/modal/notification.png') ?>" alt="No notification" width="300" height="200">
+                                                        <img src="<?= base_url('assets/modal/no-notification.svg') ?>" alt="No notification" width="300" height="200">
                                                         <h4>No notification found.</h4>
                                                     </div>
                                                 <?php
@@ -164,7 +164,7 @@
                                                     } else {
                                                 ?>
                                                     <div class="w-100 text-center">
-                                                        <img src="<?= base_url('assets/modal/notification.png') ?>" alt="No notification" width="300" height="200">
+                                                        <img src="<?= base_url('assets/modal/no-notification.svg') ?>" alt="No notification" width="300" height="200">
                                                         <h4>No notification found.</h4>
                                                     </div>
                                                 <?php
@@ -208,7 +208,7 @@
                                                     } else {
                                                 ?>
                                                     <div class="w-100 text-center">
-                                                        <img src="<?= base_url('assets/modal/notification.png') ?>" alt="No notification" width="300" height="200">
+                                                        <img src="<?= base_url('assets/modal/no-notification.svg') ?>" alt="No notification" width="300" height="200">
                                                         <h4>No notification found.</h4>
                                                     </div>
                                                 <?php
@@ -252,7 +252,7 @@
                                                     } else {
                                                 ?>
                                                     <div class="w-100 text-center">
-                                                        <img src="<?= base_url('assets/modal/notification.png') ?>" alt="No notification" width="300" height="200">
+                                                        <img src="<?= base_url('assets/modal/no-notification.svg') ?>" alt="No notification" width="300" height="200">
                                                         <h4>No notification found.</h4>
                                                     </div>
                                                 <?php

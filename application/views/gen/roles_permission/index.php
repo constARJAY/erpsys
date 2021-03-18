@@ -19,37 +19,31 @@
     }
 </style>
 
-<div class="body_area">
-    <div class="block-header">
+<div class="body_area after_bg">
+    <div class="block-header pb-0">
 		<div class="container">
 			<div class="row clearfix">
 				<div class="col-lg-6 col-md-12">
 					<ul class="breadcrumb pl-0 pb-0 ">
 						<li class="breadcrumb-item"><a href="#"><i class="zmdi zmdi-home"></i> Dashboard</a></li>
-						<li class="breadcrumb-item active"><i class="zmdi zmdi-hotel"></i> &nbsp;Roles and Permission</li>
+						<li class="breadcrumb-item active"><i class="fas fa-user-lock"></i> &nbsp;Roles and Permission</li>
 					</ul>
 					<h1 class="mt-3">Roles and Permission</h1>
 					<span>This module is used to manage Lorem ipsum dolor sit amet..</span>
 				</div>
 				<div class="col-lg-6 col-md-12 text-right">
-					<button type="button" class="btn btn-add btn-sm p-2 px-3" id="btnAdd"> <i class="icon-plus"></i> &nbsp;Add Role</button>
+					<button type="button" class="btn btn-default btn-add" id="btnAdd"> <i class="icon-plus"></i> &nbsp;Add Role</button>
 				</div>
 			</div>
 		</div>
 	</div>
 
     <div class="container">
-		<div class="row clearfix row-deck" style='text-align:right;'>
-            <div class="col-12">
-                <div class="col-12 header p-0">
-                    <ul class="header-dropdown">
-                        
-                    </ul>
-                </div>
-            </div>
-        </div>
-
-		<div class="row clearfix row-deck" id="roles_permission_content"></div>
+		<div class="row clearfix row-deck">
+			<div class="col-12 card">
+				<div class="row card-body" id="roles_permission_content"></div>
+			</div>
+		</div>
 	</div>
 </div>
 

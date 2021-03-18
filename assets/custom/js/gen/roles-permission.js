@@ -1,5 +1,25 @@
 $(document).ready(function() {
 
+    // ----- DATATABLES -----
+    function initDataTables() {
+        if ($.fn.DataTable.isDataTable('#tableModuleAccess')){
+            $('#tableModuleAccess').DataTable().destroy();
+        }
+        
+        var table = $("#tableModuleAccess").css({"min-width": "100%"}).removeAttr('width').DataTable({
+            proccessing:    false,
+            serverSide:     false,
+            scrollX:        true,
+            scrollCollapse: true,
+            ordering: false,
+            columnDefs: [
+                { targets: 0, width: "100%" },
+            ],
+        });
+    }
+    // ----- END DATATABLES -----
+
+
     // ----- PAGE CONTENT -----
     function getUserRoleContent(data) {
         // Reset the unique datas
@@ -51,7 +71,7 @@ $(document).ready(function() {
         let data = getTableData("gen_roles_permission_tbl LEFT JOIN gen_module_list_tbl USING(moduleID)", "", "roleID="+roleID);
 
         let html = `
-        <table class="table table-bordered table-hover">
+        <table class="table table-bordered table-hover" id="tableModuleAccess">
             <thead class="bg-primary text-white">
                 <tr>
                     <th>MODULE ACCESS</th>
@@ -116,6 +136,7 @@ $(document).ready(function() {
         }
         setTimeout(() => {
             $("#roles_permission_content").html(html);
+            initDataTables();
         }, 500);
     }
     pageContent();
@@ -132,17 +153,10 @@ $(document).ready(function() {
         $("#modalTitle").text(modalTitle);
 
         let button = roleID ? `
-        <button 
-            class="btn btn-primary px-5 p-2" 
-            id="btnUpdate" 
-            roleID="${roleID}">
-            UPDATE
+        <button class="btn btn-update" id="btnUpdate" roleID="${roleID}"><i class="fas fa-save"></i>
+            Update
         </button>` : `
-        <button 
-            class="btn btn-primary px-5 p-2" 
-            id="btnSave">
-            SAVE
-        </button>`;
+        <button class="btn btn-save" id="btnSave"><i class="fas fa-save"></i> Save</button>`;
 
         let html = `
         <div class="modal-body">
@@ -171,7 +185,7 @@ $(document).ready(function() {
         </div>
         <div class="modal-footer">
             ${button}
-            <button class="btn btn-danger px-5 p-2" data-dismiss="modal">CANCEL</button>
+            <button class="btn btn-cancel btnCancel" data-dismiss="modal"><i class="fas fa-ban"></i> Cancel</button>
         </div>`;
         return html;
     } 
@@ -212,8 +226,14 @@ $(document).ready(function() {
     $(document).on("click", "#btnSave", function() {
         const validate = validateForm("modal_roles_permission");
         if (validate) {
-            $("#modal_roles_permission").modal("hide");
-            $("#confirmation-modal_add_roles_permission").modal("show");
+            // $("#modal_roles_permission").modal("hide");
+            // $("#confirmation-modal_add_roles_permission").modal("show");
+
+            let data = getFormData("modal_roles_permission", true);
+            data.tableName = "gen_user_role_tbl";
+            data.feedback  = $("#input_roleName").val();
+
+            sweetAlertConfirmation("add", "Role", "modal_roles_permission", null, data, true, pageContent)
         }
     });
     // ----- END SAVE ADD -----
@@ -223,8 +243,18 @@ $(document).ready(function() {
     $(document).on("click", "#btnUpdate", function() {
         const validate = validateForm("modal_roles_permission");
         if (validate) {
-            $("#modal_roles_permission").modal("hide");
-            $("#confirmation-modal_edit_roles_permission").modal("show");
+            // $("#modal_roles_permission").modal("hide");
+            // $("#confirmation-modal_edit_roles_permission").modal("show");
+
+            const roleID = $(this).attr("roleID");
+            let roleName = $("#input_roleName").val();
+
+            let data = getFormData("modal_roles_permission", true);
+            data.tableName   = "gen_user_role_tbl";
+            data.whereFilter = "roleID = "+roleID;
+            data.feedback    = roleName;
+
+            sweetAlertConfirmation("update", "Role", "modal_roles_permission", null, data, true, pageContent)
         }
     });
     // ----- END SAVE UPDATE -----
@@ -325,8 +355,25 @@ $(document).ready(function() {
         $("#module_access_content").html(preloader);
         setTimeout(() => {
             $("#module_access_content").html(moduleData);
+            initDataTables();
         }, 500);
     })
     // ----- END SELECT USER ROLE -----
+
+
+    // ------- CANCEL MODAL--------
+	$(document).on("click", ".btnCancel", function () {
+		let formEmpty = isFormEmpty("modal_roles_permission");
+		if (!formEmpty) {
+			sweetAlertConfirmation(
+				"cancel",
+				"Role",
+				"modal_roles_permission"
+			);
+		} else {
+			$("#modal_roles_permission").modal("hide");
+		}
+	});
+	// -------- END CANCEL MODAL-----------
 
 })

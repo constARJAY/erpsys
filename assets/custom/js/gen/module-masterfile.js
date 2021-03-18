@@ -224,7 +224,7 @@ $(document).ready(function() {
                 }
                 uniqueData.push(unique);
 
-                let projectName = item.projectName.replace("|", "<br>");
+                let projectName = item.projectName.replaceAll("|", "<br>");
 
                 let status = item.moduleStatus == 1 ? `
                 <span class="badge badge-success w-100">Active</span>` : `

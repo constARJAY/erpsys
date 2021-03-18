@@ -95,19 +95,19 @@ $(document).ready(function() {
         })
         $("#moduleList").html(html);
     }
-    const moduleTableData = getTableData("gen_module_list_tbl", "", "moduleStatus = 1");
-    const moduleData = moduleTableData.map(item => item.moduleName);
+    const moduleTableData = getTableData("gen_module_list_tbl", "", "moduleStatus = 1", "moduleName ASC");
+    const moduleData = moduleTableData.map(item => item.moduleName.toLowerCase());
     getAllModules(moduleTableData);
 
     $(document).on("keypress", "#searchModule", function(e) {
-        const moduleName = $(this).val();
-        if (e.which == 13) {
-            if (moduleData.includes(moduleName)) {
-                const getController = getTableData("gen_module_list_tbl", "moduleController", "moduleName = BINARY '"+moduleName+"'");
+        let moduleName = $(this).val();
+        if (moduleName.length > 0 && e.which == 13) {
+            if (moduleData.includes(moduleName.toLowerCase())) {
+                const getController = getTableData("gen_module_list_tbl", "moduleController", "moduleName LIKE '%"+moduleName+"%'");
                 const controllerName = getController[0]["moduleController"].toLowerCase();
                 window.location.href = base_url+controllerName;
             } else {
-                showNotification("danger", `${moduleName} module not found.`)
+                showNotification("info", `${moduleName} module not found.`)
             }
         }
     })

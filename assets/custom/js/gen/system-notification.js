@@ -45,7 +45,7 @@ $(document).ready(function() {
                         <div class="card">
                             <div class="body">
                                 <div class="w-100 text-center">
-                                    <img src="${base_url}assets/modal/notification.png" alt="No notification" width="300" height="200">
+                                    <img src="${base_url}assets/modal/no-notification.svg" alt="No notification" width="300" height="200">
                                     <h4>No notification found.</h4>
                                 </div>
                             </div>

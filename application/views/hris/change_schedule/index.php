@@ -5,14 +5,14 @@
                 <div class="col-lg-8 col-sm-12">
                     <ul class="breadcrumb pl-0 pb-0 ">
                         <li class="breadcrumb-item"><a href="#"><i class="zmdi zmdi-home"></i> Dashboard</a></li>
-						<li class="breadcrumb-item"><i class="zmdi zmdi-folder"></i> &nbsp;Masterfiles</li>
-                        <li class="breadcrumb-item active">Schedule Setup</li>
+						<li class="breadcrumb-item"><i class="zmdi zmdi-folder"></i> &nbsp;Forms</li>
+                        <li class="breadcrumb-item active">Change Schedule</li>
                     </ul>
-                    <h1 class="mb-1 mt-1">Schedule Setup</h1>
+                    <h1 class="mb-1 mt-1">Change Schedule</h1>
                     <span>Lorem ipsum dolor sit amet consectetur adipisicing elit. At, quae.</span>
                 </div>
                 <div class="col-lg-4 col-sm-12 text-right">
-                    <button type="button" class="btn btn-default btn-add" id="btnAdd"> <i class="icon-plus"></i> &nbsp;Add Schedule</button>
+                    <button type="button" class="btn btn-default btn-add" id="btnAdd"> <i class="icon-plus"></i> &nbsp;Add Change Schedule</button>
                 </div>
             </div>
         </div>
@@ -29,21 +29,21 @@
 
 
 <!-- ----- MODAL ----- -->
-<div id="modal_schedule_setup" class="modal custom-modal fade" data-backdrop="static" data-keyboard="false" role="dialog">
+<div id="modal_change_schedule" class="modal custom-modal fade" data-backdrop="static" data-keyboard="false" role="dialog">
     <div class="modal-dialog modal-dialog-centered modal-md" role="document">
 		<div class="modal-content">
 			<div class="modal-header bg-primary text-light">
-				<h5 class="page-title font-weight-bold">ADD SCHEDULE</h5>
+				<h5 class="page-title font-weight-bold">ADD CHANGE SCHEDULE</h5>
 				<button type="button" class="close btnCancel" data-dismiss="modal" aria-label="Close">
 					<span class="text-light" aria-hidden="true">&times;</span>
 				</button>
 			</div>
 
-            <div id="modal_schedule_setup_content"></div>
+            <div id="modal_change_schedule_content"></div>
         </div>
 	</div>
 </div>
 <!-- ----- END MODAL ----- -->
 
 
-<script src="<?= base_url('assets/custom/js/hris/schedule-setup.js') ?>"></script>
+<script src="<?= base_url('assets/custom/js/hris/change-schedule.js') ?>"></script>
