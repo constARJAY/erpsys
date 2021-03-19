@@ -1,7 +1,8 @@
 // ----- GLOBAL VARIABLES -----
 let uniqueData          = []; // Store unique data here
-const base_url          = $("#base_url").val();
-const sessionID         = $("#base_url").attr("session");
+const base_url          = $(".page-loader-wrapper").attr("base_url");
+const sessionID         = $(".page-loader-wrapper").attr("session");
+const sessionRoleID     = $(".page-loader-wrapper").attr("role");
 const differentInputArr = ["input", "select", "textarea"];
 const differentInputStr = differentInputArr.join(", ");
 // ----- END GLOBAL VARIABLES -----

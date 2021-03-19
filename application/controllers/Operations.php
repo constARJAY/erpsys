@@ -66,6 +66,7 @@ class Operations extends CI_Controller {
         $tableName = $this->input->post("tableName") ? $this->input->post("tableName") : null;
         $tableData = $this->input->post("tableData") ? $this->input->post("tableData") : false;
         $feedback  = $this->input->post("feedback")  ? $this->input->post("feedback") : null;
+        $method    = $this->input->post("method")  ? $this->input->post("method") : false;
         $data = array();
 
         $uploadedFiles = $this->getUploadedFiles();
@@ -81,7 +82,7 @@ class Operations extends CI_Controller {
                     $data[$key] = $value;
                 }
             }
-            echo json_encode($this->operations->insertTableData($tableName, $data, $feedback));
+            echo json_encode($this->operations->insertTableData($tableName, $data, $feedback, $method));
         } else {
             echo json_encode("false|Invalid arguments");
         }
@@ -93,6 +94,7 @@ class Operations extends CI_Controller {
         $tableData   = $this->input->post("tableData") ? $this->input->post("tableData") : false;
         $whereFilter = $this->input->post("whereFilter") ? $this->input->post("whereFilter") : false;
         $feedback    = $this->input->post("feedback")  ? $this->input->post("feedback") : null;
+        $method      = $this->input->post("method")  ? $this->input->post("method") : false;
         $data = array();
 
         $uploadedFiles = $this->getUploadedFiles();
@@ -108,7 +110,7 @@ class Operations extends CI_Controller {
                     $data[$key] = $value;
                 }
             }
-            echo json_encode($this->operations->updateTableData($tableName, $data, $whereFilter, $feedback));
+            echo json_encode($this->operations->updateTableData($tableName, $data, $whereFilter, $feedback, $method));
         } else {
             echo json_encode("false|Invalid arguments");
         }

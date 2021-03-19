@@ -1,6 +1,6 @@
 <div class="body_area after_bg">
     <div class="block-header pb-0">
-        <div class="container">
+        <div class="container" id="headerContainer">
             <div class="row clearfix">
                 <div class="col-lg-8 col-sm-12">
                     <ul class="breadcrumb pl-0 pb-0 ">
@@ -20,8 +20,19 @@
 
     <div class="container">
 		<div class="row clearfix row-deck">
-            <div class="card col-12" id="page_content">
-                <div class="card-body table-responsive" id="table_content"></div>
+            <div class="card col-12">
+                <div class="card-body" id="page_content">
+                    <div class="tab-content">
+                        <div role="tabpanel" class="tab-pane" id="forApprovalTab" aria-expanded="false">
+                            <div class="table-responsive" id="tableForApprovalParent">
+                            </div>
+                        </div>
+                        <div role="tabpanel" class="tab-pane active" id="myFormsTab" aria-expanded="false">
+                            <div class="table-responsive" id="tableMyFormsParent">
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 	</div>
@@ -34,7 +45,7 @@
 		<div class="modal-content">
 			<div class="modal-header bg-primary text-light">
 				<h5 class="page-title font-weight-bold">ADD CHANGE SCHEDULE</h5>
-				<button type="button" class="close btnCancel" data-dismiss="modal" aria-label="Close">
+				<button type="button" class="close btnCancel" data-dismiss="modal" aria-label="Close" id="btnCancel">
 					<span class="text-light" aria-hidden="true">&times;</span>
 				</button>
 			</div>

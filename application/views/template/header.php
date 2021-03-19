@@ -67,11 +67,9 @@
 
 <body class="font-nunito fullwidth h_menu">
 
-<input type="hidden" name="base_url" id="base_url" value="<?= base_url() ?>" session="<?= $sessionID ?>">
-
 <div id="body" class="theme-blackbox">
     <!-- Page Loader -->
-    <div class="page-loader-wrapper">
+    <div class="page-loader-wrapper" base_url="<?= base_url() ?>" session="<?= $sessionID ?>" role="1">
         <div class="loader">
             <div class="mt-3"><img class="zmdi-hc-spin w60" src="<?= base_url() ?>assets/images/loader.svg" alt="Amaze"></div>
             <p>Please wait...</p>        

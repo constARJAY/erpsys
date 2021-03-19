@@ -50,7 +50,7 @@ function sweetAlertConfirmation(
             cancelButtonText: 'No',
             confirmButtonText: 'Yes',
             allowOutsideClick: false
-            }).then((result) => {
+        }).then((result) => {
             if (result.isConfirmed) {
                 let swalTitle = success_title.toUpperCase();
 
@@ -58,7 +58,7 @@ function sweetAlertConfirmation(
                     let saveData = condition.toLowerCase() == "add" ? insertTableData(data, isObject, false, swalTitle) : updateTableData(data, isObject, false, swalTitle);
                     saveData.then(res => {  
                         if (res) {
-                            callback ? callback() : tableContent();
+                            callback && callback();
                         } else {
                             Swal.fire({
                                 icon: 'danger',
@@ -78,7 +78,7 @@ function sweetAlertConfirmation(
                     });
                 }
             } else {
-                containerID ? $("#"+containerID).show() : "";
+                containerID && $("#"+containerID).show();
                 $("#"+modalID).modal("show");
             }
         });

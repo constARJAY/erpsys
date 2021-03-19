@@ -39,10 +39,13 @@
 
 </style>
 <body>
-	<input type="hidden" name="base_url" id="base_url" value="<?= base_url() ?>">
+	<!-- <input type="hidden" name="base_url" id="base_url" value="<?= base_url() ?>"> -->
 	<!-- <div>
         <img src="images/bb-loader-md.png" class="ld ld-dim" alt="" style="animation-duration:1.0s">
     </div> -->
+
+	<div class="page-loader-wrapper" base_url="<?= base_url() ?>"></div>
+
 	<div class="limiter">
 		<div class="container-loginTACS">
 			<div class="wrap-login100">
