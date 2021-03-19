@@ -13,14 +13,30 @@ $(document).ready(function(){
             scrollCollapse: true,
             columnDefs: [
                 { targets: 0, width: 100 },
-                { targets: 1, width: 500 },
-                { targets: 2, width: 50 },
+                { targets: 1, width: 200 },
+                { targets: 2, width: 200 },
                 { targets: 3, width: 50 },
+                { targets: 4, width: 50 },
             ],
         });
     }
     initDataTables();
     // ----- END DATATABLES -----
+
+    // ----- DEPARTMENT CONTENT -----
+    function departmentContent(param = false) {
+    // getTableData(tableName = null, columnName = “”, WHERE = “”, orderBy = “”) 
+    const data = getTableData("ims_inventory_classification_tbl", 
+        "classificationID   ,classificationName", "", "");
+        
+            let html = ` <option value="" disabled selected ${!param && "selected"}>No Selected</option>`;
+            data.map((item, index, array) => {
+                html += `<option value="${item.classificationID }" ${param && item.classificationID  == param[0].classificationID  && "selected"}>${item.classificationName}</option>`;
+            })
+            $("#input_classificationID").html(html);
+    }
+    departmentContent();
+    // ----- END DEPARTMENT CONTENT -----
 
     // ----- TABLE CONTENT -----
     function tableContent() {
@@ -36,7 +52,7 @@ $(document).ready(function(){
             method:   'POST',
             async:    false,
             dataType: 'json',
-            data:     {tableName: "ims_inventory_category_tbl"},
+            data:     {tableName: "ims_inventory_category_tbl INNER JOIN ims_inventory_classification_tbl USING(classificationID)"},
             beforeSend: function() {
                 $("#table_content").html(preloader);
                 // $("#inv_headerID").text("List of Inventory Item");
@@ -49,6 +65,7 @@ $(document).ready(function(){
                     <tr class="text-center">
                         <th>Item Category Code</th>
                         <th>Category Name</th>
+                        <th>Classification Name</th>
                         <th>Status</th>
                         <th>Action</th>
                     </tr>
@@ -76,6 +93,7 @@ $(document).ready(function(){
                     <tr>
                         <td>${item.categoryCode}</td>
                         <td>${item.categoryName}</td>
+                        <td>${item.classificationName}</td>
                         <td>${status}</td>
                         <td>
                             <button 
@@ -83,7 +101,7 @@ $(document).ready(function(){
                                 id="${item.categoryID}"
                                 feedback="${item.categoryName}">
                                 <i class="fas fa-edit"></i>
-                                EDIT
+                                Edit
                             </button>
                         </td>
                     </tr>`;
@@ -121,12 +139,12 @@ $(document).ready(function(){
             rowID="${categoryID}"
             feedback="${categoryName}">
             <i class="fas fa-save"></i>
-            UPDATE
+            Update
         </button>` : `
         <button 
             class="btn btn-save px-5 p-2" 
             id="btnSave"><i class="fas fa-save"></i>
-            SAVE
+            Save
         </button>`;
 
         let html = `
@@ -134,7 +152,7 @@ $(document).ready(function(){
             <div class="row">
                 <div class="col-md-12 col-sm-12">
                     <div class="form-group">
-                        <label>Category Name<span class="text-danger font-weight-bold">*</span></label>
+                        <label>Category Name <span class="text-danger font-weight-bold">*</span></label>
                         <input 
                             type="text" 
                             class="form-control validate" 
@@ -154,7 +172,22 @@ $(document).ready(function(){
             <div class="row">
                 <div class="col-md-12 col-sm-12">
                     <div class="form-group">
-                        <label>Status<span class="text-danger font-weight-bold">*</span></label>
+                        <label>Classification Name <span class="text-danger font-weight-bold">*</span></label>
+                        <select 
+                            class="form-control select2 validate" 
+                            id="input_classificationID" 
+                            name="classificationID"
+                            autocomplete="off"
+                            required>
+                        </select>
+                        <div class="invalid-feedback d-block" id="invalid-input_classificationID"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12 col-sm-12">
+                    <div class="form-group">
+                        <label>Status <span class="text-danger font-weight-bold">*</span></label>
                         <select 
                             class="form-control select2 validate" 
                             id="input_categoryStatus" 
@@ -166,7 +199,7 @@ $(document).ready(function(){
                                 ${data && categoryStatus == "1" && "selected"} >Active</option>
                             <option 
                                 value="0" 
-                                ${data && categoryStatus == "0" && "selected"}>InActive</option>
+                                ${data && categoryStatus == "0" && "selected"}>Inactive</option>
                         </select>
                         <div class="invalid-feedback d-block" id="invalid-input_categoryStatus"></div>
                     </div>
@@ -175,7 +208,7 @@ $(document).ready(function(){
         </div>
         <div class="modal-footer">
             ${button}
-            <button class="btn btn-danger px-5 p-2 btnCancel">CANCEL</button>
+            <button class="btn btn-cancel px-5 p-2 btnCancel"><i class="fas fa-ban"></i> Cancel</button>
         </div>`;
     return html;
 } 
@@ -188,6 +221,7 @@ $(document).ready(function(){
         $("#modal_inventory_category_content").html(preloader);
         const content = modalContent();
         $("#modal_inventory_category_content").html(content);
+        departmentContent();
         initAll();
     });
     // ----- END OPEN ADD MODAL -----
@@ -226,6 +260,7 @@ $(document).ready(function(){
             const content = modalContent(tableData);
             setTimeout(() => {
                 $("#modal_inventory_category_content").html(content);
+                departmentContent(tableData);
                 $("#btnSaveConfirmationEdit").attr("accountid", id);
                 $("#btnSaveConfirmationEdit").attr("feedback", feedback);
                 initAll();

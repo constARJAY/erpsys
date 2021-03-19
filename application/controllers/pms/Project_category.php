@@ -11,7 +11,7 @@ class Project_category extends CI_Controller {
 
     public function index()
     {
-        $data["title"] = "Project Category Masterfile";
+        $data["title"] = "Project Category";
 
         $this->load->view("template/header",$data);
         $this->load->view("pms/project_category/index");

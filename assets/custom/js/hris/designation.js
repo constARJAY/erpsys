@@ -100,7 +100,7 @@ $(document).ready(function(){
                                 id="${item.designationID}"
                                 feedback="${item.designationName}">
                                 <i class="fas fa-edit"></i>
-                                EDIT
+                                Edit
                             </button>
                         </td>
                     </tr>`;
@@ -137,12 +137,12 @@ $(document).ready(function(){
             id="btnUpdate" 
             rowID="${designationID}">
             <i class="fas fa-save"></i>
-            UPDATE
+            Update
         </button>` : `
         <button 
             class="btn btn-save px-5 p-2" 
             id="btnSave"><i class="fas fa-save"></i>
-            SAVE
+            Save
         </button>`;
 
         let html = `
@@ -150,7 +150,7 @@ $(document).ready(function(){
             <div class="row">
                 <div class="col-md-12 col-sm-12">
                     <div class="form-group">
-                        <label>Department Name<span class="text-danger font-weight-bold">*</span></label>
+                        <label>Department Name <span class="text-danger font-weight-bold">*</span></label>
                         <select 
                             class="form-control select2 validate" 
                             id="input_departmentID" 
@@ -165,7 +165,7 @@ $(document).ready(function(){
             <div class="row">
                 <div class="col-md-12 col-sm-12">
                     <div class="form-group">
-                        <label>Designation Name<span class="text-danger font-weight-bold">*</span></label>
+                        <label>Designation Name <span class="text-danger font-weight-bold">*</span></label>
                         <input 
                             type="text" 
                             class="form-control validate" 
@@ -185,7 +185,7 @@ $(document).ready(function(){
             <div class="row">
                 <div class="col-md-12 col-sm-12">
                     <div class="form-group">
-                        <label>Status<span class="text-danger font-weight-bold">*</span></label>
+                        <label>Status <span class="text-danger font-weight-bold">*</span></label>
                         <select 
                             class="form-control select2 validate" 
                             id="input_designationStatus" 
@@ -197,7 +197,7 @@ $(document).ready(function(){
                                 ${data && designationStatus == "1" && "selected"}>Active</option>
                             <option 
                                 value="0" 
-                                ${data && designationStatus == "0" && "selected"}>InActive</option>
+                                ${data && designationStatus == "0" && "selected"}>Inactive</option>
                         </select>
                         <div class="invalid-feedback d-block" id="invalid-input_designationStatus"></div>
                     </div>
@@ -207,7 +207,7 @@ $(document).ready(function(){
         </div>
         <div class="modal-footer">
             ${button}
-            <button class="btn btn-danger px-5 p-2 btnCancel">CANCEL</button>
+            <button class="btn btn-cancel px-5 p-2 btnCancel"><i class="fas fa-ban"></i> Cancel</button>
         </div>`;
     return html;
 } 

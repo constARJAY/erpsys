@@ -106,7 +106,7 @@ $(document).ready(function(){
                                 id="${item.itemID}"
                                 feedback="${item.itemName}">
                                 <i class="fas fa-edit"></i>
-                                EDIT
+                                Edit
                             </button>
                         </td>
                     </tr>`;
@@ -199,12 +199,12 @@ $(document).ready(function(){
             rowID="${itemID}"
             feedback="${itemName}">
             <i class="fas fa-save"></i>
-            UPDATE
+            Update
         </button>` : `
         <button 
             class="btn btn-save px-5 p-2" 
             id="btnSave"><i class="fas fa-save"></i>
-            SAVE
+            Save
         </button>`;
        
         let html = `
@@ -212,7 +212,7 @@ $(document).ready(function(){
                 <div class="row">
                     <div class="col-md-6 col-sm-12">
                         <div class="form-group">
-                            <label>Storage Code<span class="text-danger font-weight-bold">*</span></label>
+                            <label>Storage Code <span class="text-danger font-weight-bold">*</span></label>
                             <select 
                             class="form-control select2 validate" 
                             id="input_inventoryStorageID" 
@@ -225,7 +225,7 @@ $(document).ready(function(){
                     </div>
                     <div class="col-md-6 col-sm-12">
                         <div class="form-group">
-                            <label>Item Name<span class="text-danger font-weight-bold">*</span></label>
+                            <label>Item Name <span class="text-danger font-weight-bold">*</span></label>
                             <input 
                                 type="text" 
                                 class="form-control validate" 
@@ -243,7 +243,7 @@ $(document).ready(function(){
                     </div>
                     <div class="col-md-6 col-sm-12">
                     <div class="form-group">
-                        <label>Item Classification<span class="text-danger font-weight-bold">*</span></label>
+                        <label>Item Classification <span class="text-danger font-weight-bold">*</span></label>
                         <select 
                             class="form-control select2 validate" 
                             id="input_classificationID" 
@@ -256,7 +256,7 @@ $(document).ready(function(){
                 </div>
                 <div class="col-md-6 col-sm-12">
                 <div class="form-group">
-                    <label>Item Category<span class="text-danger font-weight-bold">*</span></label>
+                    <label>Item Category <span class="text-danger font-weight-bold">*</span></label>
                     <select 
                     class="form-control select2 validate" 
                     id="input_categoryID" 
@@ -269,7 +269,7 @@ $(document).ready(function(){
             </div>
             <div class="col-md-6 col-sm-12">
             <div class="form-group">
-                <label>Item Size<span class="text-danger font-weight-bold">*</span></label>
+                <label>Item Size <span class="text-danger font-weight-bold">*</span></label>
                 <select 
                     class="form-control select2 validate" 
                     id="input_itemSize" 
@@ -303,7 +303,7 @@ $(document).ready(function(){
 
         <div class="col-md-6 col-sm-12">
             <div class="form-group">
-                <label>Unit of Measurement<span class="text-danger font-weight-bold">*</span></label>
+                <label>Unit of Measurement <span class="text-danger font-weight-bold">*</span></label>
                 <select 
                     class="form-control select2 validate" 
                     id="input_unitOfMeasurementID" 
@@ -337,7 +337,7 @@ $(document).ready(function(){
 
         <div class="col-md-6 col-sm-12">
             <div class="form-group">
-                <label>Vat Type<span class="text-danger font-weight-bold">*</span></label>
+                <label>Vat Type <span class="text-danger font-weight-bold">*</span></label>
                 <select 
                     class="form-control select2 validate" 
                     id="input_vatType" 
@@ -363,7 +363,7 @@ $(document).ready(function(){
         </div>
         <div class="col-md-6 col-sm-12">
                         <div class="form-group">
-                            <label>Re-order Level<span class="text-danger font-weight-bold">*</span></label>
+                            <label>Re-order Level <span class="text-danger font-weight-bold">*</span></label>
                             <input 
                                 type="text" 
                                 class="form-control validate" 
@@ -381,7 +381,7 @@ $(document).ready(function(){
 
                     <div class="col-md-6 col-sm-12">
                     <div class="form-group">
-                        <label>Unit of Measurement<span class="text-danger font-weight-bold">*</span></label>
+                        <label>Status <span class="text-danger font-weight-bold">*</span></label>
                         <select 
                             class="form-control select2 validate" 
                             id="input_itemStatus" 
@@ -389,16 +389,11 @@ $(document).ready(function(){
                             autocomplete="off"
                             required>
                             <option 
-                                value="" 
-                                disabled 
-                                selected
-                                ${!data && "selected"} >No Selected</option>
-                            <option 
                                 value="1" 
                                 ${data && itemStatus == "1" && "selected"} >Active</option>
                             <option 
                                 value="0" 
-                                ${data && itemStatus == "0" && "selected"}>InActive</option>
+                                ${data && itemStatus == "0" && "selected"}>Inactive</option>
                         </select>
                         <div class="invalid-feedback d-block" id="invalid-itemStatus"></div>
                     </div>
@@ -406,7 +401,7 @@ $(document).ready(function(){
                    
                     <div class="col-md-6 col-sm-12">
                         <div class="form-group">
-                        <label>Unit Price<span class="text-danger font-weight-bold">*</span></label>
+                        <label>Unit Price <span class="text-danger font-weight-bold">*</span></label>
                             <input 
                                 type="text" 
                                 class="form-control amount" 
@@ -428,7 +423,7 @@ $(document).ready(function(){
             
             <div class="modal-footer">
                 ${button}
-                <button class="btn btn-cancel px-5 p-2 btnCancel"><i class="fas fa-ban"></i> CANCEL</button>
+                <button class="btn btn-cancel px-5 p-2 btnCancel"><i class="fas fa-ban"></i> Cancel</button>
             </div>`;
         return html;
         

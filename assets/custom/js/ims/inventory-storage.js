@@ -222,7 +222,7 @@
                                 class="btn btn-edit btnEdit w-100" 
                                 id="${item.inventoryStorageID}"
                                 feedback="${item.inventoryStorageOfficeName}">
-                                EDIT
+                                Edit
                             </button>
                             </td>
                         </tr>`;
@@ -273,12 +273,14 @@
                 class="btn btn-update px-5 p-2" 
                 id="btnUpdate" 
                 rowID="${inventoryStorageID}">
-                UPDATE
+                <i class="fas fa-save"></i>
+                Update
             </button>` : `
             <button 
                 class="btn btn-save px-5 p-2" 
                 id="btnSave">
-                SAVE
+                <i class="fas fa-save"></i>
+                Save
             </button>`;
 
             let html = `
@@ -303,7 +305,7 @@
 
                         <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6">
                         <div class="form-group">
-                            <label>Region</label>
+                            <label>Region <span class="text-danger">*</span></label>
                             <select class=" form-control show-tick select2 validate" name="inventoryStorageRegion" id="input_region" required>
                             <option value="" selected>Select Region</option>
                             ${getRegionOptions(inventoryStorageRegion)}
@@ -447,7 +449,7 @@
                     </div>
                 <div class="modal-footer">
                     ${button}
-                    <button class="btn btn-danger btnCancel px-5 p-2" data-dismiss="modal">CANCEL</button>
+                    <button class="btn btn-cancel btnCancel px-5 p-2" data-dismiss="modal"><i class="fas fa-ban"></i> Cancel</button>
                 </div>`;
             return html;
         } 

@@ -46,67 +46,6 @@
 			</div>
 		</div>
 	</div>
-
-    <!-- <div class="container" id="container_2"> 
-		<div class="row clearfix">
-			<div class="col-lg-12">
-				<div class="card">
-                <div class="col-12 mt-4 mb-4">
-						<div class="row clearfix">
-						
-								<div class="col-md-4">
-									<div class="form-group">
-										<label>Item Code <strong class="text-red">*</strong></label>
-										<input type="text" class="form-control" placeholder="">
-									</div>
-								</div>
-								<div class="col-md-4">
-									<div class="form-group">
-										<label>Item Name <strong class="text-red">*</strong></label>
-										<input type="text" class="form-control" placeholder="">
-									</div>
-								</div>
-                                <div class="col-md-4">
-									<div class="form-group">
-										<label>Item Group <strong class="text-red">*</strong></label>
-										<input type="text" class="form-control" placeholder="">
-									</div>
-								</div>
-						
-						</div>
-                        <div class="row clearfix">
-						
-								<div class="col-md-4">
-									<div class="form-group">
-										<label>Item Category <strong class="text-red">*</strong></label>
-										<input type="text" class="form-control" placeholder="">
-									</div>
-								</div>
-								<div class="col-md-4">
-									<div class="form-group">
-										<label>Item Size <strong class="text-red">*</strong></label>
-										<input type="text" class="form-control" placeholder="">
-									</div>
-								</div>
-                                <div class="col-md-4">
-									<div class="form-group">
-										<label>Unit Price <strong class="text-red">*</strong></label>
-										<input type="text" class="form-control" placeholder="">
-									</div>
-								</div>
-						
-						</div>
-                        <div class="row clearfix">
-							<div class="col-4"></div>
-                            <div class="col-4 d-flex"><button type="button" class="btn btn-outline-success btn-block  p-2 px-3" id="btnAdd"> <i class="fas fa-save"></i> &nbsp;Save</button></div>
-                            <div class="col-4"></div>
-						</div>
-
-				</div>
-                </div>
-			</div>
-		</div>
-	</div> -->
 </div>
 
 <!-- ----- ADD MODAL ----- -->

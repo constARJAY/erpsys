@@ -27,22 +27,22 @@ $(document).ready(function(){
         // Reset the unique datas
         uniqueData = [];
          // getTableData(tableName = null, columnName = “”, WHERE = “”, orderBy = “”) 
-         const data = getTableData("hris_department_tbl", 
-         "*, CONCAT('DEP-',SUBSTR(datecreated,3,2),'-',LPAD(departmentID, 5, '0')) AS departmentCode", "", "");
+        //  const data = getTableData("hris_department_tbl", 
+        //  "*, CONCAT('DEP-',SUBSTR(datecreated,3,2),'-',LPAD(departmentID, 5, '0')) AS departmentCode", "", "");
 
 
-        // $.ajax({
-        //     url:      `${base_url}operations/getTableData`,
-        //     method:   'POST',
-        //     async:    false,
-        //     dataType: 'json',
-        //     data:     {tableName: "user_account_tbl"},
-        //     beforeSend: function() {
+        $.ajax({
+            url:      `${base_url}operations/getTableData`,
+            method:   'POST',
+            async:    false,
+            dataType: 'json',
+            data:     {tableName: "hris_department_tbl"},
+            beforeSend: function() {
                 $("#table_content").html(preloader);
-        //         // $("#inv_headerID").text("List of Inventory Item");
-        //     },
-        //     success: function(data) {
-        //         console.log(data);
+                // $("#inv_headerID").text("List of Inventory Item");
+            },
+            success: function(data) {
+                console.log(data);
                 let html = `
                 <table class="table table-bordered table-striped table-hover" id="tableHRISDepartment">
                     <thead>
@@ -82,7 +82,7 @@ $(document).ready(function(){
                                 id="${item.departmentID}"
                                 feedback="${item.departmentName}">
                                 <i class="fas fa-edit"></i>
-                                EDIT
+                                Edit
                             </button>
                         </td>
                     </tr>`;
@@ -94,15 +94,15 @@ $(document).ready(function(){
                     $("#table_content").html(html);
                     initDataTables();
                 }, 500);
-        //     },
-        //     error: function() {
-        //         let html = `
-        //             <div class="w-100 h5 text-center text-danger>
-        //                 There was an error fetching data.
-        //             </div>`;
-        //         $("#table_content").html(html);
-        //     }
-        // })
+            },
+            error: function() {
+                let html = `
+                    <div class="w-100 h5 text-center text-danger>
+                        There was an error fetching data.
+                    </div>`;
+                $("#table_content").html(html);
+            }
+        })
     }
     tableContent();
     // ----- END TABLE CONTENT -----
@@ -117,14 +117,14 @@ $(document).ready(function(){
         <button 
             class="btn btn-update px-5 p-2" 
             id="btnUpdate" 
-            accountid="${departmentID}">
+            rowID="${departmentID}">
             <i class="fas fa-save"></i>
-            UPDATE
+            Update
         </button>` : `
         <button 
             class="btn btn-save px-5 p-2" 
             id="btnSave"><i class="fas fa-save"></i>
-            SAVE
+            Save
         </button>`;
 
         let html = `
@@ -133,7 +133,7 @@ $(document).ready(function(){
             <div class="row">
                 <div class="col-md-12 col-sm-12">
                     <div class="form-group">
-                        <label>Department Name<span class="text-danger font-weight-bold">*</span></label>
+                        <label>Department Name <span class="text-danger font-weight-bold">*</span></label>
                         <input 
                             type="text" 
                             class="form-control validate" 
@@ -153,7 +153,7 @@ $(document).ready(function(){
             <div class="row">
                 <div class="col-md-12 col-sm-12">
                     <div class="form-group">
-                        <label>Status<span class="text-danger font-weight-bold">*</span></label>
+                        <label>Status <span class="text-danger font-weight-bold">*</span></label>
                         <select 
                             class="form-control select2 validate" 
                             id="input_departmentStatus" 
@@ -161,16 +161,11 @@ $(document).ready(function(){
                             autocomplete="off"
                             required>
                             <option 
-                                value="" 
-                                disabled 
-                                selected
-                                ${!data && "selected"}>No Selected</option>
-                            <option 
                                 value="1" 
                                 ${data && departmentStatus == "1" && "selected"}>Active</option>
                             <option 
                                 value="0" 
-                                ${data && departmentStatus == "0" && "selected"}>InActive</option>
+                                ${data && departmentStatus == "0" && "selected"}>Inactive</option>
                         </select>
                         <div class="invalid-feedback d-block" id="invalid-input_departmentStatus"></div>
                     </div>
@@ -180,7 +175,7 @@ $(document).ready(function(){
         </div>
         <div class="modal-footer">
             ${button}
-            <button class="btn btn-danger px-5 p-2 btnCancel">CANCEL</button>
+            <button class="btn btn-cancel px-5 p-2 btnCancel"><i class="fas fa-ban"></i> Cancel</button>
         </div>`;
     return html;
 } 
@@ -202,62 +197,15 @@ $(document).ready(function(){
     $(document).on("click", "#btnSave", function() {
     const validate = validateForm("modal_hris_department");
     if (validate) {
-        $("#modal_hris_department").modal("hide");
-        // Swal.fire({
-        //     title: 'Are you sure?',
-        //     text: "You want to save this?",
-        //     icon: 'warning',
-        //     showCancelButton: true,
-        //     confirmButtonColor: '#3085d6',
-        //     cancelButtonColor: '#d33',
-        //     confirmButtonText: 'Save'
-        // }).
-        
-        Swal.fire({
-            title: 'Are you sure?',
-            text: "You want to save this?",
-            imageUrl: `${base_url}assets/custom/isometric_image/save.png`,
-            imageWidth: 200,
-            imageHeight: 200,
-            imageAlt: 'Custom image',
-            showCancelButton: true,
-            confirmButtonColor: '#28a745',
-            cancelButtonColor: '#1A1A1A',
-            confirmButtonText: 'Save',
-            allowOutsideClick: false
-          }).then((result) => {
-            if (result.isConfirmed) {
 
-            /**
-             * ----- FORM DATA -----
-             * tableData = {} -> Objects
-             */
-            let data = getFormData("modal_hris_department");
-            data.append("tableName", "hris_department_tbl");
-            data.append("feedback", "Your choice");
-            /**
-             * ----- DATA -----
-             * 1. tableName
-             * 2. tableData
-             * 3. feedback
-             */
+        let data = getFormData("modal_hris_department", true);
+        data["tableData[departmentCode]"] = generateCode("DPT", false, "hris_department_tbl", "departmentCode");
+        data["tableData[createdBy]"] = sessionID;
+        data["tableData[updatedBy]"] = sessionID;
+        data["tableName"]            = "hris_department_tbl";
+        data["feedback"]             = $("[name=departmentName]").val();
 
-            const saveData = insertTableData(data);
-            if (saveData) {
-                tableContent();
-            }
-                
-            Swal.fire({
-                icon: 'success',
-                title: 'Successfully saved!',
-                showConfirmButton: false,
-                timer: 2000
-              })
-            }else{
-                $("#modal_hris_department").modal("show");
-            }
-        });
-            
+        sweetAlertConfirmation("add", "Department Masterfile", "modal_hris_department", null, data, true, tableContent);
         }
     });
     // ----- END SAVE MODAL -----
@@ -277,7 +225,7 @@ $(document).ready(function(){
             const content = modalContent(tableData);
             setTimeout(() => {
                 $("#modal_hris_department_content").html(content);
-                $("#btnSaveConfirmationEdit").attr("accountid", id);
+                $("#btnSaveConfirmationEdit").attr("rowID", id);
                 $("#btnSaveConfirmationEdit").attr("feedback", feedback);
                 initAll();
             }, 500);
@@ -287,56 +235,25 @@ $(document).ready(function(){
 
     // ----- UPDATE MODAL -----
     $(document).on("click", "#btnUpdate", function() {
+        const rowID = $(this).attr("rowID");
         const validate = validateForm("modal_hris_department");
         if (validate) {
-        $("#modal_hris_department").modal("hide");
-            Swal.fire({
-                title: 'Are you sure?',
-                text: "You want to save this?",
-                imageUrl: `${base_url}assets/custom/isometric_image/save.png`,
-                imageWidth: 200,
-                imageHeight: 200,
-                imageAlt: 'Custom image',
-                showCancelButton: true,
-                confirmButtonColor: '#28a745',
-                cancelButtonColor: '#1A1A1A',
-                confirmButtonText: 'Yes, save changes',
-                allowOutsideClick: false
-              }).then((result) => {
-                if (result.isConfirmed) {
-    
-                    const accountID = $(this).attr("accountid");
-                    const feedback  = $(this).attr("feedback");
-        
-                    let data = getFormData("modal_hris_department");
-                    data.append("tableName", "hris_department_tbl");
-                    data.append("whereFilter", "departmentID="+accountID);
-                    data.append("feedback", feedback);
-        
-                    /**
-                     * ----- DATA -----
-                     * 1. tableName
-                     * 2. tableData
-                     * 3. whereFilter
-                     * 4. feedback
-                    */
-        
-                    const saveData = updateTableData(data);
-                    if (saveData) {
-                       tableContent();
-                    }
-                    
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Successfully saved!',
-                    showConfirmButton: false,
-                    timer: 2000
-                })
-                }else{
-                    $("#modal_hris_department").modal("show");
-                }
-            });
-                
+
+            let data = getFormData("modal_hris_department", true);
+			data["tableData[updatedBy]"] = sessionID;
+			data["tableName"]            = "hris_department_tbl";
+			data["whereFilter"]          ="departmentID="+rowID;
+			data["feedback"]             = $("[name=inventoryVendorName]").val();
+
+			sweetAlertConfirmation(
+				"update",
+				"Inventory Vendor",
+				"modal_hris_department",
+				"",
+				data,
+				true,
+				tableContent
+            );
             }
         });
         // ----- END UPDATE MODAL -----
@@ -390,51 +307,5 @@ $(document).ready(function(){
     });
     // -------- END CANCEL MODAL-----------
 
-    // ---- OPEN DELETE MODAL -----
-    $(document).on("click", ".btnDelete", function() {
-        const id = $(this).attr("id");
-        const feedback = $(this).attr("feedback");
-
-        Swal.fire({
-            title: 'Are you sure?',
-            text: "You want to delete this!",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#3085d6',
-            cancelButtonColor: '#d33',
-            confirmButtonText: 'Discard',
-            allowOutsideClick: false
-          }).then((result) => {
-            if (result.isConfirmed) {
-
-            // /**
-            //  * ----- DATA -----
-            //  * 1. tableName
-            //  * 2. whereFilter
-            //  * 3. feedback
-            // */
-
-            // const data = {
-            //     tableName:   "user_account_tbl",
-            //     whereFilter: "departmentID="+accountID,
-            //     feedback
-            // };
-
-            // const saveData = deleteTableData(data);
-            // if (saveData) {
-            //    tableContent();
-            // }
-
-              Swal.fire(
-                'Successfully Deleted!',
-                '',
-                'success'
-              )
-            }
-          });
-    });
-    // ---- END OPEN DELETE MODAL -----
-
-
-      
+   
 });

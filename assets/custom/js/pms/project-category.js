@@ -133,7 +133,7 @@ $(document).ready(function(){
             <div class="row">
                 <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12">
                     <div class="form-group">
-                        <label>Category Name<span class="text-danger font-weight-bold">*</span></label>
+                        <label>Category Name <span class="text-danger font-weight-bold">*</span></label>
                         <input 
                             type="text" 
                             class="form-control validate" 
@@ -151,7 +151,7 @@ $(document).ready(function(){
                 </div>
                 <div class="col-xl-8 col-lg-8 col-md-8 col-sm-12">
                     <div class="form-group">
-                        <label>Company Name<span class="text-danger font-weight-bold">*</span></label>
+                        <label>Company Name <span class="text-danger font-weight-bold">*</span></label>
                         <input 
                             type="text" 
                             class="form-control validate" 
@@ -168,7 +168,7 @@ $(document).ready(function(){
                 </div>
                 <div class="col-xl-4 col-lg-4 col-md-4 col-sm-12">
                     <div class="form-group">
-                        <label>Status<span class="text-danger font-weight-bold">*</span></label>
+                        <label>Status <span class="text-danger font-weight-bold">*</span></label>
                         <select 
                             class="form-control select2 validate" 
                             id="input_categoryStatus" 
@@ -180,7 +180,7 @@ $(document).ready(function(){
                                 ${data && categoryStatus == "1" && "selected"}>Active</option>
                             <option 
                                 value="0" 
-                                ${data && categoryStatus == "0" && "selected"}>InActive</option>
+                                ${data && categoryStatus == "0" && "selected"}>Inactive</option>
                         </select>
                         <div class="invalid-feedback d-block" id="invalid-input_categoryStatus"></div>
                     </div>

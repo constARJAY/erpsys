@@ -191,7 +191,7 @@ $(document).on("change", "[name=clientCity]", function() {
                 <table class="table table-bordered table-striped table-hover" id="tableProjectClient">
                     <thead>
                         <tr class="text-center" style="white-space:nowrap">
-                            <th>Client ID</th>
+                            <th>Client Code</th>
                             <th>Client Name</th>
                             <th>Client Address</th>
                             <th>Contact Person</th>

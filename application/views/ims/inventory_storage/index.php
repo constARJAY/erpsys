@@ -1,4 +1,31 @@
-<div class="body_area">
+<div class="body_area after_bg sm">
+	<div class="block-header">
+		<div class="container">
+			<div class="row clearfix">
+				<div class="col-lg-6 col-md-12">
+					<ul class="breadcrumb pl-0 pb-0 ">
+							<li class="breadcrumb-item"><a href="#"><i class="zmdi zmdi-home"></i> Dashboard</a></li>
+						<li class="breadcrumb-item"><i class="zmdi zmdi-folder"></i> &nbsp;Masterfile</li>
+						<li class="breadcrumb-item active">Inventory Storage</li>
+                        <!-- <li class="breadcrumb-item" id="inv_item_breadcrumbs" style="visibility:hidden;"><i class="icon-social-dropbox" ></i> &nbsp;Add Item</li> -->
+					</ul>
+					<h1 class="mt-3">List of Inventory Storage</h1>
+					<span>This module is used to manage inventory storage details.</span>
+				</div>
+				<div class="col-lg-6 col-md-12 text-md-right">
+					<!-- <button class="btn btn-default hidden-xs ml-2">Download Report</button>
+                        <button class="btn btn-secondary hidden-xs ml-2">New Report</button> -->
+                        <!-- <button type="button" class="btn btn-danger pr-2" id="btnAdd"> <i class="icon-plus" id="btnIcon"></i> &nbsp;Add Item</button> -->
+						<button type="button" class="btn btn-add p-2 px-3" id="btnAdd"> <i class="icon-plus"></i> &nbsp;Add inventory storage</button>
+                        <!-- <button type="button" class="btn btn-add pr-2" id="btnAdd"> <i class="fas fa-plus-square"></i> Add Item</button> -->
+                        <!-- <button type="button" class="btn btn-light pr-2" id="btnCancel"> <i class="icon-ban"></i> &nbsp;Cancel</button> -->
+                    </ul>
+				</div>
+			</div>
+		</div>
+	</div>
+
+<!-- <div class="body_area">
     <div class="block-header">
 		<div class="container">
 			<div class="row clearfix">
@@ -16,9 +43,31 @@
 				</div>
 			</div>
 		</div>
-	</div>
+	</div> -->
 
-    <div class="container">
+	<div class="container" > <!-- table front page -->
+		<div class="row clearfix">
+			<div class="col-lg-12">
+				<div class="card">
+					<div class="header text-right p-0">
+						<div class="closeBtn"></div>
+					</div>
+					<div class="body" id="main_body">
+						<div class="row" id="loading-screen" style="visibility:hidden;"></div>
+						<div class="row clearfix row-deck">
+							<div class="col-12">
+								<div class="table-responsive" id="table_content"></div>
+							</div>
+						</div>
+					</div>
+
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+    <!-- <div class="container"> -->
 		<!-- <div class="row clearfix row-deck" style='text-align:right;'>
             <div class="col-12">
                 <div class="col-12 header p-0">
@@ -27,14 +76,14 @@
                 </div>
             </div>
         </div> -->
-
+<!-- 
 		<div class="row clearfix row-deck">
             <div class="col-12">
                 <div class="table-responsive" id="table_content"></div>
             </div>
         </div>
 	</div>
-</div>
+</div> -->
 
 <!-- ----- ADD MODAL ----- -->
 <div id="modal_inventory_storage" class="modal custom-modal fade" data-backdrop="static" data-keyboard="false" role="dialog">

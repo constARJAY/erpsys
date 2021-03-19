@@ -20,7 +20,7 @@
 
     <div class="container">
 		<div class="row clearfix row-deck">
-            <div class="card col-12">
+            <div class="card col-12" id="page_content">
                 <div class="card-body table-responsive" id="table_content"></div>
             </div>
         </div>
@@ -46,4 +46,5 @@
 <!-- ----- END MODAL ----- -->
 
 
+<script src="<?= base_url('assets/custom/js/gen/approver-function.js') ?>"></script>
 <script src="<?= base_url('assets/custom/js/hris/change-schedule.js') ?>"></script>

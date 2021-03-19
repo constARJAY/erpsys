@@ -29,21 +29,21 @@ $(document).ready(function(){
         uniqueData = []; 
 
         // getTableData(tableName = null, columnName = “”, WHERE = “”, orderBy = “”) 
-        const data = getTableData("hris_requirement_tbl", "*", "", "");
+        // const data = getTableData("hris_requirement_tbl", "*", "", "");
     
 
-        // $.ajax({
-        //     url:      `${base_url}operations/getTableData`,
-        //     method:   'POST',
-        //     async:    false,
-        //     dataType: 'json',
-        //     data:     {tableName: "user_account_tbl"},
-        //     beforeSend: function() {
-        //         $("#table_content").html(preloader);
-        //         // $("#inv_headerID").text("List of Inventory Item");
-        //     },
-        //     success: function(data) {
-        //         console.log(data);
+        $.ajax({
+            url:      `${base_url}operations/getTableData`,
+            method:   'POST',
+            async:    false,
+            dataType: 'json',
+            data:     {tableName: "hris_requirement_tbl"},
+            beforeSend: function() {
+                $("#table_content").html(preloader);
+                // $("#inv_headerID").text("List of Inventory Item");
+            },
+            success: function(data) {
+                console.log(data);
                 let html = `
                 <table class="table table-bordered table-striped table-hover" id="tableHRISRequirements">
                     <thead>
@@ -66,20 +66,25 @@ $(document).ready(function(){
                     }
                     uniqueData.push(unique);
                     // ----- END INSERT UNIQUE DATA TO uniqueData VARIABLE ----
-
+                    if(item.requirementStatus == 1){
+                        var status=`<span class="badge badge-outline-success w-100">Active</span>`;
+                     }   
+                     if(item.requirementStatus == 0){
+                        var status=`<span class="badge badge-outline-danger w-100">Inactive</span>`;
+                     }
                     html += `
                     <tr>
                     <td>${item.requirementCode}</td>
                     <td>${item.requirementName}</td>
                     <td>${item.requirementDescription}</td>
-                    <td><span class="badge badge-outline-success w-100">Active</span></td>
+                    <td>${status}</td>
                         <td>
                             <button 
                                 class="btn btn-edit btn-block btnEdit" 
                                 id="${item.requirementID}"
                                 feedback="${item.requirementName}">
                                 <i class="fas fa-edit"></i>
-                                EDIT
+                                Edit
                             </button>
                         </td>
                     </tr>`;
@@ -91,15 +96,15 @@ $(document).ready(function(){
                     $("#table_content").html(html);
                     initDataTables();
                 }, 500);
-        //     },
-        //     error: function() {
-        //         let html = `
-        //             <div class="w-100 h5 text-center text-danger>
-        //                 There was an error fetching data.
-        //             </div>`;
-        //         $("#table_content").html(html);
-        //     }
-        // })
+            },
+            error: function() {
+                let html = `
+                    <div class="w-100 h5 text-center text-danger>
+                        There was an error fetching data.
+                    </div>`;
+                $("#table_content").html(html);
+            }
+        })
     }
     tableContent();
     // ----- END TABLE CONTENT -----
@@ -117,12 +122,12 @@ $(document).ready(function(){
             id="btnUpdate" 
             rowID="${requirementID}">
             <i class="fas fa-save"></i>
-            UPDATE
+            Update
         </button>` : `
         <button 
             class="btn btn-save px-5 p-2" 
             id="btnSave"><i class="fas fa-save"></i>
-            SAVE
+            Save
         </button>`;
 
         let html = `
@@ -130,7 +135,7 @@ $(document).ready(function(){
             <div class="row">
                 <div class="col-md-12 col-sm-12">
                     <div class="form-group">
-                        <label>Requirement Name<span class="text-danger font-weight-bold">*</span></label>
+                        <label>Requirement Name <span class="text-danger font-weight-bold">*</span></label>
                         <input 
                             type="text" 
                             class="form-control validate" 
@@ -150,7 +155,7 @@ $(document).ready(function(){
             <div class="row">
                 <div class="col-md-12 col-sm-12">
                     <div class="form-group">
-                        <label>Description<span class="text-danger font-weight-bold">*</span></label>
+                        <label>Description <span class="text-danger font-weight-bold">*</span></label>
                         <textarea rows="4" 
                         class="form-control validate no-resize" 
                         placeholder="Please type description..."
@@ -166,7 +171,7 @@ $(document).ready(function(){
             <div class="row">
                 <div class="col-md-12 col-sm-12">
                     <div class="form-group">
-                        <label>Status<span class="text-danger font-weight-bold">*</span></label>
+                        <label>Status <span class="text-danger font-weight-bold">*</span></label>
                         <select 
                             class="form-control select2 validate" 
                             id="input_requirementStatus" 
@@ -174,16 +179,11 @@ $(document).ready(function(){
                             autocomplete="off"
                             required>
                             <option 
-                                value="" 
-                                disabled 
-                                selected
-                                ${!data && "selected"}>No Selected</option>
-                            <option 
                                 value="1" 
                                 ${data && requirementStatus == "1" && "selected"} >Active</option>
                             <option 
                                 value="0" 
-                                ${data && requirementStatus == "0" && "selected"}>InActive</option>
+                                ${data && requirementStatus == "0" && "selected"}>Inactive</option>
                         </select>
                         <div class="invalid-feedback d-block" id="invalid-input_requirementStatus"></div>
                     </div>
@@ -193,7 +193,7 @@ $(document).ready(function(){
         </div>
         <div class="modal-footer">
             ${button}
-            <button class="btn btn-danger px-5 p-2 btnCancel">CANCEL</button>
+            <button class="btn btn-cancel px-5 p-2 btnCancel"><i class="fas fa-ban"></i> Cancel</button>
         </div>`;
     return html;
 } 
@@ -216,24 +216,14 @@ $(document).ready(function(){
     const validate = validateForm("modal_hris_requirements");
     if (validate) {
 
-        let tableData           = getTableData("hris_requirement_tbl","","","requirementCode DESC");
-        var currentDate         = new Date();
-        let currentYear         = currentDate.getFullYear();
-        let currentYearStr      = currentYear.toString();
+        let data = getFormData("modal_hris_requirements", true);
+        data["tableData[requirementCode]"] = generateCode("RQT", false, "hris_requirement_tbl", "requirementCode");
+        data["tableData[createdBy]"] = sessionID;
+        data["tableData[updatedBy]"] = sessionID;
+        data["tableName"]            = "hris_requirement_tbl";
+        data["feedback"]             = $("[name=requirementName]").val();
 
-         // Generate Number
-         let tableDataCode       = tableData.length < 1 ? "" : parseInt(tableData[0]["requirementCode"].slice(6)) + 1;
-
-         let genCode  = tableData.length < 1 ? "RQT-"+currentYearStr.slice(2)+"-00001" : "RQT-"+currentYearStr.slice(2)+"-"+numberCodeSize(tableDataCode, "5");
-
-// genCode("RQT",null,"tablename","columnName");
-         let data = getFormData("modal_hris_requirements",true);
-         data["tableData[requirementCode]"]     = genCode;
-         data["tableData[createdBy]"]     = "1";
-         data["tableData[updatedBy]"]     = "1";
-         data["tableName"]                = "hris_requirement_tbl";
-         data["feedback"]                 = genCode;
-         sweetAlertConfirmation("add", "Requirements Masterfile","modal_hris_requirements", null, data);
+        sweetAlertConfirmation("add", "Requirements Masterfile", "modal_hris_requirements", null, data, true, tableContent);
         }
     });
     // ----- END SAVE MODAL -----
@@ -265,34 +255,40 @@ $(document).ready(function(){
     $(document).on("click", "#btnUpdate", function() {
         const validate = validateForm("modal_hris_requirements");
         let rowID           = $(this).attr("rowID");
-        let genCode         = getTableData("hris_requirement_tbl","requirementCode","requirementID="+rowID,"requirementCode DESC");
         if (validate) {
 
             let data = getFormData("modal_hris_requirements", true);
-            data["tableData"]["updatedBy"]   =  "2";
-            data["whereFilter"]              =  "requirementID="+rowID;
-            data["tableName"]                =  "hris_requirement_tbl";
-            data["feedback"]                 =   genCode[0]["requirementCode"];
-            console.log(data);
-            sweetAlertConfirmation("update", "Requirements Masterfile","modal_hris_requirements", null , data);
+			data["tableData[updatedBy]"] = sessionID;
+			data["tableName"]            = "hris_requirement_tbl";
+			data["whereFilter"]          =  "requirementID="+rowID;
+			data["feedback"]             = $("[name=requirementName]").val();
 
-      
+			sweetAlertConfirmation(
+				"update",
+				"Requirements Masterfile",
+				"modal_hris_requirements",
+				"",
+				data,
+				true,
+				tableContent
+			);
             }
         });
         // ----- END UPDATE MODAL -----
 
     // ------- CANCEl MODAL-------- 
-
-    $(document).on("click",".btnCancel", function(){
-        let condition = emptyFormCondition("modal_hris_requirements");
-        if(condition==true){
-            sweetAlertConfirmation("", "Requirement Masterfile","modal_hris_requirements");
-        }else{
-            $("#modal_hris_requirements").modal("hide");
-        }
-        
+    $(document).on("click", ".btnCancel", function () {
+		let formEmpty = isFormEmpty("modal_hris_requirements");
+		if (!formEmpty) {
+			sweetAlertConfirmation(
+				"cancel",
+				"Requirements Masterfile",
+				"modal_hris_requirements"
+			);
+		} else {
+			$("#modal_hris_requirements").modal("hide");
+		}
     });
-  
     // -------- END CANCEL MODAL-----------
  
 });

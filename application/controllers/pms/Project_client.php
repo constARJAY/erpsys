@@ -11,7 +11,7 @@ class Project_client extends CI_Controller {
 
     public function index()
     {
-        $data["title"] = "Project Client Masterfile";
+        $data["title"] = "Project Client";
 
         $this->load->view("template/header",$data);
         $this->load->view("pms/project_client/index");
