@@ -3,16 +3,13 @@
 ?>
 <style>
     .module-active{border-left: 5px solid #10948b;}
-    .module-list:hover{cursor:pointer}
-    .select2{
-        width: 100%;
-    }
+    .role-list:hover{cursor:pointer}
 </style>
-<div class="body_area">
+<div class="body_area after_bg">
     <div class="block-header">
 		<div class="container">
 			<div class="row clearfix">
-				<div class="col-lg-6 col-md-12">
+				<div class="col-lg-6 col-md-6">
 					<ul class="breadcrumb pl-0 pb-0 ">
 						<li class="breadcrumb-item"><a href="#"><i class="zmdi zmdi-home"></i> Dashboard</a></li>
 						<li class="breadcrumb-item"><i class="zmdi zmdi-folder"></i> &nbsp;Approval Setup</li>
@@ -20,6 +17,14 @@
 					</ul>
 					<h1 class="mt-3">Approval Setup</h1>
 					<span>This module is used to manage Lorem ipsum dolor sit amet..</span>
+				</div>
+				<div class="col-lg-6 col-md-6 d-flex justify-content-end align-items-center list-of-module">
+					<select class="form-control w-50 text-center" id="select2-modules">
+						<option value="" selected dissabled>Select Module</option>
+						<?php foreach($module_list as $moduleRow):?>
+							<option value="<?=$moduleRow["moduleID"]?>"><?=$moduleRow["moduleName"]?></option>
+						<?php endforeach;?>
+					</select>
 				</div>
 			</div>
 		</div>
@@ -30,15 +35,14 @@
             <div class="card py-4">
                 <div class="col-12 row">
                     <div class="col-12 col-lg-4 col-xl-4 py-2 text-left">
-						<h6 class="bg-primary text-light p-3"><strong>APPROVALS</strong></h6>
-                        <?php foreach($module_list as $row): ?>
-                            <div class="card my-0 p-3">
-                                <div class="d-flex justify-content-between align-items-center module-list" data-moduleid="<?=$row["moduleID"]?>" id="moduleList<?=$row["moduleID"]?>">
-                                    <h6 class="module-header text-dark"><?=$row["moduleName"]?></h6> 
+						<h6 class="bg-primary text-light p-3"><strong>POSITIONS</strong></h6>
+						<div class="position-list" id="position_form">
+							<div class="card my-0 p-3">
+                                <div class="d-flex justify-content-center align-items-center">
+                                    <h6 class="module-header text-gray">No position found</h6> 
                                 </div>
-                            </div> 
-                        <?php endforeach; ?>    
-
+                            </div>
+						</div>
                     </div>
 
                     <div class="col-12 col-lg-8 col-xl-8 py-2 text-left">
@@ -71,88 +75,36 @@
 					<span class="text-light" aria-hidden="true">&times;</span>
 				</button>
 			</div>
-            <form id="modal_approval_setup_form">
-				<div class="modal-body">
-                    <div class="col-12">
-                        <div class="form-group">
-                            <label for="">Level 1 Approver</label>
-                            <select class="form-control select2 validate" name="" id="" required>
-                                <option >Select Role</option>
-                                <option >Admin</option>
-                                <option>Operations</option>
-                            </select>
-                            <div class="invalid-feedback" id=""></div>
-                        </div>
-                    </div>
-				</div>
-            </form>
+			<div class="modal_approval_setup_content">
+				<input type="hidden" id="hidden_module_role" module="" role="">
+				<form id="modal_approval_setup_form">
+					<div class="modal-body">
+						<div class="col-12">
+							<div class="form-group">
+								<label for="">Level 1 Approver</label>
+								<select class="form-control select2 validate" name="" id="" required>
+									<option >Select Role</option>
+									<option >Admin</option>
+									<option>Operations</option>
+								</select>
+								<div class="invalid-feedback" id=""></div>
+							</div>
+						</div>
+						<div class="col-12 text-center">
+							<button class="btn btn-primary px-5 p-2 w-50" id="add-role">ADD ROLE</button>
+						</div>
+					</div>
+				</form>
 				<div class="modal-footer">
 					<button class="btn btn-primary px-5 p-2" data-moduleid="0" id="btnUpdate">UPDATE</button>
 					<button class="btn btn-danger px-5 p-2" data-dismiss="modal">CANCEL</button>
 				</div>
+			</div>
 		</div>
 	</div>
 </div>
 <!-- ----- END ADD MODAL ----- -->
 
-
-<!-- ----- CONFIRMATION MODAL ----- -->
-<div id="confirmation-modal_approval_setup" class="modal custom-modal fade" role="dialog" data-backdrop="static" data-keyboard="false">
-	<div class="modal-dialog modal-dialog-centered modal-min" role="document">
-		<div class="modal-content">
-			<div class="modal-body pb-3 text-center">
-			<button type="button" class="close btnCloseConfirmationAdd" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-			<img class="isometric confirmationisometric" width="230px" height="200px" style="text-align: center" src="<?=base_url(); ?>assets/modal/add.png">
-				<h2 class="text-primary text-center">SETUP APPROVAL</h2>
-				<p class="text-center my-2">Are you sure you want to setup this approval?</p>
-			</div>
-			<div class="modal-footer">
-				<div class="w-100 text-right">
-					<button type="button" class="btn btn-primary shadow-none" id="btnSaveConfirmationAdd"> YES</button>
-					<button type="button" class="btn btn-danger shadow-none btnCloseConfirmationAdd"> NO</button>
-				</div>
-			</div>
-		</div>
-	</div>
-</div>
-
-<div id="confirmation-modal_edit_user_account" class="modal custom-modal fade" role="dialog" data-backdrop="static" data-keyboard="false">
-	<div class="modal-dialog modal-dialog-centered modal-min" role="document">
-		<div class="modal-content">
-			<div class="modal-body pb-3 text-center">
-			<button type="button" class="close btnCloseConfirmationAdd" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-			<img class="isometric confirmationisometric" width="230px" height="200px" style="text-align: center" src="<?=base_url(); ?>assets/modal/add.png">
-				<h2 class="text-primary text-center">UPDATE USER ACCOUNT</h2>
-				<p class="text-center my-2">Are you sure you want to update this user account?</p>
-			</div>
-			<div class="modal-footer">
-				<div class="w-100 text-right">
-					<button type="button" class="btn btn-primary shadow-none" id="btnSaveConfirmationEdit"> YES</button>
-					<button type="button" class="btn btn-danger shadow-none btnCloseConfirmationEdit"> NO</button>
-				</div>
-			</div>
-		</div>
-	</div>
-</div>
-
-<div id="confirmation-modal_delete_user_account" class="modal custom-modal fade" role="dialog" data-backdrop="static" data-keyboard="false">
-	<div class="modal-dialog modal-dialog-centered modal-min" role="document">
-		<div class="modal-content">
-			<div class="modal-body pb-3 text-center">
-			<button type="button" class="close btnCloseConfirmationDelete" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-			<img class="isometric confirmationisometric" width="230px" height="200px" style="text-align: center" src="<?=base_url(); ?>assets/modal/add.png">
-				<h2 class="text-primary text-center">DELETE USER ACCOUNT</h2>
-				<p class="text-center my-2">Are you sure you want to delete this user account?</p>
-			</div>
-			<div class="modal-footer">
-				<div class="w-100 text-right">
-					<button type="button" class="btn btn-primary shadow-none" id="btnSaveConfirmationDelete"> YES</button>
-					<button type="button" class="btn btn-danger shadow-none btnCloseConfirmationDelete"> NO</button>
-				</div>
-			</div>
-		</div>
-	</div>
-</div>
 <!-- ----- END CONFIRMATION MODAL ----- -->
 
 <script src="<?=base_url('assets/custom/js/gen/approval-setup.js')?>"></script>

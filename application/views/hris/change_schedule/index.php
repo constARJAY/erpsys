@@ -11,9 +11,7 @@
                     <h1 class="mb-1 mt-1">Change Schedule</h1>
                     <span>Lorem ipsum dolor sit amet consectetur adipisicing elit. At, quae.</span>
                 </div>
-                <div class="col-lg-4 col-sm-12 text-right">
-                    <button type="button" class="btn btn-default btn-add" id="btnAdd"> <i class="icon-plus"></i> &nbsp;Add Change Schedule</button>
-                </div>
+                <div class="col-lg-4 col-sm-12 text-right" id="headerButton"></div>
             </div>
         </div>
     </div>
@@ -22,16 +20,8 @@
 		<div class="row clearfix row-deck">
             <div class="card col-12">
                 <div class="card-body" id="page_content">
-                    <div class="tab-content">
-                        <div role="tabpanel" class="tab-pane" id="forApprovalTab" aria-expanded="false">
-                            <div class="table-responsive" id="tableForApprovalParent">
-                            </div>
-                        </div>
-                        <div role="tabpanel" class="tab-pane active" id="myFormsTab" aria-expanded="false">
-                            <div class="table-responsive" id="tableMyFormsParent">
-                            </div>
-                        </div>
-                    </div>
+
+                    
                 </div>
             </div>
         </div>
@@ -44,8 +34,8 @@
     <div class="modal-dialog modal-dialog-centered modal-md" role="document">
 		<div class="modal-content">
 			<div class="modal-header bg-primary text-light">
-				<h5 class="page-title font-weight-bold">ADD CHANGE SCHEDULE</h5>
-				<button type="button" class="close btnCancel" data-dismiss="modal" aria-label="Close" id="btnCancel">
+				<h6 class="page-title font-weight-bold">ADD CHANGE SCHEDULE</h6>
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
 					<span class="text-light" aria-hidden="true">&times;</span>
 				</button>
 			</div>

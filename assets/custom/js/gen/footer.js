@@ -58,7 +58,13 @@ function sweetAlertConfirmation(
                     let saveData = condition.toLowerCase() == "add" ? insertTableData(data, isObject, false, swalTitle) : updateTableData(data, isObject, false, swalTitle);
                     saveData.then(res => {  
                         if (res) {
+                            
+                            if (moduleName.toLowerCase() === "role") {
+                                generateNewRolesPermission();
+                            }   
+
                             callback && callback();
+
                         } else {
                             Swal.fire({
                                 icon: 'danger',
@@ -82,6 +88,20 @@ function sweetAlertConfirmation(
                 $("#"+modalID).modal("show");
             }
         });
+}
+
+
+function generateNewRolesPermission() {
+    let roleID = getTableData("gen_user_role_tbl", "", "", "createdAt DESC", "", "LIMIT 1");    
+        roleID = roleID[0]["roleID"];
+
+    $.ajax({
+        method: "POST",
+        url: `${base_url}roles_permission/generateNewRolesPermission`,
+        data: {roleID},
+        dataType: "json",
+        success: function(data) {}
+    })
 }
 // ----- ON DEVELOPMENT -----
 

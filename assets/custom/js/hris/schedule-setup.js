@@ -281,13 +281,13 @@ $(document).ready(function(){
     // ----- CUSTOM INPUTMASK -----
     function initInputmaskTime(isMethodAdd = true) {
         if (isMethodAdd) {
-            $(".timeFrom").val("08:00:00");
-            $(".timeTo").val("17:00:00");
+            $(".timeFrom").val("08:00");
+            $(".timeTo").val("17:00");
         }
 
         $(".timeFrom").inputmask({
-            mask:            "h:s:s",
-            placeholder:     "08:00:00",
+            mask:            "h:s",
+            placeholder:     "08:00",
             insertMode:      false,
             hourFormat:      "24", 
             clearMaskOnLostFocus: false,
@@ -297,8 +297,8 @@ $(document).ready(function(){
             }
         })
         $(".timeTo").inputmask({
-            mask:            "h:s:s",
-            placeholder:     "17:00:00",
+            mask:            "h:s",
+            placeholder:     "17:00",
             insertMode:      false,
             hourFormat:      "24", 
             clearMaskOnLostFocus: false,
@@ -318,8 +318,8 @@ $(document).ready(function(){
         $(element).each(function() {
             const from      = $(this).attr("from");
             const validated = $(this).hasClass("validated");
-            const fromValue = $(`[name=${from}]`).val();
-            const toValue   = $(this).val();
+            const fromValue = $(`[name=${from}]`).val()+":00";
+            const toValue   = $(this).val()+":00";
 
             const timeFrom = moment(`2021-01-01 ${fromValue}`);
             const timeTo   = moment(`2021-01-01 ${toValue}`);

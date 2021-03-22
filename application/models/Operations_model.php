@@ -30,18 +30,32 @@ class Operations_model extends CI_Model {
         }
     }
 
-    public function getTableData($tableName = null, $columnName = "*", $searchFilter = "", $orderBy = "", $groupBy = "")
+    public function getTableData($tableName = null, $columnName = "*", $searchFilter = "", $orderBy = "", $groupBy = "", $others = "")
     {
         if ($tableName) {
             $columnName  = $columnName   ? $columnName : "*";
             $whereFilter = $searchFilter ? "WHERE $searchFilter" : "";
             $orderFilter = $orderBy ? "ORDER BY $orderBy" : "";
             $groupFilter = $groupBy ? "GROUP BY $groupBy" : "";
-            $sql         = "SELECT $columnName FROM $tableName $whereFilter $orderFilter $groupFilter";
+            $sql         = "SELECT $columnName FROM $tableName $whereFilter $orderFilter $groupFilter $others";
             $query       = $this->db->query($sql);
             return $query ? $query->result_array() : [];
         }
         return [];
+    }
+
+    public function getTableDataLength($tableName = null, $columnName = "*", $searchFilter = "", $orderBy = "", $groupBy = "", $others = "")
+    {
+        if ($tableName) {
+            $columnName  = $columnName   ? $columnName : "*";
+            $whereFilter = $searchFilter ? "WHERE $searchFilter" : "";
+            $orderFilter = $orderBy ? "ORDER BY $orderBy" : "";
+            $groupFilter = $groupBy ? "GROUP BY $groupBy" : "";
+            $sql         = "SELECT $columnName FROM $tableName $whereFilter $orderFilter $groupFilter $others";
+            $query       = $this->db->query($sql);
+            return $query ? $query->num_rows() : 0;
+        }
+        return 0;
     }
 
     public function insertTableData($tableName = null, $tableData = [], $feedback = "Data", $method = false)

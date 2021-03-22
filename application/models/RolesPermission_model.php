@@ -64,4 +64,48 @@ class RolesPermission_model extends CI_Model {
         }
     }
 
+    public function generateNewRolesPermission($roleID)
+    {
+        $getModules = $this->getModules();
+        if ($getModules) {
+            $data = [];
+            foreach ($getModules as $module) {
+                $moduleID = $module["moduleID"];
+                $status = $roleID == 1 ? 1 : 0; 
+                $temp = [
+                    "roleID"           => $roleID,
+                    "moduleID"         => $moduleID,
+                    "permissionStatus" => $status
+                ];
+                array_push($data, $temp);
+            }
+            $query = $this->db->insert_batch("gen_roles_permission_tbl", $data);
+            return $query ? "Roles and permission generated successfully" : "Failed to generate roles and permission";
+        } else {
+            return "Failed to get modules";
+        }
+    }
+
+    public function addModuleRolesPermission($moduleID)
+    {
+        $getUserRole = $this->getUserRole();
+        if ($getUserRole) {
+            $data = [];
+            foreach ($getUserRole as $role) {
+                $roleID = $role["roleID"];
+                $status = $roleID == 1 ? 1 : 0; 
+                $temp = [
+                    "roleID"           => $roleID,
+                    "moduleID"         => $moduleID,
+                    "permissionStatus" => $status
+                ];
+                array_push($data, $temp);
+            }
+            $query = $this->db->insert_batch("gen_roles_permission_tbl", $data);
+            return $query ? "Roles and permission generated successfully" : "Failed to generate roles and permission";
+        } else {
+            return "Failed to get user role";
+        }
+    }
+
 }

@@ -25,7 +25,19 @@ class Operations extends CI_Controller {
         $searchFilter = $this->input->post("searchFilter");
         $orderBy      = $this->input->post("orderBy");
         $groupBy      = $this->input->post("groupBy");
-        echo json_encode($this->operations->getTableData($tableName, $columnName, $searchFilter, $orderBy, $groupBy));
+        $others       = $this->input->post("others");
+        echo json_encode($this->operations->getTableData($tableName, $columnName, $searchFilter, $orderBy, $groupBy, $others));
+    }
+
+    public function getTableDataLength() 
+    {
+        $tableName    = $this->input->post("tableName");
+        $columnName   = $this->input->post("columnName"); 
+        $searchFilter = $this->input->post("searchFilter");
+        $orderBy      = $this->input->post("orderBy");
+        $groupBy      = $this->input->post("groupBy");
+        $others       = $this->input->post("others");
+        echo ($this->operations->getTableDataLength($tableName, $columnName, $searchFilter, $orderBy, $groupBy, $others));
     }
 
     public function getUploadedFiles()

@@ -1,3 +1,17 @@
+$(function() {
+    $('form').each(function() {
+        $(this).find('input').keypress(function(e) {
+            // Enter pressed?
+            if(e.which == 10 || e.which == 13) {
+                // this.form.submit();
+                document.getElementById("login-btn").click();
+            }
+        });
+
+        $(this).find('input[type=submit]').hide();
+    });
+});
+
 $(document).on("click", "#login-btn", function(e){
     
     $(".confirmation").show();

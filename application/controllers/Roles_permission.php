@@ -22,4 +22,16 @@ class Roles_permission extends CI_Controller {
         echo json_encode($this->rolespermission->generateRolesPermission());
     }
 
+    public function generateNewRolesPermission()
+    {
+        $roleID = $this->input->post("roleID");
+        echo json_encode($this->rolespermission->generateNewRolesPermission($roleID));
+    }
+    
+    public function addModuleRolesPermission()
+    {
+        $moduleID = $this->input->post("moduleID");
+        echo json_encode($this->rolespermission->addModuleRolesPermission($moduleID));
+    }
+
 }

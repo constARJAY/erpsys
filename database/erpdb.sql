@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Mar 19, 2021 at 09:12 AM
+-- Generation Time: Mar 22, 2021 at 01:39 AM
 -- Server version: 10.4.14-MariaDB
 -- PHP Version: 7.4.10
 
@@ -73,7 +73,8 @@ CREATE TABLE `fms_chart_of_accounts_tbl` (
 CREATE TABLE `gen_approval_setup_tbl` (
   `approvalID` bigint(20) NOT NULL,
   `moduleID` bigint(20) NOT NULL,
-  `approvalUserAccounts` text NOT NULL,
+  `roleID` bigint(20) NOT NULL,
+  `userAccountID` text NOT NULL,
   `createdBy` bigint(20) NOT NULL,
   `updatedBy` bigint(20) NOT NULL,
   `createdAt` date NOT NULL DEFAULT current_timestamp(),
@@ -84,10 +85,12 @@ CREATE TABLE `gen_approval_setup_tbl` (
 -- Dumping data for table `gen_approval_setup_tbl`
 --
 
-INSERT INTO `gen_approval_setup_tbl` (`approvalID`, `moduleID`, `approvalUserAccounts`, `createdBy`, `updatedBy`, `createdAt`, `updatedAt`) VALUES
-(5, 1, '9|2|1', 1, 1, '2021-03-05', '2021-03-10 07:15:59'),
-(9, 6, '2|1|9', 1, 1, '2021-03-10', '2021-03-10 08:02:06'),
-(10, 21, '', 1, 1, '2021-03-17', '2021-03-17 08:08:39');
+INSERT INTO `gen_approval_setup_tbl` (`approvalID`, `moduleID`, `roleID`, `userAccountID`, `createdBy`, `updatedBy`, `createdAt`, `updatedAt`) VALUES
+(58, 13, 1, '1|2|9|0', 9, 9, '2021-03-19', '2021-03-18 23:00:50'),
+(59, 13, 3, '0', 9, 9, '2021-03-19', '2021-03-18 22:55:07'),
+(60, 13, 6, '0', 9, 9, '2021-03-19', '2021-03-18 22:55:07'),
+(61, 13, 8, '0', 9, 9, '2021-03-19', '2021-03-18 22:55:08'),
+(62, 13, 10, '0', 9, 9, '2021-03-19', '2021-03-18 22:55:08');
 
 -- --------------------------------------------------------
 
@@ -567,7 +570,8 @@ CREATE TABLE `gen_user_account_tbl` (
 INSERT INTO `gen_user_account_tbl` (`userAccountID`, `role`, `firstname`, `lastname`, `email`, `mobile`, `telephone`, `address`, `gender`, `birthday`, `link`, `username`, `password`, `amount`, `skills`, `file`, `userType`, `status`, `createdAt`, `updatedAt`) VALUES
 (1, 'Admin', 'Ako To Si', 'Natoy', 'rjpinca@gmail.com', '(+63) 099 0908 595', '(32) 1321 423', '1709 Antel Bldg, Julia Vargas', 'Male', '2021-02-03', 'http://theblackcoders.com', 'admin', 'admin', '0.00', '', '01614667776.svg', 1, 1, '2021-02-26 05:19:00', '2021-03-19 00:29:18'),
 (2, 'Operations', 'Akosi', 'RJ', 'hakdog123@gmail.com', '(+63) 545 8987 987', '(54) 6545 646', '1709 Antel Bldg, Julia Vargas', 'Male', '2021-03-05', 'http://theblackcoders.com', 'arjay', 'arjay', '999.95', 'CSS|JS', '01614668556.svg|11614668556.svg|21614668556.svg|31614668556.svg|41614668556.svg|51614668556.svg', 1, 1, '2021-02-26 05:25:07', '2021-03-19 00:29:12'),
-(3, 'Admin', 'Charles', 'Vincent', 'charlesvincent@gmail.com', '(+63) 123 2141 242', '(53) 2432 423', 'Quezon City', 'Male', '2021-03-09', 'http://theblackcoders.com', 'charles', 'charles', '0.00', 'CSS|HTML|JS', '01614668026.svg|11614668026.svg|21614668026.svg|31614668026.svg|41614668026.svg|51614668026.svg', 1, 1, '2021-03-02 06:52:07', '2021-03-19 00:28:56');
+(3, 'Admin', 'Charles', 'Vincent', 'charlesvincent@gmail.com', '(+63) 123 2141 242', '(53) 2432 423', 'Quezon City', 'Male', '2021-03-09', 'http://theblackcoders.com', 'charles', 'charles', '0.00', 'CSS|HTML|JS', '01614668026.svg|11614668026.svg|21614668026.svg|31614668026.svg|41614668026.svg|51614668026.svg', 1, 1, '2021-03-02 06:52:07', '2021-03-19 00:28:56'),
+(4, 'Admin', 'Joseph', 'Berongoy', 'joseph@gmail.com', '0909900905965', '556565956', 'Pasig City', 'Male', '2021-03-10', 'theblackcoders.com', 'joseph', 'joseph', NULL, NULL, NULL, 1, 1, '2021-03-21 23:56:09', '2021-03-22 00:16:59');
 
 -- --------------------------------------------------------
 
@@ -667,34 +671,16 @@ CREATE TABLE `hris_change_schedule_tbl` (
   `changeScheduleTimeOut` time NOT NULL,
   `changeScheduleReason` text DEFAULT NULL,
   `approversID` text DEFAULT NULL,
+  `approversStatus` text DEFAULT NULL,
   `approversDate` text DEFAULT NULL,
   `changeScheduleStatus` int(11) NOT NULL,
+  `changeScheduleRemarks` text DEFAULT NULL,
+  `submittedAt` timestamp NULL DEFAULT NULL,
   `createdBy` bigint(20) NOT NULL,
   `updatedBy` bigint(20) NOT NULL,
   `createdAt` timestamp NOT NULL DEFAULT current_timestamp(),
   `updatedAt` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
---
--- Dumping data for table `hris_change_schedule_tbl`
---
-
-INSERT INTO `hris_change_schedule_tbl` (`changeScheduleID`, `changeScheduleCode`, `employeeID`, `changeScheduleDate`, `changeScheduleTimeIn`, `changeScheduleTimeOut`, `changeScheduleReason`, `approversID`, `approversDate`, `changeScheduleStatus`, `createdBy`, `updatedBy`, `createdAt`, `updatedAt`) VALUES
-(1, 'SCH-21-00001', 1, '2021-03-20', '08:00:00', '17:00:00', 'Example Reason', '1|2|3', NULL, 1, 1, 1, '2021-03-19 01:30:59', '2021-03-19 08:04:01'),
-(2, 'SCH-21-00002', 2, '2021-03-27', '08:00:00', '17:00:00', '1231', '1|3', NULL, 1, 2, 2, '2021-03-19 04:55:08', '2021-03-19 04:55:08'),
-(3, 'SCH-21-00003', 2, '2021-03-03', '08:00:00', '17:00:00', '123', '1|3', NULL, 4, 2, 2, '2021-03-19 04:58:23', '2021-03-19 07:58:03'),
-(4, 'SCH-21-00004', 2, '2021-03-24', '08:00:00', '14:00:00', '123', '1|3', NULL, 3, 2, 2, '2021-03-19 06:16:56', '2021-03-19 07:03:00'),
-(5, 'SCH-21-00005', 2, '2021-03-15', '08:00:00', '17:00:00', ' vb', '1|3', NULL, 4, 2, 2, '2021-03-19 06:17:42', '2021-03-19 07:56:31'),
-(7, 'SCH-21-00006', 2, '2021-03-26', '08:00:00', '17:00:00', '432', '1|3', NULL, 0, 2, 2, '2021-03-19 06:51:00', '2021-03-19 07:17:14'),
-(8, 'SCH-21-00007', 2, '2021-03-11', '08:00:00', '17:00:00', '321', '1|3', NULL, 1, 2, 2, '2021-03-19 07:13:40', '2021-03-19 07:13:40'),
-(9, 'SCH-21-00008', 2, '2021-03-26', '08:00:00', '17:00:00', '123', '1|3|2', NULL, 1, 2, 2, '2021-03-19 07:47:51', '2021-03-19 08:01:15'),
-(10, 'SCH-21-00009', 2, '2021-03-11', '08:00:00', '17:00:00', 'fds', '1|3|2', NULL, 4, 2, 2, '2021-03-19 07:59:02', '2021-03-19 07:59:09'),
-(11, 'SCH-21-00010', 2, '2021-03-10', '08:00:00', '17:00:00', 'ds', '1|3|2', NULL, 1, 2, 2, '2021-03-19 07:59:23', '2021-03-19 07:59:23'),
-(12, 'SCH-21-00011', 2, '2021-03-03', '08:00:00', '17:00:00', '312', '1|3|2', NULL, 1, 2, 2, '2021-03-19 08:00:49', '2021-03-19 08:00:49'),
-(13, 'SCH-21-00012', 2, '2021-03-10', '08:00:00', '17:00:00', '123', '1|3', NULL, 1, 2, 2, '2021-03-19 08:03:12', '2021-03-19 08:03:30'),
-(14, 'SCH-21-00013', 2, '2021-03-17', '08:00:00', '17:00:00', '123', '1|3', NULL, 1, 2, 2, '2021-03-19 08:03:22', '2021-03-19 08:03:22'),
-(15, 'SCH-21-00014', 2, '2021-03-12', '08:00:00', '17:00:00', '123', '1|3|2', NULL, 1, 2, 2, '2021-03-19 08:05:10', '2021-03-19 08:05:10'),
-(16, 'SCH-21-00015', 2, '2021-03-10', '08:00:00', '17:00:00', 'dsa', '1|3|2', NULL, 1, 2, 2, '2021-03-19 08:05:22', '2021-03-19 08:05:32');
 
 -- --------------------------------------------------------
 
@@ -1592,7 +1578,7 @@ ALTER TABLE `fms_chart_of_accounts_tbl`
 -- AUTO_INCREMENT for table `gen_approval_setup_tbl`
 --
 ALTER TABLE `gen_approval_setup_tbl`
-  MODIFY `approvalID` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `approvalID` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=63;
 
 --
 -- AUTO_INCREMENT for table `gen_module_category_tbl`
@@ -1634,7 +1620,7 @@ ALTER TABLE `gen_system_notification_tbl`
 -- AUTO_INCREMENT for table `gen_user_account_tbl`
 --
 ALTER TABLE `gen_user_account_tbl`
-  MODIFY `userAccountID` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+  MODIFY `userAccountID` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- AUTO_INCREMENT for table `gen_user_role_tbl`
@@ -1658,7 +1644,7 @@ ALTER TABLE `hris_branch_tbl`
 -- AUTO_INCREMENT for table `hris_change_schedule_tbl`
 --
 ALTER TABLE `hris_change_schedule_tbl`
-  MODIFY `changeScheduleID` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
+  MODIFY `changeScheduleID` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `hris_code_conduct_category_tbl`

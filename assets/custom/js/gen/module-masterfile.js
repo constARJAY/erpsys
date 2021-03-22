@@ -548,7 +548,7 @@ $(document).ready(function() {
                                 id="input_moduleCategory"
                                 data-allowcharacters="[a-z][A-Z][ ][-]"
                                 minlength="2"
-                                maxlength="20"
+                                maxlength="50"
                                 required
                                 unique="${moduleCategoryID}"
                                 autocomplete="off"
@@ -809,12 +809,30 @@ $(document).ready(function() {
             if (saveData) {
                 const moduleListContent = moduleList();
                 $("#tableModuleList").html(moduleListContent);
+
+                addModuleRolesPermission();
             }
         }  
 
         initDataTables();
     })
     // ----- END SAVE CONFIRMATION ADD -----
+
+
+    // ----- MODULE ROLES PERMISSION -----
+    function addModuleRolesPermission() {
+        let moduleID = getTableData("gen_module_list_tbl", "", "", "createdAt DESC", "", "LIMIT 1");    
+            moduleID = moduleID[0]["moduleID"];
+
+    $.ajax({
+        method: "POST",
+        url: `${base_url}roles_permission/addModuleRolesPermission`,
+        data: {moduleID},
+        dataType: "json",
+        success: function(data) {}
+    })
+    }
+    // ----- END MODULE ROLES PERMISSION -----
 
 
     // ----- SAVE CONFIRMATION ADD -----
