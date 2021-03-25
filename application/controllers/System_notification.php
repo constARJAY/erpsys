@@ -11,6 +11,8 @@ class System_notification extends CI_Controller {
 
     public function index()
     {
+        $sessionID = $this->session->has_userdata("adminSessionID") ? $this->session->userdata("adminSessionID") : 1;
+
         $query = $this->db->update("gen_system_notification_tbl", ["markRead" => 1], 
         [
             "notificationID !=" => 0,

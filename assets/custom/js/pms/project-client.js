@@ -364,7 +364,7 @@ $(document).on("change", "[name=clientCity]", function() {
                             <label>Unit Number <span
                                     class="text-danger font-weight-bold">*</span></label>
                             <input class="form-control validate" required=""
-                            data-allowcharacters="[a-z][A-Z][.][-][#][0-9][ ]" minlength="1" maxlength="35"  id="input_clientUnitNumber" name="clientUnitNumber" value="${clientUnitNumber}" type="text">
+                            data-allowcharacters="[0-9]" minlength="1" maxlength="35"  id="input_clientUnitNumber" name="clientUnitNumber" value="${clientUnitNumber}" type="text">
                             <div class="invalid-feedback d-block" id="invalid-input_clientUnitNumber"></div>
                         </div>
                     </div>

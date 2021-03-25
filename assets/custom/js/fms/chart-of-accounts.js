@@ -141,7 +141,7 @@ $(document).ready(function(){
     function bankContent(param = false) {
     // getTableData(tableName = null, columnName = “”, WHERE = “”, orderBy = “”) 
     const data = getTableData("fms_bank_tbl", 
-        "bankID ,bankName,bankNumber", "", "");
+        "bankID ,bankName,bankNumber", "bankStatus = 1", "");
       
             let html = ` <option value="" disabled selected ${!param && "selected"}>No Selected</option>`;
             data.map((item, index, array) => {
@@ -434,6 +434,7 @@ $(document).ready(function(){
          // ----- SAVE LEDGER MODAL -----
          $(document).on("click", ".btnSaveLedger", function() {
             const validate = validateForm("ledgerClassForm");
+            const ledger = $("[name=ledgerClassificationName]").val();
             if (validate) {
                 $("#modal_fms_chartofaccts").modal("hide");
                 $("#modal_fms_ledgerClassification").modal("hide");
@@ -448,8 +449,8 @@ $(document).ready(function(){
                 // }).
                 
                 Swal.fire({
-                    title: 'Are you sure?',
-                    text: "You want to save this?",
+                    title: 'ADD SPECIFIC LEDGER CLASSIFICATION',
+                    text: "Are you sure that you want to add a new specific ledger classification to the system?",
                     imageUrl: `${base_url}assets/custom/isometric_image/save.png`,
                     imageWidth: 200,
                     imageHeight: 200,
@@ -468,7 +469,7 @@ $(document).ready(function(){
                      */
                     let data = getFormData("ledgerClassForm");
                     data.append("tableName", "gen_ledger_classification_tbl");
-                    data.append("feedback", "Your choice");
+                    data.append("feedback", ledger);
                     /**
                      * ----- DATA -----
                      * 1. tableName
@@ -494,12 +495,12 @@ $(document).ready(function(){
                              html +=`<option value="${item.ledgerClassificationID }" selected>${item.ledgerClassificationName}</option>`;
                             })
                             $("#input_ledgerClassificationID").append(html);
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Successfully saved!',
-                        showConfirmButton: false,
-                        timer: 2000
-                      })
+                            Swal.fire({
+                                icon: 'success',
+                                title: ledger+' saved successfully!',
+                                showConfirmButton: false,
+                                timer: 2000
+                            })
 
                       setTimeout(() => {
                         $("#modal_fms_chartofaccts").modal("show");
@@ -638,7 +639,7 @@ $(document).ready(function(){
 
 			sweetAlertConfirmation(
 				"update",
-				"Chart pf Accounts",
+				"Chart of Accounts",
 				"modal_fms_chartofaccts",
 				"",
 				data,

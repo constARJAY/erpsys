@@ -67,8 +67,18 @@ $(document).ready(function() {
         return html;
     }
 
-    function getModuleAccessContent(roleID = 1, roleName = "Administrator") { 
-        let data = getTableData("gen_roles_permission_tbl LEFT JOIN gen_module_list_tbl USING(moduleID)", "", "roleID="+roleID);
+    function getModuleAccessContent(roleID = 1, roleName = "Administrator", projectName = "All") { 
+
+        let data;
+        if (projectName == "All") {
+            data = getTableData("gen_roles_permission_tbl LEFT JOIN gen_module_list_tbl USING(moduleID)", "", "roleID="+roleID);
+        } else {
+            data = getTableData(
+                `gen_roles_permission_tbl AS grpt 
+                LEFT JOIN gen_module_list_tbl AS gmlt USING(moduleID)`, 
+                "", 
+                `grpt.roleID=${roleID} AND FIND_IN_SET('${projectName}', REPLACE(gmlt.projectName, '|', ','))`);
+        }
 
         let html = `
         <table class="table table-bordered table-hover" id="tableModuleAccess">
@@ -124,6 +134,19 @@ $(document).ready(function() {
                 </div>
             </div>
             <div class="col-md-9 col-sm-12">
+
+                <div class="row">
+                    <div class="col-md-6 col-sm-12 mb-4">
+                        <select class="form-control select2" id="projectName" roleID="1" roleName="Administrator">
+                            <option value="All" selected>All</option>
+                            <option value="Inventory Management System">Inventory Management System</option>
+                            <option value="Project Management System">Project Management System</option>
+                            <option value="Finance Management System">Finance Management System</option>
+                            <option value="Human Resource Information System">Human Resource Information System</option>
+                        </select>
+                    </div>
+                </div>
+                
                 <div class="table-responsive" id="module_access_content">
                     ${getModuleAccessContent()}
                 </div>
@@ -137,6 +160,7 @@ $(document).ready(function() {
         setTimeout(() => {
             $("#roles_permission_content").html(html);
             initDataTables();
+            initAll();
         }, 500);
     }
     pageContent();
@@ -190,6 +214,22 @@ $(document).ready(function() {
         return html;
     } 
     // ----- END MODAL CONTENT -----
+
+
+    // ----- CHANGE PROJECT NAME -----
+    $(document).on("change", "#projectName", function() {
+        const roleID      = $(this).attr("roleID");
+        const roleName    = $(this).attr("roleName");
+        const projectName = $(this).val();
+
+        const moduleData = getModuleAccessContent(roleID, roleName, projectName);
+        $("#module_access_content").html(preloader);
+        setTimeout(() => {
+            $("#module_access_content").html(moduleData);
+            initDataTables();
+        }, 500);
+    })
+    // ----- END CHANGE PROJECT NAME -----
 
 
     // ----- OPEN ADD MODAL -----
@@ -351,7 +391,10 @@ $(document).ready(function() {
         const roleName = $(this).find(".name").text();
         $("#user_role_content").find(".active-menu").removeClass("active-menu");
         $("#user_role_content").find(`[roleid=${roleID}]`).parent().parent().parent().addClass("active-menu");
-        const moduleData = getModuleAccessContent(roleID, roleName);
+        const projectName = $("#projectName").val();
+        $("#projectName").attr("roleID", roleID);
+        $("#projectName").attr("roleName", roleName);
+        const moduleData = getModuleAccessContent(roleID, roleName, projectName);
         $("#module_access_content").html(preloader);
         setTimeout(() => {
             $("#module_access_content").html(moduleData);

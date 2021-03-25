@@ -141,13 +141,14 @@ $(document).ready(function(){
                             class="form-control validate" 
                             name="requirementName" 
                             id="input_requirementName" 
-                            data-allowcharacters="[A-Z][a-z][0-9][.][,][-][(][)]['][/]" 
+                            data-allowcharacters="[A-Z][a-z][0-9][.][,][-][(][)]['][/][ ]" 
                             minlength="2" 
                             maxlength="75" 
                             required 
                             unique="${requirementID}" 
                             value="${requirementName}"
-                            autocomplete="off">
+                            autocomplete="off"
+                            title="Requirement Name">
                         <div class="invalid-feedback d-block" id="invalid-input_requirementName"></div>
                     </div>
                 </div>
@@ -160,7 +161,7 @@ $(document).ready(function(){
                         class="form-control validate no-resize" 
                         placeholder="Please type description..."
                         id="input_requirementDescription"
-                        data-allowcharacters="[A-Z][a-z][0-9][.][,][-][(][)]['][/]" 
+                        data-allowcharacters="[A-Z][a-z][0-9][.][,][-][(][)]['][/][ ]" 
                         name="requirementDescription"
                         required
                         >${requirementDescription}</textarea>

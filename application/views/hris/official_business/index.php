@@ -6,10 +6,10 @@
                     <ul class="breadcrumb pl-0 pb-0 ">
                         <li class="breadcrumb-item"><a href="#"><i class="zmdi zmdi-home"></i> Dashboard</a></li>
 						<li class="breadcrumb-item"><i class="zmdi zmdi-folder"></i> &nbsp;Forms</li>
-                        <li class="breadcrumb-item active">Official Business</li>
+                        <li class="breadcrumb-item active">Official Business FORM</li>
                     </ul>
-                    <h1 class="mb-1 mt-1">Official Business</h1>
-                    <span>Lorem ipsum dolor sit amet consectetur adipisicing elit. At, quae.</span>
+                    <h1 class="mb-1 mt-1">Official Business Form</h1>
+                    <span>This form is used  to manage  the Official Business.</span>
                 </div>
                 <div class="col-lg-4 col-sm-12 text-right" id="headerButton"></div>
             </div>

@@ -243,7 +243,7 @@ $(document).ready(function(){
 			data["tableData[updatedBy]"] = sessionID;
 			data["tableName"]            = "hris_department_tbl";
 			data["whereFilter"]          ="departmentID="+rowID;
-			data["feedback"]             = $("[name=inventoryVendorName]").val();
+			data["feedback"]             = $("[name=departmentName]").val();
 
 			sweetAlertConfirmation(
 				"update",

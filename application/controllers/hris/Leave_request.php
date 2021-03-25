@@ -6,7 +6,6 @@ class Leave_request extends CI_Controller {
     public function __construct()
     {
         parent::__construct();
-        isAllowed(55);
     }
 
     public function index()

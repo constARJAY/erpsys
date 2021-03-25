@@ -29,7 +29,7 @@
 						<li class="breadcrumb-item active"><i class="fas fa-user-lock"></i> &nbsp;Roles and Permission</li>
 					</ul>
 					<h1 class="mt-3">Roles and Permission</h1>
-					<span>This module is used to manage Lorem ipsum dolor sit amet..</span>
+					<span>This module is used to manage roles and permission details</span>
 				</div>
 				<div class="col-lg-6 col-md-12 text-right">
 					<button type="button" class="btn btn-default btn-add" id="btnAdd"> <i class="icon-plus"></i> &nbsp;Add Role</button>
