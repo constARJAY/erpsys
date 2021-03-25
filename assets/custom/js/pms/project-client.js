@@ -159,8 +159,8 @@ $(document).on("change", "[name=clientCity]", function() {
                 { targets: 6, width: 100 },
                 { targets: 7, width: 100 },
                 { targets: 8, width: 200 },
-                { targets: 9, width: 50 },
-                { targets: 10, width: 100 }
+                { targets: 9, width: 80 },
+                { targets: 10, width: 80 }
             ],
         });
     }
@@ -190,7 +190,7 @@ $(document).on("change", "[name=clientCity]", function() {
                 let html = `
                 <table class="table table-bordered table-striped table-hover" id="tableProjectClient">
                     <thead>
-                        <tr class="text-center" style="white-space:nowrap">
+                        <tr style="white-space:nowrap">
                             <th>Client Code</th>
                             <th>Client Name</th>
                             <th>Client Address</th>
@@ -225,7 +225,15 @@ $(document).on("change", "[name=clientCity]", function() {
                     <tr>
                         <td>${item.clientCode}</td>
                         <td>${item.clientName}</td>
-                        <td>${getRegionName(item.clientRegion)} ${item.clientProvince} ${item.clientCity} ${item.clientBarangay} ${item.clientHouseNumber} ${item.clientCountry} ${item.clientPostalCode}</td>
+                        <td>
+                            ${item.clientUnitNumber && titleCase(item.clientUnitNumber)+", "} 
+                            ${item.clientHouseNumber && titleCase(item.clientHouseNumber)+", "} 
+                            ${item.clientBarangay && titleCase(item.clientBarangay)+", "} 
+                            ${item.clientCity && titleCase(item.clientCity)+", "} 
+                            ${item.clientProvince && titleCase(item.clientProvince)+", "}
+                            ${item.clientCountry && titleCase(item.clientCountry)+", "} 
+                            ${item.clientPostalCode && titleCase(item.clientPostalCode)}
+                        </td>
                         <td>${item.clientContactPerson}</td>
                         <td>${item.clientEmailAddress}</td>
                         <td>${item.clientTin}</td>
@@ -305,9 +313,9 @@ $(document).on("change", "[name=clientCity]", function() {
                                 class="form-control validate" 
                                 name="clientName" 
                                 id="clientName" 
-                                data-allowcharacters="[A-Z][a-z][0-9][-][(][)][,]" 
+                                data-allowcharacters="[A-Z][a-z][0-9][-][(][)][,][ ]" 
                                 minlength="2" 
-                                maxlength="20" 
+                                maxlength="50" 
                                 required 
                                 unique="${clientID}"
                                 value="${clientName}"
@@ -419,7 +427,8 @@ $(document).on("change", "[name=clientCity]", function() {
                                 maxlength="50" 
                                 unique="${clientID}"
                                 value="${clientEmailAddress}"
-                                autocomplete="off" unique>
+                                autocomplete="off" unique
+                                placeholder="sample@email.com">
                             <div class="invalid-feedback d-block" id="invalid-input_clientEmailAddress"></div>
                         </div>
                     </div>
@@ -474,7 +483,7 @@ $(document).on("change", "[name=clientCity]", function() {
                             <div class="invalid-feedback d-block" id="invalid-input_clientTelephoneNo"></div>
                         </div>
                     </div>
-                    <div class="col-xl-10 col-lg-8 col-md-6 col-sm-12">
+                    <div class="col-xl-10 col-lg-6 col-md-6 col-sm-12">
                         <div class="form-group">
                             <label>Website <small class="text-muted">(Optional)</small></label>
                             <input 
@@ -482,7 +491,7 @@ $(document).on("change", "[name=clientCity]", function() {
                                 class="form-control validate" 
                                 name="clientBrandName" 
                                 id="input_clientBrandName" 
-                                data-allowcharacters="[A-Z][a-z][0-9][/][.][-]" 
+                                data-allowcharacters="[A-Z][a-z][0-9][/][.][-][:]" 
                                 minlength="2" 
                                 maxlength="30" 
                                 value="${clientBrandName}"
@@ -490,7 +499,7 @@ $(document).on("change", "[name=clientCity]", function() {
                        
                         </div>
                     </div>
-                    <div class="col-xl-2 col-lg-4 col-md-6 col-sm-12">
+                    <div class="col-md-6 col-sm-12">
                         <div class="form-group">
                             <label>Status <span class="text-danger font-weight-bold">*</span></label>
                             <select class=" form-control show-tick select2 validate" name="clientStatus" id="input_clientStatus" autocomplete="off" required>

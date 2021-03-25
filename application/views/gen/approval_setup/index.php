@@ -20,7 +20,7 @@
 				</div>
 				<div class="col-lg-6 col-md-6 d-flex justify-content-end align-items-center list-of-module">
 					<select class="form-control w-50 text-center" id="select2-modules">
-						<option value="" selected dissabled>Select Module</option>
+						<option value="" selected disabled>Select Module</option>
 						<?php foreach($module_list as $moduleRow):?>
 							<option value="<?=$moduleRow["moduleID"]?>"><?=$moduleRow["moduleName"]?></option>
 						<?php endforeach;?>

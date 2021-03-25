@@ -7,6 +7,7 @@ class Transfer_request extends CI_Controller {
     {
         parent::__construct();
         // $this->load->model("Companysetup_model", "company_setup");
+        isAllowed(37);
     }
 
     public function index()

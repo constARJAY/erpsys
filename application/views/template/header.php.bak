@@ -59,15 +59,17 @@
     <script src="<?=base_url('assets/js/sweetalert2.all.min.js')?>"></script>
     <script src="<?=base_url('assets/js/sweetalert2.min.js')?>"></script>
 
+    <link rel="stylesheet" href="<?=base_url('assets/plugins/fullcalendar/fullcalendar.min.css')?>">
+	<script src="<?=base_url('assets/bundles/vendorscripts.bundle.js')?>"></script>
+    <script src="<?=base_url('assets/plugins/momentjs/moment.js')?>"></script>
+
 </head>
 
 <body class="font-nunito fullwidth h_menu">
 
-<input type="hidden" name="base_url" id="base_url" value="<?= base_url() ?>" session="1">
-
 <div id="body" class="theme-blackbox">
     <!-- Page Loader -->
-    <div class="page-loader-wrapper">
+    <div class="page-loader-wrapper" base_url="<?= base_url() ?>" session="<?= $sessionID ?>" role="1">
         <div class="loader">
             <div class="mt-3"><img class="zmdi-hc-spin w60" src="<?= base_url() ?>assets/images/loader.svg" alt="Amaze"></div>
             <p>Please wait...</p>        
@@ -101,7 +103,7 @@
                                 <li class="search_bar hidden-sm">
                                     <div class="input-group">
                                         <i class="icon-magnifier"></i>
-                                        <input type="text" class="form-control" placeholder="Search module..." id="searchModule" list="moduleList">
+                                        <input type="text" class="form-control" placeholder="Search module..." id="searchModule" list="moduleList" autocomplete="off">
                                     </div>
                                     <datalist id="moduleList"></datalist>
                                 </li>

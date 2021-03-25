@@ -6,7 +6,7 @@ $(document).ready(function(){
 // OPENING ADD & EDIT MODAL
 $(document).on("click",".addLeave", function(){
     $("#modal_leave").modal("show");
-    $(".modal_leave_header").text("ADD LEAVE");
+    $(".modal_leave_header").text("ADD LEAVE TYPE");
     $("#modal_leave_content").html(preloader);
     let modal_leave_content    =   ` 
                                             <div class="modal-body">  
@@ -14,15 +14,15 @@ $(document).on("click",".addLeave", function(){
                                                     <div class="row"> 
                                                         <div class="col-md-12 col-sm-12">
                                                             <div class="form-group">
-                                                                <label for="">Leave Name <span class="text-danger">*</span></label>
+                                                                <label for="">Leave Type Name <strong class="text-danger">*</strong></label>
                                                                 <input 
                                                                     type="text" 
                                                                     class="form-control validate" 
                                                                     name="leaveName" 
                                                                     id="inputleaveName" 
-                                                                    data-allowcharacters="[A-Z][ ][a-z][0-9]" 
-                                                                    minlength="5" 
-                                                                    maxlength="50" 
+                                                                    data-allowcharacters="[A-Z][ ][a-z][0-9][-][()]['][/]" 
+                                                                    minlength="2" 
+                                                                    maxlength="75" 
                                                                     unique
                                                                     required >
                                                                 <div class="invalid-feedback d-block" id="invalid-inputleaveName"></div>
@@ -30,7 +30,7 @@ $(document).on("click",".addLeave", function(){
                                                         </div>
                                                         <div class="col-md-12 col-sm-12">
                                                             <div class="form-group">
-                                                                <label for="">Leave Status  <span class="text-danger">*</span></label>
+                                                                <label for="">Status <strong class="text-danger">*</strong></label>
                                                                 <select class="form-control select2 validate" name="leaveStatus" id="inputleaveStatus">
                                                                     <option value="1">Active</option>
                                                                     <option value="0">Inactive</option>
@@ -42,8 +42,8 @@ $(document).on("click",".addLeave", function(){
                                                 </form>
                                             </div>
                                             <div class="modal-footer">
-                                                <button class="btn btn-primary px-5 p-2" id="btnSave">SAVE</button>
-                                                <button class="btn btn-danger px-5 p-2" id="btnCancel">CANCEL</button>
+                                                <button class="btn btn-primary btn-save" id="btnSave"><i class="fas fa-save"></i>&nbsp;SAVE</button>
+                                                <button class="btn btn-danger btn-cancel btnCancel"><i class="fas fa-ban"></i>&nbsp;CANCEL</button>
                                             </div>
                                             `;
     setTimeout(function(){
@@ -53,7 +53,7 @@ $(document).on("click",".addLeave", function(){
 });
 
 $(document).on("click",".editleave", function(){
-    $(".modal_leave_header").text("EDIT leave");
+    $(".modal_leave_header").text("EDIT LEAVE TYPE");
     let leaveID       =   $(this).data("leaveid");
     let tableData       =   getTableData("hris_leave_tbl","","leaveID="+leaveID);
 
@@ -68,15 +68,15 @@ $(document).on("click",".editleave", function(){
                                                     <div class="row"> 
                                                         <div class="col-md-12 col-sm-12">
                                                             <div class="form-group">
-                                                                <label for="">Leave Name</label>
+                                                                <label for="">Leave Type Name <strong class="text-danger">*</strong></label>
                                                                 <input type="text" class="form-control validate" name="leaveName" id="inputleaveName" 
-                                                                    data-allowcharacters="[A-Z][ ][a-z][0-9]" minlength="5" maxlength="20" unique="${tableData[0]["leaveID"]}" value="${tableData[0]["leaveName"]}" required >
+                                                                    data-allowcharacters="[A-Z][ ][a-z][0-9][-][()]['][/]" minlength="5" maxlength="20" unique="${tableData[0]["leaveID"]}" value="${tableData[0]["leaveName"]}" required >
                                                                 <div class="invalid-feedback d-block" id="invalid-inputleaveName"></div>
                                                             </div>
                                                         </div>
                                                         <div class="col-md-12 col-sm-12">
                                                             <div class="form-group">
-                                                                <label for="">Leave Status</label>
+                                                                <label for="">Status <strong class="text-danger">*</strong></label>
                                                                 <select class="form-control select2 validate" name="leaveStatus" id="inputleaveStatus">
                                                                     ${statusOption}
                                                                 </select>
@@ -87,8 +87,8 @@ $(document).on("click",".editleave", function(){
                                                 </form>
                                             </div>
                                             <div class="modal-footer">
-                                                <button class="btn btn-primary px-5 p-2" id="btnUpdate" data-leaveid="${tableData[0]["leaveID"]}">UPDATE</button>
-                                                <button class="btn btn-danger px-5 p-2" id="btnCancel">CANCEL</button>
+                                                <button class="btn btn-primary btn-save" id="btnUpdate" data-leaveid="${tableData[0]["leaveID"]}"><i class="fas fa-save"></i>&nbsp;UPDATE</button>
+                                                <button class="btn btn-danger btn-cancel btnCancel"><i class="fas fa-ban"></i>&nbsp;CANCEL</button>
                                             </div>
                                             `;
     setTimeout(function(){
@@ -112,7 +112,7 @@ $(document).on("click", "#btnSave", function(){
         data["tableData[updatedBy]"]     = sessionID;
         data["tableName"]                = "hris_leave_tbl";
         data["feedback"]                 = $("#inputleaveName").val();
-        sweetAlertConfirmation("add", "Leave Masterfile","modal_leave", null, data, true, tableContent);
+        sweetAlertConfirmation("add", "Leave Type","modal_leave", null, data, true, tableContent);
 
 
     }
@@ -129,15 +129,15 @@ $(document).on("click", "#btnUpdate", function(){
         data["tableName"]                =  "hris_leave_tbl";
         data["feedback"]                 =  $("#inputleaveName").val();
         console.log(data);
-        sweetAlertConfirmation("update", "leave","modal_leave", null , data, true, tableContent);
+        sweetAlertConfirmation("update", "Leave Type","modal_leave", null , data, true, tableContent);
     }
     
 });
 
-$(document).on("click","#btnCancel", function(){
+$(document).on("click",".btnCancel", function(){
     let condition = isFormEmpty("modal_leave_form");
     if(!condition){
-        sweetAlertConfirmation("cancel", "Leave","modal_leave");
+        sweetAlertConfirmation("cancel", "Leave Type","modal_leave");
     }else{
         $("#modal_leave").modal("hide");
     }
@@ -183,8 +183,8 @@ function tableContent(){
                     <table class="table table-bordered table-striped table-hover" id="tableLeave">
                         <thead>
                             <tr class="text-left">
-                                <th>Leave Code</th>
-                                <th>Leave Name</th>
+                                <th>Leave Type Code</th>
+                                <th>Leave Type Name</th>
                                 <th>Status</th>
                                 <th>Action</th>
                             </tr>

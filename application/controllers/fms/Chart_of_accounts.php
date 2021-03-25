@@ -7,6 +7,7 @@ class Chart_of_accounts extends CI_Controller {
     {
         parent::__construct();
         // $this->load->model("Companysetup_model", "company_setup");
+        isAllowed(15);
     }
 
     public function index()

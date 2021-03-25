@@ -22,8 +22,8 @@ $(document).ready(function(){
                 { targets: 7, width: 100 },
                 { targets: 8, width: 100 },
                 { targets: 9, width: 100 },
-                { targets: 10, width: 100 },
-                { targets: 11, width: 100 },
+                { targets: 10, width: 80 },
+                { targets: 11, width: 80 },
             ],
         });
     }
@@ -53,7 +53,7 @@ $(document).ready(function(){
                 let html = `
                 <table class="table table-bordered table-striped table-hover" id="tableInventoryItem">
                     <thead>
-                        <tr class="text-center">
+                        <tr>
                             <th>Item No.</th>
                             <th>Storage Name</th>
                             <th>Item Name</th>
@@ -98,7 +98,7 @@ $(document).ready(function(){
                         <td>${item.unitOfMeasurementID}</td>
                         <td>${item.vatType}</td>
                         <td>${item.reOrderLevel}</td>
-                        <td>${item.basePrice}</td>
+                        <td class="text-right">${formatAmount(item.basePrice, true)}</td>
                         <td>${status}</td>
                         <td>
                             <button 
@@ -165,7 +165,7 @@ $(document).ready(function(){
     function categoryContent(param = false) {
     // getTableData(tableName = null, columnName = “”, WHERE = “”, orderBy = “”) 
     const data = getTableData("ims_inventory_category_tbl", 
-        "categoryID ,categoryName", "", "");
+        "categoryID ,categoryName", "categoryStatus = 1", "");
         
             let html = ` <option value="" disabled selected ${!param && "selected"}>No Selected</option>`;
             data.map((item, index, array) => {
@@ -337,7 +337,7 @@ $(document).ready(function(){
 
         <div class="col-md-6 col-sm-12">
             <div class="form-group">
-                <label>Vat Type <span class="text-danger font-weight-bold">*</span></label>
+                <label>VAT Type <span class="text-danger font-weight-bold">*</span></label>
                 <select 
                     class="form-control select2 validate" 
                     id="input_vatType" 
@@ -402,6 +402,10 @@ $(document).ready(function(){
                     <div class="col-md-6 col-sm-12">
                         <div class="form-group">
                         <label>Unit Price <span class="text-danger font-weight-bold">*</span></label>
+                        <div class="input-group w-100">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text" id="basic-addon1">₱</span>
+                            </div>
                             <input 
                                 type="text" 
                                 class="form-control amount" 
@@ -410,11 +414,13 @@ $(document).ready(function(){
                                 data-allowcharacters="[A-Z][a-z][0-9][ ]" 
                                 minlength="2" 
                                 maxlength="20"  
-                                min="-100"
+                                min="1"
                                 max="100000"
                                 required
                                 value="${basePrice}"
                                 autocomplete="off">
+                        </div>
+                            
                             <div class="invalid-feedback d-block" id="invalid-input_basePrice"></div>
                         </div>
                     </div>
@@ -432,7 +438,7 @@ $(document).ready(function(){
 
     // ----- OPEN ADD MODAL -----
     $(document).on("click", "#btnAdd", function() {
-        $("#inventory_item_modalheader").text("ADD ITEM");
+        $("#inventory_item_modalheader").text("ADD INVENTORY ITEM");
         $("#modal_inventory_item").modal("show");
         $("#modal_inventory_item_content").html(preloader);
         const content = modalContent();
@@ -466,7 +472,7 @@ $(document).ready(function(){
     $(document).on("click", ".btnEdit", function() {
         const id       = $(this).attr("id");
         const feedback = $(this).attr("feedback");
-        $("#inventory_item_modalheader").text("VIEW ITEM");
+        $("#inventory_item_modalheader").text("EDIT INVENTORY ITEM");
         $("#modal_inventory_item").modal("show");
 
         // Display preloader while waiting for the completion of getting the data

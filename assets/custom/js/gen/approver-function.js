@@ -17,14 +17,15 @@ async function saveFormData(action, method, data, isObject, swalTitle) {
 
 // ----- FORM/DOCUMENT CONFIRMATION -----
 function formConfirmation(
-	method = "", // save|cancelform|approve|reject|submit|cancel
-	action = "",
-	title = "",
-	modalID = "",
+	method      = "", // save|cancelform|approve|reject|submit|cancel
+	action      = "",
+	title       = "",
+	modalID     = "",
 	containerID = "",
-	data = null,
-	isObject = true,
-	callback = false
+	data        = null,
+	isObject    = true,
+	callback    = false,
+	notificationData = false
 ) {
 	if (method && action && title && (modalID || containerID)) {
 		method = method.toLowerCase();
@@ -36,48 +37,48 @@ function formConfirmation(
 		switch (method) {
 			case "save":
 				swalTitle = `SAVE ${title.toUpperCase()}`;
-				swalText = "Are you sure to save this document?";
-				swalImg = `${base_url}assets/modal/add.svg`;
+				swalText  = "Are you sure to save this document?";
+				swalImg   = `${base_url}assets/modal/draft.svg`;
 				break;
 			case "submit":
 				swalTitle = `SUBMIT ${title.toUpperCase()}`;
-				swalText = "Are you sure to submit this document?";
-				swalImg = `${base_url}assets/modal/add.svg`;
+				swalText  = "Are you sure to submit this document?";
+				swalImg   = `${base_url}assets/modal/add.svg`;
 				break;
 			case "approve":
 				swalTitle = `APPROVE ${title.toUpperCase()}`;
-				swalText = "Are you sure to approve this document?";
-				swalImg = `${base_url}assets/modal/add.svg`;
+				swalText  = "Are you sure to approve this document?";
+				swalImg   = `${base_url}assets/modal/approve.svg`;
 				break;
 			case "reject":
-				swalTitle = `REJECT ${title.toUpperCase()}`;
-				swalText = "Are you sure to reject this document?";
-				swalImg = `${base_url}assets/modal/add.svg`;
+				swalTitle = `DENY ${title.toUpperCase()}`;
+				swalText  = "Are you sure to deny this document?";
+				swalImg   = `${base_url}assets/modal/reject.svg`;
 				break;
 			case "cancelform":
 				swalTitle = `CANCEL ${title.toUpperCase()} DOCUMENT`;
-				swalText = "Are you sure to cancel this document?";
-				swalImg = `${base_url}assets/modal/add.svg`;
+				swalText  = "Are you sure to cancel this document?";
+				swalImg   = `${base_url}assets/modal/cancel.svg`;
 				break;
 			default:
 				swalTitle = `CANCEL ${title.toUpperCase()}`;
-				swalText = "Are you sure that you want to cancel this process?";
-				swalImg = `${base_url}assets/modal/add.svg`;
+				swalText  = "Are you sure that you want to cancel this process?";
+				swalImg   = `${base_url}assets/modal/cancel.svg`;
 				break;
 		}
 		Swal.fire({
-			title: swalTitle,
-			text: swalText,
-			imageUrl: swalImg,
-			imageWidth: 200,
-			imageHeight: 200,
-			imageAlt: "Custom image",
-			showCancelButton: true,
+			title:              swalTitle,
+			text:               swalText,
+			imageUrl:           swalImg,
+			imageWidth:         200,
+			imageHeight:        200,
+			imageAlt:           "Custom image",
+			showCancelButton:   true,
 			confirmButtonColor: "#28a745",
-			cancelButtonColor: "#1A1A1A",
-			cancelButtonText: "No",
-			confirmButtonText: "Yes",
-			allowOutsideClick: false,
+			cancelButtonColor:  "#1A1A1A",
+			cancelButtonText:   "No",
+			confirmButtonText:  "Yes",
+			allowOutsideClick:  false,
 		}).then((result) => {
 			if (result.isConfirmed) {
 				if (method != "cancel") {
@@ -91,13 +92,16 @@ function formConfirmation(
 					saveData.then((res) => {
 						if (res) {
 							callback && callback();
+
+							notificationData && insertNotificationData(notificationData);
+
 						} else {
 							Swal.fire({
-								icon: "danger",
-								title: "Failed!",
-								text: result[1],
+								icon:              "danger",
+								title:             "Failed!",
+								text:              result[1],
 								showConfirmButton: false,
-								timer: 2000,
+								timer:             2000,
 							});
 						}
 					});
@@ -190,17 +194,27 @@ function cancelForm(
 
 
 // ----- GET MODULE APPROVER -----
-function getModuleApprover(moduleID = null) {
-	const getData = getTableData("gen_approval_setup_tbl", "", "moduleID = "+moduleID+" AND roleID = "+sessionRoleID);
-	if (getData.length > 0) {
-		let approverID    = getData[0]["userAccountID"] ? getData[0]["userAccountID"] : "";
-		let approverIDArr = approverID ? approverID.split("|") : [];
-			approverIDArr = approverIDArr.filter(item => item != '0');
-		let index = approverIDArr.indexOf(sessionID);
-		if (index === -1) {
-			return approverIDArr.join("|");
-		} else {
-			return approverIDArr.slice(index+1).join("|");
+function getModuleApprover(module = null) {
+	let getData;
+
+	if (module) {
+		if (typeof module === "number") {
+			getData = getTableData("gen_approval_setup_tbl", "", "moduleID = " + module + " AND roleID = "+sessionRoleID);
+		} 
+		if (typeof module === "string") {
+			getData = getTableData("gen_approval_setup_tbl", "", "LOWER(moduleName) = BINARY LOWER('" + module + "') AND roleID = "+sessionRoleID);
+		}
+
+		if (getData.length > 0) {
+			let approverID    = getData[0]["userAccountID"] ? getData[0]["userAccountID"] : "";
+			let approverIDArr = approverID ? approverID.split("|") : [];
+				approverIDArr = approverIDArr.filter(item => item != '0');
+			let index = approverIDArr.indexOf(sessionID);
+			if (index === -1) {
+				return approverIDArr.join("|");
+			} else {
+				return approverIDArr.slice(index+1).join("|");
+			}
 		}
 	}
 	return "";
@@ -317,10 +331,10 @@ function getApproversStatus(approversID, approversStatus, approversDate) {
 			let date = moment(dateArr[index]).format("MMMM DD, YYYY hh:mm:ss A");
 
 			let statusBadge = item == 2 ? `
-			<span class="badge badge-outline-success">
+			<span class="badge badge-info">
 				Approved - ${date}</span>` : `
-			<span class="badge badge-outline-danger">
-				Rejected - ${date}</span>`;
+			<span class="badge badge-danger">
+				Denied - ${date}</span>`;
 
 			html += `
 			<div class="col-xl-3 col-lg-3 col-md-4 col-sm-12"
@@ -342,7 +356,7 @@ function getStatusStyle(status = 1) {
 		case "2":
 			return `<span class="badge badge-info w-100">Approved</span>`;
 		case "3":
-			return `<span class="badge badge-danger w-100">Rejected</span>`;
+			return `<span class="badge badge-danger w-100">Denied</span>`;
 		case "4":
 			return `<span class="badge badge-primary w-100">Cancelled</span>`;
 		case "0":
@@ -352,4 +366,15 @@ function getStatusStyle(status = 1) {
 }
 // ----- END BADGE STATUS -----
 
+
+// ----- GET APPROVER -----
+function getNotificationEmployeeID(id, date) {
+	if (id) {
+		let idArr = id.split("|");
+		let index = date && date != null ? date.split("|").length : 1;
+		return idArr[index];
+	}
+	return null;
+}
+// ----- END GET APPROVER -----
 

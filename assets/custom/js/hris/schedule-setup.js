@@ -32,6 +32,8 @@ $(document).ready(function(){
 
     // ----- TABLE CONTENT -----
     function tableContent() {
+        preventRefresh(false);
+
         // Reset the unique datas
         uniqueData = []; 
 
@@ -65,21 +67,35 @@ $(document).ready(function(){
                     <tbody>`;
 
                 data.map((item, index, array) => {
+                    let unique = {
+                        id: item.scheduleID,
+                        scheduleName: item.scheduleName,
+                    };
+                    uniqueData.push(unique);
+
                     let status = item.scheduleStatus == 1 ? `
                     <span class="badge badge-outline-success w-100">Active</span>` :
                     `<span class="badge badge-outline-danger w-100">Inactive</span>`;
+
+                    const monday    = item.mondayStatus == 1 ? `${item.mondayFrom} - ${item.mondayTo}` : "-";
+                    const tuesday   = item.tuesdayStatus == 1 ? `${item.tuesdayFrom} - ${item.tuesdayTo}` : "-";
+                    const wednesday = item.wednesdayStatus == 1 ? `${item.wednesdayFrom} - ${item.wednesdayTo}` : "-";
+                    const thursday  = item.thursdayStatus == 1 ? `${item.thursdayFrom} - ${item.thursdayTo}` : "-";
+                    const friday    = item.fridayStatus == 1 ? `${item.fridayFrom} - ${item.fridayTo}` : "-";
+                    const saturday  = item.saturdayStatus == 1 ? `${item.saturdayFrom} - ${item.saturdayTo}` : "-";
+                    const sunday    = item.sundayStatus == 1 ? `${item.sundayFrom} - ${item.sundayTo}` : "-";
 
                     html += `
                     <tr>
                         <td>${++index}</td>
                         <td>${item.scheduleName}</td>
-                        <td>${item.mondayFrom} - ${item.mondayTo}</td>
-                        <td>${item.tuesdayFrom} - ${item.tuesdayTo}</td>
-                        <td>${item.wednesdayFrom} - ${item.wednesdayTo}</td>
-                        <td>${item.thursdayFrom} - ${item.thursdayTo}</td>
-                        <td>${item.fridayFrom} - ${item.fridayTo}</td>
-                        <td>${item.saturdayFrom} - ${item.saturdayTo}</td>
-                        <td>${item.sundayFrom} - ${item.sundayTo}</td>
+                        <td>${monday}</td>
+                        <td>${tuesday}</td>
+                        <td>${wednesday}</td>
+                        <td>${thursday}</td>
+                        <td>${friday}</td>
+                        <td>${saturday}</td>
+                        <td>${sunday}</td>
                         <td>${status}</td>
                         <td>
                             <button class="btn btn-edit w-100 btnEdit" id="${item.scheduleID}"><i class="fas fa-edit"></i> Edit</button>
@@ -109,10 +125,11 @@ $(document).ready(function(){
 
     // ----- MODAL CONTENT -----
     function modalContent(data = false) {
+
         let  {
             scheduleID      = "",
             scheduleName    = "",
-            scheduleStatus  = "",
+            scheduleStatus  = "1",
             mondayFrom      = "",
             mondayTo        = "",
             mondayStatus    = "",
@@ -155,7 +172,7 @@ $(document).ready(function(){
                 <div class="col-12">
                     <div class="form-group">
                         <label>Schedule Name <code>*</code></label>
-                        <input class="form-control validate" data-allowcharacters="[a-z][A-Z][0-9][ ][.][,][-][()]['][/][&]" minlength="1" maxlength="30" required unique name="scheduleName" id="input_scheduleName" value="${scheduleName}">
+                        <input class="form-control validate" data-allowcharacters="[a-z][A-Z][0-9][ ][.][,][-][()]['][/][&]" minlength="1" maxlength="30" required unique="${scheduleID}" name="scheduleName" id="input_scheduleName" value="${scheduleName}" title="Schedule Name" autocomplete="off">
                         <div class="d-block invalid-feedback" id="invalid-input_scheduleName"></div>
                     </div>
                 </div>
@@ -348,13 +365,15 @@ $(document).ready(function(){
 
     // ----- CHANGE TIME TO -----
     $(document).on("keyup", ".timeTo", function() {
-        checkTimeRange($(this).attr("id"));
+        // checkTimeRange($(this).attr("id"));
     })
     // ----- END CHANGE TIME TO -----
 
 
     // ----- OPEN ADD MODAL -----
     $(document).on("click", "#btnAdd", function() {
+        preventRefresh(true);
+
         $("#modal_schedule_setup").modal("show");
         $("#modal_schedule_setup .page-title").text("ADD SCHEDULE");
         $("#modal_schedule_setup_content").html(preloader);
@@ -368,9 +387,9 @@ $(document).ready(function(){
 
     // ----- SAVE MODAL -----
 	$(document).on("click", "#btnSave", function () {
-		const validate     = validateForm("modal_schedule_setup");
-		const validateTime = checkTimeRange(false, true);
-		if (validate && validateTime) {
+		const validate = validateForm("modal_schedule_setup");
+
+		if (validate) {
 			let data = getFormData("modal_schedule_setup", true);
 			data["tableName"] = "hris_schedule_setup_tbl";
 			data["feedback"]  = $("[name=scheduleName]").val();
@@ -391,6 +410,8 @@ $(document).ready(function(){
     
     // ----- OPEN EDIT MODAL -----
     $(document).on("click", ".btnEdit", function() {
+        preventRefresh(true);
+
         const id = $(this).attr("id");
         $("#modal_schedule_setup").modal("show");
         $("#modal_schedule_setup .page-title").text("EDIT SCHEDULE");
@@ -414,9 +435,8 @@ $(document).ready(function(){
 		const id = $(this).attr("scheduleid");
 
 		const validate = validateForm("modal_schedule_setup");
-        const validateTime = checkTimeRange(false, true); 
 
-		if (validate && validateTime) {
+		if (validate) {
 			let data = getFormData("modal_schedule_setup", true);
 			data["tableName"]   = "hris_schedule_setup_tbl";
 			data["whereFilter"] = "scheduleID=" + id;
@@ -446,9 +466,10 @@ $(document).ready(function(){
 				"modal_schedule_setup"
 			);
 		} else {
+            preventRefresh(false);
 			$("#modal_schedule_setup").modal("hide");
 		}
 	});
 	// -------- END CANCEL MODAL-----------
-    
+
 });

@@ -6,6 +6,7 @@ class Inventory_storage extends CI_Controller {
     public function __construct()
     {
         parent::__construct();
+        isAllowed(7);
     }
 
     public function index()

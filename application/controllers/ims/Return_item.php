@@ -7,6 +7,7 @@ class Return_item extends CI_Controller {
     {
         parent::__construct();
         // $this->load->model("Companysetup_model", "company_setup");
+        isAllowed(35);
     }
 
     public function index()

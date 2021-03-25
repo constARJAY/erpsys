@@ -7,11 +7,12 @@ class Inventory_category extends CI_Controller {
     {
         parent::__construct();
         // $this->load->model("Companysetup_model", "company_setup");
+        isAllowed(5);
     }
 
     public function index()
     {
-        $data["title"] = "Inventory Category";
+        $data["title"] = "Inventory Category Masterfile";
 
         $this->load->view("template/header",$data);
         $this->load->view("ims/inventory_category/index");

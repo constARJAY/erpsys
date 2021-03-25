@@ -13,7 +13,7 @@
 					<span>This module is used to manage inventory category details.</span>
 				</div>
 				<div class="col-lg-6 col-md-12 text-md-right">
-                        <button type="button" class="btn btn-danger pr-2" id="btnAdd"> <i class="icon-plus"></i> &nbsp;Add Category</button>
+                        <button type="button" class="btn btn-default btn-add" id="btnAdd"> <i class="icon-plus"></i> &nbsp;Add Category</button>
                     </ul>
 				</div>
 			</div>
@@ -49,7 +49,7 @@
     <div class="modal-dialog modal-dialog-centered modal-md" role="document">
 		<div class="modal-content">
 			<div class="modal-header bg-primary text-light">
-				<h5 class="page-title font-weight-bold" id="inventory_item_modalheader">ADD CATEGORY</h5>
+				<h5 class="page-title font-weight-bold" id="inventory_category_modalheader">ADD CATEGORY</h5>
 				<button type="button" class="close btnCancel" data-dismiss="modal" aria-label="Close">
 					<span class="text-light" aria-hidden="true">&times;</span>
 				</button>

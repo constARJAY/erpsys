@@ -7,6 +7,7 @@ class Job_posting extends CI_Controller {
     {
         parent::__construct();
         // $this->load->model("Companysetup_model", "company_setup");
+        isAllowed(103);
     }
 
     public function index()

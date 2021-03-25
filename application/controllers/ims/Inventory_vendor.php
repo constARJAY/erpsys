@@ -6,7 +6,7 @@ class Inventory_vendor extends CI_Controller {
     public function __construct()
     {
         parent::__construct();
-        isAllowed(18);
+        isAllowed(8);
     }
 
     public function index()

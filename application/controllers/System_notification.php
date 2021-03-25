@@ -6,11 +6,16 @@ class System_notification extends CI_Controller {
     public function __construct()
     {
         parent::__construct();
+        isAllowed(3);
     }
 
     public function index()
     {
-        $query = $this->db->update("gen_system_notification_tbl", ["markRead" => 1], ["notificationID !=" => 0]);
+        $query = $this->db->update("gen_system_notification_tbl", ["markRead" => 1], 
+        [
+            "notificationID !=" => 0,
+            "employeeID"        => $sessionID,
+        ]);
 
         $data["title"] = "System Notification";
         $this->load->view('template/header', $data);
@@ -32,7 +37,10 @@ class System_notification extends CI_Controller {
     {
         $notifID = $this->input->post("notifID");
         if ($notifID) {
-            $data = ["markRead" => 1];
+            $data = [
+                "updatedAt" => $sessionID,
+                "markRead"  => 1,
+            ];
             $query = $this->db->update("gen_system_notification_tbl", $data, ["notificationID" => $notifID]);
             $result = $query ? true : false;
             echo $result;

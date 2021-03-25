@@ -12,14 +12,14 @@ $(document).ready(function(){
           scrollX:        true,
           scrollCollapse: true,
           columnDefs: [
-              { targets: 0, width: 100 },
+              { targets: 0, width: 80  },
               { targets: 1, width: 100 },
               { targets: 2, width: 100 },
-              { targets: 3, width: 100 },
+              { targets: 3, width: 150 },
               { targets: 4, width: 100 },
               { targets: 5, width: 100 },
-              { targets: 6, width: 50 },
-              { targets: 7, width: 50 },
+              { targets: 6, width: 80  },
+              { targets: 7, width: 80  },
           ],
       });
   }
@@ -43,11 +43,10 @@ $(document).ready(function(){
               // $("#inv_headerID").text("List of Inventory Item");
           },
           success: function(data) {
-              console.log(data);
               let html = `
               <table class="table table-bordered table-striped table-hover" id="tableJobPosting">
                   <thead>
-                  <tr class="text-center">
+                  <tr>
                       <th>Job Code</th>
                       <th>Company</th>
                       <th>Job Title</th>
@@ -159,6 +158,7 @@ $(document).ready(function(){
                                   id="input_jobCompany" 
                                   name="jobCompany"
                                   autocomplete="off"
+                                  style="width: 100%"
                                   required>
                                   <option disabled ${!data && "selected"} selected>Select Company</option>
                                   <option ${data && jobCompany == "BlackCoders Group Inc." && "selected"} value="BlackCoders Group Inc.">BlackCoders Group Inc.</option>
@@ -178,7 +178,7 @@ $(document).ready(function(){
                                   class="form-control validate" 
                                   name="jobTitle" 
                                   id="input_jobTitle" 
-                                  data-allowcharacters="[A-Z][a-z][0-9][-][(][)][,]['][&]" 
+                                  data-allowcharacters="[A-Z][a-z][0-9][-][(][)][,]['][&][ ]" 
                                   minlength="2" 
                                   maxlength="50" 
                                   required 
@@ -202,6 +202,7 @@ $(document).ready(function(){
                                   maxlength="325" 
                                   rows="3"
                                   required 
+                                  style="resize: none"
                                   autocomplete="off">${jobDescription}</textarea>
                               <div class="invalid-feedback d-block" id="invalid-input_jobDescription"></div>
                           </div>
@@ -219,6 +220,7 @@ $(document).ready(function(){
                                   maxlength="500" 
                                   rows="3"
                                   required 
+                                  style="resize: none"
                                   autocomplete="off">${jobResponsibilities}</textarea>
                               <div class="invalid-feedback d-block" id="invalid-input_jobResponsibilities"></div>
                           </div>
@@ -231,6 +233,7 @@ $(document).ready(function(){
                                   id="input_jobType" 
                                   name="jobType"
                                   autocomplete="off"
+                                  style="width: 100%"
                                   required>
                                   <option disabled ${!data && "selected"} selected>Select Type</option>
                                   <option ${data && jobType == "Full-Time" && "selected"} value="Full-Time">Full-Time</option>
@@ -251,6 +254,7 @@ $(document).ready(function(){
                                   id="input_jobCategory" 
                                   name="jobCategory"
                                   autocomplete="off"
+                                  style="width: 100%"
                                   required>
                                   <option disabled ${!data && "selected"} selected>Select Category</option>
                                   <option ${data && jobCategory == "Accounting/Finance" && "selected"} value="Accounting/Finance">Accounting/Finance</option>
@@ -276,6 +280,7 @@ $(document).ready(function(){
                               maxlength="500" 
                               rows="4"
                               required 
+                              style="resize: none"
                               autocomplete="off">${techSkillsQualification}</textarea>
                               <div class="invalid-feedback d-block" id="invalid-input_techSkillsQualification"></div>
                           </div>
@@ -293,11 +298,12 @@ $(document).ready(function(){
                             maxlength="500" 
                             rows="4"
                             required 
+                            style="resize: none"
                             autocomplete="off">${jobBenefits}</textarea>
                             <div class="invalid-feedback d-block" id="invalid-input_jobBenefits"></div>
                         </div>
                     </div>
-                      <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12">
+                      <div class=" col-md-6 col-sm-12">
                           <div class="form-group">
                               <label>Language <span class="text-danger font-weight-bold">*</span></label>
                               <select 
@@ -305,6 +311,7 @@ $(document).ready(function(){
                                   id="input_jobLanguage" 
                                   name="jobLanguage"
                                   autocomplete="off"
+                                  style="width: 100%"
                                   title="Select Language"
                                   required multiple>
                                   <option ${data && jobLanguage && jobLanguage.some(x => x == "Tagalog") ? "selected" : ""} value="Tagalog">Tagalog</option>
@@ -314,7 +321,7 @@ $(document).ready(function(){
                               <div class="invalid-feedback d-block" id="invalid-input_jobLanguage"></div>
                           </div>
                       </div>
-                      <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12">
+                      <div class=" col-md-6 col-sm-12">
                           <div class="form-group">
                               <label>No. of Vacancies <span class="text-danger font-weight-bold">*</span></label>
                               <input 
@@ -323,7 +330,7 @@ $(document).ready(function(){
                                   name="jobSlot" 
                                   id="input_jobSlot" 
                                   data-allowcharacters="[0-9]" 
-                                  minlength="2" 
+                                  minlength="1" 
                                   maxlength="50" 
                                   required 
                                   value="${jobSlot}"
@@ -331,7 +338,48 @@ $(document).ready(function(){
                               <div class="invalid-feedback d-block" id="invalid-input_jobSlot"></div>
                           </div>
                       </div>     
-                      <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12">
+                      <div class="col-md-6 col-sm-12">
+                          <div class="form-group">
+                              <label>Salary Range <span class="text-danger font-weight-bold">*</span></label>
+                              <div class="input-group w-100">
+                                <div class="input-group-prepend">
+
+                                <select 
+                                    class="form-control select2 validate" 
+                                    id="input_salaryRangeSelect" 
+                                    style="width: 100%"
+                                    name="salaryRangeSelect"
+                                    autocomplete="off"
+                                    title="Select Range"
+                                    >
+                                    <option ${data && salaryRangeSelect == "1" && "selected"} value="1">Above</option>
+                                    <option ${data && salaryRangeSelect == "2" && "selected"} value="2">Below</option>
+                                    <option ${data && salaryRangeSelect == "3" && "selected"} value="3">Average</option>
+                                </select>
+                                <span class="input-group-text" id="basic-addon1">₱</span>
+                            
+                                </div>
+
+                                <input 
+                                    type="text" 
+                                    class="form-control amount text-right" 
+                                    name="salaryRange" 
+                                    id="input_salaryRange" 
+                                    min="1000"
+                                    max="99999999"
+                                    data-allowcharacters="[0-9]" 
+                                    placeholder="0.00"
+                                    required 
+                                    value="${salaryRange}"
+                                    autocomplete="off">
+
+                              </div>
+
+                              <div class="invalid-feedback d-block" id="invalid-input_salaryRange"></div>
+                          </div>
+                      </div>
+
+                      <div class="col-md-6 col-sm-12">
                             <div class="form-group">
                                 <label>Status <span class="text-danger font-weight-bold">*</span></label>
                                 <select 
@@ -339,6 +387,7 @@ $(document).ready(function(){
                                     id="input_jobStatus" 
                                     name="jobStatus"
                                     autocomplete="off"
+                                    style="width: 100%"
                                     >
                                     <option 
                                         value="1" 
@@ -350,38 +399,7 @@ $(document).ready(function(){
                                 <div class="invalid-feedback d-block" id="invalid-input_jobStatus"></div>
                             </div>
                         </div>
-                      <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12">
-                          <div class="form-group">
-                              <label>Salary Range <span class="text-danger font-weight-bold">*</span></label>
-                              <div class="input-group mb-3">
-                                <div class="input-group-prepend">
-                                <select 
-                                class="form-control select2 validate" 
-                                id="input_salaryRangeSelect" 
-                                name="salaryRangeSelect"
-                                autocomplete="off"
-                                title="Select Range"
-                                >
-                                <option ${data && salaryRangeSelect == "1" && "selected"} value="1">Above</option>
-                                <option ${data && salaryRangeSelect == "2" && "selected"} value="2">Below</option>
-                                <option ${data && salaryRangeSelect == "3" && "selected"} value="3">Average</option>
-                            </select>
-                                </div>
-                                <input 
-                                type="text" 
-                                class="form-control amount text-right inputmask" 
-                                name="salaryRange" 
-                                id="input_salaryRange" 
-                                data-allowcharacters="[0-9]" 
-                                placeholder="0.00"
-                                required 
-                                value="${salaryRange}"
-                                autocomplete="off">
-                              </div>
 
-                              <div class="invalid-feedback d-block" id="invalid-input_salaryRange"></div>
-                          </div>
-                      </div>
                   </div>
                   </div>
 
@@ -395,7 +413,7 @@ $(document).ready(function(){
 
   // ----- OPEN ADD MODAL -----
   $(document).on("click", "#btnAdd", function() {
-      $("#modalJobPostingHeader").text("POST NEW JOB");
+      $("#modalJobPostingHeader").text("ADD JOB VACANT");
       $("#modalJobPosting").modal("show");
       $("#modalJobPostingContent").html(preloader);
       const content = modalContent();
@@ -426,7 +444,7 @@ $(document).ready(function(){
   $(document).on("click", ".btnEdit", function() {
       const id       = $(this).attr("id");
       const feedback = $(this).attr("feedback");
-      $("#modalJobPostingHeader").text("VIEW JOB INFORMATION");
+      $("#modalJobPostingHeader").text("EDIT JOB VACANT");
       $("#modalJobPosting").modal("show");
 
       // Display preloader while waiting for the completion of getting the data

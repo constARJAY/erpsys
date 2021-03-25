@@ -6,6 +6,7 @@ class Award extends CI_Controller {
     public function __construct(){
         parent::__construct();
         $this->load->model("Operations_model", "operations");
+        isAllowed(27);
     }
 
     public function index(){

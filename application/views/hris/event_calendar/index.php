@@ -6,11 +6,11 @@
             <div class="row clearfix">
                 <div class="col-lg-6 col-md-12">
                     <ul class="breadcrumb pl-0 pb-0 ">
-                        <li class="breadcrumb-item"><a href="index.html">Home</a></li>
-                        <li class="breadcrumb-item">App</li>
-                        <li class="breadcrumb-item active">Calendar</li>
+                        <li class="breadcrumb-item"><a href="#"><i class="zmdi zmdi-home"></i>&nbsp;Dashboard</a></li>
+                        <li class="breadcrumb-item active">Event Calendar</li>
                     </ul>
-                    <h1 class="mb-1 mt-1">My Calendar</h1>
+                    <h1 class="mb-1 mt-1">Calendar</h1>
+                    <span>This module is used to manage the event calendar</span>
                 </div>            
                 <div class="col-lg-6 col-md-12 text-md-right">
                     <button class="btn btn-secondary waves-effect" type="button" data-toggle="collapse" data-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample"> Upcoming Event</button>
@@ -44,8 +44,7 @@
 			<div class="col-lg-12">
 				<div class="card">
                         <div class="header">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <h5 class="mt-2">CALENDAR</h5>
+                            <div class="d-flex justify-content-end align-items-center px-3">
                                 <button class="btn btn-primary p-2 align-self-baseline" data-toggle="modal" id="add_event"><i class="icon-plus"></i>&nbsp;&nbsp;Add Event</button>
                             </div>
                         </div>

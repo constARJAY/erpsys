@@ -4,14 +4,18 @@
             <div class="row clearfix">
                 <div class="col-8">
                     <ul class="breadcrumb pl-0 pb-0 ">
-                        <li class="breadcrumb-item"><a href="index.html">Dashboard</a></li>
-                        <li class="breadcrumb-item">HRIS</li>
-                        <li class="breadcrumb-item active">Masterfile</li>
+                        <li class="breadcrumb-item"><a href="#"><i class="zmdi zmdi-home"></i>&nbsp;Dashboard</a></li>
+                        <li class="breadcrumb-item"><i class="zmdi zmdi-folder"></i>&nbsp;Masterfile</li>
+                        <li class="breadcrumb-item active">Award Masterfile</li>
                     </ul>
-                    <h1 class="mb-1 mt-1">Award</h1>
+                    <h1 class="mb-1 mt-1">List of Awards</h1>
+                    <span>This modules is used to manage the award details</span>
                 </div>
                 <div class="col-4 d-flex justify-content-end align-items-center">
-                    <button class="btn btn-default btn-add ml-2 d-flex justify-content-center align-items-center addAward"><i class="icon-plus px-2"></i> <span class="d-none d-sm-none d-md-block d-lg-block d-xl-block">Add&nbsp;</span> Award</button>
+                    <button class="btn btn-default btn-add ml-2 d-flex justify-content-center align-items-center addAward">
+                        <i class="icon-plus px-2"></i> 
+                        <span class="d-none d-sm-none d-md-block d-lg-block d-xl-block">Add&nbsp;</span> Award
+                    </button>
                 </div>
             </div>
         </div>
@@ -31,7 +35,7 @@
 		<div class="modal-content">
 			<div class="modal-header bg-primary text-light">
 				<h5 class="page-title font-weight-bold modal_award_header">ADD AWARD</h5>
-				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+				<button type="button" class="close btnCancel" data-dismiss="modal" aria-label="Close">
 					<span class="text-light" aria-hidden="true">&times;</span>
 				</button>
 			</div>

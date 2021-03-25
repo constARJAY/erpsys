@@ -1,8 +1,8 @@
-<div class="body_area">
-    <div class="block-header">
-		<div class="container">
+<div class="body_area after_bg">
+    <div class="block-header pb-0">
+		<div class="container" id="headerContainer">
 			<div class="row clearfix">
-				<div class="col-lg-6 col-md-12">
+				<div class="col-8">
 					<ul class="breadcrumb pl-0 pb-0 ">
 						<li class="breadcrumb-item"><a href="#"><i class="zmdi zmdi-home"></i> Dashboard</a></li>
 						<li class="breadcrumb-item"><i class="zmdi zmdi-folder"></i> &nbsp;Module</li>
@@ -11,24 +11,23 @@
 					<h1 class="mt-3">Overtime Request</h1>
 					<span>This module is used to manage Lorem ipsum dolor sit amet..</span>
 				</div>
+				<div class="col-4 d-flex justify-content-end align-items-center" id="headerButton">
+                    <button class="btn btn-default btn-add ml-2 d-flex justify-content-center align-items-center addOvertimeRequest">
+                        <i class="icon-plus px-2"></i> 
+                        <span class="d-none d-sm-none d-md-block d-lg-block d-xl-block">Add&nbsp;</span> Overtime Request
+                    </button>
+                </div>
 			</div>
 		</div>
 	</div>
 
     <div class="container">
-		<div class="row clearfix row-deck" style='text-align:right;'>
-            <div class="col-12">
-                <div class="col-12 header p-0">
-                    <ul class="header-dropdown">
-                        <button type="button" class="btn btn-primary p-2 px-3" id="btnAdd"> <i class="icon-plus"></i> &nbsp;Add overtime request</button>
-                    </ul>
-                </div>
-            </div>
-        </div>
-
 		<div class="row clearfix row-deck">
-            <div class="col-12">
-                <div class="table-responsive" id="table_content"></div>
+            <div class="card col-12">
+                <div class="card-body" id="page_content">
+
+                    
+                </div>
             </div>
         </div>
 	</div>
@@ -52,4 +51,4 @@
 
    
 
-     <script src="<?= base_url()?>assets/custom/js/hris/overtime-request.js"></script>
+<script src="<?= base_url()?>assets/custom/js/hris/overtime-request.js"></script>

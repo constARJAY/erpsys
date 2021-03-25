@@ -173,6 +173,12 @@ $(document).ready(function () {
             <tbody>`;
 
 		scheduleData.map((item) => {
+			let unique = {
+				id: item.changeScheduleID,
+				changeScheduleDate: moment(item.changeScheduleDate).format("MMMM DD, YYYY")
+			};
+			uniqueData.push(unique);
+
 			let button =
 				item.changeScheduleStatus != 0
 					? `
@@ -314,6 +320,12 @@ $(document).ready(function () {
 			createdAt             = false,
 		} = data && data[0];
 
+		if (readOnly) {
+			preventRefresh(false);
+		} else {
+			preventRefresh(true);
+		}
+
 		$("#btnBack").attr("changeScheduleID", changeScheduleID);
 		$("#btnBack").attr("changeScheduleCode", changeScheduleCode);
 		$("#btnBack").attr("status", changeScheduleStatus);
@@ -405,7 +417,9 @@ $(document).ready(function () {
                         id="changeScheduleDate"
                         name="changeScheduleDate"
                         value="${changeScheduleDate && moment(changeScheduleDate).format("MMMM DD, YYYY")}"
-						${disabled}>
+						${disabled}
+						unique="${changeScheduleID}"
+						title="Date">
                     <div class="d-block invalid-feedback" id="invalid-changeScheduleDate"></div>
                 </div>
             </div>
@@ -474,6 +488,7 @@ $(document).ready(function () {
 	function pageContent(isForm = false, data = false, readOnly = false) {
 		$("#page_content").html(preloader);
 		if (!isForm) {
+			preventRefresh(false);
 			let html = `
             <div class="tab-content">
                 <div role="tabpanel" class="tab-pane" id="forApprovalTab" aria-expanded="false">
@@ -582,8 +597,8 @@ $(document).ready(function () {
 		if (action && method != "" && feedback != "") {
 			data["tableData[changeScheduleStatus]"] = status;
 			data["tableData[updatedBy]"] = sessionID;
-			data["feedback"] = feedback;
-			data["method"] = method;
+			data["feedback"]  = feedback;
+			data["method"]    = method;
 			data["tableName"] = "hris_change_schedule_tbl";
 			if (submittedAt) data["tableData[submittedAt]"] = submittedAt;
 
@@ -593,19 +608,19 @@ $(document).ready(function () {
 					false,
 					"hris_change_schedule_tbl",
 					"changeScheduleCode",
-					`employeeID = ${sessionID}`
 				);
 				data["tableData[employeeID]"] = sessionID;
 				data["tableData[createdBy]"]  = sessionID;
 				data["tableData[createdAt]"]  = dateToday;
 
-				const approversID = getModuleApprover(123412);
-				if (approversID) {
+				const approversID = getModuleApprover("change request");
+				if (approversID && method == "submit") {
 					data["tableData[approversID]"] = approversID;
-				} else {
-					data["tableData[approversID]"] = sessionID;
+				}
+				if (!approversID && method == "submit") {
+					data["tableData[approversID]"]     = sessionID;
 					data["tableData[approversStatus]"] = 2;
-					data["tableData[approversDate]"] = dateToday;
+					data["tableData[approversDate]"]   = dateToday;
 					data["tableData[changeScheduleStatus]"] = 2;
 				}
 
@@ -648,7 +663,6 @@ $(document).ready(function () {
 					false,
 					"hris_change_schedule_tbl",
 					"changeScheduleCode",
-					`employeeID = ${sessionID}`
 			  );
 
 			const action = id && feedback ? "update" : "insert";
@@ -713,7 +727,6 @@ $(document).ready(function () {
 				false,
 				"hris_change_schedule_tbl",
 				"changeScheduleCode",
-				`employeeID = ${sessionID}`
 			);
 
 			const data = getData(action, 0, "save", feedback);
@@ -748,12 +761,20 @@ $(document).ready(function () {
 					false,
 					"hris_change_schedule_tbl",
 					"changeScheduleCode",
-					`employeeID = ${sessionID}`
 			  );
 			  
 			const action = id && feedback ? "update" : "insert";
 
 			const data = getData(action, 1, "submit", feedback, id);
+
+			
+			let notificationData = {
+				moduleID:                13,
+				notificationTitle:       "Change Schedule Form",
+				notificationDescription: `${sessionID} asked for your approval.`,
+				notificationType:        2,
+				employeeID: getNotificationEmployeeID(data["tableData[approversID]"], data["tableData[approversDate]"]),
+			};
 
 			formConfirmation(
 				"submit",
@@ -763,7 +784,8 @@ $(document).ready(function () {
 				"form_change_schedule",
 				data,
 				true,
-				pageContent
+				pageContent,
+				notificationData
 			);
 		}
 	});
@@ -802,7 +824,6 @@ $(document).ready(function () {
 					false,
 					"hris_change_schedule_tbl",
 					"changeScheduleCode",
-					`employeeID = ${sessionID}`
 			  );
 
 		const action = id && feedback ? "update" : "insert";
@@ -832,12 +853,33 @@ $(document).ready(function () {
 			let approversID     = tableData[0].approversID;
 			let approversStatus = tableData[0].approversStatus;
 			let approversDate   = tableData[0].approversDate;
+			let employeeID      = tableData[0].employeeID   ;
 
 			let data = getData("update", 2, "approve", feedback, id);
 			data["tableData[approversStatus]"] = updateApproveStatus(approversStatus, 2);
 			data["tableData[approversDate]"]   = updateApproveDate(approversDate);
 
-			let status = isImLastApprover(approversID, approversDate) ? 2 : 1;
+			let status, notificationData;
+			if (isImLastApprover(approversID, approversDate)) {
+				status = 2;
+				notificationData = {
+					moduleID:                13,
+					notificationTitle:       "Change Schedule Form",
+					notificationDescription: `${tableData[0].changeScheduleCode}: Your request has been approved.`,
+					notificationType:        2,
+					employeeID:              employeeID,
+				};
+			} else {
+				status = 1;
+				notificationData = {
+					moduleID:                13,
+					notificationTitle:       "Change Schedule Form",
+					notificationDescription: `${employeeID} asked for your approval.`,
+					notificationType:        2,
+					employeeID:              getNotificationEmployeeID(approversID, approversDate),
+				};
+			}
+
 			data["tableData[changeScheduleStatus]"] = status;
 
 			formConfirmation(
@@ -848,7 +890,8 @@ $(document).ready(function () {
 				"form_change_schedule",
 				data,
 				true,
-				pageContent
+				pageContent,
+				notificationData
 			);
 		}
 	})
@@ -861,7 +904,7 @@ $(document).ready(function () {
 		const feedback = $(this).attr("changeScheduleCode");
 
 		$("#modal_change_schedule_content").html(preloader);
-		$("#modal_change_schedule .page-title").text("REJECT CHANGE SCHEDULE DOCUMENT");
+		$("#modal_change_schedule .page-title").text("DENY CHANGE SCHEDULE DOCUMENT");
 		$("#modal_change_schedule").modal("show");
 		let html = `
 		<div class="modal-body">
@@ -882,7 +925,7 @@ $(document).ready(function () {
 		<div class="modal-footer text-right">
 			<button class="btn btn-primary" id="btnRejectConfirmation"
 			changeScheduleID="${id}"
-			changeScheduleCode="${feedback}">Reject</button>
+			changeScheduleCode="${feedback}">Deny</button>
 			<button class="btn btn-danger" data-dismiss="modal">Cancel</button>
 		</div>`;
 		$("#modal_change_schedule_content").html(html);
@@ -900,11 +943,20 @@ $(document).ready(function () {
 				let approversID     = tableData[0].approversID;
 				let approversStatus = tableData[0].approversStatus;
 				let approversDate   = tableData[0].approversDate;
+				let employeeID      = tableData[0].employeeID;
 	
 				let data = getData("update", 3, "reject", feedback, id);
 				data["tableData[changeScheduleRemarks]"] = $("[name=changeScheduleRemarks]").val().trim();
 				data["tableData[approversStatus]"] = updateApproveStatus(approversStatus, 3);
-				data["tableData[approversDate]"] = updateApproveDate(approversDate);
+				data["tableData[approversDate]"]   = updateApproveDate(approversDate);
+
+				let notificationData = {
+					moduleID:                13,
+					notificationTitle:       "Change Schedule Form",
+					notificationDescription: `${tableData[0].changeScheduleCode}: Your request has been denied.`,
+					notificationType:        2,
+					employeeID:              employeeID,
+				};
 	
 				formConfirmation(
 					"reject",
@@ -914,7 +966,8 @@ $(document).ready(function () {
 					"",
 					data,
 					true,
-					pageContent
+					pageContent,
+					notificationData
 				);
 			}
 		}

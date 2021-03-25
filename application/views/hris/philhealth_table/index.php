@@ -9,7 +9,7 @@
                         <li class="breadcrumb-item active">PhilHealth Table</li>
                     </ul>
                     <h1 class="mb-1 mt-1">PhilHealth Table</h1>
-                    <span>Lorem ipsum dolor, sit amet consectetur adipisicing elit. Nulla, quasi.</span>
+                    <span>This module is used to manage philhealth details.</span>
                     <span class="d-block text-warning">NOTE: This master file is for viewing purposes and payroll reference only.</span>
                 </div>
             </div>

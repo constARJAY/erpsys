@@ -10,6 +10,14 @@ class ApprovalSetup_model extends CI_Model {
         $moduleID       =   $data["moduleID"];
         $roleID         =   $data["roleID"];
         $userAccountID  =   $data["userAccountID"];
+
+        // Getting the module Name
+        $moduleNameSql      =   "SELECT moduleName FROM `gen_module_list_tbl` WHERE moduleID = '$moduleID'";
+        $moduleNameQuery    =   $this->db->query($moduleNameSql);
+        $moduleNameResult   =   $moduleNameQuery->result_array();
+        $moduleName         =   $moduleNameResult[0]["moduleName"];
+        
+
         // Array Variable
         $roleID_array           =   explode("|", $roleID);
         $userAccountID_array    =   explode(",", $userAccountID);
@@ -23,7 +31,8 @@ class ApprovalSetup_model extends CI_Model {
             foreach($roleID_array as $roles){
                 $userAccountID_value = $userAccountID_array[$indexRoles];
                 $insertSql      = "INSERT INTO gen_approval_setup_tbl SET 
-                                `moduleID`      = '$moduleID', 
+                                `moduleID`      = '$moduleID',
+                                `moduleName`    = '$moduleName',
                                 `roleID`        = '$roles', 
                                 `userAccountID` = '$userAccountID_value', 
                                 `createdBy`     = '$sessionID', 

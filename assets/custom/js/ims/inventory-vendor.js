@@ -172,6 +172,8 @@ $(document).ready(function () {
 
 	// ----- TABLE CONTENT -----
 	function tableContent() {
+        preventRefresh(false);
+
 		// Reset the unique datas
 		uniqueData = [];
 
@@ -188,7 +190,7 @@ $(document).ready(function () {
 				let html = `
                 <table class="table table-bordered table-striped table-hover" id="tableInventoryVendor">
                     <thead>
-                        <tr class="text-center" style="white-space:nowrap">
+                        <tr style="white-space:nowrap">
                             <th>Supplier Code</th>
                             <th>Supplier Name</th>
                             <th>Supplier Address</th>
@@ -225,7 +227,17 @@ $(document).ready(function () {
                     <tr>
                         <td>${item.inventoryVendorCode}</td>
                         <td>${item.inventoryVendorName}</td>
-                        <td>${getRegionName(item.inventoryVendorRegion)} ${item.inventoryVendorProvince} ${item.inventoryVendorCity} ${item.inventoryVendorBarangay} ${item.inventoryVendorStreet} ${item.inventoryVendorSubdivision} ${item.inventoryVendorCountry} ${item.inventoryVendorZipCode}</td>
+                        <td>
+                            ${item.inventoryVendorUnit && titleCase(item.inventoryVendorUnit)+", "} 
+                            ${item.inventoryVendorBuilding && titleCase(item.inventoryVendorBuilding)+", "} 
+                            ${item.inventoryVendorStreet && titleCase(item.inventoryVendorStreet)+", "}
+                            ${item.inventoryVendorSubdivision && titleCase(item.inventoryVendorSubdivision)+", "} 
+                            ${item.inventoryVendorBarangay && titleCase(item.inventoryVendorBarangay)+", "} 
+                            ${item.inventoryVendorCity && titleCase(item.inventoryVendorCity)+", "} 
+                            ${item.inventoryVendorProvince && titleCase(item.inventoryVendorProvince)+", "}
+                            ${item.inventoryVendorCountry && titleCase(item.inventoryVendorCountry)+", "} 
+                            ${item.inventoryVendorZipCode && titleCase(item.inventoryVendorZipCode)}
+                        </td>
                         <td>${item.inventoryVendorPerson}</td>
                         <td>${item.inventoryVendorEmail}</td>
                         <td>${item.inventoryVendorTIN}</td>
@@ -455,7 +467,7 @@ $(document).ready(function () {
                                 minlength="15" 
                                 maxlength="15" 
                                 value="${inventoryVendorTIN}"
-                                mask="999 999 999 999"
+                                mask="999-999-999-999"
                                 autocomplete="off">
                             <div class="invalid-feedback d-block" id="invalid-inventoryVendorTIN"></div>
                         </div>
@@ -469,7 +481,7 @@ $(document).ready(function () {
                                 name="inventoryVendorMobile" 
                                 id="inventoryVendorMobile" 
                                 data-allowcharacters="[0-9]" 
-                                mask="0\\999 9999 999" 
+                                mask="0\\999-9999-999" 
                                 minlength="13" 
                                 maxlength="13"
                                 value="${inventoryVendorMobile}">
@@ -484,7 +496,7 @@ $(document).ready(function () {
                                 name="inventoryVendorTelephone" 
                                 id="inventoryVendorTelephone" 
                                 data-allowcharacters="[0-9]" 
-                                mask="(99) 9999 9999" 
+                                mask="(99)-9999-9999" 
                                 minlength="14" 
                                 maxlength="14"  
                                 value="${inventoryVendorTelephone}">
@@ -499,7 +511,7 @@ $(document).ready(function () {
                                 class="form-control validate" 
                                 name="inventoryVendorBrand" 
                                 id="inventoryVendorBrand" 
-                                data-allowcharacters="[A-Z][a-z][0-9][.][,][-][()]['][/]"
+                                data-allowcharacters="[A-Z][a-z][0-9][.][,][-][()]['][/][ ]"
                                 minlength="2" 
                                 maxlength="50" 
                                 value="${inventoryVendorBrand}"
@@ -541,6 +553,8 @@ $(document).ready(function () {
 
 	// ----- OPEN ADD MODAL -----
 	$(document).on("click", "#btnAdd", function () {
+        preventRefresh(true);
+
 		$("#modal_inventory_vendor .page-title").text("ADD INVENTORY VENDOR");
 		$("#modal_inventory_vendor").modal("show");
 		$("#modal_inventory_vendor_content").html(preloader);
@@ -570,8 +584,10 @@ $(document).ready(function () {
     
 	// ----- OPEN EDIT MODAL -----
 	$(document).on("click", ".btnEdit", function () {
+        preventRefresh(true);
+
 		const id = $(this).attr("id");
-		$("#modal_inventory_vendor .page-title").text("ADD INVENTORY VENDOR");
+		$("#modal_inventory_vendor .page-title").text("EDIT INVENTORY VENDOR");
 		$("#modal_inventory_vendor").modal("show");
 
 		// Display preloader while waiting for the completion of getting the data
@@ -630,6 +646,7 @@ $(document).ready(function () {
 				"modal_inventory_vendor"
 			);
 		} else {
+            preventRefresh(false);
 			$("#modal_inventory_vendor").modal("hide");
 		}
 	});

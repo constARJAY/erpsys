@@ -1,5 +1,5 @@
-// ----- ON DEVELOPMENT -----
-function sweetAlertConfirmation(
+// ----- SWEET ALERT CONFIRMATION -----
+const sweetAlertConfirmation = (
         condition   = "add",            // add|update|cancel
         moduleName  = "Another Data",   // Title
         modalID     = null,             // Modal ID 
@@ -7,7 +7,7 @@ function sweetAlertConfirmation(
         data        = null,             // data - object or formData
         isObject    = true,             // if the data is object or not
         callback    = false             // Function to be called after execution
-    ) {
+    ) => {
 
     $("#"+modalID).modal("hide");
 
@@ -32,9 +32,9 @@ function sweetAlertConfirmation(
             swalImg                 +=  `${base_url}assets/modal/update.svg`;
             break;
         default:
-            title 					+=  "CANCEL " + upperCase;
+            title 					+=  "DISCARD CHANGES";
             text 					+=  "Are you sure that you want to cancel this process?"
-            success_title        	+=  "Cancel "+ capitalCase + "!";
+            success_title        	+=  "Process successfully discarded!";
             swalImg                 +=  `${base_url}assets/modal/cancel.svg`;
         }
         Swal.fire({
@@ -76,6 +76,7 @@ function sweetAlertConfirmation(
                         }
                     })
                 } else {
+                    preventRefresh(false);
                     Swal.fire({
                         icon:  'success',
                         title: swalTitle,
@@ -84,14 +85,32 @@ function sweetAlertConfirmation(
                     });
                 }
             } else {
+                preventRefresh(false);
                 containerID && $("#"+containerID).show();
                 $("#"+modalID).modal("show");
             }
         });
 }
+// ----- END SWEET ALERT CONFIRMATION -----
 
 
-function generateNewRolesPermission() {
+// ----- PREVENT REFRESH -----
+function preventRefresh(flag = false) {
+    $("body").attr("refresh", flag);
+}
+
+window.addEventListener('beforeunload', function (e) {
+    if ($("body").attr("refresh") == "true") {
+        e.preventDefault(); // If you prevent default behavior in Mozilla Firefox prompt will always be shown
+        // Chrome requires returnValue to be set
+        e.returnValue = '';
+    }
+});
+// ----- END PREVENT REFRESH -----
+
+
+// ----- GENERATE NEW ROLE -----
+const generateNewRolesPermission =() => {
     let roleID = getTableData("gen_user_role_tbl", "", "", "createdAt DESC", "", "LIMIT 1");    
         roleID = roleID[0]["roleID"];
 
@@ -103,7 +122,7 @@ function generateNewRolesPermission() {
         success: function(data) {}
     })
 }
-// ----- ON DEVELOPMENT -----
+// ----- END GENERATE NEW ROLE -----
 
 
 $(document).ready(function() {
@@ -115,7 +134,7 @@ $(document).ready(function() {
         })
         $("#moduleList").html(html);
     }
-    const moduleTableData = getTableData("gen_module_list_tbl", "", "moduleStatus = 1", "moduleName ASC");
+    const moduleTableData = getTableData("gen_roles_permission_tbl AS grpt LEFT JOIN gen_module_list_tbl AS gmlt USING(moduleID)", "gmlt.moduleName AS moduleName", `grpt.roleID = ${sessionRoleID} AND gmlt.moduleStatus = 1`, "gmlt.moduleName ASC");
     const moduleData = moduleTableData.map(item => item.moduleName.toLowerCase());
     getAllModules(moduleTableData);
 

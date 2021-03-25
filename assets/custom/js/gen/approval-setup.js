@@ -309,8 +309,6 @@ function getApproval(moduleID = null,roleID = null){
         roleID   = $("#hidden_module_role").attr("role");
     }
 
-
-
     let approval        = getTableData("gen_approval_setup_tbl", "", "moduleID = '"+moduleID+"' AND roleID = '"+roleID+"' "); // RESULT 0/ 1|2|3;
     let tableData       = getTableData("gen_module_list_tbl", "", "moduleID = '"+ moduleID +"'");
     let approvalList    = "";
@@ -419,6 +417,7 @@ function userAccountList(approvers){
 
     return  returnValue;
 }
+
 function approvalList(userAccountID){
     let returnData              = "";
     let optionApproverList      = getTableData("gen_user_account_tbl","","userAccountID="+userAccountID);
@@ -426,7 +425,6 @@ function approvalList(userAccountID){
         
     return returnData;
 }
-
 
 // getApproversForm(modalBody,"2");
 function getApproversForm(formID, condition = null){
@@ -440,15 +438,12 @@ function getApproversForm(formID, condition = null){
    return data.join(",");
 }
 
-
 // FUNCTION FOR CALLING THE AFTER THE UPDATE
-
-
 function select2_modules(moduleID = null){
     if(moduleID != null){
         let tableData = getTableData("gen_module_list_tbl", "", "moduleApprover != '0'");
         let list_of_module = `  <select class="form-control w-50 text-center" id="select2-modules">
-                                    <option value="" selected dissabled>Select Module</option>`;
+                                    <option value="" selected disabled>Select Module</option>`;
         tableData.map(items => {list_of_module    += `<option value="${items["moduleID"]}">${items["moduleName"]}</option>`});
         list_of_module    += `</select>`;
         $(".list-of-module").html(list_of_module);

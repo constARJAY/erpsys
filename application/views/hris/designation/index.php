@@ -13,7 +13,7 @@
 					<span>This module is used to manage designation details.</span>
 				</div>
 				<div class="col-lg-6 col-md-12 text-md-right">
-                        <button type="button" class="btn btn-danger pr-2" id="btnAdd"> <i class="icon-plus"></i> &nbsp;Add Designation</button>
+                        <button type="button" class="btn btn-default btn-add" id="btnAdd"> <i class="icon-plus"></i> &nbsp;Add Designation</button>
                     </ul>
 				</div>
 			</div>

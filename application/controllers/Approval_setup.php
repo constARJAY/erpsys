@@ -8,6 +8,7 @@ class Approval_setup extends CI_Controller {
         $this->load->model("Operations_model", "operations");
         $this->load->model("ApprovalSetup_model", "approval_setup");
         // $this->load->model("ApprovalSetup_model", "ApprovalSetup_model");
+        isAllowed(1);
     }
 
     public function index(){

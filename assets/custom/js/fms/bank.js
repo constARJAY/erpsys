@@ -12,10 +12,10 @@ $(document).ready(function(){
             scrollX:        true,
             scrollCollapse: true,
             columnDefs: [
-                { targets: 0, width: 300 },
-                { targets: 1, width: 300 },
-                { targets: 2, width: 50 },
-                { targets: 3, width: 50 },
+                { targets: 0, width: "50%" },
+                { targets: 1, width: "50%" },
+                { targets: 2, width: 80 },
+                { targets: 3, width: 80 },
             ],
         });
     }
@@ -44,7 +44,7 @@ $(document).ready(function(){
                 let html = `
                 <table class="table table-bordered table-striped table-hover" id="tableFinanceBank">
                     <thead>
-                    <tr class="text-center">
+                    <tr>
                         <th>Bank Name</th>
                         <th>Account Number</th>
                         <th>Status</th>
@@ -119,7 +119,7 @@ $(document).ready(function(){
             id="btnUpdate" 
             rowID="${bankID}">
             <i class="fas fa-save"></i>
-            Updaye
+            Update
         </button>` : `
         <button 
             class="btn btn-save px-5 p-2" 
@@ -231,7 +231,7 @@ $(document).ready(function(){
     $(document).on("click", ".btnEdit", function() {
         const id       = $(this).attr("id");
         const feedback = $(this).attr("feedback");
-        $("#finance_bank_modalheader").text("VIEW BANK");
+        $("#finance_bank_modalheader").text("EDIT BANK");
         $("#modal_finance_bank").modal("show");
 
         // Display preloader while waiting for the completion of getting the data

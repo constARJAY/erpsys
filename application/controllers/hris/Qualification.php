@@ -5,6 +5,7 @@ class Qualification extends CI_Controller {
     public function __construct(){
         parent::__construct();
         $this->load->model("Operations_model", "operations");
+        isAllowed(26);
     }
     public function index(){
         $data["title"]              = "Qualification Masterfile";

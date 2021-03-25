@@ -7,6 +7,7 @@ const differentInputArr = ["input", "select", "textarea"];
 const differentInputStr = differentInputArr.join(", ");
 // ----- END GLOBAL VARIABLES -----
 
+
 // ----- PRELOADER -----
 const preloader = `
     <div class="loader w-100 p-5 text-center">
@@ -18,11 +19,13 @@ const preloader = `
     </div>`;
 // ----- END PRELOADER -----
 
+
 // ----- CLOSE MODALS -----
 const closeModals = () => {
 	$(".modal").modal("hide");
 };
 // ----- END CLOSE MODALS -----
+
 
 // ---- GET DOM ELEMENT -----
 const getElement = (element = null, defaultElement = null) => {
@@ -37,6 +40,7 @@ const getElement = (element = null, defaultElement = null) => {
 };
 // ---- END GET DOM ELEMENT -----
 
+
 // ----- REINITIALIZE ALL FUNCTION -----
 const initAll = () => {
 	initSelect2();
@@ -46,6 +50,7 @@ const initAll = () => {
 };
 // ----- END REINITIALIZE ALL FUNCTION -----
 
+
 // ----- INITIALIZE SELECT2 -----
 const initSelect2 = (element = null) => {
 	let elem = getElement(element, ".select2");
@@ -53,6 +58,7 @@ const initSelect2 = (element = null) => {
 };
 initSelect2();
 // ----- END INITIALIZE SELECT2 -----
+
 
 // ----- INITIALIZE SINGLE DATERANGEPICKER -----
 const initDateRangePicker = (element = null, otherOption = false) => {
@@ -89,6 +95,7 @@ const initDateRangePicker = (element = null, otherOption = false) => {
 initDateRangePicker();
 // ----- END INITIALIZE SINGLE DATERANGEPICKER -----
 
+
 // ----- INITIALIZE INPUTMASK -----
 const initInputmask = (element = null) => {
 	let elem = getElement(element, ".inputmask");
@@ -108,6 +115,7 @@ const initInputmask = (element = null) => {
 initInputmask();
 // ----- END INITIALIZE INPUTMASK -----
 
+
 // ----- INITIALIZE AMOUNT FORMAT -----
 const initAmount = (element = null) => {
 	let elem = getElement(element, ".amount");
@@ -119,92 +127,6 @@ const initAmount = (element = null) => {
 initAmount();
 // ----- END INITIALIZE AMOUNT FORMAT -----
 
-// ----- GET DATABASE TABLE DATA -----
-const getTableData = (
-	tableName = null,
-	columnName = "",
-	searchFilter = "",
-	orderBy = "",
-	groupBy = "",
-	others = ""
-) => {
-	let path = `${base_url}operations/getTableData`;
-	let data = {
-		tableName,
-		columnName,
-		searchFilter,
-		orderBy,
-		groupBy,
-		others,
-	};
-	let result = [];
-	if (tableName) {
-		$.ajax({
-			method: "POST",
-			url: path,
-			data,
-			async: false,
-			dataType: "json",
-			success: function (data) {
-				if (data) {
-					data.map((item) => {
-						result.push(item);
-					});
-				}
-			},
-			error: function (err) {
-				showNotification(
-					"danger",
-					"System error: Please contact the system administrator for assistance!"
-				);
-			},
-		});
-	}
-	return result;
-};
-// ----- END GET DATABASE TABLE DATA -----
-
-// ----- GET DATABASE TABLE DATA -----
-const getTableDataLength = (
-	tableName = null,
-	columnName = "",
-	searchFilter = "",
-	orderBy = "",
-	groupBy = "",
-	others = ""
-) => {
-	let path = `${base_url}operations/getTableDataLength`;
-	let data = {
-		tableName,
-		columnName,
-		searchFilter,
-		orderBy,
-		groupBy,
-		others,
-	};
-	let result = 0;
-	if (tableName) {
-		$.ajax({
-			method: "POST",
-			url: path,
-			data,
-			async: false,
-			success: function (data) {
-				if (data) {
-					result = data;
-				}
-			},
-			error: function (err) {
-				showNotification(
-					"danger",
-					"System error: Please contact the system administrator for assistance!"
-				);
-			},
-		});
-	}
-	return result;
-};
-// ----- END GET DATABASE TABLE DATA -----
 
 // ----- RESET FORM -----
 const resetForm = (formID = null) => {
@@ -254,6 +176,7 @@ const resetForm = (formID = null) => {
 };
 // ----- END RESET FORM -----
 
+
 // ----- CHECK IF THE FORM IS EMPTY -----
 const isFormEmpty = (formID = false) => {
 	if (formID) {
@@ -261,13 +184,14 @@ const isFormEmpty = (formID = false) => {
 		$("#" + formID)
 			.find("input[required], select[required], textarea[required]")
 			.each(function () {
-				if ($(this).val().length > 0) flag++;
+				if ($(this).val() && $(this).val().length > 0) flag++;
 			});
 		return flag > 0 ? false : true;
 	}
 	return true;
 };
 // ----- END CHECK IF THE FORM IS EMPTY -----
+
 
 // ----- CLEAR VALIDATION -----
 const clearInputValidation = (elementID = null) => {
@@ -297,6 +221,7 @@ const clearInputValidation = (elementID = null) => {
 	}
 };
 // ----- END CLEAR VALIDATION -----
+
 
 // ----- GET FORM DATA -----
 const getFormData = (formID = null, object = false) => {
@@ -377,6 +302,7 @@ const getFormData = (formID = null, object = false) => {
 };
 // ----- END GET FORM DATA -----
 
+
 // ----- VALIDATE INPUT LENGTH -----
 const checkLength = (elementID, invalidFeedback) => {
 	const validated = $(elementID).hasClass("validated");
@@ -418,6 +344,7 @@ const checkLength = (elementID, invalidFeedback) => {
 	}
 };
 // ----- END VALIDATE INPUT LENGTH -----
+
 
 // ----- VALIDATE NUMBER -----
 const checkNumber = (elementID, invalidFeedback, value) => {
@@ -470,6 +397,7 @@ const checkNumber = (elementID, invalidFeedback, value) => {
 };
 // ----- END VALIDATE NUMBER -----
 
+
 // ----- VALIDATE CURRENCY -----
 const checkAmount = (elementID, invalidFeedback, value) => {
 	const validated = $(elementID).hasClass("validated");
@@ -477,40 +405,43 @@ const checkAmount = (elementID, invalidFeedback, value) => {
 	const max = $(elementID).attr("max") ? +$(elementID).attr("max") : false;
 	let currencyValue = +value.split(",").join("");
 
-	if (!min && !max) {
+	if (typeof min != "number" && typeof max != "number") {
 		validated
 			? $(elementID).removeClass("is-invalid").addClass("is-valid")
 			: $(elementID).removeClass("is-invalid").removeClass("is-valid");
 		invalidFeedback.text("");
-	} else if (!min && max) {
+	} else if (typeof min != "number" && typeof max == "number") {
 		if (currencyValue > max) {
 			$(elementID).removeClass("is-valid").addClass("is-invalid");
-			invalidFeedback.text(`Please input amount less than ${max}`);
+			invalidFeedback.text(`Please input amount less than ${formatAmount(max)}`);
 		} else {
 			validated
 				? $(elementID).removeClass("is-invalid").addClass("is-valid")
 				: $(elementID).removeClass("is-invalid").removeClass("is-valid");
 			invalidFeedback.text("");
 		}
-	} else if (min && !max) {
+	} else if (typeof min == "number" && typeof max != "number") {
 		if (currencyValue < min) {
 			$(elementID).removeClass("is-valid").addClass("is-invalid");
-			invalidFeedback.text(`Please input amount greater than ${min}`);
+			invalidFeedback.text(`Please input amount greater than ${formatAmount(min)}`);
 		} else {
 			validated
 				? $(elementID).removeClass("is-invalid").addClass("is-valid")
 				: $(elementID).removeClass("is-invalid").removeClass("is-valid");
 			invalidFeedback.text("");
 		}
-	} else if (min && max) {
+	} else if (typeof min == "number" && typeof max == "number") {
 		if (currencyValue >= min && currencyValue > max) {
 			$(elementID).removeClass("is-valid").addClass("is-invalid");
-			invalidFeedback.text(`Please input amount less than ${max}`);
+			invalidFeedback.text(`Please input amount less than ${formatAmount(max)}`);
 		} else if (currencyValue >= min && currencyValue <= max) {
-			// DISREGARD
+			validated
+				? $(elementID).removeClass("is-invalid").addClass("is-valid")
+				: $(elementID).removeClass("is-invalid").removeClass("is-valid");
+			invalidFeedback.text("");
 		} else if (currencyValue < min && currencyValue <= max) {
 			$(elementID).removeClass("is-valid").addClass("is-invalid");
-			invalidFeedback.text(`Please input amount greater than ${min}`);
+			invalidFeedback.text(`Please input amount greater than ${formatAmount(min)}`);
 		}
 	} else {
 		validated
@@ -521,6 +452,7 @@ const checkAmount = (elementID, invalidFeedback, value) => {
 };
 // ----- END VALIDATE CURRENCY -----
 
+
 // ----- VALIDATE IF EXISTS -----
 const checkExists = (elementID, invalidFeedback) => {
 	let inputs = {};
@@ -529,9 +461,9 @@ const checkExists = (elementID, invalidFeedback) => {
 	let flag = false;
 
 	if ($(`${elementID}[unique]`).length > 0) {
-		const name = $(elementID).attr("name");
+		const name     = $(elementID).attr("name");
 		const uniqueID = $(elementID).attr("unique");
-		const title = $(elementID).attr("title")
+		const title    = $(elementID).attr("title")
 			? $(elementID).attr("title")
 			: "Data";
 
@@ -544,7 +476,7 @@ const checkExists = (elementID, invalidFeedback) => {
 
 		let multiple = {};
 		$("select[unique], input[unique], textarea[unique]").each(function () {
-			let key = $(this).attr("name");
+			let key   = $(this).attr("name");
 			let value = $(this).val();
 			keys.push(key);
 			values.push(value);
@@ -580,10 +512,10 @@ const checkExists = (elementID, invalidFeedback) => {
 				if (keys.length > 0) {
 					keys.map((item, index) => {
 						if (
-							data.id !== uniqueID &&
-							item === name &&
+							data.id    !== uniqueID &&
+							item       === name &&
 							data[item] === values[index] &&
-							elementID &&
+							elementID  &&
 							invalidFeedback
 						) {
 							flag = true;
@@ -598,6 +530,7 @@ const checkExists = (elementID, invalidFeedback) => {
 	return flag;
 };
 // ----- END VALIDATE IF EXISTS -----
+
 
 // ----- VALIDATE EMAIL -----
 const checkEmail = (elementID, invalidFeedback, value) => {
@@ -631,6 +564,7 @@ const checkEmail = (elementID, invalidFeedback, value) => {
 };
 // ----- END VALIDATE EMAIL -----
 
+
 // ----- VALIDATE URL -----
 const checkURL = (elementID, invalidFeedback, value) => {
 	const validated = $(elementID).hasClass("validated");
@@ -648,6 +582,7 @@ const checkURL = (elementID, invalidFeedback, value) => {
 	}
 };
 // ----- END VALIDATE URL -----
+
 
 // ----- APPLY CHARACTER FORMAT -----
 const characterCasing = (elementID) => {
@@ -675,11 +610,12 @@ const characterCasing = (elementID) => {
 };
 // ----- END APPLY CHARACTER FORMAT -----
 
+
 // ----- VALIDATE INPUTS -----
 const validateInput = (elementID) => {
 	$(elementID).addClass("validated");
 	let currency = $(elementID).hasClass("amount");
-	let number = $(elementID).hasClass("number");
+	let number   = $(elementID).hasClass("number");
 	let required = $(elementID).attr("required");
 	let disabled = $(elementID).attr("disabled");
 	let value =
@@ -788,9 +724,11 @@ const validateInput = (elementID) => {
 				if (value != "" && value != undefined && value != null) {
 					$(elementID).removeClass("is-invalid").addClass("is-valid");
 					invalidFeedback.text("");
+					checkExists(elementID, invalidFeedback);
 				} else {
 					$(elementID).removeClass("is-valid").addClass("is-invalid");
 					invalidFeedback.text("This field is required.");
+					checkExists(elementID, invalidFeedback);
 				}
 			} else {
 				$(elementID).removeClass("is-invalid").addClass("is-valid");
@@ -825,6 +763,7 @@ const validateInput = (elementID) => {
 };
 // ----- END VALIDATE INPUTS -----
 
+
 // ----- VALIDATE FORMS -----
 const validateForm = (formID = null) => {
 	if (formID) {
@@ -843,6 +782,7 @@ const validateForm = (formID = null) => {
 };
 // ----- END VALIDATE FORMS -----
 
+
 // ----- FORMAT AMOUNT -----
 const formatAmount = (amount = 0, pesoSign = false) => {
 	var currency = new Intl.NumberFormat("tl-PH", {
@@ -854,415 +794,23 @@ const formatAmount = (amount = 0, pesoSign = false) => {
 };
 // ----- END FORMAT AMOUNT -----
 
-// ----- GET LAST CODE -----
-const getTableLastCode = (tableName = false, columnName = false, whereFilter = "") => {
-	if (tableName && columnName) {
-		let table = getTableDataLength(tableName, "createdAt");
-		let result = 0;
 
-		if (table.length > 0) {
-			let lastID = getTableData(
-				tableName,
-				"",
-				whereFilter,
-				"createdAt DESC",
-				"",
-				"LIMIT 1"
-			);
-			if (lastID && lastID.length > 0) {
-				const columnValue = lastID[0][columnName];
-				const arrValue = columnValue.split("-");
-				result = +arrValue[2];
-			} else {
-				result = 0;
-			}
-		}
-
-		return result;
+// ----- TITLE CASE -----
+const titleCase = (string = false) => {
+	if (string) {
+		let html = [];
+		let arr = string.split(" ");
+		arr.forEach(function(item) {
+			let temp = `${item.substr(0,1).toUpperCase()}${item.substr(1,item.length).toLowerCase()}`;
+			html.push(temp);
+		})
+		html = html.join(" ");
+		return html;
 	}
-	return "Invalid arguments";
-};
-// ----- END GET LAST CODE -----
+	return string;
+}
+// ----- END TITLE CASE -----
 
-// ----- GENERATE CODE -----
-const generateCode = (
-	firstStr = "STR",
-	lastID = false,
-	tableName = false,
-	columnName = false,
-	whereFilter = ""
-) => {
-	let id;
-	if (!lastID && tableName && columnName) {
-		id = getTableLastCode(tableName, columnName, whereFilter) + 1;
-	} else {
-		id = lastID ? lastID + 1 : 1;
-	}
-
-	id = id.toString();
-	let lastStr = "00001";
-	if (id.length <= 0) {
-		return `${firstStr}-${moment().format("YY")}-${lastStr}`;
-	} else if (id.length > 0 && id.length < 5) {
-		lastStr = "0".repeat(5 - id.length) + id;
-		return `${firstStr}-${moment().format("YY")}-${lastStr}`;
-	} else {
-		return `${firstStr}-${moment().format("YY")}-${id}`;
-	}
-};
-// ----- END GENERATE CODE -----
-
-// ----- SAVE/UPDATE/DELETE TABLE DATA -----
-const saveUpdateDeleteDatabaseFormData = async (
-	data,
-	path,
-	feedback = false,
-	swalTitle
-) => {
-	let result = await $.ajax({
-		method: "POST",
-		url: path,
-		data,
-		processData: false,
-		contentType: false,
-		global: false,
-		cache: false,
-		async: false,
-		dataType: "json",
-		beforeSend: function () {
-			$("#loader").show();
-		},
-		success: function (data) {
-			let result = data.split("|");
-			let isSuccess = result[0],
-				message = result[1],
-				id = result[2] ? result[2] : null;
-
-			if (isSuccess == "true") {
-				if (feedback) {
-					feedback = feedback.split("|");
-					feedbackClass = feedback[0];
-					feedbackMsg = feedback[1];
-					setTimeout(() => {
-						$("#loader").hide();
-						closeModals();
-						if (swalTitle) {
-							Swal.fire({
-								icon: feedbackClass,
-								title: swalTitle,
-								text: feedbackMsg,
-								showConfirmButton: false,
-								timer: 2000,
-							});
-						} else {
-							Swal.fire({
-								icon: feedbackClass,
-								title: feedbackMsg,
-								showConfirmButton: false,
-								timer: 2000,
-							});
-						}
-					}, 500);
-				} else {
-					setTimeout(() => {
-						$("#loader").hide();
-						closeModals();
-						Swal.fire({
-							icon: "success",
-							title: message,
-							showConfirmButton: false,
-							timer: 2000,
-						});
-					}, 500);
-				}
-			} else {
-				$("#loader").hide();
-				Swal.fire({
-					icon: "danger",
-					title: message,
-					showConfirmButton: false,
-					timer: 2000,
-				});
-			}
-		},
-		error: function (err) {
-			showNotification(
-				"danger",
-				"System error: Please contact the system administrator for assistance!"
-			);
-			$("#loader").hide();
-		},
-	});
-	return (await result) ? result : false;
-};
-
-const saveUpdateDeleteDatabaseFormDatav1 = async (
-	data,
-	path,
-	feedback = false,
-	swalTitle
-) => {
-	let flag;
-	$.ajax({
-		method: "POST",
-		url: path,
-		data,
-		processData: false,
-		contentType: false,
-		global: false,
-		cache: false,
-		async: false,
-		dataType: "json",
-		beforeSend: function () {
-			$("#loader").show();
-		},
-		success: function (data) {
-			let result = data.split("|");
-			let isSuccess = result[0],
-				message = result[1],
-				id = result[2] ? result[2] : null;
-
-			if (isSuccess == "true") {
-				if (feedback) {
-					feedback = feedback.split("|");
-					feedbackClass = feedback[0];
-					feedbackMsg = feedback[1];
-					setTimeout(() => {
-						closeModals();
-						showNotification(feedbackClass, feedbackMsg);
-						flag = true;
-						$("#loader").hide();
-					}, 500);
-				} else {
-					setTimeout(() => {
-						closeModals();
-						showNotification("success", message);
-						flag = true;
-						$("#loader").hide();
-					}, 500);
-				}
-			} else {
-				flag = false;
-				showNotification("danger", message);
-				$("#loader").hide();
-			}
-		},
-		error: function (err) {
-			flag = false;
-			showNotification(
-				"danger",
-				"System error: Please contact the system administrator for assistance!"
-			);
-			$("#loader").hide();
-		},
-	});
-	return await flag;
-};
-
-const saveUpdateDeleteDatabaseObject = async (
-	data,
-	path,
-	feedback = false,
-	swalTitle
-) => {
-	let result = await $.ajax({
-		method: "POST",
-		url: path,
-		data,
-		async: false,
-		dataType: "json",
-		beforeSend: function () {
-			$("#loader").show();
-		},
-		success: function (data) {
-			let result = data.split("|");
-			let isSuccess = result[0],
-				message = result[1],
-				id = result[2] ? result[2] : null;
-
-			if (isSuccess == "true") {
-				if (feedback) {
-					feedback = feedback.split("|");
-					feedbackClass = feedback[0];
-					feedbackMsg = feedback[1];
-					setTimeout(() => {
-						$("#loader").hide();
-						closeModals();
-						if (swalTitle) {
-							Swal.fire({
-								icon: feedbackClass,
-								title: swalTitle,
-								text: feedbackMsg,
-								showConfirmButton: false,
-								timer: 2000,
-							});
-						} else {
-							Swal.fire({
-								icon: feedbackClass,
-								title: feedbackMsg,
-								showConfirmButton: false,
-								timer: 2000,
-							});
-						}
-					}, 500);
-				} else {
-					setTimeout(() => {
-						$("#loader").hide();
-						closeModals();
-						Swal.fire({
-							icon: "success",
-							title: message,
-							showConfirmButton: false,
-							timer: 2000,
-						});
-					}, 500);
-				}
-			} else {
-				$("#loader").hide();
-				Swal.fire({
-					icon: "danger",
-					title: message,
-					showConfirmButton: false,
-					timer: 2000,
-				});
-			}
-		},
-		error: function (err) {
-			showNotification(
-				"danger",
-				"System error: Please contact the system administrator for assistance!"
-			);
-			$("#loader").hide();
-		},
-	});
-	return (await result) ? result : false;
-};
-
-const saveUpdateDeleteDatabaseObjectv1 = async (
-	data,
-	path,
-	feedback = false,
-	swalTitle
-) => {
-	let flag;
-	$.ajax({
-		method: "POST",
-		url: path,
-		data,
-		async: false,
-		dataType: "json",
-		beforeSend: function () {
-			$("#loader").show();
-		},
-		success: function (data) {
-			let result = data.split("|");
-			let isSuccess = result[0],
-				message = result[1],
-				id = result[2] ? result[2] : null;
-
-			if (isSuccess == "true") {
-				if (feedback) {
-					feedback = feedback.split("|");
-					feedbackClass = feedback[0];
-					feedbackMsg = feedback[1];
-					setTimeout(() => {
-						closeModals();
-						showNotification(feedbackClass, feedbackMsg);
-						flag = true;
-						$("#loader").hide();
-					}, 500);
-				} else {
-					setTimeout(() => {
-						closeModals();
-						showNotification("success", message);
-						flag = true;
-						$("#loader").hide();
-					}, 500);
-				}
-			} else {
-				flag = false;
-				showNotification(
-					"danger",
-					"System error: Please contact the system administrator for assistance!"
-				);
-				$("#loader").hide();
-			}
-		},
-		error: function (err) {
-			flag = false;
-			showNotification(
-				"danger",
-				"System error: Please contact the system administrator for assistance!"
-			);
-			$("#loader").hide();
-		},
-	});
-	return await flag;
-};
-
-const insertTableData = async (
-	data,
-	object = false,
-	feedback = false,
-	swalTitle = false
-) => {
-	let path = `${base_url}operations/insertTableData`;
-	return !object
-		? await saveUpdateDeleteDatabaseFormData(data, path, feedback, swalTitle)
-		: await saveUpdateDeleteDatabaseObject(data, path, feedback, swalTitle);
-};
-
-const insertTableDatav1 = async (
-	data,
-	object = false,
-	feedback = false,
-	swalTitle = false
-) => {
-	$("#loader").show();
-	let path = `${base_url}operations/insertTableData`;
-	return !object
-		? await saveUpdateDeleteDatabaseFormDatav1(data, path, feedback, swalTitle)
-		: await saveUpdateDeleteDatabaseObjectv1(data, path, feedback, swalTitle);
-};
-
-const updateTableData = async (
-	data,
-	object = false,
-	feedback = false,
-	swalTitle = false
-) => {
-	let path = `${base_url}operations/updateTableData`;
-	return !object
-		? await saveUpdateDeleteDatabaseFormData(data, path, feedback, swalTitle)
-		: await saveUpdateDeleteDatabaseObject(data, path, feedback, swalTitle);
-};
-
-const updateTableDatav1 = async (
-	data,
-	object = false,
-	feedback = false,
-	swalTitle = false
-) => {
-	$("#loader").show();
-	let path = `${base_url}operations/updateTableData`;
-	return !object
-		? await saveUpdateDeleteDatabaseFormDatav1(data, path, feedback, swalTitle)
-		: await saveUpdateDeleteDatabaseObjectv1(data, path, feedback, swalTitle);
-};
-
-const deleteTableData = async (
-	data,
-	object = false,
-	feedback = false,
-	swalTitle = false
-) => {
-	$("#loader").show();
-	let path = `${base_url}operations/deleteTableData`;
-	return !object
-		? await saveUpdateDeleteDatabaseFormData(data, path, feedback, swalTitle)
-		: await saveUpdateDeleteDatabaseObject(data, path, feedback, swalTitle);
-};
-// ----- END SAVE/UPDATE/DELETE TABLE DATA -----
 
 $(function () {
 	/**
@@ -1319,6 +867,7 @@ $(function () {
 		}
 	});
 	// ----- END PREVENT FROM ENTERING NOT ALLOWED CHARACTERS -----
+
 
 	// ----- CHECK IF THE INPUTS IS VALID OR INVALID BASED ON THE LENGTH -----
 	$(document).on("keyup", ".validate", function (e) {
@@ -1381,6 +930,7 @@ $(function () {
 		}
 	});
 	// ----- END CHECK IF THE INPUTS IS VALID OR INVALID BASED ON THE LENGTH -----
+
 
 	// ----- EVERY TIME THE SELECT CHANGES -----
 	$(document).on("change", "select", function () {
@@ -1470,4 +1020,19 @@ $(function () {
 		}
 	});
 	// ----- END EVERY TIME THE SELECT CHANGES -----
+
+
+	// ----- CHECK AMOUNT KEYUP -----
+	$(document).on("keyup", ".amount", function() {
+		let value     = $(this).val();
+		let elementID = `#${$(this).attr("id")}`;
+		let invalidFeedback =
+		$(elementID).parent().find(".invalid-feedback").length > 0
+			? $(elementID).parent().find(".invalid-feedback")
+			: $(elementID).parent().parent().find(".invalid-feedback").length > 0
+			? $(elementID).parent().parent().find(".invalid-feedback")
+			: $(elementID).parent().parent().parent().find(".invalid-feedback");
+		checkAmount(elementID, invalidFeedback, value);
+	})
+	// ----- END CHECK AMOUNT KEYUP -----
 });

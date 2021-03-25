@@ -9,7 +9,7 @@
 						<li class="breadcrumb-item active"  id="invMainConditionsBreadcrumbs"><i class="fa fas-users"></i> &nbsp;Inventory Condition</li>
 					</ul>
 					<h1 class="mt-3" id="invConditionsHeaderID">List of Inventory Condition</h1>
-					<span>This module is used to manage inventory status details.</span>
+					<span>This module is used to manage inventory condition details.</span>
 				</div>
 				<div class="col-lg-6 col-md-12 text-md-right">
                         <button class="btn btn-default btn-add" id="btnAdd"><i class="icon=plus"></i> Add Condition</button>

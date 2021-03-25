@@ -197,7 +197,7 @@ $(document).ready(function () {
 
 	// ----- OPEN ADD MODAL -----
 	$(document).on("click", "#btnAdd", function () {
-		$("#modal_inventory_condition .page-title").text("ADD CONDITION");
+		$("#modal_inventory_condition .page-title").text("ADD INVENTORY CONDITION");
 		$("#modal_inventory_condition").modal("show");
 		$("#modal_inventory_condition_content").html(preloader);
 		const content = modalContent();
@@ -236,7 +236,7 @@ $(document).ready(function () {
 	// ----- OPEN EDIT MODAL -----
 	$(document).on("click", ".btnEdit", function () {
 		const id = $(this).attr("id");
-		$("#modal_inventory_condition .page-title").text("EDIT CONDITION");
+		$("#modal_inventory_condition .page-title").text("EDIT INVENTORY CONDITION");
 		$("#modal_inventory_condition").modal("show");
 
 		// Display preloader while waiting for the completion of getting the data

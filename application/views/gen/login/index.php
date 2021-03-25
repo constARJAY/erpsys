@@ -119,6 +119,7 @@
 	
     <script type="text/javascript" src="<?=base_url('assets/custom/js/gen/')?>login.js"></script>
     <script type="text/javascript" src="<?=base_url('assets/custom/js/')?>custom-validation.js"></script>
+    <script type="text/javascript" src="<?=base_url('assets/custom/js/')?>operations.js"></script>
 <!--===============================================================================================-->
 
 </body>

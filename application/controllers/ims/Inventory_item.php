@@ -7,11 +7,12 @@ class Inventory_item extends CI_Controller {
     {
         parent::__construct();
         // $this->load->model("Companysetup_model", "company_setup");
+        isAllowed(4);
     }
 
     public function index()
     {
-        $data["title"] = "Inventory Item";
+        $data["title"] = "Inventory Item Mastefile";
 
         $this->load->view("template/header",$data);
         $this->load->view("ims/inventory_item/index");

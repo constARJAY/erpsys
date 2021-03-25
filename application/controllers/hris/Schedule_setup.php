@@ -6,6 +6,7 @@ class Schedule_setup extends CI_Controller {
     public function __construct()
     {
         parent::__construct();
+        isAllowed(101);
     }
 
     public function index()

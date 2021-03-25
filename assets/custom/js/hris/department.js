@@ -14,8 +14,8 @@ $(document).ready(function(){
             columnDefs: [
                 { targets: 0, width: 100 },
                 { targets: 1, width: 400 },
-                { targets: 2, width: 50 },
-                { targets: 3, width: 50 },
+                { targets: 2, width: 80 },
+                { targets: 3, width: 80 },
             ],
         });
     }
@@ -205,7 +205,7 @@ $(document).ready(function(){
         data["tableName"]            = "hris_department_tbl";
         data["feedback"]             = $("[name=departmentName]").val();
 
-        sweetAlertConfirmation("add", "Department Masterfile", "modal_hris_department", null, data, true, tableContent);
+        sweetAlertConfirmation("add", "Department", "modal_hris_department", null, data, true, tableContent);
         }
     });
     // ----- END SAVE MODAL -----
@@ -214,7 +214,7 @@ $(document).ready(function(){
     $(document).on("click", ".btnEdit", function() {
         const id       = $(this).attr("id");
         const feedback = $(this).attr("feedback");
-        $("#hris_department_modalheader").text("VIEW DEPARTMENT");
+        $("#hris_department_modalheader").text("EDIT DEPARTMENT");
         $("#modal_hris_department").modal("show");
 
         // Display preloader while waiting for the completion of getting the data
@@ -247,7 +247,7 @@ $(document).ready(function(){
 
 			sweetAlertConfirmation(
 				"update",
-				"Inventory Vendor",
+				"Department",
 				"modal_hris_department",
 				"",
 				data,
@@ -259,51 +259,17 @@ $(document).ready(function(){
         // ----- END UPDATE MODAL -----
 
     // ------- CANCEl MODAL-------- 
-    $(document).on("click",".btnCancel",function(){
-        $("#modal_hris_department").modal("hide");
-
-        const data = getFormData("modal_hris_department");
-
-        var validate = false;
-            for(var i of data.entries()) {
-                const count =+i[1];
-               validate[0] = i[1];
-                if(i[1] !=""){
-                    validate = true;
-                }
-            }
-
-            if(validate == true){
-
-                Swal.fire({
-                    title: 'Are you sure?',
-                    text: "You won't be able to revert this!",
-                    imageUrl: `${base_url}assets/custom/isometric_image/questions.png`,
-                    imageWidth: 200,
-                    imageHeight: 200,
-                    imageAlt: 'Custom image',
-                    showCancelButton: true,
-                    confirmButtonColor: '#28a745',
-                    cancelButtonColor: '#1A1A1A',
-                    confirmButtonText: 'Yes, discard!',
-                    allowOutsideClick: false
-                  }).then((result) => {
-                    if (result.isConfirmed) {
-
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Changes successfully discard!',
-                        showConfirmButton: false,
-                        timer: 2000
-                      })
-                    }else{
-                        $("#modal_hris_department").modal("show");
-                    }
-                  });
-            }else{
-                $("#modal_hris_department").modal("hide");
-            }
-       
+    $(document).on("click", ".btnCancel", function () {
+		let formEmpty = isFormEmpty("modal_hris_department");
+		if (!formEmpty) {
+			sweetAlertConfirmation(
+				"cancel",
+				"Department",
+				"modal_hris_department"
+			);
+		} else {
+			$("#modal_hris_department").modal("hide");
+		}
     });
     // -------- END CANCEL MODAL-----------
 

@@ -6,11 +6,12 @@ class Inventory_condition extends CI_Controller {
     public function __construct()
     {
         parent::__construct();
+        isAllowed(9);
     }
 
     public function index()
     {
-        $data["title"] = "Inventory Conditions Masterfile";
+        $data["title"] = "Inventory Condition Masterfile";
 
         $this->load->view("template/header",$data);
         $this->load->view("ims/inventory_condition/index");

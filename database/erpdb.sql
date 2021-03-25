@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Mar 22, 2021 at 01:39 AM
+-- Generation Time: Mar 25, 2021 at 04:11 AM
 -- Server version: 10.4.14-MariaDB
 -- PHP Version: 7.4.10
 
@@ -40,6 +40,13 @@ CREATE TABLE `fms_bank_tbl` (
   `updatedAt` datetime NOT NULL DEFAULT '0000-00-00 00:00:00' ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+--
+-- Dumping data for table `fms_bank_tbl`
+--
+
+INSERT INTO `fms_bank_tbl` (`bankID`, `bankCode`, `bankName`, `bankNumber`, `bankStatus`, `datecreated`, `createdBy`, `updatedBy`, `createdAt`, `updatedAt`) VALUES
+(1, 'VEN-21-00001', 'BSP', '12345121321', 1, '2021-03-23', 3, 3, '2021-03-23 10:02:31', '0000-00-00 00:00:00');
+
 -- --------------------------------------------------------
 
 --
@@ -64,6 +71,13 @@ CREATE TABLE `fms_chart_of_accounts_tbl` (
   `updatedAt` datetime NOT NULL DEFAULT '0000-00-00 00:00:00' ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+--
+-- Dumping data for table `fms_chart_of_accounts_tbl`
+--
+
+INSERT INTO `fms_chart_of_accounts_tbl` (`chartOfAccountID`, `bankID`, `accountCode`, `accountName`, `accountDescription`, `accountLevel`, `ledgerClassificationID`, `accountGrouping`, `financialStatement`, `accountStatus`, `accountDatecreated`, `createdBy`, `updatedBy`, `createdAt`, `updatedAt`) VALUES
+(1, 1, '132', '12312', '123123', '123123', 1, 'Non-current Asset', 'Equity', 1, '2021-03-23', 3, 3, '2021-03-23 10:02:54', '0000-00-00 00:00:00');
+
 -- --------------------------------------------------------
 
 --
@@ -73,6 +87,7 @@ CREATE TABLE `fms_chart_of_accounts_tbl` (
 CREATE TABLE `gen_approval_setup_tbl` (
   `approvalID` bigint(20) NOT NULL,
   `moduleID` bigint(20) NOT NULL,
+  `moduleName` varchar(100) DEFAULT NULL,
   `roleID` bigint(20) NOT NULL,
   `userAccountID` text NOT NULL,
   `createdBy` bigint(20) NOT NULL,
@@ -81,16 +96,17 @@ CREATE TABLE `gen_approval_setup_tbl` (
   `updatedAt` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+-- --------------------------------------------------------
+
 --
--- Dumping data for table `gen_approval_setup_tbl`
+-- Table structure for table `gen_ledger_classification_tbl`
 --
 
-INSERT INTO `gen_approval_setup_tbl` (`approvalID`, `moduleID`, `roleID`, `userAccountID`, `createdBy`, `updatedBy`, `createdAt`, `updatedAt`) VALUES
-(58, 13, 1, '1|2|9|0', 9, 9, '2021-03-19', '2021-03-18 23:00:50'),
-(59, 13, 3, '0', 9, 9, '2021-03-19', '2021-03-18 22:55:07'),
-(60, 13, 6, '0', 9, 9, '2021-03-19', '2021-03-18 22:55:07'),
-(61, 13, 8, '0', 9, 9, '2021-03-19', '2021-03-18 22:55:08'),
-(62, 13, 10, '0', 9, 9, '2021-03-19', '2021-03-18 22:55:08');
+CREATE TABLE `gen_ledger_classification_tbl` (
+  `ledgerClassificationID` bigint(20) NOT NULL,
+  `ledgerClassificationName` varchar(255) NOT NULL,
+  `ledgerClassificationDatecreated` date NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -114,11 +130,18 @@ CREATE TABLE `gen_module_category_tbl` (
 --
 
 INSERT INTO `gen_module_category_tbl` (`moduleCategoryID`, `moduleHeaderID`, `moduleCategoryOrder`, `moduleCategoryIcon`, `moduleCategoryName`, `moduleCategoryStatus`, `createdAt`, `updatedAt`) VALUES
-(1, 1, 1, '01615537147.svg', 'Dashboard', 1, '2021-03-12 08:19:07', '2021-03-12 08:19:07'),
-(2, 2, 0, '01615538110.svg', 'Masterfiles', 1, '2021-03-12 08:35:10', '2021-03-18 23:16:39'),
-(3, 3, 4, '01615538293.svg', 'System Settings', 1, '2021-03-12 08:38:13', '2021-03-12 08:44:00'),
-(4, 5, 5, '01615538430.svg', 'Management', 1, '2021-03-12 08:40:30', '2021-03-18 23:16:01'),
-(5, 2, 2, '01616108987.svg', 'Employee', 1, '2021-03-18 23:09:47', '2021-03-18 23:15:20');
+(1, 5, 1, '', 'System Setting', 1, '2021-03-23 22:19:25', '2021-03-23 22:19:25'),
+(2, 2, 1, '', 'Masterfiles', 1, '2021-03-23 22:19:25', '2021-03-23 22:19:25'),
+(3, 2, 2, '', 'Inventory Modules', 1, '2021-03-23 22:19:25', '2021-03-23 22:19:25'),
+(4, 2, 3, '', 'Employee Forms', 1, '2021-03-23 22:19:25', '2021-03-23 22:19:25'),
+(5, 2, 4, '', 'Project Modules', 1, '2021-03-23 22:19:25', '2021-03-23 22:19:25'),
+(6, 4, 1, '', 'Reports', 1, '2021-03-23 22:19:25', '2021-03-23 22:19:25'),
+(7, 2, 5, '', 'Finance Modules', 1, '2021-03-23 22:19:25', '2021-03-23 22:19:25'),
+(8, 2, 6, '', 'HR Modules', 1, '2021-03-23 22:19:25', '2021-03-23 22:19:25'),
+(9, 5, 2, '', 'System Setup', 1, '2021-03-23 22:19:25', '2021-03-23 22:19:25'),
+(10, 2, 7, '', 'Recruitment Modules', 1, '2021-03-23 22:19:25', '2021-03-23 22:19:25'),
+(11, 2, 8, '', 'Payroll Modules', 1, '2021-03-23 22:19:25', '2021-03-23 22:19:25'),
+(12, 1, 1, '', 'Dashboard', 1, '2021-03-23 22:53:33', '2021-03-23 22:53:33');
 
 -- --------------------------------------------------------
 
@@ -140,12 +163,11 @@ CREATE TABLE `gen_module_header_tbl` (
 --
 
 INSERT INTO `gen_module_header_tbl` (`moduleHeaderID`, `moduleHeaderOrder`, `moduleHeaderName`, `moduleHeaderStatus`, `createdAt`, `updatedAt`) VALUES
-(1, 1, 'Main', 1, '2021-03-12 08:17:06', '2021-03-12 08:30:08'),
-(2, 3, 'Forms', 1, '2021-03-12 08:22:13', '2021-03-12 08:44:27'),
-(3, 4, 'Settings', 1, '2021-03-12 08:23:32', '2021-03-12 08:44:34'),
-(4, 5, 'Reports', 1, '2021-03-12 08:24:01', '2021-03-12 08:44:38'),
-(5, 2, 'Management', 1, '2021-03-12 08:40:11', '2021-03-12 08:40:11'),
-(6, 1, 'Test', 1, '2021-03-17 05:29:58', '2021-03-17 05:31:10');
+(1, 1, 'Main', 1, '2021-03-23 23:26:04', '2021-03-23 23:26:05'),
+(2, 2, 'Forms', 1, '2021-03-18 23:26:06', '2021-03-23 23:26:08'),
+(3, 3, 'Management', 1, '2021-03-16 23:26:09', '2021-03-23 23:26:10'),
+(4, 4, 'Reports', 1, '2021-03-07 23:26:11', '2021-03-23 23:26:12'),
+(5, 5, 'Settings', 1, '2021-03-16 23:26:12', '2021-03-23 23:26:13');
 
 -- --------------------------------------------------------
 
@@ -173,27 +195,130 @@ CREATE TABLE `gen_module_list_tbl` (
 --
 
 INSERT INTO `gen_module_list_tbl` (`moduleID`, `moduleHeaderID`, `moduleCategoryID`, `moduleOrder`, `projectName`, `moduleIcon`, `moduleName`, `moduleApprover`, `moduleController`, `moduleStatus`, `createdAt`, `updatedAt`) VALUES
-(1, 2, 2, 1, 'Human Resources Information System', NULL, 'Schedule Setup', 0, 'hris/schedule_setup', 1, '2021-03-12 08:46:30', '2021-03-12 08:52:42'),
-(2, 1, 1, 1, 'Human Resources Information System', '01615537839.svg', 'HRIS Dashboard', 0, 'hris/dashboard', 1, '2021-03-12 08:30:39', '2021-03-12 08:52:39'),
-(3, 2, 2, 1, 'Finance Management System', NULL, 'Bank', 0, 'fms/bank', 1, '2021-03-12 08:36:28', '2021-03-12 08:52:37'),
-(4, 3, 3, 1, 'Human Resources Information System|Project Management System|Inventory Management System|Finance Management System', NULL, 'Approval Setup', 0, 'approval_setup', 1, '2021-03-12 08:38:47', '2021-03-12 08:52:34'),
-(5, 3, 3, 1, 'Human Resources Information System|Project Management System|Inventory Management System|Finance Management System', NULL, 'Roles and Permission', 0, 'roles_permission', 1, '2021-03-12 08:39:34', '2021-03-12 08:52:32'),
-(6, 5, 4, 1, 'Human Resources Information System|Project Management System|Inventory Management System|Finance Management System', NULL, 'System Notification', 0, 'system_notification', 1, '2021-03-12 08:41:05', '2021-03-12 08:52:29'),
-(7, 2, 2, 1, 'Human Resources Information System', NULL, 'Holiday', 0, 'hris/holiday', 1, '2021-03-12 08:43:31', '2021-03-12 08:52:24'),
-(8, 2, 2, 1, 'Human Resources Information System', NULL, 'Leave Request', 3, 'hris/leave_request', 1, '2021-03-12 08:45:29', '2021-03-18 22:59:48'),
-(9, 2, 2, 1, 'Human Resources Information System', NULL, 'Leave', 0, 'hris/leave', 1, '2021-03-12 08:46:05', '2021-03-12 08:52:18'),
-(10, 2, 2, 1, 'Human Resources Information System', NULL, 'Loan', 0, 'hris/load', 1, '2021-03-12 08:46:30', '2021-03-12 08:52:15'),
-(11, 2, 2, 1, 'Human Resources Information System', NULL, 'PhilHealth Table', 0, 'hris/philhealth_table', 1, '2021-03-12 08:46:30', '2021-03-12 08:46:30'),
-(12, 2, 2, 1, 'Human Resources Information System', NULL, 'SSS Table', 0, 'hris/sss_table', 1, '2021-03-12 08:54:47', '2021-03-12 08:54:47'),
-(13, 2, 2, 1, 'Human Resources Information System', NULL, 'Tax Table', 0, 'hris/tax_table', 1, '2021-03-12 08:55:14', '2021-03-12 08:55:14'),
-(14, 2, 2, 1, 'Inventory Management System', NULL, 'Inventory Category', 0, 'ims/inventory_category', 1, '2021-03-12 08:58:23', '2021-03-12 08:58:23'),
-(15, 2, 2, 1, 'Inventory Management System', NULL, 'Inventory Classification', 0, 'ims/inventory_classification', 1, '2021-03-12 09:00:13', '2021-03-12 09:00:13'),
-(16, 2, 2, 1, 'Inventory Management System', NULL, 'Inventory Condition', 0, 'ims/inventory_condition', 1, '2021-03-12 09:00:41', '2021-03-12 09:00:41'),
-(17, 2, 2, 1, 'Inventory Management System', NULL, 'Inventory Item', 0, 'ims/inventory_item', 1, '2021-03-12 09:01:06', '2021-03-12 09:01:06'),
-(18, 2, 2, 1, 'Inventory Management System', NULL, 'Inventory Vendor', 0, 'ims/inventory_vendor', 1, '2021-03-12 09:02:00', '2021-03-12 09:02:00'),
-(19, 2, 2, 1, 'Project Management System', NULL, 'Project Client', 0, 'pms/project_client', 1, '2021-03-12 09:02:38', '2021-03-12 09:02:38'),
-(22, 2, 2, 1, 'Project Management System', NULL, 'Project Milestone', 0, 'pms/project_milestone', 1, '2021-03-18 04:26:52', '2021-03-18 04:26:52'),
-(23, 2, 5, 1, 'Human Resources Information System', NULL, 'Change Schedule', 3, 'hris/change_schedule', 1, '2021-03-18 23:14:31', '2021-03-18 23:14:31');
+(1, 5, 1, 1, 'Inventory Management System|Project Management System|Finance Management System|Human Resource Information System', NULL, 'Approval Setup', 0, 'approval_setup', 1, '2021-03-23 23:22:25', '2021-03-23 23:58:14'),
+(2, 5, 1, 2, 'Inventory Management System|Project Management System|Finance Management System|Human Resource Information System', NULL, 'Roles and Permission', 0, 'roles_permission', 1, '2021-03-23 23:22:25', '2021-03-23 23:58:14'),
+(3, 5, 1, 3, 'Inventory Management System|Project Management System|Finance Management System|Human Resource Information System', NULL, 'System Notification', 0, 'system_notification', 1, '2021-03-23 23:22:25', '2021-03-23 23:58:14'),
+(4, 2, 2, 1, 'Inventory Management System', NULL, 'Inventory Item', 0, 'ims/inventory_item', 1, '2021-03-23 23:22:25', '2021-03-23 23:22:25'),
+(5, 2, 2, 2, 'Inventory Management System', NULL, 'Inventory Category', 0, 'ims/inventory_category', 1, '2021-03-23 23:22:25', '2021-03-23 23:22:25'),
+(6, 2, 2, 3, 'Inventory Management System', NULL, 'Inventory Classification', 0, 'ims/inventory_classification', 1, '2021-03-23 23:22:25', '2021-03-23 23:22:25'),
+(7, 2, 2, 4, 'Inventory Management System', NULL, 'Inventory Storage', 0, 'ims/inventory_storage', 1, '2021-03-23 23:22:25', '2021-03-23 23:22:25'),
+(8, 2, 2, 5, 'Inventory Management System', NULL, 'Inventory Vendor', 0, 'ims/inventory_vendor', 1, '2021-03-23 23:22:25', '2021-03-23 23:22:25'),
+(9, 2, 2, 6, 'Inventory Management System', NULL, 'Inventory Condition', 0, 'ims/inventory_condition', 1, '2021-03-23 23:22:25', '2021-03-23 23:22:25'),
+(10, 2, 2, 7, 'Project Management System', NULL, 'Project Milestone', 0, 'pms/project_milestone', 1, '2021-03-23 23:22:25', '2021-03-23 23:22:25'),
+(11, 2, 2, 8, 'Project Management System', NULL, 'Project List', 0, 'pms/project_list', 1, '2021-03-23 23:22:25', '2021-03-23 23:22:25'),
+(12, 2, 2, 9, 'Project Management System', NULL, 'Project Client', 0, 'pms/project_client', 1, '2021-03-23 23:22:25', '2021-03-23 23:22:25'),
+(13, 2, 2, 10, 'Project Management System', NULL, 'Project Category', 0, 'pms/project_category', 1, '2021-03-23 23:22:25', '2021-03-23 23:22:25'),
+(14, 2, 2, 11, 'Finance Management System', NULL, 'Bank', 0, 'fms/bank', 1, '2021-03-23 23:22:25', '2021-03-23 23:22:25'),
+(15, 2, 2, 12, 'Finance Management System', NULL, 'Chart of Accounts', 0, 'fms/chart_of_account', 1, '2021-03-23 23:22:25', '2021-03-23 23:22:25'),
+(16, 2, 2, 13, 'Finance Management System', NULL, 'Ledger Classification', 0, 'fms/ledger_classification', 1, '2021-03-23 23:22:25', '2021-03-23 23:22:25'),
+(17, 2, 2, 14, 'Human Resource Information System', NULL, 'Designation', 0, 'hris/designation', 1, '2021-03-23 23:22:25', '2021-03-23 23:22:25'),
+(18, 2, 2, 15, 'Human Resource Information System', NULL, 'Department', 0, 'hris/department', 1, '2021-03-23 23:22:25', '2021-03-23 23:22:25'),
+(19, 2, 2, 16, 'Human Resource Information System', NULL, 'Requirement', 0, 'hris/requirement', 1, '2021-03-23 23:22:25', '2021-03-23 23:22:25'),
+(20, 2, 2, 17, 'Human Resource Information System', NULL, 'Holiday', 0, 'hris/holiday', 1, '2021-03-23 23:22:25', '2021-03-23 23:22:25'),
+(21, 2, 2, 18, 'Human Resource Information System', NULL, 'Leave Type', 0, 'hris/leave_type', 1, '2021-03-23 23:22:25', '2021-03-23 23:22:25'),
+(22, 2, 2, 19, 'Human Resource Information System', NULL, 'Loan Type', 0, 'hris/loan_type', 1, '2021-03-23 23:22:25', '2021-03-23 23:22:25'),
+(23, 2, 2, 20, 'Human Resource Information System', NULL, 'Code of Conduct Category', 0, 'hris/code_conduct_category', 1, '2021-03-23 23:22:25', '2021-03-23 23:22:25'),
+(24, 2, 2, 21, 'Human Resource Information System', NULL, 'Code of Conduct Section', 0, 'hris/code_conduct_section', 1, '2021-03-23 23:22:25', '2021-03-23 23:22:25'),
+(25, 2, 2, 22, 'Human Resource Information System', NULL, 'Branch', 0, 'hris/branch', 1, '2021-03-23 23:22:25', '2021-03-23 23:22:25'),
+(26, 2, 2, 23, 'Human Resource Information System', NULL, 'Qualification', 0, 'hris/qualification', 1, '2021-03-23 23:22:25', '2021-03-23 23:22:25'),
+(27, 2, 2, 24, 'Human Resource Information System', NULL, 'Award', 0, 'hris/award', 1, '2021-03-23 23:22:25', '2021-03-23 23:22:25'),
+(28, 2, 2, 25, 'Human Resource Information System', NULL, 'SSS Table', 0, 'hris/sss_table', 1, '2021-03-23 23:22:25', '2021-03-23 23:22:25'),
+(29, 2, 2, 26, 'Human Resource Information System', NULL, 'PhilHealth Table', 0, 'hris/philhealth_table', 1, '2021-03-23 23:22:25', '2021-03-23 23:22:25'),
+(30, 2, 2, 27, 'Human Resource Information System', NULL, 'Tax Table', 0, 'hris/tax_table', 1, '2021-03-23 23:22:25', '2021-03-23 23:22:25'),
+(31, 2, 2, 28, 'Human Resource Information System', NULL, 'Training and Development', 0, 'hris/training_development', 1, '2021-03-23 23:22:25', '2021-03-23 23:22:25'),
+(32, 2, 2, 29, 'Human Resource Information System', NULL, 'Examination', 0, 'hris/examination', 1, '2021-03-23 23:22:25', '2021-03-23 23:22:25'),
+(33, 2, 3, 1, 'Inventory Management System', NULL, 'Inventory Receiving', 3, 'ims/inventory_receiving', 1, '2021-03-23 23:22:25', '2021-03-23 23:58:14'),
+(34, 2, 3, 2, 'Inventory Management System', NULL, 'List of Stocks', 0, 'ims/list_stocks', 1, '2021-03-23 23:22:25', '2021-03-23 23:58:14'),
+(35, 2, 3, 3, 'Inventory Management System', NULL, 'Return Item', 3, 'ims/return_item', 1, '2021-03-23 23:22:25', '2021-03-23 23:58:14'),
+(36, 2, 3, 4, 'Inventory Management System', NULL, 'Disposal', 3, 'ims/disposal', 1, '2021-03-23 23:22:25', '2021-03-23 23:58:14'),
+(37, 2, 3, 5, 'Inventory Management System', NULL, 'Transfer Request', 3, 'ims/transfer_request', 1, '2021-03-23 23:22:25', '2021-03-23 23:58:14'),
+(38, 2, 3, 6, 'Inventory Management System', NULL, 'Cost Estimate', 3, 'ims/cost_estimate', 1, '2021-03-23 23:22:25', '2021-03-23 23:58:14'),
+(39, 2, 3, 7, 'Inventory Management System', NULL, 'Bill of Material', 3, 'ims/bill_material', 1, '2021-03-23 23:22:25', '2021-03-23 23:58:14'),
+(40, 2, 3, 8, 'Inventory Management System', NULL, 'Bid Recap', 3, 'ims/bid_recap', 1, '2021-03-23 23:22:25', '2021-03-23 23:58:14'),
+(41, 2, 3, 9, 'Inventory Management System', NULL, 'Service Order', 3, 'ims/service_order', 1, '2021-03-23 23:22:25', '2021-03-23 23:58:14'),
+(42, 2, 4, 1, 'Inventory Management System', NULL, 'Material Withdrawal', 3, 'ims/material_withdrawal', 1, '2021-03-23 23:22:25', '2021-03-23 23:58:14'),
+(43, 2, 4, 2, 'Inventory Management System', NULL, 'Equipment Borrowing', 3, 'ims/equipment_borrowing', 1, '2021-03-23 23:22:25', '2021-03-23 23:58:14'),
+(44, 2, 4, 3, 'Inventory Management System', NULL, 'Inventory Incident', 3, 'ims/inventory_incident', 1, '2021-03-23 23:22:25', '2021-03-23 23:58:14'),
+(45, 2, 4, 4, 'Inventory Management System', NULL, 'Material Usage', 3, 'ims/material_usage', 1, '2021-03-23 23:22:25', '2021-03-23 23:58:14'),
+(46, 2, 4, 5, 'Inventory Management System', NULL, 'Purchase Request', 3, 'ims/purchase_request', 1, '2021-03-23 23:22:25', '2021-03-23 23:58:14'),
+(47, 2, 4, 6, 'Inventory Management System', NULL, 'Purchase Order', 3, 'ims/purchase_order', 1, '2021-03-23 23:22:25', '2021-03-23 23:58:14'),
+(48, 2, 4, 7, 'Inventory Management System', NULL, 'Item Price List', 0, 'ims/item_price_list', 1, '2021-03-23 23:22:25', '2021-03-23 23:58:14'),
+(49, 2, 4, 8, 'Inventory Management System', NULL, 'Service Order Requisition', 3, 'ims/service_order_requisition', 1, '2021-03-23 23:22:25', '2021-03-23 23:58:14'),
+(50, 2, 4, 9, 'Project Management System', NULL, 'Personel Requisition', 3, 'pms/personel_requisition', 1, '2021-03-23 23:22:25', '2021-03-23 23:58:14'),
+(51, 2, 4, 10, 'Project Management System', NULL, 'Employee Taskboard', 3, 'pms/employee_taskboard', 1, '2021-03-23 23:22:25', '2021-03-23 23:58:14'),
+(52, 2, 4, 11, 'Project Management System', NULL, 'Sign-off', 3, 'pms/sign_off', 1, '2021-03-23 23:22:25', '2021-03-23 23:58:14'),
+(53, 2, 4, 12, 'Finance Management System', NULL, 'Petty Cash Request', 3, 'fms/petty_cash_request', 1, '2021-03-23 23:22:25', '2021-03-23 23:58:14'),
+(54, 2, 4, 13, 'Finance Management System', NULL, 'Client Fund Request', 3, 'fms/client_fund_request', 1, '2021-03-23 23:22:25', '2021-03-23 23:58:14'),
+(55, 2, 4, 14, 'Human Resource Information System', NULL, 'Leave Request', 3, 'hris/leave_request', 1, '2021-03-23 23:22:25', '2021-03-23 23:58:14'),
+(56, 2, 4, 15, 'Human Resource Information System', NULL, 'Overtime Request', 3, 'hris/overtime_request', 1, '2021-03-23 23:22:25', '2021-03-23 23:58:14'),
+(57, 2, 4, 16, 'Human Resource Information System', NULL, 'No Time In/Out', 3, 'hris/no_timein_out', 1, '2021-03-23 23:22:25', '2021-03-23 23:58:14'),
+(58, 2, 4, 17, 'Human Resource Information System', NULL, 'Official Business', 3, 'hris/official_business', 1, '2021-03-23 23:22:25', '2021-03-23 23:58:14'),
+(59, 2, 4, 18, 'Human Resource Information System', NULL, 'Loan', 3, 'hris/loan', 1, '2021-03-23 23:22:25', '2021-03-23 23:58:14'),
+(60, 2, 4, 19, 'Human Resource Information System', NULL, 'Change Schedule', 3, 'hris/change_schedule', 1, '2021-03-23 23:22:25', '2021-03-23 23:58:14'),
+(61, 2, 4, 20, 'Human Resource Information System', NULL, 'Employee Evaluation', 3, 'hris/employee_evaluation', 1, '2021-03-23 23:22:25', '2021-03-23 23:58:14'),
+(62, 2, 4, 21, 'Human Resource Information System', NULL, 'Clearance', 3, 'hris/clearance', 1, '2021-03-23 23:22:25', '2021-03-23 23:58:14'),
+(63, 6, 4, 1, 'Inventory Management System', NULL, 'Purhcase Order Report', 0, 'ims/purchase_order_report', 1, '2021-03-23 23:22:25', '2021-03-23 23:22:25'),
+(64, 6, 4, 2, 'Inventory Management System', NULL, 'Receiving Report', 0, 'ims/receiving_report', 1, '2021-03-23 23:22:25', '2021-03-23 23:22:25'),
+(65, 6, 4, 3, 'Inventory Management System', NULL, 'Inventory Incident Report', 0, 'ims/inventory_incident_report', 1, '2021-03-23 23:22:25', '2021-03-23 23:22:25'),
+(66, 6, 4, 4, 'Inventory Management System', NULL, 'Inventory Report', 0, 'ims/inventory_report', 1, '2021-03-23 23:22:25', '2021-03-23 23:22:25'),
+(67, 1, 12, 1, 'Inventory Management System', NULL, 'Inventory Dashboard', 0, 'ims/inventory_dashboard', 1, '2021-03-23 23:22:25', '2021-03-23 23:58:14'),
+(68, 1, 12, 2, 'Project Management System', NULL, 'Project Dashboard', 0, 'pms/project_dashboard', 1, '2021-03-23 23:22:25', '2021-03-23 23:58:14'),
+(69, 1, 12, 3, 'Finance Management System', NULL, 'Finance Dashboard', 0, 'fms/finance_dashboard', 1, '2021-03-23 23:22:25', '2021-03-23 23:58:14'),
+(70, 1, 12, 4, 'Human Resource Information System', NULL, 'HRIS Dashboard', 0, 'hris/hr_dashboard', 1, '2021-03-23 23:22:25', '2021-03-23 23:58:14'),
+(71, 4, 6, 5, 'Project Management System', NULL, 'Project Management', 0, 'fms/project_management', 1, '2021-03-23 23:22:25', '2021-03-23 23:58:14'),
+(72, 4, 6, 6, 'Project Management System', NULL, 'Project Task', 0, 'fms/project_task', 1, '2021-03-23 23:22:25', '2021-03-23 23:58:14'),
+(73, 4, 6, 7, 'Project Management System', NULL, 'Project Timeline', 0, 'fms/project_timeline', 1, '2021-03-23 23:22:25', '2021-03-23 23:58:14'),
+(74, 4, 6, 8, 'Finance Management System', NULL, 'Petty Cash Voucher', 0, 'fms/petty_cash_voucher', 1, '2021-03-23 23:22:25', '2021-03-23 23:58:14'),
+(75, 4, 6, 9, 'Finance Management System', NULL, 'Client Fund Voucher', 0, 'fms/client_fund_voucher', 1, '2021-03-23 23:22:25', '2021-03-23 23:58:14'),
+(76, 4, 6, 10, 'Finance Management System', NULL, 'Payment Request', 0, 'fms/payment_request', 1, '2021-03-23 23:22:25', '2021-03-23 23:58:14'),
+(77, 4, 6, 11, 'Finance Management System', NULL, 'Check Voucher', 0, 'fms/check_voucher', 1, '2021-03-23 23:22:25', '2021-03-23 23:58:14'),
+(78, 4, 6, 12, 'Human Resource Information System', NULL, 'Examination Report', 0, 'hris/examination_report', 1, '2021-03-23 23:22:25', '2021-03-23 23:58:14'),
+(79, 4, 6, 13, 'Human Resource Information System', NULL, 'Timekeeping Report', 0, 'hris/timekeeping_report', 1, '2021-03-23 23:22:25', '2021-03-23 23:58:14'),
+(80, 4, 6, 14, 'Human Resource Information System', NULL, 'Payroll Report', 0, 'hris/payroll_report', 1, '2021-03-23 23:22:25', '2021-03-23 23:58:14'),
+(81, 4, 6, 15, 'Human Resource Information System', NULL, 'Payroll Adjustment Report', 0, 'hris/payroll_adjustment_report', 1, '2021-03-23 23:22:25', '2021-03-23 23:58:14'),
+(82, 4, 6, 16, 'Human Resource Information System', NULL, 'Payslip Generation', 0, 'hris/payslip_generation', 1, '2021-03-23 23:22:25', '2021-03-23 23:58:14'),
+(83, 4, 6, 17, 'Human Resource Information System', NULL, '13th Month Report', 0, 'hris/13th_month_report', 1, '2021-03-23 23:22:25', '2021-03-23 23:58:14'),
+(84, 4, 6, 18, 'Human Resource Information System', NULL, 'PHIC Premium Payment', 0, 'hris/phic_premium_payment', 1, '2021-03-23 23:22:25', '2021-03-23 23:58:14'),
+(85, 4, 6, 19, 'Human Resource Information System', NULL, 'SSS Premium Payment', 0, 'hris/sss_premium_payment', 1, '2021-03-23 23:22:25', '2021-03-23 23:58:14'),
+(86, 4, 6, 20, 'Human Resource Information System', NULL, 'HDMF Premim Payment', 0, 'hris/hdmf_premium_payment', 1, '2021-03-23 23:22:25', '2021-03-23 23:58:14'),
+(87, 4, 6, 21, 'Human Resource Information System', NULL, 'Manpower Management Report', 0, 'hris/manpower_management_report', 1, '2021-03-23 23:22:25', '2021-03-23 23:58:14'),
+(88, 1, 12, 5, 'Human Resource Information System', NULL, 'Employee Dashboard', 0, 'hris/employee_dashboard', 1, '2021-03-23 23:22:25', '2021-03-23 23:58:14'),
+(89, 2, 5, 1, 'Project Management System', NULL, 'Milestone Builder', 3, 'pms/milestone_builder', 1, '2021-03-23 23:22:25', '2021-03-23 23:58:14'),
+(90, 2, 5, 2, 'Project Management System', NULL, 'Project Timeline Builder', 0, 'pms/project_timeline_builder', 1, '2021-03-23 23:22:25', '2021-03-23 23:58:14'),
+(91, 2, 5, 3, 'Project Management System', NULL, 'Manage Project Budget', 3, 'pms/manage_project_budget', 1, '2021-03-23 23:22:25', '2021-03-23 23:58:14'),
+(92, 2, 5, 4, 'Project Management System', NULL, 'Project Management Board', 3, 'pms/project_management_board', 1, '2021-03-23 23:22:25', '2021-03-23 23:58:14'),
+(93, 2, 7, 1, 'Finance Management System', NULL, 'Petty Cash Voucher', 3, 'fms/petty_cash_voucher', 1, '2021-03-23 23:22:25', '2021-03-23 23:58:14'),
+(94, 2, 7, 2, 'Finance Management System', NULL, 'Client Fund Voucher', 3, 'fms/client_fund_voucher', 1, '2021-03-23 23:22:25', '2021-03-23 23:58:14'),
+(95, 2, 7, 3, 'Finance Management System', NULL, 'Payment Request', 3, 'fms/payment_request', 1, '2021-03-23 23:22:25', '2021-03-23 23:58:14'),
+(96, 2, 7, 4, 'Finance Management System', NULL, 'Check Voucher', 3, 'fms/check_voucher', 1, '2021-03-23 23:22:25', '2021-03-23 23:58:14'),
+(97, 2, 7, 5, 'Finance Management System', NULL, 'Check Writer', 3, 'fms/check_writer', 1, '2021-03-23 23:22:25', '2021-03-23 23:58:14'),
+(98, 2, 7, 6, 'Finance Management System', NULL, 'Check Voucher Liquidation', 3, 'fms/check_voucher_liquidation', 1, '2021-03-23 23:22:25', '2021-03-23 23:58:14'),
+(99, 2, 7, 7, 'Finance Management System', NULL, 'Billing', 3, 'fms/billing', 1, '2021-03-23 23:22:25', '2021-03-23 23:58:14'),
+(100, 2, 7, 8, 'Finance Management System', NULL, 'Collection', 3, 'fms/collection', 1, '2021-03-23 23:22:25', '2021-03-23 23:58:14'),
+(101, 5, 9, 1, 'Human Resource Information System', NULL, 'Schedule Setup', 0, 'hris/schedule_setup', 1, '2021-03-23 23:22:25', '2021-03-23 23:58:14'),
+(102, 5, 9, 2, 'Human Resource Information System', NULL, 'Orientation Setup', 0, 'hris/orientation_setup', 1, '2021-03-23 23:22:25', '2021-03-23 23:58:14'),
+(103, 2, 10, 1, 'Human Resource Information System', NULL, 'Job Posting', 0, 'hris/jop_posting', 1, '2021-03-23 23:22:25', '2021-03-23 23:58:14'),
+(104, 2, 10, 2, 'Human Resource Information System', NULL, 'Applicant Registration', 0, 'hris/application_registration', 1, '2021-03-23 23:22:25', '2021-03-23 23:58:14'),
+(105, 2, 10, 3, 'Human Resource Information System', NULL, 'Examination', 0, 'hris/examination', 1, '2021-03-23 23:22:25', '2021-03-23 23:58:14'),
+(106, 2, 10, 4, 'Human Resource Information System', NULL, 'Applicant List', 0, 'hris/applicant_list', 1, '2021-03-23 23:22:25', '2021-03-23 23:58:14'),
+(107, 2, 10, 5, 'Human Resource Information System', NULL, 'On-boarding', 0, 'hris/on_boarding', 1, '2021-03-23 23:22:25', '2021-03-23 23:58:14'),
+(108, 2, 11, 1, 'Human Resource Information System', NULL, 'Employee Attendance', 0, 'hris/employee_attendance', 1, '2021-03-23 23:22:25', '2021-03-23 23:58:14'),
+(109, 2, 11, 2, 'Human Resource Information System', NULL, 'Timekeeping', 0, 'hris/timekeeping', 1, '2021-03-23 23:22:25', '2021-03-23 23:58:14'),
+(110, 2, 11, 3, 'Human Resource Information System', NULL, 'Payroll', 0, 'hris/payroll', 1, '2021-03-23 23:22:25', '2021-03-23 23:58:14'),
+(111, 2, 11, 4, 'Human Resource Information System', NULL, 'Payroll Adjustment', 0, 'hris/payroll_adjustment', 1, '2021-03-23 23:22:25', '2021-03-23 23:58:14'),
+(112, 2, 11, 5, 'Human Resource Information System', NULL, '13th Month', 0, 'hris/13th_month', 1, '2021-03-23 23:22:25', '2021-03-23 23:58:14'),
+(113, 2, 8, 1, 'Human Resource Information System', NULL, 'Personnel Requisition', 0, 'hris/personnel_requisition', 1, '2021-03-23 23:22:25', '2021-03-23 23:58:14'),
+(114, 2, 8, 2, 'Human Resource Information System', NULL, 'Employee', 0, 'hris/employee', 1, '2021-03-23 23:22:25', '2021-03-23 23:58:14'),
+(115, 2, 8, 3, 'Human Resource Information System', NULL, 'Personal Action Notice', 0, 'hris/personal_action_notice', 1, '2021-03-23 23:22:25', '2021-03-23 23:58:14'),
+(116, 2, 8, 4, 'Human Resource Information System', NULL, 'Manpower Management', 0, 'hris/manpower_management', 1, '2021-03-23 23:22:25', '2021-03-23 23:58:14'),
+(117, 2, 8, 5, 'Human Resource Information System', NULL, 'Employee Relation', 0, 'hris/employee_relation', 1, '2021-03-23 23:22:25', '2021-03-23 23:58:14'),
+(118, 2, 8, 6, 'Human Resource Information System', NULL, 'Employee Evaluation', 0, 'hris/employee_evaluation', 1, '2021-03-23 23:22:25', '2021-03-23 23:58:14'),
+(119, 2, 8, 7, 'Human Resource Information System', NULL, 'Employee Management', 0, 'hris/employee_management', 1, '2021-03-23 23:22:25', '2021-03-23 23:58:14'),
+(120, 2, 8, 8, 'Human Resource Information System', NULL, 'Memorandum', 0, 'hris/memorandum', 1, '2021-03-23 23:22:25', '2021-03-23 23:58:14'),
+(121, 2, 8, 9, 'Human Resource Information System', NULL, 'Employee Award', 0, 'hris/employee_award', 1, '2021-03-23 23:22:25', '2021-03-23 23:58:14'),
+(122, 2, 8, 10, 'Human Resource Information System', NULL, 'Leave Monitoring', 0, 'hris/leave_monitoring', 1, '2021-03-23 23:22:25', '2021-03-23 23:58:14'),
+(123, 2, 8, 11, 'Human Resource Information System', NULL, 'Training and Development', 0, 'hris/training_development', 1, '2021-03-23 23:22:25', '2021-03-23 23:58:14'),
+(124, 2, 8, 12, 'Human Resource Information System', NULL, 'Event Calendar', 0, 'hris/event_calendar', 1, '2021-03-23 23:22:25', '2021-03-23 23:58:14');
 
 -- --------------------------------------------------------
 
@@ -253,258 +378,1371 @@ CREATE TABLE `gen_roles_permission_tbl` (
 --
 
 INSERT INTO `gen_roles_permission_tbl` (`permissionID`, `roleID`, `moduleID`, `permissionStatus`, `createdAt`, `updatedAt`) VALUES
-(1, 1, 1, 1, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(2, 1, 2, 1, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(3, 1, 3, 1, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(4, 1, 4, 1, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(5, 1, 5, 1, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(6, 1, 6, 1, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(7, 1, 7, 1, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(8, 1, 8, 1, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(9, 1, 9, 1, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(10, 1, 10, 1, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(11, 1, 11, 1, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(12, 1, 12, 1, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(13, 1, 13, 1, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(14, 1, 14, 1, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(15, 1, 15, 1, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(16, 1, 16, 1, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(17, 1, 17, 1, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(18, 1, 18, 1, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(19, 1, 19, 1, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(20, 1, 22, 1, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(21, 1, 23, 1, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(22, 2, 1, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(23, 2, 2, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(24, 2, 3, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(25, 2, 4, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(26, 2, 5, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(27, 2, 6, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(28, 2, 7, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(29, 2, 8, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(30, 2, 9, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(31, 2, 10, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(32, 2, 11, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(33, 2, 12, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(34, 2, 13, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(35, 2, 14, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(36, 2, 15, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(37, 2, 16, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(38, 2, 17, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(39, 2, 18, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(40, 2, 19, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(41, 2, 22, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(42, 2, 23, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(43, 3, 1, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(44, 3, 2, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(45, 3, 3, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(46, 3, 4, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(47, 3, 5, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(48, 3, 6, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(49, 3, 7, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(50, 3, 8, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(51, 3, 9, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(52, 3, 10, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(53, 3, 11, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(54, 3, 12, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(55, 3, 13, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(56, 3, 14, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(57, 3, 15, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(58, 3, 16, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(59, 3, 17, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(60, 3, 18, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(61, 3, 19, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(62, 3, 22, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(63, 3, 23, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(64, 4, 1, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(65, 4, 2, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(66, 4, 3, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(67, 4, 4, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(68, 4, 5, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(69, 4, 6, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(70, 4, 7, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(71, 4, 8, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(72, 4, 9, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(73, 4, 10, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(74, 4, 11, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(75, 4, 12, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(76, 4, 13, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(77, 4, 14, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(78, 4, 15, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(79, 4, 16, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(80, 4, 17, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(81, 4, 18, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(82, 4, 19, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(83, 4, 22, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(84, 4, 23, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(85, 5, 1, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(86, 5, 2, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(87, 5, 3, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(88, 5, 4, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(89, 5, 5, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(90, 5, 6, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(91, 5, 7, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(92, 5, 8, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(93, 5, 9, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(94, 5, 10, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(95, 5, 11, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(96, 5, 12, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(97, 5, 13, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(98, 5, 14, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(99, 5, 15, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(100, 5, 16, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(101, 5, 17, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(102, 5, 18, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(103, 5, 19, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(104, 5, 22, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(105, 5, 23, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(106, 6, 1, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(107, 6, 2, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(108, 6, 3, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(109, 6, 4, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(110, 6, 5, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(111, 6, 6, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(112, 6, 7, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(113, 6, 8, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(114, 6, 9, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(115, 6, 10, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(116, 6, 11, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(117, 6, 12, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(118, 6, 13, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(119, 6, 14, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(120, 6, 15, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(121, 6, 16, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(122, 6, 17, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(123, 6, 18, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(124, 6, 19, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(125, 6, 22, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(126, 6, 23, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(127, 7, 1, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(128, 7, 2, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(129, 7, 3, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(130, 7, 4, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(131, 7, 5, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(132, 7, 6, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(133, 7, 7, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(134, 7, 8, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(135, 7, 9, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(136, 7, 10, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(137, 7, 11, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(138, 7, 12, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(139, 7, 13, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(140, 7, 14, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(141, 7, 15, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(142, 7, 16, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(143, 7, 17, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(144, 7, 18, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(145, 7, 19, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(146, 7, 22, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(147, 7, 23, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(148, 8, 1, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(149, 8, 2, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(150, 8, 3, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(151, 8, 4, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(152, 8, 5, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(153, 8, 6, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(154, 8, 7, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(155, 8, 8, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(156, 8, 9, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(157, 8, 10, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(158, 8, 11, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(159, 8, 12, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(160, 8, 13, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(161, 8, 14, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(162, 8, 15, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(163, 8, 16, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(164, 8, 17, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(165, 8, 18, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(166, 8, 19, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(167, 8, 22, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(168, 8, 23, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(169, 9, 1, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(170, 9, 2, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(171, 9, 3, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(172, 9, 4, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(173, 9, 5, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(174, 9, 6, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(175, 9, 7, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(176, 9, 8, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(177, 9, 9, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(178, 9, 10, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(179, 9, 11, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(180, 9, 12, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(181, 9, 13, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(182, 9, 14, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(183, 9, 15, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(184, 9, 16, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(185, 9, 17, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(186, 9, 18, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(187, 9, 19, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(188, 9, 22, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(189, 9, 23, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(190, 10, 1, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(191, 10, 2, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(192, 10, 3, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(193, 10, 4, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(194, 10, 5, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(195, 10, 6, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(196, 10, 7, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(197, 10, 8, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(198, 10, 9, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(199, 10, 10, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(200, 10, 11, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(201, 10, 12, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(202, 10, 13, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(203, 10, 14, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(204, 10, 15, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(205, 10, 16, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(206, 10, 17, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(207, 10, 18, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(208, 10, 19, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(209, 10, 22, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(210, 10, 23, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(211, 11, 1, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(212, 11, 2, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(213, 11, 3, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(214, 11, 4, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(215, 11, 5, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(216, 11, 6, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(217, 11, 7, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(218, 11, 8, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(219, 11, 9, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(220, 11, 10, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(221, 11, 11, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(222, 11, 12, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(223, 11, 13, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(224, 11, 14, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(225, 11, 15, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(226, 11, 16, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(227, 11, 17, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(228, 11, 18, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(229, 11, 19, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(230, 11, 22, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(231, 11, 23, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(232, 12, 1, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(233, 12, 2, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(234, 12, 3, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(235, 12, 4, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(236, 12, 5, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(237, 12, 6, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(238, 12, 7, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(239, 12, 8, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(240, 12, 9, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(241, 12, 10, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(242, 12, 11, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(243, 12, 12, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(244, 12, 13, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(245, 12, 14, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(246, 12, 15, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(247, 12, 16, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(248, 12, 17, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(249, 12, 18, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(250, 12, 19, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(251, 12, 22, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00'),
-(252, 12, 23, 0, '2021-03-19 00:21:00', '2021-03-19 00:21:00');
+(1, 1, 1, 1, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(2, 1, 2, 1, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(3, 1, 3, 1, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(4, 1, 4, 1, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(5, 1, 5, 1, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(6, 1, 6, 1, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(7, 1, 7, 1, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(8, 1, 8, 1, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(9, 1, 9, 1, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(10, 1, 10, 1, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(11, 1, 11, 1, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(12, 1, 12, 1, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(13, 1, 13, 1, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(14, 1, 14, 1, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(15, 1, 15, 1, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(16, 1, 16, 1, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(17, 1, 17, 1, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(18, 1, 18, 1, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(19, 1, 19, 1, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(20, 1, 20, 1, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(21, 1, 21, 1, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(22, 1, 22, 1, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(23, 1, 23, 1, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(24, 1, 24, 1, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(25, 1, 25, 1, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(26, 1, 26, 1, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(27, 1, 27, 1, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(28, 1, 28, 1, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(29, 1, 29, 1, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(30, 1, 30, 1, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(31, 1, 31, 1, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(32, 1, 32, 1, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(33, 1, 33, 1, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(34, 1, 34, 1, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(35, 1, 35, 1, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(36, 1, 36, 1, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(37, 1, 37, 1, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(38, 1, 38, 1, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(39, 1, 39, 1, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(40, 1, 40, 1, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(41, 1, 41, 1, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(42, 1, 42, 1, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(43, 1, 43, 1, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(44, 1, 44, 1, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(45, 1, 45, 1, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(46, 1, 46, 1, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(47, 1, 47, 1, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(48, 1, 48, 1, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(49, 1, 49, 1, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(50, 1, 50, 1, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(51, 1, 51, 1, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(52, 1, 52, 1, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(53, 1, 53, 1, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(54, 1, 54, 1, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(55, 1, 55, 1, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(56, 1, 56, 1, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(57, 1, 57, 1, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(58, 1, 58, 1, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(59, 1, 59, 1, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(60, 1, 60, 1, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(61, 1, 61, 1, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(62, 1, 62, 1, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(63, 1, 63, 1, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(64, 1, 64, 1, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(65, 1, 65, 1, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(66, 1, 66, 1, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(67, 1, 67, 1, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(68, 1, 68, 1, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(69, 1, 69, 1, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(70, 1, 70, 1, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(71, 1, 71, 1, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(72, 1, 72, 1, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(73, 1, 73, 1, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(74, 1, 74, 1, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(75, 1, 75, 1, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(76, 1, 76, 1, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(77, 1, 77, 1, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(78, 1, 78, 1, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(79, 1, 79, 1, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(80, 1, 80, 1, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(81, 1, 81, 1, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(82, 1, 82, 1, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(83, 1, 83, 1, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(84, 1, 84, 1, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(85, 1, 85, 1, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(86, 1, 86, 1, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(87, 1, 87, 1, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(88, 1, 88, 1, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(89, 1, 89, 1, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(90, 1, 90, 1, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(91, 1, 91, 1, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(92, 1, 92, 1, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(93, 1, 93, 1, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(94, 1, 94, 1, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(95, 1, 95, 1, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(96, 1, 96, 1, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(97, 1, 97, 1, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(98, 1, 98, 1, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(99, 1, 99, 1, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(100, 1, 100, 1, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(101, 1, 101, 1, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(102, 1, 102, 1, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(103, 1, 103, 1, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(104, 1, 104, 1, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(105, 1, 105, 1, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(106, 1, 106, 1, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(107, 1, 107, 1, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(108, 1, 108, 1, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(109, 1, 109, 1, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(110, 1, 110, 1, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(111, 1, 111, 1, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(112, 1, 112, 1, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(113, 1, 113, 1, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(114, 1, 114, 1, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(115, 1, 115, 1, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(116, 1, 116, 1, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(117, 1, 117, 1, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(118, 1, 118, 1, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(119, 1, 119, 1, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(120, 1, 120, 1, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(121, 1, 121, 1, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(122, 1, 122, 1, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(123, 1, 123, 1, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(124, 1, 124, 1, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(125, 2, 1, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(126, 2, 2, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(127, 2, 3, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(128, 2, 4, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(129, 2, 5, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(130, 2, 6, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(131, 2, 7, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(132, 2, 8, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(133, 2, 9, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(134, 2, 10, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(135, 2, 11, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(136, 2, 12, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(137, 2, 13, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(138, 2, 14, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(139, 2, 15, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(140, 2, 16, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(141, 2, 17, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(142, 2, 18, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(143, 2, 19, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(144, 2, 20, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(145, 2, 21, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(146, 2, 22, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(147, 2, 23, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(148, 2, 24, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(149, 2, 25, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(150, 2, 26, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(151, 2, 27, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(152, 2, 28, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(153, 2, 29, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(154, 2, 30, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(155, 2, 31, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(156, 2, 32, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(157, 2, 33, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(158, 2, 34, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(159, 2, 35, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(160, 2, 36, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(161, 2, 37, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(162, 2, 38, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(163, 2, 39, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(164, 2, 40, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(165, 2, 41, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(166, 2, 42, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(167, 2, 43, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(168, 2, 44, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(169, 2, 45, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(170, 2, 46, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(171, 2, 47, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(172, 2, 48, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(173, 2, 49, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(174, 2, 50, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(175, 2, 51, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(176, 2, 52, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(177, 2, 53, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(178, 2, 54, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(179, 2, 55, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(180, 2, 56, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(181, 2, 57, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(182, 2, 58, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(183, 2, 59, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(184, 2, 60, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(185, 2, 61, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(186, 2, 62, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(187, 2, 63, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(188, 2, 64, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(189, 2, 65, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(190, 2, 66, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(191, 2, 67, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(192, 2, 68, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(193, 2, 69, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(194, 2, 70, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(195, 2, 71, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(196, 2, 72, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(197, 2, 73, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(198, 2, 74, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(199, 2, 75, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(200, 2, 76, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(201, 2, 77, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(202, 2, 78, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(203, 2, 79, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(204, 2, 80, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(205, 2, 81, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(206, 2, 82, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(207, 2, 83, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(208, 2, 84, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(209, 2, 85, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(210, 2, 86, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(211, 2, 87, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(212, 2, 88, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(213, 2, 89, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(214, 2, 90, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(215, 2, 91, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(216, 2, 92, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(217, 2, 93, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(218, 2, 94, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(219, 2, 95, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(220, 2, 96, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(221, 2, 97, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(222, 2, 98, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(223, 2, 99, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(224, 2, 100, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(225, 2, 101, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(226, 2, 102, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(227, 2, 103, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(228, 2, 104, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(229, 2, 105, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(230, 2, 106, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(231, 2, 107, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(232, 2, 108, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(233, 2, 109, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(234, 2, 110, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(235, 2, 111, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(236, 2, 112, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(237, 2, 113, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(238, 2, 114, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(239, 2, 115, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(240, 2, 116, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(241, 2, 117, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(242, 2, 118, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(243, 2, 119, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(244, 2, 120, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(245, 2, 121, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(246, 2, 122, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(247, 2, 123, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(248, 2, 124, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(249, 3, 1, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(250, 3, 2, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(251, 3, 3, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(252, 3, 4, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(253, 3, 5, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(254, 3, 6, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(255, 3, 7, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(256, 3, 8, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(257, 3, 9, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(258, 3, 10, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(259, 3, 11, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(260, 3, 12, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(261, 3, 13, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(262, 3, 14, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(263, 3, 15, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(264, 3, 16, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(265, 3, 17, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(266, 3, 18, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(267, 3, 19, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(268, 3, 20, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(269, 3, 21, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(270, 3, 22, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(271, 3, 23, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(272, 3, 24, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(273, 3, 25, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(274, 3, 26, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(275, 3, 27, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(276, 3, 28, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(277, 3, 29, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(278, 3, 30, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(279, 3, 31, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(280, 3, 32, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(281, 3, 33, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(282, 3, 34, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(283, 3, 35, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(284, 3, 36, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(285, 3, 37, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(286, 3, 38, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(287, 3, 39, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(288, 3, 40, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(289, 3, 41, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(290, 3, 42, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(291, 3, 43, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(292, 3, 44, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(293, 3, 45, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(294, 3, 46, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(295, 3, 47, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(296, 3, 48, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(297, 3, 49, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(298, 3, 50, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(299, 3, 51, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(300, 3, 52, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(301, 3, 53, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(302, 3, 54, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(303, 3, 55, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(304, 3, 56, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(305, 3, 57, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(306, 3, 58, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(307, 3, 59, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(308, 3, 60, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(309, 3, 61, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(310, 3, 62, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(311, 3, 63, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(312, 3, 64, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(313, 3, 65, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(314, 3, 66, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(315, 3, 67, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(316, 3, 68, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(317, 3, 69, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(318, 3, 70, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(319, 3, 71, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(320, 3, 72, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(321, 3, 73, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(322, 3, 74, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(323, 3, 75, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(324, 3, 76, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(325, 3, 77, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(326, 3, 78, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(327, 3, 79, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(328, 3, 80, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(329, 3, 81, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(330, 3, 82, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(331, 3, 83, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(332, 3, 84, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(333, 3, 85, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(334, 3, 86, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(335, 3, 87, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(336, 3, 88, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(337, 3, 89, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(338, 3, 90, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(339, 3, 91, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(340, 3, 92, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(341, 3, 93, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(342, 3, 94, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(343, 3, 95, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(344, 3, 96, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(345, 3, 97, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(346, 3, 98, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(347, 3, 99, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(348, 3, 100, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(349, 3, 101, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(350, 3, 102, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(351, 3, 103, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(352, 3, 104, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(353, 3, 105, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(354, 3, 106, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(355, 3, 107, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(356, 3, 108, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(357, 3, 109, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(358, 3, 110, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(359, 3, 111, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(360, 3, 112, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(361, 3, 113, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(362, 3, 114, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(363, 3, 115, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(364, 3, 116, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(365, 3, 117, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(366, 3, 118, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(367, 3, 119, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(368, 3, 120, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(369, 3, 121, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(370, 3, 122, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(371, 3, 123, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(372, 3, 124, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(373, 4, 1, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(374, 4, 2, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(375, 4, 3, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(376, 4, 4, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(377, 4, 5, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(378, 4, 6, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(379, 4, 7, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(380, 4, 8, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(381, 4, 9, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(382, 4, 10, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(383, 4, 11, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(384, 4, 12, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(385, 4, 13, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(386, 4, 14, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(387, 4, 15, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(388, 4, 16, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(389, 4, 17, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(390, 4, 18, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(391, 4, 19, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(392, 4, 20, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(393, 4, 21, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(394, 4, 22, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(395, 4, 23, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(396, 4, 24, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(397, 4, 25, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(398, 4, 26, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(399, 4, 27, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(400, 4, 28, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(401, 4, 29, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(402, 4, 30, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(403, 4, 31, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(404, 4, 32, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(405, 4, 33, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(406, 4, 34, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(407, 4, 35, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(408, 4, 36, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(409, 4, 37, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(410, 4, 38, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(411, 4, 39, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(412, 4, 40, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(413, 4, 41, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(414, 4, 42, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(415, 4, 43, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(416, 4, 44, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(417, 4, 45, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(418, 4, 46, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(419, 4, 47, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(420, 4, 48, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(421, 4, 49, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(422, 4, 50, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(423, 4, 51, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(424, 4, 52, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(425, 4, 53, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(426, 4, 54, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(427, 4, 55, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(428, 4, 56, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(429, 4, 57, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(430, 4, 58, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(431, 4, 59, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(432, 4, 60, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(433, 4, 61, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(434, 4, 62, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(435, 4, 63, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(436, 4, 64, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(437, 4, 65, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(438, 4, 66, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(439, 4, 67, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(440, 4, 68, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(441, 4, 69, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(442, 4, 70, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(443, 4, 71, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(444, 4, 72, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(445, 4, 73, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(446, 4, 74, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(447, 4, 75, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(448, 4, 76, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(449, 4, 77, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(450, 4, 78, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(451, 4, 79, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(452, 4, 80, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(453, 4, 81, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(454, 4, 82, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(455, 4, 83, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(456, 4, 84, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(457, 4, 85, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(458, 4, 86, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(459, 4, 87, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(460, 4, 88, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(461, 4, 89, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(462, 4, 90, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(463, 4, 91, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(464, 4, 92, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(465, 4, 93, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(466, 4, 94, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(467, 4, 95, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(468, 4, 96, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(469, 4, 97, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(470, 4, 98, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(471, 4, 99, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(472, 4, 100, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(473, 4, 101, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(474, 4, 102, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(475, 4, 103, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(476, 4, 104, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(477, 4, 105, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(478, 4, 106, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(479, 4, 107, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(480, 4, 108, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(481, 4, 109, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(482, 4, 110, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(483, 4, 111, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(484, 4, 112, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(485, 4, 113, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(486, 4, 114, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(487, 4, 115, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(488, 4, 116, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(489, 4, 117, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(490, 4, 118, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(491, 4, 119, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(492, 4, 120, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(493, 4, 121, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(494, 4, 122, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(495, 4, 123, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(496, 4, 124, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(497, 5, 1, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(498, 5, 2, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(499, 5, 3, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(500, 5, 4, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(501, 5, 5, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(502, 5, 6, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(503, 5, 7, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(504, 5, 8, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(505, 5, 9, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(506, 5, 10, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(507, 5, 11, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(508, 5, 12, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(509, 5, 13, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(510, 5, 14, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(511, 5, 15, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(512, 5, 16, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(513, 5, 17, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(514, 5, 18, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(515, 5, 19, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(516, 5, 20, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(517, 5, 21, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(518, 5, 22, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(519, 5, 23, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(520, 5, 24, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(521, 5, 25, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(522, 5, 26, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(523, 5, 27, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(524, 5, 28, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(525, 5, 29, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(526, 5, 30, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(527, 5, 31, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(528, 5, 32, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(529, 5, 33, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(530, 5, 34, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(531, 5, 35, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(532, 5, 36, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(533, 5, 37, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(534, 5, 38, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(535, 5, 39, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(536, 5, 40, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(537, 5, 41, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(538, 5, 42, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(539, 5, 43, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(540, 5, 44, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(541, 5, 45, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(542, 5, 46, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(543, 5, 47, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(544, 5, 48, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(545, 5, 49, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(546, 5, 50, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(547, 5, 51, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(548, 5, 52, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(549, 5, 53, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(550, 5, 54, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(551, 5, 55, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(552, 5, 56, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(553, 5, 57, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(554, 5, 58, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(555, 5, 59, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(556, 5, 60, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(557, 5, 61, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(558, 5, 62, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(559, 5, 63, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(560, 5, 64, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(561, 5, 65, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(562, 5, 66, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(563, 5, 67, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(564, 5, 68, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(565, 5, 69, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(566, 5, 70, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(567, 5, 71, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(568, 5, 72, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(569, 5, 73, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(570, 5, 74, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(571, 5, 75, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(572, 5, 76, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(573, 5, 77, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(574, 5, 78, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(575, 5, 79, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(576, 5, 80, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(577, 5, 81, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(578, 5, 82, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(579, 5, 83, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(580, 5, 84, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(581, 5, 85, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(582, 5, 86, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(583, 5, 87, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(584, 5, 88, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(585, 5, 89, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(586, 5, 90, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(587, 5, 91, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(588, 5, 92, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(589, 5, 93, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(590, 5, 94, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(591, 5, 95, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(592, 5, 96, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(593, 5, 97, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(594, 5, 98, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(595, 5, 99, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(596, 5, 100, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(597, 5, 101, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(598, 5, 102, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(599, 5, 103, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(600, 5, 104, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(601, 5, 105, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(602, 5, 106, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(603, 5, 107, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(604, 5, 108, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(605, 5, 109, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(606, 5, 110, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(607, 5, 111, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(608, 5, 112, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(609, 5, 113, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(610, 5, 114, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(611, 5, 115, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(612, 5, 116, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(613, 5, 117, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(614, 5, 118, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(615, 5, 119, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(616, 5, 120, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(617, 5, 121, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(618, 5, 122, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(619, 5, 123, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(620, 5, 124, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(621, 6, 1, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(622, 6, 2, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(623, 6, 3, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(624, 6, 4, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(625, 6, 5, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(626, 6, 6, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(627, 6, 7, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(628, 6, 8, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(629, 6, 9, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(630, 6, 10, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(631, 6, 11, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(632, 6, 12, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(633, 6, 13, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(634, 6, 14, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(635, 6, 15, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(636, 6, 16, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(637, 6, 17, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(638, 6, 18, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(639, 6, 19, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(640, 6, 20, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(641, 6, 21, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(642, 6, 22, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(643, 6, 23, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(644, 6, 24, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(645, 6, 25, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(646, 6, 26, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(647, 6, 27, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(648, 6, 28, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(649, 6, 29, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(650, 6, 30, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(651, 6, 31, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(652, 6, 32, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(653, 6, 33, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(654, 6, 34, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(655, 6, 35, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(656, 6, 36, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(657, 6, 37, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(658, 6, 38, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(659, 6, 39, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(660, 6, 40, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(661, 6, 41, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(662, 6, 42, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(663, 6, 43, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(664, 6, 44, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(665, 6, 45, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(666, 6, 46, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(667, 6, 47, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(668, 6, 48, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(669, 6, 49, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(670, 6, 50, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(671, 6, 51, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(672, 6, 52, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(673, 6, 53, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(674, 6, 54, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(675, 6, 55, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(676, 6, 56, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(677, 6, 57, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(678, 6, 58, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(679, 6, 59, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(680, 6, 60, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(681, 6, 61, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(682, 6, 62, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(683, 6, 63, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(684, 6, 64, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(685, 6, 65, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(686, 6, 66, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(687, 6, 67, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(688, 6, 68, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(689, 6, 69, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(690, 6, 70, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(691, 6, 71, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(692, 6, 72, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(693, 6, 73, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(694, 6, 74, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(695, 6, 75, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(696, 6, 76, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(697, 6, 77, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(698, 6, 78, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(699, 6, 79, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(700, 6, 80, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(701, 6, 81, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(702, 6, 82, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(703, 6, 83, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(704, 6, 84, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(705, 6, 85, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(706, 6, 86, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(707, 6, 87, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(708, 6, 88, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(709, 6, 89, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(710, 6, 90, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(711, 6, 91, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(712, 6, 92, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(713, 6, 93, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(714, 6, 94, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(715, 6, 95, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(716, 6, 96, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(717, 6, 97, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(718, 6, 98, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(719, 6, 99, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(720, 6, 100, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(721, 6, 101, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(722, 6, 102, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(723, 6, 103, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(724, 6, 104, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(725, 6, 105, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(726, 6, 106, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(727, 6, 107, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(728, 6, 108, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(729, 6, 109, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(730, 6, 110, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(731, 6, 111, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(732, 6, 112, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(733, 6, 113, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(734, 6, 114, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(735, 6, 115, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(736, 6, 116, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(737, 6, 117, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(738, 6, 118, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(739, 6, 119, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(740, 6, 120, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(741, 6, 121, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(742, 6, 122, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(743, 6, 123, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(744, 6, 124, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(745, 7, 1, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(746, 7, 2, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(747, 7, 3, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(748, 7, 4, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(749, 7, 5, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(750, 7, 6, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(751, 7, 7, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(752, 7, 8, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(753, 7, 9, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(754, 7, 10, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(755, 7, 11, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(756, 7, 12, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(757, 7, 13, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(758, 7, 14, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(759, 7, 15, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(760, 7, 16, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(761, 7, 17, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(762, 7, 18, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(763, 7, 19, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(764, 7, 20, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(765, 7, 21, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(766, 7, 22, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(767, 7, 23, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(768, 7, 24, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(769, 7, 25, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(770, 7, 26, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(771, 7, 27, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(772, 7, 28, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(773, 7, 29, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(774, 7, 30, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(775, 7, 31, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(776, 7, 32, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(777, 7, 33, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(778, 7, 34, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(779, 7, 35, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(780, 7, 36, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(781, 7, 37, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(782, 7, 38, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(783, 7, 39, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(784, 7, 40, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(785, 7, 41, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(786, 7, 42, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(787, 7, 43, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(788, 7, 44, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(789, 7, 45, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(790, 7, 46, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(791, 7, 47, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(792, 7, 48, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(793, 7, 49, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(794, 7, 50, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(795, 7, 51, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(796, 7, 52, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(797, 7, 53, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(798, 7, 54, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(799, 7, 55, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(800, 7, 56, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(801, 7, 57, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(802, 7, 58, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(803, 7, 59, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(804, 7, 60, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(805, 7, 61, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(806, 7, 62, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(807, 7, 63, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(808, 7, 64, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(809, 7, 65, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(810, 7, 66, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(811, 7, 67, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(812, 7, 68, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(813, 7, 69, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(814, 7, 70, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(815, 7, 71, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(816, 7, 72, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(817, 7, 73, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39');
+INSERT INTO `gen_roles_permission_tbl` (`permissionID`, `roleID`, `moduleID`, `permissionStatus`, `createdAt`, `updatedAt`) VALUES
+(818, 7, 74, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(819, 7, 75, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(820, 7, 76, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(821, 7, 77, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(822, 7, 78, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(823, 7, 79, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(824, 7, 80, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(825, 7, 81, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(826, 7, 82, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(827, 7, 83, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(828, 7, 84, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(829, 7, 85, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(830, 7, 86, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(831, 7, 87, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(832, 7, 88, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(833, 7, 89, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(834, 7, 90, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(835, 7, 91, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(836, 7, 92, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(837, 7, 93, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(838, 7, 94, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(839, 7, 95, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(840, 7, 96, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(841, 7, 97, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(842, 7, 98, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(843, 7, 99, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(844, 7, 100, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(845, 7, 101, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(846, 7, 102, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(847, 7, 103, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(848, 7, 104, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(849, 7, 105, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(850, 7, 106, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(851, 7, 107, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(852, 7, 108, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(853, 7, 109, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(854, 7, 110, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(855, 7, 111, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(856, 7, 112, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(857, 7, 113, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(858, 7, 114, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(859, 7, 115, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(860, 7, 116, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(861, 7, 117, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(862, 7, 118, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(863, 7, 119, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(864, 7, 120, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(865, 7, 121, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(866, 7, 122, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(867, 7, 123, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(868, 7, 124, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(869, 8, 1, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(870, 8, 2, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(871, 8, 3, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(872, 8, 4, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(873, 8, 5, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(874, 8, 6, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(875, 8, 7, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(876, 8, 8, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(877, 8, 9, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(878, 8, 10, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(879, 8, 11, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(880, 8, 12, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(881, 8, 13, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(882, 8, 14, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(883, 8, 15, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(884, 8, 16, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(885, 8, 17, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(886, 8, 18, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(887, 8, 19, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(888, 8, 20, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(889, 8, 21, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(890, 8, 22, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(891, 8, 23, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(892, 8, 24, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(893, 8, 25, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(894, 8, 26, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(895, 8, 27, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(896, 8, 28, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(897, 8, 29, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(898, 8, 30, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(899, 8, 31, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(900, 8, 32, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(901, 8, 33, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(902, 8, 34, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(903, 8, 35, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(904, 8, 36, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(905, 8, 37, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(906, 8, 38, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(907, 8, 39, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(908, 8, 40, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(909, 8, 41, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(910, 8, 42, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(911, 8, 43, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(912, 8, 44, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(913, 8, 45, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(914, 8, 46, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(915, 8, 47, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(916, 8, 48, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(917, 8, 49, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(918, 8, 50, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(919, 8, 51, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(920, 8, 52, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(921, 8, 53, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(922, 8, 54, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(923, 8, 55, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(924, 8, 56, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(925, 8, 57, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(926, 8, 58, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(927, 8, 59, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(928, 8, 60, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(929, 8, 61, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(930, 8, 62, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(931, 8, 63, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(932, 8, 64, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(933, 8, 65, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(934, 8, 66, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(935, 8, 67, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(936, 8, 68, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(937, 8, 69, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(938, 8, 70, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(939, 8, 71, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(940, 8, 72, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(941, 8, 73, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(942, 8, 74, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(943, 8, 75, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(944, 8, 76, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(945, 8, 77, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(946, 8, 78, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(947, 8, 79, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(948, 8, 80, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(949, 8, 81, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(950, 8, 82, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(951, 8, 83, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(952, 8, 84, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(953, 8, 85, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(954, 8, 86, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(955, 8, 87, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(956, 8, 88, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(957, 8, 89, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(958, 8, 90, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(959, 8, 91, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(960, 8, 92, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(961, 8, 93, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(962, 8, 94, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(963, 8, 95, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(964, 8, 96, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(965, 8, 97, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(966, 8, 98, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(967, 8, 99, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(968, 8, 100, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(969, 8, 101, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(970, 8, 102, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(971, 8, 103, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(972, 8, 104, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(973, 8, 105, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(974, 8, 106, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(975, 8, 107, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(976, 8, 108, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(977, 8, 109, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(978, 8, 110, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(979, 8, 111, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(980, 8, 112, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(981, 8, 113, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(982, 8, 114, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(983, 8, 115, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(984, 8, 116, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(985, 8, 117, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(986, 8, 118, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(987, 8, 119, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(988, 8, 120, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(989, 8, 121, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(990, 8, 122, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(991, 8, 123, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(992, 8, 124, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(993, 9, 1, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(994, 9, 2, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(995, 9, 3, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(996, 9, 4, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(997, 9, 5, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(998, 9, 6, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(999, 9, 7, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1000, 9, 8, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1001, 9, 9, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1002, 9, 10, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1003, 9, 11, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1004, 9, 12, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1005, 9, 13, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1006, 9, 14, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1007, 9, 15, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1008, 9, 16, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1009, 9, 17, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1010, 9, 18, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1011, 9, 19, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1012, 9, 20, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1013, 9, 21, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1014, 9, 22, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1015, 9, 23, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1016, 9, 24, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1017, 9, 25, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1018, 9, 26, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1019, 9, 27, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1020, 9, 28, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1021, 9, 29, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1022, 9, 30, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1023, 9, 31, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1024, 9, 32, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1025, 9, 33, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1026, 9, 34, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1027, 9, 35, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1028, 9, 36, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1029, 9, 37, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1030, 9, 38, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1031, 9, 39, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1032, 9, 40, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1033, 9, 41, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1034, 9, 42, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1035, 9, 43, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1036, 9, 44, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1037, 9, 45, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1038, 9, 46, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1039, 9, 47, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1040, 9, 48, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1041, 9, 49, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1042, 9, 50, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1043, 9, 51, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1044, 9, 52, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1045, 9, 53, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1046, 9, 54, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1047, 9, 55, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1048, 9, 56, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1049, 9, 57, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1050, 9, 58, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1051, 9, 59, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1052, 9, 60, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1053, 9, 61, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1054, 9, 62, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1055, 9, 63, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1056, 9, 64, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1057, 9, 65, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1058, 9, 66, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1059, 9, 67, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1060, 9, 68, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1061, 9, 69, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1062, 9, 70, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1063, 9, 71, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1064, 9, 72, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1065, 9, 73, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1066, 9, 74, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1067, 9, 75, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1068, 9, 76, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1069, 9, 77, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1070, 9, 78, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1071, 9, 79, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1072, 9, 80, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1073, 9, 81, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1074, 9, 82, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1075, 9, 83, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1076, 9, 84, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1077, 9, 85, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1078, 9, 86, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1079, 9, 87, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1080, 9, 88, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1081, 9, 89, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1082, 9, 90, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1083, 9, 91, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1084, 9, 92, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1085, 9, 93, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1086, 9, 94, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1087, 9, 95, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1088, 9, 96, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1089, 9, 97, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1090, 9, 98, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1091, 9, 99, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1092, 9, 100, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1093, 9, 101, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1094, 9, 102, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1095, 9, 103, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1096, 9, 104, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1097, 9, 105, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1098, 9, 106, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1099, 9, 107, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1100, 9, 108, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1101, 9, 109, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1102, 9, 110, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1103, 9, 111, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1104, 9, 112, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1105, 9, 113, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1106, 9, 114, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1107, 9, 115, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1108, 9, 116, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1109, 9, 117, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1110, 9, 118, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1111, 9, 119, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1112, 9, 120, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1113, 9, 121, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1114, 9, 122, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1115, 9, 123, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1116, 9, 124, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1117, 10, 1, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1118, 10, 2, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1119, 10, 3, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1120, 10, 4, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1121, 10, 5, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1122, 10, 6, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1123, 10, 7, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1124, 10, 8, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1125, 10, 9, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1126, 10, 10, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1127, 10, 11, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1128, 10, 12, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1129, 10, 13, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1130, 10, 14, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1131, 10, 15, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1132, 10, 16, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1133, 10, 17, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1134, 10, 18, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1135, 10, 19, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1136, 10, 20, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1137, 10, 21, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1138, 10, 22, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1139, 10, 23, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1140, 10, 24, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1141, 10, 25, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1142, 10, 26, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1143, 10, 27, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1144, 10, 28, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1145, 10, 29, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1146, 10, 30, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1147, 10, 31, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1148, 10, 32, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1149, 10, 33, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1150, 10, 34, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1151, 10, 35, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1152, 10, 36, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1153, 10, 37, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1154, 10, 38, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1155, 10, 39, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1156, 10, 40, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1157, 10, 41, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1158, 10, 42, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1159, 10, 43, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1160, 10, 44, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1161, 10, 45, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1162, 10, 46, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1163, 10, 47, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1164, 10, 48, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1165, 10, 49, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1166, 10, 50, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1167, 10, 51, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1168, 10, 52, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1169, 10, 53, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1170, 10, 54, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1171, 10, 55, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1172, 10, 56, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1173, 10, 57, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1174, 10, 58, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1175, 10, 59, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1176, 10, 60, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1177, 10, 61, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1178, 10, 62, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1179, 10, 63, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1180, 10, 64, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1181, 10, 65, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1182, 10, 66, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1183, 10, 67, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1184, 10, 68, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1185, 10, 69, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1186, 10, 70, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1187, 10, 71, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1188, 10, 72, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1189, 10, 73, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1190, 10, 74, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1191, 10, 75, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1192, 10, 76, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1193, 10, 77, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1194, 10, 78, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1195, 10, 79, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1196, 10, 80, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1197, 10, 81, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1198, 10, 82, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1199, 10, 83, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1200, 10, 84, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1201, 10, 85, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1202, 10, 86, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1203, 10, 87, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1204, 10, 88, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1205, 10, 89, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1206, 10, 90, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1207, 10, 91, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1208, 10, 92, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1209, 10, 93, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1210, 10, 94, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1211, 10, 95, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1212, 10, 96, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1213, 10, 97, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1214, 10, 98, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1215, 10, 99, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1216, 10, 100, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1217, 10, 101, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1218, 10, 102, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1219, 10, 103, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1220, 10, 104, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1221, 10, 105, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1222, 10, 106, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1223, 10, 107, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1224, 10, 108, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1225, 10, 109, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1226, 10, 110, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1227, 10, 111, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1228, 10, 112, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1229, 10, 113, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1230, 10, 114, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1231, 10, 115, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1232, 10, 116, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1233, 10, 117, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1234, 10, 118, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1235, 10, 119, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1236, 10, 120, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1237, 10, 121, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1238, 10, 122, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1239, 10, 123, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1240, 10, 124, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1241, 16, 1, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1242, 16, 2, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1243, 16, 3, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1244, 16, 4, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1245, 16, 5, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1246, 16, 6, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1247, 16, 7, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1248, 16, 8, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1249, 16, 9, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1250, 16, 10, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1251, 16, 11, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1252, 16, 12, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1253, 16, 13, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1254, 16, 14, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1255, 16, 15, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1256, 16, 16, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1257, 16, 17, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1258, 16, 18, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1259, 16, 19, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1260, 16, 20, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1261, 16, 21, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1262, 16, 22, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1263, 16, 23, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1264, 16, 24, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1265, 16, 25, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1266, 16, 26, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1267, 16, 27, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1268, 16, 28, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1269, 16, 29, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1270, 16, 30, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1271, 16, 31, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1272, 16, 32, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1273, 16, 33, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1274, 16, 34, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1275, 16, 35, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1276, 16, 36, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1277, 16, 37, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1278, 16, 38, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1279, 16, 39, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1280, 16, 40, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1281, 16, 41, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1282, 16, 42, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1283, 16, 43, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1284, 16, 44, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1285, 16, 45, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1286, 16, 46, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1287, 16, 47, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1288, 16, 48, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1289, 16, 49, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1290, 16, 50, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1291, 16, 51, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1292, 16, 52, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1293, 16, 53, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1294, 16, 54, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1295, 16, 55, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1296, 16, 56, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1297, 16, 57, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1298, 16, 58, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1299, 16, 59, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1300, 16, 60, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1301, 16, 61, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1302, 16, 62, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1303, 16, 63, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1304, 16, 64, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1305, 16, 65, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1306, 16, 66, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1307, 16, 67, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1308, 16, 68, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1309, 16, 69, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1310, 16, 70, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1311, 16, 71, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1312, 16, 72, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1313, 16, 73, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1314, 16, 74, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1315, 16, 75, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1316, 16, 76, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1317, 16, 77, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1318, 16, 78, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1319, 16, 79, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1320, 16, 80, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1321, 16, 81, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1322, 16, 82, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1323, 16, 83, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1324, 16, 84, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1325, 16, 85, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1326, 16, 86, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1327, 16, 87, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1328, 16, 88, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1329, 16, 89, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1330, 16, 90, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1331, 16, 91, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1332, 16, 92, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1333, 16, 93, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1334, 16, 94, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1335, 16, 95, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1336, 16, 96, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1337, 16, 97, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1338, 16, 98, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1339, 16, 99, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1340, 16, 100, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1341, 16, 101, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1342, 16, 102, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1343, 16, 103, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1344, 16, 104, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1345, 16, 105, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1346, 16, 106, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1347, 16, 107, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1348, 16, 108, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1349, 16, 109, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1350, 16, 110, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1351, 16, 111, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1352, 16, 112, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1353, 16, 113, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1354, 16, 114, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1355, 16, 115, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1356, 16, 116, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1357, 16, 117, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1358, 16, 118, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1359, 16, 119, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1360, 16, 120, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1361, 16, 121, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1362, 16, 122, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1363, 16, 123, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39'),
+(1364, 16, 124, 0, '2021-03-24 07:32:39', '2021-03-24 07:32:39');
 
 -- --------------------------------------------------------
 
@@ -514,6 +1752,7 @@ INSERT INTO `gen_roles_permission_tbl` (`permissionID`, `roleID`, `moduleID`, `p
 
 CREATE TABLE `gen_system_notification_tbl` (
   `notificationID` bigint(20) NOT NULL,
+  `employeeID` bigint(20) NOT NULL,
   `moduleID` bigint(20) NOT NULL,
   `notificationTitle` text NOT NULL,
   `notificationDescription` mediumtext NOT NULL,
@@ -528,11 +1767,8 @@ CREATE TABLE `gen_system_notification_tbl` (
 -- Dumping data for table `gen_system_notification_tbl`
 --
 
-INSERT INTO `gen_system_notification_tbl` (`notificationID`, `moduleID`, `notificationTitle`, `notificationDescription`, `notificationType`, `markRead`, `createdBy`, `createdAt`, `updatedAt`) VALUES
-(1, 1, 'Inventory Item', 'Hammer - Low Stock', 1, 1, 1, '2021-03-09 05:31:59', '2021-03-12 08:14:07'),
-(2, 5, 'Arjay Diangzon', 'Passed resignation letter', 2, 1, 1, '2021-03-09 05:33:20', '2021-03-17 07:04:08'),
-(3, 3, 'Charles Verdadero', 'Extended Contract', 3, 1, 1, '2021-03-09 05:40:22', '2021-03-10 06:34:38'),
-(6, 3, 'Joseph Berongoy', 'Extended Contract', 2, 1, 1, '2021-03-09 07:15:05', '2021-03-10 06:34:47');
+INSERT INTO `gen_system_notification_tbl` (`notificationID`, `employeeID`, `moduleID`, `notificationTitle`, `notificationDescription`, `notificationType`, `markRead`, `createdBy`, `createdAt`, `updatedAt`) VALUES
+(1, 1, 13, 'Change Schedule Form', 'SCH-21-00004: Your request has been denied.', 2, 0, 2, '2021-03-24 05:52:48', '2021-03-24 05:52:48');
 
 -- --------------------------------------------------------
 
@@ -568,10 +1804,10 @@ CREATE TABLE `gen_user_account_tbl` (
 --
 
 INSERT INTO `gen_user_account_tbl` (`userAccountID`, `role`, `firstname`, `lastname`, `email`, `mobile`, `telephone`, `address`, `gender`, `birthday`, `link`, `username`, `password`, `amount`, `skills`, `file`, `userType`, `status`, `createdAt`, `updatedAt`) VALUES
-(1, 'Admin', 'Ako To Si', 'Natoy', 'rjpinca@gmail.com', '(+63) 099 0908 595', '(32) 1321 423', '1709 Antel Bldg, Julia Vargas', 'Male', '2021-02-03', 'http://theblackcoders.com', 'admin', 'admin', '0.00', '', '01614667776.svg', 1, 1, '2021-02-26 05:19:00', '2021-03-19 00:29:18'),
-(2, 'Operations', 'Akosi', 'RJ', 'hakdog123@gmail.com', '(+63) 545 8987 987', '(54) 6545 646', '1709 Antel Bldg, Julia Vargas', 'Male', '2021-03-05', 'http://theblackcoders.com', 'arjay', 'arjay', '999.95', 'CSS|JS', '01614668556.svg|11614668556.svg|21614668556.svg|31614668556.svg|41614668556.svg|51614668556.svg', 1, 1, '2021-02-26 05:25:07', '2021-03-19 00:29:12'),
-(3, 'Admin', 'Charles', 'Vincent', 'charlesvincent@gmail.com', '(+63) 123 2141 242', '(53) 2432 423', 'Quezon City', 'Male', '2021-03-09', 'http://theblackcoders.com', 'charles', 'charles', '0.00', 'CSS|HTML|JS', '01614668026.svg|11614668026.svg|21614668026.svg|31614668026.svg|41614668026.svg|51614668026.svg', 1, 1, '2021-03-02 06:52:07', '2021-03-19 00:28:56'),
-(4, 'Admin', 'Joseph', 'Berongoy', 'joseph@gmail.com', '0909900905965', '556565956', 'Pasig City', 'Male', '2021-03-10', 'theblackcoders.com', 'joseph', 'joseph', NULL, NULL, NULL, 1, 1, '2021-03-21 23:56:09', '2021-03-22 00:16:59');
+(1, '1', 'Ako To Si', 'Natoy', 'rjpinca@gmail.com', '(+63) 099 0908 595', '(32) 1321 423', '1709 Antel Bldg, Julia Vargas', 'Male', '2021-02-03', 'http://theblackcoders.com', 'admin', 'admin', '0.00', '', '01614667776.svg', 1, 1, '2021-02-26 05:19:00', '2021-03-22 01:45:34'),
+(2, '2', 'Akosi', 'RJ', 'hakdog123@gmail.com', '(+63) 545 8987 987', '(54) 6545 646', '1709 Antel Bldg, Julia Vargas', 'Male', '2021-03-05', 'http://theblackcoders.com', 'arjay', 'arjay', '999.95', 'CSS|JS', '01614668556.svg|11614668556.svg|21614668556.svg|31614668556.svg|41614668556.svg|51614668556.svg', 1, 1, '2021-02-26 05:25:07', '2021-03-23 03:40:47'),
+(3, '3', 'Charles', 'Vincent', 'charlesvincent@gmail.com', '(+63) 123 2141 242', '(53) 2432 423', 'Quezon City', 'Male', '2021-03-09', 'http://theblackcoders.com', 'charles', 'charles', '0.00', 'CSS|HTML|JS', '01614668026.svg|11614668026.svg|21614668026.svg|31614668026.svg|41614668026.svg|51614668026.svg', 1, 1, '2021-03-02 06:52:07', '2021-03-23 03:40:50'),
+(4, '4', 'Joseph', 'Berongoy', 'joseph@gmail.com', '0909900905965', '556565956', 'Pasig City', 'Male', '2021-03-10', 'theblackcoders.com', 'joseph', 'joseph', NULL, NULL, NULL, 1, 1, '2021-03-21 23:56:09', '2021-03-23 03:40:53');
 
 -- --------------------------------------------------------
 
@@ -602,8 +1838,7 @@ INSERT INTO `gen_user_role_tbl` (`roleID`, `roleName`, `roleStatus`, `createdAt`
 (8, 'IT Admin', 1, '2021-03-08 03:46:45', '2021-03-08 03:46:45'),
 (9, 'Quality Analyst', 1, '2021-03-09 23:31:46', '2021-03-09 23:31:46'),
 (10, 'Marketing', 1, '2021-03-09 23:33:00', '2021-03-09 23:33:00'),
-(11, 'Testt', 1, '2021-03-17 05:38:29', '2021-03-17 05:38:29'),
-(12, 'Teest', 0, '2021-03-18 03:37:47', '2021-03-18 03:37:47');
+(16, 'Testt', 1, '2021-03-23 03:30:36', '2021-03-23 03:30:36');
 
 -- --------------------------------------------------------
 
@@ -623,14 +1858,6 @@ CREATE TABLE `hris_award_tbl` (
   `updatedAt` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
---
--- Dumping data for table `hris_award_tbl`
---
-
-INSERT INTO `hris_award_tbl` (`awardID`, `awardTitle`, `awardDescription`, `awardSignatories`, `awardStatus`, `createdBy`, `updatedBy`, `createdAt`, `updatedAt`) VALUES
-(1, 'Best Employee of the Month', 'Ito ay para sa mga taong malulupit sa buwan na nabanggit', '9|2', 1, 1, 2, '2021-03-12 07:38:07', '2021-03-12 07:53:11'),
-(2, 'Sample date', 'askdljaskldaskd', '2', 0, 1, 2, '2021-03-12 08:01:10', '2021-03-12 08:01:20');
-
 -- --------------------------------------------------------
 
 --
@@ -647,14 +1874,6 @@ CREATE TABLE `hris_branch_tbl` (
   `createdAt` timestamp NOT NULL DEFAULT current_timestamp(),
   `updatedAt` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
---
--- Dumping data for table `hris_branch_tbl`
---
-
-INSERT INTO `hris_branch_tbl` (`branchID`, `branchCode`, `branchName`, `branchStatus`, `createdBy`, `updatedBy`, `createdAt`, `updatedAt`) VALUES
-(1, 'BRC-21-00001', 'Mark lang charot', 1, 1, 2, '2021-03-15 06:10:25', '2021-03-15 06:11:55'),
-(2, 'BRC-21-00002', 'qweqweqwe', 1, 9, 9, '2021-03-15 07:56:37', '2021-03-15 07:56:37');
 
 -- --------------------------------------------------------
 
@@ -682,6 +1901,27 @@ CREATE TABLE `hris_change_schedule_tbl` (
   `updatedAt` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+--
+-- Dumping data for table `hris_change_schedule_tbl`
+--
+
+INSERT INTO `hris_change_schedule_tbl` (`changeScheduleID`, `changeScheduleCode`, `employeeID`, `changeScheduleDate`, `changeScheduleTimeIn`, `changeScheduleTimeOut`, `changeScheduleReason`, `approversID`, `approversStatus`, `approversDate`, `changeScheduleStatus`, `changeScheduleRemarks`, `submittedAt`, `createdBy`, `updatedBy`, `createdAt`, `updatedAt`) VALUES
+(2, 'SCH-21-00001', 3, '2021-03-11', '08:00:00', '17:00:00', 'FOR TESTING', '2', '2', '2021-03-22 08:52:45', 2, NULL, '2021-03-22 00:50:43', 3, 2, '2021-03-22 00:50:43', '2021-03-22 00:52:46'),
+(3, 'SCH-21-00001', 4, '2021-03-18', '08:00:00', '17:00:00', 'JOSEPH', '1|3|2', '2|3', '2021-03-22 08:56:02|2021-03-22 08:57:25', 3, 'REJECT KO MUNA', '2021-03-22 00:54:21', 4, 3, '2021-03-22 00:54:10', '2021-03-22 00:57:27'),
+(4, 'SCH-21-00002', 4, '2021-03-20', '08:00:00', '17:00:00', 'TRY', '1|3|2', '2|2|2', '2021-03-22 08:59:45|2021-03-22 09:00:05|2021-03-22 09:00:28', 2, NULL, '2021-03-22 00:59:24', 4, 2, '2021-03-22 00:59:24', '2021-03-22 01:00:29'),
+(5, 'SCH-21-00001', 2, '2021-03-24', '08:00:00', '17:00:00', 'AUTO  APPROVED', '2', '2', '2021-03-22 09:01:52', 2, NULL, '2021-03-22 01:01:52', 2, 2, '2021-03-22 01:01:52', '2021-03-22 01:01:53'),
+(6, 'SCH-21-00002', 3, '2021-04-01', '08:00:00', '17:00:00', 'Ha', '3', '2', '2021-03-23 02:24:53', 2, NULL, '2021-03-22 18:24:53', 3, 3, '2021-03-22 18:24:53', '2021-03-23 06:24:54'),
+(7, 'SCH-21-00003', 1, '2021-03-19', '08:00:00', '17:00:00', 'Tra', '1', '2', '2021-03-23 02:31:44', 2, NULL, '2021-03-22 18:31:44', 1, 1, '2021-03-22 18:31:44', '2021-03-23 06:31:44'),
+(8, 'SCH-21-00004', 1, '2021-03-12', '08:00:00', '17:00:00', 'REASON', '2|3', '3', '2021-03-24 01:52:37', 3, 'Reject', '2021-03-22 18:33:11', 1, 2, '2021-03-22 18:33:11', '2021-03-24 05:52:48'),
+(9, 'SCH-21-00005', 2, '2021-03-19', '08:00:00', '17:00:00', '123', '3', NULL, NULL, 1, NULL, '2021-03-22 19:47:17', 2, 2, '2021-03-22 19:47:17', '2021-03-23 07:47:19'),
+(10, 'SCH-21-00006', 1, '2021-04-02', '08:00:00', '17:00:00', 'TEST', '2|3', '2|2', '2021-03-24 08:32:07|2021-03-24 08:33:31', 2, NULL, '2021-03-22 19:53:49', 1, 3, '2021-03-22 19:53:49', '2021-03-24 00:33:32'),
+(11, 'SCH-21-00007', 1, '2021-03-23', '08:00:00', '17:00:00', 'TEST', '2|3', '3', '2021-03-24 08:30:15', 3, 'Denied', '2021-03-22 19:55:37', 1, 2, '2021-03-22 19:55:37', '2021-03-24 00:30:16'),
+(12, 'SCH-21-00008', 1, '2021-03-11', '08:00:00', '17:00:00', 'Test', '1', '2', '2021-03-24 01:50:55', 2, NULL, '2021-03-23 17:50:55', 1, 1, '2021-03-23 17:50:55', '2021-03-24 05:50:57'),
+(13, 'SCH-21-00009', 2, '2021-03-25', '08:00:00', '17:00:00', 'REASSSONS', '2', '2', '2021-03-24 01:55:40', 2, NULL, NULL, 2, 2, '2021-03-23 17:55:40', '2021-03-24 05:55:41'),
+(14, 'SCH-21-00010', 2, '2021-04-03', '08:00:00', '17:00:00', 'TEST', '2', '2', '2021-03-24 01:56:01', 2, NULL, NULL, 2, 2, '2021-03-23 17:56:01', '2021-03-24 05:56:02'),
+(15, 'SCH-21-00011', 2, '2021-03-17', '08:00:00', '17:00:00', 'TEEEST REASON', '2', '2', '2021-03-24 01:59:20', 2, NULL, '2021-03-23 17:59:20', 2, 2, '2021-03-23 17:59:20', '2021-03-24 05:59:21'),
+(16, 'SCH-21-00012', 2, '2021-03-20', '08:00:00', '17:00:00', 'TEST', NULL, NULL, NULL, 4, NULL, NULL, 2, 2, '2021-03-23 17:59:36', '2021-03-24 05:59:48');
+
 -- --------------------------------------------------------
 
 --
@@ -703,8 +1943,7 @@ CREATE TABLE `hris_code_conduct_category_tbl` (
 --
 
 INSERT INTO `hris_code_conduct_category_tbl` (`codeConductCategoryID`, `codeConductCategoryName`, `codeConductCategoryStatus`, `createdBy`, `updatedBy`, `createdAt`, `updatedAt`) VALUES
-(1, 'Sample Category One', 1, 1, 2, '2021-03-15 03:28:09', '2021-03-12 03:46:42'),
-(2, 'Sample Category Two', 1, 1, 2, '2021-03-15 03:28:24', '2021-03-15 03:19:57');
+(1, 'Test', 1, 1, 1, '2021-03-24 05:25:40', '2021-03-24 05:25:40');
 
 -- --------------------------------------------------------
 
@@ -724,13 +1963,6 @@ CREATE TABLE `hris_code_conduct_section_tbl` (
   `updatedAt` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
---
--- Dumping data for table `hris_code_conduct_section_tbl`
---
-
-INSERT INTO `hris_code_conduct_section_tbl` (`codeConductSectionID`, `codeConductCategoryID`, `codeConductSection`, `codeConductSectionDescription`, `codeConductSectionStatus`, `createdBy`, `updatedBy`, `createdAt`, `updatedAt`) VALUES
-(9, 1, '1.1', 'Sample Code Section', 1, 1, 1, '2021-03-15 07:52:15', '2021-03-15 07:52:15');
-
 -- --------------------------------------------------------
 
 --
@@ -748,6 +1980,13 @@ CREATE TABLE `hris_department_tbl` (
   `createdAt` datetime NOT NULL DEFAULT current_timestamp(),
   `updatedAt` datetime NOT NULL DEFAULT '0000-00-00 00:00:00' ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Dumping data for table `hris_department_tbl`
+--
+
+INSERT INTO `hris_department_tbl` (`departmentID`, `departmentCode`, `departmentName`, `departmentStatus`, `datecreated`, `createdBy`, `updatedBy`, `createdAt`, `updatedAt`) VALUES
+(1, 'DPT-21-00001', 'Test', 1, '2021-03-24 13:06:48', 1, 1, '2021-03-24 13:06:48', '0000-00-00 00:00:00');
 
 -- --------------------------------------------------------
 
@@ -768,6 +2007,13 @@ CREATE TABLE `hris_designation_tbl` (
   `updatedAt` datetime NOT NULL DEFAULT '0000-00-00 00:00:00' ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+--
+-- Dumping data for table `hris_designation_tbl`
+--
+
+INSERT INTO `hris_designation_tbl` (`designationID`, `designationCode`, `departmentID`, `designationName`, `designationStatus`, `datecreated`, `createdBy`, `updatedBy`, `createdAt`, `updatedAt`) VALUES
+(1, 'DSN-21-00001', 1, 'Test', 1, '2021-03-24', 1, 1, '2021-03-24 13:07:13', '0000-00-00 00:00:00');
+
 -- --------------------------------------------------------
 
 --
@@ -785,18 +2031,6 @@ CREATE TABLE `hris_event_calendar_tbl` (
   `createdAt` timestamp NOT NULL DEFAULT current_timestamp(),
   `updatedAt` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
---
--- Dumping data for table `hris_event_calendar_tbl`
---
-
-INSERT INTO `hris_event_calendar_tbl` (`eventCalendarID`, `eventCalendarName`, `eventCalendarBackground`, `eventCalendarDateFrom`, `eventCalendarDateTo`, `createdBy`, `updatedBy`, `createdAt`, `updatedAt`) VALUES
-(4, 'Arjay Event nga', 'bg-violet', '2021-03-15', '2021-03-22', 0, 9, '2021-03-17 01:27:32', '2021-03-17 03:12:22'),
-(7, 'Event 1', '', '2021-03-01', '2021-03-05', 0, 9, '2021-03-17 03:29:27', '2021-03-17 03:29:27'),
-(10, 'Sample lang', 'bg-red', '2021-03-01', '2021-03-02', 0, 9, '2021-03-17 03:31:06', '2021-03-17 03:31:06'),
-(14, 'qweqwe', '', '2021-03-04', '2021-03-07', 0, 9, '2021-03-17 03:34:57', '2021-03-18 05:17:59'),
-(15, 'Sammple lang po', 'bg-red', '2021-03-18', '2021-03-20', 0, 9, '2021-03-17 05:10:25', '2021-03-17 05:10:25'),
-(16, 'Sample lang po', 'bg-yellow', '2021-03-07', '2021-03-08', 0, 9, '2021-03-17 05:10:47', '2021-03-17 05:10:47');
 
 -- --------------------------------------------------------
 
@@ -816,14 +2050,6 @@ CREATE TABLE `hris_holiday_tbl` (
   `createdAt` timestamp NOT NULL DEFAULT current_timestamp(),
   `updatedAt` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
---
--- Dumping data for table `hris_holiday_tbl`
---
-
-INSERT INTO `hris_holiday_tbl` (`holidayID`, `holidayCode`, `holidayName`, `holidayDate`, `holidayType`, `holidayStatus`, `createdBy`, `updatedBy`, `createdAt`, `updatedAt`) VALUES
-(18, 'HLD-21-00001', 'Independence Dayw', '2021-03-11', 'Regular Holiday', 1, 1, 2, '2021-03-12 02:32:12', '2021-03-15 07:33:23'),
-(19, 'HLD-21-00000', 'Sanal All holiday', '2021-04-02', 'Regular Holiday', 1, 1, 2, '2021-03-12 02:32:57', '2021-03-12 02:37:49');
 
 -- --------------------------------------------------------
 
@@ -854,6 +2080,13 @@ CREATE TABLE `hris_job_posting_tbl` (
   `updatedBy` bigint(20) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+--
+-- Dumping data for table `hris_job_posting_tbl`
+--
+
+INSERT INTO `hris_job_posting_tbl` (`jobID`, `jobCode`, `jobCompany`, `jobTitle`, `jobDescription`, `jobResponsibilities`, `jobType`, `jobCategory`, `techSkillsQualification`, `jobBenefits`, `jobLanguage`, `jobSlot`, `salaryRangeSelect`, `salaryRange`, `jobStatus`, `datecreated`, `createdAt`, `updatedAt`, `createdBy`, `updatedBy`) VALUES
+(1, 'VEN-21-00001', 'CMTLand Development Inc.', 'Title', 'Decription', 'Responsibilities', 'Part-Time', 'Computer/Information Technology', 'Test', 'Test', 'English', 22, 3, '1500.00', 1, '2021-03-24', '2021-03-24 10:21:13', '2021-03-24 11:24:35', 1, 1);
+
 -- --------------------------------------------------------
 
 --
@@ -871,12 +2104,33 @@ CREATE TABLE `hris_leave_tbl` (
   `updatedAt` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+-- --------------------------------------------------------
+
 --
--- Dumping data for table `hris_leave_tbl`
+-- Table structure for table `hris_loan_form_tbl`
 --
 
-INSERT INTO `hris_leave_tbl` (`leaveID`, `leaveCode`, `leaveName`, `leaveStatus`, `createdBy`, `updatedBy`, `createdAt`, `updatedAt`) VALUES
-(1, 'LVE-21-00001', 'Vacation Leave', 0, 1, 2, '2021-03-12 02:57:49', '2021-03-12 02:58:37');
+CREATE TABLE `hris_loan_form_tbl` (
+  `loanFormID` bigint(20) NOT NULL,
+  `loanFormCode` text NOT NULL,
+  `employeeID` bigint(20) NOT NULL,
+  `loanID` bigint(20) NOT NULL,
+  `loanFormTermPayment` int(10) NOT NULL,
+  `loanFormDate` text NOT NULL,
+  `loanFormNoOfDays` int(10) NOT NULL,
+  `loanFormAmount` decimal(19,2) NOT NULL,
+  `loanFormDeductionAmount` decimal(19,2) NOT NULL,
+  `approversID` text NOT NULL,
+  `approversStatus` text NOT NULL,
+  `approversDate` text NOT NULL,
+  `loanFormStatus` int(11) NOT NULL,
+  `loanFormRemarks` text NOT NULL,
+  `submittedAt` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `createdBy` bigint(20) NOT NULL,
+  `updatedBy` bigint(20) NOT NULL,
+  `createdAt` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updatedAt` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -895,15 +2149,85 @@ CREATE TABLE `hris_loan_tbl` (
   `updatedAt` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+-- --------------------------------------------------------
+
 --
--- Dumping data for table `hris_loan_tbl`
+-- Table structure for table `hris_official_business_tbl`
 --
 
-INSERT INTO `hris_loan_tbl` (`loanID`, `loanCode`, `loanName`, `loanStatus`, `createdBy`, `updatedBy`, `createdAt`, `updatedAt`) VALUES
-(1, 'LON-21-00001', 'Pautan mark loan', 1, 1, 2, '2021-03-12 03:09:40', '2021-03-12 03:10:03'),
-(2, 'LON-21-00000', 'Pautang Arjay', 1, 1, 2, '2021-03-12 03:09:55', '2021-03-12 03:10:09'),
-(3, 'LON-21-00001', 'qweqwe', 1, 9, 9, '2021-03-15 07:45:10', '2021-03-15 07:45:10'),
-(4, 'LON-21-00002', 'qweqweqweqwe', 0, 9, 9, '2021-03-15 07:45:25', '2021-03-15 07:45:53');
+CREATE TABLE `hris_official_business_tbl` (
+  `officialBusinessID` bigint(20) NOT NULL,
+  `officialBusinessCode` varchar(50) NOT NULL,
+  `employeeID` bigint(20) NOT NULL,
+  `officialBusinessCompanyID` bigint(40) NOT NULL,
+  `officialBusinessAddress` text NOT NULL,
+  `officialBusinessDate` date NOT NULL,
+  `officialBusinessTimeIn` time NOT NULL,
+  `officialBusinessTimeOut` time NOT NULL,
+  `officialBusinessReason` text NOT NULL,
+  `approversID` text NOT NULL,
+  `approversStatus` text NOT NULL,
+  `approversDate` text NOT NULL,
+  `officialBusinessStatus` int(11) NOT NULL,
+  `officialBusinessRemarks` text NOT NULL,
+  `submittedAt` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `createdBy` bigint(20) NOT NULL,
+  `updatedBy` bigint(20) NOT NULL,
+  `createdAt` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updatedAt` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `hris_on_timein_timeout_tbl`
+--
+
+CREATE TABLE `hris_on_timein_timeout_tbl` (
+  `no_Timein_timeoutID` bigint(20) NOT NULL,
+  `no_Timein_timeoutCode` varchar(100) NOT NULL,
+  `employeeID` bigint(20) NOT NULL,
+  `no_Timein_timeoutDate` date NOT NULL,
+  `no_Timein_timeoutTimeIn` time NOT NULL,
+  `no_Timein_timeoutTimeOut` time NOT NULL,
+  `no_Timein_timeoutReason` text DEFAULT NULL,
+  `approversID` text DEFAULT NULL,
+  `approversStatus` text DEFAULT NULL,
+  `approversDate` text DEFAULT NULL,
+  `no_Timein_timeoutStatus` int(11) NOT NULL,
+  `no_Timein_timeoutRemarks` text DEFAULT NULL,
+  `submittedAt` timestamp NULL DEFAULT NULL,
+  `createdBy` bigint(20) NOT NULL,
+  `updatedBy` bigint(20) NOT NULL,
+  `createdAt` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updatedAt` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `hris_overtime_request_tbl`
+--
+
+CREATE TABLE `hris_overtime_request_tbl` (
+  `overtimeRequestID` bigint(20) NOT NULL,
+  `overtimeRequestCode` text NOT NULL,
+  `employeeID` bigint(20) NOT NULL,
+  `overtimeRequestDate` date NOT NULL,
+  `overtimeRequestTimeIn` time NOT NULL,
+  `overtimeRequestTimeOut` time NOT NULL,
+  `overtimeRequestReason` text NOT NULL,
+  `approversID` text NOT NULL,
+  `approversStatus` text NOT NULL,
+  `approversDate` text NOT NULL,
+  `overtimeRequestStatus` int(11) NOT NULL,
+  `overtimeRequestRemarks` text NOT NULL,
+  `submittedAt` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `createdBy` bigint(20) NOT NULL,
+  `updatedBy` bigint(20) NOT NULL,
+  `createdAt` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updatedAt` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -943,14 +2267,6 @@ CREATE TABLE `hris_qualification_tbl` (
   `updatedAt` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
---
--- Dumping data for table `hris_qualification_tbl`
---
-
-INSERT INTO `hris_qualification_tbl` (`qualificationID`, `qualificationName`, `qualificationStatus`, `createdBy`, `updatedBy`, `createdAt`, `updatedAt`) VALUES
-(1, 'Smaple Qualifcation Ones', 0, 1, 2, '2021-03-15 06:39:58', '2021-03-15 06:42:35'),
-(2, 'Smaple Qualification Ones', 0, 1, 1, '2021-03-15 06:42:29', '2021-03-15 06:42:29');
-
 -- --------------------------------------------------------
 
 --
@@ -969,6 +2285,13 @@ CREATE TABLE `hris_requirement_tbl` (
   `createdAt` datetime NOT NULL DEFAULT current_timestamp(),
   `updatedAt` datetime NOT NULL DEFAULT '0000-00-00 00:00:00' ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Dumping data for table `hris_requirement_tbl`
+--
+
+INSERT INTO `hris_requirement_tbl` (`requirementID`, `requirementCode`, `requirementName`, `requirementDescription`, `requirementStatus`, `datecreated`, `createdBy`, `updatedBy`, `createdAt`, `updatedAt`) VALUES
+(1, 'RQT-21-00001', 'Test', 'Test', 1, '2021-03-24', 1, 1, '2021-03-24 13:21:34', '0000-00-00 00:00:00');
 
 -- --------------------------------------------------------
 
@@ -1012,7 +2335,7 @@ CREATE TABLE `hris_schedule_setup_tbl` (
 --
 
 INSERT INTO `hris_schedule_setup_tbl` (`scheduleID`, `scheduleName`, `mondayFrom`, `mondayTo`, `mondayStatus`, `tuesdayFrom`, `tuesdayTo`, `tuesdayStatus`, `wednesdayFrom`, `wednesdayTo`, `wednesdayStatus`, `thursdayFrom`, `thursdayTo`, `thursdayStatus`, `fridayFrom`, `fridayTo`, `fridayStatus`, `saturdayFrom`, `saturdayTo`, `saturdayStatus`, `sundayFrom`, `sundayTo`, `sundayStatus`, `scheduleStatus`, `createdBy`, `updatedBy`, `createdAt`, `updatedAt`) VALUES
-(1, 'Mid Shift', '08:00:00', '17:00:00', 1, '08:00:00', '14:00:00', 0, '08:00:00', '17:00:00', 1, '08:00:00', '17:00:00', 1, '08:00:00', '17:00:00', 1, '08:00:00', '17:00:00', 0, '08:00:00', '17:00:00', 0, 1, 1, 1, '2021-03-11 02:54:03', '2021-03-17 03:44:17'),
+(1, 'Mid Shift', '08:00:00', '17:00:00', 1, '08:00:00', '14:00:00', 1, '08:00:00', '17:00:00', 1, '08:00:00', '17:00:00', 1, '08:00:00', '17:00:00', 1, '08:00:00', '17:00:00', 0, '08:00:00', '17:00:00', 0, 1, 1, 1, '2021-03-11 02:54:03', '2021-03-23 01:31:12'),
 (2, 'Morning Shift', '06:00:00', '15:00:00', 1, '06:00:00', '15:00:00', 1, '06:00:00', '15:00:00', 0, '06:00:00', '15:00:00', 0, '06:00:00', '15:00:00', 0, '06:00:00', '15:00:00', 0, '06:00:00', '15:00:00', 0, 0, 0, 0, '2021-03-17 03:32:18', '2021-03-17 03:50:04'),
 (3, 'Graveyard', '02:00:00', '10:00:00', 1, '08:00:00', '17:00:00', 0, '08:00:00', '17:00:00', 0, '08:00:00', '17:00:00', 0, '08:00:00', '17:00:00', 0, '08:00:00', '17:00:00', 0, '08:00:00', '17:00:00', 1, 1, 0, 0, '2021-03-17 03:53:29', '2021-03-17 03:54:06');
 
@@ -1082,6 +2405,13 @@ CREATE TABLE `ims_inventory_category_tbl` (
   `updatedAt` datetime NOT NULL DEFAULT '0000-00-00 00:00:00' ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+--
+-- Dumping data for table `ims_inventory_category_tbl`
+--
+
+INSERT INTO `ims_inventory_category_tbl` (`categoryID`, `categoryCode`, `categoryName`, `classificationID`, `categoryStatus`, `createdBy`, `updatedBy`, `createdAt`, `updatedAt`) VALUES
+(1, 'CTY-21-00001', 'Test', 1, '1', 1, 1, '2021-03-24 11:46:42', '0000-00-00 00:00:00');
+
 -- --------------------------------------------------------
 
 --
@@ -1098,6 +2428,13 @@ CREATE TABLE `ims_inventory_classification_tbl` (
   `createdAt` timestamp NOT NULL DEFAULT current_timestamp(),
   `updatedAt` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Dumping data for table `ims_inventory_classification_tbl`
+--
+
+INSERT INTO `ims_inventory_classification_tbl` (`classificationID`, `classificationCode`, `classificationName`, `classificationStatus`, `createdBy`, `updatedBy`, `createdAt`, `updatedAt`) VALUES
+(1, 'CFN-21-00001', 'Test', 1, 1, 1, '2021-03-24 03:45:17', '2021-03-24 03:45:17');
 
 -- --------------------------------------------------------
 
@@ -1150,6 +2487,13 @@ CREATE TABLE `ims_inventory_item_tbl` (
   `updatedAt` datetime NOT NULL DEFAULT '0000-00-00 00:00:00' ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+--
+-- Dumping data for table `ims_inventory_item_tbl`
+--
+
+INSERT INTO `ims_inventory_item_tbl` (`itemID`, `itemCode`, `inventoryStorageID`, `itemName`, `classificationID`, `categoryID`, `itemSize`, `unitOfMeasurementID`, `basePrice`, `reOrderLevel`, `vatType`, `itemStatus`, `datecreated`, `createdBy`, `updatedBy`, `createdAt`, `updatedAt`) VALUES
+(1, 'ITM-21-00001', 1, 'Test', 1, 1, 'ExtraSmall', 'Kg', '1223.00', 12, 'Vatable', 1, '2021-03-24', 1, 1, '2021-03-24 12:28:39', '0000-00-00 00:00:00');
+
 -- --------------------------------------------------------
 
 --
@@ -1178,6 +2522,13 @@ CREATE TABLE `ims_inventory_storage_tbl` (
   `updatedBy` bigint(80) NOT NULL,
   `updatedAt` timestamp(6) NOT NULL DEFAULT current_timestamp(6) ON UPDATE current_timestamp(6)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Dumping data for table `ims_inventory_storage_tbl`
+--
+
+INSERT INTO `ims_inventory_storage_tbl` (`inventoryStorageID`, `inventoryStorageCode`, `inventoryStorageOfficeName`, `inventoryStorageUnitNumber`, `inventoryStorageHouseNumber`, `inventoryStorageStreetName`, `inventoryStorageSubdivisionName`, `inventoryStorageBarangay`, `inventoryStorageMunicipality`, `inventoryStorageProvince`, `inventoryStorageRegion`, `inventoryStorageCountry`, `inventoryStorageZipCode`, `inventoryStorageRoomType`, `inventoryStorageDepartment`, `inventoryStorageStatus`, `createdBy`, `createdAt`, `updatedBy`, `updatedAt`) VALUES
+(1, 'ISM-21-00001', 'GTC', '1021', 'Antel', 'Julia Vargas', 'Ortigas', 'ADAMS (POB.)', 'ADAMS', 'ILOCOS NORTE', '01', 'Philippines', 1900, 'Test', 'Testt', '1', 1, '2021-03-24 04:22:07.130988', 1, '2021-03-24 04:22:07.130988');
 
 -- --------------------------------------------------------
 
@@ -1218,7 +2569,7 @@ CREATE TABLE `ims_inventory_vendor_tbl` (
 --
 
 INSERT INTO `ims_inventory_vendor_tbl` (`inventoryVendorID`, `inventoryVendorCode`, `inventoryVendorName`, `inventoryVendorRegion`, `inventoryVendorProvince`, `inventoryVendorCity`, `inventoryVendorBarangay`, `inventoryVendorUnit`, `inventoryVendorBuilding`, `inventoryVendorStreet`, `inventoryVendorSubdivision`, `inventoryVendorCountry`, `inventoryVendorZipCode`, `inventoryVendorPerson`, `inventoryVendorEmail`, `inventoryVendorTIN`, `inventoryVendorMobile`, `inventoryVendorTelephone`, `inventoryVendorBrand`, `inventoryVendorVAT`, `inventoryVendorStatus`, `createdBy`, `updatedBy`, `createdAt`, `updatedAt`) VALUES
-(1, 'VEN-21-00001', 'National Bookstore', '01', 'ILOCOS SUR', 'BURGOS', 'BANGBANGAR', '1701', 'Antel', 'Julia Vargas', 'Ortigas', 'Philippines', '1900', 'Arjay Diangzon', 'arjaydiangzon@email.com', '123 421 523 123', '0956 5969 798', '(12) 1234 1233', 'NB', 1, 1, 1, 1, '2021-03-15 06:28:45', '2021-03-16 07:30:16');
+(1, 'VEN-21-00001', 'National Bookstore', '01', 'ILOCOS SUR', 'BURGOS', '', '1701', 'Antel', 'Julia Vargas', 'Ortigas', 'Philippines', '1900', 'Arjay Diangzon', 'arjaydiangzon@email.com', '123 421 523 123', '0956 5969 798', '(12) 1234 1233', 'NB', 1, 1, 1, 3, '2021-03-15 06:28:45', '2021-03-23 04:28:54');
 
 -- --------------------------------------------------------
 
@@ -1238,6 +2589,13 @@ CREATE TABLE `pms_category_tbl` (
   `createdAt` datetime NOT NULL DEFAULT current_timestamp(),
   `updatedAt` datetime NOT NULL DEFAULT '0000-00-00 00:00:00' ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Dumping data for table `pms_category_tbl`
+--
+
+INSERT INTO `pms_category_tbl` (`categoryID`, `categoryCode`, `categoryName`, `companyName`, `categoryStatus`, `createdBy`, `updatedBy`, `datecreated`, `createdAt`, `updatedAt`) VALUES
+(1, 'PCT-21-00001', 'Test', 'Test', 1, 1, 1, '0000-00-00', '2021-03-24 11:41:45', '0000-00-00 00:00:00');
 
 -- --------------------------------------------------------
 
@@ -1269,6 +2627,13 @@ CREATE TABLE `pms_client_tbl` (
   `createdAt` datetime NOT NULL DEFAULT current_timestamp(),
   `updatedAt` datetime NOT NULL DEFAULT '0000-00-00 00:00:00' ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Dumping data for table `pms_client_tbl`
+--
+
+INSERT INTO `pms_client_tbl` (`clientID`, `clientCode`, `clientName`, `clientRegion`, `clientProvince`, `clientCity`, `clientBarangay`, `clientUnitNumber`, `clientHouseNumber`, `clientCountry`, `clientPostalCode`, `clientContactPerson`, `clientEmailAddress`, `clientTin`, `client_MobileNo`, `clientTelephoneNo`, `clientBrandName`, `clientStatus`, `createdBy`, `updatedBy`, `createdAt`, `updatedAt`) VALUES
+(1, 'CLT-21-00001', '123', '02', 'BATANES', 'ITBAYAT', 'SAN RAFAEL (IDIANG)', '123', '123', 'dsadsadas', 1233, 'qwe', '', '123 312 312 312', '1233 1232 131', '(31) 2312 312', '', 1, 3, 3, '2021-03-23 08:33:14', '0000-00-00 00:00:00');
 
 -- --------------------------------------------------------
 
@@ -1341,6 +2706,12 @@ ALTER TABLE `fms_chart_of_accounts_tbl`
 --
 ALTER TABLE `gen_approval_setup_tbl`
   ADD PRIMARY KEY (`approvalID`);
+
+--
+-- Indexes for table `gen_ledger_classification_tbl`
+--
+ALTER TABLE `gen_ledger_classification_tbl`
+  ADD PRIMARY KEY (`ledgerClassificationID`);
 
 --
 -- Indexes for table `gen_module_category_tbl`
@@ -1457,10 +2828,34 @@ ALTER TABLE `hris_leave_tbl`
   ADD PRIMARY KEY (`leaveID`);
 
 --
+-- Indexes for table `hris_loan_form_tbl`
+--
+ALTER TABLE `hris_loan_form_tbl`
+  ADD PRIMARY KEY (`loanFormID`);
+
+--
 -- Indexes for table `hris_loan_tbl`
 --
 ALTER TABLE `hris_loan_tbl`
   ADD PRIMARY KEY (`loanID`);
+
+--
+-- Indexes for table `hris_official_business_tbl`
+--
+ALTER TABLE `hris_official_business_tbl`
+  ADD PRIMARY KEY (`officialBusinessID`);
+
+--
+-- Indexes for table `hris_on_timein_timeout_tbl`
+--
+ALTER TABLE `hris_on_timein_timeout_tbl`
+  ADD PRIMARY KEY (`no_Timein_timeoutID`);
+
+--
+-- Indexes for table `hris_overtime_request_tbl`
+--
+ALTER TABLE `hris_overtime_request_tbl`
+  ADD PRIMARY KEY (`overtimeRequestID`);
 
 --
 -- Indexes for table `hris_philhealth_table_tbl`
@@ -1566,37 +2961,43 @@ ALTER TABLE `pms_project_milestone_tbl`
 -- AUTO_INCREMENT for table `fms_bank_tbl`
 --
 ALTER TABLE `fms_bank_tbl`
-  MODIFY `bankID` bigint(20) NOT NULL AUTO_INCREMENT;
+  MODIFY `bankID` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `fms_chart_of_accounts_tbl`
 --
 ALTER TABLE `fms_chart_of_accounts_tbl`
-  MODIFY `chartOfAccountID` bigint(20) NOT NULL AUTO_INCREMENT;
+  MODIFY `chartOfAccountID` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `gen_approval_setup_tbl`
 --
 ALTER TABLE `gen_approval_setup_tbl`
-  MODIFY `approvalID` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=63;
+  MODIFY `approvalID` bigint(20) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `gen_ledger_classification_tbl`
+--
+ALTER TABLE `gen_ledger_classification_tbl`
+  MODIFY `ledgerClassificationID` bigint(20) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `gen_module_category_tbl`
 --
 ALTER TABLE `gen_module_category_tbl`
-  MODIFY `moduleCategoryID` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `moduleCategoryID` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
 -- AUTO_INCREMENT for table `gen_module_header_tbl`
 --
 ALTER TABLE `gen_module_header_tbl`
-  MODIFY `moduleHeaderID` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `moduleHeaderID` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT for table `gen_module_list_tbl`
 --
 ALTER TABLE `gen_module_list_tbl`
-  MODIFY `moduleID` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=24;
+  MODIFY `moduleID` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=125;
 
 --
 -- AUTO_INCREMENT for table `gen_operations_tbl`
@@ -1608,13 +3009,13 @@ ALTER TABLE `gen_operations_tbl`
 -- AUTO_INCREMENT for table `gen_roles_permission_tbl`
 --
 ALTER TABLE `gen_roles_permission_tbl`
-  MODIFY `permissionID` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=253;
+  MODIFY `permissionID` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=1365;
 
 --
 -- AUTO_INCREMENT for table `gen_system_notification_tbl`
 --
 ALTER TABLE `gen_system_notification_tbl`
-  MODIFY `notificationID` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `notificationID` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `gen_user_account_tbl`
@@ -1626,79 +3027,103 @@ ALTER TABLE `gen_user_account_tbl`
 -- AUTO_INCREMENT for table `gen_user_role_tbl`
 --
 ALTER TABLE `gen_user_role_tbl`
-  MODIFY `roleID` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+  MODIFY `roleID` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
 
 --
 -- AUTO_INCREMENT for table `hris_award_tbl`
 --
 ALTER TABLE `hris_award_tbl`
-  MODIFY `awardID` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `awardID` bigint(20) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `hris_branch_tbl`
 --
 ALTER TABLE `hris_branch_tbl`
-  MODIFY `branchID` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `branchID` bigint(20) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `hris_change_schedule_tbl`
 --
 ALTER TABLE `hris_change_schedule_tbl`
-  MODIFY `changeScheduleID` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `changeScheduleID` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
 
 --
 -- AUTO_INCREMENT for table `hris_code_conduct_category_tbl`
 --
 ALTER TABLE `hris_code_conduct_category_tbl`
-  MODIFY `codeConductCategoryID` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `codeConductCategoryID` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `hris_code_conduct_section_tbl`
 --
 ALTER TABLE `hris_code_conduct_section_tbl`
-  MODIFY `codeConductSectionID` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+  MODIFY `codeConductSectionID` bigint(20) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `hris_department_tbl`
 --
 ALTER TABLE `hris_department_tbl`
-  MODIFY `departmentID` bigint(20) NOT NULL AUTO_INCREMENT;
+  MODIFY `departmentID` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `hris_designation_tbl`
 --
 ALTER TABLE `hris_designation_tbl`
-  MODIFY `designationID` bigint(20) NOT NULL AUTO_INCREMENT;
+  MODIFY `designationID` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `hris_event_calendar_tbl`
 --
 ALTER TABLE `hris_event_calendar_tbl`
-  MODIFY `eventCalendarID` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
+  MODIFY `eventCalendarID` bigint(20) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `hris_holiday_tbl`
 --
 ALTER TABLE `hris_holiday_tbl`
-  MODIFY `holidayID` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
+  MODIFY `holidayID` bigint(20) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `hris_job_posting_tbl`
 --
 ALTER TABLE `hris_job_posting_tbl`
-  MODIFY `jobID` bigint(20) NOT NULL AUTO_INCREMENT;
+  MODIFY `jobID` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `hris_leave_tbl`
 --
 ALTER TABLE `hris_leave_tbl`
-  MODIFY `leaveID` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `leaveID` bigint(20) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `hris_loan_form_tbl`
+--
+ALTER TABLE `hris_loan_form_tbl`
+  MODIFY `loanFormID` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `hris_loan_tbl`
 --
 ALTER TABLE `hris_loan_tbl`
-  MODIFY `loanID` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `loanID` bigint(20) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `hris_official_business_tbl`
+--
+ALTER TABLE `hris_official_business_tbl`
+  MODIFY `officialBusinessID` bigint(20) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `hris_on_timein_timeout_tbl`
+--
+ALTER TABLE `hris_on_timein_timeout_tbl`
+  MODIFY `no_Timein_timeoutID` bigint(20) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `hris_overtime_request_tbl`
+--
+ALTER TABLE `hris_overtime_request_tbl`
+  MODIFY `overtimeRequestID` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `hris_philhealth_table_tbl`
@@ -1710,13 +3135,13 @@ ALTER TABLE `hris_philhealth_table_tbl`
 -- AUTO_INCREMENT for table `hris_qualification_tbl`
 --
 ALTER TABLE `hris_qualification_tbl`
-  MODIFY `qualificationID` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `qualificationID` bigint(20) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `hris_requirement_tbl`
 --
 ALTER TABLE `hris_requirement_tbl`
-  MODIFY `requirementID` bigint(20) NOT NULL AUTO_INCREMENT;
+  MODIFY `requirementID` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `hris_schedule_setup_tbl`
@@ -1740,13 +3165,13 @@ ALTER TABLE `hris_tax_table_tbl`
 -- AUTO_INCREMENT for table `ims_inventory_category_tbl`
 --
 ALTER TABLE `ims_inventory_category_tbl`
-  MODIFY `categoryID` bigint(20) NOT NULL AUTO_INCREMENT;
+  MODIFY `categoryID` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `ims_inventory_classification_tbl`
 --
 ALTER TABLE `ims_inventory_classification_tbl`
-  MODIFY `classificationID` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+  MODIFY `classificationID` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `ims_inventory_condition_tbl`
@@ -1758,13 +3183,13 @@ ALTER TABLE `ims_inventory_condition_tbl`
 -- AUTO_INCREMENT for table `ims_inventory_item_tbl`
 --
 ALTER TABLE `ims_inventory_item_tbl`
-  MODIFY `itemID` bigint(20) NOT NULL AUTO_INCREMENT;
+  MODIFY `itemID` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `ims_inventory_storage_tbl`
 --
 ALTER TABLE `ims_inventory_storage_tbl`
-  MODIFY `inventoryStorageID` bigint(120) NOT NULL AUTO_INCREMENT;
+  MODIFY `inventoryStorageID` bigint(120) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `ims_inventory_vendor_tbl`
@@ -1776,13 +3201,13 @@ ALTER TABLE `ims_inventory_vendor_tbl`
 -- AUTO_INCREMENT for table `pms_category_tbl`
 --
 ALTER TABLE `pms_category_tbl`
-  MODIFY `categoryID` bigint(20) NOT NULL AUTO_INCREMENT;
+  MODIFY `categoryID` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `pms_client_tbl`
 --
 ALTER TABLE `pms_client_tbl`
-  MODIFY `clientID` bigint(20) NOT NULL AUTO_INCREMENT;
+  MODIFY `clientID` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `pms_project_list_tbl`

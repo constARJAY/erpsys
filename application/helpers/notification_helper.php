@@ -1,18 +1,27 @@
 <?php
     date_default_timezone_set("Asia/Manila");
 
-    function insertNotificationData($data = [])
+    function insertNotificationData($employeeID, $moduleID, $notificationTitle, $notificationDescription, $notificationType)
     {
         $CI =& get_instance();
-        if ($data) {
-            $tableName = "gen_system_notification_tbl";
-            
+        $sessionID = $CI->session->has_userdata('adminSessionID') ? $CI->session->userdata('adminSessionID') : 1;
+
+        if ($employeeID && $moduleID && $notificationTitle && $notificationDescription && $notificationType) {
+            $data = [
+                "employeeID"              => $employeeID,
+                "moduleID"                => $moduleID,
+                "notificationTitle"       => $notificationTitle,
+                "notificationDescription" => $notificationDescription,
+                "notificationType"        => $notificationType,
+                "createdBy"               => $sessionID,
+            ];
             /**
              * ----- DATA -----
-             * 1. moduleID                  = (int)    e.g. 1
-             * 2. notificationTitle         = (string) e.g. Inventory Item
-             * 3. notificationDescription   = (string) e.g. Hammer - Low Stocks 
-             * 4. notificationType          = (int)    e.g. 1
+             * 1. employeeID                = (int)    e.g. 1
+             * 2. moduleID                  = (int)    e.g. 1
+             * 3. notificationTitle         = (string) e.g. Inventory Item
+             * 4. notificationDescription   = (string) e.g. Hammer - Low Stocks 
+             * 5. notificationType          = (int)    e.g. 1
              *      Basis:  1 - Highest Prio (red)
              *              2 - Medium Prio (info)
              *              3 - Low Prio (gray)
@@ -20,11 +29,11 @@
              *              5 - Pending (yellow)
              *              6 - Warning (orange)
              *              7 - Approved (green)
-             * 5. createdBy
+             * 6. createdBy
              * ----- END DATA -----
              */
             
-            $query = $CI->db->insert($tableName, $data);
+            $query = $CI->db->insert("gen_system_notification_tbl", $data);
             return $query ? true : false;
         } else {
             return false;
@@ -34,7 +43,8 @@
     function getCountUnreadNotification()
     {
         $CI =& get_instance();
-        $sql = "SELECT * FROM gen_system_notification_tbl WHERE markRead = 0";
+        $sessionID = $CI->session->has_userdata('adminSessionID') ? $CI->session->userdata('adminSessionID') : 1;
+        $sql = "SELECT * FROM gen_system_notification_tbl WHERE employeeID = $sessionID AND markRead = 0";
         $query = $CI->db->query($sql);
         return $query ? $query->num_rows() : 0;
     }
@@ -42,11 +52,12 @@
     function getNotificationData($projectName = "all", $read = "", $dateFrom = "", $dateTo = "")
     {
         $CI =& get_instance();
+        $sessionID = $CI->session->has_userdata('adminSessionID') ? $CI->session->userdata('adminSessionID') : 1;
         $readFilter = $read != "" ? "markRead = $read" : "1=1";
         if ($dateFrom != "" && $dateTo != "") {
-            $sql = "SELECT * FROM gen_system_notification_tbl WHERE createdAt BETWEEN '$dateFrom' AND '$dateTo' AND $readFilter";
+            $sql = "SELECT * FROM gen_system_notification_tbl WHERE employeeID = $sessionID AND createdAt BETWEEN '$dateFrom' AND '$dateTo' AND $readFilter";
         } else {
-            $sql = "SELECT * FROM gen_system_notification_tbl WHERE $readFilter";   
+            $sql = "SELECT * FROM gen_system_notification_tbl WHERE employeeID = $sessionID AND $readFilter";   
         }
         $query = $CI->db->query($sql);
         $data = $query ? $query->result_array() : [];

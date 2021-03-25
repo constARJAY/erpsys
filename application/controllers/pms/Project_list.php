@@ -6,6 +6,7 @@ class Project_list extends CI_Controller {
     public function __construct()
     {
         parent::__construct();
+        isAllowed(11);
     }
 
     public function index()

@@ -5,16 +5,15 @@
 				<div class="col-lg-6 col-md-12">
 					<ul class="breadcrumb pl-0 pb-0 ">
 						<li class="breadcrumb-item"><a href="#"><i class="zmdi zmdi-home"></i> Dashboard</a></li>
-						<li class="breadcrumb-item"><i class="zmdi zmdi-folder"></i> &nbsp;Recruitment Module</li>
+						<li class="breadcrumb-item"><i class="zmdi zmdi-folder"></i> &nbsp;Masterfiles</li>
 						<li class="breadcrumb-item active"  id="inv_mainItem_breadcrumbs">Job Posting</li>
                         <!-- <li class="breadcrumb-item" id="inv_item_breadcrumbs" style="visibility:hidden;"><i class="icon-social-dropbox" ></i> &nbsp;Add Category</li> -->
 					</ul>
-					<h1 class="mt-3" id="inv_headerID">List of Jobs Posted</h1>
+					<h1 class="mt-3" id="inv_headerID">List of Jobs Vacancies</h1>
 					<span>This module is used to manage job posts details.</span>
 				</div>
 				<div class="col-lg-6 col-md-12 text-md-right">
-                        <button type="button" class="btn btn-danger pr-2" id="btnAdd"> <i class="fas fa-plus-square"></i> Add Job</button>
-                    </ul>
+					<button class="btn btn-default btn-add" id="btnAdd"><i class="icon-plus"></i> Add Job Vacant</button>
 				</div>
 			</div>
 		</div>

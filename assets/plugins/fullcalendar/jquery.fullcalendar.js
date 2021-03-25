@@ -1,6 +1,6 @@
 
 !function($) {
-    const base_url = $("#base_url").val();
+    const base_url = $(".page-loader-wrapper").attr("base_url");
     "use strict";
     var CalendarApp = function() {
         this.$body = $("body")
@@ -46,14 +46,14 @@
             const dateFrom   = moment(new Date(calEvent.start._d));
             const dateTo     = moment(new Date(calEvent.end._d));
             const eventDate  = moment(new Date(calEvent.start._d)).format("MMMM DD, YYYY")+" - "+moment(new Date(calEvent.end._d)).format("MMMM DD, YYYY");
-            const modalButtons = `<button type="button" class="btn btn-primary update-event submit-btn" data-calendarid="${calendarID}">UPDATE EVENT</button>
-                                  <button type="button" class="btn btn-danger delete-event submit-btn">DELETE</button>`;
+            const modalButtons = `<button type="button" class="btn btn-save update-event submit-btn" data-calendarid="${calendarID}"><i class="fas fa-save"></i>&nbsp;UPDATE EVENT</button>
+                                  <button type="button" class="btn btn-cancel delete-event submit-btn"><i class="fas fa-trash"></i>&nbsp;DELETE</button>`;
             // modalButtons = `<button type="button" class="btn btn-primary save-event submit-btn">CREATE EVENT</button>
             //                 <button type="button" class="btn btn-danger delete-event submit-btn" id="btn-cancel">CANCEL</button>`;
         const   my_event_content = `<div class="modal-body">
                                         <div class="form-group">
                                             <label>Event Name <span class="text-danger">*</span></label>
-                                            <input class="form-control validate" data-allowcharacters="[A-Z][a-z][0-9][ ][.][,][_][-]" name="eventCalendarName" type="text" id="edit-eventname" value="${eventName}" minlength="2" maxlength="30" required autocomplete="off">
+                                            <input class="form-control validate" data-allowcharacters="[A-Z][a-z][0-9][ ][-][.][,][()]['][&][*]" name="eventCalendarName" type="text" id="edit-eventname" value="${eventName}" minlength="2" maxlength="30" required autocomplete="off">
                                             <div class="invalid-feedback d-block" id="invalid-edit-eventname"></div>
                                         </div>
                                         <div class="form-group">
@@ -298,12 +298,12 @@ function calendarDateRangerPicker(){
 
 function addingEvent(data = null){
     let eventDate = data == null ? moment().format("MMMM DD, YYYY")+ " - "+ moment().format("MMMM DD, YYYY"): data;  
-    let  modalButtons           = ` <button type="button" class="btn btn-primary save-event submit-btn">CREATE EVENT</button>
-    <button type="button" class="btn btn-danger delete-event submit-btn" id="btn-cancel">CANCEL</button>`;
+    let  modalButtons           = ` <button type="button" class="btn btn-save save-event submit-btn"><i class="fas fa-save"></i>&nbsp;CREATE EVENT</button>
+                                    <button type="button" class="btn btn-cancel delete-event submit-btn" data-dismiss="modal" id="btn-cancel"><i class="fas fa-ban"></i>&nbsp;CANCEL</button>`;
     const   my_event_content    = ` <div class="modal-body">
         <div class="form-group">
             <label>Event Name <span class="text-danger">*</span></label>
-            <input class="form-control validate" data-allowcharacters="[A-Z][a-z][0-9][ ][.][,][_][-]" name="eventCalendarName" type="text" id="edit-eventname" value="" minlength="2" maxlength="30" required autocomplete="off">
+            <input class="form-control validate" data-allowcharacters="[A-Z][a-z][0-9][ ][-][.][,][()]['][&][*]" name="eventCalendarName" type="text" id="edit-eventname" value="" minlength="2" maxlength="30" required autocomplete="off">
             <div class="invalid-feedback d-block" id="invalid-edit-eventname"></div>
         </div>
         <div class="form-group">

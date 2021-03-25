@@ -7,11 +7,12 @@ class Bank extends CI_Controller {
     {
         parent::__construct();
         // $this->load->model("Companysetup_model", "company_setup");
+        isAllowed(14);
     }
 
     public function index()
     {
-        $data["title"] = "Bank";
+        $data["title"] = "Bank Masterfile";
 
         $this->load->view("template/header",$data);
         $this->load->view("fms/bank/index");

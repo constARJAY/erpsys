@@ -16,7 +16,7 @@
 					<!-- <button class="btn btn-default hidden-xs ml-2">Download Report</button>
                         <button class="btn btn-secondary hidden-xs ml-2">New Report</button> -->
                         <!-- <button type="button" class="btn btn-danger pr-2" id="btnAdd"> <i class="icon-plus" id="btnIcon"></i> &nbsp;Add Item</button> -->
-                        <button type="button" class="btn btn-add pr-2" id="btnAdd"> <i class="fas fa-plus-square"></i> Add Item</button>
+                        <button type="button" class="btn btn-default btn-add" id="btnAdd"> <i class="icon-plus"></i> Add Item</button>
                         <!-- <button type="button" class="btn btn-light pr-2" id="btnCancel"> <i class="icon-ban"></i> &nbsp;Cancel</button> -->
                     </ul>
 				</div>

@@ -12,11 +12,11 @@ $(document).ready(function(){
             scrollX:        true,
             scrollCollapse: true,
             columnDefs: [
-                { targets: 0, width: 100 },
-                { targets: 1, width: 250 },
-                { targets: 2, width: 250 },
-                { targets: 3, width: 50 },
-                { targets: 4, width: 50 },
+                { targets: 0, width: 150 },
+                { targets: 1, width: "50%" },
+                { targets: 2, width: "50%" },
+                { targets: 3, width: 80 },
+                { targets: 4, width: 80 },
             ],
         });
     }
@@ -246,7 +246,7 @@ $(document).ready(function(){
     $(document).on("click", ".btnEdit", function() {
         const id       = $(this).attr("id");
         const feedback = $(this).attr("feedback");
-        $("#hris_designation_modalheader").text("VIEW DESIGNATION");
+        $("#hris_designation_modalheader").text("EDIT DESIGNATION");
         $("#modal_hris_designation").modal("show");
 
         // Display preloader while waiting for the completion of getting the data
@@ -280,7 +280,7 @@ $(document).ready(function(){
 
 			sweetAlertConfirmation(
 				"update",
-				"Designation Masterfile",
+				"Designation",
 				"modal_hris_designation",
 				"",
 				data,
@@ -299,11 +299,11 @@ $(document).ready(function(){
 		if (!formEmpty) {
 			sweetAlertConfirmation(
 				"cancel",
-				"Designation Masterfile",
+				"Designation",
 				"modal_hris_designation"
 			);
 		} else {
-			$("#modal_inventory_vendor").modal("hide");
+			$("#modal_hris_designation").modal("hide");
 		}
     });
     // -------- END CANCEL MODAL-----------

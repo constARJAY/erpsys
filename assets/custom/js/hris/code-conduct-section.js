@@ -3,8 +3,6 @@ $(document).ready(function(){
     tableContent();
 });
 
-
-
 // OPENING ADD & EDIT MODAL
 $(document).on("click",".addCodeConductSection", function(){
     $("#modal_codeConductSection").modal("show");
@@ -21,7 +19,7 @@ $(document).on("click",".addCodeConductSection", function(){
                                                     <div class="row"> 
                                                         <div class="col-md-12 col-sm-12">
                                                             <div class="form-group">
-                                                                <label for="">Code of Conduct Category<span class="text-danger">*</span></label>
+                                                                <label for="">Code of Conduct Section <strong class="text-danger">*</strong></label>
                                                                 <select class="form-control select2 validate" name="codeConductCategoryID" id="inputcodeConductCategoryID" required>
                                                                     ${codeOfConductCategory}
                                                                 </select>
@@ -30,14 +28,14 @@ $(document).on("click",".addCodeConductSection", function(){
                                                         </div>
                                                         <div class="col-md-12 col-sm-12">
                                                             <div class="form-group">
-                                                                <label for="">Code of Conduct Category<span class="text-danger">*</span></label>
-                                                                <textarea class="form-control validate" style="resize:none" name="codeConductSectionDescription" id="inputcodeConductSectionDescription" minlength="15" maxlength="250" max required></textarea>
+                                                                <label for="">Code of Conduct Section Description <span class="text-danger">*</span></label>
+                                                                <textarea class="form-control validate" data-allowcharacters="[a-z][A-Z][0-9][.][,][-][()]['][/][?][*][!][#][%][&][ ]"  style="resize:none" name="codeConductSectionDescription" id="inputcodeConductSectionDescription" minlength="5" maxlength="500" max required></textarea>
                                                                 <div class="invalid-feedback d-block" id="invalid-inputcodeConductSectionDescription"></div>
                                                             </div>
                                                         </div>
                                                         <div class="col-md-12 col-sm-12">
                                                             <div class="form-group">
-                                                                <label for="">Code of Conduct Section Status  <span class="text-danger">*</span></label>
+                                                                <label for="">Status <strong class="text-danger">*</strong></label>
                                                                 <select class="form-control select2 validate" name="codeConductSectionStatus" id="inputcodeConductSectionStatus">
                                                                     <option value="1">Active</option>
                                                                     <option value="0">Inactive</option>
@@ -49,8 +47,8 @@ $(document).on("click",".addCodeConductSection", function(){
                                                 </form>
                                             </div>
                                             <div class="modal-footer">
-                                                <button class="btn btn-primary px-5 p-2" id="btnSave">SAVE</button>
-                                                <button class="btn btn-danger px-5 p-2" id="btnCancel">CANCEL</button>
+                                                <button class="btn btn-primary btn-save" id="btnSave"><i class="fas fa-save"></i>&nbsp;SAVE</button>
+                                                <button class="btn btn-danger btn-cancel btnCancel"><i class="fas fa-ban"></i>&nbsp;CANCEL</button>
                                             </div>
                                                 `;
     setTimeout(function(){
@@ -86,7 +84,7 @@ $(document).on("click",".editCodeConductSection", function(){
                                                     <div class="row"> 
                                                         <div class="col-md-12 col-sm-12">
                                                             <div class="form-group">
-                                                                <label for="">Code of Conduct Category<span class="text-danger">*</span></label>
+                                                                <label for="">Code of Conduct Category <strong class="text-danger">*</strong></label>
                                                                 <select class="form-control select2 validate" name="codeConductCategoryID" id="inputcodeConductCategoryID" required>
                                                                     ${codeOfConductCategory}
                                                                 </select>
@@ -95,14 +93,14 @@ $(document).on("click",".editCodeConductSection", function(){
                                                         </div>
                                                         <div class="col-md-12 col-sm-12">
                                                             <div class="form-group">
-                                                                <label for="">Code of Conduct Category<span class="text-danger">*</span></label>
-                                                                <textarea class="form-control validate" style="resize:none" name="codeConductSectionDescription" id="inputcodeConductSectionDescription" minlength="15" maxlength="250" required>${tableData[0]["codeConductSectionDescription"]}</textarea>
+                                                                <label for="">Code of Conduct Section Description <strong class="text-danger">*</strong></label>
+                                                                <textarea class="form-control validate" data-allowcharacters="[a-z][A-Z][0-9][.][,][-][()]['][/][?][*][!][#][%][&][ ]" style="resize:none" name="codeConductSectionDescription" id="inputcodeConductSectionDescription" minlength="5" maxlength="500" required>${tableData[0]["codeConductSectionDescription"]}</textarea>
                                                                 <div class="invalid-feedback d-block" id="invalid-inputcodeConductSectionDescription"></div>
                                                             </div>
                                                         </div>
                                                         <div class="col-md-12 col-sm-12">
                                                             <div class="form-group">
-                                                                <label for="">Code of Conduct Section Status  <span class="text-danger">*</span></label>
+                                                                <label for="">Status <strong class="text-danger">*</strong></label>
                                                                 <select class="form-control select2 validate" name="codeConductSectionStatus" id="inputcodeConductSectionStatus">
                                                                     ${statusOption}
                                                                 </select>
@@ -113,10 +111,10 @@ $(document).on("click",".editCodeConductSection", function(){
                                                 </form>
                                             </div>
                                             <div class="modal-footer">
-                                                <button class="btn btn-primary px-5 p-2" id="btnUpdate" data-codeconductsectionid="${tableData[0]["codeConductSectionID"]}">UPDATE</button>
-                                                <button class="btn btn-danger px-5 p-2" id="btnCancel">CANCEL</button>
+                                                <button class="btn btn-primary btn-save" id="btnUpdate" data-codeconductsectionid="${tableData[0]["codeConductSectionID"]}"><i class="fas fa-save"></i>&nbsp;UPDATE</button>
+                                                <button class="btn btn-danger btn-cancel btnCancel"><i class="fas fa-ban"></i>&nbsp;CANCEL</button>
                                             </div>
-                                            `;
+                                                `;
     setTimeout(function(){
         $("#modal_codeConductSection_content").html(modal_codeConductSection_content);
         initAll();
@@ -147,10 +145,10 @@ $(document).on("click", "#btnUpdate", function(){
     let condition                       = validateForm("modal_codeConductSection_form");
     let codeConductSectionID            = $(this).data("codeconductsectionid");
     let inputCategoryID                 = $("#inputcodeConductCategoryID").val();
-    let tableData                       = getTableData("hris_code_conduct_section_tbl","codeConductCategoryID","codeConductSectionID = "+codeConductSectionID);
+    let tableData                       = getTableData("hris_code_conduct_section_tbl","","codeConductSectionID = "+codeConductSectionID);
     let codeConductSection              = "";
     if(inputCategoryID == tableData[0]["codeConductCategoryID"]){
-        codeConductSection              =  tableData[0]["codeConductSection"];
+        codeConductSection              = tableData[0]["codeConductSection"];
     }else{
         let tableDataCategory   = getTableData("hris_code_conduct_section_tbl","COUNT(codeConductCategoryID) AS lastSection","codeConductCategoryID="+inputCategoryID);
         let incrementSectionID  = parseInt(tableDataCategory[0]["lastSection"]) + 1;
@@ -158,22 +156,21 @@ $(document).on("click", "#btnUpdate", function(){
     }
     
     
-
     if(condition == true){
         let data = getFormData("modal_codeConductSection_form", true);
         data["tableData"]["codeConductSection"]     =  codeConductSection;    
         data["tableData"]["updatedBy"]              =  "2";
         data["whereFilter"]                         =  "codeConductSectionID="+codeConductSectionID;
         data["tableName"]                           =  "hris_code_conduct_section_tbl";
-        data["feedback"]                            =  "Code of Conduct";
+        data["feedback"]                            =  "Section "+ codeConductSection;
         sweetAlertConfirmation("update", "Code of Conduct Section","modal_codeConductSection", null , data, true, tableContent);
     }
     
 });
 
-$(document).on("click","#btnCancel", function(){
+$(document).on("click",".btnCancel", function(){
     let condition = isFormEmpty("modal_codeConductSection_form");
-    if(condition == true){
+    if(!condition){
         sweetAlertConfirmation("cancel", "Code of Conduct Section Masterfile","modal_codeConductSection");
     }else{
         $("#modal_codeConductSection").modal("hide");
@@ -225,7 +222,7 @@ function tableContent(){
                                 <th>No.</th>
                                 <th>Code of Conduct Category</th>
                                 <th>Code of Conduct Section No.</th>
-                                <th>Conduct Description</th>
+                                <th>Conduct of Conduct Description</th>
                                 <th>Status</th>
                                 <th>Action</th>
                             </tr>

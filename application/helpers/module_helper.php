@@ -3,16 +3,24 @@
     function isAllowed($moduleID, $displayModule = false)
     {
         $CI =& get_instance();
-        $roleID = 1; // Change this based on the current session
-        $sql = "SELECT permissionStatus FROM gen_roles_permission_tbl WHERE moduleID = $moduleID AND roleID = $roleID AND permissionStatus = 1";
-        $query = $CI->db->query($sql);
+        $CI->load->helper('url', 'string', 'integer'); 
 
+        $sessionUserAccount = getAdminSessionAccount();
+        $roleID = $sessionUserAccount->role;
+        
+        if ($moduleID) {
+            $sql = "SELECT permissionStatus FROM gen_roles_permission_tbl WHERE moduleID = $moduleID AND roleID = $roleID AND permissionStatus = 1";
+        } else {
+            redirect(base_url('denied'));
+        }
+
+        
+        $query = $CI->db->query($sql);
         if ($displayModule) {
             return $query->num_rows() > 0 ? true : false;
         } else {
             if ($query->num_rows() == 0) {
-                $CI->load->helper('url'); 
-                redirect(base_url('denied')); 
+                redirect(base_url('denied'));
             }
         }
     }

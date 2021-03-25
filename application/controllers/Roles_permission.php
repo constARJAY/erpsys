@@ -7,6 +7,7 @@ class Roles_permission extends CI_Controller {
     {
         parent::__construct();
         $this->load->model("RolesPermission_model", "rolespermission");
+        isAllowed(2);
     }
 
     public function index()
@@ -32,6 +33,11 @@ class Roles_permission extends CI_Controller {
     {
         $moduleID = $this->input->post("moduleID");
         echo json_encode($this->rolespermission->addModuleRolesPermission($moduleID));
+    }
+
+    public function getModuleContent()
+    {
+        echo json_encode(getModuleContent());
     }
 
 }

@@ -49,7 +49,7 @@ $(document).ready(function(){
                 let html = `
                 <table class="table table-bordered table-striped table-hover" id="tableHRISChartOfAccounts">
                     <thead>
-                    <tr class="text-center">
+                    <tr>
                         <th>Account Code</th>
                         <th>Account Name</th>
                         <th>Description</th>
@@ -255,7 +255,7 @@ $(document).ready(function(){
                             class="form-control validate" 
                             name="accountLevel" 
                             id="input_accountLevel" 
-                            data-allowcharacters="[A-Z][a-z][0-9]" 
+                            data-allowcharacters="[A-Z][a-z][0-9][ ]" 
                             minlength="2" 
                             maxlength="20" 
                             required 
@@ -357,7 +357,7 @@ $(document).ready(function(){
 
                 <div class="col-md-6 col-sm-6">
                     <div class="form-group">
-                        <label>Bank Account Number <span class="text-danger font-weight-bold">*</span></label>
+                        <label>Bank Account Number</label>
                         <input 
                             type="text" 
                             class="form-control validate" 
@@ -380,8 +380,7 @@ $(document).ready(function(){
                             class="form-control select2 validate" 
                             id="input_accountStatus" 
                             name="accountStatus"
-                            autocomplete="off"
-                            required>
+                            autocomplete="off">
                             <option 
                                 value="1" 
                                 ${data && accountStatus == "1" && "selected"} >Active</option>
@@ -414,7 +413,7 @@ $(document).ready(function(){
                      <div class="row">
                          <div class="col-md-12 mb-3">
                              <div class="form-group">
-                                 <label>Ledger Classification<code>*</code> </label>
+                                 <label>Ledger Classification <code>*</code> </label>
                                  <input type="text" class="form-control validate" name="ledgerClassificationName"
                                      id="ledgerClassificationName" data-allowcharacters="[A-Z][a-z][ ][.][,]" required autocomplete="off">
                                  <div class="invalid-feedback d-block" id="invalid-input_ledgerClassificationName"></div>
@@ -603,7 +602,7 @@ $(document).ready(function(){
     $(document).on("click", ".btnEdit", function() {
         const id       = $(this).attr("id");
         const feedback = $(this).attr("feedback");
-        $("#fms_chartofaccts_modalheader").text("VIEW ACCOUNT");
+        $("#fms_chartofaccts_modalheader").text("EDIT ACCOUNT");
         $("#modal_fms_chartofaccts").modal("show");
 
         // Display preloader while waiting for the completion of getting the data

@@ -6,7 +6,7 @@ $(document).ready(function(){
 // OPENING ADD & EDIT MODAL
 $(document).on("click",".addLoan", function(){
     $("#modal_loan").modal("show");
-    $(".modal_loan_header").text("ADD LOAN");
+    $(".modal_loan_header").text("ADD LOAN TYPE");
     $("#modal_loan_content").html(preloader);
     let modal_loan_content    =   ` 
                                             <div class="modal-body">  
@@ -14,13 +14,13 @@ $(document).on("click",".addLoan", function(){
                                                     <div class="row"> 
                                                         <div class="col-md-12 col-sm-12">
                                                             <div class="form-group">
-                                                                <label for="">Loan Name <span class="text-danger">*</span></label>
+                                                                <label for="">Loan Type Name <span class="text-danger">*</span></label>
                                                                 <input 
                                                                     type="text" 
                                                                     class="form-control validate" 
                                                                     name="loanName" 
                                                                     id="inputloanName" 
-                                                                    data-allowcharacters="[A-Z][ ][a-z][0-9]" 
+                                                                    data-allowcharacters="[A-Z][ ][a-z][0-9][-][()]['][/]" 
                                                                     minlength="5" 
                                                                     maxlength="50" 
                                                                     unique
@@ -30,7 +30,7 @@ $(document).on("click",".addLoan", function(){
                                                         </div>
                                                         <div class="col-md-12 col-sm-12">
                                                             <div class="form-group">
-                                                                <label for="">Loan Status  <span class="text-danger">*</span></label>
+                                                                <label for="">Status  <strong class="text-danger">*</strong></label>
                                                                 <select class="form-control select2 validate" name="loanStatus" id="inputloanStatus">
                                                                     <option value="1">Active</option>
                                                                     <option value="0">Inactive</option>
@@ -42,8 +42,8 @@ $(document).on("click",".addLoan", function(){
                                                 </form>
                                             </div>
                                             <div class="modal-footer">
-                                                <button class="btn btn-primary px-5 p-2" id="btnSave">SAVE</button>
-                                                <button class="btn btn-danger px-5 p-2" id="btnCancel">CANCEL</button>
+                                                <button class="btn btn-primary btn-save" id="btnSave"><i class="fas fa-save"></i>&nbsp;SAVE</button>
+                                                <button class="btn btn-danger btn-cancel btnCancel"><i class="fas fa-ban"></i>&nbsp;CANCEL</button>
                                             </div>
                                             `;
     setTimeout(function(){
@@ -53,7 +53,7 @@ $(document).on("click",".addLoan", function(){
 });
 
 $(document).on("click",".editloan", function(){
-    $(".modal_loan_header").text("EDIT LOAN");
+    $(".modal_loan_header").text("EDIT LOAN TYPE");
     let loanID       =   $(this).data("loanid");
     let tableData       =   getTableData("hris_loan_tbl","","loanID="+loanID);
 
@@ -67,15 +67,15 @@ $(document).on("click",".editloan", function(){
                                                     <div class="row"> 
                                                         <div class="col-md-12 col-sm-12">
                                                             <div class="form-group">
-                                                                <label for="">Loan Name</label>
+                                                                <label for="">Loan Type Name</label>
                                                                 <input type="text" class="form-control validate" name="loanName" id="inputloanName" 
-                                                                    data-allowcharacters="[A-Z][ ][a-z][0-9]" minlength="5" maxlength="20" unique="${tableData[0]["loanID"]}" value="${tableData[0]["loanName"]}" required >
+                                                                    data-allowcharacters="[A-Z][ ][a-z][0-9][-][()]['][/]" minlength="5" maxlength="20" unique="${tableData[0]["loanID"]}" value="${tableData[0]["loanName"]}" required >
                                                                 <div class="invalid-feedback d-block" id="invalid-inputloanName"></div>
                                                             </div>
                                                         </div>
                                                         <div class="col-md-12 col-sm-12">
                                                             <div class="form-group">
-                                                                <label for="">Loan Status</label>
+                                                                <label for="">Status <strong class="text-danger">*</strong></label>
                                                                 <select class="form-control select2 validate" name="loanStatus" id="inputloanStatus">
                                                                     ${statusOption}
                                                                 </select>
@@ -86,8 +86,8 @@ $(document).on("click",".editloan", function(){
                                                 </form>
                                             </div>
                                             <div class="modal-footer">
-                                                <button class="btn btn-primary px-5 p-2" id="btnUpdate" data-loanid="${tableData[0]["loanID"]}">UPDATE</button>
-                                                <button class="btn btn-danger px-5 p-2" id="btnCancel">CANCEL</button>
+                                                <button class="btn btn-primary btn-save" id="btnUpdate" data-loanid="${tableData[0]["loanID"]}"><i class="fas fa-save"></i>&nbsp;UPDATE</button>
+                                                <button class="btn btn-danger btn-cancel btnCancel"><i class="fas fa-ban"></i>&nbsp;CANCEL</button>
                                             </div>
                                             `;
     setTimeout(function(){
@@ -111,7 +111,7 @@ $(document).on("click", "#btnSave", function(){
         data["tableData[updatedBy]"]     = sessionID;
         data["tableName"]                = "hris_loan_tbl";
         data["feedback"]                 = $("#inputloanName").val();
-        sweetAlertConfirmation("add", "Loan","modal_loan", null, data, true, tableContent);
+        sweetAlertConfirmation("add", "Loan Type","modal_loan", null, data, true, tableContent);
     }
 
 });
@@ -126,15 +126,15 @@ $(document).on("click", "#btnUpdate", function(){
         data["whereFilter"]              =  "loanID="+loanID;
         data["tableName"]                =  "hris_loan_tbl";
         data["feedback"]                 =  $("#inputloanName").val();
-        sweetAlertConfirmation("update", "Loan","modal_loan", null , data, true,    );
+        sweetAlertConfirmation("update", "Loan Type","modal_loan", null , data, true, tableContent);
     }
     
 });
 
-$(document).on("click","#btnCancel", function(){
+$(document).on("click",".btnCancel", function(){
     let condition = isFormEmpty("modal_loan_form");
     if(!condition){
-        sweetAlertConfirmation("cancel", "Loan","modal_loan");
+        sweetAlertConfirmation("cancel", "Loan Type","modal_loan");
     }else{
         $("#modal_loan").modal("hide");
     }
@@ -178,8 +178,8 @@ function tableContent(){
                     <table class="table table-bordered table-striped table-hover" id="tableLoan">
                         <thead>
                             <tr class="text-left">
-                                <th>Loan Code</th>
-                                <th>Loan Name</th>
+                                <th>Loan Type Code</th>
+                                <th>Loan Type Name</th>
                                 <th>Status</th>
                                 <th>Action</th>
                             </tr>

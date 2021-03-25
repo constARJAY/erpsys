@@ -6,6 +6,7 @@ class Sss_table extends CI_Controller {
     public function __construct()
     {
         parent::__construct();
+        isAllowed(28);
     }
 
     public function index()

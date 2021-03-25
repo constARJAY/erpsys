@@ -8,8 +8,8 @@
 						<li class="breadcrumb-item"><i class="zmdi zmdi-folder"></i> &nbsp;Masterfiles</li>
                         <li class="breadcrumb-item active">Schedule Setup</li>
                     </ul>
-                    <h1 class="mb-1 mt-1">Schedule Setup</h1>
-                    <span>Lorem ipsum dolor sit amet consectetur adipisicing elit. At, quae.</span>
+                    <h1 class="mb-1 mt-1">List of Schedule</h1>
+                    <span>This module is used to manage the schedule details.</span>
                 </div>
                 <div class="col-lg-4 col-sm-12 text-right">
                     <button type="button" class="btn btn-default btn-add" id="btnAdd"> <i class="icon-plus"></i> &nbsp;Add Schedule</button>

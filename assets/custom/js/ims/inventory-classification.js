@@ -12,15 +12,15 @@ $(document).on("click",".addClassification", function(){
                                                 <form id="modal_classification_form"> 
                                                     <div class="col-md-12 col-sm-12">
                                                         <div class="form-group">
-                                                            <label for="">Classification Name</label>
+                                                            <label for="">Classification Name <strong class="text-danger">*</strong></label>
                                                             <input type="text" class="form-control validate" name="classificationName" unique id="input_classificationName" 
-                                                                    data-allowcharacters="[A-Z][a-z][ ][0-9]" minlength="5" maxlength="20" required>
+                                                                    data-allowcharacters="[A-Z][a-z][ ][0-9][-][']" minlength="2" maxlength="50" required>
                                                             <div class="invalid-feedback d-block" id="invalid-input_classificationName"></div>
                                                         </div>
                                                     </div>
                                                     <div class="col-md-12 col-sm-12">
                                                         <div class="form-group">
-                                                            <label for="">Classification Status</label>
+                                                            <label for="">Status</label>
                                                             <select class="form-control select2 validate" name="classificationStatus" id="input_classificationStatus">
                                                                 <option value="1">Active</option>
                                                                 <option value="0">Inactive</option>
@@ -31,8 +31,8 @@ $(document).on("click",".addClassification", function(){
                                                 </form>
                                             </div>
                                             <div class="modal-footer">
-                                                <button class="btn btn-primary px-5 p-2" id="btnSave">SAVE</button>
-                                                <button class="btn btn-danger px-5 p-2" id="btnCancel">CANCEL</button>
+                                                <button class="btn btn-primary btn-save" id="btnSave"><i class="fas fa-save"></i>&nbsp;SAVE</button>
+                                                <button class="btn btn-danger btn-cancel btnCancel"><i class="fas fa-ban"></i>&nbsp;CANCEL</button>
                                             </div>
                                             `;
     setTimeout(function(){
@@ -53,14 +53,14 @@ $(document).on("click",".editClassification", function(){
                                                 <form id="modal_classification_form"> 
                                                     <div class="col-md-12 col-sm-12">
                                                         <div class="form-group">
-                                                            <label for="">Classification Name</label>
+                                                            <label for="">Classification Name <strong class="text-danger">*</strong></label>
                                                             <input 
                                                                 type="text" 
                                                                 class="form-control validate" 
                                                                 name="classificationName" id="input_classificationName" 
-                                                                data-allowcharacters="[A-Z][a-z][ ][0-9]" 
-                                                                minlength="5" 
-                                                                maxlength="20" 
+                                                                data-allowcharacters="[A-Z][a-z][ ][0-9][-][']" 
+                                                                minlength="2" 
+                                                                maxlength="50" 
                                                                 required  unique="${tableData[0]["classificationID"]}"
                                                                 value="${tableData[0]["classificationName"]}">
                                                             <div class="invalid-feedback d-block" id="invalid-input_classificationName"></div>
@@ -68,7 +68,7 @@ $(document).on("click",".editClassification", function(){
                                                     </div>
                                                     <div class="col-md-12 col-sm-12">
                                                         <div class="form-group">
-                                                            <label for="">Classification Status</label>
+                                                            <label for="">Status</label>
                                                             <select class="form-control select2 validate" name="classificationStatus" id="input_classificationStatus">
                                                                 ${statusOption}
                                                             </select>
@@ -78,8 +78,8 @@ $(document).on("click",".editClassification", function(){
                                                 </form>
                                             </div>
                                             <div class="modal-footer">
-                                                <button class="btn btn-primary px-5 p-2" id="btnUpdate" data-classificationid="${classificationID}">UPDATE</button>
-                                                <button class="btn btn-danger px-5 p-2" id="btnCancel">CANCEL</button>
+                                                <button class="btn btn-primary btn-save" id="btnUpdate" data-classificationid="${classificationID}">UPDATE</button>
+                                                <button class="btn btn-danger btn-cancel btnCancel"><i class="fas fa-ban"></i>&nbsp;CANCEL</button>
                                             </div>  
                                             `;
     setTimeout(function(){
@@ -127,7 +127,7 @@ $(document).on("click", "#btnUpdate", function(){
     
 });
 
-$(document).on("click","#btnCancel", function(){
+$(document).on("click",".btnCancel", function(){
     let condition = isFormEmpty("modal_classification_form");
     if(!condition){
         sweetAlertConfirmation("cancel", "Inventory Classification","modal_classification");

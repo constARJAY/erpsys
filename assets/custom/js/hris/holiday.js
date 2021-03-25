@@ -14,15 +14,15 @@ $(document).on("click",".addHoliday", function(){
                                                     <div class="row"> 
                                                         <div class="col-md-12 col-sm-12">
                                                             <div class="form-group">
-                                                                <label for="">Holiday Name</label>
+                                                                <label for="">Holiday Name <strong class="text-danger">*</strong></label>
                                                                 <input 
                                                                     type="text" 
                                                                     class="form-control validate" 
                                                                     name="holidayName" 
                                                                     id="inputholidayName" 
-                                                                    data-allowcharacters="[A-Z][ ][a-z][0-9]" 
+                                                                    data-allowcharacters="[A-Z][ ][a-z][0-9][-][()][']" 
                                                                     minlength="5" 
-                                                                    maxlength="50" 
+                                                                    maxlength="75" 
                                                                     unique
                                                                     required >
                                                                 <div class="invalid-feedback d-block" id="invalid-inputholidayName"></div>
@@ -30,7 +30,7 @@ $(document).on("click",".addHoliday", function(){
                                                         </div>
                                                         <div class="col-md-12 col-sm-12">
                                                             <div class="form-group">
-                                                                <label for="">Holiday Date</label>
+                                                                <label for="">Holiday Date <strong class="text-danger">*</strong></label>
                                                                 <input 
                                                                     type="button" 
                                                                     class="form-control daterange validate text-left" 
@@ -46,18 +46,19 @@ $(document).on("click",".addHoliday", function(){
                                                         </div>
                                                         <div class="col-md-6 col-sm-6">
                                                             <div class="form-group">
-                                                                <label for="">Holiday Type</label>
+                                                                <label for="">Holiday Type <strong class="text-danger">*</strong></label>
                                                                 <select class="form-control select2 validate" name="holidayType" id="inputholidayType" required>
                                                                     <option value="" dissabled>No selected</option>
                                                                     <option value="Regular Holiday">Regular Holiday</option>
-                                                                    <option value="Special Holiday">Special Holiday</option>
+                                                                    <option value="Special Non-Working Holiday">Special Non-Working Holiday</option>
+                                                                    <option value="Special Working Holiday">Special Working Holiday</option>
                                                                 </select>
                                                                 <div class="invalid-feedback d-block" id="invalid-inputholidayType"></div>
                                                             </div>
                                                         </div>
                                                         <div class="col-md-6 col-sm-6">
                                                             <div class="form-group">
-                                                                <label for="">Holiday Status</label>
+                                                                <label for="">Status <strong class="text-danger">*</strong></label>
                                                                 <select class="form-control select2 validate" name="holidayStatus" id="inputholidayStatus">
                                                                     <option value="1">Active</option>
                                                                     <option value="0">Inactive</option>
@@ -69,8 +70,8 @@ $(document).on("click",".addHoliday", function(){
                                                 </form>
                                             </div>
                                             <div class="modal-footer">
-                                                <button class="btn btn-primary px-5 p-2" id="btnSave">SAVE</button>
-                                                <button class="btn btn-danger px-5 p-2" id="btnCancel">CANCEL</button>
+                                                <button class="btn btn-primary btn-save" id="btnSave"><i class="fas fa-save"></i>&nbsp;SAVE</button>
+                                                <button class="btn btn-danger btn-cancel btnCancel"><i class="fas fa-ban"></i>&nbsp;CANCEL</button>
                                             </div>
                                             `;
     setTimeout(function(){
@@ -88,22 +89,39 @@ $(document).on("click",".editHoliday", function(){
     $("#modal_holiday").modal("show");
     $("#modal_holiday_content").html(preloader);
     let statusOption        = tableData[0]["holidayStatus"] == "1" ?`<option value="1" selected>Active</option> <option value="0" >Inactive</option>` : `<option value="1" >Active</option> <option value="0" selected>Inactive</option>`;
-    let holidayTypeOption   = tableData[0]["holidayType"] == "Regular Holiday" ? `<option dissabled>Select Holiday Type</option><option value="Regular Holiday" selected>Regular Holiday</option><option value="Special Holiday">Special Holiday</option>` : `<option value="" dissabled>Select Holiday Type</option><option value="Regular Holiday">Regular Holiday</option><option value="Special Holiday" selected>Special Holiday</option>`;
+    let holidayTypeOption   = `<option value="" dissabled>No selected</option>`;
+    switch(tableData[0]["holidayType"]){
+        case "Regular Holiday":
+            holidayTypeOption += `  <option value="Regular Holiday" selected>Regular Holiday</option>
+                                    <option value="Special Non-Working Holiday">Special Non-Working Holiday</option>
+                                    <option value="Special Working Holiday">Special Working Holiday</option>`;
+        break;
+        case"Special Non-Working Holiday":
+        holidayTypeOption += `  <option value="Regular Holiday">Regular Holiday</option>
+                                    <option value="Special Non-Working Holiday" selected>Special Non-Working Holiday</option>
+                                    <option value="Special Working Holiday">Special Working Holiday</option>`;
+        break;
+        default:
+            holidayTypeOption += `  <option value="Regular Holiday">Regular Holiday</option>
+                                    <option value="Special Non-Working Holiday">Special Non-Working Holiday</option>
+                                    <option value="Special Working Holiday" selected>Special Working Holiday</option>`;
+        break;
+    }
     let modal_holiday_content    =   ` 
     <div class="modal-body">  
                                                 <form id="modal_holiday_form">
                                                     <div class="row"> 
                                                         <div class="col-md-12 col-sm-12">
                                                             <div class="form-group">
-                                                                <label for="">Holiday Name</label>
+                                                                <label for="">Holiday Name <strong class="text-danger">*</strong></label>
                                                                 <input type="text" class="form-control validate" name="holidayName" id="inputholidayName" 
-                                                                    data-allowcharacters="[A-Z][ ][a-z][0-9]" minlength="5" maxlength="20" unique="${tableData[0]["holidayID"]}" value="${tableData[0]["holidayName"]}" required >
+                                                                    data-allowcharacters="[A-Z][ ][a-z][0-9][-][()][']" minlength="5" maxlength="75" unique="${tableData[0]["holidayID"]}" value="${tableData[0]["holidayName"]}" required >
                                                                 <div class="invalid-feedback d-block" id="invalid-inputholidayName"></div>
                                                             </div>
                                                         </div>
                                                         <div class="col-md-12 col-sm-12">
                                                             <div class="form-group">
-                                                                <label for="">Holiday Date</label>
+                                                                <label for="">Holiday Date <strong class="text-danger">*</strong></label>
                                                                 <input type="button" class="form-control text-left daterange validate" name="holidayDate" id="inputholidayDate" data-allowcharacters="[A-Z][ ][,][a-z][0-9]" 
                                                                     minlength="5"  maxlength="20" unique="${tableData[0]["holidayID"]}" value="${moment(tableData[0]["holidayDate"]).format("MMMM DD, YYYY")}" required >
                                                                 <div class="invalid-feedback d-block" id="invalid-inputholidayDate"></div>
@@ -111,8 +129,8 @@ $(document).on("click",".editHoliday", function(){
                                                         </div>
                                                         <div class="col-md-6 col-sm-6">
                                                             <div class="form-group">
-                                                                <label for="">Holiday Type</label>
-                                                                <select class="form-control select2 validate" name="holidayType" id="inputholidayType">
+                                                                <label for="">Holiday Type <strong class="text-danger">*</strong></label>
+                                                                <select class="form-control select2 validate" name="holidayType" id="inputholidayType" required>
                                                                     ${holidayTypeOption}
                                                                 </select>
                                                                 <div class="invalid-feedback d-block" id="invalid-inputholidayType"></div>
@@ -120,7 +138,7 @@ $(document).on("click",".editHoliday", function(){
                                                         </div>
                                                         <div class="col-md-6 col-sm-6">
                                                             <div class="form-group">
-                                                                <label for="">Holiday Status</label>
+                                                                <label for="">Status <strong class="text-danger">*</strong></label>
                                                                 <select class="form-control select2 validate" name="holidayStatus" id="inputholidayStatus">
                                                                     ${statusOption}
                                                                 </select>
@@ -131,8 +149,9 @@ $(document).on("click",".editHoliday", function(){
                                                 </form>
                                             </div>
                                             <div class="modal-footer">
-                                                <button class="btn btn-primary px-5 p-2" id="btnUpdate" data-holidayid="${tableData[0]["holidayID"]}">UPDATE</button>
-                                                <button class="btn btn-danger px-5 p-2" id="btnCancel">CANCEL</button>
+                                                <button class="btn btn-primary btn-save" id="btnUpdate" data-holidayid="${tableData[0]["holidayID"]}"><i class="fas fa-save"></i>&nbsp;UPDATE</button>
+                                                <button class="btn btn-danger btn-cancel btnCancel"><i class="fas fa-ban"></i>&nbsp;
+                                                CANCEL</button>
                                             </div>
                                             `;
     setTimeout(function(){
@@ -177,7 +196,7 @@ $(document).on("click", "#btnUpdate", function(){
     }
 });
 
-$(document).on("click","#btnCancel", function(){
+$(document).on("click",".btnCancel", function(){
     let condition = isFormEmpty("modal_holiday_form");
     if(!condition){
         sweetAlertConfirmation("cancel", "Holiday","modal_holiday");
@@ -194,8 +213,6 @@ $(document).on("click","#btnCancel", function(){
 
 
 // FUNCTIONS
-
-
 function initDataTables() {
             if ($.fn.DataTable.isDataTable('#tableHoliday')){
                 $('#tableHoliday').DataTable().destroy();
@@ -256,7 +273,7 @@ function tableContent(){
                         <tr>
                             <td>${item["holidayCode"]}</td>
                             <td>${item["holidayName"]}</td>
-                            <td>${moment(item["holidayDate"]).format("MMMM DD YYYY")}</td>
+                            <td>${moment(item["holidayDate"]).format("MMMM DD, YYYY")}</td>
                             <td>${item["holidayType"]}</td>
                             <td>${item["holidayStatus"] == 0 ? "<span class='badge badge-outline-danger w-100 p-2'>Inactive</span>" : "<span class='badge badge-outline-success w-100 p-2'>Active</span>"} </td>
                             <td class="text-center"> <button class="btn w-100 btn-primary d-flex justify-content-center align-items-center editHoliday" data-holidayid="${item["holidayID"]}"><i class="icon-pencil px-2"></i> <span class="d-none d-sm-none d-md-block d-lg-block d-xl-block">Edit&nbsp;</span> </button></td>

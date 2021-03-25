@@ -7,11 +7,12 @@ class Department extends CI_Controller {
     {
         parent::__construct();
         // $this->load->model("Companysetup_model", "company_setup");
+        isAllowed(18);
     }
 
     public function index()
     {
-        $data["title"] = "Department";
+        $data["title"] = "Department Masterfile";
 
         $this->load->view("template/header",$data);
         $this->load->view("hris/department/index");

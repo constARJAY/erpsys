@@ -7,11 +7,12 @@ class Designation extends CI_Controller {
     {
         parent::__construct();
         // $this->load->model("Companysetup_model", "company_setup");
+        isAllowed(17);
     }
 
     public function index()
     {
-        $data["title"] = "Designation";
+        $data["title"] = "Designation Masterfile";
 
         $this->load->view("template/header",$data);
         $this->load->view("hris/designation/index");

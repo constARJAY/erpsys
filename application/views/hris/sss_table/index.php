@@ -9,7 +9,7 @@
                         <li class="breadcrumb-item active">SSS Table</li>
                     </ul>
                     <h1 class="mb-1 mt-1">SSS Table</h1>
-                    <span>Lorem ipsum dolor sit amet consectetur adipisicing elit. Quaerat, nobis?</span>
+                    <span>This module is used to manage sss details.</span>
                     <span class="d-block text-warning">NOTE: This master file is for viewing purposes and payroll reference only.</span>
                 </div>
             </div>

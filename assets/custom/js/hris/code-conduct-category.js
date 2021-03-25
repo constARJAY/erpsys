@@ -3,10 +3,6 @@ $(document).ready(function(){
     tableContent();
 });
 
-
-
-
-
 // OPENING ADD & EDIT MODAL
 $(document).on("click",".addCodeConductCategory", function(){
     $("#modal_codeConductCategory").modal("show");
@@ -24,9 +20,9 @@ $(document).on("click",".addCodeConductCategory", function(){
                                                                     class="form-control validate" 
                                                                     name="codeConductCategoryName" 
                                                                     id="inputcodeConductCategoryName" 
-                                                                    data-allowcharacters="[A-Z][ ][a-z][0-9]" 
-                                                                    minlength="5" 
-                                                                    maxlength="50" 
+                                                                    data-allowcharacters="[A-Z][ ][a-z][0-9][-][()]['][/]" 
+                                                                    minlength="2" 
+                                                                    maxlength="75" 
                                                                     unique
                                                                     required >
                                                                 <div class="invalid-feedback d-block" id="invalid-inputcodeConductCategoryName"></div>
@@ -34,7 +30,7 @@ $(document).on("click",".addCodeConductCategory", function(){
                                                         </div>
                                                         <div class="col-md-12 col-sm-12">
                                                             <div class="form-group">
-                                                                <label for="">Code of Conduct Category Status  <span class="text-danger">*</span></label>
+                                                                <label for="">Status <strong class="text-danger">*</strong></label>
                                                                 <select class="form-control select2 validate" name="codeConductCategoryStatus" id="inputcodeConductCategoryStatus">
                                                                     <option value="1">Active</option>
                                                                     <option value="0">Inactive</option>
@@ -46,8 +42,8 @@ $(document).on("click",".addCodeConductCategory", function(){
                                                 </form>
                                             </div>
                                             <div class="modal-footer">
-                                                <button class="btn btn-primary px-5 p-2" id="btnSave">SAVE</button>
-                                                <button class="btn btn-danger px-5 p-2" id="btnCancel">CANCEL</button>
+                                                <button class="btn btn-primary btn-save" id="btnSave"><i class="fas fa-save"></i>&nbsp;SAVE</button>
+                                                <button class="btn btn-danger btn-cancel btnCancel"><i class="fas fa-ban"></i>&nbsp;CANCEL</button>
                                             </div>
                                             `;
     setTimeout(function(){
@@ -71,15 +67,15 @@ $(document).on("click",".editCodeConductCategory", function(){
                                                     <div class="row"> 
                                                         <div class="col-md-12 col-sm-12">
                                                             <div class="form-group">
-                                                                <label for="">Code of Conduct Category Name</label>
+                                                                <label for="">Code of Conduct Category Name <strong class="text-danger">*</strong></label>
                                                                 <input type="text" class="form-control validate" name="codeConductCategoryName" id="inputcodeConductCategoryName" 
-                                                                    data-allowcharacters="[A-Z][ ][a-z][0-9]" minlength="5" maxlength="20" unique="${tableData[0]["codeConductCategoryID"]}" value="${tableData[0]["codeConductCategoryName"]}" required >
+                                                                    data-allowcharacters="[A-Z][ ][a-z][0-9][-][()]['][/]" minlength="2" maxlength="75" unique="${tableData[0]["codeConductCategoryID"]}" value="${tableData[0]["codeConductCategoryName"]}" required >
                                                                 <div class="invalid-feedback d-block" id="invalid-inputcodeConductCategoryName"></div>
                                                             </div>
                                                         </div>
                                                         <div class="col-md-12 col-sm-12">
                                                             <div class="form-group">
-                                                                <label for="">Code of Conduct Category Status</label>
+                                                                <label for="">Status <strong class="text-danger">*</strong></label>
                                                                 <select class="form-control select2 validate" name="codeConductCategoryStatus" id="inputcodeConductCategoryStatus">
                                                                     ${statusOption}
                                                                 </select>
@@ -90,8 +86,8 @@ $(document).on("click",".editCodeConductCategory", function(){
                                                 </form>
                                             </div>
                                             <div class="modal-footer">
-                                                <button class="btn btn-primary px-5 p-2" id="btnUpdate" data-codeConductCategoryID="${tableData[0]["codeConductCategoryID"]}">UPDATE</button>
-                                                <button class="btn btn-danger px-5 p-2" id="btnCancel">CANCEL</button>
+                                                <button class="btn btn-primary btn-save" data-codeConductCategoryID="${tableData[0]["codeConductCategoryID"]}" id="btnSave"><i class="fas fa-save"></i>&nbsp;UPDATE</button>
+                                                <button class="btn btn-danger btn-cancel btnCancel"><i class="fas fa-ban"></i>&nbsp;CANCEL</button>
                                             </div>
                                             `;
     setTimeout(function(){
@@ -130,9 +126,9 @@ $(document).on("click", "#btnUpdate", function(){
     
 });
 
-$(document).on("click","#btnCancel", function(){
+$(document).on("click",".btnCancel", function(){
     let condition = isFormEmpty("modal_codeConductCategory_form");
-    if(condition == true){
+    if(!condition){
         sweetAlertConfirmation("cancel", "Code of Conduct Category Masterfile","modal_codeConductCategory");
     }else{
         $("#modal_codeConductCategory").modal("hide");
@@ -145,8 +141,6 @@ $(document).on("click","#btnCancel", function(){
 
 
 // FUNCTIONS
-
-
 function initDataTables() {
             if ($.fn.DataTable.isDataTable('#tableCodeConductCategory')){
                 $('#tableCodeConductCategory').DataTable().destroy();
@@ -158,7 +152,7 @@ function initDataTables() {
                 scrollX:        true,
                 scrollCollapse: true,
                 columnDefs: [
-                    { targets: 0, width: "10%" },
+                    { targets: 0, width: "5%" },
                     { targets: 1, width: "25%" },
                     { targets: 2, width: "5%" },
                     { targets: 3, width: "5%" }

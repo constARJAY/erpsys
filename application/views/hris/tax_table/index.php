@@ -9,7 +9,7 @@
                         <li class="breadcrumb-item active">Tax Table</li>
                     </ul>
                     <h1 class="mb-1 mt-1">Tax Table</h1>
-                    <span>Lorem ipsum dolor, sit amet consectetur adipisicing elit. Impedit, porro?</span>
+                    <span>This module is used to manage tax details.</span>
                     <span class="d-block text-warning">NOTE: This master file is for viewing purposes and payroll reference only.</span>
                 </div>
             </div>

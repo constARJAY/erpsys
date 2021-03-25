@@ -15,8 +15,8 @@ $(document).ready(function(){
                 { targets: 0, width: 100 },
                 { targets: 1, width: 100 },
                 { targets: 2, width: 500 },
-                { targets: 3, width: 50 },
-                { targets: 4, width: 50 },
+                { targets: 3, width: 80 },
+                { targets: 4, width: 80 },
             ],
         });
     }
@@ -232,7 +232,7 @@ $(document).ready(function(){
     $(document).on("click", ".btnEdit", function() {
         const id       = $(this).attr("id");
         const feedback = $(this).attr("feedback");
-        $("#hris_requirements_modalheader").text("VIEW REQUIREMENTS");
+        $("#hris_requirements_modalheader").text("EDIT REQUIREMENTS");
         $("#modal_hris_requirements").modal("show");
 
         // Display preloader while waiting for the completion of getting the data

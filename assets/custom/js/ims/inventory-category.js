@@ -27,7 +27,7 @@ $(document).ready(function(){
     function departmentContent(param = false) {
     // getTableData(tableName = null, columnName = “”, WHERE = “”, orderBy = “”) 
     const data = getTableData("ims_inventory_classification_tbl", 
-        "classificationID   ,classificationName", "", "");
+        "classificationID   ,classificationName", "", "classificationStatus = 1");
         
             let html = ` <option value="" disabled selected ${!param && "selected"}>No Selected</option>`;
             data.map((item, index, array) => {
@@ -62,7 +62,7 @@ $(document).ready(function(){
                 let html = `
                 <table class="table table-bordered table-striped table-hover" id="tableInventoryCategory">
                     <thead>
-                    <tr class="text-center">
+                    <tr>
                         <th>Item Category Code</th>
                         <th>Category Name</th>
                         <th>Classification Name</th>
@@ -216,7 +216,7 @@ $(document).ready(function(){
 
     // ----- OPEN ADD MODAL -----
     $(document).on("click", "#btnAdd", function() {
-        $("#inventory_category_modalheader").text("ADD CATEGORY");
+        $("#inventory_category_modalheader").text("ADD INVENTORY CATEGORY");
         $("#modal_inventory_category").modal("show");
         $("#modal_inventory_category_content").html(preloader);
         const content = modalContent();
@@ -249,7 +249,7 @@ $(document).ready(function(){
     $(document).on("click", ".btnEdit", function() {
         const id       = $(this).attr("id");
         const feedback = $(this).attr("feedback");
-        $("#inventory_category_modalheader").text("VIEW CATEGORY");
+        $("#inventory_category_modalheader").text("EDIT INVENTORY CATEGORY");
         $("#modal_inventory_category").modal("show");
 
         // Display preloader while waiting for the completion of getting the data

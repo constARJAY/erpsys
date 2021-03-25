@@ -7,6 +7,7 @@ class List_stocks extends CI_Controller {
     {
         parent::__construct();
         // $this->load->model("Companysetup_model", "company_setup");
+        isAllowed(34);
     }
 
     public function index()

@@ -3,6 +3,7 @@
     $sessionID  =   $this->session->has_userdata('adminSessionID') ? $this->session->userdata('adminSessionID') : redirect(base_url("login"));
     $sessionUserAccount = getAdminSessionAccount();
 
+    $sessionRoleID = $sessionUserAccount->role;
 
 ?>
 
@@ -69,7 +70,7 @@
 
 <div id="body" class="theme-blackbox">
     <!-- Page Loader -->
-    <div class="page-loader-wrapper" base_url="<?= base_url() ?>" session="<?= $sessionID ?>" role="1">
+    <div class="page-loader-wrapper" base_url="<?= base_url() ?>" session="<?= $sessionID ?>" role="<?= $sessionRoleID ?>">
         <div class="loader">
             <div class="mt-3"><img class="zmdi-hc-spin w60" src="<?= base_url() ?>assets/images/loader.svg" alt="Amaze"></div>
             <p>Please wait...</p>        
@@ -206,7 +207,7 @@
                 
                 if (count($moduleCategory) > 0) {
                     foreach ($moduleCategory as $category) {
-                        $icon = $category["icon"];
+                        $icon = $category["icon"] ? $category["icon"] : "default.svg";
                         $moduleLength = count($category["modules"]);
 
                         if ($moduleLength > 0) {
@@ -223,7 +224,7 @@
                                 <div class="row">';
                                 foreach ($category["modules"] as $item) {
                                     $html .= '
-                                    <div class="col-xl-3 col-md-4 col-sm-12">
+                                    <div class="col-xl-3 col-md-12 col-sm-12">
                                     <li class="w-100">
                                         <a href="'.base_url().strtolower($item["controller"]).'">'.$item["name"].'</a>
                                     </li>
@@ -251,7 +252,7 @@
 
                 if (count($moduleNoCategory) > 0) {
                     foreach ($moduleNoCategory as $category) {
-                        $icon = $category["icon"];
+                        $icon = $category["icon"] ? $category["icon"] : "default.svg";
                         $html .= '
                         <li class="">
                             <a href="'.base_url().strtolower($category["controller"]).'">

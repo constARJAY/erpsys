@@ -7,11 +7,12 @@ class Requirements extends CI_Controller {
     {
         parent::__construct();
         // $this->load->model("Companysetup_model", "company_setup");
+        isAllowed(19);
     }
 
     public function index()
     {
-        $data["title"] = "Requirements";
+        $data["title"] = "Requirement Masterfile";
 
         $this->load->view("template/header",$data);
         $this->load->view("hris/requirements/index");

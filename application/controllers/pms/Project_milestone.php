@@ -7,6 +7,7 @@ class Project_milestone extends CI_Controller {
     {
         parent::__construct();
         // $this->load->model("Companysetup_model", "company_setup");
+        isAllowed(10);
     }
 
     public function index()
