@@ -1,4 +1,4 @@
-<div class="body_area">
+<div class="body_area after_bg">
     <div class="block-header">
         <div class="container">
             <div class="row clearfix">
@@ -6,13 +6,13 @@
                     <ul class="breadcrumb pl-0 pb-0 ">
                         <li class="breadcrumb-item"><a href="#"><i class="zmdi zmdi-home"></i>&nbsp;Dashboard</a></li>
                         <li class="breadcrumb-item"><i class="zmdi zmdi-folder"></i>&nbsp;Masterfile</li>
-                        <li class="breadcrumb-item active">Code of Conduct Section Masterfile</li>
+                        <li class="breadcrumb-item active">Code of Conduct Section</li>
                     </ul>
                     <h1 class="mb-1 mt-1">List of Code of Code of Conduct Section</h1>
                     <span>This module is used to manage the code of conduct section details.</span>
                 </div>
                 <div class="col-4 d-flex justify-content-end align-items-center">
-                    <button class="btn btn-default btn-add ml-2 d-flex justify-content-center align-items-center addCodeConductSection"><i class="icon-plus px-2"></i> <span class="d-none d-sm-none d-md-block d-lg-block d-xl-block">Add&nbsp;</span> Code Conduct Section</button>
+                    <button class="btn btn-default btn-add ml-2 d-flex justify-content-center align-items-center addCodeConductSection"><i class="icon-plus px-2"></i> <span class="d-none d-sm-none d-md-block d-lg-block d-xl-block">Add&nbsp;</span> Code of Conduct Section</button>
                 </div>
             </div>
         </div>
@@ -20,8 +20,10 @@
 
     <div class="container">
 		<div class="row clearfix row-deck">
-            <div class="col-12">
-                <div class="table-responsive" id="table_content"></div>
+            <div class="card p-3">
+                <div class="col-12">
+                    <div class="table-responsive" id="table_content"></div>
+                </div>
             </div>
         </div>
 	</div>

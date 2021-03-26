@@ -9,7 +9,7 @@ class Change_schedule extends CI_Controller {
         isAllowed(60);
     }
 
-    public function index()
+    public function index($id = "")
     {
         $data["title"] = "Change Schedule Form";
         $this->load->view("template/header", $data);

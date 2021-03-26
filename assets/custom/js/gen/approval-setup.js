@@ -14,7 +14,7 @@ $(document).on("change","#select2-modules", function(){
     $(".approval-list").html(preloader);
     let position_list   =   `<div class="card my-0 p-3">
                                 <div class="d-flex justify-content-center align-items-center">
-                                    <h6 class="module-header text-gray">No position found</h6> 
+                                    <h6 class="module-header text-gray">No role found</h6> 
                                 </div>
                             </div>`;
 
@@ -22,10 +22,10 @@ $(document).on("change","#select2-modules", function(){
     if(approvalRole.length > 0){
         position_list = viewAttachRole(thisValue);
     }
-    
+    let buttonName  =   approvalRole.length > 0  ? "Update Selected Role/s" : "Select Role/s"
     position_list   +=   `  <div class="card my-0 p-1">
                                 <div class="d-flex justify-content-center align-items-center">
-                                    <button class="btn btn-primary" module="${thisValue}" id="btn-approval_role">Update Attach Role</button>
+                                    <button class="btn btn-primary" module="${thisValue}" id="btn-approval_role">${buttonName}</button>
                                 </div>
                             </div>`;
     setTimeout(function(){
@@ -59,8 +59,8 @@ $(document).on("click","#btn-approval_role", function(){
     }
     position_list   +=   `  <div class="card my-0 p-1">
                                 <div class="d-flex justify-content-center align-items-center py-2">
-                                    <button class="btn btn-primary px-5 p-2 mx-2" module="${thisModuleID}" id="update_attach-role">UPDATE</button>
-                                    <button class="btn btn-danger px-5 p-2 mx-2" module="${thisModuleID}" id="cancel_attach-role">CANCEL</button>
+                                    <button class="btn btn-update px-5 p-2 mx-2" module="${thisModuleID}" id="update_attach-role"><i class="fas fa-save"></i>&nbsp;Update</button>
+                                    <button class="btn btn-cancel px-5 p-2 mx-2" module="${thisModuleID}" id="cancel_attach-role"><i class="fas fa-ban"></i>&nbsp;Cancel</button>
                                 </div>
                             </div>`;
     setTimeout(function(){$(".position-list").html(position_list);},500);
@@ -90,6 +90,8 @@ $(document).on("click", "#update_attach-role", function(){
         success:function(data){
             if(data){ 
             let position_list   = viewAttachRole(moduleID);
+            // let buttonName  =   approvalRole.length > 0  ? "Update Selected Role/s" : "Select Role/s"
+            console.log(position_list);
                 position_list   +=   `  <div class="card my-0 p-1">
                                             <div class="d-flex justify-content-center align-items-center">
                                                 <button class="btn btn-primary" module="${moduleID}" id="btn-approval_role">Update Attach Role</button>
@@ -119,13 +121,14 @@ $(document).on("click", "#cancel_attach-role", function(){
             if(approvalRole.length < 1 ){
                 position_list   += `<div class="card my-0 p-3">
                                         <div class="d-flex justify-content-center align-items-center">
-                                            <h6 class="module-header text-gray">No position found</h6> 
+                                            <h6 class="module-header text-gray">No role found</h6> 
                                         </div>
                                     </div>`;
             }
+    let buttonName  =   approvalRole.length > 0  ? "Update Selected Role/s" : "Select Role/s";
     position_list   +=   `  <div class="card my-0 p-1">
                                 <div class="d-flex justify-content-center align-items-center">
-                                    <button class="btn btn-primary" module="${thisValue}" id="btn-approval_role">Update Attach Role</button>
+                                    <button class="btn btn-primary" module="${thisValue}" id="btn-approval_role">${buttonName}</button>
                                 </div>
                             </div>`;
     setTimeout(function(){
@@ -147,20 +150,14 @@ $(document).on("click", ".role-list", function(){
     setTimeout(function(){ getApproval(moduleID,roleID);  }, 500);
      // Script bellow is for designing
      $(".card").removeClass('module-active');
-     $(".module-header").addClass("text-dark").removeClass("text-primary font-weight-bold");
+     $(".module-header").addClass("text-dark").removeClass("text-primary color-active font-weight-bold");
     
      $(this).addClass('module-active');
-     $(this).find(".module-header").removeClass("text-dark").addClass("text-primary font-weight-bold");
+     $(this).find(".module-header").removeClass("text-dark").addClass("text-primary color-active font-weight-bold");
 
     
 
 });
-
-
-
-
-
-
 
 
 // BTN SETTING UP THE APPROVERS
@@ -233,11 +230,6 @@ $(document).on("click","#approvalCancelBtn", function(){
     }
     
 });
-
-
-
-
-
 
 function viewAttachRole(moduleID = null){
     if(moduleID == null){
@@ -316,13 +308,14 @@ function getApproval(moduleID = null,roleID = null){
        
             let approvalArray =    approval[0]["userAccountID"].split("|");
             approvalArray.map((items,index) =>{
-                let approvalItems = getTableData("gen_user_account_tbl", "", "userAccountID = '"+ items +"' ");
-                let approverName    = approvalItems.length > 0 ? approvalItems[0]["firstname"]+" "+approvalItems[0]["lastname"] : `Level ${index + 1} Approver N / A `;
-                let approverRole    = approvalItems.length > 0 ? approvalItems[0]["role"]: "Department";
+                let approvalItems   = getTableData("hris_employee_list_tbl", "", "employeeID = '"+ items +"' ");
+                
+                let approverName    = approvalItems.length > 0 ? approvalItems[0]["employeeFirstname"]+" "+approvalItems[0]["employeeLastname"] : `Level ${index + 1} Approver N / A `;
+                let approverRole    = approvalItems.length > 0 ? getTableData("gen_user_role_tbl","","roleID="+approvalItems[0].roleID) : "Department";
                 approvalList    +=   ` <div class="row border rounded m-2 py-1">
                                             <div class="col-3 col-lg-3 col-xl-1 d-flex align-items-center"><img class="img-fluid rounded-circle" src="assets/images/profile-images/default.jpg" alt="avatar" height="70" width="70"></div>
                                             <div class="col-5 col-lg-6 col-xl-9 d-flex justify-content-start align-items-center">
-                                                <span>${approverName} <br> <small class="text-primary">${approverRole} | Designation</small>    
+                                                <span>${approverName} <br> <small class="text-primary">${approverRole != "Department" ? approverRole[0].roleName : approverRole} | Designation</small>    
                                                 </span>
                                             </div>
                                             <div class="col-4 col-lg-3 col-xl-2 d-flex justify-content-center align-items-center">
@@ -338,7 +331,7 @@ function getApproval(moduleID = null,roleID = null){
                                         <div class="col-3 col-lg-3 col-xl-1 d-flex align-items-center"><img class="img-fluid rounded-circle" src="assets/images/profile-images/default.jpg" alt="avatar" height="70" width="70"></div>
                                         <div class="col-5 col-lg-6 col-xl-9 d-flex justify-content-start align-items-center">
                                             <span>
-                                                Level ${i + 1} Name Approver  <br>
+                                                Name of Approver  <br>
                                                 <small class="text-primary">Department | Designation</small>    
                                             </span>
                                         </div>
@@ -398,8 +391,8 @@ function approvalModalContent(approvalID){
 
 
 
-    modalFooterContent = `  <button class="btn btn-primary px-5 p-2" approval="${approvalTableData[0]["approvalID"]}" module="${approvalTableData[0]["moduleID"]}" role="${approvalTableData[0]["roleID"]}" id="approvalUpdateBtn">UPDATE</button>
-                            <button class="btn btn-danger px-5 p-2" data-dismiss="modal" id="approvalCancelBtn">CANCEL</button>`;
+    modalFooterContent = `  <button class="btn btn-update" approval="${approvalTableData[0]["approvalID"]}" module="${approvalTableData[0]["moduleID"]}" role="${approvalTableData[0]["roleID"]}" id="approvalUpdateBtn"><i class="fas fa-save"></i>&nbsp;Update</button>
+                            <button class="btn btn-cancel" data-dismiss="modal" id="approvalCancelBtn"><i class="fas fa-ban"></i>&nbsp;Cancel</button>`;
 
 
     $(modalBody).html(modalBodyContent);
@@ -409,10 +402,10 @@ function approvalModalContent(approvalID){
 }
 
 function userAccountList(approvers){
-    let tableData       = getTableData("gen_user_account_tbl", "", "userAccountID NOT IN("+approvers+")   "); 
+    let tableData       = getTableData("hris_employee_list_tbl", "", "employeeID NOT IN("+approvers+")   "); 
     let returnValue     = `<option value="" dissabled>Select Role</option><option value="0">N/A</option>`;
     tableData. map((items,index)=>{
-        returnValue += `<option value="${items["userAccountID"]}">${items["firstname"]} ${items["lastname"]}</option>`;
+        returnValue += `<option value="${items["employeeID"]}">${items["employeeFirstname"]} ${items["employeeLastname"]}</option>`;
     });
 
     return  returnValue;
@@ -420,8 +413,8 @@ function userAccountList(approvers){
 
 function approvalList(userAccountID){
     let returnData              = "";
-    let optionApproverList      = getTableData("gen_user_account_tbl","","userAccountID="+userAccountID);
-        optionApproverList.length > 0 ? returnData += `<option value="${optionApproverList[0]["userAccountID"]}" selected>${optionApproverList[0]["firstname"]} ${optionApproverList[0]["lastname"]}</option>` : `<option value="0" selected>N/A</option>` ;
+    let optionApproverList      = getTableData("hris_employee_list_tbl","","employeeID="+userAccountID);
+        optionApproverList.length > 0 ? returnData += `<option value="${optionApproverList[0]["employeeID"]}" selected>${optionApproverList[0]["employeeFirstname"]} ${optionApproverList[0]["employeeLastname"]}</option>` : `<option value="0" selected>N/A</option>` ;
         
     return returnData;
 }

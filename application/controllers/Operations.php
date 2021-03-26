@@ -104,10 +104,11 @@ class Operations extends CI_Controller {
     {
         $employeeID              = $this->input->post("employeeID") ? $this->input->post("employeeID") : false;
         $moduleID                = $this->input->post("moduleID") ? $this->input->post("moduleID") : false;
+        $tableID                 = $this->input->post("tableID") ? $this->input->post("tableID") : false;
         $notificationTitle       = $this->input->post("notificationTitle") ? $this->input->post("notificationTitle") : false;
         $notificationDescription = $this->input->post("notificationDescription") ? $this->input->post("notificationDescription") : false;
         $notificationType        = $this->input->post("notificationType") ? $this->input->post("notificationType") : false;
-        echo json_encode(insertNotificationData($employeeID, $moduleID, $notificationTitle, $notificationDescription, $notificationType));
+        echo json_encode(insertNotificationData($employeeID, $moduleID, $tableID, $notificationTitle, $notificationDescription, $notificationType));
     }
 
     public function updateTableData()

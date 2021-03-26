@@ -1,4 +1,4 @@
-<div class="body_area">
+<div class="body_area after_bg">
     <div class="block-header">
         <div class="container">
             <div class="row clearfix">
@@ -20,8 +20,10 @@
 
     <div class="container">
 		<div class="row clearfix row-deck">
-            <div class="col-12">
-                <div class="table-responsive" id="table_content"></div>
+            <div class="card p-3">
+                <div class="col-12">
+                    <div class="table-responsive" id="table_content"></div>
+                </div>
             </div>
         </div>
 	</div>

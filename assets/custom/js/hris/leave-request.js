@@ -20,38 +20,16 @@ $(document).ready(function () {
 				serverSide: false,
 				// scrollX: true,
 				scrollCollapse: true,
-				columnDefs: [{
-						targets: 0,
-						width: 80
-					},
-					{
-						targets: 1,
-						width: 150
-					},
-					{
-						targets: 2,
-						width: 150
-					},
-					{
-						targets: 3,
-						width: 150
-					},
-					{
-						targets: 4,
-						width: 150
-					},
-					{
-						targets: 5,
-						width: 150
-					},
-					{
-						targets: 6,
-						width: 80
-					},
-					{
-						targets: 7,
-						width: 80
-					},
+				columnDefs: [
+					{ targets: 0, width: 150 },
+					{ targets: 1, width: 150 },
+					{ targets: 2, width: 150 },
+					{ targets: 3, width: 150 },
+					{ targets: 4, width: 150 },
+					{ targets: 5, width: 150 },
+					{ targets: 6, width: 150 },
+					{ targets: 7, width: 80  },
+					{ targets: 8, width: 80 },
 				],
 			});
 
@@ -65,38 +43,16 @@ $(document).ready(function () {
 				serverSide: false,
 				// scrollX: true,
 				scrollCollapse: true,
-				columnDefs: [{
-						targets: 0,
-						width: 80
-					},
-					{
-						targets: 1,
-						width: 150
-					},
-					{
-						targets: 2,
-						width: 150
-					},
-					{
-						targets: 3,
-						width: 150
-					},
-					{
-						targets: 4,
-						width: 150
-					},
-					{
-						targets: 5,
-						width: 150
-					},
-					{
-						targets: 6,
-						width: 80
-					},
-					{
-						targets: 7,
-						width: 80
-					},
+				columnDefs: [
+					{ targets: 0, width: 150 },
+					{ targets: 1, width: 150 },
+					{ targets: 2, width: 150 },
+					{ targets: 3, width: 150 },
+					{ targets: 4, width: 150 },
+					{ targets: 5, width: 150 },
+					{ targets: 6, width: 150 },
+					{ targets: 7, width: 80  },
+					{ targets: 8, width: 80 },
 				],
 			});
 	}
@@ -145,7 +101,8 @@ $(document).ready(function () {
 	function forApprovalContent() {
 		$("#tableForApprovalParent").html(preloader);
 		let scheduleData = getTableData(
-			"hris_leave_request_tbl LEFT JOIN gen_user_account_tbl ON hris_leave_request_tbl.employeeID = gen_user_account_tbl.userAccountID",
+			`hris_leave_request_tbl LEFT JOIN hris_employee_list_tbl
+			USING(employeeID)`,
 			"",
 			`employeeID != ${sessionID} AND leaveRequestStatus != 0 AND leaveRequestStatus != 4 ORDER BY leaveRequestID DESC`
 		);
@@ -156,6 +113,7 @@ $(document).ready(function () {
                 <tr>
                     <th>Code</th>
                     <th>Employee Name</th>
+					<th>Date Created</th>
                     <th>Date From</th>
                     <th>Date To</th>
                     <th>Remaining Leave</th>
@@ -175,7 +133,8 @@ $(document).ready(function () {
 				html += `
 				<tr>
 					<td>${item.leaveRequestCode}</td>
-					<td>${item.firstname+' '+item.lastname}</td>
+					<td>${item.employeeFirstname + ' ' +item.employeeLastname}</td>
+					<td>${moment(item.createdAt).format("MMMM DD, YYYY")}</td>
 					<td>${moment(item.leaveRequestDateFrom).format("MMMM DD, YYYY")}</td>
                     <td>${moment(item.leaveRequestDateTo).format("MMMM DD, YYYY")}</td>
                     <td>${item.leaveRequestNumberOfDate}</td>
@@ -206,7 +165,8 @@ $(document).ready(function () {
 	function myFormsContent() {
 		$("#tableMyFormsParent").html(preloader);
 		let scheduleData = getTableData(
-			"hris_leave_request_tbl LEFT JOIN gen_user_account_tbl ON hris_leave_request_tbl.employeeID = gen_user_account_tbl.userAccountID",
+			`hris_leave_request_tbl LEFT JOIN hris_employee_list_tbl
+			USING(employeeID)`,
 			"",
 			`employeeID = ${sessionID}  ORDER BY leaveRequestID DESC`
 		);
@@ -217,6 +177,7 @@ $(document).ready(function () {
                 <tr>
                     <th>Code</th>
                     <th>Employee Name</th>
+					<th>Date Created</th>
                     <th>Date From</th>
                     <th>Date To</th>
                     <th>Remaining Leave</th>
@@ -245,7 +206,8 @@ $(document).ready(function () {
 			html += `
             <tr>
                 <td>${item.leaveRequestCode}</td>
-                <td>${item.firstname+' '+item.lastname}</td>
+                <td>${item.employeeFirstname + ' ' + item.employeeLastname}</td>
+				<td>${moment(item.createdAt).format("MMMM DD, YYYY")}</td>
                 <td>${moment(item.leaveRequestDateFrom).format("MMMM DD, YYYY")}</td>
                 <td>${moment(item.leaveRequestDateTo).format("MMMM DD, YYYY")}</td>
                 <td>${item.leaveRequestNumberOfDate}</td>
@@ -468,7 +430,7 @@ $(document).ready(function () {
             </div>
             <div class="col-md-4 col-sm-12">
             <div class="form-group">
-                <label>Date <code> *</code></label>&nbsp;
+                <label>Date ${!disabled ? "<code>*</code>" : ""}</label>&nbsp;
 				<input type="text" 
                         class="form-control leaveRequestDateFromdata" 
                         id="leaveRequestDate" 
@@ -525,7 +487,7 @@ $(document).ready(function () {
         </div>
             <div class="col-md-12 col-sm-12" >
                 <div class="form-group">
-                    <label>Reason <code ${disabled}>*</code></label>
+                    <label>Reason ${!disabled ? "<code>*</code>" : ""}</label>
                     <textarea class="form-control validate"
                         data-allowcharacters="[a-z][A-Z][0-9][ ][.][,][-][()]['][/][&]"
                         minlength="1"
@@ -552,11 +514,11 @@ $(document).ready(function () {
 			initAll();
 			initDataTables();
 			daterange();
-			
+
 			if (leaveRequestDate) {
 				let dateArr = leaveRequestDate.split(" - ");
-				let start = moment(dateArr[0]).format("MMMM D, YYYY"), 
-					end   = moment(dateArr[1]).format("MMMM D, YYYY");
+				let start = moment(dateArr[0]).format("MMMM D, YYYY"),
+					end = moment(dateArr[1]).format("MMMM D, YYYY");
 				cb(start, end);
 			}
 			return html;
@@ -569,14 +531,15 @@ $(document).ready(function () {
 
 	function cb(start, end = "") {
 		let from = moment(start).format('YYYY-MM-DD'),
-			to   = moment(end).format('YYYY-MM-DD');
-		
+			to = moment(end).format('YYYY-MM-DD');
+
 		$("#leaveRequestDate").data('daterangepicker').setStartDate(start || from);
 		$("#leaveRequestDate").data('daterangepicker').setEndDate(end || to);
 
 		$("#leaveRequestDateFrom").val(from);
 		$("#leaveRequestDateTo").val(to);
-		
+
+
 		var daysDiff = dateDiffInDays(new Date(start), new Date(end));
 		$("#leaveRequestNumberOfDate").val(daysDiff);
 	}
@@ -818,7 +781,7 @@ $(document).ready(function () {
 			const data = getData(action, 1, "submit", feedback, id);
 
 			let notificationData = {
-				moduleID: 13,
+				moduleID: 55,
 				notificationTitle: "Leave Request",
 				notificationDescription: `${sessionID} asked for your approval.`,
 				notificationType: 2,
@@ -919,7 +882,7 @@ $(document).ready(function () {
 			if (isImLastApprover(approversID, approversDate)) {
 				status = 2;
 				notificationData = {
-					moduleID: 13,
+					moduleID: 55,
 					notificationTitle: "Leave Request",
 					notificationDescription: `${tableData[0].leaveRequestCode}: Your request has been approved.`,
 					notificationType: 2,
@@ -928,7 +891,7 @@ $(document).ready(function () {
 			} else {
 				status = 1;
 				notificationData = {
-					moduleID: 13,
+					moduleID: 55,
 					notificationTitle: "Leave Request",
 					notificationDescription: `${employeeID} asked for your approval.`,
 					notificationType: 2,
@@ -1007,7 +970,7 @@ $(document).ready(function () {
 				data["tableData[approversDate]"] = updateApproveDate(approversDate);
 
 				let notificationData = {
-					moduleID: 13,
+					moduleID: 55,
 					notificationTitle: "Leave Request",
 					notificationDescription: `${tableData[0].leaveRequestCode}: Your request has been denied.`,
 					notificationType: 2,

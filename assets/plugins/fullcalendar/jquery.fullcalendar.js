@@ -46,7 +46,7 @@
             const dateFrom   = moment(new Date(calEvent.start._d));
             const dateTo     = moment(new Date(calEvent.end._d));
             const eventDate  = moment(new Date(calEvent.start._d)).format("MMMM DD, YYYY")+" - "+moment(new Date(calEvent.end._d)).format("MMMM DD, YYYY");
-            const modalButtons = `<button type="button" class="btn btn-save update-event submit-btn" data-calendarid="${calendarID}"><i class="fas fa-save"></i>&nbsp;UPDATE EVENT</button>
+            const modalButtons = `<button type="button" class="btn btn-save update-event submit-btn" data-calendarid="${calendarID}"><i class="fas fa-save"></i>&nbsp;Update</button>
                                   <button type="button" class="btn btn-cancel delete-event submit-btn"><i class="fas fa-trash"></i>&nbsp;DELETE</button>`;
             // modalButtons = `<button type="button" class="btn btn-primary save-event submit-btn">CREATE EVENT</button>
             //                 <button type="button" class="btn btn-danger delete-event submit-btn" id="btn-cancel">CANCEL</button>`;
@@ -208,9 +208,9 @@
             defaultView: 'month',  
             handleWindowResize: true,  
             header: {
-                left: 'prev,next today',
+                left: 'prev',
                 center: 'title',
-                right: 'month'
+                right: 'next'
             },
             events: getAvailabilityCalendar,
             editable: true,
@@ -298,8 +298,8 @@ function calendarDateRangerPicker(){
 
 function addingEvent(data = null){
     let eventDate = data == null ? moment().format("MMMM DD, YYYY")+ " - "+ moment().format("MMMM DD, YYYY"): data;  
-    let  modalButtons           = ` <button type="button" class="btn btn-save save-event submit-btn"><i class="fas fa-save"></i>&nbsp;CREATE EVENT</button>
-                                    <button type="button" class="btn btn-cancel delete-event submit-btn" data-dismiss="modal" id="btn-cancel"><i class="fas fa-ban"></i>&nbsp;CANCEL</button>`;
+    let  modalButtons           = ` <button type="button" class="btn btn-save save-event submit-btn"><i class="fas fa-save"></i>&nbsp;Save</button>
+                                    <button type="button" class="btn btn-cancel btn-close" data-dismiss="modal" id="btn-cancel"><i class="fas fa-ban"></i>&nbsp;Cancel</button>`;
     const   my_event_content    = ` <div class="modal-body">
         <div class="form-group">
             <label>Event Name <span class="text-danger">*</span></label>
@@ -336,21 +336,34 @@ function addingEvent(data = null){
 
 $(document).on("click", ".save-event", function (e) {
     let condition  = validateForm("my_event_content");
-    if(condition == true){
-        e.preventDefault();
-            const eventName  = $("#edit-eventname").val();
-            const background = $("#edit-eventcolor").val();
-            const newDate    = $(".calendarDateRangerPicker").val().split("-");
-            let dateFrom     = moment(new Date(newDate[0])).format("YYYY-MM-DD");
-            let dateTo       = moment(new Date(newDate[1])).format("YYYY-MM-DD");
-            const data       = getFormData("my_event_content", true);
-            data["tableData"]["eventCalendarName"]          = eventName;
-            data["tableData"]["eventCalendarBackground"]    = background;
-            data["tableData"]["eventCalendarDateFrom"]      = dateFrom;
-            data["tableData"]["eventCalendarDateTo"]        = dateTo;
-            data["tableData"]["updatedBy"]   =  sessionID;
-            data["tableName"]                =  "hris_event_calendar_tbl";
-            data["feedback"]                 =  eventName;
-            sweetAlertConfirmation("add", "Event","my_event", null, data, true, callCalendar);
+    let eventColor = $("#edit-eventcolor").val();
+            if(condition==true && $("#edit-eventcolor").val() != null ){
+                e.preventDefault();
+                    const eventName  = $("#edit-eventname").val();
+                    const background = $("#edit-eventcolor").val();
+                    const newDate    = $(".calendarDateRangerPicker").val().split("-");
+                    let dateFrom     = moment(new Date(newDate[0])).format("YYYY-MM-DD");
+                    let dateTo       = moment(new Date(newDate[1])).format("YYYY-MM-DD");
+                    const data       = getFormData("my_event_content", true);
+                    data["tableData"]["eventCalendarName"]          = eventName;
+                    data["tableData"]["eventCalendarBackground"]    = background;
+                    data["tableData"]["eventCalendarDateFrom"]      = dateFrom;
+                    data["tableData"]["eventCalendarDateTo"]        = dateTo;
+                    data["tableData"]["updatedBy"]   =  sessionID;
+                    data["tableName"]                =  "hris_event_calendar_tbl";
+                    data["feedback"]                 =  eventName;
+                    sweetAlertConfirmation("add", "Event","my_event", null, data, true, callCalendar);
+            }
+});
+
+$(document).on("click", ".btn-close", function(){
+    let flag = 0 ;
+    $("#my_event_content").find("input[required], select[required], textarea[required]").each(function () {
+				if (this.value == "" || this.value == null) flag++;
+	});
+    if(flag < 2){ 
+        sweetAlertConfirmation("cancel", "Event","my_event");
+    }else{
+        $("#my_event").modal("hide");
     }
 });

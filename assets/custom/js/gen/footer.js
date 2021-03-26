@@ -155,6 +155,7 @@ $(document).ready(function() {
     $(document).on("click", ".btnViewNotification", function(e) {
         e.preventDefault();
         const notifID    = $(this).attr("id");
+        const table      = $(this).attr("table");
         const controller = $(this).attr("controller");
 
         $.ajax({
@@ -163,6 +164,7 @@ $(document).ready(function() {
             data: {notifID},
             success: function(data) {
                 if (data) {
+                    // window.location.href = base_url+controller+"?view_id="+table;
                     window.location.href = base_url+controller;
                 }
             }

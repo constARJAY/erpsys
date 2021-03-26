@@ -14,15 +14,15 @@ $(document).on("click",".addQualification", function(){
                                                     <div class="row"> 
                                                         <div class="col-md-12 col-sm-12">
                                                             <div class="form-group">
-                                                                <label for="">Qualification<strong class="text-danger">*</strong></label>
+                                                                <label for="">Qualification <strong class="text-danger">*</strong></label>
                                                                 <input 
                                                                     type="text" 
                                                                     class="form-control validate" 
                                                                     name="qualificationName" 
                                                                     id="inputqualification" 
                                                                     data-allowcharacters="[A-Z][ ][a-z][0-9][.][,][-][()]['][/][?][*][!][#][%]" 
-                                                                    minlength="5" 
-                                                                    maxlength="50" 
+                                                                    minlength="2" 
+                                                                    maxlength="150" 
                                                                     unique
                                                                     required >
                                                                 <div class="invalid-feedback d-block" id="invalid-inputqualification"></div>
@@ -42,8 +42,8 @@ $(document).on("click",".addQualification", function(){
                                                 </form>
                                             </div>
                                             <div class="modal-footer">
-                                                <button class="btn btn-primary btn-save" id="btnSave"><i class="fas fa-save"></i>&nbsp;SAVE</button>
-                                                <button class="btn btn-danger btn-cancel btnCancel"><i class="fas fa-ban"></i>&nbsp;CANCEL</button>
+                                                <button class="btn btn-save" id="btnSave"><i class="fas fa-save"></i>&nbsp;SAVE</button>
+                                                <button class="btn btn-cancel btnCancel"><i class="fas fa-ban"></i>&nbsp;CANCEL</button>
                                             </div>
                                             `;
     setTimeout(function(){
@@ -68,7 +68,7 @@ $(document).on("click",".editQualification", function(){
                                                             <div class="form-group">
                                                                 <label for="">Qualification<strong class="text-danger">*</strong></label>
                                                                 <input type="text" class="form-control validate" name="qualificationName" id="inputqualification" 
-                                                                    data-allowcharacters="[A-Z][ ][a-z][0-9][.][,][-][()]['][/][?][*][!][#][%]" minlength="5" maxlength="50" unique="${tableData[0]["qualificationID"]}" value="${tableData[0]["qualificationName"]}" required >
+                                                                    data-allowcharacters="[A-Z][ ][a-z][0-9][.][,][-][()]['][/][?][*][!][#][%]" minlength="2" maxlength="150" unique="${tableData[0]["qualificationID"]}" value="${tableData[0]["qualificationName"]}" required >
                                                                 <div class="invalid-feedback d-block" id="invalid-inputqualification"></div>
                                                             </div>
                                                         </div>
@@ -85,8 +85,8 @@ $(document).on("click",".editQualification", function(){
                                                 </form>
                                             </div>
                                             <div class="modal-footer">
-                                                <button class="btn btn-primary btn-save" id="btnUpdate" data-qualificationid="${tableData[0]["qualificationID"]}"><i class="fas fa-save"></i>&nbsp;UPDATE</button>
-                                                <button class="btn btn-danger btn-cancel btnCancel"><i class="fas fa-ban"></i>&nbsp;CANCEL</button>
+                                                <button class="btn btn-update" id="btnUpdate" data-qualificationid="${tableData[0]["qualificationID"]}"><i class="fas fa-save"></i>&nbsp;UPDATE</button>
+                                                <button class="btn btn-cancel btnCancel"><i class="fas fa-ban"></i>&nbsp;CANCEL</button>
                                             </div>
                                             `;
     setTimeout(function(){
@@ -107,7 +107,7 @@ $(document).on("click", "#btnSave", function(){
         data["tableData[updatedBy]"]     = sessionID;
         data["tableName"]                = "hris_qualification_tbl";
         data["feedback"]                 = $("#inputqualification").val();
-        sweetAlertConfirmation("add", "Qualification Masterfile","modal_qualification", null, data, true, tableContent);
+        sweetAlertConfirmation("add", "Qualification","modal_qualification", null, data, true, tableContent);
 
 
     }
@@ -122,7 +122,7 @@ $(document).on("click", "#btnUpdate", function(){
         data["whereFilter"]              =  "qualificationID="+qualificationID;
         data["tableName"]                =  "hris_qualification_tbl";
         data["feedback"]                 =  $("#inputqualification").val();
-        sweetAlertConfirmation("update", "Qualification Masterfile","modal_qualification", null , data, true, tableContent);
+        sweetAlertConfirmation("update", "Qualification","modal_qualification", null , data, true, tableContent);
     }
     
 });
@@ -130,7 +130,7 @@ $(document).on("click", "#btnUpdate", function(){
 $(document).on("click",".btnCancel", function(){
     let condition = isFormEmpty("modal_qualification_form");
     if(!condition){
-        sweetAlertConfirmation("cancel", "Qualification Masterfile","modal_qualification");
+        sweetAlertConfirmation("cancel", "Qualification","modal_qualification");
     }else{
         $("#modal_qualification").modal("hide");
     }
@@ -196,8 +196,8 @@ function tableContent(){
                         <tr>
                             <td>${index + 1}</td>
                             <td>${item["qualificationName"]}</td>
-                            <td>${item["qualificationStatus"] == 0 ? "<span class='badge badge-outline-danger w-100 p-2'>Inactive</span>" : "<span class='badge badge-outline-success w-100 p-2'>Active</span>"} </td>
-                            <td class="text-center"> <button class="btn w-100 btn-primary d-flex justify-content-center align-items-center editQualification" data-qualificationid="${item["qualificationID"]}"><i class="icon-pencil px-2"></i> <span class="d-none d-sm-none d-md-block d-lg-block d-xl-block">Edit&nbsp;</span> </button></td>
+                            <td>${item["qualificationStatus"] == 0 ? "<span class='badge badge-outline-danger w-100 '>Inactive</span>" : "<span class='badge badge-outline-success w-100 '>Active</span>"} </td>
+                            <td class="text-center"> <button class="btn w-100 btn-edit editQualification" data-qualificationid="${item["qualificationID"]}"><i class="fas fa-edit"></i> Edit </button></td>
                         </tr>`;
                     })
                     html += `</tbody>

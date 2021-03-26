@@ -19,7 +19,7 @@ $(document).on("click",".addCodeConductSection", function(){
                                                     <div class="row"> 
                                                         <div class="col-md-12 col-sm-12">
                                                             <div class="form-group">
-                                                                <label for="">Code of Conduct Section <strong class="text-danger">*</strong></label>
+                                                                <label for="">Code of Conduct Category <strong class="text-danger">*</strong></label>
                                                                 <select class="form-control select2 validate" name="codeConductCategoryID" id="inputcodeConductCategoryID" required>
                                                                     ${codeOfConductCategory}
                                                                 </select>
@@ -47,8 +47,8 @@ $(document).on("click",".addCodeConductSection", function(){
                                                 </form>
                                             </div>
                                             <div class="modal-footer">
-                                                <button class="btn btn-primary btn-save" id="btnSave"><i class="fas fa-save"></i>&nbsp;SAVE</button>
-                                                <button class="btn btn-danger btn-cancel btnCancel"><i class="fas fa-ban"></i>&nbsp;CANCEL</button>
+                                                <button class="btn btn-save" id="btnSave"><i class="fas fa-save"></i>&nbsp;SAVE</button>
+                                                <button class="btn btn-cancel btnCancel"><i class="fas fa-ban"></i>&nbsp;CANCEL</button>
                                             </div>
                                                 `;
     setTimeout(function(){
@@ -93,7 +93,7 @@ $(document).on("click",".editCodeConductSection", function(){
                                                         </div>
                                                         <div class="col-md-12 col-sm-12">
                                                             <div class="form-group">
-                                                                <label for="">Code of Conduct Section Description <strong class="text-danger">*</strong></label>
+                                                                <label for="">Code of Conduct Description <strong class="text-danger">*</strong></label>
                                                                 <textarea class="form-control validate" data-allowcharacters="[a-z][A-Z][0-9][.][,][-][()]['][/][?][*][!][#][%][&][ ]" style="resize:none" name="codeConductSectionDescription" id="inputcodeConductSectionDescription" minlength="5" maxlength="500" required>${tableData[0]["codeConductSectionDescription"]}</textarea>
                                                                 <div class="invalid-feedback d-block" id="invalid-inputcodeConductSectionDescription"></div>
                                                             </div>
@@ -111,8 +111,8 @@ $(document).on("click",".editCodeConductSection", function(){
                                                 </form>
                                             </div>
                                             <div class="modal-footer">
-                                                <button class="btn btn-primary btn-save" id="btnUpdate" data-codeconductsectionid="${tableData[0]["codeConductSectionID"]}"><i class="fas fa-save"></i>&nbsp;UPDATE</button>
-                                                <button class="btn btn-danger btn-cancel btnCancel"><i class="fas fa-ban"></i>&nbsp;CANCEL</button>
+                                                <button class="btn btn-update" id="btnUpdate" data-codeconductsectionid="${tableData[0]["codeConductSectionID"]}"><i class="fas fa-save"></i>&nbsp;UPDATE</button>
+                                                <button class="btn btn-cancel btnCancel"><i class="fas fa-ban"></i>&nbsp;CANCEL</button>
                                             </div>
                                                 `;
     setTimeout(function(){
@@ -137,7 +137,7 @@ $(document).on("click", "#btnSave", function(){
         data["tableData[updatedBy]"]                = "1";
         data["tableName"]                           = "hris_code_conduct_section_tbl";
         data["feedback"]                            = "Section "+ sectionID;
-        sweetAlertConfirmation("add", "Code of Conduct Section Masterfile","modal_codeConductSection", null, data, true, tableContent);
+        sweetAlertConfirmation("add", "Code of Conduct Section","modal_codeConductSection", null, data, true, tableContent);
     }
 });
 
@@ -171,7 +171,7 @@ $(document).on("click", "#btnUpdate", function(){
 $(document).on("click",".btnCancel", function(){
     let condition = isFormEmpty("modal_codeConductSection_form");
     if(!condition){
-        sweetAlertConfirmation("cancel", "Code of Conduct Section Masterfile","modal_codeConductSection");
+        sweetAlertConfirmation("cancel", "Code of Conduct Section","modal_codeConductSection");
     }else{
         $("#modal_codeConductSection").modal("hide");
     }
@@ -245,8 +245,8 @@ function tableContent(){
                             <td>${categoryName[0]["codeConductCategoryName"]}</td>
                             <td>${item["codeConductSection"]}</td>
                             <td>${item["codeConductSectionDescription"]}</td>
-                            <td>${item["codeConductSectionStatus"] == 0 ? "<span class='badge badge-outline-danger w-100 p-2'>Inactive</span>" : "<span class='badge badge-outline-success w-100 p-2'>Active</span>"} </td>
-                            <td class="text-center"> <button class="btn w-100 btn-primary d-flex justify-content-center align-items-center editCodeConductSection" data-codeconductsectionid="${item["codeConductSectionID"]}"><i class="icon-pencil px-2"></i> <span class="d-none d-sm-none d-md-block d-lg-block d-xl-block">Edit&nbsp;</span> </button></td>
+                            <td>${item["codeConductSectionStatus"] == 0 ? "<span class='badge badge-outline-danger w-100'>Inactive</span>" : "<span class='badge badge-outline-success w-100'>Active</span>"} </td>
+                            <td class="text-center"> <button class="btn w-100 btn-edit d-flex justify-content-center align-items-center editCodeConductSection" data-codeconductsectionid="${item["codeConductSectionID"]}"><i class="fas fa-edit"></i> Edit&nbsp; </button></td>
                         </tr>`;
                     });
 

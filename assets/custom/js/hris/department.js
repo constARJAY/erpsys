@@ -44,7 +44,7 @@ $(document).ready(function(){
             success: function(data) {
                 console.log(data);
                 let html = `
-                <table class="table table-bordered table-striped table-hover" id="tableHRISDepartment">
+                <table class="table table-bordered table-striped table-hover nowrap" id="tableHRISDepartment">
                     <thead>
                     <tr class="text-center">
                         <th>Department No.</th>

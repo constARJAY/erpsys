@@ -1,15 +1,15 @@
-<div class="body_area">
+<div class="body_area after_bg">
     <div class="block-header">
         <div class="container">
             <div class="row clearfix">
                 <div class="col-8">
                     <ul class="breadcrumb pl-0 pb-0 ">
-                        <li class="breadcrumb-item"><a href="#"><i class="zmdi zmdi-home"></i>&nbsp;Dashboard</a></li>
+                        <li class="breadcrumb-item"><a href="#"> Dashboard</a></li>
                         <li class="breadcrumb-item"><i class="zmdi zmdi-folder"></i>&nbsp;Masterfile</li>
-                        <li class="breadcrumb-item active">Award Masterfile</li>
+                        <li class="breadcrumb-item active">Award</li>
                     </ul>
                     <h1 class="mb-1 mt-1">List of Awards</h1>
-                    <span>This modules is used to manage the award details</span>
+                    <span>This modules is used to manage the award details.</span>
                 </div>
                 <div class="col-4 d-flex justify-content-end align-items-center">
                     <button class="btn btn-default btn-add ml-2 d-flex justify-content-center align-items-center addAward">
@@ -23,8 +23,10 @@
 
     <div class="container">
 		<div class="row clearfix row-deck">
-            <div class="col-12">
-                <div class="table-responsive" id="table_content"></div>
+            <div class="card p-3">
+                <div class="col-12">
+                    <div class="table-responsive" id="table_content"></div>
+                </div>
             </div>
         </div>
 	</div>

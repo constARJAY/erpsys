@@ -188,9 +188,9 @@ $(document).on("change", "[name=clientCity]", function() {
             success: function(data) {
                 console.log(data);
                 let html = `
-                <table class="table table-bordered table-striped table-hover" id="tableProjectClient">
+                <table class="table table-bordered table-striped table-hover nowrap" id="tableProjectClient">
                     <thead>
-                        <tr style="white-space:nowrap">
+                        <tr>
                             <th>Client Code</th>
                             <th>Client Name</th>
                             <th>Client Address</th>
@@ -227,7 +227,7 @@ $(document).on("change", "[name=clientCity]", function() {
                         <td>${item.clientName}</td>
                         <td>
                             ${item.clientUnitNumber && titleCase(item.clientUnitNumber)+", "} 
-                            ${item.clientHouseNumber && titleCase(item.clientHouseNumber)+", "} 
+                            ${item.clientHouseNumber && item.clientHouseNumber +", "} 
                             ${item.clientBarangay && titleCase(item.clientBarangay)+", "} 
                             ${item.clientCity && titleCase(item.clientCity)+", "} 
                             ${item.clientProvince && titleCase(item.clientProvince)+", "}

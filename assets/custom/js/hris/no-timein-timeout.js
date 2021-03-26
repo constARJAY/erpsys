@@ -24,8 +24,9 @@ $(document).ready(function () {
 					{ targets: 2, width: 150 },
 					{ targets: 3, width: 150 },
 					{ targets: 4, width: 150 },
-					{ targets: 5, width: 80 },
+					{ targets: 5, width: 150 },
 					{ targets: 6, width: 80 },
+					{ targets: 7, width: 80 },
 				],
 			});
 
@@ -43,8 +44,9 @@ $(document).ready(function () {
 					{ targets: 2, width: 150 },
 					{ targets: 3, width: 150 },
 					{ targets: 4, width: 150 },
-					{ targets: 5, width: 80 },
+					{ targets: 5, width: 150 },
 					{ targets: 6, width: 80 },
+					{ targets: 7, width: 80 },
 				],
 			});
 	}
@@ -99,11 +101,12 @@ $(document).ready(function () {
 		);
 
 		let html = `
-        <table class="table table-bordered table-striped table-hover" id="tableForApprroval">
+        <table class="table table-bordered table-striped table-hover nowrap" id="tableForApprroval">
             <thead>
                 <tr>
                     <th>Code</th>
                     <th>Employee Name</th>
+					<th>Date Created</th>
                     <th>Date</th>
                     <th>Time In/Time Out</th>
                     <th>Reason</th>
@@ -123,6 +126,7 @@ $(document).ready(function () {
 				<tr>
 					<td>${item.no_Timein_timeoutCode}</td>
 					<td>${item.firstname+' '+item.lastname}</td>
+					<td>${moment(item.createdAt).format("MMMM DD, YYYY")}</td>
 					<td>${moment(item.no_Timein_timeoutDate).format("MMMM DD, YYYY")}</td>
 					<td>${item.no_Timein_timeoutTimeIn} - ${item.no_Timein_timeoutTimeOut}</td>
 					<td>${item.no_Timein_timeoutReason}</td>
@@ -158,11 +162,12 @@ $(document).ready(function () {
 		);
 
 		let html = `
-        <table class="table table-bordered table-striped table-hover" id="tableMyForms">
+        <table class="table table-bordered table-striped table-hover nowrap" id="tableMyForms">
             <thead>
                 <tr>
                     <th>Code</th>
                     <th>Employee Name</th>
+					<th>Date Created</th>
                     <th>Date</th>
                     <th>Time In/Time Out</th>
                     <th>Reason</th>
@@ -191,6 +196,7 @@ $(document).ready(function () {
             <tr>
                 <td>${item.no_Timein_timeoutCode}</td>
                 <td>${item.firstname + ' ' +item.lastname}</td>
+				<td>${moment(item.createdAt).format("MMMM DD, YYYY")}</td>
                 <td>${moment(item.no_Timein_timeoutDate).format("MMMM DD, YYYY")}</td>
                 <td>${item.no_Timein_timeoutTimeIn} - ${item.no_Timein_timeoutTimeOut}</td>
                 <td>${item.no_Timein_timeoutReason}</td>
@@ -409,7 +415,7 @@ $(document).ready(function () {
             </div>
             <div class="col-md-4 col-sm-12">
                 <div class="form-group">
-                    <label>Date <code>*</code></label>
+                    <label>Date ${!disabled ? "<code>*</code>" : ""}</label>
                     <input type="button" 
                         class="form-control validate daterange text-left"
                         required
@@ -425,7 +431,7 @@ $(document).ready(function () {
             </div>
             <div class="col-md-4 col-sm-12">
                 <div class="form-group">
-                    <label>Time In <code>*</code></label>
+                    <label>Time In  ${!disabled ? "<code>*</code>" : ""}</label>
                     <input type="text" 
                         class="form-control timeIn" 
                         id="no_Timein_timeoutTimeIn" 
@@ -438,7 +444,7 @@ $(document).ready(function () {
             </div>
             <div class="col-md-4 col-sm-12">
                 <div class="form-group">
-                    <label>Time Out <code>*</code></label>
+                    <label>Time Out  ${!disabled ? "<code>*</code>" : ""}</label>
                     <input type="text" 
                         class="form-control timeOut" 
                         id="no_Timein_timeoutTimeOut" 
@@ -451,7 +457,7 @@ $(document).ready(function () {
             </div>
             <div class="col-md-12 col-sm-12">
                 <div class="form-group">
-                    <label>Reason <code>*</code></label>
+                    <label>Reason ${!disabled ? "<code>*</code>" : ""}</label>
                     <textarea class="form-control validate"
                         data-allowcharacters="[a-z][A-Z][0-9][ ][.][,][-][()]['][/][&]"
                         minlength="1"
@@ -777,7 +783,7 @@ $(document).ready(function () {
 			const data = getData(action, 1, "submit", feedback, id);
 			
 			let notificationData = {
-				moduleID:                57,
+				moduleID:                78,
 				notificationTitle:       "No Time-in/ Time-out",
 				notificationDescription: `${sessionID} asked for your approval.`,
 				notificationType:        2,
@@ -878,7 +884,7 @@ $(document).ready(function () {
 			if (isImLastApprover(approversID, approversDate)) {
 				status = 2;
 				notificationData = {
-					moduleID:                57,
+					moduleID:                78,
 					notificationTitle:       "No Time-in / Time-out",
 					notificationDescription: `${tableData[0].no_Timein_timeoutCode}: Your request has been approved.`,
 					notificationType:        2,
@@ -887,7 +893,7 @@ $(document).ready(function () {
 			} else {
 				status = 1;
 				notificationData = {
-					moduleID:                57,
+					moduleID:                78,
 					notificationTitle:       "No Time-in / Time-out",
 					notificationDescription: `${employeeID} asked for your approval.`,
 					notificationType:        2,
@@ -965,7 +971,7 @@ $(document).ready(function () {
 				data["tableData[approversDate]"]   = updateApproveDate(approversDate);
 
 				let notificationData = {
-					moduleID:                57,
+					moduleID:                78,
 					notificationTitle:       "No Time-in / Time-out",
 					notificationDescription: `${tableData[0].no_Timein_timeoutCode}: Your request has been denied.`,
 					notificationType:        2,

@@ -276,7 +276,7 @@ $(document).ready(function(){
                 </div>
                 <div class="col-12">
                     <div class="form-group">
-                        <label>Status</label>
+                        <label>Status <code>*</code></label>
                         <select class="form-control select2" id="scheduleStatus" name="scheduleStatus">
                             <option value="1" ${scheduleStatus == 1 && "selected"}>Active</option>
                             <option value="0" ${scheduleStatus == 0 && "selected"}>Inactive</option>

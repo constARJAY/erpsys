@@ -91,7 +91,7 @@ $(document).ready(function () {
 		);
 
 		let html = `
-        <table class="table table-bordered table-striped table-hover" id="tableForApprroval">
+        <table class="table table-bordered table-striped table-hover nowrap" id="tableForApprroval">
             <thead>
                 <tr>
                     <th>Code</th>
@@ -115,16 +115,15 @@ $(document).ready(function () {
 				<tr>
 					<td>${item.loanFormCode}</td>
 					<td>${item.employeeID}</td>
-					<td>${moment(item.loanFormDateFrom).format("MMMM DD, YYYY")}</td>
-					<td>${item.loanFormDateTo}</td>
-					<td>${item.loanFormReason}</td>
+					<td>${loanTypeTableData[0].loanName}</td>
+					<td>${item.loanFormAmount}</td>
+					<td>${item.	loanFormTermPayment == 0 ? "Payday" : "Monthly"}</td>
 					<td class="text-center">${getStatusStyle(item.loanFormStatus)}</td>
 					<td class="text-center">
 						${button}
 					</td>
 				</tr>`;
 			}
-			
 		});
 
 		html += `
@@ -150,7 +149,7 @@ $(document).ready(function () {
 		);
 
 		let html = `
-        <table class="table table-bordered table-striped table-hover" id="tableMyForms">
+        <table class="table table-bordered table-striped table-hover nowrap" id="tableMyForms">
             <thead>
                 <tr>
                     <th>Code</th>
@@ -621,16 +620,22 @@ $(document).ready(function () {
 				data["tableData[employeeID]"] = sessionID;
 				data["tableData[createdBy]"]  = sessionID;
 				data["tableData[createdAt]"]  = dateToday;
-
-				const approversID = getModuleApprover("loan");
-				if (approversID) {
+				
+				const approversID = getModuleApprover("loan form");
+				if (approversID && method == "submit") {
 					data["tableData[approversID]"] = approversID;
-				} else {
+				}
+				if (!approversID && method == "submit") {
 					data["tableData[approversID]"]     = sessionID;
 					data["tableData[approversStatus]"] = 2;
 					data["tableData[approversDate]"]   = dateToday;
-					data["tableData[loanFormStatus]"] = 2;
+					data["tableData[changeScheduleStatus]"] = 2;
 				}
+
+
+
+
+
 
 			} else {
 				data["whereFilter"] = "loanFormID=" + id;
@@ -777,7 +782,7 @@ $(document).ready(function () {
 
 			
 			let notificationData = {
-				moduleID:                13,
+				moduleID:                56,
 				notificationTitle:       "Loan Form",
 				notificationDescription: `${sessionID} asked for your approval.`,
 				notificationType:        2,
@@ -871,8 +876,8 @@ $(document).ready(function () {
 			if (isImLastApprover(approversID, approversDate)) {
 				status = 2;
 				notificationData = {
-					moduleID:                13,
-					notificationTitle:       "Loan Schedule Form",
+					moduleID:                56,
+					notificationTitle:       "Loan Form",
 					notificationDescription: `${tableData[0].loanFormCode}: Your request has been approved.`,
 					notificationType:        2,
 					employeeID:              employeeID,
@@ -880,8 +885,8 @@ $(document).ready(function () {
 			} else {
 				status = 1;
 				notificationData = {
-					moduleID:                13,
-					notificationTitle:       "Loan Schedule Form",
+					moduleID:                56,
+					notificationTitle:       "Loan Form",
 					notificationDescription: `${employeeID} asked for your approval.`,
 					notificationType:        2,
 					employeeID:              getNotificationEmployeeID(approversID, approversDate),
@@ -959,8 +964,8 @@ $(document).ready(function () {
 				data["tableData[approversDate]"]   = updateApproveDate(approversDate);
 
 				let notificationData = {
-					moduleID:                13,
-					notificationTitle:       "Loan Schedule Form",
+					moduleID:                56,
+					notificationTitle:       "Loan Form",
 					notificationDescription: `${tableData[0].loanFormCode}: Your request has been denied.`,
 					notificationType:        2,
 					employeeID:              employeeID,
@@ -996,7 +1001,7 @@ $(document).on("change", ".daterangeLoanForm" ,function(){
     // from = start.format('YYYY-MM-DD 00:00:00');
     //               to = end.format('YYYY-MM-DD 23:59:59');
 
-    let fromDate        =  new Date(thisValueSplit[0]);
+    let fromDate        =  new Date(thisValueSplit[0]); 	
     let toDate          =  new Date(thisValueSplit[1]);
     let numberOfDays    =  Math.round((toDate-fromDate)/(1000*60*60*24));
     $("#loanFormNoOfDays").val(numberOfDays);
@@ -1010,18 +1015,19 @@ $(document).on("change", ".daterangeLoanForm" ,function(){
 function loanFormDateRange(){
     $('.daterangeLoanForm').daterangepicker({
         "showDropdowns": true,
+		minDate: moment(),
         startDate: moment().startOf('hour'),
         endDate: moment().startOf('hour').add(32, 'hour'),
         locale: {
           format: 'MMMM D, YYYY'
         },
         ranges: {
-          'Today': [moment(), moment()],
-          'Yesterday': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
-          'Last 7 Days': [moment().subtract(6, 'days'), moment()],
-          'Last 30 Days': [moment().subtract(29, 'days'), moment()],
-          'This Month': [moment().startOf('month'), moment().endOf('month')],
-          'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+        //   'Today': [moment(), moment()],
+        //   'Tommorow': [moment().add(1, 'days'), moment().add(1, 'days')],
+          'Month': [moment(), moment().add(30, 'days')],
+          'Quarter': [moment(), moment().add(3, 'months')],
+		  'Semiannual':[moment(), moment().add(6, 'months')],
+          'Annual': [moment(), moment().add(1, 'years')]
         }
     });
 }

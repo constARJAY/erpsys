@@ -1,15 +1,16 @@
 <?php
     date_default_timezone_set("Asia/Manila");
 
-    function insertNotificationData($employeeID, $moduleID, $notificationTitle, $notificationDescription, $notificationType)
+    function insertNotificationData($employeeID, $moduleID, $tableID, $notificationTitle, $notificationDescription, $notificationType)
     {
         $CI =& get_instance();
         $sessionID = $CI->session->has_userdata('adminSessionID') ? $CI->session->userdata('adminSessionID') : 1;
 
-        if ($employeeID && $moduleID && $notificationTitle && $notificationDescription && $notificationType) {
+        if ($employeeID && $moduleID && $tableID && $notificationTitle && $notificationDescription && $notificationType) {
             $data = [
                 "employeeID"              => $employeeID,
                 "moduleID"                => $moduleID,
+                "tableID"                 => $tableID,
                 "notificationTitle"       => $notificationTitle,
                 "notificationDescription" => $notificationDescription,
                 "notificationType"        => $notificationType,
@@ -68,6 +69,7 @@
             $description = $notif["notificationDescription"];
             $type        = $notif["notificationType"];
             $moduleID    = $notif["moduleID"];
+            $tableID     = $notif["tableID"];
             $createdAt   = date("Y-m-d H:i:s", strtotime($notif["createdAt"]));
 
             $icon = $color = $controller = $project = $time = "";
@@ -119,6 +121,7 @@
                 "icon"        => $icon,
                 "color"       => $color,
                 "title"       => $title,
+                "table"       => $tableID,
                 "description" => $description,
                 "controller"  => $controller,
                 "time"        => $time,

@@ -2,21 +2,23 @@
 // $approval = getApprover("1");
 ?>
 <style>
-    .module-active{border-left: 5px solid #10948b;}
+    .module-active{border-left: 5px solid #dc3454;}
     .role-list:hover{cursor:pointer}
+	.color-active{color:#dc3454 !important;}
 </style>
 <div class="body_area after_bg">
-    <div class="block-header">
+    <div class="block-header pb-0">
 		<div class="container">
 			<div class="row clearfix">
 				<div class="col-lg-6 col-md-6">
-					<ul class="breadcrumb pl-0 pb-0 ">
+					<ul class="breadcrumb pl-0 pb-0">
 						<li class="breadcrumb-item"><a href="#"><i class="zmdi zmdi-home"></i> Dashboard</a></li>
-						<li class="breadcrumb-item"><i class="zmdi zmdi-folder"></i> &nbsp;Approval Setup</li>
+						<li class="breadcrumb-item d-flex align-items-center"><i class="zmdi zmdi-settings d-flex align-items-center"></i>&nbsp;System Settings</li>
+						<li class="breadcrumb-item active d-flex align-items-center"><i class="fas fa-toggle-on d-flex align-items-center"></i>&nbsp;Approval Setup</li>
 						<!-- <li class="breadcrumb-item active"><i class="zmdi zmdi-hotel"></i> &nbsp;Crud Operatio  -->
 					</ul>
-					<h1 class="mt-3">Approval Setup</h1>
-					<span>This module is used to manage Lorem ipsum dolor sit amet..</span>
+					<h1 class="mb-1 mt-1">List of Approvers</h1>
+					<span class="font-weight-light">This module is to manage approval setup</span>
 				</div>
 				<div class="col-lg-6 col-md-6 d-flex justify-content-end align-items-center list-of-module">
 					<select class="form-control w-50 text-center" id="select2-modules">
@@ -32,7 +34,7 @@
 
     <div class="container">
 		<div class="row clearfix row-deck" style='text-align:right;'>
-            <div class="card py-4">
+            <div class="card py-3 px-3">
                 <div class="col-12 row">
                     <div class="col-12 col-lg-4 col-xl-4 py-2 text-left">
 						<h6 class="bg-primary text-light p-3"><strong>POSITIONS</strong></h6>

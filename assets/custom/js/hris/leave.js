@@ -5,8 +5,8 @@ $(document).ready(function(){
 
 // OPENING ADD & EDIT MODAL
 $(document).on("click",".addLeave", function(){
-    $("#modal_leave").modal("show");
     $(".modal_leave_header").text("ADD LEAVE TYPE");
+    $("#modal_leave").modal("show");
     $("#modal_leave_content").html(preloader);
     let modal_leave_content    =   ` 
                                             <div class="modal-body">  
@@ -20,9 +20,9 @@ $(document).on("click",".addLeave", function(){
                                                                     class="form-control validate" 
                                                                     name="leaveName" 
                                                                     id="inputleaveName" 
-                                                                    data-allowcharacters="[A-Z][ ][a-z][0-9][-][()]['][/]" 
+                                                                    data-allowcharacters="[a-z][A-Z][0-9][ ][.][,][-][()]['][/]" 
                                                                     minlength="2" 
-                                                                    maxlength="75" 
+                                                                    maxlength="150" 
                                                                     unique
                                                                     required >
                                                                 <div class="invalid-feedback d-block" id="invalid-inputleaveName"></div>
@@ -42,8 +42,8 @@ $(document).on("click",".addLeave", function(){
                                                 </form>
                                             </div>
                                             <div class="modal-footer">
-                                                <button class="btn btn-primary btn-save" id="btnSave"><i class="fas fa-save"></i>&nbsp;SAVE</button>
-                                                <button class="btn btn-danger btn-cancel btnCancel"><i class="fas fa-ban"></i>&nbsp;CANCEL</button>
+                                                <button class="btn btn-save" id="btnSave"><i class="fas fa-save"></i>&nbsp;SAVE</button>
+                                                <button class="btn btn-cancel btnCancel"><i class="fas fa-ban"></i>&nbsp;CANCEL</button>
                                             </div>
                                             `;
     setTimeout(function(){
@@ -70,7 +70,7 @@ $(document).on("click",".editleave", function(){
                                                             <div class="form-group">
                                                                 <label for="">Leave Type Name <strong class="text-danger">*</strong></label>
                                                                 <input type="text" class="form-control validate" name="leaveName" id="inputleaveName" 
-                                                                    data-allowcharacters="[A-Z][ ][a-z][0-9][-][()]['][/]" minlength="5" maxlength="20" unique="${tableData[0]["leaveID"]}" value="${tableData[0]["leaveName"]}" required >
+                                                                    data-allowcharacters="[a-z][A-Z][0-9][ ][.][,][-][()]['][/]" minlength="2" maxlength="150" unique="${tableData[0]["leaveID"]}" value="${tableData[0]["leaveName"]}" required >
                                                                 <div class="invalid-feedback d-block" id="invalid-inputleaveName"></div>
                                                             </div>
                                                         </div>
@@ -87,8 +87,8 @@ $(document).on("click",".editleave", function(){
                                                 </form>
                                             </div>
                                             <div class="modal-footer">
-                                                <button class="btn btn-primary btn-save" id="btnUpdate" data-leaveid="${tableData[0]["leaveID"]}"><i class="fas fa-save"></i>&nbsp;UPDATE</button>
-                                                <button class="btn btn-danger btn-cancel btnCancel"><i class="fas fa-ban"></i>&nbsp;CANCEL</button>
+                                                <button class="btn btn-update" id="btnUpdate" data-leaveid="${tableData[0]["leaveID"]}"><i class="fas fa-save"></i>&nbsp;UPDATE</button>
+                                                <button class="btn btn-cancel btnCancel"><i class="fas fa-ban"></i>&nbsp;CANCEL</button>
                                             </div>
                                             `;
     setTimeout(function(){
@@ -204,8 +204,8 @@ function tableContent(){
                         <tr>
                             <td>${item["leaveCode"]}</td>
                             <td>${item["leaveName"]}</td>
-                            <td>${item["leaveStatus"] == 0 ? "<span class='badge badge-outline-danger w-100 p-2'>Inactive</span>" : "<span class='badge badge-outline-success w-100 p-2'>Active</span>"} </td>
-                            <td class="text-center"> <button class="btn w-100 btn-primary d-flex justify-content-center align-items-center editleave" data-leaveid="${item["leaveID"]}"><i class="icon-pencil px-2"></i> <span class="d-none d-sm-none d-md-block d-lg-block d-xl-block">Edit&nbsp;</span> </button></td>
+                            <td>${item["leaveStatus"] == 0 ? "<span class='badge badge-outline-danger w-100'>Inactive</span>" : "<span class='badge badge-outline-success w-100 '>Active</span>"} </td>
+                            <td class="text-center"> <button class="btn w-100 btn-edit editleave" data-leaveid="${item["leaveID"]}"><i class="fas fa-edit"></i>Edit&nbsp;</button></td>
                         </tr>`;
                     })
                     html += `</tbody>

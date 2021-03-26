@@ -16,7 +16,7 @@ $(document).on("click",".addAward", function(){
                                                             <div class="form-group">
                                                                 <label for="">Award Title <strong class="text-danger">*</strong></label>
                                                                 <input type="text" class="form-control validate" name="awardTitle" id="inputawardTitle" 
-                                                                    data-allowcharacters="[A-Z][ ][a-z][0-9][-][()][']" minlength="2" maxlength="75" unique="" value="" required >
+                                                                    data-allowcharacters="[a-z][A-Z][0-9][ ][.][,][-][()]['][/]" minlength="2" maxlength="150" unique="" value="" required >
                                                                 <div class="invalid-feedback d-block" id="invalid-inputawardTitle"></div>
                                                             </div>
                                                         </div>
@@ -24,8 +24,7 @@ $(document).on("click",".addAward", function(){
                                                             <div class="form-group">
                                                                 <label for="">Award Description <strong class="text-danger">*</strong></label>
                                                                 <textarea style="resize:none" row="3" class="form-control validate" name="awardDescription" id="inputawardDescription" 
-                                                                    data-allowcharacters="[a-z][A-Z][0-9][.][,][-][()]['][/][?][*][!][#][%][&][ ]" minlength="5" maxlength="200" value="" required ></textarea>
-
+                                                                    data-allowcharacters="[a-z][A-Z][0-9][.][,][-][()]['][/][?][*][!][#][%][&][ ]" minlength="2" maxlength="500" value="" required ></textarea>
                                                                 <div class="invalid-feedback d-block" id="invalid-inputawardDescription"></div>
                                                             </div>
                                                         </div>
@@ -33,7 +32,7 @@ $(document).on("click",".addAward", function(){
                                                         <div class="col-md-12 col-sm-12">
                                                             <div class="form-group">
                                                                 <label for="">Signatories <strong class="text-danger">*</strong></label>
-                                                                <select class="form-control select2 validate" multiple="multiple" name="awardSignatories" id="awardSignatories">
+                                                                <select class="form-control select2 validate" multiple="multiple" name="awardSignatories" id="awardSignatories" required>
                                                                     ${userAccountOption()}
                                                                 </select>
                                                                 <div class="invalid-feedback d-block" id="invalid-awardSignatories"></div>
@@ -55,8 +54,8 @@ $(document).on("click",".addAward", function(){
                                                 </form>
                                             </div>
                                             <div class="modal-footer">
-                                                <button class="btn btn-primary btn-save" id="btnSave" data-awardid=""><i class="fas fa-save"></i>&nbsp;SAVE</button>
-                                                <button class="btn btn-danger btn-cancel btnCancel"><i class="fas fa-ban"></i>&nbsp;CANCEL</button>
+                                                <button class="btn btn-save" id="btnSave" data-awardid=""><i class="fas fa-save"></i>&nbsp;Save</button>
+                                                <button class="btn btn-cancel btnCancel"><i class="fas fa-ban"></i>&nbsp;Cancel</button>
                                             </div>
                                             `;
     setTimeout(function(){
@@ -81,7 +80,7 @@ $(document).on("click",".editAward", function(){
                                                             <div class="form-group">
                                                                 <label for="">Award Title <strong class="text-danger">*</strong></label>
                                                                 <input type="text" class="form-control validate" name="awardTitle" id="inputawardTitle" 
-                                                                    data-allowcharacters="[A-Z][ ][a-z][0-9][-][()][']" minlength="2" maxlength="75" unique="${tableData[0]["awardID"]}" value="${tableData[0]["awardTitle"]}" required >
+                                                                    data-allowcharacters="[a-z][A-Z][0-9][ ][.][,][-][()]['][/]" minlength="2" maxlength="150" unique="${tableData[0]["awardID"]}" value="${tableData[0]["awardTitle"]}" required >
                                                                 <div class="invalid-feedback d-block" id="invalid-inputawardTitle"></div>
                                                             </div>
                                                         </div>
@@ -89,7 +88,7 @@ $(document).on("click",".editAward", function(){
                                                             <div class="form-group">
                                                                 <label for="">Award Description <strong class="text-danger">*</strong></label>
                                                                 <textarea style="resize:none" row="3" class="form-control validate" name="awardDescription" id="inputawardDescription" 
-                                                                    data-allowcharacters="[a-z][A-Z][0-9][.][,][-][()]['][/][?][*][!][#][%][&][ ]" minlength="5" maxlength="200" required >${tableData[0]["awardDescription"]}</textarea>
+                                                                    data-allowcharacters="[a-z][A-Z][0-9][.][,][-][()]['][/][?][*][!][#][%][&][ ]" minlength="2" maxlength="500" required >${tableData[0]["awardDescription"]}</textarea>
                                                                 <div class="invalid-feedback d-block" id="invalid-inputawardDescription"></div>
                                                             </div>
                                                         </div>
@@ -97,7 +96,7 @@ $(document).on("click",".editAward", function(){
                                                         <div class="col-md-12 col-sm-12">
                                                             <div class="form-group">
                                                                 <label for="">Signatories <strong class="text-danger">*</strong></label>
-                                                                <select class="form-control select2 validate" multiple="multiple" name="awardSignatories" id="awardSignatories">
+                                                                <select class="form-control select2 validate" multiple="multiple" name="awardSignatories" id="awardSignatories" required>
                                                                     ${userAccountOption(tableData[0]["awardSignatories"])}
                                                                 </select>
                                                                 <div class="invalid-feedback d-block" id="invalid-awardSignatories"></div>
@@ -118,8 +117,8 @@ $(document).on("click",".editAward", function(){
                                                 </form>
                                             </div>
                                             <div class="modal-footer">
-                                                <button class="btn btn-primary btn-save" id="btnUpdate" data-awardid="${tableData[0]["awardID"]}"><i class="fas fa-save"></i>&nbsp;UPDATE</button>
-                                                <button class="btn btn-danger btn-cancel btnCancel"><i class="fas fa-ban"></i>&nbsp;CANCEL</button>
+                                                <button class="btn btn-update" id="btnUpdate" data-awardid="${tableData[0]["awardID"]}"><i class="fas fa-save"></i>&nbsp;Update</button>
+                                                <button class="btn btn-cancel btnCancel"><i class="fas fa-ban"></i>&nbsp;Cancel</button>
                                             </div>
                                             
                                     `;
@@ -141,7 +140,7 @@ $(document).on("click", "#btnSave", function(){
         data["tableData[updatedBy]"]     = sessionID;
         data["tableName"]                = "hris_award_tbl";
         data["feedback"]                 = $("#inputawardTitle").val();
-        sweetAlertConfirmation("add", "Award Masterfile","modal_award", null, data, true, tableContent);
+        sweetAlertConfirmation("add", "Award","modal_award", null, data, true, tableContent);
     }
 });
 
@@ -154,7 +153,7 @@ $(document).on("click", "#btnUpdate", function(){
         data["whereFilter"]              =  "awardID="+awardID;
         data["tableName"]                =  "hris_award_tbl";
         data["feedback"]                 =  $("#inputawardTitle").val();
-        sweetAlertConfirmation("update", "Award Masterfile","modal_award", null , data, true, tableContent);
+        sweetAlertConfirmation("update", "Award","modal_award", null , data, true, tableContent);
     }
     
 });
@@ -221,7 +220,7 @@ function tableContent(){
                         // ----- INSERT UNIQUE DATA TO uniqueData VARIABLE ----
                         let unique = {
                             id:             item.awardID, // Required
-                            awardName:    item.awardName
+                            awardTitle:    item.awardTitle
                         }
                         uniqueData.push(unique);
                         // ----- END INSERT UNIQUE DATA TO uniqueData VARIABLE ----
@@ -230,9 +229,9 @@ function tableContent(){
                        let listOfSignatories    = "";
                        
                        signatories.map((signatoriesItems, index)=>{
-                           let tableDataSignatories =   getTableData("gen_user_account_tbl","","userAccountID="+signatoriesItems);
+                           let tableDataSignatories =   getTableData("hris_employee_list_tbl","","employeeID="+signatoriesItems);
                            let comma                =   signatories.length == (index + 1) ? "": ", ";
-                            listOfSignatories       +=  tableDataSignatories[0]["firstname"]+" "+ tableDataSignatories[0]["lastname"]+comma;  
+                            listOfSignatories       +=  tableDataSignatories[0]["employeeFirstname"]+" "+ tableDataSignatories[0]["employeeLastname"]+comma;  
                        });
 
                         html += `
@@ -241,8 +240,8 @@ function tableContent(){
                             <td>${item["awardTitle"]}</td>
                             <td>${item["awardDescription"]}</td>
                             <td>${listOfSignatories}</td>
-                            <td>${item["awardStatus"] == 0 ? "<span class='badge badge-outline-danger w-100 p-2'>Inactive</span>" : "<span class='badge badge-outline-success w-100 p-2'>Active</span>"} </td>
-                            <td class="text-center"> <button class="btn w-100 btn-primary d-flex justify-content-center align-items-center editAward" data-awardid="${item["awardID"]}"><i class="icon-pencil px-2"></i> <span class="d-none d-sm-none d-md-block d-lg-block d-xl-block">Edit&nbsp;</span> </button></td>
+                            <td>${item["awardStatus"] == 0 ? "<span class='badge badge-outline-danger w-100'>Inactive</span>" : "<span class='badge badge-outline-success w-100'>Active</span>"} </td>
+                            <td class="text-center"> <button class="btn w-100 btn-edit editAward" data-awardid="${item["awardID"]}"> <i class="fas fa-edit"></i> Edit </button></td>
                         </tr>`;
                     });
 
@@ -267,18 +266,17 @@ function tableContent(){
 
 function userAccountOption(selected = null){
     let returnData          =  "";
-    let selectedSplit       =   selected == null ? "0" : selected.split("|");
-    let tableData           =   getTableData("gen_user_account_tbl","","userAccountID NOT IN("+selectedSplit+") AND status != 0");    
+    let selectedSplit       =  selected == null ? "0" : selected.split("|");
+    let tableData           =  getTableData("hris_employee_list_tbl","","employeeID NOT IN("+selectedSplit+") AND employeeStatus != 0");    
     if(selected != null){
-           
             selectedSplit.map(selectedItems =>{
-                let tableDataSelected   =   getTableData("gen_user_account_tbl","","userAccountID='"+selectedItems+"'");
-                returnData              += `<option value='${tableDataSelected[0]["userAccountID"]}' selected> ${tableDataSelected[0]["firstname"]} ${tableDataSelected[0]["lastname"]}</option>`;
+                let tableDataSelected   =   getTableData("hris_employee_list_tbl","","employeeID='"+selectedItems+"'");
+                returnData              += `<option value='${tableDataSelected[0]["employeeID"]}' selected> ${tableDataSelected[0]["employeeFirstname"]} ${tableDataSelected[0]["employeeLastname"]}</option>`;
             });
         }
     
     tableData.map(items=>{
-        returnData += `<option value="${items["userAccountID"]}">${items["firstname"]} ${items["lastname"]}</option>`;
+        returnData += `<option value="${items["employeeID"]}">${items["employeeFirstname"]} ${items["employeeLastname"]}</option>`;
     });
     return returnData;
 }

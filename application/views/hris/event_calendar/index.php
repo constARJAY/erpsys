@@ -70,7 +70,7 @@
         <div class="modal-content">
             <div class="modal-header bg-primary text-light">
 				<h5 class="page-title font-weight-bold my_event_header">EDIT EVENT</h5>
-				<button type="button" class="close btn-close" data-dismiss="modal" aria-label="Close">
+				<button type="button" class="close btn-close" aria-label="Close">
 					<span class="text-light" aria-hidden="true">&times;</span>
 				</button>
 			</div>

@@ -5,8 +5,8 @@ $(document).ready(function(){
 
 // OPENING ADD & EDIT MODAL
 $(document).on("click",".addHoliday", function(){
+    $(".modal_holiday_header").text("ADD HOLIDAY")
     $("#modal_holiday").modal("show");
-    $(".modal_holiday_header").text("ADD HOLIDAY");
     $("#modal_holiday_content").html(preloader);
     let modal_holiday_content    =   ` 
                                             <div class="modal-body">  
@@ -20,9 +20,9 @@ $(document).on("click",".addHoliday", function(){
                                                                     class="form-control validate" 
                                                                     name="holidayName" 
                                                                     id="inputholidayName" 
-                                                                    data-allowcharacters="[A-Z][ ][a-z][0-9][-][()][']" 
-                                                                    minlength="5" 
-                                                                    maxlength="75" 
+                                                                    data-allowcharacters="[a-z][A-Z][0-9][ ][.][,][-][()]['][/]" 
+                                                                    minlength="2" 
+                                                                    maxlength="150" 
                                                                     unique
                                                                     required >
                                                                 <div class="invalid-feedback d-block" id="invalid-inputholidayName"></div>
@@ -70,8 +70,8 @@ $(document).on("click",".addHoliday", function(){
                                                 </form>
                                             </div>
                                             <div class="modal-footer">
-                                                <button class="btn btn-primary btn-save" id="btnSave"><i class="fas fa-save"></i>&nbsp;SAVE</button>
-                                                <button class="btn btn-danger btn-cancel btnCancel"><i class="fas fa-ban"></i>&nbsp;CANCEL</button>
+                                                <button class="btn btn-save" id="btnSave"><i class="fas fa-save"></i>&nbsp;SAVE</button>
+                                                <button class="btn btn-cancel btnCancel"><i class="fas fa-ban"></i>&nbsp;CANCEL</button>
                                             </div>
                                             `;
     setTimeout(function(){
@@ -115,7 +115,7 @@ $(document).on("click",".editHoliday", function(){
                                                             <div class="form-group">
                                                                 <label for="">Holiday Name <strong class="text-danger">*</strong></label>
                                                                 <input type="text" class="form-control validate" name="holidayName" id="inputholidayName" 
-                                                                    data-allowcharacters="[A-Z][ ][a-z][0-9][-][()][']" minlength="5" maxlength="75" unique="${tableData[0]["holidayID"]}" value="${tableData[0]["holidayName"]}" required >
+                                                                    data-allowcharacters="[a-z][A-Z][0-9][ ][.][,][-][()]['][/]" minlength="2" maxlength="150" unique="${tableData[0]["holidayID"]}" value="${tableData[0]["holidayName"]}" required >
                                                                 <div class="invalid-feedback d-block" id="invalid-inputholidayName"></div>
                                                             </div>
                                                         </div>
@@ -149,8 +149,8 @@ $(document).on("click",".editHoliday", function(){
                                                 </form>
                                             </div>
                                             <div class="modal-footer">
-                                                <button class="btn btn-primary btn-save" id="btnUpdate" data-holidayid="${tableData[0]["holidayID"]}"><i class="fas fa-save"></i>&nbsp;UPDATE</button>
-                                                <button class="btn btn-danger btn-cancel btnCancel"><i class="fas fa-ban"></i>&nbsp;
+                                                <button class="btn btn-update" id="btnUpdate" data-holidayid="${tableData[0]["holidayID"]}"><i class="fas fa-save"></i>&nbsp;UPDATE</button>
+                                                <button class="btn btn-cancel btnCancel"><i class="fas fa-ban"></i>&nbsp;
                                                 CANCEL</button>
                                             </div>
                                             `;
@@ -275,8 +275,8 @@ function tableContent(){
                             <td>${item["holidayName"]}</td>
                             <td>${moment(item["holidayDate"]).format("MMMM DD, YYYY")}</td>
                             <td>${item["holidayType"]}</td>
-                            <td>${item["holidayStatus"] == 0 ? "<span class='badge badge-outline-danger w-100 p-2'>Inactive</span>" : "<span class='badge badge-outline-success w-100 p-2'>Active</span>"} </td>
-                            <td class="text-center"> <button class="btn w-100 btn-primary d-flex justify-content-center align-items-center editHoliday" data-holidayid="${item["holidayID"]}"><i class="icon-pencil px-2"></i> <span class="d-none d-sm-none d-md-block d-lg-block d-xl-block">Edit&nbsp;</span> </button></td>
+                            <td>${item["holidayStatus"] == 0 ? "<span class='badge badge-outline-danger w-100 '>Inactive</span>" : "<span class='badge badge-outline-success w-100 '>Active</span>"} </td>
+                            <td class="text-center"> <button class="btn w-100 btn-edit editHoliday" data-holidayid="${item["holidayID"]}"><i class="fas fa-edit"></i>Edit&nbsp;</span> </button></td>
                         </tr>`;
                     })
                     html += `</tbody>

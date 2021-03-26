@@ -47,7 +47,7 @@ $(document).ready(function(){
             success: function(data) {
                 console.log(data);
                 let html = `
-                <table class="table table-bordered table-striped table-hover" id="tableHRISChartOfAccounts">
+                <table class="table table-bordered table-striped table-hover nowrap" id="tableHRISChartOfAccounts">
                     <thead>
                     <tr>
                         <th>Account Code</th>

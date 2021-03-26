@@ -11,7 +11,7 @@ class Inventory_storage extends CI_Controller {
 
     public function index()
     {
-        $data["title"] = "Inventory Storage";
+        $data["title"] = "Inventory Storage Masterfile";
         $this->load->view("template/header",$data);
         $this->load->view("ims/inventory_storage/index");
         $this->load->view("template/footer");

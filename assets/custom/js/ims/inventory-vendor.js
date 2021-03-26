@@ -228,7 +228,7 @@ $(document).ready(function () {
                         <td>${item.inventoryVendorCode}</td>
                         <td>${item.inventoryVendorName}</td>
                         <td>
-                            ${item.inventoryVendorUnit && titleCase(item.inventoryVendorUnit)+", "} 
+                            ${item.inventoryVendorUnit+", "} 
                             ${item.inventoryVendorBuilding && titleCase(item.inventoryVendorBuilding)+", "} 
                             ${item.inventoryVendorStreet && titleCase(item.inventoryVendorStreet)+", "}
                             ${item.inventoryVendorSubdivision && titleCase(item.inventoryVendorSubdivision)+", "} 

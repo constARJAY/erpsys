@@ -45,7 +45,7 @@ $(document).ready(function(){
             success: function(data) {
                 console.log(data);
                 let html = `
-                <table class="table table-bordered table-striped table-hover" id="tableHRISRequirements">
+                <table class="table table-bordered table-striped table-hover nowrap" id="tableHRISRequirements">
                     <thead>
                     <tr class="text-center">
                         <th>Requirement Code</th>
@@ -224,7 +224,7 @@ $(document).ready(function(){
         data["tableName"]            = "hris_requirement_tbl";
         data["feedback"]             = $("[name=requirementName]").val();
 
-        sweetAlertConfirmation("add", "Requirements Masterfile", "modal_hris_requirements", null, data, true, tableContent);
+        sweetAlertConfirmation("add", "Requirements", "modal_hris_requirements", null, data, true, tableContent);
         }
     });
     // ----- END SAVE MODAL -----
@@ -266,7 +266,7 @@ $(document).ready(function(){
 
 			sweetAlertConfirmation(
 				"update",
-				"Requirements Masterfile",
+				"Requirements",
 				"modal_hris_requirements",
 				"",
 				data,
@@ -283,7 +283,7 @@ $(document).ready(function(){
 		if (!formEmpty) {
 			sweetAlertConfirmation(
 				"cancel",
-				"Requirements Masterfile",
+				"Requirements",
 				"modal_hris_requirements"
 			);
 		} else {

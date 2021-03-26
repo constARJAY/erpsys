@@ -12,7 +12,7 @@
 					<span>This module is used to manage inventory condition details.</span>
 				</div>
 				<div class="col-lg-6 col-md-12 text-md-right">
-                        <button class="btn btn-default btn-add" id="btnAdd"><i class="icon=plus"></i> Add Condition</button>
+                        <button class="btn btn-default btn-add" id="btnAdd"><i class="icon-plus"></i> Add Condition</button>
                     </ul>
 				</div>
 			</div>

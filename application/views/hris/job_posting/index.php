@@ -1,4 +1,4 @@
-<div class="body_area after_bg sm">
+<div class="body_area after_bg ">
 	<div class="block-header">
 		<div class="container">
 			<div class="row clearfix">

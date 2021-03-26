@@ -283,7 +283,7 @@ function isAlreadyApproved(approversID = null, approversDate = null) {
 
 // ----- FUNCTION UPDATE DATE -----
 function updateApproveDate(date) {
-	let dateToday = moment().format("YYYY-MM-DD HH:mm:ss");
+	let dateToday = moment().format("YYYY-MM-DD hh:mm:ss");
 	if (date) {
 		let dateArr = date.split("|");
 		dateArr.push(dateToday);
@@ -329,6 +329,7 @@ function getApproversStatus(approversID, approversStatus, approversDate) {
 		html += `<div class="row mt-4">`;
 		statusArr && statusArr.map((item, index) => {
 			let date = moment(dateArr[index]).format("MMMM DD, YYYY hh:mm:ss A");
+
 			let statusBadge = item == 2 ? `
 			<span class="badge badge-info">
 				Approved - ${date}</span>` : `
@@ -336,10 +337,8 @@ function getApproversStatus(approversID, approversStatus, approversDate) {
 				Denied - ${date}</span>`;
 
 			html += `
-			<div class="col-xl-3 col-lg-3 col-md-4 col-sm-12">
-				<div class="d-flex justify-content-start align-items-center">
-					<span class="font-weight-bold">${getEmployeeFullname(idArr[index])}</span> <small>&nbsp;- Level ${index + 1} Approver</small>
-				</div>
+			<div class="col-xl-3 col-lg-3 col-md-4 col-sm-12"
+				<span>Arjay Diangzon - ${idArr[index]}</span><br>
 				${statusBadge}
 			</div>`;
 		})
@@ -369,26 +368,13 @@ function getStatusStyle(status = 1) {
 
 
 // ----- GET APPROVER -----
-function getNotificationEmployeeID(id, date, first = false) {
+function getNotificationEmployeeID(id, date) {
 	if (id) {
 		let idArr = id.split("|");
 		let index = date && date != null ? date.split("|").length : 1;
-		return first ? idArr[0] : idArr[index];
+		return idArr[index];
 	}
 	return null;
 }
 // ----- END GET APPROVER -----
-
-
-// ----- GET FULLNAME -----
-function getEmployeeFullname(employeeID) {
-	if (employeeID) {
-		let data = getTableData("hris_employee_list_tbl", "CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname", "employeeID = "+employeeID);
-		if (data) {
-			return data[0].fullname;
-		}
-	}
-	return "";
-}
-// ----- END GET FULLNAME -----
 

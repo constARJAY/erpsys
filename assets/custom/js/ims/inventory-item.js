@@ -43,7 +43,8 @@ $(document).ready(function(){
             method:   'POST',
             async:    false,
             dataType: 'json',
-            data:     {tableName: "ims_inventory_item_tbl as item INNER JOIN ims_inventory_classification_tbl as classification USING(classificationID) INNER JOIN ims_inventory_category_tbl as category USING(categoryID) INNER JOIN ims_inventory_storage_tbl USING(inventoryStorageID)"},
+            data:     {tableName: "ims_inventory_item_tbl as item INNER JOIN ims_inventory_classification_tbl as classification USING(classificationID) INNER JOIN ims_inventory_category_tbl as category USING(categoryID) INNER JOIN ims_inventory_storage_tbl USING(inventoryStorageID)",
+                        tableWhere: "categoryStatus=1"},
             beforeSend: function() {
                 $("#table_content").html(preloader);
                 // $("#inv_headerID").text("List of Inventory Item");
@@ -51,8 +52,8 @@ $(document).ready(function(){
             success: function(data) {
                 console.log(data);
                 let html = `
-                <table class="table table-bordered table-striped table-hover" id="tableInventoryItem">
-                    <thead>
+                <table class="table table-bordered table-striped table-hover nowrap" id="tableInventoryItem">
+                    <thead style="white-space:nowrap">
                         <tr>
                             <th>Item No.</th>
                             <th>Storage Name</th>
@@ -135,7 +136,7 @@ $(document).ready(function(){
     function storageContent(param = false) {
     // getTableData(tableName = null, columnName = “”, WHERE = “”, orderBy = “”) 
     const data = getTableData("ims_inventory_storage_tbl", 
-        "inventoryStorageID  ,inventoryStorageOfficeName", "", "");
+        "inventoryStorageID  ,inventoryStorageOfficeName", "inventoryStorageStatus=1", "");
       
             let html = ` <option value="" disabled selected ${!param && "selected"}>No Selected</option>`;
             data.map((item, index, array) => {
@@ -150,7 +151,7 @@ $(document).ready(function(){
     function classificationContent(param = false) {
     // getTableData(tableName = null, columnName = “”, WHERE = “”, orderBy = “”) 
     const data = getTableData("ims_inventory_classification_tbl", 
-        "classificationID ,classificationName", "", "");
+        "classificationID ,classificationName", "classificationStatus = 1", "");
       
             let html = ` <option value="" disabled selected ${!param && "selected"}>No Selected</option>`;
             data.map((item, index, array) => {

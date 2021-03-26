@@ -9,7 +9,7 @@
                         <li class="breadcrumb-item active">Change Schedule</li>
                     </ul>
                     <h1 class="mb-1 mt-1">Change Schedule</h1>
-                    <span>Lorem ipsum dolor sit amet consectetur adipisicing elit. At, quae.</span>
+                    <span>This module is used to manage change schedule form details.</span>
                 </div>
                 <div class="col-lg-4 col-sm-12 text-right" id="headerButton"></div>
             </div>

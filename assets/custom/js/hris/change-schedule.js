@@ -1,5 +1,15 @@
 $(document).ready(function () {
 
+
+	// ----- GET SESSION DATA -----
+	let {
+		fullname:        employeeFullname    = "",
+		departmentName:  employeeDepartment  = "",
+		designationName: employeeDesignation = "",
+	} = getEmployeeData(sessionID);
+	// ----- END GET SESSION DATA -----
+
+
 	// ----- DATATABLES -----
 	function initDataTables() {
 		if ($.fn.DataTable.isDataTable("#tableForApprroval")) {
@@ -92,9 +102,10 @@ $(document).ready(function () {
 	// ----- FOR APPROVAL CONTENT -----
 	function forApprovalContent() {
 		$("#tableForApprovalParent").html(preloader);
+
 		let scheduleData = getTableData(
-			"hris_change_schedule_tbl",
-			"",
+			"hris_change_schedule_tbl LEFT JOIN hris_employee_list_tbl USING(employeeID)",
+			"*, CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname",
 			`employeeID != ${sessionID} AND changeScheduleStatus != 0 AND changeScheduleStatus != 4`
 		);
 
@@ -122,7 +133,7 @@ $(document).ready(function () {
 				html += `
 				<tr>
 					<td>${item.changeScheduleCode}</td>
-					<td>${item.employeeID}</td>
+					<td>${item.fullname}</td>
 					<td>${moment(item.changeScheduleDate).format("MMMM DD, YYYY")}</td>
 					<td>${item.changeScheduleTimeIn} - ${item.changeScheduleTimeOut}</td>
 					<td>${item.changeScheduleReason}</td>
@@ -142,6 +153,7 @@ $(document).ready(function () {
 		setTimeout(() => {
 			$("#tableForApprovalParent").html(html);
 			initDataTables();
+			viewNotification();
 			return html;
 		}, 500);
 	}
@@ -152,9 +164,9 @@ $(document).ready(function () {
 	function myFormsContent() {
 		$("#tableMyFormsParent").html(preloader);
 		let scheduleData = getTableData(
-			"hris_change_schedule_tbl",
-			"",
-			`employeeID = ${sessionID}`
+			"hris_change_schedule_tbl LEFT JOIN hris_employee_list_tbl USING(employeeID)",
+			"*, CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname",
+			`hris_change_schedule_tbl.employeeID = ${sessionID}`
 		);
 
 		let html = `
@@ -191,7 +203,7 @@ $(document).ready(function () {
 			html += `
             <tr>
                 <td>${item.changeScheduleCode}</td>
-                <td>${item.employeeID}</td>
+                <td>${item.fullname}</td>
                 <td>${moment(item.changeScheduleDate).format("MMMM DD, YYYY")}</td>
                 <td>${item.changeScheduleTimeIn} - ${item.changeScheduleTimeOut}</td>
                 <td>${item.changeScheduleReason}</td>
@@ -393,24 +405,24 @@ $(document).ready(function () {
             <div class="col-md-4 col-sm-12">
                 <div class="form-group">
                     <label>Employee Name</label>
-                    <input type="text" class="form-control" disabled value="Arjay Diangzon">
+                    <input type="text" class="form-control" disabled value="${employeeFullname}">
                 </div>
             </div>
             <div class="col-md-4 col-sm-12">
                 <div class="form-group">
                     <label>Department</label>
-                    <input type="text" class="form-control" disabled value="Operations">
+                    <input type="text" class="form-control" disabled value="${employeeDepartment}">
                 </div>
             </div>
             <div class="col-md-4 col-sm-12">
                 <div class="form-group">
                     <label>Position</label>
-                    <input type="text" class="form-control" disabled value="Junior Developer I">
+                    <input type="text" class="form-control" disabled value="${employeeDesignation}">
                 </div>
             </div>
             <div class="col-md-4 col-sm-12">
                 <div class="form-group">
-                    <label>Date <code>*</code></label>
+                    <label>Date ${!disabled ? "<code>*</code>" : ""}</label>
                     <input type="button" 
                         class="form-control validate daterange text-left"
                         required
@@ -425,7 +437,7 @@ $(document).ready(function () {
             </div>
             <div class="col-md-4 col-sm-12">
                 <div class="form-group">
-                    <label>Time In <code>*</code></label>
+                    <label>Time In ${!disabled ? "<code>*</code>" : ""}</label>
                     <input type="text" 
                         class="form-control timeIn" 
                         id="changeScheduleTimeIn" 
@@ -438,7 +450,7 @@ $(document).ready(function () {
             </div>
             <div class="col-md-4 col-sm-12">
                 <div class="form-group">
-                    <label>Time Out <code>*</code></label>
+                    <label>Time Out ${!disabled ? "<code>*</code>" : ""}</label>
                     <input type="text" 
                         class="form-control timeOut" 
                         id="changeScheduleTimeOut" 
@@ -451,7 +463,7 @@ $(document).ready(function () {
             </div>
             <div class="col-md-12 col-sm-12">
                 <div class="form-group">
-                    <label>Reason <code>*</code></label>
+                    <label>Reason ${!disabled ? "<code>*</code>" : ""}</label>
                     <textarea class="form-control validate"
                         data-allowcharacters="[a-z][A-Z][0-9][ ][.][,][-][()]['][/][&]"
                         minlength="1"
@@ -513,6 +525,7 @@ $(document).ready(function () {
 		}
 	}
 	pageContent();
+	viewNotification();
 	// ----- END PAGE CONTENT -----
 
 
@@ -590,9 +603,9 @@ $(document).ready(function () {
 		let data = getFormData("form_change_schedule", true);
 
 		const submittedAt =
-			(status == 1 && moment().format("YYYY-MM-DD hh:mm:ss")) ||
+			(status == 1 && moment().format("YYYY-MM-DD HH:mm:ss")) ||
 			(status == 4 && null);
-		const dateToday = moment().format("YYYY-MM-DD hh:mm:ss");
+		const dateToday = moment().format("YYYY-MM-DD HH:mm:ss");
 
 		if (action && method != "" && feedback != "") {
 			data["tableData[changeScheduleStatus]"] = status;
@@ -613,7 +626,7 @@ $(document).ready(function () {
 				data["tableData[createdBy]"]  = sessionID;
 				data["tableData[createdAt]"]  = dateToday;
 
-				const approversID = getModuleApprover("change request");
+				const approversID = getModuleApprover("change schedule");
 				if (approversID && method == "submit") {
 					data["tableData[approversID]"] = approversID;
 				}
@@ -767,13 +780,23 @@ $(document).ready(function () {
 
 			const data = getData(action, 1, "submit", feedback, id);
 
+			const tableData = getTableData(
+				"hris_change_schedule_tbl",
+				"changeScheduleID",
+				"",
+				"createdAt DESC",
+				"",
+				"LIMIT 1"
+			);
+			const lastID = +tableData[0].changeScheduleID + 1;
 			
 			let notificationData = {
-				moduleID:                13,
+				moduleID:                60,
+				tableID: 				 lastID,
 				notificationTitle:       "Change Schedule Form",
-				notificationDescription: `${sessionID} asked for your approval.`,
+				notificationDescription: `${getEmployeeFullname(sessionID)} asked for your approval.`,
 				notificationType:        2,
-				employeeID: getNotificationEmployeeID(data["tableData[approversID]"], data["tableData[approversDate]"]),
+				employeeID: getNotificationEmployeeID(data["tableData[approversID]"], data["tableData[approversDate]"], true),
 			};
 
 			formConfirmation(
@@ -863,7 +886,8 @@ $(document).ready(function () {
 			if (isImLastApprover(approversID, approversDate)) {
 				status = 2;
 				notificationData = {
-					moduleID:                13,
+					moduleID:                60,
+					tableID:			 	 id,
 					notificationTitle:       "Change Schedule Form",
 					notificationDescription: `${tableData[0].changeScheduleCode}: Your request has been approved.`,
 					notificationType:        2,
@@ -872,9 +896,10 @@ $(document).ready(function () {
 			} else {
 				status = 1;
 				notificationData = {
-					moduleID:                13,
+					moduleID:                60,
+					tableID:				 id,
 					notificationTitle:       "Change Schedule Form",
-					notificationDescription: `${employeeID} asked for your approval.`,
+					notificationDescription: `${getEmployeeFullname(employeeID)} asked for your approval.`,
 					notificationType:        2,
 					employeeID:              getNotificationEmployeeID(approversID, approversDate),
 				};
@@ -923,10 +948,10 @@ $(document).ready(function () {
 			</div>
 		</div>
 		<div class="modal-footer text-right">
-			<button class="btn btn-primary" id="btnRejectConfirmation"
+			<button class="btn btn-danger" id="btnRejectConfirmation"
 			changeScheduleID="${id}"
-			changeScheduleCode="${feedback}">Deny</button>
-			<button class="btn btn-danger" data-dismiss="modal">Cancel</button>
+			changeScheduleCode="${feedback}"><i class="far fa-times-circle"></i> Deny</button>
+			<button class="btn btn-cancel" data-dismiss="modal"><i class="fas fa-ban"></i> Cancel</button>
 		</div>`;
 		$("#modal_change_schedule_content").html(html);
 	})
@@ -951,7 +976,7 @@ $(document).ready(function () {
 				data["tableData[approversDate]"]   = updateApproveDate(approversDate);
 
 				let notificationData = {
-					moduleID:                13,
+					moduleID:                60,
 					notificationTitle:       "Change Schedule Form",
 					notificationDescription: `${tableData[0].changeScheduleCode}: Your request has been denied.`,
 					notificationType:        2,
@@ -973,4 +998,17 @@ $(document).ready(function () {
 		}
 	})
 	// ----- END REJECT DOCUMENT -----
+
 });
+
+
+// ----- VIEW NOTIFICATION -----
+function viewNotification() {
+	let url = window.document.URL;
+	url = url.split("?view_id=");
+	if (url.length > 1) {
+		let id = url[1];
+		$(`.btnView[id=${id}]`).trigger("click");
+	}
+}
+// ----- END VIEW NOTIFICATION -----

@@ -1,4 +1,4 @@
-<div class="body_area after_bg sm">
+<div class="body_area after_bg">
 	<div class="block-header">
 		<div class="container">
 			<div class="row clearfix">
@@ -16,7 +16,7 @@
 					<!-- <button class="btn btn-default hidden-xs ml-2">Download Report</button>
                         <button class="btn btn-secondary hidden-xs ml-2">New Report</button> -->
                         <!-- <button type="button" class="btn btn-danger pr-2" id="btnAdd"> <i class="icon-plus" id="btnIcon"></i> &nbsp;Add Item</button> -->
-						<button type="button" class="btn btn-add btn-default" id="btnAdd"> <i class="icon-plus"></i> &nbsp;Add Inventory Storage</button>
+						<button type="button" class="btn btn-add btn-default" id="btnAdd"> <i class="icon-plus"></i> &nbsp;Add Storage</button>
                         <!-- <button type="button" class="btn btn-add pr-2" id="btnAdd"> <i class="fas fa-plus-square"></i> Add Item</button> -->
                         <!-- <button type="button" class="btn btn-light pr-2" id="btnCancel"> <i class="icon-ban"></i> &nbsp;Cancel</button> -->
                     </ul>
@@ -90,7 +90,7 @@
     <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
 		<div class="modal-content">
 			<div class="modal-header bg-primary text-light">
-				<h5 class="page-title font-weight-bold">ADD INVENTORY STORAGE</h5>
+				<h5 class="page-title font-weight-bold" id="inventory_storage_modalheader">ADD INVENTORY STORAGE</h5>
 				<button type="button" class="close btnCancel" data-dismiss="modal" aria-label="Close">
 					<span class="text-light" aria-hidden="true">&times;</span>
 				</button>

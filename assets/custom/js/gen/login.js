@@ -17,8 +17,7 @@ $(document).on("click", "#login-btn", function(e){
     $(".confirmation").show();
     let username            = $("#username").val();
     let password            = $("#password").val();
-    let condition           = getTableData("gen_user_account_tbl","", "username = BINARY '"+username+"' AND password = BINARY '"+password+"' ");
-    let usernameCondition   = getTableData("gen_user_account_tbl","username, status", "username = BINARY '"+username+"' ");
+    let condition           = getTableData("hris_employee_list_tbl","", "employeeUsername = BINARY '"+username+"' AND employeePassword = BINARY '"+password+"' ");
     let confirmation;
     
     if(username == "" || password == ""){
@@ -40,27 +39,17 @@ $(document).on("click", "#login-btn", function(e){
                 // $("#username").val(username);
                 $("#username").focus();
                 $("#password").val("");    
-        }else{
-            
-                if(condition[0]["userType"] != "1"){
-                    confirmation = '<div class="alert alert-danger text-center d-flex justify-content-center" role="alert"> <span>The account that you are trying to access is inactive <br> Please contact the system administrator for more information</span> </div>';
-                    $(".confirmation").html(confirmation);
-                    // $("#username").val(username);
-                    $("#username").focus();
-                    $("#password").val(""); 
-                }else{
-                    let data = {"userType"  : condition[0]["userType"],"userAccountID" : condition[0]["userAccountID"]};
-                    $.ajax({
-                        url:"login/set_session",
-                        method:"POST",
-                        data,
-                        dataType:"json",
-                        success:function(data){
-                            // if(data == true) window.location.replace('operations');
-                            if(data == true) window.location.replace('approval_setup');
-                        }
-                    });
+        }else{ 
+            let data = {"userType"  : "1","userAccountID" : condition[0]["employeeID"]};
+            $.ajax({
+                url:"login/set_session",
+                method:"POST",
+                data,
+                dataType:"json",
+                success:function(data){
+                    if(data == true) window.location.replace('approval_setup');
                 }
+            });
                 
         }
 

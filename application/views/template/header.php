@@ -3,7 +3,8 @@
     $sessionID  =   $this->session->has_userdata('adminSessionID') ? $this->session->userdata('adminSessionID') : redirect(base_url("login"));
     $sessionUserAccount = getAdminSessionAccount();
 
-    $sessionRoleID = $sessionUserAccount->role;
+    $sessionRoleID = $sessionUserAccount->roleID;
+    $sessionFullname    = $sessionUserAccount->employeeFirstname." ".$sessionUserAccount->employeeLastname;
 
 ?>
 
@@ -121,8 +122,8 @@
                                                 foreach ($notifications as $notif) {
                                         ?>
                                             <li>
-                                                <a href="<?= $notif["controller"] ?>" class="btnViewNotification" controller="<?= $notif["controller"] ?>" id="<?= $notif['id'] ?>">
-                                                    <div class="media">
+                                                <a href="<?= $notif["controller"] ?>" class="btnViewNotification" controller="<?= $notif["controller"] ?>" id="<?= $notif['id'] ?>" table="<?= $notif['table'] ?>">
+                                                    <div class="media" title="<?= $notif["description"] ?>">
                                                         <img class="media-object" src="<?= base_url() ?>assets/notification/<?= $notif["icon"] ?>" alt="">
                                                         <div class="media-body">
                                                             <span class="name"><?= $notif["title"] ?> <span class="time"><?= $notif["time"] ?></span></span>
@@ -158,7 +159,7 @@
                                     <ul class="dropdown-menu">
                                         <li>
                                             <div class="user-info">
-                                                <h5 class="user-name mb-0">Alizee Thomas</h5>
+                                                <h5 class="user-name mb-0"><?=$sessionFullname ? $sessionFullname :"Alizee Thomas"; ?></h5>
                                                 <p class="user-position font-13">Available</p>
                                                 <a title="facebook" href="javascript:void(0);"><i class="zmdi zmdi-facebook"></i></a>
                                                 <a title="twitter" href="javascript:void(0);"><i class="zmdi zmdi-twitter"></i></a>

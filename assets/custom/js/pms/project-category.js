@@ -43,7 +43,7 @@ $(document).ready(function(){
             success: function(data) {
                 console.log(data);
                 let html = `
-                <table class="table table-bordered table-striped table-hover" id="tableProjectCategory">
+                <table class="table table-bordered table-striped table-hover nowrap" id="tableProjectCategory">
                     <thead>
                     <tr class="text-center">
                         <th>Category Code</th>

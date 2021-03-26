@@ -1,4 +1,4 @@
-<div class="body_area">
+<div class="body_area after_bg">
     <div class="block-header">
         <div class="container">
             <div class="row clearfix">
@@ -6,7 +6,7 @@
                     <ul class="breadcrumb pl-0 pb-0 ">
                         <li class="breadcrumb-item"><a href="#"><i class="zmdi zmdi-home"></i>&nbsp;Dashboard</a></li>
                         <li class="breadcrumb-item"><i class="zmdi zmdi-folder"></i>&nbsp;Masterfile</li>
-                        <li class="breadcrumb-item active">Leave Masterfile</li>
+                        <li class="breadcrumb-item active">Leave Type</li>
                     </ul>
                     <h1 class="mb-1 mt-1">List of Leave Types</h1>
                     <span>This module is used to manage the leave type details.</span>
@@ -20,8 +20,10 @@
 
     <div class="container">
 		<div class="row clearfix row-deck">
-            <div class="col-12">
-                <div class="table-responsive" id="table_content"></div>
+            <div class="card p-3">
+                <div class="col-12">
+                    <div class="table-responsive" id="table_content"></div>
+                </div>
             </div>
         </div>
 	</div>

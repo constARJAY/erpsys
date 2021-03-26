@@ -510,7 +510,7 @@ const deleteTableData = async (
 
 
 // ----- INSERT NOTIFICATION -----
-function insertNotificationData(data) {
+const insertNotificationData = (data) => {
 	if (data) {
 		$.ajax({
 			method: "POST",
@@ -524,3 +524,18 @@ function insertNotificationData(data) {
 	return false;
 }
 // ----- END INSERT NOTIFICATION -----
+
+
+// ----- GET EMPLOYEE DATA -----
+const getEmployeeData = employeeID => {
+	if (employeeID) {
+		const data = getTableData(`
+			hris_employee_list_tbl AS helt
+				LEFT JOIN hris_department_tbl USING(departmentID)
+				LEFT JOIN hris_designation_tbl USING(designationID)`, `
+			*, CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname`, "employeeID="+employeeID);
+		return (data && data[0]) || null;
+	}
+	return null;
+}
+// ----- END GET EMPLOYEE DATA -----

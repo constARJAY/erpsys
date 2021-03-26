@@ -23,7 +23,7 @@ class ApprovalSetup_model extends CI_Model {
         $userAccountID_array    =   explode(",", $userAccountID);
 
         // DELETE BEFORE INSERTING NEW DATA
-        $deleteSql      = "DELETE FROM `gen_approval_setup_tbl` WHERE moduleID = 1";
+        $deleteSql      = "DELETE FROM `gen_approval_setup_tbl` WHERE moduleID = $moduleID";
         $deleteQuery    = $this->db->query($deleteSql);
         if($deleteQuery){
             // Loop the Roles ID

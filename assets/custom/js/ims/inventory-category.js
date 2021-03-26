@@ -27,7 +27,7 @@ $(document).ready(function(){
     function departmentContent(param = false) {
     // getTableData(tableName = null, columnName = “”, WHERE = “”, orderBy = “”) 
     const data = getTableData("ims_inventory_classification_tbl", 
-        "classificationID   ,classificationName", "", "classificationStatus = 1");
+        "classificationID   ,classificationName", "classificationStatus = 1", "");
         
             let html = ` <option value="" disabled selected ${!param && "selected"}>No Selected</option>`;
             data.map((item, index, array) => {
@@ -60,7 +60,7 @@ $(document).ready(function(){
             success: function(data) {
                 console.log(data);
                 let html = `
-                <table class="table table-bordered table-striped table-hover" id="tableInventoryCategory">
+                <table class="table table-bordered table-striped table-hover nowrap" id="tableInventoryCategory">
                     <thead>
                     <tr>
                         <th>Item Category Code</th>

@@ -292,7 +292,7 @@ $(document).ready(function () {
 			},
 			success: function (data) {
 				let html = `
-                    <table class="table table-bordered table-striped table-hover" id="tableUserAccount">
+                    <table class="table table-bordered table-striped table-hover nowrap" id="tableUserAccount" >
                         <thead>
                             <tr class="text-center">
                                 <th>Storage Code</th>
@@ -304,7 +304,7 @@ $(document).ready(function () {
                                 <th>Action</th>
                             </tr>
                         </thead>
-                        <tbody>`;
+                        <tbody >`;
 				data.map((item, index, array) => {
 					if (item.inventoryStorageStatus == "1") {
 						var activestatus = `<span class="badge badge-outline-success w-100">Active</span>`;
@@ -325,15 +325,18 @@ $(document).ready(function () {
                         <tr>
                            <td>${item.inventoryStorageCode}</td>
                            <td>${item.inventoryStorageOfficeName}</td>
-                           <td>
+						   <td>
+
                         ${item.inventoryStorageUnitNumber && titleCase(item.inventoryStorageUnitNumber)+", "} 
-                        ${item.inventoryStorageHouseNumber && titleCase(item.inventoryStorageHouseNumber)+", "} 
+                        ${item.inventoryStorageHouseNumber && item.inventoryStorageHouseNumber +", "} 
                         ${item.inventoryStorageStreetName && titleCase(item.inventoryStorageStreetName)+", "}
                         ${item.inventoryStorageSubdivisionName && titleCase(item.inventoryStorageSubdivisionName)+", "} 
                         ${item.inventoryStorageBarangay && titleCase(item.inventoryStorageBarangay)+", "} 
                         ${item.inventoryStorageMunicipality && titleCase(item.inventoryStorageMunicipality)+", "} 
                         ${item.inventoryStorageProvince && titleCase(item.inventoryStorageProvince)+", "}
-                        ${item.inventoryStorageCountry && titleCase(item.inventoryStorageCountry)}
+						${item.inventoryStorageCountry && titleCase(item.inventoryStorageCountry)+", "}
+						${item.inventoryStorageZipCode && titleCase(item.inventoryStorageZipCode)}
+						
 
                            </td>
                            <td>${item.inventoryStorageRoomType}</td>
@@ -576,22 +579,22 @@ $(document).ready(function () {
                             class="form-control select2 validate" 
                                     name="inventoryStorageStatus" 
                                     id="input_storage_status" 
-                                    required>
+                                    >
                             
                                 <option 
                                     value="1" 
                                     ${
-																			data &&
-																			inventoryStorageStatus == "1" &&
-																			"selected"
-																		}>Active</option>
+										data &&
+										inventoryStorageStatus == "1" &&
+										"selected"
+									}>Active</option>
                                 <option 
                                     value="0" 
                                     ${
-																			data &&
-																			inventoryStorageStatus == "0" &&
-																			"selected"
-																		}>Inactive</option>
+										data &&
+										inventoryStorageStatus == "0" &&
+										"selected"
+									}>Inactive</option>
                                 </select>
                                 <div class="invalid-feedback d-block" id="invalid-input_storage_status"></div>
                              </div>
@@ -606,6 +609,7 @@ $(document).ready(function () {
 	}
 
 	$(document).on("click", "#btnAdd", function () {
+		$("#inventory_storage_modalheader").text("ADD INVENTORY STORAGE");
 		$("#modal_inventory_storage").modal("show");
 		$("#modal_inventory_storage_content").html(preloader);
 		const content = modalContent();
@@ -650,7 +654,7 @@ $(document).ready(function () {
 		const id = $(this).attr("id");
 		const feedback = $(this).attr("feedback");
 		$("#modal_inventory_storage").modal("show");
-
+		$("#inventory_storage_modalheader").text("EDIT INVENTORY STORAGE");
 		// Display preloader while waiting for the completion of getting the data
 		$("#modal_inventory_storage_content").html(preloader);
 
@@ -699,14 +703,15 @@ $(document).ready(function () {
 
 	// ------- CANCEl MODAL--------
 	$(document).on("click", ".btnCancel", function () {
-		let condition = emptyFormCondition("modal_inventory_storage");
-		if (condition == true) {
+		let formEmpty = isFormEmpty("modal_inventory_storage");
+		if (!formEmpty) {
 			sweetAlertConfirmation(
 				"cancel",
 				"Inventory Storage",
 				"modal_inventory_storage"
 			);
 		} else {
+            preventRefresh(false);
 			$("#modal_inventory_storage").modal("hide");
 		}
 	});
