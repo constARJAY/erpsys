@@ -12,18 +12,17 @@ $(document).ready(function(){
             scrollX:        true,
             scrollCollapse: true,
             columnDefs: [
-                { targets: 0, width: 100 },
-                { targets: 1, width: 100 },
-                { targets: 2, width: 100 },
-                { targets: 3, width: 100 },
-                { targets: 4, width: 100 },
-                { targets: 5, width: 100 },
-                { targets: 6, width: 100 },
-                { targets: 7, width: 100 },
-                { targets: 8, width: 100 },
-                { targets: 9, width: 100 },
-                { targets: 10, width: 80 },
-                { targets: 11, width: 80 },
+                { targets: 0, width: "10%" },
+                { targets: 1, width: "10%" },
+                { targets: 2, width: "10%" },
+                { targets: 3, width: "10%" },
+                { targets: 4, width: "10%" },
+                { targets: 5, width: "10%" },
+                { targets: 6, width: "5%" },
+                { targets: 7, width: "5%" },
+                { targets: 8, width: "10%" },
+                { targets: 9, width: "10%" },
+                { targets: 10, width: "10%" },
             ],
         });
     }
@@ -55,7 +54,7 @@ $(document).ready(function(){
                 <table class="table table-bordered table-striped table-hover nowrap" id="tableInventoryItem">
                     <thead style="white-space:nowrap">
                         <tr>
-                            <th>Item No.</th>
+                            <th>Item Code</th>
                             <th>Storage Name</th>
                             <th>Item Name</th>
                             <th>Item Category</th>
@@ -66,7 +65,6 @@ $(document).ready(function(){
                             <th>Re-Order Level</th>
                             <th>Base Price</th>
                             <th>Status</th>
-                            <th>Action</th>
                         </tr>
                     </thead>
                     <tbody>`;
@@ -89,7 +87,10 @@ $(document).ready(function(){
                     }
 
                     html += `
-                    <tr>
+                    <tr
+                    class="btnEdit" 
+                    id="${item.itemID}"
+                    feedback="${item.itemName}">
                         <td>${item.itemCode}</td>
                         <td>${item.inventoryStorageOfficeName}</td>
                         <td>${item.itemName}</td>
@@ -100,16 +101,7 @@ $(document).ready(function(){
                         <td>${item.vatType}</td>
                         <td>${item.reOrderLevel}</td>
                         <td class="text-right">${formatAmount(item.basePrice, true)}</td>
-                        <td>${status}</td>
-                        <td>
-                            <button 
-                                class="btn btn-edit btn-block btnEdit" 
-                                id="${item.itemID}"
-                                feedback="${item.itemName}">
-                                <i class="fas fa-edit"></i>
-                                Edit
-                            </button>
-                        </td>
+                        <td class="text-center">${status}</td>
                     </tr>`;
                 })
                 html += `</tbody>
@@ -138,7 +130,7 @@ $(document).ready(function(){
     const data = getTableData("ims_inventory_storage_tbl", 
         "inventoryStorageID  ,inventoryStorageOfficeName", "inventoryStorageStatus=1", "");
       
-            let html = ` <option value="" disabled selected ${!param && "selected"}>No Selected</option>`;
+            let html = ` <option value="" disabled selected ${!param && "selected"}>Select Storage Code</option>`;
             data.map((item, index, array) => {
                 html += `<option value="${item.inventoryStorageID}" ${param && item.inventoryStorageID  == param[0].inventoryStorageID  && "selected"}>${item.inventoryStorageOfficeName}</option>`;
             })
@@ -153,7 +145,7 @@ $(document).ready(function(){
     const data = getTableData("ims_inventory_classification_tbl", 
         "classificationID ,classificationName", "classificationStatus = 1", "");
       
-            let html = ` <option value="" disabled selected ${!param && "selected"}>No Selected</option>`;
+            let html = ` <option value="" disabled selected ${!param && "selected"}>Select Item Classification</option>`;
             data.map((item, index, array) => {
                 html += `<option value="${item.classificationID}" ${param && item.classificationID == param[0].classificationID && "selected"}>${item.classificationName}</option>`;
             })
@@ -168,7 +160,7 @@ $(document).ready(function(){
     const data = getTableData("ims_inventory_category_tbl", 
         "categoryID ,categoryName", "categoryStatus = 1", "");
         
-            let html = ` <option value="" disabled selected ${!param && "selected"}>No Selected</option>`;
+            let html = ` <option value="" disabled selected ${!param && "selected"}>Select Item Category</option>`;
             data.map((item, index, array) => {
                 html += `<option value="${item.categoryID}" ${param && item.categoryID == param[0].categoryID && "selected"}>${item.categoryName}</option>`;
             })
@@ -281,7 +273,7 @@ $(document).ready(function(){
                         value="" 
                         disabled 
                         selected
-                        ${!data && "selected"} >No Selected</option>
+                        ${!data && "selected"} >Select Item Size</option>
                     <option 
                         value="ExtraSmall" 
                         ${data && itemSize == "ExtraSmall" && "selected"} > ExtraSmall</option>
@@ -315,7 +307,7 @@ $(document).ready(function(){
                         value="" 
                         disabled 
                         selected
-                        ${!data && "selected"} >No Selected</option>
+                        ${!data && "selected"} >Select Unit of Measurement</option>
                     <option 
                         value="Pcs" 
                         ${data && unitOfMeasurementID == "Pcs" && "selected"} > Pcs</option>
@@ -350,7 +342,7 @@ $(document).ready(function(){
                         value="" 
                         disabled 
                         selected
-                        ${!data && "selected"}>No Selected</option>
+                        ${!data && "selected"}>Select VAT Type</option>
                     <option 
                         value="Vatable" 
                         ${data && vatType == "Vatable" && "selected"}  > Vatable</option>
@@ -388,7 +380,7 @@ $(document).ready(function(){
                             id="input_itemStatus" 
                             name="itemStatus"
                             autocomplete="off"
-                            required>
+                            >
                             <option 
                                 value="1" 
                                 ${data && itemStatus == "1" && "selected"} >Active</option>

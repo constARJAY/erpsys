@@ -20,8 +20,10 @@ $(document).on("click", "#login-btn", function(e){
     let condition           = getTableData("hris_employee_list_tbl","", "employeeUsername = BINARY '"+username+"' AND employeePassword = BINARY '"+password+"' ");
     let confirmation;
     
-    if(username == "" || password == ""){
-        
+    if(username == ""){
+        $("#username").focus();
+    }else if(password == ""){
+        $("#password").focus();
     }else{
         e.preventDefault();
 
@@ -33,7 +35,7 @@ $(document).on("click", "#login-btn", function(e){
                     $("#username").focus();
                     $("#password").val("");
 
-        }else if(condition[0]["status"] == "0"){
+        }else if(condition[0]["employeeStatus"] == "0"){
                 confirmation = '<div class="alert alert-danger text-center d-flex justify-content-center" role="alert"> <span>The account that you are trying to access is inactive <br> Please contact the system administrator for more information</span> </div>';
                 $(".confirmation").html(confirmation);
                 // $("#username").val(username);

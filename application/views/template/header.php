@@ -1,10 +1,11 @@
 <?php
 
     $sessionID  =   $this->session->has_userdata('adminSessionID') ? $this->session->userdata('adminSessionID') : redirect(base_url("login"));
-    $sessionUserAccount = getAdminSessionAccount();
-
-    $sessionRoleID = $sessionUserAccount->roleID;
-    $sessionFullname    = $sessionUserAccount->employeeFirstname." ".$sessionUserAccount->employeeLastname;
+    $sessionUserAccount         = getAdminSessionAccount();
+    $sessionRoleID              = $sessionUserAccount->roleID;
+    $sessionFullname            = $sessionUserAccount->employeeFirstname." ".$sessionUserAccount->employeeLastname;
+    $sessionDesignationID       = $sessionUserAccount->designationID;
+    $sessionDesignationName     = $sessionUserAccount->designationName;
 
 ?>
 
@@ -65,13 +66,15 @@
 	<script src="<?=base_url('assets/bundles/vendorscripts.bundle.js')?>"></script>
     <script src="<?=base_url('assets/plugins/momentjs/moment.js')?>"></script>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.2/rollups/aes.js"></script>
+
 </head>
 
 <body class="font-nunito fullwidth h_menu">
 
 <div id="body" class="theme-blackbox">
     <!-- Page Loader -->
-    <div class="page-loader-wrapper" base_url="<?= base_url() ?>" session="<?= $sessionID ?>" role="<?= $sessionRoleID ?>">
+    <div class="page-loader-wrapper" base_url="<?= base_url() ?>" session="<?= $sessionID ?>" role="<?= $sessionRoleID ?>" designation="<?= $sessionDesignationID ?>">
         <div class="loader">
             <div class="mt-3"><img class="zmdi-hc-spin w60" src="<?= base_url() ?>assets/images/loader.svg" alt="Amaze"></div>
             <p>Please wait...</p>        
@@ -160,19 +163,19 @@
                                         <li>
                                             <div class="user-info">
                                                 <h5 class="user-name mb-0"><?=$sessionFullname ? $sessionFullname :"Alizee Thomas"; ?></h5>
-                                                <p class="user-position font-13">Available</p>
-                                                <a title="facebook" href="javascript:void(0);"><i class="zmdi zmdi-facebook"></i></a>
+                                                <p class="user-position font-13"><?=$sessionDesignationName?></p>
+                                                <!-- <a title="facebook" href="javascript:void(0);"><i class="zmdi zmdi-facebook"></i></a>
                                                 <a title="twitter" href="javascript:void(0);"><i class="zmdi zmdi-twitter"></i></a>
                                                 <a title="instagram" href="javascript:void(0);"><i class="zmdi zmdi-instagram"></i></a>
                                                 <a title="linkedin" href="javascript:void(0);"><i class="zmdi zmdi-linkedin-box"></i></a>
-                                                <a title="dribbble" href="javascript:void(0);"><i class="zmdi zmdi-dribbble"></i></a>
+                                                <a title="dribbble" href="javascript:void(0);"><i class="zmdi zmdi-dribbble"></i></a> -->
                                                 <hr>
                                             </div>
                                         </li>                            
-                                        <li><a href="profile.html"><i class="icon-user mr-2"></i> <span>My Profile</span> <span class="badge badge-success float-right">80%</span></a></li>
-                                        <li><a href="taskboard.html"><i class="icon-notebook mr-2"></i><span>Taskboard</span> <span class="badge badge-info float-right">New</span></a></li>
-                                        <li><a href="locked.html"><i class="icon-lock mr-2"></i><span>Locked</span></a></li>
-                                        <li><a href="<?= base_url('login/sign_out') ?>"><i class="icon-power mr-2"></i><span>Sign Out</span></a></li>
+                                        <li><a href="profile.html"><i class="text-danger icon-user mr-2"></i> <span>My Profile</span> <span class="badge badge-success float-right">80%</span></a></li>
+                                        <li><a href="taskboard.html"><i class="text-danger icon-notebook mr-2"></i><span>Taskboard</span> <span class="badge badge-info float-right">New</span></a></li>
+                                        <li><a href="locked.html"><i class="text-danger icon-lock mr-2"></i><span>Locked</span></a></li>
+                                        <li><a href="<?= base_url('login/sign_out') ?>"><i class="text-danger icon-power mr-2"></i><span>Sign Out</span></a></li>
                                     </ul>
                                 </li>
                             </ul>
@@ -186,6 +189,15 @@
     <aside id="leftsidebar" class="sidebar">
         <div class="container">
             <div class="row clearfix">
+                <div class="side-search_bar">
+                    <li class="search_bar">
+                        <div class="input-group">
+                            <!-- <i class="icon-magnifier"></i> -->
+                            <input type="text" class="form-control" placeholder="Search module..." id="searchModule" list="moduleList" autocomplete="off">
+                        </div>
+                        <datalist id="moduleList"></datalist>
+                    </li>
+                </div>
                 <div class="col-12">
                     <div class="menu">
                         <ul class="list">
@@ -215,7 +227,7 @@
                             $html .= '
                             <li class="">
                                 <a href="javascript:void(0);" class="menu-toggle">
-                                    <img src="'.base_url("assets/upload-files/icons/$icon").'" height="25" width="25">
+                                    <img src="'.base_url("assets/upload-files/icons/$icon").'" height="20" width="20">
                                     <span class="ml-1">'.$category["categoryName"].'</span>
                                 </a>';
 
@@ -257,7 +269,7 @@
                         $html .= '
                         <li class="">
                             <a href="'.base_url().strtolower($category["controller"]).'">
-                                <img src="'.base_url("assets/upload-files/icons/$icon").'" height="25" width="25">
+                                <img src="'.base_url("assets/upload-files/icons/$icon").'" height="20" width="20">
                                 '.$category["name"].'
                             </a>
                         </li>';

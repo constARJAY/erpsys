@@ -330,13 +330,13 @@ $(document).ready(function () {
         let employeeName    =   "Sample Name of Employee";
         let employeeRole    =   "Junior Developer I";
         let loanType        =   getTableData("hris_loan_tbl","","loanStatus != 0");
-        let optionLoanType  =   `<option value="" disabled selected> No Selected</option>`;
+        let optionLoanType  =   `<option value="" disabled selected>Select Loan Type</option>`;
         loanType.map((loanTypeItems, loanTypeIndex) =>{
             var isSelected = loanTypeItems["loanID"] == loanID ? "selected" : "";
             optionLoanType += `<option value="${loanTypeItems["loanID"]}" ${isSelected}>${loanTypeItems["loanName"]}</option>`;
         });
         // Payday = 0, Monthly = 1;
-        let optionLoanFormTermPayment = data == false ? `<option value="" disabled selected>No Selected</option><option value="0">Payday</option><option value="1">Monthly</option>`: (loanFormTermPayment == "0" ? `<option value="" disabled>No Selected</option><option value="0" selected>Payday</option><option value="1">Monthly</option>` : `<option value="" disabled>No Selected</option><option value="0">Payday</option><option value="1" selected>Monthly</option>`);
+        let optionLoanFormTermPayment = data == false ? `<option value="" disabled selected>Select Term of Payment</option><option value="0">Payday</option><option value="1">Monthly</option>`: (loanFormTermPayment == "0" ? `<option value="" disabled>Select Term of Payment</option><option value="0" selected>Payday</option><option value="1">Monthly</option>` : `<option value="" disabled>Select Term of Payment</option><option value="0">Payday</option><option value="1" selected>Monthly</option>`);
 
 		let html = `
         <div class="row">

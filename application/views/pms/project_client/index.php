@@ -1,5 +1,5 @@
 <div class="body_area after_bg">
-	<div class="block-header">
+	<div class="block-header pb-0">
 		<div class="container">
 			<div class="row clearfix">
 				<div class="col-lg-6 col-md-12">

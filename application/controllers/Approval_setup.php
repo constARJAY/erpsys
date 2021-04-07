@@ -20,13 +20,13 @@ class Approval_setup extends CI_Controller {
         $this->load->view("template/footer");
     }
 
-    public function update_attach_role(){
-        // {moduleID: "13", roleID: "1|2|5|7", userAccountID: "0,0,0,0"}
+    public function update_attach_designation(){
+        // {moduleID: "13", designationID: "1|2|5|7", userAccountID: "0,0,0,0"}
         $moduleID       =   $this->input->post("moduleID");
-        $roleID         =   $this->input->post("roleID");
+        $designationID         =   $this->input->post("designationID");
         $userAccountID  =   $this->input->post("approvalUsers");
-        $data           =   [ "moduleID"=>$moduleID, "roleID" => $roleID, "userAccountID" =>$userAccountID];
-        $result         =   $this->approval_setup->updateAttachRole($data);
+        $data           =   [ "moduleID"=>$moduleID, "designationID" => $designationID, "userAccountID" =>$userAccountID];
+        $result         =   $this->approval_setup->updateAttachDesignation($data);
         echo json_encode($result);
     }
 

@@ -1,3 +1,21 @@
+function encryptString(str) {
+    if (str) {
+        const ciphertext = CryptoJS.AES.encrypt(str, "Bl@ckC0d3r$");
+        return ciphertext.toString();
+    }  
+    return false;
+}
+
+function decryptString(str) {
+    if (str) {
+        const bytes = CryptoJS.AES.decrypt(str.toString(), 'Bl@ckC0d3r$');
+        const plaintext = bytes.toString(CryptoJS.enc.Utf8);
+        return plaintext.toString();
+    }
+    return false;
+}
+
+
 // ----- SWEET ALERT CONFIRMATION -----
 const sweetAlertConfirmation = (
         condition   = "add",            // add|update|cancel
@@ -134,7 +152,7 @@ $(document).ready(function() {
         })
         $("#moduleList").html(html);
     }
-    const moduleTableData = getTableData("gen_roles_permission_tbl AS grpt LEFT JOIN gen_module_list_tbl AS gmlt USING(moduleID)", "gmlt.moduleName AS moduleName", `grpt.roleID = ${sessionRoleID} AND gmlt.moduleStatus = 1`, "gmlt.moduleName ASC");
+    const moduleTableData = getTableData("gen_roles_permission_tbl AS grpt LEFT JOIN gen_module_list_tbl AS gmlt USING(moduleID)", "gmlt.moduleName AS moduleName", `grpt.designationID = ${sessionDesignationID} AND gmlt.moduleStatus = 1`, "gmlt.moduleName ASC");
     const moduleData = moduleTableData.map(item => item.moduleName.toLowerCase());
     getAllModules(moduleTableData);
 

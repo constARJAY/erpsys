@@ -12,11 +12,10 @@ $(document).ready(function(){
             scrollX:        true,
             scrollCollapse: true,
             columnDefs: [
-                { targets: 0, width: 100 },
-                { targets: 1, width: 200 },
-                { targets: 2, width: 200 },
-                { targets: 3, width: 50 },
-                { targets: 4, width: 50 },
+                { targets: 0, width: "10%" },
+                { targets: 1, width: "40%" },
+                { targets: 2, width: "40%" },
+                { targets: 3, width: "10%" },
             ],
         });
     }
@@ -29,7 +28,7 @@ $(document).ready(function(){
     const data = getTableData("ims_inventory_classification_tbl", 
         "classificationID   ,classificationName", "classificationStatus = 1", "");
         
-            let html = ` <option value="" disabled selected ${!param && "selected"}>No Selected</option>`;
+            let html = ` <option value="" disabled selected ${!param && "selected"}>Select Classification Name</option>`;
             data.map((item, index, array) => {
                 html += `<option value="${item.classificationID }" ${param && item.classificationID  == param[0].classificationID  && "selected"}>${item.classificationName}</option>`;
             })
@@ -67,7 +66,6 @@ $(document).ready(function(){
                         <th>Category Name</th>
                         <th>Classification Name</th>
                         <th>Status</th>
-                        <th>Action</th>
                     </tr>
                     </thead>
                     <tbody>`;
@@ -90,20 +88,14 @@ $(document).ready(function(){
                      }
 
                     html += `
-                    <tr>
+                    <tr
+                    class="btnEdit" 
+                    id="${item.categoryID}"
+                    feedback="${item.categoryName}">
                         <td>${item.categoryCode}</td>
                         <td>${item.categoryName}</td>
                         <td>${item.classificationName}</td>
-                        <td>${status}</td>
-                        <td>
-                            <button 
-                                class="btn btn-edit btn-block btnEdit" 
-                                id="${item.categoryID}"
-                                feedback="${item.categoryName}">
-                                <i class="fas fa-edit"></i>
-                                Edit
-                            </button>
-                        </td>
+                        <td class="text-center">${status}</td>
                     </tr>`;
                 })
                 html += `</tbody>
@@ -193,7 +185,7 @@ $(document).ready(function(){
                             id="input_categoryStatus" 
                             name="categoryStatus"
                             autocomplete="off"
-                            required>
+                            getcategoryid = "${categoryID}">
                             <option 
                                 value="1" 
                                 ${data && categoryStatus == "1" && "selected"} >Active</option>
@@ -213,6 +205,32 @@ $(document).ready(function(){
     return html;
 } 
     // ----- END MODAL CONTENT -----
+
+        // ------ CHECK INVENTORY ITEM STATUS -------
+        $(document).on("change","#input_categoryStatus",function(){
+            var tempCategoryStatus = $(this).find("option:selected").val()
+           var getCategoryID = $(this).attr("getcategoryid") ;
+            var itemData = getTableData("ims_inventory_item_tbl INNER JOIN ims_inventory_category_tbl USING(categoryID)", 
+            "itemStatus", "itemStatus = 1 AND categoryID ="+getCategoryID, "");
+    
+            if(itemData.length != 0 ){
+                if(tempCategoryStatus == 0 ){
+                    $(this).removeClass("is-valid").addClass("is-invalid");
+                    $("#invalid-input_categoryStatus").removeClass("is-valid").addClass("is-invalid");
+                                $("#invalid-input_categoryStatus").text('There is active inventory item in this category! ');
+                               
+                            
+                              
+                }
+                else{
+                    $(this).removeClass("is-invalid").addClass("is-valid");
+                    $("#invalid-input_categoryStatus").removeClass("is-invalid").addClass("is-valid");
+                    $("#invalid-input_categoryStatus").text('');
+                }
+            }
+    
+        });
+        // ------ END CHECK INVENTORY ITEM STATUS -------
 
     // ----- OPEN ADD MODAL -----
     $(document).on("click", "#btnAdd", function() {
@@ -271,30 +289,37 @@ $(document).ready(function(){
 
     // ----- UPDATE MODAL -----
     $(document).on("click", "#btnUpdate", function() {
+        let condition = $("#input_categoryStatus").hasClass("is-invalid");
+        
         const rowID = $(this).attr("rowID");
-        const validate = validateForm("modal_inventory_category");
-        if (validate) {
+        if(!condition){
+            const validate = validateForm("modal_inventory_category");
+            if (validate) {
 
-            let data = getFormData("modal_inventory_category", true);
-			data["tableData[updatedBy]"] = sessionID;
-			data["tableName"]            = "ims_inventory_category_tbl";
-			data["whereFilter"]          = "categoryID=" + rowID;
-			data["feedback"]             = $("[name=categoryName]").val();
+                let data = getFormData("modal_inventory_category", true);
+                data["tableData[updatedBy]"] = sessionID;
+                data["tableName"]            = "ims_inventory_category_tbl";
+                data["whereFilter"]          = "categoryID=" + rowID;
+                data["feedback"]             = $("[name=categoryName]").val();
 
-			sweetAlertConfirmation(
-				"update",
-				"Inventory Category",
-				"modal_inventory_category",
-				"",
-				data,
-				true,
-				tableContent
-            );
-            
-       
+                sweetAlertConfirmation(
+                    "update",
+                    "Inventory Category",
+                    "modal_inventory_category",
+                    "",
+                    data,
+                    true,
+                    tableContent
+                );
                 
-            }
-        });
+        
+                    
+                }
+            
+        }else{
+            $("#input_categoryStatus").select2('focus');
+        }
+    });
         // ----- END UPDATE MODAL -----
 
     // ------- CANCEl MODAL-------- 

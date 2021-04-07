@@ -22,7 +22,7 @@ $(document).on("click",".addLoan", function(){
                                                                     id="inputloanName" 
                                                                     data-allowcharacters="[a-z][A-Z][0-9][ ][.][,][-][()]['][/]" 
                                                                     minlength="2" 
-                                                                    maxlength="150" 
+                                                                    maxlength="50" 
                                                                     unique
                                                                     required >
                                                                 <div class="invalid-feedback d-block" id="invalid-inputloanName"></div>
@@ -42,8 +42,8 @@ $(document).on("click",".addLoan", function(){
                                                 </form>
                                             </div>
                                             <div class="modal-footer">
-                                                <button class="btn btn-save" id="btnSave"><i class="fas fa-save"></i>&nbsp;SAVE</button>
-                                                <button class="btn btn-cancel btnCancel"><i class="fas fa-ban"></i>&nbsp;CANCEL</button>
+                                                <button class="btn btn-save" id="btnSave"><i class="fas fa-save"></i>&nbsp;Save</button>
+                                                <button class="btn btn-cancel btnCancel"><i class="fas fa-ban"></i>&nbsp;Cancel</button>
                                             </div>
                                             `;
     setTimeout(function(){
@@ -69,7 +69,7 @@ $(document).on("click",".editloan", function(){
                                                             <div class="form-group">
                                                                 <label for="">Loan Type Name</label>
                                                                 <input type="text" class="form-control validate" name="loanName" id="inputloanName" 
-                                                                    data-allowcharacters="[a-z][A-Z][0-9][ ][.][,][-][()]['][/]" minlength="2" maxlength="150" unique="${tableData[0]["loanID"]}" value="${tableData[0]["loanName"]}" required >
+                                                                    data-allowcharacters="[a-z][A-Z][0-9][ ][.][,][-][()]['][/]" minlength="2" maxlength="50" unique="${tableData[0]["loanID"]}" value="${tableData[0]["loanName"]}" required >
                                                                 <div class="invalid-feedback d-block" id="invalid-inputloanName"></div>
                                                             </div>
                                                         </div>
@@ -86,8 +86,8 @@ $(document).on("click",".editloan", function(){
                                                 </form>
                                             </div>
                                             <div class="modal-footer">
-                                                <button class="btn btn-update" id="btnUpdate" data-loanid="${tableData[0]["loanID"]}"><i class="fas fa-save"></i>&nbsp;UPDATE</button>
-                                                <button class="btn btn-cancel btnCancel"><i class="fas fa-ban"></i>&nbsp;CANCEL</button>
+                                                <button class="btn btn-update" id="btnUpdate" data-loanid="${tableData[0]["loanID"]}"><i class="fas fa-save"></i>&nbsp;Update</button>
+                                                <button class="btn btn-cancel btnCancel"><i class="fas fa-ban"></i>&nbsp;Cancel</button>
                                             </div>
                                             `;
     setTimeout(function(){
@@ -153,10 +153,9 @@ function initDataTables() {
                 scrollX:        true,
                 scrollCollapse: true,
                 columnDefs: [
-                    { targets: 0, width: "10%" },
+                    { targets: 0, width: "5%" },
                     { targets: 1, width: "25%" },
-                    { targets: 2, width: "5%" },
-                    { targets: 3, width: "5%" }
+                    { targets: 2, width: "5%" }
                 ],
             });
 }
@@ -181,7 +180,6 @@ function tableContent(){
                                 <th>Loan Type Code</th>
                                 <th>Loan Type Name</th>
                                 <th>Status</th>
-                                <th>Action</th>
                             </tr>
                         </thead>
                         <tbody>`;
@@ -196,11 +194,10 @@ function tableContent(){
                         // ----- END INSERT UNIQUE DATA TO uniqueData VARIABLE ----
 
                         html += `
-                        <tr>
+                        <tr class="btnEdit editloan" data-loanid="${item["loanID"]}">
                             <td>${item["loanCode"]}</td>
                             <td>${item["loanName"]}</td>
-                            <td>${item["loanStatus"] == 0 ? "<span class='badge badge-outline-danger w-100'>Inactive</span>" : "<span class='badge badge-outline-success w-100 '>Active</span>"} </td>
-                            <td class="text-center"> <button class="btn w-100 btn-edit editloan" data-loanid="${item["loanID"]}"><i class="fas fa-edit"></i> Edit&nbsp; </button></td>
+                            <td class="text-center">${item["loanStatus"] == 0 ? "<span class='badge badge-outline-danger w-100'>Inactive</span>" : "<span class='badge badge-outline-success w-100 '>Active</span>"} </td>
                         </tr>`;
                     })
                     html += `</tbody>

@@ -95,13 +95,17 @@ $(document).ready(function () {
 	function forApprovalContent() {
 		$("#tableForApprovalParent").html(preloader);
 		let scheduleData = getTableData(
-			"hris_on_timein_timeout_tbl LEFT JOIN gen_user_account_tbl ON hris_on_timein_timeout_tbl.employeeID = gen_user_account_tbl.userAccountID",
-			"",
-			`employeeID != ${sessionID} AND no_Timein_timeoutStatus != 0 AND no_Timein_timeoutStatus != 4`
+			`hris_on_timein_timeout_tbl AS notime
+			LEFT JOIN hris_employee_list_tbl USING(employeeID)`,
+			`notime.no_Timein_timeoutID, notime.no_Timein_timeoutCode, notime.employeeID,notime.no_Timein_timeoutDate, notime.no_Timein_timeoutTimeIn,
+			notime.no_Timein_timeoutTimeOut,notime.no_Timein_timeoutReason,notime.approversID,notime.approversStatus,notime.approversDate,notime.no_Timein_timeoutStatus,
+			notime.no_Timein_timeoutRemarks,notime.submittedAt,notime.createdBy,notime.updatedBy,notime.createdAt,notime.updatedAt,
+			hris_employee_list_tbl.employeeFirstname, hris_employee_list_tbl.employeeLastname`,
+			`notime.employeeID != ${sessionID} AND no_Timein_timeoutStatus != 0 AND no_Timein_timeoutStatus != 4`
 		);
 
 		let html = `
-        <table class="table table-bordered table-striped table-hover nowrap" id="tableForApprroval">
+        <table class="table table-bordered table-striped table-hover" id="tableForApprroval">
             <thead>
                 <tr>
                     <th>Code</th>
@@ -117,7 +121,11 @@ $(document).ready(function () {
             <tbody>`;
 
 		scheduleData.map((item) => {
-
+			if(item.no_Timein_timeoutStatus=="0"){
+				var submitat = "";
+			}else{
+				var submitat = moment(item.submittedAt).format("MMMM DD, YYYY hh:mm:ss A");
+			}
 			let button = `
 			<button class="btn btn-view w-100 btnView" id="${item.no_Timein_timeoutID}"><i class="fas fa-eye"></i> View</button>`;
 
@@ -125,8 +133,8 @@ $(document).ready(function () {
 				html += `
 				<tr>
 					<td>${item.no_Timein_timeoutCode}</td>
-					<td>${item.firstname+' '+item.lastname}</td>
-					<td>${moment(item.createdAt).format("MMMM DD, YYYY")}</td>
+					<td>${item.employeeFirstname + ' ' +item.employeeLastname}</td>
+					<td>${submitat}</td>
 					<td>${moment(item.no_Timein_timeoutDate).format("MMMM DD, YYYY")}</td>
 					<td>${item.no_Timein_timeoutTimeIn} - ${item.no_Timein_timeoutTimeOut}</td>
 					<td>${item.no_Timein_timeoutReason}</td>
@@ -156,13 +164,17 @@ $(document).ready(function () {
 	function myFormsContent() {
 		$("#tableMyFormsParent").html(preloader);
 		let scheduleData = getTableData(
-			"hris_on_timein_timeout_tbl LEFT JOIN gen_user_account_tbl ON hris_on_timein_timeout_tbl.employeeID = gen_user_account_tbl.userAccountID",
-			"",
+			`hris_on_timein_timeout_tbl AS notime
+			LEFT JOIN hris_employee_list_tbl USING(employeeID)`,
+			`notime.no_Timein_timeoutID, notime.no_Timein_timeoutCode, notime.employeeID,notime.no_Timein_timeoutDate, notime.no_Timein_timeoutTimeIn,
+			notime.no_Timein_timeoutTimeOut,notime.no_Timein_timeoutReason,notime.approversID,notime.approversStatus,notime.approversDate,notime.no_Timein_timeoutStatus,
+			notime.no_Timein_timeoutRemarks,notime.submittedAt,notime.createdBy,notime.updatedBy,notime.createdAt,notime.updatedAt,
+			hris_employee_list_tbl.employeeFirstname, hris_employee_list_tbl.employeeLastname`,
 			`employeeID = ${sessionID}`
 		);
 
 		let html = `
-        <table class="table table-bordered table-striped table-hover nowrap" id="tableMyForms">
+        <table class="table table-bordered table-striped table-hover" id="tableMyForms">
             <thead>
                 <tr>
                     <th>Code</th>
@@ -178,6 +190,11 @@ $(document).ready(function () {
             <tbody>`;
 
 		scheduleData.map((item) => {
+			if(item.no_Timein_timeoutStatus=="0"){
+				var submitat = "";
+			}else{
+				var submitat = moment(item.submittedAt).format("MMMM DD, YYYY hh:mm:ss A");
+			}
 			let unique = {
 				id: item.no_Timein_timeoutID,
 				no_Timein_timeoutDate: moment(item.no_Timein_timeoutDate).format("MMMM DD, YYYY")
@@ -195,8 +212,8 @@ $(document).ready(function () {
 			html += `
             <tr>
                 <td>${item.no_Timein_timeoutCode}</td>
-                <td>${item.firstname + ' ' +item.lastname}</td>
-				<td>${moment(item.createdAt).format("MMMM DD, YYYY")}</td>
+                <td>${item.employeeFirstname + ' ' +item.employeeLastname}</td>
+				<td>${submitat}</td>
                 <td>${moment(item.no_Timein_timeoutDate).format("MMMM DD, YYYY")}</td>
                 <td>${item.no_Timein_timeoutTimeIn} - ${item.no_Timein_timeoutTimeOut}</td>
                 <td>${item.no_Timein_timeoutReason}</td>
@@ -311,13 +328,13 @@ $(document).ready(function () {
 		let {
 			no_Timein_timeoutID      = "",
 			no_Timein_timeoutCode    = "",
-			employeeID            = "",
+			employeeID            	 = "",
 			no_Timein_timeoutDate    = "",
 			no_Timein_timeoutTimeIn  = "",
 			no_Timein_timeoutTimeOut = "",
 			no_Timein_timeoutReason  = "",
 			no_Timein_timeoutRemarks = "",
-			approversID           = "",
+			approversID          	 = "",
 			approversStatus       = "",
 			approversDate         = "",
 			no_Timein_timeoutStatus  = false,
@@ -431,7 +448,7 @@ $(document).ready(function () {
             </div>
             <div class="col-md-4 col-sm-12">
                 <div class="form-group">
-                    <label>Time In  ${!disabled ? "<code>*</code>" : ""}</label>
+                    <label>Time In ${!disabled ? "<code>*</code>" : ""}</label>
                     <input type="text" 
                         class="form-control timeIn" 
                         id="no_Timein_timeoutTimeIn" 
@@ -444,7 +461,7 @@ $(document).ready(function () {
             </div>
             <div class="col-md-4 col-sm-12">
                 <div class="form-group">
-                    <label>Time Out  ${!disabled ? "<code>*</code>" : ""}</label>
+                    <label>Time Out ${!disabled ? "<code>*</code>" : ""}</label>
                     <input type="text" 
                         class="form-control timeOut" 
                         id="no_Timein_timeoutTimeOut" 
@@ -619,7 +636,7 @@ $(document).ready(function () {
 				data["tableData[createdBy]"]  = sessionID;
 				data["tableData[createdAt]"]  = dateToday;
 
-				const approversID = getModuleApprover("No Time In/Out");
+				const approversID = getModuleApprover(57);
 				if (approversID && method == "submit") {
 					data["tableData[approversID]"] = approversID;
 				}
@@ -783,7 +800,7 @@ $(document).ready(function () {
 			const data = getData(action, 1, "submit", feedback, id);
 			
 			let notificationData = {
-				moduleID:                78,
+				moduleID:                58,
 				notificationTitle:       "No Time-in/ Time-out",
 				notificationDescription: `${sessionID} asked for your approval.`,
 				notificationType:        2,
@@ -884,7 +901,7 @@ $(document).ready(function () {
 			if (isImLastApprover(approversID, approversDate)) {
 				status = 2;
 				notificationData = {
-					moduleID:                78,
+					moduleID:                58,
 					notificationTitle:       "No Time-in / Time-out",
 					notificationDescription: `${tableData[0].no_Timein_timeoutCode}: Your request has been approved.`,
 					notificationType:        2,
@@ -893,7 +910,7 @@ $(document).ready(function () {
 			} else {
 				status = 1;
 				notificationData = {
-					moduleID:                78,
+					moduleID:                58,
 					notificationTitle:       "No Time-in / Time-out",
 					notificationDescription: `${employeeID} asked for your approval.`,
 					notificationType:        2,
@@ -943,10 +960,10 @@ $(document).ready(function () {
 			</div>
 		</div>
 		<div class="modal-footer text-right">
-			<button class="btn btn-primary" id="btnRejectConfirmation"
+			<button class="btn btn-danger" id="btnRejectConfirmation"
 			no_Timein_timeoutID="${id}"
-			no_Timein_timeoutCode="${feedback}">Deny</button>
-			<button class="btn btn-danger" data-dismiss="modal">Cancel</button>
+			no_Timein_timeoutCode="${feedback}"><i class="far fa-times-circle"></i> Deny</button>
+			<button class="btn btn-cancel" data-dismiss="modal"><i class="fas fa-ban"></i> Cancel</button>
 		</div>`;
 		$("#modal_change_schedule_content").html(html);
 	})
@@ -971,7 +988,7 @@ $(document).ready(function () {
 				data["tableData[approversDate]"]   = updateApproveDate(approversDate);
 
 				let notificationData = {
-					moduleID:                78,
+					moduleID:                58,
 					notificationTitle:       "No Time-in / Time-out",
 					notificationDescription: `${tableData[0].no_Timein_timeoutCode}: Your request has been denied.`,
 					notificationType:        2,

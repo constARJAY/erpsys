@@ -42,8 +42,8 @@ $(document).on("click",".addQualification", function(){
                                                 </form>
                                             </div>
                                             <div class="modal-footer">
-                                                <button class="btn btn-save" id="btnSave"><i class="fas fa-save"></i>&nbsp;SAVE</button>
-                                                <button class="btn btn-cancel btnCancel"><i class="fas fa-ban"></i>&nbsp;CANCEL</button>
+                                                <button class="btn btn-save" id="btnSave"><i class="fas fa-save"></i>&nbsp;Save</button>
+                                                <button class="btn btn-cancel btnCancel"><i class="fas fa-ban"></i>&nbsp;Cancel</button>
                                             </div>
                                             `;
     setTimeout(function(){
@@ -85,8 +85,8 @@ $(document).on("click",".editQualification", function(){
                                                 </form>
                                             </div>
                                             <div class="modal-footer">
-                                                <button class="btn btn-update" id="btnUpdate" data-qualificationid="${tableData[0]["qualificationID"]}"><i class="fas fa-save"></i>&nbsp;UPDATE</button>
-                                                <button class="btn btn-cancel btnCancel"><i class="fas fa-ban"></i>&nbsp;CANCEL</button>
+                                                <button class="btn btn-update" id="btnUpdate" data-qualificationid="${tableData[0]["qualificationID"]}"><i class="fas fa-save"></i>&nbsp;Update</button>
+                                                <button class="btn btn-cancel btnCancel"><i class="fas fa-ban"></i>&nbsp;Cancel</button>
                                             </div>
                                             `;
     setTimeout(function(){
@@ -152,8 +152,7 @@ function initDataTables() {
                 columnDefs: [
                     { targets: 0, width: "5%" },
                     { targets: 1, width: "25%" },
-                    { targets: 2, width: "5%" },
-                    { targets: 3, width: "5%" }
+                    { targets: 2, width: "5%" }
                 ],
             });
 }
@@ -178,7 +177,6 @@ function tableContent(){
                                 <th>Qualification No.</th>
                                 <th>Qualification Name</th>
                                 <th>Status</th>
-                                <th>Action</th>
                             </tr>
                         </thead>
                         <tbody>`;
@@ -193,11 +191,10 @@ function tableContent(){
                         // ----- END INSERT UNIQUE DATA TO uniqueData VARIABLE ----
 
                         html += `
-                        <tr>
+                        <tr class="btnEdit editQualification" data-qualificationid="${item["qualificationID"]}">
                             <td>${index + 1}</td>
                             <td>${item["qualificationName"]}</td>
-                            <td>${item["qualificationStatus"] == 0 ? "<span class='badge badge-outline-danger w-100 '>Inactive</span>" : "<span class='badge badge-outline-success w-100 '>Active</span>"} </td>
-                            <td class="text-center"> <button class="btn w-100 btn-edit editQualification" data-qualificationid="${item["qualificationID"]}"><i class="fas fa-edit"></i> Edit </button></td>
+                            <td class="text-center">${item["qualificationStatus"] == 0 ? "<span class='badge badge-outline-danger w-100 '>Inactive</span>" : "<span class='badge badge-outline-success w-100 '>Active</span>"} </td>
                         </tr>`;
                     })
                     html += `</tbody>

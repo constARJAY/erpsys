@@ -22,7 +22,7 @@ class Operations_model extends CI_Model {
                 case "approve":
                     return "$feedback approved successfully!";
                 case "reject":
-                    return "$feedback rejected successfully!";
+                    return "$feedback denied successfully!";
                 case "cancelform":
                 default:
                     return "$feedback cancelled successfully!";
@@ -56,6 +56,18 @@ class Operations_model extends CI_Model {
             return $query ? $query->num_rows() : 0;
         }
         return 0;
+    }
+
+    public function database($sql = "")
+    {
+        if ($sql) {
+            $query = $this->db->query($sql);
+            if ($query) {
+                return $query->result_array();
+            }
+            return false;
+        }
+        return false;
     }
 
     public function insertTableData($tableName = null, $tableData = [], $feedback = "Data", $method = false)

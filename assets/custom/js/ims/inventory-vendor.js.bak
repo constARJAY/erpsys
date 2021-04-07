@@ -161,7 +161,8 @@ $(document).ready(function () {
 					{ targets: 7,  width: 150 },
 					{ targets: 8,  width: 150 },
 					{ targets: 9,  width: 150 },
-					{ targets: 10, width: 80 }
+					{ targets: 10, width: 80 },
+					{ targets: 11, width: 80 },
 				],
 			});
 	}
@@ -201,6 +202,7 @@ $(document).ready(function () {
                             <th>VAT</th>
                             <th>Brand Name</th>
                             <th>Status</th>
+                            <th>Action</th>
                         </tr>
                     </thead>
                     <tbody>`;
@@ -222,7 +224,7 @@ $(document).ready(function () {
                     <span class="badge badge-outline-danger w-100">Inactive</span>`;
 
 					html += `
-                    <tr class="btnEdit" id="${item.inventoryVendorID}">
+                    <tr>
                         <td>${item.inventoryVendorCode}</td>
                         <td>${item.inventoryVendorName}</td>
                         <td>
@@ -244,6 +246,11 @@ $(document).ready(function () {
                         <td>${item.inventoryVendorVAT == 1 ? "Vatable" : "Non Vatable"}</td>
                         <td>${item.inventoryVendorBrand}</td>
                         <td>${status}</td>
+                        <td>
+                            <button class="btn btn-edit btn-block btnEdit" 
+                            id="${item.inventoryVendorID}">
+                            <i class="fas fa-edit"></i> Edit</button>
+                        </td>
                     </tr>`;
 				});
 				html += `</tbody>

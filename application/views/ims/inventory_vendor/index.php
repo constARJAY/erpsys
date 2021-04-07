@@ -13,7 +13,7 @@
 					<span>This module is used to manage inventory vendor details.</span>
 				</div>
 				<div class="col-lg-6 col-md-12 text-md-right">
-					<button class="btn btn-default btn-add" id="btnAdd"><i class="icon-plus"></i> Add Vendor</button>
+					<button class="btn btn-default btn-add" id="btnAdd"><i class="icon-plus"></i> Add Inventory Vendor</button>
 				</div>
 			</div>
 		</div>

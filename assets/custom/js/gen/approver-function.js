@@ -197,12 +197,14 @@ function cancelForm(
 function getModuleApprover(module = null) {
 	let getData;
 
+	let [ columnName, columnValue ] = [ "designationID", sessionDesignationID ]; // CHANGE IT TO DESIGNATION
+
 	if (module) {
 		if (typeof module === "number") {
-			getData = getTableData("gen_approval_setup_tbl", "", "moduleID = " + module + " AND roleID = "+sessionRoleID);
+			getData = getTableData("gen_approval_setup_tbl", "", `moduleID = ${module} AND ${columnName} = ${columnValue}`);
 		} 
 		if (typeof module === "string") {
-			getData = getTableData("gen_approval_setup_tbl", "", "LOWER(moduleName) = BINARY LOWER('" + module + "') AND roleID = "+sessionRoleID);
+			getData = getTableData("gen_approval_setup_tbl", "", `LOWER(moduleName) = BINARY LOWER ("${module}") AND ${columnName} = ${columnValue}`);
 		}
 
 		if (getData.length > 0) {
@@ -268,6 +270,19 @@ function isImCurrentApprover(approversID = null, approversDate = null, status = 
 // ----- END CURRENT APPROVER -----
 
 
+// ----- CURRENT APPROVER -----
+function getCurrentApprover(approversID = null, approversDate = null, status = null) {
+	if (approversID && status == 1) {
+		const index = approversDate ? approversDate.split("|").length : 0;
+		const approversIDArr = approversID.split("|");
+		const id = approversIDArr[index];
+		return getEmployeeFullname(id);
+	}
+	return "-";
+}
+// ----- END CURRENT APPROVER -----
+
+
 // ----- IS DOCUMENT ALREADY APPROVED -----
 function isAlreadyApproved(approversID = null, approversDate = null) {
 	if (approversID) {
@@ -322,27 +337,50 @@ function getDateApproved(status, approversID = false, approversDate = false) {
 
 function getApproversStatus(approversID, approversStatus, approversDate) {
 	let html = "";
-	if (approversID && approversStatus) {
+	if (approversID) {
 		let idArr     = approversID.split("|");
-		let statusArr = approversStatus.split("|");
-		let dateArr   = approversDate.split("|");
+		let statusArr = approversStatus ? approversStatus.split("|") : [];
+		let dateArr   = approversDate ? approversDate.split("|") : [];
 		html += `<div class="row mt-4">`;
-		statusArr && statusArr.map((item, index) => {
-			let date = moment(dateArr[index]).format("MMMM DD, YYYY hh:mm:ss A");
-			let statusBadge = item == 2 ? `
-			<span class="badge badge-info">
-				Approved - ${date}</span>` : `
-			<span class="badge badge-danger">
-				Denied - ${date}</span>`;
+
+		idArr && idArr.map((item, index) => {
+			let date   = dateArr[index] ? moment(dateArr[index]).format("MMMM DD, YYYY hh:mm:ss A") : "";
+			let status = statusArr[index] ? statusArr[index] : "";
+			let statusBadge = "";
+			if (date && status) {
+				if (status == 2) {
+					statusBadge = `<span class="badge badge-info">Approved - ${date}</span>`;
+				} else if (status == 3) {
+					statusBadge = `<span class="badge badge-danger">Denied - ${date}</span>`;
+				}
+			}
 
 			html += `
 			<div class="col-xl-3 col-lg-3 col-md-4 col-sm-12">
 				<div class="d-flex justify-content-start align-items-center">
-					<span class="font-weight-bold">${getEmployeeFullname(idArr[index])}</span> <small>&nbsp;- Level ${index + 1} Approver</small>
+					<span class="font-weight-bold">${getEmployeeFullname(item)}</span> <small>&nbsp;- Level ${index + 1} Approver</small>
 				</div>
 				${statusBadge}
 			</div>`;
 		})
+
+		// statusArr && statusArr.map((item, index) => {
+		// 	let date = moment(dateArr[index]).format("MMMM DD, YYYY hh:mm:ss A");
+		// 	let statusBadge = item == 2 ? `
+		// 	<span class="badge badge-info">
+		// 		Approved - ${date}</span>` : `
+		// 	<span class="badge badge-danger">
+		// 		Denied - ${date}</span>`;
+
+		// 	html += `
+		// 	<div class="col-xl-3 col-lg-3 col-md-4 col-sm-12">
+		// 		<div class="d-flex justify-content-start align-items-center">
+		// 			<span class="font-weight-bold">${getEmployeeFullname(idArr[index])}</span> <small>&nbsp;- Level ${index + 1} Approver</small>
+		// 		</div>
+		// 		${statusBadge}
+		// 	</div>`;
+		// })
+
 		html += `</div>`;
 	}
 	return html;

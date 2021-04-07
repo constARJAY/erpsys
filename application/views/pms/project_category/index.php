@@ -1,5 +1,5 @@
 <div class="body_area after_bg">
-	<div class="block-header">
+	<div class="block-header pb-0">
 		<div class="container">
 			<div class="row clearfix">
 				<div class="col-lg-6 col-md-12">
@@ -13,7 +13,8 @@
 					<span>This module is used to manage project category details.</span>
 				</div>
 				<div class="col-lg-6 col-md-12 text-md-right">
-                        <button type="button" class="btn btn-danger pr-2" id="btnAdd"> <i class="fas fa-plus-square"></i> Add Category</button>
+                        <!-- <button type="button" class="btn btn-danger pr-2" id="btnAdd"> <i class="fas fa-plus-square"></i> Add Category</button> -->
+						<button type="button" class="btn btn-add btn-default" id="btnAdd"> <i class="icon-plus"></i> &nbsp;Add Category</button>
                     </ul>
 				</div>
 			</div>

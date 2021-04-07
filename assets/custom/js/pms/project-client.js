@@ -150,17 +150,16 @@ $(document).on("change", "[name=clientCity]", function() {
             scrollX:        true,
             scrollCollapse: true,
             columnDefs: [
-                { targets: 0, width: 200 },
-                { targets: 1, width: 200 },
-                { targets: 2, width: 500 },
-                { targets: 3, width: 200 },
-                { targets: 4, width: 200 },
-                { targets: 5, width: 150 },
-                { targets: 6, width: 100 },
-                { targets: 7, width: 100 },
-                { targets: 8, width: 200 },
-                { targets: 9, width: 80 },
-                { targets: 10, width: 80 }
+                { targets: 0, width: "10%" },
+                { targets: 1, width: "10%" },
+                { targets: 2, width: "10%" },
+                { targets: 3, width: "10%" },
+                { targets: 4, width: "10%" },
+                { targets: 5, width: "10%" },
+                { targets: 6, width: "10%" },
+                { targets: 7, width: "10%" },
+                { targets: 8, width: "10%" },
+                { targets: 9, width: "10%" }
             ],
         });
     }
@@ -201,7 +200,6 @@ $(document).on("change", "[name=clientCity]", function() {
                             <th>Telephone No.</th>
                             <th>Website</th>
                             <th>Status</th>
-                            <th>Action</th>
                         </tr>
                     </thead>
                     <tbody>`;
@@ -222,7 +220,10 @@ $(document).on("change", "[name=clientCity]", function() {
                         var status=`<span class="badge badge-outline-danger w-100">Inactive</span>`;
                      }
                     html += `
-                    <tr>
+                    <tr
+                    class="btnEdit" 
+                    id="${item.clientID}"
+                    feedback="${item.clientName}">
                         <td>${item.clientCode}</td>
                         <td>${item.clientName}</td>
                         <td>
@@ -240,13 +241,7 @@ $(document).on("change", "[name=clientCity]", function() {
                         <td>${item.client_MobileNo}</td>
                         <td>${item.clientTelephoneNo}</td>
                         <td>${item.clientBrandName}</td>
-                        <td>${status}</td>
-                        <td>
-                            <button class="btn btn-edit btn-block btnEdit" 
-                            id="${item.clientID}"
-                            feedback="${item.clientName}">
-                            <i class="fas fa-edit"></i> Edit</button>
-                        </td>
+                        <td class="text-center">${status}</td>
                     </tr>`;
                 })
                 html += `</tbody>
@@ -328,7 +323,10 @@ $(document).on("change", "[name=clientCity]", function() {
                             <label>Region <span
                                     class="text-danger font-weight-bold">*</span></label>
                             <select class=" form-control show-tick select2 validate" name="clientRegion" required=""
-                                id="input_clientRegion" readonly=""> ${getRegionOptions(clientRegion)}</select>
+                                id="input_clientRegion" readonly=""> 
+                                <option value="" disabled selected>Select Region</option>
+                                ${getRegionOptions(clientRegion)}
+                                </select>
                                 <div class="invalid-feedback d-block" id="invalid-input_clientRegion"></div>
                         </div>
                     </div>
@@ -337,7 +335,10 @@ $(document).on("change", "[name=clientCity]", function() {
                             <label>Province <span
                                     class="text-danger font-weight-bold">*</span></label>
                             <select class=" form-control show-tick select2 validate" name="clientProvince" required=""
-                                id="input_clientProvince" readonly="">${data && getProvinceOptions(clientProvince, clientRegion)}</select>
+                                id="input_clientProvince" readonly="">
+                                <option value="" disabled selected>Select Province</option>
+                                ${data && getProvinceOptions(clientProvince, clientRegion)}
+                                </select>
                                 <div class="invalid-feedback d-block" id="invalid-input_clientProvince"></div>
                         </div>
                     </div>
@@ -346,6 +347,7 @@ $(document).on("change", "[name=clientCity]", function() {
                             <label>City <span
                                     class="text-danger font-weight-bold validate">*</span></label>
                             <select class=" form-control show-tick select2" required="" id="input_clientCity" name="clientCity" readonly="">
+                            <option value="" disabled selected>Select City/Municipality</option>
                             ${data && getMunicipalityOptions(clientCity, clientRegion, clientProvince)}
                             </select> 
                             <div class="invalid-feedback d-block" id="invalid-input_clientCity"></div>
@@ -355,7 +357,10 @@ $(document).on("change", "[name=clientCity]", function() {
                         <div class="form-group">
                             <label>Barangay</label>
                             <select class=" form-control show-tick select2 validate" name="clientBarangay" required=""
-                                id="input_clientBarangay" readonly="">${data && getBarangayOptions(clientBarangay, clientRegion, clientProvince, clientCity)}</select>
+                                id="input_clientBarangay" readonly="">
+                                <option value="" disabled selected>Select Barangay</option>
+                                ${data && getBarangayOptions(clientBarangay, clientRegion, clientProvince, clientCity)}
+                                </select>
                                 <div class="invalid-feedback d-block" id="invalid-input_clientBarangay"></div>
                         </div>
                     </div>
@@ -502,7 +507,7 @@ $(document).on("change", "[name=clientCity]", function() {
                     <div class="col-md-6 col-sm-12">
                         <div class="form-group">
                             <label>Status <span class="text-danger font-weight-bold">*</span></label>
-                            <select class=" form-control show-tick select2 validate" name="clientStatus" id="input_clientStatus" autocomplete="off" required>
+                            <select class=" form-control show-tick select2 validate" name="clientStatus" id="input_clientStatus" autocomplete="off" >
                                 <option ${data && clientStatus == "1" && "selected"} value="1">Active</option>   
                                 <option ${data && clientStatus == "0" && "selected"} value="0">Inactive</option>
                                 <div class="invalid-feedback d-block" id="invalid-input_clientStatus"></div>

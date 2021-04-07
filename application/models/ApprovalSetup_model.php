@@ -3,12 +3,12 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class ApprovalSetup_model extends CI_Model {
 
-    public function updateAttachRole($data){
-        // {moduleID: "13", roleID: "1|2|5|7", userAccountID: "0,0,0,0"}
+    public function updateAttachDesignation($data){
+        // {moduleID: "13", designationID: "1|2|5|7", userAccountID: "0,0,0,0"}
         // $data Variables
         $sessionID      =   $this->session->userdata('adminSessionID');
         $moduleID       =   $data["moduleID"];
-        $roleID         =   $data["roleID"];
+        $designationID         =   $data["designationID"];
         $userAccountID  =   $data["userAccountID"];
 
         // Getting the module Name
@@ -19,7 +19,7 @@ class ApprovalSetup_model extends CI_Model {
         
 
         // Array Variable
-        $roleID_array           =   explode("|", $roleID);
+        $designationID_array           =   explode("|", $designationID);
         $userAccountID_array    =   explode(",", $userAccountID);
 
         // DELETE BEFORE INSERTING NEW DATA
@@ -28,12 +28,12 @@ class ApprovalSetup_model extends CI_Model {
         if($deleteQuery){
             // Loop the Roles ID
             $indexRoles =   0;
-            foreach($roleID_array as $roles){
+            foreach($designationID_array as $designations){
                 $userAccountID_value = $userAccountID_array[$indexRoles];
                 $insertSql      = "INSERT INTO gen_approval_setup_tbl SET 
                                 `moduleID`      = '$moduleID',
                                 `moduleName`    = '$moduleName',
-                                `roleID`        = '$roles', 
+                                `designationID` = '$designations', 
                                 `userAccountID` = '$userAccountID_value', 
                                 `createdBy`     = '$sessionID', 
                                 `updatedBy`     = '$sessionID'

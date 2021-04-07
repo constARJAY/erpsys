@@ -12,10 +12,9 @@ $(document).ready(function(){
             scrollX:        true,
             scrollCollapse: true,
             columnDefs: [
-                { targets: 0, width: 100 },
-                { targets: 1, width: 400 },
-                { targets: 2, width: 80 },
-                { targets: 3, width: 80 },
+                { targets: 0, width: "10%" },
+                { targets: 1, width: "80%" },
+                { targets: 2, width: "10%" },
             ],
         });
     }
@@ -46,11 +45,10 @@ $(document).ready(function(){
                 let html = `
                 <table class="table table-bordered table-striped table-hover nowrap" id="tableHRISDepartment">
                     <thead>
-                    <tr class="text-center">
+                    <tr class="text-left">
                         <th>Department No.</th>
                         <th>Department Name</th>
                         <th>Status</th>
-                        <th>Action</th>
                     </tr>
                     </thead>
                     <tbody>`;
@@ -72,19 +70,13 @@ $(document).ready(function(){
                      }
 
                     html += `
-                    <tr>
+                    <tr 
+                    class="btnEdit" 
+                    id="${item.departmentID}"
+                    feedback="${item.departmentName}">
                         <td>${item.departmentCode}</td>
                         <td>${item.departmentName}</td>
-                        <td>${status}</td>
-                        <td>
-                            <button 
-                                class="btn btn-edit btn-block btnEdit" 
-                                id="${item.departmentID}"
-                                feedback="${item.departmentName}">
-                                <i class="fas fa-edit"></i>
-                                Edit
-                            </button>
-                        </td>
+                        <td class="text-center">${status}</td>
                     </tr>`;
                 })
                 html += `</tbody>
@@ -159,7 +151,8 @@ $(document).ready(function(){
                             id="input_departmentStatus" 
                             name="departmentStatus"
                             autocomplete="off"
-                            required>
+                            getdepartmentid = "${departmentID}"
+                            >
                             <option 
                                 value="1" 
                                 ${data && departmentStatus == "1" && "selected"}>Active</option>
@@ -180,6 +173,33 @@ $(document).ready(function(){
     return html;
 } 
     // ----- END MODAL CONTENT -----
+
+
+    // ------ CHECK INVENTORY ITEM STATUS -------
+    $(document).on("change","#input_departmentStatus",function(){
+        var tempCategoryStatus = $(this).find("option:selected").val()
+        var getdepartmentID = $(this).attr("getdepartmentid") ;
+        var itemData = getTableData("hris_designation_tbl INNER JOIN hris_department_tbl USING(departmentID)", 
+        "departmentStatus", "departmentStatus = 1 AND departmentID ="+getdepartmentID, "");
+
+        if(itemData.length != 0 ){
+            if(tempCategoryStatus == 0 ){
+                $(this).removeClass("is-valid").addClass("is-invalid");
+                $("#invalid-input_departmentStatus").removeClass("is-valid").addClass("is-invalid");
+                            $("#invalid-input_departmentStatus").text('There is active designation in this department! ');
+                            
+                        
+                            
+            }
+            else{
+                $(this).removeClass("is-invalid").addClass("is-valid");
+                $("#invalid-input_departmentStatus").removeClass("is-invalid").addClass("is-valid");
+                $("#invalid-input_departmentStatus").text('');
+            }
+        }
+
+    });
+    // ------ END CHECK INVENTORY ITEM STATUS -------
 
     // ----- OPEN ADD MODAL -----
     $(document).on("click", "#btnAdd", function() {
@@ -235,25 +255,32 @@ $(document).ready(function(){
 
     // ----- UPDATE MODAL -----
     $(document).on("click", "#btnUpdate", function() {
-        const rowID = $(this).attr("rowID");
-        const validate = validateForm("modal_hris_department");
-        if (validate) {
+            let condition = $("#input_departmentStatus").hasClass("is-invalid");
+        
+            const rowID = $(this).attr("rowID");
+            if(!condition){
+                const validate = validateForm("modal_hris_department");
+                if (validate) {
 
-            let data = getFormData("modal_hris_department", true);
-			data["tableData[updatedBy]"] = sessionID;
-			data["tableName"]            = "hris_department_tbl";
-			data["whereFilter"]          ="departmentID="+rowID;
-			data["feedback"]             = $("[name=departmentName]").val();
-
-			sweetAlertConfirmation(
-				"update",
-				"Department",
-				"modal_hris_department",
-				"",
-				data,
-				true,
-				tableContent
-            );
+                    let data = getFormData("modal_hris_department", true);
+                    data["tableData[updatedBy]"] = sessionID;
+                    data["tableName"]            = "hris_department_tbl";
+                    data["whereFilter"]          ="departmentID="+rowID;
+                    data["feedback"]             = $("[name=departmentName]").val();
+        
+                    sweetAlertConfirmation(
+                        "update",
+                        "Department",
+                        "modal_hris_department",
+                        "",
+                        data,
+                        true,
+                        tableContent
+                    );
+                    }
+                
+            }else{
+                $("#input_departmentStatus").select2('focus');
             }
         });
         // ----- END UPDATE MODAL -----

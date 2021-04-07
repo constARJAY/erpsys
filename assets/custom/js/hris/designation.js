@@ -12,11 +12,10 @@ $(document).ready(function(){
             scrollX:        true,
             scrollCollapse: true,
             columnDefs: [
-                { targets: 0, width: 150 },
-                { targets: 1, width: "50%" },
-                { targets: 2, width: "50%" },
-                { targets: 3, width: 80 },
-                { targets: 4, width: 80 },
+                { targets: 0, width: "10%" },
+                { targets: 1, width: "40%" },
+                { targets: 2, width: "40%" },
+                { targets: 3, width: "10%" },
             ],
         });
     }
@@ -29,7 +28,7 @@ $(document).ready(function(){
     const data = getTableData("hris_department_tbl", 
         "departmentID  ,departmentName", "departmentStatus =1", "");
       
-            let html = ` <option value="" disabled selected ${!param && "selected"}>No Selected</option>`;
+            let html = ` <option value="" disabled selected ${!param && "selected"}>Select Department Name</option>`;
             data.map((item, index, array) => {
                 html += `<option value="${item.departmentID }" ${param && item.departmentID  == param[0].departmentID  && "selected"}>${item.departmentName}</option>`;
             })
@@ -61,12 +60,11 @@ $(document).ready(function(){
                 let html = `
                 <table class="table table-bordered table-striped table-hover" id="tableHRISDesignation">
                     <thead>
-                    <tr class="text-center">
+                    <tr class="text-left">
                         <th>Designation Code</th>
                         <th>Designation Name</th>
                         <th>Department Name</th>
                         <th>Status</th>
-                        <th>Action</th>
                     </tr>
                     </thead>
                     <tbody>`;
@@ -89,20 +87,15 @@ $(document).ready(function(){
                      }
 
                     html += `
-                    <tr>
+                    <tr
+                    class="btnEdit" 
+                    id="${item.designationID}"
+                    feedback="${item.designationName}"
+                    >
                         <td>${item.designationCode}</td>
                         <td>${item.designationName}</td>
                         <td>${item.departmentName}</td>
-                        <td>${status}</td>
-                        <td>
-                            <button 
-                                class="btn btn-edit btn-block btnEdit" 
-                                id="${item.designationID}"
-                                feedback="${item.designationName}">
-                                <i class="fas fa-edit"></i>
-                                Edit
-                            </button>
-                        </td>
+                        <td class="text-center">${status}</td>
                     </tr>`;
                 })
                 html += `</tbody>
@@ -191,7 +184,7 @@ $(document).ready(function(){
                             id="input_designationStatus" 
                             name="designationStatus"
                             autocomplete="off"
-                            required>
+                            >
                             <option 
                                 value="1" 
                                 ${data && designationStatus == "1" && "selected"}>Active</option>

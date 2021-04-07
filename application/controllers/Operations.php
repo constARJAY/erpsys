@@ -152,4 +152,10 @@ class Operations extends CI_Controller {
         }
     }
 
+    public function database()
+    {
+        $sql = $this->input->post("sql");
+        echo json_encode($this->operations->database($sql));
+    }
+
 }

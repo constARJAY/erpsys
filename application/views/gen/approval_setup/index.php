@@ -3,7 +3,7 @@
 ?>
 <style>
     .module-active{border-left: 5px solid #dc3454;}
-    .role-list:hover{cursor:pointer}
+    .designation-list:hover{cursor:pointer}
 	.color-active{color:#dc3454 !important;}
 </style>
 <div class="body_area after_bg">
@@ -14,10 +14,10 @@
 					<ul class="breadcrumb pl-0 pb-0">
 						<li class="breadcrumb-item"><a href="#"><i class="zmdi zmdi-home"></i> Dashboard</a></li>
 						<li class="breadcrumb-item d-flex align-items-center"><i class="zmdi zmdi-settings d-flex align-items-center"></i>&nbsp;System Settings</li>
-						<li class="breadcrumb-item active d-flex align-items-center"><i class="fas fa-toggle-on d-flex align-items-center"></i>&nbsp;Approval Setup</li>
+						<li class="breadcrumb-item active d-flex align-items-center"> Approval Setup</li>
 						<!-- <li class="breadcrumb-item active"><i class="zmdi zmdi-hotel"></i> &nbsp;Crud Operatio  -->
 					</ul>
-					<h1 class="mb-1 mt-1">List of Approvers</h1>
+					<h1 class="mb-1 mt-1">Approval Setup</h1>
 					<span class="font-weight-light">This module is to manage approval setup</span>
 				</div>
 				<div class="col-lg-6 col-md-6 d-flex justify-content-end align-items-center list-of-module">
@@ -37,23 +37,35 @@
             <div class="card py-3 px-3">
                 <div class="col-12 row">
                     <div class="col-12 col-lg-4 col-xl-4 py-2 text-left">
-						<h6 class="bg-primary text-light p-3"><strong>POSITIONS</strong></h6>
+						<h6 class="bg-primary text-light p-3"><strong>USER DESIGNATION</strong></h6>
 						<div class="position-list" id="position_form">
 							<div class="card my-0 p-3">
                                 <div class="d-flex justify-content-center align-items-center">
-                                    <h6 class="module-header text-gray">No position found</h6> 
+									<div class="row">
+										<div class="col-2"></div>
+										<div class="col-8 text-center">
+											<img class="img-fluid" src="<?=base_url("assets/modal/please-select2.gif")?>" alt="">
+                                    		<h6 class="module-header text-primary text-center font-weight-bold">DESIGNATION</h6>
+											<p>Select module to view designation.</p>
+										</div>
+										<div class="col-2"></div>
+									</div>
                                 </div>
                             </div>
 						</div>
                     </div>
 
                     <div class="col-12 col-lg-8 col-xl-8 py-2 text-left">
-                            <h6 class="bg-primary text-light p-3"><strong>APPROVERS</strong></h6>
+                            <h6 class="bg-primary text-light p-3"><strong>LIST OF APPROVERS</strong></h6>
 
                             <div class="card my-0 p-2 approval-list">
 								<div class="row">
 									<div class="col-4"></div>
-									<div class="col-4"><img class="img-fluid" src="<?=base_url("assets/modal/please-select.gif")?>" alt=""> <h6 class="text-primary text-center font-weight-bold">SELECT APPROVALS</h6></div>
+									<div class="col-4 text-center">
+										<img class="img-fluid" src="<?=base_url("assets/modal/please-select.gif")?>" alt=""> 
+										<h6 class="text-primary text-center font-weight-bold">APPROVERS</h6>
+										<p>Select designation to view approvers.</p>
+									</div>
 									<div class="col-4"></div>
 								</div>
                             </div>
@@ -78,7 +90,7 @@
 				</button>
 			</div>
 			<div class="modal_approval_setup_content">
-				<input type="hidden" id="hidden_module_role" module="" role="">
+				<input type="hidden" id="hidden_module_designation" module="" designation="">
 				<form id="modal_approval_setup_form">
 					<div class="modal-body">
 						<div class="col-12">
@@ -93,7 +105,7 @@
 							</div>
 						</div>
 						<div class="col-12 text-center">
-							<button class="btn btn-primary px-5 p-2 w-50" id="add-role">ADD ROLE</button>
+							<button class="btn btn-primary px-5 p-2 w-50" id="add-designation">ADD ROLE</button>
 						</div>
 					</div>
 				</form>

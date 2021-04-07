@@ -12,15 +12,14 @@ $(document).ready(function(){
             scrollX:        true,
             scrollCollapse: true,
             columnDefs: [
-                { targets: 0, width: 100 },
-                { targets: 1, width: 100 },
-                { targets: 2, width: 100 },
-                { targets: 3, width: 100 },
-                { targets: 4, width: 100 },
-                { targets: 5, width: 100 },
-                { targets: 6, width: 100 },
-                { targets: 7, width: 100 },
-                { targets: 8, width: 100 },
+                { targets: 0, width: "10%" },
+                { targets: 1, width: "20%" },
+                { targets: 2, width: "20%" },
+                { targets: 3, width: "10%" },
+                { targets: 4, width: "10%" },
+                { targets: 5, width: "10%" },
+                { targets: 6, width: "10%" },
+                { targets: 7, width: "10%" },
             ],
         });
     }
@@ -58,7 +57,6 @@ $(document).ready(function(){
                         <th>Groupings</th>
                         <th>Financial Statement Presentation</th>
                         <th>Status</th>
-                        <th>Action</th>
                     </tr>
                     </thead>
                     <tbody>`;
@@ -82,7 +80,10 @@ $(document).ready(function(){
                      }
 
                     html += `
-                    <tr>
+                    <tr 
+                    class="btnEdit" 
+                    id="${item.chartOfAccountID}"
+                    feedback="${item.username}">
                         <td>${item.accountCode}</td>
                         <td>${item.accountName}</td>
                         <td>${item.accountDescription}</td>
@@ -90,16 +91,7 @@ $(document).ready(function(){
                         <td>${item.ledgerClassificationName}</td>
                         <td>${item.accountGrouping}</td>
                         <td>${item.financialStatement}</td>
-                        <td>${status}</td>
-                        <td>
-                            <button 
-                                class="btn btn-edit btn-block btnEdit" 
-                                id="${item.chartOfAccountID}"
-                                feedback="${item.username}">
-                                <i class="fas fa-edit"></i>
-                                Edit
-                            </button>
-                        </td>
+                        <td class="text-center">${status}</td>
                     </tr>`;
                 })
                 html += `</tbody>
@@ -128,7 +120,7 @@ $(document).ready(function(){
     const data = getTableData("gen_ledger_classification_tbl", 
         "ledgerClassificationID ,ledgerClassificationName", "", "");
             console.log(data);
-            let html = ` <option value="" disabled selected ${!param && "selected"}>No Selected</option>`;
+            let html = ` <option value="" disabled selected ${!param && "selected"}>Select Ledger Classification</option>`;
             data.map((item, index, array) => {
                 html += `<option value="${item.ledgerClassificationID}" ${param && item.ledgerClassificationID == param[0].ledgerClassificationID && "selected"}>${item.ledgerClassificationName}</option>`;
             })
@@ -143,7 +135,7 @@ $(document).ready(function(){
     const data = getTableData("fms_bank_tbl", 
         "bankID ,bankName,bankNumber", "bankStatus = 1", "");
       
-            let html = ` <option value="" disabled selected ${!param && "selected"}>No Selected</option>`;
+            let html = ` <option value="" disabled selected ${!param && "selected"}>Select Bank</option>`;
             data.map((item, index, array) => {
                 html += `<option value="${item.bankID}" bank_number="${item.bankNumber}" ${param && item.bankID == param[0].bankID && "selected"}>${item.bankName}</option>`;
                 if(param && item.bankID == param[0].bankID){
@@ -278,7 +270,7 @@ $(document).ready(function(){
                                 value="" 
                                 disabled 
                                 selected
-                                ${!data && "selected"}>No Selected</option>
+                                ${!data && "selected"}>Select Ledger Classification</option>
                         </select>
                         <span class="fas fa-plus-square fa-lg form-control-feedback mt-2 pr-1" id="ledgerClassAdd" style="float:right"></span>
                         <div class="invalid-feedback d-block" id="invalid-input_ledgerClassificationID"></div>
@@ -298,7 +290,7 @@ $(document).ready(function(){
                                 value="" 
                                 disabled 
                                 selected
-                                ${!data && "selected"}>No Selected</option>
+                                ${!data && "selected"}>Select Grouping</option>
 
                             <option value="Current Asset" ${data && accountGrouping == "Current Asset" && "selected"}>Current Asset</option>
                             <option value="Non-current Asset" ${data && accountGrouping == "Non-current Asset" && "selected"}>Non-current Asset</option>
@@ -328,7 +320,7 @@ $(document).ready(function(){
                                 value="" 
                                 disabled 
                                 selected
-                                ${!data && "selected"}>No Selected</option>
+                                ${!data && "selected"}>Select Financial Statement Presentation</option>
                             <option value="Asset" ${data && financialStatement == "Asset" && "selected"}>Asset</option>
                             <option value="Liability" ${data && financialStatement == "Liability" && "selected"}>Liability</option>
                             <option value="Equity" ${data && financialStatement == "Equity" && "selected"}>Equity</option>

@@ -70,8 +70,8 @@ $(document).on("click",".addHoliday", function(){
                                                 </form>
                                             </div>
                                             <div class="modal-footer">
-                                                <button class="btn btn-save" id="btnSave"><i class="fas fa-save"></i>&nbsp;SAVE</button>
-                                                <button class="btn btn-cancel btnCancel"><i class="fas fa-ban"></i>&nbsp;CANCEL</button>
+                                                <button class="btn btn-save" id="btnSave"><i class="fas fa-save"></i>&nbsp;Save</button>
+                                                <button class="btn btn-cancel btnCancel"><i class="fas fa-ban"></i>&nbsp;Cancel</button>
                                             </div>
                                             `;
     setTimeout(function(){
@@ -108,7 +108,7 @@ $(document).on("click",".editHoliday", function(){
         break;
     }
     let modal_holiday_content    =   ` 
-    <div class="modal-body">  
+                                            <div class="modal-body">  
                                                 <form id="modal_holiday_form">
                                                     <div class="row"> 
                                                         <div class="col-md-12 col-sm-12">
@@ -149,7 +149,7 @@ $(document).on("click",".editHoliday", function(){
                                                 </form>
                                             </div>
                                             <div class="modal-footer">
-                                                <button class="btn btn-update" id="btnUpdate" data-holidayid="${tableData[0]["holidayID"]}"><i class="fas fa-save"></i>&nbsp;UPDATE</button>
+                                                <button class="btn btn-update" id="btnUpdate" data-holidayid="${tableData[0]["holidayID"]}"><i class="fas fa-save"></i>&nbsp;Update</button>
                                                 <button class="btn btn-cancel btnCancel"><i class="fas fa-ban"></i>&nbsp;
                                                 CANCEL</button>
                                             </div>
@@ -157,6 +157,8 @@ $(document).on("click",".editHoliday", function(){
     setTimeout(function(){
         $("#modal_holiday_content").html(modal_holiday_content);
         initAll();
+        $("#inputholidayDate").data("daterangepicker").startDate = moment(tableData[0]["holidayDate"],"YYYY-MM-DD");
+        $("#inputholidayDate").data("daterangepicker").endDate 	= moment(tableData[0]["holidayDate"],"YYYY-MM-DD");
     },500);
             
       
@@ -210,8 +212,6 @@ $(document).on("click",".btnCancel", function(){
 
 
 
-
-
 // FUNCTIONS
 function initDataTables() {
             if ($.fn.DataTable.isDataTable('#tableHoliday')){
@@ -225,9 +225,7 @@ function initDataTables() {
                 scrollCollapse: true,
                 columnDefs: [
                     { targets: 0, width: "10%" },
-                    { targets: 1, width: "25%" },
-                    { targets: 4, width: "10%" },
-                    { targets: 5, width: "10%" }
+                    { targets: 4, width: "5%" }
                 ],
             });
 }
@@ -254,7 +252,6 @@ function tableContent(){
                                 <th>Holiday Date</th>
                                 <th>Holiday Type</th>
                                 <th>Status</th>
-                                <th>Action</th>
                             </tr>
                         </thead>
                         <tbody>`;
@@ -270,13 +267,12 @@ function tableContent(){
                         // ----- END INSERT UNIQUE DATA TO uniqueData VARIABLE ----
 
                         html += `
-                        <tr>
+                        <tr class="btnEdit editHoliday" data-holidayid="${item["holidayID"]}">
                             <td>${item["holidayCode"]}</td>
                             <td>${item["holidayName"]}</td>
                             <td>${moment(item["holidayDate"]).format("MMMM DD, YYYY")}</td>
                             <td>${item["holidayType"]}</td>
-                            <td>${item["holidayStatus"] == 0 ? "<span class='badge badge-outline-danger w-100 '>Inactive</span>" : "<span class='badge badge-outline-success w-100 '>Active</span>"} </td>
-                            <td class="text-center"> <button class="btn w-100 btn-edit editHoliday" data-holidayid="${item["holidayID"]}"><i class="fas fa-edit"></i>Edit&nbsp;</span> </button></td>
+                            <td class="text-center">${item["holidayStatus"] == 0 ? "<span class='badge badge-outline-danger w-100 '>Inactive</span>" : "<span class='badge badge-outline-success w-100 '>Active</span>"} </td>
                         </tr>`;
                     })
                     html += `</tbody>

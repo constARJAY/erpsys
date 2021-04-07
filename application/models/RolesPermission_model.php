@@ -15,9 +15,9 @@ class RolesPermission_model extends CI_Model {
         return $query ? true : false;
     }
 
-    public function getUserRole()
+    public function getDesignation()
     {
-        $sql = "SELECT * FROM gen_user_role_tbl";
+        $sql = "SELECT * FROM hris_designation_tbl";
         $query = $this->db->query($sql);
         return $query ? $query->result_array() : false;
     }
@@ -33,18 +33,18 @@ class RolesPermission_model extends CI_Model {
     {
         $truncateTable = $this->truncateTable();
         if ($truncateTable) {
-            $getUserRole = $this->getUserRole();
-            if ($getUserRole) {
+            $getDesignation = $this->getDesignation();
+            if ($getDesignation) {
                 $getModules = $this->getModules();
                 if ($getModules) {
                     $data = [];
-                    foreach ($getUserRole as $role) {
-                        $roleID = $role["roleID"];
+                    foreach ($getDesignation as $designation) {
+                        $designationID = $designation["designationID"];
                         foreach ($getModules as $module) {
                             $moduleID = $module["moduleID"];
-                            $status = $roleID == 1 ? 1 : 0; 
+                            $status = $designationID == 1 ? 1 : 0; 
                             $temp = [
-                                "roleID"           => $roleID,
+                                "designationID"    => $designationID,
                                 "moduleID"         => $moduleID,
                                 "permissionStatus" => $status
                             ];
@@ -64,16 +64,16 @@ class RolesPermission_model extends CI_Model {
         }
     }
 
-    public function generateNewRolesPermission($roleID)
+    public function generateNewRolesPermission($designationID)
     {
         $getModules = $this->getModules();
         if ($getModules) {
             $data = [];
             foreach ($getModules as $module) {
                 $moduleID = $module["moduleID"];
-                $status = $roleID == 1 ? 1 : 0; 
+                $status = $designationID == 1 ? 1 : 0; 
                 $temp = [
-                    "roleID"           => $roleID,
+                    "designationID"    => $designationID,
                     "moduleID"         => $moduleID,
                     "permissionStatus" => $status
                 ];
@@ -88,14 +88,14 @@ class RolesPermission_model extends CI_Model {
 
     public function addModuleRolesPermission($moduleID)
     {
-        $getUserRole = $this->getUserRole();
-        if ($getUserRole) {
+        $getDesignation = $this->getDesignation();
+        if ($getDesignation) {
             $data = [];
-            foreach ($getUserRole as $role) {
-                $roleID = $role["roleID"];
-                $status = $roleID == 1 ? 1 : 0; 
+            foreach ($getDesignation as $designation) {
+                $designationID = $designation["designationID"];
+                $status = $designationID == 1 ? 1 : 0; 
                 $temp = [
-                    "roleID"           => $roleID,
+                    "designationID"    => $designationID,
                     "moduleID"         => $moduleID,
                     "permissionStatus" => $status
                 ];

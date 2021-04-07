@@ -9,7 +9,7 @@ $(document).on("click",".addCodeConductSection", function(){
     $(".modal_codeConductSection_header").text("ADD CODE OF CONDUCT SECTION");
     $("#modal_codeConductSection_content").html(preloader);
     let codeOfConductTable                  =   getTableData("hris_code_conduct_category_tbl","","codeConductCategoryStatus != 0");
-    let codeOfConductCategory               =   `<option value="" dissabled>No Selected</option>`;
+    let codeOfConductCategory               =   `<option value="" dissabled>Select Code of Conduct Category</option>`;
     codeOfConductTable.map(items=>{
         codeOfConductCategory += `<option value="${items["codeConductCategoryID"]}">${items["codeConductCategoryName"]}</option>`;
     })
@@ -47,8 +47,8 @@ $(document).on("click",".addCodeConductSection", function(){
                                                 </form>
                                             </div>
                                             <div class="modal-footer">
-                                                <button class="btn btn-save" id="btnSave"><i class="fas fa-save"></i>&nbsp;SAVE</button>
-                                                <button class="btn btn-cancel btnCancel"><i class="fas fa-ban"></i>&nbsp;CANCEL</button>
+                                                <button class="btn btn-save" id="btnSave"><i class="fas fa-save"></i>&nbsp;Save</button>
+                                                <button class="btn btn-cancel btnCancel"><i class="fas fa-ban"></i>&nbsp;Cancel</button>
                                             </div>
                                                 `;
     setTimeout(function(){
@@ -111,8 +111,8 @@ $(document).on("click",".editCodeConductSection", function(){
                                                 </form>
                                             </div>
                                             <div class="modal-footer">
-                                                <button class="btn btn-update" id="btnUpdate" data-codeconductsectionid="${tableData[0]["codeConductSectionID"]}"><i class="fas fa-save"></i>&nbsp;UPDATE</button>
-                                                <button class="btn btn-cancel btnCancel"><i class="fas fa-ban"></i>&nbsp;CANCEL</button>
+                                                <button class="btn btn-update" id="btnUpdate" data-codeconductsectionid="${tableData[0]["codeConductSectionID"]}"><i class="fas fa-save"></i>&nbsp;Update</button>
+                                                <button class="btn btn-cancel btnCancel"><i class="fas fa-ban"></i>&nbsp;Cancel</button>
                                             </div>
                                                 `;
     setTimeout(function(){
@@ -142,7 +142,7 @@ $(document).on("click", "#btnSave", function(){
 });
 
 $(document).on("click", "#btnUpdate", function(){
-    let condition                       = validateForm("modal_codeConductSection_form");
+    let validation                      = validateForm("modal_codeConductSection_form");
     let codeConductSectionID            = $(this).data("codeconductsectionid");
     let inputCategoryID                 = $("#inputcodeConductCategoryID").val();
     let tableData                       = getTableData("hris_code_conduct_section_tbl","","codeConductSectionID = "+codeConductSectionID);
@@ -152,11 +152,11 @@ $(document).on("click", "#btnUpdate", function(){
     }else{
         let tableDataCategory   = getTableData("hris_code_conduct_section_tbl","COUNT(codeConductCategoryID) AS lastSection","codeConductCategoryID="+inputCategoryID);
         let incrementSectionID  = parseInt(tableDataCategory[0]["lastSection"]) + 1;
-         codeConductSection     = inputCategoryID +"."+incrementSectionID;
+        codeConductSection     = inputCategoryID +"."+incrementSectionID;
     }
     
     
-    if(condition == true){
+    if(validation){
         let data = getFormData("modal_codeConductSection_form", true);
         data["tableData"]["codeConductSection"]     =  codeConductSection;    
         data["tableData"]["updatedBy"]              =  "2";
@@ -192,11 +192,8 @@ function initDataTables() {
                 scrollX:        true,
                 scrollCollapse: true,
                 columnDefs: [
-                    { targets: 0, width: "5%" },
-                    { targets: 1, width: "25%" },
-                    { targets: 2, width: "10%" },
-                    { targets: 4, width: "5%" },
-                    { targets: 5, width: "5%" }
+                    { targets: 0, width: "10%" },
+                    { targets: 4, width: "5%" }
                 ],
             });
 }
@@ -219,12 +216,11 @@ function tableContent(){
                     <table class="table table-bordered table-striped table-hover" id="tableCodeConductSection">
                         <thead>
                             <tr class="text-left">
-                                <th>No.</th>
+                                <th>Section No.</th>
                                 <th>Code of Conduct Category</th>
                                 <th>Code of Conduct Section No.</th>
                                 <th>Conduct of Conduct Description</th>
                                 <th>Status</th>
-                                <th>Action</th>
                             </tr>
                         </thead>
                         <tbody>`;
@@ -240,13 +236,12 @@ function tableContent(){
                         let categoryName = getTableData("hris_code_conduct_category_tbl","codeConductCategoryName","codeConductCategoryID="+item["codeConductCategoryID"]);
 
                         html += `
-                        <tr>
+                        <tr class="btnEdit editCodeConductSection" data-codeconductsectionid="${item["codeConductSectionID"]}">
                             <td>${index + 1}</td>
                             <td>${categoryName[0]["codeConductCategoryName"]}</td>
                             <td>${item["codeConductSection"]}</td>
                             <td>${item["codeConductSectionDescription"]}</td>
-                            <td>${item["codeConductSectionStatus"] == 0 ? "<span class='badge badge-outline-danger w-100'>Inactive</span>" : "<span class='badge badge-outline-success w-100'>Active</span>"} </td>
-                            <td class="text-center"> <button class="btn w-100 btn-edit d-flex justify-content-center align-items-center editCodeConductSection" data-codeconductsectionid="${item["codeConductSectionID"]}"><i class="fas fa-edit"></i> Edit&nbsp; </button></td>
+                            <td class="text-center">${item["codeConductSectionStatus"] == 0 ? "<span class='badge badge-outline-danger w-100'>Inactive</span>" : "<span class='badge badge-outline-success w-100'>Active</span>"} </td>
                         </tr>`;
                     });
 

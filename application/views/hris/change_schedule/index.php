@@ -2,16 +2,16 @@
     <div class="block-header pb-0">
         <div class="container" id="headerContainer">
             <div class="row clearfix">
-                <div class="col-lg-8 col-sm-12">
+                <div class="col-lg-6 col-md-6">
                     <ul class="breadcrumb pl-0 pb-0 ">
                         <li class="breadcrumb-item"><a href="#"><i class="zmdi zmdi-home"></i> Dashboard</a></li>
-						<li class="breadcrumb-item"><i class="zmdi zmdi-folder"></i> &nbsp;Forms</li>
+						<li class="breadcrumb-item"><i class="fas fa-users"></i> &nbsp;Employee Forms</li>
                         <li class="breadcrumb-item active">Change Schedule</li>
                     </ul>
                     <h1 class="mb-1 mt-1">Change Schedule</h1>
                     <span>This module is used to manage change schedule form details.</span>
                 </div>
-                <div class="col-lg-4 col-sm-12 text-right" id="headerButton"></div>
+                <div class="col-lg-6 col-md-6 text-right" id="headerButton"></div>
             </div>
         </div>
     </div>

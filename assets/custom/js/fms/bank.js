@@ -12,10 +12,10 @@ $(document).ready(function(){
             scrollX:        true,
             scrollCollapse: true,
             columnDefs: [
-                { targets: 0, width: "50%" },
-                { targets: 1, width: "50%" },
-                { targets: 2, width: 80 },
-                { targets: 3, width: 80 },
+                { targets: 0, width: "10%" },
+                { targets: 1, width: "60%" },
+                { targets: 2, width: "20%" },
+                { targets: 3, width: "10%" },
             ],
         });
     }
@@ -45,10 +45,10 @@ $(document).ready(function(){
                 <table class="table table-bordered table-striped table-hover nowrap" id="tableFinanceBank">
                     <thead>
                     <tr>
+                        <th>Bank Code</th>
                         <th>Bank Name</th>
                         <th>Account Number</th>
                         <th>Status</th>
-                        <th>Action</th>
                     </tr>
                     </thead>
                     <tbody>`;
@@ -71,19 +71,14 @@ $(document).ready(function(){
                      }
 
                     html += `
-                    <tr>
+                    <tr
+                    class="btnEdit" 
+                    id="${item.bankID}"
+                    feedback="${item.username}">
+                        <td>${item.bankCode}</td>
                         <td>${item.bankName}</td>
                         <td>${item.bankNumber}</td>
-                        <td>${status}</td>
-                        <td>
-                            <button 
-                                class="btn btn-edit btn-block btnEdit" 
-                                id="${item.bankID}"
-                                feedback="${item.username}">
-                                <i class="fas fa-edit"></i>
-                                Edit
-                            </button>
-                        </td>
+                        <td class="text-center">${status}</td>
                     </tr>`;
                 })
                 html += `</tbody>
@@ -177,7 +172,7 @@ $(document).ready(function(){
                         id="input_bankStatus" 
                         name="bankStatus"
                         autocomplete="off"
-                        required>
+                        >
                         <option 
                             value="1" 
                             ${data && bankStatus == "1" && "selected"} >Active</option>
@@ -216,13 +211,13 @@ $(document).ready(function(){
     if (validate) {
 
         let data = getFormData("modal_finance_bank", true);
-        data["tableData[bankCode]"] = generateCode("VEN", false, "fms_bank_tbl", "bankCode");
+        data["tableData[bankCode]"] = generateCode("BNK", false, "fms_bank_tbl", "bankCode");
         data["tableData[createdBy]"] = sessionID;
         data["tableData[updatedBy]"] = sessionID;
         data["tableName"]            = "fms_bank_tbl";
         data["feedback"]             = $("[name=bankName]").val();
 
-        sweetAlertConfirmation("add", "Bank Masterfile", "modal_finance_bank", null, data, true, tableContent);
+        sweetAlertConfirmation("add", "Bank", "modal_finance_bank", null, data, true, tableContent);
         }
     });
     // ----- END SAVE MODAL -----
@@ -264,7 +259,7 @@ $(document).ready(function(){
 
 			sweetAlertConfirmation(
 				"update",
-				"Bank Masterfile",
+				"Bank",
 				"modal_finance_bank",
 				"",
 				data,
@@ -283,7 +278,7 @@ $(document).ready(function(){
 		if (!formEmpty) {
 			sweetAlertConfirmation(
 				"cancel",
-				"Bank Masterfile",
+				"Bank",
 				"modal_finance_bank"
 			);
 		} else {

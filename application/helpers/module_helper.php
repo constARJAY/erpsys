@@ -6,10 +6,10 @@
         $CI->load->helper('url', 'string', 'integer'); 
 
         $sessionUserAccount = getAdminSessionAccount();
-        $roleID = $sessionUserAccount->roleID;
+        $designationID = $sessionUserAccount->designationID;
         
         if ($moduleID) {
-            $sql = "SELECT permissionStatus FROM gen_roles_permission_tbl WHERE moduleID = $moduleID AND roleID = $roleID AND permissionStatus = 1";
+            $sql = "SELECT permissionStatus FROM gen_roles_permission_tbl WHERE moduleID = $moduleID AND designationID = $designationID AND permissionStatus = 1";
         } else {
             redirect(base_url('denied'));
         }

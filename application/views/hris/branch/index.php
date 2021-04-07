@@ -1,11 +1,11 @@
 <div class="body_area after_bg">
-    <div class="block-header">
+    <div class="block-header pb-0">
         <div class="container">
             <div class="row clearfix">
                 <div class="col-8">
                     <ul class="breadcrumb pl-0 pb-0 ">
                         <li class="breadcrumb-item"><a href="#"><i class="zmdi zmdi-home"></i>&nbsp;Dashboard</a></li>
-                        <li class="breadcrumb-item"><i class="zmdi zmdi-folder"></i>&nbsp;Masterfile</li>
+                        <li class="breadcrumb-item"><i class="zmdi zmdi-folder"></i>&nbsp;Masterfiles</li>
                         <li class="breadcrumb-item active">Branch</li>
                     </ul>
                     <h1 class="mb-1 mt-1">List of Branches</h1>
@@ -19,10 +19,20 @@
     </div>
 
     <div class="container">
-		<div class="row clearfix row-deck">
-            <div class="card p-3">
-                <div class="col-12">
-                    <div class="table-responsive" id="table_content"></div>
+		<div class="row clearfix">
+            <div class="col-lg-12">
+                <div class="card">
+                    <div class="header text-right p-0">
+						<div class="closeBtn"></div>
+					</div>
+					<div class="body" id="main_body">
+						<div class="row" id="loading-screen" style="visibility:hidden;"></div>
+						<div class="row clearfix row-deck">
+							<div class="col-12">
+                                <div class="table-responsive" id="table_content"></div>
+							</div>
+						</div>
+					</div>
                 </div>
             </div>
         </div>

@@ -20,45 +20,16 @@ $(document).ready(function () {
 				// scrollX: true,
 				scrollCollapse: true,
 				columnDefs: [{
-						targets: 0,
-						width: 150
-					},
-					{
-						targets: 1,
-						width: 150
-					},
-					{
-						targets: 2,
-						width: 150
-					},
-					{
-						targets: 3,
-						width: 150
-					},
-					{
-						targets: 4,
-						width: 150
-					},
-					{
-						targets: 5,
-						width: 150
-					},
-					{
-						targets: 6,
-						width: 150
-					},
-					{
-						targets: 7,
-						width: 150
-					},
-					{
-						targets: 8,
-						width: 80
-					},
-					{
-						targets: 9,
-						width: 80
-					},
+					 targets: 0, width: 150 },
+					{ targets: 1, width: 150 },
+					{ targets: 2, width: 150 },
+					{ targets: 3, width: 150 },
+					{ targets: 4, width: 290 },
+					{ targets: 5, width: 150 },
+					{ targets: 6, width: 150 },
+					{ targets: 7, width: 150 },
+					{ targets: 8, width: 80 },
+					{ targets: 9, width: 80 },
 				],
 			});
 
@@ -73,45 +44,16 @@ $(document).ready(function () {
 				// scrollX: true,
 				scrollCollapse: true,
 				columnDefs: [{
-						targets: 0,
-						width: 150
-					},
-					{
-						targets: 1,
-						width: 150
-					},
-					{
-						targets: 2,
-						width: 150
-					},
-					{
-						targets: 3,
-						width: 150
-					},
-					{
-						targets: 4,
-						width: 150
-					},
-					{
-						targets: 5,
-						width: 150
-					},
-					{
-						targets: 6,
-						width: 150
-					},
-					{
-						targets: 7,
-						width: 150
-					},
-					{
-						targets: 8,
-						width: 80
-					},
-					{
-						targets: 9,
-						width: 80
-					},
+					 targets: 0, width: 150 },
+					{ targets: 1, width: 150 },
+					{ targets: 2, width: 150 },
+					{ targets: 3, width: 150 },
+					{ targets: 4, width: 290 },
+					{ targets: 5, width: 150 },
+					{ targets: 6, width: 150 },
+					{ targets: 7, width: 150 },
+					{ targets: 8, width: 80 },
+					{ targets: 9, width: 80 },
 				],
 			});
 	}
@@ -156,15 +98,18 @@ $(document).ready(function () {
 	function forApprovalContent() {
 		$("#tableForApprovalParent").html(preloader);
 		let scheduleData = getTableData(
-			`hris_official_business_tbl  
-			LEFT JOIN hris_employee_list_tbl USING(employeeID)
-			LEFT JOIN pms_client_tbl ON hris_official_business_tbl.officialBusinessCompanyID=pms_client_tbl.clientID`,
-			"",
+			`hris_official_business_tbl AS ob 
+					LEFT JOIN pms_client_tbl AS cl ON ob.officialBusinessCompanyID=cl.clientID 
+					LEFT JOIN hris_employee_list_tbl USING(employeeID)`,
+			`ob.officialBusinessID,ob.officialBusinessCode,ob.employeeID,officialBusinessCompanyID,ob.officialBusinessAddress,ob.officialBusinessDate,
+					ob.officialBusinessTimeIn,ob.officialBusinessTimeOut,ob.officialBusinessReason,ob.approversID,ob.approversStatus,ob.approversDate,
+					ob.officialBusinessStatus,ob.officialBusinessRemarks,ob.submittedAt,ob.createdBy,ob.updatedBy,ob.createdAt,ob.updatedAt,cl.clientName,
+					hris_employee_list_tbl.employeeFirstname, hris_employee_list_tbl.employeeLastname`,
 			`employeeID != ${sessionID} AND officialBusinessStatus != 0 AND officialBusinessStatus != 4`
 		);
 
 		let html = `
-        <table class="table table-bordered table-striped table-hover" id="tableForApprroval">
+        <table class="table table-bordered table-striped table-hover nowrap" id="tableForApprroval">
             <thead>
                 <tr>
                     <th>Code</th>
@@ -182,7 +127,14 @@ $(document).ready(function () {
             <tbody>`;
 
 		scheduleData.map((item) => {
-
+			console.log(item.submittedAt);
+			if(item.officialBusinessStatus=="0"){
+				
+				var submitat = "";
+			}else{
+				var submitat = moment(item.submittedAt).format("MMMM DD, YYYY hh:mm:ss A");
+				
+			}
 			let button = `
 			<button class="btn btn-view w-100 btnView" id="${item.officialBusinessID}"><i class="fas fa-eye"></i> View</button>`;
 
@@ -191,7 +143,7 @@ $(document).ready(function () {
 				<tr>
 					<td>${item.officialBusinessCode}</td>
 					<td>${item.employeeFirstname + ' ' + item.employeeLastname}</td>
-					<td>${moment(item.createdAt).format("MMMM DD, YYYY")}</td>
+					<td>${submitat}</td>
                     <td>${item.clientName}</td>
                     <td>${item.officialBusinessAddress}</td>
 					<td>${moment(item.officialBusinessDate).format("MMMM DD, YYYY")}</td>
@@ -222,15 +174,18 @@ $(document).ready(function () {
 	function myFormsContent() {
 		$("#tableMyFormsParent").html(preloader);
 		let scheduleData = getTableData(
-			`hris_official_business_tbl  
-			LEFT JOIN hris_employee_list_tbl USING(employeeID) 
-			LEFT JOIN pms_client_tbl ON hris_official_business_tbl.officialBusinessCompanyID=pms_client_tbl.clientID`,
-			"",
+			`hris_official_business_tbl AS ob 
+			LEFT JOIN pms_client_tbl AS cl ON ob.officialBusinessCompanyID=cl.clientID 
+			LEFT JOIN hris_employee_list_tbl USING(employeeID)`,
+			`ob.officialBusinessID,ob.officialBusinessCode,ob.employeeID,officialBusinessCompanyID,ob.officialBusinessAddress,ob.officialBusinessDate,
+			ob.officialBusinessTimeIn,ob.officialBusinessTimeOut,ob.officialBusinessReason,ob.approversID,ob.approversStatus,ob.approversDate,
+			ob.officialBusinessStatus,ob.officialBusinessRemarks,ob.submittedAt,ob.createdBy,ob.updatedBy,ob.createdAt,ob.updatedAt,cl.clientName,
+			hris_employee_list_tbl.employeeFirstname, hris_employee_list_tbl.employeeLastname`,
 			`employeeID = ${sessionID}`
 		);
 
 		let html = `
-        <table class="table table-bordered table-striped table-hover" id="tableMyForms">
+        <table class="table table-bordered table-striped table-hover nowrap" id="tableMyForms">
             <thead>
                 <tr>
                     <th>Code</th>
@@ -248,6 +203,12 @@ $(document).ready(function () {
             <tbody>`;
 
 		scheduleData.map((item) => {
+
+			if(item.officialBusinessStatus=="0"){
+				var submitat = "";
+			}else{
+				var submitat = moment(item.submittedAt).format("MMMM DD, YYYY hh:mm:ss A");
+			}
 			let unique = {
 				id: item.officialBusinessID,
 				officialBusinessDate: moment(item.officialBusinessDate).format("MMMM DD, YYYY")
@@ -267,7 +228,7 @@ $(document).ready(function () {
             <tr>
                 <td>${item.officialBusinessCode}</td>
                 <td>${item.employeeFirstname + ' ' + item.employeeLastname}</td>
-				<td>${moment(item.createdAt).format("MMMM DD, YYYY")}</td>
+				<td>${submitat}</td>
                 <td>${item.clientName}</td>
                 <td>${item.officialBusinessAddress}</td>
                 <td>${moment(item.officialBusinessDate).format("MMMM DD, YYYY")}</td>
@@ -480,9 +441,8 @@ $(document).ready(function () {
                     id="officialBusinessCompanyID" 
                     name="officialBusinessCompanyID"
                     ${disabled} required>
-                    ${getModuleHeaderOptions(officialBusinessCompanyID)}
+                    ${getCompanyContent()}
                     </select>
-                </select>
             <div class="invalid-feedback d-block" id="invalid-officialBusinessCompanyID"></div>
                 </div>
              </div>
@@ -495,7 +455,7 @@ $(document).ready(function () {
                     id="officialBusinessAddress"
                     name="officialBusinessAddress"
                     value="${officialBusinessAddress}"
-                    ${disabled} required>
+                    ${disabled} readonly required>
                 <div class="d-block invalid-feedback" id="invalid-officialBusinessAddress"></div>
              </div>
             </div>
@@ -503,12 +463,12 @@ $(document).ready(function () {
                 <div class="form-group">
                     <label>Date ${!disabled ? "<code>*</code>" : ""}</label>
                     <input type="button" 
-                        class="form-control validate daterange text-left"
+                        class="form-control validate officialBusinessDate text-left"
                         required
                         id="officialBusinessDate"
                         name="officialBusinessDate"
                         value="${officialBusinessDate && moment(officialBusinessDate).format("MMMM DD, YYYY")}"
-						${disabled}"
+						${disabled}
 						title="Date">
                     <div class="d-block invalid-feedback" id="invalid-officialBusinessDate"></div>
                 </div>
@@ -566,6 +526,7 @@ $(document).ready(function () {
 		setTimeout(() => {
 			$("#page_content").html(html);
 			initAll();
+			OfficialBusinessDateRange();
 			initDataTables();
 			data ? initInputmaskTime(false) : initInputmaskTime();
 			return html;
@@ -604,16 +565,45 @@ $(document).ready(function () {
 	pageContent();
 	// ----- END PAGE CONTENT ----
 
-	function getModuleHeaderOptions(clientID = 0) {
+	// function getModuleHeaderOptions(clientID = 0) {
+	// 	let getModuleHeader = getTableData("pms_client_tbl", "*", "	clientStatus = 1");
+	// 	let moduleHeaderOptions = `<option ${clientID == 0 && "selected"} disabled>Select Company Name</option>`;
+	// 	getModuleHeader.map(item => {
+	// 		moduleHeaderOptions += `<option value="${item.clientID}" ${item.clientID == clientID && "selected"}>${item.clientName}</option>`;
+	// 	})
+
+	// 	return moduleHeaderOptions;
+
+	// }
+
+	// ----- COMPANY CONTENT ----
+	function getCompanyContent(clientID = false) {
 		let getModuleHeader = getTableData("pms_client_tbl", "*", "	clientStatus = 1");
-		let moduleHeaderOptions = `<option ${clientID == 0 && "selected"} disabled>Select Company Name</option>`;
+
+		let moduleHeaderOptions = `<option ${!clientID && "selected"} disabled>Select Company Name</option>`;
 		getModuleHeader.map(item => {
-			moduleHeaderOptions += `<option value="${item.clientID}" ${item.clientID == clientID && "selected"}>${item.clientName}</option>`;
+
+			let address = `${item.clientUnitNumber && titleCase(item.clientUnitNumber)+", "}${item.clientHouseNumber && item.clientHouseNumber +", "}${item.clientBarangay && titleCase(item.clientBarangay)+", "}${item.clientCity && titleCase(item.clientCity)+", "}${item.clientProvince && titleCase(item.clientProvince)+", "}${item.clientCountry && titleCase(item.clientCountry)+", "}${item.clientPostalCode && titleCase(item.clientPostalCode)}`;
+
+			moduleHeaderOptions += `<option value="${item.clientID}" ${item.clientID == clientID && "selected"} companyAddress="${address}">${item.clientName}</option>`;
+
+			if (clientID && item.clientID == clientID[0].clientID) {
+				$("#officialBusinessAddress").val(address);
+			}
+
 		})
 
 		return moduleHeaderOptions;
 
 	}
+	getCompanyContent();
+
+	 // ----- CHANGE CLIENT ADDRESS -----
+	 $(document).on("change", "#officialBusinessCompanyID", function() {
+        var companyAddress = $(this).find("option:selected").attr("companyAddress");
+        $("#officialBusinessAddress").val(companyAddress);
+    });
+    // ----- END CHANGE CLIENT ADDRESS -----
 
 
 
@@ -690,9 +680,9 @@ $(document).ready(function () {
 		let data = getFormData("form_official_business", true);
 
 		const submittedAt =
-			(status == 1 && moment().format("YYYY-MM-DD hh:mm:ss")) ||
+			(status == 1 && moment().format("YYYY-MM-DD HH:mm:ss")) ||
 			(status == 4 && null);
-		const dateToday = moment().format("YYYY-MM-DD hh:mm:ss");
+		const dateToday = moment().format("YYYY-MM-DD HH:mm:ss");
 
 		if (action && method != "" && feedback != "") {
 			data["tableData[officialBusinessStatus]"] = status;
@@ -760,7 +750,7 @@ $(document).ready(function () {
 					"SCH",
 					false,
 					"hris_official_business_tbl",
-					"officialBusinessCode"
+					"officialBusinessCode",
 				);
 
 			const action = id && feedback ? "update" : "insert";
@@ -797,6 +787,7 @@ $(document).ready(function () {
 		);
 
 		pageContent(true, tableData);
+		getCompanyContent(tableData);
 	});
 	// ----- END OPEN EDIT MODAL -----
 
@@ -858,7 +849,7 @@ $(document).ready(function () {
 					"SCH",
 					false,
 					"hris_official_business_tbl",
-					"officialBusinessCode"
+					"officialBusinessCode",
 				);
 
 			const action = id && feedback ? "update" : "insert";
@@ -1040,10 +1031,10 @@ $(document).ready(function () {
 			</div>
 		</div>
 		<div class="modal-footer text-right">
-			<button class="btn btn-primary" id="btnRejectConfirmation"
+			<button class="btn btn-danger" id="btnRejectConfirmation"
 			officialBusinessID="${id}"
-			officialBusinessCode="${feedback}">Deny</button>
-			<button class="btn btn-danger" data-dismiss="modal">Cancel</button>
+			officialBusinessCode="${feedback}"><i class="far fa-times-circle"></i> Deny</button>
+			<button class="btn btn-cancel" data-dismiss="modal"><i class="fas fa-ban"></i> Cancel</button>
 		</div>`;
 		$("#modal_change_schedule_content").html(html);
 	})
@@ -1091,7 +1082,39 @@ $(document).ready(function () {
 	// ----- END REJECT DOCUMENT -----
 
 
+	$(document).on("change", ".officialBusinessDate" ,function(){
+		let thisValue       =   $(this).val();
+		let thisValueSplit  =   thisValue.split(" - ");
+	
+		// from = start.format('YYYY-MM-DD 00:00:00');
+		//               to = end.format('YYYY-MM-DD 23:59:59');
+	
+		let fromDate        =  new Date(thisValueSplit[0]); 	
+		let toDate          =  new Date(thisValueSplit[1]);
+		let numberOfDays    =  Math.round((toDate-fromDate)/(1000*60*60*24));
+		$("#loanFormNoOfDays").val(numberOfDays);
+		// alert(thisValue);
+	})
 
+	function OfficialBusinessDateRange(){
+		$('.officialBusinessDate').daterangepicker({
+			"showDropdowns": true,
+			minDate: moment(),
+			startDate: moment().startOf('hour'),
+			endDate: moment().startOf('hour').add(32, 'hour'),
+			locale: {
+			  format: 'MMMM D, YYYY'
+			},
+			ranges: {
+			//   'Today': [moment(), moment()],
+			//   'Tommorow': [moment().add(1, 'days'), moment().add(1, 'days')],
+			  'Month': [moment(), moment().add(30, 'days')],
+			  'Quarter': [moment(), moment().add(3, 'months')],
+			  'Semiannual':[moment(), moment().add(6, 'months')],
+			  'Annual': [moment(), moment().add(1, 'years')]
+			}
+		});
+	}
 
 
 

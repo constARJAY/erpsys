@@ -12,14 +12,14 @@ $(document).ready(function(){
           scrollX:        true,
           scrollCollapse: true,
           columnDefs: [
-              { targets: 0, width: 80  },
-              { targets: 1, width: 100 },
-              { targets: 2, width: 100 },
-              { targets: 3, width: 150 },
-              { targets: 4, width: 100 },
-              { targets: 5, width: 100 },
-              { targets: 6, width: 80  },
-              { targets: 7, width: 80  },
+              { targets: 0, width: "10%"  },
+              { targets: 1, width: "10%" },
+              { targets: 2, width: "20%" },
+              { targets: 3, width: "20%" },
+              { targets: 4, width: "10%" },
+              { targets: 5, width: "10%" },
+              { targets: 6, width: "10%"  },
+              { targets: 7, width: "10%"  },
           ],
       });
   }
@@ -53,8 +53,8 @@ $(document).ready(function(){
                       <th>Job Description</th>
                       <th>Job Type</th>
                       <th>Job Category</th>
+                      <th>No. of Vacancy</th>
                       <th>Status</th>
-                      <th>Action</th>
                   </tr>
                   </thead>
                   <tbody>`;
@@ -76,23 +76,18 @@ $(document).ready(function(){
                 }
                 
                   html += `
-                  <tr>
+                  <tr
+                    class="btnEdit" 
+                    id="${item.jobID}"
+                    feedback="${item.jobTitle}">
                       <td>${item.jobCode}</td>
                       <td>${item.jobCompany}</td>
                       <td>${item.jobTitle}</td>
                       <td>${item.jobDescription}</td>
                       <td>${item.jobType}</td>
                       <td>${item.jobCategory}</td>
-                      <td>${status}</td>
-                      <td>
-                          <button 
-                              class="btn btn-edit btn-block btnEdit" 
-                              id="${item.jobID}"
-                              feedback="${item.jobTitle}">
-                              <i class="fas fa-edit"></i>
-                              Edit
-                          </button>
-                      </td>
+                      <td class="text-center">${item.jobSlot}</td>
+                      <td class="text-center">${status}</td>
                   </tr>`;
               })
               html += `</tbody>

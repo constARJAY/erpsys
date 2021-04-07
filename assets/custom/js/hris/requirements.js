@@ -12,11 +12,10 @@ $(document).ready(function(){
             scrollX:        true,
             scrollCollapse: true,
             columnDefs: [
-                { targets: 0, width: 100 },
-                { targets: 1, width: 100 },
-                { targets: 2, width: 500 },
-                { targets: 3, width: 80 },
-                { targets: 4, width: 80 },
+                { targets: 0, width: "10%" },
+                { targets: 1, width: "40%" },
+                { targets: 2, width: "40%" },
+                { targets: 3, width: "10%" },
             ],
         });
     }
@@ -47,12 +46,11 @@ $(document).ready(function(){
                 let html = `
                 <table class="table table-bordered table-striped table-hover nowrap" id="tableHRISRequirements">
                     <thead>
-                    <tr class="text-center">
+                    <tr class="text-left">
                         <th>Requirement Code</th>
                         <th>Requirement Name</th>
                         <th>Description</th>
                         <th>Status</th>
-                        <th>Action</th>
                     </tr>
                     </thead>
                     <tbody>`;
@@ -73,20 +71,14 @@ $(document).ready(function(){
                         var status=`<span class="badge badge-outline-danger w-100">Inactive</span>`;
                      }
                     html += `
-                    <tr>
+                    <tr
+                    class="btnEdit" 
+                    id="${item.requirementID}"
+                    feedback="${item.requirementName}">
                     <td>${item.requirementCode}</td>
                     <td>${item.requirementName}</td>
                     <td>${item.requirementDescription}</td>
-                    <td>${status}</td>
-                        <td>
-                            <button 
-                                class="btn btn-edit btn-block btnEdit" 
-                                id="${item.requirementID}"
-                                feedback="${item.requirementName}">
-                                <i class="fas fa-edit"></i>
-                                Edit
-                            </button>
-                        </td>
+                    <td class="text-center">${status}</td>
                     </tr>`;
                 })
                 html += `</tbody>
@@ -178,7 +170,7 @@ $(document).ready(function(){
                             id="input_requirementStatus" 
                             name="requirementStatus"
                             autocomplete="off"
-                            required>
+                            >
                             <option 
                                 value="1" 
                                 ${data && requirementStatus == "1" && "selected"} >Active</option>
@@ -224,7 +216,7 @@ $(document).ready(function(){
         data["tableName"]            = "hris_requirement_tbl";
         data["feedback"]             = $("[name=requirementName]").val();
 
-        sweetAlertConfirmation("add", "Requirements", "modal_hris_requirements", null, data, true, tableContent);
+        sweetAlertConfirmation("add", "Requirement", "modal_hris_requirements", null, data, true, tableContent);
         }
     });
     // ----- END SAVE MODAL -----
@@ -266,7 +258,7 @@ $(document).ready(function(){
 
 			sweetAlertConfirmation(
 				"update",
-				"Requirements",
+				"Requirement",
 				"modal_hris_requirements",
 				"",
 				data,
@@ -283,7 +275,7 @@ $(document).ready(function(){
 		if (!formEmpty) {
 			sweetAlertConfirmation(
 				"cancel",
-				"Requirements",
+				"Requirement",
 				"modal_hris_requirements"
 			);
 		} else {

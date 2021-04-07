@@ -4,7 +4,7 @@
 		<div class="col-md-12 col-lg-12">
 			<div class="card" style='border:0px;'>
 				<div class="body text-center">
-					<p class="copyright mb-0">Copyright 2020 © All Rights Reserved. <a
+					<p class="copyright mb-0">Copyright 2021 © All Rights Reserved. <a
 							href="http://theblackcoders.com" target="_blank">BlackCoders</a></p>
 				</div>
 			</div>

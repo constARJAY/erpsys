@@ -8,7 +8,7 @@
 						<li class="breadcrumb-item active"><i class="zmdi zmdi-hotel"></i> &nbsp;System Notification</li>
 					</ul>
 					<h1 class="mt-3">System Notification</h1>
-					<span>This module is used to manage Lorem ipsum dolor sit amet..</span>
+					<span>This module is used to manage system notification details.</span>
 				</div>
 			</div>
             <div class="bh_divider"></div>

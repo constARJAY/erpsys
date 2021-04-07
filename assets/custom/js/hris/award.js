@@ -60,7 +60,7 @@ $(document).on("click",".addAward", function(){
                                             `;
     setTimeout(function(){
         $("#modal_award_content").html(modal_award_content);
-        initAll();
+        $("#awardSignatories").select2({ placeholder: "Select Signatories", theme: "bootstrap" });
     },500); 
 });
 
@@ -124,7 +124,7 @@ $(document).on("click",".editAward", function(){
                                     `;
     setTimeout(function(){
         $("#modal_award_content").html(modal_award_content);
-        initAll();
+        $("#awardSignatories").select2({ placeholder: "Select Signatories", theme: "bootstrap" });
     },500);
             
       
@@ -182,8 +182,8 @@ function initDataTables() {
                 columnDefs: [
                     { targets: 0, width: "5%" },
                     { targets: 1, width: "25%" },
-                    { targets: 4, width: "10%" },
-                    { targets: 5, width: "10%" }
+                    { targets: 3, width: "15%" },
+                    { targets: 4, width: "5%" }
                 ],
             });
 }
@@ -211,7 +211,6 @@ function tableContent(){
                                 <th>Award Description</th>
                                 <th>Signatories</th>
                                 <th>Status</th>
-                                <th>Action</th>
                             </tr>
                         </thead>
                         <tbody>`;
@@ -235,13 +234,12 @@ function tableContent(){
                        });
 
                         html += `
-                        <tr>
+                        <tr class="btnEdit editAward" data-awardid="${item["awardID"]}">
                             <td>${item["awardID"]}</td> 
                             <td>${item["awardTitle"]}</td>
                             <td>${item["awardDescription"]}</td>
                             <td>${listOfSignatories}</td>
-                            <td>${item["awardStatus"] == 0 ? "<span class='badge badge-outline-danger w-100'>Inactive</span>" : "<span class='badge badge-outline-success w-100'>Active</span>"} </td>
-                            <td class="text-center"> <button class="btn w-100 btn-edit editAward" data-awardid="${item["awardID"]}"> <i class="fas fa-edit"></i> Edit </button></td>
+                            <td class="text-center">${item["awardStatus"] == 0 ? "<span class='badge badge-outline-danger w-100'>Inactive</span>" : "<span class='badge badge-outline-success w-100'>Active</span>"} </td>
                         </tr>`;
                     });
 
@@ -265,9 +263,9 @@ function tableContent(){
 }
 
 function userAccountOption(selected = null){
-    let returnData          =  "";
-    let selectedSplit       =  selected == null ? "0" : selected.split("|");
-    let tableData           =  getTableData("hris_employee_list_tbl","","employeeID NOT IN("+selectedSplit+") AND employeeStatus != 0");    
+    let selectedSplit           =   selected == null ? "0" : selected.split("|");
+    let tableData               =   getTableData("hris_employee_list_tbl","","employeeID NOT IN("+selectedSplit+") AND employeeStatus != 0");
+    let returnData              =   "";
     if(selected != null){
             selectedSplit.map(selectedItems =>{
                 let tableDataSelected   =   getTableData("hris_employee_list_tbl","","employeeID='"+selectedItems+"'");

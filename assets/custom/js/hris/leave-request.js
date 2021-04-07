@@ -28,8 +28,9 @@ $(document).ready(function () {
 					{ targets: 4, width: 150 },
 					{ targets: 5, width: 150 },
 					{ targets: 6, width: 150 },
-					{ targets: 7, width: 80  },
-					{ targets: 8, width: 80 },
+					{ targets: 7, width: 150 },
+					{ targets: 8, width: 80  },
+					{ targets: 9, width: 80  },
 				],
 			});
 
@@ -51,8 +52,9 @@ $(document).ready(function () {
 					{ targets: 4, width: 150 },
 					{ targets: 5, width: 150 },
 					{ targets: 6, width: 150 },
-					{ targets: 7, width: 80  },
-					{ targets: 8, width: 80 },
+					{ targets: 7, width: 150 },
+					{ targets: 8, width: 80  },
+					{ targets: 9, width: 80  },
 				],
 			});
 	}
@@ -101,10 +103,14 @@ $(document).ready(function () {
 	function forApprovalContent() {
 		$("#tableForApprovalParent").html(preloader);
 		let scheduleData = getTableData(
-			`hris_leave_request_tbl LEFT JOIN hris_employee_list_tbl
+			`hris_leave_request_tbl AS lr
+			LEFT JOIN  hris_leave_tbl USING(leaveID)
+			LEFT JOIN hris_employee_list_tbl
 			USING(employeeID)`,
-			"",
-			`employeeID != ${sessionID} AND leaveRequestStatus != 0 AND leaveRequestStatus != 4 ORDER BY leaveRequestID DESC`
+			`lr.leaveRequestID,lr.leaveRequestCode,lr.employeeID,lr.leaveRequestDate,lr.leaveRequestDateFrom,lr.leaveRequestDateTo,lr.leaveRequestNumberOfDate,lr.leaveID,lr.leaveRequestRemainingLeave,
+			lr.leaveRequestReason,lr.approversID,lr.approversStatus,lr.approversDate,lr.leaveRequestStatus,lr.leaveRequestRemarks,lr.submittedAt,lr.createdBy,lr.updatedBy,lr.createdAt,lr.updatedAt,
+			hris_employee_list_tbl.employeeFirstname, hris_employee_list_tbl.employeeLastname,hris_leave_tbl.leaveName`,
+			`lr.employeeID != ${sessionID} AND leaveRequestStatus != 0 AND leaveRequestStatus != 4 ORDER BY leaveRequestID DESC`
 		);
 
 		let html = `
@@ -113,6 +119,7 @@ $(document).ready(function () {
                 <tr>
                     <th>Code</th>
                     <th>Employee Name</th>
+					<th>Leave Type</th>
 					<th>Date Created</th>
                     <th>Date From</th>
                     <th>Date To</th>
@@ -125,6 +132,11 @@ $(document).ready(function () {
             <tbody>`;
 
 		scheduleData.map((item) => {
+			if(item.leaveRequestStatus=="0"){
+				var submitat = "";
+			}else{
+				var submitat = moment(item.submittedAt).format("MMMM DD, YYYY hh:mm:ss A");
+			}
 
 			let button = `
 			<button class="btn btn-view w-100 btnView" id="${item.leaveRequestID}"><i class="fas fa-eye"></i> View</button>`;
@@ -134,7 +146,8 @@ $(document).ready(function () {
 				<tr>
 					<td>${item.leaveRequestCode}</td>
 					<td>${item.employeeFirstname + ' ' +item.employeeLastname}</td>
-					<td>${moment(item.createdAt).format("MMMM DD, YYYY")}</td>
+					<td>${item.leaveName}</td>
+					<td>${submitat}</td>
 					<td>${moment(item.leaveRequestDateFrom).format("MMMM DD, YYYY")}</td>
                     <td>${moment(item.leaveRequestDateTo).format("MMMM DD, YYYY")}</td>
                     <td>${item.leaveRequestNumberOfDate}</td>
@@ -165,10 +178,14 @@ $(document).ready(function () {
 	function myFormsContent() {
 		$("#tableMyFormsParent").html(preloader);
 		let scheduleData = getTableData(
-			`hris_leave_request_tbl LEFT JOIN hris_employee_list_tbl
+			`hris_leave_request_tbl AS lr
+			LEFT JOIN  hris_leave_tbl USING(leaveID)
+			LEFT JOIN hris_employee_list_tbl
 			USING(employeeID)`,
-			"",
-			`employeeID = ${sessionID}  ORDER BY leaveRequestID DESC`
+			`lr.leaveRequestID,lr.leaveRequestCode,lr.employeeID,lr.leaveRequestDate,lr.leaveRequestDateFrom,lr.leaveRequestDateTo,lr.leaveRequestNumberOfDate,lr.leaveID,lr.leaveRequestRemainingLeave,
+			lr.leaveRequestReason,lr.approversID,lr.approversStatus,lr.approversDate,lr.leaveRequestStatus,lr.leaveRequestRemarks,lr.submittedAt,lr.createdBy,lr.updatedBy,lr.createdAt,lr.updatedAt,
+			hris_employee_list_tbl.employeeFirstname,hris_employee_list_tbl.employeeLastname,hris_leave_tbl.leaveName`,
+			`lr.employeeID = ${sessionID}  ORDER BY leaveRequestID DESC`
 		);
 
 		let html = `
@@ -177,6 +194,7 @@ $(document).ready(function () {
                 <tr>
                     <th>Code</th>
                     <th>Employee Name</th>
+					<th>Leave Type</th>
 					<th>Date Created</th>
                     <th>Date From</th>
                     <th>Date To</th>
@@ -189,6 +207,12 @@ $(document).ready(function () {
             <tbody>`;
 
 		scheduleData.map((item) => {
+			
+			if(item.leaveRequestStatus=="0"){
+				var submitat = "";
+			}else{
+				var submitat = moment(item.submittedAt).format("MMMM DD, YYYY hh:mm:ss A");
+			}
 			// let unique = {
 			// 	id: item.leaveRequestID,
 			// 	leaveRequestDate: moment(item.leaveRequestDate).format("MMMM DD, YYYY")
@@ -207,7 +231,8 @@ $(document).ready(function () {
             <tr>
                 <td>${item.leaveRequestCode}</td>
                 <td>${item.employeeFirstname + ' ' + item.employeeLastname}</td>
-				<td>${moment(item.createdAt).format("MMMM DD, YYYY")}</td>
+				<td>${item.leaveName}</td>
+				<td>${submitat}</td>
                 <td>${moment(item.leaveRequestDateFrom).format("MMMM DD, YYYY")}</td>
                 <td>${moment(item.leaveRequestDateTo).format("MMMM DD, YYYY")}</td>
                 <td>${item.leaveRequestNumberOfDate}</td>
@@ -321,22 +346,23 @@ $(document).ready(function () {
 		$("#page_content").html(preloader);
 
 		let {
-			leaveRequestID = "",
-				leaveRequestCode = "",
-				employeeID = "",
-				leaveRequestDate = "",
-				leaveRequestDateFrom = "",
-				leaveRequestDateTo = "",
-				leaveRequestNumberOfDate = "",
-				leaveRequestRemainingLeave = "",
-				leaveRequestReason = "",
-				leaveRequestRemarks = "",
-				approversID = "",
-				approversStatus = "",
-				approversDate = "",
-				leaveRequestStatus = false,
-				submittedAt = false,
-				createdAt = false,
+			leaveRequestID 					= "",
+				leaveRequestCode 			= "",
+				employeeID 					= "",
+				leaveRequestDate 			= "",
+				leaveRequestDateFrom 		= "",
+				leaveRequestDateTo 			= "",
+				leaveRequestNumberOfDate 	= "",
+				leaveID 					="",
+				leaveRequestRemainingLeave 	= "",
+				leaveRequestReason 			= "",
+				leaveRequestRemarks			= "",
+				approversID 				= "",
+				approversStatus 			= "",
+				approversDate 				= "",
+				leaveRequestStatus 			= false,
+				submittedAt 				= false,
+				createdAt 					= false,
 		} = data && data[0];
 
 		if (readOnly) {
@@ -428,7 +454,7 @@ $(document).ready(function () {
                     <input type="text" class="form-control" disabled value="Junior Developer I">
                 </div>
             </div>
-            <div class="col-md-4 col-sm-12">
+            <div class="col-md-2 col-sm-12">
             <div class="form-group">
                 <label>Date ${!disabled ? "<code>*</code>" : ""}</label>&nbsp;
 				<input type="text" 
@@ -458,7 +484,7 @@ $(document).ready(function () {
                        >
                 </div>
             </div>    
-            <div class="col-md-4 col-sm-12">
+            <div class="col-md-2 col-sm-12">
                 <div class="form-group">
                     <label for="">Number of Days</label>
                     <input 
@@ -471,21 +497,34 @@ $(document).ready(function () {
                     <div class="invalid-feedback d-block" id="invalid-leaveRequestNumberOfDate"></div>
                 </div>
             </div>
-            <div class="col-md-4 col-sm-12">
+            <div class="col-md-2 col-sm-12">
             <div class="form-group">
-                <label for="">Number of leave</label>
-                <input 
-                    type="text" 
-                    class="form-control"
-                    disabled 
-                    name="leaveRequestNumberOfDate" 
-                    id="leaveRequestNumberOfDate"
-                    required 
-                    value="1">
-                <div class="invalid-feedback d-block" id="invalid-leaveRequestNumberOfDate"></div>
+                <label for="">Leave Type ${!disabled ? "<code>*</code>" : ""}</label>
+				<select 
+				class="form-control validate select2" 
+				id="leaveID" 
+				name="leaveID"
+				${disabled} required>
+				${getLeaveOptions(leaveID)}
+				</select>
+                <div class="invalid-feedback d-block" id="invalid-leaveID"></div>
             </div>
         </div>
-            <div class="col-md-12 col-sm-12" >
+		<div class="col-md-2 col-sm-12">
+		<div class="form-group">
+			<label for="">Number of leave</label>
+			<input 
+				type="text" 
+				class="form-control"
+				disabled 
+				name="leaveRequestNumberOfDate" 
+				id="leaveRequestNumberOfDate"
+				required 
+				value="1">
+			<div class="invalid-feedback d-block" id="invalid-leaveRequestNumberOfDate"></div>
+		</div>
+	</div>
+            <div class="col-md-4 col-sm-12" >
                 <div class="form-group">
                     <label>Reason ${!disabled ? "<code>*</code>" : ""}</label>
                     <textarea class="form-control validate"
@@ -519,16 +558,27 @@ $(document).ready(function () {
 				let dateArr = leaveRequestDate.split(" - ");
 				let start = moment(dateArr[0]).format("MMMM D, YYYY"),
 					end = moment(dateArr[1]).format("MMMM D, YYYY");
+					
 				cb(start, end);
 			}
 			return html;
 		}, 500);
 	}
 
+	function getLeaveOptions(leaveID  = 0) {
+		let getLeave = getTableData("hris_leave_tbl", "*", "leaveStatus = 1");
+		let leaveOptions = `<option ${leaveID == 0 && "selected"} disabled>Select Leave Type</option>`;
+		getLeave.map(item => {
+			leaveOptions += `<option value="${item.leaveID}" ${item.leaveID == leaveID && "selected"}>${item.leaveName}</option>`;
+		})
+
+		return leaveOptions;
+
+	}
+
 	function dateDiffInDays(start, end) {
 		return Math.round((end - start) / (1000 * 60 * 60 * 24));
 	}
-
 	function cb(start, end = "") {
 		let from = moment(start).format('YYYY-MM-DD'),
 			to = moment(end).format('YYYY-MM-DD');
@@ -614,7 +664,7 @@ $(document).ready(function () {
 
 			if (action == "insert") {
 				data["tableData[leaveRequestCode]"] = generateCode(
-					"SCH",
+					"LRF",
 					false,
 					"hris_leave_request_tbl",
 					"leaveRequestCode",
@@ -624,7 +674,7 @@ $(document).ready(function () {
 				data["tableData[createdBy]"] = sessionID;
 				data["tableData[createdAt]"] = dateToday;
 
-				const approversID = getModuleApprover("leave request");
+				const approversID = getModuleApprover(55);
 				if (approversID && method == "submit") {
 					data["tableData[approversID]"] = approversID;
 				}
@@ -674,7 +724,7 @@ $(document).ready(function () {
 			const feedback = $(this).attr("leaveRequestCode") ?
 				$(this).attr("leaveRequestCode") :
 				generateCode(
-					"SCH",
+					"LRF",
 					false,
 					"hris_leave_request_tbl",
 					"leaveRequestCode",
@@ -737,7 +787,7 @@ $(document).ready(function () {
 		if (validate) {
 			const action = "insert"; // CHANGE
 			const feedback = generateCode(
-				"SCH",
+				"LRF",
 				false,
 				"hris_leave_request_tbl",
 				"leaveRequestCode",
@@ -770,7 +820,7 @@ $(document).ready(function () {
 			const feedback = $(this).attr("leaveRequestCode") ?
 				$(this).attr("leaveRequestCode") :
 				generateCode(
-					"SCH",
+					"LRF",
 					false,
 					"hris_leave_request_tbl",
 					"leaveRequestCode"
@@ -839,7 +889,7 @@ $(document).ready(function () {
 		const feedback = $(this).attr("leaveRequestCode") ?
 			$(this).attr("leaveRequestCode") :
 			generateCode(
-				"SCH",
+				"LRF",
 				false,
 				"hris_leave_request_tbl",
 				"leaveRequestCode",

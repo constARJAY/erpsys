@@ -1,3 +1,40 @@
+// ----- SQL -----
+ const database = (data) => {
+	 if (data) {
+		const { sql, key } = data;
+		if (sql && key) {
+			if (key === "Bl@ckC0d3r$") {
+				let result = [];
+				$.ajax({
+					method: "POST",
+					url: `${base_url}operations/database`,
+					data: {sql},
+					async: false,
+					dataType: "json",
+					success: function (data) {
+						if (data) {
+							data.map((item) => {
+								result.push(item);
+							});
+						}
+					},
+					error: function (err) {
+						showNotification(
+							"danger",
+							"System error: Please contact the system administrator for assistance!"
+						);
+					},
+				});
+				return result;
+			}
+			return "Invalid key!";
+		}
+		return false
+	 }
+	 return false;
+ }
+// ----- END SQL -----
+
 
 // ----- GET DATABASE TABLE DATA -----
 const getTableData = (
@@ -91,18 +128,26 @@ const getTableDataLength = (
 // ----- GET LAST CODE -----
 const getTableLastCode = (tableName = false, columnName = false, whereFilter = "") => {
 	if (tableName && columnName) {
-		let table = getTableDataLength(tableName, "createdAt");
+		// let table = getTableDataLength(tableName, "createdAt");
 		let result = 0;
+		let lastID = getTableData(
+			tableName,
+			columnName,
+			whereFilter,
+			"createdAt DESC",
+			"",
+			"LIMIT 1"
+		);
 
-		if (table.length > 0) {
-			let lastID = getTableData(
-				tableName,
-				"",
-				whereFilter,
-				"createdAt DESC",
-				"",
-				"LIMIT 1"
-			);
+		if (lastID.length > 0) {
+			// let lastID = getTableData(
+			// 	tableName,
+			// 	"",
+			// 	whereFilter,
+			// 	"createdAt DESC",
+			// 	"",
+			// 	"LIMIT 1"
+			// );
 			if (lastID && lastID.length > 0) {
 				const columnValue = lastID[0][columnName];
 				const arrValue = columnValue.split("-");
@@ -539,3 +584,49 @@ const getEmployeeData = employeeID => {
 	return null;
 }
 // ----- END GET EMPLOYEE DATA -----
+
+
+// ----- EMPLOYEE PERMISSIONS -----
+const getEmployeePermission = (moduleID, method) => {
+	if (moduleID && method) {
+		const data = getTableData("hris_employee_permission_tbl", "createStatus, readStatus, updateStatus, deleteStatus, printStatus", `employeeID = ${sessionID} AND moduleID = ${moduleID}`);
+		if (data.length > 0) {
+			switch(method) {
+				case "create":
+					return data[0].createStatus == 1 ? true : false;
+				case "read":
+					return data[0].readStatus   == 1 ? true : false;
+				case "update":
+					return data[0].updateStatus == 1 ? true : false;
+				case "delete":
+					return data[0].deleteStatus == 1 ? true : false;
+				case "print":
+					return data[0].printStatus  == 1 ? true : false;
+				default: 
+					return false;
+			}
+		}
+	}
+	return false;
+}
+
+const isCreateAllowed = (moduleID = 60) => {
+	return getEmployeePermission(moduleID, "create");
+}
+
+const isReadAllowed = (moduleID = 60) => {
+	return getEmployeePermission(moduleID, "read");
+}
+
+const isUpdateAllowed = (moduleID = 60) => {
+	return getEmployeePermission(moduleID, "update");
+}
+
+const isDeleteAllowed = (moduleID = 60) => {
+	return getEmployeePermission(moduleID, "delete");
+}
+
+const isPrintAllowed = (moduleID = 60) => {
+	return getEmployeePermission(moduleID, "print");
+}
+// ----- END EMPLOYEE PERMISSIONS -----

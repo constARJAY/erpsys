@@ -29,33 +29,28 @@ $(document).ready(function() {
         <table class="table table-bordered">
             <thead class="bg-primary text-white">
                 <tr>
-                    <th>USER ROLE</th>
+                    <th>USER DESIGNATION</th>
                 </tr>
             </thead>
             <tbody>`;
 
         data.map((item, index) => {
             let unique = {
-                id:       item.roleID,
-                roleName: item.roleName
+                id:             item.designationID,
+                designationName: item.designationName
             };
             uniqueData.push(unique);  
 
-            let button = item.roleID != 1 ? `<i class="icon-pencil btnEdit" roleID="${item.roleID}"></i>` : "";
+            let button = item.designationID != 1 ? `<i class="icon-pencil btnEdit" roleID="${item.designationID}"></i>` : "";
             let activeMenu = index == 0 ? "active-menu" : "";
-            let statusClass = item.roleStatus == 1 ? "badge-success bg-success" : "badge-danger bg-danger";
+            let statusClass = item.designationStatus == 1 ? "badge-success bg-success" : "badge-danger bg-danger";
 
             html += `
-            <tr class="${activeMenu} user-role-menu" style="height: 50px;">
-                <td>
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div style="cursor: pointer;" class="userRole" roleID="${item.roleID}">
-                            <span class="badge ${statusClass} rounded-circle" style="height: 10px; width: 10px;">&nbsp;</span>
-                            <span class="ml-2 name">${item.roleName}</span>
-                        </div>
-                        <div style="cursor: pointer;">
-                            ${button}
-                        </div>
+            <tr class="${activeMenu} user-role-menu userRole" style="height: 50px;" roleID="${item.designationID}">
+                <td style="cursor: pointer;">
+                    <div class="ml-1">
+                        <span class="badge ${statusClass} rounded-circle" style="height: 10px; width: 10px;">&nbsp;</span>
+                        <span class="ml-2 name">${item.designationName}</span>
                     </div>
                 </td>
             </tr>`;
@@ -71,13 +66,13 @@ $(document).ready(function() {
 
         let data;
         if (projectName == "All") {
-            data = getTableData("gen_roles_permission_tbl LEFT JOIN gen_module_list_tbl USING(moduleID)", "", "roleID="+roleID);
+            data = getTableData("gen_roles_permission_tbl LEFT JOIN gen_module_list_tbl USING(moduleID)", "", "designationID="+roleID);
         } else {
             data = getTableData(
                 `gen_roles_permission_tbl AS grpt 
                 LEFT JOIN gen_module_list_tbl AS gmlt USING(moduleID)`, 
                 "", 
-                `grpt.roleID=${roleID} AND FIND_IN_SET('${projectName}', REPLACE(gmlt.projectName, '|', ','))`);
+                `grpt.designationID=${roleID} AND FIND_IN_SET('${projectName}', REPLACE(gmlt.projectName, '|', ','))`);
         }
 
         let html = `
@@ -124,7 +119,7 @@ $(document).ready(function() {
 
     function pageContent() {
         $("#roles_permission_content").html(preloader);
-        const userRoleData = getTableData("gen_user_role_tbl");
+        const userRoleData = getTableData("hris_designation_tbl");
         let html = "";
         if (userRoleData) {
             html = `
@@ -291,7 +286,7 @@ $(document).ready(function() {
 
             let data = getFormData("modal_roles_permission", true);
             data.tableName   = "gen_user_role_tbl";
-            data.whereFilter = "roleID = "+roleID;
+            data.whereFilter = "designationID = "+roleID;
             data.feedback    = roleName;
 
             sweetAlertConfirmation("update", "Role", "modal_roles_permission", null, data, true, pageContent)
@@ -365,7 +360,7 @@ $(document).ready(function() {
             tableData: {
                 permissionStatus: status
             },
-            whereFilter: `roleID=${roleID} AND moduleID=${moduleID}`,
+            whereFilter: `designationID=${roleID} AND moduleID=${moduleID}`,
             feedback: moduleName
         }
         const feedback = status == 1 ? `success|${roleName} - ${moduleName} has been enabled.` : `warning|${roleName} - ${moduleName} has been disabled.`;
@@ -388,9 +383,9 @@ $(document).ready(function() {
     // ----- SELECT USER ROLE -----
     $(document).on("click", ".userRole", function() {
         const roleID   = $(this).attr("roleID");
-        const roleName = $(this).find(".name").text();
+        const roleName = $(`[roleID=${roleID}]`).find(".name").text();
         $("#user_role_content").find(".active-menu").removeClass("active-menu");
-        $("#user_role_content").find(`[roleid=${roleID}]`).parent().parent().parent().addClass("active-menu");
+        $("#user_role_content").find(`[roleID=${roleID}]`).addClass("active-menu");
         const projectName = $("#projectName").val();
         $("#projectName").attr("roleID", roleID);
         $("#projectName").attr("roleName", roleName);

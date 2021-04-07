@@ -1,10 +1,11 @@
 // ----- GLOBAL VARIABLES -----
 let uniqueData = []; // Store unique data here
-const base_url = $(".page-loader-wrapper").attr("base_url");
-const sessionID = $(".page-loader-wrapper").attr("session");
-const sessionRoleID = $(".page-loader-wrapper").attr("role");
-const differentInputArr = ["input", "select", "textarea"];
-const differentInputStr = differentInputArr.join(", ");
+const base_url             = $(".page-loader-wrapper").attr("base_url");
+const sessionID            = $(".page-loader-wrapper").attr("session");
+const sessionRoleID        = $(".page-loader-wrapper").attr("role");
+const sessionDesignationID = $(".page-loader-wrapper").attr("designation");
+const differentInputArr    = ["input", "select", "textarea"];
+const differentInputStr    = differentInputArr.join(", ");
 // ----- END GLOBAL VARIABLES -----
 
 
@@ -31,7 +32,7 @@ const closeModals = () => {
 const getElement = (element = null, defaultElement = null) => {
 	let elem = element
 		? element.indexOf(".") != "-1"
-			? "." + element
+			? element
 			: element.indexOf("#") != "-1"
 			? element
 			: "#" + element

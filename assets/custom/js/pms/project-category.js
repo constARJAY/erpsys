@@ -12,11 +12,10 @@ $(document).ready(function(){
             scrollX:        true,
             scrollCollapse: true,
             columnDefs: [
-                { targets: 0, width: 100 },
-                { targets: 1, width: 300 },
-                { targets: 2, width: 300 },
-                { targets: 3, width: 50 },
-                { targets: 4, width: 50 },
+                { targets: 0, width: "10%" },
+                { targets: 1, width: "40%" },
+                { targets: 2, width: "40%" },
+                { targets: 3, width: "10%" },
             ],
         });
     }
@@ -45,12 +44,11 @@ $(document).ready(function(){
                 let html = `
                 <table class="table table-bordered table-striped table-hover nowrap" id="tableProjectCategory">
                     <thead>
-                    <tr class="text-center">
+                    <tr class="text-left">
                         <th>Category Code</th>
                         <th>Category Name</th>
                         <th>Company Name</th>
                         <th>Status</th>
-                        <th>Action</th>
                     </tr>
                     </thead>
                     <tbody>`;
@@ -71,20 +69,14 @@ $(document).ready(function(){
                         var status=`<span class="badge badge-outline-danger w-100">Inactive</span>`;
                      }
                     html += `
-                    <tr>
+                    <tr
+                    class="btnEdit" 
+                    id="${item.categoryID}"
+                    feedback="${item.categoryName}">
                         <td>${item.categoryCode}</td>
                         <td>${item.categoryName}</td>
                         <td>${item.companyName}</td>
-                        <td>${status}</td>
-                        <td>
-                            <button 
-                                class="btn btn-edit btn-block btnEdit" 
-                                id="${item.categoryID}"
-                                feedback="${item.categoryName}">
-                                <i class="fas fa-edit"></i>
-                                Edit
-                            </button>
-                        </td>
+                        <td class="text-center">${status}</td>
                     </tr>`;
                 })
                 html += `</tbody>
@@ -174,7 +166,7 @@ $(document).ready(function(){
                             id="input_categoryStatus" 
                             name="categoryStatus"
                             autocomplete="off"
-                            required>
+                            >
                             <option 
                                 value="1" 
                                 ${data && categoryStatus == "1" && "selected"}>Active</option>

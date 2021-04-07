@@ -32,8 +32,8 @@ $(document).on("click",".addClassification", function(){
                                                 </form>
                                             </div>
                                             <div class="modal-footer">
-                                                <button class="btn btn-save" id="btnSave"><i class="fas fa-save"></i>&nbsp;SAVE</button>
-                                                <button class="btn btn-cancel btnCancel"><i class="fas fa-ban"></i>&nbsp;CANCEL</button>
+                                                <button class="btn btn-save" id="btnSave"><i class="fas fa-save"></i>&nbsp;Save</button>
+                                                <button class="btn btn-cancel btnCancel"><i class="fas fa-ban"></i>&nbsp;Cancel</button>
                                             </div>
                                             `;
     setTimeout(function(){
@@ -71,17 +71,17 @@ $(document).on("click",".editClassification", function(){
                                                     <div class="col-md-12 col-sm-12">
                                                         <div class="form-group">
                                                             <label for="">Status <strong class="text-danger">*</strong></label>
-                                                            <select class="form-control select2 validate" name="classificationStatus" id="input_classificationStatus">
+                                                            <select class="form-control select2 validate" name="classificationStatus" id="input_classificationStatus" data-classificationid="${classificationID}">
                                                                 ${statusOption}
                                                             </select>
-                                                            <div class="invalid-feedback d-block" id="invalid-input_classificationName"></div>
+                                                            <div class="invalid-feedback d-block" id="invalid-input_classificationStatus"></div>
                                                         </div>
                                                     </div>
                                                 </form>
                                             </div>
                                             <div class="modal-footer">
-                                                <button class="btn btn-update" id="btnUpdate" data-classificationid="${classificationID}"><i class="fas fa-save"></i>&nbsp;UPDATE</button>
-                                                <button class="btn btn-cancel btnCancel"><i class="fas fa-ban"></i>&nbsp;CANCEL</button>
+                                                <button class="btn btn-update" id="btnUpdate" data-classificationid="${classificationID}"><i class="fas fa-save"></i>&nbsp;Update</button>
+                                                <button class="btn btn-cancel btnCancel"><i class="fas fa-ban"></i>&nbsp;Cancel</button>
                                             </div>  
                                             `;
     setTimeout(function(){
@@ -113,20 +113,22 @@ $(document).on("click", "#btnSave", function(){
 });
 
 $(document).on("click", "#btnUpdate", function(){
-    let condition           = validateForm("modal_classification_form");
     let classificationID    = $(this).data("classificationid");
-    let classificationCode  = getTableData("ims_inventory_classification_tbl","classificationCode","classificationID="+classificationID,"classificationCode DESC");
-    if(condition == true){
-        let data = getFormData("modal_classification_form", true);
+    // let classificationCode  = getTableData("ims_inventory_classification_tbl","classificationCode","classificationID="+classificationID,"classificationCode DESC");
+    let condition           = $("#input_classificationStatus").hasClass("is-invalid");
+    if(!condition){   
+        let validation           = validateForm("modal_classification_form");
+        if(validation == true){
+            let data = getFormData("modal_classification_form", true);
 
-        data["tableData[updatedBy]"]     =  sessionID;
-        data["whereFilter"]              =  "classificationID="+classificationID;
-        data["tableName"]                =  "ims_inventory_classification_tbl";
-        data["feedback"]                 =  $("#input_classificationName").val();
+            data["tableData[updatedBy]"]     =  sessionID;
+            data["whereFilter"]              =  "classificationID="+classificationID;
+            data["tableName"]                =  "ims_inventory_classification_tbl";
+            data["feedback"]                 =  $("#input_classificationName").val();
 
-        sweetAlertConfirmation("update", "Classification","modal_classification",null, data, true, tableContent);
-    }
-    
+            sweetAlertConfirmation("update", "Classification","modal_classification",null, data, true, tableContent);
+        }
+    }else{$("#input_classificationStatus").select2('focus');}
 });
 
 $(document).on("click",".btnCancel", function(){
@@ -138,6 +140,17 @@ $(document).on("click",".btnCancel", function(){
     }
 });
 
+$(document).on("change", "#input_classificationStatus", function(){
+    if($(this).data("classificationid")){
+        let thisID      =   $(this).data("classificationid");
+        let thisValue   =   $(this).val();
+        let tableData   =   getTableData("ims_inventory_item_tbl","","classificationID="+thisID);
+        tableData.length > 0 && thisValue == 0 ? $(this).addClass("is-invalid") : $(this).removeClass("is-invalid");
+        let textAlert   =   tableData.length > 0 && thisValue == 0 ? "There is active inventory item in this classifications" : "";
+        $("#invalid-input_classificationStatus").text(textAlert);
+    }
+
+});
 // FUNCTIONS
 
 function initDataTables() {
@@ -151,10 +164,8 @@ function initDataTables() {
                 scrollX:        true,
                 scrollCollapse: true,
                 columnDefs: [
-                    { targets: 0, width: "10%" },
-                    { targets: 1, width: "40%" },
-                    { targets: 2, width: "5%" },
-                    { targets: 3, width: "5%" }
+                    { targets: 0, width: "20%" },
+                    { targets: 2, width: "20%" }
                 ],
             });
 }
@@ -179,7 +190,6 @@ function tableContent(){
                                 <th>Classification Code</th>
                                 <th>Classification Name</th>
                                 <th>Status</th>
-                                <th>Action</th>
                             </tr>
                         </thead>
                         <tbody>`;
@@ -194,11 +204,10 @@ function tableContent(){
                         // ----- END INSERT UNIQUE DATA TO uniqueData VARIABLE ----
 
                         html += `
-                        <tr>
+                        <tr class="btnEdit editClassification" data-classificationid="${item["classificationID"]}">
                             <td>${item["classificationCode"]}</td>
                             <td>${item["classificationName"]}</td>
-                            <td>${item["classificationStatus"] == 0 ? "<span class='badge badge-outline-danger w-100'>Inactive</span>" : "<span class='badge badge-outline-success w-100'>Active</span>"} </td>
-                            <td class="text-center"> <button class="btn w-100 btn-edit editClassification" data-classificationid="${item["classificationID"]}"><i class="fas fa-edit"></i> Edit&nbsp; </button></td>
+                            <td class="text-center">${item["classificationStatus"] == 0 ? "<span class='badge badge-outline-danger w-100'>Inactive</span>" : "<span class='badge badge-outline-success w-100'>Active</span>"} </td>
                         </tr>`;
                     })
                     html += `</tbody>

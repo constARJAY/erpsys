@@ -242,31 +242,27 @@ $(document).ready(function () {
 				columnDefs: [
 					{
 						targets: 0,
-						width: 100,
+						width: "10%",
 					},
 					{
 						targets: 1,
-						width: 120,
+						width: "25%",
 					},
 					{
 						targets: 2,
-						width: 100,
+						width: "25%",
 					},
 					{
 						targets: 3,
-						width: 100,
+						width: "15%",
 					},
 					{
 						targets: 4,
-						width: 100,
+						width: "15%",
 					},
 					{
 						targets: 5,
-						width: 50,
-					},
-					{
-						targets: 6,
-						width: 50,
+						width: "10%",
 					},
 				],
 			});
@@ -292,16 +288,15 @@ $(document).ready(function () {
 			},
 			success: function (data) {
 				let html = `
-                    <table class="table table-bordered table-striped table-hover nowrap" id="tableUserAccount" >
+                    <table class="table table-bordered table-striped table-hover" id="tableUserAccount">
                         <thead>
-                            <tr class="text-center">
+                            <tr style="white-space:nowrap">
                                 <th>Storage Code</th>
                                 <th>Office Name</th>
                                 <th>Storage Address</th>
                                 <th>Room Type</th>
                                 <th>Department</th>
                                 <th>Status</th>
-                                <th>Action</th>
                             </tr>
                         </thead>
                         <tbody >`;
@@ -322,7 +317,10 @@ $(document).ready(function () {
 					uniqueData.push(unique);
 
 					html += `
-                        <tr>
+						<tr
+						class="btnEdit" 
+						id="${item.inventoryStorageID}"
+						feedback="${item.inventoryStorageOfficeName}">
                            <td>${item.inventoryStorageCode}</td>
                            <td>${item.inventoryStorageOfficeName}</td>
 						   <td>
@@ -341,15 +339,7 @@ $(document).ready(function () {
                            </td>
                            <td>${item.inventoryStorageRoomType}</td>
                            <td>${item.inventoryStorageDepartment}</td>
-                           <td>${activestatus}</td>
-                           <td>
-                           <button 
-                                class="btn btn-edit btnEdit w-100" 
-                                id="${item.inventoryStorageID}"
-                                feedback="${item.inventoryStorageOfficeName}">
-                                Edit
-                            </button>
-                            </td>
+                           <td class="text-center">${activestatus}</td>
                         </tr>`;
 				});
 				html += `</tbody>
@@ -432,7 +422,7 @@ $(document).ready(function () {
                         <div class="form-group">
                             <label>Region <span class="text-danger">*</span></label>
                             <select class=" form-control show-tick select2 validate" name="inventoryStorageRegion" id="input_region" required>
-                            <option value="" selected>Select Region</option>
+                            <option value="" disabled selected>Select Region</option>
                             ${getRegionOptions(inventoryStorageRegion)}
                             </select>
                             <div class="invalid-feedback d-block" id="invalid-input_region"></div>
@@ -442,7 +432,8 @@ $(document).ready(function () {
                         <div class="form-group">
                             <label>State/Province <span class="text-danger">*</span></label>
                             <select class=" form-control show-tick select2 validate" name="inventoryStorageProvince"
-                            id="input_province" required>
+							id="input_province" required>
+							<option value="" disabled selected>Select Province</option>
                                 ${
 																	data &&
 																	getProvinceOptions(
@@ -457,7 +448,8 @@ $(document).ready(function () {
                     <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6">
                         <div class="form-group">
                             <label>City/Municipality <span class="text-danger">*</span></label>
-                            <select class=" form-control show-tick select2" id="input_municipality" name="inventoryStorageMunicipality" required>
+							<select class=" form-control show-tick select2" id="input_municipality" name="inventoryStorageMunicipality" required>
+							<option value="" disabled selected>Select City/Municipality</option>
                                 ${
 																	data &&
 																	getMunicipalityOptions(
@@ -473,7 +465,8 @@ $(document).ready(function () {
                     <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6">
                         <div class="form-group">
                             <label>Barangay <span class="text-danger">*</span></label>
-                            <select class=" form-control show-tick select2 validate" name="inventoryStorageBarangay" id="input_barangay" required>
+							<select class=" form-control show-tick select2 validate" name="inventoryStorageBarangay" id="input_barangay" required>
+							<option value="" disabled selected>Select Barangay</option>
                                 ${
 																	data &&
 																	getBarangayOptions(
