@@ -150,9 +150,8 @@ function initDataTables() {
                 scrollX:        true,
                 scrollCollapse: true,
                 columnDefs: [
-                    { targets: 0, width: "5%" },
-                    { targets: 1, width: "25%" },
-                    { targets: 2, width: "5%" }
+                    { targets: 0, width: "10%" },
+                    { targets: 2, width: 80 }
                 ],
             });
 }
@@ -174,7 +173,7 @@ function tableContent(){
                     <table class="table table-bordered table-striped table-hover" id="tableQualification">
                         <thead>
                             <tr class="text-left">
-                                <th>Qualification No.</th>
+                                <th>Qualification Code</th>
                                 <th>Qualification Name</th>
                                 <th>Status</th>
                             </tr>
@@ -192,7 +191,7 @@ function tableContent(){
 
                         html += `
                         <tr class="btnEdit editQualification" data-qualificationid="${item["qualificationID"]}">
-                            <td>${index + 1}</td>
+                            <td>${generateCode("QLN",item["qualificationID"] - 1)}</td>
                             <td>${item["qualificationName"]}</td>
                             <td class="text-center">${item["qualificationStatus"] == 0 ? "<span class='badge badge-outline-danger w-100 '>Inactive</span>" : "<span class='badge badge-outline-success w-100 '>Active</span>"} </td>
                         </tr>`;

@@ -49,7 +49,7 @@
     <div class="modal-dialog modal-dialog-centered modal-md" role="document">
 		<div class="modal-content">
 			<div class="modal-header bg-primary text-light">
-				<h5 class="page-title font-weight-bold" id="hris_designation_modalheader">ADD DESIGNATION</h5>
+				<h5 class="page-title font-weight-bold" id="hris_designation_modalheader">Add Designation</h5>
 				<button type="button" class="close btnCancel" data-dismiss="modal" aria-label="Close">
 					<span class="text-light" aria-hidden="true">&times;</span>
 				</button>

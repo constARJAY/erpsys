@@ -13,16 +13,7 @@ $(document).ready(function(){
             scrollCollapse: true,
             columnDefs: [
                 { targets: 0,  width: 10 },
-                { targets: 1,  width: 120 },
-                { targets: 2,  width: 150 },
-                { targets: 3,  width: 150 },
-                { targets: 4,  width: 150 },
-                { targets: 5,  width: 150 },
-                { targets: 6,  width: 150 },
-                { targets: 7,  width: 150 },
-                { targets: 8,  width: 150 },
-                { targets: 9,  width: 80 },
-                { targets: 10, width: 80 },
+                { targets: 9,  width: 80 }
             ],
         });
     }
@@ -61,7 +52,6 @@ $(document).ready(function(){
                             <th>Saturday</th>
                             <th>Sunday</th>
                             <th>Status</th>
-                            <th>Action</th>
                         </tr>
                     </thead>
                     <tbody>`;
@@ -86,7 +76,7 @@ $(document).ready(function(){
                     const sunday    = item.sundayStatus == 1 ? `${item.sundayFrom} - ${item.sundayTo}` : "-";
 
                     html += `
-                    <tr>
+                    <tr class="btnEdit" id="${item.scheduleID}">
                         <td>${++index}</td>
                         <td>${item.scheduleName}</td>
                         <td>${monday}</td>
@@ -97,9 +87,6 @@ $(document).ready(function(){
                         <td>${saturday}</td>
                         <td>${sunday}</td>
                         <td>${status}</td>
-                        <td>
-                            <button class="btn btn-edit w-100 btnEdit" id="${item.scheduleID}"><i class="fas fa-edit"></i> Edit</button>
-                        </td>
                     </tr>`;
                 })
                 html += `</tbody>

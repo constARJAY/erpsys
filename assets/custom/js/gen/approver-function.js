@@ -17,16 +17,18 @@ async function saveFormData(action, method, data, isObject, swalTitle) {
 
 // ----- FORM/DOCUMENT CONFIRMATION -----
 function formConfirmation(
-	method      = "", // save|cancelform|approve|reject|submit|cancel
-	action      = "",
-	title       = "",
-	modalID     = "",
+	method = "", // save|cancelform|approve|reject|submit|cancel
+	action = "",
+	title = "",
+	modalID = "",
 	containerID = "",
-	data        = null,
-	isObject    = true,
-	callback    = false,
-	notificationData = false
+	data = null,
+	isObject = true,
+	callback = false,
+	notificationData = false,
+	buttonElement = null
 ) {
+	buttonElement && formButtonHTML(buttonElement, false);
 	if (method && action && title && (modalID || containerID)) {
 		method = method.toLowerCase();
 		action = action.toLowerCase() == "update" ? "update" : "insert";
@@ -37,48 +39,48 @@ function formConfirmation(
 		switch (method) {
 			case "save":
 				swalTitle = `SAVE ${title.toUpperCase()}`;
-				swalText  = "Are you sure to save this document?";
-				swalImg   = `${base_url}assets/modal/draft.svg`;
+				swalText = "Are you sure to save this document?";
+				swalImg = `${base_url}assets/modal/draft.svg`;
 				break;
 			case "submit":
 				swalTitle = `SUBMIT ${title.toUpperCase()}`;
-				swalText  = "Are you sure to submit this document?";
-				swalImg   = `${base_url}assets/modal/add.svg`;
+				swalText = "Are you sure to submit this document?";
+				swalImg = `${base_url}assets/modal/add.svg`;
 				break;
 			case "approve":
 				swalTitle = `APPROVE ${title.toUpperCase()}`;
-				swalText  = "Are you sure to approve this document?";
-				swalImg   = `${base_url}assets/modal/approve.svg`;
+				swalText = "Are you sure to approve this document?";
+				swalImg = `${base_url}assets/modal/approve.svg`;
 				break;
 			case "reject":
 				swalTitle = `DENY ${title.toUpperCase()}`;
-				swalText  = "Are you sure to deny this document?";
-				swalImg   = `${base_url}assets/modal/reject.svg`;
+				swalText = "Are you sure to deny this document?";
+				swalImg = `${base_url}assets/modal/reject.svg`;
 				break;
 			case "cancelform":
 				swalTitle = `CANCEL ${title.toUpperCase()} DOCUMENT`;
-				swalText  = "Are you sure to cancel this document?";
-				swalImg   = `${base_url}assets/modal/cancel.svg`;
+				swalText = "Are you sure to cancel this document?";
+				swalImg = `${base_url}assets/modal/cancel.svg`;
 				break;
 			default:
 				swalTitle = `CANCEL ${title.toUpperCase()}`;
-				swalText  = "Are you sure that you want to cancel this process?";
-				swalImg   = `${base_url}assets/modal/cancel.svg`;
+				swalText = "Are you sure that you want to cancel this process?";
+				swalImg = `${base_url}assets/modal/cancel.svg`;
 				break;
 		}
 		Swal.fire({
-			title:              swalTitle,
-			text:               swalText,
-			imageUrl:           swalImg,
-			imageWidth:         200,
-			imageHeight:        200,
-			imageAlt:           "Custom image",
-			showCancelButton:   true,
-			confirmButtonColor: "#28a745",
-			cancelButtonColor:  "#1A1A1A",
-			cancelButtonText:   "No",
-			confirmButtonText:  "Yes",
-			allowOutsideClick:  false,
+			title: swalTitle,
+			text: swalText,
+			imageUrl: swalImg,
+			imageWidth: 200,
+			imageHeight: 200,
+			imageAlt: "Custom image",
+			showCancelButton: true,
+			confirmButtonColor: "#dc3545",
+			cancelButtonColor: "#1a1a1a",
+			cancelButtonText: "No",
+			confirmButtonText: "Yes",
+			// allowOutsideClick:  false,
 		}).then((result) => {
 			if (result.isConfirmed) {
 				if (method != "cancel") {
@@ -94,14 +96,13 @@ function formConfirmation(
 							callback && callback();
 
 							notificationData && insertNotificationData(notificationData);
-
 						} else {
 							Swal.fire({
-								icon:              "danger",
-								title:             "Failed!",
-								text:              result[1],
+								icon: "danger",
+								title: "Failed!",
+								text: result[1],
 								showConfirmButton: false,
-								timer:             2000,
+								timer: 2000,
 							});
 						}
 					});
@@ -134,8 +135,10 @@ function cancelForm(
 	containerID = "",
 	data = null,
 	isObject = true,
-	callback = false
+	callback = false,
+	buttonElement = null
 ) {
+	buttonElement && formButtonHTML(buttonElement, false);
 	if (method && action && title && (modalID || containerID)) {
 		modalID && $("#" + modalID).modal("hide");
 
@@ -147,11 +150,11 @@ function cancelForm(
 			imageHeight: 200,
 			imageAlt: "Custom image",
 			showCancelButton: true,
-			confirmButtonColor: "#28a745",
-			cancelButtonColor: "#1A1A1A",
+			confirmButtonColor: "#dc3545",
+			cancelButtonColor: "#1a1a1a",
 			cancelButtonText: "No",
 			confirmButtonText: "Yes",
-			allowOutsideClick: false,
+			// allowOutsideClick: false,
 		}).then((result) => {
 			if (result.isConfirmed) {
 				const formID = modalID ? modalID : containerID;
@@ -181,9 +184,11 @@ function cancelForm(
 					modalID && $("#" + modalID).modal("show");
 				}
 			} else {
-				modalID && $("#" + modalID).modal("hide");
-				containerID && $("#" + containerID).hide();
-				callback && callback();
+				if (result.dismiss === "cancel") {
+					modalID && $("#" + modalID).modal("hide");
+					containerID && $("#" + containerID).hide();
+					callback && callback();
+				}
 			}
 		});
 	} else {
@@ -191,6 +196,19 @@ function cancelForm(
 	}
 }
 // ----- END CANCEL FORM -----
+
+
+// ----- BUTTON LOADER -----
+let submitHTML = "";
+function formButtonHTML(elem, process = true) {
+	submitHTML = process ? $(elem).html() : submitHTML;
+	let disabled = process ? true : false;
+	let loaderHTML = `<i class="zmdi zmdi-rotate-right zmdi-hc-spin"></i> Please wait...`;
+	let html = process ? loaderHTML : submitHTML;
+	$(elem).attr("disabled", disabled);
+	$(elem).html(html);
+}
+// ----- END BUTTON LOADER -----
 
 
 // ----- GET MODULE APPROVER -----

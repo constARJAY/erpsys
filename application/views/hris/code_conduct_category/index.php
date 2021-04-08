@@ -2,17 +2,17 @@
     <div class="block-header pb-0">
         <div class="container">
             <div class="row clearfix">
-                <div class="col-8">
+                <div class="col-sm-12 col-md-8">
                     <ul class="breadcrumb pl-0 pb-0 ">
                         <li class="breadcrumb-item"><a href="index.html"><i class="zmdi zmdi-home"></i>&nbsp;Dashboard</a></li>
                         <li class="breadcrumb-item"><i class="zmdi zmdi-folder"></i>&nbsp;Masterfiles</li>
                         <li class="breadcrumb-item active">Code of Conduct Category</li>
                     </ul>
-                    <h1 class="mb-1 mt-1">List of Code of Conduct Category</h1>
+                    <h1 class="mt-3">List of Code of Conduct Category</h1>
                     <span>This module is used to manage the code of conduct category details.</span>
                 </div>
-                <div class="col-4 d-flex justify-content-end align-items-center">
-                    <button class="btn btn-default btn-add ml-2 d-flex justify-content-center align-items-center addCodeConductCategory"><i class="icon-plus px-2"></i> <span class="d-none d-sm-none d-md-block d-lg-block d-xl-block">Add&nbsp;</span> Code of Conduct Category</button>
+                <div class="col-sm-12 col-md-4 d-flex justify-content-end align-items-start">
+                    <button class="btn btn-default btn-add ml-2 d-flex justify-content-center align-items-center addCodeConductCategory"><i class="icon-plus px-2"></i> Add Category</button>
                 </div>
             </div>
         </div>

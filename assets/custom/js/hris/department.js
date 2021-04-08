@@ -13,8 +13,8 @@ $(document).ready(function(){
             scrollCollapse: true,
             columnDefs: [
                 { targets: 0, width: "10%" },
-                { targets: 1, width: "80%" },
-                { targets: 2, width: "10%" },
+                // { targets: 1, width: "80%" },
+                { targets: 2, width: 80 },
             ],
         });
     }
@@ -46,7 +46,7 @@ $(document).ready(function(){
                 <table class="table table-bordered table-striped table-hover nowrap" id="tableHRISDepartment">
                     <thead>
                     <tr class="text-left">
-                        <th>Department No.</th>
+                        <th>Department Code</th>
                         <th>Department Name</th>
                         <th>Status</th>
                     </tr>

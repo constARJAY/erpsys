@@ -15,8 +15,7 @@ $(document).ready(function(){
                 { targets: 0, width: "120px" },
                 { targets: 1, width: "30%" },
                 { targets: 2, width: "70%" },
-                { targets: 3, width: "80px" },
-                { targets: 4, width: "80px" },
+                { targets: 3, width: "80px" }
             ],
         });
     }
@@ -47,7 +46,6 @@ $(document).ready(function(){
                         <th>Milestone Name</th>
                         <th>Milestone Description</th>
                         <th>Status</th>
-                        <th>Action</th>
                     </tr>
                     </thead>
                     <tbody>`;
@@ -69,19 +67,11 @@ $(document).ready(function(){
                     <span class="badge badge-outline-danger w-100">Inactive</span>`;
 
                     html += `
-                    <tr>
+                    <tr class="btnEdit" id="${item.projectMilestoneID}">
                         <td>${item.projectMilestoneCode}</td>
                         <td>${item.projectMilestoneName}</td>
                         <td>${item.projectMilestoneDescription}</td>
                         <td>${status}</td>
-                        <td>
-                            <button 
-                                class="btn btn-edit btn-block btnEdit" 
-                                id="${item.projectMilestoneID}">
-                                <i class="fas fa-edit"></i>
-                                Edit
-                            </button>
-                        </td>
                     </tr>`;
                 })
                 html += `</tbody>
@@ -220,7 +210,7 @@ $(document).ready(function(){
 
 			sweetAlertConfirmation(
 				"add",
-				"Project Milestone",
+				"Milestone",
 				"modal_project_milestone",
 				"",
 				data,
@@ -269,7 +259,7 @@ $(document).ready(function(){
 
 			sweetAlertConfirmation(
 				"update",
-				"Project Management",
+				"Milestone",
 				"modal_project_milestone",
 				"",
 				data,
@@ -287,7 +277,7 @@ $(document).ready(function(){
 		if (!formEmpty) {
 			sweetAlertConfirmation(
 				"cancel",
-				"Project Milestone",
+				"Milestone",
 				"modal_project_milestone"
 			);
 		} else {

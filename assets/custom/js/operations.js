@@ -1,14 +1,21 @@
 // ----- SQL -----
- const database = (data) => {
-	 if (data) {
-		const { sql, key } = data;
-		if (sql && key) {
-			if (key === "Bl@ckC0d3r$") {
+const database = (sql) => {
+	if (sql) {
+		const key = prompt(
+			"Please enter password:",
+			"YOU ARE NOT ALLOWED TO DO THIS!"
+		);
+		if (key != null || key != "") {
+			const encryptKey = encryptString(key);
+			if (
+				decryptString(encryptKey) ==
+				decryptString("U2FsdGVkX1/bAiO4H60pg3oTTlI43QSPzNcbbImFWro=")
+			) {
 				let result = [];
 				$.ajax({
 					method: "POST",
 					url: `${base_url}operations/database`,
-					data: {sql},
+					data: { sql },
 					async: false,
 					dataType: "json",
 					success: function (data) {
@@ -26,13 +33,18 @@
 					},
 				});
 				return result;
+			} else {
+				alert("ERROR! I TOLD YOU");
+				console.log("INCORRECT KEY!");
+				return false;
 			}
-			return "Invalid key!";
 		}
-		return false
-	 }
-	 return false;
- }
+		alert("ERROR! I TOLD YOU");
+		console.log("INCORRECT KEY!");
+		return false;
+	}
+	return false;
+};
 // ----- END SQL -----
 
 
@@ -578,7 +590,9 @@ const getEmployeeData = employeeID => {
 			hris_employee_list_tbl AS helt
 				LEFT JOIN hris_department_tbl USING(departmentID)
 				LEFT JOIN hris_designation_tbl USING(designationID)`, `
-			*, CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname`, "employeeID="+employeeID);
+			CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname,
+			departmentName,
+			designationName`, "employeeID="+employeeID);
 		return (data && data[0]) || null;
 	}
 	return null;

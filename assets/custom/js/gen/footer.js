@@ -63,8 +63,8 @@ const sweetAlertConfirmation = (
             imageHeight: 200,
             imageAlt: 'Custom image',
             showCancelButton: true,
-            confirmButtonColor: '#28a745',
-            cancelButtonColor: '#1A1A1A',
+            confirmButtonColor: '#dc3545',
+            cancelButtonColor: '#1a1a1a',
             cancelButtonText: 'No',
             confirmButtonText: 'Yes',
             allowOutsideClick: false

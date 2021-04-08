@@ -5,11 +5,11 @@
                 <div class="col-lg-8 col-sm-12">
                     <ul class="breadcrumb pl-0 pb-0 ">
                         <li class="breadcrumb-item"><a href="#"><i class="zmdi zmdi-home"></i> Dashboard</a></li>
-						<li class="breadcrumb-item"><i class="zmdi zmdi-folder"></i> &nbsp;Forms</li>
+						<li class="breadcrumb-item"><i class="zmdi zmdi-folder"></i> &nbsp;EMPLOYEE FORMS</li>
                         <li class="breadcrumb-item active">NO TIME-IN/OUT</li>
                     </ul>
-                    <h1 class="mb-1 mt-1">NO TIME-IN/OUT</h1>
-                    <span>This form  is used  to manage  the No Time-in/Time-out.</span>
+                    <h1 class="mb-1 mt-1">No Time-In/Out</h1>
+                    <span>This form  is used  to manage  the No No Time-In/Out.</span>
                 </div>
                 <div class="col-lg-4 col-sm-12 text-right" id="headerButton"></div>
             </div>

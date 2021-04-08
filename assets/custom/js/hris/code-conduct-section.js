@@ -137,7 +137,7 @@ $(document).on("click", "#btnSave", function(){
         data["tableData[updatedBy]"]                = "1";
         data["tableName"]                           = "hris_code_conduct_section_tbl";
         data["feedback"]                            = "Section "+ sectionID;
-        sweetAlertConfirmation("add", "Code of Conduct Section","modal_codeConductSection", null, data, true, tableContent);
+        sweetAlertConfirmation("add", "Section","modal_codeConductSection", null, data, true, tableContent);
     }
 });
 
@@ -163,7 +163,7 @@ $(document).on("click", "#btnUpdate", function(){
         data["whereFilter"]                         =  "codeConductSectionID="+codeConductSectionID;
         data["tableName"]                           =  "hris_code_conduct_section_tbl";
         data["feedback"]                            =  "Section "+ codeConductSection;
-        sweetAlertConfirmation("update", "Code of Conduct Section","modal_codeConductSection", null , data, true, tableContent);
+        sweetAlertConfirmation("update", "Section","modal_codeConductSection", null , data, true, tableContent);
     }
     
 });
@@ -171,7 +171,7 @@ $(document).on("click", "#btnUpdate", function(){
 $(document).on("click",".btnCancel", function(){
     let condition = isFormEmpty("modal_codeConductSection_form");
     if(!condition){
-        sweetAlertConfirmation("cancel", "Code of Conduct Section","modal_codeConductSection");
+        sweetAlertConfirmation("cancel", "Section","modal_codeConductSection");
     }else{
         $("#modal_codeConductSection").modal("hide");
     }
@@ -193,7 +193,7 @@ function initDataTables() {
                 scrollCollapse: true,
                 columnDefs: [
                     { targets: 0, width: "10%" },
-                    { targets: 4, width: "5%" }
+                    { targets: 4, width: 80 }
                 ],
             });
 }

@@ -144,9 +144,9 @@ $(document).on("change", "#input_classificationStatus", function(){
     if($(this).data("classificationid")){
         let thisID      =   $(this).data("classificationid");
         let thisValue   =   $(this).val();
-        let tableData   =   getTableData("ims_inventory_item_tbl","","classificationID="+thisID);
+        let tableData   =   getTableData("ims_inventory_category_tbl","","classificationID="+thisID);
         tableData.length > 0 && thisValue == 0 ? $(this).addClass("is-invalid") : $(this).removeClass("is-invalid");
-        let textAlert   =   tableData.length > 0 && thisValue == 0 ? "There is active inventory item in this classifications" : "";
+        let textAlert   =   tableData.length > 0 && thisValue == 0 ? "There is active inventory category in this classifications" : "";
         $("#invalid-input_classificationStatus").text(textAlert);
     }
 
@@ -164,8 +164,8 @@ function initDataTables() {
                 scrollX:        true,
                 scrollCollapse: true,
                 columnDefs: [
-                    { targets: 0, width: "20%" },
-                    { targets: 2, width: "20%" }
+                    { targets: 0, width: "10%" },
+                    { targets: 2, width: 80 }
                 ],
             });
 }

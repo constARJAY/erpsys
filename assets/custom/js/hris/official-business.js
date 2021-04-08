@@ -17,12 +17,12 @@ $(document).ready(function () {
 			.DataTable({
 				proccessing: false,
 				serverSide: false,
-				// scrollX: true,
+				scrollX: true,
 				scrollCollapse: true,
 				columnDefs: [{
 					 targets: 0, width: 150 },
 					{ targets: 1, width: 150 },
-					{ targets: 2, width: 150 },
+					{ targets: 2, width: 180 },
 					{ targets: 3, width: 150 },
 					{ targets: 4, width: 290 },
 					{ targets: 5, width: 150 },
@@ -41,12 +41,12 @@ $(document).ready(function () {
 			.DataTable({
 				proccessing: false,
 				serverSide: false,
-				// scrollX: true,
+				scrollX: true,
 				scrollCollapse: true,
 				columnDefs: [{
 					 targets: 0, width: 150 },
 					{ targets: 1, width: 150 },
-					{ targets: 2, width: 150 },
+					{ targets: 2, width: 180 },
 					{ targets: 3, width: 150 },
 					{ targets: 4, width: 290 },
 					{ targets: 5, width: 150 },
@@ -109,17 +109,17 @@ $(document).ready(function () {
 		);
 
 		let html = `
-        <table class="table table-bordered table-striped table-hover nowrap" id="tableForApprroval">
+        <table class="table table-bordered table-striped table-hover" id="tableForApprroval">
             <thead>
                 <tr>
-                    <th>Code</th>
+                    <th>Document Code</th>
                     <th>Employee Name</th>
 					<th>Date Created</th>
                     <th>Company</th>
                     <th>Address</th>
                     <th>Date</th>
                     <th>Time In/Time Out</th>
-                    <th>Work Performed</th>
+                    <th>Remarks</th>
                     <th>Status</th>
                     <th>Action</th>
                 </tr>
@@ -128,13 +128,6 @@ $(document).ready(function () {
 
 		scheduleData.map((item) => {
 			console.log(item.submittedAt);
-			if(item.officialBusinessStatus=="0"){
-				
-				var submitat = "";
-			}else{
-				var submitat = moment(item.submittedAt).format("MMMM DD, YYYY hh:mm:ss A");
-				
-			}
 			let button = `
 			<button class="btn btn-view w-100 btnView" id="${item.officialBusinessID}"><i class="fas fa-eye"></i> View</button>`;
 
@@ -143,12 +136,12 @@ $(document).ready(function () {
 				<tr>
 					<td>${item.officialBusinessCode}</td>
 					<td>${item.employeeFirstname + ' ' + item.employeeLastname}</td>
-					<td>${submitat}</td>
+					<td>${moment(item.createdAt).format("MMMM DD, YYYY hh:mm:ss A")}</td>
                     <td>${item.clientName}</td>
                     <td>${item.officialBusinessAddress}</td>
 					<td>${moment(item.officialBusinessDate).format("MMMM DD, YYYY")}</td>
 					<td>${item.officialBusinessTimeIn} - ${item.officialBusinessTimeOut}</td>
-					<td>${item.officialBusinessReason}</td>
+					<td>${item.officialBusinessRemarks}</td>
 					<td class="text-center">${getStatusStyle(item.officialBusinessStatus)}</td>
 					<td class="text-center">
 						${button}
@@ -185,17 +178,17 @@ $(document).ready(function () {
 		);
 
 		let html = `
-        <table class="table table-bordered table-striped table-hover nowrap" id="tableMyForms">
+        <table class="table table-bordered table-striped table-hover" id="tableMyForms">
             <thead>
                 <tr>
-                    <th>Code</th>
+                    <th>Document Code</th>
                     <th>Employee Name</th>
 					<th>Date Created</th>
                     <th>Company</th>
                     <th>Address</th>
                     <th>Date</th>
                     <th>Time In/Time Out</th>
-                    <th>Work Performed</th>
+                    <th>Remarks</th>
                     <th>Status</th>
                     <th>Action</th>
                 </tr>
@@ -203,12 +196,6 @@ $(document).ready(function () {
             <tbody>`;
 
 		scheduleData.map((item) => {
-
-			if(item.officialBusinessStatus=="0"){
-				var submitat = "";
-			}else{
-				var submitat = moment(item.submittedAt).format("MMMM DD, YYYY hh:mm:ss A");
-			}
 			let unique = {
 				id: item.officialBusinessID,
 				officialBusinessDate: moment(item.officialBusinessDate).format("MMMM DD, YYYY")
@@ -228,12 +215,12 @@ $(document).ready(function () {
             <tr>
                 <td>${item.officialBusinessCode}</td>
                 <td>${item.employeeFirstname + ' ' + item.employeeLastname}</td>
-				<td>${submitat}</td>
+				<td>${moment(item.createdAt).format("MMMM DD, YYYY hh:mm:ss A")}</td>
                 <td>${item.clientName}</td>
                 <td>${item.officialBusinessAddress}</td>
                 <td>${moment(item.officialBusinessDate).format("MMMM DD, YYYY")}</td>
                 <td>${item.officialBusinessTimeIn} - ${item.officialBusinessTimeOut}</td>
-                <td>${item.officialBusinessReason}</td>
+                <td>${item.officialBusinessRemarks}</td>
                 <td class="text-center">${getStatusStyle(item.officialBusinessStatus)}</td>
                 <td class="text-center">
                     ${button}
@@ -441,7 +428,7 @@ $(document).ready(function () {
                     id="officialBusinessCompanyID" 
                     name="officialBusinessCompanyID"
                     ${disabled} required>
-                    ${getCompanyContent()}
+                    ${getCompanyContent(officialBusinessCompanyID)}
                     </select>
             <div class="invalid-feedback d-block" id="invalid-officialBusinessCompanyID"></div>
                 </div>
@@ -463,7 +450,7 @@ $(document).ready(function () {
                 <div class="form-group">
                     <label>Date ${!disabled ? "<code>*</code>" : ""}</label>
                     <input type="button" 
-                        class="form-control validate officialBusinessDate text-left"
+                        class="form-control validate daterange text-left"
                         required
                         id="officialBusinessDate"
                         name="officialBusinessDate"
@@ -526,9 +513,17 @@ $(document).ready(function () {
 		setTimeout(() => {
 			$("#page_content").html(html);
 			initAll();
-			OfficialBusinessDateRange();
 			initDataTables();
-			data ? initInputmaskTime(false) : initInputmaskTime();
+			
+			if(data){
+				initInputmaskTime(false) 
+			}else{
+				initInputmaskTime();
+			$("#officialBusinessDate").val(moment(new Date).format("MMMM DD, YYYY"));
+			}
+			
+			$("#officialBusinessDate").data("daterangepicker").minDate = moment();
+			//data ? initInputmaskTime(false) : initInputmaskTime();
 			return html;
 		}, 500);
 	}
@@ -589,6 +584,7 @@ $(document).ready(function () {
 
 			if (clientID && item.clientID == clientID[0].clientID) {
 				$("#officialBusinessAddress").val(address);
+
 			}
 
 		})
@@ -694,7 +690,7 @@ $(document).ready(function () {
 
 			if (action == "insert") {
 				data["tableData[officialBusinessCode]"] = generateCode(
-					"SRF",
+					"OBF",
 					false,
 					"hris_official_business_tbl",
 					"officialBusinessCode",
@@ -747,7 +743,7 @@ $(document).ready(function () {
 			const feedback = $(this).attr("officialBusinessCode") ?
 				$(this).attr("officialBusinessCode") :
 				generateCode(
-					"SCH",
+					"OBF",
 					false,
 					"hris_official_business_tbl",
 					"officialBusinessCode",
@@ -812,7 +808,7 @@ $(document).ready(function () {
 		if (validate && validateTime) {
 			const action = "insert"; // CHANGE
 			const feedback = generateCode(
-				"SCH",
+				"OBF",
 				false,
 				"hris_official_business_tbl",
 				"officialBusinessCode",
@@ -846,7 +842,7 @@ $(document).ready(function () {
 			const feedback = $(this).attr("officialBusinessCode") ?
 				$(this).attr("officialBusinessCode") :
 				generateCode(
-					"SCH",
+					"OBF",
 					false,
 					"hris_official_business_tbl",
 					"officialBusinessCode",
@@ -926,7 +922,7 @@ $(document).ready(function () {
 		const feedback = $(this).attr("officialBusinessCode") ?
 			$(this).attr("officialBusinessCode") :
 			generateCode(
-				"SCH",
+				"OBF",
 				false,
 				" hris_official_business_tbl",
 				"officialBusinessCode",
@@ -1060,10 +1056,10 @@ $(document).ready(function () {
 					employeeID: employeeID,
 				};
 
-				// let data = getData("update", 3, "reject", feedback, id);
-				// data["tableData[officialBusinessRemarks]"] = $("[name=officialBusinessRemarks]").val().trim();
-				// data["tableData[approversStatus]"] = updateApproveStatus(approversStatus, 3);
-				// data["tableData[approversDate]"] = updateApproveDate(approversDate);
+				let data = getData("update", 3, "reject", feedback, id);
+				data["tableData[officialBusinessRemarks]"] = $("[name=officialBusinessRemarks]").val().trim();
+				data["tableData[approversStatus]"] = updateApproveStatus(approversStatus, 3);
+				data["tableData[approversDate]"] = updateApproveDate(approversDate);
 
 				formConfirmation(
 					"reject",
@@ -1079,43 +1075,38 @@ $(document).ready(function () {
 			}
 		}
 	})
+	$(document).on("click", ".nav-link", function () {
+		const tab = $(this).attr("href");
+		if (tab == "#forApprovalTab") {
+			forApprovalContent();
+		}
+		if (tab == "#myFormsTab") {
+			myFormsContent();
+		}
+	});
 	// ----- END REJECT DOCUMENT -----
 
 
-	$(document).on("change", ".officialBusinessDate" ,function(){
-		let thisValue       =   $(this).val();
-		let thisValueSplit  =   thisValue.split(" - ");
+	// $(document).on("change", ".officialBusinessDate" ,function(){
+	// 	let thisValue       =   $(this).val();
+	// 	let thisValueSplit  =   thisValue.split(" - ");
 	
-		// from = start.format('YYYY-MM-DD 00:00:00');
-		//               to = end.format('YYYY-MM-DD 23:59:59');
+	// 	// from = start.format('YYYY-MM-DD 00:00:00');
+	// 	//               to = end.format('YYYY-MM-DD 23:59:59');
 	
-		let fromDate        =  new Date(thisValueSplit[0]); 	
-		let toDate          =  new Date(thisValueSplit[1]);
-		let numberOfDays    =  Math.round((toDate-fromDate)/(1000*60*60*24));
-		$("#loanFormNoOfDays").val(numberOfDays);
-		// alert(thisValue);
-	})
+	// 	let fromDate        =  new Date(thisValueSplit[0]); 	
+	// 	let toDate          =  new Date(thisValueSplit[1]);
+	// 	let numberOfDays    =  Math.round((toDate-fromDate)/(1000*60*60*24));
+	// 	$("#loanFormNoOfDays").val(numberOfDays);
+	// 	// alert(thisValue);
+	// })
 
-	function OfficialBusinessDateRange(){
-		$('.officialBusinessDate').daterangepicker({
-			"showDropdowns": true,
-			minDate: moment(),
-			startDate: moment().startOf('hour'),
-			endDate: moment().startOf('hour').add(32, 'hour'),
-			locale: {
-			  format: 'MMMM D, YYYY'
-			},
-			ranges: {
-			//   'Today': [moment(), moment()],
-			//   'Tommorow': [moment().add(1, 'days'), moment().add(1, 'days')],
-			  'Month': [moment(), moment().add(30, 'days')],
-			  'Quarter': [moment(), moment().add(3, 'months')],
-			  'Semiannual':[moment(), moment().add(6, 'months')],
-			  'Annual': [moment(), moment().add(1, 'years')]
-			}
-		});
+});
+function viewNotification() {
+	let url = window.document.URL;
+	url = url.split("?view_id=");
+	if (url.length > 1) {
+		let id = url[1];
+		$(`.btnView[id=${id}]`).trigger("click");
 	}
-
-
-
-})
+}

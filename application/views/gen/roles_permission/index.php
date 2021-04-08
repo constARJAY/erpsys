@@ -39,8 +39,10 @@
 
     <div class="container">
 		<div class="row clearfix row-deck">
-			<div class="col-12 card">
-				<div class="row card-body" id="roles_permission_content"></div>
+			<div class="col-lg-12">
+				<div class="card">
+					<div class="row card-body" id="roles_permission_content"></div>
+				</div>
 			</div>
 		</div>
 	</div>

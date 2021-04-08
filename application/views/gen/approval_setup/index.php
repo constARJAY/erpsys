@@ -17,7 +17,7 @@
 						<li class="breadcrumb-item active d-flex align-items-center"> Approval Setup</li>
 						<!-- <li class="breadcrumb-item active"><i class="zmdi zmdi-hotel"></i> &nbsp;Crud Operatio  -->
 					</ul>
-					<h1 class="mb-1 mt-1">Approval Setup</h1>
+					<h1 class="mt-3">Approval Setup</h1>
 					<span class="font-weight-light">This module is to manage approval setup</span>
 				</div>
 				<div class="col-lg-6 col-md-6 d-flex justify-content-end align-items-center list-of-module">
@@ -34,8 +34,8 @@
 
     <div class="container">
 		<div class="row clearfix row-deck" style='text-align:right;'>
-            <div class="card py-3 px-3">
-                <div class="col-12 row">
+            <div class="col-12 card">
+                <div class="row card-body">
                     <div class="col-12 col-lg-4 col-xl-4 py-2 text-left">
 						<h6 class="bg-primary text-light p-3"><strong>USER DESIGNATION</strong></h6>
 						<div class="position-list" id="position_form">
@@ -73,8 +73,8 @@
                 </div>
             </div>
         </div>
-
 	</div>
+
 </div>
 
 

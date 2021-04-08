@@ -22,8 +22,7 @@ $(document).ready(function(){
                 { targets: 7, width: 100 },
                 { targets: 8, width: 200 },
                 { targets: 9, width: 50 },
-                { targets: 10, width: 50 },
-                { targets: 11, width: 100 }
+                { targets: 10, width: 80 },
             ],
         });
     }
@@ -61,7 +60,6 @@ $(document).ready(function(){
                             <th>Team Members</th>
                             <th>Priority Level</th>
                             <th>Status</th>
-                            <th>Action</th>
                         </tr>
                     </thead>
                     <tbody>`;
@@ -88,7 +86,7 @@ $(document).ready(function(){
                             `Medium` : `Low`);
 
                     html += `
-                    <tr>
+                    <tr class="btnEdit" id="${item.projectListID}">
                         <td>${item.projectListCode}</td>
                         <td>${item.projectListName}</td>
                         <td>${item.projectListDescription}</td>
@@ -99,13 +97,7 @@ $(document).ready(function(){
                         <td>${item.projectListLeaderID}</td>
                         <td>${item.projectListMemberID}</td>
                         <td>${priorityLevel}</td>
-
                         <td>${status}</td>
-                        <td>
-                            <button class="btn btn-edit btn-block btnEdit" 
-                            id="${item.projectListID}">
-                            <i class="fas fa-edit"></i> Edit</button>
-                        </td>
                     </tr>`;
                 })
                 html += `</tbody>
@@ -129,6 +121,83 @@ $(document).ready(function(){
     // ----- END TABLE CONTENT -----
 
 
+    // ----- GET PROJECT CLIENT -----
+    function getProjectClient(id = false, outputHTML = false) {
+        let clients, html = `<option selected disabled>Select Client</option>`;
+
+        if (!id && !outputHTML) {
+            clients = getTableData("pms_client_tbl", "clientID, clientName", "clientStatus = 1");
+            return clients;
+        } else if (!id && outputHTML) {
+            clients = getTableData("pms_client_tbl", "clientID, clientName", "clientStatus = 1");
+            clients.map(client => {
+                html += `<option value="${client.clientID}">${client.clientName}</option>`;
+            })
+            return html;
+        } else if (id && !outputHTML) {
+            clients = getTableData(`pms_client_tbl", "clientID, clientName", "clientStatus = 1 AND clientID = ${id}`);
+            return clients;
+        } else {
+            clients = getTableData(`pms_client_tbl", "clientID, clientName", "clientStatus = 1 AND clientID = ${id}`);
+            clients.map(client => {
+                html += `<option value="${client.clientID}" ${id === client.clientID ? "selected" : ""}>${client.clientName}</option>`;
+            })
+            return html;
+        }
+    }
+    // ----- END GET PROJECT CLIENT -----
+
+    
+    // ----- GET EMPLOYEE -----
+    function getEmployeeList(employeeID = [], id = null, option) {
+        console.log(employeeID, id);
+        let empID;
+        if (typeof id == "object") {
+            empID = id && id.length > 0 ? `employeeID IN (${id.join(", ")})` : "1=1";
+        } else {
+            empID = id ? `employeeID = ${id}` : "1=1";
+        }
+        
+        let where = employeeID.length > 0 ? `employeeID NOT IN (${employeeID}) OR ${empID}` : "1=1";
+        let employees = getTableData("hris_employee_list_tbl", "employeeID, CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname", `employeeStatus = 1 AND ${where}`);
+
+        let html = "";
+        html += option ? `<option selected disabled>Select ${option}</option>` : "";
+        employees.map(employee => {
+            html += `<option value="${employee.employeeID}" ${id && id == employee.employeeID && "selected"}>${employee.fullname}</option>`;
+        })
+        return html;
+    }
+    // ----- END GET EMPLOYEE -----
+
+
+    // ----- CLICK CLIENT -----
+    $(document).on("change", `[name=projectListManagerID], [name=projectListLeaderID], [name=projectListMemberID]`, function() {
+        let pmID = $(`[name=projectListManagerID]`).val();
+        let tlID = $(`[name=projectListLeaderID]`).val();
+        let tmID = $(`[name=projectListMemberID]`).val();
+
+        let employeeID = [];
+        pmID && employeeID.push(pmID);
+        tlID && employeeID.push(tlID);
+        tmID.length > 0 && employeeID.push(...tmID);
+
+        let name = this.name;
+        if (name == "projectListManagerID") {
+            $(`[name=projectListLeaderID]`).html(getEmployeeList(employeeID, tlID, "Team Leader"));
+            $(`[name=projectListMemberID]`).html(getEmployeeList(employeeID, tmID, "Team Member"));
+        } else if (name == "projectListLeaderID") {
+            $(`[name=projectListManagerID]`).html(getEmployeeList(employeeID, pmID, "Project Manager"));
+            $(`[name=projectListMemberID]`).html(getEmployeeList(employeeID, tmID, "Team Member"));
+        } else if (name == "projectListMemberID") {
+            $(`[name=projectListManagerID]`).html(getEmployeeList(employeeID, pmID, "Project Manager"));
+            $(`[name=projectListLeaderID]`).html(getEmployeeList(employeeID, tlID, "Team Leader"));
+        }
+
+    })
+    // ----- END CLICK CLIENT -----
+
+
     // ----- MODAL CONTENT -----
     function modalContent(data = false) {
         let {
@@ -144,6 +213,8 @@ $(document).ready(function(){
             projectListMemberID      = "",
             projectListStatus        = "",
         } = data && data[0];
+
+        
 
         let button = projectListID ? `
         <button 
@@ -178,7 +249,7 @@ $(document).ready(function(){
                     </div>
                     <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12">
                         <div class="form-group">
-                            <label>Project Description </label>
+                            <label>Project Description <code>*</code></label>
                             <textarea 
                                 type="text" 
                                 class="form-control validate" 
@@ -222,13 +293,7 @@ $(document).ready(function(){
                             <label>Client <code>*</code></label>
                             <select class=" form-control show-tick select2 validate" name="projectListClientID" id="projectListClient" autocomplete="off" required>
                             <!-- TEMPORARY OPTIONS -->
-                                <option value="" selected>Select Client</option>   
-                                <option value="1" ${projectListClientID == 1 && "selected"}>BlackCoders Group Inc.</option>   
-                                <option value="2" ${projectListClientID == 2 && "selected"}>Gatchallan Tangalin Co.&CPA's</option>
-                                <option value="3" ${projectListClientID == 3 && "selected"}>CMTLand Development Inc.</option>   
-                                <option value="4" ${projectListClientID == 4 && "selected"}>CMTBuilders Inc.</option>
-                                <option value="5" ${projectListClientID == 5 && "selected"}>MFOX Computer Services</option>   
-                                <option value="6" ${projectListClientID == 6 && "selected"}>DeltaMike Security</option>
+                                ${getProjectClient(false, true)}
                             <!-- END TEMPORARY OPTIONS -->
                             </select>
                             <div class="invalid-feedback d-block" id="invalidp-rojectListClient"></div>
@@ -239,13 +304,16 @@ $(document).ready(function(){
                             <label>Project Manager <code>*</code></label>
                             <select class=" form-control show-tick select2 validate" name="projectListManagerID" id="projectListManagerID" autocomplete="off" required>
                             <!-- TEMPORARY OPTIONS -->
-                                <option value="" selected>Select Manager</option> 
+                                <option selected disabled>Select Project Manager</option>
+                                ${getEmployeeList()}
+                            <!--
                                 <option value="1" ${projectListManagerID == 1 && "selected"}>Robinjamin Gelilio</option>   
                                 <option value="2" ${projectListManagerID == 2 && "selected"}>Nina Geronimo</option>
                                 <option value="3" ${projectListManagerID == 3 && "selected"}>Renz Fabian</option>   
                                 <option value="4" ${projectListManagerID == 4 && "selected"}>Sheryl Antinero</option>
                                 <option value="5" ${projectListManagerID == 5 && "selected"}>Ulysis Ramizares</option>   
                                 <option value="6" ${projectListManagerID == 6 && "selected"}>Jill Macalintal</option>
+                            -->
                             <!-- END TEMPORARY OPTIONS -->
                             </select>
                             <div class="invalid-feedback d-block" id="invalid-projectListManagerID"></div>
@@ -256,13 +324,16 @@ $(document).ready(function(){
                             <label>Team Leader</label>
                             <select class=" form-control show-tick select2 validate" name="projectListLeaderID" id="projectListLeaderID" autocomplete="off">
                             <!-- TEMPORARY OPTIONS -->
-                                <option value="" selected>Select Leader</option> 
+                                <option selected disabled>Select Team Leader</option>
+                                ${getEmployeeList()}
+                            <!--
                                 <option value="1" ${projectListLeaderID == 1 && "selected"}>Robinjamin Gelilio</option>   
                                 <option value="2" ${projectListLeaderID == 2 && "selected"}>Nina Geronimo</option>
                                 <option value="3" ${projectListLeaderID == 3 && "selected"}>Renz Fabian</option>   
                                 <option value="4" ${projectListLeaderID == 4 && "selected"}>Sheryl Antinero</option>
                                 <option value="5" ${projectListLeaderID == 5 && "selected"}>Ulysis Ramizares</option>   
                                 <option value="6" ${projectListLeaderID == 6 && "selected"}>Jill Macalintal</option>
+                            -->
                             <!-- END TEMPORARY OPTIONS -->
                             </select>
                             <div class="invalid-feedback d-block" id="invalid-projectListLeaderID"></div>
@@ -273,7 +344,7 @@ $(document).ready(function(){
                             <label>Priority Level <code>*</code></label>
                             <select class=" form-control show-tick select2 validate" name="projectListPriorityLevel" id="projectListPriorityLevel" autocomplete="off" required>
                             <!-- TEMPORARY OPTIONS -->
-                                <option value="" selected>Select Prioriry Level</option>
+                                <option selected disabled>Select Priority Level</option>
                                 <option value="3" ${projectListPriorityLevel == 1 && "selected"}>High</option>   
                                 <option value="2" ${projectListPriorityLevel == 2 && "selected"}>Medium</option>
                                 <option value="1" ${projectListPriorityLevel == 3 && "selected"}>Low</option>  
@@ -287,13 +358,15 @@ $(document).ready(function(){
                             <label>Team Members</label>
                             <select class=" form-control show-tick select2 validate" name="projectListMemberID" id="projectListMemberID" autocomplete="off" multiple="multiple">
                             <!-- TEMPORARY OPTIONS -->
-                                <option disabled>Select Team Member</option> 
+                                ${getEmployeeList()}
+                            <!--
                                 <option value="1" ${projectListMemberID && projectListMemberID.split("|").includes("1") && "selected"}>Robinjamin Gelilio</option>   
                                 <option value="2" ${projectListMemberID && projectListMemberID.split("|").includes("2") && "selected"}>Nina Geronimo</option>
                                 <option value="3" ${projectListMemberID && projectListMemberID.split("|").includes("3") && "selected"}>Renz Fabian</option>   
                                 <option value="4" ${projectListMemberID && projectListMemberID.split("|").includes("4") && "selected"}>Sheryl Antinero</option>
                                 <option value="5" ${projectListMemberID && projectListMemberID.split("|").includes("5") && "selected"}>Ulysis Ramizares</option>   
                                 <option value="6" ${projectListMemberID && projectListMemberID.split("|").includes("6") && "selected"}>Jill Macalintal</option>
+                            -->
                             <!-- END TEMPORARY OPTIONS -->
                             </select>
                             <div class="invalid-feedback d-block" id="invalid-projectListMemberID"></div>

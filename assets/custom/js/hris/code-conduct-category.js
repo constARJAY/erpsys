@@ -108,7 +108,7 @@ $(document).on("click", "#btnSave", function(){
         data["tableData[updatedBy]"]     = sessionID;
         data["tableName"]                = "hris_code_conduct_category_tbl";
         data["feedback"]                 = $("#inputcodeConductCategoryName").val();
-        sweetAlertConfirmation("add", "Code of Conduct Category","modal_codeConductCategory", null, data, true, tableContent);
+        sweetAlertConfirmation("add", "Category","modal_codeConductCategory", null, data, true, tableContent);
     }
 });
 
@@ -123,7 +123,7 @@ $(document).on("click", "#btnUpdate", function(){
             data["whereFilter"]              =  "codeConductCategoryID="+codeConductCategoryID;
             data["tableName"]                =  "hris_code_conduct_category_tbl";
             data["feedback"]                 =  $("#inputcodeConductCategoryName").val();
-            sweetAlertConfirmation("update", "Code of Conduct Category","modal_codeConductCategory", null , data, true, tableContent);
+            sweetAlertConfirmation("update", "Category","modal_codeConductCategory", null , data, true, tableContent);
         }
     }else{$("#inputcodeConductCategoryStatus").select2('focus');}
     
@@ -132,7 +132,7 @@ $(document).on("click", "#btnUpdate", function(){
 $(document).on("click",".btnCancel", function(){
     let condition = isFormEmpty("modal_codeConductCategory_form");
     if(!condition){
-        sweetAlertConfirmation("cancel", "Code of Conduct Category Masterfile","modal_codeConductCategory");
+        sweetAlertConfirmation("cancel", "Category","modal_codeConductCategory");
     }else{
         $("#modal_codeConductCategory").modal("hide");
     }
@@ -164,9 +164,8 @@ function initDataTables() {
                 scrollX:        true,
                 scrollCollapse: true,
                 columnDefs: [
-                    { targets: 0, width: "5%" },
-                    { targets: 1, width: "25%" },
-                    { targets: 2, width: "5%" }
+                    { targets: 0, width: "10%" },
+                    { targets: 2, width: 80 }
                 ],
             });
 }

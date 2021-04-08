@@ -180,10 +180,10 @@ function initDataTables() {
                 scrollX:        true,
                 scrollCollapse: true,
                 columnDefs: [
-                    { targets: 0, width: "5%" },
+                    { targets: 0, width:  80 },
                     { targets: 1, width: "25%" },
                     { targets: 3, width: "15%" },
-                    { targets: 4, width: "5%" }
+                    { targets: 4, width:  80 }
                 ],
             });
 }

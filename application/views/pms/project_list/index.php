@@ -1,5 +1,5 @@
-<div class="body_area after_bg sm">
-	<div class="block-header">
+<div class="body_area after_bg">
+	<div class="block-header pb-0">
 		<div class="container">
 			<div class="row clearfix">
 				<div class="col-lg-6 col-md-12">
@@ -12,8 +12,7 @@
 					<span>This module is used to manage project details.</span>
 				</div>
 				<div class="col-lg-6 col-md-12 text-md-right">
-                        <button type="button" class="btn btn-danger pr-2" id="btnAdd"> <i class="fas fa-plus-square"></i> Add Project</button>
-                    </ul>
+					<button class="btn btn-default btn-add" id="btnAdd"><i class="icon-plus"></i> Add Project</button>
 				</div>
 			</div>
 		</div>
@@ -23,15 +22,9 @@
 		<div class="row clearfix">
 			<div class="col-lg-12">
 				<div class="card">
-					<div class="header text-right p-0">
-						<div class="closeBtn"></div>
-					</div>
-					<div class="body" id="main_body">
-						<div class="row clearfix row-deck">
-							<div class="col-12">
-								<div class="table-responsive" id="table_content"></div>
-							</div>
-						</div>
+					<div class="card-body">
+						<div class="table-responsive" id="table_content"></div>
+					
 					</div>
 
 				</div>

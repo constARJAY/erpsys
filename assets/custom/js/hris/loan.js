@@ -153,9 +153,8 @@ function initDataTables() {
                 scrollX:        true,
                 scrollCollapse: true,
                 columnDefs: [
-                    { targets: 0, width: "5%" },
-                    { targets: 1, width: "25%" },
-                    { targets: 2, width: "5%" }
+                    { targets: 0, width: "10%" },
+                    { targets: 2, width: 80 }
                 ],
             });
 }

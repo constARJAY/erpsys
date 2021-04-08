@@ -38,7 +38,8 @@ $(document).on("click",".addHoliday", function(){
                                                                     id="inputholidayDate" 
                                                                     data-allowcharacters="[A-Z][ ][,][a-z][0-9]" 
                                                                     minlength="5" 
-                                                                    maxlength="20" 
+                                                                    maxlength="20"
+                                                                    value="${moment().format("MMMM DD, YYYY")}"
                                                                     unique
                                                                     required >
                                                                 <div class="invalid-feedback d-block" id="invalid-inputholidayDate"></div>
@@ -77,6 +78,8 @@ $(document).on("click",".addHoliday", function(){
     setTimeout(function(){
         $("#modal_holiday_content").html(modal_holiday_content);
         initAll();
+        $("#inputholidayDate").data("daterangepicker").startDate = moment();
+        $("#inputholidayDate").data("daterangepicker").endDate 	= moment();
     },500); 
 });
 
@@ -225,7 +228,7 @@ function initDataTables() {
                 scrollCollapse: true,
                 columnDefs: [
                     { targets: 0, width: "10%" },
-                    { targets: 4, width: "5%" }
+                    { targets: 4, width: 80 }
                 ],
             });
 }

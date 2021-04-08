@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Apr 07, 2021 at 09:51 AM
+-- Generation Time: Apr 08, 2021 at 09:58 AM
 -- Server version: 10.4.14-MariaDB
 -- PHP Version: 7.4.10
 
@@ -105,7 +105,9 @@ CREATE TABLE `gen_approval_setup_tbl` (
 INSERT INTO `gen_approval_setup_tbl` (`approvalID`, `moduleID`, `moduleName`, `designationID`, `roleID`, `userAccountID`, `createdBy`, `updatedBy`, `createdAt`, `updatedAt`) VALUES
 (128, 33, 'Inventory Receiving', 1, 0, '0', 1, 1, '2021-04-07', '2021-04-07 05:51:35'),
 (129, 33, 'Inventory Receiving', 2, 0, '0', 1, 1, '2021-04-07', '2021-04-07 05:51:35'),
-(130, 33, 'Inventory Receiving', 3, 0, '0', 1, 1, '2021-04-07', '2021-04-07 05:51:35');
+(130, 33, 'Inventory Receiving', 3, 0, '0', 1, 1, '2021-04-07', '2021-04-07 05:51:35'),
+(131, 60, 'Change Schedule', 2, 0, '3|4|1', 1, 1, '2021-04-08', '2021-04-08 00:13:29'),
+(132, 56, 'Overtime Request', 1, 0, '3|4|2', 1, 1, '2021-04-08', '2021-04-08 02:38:27');
 
 -- --------------------------------------------------------
 
@@ -577,7 +579,7 @@ INSERT INTO `gen_roles_permission_tbl` (`permissionID`, `designationID`, `roleID
 (177, 2, 0, 53, 0, '2021-04-07 05:37:51', '2021-04-07 05:37:51'),
 (178, 2, 0, 54, 0, '2021-04-07 05:37:51', '2021-04-07 05:37:51'),
 (179, 2, 0, 55, 0, '2021-04-07 05:37:51', '2021-04-07 05:37:51'),
-(180, 2, 0, 56, 0, '2021-04-07 05:37:51', '2021-04-07 05:37:51'),
+(180, 2, 0, 56, 1, '2021-04-07 05:37:51', '2021-04-07 05:37:51'),
 (181, 2, 0, 57, 0, '2021-04-07 05:37:51', '2021-04-07 05:37:51'),
 (182, 2, 0, 58, 0, '2021-04-07 05:37:51', '2021-04-07 05:37:51'),
 (183, 2, 0, 59, 0, '2021-04-07 05:37:51', '2021-04-07 05:37:51'),
@@ -701,11 +703,11 @@ INSERT INTO `gen_roles_permission_tbl` (`permissionID`, `designationID`, `roleID
 (301, 3, 0, 53, 0, '2021-04-07 05:37:51', '2021-04-07 05:37:51'),
 (302, 3, 0, 54, 0, '2021-04-07 05:37:51', '2021-04-07 05:37:51'),
 (303, 3, 0, 55, 0, '2021-04-07 05:37:51', '2021-04-07 05:37:51'),
-(304, 3, 0, 56, 0, '2021-04-07 05:37:51', '2021-04-07 05:37:51'),
+(304, 3, 0, 56, 1, '2021-04-07 05:37:51', '2021-04-07 05:37:51'),
 (305, 3, 0, 57, 0, '2021-04-07 05:37:51', '2021-04-07 05:37:51'),
 (306, 3, 0, 58, 0, '2021-04-07 05:37:51', '2021-04-07 05:37:51'),
 (307, 3, 0, 59, 0, '2021-04-07 05:37:51', '2021-04-07 05:37:51'),
-(308, 3, 0, 60, 0, '2021-04-07 05:37:51', '2021-04-07 05:37:51'),
+(308, 3, 0, 60, 1, '2021-04-07 05:37:51', '2021-04-07 05:37:51'),
 (309, 3, 0, 61, 0, '2021-04-07 05:37:51', '2021-04-07 05:37:51'),
 (310, 3, 0, 62, 0, '2021-04-07 05:37:51', '2021-04-07 05:37:51'),
 (311, 3, 0, 63, 0, '2021-04-07 05:37:51', '2021-04-07 05:37:51'),
@@ -825,11 +827,11 @@ INSERT INTO `gen_roles_permission_tbl` (`permissionID`, `designationID`, `roleID
 (425, 4, 0, 53, 0, '2021-04-07 05:37:52', '2021-04-07 05:37:52'),
 (426, 4, 0, 54, 0, '2021-04-07 05:37:52', '2021-04-07 05:37:52'),
 (427, 4, 0, 55, 0, '2021-04-07 05:37:52', '2021-04-07 05:37:52'),
-(428, 4, 0, 56, 0, '2021-04-07 05:37:52', '2021-04-07 05:37:52'),
+(428, 4, 0, 56, 1, '2021-04-07 05:37:52', '2021-04-07 05:37:52'),
 (429, 4, 0, 57, 0, '2021-04-07 05:37:52', '2021-04-07 05:37:52'),
 (430, 4, 0, 58, 0, '2021-04-07 05:37:52', '2021-04-07 05:37:52'),
 (431, 4, 0, 59, 0, '2021-04-07 05:37:52', '2021-04-07 05:37:52'),
-(432, 4, 0, 60, 0, '2021-04-07 05:37:52', '2021-04-07 05:37:52'),
+(432, 4, 0, 60, 1, '2021-04-07 05:37:52', '2021-04-07 05:37:52'),
 (433, 4, 0, 61, 0, '2021-04-07 05:37:52', '2021-04-07 05:37:52'),
 (434, 4, 0, 62, 0, '2021-04-07 05:37:52', '2021-04-07 05:37:52'),
 (435, 4, 0, 63, 0, '2021-04-07 05:37:52', '2021-04-07 05:37:52'),
@@ -953,7 +955,7 @@ INSERT INTO `gen_roles_permission_tbl` (`permissionID`, `designationID`, `roleID
 (553, 5, 0, 57, 0, '2021-04-07 05:37:52', '2021-04-07 05:37:52'),
 (554, 5, 0, 58, 0, '2021-04-07 05:37:52', '2021-04-07 05:37:52'),
 (555, 5, 0, 59, 0, '2021-04-07 05:37:52', '2021-04-07 05:37:52'),
-(556, 5, 0, 60, 0, '2021-04-07 05:37:52', '2021-04-07 05:37:52'),
+(556, 5, 0, 60, 1, '2021-04-07 05:37:52', '2021-04-07 05:37:52'),
 (557, 5, 0, 61, 0, '2021-04-07 05:37:52', '2021-04-07 05:37:52'),
 (558, 5, 0, 62, 0, '2021-04-07 05:37:52', '2021-04-07 05:37:52'),
 (559, 5, 0, 63, 0, '2021-04-07 05:37:52', '2021-04-07 05:37:52'),
@@ -1682,7 +1684,9 @@ INSERT INTO `gen_system_notification_tbl` (`notificationID`, `employeeID`, `modu
 (14, 3, 60, 9, 'Change Schedule Form', 'Arjay Diangzon asked for your approval.', 2, 0, 2, 0, '2021-04-07 04:24:57', '2021-04-07 04:24:57'),
 (15, 4, 60, 7, 'Change Schedule Form', 'Akosi Admin asked for your approval.', 2, 0, 3, 0, '2021-04-07 04:40:48', '2021-04-07 04:40:48'),
 (16, 4, 60, 8, 'Change Schedule Form', 'Akosi Admin asked for your approval.', 2, 0, 3, 0, '2021-04-07 04:43:15', '2021-04-07 04:43:15'),
-(17, 4, 60, 8, 'Change Schedule Form', 'Akosi Admin asked for your approval.', 2, 0, 4, 0, '2021-04-07 04:43:48', '2021-04-07 04:43:48');
+(17, 4, 60, 8, 'Change Schedule Form', 'Akosi Admin asked for your approval.', 2, 0, 4, 0, '2021-04-07 04:43:48', '2021-04-07 04:43:48'),
+(18, 3, 60, 6, 'Change Schedule Form', 'Arjay Diangzon asked for your approval.', 2, 0, 2, 0, '2021-04-08 00:14:23', '2021-04-08 00:14:23'),
+(19, 3, 60, 7, 'Change Schedule Form', 'Arjay Diangzon asked for your approval.', 2, 0, 2, 0, '2021-04-08 03:36:43', '2021-04-08 03:36:43');
 
 -- --------------------------------------------------------
 
@@ -1822,7 +1826,11 @@ CREATE TABLE `hris_change_schedule_tbl` (
 INSERT INTO `hris_change_schedule_tbl` (`changeScheduleID`, `changeScheduleCode`, `employeeID`, `changeScheduleDate`, `changeScheduleTimeIn`, `changeScheduleTimeOut`, `changeScheduleReason`, `approversID`, `approversStatus`, `approversDate`, `changeScheduleStatus`, `changeScheduleRemarks`, `submittedAt`, `createdBy`, `updatedBy`, `createdAt`, `updatedAt`) VALUES
 (1, 'SCH-21-00001', 2, '2021-04-07', '08:00:00', '17:00:00', 'TEST', '2', '2', '2021-04-07 15:48:12', 2, NULL, '2021-04-07 07:48:12', 2, 2, '2021-04-07 07:48:12', '2021-04-07 07:48:13'),
 (2, 'SCH-21-00002', 2, '2021-04-01', '08:00:00', '17:00:00', 'TEST', NULL, NULL, NULL, 0, NULL, NULL, 2, 2, '2021-04-07 07:48:40', '2021-04-07 07:48:41'),
-(3, 'SCH-21-00003', 2, '2021-04-08', '08:00:00', '17:00:00', 'TEST', '2', '2', '2021-04-07 15:48:55', 2, NULL, '2021-04-07 07:48:55', 2, 2, '2021-04-07 07:48:55', '2021-04-07 07:48:56');
+(3, 'SCH-21-00003', 2, '2021-04-08', '08:00:00', '17:00:00', 'TEST', '2', '2', '2021-04-07 15:48:55', 2, NULL, '2021-04-07 07:48:55', 2, 2, '2021-04-07 07:48:55', '2021-04-07 07:48:56'),
+(4, 'SCH-21-00004', 1, '2021-04-08', '08:00:00', '17:00:00', 'TEST', '1', '2', '2021-04-08 08:12:16', 2, NULL, '2021-04-08 00:12:16', 1, 1, '2021-04-08 00:12:16', '2021-04-08 00:12:18'),
+(5, 'SCH-21-00005', 2, '2021-04-15', '08:00:00', '17:00:00', 'TEST', '2', '2', '2021-04-08 08:12:56', 2, NULL, '2021-04-08 00:12:56', 2, 2, '2021-04-08 00:12:56', '2021-04-08 00:12:58'),
+(6, 'SCH-21-00006', 2, '2021-04-23', '08:00:00', '17:00:00', 'TEST', '3|4|1', '3', '2021-04-08 08:20:39', 3, 'TEST', '2021-04-08 00:14:20', 2, 3, '2021-04-08 00:14:20', '2021-04-08 00:20:42'),
+(7, 'SCH-21-00007', 2, '2021-04-26', '08:00:00', '17:00:00', 'TEST', '3|4|1', NULL, NULL, 1, NULL, '2021-04-08 03:36:41', 2, 2, '2021-04-08 03:36:41', '2021-04-08 03:36:43');
 
 -- --------------------------------------------------------
 
@@ -2945,7 +2953,7 @@ CREATE TABLE `hris_leave_request_tbl` (
   `leaveRequestDateFrom` date NOT NULL,
   `leaveRequestDateTo` date NOT NULL,
   `leaveRequestNumberOfDate` bigint(20) NOT NULL,
-  `leaveID` varchar(20) NOT NULL,
+  `leaveID` varchar(140) NOT NULL,
   `leaveRequestRemainingLeave` bigint(20) NOT NULL,
   `leaveRequestReason` text DEFAULT NULL,
   `approversID` text DEFAULT NULL,
@@ -2959,13 +2967,6 @@ CREATE TABLE `hris_leave_request_tbl` (
   `createdAt` timestamp NOT NULL DEFAULT current_timestamp(),
   `updatedAt` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
---
--- Dumping data for table `hris_leave_request_tbl`
---
-
-INSERT INTO `hris_leave_request_tbl` (`leaveRequestID`, `leaveRequestCode`, `employeeID`, `leaveRequestDate`, `leaveRequestDateFrom`, `leaveRequestDateTo`, `leaveRequestNumberOfDate`, `leaveID`, `leaveRequestRemainingLeave`, `leaveRequestReason`, `approversID`, `approversStatus`, `approversDate`, `leaveRequestStatus`, `leaveRequestRemarks`, `submittedAt`, `createdBy`, `updatedBy`, `createdAt`, `updatedAt`) VALUES
-(0, 'LRF-21-00001', 1, 'April 07, 2021 - April 07, 2021', '0000-00-00', '0000-00-00', 0, '1', 0, 'TEST', NULL, NULL, NULL, 0, NULL, NULL, 1, 1, '2021-04-06 18:33:41', '2021-04-07 06:33:42');
 
 -- --------------------------------------------------------
 
@@ -3127,6 +3128,14 @@ CREATE TABLE `hris_overtime_request_tbl` (
   `createdAt` timestamp NOT NULL DEFAULT current_timestamp(),
   `updatedAt` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Dumping data for table `hris_overtime_request_tbl`
+--
+
+INSERT INTO `hris_overtime_request_tbl` (`overtimeRequestID`, `overtimeRequestCode`, `employeeID`, `overtimeRequestDate`, `overtimeRequestTimeIn`, `overtimeRequestTimeOut`, `overtimeRequestReason`, `approversID`, `approversStatus`, `approversDate`, `overtimeRequestStatus`, `overtimeRequestRemarks`, `submittedAt`, `createdBy`, `updatedBy`, `createdAt`, `updatedAt`) VALUES
+(3, 'OTR-21-00001', 1, '2021-04-06', '08:00:00', '17:00:00', 'TEST', '1', '2', '2021-04-08 10:37:22', 2, '', '2021-04-08 02:37:22', 1, 1, '2021-04-08 02:37:22', '2021-04-08 02:37:26'),
+(4, 'OTR-21-00002', 1, '2021-04-28', '08:00:00', '17:00:00', 'TESTY', '3|4|2', '', '', 1, '', '2021-04-08 02:38:43', 1, 1, '2021-04-08 02:38:43', '2021-04-08 02:38:44');
 
 -- --------------------------------------------------------
 
@@ -3533,7 +3542,8 @@ CREATE TABLE `pms_client_tbl` (
 --
 
 INSERT INTO `pms_client_tbl` (`clientID`, `clientCode`, `clientName`, `clientRegion`, `clientProvince`, `clientCity`, `clientBarangay`, `clientUnitNumber`, `clientHouseNumber`, `clientCountry`, `clientPostalCode`, `clientContactPerson`, `clientEmailAddress`, `clientTin`, `client_MobileNo`, `clientTelephoneNo`, `clientBrandName`, `clientStatus`, `createdBy`, `updatedBy`, `createdAt`, `updatedAt`) VALUES
-(1, 'CLT-21-00001', '123', '02', 'BATANES', 'ITBAYAT', 'SAN RAFAEL (IDIANG)', '123', '123', 'dsadsadas', 1233, 'qwe', '', '123 312 312 312', '1233 1232 131', '(31) 2312 312', '', 1, 3, 3, '2021-03-23 08:33:14', '0000-00-00 00:00:00');
+(1, 'CLT-21-00001', '123', '02', 'BATANES', 'ITBAYAT', 'SAN RAFAEL (IDIANG)', '123', '123', 'dsadsadas', 1233, 'qwe', '', '123 312 312 312', '1233 1232 131', '(31) 2312 312', '', 1, 3, 3, '2021-03-23 08:33:14', '0000-00-00 00:00:00'),
+(2, 'CLT-21-00002', 'BlackCoders', '01', 'ILOCOS NORTE', 'ADAMS', 'ADAMS (POB.)', '1701', 'Antel', 'Philippines', 1609, 'Mark Nieto', 'marknieto@gmail.com', '125 123 125 213', '0959 5956 598', '(14) 5465 489', 'www.theblackcoders.com', 1, 1, 1, '2021-04-08 11:21:01', '0000-00-00 00:00:00');
 
 -- --------------------------------------------------------
 
@@ -3560,6 +3570,13 @@ CREATE TABLE `pms_project_list_tbl` (
   `updatedAt` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+--
+-- Dumping data for table `pms_project_list_tbl`
+--
+
+INSERT INTO `pms_project_list_tbl` (`projectListID`, `projectListCode`, `projectListName`, `projectListDescription`, `projectListFrom`, `projectListTo`, `projectListClientID`, `projectListManagerID`, `projectListLeaderID`, `projectListMemberID`, `projectListPriorityLevel`, `projectListStatus`, `createdBy`, `updatedBy`, `createdAt`, `updatedAt`) VALUES
+(4, 'PRO-21-00001', 'TEST', 'TEST', '2021-03-30', '2021-03-30', 1, 1, 2, '2|3', 3, 1, 0, 0, '2021-04-08 03:24:17', '2021-04-08 03:24:17');
+
 -- --------------------------------------------------------
 
 --
@@ -3583,7 +3600,8 @@ CREATE TABLE `pms_project_milestone_tbl` (
 --
 
 INSERT INTO `pms_project_milestone_tbl` (`projectMilestoneID`, `projectMilestoneCode`, `projectMilestoneName`, `projectMilestoneDescription`, `projectMilestoneStatus`, `createdBy`, `updatedBy`, `createdAt`, `updatedAt`) VALUES
-(5, 'MIL-21-00001', 'Milestone 1', 'Milestone Desc', 1, 0, 0, '2021-03-18 01:25:52', '2021-03-18 01:25:52');
+(5, 'MIL-21-00001', 'Milestone 1', 'Milestone Desc', 1, 0, 0, '2021-03-18 01:25:52', '2021-03-18 01:25:52'),
+(6, 'MIL-21-00002', 'TEST', 'TEST', 1, 0, 1, '2021-04-08 03:06:26', '2021-04-08 03:06:39');
 
 --
 -- Indexes for dumped tables
@@ -3734,6 +3752,12 @@ ALTER TABLE `hris_job_posting_tbl`
   ADD PRIMARY KEY (`jobID`);
 
 --
+-- Indexes for table `hris_leave_request_tbl`
+--
+ALTER TABLE `hris_leave_request_tbl`
+  ADD PRIMARY KEY (`leaveRequestID`);
+
+--
 -- Indexes for table `hris_leave_tbl`
 --
 ALTER TABLE `hris_leave_tbl`
@@ -3879,7 +3903,7 @@ ALTER TABLE `fms_chart_of_accounts_tbl`
 -- AUTO_INCREMENT for table `gen_approval_setup_tbl`
 --
 ALTER TABLE `gen_approval_setup_tbl`
-  MODIFY `approvalID` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=131;
+  MODIFY `approvalID` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=133;
 
 --
 -- AUTO_INCREMENT for table `gen_ledger_classification_tbl`
@@ -3921,7 +3945,7 @@ ALTER TABLE `gen_roles_permission_tbl`
 -- AUTO_INCREMENT for table `gen_system_notification_tbl`
 --
 ALTER TABLE `gen_system_notification_tbl`
-  MODIFY `notificationID` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
+  MODIFY `notificationID` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
 
 --
 -- AUTO_INCREMENT for table `gen_user_account_tbl`
@@ -3951,7 +3975,7 @@ ALTER TABLE `hris_branch_tbl`
 -- AUTO_INCREMENT for table `hris_change_schedule_tbl`
 --
 ALTER TABLE `hris_change_schedule_tbl`
-  MODIFY `changeScheduleID` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `changeScheduleID` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT for table `hris_code_conduct_category_tbl`
@@ -4008,6 +4032,12 @@ ALTER TABLE `hris_job_posting_tbl`
   MODIFY `jobID` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
+-- AUTO_INCREMENT for table `hris_leave_request_tbl`
+--
+ALTER TABLE `hris_leave_request_tbl`
+  MODIFY `leaveRequestID` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+
+--
 -- AUTO_INCREMENT for table `hris_leave_tbl`
 --
 ALTER TABLE `hris_leave_tbl`
@@ -4035,7 +4065,7 @@ ALTER TABLE `hris_official_business_tbl`
 -- AUTO_INCREMENT for table `hris_overtime_request_tbl`
 --
 ALTER TABLE `hris_overtime_request_tbl`
-  MODIFY `overtimeRequestID` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `overtimeRequestID` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `hris_philhealth_table_tbl`
@@ -4119,19 +4149,19 @@ ALTER TABLE `pms_category_tbl`
 -- AUTO_INCREMENT for table `pms_client_tbl`
 --
 ALTER TABLE `pms_client_tbl`
-  MODIFY `clientID` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `clientID` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `pms_project_list_tbl`
 --
 ALTER TABLE `pms_project_list_tbl`
-  MODIFY `projectListID` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `projectListID` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `pms_project_milestone_tbl`
 --
 ALTER TABLE `pms_project_milestone_tbl`
-  MODIFY `projectMilestoneID` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `projectMilestoneID` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

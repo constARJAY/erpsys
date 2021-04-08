@@ -16,7 +16,7 @@ $(document).ready(function () {
 			.DataTable({
 				proccessing: false,
 				serverSide: false,
-				// scrollX: true,
+				scrollX: true,
 				scrollCollapse: true,
 				columnDefs: [
 					{ targets: 0, width: 80 },
@@ -24,9 +24,8 @@ $(document).ready(function () {
 					{ targets: 2, width: 150 },
 					{ targets: 3, width: 150 },
 					{ targets: 4, width: 150 },
-					{ targets: 5, width: 150 },
+					{ targets: 5, width: 80 },
 					{ targets: 6, width: 80 },
-					{ targets: 7, width: 80 },
 				],
 			});
 
@@ -36,7 +35,7 @@ $(document).ready(function () {
 			.DataTable({
 				proccessing: false,
 				serverSide: false,
-				// scrollX: true,
+				scrollX: true,
 				scrollCollapse: true,
 				columnDefs: [
 					{ targets: 0, width: 80 },
@@ -44,9 +43,8 @@ $(document).ready(function () {
 					{ targets: 2, width: 150 },
 					{ targets: 3, width: 150 },
 					{ targets: 4, width: 150 },
-					{ targets: 5, width: 150 },
+					{ targets: 5, width: 80 },
 					{ targets: 6, width: 80 },
-					{ targets: 7, width: 80 },
 				],
 			});
 	}
@@ -108,12 +106,11 @@ $(document).ready(function () {
         <table class="table table-bordered table-striped table-hover" id="tableForApprroval">
             <thead>
                 <tr>
-                    <th>Code</th>
+                    <th>Document Code</th>
                     <th>Employee Name</th>
 					<th>Date Created</th>
                     <th>Date</th>
                     <th>Time In/Time Out</th>
-                    <th>Reason</th>
                     <th>Status</th>
                     <th>Action</th>
                 </tr>
@@ -137,7 +134,6 @@ $(document).ready(function () {
 					<td>${submitat}</td>
 					<td>${moment(item.no_Timein_timeoutDate).format("MMMM DD, YYYY")}</td>
 					<td>${item.no_Timein_timeoutTimeIn} - ${item.no_Timein_timeoutTimeOut}</td>
-					<td>${item.no_Timein_timeoutReason}</td>
 					<td class="text-center">${getStatusStyle(item.no_Timein_timeoutStatus)}</td>
 					<td class="text-center">
 						${button}
@@ -177,12 +173,11 @@ $(document).ready(function () {
         <table class="table table-bordered table-striped table-hover" id="tableMyForms">
             <thead>
                 <tr>
-                    <th>Code</th>
+                    <th>Document Code</th>
                     <th>Employee Name</th>
 					<th>Date Created</th>
                     <th>Date</th>
                     <th>Time In/Time Out</th>
-                    <th>Reason</th>
                     <th>Status</th>
                     <th>Action</th>
                 </tr>
@@ -216,7 +211,6 @@ $(document).ready(function () {
 				<td>${submitat}</td>
                 <td>${moment(item.no_Timein_timeoutDate).format("MMMM DD, YYYY")}</td>
                 <td>${item.no_Timein_timeoutTimeIn} - ${item.no_Timein_timeoutTimeOut}</td>
-                <td>${item.no_Timein_timeoutReason}</td>
                 <td class="text-center">${getStatusStyle(item.no_Timein_timeoutStatus)}</td>
                 <td class="text-center">
                     ${button}
@@ -329,6 +323,7 @@ $(document).ready(function () {
 			no_Timein_timeoutID      = "",
 			no_Timein_timeoutCode    = "",
 			employeeID            	 = "",
+			no_Timein_timeoutNegligence ="",
 			no_Timein_timeoutDate    = "",
 			no_Timein_timeoutTimeIn  = "",
 			no_Timein_timeoutTimeOut = "",
@@ -430,7 +425,7 @@ $(document).ready(function () {
                     <input type="text" class="form-control" disabled value="Junior Developer I">
                 </div>
             </div>
-            <div class="col-md-4 col-sm-12">
+            <div class="col-md-2 col-sm-12">
                 <div class="form-group">
                     <label>Date ${!disabled ? "<code>*</code>" : ""}</label>
                     <input type="button" 
@@ -446,6 +441,26 @@ $(document).ready(function () {
                     <div class="d-block invalid-feedback" id="invalid-changeScheduleDate"></div>
                 </div>
             </div>
+			<div class="col-md-2 col-sm-12">
+                <div class="form-group">
+                    <label>Negligence ${!disabled ? "<code>*</code>" : ""}</label>
+					<select 
+					class="form-control validate select2" 
+					id="negligence"
+					no_Timein_timeoutTimeIn="no_Timein_timeoutTimeIn"
+					${disabled}
+					name="no_Timein_timeoutNegligence">
+					<option disabled selected>Select Negligence</option>
+					<option value="1"  ${data && no_Timein_timeoutNegligence == "1" && "selected"}>No Time In</option>
+					<option value="2"  ${data && no_Timein_timeoutNegligence == "2" && "selected"}>No Time out</option>
+					<option value="3"  ${data && no_Timein_timeoutNegligence == "3" && "selected"}>Both</option>
+				  </select>
+                    <div class="d-block invalid-feedback" id="invalid-changeScheduleDate"></div>
+                </div>
+            </div>
+			
+
+
             <div class="col-md-4 col-sm-12">
                 <div class="form-group">
                     <label>Time In ${!disabled ? "<code>*</code>" : ""}</label>
@@ -453,7 +468,7 @@ $(document).ready(function () {
                         class="form-control timeIn" 
                         id="no_Timein_timeoutTimeIn" 
                         name="no_Timein_timeoutTimeIn" 
-                        required
+						disabled
                         value="${no_Timein_timeoutTimeIn}"
 						${disabled}>
                     <div class="d-block invalid-feedback" id="invalid-no_Timein_timeoutTimeIn"></div>
@@ -466,7 +481,7 @@ $(document).ready(function () {
                         class="form-control timeOut" 
                         id="no_Timein_timeoutTimeOut" 
                         name="no_Timein_timeoutTimeOut" 
-                        required
+						disabled
                         value="${no_Timein_timeoutTimeOut}"
 						${disabled}>
                     <div class="d-block invalid-feedback" id="invalid-no_Timein_timeoutTimeOut"></div>
@@ -500,7 +515,15 @@ $(document).ready(function () {
 			$("#page_content").html(html);
 			initAll();
 			initDataTables();
-			data ? initInputmaskTime(false) : initInputmaskTime();
+			if(data){
+				initInputmaskTime(false) 
+			}else{
+				initInputmaskTime();
+				$("#no_Timein_timeoutDate").val(moment(new Date).format("MMMM DD, YYYY"));
+			}
+			
+			$("#no_Timein_timeoutDate").data("daterangepicker").minDate = moment();
+			// data ? initInputmaskTime(false) : initInputmaskTime();
 			return html;
 		}, 500);
 	}
@@ -666,7 +689,9 @@ $(document).ready(function () {
 
 	// ----- CHANGE TIME TO -----
 	$(document).on("keyup", ".timeOut", function () {
+	
 		checkTimeRange($(this).attr("id"));
+		//console.log($(this).attr("id"));
 	});
 	// ----- END CHANGE TIME TO -----
 
@@ -749,30 +774,79 @@ $(document).ready(function () {
 
 	// ----- SAVE DOCUMENT -----
 	$(document).on("click", "#btnSave", function () {
-		const validate = validateForm("form_change_schedule");
-		const validateTime = checkTimeRange(false, true);
-		if (validate && validateTime) {
-			const action = "insert"; // CHANGE
-			const feedback = generateCode(
-				"SCH",
-				false,
-				"hris_on_timein_timeout_tbl",
-				"no_Timein_timeoutCode"
-			);
-
-			const data = getData(action, 0, "save", feedback);
-
-			formConfirmation(
-				"save",
-				"insert",
-				"NO TIME-IN / TIME-OUT",
-				"",
-				"form_change_schedule",
-				data,
-				true,
-				myFormsContent
-			);
+		var getNegligenceValue = $("#negligence option:selected").val();
+		var boolean = false;
+		if(getNegligenceValue == "2"){
+			if($("#no_Timein_timeoutTimeOut").val() != "00:00" ){
+			
+				boolean = true;
+			}else{
+				$("#no_Timein_timeoutTimeOut").focus();
+				$("#no_Timein_timeoutTimeOut").addClass("is-invalid")
+				$("#invalid-no_Timein_timeoutTimeOut").addClass("is-invalid")
+				$("#invalid-no_Timein_timeoutTimeOut").text("Invalid time range")
+			}
 		}
+
+		if(getNegligenceValue == "1"){
+			if($("#no_Timein_timeoutTimeIn").val() != "00:00"){
+				boolean = true;
+			}else{
+				$("#no_Timein_timeoutTimeIn").focus();
+				$("#no_Timein_timeoutTimeIn").addClass("is-invalid")
+				$("#invalid-no_Timein_timeoutTimeIn").addClass("is-invalid")
+				$("#invalid-no_Timein_timeoutTimeIn").text("Invalid time range")
+			}
+		}
+
+		if(getNegligenceValue == "3"){
+			if($("#no_Timein_timeoutTimeIn").val() != "00:00" && $("#no_Timein_timeoutTimeOut").val() != "00:00" ){
+				
+				boolean = true;
+			}else{
+				if($("#no_Timein_timeoutTimeIn").val() == "00:00"){
+					$("#no_Timein_timeoutTimeIn").focus();
+					$("#no_Timein_timeoutTimeIn").addClass("is-invalid")
+					$("#invalid-no_Timein_timeoutTimeIn").addClass("is-invalid")
+					$("#invalid-no_Timein_timeoutTimeIn").text("Invalid time range")
+				}
+
+				if($("#no_Timein_timeoutTimeOut").val() == "00:00"){
+					$("#no_Timein_timeoutTimeOut").focus();
+					$("#no_Timein_timeoutTimeOut").addClass("is-invalid")
+					$("#invalid-no_Timein_timeoutTimeOut").addClass("is-invalid")
+					$("#invalid-no_Timein_timeoutTimeOut").text("Invalid time range")
+				}
+			}
+		}
+
+		if(boolean == true){
+			const validate = validateForm("form_change_schedule");
+			const validateTime = checkTimeRange(false, true);
+			if (validate && validateTime) {
+				const action = "insert"; // CHANGE
+				const feedback = generateCode(
+					"SCH",
+					false,
+					"hris_on_timein_timeout_tbl",
+					"no_Timein_timeoutCode"
+				);
+	
+				const data = getData(action, 0, "save", feedback);
+	
+				formConfirmation(
+					"save",
+					"insert",
+					"NO TIME-IN / TIME-OUT",
+					"",
+					"form_change_schedule",
+					data,
+					true,
+					myFormsContent
+				);
+			}
+		}
+		
 	});
 	// ----- END SAVE DOCUMENT -----
 
@@ -780,43 +854,90 @@ $(document).ready(function () {
 	// ----- SUBMIT DOCUMENT -----
 	$(document).on("click", "#btnSubmit", function () {
 		const id = $(this).attr("no_Timein_timeoutID");
-
-		const validate = validateForm("form_change_schedule");
-		const validateTime = checkTimeRange(false, true);
-
-		if (validate && validateTime) {
-			const feedback = $(this).attr("no_Timein_timeoutCode")
-			? $(this).attr("no_Timein_timeoutCode")
-			: generateCode(
-					"SCH",
-					false,
-					"hris_on_timein_timeout_tbl",
-					"no_Timein_timeoutCode",
-					`employeeID = ${sessionID}`
-			  );
-			  
-			const action = id && feedback ? "update" : "insert";
-
-			const data = getData(action, 1, "submit", feedback, id);
+		var getNegligenceValue = $("#negligence option:selected").val();
+		var boolean = false;
+		if(getNegligenceValue == "2"){
+			if($("#no_Timein_timeoutTimeOut").val() != "00:00" ){
 			
-			let notificationData = {
-				moduleID:                58,
-				notificationTitle:       "No Time-in/ Time-out",
-				notificationDescription: `${sessionID} asked for your approval.`,
-				notificationType:        2,
-				employeeID: getNotificationEmployeeID(data["tableData[approversID]"], data["tableData[approversDate]"]),
-			};
-			formConfirmation(
-				"submit",
-				action,
-				"NO TIME-IN / TIME-OUT",
-				"",
-				"form_change_schedule",
-				data,
-				true,
-				pageContent,
-				notificationData
-			);
+				boolean = true;
+			}else{
+				$("#no_Timein_timeoutTimeOut").focus();
+				$("#no_Timein_timeoutTimeOut").addClass("is-invalid")
+				$("#invalid-no_Timein_timeoutTimeOut").addClass("is-invalid")
+				$("#invalid-no_Timein_timeoutTimeOut").text("Invalid time range")
+			}
+		}
+
+		if(getNegligenceValue == "1"){
+			if($("#no_Timein_timeoutTimeIn").val() != "00:00"){
+				boolean = true;
+			}else{
+				$("#no_Timein_timeoutTimeIn").focus();
+				$("#no_Timein_timeoutTimeIn").addClass("is-invalid")
+				$("#invalid-no_Timein_timeoutTimeIn").addClass("is-invalid")
+				$("#invalid-no_Timein_timeoutTimeIn").text("Invalid time range")
+			}
+		}
+
+		if(getNegligenceValue == "3"){
+			if($("#no_Timein_timeoutTimeIn").val() != "00:00" && $("#no_Timein_timeoutTimeOut").val() != "00:00" ){
+			
+				boolean = true;
+			}else{
+				if($("#no_Timein_timeoutTimeIn").val() == "00:00"){
+					$("#no_Timein_timeoutTimeIn").focus();
+					$("#no_Timein_timeoutTimeIn").addClass("is-invalid")
+					$("#invalid-no_Timein_timeoutTimeIn").addClass("is-invalid")
+					$("#invalid-no_Timein_timeoutTimeIn").text("Invalid time range")
+				}
+
+				if($("#no_Timein_timeoutTimeOut").val() == "00:00"){
+					$("#no_Timein_timeoutTimeOut").focus();
+					$("#no_Timein_timeoutTimeOut").addClass("is-invalid")
+					$("#invalid-no_Timein_timeoutTimeOut").addClass("is-invalid")
+					$("#invalid-no_Timein_timeoutTimeOut").text("Invalid time range")
+				}
+			}
+		}
+		if(boolean == true){
+
+			const validate = validateForm("form_change_schedule");
+			const validateTime = checkTimeRange(false, true);
+
+			if (validate && validateTime) {
+				const feedback = $(this).attr("no_Timein_timeoutCode")
+				? $(this).attr("no_Timein_timeoutCode")
+				: generateCode(
+						"SCH",
+						false,
+						"hris_on_timein_timeout_tbl",
+						"no_Timein_timeoutCode",
+						`employeeID = ${sessionID}`
+				);
+				
+				const action = id && feedback ? "update" : "insert";
+
+				const data = getData(action, 1, "submit", feedback, id);
+				
+				let notificationData = {
+					moduleID:                58,
+					notificationTitle:       "No Time-in/ Time-out",
+					notificationDescription: `${sessionID} asked for your approval.`,
+					notificationType:        2,
+					employeeID: getNotificationEmployeeID(data["tableData[approversID]"], data["tableData[approversDate]"]),
+				};
+				formConfirmation(
+					"submit",
+					action,
+					"NO TIME-IN / TIME-OUT",
+					"",
+					"form_change_schedule",
+					data,
+					true,
+					pageContent,
+					notificationData
+				);
+			}
 		}
 	});
 	// ----- END SUBMIT DOCUMENT -----
@@ -933,6 +1054,54 @@ $(document).ready(function () {
 		}
 	})
 	// ----- END APPROVE DOCUMENT -----
+	
+	// ----- CONDITION FOR NEGLIGENCE -----
+	$(document).on("change", "#negligence", function() {
+		var negligenceValue = $("#negligence option:selected").val();
+		if(negligenceValue == "2"){
+			$("#no_Timein_timeoutTimeIn").prop("disabled",true);
+			$("#no_Timein_timeoutTimeIn").removeAttr("required");
+			$("#no_Timein_timeoutTimeIn").val("00:00");
+			$("#no_Timein_timeoutTimeIn").removeClass("is-invalid").removeClass("is-valid").removeClass("validated");
+			$("#invalid-no_Timein_timeoutTimeIn").text("").removeClass("is-invalid").removeClass("is-valid").removeClass("validated");
+
+
+			$("#no_Timein_timeoutTimeOut").prop("disabled",false);
+			$("#no_Timein_timeoutTimeOut").attr("required","");
+			$("#no_Timein_timeoutTimeOut").val("00:00");
+		}
+		if(negligenceValue == "1"){
+			$("#no_Timein_timeoutTimeOut").prop("disabled",true);
+			$("#no_Timein_timeoutTimeOut").removeAttr("required");
+			$("#no_Timein_timeoutTimeOut").val("00:00");
+			$("#no_Timein_timeoutTimeOut").removeClass("is-invalid").removeClass("is-valid").removeClass("validated");
+			$("#invalid-no_Timein_timeoutTimeOut").text("").removeClass("is-invalid").removeClass("is-valid").removeClass("validated");
+
+			$("#no_Timein_timeoutTimeIn").prop("disabled",false);
+			$("#no_Timein_timeoutTimeIn").attr("required","");
+			$("#no_Timein_timeoutTimeIn").val("00:00");
+			
+		}
+		if(negligenceValue == "3"){
+			$("#no_Timein_timeoutTimeIn").val("00:00");
+			$("#no_Timein_timeoutTimeIn").removeClass("is-invalid").removeClass("is-valid").removeClass("validated");
+			$("#invalid-no_Timein_timeoutTimeIn").text("").removeClass("is-invalid").removeClass("is-valid").removeClass("validated");
+			$("#no_Timein_timeoutTimeIn").prop("disabled",false);
+			$("#no_Timein_timeoutTimeIn").attr("required","");
+
+
+			$("#no_Timein_timeoutTimeOut").val("00:00");
+			$("#no_Timein_timeoutTimeOut").removeClass("is-invalid").removeClass("is-valid").removeClass("validated");
+			$("#invalid-no_Timein_timeoutTimeOut").text("").removeClass("is-invalid").removeClass("is-valid").removeClass("validated");
+			$("#no_Timein_timeoutTimeOut").prop("disabled",false);
+			$("#no_Timein_timeoutTimeOut").attr("required","");
+
+
+
+		}
+	});
+	// ----- END CONDITION FOR NEGLIGENCE -----
+
 
 
 	// ----- REJECT DOCUMENT -----
@@ -1010,4 +1179,27 @@ $(document).ready(function () {
 		}
 	})
 	// ----- END REJECT DOCUMENT -----
+
+	// ----- NAV LINK -----
+	$(document).on("click", ".nav-link", function () {
+		const tab = $(this).attr("href");
+		if (tab == "#forApprovalTab") {
+			forApprovalContent();
+		}
+		if (tab == "#myFormsTab") {
+			myFormsContent();
+		}
+	});
+	// ----- END NAV LINK -----
 });
+// ----- VIEW NOTIFICATION -----
+function viewNotification() {
+	let url = window.document.URL;
+	url = url.split("?view_id=");
+	if (url.length > 1) {
+		let id = url[1];
+		$(`.btnView[id=${id}]`).trigger("click");
+	}
+}
+// ----- END VIEW NOTIFICATION -----
+

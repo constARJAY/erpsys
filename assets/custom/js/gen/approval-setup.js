@@ -96,7 +96,6 @@ $(document).on("click", "#update_attach-designation", function(){
             if(data){ 
             let position_list   = viewAttachDesignation(moduleID);
             // let buttonName  =   approvalDesignation.length > 0  ? "Update Selected Designation/s" : "Select Designation/s"
-            console.log(position_list);
                 position_list   +=   `  <div class="card my-0 p-1">
                                             <div class="d-flex justify-content-center align-items-center">
                                                 <button class="btn btn-primary" module="${moduleID}" id="btn-approval_designation">Update Attach Designation</button>

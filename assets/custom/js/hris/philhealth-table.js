@@ -12,10 +12,7 @@ $(document).ready(function(){
             scrollX:        true,
             scrollCollapse: true,
             columnDefs: [
-                { targets: 0, width: 10 },
-                { targets: 1, width: 50 },
-                { targets: 2, width: 50 },
-                { targets: 3, width: 50 },
+                { targets: 0, width: "10%" }
             ],
         });
     }

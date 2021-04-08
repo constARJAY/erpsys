@@ -155,11 +155,11 @@ $(document).ready(function () {
 					{ targets: 1,  width: 150 },
 					{ targets: 2,  width: 300 },
 					{ targets: 3,  width: 150 },
-					{ targets: 4,  width: 150 },
-					{ targets: 5,  width: 150 },
-					{ targets: 6,  width: 150 },
-					{ targets: 7,  width: 150 },
-					{ targets: 8,  width: 150 },
+					{ targets: 4,  width: 100 },
+					{ targets: 5,  width: 100 },
+					{ targets: 6,  width: 100 },
+					{ targets: 7,  width: 100 },
+					{ targets: 8,  width: 100 },
 					{ targets: 9,  width: 150 },
 					{ targets: 10, width: 80 }
 				],
@@ -190,9 +190,9 @@ $(document).ready(function () {
                 <table class="table table-bordered table-striped table-hover" id="tableInventoryVendor">
                     <thead>
                         <tr style="white-space:nowrap">
-                            <th>Supplier Code</th>
-                            <th>Supplier Name</th>
-                            <th>Supplier Address</th>
+                            <th>Vendor Code</th>
+                            <th>Vendor Name</th>
+                            <th>Vendor Address</th>
                             <th>Contact Person</th>
                             <th>Email Address</th>
                             <th>TIN</th>
@@ -569,7 +569,7 @@ $(document).ready(function () {
             data["tableName"]            = "ims_inventory_vendor_tbl";
             data["feedback"]             = $("[name=inventoryVendorName]").val();
 
-            sweetAlertConfirmation("add", "Inventory Vendor", "modal_inventory_vendor", null, data, true, tableContent);
+            sweetAlertConfirmation("add", "Vendor", "modal_inventory_vendor", null, data, true, tableContent);
 		}
 	});
 	// ----- END SAVE MODAL -----
@@ -617,7 +617,7 @@ $(document).ready(function () {
 
 			sweetAlertConfirmation(
 				"update",
-				"Inventory Vendor",
+				"Vendor",
 				"modal_inventory_vendor",
 				"",
 				data,
@@ -635,7 +635,7 @@ $(document).ready(function () {
 		if (!formEmpty) {
 			sweetAlertConfirmation(
 				"cancel",
-				"Inventory Vendor",
+				"Vendor",
 				"modal_inventory_vendor"
 			);
 		} else {

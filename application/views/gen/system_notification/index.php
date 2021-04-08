@@ -5,7 +5,8 @@
 				<div class="col-lg-6 col-md-12">
 					<ul class="breadcrumb pl-0 pb-0 ">
 						<li class="breadcrumb-item"><a href="#"><i class="zmdi zmdi-home"></i> Dashboard</a></li>
-						<li class="breadcrumb-item active"><i class="zmdi zmdi-hotel"></i> &nbsp;System Notification</li>
+                        <li class="breadcrumb-item d-flex align-items-center"><a href="#"><i class="zmdi zmdi-settings"></i> System Settings</a></li>
+						<li class="breadcrumb-item active"> System Notification</li>
 					</ul>
 					<h1 class="mt-3">System Notification</h1>
 					<span>This module is used to manage system notification details.</span>
@@ -30,7 +31,7 @@
 		<div class="row clearfix row-deck">
             <div class="col-12">
                 <div class="card">
-                    <div class="body">
+                    <div class="card-body">
                         <div class="tab-content">
                             <div class="row">
                                 <div class="col-md-4 col-sm-12">
@@ -77,7 +78,7 @@
                                                 ?>
                                                     <div class="w-100 text-center">
                                                         <img src="<?= base_url('assets/modal/no-notification.svg') ?>" alt="No notification" width="300" height="200">
-                                                        <h4>No notification found.</h4>
+                                                        <h4>No notification found</h4>
                                                     </div>
                                                 <?php
                                                     }
@@ -121,7 +122,7 @@
                                                 ?>
                                                     <div class="w-100 text-center">
                                                         <img src="<?= base_url('assets/modal/no-notification.svg') ?>" alt="No notification" width="300" height="200">
-                                                        <h4>No notification found.</h4>
+                                                        <h4>No notification found</h4>
                                                     </div>
                                                 <?php
                                                     }
@@ -165,7 +166,7 @@
                                                 ?>
                                                     <div class="w-100 text-center">
                                                         <img src="<?= base_url('assets/modal/no-notification.svg') ?>" alt="No notification" width="300" height="200">
-                                                        <h4>No notification found.</h4>
+                                                        <h4>No notification found</h4>
                                                     </div>
                                                 <?php
                                                     }
@@ -209,7 +210,7 @@
                                                 ?>
                                                     <div class="w-100 text-center">
                                                         <img src="<?= base_url('assets/modal/no-notification.svg') ?>" alt="No notification" width="300" height="200">
-                                                        <h4>No notification found.</h4>
+                                                        <h4>No notification found</h4>
                                                     </div>
                                                 <?php
                                                     }
@@ -253,7 +254,7 @@
                                                 ?>
                                                     <div class="w-100 text-center">
                                                         <img src="<?= base_url('assets/modal/no-notification.svg') ?>" alt="No notification" width="300" height="200">
-                                                        <h4>No notification found.</h4>
+                                                        <h4>No notification found</h4>
                                                     </div>
                                                 <?php
                                                     }

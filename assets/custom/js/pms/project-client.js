@@ -151,15 +151,8 @@ $(document).on("change", "[name=clientCity]", function() {
             scrollCollapse: true,
             columnDefs: [
                 { targets: 0, width: "10%" },
-                { targets: 1, width: "10%" },
-                { targets: 2, width: "10%" },
-                { targets: 3, width: "10%" },
-                { targets: 4, width: "10%" },
-                { targets: 5, width: "10%" },
-                { targets: 6, width: "10%" },
-                { targets: 7, width: "10%" },
-                { targets: 8, width: "10%" },
-                { targets: 9, width: "10%" }
+
+                { targets: 9, width: 80 }
             ],
         });
     }
@@ -457,7 +450,7 @@ $(document).on("change", "[name=clientCity]", function() {
                     </div>
                     <div class="col-xl-4 col-lg-6 col-md-6 col-sm-12">
                         <div class="form-group">
-                            <label>Mobile No. <span class="text-danger font-weight-bold">*</span></label>
+                            <label>Mobile No.</label>
                                 <input 
                                 type="text" 
                                 class="form-control validate inputmask" 
@@ -474,7 +467,7 @@ $(document).on("change", "[name=clientCity]", function() {
                     </div>
                     <div class="col-xl-4 col-lg-6 col-md-6 col-sm-12">
                         <div class="form-group">
-                            <label>Telephone No. <span class="text-danger font-weight-bold">*</span></label>
+                            <label>Telephone No.</label>
                                 <input type="text" 
                                 class="form-control validate inputmask" 
                                 name="clientTelephoneNo" 
@@ -493,7 +486,7 @@ $(document).on("change", "[name=clientCity]", function() {
                             <label>Website <small class="text-muted">(Optional)</small></label>
                             <input 
                                 type="text" 
-                                class="form-control validate" 
+                                class="form-control" 
                                 name="clientBrandName" 
                                 id="input_clientBrandName" 
                                 data-allowcharacters="[A-Z][a-z][0-9][/][.][-][:]" 
@@ -501,7 +494,6 @@ $(document).on("change", "[name=clientCity]", function() {
                                 maxlength="30" 
                                 value="${clientBrandName}"
                                 autocomplete="off">
-                       
                         </div>
                     </div>
                     <div class="col-md-6 col-sm-12">

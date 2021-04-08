@@ -64,7 +64,7 @@
 					<div class="login-form" id="login-form">
                         <div class="confirmation"></div>
 						<div class="wrap-input100 validate-input mb-2" data-validate="Please provide a username.">
-							<input class="input100 login-input validate" data-allowcharacters="[a-z][A-Z][0-9][ ][,][.][@][-][_]" minlength="5" maxlength="50" type="text" id="username" placeholder="Username">
+							<input class="input100 login-input validate" data-allowcharacters="[a-z][A-Z][0-9][ ][,][.][@][-][_]" minlength="5" maxlength="50" type="text" id="username" autocomplete="off" placeholder="Username">
 							
 							<span class="focus-input100"></span>
 							<span class="symbol-input100">

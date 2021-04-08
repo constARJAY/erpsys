@@ -13,13 +13,9 @@ $(document).ready(function(){
           scrollCollapse: true,
           columnDefs: [
               { targets: 0, width: "10%"  },
-              { targets: 1, width: "10%" },
               { targets: 2, width: "20%" },
               { targets: 3, width: "20%" },
-              { targets: 4, width: "10%" },
-              { targets: 5, width: "10%" },
-              { targets: 6, width: "10%"  },
-              { targets: 7, width: "10%"  },
+              { targets: 7, width: 80  },
           ],
       });
   }
@@ -424,13 +420,13 @@ $(document).ready(function(){
   if (validate) {
 
     let data = getFormData("modalJobPosting", true);
-    data["tableData[jobCode]"] = generateCode("VEN", false, "hris_job_posting_tbl", "jobCode");
+    data["tableData[jobCode]"] = generateCode("JPG", false, "hris_job_posting_tbl", "jobCode");
     data["tableData[createdBy]"] = sessionID;
     data["tableData[updatedBy]"] = sessionID;
     data["tableName"]            = "hris_job_posting_tbl";
     data["feedback"]             = $("[name=jobTitle]").val();
 
-    sweetAlertConfirmation("add", "Job Posting", "modalJobPosting", null, data, true, tableContent);
+    sweetAlertConfirmation("add", "Vacant Position", "modalJobPosting", null, data, true, tableContent);
       }
   });
   // ----- END SAVE MODAL -----
@@ -474,7 +470,7 @@ $(document).ready(function(){
 
 			sweetAlertConfirmation(
 				"update",
-				"Job Posting",
+				"Vacant Position",
 				"modalJobPosting",
 				"",
 				data,

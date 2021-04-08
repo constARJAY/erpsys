@@ -2,7 +2,7 @@
 	<div class="block-header pb-0">
 		<div class="container">
 			<div class="row clearfix">
-				<div class="col-lg-6 col-md-12">
+				<div class="col-lg-6 col-md-6">
 					<ul class="breadcrumb pl-0 pb-0 ">
 						<li class="breadcrumb-item"><a href="#"><i class="zmdi zmdi-home"></i> Dashboard</a></li>
 						<li class="breadcrumb-item"><i class="zmdi zmdi-folder"></i> &nbsp;Masterfiles</li>
@@ -11,7 +11,7 @@
 					<h1 class="mt-3" id="inv_headerID">List of Project Milestone</h1>
 					<span>This module is used to manage project milestone details.</span>
 				</div>
-				<div class="col-lg-6 col-md-12 text-md-right">
+				<div class="col-lg-6 col-md-6 text-md-right">
                         <button type="button" class="btn btn-default btn-add" id="btnAdd"> <i class="icon-plus"></i> Add Milestone</button>
                     </ul>
 				</div>

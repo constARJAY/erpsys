@@ -14,11 +14,10 @@ $(document).ready(function () {
 				scrollX: true,
 				scrollCollapse: true,
 				columnDefs: [
-					{ targets: 0, width: "15%" },
-					{ targets: 1, width: "20%" },
-					{ targets: 2, width: "45%" },
-					{ targets: 3, width: "10%" },
-					{ targets: 4, width: "10%" },
+					{ targets: 0, width: 80 },
+					{ targets: 1, width: "30%" },
+					{ targets: 2, width: "70%" },
+					{ targets: 3, width: 80 },
 				],
 			});
 	}
@@ -43,12 +42,11 @@ $(document).ready(function () {
 				let html = `
                 <table class="table table-bordered table-striped table-hover" id="tableInventoryConditions">
                     <thead>
-                        <tr class="text-center" style="white-space:nowrap">
-                            <th>No.</th>
+                        <tr style="white-space:nowrap">
+                            <th>Condition Code</th>
                             <th>Condition Name</th>
                             <th>Condition Description</th>
                             <th>Status</th>
-                            <th>Action</th>
                         </tr>
                     </thead>
                     <tbody>`;
@@ -70,16 +68,11 @@ $(document).ready(function () {
                     <span class="badge badge-outline-danger w-100">Inactive</span>`;
 
 					html += `
-                    <tr>
+                    <tr class="btnEdit" id="${item.conditionID}">
                         <td>${item.conditionCode}</td>
                         <td>${item.conditionName}</td>
                         <td>${item.conditionDescription}</td>
                         <td>${status}</td>
-                        <td>
-                            <button class="btn btn-edit btn-block btnEdit" 
-                            id="${item.conditionID}">
-                            <i class="fas fa-edit"></i> Edit</button>
-                        </td>
                     </tr>`;
 				});
 				html += `</tbody>
@@ -222,7 +215,7 @@ $(document).ready(function () {
 
 			sweetAlertConfirmation(
 				"add",
-				"Inventory Condition",
+				"Condition",
 				"modal_inventory_condition",
 				"",
 				data,
@@ -270,7 +263,7 @@ $(document).ready(function () {
 
 			sweetAlertConfirmation(
 				"update",
-				"Inventory Condition",
+				"Condition",
 				"modal_inventory_condition",
 				"",
 				data,
@@ -287,7 +280,7 @@ $(document).ready(function () {
 		if (!formEmpty) {
 			sweetAlertConfirmation(
 				"cancel",
-				"Inventory Condition",
+				"Condition",
 				"modal_inventory_condition"
 			);
 		} else {
