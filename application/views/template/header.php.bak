@@ -189,6 +189,15 @@
     <aside id="leftsidebar" class="sidebar">
         <div class="container">
             <div class="row clearfix">
+                <div class="side-search_bar">
+                    <li class="search_bar">
+                        <div class="input-group">
+                            <!-- <i class="icon-magnifier"></i> -->
+                            <input type="text" class="form-control" placeholder="Search module..." id="searchModule" list="moduleList" autocomplete="off">
+                        </div>
+                        <datalist id="moduleList"></datalist>
+                    </li>
+                </div>
                 <div class="col-12">
                     <div class="menu">
                         <ul class="list">
@@ -218,7 +227,7 @@
                             $html .= '
                             <li class="">
                                 <a href="javascript:void(0);" class="menu-toggle">
-                                    <img src="'.base_url("assets/upload-files/icons/$icon").'" height="25" width="25">
+                                    <img src="'.base_url("assets/upload-files/icons/$icon").'" height="20" width="20">
                                     <span class="ml-1">'.$category["categoryName"].'</span>
                                 </a>';
 
@@ -260,7 +269,7 @@
                         $html .= '
                         <li class="">
                             <a href="'.base_url().strtolower($category["controller"]).'">
-                                <img src="'.base_url("assets/upload-files/icons/$icon").'" height="25" width="25">
+                                <img src="'.base_url("assets/upload-files/icons/$icon").'" height="20" width="20">
                                 '.$category["name"].'
                             </a>
                         </li>';

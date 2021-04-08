@@ -76,7 +76,7 @@
     <!-- Page Loader -->
     <div class="page-loader-wrapper" base_url="<?= base_url() ?>" session="<?= $sessionID ?>" role="<?= $sessionRoleID ?>" designation="<?= $sessionDesignationID ?>">
         <div class="loader">
-            <div class="mt-3"><img class="zmdi-hc-spin w60" src="<?= base_url() ?>assets/images/loader.svg" alt="Amaze"></div>
+            <div class="mt-3"><img class="zmdi-hc-spin w60" src="<?= base_url() ?>assets/images/loader.svg" alt="ERP"></div>
             <p>Please wait...</p>        
         </div>
     </div>
@@ -84,7 +84,7 @@
     <!-- Save/Update Loader -->
     <div class="page-loader-wrapper" id="loader" style='display: none;'>
         <div class="loader">
-            <div class="mt-3"><img class="zmdi-hc-spin w60" src="<?= base_url() ?>assets/images/spinner.svg" alt="Amaze"></div>
+            <div class="mt-3"><img class="zmdi-hc-spin w60" src="<?= base_url() ?>assets/images/spinner.svg" alt="ERP"></div>
             <p>Saving...</p>        
         </div>
     </div>
@@ -99,7 +99,7 @@
                     <div class="d-flex justify-content-between align-items-center">
                         <div class="navbar-logo">
                             <a href="javascript:void(0);" class="bars"></a>
-                            <a class="navbar-brand" href="index.html"><img src="<?= base_url() ?>assets/images/logo.svg" width="30" alt="Amaze"><span class="ml-2">Amaze</span></a>
+                            <a class="navbar-brand" href="index.html"><img src="<?= base_url() ?>assets/images/BC-WHITE.png" width="165" alt="ERP"><span class="ml-2"></span></a>
                         </div>
                         <div class="d-flex justify-content-end justify-content-md-between align-items-center flex-grow-1">
                             <div class="d-flex align-items-center currently_maintain hidden-xs">
