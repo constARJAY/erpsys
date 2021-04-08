@@ -25,11 +25,6 @@
 	box-shadow: 0px 0px 15px 5px rgba(0, 0, 0, 0.1);
 }
 
-
-#moduleList{
-	color:green;
-}
-
 .table-responsive{
 	zoom:85%;
 }
@@ -145,6 +140,44 @@ body::-webkit-scrollbar,
 }
 
 body::-webkit-scrollbar-thumb,
+.modal::-webkit-scrollbar-thumb {
+	/*-webkit-box-shadow: inset 0 0 6px rgba(0,0,0,.3);*/
+	background-color: #dc3450;
+}
+
+.dataTables_scrollBody::-webkit-scrollbar-track,
+.modal::-webkit-scrollbar-track {
+	-webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+	background-color: #f7f7f7;
+}
+
+.dataTables_scrollBody::-webkit-scrollbar,
+.modal::-webkit-scrollbar {
+	width: 7px;
+	height: 10px;
+	background-color: #f7f7f7;
+}
+
+.dataTables_scrollBody::-webkit-scrollbar-thumb,
+.modal::-webkit-scrollbar-thumb {
+	/*-webkit-box-shadow: inset 0 0 6px rgba(0,0,0,.3);*/
+	background-color: #dc3450;
+}
+
+#tableMyFormsParent::-webkit-scrollbar-track,
+.modal::-webkit-scrollbar-track {
+	-webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+	background-color: #f7f7f7;
+}
+
+#tableMyFormsParent::-webkit-scrollbar,
+.modal::-webkit-scrollbar {
+	width: 7px;
+	height: 10px;
+	background-color: #f7f7f7;
+}
+
+#tableMyFormsParent::-webkit-scrollbar-thumb,
 .modal::-webkit-scrollbar-thumb {
 	/*-webkit-box-shadow: inset 0 0 6px rgba(0,0,0,.3);*/
 	background-color: #dc3450;
