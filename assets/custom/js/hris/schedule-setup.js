@@ -1,44 +1,53 @@
-$(document).ready(function(){
-        
-    // ----- DATATABLES -----
-    function initDataTables() {
-        if ($.fn.DataTable.isDataTable('#tableSssTable')){
-            $('#tableSssTable').DataTable().destroy();
-        }
-        
-        var table = $("#tableSssTable").css({"min-width": "100%"}).removeAttr('width').DataTable({
-            proccessing:    false,
-            serverSide:     false,
-            scrollX:        true,
-            scrollCollapse: true,
-            columnDefs: [
-                { targets: 0,  width: 10 },
-                { targets: 9,  width: 80 }
-            ],
-        });
-    }
-    initDataTables();
-    // ----- END DATATABLES -----
+$(document).ready(function () {
+	// ----- DATATABLES -----
+	function initDataTables() {
+		if ($.fn.DataTable.isDataTable("#tableSssTable")) {
+			$("#tableSssTable").DataTable().destroy();
+		}
 
+		var table = $("#tableSssTable")
+			.css({ "min-width": "100%" })
+			.removeAttr("width")
+			.DataTable({
+				proccessing: false,
+				serverSide: false,
+				scrollX: true,
+				scrollCollapse: true,
+				columnDefs: [
+					{ targets: 0, width: 10 },
+					{ targets: 1, width: 120 },
+					{ targets: 2, width: 130 },
+					{ targets: 3, width: 130 },
+					{ targets: 4, width: 130 },
+					{ targets: 5, width: 130 },
+					{ targets: 6, width: 130 },
+					{ targets: 7, width: 130 },
+					{ targets: 8, width: 130 },
+					{ targets: 9, width: 80 },
+				],
+			});
+	}
+	initDataTables();
+	// ----- END DATATABLES -----
 
-    // ----- TABLE CONTENT -----
-    function tableContent() {
-        preventRefresh(false);
+	// ----- TABLE CONTENT -----
+	function tableContent() {
+		preventRefresh(false);
 
-        // Reset the unique datas
-        uniqueData = []; 
+		// Reset the unique datas
+		uniqueData = [];
 
-        $.ajax({
-            url:      `${base_url}operations/getTableData`,
-            method:   'POST',
-            async:    false,
-            dataType: 'json',
-            data:     {tableName: "hris_schedule_setup_tbl"},
-            beforeSend: function() {
-                $("#table_content").html(preloader);
-            },
-            success: function(data) {
-                let html = `
+		$.ajax({
+			url: `${base_url}operations/getTableData`,
+			method: "POST",
+			async: false,
+			dataType: "json",
+			data: { tableName: "hris_schedule_setup_tbl" },
+			beforeSend: function () {
+				$("#table_content").html(preloader);
+			},
+			success: function (data) {
+				let html = `
                 <table class="table table-bordered table-striped table-hover" id="tableSssTable">
                     <thead>
                         <tr>
@@ -56,26 +65,69 @@ $(document).ready(function(){
                     </thead>
                     <tbody>`;
 
-                data.map((item, index, array) => {
-                    let unique = {
-                        id: item.scheduleID,
-                        scheduleName: item.scheduleName,
-                    };
-                    uniqueData.push(unique);
+				data.map((item, index, array) => {
+					let unique = {
+						id: item.scheduleID,
+						scheduleName: item.scheduleName,
+					};
+					uniqueData.push(unique);
 
-                    let status = item.scheduleStatus == 1 ? `
-                    <span class="badge badge-outline-success w-100">Active</span>` :
-                    `<span class="badge badge-outline-danger w-100">Inactive</span>`;
+					let status =
+						item.scheduleStatus == 1
+							? `
+                    <span class="badge badge-outline-success w-100">Active</span>`
+							: `<span class="badge badge-outline-danger w-100">Inactive</span>`;
 
-                    const monday    = item.mondayStatus == 1 ? `${item.mondayFrom} - ${item.mondayTo}` : "-";
-                    const tuesday   = item.tuesdayStatus == 1 ? `${item.tuesdayFrom} - ${item.tuesdayTo}` : "-";
-                    const wednesday = item.wednesdayStatus == 1 ? `${item.wednesdayFrom} - ${item.wednesdayTo}` : "-";
-                    const thursday  = item.thursdayStatus == 1 ? `${item.thursdayFrom} - ${item.thursdayTo}` : "-";
-                    const friday    = item.fridayStatus == 1 ? `${item.fridayFrom} - ${item.fridayTo}` : "-";
-                    const saturday  = item.saturdayStatus == 1 ? `${item.saturdayFrom} - ${item.saturdayTo}` : "-";
-                    const sunday    = item.sundayStatus == 1 ? `${item.sundayFrom} - ${item.sundayTo}` : "-";
+					const monday =
+						item.mondayStatus == 1
+							? `${moment("2021-04-09 " + item.mondayFrom).format(
+									"hh:mmA"
+							  )} - ${moment("2021-04-09 " + item.mondayTo).format("hh:mmA")}`
+							: "-";
+					const tuesday =
+						item.tuesdayStatus == 1
+							? `${moment("2021-04-09 " + item.tuesdayFrom).format(
+									"hh:mmA"
+							  )} - ${moment("2021-04-09 " + item.tuesdayTo).format("hh:mmA")}`
+							: "-";
+					const wednesday =
+						item.wednesdayStatus == 1
+							? `${moment("2021-04-09 " + item.wednesdayFrom).format(
+									"hh:mmA"
+							  )} - ${moment("2021-04-09 " + item.wednesdayTo).format(
+									"hh:mmA"
+							  )}`
+							: "-";
+					const thursday =
+						item.thursdayStatus == 1
+							? `${moment("2021-04-09 " + item.thursdayFrom).format(
+									"hh:mmA"
+							  )} - ${moment("2021-04-09 " + item.thursdayTo).format(
+									"hh:mmA"
+							  )}`
+							: "-";
+					const friday =
+						item.fridayStatus == 1
+							? `${moment("2021-04-09 " + item.fridayFrom).format(
+									"hh:mmA"
+							  )} - ${moment("2021-04-09 " + item.fridayTo).format("hh:mmA")}`
+							: "-";
+					const saturday =
+						item.saturdayStatus == 1
+							? `${moment("2021-04-09 " + item.saturdayFrom).format(
+									"hh:mmA"
+							  )} - ${moment("2021-04-09 " + item.saturdayTo).format(
+									"hh:mmA"
+							  )}`
+							: "-";
+					const sunday =
+						item.sundayStatus == 1
+							? `${moment("2021-04-09 " + item.sundayFrom).format(
+									"hh:mmA"
+							  )} - ${moment("2021-04-09 " + item.sundayTo).format("hh:mmA")}`
+							: "-";
 
-                    html += `
+					html += `
                     <tr class="btnEdit" id="${item.scheduleID}">
                         <td>${++index}</td>
                         <td>${item.scheduleName}</td>
@@ -88,72 +140,72 @@ $(document).ready(function(){
                         <td>${sunday}</td>
                         <td>${status}</td>
                     </tr>`;
-                })
-                html += `</tbody>
+				});
+				html += `</tbody>
                 </table>`;
 
-                setTimeout(() => {
-                    $("#table_content").html(html);
-                    initDataTables();
-                }, 500);
-            },
-            error: function() {
-                let html = `
+				setTimeout(() => {
+					$("#table_content").html(html);
+					initDataTables();
+				}, 500);
+			},
+			error: function () {
+				let html = `
                     <div class="w-100 h5 text-center text-danger>
                         There was an error fetching data.
                     </div>`;
-                $("#table_content").html(html);
-            }
-        })
-    }
-    tableContent();
-    // ----- END TABLE CONTENT -----
+				$("#table_content").html(html);
+			},
+		});
+	}
+	tableContent();
+	// ----- END TABLE CONTENT -----
 
+	// ----- MODAL CONTENT -----
+	function modalContent(data = false) {
+		let {
+			scheduleID = "",
+			scheduleName = "",
+			scheduleStatus = "1",
+			mondayFrom = "",
+			mondayTo = "",
+			mondayStatus = "",
+			tuesdayFrom = "",
+			tuesdayTo = "",
+			tuesdayStatus = "",
+			wednesdayFrom = "",
+			wednesdayTo = "",
+			wednesdayStatus = "",
+			thursdayFrom = "",
+			thursdayTo = "",
+			thursdayStatus = "",
+			fridayFrom = "",
+			fridayTo = "",
+			fridayStatus = "",
+			saturdayFrom = "",
+			saturdayTo = "",
+			saturdayStatus = "",
+			sundayFrom = "",
+			sundayTo = "",
+			sundayStatus = "",
+		} = data && data[0];
 
-    // ----- MODAL CONTENT -----
-    function modalContent(data = false) {
-
-        let  {
-            scheduleID      = "",
-            scheduleName    = "",
-            scheduleStatus  = "1",
-            mondayFrom      = "",
-            mondayTo        = "",
-            mondayStatus    = "",
-            tuesdayFrom     = "",
-            tuesdayTo       = "",
-            tuesdayStatus   = "",
-            wednesdayFrom   = "",
-            wednesdayTo     = "",
-            wednesdayStatus = "",
-            thursdayFrom    = "",
-            thursdayTo      = "",
-            thursdayStatus  = "",
-            fridayFrom      = "",
-            fridayTo        = "",
-            fridayStatus    = "",
-            saturdayFrom    = "",
-            saturdayTo      = "",
-            saturdayStatus  = "",
-            sundayFrom      = "",
-            sundayTo        = "",
-            sundayStatus    = "",
-        } = data && data[0];
-
-        let button = scheduleID ? `
+		let button = scheduleID
+			? `
         <button 
             class="btn btn-update"
             id="btnUpdate"
             scheduleID="${scheduleID}"><i class="fas fa-save"></i>
             Update
-        </button>` : `
+        </button>`
+			: `
         <button 
             class="btn btn-save"
             id="btnSave"><i class="fas fa-save"></i>
             Save
         </button>`;
 
-        let html = `
+		let html = `
         <div class="modal-body">
             <div class="row">
                 <div class="col-12">
@@ -175,7 +227,9 @@ $(document).ready(function(){
                         </thead>
                         <tbody>
                             <tr>
-                                <td><input type="checkbox" id="mondayStatus" name="mondayStatus" ${mondayStatus == 1 && "checked"}></td>
+                                <td><input type="checkbox" id="mondayStatus" name="mondayStatus" ${
+																	mondayStatus == 1 && "checked"
+																}></td>
                                 <td class="text-left">Monday</td>
                                 <td>
                                     <input type="text" class="form-control timeFrom text-center" id="input_mondayFrom" name="mondayFrom" required value="${mondayFrom}">
@@ -187,7 +241,9 @@ $(document).ready(function(){
                                 </td>
                             </tr>
                             <tr>
-                                <td><input type="checkbox" id="tuesdayStatus" name="tuesdayStatus" ${tuesdayStatus == 1 && "checked"}></td>
+                                <td><input type="checkbox" id="tuesdayStatus" name="tuesdayStatus" ${
+																	tuesdayStatus == 1 && "checked"
+																}></td>
                                 <td class="text-left">Tuesday</td>
                                 <td>
                                     <input type="text" class="form-control timeFrom text-center" id="input_tuesdayFrom" name="tuesdayFrom" required value="${tuesdayFrom}">
@@ -199,7 +255,9 @@ $(document).ready(function(){
                                 </td>
                             </tr>
                             <tr>
-                                <td><input type="checkbox" id="wednesdayStatus" name="wednesdayStatus" ${wednesdayStatus == 1 && "checked"}></td>
+                                <td><input type="checkbox" id="wednesdayStatus" name="wednesdayStatus" ${
+																	wednesdayStatus == 1 && "checked"
+																}></td>
                                 <td class="text-left">Wednesday</td>
                                 <td>
                                     <input type="text" class="form-control timeFrom text-center" id="input_wednesdayFrom" name="wednesdayFrom" required value="${wednesdayFrom}">
@@ -211,7 +269,9 @@ $(document).ready(function(){
                                 </td>
                             </tr>
                             <tr>
-                                <td><input type="checkbox" id="thursdayStatus"  name="thursdayStatus" ${thursdayStatus == 1 && "checked"}></td>
+                                <td><input type="checkbox" id="thursdayStatus"  name="thursdayStatus" ${
+																	thursdayStatus == 1 && "checked"
+																}></td>
                                 <td class="text-left">Thursday</td>
                                 <td>
                                     <input type="text" class="form-control timeFrom text-center" id="input_thursdayFrom" name="thursdayFrom" required value="${thursdayFrom}">
@@ -223,7 +283,9 @@ $(document).ready(function(){
                                 </td>
                             </tr>
                             <tr>
-                                <td><input type="checkbox" id="fridayStatus" name="fridayStatus" ${fridayStatus == 1 && "checked"}></td>
+                                <td><input type="checkbox" id="fridayStatus" name="fridayStatus" ${
+																	fridayStatus == 1 && "checked"
+																}></td>
                                 <td class="text-left">Friday</td>
                                 <td>
                                     <input type="text" class="form-control timeFrom text-center" id="input_fridayFrom" name="fridayFrom" required value="${fridayFrom}">
@@ -235,7 +297,9 @@ $(document).ready(function(){
                                 </td>
                             </tr>
                             <tr>
-                                <td><input type="checkbox" id="saturdayStatus" name="saturdayStatus" ${saturdayStatus == 1 && "selected"}></td>
+                                <td><input type="checkbox" id="saturdayStatus" name="saturdayStatus" ${
+																	saturdayStatus == 1 && "selected"
+																}></td>
                                 <td class="text-left">Saturday</td>
                                 <td>
                                     <input type="text" class="form-control timeFrom text-center" id="input_saturdayFrom" name="saturdayFrom" required value="${saturdayFrom}">
@@ -247,7 +311,9 @@ $(document).ready(function(){
                                 </td>
                             </tr>
                             <tr>
-                                <td><input type="checkbox" id="sundayStatus" name="sundayStatus" ${sundayStatus == 1 && "checked"}></td>
+                                <td><input type="checkbox" id="sundayStatus" name="sundayStatus" ${
+																	sundayStatus == 1 && "checked"
+																}></td>
                                 <td class="text-left">Sunday</td>
                                 <td>
                                     <input type="text" class="form-control timeFrom text-center" id="input_sundayFrom" name="sundayFrom" required value="${sundayFrom}">
@@ -265,8 +331,12 @@ $(document).ready(function(){
                     <div class="form-group">
                         <label>Status <code>*</code></label>
                         <select class="form-control select2" id="scheduleStatus" name="scheduleStatus">
-                            <option value="1" ${scheduleStatus == 1 && "selected"}>Active</option>
-                            <option value="0" ${scheduleStatus == 0 && "selected"}>Inactive</option>
+                            <option value="1" ${
+															scheduleStatus == 1 && "selected"
+														}>Active</option>
+                            <option value="0" ${
+															scheduleStatus == 0 && "selected"
+														}>Inactive</option>
                         </select>
                         <div class="d-block invalid-feedback" id="invalid-scheduleStatus"></div>
                     </div>
@@ -277,109 +347,106 @@ $(document).ready(function(){
             ${button}
             <button class="btn btn-cancel btnCancel"><i class="fas fa-ban"></i> Cancel</button>
         </div>`;
-        return html;
-    } 
-    // ----- END MODAL CONTENT -----
+		return html;
+	}
+	// ----- END MODAL CONTENT -----
 
+	// ----- CUSTOM INPUTMASK -----
+	function initInputmaskTime(isMethodAdd = true) {
+		if (isMethodAdd) {
+			$(".timeFrom").val("08:00");
+			$(".timeTo").val("17:00");
+		}
 
-    // ----- CUSTOM INPUTMASK -----
-    function initInputmaskTime(isMethodAdd = true) {
-        if (isMethodAdd) {
-            $(".timeFrom").val("08:00");
-            $(".timeTo").val("17:00");
-        }
+		$(".timeFrom").inputmask({
+			mask: "h:s",
+			placeholder: "08:00",
+			insertMode: false,
+			hourFormat: "24",
+			clearMaskOnLostFocus: false,
+			floatLabelType: "Always",
+			focus: function (args) {
+				args.selectionEnd = args.selectionStart;
+			},
+		});
+		$(".timeTo").inputmask({
+			mask: "h:s",
+			placeholder: "17:00",
+			insertMode: false,
+			hourFormat: "24",
+			clearMaskOnLostFocus: false,
+			floatLabelType: "Always",
+			focus: function (args) {
+				args.selectionEnd = args.selectionStart;
+			},
+		});
+	}
+	// ----- END CUSTOM INPUTMASK -----
 
-        $(".timeFrom").inputmask({
-            mask:            "h:s",
-            placeholder:     "08:00",
-            insertMode:      false,
-            hourFormat:      "24", 
-            clearMaskOnLostFocus: false,
-            floatLabelType: 'Always',
-            focus: function(args) {
-                args.selectionEnd= args.selectionStart;
-            }
-        })
-        $(".timeTo").inputmask({
-            mask:            "h:s",
-            placeholder:     "17:00",
-            insertMode:      false,
-            hourFormat:      "24", 
-            clearMaskOnLostFocus: false,
-            floatLabelType: 'Always',
-            focus: function(args) {
-                args.selectionEnd= args.selectionStart;
-            }
-        })
-    }    
-    // ----- END CUSTOM INPUTMASK -----
+	// ----- CHECK TIME RANGE -----
+	function checkTimeRange(elementID = false, isReturnable = false) {
+		let element = elementID ? `#${elementID}` : ".timeTo";
+		let flag = 0;
+		$(element).each(function () {
+			const from = $(this).attr("from");
+			const validated = $(this).hasClass("validated");
+			const fromValue = $(`[name=${from}]`).val() + ":00";
+			const toValue = $(this).val() + ":00";
 
+			const timeFrom = moment(`2021-01-01 ${fromValue}`);
+			const timeTo = moment(`2021-01-01 ${toValue}`);
 
-    // ----- CHECK TIME RANGE -----
-    function checkTimeRange(elementID = false, isReturnable = false) {
-        let element = elementID ?  `#${elementID}` : ".timeTo";
-        let flag = 0;
-        $(element).each(function() {
-            const from      = $(this).attr("from");
-            const validated = $(this).hasClass("validated");
-            const fromValue = $(`[name=${from}]`).val()+":00";
-            const toValue   = $(this).val()+":00";
+			let diff = moment.duration(timeTo.diff(timeFrom));
+			diff = diff.asSeconds();
 
-            const timeFrom = moment(`2021-01-01 ${fromValue}`);
-            const timeTo   = moment(`2021-01-01 ${toValue}`);
+			const invalidFeedback = $(this).parent().find(".invalid-feedback");
 
-            let diff = moment.duration(timeTo.diff(timeFrom));
-                diff = diff.asSeconds();
+			if (diff <= 0) {
+				$(this).removeClass("is-valid").addClass("is-invalid");
+				invalidFeedback.text("Invalid time range");
+				flag++;
+			} else {
+				isReturnable || validated
+					? $(this).removeClass("is-invalid").addClass("is-valid")
+					: $(this).removeClass("is-invalid").removeClass("is-valid");
+				invalidFeedback.text("");
+			}
+		});
+		if (isReturnable) {
+			$(".modal").find(".is-invalid").first().focus();
+			return flag > 0 ? false : true;
+		}
+	}
+	// ----- END CHECK TIME RANGE -----
 
-            const invalidFeedback = $(this).parent().find(".invalid-feedback");
+	// ----- CHANGE TIME TO -----
+	$(document).on("keyup", ".timeTo", function () {
+		// checkTimeRange($(this).attr("id"));
+	});
+	// ----- END CHANGE TIME TO -----
 
-            if (diff <= 0) {
-                $(this).removeClass("is-valid").addClass("is-invalid");
-                invalidFeedback.text("Invalid time range");
-                flag++;
-            } else {
-                isReturnable || validated ? $(this).removeClass("is-invalid").addClass("is-valid") :  $(this).removeClass("is-invalid").removeClass("is-valid");
-                invalidFeedback.text("");
-            }
-        })
-        if (isReturnable) {
-            $(".modal").find(".is-invalid").first().focus();
-            return flag > 0 ? false : true;
-        }
-    }
-    // ----- END CHECK TIME RANGE -----
+	// ----- OPEN ADD MODAL -----
+	$(document).on("click", "#btnAdd", function () {
+		preventRefresh(true);
 
+		$("#modal_schedule_setup").modal("show");
+		$("#modal_schedule_setup .page-title").text("ADD SCHEDULE");
+		$("#modal_schedule_setup_content").html(preloader);
+		const content = modalContent();
+		$("#modal_schedule_setup_content").html(content);
+		initAll();
+		initInputmaskTime();
+	});
+	// ----- END OPEN ADD MODAL -----
 
-    // ----- CHANGE TIME TO -----
-    $(document).on("keyup", ".timeTo", function() {
-        // checkTimeRange($(this).attr("id"));
-    })
-    // ----- END CHANGE TIME TO -----
-
-
-    // ----- OPEN ADD MODAL -----
-    $(document).on("click", "#btnAdd", function() {
-        preventRefresh(true);
-
-        $("#modal_schedule_setup").modal("show");
-        $("#modal_schedule_setup .page-title").text("ADD SCHEDULE");
-        $("#modal_schedule_setup_content").html(preloader);
-        const content = modalContent();
-        $("#modal_schedule_setup_content").html(content);
-        initAll();
-        initInputmaskTime();
-    });
-    // ----- END OPEN ADD MODAL -----
-
-
-    // ----- SAVE MODAL -----
+	// ----- SAVE MODAL -----
 	$(document).on("click", "#btnSave", function () {
 		const validate = validateForm("modal_schedule_setup");
 
 		if (validate) {
 			let data = getFormData("modal_schedule_setup", true);
 			data["tableName"] = "hris_schedule_setup_tbl";
-			data["feedback"]  = $("[name=scheduleName]").val();
+			data["feedback"] = $("[name=scheduleName]").val();
 
 			sweetAlertConfirmation(
 				"add",
@@ -394,30 +461,33 @@ $(document).ready(function(){
 	});
 	// ----- END SAVE MODAL -----
 
-    
-    // ----- OPEN EDIT MODAL -----
-    $(document).on("click", ".btnEdit", function() {
-        preventRefresh(true);
+	// ----- OPEN EDIT MODAL -----
+	$(document).on("click", ".btnEdit", function () {
+		preventRefresh(true);
 
-        const id = $(this).attr("id");
-        $("#modal_schedule_setup").modal("show");
-        $("#modal_schedule_setup .page-title").text("EDIT SCHEDULE");
-        $("#modal_schedule_setup_content").html(preloader); 
+		const id = $(this).attr("id");
+		$("#modal_schedule_setup").modal("show");
+		$("#modal_schedule_setup .page-title").text("EDIT SCHEDULE");
+		$("#modal_schedule_setup_content").html(preloader);
 
-        const tableData = getTableData("hris_schedule_setup_tbl", "*", "scheduleID="+id, "");
-        if (tableData) {
-            const content = modalContent(tableData);
-            setTimeout(() => {
-                $("#modal_schedule_setup_content").html(content);
-                initAll();
-                initInputmaskTime(false);
-            }, 500);
-        }
-    });
-    // ----- END OPEN EDIT MODAL -----
+		const tableData = getTableData(
+			"hris_schedule_setup_tbl",
+			"*",
+			"scheduleID=" + id,
+			""
+		);
+		if (tableData) {
+			const content = modalContent(tableData);
+			setTimeout(() => {
+				$("#modal_schedule_setup_content").html(content);
+				initAll();
+				initInputmaskTime(false);
+			}, 500);
+		}
+	});
+	// ----- END OPEN EDIT MODAL -----
 
-
-    // ----- UPDATE MODAL -----
+	// ----- UPDATE MODAL -----
 	$(document).on("click", "#btnUpdate", function () {
 		const id = $(this).attr("scheduleid");
 
@@ -425,9 +495,9 @@ $(document).ready(function(){
 
 		if (validate) {
 			let data = getFormData("modal_schedule_setup", true);
-			data["tableName"]   = "hris_schedule_setup_tbl";
+			data["tableName"] = "hris_schedule_setup_tbl";
 			data["whereFilter"] = "scheduleID=" + id;
-			data["feedback"]    = $("[name=scheduleName]").val();
+			data["feedback"] = $("[name=scheduleName]").val();
 
 			sweetAlertConfirmation(
 				"update",
@@ -442,21 +512,15 @@ $(document).ready(function(){
 	});
 	// ----- END UPDATE MODAL -----
 
-
-    // ------- CANCEL MODAL--------
+	// ------- CANCEL MODAL--------
 	$(document).on("click", ".btnCancel", function () {
 		let formEmpty = isFormEmpty("modal_schedule_setup");
 		if (!formEmpty) {
-			sweetAlertConfirmation(
-				"cancel",
-				"Schedule",
-				"modal_schedule_setup"
-			);
+			sweetAlertConfirmation("cancel", "Schedule", "modal_schedule_setup");
 		} else {
-            preventRefresh(false);
+			preventRefresh(false);
 			$("#modal_schedule_setup").modal("hide");
 		}
 	});
 	// -------- END CANCEL MODAL-----------
-
 });

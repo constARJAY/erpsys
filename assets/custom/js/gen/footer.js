@@ -8,12 +8,25 @@ function encryptString(str) {
 
 function decryptString(str) {
     if (str) {
-        const bytes = CryptoJS.AES.decrypt(str.toString(), 'Bl@ckC0d3r$');
+        const bytes     = CryptoJS.AES.decrypt(str.toString(), 'Bl@ckC0d3r$');
         const plaintext = bytes.toString(CryptoJS.enc.Utf8);
         return plaintext.toString();
     }
     return false;
 }
+
+
+// ----- ENCRYPT ID -----
+$(".btnViewNotification").each(function() {
+    const table = encryptString($(this).attr("table"));
+    $(this).attr("table", table);
+})
+
+$(".btnDetails").each(function() {
+    const table = encryptString($(this).attr("table"));
+    $(this).attr("table", table);
+})
+// ----- END ENCRYPT ID -----
 
 
 // ----- SWEET ALERT CONFIRMATION -----
@@ -182,8 +195,8 @@ $(document).ready(function() {
             data: {notifID},
             success: function(data) {
                 if (data) {
-                    // window.location.href = base_url+controller+"?view_id="+table;
-                    window.location.href = base_url+controller;
+                    window.location.href = base_url+controller+"?view_id="+table;
+                    // window.location.href = base_url+controller;
                 }
             }
         })

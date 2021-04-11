@@ -117,7 +117,10 @@
                                     <ul class="dropdown-menu">
                                         <li class="header">New Notification</li>
 
-                                        <li class="body">
+                                        <li class="body" 
+                                            style="height: auto;
+                                                   max-height: 60vh;
+                                                   overflow-y: scroll;">
                                             <ul class="menu list-unstyled">
                                         <?php
                                             $notifications = getNotificationData("all", "0");
@@ -125,7 +128,9 @@
                                                 foreach ($notifications as $notif) {
                                         ?>
                                             <li>
-                                                <a href="<?= $notif["controller"] ?>" class="btnViewNotification" controller="<?= $notif["controller"] ?>" id="<?= $notif['id'] ?>" table="<?= $notif['table'] ?>">
+                                                <a href="<?= $notif["controller"] ?>" class="btnViewNotification" controller="<?= $notif["controller"] ?>" 
+                                                id="<?= $notif['id'] ?>" 
+                                                table="<?= $notif['table'] ?>">
                                                     <div class="media" title="<?= $notif["description"] ?>">
                                                         <img class="media-object" src="<?= base_url() ?>assets/notification/<?= $notif["icon"] ?>" alt="">
                                                         <div class="media-body">

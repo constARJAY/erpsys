@@ -47,7 +47,6 @@ const database = (sql) => {
 };
 // ----- END SQL -----
 
-
 // ----- GET DATABASE TABLE DATA -----
 const getTableData = (
 	tableName = null,
@@ -93,7 +92,6 @@ const getTableData = (
 };
 // ----- END GET DATABASE TABLE DATA -----
 
-
 // ----- GET DATABASE TABLE DATA -----
 const getTableDataLength = (
 	tableName = null,
@@ -136,9 +134,12 @@ const getTableDataLength = (
 };
 // ----- END GET DATABASE TABLE DATA -----
 
-
 // ----- GET LAST CODE -----
-const getTableLastCode = (tableName = false, columnName = false, whereFilter = "") => {
+const getTableLastCode = (
+	tableName = false,
+	columnName = false,
+	whereFilter = ""
+) => {
 	if (tableName && columnName) {
 		// let table = getTableDataLength(tableName, "createdAt");
 		let result = 0;
@@ -175,13 +176,12 @@ const getTableLastCode = (tableName = false, columnName = false, whereFilter = "
 };
 // ----- END GET LAST CODE -----
 
-
 // ----- GENERATE CODE -----
 const generateCode = (
-	firstStr    = "STR",
-	lastID      = false,
-	tableName   = false,
-	columnName  = false,
+	firstStr = "STR",
+	lastID = false,
+	tableName = false,
+	columnName = false,
 	whereFilter = ""
 ) => {
 	let id;
@@ -204,13 +204,13 @@ const generateCode = (
 };
 // ----- END GENERATE CODE -----
 
-
 // ----- SAVE/UPDATE/DELETE TABLE DATA -----
 const saveUpdateDeleteDatabaseFormData = async (
 	data,
 	path,
 	feedback = false,
-	swalTitle
+	swalTitle,
+	overrideSuccessConfirmation
 ) => {
 	let result = await $.ajax({
 		method: "POST",
@@ -288,7 +288,6 @@ const saveUpdateDeleteDatabaseFormData = async (
 	});
 	return (await result) ? result : false;
 };
-
 
 const saveUpdateDeleteDatabaseFormDatav1 = async (
 	data,
@@ -353,12 +352,12 @@ const saveUpdateDeleteDatabaseFormDatav1 = async (
 	return await flag;
 };
 
-
 const saveUpdateDeleteDatabaseObject = async (
 	data,
 	path,
 	feedback = false,
-	swalTitle
+	swalTitle,
+	overrideSuccessConfirmation = false
 ) => {
 	let result = await $.ajax({
 		method: "POST",
@@ -372,14 +371,14 @@ const saveUpdateDeleteDatabaseObject = async (
 		success: function (data) {
 			let result = data.split("|");
 			let isSuccess = result[0],
-				message = result[1],
-				id = result[2] ? result[2] : null;
+				message   = result[1],
+				id        = result[2] ? result[2] : null;
 
 			if (isSuccess == "true") {
 				if (feedback) {
-					feedback = feedback.split("|");
+					feedback      = feedback.split("|");
 					feedbackClass = feedback[0];
-					feedbackMsg = feedback[1];
+					feedbackMsg   = feedback[1];
 					setTimeout(() => {
 						$("#loader").hide();
 						closeModals();
@@ -399,18 +398,39 @@ const saveUpdateDeleteDatabaseObject = async (
 								timer: 2000,
 							});
 						}
+
 					}, 500);
 				} else {
-					setTimeout(() => {
-						$("#loader").hide();
-						closeModals();
-						Swal.fire({
-							icon: "success",
-							title: message,
-							showConfirmButton: false,
-							timer: 2000,
-						});
-					}, 500);
+
+					if (overrideSuccessConfirmation) {
+						let code = overrideSuccessConfirmation.split("-");
+							code = getFormCode(code[0], code[1], id);
+						let title = message.split(" ");
+							title = `${code} ${title[1]} ${title[2]}`;
+						
+						setTimeout(() => {
+							$("#loader").hide();
+							closeModals();
+							Swal.fire({
+								icon: "success",
+								title: title,
+								showConfirmButton: false,
+								timer: 2000,
+							});
+						}, 500);
+					} else {
+						setTimeout(() => {
+							$("#loader").hide();
+							closeModals();
+							Swal.fire({
+								icon: "success",
+								title: message,
+								showConfirmButton: false,
+								timer: 2000,
+							});
+						}, 500);
+					}
+					
 				}
 			} else {
 				$("#loader").hide();
@@ -432,7 +452,6 @@ const saveUpdateDeleteDatabaseObject = async (
 	});
 	return (await result) ? result : false;
 };
-
 
 const saveUpdateDeleteDatabaseObjectv1 = async (
 	data,
@@ -496,7 +515,6 @@ const saveUpdateDeleteDatabaseObjectv1 = async (
 	return await flag;
 };
 
-
 const insertTableData = async (
 	data,
 	object = false,
@@ -508,7 +526,6 @@ const insertTableData = async (
 		? await saveUpdateDeleteDatabaseFormData(data, path, feedback, swalTitle)
 		: await saveUpdateDeleteDatabaseObject(data, path, feedback, swalTitle);
 };
-
 
 const insertTableDatav1 = async (
 	data,
@@ -523,7 +540,6 @@ const insertTableDatav1 = async (
 		: await saveUpdateDeleteDatabaseObjectv1(data, path, feedback, swalTitle);
 };
 
-
 const updateTableData = async (
 	data,
 	object = false,
@@ -535,7 +551,6 @@ const updateTableData = async (
 		? await saveUpdateDeleteDatabaseFormData(data, path, feedback, swalTitle)
 		: await saveUpdateDeleteDatabaseObject(data, path, feedback, swalTitle);
 };
-
 
 const updateTableDatav1 = async (
 	data,
@@ -550,11 +565,10 @@ const updateTableDatav1 = async (
 		: await saveUpdateDeleteDatabaseObjectv1(data, path, feedback, swalTitle);
 };
 
-
 const deleteTableData = async (
 	data,
-	object    = false,
-	feedback  = false,
+	object = false,
+	feedback = false,
 	swalTitle = false
 ) => {
 	$("#loader").show();
@@ -565,7 +579,6 @@ const deleteTableData = async (
 };
 // ----- END SAVE/UPDATE/DELETE TABLE DATA -----
 
-
 // ----- INSERT NOTIFICATION -----
 const insertNotificationData = (data) => {
 	if (data) {
@@ -573,74 +586,96 @@ const insertNotificationData = (data) => {
 			method: "POST",
 			url: `${base_url}operations/insertNotificationData`,
 			data,
-			dataType: 'json',
+			dataType: "json",
 			async: false,
-			success: function(data) {}
-		})
+			success: function (data) {},
+		});
 	}
 	return false;
-}
+};
 // ----- END INSERT NOTIFICATION -----
 
-
 // ----- GET EMPLOYEE DATA -----
-const getEmployeeData = employeeID => {
+const getAllEmployeeData = () => {
+	const data = getTableData(
+		`
+		hris_employee_list_tbl AS helt
+			LEFT JOIN hris_department_tbl USING(departmentID)
+			LEFT JOIN hris_designation_tbl USING(designationID)`,
+		`
+		employeeID,
+		CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname,
+		departmentName AS department,
+		designationName AS designation`,
+		"employeeStatus = 1"
+	);
+	return data || [];
+};
+
+const getEmployeeData = (employeeID) => {
 	if (employeeID) {
-		const data = getTableData(`
+		const data = getTableData(
+			`
 			hris_employee_list_tbl AS helt
 				LEFT JOIN hris_department_tbl USING(departmentID)
-				LEFT JOIN hris_designation_tbl USING(designationID)`, `
+				LEFT JOIN hris_designation_tbl USING(designationID)`,
+			`
 			CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname,
 			departmentName,
-			designationName`, "employeeID="+employeeID);
+			designationName`,
+			"employeeID=" + employeeID
+		);
 		return (data && data[0]) || null;
 	}
 	return null;
-}
+};
 // ----- END GET EMPLOYEE DATA -----
-
 
 // ----- EMPLOYEE PERMISSIONS -----
 const getEmployeePermission = (moduleID, method) => {
 	if (moduleID && method) {
-		const data = getTableData("hris_employee_permission_tbl", "createStatus, readStatus, updateStatus, deleteStatus, printStatus", `employeeID = ${sessionID} AND moduleID = ${moduleID}`);
+		const data = getTableData(
+			"hris_employee_permission_tbl",
+			"createStatus, readStatus, updateStatus, deleteStatus, printStatus",
+			`employeeID = ${sessionID} AND moduleID = ${moduleID}`
+		);
 		if (data.length > 0) {
-			switch(method) {
+			switch (method) {
 				case "create":
 					return data[0].createStatus == 1 ? true : false;
 				case "read":
-					return data[0].readStatus   == 1 ? true : false;
+					return data[0].readStatus == 1 ? true : false;
 				case "update":
 					return data[0].updateStatus == 1 ? true : false;
 				case "delete":
 					return data[0].deleteStatus == 1 ? true : false;
 				case "print":
-					return data[0].printStatus  == 1 ? true : false;
-				default: 
+					return data[0].printStatus == 1 ? true : false;
+				default:
 					return false;
 			}
 		}
 	}
 	return false;
-}
+};
 
 const isCreateAllowed = (moduleID = 60) => {
 	return getEmployeePermission(moduleID, "create");
-}
+};
 
 const isReadAllowed = (moduleID = 60) => {
 	return getEmployeePermission(moduleID, "read");
-}
+};
 
 const isUpdateAllowed = (moduleID = 60) => {
 	return getEmployeePermission(moduleID, "update");
-}
+};
 
 const isDeleteAllowed = (moduleID = 60) => {
 	return getEmployeePermission(moduleID, "delete");
-}
+};
 
 const isPrintAllowed = (moduleID = 60) => {
 	return getEmployeePermission(moduleID, "print");
-}
+};
 // ----- END EMPLOYEE PERMISSIONS -----

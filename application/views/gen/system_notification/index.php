@@ -68,7 +68,7 @@
                                                             <div class="ml-3">
                                                                 <h6 class="font-weight-bold"><?= $notif["title"] ?></h6>
                                                                 <div><?= $notif["description"] ?></div>
-                                                                <a href="<?= base_url().$notif['controller'] ?>">Details</a>  
+                                                                <a href="#" controller="<?= $notif["controller"] ?>" table="<?= $notif['table'] ?>" id="<?= $notif["id"] ?>" class="btnDetails">Details</a>  
                                                             </div>
                                                         </div>
                                                     </div>   
@@ -112,7 +112,7 @@
                                                             <div class="ml-3">
                                                                 <h6 class="font-weight-bold"><?= $notif["title"] ?></h6>
                                                                 <div><?= $notif["description"] ?></div>
-                                                                <a href="<?= base_url().$notif['controller'] ?>">Details</a>  
+                                                                <a href="#" controller="<?= $notif["controller"] ?>" table="<?= $notif['table'] ?>" id="<?= $notif["id"] ?>" class="btnDetails">Details</a>  
                                                             </div>
                                                         </div>
                                                     </div>   
@@ -156,7 +156,7 @@
                                                             <div class="ml-3">
                                                                 <h6 class="font-weight-bold"><?= $notif["title"] ?></h6>
                                                                 <div><?= $notif["description"] ?></div>
-                                                                <a href="<?= base_url().$notif['controller'] ?>">Details</a>  
+                                                                <a href="#" controller="<?= $notif["controller"] ?>" table="<?= $notif['table'] ?>" id="<?= $notif["id"] ?>" class="btnDetails">Details</a>  
                                                             </div>
                                                         </div>
                                                     </div>   
@@ -200,7 +200,7 @@
                                                             <div class="ml-3">
                                                                 <h6 class="font-weight-bold"><?= $notif["title"] ?></h6>
                                                                 <div><?= $notif["description"] ?></div>
-                                                                <a href="<?= base_url().$notif['controller'] ?>">Details</a>  
+                                                                <a href="#" controller="<?= $notif["controller"] ?>" table="<?= $notif['table'] ?>" id="<?= $notif["id"] ?>" class="btnDetails">Details</a>  
                                                             </div>
                                                         </div>
                                                     </div>   
@@ -244,7 +244,7 @@
                                                             <div class="ml-3">
                                                                 <h6 class="font-weight-bold"><?= $notif["title"] ?></h6>
                                                                 <div><?= $notif["description"] ?></div>
-                                                                <a href="<?= base_url().$notif['controller'] ?>">Details</a>  
+                                                                <a href="#" controller="<?= $notif["controller"] ?>" table="<?= $notif['table'] ?>" id="<?= $notif["id"] ?>" class="btnDetails">Details</a>  
                                                             </div>
                                                         </div>
                                                     </div>   

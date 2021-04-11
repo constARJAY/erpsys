@@ -1,4 +1,28 @@
+
+
 $(document).ready(function() {
+
+    // ----- CLICK DETAILS -----
+    $(document).on("click", ".btnDetails", function(e) {
+        e.preventDefault();
+        const notifID    = $(this).attr("id");
+        const table      = $(this).attr("table");
+        const controller = $(this).attr("controller");
+
+        $.ajax({
+            method: "POST",
+            url: base_url+"system_notification/updateNotification",
+            data: {notifID},
+            success: function(data) {
+                if (data) {
+                    window.location.href = base_url+controller+"?view_id="+table;
+                    // window.location.href = base_url+controller;
+                }
+            }
+        })
+    })
+    // ----- END CLICK DETAILS -----
+
 
     // ----- GET NOTIFICATION -----
     function getSystemNotification(projectName, dateFrom, dateTo, tabName) {
@@ -29,7 +53,7 @@ $(document).ready(function() {
                                 <div class="ml-3">
                                     <h6 class="font-weight-bold">${notif["title"]}</h6>
                                     <div>${notif["description"]}</div>
-                                    <a href="${base_url}${notif['controller']}">Details</a>  
+                                    <a href="${base_url}${notif['controller']}?view_id=${encryptString(notif['table'])}">Details</a>  
                                 </div>
                             </div>
                         </div>  `;

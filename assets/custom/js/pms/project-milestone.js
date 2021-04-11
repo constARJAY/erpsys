@@ -1,44 +1,45 @@
-$(document).ready(function(){
+$(document).ready(function () {
+	// ----- DATATABLES -----
+	function initDataTables() {
+		if ($.fn.DataTable.isDataTable("#tableProjectMilestoneTable")) {
+			$("#tableProjectMilestoneTable").DataTable().destroy();
+		}
 
-    // ----- DATATABLES -----
-    function initDataTables() {
-        if ($.fn.DataTable.isDataTable('#tableProjectMilestoneTable')){
-            $('#tableProjectMilestoneTable').DataTable().destroy();
-        }
-        
-        var table = $("#tableProjectMilestoneTable").css({"min-width": "100%"}).removeAttr('width').DataTable({
-            proccessing:    false,
-            serverSide:     false,
-            scrollX:        true,
-            scrollCollapse: true,
-            columnDefs: [
-                { targets: 0, width: "120px" },
-                { targets: 1, width: "30%" },
-                { targets: 2, width: "70%" },
-                { targets: 3, width: "80px" }
-            ],
-        });
-    }
-    initDataTables();
-    // ----- END DATATABLES -----
+		var table = $("#tableProjectMilestoneTable")
+			.css({ "min-width": "100%" })
+			.removeAttr("width")
+			.DataTable({
+				proccessing: false,
+				serverSide: false,
+				scrollX: true,
+				scrollCollapse: true,
+				columnDefs: [
+					{ targets: 0, width: "120px" },
+					{ targets: 1, width: "30%" },
+					{ targets: 2, width: "70%" },
+					{ targets: 3, width: "80px" },
+				],
+			});
+	}
+	initDataTables();
+	// ----- END DATATABLES -----
 
+	// ----- TABLE CONTENT -----
+	function tableContent() {
+		// Reset the unique datas
+		uniqueData = [];
 
-    // ----- TABLE CONTENT -----
-    function tableContent() {
-        // Reset the unique datas
-        uniqueData = []; 
-
-        $.ajax({
-            url:      `${base_url}operations/getTableData`,
-            method:   'POST',
-            async:    false,
-            dataType: 'json',
-            data:     {tableName: "pms_project_milestone_tbl"},
-            beforeSend: function() {
-                $("#table_content").html(preloader);
-            },
-            success: function(data) {
-                let html = `
+		$.ajax({
+			url: `${base_url}operations/getTableData`,
+			method: "POST",
+			async: false,
+			dataType: "json",
+			data: { tableName: "pms_project_milestone_tbl" },
+			beforeSend: function () {
+				$("#table_content").html(preloader);
+			},
+			success: function (data) {
+				let html = `
                 <table class="table table-bordered table-striped table-hover" id="tableProjectMilestoneTable">
                     <thead>
                     <tr>
@@ -50,75 +51,76 @@ $(document).ready(function(){
                     </thead>
                     <tbody>`;
 
-                data.map((item, index, array) => {
-                    // ----- INSERT UNIQUE DATA TO uniqueData VARIABLE ----
-                    let unique = {
-                        id:                   item.projectMilestoneID, // Required
-                        projectMilestoneName: item.projectMilestoneName,
-                    }
-                    uniqueData.push(unique);
-                    // ----- END INSERT UNIQUE DATA TO uniqueData VARIABLE ----
+				data.map((item, index, array) => {
+					// ----- INSERT UNIQUE DATA TO uniqueData VARIABLE ----
+					let unique = {
+						id: item.projectMilestoneID, // Required
+						projectMilestoneName: item.projectMilestoneName,
+					};
+					uniqueData.push(unique);
+					// ----- END INSERT UNIQUE DATA TO uniqueData VARIABLE ----
 
-                    let status =
+					let status =
 						item.projectMilestoneStatus == 1
 							? `
                     <span class="badge badge-outline-success w-100">Active</span>`
 							: `
                     <span class="badge badge-outline-danger w-100">Inactive</span>`;
 
-                    html += `
+					html += `
                     <tr class="btnEdit" id="${item.projectMilestoneID}">
                         <td>${item.projectMilestoneCode}</td>
                         <td>${item.projectMilestoneName}</td>
                         <td>${item.projectMilestoneDescription}</td>
                         <td>${status}</td>
                     </tr>`;
-                })
-                html += `</tbody>
+				});
+				html += `</tbody>
                 </table>`;
 
-                setTimeout(() => {
-                    $("#table_content").html(html);
-                    initDataTables();
-                }, 500);
-            },
-            error: function() {
-                let html = `
+				setTimeout(() => {
+					$("#table_content").html(html);
+					initDataTables();
+				}, 500);
+			},
+			error: function () {
+				let html = `
                     <div class="w-100 h5 text-center text-danger>
                         There was an error fetching data.
                     </div>`;
-                $("#table_content").html(html);
-            }
-        })
-    }
-    tableContent();
-    // ----- END TABLE CONTENT -----
+				$("#table_content").html(html);
+			},
+		});
+	}
+	tableContent();
+	// ----- END TABLE CONTENT -----
 
+	// ----- MODAL CONTENT -----
+	function modalContent(data = false) {
+		let {
+			projectMilestoneID = "",
+			projectMilestoneName = "",
+			projectMilestoneDescription = "",
+			projectMilestoneStatus = "1",
+		} = data && data[0];
 
-    // ----- MODAL CONTENT -----
-    function modalContent(data = false) {
-        let {
-            projectMilestoneID          = "",
-            projectMilestoneName        = "",
-            projectMilestoneDescription = "",
-            projectMilestoneStatus      = "1",
-        } = data && data[0];
-          
-        let button = projectMilestoneID ? `
+		let button = projectMilestoneID
+			? `
         <button 
             class="btn btn-update " 
             id="btnUpdate" 
             projectMilestoneID="${projectMilestoneID}">
             <i class="fas fa-save"></i>
             Update
-        </button>` : `
+        </button>`
+			: `
         <button 
             class="btn btn-save" 
             id="btnSave"><i class="fas fa-save"></i>
             Save
         </button>`;
 
-        let html = `
+		let html = `
         <div class="modal-body">
             <div class="row">
                 <div class="col-md-12 col-sm-12">
@@ -153,6 +155,7 @@ $(document).ready(function(){
                             maxlength="250" 
                             rows="4"
                             required 
+                            style="resize: none"
                             autocomplete="off">${projectMilestoneDescription}</textarea>
                         <div class="invalid-feedback d-block" id="invalid-projectMilestoneDescription"></div>
                     </div>
@@ -165,8 +168,12 @@ $(document).ready(function(){
                             id="projectMilestoneStatus" 
                             name="projectMilestoneStatus"
                             required>
-                            <option value="1" ${projectMilestoneStatus == 1 && "selected"}>Active</option>
-                            <option value="0" ${projectMilestoneStatus == 0 && "selected"}>Inactive</option>
+                            <option value="1" ${
+															projectMilestoneStatus == 1 && "selected"
+														}>Active</option>
+                            <option value="0" ${
+															projectMilestoneStatus == 0 && "selected"
+														}>Inactive</option>
                         </select>
                         <div class="invalid-feedback d-block" id="invalid-projectMilestoneStatus"></div>
                     </div>
@@ -177,28 +184,26 @@ $(document).ready(function(){
             ${button}
             <button class="btn btn-cancel btnCancel"><i class="fas fa-ban"></i> Cancel</button>
         </div>`;
-        return html;
-    } 
-    // ----- END MODAL CONTENT -----
+		return html;
+	}
+	// ----- END MODAL CONTENT -----
 
+	// ----- OPEN ADD MODAL -----
+	$(document).on("click", "#btnAdd", function () {
+		$("#modal_project_milestone .page-title").text("ADD PROJECT MILESTONE");
+		$("#modal_project_milestone").modal("show");
+		$("#modal_project_milestone_content").html(preloader);
+		const content = modalContent();
+		$("#modal_project_milestone_content").html(content);
+		initAll();
+	});
+	// ----- END OPEN ADD MODAL -----
 
-    // ----- OPEN ADD MODAL -----
-    $(document).on("click", "#btnAdd", function() {
-        $("#modal_project_milestone .page-title").text("ADD MILESTONE");
-        $("#modal_project_milestone").modal("show");
-        $("#modal_project_milestone_content").html(preloader);
-        const content = modalContent();
-        $("#modal_project_milestone_content").html(content);
-        initAll();
-    });
-    // ----- END OPEN ADD MODAL -----
-
-
-    // ----- SAVE MODAL -----
-    $(document).on("click", "#btnSave", function() {
-        const validate = validateForm("modal_project_milestone");
-        if (validate) {
-            let data = getFormData("modal_project_milestone", true);
+	// ----- SAVE MODAL -----
+	$(document).on("click", "#btnSave", function () {
+		const validate = validateForm("modal_project_milestone");
+		if (validate) {
+			let data = getFormData("modal_project_milestone", true);
 			data["tableData[projectMilestoneCode]"] = generateCode(
 				"MIL",
 				false,
@@ -217,14 +222,13 @@ $(document).ready(function(){
 				true,
 				tableContent
 			);
-        }
-    });
-    // ----- END SAVE MODAL -----
+		}
+	});
+	// ----- END SAVE MODAL -----
 
-
-    // ----- OPEN EDIT MODAL -----
-    $(document).on("click", ".btnEdit", function() {
-        const id = $(this).attr("id");
+	// ----- OPEN EDIT MODAL -----
+	$(document).on("click", ".btnEdit", function () {
+		const id = $(this).attr("id");
 		$("#modal_project_milestone .page-title").text("EDIT PROJECT MILESTONE");
 		$("#modal_project_milestone").modal("show");
 		$("#modal_project_milestone_content").html(preloader);
@@ -241,11 +245,10 @@ $(document).ready(function(){
 				initAll();
 			}, 500);
 		}
-    });
-    // ----- END OPEN EDIT MODAL -----
+	});
+	// ----- END OPEN EDIT MODAL -----
 
-
-    // ----- UPDATE MODAL -----
+	// ----- UPDATE MODAL -----
 	$(document).on("click", "#btnUpdate", function () {
 		const id = $(this).attr("projectMilestoneID");
 
@@ -253,9 +256,9 @@ $(document).ready(function(){
 		if (validate) {
 			let data = getFormData("modal_project_milestone", true);
 			data["tableData[updatedBy]"] = sessionID;
-			data["tableName"]            = "pms_project_milestone_tbl";
-			data["whereFilter"]          = "projectMilestoneID=" + id;
-			data["feedback"]             = $("[name=projectMilestoneName]").val();
+			data["tableName"] = "pms_project_milestone_tbl";
+			data["whereFilter"] = "projectMilestoneID=" + id;
+			data["feedback"] = $("[name=projectMilestoneName]").val();
 
 			sweetAlertConfirmation(
 				"update",
@@ -270,21 +273,14 @@ $(document).ready(function(){
 	});
 	// ----- END UPDATE MODAL -----
 
-
-    // ------- CANCEL MODAL--------
+	// ------- CANCEL MODAL--------
 	$(document).on("click", ".btnCancel", function () {
 		let formEmpty = isFormEmpty("modal_project_milestone");
 		if (!formEmpty) {
-			sweetAlertConfirmation(
-				"cancel",
-				"Milestone",
-				"modal_project_milestone"
-			);
+			sweetAlertConfirmation("cancel", "Milestone", "modal_project_milestone");
 		} else {
 			$("#modal_project_milestone").modal("hide");
 		}
 	});
 	// -------- END CANCEL MODAL-----------
-
-      
 });

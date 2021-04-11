@@ -1,6 +1,5 @@
 $(document).ready(function () {
-
-    // ----- GET PHILIPPINE ADDRESSES -----
+	// ----- GET PHILIPPINE ADDRESSES -----
 	const getPhAddresses = () => {
 		let result = [];
 		$.ajax({
@@ -17,124 +16,165 @@ $(document).ready(function () {
 	const address = getPhAddresses();
 
 	const phRegion = [
-		{ key: "01",    name: "REGION I" },
-		{ key: "02",    name: "REGION II" },
-		{ key: "03",    name: "REGION III" },
-		{ key: "4A",    name: "REGION IV-A" },
-		{ key: "4B",    name: "REGION IV-B" },
-		{ key: "05",    name: "REGION V" },
-		{ key: "06",    name: "REGION VI" },
-		{ key: "07",    name: "REGION VII" },
-		{ key: "08",    name: "REGION VIII" },
-		{ key: "09",    name: "REGION IX" },
-		{ key: "10",    name: "REGION X" },
-		{ key: "11",    name: "REGION XI" },
-		{ key: "12",    name: "REGION XII" },
-		{ key: "13",    name: "REGION XIII" },
+		{ key: "01", name: "REGION I" },
+		{ key: "02", name: "REGION II" },
+		{ key: "03", name: "REGION III" },
+		{ key: "4A", name: "REGION IV-A" },
+		{ key: "4B", name: "REGION IV-B" },
+		{ key: "05", name: "REGION V" },
+		{ key: "06", name: "REGION VI" },
+		{ key: "07", name: "REGION VII" },
+		{ key: "08", name: "REGION VIII" },
+		{ key: "09", name: "REGION IX" },
+		{ key: "10", name: "REGION X" },
+		{ key: "11", name: "REGION XI" },
+		{ key: "12", name: "REGION XII" },
+		{ key: "13", name: "REGION XIII" },
 		{ key: "BARMM", name: "BARMM" },
-		{ key: "CAR",   name: "CAR" },
-		{ key: "NCR",   name: "NCR" },
+		{ key: "CAR", name: "CAR" },
+		{ key: "NCR", name: "NCR" },
 	];
 
-    const getRegionName = (regionKey = "01") => {
-        let region = phRegion.filter(item => {
-            if (item.key == regionKey) {
-                return item;
-            }
-        });
-        return region.length > 0 ? region[0].name : "";
-    }
+	const getRegionName = (regionKey = "01") => {
+		let region = phRegion.filter((item) => {
+			if (item.key == regionKey) {
+				return item;
+			}
+		});
+		return region.length > 0 ? region[0].name : "";
+	};
 
-    function getRegionOptions(regionKey = false) {
-        let html = "";
-        phRegion.map(item => {
-            html += `<option value="${item.key}" ${regionKey == item.key && "selected"}>${item.name}</option>`;
-        })
-        return html;
-    }
+	function getRegionOptions(regionKey = false) {
+		let html = "";
+		phRegion.map((item) => {
+			html += `<option value="${item.key}" ${
+				regionKey == item.key && "selected"
+			}>${item.name}</option>`;
+		});
+		return html;
+	}
 
-    function getProvinceOptions(provinceKey = false, region = "01", doEmpty = false) {
-        let html = !provinceKey && `<option value="" selected>Select Province</option>`;
-        if (!doEmpty) {
-            const provinceList = region && Object.keys(address[region].province_list);
-            provinceList && provinceList.map(item => {
-                html += `<option value="${item}" ${provinceKey == item && "selected"}>${item}</option>`;
-            })
-        }
-        return html;
-    }
+	function getProvinceOptions(
+		provinceKey = false,
+		region = "01",
+		doEmpty = false
+	) {
+		let html =
+			!provinceKey && `<option value="" selected>Select Province</option>`;
+		if (!doEmpty) {
+			const provinceList = region && Object.keys(address[region].province_list);
+			provinceList &&
+				provinceList.map((item) => {
+					html += `<option value="${item}" ${
+						provinceKey == item && "selected"
+					}>${item}</option>`;
+				});
+		}
+		return html;
+	}
 
-    function getMunicipalityOptions(municipalityKey = false, region = "01", province = "ILOCOS NORTE", doEmpty = false) {
-        let html = !municipalityKey && `<option value="" selected>Select City/Municipality</option>`;
-        if (!doEmpty) {
-            const municipalityList = region && province && Object.keys(address[region].province_list[province].municipality_list);
-            municipalityList && municipalityList.map(item => {
-                html += `<option value="${item}" ${municipalityKey == item && "selected"}>${item}</option>`;
-            })
-        }
-        return html;
-    }
+	function getMunicipalityOptions(
+		municipalityKey = false,
+		region = "01",
+		province = "ILOCOS NORTE",
+		doEmpty = false
+	) {
+		let html =
+			!municipalityKey &&
+			`<option value="" selected>Select City/Municipality</option>`;
+		if (!doEmpty) {
+			const municipalityList =
+				region &&
+				province &&
+				Object.keys(address[region].province_list[province].municipality_list);
+			municipalityList &&
+				municipalityList.map((item) => {
+					html += `<option value="${item}" ${
+						municipalityKey == item && "selected"
+					}>${item}</option>`;
+				});
+		}
+		return html;
+	}
 
-    function getBarangayOptions(barangayKey = false, region = "01", province = "ILOCOS NORTE", city = "ADAMS", doEmpty = false) {
-        let html = !barangayKey && `<option value="" selected>Select Barangay</option>`;
-        if (!doEmpty) {
-            const barangayList = region && region && province && address[region].province_list[province].municipality_list[city].barangay_list;
-            barangayList && barangayList.map(item => {
-                html += `<option value="${item}" ${barangayKey == item && "selected"}>${item}</option>`;
-            })
-        }
-        return html;
-    }
+	function getBarangayOptions(
+		barangayKey = false,
+		region = "01",
+		province = "ILOCOS NORTE",
+		city = "ADAMS",
+		doEmpty = false
+	) {
+		let html =
+			!barangayKey && `<option value="" selected>Select Barangay</option>`;
+		if (!doEmpty) {
+			const barangayList =
+				region &&
+				region &&
+				province &&
+				address[region].province_list[province].municipality_list[city]
+					.barangay_list;
+			barangayList &&
+				barangayList.map((item) => {
+					html += `<option value="${item}" ${
+						barangayKey == item && "selected"
+					}>${item}</option>`;
+				});
+		}
+		return html;
+	}
 
-    $(document).on("change", "[name=inventoryVendorRegion]", function() {
-        const region = $(this).val();
+	$(document).on("change", "[name=inventoryVendorRegion]", function () {
+		const region = $(this).val();
 
-        if (region) {
-            const provinceOptions = getProvinceOptions(false, region);
-            $("[name=inventoryVendorProvince]").html(provinceOptions);
-        } else {
-            const provinceOptions = getProvinceOptions(false, "", true);
-            $("[name=inventoryVendorProvince]").html(provinceOptions);
-        }
+		if (region) {
+			const provinceOptions = getProvinceOptions(false, region);
+			$("[name=inventoryVendorProvince]").html(provinceOptions);
+		} else {
+			const provinceOptions = getProvinceOptions(false, "", true);
+			$("[name=inventoryVendorProvince]").html(provinceOptions);
+		}
 
-        const municipality = getMunicipalityOptions(false, "", "", true);
-        $("[name=inventoryVendorCity]").html(municipality); 
+		const municipality = getMunicipalityOptions(false, "", "", true);
+		$("[name=inventoryVendorCity]").html(municipality);
 
-        const barangay = getBarangayOptions(false, "", "", "", true);
-        $("[name=inventoryVendorBarangay]").html(barangay);
-    })
+		const barangay = getBarangayOptions(false, "", "", "", true);
+		$("[name=inventoryVendorBarangay]").html(barangay);
+	});
 
-    $(document).on("change", "[name=inventoryVendorProvince]", function() {
-        const region   = $("[name=inventoryVendorRegion]").val();
-        const province = $(this).val();
-        
-        if (province) {
-            const municipalityOptions = getMunicipalityOptions(false, region, province);
-            $("[name=inventoryVendorCity]").html(municipalityOptions);
-        } else {
-            const municipalityOptions = getMunicipalityOptions(false, "", "", true);
-            $("[name=inventoryVendorCity]").html(municipalityOptions);
-        }
+	$(document).on("change", "[name=inventoryVendorProvince]", function () {
+		const region = $("[name=inventoryVendorRegion]").val();
+		const province = $(this).val();
 
-        const barangay = getBarangayOptions(false, "", "", "", true);
-        $("[name=inventoryVendorBarangay]").html(barangay);
-    })
+		if (province) {
+			const municipalityOptions = getMunicipalityOptions(
+				false,
+				region,
+				province
+			);
+			$("[name=inventoryVendorCity]").html(municipalityOptions);
+		} else {
+			const municipalityOptions = getMunicipalityOptions(false, "", "", true);
+			$("[name=inventoryVendorCity]").html(municipalityOptions);
+		}
 
-    $(document).on("change", "[name=inventoryVendorCity]", function() {
-        const region   = $("[name=inventoryVendorRegion]").val();
-        const province = $("[name=inventoryVendorProvince]").val();
-        const city     = $(this).val();
+		const barangay = getBarangayOptions(false, "", "", "", true);
+		$("[name=inventoryVendorBarangay]").html(barangay);
+	});
 
-        if (city) {
-            const barangay = getBarangayOptions(false, region, province, city);
-            $("[name=inventoryVendorBarangay]").html(barangay);
-        } else {
-            const barangay = getBarangayOptions(false, "", "", "", true);
-            $("[name=inventoryVendorBarangay]").html(barangay);
-        }
-    })
+	$(document).on("change", "[name=inventoryVendorCity]", function () {
+		const region = $("[name=inventoryVendorRegion]").val();
+		const province = $("[name=inventoryVendorProvince]").val();
+		const city = $(this).val();
+
+		if (city) {
+			const barangay = getBarangayOptions(false, region, province, city);
+			$("[name=inventoryVendorBarangay]").html(barangay);
+		} else {
+			const barangay = getBarangayOptions(false, "", "", "", true);
+			$("[name=inventoryVendorBarangay]").html(barangay);
+		}
+	});
 	// ----- END GET PHILIPPINE ADDRESSES -----
-
 
 	// ----- DATATABLES -----
 	function initDataTables() {
@@ -151,27 +191,26 @@ $(document).ready(function () {
 				scrollX: true,
 				scrollCollapse: true,
 				columnDefs: [
-					{ targets: 0,  width: 50 },
-					{ targets: 1,  width: 150 },
-					{ targets: 2,  width: 300 },
-					{ targets: 3,  width: 150 },
-					{ targets: 4,  width: 100 },
-					{ targets: 5,  width: 100 },
-					{ targets: 6,  width: 100 },
-					{ targets: 7,  width: 100 },
-					{ targets: 8,  width: 100 },
-					{ targets: 9,  width: 150 },
-					{ targets: 10, width: 80 }
+					{ targets: 0, width: 50 },
+					{ targets: 1, width: 150 },
+					{ targets: 2, width: 300 },
+					{ targets: 3, width: 150 },
+					{ targets: 4, width: 100 },
+					{ targets: 5, width: 110 },
+					{ targets: 6, width: 100 },
+					{ targets: 7, width: 100 },
+					{ targets: 8, width: 100 },
+					{ targets: 9, width: 150 },
+					{ targets: 10, width: 80 },
 				],
 			});
 	}
 	initDataTables();
 	// ----- END DATATABLES -----
 
-
 	// ----- TABLE CONTENT -----
 	function tableContent() {
-        preventRefresh(false);
+		preventRefresh(false);
 
 		// Reset the unique datas
 		uniqueData = [];
@@ -214,7 +253,7 @@ $(document).ready(function () {
 					uniqueData.push(unique);
 					// ----- END INSERT UNIQUE DATA TO uniqueData VARIABLE ----
 
-                    let status =
+					let status =
 						item.inventoryVendorStatus == 1
 							? `
                     <span class="badge badge-outline-success w-100">Active</span>`
@@ -226,22 +265,50 @@ $(document).ready(function () {
                         <td>${item.inventoryVendorCode}</td>
                         <td>${item.inventoryVendorName}</td>
                         <td>
-                            ${item.inventoryVendorUnit+", "} 
-                            ${item.inventoryVendorBuilding && titleCase(item.inventoryVendorBuilding)+", "} 
-                            ${item.inventoryVendorStreet && titleCase(item.inventoryVendorStreet)+", "}
-                            ${item.inventoryVendorSubdivision && titleCase(item.inventoryVendorSubdivision)+", "} 
-                            ${item.inventoryVendorBarangay && titleCase(item.inventoryVendorBarangay)+", "} 
-                            ${item.inventoryVendorCity && titleCase(item.inventoryVendorCity)+", "} 
-                            ${item.inventoryVendorProvince && titleCase(item.inventoryVendorProvince)+", "}
-                            ${item.inventoryVendorCountry && titleCase(item.inventoryVendorCountry)+", "} 
-                            ${item.inventoryVendorZipCode && titleCase(item.inventoryVendorZipCode)}
+                            ${item.inventoryVendorUnit + ", "} 
+                            ${
+															item.inventoryVendorBuilding &&
+															titleCase(item.inventoryVendorBuilding) + ", "
+														} 
+                            ${
+															item.inventoryVendorStreet &&
+															titleCase(item.inventoryVendorStreet) + ", "
+														}
+                            ${
+															item.inventoryVendorSubdivision &&
+															titleCase(item.inventoryVendorSubdivision) + ", "
+														} 
+                            ${
+															item.inventoryVendorBarangay &&
+															titleCase(item.inventoryVendorBarangay) + ", "
+														} 
+                            ${
+															item.inventoryVendorCity &&
+															titleCase(item.inventoryVendorCity) + ", "
+														} 
+                            ${
+															item.inventoryVendorProvince &&
+															titleCase(item.inventoryVendorProvince) + ", "
+														}
+                            ${
+															item.inventoryVendorCountry &&
+															titleCase(item.inventoryVendorCountry) + ", "
+														} 
+                            ${
+															item.inventoryVendorZipCode &&
+															titleCase(item.inventoryVendorZipCode)
+														}
                         </td>
                         <td>${item.inventoryVendorPerson}</td>
                         <td>${item.inventoryVendorEmail}</td>
                         <td>${item.inventoryVendorTIN}</td>
                         <td>${item.inventoryVendorMobile}</td>
                         <td>${item.inventoryVendorTelephone}</td>
-                        <td>${item.inventoryVendorVAT == 1 ? "Vatable" : "Non Vatable"}</td>
+                        <td>${
+													item.inventoryVendorVAT == 1
+														? "Vatable"
+														: "Non Vatable"
+												}</td>
                         <td>${item.inventoryVendorBrand}</td>
                         <td>${status}</td>
                     </tr>`;
@@ -266,31 +333,30 @@ $(document).ready(function () {
 	tableContent();
 	// ----- END TABLE CONTENT -----
 
-
 	// ----- MODAL CONTENT -----
 	function modalContent(data = false) {
-        let { 
-            inventoryVendorID          = "",
-            inventoryVendorName        = "",
-            inventoryVendorRegion      = false,
-            inventoryVendorProvince    = false,
-            inventoryVendorCity        = false,
-            inventoryVendorBarangay    = false,
-            inventoryVendorUnit        = "",
-            inventoryVendorBuilding    = "",
-            inventoryVendorStreet      = "",
-            inventoryVendorSubdivision = "",
-            inventoryVendorCountry     = "",
-            inventoryVendorZipCode     = "",
-            inventoryVendorPerson      = "",
-            inventoryVendorEmail       = "",
-            inventoryVendorTIN         = "",
-            inventoryVendorMobile      = "",
-            inventoryVendorTelephone   = "",
-            inventoryVendorBrand       = "",
-            inventoryVendorVAT         = "1",
-            inventoryVendorStatus      = "1",
-        } = data && data[0];
+		let {
+			inventoryVendorID = "",
+			inventoryVendorName = "",
+			inventoryVendorRegion = false,
+			inventoryVendorProvince = false,
+			inventoryVendorCity = false,
+			inventoryVendorBarangay = false,
+			inventoryVendorUnit = "",
+			inventoryVendorBuilding = "",
+			inventoryVendorStreet = "",
+			inventoryVendorSubdivision = "",
+			inventoryVendorCountry = "",
+			inventoryVendorZipCode = "",
+			inventoryVendorPerson = "",
+			inventoryVendorEmail = "",
+			inventoryVendorTIN = "",
+			inventoryVendorMobile = "",
+			inventoryVendorTelephone = "",
+			inventoryVendorBrand = "",
+			inventoryVendorVAT = "1",
+			inventoryVendorStatus = "1",
+		} = data && data[0];
 
 		let button = data
 			? `
@@ -341,7 +407,13 @@ $(document).ready(function () {
                             <select class=" form-control show-tick select2 validate" name="inventoryVendorProvince"
                             id="inventoryVendorProvince">
                                 <option value="" selected>Select Province</option>
-                                ${data && getProvinceOptions(inventoryVendorProvince, inventoryVendorRegion)}
+                                ${
+																	data &&
+																	getProvinceOptions(
+																		inventoryVendorProvince,
+																		inventoryVendorRegion
+																	)
+																}
                             </select>
                             <div class="invalid-feedback d-block" id="invalid-inventoryVendorProvince"></div>
                         </div>
@@ -351,7 +423,14 @@ $(document).ready(function () {
                             <label>City/Municipality</label>
                             <select class=" form-control show-tick select2" id="inventoryVendorCity" name="inventoryVendorCity">
                                 <option value="" selected>Select City/Municipality</option>
-                                ${data && getMunicipalityOptions(inventoryVendorCity, inventoryVendorRegion, inventoryVendorProvince)}
+                                ${
+																	data &&
+																	getMunicipalityOptions(
+																		inventoryVendorCity,
+																		inventoryVendorRegion,
+																		inventoryVendorProvince
+																	)
+																}
                             </select> 
                             <div class="invalid-feedback d-block" id="invalid-inventoryVendorCity"></div>
                         </div>
@@ -361,7 +440,15 @@ $(document).ready(function () {
                             <label>Barangay</label>
                             <select class=" form-control show-tick select2 validate" name="inventoryVendorBarangay" id="inventoryVendorBarangay">
                                 <option value="" selected>Select Barangay</option>
-                                ${data && getBarangayOptions(inventoryVendorBarangay, inventoryVendorRegion, inventoryVendorProvince, inventoryVendorCity)}
+                                ${
+																	data &&
+																	getBarangayOptions(
+																		inventoryVendorBarangay,
+																		inventoryVendorRegion,
+																		inventoryVendorProvince,
+																		inventoryVendorCity
+																	)
+																}
                             </select>
                             <div class="invalid-feedback d-block" id="invalid-inventoryVendorBarangay"></div>
                         </div>
@@ -444,6 +531,7 @@ $(document).ready(function () {
                                 minlength="2" 
                                 maxlength="50" 
                                 value="${inventoryVendorEmail}"
+								placeholder="sample@email.com"
                                 autocomplete="off">
                             <div class="invalid-feedback d-block" id="invalid-inventoryVendorEmail"></div>
                         </div>
@@ -517,8 +605,12 @@ $(document).ready(function () {
                         <div class="form-group">
                             <label>VAT <code>*</code></label>
                             <select class=" form-control show-tick select2 validate" name="inventoryVendorVAT" id="inventoryVendorVAT" autocomplete="off">
-                                <option value="1" ${inventoryVendorVAT == 1 && "selected"}>Vatable</option>   
-                                <option value="0" ${inventoryVendorVAT == 0 && "selected"}>Non-Vatable</option>
+                                <option value="1" ${
+																	inventoryVendorVAT == 1 && "selected"
+																}>Vatable</option>   
+                                <option value="0" ${
+																	inventoryVendorVAT == 0 && "selected"
+																}>Non-Vatable</option>
                             </select>
                             <div class="invalid-feedback d-block" id="invalid-inventoryVendorVAT"></div>
                         </div>
@@ -527,8 +619,12 @@ $(document).ready(function () {
                         <div class="form-group">
                             <label>Status <code>*</code></label>
                             <select class=" form-control show-tick select2 validate" name="inventoryVendorStatus" id="inventoryVendorStatus" autocomplete="off" title="Select Status">
-                                <option value="1" ${inventoryVendorStatus == 1 && "selected"}>Active</option>   
-                                <option value="0" ${inventoryVendorStatus == 0 && "selected"}>Inactive</option>
+                                <option value="1" ${
+																	inventoryVendorStatus == 1 && "selected"
+																}>Active</option>   
+                                <option value="0" ${
+																	inventoryVendorStatus == 0 && "selected"
+																}>Inactive</option>
                             </select>
                             <div class="invalid-feedback d-block" id="invalid-inventoryVendorStatus"></div>
                         </div>
@@ -543,10 +639,9 @@ $(document).ready(function () {
 	}
 	// ----- END MODAL CONTENT -----
 
-
 	// ----- OPEN ADD MODAL -----
 	$(document).on("click", "#btnAdd", function () {
-        preventRefresh(true);
+		preventRefresh(true);
 
 		$("#modal_inventory_vendor .page-title").text("ADD INVENTORY VENDOR");
 		$("#modal_inventory_vendor").modal("show");
@@ -557,27 +652,38 @@ $(document).ready(function () {
 	});
 	// ----- END OPEN ADD MODAL -----
 
-
 	// ----- SAVE MODAL -----
 	$(document).on("click", "#btnSave", function () {
 		const validate = validateForm("modal_inventory_vendor");
 		if (validate) {
-            let data = getFormData("modal_inventory_vendor", true);
-            data["tableData[inventoryVendorCode]"] = generateCode("VEN", false, "ims_inventory_vendor_tbl", "inventoryVendorCode");
-            data["tableData[createdBy]"] = sessionID;
-            data["tableData[updatedBy]"] = sessionID;
-            data["tableName"]            = "ims_inventory_vendor_tbl";
-            data["feedback"]             = $("[name=inventoryVendorName]").val();
+			let data = getFormData("modal_inventory_vendor", true);
+			data["tableData[inventoryVendorCode]"] = generateCode(
+				"VEN",
+				false,
+				"ims_inventory_vendor_tbl",
+				"inventoryVendorCode"
+			);
+			data["tableData[createdBy]"] = sessionID;
+			data["tableData[updatedBy]"] = sessionID;
+			data["tableName"] = "ims_inventory_vendor_tbl";
+			data["feedback"] = $("[name=inventoryVendorName]").val();
 
-            sweetAlertConfirmation("add", "Vendor", "modal_inventory_vendor", null, data, true, tableContent);
+			sweetAlertConfirmation(
+				"add",
+				"Vendor",
+				"modal_inventory_vendor",
+				null,
+				data,
+				true,
+				tableContent
+			);
 		}
 	});
 	// ----- END SAVE MODAL -----
 
-    
 	// ----- OPEN EDIT MODAL -----
 	$(document).on("click", ".btnEdit", function () {
-        preventRefresh(true);
+		preventRefresh(true);
 
 		const id = $(this).attr("id");
 		$("#modal_inventory_vendor .page-title").text("EDIT INVENTORY VENDOR");
@@ -602,7 +708,6 @@ $(document).ready(function () {
 	});
 	// ----- END OPEN EDIT MODAL -----
 
-
 	// ----- UPDATE MODAL -----
 	$(document).on("click", "#btnUpdate", function () {
 		const id = $(this).attr("vendorID");
@@ -611,9 +716,9 @@ $(document).ready(function () {
 		if (validate) {
 			let data = getFormData("modal_inventory_vendor", true);
 			data["tableData[updatedBy]"] = sessionID;
-			data["tableName"]            = "ims_inventory_vendor_tbl";
-			data["whereFilter"]          = "inventoryVendorID=" + id;
-			data["feedback"]             = $("[name=inventoryVendorName]").val();
+			data["tableName"] = "ims_inventory_vendor_tbl";
+			data["whereFilter"] = "inventoryVendorID=" + id;
+			data["feedback"] = $("[name=inventoryVendorName]").val();
 
 			sweetAlertConfirmation(
 				"update",
@@ -628,21 +733,15 @@ $(document).ready(function () {
 	});
 	// ----- END UPDATE MODAL -----
 
-
 	// ------- CANCEL MODAL--------
 	$(document).on("click", ".btnCancel", function () {
 		let formEmpty = isFormEmpty("modal_inventory_vendor");
 		if (!formEmpty) {
-			sweetAlertConfirmation(
-				"cancel",
-				"Vendor",
-				"modal_inventory_vendor"
-			);
+			sweetAlertConfirmation("cancel", "Vendor", "modal_inventory_vendor");
 		} else {
-            preventRefresh(false);
+			preventRefresh(false);
 			$("#modal_inventory_vendor").modal("hide");
 		}
 	});
 	// -------- END CANCEL MODAL-----------
-
 });

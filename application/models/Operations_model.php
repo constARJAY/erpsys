@@ -92,7 +92,8 @@ class Operations_model extends CI_Model {
                 $query = $this->db->update($tableName, $tableData, $whereFilter);
                 $method = $method ? $method : "update";
                 $feedbackMessage = $this->getFeedbackMessage($feedback, $method);
-                return $query ? "true|$feedbackMessage" : "false|System error: Please contact the system administrator for assistance!";
+                $idArr = explode("=", $whereFilter);
+                return $query ? "true|$feedbackMessage|$idArr[1]" : "false|System error: Please contact the system administrator for assistance!";
             } else {
                 return "false|Invalid where clause in mysql";
             }

@@ -56,9 +56,9 @@
         $sessionID = $CI->session->has_userdata('adminSessionID') ? $CI->session->userdata('adminSessionID') : 1;
         $readFilter = $read != "" ? "markRead = $read" : "1=1";
         if ($dateFrom != "" && $dateTo != "") {
-            $sql = "SELECT * FROM gen_system_notification_tbl WHERE employeeID = $sessionID AND createdAt BETWEEN '$dateFrom' AND '$dateTo' AND $readFilter";
+            $sql = "SELECT * FROM gen_system_notification_tbl WHERE employeeID = $sessionID AND createdAt BETWEEN '$dateFrom' AND '$dateTo' AND $readFilter ORDER BY createdAt DESC";
         } else {
-            $sql = "SELECT * FROM gen_system_notification_tbl WHERE employeeID = $sessionID AND $readFilter";   
+            $sql = "SELECT * FROM gen_system_notification_tbl WHERE employeeID = $sessionID AND $readFilter ORDER BY createdAt DESC";   
         }
         $query = $CI->db->query($sql);
         $data = $query ? $query->result_array() : [];

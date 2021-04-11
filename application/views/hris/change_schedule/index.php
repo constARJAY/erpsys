@@ -18,10 +18,10 @@
 
     <div class="container">
 		<div class="row clearfix row-deck">
-            <div class="card col-12">
-                <div class="card-body" id="page_content">
-
-                    
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body" id="page_content">
+                    </div>
                 </div>
             </div>
         </div>
