@@ -10,7 +10,6 @@ $(document).ready(function () {
 	const employeeData = (id) => {
 		if (id) {
 			let data = allEmployeeData.filter(employee => employee.employeeID == id);
-			console.log(id, data);
 			let { employeeID, fullname, designation, department } = data && data[0];
 			return { employeeID, fullname, designation, department };
 		}
@@ -87,11 +86,11 @@ $(document).ready(function () {
 
 	function updateURL(view_id = 0, isAdd = false) {
 		if (view_id && !isAdd) {
-			window.history.pushState("", "", `${base_url}/hris/change_schedule?view_id=${view_id}`);
+			window.history.pushState("", "", `${base_url}hris/change_schedule?view_id=${view_id}`);
 		} else if (!view_id && isAdd) {
-			window.history.pushState("", "", `${base_url}/hris/change_schedule?add`);
+			window.history.pushState("", "", `${base_url}hris/change_schedule?add`);
 		} else {
-			window.history.pushState("", "", `${base_url}/hris/change_schedule`);
+			window.history.pushState("", "", `${base_url}hris/change_schedule`);
 		}
 	}
 	// ----- END VIEW DOCUMENT -----
@@ -123,15 +122,15 @@ $(document).ready(function () {
 				sorting: [],
 				scrollCollapse: true,
 				columnDefs: [
-					{ targets: 0, width: 180 },
+					{ targets: 0, width: 100 },
 					{ targets: 1, width: 150 },
 					{ targets: 2, width: 150 },
 					{ targets: 3, width: 200 },
 					{ targets: 4, width: 200 },
 					{ targets: 5, width: 200 },
-					{ targets: 6, width: 250 },
-					{ targets: 7, width: 80 },
-					{ targets: 8, width: 80 },
+					{ targets: 6, width: 80  },
+					{ targets: 7, width: 250 },
+					{ targets: 8, width: 80  },
 				],
 			});
 
@@ -145,15 +144,15 @@ $(document).ready(function () {
 				sorting: [],
 				scrollCollapse: true,
 				columnDefs: [
-					{ targets: 0, width: 180 },
+					{ targets: 0, width: 100 },
 					{ targets: 1, width: 150 },
 					{ targets: 2, width: 150 },
 					{ targets: 3, width: 200 },
 					{ targets: 4, width: 200 },
 					{ targets: 5, width: 200 },
-					{ targets: 6, width: 250 },
-					{ targets: 7, width: 80 },
-					{ targets: 8, width: 80 },
+					{ targets: 6, width: 80  },
+					{ targets: 7, width: 250 },
+					{ targets: 8, width: 80  },
 				],
 			});
 	}
@@ -221,8 +220,8 @@ $(document).ready(function () {
 					<th>Date Created</th>
 					<th>Date Submitted</th>
 					<th>Date Approved</th>
-					<th>Remarks</th>
                     <th>Status</th>
+					<th>Remarks</th>
                     <th>Action</th>
                 </tr>
             </thead>
@@ -262,10 +261,10 @@ $(document).ready(function () {
 					<td>${dateCreated}</td>
 					<td>${dateSubmitted}</td>
 					<td>${dateApproved}</td>
-					<td>${remarks}</td>
 					<td class="text-center">
 						${getStatusStyle(changeScheduleStatus)}
 					</td>
+					<td>${remarks}</td>
 					<td class="text-center">
 						${button}
 					</td>
@@ -281,7 +280,7 @@ $(document).ready(function () {
 			$("#tableForApprovalParent").html(html);
 			initDataTables();
 			return html;
-		}, 100);
+		}, 300);
 	}
 	// ----- END FOR APPROVAL CONTENT -----
 
@@ -306,8 +305,8 @@ $(document).ready(function () {
 					<th>Date Created</th>
 					<th>Date Submitted</th>
 					<th>Date Approved</th>
-					<th>Remarks</th>
                     <th>Status</th>
+					<th>Remarks</th>
                     <th>Action</th>
                 </tr>
             </thead>
@@ -359,10 +358,10 @@ $(document).ready(function () {
 				<td>${dateCreated}</td>
 				<td>${dateSubmitted}</td>
 				<td>${dateApproved}</td>
-				<td>${remarks}</td>
                 <td class="text-center">
                     ${getStatusStyle(changeScheduleStatus)}
                 </td>
+				<td>${remarks}</td>
                 <td class="text-center">
                     ${button}
                 </td>
@@ -377,7 +376,7 @@ $(document).ready(function () {
 			$("#tableMyFormsParent").html(html);
 			initDataTables();
 			return html;
-		}, 100);
+		}, 300);
 	}
 	// ----- END MY FORMS CONTENT -----
 
@@ -506,7 +505,7 @@ $(document).ready(function () {
 		let button   = formButtons(data);
 
 		let html = `
-        <div class="row">
+        <div class="row px-2">
             <div class="col-lg-2 col-md-6 col-sm-12 px-1">
                 <div class="card">
                     <div class="body">
@@ -561,7 +560,7 @@ $(document).ready(function () {
                 </div>
                 </div>
             </div>
-            <div class="col-sm-12">
+            <div class="col-sm-12 px-1">
                 <div class="card">
                     <div class="body">
                         <small class="text-small text-muted font-weight-bold">Remarks</small>
@@ -670,7 +669,7 @@ $(document).ready(function () {
 				$("#changeScheduleDate").val(moment(new Date).format("MMMM DD, YYYY"));
 			}
 			return html;
-		}, 100);
+		}, 300);
 	}
 	// ----- END FORM CONTENT -----
 
@@ -875,7 +874,7 @@ $(document).ready(function () {
 					pageContent,
 					this
 				);
-			}, 100);
+			}, 300);
 		}
 	});
 	// ----- END CLOSE FORM -----
@@ -990,7 +989,7 @@ $(document).ready(function () {
 					notificationData,
 					this
 				);
-			}, 100);
+			}, 300);
 		} else {
 			formButtonHTML(this, false);
 		}
@@ -1099,7 +1098,7 @@ $(document).ready(function () {
 					notificationData,
 					this
 				);
-			}, 100);
+			}, 300);
 		}
 	});
 	// ----- END APPROVE DOCUMENT -----
@@ -1183,7 +1182,7 @@ $(document).ready(function () {
 						this
 					);
 					$(`[redirect=forApprovalTab]`).trigger("click");
-				}, 100);
+				}, 300);
 			} else {
 				formButtonHTML(this, false);
 			}

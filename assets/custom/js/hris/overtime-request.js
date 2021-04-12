@@ -10,7 +10,7 @@ $(document).ready(function () {
 		}
 
 		var table = $("#tableForApprroval")
-			.css({ "min-width": "100%" })
+			.css({ "min-width": "100%"})
 			.removeAttr("width")
 			.DataTable({
 				proccessing: false,
@@ -25,8 +25,8 @@ $(document).ready(function () {
 					{ targets: 3, width: 200 },
 					{ targets: 4, width: 200 },
 					{ targets: 5, width: 200 },
-					{ targets: 6, width: 250 },
-					{ targets: 7, width: 80 },
+					{ targets: 6, width: 80 },
+					{ targets: 7, width: 250 },
 					{ targets: 8, width: 80 },
 				],
 			});
@@ -47,8 +47,8 @@ $(document).ready(function () {
 					{ targets: 3, width: 200 },
 					{ targets: 4, width: 200 },
 					{ targets: 5, width: 200 },
-					{ targets: 6, width: 250 },
-					{ targets: 7, width: 80 },
+					{ targets: 6, width: 80 },
+					{ targets: 7, width: 250 },
 					{ targets: 8, width: 80 },
 				],
 			});
@@ -97,7 +97,7 @@ $(document).ready(function () {
 	function forApprovalContent() {
 		$("#tableForApprovalParent").html(preloader);
 
-		let scheduleData = getTableData(
+		let requestData = getTableData(
 			"hris_overtime_request_tbl LEFT JOIN hris_employee_list_tbl USING(employeeID)",
 			"hris_overtime_request_tbl.*, CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname",
 			`employeeID != ${sessionID} AND overtimeRequestStatus != 0 AND overtimeRequestStatus != 4`,
@@ -115,15 +115,16 @@ $(document).ready(function () {
 					<th>Date Created</th>
 					<th>Date Submitted</th>
 					<th>Date Approved</th>
-					<th>Remarks</th>
 
-                    <th>Status</th>
+					<th>Status</th>
+					<th>Remarks</th>
+                    
                     <th>Action</th>
                 </tr>
             </thead>
             <tbody>`;
 
-		scheduleData.map((item) => {
+		requestData.map((item) => {
 			let remarks = item.overtimeRequestRemarks
 				? item.overtimeRequestRemarks
 				: "-";
@@ -165,9 +166,9 @@ $(document).ready(function () {
 					<td>${dateCreated}</td>
 					<td>${dateSubmitted}</td>
 					<td>${dateApproved}</td>
-					<td>${remarks}</td>
 
 					<td class="text-center">${getStatusStyle(item.overtimeRequestStatus)}</td>
+					<td>${remarks}</td>
 					<td class="text-center">
 						${button}
 					</td>
@@ -191,7 +192,7 @@ $(document).ready(function () {
 	// ----- MY FORMS CONTENT -----
 	function myFormsContent() {
 		$("#tableMyFormsParent").html(preloader);
-		let scheduleData = getTableData(
+		let requestData = getTableData(
 			"hris_overtime_request_tbl LEFT JOIN hris_employee_list_tbl USING(employeeID)",
 			"*, CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname, hris_overtime_request_tbl.createdAt AS dateCreated",
 			`hris_overtime_request_tbl.employeeID = ${sessionID}`,
@@ -209,15 +210,15 @@ $(document).ready(function () {
 					<th>Date Created</th>
 					<th>Date Submitted</th>
 					<th>Date Approved</th>
-					<th>Remarks</th>
 
-                    <th>Status</th>
+					<th>Status</th>
+					<th>Remarks</th>
                     <th>Action</th>
                 </tr>
             </thead>
             <tbody>`;
 
-		scheduleData.map((item) => {
+		requestData.map((item) => {
 			let unique = {
 				id: item.overtimeRequestID,
 				overtimeRequestDate: moment(item.overtimeRequestDate).format(
@@ -265,11 +266,11 @@ $(document).ready(function () {
 				<td>${dateCreated}</td>
 				<td>${dateSubmitted}</td>
 				<td>${dateApproved}</td>
-				<td>${remarks}</td>
-
+				
                 <td class="text-center">${getStatusStyle(
 									item.overtimeRequestStatus
 								)}</td>
+				<td>${remarks}</td>
                 <td class="text-center">
                     ${button}
                 </td>
@@ -725,7 +726,7 @@ $(document).ready(function () {
 
 			if (action == "insert") {
 				data["tableData[overtimeRequestCode]"] = generateCode(
-					"SCH",
+					"OTR",
 					false,
 					"hris_overtime_request_tbl",
 					"overtimeRequestCode"
@@ -779,7 +780,7 @@ $(document).ready(function () {
 			const feedback = $(this).attr("overtimeRequestCode")
 				? $(this).attr("overtimeRequestCode")
 				: generateCode(
-						"SCH",
+						"OTR",
 						false,
 						"hris_overtime_request_tbl",
 						"overtimeRequestCode"
@@ -793,7 +794,7 @@ $(document).ready(function () {
 				cancelForm(
 					"save",
 					action,
-					"CHANGE SCHEDULE",
+					"OVERTIME REQUEST",
 					"",
 					"form_overtime_request",
 					data,
@@ -842,7 +843,7 @@ $(document).ready(function () {
 		if (validate && validateTime) {
 			const action = "insert"; // CHANGE
 			const feedback = generateCode(
-				"SCH",
+				"OTR",
 				false,
 				"hris_overtime_request_tbl",
 				"overtimeRequestCode"
@@ -853,7 +854,7 @@ $(document).ready(function () {
 			formConfirmation(
 				"save",
 				"insert",
-				"CHANGE SCHEDULE",
+				"OVERTIME REQUEST",
 				"",
 				"form_overtime_request",
 				data,
@@ -876,7 +877,7 @@ $(document).ready(function () {
 			const feedback = $(this).attr("overtimeRequestCode")
 				? $(this).attr("overtimeRequestCode")
 				: generateCode(
-						"SCH",
+						"OTR",
 						false,
 						"hris_overtime_request_tbl",
 						"overtimeRequestCode"
@@ -920,7 +921,7 @@ $(document).ready(function () {
 				formConfirmation(
 					"submit",
 					action,
-					"CHANGE SCHEDULE",
+					"OVERTIME REQUEST",
 					"",
 					"form_overtime_request",
 					data,
@@ -947,7 +948,7 @@ $(document).ready(function () {
 		formConfirmation(
 			"cancelform",
 			action,
-			"CHANGE SCHEDULE",
+			"OVERTIME REQUEST",
 			"",
 			"form_overtime_request",
 			data,
@@ -964,7 +965,7 @@ $(document).ready(function () {
 		const feedback = $(this).attr("overtimeRequestCode")
 			? $(this).attr("overtimeRequestCode")
 			: generateCode(
-					"SCH",
+					"OTR",
 					false,
 					"hris_overtime_request_tbl",
 					"overtimeRequestCode"
@@ -977,7 +978,7 @@ $(document).ready(function () {
 		cancelForm(
 			"save",
 			action,
-			"CHANGE SCHEDULE",
+			"OVERTIME REQUEST",
 			"",
 			"form_overtime_request",
 			data,
@@ -1042,7 +1043,7 @@ $(document).ready(function () {
 				formConfirmation(
 					"approve",
 					"update",
-					"CHANGE SCHEDULE",
+					"OVERTIME REQUEST",
 					"",
 					"form_overtime_request",
 					data,
@@ -1064,7 +1065,7 @@ $(document).ready(function () {
 
 		$("#modal_overtime_request_content").html(preloader);
 		$("#modal_overtime_request .page-title").text(
-			"DENY CHANGE SCHEDULE DOCUMENT"
+			"DENY OVERTIME REQUEST DOCUMENT"
 		);
 		$("#modal_overtime_request").modal("show");
 		let html = `
@@ -1130,7 +1131,7 @@ $(document).ready(function () {
 					formConfirmation(
 						"reject",
 						"update",
-						"CHANGE SCHEDULE",
+						"OVERTIME REQUEST",
 						"modal_overtime_request",
 						"",
 						data,

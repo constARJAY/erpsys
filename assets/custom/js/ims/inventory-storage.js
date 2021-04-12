@@ -308,8 +308,8 @@ $(document).ready(function () {
 					}
 					// ----- INSERT UNIQUE DATA TO uniqueData VARIABLE ----
 					let unique = {
-						id: item.inventoryStorageID, // Required
 						multiple: {
+							id: 						item.inventoryStorageID, // Required
 							inventoryStorageOfficeName: item.inventoryStorageOfficeName, // Required
 							inventoryStorageUnitNumber: item.inventoryStorageUnitNumber,
 						},

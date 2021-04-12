@@ -16,7 +16,7 @@
         </div>
     </div>
 
-    <div class="container">
+    <!-- <div class="container">
 		<div class="row clearfix">
             <div class="col-lg-12">
                 <div class="card">
@@ -27,10 +27,21 @@
 						<div class="row" id="loading-screen" style="visibility:hidden;"></div>
 						<div class="row clearfix row-deck">
 							<div class="col-12">
-                                <div class="table-responsive" id="page_content"></div>
+                                <div class="card-body" id="page_content"></div>
 							</div>
 						</div>
 					</div>
+                </div>
+            </div>
+        </div>
+	</div> -->
+
+    <div class="container">
+		<div class="row clearfix row-deck">
+            <div class="card col-12">
+                <div class="card-body" id="page_content">
+
+                    
                 </div>
             </div>
         </div>

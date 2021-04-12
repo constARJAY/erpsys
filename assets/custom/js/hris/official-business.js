@@ -1,5 +1,25 @@
 $(document).ready(function () {
 
+	// ---- GET EMPLOYEE DATA -----
+	const allEmployeeData = getAllEmployeeData();
+	const employeeData = (id) => {
+		if (id) {
+			let data = allEmployeeData.filter(employee => employee.employeeID == id);
+			let { employeeID, fullname, designation, department } = data && data[0];
+			return { employeeID, fullname, designation, department };
+		}
+		return {};
+	}
+	const employeeFullname = (id) => {
+		if (id != "-") {
+			let data = employeeData(id);
+			return data.fullname || "-";
+		}
+		return "-";
+	}
+	// ---- END GET EMPLOYEE DATA -----
+
+
 	function initDataTables() {
 		if ($.fn.DataTable.isDataTable("#tableForApprroval")) {
 			$("#tableForApprroval").DataTable().destroy();
@@ -19,17 +39,21 @@ $(document).ready(function () {
 				serverSide: false,
 				scrollX: true,
 				scrollCollapse: true,
-				columnDefs: [{
-					 targets: 0, width: 150 },
-					{ targets: 1, width: 150 },
-					{ targets: 2, width: 180 },
-					{ targets: 3, width: 150 },
-					{ targets: 4, width: 290 },
-					{ targets: 5, width: 150 },
-					{ targets: 6, width: 150 },
-					{ targets: 7, width: 150 },
-					{ targets: 8, width: 80 },
-					{ targets: 9, width: 80 },
+				sorting: [],
+				columnDefs: [
+					{ targets: 0,  width: 100 },
+					{ targets: 1,  width: 150 },
+					{ targets: 2,  width: 150 },
+					{ targets: 3,  width: 180 },
+					{ targets: 4,  width: 200 },
+					{ targets: 5,  width: 100 },
+					{ targets: 6,  width: 150 },
+					{ targets: 7,  width: 200 },
+					{ targets: 8,  width: 200 },
+					{ targets: 9,  width: 200 },
+					{ targets: 10, width: 80  },
+					{ targets: 11, width: 250 },
+					{ targets: 12, width: 80  },
 				],
 			});
 
@@ -43,17 +67,21 @@ $(document).ready(function () {
 				serverSide: false,
 				scrollX: true,
 				scrollCollapse: true,
-				columnDefs: [{
-					 targets: 0, width: 150 },
-					{ targets: 1, width: 150 },
-					{ targets: 2, width: 180 },
-					{ targets: 3, width: 150 },
-					{ targets: 4, width: 290 },
-					{ targets: 5, width: 150 },
-					{ targets: 6, width: 150 },
-					{ targets: 7, width: 150 },
-					{ targets: 8, width: 80 },
-					{ targets: 9, width: 80 },
+				sorting: [],
+				columnDefs: [
+					{ targets: 0,  width: 100 },
+					{ targets: 1,  width: 150 },
+					{ targets: 2,  width: 150 },
+					{ targets: 3,  width: 180 },
+					{ targets: 4,  width: 200 },
+					{ targets: 5,  width: 100 },
+					{ targets: 6,  width: 150 },
+					{ targets: 7,  width: 200 },
+					{ targets: 8,  width: 200 },
+					{ targets: 9,  width: 200 },
+					{ targets: 10, width: 80  },
+					{ targets: 11, width: 250 },
+					{ targets: 12, width: 80  },
 				],
 			});
 	}
@@ -105,29 +133,43 @@ $(document).ready(function () {
 					ob.officialBusinessTimeIn,ob.officialBusinessTimeOut,ob.officialBusinessReason,ob.approversID,ob.approversStatus,ob.approversDate,
 					ob.officialBusinessStatus,ob.officialBusinessRemarks,ob.submittedAt,ob.createdBy,ob.updatedBy,ob.createdAt,ob.updatedAt,cl.clientName,
 					hris_employee_list_tbl.employeeFirstname, hris_employee_list_tbl.employeeLastname`,
-			`employeeID != ${sessionID} AND officialBusinessStatus != 0 AND officialBusinessStatus != 4`
+			`employeeID != ${sessionID} AND officialBusinessStatus != 0 AND officialBusinessStatus != 4`,
+			`FIELD(officialBusinessStatus, 0, 1, 3, 2, 4), COALESCE(ob.submittedAt, ob.createdAt)`
 		);
 
 		let html = `
         <table class="table table-bordered table-striped table-hover" id="tableForApprroval">
             <thead>
                 <tr>
-                    <th>Document Code</th>
-                    <th>Employee Name</th>
+					<th>Document No.</th>
+					<th>Employee Name</th>
+					<th>Current Approver</th>
+
+					<th>Company</th>
+					<th>Address</th>
+					<th>Date</th>
+					<th>Time In/Time Out</th>
+					
 					<th>Date Created</th>
-                    <th>Company</th>
-                    <th>Address</th>
-                    <th>Date</th>
-                    <th>Time In/Time Out</th>
-                    <th>Remarks</th>
-                    <th>Status</th>
-                    <th>Action</th>
+					<th>Date Submitted</th>
+					<th>Date Approved</th>
+
+					<th>Status</th>
+					<th>Remarks</th>
+					<th>Action</th>
                 </tr>
             </thead>
             <tbody>`;
 
 		scheduleData.map((item) => {
-			console.log(item.submittedAt);
+			let remarks       = item.officialBusinessRemarks ? item.officialBusinessRemarks : "-";
+			let dateCreated   = moment(item.createdAt).format("MMMM DD, YYYY hh:mm:ss A");
+			let dateSubmitted = item.submittedAt	? moment(item.submittedAt).format("MMMM DD, YYYY hh:mm:ss A") : "-";
+			let dateApproved  = item.officialBusinessStatus == 2 ? item.approversDate.split("|") : "-";
+			if (dateApproved !== "-") {
+				dateApproved = moment(dateApproved[dateApproved.length - 1]).format("MMMM DD, YYYY hh:mm:ss A");
+			}
+
 			let button = `
 			<button class="btn btn-view w-100 btnView" id="${item.officialBusinessID}"><i class="fas fa-eye"></i> View</button>`;
 
@@ -136,13 +178,21 @@ $(document).ready(function () {
 				<tr>
 					<td>${item.officialBusinessCode}</td>
 					<td>${item.employeeFirstname + ' ' + item.employeeLastname}</td>
-					<td>${moment(item.createdAt).format("MMMM DD, YYYY hh:mm:ss A")}</td>
-                    <td>${item.clientName}</td>
-                    <td>${item.officialBusinessAddress}</td>
+					<td>
+						${employeeFullname(getCurrentApprover(item.approversID, item.approversDate, item.officialBusinessStatus, true))}
+					</td>
+
+					<td>${item.clientName}</td>
+					<td>${item.officialBusinessAddress}</td>
 					<td>${moment(item.officialBusinessDate).format("MMMM DD, YYYY")}</td>
 					<td>${item.officialBusinessTimeIn} - ${item.officialBusinessTimeOut}</td>
-					<td>${item.officialBusinessRemarks}</td>
+
+					<td>${dateCreated}</td>
+					<td>${dateSubmitted}</td>
+					<td>${dateApproved}</td>
+
 					<td class="text-center">${getStatusStyle(item.officialBusinessStatus)}</td>
+					<td>${remarks}</td>
 					<td class="text-center">
 						${button}
 					</td>
@@ -174,22 +224,29 @@ $(document).ready(function () {
 			ob.officialBusinessTimeIn,ob.officialBusinessTimeOut,ob.officialBusinessReason,ob.approversID,ob.approversStatus,ob.approversDate,
 			ob.officialBusinessStatus,ob.officialBusinessRemarks,ob.submittedAt,ob.createdBy,ob.updatedBy,ob.createdAt,ob.updatedAt,cl.clientName,
 			hris_employee_list_tbl.employeeFirstname, hris_employee_list_tbl.employeeLastname`,
-			`employeeID = ${sessionID}`
+			`employeeID = ${sessionID}`,
+			`FIELD(officialBusinessStatus, 0, 1, 3, 2, 4), COALESCE(ob.submittedAt, ob.createdAt)`
 		);
 
 		let html = `
         <table class="table table-bordered table-striped table-hover" id="tableMyForms">
             <thead>
                 <tr>
-                    <th>Document Code</th>
+                    <th>Document No.</th>
                     <th>Employee Name</th>
-					<th>Date Created</th>
+					<th>Current Approver</th>
+
                     <th>Company</th>
                     <th>Address</th>
                     <th>Date</th>
                     <th>Time In/Time Out</th>
-                    <th>Remarks</th>
+					
+					<th>Date Created</th>
+					<th>Date Submitted</th>
+					<th>Date Approved</th>
+
                     <th>Status</th>
+                    <th>Remarks</th>
                     <th>Action</th>
                 </tr>
             </thead>
@@ -201,6 +258,14 @@ $(document).ready(function () {
 				officialBusinessDate: moment(item.officialBusinessDate).format("MMMM DD, YYYY")
 			};
 			uniqueData.push(unique);
+
+			let remarks       = item.officialBusinessRemarks ? item.officialBusinessRemarks : "-";
+			let dateCreated   = moment(item.createdAt).format("MMMM DD, YYYY hh:mm:ss A");
+			let dateSubmitted = item.submittedAt	? moment(item.submittedAt).format("MMMM DD, YYYY hh:mm:ss A") : "-";
+			let dateApproved  = item.officialBusinessStatus == 2 ? item.approversDate.split("|") : "-";
+			if (dateApproved !== "-") {
+				dateApproved = moment(dateApproved[dateApproved.length - 1]).format("MMMM DD, YYYY hh:mm:ss A");
+			}
 
 			let button =
 				item.officialBusinessStatus != 0 ?
@@ -215,13 +280,21 @@ $(document).ready(function () {
             <tr>
                 <td>${item.officialBusinessCode}</td>
                 <td>${item.employeeFirstname + ' ' + item.employeeLastname}</td>
-				<td>${moment(item.createdAt).format("MMMM DD, YYYY hh:mm:ss A")}</td>
+				<td>
+					${employeeFullname(getCurrentApprover(item.approversID, item.approversDate, item.officialBusinessStatus, true))}
+				</td>
+
                 <td>${item.clientName}</td>
                 <td>${item.officialBusinessAddress}</td>
                 <td>${moment(item.officialBusinessDate).format("MMMM DD, YYYY")}</td>
                 <td>${item.officialBusinessTimeIn} - ${item.officialBusinessTimeOut}</td>
-                <td>${item.officialBusinessRemarks}</td>
+
+				<td>${dateCreated}</td>
+				<td>${dateSubmitted}</td>
+				<td>${dateApproved}</td>
+
                 <td class="text-center">${getStatusStyle(item.officialBusinessStatus)}</td>
+                <td>${remarks}</td>
                 <td class="text-center">
                     ${button}
                 </td>
@@ -358,7 +431,7 @@ $(document).ready(function () {
 		let button = formButtons(data);
 
 		let html = `
-        <div class="row">
+        <div class="row px-2">
             <div class="col-lg-2 col-md-6 col-sm-12 px-1">
                 <div class="card">
                     <div class="body">
@@ -403,7 +476,7 @@ $(document).ready(function () {
                 </div>
                 </div>
             </div>
-            <div class="col-sm-12">
+            <div class="col-sm-12 px-1">
                 <div class="card">
                     <div class="body">
                         <small class="text-small text-muted font-weight-bold">Remarks</small>
@@ -427,6 +500,7 @@ $(document).ready(function () {
                     class="form-control validate select2" 
                     id="officialBusinessCompanyID" 
                     name="officialBusinessCompanyID"
+					style="width: 100%"
                     ${disabled} required>
                     ${getCompanyContent(officialBusinessCompanyID)}
                     </select>
@@ -442,7 +516,7 @@ $(document).ready(function () {
                     id="officialBusinessAddress"
                     name="officialBusinessAddress"
                     value="${officialBusinessAddress}"
-                    ${disabled} readonly required>
+                    disabled>
                 <div class="d-block invalid-feedback" id="invalid-officialBusinessAddress"></div>
              </div>
             </div>
@@ -720,7 +794,7 @@ $(document).ready(function () {
 
 	// ----- CHANGE TIME TO -----
 	$(document).on("keyup", ".timeOut", function () {
-		checkTimeRange($(this).attr("id"));
+		// checkTimeRange($(this).attr("id"));
 	});
 	// ----- END CHANGE TIME TO -----
 
@@ -804,8 +878,8 @@ $(document).ready(function () {
 	// ----- SAVE DOCUMENT -----
 	$(document).on("click", "#btnSave", function () {
 		const validate = validateForm("form_official_business");
-		const validateTime = checkTimeRange(false, true);
-		if (validate && validateTime) {
+		// const validateTime = checkTimeRange(false, true);
+		if (validate) {
 			const action = "insert"; // CHANGE
 			const feedback = generateCode(
 				"OBF",
@@ -836,9 +910,9 @@ $(document).ready(function () {
 		const id = $(this).attr("officialBusinessID");
 
 		const validate = validateForm("form_official_business");
-		const validateTime = checkTimeRange(false, true);
+		// const validateTime = checkTimeRange(false, true);
 
-		if (validate && validateTime) {
+		if (validate) {
 			const feedback = $(this).attr("officialBusinessCode") ?
 				$(this).attr("officialBusinessCode") :
 				generateCode(

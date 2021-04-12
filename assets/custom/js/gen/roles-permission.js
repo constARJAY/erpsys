@@ -104,7 +104,7 @@ $(document).ready(function () {
 		if (data.length > 0) {
 			data.map((item, index) => {
 				let checkbox =
-					item.roleID != 1
+					item.designationID != 1
 						? `
                 <div class="status-toggle">
                     <label class="switch">

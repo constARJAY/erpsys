@@ -14,28 +14,37 @@
                     <span>This module is used to manage the event calendar</span>
                 </div>            
                 <div class="col-lg-6 col-md-12 d-flex justify-content-end align-items-start">
-                    <button class="btn btn-default btn-add waves-effect d-flex align-items-center" type="button" data-toggle="collapse" data-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample"><i class="zmdi zmdi-caret-down"></i>&nbsp;Upcoming Event</button>
+                    <button class="btn btn-default btn-add waves-effect d-flex align-items-center" type="button" data-toggle="collapse" id="showEventIcon" aria-expanded="false" aria-controls="collapseExample"><i class="zmdi zmdi-caret-down"></i>&nbsp; <span>Upcoming Event</span></button>
                 </div>
             </div>
-            <div class="row collapse" id="collapseExample">
+            <div class="row collapseExampleForIcon collapse">
                 <div class="col-12">
                     <div class="bh_divider"></div>
                 </div>
-                <?php foreach($events as $rowEvents): $eventDate = date_create($rowEvents["eventCalendarDateFrom"]); ?>
+
+                <?php if(count($events) < 1):?>
                     <div class="col-lg-3 col-md-6 col-sm-6">
-                        <div class="d-flex justify-content-start">
-                            <div class="px-3">
-                                <h3 class="mb-0"><?=date_format($eventDate, "d")?></h3>
-                                <span class="font-12"><?= date_format($eventDate, "F")?></span>
-                            </div>
-                            <div class="px-3 border-left">
-                                <h6><?=$rowEvents["eventCalendarName"]?></h6>
-                                <!-- <span class="font-13">Mobile World Congress 2020</span>
-                                <div class="font-11">71 Pilgrim Avenue Chase, MD 20815</div> -->
+                            <div class="d-flex justify-content-start">
+                                <h5 class="text-light">No available event for this month</h5>
                             </div>
                         </div>
-                    </div>
-                <?php endforeach;?>
+                <?php else:?>
+                    <?php foreach($events as $rowEvents): $eventDate = date_create($rowEvents["eventCalendarDateFrom"]); ?>
+                        <div class="col-lg-3 col-md-6 col-sm-6">
+                            <div class="d-flex justify-content-start">
+                                <div class="px-3">
+                                    <h3 class="mb-0"><?=date_format($eventDate, "d")?></h3>
+                                    <span class="font-12"><?= date_format($eventDate, "F")?></span>
+                                </div>
+                                <div class="px-3 border-left">
+                                    <h6><?=$rowEvents["eventCalendarName"]?></h6>
+                                    <!-- <span class="font-13">Mobile World Congress 2020</span>
+                                    <div class="font-11">71 Pilgrim Avenue Chase, MD 20815</div> -->
+                                </div>
+                            </div>
+                        </div>
+                    <?php endforeach;?>
+                <?php endif;?>
             </div>
         </div>
     </div>
@@ -85,6 +94,6 @@
 
     <script src="<?php echo base_url(); ?>assets/js/jquery-ui.min.js"></script>
 	<script src="<?php echo base_url(); ?>assets/plugins/fullcalendar/fullcalendar.min.js"></script>
-	<!-- <script src="<?php echo base_url(); ?>assets/custom/js/hris/event_calendar.js"></script> -->
+	<script src="<?php echo base_url(); ?>assets/custom/js/hris/event-calendar.js"></script>
 	<script src="<?php echo base_url(); ?>assets/plugins/fullcalendar/jquery.fullcalendar.js"></script>
 

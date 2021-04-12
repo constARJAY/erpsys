@@ -10,7 +10,7 @@ class Leave_request extends CI_Controller {
 
     public function index()
     {
-        $data["title"] = "Leave Request";
+        $data["title"] = "Leave Request Form";
         $this->load->view("template/header",$data);
         $this->load->view("hris/leave_request/index");
         $this->load->view("template/footer");

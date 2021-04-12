@@ -1,5 +1,25 @@
 $(document).ready(function () {
 
+	// ---- GET EMPLOYEE DATA -----
+	const allEmployeeData = getAllEmployeeData();
+	const employeeData = (id) => {
+		if (id) {
+			let data = allEmployeeData.filter(employee => employee.employeeID == id);
+			let { employeeID, fullname, designation, department } = data && data[0];
+			return { employeeID, fullname, designation, department };
+		}
+		return {};
+	}
+	const employeeFullname = (id) => {
+		if (id != "-") {
+			let data = employeeData(id);
+			return data.fullname || "-";
+		}
+		return "-";
+	}
+	// ---- END GET EMPLOYEE DATA -----
+
+
 	// ----- DATATABLES -----
 	function initDataTables() {
 		if ($.fn.DataTable.isDataTable("#tableForApprroval")) {
@@ -18,14 +38,17 @@ $(document).ready(function () {
 				serverSide: false,
 				scrollX: true,
 				scrollCollapse: true,
+				sorting: [],
 				columnDefs: [
-					{ targets: 0, width: 80 },
+					{ targets: 0, width: 100 },
 					{ targets: 1, width: 150 },
 					{ targets: 2, width: 150 },
-					{ targets: 3, width: 150 },
-					{ targets: 4, width: 150 },
-					{ targets: 5, width: 80 },
-					{ targets: 6, width: 80 },
+					{ targets: 3, width: 200 },
+					{ targets: 4, width: 200 },
+					{ targets: 5, width: 200 },
+					{ targets: 6, width: 250 },
+					{ targets: 7, width: 80 },
+					{ targets: 8, width: 80 },
 				],
 			});
 
@@ -37,14 +60,17 @@ $(document).ready(function () {
 				serverSide: false,
 				scrollX: true,
 				scrollCollapse: true,
+				sorting: [],
 				columnDefs: [
-					{ targets: 0, width: 80 },
+					{ targets: 0, width: 100 },
 					{ targets: 1, width: 150 },
 					{ targets: 2, width: 150 },
-					{ targets: 3, width: 150 },
-					{ targets: 4, width: 150 },
-					{ targets: 5, width: 80 },
-					{ targets: 6, width: 80 },
+					{ targets: 3, width: 200 },
+					{ targets: 4, width: 200 },
+					{ targets: 5, width: 200 },
+					{ targets: 6, width: 250 },
+					{ targets: 7, width: 80 },
+					{ targets: 8, width: 80 },
 				],
 			});
 	}
@@ -99,25 +125,36 @@ $(document).ready(function () {
 			notime.no_Timein_timeoutTimeOut,notime.no_Timein_timeoutReason,notime.approversID,notime.approversStatus,notime.approversDate,notime.no_Timein_timeoutStatus,
 			notime.no_Timein_timeoutRemarks,notime.submittedAt,notime.createdBy,notime.updatedBy,notime.createdAt,notime.updatedAt,
 			hris_employee_list_tbl.employeeFirstname, hris_employee_list_tbl.employeeLastname`,
-			`notime.employeeID != ${sessionID} AND no_Timein_timeoutStatus != 0 AND no_Timein_timeoutStatus != 4`
+			`notime.employeeID != ${sessionID} AND no_Timein_timeoutStatus != 0 AND no_Timein_timeoutStatus != 4`,
+			`FIELD(no_Timein_timeoutStatus, 0, 1, 3, 2, 4), COALESCE(notime.submittedAt, notime.createdAt)`
 		);
 
 		let html = `
         <table class="table table-bordered table-striped table-hover" id="tableForApprroval">
             <thead>
-                <tr>
-                    <th>Document Code</th>
-                    <th>Employee Name</th>
+				<tr>
+					<th>Document No.</th>
+					<th>Employee Name</th>
+					<th>Current Approver</th>
 					<th>Date Created</th>
-                    <th>Date</th>
-                    <th>Time In/Time Out</th>
-                    <th>Status</th>
-                    <th>Action</th>
-                </tr>
+					<th>Date Submitted</th>
+					<th>Date Approved</th>
+					<th>Remarks</th>
+					<th>Status</th>
+					<th>Action</th>
+				</tr>
             </thead>
             <tbody>`;
 
 		scheduleData.map((item) => {
+			let remarks       = item.no_Timein_timeoutRemarks ? item.no_Timein_timeoutRemarks : "-";
+			let dateCreated   = moment(item.createdAt).format("MMMM DD, YYYY hh:mm:ss A");
+			let dateSubmitted = item.submittedAt	? moment(item.submittedAt).format("MMMM DD, YYYY hh:mm:ss A") : "-";
+			let dateApproved  = item.no_Timein_timeoutStatus == 2 ? item.approversDate.split("|") : "-";
+			if (dateApproved !== "-") {
+				dateApproved = moment(dateApproved[dateApproved.length - 1]).format("MMMM DD, YYYY hh:mm:ss A");
+			}
+
 			if(item.no_Timein_timeoutStatus=="0"){
 				var submitat = "";
 			}else{
@@ -131,9 +168,15 @@ $(document).ready(function () {
 				<tr>
 					<td>${item.no_Timein_timeoutCode}</td>
 					<td>${item.employeeFirstname + ' ' +item.employeeLastname}</td>
-					<td>${submitat}</td>
-					<td>${moment(item.no_Timein_timeoutDate).format("MMMM DD, YYYY")}</td>
-					<td>${item.no_Timein_timeoutTimeIn} - ${item.no_Timein_timeoutTimeOut}</td>
+
+					<td>
+						${employeeFullname(getCurrentApprover(item.approversID, item.approversDate, item.no_Timein_timeoutStatus, true))}
+					</td>
+					<td>${dateCreated}</td>
+					<td>${dateSubmitted}</td>
+					<td>${dateApproved}</td>
+					<td>${remarks}</td>
+
 					<td class="text-center">${getStatusStyle(item.no_Timein_timeoutStatus)}</td>
 					<td class="text-center">
 						${button}
@@ -166,18 +209,21 @@ $(document).ready(function () {
 			notime.no_Timein_timeoutTimeOut,notime.no_Timein_timeoutReason,notime.approversID,notime.approversStatus,notime.approversDate,notime.no_Timein_timeoutStatus,
 			notime.no_Timein_timeoutRemarks,notime.submittedAt,notime.createdBy,notime.updatedBy,notime.createdAt,notime.updatedAt,
 			hris_employee_list_tbl.employeeFirstname, hris_employee_list_tbl.employeeLastname`,
-			`employeeID = ${sessionID}`
+			`employeeID = ${sessionID}`,
+			`FIELD(no_Timein_timeoutStatus, 0, 1, 3, 2, 4), COALESCE(notime.submittedAt, notime.createdAt)`
 		);
 
 		let html = `
         <table class="table table-bordered table-striped table-hover" id="tableMyForms">
             <thead>
                 <tr>
-                    <th>Document Code</th>
+                    <th>Document No.</th>
                     <th>Employee Name</th>
+					<th>Current Approver</th>
 					<th>Date Created</th>
-                    <th>Date</th>
-                    <th>Time In/Time Out</th>
+					<th>Date Submitted</th>
+					<th>Date Approved</th>
+					<th>Remarks</th>
                     <th>Status</th>
                     <th>Action</th>
                 </tr>
@@ -185,6 +231,15 @@ $(document).ready(function () {
             <tbody>`;
 
 		scheduleData.map((item) => {
+
+			let remarks       = item.no_Timein_timeoutRemarks ? item.no_Timein_timeoutRemarks : "-";
+			let dateCreated   = moment(item.createdAt).format("MMMM DD, YYYY hh:mm:ss A");
+			let dateSubmitted = item.submittedAt	? moment(item.submittedAt).format("MMMM DD, YYYY hh:mm:ss A") : "-";
+			let dateApproved  = item.no_Timein_timeoutStatus == 2 ? item.approversDate.split("|") : "-";
+			if (dateApproved !== "-") {
+				dateApproved = moment(dateApproved[dateApproved.length - 1]).format("MMMM DD, YYYY hh:mm:ss A");
+			}
+
 			if(item.no_Timein_timeoutStatus=="0"){
 				var submitat = "";
 			}else{
@@ -208,9 +263,15 @@ $(document).ready(function () {
             <tr>
                 <td>${item.no_Timein_timeoutCode}</td>
                 <td>${item.employeeFirstname + ' ' +item.employeeLastname}</td>
-				<td>${submitat}</td>
-                <td>${moment(item.no_Timein_timeoutDate).format("MMMM DD, YYYY")}</td>
-                <td>${item.no_Timein_timeoutTimeIn} - ${item.no_Timein_timeoutTimeOut}</td>
+
+				<td>
+                    ${employeeFullname(getCurrentApprover(item.approversID, item.approversDate, item.no_Timein_timeoutStatus, true))}
+                </td>
+				<td>${dateCreated}</td>
+				<td>${dateSubmitted}</td>
+				<td>${dateApproved}</td>
+				<td>${remarks}</td>
+
                 <td class="text-center">${getStatusStyle(item.no_Timein_timeoutStatus)}</td>
                 <td class="text-center">
                     ${button}
@@ -350,8 +411,30 @@ $(document).ready(function () {
 		let disabled = readOnly && "disabled";
 		let button   = formButtons(data);
 
+		let timeInNegligence = "disabled", 
+			timeOutNegligence = "disabled";
+
+		if (readOnly) {
+			timeInNegligence = "disabled";
+			timeOutNegligence = "disabled";
+		} else {
+			if (no_Timein_timeoutNegligence == "1") {
+				timeInNegligence = "";
+				timeOutNegligence = "disabled";
+			} else if (no_Timein_timeoutNegligence == "2") {
+				timeInNegligence = "disabled";
+				timeOutNegligence = "";
+			} else if (no_Timein_timeoutNegligence == "3") {
+				timeInNegligence  = "";
+				timeOutNegligence = "";
+			} else {
+				timeInNegligence  = "disabled";
+				timeOutNegligence = "disabled";
+			}
+		}
+
 		let html = `
-        <div class="row">
+        <div class="row px-2">
             <div class="col-lg-2 col-md-6 col-sm-12 px-1">
                 <div class="card">
                     <div class="body">
@@ -396,7 +479,7 @@ $(document).ready(function () {
                 </div>
                 </div>
             </div>
-            <div class="col-sm-12">
+            <div class="col-sm-12 px-1">
                 <div class="card">
                     <div class="body">
                         <small class="text-small text-muted font-weight-bold">Remarks</small>
@@ -449,6 +532,7 @@ $(document).ready(function () {
 					id="negligence"
 					no_Timein_timeoutTimeIn="no_Timein_timeoutTimeIn"
 					${disabled}
+					required
 					name="no_Timein_timeoutNegligence">
 					<option disabled selected>Select Negligence</option>
 					<option value="1"  ${data && no_Timein_timeoutNegligence == "1" && "selected"}>No Time In</option>
@@ -463,27 +547,25 @@ $(document).ready(function () {
 
             <div class="col-md-4 col-sm-12">
                 <div class="form-group">
-                    <label>Time In ${!disabled ? "<code>*</code>" : ""}</label>
+                    <label>Time In ${!timeInNegligence ? "<code>*</code>" : ""}</label>
                     <input type="text" 
                         class="form-control timeIn" 
                         id="no_Timein_timeoutTimeIn" 
                         name="no_Timein_timeoutTimeIn" 
-						disabled
                         value="${no_Timein_timeoutTimeIn}"
-						${disabled}>
+						${timeInNegligence}>
                     <div class="d-block invalid-feedback" id="invalid-no_Timein_timeoutTimeIn"></div>
                 </div>
             </div>
             <div class="col-md-4 col-sm-12">
                 <div class="form-group">
-                    <label>Time Out ${!disabled ? "<code>*</code>" : ""}</label>
+                    <label>Time Out ${!timeOutNegligence ? "<code>*</code>" : ""}</label>
                     <input type="text" 
                         class="form-control timeOut" 
                         id="no_Timein_timeoutTimeOut" 
                         name="no_Timein_timeoutTimeOut" 
-						disabled
                         value="${no_Timein_timeoutTimeOut}"
-						${disabled}>
+						${timeOutNegligence}>
                     <div class="d-block invalid-feedback" id="invalid-no_Timein_timeoutTimeOut"></div>
                 </div>
             </div>
@@ -690,7 +772,7 @@ $(document).ready(function () {
 	// ----- CHANGE TIME TO -----
 	$(document).on("keyup", ".timeOut", function () {
 	
-		checkTimeRange($(this).attr("id"));
+		// checkTimeRange($(this).attr("id"));
 		//console.log($(this).attr("id"));
 	});
 	// ----- END CHANGE TIME TO -----
@@ -822,8 +904,8 @@ $(document).ready(function () {
 
 		if(boolean == true){
 			const validate = validateForm("form_change_schedule");
-			const validateTime = checkTimeRange(false, true);
-			if (validate && validateTime) {
+			// const validateTime = checkTimeRange(false, true);
+			if (validate) {
 				const action = "insert"; // CHANGE
 				const feedback = generateCode(
 					"SCH",
@@ -856,55 +938,55 @@ $(document).ready(function () {
 		const id = $(this).attr("no_Timein_timeoutID");
 		var getNegligenceValue = $("#negligence option:selected").val();
 		var boolean = false;
-		if(getNegligenceValue == "2"){
-			if($("#no_Timein_timeoutTimeOut").val() != "00:00" ){
+		// if(getNegligenceValue == "2"){
+		// 	if($("#no_Timein_timeoutTimeOut").val() != "00:00" ){
 			
-				boolean = true;
-			}else{
-				$("#no_Timein_timeoutTimeOut").focus();
-				$("#no_Timein_timeoutTimeOut").addClass("is-invalid")
-				$("#invalid-no_Timein_timeoutTimeOut").addClass("is-invalid")
-				$("#invalid-no_Timein_timeoutTimeOut").text("Invalid time range")
-			}
-		}
+		// 		boolean = true;
+		// 	}else{
+		// 		$("#no_Timein_timeoutTimeOut").focus();
+		// 		$("#no_Timein_timeoutTimeOut").addClass("is-invalid")
+		// 		$("#invalid-no_Timein_timeoutTimeOut").addClass("is-invalid")
+		// 		$("#invalid-no_Timein_timeoutTimeOut").text("Invalid time range")
+		// 	}
+		// }
 
-		if(getNegligenceValue == "1"){
-			if($("#no_Timein_timeoutTimeIn").val() != "00:00"){
-				boolean = true;
-			}else{
-				$("#no_Timein_timeoutTimeIn").focus();
-				$("#no_Timein_timeoutTimeIn").addClass("is-invalid")
-				$("#invalid-no_Timein_timeoutTimeIn").addClass("is-invalid")
-				$("#invalid-no_Timein_timeoutTimeIn").text("Invalid time range")
-			}
-		}
+		// if(getNegligenceValue == "1"){
+		// 	if($("#no_Timein_timeoutTimeIn").val() != "00:00"){
+		// 		boolean = true;
+		// 	}else{
+		// 		$("#no_Timein_timeoutTimeIn").focus();
+		// 		$("#no_Timein_timeoutTimeIn").addClass("is-invalid")
+		// 		$("#invalid-no_Timein_timeoutTimeIn").addClass("is-invalid")
+		// 		$("#invalid-no_Timein_timeoutTimeIn").text("Invalid time range")
+		// 	}
+		// }
 
-		if(getNegligenceValue == "3"){
-			if($("#no_Timein_timeoutTimeIn").val() != "00:00" && $("#no_Timein_timeoutTimeOut").val() != "00:00" ){
+		// if(getNegligenceValue == "3"){
+		// 	if($("#no_Timein_timeoutTimeIn").val() != "00:00" && $("#no_Timein_timeoutTimeOut").val() != "00:00" ){
 			
-				boolean = true;
-			}else{
-				if($("#no_Timein_timeoutTimeIn").val() == "00:00"){
-					$("#no_Timein_timeoutTimeIn").focus();
-					$("#no_Timein_timeoutTimeIn").addClass("is-invalid")
-					$("#invalid-no_Timein_timeoutTimeIn").addClass("is-invalid")
-					$("#invalid-no_Timein_timeoutTimeIn").text("Invalid time range")
-				}
+		// 		boolean = true;
+		// 	}else{
+		// 		if($("#no_Timein_timeoutTimeIn").val() == "00:00"){
+		// 			$("#no_Timein_timeoutTimeIn").focus();
+		// 			$("#no_Timein_timeoutTimeIn").addClass("is-invalid")
+		// 			$("#invalid-no_Timein_timeoutTimeIn").addClass("is-invalid")
+		// 			$("#invalid-no_Timein_timeoutTimeIn").text("Invalid time range")
+		// 		}
 
-				if($("#no_Timein_timeoutTimeOut").val() == "00:00"){
-					$("#no_Timein_timeoutTimeOut").focus();
-					$("#no_Timein_timeoutTimeOut").addClass("is-invalid")
-					$("#invalid-no_Timein_timeoutTimeOut").addClass("is-invalid")
-					$("#invalid-no_Timein_timeoutTimeOut").text("Invalid time range")
-				}
-			}
-		}
-		if(boolean == true){
+		// 		if($("#no_Timein_timeoutTimeOut").val() == "00:00"){
+		// 			$("#no_Timein_timeoutTimeOut").focus();
+		// 			$("#no_Timein_timeoutTimeOut").addClass("is-invalid")
+		// 			$("#invalid-no_Timein_timeoutTimeOut").addClass("is-invalid")
+		// 			$("#invalid-no_Timein_timeoutTimeOut").text("Invalid time range")
+		// 		}
+		// 	}
+		// }
+		// if(boolean == true){
 
 			const validate = validateForm("form_change_schedule");
-			const validateTime = checkTimeRange(false, true);
+			// const validateTime = checkTimeRange(false, true);
 
-			if (validate && validateTime) {
+			if (validate) {
 				const feedback = $(this).attr("no_Timein_timeoutCode")
 				? $(this).attr("no_Timein_timeoutCode")
 				: generateCode(
@@ -938,7 +1020,7 @@ $(document).ready(function () {
 					notificationData
 				);
 			}
-		}
+		// }
 	});
 	// ----- END SUBMIT DOCUMENT -----
 

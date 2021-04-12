@@ -11,7 +11,7 @@ class Official_business extends CI_Controller {
 
     public function index()
     {
-        $data["title"] = "Official Business";
+        $data["title"] = "Official Business Form";
         $this->load->view("template/header", $data);
         $this->load->view("hris/official_business/index");
         $this->load->view("template/footer");

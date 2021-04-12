@@ -46,7 +46,7 @@ $(document).ready(function(){
                     <tr>
                         <th>Bank Code</th>
                         <th>Bank Name</th>
-                        <th>Account Number</th>
+                        <th>Account Number Format</th>
                         <th>Status</th>
                     </tr>
                     </thead>
@@ -146,7 +146,7 @@ $(document).ready(function(){
             <div class="row">
                 <div class="col-md-12 col-sm-12">
                     <div class="form-group">
-                        <label>Bank Number <span class="text-danger font-weight-bold">*</span></label>
+                        <label>Account Number Format <span class="text-danger font-weight-bold">*</span></label>
                         <input 
                             type="text" 
                             class="form-control validate" 

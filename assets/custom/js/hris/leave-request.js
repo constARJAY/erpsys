@@ -1,5 +1,25 @@
 $(document).ready(function () {
 
+	// ---- GET EMPLOYEE DATA -----
+	const allEmployeeData = getAllEmployeeData();
+	const employeeData = (id) => {
+		if (id) {
+			let data = allEmployeeData.filter(employee => employee.employeeID == id);
+			let { employeeID, fullname, designation, department } = data && data[0];
+			return { employeeID, fullname, designation, department };
+		}
+		return {};
+	}
+	const employeeFullname = (id) => {
+		if (id != "-") {
+			let data = employeeData(id);
+			return data.fullname || "-";
+		}
+		return "-";
+	}
+	// ---- END GET EMPLOYEE DATA -----
+
+
 	// ----- DATATABLES -----
 	function initDataTables() {
 		if ($.fn.DataTable.isDataTable("#tableForApprroval")) {
@@ -18,12 +38,19 @@ $(document).ready(function () {
 			.DataTable({
 				proccessing: false,
 				serverSide: false,
-				// scrollX: true,
+				scrollX: true,
+				sorting: [],
 				scrollCollapse: true,
 				columnDefs: [
-					{ targets: 7, width: "30%" },
+					{ targets: 0, width: 100 },
+					{ targets: 1, width: 150 },
+					{ targets: 2, width: 150 },
+					{ targets: 3, width: 200 },
+					{ targets: 4, width: 200 },
+					{ targets: 5, width: 200 },
+					{ targets: 6, width: 80 },
+					{ targets: 7, width: 250  },
 					{ targets: 8, width: 80  },
-					{ targets: 9, width: 80  },
 				],
 			});
 
@@ -35,13 +62,19 @@ $(document).ready(function () {
 			.DataTable({
 				proccessing: false,
 				serverSide: false,
-				// scrollX: true,
+				scrollX: true,
+				sorting: [],
 				scrollCollapse: true,
 				columnDefs: [
-	
-					{ targets: 7, width: "30%" },
+					{ targets: 0, width: 100 },
+					{ targets: 1, width: 150 },
+					{ targets: 2, width: 150 },
+					{ targets: 3, width: 200 },
+					{ targets: 4, width: 200 },
+					{ targets: 5, width: 200 },
+					{ targets: 6, width: 80 },
+					{ targets: 7, width: 250  },
 					{ targets: 8, width: 80  },
-					{ targets: 9, width: 80  },
 				],
 			});
 	}
@@ -97,39 +130,49 @@ $(document).ready(function () {
 			`lr.leaveRequestID,lr.leaveRequestCode,lr.employeeID,lr.leaveRequestDate,lr.leaveRequestDateFrom,lr.leaveRequestDateTo,lr.leaveRequestNumberOfDate,lr.leaveID,lr.leaveRequestRemainingLeave,
 			lr.leaveRequestRemarks,lr.approversID,lr.approversStatus,lr.approversDate,lr.leaveRequestStatus,lr.leaveRequestRemarks,lr.submittedAt,lr.createdBy,lr.updatedBy,lr.createdAt,lr.updatedAt,
 			hris_employee_list_tbl.employeeFirstname, hris_employee_list_tbl.employeeLastname,hris_leave_tbl.leaveName`,
-			`lr.employeeID != ${sessionID} AND leaveRequestStatus != 0 AND leaveRequestStatus != 4 ORDER BY leaveRequestID DESC`
+			`lr.employeeID != ${sessionID} AND leaveRequestStatus != 0 AND leaveRequestStatus != 4`,
+			`FIELD(leaveRequestStatus, 0, 1, 3, 2, 4), COALESCE(lr.submittedAt, lr.createdAt)`
 		);
 
 		let html = `
         <table class="table table-bordered table-striped table-hover" id="tableForApprroval">
             <thead>
-                <tr>
-                    <th>Document No.</th>
-                    <th>Employee Name</th>
-					<th>Leave Type</th>
+				<tr>
+					<th>Document No.</th>
+					<th>Employee Name</th>
+					<th>Current Approver</th>
 					<th>Date Created</th>
-                    <th>Date From</th>
-                    <th>Date To</th>
-                    <th>No. of Days</th>
-                    <th>Remarks</th>
-                    <th>Status</th>
-                    <th>Action</th>
-                </tr>
+					<th>Date Submitted</th>
+					<th>Date Approved</th>
+					<th>Status</th>
+					<th>Remarks</th>
+					<th>Action</th>
+				</tr>
             </thead>
             <tbody>`;
 
 		scheduleData.map((item) => {
+
+			let remarks       = item.leaveRequestRemarks ? item.leaveRequestRemarks : "-";
+			let dateCreated   = moment(item.createdAt).format("MMMM DD, YYYY hh:mm:ss A");
+			let dateSubmitted = item.submittedAt	? moment(item.submittedAt).format("MMMM DD, YYYY hh:mm:ss A") : "-";
+			let dateApproved  = item.leaveRequestStatus == 2 ? item.approversDate.split("|") : "-";
+			if (dateApproved !== "-") {
+				dateApproved = moment(dateApproved[dateApproved.length - 1]).format("MMMM DD, YYYY hh:mm:ss A");
+			}
+
+
 			// if(item.leaveRequestStatus=="0"){
 			// 	var submitat = "";
 			// }else{
 			// 	var submitat = moment(item.submittedAt).format("MMMM DD, YYYY hh:mm:ss A");
 			// }
 
-			if(item.leaveRequestRemarks == null){
-				var remarks = "";
-			}else{
-				var remarks = item.leaveRequestRemarks;
-			}
+			// if(item.leaveRequestRemarks == null){
+			// 	var remarks = "";
+			// }else{
+			// 	var remarks = item.leaveRequestRemarks;
+			// }
 
 			let button = `
 			<button class="btn btn-view w-100 btnView" id="${item.leaveRequestID}"><i class="fas fa-eye"></i> View</button>`;
@@ -138,14 +181,17 @@ $(document).ready(function () {
 				html += `
 				<tr>
 					<td>${item.leaveRequestCode}</td>
-					<td>${item.employeeFirstname + ' ' +item.employeeLastname}</td>
-					<td>${item.leaveName}</td>
-					<td>${moment(item.createdAt).format("MMMM DD, YYYY hh:mm:ss A")}</td>
-					<td>${moment(item.leaveRequestDateFrom).format("MMMM DD, YYYY")}</td>
-                    <td>${moment(item.leaveRequestDateTo).format("MMMM DD, YYYY")}</td>
-                    <td>${item.leaveRequestNumberOfDate}</td>
-					<td>${remarks}</td>
+					<td>${item.employeeFirstname + ' ' + item.employeeLastname}</td>
+					
+					<td>
+						${employeeFullname(getCurrentApprover(item.approversID, item.approversDate, item.leaveRequestStatus, true))}
+					</td>
+					<td>${dateCreated}</td>
+					<td>${dateSubmitted}</td>
+					<td>${dateApproved}</td>
 					<td class="text-center">${getStatusStyle(item.leaveRequestStatus)}</td>
+					<td>${remarks}</td>
+
 					<td class="text-center">
 						${button}
 					</td>
@@ -178,40 +224,42 @@ $(document).ready(function () {
 			`lr.leaveRequestID,lr.leaveRequestCode,lr.employeeID,lr.leaveRequestDate,lr.leaveRequestDateFrom,lr.leaveRequestDateTo,lr.leaveRequestNumberOfDate,lr.leaveID,lr.leaveRequestRemainingLeave,
 			lr.leaveRequestRemarks,lr.approversID,lr.approversStatus,lr.approversDate,lr.leaveRequestStatus,lr.leaveRequestRemarks,lr.submittedAt,lr.createdBy,lr.updatedBy,lr.createdAt,lr.updatedAt,
 			hris_employee_list_tbl.employeeFirstname,hris_employee_list_tbl.employeeLastname,hris_leave_tbl.leaveName`,
-			`lr.employeeID = ${sessionID}  ORDER BY leaveRequestID DESC`
+			`lr.employeeID = ${sessionID}`,
+			`FIELD(leaveRequestStatus, 0, 1, 3, 2, 4), COALESCE(lr.submittedAt, lr.createdAt)`
 		);
 
 		let html = `
         <table class="table table-bordered table-striped table-hover" id="tableMyForms">
             <thead>
                 <tr>
-                    <th>Document</th>
-                    <th>Employee Name</th>
-					<th>Leave Type</th>
+					<th>Document No.</th>
+					<th>Employee Name</th>
+					<th>Current Approver</th>
 					<th>Date Created</th>
-                    <th>Date From</th>
-                    <th>Date To</th>
-                    <th>No. of Days</th>
-                    <th>Remarks</th>
-                    <th>Status</th>
-                    <th>Action</th>
+					<th>Date Submitted</th>
+					<th>Date Approved</th>
+					<th>Status</th>
+					<th>Remarks</th>
+					<th>Action</th>
                 </tr>
             </thead>
             <tbody>`;
 
 		scheduleData.map((item) => {
 			
+			let remarks       = item.leaveRequestRemarks ? item.leaveRequestRemarks : "-";
+			let dateCreated   = moment(item.createdAt).format("MMMM DD, YYYY hh:mm:ss A");
+			let dateSubmitted = item.submittedAt	? moment(item.submittedAt).format("MMMM DD, YYYY hh:mm:ss A") : "-";
+			let dateApproved  = item.leaveRequestStatus == 2 ? item.approversDate.split("|") : "-";
+			if (dateApproved !== "-") {
+				dateApproved = moment(dateApproved[dateApproved.length - 1]).format("MMMM DD, YYYY hh:mm:ss A");
+			}
+
 			// if(item.leaveRequestStatus=="0"){
 			// 	var submitat = "";
 			// }else{
 				// var submitat = moment(item.createdAt).format("MMMM DD, YYYY hh:mm:ss A");
 			// }
-
-			if(item.leaveRequestRemarks == null){
-				var remarks = "";
-			}else{
-				var remarks = item.leaveRequestRemarks;
-			}
 
 			// let unique = {
 			// 	id: item.leaveRequestID,
@@ -231,13 +279,16 @@ $(document).ready(function () {
             <tr>
                 <td>${item.leaveRequestCode}</td>
                 <td>${item.employeeFirstname + ' ' + item.employeeLastname}</td>
-				<td>${item.leaveName}</td>
-				<td>${moment(item.createdAt).format("MMMM DD, YYYY hh:mm:ss A")}</td>
-                <td>${moment(item.leaveRequestDateFrom).format("MMMM DD, YYYY")}</td>
-                <td>${moment(item.leaveRequestDateTo).format("MMMM DD, YYYY")}</td>
-                <td>${item.leaveRequestNumberOfDate}</td>
-                <td>${remarks}</td>
+				
+				<td>
+                    ${employeeFullname(getCurrentApprover(item.approversID, item.approversDate, item.leaveRequestStatus, true))}
+                </td>
+				<td>${dateCreated}</td>
+				<td>${dateSubmitted}</td>
+				<td>${dateApproved}</td>
                 <td class="text-center">${getStatusStyle(item.leaveRequestStatus)}</td>
+				<td>${remarks}</td>
+
                 <td class="text-center">
                     ${button}
                 </td>
@@ -350,8 +401,8 @@ $(document).ready(function () {
 				leaveRequestCode 			= "",
 				employeeID 					= "",
 				leaveRequestDate 			= "",
-				leaveRequestDateFrom 		= "",
-				leaveRequestDateTo 			= "",
+				leaveRequestDateFrom 		= moment(new Date).format("YYYY-MM-DD"),
+				leaveRequestDateTo 			= moment(new Date).format("YYYY-MM-DD"),
 				leaveRequestNumberOfDate 	= "1",
 				leaveID 					="",
 				leaveRequestRemainingLeave 	= "",
@@ -380,7 +431,7 @@ $(document).ready(function () {
 
 
 		let html = `
-        <div class="row">
+        <div class="row px-2">
             <div class="col-lg-2 col-md-6 col-sm-12 px-1">
                 <div class="card">
                     <div class="body">
@@ -425,7 +476,7 @@ $(document).ready(function () {
                 </div>
                 </div>
             </div>
-            <div class="col-sm-12">
+            <div class="col-sm-12 px-1">
                 <div class="card">
                     <div class="body">
                         <small class="text-small text-muted font-weight-bold">Remarks</small>
@@ -486,7 +537,7 @@ $(document).ready(function () {
             </div>    
             <div class="col-md-2 col-sm-12">
                 <div class="form-group">
-                    <label for="">Number of Days</label>
+                    <label for="">Number of Day/s</label>
                     <input 
                         type="text" 
                         class="form-control"
@@ -512,7 +563,7 @@ $(document).ready(function () {
         </div>
 		<div class="col-md-2 col-sm-12">
 		<div class="form-group">
-			<label for="">Number of leave</label>
+			<label for="">Leave Credit/s</label>
 			<input 
 				type="text" 
 				class="form-control"
@@ -557,9 +608,11 @@ $(document).ready(function () {
 			if (leaveRequestDate) {
 				let dateArr = leaveRequestDate.split(" - ");
 				let start = moment(dateArr[0]).format("MMMM D, YYYY"),
-					end = moment(dateArr[1]).format("MMMM D, YYYY");
+					end   = moment(dateArr[1]).format("MMMM D, YYYY");
+				// let start = new Date(dateArr[0]), end = new Date(dateArr[1]);
 					
-				cb(start, end);
+				// cb(start, end);
+				cb(leaveRequestDateFrom, leaveRequestDateTo);
 			}
 			return html;
 		}, 500);
@@ -583,14 +636,15 @@ $(document).ready(function () {
 		let from = moment(start).format('YYYY-MM-DD'),
 			to = moment(end).format('YYYY-MM-DD');
 
-		$("#leaveRequestDate").data('daterangepicker').setStartDate(start || from);
-		$("#leaveRequestDate").data('daterangepicker').setEndDate(end || to);
+		$("#leaveRequestDate").data('daterangepicker').setStartDate(from);
+		$("#leaveRequestDate").data('daterangepicker').setEndDate(to);
 
 		$("#leaveRequestDateFrom").val(from);
 		$("#leaveRequestDateTo").val(to);
 
-
-		var daysDiff = dateDiffInDays(new Date(start), new Date(end));
+		var daysDiff = dateDiffInDays(new Date(from), new Date(to));
+		var dateDisplay = `${moment(from).format("MMMM DD, YYYY")}`
+		$("#leaveRequestDate").val()
 		$("#leaveRequestNumberOfDate").val(daysDiff);
 	}
 
@@ -698,7 +752,7 @@ $(document).ready(function () {
 				data["tableData[createdBy]"] = sessionID;
 				data["tableData[createdAt]"] = dateToday;
 
-				const approversID = getModuleApprover(55);
+				const approversID = getModuleApprover("leave request");
 				if (approversID && method == "submit") {
 					data["tableData[approversID]"] = approversID;
 				}
@@ -1065,4 +1119,17 @@ $(document).ready(function () {
 		}
 	})
 	// ----- END REJECT DOCUMENT -----
+
+	// ----- NAV LINK -----
+	$(document).on("click", ".nav-link", function () {
+		const tab = $(this).attr("href");
+		if (tab == "#forApprovalTab") {
+			forApprovalContent();
+		}
+		if (tab == "#myFormsTab") {
+			myFormsContent();
+		}
+	});
+	// ----- END NAV LINK -----
+
 });

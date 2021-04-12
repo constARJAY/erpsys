@@ -966,6 +966,7 @@ $(function () {
 							.children()
 							.removeClass("no-error")
 							.addClass("has-error");
+						checkExists(elementID, invalidFeedback);
 						$(elementID).removeClass("is-valid").addClass("is-invalid");
 						invalidFeedback.text("This field is required.");
 					} else {
@@ -978,6 +979,7 @@ $(function () {
 							.children()
 							.removeClass("has-error")
 							.addClass("no-error");
+						checkExists(elementID, invalidFeedback);
 						$(elementID).removeClass("is-invalid").addClass("is-valid");
 						invalidFeedback.text("");
 					}
@@ -995,6 +997,7 @@ $(function () {
 							.removeClass("is-valid")
 							.removeClass("no-error")
 							.addClass("has-error");
+						checkExists(elementID, invalidFeedback);
 						$(elementID).removeClass("is-valid").addClass("is-invalid");
 						invalidFeedback.text("This field is required.");
 					} else {
@@ -1004,6 +1007,7 @@ $(function () {
 							.removeClass("is-valid")
 							.removeClass("has-error")
 							.addClass("no-error");
+						checkExists(elementID, invalidFeedback);
 						$(elementID).removeClass("is-invalid").addClass("is-valid");
 						invalidFeedback.text("");
 					}
