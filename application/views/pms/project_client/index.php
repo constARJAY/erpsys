@@ -6,7 +6,7 @@
 					<ul class="breadcrumb pl-0 pb-0 ">
 						<li class="breadcrumb-item"><a href="#"><i class="zmdi zmdi-home"></i> Dashboard</a></li>
 						<li class="breadcrumb-item"><i class="zmdi zmdi-folder"></i> &nbsp;Masterfiles</li>
-						<li class="breadcrumb-item active"  id="inv_mainItem_breadcrumbs"> Project Client Masterfile</li>
+						<li class="breadcrumb-item active"  id="inv_mainItem_breadcrumbs"> Project Client</li>
 					</ul>
 					<h1 class="mt-3" id="inv_headerID">List of Clients</h1>
 					<span>This module is used to manage project management clients details.</span>

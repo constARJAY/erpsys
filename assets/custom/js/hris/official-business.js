@@ -1,5 +1,9 @@
 $(document).ready(function () {
 
+	// ----- MODULE APPROVER -----
+	const moduleApprover = getModuleApprover("official business");
+	// ----- END MODULE APPROVER -----
+
 	// ---- GET EMPLOYEE DATA -----
 	const allEmployeeData = getAllEmployeeData();
 	const employeeData = (id) => {
@@ -18,6 +22,83 @@ $(document).ready(function () {
 		return "-";
 	}
 	// ---- END GET EMPLOYEE DATA -----
+
+	
+	// ----- VIEW DOCUMENT -----
+	function viewDocument(view_id = false, readOnly = false) {
+		const loadData = (id) => {
+			const tableData = getTableData("hris_official_business_tbl", "", "officialBusinessID=" + id);
+
+			if (tableData.length > 0) {
+				let {
+					employeeID,
+					officialBusinessStatus
+				} = tableData[0];
+
+				let isReadOnly = true, isAllowed = true;
+
+				if (employeeID != sessionID) {
+					isReadOnly = true;
+					if (officialBusinessStatus == 0 || officialBusinessStatus == 4) {
+						isAllowed = false;
+					}
+				} else if (employeeID == sessionID) {
+					if (officialBusinessStatus == 0) {
+						isReadOnly = false;
+					} else {
+						isReadOnly = true;
+					}
+				} else {
+					isReadOnly = readOnly;
+				}
+
+				if (isAllowed) {
+					pageContent(true, tableData, isReadOnly);
+					updateURL(encryptString(id));
+				} else {
+					pageContent();
+					updateURL();
+				}
+				
+			} else {
+				pageContent();
+				updateURL();
+			}
+		}
+
+		if (view_id) {
+			let id = decryptString(view_id);
+				id && isFinite(id) && loadData(id);
+		} else {
+			let url   = window.document.URL;
+			let arr   = url.split("?view_id=");
+			let isAdd = url.indexOf("?add");
+			if (arr.length > 1) {
+				let id = decryptString(arr[1]);
+					id && isFinite(id) && loadData(id);
+			} else if (isAdd != -1) {
+				pageContent(true);
+			}
+		}
+		
+	}
+
+	function updateURL(view_id = 0, isAdd = false) {
+		if (view_id && !isAdd) {
+			window.history.pushState("", "", `${base_url}hris/official_business?view_id=${view_id}`);
+		} else if (!view_id && isAdd) {
+			window.history.pushState("", "", `${base_url}hris/official_business?add`);
+		} else {
+			window.history.pushState("", "", `${base_url}hris/official_business`);
+		}
+	}
+	// ----- END VIEW DOCUMENT -----
+
+	// GLOBAL VARIABLE - REUSABLE 
+	const dateToday = () => {
+		return moment(new Date).format("YYYY-MM-DD HH:mm:ss");
+	};
+	// END GLOBAL VARIABLE - REUSABLE 
 
 
 	function initDataTables() {
@@ -41,19 +122,20 @@ $(document).ready(function () {
 				scrollCollapse: true,
 				sorting: [],
 				columnDefs: [
-					{ targets: 0,  width: 100 },
+					{ targets: 0,  width: 110 },
 					{ targets: 1,  width: 150 },
 					{ targets: 2,  width: 150 },
 					{ targets: 3,  width: 180 },
 					{ targets: 4,  width: 200 },
-					{ targets: 5,  width: 100 },
-					{ targets: 6,  width: 150 },
-					{ targets: 7,  width: 200 },
+					{ targets: 5,  width: 200 },
+					{ targets: 6,  width: 100 },
+					{ targets: 7,  width: 150 },
 					{ targets: 8,  width: 200 },
 					{ targets: 9,  width: 200 },
-					{ targets: 10, width: 80  },
-					{ targets: 11, width: 250 },
-					{ targets: 12, width: 80  },
+					{ targets: 10, width: 200 },
+					{ targets: 11, width: 80  },
+					{ targets: 12, width: 250 },
+					{ targets: 13, width: 80  },
 				],
 			});
 
@@ -69,19 +151,20 @@ $(document).ready(function () {
 				scrollCollapse: true,
 				sorting: [],
 				columnDefs: [
-					{ targets: 0,  width: 100 },
+					{ targets: 0,  width: 110 },
 					{ targets: 1,  width: 150 },
 					{ targets: 2,  width: 150 },
 					{ targets: 3,  width: 180 },
 					{ targets: 4,  width: 200 },
-					{ targets: 5,  width: 100 },
-					{ targets: 6,  width: 150 },
-					{ targets: 7,  width: 200 },
+					{ targets: 5,  width: 200 },
+					{ targets: 6,  width: 100 },
+					{ targets: 7,  width: 150 },
 					{ targets: 8,  width: 200 },
 					{ targets: 9,  width: 200 },
-					{ targets: 10, width: 80  },
-					{ targets: 11, width: 250 },
-					{ targets: 12, width: 80  },
+					{ targets: 10, width: 200 },
+					{ targets: 11, width: 80  },
+					{ targets: 12, width: 250 },
+					{ targets: 13, width: 80  },
 				],
 			});
 	}
@@ -95,8 +178,8 @@ $(document).ready(function () {
                 <div class="row clearfix appendHeader">
                     <div class="col-12">
                         <ul class="nav nav-tabs">
-                            <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#forApprovalTab">For Approval</a></li>
-                            <li class="nav-item"><a class="nav-link active" data-toggle="tab" href="#myFormsTab">My Forms</a></li>
+                            <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#forApprovalTab" redirect="forApprovalTab">For Approval</a></li>
+                            <li class="nav-item"><a class="nav-link active" data-toggle="tab" href="#myFormsTab" redirect="myFormsTab">My Forms</a></li>
                         </ul>
                     </div>
                 </div>`;
@@ -125,14 +208,22 @@ $(document).ready(function () {
 	// ----- FOR APPROVAL CONTENT -----
 	function forApprovalContent() {
 		$("#tableForApprovalParent").html(preloader);
-		let scheduleData = getTableData(
+		let officialBusinessData = getTableData(
 			`hris_official_business_tbl AS ob 
 					LEFT JOIN pms_client_tbl AS cl ON ob.officialBusinessCompanyID=cl.clientID 
 					LEFT JOIN hris_employee_list_tbl USING(employeeID)`,
-			`ob.officialBusinessID,ob.officialBusinessCode,ob.employeeID,officialBusinessCompanyID,ob.officialBusinessAddress,ob.officialBusinessDate,
+			`ob.officialBusinessID,ob.officialBusinessCode,ob.employeeID,officialBusinessCompanyID,ob.officialBusinessDate,
 					ob.officialBusinessTimeIn,ob.officialBusinessTimeOut,ob.officialBusinessReason,ob.approversID,ob.approversStatus,ob.approversDate,
-					ob.officialBusinessStatus,ob.officialBusinessRemarks,ob.submittedAt,ob.createdBy,ob.updatedBy,ob.createdAt,ob.updatedAt,cl.clientName,
-					hris_employee_list_tbl.employeeFirstname, hris_employee_list_tbl.employeeLastname`,
+					ob.officialBusinessStatus,ob.officialBusinessRemarks,ob.submittedAt,ob.createdBy,ob.updatedBy,ob.createdAt,ob.updatedAt,IFNULL(cl.clientName,'') AS clientName,
+					CONCAT(hris_employee_list_tbl.employeeFirstname,' ',hris_employee_list_tbl.employeeLastname) AS  fullname, 
+					IFNULL(concat(
+						UPPER(SUBSTRING(cl.clientPostalCode,1,1)),
+						' ',UPPER(SUBSTRING(cl.clientHouseNumber,1,1)),LOWER(SUBSTRING(cl.clientHouseNumber,2)),
+						' ',UPPER(SUBSTRING(cl.clientBarangay,1,1)),LOWER(SUBSTRING(cl.clientBarangay,2)),
+						' ',UPPER(SUBSTRING(cl.clientCity,1,1)),LOWER(SUBSTRING(cl.clientCity,2)),
+						' ',UPPER(SUBSTRING(cl.clientProvince,1,1)),LOWER(SUBSTRING(cl.clientProvince,2)),
+						' ',UPPER(SUBSTRING(cl.clientCountry,1,1)),LOWER(SUBSTRING(cl.clientCountry,2)),
+						' ',UPPER(SUBSTRING(cl.clientPostalCode,1,1)),LOWER(SUBSTRING(cl.clientPostalCode,2))),'') AS officialBusinessAddress`,
 			`employeeID != ${sessionID} AND officialBusinessStatus != 0 AND officialBusinessStatus != 4`,
 			`FIELD(officialBusinessStatus, 0, 1, 3, 2, 4), COALESCE(ob.submittedAt, ob.createdAt)`
 		);
@@ -147,6 +238,7 @@ $(document).ready(function () {
 
 					<th>Company</th>
 					<th>Address</th>
+					<th>Reason</th>
 					<th>Date</th>
 					<th>Time In/Time Out</th>
 					
@@ -161,37 +253,55 @@ $(document).ready(function () {
             </thead>
             <tbody>`;
 
-		scheduleData.map((item) => {
-			let remarks       = item.officialBusinessRemarks ? item.officialBusinessRemarks : "-";
-			let dateCreated   = moment(item.createdAt).format("MMMM DD, YYYY hh:mm:ss A");
-			let dateSubmitted = item.submittedAt	? moment(item.submittedAt).format("MMMM DD, YYYY hh:mm:ss A") : "-";
-			let dateApproved  = item.officialBusinessStatus == 2 ? item.approversDate.split("|") : "-";
+		officialBusinessData.map((item) => {
+			let {
+				officialBusinessID,
+				fullname,
+				clientName,
+				officialBusinessAddress,
+				officialBusinessReason,
+				officialBusinessDate,
+				officialBusinessTimeIn,
+				officialBusinessTimeOut,
+				approversID,
+				approversDate,
+				officialBusinessStatus,
+				officialBusinessRemarks,
+				submittedAt,
+				createdAt,
+			} = item;	
+
+			let remarks       = officialBusinessRemarks ? officialBusinessRemarks : "-";
+			let dateCreated   = moment(createdAt).format("MMMM DD, YYYY hh:mm:ss A");
+			let dateSubmitted = submittedAt	? moment(submittedAt).format("MMMM DD, YYYY hh:mm:ss A") : "-";
+			let dateApproved  = officialBusinessStatus == 2 ? approversDate.split("|") : "-";
 			if (dateApproved !== "-") {
 				dateApproved = moment(dateApproved[dateApproved.length - 1]).format("MMMM DD, YYYY hh:mm:ss A");
 			}
 
 			let button = `
-			<button class="btn btn-view w-100 btnView" id="${item.officialBusinessID}"><i class="fas fa-eye"></i> View</button>`;
+			<button class="btn btn-view w-100 btnView" id="${encryptString(item.officialBusinessID)}"><i class="fas fa-eye"></i> View</button>`;
 
-			if (isImCurrentApprover(item.approversID, item.approversDate, item.officialBusinessStatus) || isAlreadyApproved(item.approversID, item.approversDate)) {
+			if (isImCurrentApprover(approversID, approversDate, officialBusinessStatus) || isAlreadyApproved(approversID, approversDate)) {
 				html += `
 				<tr>
-					<td>${item.officialBusinessCode}</td>
-					<td>${item.employeeFirstname + ' ' + item.employeeLastname}</td>
+					<td>${getFormCode("OBF", dateCreated, officialBusinessID)}</td>
+					<td>${fullname}</td>
 					<td>
-						${employeeFullname(getCurrentApprover(item.approversID, item.approversDate, item.officialBusinessStatus, true))}
+						${employeeFullname(getCurrentApprover(approversID, approversDate, officialBusinessStatus, true))}
 					</td>
 
-					<td>${item.clientName}</td>
-					<td>${item.officialBusinessAddress}</td>
-					<td>${moment(item.officialBusinessDate).format("MMMM DD, YYYY")}</td>
-					<td>${item.officialBusinessTimeIn} - ${item.officialBusinessTimeOut}</td>
+					<td>${clientName}</td>
+					<td>${officialBusinessAddress}</td>
+					<td>${officialBusinessReason}</td>
+					<td>${moment(officialBusinessDate).format("MMMM DD, YYYY")}</td>
+					<td>${officialBusinessTimeIn} - ${officialBusinessTimeOut}</td>
 
 					<td>${dateCreated}</td>
 					<td>${dateSubmitted}</td>
 					<td>${dateApproved}</td>
 
-					<td class="text-center">${getStatusStyle(item.officialBusinessStatus)}</td>
+					<td class="text-center">${getStatusStyle(officialBusinessStatus)}</td>
 					<td>${remarks}</td>
 					<td class="text-center">
 						${button}
@@ -216,14 +326,22 @@ $(document).ready(function () {
 	// ----- MY FORMS CONTENT -----
 	function myFormsContent() {
 		$("#tableMyFormsParent").html(preloader);
-		let scheduleData = getTableData(
+		let officialBusinessData = getTableData(
 			`hris_official_business_tbl AS ob 
 			LEFT JOIN pms_client_tbl AS cl ON ob.officialBusinessCompanyID=cl.clientID 
 			LEFT JOIN hris_employee_list_tbl USING(employeeID)`,
-			`ob.officialBusinessID,ob.officialBusinessCode,ob.employeeID,officialBusinessCompanyID,ob.officialBusinessAddress,ob.officialBusinessDate,
+			`ob.officialBusinessID,ob.officialBusinessCode,ob.employeeID,officialBusinessCompanyID,ob.officialBusinessDate,
 			ob.officialBusinessTimeIn,ob.officialBusinessTimeOut,ob.officialBusinessReason,ob.approversID,ob.approversStatus,ob.approversDate,
-			ob.officialBusinessStatus,ob.officialBusinessRemarks,ob.submittedAt,ob.createdBy,ob.updatedBy,ob.createdAt,ob.updatedAt,cl.clientName,
-			hris_employee_list_tbl.employeeFirstname, hris_employee_list_tbl.employeeLastname`,
+			ob.officialBusinessStatus,ob.officialBusinessRemarks,ob.submittedAt,ob.createdBy,ob.updatedBy,ob.createdAt,ob.updatedAt,IFNULL(cl.clientName,'') AS clientName,
+			CONCAT(hris_employee_list_tbl.employeeFirstname,' ',hris_employee_list_tbl.employeeLastname) AS  fullname, 
+			IFNULL(concat(
+				UPPER(SUBSTRING(cl.clientPostalCode,1,1)),
+				' ',UPPER(SUBSTRING(cl.clientHouseNumber,1,1)),LOWER(SUBSTRING(cl.clientHouseNumber,2)),
+				' ',UPPER(SUBSTRING(cl.clientBarangay,1,1)),LOWER(SUBSTRING(cl.clientBarangay,2)),
+				' ',UPPER(SUBSTRING(cl.clientCity,1,1)),LOWER(SUBSTRING(cl.clientCity,2)),
+				' ',UPPER(SUBSTRING(cl.clientProvince,1,1)),LOWER(SUBSTRING(cl.clientProvince,2)),
+				' ',UPPER(SUBSTRING(cl.clientCountry,1,1)),LOWER(SUBSTRING(cl.clientCountry,2)),
+				' ',UPPER(SUBSTRING(cl.clientPostalCode,1,1)),LOWER(SUBSTRING(cl.clientPostalCode,2))),'') AS officialBusinessAddress`,
 			`employeeID = ${sessionID}`,
 			`FIELD(officialBusinessStatus, 0, 1, 3, 2, 4), COALESCE(ob.submittedAt, ob.createdAt)`
 		);
@@ -238,6 +356,7 @@ $(document).ready(function () {
 
                     <th>Company</th>
                     <th>Address</th>
+					<th>Reason</th>
                     <th>Date</th>
                     <th>Time In/Time Out</th>
 					
@@ -252,48 +371,71 @@ $(document).ready(function () {
             </thead>
             <tbody>`;
 
-		scheduleData.map((item) => {
-			let unique = {
-				id: item.officialBusinessID,
-				officialBusinessDate: moment(item.officialBusinessDate).format("MMMM DD, YYYY")
-			};
-			uniqueData.push(unique);
+		officialBusinessData.map((item) => {
+			
+			let {
+				officialBusinessID,
+				fullname,
+				clientName,
+				officialBusinessAddress,
+				officialBusinessReason,
+				officialBusinessDate,
+				officialBusinessTimeIn,
+				officialBusinessTimeOut,
+				approversID,
+				approversDate,
+				officialBusinessStatus,
+				officialBusinessRemarks,
+				submittedAt,
+				createdAt,
+			} = item;
 
-			let remarks       = item.officialBusinessRemarks ? item.officialBusinessRemarks : "-";
-			let dateCreated   = moment(item.createdAt).format("MMMM DD, YYYY hh:mm:ss A");
-			let dateSubmitted = item.submittedAt	? moment(item.submittedAt).format("MMMM DD, YYYY hh:mm:ss A") : "-";
-			let dateApproved  = item.officialBusinessStatus == 2 ? item.approversDate.split("|") : "-";
+			let remarks       = officialBusinessRemarks ? officialBusinessRemarks : "-";
+			let dateCreated   = moment(createdAt).format("MMMM DD, YYYY hh:mm:ss A");
+			let dateSubmitted = submittedAt	? moment(submittedAt).format("MMMM DD, YYYY hh:mm:ss A") : "-";
+			let dateApproved  = officialBusinessStatus == 2 ? approversDate.split("|") : "-";
 			if (dateApproved !== "-") {
 				dateApproved = moment(dateApproved[dateApproved.length - 1]).format("MMMM DD, YYYY hh:mm:ss A");
 			}
 
+			let unique = {
+				multiple:{	id:                 		officialBusinessID,
+					officialBusinessTimeIn:             moment("2021-01-01 "+officialBusinessTimeIn).format("HH:mm"),
+					officialBusinessTimeOut:            moment("2021-01-01 "+officialBusinessTimeOut).format("HH:mm"),
+					officialBusinessDate: 				moment(officialBusinessDate).format("MMMM DD, YYYY")}
+			
+			};
+			(officialBusinessStatus == 1 || officialBusinessStatus == 2) && uniqueData.push(unique);
+			
+
 			let button =
-				item.officialBusinessStatus != 0 ?
+				officialBusinessStatus != 0 ?
 				`
-            <button class="btn btn-view w-100 btnView" id="${item.officialBusinessID}"><i class="fas fa-eye"></i> View</button>` :
+            <button class="btn btn-view w-100 btnView" id="${encryptString(officialBusinessID)}"><i class="fas fa-eye"></i> View</button>` :
 				`
             <button 
                 class="btn btn-edit w-100 btnEdit" 
-                id="${item.officialBusinessID}" 
-                code="${item.officialBusinessCode}"><i class="fas fa-edit"></i> Edit</button>`;
+                id="${encryptString(officialBusinessID)}" 
+                code="${getFormCode("OBF", dateCreated, officialBusinessID)}"><i class="fas fa-edit"></i> Edit</button>`;
 			html += `
             <tr>
-                <td>${item.officialBusinessCode}</td>
-                <td>${item.employeeFirstname + ' ' + item.employeeLastname}</td>
+                <td>${getFormCode("OBF", dateCreated, officialBusinessID)}</td>
+                <td>${fullname}</td>
 				<td>
-					${employeeFullname(getCurrentApprover(item.approversID, item.approversDate, item.officialBusinessStatus, true))}
+					${employeeFullname(getCurrentApprover(approversID, approversDate, officialBusinessStatus, true))}
 				</td>
 
-                <td>${item.clientName}</td>
-                <td>${item.officialBusinessAddress}</td>
-                <td>${moment(item.officialBusinessDate).format("MMMM DD, YYYY")}</td>
-                <td>${item.officialBusinessTimeIn} - ${item.officialBusinessTimeOut}</td>
+                <td>${clientName}</td>
+                <td>${officialBusinessAddress}</td>
+				<td>${officialBusinessReason}</td>
+                <td>${moment(officialBusinessDate).format("MMMM DD, YYYY")}</td>
+                <td>${officialBusinessTimeIn} - ${officialBusinessTimeOut}</td>
 
 				<td>${dateCreated}</td>
 				<td>${dateSubmitted}</td>
 				<td>${dateApproved}</td>
 
-                <td class="text-center">${getStatusStyle(item.officialBusinessStatus)}</td>
+                <td class="text-center">${getStatusStyle(officialBusinessStatus)}</td>
                 <td>${remarks}</td>
                 <td class="text-center">
                     ${button}
@@ -318,12 +460,12 @@ $(document).ready(function () {
 		if (data) {
 
 			let {
-				officialBusinessID = "",
-					officialBusinessCode = "",
-					officialBusinessStatus = "",
-					employeeID = "",
-					approversID = "",
-					approversDate = "",
+					officialBusinessID 		= "",
+					officialBusinessStatus 	= "",
+					employeeID				= "",
+					approversID 			= "",
+					approversDate 			= "",
+					createdAt           	= new Date
 			} = data && data[0];
 
 			let isOngoing = approversDate ? (approversDate.split("|").length > 0 ? true : false) : false;
@@ -335,14 +477,14 @@ $(document).ready(function () {
 						class="btn btn-submit" 
 						id="btnSubmit" 
 						officialBusinessID="${officialBusinessID}"
-						officialBusinessCode="${officialBusinessCode}"><i class="fas fa-paper-plane"></i>
+						code="${getFormCode("OBF", createdAt, officialBusinessID)}"><i class="fas fa-paper-plane"></i>
 						Submit
 					</button>
 					<button 
 						class="btn btn-cancel"
 						id="btnCancelForm" 
 						officialBusinessID="${officialBusinessID}"
-						officialBusinessCode="${officialBusinessCode}"><i class="fas fa-ban"></i> 
+						code="${getFormCode("OBF", createdAt, officialBusinessID)}"><i class="fas fa-ban"></i> 
 						Cancel
 					</button>`;
 				} else if (officialBusinessStatus == 1) {
@@ -352,7 +494,7 @@ $(document).ready(function () {
 							class="btn btn-cancel"
 							id="btnCancelForm" 
 							officialBusinessID="${officialBusinessID}"
-							officialBusinessCode="${officialBusinessCode}"><i class="fas fa-ban"></i> 
+							code="${getFormCode("OBF", createdAt, officialBusinessID)}"><i class="fas fa-ban"></i> 
 							Cancel
 						</button>`;
 					}
@@ -364,15 +506,15 @@ $(document).ready(function () {
 						<button 
 							class="btn btn-submit" 
 							id="btnApprove" 
-							officialBusinessID="${officialBusinessID}"
-							officialBusinessCode="${officialBusinessCode}"><i class="fas fa-paper-plane"></i>
+							officialBusinessID="${encryptString(officialBusinessID)}"
+							code="${getFormCode("OBF", createdAt, officialBusinessID)}"><i class="fas fa-paper-plane"></i>
 							Approve
 						</button>
 						<button 
 							class="btn btn-cancel"
 							id="btnReject" 
-							officialBusinessID="${officialBusinessID}"
-							officialBusinessCode="${officialBusinessCode}"><i class="fas fa-ban"></i> 
+							officialBusinessID="${encryptString(officialBusinessID)}"
+							code="${getFormCode("OBF", createdAt, officialBusinessID)}"><i class="fas fa-ban"></i> 
 							Deny
 						</button>`;
 					}
@@ -399,35 +541,39 @@ $(document).ready(function () {
 		$("#page_content").html(preloader);
 
 		let {
-			officialBusinessID = "",
-				officialBusinessCode = "",
-				employeeID = "",
-				officialBusinessCompanyID = "",
-				officialBusinessAddress = "",
-				officialBusinessDate = "",
-				officialBusinessTimeIn = "",
-				officialBusinessTimeOut = "",
-				officialBusinessReason = "",
-				officialBusinessRemarks = "",
-				approversID = "",
-				approversStatus = "",
-				approversDate = "",
-				officialBusinessStatus = false,
-				submittedAt = false,
-				createdAt = false,
+				officialBusinessID 			= "",
+				employeeID 					= "",
+				officialBusinessCompanyID 	= "",
+				officialBusinessAddress 	= "",
+				officialBusinessDate 		= "",
+				officialBusinessTimeIn 		= "",
+				officialBusinessTimeOut 	= "",
+				officialBusinessReason 		= "",
+				officialBusinessRemarks 	= "",
+				approversID 				= "",
+				approversStatus 			= "",
+				approversDate 				= "",
+				officialBusinessStatus 		= false,
+				submittedAt 				= false,
+				createdAt 					= false,
 		} = data && data[0];
 
-		if (readOnly) {
-			preventRefresh(false);
-		} else {
-			preventRefresh(true);
-		}
+		// ----- GET EMPLOYEE DATA -----
+		let {
+			fullname:    employeeFullname    = "",
+			// department:  employeeDepartment  = "",
+			// designation: employeeDesignation = "",
+		} = employeeData(data ? employeeID : sessionID);
+		// ----- END GET EMPLOYEE DATA -----
+
+		readOnly ? preventRefresh(false) : preventRefresh(true);
+
 
 		$("#btnBack").attr("officialBusinessID", officialBusinessID);
-		$("#btnBack").attr("officialBusinessCode", officialBusinessCode);
 		$("#btnBack").attr("status", officialBusinessStatus);
+		$("#btnBack").attr("employeeID", employeeID);
 
-		let disabled = readOnly && "disabled";
+		let disabled = readOnly ? "disabled" : "";
 		let button = formButtons(data);
 
 		let html = `
@@ -436,7 +582,9 @@ $(document).ready(function () {
                 <div class="card">
                     <div class="body">
                         <small class="text-small text-muted font-weight-bold">Document No.</small>
-                        <h6 class="mt-0 text-danger font-weight-bold">${officialBusinessCode ? officialBusinessCode : "---"}</h6>      
+                        <h6 class="mt-0 text-danger font-weight-bold">
+						${officialBusinessID ? getFormCode("OBF", createdAt, officialBusinessID) : "---"}
+						</h6>      
                     </div>
                 </div>
             </div>
@@ -490,7 +638,7 @@ $(document).ready(function () {
             <div class="col-md-4 col-sm-12">
                 <div class="form-group">
                     <label>Employee Name</label>
-                    <input type="text" class="form-control" disabled value="Arjay Diangzon">
+                    <input type="text" class="form-control" disabled value="${employeeFullname}">
                 </div>
             </div>
             <div class="col-md-4 col-sm-12">
@@ -530,6 +678,7 @@ $(document).ready(function () {
                         name="officialBusinessDate"
                         value="${officialBusinessDate && moment(officialBusinessDate).format("MMMM DD, YYYY")}"
 						${disabled}
+						unique="${officialBusinessDate}"
 						title="Date">
                     <div class="d-block invalid-feedback" id="invalid-officialBusinessDate"></div>
                 </div>
@@ -543,7 +692,10 @@ $(document).ready(function () {
                         name="officialBusinessTimeIn" 
                         required
                         value="${officialBusinessTimeIn}"
-						${disabled}>
+						${disabled}
+						unique="${officialBusinessTimeIn}"
+						title="Date"
+						>
                     <div class="d-block invalid-feedback" id="invalid-officialBusinessTimeIn"></div>
                 </div>
             </div>
@@ -556,6 +708,8 @@ $(document).ready(function () {
                         name="officialBusinessTimeOut" 
                         required
                         value="${officialBusinessTimeOut}"
+						unique="${officialBusinessTimeOut}"
+						title="Date"
 						${disabled}>
                     <div class="d-block invalid-feedback" id="invalid-officialBusinessTimeOut"></div>
                 </div>
@@ -599,7 +753,7 @@ $(document).ready(function () {
 			$("#officialBusinessDate").data("daterangepicker").minDate = moment();
 			//data ? initInputmaskTime(false) : initInputmaskTime();
 			return html;
-		}, 500);
+		}, 300);
 	}
 	// ----- END FORM CONTENT -----
 
@@ -623,15 +777,19 @@ $(document).ready(function () {
 
 			headerButton(true, "Add Official Business");
 			headerTabContent();
-			forApprovalContent();
+			//forApprovalContent();
 			myFormsContent();
+			updateURL();
 		} else {
 			headerButton(false);
 			headerTabContent(false);
 			formContent(data, readOnly);
 		}
 	}
-	pageContent();
+	viewDocument();
+	$("#page_content").text().trim().length == 0 && pageContent(); // CHECK IF THERE IS ALREADY LOADED ONE
+	// ----- END PAGE CONTENT -----
+
 	// ----- END PAGE CONTENT ----
 
 	// function getModuleHeaderOptions(clientID = 0) {
@@ -649,16 +807,17 @@ $(document).ready(function () {
 	function getCompanyContent(clientID = false) {
 		let getModuleHeader = getTableData("pms_client_tbl", "*", "	clientStatus = 1");
 
-		let moduleHeaderOptions = `<option ${!clientID && "selected"} disabled>Select Company Name</option>`;
+		let moduleHeaderOptions = `<option selected disabled>Select Company Name</option>`;
+		let address = "";
+
 		getModuleHeader.map(item => {
 
-			let address = `${item.clientUnitNumber && titleCase(item.clientUnitNumber)+", "}${item.clientHouseNumber && item.clientHouseNumber +", "}${item.clientBarangay && titleCase(item.clientBarangay)+", "}${item.clientCity && titleCase(item.clientCity)+", "}${item.clientProvince && titleCase(item.clientProvince)+", "}${item.clientCountry && titleCase(item.clientCountry)+", "}${item.clientPostalCode && titleCase(item.clientPostalCode)}`;
+			address = `${item.clientUnitNumber && titleCase(item.clientUnitNumber)+", "}${item.clientHouseNumber && item.clientHouseNumber +", "}${item.clientBarangay && titleCase(item.clientBarangay)+", "}${item.clientCity && titleCase(item.clientCity)+", "}${item.clientProvince && titleCase(item.clientProvince)+", "}${item.clientCountry && titleCase(item.clientCountry)+", "}${item.clientPostalCode && titleCase(item.clientPostalCode)}`;
 
 			moduleHeaderOptions += `<option value="${item.clientID}" ${item.clientID == clientID && "selected"} companyAddress="${address}">${item.clientName}</option>`;
 
 			if (clientID && item.clientID == clientID[0].clientID) {
 				$("#officialBusinessAddress").val(address);
-
 			}
 
 		})
@@ -752,39 +911,49 @@ $(document).ready(function () {
 		const submittedAt =
 			(status == 1 && moment().format("YYYY-MM-DD HH:mm:ss")) ||
 			(status == 4 && null);
-		const dateToday = moment().format("YYYY-MM-DD HH:mm:ss");
+			const approversID = method != "approve" && moduleApprover;
 
 		if (action && method != "" && feedback != "") {
-			data["tableData[officialBusinessStatus]"] = status;
-			data["tableData[updatedBy]"] = sessionID;
-			data["feedback"] = feedback;
-			data["method"] = method;
-			data["tableName"] = "hris_official_business_tbl";
+			data["tableData[officialBusinessStatus]"] 	= status;
+			data["tableData[updatedBy]"] 				= sessionID;
+			data["feedback"] 							= feedback;
+			data["method"] 								= method;
+			data["tableName"] 							= "hris_official_business_tbl";
 			if (submittedAt) data["tableData[submittedAt]"] = submittedAt;
 
 			if (action == "insert") {
-				data["tableData[officialBusinessCode]"] = generateCode(
-					"OBF",
-					false,
-					"hris_official_business_tbl",
-					"officialBusinessCode",
-				);
-				data["tableData[employeeID]"] = sessionID;
-				data["tableData[createdBy]"] = sessionID;
-				data["tableData[createdAt]"] = dateToday;
+				// data["tableData[officialBusinessCode]"] = generateCode(
+				// 	"OBF",
+				// 	false,
+				// 	"hris_official_business_tbl",
+				// 	"officialBusinessCode",
+				// );
+				data["tableData[employeeID]"] 			= sessionID;
+				data["tableData[createdBy]"] 			= sessionID;
+				data["tableData[createdAt]"] 			= dateToday();
 
-				const approversID = getModuleApprover(58);
+				//const approversID = getModuleApprover(58);
 				if (approversID && method == "submit") {
-					data["tableData[approversID]"] = approversID;
+					data["tableData[approversID]"] 		= approversID;
 				}
 				if (!approversID && method == "submit") {
-					data["tableData[approversID]"] = sessionID;
-					data["tableData[approversStatus]"] = 2;
-					data["tableData[approversDate]"] = dateToday;
-					data["tableData[officialBusinessStatus]"] = 2;
+					data["tableData[approversID]"] 				= sessionID;
+					data["tableData[approversStatus]"] 			= 2;
+					data["tableData[approversDate]"] 			= dateToday();
+					data["tableData[officialBusinessStatus]"] 	= 2;
 				}
 
 			} else {
+				if (status == 1) {
+					data["tableData[approversID]"] = approversID;
+
+					if (!approversID && method == "submit") {
+						data["tableData[approversID]"]          = sessionID;
+						data["tableData[approversStatus]"]      = 2;
+						data["tableData[approversDate]"]        = dateToday();
+						data["tableData[changeScheduleStatus]"] = 2;
+					}
+				}
 				data["whereFilter"] = "officialBusinessID =" + id;
 			}
 		}
@@ -794,7 +963,7 @@ $(document).ready(function () {
 
 	// ----- CHANGE TIME TO -----
 	$(document).on("keyup", ".timeOut", function () {
-		// checkTimeRange($(this).attr("id"));
+		checkTimeRange($(this).attr("id"));
 	});
 	// ----- END CHANGE TIME TO -----
 
@@ -802,41 +971,41 @@ $(document).ready(function () {
 	// ----- OPEN ADD FORM -----
 	$(document).on("click", "#btnAdd", function () {
 		pageContent(true);
+		updateURL(null, true);
 	});
 	// ----- END OPEN ADD FORM -----
 
 	// ----- CLOSE FORM -----
 	$(document).on("click", "#btnBack", function () {
-		const id = $(this).attr("officialBusinessID");
-		const status = $(this).attr("status");
+		const id 			= $(this).attr("officialBusinessID");
+		const employeeID 	= $(this).attr("employeeID");
+		const feedback   	= $(this).attr("code") || getFormCode("OBF", dateToday(), id);
+		const status 		= $(this).attr("status");
 
 		if (status != "false" && status != 0) {
 			$("#page_content").html(preloader);
 			pageContent();
-		} else {
-			const feedback = $(this).attr("officialBusinessCode") ?
-				$(this).attr("officialBusinessCode") :
-				generateCode(
-					"OBF",
-					false,
-					"hris_official_business_tbl",
-					"officialBusinessCode",
-				);
 
+			if (employeeID != sessionID) {
+				$("[redirect=forApprovalTab]").length > 0 && $("[redirect=forApprovalTab]").trigger("click");
+			}	
+		} else {
 			const action = id && feedback ? "update" : "insert";
 
 			const data = getData(action, 0, "save", feedback, id);
 
-			cancelForm(
-				"save",
-				action,
-				"OFFICIAL BUSINESS",
-				"",
-				"form_official_business",
-				data,
-				true,
-				pageContent
-			);
+			setTimeout(() => {
+				cancelForm(
+					"save",
+					action,
+					"OFFICIAL BUSINESS",
+					"",
+					"form_official_business",
+					data,
+					true,
+					pageContent
+				);
+			}, 300);
 		}
 
 	});
@@ -847,17 +1016,18 @@ $(document).ready(function () {
 	// ----- OPEN EDIT MODAL -----
 	$(document).on("click", ".btnEdit", function () {
 		const id = $(this).attr("id");
-		const code = $(this).attr("code");
+		viewDocument(id);
+		// const code = $(this).attr("code");
 
-		const tableData = getTableData(
-			"hris_official_business_tbl",
-			"*",
-			"officialBusinessID=" + id,
-			""
-		);
+		// const tableData = getTableData(
+		// 	"hris_official_business_tbl",
+		// 	"*",
+		// 	"officialBusinessID=" + id,
+		// 	""
+		// );
 
-		pageContent(true, tableData);
-		getCompanyContent(tableData);
+		// pageContent(true, tableData);
+		// getCompanyContent(tableData);
 	});
 	// ----- END OPEN EDIT MODAL -----
 
@@ -865,30 +1035,34 @@ $(document).ready(function () {
 	// ----- VIEW DOCUMENT -----
 	$(document).on("click", ".btnView", function () {
 		const id = $(this).attr("id");
-		const tableData = getTableData(
-			"hris_official_business_tbl",
-			"*",
-			"officialBusinessID=" + id,
-			""
-		);
-		pageContent(true, tableData, true);
+		viewDocument(id, true);
+		// const tableData = getTableData(
+		// 	"hris_official_business_tbl",
+		// 	"*",
+		// 	"officialBusinessID=" + id,
+		// 	""
+		// );
+		// pageContent(true, tableData, true);
 	});
 	// ----- END VIEW DOCUMENT -----
 
 	// ----- SAVE DOCUMENT -----
 	$(document).on("click", "#btnSave", function () {
-		const validate = validateForm("form_official_business");
-		// const validateTime = checkTimeRange(false, true);
-		if (validate) {
-			const action = "insert"; // CHANGE
-			const feedback = generateCode(
-				"OBF",
-				false,
-				"hris_official_business_tbl",
-				"officialBusinessCode",
-			);
+		const action   = "insert"; 
+		const feedback = getFormCode("OBF", dateToday()); 
+		const data     = getData(action, 0, "save", feedback);
+		// const validate = validateForm("form_official_business");
+		// // const validateTime = checkTimeRange(false, true);
+		// if (validate) {
+		// 	const action = "insert"; // CHANGE
+		// 	const feedback = generateCode(
+		// 		"OBF",
+		// 		false,
+		// 		"hris_official_business_tbl",
+		// 		"officialBusinessCode",
+		// 	);
 
-			const data = getData(action, 0, "save", feedback);
+			//const data = getData(action, 0, "save", feedback);
 
 			formConfirmation(
 				"save",
@@ -900,7 +1074,7 @@ $(document).ready(function () {
 				true,
 				myFormsContent
 			);
-		}
+		// }
 	});
 	// ----- END SAVE DOCUMENT -----
 
@@ -913,38 +1087,61 @@ $(document).ready(function () {
 		// const validateTime = checkTimeRange(false, true);
 
 		if (validate) {
-			const feedback = $(this).attr("officialBusinessCode") ?
-				$(this).attr("officialBusinessCode") :
-				generateCode(
-					"OBF",
-					false,
-					"hris_official_business_tbl",
-					"officialBusinessCode",
-				);
+			const feedback = $(this).attr("code") || getFormCode("OBF", dateToday(), id);
+			const action   = id && feedback ? "update" : "insert";
+			const data     = getData(action, 1, "submit", feedback, id);
 
-			const action = id && feedback ? "update" : "insert";
-
-			const data = getData(action, 1, "submit", feedback, id);
-
-			let notificationData = {
-				moduleID: 58,
-				notificationTitle: "Official Business Form",
-				notificationDescription: `${sessionID} asked for your approval.`,
-				notificationType: 2,
-				employeeID: getNotificationEmployeeID(data["tableData[approversID]"], data["tableData[approversDate]"]),
-			};
-
-			formConfirmation(
-				"submit",
-				action,
-				"OFFICIAL BUSINESS",
-				"",
-				"form_official_business",
-				data,
-				true,
-				pageContent,
-				notificationData
+			const employeeID = getNotificationEmployeeID(
+				data["tableData[approversID]"],
+				data["tableData[approversDate]"],
+				true
 			);
+
+			// const feedback = $(this).attr("officialBusinessCode") ?
+			// 	$(this).attr("officialBusinessCode") :
+			// 	generateCode(
+			// 		"OBF",
+			// 		false,
+			// 		"hris_official_business_tbl",
+			// 		"officialBusinessCode",
+			// 	);
+
+			// const action = id && feedback ? "update" : "insert";
+
+			// const data = getData(action, 1, "submit", feedback, id);
+			
+			let notificationData = false;
+			if (employeeID != sessionID) {
+				notificationData = {
+					moduleID:                60,
+					// tableID:                 1, // AUTO FILL
+					notificationTitle:       "Official Business Form",
+					notificationDescription: `${employeeFullname(sessionID)} asked for your approval.`,
+					notificationType:        2,
+					employeeID,
+				};
+			}
+
+			// let notificationData = {
+			// 	moduleID: 58,
+			// 	notificationTitle: "Official Business Form",
+			// 	notificationDescription: `${sessionID} asked for your approval.`,
+			// 	notificationType: 2,
+			// 	employeeID: getNotificationEmployeeID(data["tableData[approversID]"], data["tableData[approversDate]"]),
+			// };
+			setTimeout(() => {
+				formConfirmation(
+					"submit",
+					action,
+					"OFFICIAL BUSINESS",
+					"",
+					"form_official_business",
+					data,
+					true,
+					pageContent,
+					notificationData
+				);
+			}, 300);
 		}
 	});
 	// ----- END SUBMIT DOCUMENT -----
@@ -952,15 +1149,20 @@ $(document).ready(function () {
 	// ----- CANCEL DOCUMENT -----
 	$(document).on("click", "#btnCancelForm", function () {
 		const id = $(this).attr("officialBusinessID");
-		const feedback = $(this).attr("officialBusinessCode");
+		const feedback = $(this).attr("code") || getFormCode("OBF", dateToday(), id);
+		const action   = "update";
+		const data     = getData(action, 4, "cancelform", feedback, id);
+
+
+		//const feedback = $(this).attr("officialBusinessCode");
 
 		// const validate = validateForm("form_change_schedule");
 		// const validateTime = checkTimeRange(false, true);
 
 		// if (validate && validateTime) {
 
-		const action = "update";
-		const data = getData(action, 4, "cancelform", feedback, id);
+		// const action = "update";
+		// const data = getData(action, 4, "cancelform", feedback, id);
 
 		formConfirmation(
 			"cancelform",
@@ -993,18 +1195,22 @@ $(document).ready(function () {
 	// ----- CANCEL DOCUMENT -----
 	$(document).on("click", "#btnCancel", function () {
 		const id = $(this).attr("officialBusinessID");
-		const feedback = $(this).attr("officialBusinessCode") ?
-			$(this).attr("officialBusinessCode") :
-			generateCode(
-				"OBF",
-				false,
-				" hris_official_business_tbl",
-				"officialBusinessCode",
-			);
+		const feedback = $(this).attr("code") || getFormCode("OBF", dateToday(), id);
+		const action   = id && feedback ? "update" : "insert";
+		const data     = getData(action, 0, "save", feedback, id);
 
-		const action = id && feedback ? "update" : "insert";
+		// const feedback = $(this).attr("officialBusinessCode") ?
+		// 	$(this).attr("officialBusinessCode") :
+		// 	generateCode(
+		// 		"OBF",
+		// 		false,
+		// 		" hris_official_business_tbl",
+		// 		"officialBusinessCode",
+		// 	);
 
-		const data = getData(action, 0, "save", feedback, id);
+		// const action = id && feedback ? "update" : "insert";
+
+		// const data = getData(action, 0, "save", feedback, id);
 
 		cancelForm(
 			"save",
@@ -1020,36 +1226,41 @@ $(document).ready(function () {
 	// ----- END CANCEL DOCUMENT -----
 	// ----- APPROVE DOCUMENT -----
 	$(document).on("click", "#btnApprove", function () {
-		const id = $(this).attr("officialBusinessID");
-		const feedback = $(this).attr("officialBusinessCode");
-		let tableData = getTableData(" hris_official_business_tbl", "", "officialBusinessID = " + id);
+		const id 				= decryptString($(this).attr("officialBusinessID"));
+		const feedback 			= $(this).attr("code") || getFormCode("OBF", dateCreated, id);
+		let tableData 			= getTableData(" hris_official_business_tbl", "", "officialBusinessID = " + id);
 		if (tableData) {
-			let approversID = tableData[0].approversID;
+			let approversID 	= tableData[0].approversID;
 			let approversStatus = tableData[0].approversStatus;
-			let approversDate = tableData[0].approversDate;
-			let employeeID = tableData[0].employeeID;
+			let approversDate 	= tableData[0].approversDate;
+			let employeeID 		= tableData[0].employeeID;
+			let createdAt       = tableData[0].createdAt;
 
-			let data = getData("update", 2, "approve", feedback, id);
-			data["tableData[approversStatus]"] = updateApproveStatus(approversStatus, 2);
-			data["tableData[approversDate]"] = updateApproveDate(approversDate);
+			let data 							= getData("update", 2, "approve", feedback, id);
+			data["tableData[approversStatus]"] 	= updateApproveStatus(approversStatus, 2);
+			let dateApproved 					= updateApproveDate(approversDate)
+			data["tableData[approversDate]"] 	= dateApproved;
+
 			let status, notificationData;
 			if (isImLastApprover(approversID, approversDate)) {
 				status = 2;
 				notificationData = {
-					moduleID: 58,
-					notificationTitle: "Official Business",
-					notificationDescription: `${tableData[0].officialBusinessCode}: Your request has been approved.`,
-					notificationType: 2,
-					employeeID: employeeID,
+					moduleID: 					58,
+					tableID:                 	id,
+					notificationTitle: 			"Official Business",
+					notificationDescription: 	`${getFormCode("OBF", createdAt, id)}: Your request has been approved.`,
+					notificationType: 			7,
+					employeeID,
 				};
 			} else {
 				status = 1;
 				notificationData = {
 					moduleID: 58,
-					notificationTitle: "Official Business",
-					notificationDescription: `${employeeID} asked for your approval.`,
-					notificationType: 2,
-					employeeID: getNotificationEmployeeID(approversID, approversDate),
+					tableID:                 	id,
+					notificationTitle: 			"Official Business",
+					notificationDescription: 	`${employeeFullname(employeeID)} asked for your approval.`,
+					notificationType: 			2,
+					employeeID: 				getNotificationEmployeeID(approversID, approversDate),
 				};
 			}
 			data["tableData[officialBusinessStatus]"] = status;
@@ -1061,17 +1272,19 @@ $(document).ready(function () {
 			// let status = isImLastApprover(approversID, approversDate) ? 2 : 1;
 			// data["tableData[officialBusinessStatus]"] = status;
 
-			formConfirmation(
-				"approve",
-				"update",
-				"OFFICIAL BUSINESS",
-				"",
-				"form_official_business",
-				data,
-				true,
-				pageContent,
-				notificationData
-			);
+			setTimeout(() => {
+				formConfirmation(
+					"approve",
+					"update",
+					"OFFICIAL BUSINESS",
+					"",
+					"form_official_business",
+					data,
+					true,
+					pageContent,
+					notificationData
+				);
+			}, 300);	
 		}
 	})
 	// ----- END APPROVE DOCUMENT -----
@@ -1079,7 +1292,7 @@ $(document).ready(function () {
 	// ----- REJECT DOCUMENT -----
 	$(document).on("click", "#btnReject", function () {
 		const id = $(this).attr("officialBusinessID");
-		const feedback = $(this).attr("officialBusinessCode");
+		const feedback =  $(this).attr("code") || getFormCode("OBF", dateToday(), id);
 
 		$("#modal_change_schedule_content").html(preloader);
 		$("#modal_change_schedule .page-title").text("DENY OFFICIAL BUSINESS DOCUMENT");
@@ -1089,7 +1302,7 @@ $(document).ready(function () {
 			<div class="form-group">
 				<label>Remarks <code>*</code></label>
 				<textarea class="form-control validate"
-					data-allowcharacters="[0-9][a-z][A-Z][ ][.][,][_]['][()][?]"
+					data-allowcharacters="[0-9][a-z][A-Z][ ][.][,][_]['][()][?][-][/]"
 					minlength="2"
 					maxlength="250"
 					id="officialBusinessRemarks"
@@ -1110,31 +1323,34 @@ $(document).ready(function () {
 	})
 
 	$(document).on("click", "#btnRejectConfirmation", function () {
-		const id = $(this).attr("officialBusinessID");
-		const feedback = $(this).attr("officialBusinessCode");
+		const id = decryptString($(this).attr("officialBusinessID"));
+		const feedback = $(this).attr("code") || getFormCode("OBF",dateToday(), id);
 
 		const validate = validateForm("modal_change_schedule");
 		if (validate) {
 			let tableData = getTableData("hris_official_business_tbl", "", "officialBusinessID = " + id);
 			if (tableData) {
-				let approversID = tableData[0].approversID;
-				let approversStatus = tableData[0].approversStatus;
-				let approversDate = tableData[0].approversDate;
-				let employeeID = tableData[0].employeeID;
-
-				let notificationData = {
-					moduleID: 58,
-					notificationTitle: "Oficial Business Form",
-					notificationDescription: `${tableData[0].officialBusinessCode}: Your request has been denied.`,
-					notificationType: 2,
-					employeeID: employeeID,
-				};
+				let approversID 			= tableData[0].approversID;
+				let approversStatus 		= tableData[0].approversStatus;
+				let approversDate 			= tableData[0].approversDate;
+				let employeeID 				= tableData[0].employeeID;
+				let createdAt       		= tableData[0].createdAt;
 
 				let data = getData("update", 3, "reject", feedback, id);
 				data["tableData[officialBusinessRemarks]"] = $("[name=officialBusinessRemarks]").val().trim();
 				data["tableData[approversStatus]"] = updateApproveStatus(approversStatus, 3);
 				data["tableData[approversDate]"] = updateApproveDate(approversDate);
 
+				let notificationData = {
+					moduleID: 					58,
+					tableID: 				 	id,
+					notificationTitle: 			"Oficial Business Form",
+					notificationDescription: 	`${getFormCode("OBF", createdAt, id)}: Your request has been denied.`,
+					notificationType: 			1,
+					employeeID,
+				};
+
+				setTimeout(() => {
 				formConfirmation(
 					"reject",
 					"update",
@@ -1144,11 +1360,14 @@ $(document).ready(function () {
 					data,
 					true,
 					pageContent,
-					notificationData
+					notificationData,
+					this
 				);
+				$(`[redirect=forApprovalTab]`).trigger("click");
+				}, 300);	
 			}
 		}
-	})
+	});
 	$(document).on("click", ".nav-link", function () {
 		const tab = $(this).attr("href");
 		if (tab == "#forApprovalTab") {
@@ -1175,12 +1394,43 @@ $(document).ready(function () {
 	// 	// alert(thisValue);
 	// })
 
-});
-function viewNotification() {
-	let url = window.document.URL;
-	url = url.split("?view_id=");
-	if (url.length > 1) {
-		let id = url[1];
-		$(`.btnView[id=${id}]`).trigger("click");
+	// ----- APPROVER STATUS -----
+function getApproversStatus(approversID, approversStatus, approversDate) {
+	let html = "";
+	if (approversID) {
+		let idArr = approversID.split("|");
+		let statusArr = approversStatus ? approversStatus.split("|") : [];
+		let dateArr = approversDate ? approversDate.split("|") : [];
+		html += `<div class="row mt-4">`;
+
+		idArr && idArr.map((item, index) => {
+			let date   = dateArr[index] ? moment(dateArr[index]).format("MMMM DD, YYYY hh:mm:ss A") : "";
+			let status = statusArr[index] ? statusArr[index] : "";
+			let statusBadge = "";
+			if (date && status) {
+				if (status == 2) {
+					statusBadge = `<span class="badge badge-info">Approved - ${date}</span>`;
+				} else if (status == 3) {
+					statusBadge = `<span class="badge badge-danger">Denied - ${date}</span>`;
+				}
+			}
+
+			html += `
+			<div class="col-xl-3 col-lg-3 col-md-4 col-sm-12">
+				<div class="d-flex justify-content-start align-items-center">
+					<span class="font-weight-bold">
+						${employeeFullname(item)}
+					</span>
+					<small>&nbsp;- Level ${index + 1} Approver</small>
+				</div>
+				${statusBadge}
+			</div>`;
+		});
+		html += `</div>`;
 	}
+	return html;
 }
+// ----- END APPROVER STATUS -----
+
+});
+

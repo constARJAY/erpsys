@@ -13,7 +13,7 @@
 				<div class="col-lg-6 col-md-6">
 					<ul class="breadcrumb pl-0 pb-0">
 						<li class="breadcrumb-item"><a href="#"><i class="zmdi zmdi-home"></i> Dashboard</a></li>
-						<li class="breadcrumb-item d-flex align-items-center"><i class="zmdi zmdi-settings d-flex align-items-center"></i>&nbsp;System Settings</li>
+						<li class="breadcrumb-item d-flex align-items-center"><a href="#"><i class="zmdi zmdi-settings"></i> System Settings</a></li>
 						<li class="breadcrumb-item active d-flex align-items-center"> Approval Setup</li>
 						<!-- <li class="breadcrumb-item active"><i class="zmdi zmdi-hotel"></i> &nbsp;Crud Operatio  -->
 					</ul>
@@ -32,7 +32,7 @@
 		</div>
 	</div>
 
-    <div class="container">
+    <!-- <div class="container">
 		<div class="row clearfix row-deck" style='text-align:right;'>
             <div class="col-12 card">
                 <div class="row card-body">
@@ -73,7 +73,63 @@
                 </div>
             </div>
         </div>
+	</div> -->
+
+	<div class="container">
+		<div class="row clearfix">
+            <div class="col-lg-12">
+                <div class="card">
+                    <div class="header text-right p-0">
+						<div class="closeBtn"></div>
+					</div>
+					<div class="body" id="main_body">
+						<div class="row" id="loading-screen" style="visibility:hidden;"></div>
+						<div class="row clearfix row-deck">
+							<div class="row card-body">
+								<div class="col-12 col-lg-4 col-xl-4 py-2 text-left">
+									<h6 class="bg-primary text-light p-3"><strong>USER DESIGNATION</strong></h6>
+									<div class="position-list" id="position_form">
+										<div class="card my-0 p-3">
+											<div class="d-flex justify-content-center align-items-center">
+												<div class="row">
+													<div class="col-2"></div>
+													<div class="col-8 text-center">
+														<img class="img-fluid" src="<?=base_url("assets/modal/please-select2.gif")?>" alt="">
+														<h6 class="module-header text-primary text-center font-weight-bold">DESIGNATION</h6>
+														<p>Select module to view designation.</p>
+													</div>
+													<div class="col-2"></div>
+												</div>
+											</div>
+										</div>
+									</div>
+								</div>
+
+								<div class="col-12 col-lg-8 col-xl-8 py-2 text-left">
+										<h6 class="bg-primary text-light p-3"><strong>LIST OF APPROVERS</strong></h6>
+
+										<div class="card my-0 p-2 approval-list">
+											<div class="row">
+												<div class="col-4"></div>
+												<div class="col-4 text-center">
+													<img class="img-fluid" src="<?=base_url("assets/modal/please-select.gif")?>" alt=""> 
+													<h6 class="text-primary text-center font-weight-bold">APPROVERS</h6>
+													<p>Select designation to view approvers.</p>
+												</div>
+												<div class="col-4"></div>
+											</div>
+										</div>
+								</div>
+							</div>
+						</div>
+					</div>
+                </div>
+            </div>
+        </div>
 	</div>
+
+
+
 
 </div>
 

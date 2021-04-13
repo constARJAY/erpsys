@@ -266,49 +266,23 @@ $(document).ready(function () {
                         <td>${item.inventoryVendorName}</td>
                         <td>
                             ${item.inventoryVendorUnit + ", "} 
-                            ${
-															item.inventoryVendorBuilding &&
-															titleCase(item.inventoryVendorBuilding) + ", "
-														} 
-                            ${
-															item.inventoryVendorStreet &&
-															titleCase(item.inventoryVendorStreet) + ", "
-														}
-                            ${
-															item.inventoryVendorSubdivision &&
-															titleCase(item.inventoryVendorSubdivision) + ", "
-														} 
-                            ${
-															item.inventoryVendorBarangay &&
-															titleCase(item.inventoryVendorBarangay) + ", "
-														} 
-                            ${
-															item.inventoryVendorCity &&
-															titleCase(item.inventoryVendorCity) + ", "
-														} 
-                            ${
-															item.inventoryVendorProvince &&
-															titleCase(item.inventoryVendorProvince) + ", "
-														}
-                            ${
-															item.inventoryVendorCountry &&
-															titleCase(item.inventoryVendorCountry) + ", "
-														} 
-                            ${
-															item.inventoryVendorZipCode &&
-															titleCase(item.inventoryVendorZipCode)
-														}
+                            ${item.inventoryVendorBuilding && titleCase(item.inventoryVendorBuilding) + ", "} 
+                            ${item.inventoryVendorStreet && titleCase(item.inventoryVendorStreet) + ", "}
+                            ${item.inventoryVendorSubdivision && titleCase(item.inventoryVendorSubdivision) + ", "} 
+                            ${item.inventoryVendorBarangay && titleCase(item.inventoryVendorBarangay) + ", "} 
+                            ${item.inventoryVendorCity && titleCase(item.inventoryVendorCity) + ", "} 
+                            ${item.inventoryVendorProvince && titleCase(item.inventoryVendorProvince) + ", "}
+                            ${item.inventoryVendorCountry && titleCase(item.inventoryVendorCountry) + ", "} 
+                            ${item.inventoryVendorZipCode && titleCase(item.inventoryVendorZipCode)}
                         </td>
                         <td>${item.inventoryVendorPerson}</td>
                         <td>${item.inventoryVendorEmail}</td>
                         <td>${item.inventoryVendorTIN}</td>
                         <td>${item.inventoryVendorMobile}</td>
                         <td>${item.inventoryVendorTelephone}</td>
-                        <td>${
-													item.inventoryVendorVAT == 1
-														? "Vatable"
-														: "Non Vatable"
-												}</td>
+                        <td>
+							${item.inventoryVendorVAT == 1 ? "Vatable" : "Non Vatable"}
+						</td>
                         <td>${item.inventoryVendorBrand}</td>
                         <td>${status}</td>
                     </tr>`;
@@ -333,29 +307,175 @@ $(document).ready(function () {
 	tableContent();
 	// ----- END TABLE CONTENT -----
 
+
+	// ----- GET BANK MASTERFILE -----
+	function getBank(id = null, display = true) {
+		let tableData = getTableData("fms_bank_tbl", "bankID, bankName, bankNumber", "bankStatus = 1");
+		let html = tableData.map(bank => {
+			return `<option value="${bank.bankID}" ${bank.bankID == id && "selected"} format="${bank.bankNumber}">${bank.bankName}</option>`;
+		})
+		return display ? html : tableData;
+	}
+	// ----- GET BANK MASTERFILE -----
+
+
+	// ----- GET BANK NUMBER FORMAT -----
+	function applyBankFormat(format = null) {
+		if (format) {
+			let formatArr = format.split("");
+			let newFormat = formatArr.map(char => {
+				return isFinite(String(char)) ? "9" : char;
+			})
+			return newFormat.join("");
+		}
+		return "";
+	}
+	// ----- END GET BANK NUMBER FORMAT -----
+
+
+	// ----- SELECT BANK -----
+	$(document).on("change", "[name=bankID]", function() {
+		$("[name=inventoryVendorBankAccNo]").val("");
+		const format = $('option:selected', this).attr("format");
+		const newFormat = applyBankFormat(format);
+		$("[name=inventoryVendorBankAccNo]").attr("mask", newFormat);
+		$("[name=inventoryVendorBankAccNo]").attr("minlength", newFormat.length);
+		$("[name=inventoryVendorBankAccNo]").attr("maxlength", newFormat.length);
+		initInputmask("inventoryVendorBankAccNo");
+		initAll();
+	})
+	// ----- END SELECT BANK -----
+
+
+	// ----- GET ENTERPRISE -----
+	function getEnterprise(enterpriseStr = "", display = true) {
+		let enterpriseArr = [
+			"Sole Proprietorship",
+			"Business Corporation",
+			"General Partnership",
+			"Limited Partnership",
+			"Joint Venture",
+			"Non-profit Legal Person",
+			"Association",
+			"Cooperative",
+			"Group of Person" ];
+		let html = enterpriseArr.map(enterprise => {
+			return `<option value="${enterprise}" ${enterpriseStr == enterprise && "selected"}>${enterprise}</option>`;
+		})
+		return display ? html : enterpriseArr;
+	}
+	// ----- END GET ENTERPRISE -----
+
+
+	// ---- GET INDUSTRY -----
+	function getIndustry(industryStr = "", display = true) {
+		let industryArr = [
+			"Advertising",
+			"Communications Industry",
+			"Creative Industries",
+			"Entertainment Industry",
+			"Fashion",
+			"Green Industry",
+			"Hospitality Inductry",
+			"Information Technology",
+			"IT Industry",
+			"Manufacturing",
+			"Media",
+			"Primary Industry",
+			"Retail",
+			"Secondary Inustry",
+			"Space",
+			"Technology Industry",
+			"Tertiary Sector",
+			"Agriculture Industry",
+			"Construction Industry",
+			"Education",
+			"Farming",
+			"Finance",
+			"Heavy Industry",
+			"Information Industry",
+			"Infrastructure",
+			"Light Industry",
+			"Materials",
+			"Music Industry",
+			"Publishing",
+			"Robotics",
+			"Service Industry",
+			"Space Industry",
+			"Telecom" ];
+		let html = industryArr.map(industry => {
+			return `<option value="${industry}" ${industryStr == industry && "selected"}>${industry}</option>`;
+		})
+		return display ? html : industryArr;
+	}
+	// ---- END GET INDUSTRY -----
+
+
+	// ----- CUSTOM INPUTMASK -----
+	function initInputmaskTime(isMethodAdd = true) {
+		if (isMethodAdd) {
+			$(".openingHours").val("08:00");
+			$(".closingHours").val("17:00");
+		}
+
+		$(".openingHours").inputmask({
+			mask: "h:s",
+			placeholder: "08:00",
+			insertMode: false,
+			hourFormat: "24",
+			clearMaskOnLostFocus: false,
+			floatLabelType: "Always",
+			focus: function (args) {
+				args.selectionEnd = args.selectionStart;
+			},
+		});
+		$(".closingHours").inputmask({
+			mask: "h:s",
+			placeholder: "17:00",
+			insertMode: false,
+			hourFormat: "24",
+			clearMaskOnLostFocus: false,
+			floatLabelType: "Always",
+			focus: function (args) {
+				args.selectionEnd = args.selectionStart;
+			},
+		});
+	}
+	// ----- END CUSTOM INPUTMASK ------
+
+
 	// ----- MODAL CONTENT -----
 	function modalContent(data = false) {
 		let {
-			inventoryVendorID = "",
-			inventoryVendorName = "",
-			inventoryVendorRegion = false,
-			inventoryVendorProvince = false,
-			inventoryVendorCity = false,
-			inventoryVendorBarangay = false,
-			inventoryVendorUnit = "",
-			inventoryVendorBuilding = "",
-			inventoryVendorStreet = "",
-			inventoryVendorSubdivision = "",
-			inventoryVendorCountry = "",
-			inventoryVendorZipCode = "",
-			inventoryVendorPerson = "",
-			inventoryVendorEmail = "",
-			inventoryVendorTIN = "",
-			inventoryVendorMobile = "",
-			inventoryVendorTelephone = "",
-			inventoryVendorBrand = "",
-			inventoryVendorVAT = "1",
-			inventoryVendorStatus = "1",
+			inventoryVendorID           = "",
+			inventoryVendorName         = "",
+			inventoryVendorRegion       = false,
+			inventoryVendorProvince     = false,
+			inventoryVendorCity         = false,
+			inventoryVendorBarangay     = false,
+			inventoryVendorUnit         = "",
+			inventoryVendorBuilding     = "",
+			inventoryVendorStreet       = "",
+			inventoryVendorSubdivision  = "",
+			inventoryVendorCountry      = "",
+			inventoryVendorZipCode      = "",
+			inventoryVendorPerson       = "",
+			inventoryVendorEmail        = "",
+			inventoryVendorTIN          = "",
+			inventoryVendorMobile       = "",
+			inventoryVendorTelephone    = "",
+			inventoryVendorBrand        = "",
+			inventoryVendorVAT          = "1",
+			inventoryVendorStatus       = "1",
+
+			inventoryVendorFaxNumber    = "",
+			inventoryVendorEnterprise   = "",
+			inventoryVendorIndustry     = "",
+			bankID                      = "",
+			inventoryVendorBankAccName  = "",
+			inventoryVendorBankAccNo    = "",
+			inventoryVendorOpeningHours = "",
+			inventoryVendorClosingHours = "",
 		} = data && data[0];
 
 		let button = data
@@ -536,12 +656,12 @@ $(document).ready(function () {
                             <div class="invalid-feedback d-block" id="invalid-inventoryVendorEmail"></div>
                         </div>
                     </div>
-                    <div class="col-xl-4 col-lg-6 col-md-6 col-sm-12">
+                    <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12">
                         <div class="form-group">
                             <label>Tax Identification Number </label>
                             <input 
                                 type="text" 
-                                class="form-control validate inputmask" 
+                                class="form-control inputmask validate" 
                                 name="inventoryVendorTIN" 
                                 id="inventoryVendorTIN" 
                                 data-allowcharacters="[0-9]" 
@@ -553,12 +673,12 @@ $(document).ready(function () {
                             <div class="invalid-feedback d-block" id="invalid-inventoryVendorTIN"></div>
                         </div>
                     </div>
-                    <div class="col-xl-4 col-lg-6 col-md-6 col-sm-12">
+                    <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12">
                         <div class="form-group">
                             <label>Mobile No. </label>
                                 <input 
                                 type="text" 
-                                class="form-control validate inputmask" 
+                                class="form-control inputmask validate" 
                                 name="inventoryVendorMobile" 
                                 id="inventoryVendorMobile" 
                                 data-allowcharacters="[0-9]" 
@@ -569,11 +689,11 @@ $(document).ready(function () {
                             <div class="invalid-feedback d-block" id="invalid-inventoryVendorMobile"></div>
                         </div>
                     </div>
-                    <div class="col-xl-4 col-lg-6 col-md-6 col-sm-12">
+                    <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12">
                         <div class="form-group">
                             <label>Telephone No. </label>
                                 <input type="text" 
-                                class="form-control validate inputmask" 
+                                class="form-control inputmask validate" 
                                 name="inventoryVendorTelephone" 
                                 id="inventoryVendorTelephone" 
                                 data-allowcharacters="[0-9]" 
@@ -601,16 +721,131 @@ $(document).ready(function () {
                             <div class="invalid-feedback d-block" id="invalid-inventoryVendorBrand"></div>
                         </div>
                     </div>
+
+					<div class="col-xl-6 col-lg-6 col-md-6 col-sm-12">
+						<div class="form-group">
+							<label>Fax Number <code>*</code></label>
+							<input 
+								type="text" 
+								class="form-control inputmask validate" 
+								name="inventoryVendorFaxNumber" 
+								id="inventoryVendorFaxNumber" 
+								data-allowcharacters="[0-9]"
+								minlength="11" 
+								maxlength="11" 
+								value="${inventoryVendorFaxNumber}"
+								autocomplete="off"
+								mask="99-999-9999"
+								required>
+							<div class="invalid-feedback d-block" id="invalid-inventoryVendorFaxNumber"></div>
+						</div>
+					</div>
+					<div class="col-xl-6 col-lg-6 col-md-6 col-sm-12">
+						<div class="form-group">
+							<label>Industry <code>*</code></label>
+							<select
+								class="form-control validate select2" 
+								name="inventoryVendorIndustry" 
+								id="inventoryVendorIndustry"
+								required>
+								<option disabled selected>Select Enterprise</option>
+								${getIndustry(inventoryVendorIndustry)}
+							</select>
+							<div class="invalid-feedback d-block" id="invalid-inventoryVendorIndustry"></div>
+						</div>
+					</div>
+					<div class="col-xl-6 col-lg-6 col-md-6 col-sm-12">
+						<div class="form-group">
+							<label>Enterprise <code>*</code></label>
+							<select
+								class="form-control validate select2" 
+								name="inventoryVendorEnterprise" 
+								id="inventoryVendorEnterprise"
+								required>
+								<option disabled selected>Select Enterprise</option>
+								${getEnterprise(inventoryVendorEnterprise)}
+							</select>
+							<div class="invalid-feedback d-block" id="invalid-inventoryVendorEnterprise"></div>
+						</div>
+					</div>
+					<div class="col-xl-6 col-lg-6 col-md-6 col-sm-12">
+						<div class="form-group">
+							<label>Bank</label>
+							<select
+								class="form-control validate select2" 
+								name="bankID" 
+								id="bankID">
+								<option disabled selected>Select Bank</option>
+								${getBank(bankID)}
+							</select>
+							<div class="invalid-feedback d-block" id="invalid-bankID"></div>
+						</div>
+					</div>
+					<div class="col-xl-6 col-lg-6 col-md-6 col-sm-12">
+						<div class="form-group">
+							<label>Bank Account Name <code>*</code></label>
+							<input 
+								type="text" 
+								class="form-control validate" 
+								name="inventoryVendorBankAccName" 
+								id="inventoryVendorBankAccName" 
+								data-allowcharacters="[A-Z][a-z][ ][.][-]['][0-9]"
+								minlength="2" 
+								maxlength="50" 
+								value="${inventoryVendorBankAccName}"
+								autocomplete="off"
+								required>
+							<div class="invalid-feedback d-block" id="invalid-inventoryVendorBankAccName"></div>
+						</div>
+					</div>
+					<div class="col-xl-6 col-lg-6 col-md-6 col-sm-12">
+						<div class="form-group">
+							<label>Bank Account No. <code>*</code></label>
+							<input 
+								type="text" 
+								class="form-control validate" 
+								name="inventoryVendorBankAccNo" 
+								id="inventoryVendorBankAccNo" 
+								data-allowcharacters="[0-9]"
+								minlength="2" 
+								maxlength="50" 
+								value="${inventoryVendorBankAccNo}"
+								autocomplete="off"
+								required>
+							<div class="invalid-feedback d-block" id="invalid-inventoryVendorBankAccNo"></div>
+						</div>
+					</div>
+					<div class="col-xl-3 col-lg-3 col-md-6 col-sm-12">
+						<div class="form-group">
+							<label>Opening Hours</label>
+							<input type="text" 
+								class="form-control openingHours" 
+								id="inventoryVendorOpeningHours" 
+								name="inventoryVendorOpeningHours" 
+								required
+								value="${inventoryVendorOpeningHours}">
+							<div class="d-block invalid-feedback" id="invalid-inventoryVendorOpeningHours"></div>
+						</div>
+					</div>
+					<div class="col-xl-3 col-lg-3 col-md-6 col-sm-12">
+						<div class="form-group">
+							<label>Closing Hours</label>
+							<input type="text" 
+								class="form-control closingHours" 
+								id="inventoryVendorClosingHours" 
+								name="inventoryVendorClosingHours" 
+								required
+								value="${inventoryVendorClosingHours}">
+							<div class="d-block invalid-feedback" id="invalid-inventoryVendorClosingHours"></div>
+						</div>
+					</div>
+					
                     <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12">
                         <div class="form-group">
                             <label>VAT <code>*</code></label>
                             <select class=" form-control show-tick select2 validate" name="inventoryVendorVAT" id="inventoryVendorVAT" autocomplete="off">
-                                <option value="1" ${
-																	inventoryVendorVAT == 1 && "selected"
-																}>Vatable</option>   
-                                <option value="0" ${
-																	inventoryVendorVAT == 0 && "selected"
-																}>Non-Vatable</option>
+                                <option value="1" ${inventoryVendorVAT == 1 && "selected"}>Vatable</option>   
+                                <option value="0" ${inventoryVendorVAT == 0 && "selected"}>Non-Vatable</option>
                             </select>
                             <div class="invalid-feedback d-block" id="invalid-inventoryVendorVAT"></div>
                         </div>
@@ -619,12 +854,8 @@ $(document).ready(function () {
                         <div class="form-group">
                             <label>Status <code>*</code></label>
                             <select class=" form-control show-tick select2 validate" name="inventoryVendorStatus" id="inventoryVendorStatus" autocomplete="off" title="Select Status">
-                                <option value="1" ${
-																	inventoryVendorStatus == 1 && "selected"
-																}>Active</option>   
-                                <option value="0" ${
-																	inventoryVendorStatus == 0 && "selected"
-																}>Inactive</option>
+                                <option value="1" ${inventoryVendorStatus == 1 && "selected"}>Active</option>   
+                                <option value="0" ${inventoryVendorStatus == 0 && "selected"}>Inactive</option>
                             </select>
                             <div class="invalid-feedback d-block" id="invalid-inventoryVendorStatus"></div>
                         </div>
@@ -639,6 +870,7 @@ $(document).ready(function () {
 	}
 	// ----- END MODAL CONTENT -----
 
+	
 	// ----- OPEN ADD MODAL -----
 	$(document).on("click", "#btnAdd", function () {
 		preventRefresh(true);
@@ -649,6 +881,7 @@ $(document).ready(function () {
 		const content = modalContent();
 		$("#modal_inventory_vendor_content").html(content);
 		initAll();
+		initInputmaskTime();
 	});
 	// ----- END OPEN ADD MODAL -----
 
@@ -703,6 +936,7 @@ $(document).ready(function () {
 			setTimeout(() => {
 				$("#modal_inventory_vendor_content").html(content);
 				initAll();
+				initInputmaskTime(false);
 			}, 500);
 		}
 	});

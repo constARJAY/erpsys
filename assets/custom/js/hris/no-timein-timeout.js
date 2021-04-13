@@ -1,5 +1,10 @@
 $(document).ready(function () {
 
+	// ----- MODULE APPROVER -----
+	const moduleApprover = getModuleApprover(57);
+	// ----- END MODULE APPROVER -----
+
+
 	// ---- GET EMPLOYEE DATA -----
 	const allEmployeeData = getAllEmployeeData();
 	const employeeData = (id) => {
@@ -18,6 +23,84 @@ $(document).ready(function () {
 		return "-";
 	}
 	// ---- END GET EMPLOYEE DATA -----
+
+
+	// ----- VIEW DOCUMENT -----
+	function viewDocument(view_id = false, readOnly = false) {
+		const loadData = (id) => {
+			const tableData = getTableData("hris_no_timein_timeout_tbl", "", "noTimeinTimeoutID=" + id);
+
+			if (tableData.length > 0) {
+				let {
+					employeeID,
+					noTimeinTimeoutStatus
+				} = tableData[0];
+
+				let isReadOnly = true, isAllowed = true;
+
+				if (employeeID != sessionID) {
+					isReadOnly = true;
+					if (noTimeinTimeoutStatus == 0 || noTimeinTimeoutStatus == 4) {
+						isAllowed = false;
+					}
+				} else if (employeeID == sessionID) {
+					if (noTimeinTimeoutStatus == 0) {
+						isReadOnly = false;
+					} else {
+						isReadOnly = true;
+					}
+				} else {
+					isReadOnly = readOnly;
+				}
+
+				if (isAllowed) {
+					pageContent(true, tableData, isReadOnly);
+					updateURL(encryptString(id));
+				} else {
+					pageContent();
+					updateURL();
+				}
+				
+			} else {
+				pageContent();
+				updateURL();
+			}
+		}
+
+		if (view_id) {
+			let id = decryptString(view_id);
+				id && isFinite(id) && loadData(id);
+		} else {
+			let url   = window.document.URL;
+			let arr   = url.split("?view_id=");
+			let isAdd = url.indexOf("?add");
+			if (arr.length > 1) {
+				let id = decryptString(arr[1]);
+					id && isFinite(id) && loadData(id);
+			} else if (isAdd != -1) {
+				pageContent(true);
+			}
+		}
+		
+	}
+
+	function updateURL(view_id = 0, isAdd = false) {
+		if (view_id && !isAdd) {
+			window.history.pushState("", "", `${base_url}hris/no_timein_timeout?view_id=${view_id}`);
+		} else if (!view_id && isAdd) {
+			window.history.pushState("", "", `${base_url}hris/no_timein_timeout?add`);
+		} else {
+			window.history.pushState("", "", `${base_url}hris/no_timein_timeout`);
+		}
+	}
+	// ----- END VIEW DOCUMENT -----
+
+
+	// GLOBAL VARIABLE - REUSABLE 
+	const dateToday = () => {
+		return moment(new Date).format("YYYY-MM-DD HH:mm:ss");
+	};
+	// END GLOBAL VARIABLE - REUSABLE 
 
 
 	// ----- DATATABLES -----
@@ -46,8 +129,8 @@ $(document).ready(function () {
 					{ targets: 3, width: 200 },
 					{ targets: 4, width: 200 },
 					{ targets: 5, width: 200 },
-					{ targets: 6, width: 250 },
-					{ targets: 7, width: 80 },
+					{ targets: 6, width: 80 },
+					{ targets: 7, width: 250 },
 					{ targets: 8, width: 80 },
 				],
 			});
@@ -68,8 +151,8 @@ $(document).ready(function () {
 					{ targets: 3, width: 200 },
 					{ targets: 4, width: 200 },
 					{ targets: 5, width: 200 },
-					{ targets: 6, width: 250 },
-					{ targets: 7, width: 80 },
+					{ targets: 6, width: 80 },
+					{ targets: 7, width: 250 },
 					{ targets: 8, width: 80 },
 				],
 			});
@@ -80,14 +163,14 @@ $(document).ready(function () {
 	// ----- HEADER CONTENT -----
 	function headerTabContent(display = true) {
 		if (display) {
-			if (isImModuleApprover("hris_on_timein_timeout_tbl", "approversID")) {
+			if (isImModuleApprover("hris_no_timein_timeout_tbl", "approversID")) {
 				let html = `
                 <div class="bh_divider appendHeader"></div>
                 <div class="row clearfix appendHeader">
                     <div class="col-12">
                         <ul class="nav nav-tabs">
-                            <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#forApprovalTab">For Approval</a></li>
-                            <li class="nav-item"><a class="nav-link active" data-toggle="tab" href="#myFormsTab">My Forms</a></li>
+                            <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#forApprovalTab" redirect="forApprovalTab">For Approval</a></li>
+                            <li class="nav-item"><a class="nav-link active" data-toggle="tab" href="#myFormsTab" redirect="myFormsTab">My Forms</a></li>
                         </ul>
                     </div>
                 </div>`;
@@ -104,8 +187,10 @@ $(document).ready(function () {
 	function headerButton(isAdd = true, text = "Add") {
 		let html;
 		if (isAdd) {
-			html = `
-            <button type="button" class="btn btn-default btn-add" id="btnAdd"><i class="icon-plus"></i> &nbsp;${text}</button>`;
+			if (isCreateAllowed(57)) {
+				html = `
+				<button type="button" class="btn btn-default btn-add" id="btnAdd"><i class="icon-plus"></i> &nbsp;${text}</button>`;
+			}
 		} else {
 			html = `
             <button type="button" class="btn btn-default btn-light" id="btnBack"><i class="fas fa-arrow-left"></i> &nbsp;Back</button>`;
@@ -118,66 +203,87 @@ $(document).ready(function () {
 	// ----- FOR APPROVAL CONTENT -----
 	function forApprovalContent() {
 		$("#tableForApprovalParent").html(preloader);
-		let scheduleData = getTableData(
-			`hris_on_timein_timeout_tbl AS notime
+
+		let noTimeinTimeoutData = getTableData(
+			`hris_no_timein_timeout_tbl AS notime
 			LEFT JOIN hris_employee_list_tbl USING(employeeID)`,
-			`notime.no_Timein_timeoutID, notime.no_Timein_timeoutCode, notime.employeeID,notime.no_Timein_timeoutDate, notime.no_Timein_timeoutTimeIn,
-			notime.no_Timein_timeoutTimeOut,notime.no_Timein_timeoutReason,notime.approversID,notime.approversStatus,notime.approversDate,notime.no_Timein_timeoutStatus,
-			notime.no_Timein_timeoutRemarks,notime.submittedAt,notime.createdBy,notime.updatedBy,notime.createdAt,notime.updatedAt,
-			hris_employee_list_tbl.employeeFirstname, hris_employee_list_tbl.employeeLastname`,
-			`notime.employeeID != ${sessionID} AND no_Timein_timeoutStatus != 0 AND no_Timein_timeoutStatus != 4`,
-			`FIELD(no_Timein_timeoutStatus, 0, 1, 3, 2, 4), COALESCE(notime.submittedAt, notime.createdAt)`
+			`notime.noTimeinTimeoutID, 
+			notime.employeeID,
+			notime.noTimeinTimeoutDate, 
+			notime.noTimeinTimeoutTimeIn,
+			notime.noTimeinTimeoutTimeOut,
+			notime.noTimeinTimeoutReason,
+			notime.approversID,
+			notime.approversStatus,
+			notime.approversDate,
+			notime.noTimeinTimeoutStatus,
+			notime.noTimeinTimeoutRemarks,
+			notime.submittedAt,
+			notime.createdBy,
+			notime.updatedBy,
+			notime.createdAt,
+			notime.updatedAt,
+			hris_employee_list_tbl.employeeFirstname, 
+			hris_employee_list_tbl.employeeLastname`,
+			`notime.employeeID != ${sessionID} AND noTimeinTimeoutStatus != 0 AND noTimeinTimeoutStatus != 4`,
+			`FIELD(noTimeinTimeoutStatus, 0, 1, 3, 2, 4), COALESCE(notime.submittedAt, notime.createdAt)`
 		);
 
 		let html = `
         <table class="table table-bordered table-striped table-hover" id="tableForApprroval">
             <thead>
-				<tr>
+				<tr style="white-space: nowrap">
 					<th>Document No.</th>
 					<th>Employee Name</th>
 					<th>Current Approver</th>
 					<th>Date Created</th>
 					<th>Date Submitted</th>
 					<th>Date Approved</th>
-					<th>Remarks</th>
 					<th>Status</th>
+					<th>Remarks</th>
 					<th>Action</th>
 				</tr>
             </thead>
             <tbody>`;
 
-		scheduleData.map((item) => {
-			let remarks       = item.no_Timein_timeoutRemarks ? item.no_Timein_timeoutRemarks : "-";
-			let dateCreated   = moment(item.createdAt).format("MMMM DD, YYYY hh:mm:ss A");
-			let dateSubmitted = item.submittedAt	? moment(item.submittedAt).format("MMMM DD, YYYY hh:mm:ss A") : "-";
-			let dateApproved  = item.no_Timein_timeoutStatus == 2 ? item.approversDate.split("|") : "-";
+		noTimeinTimeoutData.map((item) => {
+
+			let {
+				noTimeinTimeoutID,
+				approversID,
+				approversDate,
+				noTimeinTimeoutStatus,
+				noTimeinTimeoutRemarks,
+				submittedAt,
+				createdAt,
+				employeeFirstname,
+				employeeLastname
+			} = item;
+
+			let remarks       = noTimeinTimeoutRemarks ? noTimeinTimeoutRemarks : "-";
+			let dateCreated   = moment(createdAt).format("MMMM DD, YYYY hh:mm:ss A");
+			let dateSubmitted = submittedAt	? moment(submittedAt).format("MMMM DD, YYYY hh:mm:ss A") : "-";
+			let dateApproved  = noTimeinTimeoutStatus == 2 ? approversDate.split("|") : "-";
 			if (dateApproved !== "-") {
 				dateApproved = moment(dateApproved[dateApproved.length - 1]).format("MMMM DD, YYYY hh:mm:ss A");
 			}
 
-			if(item.no_Timein_timeoutStatus=="0"){
-				var submitat = "";
-			}else{
-				var submitat = moment(item.submittedAt).format("MMMM DD, YYYY hh:mm:ss A");
-			}
 			let button = `
-			<button class="btn btn-view w-100 btnView" id="${item.no_Timein_timeoutID}"><i class="fas fa-eye"></i> View</button>`;
+			<button class="btn btn-view w-100 btnView" id="${encryptString(noTimeinTimeoutID)}"><i class="fas fa-eye"></i> View</button>`;
 
-			if (isImCurrentApprover(item.approversID, item.approversDate, item.no_Timein_timeoutStatus) || isAlreadyApproved(item.approversID, item.approversDate)) {
+			if (isImCurrentApprover(approversID, approversDate, noTimeinTimeoutStatus) || isAlreadyApproved(approversID, approversDate)) {
 				html += `
 				<tr>
-					<td>${item.no_Timein_timeoutCode}</td>
-					<td>${item.employeeFirstname + ' ' +item.employeeLastname}</td>
-
+					<td>${getFormCode("NTI", createdAt, noTimeinTimeoutID)}</td>
+					<td>${employeeFirstname + ' ' +employeeLastname}</td>
 					<td>
-						${employeeFullname(getCurrentApprover(item.approversID, item.approversDate, item.no_Timein_timeoutStatus, true))}
+						${employeeFullname(getCurrentApprover(approversID, approversDate, noTimeinTimeoutStatus, true))}
 					</td>
 					<td>${dateCreated}</td>
 					<td>${dateSubmitted}</td>
 					<td>${dateApproved}</td>
+					<td class="text-center">${getStatusStyle(noTimeinTimeoutStatus)}</td>
 					<td>${remarks}</td>
-
-					<td class="text-center">${getStatusStyle(item.no_Timein_timeoutStatus)}</td>
 					<td class="text-center">
 						${button}
 					</td>
@@ -202,15 +308,29 @@ $(document).ready(function () {
 	// ----- MY FORMS CONTENT -----
 	function myFormsContent() {
 		$("#tableMyFormsParent").html(preloader);
-		let scheduleData = getTableData(
-			`hris_on_timein_timeout_tbl AS notime
+		let noTimeinTimeoutData = getTableData(
+			`hris_no_timein_timeout_tbl AS notime
 			LEFT JOIN hris_employee_list_tbl USING(employeeID)`,
-			`notime.no_Timein_timeoutID, notime.no_Timein_timeoutCode, notime.employeeID,notime.no_Timein_timeoutDate, notime.no_Timein_timeoutTimeIn,
-			notime.no_Timein_timeoutTimeOut,notime.no_Timein_timeoutReason,notime.approversID,notime.approversStatus,notime.approversDate,notime.no_Timein_timeoutStatus,
-			notime.no_Timein_timeoutRemarks,notime.submittedAt,notime.createdBy,notime.updatedBy,notime.createdAt,notime.updatedAt,
-			hris_employee_list_tbl.employeeFirstname, hris_employee_list_tbl.employeeLastname`,
+			`notime.noTimeinTimeoutID, 
+			notime.employeeID,
+			notime.noTimeinTimeoutDate, 
+			notime.noTimeinTimeoutTimeIn,
+			notime.noTimeinTimeoutTimeOut,
+			notime.noTimeinTimeoutReason,
+			notime.approversID,
+			notime.approversStatus,
+			notime.approversDate,
+			notime.noTimeinTimeoutStatus,
+			notime.noTimeinTimeoutRemarks,
+			notime.submittedAt,
+			notime.createdBy,
+			notime.updatedBy,
+			notime.createdAt,
+			notime.updatedAt,
+			hris_employee_list_tbl.employeeFirstname, 
+			hris_employee_list_tbl.employeeLastname`,
 			`employeeID = ${sessionID}`,
-			`FIELD(no_Timein_timeoutStatus, 0, 1, 3, 2, 4), COALESCE(notime.submittedAt, notime.createdAt)`
+			`FIELD(noTimeinTimeoutStatus, 0, 1, 3, 2, 4), COALESCE(notime.submittedAt, notime.createdAt)`
 		);
 
 		let html = `
@@ -223,56 +343,63 @@ $(document).ready(function () {
 					<th>Date Created</th>
 					<th>Date Submitted</th>
 					<th>Date Approved</th>
-					<th>Remarks</th>
                     <th>Status</th>
+					<th>Remarks</th>
                     <th>Action</th>
                 </tr>
             </thead>
             <tbody>`;
 
-		scheduleData.map((item) => {
+		noTimeinTimeoutData.map((item) => {
 
-			let remarks       = item.no_Timein_timeoutRemarks ? item.no_Timein_timeoutRemarks : "-";
-			let dateCreated   = moment(item.createdAt).format("MMMM DD, YYYY hh:mm:ss A");
-			let dateSubmitted = item.submittedAt	? moment(item.submittedAt).format("MMMM DD, YYYY hh:mm:ss A") : "-";
-			let dateApproved  = item.no_Timein_timeoutStatus == 2 ? item.approversDate.split("|") : "-";
+			let {
+				noTimeinTimeoutID,
+				noTimeinTimeoutDate,
+				approversID,
+				approversDate,
+				noTimeinTimeoutStatus,
+				noTimeinTimeoutRemarks,
+				submittedAt,
+				createdAt,
+				employeeFirstname,
+				employeeLastname
+			} = item;
+
+			let remarks       = noTimeinTimeoutRemarks ? noTimeinTimeoutRemarks : "-";
+			let dateCreated   = moment(createdAt).format("MMMM DD, YYYY hh:mm:ss A");
+			let dateSubmitted = submittedAt	? moment(submittedAt).format("MMMM DD, YYYY hh:mm:ss A") : "-";
+			let dateApproved  = noTimeinTimeoutStatus == 2 ? approversDate.split("|") : "-";
 			if (dateApproved !== "-") {
 				dateApproved = moment(dateApproved[dateApproved.length - 1]).format("MMMM DD, YYYY hh:mm:ss A");
 			}
 
-			if(item.no_Timein_timeoutStatus=="0"){
-				var submitat = "";
-			}else{
-				var submitat = moment(item.submittedAt).format("MMMM DD, YYYY hh:mm:ss A");
-			}
 			let unique = {
-				id: item.no_Timein_timeoutID,
-				no_Timein_timeoutDate: moment(item.no_Timein_timeoutDate).format("MMMM DD, YYYY")
+				id: 				 noTimeinTimeoutID,
+				noTimeinTimeoutDate: moment(noTimeinTimeoutDate).format("MMMM DD, YYYY")
 			};
-			uniqueData.push(unique);
+			(noTimeinTimeoutStatus == 1 || noTimeinTimeoutStatus == 2) && uniqueData.push(unique);
+
 			let button =
-				item.no_Timein_timeoutStatus != 0
+				noTimeinTimeoutStatus != 0
 					? `
-            <button class="btn btn-view w-100 btnView" id="${item.no_Timein_timeoutID}"><i class="fas fa-eye"></i> View</button>`
+            <button class="btn btn-view w-100 btnView" id="${encryptString(noTimeinTimeoutID)}"><i class="fas fa-eye"></i> View</button>`
 					: `
             <button 
                 class="btn btn-edit w-100 btnEdit" 
-                id="${item.no_Timein_timeoutID}" 
-                code="${item.no_Timein_timeoutCode}"><i class="fas fa-edit"></i> Edit</button>`;
+                id="${encryptString(noTimeinTimeoutID)}" 
+                code="${getFormCode("NTI", createdAt, noTimeinTimeoutID)}"><i class="fas fa-edit"></i> Edit</button>`;
 			html += `
             <tr>
-                <td>${item.no_Timein_timeoutCode}</td>
-                <td>${item.employeeFirstname + ' ' +item.employeeLastname}</td>
-
+                <td>${getFormCode("NTI", createdAt, noTimeinTimeoutID)}</td>
+                <td>${employeeFirstname + ' ' +employeeLastname}</td>
 				<td>
-                    ${employeeFullname(getCurrentApprover(item.approversID, item.approversDate, item.no_Timein_timeoutStatus, true))}
+                    ${employeeFullname(getCurrentApprover(approversID, approversDate, noTimeinTimeoutStatus, true))}
                 </td>
 				<td>${dateCreated}</td>
 				<td>${dateSubmitted}</td>
 				<td>${dateApproved}</td>
+                <td class="text-center">${getStatusStyle(noTimeinTimeoutStatus)}</td>
 				<td>${remarks}</td>
-
-                <td class="text-center">${getStatusStyle(item.no_Timein_timeoutStatus)}</td>
                 <td class="text-center">
                     ${button}
                 </td>
@@ -298,61 +425,61 @@ $(document).ready(function () {
 		if (data) {
 
 			let {
-				no_Timein_timeoutID     = "",
-				no_Timein_timeoutCode   = "",
-				no_Timein_timeoutStatus = "",
-				employeeID           = "",
-				approversID          = "",
-				approversDate        = "",
+				noTimeinTimeoutID     = "",
+				noTimeinTimeoutStatus = "",
+				employeeID            = "",
+				approversID           = "",
+				approversDate         = "",
+				createdAt             = new Date
 			} = data && data[0];
 
 			let isOngoing = approversDate ? (approversDate.split("|").length > 0 ? true : false) : false;
 			if (employeeID === sessionID) {
-				if (no_Timein_timeoutStatus == 0) {
+				if (noTimeinTimeoutStatus == 0) {
 					// DRAFT
 					button = `
 					<button 
 						class="btn btn-submit" 
 						id="btnSubmit" 
-						no_Timein_timeoutID="${no_Timein_timeoutID}"
-						no_Timein_timeoutCode="${no_Timein_timeoutCode}"><i class="fas fa-paper-plane"></i>
+						noTimeinTimeoutID="${noTimeinTimeoutID}"
+						code="${getFormCode("NTI", createdAt, noTimeinTimeoutID)}"><i class="fas fa-paper-plane"></i>
 						Submit
 					</button>
 					<button 
 						class="btn btn-cancel"
 						id="btnCancelForm" 
-						no_Timein_timeoutID="${no_Timein_timeoutID}"
-						no_Timein_timeoutCode="${no_Timein_timeoutCode}"><i class="fas fa-ban"></i> 
+						noTimeinTimeoutID="${noTimeinTimeoutID}"
+						code="${getFormCode("NTI", createdAt, noTimeinTimeoutID)}"><i class="fas fa-ban"></i> 
 						Cancel
 					</button>`;
-				} else if (no_Timein_timeoutStatus == 1) {
+				} else if (noTimeinTimeoutStatus == 1) {
 					if (!isOngoing) {
 						button = `
 						<button 
 							class="btn btn-cancel"
 							id="btnCancelForm" 
-							no_Timein_timeoutID="${no_Timein_timeoutID}"
-							no_Timein_timeoutCode="${no_Timein_timeoutCode}"><i class="fas fa-ban"></i> 
+							noTimeinTimeoutID="${noTimeinTimeoutID}"
+							code="${getFormCode("NTI", createdAt, noTimeinTimeoutID)}"><i class="fas fa-ban"></i> 
 							Cancel
 						</button>`;
 					}
 				} 
 			} else {
-				if (no_Timein_timeoutStatus == 1) {
+				if (noTimeinTimeoutStatus == 1) {
 					if (isImCurrentApprover(approversID, approversDate)) {
 						button = `
 						<button 
 							class="btn btn-submit" 
 							id="btnApprove" 
-							no_Timein_timeoutID="${no_Timein_timeoutID}"
-							no_Timein_timeoutCode="${no_Timein_timeoutCode}"><i class="fas fa-paper-plane"></i>
+							noTimeinTimeoutID="${noTimeinTimeoutID}"
+							code="${getFormCode("NTI", createdAt, noTimeinTimeoutID)}"><i class="fas fa-paper-plane"></i>
 							Approve
 						</button>
 						<button 
 							class="btn btn-cancel"
 							id="btnReject" 
-							no_Timein_timeoutID="${no_Timein_timeoutID}"
-							no_Timein_timeoutCode="${no_Timein_timeoutCode}"><i class="fas fa-ban"></i> 
+							noTimeinTimeoutID="${noTimeinTimeoutID}"
+							code="${getFormCode("NTI", createdAt, noTimeinTimeoutID)}"><i class="fas fa-ban"></i> 
 							Deny
 						</button>`;
 					}
@@ -381,50 +508,53 @@ $(document).ready(function () {
 		$("#page_content").html(preloader);
 
 		let {
-			no_Timein_timeoutID      = "",
-			no_Timein_timeoutCode    = "",
-			employeeID            	 = "",
-			no_Timein_timeoutNegligence ="",
-			no_Timein_timeoutDate    = "",
-			no_Timein_timeoutTimeIn  = "",
-			no_Timein_timeoutTimeOut = "",
-			no_Timein_timeoutReason  = "",
-			no_Timein_timeoutRemarks = "",
-			approversID          	 = "",
-			approversStatus       = "",
-			approversDate         = "",
-			no_Timein_timeoutStatus  = false,
-			submittedAt           = false,
-			createdAt             = false,
+			noTimeinTimeoutID         = "",
+			employeeID            	  = "",
+			noTimeinTimeoutNegligence ="",
+			noTimeinTimeoutDate       = "",
+			noTimeinTimeoutTimeIn     = "",
+			noTimeinTimeoutTimeOut    = "",
+			noTimeinTimeoutReason     = "",
+			noTimeinTimeoutRemarks    = "",
+			approversID          	  = "",
+			approversStatus           = "",
+			approversDate             = "",
+			noTimeinTimeoutStatus     = false,
+			submittedAt               = false,
+			createdAt                 = false,
 		} = data && data[0];
 
-		if (readOnly) {
-			preventRefresh(false);
-		} else {
-			preventRefresh(true);
-		}
+		// ----- GET EMPLOYEE DATA -----
+		let {
+			fullname:    employeeFullname    = "",
+			department:  employeeDepartment  = "",
+			designation: employeeDesignation = "",
+		} = employeeData(data ? employeeID : sessionID);
+		// ----- END GET EMPLOYEE DATA -----
 
-		$("#btnBack").attr("no_Timein_timeoutID", no_Timein_timeoutID);
-		$("#btnBack").attr("no_Timein_timeoutCode", no_Timein_timeoutCode);
-		$("#btnBack").attr("status", no_Timein_timeoutStatus);
+		readOnly ? preventRefresh(false) : preventRefresh(true);
 
-		let disabled = readOnly && "disabled";
+		$("#btnBack").attr("noTimeinTimeoutID", noTimeinTimeoutID);
+		$("#btnBack").attr("status", noTimeinTimeoutStatus);
+		$("#btnBack").attr("employeeID", employeeID);
+
+		let disabled = readOnly ? "disabled" : "";
 		let button   = formButtons(data);
 
-		let timeInNegligence = "disabled", 
+		let timeInNegligence  = "disabled", 
 			timeOutNegligence = "disabled";
 
 		if (readOnly) {
 			timeInNegligence = "disabled";
 			timeOutNegligence = "disabled";
 		} else {
-			if (no_Timein_timeoutNegligence == "1") {
+			if (noTimeinTimeoutNegligence == "1") {
 				timeInNegligence = "";
 				timeOutNegligence = "disabled";
-			} else if (no_Timein_timeoutNegligence == "2") {
+			} else if (noTimeinTimeoutNegligence == "2") {
 				timeInNegligence = "disabled";
 				timeOutNegligence = "";
-			} else if (no_Timein_timeoutNegligence == "3") {
+			} else if (noTimeinTimeoutNegligence == "3") {
 				timeInNegligence  = "";
 				timeOutNegligence = "";
 			} else {
@@ -439,7 +569,7 @@ $(document).ready(function () {
                 <div class="card">
                     <div class="body">
                         <small class="text-small text-muted font-weight-bold">Document No.</small>
-                        <h6 class="mt-0 text-danger font-weight-bold">${no_Timein_timeoutCode ? no_Timein_timeoutCode : "---"}</h6>      
+                        <h6 class="mt-0 text-danger font-weight-bold">${noTimeinTimeoutID ? getFormCode("NTI", createdAt, noTimeinTimeoutID) : "---"}</h6>      
                     </div>
                 </div>
             </div>
@@ -447,7 +577,7 @@ $(document).ready(function () {
                 <div class="card">
                     <div class="body">
                         <small class="text-small text-muted font-weight-bold">Status</small>
-                        <h6 class="mt-0 font-weight-bold">${no_Timein_timeoutStatus ? getStatusStyle(no_Timein_timeoutStatus) : "---"}</h6>      
+                        <h6 class="mt-0 font-weight-bold">${noTimeinTimeoutStatus ? getStatusStyle(noTimeinTimeoutStatus) : "---"}</h6>      
                     </div>
                 </div>
             </div>
@@ -473,7 +603,7 @@ $(document).ready(function () {
                     <div class="card">
                         <div class="body">
                             <small class="text-small text-muted font-weight-bold">Date Approved</small>
-                            <h6 class="mt-0 font-weight-bold">${getDateApproved(no_Timein_timeoutStatus, approversID, approversDate)}</h6>      
+                            <h6 class="mt-0 font-weight-bold">${getDateApproved(noTimeinTimeoutStatus, approversID, approversDate)}</h6>      
                         </div>
                     </div>
                 </div>
@@ -483,90 +613,88 @@ $(document).ready(function () {
                 <div class="card">
                     <div class="body">
                         <small class="text-small text-muted font-weight-bold">Remarks</small>
-                        <h6 class="mt-0 font-weight-bold">${no_Timein_timeoutRemarks ? no_Timein_timeoutRemarks : "---"}</h6>      
+                        <h6 class="mt-0 font-weight-bold">${noTimeinTimeoutRemarks ? noTimeinTimeoutRemarks : "---"}</h6>      
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="row" id="form_change_schedule">
+        <div class="row" id="form_no_timein_timeout">
             <div class="col-md-4 col-sm-12">
                 <div class="form-group">
                     <label>Employee Name</label>
-                    <input type="text" class="form-control" disabled value="Arjay Diangzon">
+                    <input type="text" class="form-control" disabled value="${employeeFullname}">
                 </div>
             </div>
             <div class="col-md-4 col-sm-12">
                 <div class="form-group">
                     <label>Department</label>
-                    <input type="text" class="form-control" disabled value="Operations">
+                    <input type="text" class="form-control" disabled value="${employeeDepartment}">
                 </div>
             </div>
             <div class="col-md-4 col-sm-12">
                 <div class="form-group">
                     <label>Position</label>
-                    <input type="text" class="form-control" disabled value="Junior Developer I">
+                    <input type="text" class="form-control" disabled value="${employeeDesignation}">
                 </div>
             </div>
-            <div class="col-md-2 col-sm-12">
+            <div class="col-md-3 col-sm-12">
                 <div class="form-group">
                     <label>Date ${!disabled ? "<code>*</code>" : ""}</label>
                     <input type="button" 
                         class="form-control validate daterange text-left"
                         required
-                        id="no_Timein_timeoutDate"
-                        name="no_Timein_timeoutDate"
-                        value="${no_Timein_timeoutDate && moment(no_Timein_timeoutDate).format("MMMM DD, YYYY")}"
+                        id="noTimeinTimeoutDate"
+                        name="noTimeinTimeoutDate"
+                        value="${noTimeinTimeoutDate && moment(noTimeinTimeoutDate).format("MMMM DD, YYYY")}"
 						${disabled}
-						unique="${no_Timein_timeoutID}"
+						unique="${noTimeinTimeoutID}"
 						title="Date"
 						>
                     <div class="d-block invalid-feedback" id="invalid-changeScheduleDate"></div>
                 </div>
             </div>
-			<div class="col-md-2 col-sm-12">
+			<div class="col-md-3 col-sm-12">
                 <div class="form-group">
                     <label>Negligence ${!disabled ? "<code>*</code>" : ""}</label>
 					<select 
 					class="form-control validate select2" 
 					id="negligence"
-					no_Timein_timeoutTimeIn="no_Timein_timeoutTimeIn"
+					noTimeinTimeoutTimeIn="noTimeinTimeoutTimeIn"
 					${disabled}
 					required
-					name="no_Timein_timeoutNegligence">
+					name="noTimeinTimeoutNegligence">
 					<option disabled selected>Select Negligence</option>
-					<option value="1"  ${data && no_Timein_timeoutNegligence == "1" && "selected"}>No Time In</option>
-					<option value="2"  ${data && no_Timein_timeoutNegligence == "2" && "selected"}>No Time out</option>
-					<option value="3"  ${data && no_Timein_timeoutNegligence == "3" && "selected"}>Both</option>
+					<option value="1"  ${data && noTimeinTimeoutNegligence == "1" && "selected"}>No Time In</option>
+					<option value="2"  ${data && noTimeinTimeoutNegligence == "2" && "selected"}>No Time out</option>
+					<option value="3"  ${data && noTimeinTimeoutNegligence == "3" && "selected"}>Both</option>
 				  </select>
                     <div class="d-block invalid-feedback" id="invalid-changeScheduleDate"></div>
                 </div>
             </div>
-			
 
-
-            <div class="col-md-4 col-sm-12">
+            <div class="col-md-3 col-sm-12">
                 <div class="form-group">
                     <label>Time In ${!timeInNegligence ? "<code>*</code>" : ""}</label>
                     <input type="text" 
                         class="form-control timeIn" 
-                        id="no_Timein_timeoutTimeIn" 
-                        name="no_Timein_timeoutTimeIn" 
-                        value="${no_Timein_timeoutTimeIn}"
+                        id="noTimeinTimeoutTimeIn" 
+                        name="noTimeinTimeoutTimeIn" 
+                        value="${noTimeinTimeoutTimeIn}"
 						${timeInNegligence}>
-                    <div class="d-block invalid-feedback" id="invalid-no_Timein_timeoutTimeIn"></div>
+                    <div class="d-block invalid-feedback" id="invalid-noTimeinTimeoutTimeIn"></div>
                 </div>
             </div>
-            <div class="col-md-4 col-sm-12">
+            <div class="col-md-3 col-sm-12">
                 <div class="form-group">
                     <label>Time Out ${!timeOutNegligence ? "<code>*</code>" : ""}</label>
                     <input type="text" 
                         class="form-control timeOut" 
-                        id="no_Timein_timeoutTimeOut" 
-                        name="no_Timein_timeoutTimeOut" 
-                        value="${no_Timein_timeoutTimeOut}"
+                        id="noTimeinTimeoutTimeOut" 
+                        name="noTimeinTimeoutTimeOut" 
+                        value="${noTimeinTimeoutTimeOut}"
 						${timeOutNegligence}>
-                    <div class="d-block invalid-feedback" id="invalid-no_Timein_timeoutTimeOut"></div>
+                    <div class="d-block invalid-feedback" id="invalid-noTimeinTimeoutTimeOut"></div>
                 </div>
             </div>
             <div class="col-md-12 col-sm-12">
@@ -576,13 +704,13 @@ $(document).ready(function () {
                         data-allowcharacters="[a-z][A-Z][0-9][ ][.][,][-][()]['][/][&]"
                         minlength="1"
                         maxlength="200"
-                        id="no_Timein_timeoutReason"
-                        name="no_Timein_timeoutReason"
+                        id="noTimeinTimeoutReason"
+                        name="noTimeinTimeoutReason"
                         required
                         rows="4"
                         style="resize:none;"
-						${disabled}>${no_Timein_timeoutReason}</textarea>
-                    <div class="d-block invalid-feedback" id="invalid-no_Timein_timeoutReason"></div>
+						${disabled}>${noTimeinTimeoutReason}</textarea>
+                    <div class="d-block invalid-feedback" id="invalid-noTimeinTimeoutReason"></div>
                 </div>
             </div>
             <div class="col-md-12 text-right">
@@ -598,16 +726,17 @@ $(document).ready(function () {
 			initAll();
 			initDataTables();
 			if(data){
-				initInputmaskTime(false) 
+				initInputmaskTime(false);
+				$("#noTimeinTimeoutDate").data("daterangepicker").startDate = moment(noTimeinTimeoutDate, "YYYY-MM-DD");
+				$("#noTimeinTimeoutDate").data("daterangepicker").endDate   = moment(noTimeinTimeoutDate, "YYYY-MM-DD");
 			}else{
 				initInputmaskTime();
-				$("#no_Timein_timeoutDate").val(moment(new Date).format("MMMM DD, YYYY"));
+				$("#noTimeinTimeoutDate").val(moment(new Date).format("MMMM DD, YYYY"));
 			}
 			
-			$("#no_Timein_timeoutDate").data("daterangepicker").minDate = moment();
-			// data ? initInputmaskTime(false) : initInputmaskTime();
+			$("#noTimeinTimeoutDate").data("daterangepicker").maxDate = moment();
 			return html;
-		}, 500);
+		}, 300);
 	}
 	// ----- END FORM CONTENT -----
 
@@ -632,15 +761,17 @@ $(document).ready(function () {
 
 			headerButton(true, "Add No Time-in / Time-out");
 			headerTabContent();
-			forApprovalContent();
+			// forApprovalContent();
 			myFormsContent();
+			updateURL();
 		} else {
 			headerButton(false);
 			headerTabContent(false);
 			formContent(data, readOnly);
 		}
 	}
-	pageContent();
+	viewDocument();
+	$("#page_content").text().trim().length == 0 && pageContent(); // CHECK IF THERE IS ALREADY LOADED ONE
 	// ----- END PAGE CONTENT -----
 
 
@@ -682,7 +813,7 @@ $(document).ready(function () {
 		let element = elementID ? `#${elementID}` : ".timeOut";
 		let flag = 0;
 		$(element).each(function () {
-			const fromValue = $("#no_Timein_timeoutTimeIn").val()+":00";
+			const fromValue = $("#noTimeinTimeoutTimeIn").val()+":00";
 			const validated = $(this).hasClass("validated");
 			const toValue = $(this).val()+":00";
 
@@ -715,53 +846,48 @@ $(document).ready(function () {
 
 	// ----- GET DATA -----
 	function getData(action = "insert", status, method, feedback, id = null) {
-		let data = getFormData("form_change_schedule", true);
+		let data = getFormData("form_no_timein_timeout", true);
 
 		const submittedAt =
-			(status == 1 && moment().format("YYYY-MM-DD hh:mm:ss")) ||
+			(status == 1 && moment().format("YYYY-MM-DD HH:mm:ss")) ||
 			(status == 4 && null);
-		const dateToday = moment().format("YYYY-MM-DD hh:mm:ss");
+		const approversID = method != "approve" && moduleApprover;
 
 		if (action && method != "" && feedback != "") {
-			data["tableData[no_Timein_timeoutStatus]"] = status;
-			data["tableData[updatedBy]"] = sessionID;
-			data["feedback"] 	= feedback;
-			data["method"] 		= method;
-			data["tableName"] = "hris_on_timein_timeout_tbl";
+			data["tableData[noTimeinTimeoutStatus]"] = status;
+			data["tableData[updatedBy]"] 			 = sessionID;
+			data["feedback"] 					  	 = feedback;
+			data["method"] 							 = method;
+			data["tableName"]						 = "hris_no_timein_timeout_tbl";
+
 			if (submittedAt) data["tableData[submittedAt]"] = submittedAt;
 
 			if (action == "insert") {
-				data["tableData[no_Timein_timeoutCode]"] = generateCode(
-					"SCH",
-					false,
-					"hris_on_timein_timeout_tbl",
-					"no_Timein_timeoutCode",
-				);
 				data["tableData[employeeID]"] = sessionID;
 				data["tableData[createdBy]"]  = sessionID;
-				data["tableData[createdAt]"]  = dateToday;
+				data["tableData[createdAt]"]  = dateToday();
 
-				const approversID = getModuleApprover(57);
 				if (approversID && method == "submit") {
 					data["tableData[approversID]"] = approversID;
 				}
 				if (!approversID && method == "submit") {
-					data["tableData[approversID]"]     = sessionID;
-					data["tableData[approversStatus]"] = 2;
-					data["tableData[approversDate]"]   = dateToday;
-					data["tableData[no_Timein_timeoutStatus]"] = 2;
+					data["tableData[approversID]"]           = sessionID;
+					data["tableData[approversStatus]"]       = 2;
+					data["tableData[approversDate]"]         = dateToday();
+					data["tableData[noTimeinTimeoutStatus]"] = 2;
 				}
-				// if (approversID) {
-				// 	data["tableData[approversID]"] = approversID;
-				// } else {
-				// 	data["tableData[approversID]"] = sessionID;
-				// 	data["tableData[approversStatus]"] = 2;
-				// 	data["tableData[approversDate]"] = dateToday;
-				// 	data["tableData[no_Timein_timeoutStatus]"] = 2;
-				// }
-
 			} else {
-				data["whereFilter"] = "no_Timein_timeoutID=" + id;
+				if (status == 1) {
+					data["tableData[approversID]"] = approversID;
+
+					if (!approversID && method == "submit") {
+						data["tableData[approversID]"]          = sessionID;
+						data["tableData[approversStatus]"]      = 2;
+						data["tableData[approversDate]"]        = dateToday();
+						data["tableData[changeScheduleStatus]"] = 2;
+					}
+				}
+				data["whereFilter"] = "noTimeinTimeoutID=" + id;
 			}
 		}
 		return data;
@@ -771,7 +897,6 @@ $(document).ready(function () {
 
 	// ----- CHANGE TIME TO -----
 	$(document).on("keyup", ".timeOut", function () {
-	
 		// checkTimeRange($(this).attr("id"));
 		//console.log($(this).attr("id"));
 	});
@@ -781,42 +906,41 @@ $(document).ready(function () {
 	// ----- OPEN ADD FORM -----
 	$(document).on("click", "#btnAdd", function () {
 		pageContent(true);
+		updateURL(null, true);
 	});
 	// ----- END OPEN ADD FORM -----
 
 
 	// ----- CLOSE FORM -----
 	$(document).on("click", "#btnBack", function () {
-		const id       = $(this).attr("no_Timein_timeoutID");
-		const status   = $(this).attr("status");
+		const id         = $(this).attr("noTimeinTimeoutID");
+		const employeeID = $(this).attr("employeeID");
+		const feedback   = $(this).attr("code") || getFormCode("SCH", dateToday(), id);
+		const status     = $(this).attr("status");
 
 		if (status != "false" && status != 0) {
 			$("#page_content").html(preloader);
 			pageContent();
+
+			if (employeeID != sessionID) {
+				$("[redirect=forApprovalTab]").length > 0 && $("[redirect=forApprovalTab]").trigger("click");
+			}
 		} else {
-			const feedback = $(this).attr("no_Timein_timeoutCode")
-			? $(this).attr("no_Timein_timeoutCode")
-			: generateCode(
-					"SCH",
-					false,
-					"hris_on_timein_timeout_tbl",
-					"no_Timein_timeoutCode",
-			  );
-
 			const action = id && feedback ? "update" : "insert";
+			const data   = getData(action, 0, "save", feedback, id);
 
-			const data = getData(action, 0, "save", feedback, id);
-
-			cancelForm(
-				"save",
-				action,
-				"NO TIME-IN / TIME-OUT",
-				"",
-				"form_change_schedule",
-				data,
-				true,
-				pageContent
-			);
+			setTimeout(() => {
+				cancelForm(
+					"save",
+					action,
+					"NO TIME-IN / TIME-OUT",
+					"",
+					"form_no_timein_timeout",
+					data,
+					true,
+					pageContent
+				);
+			}, 300);
 		}
 		
 	});
@@ -825,31 +949,16 @@ $(document).ready(function () {
 
 	// ----- OPEN EDIT MODAL -----
 	$(document).on("click", ".btnEdit", function () {
-		const id   = $(this).attr("id");
-		const code = $(this).attr("code");
-
-		const tableData = getTableData(
-			"hris_on_timein_timeout_tbl",
-			"*",
-			"no_Timein_timeoutID=" + id,
-			""
-		);
-
-		pageContent(true, tableData);
+		const id = $(this).attr("id");
+		viewDocument(id);
 	});
 	// ----- END OPEN EDIT MODAL -----
 
 
 	// ----- VIEW DOCUMENT -----
 	$(document).on("click", ".btnView", function () {
-		const id        = $(this).attr("id");
-		const tableData = getTableData(
-			"hris_on_timein_timeout_tbl",
-			"*",
-			"no_Timein_timeoutID=" + id,
-			""
-		);
-		pageContent(true, tableData, true);
+		const id = $(this).attr("id");
+		viewDocument(id);
 	});
 	// ----- END VIEW DOCUMENT -----
 
@@ -859,74 +968,64 @@ $(document).ready(function () {
 		var getNegligenceValue = $("#negligence option:selected").val();
 		var boolean = false;
 		if(getNegligenceValue == "2"){
-			if($("#no_Timein_timeoutTimeOut").val() != "00:00" ){
+			if($("#noTimeinTimeoutTimeOut").val() != "00:00" ){
 			
 				boolean = true;
 			}else{
-				$("#no_Timein_timeoutTimeOut").focus();
-				$("#no_Timein_timeoutTimeOut").addClass("is-invalid")
-				$("#invalid-no_Timein_timeoutTimeOut").addClass("is-invalid")
-				$("#invalid-no_Timein_timeoutTimeOut").text("Invalid time range")
+				$("#noTimeinTimeoutTimeOut").focus();
+				$("#noTimeinTimeoutTimeOut").addClass("is-invalid")
+				$("#invalid-noTimeinTimeoutTimeOut").addClass("is-invalid")
+				$("#invalid-noTimeinTimeoutTimeOut").text("Invalid time range")
 			}
 		}
 
 		if(getNegligenceValue == "1"){
-			if($("#no_Timein_timeoutTimeIn").val() != "00:00"){
+			if($("#noTimeinTimeoutTimeIn").val() != "00:00"){
 				boolean = true;
 			}else{
-				$("#no_Timein_timeoutTimeIn").focus();
-				$("#no_Timein_timeoutTimeIn").addClass("is-invalid")
-				$("#invalid-no_Timein_timeoutTimeIn").addClass("is-invalid")
-				$("#invalid-no_Timein_timeoutTimeIn").text("Invalid time range")
+				$("#noTimeinTimeoutTimeIn").focus();
+				$("#noTimeinTimeoutTimeIn").addClass("is-invalid")
+				$("#invalid-noTimeinTimeoutTimeIn").addClass("is-invalid")
+				$("#invalid-noTimeinTimeoutTimeIn").text("Invalid time range")
 			}
 		}
 
 		if(getNegligenceValue == "3"){
-			if($("#no_Timein_timeoutTimeIn").val() != "00:00" && $("#no_Timein_timeoutTimeOut").val() != "00:00" ){
+			if($("#noTimeinTimeoutTimeIn").val() != "00:00" && $("#noTimeinTimeoutTimeOut").val() != "00:00" ){
 				
 				boolean = true;
 			}else{
-				if($("#no_Timein_timeoutTimeIn").val() == "00:00"){
-					$("#no_Timein_timeoutTimeIn").focus();
-					$("#no_Timein_timeoutTimeIn").addClass("is-invalid")
-					$("#invalid-no_Timein_timeoutTimeIn").addClass("is-invalid")
-					$("#invalid-no_Timein_timeoutTimeIn").text("Invalid time range")
+				if($("#noTimeinTimeoutTimeIn").val() == "00:00"){
+					$("#noTimeinTimeoutTimeIn").focus();
+					$("#noTimeinTimeoutTimeIn").addClass("is-invalid")
+					$("#invalid-noTimeinTimeoutTimeIn").addClass("is-invalid")
+					$("#invalid-noTimeinTimeoutTimeIn").text("Invalid time range")
 				}
 
-				if($("#no_Timein_timeoutTimeOut").val() == "00:00"){
-					$("#no_Timein_timeoutTimeOut").focus();
-					$("#no_Timein_timeoutTimeOut").addClass("is-invalid")
-					$("#invalid-no_Timein_timeoutTimeOut").addClass("is-invalid")
-					$("#invalid-no_Timein_timeoutTimeOut").text("Invalid time range")
+				if($("#noTimeinTimeoutTimeOut").val() == "00:00"){
+					$("#noTimeinTimeoutTimeOut").focus();
+					$("#noTimeinTimeoutTimeOut").addClass("is-invalid")
+					$("#invalid-noTimeinTimeoutTimeOut").addClass("is-invalid")
+					$("#invalid-noTimeinTimeoutTimeOut").text("Invalid time range")
 				}
 			}
 		}
 
 		if(boolean == true){
-			const validate = validateForm("form_change_schedule");
-			// const validateTime = checkTimeRange(false, true);
-			if (validate) {
-				const action = "insert"; // CHANGE
-				const feedback = generateCode(
-					"SCH",
-					false,
-					"hris_on_timein_timeout_tbl",
-					"no_Timein_timeoutCode"
-				);
-	
-				const data = getData(action, 0, "save", feedback);
-	
-				formConfirmation(
-					"save",
-					"insert",
-					"NO TIME-IN / TIME-OUT",
-					"",
-					"form_change_schedule",
-					data,
-					true,
-					myFormsContent
-				);
-			}
+			const action   = "insert"; // CHANGE
+			const feedback = getFormCode("SCH", dateToday()); 
+			const data     = getData(action, 0, "save", feedback);
+
+			formConfirmation(
+				"save",
+				"insert",
+				"NO TIME-IN / TIME-OUT",
+				"",
+				"form_no_timein_timeout",
+				data,
+				true,
+				myFormsContent
+			);
 		}
 		
 	});
@@ -935,148 +1034,84 @@ $(document).ready(function () {
 
 	// ----- SUBMIT DOCUMENT -----
 	$(document).on("click", "#btnSubmit", function () {
-		const id = $(this).attr("no_Timein_timeoutID");
-		var getNegligenceValue = $("#negligence option:selected").val();
-		var boolean = false;
-		// if(getNegligenceValue == "2"){
-		// 	if($("#no_Timein_timeoutTimeOut").val() != "00:00" ){
+		const id       = $(this).attr("noTimeinTimeoutID");
+		const validate = validateForm("form_no_timein_timeout");
+
+		if (validate) {
+			const feedback = $(this).attr("code") || getFormCode("NTI", dateToday(), id);
+			const action   = id && feedback ? "update" : "insert";
+			const data     = getData(action, 1, "submit", feedback, id);
+
+			const employeeID = getNotificationEmployeeID(
+				data["tableData[approversID]"],
+				data["tableData[approversDate]"],
+				true
+			);
 			
-		// 		boolean = true;
-		// 	}else{
-		// 		$("#no_Timein_timeoutTimeOut").focus();
-		// 		$("#no_Timein_timeoutTimeOut").addClass("is-invalid")
-		// 		$("#invalid-no_Timein_timeoutTimeOut").addClass("is-invalid")
-		// 		$("#invalid-no_Timein_timeoutTimeOut").text("Invalid time range")
-		// 	}
-		// }
-
-		// if(getNegligenceValue == "1"){
-		// 	if($("#no_Timein_timeoutTimeIn").val() != "00:00"){
-		// 		boolean = true;
-		// 	}else{
-		// 		$("#no_Timein_timeoutTimeIn").focus();
-		// 		$("#no_Timein_timeoutTimeIn").addClass("is-invalid")
-		// 		$("#invalid-no_Timein_timeoutTimeIn").addClass("is-invalid")
-		// 		$("#invalid-no_Timein_timeoutTimeIn").text("Invalid time range")
-		// 	}
-		// }
-
-		// if(getNegligenceValue == "3"){
-		// 	if($("#no_Timein_timeoutTimeIn").val() != "00:00" && $("#no_Timein_timeoutTimeOut").val() != "00:00" ){
-			
-		// 		boolean = true;
-		// 	}else{
-		// 		if($("#no_Timein_timeoutTimeIn").val() == "00:00"){
-		// 			$("#no_Timein_timeoutTimeIn").focus();
-		// 			$("#no_Timein_timeoutTimeIn").addClass("is-invalid")
-		// 			$("#invalid-no_Timein_timeoutTimeIn").addClass("is-invalid")
-		// 			$("#invalid-no_Timein_timeoutTimeIn").text("Invalid time range")
-		// 		}
-
-		// 		if($("#no_Timein_timeoutTimeOut").val() == "00:00"){
-		// 			$("#no_Timein_timeoutTimeOut").focus();
-		// 			$("#no_Timein_timeoutTimeOut").addClass("is-invalid")
-		// 			$("#invalid-no_Timein_timeoutTimeOut").addClass("is-invalid")
-		// 			$("#invalid-no_Timein_timeoutTimeOut").text("Invalid time range")
-		// 		}
-		// 	}
-		// }
-		// if(boolean == true){
-
-			const validate = validateForm("form_change_schedule");
-			// const validateTime = checkTimeRange(false, true);
-
-			if (validate) {
-				const feedback = $(this).attr("no_Timein_timeoutCode")
-				? $(this).attr("no_Timein_timeoutCode")
-				: generateCode(
-						"SCH",
-						false,
-						"hris_on_timein_timeout_tbl",
-						"no_Timein_timeoutCode",
-						`employeeID = ${sessionID}`
-				);
-				
-				const action = id && feedback ? "update" : "insert";
-
-				const data = getData(action, 1, "submit", feedback, id);
-				
-				let notificationData = {
-					moduleID:                58,
-					notificationTitle:       "No Time-in/ Time-out",
-					notificationDescription: `${sessionID} asked for your approval.`,
+			let notificationData = false;
+			if (employeeID != sessionID) {
+				notificationData = {
+					moduleID:                57,
+					// tableID:                 1, // AUTO FILL
+					notificationTitle:       "No Time-in/Time-out",
+					notificationDescription: `${employeeFullname(sessionID)} asked for your approval.`,
 					notificationType:        2,
-					employeeID: getNotificationEmployeeID(data["tableData[approversID]"], data["tableData[approversDate]"]),
+					employeeID,
 				};
+			}
+
+			setTimeout(() => {
 				formConfirmation(
 					"submit",
 					action,
 					"NO TIME-IN / TIME-OUT",
 					"",
-					"form_change_schedule",
+					"form_no_timein_timeout",
 					data,
 					true,
 					pageContent,
 					notificationData
 				);
-			}
-		// }
+			}, 300);
+		}
 	});
 	// ----- END SUBMIT DOCUMENT -----
 
 
 	// ----- CANCEL DOCUMENT -----
 	$(document).on("click", "#btnCancelForm", function () {
-		const id = $(this).attr("no_Timein_timeoutID");
-		const feedback = $(this).attr("no_Timein_timeoutCode");
+		const id       = $(this).attr("noTimeinTimeoutID");
+		const feedback = $(this).attr("code") || getFormCode("NTI", dateToday(), id);
+		const action   = "update";
+		const data     = getData(action, 4, "cancelform", feedback, id);
 
-		// const validate = validateForm("form_change_schedule");
-		// const validateTime = checkTimeRange(false, true);
-
-		// if (validate && validateTime) {
-			// const action = "update";
-
-			// const data = getData(action, 4, "cancelform", feedback, id);
-			const action = "update";
-			const data   = getData(action, 4, "cancelform", feedback, id);
-			formConfirmation(
-				"cancelform",
-				action,
-				"NO TIME-IN / TIME-OUT",
-				"",
-				"form_change_schedule",
-				data,
-				true,
-				pageContent
-			);
-		// }
+		formConfirmation(
+			"cancelform",
+			action,
+			"NO TIME-IN / TIME-OUT",
+			"",
+			"form_no_timein_timeout",
+			data,
+			true,
+			pageContent
+		);
 	});
 	// ----- END CANCEL DOCUMENT -----
 
 
 	// ----- CANCEL DOCUMENT -----
 	$(document).on("click", "#btnCancel", function () {
-		const id = $(this).attr("no_Timein_timeoutID");
-		const feedback = $(this).attr("no_Timein_timeoutCode")
-			? $(this).attr("no_Timein_timeoutCode")
-			: generateCode(
-					"SCH",
-					false,
-					"hris_on_timein_timeout_tbl",
-					"no_Timein_timeoutCode",
-					`employeeID = ${sessionID}`
-			  );
-
-		const action = id && feedback ? "update" : "insert";
-
-		const data = getData(action, 0, "save", feedback, id);
+		const id	   = $(this).attr("noTimeinTimeoutID");
+		const feedback = $(this).attr("code") || getFormCode("NTI", dateToday(), id);
+		const action   = id && feedback ? "update" : "insert";
+		const data     = getData(action, 0, "save", feedback, id);
 
 		cancelForm(
 			"save",
 			action,
 			"NO TIME-IN / TIME-OUT",
 			"",
-			"form_change_schedule",
+			"form_no_timein_timeout",
 			data,
 			true,
 			pageContent
@@ -1087,96 +1122,104 @@ $(document).ready(function () {
 
 	// ----- APPROVE DOCUMENT -----
 	$(document).on("click", "#btnApprove", function() {
-		const id       = $(this).attr("no_Timein_timeoutID");
-		const feedback = $(this).attr("no_Timein_timeoutCode");
-		let tableData = getTableData("hris_on_timein_timeout_tbl", "", "no_Timein_timeoutID = "+ id);
+		const id       = decryptString($(this).attr("noTimeinTimeoutID"));
+		const feedback = $(this).attr("code") || getFormCode("NTI", dateToday(), id);
+		let tableData  = getTableData("hris_no_timein_timeout_tbl", "", "noTimeinTimeoutID = " + id);
+
 		if (tableData) {
 			let approversID     = tableData[0].approversID;
 			let approversStatus = tableData[0].approversStatus;
 			let approversDate   = tableData[0].approversDate;
-			let employeeID      = tableData[0].employeeID   ;
+			let employeeID      = tableData[0].employeeID;
+			let createdAt       = tableData[0].createdAt;
 
 			let data = getData("update", 2, "approve", feedback, id);
 			data["tableData[approversStatus]"] = updateApproveStatus(approversStatus, 2);
-			data["tableData[approversDate]"]   = updateApproveDate(approversDate);
+			let dateApproved = updateApproveDate(approversDate)
+			data["tableData[approversDate]"]   = dateApproved;
 
 			let status, notificationData;
 			if (isImLastApprover(approversID, approversDate)) {
 				status = 2;
 				notificationData = {
-					moduleID:                58,
-					notificationTitle:       "No Time-in / Time-out",
-					notificationDescription: `${tableData[0].no_Timein_timeoutCode}: Your request has been approved.`,
-					notificationType:        2,
-					employeeID:              employeeID,
+					moduleID:                57,
+					tableID:                 id,
+					notificationTitle:       "No Time-in/Time-out",
+					notificationDescription: `${getFormCode("NTI", createdAt, id)}: Your request has been approved.`,
+					notificationType:        7,
+					employeeID,
 				};
 			} else {
 				status = 1;
 				notificationData = {
-					moduleID:                58,
-					notificationTitle:       "No Time-in / Time-out",
-					notificationDescription: `${employeeID} asked for your approval.`,
+					moduleID:                57,
+					notificationTitle:       "No Time-in/Time-out",
+					notificationDescription: `${employeeFullname(employeeID)} asked for your approval.`,
 					notificationType:        2,
 					employeeID:              getNotificationEmployeeID(approversID, approversDate),
 				};
 			}
-			data["tableData[no_Timein_timeoutStatus]"] = status;
+			data["tableData[noTimeinTimeoutStatus]"] = status;
 
-			formConfirmation(
-				"approve",
-				"update",
-				"NO TIME-IN / TIME-OUT",
-				"",
-				"form_change_schedule",
-				data,
-				true,
-				pageContent,
-				notificationData
-			);
+			setTimeout(() => {
+				formConfirmation(
+					"approve",
+					"update",
+					"NO TIME-IN / TIME-OUT",
+					"",
+					"form_no_timein_timeout",
+					data,
+					true,
+					pageContent,
+					notificationData
+				);
+				$("[redirect=forApprovalTab]").length > 0 && $("[redirect=forApprovalTab]").trigger("click");
+			}, 300);
 		}
 	})
 	// ----- END APPROVE DOCUMENT -----
 	
+
 	// ----- CONDITION FOR NEGLIGENCE -----
 	$(document).on("change", "#negligence", function() {
 		var negligenceValue = $("#negligence option:selected").val();
 		if(negligenceValue == "2"){
-			$("#no_Timein_timeoutTimeIn").prop("disabled",true);
-			$("#no_Timein_timeoutTimeIn").removeAttr("required");
-			$("#no_Timein_timeoutTimeIn").val("00:00");
-			$("#no_Timein_timeoutTimeIn").removeClass("is-invalid").removeClass("is-valid").removeClass("validated");
-			$("#invalid-no_Timein_timeoutTimeIn").text("").removeClass("is-invalid").removeClass("is-valid").removeClass("validated");
+			$("#noTimeinTimeoutTimeIn").prop("disabled",true);
+			$("#noTimeinTimeoutTimeIn").removeAttr("required");
+			$("#noTimeinTimeoutTimeIn").val("00:00");
+			$("#noTimeinTimeoutTimeIn").removeClass("is-invalid").removeClass("is-valid").removeClass("validated");
+			$("#invalid-noTimeinTimeoutTimeIn").text("").removeClass("is-invalid").removeClass("is-valid").removeClass("validated");
 
 
-			$("#no_Timein_timeoutTimeOut").prop("disabled",false);
-			$("#no_Timein_timeoutTimeOut").attr("required","");
-			$("#no_Timein_timeoutTimeOut").val("00:00");
+			$("#noTimeinTimeoutTimeOut").prop("disabled",false);
+			$("#noTimeinTimeoutTimeOut").attr("required","");
+			$("#noTimeinTimeoutTimeOut").val("00:00");
 		}
 		if(negligenceValue == "1"){
-			$("#no_Timein_timeoutTimeOut").prop("disabled",true);
-			$("#no_Timein_timeoutTimeOut").removeAttr("required");
-			$("#no_Timein_timeoutTimeOut").val("00:00");
-			$("#no_Timein_timeoutTimeOut").removeClass("is-invalid").removeClass("is-valid").removeClass("validated");
-			$("#invalid-no_Timein_timeoutTimeOut").text("").removeClass("is-invalid").removeClass("is-valid").removeClass("validated");
+			$("#noTimeinTimeoutTimeOut").prop("disabled",true);
+			$("#noTimeinTimeoutTimeOut").removeAttr("required");
+			$("#noTimeinTimeoutTimeOut").val("00:00");
+			$("#noTimeinTimeoutTimeOut").removeClass("is-invalid").removeClass("is-valid").removeClass("validated");
+			$("#invalid-noTimeinTimeoutTimeOut").text("").removeClass("is-invalid").removeClass("is-valid").removeClass("validated");
 
-			$("#no_Timein_timeoutTimeIn").prop("disabled",false);
-			$("#no_Timein_timeoutTimeIn").attr("required","");
-			$("#no_Timein_timeoutTimeIn").val("00:00");
+			$("#noTimeinTimeoutTimeIn").prop("disabled",false);
+			$("#noTimeinTimeoutTimeIn").attr("required","");
+			$("#noTimeinTimeoutTimeIn").val("00:00");
 			
 		}
 		if(negligenceValue == "3"){
-			$("#no_Timein_timeoutTimeIn").val("00:00");
-			$("#no_Timein_timeoutTimeIn").removeClass("is-invalid").removeClass("is-valid").removeClass("validated");
-			$("#invalid-no_Timein_timeoutTimeIn").text("").removeClass("is-invalid").removeClass("is-valid").removeClass("validated");
-			$("#no_Timein_timeoutTimeIn").prop("disabled",false);
-			$("#no_Timein_timeoutTimeIn").attr("required","");
+			$("#noTimeinTimeoutTimeIn").val("00:00");
+			$("#noTimeinTimeoutTimeIn").removeClass("is-invalid").removeClass("is-valid").removeClass("validated");
+			$("#invalid-noTimeinTimeoutTimeIn").text("").removeClass("is-invalid").removeClass("is-valid").removeClass("validated");
+			$("#noTimeinTimeoutTimeIn").prop("disabled",false);
+			$("#noTimeinTimeoutTimeIn").attr("required","");
 
 
-			$("#no_Timein_timeoutTimeOut").val("00:00");
-			$("#no_Timein_timeoutTimeOut").removeClass("is-invalid").removeClass("is-valid").removeClass("validated");
-			$("#invalid-no_Timein_timeoutTimeOut").text("").removeClass("is-invalid").removeClass("is-valid").removeClass("validated");
-			$("#no_Timein_timeoutTimeOut").prop("disabled",false);
-			$("#no_Timein_timeoutTimeOut").attr("required","");
+			$("#noTimeinTimeoutTimeOut").val("00:00");
+			$("#noTimeinTimeoutTimeOut").removeClass("is-invalid").removeClass("is-valid").removeClass("validated");
+			$("#invalid-noTimeinTimeoutTimeOut").text("").removeClass("is-invalid").removeClass("is-valid").removeClass("validated");
+			$("#noTimeinTimeoutTimeOut").prop("disabled",false);
+			$("#noTimeinTimeoutTimeOut").attr("required","");
 
 
 
@@ -1188,8 +1231,8 @@ $(document).ready(function () {
 
 	// ----- REJECT DOCUMENT -----
 	$(document).on("click", "#btnReject", function() {
-		const id       = $(this).attr("no_Timein_timeoutID");
-		const feedback = $(this).attr("no_Timein_timeoutCode");
+		const id       = $(this).attr("noTimeinTimeoutID");
+		const feedback = $(this).attr("code") || getFormCode("NTI", dateToday(), id);
 
 		$("#modal_change_schedule_content").html(preloader);
 		$("#modal_change_schedule .page-title").text("DENY NO TIME-IN / TIME-OUT DOCUMENT");
@@ -1199,21 +1242,21 @@ $(document).ready(function () {
 			<div class="form-group">
 				<label>Remarks <code>*</code></label>
 				<textarea class="form-control validate"
-					data-allowcharacters="[0-9][a-z][A-Z][ ][.][,][_]['][()][?]"
+					data-allowcharacters="[0-9][a-z][A-Z][ ][.][,][_]['][()][?][-][/]"
 					minlength="2"
 					maxlength="250"
-					id="no_Timein_timeoutRemarks"
-					name="no_Timein_timeoutRemarks"
+					id="noTimeinTimeoutRemarks"
+					name="noTimeinTimeoutRemarks"
 					rows="4"
 					style="resize: none"
 					required></textarea>
-				<div class="d-block invalid-feedback" id="invalid-no_Timein_timeoutRemarks"></div>
+				<div class="d-block invalid-feedback" id="invalid-noTimeinTimeoutRemarks"></div>
 			</div>
 		</div>
 		<div class="modal-footer text-right">
 			<button class="btn btn-danger" id="btnRejectConfirmation"
-			no_Timein_timeoutID="${id}"
-			no_Timein_timeoutCode="${feedback}"><i class="far fa-times-circle"></i> Deny</button>
+			noTimeinTimeoutID="${id}"
+			code="${feedback}"><i class="far fa-times-circle"></i> Deny</button>
 			<button class="btn btn-cancel" data-dismiss="modal"><i class="fas fa-ban"></i> Cancel</button>
 		</div>`;
 		$("#modal_change_schedule_content").html(html);
@@ -1221,46 +1264,52 @@ $(document).ready(function () {
 
 
 	$(document).on("click", "#btnRejectConfirmation", function() {
-		const id       = $(this).attr("no_Timein_timeoutID");
-		const feedback = $(this).attr("no_Timein_timeoutCode");
+		const id       = $(this).attr("noTimeinTimeoutID");
+		const feedback = $(this).attr("code") || getFormCode("NTI", dateToday(), id);
 
 		const validate = validateForm("modal_change_schedule");
 		if (validate) {
-			let tableData = getTableData("hris_on_timein_timeout_tbl", "", "no_Timein_timeoutID = "+ id);
+			let tableData = getTableData("hris_no_timein_timeout_tbl", "", "noTimeinTimeoutID = "+ id);
 			if (tableData) {
 				let approversID     = tableData[0].approversID;
 				let approversStatus = tableData[0].approversStatus;
 				let approversDate   = tableData[0].approversDate;
 				let employeeID      = tableData[0].employeeID;
+				let createdAt       = tableData[0].createdAt;
 	
 				let data = getData("update", 3, "reject", feedback, id);
-				data["tableData[no_Timein_timeoutRemarks]"] = $("[name=no_Timein_timeoutRemarks]").val().trim();
+				data["tableData[noTimeinTimeoutRemarks]"] = $("[name=noTimeinTimeoutRemarks]").val().trim();
 				data["tableData[approversStatus]"] = updateApproveStatus(approversStatus, 3);
 				data["tableData[approversDate]"]   = updateApproveDate(approversDate);
 
 				let notificationData = {
-					moduleID:                58,
+					moduleID:                57,
+					tableID: 				 id,
 					notificationTitle:       "No Time-in / Time-out",
-					notificationDescription: `${tableData[0].no_Timein_timeoutCode}: Your request has been denied.`,
-					notificationType:        2,
-					employeeID:              employeeID,
+					notificationDescription: `${getFormCode("NTI", createdAt, id)}: Your request has been denied.`,
+					notificationType:        1,
+					employeeID,
 				};
 	
-				formConfirmation(
-					"reject",
-					"update",
-					"NO TIME-IN / TIME-OUT",
-					"modal_change_schedule",
-					"",
-					data,
-					true,
-					pageContent,
-					notificationData
-				);
+				setTimeout(() => {
+					formConfirmation(
+						"reject",
+						"update",
+						"NO TIME-IN / TIME-OUT",
+						"modal_change_schedule",
+						"",
+						data,
+						true,
+						pageContent,
+						notificationData
+					);
+					$("[redirect=forApprovalTab]").length > 0 && $("[redirect=forApprovalTab]").trigger("click");
+				}, 300);
 			}
 		}
 	})
 	// ----- END REJECT DOCUMENT -----
+
 
 	// ----- NAV LINK -----
 	$(document).on("click", ".nav-link", function () {
@@ -1273,15 +1322,45 @@ $(document).ready(function () {
 		}
 	});
 	// ----- END NAV LINK -----
-});
-// ----- VIEW NOTIFICATION -----
-function viewNotification() {
-	let url = window.document.URL;
-	url = url.split("?view_id=");
-	if (url.length > 1) {
-		let id = url[1];
-		$(`.btnView[id=${id}]`).trigger("click");
+
+
+	// ----- APPROVER STATUS -----
+	function getApproversStatus(approversID, approversStatus, approversDate) {
+		let html = "";
+		if (approversID) {
+			let idArr = approversID.split("|");
+			let statusArr = approversStatus ? approversStatus.split("|") : [];
+			let dateArr = approversDate ? approversDate.split("|") : [];
+			html += `<div class="row mt-4">`;
+	
+			idArr && idArr.map((item, index) => {
+				let date   = dateArr[index] ? moment(dateArr[index]).format("MMMM DD, YYYY hh:mm:ss A") : "";
+				let status = statusArr[index] ? statusArr[index] : "";
+				let statusBadge = "";
+				if (date && status) {
+					if (status == 2) {
+						statusBadge = `<span class="badge badge-info">Approved - ${date}</span>`;
+					} else if (status == 3) {
+						statusBadge = `<span class="badge badge-danger">Denied - ${date}</span>`;
+					}
+				}
+	
+				html += `
+				<div class="col-xl-3 col-lg-3 col-md-4 col-sm-12">
+					<div class="d-flex justify-content-start align-items-center">
+						<span class="font-weight-bold">
+							${employeeFullname(item)}
+						</span>
+						<small>&nbsp;- Level ${index + 1} Approver</small>
+					</div>
+					${statusBadge}
+				</div>`;
+			});
+			html += `</div>`;
+		}
+		return html;
 	}
-}
-// ----- END VIEW NOTIFICATION -----
+	// ----- END APPROVER STATUS -----
+
+});
 

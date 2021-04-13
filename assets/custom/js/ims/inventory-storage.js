@@ -308,14 +308,17 @@ $(document).ready(function () {
 					}
 					// ----- INSERT UNIQUE DATA TO uniqueData VARIABLE ----
 					let unique = {
+						
 						multiple: {
-							id: 						item.inventoryStorageID, // Required
+							id: item.inventoryStorageID, // Required
 							inventoryStorageOfficeName: item.inventoryStorageOfficeName, // Required
 							inventoryStorageUnitNumber: item.inventoryStorageUnitNumber,
+							inventoryStorageRoomType: item.inventoryStorageRoomType,
+							inventoryStorageDepartment: item.inventoryStorageDepartment
 						},
 					};
 					uniqueData.push(unique);
-
+					var storageDepartmentName = getTableData("hris_department_tbl","departmentName", "departmentID="+item.inventoryStorageDepartment)
 					html += `
 						<tr
 						class="btnEdit" 
@@ -338,7 +341,7 @@ $(document).ready(function () {
 
                            </td>
                            <td>${item.inventoryStorageRoomType}</td>
-                           <td>${item.inventoryStorageDepartment}</td>
+                           <td>${storageDepartmentName[0].departmentName}</td>
                            <td class="text-center">${activestatus}</td>
                         </tr>`;
 				});
@@ -403,7 +406,7 @@ $(document).ready(function () {
                     <div class="row">
                         <div class="col-md-12 col-lg-12">
                             <div class="form-group">
-                                <label for="">Office Name <span class="text-danger">*</span></label>
+                                <label for="">Storage Name <span class="text-danger">*</span></label>
                                 <input 
                                     type="text" 
                                     class="form-control validate " 
@@ -412,9 +415,9 @@ $(document).ready(function () {
                                     minlength="2" 
                                     minlength="50"
                                     data-allowcharacters="[a-z][A-Z][0-9][.][,][-][(][)]['][/][ ]"
-                                     value="${inventoryStorageOfficeName}"unique="${inventoryStorageID}" 
+                                     value="${inventoryStorageOfficeName}" unique="${inventoryStorageID}" 
                                     required>  
-                                 <div class="invalid-feedback d-block" id="invalid-input_officenamee"></div>
+                                 <div class="invalid-feedback d-block" id="invalid-input_officename"></div>
                             </div>
                         </div>
 
@@ -546,23 +549,23 @@ $(document).ready(function () {
                                     id="input_roomType"
                                     minlength="2" 
                                     minlength="75"
-                                    data-allowcharacters="[a-z][A-Z][0-9][.][,][-][(][)]['][/][ ]"
+                                    data-allowcharacters="[a-z][A-Z][0-9][.][,][-][(][)]['][/][ ]" unique="${inventoryStorageID}"
                                     value="${inventoryStorageRoomType}">  
-                               
+								<div class="invalid-feedback d-block" id="invalid-input_roomType"></div>
                             </div>
                         </div>
                         <div class="col-md-6 col-lg-6">
                             <div class="form-group">
                                 <label for="">Department </label>
-                                <input 
-                                    type="text" 
-                                    class="form-control validate" 
-                                    name="inventoryStorageDepartment" 
-                                    id="input_department"
-                                    minlength="2" 
-                                    minlength="75"
-                                    data-allowcharacters="[a-z][A-Z][0-9][.][,][-][(][)]['][/][ ]"
-                                     value="${inventoryStorageDepartment}"> 
+								<select 
+									class="form-control validate select2" 
+									id="input_departmentStorage" 
+									name="inventoryStorageDepartment"
+									required
+									unique="${inventoryStorageID}">
+									${departmentOptions(inventoryStorageDepartment)}
+								</select>
+								<div class="invalid-feedback d-block" id="invalid-input_departmentStorage"></div>
                             </div>
                         </div>
                         <div class="col-md-6 col-lg-6">
@@ -711,3 +714,17 @@ $(document).ready(function () {
 
 	// -------- END CANCEL MODAL-----------
 });
+
+
+
+function departmentOptions(departmentID = 0) {
+	let getDepartment = getTableData("hris_department_tbl", "*", "departmentStatus = 1");
+        let departmentOptions = `<option ${departmentID == 0 && "selected"} disabled>Select Department</option>`;
+		departmentOptions += `<option value="">N/A</option>`;
+        
+		getDepartment.map(item => {
+            departmentOptions += `<option value="${item.departmentID}" ${item.departmentID == departmentID && "selected"}>${item.departmentName}</option>`;
+        })
+	
+	return departmentOptions;
+}

@@ -66,7 +66,7 @@
 	<script src="<?=base_url('assets/bundles/vendorscripts.bundle.js')?>"></script>
     <script src="<?=base_url('assets/plugins/momentjs/moment.js')?>"></script>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.2/rollups/aes.js"></script>
+    <script src="<?= base_url('assets/js/aes.js') ?>"></script>
 
 </head>
 
@@ -76,7 +76,7 @@
     <!-- Page Loader -->
     <div class="page-loader-wrapper" base_url="<?= base_url() ?>" session="<?= $sessionID ?>" role="<?= $sessionRoleID ?>" designation="<?= $sessionDesignationID ?>">
         <div class="loader">
-            <div class="mt-3"><img class="zmdi-hc-spin w60" src="<?= base_url() ?>assets/images/loader.svg" alt="Amaze"></div>
+            <div class="mt-3"><img class="zmdi-hc-spin w60" src="<?= base_url() ?>assets/images/loader.svg" alt="ERP"></div>
             <p>Please wait...</p>        
         </div>
     </div>
@@ -84,7 +84,7 @@
     <!-- Save/Update Loader -->
     <div class="page-loader-wrapper" id="loader" style='display: none;'>
         <div class="loader">
-            <div class="mt-3"><img class="zmdi-hc-spin w60" src="<?= base_url() ?>assets/images/spinner.svg" alt="Amaze"></div>
+            <div class="mt-3"><img class="zmdi-hc-spin w60" src="<?= base_url() ?>assets/images/spinner.svg" alt="ERP"></div>
             <p>Saving...</p>        
         </div>
     </div>
@@ -99,7 +99,7 @@
                     <div class="d-flex justify-content-between align-items-center">
                         <div class="navbar-logo">
                             <a href="javascript:void(0);" class="bars"></a>
-                            <a class="navbar-brand" href="index.html"><img src="<?= base_url() ?>assets/images/logo.svg" width="30" alt="Amaze"><span class="ml-2">Amaze</span></a>
+                            <a class="navbar-brand" href="index.html"><img src="<?= base_url() ?>assets/images/BC-WHITE.png" width="165" alt="ERP"><span class="ml-2"></span></a>
                         </div>
                         <div class="d-flex justify-content-end justify-content-md-between align-items-center flex-grow-1">
                             <div class="d-flex align-items-center currently_maintain hidden-xs">
@@ -117,7 +117,10 @@
                                     <ul class="dropdown-menu">
                                         <li class="header">New Notification</li>
 
-                                        <li class="body">
+                                        <li class="body" 
+                                            style="height: auto;
+                                                   max-height: 60vh;
+                                                   overflow-y: scroll;">
                                             <ul class="menu list-unstyled">
                                         <?php
                                             $notifications = getNotificationData("all", "0");
@@ -125,7 +128,9 @@
                                                 foreach ($notifications as $notif) {
                                         ?>
                                             <li>
-                                                <a href="<?= $notif["controller"] ?>" class="btnViewNotification" controller="<?= $notif["controller"] ?>" id="<?= $notif['id'] ?>" table="<?= $notif['table'] ?>">
+                                                <a href="<?= $notif["controller"] ?>" class="btnViewNotification" controller="<?= $notif["controller"] ?>" 
+                                                id="<?= $notif['id'] ?>" 
+                                                table="<?= $notif['table'] ?>">
                                                     <div class="media" title="<?= $notif["description"] ?>">
                                                         <img class="media-object" src="<?= base_url() ?>assets/notification/<?= $notif["icon"] ?>" alt="">
                                                         <div class="media-body">

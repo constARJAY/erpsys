@@ -4,7 +4,7 @@
             <div class="row clearfix">
                 <div class="col-sm-12 col-md-8">
                     <ul class="breadcrumb pl-0 pb-0 ">
-                        <li class="breadcrumb-item"><a href="#"><i class="zmdi zmdi-home"></i>Dashboard</a></li>
+                        <li class="breadcrumb-item"><a href="#"><i class="zmdi zmdi-home"></i> Dashboard</a></li>
                         <li class="breadcrumb-item"><i class="zmdi zmdi-folder"></i>&nbsp;Masterfiles</li>
                         <li class="breadcrumb-item active">Award</li>
                     </ul>

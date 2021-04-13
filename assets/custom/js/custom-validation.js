@@ -502,8 +502,35 @@ const checkExists = (elementID, invalidFeedback) => {
 						});
 						if (countKeys == countTemp) {
 							flag = true;
-							$(elementID).removeClass("is-valid").addClass("is-invalid");
+							if ($(elementID).hasClass("select2")) {
+								$(elementID)
+									.parent()
+									.find(".selection")
+									.children()
+									.removeClass("is-invalid")
+									.removeClass("is-valid")
+									.removeClass("no-error")
+									.addClass("has-error");
+							} else {
+								$(elementID).removeClass("is-valid").addClass("is-invalid");
+							}
 							invalidFeedback.text(`${title} already exists!`);
+						} else {
+							if ($(elementID).hasClass("validated")) {
+								if ($(elementID).hasClass("select2")) {
+									$(elementID)
+										.parent()
+										.find(".selection")
+										.children()
+										.removeClass("is-invalid")
+										.removeClass("is-valid")
+										.removeClass("has-error")
+										.addClass("no-error");
+								} else {
+									$(elementID).removeClass("is-invalid").addClass("is-valid");
+								}
+								invalidFeedback.text(``);
+							}
 						}
 					}
 				}
@@ -520,8 +547,35 @@ const checkExists = (elementID, invalidFeedback) => {
 							invalidFeedback
 						) {
 							flag = true;
-							$(elementID).removeClass("is-valid").addClass("is-invalid");
+							if ($(elementID).hasClass("select2")) {
+								$(elementID)
+									.parent()
+									.find(".selection")
+									.children()
+									.removeClass("is-invalid")
+									.removeClass("is-valid")
+									.removeClass("no-error")
+									.addClass("has-error");
+							} else {
+								$(elementID).removeClass("is-valid").addClass("is-invalid");
+							}
 							invalidFeedback.text(`${title} already exists!`);
+						} else {
+							if ($(elementID).hasClass("validated")) {
+								if ($(elementID).hasClass("select2")) {
+									$(elementID)
+										.parent()
+										.find(".selection")
+										.children()
+										.removeClass("is-invalid")
+										.removeClass("is-valid")
+										.removeClass("has-error")
+										.addClass("no-error");
+								} else {
+									$(elementID).removeClass("is-invalid").addClass("is-valid");
+								}
+								invalidFeedback.text(``);
+							}
 						}
 					});
 				}
@@ -672,6 +726,7 @@ const validateInput = (elementID) => {
 							.addClass("no-error");
 						$(elementID).removeClass("is-invalid").addClass("is-valid");
 						invalidFeedback.text("");
+						checkExists(elementID, invalidFeedback);
 					}
 				} else {
 					if (
@@ -696,6 +751,7 @@ const validateInput = (elementID) => {
 							.removeClass("has-error")
 							.addClass("no-error");
 						invalidFeedback.text("");
+						checkExists(elementID, invalidFeedback);
 					}
 				}
 			} else {
@@ -716,6 +772,7 @@ const validateInput = (elementID) => {
 					.addClass("no-error");
 				$(elementID).removeClass("is-invalid").addClass("is-valid");
 				invalidFeedback.text("");
+				checkExists(elementID, invalidFeedback);
 			}
 		} else if (isInputButton > 0) {
 			let value = $("[type=button]" + elementID).val()
@@ -966,9 +1023,9 @@ $(function () {
 							.children()
 							.removeClass("no-error")
 							.addClass("has-error");
-						checkExists(elementID, invalidFeedback);
 						$(elementID).removeClass("is-valid").addClass("is-invalid");
 						invalidFeedback.text("This field is required.");
+						checkExists(elementID, invalidFeedback);
 					} else {
 						$(elementID)
 							.parent()
@@ -979,9 +1036,9 @@ $(function () {
 							.children()
 							.removeClass("has-error")
 							.addClass("no-error");
-						checkExists(elementID, invalidFeedback);
 						$(elementID).removeClass("is-invalid").addClass("is-valid");
 						invalidFeedback.text("");
+						checkExists(elementID, invalidFeedback);
 					}
 				} else {
 					if (
@@ -997,9 +1054,9 @@ $(function () {
 							.removeClass("is-valid")
 							.removeClass("no-error")
 							.addClass("has-error");
-						checkExists(elementID, invalidFeedback);
 						$(elementID).removeClass("is-valid").addClass("is-invalid");
 						invalidFeedback.text("This field is required.");
+						checkExists(elementID, invalidFeedback);
 					} else {
 						$(elementID)
 							.parent()
@@ -1007,9 +1064,9 @@ $(function () {
 							.removeClass("is-valid")
 							.removeClass("has-error")
 							.addClass("no-error");
-						checkExists(elementID, invalidFeedback);
 						$(elementID).removeClass("is-invalid").addClass("is-valid");
 						invalidFeedback.text("");
+						checkExists(elementID, invalidFeedback);
 					}
 				}
 			} else {
@@ -1019,6 +1076,81 @@ $(function () {
 					.removeClass("is-valid")
 					.removeClass("has-error")
 					.addClass("no-error");
+				$(elementID).removeClass("is-invalid").addClass("is-valid");
+				invalidFeedback.text("");
+			}
+		} else {
+			if (required != undefined && required != "undefined") {
+				if (isSelect2) {
+					if (
+						value == "" ||
+						value == "undefined" ||
+						value == undefined ||
+						value == "null" ||
+						value == null
+					) {
+						$(elementID)
+							.parent()
+							.children()
+							.next()
+							.next()
+							.children()
+							.children()
+							.removeClass("no-error")
+							.addClass("has-error");
+						$(elementID).removeClass("is-valid").addClass("is-invalid");
+						invalidFeedback.text("This field is required.");
+						checkExists(elementID, invalidFeedback);
+					} else {
+						$(elementID)
+							.parent()
+							.children()
+							.next()
+							.next()
+							.children()
+							.children()
+							.removeClass("has-error")
+							.removeClass("no-error");
+						$(elementID).removeClass("is-invalid").addClass("is-valid");
+						invalidFeedback.text("");
+						checkExists(elementID, invalidFeedback);
+					}
+				} else {
+					if (
+						value == "" ||
+						value == "undefined" ||
+						value == undefined ||
+						value == "null" ||
+						value == null
+					) {
+						$(elementID)
+							.parent()
+							.removeClass("is-invalid")
+							.removeClass("is-valid")
+							.removeClass("no-error")
+							.addClass("has-error");
+						$(elementID).removeClass("is-valid").addClass("is-invalid");
+						invalidFeedback.text("This field is required.");
+						checkExists(elementID, invalidFeedback);
+					} else {
+						$(elementID)
+							.parent()
+							.removeClass("is-invalid")
+							.removeClass("is-valid")
+							.removeClass("has-error")
+							.removeClass("no-error");
+						$(elementID).removeClass("is-invalid").addClass("is-valid");
+						invalidFeedback.text("");
+						checkExists(elementID, invalidFeedback);
+					}
+				}
+			} else {
+				$(elementID)
+					.parent()
+					.removeClass("is-invalid")
+					.removeClass("is-valid")
+					.removeClass("has-error")
+					.removeClass("no-error");
 				$(elementID).removeClass("is-invalid").addClass("is-valid");
 				invalidFeedback.text("");
 			}

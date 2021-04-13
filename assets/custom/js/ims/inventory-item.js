@@ -42,7 +42,7 @@ $(document).ready(function(){
             method:   'POST',
             async:    false,
             dataType: 'json',
-            data:     {tableName: "ims_inventory_item_tbl as item INNER JOIN ims_inventory_classification_tbl as classification USING(classificationID) INNER JOIN ims_inventory_category_tbl as category USING(categoryID) INNER JOIN ims_inventory_storage_tbl USING(inventoryStorageID)",
+            data:     {tableName: "ims_inventory_item_tbl as item INNER JOIN ims_inventory_classification_tbl as classification USING(classificationID) INNER JOIN ims_inventory_category_tbl as category USING(categoryID)",
                         tableWhere: "categoryStatus=1"},
             beforeSend: function() {
                 $("#table_content").html(preloader);
@@ -55,13 +55,13 @@ $(document).ready(function(){
                     <thead style="white-space:nowrap">
                         <tr>
                             <th>Item Code</th>
-                            <th>Storage Name</th>
+                            <th>Brand Name</th>
                             <th>Item Name</th>
-                            <th>Item Category</th>
                             <th>Item Classification</th>
+                            <th>Item Category</th>
                             <th>Item Size</th>
                             <th>UOM</th>
-                            <th>VAT</th>
+                            <th>Item Description</th>
                             <th>Re-Order Level</th>
                             <th>Base Price</th>
                             <th>Status</th>
@@ -92,13 +92,13 @@ $(document).ready(function(){
                     id="${item.itemID}"
                     feedback="${item.itemName}">
                         <td>${item.itemCode}</td>
-                        <td>${item.inventoryStorageOfficeName}</td>
+                        <td>${item.brandName}</td>
                         <td>${item.itemName}</td>
-                        <td>${item.categoryName}</td>
                         <td>${item.classificationName}</td>
+                        <td>${item.categoryName}</td>
                         <td>${item.itemSize}</td>
                         <td>${item.unitOfMeasurementID}</td>
-                        <td>${item.vatType}</td>
+                        <td>${item.itemDescription}</td>
                         <td>${item.reOrderLevel}</td>
                         <td class="text-right">${formatAmount(item.basePrice, true)}</td>
                         <td class="text-center">${status}</td>
@@ -181,9 +181,12 @@ $(document).ready(function(){
         vatType             = "",
         reOrderLevel        = "",
         basePrice           = "",
+        brandName           = "",
+        itemDescription      = "",
+
         unitOfMeasurementID = "",
         itemStatus          = ""
-        }= data && data[0];  
+        }= data && data[0];     
         // classificationContent(data);
         let button = itemID ? `
         <button 
@@ -205,15 +208,20 @@ $(document).ready(function(){
                 <div class="row">
                     <div class="col-md-6 col-sm-12">
                         <div class="form-group">
-                            <label>Storage Code <span class="text-danger font-weight-bold">*</span></label>
-                            <select 
-                            class="form-control select2 validate" 
-                            id="input_inventoryStorageID" 
-                            name="inventoryStorageID"
-                            autocomplete="off"
-                            required>
-                        </select>
-                            <div class="invalid-feedback d-block" id="invalid-input_inventoryStorageID"></div>
+                            <label>Brand Name <span class="text-danger font-weight-bold">*</span></label>
+                            <input 
+                                type="text" 
+                                class="form-control validate" 
+                                name="brandName" 
+                                id="input_brandName" 
+                                data-allowcharacters="[A-Z][a-z][0-9][ ]['][-]" 
+                                minlength="2" 
+                                maxlength="100" 
+                                required 
+                                unique="${itemID}" 
+                                value="${brandName}"
+                                autocomplete="off">
+                            <div class="invalid-feedback d-block" id="invalid-input_brandName"></div>
                         </div>
                     </div>
                     <div class="col-md-6 col-sm-12">
@@ -226,7 +234,7 @@ $(document).ready(function(){
                                 id="input_itemName" 
                                 data-allowcharacters="[A-Z][a-z][0-9][ ]['][-]" 
                                 minlength="2" 
-                                maxlength="20" 
+                                maxlength="100" 
                                 required 
                                 unique="${itemID}" 
                                 value="${itemName}"
@@ -274,6 +282,9 @@ $(document).ready(function(){
                         disabled 
                         selected
                         ${!data && "selected"} >Select Item Size</option>
+                    <option 
+                        value="" 
+                        ${data && itemSize == "N/A" && "selected"} > N/A</option>
                     <option 
                         value="ExtraSmall" 
                         ${data && itemSize == "ExtraSmall" && "selected"} > ExtraSmall</option>
@@ -327,35 +338,17 @@ $(document).ready(function(){
                 <div class="invalid-feedback d-block" id="invalid-unitOfMeasurementID"></div>
             </div>
         </div>
-
-        <div class="col-md-6 col-sm-12">
-            <div class="form-group">
-                <label>VAT Type <span class="text-danger font-weight-bold">*</span></label>
-                <select 
-                    class="form-control select2 validate" 
-                    id="input_vatType" 
-                    name="vatType"
-                    autocomplete="off"
-                    
-                    required>
-                    <option 
-                        value="" 
-                        disabled 
-                        selected
-                        ${!data && "selected"}>Select VAT Type</option>
-                    <option 
-                        value="Vatable" 
-                        ${data && vatType == "Vatable" && "selected"}  > Vatable</option>
-                    <option 
-                        value="Non-Vatable" 
-                        ${data && vatType == "Non-Vatable" && "selected"}  >Non-Vatable</option>
-                   
-                </select>
-                <div class="invalid-feedback d-block" id="invalid-input_vatType"></div>
-            </div>
-        </div>
-        <div class="col-md-6 col-sm-12">
+                
+                <div class="col-md-12 col-sm-12">
                         <div class="form-group">
+                            <label>Item Description<span class="text-danger font-weight-bold">*</span></label>
+                            <textarea style="resize:none" row="3" class="form-control validate" name="itemDescription" id="inputItemDescription" 
+                                    data-allowcharacters="[a-z][A-Z][0-9][.][,][-][()]['][/][?][*][!][#][%][&][ ]" minlength="2" maxlength="500" required >${itemDescription}</textarea>
+                            <div class="invalid-feedback d-block" id="invalid-inputItemDescription"></div>
+                        </div>
+                </div>
+                <div class="col-md-6 col-sm-12">
+                    <div class="form-group">
                             <label>Re-order Level <span class="text-danger font-weight-bold">*</span></label>
                             <input 
                                 type="text" 
@@ -370,9 +363,8 @@ $(document).ready(function(){
                                 autocomplete="off">
                             <div class="invalid-feedback d-block" id="invalid-input_reOrderLevel"></div>
                         </div>
-                    </div>
-
-                    <div class="col-md-6 col-sm-12">
+                </div>
+                <div class="col-md-6 col-sm-12">
                     <div class="form-group">
                         <label>Status <span class="text-danger font-weight-bold">*</span></label>
                         <select 
@@ -390,33 +382,8 @@ $(document).ready(function(){
                         </select>
                         <div class="invalid-feedback d-block" id="invalid-itemStatus"></div>
                     </div>
-                </div>  
-                   
-                    <div class="col-md-6 col-sm-12">
-                        <div class="form-group">
-                        <label>Unit Price <span class="text-danger font-weight-bold">*</span></label>
-                        <div class="input-group w-100">
-                            <div class="input-group-prepend">
-                                <span class="input-group-text" id="basic-addon1">₱</span>
-                            </div>
-                            <input 
-                                type="text" 
-                                class="form-control amount" 
-                                name="basePrice" 
-                                id="input_basePrice" 
-                                data-allowcharacters="[A-Z][a-z][0-9][ ]" 
-                                minlength="2" 
-                                maxlength="20"  
-                                min="1"
-                                max="100000"
-                                required
-                                value="${basePrice}"
-                                autocomplete="off">
-                        </div>
-                            
-                            <div class="invalid-feedback d-block" id="invalid-input_basePrice"></div>
-                        </div>
-                    </div>
+                </div>
+
                 </div>
             </div>
             

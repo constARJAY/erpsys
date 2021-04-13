@@ -95,6 +95,7 @@ $(document).ready(function () {
 	}
 	// ----- END VIEW DOCUMENT -----
 
+
 	// GLOBAL VARIABLE - REUSABLE 
 	const dateToday = () => {
 		return moment(new Date).format("YYYY-MM-DD HH:mm:ss");
@@ -253,7 +254,7 @@ $(document).ready(function () {
 			if (isImCurrentApprover(approversID, approversDate, changeScheduleStatus) || isAlreadyApproved(approversID, approversDate)) {
 				html += `
 				<tr>
-					<td>${getFormCode("SCH", dateCreated, changeScheduleID)}</td>
+					<td>${getFormCode("SCH", createdAt, changeScheduleID)}</td>
 					<td>${fullname}</td>
 					<td>
 						${employeeFullname(getCurrentApprover(approversID, approversDate, changeScheduleStatus, true))}
@@ -347,10 +348,10 @@ $(document).ready(function () {
             <button 
                 class="btn btn-edit w-100 btnEdit" 
                 id="${encryptString(changeScheduleID)}" 
-                code="${getFormCode("SCH", dateCreated, changeScheduleID)}"><i class="fas fa-edit"></i> Edit</button>`;
+                code="${getFormCode("SCH", createdAt, changeScheduleID)}"><i class="fas fa-edit"></i> Edit</button>`;
 			html += `
             <tr>
-                <td>${getFormCode("SCH", dateCreated, changeScheduleID)}</td>
+                <td>${getFormCode("SCH", createdAt, changeScheduleID)}</td>
                 <td>${fullname}</td>
                 <td>
                     ${employeeFullname(getCurrentApprover(approversID, approversDate, changeScheduleStatus, true))}
@@ -830,7 +831,7 @@ $(document).ready(function () {
 
 	// ----- CHANGE TIME TO -----
 	$(document).on("keyup", ".timeOut", function () {
-		checkTimeRange($(this).attr("id"));
+		// checkTimeRange($(this).attr("id"));
 	});
 	// ----- END CHANGE TIME TO -----
 
@@ -858,7 +859,6 @@ $(document).ready(function () {
 				$("[redirect=forApprovalTab]").length > 0 && $("[redirect=forApprovalTab]").trigger("click");
 			}
 		} else {
-			formButtonHTML(this);
 			const action   = id && feedback ? "update" : "insert";
 			const data     = getData(action, 0, "save", feedback, id);
 
@@ -871,8 +871,7 @@ $(document).ready(function () {
 					"form_change_schedule",
 					data,
 					true,
-					pageContent,
-					this
+					pageContent
 				);
 			}, 300);
 		}
@@ -948,12 +947,11 @@ $(document).ready(function () {
 
 	// ----- SUBMIT DOCUMENT -----
 	$(document).on("click", "#btnSubmit", function () {
-		formButtonHTML(this);
 		const id           = $(this).attr("changeScheduleID");
 		const validate     = validateForm("form_change_schedule");
-		const validateTime = checkTimeRange(false, true);
+		// const validateTime = checkTimeRange(false, true);
 
-		if (validate && validateTime) {
+		if (validate) {
 			const feedback = $(this).attr("code") || getFormCode("SCH", dateToday(), id);
 			const action   = id && feedback ? "update" : "insert";
 			const data     = getData(action, 1, "submit", feedback, id);
@@ -986,12 +984,9 @@ $(document).ready(function () {
 					data,
 					true,
 					pageContent,
-					notificationData,
-					this
+					notificationData
 				);
 			}, 300);
-		} else {
-			formButtonHTML(this, false);
 		}
 	});
 	// ----- END SUBMIT DOCUMENT -----
@@ -1020,7 +1015,6 @@ $(document).ready(function () {
 
 	// ----- CANCEL DOCUMENT -----
 	$(document).on("click", "#btnCancel", function () {
-		formButtonHTML(this);
 		const id       = $(this).attr("changeScheduleID");
 		const feedback = $(this).attr("code") || getFormCode("SCH", dateToday(), id);
 		const action   = id && feedback ? "update" : "insert";
@@ -1034,8 +1028,7 @@ $(document).ready(function () {
 			"form_change_schedule",
 			data,
 			true,
-			pageContent,
-			this
+			pageContent
 		);
 	});
 	// ----- END CANCEL DOCUMENT -----
@@ -1043,9 +1036,8 @@ $(document).ready(function () {
 
 	// ----- APPROVE DOCUMENT -----
 	$(document).on("click", "#btnApprove", function () {
-		formButtonHTML(this);
 		const id       = decryptString($(this).attr("changeScheduleID"));
-		const feedback = $(this).attr("code") || getFormCode("SCH", dateCreated, id);
+		const feedback = $(this).attr("code") || getFormCode("SCH", dateToday(), id);
 		let tableData  = getTableData("hris_change_schedule_tbl", "", "changeScheduleID = " + id);
 
 		if (tableData) {
@@ -1095,9 +1087,9 @@ $(document).ready(function () {
 					data,
 					true,
 					pageContent,
-					notificationData,
-					this
+					notificationData
 				);
+				$("[redirect=forApprovalTab]").length > 0 && $("[redirect=forApprovalTab]").trigger("click");
 			}, 300);
 		}
 	});
@@ -1107,7 +1099,7 @@ $(document).ready(function () {
 	// ----- REJECT DOCUMENT -----
 	$(document).on("click", "#btnReject", function () {
 		const id       = $(this).attr("changeScheduleID");
-		const feedback = $(this).attr("code") || getFormCode("SCH", dateCreated, id);
+		const feedback = $(this).attr("code") || getFormCode("SCH", dateToday(), id);
 
 		$("#modal_change_schedule_content").html(preloader);
 		$("#modal_change_schedule .page-title").text(
@@ -1140,9 +1132,8 @@ $(document).ready(function () {
 	});
 
 	$(document).on("click", "#btnRejectConfirmation", function () {
-		formButtonHTML(this);
 		const id       = decryptString($(this).attr("changeScheduleID"));
-		const feedback = $(this).attr("code") || getFormCode("SCH", dateCreated, id);
+		const feedback = $(this).attr("code") || getFormCode("SCH", dateToday(), id);
 
 		const validate = validateForm("modal_change_schedule");
 		if (validate) {
@@ -1178,17 +1169,12 @@ $(document).ready(function () {
 						data,
 						true,
 						pageContent,
-						notificationData,
-						this
+						notificationData
 					);
-					$(`[redirect=forApprovalTab]`).trigger("click");
+					$("[redirect=forApprovalTab]").length > 0 && $("[redirect=forApprovalTab]").trigger("click");
 				}, 300);
-			} else {
-				formButtonHTML(this, false);
-			}
-		} else {
-			formButtonHTML(this, false);
-		}
+			} 
+		} 
 	});
 	// ----- END REJECT DOCUMENT -----
 

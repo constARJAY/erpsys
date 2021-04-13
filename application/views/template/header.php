@@ -18,7 +18,7 @@
     <meta name="description" content="Web Portal Blackcoders">
     <title><?= $title ?> | BlackBox ERP System</title>
 
-    <link rel="icon" href="<?=base_url("assets/images/logo.ico")?>" type="image/x-icon">
+    <link rel="icon" href="<?=base_url("assets/images/logo_erp.ico")?>" type="image/x-icon">
     <link rel="stylesheet" href="<?=base_url('assets/plugins/bootstrap/css/bootstrap.min.css')?>">
     <link rel="stylesheet" href="<?=base_url('assets/plugins/morrisjs/morris.css')?>" />
     <link rel="stylesheet" href="<?=base_url('assets/plugins/bootstrap-colorpicker/css/bootstrap-colorpicker.css')?>" />
@@ -66,7 +66,7 @@
 	<script src="<?=base_url('assets/bundles/vendorscripts.bundle.js')?>"></script>
     <script src="<?=base_url('assets/plugins/momentjs/moment.js')?>"></script>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.2/rollups/aes.js"></script>
+    <script src="<?= base_url('assets/js/aes.js') ?>"></script>
 
 </head>
 

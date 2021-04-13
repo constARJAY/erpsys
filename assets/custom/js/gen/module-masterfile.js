@@ -455,7 +455,8 @@ $(document).ready(function() {
                                 type="file"
                                 class="form-control validate" 
                                 name="moduleIcon|icons"
-                                id="input_moduleIcon">
+                                id="input_moduleIcon"
+                                multiple>
                             <div class="invalid-feedback d-block" id="invalid-input_moduleIcon"></div>
                         </div>
                     </div>

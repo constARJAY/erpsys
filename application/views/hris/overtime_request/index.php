@@ -6,7 +6,7 @@
                     <ul class="breadcrumb pl-0 pb-0 ">
                         <li class="breadcrumb-item"><a href="#"><i class="zmdi zmdi-home"></i> Dashboard</a></li>
 						<li class="breadcrumb-item"><i class="fas fa-users"></i> &nbsp;Employee Forms</li>
-                        <li class="breadcrumb-item active">Overtime Request Form</li>
+                        <li class="breadcrumb-item active">Overtime Request</li>
                     </ul>
                     <h1 class="mt-3">Overtime Request</h1>
                     <span>This module is used to manage overtime request form details.</span>
@@ -16,28 +16,8 @@
         </div>
     </div>
 
-    <!-- <div class="container">
-		<div class="row clearfix">
-            <div class="col-lg-12">
-                <div class="card">
-                    <div class="header text-right p-0">
-						<div class="closeBtn"></div>
-					</div>
-					<div class="body" id="main_body">
-						<div class="row" id="loading-screen" style="visibility:hidden;"></div>
-						<div class="row clearfix row-deck">
-							<div class="col-12">
-                                <div class="card-body" id="page_content"></div>
-							</div>
-						</div>
-					</div>
-                </div>
-            </div>
-        </div>
-	</div> -->
-
     <div class="container">
-		<div class="row clearfix row-deck">
+		<div class="row clearfix row-deck mx-1">
             <div class="card col-12">
                 <div class="card-body" id="page_content">
 

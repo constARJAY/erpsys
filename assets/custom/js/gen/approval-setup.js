@@ -27,7 +27,7 @@ $(document).on("change","#select2-modules", function(){
         position_list = viewAttachDesignation(thisValue);
     }
     let buttonName  =   approvalDesignation.length > 0  ? "Update Selected Designation/s" : "Select Designation/s"
-    position_list   +=   `  <div class="card my-0 p-1">
+    position_list   +=   `  <div class="card my-0 p-1" style="box-shadow: none !important;">
                                 <div class="d-flex justify-content-center align-items-center">
                                     <button class="btn btn-primary" module="${thisValue}" id="btn-approval_designation">${buttonName}</button>
                                 </div>
@@ -54,15 +54,15 @@ $(document).on("click","#btn-approval_designation", function(){
     }else{
         let tableDataDesignation    =  getTableData("hris_designation_tbl", "","designationStatus != 0", "designationID ASC");
         tableDataDesignation.map((itemDesignation, index)=>{
-            position_list   +=   `<div class="card my-0 p-2">
-                                    <div class="d-flex justify-content-start align-items-center">
+            position_list   +=   `<div class="card my-0 p-2" style="box-shadow: none !important;">
+                                    <div class="d-flex justify-content-start align-items-center" >
                                         <input class="list-designation" type="checkbox" approvers="0" value="${itemDesignation["designationID"]}">
                                         <h6 class="mx-3 module-header text-gray">${itemDesignation["designationName"]}</h6> 
                                     </div>
                                   </div>`;
         });        
     }
-    position_list   +=   `  <div class="card my-0 p-1">
+    position_list   +=   `  <div class="card my-0 p-1" style="box-shadow: none !important;">
                                 <div class="d-flex justify-content-center align-items-center py-2">
                                     <button class="btn btn-update px-5 p-2 mx-2" module="${thisModuleID}" id="update_attach-designation"><i class="fas fa-save"></i>&nbsp;Update</button>
                                     <button class="btn btn-cancel px-5 p-2 mx-2" module="${thisModuleID}" id="cancel_attach-designation"><i class="fas fa-ban"></i>&nbsp;Cancel</button>
@@ -70,7 +70,6 @@ $(document).on("click","#btn-approval_designation", function(){
                             </div>`;
     setTimeout(function(){$(".position-list").html(position_list);},500);
 });
-
 
 // BTN UPDATING ATTACH ROLES
 $(document).on("click", "#update_attach-designation", function(){
@@ -96,7 +95,7 @@ $(document).on("click", "#update_attach-designation", function(){
             if(data){ 
             let position_list   = viewAttachDesignation(moduleID);
             // let buttonName  =   approvalDesignation.length > 0  ? "Update Selected Designation/s" : "Select Designation/s"
-                position_list   +=   `  <div class="card my-0 p-1">
+                position_list   +=   `  <div class="card my-0 p-1" style="box-shadow: none !important;">
                                             <div class="d-flex justify-content-center align-items-center">
                                                 <button class="btn btn-primary" module="${moduleID}" id="btn-approval_designation">Update Attach Designation</button>
                                             </div>
@@ -135,7 +134,7 @@ $(document).on("click", "#cancel_attach-designation", function(){
                                     </div>`;
             }
     let buttonName  =   approvalDesignation.length > 0  ? "Update Selected Designation/s" : "Select Designation/s";
-    position_list   +=   `  <div class="card my-0 p-1">
+    position_list   +=   `  <div class="card my-0 p-1"  style="box-shadow: none !important;">
                                 <div class="d-flex justify-content-center align-items-center">
                                     <button class="btn btn-primary" module="${thisValue}" id="btn-approval_designation">${buttonName}</button>
                                 </div>
@@ -168,7 +167,6 @@ $(document).on("click", ".designation-list", function(){
 });
 
 // BTN SETTING UP THE APPROVERS
-
 $(document).on("click", ".btn-approval-setup", function(){
     let approvalID    =   $(this).attr("approval");
     $("#modal_approval_setup").modal("show");
@@ -254,7 +252,7 @@ function viewAttachDesignation(moduleID = null){
         tableDataDesignation.map((item_designation, index)=>{
             let checkedCondition    = approvalDesignationID.indexOf(item_designation["designationID"]);
             if(checkedCondition >= 0){
-                returnData              +=  `<div class="card my-0 p-2 designation-list" module="${moduleID}" designation="${item_designation["designationID"]}">
+                returnData              +=  `<div class="card my-0 p-2 designation-list" module="${moduleID}" designation="${item_designation["designationID"]}" style="box-shadow: none !important;">
                                                 <div class="d-flex justify-content-start align-items-center">
                                                     <h6 class="mx-3 module-header py-1 text-gray">${item_designation["designationName"]}</h6> 
                                                 </div>

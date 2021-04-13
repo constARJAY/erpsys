@@ -1,5 +1,107 @@
 $(document).ready(function () {
 
+	// ----- MODULE APPROVER -----
+	const moduleApprover = getModuleApprover("loan form");
+	// ----- END MODULE APPROVER -----
+
+
+	// ---- GET EMPLOYEE DATA -----
+	const allEmployeeData = getAllEmployeeData();
+	const employeeData = (id) => {
+		if (id) {
+			let data = allEmployeeData.filter(employee => employee.employeeID == id);
+			let { employeeID, fullname, designation, department } = data && data[0];
+			return { employeeID, fullname, designation, department };
+		}
+		return {};
+	}
+	const employeeFullname = (id) => {
+		if (id != "-") {
+			let data = employeeData(id);
+			return data.fullname || "-";
+		}
+		return "-";
+	}
+	// ---- END GET EMPLOYEE DATA -----
+
+
+	// ----- VIEW DOCUMENT -----
+	function viewDocument(view_id = false, readOnly = false) {
+		const loadData = (id) => {
+			const tableData = getTableData("hris_loan_form_tbl", "", "loanFormID=" + id);
+
+			if (tableData.length > 0) {
+				let {
+					employeeID,
+					loanFormStatus
+				} = tableData[0];
+
+				let isReadOnly = true, isAllowed = true;
+
+				if (employeeID != sessionID) {
+					isReadOnly = true;
+					if (loanFormStatus == 0 || loanFormStatus == 4) {
+						isAllowed = false;
+					}
+				} else if (employeeID == sessionID) {
+					if (loanFormStatus == 0) {
+						isReadOnly = false;
+					} else {
+						isReadOnly = true;
+					}
+				} else {
+					isReadOnly = readOnly;
+				}
+
+				if (isAllowed) {
+					pageContent(true, tableData, isReadOnly);
+					updateURL(encryptString(id));
+				} else {
+					pageContent();
+					updateURL();
+				}
+				
+			} else {
+				pageContent();
+				updateURL();
+			}
+		}
+
+		if (view_id) {
+			let id = decryptString(view_id);
+				id && isFinite(id) && loadData(id);
+		} else {
+			let url   = window.document.URL;
+			let arr   = url.split("?view_id=");
+			let isAdd = url.indexOf("?add");
+			if (arr.length > 1) {
+				let id = decryptString(arr[1]);
+					id && isFinite(id) && loadData(id);
+			} else if (isAdd != -1) {
+				pageContent(true);
+			}
+		}
+		
+	}
+
+	function updateURL(view_id = 0, isAdd = false) {
+		if (view_id && !isAdd) {
+			window.history.pushState("", "", `${base_url}hris/loan_form?view_id=${view_id}`);
+		} else if (!view_id && isAdd) {
+			window.history.pushState("", "", `${base_url}hris/loan_form?add`);
+		} else {
+			window.history.pushState("", "", `${base_url}hris/loan_form`);
+		}
+	}
+	// ----- END VIEW DOCUMENT -----
+
+	// GLOBAL VARIABLE - REUSABLE 
+	const dateToday = () => {
+		return moment(new Date).format("YYYY-MM-DD HH:mm:ss");
+	};
+	// END GLOBAL VARIABLE - REUSABLE 
+
+
 	// ----- DATATABLES -----
 	function initDataTables() {
 		if ($.fn.DataTable.isDataTable("#tableForApprroval")) {
@@ -16,12 +118,19 @@ $(document).ready(function () {
 			.DataTable({
 				proccessing: false,
 				serverSide: false,
-				// scrollX: true,
+				scrollX: true,
+				sorting: [],
 				scrollCollapse: true,
 				columnDefs: [
-					{ targets: 0, width: "10%"},
-					{ targets: 5, width: "5%"},
-					{ targets: 6, width: "5%"},
+					{ targets: 0, width: 100 },
+					{ targets: 1, width: 150 },
+					{ targets: 2, width: 150 },
+					{ targets: 3, width: 200 },
+					{ targets: 4, width: 200 },
+					{ targets: 5, width: 200 },
+					{ targets: 6, width: 80  },
+					{ targets: 7, width: 250 },
+					{ targets: 8, width: 80  },
 				],
 			});
 
@@ -31,12 +140,19 @@ $(document).ready(function () {
 			.DataTable({
 				proccessing: false,
 				serverSide: false,
-				// scrollX: true,
+				scrollX: true,
+				sorting: [],
 				scrollCollapse: true,
 				columnDefs: [
-					{ targets: 0, width: "10%"},
-					{ targets: 5, width: "5%"},
-					{ targets: 6, width: "5%"},
+					{ targets: 0, width: 100 },
+					{ targets: 1, width: 150 },
+					{ targets: 2, width: 150 },
+					{ targets: 3, width: 200 },
+					{ targets: 4, width: 200 },
+					{ targets: 5, width: 200 },
+					{ targets: 6, width: 80  },
+					{ targets: 7, width: 250 },
+					{ targets: 8, width: 80  },
 				],
 			});
 	}
@@ -52,8 +168,8 @@ $(document).ready(function () {
                 <div class="row clearfix appendHeader">
                     <div class="col-12">
                         <ul class="nav nav-tabs">
-                            <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#forApprovalTab">For Approval</a></li>
-                            <li class="nav-item"><a class="nav-link active" data-toggle="tab" href="#myFormsTab">My Forms</a></li>
+                            <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#forApprovalTab" redirect="forApprovalTab">For Approval</a></li>
+                            <li class="nav-item"><a class="nav-link active" data-toggle="tab" href="#myFormsTab" redirect="myFormsTab">My Forms</a></li>
                         </ul>
                     </div>
                 </div>`;
@@ -70,8 +186,10 @@ $(document).ready(function () {
 	function headerButton(isAdd = true, text = "Add") {
 		let html;
 		if (isAdd) {
-			html = `
-            <button type="button" class="btn btn-default btn-add" id="btnAdd"><i class="icon-plus"></i> &nbsp;${text}</button>`;
+			if (isCreateAllowed(60)) {
+				html = `
+				<button type="button" class="btn btn-default btn-add" id="btnAdd"><i class="icon-plus"></i> &nbsp;${text}</button>`;
+			}
 		} else {
 			html = `
             <button type="button" class="btn btn-default btn-light" id="btnBack"><i class="fas fa-arrow-left"></i> &nbsp;Back</button>`;
@@ -84,41 +202,69 @@ $(document).ready(function () {
 	// ----- FOR APPROVAL CONTENT -----
 	function forApprovalContent() {
 		$("#tableForApprovalParent").html(preloader);
+
 		let scheduleData = getTableData(
-			"hris_loan_form_tbl",
-			"",
-			`employeeID != ${sessionID} AND loanFormStatus != 0 AND loanFormStatus != 4`
+			"hris_loan_form_tbl LEFT JOIN hris_employee_list_tbl USING(employeeID)",
+			"hris_loan_form_tbl.*, CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname",
+			`employeeID != ${sessionID} AND loanFormStatus != 0 AND loanFormStatus != 4`,
+			`FIELD(loanFormStatus, 0, 1, 3, 2, 4), COALESCE(hris_loan_form_tbl.submittedAt, hris_loan_form_tbl.createdAt)`
 		);
 
 		let html = `
-        <table class="table table-bordered table-striped table-hover nowrap" id="tableForApprroval">
+        <table class="table table-bordered table-striped table-hover" id="tableForApprroval">
             <thead>
-                <tr>
-                    <th>Code</th>
+                <tr style="white-space: nowrap">
+                    <th>Document No.</th>
                     <th>Employee Name</th>
-                    <th>Loan Type</th>
-                    <th>Loan Amount</th>
-                    <th>Term of Payment</th>
+					<th>Current Approver</th>
+					<th>Date Created</th>
+					<th>Date Submitted</th>
+					<th>Date Approved</th>
                     <th>Status</th>
+					<th>Remarks</th>
                     <th>Action</th>
                 </tr>
             </thead>
             <tbody>`;
 
-		scheduleData.map((item) => {
+		scheduleData.map((schedule) => {
+			let {
+				fullname,
+				loanFormID,
+				approversID,
+				approversDate,
+				loanFormStatus,
+				loanFormRemarks,
+				submittedAt,
+				createdAt,
+			} = schedule;
+
+			let remarks       = loanFormRemarks ? loanFormRemarks : "-";
+			let dateCreated   = moment(createdAt).format("MMMM DD, YYYY hh:mm:ss A");
+			let dateSubmitted = submittedAt	? moment(submittedAt).format("MMMM DD, YYYY hh:mm:ss A") : "-";
+			let dateApproved  = loanFormStatus == 2 ? approversDate.split("|") : "-";
+			if (dateApproved !== "-") {
+				dateApproved = moment(dateApproved[dateApproved.length - 1]).format("MMMM DD, YYYY hh:mm:ss A");
+			}
 
 			let button = `
-			<button class="btn btn-view w-100 btnView" id="${item.loanFormID}"><i class="fas fa-eye"></i> View</button>`;
+			<button class="btn btn-view w-100 btnView" id="${encryptString(loanFormID)}"><i class="fas fa-eye"></i> View</button>`;
 
-			if (isImCurrentApprover(item.approversID, item.approversDate, item.loanFormStatus) || isAlreadyApproved(item.approversID, item.approversDate)) {
+			if (isImCurrentApprover(approversID, approversDate, loanFormStatus) || isAlreadyApproved(approversID, approversDate)) {
 				html += `
 				<tr>
-					<td>${item.loanFormCode}</td>
-					<td>${item.employeeID}</td>
-					<td>${loanTypeTableData[0].loanName}</td>
-					<td>${item.loanFormAmount}</td>
-					<td>${item.	loanFormTermPayment == 0 ? "Payday" : "Monthly"}</td>
-					<td class="text-center">${getStatusStyle(item.loanFormStatus)}</td>
+					<td>${getFormCode("LNF", dateCreated, loanFormID)}</td>
+					<td>${fullname}</td>
+					<td>
+						${employeeFullname(getCurrentApprover(approversID, approversDate, loanFormStatus, true))}
+					</td>
+					<td>${dateCreated}</td>
+					<td>${dateSubmitted}</td>
+					<td>${dateApproved}</td>
+					<td class="text-center">
+						${getStatusStyle(loanFormStatus)}
+					</td>
+					<td>${remarks}</td>
 					<td class="text-center">
 						${button}
 					</td>
@@ -134,7 +280,7 @@ $(document).ready(function () {
 			$("#tableForApprovalParent").html(html);
 			initDataTables();
 			return html;
-		}, 500);
+		}, 300);
 	}
 	// ----- END FOR APPROVAL CONTENT -----
 
@@ -143,51 +289,79 @@ $(document).ready(function () {
 	function myFormsContent() {
 		$("#tableMyFormsParent").html(preloader);
 		let scheduleData = getTableData(
-			"hris_loan_form_tbl",
-			"",
-			`employeeID = ${sessionID}`
+			"hris_loan_form_tbl LEFT JOIN hris_employee_list_tbl USING(employeeID)",
+			"hris_loan_form_tbl.*, CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname, hris_loan_form_tbl.createdAt AS dateCreated",
+			`hris_loan_form_tbl.employeeID = ${sessionID}`,
+			`FIELD(loanFormStatus, 0, 1, 3, 2, 4), COALESCE(hris_loan_form_tbl.submittedAt, hris_loan_form_tbl.createdAt)`
 		);
 
 		let html = `
-        <table class="table table-bordered table-striped table-hover nowrap" id="tableMyForms">
+        <table class="table table-bordered table-striped table-hover" id="tableMyForms">
             <thead>
-                <tr>
-                    <th>Code</th>
+                <tr style="white-space: nowrap">
+                    <th>Document No.</th>
                     <th>Employee Name</th>
-                    <th>Loan Type</th>
-                    <th>Loan Amount</th>
-                    <th>Term of Payment</th>
+                    <th>Current Approver</th>
+					<th>Date Created</th>
+					<th>Date Submitted</th>
+					<th>Date Approved</th>
                     <th>Status</th>
+					<th>Remarks</th>
                     <th>Action</th>
                 </tr>
             </thead>
             <tbody>`;
 
 		scheduleData.map((item) => {
+			let {
+				fullname,
+				loanFormID,
+				loanFormDate,
+				approversID,
+				approversDate,
+				loanFormStatus,
+				loanFormRemarks,
+				submittedAt,
+				createdAt,
+			} = item;
+
+			let remarks       = loanFormRemarks ? loanFormRemarks : "-";
+			let dateCreated   = moment(createdAt).format("MMMM DD, YYYY hh:mm:ss A");
+			let dateSubmitted = submittedAt ? moment(submittedAt).format("MMMM DD, YYYY hh:mm:ss A") : "-";
+			let dateApproved  = loanFormStatus == 2 ? approversDate.split("|") : "-";
+			if (dateApproved !== "-") {
+				dateApproved = moment(dateApproved[dateApproved.length - 1]).format("MMMM DD, YYYY hh:mm:ss A");
+			}
+
 			let unique = {
-				id: item.loanFormID,
-				loanFormDateFrom: moment(item.loanFormDateFrom).format("MMMM DD, YYYY")
+				id:           loanFormID,
+				loanFormDate: loanFormDate,
 			};
-            let loanTypeTableData = getTableData("hris_loan_tbl", "","loanID="+item.loanID);
-			uniqueData.push(unique);
+			(loanFormStatus == 1 || loanFormStatus == 2) && uniqueData.push(unique);
 
 			let button =
-				item.loanFormStatus != 0
+				loanFormStatus != 0
 					? `
-            <button class="btn btn-view w-100 btnView" id="${item.loanFormID}"><i class="fas fa-eye"></i> View</button>`
+            <button class="btn btn-view w-100 btnView" id="${encryptString(loanFormID)}"><i class="fas fa-eye"></i> View</button>`
 					: `
             <button 
                 class="btn btn-edit w-100 btnEdit" 
-                id="${item.loanFormID}" 
-                code="${item.loanFormCode}"><i class="fas fa-edit"></i> Edit</button>`;
+                id="${encryptString(loanFormID)}" 
+                code="${getFormCode("LNF", dateCreated, loanFormID)}"><i class="fas fa-edit"></i> Edit</button>`;
 			html += `
             <tr>
-                <td>${item.loanFormCode}</td>
-                <td>${item.employeeID}</td>
-                <td>${loanTypeTableData[0].loanName}</td>
-                <td>${item.loanFormAmount}</td>
-                <td>${item.	loanFormTermPayment == 0 ? "Payday" : "Monthly"}</td>
-                <td class="text-center">${getStatusStyle(item.loanFormStatus)}</td>
+                <td>${getFormCode("LNF", dateCreated, loanFormID)}</td>
+                <td>${fullname}</td>
+                <td>
+                    ${employeeFullname(getCurrentApprover(approversID, approversDate, loanFormStatus, true))}
+                </td>
+				<td>${dateCreated}</td>
+				<td>${dateSubmitted}</td>
+				<td>${dateApproved}</td>
+                <td class="text-center">
+                    ${getStatusStyle(loanFormStatus)}
+                </td>
+				<td>${remarks}</td>
                 <td class="text-center">
                     ${button}
                 </td>
@@ -202,7 +376,7 @@ $(document).ready(function () {
 			$("#tableMyFormsParent").html(html);
 			initDataTables();
 			return html;
-		}, 500);
+		}, 300);
 	}
 	// ----- END MY FORMS CONTENT -----
 
@@ -211,17 +385,20 @@ $(document).ready(function () {
 	function formButtons(data = false) {
 		let button = "";
 		if (data) {
-
 			let {
 				loanFormID     = "",
-				loanFormCode   = "",
 				loanFormStatus = "",
 				employeeID           = "",
 				approversID          = "",
 				approversDate        = "",
+				createdAt            = new Date
 			} = data && data[0];
 
-			let isOngoing = approversDate ? (approversDate.split("|").length > 0 ? true : false) : false;
+			let isOngoing = approversDate
+				? approversDate.split("|").length > 0
+					? true
+					: false
+				: false;
 			if (employeeID === sessionID) {
 				if (loanFormStatus == 0) {
 					// DRAFT
@@ -230,14 +407,14 @@ $(document).ready(function () {
 						class="btn btn-submit" 
 						id="btnSubmit" 
 						loanFormID="${loanFormID}"
-						loanFormCode="${loanFormCode}"><i class="fas fa-paper-plane"></i>
+						code="${getFormCode("LNF", createdAt, loanFormID)}"><i class="fas fa-paper-plane"></i>
 						Submit
 					</button>
 					<button 
 						class="btn btn-cancel"
 						id="btnCancelForm" 
 						loanFormID="${loanFormID}"
-						loanFormCode="${loanFormCode}"><i class="fas fa-ban"></i> 
+						code="${getFormCode("LNF", createdAt, loanFormID)}"><i class="fas fa-ban"></i> 
 						Cancel
 					</button>`;
 				} else if (loanFormStatus == 1) {
@@ -247,11 +424,11 @@ $(document).ready(function () {
 							class="btn btn-cancel"
 							id="btnCancelForm" 
 							loanFormID="${loanFormID}"
-							loanFormCode="${loanFormCode}"><i class="fas fa-ban"></i> 
+							code="${getFormCode("LNF", createdAt, loanFormID)}"><i class="fas fa-ban"></i> 
 							Cancel
 						</button>`;
 					}
-				} 
+				}
 			} else {
 				if (loanFormStatus == 1) {
 					if (isImCurrentApprover(approversID, approversDate)) {
@@ -259,21 +436,20 @@ $(document).ready(function () {
 						<button 
 							class="btn btn-submit" 
 							id="btnApprove" 
-							loanFormID="${loanFormID}"
-							loanFormCode="${loanFormCode}"><i class="fas fa-paper-plane"></i>
+							loanFormID="${encryptString(loanFormID)}"
+							code="${getFormCode("LNF", createdAt, loanFormID)}"><i class="fas fa-paper-plane"></i>
 							Approve
 						</button>
 						<button 
 							class="btn btn-cancel"
 							id="btnReject" 
-							loanFormID="${loanFormID}"
-							loanFormCode="${loanFormCode}"><i class="fas fa-ban"></i> 
+							loanFormID="${encryptString(loanFormID)}"
+							code="${getFormCode("LNF", createdAt, loanFormID)}"><i class="fas fa-ban"></i> 
 							Deny
 						</button>`;
 					}
 				}
 			}
-
 		} else {
 			button = `
 			<button 
@@ -314,21 +490,21 @@ $(document).ready(function () {
 			createdAt                   = false,
 		} = data && data[0];
 
-		if (readOnly) {
-			preventRefresh(false);
-		} else {
-			preventRefresh(true);
-		}
+		// ----- GET EMPLOYEE DATA -----
+		let {
+			fullname:    employeeFullname    = "",
+			department:  employeeDepartment  = "",
+			designation: employeeDesignation = "",
+		} = employeeData(data ? employeeID : sessionID);
+		// ----- END GET EMPLOYEE DATA -----
+		readOnly ? preventRefresh(false) : preventRefresh(true);
 
 		$("#btnBack").attr("loanFormID", loanFormID);
-		$("#btnBack").attr("loanFormCode", loanFormCode);
 		$("#btnBack").attr("status", loanFormStatus);
+		$("#btnBack").attr("employeeID", employeeID);
 
-		let disabled = readOnly && "disabled";
+		let disabled = readOnly ? "disabled" : "";
 		let button   = formButtons(data);
-        // let employeeInfo    =   getTableData("gen_user_account_tbl", "", "userAccountID="+sessionID);
-        let employeeName    =   "Sample Name of Employee";
-        let employeeRole    =   "Junior Developer I";
         let loanType        =   getTableData("hris_loan_tbl","","loanStatus != 0");
         let optionLoanType  =   `<option value="" disabled selected>Select Loan Type</option>`;
         loanType.map((loanTypeItems, loanTypeIndex) =>{
@@ -337,14 +513,15 @@ $(document).ready(function () {
         });
         // Payday = 0, Monthly = 1;
         let optionLoanFormTermPayment = data == false ? `<option value="" disabled selected>Select Term of Payment</option><option value="0">Payday</option><option value="1">Monthly</option>`: (loanFormTermPayment == "0" ? `<option value="" disabled>Select Term of Payment</option><option value="0" selected>Payday</option><option value="1">Monthly</option>` : `<option value="" disabled>Select Term of Payment</option><option value="0">Payday</option><option value="1" selected>Monthly</option>`);
-
 		let html = `
-        <div class="row">
+        <div class="row px-2">
             <div class="col-lg-2 col-md-6 col-sm-12 px-1">
                 <div class="card">
                     <div class="body">
                         <small class="text-small text-muted font-weight-bold">Document No.</small>
-                        <h6 class="mt-0 text-danger font-weight-bold">${loanFormCode ? loanFormCode : "---"}</h6>      
+                        <h6 class="mt-0 text-danger font-weight-bold">
+							${loanFormID ? getFormCode("LNF", createdAt, loanFormID) : "---"}
+						</h6>      
                     </div>
                 </div>
             </div>
@@ -352,7 +529,9 @@ $(document).ready(function () {
                 <div class="card">
                     <div class="body">
                         <small class="text-small text-muted font-weight-bold">Status</small>
-                        <h6 class="mt-0 font-weight-bold">${loanFormStatus ? getStatusStyle(loanFormStatus) : "---"}</h6>      
+                        <h6 class="mt-0 font-weight-bold">
+							${loanFormStatus ? getStatusStyle(loanFormStatus) : "---"}
+						</h6>      
                     </div>
                 </div>
             </div>
@@ -362,7 +541,9 @@ $(document).ready(function () {
                     <div class="card">
                         <div class="body">
                             <small class="text-small text-muted font-weight-bold">Date Created</small>
-                            <h6 class="mt-0 font-weight-bold">${createdAt ? moment(createdAt).format("MMMM DD, YYYY hh:mm:ss A") : "---"}</h6>      
+                            <h6 class="mt-0 font-weight-bold">
+								${createdAt ? moment(createdAt).format("MMMM DD, YYYY hh:mm:ss A") : "---"}
+                            </h6>      
                         </div>
                     </div>
                 </div>
@@ -370,7 +551,9 @@ $(document).ready(function () {
                     <div class="card">
                         <div class="body">
                             <small class="text-small text-muted font-weight-bold">Date Submitted</small>
-                            <h6 class="mt-0 font-weight-bold">${submittedAt ? moment(submittedAt).format("MMMM DD, YYYY hh:mm:ss A") : "---"}</h6>      
+                            <h6 class="mt-0 font-weight-bold">
+								${submittedAt ? moment(submittedAt).format("MMMM DD, YYYY hh:mm:ss A") : "---"}
+							</h6>      
                         </div>
                     </div>
                 </div>
@@ -378,17 +561,21 @@ $(document).ready(function () {
                     <div class="card">
                         <div class="body">
                             <small class="text-small text-muted font-weight-bold">Date Approved</small>
-                            <h6 class="mt-0 font-weight-bold">${getDateApproved(loanFormStatus, approversID, approversDate)}</h6>      
+                            <h6 class="mt-0 font-weight-bold">
+								${getDateApproved(loanFormStatus, approversID, approversDate)}
+							</h6>      
                         </div>
                     </div>
                 </div>
                 </div>
             </div>
-            <div class="col-sm-12">
+            <div class="col-sm-12 px-1">
                 <div class="card">
                     <div class="body">
                         <small class="text-small text-muted font-weight-bold">Remarks</small>
-                        <h6 class="mt-0 font-weight-bold">${loanFormRemarks ? loanFormRemarks : "---"}</h6>      
+                        <h6 class="mt-0 font-weight-bold">
+							${loanFormRemarks ? loanFormRemarks : "---"}
+						</h6>      
                     </div>
                 </div>
             </div>
@@ -398,22 +585,21 @@ $(document).ready(function () {
             <div class="col-md-4 col-sm-12">
                 <div class="form-group">
                     <label>Employee Name</label>
-                    <input type="text" class="form-control" disabled value="${employeeName}">
+                    <input type="text" class="form-control" disabled value="${employeeFullname}">
                 </div>
             </div>
             <div class="col-md-4 col-sm-12">
                 <div class="form-group">
                     <label>Department</label>
-                    <input type="text" class="form-control" disabled value="Operations">
+                    <input type="text" class="form-control" disabled value="${employeeDepartment}">
                 </div>
             </div>
             <div class="col-md-4 col-sm-12">
                 <div class="form-group">
                     <label>Position</label>
-                    <input type="text" class="form-control" disabled value="${employeeRole}">
+                    <input type="text" class="form-control" disabled value="${employeeDesignation}">
                 </div>
             </div>
-
             <div class="col-md-3 col-sm-12">
                 <div class="form-group">
                     <label>Loan Type <code>*</code></label>
@@ -437,8 +623,8 @@ $(document).ready(function () {
             <div class="col-md-3 col-sm-12">
                 <div class="form-group">
                     <label>Start Date - End Date <code>*</code></label>
-                    <input type="button" class="form-control validate daterangeLoanForm text-left" required id="loanFormDate"
-                            name="loanFormDate" value="${loanFormDate && moment(loanFormDate).format("MMMM DD, YYYY")}"
+                    <input type="button" class="form-control validate text-left" required id="loanFormDate"
+                            name="loanFormDate" value="${loanFormDate && loanFormDate}"
 						    unique="${loanFormID}" title="Date" ${disabled}>
                     <div class="d-block invalid-feedback" id="invalid-loanFormDate"></div>
                 </div>
@@ -484,10 +670,18 @@ $(document).ready(function () {
 			$("#page_content").html(html);
 			initAll();
 			initDataTables();
-            loanFormDateRange();
-			data ? initInputmaskTime(false) : initInputmaskTime();
+			if (data) {
+				initInputmaskTime(false);
+                let loanFormDateSplit = loanFormDate.split(" - ");
+                loanFormDateRange(moment(loanFormDateSplit[0], "'MMMM D, YYYY'"),moment(loanFormDateSplit[1], "'MMMM D, YYYY'"));
+				// $("#loanFormDate").data("daterangepicker").startDate = moment(loanFormDateSplit[0], "YYYY-MM-DD");
+				// $("#loanFormDate").data("daterangepicker").endDate   = moment(loanFormDateSplit[1], "YYYY-MM-DD");
+			} else {
+				initInputmaskTime();
+                loanFormDateRange();
+			}
 			return html;
-		}, 500);
+		}, 300);
 	}
 	// ----- END FORM CONTENT -----
 
@@ -510,17 +704,19 @@ $(document).ready(function () {
             </div>`;
 			$("#page_content").html(html);
 
-			headerButton(true, "Add Loan Form");
+			headerButton(true, "Add Loan");
 			headerTabContent();
-			forApprovalContent();
+			// forApprovalContent();
 			myFormsContent();
+			updateURL();
 		} else {
 			headerButton(false);
 			headerTabContent(false);
 			formContent(data, readOnly);
 		}
 	}
-	pageContent();
+	viewDocument();
+	$("#page_content").text().trim().length == 0 && pageContent(); // CHECK IF THERE IS ALREADY LOADED ONE
 	// ----- END PAGE CONTENT -----
 
 
@@ -554,7 +750,7 @@ $(document).ready(function () {
 			},
 		});
 	}
-	// ----- END CUSTOM INPUTMASK -----
+	// ----- END CUSTOM INPUTMASK ------
 
 
 	// ----- CHECK TIME RANGE -----
@@ -562,15 +758,15 @@ $(document).ready(function () {
 		let element = elementID ? `#${elementID}` : ".timeOut";
 		let flag = 0;
 		$(element).each(function () {
-			const fromValue = $("#loanFormDateTo").val()+":00";
+			const fromValue = $("#loanFormTimeIn").val() + ":00";
 			const validated = $(this).hasClass("validated");
-			const toValue   = $(this).val()+":00";
+			const toValue   = $(this).val() + ":00";
 
 			const timeIn  = moment(`2021-01-01 ${fromValue}`);
 			const timeOut = moment(`2021-01-01 ${toValue}`);
 
 			let diff = moment.duration(timeOut.diff(timeIn));
-			diff = diff.asSeconds();
+				diff = diff.asSeconds();
 
 			const invalidFeedback = $(this).parent().find(".invalid-feedback");
 
@@ -598,46 +794,44 @@ $(document).ready(function () {
 		let data = getFormData("form_loan_form", true);
 
 		const submittedAt =
-			(status == 1 && moment().format("YYYY-MM-DD hh:mm:ss")) ||
+			(status == 1 && moment().format("YYYY-MM-DD HH:mm:ss")) ||
 			(status == 4 && null);
-		const dateToday = moment().format("YYYY-MM-DD hh:mm:ss");
+		const approversID = method != "approve" && moduleApprover;
 
 		if (action && method != "" && feedback != "") {
 			data["tableData[loanFormStatus]"] = status;
-			data["tableData[updatedBy]"] = sessionID;
-			data["feedback"]  = feedback;
-			data["method"]    = method;
-			data["tableName"] = "hris_loan_form_tbl";
+			data["tableData[updatedBy]"]            = sessionID;
+			data["feedback"]                        = feedback;
+			data["method"]                          = method;
+			data["tableName"]                       = "hris_loan_form_tbl";
+
 			if (submittedAt) data["tableData[submittedAt]"] = submittedAt;
 
 			if (action == "insert") {
-				data["tableData[loanFormCode]"] = generateCode(
-					"SCH",
-					false,
-					"hris_loan_form_tbl",
-					"loanFormCode",
-				);
-				data["tableData[employeeID]"] = sessionID;
-				data["tableData[createdBy]"]  = sessionID;
-				data["tableData[createdAt]"]  = dateToday;
-				
-				const approversID = getModuleApprover("loan form");
+				data["tableData[employeeID]"]         = sessionID;
+				data["tableData[createdBy]"]          = sessionID;
+				data["tableData[createdAt]"]          = dateToday();
+
 				if (approversID && method == "submit") {
 					data["tableData[approversID]"] = approversID;
 				}
 				if (!approversID && method == "submit") {
-					data["tableData[approversID]"]     = sessionID;
-					data["tableData[approversStatus]"] = 2;
-					data["tableData[approversDate]"]   = dateToday;
-					data["tableData[changeScheduleStatus]"] = 2;
+					data["tableData[approversID]"]          = sessionID;
+					data["tableData[approversStatus]"]      = 2;
+					data["tableData[approversDate]"]        = dateToday();
+					data["tableData[loanFormStatus]"] = 2;
 				}
-
-
-
-
-
-
 			} else {
+				if (status == 1) {
+					data["tableData[approversID]"] = approversID;
+
+					if (!approversID && method == "submit") {
+						data["tableData[approversID]"]          = sessionID;
+						data["tableData[approversStatus]"]      = 2;
+						data["tableData[approversDate]"]        = dateToday();
+						data["tableData[loanFormStatus]"] = 2;
+					}
+				}
 				data["whereFilter"] = "loanFormID=" + id;
 			}
 		}
@@ -652,154 +846,158 @@ $(document).ready(function () {
 	});
 	// ----- END CHANGE TIME TO -----
 
-
+	
 	// ----- OPEN ADD FORM -----
 	$(document).on("click", "#btnAdd", function () {
 		pageContent(true);
+		updateURL(null, true);
 	});
 	// ----- END OPEN ADD FORM -----
 
 
 	// ----- CLOSE FORM -----
 	$(document).on("click", "#btnBack", function () {
-		const id       = $(this).attr("loanFormID");
-		const status   = $(this).attr("status");
+		const id         = $(this).attr("loanFormID");
+		const employeeID = $(this).attr("employeeID");
+		const feedback   = $(this).attr("code") || getFormCode("LNF", dateToday(), id);
+		const status     = $(this).attr("status");
 
 		if (status != "false" && status != 0) {
 			$("#page_content").html(preloader);
 			pageContent();
+
+			if (employeeID != sessionID) {
+				$("[redirect=forApprovalTab]").length > 0 && $("[redirect=forApprovalTab]").trigger("click");
+			}
 		} else {
-			const feedback = $(this).attr("loanFormCode")
-			? $(this).attr("loanFormCode")
-			: generateCode(
-					"LNF",
-					false,
-					"hris_loan_form_tbl",
-					"loanFormCode",
-			  );
+			const action   = id && feedback ? "update" : "insert";
+			const data     = getData(action, 0, "save", feedback, id);
 
-			const action = id && feedback ? "update" : "insert";
-
-			const data = getData(action, 0, "save", feedback, id);
-
-			cancelForm(
-				"save",
-				action,
-				"LOAN FORM",
-				"",
-				"form_loan_form",
-				data,
-				true,
-				pageContent
-			);
+			setTimeout(() => {
+				cancelForm(
+					"save",
+					action,
+					"LOAN",
+					"",
+					"form_loan_form",
+					data,
+					true,
+					pageContent
+				);
+			}, 300);
 		}
-		
 	});
 	// ----- END CLOSE FORM -----
 
 
 	// ----- OPEN EDIT MODAL -----
 	$(document).on("click", ".btnEdit", function () {
-		const id   = $(this).attr("id");
-		const code = $(this).attr("code");
-
-		const tableData = getTableData(
-			"hris_loan_form_tbl",
-			"*",
-			"loanFormID=" + id,
-			""
-		);
-
-		pageContent(true, tableData);
+		const id = $(this).attr("id");
+		// const tableData = getTableData("hris_loan_form_tbl", "", "loanFormID=" + id);
+		// pageContent(true, tableData);
+		viewDocument(id);
 	});
 	// ----- END OPEN EDIT MODAL -----
 
 
 	// ----- VIEW DOCUMENT -----
 	$(document).on("click", ".btnView", function () {
-		const id        = $(this).attr("id");
-		const tableData = getTableData(
-			"hris_loan_form_tbl",
-			"*",
-			"loanFormID=" + id,
-			""
-		);
-		pageContent(true, tableData, true);
+		const id = $(this).attr("id");
+		// const tableData = getTableData("hris_loan_form_tbl", "", "loanFormID=" + id);
+		// pageContent(true, tableData, true);
+		viewDocument(id, true);
 	});
 	// ----- END VIEW DOCUMENT -----
 
 
 	// ----- SAVE DOCUMENT -----
 	$(document).on("click", "#btnSave", function () {
-		const validate = validateForm("form_loan_form");
-		const validateTime = checkTimeRange(false, true);
-		if (validate && validateTime) {
-			const action = "insert"; // CHANGE
-			const feedback = generateCode(
-				"SCH",
-				false,
-				"hris_loan_form_tbl",
-				"loanFormCode",
-			);
+		/**
+		 * 
+		 * 	I THINK IF IT'S A DRAFT DOCUMENT, NO NEED TO VALIDATE...
+		 * 
+		 */
+		// const validate     = validateForm("form_loan_form");
+		// const validateTime = checkTimeRange(false, true);
 
-			const data = getData(action, 0, "save", feedback);
+		// if (validate && validateTime) {
+		// 	const action   = "insert"; 
+		// 	const feedback = getFormCode("LNF", dateToday()); // OTR-20-00000
 
-			formConfirmation(
-				"save",
-				"insert",
-				"LOAN FORM",
-				"",
-				"form_loan_form",
-				data,
-				true,
-				myFormsContent
-			);
-		}
+		// 	const data = getData(action, 0, "save", feedback);
+
+		// 	formConfirmation(
+		// 		"save",
+		// 		"insert",
+		// 		"LOAN",
+		// 		"",
+		// 		"form_loan_form",
+		// 		data,
+		// 		true,
+		// 		myFormsContent
+		// 	);
+		// }
+
+		const action   = "insert"; 
+		const feedback = getFormCode("LNF", dateToday()); 
+		const data     = getData(action, 0, "save", feedback);
+
+		formConfirmation(
+			"save",
+			"insert",
+			"LOAN",
+			"",
+			"form_loan_form",
+			data,
+			true,
+			myFormsContent
+		);
 	});
 	// ----- END SAVE DOCUMENT -----
 
 
 	// ----- SUBMIT DOCUMENT -----
 	$(document).on("click", "#btnSubmit", function () {
-		const id = $(this).attr("loanFormID");
-
-		const validate = validateForm("form_loan_form");
+		const id           = $(this).attr("loanFormID");
+		const validate     = validateForm("form_loan_form");
 		const validateTime = checkTimeRange(false, true);
 
 		if (validate && validateTime) {
-			const feedback = $(this).attr("loanFormCode")
-			? $(this).attr("loanFormCode")
-			: generateCode(
-					"LNF",
-					false,
-					"hris_loan_form_tbl",
-					"loanFormCode",
-			  );
-			  
-			const action = id && feedback ? "update" : "insert";
+			const feedback = $(this).attr("code") || getFormCode("LNF", dateToday(), id);
+			const action   = id && feedback ? "update" : "insert";
+			const data     = getData(action, 1, "submit", feedback, id);
 
-			const data = getData(action, 1, "submit", feedback, id);
-
-			
-			let notificationData = {
-				moduleID:                56,
-				notificationTitle:       "Loan Form",
-				notificationDescription: `${sessionID} asked for your approval.`,
-				notificationType:        2,
-				employeeID: getNotificationEmployeeID(data["tableData[approversID]"], data["tableData[approversDate]"]),
-			};
-
-			formConfirmation(
-				"submit",
-				action,
-				"LOAN FORM",
-				"",
-				"form_loan_form",
-				data,
-				true,
-				pageContent,
-				notificationData
+			const employeeID = getNotificationEmployeeID(
+				data["tableData[approversID]"],
+				data["tableData[approversDate]"],
+				true
 			);
+
+			let notificationData = false;
+			if (employeeID != sessionID) {
+				notificationData = {
+					moduleID:                60,
+					// tableID:                 1, // AUTO FILL
+					notificationTitle:       "Loan Form",
+					notificationDescription: `${employeeFullname(sessionID)} asked for your approval.`,
+					notificationType:        2,
+					employeeID,
+				};
+			}
+
+			setTimeout(() => {
+				formConfirmation(
+					"submit",
+					action,
+					"LOAN",
+					"",
+					"form_loan_form",
+					data,
+					true,
+					pageContent,
+					notificationData
+				);
+			}, 0);
 		}
 	});
 	// ----- END SUBMIT DOCUMENT -----
@@ -807,16 +1005,15 @@ $(document).ready(function () {
 
 	// ----- CANCEL DOCUMENT -----
 	$(document).on("click", "#btnCancelForm", function () {
-		const id = $(this).attr("loanFormID");
-		const feedback = $(this).attr("loanFormCode");
-
-		const action = "update";
-		const data   = getData(action, 4, "cancelform", feedback, id);
+		const id       = $(this).attr("loanFormID");
+		const feedback = $(this).attr("code") || getFormCode("LNF", dateToday(), id);
+		const action   = "update";
+		const data     = getData(action, 4, "cancelform", feedback, id);
 
 		formConfirmation(
 			"cancelform",
 			action,
-			"LOAN FORM",
+			"LOAN",
 			"",
 			"form_loan_form",
 			data,
@@ -829,24 +1026,15 @@ $(document).ready(function () {
 
 	// ----- CANCEL DOCUMENT -----
 	$(document).on("click", "#btnCancel", function () {
-		const id = $(this).attr("loanFormID");
-		const feedback = $(this).attr("loanFormCode")
-			? $(this).attr("loanFormCode")
-			: generateCode(
-					"SCH",
-					false,
-					"hris_loan_form_tbl",
-					"loanFormCode",
-			  );
-
-		const action = id && feedback ? "update" : "insert";
-
-		const data = getData(action, 0, "save", feedback, id);
+		const id       = $(this).attr("loanFormID");
+		const feedback = $(this).attr("code") || getFormCode("LNF", dateToday(), id);
+		const action   = id && feedback ? "update" : "insert";
+		const data     = getData(action, 0, "save", feedback, id);
 
 		cancelForm(
 			"save",
 			action,
-			"LOAN FORM",
+			"LOAN",
 			"",
 			"form_loan_form",
 			data,
@@ -858,73 +1046,82 @@ $(document).ready(function () {
 
 
 	// ----- APPROVE DOCUMENT -----
-	$(document).on("click", "#btnApprove", function() {
-		const id       = $(this).attr("loanFormID");
-		const feedback = $(this).attr("loanFormCode");
-		let tableData = getTableData("hris_loan_form_tbl", "", "loanFormID = "+ id);
+	$(document).on("click", "#btnApprove", function () {
+		const id       = decryptString($(this).attr("loanFormID"));
+		const feedback = $(this).attr("code") || getFormCode("LNF", dateCreated, id);
+		let tableData  = getTableData("hris_loan_form_tbl", "", "loanFormID = " + id);
+
 		if (tableData) {
 			let approversID     = tableData[0].approversID;
 			let approversStatus = tableData[0].approversStatus;
 			let approversDate   = tableData[0].approversDate;
-			let employeeID      = tableData[0].employeeID   ;
+			let employeeID      = tableData[0].employeeID;
+			let createdAt       = tableData[0].createdAt;
 
 			let data = getData("update", 2, "approve", feedback, id);
 			data["tableData[approversStatus]"] = updateApproveStatus(approversStatus, 2);
-			data["tableData[approversDate]"]   = updateApproveDate(approversDate);
+			let dateApproved = updateApproveDate(approversDate)
+			data["tableData[approversDate]"]   = dateApproved;
 
 			let status, notificationData;
 			if (isImLastApprover(approversID, approversDate)) {
 				status = 2;
 				notificationData = {
-					moduleID:                56,
+					moduleID:                60,
+					tableID:                 id,
 					notificationTitle:       "Loan Form",
-					notificationDescription: `${tableData[0].loanFormCode}: Your request has been approved.`,
-					notificationType:        2,
-					employeeID:              employeeID,
+					notificationDescription: `${getFormCode("LNF", createdAt, id)}: Your request has been approved.`,
+					notificationType:        7,
+					employeeID,
 				};
 			} else {
 				status = 1;
 				notificationData = {
-					moduleID:                56,
+					moduleID:                60,
+					tableID:                 id,
 					notificationTitle:       "Loan Form",
-					notificationDescription: `${employeeID} asked for your approval.`,
-					notificationType:        2,
-					employeeID:              getNotificationEmployeeID(approversID, approversDate),
+					notificationDescription: `${employeeFullname(employeeID)} asked for your approval.`,
+					notificationType:         2,
+					employeeID:               getNotificationEmployeeID(approversID, dateApproved),
 				};
 			}
 
 			data["tableData[loanFormStatus]"] = status;
 
-			formConfirmation(
-				"approve",
-				"update",
-				"LOAN FORM",
-				"",
-				"form_loan_form",
-				data,
-				true,
-				pageContent,
-				notificationData
-			);
+			setTimeout(() => {
+				formConfirmation(
+					"approve",
+					"update",
+					"LOAN",
+					"",
+					"form_loan_form",
+					data,
+					true,
+					pageContent,
+					notificationData
+				);
+			}, 300);
 		}
-	})
+	});
 	// ----- END APPROVE DOCUMENT -----
 
 
 	// ----- REJECT DOCUMENT -----
-	$(document).on("click", "#btnReject", function() {
+	$(document).on("click", "#btnReject", function () {
 		const id       = $(this).attr("loanFormID");
-		const feedback = $(this).attr("loanFormCode");
+		const feedback = $(this).attr("code") || getFormCode("LNF", dateToday(), id);
 
 		$("#modal_loan_form_content").html(preloader);
-		$("#modal_loan_form .page-title").text("DENY LOAN FORM DOCUMENT");
+		$("#modal_loan_form .page-title").text(
+			"DENY LOAN DOCUMENT"
+		);
 		$("#modal_loan_form").modal("show");
 		let html = `
 		<div class="modal-body">
 			<div class="form-group">
 				<label>Remarks <code>*</code></label>
 				<textarea class="form-control validate"
-					data-allowcharacters="[0-9][a-z][A-Z][ ][.][,][_]['][()][?]"
+					data-allowcharacters="[0-9][a-z][A-Z][ ][.][,][_]['][()][?][-][/]"
 					minlength="2"
 					maxlength="250"
 					id="loanFormRemarks"
@@ -936,65 +1133,118 @@ $(document).ready(function () {
 			</div>
 		</div>
 		<div class="modal-footer text-right">
-			<button class="btn btn-primary" id="btnRejectConfirmation"
+			<button class="btn btn-danger" id="btnRejectConfirmation"
 			loanFormID="${id}"
-			loanFormCode="${feedback}">Deny</button>
-			<button class="btn btn-danger" data-dismiss="modal">Cancel</button>
+			code="${feedback}"><i class="far fa-times-circle"></i> Deny</button>
+			<button class="btn btn-cancel" data-dismiss="modal"><i class="fas fa-ban"></i> Cancel</button>
 		</div>`;
 		$("#modal_loan_form_content").html(html);
-	})
+	});
 
-
-	$(document).on("click", "#btnRejectConfirmation", function() {
-		const id       = $(this).attr("loanFormID");
-		const feedback = $(this).attr("loanFormCode");
+	$(document).on("click", "#btnRejectConfirmation", function () {
+		const id       = decryptString($(this).attr("loanFormID"));
+		const feedback = $(this).attr("code") || getFormCode("LNF", dateToday(), id);
 
 		const validate = validateForm("modal_loan_form");
 		if (validate) {
-			let tableData = getTableData("hris_loan_form_tbl", "", "loanFormID = "+ id);
+			let tableData = getTableData("hris_loan_form_tbl", "", "loanFormID = " + id);
 			if (tableData) {
 				let approversID     = tableData[0].approversID;
 				let approversStatus = tableData[0].approversStatus;
 				let approversDate   = tableData[0].approversDate;
 				let employeeID      = tableData[0].employeeID;
-	
+				let createdAt       = tableData[0].createdAt;
+
 				let data = getData("update", 3, "reject", feedback, id);
 				data["tableData[loanFormRemarks]"] = $("[name=loanFormRemarks]").val().trim();
-				data["tableData[approversStatus]"] = updateApproveStatus(approversStatus, 3);
-				data["tableData[approversDate]"]   = updateApproveDate(approversDate);
+				data["tableData[approversStatus]"]       = updateApproveStatus(approversStatus, 3);
+				data["tableData[approversDate]"]         = updateApproveDate(approversDate);
 
 				let notificationData = {
-					moduleID:                56,
+					moduleID:                60,
+					tableID: 				 id,
 					notificationTitle:       "Loan Form",
-					notificationDescription: `${tableData[0].loanFormCode}: Your request has been denied.`,
-					notificationType:        2,
-					employeeID:              employeeID,
+					notificationDescription: `${getFormCode("LNF", createdAt, id)}: Your request has been denied.`,
+					notificationType:        1,
+					employeeID,
 				};
-	
-				formConfirmation(
-					"reject",
-					"update",
-					"LOAN FORM",
-					"modal_loan_form",
-					"",
-					data,
-					true,
-					pageContent,
-					notificationData
-				);
-			}
-		}
-	})
+
+				setTimeout(() => {
+					formConfirmation(
+						"reject",
+						"update",
+						"LOAN",
+						"modal_loan_form",
+						"",
+						data,
+						true,
+						pageContent,
+						notificationData,
+						this
+					);
+					$(`[redirect=forApprovalTab]`).trigger("click");
+				}, 300);
+			} 
+		} 
+	});
 	// ----- END REJECT DOCUMENT -----
+
+
+	// ----- NAV LINK -----
+	$(document).on("click", ".nav-link", function () {
+		const tab = $(this).attr("href");
+		if (tab == "#forApprovalTab") {
+			forApprovalContent();
+		}
+		if (tab == "#myFormsTab") {
+			myFormsContent();
+		}
+	});
+	// ----- END NAV LINK -----
+
+
+	// ----- APPROVER STATUS -----
+	function getApproversStatus(approversID, approversStatus, approversDate) {
+		let html = "";
+		if (approversID) {
+			let idArr = approversID.split("|");
+			let statusArr = approversStatus ? approversStatus.split("|") : [];
+			let dateArr = approversDate ? approversDate.split("|") : [];
+			html += `<div class="row mt-4">`;
+	
+			idArr && idArr.map((item, index) => {
+				let date   = dateArr[index] ? moment(dateArr[index]).format("MMMM DD, YYYY hh:mm:ss A") : "";
+				let status = statusArr[index] ? statusArr[index] : "";
+				let statusBadge = "";
+				if (date && status) {
+					if (status == 2) {
+						statusBadge = `<span class="badge badge-info">Approved - ${date}</span>`;
+					} else if (status == 3) {
+						statusBadge = `<span class="badge badge-danger">Denied - ${date}</span>`;
+					}
+				}
+	
+				html += `
+				<div class="col-xl-3 col-lg-3 col-md-4 col-sm-12">
+					<div class="d-flex justify-content-start align-items-center">
+						<span class="font-weight-bold">
+							${employeeFullname(item)}
+						</span>
+						<small>&nbsp;- Level ${index + 1} Approver</small>
+					</div>
+					${statusBadge}
+				</div>`;
+			});
+			html += `</div>`;
+		}
+		return html;
+	}
+	// ----- END APPROVER STATUS -----
+	
 });
 
 
-
-
-
-
-
-$(document).on("change", ".daterangeLoanForm" ,function(){
+$(document).on("change", "#loanFormDate" ,function(){
     let thisValue       =   $(this).val();
     let thisValueSplit  =   thisValue.split(" - ");
 
@@ -1005,19 +1255,17 @@ $(document).on("change", ".daterangeLoanForm" ,function(){
     let toDate          =  new Date(thisValueSplit[1]);
     let numberOfDays    =  Math.round((toDate-fromDate)/(1000*60*60*24));
     $("#loanFormNoOfDays").val(numberOfDays);
-    // alert(thisValue);
 })
 
 
 
-
-
-function loanFormDateRange(){
-    $('.daterangeLoanForm').daterangepicker({
+function loanFormDateRange(startDate=moment(), endDate=moment()){
+    $('#loanFormDate').daterangepicker({
         "showDropdowns": true,
 		minDate: moment(),
-        startDate: moment().startOf('hour'),
-        endDate: moment().startOf('hour').add(32, 'hour'),
+        autoApply: true,
+        startDate:startDate,
+        endDate: endDate,
         locale: {
           format: 'MMMM D, YYYY'
         },

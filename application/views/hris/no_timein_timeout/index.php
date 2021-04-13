@@ -5,11 +5,11 @@
                 <div class="col-lg-8 col-sm-12">
                     <ul class="breadcrumb pl-0 pb-0 ">
                         <li class="breadcrumb-item"><a href="#"><i class="zmdi zmdi-home"></i> Dashboard</a></li>
-						<li class="breadcrumb-item"><i class="fas fa-users"></i> &nbsp;EMPLOYEE FORMS</li>
-                        <li class="breadcrumb-item active">NO TIME-IN/OUT</li>
+						<li class="breadcrumb-item"><i class="fas fa-users"></i> &nbsp;Employee Forms</li>
+                        <li class="breadcrumb-item active">No Time-in/Time-out</li>
                     </ul>
-                    <h1 class="mb-1 mt-1">No Time-In/Out</h1>
-                    <span>This form is used to manage the No Time-In/Out.</span>
+                    <h1 class="mt-3">No Time-in/Time-out</h1>
+                    <span>This form  is used  to manage  the No Time-in/Time-out.</span>
                 </div>
                 <div class="col-lg-4 col-sm-12 text-right" id="headerButton"></div>
             </div>
@@ -17,11 +17,11 @@
     </div>
 
     <div class="container">
-		<div class="row clearfix row-deck">
-            <div class="col-12">
-                <div class="card">
-                    <div class="card-body" id="page_content">
-                    </div>
+		<div class="row clearfix row-deck mx-1">
+            <div class="card col-12">
+                <div class="card-body" id="page_content">
+
+                    
                 </div>
             </div>
         </div>

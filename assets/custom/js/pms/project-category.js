@@ -13,7 +13,9 @@ $(document).ready(function(){
             scrollCollapse: true,
             columnDefs: [
                 { targets: 0, width: "10%" },
-                { targets: 3, width: 80 },
+                { targets: 1, width: "40%" },
+                { targets: 2, width: "40%" },
+                { targets: 3, width: "10%" },
             ],
         });
     }
@@ -66,6 +68,21 @@ $(document).ready(function(){
                      if(item.categoryStatus == 0){
                         var status=`<span class="badge badge-outline-danger w-100">Inactive</span>`;
                      }
+
+                    var theCompanyName;
+                    switch(item.companyName) {
+                        case "BCGI":
+                            theCompanyName = "Blackcoders Group Inc.";
+                          break;
+                        case "GTC":
+                            theCompanyName = "Gatchallan Tangalin and Co., CPA's";
+                          break;
+                        case "CMTLAND":
+                          theCompanyName = "CMT Land";
+                          break;
+                        default:
+                          theCompanyName = "CMT Builders";
+                      }
                     html += `
                     <tr
                     class="btnEdit" 
@@ -73,7 +90,7 @@ $(document).ready(function(){
                     feedback="${item.categoryName}">
                         <td>${item.categoryCode}</td>
                         <td>${item.categoryName}</td>
-                        <td>${item.companyName}</td>
+                        <td>${theCompanyName}</td>
                         <td class="text-center">${status}</td>
                     </tr>`;
                 })
@@ -99,10 +116,10 @@ $(document).ready(function(){
 
      // ----- MODAL CONTENT -----
      function modalContent(data = false) {
-        let categoryID              = data ? (data[0].categoryID            ? data[0].categoryID        : "") : "",
-        categoryName             = data ? (data[0].categoryName       ? data[0].categoryName   : "") : "",
-        companyName                = data ? (data[0].companyName          ? data[0].companyName      : "") : "",
-        categoryStatus      = data ? (data[0].categoryStatus? data[0].categoryStatus         : "") : "";
+        let categoryID              = data ? (data[0].categoryID     ? data[0].categoryID     : "") : "",
+        categoryName                = data ? (data[0].categoryName   ? data[0].categoryName   : "") : "",
+        companyName                 = data ? (data[0].companyName    ? data[0].companyName    : "") : "",
+        categoryStatus              = data ? (data[0].categoryStatus ? data[0].categoryStatus : "") : "";
           
         let button = categoryID ? `
         <button 
@@ -131,7 +148,7 @@ $(document).ready(function(){
                             id="input_categoryName" 
                             data-allowcharacters="[A-Z][a-z][ ][-][(][)][,]" 
                             minlength="2" 
-                            maxlength="20" 
+                            maxlength="50" 
                             required 
                             unique="${categoryID}" 
                             value="${categoryName}"
@@ -139,24 +156,28 @@ $(document).ready(function(){
                         <div class="invalid-feedback d-block" id="invalid-input_categoryName"></div>
                     </div>
                 </div>
-                <div class="col-xl-8 col-lg-8 col-md-8 col-sm-12">
+                <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12">
                     <div class="form-group">
                         <label>Company Name <span class="text-danger font-weight-bold">*</span></label>
-                        <input 
-                            type="text" 
-                            class="form-control validate" 
-                            name="companyName" 
-                            id="input_companyName" 
-                            data-allowcharacters="[A-Z][a-z][ ][-][(][)][,][']"  
-                            minlength="2" 
-                            maxlength="20" 
-                            required 
-                            value="${companyName}"
-                            autocomplete="off">
+                        <select class="form-control select2 validate" name="companyName"  id="input_companyName" autocomplete="off" required >
+                            <option disabled ${companyName != "" ? "" : "selected"}>Select Company Name</option>
+                            <option 
+                                value="BCGI" 
+                                ${data && companyName == "BCGI" && "selected"}>Blackcoders Group Inc.</option>
+                            <option 
+                                value="GTC" 
+                                ${data && companyName == "GTC" && "selected"}>Gatchallan Tangalin and Co., CPA's</option>
+                            <option 
+                                value="CMTLAND" 
+                                ${data && companyName == "CMTLAND" && "selected"}>CMT Land</option>
+                            <option 
+                                value="CMTBUILDERS" 
+                                ${data && companyName == "CMTBUILDER" && "selected"}>CMT Builders</option>
+                        </select>
                         <div class="invalid-feedback d-block" id="invalid-input_companyName"></div>
                     </div>
                 </div>
-                <div class="col-xl-4 col-lg-4 col-md-4 col-sm-12">
+                <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12">
                     <div class="form-group">
                         <label>Status <span class="text-danger font-weight-bold">*</span></label>
                         <select 
@@ -209,7 +230,7 @@ $(document).ready(function(){
             data["tableName"]            = "pms_category_tbl";
             data["feedback"]             = $("[name=categoryName]").val();
 
-            sweetAlertConfirmation("add", "Category Masterfile", "modalProjectCategory", null, data, true, tableContent);
+            sweetAlertConfirmation("add", "Project Category", "modalProjectCategory", null, data, true, tableContent);
         }
     });
     // ----- END SAVE MODAL -----
@@ -218,7 +239,7 @@ $(document).ready(function(){
     $(document).on("click", ".btnEdit", function() {
         const id       = $(this).attr("id");
         const feedback = $(this).attr("feedback");
-        $("#modalProjectCategoryHeader").text("VIEW CATEGORY");
+        $("#modalProjectCategoryHeader").text("EDIT CATEGORY");
         $("#modalProjectCategory").modal("show");
 
         // Display preloader while waiting for the completion of getting the data
@@ -252,7 +273,7 @@ $(document).ready(function(){
 
 			sweetAlertConfirmation(
 				"update",
-				"Category Masterfile",
+				"Proeject Category",
 				"modalProjectCategory",
 				"",
 				data,

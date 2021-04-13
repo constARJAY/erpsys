@@ -151,8 +151,15 @@ $(document).on("change", "[name=clientCity]", function() {
             scrollCollapse: true,
             columnDefs: [
                 { targets: 0, width: "10%" },
-
-                { targets: 9, width: 80 }
+                { targets: 1, width: "10%" },
+                { targets: 2, width: "10%" },
+                { targets: 3, width: "10%" },
+                { targets: 4, width: "10%" },
+                { targets: 5, width: "10%" },
+                { targets: 6, width: "10%" },
+                { targets: 7, width: "10%" },
+                { targets: 8, width: "10%" },
+                { targets: 9, width: "10%" }
             ],
         });
     }
@@ -414,7 +421,7 @@ $(document).on("change", "[name=clientCity]", function() {
                     </div>
                     <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12">
                         <div class="form-group">
-                            <label>Email Address</label>
+                            <label>Email Address <span class="text-danger font-weight-bold">*</span></label>
                             <input 
                                 type="email" 
                                 class="form-control validate" 
@@ -443,40 +450,40 @@ $(document).on("change", "[name=clientCity]", function() {
                                 maxlength="15" 
                                 value="${clientTin}"
                                 required
-                                mask="999-999-999-999"
+                                mask="999 999 999 999"
                                 autocomplete="off">
                             <div class="invalid-feedback d-block" id="invalid-input_clientTin"></div>
                         </div>
                     </div>
                     <div class="col-xl-4 col-lg-6 col-md-6 col-sm-12">
                         <div class="form-group">
-                            <label>Mobile No.</label>
+                            <label>Mobile No. <span class="text-danger font-weight-bold">*</span></label>
                                 <input 
                                 type="text" 
-                                class="form-control  inputmask" 
+                                class="form-control validate inputmask" 
                                 name="client_MobileNo" 
                                 id="input_clientMobileNo" 
                                 data-allowcharacters="[0-9]" 
-                                mask="0\\999-9999-999" 
+                                mask="9999 9999 999" 
                                 minlength="13" 
                                 maxlength="13" 
                                 value="${client_MobileNo}"
-                                >
+                                required="">
                             <div class="invalid-feedback d-block" id="invalid-input_clientMobileNo"></div>
                         </div>
                     </div>
                     <div class="col-xl-4 col-lg-6 col-md-6 col-sm-12">
                         <div class="form-group">
-                            <label>Telephone No.</label>
+                            <label>Telephone No. <span class="text-danger font-weight-bold">*</span></label>
                                 <input type="text" 
-                                class="form-control  inputmask" 
+                                class="form-control validate inputmask" 
                                 name="clientTelephoneNo" 
                                 id="input_clientTelephoneNo" 
                                 data-allowcharacters="[0-9]" 
-                                mask="(99)-9999-9999" 
+                                mask="(99) 9999 9999" 
                                 minlength="13" 
                                 maxlength="13" 
-                                
+                                required="" 
                                 value="${clientTelephoneNo}">
                             <div class="invalid-feedback d-block" id="invalid-input_clientTelephoneNo"></div>
                         </div>
@@ -486,7 +493,7 @@ $(document).on("change", "[name=clientCity]", function() {
                             <label>Website <small class="text-muted">(Optional)</small></label>
                             <input 
                                 type="text" 
-                                class="form-control" 
+                                class="form-control validate" 
                                 name="clientBrandName" 
                                 id="input_clientBrandName" 
                                 data-allowcharacters="[A-Z][a-z][0-9][/][.][-][:]" 
@@ -494,6 +501,7 @@ $(document).on("change", "[name=clientCity]", function() {
                                 maxlength="30" 
                                 value="${clientBrandName}"
                                 autocomplete="off">
+                       
                         </div>
                     </div>
                     <div class="col-md-6 col-sm-12">

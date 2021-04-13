@@ -37,15 +37,35 @@
 		</div>
 	</div>
 
-    <div class="container">
+    <!-- <div class="container">
 		<div class="row clearfix row-deck">
-			<div class="col-lg-12">
-				<div class="card">
-					<div class="row card-body" id="roles_permission_content"></div>
-				</div>
+			<div class="col-12 card">
+				<div class="row card-body" id="roles_permission_content"></div>
 			</div>
 		</div>
+	</div> -->
+	<div class="container">
+		<div class="row clearfix">
+            <div class="col-lg-12">
+                <div class="card">
+                    <div class="header text-right p-0">
+						<div class="closeBtn"></div>
+					</div>
+					<div class="body" id="main_body">
+						<div class="row" id="loading-screen" style="visibility:hidden;"></div>
+						<div class="row clearfix row-deck">
+							<div class="col-12">
+                                <div class="row card-body" id="roles_permission_content"></div>
+							</div>
+						</div>
+					</div>
+                </div>
+            </div>
+        </div>
 	</div>
+
+
+
 </div>
 
 
