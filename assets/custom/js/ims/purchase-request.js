@@ -996,6 +996,11 @@ $(document).ready(function() {
 			</div>
 		</th>` : ``;
 		let tableRequestItemsName = !disabled ? "tableRequestItems" : "tableRequestItems0";
+		let buttonAddDeleteRow = !disabled ? `
+		<div class="w-100 text-left my-2">
+			<button class="btn btn-primary" id="btnAddRow"><i class="fas fa-plus-circle"></i> Add Row</button>
+			<button class="btn btn-danger" id="btnDeleteRow" disabled><i class="fas fa-minus-circle"></i> Delete Row/s</button>
+		</div>` : "";
 		let button = formButtons(data);
 
 		let html = `
@@ -1165,14 +1170,11 @@ $(document).ready(function() {
                             ${requestItems}
                         </tbody>
                     </table>
-                    <div class="w-100 text-left my-2">
-                        <button class="btn btn-primary" id="btnAddRow"><i class="fas fa-plus-circle"></i> Add Row</button>
-                        <button class="btn btn-danger" id="btnDeleteRow" disabled><i class="fas fa-minus-circle"></i> Delete Row/s</button>
-                    </div>
+                    ${buttonAddDeleteRow}
                 </div>
             </div>
 
-            <div class="col-md-12 text-right">
+            <div class="col-md-12 text-right mt-3">
                 ${button}
             </div>
         </div>
