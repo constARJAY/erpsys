@@ -502,36 +502,17 @@ const checkExists = (elementID, invalidFeedback) => {
 						});
 						if (countKeys == countTemp) {
 							flag = true;
-							if ($(elementID).hasClass("select2")) {
-								$(elementID)
-									.parent()
-									.find(".selection")
-									.children()
-									.removeClass("is-invalid")
-									.removeClass("is-valid")
-									.removeClass("no-error")
-									.addClass("has-error");
-							} else {
-								$(elementID).removeClass("is-valid").addClass("is-invalid");
-							}
+							$(elementID)
+								.parent()
+								.find(".selection")
+								.children()
+								.removeClass("is-invalid")
+								.removeClass("is-valid")
+								.removeClass("no-error")
+								.addClass("has-error");
+							$(elementID).removeClass("is-valid").addClass("is-invalid");
 							invalidFeedback.text(`${title} already exists!`);
-						} else {
-							if ($(elementID).hasClass("validated")) {
-								if ($(elementID).hasClass("select2")) {
-									$(elementID)
-										.parent()
-										.find(".selection")
-										.children()
-										.removeClass("is-invalid")
-										.removeClass("is-valid")
-										.removeClass("has-error")
-										.addClass("no-error");
-								} else {
-									$(elementID).removeClass("is-invalid").addClass("is-valid");
-								}
-								invalidFeedback.text(``);
-							}
-						}
+						} 
 					}
 				}
 			});
@@ -547,35 +528,16 @@ const checkExists = (elementID, invalidFeedback) => {
 							invalidFeedback
 						) {
 							flag = true;
-							if ($(elementID).hasClass("select2")) {
-								$(elementID)
-									.parent()
-									.find(".selection")
-									.children()
-									.removeClass("is-invalid")
-									.removeClass("is-valid")
-									.removeClass("no-error")
-									.addClass("has-error");
-							} else {
-								$(elementID).removeClass("is-valid").addClass("is-invalid");
-							}
+							$(elementID)
+								.parent()
+								.find(".selection")
+								.children()
+								.removeClass("is-invalid")
+								.removeClass("is-valid")
+								.removeClass("no-error")
+								.addClass("has-error");
+							$(elementID).removeClass("is-valid").addClass("is-invalid");
 							invalidFeedback.text(`${title} already exists!`);
-						} else {
-							if ($(elementID).hasClass("validated")) {
-								if ($(elementID).hasClass("select2")) {
-									$(elementID)
-										.parent()
-										.find(".selection")
-										.children()
-										.removeClass("is-invalid")
-										.removeClass("is-valid")
-										.removeClass("has-error")
-										.addClass("no-error");
-								} else {
-									$(elementID).removeClass("is-invalid").addClass("is-valid");
-								}
-								invalidFeedback.text(``);
-							}
 						}
 					});
 				}
@@ -705,11 +667,10 @@ const validateInput = (elementID) => {
 					) {
 						$(elementID)
 							.parent()
+							.find(".selection")
 							.children()
-							.next()
-							.next()
-							.children()
-							.children()
+							.removeClass("is-invalid")
+							.removeClass("is-valid")
 							.removeClass("no-error")
 							.addClass("has-error");
 						$(elementID).removeClass("is-valid").addClass("is-invalid");
@@ -717,11 +678,10 @@ const validateInput = (elementID) => {
 					} else {
 						$(elementID)
 							.parent()
+							.find(".selection")
 							.children()
-							.next()
-							.next()
-							.children()
-							.children()
+							.removeClass("is-invalid")
+							.removeClass("is-valid")
 							.removeClass("has-error")
 							.addClass("no-error");
 						$(elementID).removeClass("is-invalid").addClass("is-valid");
@@ -738,16 +698,20 @@ const validateInput = (elementID) => {
 					) {
 						$(elementID)
 							.parent()
+							.find(".selection")
 							.children()
-							.next()
+							.removeClass("is-invalid")
+							.removeClass("is-valid")
 							.removeClass("no-error")
 							.addClass("has-error");
 						invalidFeedback.text("This field is required.");
 					} else {
 						$(elementID)
 							.parent()
+							.find(".selection")
 							.children()
-							.next()
+							.removeClass("is-invalid")
+							.removeClass("is-valid")
 							.removeClass("has-error")
 							.addClass("no-error");
 						invalidFeedback.text("");
@@ -763,11 +727,10 @@ const validateInput = (elementID) => {
 					.addClass("no-error");
 				$(elementID)
 					.parent()
+					.find(".selection")
 					.children()
-					.next()
-					.next()
-					.children()
-					.children()
+					.removeClass("is-invalid")
+					.removeClass("is-valid")
 					.removeClass("has-error")
 					.addClass("no-error");
 				$(elementID).removeClass("is-invalid").addClass("is-valid");
@@ -1016,11 +979,10 @@ $(function () {
 					) {
 						$(elementID)
 							.parent()
+							.find(".selection")
 							.children()
-							.next()
-							.next()
-							.children()
-							.children()
+							.removeClass("is-invalid")
+							.removeClass("is-valid")
 							.removeClass("no-error")
 							.addClass("has-error");
 						$(elementID).removeClass("is-valid").addClass("is-invalid");
@@ -1029,11 +991,10 @@ $(function () {
 					} else {
 						$(elementID)
 							.parent()
+							.find(".selection")
 							.children()
-							.next()
-							.next()
-							.children()
-							.children()
+							.removeClass("is-invalid")
+							.removeClass("is-valid")
 							.removeClass("has-error")
 							.addClass("no-error");
 						$(elementID).removeClass("is-invalid").addClass("is-valid");
@@ -1050,6 +1011,8 @@ $(function () {
 					) {
 						$(elementID)
 							.parent()
+							.find(".selection")
+							.children()
 							.removeClass("is-invalid")
 							.removeClass("is-valid")
 							.removeClass("no-error")
@@ -1060,6 +1023,8 @@ $(function () {
 					} else {
 						$(elementID)
 							.parent()
+							.find(".selection")
+							.children()
 							.removeClass("is-invalid")
 							.removeClass("is-valid")
 							.removeClass("has-error")
@@ -1072,6 +1037,8 @@ $(function () {
 			} else {
 				$(elementID)
 					.parent()
+					.find(".selection")
+					.children()
 					.removeClass("is-invalid")
 					.removeClass("is-valid")
 					.removeClass("has-error")
@@ -1091,11 +1058,10 @@ $(function () {
 					) {
 						$(elementID)
 							.parent()
+							.find(".selection")
 							.children()
-							.next()
-							.next()
-							.children()
-							.children()
+							.removeClass("is-invalid")
+							.removeClass("is-valid")
 							.removeClass("no-error")
 							.addClass("has-error");
 						$(elementID).removeClass("is-valid").addClass("is-invalid");
@@ -1104,13 +1070,12 @@ $(function () {
 					} else {
 						$(elementID)
 							.parent()
+							.find(".selection")
 							.children()
-							.next()
-							.next()
-							.children()
-							.children()
-							.removeClass("has-error")
-							.removeClass("no-error");
+							.removeClass("is-invalid")
+							.removeClass("is-valid")
+							.removeClass("no-error")
+							.removeClass("has-error");
 						$(elementID).removeClass("is-invalid").addClass("is-valid");
 						invalidFeedback.text("");
 						checkExists(elementID, invalidFeedback);
@@ -1125,6 +1090,8 @@ $(function () {
 					) {
 						$(elementID)
 							.parent()
+							.find(".selection")
+							.children()
 							.removeClass("is-invalid")
 							.removeClass("is-valid")
 							.removeClass("no-error")
@@ -1135,10 +1102,12 @@ $(function () {
 					} else {
 						$(elementID)
 							.parent()
+							.find(".selection")
+							.children()
 							.removeClass("is-invalid")
 							.removeClass("is-valid")
-							.removeClass("has-error")
-							.removeClass("no-error");
+							.removeClass("no-error")
+							.removeClass("has-error");
 						$(elementID).removeClass("is-invalid").addClass("is-valid");
 						invalidFeedback.text("");
 						checkExists(elementID, invalidFeedback);
@@ -1147,10 +1116,12 @@ $(function () {
 			} else {
 				$(elementID)
 					.parent()
+					.find(".selection")
+					.children()
 					.removeClass("is-invalid")
 					.removeClass("is-valid")
-					.removeClass("has-error")
-					.removeClass("no-error");
+					.removeClass("no-error")
+					.removeClass("has-error");
 				$(elementID).removeClass("is-invalid").addClass("is-valid");
 				invalidFeedback.text("");
 			}

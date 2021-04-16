@@ -865,7 +865,7 @@ $(document).ready(function () {
 				cancelForm(
 					"save",
 					action,
-					"CHANGE OTREDULE",
+					"OVERTIME REQUEST",
 					"",
 					"form_overtime_request",
 					data,
@@ -917,7 +917,7 @@ $(document).ready(function () {
 		// 	formConfirmation(
 		// 		"save",
 		// 		"insert",
-		// 		"CHANGE OTREDULE",
+		// 		"OVERTIME REQUEST",
 		// 		"",
 		// 		"form_overtime_request",
 		// 		data,
@@ -933,7 +933,7 @@ $(document).ready(function () {
 		formConfirmation(
 			"save",
 			"insert",
-			"CHANGE OTREDULE",
+			"OVERTIME REQUEST",
 			"",
 			"form_overtime_request",
 			data,
@@ -977,7 +977,7 @@ $(document).ready(function () {
 				formConfirmation(
 					"submit",
 					action,
-					"CHANGE OTREDULE",
+					"OVERTIME REQUEST",
 					"",
 					"form_overtime_request",
 					data,
@@ -1001,7 +1001,7 @@ $(document).ready(function () {
 		formConfirmation(
 			"cancelform",
 			action,
-			"CHANGE OTREDULE",
+			"OVERTIME REQUEST",
 			"",
 			"form_overtime_request",
 			data,
@@ -1022,7 +1022,7 @@ $(document).ready(function () {
 		cancelForm(
 			"save",
 			action,
-			"CHANGE OTREDULE",
+			"OVERTIME REQUEST",
 			"",
 			"form_overtime_request",
 			data,
@@ -1080,7 +1080,7 @@ $(document).ready(function () {
 				formConfirmation(
 					"approve",
 					"update",
-					"CHANGE OTREDULE",
+					"OVERTIME REQUEST",
 					"",
 					"form_overtime_request",
 					data,
@@ -1101,7 +1101,7 @@ $(document).ready(function () {
 
 		$("#modal_overtime_request_content").html(preloader);
 		$("#modal_overtime_request .page-title").text(
-			"DENY CHANGE OTREDULE DOCUMENT"
+			"DENY OVERTIME REQUEST DOCUMENT"
 		);
 		$("#modal_overtime_request").modal("show");
 		let html = `
@@ -1161,7 +1161,7 @@ $(document).ready(function () {
 					formConfirmation(
 						"reject",
 						"update",
-						"CHANGE OTREDULE",
+						"OVERTIME REQUEST",
 						"modal_overtime_request",
 						"",
 						data,

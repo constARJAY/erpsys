@@ -370,39 +370,32 @@ $(document).ready(function () {
 	// ---- GET INDUSTRY -----
 	function getIndustry(industryStr = "", display = true) {
 		let industryArr = [
-			"Advertising",
-			"Communications Industry",
-			"Creative Industries",
-			"Entertainment Industry",
-			"Fashion",
-			"Green Industry",
-			"Hospitality Inductry",
-			"Information Technology",
-			"IT Industry",
-			"Manufacturing",
-			"Media",
-			"Primary Industry",
-			"Retail",
-			"Secondary Inustry",
-			"Space",
-			"Technology Industry",
-			"Tertiary Sector",
-			"Agriculture Industry",
-			"Construction Industry",
-			"Education",
-			"Farming",
-			"Finance",
-			"Heavy Industry",
-			"Information Industry",
-			"Infrastructure",
-			"Light Industry",
-			"Materials",
-			"Music Industry",
-			"Publishing",
-			"Robotics",
-			"Service Industry",
-			"Space Industry",
-			"Telecom" ];
+			"Printing Services",
+			"Electronics",
+			"Aircon repair & maintenace",
+			"Alcohol",
+			"Car Dealer",
+			"Furnitures",
+			"Indoor Slippers",
+			"Hardware, Electrical Supplies, Construction, Plumbing, Paints",
+			"Hikvision Camera",
+			"Fire Extinguisher",
+			"Computer Electronics",
+			"Electrical",
+			"Handbook, manuals",
+			"ZKTeco",
+			"Office supplies",
+			"Office supplies & Equipments",
+			"Dept. Store",
+			"ID lace",
+			"Appliances, Hardware and Construction supplies, Industrial, Lightning",
+			"Printing and Clothing",
+			"Car Insurance",
+			"Cabinets",
+			"Clothing",
+			"PPE's",
+			"Power tools"
+		];
 		let html = industryArr.map(industry => {
 			return `<option value="${industry}" ${industryStr == industry && "selected"}>${industry}</option>`;
 		})
@@ -742,12 +735,12 @@ $(document).ready(function () {
 					</div>
 					<div class="col-xl-6 col-lg-6 col-md-6 col-sm-12">
 						<div class="form-group">
-							<label>Industry <code>*</code></label>
+							<label>Industry </label>
 							<select
 								class="form-control validate select2" 
 								name="inventoryVendorIndustry" 
 								id="inventoryVendorIndustry"
-								required>
+								>
 								<option disabled selected>Select Enterprise</option>
 								${getIndustry(inventoryVendorIndustry)}
 							</select>
@@ -756,12 +749,12 @@ $(document).ready(function () {
 					</div>
 					<div class="col-xl-6 col-lg-6 col-md-6 col-sm-12">
 						<div class="form-group">
-							<label>Enterprise <code>*</code></label>
+							<label>Enterprise </label>
 							<select
 								class="form-control validate select2" 
 								name="inventoryVendorEnterprise" 
 								id="inventoryVendorEnterprise"
-								required>
+								>
 								<option disabled selected>Select Enterprise</option>
 								${getEnterprise(inventoryVendorEnterprise)}
 							</select>
@@ -783,7 +776,7 @@ $(document).ready(function () {
 					</div>
 					<div class="col-xl-6 col-lg-6 col-md-6 col-sm-12">
 						<div class="form-group">
-							<label>Bank Account Name <code>*</code></label>
+							<label>Bank Account Name</label>
 							<input 
 								type="text" 
 								class="form-control validate" 
@@ -794,13 +787,13 @@ $(document).ready(function () {
 								maxlength="50" 
 								value="${inventoryVendorBankAccName}"
 								autocomplete="off"
-								required>
+								>
 							<div class="invalid-feedback d-block" id="invalid-inventoryVendorBankAccName"></div>
 						</div>
 					</div>
 					<div class="col-xl-6 col-lg-6 col-md-6 col-sm-12">
 						<div class="form-group">
-							<label>Bank Account No. <code>*</code></label>
+							<label>Bank Account No.</label>
 							<input 
 								type="text" 
 								class="form-control validate" 
@@ -811,7 +804,7 @@ $(document).ready(function () {
 								maxlength="50" 
 								value="${inventoryVendorBankAccNo}"
 								autocomplete="off"
-								required>
+								>
 							<div class="invalid-feedback d-block" id="invalid-inventoryVendorBankAccNo"></div>
 						</div>
 					</div>

@@ -123,14 +123,16 @@ $(document).ready(function () {
 				scrollCollapse: true,
 				columnDefs: [
 					{ targets: 0, width: 100 },
-					{ targets: 1, width: 150 },
-					{ targets: 2, width: 150 },
+					{ targets: 1, width: 180 },
+					{ targets: 2, width: 180 },
 					{ targets: 3, width: 200 },
-					{ targets: 4, width: 200 },
+					{ targets: 4, width: 150 },
 					{ targets: 5, width: 200 },
-					{ targets: 6, width: 80  },
-					{ targets: 7, width: 250 },
+					{ targets: 6, width: 200 },
+					{ targets: 7, width: 200 },
 					{ targets: 8, width: 80  },
+					{ targets: 9, width: 250 },
+					{ targets: 10, width: 80  },
 				],
 			});
 
@@ -145,14 +147,16 @@ $(document).ready(function () {
 				scrollCollapse: true,
 				columnDefs: [
 					{ targets: 0, width: 100 },
-					{ targets: 1, width: 150 },
-					{ targets: 2, width: 150 },
+					{ targets: 1, width: 180 },
+					{ targets: 2, width: 180 },
 					{ targets: 3, width: 200 },
-					{ targets: 4, width: 200 },
+					{ targets: 4, width: 150 },
 					{ targets: 5, width: 200 },
-					{ targets: 6, width: 80  },
-					{ targets: 7, width: 250 },
+					{ targets: 6, width: 200 },
+					{ targets: 7, width: 200 },
 					{ targets: 8, width: 80  },
+					{ targets: 9, width: 250 },
+					{ targets: 10, width: 80  },
 				],
 			});
 	}
@@ -216,6 +220,8 @@ $(document).ready(function () {
                 <tr style="white-space: nowrap">
                     <th>Document No.</th>
                     <th>Employee Name</th>
+					<th>Leave Type</th>
+					<th>Leave Date/s</th>
 					<th>Current Approver</th>
 					<th>Date Created</th>
 					<th>Date Submitted</th>
@@ -230,6 +236,8 @@ $(document).ready(function () {
 		scheduleData.map((schedule) => {
 			let {
 				fullname,
+				leaveID,
+				leaveRequestDate,
 				leaveRequestID,
 				approversID,
 				approversDate,
@@ -238,7 +246,9 @@ $(document).ready(function () {
 				submittedAt,
 				createdAt,
 			} = schedule;
-
+			let leaveDateSplit= leaveRequestDate.split(" - ");
+			let leaveDate 	  = leaveDateSplit[0] == leaveDateSplit[1] ? leaveDateSplit[0] : leaveDateSplit[0]+" - "+leaveDateSplit[1];
+			let leaveType  	  = getTableData("hris_leave_tbl","leaveName","leaveID="+leaveID);
 			let remarks       = leaveRequestRemarks ? leaveRequestRemarks : "-";
 			let dateCreated   = moment(createdAt).format("MMMM DD, YYYY hh:mm:ss A");
 			let dateSubmitted = submittedAt	? moment(submittedAt).format("MMMM DD, YYYY hh:mm:ss A") : "-";
@@ -255,6 +265,8 @@ $(document).ready(function () {
 				<tr>
 					<td>${getFormCode("LRF", dateCreated, leaveRequestID)}</td>
 					<td>${fullname}</td>
+					<td>${leaveID != 0 ? leaveType[0].leaveName : "No selected Leave type" }</td>
+					<td>${leaveDate}</td>
 					<td>
 						${employeeFullname(getCurrentApprover(approversID, approversDate, leaveRequestStatus, true))}
 					</td>
@@ -301,6 +313,8 @@ $(document).ready(function () {
                 <tr style="white-space: nowrap">
                     <th>Document No.</th>
                     <th>Employee Name</th>
+					<th>Leave Type</th>
+					<th>Leave Date/s</th>
                     <th>Current Approver</th>
 					<th>Date Created</th>
 					<th>Date Submitted</th>
@@ -315,8 +329,9 @@ $(document).ready(function () {
 		scheduleData.map((item) => {
 			let {
 				fullname,
-				leaveRequestID,
+				leaveID,
 				leaveRequestDate,
+				leaveRequestID,
 				approversID,
 				approversDate,
 				leaveRequestStatus,
@@ -325,6 +340,9 @@ $(document).ready(function () {
 				createdAt,
 			} = item;
 
+			let leaveDateSplit= leaveRequestDate.split(" - ");
+			let leaveDate 	  = leaveDateSplit[0] == leaveDateSplit[1] ? leaveDateSplit[0] : leaveDateSplit[0]+" - "+leaveDateSplit[1];
+			let leaveType  	  = getTableData("hris_leave_tbl","leaveName","leaveID="+leaveID);
 			let remarks       = leaveRequestRemarks ? leaveRequestRemarks : "-";
 			let dateCreated   = moment(createdAt).format("MMMM DD, YYYY hh:mm:ss A");
 			let dateSubmitted = submittedAt ? moment(submittedAt).format("MMMM DD, YYYY hh:mm:ss A") : "-";
@@ -352,6 +370,8 @@ $(document).ready(function () {
             <tr>
                 <td>${getFormCode("LRF", dateCreated, leaveRequestID)}</td>
                 <td>${fullname}</td>
+				<td>${leaveID != 0 ? leaveType[0].leaveName : "No selected Leave type" }</td>
+				<td>${leaveDate}</td>
                 <td>
                     ${employeeFullname(getCurrentApprover(approversID, approversDate, leaveRequestStatus, true))}
                 </td>
@@ -636,7 +656,7 @@ $(document).ready(function () {
             <div class="col-md-3 col-sm-12">
                 <div class="form-group">
                     <label for="">Leave Credit/s</label>
-                    <input type="text" class="form-control" disabled name="leaveRequestRemainingLeave" id="leaveRequestRemainingLeave" required value="1">
+                    <input type="text" class="form-control" disabled name="leaveRequestRemainingLeave" id="leaveRequestRemainingLeave" required value="3">
                     <div class="invalid-feedback d-block" id="invalid-leaveRequestRemainingLeave"></div>
                 </div>
             </div>
@@ -1259,7 +1279,7 @@ $(document).ready(function () {
 
 function getLeaveOptions(leaveID  = 0) {
     let getLeave = getTableData("hris_leave_tbl", "*", "leaveStatus = 1");
-    let leaveOptions = `<option selected disabled>Select Leave Type</option>`;
+    let leaveOptions = `<option selected value="0" disabled>Select Leave Type</option>`;
     getLeave.map(item => {
         leaveOptions += `<option value="${item.leaveID}" ${item.leaveID == leaveID && "selected"}>${item.leaveName}</option>`;
     })
@@ -1291,11 +1311,11 @@ $(document).on("change","#leaveRequestDate", function(){
     let splitingValue       = thisValue.split("-");
     let fromDate            = new Date(splitingValue[0]); 	
     let toDate              = new Date(splitingValue[1]);
-    let numberOfDays        = Math.round((toDate-fromDate)/(1000*60*60*24));
+    let numberOfDays        = Math.round((toDate-fromDate)/(1000*60*60*24)) + 1;
     var remaining_of_days   = $("#leaveRequestRemainingLeave").val();
 
     $("#leaveRequestNumberOfDate").val(numberOfDays);
-    if(numberOfDays > remaining_of_days || numberOfDays != remaining_of_days ){
+    if(numberOfDays > remaining_of_days){
         $("#leaveRequestNumberOfDate").addClass("is-invalid");
         $("#invalid-leaveRequestNumberOfDate").addClass("is-invalid");
         $("#invalid-leaveRequestNumberOfDate").text("Not enough number of leave!");

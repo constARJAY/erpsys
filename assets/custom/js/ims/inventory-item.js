@@ -33,9 +33,6 @@ $(document).ready(function(){
     function tableContent() {
         // Reset the unique datas
         uniqueData = []; 
-        // getTableData(tableName = null, columnName = “”, WHERE = “”, orderBy = “”) 
-        // const data = getTableData("ims_inventory_item_tbl as item INNER JOIN ims_inventory_classification_tbl as classification USING(classificationID) INNER JOIN ims_inventory_category_tbl as category USING(categoryID) INNER JOIN ims_inventory_storage_tbl USING(inventoryStorageID) ", 
-        //     "*, CONCAT('ITM-',SUBSTR(item.datecreated,3,2),'-',LPAD(item.itemID, 5, '0')) AS itemCode,classification.classificationName,inventoryStorageOfficeName,category.categoryName","", "");
 
         $.ajax({
             url:      `${base_url}operations/getTableData`,
@@ -85,7 +82,7 @@ $(document).ready(function(){
                     if(item.itemStatus == 0){
                        var status=`<span class="badge badge-outline-danger w-100">Inactive</span>`;
                     }
-
+                    var unitOfMeasurementValue =  item.unitOfMeasurementID; 
                     html += `
                     <tr
                     class="btnEdit" 
@@ -97,7 +94,7 @@ $(document).ready(function(){
                         <td>${item.classificationName}</td>
                         <td>${item.categoryName}</td>
                         <td>${item.itemSize}</td>
-                        <td>${item.unitOfMeasurementID}</td>
+                        <td>${unitOfMeasurementValue.charAt(0).toUpperCase() + unitOfMeasurementValue.slice(1)}</td>
                         <td>${item.itemDescription}</td>
                         <td>${item.reOrderLevel}</td>
                         <td class="text-right">${formatAmount(item.basePrice, true)}</td>
@@ -155,18 +152,20 @@ $(document).ready(function(){
     // ----- END CLASSIFICATION CONTENT -----
 
     // -----CATEGORY CONTENT -----
-    function categoryContent(param = false) {
+    function categoryContent(condition = "add", param = false) {
     // getTableData(tableName = null, columnName = “”, WHERE = “”, orderBy = “”) 
-    const data = getTableData("ims_inventory_category_tbl", 
-        "categoryID ,categoryName", "categoryStatus = 1", "");
+    let paramCondition = param == false ? "":" AND classificationID="+param;
+    const data = getTableData("ims_inventory_category_tbl", "categoryID ,categoryName", "categoryStatus = '1'"+paramCondition, "");
         
-            let html = ` <option value="" disabled selected ${!param && "selected"}>Select Item Category</option>`;
-            data.map((item, index, array) => {
-                html += `<option value="${item.categoryID}" ${param && item.categoryID == param[0].categoryID && "selected"}>${item.categoryName}</option>`;
-            })
+            let html = ` <option value="" disabled ${condition == "add" ? "selected": ""}>Select Item Category</option>`;
+            if(param != false){
+                    data.map((item, index, array) => {
+                    html += `<option value="${item.categoryID}" ${item.classificationID == param && condition != "add" ? "selected":""}>${item.categoryName}</option>`;
+                })
+            }
             $("#input_categoryID").html(html);
     }
-    categoryContent();
+    // categoryContent();
     // ----- END CATEGORY CONTENT -----
 
      // ----- MODAL CONTENT -----
@@ -319,21 +318,7 @@ $(document).ready(function(){
                         disabled 
                         selected
                         ${!data && "selected"} >Select Unit of Measurement</option>
-                    <option 
-                        value="Pcs" 
-                        ${data && unitOfMeasurementID == "Pcs" && "selected"} > Pcs</option>
-                    <option 
-                        value="Kg" 
-                        ${data && unitOfMeasurementID == "Kg" && "selected"} >Kg</option>
-                    <option 
-                        value="Ml" 
-                        ${data && unitOfMeasurementID == "Ml" && "selected"}  >Ml</option>
-                    <option 
-                        value="Grams" 
-                        ${data && unitOfMeasurementID == "Grams" && "selected"} >Grams</option>
-                    <option 
-                        value="Ounce" 
-                        ${data && unitOfMeasurementID == "Ounce" && "selected"}  >Ounce</option>
+                    ${unitOfMeasurementOptions(unitOfMeasurementID)}
                 </select>
                 <div class="invalid-feedback d-block" id="invalid-unitOfMeasurementID"></div>
             </div>
@@ -445,7 +430,7 @@ $(document).ready(function(){
                 $("#modal_inventory_item_content").html(content);
                 storageContent(tableData);
                 classificationContent(tableData);
-                categoryContent(tableData);
+                categoryContent("edit",tableData[0].classificationID);
                 $("#btnSaveConfirmationEdit").attr("accountid", id);
                 $("#btnSaveConfirmationEdit").attr("feedback", feedback);
                 initAll();
@@ -495,5 +480,24 @@ $(document).ready(function(){
 		}
     });
     // -------- END CANCEL MODAL-----------
- 
+    
+    $(document).on("change","#input_classificationID",function(){
+        let thisValue   =   $(this).val();
+        categoryContent("add", thisValue);
+        initAll();
+    });
+
+
+    function unitOfMeasurementOptions(value){
+        let data = ["N/A","gallon","piece","gram","cup",
+            "inch","pound","ounces","litre","bag",
+            "bucket","bundle","box","case","pack",
+            "rack","roll","sheet","yard"];
+        let returnData;
+        data.map(items=>{
+            returnData +=  `<option value="${items}" ${value == items ? "selected" : ""}>${items.charAt(0).toUpperCase() + items.slice(1)}</option>`;
+        });
+        return returnData;
+    }
 });
+

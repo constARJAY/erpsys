@@ -273,7 +273,7 @@ $(document).ready(function(){
 
 			sweetAlertConfirmation(
 				"update",
-				"Proeject Category",
+				"Project Category",
 				"modalProjectCategory",
 				"",
 				data,
@@ -292,7 +292,7 @@ $(document).ready(function(){
 		if (!formEmpty) {
 			sweetAlertConfirmation(
 				"cancel",
-				"Category Masterfile",
+				"Project Category",
 				"modalProjectCategory"
 			);
 		} else {

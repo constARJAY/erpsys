@@ -73,9 +73,11 @@ $(document).ready(function(){
                 data.map((item, index, array) => {
                     // ----- INSERT UNIQUE DATA TO uniqueData VARIABLE ----
                     let unique = {
-                        id:       item.categoryID, // Required
-                        categoryName: item.categoryName,
-                        // email:    item.email,
+                        multiple: {
+                            id:               item.categoryID, // Required
+                            categoryName:     item.categoryName,
+                            classificationID: item.classificationID
+                        }
                     }
                     uniqueData.push(unique);
                     // ----- END INSERT UNIQUE DATA TO uniqueData VARIABLE ----
@@ -145,18 +147,17 @@ $(document).ready(function(){
                 <div class="col-md-12 col-sm-12">
                     <div class="form-group">
                         <label>Category Name <span class="text-danger font-weight-bold">*</span></label>
-                        <input 
-                            type="text" 
-                            class="form-control validate" 
+                        <select
+                            class="form-control validate select2" 
                             name="categoryName" 
                             id="input_categoryName" 
-                            data-allowcharacters="[A-Z][a-z][0-9][ ]['][-]" 
-                            minlength="2" 
-                            maxlength="20" 
                             required 
-                            unique="${categoryID}" 
-                            value="${categoryName}"
-                            autocomplete="off">
+                            unique="${categoryID}" >
+                            <option selected disabled>Select Category Name</option>
+                            <option value="Project" ${categoryName == "Project" && "selected"}>Project</option>
+                            <option value="Equipment" ${categoryName == "Equipment" && "selected"}>Equipment</option>
+                            <option value="Purchase" ${categoryName == "Purchase" && "selected"}>Purchase</option>
+                        </select>
                         <div class="invalid-feedback d-block" id="invalid-input_categoryName"></div>
                     </div>
                 </div>
@@ -170,7 +171,8 @@ $(document).ready(function(){
                             id="input_classificationID" 
                             name="classificationID"
                             autocomplete="off"
-                            required>
+                            required
+                            unique="${categoryID}" >
                         </select>
                         <div class="invalid-feedback d-block" id="invalid-input_classificationID"></div>
                     </div>
