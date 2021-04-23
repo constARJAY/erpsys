@@ -717,7 +717,7 @@ $(document).ready(function () {
 
 					<div class="col-xl-6 col-lg-6 col-md-6 col-sm-12">
 						<div class="form-group">
-							<label>Fax Number <code>*</code></label>
+							<label>Fax Number</label>
 							<input 
 								type="text" 
 								class="form-control inputmask validate" 
@@ -728,8 +728,7 @@ $(document).ready(function () {
 								maxlength="11" 
 								value="${inventoryVendorFaxNumber}"
 								autocomplete="off"
-								mask="99-999-9999"
-								required>
+								mask="99-999-9999">
 							<div class="invalid-feedback d-block" id="invalid-inventoryVendorFaxNumber"></div>
 						</div>
 					</div>

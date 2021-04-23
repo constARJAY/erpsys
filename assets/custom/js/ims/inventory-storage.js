@@ -312,7 +312,6 @@ $(document).ready(function () {
 						multiple: {
 							id: item.inventoryStorageID, // Required
 							inventoryStorageOfficeName: item.inventoryStorageOfficeName, // Required
-							inventoryStorageUnitNumber: item.inventoryStorageUnitNumber,
 							inventoryStorageRoomType: item.inventoryStorageRoomType,
 							inventoryStorageDepartment: item.inventoryStorageDepartment
 						},
@@ -487,7 +486,7 @@ $(document).ready(function () {
                         <div class="form-group">
                             <label>Unit Number </label>
                             <input class="form-control validate"
-                            data-allowcharacters="[A-Z][a-z][0-9][.][,][-][()]['][/]"  minlength="2" maxlength="50"  id="input_unitnumber" value="${inventoryStorageUnitNumber}" unique="${inventoryStorageID}"   name="inventoryStorageUnitNumber" type="text">
+                            data-allowcharacters="[A-Z][a-z][0-9][.][,][-][()]['][/]"  minlength="2" maxlength="50"  id="input_unitnumber" value="${inventoryStorageUnitNumber}" name="inventoryStorageUnitNumber" type="text">
                             <div class="invalid-feedback d-block" id="invalid-input_unitnumber"></div>
                         </div>
                     </div>

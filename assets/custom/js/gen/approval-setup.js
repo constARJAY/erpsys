@@ -410,8 +410,8 @@ function approvalModalContent(approvalID){
 }
 
 function userAccountList(approvers){
-    let tableData       = getTableData("hris_employee_list_tbl", "", "employeeID NOT IN("+approvers+")   "); 
-    let returnValue     = `<option value="" dissabled>Select Designation</option><option value="0">N/A</option>`;
+    let tableData       = getTableData("hris_employee_list_tbl", "", "employeeID NOT IN("+approvers+") AND employeeStatus='1'"); 
+    let returnValue     = `<option value="" disabled>Select Designation</option><option value="0">N/A</option>`;
     tableData. map((items,index)=>{
         returnValue += `<option value="${items["employeeID"]}">${items["employeeFirstname"]} ${items["employeeLastname"]}</option>`;
     });
@@ -421,7 +421,7 @@ function userAccountList(approvers){
 
 function approvalList(userAccountID){
     let returnData              = "";
-    let optionApproverList      = getTableData("hris_employee_list_tbl","","employeeID="+userAccountID);
+    let optionApproverList      = getTableData("hris_employee_list_tbl","","employeeID='"+userAccountID+"' AND employeeStatus='1'");
         optionApproverList.length > 0 ? returnData += `<option value="${optionApproverList[0]["employeeID"]}" selected>${optionApproverList[0]["employeeFirstname"]} ${optionApproverList[0]["employeeLastname"]}</option>` : `<option value="0" selected>N/A</option>` ;
         
     return returnData;

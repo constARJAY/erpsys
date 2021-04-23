@@ -204,3 +204,18 @@ $(document).ready(function() {
     // ----- END VIEW NOTIFICATION -----
 
 })
+
+
+// ----- LIST UNIT OF MEASURE -----
+function unitOfMeasurementOptions(value){
+    let data = ["none","gallon","piece","gram","cup",
+        "inch","pound","ounces","litre","bag",
+        "bucket","bundle","box","case","pack",
+        "rack","roll","sheet","yard","kilometer"];
+    let returnData =  `<option value="" disabled selected>Select Unit of Measure</option>`;
+    data.map(items=>{
+        returnData +=  `<option value="${items}" ${value == items ? "selected" : ""}>${items.charAt(0).toUpperCase() + items.slice(1)}</option>`;
+    });
+    return returnData;
+}
+// ----- END LIST UNIT OF MEASURE -----

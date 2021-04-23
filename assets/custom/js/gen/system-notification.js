@@ -45,7 +45,7 @@ $(document).ready(function() {
 
                     data.map(notif => {
                         html += `
-                        <div class="timeline-item ${notif['color']} border-bottom pb-2" date-is="${notif['date']}">
+                        <div class="timeline-item ${notif['color']} border-bottom pb-2" date-is="${moment(notif['date']).format("YYYY-MM-DD hh:mm:ss A")}">
                             <div class="d-flex align-items-center">
                                 <div>
                                     <img src="${base_url}assets/notification/${notif["icon"]}" width="50" height="50">
@@ -70,7 +70,7 @@ $(document).ready(function() {
                             <div class="body">
                                 <div class="w-100 text-center">
                                     <img src="${base_url}assets/modal/no-notification.svg" alt="No notification" width="300" height="200">
-                                    <h4>No notification found.</h4>
+                                    <h4>No notification found</h4>
                                 </div>
                             </div>
                         </div>

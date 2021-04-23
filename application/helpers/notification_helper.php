@@ -89,7 +89,7 @@
             $controller = $result ? strtolower($result[0]["moduleController"]) : "javascript:void(0)";
             $projectList = $result ? ($result[0]["projectName"] ? explode("|", $result[0]["projectName"]) : "") : "";
 
-            $date = date("F d, Y", strtotime($notif["createdAt"]));
+            $date = date("F d, Y h:i:s A", strtotime($notif["createdAt"]));
 
             $date1 = new DateTime();
             $data2 = new DateTime($createdAt); 

@@ -21,32 +21,70 @@ class Purchase_request extends CI_Controller {
 
     public function savePurchaseRequest()
     {
-        $action                = $this->input->post("action");
-        $purchaseRequestID     = $this->input->post("purchaseRequestID");
-        $employeeID            = $this->input->post("employeeID");
-        $projectID             = $this->input->post("projectID");
-        $approversID           = $this->input->post("approversID");
-        $purchaseRequestStatus = $this->input->post("purchaseRequestStatus");
-        $purchaseRequestReason = $this->input->post("purchaseRequestReason");
-        $submittedAt           = $this->input->post("submittedAt");
-        $createdBy             = $this->input->post("createdBy");
-        $updatedBy             = $this->input->post("updatedBy");
-        $createdAt             = $this->input->post("createdAt");
-        $updatedAt             = $this->input->post("updatedAt");
-        $items                 = $this->input->post("items");
+        $action                  = $this->input->post("action");
+        $method                  = $this->input->post("method");
+        $purchaseRequestID       = $this->input->post("purchaseRequestID") ?? null;
+        $revisePurchaseRequestID = $this->input->post("revisePurchaseRequestID") ?? null;
+        $employeeID              = $this->input->post("employeeID");
+        $projectID               = $this->input->post("projectID") ?? null;
+        $approversID             = $this->input->post("approversID") ?? null;
+        $approversStatus         = $this->input->post("approversStatus") ?? null;
+        $approversDate           = $this->input->post("approversDate") ?? null;
+        $purchaseRequestStatus   = $this->input->post("purchaseRequestStatus");
+        $purchaseRequestReason   = $this->input->post("purchaseRequestReason") ?? null;
+        $projectTotalAmount      = $this->input->post("projectTotalAmount") ?? null;
+        $companyTotalAmount      = $this->input->post("companyTotalAmount") ?? null;
+        $purchaseRequestRemarks  = $this->input->post("purchaseRequestRemarks") ?? null;
+        $submittedAt             = $this->input->post("submittedAt") ?? null;
+        $createdBy               = $this->input->post("createdBy");
+        $updatedBy               = $this->input->post("updatedBy");
+        $createdAt               = $this->input->post("createdAt");
+        $items                   = $this->input->post("items") ?? null;
 
         $purchaseRequestData = [
-            "employeeID"            => $employeeID,
-            "projectID"             => $projectID,
-            "approversID"           => $approversID,
-            "purchaseRequestStatus" => $purchaseRequestStatus,
-            "purchaseRequestReason" => $purchaseRequestReason,
-            "submittedAt"           => $submittedAt,
-            "createdBy"             => $createdBy,
-            "updatedBy"             => $updatedBy,
-            "createdAt"             => $createdAt,
-            "updatedAt"             => $updatedAt
+            "revisePurchaseRequestID" => $revisePurchaseRequestID,
+            "employeeID"              => $employeeID,
+            "projectID"               => $projectID,
+            "approversID"             => $approversID,
+            "approversStatus"         => $approversStatus,
+            "approversDate"           => $approversDate,
+            "purchaseRequestStatus"   => $purchaseRequestStatus,
+            "purchaseRequestReason"   => $purchaseRequestReason,
+            "projectTotalAmount"      => $projectTotalAmount,
+            "companyTotalAmount"      => $companyTotalAmount,
+            "submittedAt"             => $submittedAt,
+            "createdBy"               => $createdBy,
+            "updatedBy"               => $updatedBy,
+            "createdAt"               => $createdAt
         ];
+
+        if ($action == "update") {
+            unset($purchaseRequestData["revisePurchaseRequestID"]);
+            unset($purchaseRequestData["createdBy"]);
+            unset($purchaseRequestData["createdAt"]);
+
+            if ($method == "cancelform") {
+                $purchaseRequestData = [
+                    "purchaseRequestStatus" => 4,
+                    "updatedBy"             => $updatedBy,
+                ];
+            } else if ($method == "approve") {
+                $purchaseRequestData = [
+                    "approversStatus"       => $approversStatus,
+                    "approversDate"         => $approversDate,
+                    "purchaseRequestStatus" => $purchaseRequestStatus,
+                    "updatedBy"             => $updatedBy,
+                ];
+            } else if ($method == "deny") {
+                $purchaseRequestData = [
+                    "approversStatus"        => $approversStatus,
+                    "approversDate"          => $approversDate,
+                    "purchaseRequestStatus"  => 3,
+                    "purchaseRequestRemarks" => $purchaseRequestRemarks,
+                    "updatedBy"              => $updatedBy,
+                ];
+            }
+        }
 
         $savePurchaseRequestData = $this->purchaserequest->savePurchaseRequestData($action, $purchaseRequestData, $purchaseRequestID);
         if ($savePurchaseRequestData) {
@@ -55,53 +93,57 @@ class Purchase_request extends CI_Controller {
             if ($result[0] == "true") {
                 $purchaseRequestID = $result[2];
 
-                $purchaseRequestItems = [];
-                foreach($items as $index => $item) {
-                    $temp = [
-                        "purchaseRequestID" => $purchaseRequestID,
-                        "itemID"            => $item["itemID"],
-                        "quantity"          => $item["quantity"],
-                        "unitCost"          => $item["unitcost"],
-                        "totalCost"         => $item["totalcost"],
-                        "remarks"           => $item["remarks"] ? $item["remarks"] : null, 
-                        "createdBy"         => $item["createdBy"],
-                        "updatedBy"         => $item["updatedBy"],
-                    ];
-                    array_push($purchaseRequestItems, $temp);
-                }
-                
-                if (isset($_FILES["items"])) {
-                    $length = count($_FILES["items"]["name"]);
-                    $keys   = array_keys($_FILES["items"]["name"]);
-                    for ($i=0; $i<$length; $i++) {
-                        $uploadedFile = explode(".", $_FILES["items"]["name"][$keys[$i]]["file"]);
-
-                        $index     = (int)$uploadedFile[0]; 
-                        $extension = $uploadedFile[1];
-                        $filename  = $i.time().'.'.$extension;
-
-                        $folderDir = "assets/upload-files/request-items/";
-                        if (!is_dir($folderDir)) {
-                            mkdir($folderDir);
-                        }
-                        $targetDir = $folderDir.$filename;
-
-                        if (move_uploaded_file($_FILES["items"]["tmp_name"][$index]["file"], $targetDir)) {
-                            $purchaseRequestItems[$index]["files"] = $filename;
-                        }
-                        
-                    } 
-
-                    // ----- UPDATE ITEMS FILE -----
-                    foreach ($purchaseRequestItems as $key => $prItem) {
-                        if (!array_key_exists("files", $prItem)) {
-                            $purchaseRequestItems[$key]["files"] = null;
-                        }
+                if ($items) {
+                    $purchaseRequestItems = [];
+                    foreach($items as $index => $item) {
+                        $temp = [
+                            "purchaseRequestID" => $purchaseRequestID,
+                            "itemID"            => $item["itemID"] != "null" ? $item["itemID"] : null,
+                            "categoryType"      => $item["categoryType"],
+                            "quantity"          => $item["quantity"],
+                            "unitCost"          => $item["unitcost"],
+                            "totalCost"         => $item["totalcost"],
+                            "files"             => array_key_exists("existingFile", $item) ? $item["existingFile"] : null, 
+                            "remarks"           => $item["remarks"] ? $item["remarks"] : null, 
+                            "createdBy"         => $item["createdBy"],
+                            "updatedBy"         => $item["updatedBy"],
+                        ];
+                        array_push($purchaseRequestItems, $temp);
                     }
-                    // ----- END UPDATE ITEMS FILE -----
-                }
+                    
+                    if (isset($_FILES["items"])) {
+                        $length = count($_FILES["items"]["name"]);
+                        $keys   = array_keys($_FILES["items"]["name"]);
+                        for ($i=0; $i<$length; $i++) {
+                            $uploadedFile = explode(".", $_FILES["items"]["name"][$keys[$i]]["file"]);
 
-                $savePurchaseRequestItems = $this->purchaserequest->savePurchaseRequestItems($purchaseRequestItems, $purchaseRequestID);
+                            $index     = (int)$uploadedFile[0]; 
+                            $extension = $uploadedFile[1];
+                            $filename  = $i.time().'.'.$extension;
+
+                            $folderDir = "assets/upload-files/request-items/";
+                            if (!is_dir($folderDir)) {
+                                mkdir($folderDir);
+                            }
+                            $targetDir = $folderDir.$filename;
+
+                            if (move_uploaded_file($_FILES["items"]["tmp_name"][$index]["file"], $targetDir)) {
+                                $purchaseRequestItems[$index]["files"] = $filename;
+                            }
+                            
+                        } 
+
+                        // ----- UPDATE ITEMS FILE -----
+                        foreach ($purchaseRequestItems as $key => $prItem) {
+                            if (!array_key_exists("files", $prItem)) {
+                                $purchaseRequestItems[$key]["files"] = null;
+                            }
+                        }
+                        // ----- END UPDATE ITEMS FILE -----
+                    }
+
+                    $savePurchaseRequestItems = $this->purchaserequest->savePurchaseRequestItems($purchaseRequestItems, $purchaseRequestID);
+                }
 
             }
             

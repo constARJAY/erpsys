@@ -1,0 +1,5 @@
+0 - Draft/Saved
+1 - For Approval
+2 - Approved
+3 - Denied
+4 - Cancelled
