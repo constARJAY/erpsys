@@ -118,11 +118,11 @@ initInputmask();
 
 
 // ----- INITIALIZE AMOUNT FORMAT -----
-const initAmount = (element = null) => {
+const initAmount = (element = null, displayPrefix = false) => {
 	let elem = getElement(element, ".amount");
 	$(elem).inputmask({
 		alias: "currency",
-		prefix: "",
+		prefix: displayPrefix ? "₱" : "",
 	});
 };
 initAmount();

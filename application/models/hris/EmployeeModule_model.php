@@ -21,6 +21,7 @@ class EmployeeModule_model extends CI_Model {
         return $query ? $query->result_array() : [];
     }
 
+    // ----- GENERATE PERMISSION -----
     public function generateEmployeePermission()
     {
         $sessionID = $this->session->has_userdata("adminSessionID") ? $this->session->userdata("adminSessionID") : 1;
@@ -31,8 +32,8 @@ class EmployeeModule_model extends CI_Model {
         $data = [];
         foreach($employees as $employee) {
             $modules = $this->getAllModules();
-            // $status = $employee["roleID"] == 1 ? 1 : 0;
-            $status = 1;
+            $status = $employee["designationID"] == 1 ? 1 : 0;
+            // $status = 1;
             foreach($modules as $module) {
                 $temp = [
                     "employeeID"   => $employee["employeeID"],
@@ -51,6 +52,37 @@ class EmployeeModule_model extends CI_Model {
         $query = $this->db->insert_batch("hris_employee_permission_tbl", $data);
         return $query ? true : false;
     }
+
+    public function generateFullAccess($id = null) 
+    {
+        if ($id) {
+            $queryDelete = $this->db->delete("hris_employee_permission_tbl", ["employeeID" => $id]);
+            if ($queryDelete) {
+                $data = [];
+                $status = 1;
+                $modules = $this->getAllModules();
+                foreach($modules as $module) {
+                    $temp = [
+                        "employeeID"   => $id,
+                        "moduleID"     => $module["moduleID"],
+                        "createStatus" => $status,
+                        "readStatus"   => $status,
+                        "updateStatus" => $status,
+                        "deleteStatus" => $status,
+                        "printStatus"  => $status,
+                        "createdBy"    => 1,
+                        "updatedBy"    => 1,
+                    ];
+                    array_push($data, $temp);
+                }
+                $queryInsert = $this->db->insert_batch("hris_employee_permission_tbl", $data);
+                return $queryInsert ? true : false;
+            }
+            return false;
+        }
+        return false;
+    }
+    // ----- END GENERATE PERMISSION -----
 
     public function saveEmployeeData($data = [], $action = null, $id = null) {
         $employeeID = $id;

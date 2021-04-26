@@ -8,6 +8,27 @@ $(document).ready(function() {
     // ----- END GLOBAL VARIABLES -----
 
 
+    // ----- HIDE THE UPLOAD DOCUMENT FOR NON-HR DESIGNATION -----
+    const getDesignationName = getTableData("hris_designation_tbl", "designationName", `designationID = ${sessionDesignationID}`);
+    function isImHumanResource() {
+        if (getDesignationName.length > 0) {
+            let { designationName:designation } = getDesignationName[0];
+            let designationName = designation.toLowerCase().replaceAll(" ", "")
+            if (designationName == "humanresource" || designationName == "humanresources" || sessionDesignationID == 1) {
+                return true;
+            }
+            return false;
+        }
+        return false;
+    }
+    // ----- END HIDE THE UPLOAD DOCUMENT FOR NON-HR DESIGNATION -----
+
+
+    // ----- IS UPDATE ALLOWED -----
+    const allowedUpdate = isUpdateAllowed(114);
+    // ----- END IS UPDATE ALLOWED -----
+
+
     // ----- DATATABLES -----
     $(document).on('click', 'a[data-toggle=tab]', function (e) {
         initDataTables();
@@ -40,7 +61,7 @@ $(document).ready(function() {
 				scrollCollapse: true,
 				columnDefs: [
 					{ targets: 0, width: 50  },
-					{ targets: 1, width: 150 },
+					{ targets: 1, width: 200 },
 					{ targets: 2, width: 150 },
 					{ targets: 3, width: 150 },
 					{ targets: 4, width: 300 },
@@ -136,6 +157,7 @@ $(document).ready(function() {
                 LEFT JOIN hris_department_tbl USING(departmentID)
                 LEFT JOIN hris_designation_tbl USING(designationID)`,
             `employeeID, 
+            employeeProfile,
             employeeUsername,
             employeeEmail,
             CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname,
@@ -201,6 +223,7 @@ $(document).ready(function() {
                 employeeMobile,
                 employeeUsername,
                 employeeEmail,
+                employeeProfile = "default.jpg",
                 employeeHiredDate,
                 departmentName = "-",
                 designationName = "-",
@@ -214,14 +237,21 @@ $(document).ready(function() {
             }
             uniqueData.push(unique);
 
-            let address = `${employeeUnit != null ? titleCase(employeeUnit)+", " : ""}${employeeBuilding +", "}${titleCase(employeeBarangay)+", "}${titleCase(employeeCity)+", "}${titleCase(employeeProvince)+", "}${titleCase(employeeCountry)+", "}${titleCase(employeeZipCode)}`;
+            let profile     = employeeProfile != null ? employeeProfile : "default.jpg";
+            let profilePath = `${base_url}assets/upload-files/profile-images/${profile}`;
+            let profileImg  = `<img 
+                src="${profilePath}"
+                class="rounded rounded-circle"
+                style="width: 50px;
+                    height: 50px">`;
+            let address = `${employeeUnit ? titleCase(employeeUnit)+", " : ""}${employeeBuilding +", "}${titleCase(employeeBarangay)+", "}${titleCase(employeeCity)+", "}${titleCase(employeeProvince)+", "}${titleCase(employeeCountry)+", "}${titleCase(employeeZipCode)}`;
 
             html += `
             <tr class="btnEdit" id="${encryptString(employeeID)}">
                 <td>${getFormCode("EMP", "2021-04-12", employeeID)}</td>
-                <td>${fullname}</td>
-                <td>${designationName}</td>
+                <td>${profileImg} <span class="ml-2">${fullname}<span></td>
                 <td>${departmentName}</td>
+                <td>${designationName}</td>
                 <td>${address}</td>
                 <td>${employeeMobile}</td>
                 <td>${employeeEmail}</td>
@@ -618,7 +648,7 @@ $(document).ready(function() {
 
                             <div class="d-flex justify-content-center flex-column align-items-center">
                                 <div class="img-fluid" id="previewImageParent">
-                                    <span class="${profile != "default.jpg" ? "d-block" : "d-none"}" id="removeProfile">x</span>
+                                    <span class="${profile != "default.jpg" && allowedUpdate ? "d-block" : "d-none"}" id="removeProfile">x</span>
                                     <img class="rounded" id="previewImage" src="${base_url}assets/upload-files/profile-images/${profile}">
                                 </div>
                                 <div>
@@ -627,7 +657,7 @@ $(document).ready(function() {
                                         class="form-control validate"
                                         name="employeeProfile"
                                         id="employeeProfile"
-                                        default="${employeeProfile}"
+                                        default="${profile}"
                                         accept=".png, .svg, .jpg, .jpeg, .gif">
                                 </div>
                             </div>
@@ -707,7 +737,7 @@ $(document).ready(function() {
                                             </div>
                                             <div class="d-flex" style="flex: 3">
                                                 <div class="d-flex align-items-center pr-2">
-                                                    <input type="radio" value="Others" name="employeeGender" ${employeeGender ? (employeeGender != "Male" || employeeGender != "Female" ? "checked" : "") : ""}> <span class="ml-2">Others</span>
+                                                    <input type="radio" value="Others" name="employeeGender" ${employeeGender ? (employeeGender != "Male" && employeeGender != "Female" ? "checked" : "") : ""}> <span class="ml-2">Others</span>
                                                 </div>
                                                 <div class="form-group mb-0">
                                                     <input 
@@ -945,7 +975,8 @@ $(document).ready(function() {
                         <input type="file"
                             class="form-control validate"
                             name="employeeSignature"
-                            id="employeeSignature">
+                            id="employeeSignature"
+                            accept="image/*">
                         <div class="invalid-feedback d-block" id="invalid-employeeSignature"></div>
                     </div>
                 </div>
@@ -990,8 +1021,7 @@ $(document).ready(function() {
                         <label>Status <code>*</code></label>
                         <select class="form-control validate select2"
                             name="employeeStatus"
-                            id="employeeStatus"
-                            required>
+                            id="employeeStatus">
                             ${employeeStatuses(employeeStatus)}
                         </select>
                         <div class="invalid-feedback d-block" id="invalid-employeeStatus"></div>
@@ -1695,14 +1725,20 @@ $(document).ready(function() {
                 ${name}
             </p>`;
 
+            let button = "";
+            if (isImHumanResource()) {
+                button = `
+                <span 
+                    class        = "removeDocument" 
+                    key          = "${name}"
+                    documentType = "${documentType}"
+                    employeeID   = "${employeeID}">x</span>`;
+            }
+
             return `
             <div class="col-lg-2 col-md-3 col-sm-4 mt-2 mb-4 document" filecontent>
                 <div class="text-center">
-                    <span 
-                        class="removeDocument" 
-                        key="${name}"
-                        documentType="${documentType}"
-                        employeeID="${employeeID}">x</span>
+                    ${button}
                     <img src="${base_url}/assets/modal/${displayImage}" width="50" height="50" alt="${name}">
                     ${title}
                 </div>
@@ -1735,13 +1771,20 @@ $(document).ready(function() {
         const isHasContent = () => {
             const hasContent = $(`#${documentContentID[documentType].contentID}`).text()?.trim().length > 0;
             if (!hasContent) {
+
+                let text = "There is no available documents yet";
+                if (isImHumanResource()) {
+                    text = `
+                    Click <a href="javascript: void(0)" class="btnUpload" input="${documentContentID[documentType].input}" documentType="${documentType}">Upload</a> button to upload documents.`;
+                }
+
                 html = `
                 <div class="col-12 text-center" files="none">
                     <img src="${base_url}assets/modal/fileupload.svg" width="200" height="200">
                     <p style="
                         font-size: 1.1rem;
                         margin-top: 10px;">
-                        Click <a href="javascript: void(0)" class="btnUpload" input="${documentContentID[documentType].input}" documentType="${documentType}">Upload</a> button to upload documents.
+                        ${text}
                     </p>
                 </div>`;
                 if (!firstReload) {
@@ -1891,6 +1934,18 @@ $(document).ready(function() {
         ];
         let documentContent = documentTypes.map(document => {
             let { title, input, contentID } = document;
+
+            let button = "";
+            if (isImHumanResource()) {
+                button = `
+                <button class    = "btn btn-secondary btnUpload" 
+                    input        = "${input}" 
+                    documentType = "${title}" 
+                    content      = "${contentID}">
+                    <i class="fas fa-file-upload"></i> Upload
+                </button>`;
+            }
+
             return `
             <div class="col-sm-12">
                 <div class="card">
@@ -1906,7 +1961,7 @@ $(document).ready(function() {
                                     accept="image/*, .docx, .doc, .pdf, .xlsx, .xls"
                                     content="${contentID}"
                                     documentType="${title}">
-                                <button class="btn btn-secondary btnUpload" input="${input}" documentType="${title}" content="${contentID}"><i class="fas fa-file-upload"></i> Upload</button>
+                                ${button}
                             </div>
                         </div>
                     </div>
@@ -2208,6 +2263,10 @@ $(document).ready(function() {
 		const validate = validateForm("modal_employee_module");
         comparePassword();
 		if (validate) {
+            // ----- RESET SEARCH IN DATATABLE -----
+            $(`[aria-controls="tableAccessibility"]`).val("");
+            $('#tableAccessibility').DataTable().search("").draw();
+            // ----- RESET SEARCH IN DATATABLE -----
             setTimeout(() => {
                 getEmployeeData()
                 .then(data => {
@@ -2235,6 +2294,10 @@ $(document).ready(function() {
 		const validate = validateForm("modal_employee_module");
         comparePassword();
 		if (validate) {
+            // ----- RESET SEARCH IN DATATABLE -----
+            $(`[aria-controls="tableAccessibility"]`).val("");
+            $('#tableAccessibility').DataTable().search("").draw();
+            // ----- RESET SEARCH IN DATATABLE -----
             setTimeout(() => {
                 getEmployeeData()
                 .then(data => {
@@ -2279,9 +2342,9 @@ $(document).ready(function() {
                 setTimeout(() => {
                     $("#modal_employee_module_content").html(content);
                     initAll();
-                    employeeData[0].bankID && $("[name=bankID]").trigger("change");
+                    employeeData[0].bankID && employeeData[0].bankID != 0 && $("[name=bankID]").trigger("change");
                     $("[name=employeeBankAccountNo]").val(employeeData[0].employeeBankAccountNo);
-                    employeeData[0].scheduleID && $("[name=scheduleID]").trigger("change");
+                    employeeData[0].scheduleID && employeeData[0].scheduleID != 0 && $("[name=scheduleID]").trigger("change");
                     const disabledFutureDates = {
                         autoUpdateInput:  false,
                         singleDatePicker: true,
@@ -2295,6 +2358,14 @@ $(document).ready(function() {
                     initDateRangePicker("#employeeBirthday", disabledFutureDates);
                     initDateRangePicker("#employeeHiredDate", disabledFutureDates);
                     initDataTables();
+
+                    if (!allowedUpdate) {
+                        $("#modal_employee_module_content").find("input, select, textarea").each(function() {
+                            $(this).attr("disabled", true);
+                        })
+                        $("#btnUpdate").hide();
+                    }
+
                 }, 500);
             } catch (error) {
                 showNotification("danger", `${error}`);
@@ -2316,10 +2387,10 @@ $(document).ready(function() {
 	$(document).on("click", ".btnCancel", function () {
 		let formEmpty = isFormEmpty("modal_employee_module");
 		if (!formEmpty) {
-			sweetAlertConfirmation("cancel", "Vendor", "modal_employee_module");
+			sweetAlertConfirmation("cancel", "Employee", "modal_employee_module");
 		} else {
 			preventRefresh(false);
-			$("#modal_inventory_vendor").modal("hide");
+			$("#modal_employee_module").modal("hide");
 		}
 	});
 	// -------- END CANCEL MODAL-----------

@@ -29,6 +29,17 @@ $(".btnDetails").each(function() {
 // ----- END ENCRYPT ID -----
 
 
+// ----- CHECK IF UPDATE IS NOT ALLOWED -----
+function checkIfUpdateNotAllowed() {
+    if ($("body").attr("update") == "false") {
+		closeModals();
+        return true;
+	}
+    return false;
+}
+// ----- END CHECK IF UPDATE IS NOT ALLOWED -----
+
+
 // ----- SWEET ALERT CONFIRMATION -----
 const sweetAlertConfirmation = (
         condition   = "add",            // add|update|cancel
@@ -39,6 +50,13 @@ const sweetAlertConfirmation = (
         isObject    = true,             // if the data is object or not
         callback    = false             // Function to be called after execution
     ) => {
+
+    if (checkIfUpdateNotAllowed()) {
+        const isUpdate = $(`#${modalID}`).find(".page-title").text().trim().toLowerCase().indexOf("edit");
+        if (isUpdate != -1) {
+            return false;
+        } 
+    }
 
     $("#"+modalID).modal("hide");
 

@@ -1,3 +1,9 @@
+<style>
+	.select2-container--bootstrap .select2-selection--multiple .select2-selection__choice {
+		display: grid;
+	}
+</style>
+
 <div class="body_area after_bg">
 	<div class="block-header pb-0">
 		<div class="container">

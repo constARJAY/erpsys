@@ -6,20 +6,25 @@
         $CI->load->helper('url', 'string', 'integer'); 
 
         $sessionUserAccount = getAdminSessionAccount();
-        $designationID = $sessionUserAccount->designationID;
+        $designationID      = $sessionUserAccount->designationID;
+        $sessionID          = $CI->session->has_userdata("adminSessionID") ? $CI->session->userdata("adminSessionID") : 0;
         
         if ($moduleID) {
             $sql = "SELECT permissionStatus FROM gen_roles_permission_tbl WHERE moduleID = $moduleID AND designationID = $designationID AND permissionStatus = 1";
+            $sql2 = "SELECT readStatus FROM hris_employee_permission_tbl WHERE moduleID = $moduleID AND employeeID = $sessionID AND readStatus = 1";
         } else {
             redirect(base_url('denied'));
         }
 
         
-        $query = $CI->db->query($sql);
+        $query  = $CI->db->query($sql);
+        // $query2 = $CI->db->query($sql2); // ----- WITH ACCESSBILITY -----
         if ($displayModule) {
             return $query->num_rows() > 0 ? true : false;
+            // return $query->num_rows() > 0 && $query2->num_rows() > 0 ? true : false; // ----- WITH ACCESSBILITY -----
         } else {
             if ($query->num_rows() == 0) {
+            // if ($query->num_rows() == 0 || $query2->num_rows() == 0) { // ----- WITH ACCESSBILITY -----
                 redirect(base_url('denied'));
             }
         }

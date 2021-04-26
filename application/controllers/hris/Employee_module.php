@@ -6,7 +6,8 @@ class Employee_module extends CI_Controller {
     {
         parent::__construct();
         $this->load->model("hris/EmployeeModule_model", "employeemodule");
-        // isAllowed(114);
+        isAllowed(114);
+        isReadAllowed(114);
     }
 
     public function index()
@@ -21,6 +22,12 @@ class Employee_module extends CI_Controller {
     public function generateEmployeePermission() 
     {
         echo json_encode($this->employeemodule->generateEmployeePermission());
+    }
+
+    public function generateFullAccess()
+    {
+        $id = $this->input->get("id");
+        echo json_encode($this->employeemodule->generateFullAccess($id));
     }
 
     public function saveEmployeeData()

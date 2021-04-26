@@ -1,4 +1,25 @@
 $(document).ready(function () {
+
+	// ---- GET EMPLOYEE DATA -----
+	const allEmployeeData = getAllEmployeeData();
+	const employeeData = (id) => {
+		if (id) {
+			let data = allEmployeeData.filter(employee => employee.employeeID == id);
+			let { employeeID, fullname, designation, department } = data && data[0];
+			return { employeeID, fullname, designation, department };
+		}
+		return {};
+	}
+	const employeeFullname = (id) => {
+		if (id != "-") {
+			let data = employeeData(id);
+			return data.fullname || "-";
+		}
+		return "-";
+	}
+	// ---- END GET EMPLOYEE DATA -----
+
+
 	// ----- DATATABLES -----
 	function initDataTables() {
 		if ($.fn.DataTable.isDataTable("#tableProjectList")) {
@@ -23,7 +44,7 @@ $(document).ready(function () {
 					{ targets: 6, width: 120 },
 					{ targets: 7, width: 120 },
 					{ targets: 8, width: 120 },
-					{ targets: 9, width: 80 },
+					{ targets: 9, width: 80  },
 					{ targets: 10, width: 80 },
 				],
 			});
@@ -41,7 +62,10 @@ $(document).ready(function () {
 			method: "POST",
 			async: false,
 			dataType: "json",
-			data: { tableName: "pms_project_list_tbl" },
+			data: { 
+				tableName: "pms_project_list_tbl AS pplt LEFT JOIN pms_client_tbl AS pct ON pplt.projectListClientID = pct.clientID",
+				columnName: "pplt.*, pct.clientName"
+			},
 			beforeSend: function () {
 				$("#table_content").html(preloader);
 			},
@@ -68,31 +92,19 @@ $(document).ready(function () {
 				data.map((item, index, array) => {
 					// ----- INSERT UNIQUE DATA TO uniqueData VARIABLE ----
 					let unique = {
-						id: item.projectListID, // Required
+						id:              item.projectListID, // Required
 						projectListName: item.projectListName,
 					};
 					uniqueData.push(unique);
 					// ----- END INSERT UNIQUE DATA TO uniqueData VARIABLE ----
 
-					let clientName = item.projectListClientID
-						? getTableData(
-								"pms_client_tbl",
-								"clientName",
-								`clientID = ${item.projectListClientID}`
-						  )[0].clientName
-						: "-";
-					let projectManager =
-						getEmployeeData(item.projectListManagerID).fullname || "-";
-					let teamLeader =
-						getEmployeeData(item.projectListLeaderID).fullname || "-";
+					let projectManager = employeeFullname(item.projectListManagerID) || "-";
+					let teamLeader     = employeeFullname(item.projectListLeaderID) || "-";
 
-					let teamMembers = item.projectListMemberID
-						? item.projectListMemberID.split("|")
-						: [];
-					teamMembers = teamMembers.map((employeeID) => {
-						return `<div>${getEmployeeData(employeeID).fullname || "-"}</div>`;
-					});
-					teamMembers = teamMembers.join("");
+					let teamMembers = item.projectListMemberID ? item.projectListMemberID.split("|") : [];
+						teamMembers = teamMembers.map((employeeID) => {
+						return `<div>${employeeFullname(employeeID) || "-"}</div>`;
+					}).join("")
 
 					let status;
 					if (item.projectListStatus == 1) {
@@ -100,30 +112,26 @@ $(document).ready(function () {
 					} else if (item.projectListStatus == 0) {
 						status = `<span class="badge badge-outline-danger w-100">Inactive</span>`;
 					} else if (item.projectListStatus == 2) {
-						status = `<span class="badge badge-outline-dark w-100">Cancelled</span>`;
+						status = `<span class="badge badge-outline-primary w-100">Cancelled</span>`;
 					} else {
-						status = `<span class="badge badge-outline-primary w-100">Completed</span>`;
+						status = `<span class="badge badge-outline-info w-100">Completed</span>`;
 					}
 
 					let priorityLevel =
-						item.projectListPriorityLevel == 1
-							? `High`
-							: item.projectListPriorityLevel == 2
-							? `Medium`
-							: `Low`;
+						item.projectListPriorityLevel == 1 ? `High` : item.projectListPriorityLevel == 2 ? `Medium` : `Low`;
 
 					html += `
                     <tr class="btnEdit" id="${item.projectListID}">
                         <td>${item.projectListCode}</td>
                         <td>${item.projectListName}</td>
                         <td>${item.projectListDescription}</td>
-                        <td>${moment(item.projectListFrom).format(
-													"MMMM DD, YYYY"
-												)}</td>
-                        <td>${moment(item.projectListTo).format(
-													"MMMM DD, YYYY"
-												)}</td>
-                        <td>${clientName}</td>
+                        <td>
+							${moment(item.projectListFrom).format("MMMM DD, YYYY")}
+						</td>
+                        <td>
+							${moment(item.projectListTo).format("MMMM DD, YYYY")}
+						</td>
+                        <td>${item.clientName || "-"}</td>
                         <td>${projectManager}</td>
                         <td>${teamLeader}</td>
                         <td>${teamMembers}</td>
@@ -151,23 +159,22 @@ $(document).ready(function () {
 	tableContent();
 	// ----- END TABLE CONTENT -----
 
+
 	// ----- GET PROJECT CLIENT -----
+	const clients = getTableData(
+		"pms_client_tbl",
+		"clientID, clientName",
+		`clientStatus = 1`
+	);
 	function getProjectClient(id = 0) {
 		let html = `<option selected disabled>Select Client</option>`;
 
-		const andWhere = id ? `clientID = ${id}` : "1=1";
-		const clients = getTableData(
-			"pms_client_tbl",
-			"clientID, clientName",
-			`clientStatus = 1 AND ${andWhere}`
-		);
-
-		clients &&
-			clients.map((client) => {
-				html += `<option value="${client.clientID}" ${
-					id === client.clientID ? "selected" : ""
-				}>${client.clientName}</option>`;
-			});
+		clients.map((client) => {
+			html += `
+			<option value="${client.clientID}" ${id === client.clientID ? "selected" : ""}>
+				${client.clientName}
+			</option>`;
+		});
 		return html;
 	}
 	// ----- END GET PROJECT CLIENT -----
@@ -307,20 +314,33 @@ $(document).ready(function () {
 	);
 	// ----- END SELECT PROJECT MANAGER -----
 
+
+	// ----- PROJECT CATEGORY -----
+	const projectCategory = getTableData("pms_category_tbl", "categoryID, categoryName", "categoryStatus = 1");
+	function projectCategoryOptions(id = null) {
+		return projectCategory.map(category => {
+			let { categoryID, categoryName } = category;
+			return `<option value="${categoryID}" ${categoryID == id ? "selected" : ""}>${categoryName}</option>`;
+		}).join("");
+	}
+	// ----- END PROJECT CATEGORY -----
+
+
 	// ----- MODAL CONTENT -----
 	function modalContent(data = false) {
 		let {
-			projectListID = "",
-			projectListName = "",
-			projectListDescription = "",
-			projectListFrom = "",
-			projectListTo = "",
-			projectListClientID = "",
-			projectListManagerID = "",
-			projectListLeaderID = "",
+			projectListID            = "",
+			projectListName          = "",
+			projectListDescription   = "",
+			projectListFrom          = "",
+			projectListTo            = "",
+			projectListClientID      = "",
+			projectListManagerID     = "",
+			projectListLeaderID      = "",
 			projectListPriorityLevel = "",
-			projectListMemberID = "",
-			projectListStatus = 1,
+			projectListMemberID      = "",
+			projectListStatus        = 1,
+			categoryID               = null
 		} = data && data[0];
 
 		let button = projectListID
@@ -374,34 +394,51 @@ $(document).ready(function () {
                             <div class="invalid-feedback d-block" id="invalid-projectListDescription"></div>
                         </div>
                     </div>
-                    <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6">
+                    <div class="col-sm-12 col-md-6 col-lg-4 col-xl-4">
+                        <div class="form-group">
+                            <label>Project Category <code>*</code></label>
+                            <select class="form-control select2 validate"
+								name="categoryID"
+								id="categoryID"
+								required>
+								<option selected disabled>Select Project Category</option>
+								${projectCategoryOptions(categoryID)}
+							</select>
+                            <div class="invalid-feedback d-block" id="invalid-projectListFrom"></div>
+                        </div>
+                    </div>
+                    <div class="col-sm-12 col-md-6 col-lg-4 col-xl-4">
                         <div class="form-group">
                             <label>Start Date <code>*</code></label>
                                 <div class="input-group">
                                     <div class="input-group-prepend">
                                         <span class="input-group-text"><i class="zmdi zmdi-calendar"></i></span>
                                     </div>
-                                    <input type="button" class="form-control daterange validate text-left" name="projectListFrom" id="projectListFrom" required value="${
-																			projectListFrom &&
-																			moment(projectListFrom).format(
-																				"MMMM DD, YYYY"
-																			)
-																		}">
+                                    <input 
+										type="button" 
+										class="form-control daterange validate text-left" 
+										name="projectListFrom" 
+										id="projectListFrom" 
+										required 
+										value="${projectListFrom && moment(projectListFrom).format("MMMM DD, YYYY")}">
                                 </div>
                             <div class="invalid-feedback d-block" id="invalid-projectListFrom"></div>
                         </div>
                     </div>
-                    <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6">
+                    <div class="col-sm-12 col-md-6 col-lg-4 col-xl-4">
                         <div class="form-group">
                             <label>End Date <code>*</code></label>
                             <div class="input-group">
                                 <div class="input-group-prepend">
                                     <span class="input-group-text"><i class="zmdi zmdi-calendar"></i></span>
                                 </div>
-                                <input type="button" class="form-control validate text-left" name="projectListTo" id="projectListTo" required value="${
-																	projectListTo &&
-																	moment(projectListTo).format("MMMM DD, YYYY")
-																}">
+                                <input 
+									type="button" 
+									class="form-control validate text-left" 
+									name="projectListTo" 
+									id="projectListTo" 
+									required 
+									value="${projectListTo && moment(projectListTo).format("MMMM DD, YYYY")}">
                             </div>
                             <div class="invalid-feedback d-block" id="invalid-projectListTo"></div>
                         </div>
@@ -433,7 +470,7 @@ $(document).ready(function () {
                             <div class="invalid-feedback d-block" id="invalid-projectListLeaderID"></div>
                         </div>
                     </div>
-                    <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6">
+                    <div class="col-sm-12 col-md-6 col-lg-3 col-xl-3">
                         <div class="form-group">
                             <label>Priority Level <code>*</code></label>
                             <select class=" form-control show-tick select2 validate" name="projectListPriorityLevel" id="projectListPriorityLevel" autocomplete="off" required>
@@ -451,19 +488,7 @@ $(document).ready(function () {
                             <div class="invalid-feedback d-block" id="invalid-projectListPriorityLevel"></div>
                         </div>
                     </div>
-                    <div class="col-sm-12">
-                        <div class="form-group">
-                            <label>Team Members <code>*</code></label>
-                            <select class=" form-control show-tick select2 validate" name="projectListMemberID" id="projectListMemberID" autocomplete="off" multiple="multiple" required>
-                            ${getTeamMembers(
-															projectListMemberID &&
-																projectListMemberID.split("|")
-														)}
-                            </select>
-                            <div class="invalid-feedback d-block" id="invalid-projectListMemberID"></div>
-                        </div>
-                    </div>
-                    <div class="col-sm-12">
+					<div class="col-sm-12 col-md-6 col-lg-3 col-xl-3">
                         <div class="form-group">
                             <label>Status <code>*</code></label>
                             <select class=" form-control show-tick select2 validate" name="projectListStatus" id="projectListStatus" autocomplete="off">
@@ -481,6 +506,18 @@ $(document).ready(function () {
 																}>Completed</option>
                             </select>
                             <div class="invalid-feedback d-block" id="invalid-projectListStatus"></div>
+                        </div>
+                    </div>
+                    <div class="col-sm-12">
+                        <div class="form-group">
+                            <label>Team Members <code>*</code></label>
+                            <select class=" form-control show-tick select2 validate" name="projectListMemberID" id="projectListMemberID" autocomplete="off" multiple="multiple" required>
+                            ${getTeamMembers(
+															projectListMemberID &&
+																projectListMemberID.split("|")
+														)}
+                            </select>
+                            <div class="invalid-feedback d-block" id="invalid-projectListMemberID"></div>
                         </div>
                     </div>
                 </div>

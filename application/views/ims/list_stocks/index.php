@@ -31,7 +31,7 @@
 			<div class="col-lg-12">
 				<div class="card">
                     <div class="card-header">
-                        <h3>Inventory Storage</h3>
+                        <h3>List of Stock</h3>
                     </div>
 					<div class="header text-right p-0">
 						<div class="closeBtn"></div>
@@ -39,7 +39,7 @@
 					<div class="body" id="main_body">
 						<div class="row" id="loading-screen" style="visibility:hidden;"></div>
 						<div class="row">
-							<div class="col-xl-2 col-lg-4 col-md-4 col-sm-12">
+							<!-- <div class="col-xl-2 col-lg-4 col-md-4 col-sm-12">
                                 <div class="form-group">
                                     <label>Storage Code <span class="text-danger font-weight-bold">*</span></label>
                                     <select class=" form-control show-tick select2 validate" name="storageCode" id="input_storageCode" autocomplete="off" required>
@@ -48,108 +48,51 @@
                                     </select>
                                     <div class="invalid-feedback d-block" id="invalidInputStorageCode"></div>
                                 </div>
-							</div>
-                            <div class="col-xl-5 col-lg-4 col-md-4 col-sm-12">
+							</div> -->
+                            <!-- <div id="filterdata">
+                            </div> -->
+                            
+                            <div class="col-md-3 col-sm-12">
                                 <div class="form-group">
-                                    <label>Storage Name </label>
-                                    <input 
-                                        type="text" 
-                                        class="form-control validate" 
-                                        name="storageName" 
-                                        id="input_storageName" 
-                                        data-allowcharacters="[A-Z][a-z][0-9][ ][@]" 
-                                        minlength="2" 
-                                        maxlength="50" 
-                                        required 
-                                        value=""
-                                        autocomplete="off"
-                                        readonly>
-                                    <div class="invalid-feedback d-block" id="invalidInputStorageName"></div>
-                                </div>
-							</div>
-                            <div class="col-xl-5 col-lg-4 col-md-4 col-sm-12">
-                                <div class="form-group">
-                                    <label>Office Name </label>
-                                    <input 
-                                        type="text" 
-                                        class="form-control validate" 
-                                        name="officeName" 
-                                        id="input_officeName" 
-                                        data-allowcharacters="[A-Z][a-z][0-9][ ][@]" 
-                                        minlength="2" 
-                                        maxlength="50" 
-                                        required 
-                                        value=""
-                                        autocomplete="off"
-                                        readonly>
-                                    <div class="invalid-feedback d-block" id="invalidInputOfficeName"></div>
-                                </div>
-							</div>
-                            <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12">
-                                <div class="form-group">
-                                    <label>Storage Address </label>
-                                    <input 
-                                        type="text" 
-                                        class="form-control validate" 
-                                        name="storageAddress" 
-                                        id="input_storageAddress" 
-                                        data-allowcharacters="[A-Z][a-z][0-9][ ][@]" 
-                                        minlength="2" 
-                                        maxlength="200" 
-                                        required 
-                                        value=""
-                                        autocomplete="off" 
-                                        readonly>
-                                    <div class="invalid-feedback d-block" id="invalidInputStorageAddress"></div>
-                                </div>
-							</div>
-                            <div class="col-xl-5 col-lg-4 col-md-4 col-sm-12">
-                                <div class="form-group">
-                                    <label>Department </label>
-                                    <input 
-                                        type="text" 
-                                        class="form-control validate" 
-                                        name="department" 
-                                        id="input_department" 
-                                        data-allowcharacters="[A-Z][a-z][0-9][ ][@]" 
-                                        minlength="2" 
-                                        maxlength="50" 
-                                        required 
-                                        value=""
-                                        autocomplete="off"
-                                        readonly>
-                                    <div class="invalid-feedback d-block" id="invalidInputDepartment"></div>
-                                </div>
-							</div>
-                            <div class="col-xl-5 col-lg-4 col-md-4 col-sm-12">
-                                <div class="form-group">
-                                    <label>Room Type </label>
-                                    <input 
-                                        type="text" 
-                                        class="form-control validate" 
-                                        name="roomType" 
-                                        id="input_roomType" 
-                                        data-allowcharacters="[A-Z][a-z][0-9][ ][@]" 
-                                        minlength="2" 
-                                        maxlength="100" 
-                                        required 
-                                        value=""
-                                        autocomplete="off"
-                                        readonly>
-                                    <div class="invalid-feedback d-block" id="invalidInputRoomType"></div>
-                                </div>
-							</div>
-                            <div class="col-xl-2 col-lg-4 col-md-4 col-sm-12">
-                                <div class="form-group">
-                                    <label>Status <span class="text-danger font-weight-bold">*</span></label>
-                                    <select class=" form-control show-tick select2 validate" name="storageCode" id="input_storageCode" autocomplete="off" required>
-                                        <option value="" selected disabled>Select Status</option>
-                                        <option value="0">Inactive</option>   
-                                        <option value="1">Active</option>                                          
+                                    <label>Classification Name <span class="text-danger font-weight-bold">*</span></label>
+                                    <select
+                                        class="form-control select2 validate"
+                                        id="input_classificationID"
+                                        name="classificationID"
+                                        required>
                                     </select>
-                                    <div class="invalid-feedback d-block" id="invalidInputStatus"></div>
+                                    <div class="invalid-feedback d-block" id="invalid-input_classificationID"></div>
                                 </div>
-							</div>
+                            </div>    
+                            <div class="col-md-3 col-sm-12">
+                                <div class="form-group">
+                                    <label>Category Name <span class="text-danger font-weight-bold">*</span></label>
+                                    <select
+                                        class="form-control select2 validate"
+                                        id="input_categoryID"
+                                        name="CategoryID"
+                                        required>
+                                    </select>
+                                    <div class="invalid-feedback d-block" id="invalid-input_input_categoryID"></div>
+                                </div>
+                            </div> 
+                            <div class="col-md-3 col-sm-12">
+                                <div class="form-group">
+                                    <label>Inventory Storage <span class="text-danger font-weight-bold">*</span></label>
+                                    <select
+                                        class="form-control select2 validate"
+                                        id="input_inventoryStorageID"
+                                        name="InventoryStorageID"
+                                        required>
+                                    </select>
+                                    <div class="invalid-feedback d-block" id="invalid-input_input_InventoryStorageID"></div>
+                                </div>
+                            </div>
+                            <div class="col-md-3 col-sm-12">
+                                <div class="form-group">
+                                <button type="button" class="btn btn-success w-100 p-2 mt-4 ml-2"  id="btnSearch"><i class="icon-magnifier"></i> &nbsp;Search</button>
+                                </div>
+                            </div>         
                             <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12">
                                 <div class="card">
                                 <div class="card-header">
@@ -202,6 +145,74 @@
 	</div>
 </div>
 <!-- ----- END ADD MODAL ----- -->
+<script>
+  $(document).ready(function() {
 
+    
+  function storageContent(param = false) {
+    // getTableData(tableName = null, columnName = “”, WHERE = “”, orderBy = “”) 
+    const data = getTableData("ims_inventory_storage_tbl", 
+        "inventoryStorageID  ,inventoryStorageOfficeName", "inventoryStorageStatus=1", "");
+      
+            let html = ` <option value="" disabled selected ${!param && "selected"}>Select Storage Code</option>`;
+            data.map((item, index, array) => {
+                html += `<option value="${item.inventoryStorageID}" ${param && item.inventoryStorageID  == param[0].inventoryStorageID  && "selected"}>${item.inventoryStorageOfficeName}</option>`;
+            })
+            $("#input_inventoryStorageID").html(html);
+    }
+    storageContent();
+
+// ----- START CLASSIFICATION CONTENT -----
+    function classificationContent(param = false) {
+    // getTableData(tableName = null, columnName = “”, WHERE = “”, orderBy = “”) 
+    const data = getTableData("ims_inventory_classification_tbl", 
+        "classificationID ,classificationName", "classificationStatus = 1", "");
+      
+            let html = ` <option value="" disabled selected ${!param && "selected"}>Select Item Classification</option>`;
+            data.map((item, index, array) => {
+                html += `<option value="${item.classificationID}" ${param && item.classificationID == param[0].classificationID && "selected"}>${item.classificationName}</option>`;
+            })
+            $("#input_classificationID").html(html);
+    }
+    classificationContent();
+    // ----- END CLASSIFICATION CONTENT -----
+
+    // -----  START CATEGORY CONTENT -----
+    function categoryContent(condition = "add", param = false) {
+        
+    // getTableData(tableName = null, columnName = “”, WHERE = “”, orderBy = “”) 
+    let paramCondition = param == false ? "":" AND classificationID="+param;
+
+    const data = getTableData("ims_inventory_category_tbl", "categoryID ,categoryName", "categoryStatus = '1'"+paramCondition, "");
+        
+            let html = ` <option value="" disabled ${condition == "add" ? "selected": ""}>Select Item Category</option>`;
+            if(param != false){
+                    data.map((item, index, array) => {
+                    html += `<option value="${item.categoryID}" ${item.classificationID == param && condition != "add" ? "selected":""}>${item.categoryName}</option>`;
+                    
+                })
+            }
+            $("#input_categoryID").html(html);
+    }
+     // -----  END CATEGORY CONTENT -----
+    $(document).on("change","#input_classificationID",function(){
+        let thisValue   =   $(this).val();
+        categoryContent("add", thisValue);
+    });
+
+      
+
+
+
+   
+      
+
+       
+
+
+
+
+  }); 
+  </script> 
 
 <script src="<?=base_url()?>assets/custom/js/ims/list-stocks.js"></script>

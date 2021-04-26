@@ -1,5 +1,6 @@
 $(document).ready(function(){
 
+
     // ----- DATATABLES -----
     function initDataTables() {
         if ($.fn.DataTable.isDataTable('#tableListStocks')){
@@ -13,10 +14,10 @@ $(document).ready(function(){
             scrollCollapse: true,
             columnDefs: [
                 { targets: 0, width: 100 },
-                { targets: 1, width: 100 },
-                { targets: 2, width: 100 },
+                { targets: 1, width: 120 },
+                { targets: 2, width: 120 },
                 { targets: 3, width: 150 },
-                { targets: 4, width: 100 },
+                { targets: 4, width: 120 },
                 { targets: 5, width: 200 },
                 { targets: 6, width: 100 },
                 { targets: 7, width: 100 },
@@ -25,7 +26,10 @@ $(document).ready(function(){
                 { targets: 10, width: 100 },
                 { targets: 11, width: 100 },
                 { targets: 12, width: 100 },
-                { targets: 13, width: 100 }
+                { targets: 13, width: 100 },
+                { targets: 14, width: 100 },
+                { targets: 15, width: 100 },
+                { targets: 16, width: 100 }
             ],
         });
     }
@@ -35,8 +39,7 @@ $(document).ready(function(){
     // ----- TABLE CONTENT -----
     function tableContent() {
         // Reset the unique datas
-        uniqueData = []; 
-
+       
         $.ajax({
             url:      `${base_url}operations/getTableData`,
             method:   'POST',
@@ -53,15 +56,18 @@ $(document).ready(function(){
                 <table class="table table-bordered table-striped table-hover" id="tableListStocks">
                     <thead>
                         <tr class="text-center" style="white-space:nowrap">
-                            <th>Item Category</th>
                             <th>Item Code</th>
                             <th>Item Name</th>
+                            <th>Item Category</th>
+                            <th>Item Classification</th>
+                            <th>Storage Name</th>
+                            <th>Department</th>
                             <th>UOM</th>
                             <th>Beginning Qty</th>
                             <th>Purchased</th>
                             <th>Used</th>
                             <th>Borrowed Item</th>
-                            <th>Return Item</th>
+                            <th>Returned Item</th>
                             <th>Transferred Item</th>
                             <th>Disposed Item</th>
                             <th>End Qty</th>
@@ -70,41 +76,22 @@ $(document).ready(function(){
                         </tr>
                     </thead>
                     <tbody>`;
-
                 data.map((item, index, array) => {
                     // ----- INSERT UNIQUE DATA TO uniqueData VARIABLE ----
-                    let unique = {
-                        id:       item.userAccountID, // Required
-                        username: item.username,
-                        email:    item.email,
-                    }
-                    uniqueData.push(unique);
+                   
                     // ----- END INSERT UNIQUE DATA TO uniqueData VARIABLE ----
 
-                    html += `
-                    <tr style="white-space:nowrap">
-                        <td>Condiments</td>
-                        <td>ITM-21-00001</td>
-                        <td>Salt</td>
-                        <td>grams</td>
-                        <td>20.3</td>
-                        <td>32.5</td>
-                        <td>16.9</td>
-                        <td>3.5</td>
-                        <td>15</td>
-                        <td>12</td>
-                        <td>10</td>
-                        <td>30.8</td>
-                        <td class="text-right">₱ 6,500.00</td>
-                        <td>5.3</td>
-                    </tr>`;
+                    html += ``
+                   
                 })
                 html += `</tbody>
                 </table>`;
 
                 setTimeout(() => {
                     $("#table_content").html(html);
+                    //initAll();
                     initDataTables();
+                    //initAll();
                 }, 500);
             },
             error: function() {
@@ -113,15 +100,99 @@ $(document).ready(function(){
                         There was an error fetching data.
                     </div>`;
                 $("#table_content").html(html);
+              
+               
             }
         })
     }
     tableContent();
-    // ----- END TABLE CONTENT -----
-
-  
     
+    $(document).on("click", "#btnSearch", function() {
 
+        const validate = validateForm("main_body");
+        if (validate) {
+        var classificationID =$("#input_classificationID").val();
+        var categoryID = $("#input_categoryID").val();
+        var inventoryStorageID = $("#input_inventoryStorageID").val();
+            $.ajax({
+                url: `${base_url}ims/list_stocks/getliststocks`,
+                method: "POST",
+                data: {
+                    classificationID:           classificationID,
+                    categoryID:                 categoryID,
+                    inventoryStorageID:         inventoryStorageID
+                },
+                async: true,
+                dataType: "json",
+                beforeSend: function () {
+                    $("#loader").show();
+                },
+                success: function (data) {
+                    let html =`
+                    <table class="table table-bordered table-striped table-hover" id="tableListStocks">
+                    <thead>
+                        <tr class="text-center" style="white-space:nowrap">
+                            <th>Item Code</th>
+                            <th>Item Name</th>
+                            <th>Item Category</th>
+                            <th>Item Classification</th>
+                            <th>Storage Name</th>
+                            <th>Department</th>
+                            <th>UOM</th>
+                            <th>Beginning Qty</th>
+                            <th>Purchased</th>
+                            <th>Used</th>
+                            <th>Borrowed Item</th>
+                            <th>Returned Item</th>
+                            <th>Transferred Item</th>
+                            <th>Disposed Item</th>
+                            <th>End Qty</th>
+                            <th>Unit Cost</th>
+                            <th>Reorder Point</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    `
+                    if (data.length > 0) {
+                        data.map((item, index) => {
+                            html += `
+                            <td class="text-center">${++index}</td>
+                            <td class="text-center">${item.itemCode}</td> 
+                            <td class="text-center"></td> 
+                            <td class="text-center"></td> 
+                            <td class="text-center"></td> 
+                            <td class="text-center"></td> 
+                            <td class="text-center"></td> 
+                            <td class="text-center"></td> 
+                            <td class="text-center"></td> 
+                            <td class="text-center"></td> 
+                            <td class="text-center"></td> 
+                            <td class="text-center"></td> 
+                            <td class="text-center"></td> 
+                            <td class="text-center"></td> 
+                            <td class="text-center"></td> 
+                            <td class="text-center"></td> 
+                            <td class="text-center"></td>
+                            </tr>`;    
 
+                        });     
+
+                    }    
+                    html += `
+                        </tbody>
+                     </table>`; 
+                    
+                    setTimeout(() => {
+                        $("#loader").hide();
+                        $("#table_content").html(html);
+                        initDataTables();
+                 }, 500);            
+
+                }
+            })  
+        }      
+        
+    });
+    
       
 });

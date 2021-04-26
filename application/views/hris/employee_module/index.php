@@ -1,41 +1,4 @@
-<style>
-    #previewImageParent {
-        position: relative;
-    }
-    #previewImageParent span, .removeDocument {
-        position: absolute;
-        top: 2%;
-        right: 2%;
-        width: 20px;
-        border: 1px solid #eeeeee69;
-        border-radius: 50%;
-        text-align: center;
-        font-weight: bold;
-        cursor: pointer;
-        transition: all 250ms;
-    }
-    #previewImageParent span:hover, .removeDocument:hover {
-        background: #eeeeee69;
-        transform: scale(1.05);
-    }
-
-    #previewImageParent #previewImage {
-        max-width: 100%; 
-        width: 200px; 
-        height: 200px;
-    }
-    .removeDocument {
-        top: -15%;
-        right: 10%;
-    }
-    .fileLink {
-        font-size: .8rem;
-        display: block;
-        overflow: hidden;
-        white-space: nowrap;
-        text-overflow: ellipsis; 
-    }
-</style>
+<link rel="stylesheet" href="<?= base_url('assets/custom/css/hris/employee-module.css') ?>">
 
 <div class="body_area after_bg">
     <div class="block-header pb-0">
@@ -50,9 +13,11 @@
                     <h1 class="mt-3">Employee Module</h1>
                     <span>This module is used to manage employee details.</span>
                 </div>
-                <div class="col-lg-6 col-md-6 text-right" id="headerButton">
-                    <button class="btn btn-default btn-add" id="btnAdd"><i class="icon-plus"></i> Add Employee</button>
-                </div>
+                <?php if(isCreateAllowed(114)) { ?>
+                    <div class="col-lg-6 col-md-6 text-right" id="headerButton">
+                        <button class="btn btn-default btn-add" id="btnAdd"><i class="icon-plus"></i> Add Employee</button>
+                    </div>
+                <?php } ?>
             </div>
         </div>
     </div>

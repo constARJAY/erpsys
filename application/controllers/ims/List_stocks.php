@@ -6,7 +6,7 @@ class List_stocks extends CI_Controller {
     public function __construct()
     {
         parent::__construct();
-        // $this->load->model("Companysetup_model", "company_setup");
+        $this->load->model("ims/ListStock_model", "list_stock");
         isAllowed(34);
     }
 
@@ -17,6 +17,16 @@ class List_stocks extends CI_Controller {
         $this->load->view("template/header",$data);
         $this->load->view("ims/list_stocks/index");
         $this->load->view("template/footer");
+    }
+
+    public function getliststocks()
+    {
+        $classificationID                  = $this->input->post("classificationID");
+        $categoryID                        = $this->input->post("categoryID");
+        $inventoryStorageID                = $this->input->post("inventoryStorageID");
+        echo json_encode($this->list_stock->getListStock($classificationID, $categoryID, $inventoryStorageID));
+
+
     }
 
     // public function getTableData() 

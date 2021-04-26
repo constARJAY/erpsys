@@ -16,23 +16,23 @@ $(document).ready(function () {
 	const address = getPhAddresses();
 
 	const phRegion = [
-		{ key: "01", name: "REGION I" },
-		{ key: "02", name: "REGION II" },
-		{ key: "03", name: "REGION III" },
-		{ key: "4A", name: "REGION IV-A" },
-		{ key: "4B", name: "REGION IV-B" },
-		{ key: "05", name: "REGION V" },
-		{ key: "06", name: "REGION VI" },
-		{ key: "07", name: "REGION VII" },
-		{ key: "08", name: "REGION VIII" },
-		{ key: "09", name: "REGION IX" },
-		{ key: "10", name: "REGION X" },
-		{ key: "11", name: "REGION XI" },
-		{ key: "12", name: "REGION XII" },
-		{ key: "13", name: "REGION XIII" },
+		{ key: "01",    name: "REGION I" },
+		{ key: "02",    name: "REGION II" },
+		{ key: "03",    name: "REGION III" },
+		{ key: "4A",    name: "REGION IV-A" },
+		{ key: "4B",    name: "REGION IV-B" },
+		{ key: "05",    name: "REGION V" },
+		{ key: "06",    name: "REGION VI" },
+		{ key: "07",    name: "REGION VII" },
+		{ key: "08",    name: "REGION VIII" },
+		{ key: "09",    name: "REGION IX" },
+		{ key: "10",    name: "REGION X" },
+		{ key: "11",    name: "REGION XI" },
+		{ key: "12",    name: "REGION XII" },
+		{ key: "13",    name: "REGION XIII" },
 		{ key: "BARMM", name: "BARMM" },
-		{ key: "CAR", name: "CAR" },
-		{ key: "NCR", name: "NCR" },
+		{ key: "CAR",   name: "CAR" },
+		{ key: "NCR",   name: "NCR" },
 	];
 
 	const getRegionName = (regionKey = "01") => {
@@ -191,7 +191,7 @@ $(document).ready(function () {
 				scrollX: true,
 				scrollCollapse: true,
 				columnDefs: [
-					{ targets: 0, width: 50 },
+					{ targets: 0, width: 50  },
 					{ targets: 1, width: 150 },
 					{ targets: 2, width: 300 },
 					{ targets: 3, width: 150 },
@@ -245,45 +245,69 @@ $(document).ready(function () {
                     <tbody>`;
 
 				data.map((item, index, array) => {
+
+					let {
+						inventoryVendorID,
+						inventoryVendorName,
+						inventoryVendorStatus,
+						inventoryVendorCode,
+						inventoryVendorUnit,
+						inventoryVendorBuilding,
+						inventoryVendorStreet,
+						inventoryVendorSubdivision,
+						inventoryVendorBarangay,
+						inventoryVendorCity,
+						inventoryVendorProvince,
+						inventoryVendorCountry,
+						inventoryVendorZipCode,
+						inventoryVendorPerson,
+						inventoryVendorEmail,
+						inventoryVendorTIN,
+						inventoryVendorMobile,
+						inventoryVendorTelephone,
+						inventoryVendorVAT,
+						inventoryVendorBrand
+					} = item;
+
 					// ----- INSERT UNIQUE DATA TO uniqueData VARIABLE ----
 					let unique = {
-						id: item.inventoryVendorID, // Required
-						inventoryVendorName: item.inventoryVendorName,
+						id: inventoryVendorID, // Required
+						inventoryVendorName: inventoryVendorName,
 					};
 					uniqueData.push(unique);
 					// ----- END INSERT UNIQUE DATA TO uniqueData VARIABLE ----
 
 					let status =
-						item.inventoryVendorStatus == 1
+						inventoryVendorStatus == 1
 							? `
                     <span class="badge badge-outline-success w-100">Active</span>`
 							: `
                     <span class="badge badge-outline-danger w-100">Inactive</span>`;
 
 					html += `
-                    <tr class="btnEdit" id="${item.inventoryVendorID}">
-                        <td>${item.inventoryVendorCode}</td>
-                        <td>${item.inventoryVendorName}</td>
+                    <tr class="btnEdit" id="${inventoryVendorID}">
+                        <td>${inventoryVendorCode}</td>
+                        <td>${inventoryVendorName}</td>
                         <td>
-                            ${item.inventoryVendorUnit + ", "} 
-                            ${item.inventoryVendorBuilding && titleCase(item.inventoryVendorBuilding) + ", "} 
-                            ${item.inventoryVendorStreet && titleCase(item.inventoryVendorStreet) + ", "}
-                            ${item.inventoryVendorSubdivision && titleCase(item.inventoryVendorSubdivision) + ", "} 
-                            ${item.inventoryVendorBarangay && titleCase(item.inventoryVendorBarangay) + ", "} 
-                            ${item.inventoryVendorCity && titleCase(item.inventoryVendorCity) + ", "} 
-                            ${item.inventoryVendorProvince && titleCase(item.inventoryVendorProvince) + ", "}
-                            ${item.inventoryVendorCountry && titleCase(item.inventoryVendorCountry) + ", "} 
-                            ${item.inventoryVendorZipCode && titleCase(item.inventoryVendorZipCode)}
+                            ${inventoryVendorUnit && inventoryVendorUnit + ", "} 
+                            ${inventoryVendorBuilding && titleCase(inventoryVendorBuilding) + ", "} 
+                            ${inventoryVendorStreet && titleCase(inventoryVendorStreet) + ", "}
+                            ${inventoryVendorSubdivision && titleCase(inventoryVendorSubdivision) + ", "} 
+                            ${inventoryVendorBarangay && titleCase(inventoryVendorBarangay) + ", "} 
+                            ${inventoryVendorCity && titleCase(inventoryVendorCity) + ", "} 
+                            ${inventoryVendorProvince && titleCase(inventoryVendorProvince) + ", "}
+                            ${inventoryVendorCountry && titleCase(inventoryVendorCountry) + ", "} 
+                            ${inventoryVendorZipCode && titleCase(inventoryVendorZipCode)}
                         </td>
-                        <td>${item.inventoryVendorPerson}</td>
-                        <td>${item.inventoryVendorEmail}</td>
-                        <td>${item.inventoryVendorTIN}</td>
-                        <td>${item.inventoryVendorMobile}</td>
-                        <td>${item.inventoryVendorTelephone}</td>
+                        <td>${inventoryVendorPerson || "-"}</td>
+                        <td>${inventoryVendorEmail || "-"}</td>
+                        <td>${inventoryVendorTIN || "-"}</td>
+                        <td>${inventoryVendorMobile || "-"}</td>
+                        <td>${inventoryVendorTelephone || "-"}</td>
                         <td>
-							${item.inventoryVendorVAT == 1 ? "Vatable" : "Non Vatable"}
+							${inventoryVendorVAT == 1 ? "Vatable" : "Non Vatable"}
 						</td>
-                        <td>${item.inventoryVendorBrand}</td>
+                        <td>${inventoryVendorBrand || "-"}</td>
                         <td>${status}</td>
                     </tr>`;
 				});
@@ -649,7 +673,7 @@ $(document).ready(function () {
                             <div class="invalid-feedback d-block" id="invalid-inventoryVendorEmail"></div>
                         </div>
                     </div>
-                    <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12">
+                    <div class="col-xl-4 col-lg-6 col-md-6 col-sm-12">
                         <div class="form-group">
                             <label>Tax Identification Number </label>
                             <input 
@@ -666,7 +690,7 @@ $(document).ready(function () {
                             <div class="invalid-feedback d-block" id="invalid-inventoryVendorTIN"></div>
                         </div>
                     </div>
-                    <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12">
+                    <div class="col-xl-4 col-lg-6 col-md-6 col-sm-12">
                         <div class="form-group">
                             <label>Mobile No. </label>
                                 <input 
@@ -682,7 +706,7 @@ $(document).ready(function () {
                             <div class="invalid-feedback d-block" id="invalid-inventoryVendorMobile"></div>
                         </div>
                     </div>
-                    <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12">
+                    <div class="col-xl-4 col-lg-6 col-md-6 col-sm-12">
                         <div class="form-group">
                             <label>Telephone No. </label>
                                 <input type="text" 
@@ -697,7 +721,7 @@ $(document).ready(function () {
                             <div class="invalid-feedback d-block" id="invalid-inventoryVendorTelephone"></div>
                         </div>
                     </div>
-                    <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12">
+                    <div class="col-xl-4 col-lg-6 col-md-6 col-sm-12">
                         <div class="form-group">
                             <label>Brand Name <code>*</code></label>
                             <input 
@@ -715,7 +739,7 @@ $(document).ready(function () {
                         </div>
                     </div>
 
-					<div class="col-xl-6 col-lg-6 col-md-6 col-sm-12">
+					<div class="col-xl-4 col-lg-6 col-md-6 col-sm-12">
 						<div class="form-group">
 							<label>Fax Number</label>
 							<input 
@@ -732,7 +756,7 @@ $(document).ready(function () {
 							<div class="invalid-feedback d-block" id="invalid-inventoryVendorFaxNumber"></div>
 						</div>
 					</div>
-					<div class="col-xl-6 col-lg-6 col-md-6 col-sm-12">
+					<div class="col-xl-4 col-lg-6 col-md-6 col-sm-12">
 						<div class="form-group">
 							<label>Industry </label>
 							<select
@@ -746,7 +770,7 @@ $(document).ready(function () {
 							<div class="invalid-feedback d-block" id="invalid-inventoryVendorIndustry"></div>
 						</div>
 					</div>
-					<div class="col-xl-6 col-lg-6 col-md-6 col-sm-12">
+					<div class="col-xl-4 col-lg-6 col-md-6 col-sm-12">
 						<div class="form-group">
 							<label>Enterprise </label>
 							<select
@@ -760,7 +784,33 @@ $(document).ready(function () {
 							<div class="invalid-feedback d-block" id="invalid-inventoryVendorEnterprise"></div>
 						</div>
 					</div>
-					<div class="col-xl-6 col-lg-6 col-md-6 col-sm-12">
+					<div class="col-xl-4 col-lg-3 col-md-6 col-sm-12">
+						<div class="form-group">
+							<label>Opening Hours</label>
+							<input type="text" 
+								class="form-control openingHours" 
+								id="inventoryVendorOpeningHours" 
+								name="inventoryVendorOpeningHours" 
+								required
+								value="${inventoryVendorOpeningHours}">
+							<div class="d-block invalid-feedback" id="invalid-inventoryVendorOpeningHours"></div>
+						</div>
+					</div>
+					<div class="col-xl-4 col-lg-3 col-md-6 col-sm-12">
+						<div class="form-group">
+							<label>Closing Hours</label>
+							<input type="text" 
+								class="form-control closingHours" 
+								id="inventoryVendorClosingHours" 
+								name="inventoryVendorClosingHours" 
+								required
+								value="${inventoryVendorClosingHours}">
+							<div class="d-block invalid-feedback" id="invalid-inventoryVendorClosingHours"></div>
+						</div>
+					</div>
+
+
+					<div class="col-xl-4 col-lg-6 col-md-6 col-sm-12">
 						<div class="form-group">
 							<label>Bank</label>
 							<select
@@ -773,7 +823,7 @@ $(document).ready(function () {
 							<div class="invalid-feedback d-block" id="invalid-bankID"></div>
 						</div>
 					</div>
-					<div class="col-xl-6 col-lg-6 col-md-6 col-sm-12">
+					<div class="col-xl-4 col-lg-6 col-md-6 col-sm-12">
 						<div class="form-group">
 							<label>Bank Account Name</label>
 							<input 
@@ -790,7 +840,7 @@ $(document).ready(function () {
 							<div class="invalid-feedback d-block" id="invalid-inventoryVendorBankAccName"></div>
 						</div>
 					</div>
-					<div class="col-xl-6 col-lg-6 col-md-6 col-sm-12">
+					<div class="col-xl-4 col-lg-6 col-md-6 col-sm-12">
 						<div class="form-group">
 							<label>Bank Account No.</label>
 							<input 
@@ -807,32 +857,17 @@ $(document).ready(function () {
 							<div class="invalid-feedback d-block" id="invalid-inventoryVendorBankAccNo"></div>
 						</div>
 					</div>
-					<div class="col-xl-3 col-lg-3 col-md-6 col-sm-12">
-						<div class="form-group">
-							<label>Opening Hours</label>
-							<input type="text" 
-								class="form-control openingHours" 
-								id="inventoryVendorOpeningHours" 
-								name="inventoryVendorOpeningHours" 
-								required
-								value="${inventoryVendorOpeningHours}">
-							<div class="d-block invalid-feedback" id="invalid-inventoryVendorOpeningHours"></div>
-						</div>
-					</div>
-					<div class="col-xl-3 col-lg-3 col-md-6 col-sm-12">
-						<div class="form-group">
-							<label>Closing Hours</label>
-							<input type="text" 
-								class="form-control closingHours" 
-								id="inventoryVendorClosingHours" 
-								name="inventoryVendorClosingHours" 
-								required
-								value="${inventoryVendorClosingHours}">
-							<div class="d-block invalid-feedback" id="invalid-inventoryVendorClosingHours"></div>
-						</div>
-					</div>
-					
-                    <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12">
+                    <div class="col-xl-4 col-lg-3 col-md-6 col-sm-12">
+                        <div class="form-group">
+                            <label>File <code>*</code></label>
+                            <input type="file"
+								name="file|vendor"
+								class="form-control validate"
+								id="inventoryVendorFile">
+                            <div class="invalid-feedback d-block" id="invalid-inventoryVendorFile"></div>
+                        </div>
+                    </div>
+                    <div class="col-xl-4 col-lg-3 col-md-6 col-sm-12">
                         <div class="form-group">
                             <label>VAT <code>*</code></label>
                             <select class=" form-control show-tick select2 validate" name="inventoryVendorVAT" id="inventoryVendorVAT" autocomplete="off">
@@ -842,7 +877,7 @@ $(document).ready(function () {
                             <div class="invalid-feedback d-block" id="invalid-inventoryVendorVAT"></div>
                         </div>
                     </div>
-                    <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12">
+                    <div class="col-xl-4 col-lg-3 col-md-6 col-sm-12">
                         <div class="form-group">
                             <label>Status <code>*</code></label>
                             <select class=" form-control show-tick select2 validate" name="inventoryVendorStatus" id="inventoryVendorStatus" autocomplete="off" title="Select Status">

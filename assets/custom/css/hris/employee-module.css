@@ -1,0 +1,36 @@
+#previewImageParent {
+    position: relative;
+}
+#previewImageParent span, .removeDocument {
+    position: absolute;
+    top: 2%;
+    right: 2%;
+    width: 20px;
+    border: 1px solid #eeeeee69;
+    border-radius: 50%;
+    text-align: center;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 250ms;
+}
+#previewImageParent span:hover, .removeDocument:hover {
+    background: #eeeeee69;
+    transform: scale(1.05);
+}
+
+#previewImageParent #previewImage {
+    max-width: 100%; 
+    width: 200px; 
+    height: 200px;
+}
+.removeDocument {
+    top: -15%;
+    right: 10%;
+}
+.fileLink {
+    font-size: .8rem;
+    display: block;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis; 
+}

@@ -55,7 +55,8 @@ textarea:focus, input:focus{
 	margin-top: 0.15rem;
 }
 .select2 {
-	width: 100%;
+	/* width: 100%; */
+	width: 100% !important; /* CHANGE */
 }
 .selection .select2-selection {
 	min-height: calc(1.5em + 0.75rem + 5px);

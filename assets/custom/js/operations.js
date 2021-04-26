@@ -646,7 +646,9 @@ const getEmployeePermission = (moduleID, method) => {
 				case "read":
 					return data[0].readStatus == 1 ? true : false;
 				case "update":
-					return data[0].updateStatus == 1 ? true : false;
+					let result = data[0].updateStatus == 1 ? true : false;
+					$("body").attr("update", result);
+					return result;
 				case "delete":
 					return data[0].deleteStatus == 1 ? true : false;
 				case "print":

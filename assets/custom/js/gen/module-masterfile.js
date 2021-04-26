@@ -784,35 +784,46 @@ $(document).ready(function() {
             data.append("tableName", "gen_module_header_tbl");
             data.append("feedback", feedback);
 
-            const saveData = insertTableData(data);
-            if (saveData) {
-                const moduleHeaderContent = moduleHeader();
-                $("#tableModuleHeader").html(moduleHeaderContent);
-            }
+            $("#loader").show();
+            setTimeout(() => {
+                const saveData = insertTableData(data);
+                if (saveData) {
+                    const moduleHeaderContent = moduleHeader();
+                    $("#tableModuleHeader").html(moduleHeaderContent);
+                }
+                initDataTables();
+            }, 500);
         } else if (moduleType == "category") {
             let feedback = $("#input_moduleCategory").val();
                 feedback = feedback.substr(0,1).toUpperCase() + feedback.substr(1);
             data.append("tableName", "gen_module_category_tbl");
             data.append("feedback", feedback);
 
-            const saveData = insertTableData(data);
-            if (saveData) {
-                const moduleCategoryContent = moduleCategory();
-                $("#tableModuleCategory").html(moduleCategoryContent);
-            }
+            $("#loader").show();
+            setTimeout(() => {
+                const saveData = insertTableData(data);
+                if (saveData) {
+                    const moduleCategoryContent = moduleCategory();
+                    $("#tableModuleCategory").html(moduleCategoryContent);
+                }
+                initDataTables();
+            }, 500);
         } else {
             let feedback = $("#input_moduleName").val();
                 feedback = feedback.substr(0,1).toUpperCase() + feedback.substr(1);
             data.append("tableName", "gen_module_list_tbl");
             data.append("feedback", feedback);
 
-            const saveData = insertTableData(data);
-            if (saveData) {
-                const moduleListContent = moduleList();
-                $("#tableModuleList").html(moduleListContent);
-
-                addModuleRolesPermission();
-            }
+            $("#loader").show();
+            setTimeout(() => {
+                const saveData = insertTableData(data);
+                if (saveData) {
+                    const moduleListContent = moduleList();
+                    $("#tableModuleList").html(moduleListContent);
+                    initDataTables();
+                    addModuleRolesPermission();
+                }
+            }, 500);
         }  
 
         initDataTables();
@@ -854,11 +865,15 @@ $(document).ready(function() {
             data.append("whereFilter", "moduleHeaderID="+moduleID);
             data.append("feedback", feedback);
 
-            const saveData = updateTableData(data);
-            if (saveData) {
-                const moduleHeaderContent = moduleHeader();
-                $("#tableModuleHeader").html(moduleHeaderContent);
-            }
+            $("#loader").show()
+            setTimeout(() => {
+                const saveData = updateTableData(data);
+                if (saveData) {
+                    const moduleHeaderContent = moduleHeader();
+                    $("#tableModuleHeader").html(moduleHeaderContent);
+                }
+                initDataTables();
+            }, 500);
         } else if (moduleType == "category") {
             let feedback = $("#input_moduleCategory").val();
                 feedback = feedback.substr(0,1).toUpperCase() + feedback.substr(1);
@@ -866,11 +881,15 @@ $(document).ready(function() {
             data.append("whereFilter", "moduleCategoryID="+moduleID);
             data.append("feedback", feedback);
 
-            const saveData = updateTableData(data);
-            if (saveData) {
-                const moduleCategoryContent = moduleCategory();
-                $("#tableModuleCategory").html(moduleCategoryContent);
-            }
+            $("#loader").show()
+            setTimeout(() => {
+                const saveData = updateTableData(data);
+                if (saveData) {
+                    const moduleCategoryContent = moduleCategory();
+                    $("#tableModuleCategory").html(moduleCategoryContent);
+                }
+                initDataTables();
+            }, 500);
         } else {
             let feedback = $("#input_moduleName").val();
                 feedback = feedback.substr(0,1).toUpperCase() + feedback.substr(1);
@@ -878,14 +897,16 @@ $(document).ready(function() {
             data.append("whereFilter", "moduleID="+moduleID);
             data.append("feedback", feedback);
 
-            const saveData = updateTableData(data);
-            if (saveData) {
-                const moduleListContent = moduleList();
-                $("#tableModuleList").html(moduleListContent);
-            }
+            $("#loader").show()
+            setTimeout(() => {
+                const saveData = updateTableData(data);
+                if (saveData) {
+                    const moduleListContent = moduleList();
+                    $("#tableModuleList").html(moduleListContent);
+                }
+                initDataTables();
+            }, 500);
         }  
-
-        initDataTables();
     })
     // ----- END SAVE CONFIRMATION ADD -----
 

@@ -16,5 +16,66 @@
         return $query->row();
     }
 
+    // ----- EMPLOYEE PERMISSIONS -----
+    function getEmployeePermission($moduleID, $method)
+    {
+        $CI =& get_instance();
+        $sessionID = $CI->session->has_userdata("adminSessionID") ? $CI->session->userdata("adminSessionID") : 1;
+
+        if ($moduleID && $method) {
+            $sql = "SELECT createStatus, readStatus, updateStatus, deleteStatus, printStatus FROM hris_employee_permission_tbl WHERE moduleID = $moduleID AND employeeID = $sessionID";
+            $query = $CI->db->query($sql);
+            if ($query && $query->num_rows() > 0) {
+                $data = $query->result_array();
+                switch ($method) {
+                    case 'create':
+                        return $data[0]["createStatus"] == 1 ? true : false;
+                    case 'read':
+                        return $data[0]["readStatus"]   == 1 ? true : false;
+                    case 'update':
+                        return $data[0]["updateStatus"] == 1 ? true : false;
+                    case 'delete':
+                        return $data[0]["deleteStatus"] == 1 ? true : false;
+                    case 'print':
+                        return $data[0]["printStatus"]  == 1 ? true : false;
+                    default:
+                        return false;
+                }
+            }
+        }
+        return false;
+    }
+
+    function isCreateAllowed($moduleID)
+    {
+        return getEmployeePermission($moduleID, "create");
+    }
+
+    function isReadAllowed($moduleID)
+    {
+        $CI =& get_instance();
+        $CI->load->helper('url'); 
+        $result = getEmployeePermission($moduleID, "read");
+        if (!$result) {
+            redirect(base_url('denied'));
+        }
+        return $result;
+    }
+
+    function isUpdateAllowed($moduleID)
+    {
+        return getEmployeePermission($moduleID, "update");
+    }
+
+    function isDeleteAllowed($moduleID)
+    {
+        return getEmployeePermission($moduleID, "delete");
+    }
+
+    function isPrintAllowed($moduleID)
+    {
+        return getEmployeePermission($moduleID, "print");
+    }
+    // ----- END EMPLOYEE PERMISSIONS -----
 
 ?>
