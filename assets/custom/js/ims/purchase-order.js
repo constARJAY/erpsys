@@ -1,6 +1,6 @@
 $(document).ready(function() {
     // ----- MODULE APPROVER -----
-	const moduleApprover = getModuleApprover("purchase request");
+	const moduleApprover = getModuleApprover("purchase order");
 	// ----- END MODULE APPROVER -----
 
 
@@ -22,6 +22,17 @@ $(document).ready(function() {
 		return "-";
 	}
 	// ---- END GET EMPLOYEE DATA -----
+
+
+	// ----- IS DOCUMENT REVISED -----
+	function isDocumentRevised(id = null) {
+		if (id) {
+			const revisedDocumentsID = getTableData("ims_purchase_order_tbl", "revisePurchaseOrderID", "revisePurchaseOrderID IS NOT NULL");
+			return revisedDocumentsID.map(item => item.revisePurchaseOrderID).includes(id);
+		}
+		return false;
+	}
+	// ----- END IS DOCUMENT REVISED -----
 
 
     // ----- VIEW DOCUMENT -----
@@ -320,13 +331,12 @@ $(document).ready(function() {
 	function headerButton(isAdd = true, text = "Add", isRevise = false) {
 		let html;
 		if (isAdd) {
-            html = `
-            <button type="button" class="btn btn-default btn-add" id="btnAdd"><i class="icon-plus"></i> &nbsp;${text}</button>`;
+            html = "";
 		} else {
 			html = `
             <button type="button" class="btn btn-default btn-light" id="btnBack" revise="${isRevise}"><i class="fas fa-arrow-left"></i> &nbsp;Back</button>`;
 		}
-		// $("#headerButton").html(html);
+		$("#headerButton").html(html);
 	}
 	// ----- END HEADER BUTTON -----
 
@@ -334,11 +344,14 @@ $(document).ready(function() {
     // ----- FOR APPROVAL CONTENT -----
 	function forApprovalContent() {
 		$("#tableForApprovalParent").html(preloader);
-		let purchaseRequestData = getTableData(
-			"ims_purchase_request_tbl AS imrt LEFT JOIN hris_employee_list_tbl AS helt USING(employeeID) LEFT JOIN pms_project_list_tbl AS pplt ON pplt.projectListID = imrt.projectID",
-			"imrt.*, CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname, imrt.createdAt AS dateCreated, projectListCode, projectListName",
-			`imrt.employeeID != ${sessionID} AND purchaseRequestStatus != 0 AND purchaseRequestStatus != 4`,
-			`FIELD(purchaseRequestStatus, 0, 1, 3, 2, 4), COALESCE(imrt.submittedAt, imrt.createdAt)`
+		let purchaseOrderData = getTableData(
+			`ims_purchase_order_tbl AS ipot 
+				LEFT JOIN ims_purchase_request_tbl AS iprt USING(purchaseRequestID)
+				LEFT JOIN pms_project_list_tbl AS pplt ON pplt.projectListID = iprt.projectID
+				LEFT JOIN hris_employee_list_tbl AS helt ON iprt.employeeID = helt.employeeID`,
+			`ipot.*, CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname, ipot.createdAt AS dateCreated, projectListCode, projectListName`,
+			`ipot.employeeID != ${sessionID} AND ipot.purchaseOrderStatus != 0 AND ipot.purchaseOrderStatus != 4`,
+			`FIELD(purchaseOrderStatus, 0, 1, 3, 2, 4), COALESCE(ipot.submittedAt, ipot.createdAt)`
 		);
 
 		let html = `
@@ -361,65 +374,63 @@ $(document).ready(function() {
             </thead>
             <tbody>`;
 
-		purchaseRequestData.map((item) => {
+			purchaseOrderData.map((item) => {
 			let {
 				fullname,
-				purchaseRequestID,
-				projectID,
-				projectListCode,
-				projectListName,
-				referenceCode,
+				purchaseOrderID,
+                projectID,
+                projectListCode,
+                projectListName,
+                referenceCode,
 				approversID,
 				approversDate,
-				purchaseRequestStatus,
-				purchaseRequestRemarks,
+				purchaseOrderStatus,
+				purchaseOrderRemarks,
 				submittedAt,
 				createdAt,
 			} = item;
 
-			let remarks       = purchaseRequestRemarks ? purchaseRequestRemarks : "-";
+			let remarks       = purchaseOrderRemarks ? purchaseOrderRemarks : "-";
 			let dateCreated   = moment(createdAt).format("MMMM DD, YYYY hh:mm:ss A");
 			let dateSubmitted = submittedAt ? moment(submittedAt).format("MMMM DD, YYYY hh:mm:ss A") : "-";
-			let dateApproved  = purchaseRequestStatus == 2 ? approversDate.split("|") : "-";
+			let dateApproved  = purchaseOrderStatus == 2 ? approversDate.split("|") : "-";
 			if (dateApproved !== "-") {
 				dateApproved = moment(dateApproved[dateApproved.length - 1]).format("MMMM DD, YYYY hh:mm:ss A");
 			}
 
-			let button = purchaseRequestStatus != 0 ? `
-			<button class="btn btn-view w-100 btnView" id="${encryptString(purchaseRequestID )}"><i class="fas fa-eye"></i> View</button>` : `
-			<button 
-				class="btn btn-edit w-100 btnEdit" 
-				id="${encryptString(purchaseRequestID )}" 
-				code="${getFormCode("PR", createdAt, purchaseRequestID )}"><i class="fas fa-edit"></i> Edit</button>`;
+			let button = purchaseOrderStatus != 0 ? `
+            <button class="btn btn-view w-100 btnView" id="${encryptString(purchaseOrderID )}"><i class="fas fa-eye"></i> View</button>` : `
+            <button 
+                class="btn btn-edit w-100 btnEdit" 
+                id="${encryptString(purchaseOrderID )}" 
+                code="${getFormCode("PR", createdAt, purchaseOrderID )}"><i class="fas fa-edit"></i> Edit</button>`;
 
-			if (isImCurrentApprover(approversID, approversDate, purchaseRequestStatus) || isAlreadyApproved(approversID, approversDate)) {
-				html += `
-				<tr>
-					<td>${getFormCode("PR", createdAt, purchaseRequestID )}</td>
-					<td>${fullname}</td>
-					<td>${projectListCode || '-'}</td>
-					<td>${projectListName || '-'}</td>
-					<td>${referenceCode || '-'}</td>
-					<td>
-						${employeeFullname(getCurrentApprover(approversID, approversDate, purchaseRequestStatus, true))}
-					</td>
-					<td>${dateCreated}</td>
-					<td>${dateSubmitted}</td>
-					<td>${dateApproved}</td>
-					<td class="text-center">
-						${getStatusStyle(purchaseRequestStatus)}
-					</td>
-					<td>${remarks}</td>
-					<td class="text-center">
-						${button}
-					</td>
-				</tr>`;
-			}
+			html += `
+            <tr>
+                <td>${getFormCode("PO", createdAt, purchaseOrderID )}</td>
+                <td>${fullname}</td>
+                <td>${projectListCode || '-'}</td>
+                <td>${projectListName || '-'}</td>
+                <td>${referenceCode   || '-'}</td>
+                <td>
+                    ${employeeFullname(getCurrentApprover(approversID, approversDate, purchaseOrderStatus, true))}
+                </td>
+				<td>${dateCreated}</td>
+				<td>${dateSubmitted}</td>
+				<td>${dateApproved}</td>
+                <td class="text-center">
+                    ${getStatusStyle(purchaseOrderStatus)}
+                </td>
+				<td>${remarks}</td>
+                <td class="text-center">
+                    ${button}
+                </td>
+            </tr>`;
 		});
 
 		html += `
-			</tbody>
-		</table>`;
+            </tbody>
+        </table>`;
 
 		setTimeout(() => {
 			$("#tableForApprovalParent").html(html);
@@ -537,10 +548,10 @@ $(document).ready(function() {
 			let {
 				purchaseOrderID     = "",
 				purchaseOrderStatus = "",
-				employeeID            = "",
-				approversID           = "",
-				approversDate         = "",
-				createdAt             = new Date
+				employeeID          = "",
+				approversID         = "",
+				approversDate       = "",
+				createdAt           = new Date
 			} = data && data[0];
 
 			let isOngoing = approversDate ? approversDate.split("|").length > 0 ? true : false : false;
@@ -562,7 +573,9 @@ $(document).ready(function() {
 						<button 
 							class="btn btn-cancel" 
 							id="btnCancel"
-							revise="${isRevise}"><i class="fas fa-ban"></i> 
+							revise="${isRevise}"
+							purchaseOrderID="${purchaseOrderID}"
+							code="${getFormCode("P0", createdAt, purchaseOrderID)}"><i class="fas fa-ban"></i> 
 							Cancel
 						</button>`;
 					} else {
@@ -593,15 +606,17 @@ $(document).ready(function() {
 					}
 				} else if (purchaseOrderStatus == 3) {
 					// DENIED - FOR REVISE
-					button = `
-					<button
-						class="btn btn-cancel"
-						id="btnRevise" 
-						purchaseOrderID="${encryptString(purchaseOrderID)}"
-						code="${getFormCode("P0", createdAt, purchaseOrderID)}"
-						status="${purchaseOrderStatus}"><i class="fas fa-clone"></i>
-						Revise
-					</button>`;
+					if (!isDocumentRevised(purchaseOrderID)) {
+						button = `
+						<button
+							class="btn btn-cancel"
+							id="btnRevise" 
+							purchaseOrderID="${encryptString(purchaseOrderID)}"
+							code="${getFormCode("P0", createdAt, purchaseOrderID)}"
+							status="${purchaseOrderStatus}"><i class="fas fa-clone"></i>
+							Revise
+						</button>`;
+					}
 				}
 			} else {
 				if (purchaseOrderStatus == 1) {
@@ -842,7 +857,7 @@ $(document).ready(function() {
 				   ${files}
 				</a>
 				<span class="btnRemoveFile" style="cursor: pointer"><i class="fas fa-close"></i></span>
-			</div>` : "";
+			</div>` : "-";
 			html += `
 			<tr class="itemTableRow">
 				<td>
@@ -852,12 +867,13 @@ $(document).ready(function() {
 					<div class="itemname">
 						<div class="form-group mb-0">
 							<select
-								class="form-control validate select2"
+								class="form-control-plaintext validate select2"
 								name="itemID"
 								id="itemID"
 								style="width: 100%"
 								required
-								${attr}>
+								${attr}
+								disabled>
 								${getInventoryItem(itemID, isProject)}
 							</select>
 							<div class="invalid-feedback d-block" id="invalid-itemID"></div>
@@ -915,12 +931,6 @@ $(document).ready(function() {
 						<div class="displayfile">
 							${itemFile}
 						</div>
-						<input 
-							type="file" 
-							class="form-control" 
-							name="files" 
-							id="files"
-							accept="image/*, .pdf, .doc, .docx">
 						<div class="invalid-feedback d-block" id="invalid-files"></div>
 					</div>
 				</td>
@@ -1229,47 +1239,236 @@ $(document).ready(function() {
 		const attr        = isProject ? "[project=true]" : "[company=true]";
 		const quantityArr = $.find(`[name=quantity]${attr}`).map(element => element.value || "0");
 		const unitCostArr = $.find(`[name=unitCost]${attr}`).map(element => element.value.replaceAll(",", "") || "0");
-		const totalAmount = quantityArr.map((qty, index) => +qty * +unitCostArr[index]).reduce((a,b) => a + b, 0);
-		$(`#totalAmount${attr}`).text(formatAmount(totalAmount, true));
-		return totalAmount;
+		const total = quantityArr.map((qty, index) => +qty * +unitCostArr[index]).reduce((a,b) => a + b, 0);
+		$(`#total${attr}`).text(formatAmount(total, true));
+
+		const discount    = getNonFormattedAmount($("#discount").val());
+		const totalAmount = total - discount;
+		$("#totalAmount").html(formatAmount(totalAmount, true));
+
+		const vat      = getNonFormattedAmount($("[name=vat]").val())
+		const vatSales = totalAmount - vat;
+		$("#vatSales").html(formatAmount(vatSales, true));
+
+		const totalVat = vatSales + vat;
+		$("#totalVat").html(formatAmount(totalVat, true));
+
+		const lessEwt          = getNonFormattedAmount($("[name=lessEwt]").val());
+		const grandTotalAmount = totalVat - lessEwt;
+		$("#grandTotalAmount").html(formatAmount(grandTotalAmount, true));
 	}
 	// ----- END UPDATE TOTAL AMOUNT -----
+
+
+	// ----- GET AMOUNT -----
+	const getNonFormattedAmount = (amount = "₱0.00") => {
+		return +amount.replaceAll(",", "").replace("₱", "");
+	}
+	// ----- END GET AMOUNT -----
+
+
+	// ----- KEYUP QUANTITY OR UNITCOST -----
+	$(document).on("keyup", "[name=quantity], [name=unitCost]", function() {
+		const index     = $(this).closest("tr").first().attr("index");
+		const isProject = $(this).closest("tbody").attr("project") == "true";
+		const attr      = isProject ? "[project=true]" : "[company=true]";
+		const quantity  = +$(`#quantity${index}${attr}`).val();
+		const unitcost  = +$(`#unitcost${index}${attr}`).val().replaceAll(",", "");
+		const totalcost = quantity * unitcost;
+		$(`#totalcost${index}${attr}`).text(formatAmount(totalcost, true));
+		updateTotalAmount(isProject);
+	})
+	// ----- END KEYUP QUANTITY OR UNITCOST -----
+
+
+	// ----- KEYUP DISCOUNT -----
+	$(document).on("keyup", "[name=discount]", function() {
+		const discount = getNonFormattedAmount($(this).val());
+		const total    = getNonFormattedAmount($("#total").text());
+		
+		const totalAmount = total - discount;
+		$("#totalAmount").html(formatAmount(totalAmount, true));
+
+		const vat      = getNonFormattedAmount($("[name=vat]").val())
+		const vatSales = totalAmount - vat;
+		$("#vatSales").html(formatAmount(vatSales, true));
+
+		const totalVat = vatSales + vat;
+		$("#totalVat").html(formatAmount(totalVat, true));
+
+		const lessEwt          = getNonFormattedAmount($("[name=lessEwt]").val());
+		const grandTotalAmount = totalVat - lessEwt;
+		$("#grandTotalAmount").html(formatAmount(grandTotalAmount, true));
+	})	
+	// ----- END KEYUP DISCOUNT -----
+
+
+	// ----- KEYUP DISCOUNT -----
+	$(document).on("keyup", "[name=vat]", function() {
+		const vat         = getNonFormattedAmount($(this).val());
+		const totalAmount = getNonFormattedAmount($("#totalAmount").text());
+
+		const vatSales = totalAmount - vat;
+		$("#vatSales").html(formatAmount(vatSales, true));
+	})	
+	// ----- END KEYUP DISCOUNT -----
+
+
+	// ----- KEYUP DISCOUNT -----
+	$(document).on("keyup", "[name=lessEwt]", function() {
+		const lessEwt     = getNonFormattedAmount($(this).val());
+		const totalAmount = getNonFormattedAmount($("#totalAmount").text());
+
+		const grandTotalAmount = totalAmount - lessEwt;
+		$("#grandTotalAmount").html(formatAmount(grandTotalAmount, true));
+	})	
+	// ----- END KEYUP DISCOUNT -----
+
+
+	// ----- GET PURCHASE ORDER DATA -----
+	function getPurchaseOrderData(action = "insert", method = "submit", status = "1", id = null, currentStatus = "0", isRevise = false) {
+		/**
+		 * ----- ACTION ---------
+		 *    > insert
+		 *    > update
+		 * ----- END ACTION -----
+		 * 
+		 * ----- STATUS ---------
+		 *    0. Draft
+		 *    1. For Approval
+		 *    2. Approved
+		 *    3. Denied
+		 *    4. Cancelled
+		 * ----- END STATUS -----
+		 * 
+		 * ----- METHOD ---------
+		 *    > submit
+		 *    > save
+		 *    > deny
+		 *    > approve
+		 * ----- END METHOD -----
+		 */
+
+		 let data = { items: [] };
+		 const approversID = method != "approve" && moduleApprover;
+ 
+		 if (id) {
+			data["purchaseOrderID"] = id;
+
+			if (status != "2") {
+				data["purchaseOrderStatus"] = status;
+			}
+		}
+
+		data["action"]    = action;
+		data["method"]    = method;
+		data["updatedBy"] = sessionID;
+
+		if (currentStatus == "0" && method != "approve") {
+
+			data["paymentTerms"]     = $("[name=paymentTerms]").val()?.trim();
+			data["deliveryDate"]     = moment($("[name=deliveryDate]").val()).format("YYYY-MM-DD");
+			data["total"]            = getNonFormattedAmount($("#total").text());
+			data["discount"]         = getNonFormattedAmount($("#discount").val());
+			data["totalAmount"]      = getNonFormattedAmount($("#totalAmount").text());
+			data["vatSales"]         = getNonFormattedAmount($("#vatSales").text());
+			data["vat"]              = getNonFormattedAmount($("#vat").val());
+			data["totalVat"]         = getNonFormattedAmount($("#totalVat").text());
+			data["lessEwt"]          = getNonFormattedAmount($("#lessEwt").val());
+			data["grandTotalAmount"] = getNonFormattedAmount($("#grandTotalAmount").text());
+
+			if (action == "insert") {
+				data["createdBy"] = sessionID;
+				data["createdAt"] = dateToday();
+			} else if (action == "update") {
+				data["purchaseOrderID"]  = id;
+			}
+
+			if (method == "submit") {
+				data["submittedAt"] = dateToday();
+				if (approversID) {
+					data["approversID"]         = approversID;
+					data["purchaseOrderStatus"] = 1;
+				} else {  // AUTO APPROVED - IF NO APPROVERS
+					data["approversID"]         = sessionID;
+					data["approversStatus"]     = 2;
+					data["approversDate"]       = dateToday();
+					data["purchaseOrderStatus"] = 2;
+				}
+			}
+
+			if (isRevise) {
+				$(".itemTableRow").each(function(i, obj) {
+					const categoryType = $(this).closest("tbody").attr("project") == "true" ? "project" : "company";
+	
+					const itemID    = $("td [name=itemID]", this).val();	
+					const quantity  = +$("td [name=quantity]", this).val();	
+					const unitcost  = +$("td [name=unitCost]", this).val().replaceAll(",", "");	
+					const totalcost = quantity * unitcost;
+					const remarks   = $("td [name=remarks]", this).val()?.trim();	
+	
+					let temp = {
+						itemID, 
+						quantity, 
+						unitcost, 
+						totalcost: totalcost.toFixed(2),
+						categoryType, 
+						remarks, 
+						createdBy: sessionID, 
+						updatedBy: sessionID
+					};
+	
+					const isHadExistingFile = $("td .file .displayfile", this).text().trim().length > 0;
+					if (isHadExistingFile) {
+						const filename = $("td .file .displayfile .filename", this).text().trim();
+						temp["existingFile"] = filename;
+						temp["filename"]     = filename;
+					}
+					data["items"].push(temp);
+				});
+			}
+		} 
+
+		return data;
+	} 
+	// ----- END GET PURCHASE ORDER DATA -----
 
 
     // ----- FORM CONTENT -----
 	function formContent(data = false, readOnly = false, isRevise = false) {
 		$("#page_content").html(preloader);
-		readOnly = isRevise ? false : !readOnly ? true : false;
+		readOnly     = isRevise ? false : readOnly;
+		let disabled = readOnly ? "disabled" : "";
 
 		let {
 			purchaseOrderID       = "",
 			revisePurchaseOrderID = "",
-			employeeID              = "",
-			projectID               = "",
-			bidRecapID = "",
-			vendorName = "",
-			vendorAddress = "",
-			vendorContactDetails = "",
-			vendorContactPerson = "",
-			paymentTerms = "",
-			deliveryDate = "",
-			purchaseRequestReason   = "",
-			total      = "0",
-			discount      = "0",
-			totalAmount      = "0",
-			vatSales      = "0",
-			vat      = "0",
-			totalVat      = "0",
-			lessEwt      = "0",
-			grandTotalAmount      = "0",
-			categoryType      = "",
+			employeeID            = "",
+			projectID             = "",
+			bidRecapID            = "",
+			vendorName            = "",
+			vendorAddress         = "",
+			vendorContactDetails  = "",
+			vendorContactPerson   = "",
+			paymentTerms          = "",
+			deliveryDate          = "",
+			purchaseRequestReason = "",
+			total                 = 0,
+			discount              = 0,
+			totalAmount           = 0,
+			vatSales              = 0,
+			vat                   = 0,
+			totalVat              = 0,
+			lessEwt               = 0,
+			grandTotalAmount      = 0,
+			categoryType          = "",
 			purchaseOrderRemarks  = "",
-			approversID             = "",
-			approversStatus         = "",
-			approversDate           = "",
+			approversID           = "",
+			approversStatus       = "",
+			approversDate         = "",
 			purchaseOrderStatus   = false,
-			submittedAt             = false,
-			createdAt               = false,
+			submittedAt           = false,
+			createdAt             = false,
 		} = data && data[0];
 
 		let requestProjectItems = "", requestCompanyItems = "";
@@ -1279,10 +1478,10 @@ $(document).ready(function() {
 				`quantity, unitCost, totalCost, files, remarks, itemID, itemCode, itemName, categoryName, unitOfMeasurementID, categoryType`, 
 				`purchaseOrderID = ${purchaseOrderID}`);
 			requestItemsData.filter(item => item.categoryType == "project").map(item => {
-				requestProjectItems += getItemRow(true, item, readOnly);
+				requestProjectItems += getItemRow(true, item, !isRevise);
 			})
 			requestItemsData.filter(item => item.categoryType == "company").map(item => {
-				requestCompanyItems += getItemRow(false, item, readOnly);
+				requestCompanyItems += getItemRow(false, item, !isRevise);
 			})
 		} else {
 			requestProjectItems += getItemRow(true);
@@ -1303,10 +1502,22 @@ $(document).ready(function() {
 		$("#btnBack").attr("status", purchaseOrderStatus);
 		$("#btnBack").attr("employeeID", employeeID);
 
-		let disabled = readOnly ? "disabled" : "";
-		let tableProjectOrderItemsName = "tableProjectOrderItems0";
-		let tableCompanyOrderItemsName = "tableCompanyOrderItems0";
 		let button = formButtons(data, isRevise);
+
+		// ----- PRINT BUTTON -----
+		let printButton = '';
+		if (purchaseOrderStatus == 2) {
+			printButton = `
+			<div class="w-100 text-right pb-4">
+				<button 
+					class="btn btn-info py-2 px-3" 
+					purchaseOrderID="${purchaseOrderID}"
+					id="btnExcel">
+					<i class="fas fa-file-excel"></i> Excel
+				</button>
+			</div>`;
+		}
+		// ----- END PRINT BUTTON -----
 
 		let reviseDocumentNo    = isRevise ? purchaseOrderID : revisePurchaseOrderID;
 		let documentHeaderClass = isRevise || revisePurchaseOrderID ? "col-lg-4 col-md-4 col-sm-12 px-1" : "col-lg-2 col-md-6 col-sm-12 px-1";
@@ -1317,13 +1528,14 @@ $(document).ready(function() {
 				<div class="body">
 					<small class="text-small text-muted font-weight-bold">Revised Document No.</small>
 					<h6 class="mt-0 text-danger font-weight-bold">
-						${getFormCode("P0", createdAt, reviseDocumentNo)}
+						${getFormCode("PO", createdAt, reviseDocumentNo)}
 					</h6>      
 				</div>
 			</div>
 		</div>` : "";
 
 		let html = `
+		${printButton}
         <div class="row px-2">
 			${documentReviseNo}
             <div class="${documentHeaderClass}">
@@ -1331,7 +1543,7 @@ $(document).ready(function() {
                     <div class="body">
                         <small class="text-small text-muted font-weight-bold">Document No.</small>
                         <h6 class="mt-0 text-danger font-weight-bold">
-							${purchaseOrderID && !isRevise ? getFormCode("PR", createdAt, purchaseOrderID) : "---"}
+							${purchaseOrderID && !isRevise ? getFormCode("PO", createdAt, purchaseOrderID) : "---"}
 						</h6>      
                     </div>
                 </div>
@@ -1392,7 +1604,7 @@ $(document).ready(function() {
             </div>
         </div>
 
-        <div class="row" id="form_purchase_request">
+        <div class="row" id="form_purchase_order">
 
             <div class="col-md-4 col-sm-12">
                 <div class="form-group">
@@ -1474,7 +1686,8 @@ $(document).ready(function() {
 						minlength="2"
 						maxlength="50"
 						required
-						value="${paymentTerms || ""}">
+						value="${paymentTerms || ""}"
+						${disabled}>
 					<div class="d-block invalid-feedback" id="invalid-paymentTerms"></div>
                 </div>
             </div>
@@ -1482,11 +1695,12 @@ $(document).ready(function() {
                 <div class="form-group">
                     <label>Delivery Date <code>*</code></label>
                     <input type="button" 
-						class="form-control validate daterange" 
+						class="form-control validate daterange text-left" 
 						name="deliveryDate" 
 						id="deliveryDate"
 						required
-						value="${deliveryDate ? moment(deliveryDate).format("MMMM DD, YYYY") : ""}">
+						value="${moment(deliveryDate || dateToday()).format("MMMM DD, YYYY")}"
+						${disabled}>
 					<div class="d-block invalid-feedback" id="invalid-deliveryDate"></div>
                 </div>
             </div>
@@ -1525,13 +1739,12 @@ $(document).ready(function() {
                 </div>
             </div>
 			<div class="col-sm-12">`;
-
 			if (categoryType == "project") {
 				html += `
 				<div class="w-100">
 					<hr class="pb-1">
 					<div class="text-primary font-weight-bold" style="font-size: 1.5rem;">Project Materials and Equipment</div>
-                    <table class="table table-striped" id="${tableProjectOrderItemsName}">
+                    <table class="table table-striped" id="tableProjectOrderItems0">
                         <thead>
                             <tr style="white-space: nowrap">
                                 <th>Item Code</th>
@@ -1551,12 +1764,13 @@ $(document).ready(function() {
                     </table>
                     
 					<div class="row py-2">
-						<div class="offset-md-8 col-md-4 col-sm-12">
+						<div class="offset-md-8 col-md-4 col-sm-12 pt-3 pb-2">
 							<div class="row" style="font-size: 1.1rem; font-weight:bold">
 								<div class="col-6 text-right">Total :</div>
 								<div class="col-6 text-right text-danger"
 									project="true"
-									style="font-size: 1.05em">
+									style="font-size: 1.05em"
+									id="total">
 									${formatAmount(total, true)}
 								</div>
 							</div>
@@ -1566,7 +1780,7 @@ $(document).ready(function() {
 									project="true">
 									<input 
 										type="text" 
-										class="form-control-plaintext amount py-0 text-danger border-bottom"
+										class="form-control-plaintext amount py-0 text-danger border-bottom font-weight-bold"
 										min="0" 
 										max="9999999999"
 										minlength="1"
@@ -1574,7 +1788,8 @@ $(document).ready(function() {
 										name="discount" 
 										id="discount" 
 										style="font-size: 1.02em;"
-										value="${discount}">
+										value="${discount}"
+										${disabled}>
 								</div>
 							</div>
 							<div class="row" style="font-size: 1.1rem; font-weight:bold">
@@ -1583,7 +1798,7 @@ $(document).ready(function() {
 									project="true"
 									id="totalAmount"
 									style="font-size: 1.05em">
-									${formatAmount(total - discount, true)}
+									${formatAmount(totalAmount, true)}
 								</div>
 							</div>
 							<div class="row" style="font-size: 1.1rem; font-weight:bold">
@@ -1597,11 +1812,20 @@ $(document).ready(function() {
 							</div>
 							<div class="row" style="font-size: 1.1rem; font-weight:bold">
 								<div class="col-6 text-right">Vat 12%:</div>
-								<div class="col-6 text-right text-danger"
-									project="true"
-									id="vat"
-									style="font-size: 1.05em">
-									${formatAmount(vat, true)}
+								<div class="col-6 text-right"
+									project="true">
+									<input 
+										type="text" 
+										class="form-control-plaintext amount py-0 text-danger border-bottom font-weight-bold"
+										min="0" 
+										max="9999999999"
+										minlength="1"
+										maxlength="20" 
+										name="vat" 
+										id="vat" 
+										style="font-size: 1.02em;"
+										value="${vat}"
+										${disabled}>
 								</div>
 							</div>
 							<div class="row" style="font-size: 1.1rem; font-weight:bold">
@@ -1615,11 +1839,20 @@ $(document).ready(function() {
 							</div>
 							<div class="row" style="font-size: 1.1rem; font-weight:bold">
 								<div class="col-6 text-right">Less EWT:</div>
-								<div class="col-6 text-right text-danger"
-									project="true"
-									id="lessEwt"
-									style="font-size: 1.05em">
-									${formatAmount(lessEwt, true)}
+								<div class="col-6 text-right"
+									project="true">
+									<input 
+										type="text" 
+										class="form-control-plaintext amount py-0 text-danger border-bottom font-weight-bold"
+										min="0" 
+										max="9999999999"
+										minlength="1"
+										maxlength="20" 
+										name="lessEwt" 
+										id="lessEwt" 
+										style="font-size: 1.02em;"
+										value="${lessEwt}"
+										${disabled}>
 								</div>
 							</div>
 							<div class="row" style="font-size: 1.1rem; font-weight:bold">
@@ -1627,7 +1860,7 @@ $(document).ready(function() {
 								<div class="col-6 text-right text-danger"
 									project="true"
 									id="grandTotalAmount"
-									style="font-size: 1.05em">
+									style="font-size: 1.3em">
 									${formatAmount(grandTotalAmount, true)}
 								</div>
 							</div>
@@ -1639,7 +1872,7 @@ $(document).ready(function() {
 				<div class="w-100">
 					<hr class="pb-1">
 					<div class="text-primary font-weight-bold" style="font-size: 1.5rem;">Company Materials and Equipment</div>
-                    <table class="table table-striped" id="${tableCompanyOrderItemsName}">
+                    <table class="table table-striped" id="tableCompanyOrderItems0">
                         <thead>
                             <tr style="white-space: nowrap">
                                 <th>Item Code</th>
@@ -1658,10 +1891,107 @@ $(document).ready(function() {
                         </tbody>
                     </table>
                     
-					<div class="w-100 d-flex justify-content-end align-items-center py-2">
-						<div class="font-weight-bolder" style="font-size: 1rem;">
-							<span>Total Amount: &nbsp;</span>
-							<span class="text-danger" style="font-size: 1.2em" id="totalAmount" company="true">${formatAmount(total, true)}</span>
+					<div class="row py-2">
+						<div class="offset-md-8 col-md-4 col-sm-12 pt-3 pb-2">
+							<div class="row" style="font-size: 1.1rem; font-weight:bold">
+								<div class="col-6 text-right">Total :</div>
+								<div class="col-6 text-right text-danger"
+									project="true"
+									style="font-size: 1.05em"
+									id="total">
+									${formatAmount(total, true)}
+								</div>
+							</div>
+							<div class="row" style="font-size: 1.1rem; font-weight:bold">
+								<div class="col-6 text-right">Discount :</div>
+								<div class="col-6 text-right"
+									project="true">
+									<input 
+										type="text" 
+										class="form-control-plaintext amount py-0 text-danger border-bottom font-weight-bold"
+										min="0" 
+										max="9999999999"
+										minlength="1"
+										maxlength="20" 
+										name="discount" 
+										id="discount" 
+										style="font-size: 1.02em;"
+										value="${discount}"
+										${disabled}>
+								</div>
+							</div>
+							<div class="row" style="font-size: 1.1rem; font-weight:bold">
+								<div class="col-6 text-right">Total Amount:</div>
+								<div class="col-6 text-right text-danger"
+									project="true"
+									id="totalAmount"
+									style="font-size: 1.05em">
+									${formatAmount(totalAmount, true)}
+								</div>
+							</div>
+							<div class="row" style="font-size: 1.1rem; font-weight:bold">
+								<div class="col-6 text-right">Vatable Sales:</div>
+								<div class="col-6 text-right text-danger"
+									project="true"
+									id="vatSales"
+									style="font-size: 1.05em">
+									${formatAmount(vatSales, true)}
+								</div>
+							</div>
+							<div class="row" style="font-size: 1.1rem; font-weight:bold">
+								<div class="col-6 text-right">Vat 12%:</div>
+								<div class="col-6 text-right"
+									project="true">
+									<input 
+										type="text" 
+										class="form-control-plaintext amount py-0 text-danger border-bottom font-weight-bold"
+										min="0" 
+										max="9999999999"
+										minlength="1"
+										maxlength="20" 
+										name="vat" 
+										id="vat" 
+										style="font-size: 1.02em;"
+										value="${vat}"
+										${disabled}>
+								</div>
+							</div>
+							<div class="row" style="font-size: 1.1rem; font-weight:bold">
+								<div class="col-6 text-right">Total:</div>
+								<div class="col-6 text-right text-danger"
+									project="true"
+									id="totalVat"
+									style="font-size: 1.05em">
+									${formatAmount(totalVat, true)}
+								</div>
+							</div>
+							<div class="row" style="font-size: 1.1rem; font-weight:bold">
+								<div class="col-6 text-right">Less EWT:</div>
+								<div class="col-6 text-right"
+									project="true">
+									<input 
+										type="text" 
+										class="form-control-plaintext amount py-0 text-danger border-bottom font-weight-bold"
+										min="0" 
+										max="9999999999"
+										minlength="1"
+										maxlength="20" 
+										name="lessEwt" 
+										id="lessEwt" 
+										style="font-size: 1.02em;"
+										value="${lessEwt}"
+										${disabled}>
+								</div>
+							</div>
+							<div class="row" style="font-size: 1.1rem; font-weight:bold">
+								<div class="col-6 text-right">Grand Total:</div>
+								<div class="col-6 text-right text-danger"
+									project="true"
+									id="grandTotalAmount"
+									style="font-size: 1.05em">
+									${formatAmount(grandTotalAmount, true)}
+								</div>
+							</div>
 						</div>
 					</div>
                 </div>`;
@@ -1686,6 +2016,22 @@ $(document).ready(function() {
 			updateInventoryItemOptions();
 			projectID && projectID != 0 && $("[name=projectID]").trigger("change");
 			initAmount("#discount", true);
+			initAmount("#lessEwt", true);
+			initAmount("#vat", true);
+
+			const disablePreviousDateOptions = {
+				autoUpdateInput: false,
+				singleDatePicker: true,
+				showDropdowns: true,
+				autoApply: true,
+				locale: {
+					format: "MMMM DD, YYYY",
+				},
+				minDate: moment(new Date).format("MMMM DD, YYYY"),
+				startDate: moment(deliveryDate || new Date),
+			}
+			initDateRangePicker("#deliveryDate", disablePreviousDateOptions);
+
 			return html;
 		}, 300);
 	}
@@ -1710,7 +2056,7 @@ $(document).ready(function() {
             </div>`;
 			$("#page_content").html(html);
 
-			headerButton(true, "Add Purchase Request");
+			headerButton(true, "Add Purchase Order");
 			headerTabContent();
 			myFormsContent();
 			updateURL();
@@ -1732,4 +2078,467 @@ $(document).ready(function() {
 	});
 	// ----- END OPEN EDIT FORM -----
 
+
+	// ----- VIEW DOCUMENT -----
+	$(document).on("click", ".btnView", function () {
+		const id = $(this).attr("id");
+		viewDocument(id, true);
+	});
+	// ----- END VIEW DOCUMENT -----
+
+
+	// ----- VIEW DOCUMENT -----
+	$(document).on("click", "#btnRevise", function () {
+		const id = $(this).attr("purchaseOrderID");
+		viewDocument(id, false, true);
+	});
+	// ----- END VIEW DOCUMENT -----
+
+
+	// ----- SAVE CLOSE FORM -----
+	$(document).on("click", "#btnBack", function () {
+		const id         = $(this).attr("purchaseOrderID");
+		const revise     = $(this).attr("revise") == "true";
+		const employeeID = $(this).attr("employeeID");
+		const feedback   = $(this).attr("code") || getFormCode("PO", dateToday(), id);
+		const status     = $(this).attr("status");
+
+		if (status != "false" && status != 0) {
+			
+			if (revise) {
+				const action = revise && "insert" || (id && feedback ? "update" : "insert");
+				const data   = getPurchaseOrderData(action, "save", "0", id, status, revise);
+				data["purchaseOrderStatus"]   = 0;
+				data["revisePurchaseOrderID"] = id;
+				delete data["purchaseOrderID"];
+	
+				savePurchaseOrder(data, "save", null, pageContent);
+			} else {
+				$("#page_content").html(preloader);
+				pageContent();
+	
+				if (employeeID != sessionID) {
+					$("[redirect=forApprovalTab]").length > 0 && $("[redirect=forApprovalTab]").trigger("click");
+				}
+			}
+
+		} else {
+			const action = id && feedback ? "update" : "insert";
+			const data   = getPurchaseOrderData(action, "save", "0", id, status, revise);
+			data["purchaseOrderStatus"] = 0;
+
+			savePurchaseOrder(data, "save", null, pageContent);
+		}
+	});
+	// ----- END SAVE CLOSE FORM -----
+
+
+	// ----- SAVE DOCUMENT -----
+	$(document).on("click", "#btnSave, #btnCancel", function () {
+		const id       = $(this).attr("purchaseOrderID");
+		const revise   = $(this).attr("revise") == "true";
+		const feedback = $(this).attr("code") || getFormCode("PO", dateToday(), id);
+		const action   = revise && "insert" || (id && feedback ? "update" : "insert");
+		const data     = getPurchaseOrderData(action, "save", "0", id, "0", revise);
+		data["purchaseOrderStatus"] = 0;
+
+		if (revise) {
+			data["revisePurchaseOrderID"] = id;
+			delete data["purchaseOrderID"];
+		}
+
+		savePurchaseOrder(data, "save", null, pageContent);
+	});
+	// ----- END SAVE DOCUMENT -----
+
+
+	// ----- SUBMIT DOCUMENT -----
+	$(document).on("click", "#btnSubmit", function () {
+		const id       = $(this).attr("purchaseOrderID");
+		const revise   = $(this).attr("revise") == "true";
+		const validate = validateForm("form_purchase_order");
+
+		if (validate) {
+			const action = revise && "insert" || (id ? "update" : "insert");
+			const data   = getPurchaseOrderData(action, "submit", "1", id, "0", revise);
+
+			if (revise) {
+				data["revisePurchaseOrderID"] = id;
+				delete data["purchaseOrderID"];
+			}
+
+			const employeeID = getNotificationEmployeeID(data["approversID"], data["approversDate"], true);
+			let notificationData = false;
+			if (employeeID != sessionID) {
+				notificationData = {
+					moduleID:                47,
+					notificationTitle:       "Purchase Order",
+					notificationDescription: `${employeeFullname(sessionID)} asked for your approval.`,
+					notificationType:        2,
+					employeeID,
+				};
+			}
+
+			savePurchaseOrder(data, "submit", notificationData, pageContent);
+		}
+	});
+	// ----- END SUBMIT DOCUMENT -----
+
+
+	// ----- CANCEL DOCUMENT -----
+	$(document).on("click", "#btnCancelForm", function () {
+		const id     = $(this).attr("purchaseOrderID");
+		const status = $(this).attr("status");
+		const action = "update";
+		const data   = getPurchaseOrderData(action, "cancelform", "4", id, status);
+
+		savePurchaseOrder(data, "cancelform", null, pageContent);
+	});
+	// ----- END CANCEL DOCUMENT -----
+
+
+	// ----- APPROVE DOCUMENT -----
+	$(document).on("click", "#btnApprove", function () {
+		const id       = decryptString($(this).attr("purchaseOrderID"));
+		const feedback = $(this).attr("code") || getFormCode("PO", dateToday(), id);
+		let tableData  = getTableData("ims_purchase_order_tbl", "", "purchaseOrderID = " + id);
+
+		if (tableData) {
+			let approversID     = tableData[0].approversID;
+			let approversStatus = tableData[0].approversStatus;
+			let approversDate   = tableData[0].approversDate;
+			let employeeID      = tableData[0].employeeID;
+			let createdAt       = tableData[0].createdAt;
+
+			let data = getPurchaseOrderData("update", "approve", "2", id);
+			data["approversStatus"] = updateApproveStatus(approversStatus, 2);
+			let dateApproved = updateApproveDate(approversDate)
+			data["approversDate"] = dateApproved;
+
+			let status, notificationData;
+			if (isImLastApprover(approversID, approversDate)) {
+				status = 2;
+				notificationData = {
+					moduleID:                47,
+					tableID:                 id,
+					notificationTitle:       "Purchase Order",
+					notificationDescription: `${feedback}: Your request has been approved.`,
+					notificationType:        7,
+					employeeID,
+				};
+			} else {
+				status = 1;
+				notificationData = {
+					moduleID:                47,
+					tableID:                 id,
+					notificationTitle:       "Purchase Order",
+					notificationDescription: `${employeeFullname(employeeID)} asked for your approval.`,
+					notificationType:         2,
+					employeeID:               getNotificationEmployeeID(approversID, dateApproved),
+				};
+			}
+
+			data["purchaseOrderStatus"] = status;
+
+			savePurchaseOrder(data, "approve", notificationData, pageContent);
+		}
+	});
+	// ----- END APPROVE DOCUMENT -----
+
+
+	// ----- REJECT DOCUMENT -----
+	$(document).on("click", "#btnReject", function () {
+		const id       = $(this).attr("purchaseOrderID");
+		const feedback = $(this).attr("code") || getFormCode("PO", dateToday(), id);
+
+		$("#modal_purchase_order_content").html(preloader);
+		$("#modal_purchase_order .page-title").text("DENY PURCHASE ORDER");
+		$("#modal_purchase_order").modal("show");
+		let html = `
+		<div class="modal-body">
+			<div class="form-group">
+				<label>Remarks <code>*</code></label>
+				<textarea class="form-control validate"
+					data-allowcharacters="[0-9][a-z][A-Z][ ][.][,][_]['][()][?][-][/]"
+					minlength="2"
+					maxlength="250"
+					id="purchaseOrderRemarks"
+					name="purchaseOrderRemarks"
+					rows="4"
+					style="resize: none"
+					required></textarea>
+				<div class="d-block invalid-feedback" id="invalid-purchaseOrderRemarks"></div>
+			</div>
+		</div>
+		<div class="modal-footer text-right">
+			<button class="btn btn-danger" id="btnRejectConfirmation"
+			purchaseOrderID="${id}"
+			code="${feedback}"><i class="far fa-times-circle"></i> Deny</button>
+			<button class="btn btn-cancel" data-dismiss="modal"><i class="fas fa-ban"></i> Cancel</button>
+		</div>`;
+		$("#modal_purchase_order_content").html(html);
+	});
+
+	$(document).on("click", "#btnRejectConfirmation", function () {
+		const id       = decryptString($(this).attr("purchaseOrderID"));
+		const feedback = $(this).attr("code") || getFormCode("PO", dateToday(), id);
+
+		const validate = validateForm("modal_purchase_order");
+		if (validate) {
+			let tableData = getTableData("ims_purchase_order_tbl", "", "purchaseOrderID = " + id);
+			if (tableData) {
+				let approversStatus = tableData[0].approversStatus;
+				let approversDate   = tableData[0].approversDate;
+				let employeeID      = tableData[0].employeeID;
+
+				let data = {
+					action:               "update",
+					method:               "deny",
+					purchaseOrderID:      id,
+					approversStatus:      updateApproveStatus(approversStatus, 3),
+					approversDate:        updateApproveDate(approversDate),
+					purchaseOrderRemarks: $("[name=purchaseOrderRemarks]").val()?.trim(),
+					updatedBy:            sessionID
+				};
+
+				let notificationData = {
+					moduleID:                47,
+					tableID: 				 id,
+					notificationTitle:       "Purchase Order",
+					notificationDescription: `${feedback}: Your request has been denied.`,
+					notificationType:        1,
+					employeeID,
+				};
+
+				savePurchaseOrder(data, "deny", notificationData, pageContent);
+				$("[redirect=forApprovalTab]").length > 0 && $("[redirect=forApprovalTab]").trigger("click");
+			} 
+		} 
+	});
+	// ----- END REJECT DOCUMENT -----
+
+
+	// ----- NAV LINK -----
+	$(document).on("click", ".nav-link", function () {
+		const tab = $(this).attr("href");
+		if (tab == "#forApprovalTab") {
+			forApprovalContent();
+		}
+		if (tab == "#myFormsTab") {
+			myFormsContent();
+		}
+	});
+	// ----- END NAV LINK -----
+
+
+    // ----- APPROVER STATUS -----
+	function getApproversStatus(approversID, approversStatus, approversDate) {
+		let html = "";
+		if (approversID) {
+			let idArr = approversID.split("|");
+			let statusArr = approversStatus ? approversStatus.split("|") : [];
+			let dateArr = approversDate ? approversDate.split("|") : [];
+			html += `<div class="row mt-4">`;
+	
+			idArr && idArr.map((item, index) => {
+				let date   = dateArr[index] ? moment(dateArr[index]).format("MMMM DD, YYYY hh:mm:ss A") : "";
+				let status = statusArr[index] ? statusArr[index] : "";
+				let statusBadge = "";
+				if (date && status) {
+					if (status == 2) {
+						statusBadge = `<span class="badge badge-info">Approved - ${date}</span>`;
+					} else if (status == 3) {
+						statusBadge = `<span class="badge badge-danger">Denied - ${date}</span>`;
+					}
+				}
+	
+				html += `
+				<div class="col-xl-3 col-lg-3 col-md-4 col-sm-12">
+					<div class="d-flex justify-content-start align-items-center">
+						<span class="font-weight-bold">
+							${employeeFullname(item)}
+						</span>
+						<small>&nbsp;- Level ${index + 1} Approver</small>
+					</div>
+					${statusBadge}
+				</div>`;
+			});
+			html += `</div>`;
+		}
+		return html;
+	}
+	// ----- END APPROVER STATUS --
+
+
+	// ----- DOWNLOAD EXCEL -----
+	$(document).on("click", "#btnExcel", function() {
+		alert("MALIE")
+	})
+	// ----- END DOWNLOAD EXCEL -----
+	
+
 })
+
+
+
+// --------------- DATABASE RELATION ---------------
+function getConfirmation(method = "submit") {
+	const title = "Purchase Order";
+	let swalText, swalImg;
+
+	$("#modal_purchase_order").text().length > 0 && $("#modal_purchase_order").modal("hide");
+
+	switch (method) {
+		case "save":
+			swalTitle = `SAVE ${title.toUpperCase()}`;
+			swalText  = "Are you sure to save this document?";
+			swalImg   = `${base_url}assets/modal/draft.svg`;
+			break;
+		case "submit":
+			swalTitle = `SUBMIT ${title.toUpperCase()}`;
+			swalText  = "Are you sure to submit this document?";
+			swalImg   = `${base_url}assets/modal/add.svg`;
+			break;
+		case "approve":
+			swalTitle = `APPROVE ${title.toUpperCase()}`;
+			swalText  = "Are you sure to approve this document?";
+			swalImg   = `${base_url}assets/modal/approve.svg`;
+			break;
+		case "deny":
+			swalTitle = `DENY ${title.toUpperCase()}`;
+			swalText  = "Are you sure to deny this document?";
+			swalImg   = `${base_url}assets/modal/reject.svg`;
+			break;
+		case "cancelform":
+			swalTitle = `CANCEL ${title.toUpperCase()} DOCUMENT`;
+			swalText  = "Are you sure to cancel this document?";
+			swalImg   = `${base_url}assets/modal/cancel.svg`;
+			break;
+		default:
+			swalTitle = `CANCEL ${title.toUpperCase()}`;
+			swalText  = "Are you sure that you want to cancel this process?";
+			swalImg   = `${base_url}assets/modal/cancel.svg`;
+			break;
+	}
+	return Swal.fire({
+		title:              swalTitle,
+		text:               swalText,
+		imageUrl:           swalImg,
+		imageWidth:         200,
+		imageHeight:        200,
+		imageAlt:           "Custom image",
+		showCancelButton:   true,
+		confirmButtonColor: "#dc3545",
+		cancelButtonColor:  "#1a1a1a",
+		cancelButtonText:   "No",
+		confirmButtonText:  "Yes"
+	})
+}
+
+function savePurchaseOrder(data = null, method = "submit", notificationData = null, callback = null) {
+	if (data) {
+		const confirmation = getConfirmation(method);
+		confirmation.then(res => {
+			if (res.isConfirmed) {
+				$.ajax({
+					method:      "POST",
+					url:         `purchase_order/savePurchaseOrder`,
+					data,
+					cache:       false,
+					async:       false,
+					dataType:    "json",
+					beforeSend: function() {
+						$("#loader").show();
+					},
+					success: function(data) {
+						let result = data.split("|");
+		
+						let isSuccess   = result[0];
+						let message     = result[1];
+						let insertedID  = result[2];
+						let dateCreated = result[3];
+
+						let swalTitle;
+						if (method == "submit") {
+							swalTitle = `${getFormCode("PR", dateCreated, insertedID)} submitted successfully!`;
+						} else if (method == "save") {
+							swalTitle = `${getFormCode("PR", dateCreated, insertedID)} saved successfully!`;
+						} else if (method == "cancelform") {
+							swalTitle = `${getFormCode("PR", dateCreated, insertedID)} cancelled successfully!`;
+						} else if (method == "approve") {
+							swalTitle = `${getFormCode("PR", dateCreated, insertedID)} approved successfully!`;
+						} else if (method == "deny") {
+							swalTitle = `${getFormCode("PR", dateCreated, insertedID)} denied successfully!`;
+						}	
+		
+						if (isSuccess == "true") {
+							setTimeout(() => {
+								// ----- SAVE NOTIFICATION -----
+								if (notificationData) {
+									if (Object.keys(notificationData).includes("tableID")) {
+										insertNotificationData(notificationData);
+									} else {
+										notificationData["tableID"] = insertedID;
+										insertNotificationData(notificationData);
+									}
+								}
+								// ----- END SAVE NOTIFICATION -----
+
+								$("#loader").hide();
+								closeModals();
+								Swal.fire({
+									icon:              "success",
+									title:             swalTitle,
+									showConfirmButton: false,
+									timer:             2000,
+								});
+								callback && callback();
+
+								if (method == "approve" || method == "deny") {
+									$("[redirect=forApprovalTab]").length > 0 && $("[redirect=forApprovalTab]").trigger("click")
+								}
+							}, 500);
+						} else {
+							setTimeout(() => {
+								$("#loader").hide();
+								Swal.fire({
+									icon:              "danger",
+									title:             message,
+									showConfirmButton: false,
+									timer:             2000,
+								});
+							}, 500);
+						}
+					},
+					error: function() {
+						setTimeout(() => {
+							$("#loader").hide();
+							showNotification("danger", "System error: Please contact the system administrator for assistance!");
+						}, 500);
+					}
+				}).done(function() {
+					setTimeout(() => {
+						$("#loader").hide();
+					}, 500);
+				})
+			} else {
+				if (res.dismiss === "cancel") {
+					if (method != "deny") {
+						callback && callback();
+					} else {
+						$("#modal_purchase_order").text().length > 0 && $("#modal_purchase_order").modal("show");
+					}
+				} else if (res.isDismissed) {
+					if (method == "deny") {
+						$("#modal_purchase_order").text().length > 0 && $("#modal_purchase_order").modal("show");
+					}
+				}
+			}
+		});
+
+		
+	}
+	return false;
+}
+
+// --------------- END DATABASE RELATION ---------------

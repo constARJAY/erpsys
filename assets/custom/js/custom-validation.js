@@ -123,6 +123,7 @@ const initAmount = (element = null, displayPrefix = false) => {
 	$(elem).inputmask({
 		alias: "currency",
 		prefix: displayPrefix ? "₱" : "",
+		allowMinus: false,
 	});
 };
 initAmount();
@@ -442,7 +443,7 @@ const checkAmount = (elementID, invalidFeedback, value) => {
 			invalidFeedback.text("");
 		} else if (currencyValue < min && currencyValue <= max) {
 			$(elementID).removeClass("is-valid").addClass("is-invalid");
-			invalidFeedback.text(`Please input amount greater than ${formatAmount(min)}`);
+			invalidFeedback.text(`Please input amount greater than ${formatAmount(min - .01)}`);
 		}
 	} else {
 		validated

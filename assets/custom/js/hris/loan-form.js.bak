@@ -1,7 +1,7 @@
 $(document).ready(function () {
 
 	// ----- MODULE APPROVER -----
-	const moduleApprover = getModuleApprover("overtime request");
+	const moduleApprover = getModuleApprover("loan form");
 	// ----- END MODULE APPROVER -----
 
 
@@ -28,23 +28,23 @@ $(document).ready(function () {
 	// ----- VIEW DOCUMENT -----
 	function viewDocument(view_id = false, readOnly = false) {
 		const loadData = (id) => {
-			const tableData = getTableData("hris_overtime_request_tbl", "", "overtimeRequestID=" + id);
+			const tableData = getTableData("hris_loan_form_tbl", "", "loanFormID=" + id);
 
 			if (tableData.length > 0) {
 				let {
 					employeeID,
-					overtimeRequestStatus
+					loanFormStatus
 				} = tableData[0];
 
 				let isReadOnly = true, isAllowed = true;
 
 				if (employeeID != sessionID) {
 					isReadOnly = true;
-					if (overtimeRequestStatus == 0 || overtimeRequestStatus == 4) {
+					if (loanFormStatus == 0 || loanFormStatus == 4) {
 						isAllowed = false;
 					}
 				} else if (employeeID == sessionID) {
-					if (overtimeRequestStatus == 0) {
+					if (loanFormStatus == 0) {
 						isReadOnly = false;
 					} else {
 						isReadOnly = true;
@@ -86,11 +86,11 @@ $(document).ready(function () {
 
 	function updateURL(view_id = 0, isAdd = false) {
 		if (view_id && !isAdd) {
-			window.history.pushState("", "", `${base_url}hris/overtime_request?view_id=${view_id}`);
+			window.history.pushState("", "", `${base_url}hris/loan_form?view_id=${view_id}`);
 		} else if (!view_id && isAdd) {
-			window.history.pushState("", "", `${base_url}hris/overtime_request?add`);
+			window.history.pushState("", "", `${base_url}hris/loan_form?add`);
 		} else {
-			window.history.pushState("", "", `${base_url}hris/overtime_request`);
+			window.history.pushState("", "", `${base_url}hris/loan_form`);
 		}
 	}
 	// ----- END VIEW DOCUMENT -----
@@ -162,7 +162,7 @@ $(document).ready(function () {
 	// ----- HEADER CONTENT -----
 	function headerTabContent(display = true) {
 		if (display) {
-			if (isImModuleApprover("hris_overtime_request_tbl", "approversID")) {
+			if (isImModuleApprover("hris_loan_form_tbl", "approversID")) {
 				let html = `
                 <div class="bh_divider appendHeader"></div>
                 <div class="row clearfix appendHeader">
@@ -204,10 +204,10 @@ $(document).ready(function () {
 		$("#tableForApprovalParent").html(preloader);
 
 		let scheduleData = getTableData(
-			"hris_overtime_request_tbl LEFT JOIN hris_employee_list_tbl USING(employeeID)",
-			"hris_overtime_request_tbl.*, CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname",
-			`employeeID != ${sessionID} AND overtimeRequestStatus != 0 AND overtimeRequestStatus != 4`,
-			`FIELD(overtimeRequestStatus, 0, 1, 3, 2, 4), COALESCE(hris_overtime_request_tbl.submittedAt, hris_overtime_request_tbl.createdAt)`
+			"hris_loan_form_tbl LEFT JOIN hris_employee_list_tbl USING(employeeID)",
+			"hris_loan_form_tbl.*, CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname",
+			`employeeID != ${sessionID} AND loanFormStatus != 0 AND loanFormStatus != 4`,
+			`FIELD(loanFormStatus, 0, 1, 3, 2, 4), COALESCE(hris_loan_form_tbl.submittedAt, hris_loan_form_tbl.createdAt)`
 		);
 
 		let html = `
@@ -230,39 +230,39 @@ $(document).ready(function () {
 		scheduleData.map((schedule) => {
 			let {
 				fullname,
-				overtimeRequestID,
+				loanFormID,
 				approversID,
 				approversDate,
-				overtimeRequestStatus,
-				overtimeRequestRemarks,
+				loanFormStatus,
+				loanFormRemarks,
 				submittedAt,
 				createdAt,
 			} = schedule;
 
-			let remarks       = overtimeRequestRemarks ? overtimeRequestRemarks : "-";
+			let remarks       = loanFormRemarks ? loanFormRemarks : "-";
 			let dateCreated   = moment(createdAt).format("MMMM DD, YYYY hh:mm:ss A");
 			let dateSubmitted = submittedAt	? moment(submittedAt).format("MMMM DD, YYYY hh:mm:ss A") : "-";
-			let dateApproved  = overtimeRequestStatus == 2 ? approversDate.split("|") : "-";
+			let dateApproved  = loanFormStatus == 2 ? approversDate.split("|") : "-";
 			if (dateApproved !== "-") {
 				dateApproved = moment(dateApproved[dateApproved.length - 1]).format("MMMM DD, YYYY hh:mm:ss A");
 			}
 
 			let button = `
-			<button class="btn btn-view w-100 btnView" id="${encryptString(overtimeRequestID)}"><i class="fas fa-eye"></i> View</button>`;
+			<button class="btn btn-view w-100 btnView" id="${encryptString(loanFormID)}"><i class="fas fa-eye"></i> View</button>`;
 
-			if (isImCurrentApprover(approversID, approversDate, overtimeRequestStatus) || isAlreadyApproved(approversID, approversDate)) {
+			if (isImCurrentApprover(approversID, approversDate, loanFormStatus) || isAlreadyApproved(approversID, approversDate)) {
 				html += `
 				<tr>
-					<td>${getFormCode("OTR", dateCreated, overtimeRequestID)}</td>
+					<td>${getFormCode("LNF", dateCreated, loanFormID)}</td>
 					<td>${fullname}</td>
 					<td>
-						${employeeFullname(getCurrentApprover(approversID, approversDate, overtimeRequestStatus, true))}
+						${employeeFullname(getCurrentApprover(approversID, approversDate, loanFormStatus, true))}
 					</td>
 					<td>${dateCreated}</td>
 					<td>${dateSubmitted}</td>
 					<td>${dateApproved}</td>
 					<td class="text-center">
-						${getStatusStyle(overtimeRequestStatus)}
+						${getStatusStyle(loanFormStatus)}
 					</td>
 					<td>${remarks}</td>
 					<td class="text-center">
@@ -289,10 +289,10 @@ $(document).ready(function () {
 	function myFormsContent() {
 		$("#tableMyFormsParent").html(preloader);
 		let scheduleData = getTableData(
-			"hris_overtime_request_tbl LEFT JOIN hris_employee_list_tbl USING(employeeID)",
-			"hris_overtime_request_tbl.*, CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname, hris_overtime_request_tbl.createdAt AS dateCreated",
-			`hris_overtime_request_tbl.employeeID = ${sessionID}`,
-			`FIELD(overtimeRequestStatus, 0, 1, 3, 2, 4), COALESCE(hris_overtime_request_tbl.submittedAt, hris_overtime_request_tbl.createdAt)`
+			"hris_loan_form_tbl LEFT JOIN hris_employee_list_tbl USING(employeeID)",
+			"hris_loan_form_tbl.*, CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname, hris_loan_form_tbl.createdAt AS dateCreated",
+			`hris_loan_form_tbl.employeeID = ${sessionID}`,
+			`FIELD(loanFormStatus, 0, 1, 3, 2, 4), COALESCE(hris_loan_form_tbl.submittedAt, hris_loan_form_tbl.createdAt)`
 		);
 
 		let html = `
@@ -315,51 +315,51 @@ $(document).ready(function () {
 		scheduleData.map((item) => {
 			let {
 				fullname,
-				overtimeRequestID,
-				overtimeRequestDate,
+				loanFormID,
+				loanFormDate,
 				approversID,
 				approversDate,
-				overtimeRequestStatus,
-				overtimeRequestRemarks,
+				loanFormStatus,
+				loanFormRemarks,
 				submittedAt,
 				createdAt,
 			} = item;
 
-			let remarks       = overtimeRequestRemarks ? overtimeRequestRemarks : "-";
+			let remarks       = loanFormRemarks ? loanFormRemarks : "-";
 			let dateCreated   = moment(createdAt).format("MMMM DD, YYYY hh:mm:ss A");
 			let dateSubmitted = submittedAt ? moment(submittedAt).format("MMMM DD, YYYY hh:mm:ss A") : "-";
-			let dateApproved  = overtimeRequestStatus == 2 ? approversDate.split("|") : "-";
+			let dateApproved  = loanFormStatus == 2 ? approversDate.split("|") : "-";
 			if (dateApproved !== "-") {
 				dateApproved = moment(dateApproved[dateApproved.length - 1]).format("MMMM DD, YYYY hh:mm:ss A");
 			}
 
 			let unique = {
-				id:                 overtimeRequestID,
-				overtimeRequestDate: moment(overtimeRequestDate).format("MMMM DD, YYYY"),
+				id:           loanFormID,
+				loanFormDate: loanFormDate,
 			};
-			(overtimeRequestStatus == 1 || overtimeRequestStatus == 2) && uniqueData.push(unique);
+			(loanFormStatus == 1 || loanFormStatus == 2) && uniqueData.push(unique);
 
 			let button =
-				overtimeRequestStatus != 0
+				loanFormStatus != 0
 					? `
-            <button class="btn btn-view w-100 btnView" id="${encryptString(overtimeRequestID)}"><i class="fas fa-eye"></i> View</button>`
+            <button class="btn btn-view w-100 btnView" id="${encryptString(loanFormID)}"><i class="fas fa-eye"></i> View</button>`
 					: `
             <button 
                 class="btn btn-edit w-100 btnEdit" 
-                id="${encryptString(overtimeRequestID)}" 
-                code="${getFormCode("OTR", dateCreated, overtimeRequestID)}"><i class="fas fa-edit"></i> Edit</button>`;
+                id="${encryptString(loanFormID)}" 
+                code="${getFormCode("LNF", dateCreated, loanFormID)}"><i class="fas fa-edit"></i> Edit</button>`;
 			html += `
             <tr>
-                <td>${getFormCode("OTR", dateCreated, overtimeRequestID)}</td>
+                <td>${getFormCode("LNF", dateCreated, loanFormID)}</td>
                 <td>${fullname}</td>
                 <td>
-                    ${employeeFullname(getCurrentApprover(approversID, approversDate, overtimeRequestStatus, true))}
+                    ${employeeFullname(getCurrentApprover(approversID, approversDate, loanFormStatus, true))}
                 </td>
 				<td>${dateCreated}</td>
 				<td>${dateSubmitted}</td>
 				<td>${dateApproved}</td>
                 <td class="text-center">
-                    ${getStatusStyle(overtimeRequestStatus)}
+                    ${getStatusStyle(loanFormStatus)}
                 </td>
 				<td>${remarks}</td>
                 <td class="text-center">
@@ -386,8 +386,8 @@ $(document).ready(function () {
 		let button = "";
 		if (data) {
 			let {
-				overtimeRequestID     = "",
-				overtimeRequestStatus = "",
+				loanFormID     = "",
+				loanFormStatus = "",
 				employeeID           = "",
 				approversID          = "",
 				approversDate        = "",
@@ -400,51 +400,51 @@ $(document).ready(function () {
 					: false
 				: false;
 			if (employeeID === sessionID) {
-				if (overtimeRequestStatus == 0) {
+				if (loanFormStatus == 0) {
 					// DRAFT
 					button = `
 					<button 
 						class="btn btn-submit" 
 						id="btnSubmit" 
-						overtimeRequestID="${overtimeRequestID}"
-						code="${getFormCode("OTR", createdAt, overtimeRequestID)}"><i class="fas fa-paper-plane"></i>
+						loanFormID="${loanFormID}"
+						code="${getFormCode("LNF", createdAt, loanFormID)}"><i class="fas fa-paper-plane"></i>
 						Submit
 					</button>
 					<button 
 						class="btn btn-cancel"
 						id="btnCancelForm" 
-						overtimeRequestID="${overtimeRequestID}"
-						code="${getFormCode("OTR", createdAt, overtimeRequestID)}"><i class="fas fa-ban"></i> 
+						loanFormID="${loanFormID}"
+						code="${getFormCode("LNF", createdAt, loanFormID)}"><i class="fas fa-ban"></i> 
 						Cancel
 					</button>`;
-				} else if (overtimeRequestStatus == 1) {
+				} else if (loanFormStatus == 1) {
 					if (!isOngoing) {
 						button = `
 						<button 
 							class="btn btn-cancel"
 							id="btnCancelForm" 
-							overtimeRequestID="${overtimeRequestID}"
-							code="${getFormCode("OTR", createdAt, overtimeRequestID)}"><i class="fas fa-ban"></i> 
+							loanFormID="${loanFormID}"
+							code="${getFormCode("LNF", createdAt, loanFormID)}"><i class="fas fa-ban"></i> 
 							Cancel
 						</button>`;
 					}
 				}
 			} else {
-				if (overtimeRequestStatus == 1) {
+				if (loanFormStatus == 1) {
 					if (isImCurrentApprover(approversID, approversDate)) {
 						button = `
 						<button 
 							class="btn btn-submit" 
 							id="btnApprove" 
-							overtimeRequestID="${encryptString(overtimeRequestID)}"
-							code="${getFormCode("OTR", createdAt, overtimeRequestID)}"><i class="fas fa-paper-plane"></i>
+							loanFormID="${encryptString(loanFormID)}"
+							code="${getFormCode("LNF", createdAt, loanFormID)}"><i class="fas fa-paper-plane"></i>
 							Approve
 						</button>
 						<button 
 							class="btn btn-cancel"
 							id="btnReject" 
-							overtimeRequestID="${encryptString(overtimeRequestID)}"
-							code="${getFormCode("OTR", createdAt, overtimeRequestID)}"><i class="fas fa-ban"></i> 
+							loanFormID="${encryptString(loanFormID)}"
+							code="${getFormCode("LNF", createdAt, loanFormID)}"><i class="fas fa-ban"></i> 
 							Deny
 						</button>`;
 					}
@@ -472,19 +472,22 @@ $(document).ready(function () {
 		$("#page_content").html(preloader);
 
 		let {
-			overtimeRequestID      = "",
-			employeeID            = "",
-			overtimeRequestDate    = "",
-			overtimeRequestTimeIn  = "",
-			overtimeRequestTimeOut = "",
-			overtimeRequestReason  = "",
-			overtimeRequestRemarks = "",
-			approversID           = "",
-			approversStatus       = "",
-			approversDate         = "",
-			overtimeRequestStatus  = false,
-			submittedAt           = false,
-			createdAt             = false,
+			loanFormID                  = "",
+            loanFormCode                = "",
+			employeeID                  = "",
+            loanID                      = "",
+            loanFormTermPayment         = "",
+            loanFormDate                = "",
+            loanFormNoOfDays            = "",
+            loanFormAmount              = "",
+            loanFormDeductionAmount     = "",
+			loanFormRemarks             = "",
+			approversID                 = "",
+			approversStatus             = "",
+			approversDate               = "",
+			loanFormStatus              = false,
+			submittedAt                 = false,
+			createdAt                   = false,
 		} = data && data[0];
 
 		// ----- GET EMPLOYEE DATA -----
@@ -494,16 +497,22 @@ $(document).ready(function () {
 			designation: employeeDesignation = "",
 		} = employeeData(data ? employeeID : sessionID);
 		// ----- END GET EMPLOYEE DATA -----
-
 		readOnly ? preventRefresh(false) : preventRefresh(true);
 
-		$("#btnBack").attr("overtimeRequestID", overtimeRequestID);
-		$("#btnBack").attr("status", overtimeRequestStatus);
+		$("#btnBack").attr("loanFormID", loanFormID);
+		$("#btnBack").attr("status", loanFormStatus);
 		$("#btnBack").attr("employeeID", employeeID);
 
 		let disabled = readOnly ? "disabled" : "";
 		let button   = formButtons(data);
-
+        let loanType        =   getTableData("hris_loan_tbl","","loanStatus != 0");
+        let optionLoanType  =   `<option value="" disabled selected>Select Loan Type</option>`;
+        loanType.map((loanTypeItems, loanTypeIndex) =>{
+            var isSelected = loanTypeItems["loanID"] == loanID ? "selected" : "";
+            optionLoanType += `<option value="${loanTypeItems["loanID"]}" ${isSelected}>${loanTypeItems["loanName"]}</option>`;
+        });
+        // Payday = 0, Monthly = 1;
+        let optionLoanFormTermPayment = data == false ? `<option value="" disabled selected>Select Term of Payment</option><option value="0">Payday</option><option value="1">Monthly</option>`: (loanFormTermPayment == "0" ? `<option value="" disabled>Select Term of Payment</option><option value="0" selected>Payday</option><option value="1">Monthly</option>` : `<option value="" disabled>Select Term of Payment</option><option value="0">Payday</option><option value="1" selected>Monthly</option>`);
 		let html = `
         <div class="row px-2">
             <div class="col-lg-2 col-md-6 col-sm-12 px-1">
@@ -511,7 +520,7 @@ $(document).ready(function () {
                     <div class="body">
                         <small class="text-small text-muted font-weight-bold">Document No.</small>
                         <h6 class="mt-0 text-danger font-weight-bold">
-							${overtimeRequestID ? getFormCode("OTR", createdAt, overtimeRequestID) : "---"}
+							${loanFormID ? getFormCode("LNF", createdAt, loanFormID) : "---"}
 						</h6>      
                     </div>
                 </div>
@@ -521,7 +530,7 @@ $(document).ready(function () {
                     <div class="body">
                         <small class="text-small text-muted font-weight-bold">Status</small>
                         <h6 class="mt-0 font-weight-bold">
-							${overtimeRequestStatus ? getStatusStyle(overtimeRequestStatus) : "---"}
+							${loanFormStatus ? getStatusStyle(loanFormStatus) : "---"}
 						</h6>      
                     </div>
                 </div>
@@ -553,7 +562,7 @@ $(document).ready(function () {
                         <div class="body">
                             <small class="text-small text-muted font-weight-bold">Date Approved</small>
                             <h6 class="mt-0 font-weight-bold">
-								${getDateApproved(overtimeRequestStatus, approversID, approversDate)}
+								${getDateApproved(loanFormStatus, approversID, approversDate)}
 							</h6>      
                         </div>
                     </div>
@@ -565,14 +574,14 @@ $(document).ready(function () {
                     <div class="body">
                         <small class="text-small text-muted font-weight-bold">Remarks</small>
                         <h6 class="mt-0 font-weight-bold">
-							${overtimeRequestRemarks ? overtimeRequestRemarks : "---"}
+							${loanFormRemarks ? loanFormRemarks : "---"}
 						</h6>      
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="row" id="form_overtime_request">
+        <div class="row" id="form_loan_form">
             <div class="col-md-4 col-sm-12">
                 <div class="form-group">
                     <label>Employee Name</label>
@@ -591,63 +600,64 @@ $(document).ready(function () {
                     <input type="text" class="form-control" disabled value="${employeeDesignation}">
                 </div>
             </div>
-            <div class="col-md-4 col-sm-12">
+            <div class="col-md-3 col-sm-12">
                 <div class="form-group">
-                    <label>Date ${!disabled ? "<code>*</code>" : ""}</label>
-                    <input type="button" 
-                        class="form-control validate daterange text-left"
-                        required
-                        id="overtimeRequestDate"
-                        name="overtimeRequestDate"
-                        value="${overtimeRequestDate && moment(overtimeRequestDate).format("MMMM DD, YYYY")}"
-						${disabled}
-						unique="${overtimeRequestID}"
-						title="Date">
-                    <div class="d-block invalid-feedback" id="invalid-overtimeRequestDate"></div>
+                    <label>Loan Type <code>*</code></label>
+                    <select class="form-control select2 text-left" required id="loanFormLoanID" name="loanID" ${disabled}>
+                        ${optionLoanType}
+                    </select>
+                    <div class="d-block invalid-feedback" id="invalid-loanFormLoanID"></div>
                 </div>
             </div>
-            <div class="col-md-4 col-sm-12">
+
+            <div class="col-md-3 col-sm-12">
                 <div class="form-group">
-                    <label>Time In ${!disabled ? "<code>*</code>" : ""}</label>
-                    <input type="text" 
-                        class="form-control timeIn" 
-                        id="overtimeRequestTimeIn" 
-                        name="overtimeRequestTimeIn" 
-                        required
-                        value="${overtimeRequestTimeIn}"
-						${disabled}>
-                    <div class="d-block invalid-feedback" id="invalid-overtimeRequestTimeIn"></div>
+                    <label>Term of Payment <code>*</code></label>
+                    <select class="form-control select2 text-left" required id="loanFormTermPayment" name="loanFormTermPayment" ${disabled}>
+                        ${optionLoanFormTermPayment}
+                    </select>
+                    <div class="d-block invalid-feedback" id="invalid-loanFormTermPayment"></div>
                 </div>
             </div>
-            <div class="col-md-4 col-sm-12">
+
+            <div class="col-md-3 col-sm-12">
                 <div class="form-group">
-                    <label>Time Out ${!disabled ? "<code>*</code>" : ""}</label>
-                    <input type="text" 
-                        class="form-control timeOut" 
-                        id="overtimeRequestTimeOut" 
-                        name="overtimeRequestTimeOut" 
-                        required
-                        value="${overtimeRequestTimeOut}"
-						${disabled}>
-                    <div class="d-block invalid-feedback" id="invalid-overtimeRequestTimeOut"></div>
+                    <label>Start Date - End Date <code>*</code></label>
+                    <input type="button" class="form-control validate text-left" required id="loanFormDate"
+                            name="loanFormDate" value="${loanFormDate && loanFormDate}"
+						    unique="${loanFormID}" title="Date" ${disabled}>
+                    <div class="d-block invalid-feedback" id="invalid-loanFormDate"></div>
                 </div>
             </div>
-            <div class="col-md-12 col-sm-12">
+
+            <div class="col-md-3 col-sm-12">
                 <div class="form-group">
-                    <label>Reason ${!disabled ? "<code>*</code>" : ""}</label>
-                    <textarea class="form-control validate"
-                        data-allowcharacters="[a-z][A-Z][0-9][ ][.][,][-][()]['][/][&]"
-                        minlength="1"
-                        maxlength="200"
-                        id="overtimeRequestReason"
-                        name="overtimeRequestReason"
-                        required
-                        rows="4"
-                        style="resize:none;"
-						${disabled}>${overtimeRequestReason}</textarea>
-                    <div class="d-block invalid-feedback" id="invalid-overtimeRequestReason"></div>
+                    <label>Number of Days <code>*</code></label>
+                    <input type="text" class="form-control validate" name="loanFormNoOfDays" 
+                        id="loanFormNoOfDays" data-allowcharacters="[A-Z][a-z][0-9][ ][@]" minlength="1" 
+                        maxlength="50" required readOnly value="${loanFormNoOfDays}" autocomplete="off" >
+                    <div class="invalid-feedback d-block" id="invalid-loanFormNoOfDays"></div>
                 </div>
             </div>
+
+            <div class="col-md-6 col-sm-12">
+                <div class="form-group">
+                    <label>Loan Amount <code>*</code></label>
+                    <input type="text" class="form-control amount" name="loanFormAmount" id="input_loanFormAmount" 
+                            data-allowcharacters="[A-Z][a-z][0-9][ ][@]" minlength="2" maxlength="50"  required value="${loanFormAmount}" autocomplete="off" ${disabled}>
+                    <div class="invalid-feedback d-block" id="invalid-input_loanFormAmount"></div>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-sm-12">
+                <div class="form-group">
+                    <label>Loan Deduction Amount <code>*</code></label>
+                    <input type="text" class="form-control amount" name="loanFormDeductionAmount" id="input_loanFormDeductionAmount" 
+                            data-allowcharacters="[A-Z][a-z][0-9][ ][@]" minlength="2" maxlength="50"  required value="${loanFormDeductionAmount}" autocomplete="off" ${disabled}>
+                    <div class="invalid-feedback d-block" id="invalid-input_loanFormDeductionAmount"></div>
+                </div>
+            </div>
+
             <div class="col-md-12 text-right">
                 ${button}
             </div>
@@ -662,14 +672,14 @@ $(document).ready(function () {
 			initDataTables();
 			if (data) {
 				initInputmaskTime(false);
-				$("#overtimeRequestDate").data("daterangepicker").startDate = moment(overtimeRequestDate, "YYYY-MM-DD");
-				$("#overtimeRequestDate").data("daterangepicker").endDate   = moment(overtimeRequestDate, "YYYY-MM-DD");
+                let loanFormDateSplit = loanFormDate.split(" - ");
+                loanFormDateRange(moment(loanFormDateSplit[0], "'MMMM D, YYYY'"),moment(loanFormDateSplit[1], "'MMMM D, YYYY'"));
+				// $("#loanFormDate").data("daterangepicker").startDate = moment(loanFormDateSplit[0], "YYYY-MM-DD");
+				// $("#loanFormDate").data("daterangepicker").endDate   = moment(loanFormDateSplit[1], "YYYY-MM-DD");
 			} else {
 				initInputmaskTime();
-				$("#overtimeRequestDate").val(moment(new Date).format("MMMM DD, YYYY"));
+                loanFormDateRange();
 			}
-
-			$("#overtimeRequestDate").data("daterangepicker").minDate = moment();
 			return html;
 		}, 300);
 	}
@@ -694,7 +704,7 @@ $(document).ready(function () {
             </div>`;
 			$("#page_content").html(html);
 
-			headerButton(true, "Add Overtime Request");
+			headerButton(true, "Add Loan");
 			headerTabContent();
 			// forApprovalContent();
 			myFormsContent();
@@ -748,7 +758,7 @@ $(document).ready(function () {
 		let element = elementID ? `#${elementID}` : ".timeOut";
 		let flag = 0;
 		$(element).each(function () {
-			const fromValue = $("#overtimeRequestTimeIn").val() + ":00";
+			const fromValue = $("#loanFormTimeIn").val() + ":00";
 			const validated = $(this).hasClass("validated");
 			const toValue   = $(this).val() + ":00";
 
@@ -781,7 +791,7 @@ $(document).ready(function () {
 
 	// ----- GET DATA -----
 	function getData(action = "insert", status, method, feedback, id = null) {
-		let data = getFormData("form_overtime_request", true);
+		let data = getFormData("form_loan_form", true);
 
 		const submittedAt =
 			(status == 1 && moment().format("YYYY-MM-DD HH:mm:ss")) ||
@@ -789,11 +799,11 @@ $(document).ready(function () {
 		const approversID = method != "approve" && moduleApprover;
 
 		if (action && method != "" && feedback != "") {
-			data["tableData[overtimeRequestStatus]"] = status;
+			data["tableData[loanFormStatus]"] = status;
 			data["tableData[updatedBy]"]            = sessionID;
 			data["feedback"]                        = feedback;
 			data["method"]                          = method;
-			data["tableName"]                       = "hris_overtime_request_tbl";
+			data["tableName"]                       = "hris_loan_form_tbl";
 
 			if (submittedAt) data["tableData[submittedAt]"] = submittedAt;
 
@@ -809,7 +819,7 @@ $(document).ready(function () {
 					data["tableData[approversID]"]          = sessionID;
 					data["tableData[approversStatus]"]      = 2;
 					data["tableData[approversDate]"]        = dateToday();
-					data["tableData[overtimeRequestStatus]"] = 2;
+					data["tableData[loanFormStatus]"] = 2;
 				}
 			} else {
 				if (status == 1) {
@@ -819,10 +829,10 @@ $(document).ready(function () {
 						data["tableData[approversID]"]          = sessionID;
 						data["tableData[approversStatus]"]      = 2;
 						data["tableData[approversDate]"]        = dateToday();
-						data["tableData[overtimeRequestStatus]"] = 2;
+						data["tableData[loanFormStatus]"] = 2;
 					}
 				}
-				data["whereFilter"] = "overtimeRequestID=" + id;
+				data["whereFilter"] = "loanFormID=" + id;
 			}
 		}
 		return data;
@@ -847,9 +857,9 @@ $(document).ready(function () {
 
 	// ----- CLOSE FORM -----
 	$(document).on("click", "#btnBack", function () {
-		const id         = $(this).attr("overtimeRequestID");
+		const id         = $(this).attr("loanFormID");
 		const employeeID = $(this).attr("employeeID");
-		const feedback   = $(this).attr("code") || getFormCode("OTR", dateToday(), id);
+		const feedback   = $(this).attr("code") || getFormCode("LNF", dateToday(), id);
 		const status     = $(this).attr("status");
 
 		if (status != "false" && status != 0) {
@@ -867,9 +877,9 @@ $(document).ready(function () {
 				cancelForm(
 					"save",
 					action,
-					"OVERTIME REQUEST",
+					"LOAN",
 					"",
-					"form_overtime_request",
+					"form_loan_form",
 					data,
 					true,
 					pageContent
@@ -883,7 +893,7 @@ $(document).ready(function () {
 	// ----- OPEN EDIT MODAL -----
 	$(document).on("click", ".btnEdit", function () {
 		const id = $(this).attr("id");
-		// const tableData = getTableData("hris_overtime_request_tbl", "", "overtimeRequestID=" + id);
+		// const tableData = getTableData("hris_loan_form_tbl", "", "loanFormID=" + id);
 		// pageContent(true, tableData);
 		viewDocument(id);
 	});
@@ -893,7 +903,7 @@ $(document).ready(function () {
 	// ----- VIEW DOCUMENT -----
 	$(document).on("click", ".btnView", function () {
 		const id = $(this).attr("id");
-		// const tableData = getTableData("hris_overtime_request_tbl", "", "overtimeRequestID=" + id);
+		// const tableData = getTableData("hris_loan_form_tbl", "", "loanFormID=" + id);
 		// pageContent(true, tableData, true);
 		viewDocument(id, true);
 	});
@@ -907,21 +917,21 @@ $(document).ready(function () {
 		 * 	I THINK IF IT'S A DRAFT DOCUMENT, NO NEED TO VALIDATE...
 		 * 
 		 */
-		// const validate     = validateForm("form_overtime_request");
+		// const validate     = validateForm("form_loan_form");
 		// const validateTime = checkTimeRange(false, true);
 
 		// if (validate && validateTime) {
 		// 	const action   = "insert"; 
-		// 	const feedback = getFormCode("OTR", dateToday()); // OTR-20-00000
+		// 	const feedback = getFormCode("LNF", dateToday()); // OTR-20-00000
 
 		// 	const data = getData(action, 0, "save", feedback);
 
 		// 	formConfirmation(
 		// 		"save",
 		// 		"insert",
-		// 		"OVERTIME REQUEST",
+		// 		"LOAN",
 		// 		"",
-		// 		"form_overtime_request",
+		// 		"form_loan_form",
 		// 		data,
 		// 		true,
 		// 		myFormsContent
@@ -929,15 +939,15 @@ $(document).ready(function () {
 		// }
 
 		const action   = "insert"; 
-		const feedback = getFormCode("OTR", dateToday()); 
+		const feedback = getFormCode("LNF", dateToday()); 
 		const data     = getData(action, 0, "save", feedback);
 
 		formConfirmation(
 			"save",
 			"insert",
-			"OVERTIME REQUEST",
+			"LOAN",
 			"",
-			"form_overtime_request",
+			"form_loan_form",
 			data,
 			true,
 			myFormsContent
@@ -948,12 +958,12 @@ $(document).ready(function () {
 
 	// ----- SUBMIT DOCUMENT -----
 	$(document).on("click", "#btnSubmit", function () {
-		const id           = $(this).attr("overtimeRequestID");
-		const validate     = validateForm("form_overtime_request");
+		const id           = $(this).attr("loanFormID");
+		const validate     = validateForm("form_loan_form");
 		const validateTime = checkTimeRange(false, true);
 
 		if (validate && validateTime) {
-			const feedback = $(this).attr("code") || getFormCode("OTR", dateToday(), id);
+			const feedback = $(this).attr("code") || getFormCode("LNF", dateToday(), id);
 			const action   = id && feedback ? "update" : "insert";
 			const data     = getData(action, 1, "submit", feedback, id);
 
@@ -968,7 +978,7 @@ $(document).ready(function () {
 				notificationData = {
 					moduleID:                60,
 					// tableID:                 1, // AUTO FILL
-					notificationTitle:       "Overtime Request Form",
+					notificationTitle:       "Loan Form",
 					notificationDescription: `${employeeFullname(sessionID)} asked for your approval.`,
 					notificationType:        2,
 					employeeID,
@@ -979,9 +989,9 @@ $(document).ready(function () {
 				formConfirmation(
 					"submit",
 					action,
-					"OVERTIME REQUEST",
+					"LOAN",
 					"",
-					"form_overtime_request",
+					"form_loan_form",
 					data,
 					true,
 					pageContent,
@@ -995,17 +1005,17 @@ $(document).ready(function () {
 
 	// ----- CANCEL DOCUMENT -----
 	$(document).on("click", "#btnCancelForm", function () {
-		const id       = $(this).attr("overtimeRequestID");
-		const feedback = $(this).attr("code") || getFormCode("OTR", dateToday(), id);
+		const id       = $(this).attr("loanFormID");
+		const feedback = $(this).attr("code") || getFormCode("LNF", dateToday(), id);
 		const action   = "update";
 		const data     = getData(action, 4, "cancelform", feedback, id);
 
 		formConfirmation(
 			"cancelform",
 			action,
-			"OVERTIME REQUEST",
+			"LOAN",
 			"",
-			"form_overtime_request",
+			"form_loan_form",
 			data,
 			true,
 			pageContent
@@ -1016,17 +1026,17 @@ $(document).ready(function () {
 
 	// ----- CANCEL DOCUMENT -----
 	$(document).on("click", "#btnCancel", function () {
-		const id       = $(this).attr("overtimeRequestID");
-		const feedback = $(this).attr("code") || getFormCode("OTR", dateToday(), id);
+		const id       = $(this).attr("loanFormID");
+		const feedback = $(this).attr("code") || getFormCode("LNF", dateToday(), id);
 		const action   = id && feedback ? "update" : "insert";
 		const data     = getData(action, 0, "save", feedback, id);
 
 		cancelForm(
 			"save",
 			action,
-			"OVERTIME REQUEST",
+			"LOAN",
 			"",
-			"form_overtime_request",
+			"form_loan_form",
 			data,
 			true,
 			pageContent
@@ -1037,9 +1047,9 @@ $(document).ready(function () {
 
 	// ----- APPROVE DOCUMENT -----
 	$(document).on("click", "#btnApprove", function () {
-		const id       = decryptString($(this).attr("overtimeRequestID"));
-		const feedback = $(this).attr("code") || getFormCode("OTR", dateCreated, id);
-		let tableData  = getTableData("hris_overtime_request_tbl", "", "overtimeRequestID = " + id);
+		const id       = decryptString($(this).attr("loanFormID"));
+		const feedback = $(this).attr("code") || getFormCode("LNF", dateCreated, id);
+		let tableData  = getTableData("hris_loan_form_tbl", "", "loanFormID = " + id);
 
 		if (tableData) {
 			let approversID     = tableData[0].approversID;
@@ -1059,8 +1069,8 @@ $(document).ready(function () {
 				notificationData = {
 					moduleID:                60,
 					tableID:                 id,
-					notificationTitle:       "Overtime Request Form",
-					notificationDescription: `${getFormCode("OTR", createdAt, id)}: Your request has been approved.`,
+					notificationTitle:       "Loan Form",
+					notificationDescription: `${getFormCode("LNF", createdAt, id)}: Your request has been approved.`,
 					notificationType:        7,
 					employeeID,
 				};
@@ -1069,22 +1079,22 @@ $(document).ready(function () {
 				notificationData = {
 					moduleID:                60,
 					tableID:                 id,
-					notificationTitle:       "Overtime Request Form",
+					notificationTitle:       "Loan Form",
 					notificationDescription: `${employeeFullname(employeeID)} asked for your approval.`,
 					notificationType:         2,
 					employeeID:               getNotificationEmployeeID(approversID, dateApproved),
 				};
 			}
 
-			data["tableData[overtimeRequestStatus]"] = status;
+			data["tableData[loanFormStatus]"] = status;
 
 			setTimeout(() => {
 				formConfirmation(
 					"approve",
 					"update",
-					"OVERTIME REQUEST",
+					"LOAN",
 					"",
-					"form_overtime_request",
+					"form_loan_form",
 					data,
 					true,
 					pageContent,
@@ -1098,14 +1108,14 @@ $(document).ready(function () {
 
 	// ----- REJECT DOCUMENT -----
 	$(document).on("click", "#btnReject", function () {
-		const id       = $(this).attr("overtimeRequestID");
-		const feedback = $(this).attr("code") || getFormCode("OTR", dateToday(), id);
+		const id       = $(this).attr("loanFormID");
+		const feedback = $(this).attr("code") || getFormCode("LNF", dateToday(), id);
 
-		$("#modal_overtime_request_content").html(preloader);
-		$("#modal_overtime_request .page-title").text(
-			"DENY OVERTIME REQUEST DOCUMENT"
+		$("#modal_loan_form_content").html(preloader);
+		$("#modal_loan_form .page-title").text(
+			"DENY LOAN DOCUMENT"
 		);
-		$("#modal_overtime_request").modal("show");
+		$("#modal_loan_form").modal("show");
 		let html = `
 		<div class="modal-body">
 			<div class="form-group">
@@ -1114,30 +1124,30 @@ $(document).ready(function () {
 					data-allowcharacters="[0-9][a-z][A-Z][ ][.][,][_]['][()][?][-][/]"
 					minlength="2"
 					maxlength="250"
-					id="overtimeRequestRemarks"
-					name="overtimeRequestRemarks"
+					id="loanFormRemarks"
+					name="loanFormRemarks"
 					rows="4"
 					style="resize: none"
 					required></textarea>
-				<div class="d-block invalid-feedback" id="invalid-overtimeRequestRemarks"></div>
+				<div class="d-block invalid-feedback" id="invalid-loanFormRemarks"></div>
 			</div>
 		</div>
 		<div class="modal-footer text-right">
 			<button class="btn btn-danger" id="btnRejectConfirmation"
-			overtimeRequestID="${id}"
+			loanFormID="${id}"
 			code="${feedback}"><i class="far fa-times-circle"></i> Deny</button>
 			<button class="btn btn-cancel" data-dismiss="modal"><i class="fas fa-ban"></i> Cancel</button>
 		</div>`;
-		$("#modal_overtime_request_content").html(html);
+		$("#modal_loan_form_content").html(html);
 	});
 
 	$(document).on("click", "#btnRejectConfirmation", function () {
-		const id       = decryptString($(this).attr("overtimeRequestID"));
-		const feedback = $(this).attr("code") || getFormCode("OTR", dateToday(), id);
+		const id       = decryptString($(this).attr("loanFormID"));
+		const feedback = $(this).attr("code") || getFormCode("LNF", dateToday(), id);
 
-		const validate = validateForm("modal_overtime_request");
+		const validate = validateForm("modal_loan_form");
 		if (validate) {
-			let tableData = getTableData("hris_overtime_request_tbl", "", "overtimeRequestID = " + id);
+			let tableData = getTableData("hris_loan_form_tbl", "", "loanFormID = " + id);
 			if (tableData) {
 				let approversID     = tableData[0].approversID;
 				let approversStatus = tableData[0].approversStatus;
@@ -1146,15 +1156,15 @@ $(document).ready(function () {
 				let createdAt       = tableData[0].createdAt;
 
 				let data = getData("update", 3, "reject", feedback, id);
-				data["tableData[overtimeRequestRemarks]"] = $("[name=overtimeRequestRemarks]").val().trim();
+				data["tableData[loanFormRemarks]"] = $("[name=loanFormRemarks]").val().trim();
 				data["tableData[approversStatus]"]       = updateApproveStatus(approversStatus, 3);
 				data["tableData[approversDate]"]         = updateApproveDate(approversDate);
 
 				let notificationData = {
 					moduleID:                60,
 					tableID: 				 id,
-					notificationTitle:       "Overtime Request Form",
-					notificationDescription: `${getFormCode("OTR", createdAt, id)}: Your request has been denied.`,
+					notificationTitle:       "Loan Form",
+					notificationDescription: `${getFormCode("LNF", createdAt, id)}: Your request has been denied.`,
 					notificationType:        1,
 					employeeID,
 				};
@@ -1163,8 +1173,8 @@ $(document).ready(function () {
 					formConfirmation(
 						"reject",
 						"update",
-						"OVERTIME REQUEST",
-						"modal_overtime_request",
+						"LOAN",
+						"modal_loan_form",
 						"",
 						data,
 						true,
@@ -1232,3 +1242,40 @@ $(document).ready(function () {
 	// ----- END APPROVER STATUS -----
 	
 });
+
+
+$(document).on("change", "#loanFormDate" ,function(){
+    let thisValue       =   $(this).val();
+    let thisValueSplit  =   thisValue.split(" - ");
+
+    // from = start.format('YYYY-MM-DD 00:00:00');
+    //               to = end.format('YYYY-MM-DD 23:59:59');
+
+    let fromDate        =  new Date(thisValueSplit[0]); 	
+    let toDate          =  new Date(thisValueSplit[1]);
+    let numberOfDays    =  Math.round((toDate-fromDate)/(1000*60*60*24));
+    $("#loanFormNoOfDays").val(numberOfDays);
+})
+
+
+
+function loanFormDateRange(startDate=moment(), endDate=moment()){
+    $('#loanFormDate').daterangepicker({
+        "showDropdowns": true,
+		minDate: moment(),
+        autoApply: true,
+        startDate:startDate,
+        endDate: endDate,
+        locale: {
+          format: 'MMMM D, YYYY'
+        },
+        ranges: {
+        //   'Today': [moment(), moment()],
+        //   'Tommorow': [moment().add(1, 'days'), moment().add(1, 'days')],
+          'Month': [moment(), moment().add(30, 'days')],
+          'Quarter': [moment(), moment().add(3, 'months')],
+		  'Semiannual':[moment(), moment().add(6, 'months')],
+          'Annual': [moment(), moment().add(1, 'years')]
+        }
+    });
+}

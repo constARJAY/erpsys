@@ -132,7 +132,7 @@ $(document).ready(function(){
                             class="form-control validate" 
                             name="bankName" 
                             id="input_bankName" 
-                            data-allowcharacters="[A-Z][a-z][0-9][-][ ]" 
+                            data-allowcharacters="[A-Z][a-z][0-9][-]" 
                             minlength="2" 
                             maxlength="20" 
                             required
@@ -152,7 +152,7 @@ $(document).ready(function(){
                             class="form-control validate" 
                             name="bankNumber" 
                             id="input_bankNumber" 
-                            data-allowcharacters="[0][-][ ]" 
+                            data-allowcharacters="[0-9][-]" 
                             minlength="10" 
                             maxlength="20" 
                             required 

@@ -641,8 +641,11 @@ $(document).ready(function () {
             </div>
 
             <div class="col-md-6 col-sm-12">
-                <div class="form-group">
-                    <label>Loan Amount <code>*</code></label>
+			<label>Loan Amount <code>*</code></label>
+                <div class="input-group">
+					<div class="input-group-prepend">
+						<span class="input-group-text">?</span>
+					</div>
                     <input type="text" class="form-control amount" name="loanFormAmount" id="input_loanFormAmount" 
                             data-allowcharacters="[A-Z][a-z][0-9][ ][@]" minlength="2" maxlength="50"  required value="${loanFormAmount}" autocomplete="off" ${disabled}>
                     <div class="invalid-feedback d-block" id="invalid-input_loanFormAmount"></div>
@@ -650,8 +653,11 @@ $(document).ready(function () {
             </div>
 
             <div class="col-md-6 col-sm-12">
-                <div class="form-group">
-                    <label>Loan Deduction Amount <code>*</code></label>
+			<label>Loan Deduction Amount <code>*</code></label>
+                <div class="input-group">
+					<div class="input-group-prepend">
+						<span class="input-group-text">?</span>
+					</div>
                     <input type="text" class="form-control amount" name="loanFormDeductionAmount" id="input_loanFormDeductionAmount" 
                             data-allowcharacters="[A-Z][a-z][0-9][ ][@]" minlength="2" maxlength="50"  required value="${loanFormDeductionAmount}" autocomplete="off" ${disabled}>
                     <div class="invalid-feedback d-block" id="invalid-input_loanFormDeductionAmount"></div>

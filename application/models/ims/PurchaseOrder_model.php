@@ -83,4 +83,39 @@ class PurchaseOrder_model extends CI_Model {
         return false;
     }
 
+    public function getPurchaseOrder($id = null)
+    {
+        if ($id) {
+            $sql = "SELECT * FROM ims_purchase_order_tbl WHERE purchaseOrderID = $id";
+            $query = $this->db->query($sql);
+            return $query ? $query->row() : false;
+        }
+        return false;
+    }
+
+    public function savePurchaseOrderData($action, $data, $id = null) 
+    {
+        if ($action == "insert") {
+            $query = $this->db->insert("ims_purchase_order_tbl", $data);
+        } else {
+            $where = ["purchaseOrderID" => $id];
+            $query = $this->db->update("ims_purchase_order_tbl", $data, $where);
+        }
+
+        if ($query) {
+            $insertID = $action == "insert" ? $this->db->insert_id() : $id;
+            return "true|Successfully submitted|$insertID|".date("Y-m-d");
+        }
+        return "false|System error: Please contact the system administrator for assistance!";
+    }
+
+    public function savePurchaseOrderItems($data, $id)
+    {
+        $query = $this->db->insert_batch("ims_request_items_tbl", $data);
+        if ($query) {
+            return "true|Successfully submitted";
+        }
+        return "false|System error: Please contact the system administrator for assistance!";
+    }
+
 }

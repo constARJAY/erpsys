@@ -67,7 +67,7 @@ $(document).on("click",".editloan", function(){
                                                     <div class="row"> 
                                                         <div class="col-md-12 col-sm-12">
                                                             <div class="form-group">
-                                                                <label for="">Loan Type Name <span class="text-danger">*</span></label>
+                                                                <label for="">Loan Type Name</label>
                                                                 <input type="text" class="form-control validate" name="loanName" id="inputloanName" 
                                                                     data-allowcharacters="[a-z][A-Z][0-9][ ][.][,][-][()]['][/]" minlength="2" maxlength="50" unique="${tableData[0]["loanID"]}" value="${tableData[0]["loanName"]}" required >
                                                                 <div class="invalid-feedback d-block" id="invalid-inputloanName"></div>

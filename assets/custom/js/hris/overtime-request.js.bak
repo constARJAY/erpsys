@@ -668,8 +668,6 @@ $(document).ready(function () {
 				initInputmaskTime();
 				$("#overtimeRequestDate").val(moment(new Date).format("MMMM DD, YYYY"));
 			}
-
-			$("#overtimeRequestDate").data("daterangepicker").minDate = moment();
 			return html;
 		}, 300);
 	}
