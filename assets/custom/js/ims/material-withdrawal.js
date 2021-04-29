@@ -1,6 +1,6 @@
 $(document).ready(function() {
     // ----- MODULE APPROVER -----
-	const moduleApprover = getModuleApprover("Transfer Request");
+	const moduleApprover = getModuleApprover("Material Withdrawal");
 	// ----- END MODULE APPROVER -----
 
 
@@ -27,23 +27,23 @@ $(document).ready(function() {
     // ----- VIEW DOCUMENT -----
 	function viewDocument(view_id = false, readOnly = false, isRevise = false) {
 		const loadData = (id, isRevise = false) => {
-			const tableData = getTableData("ims_transfer_request_tbl", "", "transferRequestID=" + id);
+			const tableData = getTableData("ims_material_withdrawal_tbl", "", "materialWithdrawalID=" + id);
 
 			if (tableData.length > 0) {
 				let {
 					employeeID,
-					transferRequestStatus
+					materialWithdrawaltStatus
 				} = tableData[0];
 
 				let isReadOnly = true, isAllowed = true;
 
 				if (employeeID != sessionID) {
 					isReadOnly = true;
-					if (transferRequestStatus == 0 || transferRequestStatus == 4) {
+					if (materialWithdrawaltStatus == 0 || materialWithdrawaltStatus == 4) {
 						isAllowed = false;
 					}
 				} else if (employeeID == sessionID) {
-					if (transferRequestStatus == 0) {
+					if (materialWithdrawaltStatus == 0) {
 						isReadOnly = false;
 					} else {
 						isReadOnly = true;
@@ -96,15 +96,15 @@ $(document).ready(function() {
 
 	function updateURL(view_id = 0, isAdd = false, isRevise = false) {
 		if (view_id && !isAdd) {
-			window.history.pushState("", "", `${base_url}ims/transfer_request?view_id=${view_id}`);
+			window.history.pushState("", "", `${base_url}ims/material_withdrawal?view_id=${view_id}`);
 		} else if (isAdd) {
 			if (view_id && isRevise) {
-				window.history.pushState("", "", `${base_url}ims/transfer_request?add=${view_id}`);
+				window.history.pushState("", "", `${base_url}ims/material_withdrawal?add=${view_id}`);
 			} else {
-				window.history.pushState("", "", `${base_url}ims/transfer_request?add`);
+				window.history.pushState("", "", `${base_url}ims/material_withdrawal?add`);
 			}
 		} else {
-			window.history.pushState("", "", `${base_url}ims/transfer_request`);
+			window.history.pushState("", "", `${base_url}ims/material_withdrawal`);
 		}
 	}
 	// ----- END VIEW DOCUMENT -----
@@ -115,14 +115,18 @@ $(document).ready(function() {
 		return moment(new Date).format("YYYY-MM-DD HH:mm:ss");
 	};
 
-	const inventoryItemList = getTableData(
-		"ims_inventory_item_tbl LEFT JOIN  ims_list_stocks_details_tbl USING(itemID) LEFT JOIN  ims_list_stocks_tbl USING(listStocksID) LEFT JOIN ims_inventory_storage_tbl USING(inventoryStorageID)", "itemID, itemCode, itemName, unitOfMeasurementID,brandName,inventoryStorageID ",
-		"itemStatus = 1 AND listStocksStatus =2 GROUP BY itemID");
+        const inventoryStorageList = getTableData(
+            "ims_inventory_storage_tbl LEFT JOIN  ims_list_stocks_tbl USING(inventoryStorageID) LEFT JOIN ims_list_stocks_details_tbl USING(listStocksID) LEFT JOIN ims_inventory_item_tbl USING(itemID)", "inventoryStorageID,inventoryStorageCode,inventoryStorageOfficeName,itemID, receivingQuantity",
+            "listStocksStatus = 2");
 
-	const projectList = getTableData(
-		"ims_inventory_storage_tbl AS storage LEFT JOIN hris_department_tbl AS department ON storage.inventoryStorageDepartment = department.departmentID", 
-		"departmentName,inventoryStorageID, inventoryStorageCode, inventoryStorageOfficeName,inventoryStorageOfficeName,inventoryStorageRoomType, inventoryStorageRegion, inventoryStorageProvince, inventoryStorageMunicipality, inventoryStorageBarangay, inventoryStorageUnitNumber, inventoryStorageHouseNumber, inventoryStorageCountry, inventoryStorageZipCode",
-		"inventoryStorageStatus = 1");
+        const inventoryItemList = getTableData(
+            "ims_inventory_item_tbl", "itemID, itemCode, itemName, unitOfMeasurementID,itemDescription",
+            "itemStatus = 1");
+
+        const projectList = getTableData(
+            "pms_project_list_tbl AS pplt LEFT JOIN pms_client_tbl AS pct ON pct.clientID = pplt.projectListClientID", 
+            "projectListID, projectListCode, projectListName, clientCode, clientName, clientRegion, clientProvince, clientCity, clientBarangay, clientUnitNumber, clientHouseNumber, clientCountry, clientPostalCode",
+            "projectListStatus = 1");
 	// END GLOBAL VARIABLE - REUSABLE 
 
 
@@ -198,12 +202,15 @@ $(document).ready(function() {
                 info: false,
 				scrollCollapse: true,
 				columnDefs: [
-					{ targets: 0,  width: 50  },
-					{ targets: 1,  width: 150 },
-					{ targets: 2,  width: 150 },
-					{ targets: 3,  width: 50  },
-					{ targets: 4,  width: 120 },
-					{ targets: 5,  width: 120 }
+					{ targets: 0,  width: 20  },
+					{ targets: 1,  width: 80  },
+					{ targets: 2,  width: 80  },
+					{ targets: 3,  width: 80  },
+					{ targets: 4,  width: 80 },
+					{ targets: 5,  width: 200 },
+					{ targets: 6,  width: 10 },
+					{ targets: 7,  width: 20 },
+					{ targets: 8,  width: 250 }
 					// { targets: 9,  width: 200 },
 				],
 			});
@@ -234,7 +241,7 @@ $(document).ready(function() {
     // ----- HEADER CONTENT -----
 	function headerTabContent(display = true) {
 		if (display) {
-			if (isImModuleApprover("ims_transfer_request_tbl", "approversID")) {
+			if (isImModuleApprover("ims_material_withdrawal_tbl", "approversID")) {
 				let html = `
                 <div class="bh_divider appendHeader"></div>
                 <div class="row clearfix appendHeader">
@@ -273,10 +280,10 @@ $(document).ready(function() {
 	function forApprovalContent() {
 		$("#tableForApprovalParent").html(preloader);
 		let transferRequestData = getTableData(
-			"ims_transfer_request_tbl AS imtrt LEFT JOIN hris_employee_list_tbl AS helt USING(employeeID) LEFT JOIN ims_inventory_storage_tbl AS imsr ON imsr.inventoryStorageID  = imtrt.inventoryStorageIDSender LEFT JOIN ims_inventory_storage_tbl AS imsr2 ON imsr2.inventoryStorageID  = imtrt.inventoryStorageIDReceiver",
-			"imtrt.*, CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname, imtrt.createdAt AS dateCreated,imsr.inventoryStorageCode as inventoryStorageCode1 , imsr.inventoryStorageOfficeName as inventoryStorageOfficeName1 ,imsr2.inventoryStorageCode as inventoryStorageCode2, imsr2.inventoryStorageOfficeName as inventoryStorageOfficeName2",
-			`imtrt.employeeID != ${sessionID} AND transferRequestStatus != 0 AND transferRequestStatus != 4`,
-			`FIELD(transferRequestStatus, 0, 1, 3, 2, 4), COALESCE(imtrt.submittedAt, imtrt.createdAt)`
+			"ims_material_withdrawal_tbl AS mwt LEFT JOIN hris_employee_list_tbl AS helt USING(employeeID) LEFT JOIN pms_project_list_tbl AS pplt ON pplt.projectListID = mwt.projectID",
+			"mwt.*, CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname, mwt.createdAt AS dateCreated, projectListCode, projectListName",
+			`mwt.employeeID != ${sessionID} AND materialWithdrawaltStatus != 0 AND materialWithdrawaltStatus != 4`,
+			`FIELD(materialWithdrawaltStatus, 0, 1, 3, 2, 4), COALESCE(mwt.submittedAt, mwt.createdAt)`
 		);
 
 		let html = `
@@ -285,10 +292,8 @@ $(document).ready(function() {
                 <tr style="white-space: nowrap">
                     <th>Document No.</th>
                     <th>Employee Name</th>
-                    <th>Storage Code</th>
-                    <th>Storage Name(Sender)</th>
-					<th>Storage Code</th>
-                    <th>Storage Name(Receiver)</th>
+                    <th>Project Code</th>
+                    <th>Project Name</th>
                     <th>Current Approver</th>
                     <th>Date Created</th>
                     <th>Date Submitted</th>
@@ -303,53 +308,49 @@ $(document).ready(function() {
 		transferRequestData.map((item) => {
 			let {
 				fullname,
-				transferRequestID,
+				materialWithdrawalID,
 				projectID,
-				inventoryStorageCode1,
-                inventoryStorageOfficeName1,
-				inventoryStorageCode2,
-                inventoryStorageOfficeName2,
+				projectListCode,
+				projectListName,
 			
 				approversID,
 				approversDate,
-				transferRequestStatus,
-				transferRequestRemarks,
+				materialWithdrawaltStatus,
+				materialWithdrawalRemarks,
 				submittedAt,
 				createdAt,
 			} = item;
 
-			let remarks       = transferRequestRemarks ? transferRequestRemarks : "-";
+			let remarks       = materialWithdrawalRemarks ? materialWithdrawalRemarks : "-";
 			let dateCreated   = moment(createdAt).format("MMMM DD, YYYY hh:mm:ss A");
 			let dateSubmitted = submittedAt ? moment(submittedAt).format("MMMM DD, YYYY hh:mm:ss A") : "-";
-			let dateApproved  = transferRequestStatus == 2 ? approversDate.split("|") : "-";
+			let dateApproved  = materialWithdrawaltStatus == 2 ? approversDate.split("|") : "-";
 			if (dateApproved !== "-") {
 				dateApproved = moment(dateApproved[dateApproved.length - 1]).format("MMMM DD, YYYY hh:mm:ss A");
 			}
 
-			let button = transferRequestStatus != 0 ? `
-			<button class="btn btn-view w-100 btnView" id="${encryptString(transferRequestID )}"><i class="fas fa-eye"></i> View</button>` : `
+			let button = materialWithdrawaltStatus != 0 ? `
+			<button class="btn btn-view w-100 btnView" id="${encryptString(materialWithdrawalID)}"><i class="fas fa-eye"></i> View</button>` : `
 			<button 
 				class="btn btn-edit w-100 btnEdit" 
-				id="${encryptString(transferRequestID )}" 
-				code="${getFormCode("TR", createdAt, transferRequestID )}"><i class="fas fa-edit"></i> Edit</button>`;
+				id="${encryptString(materialWithdrawalID)}" 
+				code="${getFormCode("MWF", createdAt, materialWithdrawalID)}"><i class="fas fa-edit"></i> Edit</button>`;
 
-			if (isImCurrentApprover(approversID, approversDate, transferRequestStatus) || isAlreadyApproved(approversID, approversDate)) {
+			if (isImCurrentApprover(approversID, approversDate, materialWithdrawaltStatus) || isAlreadyApproved(approversID, approversDate)) {
 				html += `
 				<tr>
-					<td>${getFormCode("TR", createdAt, transferRequestID )}</td>
+					<td>${getFormCode("MWF", createdAt, materialWithdrawalID)}</td>
 					<td>${fullname}</td>
-					<td>${inventoryStorageCode1 || '-'}</td>
-					<td>${inventoryStorageOfficeName1 || '-'}</td>
-					<td>${inventoryStorageCode2 || '-'}</td>
-					<td>${inventoryStorageOfficeName2 || '-'}</td>
+					<td>${projectListCode || '-'}</td>
+					<td>${projectListName || '-'}</td>
 					<td>
-						${employeeFullname(getCurrentApprover(approversID, approversDate, transferRequestStatus, true))}
+						${employeeFullname(getCurrentApprover(approversID, approversDate, materialWithdrawaltStatus, true))}
 					</td>
 					<td>${dateCreated}</td>
 					<td>${dateSubmitted}</td>
 					<td>${dateApproved}</td>
 					<td class="text-center">
-						${getStatusStyle(transferRequestStatus)}
+						${getStatusStyle(materialWithdrawaltStatus)}
 					</td>
 					<td>${remarks}</td>
 					<td class="text-center">
@@ -375,11 +376,11 @@ $(document).ready(function() {
     // ----- MY FORMS CONTENT -----
 	function myFormsContent() {
 		$("#tableMyFormsParent").html(preloader);
-		let transferRequestData = getTableData(
-			"ims_transfer_request_tbl AS imtrt LEFT JOIN hris_employee_list_tbl AS helt USING(employeeID) LEFT JOIN ims_inventory_storage_tbl AS imsr ON imsr.inventoryStorageID  = imtrt.inventoryStorageIDSender LEFT JOIN ims_inventory_storage_tbl AS imsr2 ON imsr2.inventoryStorageID  = imtrt.inventoryStorageIDReceiver",
-			"imtrt.*, CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname, imtrt.createdAt AS dateCreated, imsr.inventoryStorageCode as inventoryStorageCode1 , imsr.inventoryStorageOfficeName as inventoryStorageOfficeName1 ,imsr2.inventoryStorageCode as inventoryStorageCode2, imsr2.inventoryStorageOfficeName as inventoryStorageOfficeName2",
-			`imtrt.employeeID = ${sessionID}`,
-			`FIELD(transferRequestStatus, 0, 1, 3, 2, 4), COALESCE(imtrt.submittedAt, imtrt.createdAt)`
+		let materialWithdrawalData = getTableData(
+			"ims_material_withdrawal_tbl AS mwt LEFT JOIN hris_employee_list_tbl AS helt USING(employeeID) LEFT JOIN pms_project_list_tbl AS pplt ON pplt.projectListID = mwt.projectID",
+			"mwt.*, CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname, mwt.createdAt AS dateCreated, projectListCode, projectListName",
+			`mwt.employeeID = ${sessionID}`,
+			`FIELD(materialWithdrawaltStatus, 0, 1, 3, 2, 4), COALESCE(mwt.submittedAt, mwt.createdAt)`
 		);
 
 		let html = `
@@ -388,10 +389,8 @@ $(document).ready(function() {
                 <tr style="white-space: nowrap">
                     <th>Document No.</th>
                     <th>Employee Name</th>
-                    <th>Storage Code</th>
-                    <th>Storage Name(Sender)</th>
-					<th>Storage Code</th>
-                    <th>Storage Name(Receiver)</th>
+                    <th>Project Code</th>
+                    <th>Project Name</th>
                     <th>Current Approver</th>
                     <th>Date Created</th>
                     <th>Date Submitted</th>
@@ -403,56 +402,52 @@ $(document).ready(function() {
             </thead>
             <tbody>`;
 
-		transferRequestData.map((item) => {
+		materialWithdrawalData.map((item) => {
 			let {
 				fullname,
-				transferRequestID,
+				materialWithdrawalID,
                 projectID,
-                inventoryStorageCode1,
-                inventoryStorageOfficeName1,
-				inventoryStorageCode2,
-                inventoryStorageOfficeName2,
+                projectListCode,
+                projectListName,
                
 				approversID,
 				approversDate,
-				transferRequestStatus,
-				transferRequestRemarks,
+				materialWithdrawaltStatus,
+				materialWithdrawalRemarks,
 				submittedAt,
 				createdAt,
 			} = item;
 
-			let remarks       = transferRequestRemarks ? transferRequestRemarks : "-";
+			let remarks       = materialWithdrawalRemarks ? materialWithdrawalRemarks : "-";
 			let dateCreated   = moment(createdAt).format("MMMM DD, YYYY hh:mm:ss A");
 			let dateSubmitted = submittedAt ? moment(submittedAt).format("MMMM DD, YYYY hh:mm:ss A") : "-";
-			let dateApproved  = transferRequestStatus == 2 ? approversDate.split("|") : "-";
+			let dateApproved  = materialWithdrawaltStatus == 2 ? approversDate.split("|") : "-";
 			if (dateApproved !== "-") {
 				dateApproved = moment(dateApproved[dateApproved.length - 1]).format("MMMM DD, YYYY hh:mm:ss A");
 			}
 
-			let button = transferRequestStatus != 0 ? `
-            <button class="btn btn-view w-100 btnView" id="${encryptString(transferRequestID )}"><i class="fas fa-eye"></i> View</button>` : `
+			let button = materialWithdrawaltStatus != 0 ? `
+            <button class="btn btn-view w-100 btnView" id="${encryptString(materialWithdrawalID)}"><i class="fas fa-eye"></i> View</button>` : `
             <button 
                 class="btn btn-edit w-100 btnEdit" 
-                id="${encryptString(transferRequestID )}" 
-                code="${getFormCode("TR", createdAt, transferRequestID )}"><i class="fas fa-edit"></i> Edit</button>`;
+                id="${encryptString(materialWithdrawalID)}" 
+                code="${getFormCode("MWF", createdAt, materialWithdrawalID)}"><i class="fas fa-edit"></i> Edit</button>`;
 
 			html += `
             <tr>
-                <td>${getFormCode("TR", createdAt, transferRequestID )}</td>
+                <td>${getFormCode("MWF", createdAt, materialWithdrawalID)}</td>
                 <td>${fullname}</td>
-                <td>${inventoryStorageCode1 || '-'}</td>
-                <td>${inventoryStorageOfficeName1 || '-'}</td>
-				<td>${inventoryStorageCode2 || '-'}</td>
-                <td>${inventoryStorageOfficeName2 || '-'}</td>
+                <td>${projectListCode || '-'}</td>
+                <td>${projectListName || '-'}</td>
                
                 <td>
-                    ${employeeFullname(getCurrentApprover(approversID, approversDate, transferRequestStatus, true))}
+                    ${employeeFullname(getCurrentApprover(approversID, approversDate, materialWithdrawaltStatus, true))}
                 </td>
 				<td>${dateCreated}</td>
 				<td>${dateSubmitted}</td>
 				<td>${dateApproved}</td>
                 <td class="text-center">
-                    ${getStatusStyle(transferRequestStatus)}
+                    ${getStatusStyle(materialWithdrawaltStatus)}
                 </td>
 				<td>${remarks}</td>
                 <td class="text-center">
@@ -479,8 +474,8 @@ $(document).ready(function() {
 		let button = "";
 		if (data) {
 			let {
-				transferRequestID     = "",
-				transferRequestStatus = "",
+				materialWithdrawalID     = "",
+				materialWithdrawaltStatus = "",
 				employeeID            = "",
 				approversID           = "",
 				approversDate         = "",
@@ -489,14 +484,14 @@ $(document).ready(function() {
 
 			let isOngoing = approversDate ? approversDate.split("|").length > 0 ? true : false : false;
 			if (employeeID === sessionID) {
-				if (transferRequestStatus == 0 || isRevise) {
+				if (materialWithdrawaltStatus == 0 || isRevise) {
 					// DRAFT
 					button = `
 					<button 
 						class="btn btn-submit" 
 						id="btnSubmit" 
-						transferRequestID="${transferRequestID}"
-						code="${getFormCode("TR", createdAt, transferRequestID)}"
+						materialWithdrawalID="${materialWithdrawalID}"
+						code="${getFormCode("MWF", createdAt, materialWithdrawalID)}"
 						revise=${isRevise}><i class="fas fa-paper-plane"></i>
 						Submit
 					</button>`;
@@ -514,55 +509,55 @@ $(document).ready(function() {
 						<button 
 							class="btn btn-cancel"
 							id="btnCancelForm" 
-							transferRequestID="${transferRequestID}"
-							code="${getFormCode("TR", createdAt, transferRequestID)}"
+							materialWithdrawalID="${materialWithdrawalID}"
+							code="${getFormCode("MWF", createdAt, materialWithdrawalID)}"
 							revise=${isRevise}><i class="fas fa-ban"></i> 
 							Cancel
 						</button>`;
 					}
 
 					
-				} else if (transferRequestStatus == 1) {
+				} else if (materialWithdrawaltStatus == 1) {
 					// FOR APPROVAL
 					if (!isOngoing) {
 						button = `
 						<button 
 							class="btn btn-cancel"
 							id="btnCancelForm" 
-							transferRequestID="${transferRequestID}"
-							code="${getFormCode("TR", createdAt, transferRequestID)}"
-							status="${transferRequestStatus}"><i class="fas fa-ban"></i> 
+							materialWithdrawalID="${materialWithdrawalID}"
+							code="${getFormCode("MWF", createdAt, materialWithdrawalID)}"
+							status="${materialWithdrawaltStatus}"><i class="fas fa-ban"></i> 
 							Cancel
 						</button>`;
 					}
-				} else if (transferRequestStatus == 3) {
+				} else if (materialWithdrawaltStatus == 3) {
 					// DENIED - FOR REVISE
 					button = `
 					<button
 						class="btn btn-cancel"
 						id="btnRevise" 
-						transferRequestID="${encryptString(transferRequestID)}"
-						code="${getFormCode("TR", createdAt, transferRequestID)}"
-						status="${transferRequestStatus}"><i class="fas fa-clone"></i>
+						materialWithdrawalID="${encryptString(materialWithdrawalID)}"
+						code="${getFormCode("MWF", createdAt, materialWithdrawalID)}"
+						status="${materialWithdrawaltStatus}"><i class="fas fa-clone"></i>
 						Revise
 					</button>`;
 				}
 			} else {
-				if (transferRequestStatus == 1) {
+				if (materialWithdrawaltStatus == 1) {
 					if (isImCurrentApprover(approversID, approversDate)) {
 						button = `
 						<button 
 							class="btn btn-submit" 
 							id="btnApprove" 
-							transferRequestID="${encryptString(transferRequestID)}"
-							code="${getFormCode("TR", createdAt, transferRequestID)}"><i class="fas fa-paper-plane"></i>
+							materialWithdrawalID="${encryptString(materialWithdrawalID)}"
+							code="${getFormCode("MWF", createdAt, materialWithdrawalID)}"><i class="fas fa-paper-plane"></i>
 							Approve
 						</button>
 						<button 
 							class="btn btn-cancel"
 							id="btnReject" 
-							transferRequestID="${encryptString(transferRequestID)}"
-							code="${getFormCode("TR", createdAt, transferRequestID)}"><i class="fas fa-ban"></i> 
+							materialWithdrawalID="${encryptString(materialWithdrawalID)}"
+							code="${getFormCode("MWF", createdAt, materialWithdrawalID)}"><i class="fas fa-ban"></i> 
 							Deny
 						</button>`;
 					}
@@ -587,29 +582,26 @@ $(document).ready(function() {
 
     // ----- GET PROJECT LIST -----
     function getProjectList(id = null, display = true) {
-		let html ='';
-		// let html = `
-		// <option 
-		// 	value       = "0"
-		// 	inventoryStorageName = "-"
-		// 	storageDepartment  = "-"
-		// 	storageAddress     = "-"
-		// 	officeName  = "-"
-		// 	roomType    = "-"
-		// 	${id == "0" && "selected"}>N/A</option>`;
+		let html = `
+		<option 
+			value       = "0"
+			projectCode = "-"
+			clientCode  = "-"
+			clientName  = "-"
+			address     = "-"
+			${id == "0" && "selected"}>N/A</option>`;
         html += projectList.map(project => {
-			let address = `${project.inventoryStorageUnitNumber && titleCase(project.inventoryStorageUnitNumber)+", "}${project.inventoryStorageHouseNumber && project.inventoryStorageHouseNumber +", "}${project.inventoryStorageBarangay && titleCase(project.inventoryStorageBarangay)+", "}${project.inventoryStorageMunicipality && titleCase(project.inventoryStorageMunicipality)+", "}${project.inventoryStorageProvince && titleCase(project.inventoryStorageProvince)+", "}${project.inventoryStorageCountry && titleCase(project.inventoryStorageCountry)+", "}${project.inventoryStorageZipCode && titleCase(project.inventoryStorageZipCode)}`;
+			let address = `${project.clientUnitNumber && titleCase(project.clientUnitNumber)+", "}${project.clientHouseNumber && project.clientHouseNumber +", "}${project.clientBarangay && titleCase(project.clientBarangay)+", "}${project.clientCity && titleCase(project.clientCity)+", "}${project.clientProvince && titleCase(project.clientProvince)+", "}${project.clientCountry && titleCase(project.clientCountry)+", "}${project.clientPostalCode && titleCase(project.clientPostalCode)}`;
 
             return `
             <option 
-                value       = "${project.inventoryStorageID}" 
-                inventoryStorageName = "${project.inventoryStorageOfficeName}"
-                storageDepartment  = "${project.departmentName}"
-				storageAddress     = "${address}"
-				officeName  = "${project.inventoryStorageOfficeName}"
-				roomType  = "${project.inventoryStorageRoomType}"
-                ${project.inventoryStorageID  == id && "selected"}>
-                ${project.inventoryStorageCode}
+                value       = "${project.projectListID}" 
+                projectCode = "${project.projectListCode}"
+                clientCode  = "${project.clientCode}"
+                clientName  = "${project.clientName}"
+				address     = "${address}"
+                ${project.projectListID == id && "selected"}>
+                ${project.projectListName}
             </option>`;
         })
         return display ? html : projectList;
@@ -618,16 +610,16 @@ $(document).ready(function() {
 
 	// ----- UPDATE INVENTORYT NAME -----
 	function updateInventoryItemOptions() {
-		let projectItemIDArr = [], companyItemIDArr = []; // 0 IS THE DEFAULT VALUE
-		let projectElementID = [], companyElementID = [];
-		// let optionNone = {
-		// 	itemID:              "0",
-		// 	itemCode:            "-",
-		// 	categoryName:        "-",
-		// 	unitOfMeasurementID: "-",
-		// 	itemName:            "N/A",
-		// 	brand:            	 "-"
-		// };
+		let projectItemIDArr = []; // 0 IS THE DEFAULT VALUE
+		let projectElementID = [];
+		let optionNone = {
+			itemID:              "0",
+			itemCode:            "-",
+			categoryName:        "-",
+			unitOfMeasurementID: "-",
+			itemName:            "N/A",
+			itemDescription:     "-"
+		};
 
 		$("[name=itemID][project=true]").each(function(i, obj) {
 			projectItemIDArr.push($(this).val());
@@ -638,7 +630,7 @@ $(document).ready(function() {
 
 		projectElementID.map((element, index) => {
 			let html = `<option selected disabled>Select Item Name</option>`;
-			let itemList = [...inventoryItemList];
+			let itemList = [optionNone, ...inventoryItemList];
 			html += itemList.filter(item => !projectItemIDArr.includes(item.itemID) || item.itemID == projectItemIDArr[index]).map(item => {
 				return `
 				<option 
@@ -646,7 +638,7 @@ $(document).ready(function() {
 					itemCode     = "${item.itemCode}"
 					categoryName = "${item.categoryName}"
 					uom          = "${item.unitOfMeasurementID}"
-					brand          = "${item.brandName}"
+					itemdescription  = "${item.itemDescription}"
 					${item.itemID == projectItemIDArr[index] && "selected"}>
 					${item.itemName}
 				</option>`;
@@ -658,7 +650,7 @@ $(document).ready(function() {
 
 
     // ----- GET INVENTORY ITEM -----
-    function getInventoryItem(id = null, isProject = true, display = true ,storageID = null) {
+    function getInventoryItem(id = null, isProject = true, display = true) {
         let html   = `<option selected disabled>Select Item Name</option>`;
 		const attr = isProject ? "[project=true]" : "";
 
@@ -667,74 +659,136 @@ $(document).ready(function() {
 			itemIDArr.push($(this).val());
 		}) 
 
-		// let optionNone = {
-		// 	itemID:              "0",
-		// 	itemCode:            "-",
-		// 	categoryName:        "-",
-		// 	unitOfMeasurementID: "-",
-		// 	itemName:            "N/A",
-		// 	brandName:        	 "-"
+		let optionNone = {
+			itemID:              "0",
+			itemCode:            "-",
+			categoryName:        "-",
+			unitOfMeasurementID: "-",
+			itemName:            "N/A",
+			itemDescription:      "-"
 
-		// };
-		let itemList = [...inventoryItemList];
+		};
+		let itemList = [optionNone, ...inventoryItemList];
 
-		
 		html += itemList.filter(item => !itemIDArr.includes(item.itemID) || item.itemID == id).map(item => {
+            return `
+            <option 
+                value        = "${item.itemID}" 
+                itemCode     = "${item.itemCode}"
+                categoryName = "${item.categoryName}"
+                uom          = "${item.unitOfMeasurementID}"
+                itemdescription          = "${item.itemDescription}"
+                ${item.itemID == id && "selected"}>
+                ${item.itemName}
+            </option>`;
+        })
 		
-			// if( storageID != null && storageID == item.inventoryStorageID ){
-			
-				return `
-				<option 
-					value        = "${item.itemID}" 
-					itemCode     = "${item.itemCode}"
-					categoryName = "${item.categoryName}"
-					uom          = "${item.unitOfMeasurementID}"
-					brand          = "${item.brandName}"
-					${item.itemID == id && "selected"}>
-					${item.itemName}
-				</option>`;
-			
-			// }
-			// if(storageID == null){
-		
-			// 	return `
-			// 	<option 
-			// 		value        = "${item.itemID}" 
-			// 		itemCode     = "${item.itemCode}"
-			// 		categoryName = "${item.categoryName}"
-			// 		uom          = "${item.unitOfMeasurementID}"
-			// 		brand          = "${item.brandName}"
-			// 		${item.itemID == id && "selected"}>
-			// 		${item.itemName}
-			// 	</option>`;
-			// }
-		})
         return display ? html : inventoryItemList;
     }
     // ----- END GET INVENTORY ITEM -----
+
+    // ----- UPDATE STORAGE NAME -----
+	function updateInventoryStorageOptions() {
+		let projectItemIDArr = []; // 0 IS THE DEFAULT VALUE
+		let projectElementID = [];
+     
+		$("[name=inventoryStorageID][project=true]").each(function(i, obj) {
+			projectItemIDArr.push($(this).val());
+			projectElementID.push(`#${this.id}[project=true]`);
+			$(this).val() && $(this).trigger("change");
+		}) 
+
+		projectElementID.map((element, index) => {
+			let html = `<option selected disabled>Select Storage Name</option>`;
+			let itemList = [...inventoryStorageList];
+			html += itemList.map(item => {
+				return `
+                <option 
+                value        = "${item.inventoryStorageID}" 
+                storageCode     = "${item.inventoryStorageCode}"
+                liststocks = "${item.receivingQuantity}"
+                ${item.inventoryStorageID == projectItemIDArr[index] && "selected"}>
+                ${item.inventoryStorageOfficeName}
+            </option>`;
+                
+			})
+			$(element).html(html);
+		});
+	}
+	// ----- END UPDATE STORAGE NAME -----
+
+
+    // ----- GET STORAGE -----
+    function getStorage(id = null, isProject = true, display = true, itemID = null) {
+       
+        let html   = `<option selected disabled>Select Storage Name</option>`;
+		const attr = isProject ? "[project=true]" : "";
+
+        let itemIDArr = []; // 0 IS THE DEFAULT VALUE
+		$(`[name=inventoryStorageID]${attr}`).each(function(i, obj) {
+            itemIDArr.push($(this).val());
+		}) 
+
+        console.log(itemID)
+		let storageList = [ ...inventoryStorageList];
+		
+            html += storageList.map(item => {
+                
+            if( itemID == null){
+                return `
+                <option 
+                    value        = "${item.inventoryStorageID}" 
+                    storageCode     = "${item.inventoryStorageCode}"
+                    liststocks = "${item.receivingQuantity}"
+                    ${item.inventoryStorageID == id && "selected"}>
+                    ${item.inventoryStorageOfficeName}
+                </option>`;
+            }else{
+                if(item.itemID == itemID ){
+                    return `
+                    <option 
+                        value        = "${item.inventoryStorageID}" 
+                        storageCode     = "${item.inventoryStorageCode}"
+                        liststocks = "${item.receivingQuantity}"
+                        ${item.inventoryStorageID == id && "selected"}>
+                        ${item.inventoryStorageOfficeName}
+                    </option>`;
+                }
+            }
+               
+            
+        })
+		
+        return display ? html : inventoryStorageList;
+    }
+    // ----- END GET STORAGE -----
 
 
 	// ----- GET ITEM ROW -----
     function getItemRow(isProject = true, item = {}, readOnly = false) {
 		const attr = isProject ? `project="true"` : ``;
 		let {
-			itemCode     = "",
-			itemName     = "",
-			itemID       = null,
-			quantity     = 1,
-			unitOfMeasurementID: uom = "",
-			brandName = ""
+			
+            inventoryStorageID          = null,
+			itemCode                    = "",
+			itemName                    = "",
+			itemDescription             = "",
+            inventoryStorageCode                 = "",
+			inventoryStorageOfficeName                 = "",
+			itemID                      = null,
+			quantity                    = 1,
+			unitOfMeasurementID: uom    = "",
+			receivingQuantity       = ""
 
 		} = item;
 
-		
-
+      
 		let html = "";
 		if (readOnly) {
 		
 			html += `
 			<tr class="itemTableRow">
-				<td>
+                <td>
 					<div class="itemcode">
 						${itemCode || "-"}
 					</div>
@@ -744,23 +798,42 @@ $(document).ready(function() {
 						${itemName || "-"}
 					</div>
 				</td>
+
+                <td>
+					<div class="itemdescription">
+						${itemDescription || "-"}
+					</div>
+				</td>
+
+                <td>
+					<div class="storagecode">
+						${inventoryStorageCode || "-"}
+					</div>
+				</td>
+				<td>
+					<div class="storagename">
+						${inventoryStorageOfficeName || "-"}
+					</div>
+				</td>
+				
 				<td class="text-center">
 					<div class="quantity">
 						${quantity}
 					</div>
 				</td>
-				
-				<td>
-					<div class="brand">
-						${brandName || "-"}
-					</div>
-				</td>
 
-				<td>
+                <td>
 					<div class="uom">
 						${uom || "-"}
 					</div>
 				</td>
+
+                <td>
+					<div class="liststocks">
+						${receivingQuantity || "-"}
+					</div>
+				</td>
+
 			</tr>`;
 		} else {
 		
@@ -771,6 +844,7 @@ $(document).ready(function() {
 						<input type="checkbox" class="checkboxrow">
 					</div>
 				</td>
+               
 				<td>
 					<div class="itemcode">-</div>
 				</td>
@@ -790,6 +864,30 @@ $(document).ready(function() {
 						</div>
 					</div>
 				</td>
+                <td>
+					<div class="itemdescription">-</div>
+				</td>
+
+                 <td>
+					<div class="storagecode">-</div>
+				</td>
+                <td>
+					<div class="storagename">
+						<div class="form-group mb-0">
+							<select
+								class="form-control validate select2"
+								name="inventoryStorageID"
+								id="inventoryStorageID"
+								style="width: 100%"
+								required
+								${attr}>
+								${getStorage(inventoryStorageID, isProject,true,itemID)}
+							</select>
+							<div class="invalid-feedback d-block" id="invalid-inventoryStorageID"></div>
+						</div>
+					</div>
+				</td>
+
 				<td class="text-center">
 					<div class="quantity">
 						<input 
@@ -808,10 +906,10 @@ $(document).ready(function() {
 					</div>
 				</td>
 				<td>
-					<div class="brand">-</div>
-				</td>
-				<td>
 					<div class="uom">-</div>
+				</td>
+                <td>
+                    <div class="liststocks">-</div>
 				</td>
 			</tr>`;
 		}
@@ -836,7 +934,7 @@ $(document).ready(function() {
 			$("td .itemcode", this).attr("id", `itemcode${i}`);
 
 			// ITEMNAME
-			$(this).find("select").each(function(j) {
+			$(this).find("select").eq(1).each(function(j) {
 				const itemID = $(this).val();
 				$(this).attr("index", `${i}`);
 				$(this).attr("project", `true`);
@@ -846,15 +944,32 @@ $(document).ready(function() {
 				}
 			});
 
+            // ITEMDESCRIPTION
+			$("td .itemdescription", this).attr("id", `itemdescription${i}`);
+
+            // STORAGECODE
+			$("td .storagecode", this).attr("id", `storagecode${i}`);
+
+			// STORAGENAME
+			$(this).find("select").eq(0).each(function(j) {
+				const itemID = $(this).val();
+				$(this).attr("index", `${i}`);
+				$(this).attr("project", `true`);
+				$(this).attr("id", `storagename${i}`)
+				if (!$(this).attr("data-select2-id")) {
+					$(this).select2({ theme: "bootstrap" });
+				}
+			});
+
 			// QUANTITY
 			$("td .quantity [name=quantity]", this).attr("id", `quantity${i}`);
 			$("td .quantity [name=quantity]", this).attr("project", `true`);
-			
-			// Brand
-			$("td .brand", this).attr("id", `brand${i}`);
 
 			// UOM
 			$("td .uom", this).attr("id", `uom${i}`);
+
+            // STOCKS
+			$("td .liststocks", this).attr("id", `listStocks${i}`);
 		})
 	}
 	// ----- END UPDATE TABLE ITEMS -----
@@ -902,6 +1017,10 @@ $(document).ready(function() {
 								let itemID = $(this).val();
 								$(this).html(getInventoryItem(itemID, isProject));
 							}) 
+                            // $(this).find(`[name=inventoryStorageID]${attr}`).each(function(i, obj) {
+							// 	let inventoryStorageID = $(this).val();
+							// 	$(this).html(getStorage(inventoryStorageID,isProject,true,""));
+							// }) 
 							updateDeleteButton();
 						});
 					})
@@ -916,148 +1035,81 @@ $(document).ready(function() {
 
 
 	// ----- SELECT PROJECT LIST -----
-    $(document).on("change", "[name=inventoryStorageIDSender]", function() {
-        const inventoryStorageIDSender = $('option:selected', this).val();
-        const inventoryStorageName = $('option:selected', this).attr("inventoryStorageName");
-        const storageDepartment  = $('option:selected', this).attr("storageDepartment");
-        const officeName  = $('option:selected', this).attr("officeName");
-        const storageAddress     = $('option:selected', this).attr("storageAddress");
-        const roomType     = $('option:selected', this).attr("roomType");
+    $(document).on("change", "[name=projectID]", function() {
+        const projectCode = $('option:selected', this).attr("projectCode");
+        const clientCode  = $('option:selected', this).attr("clientCode");
+        const clientName  = $('option:selected', this).attr("clientName");
+        const address     = $('option:selected', this).attr("address");
 
-        $("[name=inventoryStorageNameSender]").val(inventoryStorageName);
-        $("[name=storageDepartmentSender]").val(storageDepartment);
-        $("[name=storageAddressSender]").val(storageAddress);
-        $("[name=officeNameSender]").val(officeName);
-        $("[name=roomTypeSender]").val(roomType);
-
-		// $(`[name=itemID]`).each(function(i, obj) {
-		// 	// let itemID = $(this).val();
-		// 	$(this).html(getInventoryItem(null, true, true,inventoryStorageIDSender));
-		// }) 
-
-		const coninventoryStorageIDSender = $('[name=inventoryStorageIDSender] option:selected').val();
-		const inventoryStorageIDReceiver = $('[name=inventoryStorageIDReceiver] option:selected').val();
-
-		if(coninventoryStorageIDSender == inventoryStorageIDReceiver && (inventoryStorageIDReceiver !=0 || coninventoryStorageIDSender !=0 ) ){
-	
-			$('[name=inventoryStorageIDSender]').val($('[name=inventoryStorageIDSender] option:first-child').val()).trigger('change');
-			$("[name=inventoryStorageNameSender]").val("-");
-			$("[name=storageDepartmentSender]").val("-");
-			$("[name=storageAddressSender]").val("-");
-			$("[name=officeNameSender]").val("-");
-			$("[name=roomTypeSender]").val("-");
-			$(".invalid-feedback").eq(0).text("Please choose other Storage!");
-			$(".invalid-feedback").eq(1).text("Please choose other Storage!");
-			$('[name=inventoryStorageIDReceiver]').addClass("is-invalid");
-			
-			// $("#invalid-inventoryStorageIDSender").hide();
-			// $("#invalid-inventoryStorageIDSender").text("Please choose other Storage!");
-			
-		}
-		
+        $("[name=projectCode]").val(projectCode);
+        $("[name=clientCode]").val(clientCode);
+        $("[name=clientName]").val(clientName);
+        $("[name=clientAddress]").val(address);
     })
-
-	$(document).on("change", "[name=inventoryStorageIDReceiver]", function() {
-        const inventoryStorageName = $('option:selected', this).attr("inventoryStorageName");
-        const storageDepartment  = $('option:selected', this).attr("storageDepartment");
-        const officeName  = $('option:selected', this).attr("officeName");
-        const storageAddress     = $('option:selected', this).attr("storageAddress");
-        const roomType     = $('option:selected', this).attr("roomType");
-
-        $("[name=inventoryStorageNameReceiver]").val(inventoryStorageName);
-        $("[name=storageDepartmentReceiver]").val(storageDepartment);
-        $("[name=storageAddressReceiver]").val(storageAddress);
-        $("[name=officeNameReceiver]").val(officeName);
-        $("[name=roomTypeReceiver]").val(roomType);
-
-		const inventoryStorageIDSender = $('[name=inventoryStorageIDSender] option:selected').val();
-		const coninventoryStorageIDReceiver = $('[name=inventoryStorageIDReceiver] option:selected').val();
-
-		if(inventoryStorageIDSender == coninventoryStorageIDReceiver && (coninventoryStorageIDReceiver !=0 || inventoryStorageIDSender !=0 ) ){
-	
-			$('[name=inventoryStorageIDReceiver]').val($('[name=inventoryStorageIDReceiver] option:first-child').val()).trigger('change');
-			$("[name=inventoryStorageNameReceiver]").val("-");
-			$("[name=storageDepartmentReceiver]").val("-");
-			$("[name=storageAddressReceiver]").val("-");
-			$("[name=officeNameReceiver]").val("-");
-			$("[name=roomTypeReceiver]").val("-");
-			$("#invalid-inventoryStorageIDReceiver").text("Please choose other Storage!");
-			$(".invalid-feedback").eq(0).text("Please choose other Storage!");
-			$(".invalid-feedback").eq(1).text("Please choose other Storage!");
-			$('[name=inventoryStorageIDSender]').addClass("is-invalid");
-
-		}
-		
-    })
-
-	// $(document).on("change", "[name=inventoryStorageIDSender]", function() {
-	// 	const inventoryStorageIDSender = $('[name=inventoryStorageIDSender] option:selected').val();
-	// 	const inventoryStorageIDReceiver = $('[name=inventoryStorageIDReceiver] option:selected').val();
-
-	// 	if(inventoryStorageIDSender == inventoryStorageIDReceiver && (inventoryStorageIDReceiver !=0 || inventoryStorageIDSender !=0 ) ){
-	
-	// 		$('[name=inventoryStorageIDSender]').val($('[name=inventoryStorageIDSender] option:first-child').val()).trigger('change');
-	// 		$("[name=inventoryStorageNameSender]").val("-");
-	// 		$("[name=storageDepartmentSender]").val("-");
-	// 		$("[name=storageAddressSender]").val("-");
-	// 		$("[name=officeNameSender]").val("-");
-	// 		$("[name=roomTypeSender]").val("-");
-	// 		$("#invalid-inventoryStorageIDSender").text("Please choose other Storage!");
-			
-	// 	}
-	// });
-
-	// $(document).on("change", "[name=inventoryStorageIDReceiver]", function() {
-	// 	const inventoryStorageIDSender = $('[name=inventoryStorageIDSender] option:selected').val();
-	// 	const inventoryStorageIDReceiver = $('[name=inventoryStorageIDReceiver] option:selected').val();
-
-	// 	if(inventoryStorageIDSender == inventoryStorageIDReceiver && (inventoryStorageIDReceiver !=0 || inventoryStorageIDSender !=0 ) ){
-	
-	// 		$('[name=inventoryStorageIDReceiver]').val($('[name=inventoryStorageIDReceiver] option:first-child').val()).trigger('change');
-	// 		$("[name=inventoryStorageNameReceiver]").val("-");
-	// 		$("[name=storageDepartmentReceiver]").val("-");
-	// 		$("[name=storageAddressReceiver]").val("-");
-	// 		$("[name=officeNameReceiver]").val("-");
-	// 		$("[name=roomTypeReceiver]").val("-");
-	// 	}
-	// });
     // ----- END SELECT PROJECT LIST -----
 
 
     // ----- SELECT ITEM NAME -----
     $(document).on("change", "[name=itemID]", function() {
+        const itemID     = $('option:selected', this).val();
         const itemCode     = $('option:selected', this).attr("itemCode");
         const categoryName = $('option:selected', this).attr("categoryName");
         const uom          = $('option:selected', this).attr("uom");
-        const brand          = $('option:selected', this).attr("brand");
+        const itemDescription          = $('option:selected', this).attr("itemdescription");
 		const isProject    = $(this).closest("tbody").attr("project") == "true";
 		const attr         = isProject ? "[project=true]" : "[company=true]";
 
         $(this).closest("tr").find(`.itemcode`).first().text(itemCode);
         $(this).closest("tr").find(`.category`).first().text(categoryName);
         $(this).closest("tr").find(`.uom`).first().text(uom);
-        $(this).closest("tr").find(`.brand`).first().text(brand);
+        $(this).closest("tr").find(`.itemdescription`).first().text(itemDescription);
+
+        // Storage Field
         $(this).closest("tr").find(`[name=quantity]`).first().val(1);
+        $(this).closest("tr").find(`.storagecode`).first().text('-');
+        $(this).closest("tr").find(`.liststocks`).first().text('-');
 
-		// $(`[name=itemID]${attr}`).each(function(i, obj) {
-		// 	let itemID = $(this).val();
-		// 	$(this).html(getInventoryItem(itemID, isProject));
-		// }) 
+		$(`[name=itemID]${attr}`).each(function(i, obj) {
+			let itemID = $(this).val();
+			$(this).html(getInventoryItem(itemID, isProject));
+		}) 
 
+        $(this).closest("tr").find(`[name=inventoryStorageID]${attr}`).each(function(i, obj) {
+			let inventoryStorageID = $(this).val();
+			$(this).html(getStorage(inventoryStorageID,isProject,true,itemID));
+		}) 
 	
     })
     // ----- END SELECT ITEM NAME -----
 
+     // ----- SELECT STORAGE NAME -----
+     $(document).on("change", "[name=inventoryStorageID]", function() {
+        const itemID     = $('option:selected', this).val();
+        const storagecode     = $('option:selected', this).attr("storagecode");
+        const liststocks = $('option:selected', this).attr("liststocks");
+		const isProject    = $(this).closest("tbody").attr("project") == "true";
+		const attr         = isProject ? "[project=true]" : "[company=true]";
+
+        $(this).closest("tr").find(`.storagecode`).first().text(storagecode);
+        $(this).closest("tr").find(`.liststocks`).first().text(liststocks);
+
+        // $(`[name=inventoryStorageID]${attr}`).each(function(i, obj) {
+		// 	let inventoryStorageID = $(this).val();
+		// 	$(this).html(getStorage(inventoryStorageID, isProject));
+		// }) 
+	
+    })
+    // ----- END SELECT STORAGE NAME -----
 
 	// ----- KEYUP QUANTITY OR UNITCOST -----
 	$(document).on("change", "[name=quantity]", function() {
-		const index     		= $(this).closest("tr").first().attr("index");
+        const index     		= $(this).closest("tr").first().attr("index");
 		const isProject 		= $(this).closest("tbody").attr("project") == "true";
 		const attr      		= isProject ? "[project=true]" : "";
 		const quantity  		= $(`#quantity${index}${attr}`).val();
         const selectedItemID  	= $(this).closest("tr").find('option:selected').val();
 
-		const data = getTableData("ims_inventory_item_tbl as itm LEFT JOIN ims_list_stocks_details_tbl USING(itemID) LEFT JOIN ims_list_stocks_tbl USING(listStocksID)", 
+		const data = getTableData("ims_inventory_item_tbl as itm LEFT JOIN ims_list_stocks_details_tbl  as stcks USING(itemID) LEFT JOIN ims_list_stocks_tbl USING(listStocksID) LEFT JOIN ims_inventory_storage_tbl as isr USING(inventoryStorageID)", 
         "itemID,receivingQuantity", " itemID ="+ selectedItemID, "");
 
 			if(data.length >0){
@@ -1094,9 +1146,6 @@ $(document).ready(function() {
 				$(this).closest("tr").find("#invalid-quantity").removeClass("is-valid").addClass("is-invalid");
 				$(this).closest("tr").find("#invalid-quantity").text('No Item Selected');
 			}
-        
-			
-		
 	})
 	// ----- END KEYUP QUANTITY OR UNITCOST -----
 
@@ -1124,11 +1173,7 @@ $(document).ready(function() {
 			$(".checkboxrow[project=true]").each(function(i, obj) {
 				$(this).prop("checked", isChecked);
 			});
-		} else {
-			$(".checkboxrow[company=true]").each(function(i, obj) {
-				$(this).prop("checked", isChecked);
-			});
-		}
+		} 
 		updateDeleteButton();
 	})
 	// ----- END CHECK ALL -----
@@ -1169,26 +1214,33 @@ $(document).ready(function() {
 		readOnly = isRevise ? false : readOnly;
 
 		let {
-			transferRequestID       = "",
-			reviseTransferRequestID = "",
+			materialWithdrawalID       = "",
+			reviseMaterialWithdrawalID = "",
 			employeeID              = "",
-			inventoryStorageIDSender 		= "",
-			inventoryStorageIDReceiver 		= "",
+			projectID 		= "",
 			approversID             = "",
 			approversStatus         = "",
 			approversDate           = "",
-			transferRequestStatus   = false,
-			transferRequestRemarks   = false,
+			materialWithdrawaltStatus   = false,
+			materialWithdrawalRemarks   = false,
+			materialWithdrawalPurpose   = "",
 			submittedAt             = false,
 			createdAt               = false,
 		} = data && data[0];
+
 		
 		let requestProjectItems = "";
-		if (transferRequestID) {
+		if (materialWithdrawalID) {
 			let requestItemsData = getTableData(
-				`ims_transfer_request_tbl LEFT JOIN ims_transfer_request_details_tbl USING(transferRequestID) LEFT JOIN ims_inventory_item_tbl USING(itemID) LEFT JOIN ims_list_stocks_details_tbl  USING(itemID) LEFT JOIN ims_list_stocks_tbl  USING(listStocksID) LEFT JOIN ims_inventory_storage_tbl  USING(inventoryStorageID)  `, 
-				`itemID, itemCode, itemName, unitOfMeasurementID,brandName`, 
-				`listStocksStatus = 2 AND transferRequestID = ${transferRequestID} GROUP BY itemID`);
+				`ims_material_withdrawal_details_tbl as imwd 
+				LEFT JOIN ims_inventory_item_tbl as iiit USING(itemID) 
+				LEFT JOIN ims_inventory_storage_tbl as iist ON imwd.inventoryStorageID =iist.inventoryStorageID
+				LEFT JOIN ims_list_stocks_tbl as ilst ON imwd.inventoryStorageID= ilst.inventoryStorageID
+                AND iist.inventoryStorageID = ilst.inventoryStorageID
+				LEFT JOIN ims_list_stocks_details_tbl as ilsdt  ON imwd.itemID = ilsdt.itemID
+                AND ilst.listStocksID = ilsdt.listStocksID`, 
+				`iiit.itemID, itemCode, itemName, unitOfMeasurementID,itemDescription,imwd.inventoryStorageID,inventoryStorageCode,inventoryStorageOfficeName,receivingQuantity,quantity`, 
+				`materialWithdrawalID= ${materialWithdrawalID}  GROUP BY materialWithdrawalDetailsID ASC`);
 			requestItemsData.map(item => {
 				requestProjectItems += getItemRow(true, item, readOnly);
 			})
@@ -1207,8 +1259,8 @@ $(document).ready(function() {
 
 		readOnly ? preventRefresh(false) : preventRefresh(true);
 
-		$("#btnBack").attr("transferRequestID", transferRequestID);
-		$("#btnBack").attr("status", transferRequestStatus);
+		$("#btnBack").attr("materialWithdrawalID", materialWithdrawalID);
+		$("#btnBack").attr("status", materialWithdrawaltStatus);
 		$("#btnBack").attr("employeeID", employeeID);
 
 		let disabled = readOnly ? "disabled" : "";
@@ -1229,17 +1281,17 @@ $(document).ready(function() {
 	
 		let button = formButtons(data, isRevise);
 
-		let reviseDocumentNo    = isRevise ? purchaseRequestID : reviseTransferRequestID;
-		let documentHeaderClass = isRevise || reviseTransferRequestID ? "col-lg-4 col-md-4 col-sm-12 px-1" : "col-lg-2 col-md-6 col-sm-12 px-1";
-		let documentDateClass   = isRevise || reviseTransferRequestID ? "col-md-12 col-sm-12 px-0" : "col-lg-8 col-md-12 col-sm-12 px-1";
-		let documentReviseNo    = isRevise || reviseTransferRequestID ?
+		let reviseDocumentNo    = isRevise ? materialWithdrawalID: reviseMaterialWithdrawalID;
+		let documentHeaderClass = isRevise || reviseMaterialWithdrawalID ? "col-lg-4 col-md-4 col-sm-12 px-1" : "col-lg-2 col-md-6 col-sm-12 px-1";
+		let documentDateClass   = isRevise || reviseMaterialWithdrawalID ? "col-md-12 col-sm-12 px-0" : "col-lg-8 col-md-12 col-sm-12 px-1";
+		let documentReviseNo    = isRevise || reviseMaterialWithdrawalID ?
 		 `
 		<div class="col-lg-4 col-md-4 col-sm-12 px-1">
 			<div class="card">
 				<div class="body">
 					<small class="text-small text-muted font-weight-bold">Revised Document No.</small>
 					<h6 class="mt-0 text-danger font-weight-bold">
-						${getFormCode("TR", createdAt, reviseDocumentNo)}
+						${getFormCode("MWF", createdAt, reviseDocumentNo)}
 					</h6>      
 				</div>
 			</div>
@@ -1253,7 +1305,7 @@ $(document).ready(function() {
                     <div class="body">
                         <small class="text-small text-muted font-weight-bold">Document No.</small>
                         <h6 class="mt-0 text-danger font-weight-bold">
-							${transferRequestID && !isRevise ? getFormCode("TR", createdAt, transferRequestID) : "---"}
+							${materialWithdrawalID && !isRevise ? getFormCode("MWF", createdAt, materialWithdrawalID) : "---"}
 						</h6>      
                     </div>
                 </div>
@@ -1263,7 +1315,7 @@ $(document).ready(function() {
                     <div class="body">
                         <small class="text-small text-muted font-weight-bold">Status</small>
                         <h6 class="mt-0 font-weight-bold">
-							${transferRequestStatus && !isRevise ? getStatusStyle(transferRequestStatus) : "---"}
+							${materialWithdrawaltStatus && !isRevise ? getStatusStyle(materialWithdrawaltStatus) : "---"}
 						</h6>      
                     </div>
                 </div>
@@ -1295,7 +1347,7 @@ $(document).ready(function() {
                         <div class="body">
                             <small class="text-small text-muted font-weight-bold">Date Approved</small>
                             <h6 class="mt-0 font-weight-bold">
-								${getDateApproved(transferRequestStatus, approversID, approversDate)}
+								${getDateApproved(materialWithdrawaltStatus, approversID, approversDate)}
 							</h6>      
                         </div>
                     </div>
@@ -1307,7 +1359,7 @@ $(document).ready(function() {
                     <div class="body">
                         <small class="text-small text-muted font-weight-bold">Remarks</small>
                         <h6 class="mt-0 font-weight-bold">
-							${transferRequestRemarks && !isRevise ? transferRequestRemarks : "---"}
+							${materialWithdrawalRemarks && !isRevise ? materialWithdrawalRemarks : "---"}
 						</h6>      
                     </div>
                 </div>
@@ -1315,100 +1367,46 @@ $(document).ready(function() {
         </div>
 
         <div class="row" id="form_purchase_request">
-			<hr class="w-100"> 
-			<h6 class="font-weight-bold">Storage Sender</h6>
-			<hr class="w-100"> 
 
-			<div class="col-md-4 col-sm-12">
-				<div class="form-group">
-					<label>Storage Code ${!disabled ? "<code>*</code>" : ""}</label>
-					<select class="form-control validate select2"
-						name="inventoryStorageIDSender"
-						id="inventoryStorageIDSender"
-						style="width: 100%"
-						required
+            <div class="col-md-4 col-sm-12">
+                <div class="form-group">
+                    <label>Project Code</label>
+                    <input type="text" class="form-control" name="projectCode" disabled value="-">
+                </div>
+            </div>
+            <div class="col-md-4 col-sm-12">
+                <div class="form-group">
+                    <label>Project Name ${!disabled ? "<code>*</code>" : ""}</label>
+                    <select class="form-control validate select2"
+                        name="projectID"
+                        id="projectID"
+                        style="width: 100%"
+                        required
 						${disabled}>
-						<option selected disabled>Select Storage Code</option>
-						${getProjectList(inventoryStorageIDSender)}
-					</select>
-					<div class="d-block invalid-feedback" id="invalid-inventoryStorageIDSender"></div>
-				</div>
-			</div>
-
+                        <option selected disabled>Select Project Name</option>
+                        ${getProjectList(projectID)}
+                    </select>
+                    <div class="d-block invalid-feedback" id="invalid-projectID"></div>
+                </div>
+            </div>
+            <div class="col-md-4 col-sm-12">
+                <div class="form-group">
+                    <label>Client Code</label>
+                    <input type="text" class="form-control" name="clientCode" disabled value="-">
+                </div>
+            </div>
+            <div class="col-md-4 col-sm-12">
+                <div class="form-group">
+                    <label>Client Name</label>
+                    <input type="text" class="form-control" name="clientName" disabled value="-">
+                </div>
+            </div>
             <div class="col-md-8 col-sm-12">
                 <div class="form-group">
-                    <label>Storage Name</label>
-                    <input type="text" class="form-control" name="inventoryStorageNameSender" disabled value="-">
+                    <label>Client Address</label>
+                    <input type="text" class="form-control" name="clientAddress" disabled value="-">
                 </div>
             </div>
-            
-            <div class="col-md-4 col-sm-12">
-                <div class="form-group">
-                    <label>Storage Department</label>
-                    <input type="text" class="form-control" name="storageDepartmentSender" disabled value="-">
-                </div>
-            </div>
-            <div class="col-md-4 col-sm-12">
-                <div class="form-group">
-                    <label>Storage Address</label>
-                    <input type="text" class="form-control" name="storageAddressSender" disabled value="-">
-                </div>
-            </div>
-             <div class="col-md-4 col-sm-12">
-                <div class="form-group">
-                    <label>Room Type</label>
-                    <input type="text" class="form-control" name="roomTypeSender" disabled value="-">
-                </div>
-            </div>
-
-			<hr class="w-100"> 
-			<h6 class="font-weight-bold">Storage Reciever</h6>
-			<hr class="w-100"> 
-
-			<div class="col-md-4 col-sm-12">
-				<div class="form-group">
-					<label>Storage Code ${!disabled ? "<code>*</code>" : ""}</label>
-					<select class="form-control validate select2"
-						name="inventoryStorageIDReceiver"
-						id="inventoryStorageIDReceiver"
-						style="width: 100%"
-						required
-						${disabled}>
-						<option selected disabled>Select Storage Code</option>
-						${getProjectList(inventoryStorageIDReceiver)}
-					</select>
-					<div class="d-block invalid-feedback" id="invalid-inventoryStorageIDReceiver"></div>
-				</div>
-			</div>
-
-            <div class="col-md-8 col-sm-12">
-                <div class="form-group">
-                    <label>Storage Name</label>
-                    <input type="text" class="form-control" name="inventoryStorageNameReceiver" disabled value="-">
-                </div>
-            </div>
-            
-            <div class="col-md-4 col-sm-12">
-                <div class="form-group">
-                    <label>Storage Department</label>
-                    <input type="text" class="form-control" name="storageDepartmentReceiver" disabled value="-">
-                </div>
-            </div>
-            <div class="col-md-4 col-sm-12">
-                <div class="form-group">
-                    <label>Storage Address</label>
-                    <input type="text" class="form-control" name="storageAddressReceiver" disabled value="-">
-                </div>
-            </div>
-             <div class="col-md-4 col-sm-12">
-                <div class="form-group">
-                    <label>Room Type</label>
-                    <input type="text" class="form-control" name="roomTypeReceiver" disabled value="-">
-                </div>
-            </div>
-
-			<hr class="w-100">
-
             <div class="col-md-4 col-sm-12">
                 <div class="form-group">
                     <label>Employee Name</label>
@@ -1427,20 +1425,39 @@ $(document).ready(function() {
                     <input type="text" class="form-control" disabled value="${employeeDesignation}">
                 </div>
             </div>
+            <div class="col-md-12 col-sm-12">
+                <div class="form-group">
+                    <label>Purpose ${!disabled ? "<code>*</code>" : ""}</label>
+                    <textarea class="form-control validate"
+                        data-allowcharacters="[a-z][A-Z][0-9][ ][.][,][-][()]['][/][&]"
+                        minlength="1"
+                        maxlength="200"
+                        id="materialWithdrawalPurpose"
+                        name="materialWithdrawalPurpose"
+                        required
+                        rows="4"
+                        style="resize:none;"
+						${disabled}>${materialWithdrawalPurpose ?? ""}</textarea>
+                    <div class="d-block invalid-feedback" id="invalid-materialWithdrawalPurpose"></div>
+                </div>
+            </div>
 
             <div class="col-sm-12">
                 <div class="w-100">
 					<hr class="pb-1">
-					<div class="text-primary font-weight-bold" style="font-size: 1.5rem;">Project Materials and Equipment</div>
+					<div class="text-primary font-weight-bold" style="font-size: 1.5rem;">Withdrawn Materials and Equipment</div>
                     <table class="table table-striped" id="${tableProjectRequestItemsName}">
                         <thead>
                             <tr style="white-space: nowrap">
 								${checkboxProjectHeader}
-                                <th>Item Code</th>
+                                <th>Item Code </th>
                                 <th>Item Name </th>
+                                <th>Item Description</th>
+                                <th>Storage Code </th>
+                                <th>Storage Name </th>
                                 <th>Quantity </th>
-                                <th>Brand </th>
-                                <th>UOM</th>
+                                <th>UOM </th>
+                                <th>Stocks </th>
                             </tr>
                         </thead>
                         <tbody class="itemProjectTableBody" project="true">
@@ -1466,8 +1483,9 @@ $(document).ready(function() {
 			updateTableItems();
 			initAll();
 			updateInventoryItemOptions();
-			inventoryStorageIDSender && inventoryStorageIDSender != 0 && $("[name=inventoryStorageIDSender]").trigger("change");
-			inventoryStorageIDReceiver && inventoryStorageIDReceiver != 0 && $("[name=inventoryStorageIDReceiver]").trigger("change");
+			updateInventoryStorageOptions();
+			projectID && projectID != 0 && $("[name=projectID]").trigger("change");
+			projectID && projectID != 0 && $("[name=itemID]").trigger("change");
 			return html;
 		}, 300);
 	}
@@ -1492,7 +1510,7 @@ $(document).ready(function() {
             </div>`;
 			$("#page_content").html(html);
 
-			headerButton(true, "Add Transfer Request");
+			headerButton(true, "Add Material Withdrawal");
 			headerTabContent();
 			myFormsContent();
 			updateURL();
@@ -1536,12 +1554,12 @@ $(document).ready(function() {
 		const approversID = method != "approve" && moduleApprover;
 
 		if (id) {
-			data["transferRequestID"] = id;
-			formData.append("transferRequestID", id);
+			data["materialWithdrawalID"] = id;
+			formData.append("materialWithdrawalID", id);
 
 			if (status != "2") {
-				data["transferRequestStatus"] = status;
-				formData.append("transferRequestStatus", status);
+				data["materialWithdrawaltStatus"] = status;
+				formData.append("materialWithdrawaltStatus", status);
 			}
 		}
 
@@ -1556,16 +1574,16 @@ $(document).ready(function() {
 		if (currentStatus == "0" && method != "approve") {
 			
 			data["employeeID"]            = sessionID;
-			data["inventoryStorageIDSender"]    = $("[name=inventoryStorageIDSender]").val() || null;
-			data["inventoryStorageIDReceiver"]    = $("[name=inventoryStorageIDReceiver]").val() || null;
-			data["transferRequestReason"] = $("[name=transferRequestReason]").val()?.trim();
+			data["projectID"]    = $("[name=projectID]").val() || null;
+			data["materialWithdrawalReason"] = $("[name=materialWithdrawalReason]").val()?.trim();
+			data["materialWithdrawalPurpose"] = $("[name=materialWithdrawalPurpose]").val()?.trim();
 			data["projectTotalAmount"]    = updateTotalAmount(true);
 			data["companyTotalAmount"]    = updateTotalAmount(false);
 			
 			formData.append("employeeID", sessionID);
-			formData.append("inventoryStorageIDSender", $("[name=inventoryStorageIDSender]").val() || null);
-			formData.append("inventoryStorageIDReceiver", $("[name=inventoryStorageIDReceiver]").val() || null);
-			formData.append("transferRequestReason", $("[name=transferRequestReason]").val()?.trim());
+			formData.append("projectID", $("[name=projectID]").val() || null);
+			formData.append("materialWithdrawalReason", $("[name=materialWithdrawalReason]").val()?.trim());
+			formData.append("materialWithdrawalPurpose", $("[name=materialWithdrawalPurpose]").val()?.trim());
 
 			if (action == "insert") {
 				data["createdBy"]   = sessionID;
@@ -1574,9 +1592,9 @@ $(document).ready(function() {
 				formData.append("createdBy", sessionID);
 				formData.append("createdAt", dateToday());
 			} else if (action == "update") {
-				data["transferRequestID"] = id;
+				data["materialWithdrawalID"] = id;
 
-				formData.append("transferRequestID", id);
+				formData.append("materialWithdrawalID", id);
 			}
 
 			if (method == "submit") {
@@ -1584,20 +1602,20 @@ $(document).ready(function() {
 				formData.append("submittedAt", dateToday());
 				if (approversID) {
 					data["approversID"]           = approversID;
-					data["transferRequestStatus"] = 1;
+					data["materialWithdrawaltStatus"] = 1;
 
 					formData.append("approversID", approversID);
-					formData.append("transferRequestStatus", 1);
+					formData.append("materialWithdrawaltStatus", 1);
 				} else {  // AUTO APPROVED - IF NO APPROVERS
 					data["approversID"]           = sessionID;
 					data["approversStatus"]       = 2;
 					data["approversDate"]         = dateToday();
-					data["transferRequestStatus"] = 2;
+					data["materialWithdrawaltStatus"] = 2;
 
 					formData.append("approversID", sessionID);
 					formData.append("approversStatus", 2);
 					formData.append("approversDate", dateToday());
-					formData.append("transferRequestStatus", 2);
+					formData.append("materialWithdrawaltStatus", 2);
 				}
 			}
 
@@ -1606,14 +1624,16 @@ $(document).ready(function() {
 
 				const itemID    = $("td [name=itemID]", this).val();	
 				const quantity  = +$("td [name=quantity]", this).val();	
+				const inventoryStorageID  = +$("td [name=inventoryStorageID ]", this).val();	
 
 				let temp = {
-					itemID, quantity
+					itemID, quantity, inventoryStorageID
 					
 				};
 
 				formData.append(`items[${i}][itemID]`, itemID);
 				formData.append(`items[${i}][quantity]`, quantity);
+				formData.append(`items[${i}][inventoryStorageID]`, inventoryStorageID);
 				formData.append(`items[${i}][createdBy]`, sessionID);
 				formData.append(`items[${i}][updatedBy]`, sessionID);
 			
@@ -1655,7 +1675,7 @@ $(document).ready(function() {
 
     // ----- VIEW DOCUMENT -----
 	$(document).on("click", "#btnRevise", function () {
-		const id = $(this).attr("transferRequestID");
+		const id = $(this).attr("materialWithdrawalID");
 		viewDocument(id, false, true);
 	});
 	// ----- END VIEW DOCUMENT -----
@@ -1663,10 +1683,10 @@ $(document).ready(function() {
 
 	// ----- SAVE CLOSE FORM -----
 	$(document).on("click", "#btnBack", function () {
-		const id         = $(this).attr("transferRequestID");
+		const id         = $(this).attr("materialWithdrawalID");
 		const revise     = $(this).attr("revise") == "true";
 		const employeeID = $(this).attr("employeeID");
-		const feedback   = $(this).attr("code") || getFormCode("TR", dateToday(), id);
+		const feedback   = $(this).attr("code") || getFormCode("MWF", dateToday(), id);
 		const status     = $(this).attr("status");
 
 		if (status != "false" && status != 0) {
@@ -1674,9 +1694,9 @@ $(document).ready(function() {
 			if (revise) {
 				const action = revise && "insert" || (id && feedback ? "update" : "insert");
 				const data   = getPurchaseRequestData(action, "save", "0", id);
-				data.append("transferRequestStatus", 0);
-				data.append("reviseTransferRequestID", id);
-				data.delete("transferRequestID");
+				data.append("materialWithdrawaltStatus", 0);
+				data.append("reviseMaterialWithdrawalID", id);
+				data.delete("materialWithdrawalID");
 	
 				savePurchaseRequest(data, "save", null, pageContent);
 			} else {
@@ -1691,7 +1711,7 @@ $(document).ready(function() {
 		} else {
 			const action = id && feedback ? "update" : "insert";
 			const data   = getPurchaseRequestData(action, "save", "0", id);
-			data.append("transferRequestStatus", 0);
+			data.append("materialWithdrawaltStatus", 0);
 
 			savePurchaseRequest(data, "save", null, pageContent);
 		}
@@ -1702,23 +1722,25 @@ $(document).ready(function() {
     // ----- SAVE DOCUMENT -----
 	$(document).on("click", "#btnSave, #btnCancel", function () {
 
-		let condition = $("[name=quantity]").hasClass("is-invalid");
+        let condition = $("[name=quantity]").hasClass("is-invalid");
 
 		if(!condition){
-			const id       = $(this).attr("transferRequestID");
-			const revise   = $(this).attr("revise") == "true";
-			const feedback = $(this).attr("code") || getFormCode("TR", dateToday(), id);
-			const action   = revise && "insert" || (id && feedback ? "update" : "insert");
-			const data     = getPurchaseRequestData(action, "save", "0", id);
-			data.append("transferRequestStatus", 0);
+        
+            const id       = $(this).attr("materialWithdrawalID");
+            const revise   = $(this).attr("revise") == "true";
+            const feedback = $(this).attr("code") || getFormCode("MWF", dateToday(), id);
+            const action   = revise && "insert" || (id && feedback ? "update" : "insert");
+            const data     = getPurchaseRequestData(action, "save", "0", id);
+            data.append("materialWithdrawaltStatus", 0);
 
-			if (revise) {
-				data.append("reviseTransferRequestID", id);
-				data.delete("transferRequestID");
-			}
+            if (revise) {
+                data.append("reviseMaterialWithdrawalID", id);
+                data.delete("materialWithdrawalID");
+            }
 
-			savePurchaseRequest(data, "save", null, pageContent);
-		}else{
+            savePurchaseRequest(data, "save", null, pageContent);
+
+        }else{
 			$("[name=quantity]").focus();
 		}
 	});
@@ -1727,46 +1749,46 @@ $(document).ready(function() {
 
     // ----- SUBMIT DOCUMENT -----
 	$(document).on("click", "#btnSubmit", function () {
-		
 
-		let condition = $("[name=quantity]").hasClass("is-invalid");
+        let condition = $("[name=quantity]").hasClass("is-invalid");
 
 		if(!condition){
 
-			const id           = $(this).attr("transferRequestID");
-			const revise       = $(this).attr("revise") == "true";
-			const validate     = validateForm("form_purchase_request");
+            const id           = $(this).attr("materialWithdrawalID");
+            const revise       = $(this).attr("revise") == "true";
+            const validate     = validateForm("form_purchase_request");
 
-			if (validate) {
-				const action = revise && "insert" || (id ? "update" : "insert");
-				const data   = getPurchaseRequestData(action, "submit", "1", id);
+            if (validate) {
+                const action = revise && "insert" || (id ? "update" : "insert");
+                const data   = getPurchaseRequestData(action, "submit", "1", id);
 
-				if (revise) {
-					data.append("reviseTransferRequestID", id);
-					data.delete("transferRequestID");
-				}
+                if (revise) {
+                    data.append("reviseMaterialWithdrawalID", id);
+                    data.delete("materialWithdrawalID");
+                }
 
-				let approversID = "", approversDate = "";
-				for (var i of data) {
-					if (i[0] == "approversID")   approversID   = i[1];
-					if (i[0] == "approversDate") approversDate = i[1];
-				}
+                let approversID = "", approversDate = "";
+                for (var i of data) {
+                    if (i[0] == "approversID")   approversID   = i[1];
+                    if (i[0] == "approversDate") approversDate = i[1];
+                }
 
-				const employeeID = getNotificationEmployeeID(approversID, approversDate, true);
-				let notificationData = false;
-				if (employeeID != sessionID) {
-					notificationData = {
-						moduleID:                37,
-						notificationTitle:       "Transfer Request",
-						notificationDescription: `${employeeFullname(sessionID)} asked for your approval.`,
-						notificationType:        2,
-						employeeID,
-					};
-				}
+                const employeeID = getNotificationEmployeeID(approversID, approversDate, true);
+                let notificationData = false;
+                if (employeeID != sessionID) {
+                    notificationData = {
+                        moduleID:                42,
+                        notificationTitle:       "Material Withdrawal",
+                        notificationDescription: `${employeeFullname(sessionID)} asked for your approval.`,
+                        notificationType:        2,
+                        employeeID,
+                    };
+                }
 
-				savePurchaseRequest(data, "submit", notificationData, pageContent);
-			}
-		}else{
+                savePurchaseRequest(data, "submit", notificationData, pageContent);
+                
+            }
+        }else{
 			$("[name=quantity]").focus();
 		}
 	});
@@ -1775,7 +1797,7 @@ $(document).ready(function() {
 
     // ----- CANCEL DOCUMENT -----
 	$(document).on("click", "#btnCancelForm", function () {
-		const id     = $(this).attr("transferRequestID");
+		const id     = $(this).attr("materialWithdrawalID");
 		const status = $(this).attr("status");
 		const action = "update";
 		const data   = getPurchaseRequestData(action, "cancelform", "4", id, status);
@@ -1787,51 +1809,52 @@ $(document).ready(function() {
 
     // ----- APPROVE DOCUMENT -----
 	$(document).on("click", "#btnApprove", function () {
-		const id       = decryptString($(this).attr("transferRequestID"));
-		const feedback = $(this).attr("code") || getFormCode("TR", dateToday(), id);
-		let tableData  = getTableData("ims_transfer_request_tbl", "", "transferRequestID = " + id);
-
+		const id       = decryptString($(this).attr("materialWithdrawalID"));
+		const feedback = $(this).attr("code") || getFormCode("MWF", dateToday(), id);
+		let tableData  = getTableData("ims_material_withdrawal_tbl", "", "materialWithdrawalID = " + id);
+		
 		if (tableData) {
 			let approversID     = tableData[0].approversID;
 			let approversStatus = tableData[0].approversStatus;
 			let approversDate   = tableData[0].approversDate;
 			let employeeID      = tableData[0].employeeID;
 			let createdAt       = tableData[0].createdAt;
-
 			let data = getPurchaseRequestData("update", "approve", "2", id);
 			data.append("approversStatus", updateApproveStatus(approversStatus, 2));
 			let dateApproved = updateApproveDate(approversDate)
 			data.append("approversDate", dateApproved);
 
-			let status, notificationData,lastApproveCondition = false;
+			let status, notificationData, lastApproveCondition = false;
 			if (isImLastApprover(approversID, approversDate)) {
+				
 				status = 2;
 				notificationData = {
-					moduleID:                37,
+					moduleID:                42,
 					tableID:                 id,
-					notificationTitle:       "Transfer Request",
+					notificationTitle:       "Material Withdrawal",
 					notificationDescription: `${feedback}: Your request has been approved.`,
 					notificationType:        7,
 					employeeID,
 				};
 				lastApproveCondition = true;
 			} else {
+				
 				status = 1;
 				notificationData = {
-					moduleID:                37,
+					moduleID:                42,
 					tableID:                 id,
-					notificationTitle:       "Transfer Request",
+					notificationTitle:       "Material Withdrawal",
 					notificationDescription: `${employeeFullname(employeeID)} asked for your approval.`,
 					notificationType:         2,
 					employeeID:               getNotificationEmployeeID(approversID, dateApproved),
 				};
 			}
 
-			data.append("transferRequestStatus", status);
+			data.append("materialWithdrawaltStatus", status);
 
 			savePurchaseRequest(data, "approve", notificationData, pageContent,lastApproveCondition,id);
+			
 
-		
 		}
 	});
 	// ----- END APPROVE DOCUMENT -----
@@ -1839,8 +1862,8 @@ $(document).ready(function() {
 
     // ----- REJECT DOCUMENT -----
 	$(document).on("click", "#btnReject", function () {
-		const id       = $(this).attr("transferRequestID");
-		const feedback = $(this).attr("code") || getFormCode("TR", dateToday(), id);
+		const id       = $(this).attr("materialWithdrawalID");
+		const feedback = $(this).attr("code") || getFormCode("MWF", dateToday(), id);
 
 		$("#modal_purchase_request_content").html(preloader);
 		$("#modal_purchase_request .page-title").text("DENY TRNASFER REQUEST");
@@ -1853,17 +1876,17 @@ $(document).ready(function() {
 					data-allowcharacters="[0-9][a-z][A-Z][ ][.][,][_]['][()][?][-][/]"
 					minlength="2"
 					maxlength="250"
-					id="transferRequestRemarks"
-					name="transferRequestRemarks"
+					id="materialWithdrawalRemarks"
+					name="materialWithdrawalRemarks"
 					rows="4"
 					style="resize: none"
 					required></textarea>
-				<div class="d-block invalid-feedback" id="invalid-transferRequestRemarks"></div>
+				<div class="d-block invalid-feedback" id="invalid-materialWithdrawalRemarks"></div>
 			</div>
 		</div>
 		<div class="modal-footer text-right">
 			<button class="btn btn-danger" id="btnRejectConfirmation"
-			transferRequestID="${id}"
+			materialWithdrawalID="${id}"
 			code="${feedback}"><i class="far fa-times-circle"></i> Deny</button>
 			<button class="btn btn-cancel" data-dismiss="modal"><i class="fas fa-ban"></i> Cancel</button>
 		</div>`;
@@ -1871,12 +1894,12 @@ $(document).ready(function() {
 	});
 
 	$(document).on("click", "#btnRejectConfirmation", function () {
-		const id       = decryptString($(this).attr("transferRequestID"));
-		const feedback = $(this).attr("code") || getFormCode(" TR", dateToday(), id);
+		const id       = decryptString($(this).attr("materialWithdrawalID"));
+		const feedback = $(this).attr("code") || getFormCode(" MWF", dateToday(), id);
 
 		const validate = validateForm("modal_purchase_request");
 		if (validate) {
-			let tableData = getTableData("ims_transfer_request_tbl", "", "transferRequestID = " + id);
+			let tableData = getTableData("ims_material_withdrawal_tbl", "", "materialWithdrawalID = " + id);
 			if (tableData) {
 				let approversStatus = tableData[0].approversStatus;
 				let approversDate   = tableData[0].approversDate;
@@ -1885,16 +1908,16 @@ $(document).ready(function() {
 				let data = new FormData;
 				data.append("action", "update");
 				data.append("method", "deny");
-				data.append("transferRequestID", id);
+				data.append("materialWithdrawalID", id);
 				data.append("approversStatus", updateApproveStatus(approversStatus, 3));
 				data.append("approversDate", updateApproveDate(approversDate));
-				data.append("transferRequestRemarks", $("[name=transferRequestRemarks]").val()?.trim());
+				data.append("materialWithdrawalRemarks", $("[name=materialWithdrawalRemarks]").val()?.trim());
 				data.append("updatedBy", sessionID);
 
 				let notificationData = {
-					moduleID:                37,
+					moduleID:                42,
 					tableID: 				 id,
-					notificationTitle:       "Transfer Request",
+					notificationTitle:       "Material Withdrawal",
 					notificationDescription: `${feedback}: Your request has been denied.`,
 					notificationType:        1,
 					employeeID,
@@ -1963,7 +1986,7 @@ $(document).ready(function() {
 
 // --------------- DATABASE RELATION ---------------
 function getConfirmation(method = "submit") {
-	const title = "Transfer Request";
+	const title = "Material Withdrawal";
 	let swalText, swalImg;
 
 	$("#modal_purchase_request").text().length > 0 && $("#modal_purchase_request").modal("hide");
@@ -2015,7 +2038,8 @@ function getConfirmation(method = "submit") {
 	})
 }
 
-function savePurchaseRequest(data = null, method = "submit", notificationData = null, callback = null, lastApprover = false, isTransferRequestID = null) {
+function savePurchaseRequest(data = null, method = "submit", notificationData = null, callback = null, lastApprover = false, materialWithdrawalID = null) {
+	// function savePurchaseRequest(data = null, method = "submit", notificationData = null, callback = null, lastApprover = false, isTransferRequestID = null) {
 	
 		if (data) {
 			const confirmation = getConfirmation(method);
@@ -2024,7 +2048,7 @@ function savePurchaseRequest(data = null, method = "submit", notificationData = 
 					
 					$.ajax({
 						method:      "POST",
-						url:         `transfer_request/saveTransferRequest`,
+						url:         `material_withdrawal/saveMaterialWithdrawal`,
 						data,
 						processData: false,
 						contentType: false,
@@ -2087,7 +2111,7 @@ function savePurchaseRequest(data = null, method = "submit", notificationData = 
 								//---------- Start Change the  quantity --------------------
 							
 									if(lastApprover){
-										FunctionlastApproveCondition(isTransferRequestID);
+										FunctionlastApproveCondition(materialWithdrawalID);
 									}
 								//---------- End Change the  quantity --------------------
 
@@ -2137,26 +2161,25 @@ function savePurchaseRequest(data = null, method = "submit", notificationData = 
 	
 }
 
-function FunctionlastApproveCondition(transferID = null){
-	let ApprovedtableData  = getTableData("ims_transfer_request_tbl LEFT JOIN ims_transfer_request_details_tbl USING(transferRequestID) ", "", "transferRequestID = " + transferID);
+
+function FunctionlastApproveCondition(materialWithdrawalID = null){
+	let ApprovedtableData  = getTableData("ims_material_withdrawal_details_tbl ", "", "materialWithdrawalID = " + materialWithdrawalID);
 
 	let data = { items: [] }, formData = new FormData;
 
 
 	ApprovedtableData.map((item, index) => {
 
-		const inventoryStorageIDSender    = item.inventoryStorageIDSender;	
-		const inventoryStorageIDReceiver    = item.inventoryStorageIDReceiver;	
+		const inventoryStorageID    = item.inventoryStorageID;		
 		const itemID    = item.itemID;	
 		const quantity  = item.quantity;	
 
 		let temp = {
-			inventoryStorageIDSender,inventoryStorageIDReceiver,itemID,quantity
+			inventoryStorageID,itemID,quantity
 			
 		};
 
-		formData.append(`items[${index}][inventoryStorageIDSender]`, inventoryStorageIDSender);
-		formData.append(`items[${index}][inventoryStorageIDReceiver]`, inventoryStorageIDReceiver);
+		formData.append(`items[${index}][inventoryStorageID]`, inventoryStorageID);
 		formData.append(`items[${index}][itemID]`, itemID);
 		formData.append(`items[${index}][quantity]`, quantity);
 
@@ -2166,7 +2189,7 @@ function FunctionlastApproveCondition(transferID = null){
 	
 	$.ajax({
 		method:      "POST",
-		url:         `transfer_request/updateStorage`,
+		url:         `material_withdrawal/updateStorage`,
 		data,
 		// processData: false,
 		// contentType: false,
@@ -2188,7 +2211,7 @@ function FunctionlastApproveCondition(transferID = null){
 		}
 	});
 
-
+	console.log(data)
 
 }
 

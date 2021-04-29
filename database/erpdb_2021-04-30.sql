@@ -229,7 +229,7 @@ CREATE TABLE `gen_module_list_tbl` (
 
 LOCK TABLES `gen_module_list_tbl` WRITE;
 /*!40000 ALTER TABLE `gen_module_list_tbl` DISABLE KEYS */;
-INSERT INTO `gen_module_list_tbl` VALUES (1,5,1,1,'Project Management System|Inventory Management System|Finance Management System','01618295087.svg|11618295087.svg|21618295087.svg|31618295087.svg|41618295087.svg|51618295087.svg|6161','Approval Setup',0,'approval_setup',1,'2021-03-23 23:22:25','2021-04-13 06:24:47'),(2,5,1,2,'Inventory Management System|Project Management System|Finance Management System|Human Resource Information System',NULL,'Roles and Permission',0,'roles_permission',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(3,5,1,3,'Inventory Management System|Project Management System|Finance Management System|Human Resource Information System',NULL,'System Notification',0,'system_notification',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(4,2,2,1,'Inventory Management System',NULL,'Inventory Item',0,'ims/inventory_item',1,'2021-03-23 23:22:25','2021-03-23 23:22:25'),(5,2,2,2,'Inventory Management System',NULL,'Inventory Category',0,'ims/inventory_category',1,'2021-03-23 23:22:25','2021-03-23 23:22:25'),(6,2,2,3,'Inventory Management System',NULL,'Inventory Classification',0,'ims/inventory_classification',1,'2021-03-23 23:22:25','2021-03-23 23:22:25'),(7,2,2,4,'Inventory Management System',NULL,'Inventory Storage',0,'ims/inventory_storage',1,'2021-03-23 23:22:25','2021-03-23 23:22:25'),(8,2,2,5,'Inventory Management System',NULL,'Inventory Vendor',0,'ims/inventory_vendor',1,'2021-03-23 23:22:25','2021-03-23 23:22:25'),(9,2,2,6,'Inventory Management System',NULL,'Inventory Condition',0,'ims/inventory_condition',1,'2021-03-23 23:22:25','2021-03-23 23:22:25'),(10,2,2,7,'Project Management System',NULL,'Project Milestone',0,'pms/project_milestone',1,'2021-03-23 23:22:25','2021-03-23 23:22:25'),(11,2,2,8,'Project Management System',NULL,'Project List',0,'pms/project_list',1,'2021-03-23 23:22:25','2021-03-23 23:22:25'),(12,2,2,9,'Project Management System',NULL,'Project Client',0,'pms/project_client',1,'2021-03-23 23:22:25','2021-03-23 23:22:25'),(13,2,2,10,'Project Management System',NULL,'Project Category',0,'pms/project_category',1,'2021-03-23 23:22:25','2021-03-23 23:22:25'),(14,2,2,11,'Finance Management System',NULL,'Bank',0,'fms/bank',1,'2021-03-23 23:22:25','2021-03-23 23:22:25'),(15,2,2,12,'Finance Management System',NULL,'Chart of Accounts',0,'fms/chart_of_account',1,'2021-03-23 23:22:25','2021-03-23 23:22:25'),(16,2,2,13,'Finance Management System',NULL,'Ledger Classification',0,'fms/ledger_classification',1,'2021-03-23 23:22:25','2021-03-23 23:22:25'),(17,2,2,14,'Human Resource Information System',NULL,'Designation',0,'hris/designation',1,'2021-03-23 23:22:25','2021-03-23 23:22:25'),(18,2,2,15,'Human Resource Information System',NULL,'Department',0,'hris/department',1,'2021-03-23 23:22:25','2021-03-23 23:22:25'),(19,2,2,16,'Human Resource Information System',NULL,'Requirement',0,'hris/requirement',1,'2021-03-23 23:22:25','2021-03-23 23:22:25'),(20,2,2,17,'Human Resource Information System',NULL,'Holiday',0,'hris/holiday',1,'2021-03-23 23:22:25','2021-03-23 23:22:25'),(21,2,2,18,'Human Resource Information System',NULL,'Leave Type',0,'hris/leave_type',1,'2021-03-23 23:22:25','2021-03-23 23:22:25'),(22,2,2,19,'Human Resource Information System',NULL,'Loan Type',0,'hris/loan_type',1,'2021-03-23 23:22:25','2021-03-23 23:22:25'),(23,2,2,20,'Human Resource Information System',NULL,'Code of Conduct Category',0,'hris/code_conduct_category',1,'2021-03-23 23:22:25','2021-03-23 23:22:25'),(24,2,2,21,'Human Resource Information System',NULL,'Code of Conduct Section',0,'hris/code_conduct_section',1,'2021-03-23 23:22:25','2021-03-23 23:22:25'),(25,2,2,22,'Human Resource Information System',NULL,'Branch',0,'hris/branch',1,'2021-03-23 23:22:25','2021-03-23 23:22:25'),(26,2,2,23,'Human Resource Information System',NULL,'Qualification',0,'hris/qualification',1,'2021-03-23 23:22:25','2021-03-23 23:22:25'),(27,2,2,24,'Human Resource Information System',NULL,'Award',0,'hris/award',1,'2021-03-23 23:22:25','2021-03-23 23:22:25'),(28,2,2,25,'Human Resource Information System',NULL,'SSS Table',0,'hris/sss_table',1,'2021-03-23 23:22:25','2021-03-23 23:22:25'),(29,2,2,26,'Human Resource Information System',NULL,'PhilHealth Table',0,'hris/philhealth_table',1,'2021-03-23 23:22:25','2021-03-23 23:22:25'),(30,2,2,27,'Human Resource Information System',NULL,'Tax Table',0,'hris/tax_table',1,'2021-03-23 23:22:25','2021-03-23 23:22:25'),(31,2,2,28,'Human Resource Information System',NULL,'Training and Development',0,'hris/training_development',1,'2021-03-23 23:22:25','2021-03-23 23:22:25'),(32,2,2,29,'Human Resource Information System',NULL,'Examination',0,'hris/examination',1,'2021-03-23 23:22:25','2021-03-23 23:22:25'),(33,2,3,1,'Inventory Management System',NULL,'Inventory Receiving',3,'ims/inventory_receiving',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(34,2,3,2,'Inventory Management System',NULL,'List of Stocks',0,'ims/list_stocks',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(35,2,3,3,'Inventory Management System',NULL,'Return Item',3,'ims/return_item',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(36,2,3,4,'Inventory Management System',NULL,'Disposal',3,'ims/disposal',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(37,2,3,5,'Inventory Management System',NULL,'Transfer Request',3,'ims/transfer_request',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(38,2,3,6,'Inventory Management System',NULL,'Cost Estimate',3,'ims/cost_estimate',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(39,2,3,7,'Inventory Management System',NULL,'Bill of Material',3,'ims/bill_material',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(40,2,3,8,'Inventory Management System',NULL,'Bid Recap',3,'ims/bid_recap',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(41,2,3,9,'Inventory Management System',NULL,'Service Order',3,'ims/service_order',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(42,2,4,1,'Inventory Management System',NULL,'Material Withdrawal',3,'ims/material_withdrawal',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(43,2,4,2,'Inventory Management System',NULL,'Equipment Borrowing',3,'ims/equipment_borrowing',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(44,2,4,3,'Inventory Management System',NULL,'Inventory Incident',3,'ims/inventory_incident',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(45,2,4,4,'Inventory Management System',NULL,'Material Usage',3,'ims/material_usage',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(46,2,4,5,'Inventory Management System',NULL,'Purchase Request',3,'ims/purchase_request',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(47,2,4,6,'Inventory Management System',NULL,'Purchase Order',3,'ims/purchase_order',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(48,2,4,7,'Inventory Management System',NULL,'Item Price List',0,'ims/item_price_list',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(49,2,4,8,'Inventory Management System',NULL,'Service Order Requisition',3,'ims/service_order_requisition',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(50,2,4,9,'Project Management System',NULL,'Personel Requisition',3,'pms/personel_requisition',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(51,2,4,10,'Project Management System',NULL,'Employee Taskboard',3,'pms/employee_taskboard',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(52,2,4,11,'Project Management System',NULL,'Sign-off',3,'pms/sign_off',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(53,2,4,12,'Finance Management System',NULL,'Petty Cash Request',3,'fms/petty_cash_request',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(54,2,4,13,'Finance Management System',NULL,'Client Fund Request',3,'fms/client_fund_request',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(55,2,4,14,'Human Resource Information System',NULL,'Leave Request',3,'hris/leave_request',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(56,2,4,15,'Human Resource Information System',NULL,'Overtime Request',3,'hris/overtime_request',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(57,2,4,16,'Human Resources Information System',NULL,'No Time In/Out',3,'hris/no_timein_timeout',1,'2021-03-23 23:22:25','2021-03-25 05:53:42'),(58,2,4,17,'Human Resource Information System',NULL,'Official Business',3,'hris/official_business',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(59,2,4,18,'Human Resources Information System',NULL,'Loan',3,'hris/loan_form',1,'2021-03-23 23:22:25','2021-04-13 03:47:55'),(60,2,4,19,'Human Resource Information System',NULL,'Change Schedule',3,'hris/change_schedule',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(61,2,4,20,'Human Resource Information System',NULL,'Employee Evaluation',3,'hris/employee_evaluation',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(62,2,4,21,'Human Resource Information System',NULL,'Clearance',3,'hris/clearance',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(63,6,4,1,'Inventory Management System',NULL,'Purhcase Order Report',0,'ims/purchase_order_report',1,'2021-03-23 23:22:25','2021-03-23 23:22:25'),(64,6,4,2,'Inventory Management System',NULL,'Receiving Report',0,'ims/receiving_report',1,'2021-03-23 23:22:25','2021-03-23 23:22:25'),(65,6,4,3,'Inventory Management System',NULL,'Inventory Incident Report',0,'ims/inventory_incident_report',1,'2021-03-23 23:22:25','2021-03-23 23:22:25'),(66,6,4,4,'Inventory Management System',NULL,'Inventory Report',0,'ims/inventory_report',1,'2021-03-23 23:22:25','2021-03-23 23:22:25'),(67,1,12,1,'Inventory Management System',NULL,'Inventory Dashboard',0,'ims/inventory_dashboard',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(68,1,12,2,'Project Management System',NULL,'Project Dashboard',0,'pms/project_dashboard',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(69,1,12,3,'Finance Management System',NULL,'Finance Dashboard',0,'fms/finance_dashboard',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(70,1,12,4,'Human Resource Information System',NULL,'HRIS Dashboard',0,'hris/hr_dashboard',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(71,4,6,5,'Project Management System',NULL,'Project Management',0,'fms/project_management',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(72,4,6,6,'Project Management System',NULL,'Project Task',0,'fms/project_task',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(73,4,6,7,'Project Management System',NULL,'Project Timeline',0,'fms/project_timeline',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(74,4,6,8,'Finance Management System',NULL,'Petty Cash Voucher',0,'fms/petty_cash_voucher',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(75,4,6,9,'Finance Management System',NULL,'Client Fund Voucher',0,'fms/client_fund_voucher',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(76,4,6,10,'Finance Management System',NULL,'Payment Request',0,'fms/payment_request',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(77,4,6,11,'Finance Management System',NULL,'Check Voucher',0,'fms/check_voucher',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(78,4,6,12,'Human Resource Information System',NULL,'Examination Report',0,'hris/examination_report',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(79,4,6,13,'Human Resource Information System',NULL,'Timekeeping Report',0,'hris/timekeeping_report',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(80,4,6,14,'Human Resource Information System',NULL,'Payroll Report',0,'hris/payroll_report',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(81,4,6,15,'Human Resource Information System',NULL,'Payroll Adjustment Report',0,'hris/payroll_adjustment_report',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(82,4,6,16,'Human Resource Information System',NULL,'Payslip Generation',0,'hris/payslip_generation',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(83,4,6,17,'Human Resource Information System',NULL,'13th Month Report',0,'hris/13th_month_report',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(84,4,6,18,'Human Resource Information System',NULL,'PHIC Premium Payment',0,'hris/phic_premium_payment',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(85,4,6,19,'Human Resource Information System',NULL,'SSS Premium Payment',0,'hris/sss_premium_payment',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(86,4,6,20,'Human Resource Information System',NULL,'HDMF Premim Payment',0,'hris/hdmf_premium_payment',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(87,4,6,21,'Human Resource Information System',NULL,'Manpower Management Report',0,'hris/manpower_management_report',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(88,1,12,5,'Human Resource Information System',NULL,'Employee Dashboard',0,'hris/employee_dashboard',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(89,2,5,1,'Project Management System',NULL,'Milestone Builder',3,'pms/milestone_builder',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(90,2,5,2,'Project Management System',NULL,'Project Timeline Builder',0,'pms/project_timeline_builder',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(91,2,5,3,'Project Management System',NULL,'Manage Project Budget',3,'pms/manage_project_budget',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(92,2,5,4,'Project Management System',NULL,'Project Management Board',3,'pms/project_management_board',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(93,2,7,1,'Finance Management System',NULL,'Petty Cash Voucher',3,'fms/petty_cash_voucher',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(94,2,7,2,'Finance Management System',NULL,'Client Fund Voucher',3,'fms/client_fund_voucher',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(95,2,7,3,'Finance Management System',NULL,'Payment Request',3,'fms/payment_request',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(96,2,7,4,'Finance Management System',NULL,'Check Voucher',3,'fms/check_voucher',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(97,2,7,5,'Finance Management System',NULL,'Check Writer',3,'fms/check_writer',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(98,2,7,6,'Finance Management System',NULL,'Check Voucher Liquidation',3,'fms/check_voucher_liquidation',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(99,2,7,7,'Finance Management System',NULL,'Billing',3,'fms/billing',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(100,2,7,8,'Finance Management System',NULL,'Collection',3,'fms/collection',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(101,5,9,1,'Human Resource Information System',NULL,'Schedule Setup',0,'hris/schedule_setup',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(102,5,9,2,'Human Resource Information System',NULL,'Orientation Setup',0,'hris/orientation_setup',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(103,2,10,1,'Human Resources Information System',NULL,'Job Posting',0,'hris/job_posting',1,'2021-03-23 23:22:25','2021-03-25 05:25:43'),(104,2,10,2,'Human Resource Information System',NULL,'Applicant Registration',0,'hris/application_registration',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(105,2,10,3,'Human Resource Information System',NULL,'Examination',0,'hris/examination',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(106,2,10,4,'Human Resource Information System',NULL,'Applicant List',0,'hris/applicant_list',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(107,2,10,5,'Human Resource Information System',NULL,'On-boarding',0,'hris/on_boarding',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(108,2,11,1,'Human Resource Information System',NULL,'Employee Attendance',0,'hris/employee_attendance',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(109,2,11,2,'Human Resource Information System',NULL,'Timekeeping',0,'hris/timekeeping',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(110,2,11,3,'Human Resource Information System',NULL,'Payroll',0,'hris/payroll',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(111,2,11,4,'Human Resource Information System',NULL,'Payroll Adjustment',0,'hris/payroll_adjustment',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(112,2,11,5,'Human Resource Information System',NULL,'13th Month',0,'hris/13th_month',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(113,2,8,1,'Human Resource Information System',NULL,'Personnel Requisition',0,'hris/personnel_requisition',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(114,2,8,2,'Human Resources Information System',NULL,'Employee Module',0,'hris/employee_module',1,'2021-03-23 23:22:25','2021-04-19 05:22:53'),(115,2,8,3,'Human Resource Information System',NULL,'Personal Action Notice',0,'hris/personal_action_notice',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(116,2,8,4,'Human Resource Information System',NULL,'Manpower Management',0,'hris/manpower_management',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(117,2,8,5,'Human Resource Information System',NULL,'Employee Relation',0,'hris/employee_relation',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(118,2,8,6,'Human Resource Information System',NULL,'Employee Evaluation',0,'hris/employee_evaluation',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(119,2,8,7,'Human Resource Information System',NULL,'Employee Management',0,'hris/employee_management',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(120,2,8,8,'Human Resource Information System',NULL,'Memorandum',0,'hris/memorandum',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(121,2,8,9,'Human Resource Information System',NULL,'Employee Award',0,'hris/employee_award',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(122,2,8,10,'Human Resource Information System',NULL,'Leave Monitoring',0,'hris/leave_monitoring',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(123,2,8,11,'Human Resource Information System',NULL,'Training and Development',0,'hris/training_development',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(124,2,8,12,'Human Resource Information System',NULL,'Event Calendar',0,'hris/event_calendar',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(125,2,3,1,'Inventory Management System',NULL,'Canvassing Form',1,'ims/inventory_canvassing',1,'2021-04-20 23:29:40','2021-04-20 23:29:40'),(126,2,3,1,'Inventory Management System',NULL,'Inventory Validation Form',3,'ims/inventory_validation',1,'2021-04-20 23:41:40','2021-04-20 23:41:40'),(127,2,3,1,'Inventory Management System',NULL,'Inventory Price List',0,'ims/inventory_price_list',1,'2021-04-22 16:09:10','2021-04-22 16:09:10');
+INSERT INTO `gen_module_list_tbl` VALUES (1,5,1,1,'Project Management System|Inventory Management System|Finance Management System','01618295087.svg|11618295087.svg|21618295087.svg|31618295087.svg|41618295087.svg|51618295087.svg|6161','Approval Setup',0,'approval_setup',1,'2021-03-23 23:22:25','2021-04-13 06:24:47'),(2,5,1,2,'Inventory Management System|Project Management System|Finance Management System|Human Resource Information System',NULL,'Roles and Permission',0,'roles_permission',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(3,5,1,3,'Inventory Management System|Project Management System|Finance Management System|Human Resource Information System',NULL,'System Notification',0,'system_notification',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(4,2,2,1,'Inventory Management System',NULL,'Inventory Item',0,'ims/inventory_item',1,'2021-03-23 23:22:25','2021-03-23 23:22:25'),(5,2,2,2,'Inventory Management System',NULL,'Inventory Category',0,'ims/inventory_category',1,'2021-03-23 23:22:25','2021-03-23 23:22:25'),(6,2,2,3,'Inventory Management System',NULL,'Inventory Classification',0,'ims/inventory_classification',1,'2021-03-23 23:22:25','2021-03-23 23:22:25'),(7,2,2,4,'Inventory Management System',NULL,'Inventory Storage',0,'ims/inventory_storage',1,'2021-03-23 23:22:25','2021-03-23 23:22:25'),(8,2,2,5,'Inventory Management System',NULL,'Inventory Vendor',0,'ims/inventory_vendor',1,'2021-03-23 23:22:25','2021-03-23 23:22:25'),(9,2,2,6,'Inventory Management System',NULL,'Inventory Condition',0,'ims/inventory_condition',1,'2021-03-23 23:22:25','2021-03-23 23:22:25'),(10,2,2,7,'Project Management System',NULL,'Project Milestone',0,'pms/project_milestone',1,'2021-03-23 23:22:25','2021-03-23 23:22:25'),(11,2,2,8,'Project Management System',NULL,'Project List',0,'pms/project_list',1,'2021-03-23 23:22:25','2021-03-23 23:22:25'),(12,2,2,9,'Project Management System',NULL,'Project Client',0,'pms/project_client',1,'2021-03-23 23:22:25','2021-03-23 23:22:25'),(13,2,2,10,'Project Management System',NULL,'Project Category',0,'pms/project_category',1,'2021-03-23 23:22:25','2021-03-23 23:22:25'),(14,2,2,11,'Finance Management System',NULL,'Bank',0,'fms/bank',1,'2021-03-23 23:22:25','2021-03-23 23:22:25'),(15,2,2,12,'Finance Management System',NULL,'Chart of Accounts',0,'fms/chart_of_account',1,'2021-03-23 23:22:25','2021-03-23 23:22:25'),(16,2,2,13,'Finance Management System',NULL,'Ledger Classification',0,'fms/ledger_classification',1,'2021-03-23 23:22:25','2021-03-23 23:22:25'),(17,2,2,14,'Human Resource Information System',NULL,'Designation',0,'hris/designation',1,'2021-03-23 23:22:25','2021-03-23 23:22:25'),(18,2,2,15,'Human Resource Information System',NULL,'Department',0,'hris/department',1,'2021-03-23 23:22:25','2021-03-23 23:22:25'),(19,2,2,16,'Human Resource Information System',NULL,'Requirement',0,'hris/requirement',1,'2021-03-23 23:22:25','2021-03-23 23:22:25'),(20,2,2,17,'Human Resource Information System',NULL,'Holiday',0,'hris/holiday',1,'2021-03-23 23:22:25','2021-03-23 23:22:25'),(21,2,2,18,'Human Resource Information System',NULL,'Leave Type',0,'hris/leave_type',1,'2021-03-23 23:22:25','2021-03-23 23:22:25'),(22,2,2,19,'Human Resource Information System',NULL,'Loan Type',0,'hris/loan_type',1,'2021-03-23 23:22:25','2021-03-23 23:22:25'),(23,2,2,20,'Human Resource Information System',NULL,'Code of Conduct Category',0,'hris/code_conduct_category',1,'2021-03-23 23:22:25','2021-03-23 23:22:25'),(24,2,2,21,'Human Resource Information System',NULL,'Code of Conduct Section',0,'hris/code_conduct_section',1,'2021-03-23 23:22:25','2021-03-23 23:22:25'),(25,2,2,22,'Human Resource Information System',NULL,'Branch',0,'hris/branch',1,'2021-03-23 23:22:25','2021-03-23 23:22:25'),(26,2,2,23,'Human Resource Information System',NULL,'Qualification',0,'hris/qualification',1,'2021-03-23 23:22:25','2021-03-23 23:22:25'),(27,2,2,24,'Human Resource Information System',NULL,'Award',0,'hris/award',1,'2021-03-23 23:22:25','2021-03-23 23:22:25'),(28,2,2,25,'Human Resource Information System',NULL,'SSS Table',0,'hris/sss_table',1,'2021-03-23 23:22:25','2021-03-23 23:22:25'),(29,2,2,26,'Human Resource Information System',NULL,'PhilHealth Table',0,'hris/philhealth_table',1,'2021-03-23 23:22:25','2021-03-23 23:22:25'),(30,2,2,27,'Human Resource Information System',NULL,'Tax Table',0,'hris/tax_table',1,'2021-03-23 23:22:25','2021-03-23 23:22:25'),(31,2,2,28,'Human Resource Information System',NULL,'Training and Development',0,'hris/training_development',1,'2021-03-23 23:22:25','2021-03-23 23:22:25'),(32,2,2,29,'Human Resource Information System',NULL,'Examination',0,'hris/examination',1,'2021-03-23 23:22:25','2021-03-23 23:22:25'),(33,2,3,1,'Inventory Management System',NULL,'Inventory Receiving',3,'ims/inventory_receiving',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(34,2,3,2,'Inventory Management System',NULL,'List of Stocks',0,'ims/list_stocks',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(35,2,3,3,'Inventory Management System',NULL,'Return Item',3,'ims/return_item',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(36,2,3,4,'Inventory Management System',NULL,'Disposal',3,'ims/disposal',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(37,2,3,5,'Inventory Management System',NULL,'Transfer Request',3,'ims/transfer_request',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(38,2,3,6,'Inventory Management System',NULL,'Cost Estimate',3,'ims/cost_estimate',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(39,2,3,7,'Inventory Management System',NULL,'Bill of Material',3,'ims/bill_material',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(40,2,3,8,'Inventory Management System',NULL,'Bid Recap',3,'ims/bid_recap',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(41,2,3,9,'Inventory Management System',NULL,'Service Order',3,'ims/service_order',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(42,2,4,1,'Inventory Management System',NULL,'Material Withdrawal',3,'ims/material_withdrawal',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(43,2,4,2,'Inventory Management System',NULL,'Equipment Borrowing',3,'ims/equipment_borrowing',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(44,2,4,3,'Inventory Management System',NULL,'Inventory Incident',3,'ims/inventory_incident',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(45,2,4,4,'Inventory Management System',NULL,'Material Usage',3,'ims/material_usage',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(46,2,4,5,'Inventory Management System',NULL,'Purchase Request',3,'ims/purchase_request',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(47,2,4,6,'Inventory Management System',NULL,'Purchase Order',3,'ims/purchase_order',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(48,2,4,7,'Inventory Management System',NULL,'Item Price List',0,'ims/item_price_list',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(49,2,4,8,'Inventory Management System',NULL,'Service Requisition',3,'ims/service_requisition',1,'2021-03-23 23:22:25','2021-04-29 06:10:31'),(50,2,4,9,'Project Management System',NULL,'Personel Requisition',3,'pms/personel_requisition',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(51,2,4,10,'Project Management System',NULL,'Employee Taskboard',3,'pms/employee_taskboard',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(52,2,4,11,'Project Management System',NULL,'Sign-off',3,'pms/sign_off',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(53,2,4,12,'Finance Management System',NULL,'Petty Cash Request',3,'fms/petty_cash_request',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(54,2,4,13,'Finance Management System',NULL,'Client Fund Request',3,'fms/client_fund_request',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(55,2,4,14,'Human Resource Information System',NULL,'Leave Request',3,'hris/leave_request',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(56,2,4,15,'Human Resource Information System',NULL,'Overtime Request',3,'hris/overtime_request',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(57,2,4,16,'Human Resources Information System',NULL,'No Time In/Out',3,'hris/no_timein_timeout',1,'2021-03-23 23:22:25','2021-03-25 05:53:42'),(58,2,4,17,'Human Resource Information System',NULL,'Official Business',3,'hris/official_business',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(59,2,4,18,'Human Resources Information System',NULL,'Loan',3,'hris/loan_form',1,'2021-03-23 23:22:25','2021-04-13 03:47:55'),(60,2,4,19,'Human Resource Information System',NULL,'Change Schedule',3,'hris/change_schedule',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(61,2,4,20,'Human Resource Information System',NULL,'Employee Evaluation',3,'hris/employee_evaluation',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(62,2,4,21,'Human Resource Information System',NULL,'Clearance',3,'hris/clearance',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(63,6,4,1,'Inventory Management System',NULL,'Purhcase Order Report',0,'ims/purchase_order_report',1,'2021-03-23 23:22:25','2021-03-23 23:22:25'),(64,6,4,2,'Inventory Management System',NULL,'Receiving Report',0,'ims/receiving_report',1,'2021-03-23 23:22:25','2021-03-23 23:22:25'),(65,6,4,3,'Inventory Management System',NULL,'Inventory Incident Report',0,'ims/inventory_incident_report',1,'2021-03-23 23:22:25','2021-03-23 23:22:25'),(66,6,4,4,'Inventory Management System',NULL,'Inventory Report',0,'ims/inventory_report',1,'2021-03-23 23:22:25','2021-03-23 23:22:25'),(67,1,12,1,'Inventory Management System',NULL,'Inventory Dashboard',0,'ims/inventory_dashboard',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(68,1,12,2,'Project Management System',NULL,'Project Dashboard',0,'pms/project_dashboard',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(69,1,12,3,'Finance Management System',NULL,'Finance Dashboard',0,'fms/finance_dashboard',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(70,1,12,4,'Human Resource Information System',NULL,'HRIS Dashboard',0,'hris/hr_dashboard',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(71,4,6,5,'Project Management System',NULL,'Project Management',0,'fms/project_management',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(72,4,6,6,'Project Management System',NULL,'Project Task',0,'fms/project_task',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(73,4,6,7,'Project Management System',NULL,'Project Timeline',0,'fms/project_timeline',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(74,4,6,8,'Finance Management System',NULL,'Petty Cash Voucher',0,'fms/petty_cash_voucher',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(75,4,6,9,'Finance Management System',NULL,'Client Fund Voucher',0,'fms/client_fund_voucher',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(76,4,6,10,'Finance Management System',NULL,'Payment Request',0,'fms/payment_request',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(77,4,6,11,'Finance Management System',NULL,'Check Voucher',0,'fms/check_voucher',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(78,4,6,12,'Human Resource Information System',NULL,'Examination Report',0,'hris/examination_report',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(79,4,6,13,'Human Resource Information System',NULL,'Timekeeping Report',0,'hris/timekeeping_report',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(80,4,6,14,'Human Resource Information System',NULL,'Payroll Report',0,'hris/payroll_report',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(81,4,6,15,'Human Resource Information System',NULL,'Payroll Adjustment Report',0,'hris/payroll_adjustment_report',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(82,4,6,16,'Human Resource Information System',NULL,'Payslip Generation',0,'hris/payslip_generation',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(83,4,6,17,'Human Resource Information System',NULL,'13th Month Report',0,'hris/13th_month_report',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(84,4,6,18,'Human Resource Information System',NULL,'PHIC Premium Payment',0,'hris/phic_premium_payment',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(85,4,6,19,'Human Resource Information System',NULL,'SSS Premium Payment',0,'hris/sss_premium_payment',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(86,4,6,20,'Human Resource Information System',NULL,'HDMF Premim Payment',0,'hris/hdmf_premium_payment',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(87,4,6,21,'Human Resource Information System',NULL,'Manpower Management Report',0,'hris/manpower_management_report',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(88,1,12,5,'Human Resource Information System',NULL,'Employee Dashboard',0,'hris/employee_dashboard',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(89,2,5,1,'Project Management System',NULL,'Milestone Builder',3,'pms/milestone_builder',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(90,2,5,2,'Project Management System',NULL,'Project Timeline Builder',0,'pms/project_timeline_builder',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(91,2,5,3,'Project Management System',NULL,'Manage Project Budget',3,'pms/manage_project_budget',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(92,2,5,4,'Project Management System',NULL,'Project Management Board',3,'pms/project_management_board',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(93,2,7,1,'Finance Management System',NULL,'Petty Cash Voucher',3,'fms/petty_cash_voucher',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(94,2,7,2,'Finance Management System',NULL,'Client Fund Voucher',3,'fms/client_fund_voucher',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(95,2,7,3,'Finance Management System',NULL,'Payment Request',3,'fms/payment_request',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(96,2,7,4,'Finance Management System',NULL,'Check Voucher',3,'fms/check_voucher',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(97,2,7,5,'Finance Management System',NULL,'Check Writer',3,'fms/check_writer',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(98,2,7,6,'Finance Management System',NULL,'Check Voucher Liquidation',3,'fms/check_voucher_liquidation',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(99,2,7,7,'Finance Management System',NULL,'Billing',3,'fms/billing',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(100,2,7,8,'Finance Management System',NULL,'Collection',3,'fms/collection',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(101,5,9,1,'Human Resource Information System',NULL,'Schedule Setup',0,'hris/schedule_setup',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(102,5,9,2,'Human Resource Information System',NULL,'Orientation Setup',0,'hris/orientation_setup',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(103,2,10,1,'Human Resources Information System',NULL,'Job Posting',0,'hris/job_posting',1,'2021-03-23 23:22:25','2021-03-25 05:25:43'),(104,2,10,2,'Human Resource Information System',NULL,'Applicant Registration',0,'hris/application_registration',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(105,2,10,3,'Human Resource Information System',NULL,'Examination',0,'hris/examination',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(106,2,10,4,'Human Resource Information System',NULL,'Applicant List',0,'hris/applicant_list',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(107,2,10,5,'Human Resource Information System',NULL,'On-boarding',0,'hris/on_boarding',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(108,2,11,1,'Human Resource Information System',NULL,'Employee Attendance',0,'hris/employee_attendance',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(109,2,11,2,'Human Resource Information System',NULL,'Timekeeping',0,'hris/timekeeping',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(110,2,11,3,'Human Resource Information System',NULL,'Payroll',0,'hris/payroll',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(111,2,11,4,'Human Resource Information System',NULL,'Payroll Adjustment',0,'hris/payroll_adjustment',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(112,2,11,5,'Human Resource Information System',NULL,'13th Month',0,'hris/13th_month',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(113,2,8,1,'Human Resource Information System',NULL,'Personnel Requisition',0,'hris/personnel_requisition',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(114,2,8,2,'Human Resources Information System',NULL,'Employee Module',0,'hris/employee_module',1,'2021-03-23 23:22:25','2021-04-19 05:22:53'),(115,2,8,3,'Human Resource Information System',NULL,'Personal Action Notice',0,'hris/personal_action_notice',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(116,2,8,4,'Human Resource Information System',NULL,'Manpower Management',0,'hris/manpower_management',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(117,2,8,5,'Human Resource Information System',NULL,'Employee Relation',0,'hris/employee_relation',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(118,2,8,6,'Human Resource Information System',NULL,'Employee Evaluation',0,'hris/employee_evaluation',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(119,2,8,7,'Human Resource Information System',NULL,'Employee Management',0,'hris/employee_management',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(120,2,8,8,'Human Resource Information System',NULL,'Memorandum',0,'hris/memorandum',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(121,2,8,9,'Human Resource Information System',NULL,'Employee Award',0,'hris/employee_award',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(122,2,8,10,'Human Resource Information System',NULL,'Leave Monitoring',0,'hris/leave_monitoring',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(123,2,8,11,'Human Resource Information System',NULL,'Training and Development',0,'hris/training_development',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(124,2,8,12,'Human Resource Information System',NULL,'Event Calendar',0,'hris/event_calendar',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(125,2,3,1,'Inventory Management System',NULL,'Canvassing Form',1,'ims/inventory_canvassing',1,'2021-04-20 23:29:40','2021-04-20 23:29:40'),(126,2,3,1,'Inventory Management System',NULL,'Inventory Validation Form',3,'ims/inventory_validation',1,'2021-04-20 23:41:40','2021-04-20 23:41:40'),(127,2,3,1,'Inventory Management System',NULL,'Inventory Price List',0,'ims/inventory_price_list',1,'2021-04-22 16:09:10','2021-04-22 16:09:10');
 /*!40000 ALTER TABLE `gen_module_list_tbl` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -1441,6 +1441,76 @@ INSERT INTO `ims_inventory_condition_tbl` VALUES (1,'ICO-21-00001','Good Conditi
 UNLOCK TABLES;
 
 --
+-- Table structure for table `ims_inventory_incident_details_tbl`
+--
+
+DROP TABLE IF EXISTS `ims_inventory_incident_details_tbl`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `ims_inventory_incident_details_tbl` (
+  `incidentDetailsID` bigint(20) NOT NULL AUTO_INCREMENT,
+  `incidentID` bigint(20) NOT NULL,
+  `inventoryStorageID` bigint(20) NOT NULL,
+  `itemID` bigint(20) NOT NULL,
+  `quantity` int(11) NOT NULL,
+  `incidentInformation` longtext NOT NULL,
+  `incidentRecommendation` longtext NOT NULL,
+  `createdBy` bigint(20) NOT NULL,
+  `updatedBy` bigint(20) NOT NULL,
+  `createdAt` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updatedAt` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`incidentDetailsID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `ims_inventory_incident_details_tbl`
+--
+
+LOCK TABLES `ims_inventory_incident_details_tbl` WRITE;
+/*!40000 ALTER TABLE `ims_inventory_incident_details_tbl` DISABLE KEYS */;
+/*!40000 ALTER TABLE `ims_inventory_incident_details_tbl` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `ims_inventory_incident_tbl`
+--
+
+DROP TABLE IF EXISTS `ims_inventory_incident_tbl`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `ims_inventory_incident_tbl` (
+  `incidentID` bigint(20) NOT NULL AUTO_INCREMENT,
+  `reviseIncidentID` bigint(20) DEFAULT NULL,
+  `employeeID` bigint(20) NOT NULL,
+  `incidentActionPlan` longtext NOT NULL,
+  `incidentAccountablePerson` varchar(255) NOT NULL,
+  `incidentTargetCompletion` date DEFAULT NULL,
+  `approversID` text DEFAULT NULL,
+  `approversStatus` text DEFAULT NULL,
+  `approversDate` text DEFAULT NULL,
+  `incidentStatus` int(11) NOT NULL,
+  `incidentReason` longtext DEFAULT NULL,
+  `incidentRemarks` longtext DEFAULT NULL,
+  `submittedAt` timestamp NOT NULL DEFAULT current_timestamp(),
+  `createdBy` bigint(20) NOT NULL,
+  `updatedBy` bigint(20) NOT NULL,
+  `createdAt` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updatedAt` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`incidentID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `ims_inventory_incident_tbl`
+--
+
+LOCK TABLES `ims_inventory_incident_tbl` WRITE;
+/*!40000 ALTER TABLE `ims_inventory_incident_tbl` DISABLE KEYS */;
+/*!40000 ALTER TABLE `ims_inventory_incident_tbl` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `ims_inventory_item_tbl`
 --
 
@@ -1476,7 +1546,7 @@ CREATE TABLE `ims_inventory_item_tbl` (
 
 LOCK TABLES `ims_inventory_item_tbl` WRITE;
 /*!40000 ALTER TABLE `ims_inventory_item_tbl` DISABLE KEYS */;
-INSERT INTO `ims_inventory_item_tbl` VALUES (1,'ITM-21-00001','Item 1','Brand 1',1,1,'ExtraSmall','Kg',0.00,10,'','TEST',1,'2021-04-14',1,1,'2021-04-14 09:57:25','2021-04-14 09:57:25'),(2,'ITM-21-00002','Test 2','Brand 2',2,2,'Small','Ounce',0.00,20,'','TEST 2',1,'2021-04-14',1,1,'2021-04-14 09:57:47','2021-04-14 09:57:47'),(3,'ITM-21-00003','Item 3','Brand 3',4,3,'Small','Kg',0.00,30,'','TEST 3',1,'2021-04-14',1,1,'2021-04-14 09:58:08','2021-04-14 09:58:08');
+INSERT INTO `ims_inventory_item_tbl` VALUES (1,'ITM-21-00001','Item 1','Brand 1',1,1,'ExtraSmall','Kg',0.00,10,'','TEST',1,'2021-04-14',1,1,'2021-04-14 09:57:25','2021-04-14 09:57:25'),(2,'ITM-21-00002','This is a long text This is a long text ','Brand 2',2,1,'Small','gallon',0.00,20,'','TEST 2',1,'2021-04-14',1,1,'2021-04-14 09:57:47','2021-04-14 09:57:47'),(3,'ITM-21-00003','Item 3','Brand 3',4,3,'Small','Kg',0.00,30,'','TEST 3',1,'2021-04-14',1,1,'2021-04-14 09:58:08','2021-04-14 09:58:08');
 /*!40000 ALTER TABLE `ims_inventory_item_tbl` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -1715,6 +1785,32 @@ LOCK TABLES `ims_item_disposal_tbl` WRITE;
 UNLOCK TABLES;
 
 --
+-- Table structure for table `ims_list_stocks_details_tbl`
+--
+
+DROP TABLE IF EXISTS `ims_list_stocks_details_tbl`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `ims_list_stocks_details_tbl` (
+  `listStocksDetailsID` bigint(20) NOT NULL AUTO_INCREMENT,
+  `listStocksID` bigint(20) NOT NULL,
+  `itemID` bigint(20) NOT NULL,
+  `receivingQuantity` int(11) NOT NULL,
+  PRIMARY KEY (`listStocksDetailsID`)
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `ims_list_stocks_details_tbl`
+--
+
+LOCK TABLES `ims_list_stocks_details_tbl` WRITE;
+/*!40000 ALTER TABLE `ims_list_stocks_details_tbl` DISABLE KEYS */;
+INSERT INTO `ims_list_stocks_details_tbl` VALUES (1,1,1,119),(2,2,2,299),(3,3,1,21),(4,4,2,51);
+/*!40000 ALTER TABLE `ims_list_stocks_details_tbl` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `ims_list_stocks_tbl`
 --
 
@@ -1723,12 +1819,10 @@ DROP TABLE IF EXISTS `ims_list_stocks_tbl`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `ims_list_stocks_tbl` (
   `listStocksID` bigint(20) NOT NULL AUTO_INCREMENT,
-  `itemID` bigint(20) NOT NULL,
   `inventoryStorageID` bigint(20) NOT NULL,
   `listStocksStatus` int(11) NOT NULL,
-  `receivingQuantity` int(11) NOT NULL,
   PRIMARY KEY (`listStocksID`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1737,7 +1831,7 @@ CREATE TABLE `ims_list_stocks_tbl` (
 
 LOCK TABLES `ims_list_stocks_tbl` WRITE;
 /*!40000 ALTER TABLE `ims_list_stocks_tbl` DISABLE KEYS */;
-INSERT INTO `ims_list_stocks_tbl` VALUES (1,1,1,2,1200),(2,2,2,2,200),(3,1,1,2,100);
+INSERT INTO `ims_list_stocks_tbl` VALUES (1,1,2),(2,1,2),(3,2,2),(4,2,2);
 /*!40000 ALTER TABLE `ims_list_stocks_tbl` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -1844,6 +1938,7 @@ CREATE TABLE `ims_purchase_order_tbl` (
   `purchaseOrderStatus` int(11) NOT NULL,
   `purchaseOrderReason` text DEFAULT NULL,
   `purchaseOrderRemarks` text DEFAULT NULL,
+  `contractFile` text DEFAULT NULL,
   `submittedAt` timestamp NULL DEFAULT NULL,
   `createdBy` bigint(20) NOT NULL,
   `updatedBy` bigint(20) NOT NULL,
@@ -1859,7 +1954,7 @@ CREATE TABLE `ims_purchase_order_tbl` (
 
 LOCK TABLES `ims_purchase_order_tbl` WRITE;
 /*!40000 ALTER TABLE `ims_purchase_order_tbl` DISABLE KEYS */;
-INSERT INTO `ims_purchase_order_tbl` VALUES (1,NULL,1,1,NULL,'project',1,'TEST','','- / -','','Payment Terms','2021-04-27',27000.00,1000.00,26000.00,20200.00,5800.00,26000.00,1270.00,24730.00,'3|4|2','2|3','2021-04-27 11:25:40|2021-04-27 13:05:21',3,NULL,'TESTSSSSS','2021-04-27 02:39:06',1,4,'2021-04-26 05:42:40','2021-04-27 05:54:06'),(2,NULL,1,1,NULL,'company',1,'TEST','','- / -','','TEST','2021-05-12',27000.00,9999.00,17001.00,13881.00,3120.00,17001.00,260.00,16741.00,NULL,NULL,NULL,4,NULL,NULL,NULL,1,1,'2021-04-26 05:42:40','2021-04-27 03:00:31'),(4,NULL,1,1,NULL,'project',1,'TEST','','- / -','','TEST','2021-06-24',13000.00,3000.00,10000.00,8800.00,1200.00,10000.00,100.00,9900.00,'3|4|2','3','2021-04-27 14:56:48',3,NULL,'DENIED','2021-04-27 06:56:25',1,3,'2021-04-26 05:42:40','2021-04-27 06:56:49'),(14,1,1,1,NULL,'project',1,'TEST','','- / -','','GALIT NA TO PO','2021-05-12',500000.00,100000.00,400000.00,352000.00,48000.00,400000.00,45000.00,355000.00,'3|4|2','3','2021-04-27 14:44:26',3,NULL,'TESTT','2021-04-27 06:43:05',0,3,'2021-04-27 06:27:18','2021-04-27 06:44:59'),(15,14,1,1,NULL,'project',1,'TEST','','- / -','','GALIT NA TO PO','2021-05-12',500000.00,100000.00,400000.00,352000.00,48000.00,400000.00,45000.00,355000.00,'3|4|2','2|2','2021-04-27 15:01:19|2021-04-27 15:02:31',1,NULL,NULL,'2021-04-27 06:56:13',0,4,'2021-04-27 06:44:59','2021-04-27 07:02:31'),(16,4,1,1,NULL,'project',1,'TEST','','- / -','','TEST','2021-06-24',13000.00,3000.00,10000.00,8800.00,1200.00,10000.00,100.00,9900.00,'3|4|2','2|2|2','2021-04-27 15:01:07|2021-04-27 15:02:40|2021-04-27 15:08:23',2,NULL,NULL,'2021-04-27 07:00:50',0,2,'2021-04-27 07:00:11','2021-04-27 07:08:24');
+INSERT INTO `ims_purchase_order_tbl` VALUES (1,NULL,1,1,NULL,'project',1,'TEST','','- / -','','Payment Terms','2021-04-27',27000.00,1000.00,26000.00,20200.00,5800.00,26000.00,1270.00,24730.00,'3|4|2','2|3','2021-04-27 11:25:40|2021-04-27 13:05:21',3,NULL,'TESTSSSSS',NULL,'2021-04-27 02:39:06',1,4,'2021-04-26 05:42:40','2021-04-27 05:54:06'),(2,NULL,1,1,NULL,'company',1,'TEST','','- / -','','TEST','2021-05-12',27000.00,9999.00,17001.00,13881.00,3120.00,17001.00,260.00,16741.00,NULL,NULL,NULL,4,NULL,NULL,NULL,NULL,1,1,'2021-04-26 05:42:40','2021-04-27 03:00:31'),(4,NULL,1,1,NULL,'project',1,'TEST','','- / -','','TEST','2021-06-24',13000.00,3000.00,10000.00,8800.00,1200.00,10000.00,100.00,9900.00,'3|4|2','3','2021-04-27 14:56:48',3,NULL,'DENIED',NULL,'2021-04-27 06:56:25',1,3,'2021-04-26 05:42:40','2021-04-27 06:56:49'),(14,1,1,1,NULL,'project',1,'TEST','','- / -','','GALIT NA TO PO','2021-05-12',500000.00,100000.00,400000.00,352000.00,48000.00,400000.00,45000.00,355000.00,'3|4|2','3','2021-04-27 14:44:26',3,NULL,'TESTT',NULL,'2021-04-27 06:43:05',0,3,'2021-04-27 06:27:18','2021-04-27 06:44:59'),(15,14,1,1,NULL,'project',1,'TEST','','- / -','','GALIT NA TO PO','2021-05-12',500000.00,100000.00,400000.00,352000.00,48000.00,400000.00,45000.00,355000.00,'3|4|2','2|2','2021-04-27 15:01:19|2021-04-27 15:02:31',1,NULL,NULL,NULL,'2021-04-27 06:56:13',0,4,'2021-04-27 06:44:59','2021-04-27 07:02:31'),(16,4,1,1,NULL,'project',1,'TEST','','- / -','','TEST','2021-06-24',13000.00,3000.00,10000.00,8800.00,1200.00,10000.00,100.00,9900.00,'3|4|2','2|2|2','2021-04-27 15:01:07|2021-04-27 15:02:40|2021-04-27 15:08:23',2,NULL,NULL,'System Coding Standards.docx1619670262.docx','2021-04-27 07:00:50',0,2,'2021-04-27 07:00:11','2021-04-29 04:24:22');
 /*!40000 ALTER TABLE `ims_purchase_order_tbl` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -1951,6 +2046,41 @@ INSERT INTO `ims_request_items_tbl` VALUES (1,NULL,1,1,1,'project',1,NULL,NULL,N
 UNLOCK TABLES;
 
 --
+-- Table structure for table `ims_request_services_tbl`
+--
+
+DROP TABLE IF EXISTS `ims_request_services_tbl`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `ims_request_services_tbl` (
+  `requestServiceID` bigint(20) NOT NULL AUTO_INCREMENT,
+  `serviceRequisitionID` bigint(20) NOT NULL,
+  `serviceOrderID` bigint(20) DEFAULT NULL,
+  `serviceID` bigint(20) NOT NULL,
+  `serviceName` text DEFAULT NULL,
+  `quantity` int(11) DEFAULT NULL,
+  `serviceUom` varchar(100) DEFAULT NULL,
+  `unitCost` decimal(15,2) DEFAULT NULL,
+  `totalCost` decimal(15,2) DEFAULT NULL,
+  `remarks` text DEFAULT NULL,
+  `createdBy` bigint(20) NOT NULL,
+  `updatedBy` bigint(20) NOT NULL,
+  `createdAt` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updatedAt` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`requestServiceID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `ims_request_services_tbl`
+--
+
+LOCK TABLES `ims_request_services_tbl` WRITE;
+/*!40000 ALTER TABLE `ims_request_services_tbl` DISABLE KEYS */;
+/*!40000 ALTER TABLE `ims_request_services_tbl` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `ims_return_item_details_tbl`
 --
 
@@ -2017,6 +2147,104 @@ LOCK TABLES `ims_return_item_tbl` WRITE;
 UNLOCK TABLES;
 
 --
+-- Table structure for table `ims_service_requisition_tbl`
+--
+
+DROP TABLE IF EXISTS `ims_service_requisition_tbl`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `ims_service_requisition_tbl` (
+  `serviceRequisitionID` bigint(20) NOT NULL AUTO_INCREMENT,
+  `reviseServiceRequisitionID` bigint(20) DEFAULT NULL,
+  `employeeID` bigint(20) NOT NULL,
+  `clientID` bigint(20) DEFAULT NULL,
+  `projectID` bigint(20) DEFAULT NULL,
+  `approversID` text DEFAULT NULL,
+  `approversStatus` text DEFAULT NULL,
+  `approversDate` text DEFAULT NULL,
+  `serviceRequisitionStatus` int(11) NOT NULL,
+  `serviceRequisitionReason` text DEFAULT NULL,
+  `serviceRequisitionRemarks` text DEFAULT NULL,
+  `submittedAt` timestamp NULL DEFAULT current_timestamp(),
+  `createdBy` bigint(20) NOT NULL,
+  `updatedBy` bigint(20) NOT NULL,
+  `createdAt` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updatedAt` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`serviceRequisitionID`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `ims_service_requisition_tbl`
+--
+
+LOCK TABLES `ims_service_requisition_tbl` WRITE;
+/*!40000 ALTER TABLE `ims_service_requisition_tbl` DISABLE KEYS */;
+/*!40000 ALTER TABLE `ims_service_requisition_tbl` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `ims_service_scope_tbl`
+--
+
+DROP TABLE IF EXISTS `ims_service_scope_tbl`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `ims_service_scope_tbl` (
+  `scopeID` bigint(20) NOT NULL AUTO_INCREMENT,
+  `requestServiceID` bigint(20) NOT NULL,
+  `description` text DEFAULT NULL,
+  `file` text DEFAULT NULL,
+  `reference` text DEFAULT NULL,
+  `remarks` text DEFAULT NULL,
+  `createdBy` bigint(20) NOT NULL,
+  `updatedBy` bigint(20) NOT NULL,
+  `createdAt` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updatedAt` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`scopeID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `ims_service_scope_tbl`
+--
+
+LOCK TABLES `ims_service_scope_tbl` WRITE;
+/*!40000 ALTER TABLE `ims_service_scope_tbl` DISABLE KEYS */;
+/*!40000 ALTER TABLE `ims_service_scope_tbl` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `ims_services_tbl`
+--
+
+DROP TABLE IF EXISTS `ims_services_tbl`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `ims_services_tbl` (
+  `serviceID` bigint(20) NOT NULL AUTO_INCREMENT,
+  `serviceName` text DEFAULT NULL,
+  `serviceUom` varchar(100) DEFAULT NULL,
+  `serviceStatus` int(11) NOT NULL DEFAULT 1,
+  `createdBy` bigint(20) NOT NULL DEFAULT 1,
+  `updatedBy` bigint(20) NOT NULL DEFAULT 1,
+  `createdAt` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updatedAt` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`serviceID`)
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `ims_services_tbl`
+--
+
+LOCK TABLES `ims_services_tbl` WRITE;
+/*!40000 ALTER TABLE `ims_services_tbl` DISABLE KEYS */;
+INSERT INTO `ims_services_tbl` VALUES (1,'Aircon Cleaning','pcs',1,1,1,'2021-04-29 07:28:03','2021-04-29 07:47:11'),(2,'Office Maintenance','pcs',1,1,1,'2021-04-29 07:28:03','2021-04-29 07:47:13'),(3,'Electrical Repair','pcs',1,1,1,'2021-04-29 07:28:03','2021-04-29 07:47:18'),(4,'Office Interior Maintenance','pcs',1,1,1,'2021-04-29 07:28:03','2021-04-29 07:47:21'),(5,'Phone Installation','pcs',1,1,1,'2021-04-29 07:28:03','2021-04-29 07:47:23'),(6,'Internet Repair','pcs',1,1,1,'2021-04-29 07:28:03','2021-04-29 07:47:27');
+/*!40000 ALTER TABLE `ims_services_tbl` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `ims_transfer_request_details_tbl`
 --
 
@@ -2033,7 +2261,7 @@ CREATE TABLE `ims_transfer_request_details_tbl` (
   `createdAt` timestamp NOT NULL DEFAULT current_timestamp(),
   `updatedAt` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   PRIMARY KEY (`transferRequestItemID`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2042,6 +2270,7 @@ CREATE TABLE `ims_transfer_request_details_tbl` (
 
 LOCK TABLES `ims_transfer_request_details_tbl` WRITE;
 /*!40000 ALTER TABLE `ims_transfer_request_details_tbl` DISABLE KEYS */;
+INSERT INTO `ims_transfer_request_details_tbl` VALUES (1,4,1,1,1,1,'2021-04-26 06:35:28','2021-04-26 06:35:28'),(2,5,1,1,1,1,'2021-04-26 06:41:01','2021-04-26 06:41:01'),(3,6,2,1,1,1,'2021-04-26 07:58:39','2021-04-26 07:58:39'),(4,6,1,1,1,1,'2021-04-26 07:58:39','2021-04-26 07:58:39'),(6,7,1,1,1,1,'2021-04-26 08:24:42','2021-04-26 08:24:42'),(7,8,1,1,1,1,'2021-04-28 08:32:00','2021-04-28 08:32:00'),(8,9,2,1,1,1,'2021-04-28 08:54:57','2021-04-28 08:54:57'),(9,10,1,1,1,1,'2021-04-29 01:43:08','2021-04-29 01:43:08'),(10,10,2,1,1,1,'2021-04-29 01:43:08','2021-04-29 01:43:08'),(11,11,1,21,1,1,'2021-04-29 06:16:45','2021-04-29 06:16:45');
 /*!40000 ALTER TABLE `ims_transfer_request_details_tbl` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -2056,7 +2285,8 @@ CREATE TABLE `ims_transfer_request_tbl` (
   `transferRequestID` bigint(20) NOT NULL AUTO_INCREMENT,
   `reviseTransferRequestID` bigint(20) DEFAULT NULL,
   `employeeID` bigint(20) NOT NULL,
-  `inventoryStorageID` bigint(20) DEFAULT NULL,
+  `inventoryStorageIDSender` bigint(20) DEFAULT NULL,
+  `inventoryStorageIDReceiver` bigint(20) DEFAULT NULL,
   `approversID` text DEFAULT NULL,
   `approversStatus` text DEFAULT NULL,
   `approversDate` text DEFAULT NULL,
@@ -2069,7 +2299,7 @@ CREATE TABLE `ims_transfer_request_tbl` (
   `createdAt` timestamp NOT NULL DEFAULT current_timestamp(),
   `updatedAt` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   PRIMARY KEY (`transferRequestID`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2078,6 +2308,7 @@ CREATE TABLE `ims_transfer_request_tbl` (
 
 LOCK TABLES `ims_transfer_request_tbl` WRITE;
 /*!40000 ALTER TABLE `ims_transfer_request_tbl` DISABLE KEYS */;
+INSERT INTO `ims_transfer_request_tbl` VALUES (1,0,1,1,NULL,'1','2','2021-04-26 14:30:40',2,'undefined','','2021-04-26 06:30:40',1,1,'2021-04-26 06:30:40','2021-04-26 06:30:41'),(2,0,1,1,NULL,'1','2','2021-04-26 14:32:13',2,'undefined','','2021-04-26 06:32:13',1,1,'2021-04-26 06:32:13','2021-04-26 06:32:14'),(3,0,1,1,NULL,'1','2','2021-04-26 14:33:12',2,'undefined','','2021-04-26 06:33:12',1,1,'2021-04-26 06:33:12','2021-04-26 06:33:15'),(4,0,1,1,NULL,'1','2','2021-04-26 14:35:27',2,'undefined','','2021-04-26 06:35:27',1,1,'2021-04-26 06:35:27','2021-04-26 06:35:28'),(5,NULL,1,1,NULL,NULL,NULL,NULL,0,'undefined',NULL,NULL,1,1,'2021-04-26 06:41:00','2021-04-26 06:41:01'),(6,NULL,1,2,NULL,'1','2','2021-04-26 15:58:38',2,'undefined',NULL,'2021-04-26 07:58:38',1,1,'2021-04-26 07:58:38','2021-04-26 07:58:39'),(7,NULL,1,1,NULL,'1','2','2021-04-26 16:24:41',2,'undefined',NULL,'2021-04-26 08:24:41',1,1,'2021-04-26 08:24:26','2021-04-26 08:24:42'),(8,NULL,1,1,2,'1','2','2021-04-28 16:31:58',2,'undefined',NULL,'2021-04-28 08:31:58',1,1,'2021-04-28 08:31:58','2021-04-28 08:31:59'),(9,NULL,1,1,2,'1','2','2021-04-28 16:54:54',2,'undefined',NULL,'2021-04-28 08:54:54',1,1,'2021-04-28 08:54:54','2021-04-28 08:54:57'),(10,NULL,1,1,2,'2|3|5','2|2|2','2021-04-29 09:51:22|2021-04-29 09:52:55|2021-04-29 13:54:52',2,'undefined',NULL,'2021-04-29 01:43:07',1,5,'2021-04-29 01:43:07','2021-04-29 05:54:54'),(11,NULL,1,1,2,'2|3|5',NULL,NULL,4,'undefined',NULL,'2021-04-29 06:16:44',1,1,'2021-04-29 06:16:44','2021-04-29 06:17:09');
 /*!40000 ALTER TABLE `ims_transfer_request_tbl` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -2229,7 +2460,7 @@ CREATE TABLE `pms_project_list_tbl` (
 
 LOCK TABLES `pms_project_list_tbl` WRITE;
 /*!40000 ALTER TABLE `pms_project_list_tbl` DISABLE KEYS */;
-INSERT INTO `pms_project_list_tbl` VALUES (1,'PRO-21-00001','TEST','TEST',1,'2021-03-30','2021-03-30',1,1,2,'2|3',3,1,0,0,'2021-04-08 03:24:17','2021-04-25 23:51:25'),(5,'PRJ-21-00002','TEST 2','TEST 2',1,'2021-04-14','2021-05-05',2,3,2,'5|6',2,2,0,1,'2021-04-14 06:42:04','2021-04-25 23:51:25');
+INSERT INTO `pms_project_list_tbl` VALUES (1,'PRO-21-00001','TEST','TEST',1,'2021-03-30','2021-03-30',1,1,2,'2|3',3,1,0,0,'2021-04-08 03:24:17','2021-04-25 23:51:25'),(5,'PRJ-21-00002','TEST 2','TEST 2',1,'2021-04-14','2021-05-05',2,3,2,'5|6',2,1,0,1,'2021-04-14 06:42:04','2021-04-29 07:10:24');
 /*!40000 ALTER TABLE `pms_project_list_tbl` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -2281,4 +2512,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2021-04-29  8:57:59
+-- Dump completed on 2021-04-30  7:53:20
