@@ -78,4 +78,16 @@
     }
     // ----- END EMPLOYEE PERMISSIONS -----
 
+
+    function getFormCode($str = null, $date = null, $id = 0) {
+        if ($str && $date) {
+            $codeID = $id ? strval($id) : "0";
+            $codeID = strlen($codeID) < 5 ? str_repeat("0", 5 - strlen($codeID)).$codeID : $codeID;
+            $codeDate = date("y", strtotime($date));
+            $code = $str."-".$codeDate."-".$codeID;
+            return $code;
+        }
+        return null;
+    }
+
 ?>

@@ -2574,7 +2574,7 @@ $(document).ready(function() {
 							name="quantity" 
 							value="${quantity}" 
 							minlength="1" 
-							maxlength="5" 
+							maxlength="20" 
 							required>
 						<div class="invalid-feedback d-block" id="invalid-quantity"></div>
 					</div>

@@ -93,6 +93,57 @@ class PurchaseOrder_model extends CI_Model {
         return false;
     }
 
+    public function getPurchaseOrderItems($id = null) 
+    {
+        if ($id) {
+            $sql   = "SELECT * FROM ims_request_items_tbl WHERE purchaseOrderID = $id";
+            $query = $this->db->query($sql);
+            return $query ? $query->result_array() : [];
+        }
+        return [];
+    }
+
+    public function getPurchaseOrderData($id = null)
+    {
+        $data = ["items" => []];
+        if ($id) {
+            $purchaseOrderData = $this->getPurchaseOrder($id);
+            if ($purchaseOrderData) {
+                $data["companyName"]    = $purchaseOrderData->vendorName ?? "-";
+                $data["address"]        = $purchaseOrderData->vendorAddress ?? "-";
+                $data["contactDetails"] = $purchaseOrderData->vendorContactDetails ?? "-";
+                $data["contactPerson"]  = $purchaseOrderData->vendorContactPerson ?? "-";
+                $data["dateAproved"]    = date("F d, Y", strtotime($purchaseOrderData->submittedAt)) ?? "-";
+                $data["referenceNo"]    = $purchaseOrderData->bidRecapID ?? "-";
+                $data["paymentTerms"]   = $purchaseOrderData->paymentTerms ?? "-";
+                $data["deliveryDate"]   = date("F d, Y", strtotime($purchaseOrderData->deliveryDate)) ?? "-";
+                $data["total"]   = $purchaseOrderData->total ?? "0";
+                $data["discount"]   = $purchaseOrderData->discount ?? "0";
+                $data["totalAmount"]   = $purchaseOrderData->totalAmount ?? "0";
+                $data["vatSales"]   = $purchaseOrderData->vatSales ?? "0";
+                $data["vat"]   = $purchaseOrderData->vat ?? "0";
+                $data["totalVat"]   = $purchaseOrderData->totalVat ?? "0";
+                $data["lessEwt"]   = $purchaseOrderData->lessEwt ?? "0";
+                $data["grandTotalAmount"]   = $purchaseOrderData->grandTotalAmount ?? "0";
+
+            }
+
+            $purchaseOrderItems = $this->getPurchaseOrderItems($id);
+            foreach ($purchaseOrderItems as $item) {
+                $temp = [
+                    "code"        => getFormCode("ITM", $item["createdAt"], $item["itemID"]),
+                    "desc"        => $item["itemName"]." - ".$item["itemDescription"],
+                    "qty"         => $item["quantity"],
+                    "unit"        => $item["itemUom"],
+                    "unitcost"    => $item["unitCost"],
+                    "totalamount" => $item["totalCost"]
+                ];
+                array_push($data["items"], $temp);
+            }
+        }
+        return $data;
+    }
+
     public function savePurchaseOrderData($action, $data, $id = null) 
     {
         if ($action == "insert") {

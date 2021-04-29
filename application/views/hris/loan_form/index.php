@@ -8,8 +8,8 @@
 						<li class="breadcrumb-item"><i class="fas fa-users"></i> &nbsp;Employee Forms</li>
                         <li class="breadcrumb-item active">Loan Form</li>
                     </ul>
-                    <h1 class="mt-3">List of Loan Form</h1>
-                    <span>This module is used to manage loan form details.</span>
+                    <h1 class="mt-3">Loan Forms</h1>
+                    <span>This module is used to manage the submission and approval of loan requests.</span>
 				</div>
 				<div class="col-lg-6 col-md-12 text-md-right">
                 <div class="text-right" id="headerButton"></div>

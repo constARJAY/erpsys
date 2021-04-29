@@ -928,6 +928,7 @@ $(document).ready(function() {
 							rows="2" 
 							style="resize: none" 
 							class="form-control" 
+							data-allowcharacters="[0-9][a-z][A-Z][ ][.][,][_]['][()][?][-][/]"
 							name="remarks" 
 							id="remarks">${remarks || ""}</textarea>
 					</div>

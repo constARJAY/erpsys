@@ -1,54 +1,52 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
-class Return_item extends CI_Controller {
+class Item_disposal extends CI_Controller {
 
     public function __construct()
     {
         parent::__construct();
-        $this->load->model("ims/ReturnItem_model", "returnitem");
-        isAllowed(35);
+        $this->load->model("ims/DisposalItem_model", "disposalitem");
+        isAllowed(37);
     }
 
     public function index()
     {
-        $data["title"] = "Return Item";
+        $data["title"] = "Item Disposal";
 
         $this->load->view("template/header",$data);
-        $this->load->view("ims/return_item/index");
+        $this->load->view("ims/item_disposal/index");
         $this->load->view("template/footer");
     }
 
-    
-    public function saveTransferRequest()
+        
+    public function saveDisposalItem()
     {
         $action                  = $this->input->post("action");
         $method                  = $this->input->post("method");
-        $returnID                = $this->input->post("returnID") ?? null;
-        $reviseReturnItemID      = $this->input->post("reviseReturnItemID") ?? null;
+        $itemDisposalID          = $this->input->post("itemDisposalID") ?? null;
+        $reviseitemDisposalID    = $this->input->post("reviseitemDisposalID") ?? null;
         $employeeID              = $this->input->post("employeeID");
-        $projectID              = $this->input->post("projectID") ?? null;
         $approversID             = $this->input->post("approversID") ?? null;
         $approversStatus         = $this->input->post("approversStatus") ?? null;
         $approversDate           = $this->input->post("approversDate") ?? null;
-        $returnItemStatus          = $this->input->post("returnItemStatus");
-        $returnItemReason        = $this->input->post("returnItemReason") ?? null;
-        $returnItemRemarks      = $this->input->post("returnItemRemarks") ?? null;
+        $itemDisposalStatus      = $this->input->post("itemDisposalStatus");
+        $itemDisposalReason      = $this->input->post("itemDisposalReason") ?? null;
+        $itemDisposalRemarks      = $this->input->post("itemDisposalRemarks") ?? null;
         $submittedAt             = $this->input->post("submittedAt") ?? null;
         $createdBy               = $this->input->post("createdBy");
         $updatedBy               = $this->input->post("updatedBy");
         $createdAt               = $this->input->post("createdAt");
         $items                   = $this->input->post("items") ?? null;
 
-        $purchaseRequestData = [
+        $disposalItemData = [
             // "revisePurchaseRequestID" => $revisePurchaseRequestID,
             "employeeID"              => $employeeID,
-            "projectID "                => $projectID ,
             "approversID"             => $approversID,
             "approversStatus"         => $approversStatus,
             "approversDate"           => $approversDate,
-            "returnItemStatus"         => $returnItemStatus,
-            "returnItemReason"         => $returnItemReason,
+            "itemDisposalStatus"         => $itemDisposalStatus,
+            "itemDisposalReason"         => $itemDisposalReason,
             // "projectTotalAmount"      => $projectTotalAmount,
             // "companyTotalAmount"      => $companyTotalAmount,
             "submittedAt"             => $submittedAt,
@@ -58,48 +56,48 @@ class Return_item extends CI_Controller {
         ];
 
         if ($action == "update") {
-            // unset($purchaseRequestData["revisePurchaseRequestID"]);
-            unset($purchaseRequestData["createdBy"]);
-            unset($purchaseRequestData["createdAt"]);
+            // unset($disposalItemData["revisePurchaseRequestID"]);
+            unset($disposalItemData["createdBy"]);
+            unset($disposalItemData["createdAt"]);
 
             if ($method == "cancelform") {
-                $purchaseRequestData = [
-                    "returnItemStatus" => 4,
+                $disposalItemData = [
+                    "itemDisposalStatus" => 4,
                     "updatedBy"             => $updatedBy,
                 ];
             } else if ($method == "approve") {
-                $purchaseRequestData = [
+                $disposalItemData = [
                     "approversStatus"       => $approversStatus,
                     "approversDate"         => $approversDate,
-                    "returnItemStatus"      => $returnItemStatus,
+                    "itemDisposalStatus"      => $itemDisposalStatus,
                     "updatedBy"             => $updatedBy,
                 ];
             } else if ($method == "deny") {
-                $purchaseRequestData = [
+                $disposalItemData = [
                     "approversStatus"        => $approversStatus,
                     "approversDate"          => $approversDate,
-                    "returnItemStatus"  => 3,
-                    "returnItemRemarks" => $returnItemRemarks,
+                    "itemDisposalStatus"  => 3,
+                    "itemDisposalRemarks" => $itemDisposalRemarks,
                     "updatedBy"              => $updatedBy,
                 ];
             }
         }
 
-    $saveTransferData = $this->returnitem->savePurchaseRequestData($action, $purchaseRequestData, $returnID);
+    $saveTransferData = $this->disposalitem->saveDisposalItemData($action, $disposalItemData, $itemDisposalID);
         if ($saveTransferData) {
             $result = explode("|", $saveTransferData);
 
             if ($result[0] == "true") {
-                $returnID = $result[2];
+                $itemDisposalID  = $result[2];
 
                 if ($items) {
                     $purchaseRequestItems = [];
                     foreach($items as $index => $item) {
                         $temp = [
-                            "returnID"          => $returnID,
+                            "itemDisposalID "          => $itemDisposalID ,
                             "itemID"            => $item["itemID"] != "null" ? $item["itemID"] : null,
                             "quantity"          => $item["quantity"],
-                            "dateBorrowed"      => $item["dateBorrowed"],
+                            "itemremarks"       => $item["itemremarks"],
                             "createdBy"         => $item["createdBy"],
                             "updatedBy"         => $item["updatedBy"],
                         ];
@@ -137,7 +135,7 @@ class Return_item extends CI_Controller {
                         // ----- END UPDATE ITEMS FILE -----
                     }
 
-                    $savePurchTransferstItems = $this->returnitem->savePurchaseRequestItems($purchaseRequestItems, $returnID);
+                    $saveDisposarecordltItems = $this->disposalitem->saveDisposalItems($purchaseRequestItems, $itemDisposalID );
                 }
 
             }
@@ -145,7 +143,5 @@ class Return_item extends CI_Controller {
         }
         echo json_encode($saveTransferData);  
         
-    }    
-
-}
-?>
+    } 
+}    
