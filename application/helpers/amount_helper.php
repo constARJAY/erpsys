@@ -118,7 +118,7 @@
         } else {
             // return number_format($floatcurr,$currencies[$curr][0],$currencies[$curr][1],$currencies[$curr][2]);
             // ASSUME THAT THE SYSTEM IS IN THE PHILIPPINES ONLY
-            return '₱ '.number_format($floatcurr,$currencies[$curr][0],$currencies[$curr][1],$currencies[$curr][2]);
+            return '₱'.number_format($floatcurr,$currencies[$curr][0],$currencies[$curr][1],$currencies[$curr][2]);
         }
     }
 

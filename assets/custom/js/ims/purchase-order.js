@@ -1325,6 +1325,34 @@ $(document).ready(function() {
 	// ----- END KEYUP DISCOUNT -----
 
 
+	// ----- UPLOAD CONTRACT -----
+	$(document).on("click", "[id=btnUploadContract]", function() {
+		$(`[type=file][name=contractFile]`).trigger("click");
+	})
+
+	$(document).on("change", "[name=contractFile]", function(e) {
+		const purchaseOrderID = $(this).attr("purchaseOrderID");
+		const files        = this.files || false;
+		if (files) {
+			const filesize    = files[0].size/1024/1024;
+			const filenameArr = files[0].name.split(".");
+			const filename    = filenameArr[0];
+			const extension   = filenameArr[1];
+			const filetypeArr = files[0].type.split("/");
+			const filetype    = filetypeArr[0];
+			if (filesize > 10) {
+				showNotification("danger", `${filenameArr.join(".")} size must be less than or equal to 10mb`);
+			} else {
+				let formData = new FormData();
+				formData.append("purchaseOrderID", purchaseOrderID);
+				formData.append("files", files[0]);
+				savePurchaseOrderContract(formData, filenameArr.join("."));
+			}
+		}
+	})
+	// ----- END UPLOAD CONTRACT -----
+
+
 	// ----- GET PURCHASE ORDER DATA -----
 	function getPurchaseOrderData(action = "insert", method = "submit", status = "1", id = null, currentStatus = "0", isRevise = false) {
 		/**
@@ -1466,6 +1494,7 @@ $(document).ready(function() {
 			approversID           = "",
 			approversStatus       = "",
 			approversDate         = "",
+			contractFile		  = "",
 			purchaseOrderStatus   = false,
 			submittedAt           = false,
 			createdAt             = false,
@@ -1505,17 +1534,39 @@ $(document).ready(function() {
 		let button = formButtons(data, isRevise);
 
 		// ----- PRINT BUTTON -----
-		let printButton = '';
+		let approvedButton = '';
 		if (purchaseOrderStatus == 2) {
-			printButton = `
-			<div class="w-100 text-right pb-4">
-				<button 
-					class="btn btn-info py-2 px-3" 
+			approvedButton += `<div class="w-100 text-right pb-4">`;
+			if (grandTotalAmount > 5000) {
+				let link = contractFile ? `
+				<a href="${base_url}assets/upload-files/contracts/${contractFile}" 
+					class="pr-3" 
+					id="displayContract">${contractFile}</a>` : "";
+					
+				approvedButton += `
+				${link}
+				<input type="file"
+					id="contractFile"
+					name="contractFile"
 					purchaseOrderID="${purchaseOrderID}"
-					id="btnExcel">
-					<i class="fas fa-file-excel"></i> Excel
-				</button>
-			</div>`;
+					class="d-none"
+					accept="image/*, .pdf, .docx, .doc">
+				<button 
+					class="btn btn-secondary py-2" 
+					purchaseOrderID="${purchaseOrderID}"
+					id="btnUploadContract">
+					<i class="fas fa-file-upload"></i> Upload Contract
+				</button>`;
+			}
+
+			approvedButton += `
+			<button 
+				class="btn btn-info py-2" 
+				purchaseOrderID="${purchaseOrderID}"
+				id="btnExcel">
+				<i class="fas fa-file-excel"></i> Excel
+			</button>`;
+			approvedButton += `</div>`;
 		}
 		// ----- END PRINT BUTTON -----
 
@@ -1535,7 +1586,7 @@ $(document).ready(function() {
 		</div>` : "";
 
 		let html = `
-		${printButton}
+		${approvedButton}
         <div class="row px-2">
 			${documentReviseNo}
             <div class="${documentHeaderClass}">
@@ -2416,6 +2467,11 @@ function getConfirmation(method = "submit") {
 			swalText  = "Are you sure to cancel this document?";
 			swalImg   = `${base_url}assets/modal/cancel.svg`;
 			break;
+		case "uploadcontract":
+			swalTitle = `UPLOAD CONTRACT`;
+			swalText  = "Are you sure to upload this contract?";
+			swalImg   = `${base_url}assets/modal/add.svg`;
+			break;
 		default:
 			swalTitle = `CANCEL ${title.toUpperCase()}`;
 			swalText  = "Are you sure that you want to cancel this process?";
@@ -2537,8 +2593,76 @@ function savePurchaseOrder(data = null, method = "submit", notificationData = nu
 				}
 			}
 		});
+	}
+	return false;
+}
 
+function savePurchaseOrderContract(data = null, filename = null) {
+	if (data) {
+		const confirmation = getConfirmation("uploadcontract");
+		confirmation.then(res => {
+			if (res.isConfirmed) {
+				$.ajax({
+					method:      "POST",
+					url:         `purchase_order/savePurchaseOrderContract`,
+					data,
+					processData: false,
+					contentType: false,
+					global:      false,
+					cache:       false,
+					async:       false,
+					dataType:    "json",
+					beforeSend: function() {
+						$("#loader").show();
+					},
+					success: function(data) {
+						let result = data.split("|");
 		
+						let isSuccess   = result[0];
+						let message     = result[1];
+						let insertedID  = result[2];
+						let dateCreated = result[3];
+		
+						if (isSuccess == "true") {
+							setTimeout(() => {
+								$("#loader").hide();
+								closeModals();
+								Swal.fire({
+									icon:              "success",
+									title:             "CONTRACT UPLOADED SUCCESSFULLY!",
+									showConfirmButton: false,
+									timer:             2000,
+								});
+								$("#displayContract").text(filename);
+							}, 500);
+						} else {
+							setTimeout(() => {
+								$("#loader").hide();
+								Swal.fire({
+									icon:              "danger",
+									title:             "CONTRACT FAILED TO UPLOAD",
+									showConfirmButton: false,
+									timer:             2000,
+								});
+							}, 500);
+						}
+					},
+					error: function() {
+						setTimeout(() => {
+							$("#loader").hide();
+							showNotification("danger", "System error: Please contact the system administrator for assistance!");
+						}, 500);
+					}
+				}).done(function() {
+					setTimeout(() => {
+						$("#loader").hide();
+						$("[type=file][name=contractFile]").val("");
+					}, 500);
+				})
+			} else {
+				$("[type=file][name=contractFile]").val("");
+			}
+		});
 	}
 	return false;
 }

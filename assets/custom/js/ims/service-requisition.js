@@ -1,6 +1,6 @@
 $(document).ready(function() {
     // ----- MODULE APPROVER -----
-	const moduleApprover = getModuleApprover("purchase request");
+	const moduleApprover = getModuleApprover("service requisition");
 	// ----- END MODULE APPROVER -----
 
 
@@ -27,23 +27,23 @@ $(document).ready(function() {
     // ----- VIEW DOCUMENT -----
 	function viewDocument(view_id = false, readOnly = false, isRevise = false) {
 		const loadData = (id, isRevise = false) => {
-			const tableData = getTableData("ims_purchase_request_tbl", "", "purchaseRequestID=" + id);
+			const tableData = getTableData("ims_service_requisition_tbl", "", "serviceRequisitionID=" + id);
 
 			if (tableData.length > 0) {
 				let {
 					employeeID,
-					purchaseRequestStatus
+					serviceRequisitionStatus
 				} = tableData[0];
 
 				let isReadOnly = true, isAllowed = true;
 
 				if (employeeID != sessionID) {
 					isReadOnly = true;
-					if (purchaseRequestStatus == 0 || purchaseRequestStatus == 4) {
+					if (serviceRequisitionStatus == 0 || serviceRequisitionStatus == 4) {
 						isAllowed = false;
 					}
 				} else if (employeeID == sessionID) {
-					if (purchaseRequestStatus == 0) {
+					if (serviceRequisitionStatus == 0) {
 						isReadOnly = false;
 					} else {
 						isReadOnly = true;
@@ -96,15 +96,15 @@ $(document).ready(function() {
 
 	function updateURL(view_id = 0, isAdd = false, isRevise = false) {
 		if (view_id && !isAdd) {
-			window.history.pushState("", "", `${base_url}ims/purchase_request?view_id=${view_id}`);
+			window.history.pushState("", "", `${base_url}ims/service_requisition?view_id=${view_id}`);
 		} else if (isAdd) {
 			if (view_id && isRevise) {
-				window.history.pushState("", "", `${base_url}ims/purchase_request?add=${view_id}`);
+				window.history.pushState("", "", `${base_url}ims/service_requisition?add=${view_id}`);
 			} else {
-				window.history.pushState("", "", `${base_url}ims/purchase_request?add`);
+				window.history.pushState("", "", `${base_url}ims/service_requisition?add`);
 			}
 		} else {
-			window.history.pushState("", "", `${base_url}ims/purchase_request`);
+			window.history.pushState("", "", `${base_url}ims/service_requisition`);
 		}
 	}
 	// ----- END VIEW DOCUMENT -----
@@ -115,14 +115,22 @@ $(document).ready(function() {
 		return moment(new Date).format("YYYY-MM-DD HH:mm:ss");
 	};
 
-	const inventoryItemList = getTableData(
-		"ims_inventory_item_tbl LEFT JOIN ims_inventory_category_tbl USING(categoryID)", "itemID, itemCode, itemName, categoryName, unitOfMeasurementID",
-		"itemStatus = 1");
+    const clientList = getTableData(
+        "pms_client_tbl",
+        "*",
+        "clientStatus = 1"
+    );
 
 	const projectList = getTableData(
-		"pms_project_list_tbl AS pplt LEFT JOIN pms_client_tbl AS pct ON pct.clientID = pplt.projectListClientID", 
-		"projectListID, projectListCode, projectListName, clientCode, clientName, clientRegion, clientProvince, clientCity, clientBarangay, clientUnitNumber, clientHouseNumber, clientCountry, clientPostalCode",
+		"pms_project_list_tbl", 
+		"projectListID, projectListCode, projectListName, projectListClientID, createdAt",
 		"projectListStatus = 1");
+
+    const serviceItemList = getTableData(
+        "ims_services_tbl",
+        "*",
+        "serviceStatus = 1"
+    );
 	// END GLOBAL VARIABLE - REUSABLE 
 
 
@@ -186,7 +194,7 @@ $(document).ready(function() {
 				],
 			});
 
-        var table = $("#tableProjectRequestItems")
+        var table = $("#tableServiceRequisitionItems")
 			.css({ "min-width": "100%" })
 			.removeAttr("width")
 			.DataTable({
@@ -203,17 +211,16 @@ $(document).ready(function() {
 					{ targets: 0,  width: 50  },
 					{ targets: 1,  width: 150 },
 					{ targets: 2,  width: 150 },
-					{ targets: 3,  width: 50  },
-					{ targets: 4,  width: 120 },
-					{ targets: 5,  width: 80  },
+					{ targets: 3,  width: 200 },
+					{ targets: 4,  width: 50  },
+					{ targets: 5,  width: 100 },
 					{ targets: 6,  width: 150 },
 					{ targets: 7,  width: 150 },
-					{ targets: 8,  width: 150 },
-					{ targets: 9,  width: 200 },
+					{ targets: 8,  width: 200 },
 				],
 			});
 
-			var table = $("#tableProjectRequestItems0")
+			var table = $("#tableServiceRequisitionItems0")
 			.css({ "min-width": "100%" })
 			.removeAttr("width")
 			.DataTable({
@@ -226,13 +233,12 @@ $(document).ready(function() {
 				columnDefs: [
 					{ targets: 0,  width: 150 },
 					{ targets: 1,  width: 150 },
-					{ targets: 2,  width: 50  },
-					{ targets: 3,  width: 120 },
-					{ targets: 4,  width: 80  },
+					{ targets: 2,  width: 200 },
+					{ targets: 3,  width: 50  },
+					{ targets: 4,  width: 100 },
 					{ targets: 5,  width: 150 },
 					{ targets: 6,  width: 150 },
-					{ targets: 7,  width: 150 },
-					{ targets: 8,  width: 200 },
+					{ targets: 7,  width: 200 },
 				],
 			});
 
@@ -292,7 +298,7 @@ $(document).ready(function() {
     // ----- HEADER CONTENT -----
 	function headerTabContent(display = true) {
 		if (display) {
-			if (isImModuleApprover("ims_purchase_request_tbl", "approversID")) {
+			if (isImModuleApprover("ims_service_requisition_tbl", "approversID")) {
 				let html = `
                 <div class="bh_divider appendHeader"></div>
                 <div class="row clearfix appendHeader">
@@ -330,11 +336,11 @@ $(document).ready(function() {
     // ----- FOR APPROVAL CONTENT -----
 	function forApprovalContent() {
 		$("#tableForApprovalParent").html(preloader);
-		let purchaseRequestData = getTableData(
-			"ims_purchase_request_tbl AS imrt LEFT JOIN hris_employee_list_tbl AS helt USING(employeeID) LEFT JOIN pms_project_list_tbl AS pplt ON pplt.projectListID = imrt.projectID",
+		let serviceRequisitionData = getTableData(
+			"ims_service_requisition_tbl AS imrt LEFT JOIN hris_employee_list_tbl AS helt USING(employeeID) LEFT JOIN pms_project_list_tbl AS pplt ON pplt.projectListID = imrt.projectID",
 			"imrt.*, CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname, imrt.createdAt AS dateCreated, projectListCode, projectListName",
-			`imrt.employeeID != ${sessionID} AND purchaseRequestStatus != 0 AND purchaseRequestStatus != 4`,
-			`FIELD(purchaseRequestStatus, 0, 1, 3, 2, 4), COALESCE(imrt.submittedAt, imrt.createdAt)`
+			`imrt.employeeID != ${sessionID} AND serviceRequisitionStatus != 0 AND serviceRequisitionStatus != 4`,
+			`FIELD(serviceRequisitionStatus, 0, 1, 3, 2, 4), COALESCE(imrt.submittedAt, imrt.createdAt)`
 		);
 
 		let html = `
@@ -357,53 +363,53 @@ $(document).ready(function() {
             </thead>
             <tbody>`;
 
-		purchaseRequestData.map((item) => {
+		serviceRequisitionData.map((item) => {
 			let {
 				fullname,
-				purchaseRequestID,
+				serviceRequisitionID,
 				projectID,
 				projectListCode,
 				projectListName,
 				referenceCode,
 				approversID,
 				approversDate,
-				purchaseRequestStatus,
-				purchaseRequestRemarks,
+				serviceRequisitionStatus,
+				serviceRequisitionRemarks,
 				submittedAt,
 				createdAt,
 			} = item;
 
-			let remarks       = purchaseRequestRemarks ? purchaseRequestRemarks : "-";
+			let remarks       = serviceRequisitionRemarks ? serviceRequisitionRemarks : "-";
 			let dateCreated   = moment(createdAt).format("MMMM DD, YYYY hh:mm:ss A");
 			let dateSubmitted = submittedAt ? moment(submittedAt).format("MMMM DD, YYYY hh:mm:ss A") : "-";
-			let dateApproved  = purchaseRequestStatus == 2 ? approversDate.split("|") : "-";
+			let dateApproved  = serviceRequisitionStatus == 2 ? approversDate.split("|") : "-";
 			if (dateApproved !== "-") {
 				dateApproved = moment(dateApproved[dateApproved.length - 1]).format("MMMM DD, YYYY hh:mm:ss A");
 			}
 
-			let button = purchaseRequestStatus != 0 ? `
-			<button class="btn btn-view w-100 btnView" id="${encryptString(purchaseRequestID )}"><i class="fas fa-eye"></i> View</button>` : `
+			let button = serviceRequisitionStatus != 0 ? `
+			<button class="btn btn-view w-100 btnView" id="${encryptString(serviceRequisitionID )}"><i class="fas fa-eye"></i> View</button>` : `
 			<button 
 				class="btn btn-edit w-100 btnEdit" 
-				id="${encryptString(purchaseRequestID )}" 
-				code="${getFormCode("PR", createdAt, purchaseRequestID )}"><i class="fas fa-edit"></i> Edit</button>`;
+				id="${encryptString(serviceRequisitionID )}" 
+				code="${getFormCode("SR", createdAt, serviceRequisitionID )}"><i class="fas fa-edit"></i> Edit</button>`;
 
-			if (isImCurrentApprover(approversID, approversDate, purchaseRequestStatus) || isAlreadyApproved(approversID, approversDate)) {
+			if (isImCurrentApprover(approversID, approversDate, serviceRequisitionStatus) || isAlreadyApproved(approversID, approversDate)) {
 				html += `
 				<tr>
-					<td>${getFormCode("PR", createdAt, purchaseRequestID )}</td>
+					<td>${getFormCode("SR", createdAt, serviceRequisitionID )}</td>
 					<td>${fullname}</td>
 					<td>${projectListCode || '-'}</td>
 					<td>${projectListName || '-'}</td>
 					<td>${referenceCode || '-'}</td>
 					<td>
-						${employeeFullname(getCurrentApprover(approversID, approversDate, purchaseRequestStatus, true))}
+						${employeeFullname(getCurrentApprover(approversID, approversDate, serviceRequisitionStatus, true))}
 					</td>
 					<td>${dateCreated}</td>
 					<td>${dateSubmitted}</td>
 					<td>${dateApproved}</td>
 					<td class="text-center">
-						${getStatusStyle(purchaseRequestStatus)}
+						${getStatusStyle(serviceRequisitionStatus)}
 					</td>
 					<td>${remarks}</td>
 					<td class="text-center">
@@ -429,11 +435,11 @@ $(document).ready(function() {
     // ----- MY FORMS CONTENT -----
 	function myFormsContent() {
 		$("#tableMyFormsParent").html(preloader);
-		let purchaseRequestData = getTableData(
-			"ims_purchase_request_tbl AS imrt LEFT JOIN hris_employee_list_tbl AS helt USING(employeeID) LEFT JOIN pms_project_list_tbl AS pplt ON pplt.projectListID = imrt.projectID",
+		let serviceRequisitionData = getTableData(
+			"ims_service_requisition_tbl AS imrt LEFT JOIN hris_employee_list_tbl AS helt USING(employeeID) LEFT JOIN pms_project_list_tbl AS pplt ON pplt.projectListID = imrt.projectID",
 			"imrt.*, CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname, imrt.createdAt AS dateCreated, projectListCode, projectListName",
 			`imrt.employeeID = ${sessionID}`,
-			`FIELD(purchaseRequestStatus, 0, 1, 3, 2, 4), COALESCE(imrt.submittedAt, imrt.createdAt)`
+			`FIELD(serviceRequisitionStatus, 0, 1, 3, 2, 4), COALESCE(imrt.submittedAt, imrt.createdAt)`
 		);
 
 		let html = `
@@ -456,52 +462,52 @@ $(document).ready(function() {
             </thead>
             <tbody>`;
 
-		purchaseRequestData.map((item) => {
+		serviceRequisitionData.map((item) => {
 			let {
 				fullname,
-				purchaseRequestID,
+				serviceRequisitionID,
                 projectID,
                 projectListCode,
                 projectListName,
                 referenceCode,
 				approversID,
 				approversDate,
-				purchaseRequestStatus,
-				purchaseRequestRemarks,
+				serviceRequisitionStatus,
+				serviceRequisitionRemarks,
 				submittedAt,
 				createdAt,
 			} = item;
 
-			let remarks       = purchaseRequestRemarks ? purchaseRequestRemarks : "-";
+			let remarks       = serviceRequisitionRemarks ? serviceRequisitionRemarks : "-";
 			let dateCreated   = moment(createdAt).format("MMMM DD, YYYY hh:mm:ss A");
 			let dateSubmitted = submittedAt ? moment(submittedAt).format("MMMM DD, YYYY hh:mm:ss A") : "-";
-			let dateApproved  = purchaseRequestStatus == 2 ? approversDate.split("|") : "-";
+			let dateApproved  = serviceRequisitionStatus == 2 ? approversDate.split("|") : "-";
 			if (dateApproved !== "-") {
 				dateApproved = moment(dateApproved[dateApproved.length - 1]).format("MMMM DD, YYYY hh:mm:ss A");
 			}
 
-			let button = purchaseRequestStatus != 0 ? `
-            <button class="btn btn-view w-100 btnView" id="${encryptString(purchaseRequestID )}"><i class="fas fa-eye"></i> View</button>` : `
+			let button = serviceRequisitionStatus != 0 ? `
+            <button class="btn btn-view w-100 btnView" id="${encryptString(serviceRequisitionID )}"><i class="fas fa-eye"></i> View</button>` : `
             <button 
                 class="btn btn-edit w-100 btnEdit" 
-                id="${encryptString(purchaseRequestID )}" 
-                code="${getFormCode("PR", createdAt, purchaseRequestID )}"><i class="fas fa-edit"></i> Edit</button>`;
+                id="${encryptString(serviceRequisitionID )}" 
+                code="${getFormCode("SR", createdAt, serviceRequisitionID )}"><i class="fas fa-edit"></i> Edit</button>`;
 
 			html += `
             <tr>
-                <td>${getFormCode("PR", createdAt, purchaseRequestID )}</td>
+                <td>${getFormCode("SR", createdAt, serviceRequisitionID )}</td>
                 <td>${fullname}</td>
                 <td>${projectListCode || '-'}</td>
                 <td>${projectListName || '-'}</td>
                 <td>${referenceCode || '-'}</td>
                 <td>
-                    ${employeeFullname(getCurrentApprover(approversID, approversDate, purchaseRequestStatus, true))}
+                    ${employeeFullname(getCurrentApprover(approversID, approversDate, serviceRequisitionStatus, true))}
                 </td>
 				<td>${dateCreated}</td>
 				<td>${dateSubmitted}</td>
 				<td>${dateApproved}</td>
                 <td class="text-center">
-                    ${getStatusStyle(purchaseRequestStatus)}
+                    ${getStatusStyle(serviceRequisitionStatus)}
                 </td>
 				<td>${remarks}</td>
                 <td class="text-center">
@@ -528,8 +534,8 @@ $(document).ready(function() {
 		let button = "";
 		if (data) {
 			let {
-				purchaseRequestID     = "",
-				purchaseRequestStatus = "",
+				serviceRequisitionID     = "",
+				serviceRequisitionStatus = "",
 				employeeID            = "",
 				approversID           = "",
 				approversDate         = "",
@@ -538,14 +544,14 @@ $(document).ready(function() {
 
 			let isOngoing = approversDate ? approversDate.split("|").length > 0 ? true : false : false;
 			if (employeeID === sessionID) {
-				if (purchaseRequestStatus == 0 || isRevise) {
+				if (serviceRequisitionStatus == 0 || isRevise) {
 					// DRAFT
 					button = `
 					<button 
 						class="btn btn-submit" 
 						id="btnSubmit" 
-						purchaseRequestID="${purchaseRequestID}"
-						code="${getFormCode("PR", createdAt, purchaseRequestID)}"
+						serviceRequisitionID="${serviceRequisitionID}"
+						code="${getFormCode("SR", createdAt, serviceRequisitionID)}"
 						revise=${isRevise}><i class="fas fa-paper-plane"></i>
 						Submit
 					</button>`;
@@ -563,55 +569,55 @@ $(document).ready(function() {
 						<button 
 							class="btn btn-cancel"
 							id="btnCancelForm" 
-							purchaseRequestID="${purchaseRequestID}"
-							code="${getFormCode("PR", createdAt, purchaseRequestID)}"
+							serviceRequisitionID="${serviceRequisitionID}"
+							code="${getFormCode("SR", createdAt, serviceRequisitionID)}"
 							revise=${isRevise}><i class="fas fa-ban"></i> 
 							Cancel
 						</button>`;
 					}
 
 					
-				} else if (purchaseRequestStatus == 1) {
+				} else if (serviceRequisitionStatus == 1) {
 					// FOR APPROVAL
 					if (!isOngoing) {
 						button = `
 						<button 
 							class="btn btn-cancel"
 							id="btnCancelForm" 
-							purchaseRequestID="${purchaseRequestID}"
-							code="${getFormCode("PR", createdAt, purchaseRequestID)}"
-							status="${purchaseRequestStatus}"><i class="fas fa-ban"></i> 
+							serviceRequisitionID="${serviceRequisitionID}"
+							code="${getFormCode("SR", createdAt, serviceRequisitionID)}"
+							status="${serviceRequisitionStatus}"><i class="fas fa-ban"></i> 
 							Cancel
 						</button>`;
 					}
-				} else if (purchaseRequestStatus == 3) {
+				} else if (serviceRequisitionStatus == 3) {
 					// DENIED - FOR REVISE
 					button = `
 					<button
 						class="btn btn-cancel"
 						id="btnRevise" 
-						purchaseRequestID="${encryptString(purchaseRequestID)}"
-						code="${getFormCode("PR", createdAt, purchaseRequestID)}"
-						status="${purchaseRequestStatus}"><i class="fas fa-clone"></i>
+						serviceRequisitionID="${encryptString(serviceRequisitionID)}"
+						code="${getFormCode("SR", createdAt, serviceRequisitionID)}"
+						status="${serviceRequisitionStatus}"><i class="fas fa-clone"></i>
 						Revise
 					</button>`;
 				}
 			} else {
-				if (purchaseRequestStatus == 1) {
+				if (serviceRequisitionStatus == 1) {
 					if (isImCurrentApprover(approversID, approversDate)) {
 						button = `
 						<button 
 							class="btn btn-submit" 
 							id="btnApprove" 
-							purchaseRequestID="${encryptString(purchaseRequestID)}"
-							code="${getFormCode("PR", createdAt, purchaseRequestID)}"><i class="fas fa-paper-plane"></i>
+							serviceRequisitionID="${encryptString(serviceRequisitionID)}"
+							code="${getFormCode("SR", createdAt, serviceRequisitionID)}"><i class="fas fa-paper-plane"></i>
 							Approve
 						</button>
 						<button 
 							class="btn btn-cancel"
 							id="btnReject" 
-							purchaseRequestID="${encryptString(purchaseRequestID)}"
-							code="${getFormCode("PR", createdAt, purchaseRequestID)}"><i class="fas fa-ban"></i> 
+							serviceRequisitionID="${encryptString(serviceRequisitionID)}"
+							code="${getFormCode("SR", createdAt, serviceRequisitionID)}"><i class="fas fa-ban"></i> 
 							Deny
 						</button>`;
 					}
@@ -634,26 +640,46 @@ $(document).ready(function() {
 	// ----- END FORM BUTTONS -----
 
 
-    // ----- GET PROJECT LIST -----
-    function getProjectList(id = null, display = true) {
+    // ----- GET CLIENT LIST -----
+    function getClientList(id = null, display = true) {
 		let html = `
 		<option 
 			value       = "0"
-			projectCode = "-"
 			clientCode  = "-"
 			clientName  = "-"
 			address     = "-"
 			${id == "0" && "selected"}>N/A</option>`;
-        html += projectList.map(project => {
-			let address = `${project.clientUnitNumber && titleCase(project.clientUnitNumber)+", "}${project.clientHouseNumber && project.clientHouseNumber +", "}${project.clientBarangay && titleCase(project.clientBarangay)+", "}${project.clientCity && titleCase(project.clientCity)+", "}${project.clientProvince && titleCase(project.clientProvince)+", "}${project.clientCountry && titleCase(project.clientCountry)+", "}${project.clientPostalCode && titleCase(project.clientPostalCode)}`;
+        html += clientList.map(client => {
+			let address = `${client.clientUnitNumber && titleCase(client.clientUnitNumber)+", "}${client.clientHouseNumber && client.clientHouseNumber +", "}${client.clientBarangay && titleCase(client.clientBarangay)+", "}${client.clientCity && titleCase(client.clientCity)+", "}${client.clientProvince && titleCase(client.clientProvince)+", "}${client.clientCountry && titleCase(client.clientCountry)+", "}${client.clientPostalCode && titleCase(client.clientPostalCode)}`;
 
             return `
             <option 
-                value       = "${project.projectListID}" 
-                projectCode = "${project.projectListCode}"
-                clientCode  = "${project.clientCode}"
-                clientName  = "${project.clientName}"
+                value       = "${client.clientID}" 
+                clientCode  = "${getFormCode("CLT", client.createdAt, client.clientID)}"
+                clientName  = "${client.clientName}"
 				address     = "${address}"
+                ${client.clientID == id && "selected"}>
+                ${client.clientName}
+            </option>`;
+        })
+        return display ? html : clientList;
+    }
+    // ----- END GET CLIENT LIST -----
+
+
+    // ----- GET PROJECT LIST -----
+    function getProjectList(id = null, clientID = 0, display = true) {
+        console.log(clientID);
+		let html = `
+		<option 
+			value       = "0"
+			projectCode = "-"
+			${id == "0" && "selected"}>N/A</option>`;
+        html += projectList.filter(project => project.projectListClientID == clientID).map(project => {
+            return `
+            <option 
+                value       = "${project.projectListID}" 
+                projectCode = "${getFormCode("PRJ", project.createdAt, project.projectListID)}"
                 ${project.projectListID == id && "selected"}>
                 ${project.projectListName}
             </option>`;
@@ -665,56 +691,34 @@ $(document).ready(function() {
 
 	// ----- UPDATE INVENTORYT NAME -----
 	function updateInventoryItemOptions() {
-		let projectItemIDArr = [], companyItemIDArr = []; // 0 IS THE DEFAULT VALUE
-		let projectElementID = [], companyElementID = [];
+		let serviceIDArr = []; // 0 IS THE DEFAULT VALUE
+		let serviceElementID = [], companyElementID = [];
 		let optionNone = {
-			itemID:              "0",
-			itemCode:            "-",
-			categoryName:        "-",
-			unitOfMeasurementID: "-",
-			itemName:            "N/A"
+			serviceID:              "0",
+			serviceUom: "-",
+			serviceName:            "N/A"
 		};
 
-		$("[name=itemID][project=true]").each(function(i, obj) {
-			projectItemIDArr.push($(this).val());
-			projectElementID.push(`#${this.id}[project=true]`);
+		$("[name=serviceID]").each(function(i, obj) {
+			serviceIDArr.push($(this).val());
+			serviceElementID.push(`#${this.id}`);
 			$(this).val() && $(this).trigger("change");
-		}) 
-		$("[name=itemID][company=true]").each(function(i, obj) {
-			companyItemIDArr.push($(this).val());
-			companyElementID.push(`#${this.id}[company=true]`);
-			$(this).val() && $(this).trigger("change");
-		}) 
+		})
 
-		projectElementID.map((element, index) => {
+		serviceElementID.map((element, index) => {
 			let html = `<option selected disabled>Select Item Name</option>`;
-			let itemList = [optionNone, ...inventoryItemList];
-			html += itemList.filter(item => !projectItemIDArr.includes(item.itemID) || item.itemID == projectItemIDArr[index]).map(item => {
+			let serviceList = [optionNone, ...serviceItemList];
+			html += serviceList.filter(item => !serviceIDArr.includes(item.serviceID) || item.serviceID == serviceIDArr[index]).map(item => {
+                let serviceCode = item.serviceID != "0" ? 
+                `${getFormCode("SVC", item.createdAt, item.serviceID)}` : "-"
+
 				return `
 				<option 
-					value        = "${item.itemID}" 
-					itemCode     = "${item.itemCode}"
-					categoryName = "${item.categoryName}"
-					uom          = "${item.unitOfMeasurementID}"
-					${item.itemID == projectItemIDArr[index] && "selected"}>
-					${item.itemName}
-				</option>`;
-			})
-			$(element).html(html);
-		});
-
-		companyElementID.map((element, index) => {
-			let html = `<option selected disabled>Select Item Name</option>`;
-			let itemList = [optionNone, ...inventoryItemList];
-			html += itemList.filter(item => !companyItemIDArr.includes(item.itemID) || item.itemID == companyItemIDArr[index]).map(item => {
-				return `
-				<option 
-					value        = "${item.itemID}" 
-					itemCode     = "${item.itemCode}"
-					categoryName = "${item.categoryName}"
-					uom          = "${item.unitOfMeasurementID}"
-					${item.itemID == companyItemIDArr[index] && "selected"}>
-					${item.itemName}
+					value        = "${item.serviceID}" 
+					serviceCode     = "${serviceCode}"
+					serviceUom          = "${item.serviceUom}"
+					${item.serviceID == serviceIDArr[index] && "selected"}>
+					${item.serviceName}
 				</option>`;
 			})
 			$(element).html(html);
@@ -724,54 +728,50 @@ $(document).ready(function() {
 
 
     // ----- GET INVENTORY ITEM -----
-    function getInventoryItem(id = null, isProject = true, display = true) {
-        let html   = `<option selected disabled>Select Item Name</option>`;
-		const attr = isProject ? "[project=true]" : "[company=true]";
+    function getServiceItem(id = null, display = true) {
+        let html   = `<option selected disabled>Select Service Name</option>`;
 
-		let itemIDArr = []; // 0 IS THE DEFAULT VALUE
-		$(`[name=itemID]${attr}`).each(function(i, obj) {
-			itemIDArr.push($(this).val());
+		let serviceIDArr = []; // 0 IS THE DEFAULT VALUE
+		$(`[name=serviceID]`).each(function(i, obj) {
+			serviceIDArr.push($(this).val());
 		}) 
 
 		let optionNone = {
-			itemID:              "0",
-			itemCode:            "-",
-			categoryName:        "-",
-			unitOfMeasurementID: "-",
-			itemName:            "N/A"
+			serviceID:   "0",
+			serviceUom:  "-",
+			serviceName: "N/A",
 		};
-		let itemList = [optionNone, ...inventoryItemList];
+		let serviceList = [optionNone, ...serviceItemList];
 
-		html += itemList.filter(item => !itemIDArr.includes(item.itemID) || item.itemID == id).map(item => {
+		html += serviceList.filter(item => !serviceIDArr.includes(item.serviceID) || item.serviceID == id).map(item => {
+            let serviceCode = item.serviceID != "0" ? 
+                `${getFormCode("SVC", item.createdAt, item.serviceID)}` : "-"
             return `
             <option 
-                value        = "${item.itemID}" 
-                itemCode     = "${item.itemCode}"
-                categoryName = "${item.categoryName}"
-                uom          = "${item.unitOfMeasurementID}"
-                ${item.itemID == id && "selected"}>
-                ${item.itemName}
+                value       = "${item.serviceID}" 
+                serviceCode = "${serviceCode}"
+                serviceUom  = "${item.serviceUom}"
+                ${item.serviceID == id && "selected"}>
+                ${item.serviceName}
             </option>`;
         })
 		
-        return display ? html : inventoryItemList;
+        return display ? html : serviceItemList;
     }
     // ----- END GET INVENTORY ITEM -----
 
 
 	// ----- GET ITEM ROW -----
-    function getItemRow(isProject = true, item = {}, readOnly = false) {
+    function getServiceRow(isProject = true, item = {}, readOnly = false) {
 		const attr = isProject ? `project="true"` : `company="true"`;
 		let {
-			itemCode     = "",
-			itemName     = "",
-			itemID       = null,
+			serviceID     = "",
+			serviceName     = "",
 			quantity     = 1,
 			categoryName = "",
-			unitOfMeasurementID: uom = "",
+			serviceUom = "",
 			unitCost     = 0,
 			totalCost    = 0,
-			files        = "",
 			remarks      = ""
 		} = item;
 
@@ -781,13 +781,13 @@ $(document).ready(function() {
 			html += `
 			<tr class="itemTableRow">
 				<td>
-					<div class="itemcode">
-						${itemCode || "-"}
+					<div class="servicecode">
+						${serviceID || "-"}
 					</div>
 				</td>
 				<td>
-					<div class="itemname">
-						${itemName || "-"}
+					<div class="servicename">
+						${serviceName || "-"}
 					</div>
 				</td>
 				<td class="text-center">
@@ -801,8 +801,8 @@ $(document).ready(function() {
 					</div>
 				</td>
 				<td>
-					<div class="uom">
-						${uom || "-"}
+					<div class="serviceUom">
+						${serviceUom || "-"}
 					</div>
 				</td>
 				<td class="text-right">
@@ -827,15 +827,6 @@ $(document).ready(function() {
 				</td>
 			</tr>`;
 		} else {
-			const itemFile = files ? `
-			<div class="d-flex justify-content-between align-items-center py-2">
-				<a class="filename"
-				   href="${base_url+"assets/upload-files/request-items/"+files}" 
-				   target="_blank">
-				   ${files}
-				</a>
-				<span class="btnRemoveFile" style="cursor: pointer"><i class="fas fa-close"></i></span>
-			</div>` : "";
 			html += `
 			<tr class="itemTableRow">
 				<td class="text-center">
@@ -844,23 +835,26 @@ $(document).ready(function() {
 					</div>
 				</td>
 				<td>
-					<div class="itemcode">-</div>
+					<div class="servicecode">-</div>
 				</td>
 				<td>
-					<div class="itemname">
+					<div class="servicename">
 						<div class="form-group mb-0">
 							<select
 								class="form-control validate select2"
-								name="itemID"
-								id="itemID"
+								name="serviceID"
+								id="serviceID"
 								style="width: 100%"
 								required
 								${attr}>
-								${getInventoryItem(itemID, isProject)}
+								${getServiceItem(serviceID)}
 							</select>
-							<div class="invalid-feedback d-block" id="invalid-itemID"></div>
+							<div class="invalid-feedback d-block" id="invalid-serviceID"></div>
 						</div>
 					</div>
+				</td>
+                <td>
+					tanga
 				</td>
 				<td class="text-center">
 					<div class="quantity">
@@ -880,10 +874,7 @@ $(document).ready(function() {
 					</div>
 				</td>
 				<td>
-					<div class="category">-</div>
-				</td>
-				<td>
-					<div class="uom">-</div>
+					<div class="serviceUom">-</div>
 				</td>
 				<td class="text-right">
 					<div class="unitcost">
@@ -907,20 +898,6 @@ $(document).ready(function() {
 				</td>
 				<td class="text-right">
 					<div class="totalcost">${formatAmount(totalCost, true)}</div>
-				</td>
-				<td>
-					<div class="file">
-						<div class="displayfile">
-							${itemFile}
-						</div>
-						<input 
-							type="file" 
-							class="form-control" 
-							name="files" 
-							id="files"
-							accept="image/*, .pdf, .doc, .docx">
-						<div class="invalid-feedback d-block" id="invalid-files"></div>
-					</div>
 				</td>
 				<td>
 					<div class="remarks">
@@ -953,11 +930,11 @@ $(document).ready(function() {
 			$("td .action .checkboxrow", this).attr("project", `true`);
 
 			// ITEMCODE
-			$("td .itemcode", this).attr("id", `itemcode${i}`);
+			$("td .servicecode", this).attr("id", `servicecode${i}`);
 
 			// ITEMNAME
 			$(this).find("select").each(function(j) {
-				const itemID = $(this).val();
+				const serviceID = $(this).val();
 				$(this).attr("index", `${i}`);
 				$(this).attr("project", `true`);
 				$(this).attr("id", `projectitemid${i}`)
@@ -974,7 +951,7 @@ $(document).ready(function() {
 			$("td .category", this).attr("id", `category${i}`);
 
 			// UOM
-			$("td .uom", this).attr("id", `uom${i}`);
+			$("td .serviceUom", this).attr("id", `serviceUom${i}`);
 
 			// UNIT COST
 			$("td .unitcost [name=unitCost] ", this).attr("id", `unitcost${i}`);
@@ -1001,11 +978,11 @@ $(document).ready(function() {
 			$("td .action .checkboxrow", this).attr("company", `true`);
 
 			// ITEMCODE
-			$("td .itemcode", this).attr("id", `itemcode${i}`);
+			$("td .servicecode", this).attr("id", `servicecode${i}`);
 
 			// ITEMNAME
 			$(this).find("select").each(function(j) {
-				const itemID = $(this).val();
+				const serviceID = $(this).val();
 				$(this).attr("index", `${i}`);
 				$(this).attr("company", `true`);
 				$(this).attr("id", `companycompanyitemid${i}`)
@@ -1022,7 +999,7 @@ $(document).ready(function() {
 			$("td .category", this).attr("id", `category${i}`);
 
 			// UOM
-			$("td .uom", this).attr("id", `uom${i}`);
+			$("td .serviceUom", this).attr("id", `serviceUom${i}`);
 
 			// UNIT COST
 			$("td .unitcost [name=unitCost] ", this).attr("id", `unitcost${i}`);
@@ -1080,9 +1057,9 @@ $(document).ready(function() {
 						tableRow.fadeOut(500, function (){
 							$(this).closest("tr").remove();
 							updateTableItems();
-							$(`[name=itemID]${attr}`).each(function(i, obj) {
-								let itemID = $(this).val();
-								$(this).html(getInventoryItem(itemID, isProject));
+							$(`[name=serviceID]${attr}`).each(function(i, obj) {
+								let serviceID = $(this).val();
+								$(this).html(getServiceItem(serviceID, isProject));
 							}) 
 							updateDeleteButton();
 						});
@@ -1097,47 +1074,53 @@ $(document).ready(function() {
 	// ----- END DELETE TABLE ROW -----
 
 
-	// ----- SELECT PROJECT LIST -----
-    $(document).on("change", "[name=projectID]", function() {
-        const projectCode = $('option:selected', this).attr("projectCode");
+	// ----- SELECT CLIENT -----
+    $(document).on("change", "[name=clientID]", function() {
+        const clientID    = $(this).val();
         const clientCode  = $('option:selected', this).attr("clientCode");
         const clientName  = $('option:selected', this).attr("clientName");
         const address     = $('option:selected', this).attr("address");
 
-        $("[name=projectCode]").val(projectCode);
         $("[name=clientCode]").val(clientCode);
         $("[name=clientName]").val(clientName);
         $("[name=clientAddress]").val(address);
+
+        $(`[name="projectCode"]`).val("-");
+        $("[name=projectID]").html(getProjectList(null, clientID))
+    })
+    // ----- END SELECT CLIENT -----
+
+
+	// ----- SELECT PROJECT LIST -----
+    $(document).on("change", "[name=projectID]", function() {
+        const projectCode = $('option:selected', this).attr("projectCode");
+
+        $("[name=projectCode]").val(projectCode);
     })
     // ----- END SELECT PROJECT LIST -----
 
 
     // ----- SELECT ITEM NAME -----
-    $(document).on("change", "[name=itemID]", function() {
-        const itemCode     = $('option:selected', this).attr("itemCode");
-        const categoryName = $('option:selected', this).attr("categoryName");
-        const uom          = $('option:selected', this).attr("uom");
-		const isProject    = $(this).closest("tbody").attr("project") == "true";
-		const attr         = isProject ? "[project=true]" : "[company=true]";
+    $(document).on("change", "[name=serviceID]", function() {
+        const serviceCode = $('option:selected', this).attr("serviceCode");
+        const serviceUom  = $('option:selected', this).attr("serviceUom");
 
-        $(this).closest("tr").find(`.itemcode`).first().text(itemCode);
-        $(this).closest("tr").find(`.category`).first().text(categoryName);
-        $(this).closest("tr").find(`.uom`).first().text(uom);
+        $(this).closest("tr").find(`.servicecode`).first().text(serviceCode);
+        $(this).closest("tr").find(`.serviceUom`).first().text(serviceUom);
 
-		$(`[name=itemID]${attr}`).each(function(i, obj) {
-			let itemID = $(this).val();
-			if (itemID == "0") {
+		$(`[name=serviceID]`).each(function(i, obj) {
+			let serviceID = $(this).val();
+			if (serviceID == "0") {
 				$(this).closest("tr").find("[name=quantity]").removeAttr("required");
 				$(this).closest("tr").find("[name=quantity]").val("0");
 				$(this).closest("tr").find("[name=unitCost]").val("0.00");
 				$(this).closest("tr").find(".totalcost").text(formatAmount("0.00", true));
-				$(this).closest("tr").find("[name=files]").val("");
 				$(this).closest("tr").find("[name=remarks]").val("");
-				$(this).closest("tr").find("[name=quantity], [name=unitCost], [name=files], [name=remarks]").attr("disabled", "true");
+				$(this).closest("tr").find("[name=quantity], [name=unitCost], [name=remarks]").attr("disabled", "true");
 			} else {
-				$(this).closest("tr").find("[name=quantity], [name=unitCost], [name=files], [name=remarks]").removeAttr("disabled");
+				$(this).closest("tr").find("[name=quantity], [name=unitCost], [name=remarks]").removeAttr("disabled");
 			}
-			$(this).html(getInventoryItem(itemID, isProject));
+			$(this).html(getServiceItem(serviceID));
 		}) 
 		updateTotalAmount();
     })
@@ -1222,7 +1205,7 @@ $(document).ready(function() {
     // ----- INSERT ROW ITEM -----
     $(document).on("click", ".btnAddRow", function() {
 		let isProject = $(this).attr("project") == "true";
-        let row = getItemRow(isProject);
+        let row = getServiceRow(isProject);
 		if (isProject) {
 			$(".itemProjectTableBody").append(row);
 		} else {
@@ -1253,37 +1236,33 @@ $(document).ready(function() {
 		readOnly = isRevise ? false : readOnly;
 
 		let {
-			purchaseRequestID       = "",
-			revisePurchaseRequestID = "",
+			serviceRequisitionID       = "",
+			reviseServiceRequisitionID = "",
 			employeeID              = "",
+            clientID = "",
 			projectID               = "",
-			purchaseRequestReason   = "",
+			serviceRequisitionReason   = "",
 			projectTotalAmount      = "0",
 			companyTotalAmount      = "0",
-			purchaseRequestRemarks  = "",
+			serviceRequisitionRemarks  = "",
 			approversID             = "",
 			approversStatus         = "",
 			approversDate           = "",
-			purchaseRequestStatus   = false,
+			serviceRequisitionStatus   = false,
 			submittedAt             = false,
 			createdAt               = false,
 		} = data && data[0];
 
-		let requestProjectItems = "", requestCompanyItems = "";
-		if (purchaseRequestID) {
-			let requestItemsData = getTableData(
-				`ims_request_items_tbl LEFT JOIN ims_inventory_item_tbl USING(itemID) LEFT JOIN ims_inventory_category_tbl USING(categoryID)`, 
-				`quantity, unitCost, totalCost, files, remarks, itemID, itemCode, itemName, categoryName, unitOfMeasurementID, categoryType`, 
-				`purchaseRequestID = ${purchaseRequestID}`);
+		let requestServiceItems = "", requestCompanyItems = "";
+		if (serviceRequisitionID) {
 			requestItemsData.filter(item => item.categoryType == "project").map(item => {
-				requestProjectItems += getItemRow(true, item, readOnly);
+				requestServiceItems += getServiceRow(true, item, readOnly);
 			})
 			requestItemsData.filter(item => item.categoryType == "company").map(item => {
-				requestCompanyItems += getItemRow(false, item, readOnly);
+				requestCompanyItems += getServiceRow(false, item, readOnly);
 			})
 		} else {
-			requestProjectItems += getItemRow(true);
-			requestCompanyItems += getItemRow(false);
+			requestServiceItems += getServiceRow(true);
 		}
 
 		// ----- GET EMPLOYEE DATA -----
@@ -1296,12 +1275,12 @@ $(document).ready(function() {
 
 		readOnly ? preventRefresh(false) : preventRefresh(true);
 
-		$("#btnBack").attr("purchaseRequestID", purchaseRequestID);
-		$("#btnBack").attr("status", purchaseRequestStatus);
+		$("#btnBack").attr("serviceRequisitionID", serviceRequisitionID);
+		$("#btnBack").attr("status", serviceRequisitionStatus);
 		$("#btnBack").attr("employeeID", employeeID);
 
 		let disabled = readOnly ? "disabled" : "";
-		let checkboxProjectHeader = !disabled ? `
+		let checkboxServiceRequisitionHeader = !disabled ? `
 		<th class="text-center">
 			<div class="action">
 				<input type="checkbox" class="checkboxall" project="true">
@@ -1313,7 +1292,7 @@ $(document).ready(function() {
 				<input type="checkbox" class="checkboxall" company="true">
 			</div>
 		</th>` : ``;
-		let tableProjectRequestItemsName = !disabled ? "tableProjectRequestItems" : "tableProjectRequestItems0";
+		let tableServiceRequisitionItems = !disabled ? "tableServiceRequisitionItems" : "tableServiceRequisitionItems0";
 		let tableCompanyRequestItemsName = !disabled ? "tableCompanyRequestItems" : "tableCompanyRequestItems0";
 		let buttonProjectAddDeleteRow = !disabled ? `
 		<div class="w-100 text-left my-2">
@@ -1327,16 +1306,16 @@ $(document).ready(function() {
 		</div>` : "";
 		let button = formButtons(data, isRevise);
 
-		let reviseDocumentNo    = isRevise ? purchaseRequestID : revisePurchaseRequestID;
-		let documentHeaderClass = isRevise || revisePurchaseRequestID ? "col-lg-4 col-md-4 col-sm-12 px-1" : "col-lg-2 col-md-6 col-sm-12 px-1";
-		let documentDateClass   = isRevise || revisePurchaseRequestID ? "col-md-12 col-sm-12 px-0" : "col-lg-8 col-md-12 col-sm-12 px-1";
-		let documentReviseNo    = isRevise || revisePurchaseRequestID ? `
+		let reviseDocumentNo    = isRevise ? serviceRequisitionID : reviseServiceRequisitionID;
+		let documentHeaderClass = isRevise || reviseServiceRequisitionID ? "col-lg-4 col-md-4 col-sm-12 px-1" : "col-lg-2 col-md-6 col-sm-12 px-1";
+		let documentDateClass   = isRevise || reviseServiceRequisitionID ? "col-md-12 col-sm-12 px-0" : "col-lg-8 col-md-12 col-sm-12 px-1";
+		let documentReviseNo    = isRevise || reviseServiceRequisitionID ? `
 		<div class="col-lg-4 col-md-4 col-sm-12 px-1">
 			<div class="card">
 				<div class="body">
 					<small class="text-small text-muted font-weight-bold">Revised Document No.</small>
 					<h6 class="mt-0 text-danger font-weight-bold">
-						${getFormCode("PR", createdAt, reviseDocumentNo)}
+						${getFormCode("SR", createdAt, reviseDocumentNo)}
 					</h6>      
 				</div>
 			</div>
@@ -1350,7 +1329,7 @@ $(document).ready(function() {
                     <div class="body">
                         <small class="text-small text-muted font-weight-bold">Document No.</small>
                         <h6 class="mt-0 text-danger font-weight-bold">
-							${purchaseRequestID && !isRevise ? getFormCode("PR", createdAt, purchaseRequestID) : "---"}
+							${serviceRequisitionID && !isRevise ? getFormCode("SR", createdAt, serviceRequisitionID) : "---"}
 						</h6>      
                     </div>
                 </div>
@@ -1360,7 +1339,7 @@ $(document).ready(function() {
                     <div class="body">
                         <small class="text-small text-muted font-weight-bold">Status</small>
                         <h6 class="mt-0 font-weight-bold">
-							${purchaseRequestStatus && !isRevise ? getStatusStyle(purchaseRequestStatus) : "---"}
+							${serviceRequisitionStatus && !isRevise ? getStatusStyle(serviceRequisitionStatus) : "---"}
 						</h6>      
                     </div>
                 </div>
@@ -1392,7 +1371,7 @@ $(document).ready(function() {
                         <div class="body">
                             <small class="text-small text-muted font-weight-bold">Date Approved</small>
                             <h6 class="mt-0 font-weight-bold">
-								${getDateApproved(purchaseRequestStatus, approversID, approversDate)}
+								${getDateApproved(serviceRequisitionStatus, approversID, approversDate)}
 							</h6>      
                         </div>
                     </div>
@@ -1404,7 +1383,7 @@ $(document).ready(function() {
                     <div class="body">
                         <small class="text-small text-muted font-weight-bold">Remarks</small>
                         <h6 class="mt-0 font-weight-bold">
-							${purchaseRequestRemarks && !isRevise ? purchaseRequestRemarks : "---"}
+							${serviceRequisitionRemarks && !isRevise ? serviceRequisitionRemarks : "---"}
 						</h6>      
                     </div>
                 </div>
@@ -1413,13 +1392,37 @@ $(document).ready(function() {
 
         <div class="row" id="form_purchase_request">
 
-            <div class="col-md-4 col-sm-12">
+            <div class="col-md-3 col-sm-12">
+                <div class="form-group">
+                    <label>Client Code</label>
+                    <input type="text" class="form-control" name="clientCode" disabled value="-">
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-12">
+                <div class="form-group">
+                    <label>Client Name <code>*</code></label>
+                    <select class="form-control validate select2" 
+                        name="clientID"
+                        id="clientID"
+                        required>
+                            <option selected disabled>Select Client Name</option>
+                            ${getClientList(clientID)}
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-6 col-sm-12">
+                <div class="form-group">
+                    <label>Client Address</label>
+                    <input type="text" class="form-control" name="clientAddress" disabled value="-">
+                </div>
+            </div>
+            <div class="col-md-6 col-sm-12">
                 <div class="form-group">
                     <label>Project Code</label>
                     <input type="text" class="form-control" name="projectCode" disabled value="-">
                 </div>
             </div>
-            <div class="col-md-4 col-sm-12">
+            <div class="col-md-6 col-sm-12">
                 <div class="form-group">
                     <label>Project Name ${!disabled ? "<code>*</code>" : ""}</label>
                     <select class="form-control validate select2"
@@ -1429,27 +1432,9 @@ $(document).ready(function() {
                         required
 						${disabled}>
                         <option selected disabled>Select Project Name</option>
-                        ${getProjectList(projectID)}
+                        ${getProjectList(projectID, clientID)}
                     </select>
                     <div class="d-block invalid-feedback" id="invalid-projectID"></div>
-                </div>
-            </div>
-            <div class="col-md-4 col-sm-12">
-                <div class="form-group">
-                    <label>Client Code</label>
-                    <input type="text" class="form-control" name="clientCode" disabled value="-">
-                </div>
-            </div>
-            <div class="col-md-4 col-sm-12">
-                <div class="form-group">
-                    <label>Client Name</label>
-                    <input type="text" class="form-control" name="clientName" disabled value="-">
-                </div>
-            </div>
-            <div class="col-md-8 col-sm-12">
-                <div class="form-group">
-                    <label>Client Address</label>
-                    <input type="text" class="form-control" name="clientAddress" disabled value="-">
                 </div>
             </div>
             <div class="col-md-4 col-sm-12">
@@ -1477,37 +1462,37 @@ $(document).ready(function() {
                         data-allowcharacters="[a-z][A-Z][0-9][ ][.][,][-][()]['][/][&]"
                         minlength="1"
                         maxlength="200"
-                        id="purchaseRequestReason"
-                        name="purchaseRequestReason"
+                        id="serviceRequisitionReason"
+                        name="serviceRequisitionReason"
                         required
                         rows="4"
                         style="resize:none;"
-						${disabled}>${purchaseRequestReason ?? ""}</textarea>
-                    <div class="d-block invalid-feedback" id="invalid-purchaseRequestReason"></div>
+						${disabled}>${serviceRequisitionReason ?? ""}</textarea>
+                    <div class="d-block invalid-feedback" id="invalid-serviceRequisitionReason"></div>
                 </div>
             </div>
 
             <div class="col-sm-12">
+
                 <div class="w-100">
 					<hr class="pb-1">
-					<div class="text-primary font-weight-bold" style="font-size: 1.5rem;">Project Materials and Equipment</div>
-                    <table class="table table-striped" id="${tableProjectRequestItemsName}">
+					<div class="text-primary font-weight-bold" style="font-size: 1.5rem;">Services: </div>
+                    <table class="table table-striped" id="${tableServiceRequisitionItems}">
                         <thead>
                             <tr style="white-space: nowrap">
-								${checkboxProjectHeader}
-                                <th>Item Code</th>
-                                <th>Item Name ${!disabled ? "<code>*</code>" : ""}</th>
+								${checkboxServiceRequisitionHeader}
+                                <th>Service Code</th>
+                                <th>Service Name ${!disabled ? "<code>*</code>" : ""}</th>
+                                <th>Scope of Work</th>
                                 <th>Quantity ${!disabled ? "<code>*</code>" : ""}</th>
-                                <th>Category</th>
                                 <th>UOM</th>
                                 <th>Unit Cost ${!disabled ? "<code>*</code>" : ""}</th>
                                 <th>Total Cost</th>
-                                <th>File</th>
                                 <th>Remarks</th>
                             </tr>
                         </thead>
                         <tbody class="itemProjectTableBody" project="true">
-                            ${requestProjectItems}
+                            ${requestServiceItems}
                         </tbody>
                     </table>
                     
@@ -1520,37 +1505,6 @@ $(document).ready(function() {
 					</div>
                 </div>
 
-				<div class="w-100">
-					<hr class="pb-1">
-					<div class="text-primary font-weight-bold" style="font-size: 1.5rem;">Company Materials and Equipment</div>
-                    <table class="table table-striped" id="${tableCompanyRequestItemsName}">
-                        <thead>
-                            <tr style="white-space: nowrap">
-								${checkboxCompanyHeader}
-                                <th>Item Code</th>
-                                <th>Item Name ${!disabled ? "<code>*</code>" : ""}</th>
-                                <th>Quantity ${!disabled ? "<code>*</code>" : ""}</th>
-                                <th>Category</th>
-                                <th>UOM</th>
-                                <th>Unit Cost ${!disabled ? "<code>*</code>" : ""}</th>
-                                <th>Total Cost</th>
-                                <th>File</th>
-                                <th>Remarks</th>
-                            </tr>
-                        </thead>
-                        <tbody class="itemCompanyTableBody" company="true">
-                            ${requestCompanyItems}
-                        </tbody>
-                    </table>
-                    
-					<div class="w-100 d-flex justify-content-between align-items-center py-2">
-						<div>${buttonCompanyAddDeleteRow}</div>
-						<div class="font-weight-bolder" style="font-size: 1rem;">
-							<span>Total Amount: &nbsp;</span>
-							<span class="text-danger" style="font-size: 1.2em" id="totalAmount" company="true">${formatAmount(companyTotalAmount, true)}</span>
-						</div>
-					</div>
-                </div>
             </div>
 
             <div class="col-md-12 text-right mt-3">
@@ -1636,12 +1590,12 @@ $(document).ready(function() {
 		const approversID = method != "approve" && moduleApprover;
 
 		if (id) {
-			data["purchaseRequestID"] = id;
-			formData.append("purchaseRequestID", id);
+			data["serviceRequisitionID"] = id;
+			formData.append("serviceRequisitionID", id);
 
 			if (status != "2") {
-				data["purchaseRequestStatus"] = status;
-				formData.append("purchaseRequestStatus", status);
+				data["serviceRequisitionStatus"] = status;
+				formData.append("serviceRequisitionStatus", status);
 			}
 		}
 
@@ -1657,13 +1611,13 @@ $(document).ready(function() {
 			
 			data["employeeID"]            = sessionID;
 			data["projectID"]             = $("[name=projectID]").val() || null;
-			data["purchaseRequestReason"] = $("[name=purchaseRequestReason]").val()?.trim();
+			data["serviceRequisitionReason"] = $("[name=serviceRequisitionReason]").val()?.trim();
 			data["projectTotalAmount"]    = updateTotalAmount(true);
 			data["companyTotalAmount"]    = updateTotalAmount(false);
 			
 			formData.append("employeeID", sessionID);
 			formData.append("projectID", $("[name=projectID]").val() || null);
-			formData.append("purchaseRequestReason", $("[name=purchaseRequestReason]").val()?.trim());
+			formData.append("serviceRequisitionReason", $("[name=serviceRequisitionReason]").val()?.trim());
 			formData.append("projectTotalAmount", updateTotalAmount(true));
 			formData.append("companyTotalAmount", updateTotalAmount(false));
 
@@ -1674,9 +1628,9 @@ $(document).ready(function() {
 				formData.append("createdBy", sessionID);
 				formData.append("createdAt", dateToday());
 			} else if (action == "update") {
-				data["purchaseRequestID"] = id;
+				data["serviceRequisitionID"] = id;
 
-				formData.append("purchaseRequestID", id);
+				formData.append("serviceRequisitionID", id);
 			}
 
 			if (method == "submit") {
@@ -1684,27 +1638,27 @@ $(document).ready(function() {
 				formData.append("submittedAt", dateToday());
 				if (approversID) {
 					data["approversID"]           = approversID;
-					data["purchaseRequestStatus"] = 1;
+					data["serviceRequisitionStatus"] = 1;
 
 					formData.append("approversID", approversID);
-					formData.append("purchaseRequestStatus", 1);
+					formData.append("serviceRequisitionStatus", 1);
 				} else {  // AUTO APPROVED - IF NO APPROVERS
 					data["approversID"]           = sessionID;
 					data["approversStatus"]       = 2;
 					data["approversDate"]         = dateToday();
-					data["purchaseRequestStatus"] = 2;
+					data["serviceRequisitionStatus"] = 2;
 
 					formData.append("approversID", sessionID);
 					formData.append("approversStatus", 2);
 					formData.append("approversDate", dateToday());
-					formData.append("purchaseRequestStatus", 2);
+					formData.append("serviceRequisitionStatus", 2);
 				}
 			}
 
 			$(".itemTableRow").each(function(i, obj) {
 				const categoryType = $(this).closest("tbody").attr("project") == "true" ? "project" : "company";
 
-				const itemID    = $("td [name=itemID]", this).val();	
+				const serviceID    = $("td [name=serviceID]", this).val();	
 				const quantity  = +$("td [name=quantity]", this).val();	
 				const unitcost  = +$("td [name=unitCost]", this).val().replaceAll(",", "");	
 				const totalcost = quantity * unitcost;
@@ -1715,11 +1669,11 @@ $(document).ready(function() {
 				const filename  = file ? file?.name : "";
 
 				let temp = {
-					itemID, quantity, unitcost, totalcost: totalcost.toFixed(2),
+					serviceID, quantity, unitcost, totalcost: totalcost.toFixed(2),
 					filename, categoryType
 				};
 
-				formData.append(`items[${i}][itemID]`, itemID);
+				formData.append(`items[${i}][serviceID]`, serviceID);
 				formData.append(`items[${i}][categoryType]`, categoryType);
 				formData.append(`items[${i}][quantity]`, quantity);
 				formData.append(`items[${i}][unitcost]`, unitcost);
@@ -1778,7 +1732,7 @@ $(document).ready(function() {
 
     // ----- VIEW DOCUMENT -----
 	$(document).on("click", "#btnRevise", function () {
-		const id = $(this).attr("purchaseRequestID");
+		const id = $(this).attr("serviceRequisitionID");
 		viewDocument(id, false, true);
 	});
 	// ----- END VIEW DOCUMENT -----
@@ -1786,10 +1740,10 @@ $(document).ready(function() {
 
 	// ----- SAVE CLOSE FORM -----
 	$(document).on("click", "#btnBack", function () {
-		const id         = $(this).attr("purchaseRequestID");
+		const id         = $(this).attr("serviceRequisitionID");
 		const revise     = $(this).attr("revise") == "true";
 		const employeeID = $(this).attr("employeeID");
-		const feedback   = $(this).attr("code") || getFormCode("PR", dateToday(), id);
+		const feedback   = $(this).attr("code") || getFormCode("SR", dateToday(), id);
 		const status     = $(this).attr("status");
 
 		if (status != "false" && status != 0) {
@@ -1797,9 +1751,9 @@ $(document).ready(function() {
 			if (revise) {
 				const action = revise && "insert" || (id && feedback ? "update" : "insert");
 				const data   = getPurchaseRequestData(action, "save", "0", id);
-				data.append("purchaseRequestStatus", 0);
-				data.append("revisePurchaseRequestID", id);
-				data.delete("purchaseRequestID");
+				data.append("serviceRequisitionStatus", 0);
+				data.append("reviseServiceRequisitionID", id);
+				data.delete("serviceRequisitionID");
 	
 				savePurchaseRequest(data, "save", null, pageContent);
 			} else {
@@ -1814,7 +1768,7 @@ $(document).ready(function() {
 		} else {
 			const action = id && feedback ? "update" : "insert";
 			const data   = getPurchaseRequestData(action, "save", "0", id);
-			data.append("purchaseRequestStatus", 0);
+			data.append("serviceRequisitionStatus", 0);
 
 			savePurchaseRequest(data, "save", null, pageContent);
 		}
@@ -1824,16 +1778,16 @@ $(document).ready(function() {
 
     // ----- SAVE DOCUMENT -----
 	$(document).on("click", "#btnSave, #btnCancel", function () {
-		const id       = $(this).attr("purchaseRequestID");
+		const id       = $(this).attr("serviceRequisitionID");
 		const revise   = $(this).attr("revise") == "true";
-		const feedback = $(this).attr("code") || getFormCode("PR", dateToday(), id);
+		const feedback = $(this).attr("code") || getFormCode("SR", dateToday(), id);
 		const action   = revise && "insert" || (id && feedback ? "update" : "insert");
 		const data     = getPurchaseRequestData(action, "save", "0", id);
-		data.append("purchaseRequestStatus", 0);
+		data.append("serviceRequisitionStatus", 0);
 
 		if (revise) {
-			data.append("revisePurchaseRequestID", id);
-			data.delete("purchaseRequestID");
+			data.append("reviseServiceRequisitionID", id);
+			data.delete("serviceRequisitionID");
 		}
 
 		savePurchaseRequest(data, "save", null, pageContent);
@@ -1843,7 +1797,7 @@ $(document).ready(function() {
 
     // ----- SUBMIT DOCUMENT -----
 	$(document).on("click", "#btnSubmit", function () {
-		const id           = $(this).attr("purchaseRequestID");
+		const id           = $(this).attr("serviceRequisitionID");
 		const revise       = $(this).attr("revise") == "true";
 		const validate     = validateForm("form_purchase_request");
 
@@ -1852,8 +1806,8 @@ $(document).ready(function() {
 			const data   = getPurchaseRequestData(action, "submit", "1", id);
 
 			if (revise) {
-				data.append("revisePurchaseRequestID", id);
-				data.delete("purchaseRequestID");
+				data.append("reviseServiceRequisitionID", id);
+				data.delete("serviceRequisitionID");
 			}
 
 			let approversID = "", approversDate = "";
@@ -1882,7 +1836,7 @@ $(document).ready(function() {
 
     // ----- CANCEL DOCUMENT -----
 	$(document).on("click", "#btnCancelForm", function () {
-		const id     = $(this).attr("purchaseRequestID");
+		const id     = $(this).attr("serviceRequisitionID");
 		const status = $(this).attr("status");
 		const action = "update";
 		const data   = getPurchaseRequestData(action, "cancelform", "4", id, status);
@@ -1894,9 +1848,9 @@ $(document).ready(function() {
 
     // ----- APPROVE DOCUMENT -----
 	$(document).on("click", "#btnApprove", function () {
-		const id       = decryptString($(this).attr("purchaseRequestID"));
+		const id       = decryptString($(this).attr("serviceRequisitionID"));
 		const feedback = $(this).attr("code") || getFormCode("SCH", dateToday(), id);
-		let tableData  = getTableData("ims_purchase_request_tbl", "", "purchaseRequestID = " + id);
+		let tableData  = getTableData("ims_service_requisition_tbl", "", "serviceRequisitionID = " + id);
 
 		if (tableData) {
 			let approversID     = tableData[0].approversID;
@@ -1933,7 +1887,7 @@ $(document).ready(function() {
 				};
 			}
 
-			data.append("purchaseRequestStatus", status);
+			data.append("serviceRequisitionStatus", status);
 
 			savePurchaseRequest(data, "approve", notificationData, pageContent);
 		}
@@ -1943,8 +1897,8 @@ $(document).ready(function() {
 
     // ----- REJECT DOCUMENT -----
 	$(document).on("click", "#btnReject", function () {
-		const id       = $(this).attr("purchaseRequestID");
-		const feedback = $(this).attr("code") || getFormCode("PR", dateToday(), id);
+		const id       = $(this).attr("serviceRequisitionID");
+		const feedback = $(this).attr("code") || getFormCode("SR", dateToday(), id);
 
 		$("#modal_purchase_request_content").html(preloader);
 		$("#modal_purchase_request .page-title").text("DENY PURCHASE REQUEST");
@@ -1957,17 +1911,17 @@ $(document).ready(function() {
 					data-allowcharacters="[0-9][a-z][A-Z][ ][.][,][_]['][()][?][-][/]"
 					minlength="2"
 					maxlength="250"
-					id="purchaseRequestRemarks"
-					name="purchaseRequestRemarks"
+					id="serviceRequisitionRemarks"
+					name="serviceRequisitionRemarks"
 					rows="4"
 					style="resize: none"
 					required></textarea>
-				<div class="d-block invalid-feedback" id="invalid-purchaseRequestRemarks"></div>
+				<div class="d-block invalid-feedback" id="invalid-serviceRequisitionRemarks"></div>
 			</div>
 		</div>
 		<div class="modal-footer text-right">
 			<button class="btn btn-danger" id="btnRejectConfirmation"
-			purchaseRequestID="${id}"
+			serviceRequisitionID="${id}"
 			code="${feedback}"><i class="far fa-times-circle"></i> Deny</button>
 			<button class="btn btn-cancel" data-dismiss="modal"><i class="fas fa-ban"></i> Cancel</button>
 		</div>`;
@@ -1975,12 +1929,12 @@ $(document).ready(function() {
 	});
 
 	$(document).on("click", "#btnRejectConfirmation", function () {
-		const id       = decryptString($(this).attr("purchaseRequestID"));
-		const feedback = $(this).attr("code") || getFormCode("PR", dateToday(), id);
+		const id       = decryptString($(this).attr("serviceRequisitionID"));
+		const feedback = $(this).attr("code") || getFormCode("SR", dateToday(), id);
 
 		const validate = validateForm("modal_purchase_request");
 		if (validate) {
-			let tableData = getTableData("ims_purchase_request_tbl", "", "purchaseRequestID = " + id);
+			let tableData = getTableData("ims_service_requisition_tbl", "", "serviceRequisitionID = " + id);
 			if (tableData) {
 				let approversStatus = tableData[0].approversStatus;
 				let approversDate   = tableData[0].approversDate;
@@ -1989,10 +1943,10 @@ $(document).ready(function() {
 				let data = new FormData;
 				data.append("action", "update");
 				data.append("method", "deny");
-				data.append("purchaseRequestID", id);
+				data.append("serviceRequisitionID", id);
 				data.append("approversStatus", updateApproveStatus(approversStatus, 3));
 				data.append("approversDate", updateApproveDate(approversDate));
-				data.append("purchaseRequestRemarks", $("[name=purchaseRequestRemarks]").val()?.trim());
+				data.append("serviceRequisitionRemarks", $("[name=serviceRequisitionRemarks]").val()?.trim());
 				data.append("updatedBy", sessionID);
 
 				let notificationData = {
@@ -2147,15 +2101,15 @@ function savePurchaseRequest(data = null, method = "submit", notificationData = 
 
 						let swalTitle;
 						if (method == "submit") {
-							swalTitle = `${getFormCode("PR", dateCreated, insertedID)} submitted successfully!`;
+							swalTitle = `${getFormCode("SR", dateCreated, insertedID)} submitted successfully!`;
 						} else if (method == "save") {
-							swalTitle = `${getFormCode("PR", dateCreated, insertedID)} saved successfully!`;
+							swalTitle = `${getFormCode("SR", dateCreated, insertedID)} saved successfully!`;
 						} else if (method == "cancelform") {
-							swalTitle = `${getFormCode("PR", dateCreated, insertedID)} cancelled successfully!`;
+							swalTitle = `${getFormCode("SR", dateCreated, insertedID)} cancelled successfully!`;
 						} else if (method == "approve") {
-							swalTitle = `${getFormCode("PR", dateCreated, insertedID)} approved successfully!`;
+							swalTitle = `${getFormCode("SR", dateCreated, insertedID)} approved successfully!`;
 						} else if (method == "deny") {
-							swalTitle = `${getFormCode("PR", dateCreated, insertedID)} denied successfully!`;
+							swalTitle = `${getFormCode("SR", dateCreated, insertedID)} denied successfully!`;
 						}	
 		
 						if (isSuccess == "true") {

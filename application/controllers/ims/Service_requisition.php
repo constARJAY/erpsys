@@ -1,73 +1,40 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
-class Transfer_request extends CI_Controller {
+class Service_requisition extends CI_Controller {
 
     public function __construct()
     {
         parent::__construct();
-        $this->load->model("ims/TransferRequest_model", "purchaserequest");
-        isAllowed(37);
+        $this->load->model("ims/ServiceRequisition_model", "servicerequisition");
+        isAllowed(46);
     }
 
     public function index()
     {
-        $data["title"] = "Transfer Request";
+        $data["title"] = "Service Requisition";
 
         $this->load->view("template/header",$data);
-        $this->load->view("ims/transfer_request/index");
+        $this->load->view("ims/service_requisition/index");
         $this->load->view("template/footer");
     }
 
-    // public function getTableData() 
-    // {
-    //     $tableName    = $this->input->post("tableName");
-    //     $columnName   = $this->input->post("columnName"); 
-    //     $searchFilter = $this->input->post("searchFilter");
-    //     $orderBy      = $this->input->post("orderBy");
-    //     echo json_encode($this->company_setup->getTableData($tableName, $columnName, $searchFilter, $orderBy));
-    // }
-
-    // public function updateTableData()
-    // {
-    //     $tableName   = $this->input->post("tableName") ? $this->input->post("tableName") : null;
-    //     $tableData   = $this->input->post("tableData") ? $this->input->post("tableData") : false;
-    //     $whereFilter = $this->input->post("whereFilter") ? $this->input->post("whereFilter") : false;
-    //     $feedback    = $this->input->post("feedback")  ? $this->input->post("feedback") : null;
-    //     $data = array();
-
-    //     // $uploadedFiles = $this->getUploadedFiles();
-    //     // if ($uploadedFiles) {
-    //     //     foreach ($uploadedFiles as $fileKey => $fileValue) {
-    //     //         $data[$fileKey] = $fileValue;
-    //     //     }
-    //     // }
-        
-    //     if ($tableName && $tableData && $whereFilter) {
-    //         foreach ($tableData as $key => $value) {
-    //             $data[$key] = $value;
-    //         }
-    //         echo json_encode($this->company_setup->updateTableData($tableName, $data, $whereFilter, $feedback));
-    //     } else {
-    //         echo json_encode("false|Invalid arguments");
-    //     }
-    // }
-
-    public function saveTransferRequest()
+    public function savePurchaseRequest()
     {
         $action                  = $this->input->post("action");
         $method                  = $this->input->post("method");
-        $transferRequestID       = $this->input->post("transferRequestID") ?? null;
-        $reviseTransferRequestID = $this->input->post("reviseTransferRequestID") ?? null;
+        $purchaseRequestID       = $this->input->post("purchaseRequestID") ?? null;
+        $revisePurchaseRequestID = $this->input->post("revisePurchaseRequestID") ?? null;
         $employeeID              = $this->input->post("employeeID");
-        $inventoryStorageIDSender      = $this->input->post("inventoryStorageIDSender") ?? null;
-        $inventoryStorageIDReceiver      = $this->input->post("inventoryStorageIDReceiver") ?? null;
+        $projectID               = $this->input->post("projectID") ?? null;
         $approversID             = $this->input->post("approversID") ?? null;
         $approversStatus         = $this->input->post("approversStatus") ?? null;
         $approversDate           = $this->input->post("approversDate") ?? null;
-        $transferRequestStatus   = $this->input->post("transferRequestStatus");
-        $transferRequestReason   = $this->input->post("transferRequestReason") ?? null;
-        $transferRequestRemarks  = $this->input->post("transferRequestRemarks") ?? null;
+        $purchaseRequestStatus   = $this->input->post("purchaseRequestStatus");
+        $purchaseRequestReason   = $this->input->post("purchaseRequestReason") ?? null;
+        $projectTotalAmount      = $this->input->post("projectTotalAmount") ?? null;
+        $companyTotalAmount      = $this->input->post("companyTotalAmount") ?? null;
+        $purchaseRequestRemarks  = $this->input->post("purchaseRequestRemarks") ?? null;
         $submittedAt             = $this->input->post("submittedAt") ?? null;
         $createdBy               = $this->input->post("createdBy");
         $updatedBy               = $this->input->post("updatedBy");
@@ -75,17 +42,16 @@ class Transfer_request extends CI_Controller {
         $items                   = $this->input->post("items") ?? null;
 
         $purchaseRequestData = [
-            // "revisePurchaseRequestID" => $revisePurchaseRequestID,
+            "revisePurchaseRequestID" => $revisePurchaseRequestID,
             "employeeID"              => $employeeID,
-            "inventoryStorageIDSender"     => $inventoryStorageIDSender,
-            "inventoryStorageIDReceiver"     => $inventoryStorageIDReceiver,
+            "projectID"               => $projectID,
             "approversID"             => $approversID,
             "approversStatus"         => $approversStatus,
             "approversDate"           => $approversDate,
-            "transferRequestStatus"   => $transferRequestStatus,
-            "transferRequestReason"   => $transferRequestReason,
-            // "projectTotalAmount"      => $projectTotalAmount,
-            // "companyTotalAmount"      => $companyTotalAmount,
+            "purchaseRequestStatus"   => $purchaseRequestStatus,
+            "purchaseRequestReason"   => $purchaseRequestReason,
+            "projectTotalAmount"      => $projectTotalAmount,
+            "companyTotalAmount"      => $companyTotalAmount,
             "submittedAt"             => $submittedAt,
             "createdBy"               => $createdBy,
             "updatedBy"               => $updatedBy,
@@ -93,47 +59,52 @@ class Transfer_request extends CI_Controller {
         ];
 
         if ($action == "update") {
-            // unset($purchaseRequestData["revisePurchaseRequestID"]);
+            unset($purchaseRequestData["revisePurchaseRequestID"]);
             unset($purchaseRequestData["createdBy"]);
             unset($purchaseRequestData["createdAt"]);
 
             if ($method == "cancelform") {
                 $purchaseRequestData = [
-                    "transferRequestStatus" => 4,
+                    "purchaseRequestStatus" => 4,
                     "updatedBy"             => $updatedBy,
                 ];
             } else if ($method == "approve") {
                 $purchaseRequestData = [
                     "approversStatus"       => $approversStatus,
                     "approversDate"         => $approversDate,
-                    "transferRequestStatus" => $transferRequestStatus,
+                    "purchaseRequestStatus" => $purchaseRequestStatus,
                     "updatedBy"             => $updatedBy,
                 ];
             } else if ($method == "deny") {
                 $purchaseRequestData = [
                     "approversStatus"        => $approversStatus,
                     "approversDate"          => $approversDate,
-                    "transferRequestStatus"  => 3,
-                    "transferRequestRemarks" => $transferRequestRemarks,
+                    "purchaseRequestStatus"  => 3,
+                    "purchaseRequestRemarks" => $purchaseRequestRemarks,
                     "updatedBy"              => $updatedBy,
                 ];
             }
         }
 
-        $saveTransferData = $this->purchaserequest->savePurchaseRequestData($action, $purchaseRequestData, $transferRequestID);
-        if ($saveTransferData) {
-            $result = explode("|", $saveTransferData);
+        $savePurchaseRequestData = $this->servicerequisition->savePurchaseRequestData($action, $purchaseRequestData, $purchaseRequestID);
+        if ($savePurchaseRequestData) {
+            $result = explode("|", $savePurchaseRequestData);
 
             if ($result[0] == "true") {
-                $transferRequestID = $result[2];
+                $purchaseRequestID = $result[2];
 
                 if ($items) {
                     $purchaseRequestItems = [];
                     foreach($items as $index => $item) {
                         $temp = [
-                            "transferRequestID" => $transferRequestID,
+                            "purchaseRequestID" => $purchaseRequestID,
                             "itemID"            => $item["itemID"] != "null" ? $item["itemID"] : null,
+                            "categoryType"      => $item["categoryType"],
                             "quantity"          => $item["quantity"],
+                            "unitCost"          => $item["unitcost"],
+                            "totalCost"         => $item["totalcost"],
+                            "files"             => array_key_exists("existingFile", $item) ? $item["existingFile"] : null, 
+                            "remarks"           => $item["remarks"] ? $item["remarks"] : null, 
                             "createdBy"         => $item["createdBy"],
                             "updatedBy"         => $item["updatedBy"],
                         ];
@@ -171,20 +142,13 @@ class Transfer_request extends CI_Controller {
                         // ----- END UPDATE ITEMS FILE -----
                     }
 
-                    $savePurchTransferstItems = $this->purchaserequest->savePurchaseRequestItems($purchaseRequestItems, $transferRequestID);
+                    $savePurchaseRequestItems = $this->servicerequisition->savePurchaseRequestItems($purchaseRequestItems, $purchaseRequestID);
                 }
 
             }
             
         }
-        echo json_encode($saveTransferData);
-    }
-
-    function updateStorage(){
-
-        $saveupdateStorage = $this->purchaserequest->updateStorage();
-        echo json_encode($saveupdateStorage);
-        
+        echo json_encode($savePurchaseRequestData);
     }
 
 }

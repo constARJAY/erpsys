@@ -419,7 +419,7 @@ class Purchase_order extends CI_Controller {
 
         // ----- TITLE -----
         $sheet->mergeCells('A1:K1');
-        $sheet->setCellValue('A1', "PO-21-00001");
+        $sheet->setCellValue('A1', getFormCode("PO", $data["createdAt"], $data["purchaseOrderID"]));
         $sheet->getStyle('A1')->applyFromArray($documentNoStyle);
         $sheet->mergeCells('A2:K2');
         $sheet->setCellValue('A2', "PURCHASE ORDER");
@@ -590,31 +590,10 @@ class Purchase_order extends CI_Controller {
         $sheet->getRowDimension("$rowNumber")->setRowHeight(17);
         $rowNumber++;
 
-        $employees = [
-            [
-                "title"       => "Prepared by",
-                "name"    => "Jennifer N. Moroña",
-                "position" => "Purchasing Assistant"
-            ],
-            [
-                "title"       => "Checked by",
-                "name"    => "Joas Galaroza",
-                "position" => "Purchasing Officer"
-            ],
-            [
-                "title"       => "Approved by",
-                "name"    => "Carlmark M. Tangalin",
-                "position" => "Chief-Operating-Officer"
-            ],
-            [
-                "title"       => "Approved by",
-                "name"    => "Carlmark M. Tangalin",
-                "position" => "Chief-Operating-Officer"
-            ],
-        ];
+        $employees      = $data["employees"];
         $countEmployees = count($employees);
         if ($countEmployees > 3) {
-            $columns = [["B", "F"], ["J", "K"]];
+            $columns = [["B", "F"], ["G", "K"]];
         } else {
             $columns = [["B", "E"], ["F", "H"], ["I", "K"]];
         }
@@ -622,20 +601,33 @@ class Purchase_order extends CI_Controller {
         foreach ($employees as $index => $employee) {
             if ($countEmployees > 3) {
                 if ($index % 2 == 0) {
-                    $rowNumber++;
-                    $cell     = $columns[1][0].$rowNumber.":".$columns[1][1].$rowNumber;
-                    $baseCell = $columns[1][0].$rowNumber;
-                } else {
+                    if ($index != 0) $rowNumber++;
                     $cell     = $columns[0][0].$rowNumber.":".$columns[0][1].$rowNumber;
                     $baseCell = $columns[0][0].$rowNumber;
+                    if (($index+1) == $countEmployees) {
+                        $cell     = "B".$rowNumber.":K".$rowNumber;
+                        $baseCell = "B".$rowNumber;
+                    }
+                } else {
+                    $cell     = $columns[1][0].$rowNumber.":".$columns[1][1].$rowNumber;
+                    $baseCell = $columns[1][0].$rowNumber;
                 }
             } else {
                 $cell     = $columns[$index][0].$rowNumber.":".$columns[$index][1].$rowNumber;
                 $baseCell = $columns[$index][0].$rowNumber;
             }
             $sheet->mergeCells($cell);
-            $cellText = $employee["title"].":".$employee["name"]."\n".$employee["position"];
-            $sheet->setCellValue($baseCell, $cellText);
+            
+            $titleName = $employee["title"].": ".$employee["name"];
+            $position  = $employee["position"];
+
+            $richText = new RichText();
+            $richText->createText('');
+            $cellText = $richText->createTextRun($titleName);
+            $cellText->getFont()->setBold(true);
+            $richText->createText("\n$position");
+
+            $sheet->setCellValue($baseCell, $richText);
             $sheet->getStyle($cell)->applyFromArray($approversStyle);
             $sheet->getRowDimension($rowNumber)->setRowHeight(17*2);
         }
@@ -651,9 +643,7 @@ class Purchase_order extends CI_Controller {
         $sheet->setCellValue("I$rowNumber", "Date: ");
         $sheet->getStyle("I$rowNumber:K$rowNumber")->applyFromArray($allBorderStyle);
         $sheet->getRowDimension("$rowNumber")->setRowHeight(17*2);
-        
-        
-        
+        $sheet->getStyle("B$rowNumber:K$rowNumber")->getFont()->setBold(true);
         // ----- END FOOTER -----
 
         $writer = new Xlsx($spreadsheet);
@@ -667,12 +657,32 @@ class Purchase_order extends CI_Controller {
         $purchaseOrderID = $this->input->get("id");
         if ($purchaseOrderID) {
             $purchaseOrderData = $this->purchaseorder->getPurchaseOrderData($purchaseOrderID);
-            
             if ($purchaseOrderData) {
                 $this->purchaseOrderExcel($purchaseOrderData);
             }
+        }
+    }
 
-            
+    public function savePurchaseOrderContract()
+    {
+        $purchaseOrderID = $this->input->post("purchaseOrderID");
+        if (isset($_FILES["files"])) {
+            $uploadedFile = explode(".", $_FILES["files"]["name"]);
+            $extension    = $uploadedFile[1];
+            $filename     = implode(".", $uploadedFile).time().'.'.$extension;
+
+            $folderDir = "assets/upload-files/contracts/";
+            if (!is_dir($folderDir)) {
+                mkdir($folderDir);
+            }
+
+            $targetDir = $folderDir.$filename;
+            if (move_uploaded_file($_FILES["files"]["tmp_name"], $targetDir)) {
+                $employeeProfile = $filename;
+
+                $savePurchaseOrderContract = $this->purchaseorder->savePurchaseOrderContract($purchaseOrderID, $filename);
+                echo json_encode($savePurchaseOrderContract);
+            }
         }
     }
 

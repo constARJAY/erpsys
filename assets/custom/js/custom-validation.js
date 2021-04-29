@@ -373,7 +373,7 @@ const checkNumber = (elementID, invalidFeedback, value) => {
 	} else if (min && !max) {
 		if (currencyValue < min) {
 			$(elementID).removeClass("is-valid").addClass("is-invalid");
-			invalidFeedback.text(`Please input number greater than ${min}`);
+			invalidFeedback.text(`Please input number greater than ${min - 1}`);
 		} else {
 			validated
 				? $(elementID).removeClass("is-invalid").addClass("is-valid")
@@ -388,7 +388,7 @@ const checkNumber = (elementID, invalidFeedback, value) => {
 			// DISREGARD
 		} else if (currencyValue < min && currencyValue <= max) {
 			$(elementID).removeClass("is-valid").addClass("is-invalid");
-			invalidFeedback.text(`Please input number greater than ${min}`);
+			invalidFeedback.text(`Please input number greater than ${min - 1}`);
 		}
 	} else {
 		validated

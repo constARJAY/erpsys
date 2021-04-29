@@ -103,29 +103,67 @@ class PurchaseOrder_model extends CI_Model {
         return [];
     }
 
+    public function getEmployeeInformation($id = null) {
+        if ($id) {
+            $sql = "
+            SELECT 
+                CONCAT(helt.employeeFirstname, ' ', helt.employeeLastname) AS fullname,
+                designationName
+            FROM 
+                hris_employee_list_tbl AS helt 
+                LEFT JOIN hris_designation_tbl USING(designationID)
+            WHERE employeeID = $id";
+            $query = $this->db->query($sql);
+            return $query ? $query->row() : null;
+        }
+        return null;
+    }
+
     public function getPurchaseOrderData($id = null)
     {
-        $data = ["items" => []];
+        $data = ["items" => [], "employees" => []];
         if ($id) {
             $purchaseOrderData = $this->getPurchaseOrder($id);
             if ($purchaseOrderData) {
-                $data["companyName"]    = $purchaseOrderData->vendorName ?? "-";
-                $data["address"]        = $purchaseOrderData->vendorAddress ?? "-";
-                $data["contactDetails"] = $purchaseOrderData->vendorContactDetails ?? "-";
-                $data["contactPerson"]  = $purchaseOrderData->vendorContactPerson ?? "-";
-                $data["dateAproved"]    = date("F d, Y", strtotime($purchaseOrderData->submittedAt)) ?? "-";
-                $data["referenceNo"]    = $purchaseOrderData->bidRecapID ?? "-";
-                $data["paymentTerms"]   = $purchaseOrderData->paymentTerms ?? "-";
-                $data["deliveryDate"]   = date("F d, Y", strtotime($purchaseOrderData->deliveryDate)) ?? "-";
-                $data["total"]   = $purchaseOrderData->total ?? "0";
-                $data["discount"]   = $purchaseOrderData->discount ?? "0";
-                $data["totalAmount"]   = $purchaseOrderData->totalAmount ?? "0";
-                $data["vatSales"]   = $purchaseOrderData->vatSales ?? "0";
-                $data["vat"]   = $purchaseOrderData->vat ?? "0";
-                $data["totalVat"]   = $purchaseOrderData->totalVat ?? "0";
-                $data["lessEwt"]   = $purchaseOrderData->lessEwt ?? "0";
-                $data["grandTotalAmount"]   = $purchaseOrderData->grandTotalAmount ?? "0";
+                $data["companyName"]      = $purchaseOrderData->vendorName ?? "-";
+                $data["address"]          = $purchaseOrderData->vendorAddress ?? "-";
+                $data["contactDetails"]   = $purchaseOrderData->vendorContactDetails ?? "-";
+                $data["contactPerson"]    = $purchaseOrderData->vendorContactPerson ?? "-";
+                $data["dateAproved"]      = date("F d, Y", strtotime($purchaseOrderData->submittedAt)) ?? "-";
+                $data["referenceNo"]      = $purchaseOrderData->bidRecapID ?? "-";
+                $data["paymentTerms"]     = $purchaseOrderData->paymentTerms ?? "-";
+                $data["deliveryDate"]     = date("F d, Y", strtotime($purchaseOrderData->deliveryDate)) ?? "-";
+                $data["total"]            = $purchaseOrderData->total ?? "0";
+                $data["discount"]         = $purchaseOrderData->discount ?? "0";
+                $data["totalAmount"]      = $purchaseOrderData->totalAmount ?? "0";
+                $data["vatSales"]         = $purchaseOrderData->vatSales ?? "0";
+                $data["vat"]              = $purchaseOrderData->vat ?? "0";
+                $data["totalVat"]         = $purchaseOrderData->totalVat ?? "0";
+                $data["lessEwt"]          = $purchaseOrderData->lessEwt ?? "0";
+                $data["grandTotalAmount"] = $purchaseOrderData->grandTotalAmount ?? "0";
+                $data["createdAt"]        = $purchaseOrderData->createdAt ?? date("Y-m-d");
+                $data["purchaseOrderID"]  = $id;
 
+                $preparedID  = $purchaseOrderData->employeeID;
+                $approversID = $purchaseOrderData->approversID;
+                $approversID = explode("|", $approversID);
+                $employeesID = array_merge([$preparedID], $approversID);
+                foreach ($employeesID as $index => $employeeID) {
+                    $employeeData = $this->getEmployeeInformation($employeeID);
+                    if ($index == 0) {
+                        $title = "Prepared By";
+                    } else if (($index+1) == count($employeesID)) {
+                        $title = "Approved By";
+                    } else {
+                        $title = "Checked By";
+                    }
+                    $employee = [
+                        "title"    => $title,
+                        "name"     => $employeeData->fullname,
+                        "position" => $employeeData->designationName
+                    ];
+                    array_push($data["employees"], $employee);
+                }
             }
 
             $purchaseOrderItems = $this->getPurchaseOrderItems($id);
@@ -165,6 +203,18 @@ class PurchaseOrder_model extends CI_Model {
         $query = $this->db->insert_batch("ims_request_items_tbl", $data);
         if ($query) {
             return "true|Successfully submitted";
+        }
+        return "false|System error: Please contact the system administrator for assistance!";
+    }
+
+    public function savePurchaseOrderContract($purchaseOrderID = null, $filename = null)
+    {
+        $query = $this->db->update(
+            "ims_purchase_order_tbl", 
+            ["contractFile" => $filename],
+            ["purchaseOrderID" => $purchaseOrderID]);
+        if ($query) {
+            return "true|Successfully submitted|$purchaseOrderID|".date("Y-m-d");
         }
         return "false|System error: Please contact the system administrator for assistance!";
     }

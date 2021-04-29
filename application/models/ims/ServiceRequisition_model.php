@@ -1,7 +1,7 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
-class ReturnItem_model extends CI_Model {
+class ServiceRequisition_model extends CI_Model {
 
     public function __construct()
     {
@@ -11,10 +11,10 @@ class ReturnItem_model extends CI_Model {
     public function savePurchaseRequestData($action, $data, $id = null) 
     {
         if ($action == "insert") {
-            $query = $this->db->insert("ims_return_item_tbl", $data);
+            $query = $this->db->insert("ims_purchase_request_tbl", $data);
         } else {
-            $where = ["returnID" => $id];
-            $query = $this->db->update("ims_return_item_tbl", $data, $where);
+            $where = ["purchaseRequestID" => $id];
+            $query = $this->db->update("ims_purchase_request_tbl", $data, $where);
         }
 
         if ($query) {
@@ -25,7 +25,7 @@ class ReturnItem_model extends CI_Model {
     }
 
     public function deletePurchaseRequestItems($id) {
-        $query = $this->db->delete("ims_return_item_details_tbl", ["returnID" => $id]);
+        $query = $this->db->delete("ims_request_items_tbl", ["purchaseRequestID" => $id]);
         return $query ? true : false;
     }
 
@@ -35,7 +35,7 @@ class ReturnItem_model extends CI_Model {
             $deletePurchaseRequestItems = $this->deletePurchaseRequestItems($id);
         }
 
-        $query = $this->db->insert_batch("ims_return_item_details_tbl", $data);
+        $query = $this->db->insert_batch("ims_request_items_tbl", $data);
         if ($query) {
             return "true|Successfully submitted";
         }
