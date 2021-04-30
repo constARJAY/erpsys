@@ -83,11 +83,13 @@ class Service_requisition extends CI_Controller {
                     "serviceRequisitionRemarks" => $serviceRequisitionRemarks,
                     "updatedBy"                 => $updatedBy,
                 ];
+            } else {
+                $this->servicerequisition->deleteServicesAndScopes($serviceRequisitionID);
             }
         }
 
         $saveServiceRequisitionData = $this->servicerequisition->saveServiceRequisitionData($action, $serviceRequisitionData, $serviceRequisitionID);
-        if ($saveServiceRequisitionData) {
+        if ($saveServiceRequisitionData && ($method == "submit" || $method == "save")) {
             $result = explode("|", $saveServiceRequisitionData);
 
             if ($result[0] == "true") {

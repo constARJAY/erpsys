@@ -677,7 +677,6 @@ $(document).ready(function() {
 
     // ----- GET PROJECT LIST -----
     function getProjectList(id = null, clientID = 0, display = true) {
-		console.log(id, clientID);
 		let html = `
 		<option 
 			value       = "0"
@@ -797,6 +796,7 @@ $(document).ready(function() {
 	function updateServiceScope() {
 		$(`[name="serviceDescription"]`).each(function(i) {
 			$(this).attr("id", `serviceDescription${i}`);
+			$(this).parent().find(".invalid-feedback").attr("id", `invalid-serviceDescription${i}`);
 		})
 	}
 	// ----- END UPDATE SERVICE SCOPE -----
@@ -823,9 +823,17 @@ $(document).ready(function() {
 		);
 		let serviceScopes = getServiceScope();
 		if (scopeData.length > 0) {
-			serviceScopes = scopeData.map(scope => {
-				return getServiceScope(scope.description, readOnly);
-			}).join("");
+			if (readOnly) {
+				serviceScopes = `<ol class="pl-3 mb-0">`
+				serviceScopes += scopeData.map(scope => {
+					return `<li>${getServiceScope(scope.description, readOnly)}</li>`;
+				}).join("");
+				serviceScopes += `</ol>`;
+			} else {
+				serviceScopes = scopeData.map(scope => {
+					return getServiceScope(scope.description, readOnly);
+				}).join("");
+			}
 		}
 
 		let html = "";
@@ -834,7 +842,7 @@ $(document).ready(function() {
 			<tr class="itemTableRow">
 				<td>
 					<div class="servicecode">
-						${getFormCode("SVC", createdAt, requestServiceID)}
+						${getFormCode("SVC", createdAt, serviceID)}
 					</div>
 				</td>
 				<td>
@@ -974,14 +982,13 @@ $(document).ready(function() {
 
 	// ----- UPDATE TABLE ITEMS -----
 	function updateTableItems() {
-		$(".itemProjectTableBody tr").each(function(i) {
+		$(".itemServiceTableBody tr").each(function(i) {
 			// ROW ID
 			$(this).attr("id", `tableRow${i}`);
 			$(this).attr("index", `${i}`);
 
 			// CHECKBOX
 			$("td .action .checkboxrow", this).attr("id", `checkboxrow${i}`);
-			$("td .action .checkboxrow", this).attr("project", `true`);
 
 			// ITEMCODE
 			$("td .servicecode", this).attr("id", `servicecode${i}`);
@@ -1021,77 +1028,24 @@ $(document).ready(function() {
 			// REMARKS
 			$("td .remarks [name=remarks]", this).attr("id", `remarks${i}`);
 		})
-
-		$(".itemCompanyTableBody tr").each(function(i) {
-			// ROW ID
-			$(this).attr("id", `tableRow${i}`);
-			$(this).attr("index", `${i}`);
-
-			// CHECKBOX
-			$("td .action .checkboxrow", this).attr("id", `checkboxrow${i}`);
-			$("td .action .checkboxrow", this).attr("company", `true`);
-
-			// ITEMCODE
-			$("td .servicecode", this).attr("id", `servicecode${i}`);
-
-			// ITEMNAME
-			$(this).find("select").each(function(j) {
-				const serviceID = $(this).val();
-				$(this).attr("index", `${i}`);
-				$(this).attr("company", `true`);
-				$(this).attr("id", `companycompanyitemid${i}`)
-				if (!$(this).attr("data-select2-id")) {
-					$(this).select2({ theme: "bootstrap" });
-				}
-			});
-
-			// QUANTITY
-			$("td .quantity [name=quantity]", this).attr("id", `quantity${i}`);
-			$("td .quantity [name=quantity]", this).attr("company", `true`);
-			
-			// CATEGORY
-			$("td .category", this).attr("id", `category${i}`);
-
-			// UOM
-			$("td .serviceUom", this).attr("id", `serviceUom${i}`);
-
-			// UNIT COST
-			$("td .unitcost [name=unitCost] ", this).attr("id", `unitcost${i}`);
-			$("td .unitcost [name=unitCost] ", this).attr("company", `true`);
-
-			// TOTAL COST
-			$("td .totalcost", this).attr("id", `totalcost${i}`);
-			$("td .totalcost", this).attr("company", `true`);
-
-			// FILE
-			$("td .file [name=files]", this).attr("id", `files${i}`);
-
-			// REMARKS
-			$("td .remarks [name=remarks]", this).attr("id", `remarks${i}`);
-		})
 	}
 	// ----- END UPDATE TABLE ITEMS -----
 
 
 	// ----- UPDATE DELETE BUTTON -----
 	function updateDeleteButton() {
-		let projectCount = 0, companyCount = 0;
-		$(".checkboxrow[project=true]").each(function() {
-			this.checked && projectCount++;
+		let serviceRowCount = 0;
+		$(".checkboxrow").each(function() {
+			this.checked && serviceRowCount++;
 		})
-		$(".btnDeleteRow[project=true]").attr("disabled", projectCount == 0);
-		$(".checkboxrow[company=true]").each(function() {
-			this.checked && companyCount++;
-		})
-		$(".btnDeleteRow[company=true]").attr("disabled", companyCount == 0);
+		$(".btnDeleteRow").attr("disabled", serviceRowCount == 0);
 	}
 	// ----- END UPDATE DELETE BUTTON -----
 
 
 	// ----- DELETE TABLE ROW -----
-	function deleteTableRow(isProject = true) {
-		const attr = isProject ? "[project=true]" : "[company=true]";
-		if ($(`.checkboxrow${attr}:checked`).length != $(`.checkboxrow${attr}`).length) {
+	function deleteTableRow() {
+		if ($(`.checkboxrow:checked`).length != $(`.checkboxrow`).length) {
 			Swal.fire({
 				title:              "DELETE ROWS",
 				text:               "Are you sure to delete these rows?",
@@ -1106,15 +1060,16 @@ $(document).ready(function() {
 				confirmButtonText:  "Yes"
 			}).then((result) => {
 				if (result.isConfirmed) {
-					$(`.checkboxrow${attr}:checked`).each(function(i, obj) {
+					$(`.checkboxrow:checked`).each(function(i, obj) {
 						var tableRow = $(this).closest('tr');
 						tableRow.fadeOut(500, function (){
 							$(this).closest("tr").remove();
 							updateTableItems();
-							$(`[name=serviceID]${attr}`).each(function(i, obj) {
+							$(`[name=serviceID]`).each(function(i, obj) {
 								let serviceID = $(this).val();
-								$(this).html(getServiceItem(serviceID, isProject));
+								$(this).html(getServiceItem(serviceID));
 							}) 
+							updateTotalAmount();
 							updateDeleteButton();
 						});
 					})
@@ -1171,7 +1126,6 @@ $(document).ready(function() {
 
 	// ----- DELETE SCOPE -----
 	$(document).on("click", ".btnDeleteScope", function() {
-		console.log($(this).closest(".servicescope").find(".input-group").length);
 		const isCanDelete = $(this).closest(".servicescope").find(".input-group").length > 1;
 		if (isCanDelete) {
 			const scopeElement = $(this).closest(".input-group");
@@ -1179,7 +1133,7 @@ $(document).ready(function() {
 				$(this).closest(".input-group").remove();
 			})
 		} else {
-			showNotification("danger", "You must have at least one scope of work.");
+			showNotification("danger", "You must have atleast one scope of work.");
 		}
 	})
 	// ----- END DELETE SCOPE -----
@@ -1205,13 +1159,11 @@ $(document).ready(function() {
 	// ----- KEYUP QUANTITY OR UNITCOST -----
 	$(document).on("keyup", "[name=quantity], [name=unitCost]", function() {
 		const index     = $(this).closest("tr").first().attr("index");
-		const isProject = $(this).closest("tbody").attr("project") == "true";
-		const attr      = isProject ? "[project=true]" : "[company=true]";
-		const quantity  = +$(`#quantity${index}${attr}`).val();
-		const unitcost  = +$(`#unitcost${index}${attr}`).val().replaceAll(",", "");
+		const quantity  = +$(`#quantity${index}`).val();
+		const unitcost  = +$(`#unitcost${index}`).val().replaceAll(",", "");
 		const totalcost = quantity * unitcost;
-		$(`#totalcost${index}${attr}`).text(formatAmount(totalcost, true));
-		updateTotalAmount(isProject);
+		$(`#totalcost${index}`).text(formatAmount(totalcost, true));
+		updateTotalAmount();
 	})
 	// ----- END KEYUP QUANTITY OR UNITCOST -----
 
@@ -1246,8 +1198,7 @@ $(document).ready(function() {
 
 	// ----- CLICK DELETE ROW -----
 	$(document).on("click", ".btnDeleteRow", function(){
-		const isProject = $(this).attr("project") == "true";
-		deleteTableRow(isProject);
+		deleteTableRow();
 	})
 	// ----- END CLICK DELETE ROW -----
 
@@ -1262,16 +1213,9 @@ $(document).ready(function() {
 	// ----- CHECK ALL -----
 	$(document).on("change", ".checkboxall", function() {
 		const isChecked = $(this).prop("checked");
-		const isProject = $(this).attr("project") == "true";
-		if (isProject) {
-			$(".checkboxrow[project=true]").each(function(i, obj) {
-				$(this).prop("checked", isChecked);
-			});
-		} else {
-			$(".checkboxrow[company=true]").each(function(i, obj) {
-				$(this).prop("checked", isChecked);
-			});
-		}
+		$(".checkboxrow").each(function(i, obj) {
+			$(this).prop("checked", isChecked);
+		});
 		updateDeleteButton();
 	})
 	// ----- END CHECK ALL -----
@@ -1279,13 +1223,8 @@ $(document).ready(function() {
 
     // ----- INSERT ROW ITEM -----
     $(document).on("click", ".btnAddRow", function() {
-		let isProject = $(this).attr("project") == "true";
-        let row = getServiceRow(isProject);
-		if (isProject) {
-			$(".itemProjectTableBody").append(row);
-		} else {
-			$(".itemCompanyTableBody").append(row);
-		}
+        let row = getServiceRow();
+		$(".itemServiceTableBody").append(row);
 		updateTableItems();
 		updateServiceScope();
 		initInputmask();
@@ -1295,12 +1234,11 @@ $(document).ready(function() {
 
 
 	// ----- UPDATE TOTAL AMOUNT -----
-	function updateTotalAmount(isProject = true) {
-		const attr        = isProject ? "[project=true]" : "[company=true]";
-		const quantityArr = $.find(`[name=quantity]${attr}`).map(element => element.value || "0");
-		const unitCostArr = $.find(`[name=unitCost]${attr}`).map(element => element.value.replaceAll(",", "") || "0");
+	function updateTotalAmount() {
+		const quantityArr = $.find(`[name=quantity]`).map(element => element.value || "0");
+		const unitCostArr = $.find(`[name=unitCost]`).map(element => element.value.replaceAll(",", "") || "0");
 		const totalAmount = quantityArr.map((qty, index) => +qty * +unitCostArr[index]).reduce((a,b) => a + b, 0);
-		$(`#totalAmount${attr}`).text(formatAmount(totalAmount, true));
+		$(`#totalAmount`).text(formatAmount(totalAmount, true));
 		return totalAmount;
 	}
 	// ----- END UPDATE TOTAL AMOUNT -----
@@ -1360,26 +1298,14 @@ $(document).ready(function() {
 		let checkboxServiceRequisitionHeader = !disabled ? `
 		<th class="text-center">
 			<div class="action">
-				<input type="checkbox" class="checkboxall" project="true">
-			</div>
-		</th>` : ``;
-		let checkboxCompanyHeader = !disabled ? `
-		<th class="text-center">
-			<div class="action">
-				<input type="checkbox" class="checkboxall" company="true">
+				<input type="checkbox" class="checkboxall">
 			</div>
 		</th>` : ``;
 		let tableServiceRequisitionItems = !disabled ? "tableServiceRequisitionItems" : "tableServiceRequisitionItems0";
-		let tableCompanyRequestItemsName = !disabled ? "tableCompanyRequestItems" : "tableCompanyRequestItems0";
 		let buttonServiceAddRow = !disabled ? `
 		<div class="w-100 text-left my-2">
-			<button class="btn btn-primary btnAddRow" id="btnAddRow" project="true"><i class="fas fa-plus-circle"></i> Add Row</button>
-			<button class="btn btn-danger btnDeleteRow" id="btnDeleteRow" project="true" disabled><i class="fas fa-minus-circle"></i> Delete Row/s</button>
-		</div>` : "";
-		let buttonCompanyAddDeleteRow = !disabled ? `
-		<div class="w-100 text-left my-2">
-			<button class="btn btn-primary btnAddRow" id="btnAddRow" company="true"><i class="fas fa-plus-circle"></i> Add Row</button>
-			<button class="btn btn-danger btnDeleteRow" id="btnDeleteRow" company="true" disabled><i class="fas fa-minus-circle"></i> Delete Row/s</button>
+			<button class="btn btn-primary btnAddRow" id="btnAddRow"><i class="fas fa-plus-circle"></i> Add Row</button>
+			<button class="btn btn-danger btnDeleteRow" id="btnDeleteRow" disabled><i class="fas fa-minus-circle"></i> Delete Row/s</button>
 		</div>` : "";
 		let button = formButtons(data, isRevise);
 
@@ -1569,7 +1495,7 @@ $(document).ready(function() {
                                 <th>Remarks</th>
                             </tr>
                         </thead>
-                        <tbody class="itemProjectTableBody" project="true">
+                        <tbody class="itemServiceTableBody">
                             ${requestServiceItems}
                         </tbody>
                     </table>
@@ -1578,7 +1504,7 @@ $(document).ready(function() {
 						<div>${buttonServiceAddRow}</div>
 						<div class="font-weight-bolder" style="font-size: 1rem;">
 							<span>Total Amount: &nbsp;</span>
-							<span class="text-danger" style="font-size: 1.2em" id="totalAmount" project="true">${formatAmount(serviceRequisitionTotalAmount, true)}</span>
+							<span class="text-danger" style="font-size: 1.2em" id="totalAmount">${formatAmount(serviceRequisitionTotalAmount, true)}</span>
 						</div>
 					</div>
                 </div>
@@ -1598,6 +1524,7 @@ $(document).ready(function() {
 			initDataTables();
 			updateTableItems();
 			initAll();
+			updateServiceScope();
 			updateServiceOptions();
 			clientID && clientID != 0 && $("[name=clientID]").trigger("change");
 			return html;
@@ -1685,7 +1612,7 @@ $(document).ready(function() {
 			data["projectID"]  = $("[name=projectID]").val() || null;
 			data["clientID"]   = $("[name=clientID]").val() || null;
 			data["serviceRequisitionReason"] = $("[name=serviceRequisitionReason]").val()?.trim();
-			data["serviceRequisitionTotalAmount"] = updateTotalAmount(true);
+			data["serviceRequisitionTotalAmount"] = updateTotalAmount();
 
 			if (action == "insert") {
 				data["createdBy"] = sessionID;
@@ -1984,12 +1911,12 @@ $(document).ready(function() {
 				let approversDate   = tableData[0].approversDate;
 				let employeeID      = tableData[0].employeeID;
 
-				let data = new FormData;
+				let data = {};
 				data["action"] = "update";
 				data["method"] = "deny";
 				data["serviceRequisitionID"] = id;
 				data["approversStatus"] = updateApproveStatus(approversStatus, 3);
-				data["approversDate"] = updateApproveDate(approversDate);
+				data["approversDate"]   = updateApproveDate(approversDate);
 				data["serviceRequisitionRemarks"] = $("[name=serviceRequisitionRemarks]").val()?.trim();
 				data["updatedBy"] = sessionID;
 

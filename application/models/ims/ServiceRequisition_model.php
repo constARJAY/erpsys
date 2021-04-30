@@ -39,10 +39,6 @@ class ServiceRequisition_model extends CI_Model {
 
     public function saveServices($service = null, $scopes = null, $id = null)
     {
-        if ($id) {
-            $deleteServicesAndScopes = $this->deleteServicesAndScopes($id);
-        }
-
         if ($service && $scopes) {
             $query = $this->db->insert("ims_request_services_tbl", $service);
             if ($query) {
@@ -66,25 +62,6 @@ class ServiceRequisition_model extends CI_Model {
         }
         return false;
     }
-
-    public function deletePurchaseRequestItems($id) {
-        $query = $this->db->delete("ims_request_items_tbl", ["serviceRequisitionID" => $id]);
-        return $query ? true : false;
-    }
-
-    public function savePurchaseRequestItems($data, $id = null)
-    {
-        if ($id) {
-            $deletePurchaseRequestItems = $this->deletePurchaseRequestItems($id);
-        }
-
-        $query = $this->db->insert_batch("ims_request_items_tbl", $data);
-        if ($query) {
-            return "true|Successfully submitted";
-        }
-        return "false|System error: Please contact the system administrator for assistance!";
-    }
-
     
 
 }
