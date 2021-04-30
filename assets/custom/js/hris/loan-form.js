@@ -1,7 +1,7 @@
 $(document).ready(function () {
 
 	// ----- MODULE APPROVER -----
-	const moduleApprover = getModuleApprover("loan form");
+	const moduleApprover = getModuleApprover(59);
 	// ----- END MODULE APPROVER -----
 
 
@@ -186,7 +186,7 @@ $(document).ready(function () {
 	function headerButton(isAdd = true, text = "Add") {
 		let html;
 		if (isAdd) {
-			if (isCreateAllowed(60)) {
+			if (isCreateAllowed(59)) {
 				html = `
 				<button type="button" class="btn btn-default btn-add" id="btnAdd"><i class="icon-plus"></i> &nbsp;${text}</button>`;
 			}
@@ -478,7 +478,8 @@ $(document).ready(function () {
             loanID                      = "",
             loanFormTermPayment         = "",
             loanFormDate                = "",
-            loanFormNoOfDays            = "",
+            // loanFormNoOfDays            = "",
+            loanFormInterest            = "",
             loanFormAmount              = "",
             loanFormDeductionAmount     = "",
 			loanFormRemarks             = "",
@@ -512,7 +513,7 @@ $(document).ready(function () {
             optionLoanType += `<option value="${loanTypeItems["loanID"]}" ${isSelected}>${loanTypeItems["loanName"]}</option>`;
         });
         // Payday = 0, Monthly = 1;
-        let optionLoanFormTermPayment = data == false ? `<option value="" disabled selected>Select Term of Payment</option><option value="0">Payday</option><option value="1">Monthly</option>`: (loanFormTermPayment == "0" ? `<option value="" disabled>Select Term of Payment</option><option value="0" selected>Payday</option><option value="1">Monthly</option>` : `<option value="" disabled>Select Term of Payment</option><option value="0">Payday</option><option value="1" selected>Monthly</option>`);
+        let optionLoanFormTermPayment = data == false ? `<option value="" disabled selected>Select Term of Payment</option><option value="2">Payday</option><option value="1">Monthly</option>`: (loanFormTermPayment == "0" ? `<option value="" disabled>Select Term of Payment</option><option value="2" selected>Payday</option><option value="1">Monthly</option>` : `<option value="" disabled>Select Term of Payment</option><option value="2">Payday</option><option value="1" selected>Monthly</option>`);
 		let html = `
         <div class="row px-2">
             <div class="col-lg-2 col-md-6 col-sm-12 px-1">
@@ -625,18 +626,20 @@ $(document).ready(function () {
                     <label>Start Date - End Date <code>*</code></label>
                     <input type="button" class="form-control validate text-left" required id="loanFormDate"
                             name="loanFormDate" value="${loanFormDate && loanFormDate}"
-						    unique="${loanFormID}" title="Date" ${disabled}>
+						     title="Date" ${disabled}>
                     <div class="d-block invalid-feedback" id="invalid-loanFormDate"></div>
                 </div>
             </div>
 
             <div class="col-md-3 col-sm-12">
                 <div class="form-group">
-                    <label>Number of Days <code>*</code></label>
-                    <input type="text" class="form-control validate" name="loanFormNoOfDays" 
-                        id="loanFormNoOfDays" data-allowcharacters="[A-Z][a-z][0-9][ ][@]" minlength="1" 
-                        maxlength="50" required readOnly value="${loanFormNoOfDays}" autocomplete="off" >
-                    <div class="invalid-feedback d-block" id="invalid-loanFormNoOfDays"></div>
+                    <label>Interest (%) <code>*</code></label>
+
+					<input type="text" class="form-control validate " name="loanFormInterest" 
+					id="loanFormInterest" data-allowcharacters="[0-9][.]" minlength="1" 
+					maxlength="50" required  value="${loanFormInterest}" autocomplete="off"  ${disabled}>
+
+                    <div class="invalid-feedback d-block" id="invalid-loanFormInterest"></div>
                 </div>
             </div>
 
@@ -646,9 +649,10 @@ $(document).ready(function () {
 					<div class="input-group-prepend">
 						<span class="input-group-text">₱</span>
 					</div>
-                    <input type="text" class="form-control amount" name="loanFormAmount" id="input_loanFormAmount" min=".01" max="99999999"
-                            data-allowcharacters="[A-Z][a-z][0-9][ ][@]" minlength="2" maxlength="50"  required value="${loanFormAmount}" autocomplete="off" ${disabled}>
-                    <div class="invalid-feedback d-block" id="invalid-input_loanFormAmount"></div>
+
+					<input type="text" class="form-control amount" name="loanFormAmount" id="input_loanFormAmount" min=".01" max="99999999"
+					data-allowcharacters="[0-9]"  required   value="${loanFormAmount}" autocomplete="off" ${disabled}>
+			<div class="invalid-feedback d-block" id="invalid-input_loanFormAmount"></div>
                 </div>
             </div>
 
@@ -659,7 +663,7 @@ $(document).ready(function () {
 						<span class="input-group-text">₱</span>
 					</div>
                     <input type="text" class="form-control amount" name="loanFormDeductionAmount" id="input_loanFormDeductionAmount" min=".01" max="99999999"
-                            data-allowcharacters="[A-Z][a-z][0-9][ ][@]" minlength="2" maxlength="50"  required value="${loanFormDeductionAmount}" autocomplete="off" ${disabled}>
+                            data-allowcharacters="[0-9]"   disabled value="${loanFormDeductionAmount}" autocomplete="off" ${disabled}>
                     <div class="invalid-feedback d-block" id="invalid-input_loanFormDeductionAmount"></div>
                 </div>
             </div>
@@ -879,6 +883,15 @@ $(document).ready(function () {
 			const action   = id && feedback ? "update" : "insert";
 			const data     = getData(action, 0, "save", feedback, id);
 
+			// ---------- CONVERT VALUE WITH COMMA BEFORE SENDING IN CONTROLLER --------------------
+			let loanFormAmount = data["tableData"]["loanFormAmount"].replaceAll(",","");
+			let loanFormDeductionAmount = data["tableData"]["loanFormDeductionAmount"].replaceAll(",","");
+
+			data["tableData"]["loanFormAmount"] = loanFormAmount;
+			data["tableData"]["loanFormDeductionAmount"] = loanFormDeductionAmount;
+
+			// ---------- CONVERT VALUE WITH COMMA BEFORE SENDING IN CONTROLLER --------------------
+
 			setTimeout(() => {
 				cancelForm(
 					"save",
@@ -943,11 +956,19 @@ $(document).ready(function () {
 		// 		myFormsContent
 		// 	);
 		// }
-
 		const action   = "insert"; 
 		const feedback = getFormCode("LNF", dateToday()); 
 		const data     = getData(action, 0, "save", feedback);
 
+		// ---------- CONVERT VALUE WITH COMMA BEFORE SENDING IN CONTROLLER --------------------
+		let loanFormAmount = data["tableData"]["loanFormAmount"].replaceAll(",","");
+		let loanFormDeductionAmount = data["tableData"]["loanFormDeductionAmount"].replaceAll(",","");
+
+		data["tableData"]["loanFormAmount"] = loanFormAmount;
+		data["tableData"]["loanFormDeductionAmount"] = loanFormDeductionAmount;
+
+		// ---------- CONVERT VALUE WITH COMMA BEFORE SENDING IN CONTROLLER --------------------
+	
 		formConfirmation(
 			"save",
 			"insert",
@@ -973,6 +994,15 @@ $(document).ready(function () {
 			const action   = id && feedback ? "update" : "insert";
 			const data     = getData(action, 1, "submit", feedback, id);
 
+			// ---------- CONVERT VALUE WITH COMMA BEFORE SENDING IN CONTROLLER --------------------
+			let loanFormAmount = data["tableData"]["loanFormAmount"].replaceAll(",","");
+			let loanFormDeductionAmount = data["tableData"]["loanFormDeductionAmount"].replaceAll(",","");
+
+			data["tableData"]["loanFormAmount"] = loanFormAmount;
+			data["tableData"]["loanFormDeductionAmount"] = loanFormDeductionAmount;
+
+			// ---------- CONVERT VALUE WITH COMMA BEFORE SENDING IN CONTROLLER --------------------
+
 			const employeeID = getNotificationEmployeeID(
 				data["tableData[approversID]"],
 				data["tableData[approversDate]"],
@@ -982,7 +1012,7 @@ $(document).ready(function () {
 			let notificationData = false;
 			if (employeeID != sessionID) {
 				notificationData = {
-					moduleID:                60,
+					moduleID:                59,
 					// tableID:                 1, // AUTO FILL
 					notificationTitle:       "Loan Form",
 					notificationDescription: `${employeeFullname(sessionID)} asked for your approval.`,
@@ -1016,6 +1046,16 @@ $(document).ready(function () {
 		const action   = "update";
 		const data     = getData(action, 4, "cancelform", feedback, id);
 
+		// ---------- CONVERT VALUE WITH COMMA BEFORE SENDING IN CONTROLLER --------------------
+		let loanFormAmount = data["tableData"]["loanFormAmount"].replaceAll(",","");
+		let loanFormDeductionAmount = data["tableData"]["loanFormDeductionAmount"].replaceAll(",","");
+
+		data["tableData"]["loanFormAmount"] = loanFormAmount;
+		data["tableData"]["loanFormDeductionAmount"] = loanFormDeductionAmount;
+
+		// ---------- CONVERT VALUE WITH COMMA BEFORE SENDING IN CONTROLLER --------------------
+
+		
 		formConfirmation(
 			"cancelform",
 			action,
@@ -1036,6 +1076,15 @@ $(document).ready(function () {
 		const feedback = $(this).attr("code") || getFormCode("LNF", dateToday(), id);
 		const action   = id && feedback ? "update" : "insert";
 		const data     = getData(action, 0, "save", feedback, id);
+
+		// ---------- CONVERT VALUE WITH COMMA BEFORE SENDING IN CONTROLLER --------------------
+		let loanFormAmount = data["tableData"]["loanFormAmount"].replaceAll(",","");
+		let loanFormDeductionAmount = data["tableData"]["loanFormDeductionAmount"].replaceAll(",","");
+
+		data["tableData"]["loanFormAmount"] = loanFormAmount;
+		data["tableData"]["loanFormDeductionAmount"] = loanFormDeductionAmount;
+
+		// ---------- CONVERT VALUE WITH COMMA BEFORE SENDING IN CONTROLLER --------------------
 
 		cancelForm(
 			"save",
@@ -1073,7 +1122,7 @@ $(document).ready(function () {
 			if (isImLastApprover(approversID, approversDate)) {
 				status = 2;
 				notificationData = {
-					moduleID:                60,
+					moduleID:                59,
 					tableID:                 id,
 					notificationTitle:       "Loan Form",
 					notificationDescription: `${getFormCode("LNF", createdAt, id)}: Your request has been approved.`,
@@ -1083,7 +1132,7 @@ $(document).ready(function () {
 			} else {
 				status = 1;
 				notificationData = {
-					moduleID:                60,
+					moduleID:                59,
 					tableID:                 id,
 					notificationTitle:       "Loan Form",
 					notificationDescription: `${employeeFullname(employeeID)} asked for your approval.`,
@@ -1167,7 +1216,7 @@ $(document).ready(function () {
 				data["tableData[approversDate]"]         = updateApproveDate(approversDate);
 
 				let notificationData = {
-					moduleID:                60,
+					moduleID:                59,
 					tableID: 				 id,
 					notificationTitle:       "Loan Form",
 					notificationDescription: `${getFormCode("LNF", createdAt, id)}: Your request has been denied.`,
@@ -1249,19 +1298,73 @@ $(document).ready(function () {
 	
 });
 
+$(document).on("change keyup", "#input_loanFormAmount ,#input_loanFormDeductionAmount, #loanFormDate, #loanFormInterest , #loanFormLoanID, #loanFormTermPayment" ,function(){
 
-$(document).on("change", "#loanFormDate" ,function(){
-    let thisValue       =   $(this).val();
-    let thisValueSplit  =   thisValue.split(" - ");
+	var loanAmount = parseFloat($("#input_loanFormAmount").val().replaceAll(",",""));
+	// var deductionAmount = parseFloat($("#input_loanFormDeductionAmount").val().replaceAll(",",""));
 
-    // from = start.format('YYYY-MM-DD 00:00:00');
-    //               to = end.format('YYYY-MM-DD 23:59:59');
+	var loanType = $("#loanFormLoanID").val();
+	var loanTermPayment = $("#loanFormTermPayment").val();
+	// var loanNoOfDays = $("#loanFormNoOfDays").val();
+	var loanInterest = $("#loanFormInterest").val();
+	
 
-    let fromDate        =  new Date(thisValueSplit[0]); 	
-    let toDate          =  new Date(thisValueSplit[1]);
-    let numberOfDays    =  Math.round((toDate-fromDate)/(1000*60*60*24));
-    $("#loanFormNoOfDays").val(numberOfDays);
+		let thisValue       =   $("#loanFormDate").val();
+		let thisValueSplit  =   thisValue.split(" - ");
+		let fromDate        =  new Date(thisValueSplit[0]); 	
+		let toDate          =  new Date(thisValueSplit[1]);
+		loanNoOfDays    =  Math.round((toDate-fromDate)/(1000*60*60*24));
+	
+	
+
+	if(loanType == null || loanTermPayment == null || loanNoOfDays == 0 || loanInterest == "" || isNaN(loanAmount) == true  ){
+		
+		$("#input_loanFormDeductionAmount").val(0);
+	}else{
+
+
+		var computeDeductionAmount = loanAmount/loanNoOfDays/loanTermPayment*loanInterest ;
+
+		$("#input_loanFormDeductionAmount").val(computeDeductionAmount);
+
+		if(loanAmount < computeDeductionAmount){
+
+			$("#input_loanFormAmount").removeClass("is-valid").addClass("is-invalid");
+			// $("#input_loanFormDeductionAmount").removeClass("is-valid").addClass("is-invalid");
+	
+			$("#invalid-input_loanFormAmount").text("Deduction amount is greater than loan amount!");
+			// $("#invalid-input_loanFormDeductionAmount").text("Deduction amount is greater than loan amount!");
+			
+	
+		}else{
+		
+			$("#input_loanFormAmount").removeClass("is-invalid").addClass("is-valid");
+			// $("#input_loanFormDeductionAmount").removeClass("is-invalid").addClass("is-valid");
+	
+			$("#invalid-input_loanFormAmount").text("");
+			// $("#invalid-input_loanFormDeductionAmount").text("");
+		}
+
+	}
+
+	
+
+	
+    
 })
+
+// $(document).on("change", "#loanFormDate" ,function(){
+//     let thisValue       =   $(this).val();
+//     let thisValueSplit  =   thisValue.split(" - ");
+
+//     // from = start.format('YYYY-MM-DD 00:00:00');
+//     //               to = end.format('YYYY-MM-DD 23:59:59');
+
+//     let fromDate        =  new Date(thisValueSplit[0]); 	
+//     let toDate          =  new Date(thisValueSplit[1]);
+//     let numberOfDays    =  Math.round((toDate-fromDate)/(1000*60*60*24));
+//     $("#loanFormNoOfDays").val(numberOfDays);
+// })
 
 
 

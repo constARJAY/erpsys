@@ -7,7 +7,7 @@ class Inventory_incident extends CI_Controller {
     {
         parent::__construct();
         $this->load->model("ims/InventoryIncident_model", "purchaserequest");
-        isAllowed(37);
+        isAllowed(44);
     }
 
     public function index()

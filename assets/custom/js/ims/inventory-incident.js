@@ -1,4 +1,17 @@
 $(document).ready(function() {
+
+	//------ MODULE FUNCTION IS ALLOWED UPDATE-----
+	
+	const allowedUpdate = isUpdateAllowed(44);
+	if(!allowedUpdate){
+		$("#page_content").find("input, select, textarea").each(function(){
+			$(this).attr("disabled",true);
+		});
+		$("#btnSubmit").hide();
+	}
+
+	//------ END MODULE FUNCTION IS ALLOWED UPDATE-----
+
     // ----- MODULE APPROVER -----
 	const moduleApprover = getModuleApprover("Inventory Incident");
 	// ----- END MODULE APPROVER -----
@@ -116,11 +129,13 @@ $(document).ready(function() {
 	};
 
         const inventoryStorageList = getTableData(
-            "ims_inventory_storage_tbl LEFT JOIN  ims_list_stocks_tbl USING(inventoryStorageID) LEFT JOIN ims_list_stocks_details_tbl USING(listStocksID) LEFT JOIN ims_inventory_item_tbl USING(itemID)", "inventoryStorageID,inventoryStorageCode,inventoryStorageOfficeName,itemID, receivingQuantity",
-            "");
+            "ims_inventory_storage_tbl LEFT JOIN  ims_list_stocks_tbl USING(inventoryStorageID) LEFT JOIN ims_list_stocks_details_tbl USING(listStocksID) LEFT JOIN ims_inventory_item_tbl USING(itemID)", 
+			"inventoryStorageID,inventoryStorageCode,inventoryStorageOfficeName,itemID, receivingQuantity",
+            "itemStatus = 1 AND inventoryStorageStatus =1");
 
         const inventoryItemList = getTableData(
-            "ims_inventory_item_tbl LEFT JOIN ims_inventory_classification_tbl USING(classificationID)", "itemID, itemCode, itemName, unitOfMeasurementID,classificationName",
+            "ims_inventory_item_tbl LEFT JOIN ims_inventory_classification_tbl USING(classificationID)", 
+			"itemID, itemCode, itemName, unitOfMeasurementID,classificationName",
             "itemStatus = 1");
 
 	// END GLOBAL VARIABLE - REUSABLE 
@@ -261,8 +276,10 @@ $(document).ready(function() {
 	function headerButton(isAdd = true, text = "Add", isRevise = false) {
 		let html;
 		if (isAdd) {
-            html = `
-            <button type="button" class="btn btn-default btn-add" id="btnAdd"><i class="icon-plus"></i> &nbsp;${text}</button>`;
+			if(isCreateAllowed(44)){
+				html = `
+				<button type="button" class="btn btn-default btn-add" id="btnAdd"><i class="icon-plus"></i> &nbsp;${text}</button>`;
+				}
 		} else {
 			html = `
             <button type="button" class="btn btn-default btn-light" id="btnBack" revise="${isRevise}"><i class="fas fa-arrow-left"></i> &nbsp;Back</button>`;
@@ -568,14 +585,6 @@ $(document).ready(function() {
 	function updateInventoryItemOptions() {
 		let projectItemIDArr = []; // 0 IS THE DEFAULT VALUE
 		let projectElementID = [];
-		let optionNone = {
-			itemID:              "0",
-			itemCode:            "-",
-			categoryName:        "-",
-			unitOfMeasurementID: "-",
-			itemName:            "N/A",
-			classificationName:     "-"
-		};
 
 		$("[name=itemID][project=true]").each(function(i, obj) {
 			projectItemIDArr.push($(this).val());
@@ -586,7 +595,7 @@ $(document).ready(function() {
 
 		projectElementID.map((element, index) => {
 			let html = `<option selected disabled>Select Item Name</option>`;
-			let itemList = [optionNone, ...inventoryItemList];
+			let itemList = [...inventoryItemList];
 			html += itemList.filter(item => !projectItemIDArr.includes(item.itemID) || item.itemID == projectItemIDArr[index]).map(item => {
 				return `
 				<option 
@@ -615,16 +624,7 @@ $(document).ready(function() {
 			itemIDArr.push($(this).val());
 		}) 
 
-		let optionNone = {
-			itemID:              "0",
-			itemCode:            "-",
-			categoryName:        "-",
-			unitOfMeasurementID: "-",
-			itemName:            "N/A",
-			classificationName:      "-"
-
-		};
-		let itemList = [optionNone, ...inventoryItemList];
+		let itemList = [...inventoryItemList];
 
 		html += itemList.filter(item => !itemIDArr.includes(item.itemID) || item.itemID == id).map(item => {
             return `
@@ -843,6 +843,7 @@ $(document).ready(function() {
 								id="inventoryStorageID"
 								style="width: 100%"
 								required
+								disabled
 								${attr}>
 								${getStorage(inventoryStorageID, isProject,true,itemID)}
 							</select>
@@ -1071,6 +1072,7 @@ $(document).ready(function() {
         $(this).closest("tr").find(`[name=inventoryStorageID]${attr}`).each(function(i, obj) {
 			let inventoryStorageID = $(this).val();
 			$(this).html(getStorage(inventoryStorageID,isProject,true,itemID));
+			$(this).prop("disabled",false);
 		}) 
 	
     })
@@ -1104,7 +1106,7 @@ $(document).ready(function() {
         const selectedItemID  	= $(this).closest("tr").find('option:selected').val();
 
 		const data = getTableData("ims_inventory_item_tbl as itm LEFT JOIN ims_list_stocks_details_tbl as stcks USING(itemID) LEFT JOIN ims_list_stocks_tbl USING(listStocksID) LEFT JOIN ims_inventory_storage_tbl as isr USING(inventoryStorageID)", 
-        "itemID,receivingQuantity", "listStocksStatus = 2 AND itemID ="+ selectedItemID, "");
+        "itemID,receivingQuantity", "itemID ="+ selectedItemID, "");
 
 			if(data.length >0){
 

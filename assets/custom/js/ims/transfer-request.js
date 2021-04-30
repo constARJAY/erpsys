@@ -1,4 +1,16 @@
 $(document).ready(function() {
+
+	//------ MODULE FUNCTION IS ALLOWED UPDATE-----
+	
+	const allowedUpdate = isUpdateAllowed(37);
+	if(!allowedUpdate){
+		$("#page_content").find("input, select, textarea").each(function(){
+			$(this).attr("disabled",true);
+		});
+		$("#btnSubmit").hide();
+	}
+
+	//------ END MODULE FUNCTION IS ALLOWED UPDATE-----
     // ----- MODULE APPROVER -----
 	const moduleApprover = getModuleApprover("Transfer Request");
 	// ----- END MODULE APPROVER -----
@@ -117,7 +129,7 @@ $(document).ready(function() {
 
 	const inventoryItemList = getTableData(
 		"ims_inventory_item_tbl LEFT JOIN  ims_list_stocks_details_tbl USING(itemID) LEFT JOIN  ims_list_stocks_tbl USING(listStocksID) LEFT JOIN ims_inventory_storage_tbl USING(inventoryStorageID)", "itemID, itemCode, itemName, unitOfMeasurementID,brandName,inventoryStorageID ",
-		"itemStatus = 1 AND listStocksStatus =2 GROUP BY itemID");
+		"itemStatus = 1  GROUP BY itemID");
 
 	const projectList = getTableData(
 		"ims_inventory_storage_tbl AS storage LEFT JOIN hris_department_tbl AS department ON storage.inventoryStorageDepartment = department.departmentID", 
@@ -258,8 +270,10 @@ $(document).ready(function() {
 	function headerButton(isAdd = true, text = "Add", isRevise = false) {
 		let html;
 		if (isAdd) {
+			if(isCreateAllowed(37)){
             html = `
             <button type="button" class="btn btn-default btn-add" id="btnAdd"><i class="icon-plus"></i> &nbsp;${text}</button>`;
+			}
 		} else {
 			html = `
             <button type="button" class="btn btn-default btn-light" id="btnBack" revise="${isRevise}"><i class="fas fa-arrow-left"></i> &nbsp;Back</button>`;
@@ -1188,7 +1202,7 @@ $(document).ready(function() {
 			let requestItemsData = getTableData(
 				`ims_transfer_request_tbl LEFT JOIN ims_transfer_request_details_tbl USING(transferRequestID) LEFT JOIN ims_inventory_item_tbl USING(itemID) LEFT JOIN ims_list_stocks_details_tbl  USING(itemID) LEFT JOIN ims_list_stocks_tbl  USING(listStocksID) LEFT JOIN ims_inventory_storage_tbl  USING(inventoryStorageID)  `, 
 				`itemID, itemCode, itemName, unitOfMeasurementID,brandName`, 
-				`listStocksStatus = 2 AND transferRequestID = ${transferRequestID} GROUP BY itemID`);
+				`transferRequestID = ${transferRequestID} GROUP BY itemID`);
 			requestItemsData.map(item => {
 				requestProjectItems += getItemRow(true, item, readOnly);
 			})

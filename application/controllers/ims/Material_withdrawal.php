@@ -7,7 +7,7 @@ class Material_withdrawal extends CI_Controller {
     {
         parent::__construct();
         $this->load->model("ims/MaterialWithdrawal_model", "purchaserequest");
-        isAllowed(37);
+        isAllowed(42);
     }
 
     public function index()

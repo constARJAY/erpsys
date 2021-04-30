@@ -152,9 +152,9 @@ $(document).ready(function(){
                             class="form-control validate" 
                             name="bankNumber" 
                             id="input_bankNumber" 
-                            data-allowcharacters="[0][-][ ]" 
-                            minlength="10" 
-                            maxlength="20" 
+                            data-allowcharacters="[0-9]" 
+                            minlength="8" 
+                            maxlength="16" 
                             required 
                             value="${bankNumber}"
                             autocomplete="off">

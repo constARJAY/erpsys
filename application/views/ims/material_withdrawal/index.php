@@ -6,12 +6,12 @@
                     <ul class="breadcrumb pl-0 pb-0 ">
                         <li class="breadcrumb-item"><a href="#"><i class="zmdi zmdi-home"></i> Dashboard</a></li>
 						<li class="breadcrumb-item"><i class="fas fa-users"></i> &nbsp;Employee Forms</li>
-                        <li class="breadcrumb-item active">Inventory Incident</li>
+                        <li class="breadcrumb-item active">Material Withdrawal</li>
                     </ul>
-                    <h1 class="mt-3">Inventory Incident</h1>
-                    <span>This module is used to manage inventory incident form details.</span>
+                    <h1 class="mt-3">Material Withdrawal</h1>
+                    <span>This module is used to manage material withdrawal form details.</span>
                 </div>
-                <?php if(isCreateAllowed(44)){ ?>
+                <?php if(isCreateAllowed(42)){ ?>
                 <div class="col-lg-6 col-md-6 text-right" id="headerButton"></div>
                 <?php  } ?>
             </div>
@@ -36,7 +36,7 @@
     <div class="modal-dialog modal-dialog-centered modal-md" role="document">
 		<div class="modal-content">
 			<div class="modal-header bg-primary text-light">
-				<h6 class="page-title font-weight-bold">ADD INCIDENT</h6>
+				<h6 class="page-title font-weight-bold">ADD MATERIAL WITHDRAWAL </h6>
 				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
 					<span class="text-light" aria-hidden="true">&times;</span>
 				</button>
@@ -50,4 +50,4 @@
 
 
 <script src="<?= base_url('assets/custom/js/gen/approver-function.js') ?>"></script>
-<script src="<?= base_url('assets/custom/js/ims/inventory-incident.js') ?>"></script>
+<script src="<?= base_url('assets/custom/js/ims/material-withdrawal.js') ?>"></script>
