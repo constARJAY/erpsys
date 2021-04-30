@@ -19,136 +19,104 @@ class Service_requisition extends CI_Controller {
         $this->load->view("template/footer");
     }
 
-    public function savePurchaseRequest()
+    public function saveServiceRequisition()
     {
-        $action                  = $this->input->post("action");
-        $method                  = $this->input->post("method");
-        $purchaseRequestID       = $this->input->post("purchaseRequestID") ?? null;
-        $revisePurchaseRequestID = $this->input->post("revisePurchaseRequestID") ?? null;
-        $employeeID              = $this->input->post("employeeID");
-        $projectID               = $this->input->post("projectID") ?? null;
-        $approversID             = $this->input->post("approversID") ?? null;
-        $approversStatus         = $this->input->post("approversStatus") ?? null;
-        $approversDate           = $this->input->post("approversDate") ?? null;
-        $purchaseRequestStatus   = $this->input->post("purchaseRequestStatus");
-        $purchaseRequestReason   = $this->input->post("purchaseRequestReason") ?? null;
-        $projectTotalAmount      = $this->input->post("projectTotalAmount") ?? null;
-        $companyTotalAmount      = $this->input->post("companyTotalAmount") ?? null;
-        $purchaseRequestRemarks  = $this->input->post("purchaseRequestRemarks") ?? null;
-        $submittedAt             = $this->input->post("submittedAt") ?? null;
-        $createdBy               = $this->input->post("createdBy");
-        $updatedBy               = $this->input->post("updatedBy");
-        $createdAt               = $this->input->post("createdAt");
-        $items                   = $this->input->post("items") ?? null;
+        $action                     = $this->input->post("action");
+        $method                     = $this->input->post("method");
+        $serviceRequisitionID       = $this->input->post("serviceRequisitionID") ?? null;
+        $reviseServiceRequisitionID = $this->input->post("reviseServiceRequisitionID") ?? null;
+        $employeeID                 = $this->input->post("employeeID");
+        $clientID                   = $this->input->post("clientID") ?? null;
+        $projectID                  = $this->input->post("projectID") ?? null;
+        $approversID                = $this->input->post("approversID") ?? null;
+        $approversStatus            = $this->input->post("approversStatus") ?? null;
+        $approversDate              = $this->input->post("approversDate") ?? null;
+        $serviceRequisitionStatus   = $this->input->post("serviceRequisitionStatus");
+        $serviceRequisitionReason   = $this->input->post("serviceRequisitionReason") ?? null;
+        $serviceRequisitionRemarks  = $this->input->post("serviceRequisitionRemarks") ?? null;
+        $serviceRequisitionTotalAmount  = $this->input->post("serviceRequisitionTotalAmount") ?? null;
+        $submittedAt                = $this->input->post("submittedAt") ?? null;
+        $createdBy                  = $this->input->post("createdBy");
+        $updatedBy                  = $this->input->post("updatedBy");
+        $createdAt                  = $this->input->post("createdAt");
+        $items                      = $this->input->post("items") ?? null;
 
-        $purchaseRequestData = [
-            "revisePurchaseRequestID" => $revisePurchaseRequestID,
-            "employeeID"              => $employeeID,
-            "projectID"               => $projectID,
-            "approversID"             => $approversID,
-            "approversStatus"         => $approversStatus,
-            "approversDate"           => $approversDate,
-            "purchaseRequestStatus"   => $purchaseRequestStatus,
-            "purchaseRequestReason"   => $purchaseRequestReason,
-            "projectTotalAmount"      => $projectTotalAmount,
-            "companyTotalAmount"      => $companyTotalAmount,
-            "submittedAt"             => $submittedAt,
-            "createdBy"               => $createdBy,
-            "updatedBy"               => $updatedBy,
-            "createdAt"               => $createdAt
+        $serviceRequisitionData = [
+            "reviseServiceRequisitionID" => $reviseServiceRequisitionID,
+            "employeeID"                 => $employeeID,
+            "clientID"                   => $clientID,
+            "projectID"                  => $projectID,
+            "approversID"                => $approversID,
+            "approversStatus"            => $approversStatus,
+            "approversDate"              => $approversDate,
+            "serviceRequisitionStatus"   => $serviceRequisitionStatus,
+            "serviceRequisitionReason"   => $serviceRequisitionReason,
+            "serviceRequisitionTotalAmount"   => $serviceRequisitionTotalAmount,
+            "submittedAt"                => $submittedAt,
+            "createdBy"                  => $createdBy,
+            "updatedBy"                  => $updatedBy,
+            "createdAt"                  => $createdAt
         ];
 
         if ($action == "update") {
-            unset($purchaseRequestData["revisePurchaseRequestID"]);
-            unset($purchaseRequestData["createdBy"]);
-            unset($purchaseRequestData["createdAt"]);
+            unset($serviceRequisitionData["reviseServiceRequisitionID"]);
+            unset($serviceRequisitionData["createdBy"]);
+            unset($serviceRequisitionData["createdAt"]);
 
             if ($method == "cancelform") {
-                $purchaseRequestData = [
-                    "purchaseRequestStatus" => 4,
-                    "updatedBy"             => $updatedBy,
+                $serviceRequisitionData = [
+                    "serviceRequisitionStatus" => 4,
+                    "updatedBy"                => $updatedBy,
                 ];
             } else if ($method == "approve") {
-                $purchaseRequestData = [
-                    "approversStatus"       => $approversStatus,
-                    "approversDate"         => $approversDate,
-                    "purchaseRequestStatus" => $purchaseRequestStatus,
-                    "updatedBy"             => $updatedBy,
+                $serviceRequisitionData = [
+                    "approversStatus"          => $approversStatus,
+                    "approversDate"            => $approversDate,
+                    "serviceRequisitionStatus" => $serviceRequisitionStatus,
+                    "updatedBy"                => $updatedBy,
                 ];
             } else if ($method == "deny") {
-                $purchaseRequestData = [
-                    "approversStatus"        => $approversStatus,
-                    "approversDate"          => $approversDate,
-                    "purchaseRequestStatus"  => 3,
-                    "purchaseRequestRemarks" => $purchaseRequestRemarks,
-                    "updatedBy"              => $updatedBy,
+                $serviceRequisitionData = [
+                    "approversStatus"           => $approversStatus,
+                    "approversDate"             => $approversDate,
+                    "serviceRequisitionStatus"  => 3,
+                    "serviceRequisitionRemarks" => $serviceRequisitionRemarks,
+                    "updatedBy"                 => $updatedBy,
                 ];
             }
         }
 
-        $savePurchaseRequestData = $this->servicerequisition->savePurchaseRequestData($action, $purchaseRequestData, $purchaseRequestID);
-        if ($savePurchaseRequestData) {
-            $result = explode("|", $savePurchaseRequestData);
+        $saveServiceRequisitionData = $this->servicerequisition->saveServiceRequisitionData($action, $serviceRequisitionData, $serviceRequisitionID);
+        if ($saveServiceRequisitionData) {
+            $result = explode("|", $saveServiceRequisitionData);
 
             if ($result[0] == "true") {
-                $purchaseRequestID = $result[2];
+                $serviceRequisitionID = $result[2];
 
                 if ($items) {
-                    $purchaseRequestItems = [];
                     foreach($items as $index => $item) {
-                        $temp = [
-                            "purchaseRequestID" => $purchaseRequestID,
-                            "itemID"            => $item["itemID"] != "null" ? $item["itemID"] : null,
-                            "categoryType"      => $item["categoryType"],
-                            "quantity"          => $item["quantity"],
-                            "unitCost"          => $item["unitcost"],
-                            "totalCost"         => $item["totalcost"],
-                            "files"             => array_key_exists("existingFile", $item) ? $item["existingFile"] : null, 
-                            "remarks"           => $item["remarks"] ? $item["remarks"] : null, 
-                            "createdBy"         => $item["createdBy"],
-                            "updatedBy"         => $item["updatedBy"],
+                        $service = [
+                            "serviceRequisitionID" => $serviceRequisitionID,
+                            "serviceID"            => $item["serviceID"] != "null" ? $item["serviceID"] : null,
+                            "serviceName"          => $item["serviceName"],
+                            "serviceUom"           => $item["serviceUom"],
+                            "quantity"             => $item["quantity"],
+                            "unitCost"             => $item["unitcost"],
+                            "totalCost"            => $item["totalcost"],
+                            "remarks"             => $item["remarks"],
+                            "createdBy"            => $updatedBy,
+                            "updatedBy"            => $updatedBy,
                         ];
-                        array_push($purchaseRequestItems, $temp);
+                        $scopes = $item["scopes"];
+
+                        $saveServices = $this->servicerequisition->saveServices($service, $scopes, $serviceRequisitionID);
                     }
-                    
-                    if (isset($_FILES["items"])) {
-                        $length = count($_FILES["items"]["name"]);
-                        $keys   = array_keys($_FILES["items"]["name"]);
-                        for ($i=0; $i<$length; $i++) {
-                            $uploadedFile = explode(".", $_FILES["items"]["name"][$keys[$i]]["file"]);
-
-                            $index     = (int)$uploadedFile[0]; 
-                            $extension = $uploadedFile[1];
-                            $filename  = $i.time().'.'.$extension;
-
-                            $folderDir = "assets/upload-files/request-items/";
-                            if (!is_dir($folderDir)) {
-                                mkdir($folderDir);
-                            }
-                            $targetDir = $folderDir.$filename;
-
-                            if (move_uploaded_file($_FILES["items"]["tmp_name"][$index]["file"], $targetDir)) {
-                                $purchaseRequestItems[$index]["files"] = $filename;
-                            }
-                            
-                        } 
-
-                        // ----- UPDATE ITEMS FILE -----
-                        foreach ($purchaseRequestItems as $key => $prItem) {
-                            if (!array_key_exists("files", $prItem)) {
-                                $purchaseRequestItems[$key]["files"] = null;
-                            }
-                        }
-                        // ----- END UPDATE ITEMS FILE -----
-                    }
-
-                    $savePurchaseRequestItems = $this->servicerequisition->savePurchaseRequestItems($purchaseRequestItems, $purchaseRequestID);
                 }
 
             }
             
         }
-        echo json_encode($savePurchaseRequestData);
+        echo json_encode($saveServiceRequisitionData);
     }
 
 }

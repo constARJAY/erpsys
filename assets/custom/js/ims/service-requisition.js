@@ -337,10 +337,13 @@ $(document).ready(function() {
 	function forApprovalContent() {
 		$("#tableForApprovalParent").html(preloader);
 		let serviceRequisitionData = getTableData(
-			"ims_service_requisition_tbl AS imrt LEFT JOIN hris_employee_list_tbl AS helt USING(employeeID) LEFT JOIN pms_project_list_tbl AS pplt ON pplt.projectListID = imrt.projectID",
-			"imrt.*, CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname, imrt.createdAt AS dateCreated, projectListCode, projectListName",
-			`imrt.employeeID != ${sessionID} AND serviceRequisitionStatus != 0 AND serviceRequisitionStatus != 4`,
-			`FIELD(serviceRequisitionStatus, 0, 1, 3, 2, 4), COALESCE(imrt.submittedAt, imrt.createdAt)`
+			`ims_service_requisition_tbl AS isrt 
+				LEFT JOIN hris_employee_list_tbl AS helt USING(employeeID) 
+				LEFT JOIN pms_project_list_tbl AS pplt ON pplt.projectListID = isrt.projectID
+				LEFT JOIN pms_client_tbl AS pct ON isrt.clientID = pct.clientID`,
+			"isrt.*, CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname, isrt.createdAt AS dateCreated, projectListCode, projectListName, clientName",
+			`isrt.employeeID != ${sessionID} AND serviceRequisitionStatus != 0 AND serviceRequisitionStatus != 4`,
+			`FIELD(serviceRequisitionStatus, 0, 1, 3, 2, 4), COALESCE(isrt.submittedAt, isrt.createdAt)`
 		);
 
 		let html = `
@@ -349,9 +352,9 @@ $(document).ready(function() {
                 <tr style="white-space: nowrap">
                     <th>Document No.</th>
                     <th>Employee Name</th>
+                    <th>Client Name</th>
                     <th>Project Code</th>
                     <th>Project Name</th>
-                    <th>Reference Code</th>
                     <th>Current Approver</th>
                     <th>Date Created</th>
                     <th>Date Submitted</th>
@@ -367,6 +370,7 @@ $(document).ready(function() {
 			let {
 				fullname,
 				serviceRequisitionID,
+				clientName,
 				projectID,
 				projectListCode,
 				projectListName,
@@ -399,9 +403,9 @@ $(document).ready(function() {
 				<tr>
 					<td>${getFormCode("SR", createdAt, serviceRequisitionID )}</td>
 					<td>${fullname}</td>
+					<td>${clientName || '-'}</td>
 					<td>${projectListCode || '-'}</td>
 					<td>${projectListName || '-'}</td>
-					<td>${referenceCode || '-'}</td>
 					<td>
 						${employeeFullname(getCurrentApprover(approversID, approversDate, serviceRequisitionStatus, true))}
 					</td>
@@ -436,10 +440,13 @@ $(document).ready(function() {
 	function myFormsContent() {
 		$("#tableMyFormsParent").html(preloader);
 		let serviceRequisitionData = getTableData(
-			"ims_service_requisition_tbl AS imrt LEFT JOIN hris_employee_list_tbl AS helt USING(employeeID) LEFT JOIN pms_project_list_tbl AS pplt ON pplt.projectListID = imrt.projectID",
-			"imrt.*, CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname, imrt.createdAt AS dateCreated, projectListCode, projectListName",
-			`imrt.employeeID = ${sessionID}`,
-			`FIELD(serviceRequisitionStatus, 0, 1, 3, 2, 4), COALESCE(imrt.submittedAt, imrt.createdAt)`
+			`ims_service_requisition_tbl AS isrt 
+				LEFT JOIN hris_employee_list_tbl AS helt USING(employeeID) 
+				LEFT JOIN pms_project_list_tbl AS pplt ON pplt.projectListID = isrt.projectID
+				LEFT JOIN pms_client_tbl AS pct ON isrt.clientID = pct.clientID`,
+			"isrt.*, CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname, isrt.createdAt AS dateCreated, projectListCode, projectListName, clientName",
+			`isrt.employeeID = ${sessionID}`,
+			`FIELD(serviceRequisitionStatus, 0, 1, 3, 2, 4), COALESCE(isrt.submittedAt, isrt.createdAt)`
 		);
 
 		let html = `
@@ -448,9 +455,9 @@ $(document).ready(function() {
                 <tr style="white-space: nowrap">
                     <th>Document No.</th>
                     <th>Employee Name</th>
+                    <th>Client Name</th>
                     <th>Project Code</th>
                     <th>Project Name</th>
-                    <th>Reference Code</th>
                     <th>Current Approver</th>
                     <th>Date Created</th>
                     <th>Date Submitted</th>
@@ -466,6 +473,7 @@ $(document).ready(function() {
 			let {
 				fullname,
 				serviceRequisitionID,
+				clientName,
                 projectID,
                 projectListCode,
                 projectListName,
@@ -497,9 +505,9 @@ $(document).ready(function() {
             <tr>
                 <td>${getFormCode("SR", createdAt, serviceRequisitionID )}</td>
                 <td>${fullname}</td>
+                <td>${clientName || '-'}</td>
                 <td>${projectListCode || '-'}</td>
                 <td>${projectListName || '-'}</td>
-                <td>${referenceCode || '-'}</td>
                 <td>
                     ${employeeFullname(getCurrentApprover(approversID, approversDate, serviceRequisitionStatus, true))}
                 </td>
@@ -669,7 +677,7 @@ $(document).ready(function() {
 
     // ----- GET PROJECT LIST -----
     function getProjectList(id = null, clientID = 0, display = true) {
-        console.log(clientID);
+		console.log(id, clientID);
 		let html = `
 		<option 
 			value       = "0"
@@ -690,14 +698,9 @@ $(document).ready(function() {
 
 
 	// ----- UPDATE INVENTORYT NAME -----
-	function updateInventoryItemOptions() {
+	function updateServiceOptions() {
 		let serviceIDArr = []; // 0 IS THE DEFAULT VALUE
 		let serviceElementID = [], companyElementID = [];
-		let optionNone = {
-			serviceID:              "0",
-			serviceUom: "-",
-			serviceName:            "N/A"
-		};
 
 		$("[name=serviceID]").each(function(i, obj) {
 			serviceIDArr.push($(this).val());
@@ -707,7 +710,7 @@ $(document).ready(function() {
 
 		serviceElementID.map((element, index) => {
 			let html = `<option selected disabled>Select Item Name</option>`;
-			let serviceList = [optionNone, ...serviceItemList];
+			let serviceList = [...serviceItemList];
 			html += serviceList.filter(item => !serviceIDArr.includes(item.serviceID) || item.serviceID == serviceIDArr[index]).map(item => {
                 let serviceCode = item.serviceID != "0" ? 
                 `${getFormCode("SVC", item.createdAt, item.serviceID)}` : "-"
@@ -735,13 +738,7 @@ $(document).ready(function() {
 		$(`[name=serviceID]`).each(function(i, obj) {
 			serviceIDArr.push($(this).val());
 		}) 
-
-		let optionNone = {
-			serviceID:   "0",
-			serviceUom:  "-",
-			serviceName: "N/A",
-		};
-		let serviceList = [optionNone, ...serviceItemList];
+		let serviceList = [...serviceItemList];
 
 		html += serviceList.filter(item => !serviceIDArr.includes(item.serviceID) || item.serviceID == id).map(item => {
             let serviceCode = item.serviceID != "0" ? 
@@ -761,28 +758,83 @@ $(document).ready(function() {
     // ----- END GET INVENTORY ITEM -----
 
 
+	// ----- GET SERVICE SCOPE -----
+	function getServiceScope(scope = "", readOnly = false) {
+		let html = "";
+		if (!readOnly) {
+			html = `
+			<div class="input-group mb-0">
+				<input type="text"
+					class="form-control validate"
+					name="serviceDescription"
+					id="serviceDescription"
+					data-allowcharacters="[A-Z][a-z][0-9][ ][@][-][_]['][&][()]"
+					minlength="2"
+					maxlength="75"
+					value="${scope}"
+					required>
+				<div class="input-group-append">
+					<button class="btn btn-sm btn-danger btnDeleteScope">
+						<i class="fas fa-minus"></i>
+					</button>
+				</div>
+				<div class="d-block invalid-feedback mt-0 mb-1" id="invalid-serviceDescription"></div>
+			</div>`;
+		} else {
+			html = `
+			<div class="mb-0">
+				${scope}
+			</div>`;
+		}
+
+		
+		return html;
+	}
+	// ----- END GET SERVICE SCOPE -----
+
+
+	// ----- UPDATE SERVICE SCOPE -----
+	function updateServiceScope() {
+		$(`[name="serviceDescription"]`).each(function(i) {
+			$(this).attr("id", `serviceDescription${i}`);
+		})
+	}
+	// ----- END UPDATE SERVICE SCOPE -----
+
+
 	// ----- GET ITEM ROW -----
-    function getServiceRow(isProject = true, item = {}, readOnly = false) {
-		const attr = isProject ? `project="true"` : `company="true"`;
+    function getServiceRow(item = {}, readOnly = false) {
 		let {
-			serviceID     = "",
-			serviceName     = "",
-			quantity     = 1,
-			categoryName = "",
-			serviceUom = "",
-			unitCost     = 0,
-			totalCost    = 0,
-			remarks      = ""
+			requestServiceID = 0,
+			serviceID   = "",
+			serviceName = "",
+			serviceUom  = "-",
+			quantity    = 1,
+			unitCost    = 0,
+			totalCost   = 0,
+			remarks     = "",
+			createdAt   = ""
 		} = item;
+
+		const scopeData = getTableData(
+			`ims_service_scope_tbl`,
+			`description`,
+			`requestServiceID = ${requestServiceID}`
+		);
+		let serviceScopes = getServiceScope();
+		if (scopeData.length > 0) {
+			serviceScopes = scopeData.map(scope => {
+				return getServiceScope(scope.description, readOnly);
+			}).join("");
+		}
 
 		let html = "";
 		if (readOnly) {
-			const itemFIle = files ? `<a href="${base_url+"assets/upload-files/request-items/"+files}" target="_blank">${files}</a>` : `-`;
 			html += `
 			<tr class="itemTableRow">
 				<td>
 					<div class="servicecode">
-						${serviceID || "-"}
+						${getFormCode("SVC", createdAt, requestServiceID)}
 					</div>
 				</td>
 				<td>
@@ -790,14 +842,14 @@ $(document).ready(function() {
 						${serviceName || "-"}
 					</div>
 				</td>
+				<td>
+					<div class="servicescope">
+						${serviceScopes}
+					</div>
+				</td>
 				<td class="text-center">
 					<div class="quantity">
 						${quantity}
-					</div>
-				</td>
-				<td>
-					<div class="category">
-						${categoryName || "-"}
 					</div>
 				</td>
 				<td>
@@ -813,11 +865,6 @@ $(document).ready(function() {
 				<td class="text-right">
 					<div class="totalcost">
 						${formatAmount(totalCost, true)}
-					</div>
-				</td>
-				<td>
-					<div class="file">
-						${itemFIle}
 					</div>
 				</td>
 				<td>
@@ -845,8 +892,7 @@ $(document).ready(function() {
 								name="serviceID"
 								id="serviceID"
 								style="width: 100%"
-								required
-								${attr}>
+								required>
 								${getServiceItem(serviceID)}
 							</select>
 							<div class="invalid-feedback d-block" id="invalid-serviceID"></div>
@@ -854,7 +900,12 @@ $(document).ready(function() {
 					</div>
 				</td>
                 <td>
-					tanga
+					<div class="servicescope mt-2">
+						${serviceScopes}
+					</div>
+					<button class="btn btn-md btn-primary float-right mb-2 btnAddScope">
+						<i class="fas fa-plus"></i>
+					</button>
 				</td>
 				<td class="text-center">
 					<div class="quantity">
@@ -866,6 +917,7 @@ $(document).ready(function() {
 							max="999999999" 
 							id="quantity" 
 							name="quantity" 
+							autocomplete="off"
 							value="${quantity}" 
 							minlength="1" 
 							maxlength="20" 
@@ -874,7 +926,9 @@ $(document).ready(function() {
 					</div>
 				</td>
 				<td>
-					<div class="serviceUom">-</div>
+					<div class="serviceUom">
+						${serviceUom}
+					</div>
 				</td>
 				<td class="text-right">
 					<div class="unitcost">
@@ -1085,8 +1139,13 @@ $(document).ready(function() {
         $("[name=clientName]").val(clientName);
         $("[name=clientAddress]").val(address);
 
+		const projectID = $(`[name=projectID]`).val() || null;
+
         $(`[name="projectCode"]`).val("-");
-        $("[name=projectID]").html(getProjectList(null, clientID))
+        $("[name=projectID]").html(getProjectList(projectID, clientID));
+		if (projectID) {
+			$("[name=projectID]").trigger("change");
+		}
     })
     // ----- END SELECT CLIENT -----
 
@@ -1100,7 +1159,33 @@ $(document).ready(function() {
     // ----- END SELECT PROJECT LIST -----
 
 
-    // ----- SELECT ITEM NAME -----
+	// ----- ADD SCOPE -----
+	$(document).on("click", ".btnAddScope", function() {
+		let newScope = getServiceScope();
+		$(this).parent().find(".servicescope").append(newScope);
+		$(this).parent().find("[name=serviceDescription]").last().focus();
+		updateServiceScope();
+	})
+	// ----- END ADD SCOPE -----
+
+
+	// ----- DELETE SCOPE -----
+	$(document).on("click", ".btnDeleteScope", function() {
+		console.log($(this).closest(".servicescope").find(".input-group").length);
+		const isCanDelete = $(this).closest(".servicescope").find(".input-group").length > 1;
+		if (isCanDelete) {
+			const scopeElement = $(this).closest(".input-group");
+			scopeElement.fadeOut(500, function() {
+				$(this).closest(".input-group").remove();
+			})
+		} else {
+			showNotification("danger", "You must have at least one scope of work.");
+		}
+	})
+	// ----- END DELETE SCOPE -----
+
+
+    // ----- SELECT SERVICE NAME -----
     $(document).on("change", "[name=serviceID]", function() {
         const serviceCode = $('option:selected', this).attr("serviceCode");
         const serviceUom  = $('option:selected', this).attr("serviceUom");
@@ -1110,21 +1195,11 @@ $(document).ready(function() {
 
 		$(`[name=serviceID]`).each(function(i, obj) {
 			let serviceID = $(this).val();
-			if (serviceID == "0") {
-				$(this).closest("tr").find("[name=quantity]").removeAttr("required");
-				$(this).closest("tr").find("[name=quantity]").val("0");
-				$(this).closest("tr").find("[name=unitCost]").val("0.00");
-				$(this).closest("tr").find(".totalcost").text(formatAmount("0.00", true));
-				$(this).closest("tr").find("[name=remarks]").val("");
-				$(this).closest("tr").find("[name=quantity], [name=unitCost], [name=remarks]").attr("disabled", "true");
-			} else {
-				$(this).closest("tr").find("[name=quantity], [name=unitCost], [name=remarks]").removeAttr("disabled");
-			}
 			$(this).html(getServiceItem(serviceID));
 		}) 
 		updateTotalAmount();
     })
-    // ----- END SELECT ITEM NAME -----
+    // ----- END SELECT SERVICE NAME -----
 
 
 	// ----- KEYUP QUANTITY OR UNITCOST -----
@@ -1212,6 +1287,7 @@ $(document).ready(function() {
 			$(".itemCompanyTableBody").append(row);
 		}
 		updateTableItems();
+		updateServiceScope();
 		initInputmask();
 		initAmount();
     })
@@ -1242,9 +1318,8 @@ $(document).ready(function() {
             clientID = "",
 			projectID               = "",
 			serviceRequisitionReason   = "",
-			projectTotalAmount      = "0",
-			companyTotalAmount      = "0",
 			serviceRequisitionRemarks  = "",
+			serviceRequisitionTotalAmount      = "0",
 			approversID             = "",
 			approversStatus         = "",
 			approversDate           = "",
@@ -1253,16 +1328,18 @@ $(document).ready(function() {
 			createdAt               = false,
 		} = data && data[0];
 
-		let requestServiceItems = "", requestCompanyItems = "";
+		let requestServiceItems = "";
 		if (serviceRequisitionID) {
-			requestItemsData.filter(item => item.categoryType == "project").map(item => {
-				requestServiceItems += getServiceRow(true, item, readOnly);
-			})
-			requestItemsData.filter(item => item.categoryType == "company").map(item => {
-				requestCompanyItems += getServiceRow(false, item, readOnly);
+			let requestServicesData = getTableData(
+				`ims_request_services_tbl`,
+				``,
+				`serviceRequisitionID = ${serviceRequisitionID}`
+			)
+			requestServicesData.map(item => {
+				requestServiceItems += getServiceRow(item, readOnly);
 			})
 		} else {
-			requestServiceItems += getServiceRow(true);
+			requestServiceItems += getServiceRow();
 		}
 
 		// ----- GET EMPLOYEE DATA -----
@@ -1294,7 +1371,7 @@ $(document).ready(function() {
 		</th>` : ``;
 		let tableServiceRequisitionItems = !disabled ? "tableServiceRequisitionItems" : "tableServiceRequisitionItems0";
 		let tableCompanyRequestItemsName = !disabled ? "tableCompanyRequestItems" : "tableCompanyRequestItems0";
-		let buttonProjectAddDeleteRow = !disabled ? `
+		let buttonServiceAddRow = !disabled ? `
 		<div class="w-100 text-left my-2">
 			<button class="btn btn-primary btnAddRow" id="btnAddRow" project="true"><i class="fas fa-plus-circle"></i> Add Row</button>
 			<button class="btn btn-danger btnDeleteRow" id="btnDeleteRow" project="true" disabled><i class="fas fa-minus-circle"></i> Delete Row/s</button>
@@ -1390,7 +1467,7 @@ $(document).ready(function() {
             </div>
         </div>
 
-        <div class="row" id="form_purchase_request">
+        <div class="row" id="form_service_requisition">
 
             <div class="col-md-3 col-sm-12">
                 <div class="form-group">
@@ -1400,11 +1477,12 @@ $(document).ready(function() {
             </div>
             <div class="col-md-3 col-sm-12">
                 <div class="form-group">
-                    <label>Client Name <code>*</code></label>
+                    <label>Client Name ${!disabled ? "<code>*</code>" : ""}</label>
                     <select class="form-control validate select2" 
                         name="clientID"
                         id="clientID"
-                        required>
+                        required
+						${disabled}>
                             <option selected disabled>Select Client Name</option>
                             ${getClientList(clientID)}
                     </select>
@@ -1483,7 +1561,7 @@ $(document).ready(function() {
 								${checkboxServiceRequisitionHeader}
                                 <th>Service Code</th>
                                 <th>Service Name ${!disabled ? "<code>*</code>" : ""}</th>
-                                <th>Scope of Work</th>
+                                <th>Scope of Work ${!disabled ? "<code>*</code>" : ""}</th>
                                 <th>Quantity ${!disabled ? "<code>*</code>" : ""}</th>
                                 <th>UOM</th>
                                 <th>Unit Cost ${!disabled ? "<code>*</code>" : ""}</th>
@@ -1497,10 +1575,10 @@ $(document).ready(function() {
                     </table>
                     
 					<div class="w-100 d-flex justify-content-between align-items-center py-2">
-						<div>${buttonProjectAddDeleteRow}</div>
+						<div>${buttonServiceAddRow}</div>
 						<div class="font-weight-bolder" style="font-size: 1rem;">
 							<span>Total Amount: &nbsp;</span>
-							<span class="text-danger" style="font-size: 1.2em" id="totalAmount" project="true">${formatAmount(projectTotalAmount, true)}</span>
+							<span class="text-danger" style="font-size: 1.2em" id="totalAmount" project="true">${formatAmount(serviceRequisitionTotalAmount, true)}</span>
 						</div>
 					</div>
                 </div>
@@ -1520,8 +1598,8 @@ $(document).ready(function() {
 			initDataTables();
 			updateTableItems();
 			initAll();
-			updateInventoryItemOptions();
-			projectID && projectID != 0 && $("[name=projectID]").trigger("change");
+			updateServiceOptions();
+			clientID && clientID != 0 && $("[name=clientID]").trigger("change");
 			return html;
 		}, 300);
 	}
@@ -1546,7 +1624,7 @@ $(document).ready(function() {
             </div>`;
 			$("#page_content").html(html);
 
-			headerButton(true, "Add Purchase Request");
+			headerButton(true, "Add Service Requisition");
 			headerTabContent();
 			myFormsContent();
 			updateURL();
@@ -1562,7 +1640,7 @@ $(document).ready(function() {
 
 
 	// ----- GET PURCHASE REQUEST DATA -----
-	function getPurchaseRequestData(action = "insert", method = "submit", status = "1", id = null, currentStatus = "0", isObject = false) {
+	function getServiceRequisitionData(action = "insert", method = "submit", status = "1", id = null, currentStatus = "0") {
 
 		/**
 		 * ----- ACTION ---------
@@ -1586,114 +1664,73 @@ $(document).ready(function() {
 		 * ----- END METHOD -----
 		 */
 
-		let data = { items: [] }, formData = new FormData;
+		let data = { items: [] };
 		const approversID = method != "approve" && moduleApprover;
 
 		if (id) {
 			data["serviceRequisitionID"] = id;
-			formData.append("serviceRequisitionID", id);
 
 			if (status != "2") {
 				data["serviceRequisitionStatus"] = status;
-				formData.append("serviceRequisitionStatus", status);
 			}
 		}
 
-		data["action"]                = action;
-		data["method"]                = method;
-		data["updatedBy"]             = sessionID;
-
-		formData.append("action", action);
-		formData.append("method", method);
-		formData.append("updatedBy", sessionID);
+		data["action"]    = action;
+		data["method"]    = method;
+		data["updatedBy"] = sessionID;
 
 		if (currentStatus == "0" && method != "approve") {
 			
-			data["employeeID"]            = sessionID;
-			data["projectID"]             = $("[name=projectID]").val() || null;
+			data["employeeID"] = sessionID;
+			data["projectID"]  = $("[name=projectID]").val() || null;
+			data["clientID"]   = $("[name=clientID]").val() || null;
 			data["serviceRequisitionReason"] = $("[name=serviceRequisitionReason]").val()?.trim();
-			data["projectTotalAmount"]    = updateTotalAmount(true);
-			data["companyTotalAmount"]    = updateTotalAmount(false);
-			
-			formData.append("employeeID", sessionID);
-			formData.append("projectID", $("[name=projectID]").val() || null);
-			formData.append("serviceRequisitionReason", $("[name=serviceRequisitionReason]").val()?.trim());
-			formData.append("projectTotalAmount", updateTotalAmount(true));
-			formData.append("companyTotalAmount", updateTotalAmount(false));
+			data["serviceRequisitionTotalAmount"] = updateTotalAmount(true);
 
 			if (action == "insert") {
-				data["createdBy"]   = sessionID;
-				data["createdAt"]   = dateToday();
-
-				formData.append("createdBy", sessionID);
-				formData.append("createdAt", dateToday());
+				data["createdBy"] = sessionID;
+				data["createdAt"] = dateToday();
 			} else if (action == "update") {
 				data["serviceRequisitionID"] = id;
-
-				formData.append("serviceRequisitionID", id);
 			}
 
 			if (method == "submit") {
 				data["submittedAt"] = dateToday();
-				formData.append("submittedAt", dateToday());
 				if (approversID) {
-					data["approversID"]           = approversID;
+					data["approversID"] = approversID;
 					data["serviceRequisitionStatus"] = 1;
-
-					formData.append("approversID", approversID);
-					formData.append("serviceRequisitionStatus", 1);
 				} else {  // AUTO APPROVED - IF NO APPROVERS
-					data["approversID"]           = sessionID;
-					data["approversStatus"]       = 2;
-					data["approversDate"]         = dateToday();
+					data["approversID"]     = sessionID;
+					data["approversStatus"] = 2;
+					data["approversDate"]   = dateToday();
 					data["serviceRequisitionStatus"] = 2;
-
-					formData.append("approversID", sessionID);
-					formData.append("approversStatus", 2);
-					formData.append("approversDate", dateToday());
-					formData.append("serviceRequisitionStatus", 2);
 				}
 			}
 
 			$(".itemTableRow").each(function(i, obj) {
-				const categoryType = $(this).closest("tbody").attr("project") == "true" ? "project" : "company";
-
-				const serviceID    = $("td [name=serviceID]", this).val();	
+				const serviceID   = $("td [name=serviceID]", this).val();	
+				const serviceName = serviceID ? $("td [name=serviceID]", this).find(":selected").text().replaceAll("\n", "").trim() : "";	
 				const quantity  = +$("td [name=quantity]", this).val();	
+				const serviceUom = $("td .serviceUom", this).text().trim();	
 				const unitcost  = +$("td [name=unitCost]", this).val().replaceAll(",", "");	
 				const totalcost = quantity * unitcost;
 				const remarks   = $("td [name=remarks]", this).val()?.trim();	
-				const fileID    = $("td [name=files]", this).attr("id");
-				const file      = $(`#${fileID}`)[0].files[0];
-				const fileArr   = file?.name.split(".");
-				const filename  = file ? file?.name : "";
 
 				let temp = {
-					serviceID, quantity, unitcost, totalcost: totalcost.toFixed(2),
-					filename, categoryType
+					serviceID, 
+					serviceName,
+					serviceUom,
+					quantity, 
+					unitcost, 
+					totalcost: totalcost.toFixed(2), 
+					remarks,
+					scopes: []
 				};
 
-				formData.append(`items[${i}][serviceID]`, serviceID);
-				formData.append(`items[${i}][categoryType]`, categoryType);
-				formData.append(`items[${i}][quantity]`, quantity);
-				formData.append(`items[${i}][unitcost]`, unitcost);
-				formData.append(`items[${i}][totalcost]`, totalcost);
-				formData.append(`items[${i}][remarks]`, remarks);
-				formData.append(`items[${i}][filename]`, filename);
-				formData.append(`items[${i}][createdBy]`, sessionID);
-				formData.append(`items[${i}][updatedBy]`, sessionID);
-				if (file) {
-					temp["file"] - file;
-					formData.append(`items[${i}][file]`, file, `${i}.${fileArr[1]}`);
-				} else {
-					const isHadExistingFile = $("td .file .displayfile", this).text().trim().length > 0;
-					if (isHadExistingFile) {
-						const filename = $("td .file .displayfile .filename", this).text().trim();
-
-						temp["existingFile"] = filename;
-						formData.append(`items[${i}][existingFile]`, filename);
-					}
-				}
+				$(`td [name="serviceDescription"]`, this).each(function() {
+					const scope = $(this).val()?.trim();
+					temp["scopes"].push(scope);
+				})
 
 				data["items"].push(temp);
 			});
@@ -1701,7 +1738,7 @@ $(document).ready(function() {
 
 		
 
-		return isObject ? data : formData;
+		return data;
 	}
 	// ----- END GET PURCHASE REQUEST DATA -----
 
@@ -1750,12 +1787,12 @@ $(document).ready(function() {
 			
 			if (revise) {
 				const action = revise && "insert" || (id && feedback ? "update" : "insert");
-				const data   = getPurchaseRequestData(action, "save", "0", id);
-				data.append("serviceRequisitionStatus", 0);
-				data.append("reviseServiceRequisitionID", id);
-				data.delete("serviceRequisitionID");
+				const data   = getServiceRequisitionData(action, "save", "0", id);
+				data["serviceRequisitionStatus"]   = 0;
+				data["reviseServiceRequisitionID"] = id;
+				delete data["serviceRequisitionID"];
 	
-				savePurchaseRequest(data, "save", null, pageContent);
+				saveServiceRequisition(data, "save", null, pageContent);
 			} else {
 				$("#page_content").html(preloader);
 				pageContent();
@@ -1767,10 +1804,10 @@ $(document).ready(function() {
 
 		} else {
 			const action = id && feedback ? "update" : "insert";
-			const data   = getPurchaseRequestData(action, "save", "0", id);
-			data.append("serviceRequisitionStatus", 0);
+			const data   = getServiceRequisitionData(action, "save", "0", id);
+			data["serviceRequisitionStatus"] = 0;
 
-			savePurchaseRequest(data, "save", null, pageContent);
+			saveServiceRequisition(data, "save", null, pageContent);
 		}
 	});
 	// ----- END SAVE CLOSE FORM -----
@@ -1782,53 +1819,60 @@ $(document).ready(function() {
 		const revise   = $(this).attr("revise") == "true";
 		const feedback = $(this).attr("code") || getFormCode("SR", dateToday(), id);
 		const action   = revise && "insert" || (id && feedback ? "update" : "insert");
-		const data     = getPurchaseRequestData(action, "save", "0", id);
-		data.append("serviceRequisitionStatus", 0);
+		const data     = getServiceRequisitionData(action, "save", "0", id);
+		data["serviceRequisitionStatus"] = 0;
 
 		if (revise) {
-			data.append("reviseServiceRequisitionID", id);
-			data.delete("serviceRequisitionID");
+			data["reviseServiceRequisitionID"] = id;
+			delete data["serviceRequisitionID"];
 		}
 
-		savePurchaseRequest(data, "save", null, pageContent);
+		saveServiceRequisition(data, "save", null, pageContent);
 	});
 	// ----- END SAVE DOCUMENT -----
+
+
+	// ----- REMOVE IS-VALID IN TABLE -----
+	function removeIsValid(element = "table") {
+		$(element).find(".validated, .is-valid, .no-error").removeClass("validated")
+		.removeClass("is-valid").removeClass("no-error");
+	}
+	// ----- END REMOVE IS-VALID IN TABLE -----
 
 
     // ----- SUBMIT DOCUMENT -----
 	$(document).on("click", "#btnSubmit", function () {
 		const id           = $(this).attr("serviceRequisitionID");
 		const revise       = $(this).attr("revise") == "true";
-		const validate     = validateForm("form_purchase_request");
+		const validate     = validateForm("form_service_requisition");
+		removeIsValid("#tableServiceRequisitionItems");
 
 		if (validate) {
+			
 			const action = revise && "insert" || (id ? "update" : "insert");
-			const data   = getPurchaseRequestData(action, "submit", "1", id);
+			const data   = getServiceRequisitionData(action, "submit", "1", id);
 
 			if (revise) {
-				data.append("reviseServiceRequisitionID", id);
-				data.delete("serviceRequisitionID");
+				data["reviseServiceRequisitionID"] = id;
+				delete data["serviceRequisitionID"];
 			}
 
-			let approversID = "", approversDate = "";
-			for (var i of data) {
-				if (i[0] == "approversID")   approversID   = i[1];
-				if (i[0] == "approversDate") approversDate = i[1];
-			}
+			let approversID   = data["approversID"], 
+				approversDate = data["approversDate"];
 
 			const employeeID = getNotificationEmployeeID(approversID, approversDate, true);
 			let notificationData = false;
 			if (employeeID != sessionID) {
 				notificationData = {
-					moduleID:                46,
-					notificationTitle:       "Purchase Request",
+					moduleID:                49,
+					notificationTitle:       "Service Requisition",
 					notificationDescription: `${employeeFullname(sessionID)} asked for your approval.`,
 					notificationType:        2,
 					employeeID,
 				};
 			}
 
-			savePurchaseRequest(data, "submit", notificationData, pageContent);
+			saveServiceRequisition(data, "submit", notificationData, pageContent);
 		}
 	});
 	// ----- END SUBMIT DOCUMENT -----
@@ -1839,9 +1883,9 @@ $(document).ready(function() {
 		const id     = $(this).attr("serviceRequisitionID");
 		const status = $(this).attr("status");
 		const action = "update";
-		const data   = getPurchaseRequestData(action, "cancelform", "4", id, status);
+		const data   = getServiceRequisitionData(action, "cancelform", "4", id, status);
 
-		savePurchaseRequest(data, "cancelform", null, pageContent);
+		saveServiceRequisition(data, "cancelform", null, pageContent);
 	});
 	// ----- END CANCEL DOCUMENT -----
 
@@ -1859,18 +1903,18 @@ $(document).ready(function() {
 			let employeeID      = tableData[0].employeeID;
 			let createdAt       = tableData[0].createdAt;
 
-			let data = getPurchaseRequestData("update", "approve", "2", id);
-			data.append("approversStatus", updateApproveStatus(approversStatus, 2));
+			let data = getServiceRequisitionData("update", "approve", "2", id);
+			data["approversStatus"] = updateApproveStatus(approversStatus, 2);
 			let dateApproved = updateApproveDate(approversDate)
-			data.append("approversDate", dateApproved);
+			data["approversDate"] = dateApproved;
 
 			let status, notificationData;
 			if (isImLastApprover(approversID, approversDate)) {
 				status = 2;
 				notificationData = {
-					moduleID:                46,
+					moduleID:                49,
 					tableID:                 id,
-					notificationTitle:       "Purchase Request",
+					notificationTitle:       "Service Requisition",
 					notificationDescription: `${feedback}: Your request has been approved.`,
 					notificationType:        7,
 					employeeID,
@@ -1878,18 +1922,18 @@ $(document).ready(function() {
 			} else {
 				status = 1;
 				notificationData = {
-					moduleID:                46,
+					moduleID:                49,
 					tableID:                 id,
-					notificationTitle:       "Purchase Request",
+					notificationTitle:       "Service Requisition",
 					notificationDescription: `${employeeFullname(employeeID)} asked for your approval.`,
 					notificationType:         2,
 					employeeID:               getNotificationEmployeeID(approversID, dateApproved),
 				};
 			}
 
-			data.append("serviceRequisitionStatus", status);
+			data["serviceRequisitionStatus"] = status;
 
-			savePurchaseRequest(data, "approve", notificationData, pageContent);
+			saveServiceRequisition(data, "approve", notificationData, pageContent);
 		}
 	});
 	// ----- END APPROVE DOCUMENT -----
@@ -1900,9 +1944,9 @@ $(document).ready(function() {
 		const id       = $(this).attr("serviceRequisitionID");
 		const feedback = $(this).attr("code") || getFormCode("SR", dateToday(), id);
 
-		$("#modal_purchase_request_content").html(preloader);
-		$("#modal_purchase_request .page-title").text("DENY PURCHASE REQUEST");
-		$("#modal_purchase_request").modal("show");
+		$("#modal_service_requisition_content").html(preloader);
+		$("#modal_service_requisition .page-title").text("DENY PURCHASE REQUEST");
+		$("#modal_service_requisition").modal("show");
 		let html = `
 		<div class="modal-body">
 			<div class="form-group">
@@ -1925,14 +1969,14 @@ $(document).ready(function() {
 			code="${feedback}"><i class="far fa-times-circle"></i> Deny</button>
 			<button class="btn btn-cancel" data-dismiss="modal"><i class="fas fa-ban"></i> Cancel</button>
 		</div>`;
-		$("#modal_purchase_request_content").html(html);
+		$("#modal_service_requisition_content").html(html);
 	});
 
 	$(document).on("click", "#btnRejectConfirmation", function () {
 		const id       = decryptString($(this).attr("serviceRequisitionID"));
 		const feedback = $(this).attr("code") || getFormCode("SR", dateToday(), id);
 
-		const validate = validateForm("modal_purchase_request");
+		const validate = validateForm("modal_service_requisition");
 		if (validate) {
 			let tableData = getTableData("ims_service_requisition_tbl", "", "serviceRequisitionID = " + id);
 			if (tableData) {
@@ -1941,24 +1985,24 @@ $(document).ready(function() {
 				let employeeID      = tableData[0].employeeID;
 
 				let data = new FormData;
-				data.append("action", "update");
-				data.append("method", "deny");
-				data.append("serviceRequisitionID", id);
-				data.append("approversStatus", updateApproveStatus(approversStatus, 3));
-				data.append("approversDate", updateApproveDate(approversDate));
-				data.append("serviceRequisitionRemarks", $("[name=serviceRequisitionRemarks]").val()?.trim());
-				data.append("updatedBy", sessionID);
+				data["action"] = "update";
+				data["method"] = "deny";
+				data["serviceRequisitionID"] = id;
+				data["approversStatus"] = updateApproveStatus(approversStatus, 3);
+				data["approversDate"] = updateApproveDate(approversDate);
+				data["serviceRequisitionRemarks"] = $("[name=serviceRequisitionRemarks]").val()?.trim();
+				data["updatedBy"] = sessionID;
 
 				let notificationData = {
-					moduleID:                46,
+					moduleID:                49,
 					tableID: 				 id,
-					notificationTitle:       "Purchase Request",
+					notificationTitle:       "Service Requisition",
 					notificationDescription: `${feedback}: Your request has been denied.`,
 					notificationType:        1,
 					employeeID,
 				};
 
-				savePurchaseRequest(data, "deny", notificationData, pageContent);
+				saveServiceRequisition(data, "deny", notificationData, pageContent);
 				$("[redirect=forApprovalTab]").length > 0 && $("[redirect=forApprovalTab]").trigger("click");
 			} 
 		} 
@@ -2021,10 +2065,10 @@ $(document).ready(function() {
 
 // --------------- DATABASE RELATION ---------------
 function getConfirmation(method = "submit") {
-	const title = "Purchase Request";
+	const title = "Service Requisition";
 	let swalText, swalImg;
 
-	$("#modal_purchase_request").text().length > 0 && $("#modal_purchase_request").modal("hide");
+	$("#modal_service_requisition").text().length > 0 && $("#modal_service_requisition").modal("hide");
 
 	switch (method) {
 		case "save":
@@ -2073,19 +2117,15 @@ function getConfirmation(method = "submit") {
 	})
 }
 
-function savePurchaseRequest(data = null, method = "submit", notificationData = null, callback = null) {
+function saveServiceRequisition(data = null, method = "submit", notificationData = null, callback = null) {
 	if (data) {
 		const confirmation = getConfirmation(method);
 		confirmation.then(res => {
 			if (res.isConfirmed) {
 				$.ajax({
 					method:      "POST",
-					url:         `purchase_request/savePurchaseRequest`,
+					url:         `service_requisition/saveServiceRequisition`,
 					data,
-					processData: false,
-					contentType: false,
-					global:      false,
-					cache:       false,
 					async:       false,
 					dataType:    "json",
 					beforeSend: function() {
@@ -2167,11 +2207,11 @@ function savePurchaseRequest(data = null, method = "submit", notificationData = 
 					if (method != "deny") {
 						callback && callback();
 					} else {
-						$("#modal_purchase_request").text().length > 0 && $("#modal_purchase_request").modal("show");
+						$("#modal_service_requisition").text().length > 0 && $("#modal_service_requisition").modal("show");
 					}
 				} else if (res.isDismissed) {
 					if (method == "deny") {
-						$("#modal_purchase_request").text().length > 0 && $("#modal_purchase_request").modal("show");
+						$("#modal_service_requisition").text().length > 0 && $("#modal_service_requisition").modal("show");
 					}
 				}
 			}
