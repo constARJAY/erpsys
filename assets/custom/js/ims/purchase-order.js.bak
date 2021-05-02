@@ -27,10 +27,7 @@ $(document).ready(function() {
 	// ----- IS DOCUMENT REVISED -----
 	function isDocumentRevised(id = null) {
 		if (id) {
-			const revisedDocumentsID = getTableData(
-				"ims_purchase_order_tbl", 
-				"revisePurchaseOrderID", 
-				"revisePurchaseOrderID IS NOT NULL AND purchaseOrderStatus != 4");
+			const revisedDocumentsID = getTableData("ims_purchase_order_tbl", "revisePurchaseOrderID", "revisePurchaseOrderID IS NOT NULL");
 			return revisedDocumentsID.map(item => item.revisePurchaseOrderID).includes(id);
 		}
 		return false;
@@ -406,7 +403,7 @@ $(document).ready(function() {
             <button 
                 class="btn btn-edit w-100 btnEdit" 
                 id="${encryptString(purchaseOrderID )}" 
-                code="${getFormCode("PO", createdAt, purchaseOrderID )}"><i class="fas fa-edit"></i> Edit</button>`;
+                code="${getFormCode("PR", createdAt, purchaseOrderID )}"><i class="fas fa-edit"></i> Edit</button>`;
 
 			html += `
             <tr>
@@ -506,7 +503,7 @@ $(document).ready(function() {
             <button 
                 class="btn btn-edit w-100 btnEdit" 
                 id="${encryptString(purchaseOrderID )}" 
-                code="${getFormCode("PO", createdAt, purchaseOrderID )}"><i class="fas fa-edit"></i> Edit</button>`;
+                code="${getFormCode("PR", createdAt, purchaseOrderID )}"><i class="fas fa-edit"></i> Edit</button>`;
 
 			html += `
             <tr>
@@ -1146,6 +1143,20 @@ $(document).ready(function() {
     // ----- END SELECT ITEM NAME -----
 
 
+	// ----- KEYUP QUANTITY OR UNITCOST -----
+	$(document).on("keyup", "[name=quantity], [name=unitCost]", function() {
+		const index     = $(this).closest("tr").first().attr("index");
+		const isProject = $(this).closest("tbody").attr("project") == "true";
+		const attr      = isProject ? "[project=true]" : "[company=true]";
+		const quantity  = +$(`#quantity${index}${attr}`).val();
+		const unitcost  = +$(`#unitcost${index}${attr}`).val().replaceAll(",", "");
+		const totalcost = quantity * unitcost;
+		$(`#totalcost${index}${attr}`).text(formatAmount(totalcost, true));
+		updateTotalAmount(isProject);
+	})
+	// ----- END KEYUP QUANTITY OR UNITCOST -----
+
+
 	// ----- SELECT FILE -----
 	$(document).on("change", "[name=files]", function(e) {
 		const filename = this.files[0].name;
@@ -1526,36 +1537,36 @@ $(document).ready(function() {
 		let approvedButton = '';
 		if (purchaseOrderStatus == 2) {
 			approvedButton += `<div class="w-100 text-right pb-4">`;
-			if (grandTotalAmount > 150000) {
-				approvedButton += contractFile ? `
+			if (grandTotalAmount > 5000) {
+				let link = contractFile ? `
 				<a href="${base_url}assets/upload-files/contracts/${contractFile}" 
 					class="pr-3" 
 					id="displayContract">${contractFile}</a>` : "";
-				if (employeeID == sessionID) {
-					approvedButton += `
-					<input type="file"
-						id="contractFile"
-						name="contractFile"
-						purchaseOrderID="${purchaseOrderID}"
-						class="d-none"
-						accept="image/*, .pdf, .docx, .doc">
-					<button 
-						class="btn btn-secondary py-2" 
-						purchaseOrderID="${purchaseOrderID}"
-						id="btnUploadContract">
-						<i class="fas fa-file-upload"></i> Upload Contract
-					</button>`;
-				}
+					
+				approvedButton += `
+				${link}
+				<input type="file"
+					id="contractFile"
+					name="contractFile"
+					purchaseOrderID="${purchaseOrderID}"
+					class="d-none"
+					accept="image/*, .pdf, .docx, .doc">
+				<button 
+					class="btn btn-secondary py-2" 
+					purchaseOrderID="${purchaseOrderID}"
+					id="btnUploadContract">
+					<i class="fas fa-file-upload"></i> Upload Contract
+				</button>`;
 			}
 
 			approvedButton += `
-				<button 
-					class="btn btn-info py-2" 
-					purchaseOrderID="${purchaseOrderID}"
-					id="btnExcel">
-					<i class="fas fa-file-excel"></i> Excel
-				</button>
-			</div>`;
+			<button 
+				class="btn btn-info py-2" 
+				purchaseOrderID="${purchaseOrderID}"
+				id="btnExcel">
+				<i class="fas fa-file-excel"></i> Excel
+			</button>`;
+			approvedButton += `</div>`;
 		}
 		// ----- END PRINT BUTTON -----
 
@@ -2507,15 +2518,15 @@ function savePurchaseOrder(data = null, method = "submit", notificationData = nu
 
 						let swalTitle;
 						if (method == "submit") {
-							swalTitle = `${getFormCode("PO", dateCreated, insertedID)} submitted successfully!`;
+							swalTitle = `${getFormCode("PR", dateCreated, insertedID)} submitted successfully!`;
 						} else if (method == "save") {
-							swalTitle = `${getFormCode("PO", dateCreated, insertedID)} saved successfully!`;
+							swalTitle = `${getFormCode("PR", dateCreated, insertedID)} saved successfully!`;
 						} else if (method == "cancelform") {
-							swalTitle = `${getFormCode("PO", dateCreated, insertedID)} cancelled successfully!`;
+							swalTitle = `${getFormCode("PR", dateCreated, insertedID)} cancelled successfully!`;
 						} else if (method == "approve") {
-							swalTitle = `${getFormCode("PO", dateCreated, insertedID)} approved successfully!`;
+							swalTitle = `${getFormCode("PR", dateCreated, insertedID)} approved successfully!`;
 						} else if (method == "deny") {
-							swalTitle = `${getFormCode("PO", dateCreated, insertedID)} denied successfully!`;
+							swalTitle = `${getFormCode("PR", dateCreated, insertedID)} denied successfully!`;
 						}	
 		
 						if (isSuccess == "true") {

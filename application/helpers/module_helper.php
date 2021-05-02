@@ -102,3 +102,15 @@
 
         return $result;
     }
+
+    function getModuleApprover($moduleID = null, $designationID = null)
+    {
+        $CI =& get_instance();
+        if ($designationID && $moduleID) {
+            $sql    = "SELECT userAccountID FROM gen_approval_setup_tbl WHERE designationID = $designationID AND moduleID = $moduleID";
+            $query  = $CI->db->query($sql);
+            $result = $query ? $query->row() : null;
+            return $result ? $result->userAccountID : null;
+        }
+        return null;
+    }
