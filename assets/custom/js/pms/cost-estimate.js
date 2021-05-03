@@ -116,7 +116,7 @@ $(document).ready(function() {
 	};
 
 	const inventoryItemList = getTableData(
-		"ims_inventory_item_tbl LEFT JOIN ims_inventory_category_tbl USING(categoryID)", "itemID, itemCode, itemName, categoryName, unitOfMeasurementID",
+		"ims_inventory_item_tbl LEFT JOIN ims_inventory_category_tbl USING(categoryID)", "itemID, itemCode, itemName, categoryName, itemDescription, unitOfMeasurementID",
 		"itemStatus = 1");
 	const designationList = getTableData("hris_designation_tbl JOIN hris_employee_list_tbl USING(designationID)","designationID, designationName, MAX(employeeHourlyRate) as designationRate", "designationStatus=1","","designationName");
 	
@@ -151,14 +151,13 @@ $(document).ready(function() {
 					{ targets: 1,  width: 150 },
 					{ targets: 2,  width: 150 },
 					{ targets: 3,  width: 150 },	
-					{ targets: 4,  width: 100 },
-					{ targets: 5,  width: 150 },
+					{ targets: 4,  width: 150 },
+					{ targets: 5,  width: 200 },
 					{ targets: 6,  width: 200 },
 					{ targets: 7,  width: 200 },
-					{ targets: 8,  width: 200 },
-					{ targets: 9,  width: 80  },
-					{ targets: 10, width: 250 },
-					{ targets: 11, width: 80  },
+					{ targets: 8,  width: 80  },
+					{ targets: 9, width: 250 },
+					{ targets: 10, width: 80  },
 				],
 			});
 
@@ -176,14 +175,13 @@ $(document).ready(function() {
 					{ targets: 1,  width: 150 },
 					{ targets: 2,  width: 150 },
 					{ targets: 3,  width: 150 },
-					{ targets: 4,  width: 100 },
-					{ targets: 5,  width: 150 },
+					{ targets: 4,  width: 150 },
+					{ targets: 5,  width: 200 },
 					{ targets: 6,  width: 200 },
 					{ targets: 7,  width: 200 },
-					{ targets: 8,  width: 200 },
-					{ targets: 9,  width: 80  },
-					{ targets: 10, width: 250 },
-					{ targets: 11, width: 80  },
+					{ targets: 8,  width: 80  },
+					{ targets: 9, width: 250 },
+					{ targets: 10, width: 80  },
 				],
 			});
 
@@ -410,7 +408,6 @@ $(document).ready(function() {
                     <th>Employee Name</th>
                     <th>Project Code</th>
                     <th>Project Name</th>
-                    <th>Reference Code</th>
                     <th>Current Approver</th>
                     <th>Date Created</th>
                     <th>Date Submitted</th>
@@ -429,7 +426,6 @@ $(document).ready(function() {
 				projectID,
 				projectListCode,
 				projectListName,
-				referenceCode,
 				approversID,
 				approversDate,
 				costEstimateStatus,
@@ -460,7 +456,6 @@ $(document).ready(function() {
 					<td>${fullname}</td>
 					<td>${projectListCode || '-'}</td>
 					<td>${projectListName || '-'}</td>
-					<td>${referenceCode || '-'}</td>
 					<td>
 						${employeeFullname(getCurrentApprover(approversID, approversDate, costEstimateStatus, true))}
 					</td>
@@ -509,7 +504,6 @@ $(document).ready(function() {
                     <th>Employee Name</th>
                     <th>Project Code</th>
                     <th>Project Name</th>
-                    <th>Reference Code</th>
                     <th>Current Approver</th>
                     <th>Date Created</th>
                     <th>Date Submitted</th>
@@ -528,7 +522,6 @@ $(document).ready(function() {
                 projectID,
                 projectListCode,
                 projectListName,
-                referenceCode,
 				approversID,
 				approversDate,
 				costEstimateStatus,
@@ -558,7 +551,6 @@ $(document).ready(function() {
                 <td>${fullname}</td>
                 <td>${projectListCode || '-'}</td>
                 <td>${projectListName || '-'}</td>
-                <td>${referenceCode || '-'}</td>
                 <td>
                     ${employeeFullname(getCurrentApprover(approversID, approversDate, costEstimateStatus, true))}
                 </td>
@@ -738,7 +730,7 @@ $(document).ready(function() {
 
 		projectElementID.map((element, index) => {
 			let html = `<option selected disabled>Select Item Name</option>`;
-			html += `<option value="0">None</option>`;
+			html += `<option value="-">None</option>`;
 			html += inventoryItemList.filter(item => !projectItemIDArr.includes(item.itemID) || item.itemID == projectItemIDArr[index]).map(item => {
 				
 				return `
@@ -756,7 +748,7 @@ $(document).ready(function() {
 
 		companyElementID.map((element, index) => {
 			let html = `<option selected disabled>Select Item Name</option>`;
-			html += `<option value="0">None</option>`;
+			html += `<option value="-">None</option>`;
 			html += inventoryItemList.filter(item => !companyItemIDArr.includes(item.itemID) || item.itemID == companyItemIDArr[index]).map(item => {
 				return `
 				<option 
@@ -784,13 +776,14 @@ $(document).ready(function() {
 			case "project":
 					attr = "[project=true]";
 					html += `<option selected disabled>Select Item Name</option>`;
-					html += `<option value="0" ${id == 0 ? "selected":""}>None</option>`;
+					html += `<option value="-" ${id == "-" ? "selected":""}>None</option>`;
 					 // 0 IS THE DEFAULT VALUE
 					$(`[name=itemID]${attr}`).each(function(i, obj) {
 						itemIDArr.push($(this).val());
 					}) 
 
 					html += inventoryItemList.filter(item => !itemIDArr.includes(item.itemID) || item.itemID == id).map(item => {
+						// console.log("project"+id+"|"+item.itemID);
 						return `
 						<option 
 							value        = "${item.itemID}" 
@@ -806,11 +799,12 @@ $(document).ready(function() {
 			case "company":
 					attr = "[company=true]"
 					html += `<option selected disabled>Select Item Name</option>`;
-					html += `<option value="0" ${id == 0 && "selected"}>None</option>`;
+					html += `<option value="-" ${id == "-" && "selected"}>None</option>`;
 					$(`[name=itemID]${attr}`).each(function(i, obj) {
 						itemIDArr.push($(this).val());
 					}) 
 					html += inventoryItemList.filter(item => !itemIDArr.includes(item.itemID) || item.itemID == id).map(item => {
+						// console.log("company"+id);
 						return `
 						<option 
 							value        = "${item.itemID}" 
@@ -825,7 +819,7 @@ $(document).ready(function() {
 			case "personnel":
 					attr = "[personnel=true]";
 					html += `<option selected disabled>Select Designation</option>`;
-					html += `<option value="0" ${id == 0 && "selected"}>None</option>`;
+					html += `<option value="-" ${id == 0 && "selected"}>None</option>`;
 					$(`[name=designationID]${attr}`).each(function(i, obj) {
 						itemIDArr.push($(this).val());
 					}) 
@@ -1104,33 +1098,18 @@ $(document).ready(function() {
     // ----- SELECT ITEM NAME -----
     $(document).on("change", "[name=itemID]", function() {
 		let thisValue 			= $(this).val();
-        const itemCode     		= thisValue==0?"-": $('option:selected', this).attr("itemCode");
-		const categoryName 		= thisValue==0?"-":$('option:selected', this).attr("categoryName");
-        const uom          		= thisValue==0?"-":$('option:selected', this).attr("uom");
-		const condition    		= $(this).closest("tbody").attr("project");
+        const itemCode     		= thisValue=="-"?"-": $('option:selected', this).attr("itemCode");
+		const categoryName 		= thisValue=="-"?"-":$('option:selected', this).attr("categoryName");
+        const uom          		= thisValue=="-"?"-":$('option:selected', this).attr("uom");
+		// const condition    		= $(this).closest("tbody").attr("project");
 		let attr;
 		let param;
-		switch(condition){	
-			case "project":
-					attr 	= "[project=true]";
-					param	= "project";
-				break;
-			case "company":
-					attr = "[company=true]";
-					param	= "company";
-				break;
-			case "personnel":
-					// attr 	= "[personnel=true]";
-					// param	= "personnel";
-					// $(`[name=designationID]${attr}`).each(function(i, obj) {
-					// 	let itemID = $(this).val();
-					// 	$(this).html(getInventoryItem(itemID, param));
-					// });
-					// $(this).closest("tr").find(`.designationcode`).first().text(designationCode);
-				break;
-			default:
-					attr 	= "[travel=true]";
-					param	= "travel";
+		if($(this).closest("tbody").attr("project")){
+			attr 	= "[project=true]";
+			param	= "project";
+		}else{
+			attr 	= "[company=true]";
+			param	= "company";
 		}
 		$(`[name=itemID]${attr}`).each(function(i, obj) {
 			let itemID = $(this).val();
@@ -1155,21 +1134,6 @@ $(document).ready(function() {
 		$(this).closest("tr").find(`.designationcode`).first().text(thisValue!=0?designationCode:"-");
 	});
 	// END SELECT DESIGNATION NAME
-
-
-	// ----- KEYUP QUANTITY OR UNITCOST -----
-	// $(document).on("keyup", "[name=quantity], [name=unitCost]", function() {
-	// 	const index     = $(this).closest("tr").first().attr("index");
-	// 	const isProject = $(this).closest("tbody").attr("project") == "true";
-	// 	const attr      = isProject ? "[project=true]" : "[company=true]";
-	// 	const quantity  = +$(`#quantity${index}${attr}`).val();
-	// 	const unitcost  = +$(`#unitcost${index}${attr}`).val().replaceAll(",", "");
-	// 	const totalcost = quantity * unitcost;
-	// 	$(`#totalcost${index}${attr}`).text(formatAmount(totalcost, true));
-	// 	updateTotalAmount(isProject);
-	// })
-	// ----- END KEYUP QUANTITY OR UNITCOST -----
-
 
 	// ----- SELECT FILE -----
 	$(document).on("change", "[name=files]", function(e) {
@@ -1305,8 +1269,8 @@ $(document).ready(function() {
 		let requestProjectItems = "", requestCompanyItems = "", requestPersonnel="", requestTravel="";
 		if (costEstimateID) {
 			let requestProjectItemsData = getTableData(
-				`ims_request_items_tbl LEFT JOIN ims_inventory_item_tbl USING(itemID) LEFT JOIN ims_inventory_category_tbl USING(categoryID)`, 
-				`quantity, unitCost, totalCost, files, remarks, itemID, itemCode, itemName, categoryName, unitOfMeasurementID, categoryType`, 
+				`ims_request_items_tbl LEFT JOIN ims_inventory_item_tbl USING(itemID)`, 
+				`quantity, unitCost, totalCost, files, remarks, itemID, itemCode, ims_inventory_item_tbl.itemName as itemName, unitOfMeasurementID, categoryType`, 
 				`costEstimateID = ${costEstimateID} AND categoryType = 'project'`);
 			
 			requestProjectItemsData.map(item => {
@@ -1314,16 +1278,16 @@ $(document).ready(function() {
 			})
 
 			let requestCompanyItemsData = getTableData(
-				`ims_request_items_tbl LEFT JOIN ims_inventory_item_tbl USING(itemID) LEFT JOIN ims_inventory_category_tbl USING(categoryID)`, 
-				`quantity, unitCost, totalCost, files, remarks, itemID, itemCode, itemName, categoryName, unitOfMeasurementID, categoryType`, 
+				`ims_request_items_tbl LEFT JOIN ims_inventory_item_tbl USING(itemID)`, 
+				`quantity, unitCost, totalCost, files, remarks, itemID, itemCode, ims_inventory_item_tbl.itemName as itemName, unitOfMeasurementID, categoryType`, 
 				`costEstimateID = '${costEstimateID}' AND categoryType = 'company' `);
 			
 			requestCompanyItemsData.map(item => {
 				requestCompanyItems += getItemRow("company", item, readOnly);
 			})
 
-			let requestDesignationData = getTableData(`hris_designation_tbl JOIN ims_request_items_tbl USING(designationID)`,
-										`designationID,designationName,designationTotalHours,quantity`,`costEstimateID = ${costEstimateID}`)
+			let requestDesignationData = getTableData(`hris_designation_tbl JOIN hris_personnel_request_tbl USING(designationID)`,
+										`hris_personnel_request_tbl.designationID AS designationID ,hris_designation_tbl.designationName AS designationName,designationTotalHours,quantity`,`costEstimateID = ${costEstimateID}`);
 			if(requestDesignationData.length < 1){
 				requestPersonnel 	+= getItemRow("personnel");
 			}
@@ -1331,9 +1295,9 @@ $(document).ready(function() {
 				requestPersonnel += getItemRow("personnel", item, readOnly);
 			});
 
-			let requestTravelData = getTableData(`ims_request_items_tbl`,
-										`travelDescription,travelUnitOfMeasure,quantity`,
-										`costEstimateID = ${costEstimateID} AND (travelDescription !="undefined" AND travelDescription IS NOT NULL)`)
+			let requestTravelData = getTableData(`ims_travel_request_tbl`,
+										`travelDescription,unitOfMeasure,quantity`,
+										`costEstimateID = ${costEstimateID}`)
 			requestTravelData.map(item => {
 				requestTravel += getItemRow("travel", item, readOnly);
 			})
@@ -1811,25 +1775,36 @@ $(document).ready(function() {
 			}
 
 			$(".itemTableRow").each(function(i, obj) {
-				var  categoryType,itemID,designationID,travelDescription,designationTotalHours, travelUom;
+				var  categoryType,itemID,itemName, itemDescription, itemUom, designationID,designationName,travelDescription,designationTotalHours, travelUom;
 				var fileID, file, fileArr, filename ;
 				if($(this).closest("tbody").attr("project") == "true"){
 					categoryType 	= "project";
 					itemID    	 	= $("td [name=itemID]", this).val();
+					var inventoryItemListArray = inventoryItemList.filter(items=> items.itemID == itemID);
+					itemName	 	= inventoryItemListArray[0].itemName;
+					itemDescription = inventoryItemListArray[0].itemDescription;
+					itemUom			= inventoryItemListArray[0].unitOfMeasurementID;
 					fileID    		= $("td [name=files]", this).attr("id");
 					file      		= $(`#${fileID}`)[0].files[0];
 					fileArr   		= file?.name.split(".");
 					filename  		= file ? file?.name : "";
 				}else if($(this).closest("tbody").attr("company") == "true"){
-					categoryType = "company";
-					itemID     	 = $("td [name=itemID]", this).val();
-					fileID    	 = $("td [name=files]", this).attr("id");
-					file      	 = $(`#${fileID}`)[0].files[0];
-					fileArr   	 = file?.name.split(".");
+					categoryType 	= "company";
+					
+					itemID     	 	= $("td [name=itemID]", this).val();
+					var inventoryItemListArray = inventoryItemList.filter(items=> items.itemID == itemID);
+					itemName	 	= inventoryItemListArray[0].itemName;
+					itemDescription = inventoryItemListArray[0].itemDescription;
+					itemUom			= inventoryItemListArray[0].unitOfMeasurementID;
+					fileID    	 	= $("td [name=files]", this).attr("id");
+					file      	 	= $(`#${fileID}`)[0].files[0];
+					fileArr   	 	= file?.name.split(".");
 					filename  		= file ? file?.name : "";
 				}else{
 						if($(this).closest("tbody").attr("personnel") == "true"){
 							designationID 			= $("td [name=designationID]", this).val();
+							var designationListData = designationList.filter(items=>items.designationID);
+							designationName 		= designationListData[0].designationName;
 							designationTotalHours	=	$("td [name=employeeTotalHours]", this).val();
 						}else{
 							travelDescription = $("td [name=description]", this).val();
@@ -1838,11 +1813,15 @@ $(document).ready(function() {
 				}
 				const quantity  = +$("td [name=quantity]", this).val();	
 				let temp = {
-					itemID, quantity, filename, categoryType,categoryType,
-					itemID,designationID,travelDescription,designationTotalHours, travelUom,
+					itemID, itemName, itemDescription,itemUom,quantity, filename, categoryType,categoryType,
+					designationID,designationName,travelDescription,designationTotalHours, travelUom,
 				};
 				formData.append(`items[${i}][itemID]`, itemID);
+				formData.append(`items[${i}][itemName]`, itemName);
+				formData.append(`items[${i}][itemDescription]`, itemDescription);
+				formData.append(`items[${i}][itemUom]`, itemUom);
 				formData.append(`items[${i}][designationID]`, designationID);
+				formData.append(`items[${i}][designationName]`, designationName);
 				formData.append(`items[${i}][designationTotalHours]`, designationTotalHours);
 				formData.append(`items[${i}][travelDescription]`, travelDescription);
 				formData.append(`items[${i}][travelUnitOfMeasure]`, travelUom);
@@ -2017,11 +1996,16 @@ $(document).ready(function() {
 
     // ----- APPROVE DOCUMENT -----
 	$(document).on("click", "#btnApprove", function () {
-		const id       = decryptString($(this).attr("costEstimateID"));
-		const feedback = $(this).attr("code") || getFormCode("SCH", dateToday(), id);
-		let tableData  = getTableData("pms_cost_estimate_tbl", "", "costEstimateID = " + id);
+		const id       		= decryptString($(this).attr("costEstimateID"));
+		const feedback 		= $(this).attr("code") || getFormCode("SCH", dateToday(), id);
+		let tableData  		= getTableData("pms_cost_estimate_tbl", "", "costEstimateID = " + id);
+		let thisCondition 	= false;
+		
+			
+
 
 		if (tableData) {
+			let costEstimateID  = tableData[0].costEstimateID;
 			let approversID     = tableData[0].approversID;
 			let approversStatus = tableData[0].approversStatus;
 			let approversDate   = tableData[0].approversDate;
@@ -2035,7 +2019,6 @@ $(document).ready(function() {
 
 			let status, notificationData;
 			if (isImLastApprover(approversID, approversDate)) {
-				
 				status = 2;
 				notificationData = {
 					moduleID:                46,
@@ -2045,6 +2028,7 @@ $(document).ready(function() {
 					notificationType:        7,
 					employeeID,
 				};
+				thisCondition = true;
 			} else {
 				status = 1;
 				notificationData = {
@@ -2058,8 +2042,8 @@ $(document).ready(function() {
 			}
 
 			data.append("costEstimateStatus", status);
-
-			savecostEstimate(data, "approve", notificationData, pageContent);
+			savecostEstimate(data, "approve", notificationData, pageContent, costEstimateID);
+		
 		}
 	});
 	// ----- END APPROVE DOCUMENT -----
@@ -2193,7 +2177,7 @@ $(document).ready(function() {
 		let {
 			itemCode     = "",
 			itemName     = "",
-			itemID       = null,
+			itemID       = "",
 			quantity     = 1,
 			unitOfMeasurementID: uom = "",
 			files        = ""
@@ -2275,7 +2259,7 @@ $(document).ready(function() {
 							name="quantity" 
 							value="${quantity}" 
 							minlength="1" 
-							maxlength="5" 
+							maxlength="20" 
 							required>
 						<div class="invalid-feedback d-block" id="invalid-projectQuantity"></div>
 					</div>
@@ -2308,7 +2292,7 @@ $(document).ready(function() {
 		let {
 			itemCode     = "",
 			itemName     = "",
-			itemID       = null,
+			itemID       = "",
 			quantity     = 1,
 			unitOfMeasurementID: uom = "",
 			files        = ""
@@ -2391,7 +2375,7 @@ $(document).ready(function() {
 							name="quantity" 
 							value="${quantity}" 
 							minlength="1" 
-							maxlength="5" 
+							maxlength="20" 
 							required>
 						<div class="invalid-feedback d-block" id="invalid-companyQuantity"></div>
 					</div>
@@ -2419,7 +2403,6 @@ $(document).ready(function() {
 	}
 
 	function getPersonnelRow(data={}, readOnly = false){
-		console.log(data);
 		let html = "";
 		let {
 			designationID   = null,
@@ -2489,7 +2472,7 @@ $(document).ready(function() {
 							name="quantity" 
 							value="${quantity}" 
 							minlength="1" 
-							maxlength="5" 
+							maxlength="20" 
 							required>
 						<div class="invalid-feedback d-block" id="invalid-personnelQuantity"></div>
 					</div>
@@ -2505,7 +2488,7 @@ $(document).ready(function() {
 							name="employeeTotalHours" 
 							value="${designationTotalHours}" 
 							minlength="1" 
-							maxlength="5" 
+							maxlength="20" 
 							required>
 						<div class="invalid-feedback d-block" id="invalid-employeeTotalHours"></div>
 					</div>
@@ -2520,7 +2503,7 @@ $(document).ready(function() {
 		let {
 			travelDescription 	= "",
 			quantity     		= 1,
-			travelUnitOfMeasure = "",
+			unitOfMeasure = "",
 		} = data;
 		if (readOnly) {
 			html += `
@@ -2537,7 +2520,7 @@ $(document).ready(function() {
 				</td>
 				<td>
 					<div class="uom">
-						${travelUnitOfMeasure || "-"}
+						${unitOfMeasure || "-"}
 					</div>
 				</td>
 			</tr>`;
@@ -2574,7 +2557,7 @@ $(document).ready(function() {
 							name="quantity" 
 							value="${quantity}" 
 							minlength="1" 
-							maxlength="5" 
+							maxlength="20" 
 							required>
 						<div class="invalid-feedback d-block" id="invalid-quantity"></div>
 					</div>
@@ -2588,7 +2571,7 @@ $(document).ready(function() {
 						style="width: 100%"
 						required
 						travel="true">
-							${unitOfMeasurementOptions(travelUnitOfMeasure)}
+							${unitOfMeasurementOptions(unitOfMeasure)}
 						</select>
 						<div class="invalid-feedback d-block" id="invalid-travelUom"></div>
 					</div>
@@ -2657,7 +2640,8 @@ function getConfirmation(method = "submit") {
 	})
 }
 
-function savecostEstimate(data = null, method = "submit", notificationData = null, callback = null) {
+function savecostEstimate(data = null, method = "submit", notificationData = null, callback = null, lastApproverID = 0) {
+	let thisReturnData = false;
 	if (data) {
 		const confirmation = getConfirmation(method);
 		confirmation.then(res => {
@@ -2707,7 +2691,7 @@ function savecostEstimate(data = null, method = "submit", notificationData = nul
 									timer:             2000,
 								});
 								callback && callback();
-
+								
 								if (method == "approve" || method == "deny") {
 									$("[redirect=forApprovalTab]").length > 0 && $("[redirect=forApprovalTab]").trigger("click")
 								}
@@ -2722,6 +2706,22 @@ function savecostEstimate(data = null, method = "submit", notificationData = nul
 									}
 								}
 								// ----- END SAVE NOTIFICATION -----
+									// if(lastApproverID != 0){
+									// 	$.ajax({
+									// 		method: "POST",
+									// 		url: `${base_url}pms/cost_estimate/saveCanvassingData`,
+									// 		data:{"costEstimateID":lastApproverID},
+									// 		dataType: "json",
+									// 		async: false,
+									// 		success: function (data) {
+									// 			console.log("tangina mo ka");
+									// 		},
+									// 	});
+									// }
+									
+
+
+
 							}, 500);
 						} else {
 							setTimeout(() => {
@@ -2760,10 +2760,8 @@ function savecostEstimate(data = null, method = "submit", notificationData = nul
 				}
 			}
 		});
-
-		
 	}
-	return false;
+	return thisReturnData;
 }
 
 // --------------- END DATABASE RELATION ---------------

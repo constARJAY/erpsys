@@ -95,7 +95,11 @@ class Cost_estimate extends CI_Controller {
                         $temp = [
                             "costEstimateID"        => $costEstimateID,
                             "itemID"                => $item["itemID"],
+                            "itemName"	 	        => $item["itemName"],
+                            "itemDescription"       => $item["itemDescription"],
+                            "itemUom"	            => $item["itemUom"],
                             "designationID"         => $item["designationID"],
+                            "designationName"       => $item["designationName"],
                             "designationTotalHours" => $item["designationTotalHours"],
                             "travelDescription"     => $item["travelDescription"],
                             "travelUnitOfMeasure"   => $item["travelUnitOfMeasure"],

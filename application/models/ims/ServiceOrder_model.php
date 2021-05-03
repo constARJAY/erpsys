@@ -83,17 +83,42 @@ class ServiceOrder_model extends CI_Model {
     public function getServiceOrder($id = null)
     {
         if ($id) {
-            $sql = "SELECT * FROM ims_service_order_tbl WHERE serviceOrderID = $id";
+            $sql = "
+            SELECT 
+                isot.*,
+                isrt.createdAt AS srCreatedAt
+            FROM 
+                ims_service_order_tbl AS isot 
+                LEFT JOIN ims_service_requisition_tbl AS isrt USING(serviceRequisitionID)
+            WHERE serviceOrderID = $id";
             $query = $this->db->query($sql);
             return $query ? $query->row() : false;
         }
         return false;
     }
 
+    public function getServiceScopeItems($id = null)
+    {
+        if ($id) {
+            $sql = "SELECT * FROM ims_service_scope_tbl WHERE requestServiceID = $id";
+            $query = $this->db->query($sql);
+            return $query ? $query->result_array() : [];
+        }
+        return [];
+    }
+
     public function getServiceOrderItems($id = null) 
     {
         if ($id) {
-            $sql   = "SELECT * FROM ims_request_items_tbl WHERE serviceOrderID = $id";
+            $sql   = "
+            SELECT 
+                requestServiceID,
+                irst.serviceName, 
+                irst.serviceID,
+                ist.createdAt AS istCreatedAt
+            FROM ims_request_services_tbl AS irst 
+                LEFT JOIN ims_services_tbl AS ist USING(serviceID)
+            WHERE serviceOrderID = $id";
             $query = $this->db->query($sql);
             return $query ? $query->result_array() : [];
         }
@@ -120,29 +145,29 @@ class ServiceOrder_model extends CI_Model {
     {
         $data = ["items" => [], "employees" => []];
         if ($id) {
-            $purchaseOrderData = $this->getServiceOrder($id);
-            if ($purchaseOrderData) {
-                $data["companyName"]      = $purchaseOrderData->vendorName ?? "-";
-                $data["address"]          = $purchaseOrderData->vendorAddress ?? "-";
-                $data["contactDetails"]   = $purchaseOrderData->vendorContactDetails ?? "-";
-                $data["contactPerson"]    = $purchaseOrderData->vendorContactPerson ?? "-";
-                $data["dateAproved"]      = date("F d, Y", strtotime($purchaseOrderData->submittedAt)) ?? "-";
-                $data["referenceNo"]      = $purchaseOrderData->bidRecapID ?? "-";
-                $data["paymentTerms"]     = $purchaseOrderData->paymentTerms ?? "-";
-                $data["deliveryDate"]     = date("F d, Y", strtotime($purchaseOrderData->deliveryDate)) ?? "-";
-                $data["total"]            = $purchaseOrderData->total ?? "0";
-                $data["discount"]         = $purchaseOrderData->discount ?? "0";
-                $data["totalAmount"]      = $purchaseOrderData->totalAmount ?? "0";
-                $data["vatSales"]         = $purchaseOrderData->vatSales ?? "0";
-                $data["vat"]              = $purchaseOrderData->vat ?? "0";
-                $data["totalVat"]         = $purchaseOrderData->totalVat ?? "0";
-                $data["lessEwt"]          = $purchaseOrderData->lessEwt ?? "0";
-                $data["grandTotalAmount"] = $purchaseOrderData->grandTotalAmount ?? "0";
-                $data["createdAt"]        = $purchaseOrderData->createdAt ?? date("Y-m-d");
+            $soData = $this->getServiceOrder($id);
+            if ($soData) {
+                $data["companyName"]      = $soData->clientName ?? "-";
+                $data["address"]          = $soData->clientAddress ?? "-";
+                $data["contactDetails"]   = $soData->clientContactDetails ?? "-";
+                $data["contactPerson"]    = $soData->clientContactPerson ?? "-";
+                $data["dateAproved"]      = date("F d, Y", strtotime($soData->submittedAt)) ?? "-";
+                $data["referenceNo"]      = $soData->serviceRequisitionID ? getFormCode("SR", $soData->srCreatedAt, $soData->serviceRequisitionID) : "-";
+                $data["paymentTerms"]     = $soData->paymentTerms ?? "-";
+                $data["scheduleDate"]     = date("F d, Y", strtotime($soData->scheduleDate)) ?? "-";
+                $data["total"]            = $soData->total ?? "0";
+                $data["discount"]         = $soData->discount ?? "0";
+                $data["totalAmount"]      = $soData->totalAmount ?? "0";
+                $data["vatSales"]         = $soData->vatSales ?? "0";
+                $data["vat"]              = $soData->vat ?? "0";
+                $data["totalVat"]         = $soData->totalVat ?? "0";
+                $data["lessEwt"]          = $soData->lessEwt ?? "0";
+                $data["grandTotalAmount"] = $soData->grandTotalAmount ?? "0";
+                $data["createdAt"]        = $soData->createdAt ?? date("Y-m-d");
                 $data["serviceOrderID"]  = $id;
 
-                $preparedID  = $purchaseOrderData->employeeID;
-                $approversID = $purchaseOrderData->approversID;
+                $preparedID  = $soData->employeeID;
+                $approversID = $soData->approversID;
                 $approversID = explode("|", $approversID);
                 $employeesID = array_merge([$preparedID], $approversID);
                 foreach ($employeesID as $index => $employeeID) {
@@ -163,15 +188,26 @@ class ServiceOrder_model extends CI_Model {
                 }
             }
 
-            $purchaseOrderItems = $this->getServiceOrderItems($id);
-            foreach ($purchaseOrderItems as $item) {
+            $serviceOrderItems = $this->getServiceOrderItems($id);
+            foreach ($serviceOrderItems as $item) {
+                $requestServiceID = $item["requestServiceID"];
+                $seviceScopeItems = $this->getServiceScopeItems($requestServiceID);
+                $scopes = [];
+                foreach ($seviceScopeItems as $scope) {
+                    $temp = [
+                        "description" => $scope["description"],
+                        "quantity"    => $scope["quantity"],
+                        "uom"         => $scope["uom"],
+                        "unitCost"    => $scope["unitCost"],
+                        "totalCost"   => $scope["totalCost"],
+                    ];
+                    array_push($scopes, $temp);
+                }
+
                 $temp = [
-                    "code"        => getFormCode("ITM", $item["createdAt"], $item["itemID"]),
-                    "desc"        => $item["itemName"]." - ".$item["itemDescription"],
-                    "qty"         => $item["quantity"],
-                    "unit"        => $item["itemUom"],
-                    "unitcost"    => $item["unitCost"],
-                    "totalamount" => $item["totalCost"]
+                    "serviceCode" => getFormCode("SVC", $item["istCreatedAt"], $item["serviceID"]),
+                    "serviceName" => $item["serviceName"],
+                    "scopes"      => $scopes
                 ];
                 array_push($data["items"], $temp);
             }

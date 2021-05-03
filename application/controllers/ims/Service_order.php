@@ -39,69 +39,6 @@ class Service_order extends CI_Controller {
         $this->load->view("template/footer");
     }
 
-    public function insertServiceOrder()
-    {
-        $sessionID = 
-            $CI->session->has_userdata("otherSessionID") ? 
-            $CI->session->userdata("otherSessionID") : 1;
-
-        $serviceOrderID   = $this->input->get("serviceOrderID");
-        $bidRecapID        = $this->input->get("bidRecapID");
-        $categoryType      = $this->input->get("categoryType");
-        $inventoryVendorID = $this->input->get("inventoryVendorID");
-
-        $data = [];
-        $inventoryVendor = $this->serviceorder->getInventoryVendor($inventoryVendorID);
-        if ($inventoryVendor) {
-            $vendorName           = $inventoryVendor->vendorName;
-            $vendorAddress        = $inventoryVendor->vendorAddress;
-            $vendorContactDetails = $inventoryVendor->vendorContactDetails;
-            $vendorContactPerson  = $inventoryVendor->vendorContactPerson;
-            
-            $requestItems = $this->serviceorder->getOrderItems($serviceOrderID, $inventoryVendorID, $categoryType);
-
-            $total            = 0;
-            $discount         = 0;
-            $totalAmount      = 0;
-            $vatSales         = 0;
-            $vat              = 0;
-            $totalVat         = 0;
-            $lessEwt          = 0;
-            $grandTotalAmount = 0;
-            $requestItemsID   = [];
-            if ($requestItems) {
-                foreach ($requestItems as $requestItem) {
-                    array_push($requestItemsID, $requestItem["requestItemID"]);
-                    $total += $requestItem["totalCost"];
-                }
-            }
-
-            $data = [
-                "serviceOrderID"    => $serviceOrderID,
-                "bidRecapID"           => $bidRecapID,
-                "categoryType"         => $categoryType,
-                "inventoryVendorID"    => $inventoryVendorID,
-                "vendorName"           => $vendorName,
-                "vendorAddress"        => $vendorAddress,
-                "vendorContactDetails" => $vendorContactDetails,
-                "vendorContactPerson"  => $vendorContactPerson,
-                "total"                => $total,
-                "discount"             => $discount,
-                "totalAmount"          => $totalAmount,
-                "vatSales"             => $vatSales,
-                "vat"                  => $vat,
-                "totalVat"             => $totalVat,
-                "lessEwt"              => $lessEwt,
-                "grandTotalAmount"     => $grandTotalAmount,
-                "createdBy"            => $sessionID,
-                "updatedBy"            => $sessionID
-            ];
-            $requestItemsID = implode(", ", $requestItemsID);
-            $insertServiceOrder = $this->serviceorder->insertServiceOrder($data, $requestItemsID);
-            echo json_encode($insertServiceOrder);
-        }
-    }
-
     public function saveServiceOrder()
     {
         $action                = $this->input->post("action");
@@ -384,7 +321,7 @@ class Service_order extends CI_Controller {
         $sheet->setCellValue('A1', getFormCode("PO", $data["createdAt"], $data["serviceOrderID"]));
         $sheet->getStyle('A1')->applyFromArray($documentNoStyle);
         $sheet->mergeCells('A2:K2');
-        $sheet->setCellValue('A2', "PURCHASE ORDER");
+        $sheet->setCellValue('A2', "SERVICE ORDER");
         $sheet->getStyle('A2')->applyFromArray($titleStyle);
         // ----- END TITLE -----
 
@@ -422,7 +359,7 @@ class Service_order extends CI_Controller {
         $sheet->mergeCells('D6:G6');
         $sheet->setCellValue('D6', $data["contactPerson"]);
         $sheet->mergeCells('H6:I6');
-        $sheet->setCellValue('H6', "Delivery Date: ");
+        $sheet->setCellValue('H6', "Schedule: ");
         $sheet->mergeCells('J6:K6');
         $sheet->setCellValue('J6', $data["scheduleDate"]);
 
@@ -434,7 +371,7 @@ class Service_order extends CI_Controller {
         // ----- REQUEST ITEMS -----
         $sheet->setCellValue('B8', "Code");
         $sheet->mergeCells('C8:G8');
-        $sheet->setCellValue('C8', "Item Description");
+        $sheet->setCellValue('C8', "Scope of work");
         $sheet->setCellValue('H8', "Qty");
         $sheet->setCellValue('I8', "Unit");
         $sheet->setCellValue('J8', "Unit Cost");
@@ -444,24 +381,29 @@ class Service_order extends CI_Controller {
 
         $rowNumber = 9;
         $requestItems = $data["items"];
+        var_dump($requestItems);
         $limit = count($requestItems) <= 20 ? 20 : count($requestItems);
         for ($i=0; $i<$limit; $i++) { 
-            $code = $desc = $qty = $unit = $unitcost = $totalamount = "";
+            $serviceCode = $serviceName = $qty = $unit = $unitcost = $totalamount = "";
             if ($i < count($requestItems)) {
-                $code        = $requestItems[$i]["code"] ?? "";
-                $desc        = $requestItems[$i]["desc"] ?? "";
-                $qty         = $requestItems[$i]["qty"] ?? "";
-                $unit        = $requestItems[$i]["unit"] ?? "";
-                $unitcost    = $requestItems[$i]["unitcost"] ? formatAmount($requestItems[$i]["unitcost"] ?? 0.00) : "";
-                $totalamount = $requestItems[$i]["totalamount"] ? formatAmount($requestItems[$i]["totalamount"] ?? 0.00) : "";
+                $serviceCode        = $requestItems[$i]["serviceCode"] ?? "";
+                $serviceName        = $requestItems[$i]["serviceName"] ?? "";
             }
-            $sheet->setCellValue("B$rowNumber", $code);
+            $sheet->setCellValue("B$rowNumber", $serviceCode);
             $sheet->mergeCells("C$rowNumber:G$rowNumber");
-            $sheet->setCellValue("C$rowNumber", $desc);
-            $sheet->setCellValue("H$rowNumber", $qty);
-            $sheet->setCellValue("I$rowNumber", $unit);
-            $sheet->setCellValue("J$rowNumber", $unitcost);
-            $sheet->setCellValue("K$rowNumber", $totalamount);
+            $sheet->setCellValue("C$rowNumber", $serviceName);
+
+            $rowNumber++;
+            $scopes = $requestItems[$i]["scopes"];
+            foreach ($scopes as $scope) {
+                $sheet->mergeCells("C$rowNumber:G$rowNumber");
+                $sheet->setCellValue("C$rowNumber", $scope["description"]);
+                $sheet->setCellValue("H$rowNumber", $scope["quantity"]);
+                $sheet->setCellValue("I$rowNumber", $scope["uom"]);
+                $sheet->setCellValue("J$rowNumber", $scope["unitCost"]);
+                $sheet->setCellValue("K$rowNumber", $scope["totalCost"]);
+                $rowNumber++;
+            }
 
             $sheet->getStyle("B$rowNumber")->applyFromArray($sideBorderStyle);
             $sheet->getStyle("C$rowNumber")->applyFromArray($sideBorderStyle);
@@ -491,7 +433,7 @@ class Service_order extends CI_Controller {
         $sheet->getRowDimension("$rowNumber")->setRowHeight(17);
         $sheet->getStyle("J$rowNumber:J".($rowNumber+7))->applyFromArray($labelBoldStyle);
         $rowNumber++;
-        $commentInstructionText = "1. Service Order must appear in all documents.\n2. The price of the Goods and/or Services stated in this purchase order shall be the price agreed upon in writing by the Company and the Supplier.\n3. Goods are subject to inspection upon arrival Goods must conform to description and specification set above, otherwise this will be return at the supplier's expenses.\n4. Original Invoice and/or Delivery receipt are left with Receiving Clerk to facilitate payment.";
+        $commentInstructionText = "1. Service Order must appear in all documents.\n2. The price of the Services stated in this service order shall be the price agreed upon in writing by the Company and the Supplier.\n3. Services are subject to inspection upon completion. Services must conform to description and specification set above, otherwise this will be resolve at the supplier's expenses.\n4. Original receipt left with Receiving Clerk to facilitate payment.";
         $sheet->mergeCells("B$rowNumber:I".($rowNumber+3));
         $sheet->setCellValue("B$rowNumber", $commentInstructionText);
         $sheet->getStyle("B$rowNumber:I".($rowNumber+3))->applyFromArray($commentInstructionStyle);
@@ -608,10 +550,10 @@ class Service_order extends CI_Controller {
         $sheet->getStyle("B$rowNumber:K$rowNumber")->getFont()->setBold(true);
         // ----- END FOOTER -----
 
-        $writer = new Xlsx($spreadsheet);
-        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-        header('Content-Disposition: attachment; filename="'. urlencode($fileName).'"');
-        $writer->save('php://output');
+        // $writer = new Xlsx($spreadsheet);
+        // header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        // header('Content-Disposition: attachment; filename="'. urlencode($fileName).'"');
+        // $writer->save('php://output');
     }
 
     public function downloadExcel()

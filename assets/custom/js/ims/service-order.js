@@ -2281,7 +2281,7 @@ $(document).ready(function() {
 
 	// ----- DOWNLOAD EXCEL -----
 	$(document).on("click", "#btnExcel", function() {
-		const serviceOrderID = $(this).attr("purchaseorderid");
+		const serviceOrderID = $(this).attr("serviceorderid");
 		const url = `${base_url}ims/service_order/downloadExcel?id=${serviceOrderID}`;
 		window.location.replace(url); 
 	})
