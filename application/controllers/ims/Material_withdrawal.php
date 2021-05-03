@@ -100,7 +100,12 @@ class Material_withdrawal extends CI_Controller {
                         $temp = [
                             "materialWithdrawalID " => $materialWithdrawalID ,
                             "itemID"            => $item["itemID"] != "null" ? $item["itemID"] : null,
+                            "itemName"            => $item["itemName"] != "null" ? $item["itemName"] : null,
+                            "itemDescription"          => $item["itemdescription"],
+                            "unitOfMeasurementID"          => $item["uom"],
                             "inventoryStorageID"            => $item["inventoryStorageID"] != "null" ? $item["inventoryStorageID"] : null,
+                            "inventoryStorageOfficeName"            => $item["inventoryStorageName"] != "null" ? $item["inventoryStorageName"] : null,
+                            "receivingQuantity"          => $item["liststocks"],
                             "quantity"          => $item["quantity"],
                             "createdBy"         => $item["createdBy"],
                             "updatedBy"         => $item["updatedBy"],

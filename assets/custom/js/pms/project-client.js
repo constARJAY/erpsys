@@ -1,5 +1,18 @@
 
 $(document).ready(function(){
+
+
+    //------ MODULE FUNCTION IS ALLOWED UPDATE-----
+	
+	const allowedUpdate = isUpdateAllowed(12);
+	if(!allowedUpdate){
+		$("#modalProjectClientContent").find("input, select, textarea").each(function(){
+			$(this).attr("disabled",true);
+		});
+		$("#btnUpdate").hide();
+	}
+
+	//------ END MODULE FUNCTION IS ALLOWED UPDATE-----
     // ----- GET PHILIPPINE ADDRESSES -----
  const getPhAddresses = () => {
     let result = [];

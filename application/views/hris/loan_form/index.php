@@ -12,7 +12,10 @@
                     <span>This module is used to manage the submission and approval of loan requests.</span>
 				</div>
 				<div class="col-lg-6 col-md-12 text-md-right">
-                <div class="text-right" id="headerButton"></div>
+						<?php if(isCreateAllowed(59)){ ?>
+							<div class="text-right" id="headerButton"></div>
+						<?php  } ?>
+               
                     </ul>
 				</div>
 			</div>

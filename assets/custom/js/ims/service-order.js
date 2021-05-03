@@ -1479,7 +1479,6 @@ $(document).ready(function() {
 		readOnly     = isRevise ? false : readOnly;
 		let disabled = readOnly ? "disabled" : "";
 
-		console.log(data);
 		let {
 			serviceOrderID       = "",
 			reviseServiceOrderID = "",

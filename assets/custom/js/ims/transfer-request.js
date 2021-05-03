@@ -826,10 +826,10 @@ $(document).ready(function() {
 					</div>
 				</td>
 				<td>
-					<div class="brand">-</div>
+					<div class="brand" name="brandName">-</div>
 				</td>
 				<td>
-					<div class="uom">-</div>
+					<div class="uom" name="uom">-</div>
 				</td>
 			</tr>`;
 		}
@@ -1205,8 +1205,8 @@ $(document).ready(function() {
 		let requestProjectItems = "";
 		if (transferRequestID) {
 			let requestItemsData = getTableData(
-				`ims_transfer_request_tbl LEFT JOIN ims_transfer_request_details_tbl USING(transferRequestID) LEFT JOIN ims_inventory_item_tbl USING(itemID) LEFT JOIN ims_list_stocks_details_tbl  USING(itemID) LEFT JOIN ims_list_stocks_tbl  USING(listStocksID) LEFT JOIN ims_inventory_storage_tbl  USING(inventoryStorageID)  `, 
-				`itemID, itemCode, itemName, unitOfMeasurementID,brandName`, 
+				`ims_transfer_request_tbl LEFT JOIN ims_transfer_request_details_tbl as itrt USING(transferRequestID) LEFT JOIN ims_inventory_item_tbl USING(itemID) LEFT JOIN ims_list_stocks_details_tbl  USING(itemID) LEFT JOIN ims_list_stocks_tbl  USING(listStocksID) LEFT JOIN ims_inventory_storage_tbl  USING(inventoryStorageID)  `, 
+				`itemID, itemCode, itrt.itemName, itrt.unitOfMeasurementID,itrt.brandName`, 
 				`transferRequestID = ${transferRequestID} GROUP BY itemID`);
 			requestItemsData.map(item => {
 				requestProjectItems += getItemRow(true, item, readOnly);
@@ -1624,15 +1624,21 @@ $(document).ready(function() {
 				const categoryType = $(this).closest("tbody").attr("project") == "true" ? "project" : "";
 
 				const itemID    = $("td [name=itemID]", this).val();	
+				const itemName    = $("td [name=itemID] option:selected", this).text().trim();	
 				const quantity  = +$("td [name=quantity]", this).val();	
+				const brandName  = $("td [name=brandName]", this).text();	
+				const uom  = $("td [name=uom]", this).text();	
 
 				let temp = {
-					itemID, quantity
+					itemID,itemName, quantity,brandName,uom
 					
 				};
 
 				formData.append(`items[${i}][itemID]`, itemID);
+				formData.append(`items[${i}][itemName]`, itemName);
 				formData.append(`items[${i}][quantity]`, quantity);
+				formData.append(`items[${i}][brandName]`, brandName);
+				formData.append(`items[${i}][uom]`, uom);
 				formData.append(`items[${i}][createdBy]`, sessionID);
 				formData.append(`items[${i}][updatedBy]`, sessionID);
 			

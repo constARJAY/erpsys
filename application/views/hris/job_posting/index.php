@@ -13,7 +13,9 @@
 					<span>This module is used to manage job posts details.</span>
 				</div>
 				<div class="col-lg-6 col-md-12 text-md-right">
-					<button class="btn btn-default btn-add" id="btnAdd"><i class="icon-plus"></i> Add Job</button>
+						<?php if(isCreateAllowed(103)){ ?>
+							<button class="btn btn-default btn-add" id="btnAdd"><i class="icon-plus"></i> Add Job</button>
+						<?php  } ?>
 				</div>
 			</div>
 		</div>

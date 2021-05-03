@@ -15,7 +15,9 @@
 					<!-- <button class="btn btn-default hidden-xs ml-2">Download Report</button>
                         <button class="btn btn-secondary hidden-xs ml-2">New Report</button> -->
                         <!-- <button type="button" class="btn btn-danger pr-2" id="btnAdd"> <i class="icon-plus" id="btnIcon"></i> &nbsp;Add Item</button> -->
-                        <button type="button" class="btn btn-default btn-add" id="btnAdd"><i class="icon-plus"></i> Add Client</button>
+						<?php if(isCreateAllowed(12)){ ?>
+							<button type="button" class="btn btn-default btn-add" id="btnAdd"><i class="icon-plus"></i> Add Client</button>
+						<?php  } ?>
                         <!-- <button type="button" class="btn btn-light pr-2" id="btnCancel"> <i class="icon-ban"></i> &nbsp;Cancel</button> -->
                     </ul>
 				</div>

@@ -103,8 +103,12 @@ class Inventory_incident extends CI_Controller {
                         $temp = [
                             "incidentID" => $incidentID,
                             "itemID"            => $item["itemID"] != "null" ? $item["itemID"] : null,
+                            "itemName"            => $item["itemName"] != "null" ? $item["itemName"] : null,
+                            "classificationName"          => $item["classificationname"],
                             "inventoryStorageID"            => $item["inventoryStorageID"] != "null" ? $item["inventoryStorageID"] : null,
                             "quantity"          => $item["quantity"],
+                            "unitOfMeasurementID"          => $item["uom"],
+                            "inventoryStorageOfficeName"            => $item["inventoryStorageName"] != "null" ? $item["inventoryStorageName"] : null,
                             "incidentInformation"          => $item["incidentInformation"],
                             "incidentRecommendation"          => $item["incidentRecommendation"],
                             "createdBy"         => $item["createdBy"],

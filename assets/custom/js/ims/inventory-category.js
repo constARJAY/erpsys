@@ -1,5 +1,17 @@
 $(document).ready(function(){
 
+    //------ MODULE FUNCTION IS ALLOWED UPDATE-----
+	
+	const allowedUpdate = isUpdateAllowed(5);
+	if(!allowedUpdate){
+		$("#modal_inventory_category_content").find("input, select, textarea").each(function(){
+			$(this).attr("disabled",true);
+		});
+		$("#btnUpdate").hide();
+	}
+
+	//------ END MODULE FUNCTION IS ALLOWED UPDATE-----
+
     // ----- DATATABLES -----
     function initDataTables() {
         if ($.fn.DataTable.isDataTable('#tableInventoryCategory')){

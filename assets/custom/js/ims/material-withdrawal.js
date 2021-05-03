@@ -738,6 +738,7 @@ $(document).ready(function() {
                     ${item.inventoryStorageID == id && "selected"}>
                     ${item.inventoryStorageOfficeName}
                 </option>`;
+
             }else{
                 if(item.itemID == itemID ){
                     return `
@@ -860,7 +861,7 @@ $(document).ready(function() {
 					</div>
 				</td>
                 <td>
-					<div class="itemdescription">-</div>
+					<div class="itemdescription" name="itemdescription">-</div>
 				</td>
 
                  <td>
@@ -902,10 +903,10 @@ $(document).ready(function() {
 					</div>
 				</td>
 				<td>
-					<div class="uom">-</div>
+					<div class="uom" name="uom">-</div>
 				</td>
                 <td>
-                    <div class="liststocks">-</div>
+                    <div class="liststocks" name="liststocks">-</div>
 				</td>
 			</tr>`;
 		}
@@ -1044,7 +1045,7 @@ $(document).ready(function() {
     })
     // ----- END SELECT PROJECT LIST -----
 
-
+	
     // ----- SELECT ITEM NAME -----
     $(document).on("change", "[name=itemID]", function() {
         const itemID     = $('option:selected', this).val();
@@ -1060,12 +1061,6 @@ $(document).ready(function() {
         $(this).closest("tr").find(`.uom`).first().text(uom);
         $(this).closest("tr").find(`.itemdescription`).first().text(itemDescription);
 
-        // Storage Field
-        $(this).closest("tr").find(`[name=quantity]`).first().val(1);
-        $(this).closest("tr").find(`.storagecode`).first().text('-');
-        $(this).closest("tr").find(`.liststocks`).first().text('-');
-
-
 
 		$(`[name=itemID]${attr}`).each(function(i, obj) {
 			let itemID = $(this).val();
@@ -1076,7 +1071,17 @@ $(document).ready(function() {
 			let inventoryStorageID = $(this).val();
 			$(this).html(getStorage(inventoryStorageID,isProject,true,itemID));
 			$(this).prop("disabled",false);
+			
 		}) 
+
+		var tmp_StorageID =  $(this).closest("tr").find(`[name=inventoryStorageID]`).val();
+
+		if(tmp_StorageID  == null){
+		// Storage Field
+				$(this).closest("tr").find(`[name=quantity]`).first().val(1);
+				$(this).closest("tr").find(`.storagecode`).first().text('-');
+				$(this).closest("tr").find(`.liststocks`).first().text('-');
+		}
 	
     })
     // ----- END SELECT ITEM NAME -----
@@ -1128,7 +1133,7 @@ $(document).ready(function() {
 								$(`#quantity${index}${attr}`).removeClass("is-invalid").addClass("is-valid");
 								$(this).closest("tr").find("#invalid-quantity").removeClass("is-invalid").addClass("is-valid");
 								$(this).closest("tr").find("#invalid-quantity").text('');
-								removeIsValid("#tableServiceRequisitionItems");
+								removeIsValid("#tableProjectRequestItems");
 							}else{
 								$(`#quantity${index}${attr}`).removeClass("is-valid").addClass("is-invalid");
 								$(this).closest("tr").find("#invalid-quantity").removeClass("is-valid").addClass("is-invalid");
@@ -1239,7 +1244,7 @@ $(document).ready(function() {
                 AND iist.inventoryStorageID = ilst.inventoryStorageID
 				LEFT JOIN ims_list_stocks_details_tbl as ilsdt  ON imwd.itemID = ilsdt.itemID
                 AND ilst.listStocksID = ilsdt.listStocksID`, 
-				`iiit.itemID, itemCode, itemName, unitOfMeasurementID,itemDescription,imwd.inventoryStorageID,inventoryStorageCode,inventoryStorageOfficeName,receivingQuantity,quantity`, 
+				`iiit.itemID, itemCode, imwd.itemName, imwd.unitOfMeasurementID,imwd.itemDescription,imwd.inventoryStorageID,inventoryStorageCode,imwd.inventoryStorageOfficeName,imwd.receivingQuantity,quantity`, 
 				`materialWithdrawalID= ${materialWithdrawalID}  GROUP BY materialWithdrawalDetailsID ASC`);
 			requestItemsData.map(item => {
 				requestProjectItems += getItemRow(true, item, readOnly);
@@ -1623,17 +1628,29 @@ $(document).ready(function() {
 				const categoryType = $(this).closest("tbody").attr("project") == "true" ? "project" : "";
 
 				const itemID    = $("td [name=itemID]", this).val();	
+				const itemName    = $("td [name=itemID] option:selected", this).text().trim();		
 				const quantity  = +$("td [name=quantity]", this).val();	
+				const itemdescription  = $("td [name=itemdescription]", this).text();	
+				const uom  = $("td [name=uom]", this).text();	
 				const inventoryStorageID  = +$("td [name=inventoryStorageID ]", this).val();	
+				const inventoryStorageName    = $("td [name=inventoryStorageID] option:selected", this).text().trim();
+				const liststocks  = $("td [name=liststocks]", this).text();	
+						
+
 
 				let temp = {
-					itemID, quantity, inventoryStorageID
+					itemID,itemName, quantity, itemdescription ,uom ,inventoryStorageID,inventoryStorageName,liststocks
 					
 				};
 
 				formData.append(`items[${i}][itemID]`, itemID);
+				formData.append(`items[${i}][itemName]`, itemName);
 				formData.append(`items[${i}][quantity]`, quantity);
+				formData.append(`items[${i}][itemdescription]`, itemdescription);
+				formData.append(`items[${i}][uom]`, uom);
 				formData.append(`items[${i}][inventoryStorageID]`, inventoryStorageID);
+				formData.append(`items[${i}][inventoryStorageName]`, inventoryStorageName);
+				formData.append(`items[${i}][liststocks]`, liststocks);
 				formData.append(`items[${i}][createdBy]`, sessionID);
 				formData.append(`items[${i}][updatedBy]`, sessionID);
 			

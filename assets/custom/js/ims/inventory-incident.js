@@ -837,7 +837,7 @@ $(document).ready(function() {
 					</div>
 				</td>
                 <td>
-					<div class="classificationname">-</div>
+					<div class="classificationname" name="classificationname">-</div>
 				</td>
 
                  <td>
@@ -879,7 +879,7 @@ $(document).ready(function() {
 					</div>
 				</td>
 				<td>
-					<div class="uom">-</div>
+					<div class="uom" name="uom">-</div>
 				</td>
                 <td>
 					<div class="incidentinformation">
@@ -1068,10 +1068,6 @@ $(document).ready(function() {
         $(this).closest("tr").find(`.uom`).first().text(uom);
         $(this).closest("tr").find(`.classificationname`).first().text(classificationName);
 
-        // Storage Field
-        $(this).closest("tr").find(`[name=quantity]`).first().val(1);
-        $(this).closest("tr").find(`.storagecode`).first().text('-');
-        $(this).closest("tr").find(`.liststocks`).first().text('-');
 
 		$(`[name=itemID]${attr}`).each(function(i, obj) {
 			let itemID = $(this).val();
@@ -1083,6 +1079,14 @@ $(document).ready(function() {
 			$(this).html(getStorage(inventoryStorageID,isProject,true,itemID));
 			$(this).prop("disabled",false);
 		}) 
+
+		var tmp_StorageID =  $(this).closest("tr").find(`[name=inventoryStorageID]`).val();
+
+		if(tmp_StorageID  == null){
+		// Storage Field
+				$(this).closest("tr").find(`[name=quantity]`).first().val(1);
+				$(this).closest("tr").find(`.storagecode`).first().text('-');
+		}
 	
     })
     // ----- END SELECT ITEM NAME -----
@@ -1247,7 +1251,7 @@ $(document).ready(function() {
 				LEFT JOIN ims_list_stocks_details_tbl as ilsdt  ON imwd.itemID = ilsdt.itemID
                 AND ilst.listStocksID = ilsdt.listStocksID
                 LEFT JOIN ims_inventory_classification_tbl USING(classificationID)`, 
-				`quantity, iiit.itemID, itemCode, itemName, unitOfMeasurementID,itemDescription,iist.inventoryStorageID,inventoryStorageCode,inventoryStorageOfficeName,receivingQuantity,quantity,incidentInformation,incidentRecommendation,classificationName`, 
+				`quantity, iiit.itemID, itemCode, imwd.itemName, imwd.unitOfMeasurementID,iist.inventoryStorageID,inventoryStorageCode,imwd.inventoryStorageOfficeName,receivingQuantity,quantity,incidentInformation,incidentRecommendation,imwd.classificationName`, 
 				`incidentID= ${incidentID} GROUP BY incidentDetailsID  ASC`);
 			requestItemsData.map(item => {
 				requestProjectItems += getItemRow(true, item, readOnly);
@@ -1625,19 +1629,27 @@ $(document).ready(function() {
 				const categoryType = $(this).closest("tbody").attr("project") == "true" ? "project" : "";
 
 				const itemID    = $("td [name=itemID]", this).val();	
+				const itemName    = $("td [name=itemID] option:selected", this).text().trim();		
+				const classificationname  = $("td [name=classificationname]", this).text();	
 				const quantity  = +$("td [name=quantity]", this).val();	
+				const uom  = $("td [name=uom]", this).text();	
 				const inventoryStorageID  = +$("td [name=inventoryStorageID]", this).val();	
+				const inventoryStorageName    = $("td [name=inventoryStorageID] option:selected", this).text().trim();
 				const incidentInformation  = $("td [name=incidentInformation]", this).val()?.trim();	 
 				const incidentRecommendation  = $("td [name=incidentRecommendation]", this).val()?.trim();	
 
 				let temp = {
-					itemID, quantity, inventoryStorageID,incidentInformation,incidentRecommendation
+					itemID,itemName,classificationname ,quantity,uom ,inventoryStorageID,inventoryStorageName,incidentInformation,incidentRecommendation
 					
 				};
 
 				formData.append(`items[${i}][itemID]`, itemID);
+				formData.append(`items[${i}][itemName]`, itemName);
+				formData.append(`items[${i}][classificationname]`, classificationname);
 				formData.append(`items[${i}][quantity]`, quantity);
+				formData.append(`items[${i}][uom]`, uom);
 				formData.append(`items[${i}][inventoryStorageID]`, inventoryStorageID);
+				formData.append(`items[${i}][inventoryStorageName]`, inventoryStorageName);
 				formData.append(`items[${i}][incidentInformation]`, incidentInformation);
 				formData.append(`items[${i}][incidentRecommendation]`, incidentRecommendation);
 				formData.append(`items[${i}][createdBy]`, sessionID);

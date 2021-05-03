@@ -155,11 +155,11 @@ class ServiceOrder_model extends CI_Model {
         if ($query) {
             $insertID = $action == "insert" ? $this->db->insert_id() : $id;
 
-            // ----- SAVE TO SERVICE ORDER -----
+            // ----- SAVE TO SERVICE COMPLETION -----
             if ($data["serviceOrderStatus"] == 2) {
                 $insertToServiceCompletion = $this->saveServiceCompletion($insertID);
             }
-            // ----- END SAVE TO SERVICE ORDER -----
+            // ----- END SAVE TO SERVICE COMPLETION -----
 
             return "true|Successfully submitted|$insertID|".date("Y-m-d");
         }
@@ -228,54 +228,48 @@ class ServiceOrder_model extends CI_Model {
 
     // ----- SAVE TO SERVICE COMPLETION -----
     
+    public function updateServices($srID = null, $soID = null, $scID = null)
+    {
+        if ($srID && $soID && $scID) {
+            $where = [
+                "serviceRequisitionID" => $srID,
+                "serviceOrderID"       => $soID
+            ];
+            $query1 = $this->db->update(
+                "ims_request_services_tbl",
+                ["serviceCompletionID" => $scID],
+                $where);
+            $query2 = $this->db->update(
+                "ims_service_scope_tbl", 
+                ["serviceCompletionID" => $scID],
+                $where);
+            return $query1 && $query2 ? true : false;
+        }
+        return false;
+    }
+
     public function saveServiceCompletion($id = null)
     {
         $sessionID = $this->session->has_userdata("adminSessionID") ? $this->session->userdata("adminSessionID") : 0;
 
         $soData = $this->getServiceOrder($id);
         if ($soData) {
-            $employeeID       = $soData->employeeID;
-            $total            = (float)$soData->serviceRequisitionTotalAmount;
-            $discount         = 0;
-            $totalAmount      = $total - $discount;
-            $vat              = $totalAmount * 0.12;
-            $vatSales         = $totalAmount - $vat;
-            $totalVat         = $vatSales + $vat;
-            $lessEwt          = $totalVat * 0.01;
-            $grandTotalAmount = $totalVat - $lessEwt;
-            $approversID      = null;
-            $approversStatus  = null;
-            $approversDate    = null;
-
-            $soData = [
-                "serviceRequisitionID" => $id,
-                "employeeID"           => $employeeID,
-                "clientID"             => $soData->clientID,
-                "projectID"            => $soData->projectID,
-                "clientName"           => $soData->clientName,
-                "clientAddress"        => $soData->clientAddress,
-                "clientContactDetails" => $soData->clientContactDetails,
-                "clientContactPerson"  => $soData->clientContactPerson,
-                "total"                => $total,
-                "discount"             => $discount,
-                "totalAmount"          => $totalAmount,
-                "vatSales"             => $vatSales,
-                "vat"                  => $vat,
-                "totalVat"             => $totalVat,
-                "lessEwt"              => $lessEwt,
-                "grandTotalAmount"     => $grandTotalAmount,
-                "approversID"          => $approversID,
-                "approversStatus"      => $approversStatus,
-                "approversDate"        => $approversDate,
-                "serviceOrderStatus"   => 0,
-                "createdBy"            => $sessionID,
-                "updatedBy"            => $sessionID,
+            $serviceRequisitionID = $soData->serviceRequisitionID;
+            $scData = [
+                "serviceRequisitionID"    => $serviceRequisitionID,
+                "serviceOrderID"          => $id,
+                "approversID"             => null,
+                "approversStatus"         => null,
+                "approversDate"           => null,
+                "serviceCompletionStatus" => 0,
+                "createdBy"               => $sessionID,
+                "updatedBy"               => $sessionID,
             ];
 
-            $query = $this->db->insert("ims_service_order_tbl", $soData);
+            $query = $this->db->insert("ims_service_completion_tbl", $scData);
             if ($query) {
                 $insertID = $this->db->insert_id();
-                $this->updateServices($id, $insertID);
+                $this->updateServices($serviceRequisitionID, $id, $insertID);
             }
         }
     }

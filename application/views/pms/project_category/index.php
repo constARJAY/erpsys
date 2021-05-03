@@ -14,7 +14,9 @@
 				</div>
 				<div class="col-lg-6 col-md-12 text-md-right">
                         <!-- <button type="button" class="btn btn-danger pr-2" id="btnAdd"> <i class="fas fa-plus-square"></i> Add Category</button> -->
-						<button type="button" class="btn btn-add btn-default" id="btnAdd"> <i class="icon-plus"></i> &nbsp;Add Category</button>
+						<?php if(isCreateAllowed(13)){ ?>
+							<button type="button" class="btn btn-add btn-default" id="btnAdd"> <i class="icon-plus"></i> &nbsp;Add Category</button>
+						<?php  } ?>
                     </ul>
 				</div>
 			</div>

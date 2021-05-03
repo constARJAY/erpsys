@@ -1,5 +1,17 @@
 $(document).ready(function () {
 
+		//------ MODULE FUNCTION IS ALLOWED UPDATE-----
+	
+		const allowedUpdate = isUpdateAllowed(59);
+		if(!allowedUpdate){
+			$("#modal_loan_form_content").find("input, select, textarea").each(function(){
+				$(this).attr("disabled",true);
+			});
+			$("#btnSubmit").hide();
+		}
+	
+		//------ END MODULE FUNCTION IS ALLOWED UPDATE-----
+
 	// ----- MODULE APPROVER -----
 	const moduleApprover = getModuleApprover(59);
 	// ----- END MODULE APPROVER -----
@@ -1323,7 +1335,7 @@ $(document).on("change keyup", "#input_loanFormAmount ,#input_loanFormDeductionA
 	}else{
 
 
-		var computeDeductionAmount = loanAmount/loanNoOfDays/loanTermPayment*loanInterest ;
+		var computeDeductionAmount = ((loanAmount*loanInterest)+loanAmount) /loanNoOfDays/loanTermPayment;
 
 		$("#input_loanFormDeductionAmount").val(computeDeductionAmount);
 

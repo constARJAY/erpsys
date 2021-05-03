@@ -13,7 +13,9 @@
 					<span>This module is used to manage department details.</span>
 				</div>
 				<div class="col-lg-6 col-md-12 text-md-right">
-                        <button type="button" class="btn btn-default btn-add" id="btnAdd"> <i class="icon-plus"></i> &nbsp;Add Department</button>
+						<?php if(isCreateAllowed(18)){ ?>
+							<button type="button" class="btn btn-default btn-add" id="btnAdd"> <i class="icon-plus"></i> &nbsp;Add Department</button>
+						<?php  } ?>
                     </ul>
 				</div>
 			</div>

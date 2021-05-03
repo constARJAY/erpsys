@@ -1,5 +1,17 @@
 $(document).ready(function(){
 
+    	//------ MODULE FUNCTION IS ALLOWED UPDATE-----
+	
+	const allowedUpdate = isUpdateAllowed(18);
+	if(!allowedUpdate){
+		$("#modal_hris_department_content").find("input, select, textarea").each(function(){
+			$(this).attr("disabled",true);
+		});
+		$("#btnUpdate").hide();
+	}
+
+	//------ END MODULE FUNCTION IS ALLOWED UPDATE-----
+
     // ----- DATATABLES -----
     function initDataTables() {
         if ($.fn.DataTable.isDataTable('#tableHRISDepartment')){
