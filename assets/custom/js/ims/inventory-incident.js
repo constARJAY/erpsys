@@ -163,14 +163,12 @@ $(document).ready(function() {
 				columnDefs: [
 					{ targets: 0,  width: 100 },
 					{ targets: 1,  width: 150 },
-					// { targets: 2,  width: 150 },
-					// { targets: 3,  width: 150 },
-					{ targets: 2,  width: 100 },
-					{ targets: 3,  width: 150 },
-					{ targets: 4,  width: 200 },
-					{ targets: 5,  width: 200 },
+					{ targets: 2,  width: 150 },
+					{ targets: 3,  width: 180 },
+					{ targets: 4,  width: 180 },
+					{ targets: 5,  width: 180 },
 					{ targets: 6,  width: 80  },
-					{ targets: 7, width: 250 },
+					// { targets: 7, width: 300 },
 					{ targets: 8, width: 80  },
 				],
 			});
@@ -187,14 +185,12 @@ $(document).ready(function() {
 				columnDefs: [
 					{ targets: 0,  width: 100 },
 					{ targets: 1,  width: 150 },
-					// { targets: 2,  width: 150 },
-					// { targets: 3,  width: 150 },
-					{ targets: 2,  width: 100 },
-					{ targets: 3,  width: 150 },
-					{ targets: 4,  width: 200 },
-					{ targets: 5,  width: 200 },
+					{ targets: 2,  width: 150 },
+					{ targets: 3,  width: 180 },
+					{ targets: 4,  width: 180 },
+					{ targets: 5,  width: 180 },
 					{ targets: 6,  width: 80  },
-					{ targets: 7, width: 250 },
+					// { targets: 7, width: 300 },
 					{ targets: 8, width: 80  },
 				],
 			});
@@ -213,16 +209,26 @@ $(document).ready(function() {
                 info: false,
 				scrollCollapse: true,
 				columnDefs: [
-					{ targets: 0,  width: 20  },
-					{ targets: 1,  width: 120  },
-					{ targets: 2,  width: 80  },
-					{ targets: 3,  width: 120  },
+					{ targets: 0,  width: 50  },
+					{ targets: 1,  width: 120 },
+					{ targets: 2,  width: 280 },
+					{ targets: 3,  width: 150  },
 					{ targets: 4,  width: 120 },
-					{ targets: 5,  width: 200 },
-					{ targets: 6,  width: 10 },
-					{ targets: 7,  width: 20 },
-					{ targets: 8,  width: 250 }
-					// { targets: 9,  width: 200 },
+					{ targets: 5,  width: 280 },
+					{ targets: 6,  width: 40 },
+					{ targets: 7,  width: 40 },
+					{ targets: 8,  width: 200 },
+					{ targets: 9,  width: 200 },
+
+					// { targets: 0,  width: 150 },
+					// { targets: 1,  width: 150 },
+					// { targets: 2,  width: 150  },
+					// { targets: 3,  width: 150 },
+					// { targets: 4,  width: 150 },
+					// { targets: 5,  width: 40 },
+					// { targets: 6,  width: 40 },
+					// { targets: 7,  width: 200 },
+					// { targets: 8,  width: 200 }, 
 				],
 			});
 
@@ -237,12 +243,15 @@ $(document).ready(function() {
 				scrollX: true,
 				scrollCollapse: true,
 				columnDefs: [
-					{ targets: 0,  width: 50  },
-					{ targets: 1,  width: 150 },
-					{ targets: 2,  width: 150 },
-					{ targets: 3,  width: 50  },
-					{ targets: 4,  width: 120 }
-					// { targets: 8,  width: 200 },
+					{ targets: 0,  width: 120 },
+					{ targets: 1,  width: 280 },
+					{ targets: 2,  width: 150  },
+					{ targets: 3,  width: 120 },
+					{ targets: 4,  width: 280  },
+					{ targets: 5,  width: 40 },
+					{ targets: 6,  width: 40 },
+					{ targets: 7,  width: 200 },
+					{ targets: 8,  width: 200 }, 
 				],
 			});
 	}
@@ -815,7 +824,7 @@ $(document).ready(function() {
 					<div class="itemname">
 						<div class="form-group mb-0">
 							<select
-								class="form-control validate select2"
+								class="form-control select2"
 								name="itemID"
 								id="itemID"
 								style="width: 100%"
@@ -838,7 +847,7 @@ $(document).ready(function() {
 					<div class="storagename">
 						<div class="form-group mb-0">
 							<select
-								class="form-control validate select2"
+								class="form-control select2"
 								name="inventoryStorageID"
 								id="inventoryStorageID"
 								style="width: 100%"
@@ -856,7 +865,7 @@ $(document).ready(function() {
 					<div class="quantity">
 						<input 
 							type="text" 
-							class="form-control validate number text-center"
+							class="form-control number text-center"
 							min="1" 
 							data-allowcharacters="[0-9]" 
 							max="999999999" 
@@ -880,7 +889,7 @@ $(document).ready(function() {
 							maxlength="250"
 							rows="2" 
 							style="resize: none" 
-							class="form-control validate" 
+							class="form-control" 
 							name="incidentInformation" 
 							id="incidentInformation">${incidentInformation || ""}</textarea>
 							<div class="invalid-feedback d-block" id="invalid-incidentInformation"></div>
@@ -895,7 +904,7 @@ $(document).ready(function() {
 							maxlength="250"
 							rows="2" 
 							style="resize: none" 
-							class="form-control validate" 
+							class="form-control" 
 							name="incidentRecommendation" 
 							id="incidentRecommendation">${incidentRecommendation || ""}</textarea>
 							<div class="invalid-feedback d-block" id="invalid-incidentRecommendation"></div>
@@ -1125,6 +1134,7 @@ $(document).ready(function() {
 								$(`#quantity${index}${attr}`).removeClass("is-invalid").addClass("is-valid");
 								$(this).closest("tr").find("#invalid-quantity").removeClass("is-invalid").addClass("is-valid");
 								$(this).closest("tr").find("#invalid-quantity").text('');
+								removeIsValid("#tableProjectRequestItems");
 							}else{
 								$(`#quantity${index}${attr}`).removeClass("is-valid").addClass("is-invalid");
 								$(this).closest("tr").find("#invalid-quantity").removeClass("is-valid").addClass("is-invalid");
@@ -1430,7 +1440,7 @@ $(document).ready(function() {
 					<div class="text-primary font-weight-bold" style="font-size: 1.5rem;">Inventory Incident Materials and Equipment</div>
                     <table class="table table-striped" id="${tableProjectRequestItemsName}">
                         <thead>
-                            <tr style="white-space: nowrap">
+                            <tr style="white-space: nowrap" >
 								${checkboxProjectHeader}
                                 <th>Item Code</th>
                                 <th>Item Name ${!disabled ? "<code>*</code>" : ""}</th>
@@ -1743,6 +1753,14 @@ $(document).ready(function() {
 	// ----- END SAVE DOCUMENT -----
 
 
+	// ----- REMOVE IS-VALID IN TABLE -----
+	function removeIsValid(element = "table") {
+		$(element).find(".validated, .is-valid, .no-error").removeClass("validated")
+		.removeClass("is-valid").removeClass("no-error");
+	}
+	// ----- END REMOVE IS-VALID IN TABLE -----
+
+
     // ----- SUBMIT DOCUMENT -----
 	$(document).on("click", "#btnSubmit", function () {
 
@@ -1753,6 +1771,7 @@ $(document).ready(function() {
             const id           = $(this).attr("incidentID");
             const revise       = $(this).attr("revise") == "true";
             const validate     = validateForm("form_purchase_request");
+			removeIsValid("#tableProjectRequestItems");
 
             if (validate) {
                 const action = revise && "insert" || (id ? "update" : "insert");

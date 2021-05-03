@@ -58,8 +58,8 @@ class Service_order extends CI_Controller {
         $approversID           = $this->input->post("approversID") ?? null;
         $approversStatus       = $this->input->post("approversStatus") ?? null;
         $approversDate         = $this->input->post("approversDate") ?? null;
-        $serviceOrderStatus   = $this->input->post("serviceOrderStatus");
-        $serviceOrderRemarks  = $this->input->post("serviceOrderRemarks");
+        $serviceOrderStatus    = $this->input->post("serviceOrderStatus");
+        $serviceOrderRemarks   = $this->input->post("serviceOrderRemarks");
         $submittedAt           = $this->input->post("submittedAt") ?? null;
         $updatedBy             = $this->input->post("updatedBy");
         $items                 = $this->input->post("items") ?? null;
@@ -318,7 +318,7 @@ class Service_order extends CI_Controller {
 
         // ----- TITLE -----
         $sheet->mergeCells('A1:K1');
-        $sheet->setCellValue('A1', getFormCode("PO", $data["createdAt"], $data["serviceOrderID"]));
+        $sheet->setCellValue('A1', getFormCode("SO", $data["createdAt"], $data["serviceOrderID"]));
         $sheet->getStyle('A1')->applyFromArray($documentNoStyle);
         $sheet->mergeCells('A2:K2');
         $sheet->setCellValue('A2', "SERVICE ORDER");
@@ -381,29 +381,22 @@ class Service_order extends CI_Controller {
 
         $rowNumber = 9;
         $requestItems = $data["items"];
-        var_dump($requestItems);
         $limit = count($requestItems) <= 20 ? 20 : count($requestItems);
         for ($i=0; $i<$limit; $i++) { 
+            $sheet->getRowDimension("$rowNumber")->setRowHeight(17);
+
             $serviceCode = $serviceName = $qty = $unit = $unitcost = $totalamount = "";
+            $scopes = [];
             if ($i < count($requestItems)) {
-                $serviceCode        = $requestItems[$i]["serviceCode"] ?? "";
-                $serviceName        = $requestItems[$i]["serviceName"] ?? "";
+                $serviceCode = $requestItems[$i]["serviceCode"] ?? "";
+                $serviceName = $requestItems[$i]["serviceName"] ?? "";
+                $scopes      = $requestItems[$i]["scopes"];
             }
             $sheet->setCellValue("B$rowNumber", $serviceCode);
             $sheet->mergeCells("C$rowNumber:G$rowNumber");
             $sheet->setCellValue("C$rowNumber", $serviceName);
 
-            $rowNumber++;
-            $scopes = $requestItems[$i]["scopes"];
-            foreach ($scopes as $scope) {
-                $sheet->mergeCells("C$rowNumber:G$rowNumber");
-                $sheet->setCellValue("C$rowNumber", $scope["description"]);
-                $sheet->setCellValue("H$rowNumber", $scope["quantity"]);
-                $sheet->setCellValue("I$rowNumber", $scope["uom"]);
-                $sheet->setCellValue("J$rowNumber", $scope["unitCost"]);
-                $sheet->setCellValue("K$rowNumber", $scope["totalCost"]);
-                $rowNumber++;
-            }
+            $sheet->getStyle("C$rowNumber")->getFont()->setBold(true);
 
             $sheet->getStyle("B$rowNumber")->applyFromArray($sideBorderStyle);
             $sheet->getStyle("C$rowNumber")->applyFromArray($sideBorderStyle);
@@ -412,10 +405,28 @@ class Service_order extends CI_Controller {
             $sheet->getStyle("J$rowNumber")->applyFromArray($sideBorderStyle);
             $sheet->getStyle("K$rowNumber")->applyFromArray($sideBorderStyle);
 
-            $sheet->getStyle("J$rowNumber")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
-            $sheet->getStyle("K$rowNumber")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+            foreach ($scopes as $scope) {
+                $rowNumber++;
+                $sheet->getRowDimension("$rowNumber")->setRowHeight(17);
 
-            $sheet->getRowDimension("$rowNumber")->setRowHeight(17);
+                $sheet->mergeCells("C$rowNumber:G$rowNumber");
+                $sheet->setCellValue("C$rowNumber", $scope["description"]);
+                $sheet->setCellValue("H$rowNumber", $scope["quantity"]);
+                $sheet->setCellValue("I$rowNumber", $scope["uom"]);
+                $sheet->setCellValue("J$rowNumber", formatAmount($scope["unitCost"], true));
+                $sheet->setCellValue("K$rowNumber", formatAmount($scope["totalCost"], true));
+
+                $sheet->getStyle("B$rowNumber")->applyFromArray($sideBorderStyle);
+                $sheet->getStyle("C$rowNumber")->applyFromArray($sideBorderStyle);
+                $sheet->getStyle("H$rowNumber")->applyFromArray($sideBorderStyle);
+                $sheet->getStyle("I$rowNumber")->applyFromArray($sideBorderStyle);
+                $sheet->getStyle("J$rowNumber")->applyFromArray($sideBorderStyle);
+                $sheet->getStyle("K$rowNumber")->applyFromArray($sideBorderStyle);
+
+                $sheet->getStyle("J$rowNumber")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+                $sheet->getStyle("K$rowNumber")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+            }
+
             $rowNumber++;
         }
         $sheet->getStyle("B".($rowNumber-1).":K".($rowNumber-1))->applyFromArray($bottomBorderStyle);
@@ -427,7 +438,7 @@ class Service_order extends CI_Controller {
         $sheet->getStyle("B$rowNumber:I$rowNumber")->applyFromArray($labelFillStyle);
         $sheet->setCellValue("J$rowNumber", "Total");
         $sheet->getStyle("J$rowNumber")->applyFromArray($sideBorderStyle);
-        $sheet->setCellValue("K$rowNumber", formatAmount($data["total"] ?? 0.00));
+        $sheet->setCellValue("K$rowNumber", formatAmount($data["total"] ?? 0.00, true));
         $sheet->getStyle("K$rowNumber")->applyFromArray($sideBorderStyle);
         $sheet->getStyle("K$rowNumber")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
         $sheet->getRowDimension("$rowNumber")->setRowHeight(17);
@@ -439,28 +450,28 @@ class Service_order extends CI_Controller {
         $sheet->getStyle("B$rowNumber:I".($rowNumber+3))->applyFromArray($commentInstructionStyle);
         $sheet->setCellValue("J$rowNumber", "Discount");
         $sheet->getStyle("J$rowNumber")->applyFromArray($sideBorderStyle);
-        $sheet->setCellValue("K$rowNumber", formatAmount($data["discount"] ?? 0.00));
+        $sheet->setCellValue("K$rowNumber", formatAmount($data["discount"] ?? 0.00, true));
         $sheet->getStyle("K$rowNumber")->applyFromArray($sideBorderStyle);
         $sheet->getStyle("K$rowNumber")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
         $sheet->getRowDimension("$rowNumber")->setRowHeight(17);
         $rowNumber++;
         $sheet->setCellValue("J$rowNumber", "Total Amount");
         $sheet->getStyle("J$rowNumber")->applyFromArray($sideBorderStyle);
-        $sheet->setCellValue("K$rowNumber", formatAmount($data["totalAmount"] ?? 0.00));
+        $sheet->setCellValue("K$rowNumber", formatAmount($data["totalAmount"] ?? 0.00, true));
         $sheet->getStyle("K$rowNumber")->applyFromArray($sideBorderStyle);
         $sheet->getStyle("K$rowNumber")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
         $sheet->getRowDimension("$rowNumber")->setRowHeight(17);
         $rowNumber++;
         $sheet->setCellValue("J$rowNumber", "Vatable Sales");
         $sheet->getStyle("J$rowNumber")->applyFromArray($sideBorderStyle);
-        $sheet->setCellValue("K$rowNumber", formatAmount($data["vatSales"] ?? 0.00));
+        $sheet->setCellValue("K$rowNumber", formatAmount($data["vatSales"] ?? 0.00, true));
         $sheet->getStyle("K$rowNumber")->applyFromArray($sideBorderStyle);
         $sheet->getStyle("K$rowNumber")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
         $sheet->getRowDimension("$rowNumber")->setRowHeight(17);
         $rowNumber++;
         $sheet->setCellValue("J$rowNumber", "Vat 12%");
         $sheet->getStyle("J$rowNumber")->applyFromArray($sideBorderStyle);
-        $sheet->setCellValue("K$rowNumber", formatAmount($data["vat"] ?? 0.00));
+        $sheet->setCellValue("K$rowNumber", formatAmount($data["vat"] ?? 0.00, true));
         $sheet->getStyle("K$rowNumber")->applyFromArray($sideBorderStyle);
         $sheet->getStyle("K$rowNumber")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
         $sheet->getRowDimension("$rowNumber")->setRowHeight(17);
@@ -471,7 +482,7 @@ class Service_order extends CI_Controller {
         $sheet->getStyle("B$rowNumber:I$rowNumber")->applyFromArray($labelFillStyle);
         $sheet->setCellValue("J$rowNumber", "Total");
         $sheet->getStyle("J$rowNumber")->applyFromArray($sideBorderStyle);
-        $sheet->setCellValue("K$rowNumber", formatAmount($data["totalVat"] ?? 0.00));
+        $sheet->setCellValue("K$rowNumber", formatAmount($data["totalVat"] ?? 0.00, true));
         $sheet->getStyle("K$rowNumber")->applyFromArray($sideBorderStyle);
         $sheet->getStyle("K$rowNumber")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
         $sheet->getRowDimension("$rowNumber")->setRowHeight(17);
@@ -481,14 +492,14 @@ class Service_order extends CI_Controller {
         $sheet->getStyle("B$rowNumber:I".($rowNumber+1))->applyFromArray($amountWordStyle);
         $sheet->setCellValue("J$rowNumber", "Less EWT");
         $sheet->getStyle("J$rowNumber")->applyFromArray($sideBorderStyle);
-        $sheet->setCellValue("K$rowNumber", formatAmount($data["lessEwt"] ?? 0.00));
+        $sheet->setCellValue("K$rowNumber", formatAmount($data["lessEwt"] ?? 0.00, true));
         $sheet->getStyle("K$rowNumber")->applyFromArray($sideBorderStyle);
         $sheet->getStyle("K$rowNumber")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
         $sheet->getRowDimension("$rowNumber")->setRowHeight(17);
         $rowNumber++;
         $sheet->setCellValue("J$rowNumber", "Grand Total");
         $sheet->getStyle("J$rowNumber")->applyFromArray($sideBorderStyle);
-        $sheet->setCellValue("K$rowNumber", formatAmount($data["grandTotalAmount"] ?? 0.00));
+        $sheet->setCellValue("K$rowNumber", formatAmount($data["grandTotalAmount"] ?? 0.00, true));
         $sheet->getStyle("K$rowNumber")->applyFromArray($sideBorderStyle);
         $sheet->getStyle("K$rowNumber")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
         $sheet->getRowDimension("$rowNumber")->setRowHeight(17);
@@ -550,10 +561,10 @@ class Service_order extends CI_Controller {
         $sheet->getStyle("B$rowNumber:K$rowNumber")->getFont()->setBold(true);
         // ----- END FOOTER -----
 
-        // $writer = new Xlsx($spreadsheet);
-        // header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-        // header('Content-Disposition: attachment; filename="'. urlencode($fileName).'"');
-        // $writer->save('php://output');
+        $writer = new Xlsx($spreadsheet);
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment; filename="'. urlencode($fileName).'"');
+        $writer->save('php://output');
     }
 
     public function downloadExcel()

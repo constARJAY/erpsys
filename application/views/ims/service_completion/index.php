@@ -5,15 +5,13 @@
                 <div class="col-lg-6 col-md-6">
                     <ul class="breadcrumb pl-0 pb-0 ">
                         <li class="breadcrumb-item"><a href="#"><i class="zmdi zmdi-home"></i> Dashboard</a></li>
-                        <li class="breadcrumb-item"><i class="fad fa-boxes-alt"></i> &nbsp;Inventory Modules</li>
-                        <li class="breadcrumb-item active">Material Withdrawal</li>
+						<li class="breadcrumb-item"><i class="fas fa-users"></i> &nbsp;Employee Forms</li>
+                        <li class="breadcrumb-item active">Service Completion</li>
                     </ul>
-                    <h1 class="mt-3">Material Withdrawal</h1>
-                    <span>This module is used to manage material withdrawal form details.</span>
+                    <h1 class="mt-3">Service Completion</h1>
+                    <span>This module is used to manage service completion form details.</span>
                 </div>
-                <?php if(isCreateAllowed(42)){ ?>
                 <div class="col-lg-6 col-md-6 text-right" id="headerButton"></div>
-                <?php  } ?>
             </div>
         </div>
     </div>
@@ -32,17 +30,17 @@
 
 
 <!-- ----- MODAL ----- -->
-<div id="modal_purchase_request" class="modal custom-modal fade" data-backdrop="static" data-keyboard="false" role="dialog">
+<div id="modal_service_completion" class="modal custom-modal fade" data-backdrop="static" data-keyboard="false" role="dialog">
     <div class="modal-dialog modal-dialog-centered modal-md" role="document">
 		<div class="modal-content">
 			<div class="modal-header bg-primary text-light">
-				<h6 class="page-title font-weight-bold">ADD MATERIAL WITHDRAWAL </h6>
+				<h6 class="page-title font-weight-bold">ADD SERVICE COMPLETION</h6>
 				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
 					<span class="text-light" aria-hidden="true">&times;</span>
 				</button>
 			</div>
 
-            <div id="modal_purchase_request_content"></div>
+            <div id="modal_service_completion_content"></div>
         </div>
 	</div>
 </div>
@@ -50,4 +48,4 @@
 
 
 <script src="<?= base_url('assets/custom/js/gen/approver-function.js') ?>"></script>
-<script src="<?= base_url('assets/custom/js/ims/material-withdrawal.js') ?>"></script>
+<script src="<?= base_url('assets/custom/js/ims/service-completion.js') ?>"></script>
