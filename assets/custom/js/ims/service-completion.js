@@ -1397,17 +1397,23 @@ $(document).ready(function() {
 		 * ----- END METHOD -----
 		 */
 
-		 let data     = { items: [], files: serviceFiles };
-         let formData = new FormData();
-		 const approversID = method != "approve" && moduleApprover;
- 
-		 if (id) {
-			data["serviceCompletionID"] = id;
+        let data     = { items: [], files: serviceFiles };
+        let formData = new FormData();
 
-			if (status != "2") {
-				data["serviceCompletionStatus"] = status;
-			}
-		}
+        serviceFiles.map((file, i) => {
+            formData.append(`scope[${i}][scopeID]`, file.scopeID);
+            formData.append(`scope[${i}][file]`, file.files);
+        })
+
+        const approversID = method != "approve" && moduleApprover;
+
+        if (id) {
+            data["serviceCompletionID"] = id;
+
+            if (status != "2") {
+                data["serviceCompletionStatus"] = status;
+            }
+        }
 
 		data["action"]    = action;
 		data["method"]    = method;
@@ -1443,6 +1449,10 @@ $(document).ready(function() {
                     const serviceDateFrom = moment(serviceDateArr[0]).format("YYYY-MM-DD");
                     const serviceDateTo   = moment(serviceDateArr[1]).format("YYYY-MM-DD");
 	
+                    formData.append(`service[${i}][serviceID]`, serviceID);
+                    formData.append(`service[${i}][serviceDateFrom]`, serviceDateFrom);
+                    formData.append(`service[${i}][serviceDateTo]`, serviceDateTo);
+
 					let temp = {
                         serviceID,
 						serviceDateFrom, 
@@ -1453,11 +1463,9 @@ $(document).ready(function() {
 				});
 			// }
 
-            data["items"].map(service => {})
-
 		} 
 
-		return data;
+		return formData;
 	} 
 	// ----- END GET SERVICE ORDER DATA -----
 
@@ -2357,6 +2365,8 @@ function saveServiceCompletion(data = null, method = "submit", notificationData 
 					method:      "POST",
 					url:         `service_completion/saveServiceCompletion`,
 					data,
+                    processData: false,
+                    contentType: false,
 					cache:       false,
 					async:       false,
 					dataType:    "json",
