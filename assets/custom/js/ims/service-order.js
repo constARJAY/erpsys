@@ -879,10 +879,10 @@ $(document).ready(function() {
     function getServiceRow(item = {}, readOnly = false) {
 		let {
 			requestServiceID = 0,
-			serviceID   = "",
-			serviceName = "",
-			remarks     = "",
-			createdAt   = ""
+			serviceID        = "",
+			serviceName      = "",
+			remarks          = "",
+			createdAt        = ""
 		} = item;
 
 		const scopeData = getTableData(
@@ -918,7 +918,7 @@ $(document).ready(function() {
 		let html = "";
 		if (readOnly) {
 			html += `
-			<tr class="itemTableRow">
+			<tr class="itemTableRow" serviceID="${serviceID}" serviceName="${serviceName}">
 				<td>
 					<div class="servicecode">
 						${getFormCode("SVC", createdAt, serviceID)}
@@ -942,24 +942,15 @@ $(document).ready(function() {
 			</tr>`;
 		} else {
 			html += `
-			<tr class="itemTableRow">
+			<tr class="itemTableRow" serviceID="${serviceID}" serviceName="${serviceName}">
 				<td>
-					<div class="servicecode">-</div>
+					<div class="servicecode">
+						${getFormCode("SVC", createdAt, serviceID)}
+					</div>
 				</td>
 				<td>
 					<div class="servicename">
-						<div class="form-group mb-0">
-							<select
-								class="form-control validate select2"
-								name="serviceID"
-								id="serviceID"
-								style="width: 100%"
-								required
-								disabled>
-								${getServiceItem(serviceID)}
-							</select>
-							<div class="invalid-feedback d-block" id="invalid-serviceID"></div>
-						</div>
+						${serviceName}
 					</div>
 				</td>
                 <td>
@@ -1146,13 +1137,9 @@ $(document).ready(function() {
     $(document).on("change", "[name=projectID]", function() {
         const projectCode = $('option:selected', this).attr("projectCode");
         const clientCode  = $('option:selected', this).attr("clientCode");
-        const clientName  = $('option:selected', this).attr("clientName");
-        const address     = $('option:selected', this).attr("address");
 
         $("[name=projectCode]").val(projectCode);
         $("[name=clientCode]").val(clientCode);
-        $("[name=clientName]").val(clientName);
-        $("[name=clientAddress]").val(address);
     })
     // ----- END SELECT PROJECT LIST -----
 
@@ -1404,7 +1391,7 @@ $(document).ready(function() {
 		data["method"]    = method;
 		data["updatedBy"] = sessionID;
 
-		if (currentStatus == "0" && method != "approve") {
+		if ((currentStatus == "0" || currentStatus == "3") && method != "approve") {
 
 			data["paymentTerms"]     = $("[name=paymentTerms]").val()?.trim();
 			data["scheduleDate"]     = moment($("[name=scheduleDate]").val()).format("YYYY-MM-DD");
@@ -1439,8 +1426,8 @@ $(document).ready(function() {
 
 			if (isRevise) {
 				$(".itemTableRow").each(function(i, obj) {
-					const serviceID   = $("td [name=serviceID]", this).val();	
-					const serviceName = serviceID ? $("td [name=serviceID]", this).find(":selected").text().replaceAll("\n", "").trim() : "";
+					const serviceID   = $(this).attr("serviceID");	
+					const serviceName = $(this).attr("serviceName");
 					const remarks     = $("td [name=remarks]", this).val()?.trim();	
 	
 					let temp = {
@@ -1480,37 +1467,36 @@ $(document).ready(function() {
 		let disabled = readOnly ? "disabled" : "";
 
 		let {
-			serviceOrderID       = "",
-			reviseServiceOrderID = "",
-			employeeID            = "",
-			clientID  = "",
-			projectID             = "",
-			serviceRequisitionID            = "",
-			srCreatedAt = new Date,
-			clientName            = "-",
-			clientAddress         = "-",
-			clientContactDetails  = "",
-			clientContactPerson   = "",
-			paymentTerms          = "",
-			scheduleDate          = "",
+			serviceOrderID           = "",
+			reviseServiceOrderID     = "",
+			employeeID               = "",
+			clientID                 = "",
+			projectID                = "",
+			serviceRequisitionID     = "",
+			srCreatedAt              = new Date,
+			clientName               = "-",
+			clientAddress            = "-",
+			clientContactDetails     = "",
+			clientContactPerson      = "",
+			paymentTerms             = "",
+			scheduleDate             = "",
 			serviceRequisitionReason = "",
-			total                 = 0,
-			discount              = 0,
-			totalAmount           = 0,
-			vatSales              = 0,
-			vat                   = 0,
-			totalVat              = 0,
-			lessEwt               = 0,
-			grandTotalAmount      = 0,
-			categoryType          = "",
-			serviceOrderRemarks  = "",
-			approversID           = "",
-			approversStatus       = "",
-			approversDate         = "",
-			contractFile		  = "",
-			serviceOrderStatus   = false,
-			submittedAt           = false,
-			createdAt             = false,
+			total                    = 0,
+			discount                 = 0,
+			totalAmount              = 0,
+			vatSales                 = 0,
+			vat                      = 0,
+			totalVat                 = 0,
+			lessEwt                  = 0,
+			grandTotalAmount         = 0,
+			serviceOrderRemarks      = "",
+			approversID              = "",
+			approversStatus          = "",
+			approversDate            = "",
+			contractFile		     = "",
+			serviceOrderStatus       = false,
+			submittedAt              = false,
+			createdAt                = false,
 		} = data && data[0];
 
 		let requestServiceItems = "";
@@ -1521,7 +1507,7 @@ $(document).ready(function() {
 				`serviceOrderID = ${serviceOrderID}`
 			)
 			requestServicesData.map(item => {
-				requestServiceItems += getServiceRow(item, !isRevise && serviceOrderStatus != 0);
+				requestServiceItems += getServiceRow(item, readOnly || serviceOrderStatus != 3);
 			})
 		} else {
 			requestServiceItems += getServiceRow();
@@ -1548,10 +1534,13 @@ $(document).ready(function() {
 		if (serviceOrderStatus == 2) {
 			approvedButton += `<div class="w-100 text-right pb-4">`;
 			if (grandTotalAmount > 0) {
-				approvedButton += contractFile ? `
-				<a href="${base_url}assets/upload-files/contracts/${contractFile}" 
+				const file = contractFile || "";
+				const path = file ? `${base_url}assets/upload-files/contracts/${file}` : "javascript:void(0)";
+
+				approvedButton += `
+				<a href="${path}" 
 					class="pr-3" 
-					id="displayContract">${contractFile}</a>` : "";
+					id="displayContract">${file}</a>`;
 				if (employeeID == sessionID) {
 					approvedButton += `
 					<input type="file"
@@ -1727,6 +1716,7 @@ $(document).ready(function() {
 						data-allowcharacters="[0-9][%][ ][a-z][A-Z][-][_][.][,][']"
 						minlength="2"
 						maxlength="50"
+						autocomplete="off"
 						required
 						value="${paymentTerms || ""}"
 						${disabled}>

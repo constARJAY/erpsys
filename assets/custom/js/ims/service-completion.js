@@ -322,11 +322,14 @@ $(document).ready(function() {
 		$("#tableForApprovalParent").html(preloader);
 		let serviceCompletionData = getTableData(
 			`ims_service_completion_tbl AS isct 
-				LEFT JOIN ims_service_requisition_tbl AS isrt USING(serviceRequisitionID)
-				LEFT JOIN pms_client_tbl AS pct ON isct.clientID = pct.clientID
+                LEFT JOIN ims_service_requisition_tbl AS isrt ON isct.serviceRequisitionID = isrt.serviceRequisitionID
+				LEFT JOIN ims_service_order_tbl AS isot ON isct.serviceOrderID = isot.serviceOrderID
+				LEFT JOIN pms_client_tbl AS pct ON isot.clientID = pct.clientID
 				LEFT JOIN pms_project_list_tbl AS pplt ON pplt.projectListID = isrt.projectID
 				LEFT JOIN hris_employee_list_tbl AS helt ON isrt.employeeID = helt.employeeID`,
-			`isct.*, CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname, isct.createdAt AS dateCreated, projectListCode, projectListName, pct.clientName`,
+			`isct.*,  
+            CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname, 
+            isct.createdAt AS dateCreated, projectListCode, projectListName, pct.clientName`,
 			`isct.employeeID != ${sessionID} AND isct.serviceCompletionStatus != 0 AND isct.serviceCompletionStatus != 4`,
 			`FIELD(serviceCompletionStatus, 0, 1, 3, 2, 4), COALESCE(isct.submittedAt, isct.createdAt)`
 		);
@@ -547,7 +550,7 @@ $(document).ready(function() {
 						class="btn btn-submit" 
 						id="btnSubmit" 
 						serviceCompletionID="${serviceCompletionID}"
-						code="${getFormCode("P0", createdAt, serviceCompletionID)}"
+						code="${getFormCode("SC", createdAt, serviceCompletionID)}"
 						revise=${isRevise}><i class="fas fa-paper-plane"></i>
 						Submit
 					</button>`;
@@ -559,7 +562,7 @@ $(document).ready(function() {
 							id="btnCancel"
 							revise="${isRevise}"
 							serviceCompletionID="${serviceCompletionID}"
-							code="${getFormCode("P0", createdAt, serviceCompletionID)}"><i class="fas fa-ban"></i> 
+							code="${getFormCode("SC", createdAt, serviceCompletionID)}"><i class="fas fa-ban"></i> 
 							Cancel
 						</button>`;
 					} else {
@@ -568,7 +571,7 @@ $(document).ready(function() {
 							class="btn btn-cancel"
 							id="btnCancelForm" 
 							serviceCompletionID="${serviceCompletionID}"
-							code="${getFormCode("P0", createdAt, serviceCompletionID)}"
+							code="${getFormCode("SC", createdAt, serviceCompletionID)}"
 							revise=${isRevise}><i class="fas fa-ban"></i> 
 							Cancel
 						</button>`;
@@ -583,7 +586,7 @@ $(document).ready(function() {
 							class="btn btn-cancel"
 							id="btnCancelForm" 
 							serviceCompletionID="${serviceCompletionID}"
-							code="${getFormCode("P0", createdAt, serviceCompletionID)}"
+							code="${getFormCode("SC", createdAt, serviceCompletionID)}"
 							status="${serviceCompletionStatus}"><i class="fas fa-ban"></i> 
 							Cancel
 						</button>`;
@@ -596,7 +599,7 @@ $(document).ready(function() {
 							class="btn btn-cancel"
 							id="btnRevise" 
 							serviceCompletionID="${encryptString(serviceCompletionID)}"
-							code="${getFormCode("P0", createdAt, serviceCompletionID)}"
+							code="${getFormCode("SC", createdAt, serviceCompletionID)}"
 							status="${serviceCompletionStatus}"><i class="fas fa-clone"></i>
 							Revise
 						</button>`;
@@ -610,14 +613,14 @@ $(document).ready(function() {
 							class="btn btn-submit" 
 							id="btnApprove" 
 							serviceCompletionID="${encryptString(serviceCompletionID)}"
-							code="${getFormCode("P0", createdAt, serviceCompletionID)}"><i class="fas fa-paper-plane"></i>
+							code="${getFormCode("SC", createdAt, serviceCompletionID)}"><i class="fas fa-paper-plane"></i>
 							Approve
 						</button>
 						<button 
 							class="btn btn-cancel"
 							id="btnReject" 
 							serviceCompletionID="${encryptString(serviceCompletionID)}"
-							code="${getFormCode("P0", createdAt, serviceCompletionID)}"><i class="fas fa-ban"></i> 
+							code="${getFormCode("SC", createdAt, serviceCompletionID)}"><i class="fas fa-ban"></i> 
 							Deny
 						</button>`;
 					}
@@ -723,16 +726,25 @@ $(document).ready(function() {
 
 
     // ----- GET SERVICE FILE -----
-    function getServiceScopeFile(scopeID, file, link = true) {
-        let href = link ? `${base_url}assets/upload-files/request-services/${file}` : "";
+    function getServiceScopeFile(scopeID, file, link = true, readOnly = false) {
+		let href = link ? `${base_url}assets/upload-files/request-services/${file}` : "javascript:void(0)";
+		let btnDelete = !readOnly ? `
+		<span class="pr-1 btnDeleteServiceFile"
+			scopeID="${scopeID}"
+			style="cursor: pointer;">x</span>` : "";
+		const target = link ? `target="_blank"` : "";
         let html = `
-        <div>
-            <span class="pr-1 btnDeleteServiceFile"
-                scopeID="${scopeID}"
-                style="cursor: pointer;">x</span>
+        <div class="d-flex justify-content-start align-items-center">
+            ${btnDelete}
             <a class="ml-1"
+				style="display: block;
+					width: 180px;
+					overflow: hidden;
+					white-space: nowrap;
+					text-overflow: ellipsis;"
                 href="${href}"
-                target="_blank">
+                ${target}
+				title="${file}">
                 ${file}
             </a>
         </div>`;
@@ -744,18 +756,20 @@ $(document).ready(function() {
 	// ----- GET SERVICE SCOPE -----
 	function getServiceScope(scope = {}, readOnly = false) {
 		let {
-            scopeID     = "",
-			description = "",
-			quantity    = "1",
-			uom         = "pcs",
-			unitCost    = "0",
-			totalCost   = "0",
-			file        = "",
+            requestServiceID = "",
+            scopeID          = "",
+			description      = "",
+			quantity         = "1",
+			uom              = "pcs",
+			unitCost         = "0",
+			totalCost        = "0",
+			file             = "",
 		} = scope;
 
 		let html = "";
 		if (!readOnly) {
             const serviceFile = file ? getServiceScopeFile(scopeID, file) : "";
+			serviceFiles.push({requestServiceID, scopeID, filename: file});
 
 			html = `
 			<tr>
@@ -770,8 +784,11 @@ $(document).ready(function() {
 								name="serviceFile"
 								id="serviceFile"
 								autocomplete="off"
+                                requestServiceID="${requestServiceID}"
                                 scopeID="${scopeID}"
-                                accept=".png, .jpeg, .jpg, .svg">
+								filename="${file != null ? file : ""}"
+                                accept=".png, .jpeg, .jpg, .svg"
+								required>
 							<div class="d-block invalid-feedback mt-0 mb-1" id="invalid-serviceFile"></div>
 						</div>
 					</div>
@@ -801,11 +818,13 @@ $(document).ready(function() {
 				</td>
 			</tr>`;
 		} else {
+			const serviceFile = file ? getServiceScopeFile(scopeID, file, true, true) : "";
+
 			html = `
 			<tr>
 				<td>
 					<div class="servicefile">
-						${description}
+						${serviceFile || "-"}
 					</div>
 				</td>
 				<td>
@@ -896,7 +915,7 @@ $(document).ready(function() {
 		let html = "";
 		if (readOnly) {
 			html += `
-			<tr class="itemTableRow">
+			<tr class="itemTableRow" requestServiceID="${requestServiceID}">
 				<td>
 					<div class="servicecode">
 						${getFormCode("SVC", createdAt, serviceID)}
@@ -909,7 +928,7 @@ $(document).ready(function() {
 				</td>
 				<td>
 					<div class="servicedate">
-						${serviceDate || "-"}
+						${moment(serviceDateFrom).format("MMM DD, YYYY")+" - "+moment(serviceDateTo).format("MMM DD, YYYY") || "-"}
 					</div>
 				</td>
 				<td>
@@ -925,7 +944,7 @@ $(document).ready(function() {
 			</tr>`;
 		} else {
 			html += `
-			<tr class="itemTableRow">
+			<tr class="itemTableRow" requestServiceID="${requestServiceID}">
 				<td>
 					<div class="servicecode">
                         ${getFormCode("SVC", createdAt, serviceID)}
@@ -1071,13 +1090,9 @@ $(document).ready(function() {
     $(document).on("change", "[name=projectID]", function() {
         const projectCode = $('option:selected', this).attr("projectCode");
         const clientCode  = $('option:selected', this).attr("clientCode");
-        const clientName  = $('option:selected', this).attr("clientName");
-        const address     = $('option:selected', this).attr("address");
 
         $("[name=projectCode]").val(projectCode);
         $("[name=clientCode]").val(clientCode);
-        $("[name=clientName]").val(clientName);
-        $("[name=clientAddress]").val(address);
     })
     // ----- END SELECT PROJECT LIST -----
 
@@ -1222,7 +1237,6 @@ $(document).ready(function() {
             locale: {
                 format: "MMMM DD, YYYY",
             },
-            minDate:   moment(new Date).format("MMMM DD, YYYY"),
             startDate: moment(serviceDateFrom || new Date),
             endDate:   moment(serviceDateTo || new Date),
         }
@@ -1249,6 +1263,7 @@ $(document).ready(function() {
 
     // ----- UPLOAD SERVICE FILE -----
     $(document).on('change', `[name="serviceFile"]`, function() {
+        const requestServiceID = $(this).attr("requestServiceID");
         const scopeID = $(this).attr("scopeID");
 		const files   = this.files || false;
 		if (files) {
@@ -1262,11 +1277,21 @@ $(document).ready(function() {
 				showNotification("danger", `${filenameArr.join(".")} size must be less than or equal to 10mb`);
 			} else {
                 let service = {
+					requestServiceID,
                     scopeID,
-                    files: files[0]
+					filename: filenameArr.join("."),
+                    files:    files[0]
                 };
-				serviceFiles.push(service);
+				serviceFiles = serviceFiles.map(files => {
+					if (files.scopeID == scopeID) {
+						return service;
+					}
+					return files;
+				})
 
+				$(this).attr("filename", filenameArr.join("."));
+				$(this).removeClass("is-invalid");
+				$(this).parent().find(".invalid-feedback").first().text("");
                 let html = getServiceScopeFile(scopeID, filenameArr.join("."), false);
                 $(this).closest(".servicefile").find(".displayservicefile").first().html(html);
 			}
@@ -1280,8 +1305,18 @@ $(document).ready(function() {
         const scopeID = $(this).attr("scopeID");
         let div = $(this).closest('div');
         div.fadeOut(500, function (){
-            serviceFiles = serviceFiles.filter(file => file.scopeID != scopeID);
+            serviceFiles = serviceFiles.map(files => {
+				if (files.scopeID == scopeID) {
+					return {
+						requestServiceID: files.requestServiceID,
+						scopeID:          files.scopeID,
+						filename:         ""
+					};
+				}
+				return files;
+			});
             $(this).closest("td").find("[name=serviceFile]").val("");
+			$(this).closest("td").find("[name=serviceFile]").attr("filename", "");
 
             $(this).closest("div").remove();
         });
@@ -1373,7 +1408,7 @@ $(document).ready(function() {
 	// ----- END UPLOAD CONTRACT -----
 
 
-	// ----- GET SERVICE ORDER DATA -----
+	// ----- GET SERVICE COMPLETION DATA -----
 	function getServiceCompletionData(action = "insert", method = "submit", status = "1", id = null, currentStatus = "0", isRevise = false) {
 		/**
 		 * ----- ACTION ---------
@@ -1401,7 +1436,9 @@ $(document).ready(function() {
         let formData = new FormData();
 
         serviceFiles.map((file, i) => {
-            formData.append(`scopeID[${i}]`, file.scopeID);
+            formData.append(`scopes[${i}][requestServiceID]`, file.requestServiceID);
+            formData.append(`scopes[${i}][scopeID]`, file.scopeID);
+            formData.append(`scopes[${i}][filename]`, file.filename);
             formData.append(`scopeFile[${i}]`, file.files);
         })
 
@@ -1427,7 +1464,7 @@ $(document).ready(function() {
 		formData.append("method", method);
 		formData.append("updatedBy", sessionID);
 
-		if (currentStatus == "0" && method != "approve") {
+		if ((currentStatus == "0" || currentStatus == "3") && method != "approve") {
 
 			if (action == "insert") {
 				data["createdBy"] = sessionID;
@@ -1464,33 +1501,31 @@ $(document).ready(function() {
 				}
 			}
 
-			// if (isRevise) {
-				$(".itemTableRow").each(function(i, obj) {
-					const serviceDate     = $("td [name=serviceDate]", this).val();	
-					const serviceID       = $("td [name=serviceDate]", this).attr("serviceID");	
-                    const serviceDateArr  = serviceDate.split(" - ");
-                    const serviceDateFrom = moment(serviceDateArr[0]).format("YYYY-MM-DD");
-                    const serviceDateTo   = moment(serviceDateArr[1]).format("YYYY-MM-DD");
-	
-                    formData.append(`services[${i}][serviceID]`, serviceID);
-                    formData.append(`services[${i}][serviceDateFrom]`, serviceDateFrom);
-                    formData.append(`services[${i}][serviceDateTo]`, serviceDateTo);
+			$(".itemTableRow").each(function(i, obj) {
+				const requestServiceID = $(this).attr("requestServiceID");
+				const serviceDate      = $("td [name=serviceDate]", this).val();	
+				const serviceDateArr   = serviceDate.split(" - ");
+				const serviceDateFrom  = moment(serviceDateArr[0]).format("YYYY-MM-DD");
+				const serviceDateTo    = moment(serviceDateArr[1]).format("YYYY-MM-DD");
 
-					let temp = {
-                        serviceID,
-						serviceDateFrom, 
-						serviceDateTo
-					};
-	
-					data["items"].push(temp);
-				});
-			// }
+				formData.append(`services[${i}][requestServiceID]`, requestServiceID);
+				formData.append(`services[${i}][serviceDateFrom]`, serviceDateFrom);
+				formData.append(`services[${i}][serviceDateTo]`, serviceDateTo);
+
+				let temp = {
+					requestServiceID,
+					serviceDateFrom, 
+					serviceDateTo
+				};
+
+				data["items"].push(temp);
+			});
 
 		} 
 
 		return formData;
 	} 
-	// ----- END GET SERVICE ORDER DATA -----
+	// ----- END GET SERVICE COMPLETION DATA -----
 
 
     // ----- FORM CONTENT -----
@@ -1562,43 +1597,6 @@ $(document).ready(function() {
 
 		let button = formButtons(data, isRevise);
 
-		// ----- PRINT BUTTON -----
-		let approvedButton = '';
-		if (serviceCompletionStatus == 2) {
-			approvedButton += `<div class="w-100 text-right pb-4">`;
-			if (grandTotalAmount > 0) {
-				approvedButton += contractFile ? `
-				<a href="${base_url}assets/upload-files/contracts/${contractFile}" 
-					class="pr-3" 
-					id="displayContract">${contractFile}</a>` : "";
-				if (employeeID == sessionID) {
-					approvedButton += `
-					<input type="file"
-						id="contractFile"
-						name="contractFile"
-						serviceCompletionID="${serviceCompletionID}"
-						class="d-none"
-						accept="image/*, .pdf, .docx, .doc">
-					<button 
-						class="btn btn-secondary py-2" 
-						serviceCompletionID="${serviceCompletionID}"
-						id="btnUploadContract">
-						<i class="fas fa-file-upload"></i> Upload Contract
-					</button>`;
-				}
-			}
-
-			approvedButton += `
-				<button 
-					class="btn btn-info py-2" 
-					serviceCompletionID="${serviceCompletionID}"
-					id="btnExcel">
-					<i class="fas fa-file-excel"></i> Excel
-				</button>
-			</div>`;
-		}
-		// ----- END PRINT BUTTON -----
-
 		let reviseDocumentNo    = isRevise ? serviceCompletionID : reviseServiceCompletionID;
 		let documentHeaderClass = isRevise || reviseServiceCompletionID ? "col-lg-4 col-md-4 col-sm-12 px-1" : "col-lg-2 col-md-6 col-sm-12 px-1";
 		let documentDateClass   = isRevise || reviseServiceCompletionID ? "col-md-12 col-sm-12 px-0" : "col-lg-8 col-md-12 col-sm-12 px-1";
@@ -1615,7 +1613,6 @@ $(document).ready(function() {
 		</div>` : "";
 
 		let html = `
-		${approvedButton}
         <div class="row px-2">
 			${documentReviseNo}
             <div class="${documentHeaderClass}">
@@ -1946,7 +1943,6 @@ $(document).ready(function() {
 				locale: {
 					format: "MMMM DD, YYYY",
 				},
-				minDate: moment(new Date).format("MMMM DD, YYYY"),
 				startDate: moment(scheduleDate || new Date),
 			}
 			initDateRangePicker("#scheduleDate", disablePreviousDateOptions);
@@ -1965,7 +1961,7 @@ $(document).ready(function() {
     // ----- PAGE CONTENT -----
 	function pageContent(isForm = false, data = false, readOnly = false, isRevise = false) {
 		$("#page_content").html(preloader);
-        console.log(data);
+        serviceFiles = [];
 		if (!isForm) {
 			preventRefresh(false);
 			let html = `
@@ -2033,9 +2029,9 @@ $(document).ready(function() {
 			if (revise) {
 				const action = revise && "insert" || (id && feedback ? "update" : "insert");
 				const data   = getServiceCompletionData(action, "save", "0", id, status, revise);
-				data["serviceCompletionStatus"]   = 0;
-				data["reviseServiceCompletionID"] = id;
-				delete data["serviceCompletionID"];
+				data.append("serviceCompletionStatus",    0);
+				data.append("reviseServiceCompletionID",  id);
+				data.delete("serviceCompletionID");
 	
 				saveServiceCompletion(data, "save", null, pageContent);
 			} else {
@@ -2050,7 +2046,7 @@ $(document).ready(function() {
 		} else {
 			const action = id && feedback ? "update" : "insert";
 			const data   = getServiceCompletionData(action, "save", "0", id, status, revise);
-			data["serviceCompletionStatus"] = 0;
+			data.append("serviceCompletionStatus", 0);
 
 			saveServiceCompletion(data, "save", null, pageContent);
 		}
@@ -2065,11 +2061,11 @@ $(document).ready(function() {
 		const feedback = $(this).attr("code") || getFormCode("SC", dateToday(), id);
 		const action   = revise && "insert" || (id && feedback ? "update" : "insert");
 		const data     = getServiceCompletionData(action, "save", "0", id, "0", revise);
-		data["serviceCompletionStatus"] = 0;
+		data.append("serviceCompletionStatus", 0);
 
 		if (revise) {
-			data["reviseServiceCompletionID"] = id;
-			delete data["serviceCompletionID"];
+			data.append("reviseServiceCompletionID", id);
+			data.delete("serviceCompletionID");
 		}
 
 		saveServiceCompletion(data, "save", null, pageContent);
@@ -2085,27 +2081,55 @@ $(document).ready(function() {
 	// ----- END REMOVE IS-VALID IN TABLE -----
 
 
+	// ----- VALIDATE SERVICE FILE ----- 
+	function validateServiceFile() {
+		let flag = 0;
+		$(`[name="serviceFile"]`).each(function(i) {
+			const filename = $(this).attr("filename");
+			if (!filename || filename == "null") {
+				$(this).addClass("is-invalid");
+				$(this).parent().find(".invalid-feedback").first().text("File is required.");
+				flag++;
+			} else {
+				$(this).removeClass("is-invalid");
+				$(this).parent().find(".invalid-feedback").first().text("");
+			}
+		})
+		$("#form_service_completion").find(".is-invalid").first().focus();
+		return flag > 0 ? false : true;
+	}
+	// ----- END VALIDATE SERVICE FILE ----- 
+
+
 	// ----- SUBMIT DOCUMENT -----
 	$(document).on("click", "#btnSubmit", function () {
 		const id       = $(this).attr("serviceCompletionID");
 		const revise   = $(this).attr("revise") == "true";
-		const validate = validateForm("form_service_completion");
+		// const validate = validateForm("form_service_completion");
+		const validateService = validateServiceFile();
 		removeIsValid("#tableServiceCompletionItems0");
 
-		if (validate) {
+		console.log(validateService);
+		if (validateService) {
 			const action = revise && "insert" || (id ? "update" : "insert");
 			const data   = getServiceCompletionData(action, "submit", "1", id, "0", revise);
 
 			if (revise) {
-				data["reviseServiceCompletionID"] = id;
-				delete data["serviceCompletionID"];
+				data.append("reviseServiceCompletionID", id);
+				data.delete("serviceCompletionID");
 			}
 
-			const employeeID = getNotificationEmployeeID(data["approversID"], data["approversDate"], true);
+			let approversID = "", approversDate = "";
+			for (var i of data) {
+				if (i[0] == "approversID")   approversID   = i[1];
+				if (i[0] == "approversDate") approversDate = i[1];
+			}
+
+			const employeeID = getNotificationEmployeeID(approversID, approversDate, true);
 			let notificationData = false;
 			if (employeeID != sessionID) {
 				notificationData = {
-					moduleID:                41,
+					moduleID:                128,
 					notificationTitle:       "Service Completion",
 					notificationDescription: `${employeeFullname(sessionID)} asked for your approval.`,
 					notificationType:        2,
@@ -2145,15 +2169,15 @@ $(document).ready(function() {
 			let createdAt       = tableData[0].createdAt;
 
 			let data = getServiceCompletionData("update", "approve", "2", id);
-			data["approversStatus"] = updateApproveStatus(approversStatus, 2);
+			data.append("approversStatus", updateApproveStatus(approversStatus, 2));
 			let dateApproved = updateApproveDate(approversDate)
-			data["approversDate"] = dateApproved;
+			data.append("approversDate", dateApproved);
 
 			let status, notificationData;
 			if (isImLastApprover(approversID, approversDate)) {
 				status = 2;
 				notificationData = {
-					moduleID:                41,
+					moduleID:                128,
 					tableID:                 id,
 					notificationTitle:       "Service Completion",
 					notificationDescription: `${feedback}: Your request has been approved.`,
@@ -2163,7 +2187,7 @@ $(document).ready(function() {
 			} else {
 				status = 1;
 				notificationData = {
-					moduleID:                41,
+					moduleID:                128,
 					tableID:                 id,
 					notificationTitle:       "Service Completion",
 					notificationDescription: `${employeeFullname(employeeID)} asked for your approval.`,
@@ -2172,7 +2196,7 @@ $(document).ready(function() {
 				};
 			}
 
-			data["serviceCompletionStatus"] = status;
+			data.append("serviceCompletionStatus", status);
 
 			saveServiceCompletion(data, "approve", notificationData, pageContent);
 		}
@@ -2186,7 +2210,7 @@ $(document).ready(function() {
 		const feedback = $(this).attr("code") || getFormCode("SC", dateToday(), id);
 
 		$("#modal_service_completion_content").html(preloader);
-		$("#modal_service_completion .page-title").text("DENY SERVICE ORDER");
+		$("#modal_service_completion .page-title").text("DENY SERVICE COMPLETION");
 		$("#modal_service_completion").modal("show");
 		let html = `
 		<div class="modal-body">
@@ -2225,18 +2249,17 @@ $(document).ready(function() {
 				let approversDate   = tableData[0].approversDate;
 				let employeeID      = tableData[0].employeeID;
 
-				let data = {
-					action:               "update",
-					method:               "deny",
-					serviceCompletionID:      id,
-					approversStatus:      updateApproveStatus(approversStatus, 3),
-					approversDate:        updateApproveDate(approversDate),
-					serviceCompletionRemarks: $("[name=serviceCompletionRemarks]").val()?.trim(),
-					updatedBy:            sessionID
-				};
+				let formData = new FormData();
+				formData.append("action", "update");
+				formData.append("method", "deny");
+				formData.append("serviceCompletionID", id);
+				formData.append("approversStatus", updateApproveStatus(approversStatus, 3));
+				formData.append("approversDate", updateApproveDate(approversDate));
+				formData.append("serviceCompletionRemarks", $("[name=serviceCompletionRemarks]").val()?.trim());
+				formData.append("updatedBy", sessionID);
 
 				let notificationData = {
-					moduleID:                41,
+					moduleID:                128,
 					tableID: 				 id,
 					notificationTitle:       "Service Completion",
 					notificationDescription: `${feedback}: Your request has been denied.`,
@@ -2244,7 +2267,7 @@ $(document).ready(function() {
 					employeeID,
 				};
 
-				saveServiceCompletion(data, "deny", notificationData, pageContent);
+				saveServiceCompletion(formData, "deny", notificationData, pageContent);
 				$("[redirect=forApprovalTab]").length > 0 && $("[redirect=forApprovalTab]").trigger("click");
 			} 
 		} 

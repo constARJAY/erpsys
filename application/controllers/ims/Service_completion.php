@@ -6,6 +6,7 @@ class Service_completion extends CI_Controller {
     public function __construct()
     {
         parent::__construct();
+        $this->load->model("ims/ServiceOrder_model", "serviceorder");
         $this->load->model("ims/ServiceCompletion_model", "servicecompletion");
         isAllowed(46);
     }
@@ -31,11 +32,11 @@ class Service_completion extends CI_Controller {
         $serviceCompletionStatus   = $this->input->post("serviceCompletionStatus");
         $serviceCompletionRemarks  = $this->input->post("serviceCompletionRemarks") ?? null;
         $submittedAt               = $this->input->post("submittedAt") ?? null;
-        $createdBy                 = $this->input->post("createdBy");
+        $createdBy                 = $this->input->post("updatedBy");
         $updatedBy                 = $this->input->post("updatedBy");
         $createdAt                 = $this->input->post("createdAt");
         $services                  = $this->input->post("services") ?? null;
-        $scopes                    = $this->input->post("scopeID") ?? null;
+        $scopes                    = $this->input->post("scopes") ?? null;
 
         $serviceCompletionData = [
             "reviseServiceCompletionID"  => $reviseServiceCompletionID,
@@ -48,6 +49,13 @@ class Service_completion extends CI_Controller {
             "updatedBy"                  => $updatedBy,
             "createdAt"                  => $createdAt
         ];
+
+        if ($reviseServiceCompletionID) {
+            $scData = $this->servicecompletion->getServiceCompletion($reviseServiceCompletionID);
+            $serviceCompletionData["serviceRequisitionID"] = $scData->serviceRequisitionID;
+            $serviceCompletionData["serviceOrderID"]       = $scData->serviceOrderID;
+            $serviceCompletionData["employeeID"]           = $scData->employeeID;
+        }
 
         if ($action == "update") {
             unset($serviceCompletionData["reviseServiceCompletionID"]);
@@ -77,22 +85,22 @@ class Service_completion extends CI_Controller {
             }
         }
 
-        // $saveServiceCompletionData = $this->servicecompletion->saveServiceCompletionData($action, $serviceCompletionData, $serviceCompletionID);
+        $saveServiceCompletionData = $this->servicecompletion->saveServiceCompletionData($action, $serviceCompletionData, $serviceCompletionID);
 
-        // if ($saveServiceCompletionData && ($method == "submit" || $method == "save")) {
-        //     $result = explode("|", $saveServiceCompletionData);
+        if ($saveServiceCompletionData && ($method == "submit" || $method == "save")) {
+            $result = explode("|", $saveServiceCompletionData);
 
-        //     if ($result[0] == "true") {
-        //         $serviceCompletionID = $result[2];
+            if ($result[0] == "true") {
+                $serviceCompletionID = $result[2];
 
                 $servicesData = $scopesData = [];
                 if ($services) {
                     foreach($services as $index => $item) {
                         $service = [
-                            "serviceID"       => $item["serviceID"],
-                            "serviceDateFrom" => $item["serviceDateFrom"],
-                            "serviceDateTo"   => $item["serviceDateTo"],
-                            "updatedBy"       => $updatedBy,
+                            "requestServiceID" => $item["requestServiceID"],
+                            "serviceDateFrom"  => $item["serviceDateFrom"],
+                            "serviceDateTo"    => $item["serviceDateTo"],
+                            "updatedBy"        => $updatedBy,
                         ];
                         array_push($servicesData, $service);
 
@@ -100,43 +108,85 @@ class Service_completion extends CI_Controller {
                 }
 
                 if ($scopes) {
-                    foreach($scopes as $index => $scopeID) {
-                        if (isset($_FILES["scopeFile"])) {
-                            echo json_encode($_FILES["scopeFile"]);
-                            $names     = $_FILES["scopeFile"]["name"];
-                            $tmp_names = $_FILES["scopeFile"]["tmp_name"];
-                            foreach ($names as $i => $name) {
-                                $filenameArr = explode(".", $name);
-                                $filename = $filenameArr[0];
-                                $filetype = $filenameArr[1];
+                    foreach ($scopes as $scope) {
+                        $requestServiceID = $scope["requestServiceID"];
+                        $scopeID          = $scope["scopeID"];
+                        $scopeFilename    = $scope["filename"] != "null" ? $scope["filename"] : null;
 
-                                $scopeFilename = $filename.$index.time().".".$filetype;
-                                $tmp_name = $tmp_names[$i];
+                        if ($scopeFilename) {
+                            if (isset($_FILES["scopeFile"])) {
+                                $names     = $_FILES["scopeFile"]["name"];
+                                $tmp_names = $_FILES["scopeFile"]["tmp_name"];
+    
+                                $inArray = in_array($scopeFilename, $names);
 
-                                $folderDir = "assets/upload-files/request-services/";
-                                if (!is_dir($folderDir)) {
-                                    mkdir($folderDir);
-                                }
+                                if ($inArray) {
 
-                                $targetDir = $folderDir.$scopeFilename;
-                                if (move_uploaded_file($tmp_name, $targetDir)) {
-                                    $scope = [
-                                        "scopeID"   => $scopeID,
-                                        "file"      => $scopeFilename,
-                                        "updatedBy" => $updatedBy,
+                                    foreach ($names as $i => $name) {
+                                        $filenameArr = explode(".", $name);
+                                        $filename = $filenameArr[0];
+                                        $filetype = $filenameArr[1];
+            
+                                        $scopeDBFilename = $filename.$i.time().".".$filetype;
+                                        $tmp_name = $tmp_names[$i];
+            
+                                        $folderDir = "assets/upload-files/request-services/";
+                                        if (!is_dir($folderDir)) {
+                                            mkdir($folderDir);
+                                        }
+            
+                                        $targetDir = $folderDir.$scopeDBFilename;
+
+                                        if ($name == $scopeFilename) {
+                                            if (move_uploaded_file($tmp_name, $targetDir)) {
+                                                $scopeData = [
+                                                    "requestServiceID" => $requestServiceID,
+                                                    "scopeID"          => $scopeID,
+                                                    "file"             => $scopeDBFilename,
+                                                    "updatedBy"        => $updatedBy,
+                                                ];
+                                                array_push($scopesData, $scopeData);
+                                            }
+                                        }
+
+                                    }
+
+                                } else {
+                                    $scopeData = [
+                                        "requestServiceID" => $requestServiceID,
+                                        "scopeID"          => $scopeID,
+                                        "file"             => $scopeFilename,
+                                        "updatedBy"        => $updatedBy,
                                     ];
-                                    array_push($scopesData, $scope);
+                                    array_push($scopesData, $scopeData);
                                 }
+                            } else {
+                                $scopeData = [
+                                    "requestServiceID" => $requestServiceID,
+                                    "scopeID"          => $scopeID,
+                                    "file"             => $scopeFilename,
+                                    "updatedBy"        => $updatedBy,
+                                ];
+                                array_push($scopesData, $scopeData);
                             }
+                        } else {
+                            $scopeData = [
+                                "requestServiceID" => $requestServiceID,
+                                "scopeID"          => $scopeID,
+                                "file"             => "",
+                                "updatedBy"        => $updatedBy,
+                            ];
+                            array_push($scopesData, $scopeData);
                         }
+                        
                     }
                 }
-                
-        //         $saveServices = $this->servicecompletion->saveServices($service, $scopes, $serviceCompletionID);
-        //     }
+
+                $updateServices = $this->servicecompletion->updateServices($servicesData, $scopesData, $action, $serviceCompletionID);
+            }
             
-        // }
-        // echo json_encode($saveServiceCompletionData);
+        }
+        echo json_encode($saveServiceCompletionData);
     }
 
 }

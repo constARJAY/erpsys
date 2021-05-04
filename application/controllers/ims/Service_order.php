@@ -86,17 +86,17 @@ class Service_order extends CI_Controller {
 
         $serviceRequisitionID = "";
         if ($reviseServiceOrderID) {
-            $reviseSOData = $this->serviceorder->getServiceOrder($reviseServiceOrderID);
-            if ($reviseSOData) {
-                $serviceRequisitionID                     = $reviseSOData->serviceRequisitionID;
-                $serviceOrderData["employeeID"]           = $reviseSOData->employeeID;
+            $soData = $this->serviceorder->getServiceOrder($reviseServiceOrderID);
+            if ($soData) {
+                $serviceRequisitionID                     = $soData->serviceRequisitionID;
+                $serviceOrderData["employeeID"]           = $soData->employeeID;
                 $serviceOrderData["serviceRequisitionID"] = $serviceRequisitionID;
-                $serviceOrderData["clientID"]             = $reviseSOData->clientID;
-                $serviceOrderData["projectID"]            = $reviseSOData->projectID;
-                $serviceOrderData["clientName"]           = $reviseSOData->clientName;
-                $serviceOrderData["clientAddress"]        = $reviseSOData->clientAddress;
-                $serviceOrderData["clientContactDetails"] = $reviseSOData->clientContactDetails;
-                $serviceOrderData["clientContactPerson"]  = $reviseSOData->clientContactPerson;
+                $serviceOrderData["clientID"]             = $soData->clientID;
+                $serviceOrderData["projectID"]            = $soData->projectID;
+                $serviceOrderData["clientName"]           = $soData->clientName;
+                $serviceOrderData["clientAddress"]        = $soData->clientAddress;
+                $serviceOrderData["clientContactDetails"] = $soData->clientContactDetails;
+                $serviceOrderData["clientContactPerson"]  = $soData->clientContactPerson;
             }
         }
 

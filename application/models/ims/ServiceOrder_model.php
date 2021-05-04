@@ -255,9 +255,11 @@ class ServiceOrder_model extends CI_Model {
         $soData = $this->getServiceOrder($id);
         if ($soData) {
             $serviceRequisitionID = $soData->serviceRequisitionID;
+            $employeeID           = $soData->employeeID;
             $scData = [
                 "serviceRequisitionID"    => $serviceRequisitionID,
                 "serviceOrderID"          => $id,
+                "employeeID"              => $employeeID,
                 "approversID"             => null,
                 "approversStatus"         => null,
                 "approversDate"           => null,

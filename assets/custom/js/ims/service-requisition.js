@@ -1556,7 +1556,7 @@ $(document).ready(function() {
 	// ----- END PAGE CONTENT -----
 
 
-	// ----- GET PURCHASE REQUEST DATA -----
+	// ----- GET SERVICE REQUISITION DATA -----
 	function getServiceRequisitionData(action = "insert", method = "submit", status = "1", id = null, currentStatus = "0") {
 
 		/**
@@ -1657,7 +1657,7 @@ $(document).ready(function() {
 
 		return data;
 	}
-	// ----- END GET PURCHASE REQUEST DATA -----
+	// ----- END GET SERVICE REQUISITION DATA -----
 
 
     // ----- OPEN ADD FORM -----
@@ -1862,7 +1862,7 @@ $(document).ready(function() {
 		const feedback = $(this).attr("code") || getFormCode("SR", dateToday(), id);
 
 		$("#modal_service_requisition_content").html(preloader);
-		$("#modal_service_requisition .page-title").text("DENY PURCHASE REQUEST");
+		$("#modal_service_requisition .page-title").text("DENY SERVICE REQUISITION");
 		$("#modal_service_requisition").modal("show");
 		let html = `
 		<div class="modal-body">
