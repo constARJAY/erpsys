@@ -1263,7 +1263,7 @@ $(document).ready(function() {
 			} else {
                 let service = {
                     scopeID,
-                    files
+                    files: files[0]
                 };
 				serviceFiles.push(service);
 
@@ -1401,8 +1401,8 @@ $(document).ready(function() {
         let formData = new FormData();
 
         serviceFiles.map((file, i) => {
-            formData.append(`scope[${i}][scopeID]`, file.scopeID);
-            formData.append(`scope[${i}][file]`, file.files);
+            formData.append(`scopeID[${i}]`, file.scopeID);
+            formData.append(`scopeFile[${i}]`, file.files);
         })
 
         const approversID = method != "approve" && moduleApprover;
@@ -1410,8 +1410,12 @@ $(document).ready(function() {
         if (id) {
             data["serviceCompletionID"] = id;
 
+            formData.append("serviceCompletionID", id);
+
             if (status != "2") {
                 data["serviceCompletionStatus"] = status;
+
+                formData.append("serviceCompletionStatus", status);
             }
         }
 
@@ -1419,25 +1423,44 @@ $(document).ready(function() {
 		data["method"]    = method;
 		data["updatedBy"] = sessionID;
 
+		formData.append("action", action);
+		formData.append("method", method);
+		formData.append("updatedBy", sessionID);
+
 		if (currentStatus == "0" && method != "approve") {
 
 			if (action == "insert") {
 				data["createdBy"] = sessionID;
 				data["createdAt"] = dateToday();
+
+				formData.append("createdBy", sessionID);
+				formData.append("createdAt", dateToday());
 			} else if (action == "update") {
 				data["serviceCompletionID"]  = id;
+
+				formData.append("serviceCompletionID", id);
 			}
 
 			if (method == "submit") {
 				data["submittedAt"] = dateToday();
+
+				formData.append("submittedAt", dateToday());
 				if (approversID) {
-					data["approversID"]         = approversID;
+					data["approversID"] = approversID;
 					data["serviceCompletionStatus"] = 1;
+
+					formData.append("approversID", approversID);
+					formData.append("serviceCompletionStatus", 1);
 				} else {  // AUTO APPROVED - IF NO APPROVERS
-					data["approversID"]         = sessionID;
-					data["approversStatus"]     = 2;
-					data["approversDate"]       = dateToday();
+					data["approversID"]     = sessionID;
+					data["approversStatus"] = 2;
+					data["approversDate"]   = dateToday();
 					data["serviceCompletionStatus"] = 2;
+
+					formData.append("approversID",     sessionID);
+					formData.append("approversStatus", 2);
+					formData.append("approversDate",   dateToday());
+					formData.append("serviceCompletionStatus", 2);
 				}
 			}
 
@@ -1449,9 +1472,9 @@ $(document).ready(function() {
                     const serviceDateFrom = moment(serviceDateArr[0]).format("YYYY-MM-DD");
                     const serviceDateTo   = moment(serviceDateArr[1]).format("YYYY-MM-DD");
 	
-                    formData.append(`service[${i}][serviceID]`, serviceID);
-                    formData.append(`service[${i}][serviceDateFrom]`, serviceDateFrom);
-                    formData.append(`service[${i}][serviceDateTo]`, serviceDateTo);
+                    formData.append(`services[${i}][serviceID]`, serviceID);
+                    formData.append(`services[${i}][serviceDateFrom]`, serviceDateFrom);
+                    formData.append(`services[${i}][serviceDateTo]`, serviceDateTo);
 
 					let temp = {
                         serviceID,
@@ -2069,32 +2092,29 @@ $(document).ready(function() {
 		const validate = validateForm("form_service_completion");
 		removeIsValid("#tableServiceCompletionItems0");
 
-        const action = revise && "insert" || (id ? "update" : "insert");
-        const data   = getServiceCompletionData(action, "submit", "1", id, "0", revise);
+		if (validate) {
+			const action = revise && "insert" || (id ? "update" : "insert");
+			const data   = getServiceCompletionData(action, "submit", "1", id, "0", revise);
 
-		// if (validate) {
-		// 	const action = revise && "insert" || (id ? "update" : "insert");
-		// 	const data   = getServiceCompletionData(action, "submit", "1", id, "0", revise);
+			if (revise) {
+				data["reviseServiceCompletionID"] = id;
+				delete data["serviceCompletionID"];
+			}
 
-		// 	if (revise) {
-		// 		data["reviseServiceCompletionID"] = id;
-		// 		delete data["serviceCompletionID"];
-		// 	}
+			const employeeID = getNotificationEmployeeID(data["approversID"], data["approversDate"], true);
+			let notificationData = false;
+			if (employeeID != sessionID) {
+				notificationData = {
+					moduleID:                41,
+					notificationTitle:       "Service Completion",
+					notificationDescription: `${employeeFullname(sessionID)} asked for your approval.`,
+					notificationType:        2,
+					employeeID,
+				};
+			}
 
-		// 	const employeeID = getNotificationEmployeeID(data["approversID"], data["approversDate"], true);
-		// 	let notificationData = false;
-		// 	if (employeeID != sessionID) {
-		// 		notificationData = {
-		// 			moduleID:                41,
-		// 			notificationTitle:       "Service Completion",
-		// 			notificationDescription: `${employeeFullname(sessionID)} asked for your approval.`,
-		// 			notificationType:        2,
-		// 			employeeID,
-		// 		};
-		// 	}
-
-		// 	saveServiceCompletion(data, "submit", notificationData, pageContent);
-		// }
+			saveServiceCompletion(data, "submit", notificationData, pageContent);
+		}
 	});
 	// ----- END SUBMIT DOCUMENT -----
 

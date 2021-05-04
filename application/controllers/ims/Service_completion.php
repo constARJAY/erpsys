@@ -21,37 +21,28 @@ class Service_completion extends CI_Controller {
 
     public function saveServiceCompletion()
     {
-        $action                     = $this->input->post("action");
-        $method                     = $this->input->post("method");
+        $action                    = $this->input->post("action");
+        $method                    = $this->input->post("method");
         $serviceCompletionID       = $this->input->post("serviceCompletionID") ?? null;
         $reviseServiceCompletionID = $this->input->post("reviseServiceCompletionID") ?? null;
-        $employeeID                 = $this->input->post("employeeID");
-        $clientID                   = $this->input->post("clientID") ?? null;
-        $projectID                  = $this->input->post("projectID") ?? null;
-        $approversID                = $this->input->post("approversID") ?? null;
-        $approversStatus            = $this->input->post("approversStatus") ?? null;
-        $approversDate              = $this->input->post("approversDate") ?? null;
+        $approversID               = $this->input->post("approversID") ?? null;
+        $approversStatus           = $this->input->post("approversStatus") ?? null;
+        $approversDate             = $this->input->post("approversDate") ?? null;
         $serviceCompletionStatus   = $this->input->post("serviceCompletionStatus");
-        $serviceCompletionReason   = $this->input->post("serviceCompletionReason") ?? null;
         $serviceCompletionRemarks  = $this->input->post("serviceCompletionRemarks") ?? null;
-        $serviceCompletionTotalAmount  = $this->input->post("serviceCompletionTotalAmount") ?? null;
-        $submittedAt                = $this->input->post("submittedAt") ?? null;
-        $createdBy                  = $this->input->post("createdBy");
-        $updatedBy                  = $this->input->post("updatedBy");
-        $createdAt                  = $this->input->post("createdAt");
-        $items                      = $this->input->post("items") ?? null;
+        $submittedAt               = $this->input->post("submittedAt") ?? null;
+        $createdBy                 = $this->input->post("createdBy");
+        $updatedBy                 = $this->input->post("updatedBy");
+        $createdAt                 = $this->input->post("createdAt");
+        $services                  = $this->input->post("services") ?? null;
+        $scopes                    = $this->input->post("scopeID") ?? null;
 
         $serviceCompletionData = [
-            "reviseServiceCompletionID" => $reviseServiceCompletionID,
-            "employeeID"                 => $employeeID,
-            "clientID"                   => $clientID,
-            "projectID"                  => $projectID,
+            "reviseServiceCompletionID"  => $reviseServiceCompletionID,
             "approversID"                => $approversID,
             "approversStatus"            => $approversStatus,
             "approversDate"              => $approversDate,
-            "serviceCompletionStatus"   => $serviceCompletionStatus,
-            "serviceCompletionReason"   => $serviceCompletionReason,
-            "serviceCompletionTotalAmount"   => $serviceCompletionTotalAmount,
+            "serviceCompletionStatus"    => $serviceCompletionStatus,
             "submittedAt"                => $submittedAt,
             "createdBy"                  => $createdBy,
             "updatedBy"                  => $updatedBy,
@@ -66,56 +57,86 @@ class Service_completion extends CI_Controller {
             if ($method == "cancelform") {
                 $serviceCompletionData = [
                     "serviceCompletionStatus" => 4,
-                    "updatedBy"                => $updatedBy,
+                    "updatedBy"               => $updatedBy,
                 ];
             } else if ($method == "approve") {
                 $serviceCompletionData = [
-                    "approversStatus"          => $approversStatus,
-                    "approversDate"            => $approversDate,
+                    "approversStatus"         => $approversStatus,
+                    "approversDate"           => $approversDate,
                     "serviceCompletionStatus" => $serviceCompletionStatus,
-                    "updatedBy"                => $updatedBy,
+                    "updatedBy"               => $updatedBy,
                 ];
             } else if ($method == "deny") {
                 $serviceCompletionData = [
-                    "approversStatus"           => $approversStatus,
-                    "approversDate"             => $approversDate,
+                    "approversStatus"          => $approversStatus,
+                    "approversDate"            => $approversDate,
                     "serviceCompletionStatus"  => 3,
                     "serviceCompletionRemarks" => $serviceCompletionRemarks,
-                    "updatedBy"                 => $updatedBy,
+                    "updatedBy"                => $updatedBy,
                 ];
-            } else {
-                $this->servicecompletion->deleteServicesAndScopes($serviceCompletionID);
             }
         }
 
-        $saveServiceCompletionData = $this->servicecompletion->saveServiceCompletionData($action, $serviceCompletionData, $serviceCompletionID);
+        // $saveServiceCompletionData = $this->servicecompletion->saveServiceCompletionData($action, $serviceCompletionData, $serviceCompletionID);
 
-        if ($saveServiceCompletionData && ($method == "submit" || $method == "save")) {
-            $result = explode("|", $saveServiceCompletionData);
+        // if ($saveServiceCompletionData && ($method == "submit" || $method == "save")) {
+        //     $result = explode("|", $saveServiceCompletionData);
 
-            if ($result[0] == "true") {
-                $serviceCompletionID = $result[2];
+        //     if ($result[0] == "true") {
+        //         $serviceCompletionID = $result[2];
 
-                if ($items) {
-                    foreach($items as $index => $item) {
+                $servicesData = $scopesData = [];
+                if ($services) {
+                    foreach($services as $index => $item) {
                         $service = [
-                            "serviceCompletionID" => $serviceCompletionID,
-                            "serviceID"            => $item["serviceID"] != "null" ? $item["serviceID"] : null,
-                            "serviceName"          => $item["serviceName"],
-                            "remarks"              => $item["remarks"],
-                            "createdBy"            => $updatedBy,
-                            "updatedBy"            => $updatedBy,
+                            "serviceID"       => $item["serviceID"],
+                            "serviceDateFrom" => $item["serviceDateFrom"],
+                            "serviceDateTo"   => $item["serviceDateTo"],
+                            "updatedBy"       => $updatedBy,
                         ];
-                        $scopes = $item["scopes"];
+                        array_push($servicesData, $service);
 
-                        $saveServices = $this->servicecompletion->saveServices($service, $scopes, $serviceCompletionID);
                     }
                 }
 
-            }
+                if ($scopes) {
+                    foreach($scopes as $index => $scopeID) {
+                        if (isset($_FILES["scopeFile"])) {
+                            echo json_encode($_FILES["scopeFile"]);
+                            $names     = $_FILES["scopeFile"]["name"];
+                            $tmp_names = $_FILES["scopeFile"]["tmp_name"];
+                            foreach ($names as $i => $name) {
+                                $filenameArr = explode(".", $name);
+                                $filename = $filenameArr[0];
+                                $filetype = $filenameArr[1];
+
+                                $scopeFilename = $filename.$index.time().".".$filetype;
+                                $tmp_name = $tmp_names[$i];
+
+                                $folderDir = "assets/upload-files/request-services/";
+                                if (!is_dir($folderDir)) {
+                                    mkdir($folderDir);
+                                }
+
+                                $targetDir = $folderDir.$scopeFilename;
+                                if (move_uploaded_file($tmp_name, $targetDir)) {
+                                    $scope = [
+                                        "scopeID"   => $scopeID,
+                                        "file"      => $scopeFilename,
+                                        "updatedBy" => $updatedBy,
+                                    ];
+                                    array_push($scopesData, $scope);
+                                }
+                            }
+                        }
+                    }
+                }
+                
+        //         $saveServices = $this->servicecompletion->saveServices($service, $scopes, $serviceCompletionID);
+        //     }
             
-        }
-        echo json_encode($saveServiceCompletionData);
+        // }
+        // echo json_encode($saveServiceCompletionData);
     }
 
 }
