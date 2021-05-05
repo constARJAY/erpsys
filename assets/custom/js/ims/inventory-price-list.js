@@ -39,8 +39,8 @@ $(document).on("click", "#btnAddRow",function(){
 
 $(document).on("change","[name=inventoryVendorID]",function(){
     let vendorcode  = $('option:selected', this).attr("vendorcode");
-    console.log(vendorcode);
-    console.log(this);
+    // console.log(vendorcode);
+    // console.log(this);
     let datetoday   = moment(new Date()).format("MMMM DD, YYYY hh:mm:ss A");
     $(this).closest("tr").find(".vendorcode").text(vendorcode);
     $(this).closest("tr").find(".dateupdated").text(datetoday);
@@ -48,6 +48,22 @@ $(document).on("change","[name=inventoryVendorID]",function(){
     $(this).closest("tr").find("[name=preffered]").prop("checked", false);
    getVendorOptions(); 
 });
+
+
+$(document).on("keypress","[name=vendorCurrentPrice]",function(){
+    let vendorcode  = $('option:selected', this).attr("vendorcode");
+    // console.log(vendorcode);
+    // console.log(this);
+    let datetoday   = moment(new Date()).format("MMMM DD, YYYY hh:mm:ss A");
+    $(this).closest("tr").find(".vendorcode").text(vendorcode);
+    $(this).closest("tr").find(".dateupdated").text(datetoday);
+    // $(this).closest("tr").find("[name=vendorCurrentPrice").val("");
+    $(this).closest("tr").find("[name=preffered]").prop("checked", false);
+   getVendorOptions(); 
+});
+
+
+
 
 $(document).on("click","[name=preferred]", function(){
     let thisID = $(this).attr("id");
@@ -106,8 +122,11 @@ $(document).on("click","[name=preferred]", function(){
 
 // OPENING MODAL
 $(document).on("click",".editPriceList", function(){
-    $(".modal_price_list_header").text("EDIT PRICE LIST");
     let itemID    =   $(this).data("itemid");
+    let priceListData =  getTableData("ims_inventory_price_list_tbl","","itemID="+itemID);
+    let modalHeader   = priceListData.length > 0 ? `EDIT`:`ADD`;
+    let buttonText    = priceListData.length > 0 ? `Update`:`Save`;
+    $(".modal_price_list_header").text(`${modalHeader} PRICE LIST`);
     let tableData   = getTableData("ims_inventory_item_tbl","","itemID="+itemID);
 
     $("#modal_price_list").modal("show");
@@ -119,7 +138,7 @@ $(document).on("click",".editPriceList", function(){
                                                 </form>
                                             </div>
                                             <div class="modal-footer">
-                                                <button class="btn btn-update" id="btnUpdate" data-itemid="${itemID}"><i class="fas fa-save"></i>&nbsp;Update</button>
+                                                <button class="btn btn-update" id="btnUpdate" data-itemid="${itemID}"><i class="fas fa-save"></i>&nbsp;${buttonText}</button>
                                                 <button class="btn btn-cancel btnCancel"><i class="fas fa-ban"></i>&nbsp;Cancel</button>
                                             </div>  
                                             `;
@@ -133,6 +152,7 @@ $(document).on("click",".editPriceList", function(){
         getVendorOptions();
         initDataTables();
         priceListSelect2();
+        initAmount();
     },500);
             
       
@@ -143,10 +163,12 @@ $(document).on("click",".priceListRow-show-more",function(){
     let target = $(this).attr("target");
     if($(target).hasClass("hide")){
         $(this).find("i").addClass("zmdi-caret-up").removeClass("zmdi-caret-down");
+        $(this).find("span").text("Hide");
         $(target).show(550);
         $(target).addClass("show").removeClass("hide");
     }else{
         $(this).find("i").addClass("zmdi-caret-down").removeClass("zmdi-caret-up");;
+        $(this).find("span").text("Show More");
         $(target).hide(550);
         $(target).addClass("hide").removeClass("show");
     }
@@ -154,9 +176,18 @@ $(document).on("click",".priceListRow-show-more",function(){
 
 // ACTION EVENTS BUTTONS
     $(document).on("click", "#btnUpdate", function(){
-        let itemID      = $(this).data("itemid");
-        let condition   = $("#input_classificationStatus").hasClass("is-invalid");
-        if(!condition){   
+        let itemID          = $(this).data("itemid");
+        let condition       = $("#input_classificationStatus").hasClass("is-invalid");
+        let preferredArr    = [];
+            $("input[name=preferred]").each(function (i) {
+            if($(this).prop("checked")){
+                preferredArr.push("1");
+            } 
+            });
+        if(!condition){
+              let priceListData =  getTableData("ims_inventory_price_list_tbl","","itemID="+itemID);
+              let title         = priceListData.length > 0 ? `UPDATE PRICE LIST`:`ADD PRICE LIST`;
+              let text          = priceListData.length > 0 ? `update the price list`:`add a new price list`;
             let validation  = validateForm("modal_price_list_form");
             if(validation){
                     var arrData = {id:itemID,items:[]};
@@ -169,51 +200,56 @@ $(document).on("click",".priceListRow-show-more",function(){
                             var dateUpdated   = $(this).closest("tr").find(".dateupdated").text();
                                 arrData[`items[${i}][itemID]`]              = itemID;
                                 arrData[`items[${i}][inventoryVendorID]`]   = vendorName;
-                                arrData[`items[${i}][vendorCurrentPrice]`]  = currentPrice;
+                                arrData[`items[${i}][vendorCurrentPrice]`]  = currentPrice.replaceAll(",","");
                                 arrData[`items[${i}][preferred]`]           = preffered ? "1" : "0";
                                 arrData[`items[${i}][updatedAt]`]           = moment(dateUpdated).format("YYYY-MM-DD hh:mm:ss");;
                                 arrData[`items[${i}][createdBy]`]           = sessionID;
                                 arrData[`items[${i}][updatedBy]`]           = sessionID;
                     });
-                Swal.fire({
-                    title:  "ADD PRICE LIST", 
-                    text:   "Are you sure that you want to add a new price list to the system?",
-                    imageUrl: `${base_url}assets/modal/add.svg`,
-                    imageWidth: 200,
-                    imageHeight: 200,
-                    imageAlt: 'Custom image',
-                    showCancelButton: true,
-                    confirmButtonColor: '#dc3545',
-                    cancelButtonColor: '#1a1a1a',
-                    cancelButtonText: 'No',
-                    confirmButtonText: 'Yes',
-                    allowOutsideClick: false
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        $.ajax({
-                            url:      `${base_url}ims/inventory_price_list/add_price_list`,
-                            method:   'POST',
-                            async:    false,
-                            dataType: 'json',
-                            data:     arrData,
-                            success:function(data){
-                                let condition = data.split("|");
-                                if(condition[0]){
-                                    Swal.fire({
-                                        icon:  'success',
-                                        title: "Add new price list successfully saved!",
-                                        showConfirmButton: false,
-                                        timer: 2000
-                                    }).then(reInit(itemID));
-                                }else{
-                                    showNotification("danger", condition[1]);
+
+                 if(preferredArr.length > 0){
+                    Swal.fire({
+                        title:  title, 
+                        text:   `Are you sure that you want to  ${text} to the system?`,
+                        imageUrl: `${base_url}assets/modal/add.svg`,
+                        imageWidth: 200,
+                        imageHeight: 200,
+                        imageAlt: 'Custom image',
+                        showCancelButton: true,
+                        confirmButtonColor: '#dc3545',
+                        cancelButtonColor: '#1a1a1a',
+                        cancelButtonText: 'No',
+                        confirmButtonText: 'Yes',
+                        allowOutsideClick: false
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            $.ajax({
+                                url:      `${base_url}ims/item_price_list/add_price_list`,
+                                method:   'POST',
+                                async:    false,
+                                dataType: 'json',
+                                data:     arrData,
+                                success:function(data){
+                                    let condition = data.split("|");
+                                    if(condition[0]){
+                                        Swal.fire({
+                                            icon:  'success',
+                                            title: "Add new price list successfully saved!",
+                                            showConfirmButton: false,
+                                            timer: 2000
+                                        }).then(reInit(itemID));
+                                    }else{
+                                        showNotification("danger", condition[1]);
+                                    }
                                 }
-                            }
-                        });
-                    } else {
-                        $("#modal_price_list").modal("show");
-                    }
-                });
+                            });
+                        } else {
+                            $("#modal_price_list").modal("show");
+                        }
+                    });
+                 }else{
+                     showNotification("warning2","Please select preferred vendor");
+                 }
             }
         }
     });
@@ -242,6 +278,7 @@ function reInit(id){
         $(".price-list-description-row").hide();
         $("#priceListRow"+id).addClass("show").removeClass("hide");
         $("#priceListRow"+id).next().find("button i").addClass("zmdi zmdi-caret-up");
+        $("#priceListRow"+id).next().find("button span").text("Hide");
         $("#priceListRow"+id).show(750);
     }, 500);
 }
@@ -449,7 +486,7 @@ function getItemPriceList(itemID){
                                     <div class="input-group-prepend">
                                         <span class="input-group-text">₱</span>
                                     </div>
-                                    <input type="text" class="form-control validate amount" min="1" max="99999999" data-allowcharacters="[0-9][.]" placeholder="0.00" required="" value="" autocomplete="off"  name="vendorCurrentPrice" id="currentPrice0" value="0" style="text-align: right;">
+                                    <input type="text" class="form-control amount" min="1" max="99999999" data-allowcharacters="[0-9][.][,]" placeholder="0.00" required="" value="" autocomplete="off"  name="vendorCurrentPrice" id="currentPrice0" value="0" style="text-align: right;">
                                     <div class="invalid-feedback d-block" id="invalid-currentPrice0"></div>
                                 </div>
                             </td>
@@ -483,7 +520,7 @@ function getItemPriceList(itemID){
                                         <div class="input-group-prepend">
                                             <span class="input-group-text">₱</span>
                                         </div>
-                                        <input type="text" class="form-control validate amount" min="1" max="99999999" data-allowcharacters="[0-9][.]" placeholder="0.00" required="" value="${items.vendorCurrentPrice}" autocomplete="off"  name="vendorCurrentPrice" id="currentPrice${index}" value="0" style="text-align: right;">
+                                        <input type="text" class="form-control amount" min="1" max="99999999" data-allowcharacters="[0-9][.][,]" placeholder="0.00" required="" value="${formatAmount(items.vendorCurrentPrice)}" autocomplete="off"  name="vendorCurrentPrice" id="currentPrice${index}" value="0" style="text-align: right;">
                                         <div class="invalid-feedback d-block" id="invalid-currentPrice${index}"></div>
                                     </div>
                                 </td>

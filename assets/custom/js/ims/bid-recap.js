@@ -1,6 +1,6 @@
 $(document).ready(function() {
     // ----- MODULE APPROVER -----
-	const moduleApprover = getModuleApprover(126);
+	const moduleApprover = getModuleApprover(40);
 	// ----- END MODULE APPROVER -----
 
 
@@ -27,23 +27,23 @@ $(document).ready(function() {
     // ----- VIEW DOCUMENT -----
 	function viewDocument(view_id = false, readOnly = false, isRevise = false) {
 		const loadData = (id, isRevise = false) => {
-			const tableData = getTableData("ims_inventory_validation_tbl", "", "inventoryValidationID=" + id);
+			const tableData = getTableData("ims_bid_recap_tbl", "", "bidRecapID=" + id);
 
 			if (tableData.length > 0) {
 				let {
 					employeeID,
-					inventoryValidationStatus
+					bidRecapStatus
 				} = tableData[0];
 
 				let isReadOnly = true, isAllowed = true;
 
 				if (employeeID != sessionID) {
 					isReadOnly = true;
-					if (inventoryValidationStatus == 0 || inventoryValidationStatus == 4) {
+					if (bidRecapStatus == 0 || bidRecapStatus == 4) {
 						isAllowed = false;
 					}
 				} else if (employeeID == sessionID) {
-					if (inventoryValidationStatus == 0) {
+					if (bidRecapStatus == 0) {
 						isReadOnly = false;
 					} else {
 						isReadOnly = true;
@@ -96,32 +96,32 @@ $(document).ready(function() {
 
 	function updateURL(view_id = 0, isAdd = false, isRevise = false) {
 		if (view_id && !isAdd) {
-			window.history.pushState("", "", `${base_url}ims/inventory_validation?view_id=${view_id}`);
+			window.history.pushState("", "", `${base_url}ims/bid_recap?view_id=${view_id}`);
 		} else if (isAdd) {
 			if (view_id && isRevise) {
-				window.history.pushState("", "", `${base_url}ims/inventory_validation?add=${view_id}`);
+				window.history.pushState("", "", `${base_url}ims/bid_recap?add=${view_id}`);
 			} else {
-				window.history.pushState("", "", `${base_url}ims/inventory_validation?add`);
+				window.history.pushState("", "", `${base_url}ims/bid_recap?add`);
 			}
 		} else {
-			window.history.pushState("", "", `${base_url}ims/inventory_validation`);
+			window.history.pushState("", "", `${base_url}ims/bid_recap`);
 		}
 	}
 	// ----- END VIEW DOCUMENT -----
 
 
     // GLOBAL VARIABLE - REUSABLE 
+	const priceListValidation = [];
+
 	const dateToday = () => {
 		return moment(new Date).format("YYYY-MM-DD HH:mm:ss");
 	};
-
 	const inventoryItemList = getTableData(
 		"ims_inventory_item_tbl LEFT JOIN ims_inventory_category_tbl USING(categoryID)", "ims_inventory_item_tbl.itemID AS itemID, itemCode, itemName, itemDescription ,categoryName, unitOfMeasurementID",
 		"itemStatus = 1");
 	const designationList = getTableData("hris_designation_tbl JOIN hris_employee_list_tbl USING(designationID)","designationID, designationName, MAX(employeeHourlyRate) as designationRate", "designationStatus=1","","designationName");
-    
-	const inventoryValidationData = getTableData("ims_inventory_validation_tbl");
-         
+	
+	const itemPriceListData = getTableData("ims_inventory_price_list_tbl");
 	// END GLOBAL VARIABLE - REUSABLE 
 
 
@@ -204,8 +204,11 @@ $(document).ready(function() {
 					{ targets: 2,  width: 80 },
 					{ targets: 3,  width: 80  },
 					{ targets: 4,  width: 80  },
-					{ targets: 5,  width: 80 },
-                    { targets: 6,  width: 150 }
+					{ targets: 5,  width: 80  },
+                    { targets: 6,  width: 150 },
+					{ targets: 7,  width: 100 },
+					{ targets: 8,  width: 100 }
+
 				],
 			});
 
@@ -219,6 +222,8 @@ $(document).ready(function() {
                 info: false,
 				scrollX: true,
 				scrollCollapse: true,
+				order: [[ 3, "desc" ]],
+				ordering: false,
 				columnDefs: [
 					{ targets: 0,  width: 80  },
 					{ targets: 1,  width: 150 },
@@ -226,7 +231,11 @@ $(document).ready(function() {
 					{ targets: 3,  width: 80  },
 					{ targets: 4,  width: 80  },
 					{ targets: 5,  width: 80 },
-                    { targets: 6,  width: 150 }
+                    { targets: 6,  width: 150 },
+					{ targets: 7,  width: 100 },
+					{ targets: 8,  width: 100 }
+
+					
 				],
 			});
 
@@ -250,7 +259,10 @@ $(document).ready(function() {
 					{ targets: 3,  width: 80  },
 					{ targets: 4,  width: 80  },
 					{ targets: 5,  width: 80 },
-                    { targets: 6,  width: 150 }
+                    { targets: 6,  width: 150 },
+					{ targets: 7,  width: 100 },
+					{ targets: 8,  width: 100 }
+
 				],
 			});
 
@@ -264,6 +276,8 @@ $(document).ready(function() {
                 info: false,
 				scrollX: true,
 				scrollCollapse: true,
+				order: [[ 3, "desc" ]],
+				ordering: false,
 				columnDefs: [
 					{ targets: 0,  width: 80  },
 					{ targets: 1,  width: 150 },
@@ -271,7 +285,10 @@ $(document).ready(function() {
 					{ targets: 3,  width: 80  },
 					{ targets: 4,  width: 80  },
 					{ targets: 5,  width: 80 },
-                    { targets: 6,  width: 150 }
+                    { targets: 6,  width: 150 },
+					{ targets: 7,  width: 100 },
+					{ targets: 8,  width: 100 }
+
 				],
 			});
 
@@ -282,7 +299,7 @@ $(document).ready(function() {
     // ----- HEADER CONTENT -----
 	function headerTabContent(display = true) {
 		if (display) {
-			if (isImModuleApprover("ims_inventory_validation_tbl", "approversID")) {
+			if (isImModuleApprover("ims_bid_recap_tbl", "approversID")) {
 				let html = `
                 <div class="bh_divider appendHeader"></div>
                 <div class="row clearfix appendHeader">
@@ -320,11 +337,11 @@ $(document).ready(function() {
     // ----- FOR APPROVAL CONTENT -----
 	function forApprovalContent() {
 		$("#tableForApprovalParent").html(preloader);
-		let inventoryValidationData = getTableData(
-			"ims_inventory_validation_tbl AS imrt LEFT JOIN hris_employee_list_tbl AS helt USING(employeeID) LEFT JOIN pms_project_list_tbl AS pplt ON pplt.projectListID = imrt.projectID",
-			"imrt.*, CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname, imrt.createdAt AS dateCreated, projectListCode, projectListName",
-			`imrt.employeeID != ${sessionID} AND inventoryValidationStatus != 0 AND inventoryValidationStatus != 4`,
-			`FIELD(inventoryValidationStatus, 0, 1, 3, 2, 4), COALESCE(imrt.submittedAt, imrt.createdAt)`
+		let bidRecapData = getTableData(
+			"ims_bid_recap_tbl AS ibrt LEFT JOIN hris_employee_list_tbl AS helt USING(employeeID) LEFT JOIN pms_project_list_tbl AS pplt ON pplt.projectListID = ibrt.projectID",
+			"ibrt.*, CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname, ibrt.createdAt AS dateCreated, projectListCode, projectListName",
+			`ibrt.employeeID != ${sessionID} AND bidRecapStatus != 0 AND bidRecapStatus != 4`,
+			`FIELD(bidRecapStatus, 0, 1, 3, 2, 4), COALESCE(ibrt.submittedAt, ibrt.createdAt)`
 		);
 
 		let html = `
@@ -347,54 +364,55 @@ $(document).ready(function() {
             </thead>
             <tbody>`;
 
-		inventoryValidationData.map((item) => {
+		bidRecapData.map((item) => {
 			let {
 				fullname,
-				inventoryValidationID,
+				bidRecapID,
 				projectListCode,
 				projectListName,
 				documentType,
 				documentID,
+				referenceCode,
 				approversID,
 				approversDate,
-				inventoryValidationStatus,
-				inventoryValidationRemarks,
+				bidRecapStatus,
+				bidRecapRemarks,
 				submittedAt,
 				createdAt,
 			} = item;
-			let referenceNumber = getFormCode(documentType=="ce"?"CEF":"PR",moment(createdAt),documentID);
+			let referenceNumber = getFormCode("IVR",moment(createdAt),referenceCode);
 			
-			let remarks       = inventoryValidationRemarks ? inventoryValidationRemarks : "-";
+			let remarks       = bidRecapRemarks ? bidRecapRemarks : "-";
 			let dateCreated   = moment(createdAt).format("MMMM DD, YYYY hh:mm:ss A");
 			let dateSubmitted = submittedAt ? moment(submittedAt).format("MMMM DD, YYYY hh:mm:ss A") : "-";
-			let dateApproved  = inventoryValidationStatus == 2 ? approversDate.split("|") : "-";
+			let dateApproved  = bidRecapStatus == 2 ? approversDate.split("|") : "-";
 			if (dateApproved !== "-") {
 				dateApproved = moment(dateApproved[dateApproved.length - 1]).format("MMMM DD, YYYY hh:mm:ss A");
 			}
 
-			let button = inventoryValidationStatus != 0 ? `
-			<button class="btn btn-view w-100 btnView" id="${encryptString(inventoryValidationID )}"><i class="fas fa-eye"></i> View</button>` : `
+			let button = bidRecapStatus != 0 ? `
+			<button class="btn btn-view w-100 btnView" id="${encryptString(bidRecapID )}"><i class="fas fa-eye"></i> View</button>` : `
 			<button 
 				class="btn btn-edit w-100 btnEdit" 
-				id="${encryptString(inventoryValidationID )}" 
-				code="${getFormCode("IVR", createdAt, inventoryValidationID )}"><i class="fas fa-edit"></i> Edit</button>`;
+				id="${encryptString(bidRecapID )}" 
+				code="${getFormCode("BRF", createdAt, bidRecapID )}"><i class="fas fa-edit"></i> Edit</button>`;
 
-			if (isImCurrentApprover(approversID, approversDate, inventoryValidationStatus) || isAlreadyApproved(approversID, approversDate)) {
+			if (isImCurrentApprover(approversID, approversDate, bidRecapStatus) || isAlreadyApproved(approversID, approversDate)) {
 				html += `
 				<tr>
-					<td>${getFormCode("IVR", createdAt, inventoryValidationID )}</td>
+					<td>${getFormCode("BRF", createdAt, bidRecapID )}</td>
 					<td>${fullname}</td>
 					<td>${projectListCode || '-'}</td>
 					<td>${projectListName || '-'}</td>
 					<td>${referenceNumber}</td>
 					<td>
-						${employeeFullname(getCurrentApprover(approversID, approversDate, inventoryValidationStatus, true))}
+						${employeeFullname(getCurrentApprover(approversID, approversDate, bidRecapStatus, true))}
 					</td>
 					<td>${dateCreated}</td>
 					<td>${dateSubmitted}</td>
 					<td>${dateApproved}</td>
 					<td class="text-center">
-						${getStatusStyle(inventoryValidationStatus)}
+						${getStatusStyle(bidRecapStatus)}
 					</td>
 					<td>${remarks}</td>
 					<td class="text-center">
@@ -420,11 +438,11 @@ $(document).ready(function() {
     // ----- MY FORMS CONTENT -----
 	function myFormsContent() {
 		$("#tableMyFormsParent").html(preloader);
-		let inventoryValidationData = getTableData(
-			"ims_inventory_validation_tbl AS imrt LEFT JOIN hris_employee_list_tbl AS helt USING(employeeID) LEFT JOIN pms_project_list_tbl AS pplt ON pplt.projectListID = imrt.projectID",
-			"imrt.*, CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname, imrt.createdAt AS dateCreated, projectListCode, projectListName",
-			`imrt.employeeID = ${sessionID}`,
-			`FIELD(inventoryValidationStatus, 0, 1, 3, 2, 4), COALESCE(imrt.submittedAt, imrt.createdAt)`
+		let bidRecapData = getTableData(
+			"ims_bid_recap_tbl AS ibrt LEFT JOIN hris_employee_list_tbl AS helt USING(employeeID) LEFT JOIN pms_project_list_tbl AS pplt ON pplt.projectListID = ibrt.projectID",
+			"ibrt.*, CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname, ibrt.createdAt AS dateCreated, projectListCode, projectListName",
+			`ibrt.employeeID = ${sessionID}`,
+			`FIELD(bidRecapStatus, 0, 1, 3, 2, 4), COALESCE(ibrt.submittedAt, ibrt.createdAt)`
 		);
 
 		let html = `
@@ -447,52 +465,53 @@ $(document).ready(function() {
             </thead>
             <tbody>`;
 
-		inventoryValidationData.map((item) => {
+		bidRecapData.map((item) => {
 			let {
 				fullname,
-				inventoryValidationID,
+				bidRecapID,
                 projectListCode,
                 projectListName,
 				documentType,
 				documentID,
+				referenceCode,
 				approversID,
 				approversDate,
-				inventoryValidationStatus,
-				inventoryValidationRemarks,
+				bidRecapStatus,
+				bidRecapRemarks,
 				submittedAt,
 				createdAt,
 			} = item;
-			let referenceNumber = getFormCode(documentType=="ce"?"CEF":"PR",moment(createdAt),documentID);
-			let remarks       = inventoryValidationRemarks ? inventoryValidationRemarks : "-";
+			let referenceNumber = getFormCode("IVR",moment(createdAt),referenceCode);
+			let remarks       = bidRecapRemarks ? bidRecapRemarks : "-";
 			let dateCreated   = moment(createdAt).format("MMMM DD, YYYY hh:mm:ss A");
 			let dateSubmitted = submittedAt ? moment(submittedAt).format("MMMM DD, YYYY hh:mm:ss A") : "-";
-			let dateApproved  = inventoryValidationStatus == 2 ? approversDate.split("|") : "-";
+			let dateApproved  = bidRecapStatus == 2 ? approversDate.split("|") : "-";
 			if (dateApproved !== "-") {
 				dateApproved = moment(dateApproved[dateApproved.length - 1]).format("MMMM DD, YYYY hh:mm:ss A");
 			}
 
-			let button = inventoryValidationStatus != 0 ? `
-            <button class="btn btn-view w-100 btnView" id="${encryptString(inventoryValidationID )}"><i class="fas fa-eye"></i> View</button>` : `
+			let button = bidRecapStatus != 0 ? `
+            <button class="btn btn-view w-100 btnView" id="${encryptString(bidRecapID )}"><i class="fas fa-eye"></i> View</button>` : `
             <button 
                 class="btn btn-edit w-100 btnEdit" 
-                id="${encryptString(inventoryValidationID )}" 
-                code="${getFormCode("IVR", createdAt, inventoryValidationID )}"><i class="fas fa-edit"></i> Edit</button>`;
+                id="${encryptString(bidRecapID )}" 
+                code="${getFormCode("BRF", createdAt, bidRecapID )}"><i class="fas fa-edit"></i> Edit</button>`;
 
 			html += `
             <tr>
-                <td>${getFormCode("IVR", createdAt, inventoryValidationID )}</td>
+                <td>${getFormCode("BRF", createdAt, bidRecapID )}</td>
                 <td>${fullname}</td>
                 <td>${projectListCode || '-'}</td>
                 <td>${projectListName || '-'}</td>
 				<td>${referenceNumber}</td>
                 <td>
-                    ${employeeFullname(getCurrentApprover(approversID, approversDate, inventoryValidationStatus, true))}
+                    ${employeeFullname(getCurrentApprover(approversID, approversDate, bidRecapStatus, true))}
                 </td>
 				<td>${dateCreated}</td>
 				<td>${dateSubmitted}</td>
 				<td>${dateApproved}</td>
                 <td class="text-center">
-                    ${getStatusStyle(inventoryValidationStatus)}
+                    ${getStatusStyle(bidRecapStatus)}
                 </td>
 				<td>${remarks}</td>
                 <td class="text-center">
@@ -519,8 +538,8 @@ $(document).ready(function() {
 		let button = "";
 		if (data) {
 			let {
-				inventoryValidationID     = "",
-				inventoryValidationStatus = "",
+				bidRecapID     = "",
+				bidRecapStatus = "",
 				employeeID            = "",
 				approversID           = "",
 				approversDate         = "",
@@ -529,14 +548,14 @@ $(document).ready(function() {
 
 			let isOngoing = approversDate ? approversDate.split("|").length > 0 ? true : false : false;
 			if (employeeID === sessionID) {
-				if (inventoryValidationStatus == 0 || isRevise) {
+				if (bidRecapStatus == 0 || isRevise) {
 					// DRAFT
 					button = `
 					<button 
 						class="btn btn-submit" 
 						id="btnSubmit" 
-						inventoryValidationID="${inventoryValidationID}"
-						code="${getFormCode("IVR", createdAt, inventoryValidationID)}"
+						bidRecapID="${bidRecapID}"
+						code="${getFormCode("BRF", createdAt, bidRecapID)}"
 						revise=${isRevise}><i class="fas fa-paper-plane"></i>
 						Submit
 					</button>`;
@@ -554,57 +573,57 @@ $(document).ready(function() {
 						<button 
 							class="btn btn-cancel"
 							id="btnCancelForm" 
-							inventoryValidationID="${inventoryValidationID}"
-							code="${getFormCode("IVR", createdAt, inventoryValidationID)}"
+							bidRecapID="${bidRecapID}"
+							code="${getFormCode("BRF", createdAt, bidRecapID)}"
 							revise=${isRevise}><i class="fas fa-ban"></i> 
 							Cancel
 						</button>`;
 					}
 
 					
-				} else if (inventoryValidationStatus == 1) {
+				} else if (bidRecapStatus == 1) {
 					// FOR APPROVAL
 					if (!isOngoing) {
 						button = `
 						<button 
 							class="btn btn-cancel"
 							id="btnCancelForm" 
-							inventoryValidationID="${inventoryValidationID}"
-							code="${getFormCode("IVR", createdAt, inventoryValidationID)}"
-							status="${inventoryValidationStatus}"><i class="fas fa-ban"></i> 
+							bidRecapID="${bidRecapID}"
+							code="${getFormCode("BRF", createdAt, bidRecapID)}"
+							status="${bidRecapStatus}"><i class="fas fa-ban"></i> 
 							Cancel
 						</button>`;
 					}
-				} else if (inventoryValidationStatus == 3) {
+				} else if (bidRecapStatus == 3) {
 					// DENIED - FOR REVISE
-						if(!isRevised(inventoryValidationID)){
+						if(!isRevised(bidRecapID)){
 							button = `
 							<button
 								class="btn btn-cancel"
 								id="btnRevise" 
-								inventoryValidationID="${encryptString(inventoryValidationID)}"
-								code="${getFormCode("IVR", createdAt, inventoryValidationID)}"
-								status="${inventoryValidationStatus}"><i class="fas fa-clone"></i>
+								bidRecapID="${encryptString(bidRecapID)}"
+								code="${getFormCode("BRF", createdAt, bidRecapID)}"
+								status="${bidRecapStatus}"><i class="fas fa-clone"></i>
 								Revise
 							</button>`;
 						}
 				}
 			} else {
-				if (inventoryValidationStatus == 1) {
+				if (bidRecapStatus == 1) {
 					if (isImCurrentApprover(approversID, approversDate)) {
 						button = `
 						<button 
 							class="btn btn-submit" 
 							id="btnApprove" 
-							inventoryValidationID="${encryptString(inventoryValidationID)}"
-							code="${getFormCode("IVR", createdAt, inventoryValidationID)}"><i class="fas fa-paper-plane"></i>
+							bidRecapID="${encryptString(bidRecapID)}"
+							code="${getFormCode("BRF", createdAt, bidRecapID)}"><i class="fas fa-paper-plane"></i>
 							Approve
 						</button>
 						<button 
 							class="btn btn-cancel"
 							id="btnReject" 
-							inventoryValidationID="${encryptString(inventoryValidationID)}"
-							code="${getFormCode("IVR", createdAt, inventoryValidationID)}"><i class="fas fa-ban"></i> 
+							bidRecapID="${encryptString(bidRecapID)}"
+							code="${getFormCode("BRF", createdAt, bidRecapID)}"><i class="fas fa-ban"></i> 
 							Deny
 						</button>`;
 					}
@@ -628,79 +647,29 @@ $(document).ready(function() {
 
 
     // ----- GET PROJECT LIST -----
-    function getReferenceList(type = null, id = null, display = false) {
-		let html    = ``;
-        let existCE = [];
-        let existPR = [];
-        inventoryValidationData.filter(items => items.documentType == 'ce' && (items.inventoryValidationStatus == 2 || items.inventoryValidationStatus == 1)).map(items=>{
-			var tempArr;
-			if(display){
-				var tempArr = id == items.documentID ? "":items.documentID;
-			}else{
-				var tempArr = items.documentID;
-			}
-            existCE.push(tempArr);
-        });
-        inventoryValidationData.filter(items=> items.documentType == 'pr' && items.inventoryValidationStatus == 2 || items.inventoryValidationStatus == 1).map(items=>{
-            existPR.push(items.documentID);
-        });
-		var sample = inventoryValidationData.filter(items => items.documentType == 'ce' && items.inventoryValidationStatus == '2' && items.inventoryValidationStatus == '1' );
-        // console.log(existCE);
-        // console.log(inventoryValidationData);
-        
-
-        let costEstimateData        = getTableData("pms_cost_estimate_tbl","","costEstimateStatus='2'");
-        let purchaseRequestData     = getTableData("ims_purchase_request_tbl","","purchaseRequestStatus='2'");
-        
-       costEstimateData.map(costEstimateItems=>{
-		   if(!existCE.includes(costEstimateItems.costEstimateID)){
-					let projectList   = getTableData(
-						"pms_project_list_tbl AS pplt LEFT JOIN pms_client_tbl AS pct ON pct.clientID = pplt.projectListClientID", 
-						"projectListID, projectListCode, projectListName, clientCode, clientName, clientRegion, clientProvince, clientCity, clientBarangay, clientUnitNumber, clientHouseNumber, clientCountry, clientPostalCode",
-						"projectListStatus = 1 && projectListID ="+costEstimateItems.projectID);
-					let requestorName = getTableData(`hris_employee_list_tbl JOIN hris_designation_tbl USING(designationID) LEFT JOIN hris_department_tbl ON hris_employee_list_tbl.departmentID = hris_department_tbl.departmentID`, 
-												"CONCAT(employeeFirstname,' ',employeeLastname) as employeeFullname, designationName, departmentName", "employeeID="+costEstimateItems.employeeID);
-					let address       = `${projectList[0].clientUnitNumber && titleCase(projectList[0].clientUnitNumber)+", "}${projectList[0].clientHouseNumber && projectList[0].clientHouseNumber +", "}${projectList[0].clientBarangay && titleCase(projectList[0].clientBarangay)+", "}${projectList[0].clientCity && titleCase(projectList[0].clientCity)+", "}${projectList[0].clientProvince && titleCase(projectList[0].clientProvince)+", "}${projectList[0].clientCountry && titleCase(projectList[0].clientCountry)+", "}${projectList[0].clientPostalCode && titleCase(projectList[0].clientPostalCode)}`;
-
-					html +=  `<option 
-									value                = "${costEstimateItems.costEstimateID }" 
-									projectid 			 = "${projectList[0].projectListID}"
-									projectcode          = "${getFormCode("PRO",moment(projectList[0].createdAt),projectList[0].projectListID)}"
-									projectname          = "${projectList[0].projectListName}"
-									clientcode           = "${projectList[0].clientCode}"
-									clientname           = "${projectList[0].clientName}"
-									address              = "${address}"
-									requestorname        = "${requestorName[0].employeeFullname}"
-									requestordesignation = "${requestorName[0].designationName}"
-									requestordepartment  = "${requestorName[0].departmentName}"
-									${type == 'ce' && costEstimateItems.costEstimateID== id?"selected":""}>
-									${getFormCode("CEF",moment(costEstimateItems.createdAt),costEstimateItems.costEstimateID)}
-							</option>`;
-			}
-        });
-
-        purchaseRequestData.map(purchaseRequestItems=>{
-			if(!existPR.includes(purchaseRequestItems.purchaseRequestID)){
-				let requestorName = getTableData(`hris_employee_list_tbl JOIN hris_designation_tbl USING(designationID) LEFT JOIN hris_department_tbl ON hris_employee_list_tbl.departmentID = hris_department_tbl.departmentID`, 
-											"CONCAT(employeeFirstname,' ',employeeLastname) as employeeFullname, designationName, departmentName","employeeID="+purchaseRequestItems.employeeID);
-					html +=  `<option 
-								value                = "${purchaseRequestItems.purchaseRequestID}" 
-								projectid 			 = "-"
-								projectcode          = "-"
-								projectname          = "-"
-								clientcode           = "-"
-								clientname           = "-"
-								address              = "-"
-								requestorname        = "${requestorName[0].employeeFullname}"
-								requestordesignation = "${requestorName[0].designationName}"
-								requestordepartment  = "${requestorName[0].departmentName}"
-								${type == 'pr' && purchaseRequestItems.purchaseRequestID== id?"selected":""}>
-								${getFormCode("PR",moment(purchaseRequestItems.createdAt),purchaseRequestItems.purchaseRequestID)}
-							</option>`;
-			}
-        });
-
-        
+    function getReferenceList(id = null, display = false) {
+		let existIVR = [], html = ``;
+		let bidRecapData = getTableData("ims_inventory_validation_tbl", "","inventoryValidationStatus = '2' OR inventoryValidationStatus = '1'");
+		bidRecapData.map(items=>{
+			id ? "":existIVR.push(items.inventoryValidationID);
+		});
+		html += bidRecapData.filter(items => !existIVR.includes(items.inventoryValidationID)).map(items=>{
+			var projectList   = getTableData(
+				"pms_project_list_tbl AS pplt LEFT JOIN pms_client_tbl AS pct ON pct.clientID = pplt.projectListClientID", 
+				"projectListID, projectListCode, projectListName, clientCode, clientName, clientRegion, clientProvince, clientCity, clientBarangay, clientUnitNumber, clientHouseNumber, clientCountry, clientPostalCode",
+				"projectListStatus = 1 && projectListID ="+items.projectID);
+			var address       = `${projectList[0].clientUnitNumber && titleCase(projectList[0].clientUnitNumber)+", "}${projectList[0].clientHouseNumber && projectList[0].clientHouseNumber +", "}${projectList[0].clientBarangay && titleCase(projectList[0].clientBarangay)+", "}${projectList[0].clientCity && titleCase(projectList[0].clientCity)+", "}${projectList[0].clientProvince && titleCase(projectList[0].clientProvince)+", "}${projectList[0].clientCountry && titleCase(projectList[0].clientCountry)+", "}${projectList[0].clientPostalCode && titleCase(projectList[0].clientPostalCode)}`;
+			return `<option value            = "${items.inventoryValidationID }" 
+						projectid 			 = "${projectList[0].projectListID}"
+						projectcode          = "${getFormCode("PRO",moment(projectList[0].createdAt),projectList[0].projectListID)}"
+						projectname          = "${projectList[0].projectListName}"
+						clientcode           = "${projectList[0].clientCode}"
+						clientname           = "${projectList[0].clientName}"
+						address              = "${address}"
+						${items.inventoryValidationID == id?"selected":""}>
+						${getFormCode("IVR",moment(items.createdAt), items.inventoryValidationID)}
+				   	</option>`;
+		});
         return html;
         
     }
@@ -1010,35 +979,31 @@ $(document).ready(function() {
         const clientcode            = $('option:selected', this).attr("clientcode");
         const clientname            = $('option:selected', this).attr("clientname");
         const address               = $('option:selected', this).attr("address");
-        const requestorname         = $('option:selected', this).attr("requestorname");
-        const requestordepartment   = $('option:selected', this).attr("requestordepartment");
-        const requestordesignation  = $('option:selected', this).attr("requestordesignation");
 		$("[name=projectCode]").attr("projectid",projectid);
         $("[name=projectCode]").val(projectcode);
         $("[name=projectName]").val(projectname);
         $("[name=clientCode]").val(clientcode);
         $("[name=clientName]").val(clientname);
         $("[name=clientAddress]").val(address);
-        $("[name=requestorName]").val(requestorname);
-        $("[name=requestorDepartment]").val(requestordepartment);
-        $("[name=requestorPosition]").val(requestordesignation);
 
         $(".itemProjectTableBody").html('<tr><td colspan="7">'+preloader+'</td></tr>');
         $(".itemCompanyTableBody").html('<tr><td colspan="7">'+preloader+'</td></tr>');
+
         let itemProjectTableBody = requestItemData(id, "project");
 		let itemCompanyTableBody = requestItemData(id, "company");
-
-
+		let alertConfirmation 	 = priceListValidation.length > 0 ? `<div class="alert alert-warning py-1 text-center" role="alert">
+																			<small class="font-weight-bold"><i class="fa fa-exclamation-circle text-warning font-weight-bold"></i> Cannot process. Set a price for each item on the item price list first.</small>
+																	</div>` : ``;
+		$("#alert-confirmation").hide();
         setTimeout(() => {
+			$("#alert-confirmation").html(alertConfirmation);
+			$("#alert-confirmation").show(500);
 			$(".itemProjectTableBody").html(itemProjectTableBody);
             $(".itemCompanyTableBody").html(itemCompanyTableBody);
+			getGrandTotal();
 			// initDataTables();
 			// initAll();
 		}, 300);
-
-
-
-
     })
     // ----- END SELECT PROJECT LIST -----
 
@@ -1137,70 +1102,70 @@ $(document).ready(function() {
 		return totalAmount;
 	}
 	// ----- END UPDATE TOTAL AMOUNT -----
-
+	
+	// GETTING THE GRAND TOTAL OF TWO CATEGORIES
+		function getGrandTotal(){
+			// itemTableRowTotal
+			let grandTotal = 0;
+			$(".itemTableRowTotal").each(function(i, obj) {
+				
+				let totalCost = $(this).find(".totalCost").text().replaceAll("₱","").replaceAll(",","");
+				grandTotal += parseFloat(totalCost);
+			});
+			
+			$("#bidRecapGrandTotal").text(formatAmount(grandTotal,true));
+		}
+	// END GETTING THE GRAND TOTAL OF TWO CATEGORIES
 
     // ----- FORM CONTENT -----
 	function formContent(data = false, readOnly = false, isRevise = false) {
 		$("#page_content").html(preloader);
 		readOnly = isRevise ? false : readOnly;
 		let {
-			inventoryValidationID       = "",
-			reviseInventoryValidationID = "",
-			employeeID           = "",
-			projectID            = "",
+			bidRecapID       	= "",
+			reviseBidRecapID 	= "",
+			employeeID          = "",
+			projectID           = "",
+			referenceCode 		= "",
             documentID          = "",
             documentType        = "",
-			inventoryValidationReason   = "",
-			inventoryValidationRemarks  = "",
-			approversID          = "",
-			approversStatus      = "",
-			approversDate        = "",
-			inventoryValidationStatus   = false,
-			submittedAt          = false,
-			createdAt            = false,
+			bidRecapReason   	= "",
+			bidRecapRemarks  	= "",
+			approversID         = "",
+			approversStatus     = "",
+			approversDate       = "",
+			bidRecapGrandTotal	= null,
+			bidRecapStatus   	= false,
+			submittedAt         = false,
+			createdAt           = false,
 		} = data && data[0];
 
 		let requestProjectItems = "", requestCompanyItems = "";
-		// console.log(inventoryValidationID);
-		if (inventoryValidationID) {
-            requestProjectItems = requestItemData(documentID, "project", readOnly, `inventoryValidationID = '${inventoryValidationID}'`);
-            requestCompanyItems = requestItemData(documentID, "company", readOnly, `inventoryValidationID = '${inventoryValidationID}'`);
+		
+		if (bidRecapID) {
+            requestProjectItems = requestItemData(referenceCode, "project", readOnly, `bidRecapID = '${bidRecapID}'`);
+            requestCompanyItems = requestItemData(referenceCode, "company", readOnly, `bidRecapID = '${bidRecapID}'`);
 		}
 
 		if(documentType){
 			var projectid="",projectCode="-",projectName="-",clientCode="-",clientName="-",clientAddress="-",requestorName="-",requestorDepartment="-",requestorPosition="-";
-			let costEstimateData        = getTableData("pms_cost_estimate_tbl","","costEstimateStatus='2' AND costestimateID="+documentID);
-			let purchaseRequestData     = getTableData("ims_purchase_request_tbl","","purchaseRequestStatus='2' AND purchaseRequestID="+documentID);
-			costEstimateData.map(costEstimateItems=>{
-				
+			let bidRecapData        = getTableData("ims_bid_recap_tbl","","bidRecapID="+bidRecapID);
+			
+			bidRecapData.map(bidRecapItems=>{
 					let projectList   = getTableData(
 						"pms_project_list_tbl AS pplt LEFT JOIN pms_client_tbl AS pct ON pct.clientID = pplt.projectListClientID", 
 						"projectListID, projectListCode, projectListName, clientCode, clientName, clientRegion, clientProvince, clientCity, clientBarangay, clientUnitNumber, clientHouseNumber, clientCountry, clientPostalCode",
-						"projectListStatus = 1 && projectListID ="+costEstimateItems.projectID);
-					var requestorData = getTableData(`hris_employee_list_tbl JOIN hris_designation_tbl USING(designationID) LEFT JOIN hris_department_tbl ON hris_employee_list_tbl.departmentID = hris_department_tbl.departmentID`, 
-												"CONCAT(employeeFirstname,' ',employeeLastname) as employeeFullname, designationName, departmentName", "employeeID="+costEstimateItems.employeeID);
+						"projectListStatus = 1 && projectListID ="+bidRecapItems.projectID);
 					let address       = `${projectList[0].clientUnitNumber && titleCase(projectList[0].clientUnitNumber)+", "}${projectList[0].clientHouseNumber && projectList[0].clientHouseNumber +", "}${projectList[0].clientBarangay && titleCase(projectList[0].clientBarangay)+", "}${projectList[0].clientCity && titleCase(projectList[0].clientCity)+", "}${projectList[0].clientProvince && titleCase(projectList[0].clientProvince)+", "}${projectList[0].clientCountry && titleCase(projectList[0].clientCountry)+", "}${projectList[0].clientPostalCode && titleCase(projectList[0].clientPostalCode)}`;
-						if(documentType == 'ce' && costEstimateItems.costEstimateID	== documentID){
+						if(bidRecapItems.bidRecapID	== bidRecapID){
 							projectid 			= projectList[0].projectListID;
 							projectCode			= getFormCode("PRO",moment(projectList[0].createdAt),projectList[0].projectListID);
 							projectName			= projectList[0].projectListName;
 							clientCode			= projectList[0].clientCode;
 							clientName			= projectList[0].clientName;
 							clientAddress		= address;
-							requestorName		= requestorData[0].employeeFullname;
-							requestorDepartment	= requestorData[0].designationName;
-							requestorPosition	= requestorData[0].departmentName;
 						}
 				});
-			purchaseRequestData.map(purchaseRequestItems=>{
-				var requestorData = getTableData(`hris_employee_list_tbl JOIN hris_designation_tbl USING(designationID) LEFT JOIN hris_department_tbl ON hris_employee_list_tbl.departmentID = hris_department_tbl.departmentID`, 
-											"CONCAT(employeeFirstname,' ',employeeLastname) as employeeFullname, designationName, departmentName","employeeID="+purchaseRequestItems.employeeID);
-				if(documentType == 'pr' && purchaseRequestItems.purchaseRequestID	== documentID){
-					requestorName		= requestorData[0].employeeFullname;
-					requestorDepartment	= requestorData[0].designationName;
-					requestorPosition	= requestorData[0].departmentName;
-				}
-			});
 		}
 
 		// ----- GET EMPLOYEE DATA -----
@@ -1213,8 +1178,8 @@ $(document).ready(function() {
 
 		readOnly ? preventRefresh(false) : preventRefresh(true);
 
-		$("#btnBack").attr("inventoryValidationID", inventoryValidationID);
-		$("#btnBack").attr("status", inventoryValidationStatus);
+		$("#btnBack").attr("bidRecapID", bidRecapID);
+		$("#btnBack").attr("status", bidRecapStatus);
 		$("#btnBack").attr("employeeID", employeeID);
 
 		let disabled = readOnly ? "disabled" : "";
@@ -1225,16 +1190,16 @@ $(document).ready(function() {
 
 		let button = formButtons(data, isRevise);
 
-		let reviseDocumentNo    = isRevise ? inventoryValidationID : reviseInventoryValidationID;
-		let documentHeaderClass = isRevise || reviseInventoryValidationID ? "col-lg-4 col-md-4 col-sm-12 px-1" : "col-lg-2 col-md-6 col-sm-12 px-1";
-		let documentDateClass   = isRevise || reviseInventoryValidationID ? "col-md-12 col-sm-12 px-0" : "col-lg-8 col-md-12 col-sm-12 px-1";
-		let documentReviseNo    = isRevise || reviseInventoryValidationID ? `
+		let reviseDocumentNo    = isRevise ? bidRecapID : reviseBidRecapID;
+		let documentHeaderClass = isRevise || reviseBidRecapID ? "col-lg-4 col-md-4 col-sm-12 px-1" : "col-lg-2 col-md-6 col-sm-12 px-1";
+		let documentDateClass   = isRevise || reviseBidRecapID ? "col-md-12 col-sm-12 px-0" : "col-lg-8 col-md-12 col-sm-12 px-1";
+		let documentReviseNo    = isRevise || reviseBidRecapID ? `
 		<div class="col-lg-4 col-md-4 col-sm-12 px-1">
 			<div class="card">
 				<div class="body">
 					<small class="text-small text-muted font-weight-bold">Revised Document No.</small>
 					<h6 class="mt-0 text-danger font-weight-bold">
-						${getFormCode("IVR", createdAt, reviseDocumentNo)}
+						${getFormCode("BRF", createdAt, reviseDocumentNo)}
 					</h6>      
 				</div>
 			</div>
@@ -1248,7 +1213,7 @@ $(document).ready(function() {
                     <div class="body">
                         <small class="text-small text-muted font-weight-bold">Document No.</small>
                         <h6 class="mt-0 text-danger font-weight-bold">
-							${inventoryValidationID && !isRevise ? getFormCode("IVR", createdAt, inventoryValidationID) : "---"}
+							${bidRecapID && !isRevise ? getFormCode("BRF", createdAt, bidRecapID) : "---"}
 						</h6>      
                     </div>
                 </div>
@@ -1258,7 +1223,7 @@ $(document).ready(function() {
                     <div class="body">
                         <small class="text-small text-muted font-weight-bold">Status</small>
                         <h6 class="mt-0 font-weight-bold">
-							${inventoryValidationStatus && !isRevise ? getStatusStyle(inventoryValidationStatus) : "---"}
+							${bidRecapStatus && !isRevise ? getStatusStyle(bidRecapStatus) : "---"}
 						</h6>      
                     </div>
                 </div>
@@ -1290,7 +1255,7 @@ $(document).ready(function() {
                         <div class="body">
                             <small class="text-small text-muted font-weight-bold">Date Approved</small>
                             <h6 class="mt-0 font-weight-bold">
-								${getDateApproved(inventoryValidationStatus, approversID, approversDate)}
+								${getDateApproved(bidRecapStatus, approversID, approversDate)}
 							</h6>      
                         </div>
                     </div>
@@ -1302,14 +1267,14 @@ $(document).ready(function() {
                     <div class="body">
                         <small class="text-small text-muted font-weight-bold">Remarks</small>
                         <h6 class="mt-0 font-weight-bold">
-							${inventoryValidationRemarks && !isRevise ? inventoryValidationRemarks : "---"}
+							${bidRecapRemarks && !isRevise ? bidRecapRemarks : "---"}
 						</h6>      
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="row" id="form_inventory_validation">
+        <div class="row" id="form_bid_recap">
             <div class="col-md-4 col-sm-12">
                 <div class="form-group">
                     <label>Employee Name</label>
@@ -1335,13 +1300,13 @@ $(document).ready(function() {
                         data-allowcharacters="[a-z][A-Z][0-9][ ][.][,][-][()]['][/][&]"
                         minlength="1"
                         maxlength="200"
-                        id="inventoryValidationReason"
-                        name="inventoryValidationReason"
+                        id="bidRecapReason"
+                        name="bidRecapReason"
                         required
                         rows="4"
                         style="resize:none;"
-                        ${disabled}>${inventoryValidationReason ?? ""}</textarea>
-                    <div class="d-block invalid-feedback" id="invalid-inventoryValidationReason"></div>
+                        ${disabled}>${bidRecapReason ?? ""}</textarea>
+                    <div class="d-block invalid-feedback" id="invalid-bidRecapReason"></div>
                 </div>
             </div>
             <div class="col-md-4 col-sm-12">
@@ -1352,9 +1317,10 @@ $(document).ready(function() {
                         id="documentID"
                         style="width: 100%"
                         required
-						${readOnly || isRevise ? "disabled" : ""}>
+						${readOnly || isRevise ? "disabled" : ""}
+						>
                         <option selected disabled>Select Document No.</option>
-                        ${getReferenceList(documentType,documentID,readOnly)}
+                        ${getReferenceList(referenceCode,readOnly)}
                     </select>
                     <div class="d-block invalid-feedback" id="invalid-documentID"></div>
                 </div>
@@ -1389,26 +1355,8 @@ $(document).ready(function() {
                     <input type="text" class="form-control" name="clientAddress" disabled value="${clientAddress||"-"}">
                 </div>
             </div>
-
-            <div class="col-md-4 col-sm-12">
-                <div class="form-group">
-                    <label>Requestor Name</label>
-                    <input type="text" class="form-control" disabled name="requestorName" value="${requestorName||"-"}">
-                </div>
-            </div>
-            <div class="col-md-4 col-sm-12">
-                <div class="form-group">
-                    <label>Department</label>
-                    <input type="text" class="form-control" disabled name="requestorDepartment" value="${requestorDepartment||"-"}">
-                </div>
-            </div>
-            <div class="col-md-4 col-sm-12">
-                <div class="form-group">
-                    <label>Position</label>
-                    <input type="text" class="form-control" disabled name="requestorPosition" value="${requestorPosition||"-"}">
-                </div>
-            </div>
             <div class="col-sm-12">
+				<div id="alert-confirmation"></div>
 				<div class="w-100">
 					<hr class="pb-1">
 					<div class="text-primary font-weight-bold" style="font-size: 1.5rem;">Project Materials and Equipment</div>
@@ -1418,15 +1366,15 @@ $(document).ready(function() {
                                 <th>Item Code</th>
                                 <th>Item Name</th>
                                 <th>UOM</th>
-                                <th>Quantity Requested</th>
-                                <th>No of  Issuance ${!disabled ? "<code>*</code>" : ""}</th>
+                                <th>Requested</th>
+                                <th>Stocked ${!disabled ? "<code>*</code>" : ""}</th>
                                 <th>For Purchase</th>
                                 <th>File</th>
+								<th class="text-right">Unit Cost</th>
+								<th class="text-right">Total Cost</th>
                             </tr>
                         </thead>
-                        <tbody class="itemProjectTableBody" project="true">
-							${requestProjectItems}
-						</tbody>
+                        <tbody class="itemProjectTableBody" project="true"></tbody>
                     </table>
                 </div>
 				<div class="w-100">
@@ -1438,19 +1386,26 @@ $(document).ready(function() {
 								<th>Item Code</th>
                                 <th>Item Name</th>
                                 <th>UOM</th>
-                                <th>Quantity Requested</th>
-                                <th>No of  Issuance ${!disabled ? "<code>*</code>" : ""}</th>
+                                <th>Requested</th>
+                                <th>Stocked ${!disabled ? "<code>*</code>" : ""}</th>
                                 <th>For Purchase</th>
                                 <th>File</th>
+								<th class="text-right">Unit Cost</th>
+								<th class="text-right">Total Cost</th>
                             </tr>
                         </thead>
-                        <tbody class="itemCompanyTableBody" company="true">
-							${requestCompanyItems}
-						</tbody>
+                        <tbody class="itemCompanyTableBody" company="true"></tbody>
                     </table>
                 </div>
             </div>
-
+			<div class="col-sm-12 mt-3">
+				<div class="w-100 d-flex justify-content-end align-items-end py-2">
+					<div class="font-weight-bolder" style="font-size: 1rem;">
+						<span>Grand Total: &nbsp;</span>
+						<span class="text-danger" style="font-size: 1.2em" id="bidRecapGrandTotal"></span>
+					</div>
+				</div>
+            </div>
             <div class="col-md-12 text-right mt-3">
                 ${button}
             </div>
@@ -1458,8 +1413,12 @@ $(document).ready(function() {
 		<div class="approvers">
 			${!isRevise  ? getApproversStatus(approversID, approversStatus, approversDate) : ""}
 		</div>`;
+		
 		setTimeout(() => {
 			$("#page_content").html(html);
+			$(".itemProjectTableBody").append(requestProjectItems);
+			$(".itemCompanyTableBody").append(requestCompanyItems);
+			getGrandTotal();
 			initDataTables();
 			updateTableItems();
 			initAll();
@@ -1505,7 +1464,7 @@ $(document).ready(function() {
 
 
 	// ----- GET Inventory Validation DATA -----
-	function getinventoryValidationData(action = "insert", method = "submit", status = "1", id = null, currentStatus = "0", isObject = false) {
+	function getbidRecapData(action = "insert", method = "submit", status = "1", id = null, currentStatus = "0", isObject = false) {
 
 		/**
 		 * ----- ACTION ---------
@@ -1533,10 +1492,10 @@ $(document).ready(function() {
 		const approversID = method != "approve" && moduleApprover;
 
 		if (id) {
-			data["inventoryValidationID"] = id;
+			data["bidRecapID"] = id;
 
 			if (status != "2") {
-				data["inventoryValidationStatus"] = status;
+				data["bidRecapStatus"] = status;
 			}
 		}
 
@@ -1545,11 +1504,15 @@ $(document).ready(function() {
 		data["updatedBy"]             = sessionID;
 
 		if (currentStatus == "0" && method != "approve") {
-			
+		    var referenceCode 			  = $("[name=documentID]").val() || null;
+			var requestItemsData 		  = getTableData("ims_request_items_tbl","costEstimateID","	inventoryValidationID="+referenceCode); 
+			var documentID 				  = requestItemsData.length > 0 ? requestItemsData[0].costEstimateID : null;			 
 			data["employeeID"]            = sessionID;
 			data["projectID"]             = $("[name=projectCode]").attr("projectid") || null;
-			data["documentID"] 			  = $("[name=documentID]").val() || null;
-			data["inventoryValidationReason"] 	  = $("[name=inventoryValidationReason]").val()?.trim();
+			data["documentID"] 			  = documentID;
+			data["referenceCode"] 		  = referenceCode;
+			data["bidRecapReason"] 	  	  = $("[name=bidRecapReason]").val()?.trim();
+			data["bidRecapGrandTotal"] 	  = $("#bidRecapGrandTotal").text().replaceAll("₱","").replaceAll(",","");
 			
 		
 
@@ -1557,37 +1520,45 @@ $(document).ready(function() {
 				data["createdBy"]   = sessionID;
 				data["createdAt"]   = dateToday();
 			} else if (action == "update") {
-				data["inventoryValidationID"] = id;
+				data["bidRecapID"] = id;
 			}
 
 			if (method == "submit") {
 				data["submittedAt"] = dateToday();
 				if (approversID) {
-					data["approversID"]           = approversID;
-					data["inventoryValidationStatus"] = 1;
+					data["approversID"]    = approversID;
+					data["bidRecapStatus"] = 1;
 				} else {  // AUTO APPROVED - IF NO APPROVERS
-					data["approversID"]           = sessionID;
-					data["approversStatus"]       = 2;
-					data["approversDate"]         = dateToday();
-					data["inventoryValidationStatus"] = 2;
+					data["approversID"]      = sessionID;
+					data["approversStatus"]  = 2;
+					data["approversDate"]    = dateToday();
+					data["bidRecapStatus"] 	 = 2;
 				}
 			}
 
 			$(".itemTableRow").each(function(i, obj) {
-				var itemID = $(this).find(".itemcode").attr("itemid");
-				var tableData = inventoryItemList.filter(items=> items.itemID == itemID);
+				var itemID 	  				= $(this).find(".itemcode").attr("itemid");
+				var inventoryValidationID	= $(this).find(".itemcode").attr("inventoryvalidationid");
+				var itemsTableData 			= inventoryItemList.filter(items=> items.itemID == itemID);
+				var requestItemsData 		= getTableData("ims_request_items_tbl","costEstimateID","	inventoryValidationID="+inventoryValidationID); 
+				
+
 				var temp = {
-					requestItemID:	$(this).find(".itemcode").attr("requestitem"),
-					costEstimateID: $(this).find(".itemcode").attr("costestimateid"),
-					category:		$(this).attr("category"),
-					itemID:			itemID,
-					itemname:		tableData[0].itemName,
-					itemUom:		tableData[0].unitOfMeasurementID,
-					itemDescription:tableData[0].itemDescription,
-					quantity:		$(this).find(".qtyrequested").text(),
-					stocks:			$(this).find("[name=stocks]").val(),
-					forPurchase:	$(this).find(".forpurchase").text() == "-"? "0": $(this).find(".forpurchase").text(),
-					updatedBy:		sessionID
+					requestItemID:			$(this).find(".itemcode").attr("requestitem"),
+					costEstimateID: 		requestItemsData[0].costEstimateID,
+					inventoryValidationID:	inventoryValidationID,
+					category:				$(this).attr("category"),
+					itemID:					itemID,
+					itemname:				$(this).find(".itemname").text(),
+					itemUom:				$(this).find(".uom").text(),
+					itemDescription:		itemsTableData[0].itemDescription,
+					quantity:				$(this).find(".qtyrequested").text(),
+					stocks:					$(this).find(".stocks").text(),
+					forPurchase:			$(this).find(".forpurchase").text(),
+					file:					$(this).find(".file").text(),
+					unitCost:				$(this).find(".unitCost").text().replaceAll("₱","").replaceAll(",",""),
+					totalCost:				$(this).find(".totalCost").text().replaceAll("₱","").replaceAll(",",""),
+					updatedBy:				sessionID
 				};
 				data[`items`].push(temp);
 			});
@@ -1626,7 +1597,7 @@ $(document).ready(function() {
 
     // ----- VIEW DOCUMENT -----
 	$(document).on("click", "#btnRevise", function () {
-		const id = $(this).attr("inventoryValidationID");
+		const id = $(this).attr("bidRecapID");
 		viewDocument(id, false, true);
 	});
 	// ----- END VIEW DOCUMENT -----
@@ -1634,22 +1605,22 @@ $(document).ready(function() {
 
 	// ----- SAVE CLOSE FORM -----
 	$(document).on("click", "#btnBack", function () {
-		const id         = $(this).attr("inventoryValidationID");
+		const id         = $(this).attr("bidRecapID");
 		const revise     = $(this).attr("revise") == "true";
 		const employeeID = $(this).attr("employeeID");
-		const feedback   = $(this).attr("code") || getFormCode("IVR", dateToday(), id);
+		const feedback   = $(this).attr("code") || getFormCode("BRF", dateToday(), id);
 		const status     = $(this).attr("status");
 
 		if (status != "false" && status != 0) {
 			
 			if (revise) {
 				const action = revise && "insert" || (id && feedback ? "update" : "insert");
-				const data   = getinventoryValidationData(action, "save", "0", id);
-				data["inventoryValidationStatus"] 	=	0;
-				data["reviseInventoryValidationID"] = id;
-				delete data["inventoryValidationID"]; 
+				const data   = getbidRecapData(action, "save", "0", id);
+				data["bidRecapStatus"] 	=	0;
+				data["reviseBidRecapID"] = id;
+				delete data["bidRecapID"]; 
 	
-				saveinventoryValidation(data, "save", null, pageContent);
+				savebidRecapID(data, "save", null, pageContent);
 			} else {
 				$("#page_content").html(preloader);
 				pageContent();
@@ -1661,10 +1632,10 @@ $(document).ready(function() {
 
 		} else {
 			const action = id && feedback ? "update" : "insert";
-			const data   = getinventoryValidationData(action, "save", "0", id);
-			data["inventoryValidationStatus"] 	=	0;
+			const data   = getbidRecapData(action, "save", "0", id);
+			data["bidRecapStatus"] 	=	0;
 			
-			saveinventoryValidation(data, "save", null, pageContent);
+			savebidRecapID(data, "save", null, pageContent);
 		}
 	});
 	// ----- END SAVE CLOSE FORM -----
@@ -1672,38 +1643,37 @@ $(document).ready(function() {
 
     // ----- SAVE DOCUMENT -----
 	$(document).on("click", "#btnSave, #btnCancel", function () {
-		const id       = $(this).attr("inventoryValidationID");
+		const id       = $(this).attr("bidRecapID");
 		const revise   = $(this).attr("revise") == "true";
-		const feedback = $(this).attr("code") || getFormCode("IVR", dateToday(), id);
+		const feedback = $(this).attr("code") || getFormCode("BRF", dateToday(), id);
 		const action   = revise && "insert" || (id && feedback ? "update" : "insert");
-		const data     = getinventoryValidationData(action, "save", "0", id);
-		data["inventoryValidationStatus"] 	=	0;
+		const data     = getbidRecapData(action, "save", "0", id);
+		data["bidRecapStatus"] 	=	0;
 		if (revise) {
-			data["reviseInventoryValidationID"] = id;
-			delete data["inventoryValidationID"];  
+			data["reviseBidRecapID"] = id;
+			delete data["bidRecapID"];  
 		}	
-		saveinventoryValidation(data, "save", null, pageContent);
+		savebidRecapID(data, "save", null, pageContent);
 	});
 	// ----- END SAVE DOCUMENT -----
 
 
     // ----- SUBMIT DOCUMENT -----
 	$(document).on("click", "#btnSubmit", function () {
-		const id           = $(this).attr("inventoryValidationID");
+		const id           = $(this).attr("bidRecapID");
 		const revise       = $(this).attr("revise") == "true";
-		const validate     = validateForm("form_inventory_validation");
-		removeIsValid("#tableProjectRequestItems");
-		removeIsValid("#tableCompanyRequestItems");
+		const validate     = validateForm("form_bid_recap");
+
 		if (validate) {
 			const action = revise && "insert" || (id ? "update" : "insert");
-			const data   = getinventoryValidationData(action, "submit", "1", id);
+			const data   = getbidRecapData(action, "submit", "1", id);
 
 			if (revise) {
-				data["reviseInventoryValidationID"] = id;
-				delete data["inventoryValidationID"];  
+				data["reviseBidRecapID"] = id;
+				delete data["bidRecapID"];  
 				
-				// data.append("reviseInventoryValidationID", id);
-				// data.delete("inventoryValidationID");
+				// data.append("reviseBidRecapID", id);
+				// data.delete("bidRecapID");
 			}
 
 			let approversID = "", approversDate = "";
@@ -1711,19 +1681,28 @@ $(document).ready(function() {
 				if (i[0] == "approversID")   approversID   = i[1];
 				if (i[0] == "approversDate") approversDate = i[1];
 			}
-			
+
 			const employeeID = getNotificationEmployeeID(approversID, approversDate, true);
 			let notificationData = false;
 			if (employeeID != sessionID) {
 				notificationData = {
-					moduleID:                126,
-					notificationTitle:       "Inventory Validation",
+					moduleID:                40,
+					notificationTitle:       "Bid Recap",
 					notificationDescription: `${employeeFullname(sessionID)} asked for your approval.`,
 					notificationType:        2,
 					employeeID,
 				};
 			}
-			saveinventoryValidation(data, "submit", notificationData, pageContent);
+		
+			if(priceListValidation.length > 0){
+				priceListValidation.map(items=>{
+					var splitItems = items.split("|");
+					showNotification("warning2",
+					`Please set item code <strong>${getFormCode("ITM",moment(splitItems[0]), splitItems[1])}</strong> into inventory price list module to proceed in this proccess`)
+				});
+			}else{
+				savebidRecapID(data, "submit", notificationData, pageContent);
+			}
 		}
 	});
 	// ----- END SUBMIT DOCUMENT -----
@@ -1731,35 +1710,35 @@ $(document).ready(function() {
 
     // ----- CANCEL DOCUMENT -----
 	$(document).on("click", "#btnCancelForm", function () {
-		const id     = $(this).attr("inventoryValidationID");
+		const id     = $(this).attr("bidRecapID");
 		const status = $(this).attr("status");
 		const action = "update";
-		const data   = getinventoryValidationData(action, "cancelform", "4", id, status);
+		const data   = getbidRecapData(action, "cancelform", "4", id, status);
 
-		saveinventoryValidation(data, "cancelform", null, pageContent);
+		savebidRecapID(data, "cancelform", null, pageContent);
 	});
 	// ----- END CANCEL DOCUMENT -----
 
 
     // ----- APPROVE DOCUMENT -----
 	$(document).on("click", "#btnApprove", function () {
-		const id       		= decryptString($(this).attr("inventoryValidationID"));
+		const id       		= decryptString($(this).attr("bidRecapID"));
 		const feedback 		= $(this).attr("code") || getFormCode("SCH", dateToday(), id);
-		let tableData  		= getTableData("ims_inventory_validation_tbl", "", "inventoryValidationID = " + id);
+		let tableData  		= getTableData("ims_bid_recap_tbl", "", "bidRecapID = " + id);
 		let thisCondition 	= false;
 		
 			
 
 
 		if (tableData) {
-			let inventoryValidationID  = tableData[0].inventoryValidationID;
+			let bidRecapID  = tableData[0].bidRecapID;
 			let approversID     = tableData[0].approversID;
 			let approversStatus = tableData[0].approversStatus;
 			let approversDate   = tableData[0].approversDate;
 			let employeeID      = tableData[0].employeeID;
 			let createdAt       = tableData[0].createdAt;
 
-			let data = getinventoryValidationData("update", "approve", "2", id);
+			let data = getbidRecapData("update", "approve", "2", id);
 			data["approversStatus"]	= updateApproveStatus(approversStatus, 2);
 			let dateApproved = updateApproveDate(approversDate)
 			data["approversDate"]	= dateApproved;
@@ -1768,9 +1747,9 @@ $(document).ready(function() {
 			if (isImLastApprover(approversID, approversDate)) {
 				status = 2;
 				notificationData = {
-					moduleID:                126,
+					moduleID:                40,
 					tableID:                 id,
-					notificationTitle:       "Inventory Validation",
+					notificationTitle:       "Bid Recap",
 					notificationDescription: `${feedback}: Your request has been approved.`,
 					notificationType:        7,
 					employeeID,
@@ -1779,17 +1758,17 @@ $(document).ready(function() {
 			} else {
 				status = 1;
 				notificationData = {
-					moduleID:                126,
+					moduleID:                40,
 					tableID:                 id,
-					notificationTitle:       "Inventory Validation",
+					notificationTitle:       "Bid Recap",
 					notificationDescription: `${employeeFullname(employeeID)} asked for your approval.`,
 					notificationType:         2,
 					employeeID:               getNotificationEmployeeID(approversID, dateApproved),
 				};
 			}
 
-			data["inventoryValidationStatus"]	= status;
-			saveinventoryValidation(data, "approve", notificationData, pageContent, inventoryValidationID);
+			data["bidRecapStatus"]	= status;
+			savebidRecapID(data, "approve", notificationData, pageContent, bidRecapID);
 		
 		}
 	});
@@ -1798,12 +1777,12 @@ $(document).ready(function() {
 
     // ----- REJECT DOCUMENT -----
 	$(document).on("click", "#btnReject", function () {
-		const id       = $(this).attr("inventoryValidationID");
-		const feedback = $(this).attr("code") || getFormCode("IVR", dateToday(), id);
+		const id       = $(this).attr("bidRecapID");
+		const feedback = $(this).attr("code") || getFormCode("BRF", dateToday(), id);
 
-		$("#modal_inventory_validation_content").html(preloader);
-		$("#modal_inventory_validation .page-title").text("DENY INVENTORY VALIDATION");
-		$("#modal_inventory_validation").modal("show");
+		$("#modal_bid_recap_content").html(preloader);
+		$("#modal_bid_recap .page-title").text("DENY Inventory Validation");
+		$("#modal_bid_recap").modal("show");
 		let html = `
 		<div class="modal-body">
 			<div class="form-group">
@@ -1812,30 +1791,30 @@ $(document).ready(function() {
 					data-allowcharacters="[0-9][a-z][A-Z][ ][.][,][_]['][()][?][-][/]"
 					minlength="2"
 					maxlength="250"
-					id="inventoryValidationRemarks"
-					name="inventoryValidationRemarks"
+					id="bidRecapRemarks"
+					name="bidRecapRemarks"
 					rows="4"
 					style="resize: none"
 					required></textarea>
-				<div class="d-block invalid-feedback" id="invalid-inventoryValidationRemarks"></div>
+				<div class="d-block invalid-feedback" id="invalid-bidRecapRemarks"></div>
 			</div>
 		</div>
 		<div class="modal-footer text-right">
 			<button class="btn btn-danger" id="btnRejectConfirmation"
-			inventoryValidationID="${id}"
+			bidRecapID="${id}"
 			code="${feedback}"><i class="far fa-times-circle"></i> Deny</button>
 			<button class="btn btn-cancel" data-dismiss="modal"><i class="fas fa-ban"></i> Cancel</button>
 		</div>`;
-		$("#modal_inventory_validation_content").html(html);
+		$("#modal_bid_recap_content").html(html);
 	});
 
 	$(document).on("click", "#btnRejectConfirmation", function () {
-		const id       = decryptString($(this).attr("inventoryValidationID"));
-		const feedback = $(this).attr("code") || getFormCode("IVR", dateToday(), id);
+		const id       = decryptString($(this).attr("bidRecapID"));
+		const feedback = $(this).attr("code") || getFormCode("BRF", dateToday(), id);
 
-		const validate = validateForm("modal_inventory_validation");
+		const validate = validateForm("modal_bid_recap");
 		if (validate) {
-			let tableData = getTableData("ims_inventory_validation_tbl", "", "inventoryValidationID = " + id);
+			let tableData = getTableData("ims_bid_recap_tbl", "", "bidRecapID = " + id);
 			if (tableData) {
 				let approversStatus = tableData[0].approversStatus;
 				let approversDate   = tableData[0].approversDate;
@@ -1844,22 +1823,22 @@ $(document).ready(function() {
 				let data = {};
 				data["action"]						= "update";
 				data["method"]						= "deny";
-				data["inventoryValidationID"]		= id;
+				data["bidRecapID"]		= id;
 				data["approversStatus"]				= updateApproveStatus(approversStatus, 3);
 				data["approversDate"]				= updateApproveDate(approversDate);
-				data["inventoryValidationRemarks"]	= $("[name=inventoryValidationRemarks]").val()?.trim();
+				data["bidRecapRemarks"]	= $("[name=bidRecapRemarks]").val()?.trim();
 				data["updatedBy"]					= sessionID;
 
 				let notificationData = {
-					moduleID:                126,
+					moduleID:                40,
 					tableID: 				 id,
-					notificationTitle:       "Inventory Validation",
+					notificationTitle:       "Bid Recap",
 					notificationDescription: `${feedback}: Your request has been denied.`,
 					notificationType:        1,
 					employeeID,
 				};
 
-				saveinventoryValidation(data, "deny", notificationData, pageContent);
+				savebidRecapID(data, "deny", notificationData, pageContent);
 				$("[redirect=forApprovalTab]").length > 0 && $("[redirect=forApprovalTab]").trigger("click");
 			} 
 		} 
@@ -1921,20 +1900,22 @@ $(document).ready(function() {
 
     // GETTING REQUEST ITEMS 
         function requestItemData(id, type, readOnly = false, requestID = null){
-			let html = "";
-			let condition = requestID ? requestID : `costEstimateID='${id}'`;
+			let html = "", requestedQty=0, stocksQty=0, forPurchaseQty=0, totalUnitCost=0, grandTotalCost=0;
+			// AND bidRecapID IS NOT NULL
+			let condition = requestID ? requestID : `inventoryValidationID='${id}' AND bidRecapID IS NULL`;
             let tableData = getTableData("ims_request_items_tbl JOIN ims_inventory_item_tbl USING(itemID)",
-                                        "requestItemID, costEstimateID , inventoryValidationID, ims_inventory_item_tbl.itemID AS itemID, categoryType ,ims_inventory_item_tbl.createdAt AS createdAt ,ims_request_items_tbl.itemName as itemName, ims_request_items_tbl.itemDescription as itemDescription,itemUom,quantity,stocks,forPurchase,files",
-                                        `${condition} AND categoryType='${type}' `);
-				tableData.map((items,index)=>{
-					let files = items.files? `<a class="filename" href="${base_url+"assets/upload-files/request-items/"+items.files}" 
+                                        "requestItemID, inventoryValidationID , bidRecapID, ims_inventory_item_tbl.itemID AS itemID, categoryType ,ims_inventory_item_tbl.createdAt AS createdAt ,ims_request_items_tbl.itemName as itemName, ims_request_items_tbl.itemDescription as itemDescription,itemUom,quantity,stocks,forPurchase,files,unitCost,totalCost",
+                                        `${condition} AND categoryType='${type}'`);
+				tableData.map((items,index)=>{ 
+					let files = items.files ? `<a class="filename" href="${base_url+"assets/upload-files/request-items/"+items.files}" 
 													target="_blank">${items.files}
 											  </a>`:"-";
                                         if (readOnly) {
+											var unitCost = items.unitCost, totalCost = items.totalCost;
                                             html += `
                                             <tr class="itemTableRow" category="${type}">
                                                 <td>
-                                                    <div class="itemcode" requestitem="${items.requestItemID}" itemid="${items.itemID}" costEstimateID="${items.costEstimateID}">
+                                                    <div class="itemcode" requestitem="${items.requestItemID}" itemid="${items.itemID}" inventoryValidationID="${items.inventoryValidationID}">
 														${getFormCode("ITM",moment(items.createdAt), items.itemID)}
 													</div>
                                                 </td>
@@ -1944,61 +1925,101 @@ $(document).ready(function() {
 												<td>
                                                     <div class="uom">${items.itemUom}</div>
                                                 </td>
-												<td>
+												<td class="text-center">
                                                     <div class="qtyrequested">${items.quantity}</div>
                                                 </td>
                                                 <td class="text-center">
                                                     <div class="stocks">${items.stocks}</div>
                                                 </td>
-                                                <td>
+                                                <td class="text-center">
                                                     <div class="forpurchase">${items.forPurchase}</div>
                                                 </td>
                                                 <td>
                                                     <div class="file">${files}</div>
                                                 </td>
+												<td class="text-right">
+                                                    <div class="unitCost">${formatAmount(unitCost,true)}</div>
+                                                </td>
+												<td class="text-right">
+                                                    <div class="totalCost">${formatAmount(totalCost,true)}</div>
+                                                </td>
                                             </tr>`;
                                         } else {
-                                            html += `
-                                            <tr class="itemTableRow" category="${type}">
-                                                <td>
-                                                    <div class="itemcode" requestitem="${items.requestItemID}" itemid="${items.itemID}" costEstimateID="${items.costEstimateID}">${getFormCode("ITM",moment(items.createdAt), items.itemID)}</div>
-                                                </td>
-                                                <td>
-                                                    <div class="itemname">${items.itemName}</div>
-                                                </td>
-												<td>
-                                                    <div class="uom">${items.itemUom}</div>
-                                                </td>
-												<td>
-                                                    <div class="qtyrequested">${items.quantity}</div>
-                                                </td>
-                                                <td class="text-center">
-                                                    <div class="stocks">
-                                                        <input 
-                                                            type="text" 
-                                                            class="form-control validate number text-center"
-                                                            data-allowcharacters="[0-9]" 
-                                                            max="99999" 
-                                                            id="${type}stocks${index}" 
-                                                            name="stocks" 
-                                                            value="${items.stocks?items.stocks:""}" 
-                                                            minlength="1" 
-                                                            maxlength="20" 
-                                                            required>
-                                                        <div class="invalid-feedback d-block" id="invalid-${type}stocks${index}"></div>
-                                                    </div>
-                                                </td>
-                                                <td>
-                                                    <div class="forpurchase">${items.forPurchase || "0"}</div>
-                                                </td>
-                                                <td>
-                                                    <div class="file">
-                                                        ${files}
-                                                    </div>
-                                                </td>
-                                            </tr>`;
+											var priceListArray 	= itemPriceListData.filter(priceListItems => priceListItems.itemID == items.itemID  && priceListItems.preferred == 1);
+											if(priceListArray.length < 1){
+												priceListValidation.push(items.createdAt+"|"+items.itemID);
+												var unitCost 		= 0;
+												var totalCost 		= 0;
+												showNotification("warning2", 
+														`Please set item code <strong>${getFormCode("ITM",moment(items.createdAt), items.itemID)}</strong> into inventory price list module to proceed in this proccess`);
+											}else{
+												var unitCost 		= priceListArray[0].vendorCurrentPrice;
+												var totalCost 		= parseFloat(items.forPurchase) * parseFloat(unitCost);
+											}
+
+												html += `
+														<tr class="itemTableRow" category="${type}">
+															<td>
+																<div class="itemcode" requestitem="${items.requestItemID}" itemid="${items.itemID}" inventoryValidationID="${items.inventoryValidationID}">${getFormCode("ITM",moment(items.createdAt), items.itemID)}</div>
+															</td>
+															<td>
+																<div class="itemname">${items.itemName}</div>
+															</td>
+															<td>
+																<div class="uom">${items.itemUom}</div>
+															</td>
+															<td class="text-center">
+																<div class="qtyrequested">${items.quantity}</div>
+															</td>
+															<td class="text-center">
+																<div class="stocks">${items.stocks || "0"}</div>
+															</td>
+															<td class="text-center">
+																<div class="forpurchase">${items.forPurchase || "0"}</div>
+															</td>
+															<td>
+																<div class="file">
+																	${files}
+																</div>
+															</td>
+															<td>
+																<div class="unitCost text-right">${formatAmount(unitCost,true)}</div>
+															</td>
+															<td>
+																<div class="totalCost text-right">${formatAmount(totalCost,true)}</div>
+															</td>
+														</tr>`;
                                         }
+					requestedQty		+= parseFloat(items.quantity);
+					stocksQty			+= parseFloat(items.stocks || "0");
+					forPurchaseQty		+= parseFloat(items.forPurchase || "0");
+					totalUnitCost		+= parseFloat(unitCost); 
+					grandTotalCost		+= parseFloat(totalCost);
 				});
+			
+				html += `
+							<tr class="itemTableRowTotal mt-2" category="${type}" style="background-color:#f2f2f2;">
+								<th>-</th>
+								<th>-</th>
+								<th>-</th>
+								<th class="text-center mt-2">
+									<div class="qtyrequested text-danger">${requestedQty}</div>
+								</th>
+								<th class="text-center mt-2">
+									<div class="stocks text-danger">${stocksQty}</div>
+								</th>
+								<th class="text-center mt-2">
+									<div class="forpurchase text-danger">${forPurchaseQty}</div>
+								</th>
+								<th class="mt-2 text-danger">-</th>
+								<th class="mt-2">
+									<div class="unitCost text-right text-danger">${formatAmount(totalUnitCost,true)}</div>
+								</th>
+								<th class="mt-2">
+									<div class="totalCost text-right text-danger">${formatAmount(grandTotalCost,true)}</div>
+								</th>
+							</tr>
+						`;
             return html;
         }
     // END GETTING REQUEST ITEMS
@@ -2008,20 +2029,11 @@ $(document).ready(function() {
 	// CHECK IF THE DOCUMENT IS ALREADY REVISED
 	function isRevised(id = null){
 		let revised = false;
-		var tableData = getTableData("ims_inventory_validation_tbl","reviseInventoryValidationID",`reviseInventoryValidationID=`+id);
+		var tableData = getTableData("ims_bid_recap_tbl","reviseBidRecapID",`reviseBidRecapID=`+id);
 		revised = tableData.length > 0 ? true : false;
 		return revised; 
 	}
 	// END CHECK IF THE DOCUMENT IS ALREADY REVISED
-
-	// ----- REMOVE IS-VALID IN TABLE -----
-	function removeIsValid(element = "table") {
-		$(element).find(".validated, .is-valid, .no-error").removeClass("validated")
-		.removeClass("is-valid").removeClass("no-error");
-	}
-	// ----- END REMOVE IS-VALID IN TABLE -----
-
-	
 })
 
 
@@ -2030,7 +2042,7 @@ function getConfirmation(method = "submit") {
 	const title = "Inventory Validation";
 	let swalText, swalImg;
 
-	$("#modal_inventory_validation").text().length > 0 && $("#modal_inventory_validation").modal("hide");
+	$("#modal_bid_recap").text().length > 0 && $("#modal_bid_recap").modal("hide");
 
 	switch (method) {
 		case "save":
@@ -2079,14 +2091,14 @@ function getConfirmation(method = "submit") {
 	})
 }
 
-function saveinventoryValidation(data = null, method = "submit", notificationData = null, callback = null, lastApproverID = 0) {
+function savebidRecapID(data = null, method = "submit", notificationData = null, callback = null, lastApproverID = 0) {
 	let thisReturnData = false;
 	if (data) {
 		const confirmation = getConfirmation(method);
 		confirmation.then(res => {
 			if (res.isConfirmed) {
 				$.ajax({
-					url:	base_url+`ims/inventory_validation/save_inventory_validation`,
+					url:	base_url+`ims/bid_recap/save_bid_recap`,
 					method: "POST",
 					async:  false,
 					dataType:    "json",
@@ -2104,15 +2116,15 @@ function saveinventoryValidation(data = null, method = "submit", notificationDat
 
 						let swalTitle;
 						if (method == "submit") {
-							swalTitle = `${getFormCode("IVR", dateCreated, insertedID)} submitted successfully!`;
+							swalTitle = `${getFormCode("BRF", dateCreated, insertedID)} submitted successfully!`;
 						} else if (method == "save") {
-							swalTitle = `${getFormCode("IVR", dateCreated, insertedID)} saved successfully!`;
+							swalTitle = `${getFormCode("BRF", dateCreated, insertedID)} saved successfully!`;
 						} else if (method == "cancelform") {
-							swalTitle = `${getFormCode("IVR", dateCreated, insertedID)} cancelled successfully!`;
+							swalTitle = `${getFormCode("BRF", dateCreated, insertedID)} cancelled successfully!`;
 						} else if (method == "approve") {
-							swalTitle = `${getFormCode("IVR", dateCreated, insertedID)} approved successfully!`;
+							swalTitle = `${getFormCode("BRF", dateCreated, insertedID)} approved successfully!`;
 						} else if (method == "deny") {
-							swalTitle = `${getFormCode("IVR", dateCreated, insertedID)} denied successfully!`;
+							swalTitle = `${getFormCode("BRF", dateCreated, insertedID)} denied successfully!`;
 						}	
 		
 						if (isSuccess == "true") {
@@ -2172,11 +2184,11 @@ function saveinventoryValidation(data = null, method = "submit", notificationDat
 					if (method != "deny") {
 						callback && callback();
 					} else {
-						$("#modal_inventory_validation").text().length > 0 && $("#modal_inventory_validation").modal("show");
+						$("#modal_bid_recap").text().length > 0 && $("#modal_bid_recap").modal("show");
 					}
 				} else if (res.isDismissed) {
 					if (method == "deny") {
-						$("#modal_inventory_validation").text().length > 0 && $("#modal_inventory_validation").modal("show");
+						$("#modal_bid_recap").text().length > 0 && $("#modal_bid_recap").modal("show");
 					}
 				}
 			}

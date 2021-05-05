@@ -30,11 +30,11 @@ class InventoryValidation_model extends CI_Model {
     }
 
     public function saveInventoryValidationItems($data, $id = null){
-        // if ($id) {
-        //     $deleteInventoryValidationItems = $this->deleteInventoryValidationItems($id);
-        // }
+        if ($id) {
+            $deleteInventoryValidationItems = $this->deleteInventoryValidationItems($id);
+        }
 
-        $query = $this->db->update_batch("ims_request_items_tbl", $data, "requestItemID");
+        $query = $this->db->insert_batch("ims_request_items_tbl", $data);
         if ($query) {
             return "true|Successfully submitted";
         }

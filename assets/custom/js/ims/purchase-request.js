@@ -202,7 +202,7 @@ $(document).ready(function() {
 				columnDefs: [
 					{ targets: 0,  width: 50  },
 					{ targets: 1,  width: 150 },
-					{ targets: 2,  width: 150 },
+					{ targets: 2,  width: 180 },
 					{ targets: 3,  width: 50  },
 					{ targets: 4,  width: 120 },
 					{ targets: 5,  width: 80  },
@@ -853,7 +853,7 @@ $(document).ready(function() {
 								class="form-control validate select2"
 								name="itemID"
 								id="itemID"
-								style="width: 100%"
+								style="width: 180px !important"
 								required
 								${attr}>
 								${getInventoryItem(itemID, isProject)}

@@ -25,8 +25,14 @@ class CostEstimate_model extends CI_Model {
     }
 
     public function deleteCostEstimateItems($id) {
-        $query = $this->db->delete("ims_request_items_tbl", ["costEstimateID" => $id]);
-        return $query ? true : false;
+        $queryPersonnel = $this->db->delete("hris_personnel_request_tbl", ["costEstimateID" => $id]) ? true : "";
+        $queryTravel    = $this->db->delete("ims_travel_request_tbl",     ["costEstimateID" => $id]) ? true : "";
+        $queryItems     = $this->db->delete("ims_request_items_tbl",      ["costEstimateID" => $id]) ? true : "";
+        $query          = false;
+        if($queryPersonnel && $queryTravel && $queryItems){
+            $query = true;
+        }
+        return $query;
     }
 
     public function saveCostEstimateItems($data, $id = null){

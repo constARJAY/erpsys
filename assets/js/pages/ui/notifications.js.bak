@@ -67,10 +67,6 @@ function showNotification(msgtype, msg) {
     } else if (msgtype=='info') {
         title_type = 'NOTICE!';
         icon_type  = 'fa fa-exclamation-circle';
-    }else if(msgtype == 'warning2'){
-        msgtype = "warning";
-        title_type = 'WARNING!';
-        icon_type  = 'fa fa-exclamation-circle';
     } else{
         title_type = 'SUCCESS!';
         icon_type  = 'fa fa-check-circle';

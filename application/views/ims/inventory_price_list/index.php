@@ -5,11 +5,11 @@
                 <div class="col-sm-12 col-md-8">
                     <ul class="breadcrumb pl-0 pb-0 ">
                         <li class="breadcrumb-item"><a href="#"><i class="zmdi zmdi-home"></i>&nbsp;Dashboard</a></li>
-                        <li class="breadcrumb-item"><i class="zmdi zmdi-folder"></i>&nbsp;Masterfiles</li>
-                        <li class="breadcrumb-item active">Inventory Price List</li>
+                        <li class="breadcrumb-item"><i class="fas fa-boxes-alt"></i> &nbsp;Inventory Modules</li>
+                        <li class="breadcrumb-item active">Item Price List</li>
                     </ul>
-                    <h1 class="mt-3">List of Inventory Price</h1>
-                    <span>This module is used to manage the inventory price list details.</span>
+                    <h1 class="mt-3">List of Item Price List</h1>
+                    <span>This module is used to manage the inventory item price list details.</span>
                 </div>
                 <div class="col-sm-12 col-md-4 d-flex justify-content-end align-items-start" id="select2Classification">
                     <!-- <button class="btn btn-default btn-add d-flex justify-content-center align-items-center ml-2 addClassification"><i class="icon-plus px-2"></i><span class="d-none d-sm-none d-md-block d-lg-block d-xl-block">Add&nbsp;</span> Classification</button> -->
@@ -34,8 +34,8 @@
                                         <div class="col-2"></div>
                                         <div class="col-8 text-center">
                                             <img class="img-fluid" src="http://localhost/erpsys/assets/modal/please-select2.gif" alt="">
-                                            <h6 class="module-header text-primary text-center font-weight-bold">DESIGNATION</h6>
-                                            <p>Select module to view designation.</p>
+                                            <h6 class="module-header text-primary text-center font-weight-bold">ITEM PRICE LIST</h6>
+                                            <p>Select classification to show price list.</p>
                                         </div>
                                         <div class="col-2"></div>
                                     </div>

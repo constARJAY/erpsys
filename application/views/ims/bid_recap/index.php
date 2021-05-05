@@ -6,9 +6,9 @@
                     <ul class="breadcrumb pl-0 pb-0 ">
                         <li class="breadcrumb-item"><a href="#"><i class="zmdi zmdi-home"></i> Dashboard</a></li>
 						<li class="breadcrumb-item"><i class="fas fa-boxes-alt"></i> &nbsp;Inventory Modules</li>
-                        <li class="breadcrumb-item active">Inventory Validation</li>
+                        <li class="breadcrumb-item active">Bid Recap</li>
                     </ul>
-                    <h1 class="mt-3">Inventory Validation</h1>
+                    <h1 class="mt-3">Bid Recap</h1>
                     <span>This module is used to manage inventory validation form details.</span>
                 </div>
                 <div class="col-lg-6 col-md-6 text-right" id="headerButton"></div>
@@ -30,7 +30,7 @@
 
 
 <!-- ----- MODAL ----- -->
-<div id="modal_inventory_validation" class="modal custom-modal fade" data-backdrop="static" data-keyboard="false" role="dialog">
+<div id="modal_bid_recap" class="modal custom-modal fade" data-backdrop="static" data-keyboard="false" role="dialog">
     <div class="modal-dialog modal-dialog-centered modal-md" role="document">
 		<div class="modal-content">
 			<div class="modal-header bg-primary text-light">
@@ -40,7 +40,7 @@
 				</button>
 			</div>
 
-            <div id="modal_inventory_validation_content"></div>
+            <div id="modal_bid_recap_content"></div>
         </div>
 	</div>
 </div>
@@ -48,4 +48,4 @@
 
 
 <script src="<?= base_url('assets/custom/js/gen/approver-function.js') ?>"></script>
-<script src="<?= base_url('assets/custom/js/ims/inventory-validation.js') ?>"></script>
+<script src="<?= base_url('assets/custom/js/ims/bid-recap.js') ?>"></script>

@@ -91,15 +91,22 @@ class Inventory_validation extends CI_Controller {
 
             if ($result[0] == "true") {
                 $inventoryValidationID = $result[2];
-
                 if ($items) {
                     $inventoryValidationtems = [];
                     foreach($items as $index => $item) {
                         $temp = [
-                            "requestItemID"     => $item["requestItemID"],
-                            "stocks"            => $item["stocks"],
-                            "forPurchase"       => $item["forPurchase"],
-                            "updatedBy"         => $item["updatedBy"],
+                            "inventoryValidationID" => $inventoryValidationID,
+                            "costEstimateID"        => $item["costEstimateID"],
+                            "categoryType"          => $item["category"],
+                            "itemID"                => $item["itemID"],
+                            "itemname"              => $item["itemname"],
+                            "itemUom"               => $item["itemUom"],
+                            "itemDescription"       => $item["itemDescription"],
+                            "quantity"              => $item["quantity"],
+                            "stocks"                => $item["stocks"],
+                            "forPurchase"           => $item["forPurchase"],
+                            "createdBy"             => $createdBy,
+                            "updatedBy"             => $item["updatedBy"],
                         ];
                         array_push($inventoryValidationtems, $temp);
                     }

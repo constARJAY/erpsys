@@ -241,7 +241,7 @@ $(document).ready(function() {
 				columnDefs: [
 					{ targets: 0,  width: 50  },
 					{ targets: 1,  width: 150 },
-					{ targets: 2,  width: 150 },
+					{ targets: 2,  width: "10%" },
 					{ targets: 3,  width: 50  },
 					{ targets: 4,  width: 80  },
 					{ targets: 5,  width: 150 }
@@ -283,7 +283,7 @@ $(document).ready(function() {
 				columnDefs: [
 					{ targets: 0,  width: 50  },
 					{ targets: 1,  width: 150 },
-					{ targets: 2,  width: 150 },
+					{ targets: 2,  width: "10%" },
 					{ targets: 3,  width: 50  },
 					{ targets: 4,  width: 80  },
 					{ targets: 5,  width: 150 }
@@ -643,15 +643,19 @@ $(document).ready(function() {
 					}
 				} else if (costEstimateStatus == 3) {
 					// DENIED - FOR REVISE
-					button = `
-					<button
-						class="btn btn-cancel"
-						id="btnRevise" 
-						costEstimateID="${encryptString(costEstimateID)}"
-						code="${getFormCode("CEF", createdAt, costEstimateID)}"
-						status="${costEstimateStatus}"><i class="fas fa-clone"></i>
-						Revise
-					</button>`;
+
+					if(!isRevised(costEstimateID)){
+						button = `
+						<button
+							class="btn btn-cancel"
+							id="btnRevise" 
+							costEstimateID="${encryptString(costEstimateID)}"
+							code="${getFormCode("CEF", createdAt, costEstimateID)}"
+							status="${costEstimateStatus}"><i class="fas fa-clone"></i>
+							Revise
+						</button>`;
+					}
+							
 				}
 			} else {
 				if (costEstimateStatus == 1) {
@@ -819,10 +823,11 @@ $(document).ready(function() {
 			case "personnel":
 					attr = "[personnel=true]";
 					html += `<option selected disabled>Select Designation</option>`;
-					html += `<option value="-" ${id == 0 && "selected"}>None</option>`;
+					
 					$(`[name=designationID]${attr}`).each(function(i, obj) {
 						itemIDArr.push($(this).val());
 					}) 
+					html += `<option value="none" ${id === "none" && "selected"}>None</option>`;
 					html += designationList.filter(item => !itemIDArr.includes(item.designationID) || item.designationID == id).map(item => {
 						return `
 						<option 
@@ -1781,9 +1786,9 @@ $(document).ready(function() {
 					categoryType 	= "project";
 					itemID    	 	= $("td [name=itemID]", this).val();
 					var inventoryItemListArray = inventoryItemList.filter(items=> items.itemID == itemID);
-					itemName	 	= inventoryItemListArray[0].itemName;
-					itemDescription = inventoryItemListArray[0].itemDescription;
-					itemUom			= inventoryItemListArray[0].unitOfMeasurementID;
+					itemName	 	= inventoryItemListArray.length > 0 ? inventoryItemListArray[0].itemName : null;
+					itemDescription = inventoryItemListArray.length > 0 ?inventoryItemListArray[0].itemDescription : null;
+					itemUom			= inventoryItemListArray.length > 0 ?inventoryItemListArray[0].unitOfMeasurementID :null;
 					fileID    		= $("td [name=files]", this).attr("id");
 					file      		= $(`#${fileID}`)[0].files[0];
 					fileArr   		= file?.name.split(".");
@@ -1793,9 +1798,9 @@ $(document).ready(function() {
 					
 					itemID     	 	= $("td [name=itemID]", this).val();
 					var inventoryItemListArray = inventoryItemList.filter(items=> items.itemID == itemID);
-					itemName	 	= inventoryItemListArray[0].itemName;
-					itemDescription = inventoryItemListArray[0].itemDescription;
-					itemUom			= inventoryItemListArray[0].unitOfMeasurementID;
+					itemName	 	= inventoryItemListArray.length > 0 ? inventoryItemListArray[0].itemName : null;
+					itemDescription = inventoryItemListArray.length > 0 ?inventoryItemListArray[0].itemDescription : null;
+					itemUom			= inventoryItemListArray.length > 0 ?inventoryItemListArray[0].unitOfMeasurementID :null;
 					fileID    	 	= $("td [name=files]", this).attr("id");
 					file      	 	= $(`#${fileID}`)[0].files[0];
 					fileArr   	 	= file?.name.split(".");
@@ -1968,7 +1973,7 @@ $(document).ready(function() {
 			let notificationData = false;
 			if (employeeID != sessionID) {
 				notificationData = {
-					moduleID:                46,
+					moduleID:                38,
 					notificationTitle:       "Cost Estimate",
 					notificationDescription: `${employeeFullname(sessionID)} asked for your approval.`,
 					notificationType:        2,
@@ -2021,7 +2026,7 @@ $(document).ready(function() {
 			if (isImLastApprover(approversID, approversDate)) {
 				status = 2;
 				notificationData = {
-					moduleID:                46,
+					moduleID:                38,
 					tableID:                 id,
 					notificationTitle:       "Cost Estimate",
 					notificationDescription: `${feedback}: Your request has been approved.`,
@@ -2032,7 +2037,7 @@ $(document).ready(function() {
 			} else {
 				status = 1;
 				notificationData = {
-					moduleID:                46,
+					moduleID:                38,
 					tableID:                 id,
 					notificationTitle:       "Cost Estimate",
 					notificationDescription: `${employeeFullname(employeeID)} asked for your approval.`,
@@ -2104,7 +2109,7 @@ $(document).ready(function() {
 				data.append("updatedBy", sessionID);
 
 				let notificationData = {
-					moduleID:                46,
+					moduleID:                38,
 					tableID: 				 id,
 					notificationTitle:       "Cost Estimate",
 					notificationDescription: `${feedback}: Your request has been denied.`,
@@ -2239,7 +2244,7 @@ $(document).ready(function() {
 								class="form-control validate select2"
 								name="itemID"
 								id="itemID"
-								style="width: 100%"
+								style="width: 400px"
 								required
 								project="true">
 								${getInventoryItem(itemID, "project")}
@@ -2354,7 +2359,7 @@ $(document).ready(function() {
 								class="form-control validate select2"
 								name="itemID"
 								id="itemID"
-								style="width: 100%"
+								style="width: 400px"
 								required
 								company="true">
 								${getInventoryItem(itemID, "company")}
@@ -2428,7 +2433,7 @@ $(document).ready(function() {
 						${quantity || "-"}
 					</div>
 				</td>
-				<td class="text-right">
+				<td class="text-center">
 					<div class="totalhours">
 						${designationTotalHours || "-"}
 					</div>
@@ -2443,7 +2448,7 @@ $(document).ready(function() {
 					</div>
 				</td>
 				<td>
-					<div class="designationcode">${designationID == ""? "-" : getFormCode("DSN",moment(),designationID) }</div>
+					<div class="designationcode">${!designationID ? "-" : getFormCode("DSN",moment(),designationID) }</div>
 				</td>
 				<td>
 					<div class="designationname">
@@ -2488,7 +2493,7 @@ $(document).ready(function() {
 							name="employeeTotalHours" 
 							value="${designationTotalHours}" 
 							minlength="1" 
-							maxlength="20" 
+							maxlength="5" 
 							required>
 						<div class="invalid-feedback d-block" id="invalid-employeeTotalHours"></div>
 					</div>
@@ -2580,6 +2585,19 @@ $(document).ready(function() {
 		}
 		return html;
 	}
+
+	// CHECK IF THE DOCUMENT IS ALREADY REVISED
+	function isRevised(id = null){
+		let revised = false;
+		var tableData = getTableData("pms_cost_estimate_tbl","reviseCostEstimateID",`reviseCostEstimateID=`+id);
+		revised = tableData.length > 0 ? true : false;
+		return revised; 
+	}
+	// END CHECK IF THE DOCUMENT IS ALREADY REVISED
+
+
+
+
 
 
 

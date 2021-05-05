@@ -1383,6 +1383,46 @@ INSERT INTO `hris_tax_table_tbl` VALUES (1,1.00,20832.00,0.00,0.00,'2021-04-15 0
 UNLOCK TABLES;
 
 --
+-- Table structure for table `ims_bid_recap_tbl`
+--
+
+DROP TABLE IF EXISTS `ims_bid_recap_tbl`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `ims_bid_recap_tbl` (
+  `bidRecapID` bigint(20) NOT NULL AUTO_INCREMENT,
+  `reviseBidRecapID` bigint(20) DEFAULT NULL,
+  `documentType` text DEFAULT NULL,
+  `documentID` bigint(20) NOT NULL,
+  `referenceCode` bigint(20) NOT NULL,
+  `employeeID` bigint(20) NOT NULL,
+  `projectID` bigint(20) DEFAULT NULL,
+  `approversID` text DEFAULT NULL,
+  `approversStatus` text DEFAULT NULL,
+  `approversDate` text DEFAULT NULL,
+  `bidRecapStatus` int(11) NOT NULL,
+  `bidRecapReason` text DEFAULT NULL,
+  `bidRecapRemarks` text DEFAULT NULL,
+  `bidRecapGrandTotal` decimal(10,2) NOT NULL,
+  `submittedAt` timestamp NULL DEFAULT current_timestamp(),
+  `createdBy` bigint(20) NOT NULL,
+  `updatedBy` bigint(20) NOT NULL,
+  `createdAt` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updatedAt` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`bidRecapID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `ims_bid_recap_tbl`
+--
+
+LOCK TABLES `ims_bid_recap_tbl` WRITE;
+/*!40000 ALTER TABLE `ims_bid_recap_tbl` DISABLE KEYS */;
+/*!40000 ALTER TABLE `ims_bid_recap_tbl` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `ims_inventory_category_tbl`
 --
 
@@ -1606,7 +1646,7 @@ CREATE TABLE `ims_inventory_price_list_tbl` (
   `createdAt` timestamp NOT NULL DEFAULT current_timestamp(),
   `updatedAt` datetime NOT NULL,
   PRIMARY KEY (`priceListID`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1615,7 +1655,6 @@ CREATE TABLE `ims_inventory_price_list_tbl` (
 
 LOCK TABLES `ims_inventory_price_list_tbl` WRITE;
 /*!40000 ALTER TABLE `ims_inventory_price_list_tbl` DISABLE KEYS */;
-INSERT INTO `ims_inventory_price_list_tbl` VALUES (1,1,9,5000.20,1,1,1,'2021-04-26 01:24:52','2021-04-26 09:24:01');
 /*!40000 ALTER TABLE `ims_inventory_price_list_tbl` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -2052,15 +2091,14 @@ CREATE TABLE `ims_request_items_tbl` (
   `costEstimateID` bigint(20) DEFAULT NULL,
   `inventoryValidationID` bigint(20) DEFAULT NULL,
   `billMaterialID` bigint(20) DEFAULT NULL,
-  `bidRecapID` bigint(20) DEFAULT NULL,
   `purchaseRequestID` bigint(20) DEFAULT NULL,
+  `bidRecapID` bigint(20) DEFAULT NULL,
   `purchaseOrderID` bigint(20) DEFAULT NULL,
   `inventoryVendorID` bigint(20) DEFAULT NULL,
   `categoryType` varchar(50) DEFAULT NULL,
   `itemID` bigint(20) DEFAULT NULL,
   `itemName` varchar(100) DEFAULT NULL,
   `itemDescription` text DEFAULT NULL,
-  `brandName` varchar(255) DEFAULT NULL,
   `itemUom` varchar(100) DEFAULT NULL,
   `quantity` bigint(20) NOT NULL,
   `unitCost` decimal(15,2) NOT NULL,
@@ -2074,7 +2112,7 @@ CREATE TABLE `ims_request_items_tbl` (
   `createdAt` timestamp NOT NULL DEFAULT current_timestamp(),
   `updatedAt` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   PRIMARY KEY (`requestItemID`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=196 DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2716,4 +2754,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2021-05-04 16:04:46
+-- Dump completed on 2021-05-05  8:02:35

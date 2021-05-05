@@ -55,7 +55,8 @@ textarea:focus, input:focus{
 	margin-top: 0.15rem;
 }
 .select2 {
-	width: 100%;
+	/* width: 100%; */
+	width: 100% !important; /* CHANGE */
 }
 .selection .select2-selection {
 	min-height: calc(1.5em + 0.75rem + 5px);
@@ -125,6 +126,8 @@ textarea:focus, input:focus{
 
 body {
 	padding-right: 0px !important;
+	overflow-x: hidden;
+	min-width: 410px;
 }
 
 body::-webkit-scrollbar-track,
@@ -146,20 +149,20 @@ body::-webkit-scrollbar-thumb,
 }
 
 .dataTables_scrollBody::-webkit-scrollbar-track,
-.modal::-webkit-scrollbar-track {
+.modal::-webkit-scrollbar-track, #page_content::-webkit-scrollbar-track {
 	-webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
 	background-color: #f7f7f7;
 }
 
 .dataTables_scrollBody::-webkit-scrollbar,
-.modal::-webkit-scrollbar {
+.modal::-webkit-scrollbar, #page_content::-webkit-scrollbar {
 	width: 7px;
 	height: 10px;
 	background-color: #f7f7f7;
 }
 
 .dataTables_scrollBody::-webkit-scrollbar-thumb,
-.modal::-webkit-scrollbar-thumb {
+.modal::-webkit-scrollbar-thumb, #page_content::-webkit-scrollbar-thumb {
 	/*-webkit-box-shadow: inset 0 0 6px rgba(0,0,0,.3);*/
 	background-color: #dc3450;
 }
@@ -16888,16 +16891,16 @@ a:hover {
   
   
   .btn.btn-edit {
-	color: #007bff;
-	border: 1px solid #007bff;
+	color: #4b81bb;
+	border: 1px solid #2578d2;
   }
   .btn.btn-edit:hover {
 	color: #fff;
-	background-color: #007bff;
+	background-color: #468edc;
   }
   .btn-edit.focus,
   .btn-edit:focus {
-	  box-shadow: 0 0 0 .2rem #dc3545c2;
+	  box-shadow: 0 0 0 .2rem #286ca7c2;
   }
   
   
@@ -16907,7 +16910,7 @@ a:hover {
   }
   .btn.btn-view:hover {
 	color: #fff;
-	background-color: #28a745;
+	background-color: #4b9c75;
   }
   .btn-view.focus,
   .btn-view:focus {
