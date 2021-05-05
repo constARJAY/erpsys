@@ -116,8 +116,20 @@ $(document).ready(function() {
 	};
 
 	const inventoryItemList = getTableData(
-		"ims_inventory_item_tbl LEFT JOIN ims_inventory_category_tbl USING(categoryID)", "itemID, itemCode, itemName, categoryName, unitOfMeasurementID",
+		"ims_inventory_item_tbl LEFT JOIN ims_inventory_category_tbl USING(categoryID)", "itemID, itemCode, itemName, itemDescription, categoryName, unitOfMeasurementID, ims_inventory_item_tbl.createdAt",
 		"itemStatus = 1");
+
+	const inventoryPriceList = getTableData(
+		`ims_inventory_price_list_tbl`,
+		``,
+		`preferred = 1`
+	);
+
+	const costEstimateList = getTableData(
+		`pms_cost_estimate_tbl`,
+		"",
+		`costEstimateStatus = 2`
+	);
 
 	const projectList = getTableData(
 		"pms_project_list_tbl AS pplt LEFT JOIN pms_client_tbl AS pct ON pct.clientID = pplt.projectListClientID", 
@@ -213,7 +225,7 @@ $(document).ready(function() {
 				],
 			});
 
-			var table = $("#tableProjectRequestItems0")
+		var table = $("#tableProjectRequestItems0")
 			.css({ "min-width": "100%" })
 			.removeAttr("width")
 			.DataTable({
@@ -236,7 +248,7 @@ $(document).ready(function() {
 				],
 			});
 
-			var table = $("#tableCompanyRequestItems")
+		var table = $("#tableCompanyRequestItems")
 			.css({ "min-width": "100%" })
 			.removeAttr("width")
 			.DataTable({
@@ -263,7 +275,7 @@ $(document).ready(function() {
 				],
 			});
 
-			var table = $("#tableCompanyRequestItems0")
+		var table = $("#tableCompanyRequestItems0")
 			.css({ "min-width": "100%" })
 			.removeAttr("width")
 			.DataTable({
@@ -331,8 +343,11 @@ $(document).ready(function() {
 	function forApprovalContent() {
 		$("#tableForApprovalParent").html(preloader);
 		let purchaseRequestData = getTableData(
-			"ims_purchase_request_tbl AS imrt LEFT JOIN hris_employee_list_tbl AS helt USING(employeeID) LEFT JOIN pms_project_list_tbl AS pplt ON pplt.projectListID = imrt.projectID",
-			"imrt.*, CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname, imrt.createdAt AS dateCreated, projectListCode, projectListName",
+			`ims_purchase_request_tbl AS imrt 
+				LEFT JOIN hris_employee_list_tbl AS helt USING(employeeID) 
+				LEFT JOIN pms_project_list_tbl AS pplt ON pplt.projectListID = imrt.projectID
+				LEFT JOIN pms_cost_estimate_tbl AS pcet USING(costEstimateID)`,
+			"imrt.*, CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname, imrt.createdAt AS dateCreated, projectListCode, projectListName, pcet.createdAt AS ceCreatedAt",
 			`imrt.employeeID != ${sessionID} AND purchaseRequestStatus != 0 AND purchaseRequestStatus != 4`,
 			`FIELD(purchaseRequestStatus, 0, 1, 3, 2, 4), COALESCE(imrt.submittedAt, imrt.createdAt)`
 		);
@@ -343,9 +358,9 @@ $(document).ready(function() {
                 <tr style="white-space: nowrap">
                     <th>Document No.</th>
                     <th>Employee Name</th>
+                    <th>Reference No.</th>
                     <th>Project Code</th>
                     <th>Project Name</th>
-                    <th>Reference Code</th>
                     <th>Current Approver</th>
                     <th>Date Created</th>
                     <th>Date Submitted</th>
@@ -364,13 +379,14 @@ $(document).ready(function() {
 				projectID,
 				projectListCode,
 				projectListName,
-				referenceCode,
+				costEstimateID,
 				approversID,
 				approversDate,
 				purchaseRequestStatus,
 				purchaseRequestRemarks,
 				submittedAt,
 				createdAt,
+				ceCreatedAt
 			} = item;
 
 			let remarks       = purchaseRequestRemarks ? purchaseRequestRemarks : "-";
@@ -393,9 +409,9 @@ $(document).ready(function() {
 				<tr>
 					<td>${getFormCode("PR", createdAt, purchaseRequestID )}</td>
 					<td>${fullname}</td>
+					<td>${costEstimateID != 0 ? getFormCode("CE", ceCreatedAt, costEstimateID) : '-'}</td>
 					<td>${projectListCode || '-'}</td>
 					<td>${projectListName || '-'}</td>
-					<td>${referenceCode || '-'}</td>
 					<td>
 						${employeeFullname(getCurrentApprover(approversID, approversDate, purchaseRequestStatus, true))}
 					</td>
@@ -430,8 +446,11 @@ $(document).ready(function() {
 	function myFormsContent() {
 		$("#tableMyFormsParent").html(preloader);
 		let purchaseRequestData = getTableData(
-			"ims_purchase_request_tbl AS imrt LEFT JOIN hris_employee_list_tbl AS helt USING(employeeID) LEFT JOIN pms_project_list_tbl AS pplt ON pplt.projectListID = imrt.projectID",
-			"imrt.*, CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname, imrt.createdAt AS dateCreated, projectListCode, projectListName",
+			`ims_purchase_request_tbl AS imrt 
+				LEFT JOIN hris_employee_list_tbl AS helt USING(employeeID) 
+				LEFT JOIN pms_project_list_tbl AS pplt ON pplt.projectListID = imrt.projectID
+				LEFT JOIN pms_cost_estimate_tbl AS pcet USING(costEstimateID)`,
+			"imrt.*, CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname, imrt.createdAt AS dateCreated, projectListCode, projectListName, pcet.createdAt AS ceCreatedAt",
 			`imrt.employeeID = ${sessionID}`,
 			`FIELD(purchaseRequestStatus, 0, 1, 3, 2, 4), COALESCE(imrt.submittedAt, imrt.createdAt)`
 		);
@@ -442,9 +461,9 @@ $(document).ready(function() {
                 <tr style="white-space: nowrap">
                     <th>Document No.</th>
                     <th>Employee Name</th>
+                    <th>Reference No.</th>
                     <th>Project Code</th>
                     <th>Project Name</th>
-                    <th>Reference Code</th>
                     <th>Current Approver</th>
                     <th>Date Created</th>
                     <th>Date Submitted</th>
@@ -463,13 +482,14 @@ $(document).ready(function() {
                 projectID,
                 projectListCode,
                 projectListName,
-                referenceCode,
+                costEstimateID,
 				approversID,
 				approversDate,
 				purchaseRequestStatus,
 				purchaseRequestRemarks,
 				submittedAt,
 				createdAt,
+				ceCreatedAt
 			} = item;
 
 			let remarks       = purchaseRequestRemarks ? purchaseRequestRemarks : "-";
@@ -491,9 +511,9 @@ $(document).ready(function() {
             <tr>
                 <td>${getFormCode("PR", createdAt, purchaseRequestID )}</td>
                 <td>${fullname}</td>
+                <td>${costEstimateID != 0 ? getFormCode("CE", ceCreatedAt, costEstimateID) : '-'}</td>
                 <td>${projectListCode || '-'}</td>
                 <td>${projectListName || '-'}</td>
-                <td>${referenceCode || '-'}</td>
                 <td>
                     ${employeeFullname(getCurrentApprover(approversID, approversDate, purchaseRequestStatus, true))}
                 </td>
@@ -634,6 +654,29 @@ $(document).ready(function() {
 	// ----- END FORM BUTTONS -----
 
 
+	// ----- GET COST ESTIMATE LIST LIST -----
+	function getCostEstimateList(id = null, display = true) {
+		let html = `
+		<option 
+			value     = "0"
+			ceCode    = "-"
+			projectID = "0"
+			${id == "0" && "selected"}>N/A</option>`;
+        html += costEstimateList.map(ce => {
+            return `
+            <option 
+                value     = "${ce.costEstimateID}" 
+                ceCode    = "${getFormCode("CE", ce.createdAt, ce.costEstimateID)}"
+				projectID = "${ce.projectID}"
+                ${ce.costEstimateID == id && "selected"}>
+                ${getFormCode("CE", ce.createdAt, ce.costEstimateID)}
+            </option>`;
+        })
+        return display ? html : costEstimateList;
+	}
+	// ----- END GET COST ESTIMATE LIST LIST -----
+
+
     // ----- GET PROJECT LIST -----
     function getProjectList(id = null, display = true) {
 		let html = `
@@ -643,7 +686,7 @@ $(document).ready(function() {
 			clientCode  = "-"
 			clientName  = "-"
 			address     = "-"
-			${id == "0" && "selected"}>N/A</option>`;
+			${!id && "selected"}>N/A</option>`;
         html += projectList.map(project => {
 			let address = `${project.clientUnitNumber && titleCase(project.clientUnitNumber)+", "}${project.clientHouseNumber && project.clientHouseNumber +", "}${project.clientBarangay && titleCase(project.clientBarangay)+", "}${project.clientCity && titleCase(project.clientCity)+", "}${project.clientProvince && titleCase(project.clientProvince)+", "}${project.clientCountry && titleCase(project.clientCountry)+", "}${project.clientPostalCode && titleCase(project.clientPostalCode)}`;
 
@@ -723,6 +766,28 @@ $(document).ready(function() {
 	// ----- END UPDATE INVENTORYT NAME -----
 
 
+	// ----- GET INVENTORY PREFERRED PRICE -----
+	function getInventoryPreferredPrice(id = null, input, executeOnce = false) {
+		const errorMsg = `Please set item code <b>${getFormCode("ITM", dateToday(), id)}</b> into inventory price list module to proceed in this proccess`;
+		if (id && id != "0") {
+			const price = inventoryPriceList.filter(item => item.itemID == id).map(item => {
+				$(input).attr("inventoryVendorID", item.inventoryVendorID);
+				return item.vendorCurrentPrice;
+			});
+			if (price.length > 0) {
+				return price?.[0];
+			}
+			$(input).removeAttr("inventoryVendorID");
+			!executeOnce && showNotification("warning2", errorMsg);
+			return false;
+		}
+		$(input).removeAttr("inventoryVendorID");
+		id && id != "0" && !executeOnce && showNotification("warning2", errorMsg);
+		return id == "0";
+	}
+	// ----- END GET INVENTORY PREFERRED PRICE -----
+
+
     // ----- GET INVENTORY ITEM -----
     function getInventoryItem(id = null, isProject = true, display = true) {
         let html   = `<option selected disabled>Select Item Name</option>`;
@@ -738,17 +803,20 @@ $(document).ready(function() {
 			itemCode:            "-",
 			categoryName:        "-",
 			unitOfMeasurementID: "-",
-			itemName:            "N/A"
+			itemName:            "N/A",
+			itemDescription:     ""
 		};
 		let itemList = [optionNone, ...inventoryItemList];
 
 		html += itemList.filter(item => !itemIDArr.includes(item.itemID) || item.itemID == id).map(item => {
             return `
             <option 
-                value        = "${item.itemID}" 
-                itemCode     = "${item.itemCode}"
-                categoryName = "${item.categoryName}"
-                uom          = "${item.unitOfMeasurementID}"
+                value           = "${item.itemID}" 
+                itemCode        = "${item.itemCode}"
+                itemDescription = "${item.itemDescription}"
+                categoryName    = "${item.categoryName}"
+                uom             = "${item.unitOfMeasurementID}"
+				createdAt       = "${item.createdAt}"
                 ${item.itemID == id && "selected"}>
                 ${item.itemName}
             </option>`;
@@ -759,6 +827,13 @@ $(document).ready(function() {
     // ----- END GET INVENTORY ITEM -----
 
 
+	// ----- GET NON FORMAT AMOUNT -----
+	const getNonFormattedAmount = (amount = "₱0.00") => {
+		return +amount.replaceAll(",", "").replace("₱", "");
+	}
+	// ----- END GET NON FORMAT AMOUNT -----
+
+
 	// ----- GET ITEM ROW -----
     function getItemRow(isProject = true, item = {}, readOnly = false) {
 		const attr = isProject ? `project="true"` : `company="true"`;
@@ -766,6 +841,7 @@ $(document).ready(function() {
 			itemCode     = "",
 			itemName     = "",
 			itemID       = null,
+			itmCreatedAt,
 			quantity     = 1,
 			categoryName = "",
 			unitOfMeasurementID: uom = "",
@@ -775,6 +851,9 @@ $(document).ready(function() {
 			remarks      = ""
 		} = item;
 
+		itemName = itemName && itemName != "Select Item Name" ? itemName : "-";
+		uom		 = uom && uom != "undefined" ? uom : "-";
+
 		let html = "";
 		if (readOnly) {
 			const itemFIle = files ? `<a href="${base_url+"assets/upload-files/request-items/"+files}" target="_blank">${files}</a>` : `-`;
@@ -782,7 +861,7 @@ $(document).ready(function() {
 			<tr class="itemTableRow">
 				<td>
 					<div class="itemcode">
-						${itemCode || "-"}
+						${itemID && itemID != 0 ? getFormCode("ITM", itmCreatedAt, itemID) : "-"}
 					</div>
 				</td>
 				<td>
@@ -875,6 +954,7 @@ $(document).ready(function() {
 							value="${quantity}" 
 							minlength="1" 
 							maxlength="20" 
+							autocomplete="off"
 							required>
 						<div class="invalid-feedback d-block" id="invalid-quantity"></div>
 					</div>
@@ -887,22 +967,7 @@ $(document).ready(function() {
 				</td>
 				<td class="text-right">
 					<div class="unitcost">
-						<div class="input-group">
-							<div class="input-group-prepend">
-								<span class="input-group-text" >₱</span>
-							</div>
-							<input 
-								type="text" 
-								class="form-control amount"
-								min="1" 
-								max="9999999999"
-								minlength="1"
-								maxlength="20" 
-								name="unitCost" 
-								id="unitCost" 
-								value="${unitCost}">
-						</div>
-						<div class="invalid-feedback d-block" id="invalid-unitCost"></div>
+						${formatAmount(unitCost, true)}
 					</div>
 				</td>
 				<td class="text-right">
@@ -977,8 +1042,8 @@ $(document).ready(function() {
 			$("td .uom", this).attr("id", `uom${i}`);
 
 			// UNIT COST
-			$("td .unitcost [name=unitCost] ", this).attr("id", `unitcost${i}`);
-			$("td .unitcost [name=unitCost] ", this).attr("project", `true`);
+			$("td .unitcost", this).attr("id", `unitcost${i}`);
+			$("td .unitcost", this).attr("project", `true`);
 
 			// TOTAL COST
 			$("td .totalcost", this).attr("id", `totalcost${i}`);
@@ -1025,8 +1090,8 @@ $(document).ready(function() {
 			$("td .uom", this).attr("id", `uom${i}`);
 
 			// UNIT COST
-			$("td .unitcost [name=unitCost] ", this).attr("id", `unitcost${i}`);
-			$("td .unitcost [name=unitCost] ", this).attr("company", `true`);
+			$("td .unitcost", this).attr("id", `unitcost${i}`);
+			$("td .unitcost", this).attr("company", `true`);
 
 			// TOTAL COST
 			$("td .totalcost", this).attr("id", `totalcost${i}`);
@@ -1085,6 +1150,7 @@ $(document).ready(function() {
 								$(this).html(getInventoryItem(itemID, isProject));
 							}) 
 							updateDeleteButton();
+							updateTotalAmount(isProject);
 						});
 					})
 				}
@@ -1095,6 +1161,25 @@ $(document).ready(function() {
 		}
 	}
 	// ----- END DELETE TABLE ROW -----
+
+
+	// ----- SELECT INVENTORY VALIDATION -----
+	$(document).on("change", `[name="costEstimateID"]`, function() {
+		const costEstimateID = $(this).val();
+		const projectID      = $('option:selected', this).attr("projectID");
+		const viewonly       = $(this).attr("viewonly");
+		console.log(costEstimateID);
+
+		if (viewonly != "true") {
+			$(`[name="projectID"]`).val(projectID).trigger("change");
+			if (costEstimateID && costEstimateID != 0) {
+				$(`[name="projectID"]`).attr("disabled", true);
+			} else {
+				$(`[name="projectID"]`).removeAttr("disabled");
+			}
+		}
+	})
+	// ----- END SELECT INVENTORY VALIDATION -----
 
 
 	// ----- SELECT PROJECT LIST -----
@@ -1114,11 +1199,14 @@ $(document).ready(function() {
 
     // ----- SELECT ITEM NAME -----
     $(document).on("change", "[name=itemID]", function() {
-        const itemCode     = $('option:selected', this).attr("itemCode");
-        const categoryName = $('option:selected', this).attr("categoryName");
-        const uom          = $('option:selected', this).attr("uom");
-		const isProject    = $(this).closest("tbody").attr("project") == "true";
-		const attr         = isProject ? "[project=true]" : "[company=true]";
+		const selectedItemID = $(this).val();
+        const itemCode       = $('option:selected', this).attr("itemCode");
+        const categoryName   = $('option:selected', this).attr("categoryName");
+        const uom            = $('option:selected', this).attr("uom");
+		const isProject      = $(this).closest("tbody").attr("project") == "true";
+		const attr           = isProject ? "[project=true]" : "[company=true]";
+
+		getInventoryPreferredPrice(selectedItemID, this);
 
         $(this).closest("tr").find(`.itemcode`).first().text(itemCode);
         $(this).closest("tr").find(`.category`).first().text(categoryName);
@@ -1129,28 +1217,39 @@ $(document).ready(function() {
 			if (itemID == "0") {
 				$(this).closest("tr").find("[name=quantity]").removeAttr("required");
 				$(this).closest("tr").find("[name=quantity]").val("0");
-				$(this).closest("tr").find("[name=unitCost]").val("0.00");
+				$(this).closest("tr").find(".unitCost").text(formatAmount("0.00", true));
 				$(this).closest("tr").find(".totalcost").text(formatAmount("0.00", true));
 				$(this).closest("tr").find("[name=files]").val("");
+				$(this).closest("tr").find(".displayfile").empty();
 				$(this).closest("tr").find("[name=remarks]").val("");
-				$(this).closest("tr").find("[name=quantity], [name=unitCost], [name=files], [name=remarks]").attr("disabled", "true");
+				$(this).closest("tr").find("[name=quantity], [name=files], [name=remarks]").attr("disabled", "true");
 			} else {
-				$(this).closest("tr").find("[name=quantity], [name=unitCost], [name=files], [name=remarks]").removeAttr("disabled");
+				let oldQty = $(this).closest("tr").find("[name=quantity]").val();
+				oldQty = oldQty != 0 ? oldQty : 1;
+				$(this).closest("tr").find("[name=quantity]").val(oldQty);
+				$(this).closest("tr").find("[name=quantity], [name=files], [name=remarks]").removeAttr("disabled");
+
+				const unitCost  = getInventoryPreferredPrice(itemID, this, true) || 0;
+				const quantity  = $(this).closest("tr").find("[name=quantity]").val();
+				const totalCost = quantity * unitCost;
+				$(this).closest("tr").find(`.unitcost`).text(formatAmount(unitCost, true));
+				$(this).closest("tr").find(".totalcost").text(formatAmount(totalCost, true));
+
 			}
 			$(this).html(getInventoryItem(itemID, isProject));
 		}) 
-		updateTotalAmount();
+		updateTotalAmount(isProject);
     })
     // ----- END SELECT ITEM NAME -----
 
 
 	// ----- KEYUP QUANTITY OR UNITCOST -----
-	$(document).on("keyup", "[name=quantity], [name=unitCost]", function() {
+	$(document).on("keyup", "[name=quantity]", function() {
 		const index     = $(this).closest("tr").first().attr("index");
 		const isProject = $(this).closest("tbody").attr("project") == "true";
 		const attr      = isProject ? "[project=true]" : "[company=true]";
 		const quantity  = +$(`#quantity${index}${attr}`).val();
-		const unitcost  = +$(`#unitcost${index}${attr}`).val().replaceAll(",", "");
+		const unitcost  = +getNonFormattedAmount($(`#unitcost${index}${attr}`).text());
 		const totalcost = quantity * unitcost;
 		$(`#totalcost${index}${attr}`).text(formatAmount(totalcost, true));
 		updateTotalAmount(isProject);
@@ -1169,7 +1268,12 @@ $(document).ready(function() {
 		} else {
 			let html = `
 			<div class="d-flex justify-content-between align-items-center py-2">
-				<span class="filename">${filename}</span>
+				<span class="filename"
+					style="display: block;
+						width: 180px;
+						overflow: hidden;
+						white-space: nowrap;
+						text-overflow: ellipsis;">${filename}</span>
 				<span class="btnRemoveFile" style="cursor: pointer"><i class="fas fa-close"></i></span>
 			</div>`;
 			$(this).parent().find(".displayfile").first().html(html);
@@ -1239,7 +1343,7 @@ $(document).ready(function() {
 	function updateTotalAmount(isProject = true) {
 		const attr        = isProject ? "[project=true]" : "[company=true]";
 		const quantityArr = $.find(`[name=quantity]${attr}`).map(element => element.value || "0");
-		const unitCostArr = $.find(`[name=unitCost]${attr}`).map(element => element.value.replaceAll(",", "") || "0");
+		const unitCostArr = $.find(`.unitcost${attr}`).map(element => getNonFormattedAmount(element.innerText) || "0");
 		const totalAmount = quantityArr.map((qty, index) => +qty * +unitCostArr[index]).reduce((a,b) => a + b, 0);
 		$(`#totalAmount${attr}`).text(formatAmount(totalAmount, true));
 		return totalAmount;
@@ -1256,6 +1360,7 @@ $(document).ready(function() {
 			purchaseRequestID       = "",
 			revisePurchaseRequestID = "",
 			employeeID              = "",
+			costEstimateID   = "",
 			projectID               = "",
 			purchaseRequestReason   = "",
 			projectTotalAmount      = "0",
@@ -1271,10 +1376,21 @@ $(document).ready(function() {
 
 		let requestProjectItems = "", requestCompanyItems = "";
 		if (purchaseRequestID) {
-			let requestItemsData = getTableData(
-				`ims_request_items_tbl LEFT JOIN ims_inventory_item_tbl USING(itemID) LEFT JOIN ims_inventory_category_tbl USING(categoryID)`, 
-				`quantity, unitCost, totalCost, files, remarks, itemID, itemCode, itemName, categoryName, unitOfMeasurementID, categoryType`, 
-				`purchaseRequestID = ${purchaseRequestID}`);
+			let requestItemsData;
+			if (purchaseRequestStatus != 0) {
+				requestItemsData = getTableData(
+					`ims_request_items_tbl AS irit
+						LEFT JOIN ims_inventory_item_tbl AS iitt USING(itemID)`, 
+					`quantity, unitCost, totalCost, files, remarks, irit.itemID, irit.itemName, categoryType AS categoryName, itemUom AS unitOfMeasurementID, categoryType, iitt.createdAt AS itmCreatedAt`, 
+					`purchaseRequestID = ${purchaseRequestID}`);
+			} else {
+				requestItemsData = getTableData(
+					`ims_request_items_tbl AS irit
+						LEFT JOIN ims_inventory_item_tbl AS iitt USING(itemID) 
+						LEFT JOIN ims_inventory_category_tbl AS iict USING(categoryID)`, 
+					`quantity, unitCost, totalCost, files, remarks, itemID, iitt.itemName, categoryName, unitOfMeasurementID, categoryType, iitt.createdAt AS itmCreatedAt`, 
+					`purchaseRequestID = ${purchaseRequestID}`);
+			}
 			requestItemsData.filter(item => item.categoryType == "project").map(item => {
 				requestProjectItems += getItemRow(true, item, readOnly);
 			})
@@ -1415,38 +1531,53 @@ $(document).ready(function() {
 
             <div class="col-md-4 col-sm-12">
                 <div class="form-group">
+                    <label>Reference No. ${!disabled ? "<code>*</code>" : ""}</label>
+					<select class="form-control validate select2"
+                        name="costEstimateID"
+                        id="costEstimateID"
+                        style="width: 100%"
+                        required
+						${disabled}
+						viewonly="${disabled ? true : false}">
+                        <option selected disabled>Select Reference No.</option>
+                        ${getCostEstimateList(costEstimateID)}
+                    </select>
+                    <div class="d-block invalid-feedback" id="invalid-costEstimateID"></div>
+                </div>
+            </div>
+            <div class="col-md-4 col-sm-12">
+                <div class="form-group">
                     <label>Project Code</label>
                     <input type="text" class="form-control" name="projectCode" disabled value="-">
                 </div>
             </div>
             <div class="col-md-4 col-sm-12">
                 <div class="form-group">
-                    <label>Project Name ${!disabled ? "<code>*</code>" : ""}</label>
+                    <label>Project Name</label>
                     <select class="form-control validate select2"
                         name="projectID"
                         id="projectID"
                         style="width: 100%"
                         required
-						${disabled}>
-                        <option selected disabled>Select Project Name</option>
+						${costEstimateID ? "disabled" : disabled}>
                         ${getProjectList(projectID)}
                     </select>
                     <div class="d-block invalid-feedback" id="invalid-projectID"></div>
                 </div>
             </div>
-            <div class="col-md-4 col-sm-12">
+            <div class="col-md-3 col-sm-12">
                 <div class="form-group">
                     <label>Client Code</label>
                     <input type="text" class="form-control" name="clientCode" disabled value="-">
                 </div>
             </div>
-            <div class="col-md-4 col-sm-12">
+            <div class="col-md-3 col-sm-12">
                 <div class="form-group">
                     <label>Client Name</label>
                     <input type="text" class="form-control" name="clientName" disabled value="-">
                 </div>
             </div>
-            <div class="col-md-8 col-sm-12">
+            <div class="col-md-6 col-sm-12">
                 <div class="form-group">
                     <label>Client Address</label>
                     <input type="text" class="form-control" name="clientAddress" disabled value="-">
@@ -1500,7 +1631,7 @@ $(document).ready(function() {
                                 <th>Quantity ${!disabled ? "<code>*</code>" : ""}</th>
                                 <th>Category</th>
                                 <th>UOM</th>
-                                <th>Unit Cost ${!disabled ? "<code>*</code>" : ""}</th>
+                                <th>Unit Cost</th>
                                 <th>Total Cost</th>
                                 <th>File</th>
                                 <th>Remarks</th>
@@ -1532,7 +1663,7 @@ $(document).ready(function() {
                                 <th>Quantity ${!disabled ? "<code>*</code>" : ""}</th>
                                 <th>Category</th>
                                 <th>UOM</th>
-                                <th>Unit Cost ${!disabled ? "<code>*</code>" : ""}</th>
+                                <th>Unit Cost</th>
                                 <th>Total Cost</th>
                                 <th>File</th>
                                 <th>Remarks</th>
@@ -1567,7 +1698,10 @@ $(document).ready(function() {
 			updateTableItems();
 			initAll();
 			updateInventoryItemOptions();
-			projectID && projectID != 0 && $("[name=projectID]").trigger("change");
+			if (costEstimateID || projectID) {
+				$("[name=costEstimateID]").val(costEstimateID).trigger("change");
+				$("[name=projectID]").val(projectID).trigger("change");
+			}
 			return html;
 		}, 300);
 	}
@@ -1656,12 +1790,14 @@ $(document).ready(function() {
 		if (currentStatus == "0" && method != "approve") {
 			
 			data["employeeID"]            = sessionID;
+			data["costEstimateID"]        = $("[name=costEstimateID]").val() || null;;
 			data["projectID"]             = $("[name=projectID]").val() || null;
 			data["purchaseRequestReason"] = $("[name=purchaseRequestReason]").val()?.trim();
 			data["projectTotalAmount"]    = updateTotalAmount(true);
 			data["companyTotalAmount"]    = updateTotalAmount(false);
 			
 			formData.append("employeeID", sessionID);
+			formData.append("costEstimateID", $("[name=costEstimateID]").val() || null);
 			formData.append("projectID", $("[name=projectID]").val() || null);
 			formData.append("purchaseRequestReason", $("[name=purchaseRequestReason]").val()?.trim());
 			formData.append("projectTotalAmount", updateTotalAmount(true));
@@ -1702,11 +1838,17 @@ $(document).ready(function() {
 			}
 
 			$(".itemTableRow").each(function(i, obj) {
-				const categoryType = $(this).closest("tbody").attr("project") == "true" ? "project" : "company";
+				const categoryType = 
+					$(this).closest("tbody").attr("project") == "true" ? "project" : "company";
 
-				const itemID    = $("td [name=itemID]", this).val();	
+				const inventoryVendorID = $("td [name=itemID] option:selected", this).attr("inventoryVendorID");	
+				const itemID          = $("td [name=itemID]", this).val();	
+				const itemName        = $("td [name=itemID] option:selected", this).text();	
+				const itemUom         = $("td [name=itemID] option:selected", this).attr("uom");	
+				const itemDescription = $("td [name=itemID] option:selected", this).attr("itemDescription");	
+
 				const quantity  = +$("td [name=quantity]", this).val();	
-				const unitcost  = +$("td [name=unitCost]", this).val().replaceAll(",", "");	
+				const unitcost  = +getNonFormattedAmount($("td .unitcost", this).text());	
 				const totalcost = quantity * unitcost;
 				const remarks   = $("td [name=remarks]", this).val()?.trim();	
 				const fileID    = $("td [name=files]", this).attr("id");
@@ -1720,6 +1862,10 @@ $(document).ready(function() {
 				};
 
 				formData.append(`items[${i}][itemID]`, itemID);
+				formData.append(`items[${i}][itemName]`, itemName?.trim());
+				formData.append(`items[${i}][itemDescription]`, itemDescription);
+				formData.append(`items[${i}][itemUom]`, itemUom);
+				formData.append(`items[${i}][inventoryVendorID]`, inventoryVendorID);
 				formData.append(`items[${i}][categoryType]`, categoryType);
 				formData.append(`items[${i}][quantity]`, quantity);
 				formData.append(`items[${i}][unitcost]`, unitcost);
@@ -1750,6 +1896,21 @@ $(document).ready(function() {
 		return isObject ? data : formData;
 	}
 	// ----- END GET PURCHASE REQUEST DATA -----
+
+
+	// ----- VALIDATE INVENTORY ITEM PRICE LIST -----
+	function validateItemPrice() {
+		let flag = 0;
+		$(`[name="itemID"]`).each(function(i) {
+			const itemID = $(this).val();
+			const price = getInventoryPreferredPrice(itemID, this);
+			if (!price) {
+				flag++;
+			}
+		})
+		return flag > 0 ? false : true;
+	}
+	// ----- END VALIDATE INVENTORY ITEM PRICE LIST -----
 
 
     // ----- OPEN ADD FORM -----
@@ -1840,14 +2001,25 @@ $(document).ready(function() {
 	});
 	// ----- END SAVE DOCUMENT -----
 
+	
+	// ----- REMOVE IS-VALID IN TABLE -----
+	function removeIsValid(element = "table") {
+		$(element).find(".validated, .is-valid, .no-error").removeClass("validated")
+		.removeClass("is-valid").removeClass("no-error");
+	}
+	// ----- END REMOVE IS-VALID IN TABLE -----
+
 
     // ----- SUBMIT DOCUMENT -----
 	$(document).on("click", "#btnSubmit", function () {
-		const id           = $(this).attr("purchaseRequestID");
-		const revise       = $(this).attr("revise") == "true";
-		const validate     = validateForm("form_purchase_request");
+		const id            = $(this).attr("purchaseRequestID");
+		const revise        = $(this).attr("revise") == "true";
+		const validate      = validateForm("form_purchase_request");
+		const validatePrice = validateItemPrice();
+		removeIsValid("#tableProjectRequestItems");
+		removeIsValid("#tableCompanyRequestItems");
 
-		if (validate) {
+		if (validate && validatePrice) {
 			const action = revise && "insert" || (id ? "update" : "insert");
 			const data   = getPurchaseRequestData(action, "submit", "1", id);
 

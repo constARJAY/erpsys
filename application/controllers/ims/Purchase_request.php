@@ -26,6 +26,7 @@ class Purchase_request extends CI_Controller {
         $purchaseRequestID       = $this->input->post("purchaseRequestID") ?? null;
         $revisePurchaseRequestID = $this->input->post("revisePurchaseRequestID") ?? null;
         $employeeID              = $this->input->post("employeeID");
+        $costEstimateID          = $this->input->post("costEstimateID") ?? null;
         $projectID               = $this->input->post("projectID") ?? null;
         $approversID             = $this->input->post("approversID") ?? null;
         $approversStatus         = $this->input->post("approversStatus") ?? null;
@@ -44,6 +45,7 @@ class Purchase_request extends CI_Controller {
         $purchaseRequestData = [
             "revisePurchaseRequestID" => $revisePurchaseRequestID,
             "employeeID"              => $employeeID,
+            "costEstimateID"   => $costEstimateID,
             "projectID"               => $projectID,
             "approversID"             => $approversID,
             "approversStatus"         => $approversStatus,
@@ -99,6 +101,10 @@ class Purchase_request extends CI_Controller {
                         $temp = [
                             "purchaseRequestID" => $purchaseRequestID,
                             "itemID"            => $item["itemID"] != "null" ? $item["itemID"] : null,
+                            "itemName"          => $item["itemName"] != "null" ? $item["itemName"] : null,
+                            "itemDescription"   => $item["itemDescription"] != "null" ? $item["itemDescription"] : null,
+                            "itemUom"           => $item["itemUom"] != "null" ? $item["itemUom"] : null,
+                            "inventoryVendorID" => $item["inventoryVendorID"] != "null" ? $item["inventoryVendorID"] : null,
                             "categoryType"      => $item["categoryType"],
                             "quantity"          => $item["quantity"],
                             "unitCost"          => $item["unitcost"],

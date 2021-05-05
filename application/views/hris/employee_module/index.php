@@ -11,7 +11,7 @@
                         <li class="breadcrumb-item active">Employee Module</li>
                     </ul>
                     <h1 class="mt-3">Employee Module</h1>
-                    <span>This module is used to manage employee details.</span>
+                    <span>This module is used to manage employee information and documents.</span>
                 </div>
                 <?php if(isCreateAllowed(114)) { ?>
                     <div class="col-lg-6 col-md-6 text-right" id="headerButton">

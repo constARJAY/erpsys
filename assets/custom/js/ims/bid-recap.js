@@ -653,7 +653,7 @@ $(document).ready(function() {
 		bidRecapData.map(items=>{
 			id ? "":existIVR.push(items.inventoryValidationID);
 		});
-		html += bidRecapData.filter(items => !existIVR.includes(items.inventoryValidationID)).map(items=>{
+		html += bidRecapData.filter(items => !existIVR.includes(items.referenceCode)).map(items=>{
 			var projectList   = getTableData(
 				"pms_project_list_tbl AS pplt LEFT JOIN pms_client_tbl AS pct ON pct.clientID = pplt.projectListClientID", 
 				"projectListID, projectListCode, projectListName, clientCode, clientName, clientRegion, clientProvince, clientCity, clientBarangay, clientUnitNumber, clientHouseNumber, clientCountry, clientPostalCode",
