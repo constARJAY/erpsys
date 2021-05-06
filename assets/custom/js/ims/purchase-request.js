@@ -835,7 +835,7 @@ $(document).ready(function() {
 
 
 	// ----- GET ITEM ROW -----
-    function getItemRow(isProject = true, item = {}, readOnly = false) {
+    function getItemRow(isProject = true, item = {}, readOnly = false, ceID = null) {
 		const attr = isProject ? `project="true"` : `company="true"`;
 		let {
 			itemCode     = "",
@@ -856,6 +856,10 @@ $(document).ready(function() {
 
 		let html = "";
 		if (readOnly) {
+			if (ceID) {
+				unitCost = getInventoryPreferredPrice(itemID);
+			}
+			
 			const itemFIle = files ? `<a href="${base_url+"assets/upload-files/request-items/"+files}" target="_blank">${files}</a>` : `-`;
 			html += `
 			<tr class="itemTableRow">
@@ -906,6 +910,7 @@ $(document).ready(function() {
 				</td>
 			</tr>`;
 		} else {
+
 			const itemFile = files ? `
 			<div class="d-flex justify-content-between align-items-center py-2">
 				<a class="filename"
@@ -1163,12 +1168,186 @@ $(document).ready(function() {
 	// ----- END DELETE TABLE ROW -----
 
 
+	// ----- UPDATE TOTAL AMOUNT -----
+	function updateTotalAmount(isProject = true) {
+		const attr        = isProject ? "[project=true]" : "[company=true]";
+		const quantityArr = $.find(`[name=quantity]${attr}`).map(element => element.value || "0");
+		const unitCostArr = $.find(`.unitcost${attr}`).map(element => getNonFormattedAmount(element.innerText) || "0");
+		const totalAmount = quantityArr.map((qty, index) => +qty * +unitCostArr[index]).reduce((a,b) => a + b, 0);
+		$(`#totalAmount${attr}`).text(formatAmount(totalAmount, true));
+		return totalAmount;
+	}
+	// ----- END UPDATE TOTAL AMOUNT -----
+
+
+	// ----- GET TABLE MATERIALS AND EQUIPMENT -----
+	function getTableMaterialsEquipment(ceID = null, data = false, readOnly = false) {
+		let {
+			purchaseRequestID       = "",
+			revisePurchaseRequestID = "",
+			employeeID              = "",
+			costEstimateID          = "",
+			projectID               = "",
+			purchaseRequestReason   = "",
+			projectTotalAmount      = "0",
+			companyTotalAmount      = "0",
+			purchaseRequestRemarks  = "",
+			approversID             = "",
+			approversStatus         = "",
+			approversDate           = "",
+			purchaseRequestStatus   = false,
+			submittedAt             = false,
+			createdAt               = false,
+		} = data && data[0];
+
+		let disabled = readOnly ? "disabled" : "";
+
+		let requestProjectItems = "", requestCompanyItems = "";
+		if (purchaseRequestID) {
+			let requestItemsData;
+			if (purchaseRequestStatus != 0) {
+				requestItemsData = getTableData(
+					`ims_request_items_tbl AS irit
+						LEFT JOIN ims_inventory_item_tbl AS iitt USING(itemID)`, 
+					`quantity, unitCost, totalCost, files, remarks, irit.itemID, irit.itemName, categoryType AS categoryName, itemUom AS unitOfMeasurementID, categoryType, iitt.createdAt AS itmCreatedAt`, 
+					`purchaseRequestID = ${purchaseRequestID}`);
+			} else {
+				requestItemsData = getTableData(
+					`ims_request_items_tbl AS irit
+						LEFT JOIN ims_inventory_item_tbl AS iitt USING(itemID) 
+						LEFT JOIN ims_inventory_category_tbl AS iict USING(categoryID)`, 
+					`quantity, unitCost, totalCost, files, remarks, itemID, iitt.itemName, categoryName, unitOfMeasurementID, categoryType, iitt.createdAt AS itmCreatedAt`, 
+					`purchaseRequestID = ${purchaseRequestID}`);
+			}
+			requestItemsData.filter(item => item.categoryType == "project").map(item => {
+				requestProjectItems += getItemRow(true, item, readOnly);
+			})
+			requestItemsData.filter(item => item.categoryType == "company").map(item => {
+				requestCompanyItems += getItemRow(false, item, readOnly);
+			})
+		} else {
+
+			if (ceID) {
+
+				let requestItemsData;
+				requestItemsData = getTableData(
+					`ims_request_items_tbl AS irit
+						LEFT JOIN ims_inventory_item_tbl AS iitt USING(itemID)`, 
+					`quantity, unitCost, totalCost, files, remarks, irit.itemID, irit.itemName, categoryType AS categoryName, itemUom AS unitOfMeasurementID, categoryType, iitt.createdAt AS itmCreatedAt`, 
+					`costEstimateID = ${ceID}`);
+				requestItemsData.filter(item => item.categoryType == "project").map(item => {
+					requestProjectItems += getItemRow(true, item, readOnly, ceID);
+				})
+				requestItemsData.filter(item => item.categoryType == "company").map(item => {
+					requestCompanyItems += getItemRow(false, item, readOnly, ceID);
+				})
+
+			} else {
+				requestProjectItems += getItemRow(true);
+				requestCompanyItems += getItemRow(false);
+			}
+
+		}
+
+		let checkboxProjectHeader = !disabled ? `
+		<th class="text-center">
+			<div class="action">
+				<input type="checkbox" class="checkboxall" project="true">
+			</div>
+		</th>` : ``;
+		let checkboxCompanyHeader = !disabled ? `
+		<th class="text-center">
+			<div class="action">
+				<input type="checkbox" class="checkboxall" company="true">
+			</div>
+		</th>` : ``;
+		let tableProjectRequestItemsName = !disabled ? "tableProjectRequestItems" : "tableProjectRequestItems0";
+		let tableCompanyRequestItemsName = !disabled ? "tableCompanyRequestItems" : "tableCompanyRequestItems0";
+		let buttonProjectAddDeleteRow = !disabled ? `
+		<div class="w-100 text-left my-2">
+			<button class="btn btn-primary btnAddRow" id="btnAddRow" project="true"><i class="fas fa-plus-circle"></i> Add Row</button>
+			<button class="btn btn-danger btnDeleteRow" id="btnDeleteRow" project="true" disabled><i class="fas fa-minus-circle"></i> Delete Row/s</button>
+		</div>` : "";
+		let buttonCompanyAddDeleteRow = !disabled ? `
+		<div class="w-100 text-left my-2">
+			<button class="btn btn-primary btnAddRow" id="btnAddRow" company="true"><i class="fas fa-plus-circle"></i> Add Row</button>
+			<button class="btn btn-danger btnDeleteRow" id="btnDeleteRow" company="true" disabled><i class="fas fa-minus-circle"></i> Delete Row/s</button>
+		</div>` : "";
+
+		let html = `
+		<div class="w-100">
+			<hr class="pb-1">
+			<div class="text-primary font-weight-bold" style="font-size: 1.5rem;">Project Materials and Equipment</div>
+			<table class="table table-striped" id="${tableProjectRequestItemsName}">
+				<thead>
+					<tr style="white-space: nowrap">
+						${checkboxProjectHeader}
+						<th>Item Code</th>
+						<th>Item Name ${!disabled ? "<code>*</code>" : ""}</th>
+						<th>Quantity ${!disabled ? "<code>*</code>" : ""}</th>
+						<th>Category</th>
+						<th>UOM</th>
+						<th>Unit Cost</th>
+						<th>Total Cost</th>
+						<th>File</th>
+						<th>Remarks</th>
+					</tr>
+				</thead>
+				<tbody class="itemProjectTableBody" project="true">
+					${requestProjectItems}
+				</tbody>
+			</table>
+			
+			<div class="w-100 d-flex justify-content-between align-items-center py-2">
+				<div>${buttonProjectAddDeleteRow}</div>
+				<div class="font-weight-bolder" style="font-size: 1rem;">
+					<span>Total Amount: &nbsp;</span>
+					<span class="text-danger" style="font-size: 1.2em" id="totalAmount" project="true">${formatAmount(projectTotalAmount, true)}</span>
+				</div>
+			</div>
+		</div>
+
+		<div class="w-100">
+			<hr class="pb-1">
+			<div class="text-primary font-weight-bold" style="font-size: 1.5rem;">Company Materials and Equipment</div>
+			<table class="table table-striped" id="${tableCompanyRequestItemsName}">
+				<thead>
+					<tr style="white-space: nowrap">
+						${checkboxCompanyHeader}
+						<th>Item Code</th>
+						<th>Item Name ${!disabled ? "<code>*</code>" : ""}</th>
+						<th>Quantity ${!disabled ? "<code>*</code>" : ""}</th>
+						<th>Category</th>
+						<th>UOM</th>
+						<th>Unit Cost</th>
+						<th>Total Cost</th>
+						<th>File</th>
+						<th>Remarks</th>
+					</tr>
+				</thead>
+				<tbody class="itemCompanyTableBody" company="true">
+					${requestCompanyItems}
+				</tbody>
+			</table>
+			
+			<div class="w-100 d-flex justify-content-between align-items-center py-2">
+				<div>${buttonCompanyAddDeleteRow}</div>
+				<div class="font-weight-bolder" style="font-size: 1rem;">
+					<span>Total Amount: &nbsp;</span>
+					<span class="text-danger" style="font-size: 1.2em" id="totalAmount" company="true">${formatAmount(companyTotalAmount, true)}</span>
+				</div>
+			</div>
+		</div>`;
+		return  html;
+	}
+	// ----- END GET TABLE MATERIALS AND EQUIPMENT -----
+
+
 	// ----- SELECT INVENTORY VALIDATION -----
 	$(document).on("change", `[name="costEstimateID"]`, function() {
 		const costEstimateID = $(this).val();
 		const projectID      = $('option:selected', this).attr("projectID");
 		const viewonly       = $(this).attr("viewonly");
-		console.log(costEstimateID);
 
 		if (viewonly != "true") {
 			$(`[name="projectID"]`).val(projectID).trigger("change");
@@ -1178,6 +1357,21 @@ $(document).ready(function() {
 				$(`[name="projectID"]`).removeAttr("disabled");
 			}
 		}
+
+		$("#tableMaterialsEquipment").html(preloader);
+		let table = "";
+		if (costEstimateID && costEstimateID != 0) {
+			table = getTableMaterialsEquipment(costEstimateID, false, true);
+		} else {
+			table = getTableMaterialsEquipment(null, false, false);
+		}
+		setTimeout(() => {
+			$("#tableMaterialsEquipment").html(table);
+			initDataTables();
+			updateTableItems();
+			initAll();
+			updateInventoryItemOptions();
+		}, 200);
 	})
 	// ----- END SELECT INVENTORY VALIDATION -----
 
@@ -1339,18 +1533,6 @@ $(document).ready(function() {
     // ----- END INSERT ROW ITEM -----
 
 
-	// ----- UPDATE TOTAL AMOUNT -----
-	function updateTotalAmount(isProject = true) {
-		const attr        = isProject ? "[project=true]" : "[company=true]";
-		const quantityArr = $.find(`[name=quantity]${attr}`).map(element => element.value || "0");
-		const unitCostArr = $.find(`.unitcost${attr}`).map(element => getNonFormattedAmount(element.innerText) || "0");
-		const totalAmount = quantityArr.map((qty, index) => +qty * +unitCostArr[index]).reduce((a,b) => a + b, 0);
-		$(`#totalAmount${attr}`).text(formatAmount(totalAmount, true));
-		return totalAmount;
-	}
-	// ----- END UPDATE TOTAL AMOUNT -----
-
-
     // ----- FORM CONTENT -----
 	function formContent(data = false, readOnly = false, isRevise = false) {
 		$("#page_content").html(preloader);
@@ -1374,34 +1556,6 @@ $(document).ready(function() {
 			createdAt               = false,
 		} = data && data[0];
 
-		let requestProjectItems = "", requestCompanyItems = "";
-		if (purchaseRequestID) {
-			let requestItemsData;
-			if (purchaseRequestStatus != 0) {
-				requestItemsData = getTableData(
-					`ims_request_items_tbl AS irit
-						LEFT JOIN ims_inventory_item_tbl AS iitt USING(itemID)`, 
-					`quantity, unitCost, totalCost, files, remarks, irit.itemID, irit.itemName, categoryType AS categoryName, itemUom AS unitOfMeasurementID, categoryType, iitt.createdAt AS itmCreatedAt`, 
-					`purchaseRequestID = ${purchaseRequestID}`);
-			} else {
-				requestItemsData = getTableData(
-					`ims_request_items_tbl AS irit
-						LEFT JOIN ims_inventory_item_tbl AS iitt USING(itemID) 
-						LEFT JOIN ims_inventory_category_tbl AS iict USING(categoryID)`, 
-					`quantity, unitCost, totalCost, files, remarks, itemID, iitt.itemName, categoryName, unitOfMeasurementID, categoryType, iitt.createdAt AS itmCreatedAt`, 
-					`purchaseRequestID = ${purchaseRequestID}`);
-			}
-			requestItemsData.filter(item => item.categoryType == "project").map(item => {
-				requestProjectItems += getItemRow(true, item, readOnly);
-			})
-			requestItemsData.filter(item => item.categoryType == "company").map(item => {
-				requestCompanyItems += getItemRow(false, item, readOnly);
-			})
-		} else {
-			requestProjectItems += getItemRow(true);
-			requestCompanyItems += getItemRow(false);
-		}
-
 		// ----- GET EMPLOYEE DATA -----
 		let {
 			fullname:    employeeFullname    = "",
@@ -1417,30 +1571,7 @@ $(document).ready(function() {
 		$("#btnBack").attr("employeeID", employeeID);
 
 		let disabled = readOnly ? "disabled" : "";
-		let checkboxProjectHeader = !disabled ? `
-		<th class="text-center">
-			<div class="action">
-				<input type="checkbox" class="checkboxall" project="true">
-			</div>
-		</th>` : ``;
-		let checkboxCompanyHeader = !disabled ? `
-		<th class="text-center">
-			<div class="action">
-				<input type="checkbox" class="checkboxall" company="true">
-			</div>
-		</th>` : ``;
-		let tableProjectRequestItemsName = !disabled ? "tableProjectRequestItems" : "tableProjectRequestItems0";
-		let tableCompanyRequestItemsName = !disabled ? "tableCompanyRequestItems" : "tableCompanyRequestItems0";
-		let buttonProjectAddDeleteRow = !disabled ? `
-		<div class="w-100 text-left my-2">
-			<button class="btn btn-primary btnAddRow" id="btnAddRow" project="true"><i class="fas fa-plus-circle"></i> Add Row</button>
-			<button class="btn btn-danger btnDeleteRow" id="btnDeleteRow" project="true" disabled><i class="fas fa-minus-circle"></i> Delete Row/s</button>
-		</div>` : "";
-		let buttonCompanyAddDeleteRow = !disabled ? `
-		<div class="w-100 text-left my-2">
-			<button class="btn btn-primary btnAddRow" id="btnAddRow" company="true"><i class="fas fa-plus-circle"></i> Add Row</button>
-			<button class="btn btn-danger btnDeleteRow" id="btnDeleteRow" company="true" disabled><i class="fas fa-minus-circle"></i> Delete Row/s</button>
-		</div>` : "";
+		
 		let button = formButtons(data, isRevise);
 
 		let reviseDocumentNo    = isRevise ? purchaseRequestID : revisePurchaseRequestID;
@@ -1618,70 +1749,8 @@ $(document).ready(function() {
                 </div>
             </div>
 
-            <div class="col-sm-12">
-                <div class="w-100">
-					<hr class="pb-1">
-					<div class="text-primary font-weight-bold" style="font-size: 1.5rem;">Project Materials and Equipment</div>
-                    <table class="table table-striped" id="${tableProjectRequestItemsName}">
-                        <thead>
-                            <tr style="white-space: nowrap">
-								${checkboxProjectHeader}
-                                <th>Item Code</th>
-                                <th>Item Name ${!disabled ? "<code>*</code>" : ""}</th>
-                                <th>Quantity ${!disabled ? "<code>*</code>" : ""}</th>
-                                <th>Category</th>
-                                <th>UOM</th>
-                                <th>Unit Cost</th>
-                                <th>Total Cost</th>
-                                <th>File</th>
-                                <th>Remarks</th>
-                            </tr>
-                        </thead>
-                        <tbody class="itemProjectTableBody" project="true">
-                            ${requestProjectItems}
-                        </tbody>
-                    </table>
-                    
-					<div class="w-100 d-flex justify-content-between align-items-center py-2">
-						<div>${buttonProjectAddDeleteRow}</div>
-						<div class="font-weight-bolder" style="font-size: 1rem;">
-							<span>Total Amount: &nbsp;</span>
-							<span class="text-danger" style="font-size: 1.2em" id="totalAmount" project="true">${formatAmount(projectTotalAmount, true)}</span>
-						</div>
-					</div>
-                </div>
-
-				<div class="w-100">
-					<hr class="pb-1">
-					<div class="text-primary font-weight-bold" style="font-size: 1.5rem;">Company Materials and Equipment</div>
-                    <table class="table table-striped" id="${tableCompanyRequestItemsName}">
-                        <thead>
-                            <tr style="white-space: nowrap">
-								${checkboxCompanyHeader}
-                                <th>Item Code</th>
-                                <th>Item Name ${!disabled ? "<code>*</code>" : ""}</th>
-                                <th>Quantity ${!disabled ? "<code>*</code>" : ""}</th>
-                                <th>Category</th>
-                                <th>UOM</th>
-                                <th>Unit Cost</th>
-                                <th>Total Cost</th>
-                                <th>File</th>
-                                <th>Remarks</th>
-                            </tr>
-                        </thead>
-                        <tbody class="itemCompanyTableBody" company="true">
-                            ${requestCompanyItems}
-                        </tbody>
-                    </table>
-                    
-					<div class="w-100 d-flex justify-content-between align-items-center py-2">
-						<div>${buttonCompanyAddDeleteRow}</div>
-						<div class="font-weight-bolder" style="font-size: 1rem;">
-							<span>Total Amount: &nbsp;</span>
-							<span class="text-danger" style="font-size: 1.2em" id="totalAmount" company="true">${formatAmount(companyTotalAmount, true)}</span>
-						</div>
-					</div>
-                </div>
+            <div class="col-sm-12" id="tableMaterialsEquipment">
+                ${getTableMaterialsEquipment(null, data, readOnly)}
             </div>
 
             <div class="col-md-12 text-right mt-3">
