@@ -9,7 +9,7 @@
                         <li class="breadcrumb-item active">Purchase Order</li>
                     </ul>
                     <h1 class="mt-3">Purchase Order</h1>
-                    <span>This module is used to manage purchase order details.</span>
+                    <span>This module is used to manage the submission and approval of purchase order.</span>
                 </div>
                 <div class="col-lg-6 col-md-6 text-right" id="headerButton"></div>
             </div>

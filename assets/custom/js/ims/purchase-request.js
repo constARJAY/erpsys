@@ -655,23 +655,40 @@ $(document).ready(function() {
 
 
 	// ----- GET COST ESTIMATE LIST LIST -----
-	function getCostEstimateList(id = null, display = true) {
+	function getCostEstimateList(id = null, status = 0, display = true) {
+
+		const createdCEList = getTableData("ims_purchase_request_tbl", "costEstimateID", "purchaseRequestID <> 0").map(ce => ce.costEstimateID);
+		console.log(status);
 		let html = `
 		<option 
 			value     = "0"
 			ceCode    = "-"
 			projectID = "0"
 			${id == "0" && "selected"}>N/A</option>`;
-        html += costEstimateList.map(ce => {
-            return `
-            <option 
-                value     = "${ce.costEstimateID}" 
-                ceCode    = "${getFormCode("CE", ce.createdAt, ce.costEstimateID)}"
+		if (!status || status == 0) {
+			console.log(costEstimateList);
+			html += costEstimateList.filter(ce => createdCEList.includes(ce.costEstimateID ? -1 : 1)).map(ce => {
+				return `
+				<option 
+				value     = "${ce.costEstimateID}" 
+				ceCode    = "${getFormCode("CE", ce.createdAt, ce.costEstimateID)}"
 				projectID = "${ce.projectID}"
-                ${ce.costEstimateID == id && "selected"}>
-                ${getFormCode("CE", ce.createdAt, ce.costEstimateID)}
-            </option>`;
-        })
+				${ce.costEstimateID == id && "selected"}>
+				${getFormCode("CE", ce.createdAt, ce.costEstimateID)}
+				</option>`;
+			})
+		} else {
+			html += costEstimateList.map(ce => {
+				return `
+				<option 
+					value     = "${ce.costEstimateID}" 
+					ceCode    = "${getFormCode("CE", ce.createdAt, ce.costEstimateID)}"
+					projectID = "${ce.projectID}"
+					${ce.costEstimateID == id && "selected"}>
+					${getFormCode("CE", ce.createdAt, ce.costEstimateID)}
+				</option>`;
+			})
+		}
         return display ? html : costEstimateList;
 	}
 	// ----- END GET COST ESTIMATE LIST LIST -----
@@ -735,10 +752,12 @@ $(document).ready(function() {
 			html += itemList.filter(item => !projectItemIDArr.includes(item.itemID) || item.itemID == projectItemIDArr[index]).map(item => {
 				return `
 				<option 
-					value        = "${item.itemID}" 
-					itemCode     = "${item.itemCode}"
-					categoryName = "${item.categoryName}"
-					uom          = "${item.unitOfMeasurementID}"
+					value           = "${item.itemID}" 
+					itemCode        = "${item.itemCode}"
+					itemDescription = "${item.itemDescription}"
+					categoryName    = "${item.categoryName}"
+					uom             = "${item.unitOfMeasurementID}"
+					createdAt       = "${item.createdAt}"
 					${item.itemID == projectItemIDArr[index] && "selected"}>
 					${item.itemName}
 				</option>`;
@@ -752,10 +771,12 @@ $(document).ready(function() {
 			html += itemList.filter(item => !companyItemIDArr.includes(item.itemID) || item.itemID == companyItemIDArr[index]).map(item => {
 				return `
 				<option 
-					value        = "${item.itemID}" 
-					itemCode     = "${item.itemCode}"
-					categoryName = "${item.categoryName}"
-					uom          = "${item.unitOfMeasurementID}"
+					value           = "${item.itemID}" 
+					itemCode        = "${item.itemCode}"
+					itemDescription = "${item.itemDescription}"
+					categoryName    = "${item.categoryName}"
+					uom             = "${item.unitOfMeasurementID}"
+					createdAt       = "${item.createdAt}"
 					${item.itemID == companyItemIDArr[index] && "selected"}>
 					${item.itemName}
 				</option>`;
@@ -771,17 +792,17 @@ $(document).ready(function() {
 		const errorMsg = `Please set item code <b>${getFormCode("ITM", dateToday(), id)}</b> into inventory price list module to proceed in this proccess`;
 		if (id && id != "0") {
 			const price = inventoryPriceList.filter(item => item.itemID == id).map(item => {
-				$(input).attr("inventoryVendorID", item.inventoryVendorID);
+				input && $(input).attr("inventoryVendorID", item.inventoryVendorID);
 				return item.vendorCurrentPrice;
 			});
 			if (price.length > 0) {
 				return price?.[0];
 			}
-			$(input).removeAttr("inventoryVendorID");
+			input && $(input).removeAttr("inventoryVendorID");
 			!executeOnce && showNotification("warning2", errorMsg);
 			return false;
 		}
-		$(input).removeAttr("inventoryVendorID");
+		input && $(input).removeAttr("inventoryVendorID");
 		id && id != "0" && !executeOnce && showNotification("warning2", errorMsg);
 		return id == "0";
 	}
@@ -838,17 +859,18 @@ $(document).ready(function() {
     function getItemRow(isProject = true, item = {}, readOnly = false, ceID = null) {
 		const attr = isProject ? `project="true"` : `company="true"`;
 		let {
-			itemCode     = "",
-			itemName     = "",
-			itemID       = null,
+			requestItemID = "",
+			itemCode      = "",
+			itemName      = "",
+			itemID        = null,
 			itmCreatedAt,
-			quantity     = 1,
-			categoryName = "",
+			quantity      = 1,
+			categoryName  = "",
 			unitOfMeasurementID: uom = "",
-			unitCost     = 0,
-			totalCost    = 0,
-			files        = "",
-			remarks      = ""
+			unitCost      = 0,
+			totalCost     = 0,
+			files         = "",
+			remarks       = ""
 		} = item;
 
 		itemName = itemName && itemName != "Select Item Name" ? itemName : "-";
@@ -856,13 +878,9 @@ $(document).ready(function() {
 
 		let html = "";
 		if (readOnly) {
-			if (ceID) {
-				unitCost = getInventoryPreferredPrice(itemID);
-			}
-			
 			const itemFIle = files ? `<a href="${base_url+"assets/upload-files/request-items/"+files}" target="_blank">${files}</a>` : `-`;
 			html += `
-			<tr class="itemTableRow">
+			<tr class="itemTableRow" requestItemID="${requestItemID}">
 				<td>
 					<div class="itemcode">
 						${itemID && itemID != 0 ? getFormCode("ITM", itmCreatedAt, itemID) : "-"}
@@ -910,21 +928,56 @@ $(document).ready(function() {
 				</td>
 			</tr>`;
 		} else {
+			const disabled  = ceID && ceID != "0" ? "disabled" : "";
+			const inputFile = ceID && ceID != "0" ? "" : `
+			<input 
+				type="file" 
+				class="form-control" 
+				name="files" 
+				id="files"
+				accept="image/*, .pdf, .doc, .docx">
+			<div class="invalid-feedback d-block" id="invalid-files"></div>`;
 
-			const itemFile = files ? `
-			<div class="d-flex justify-content-between align-items-center py-2">
-				<a class="filename"
-				   href="${base_url+"assets/upload-files/request-items/"+files}" 
-				   target="_blank">
-				   ${files}
-				</a>
-				<span class="btnRemoveFile" style="cursor: pointer"><i class="fas fa-close"></i></span>
-			</div>` : "";
+			let itemFile  = "";
+			if (ceID && ceID != "0") {
+				if (files) {
+					itemFile = `
+					<a href="${base_url+"assets/upload-files/request-items/"+files}"
+					title="${files}" 
+					style="display: block;
+						width: 150px;
+						overflow: hidden;
+						white-space: nowrap;
+						text-overflow: ellipsis;"
+					target="_blank">${files}</a>`;
+				} else {
+					itemFile = "-";
+				}
+			} else {
+				if (files) {
+					itemFile = `
+					<div class="d-flex justify-content-between align-items-center py-2">
+						<a class="filename"
+						title="${files}"
+						style="display: block;
+							width: 150px;
+							overflow: hidden;
+							white-space: nowrap;
+							text-overflow: ellipsis;"
+						href="${base_url+"assets/upload-files/request-items/"+files}" 
+						target="_blank">
+						${files}
+						</a>
+						<span class="btnRemoveFile" style="cursor: pointer"><i class="fas fa-close"></i></span>
+					</div>`;
+				}
+			}
+
 			html += `
-			<tr class="itemTableRow">
+			<tr class="itemTableRow" requestItemID="${requestItemID}">
 				<td class="text-center">
 					<div class="action">
-						<input type="checkbox" class="checkboxrow">
+						<input type="checkbox" class="checkboxrow" ${disabled}>
 					</div>
 				</td>
 				<td>
@@ -939,7 +992,8 @@ $(document).ready(function() {
 								id="itemID"
 								style="width: 180px !important"
 								required
-								${attr}>
+								${attr}
+								${disabled}>
 								${getInventoryItem(itemID, isProject)}
 							</select>
 							<div class="invalid-feedback d-block" id="invalid-itemID"></div>
@@ -960,7 +1014,9 @@ $(document).ready(function() {
 							minlength="1" 
 							maxlength="20" 
 							autocomplete="off"
-							required>
+							required
+							ceID="${ceID ? true : false}"
+							${disabled}>
 						<div class="invalid-feedback d-block" id="invalid-quantity"></div>
 					</div>
 				</td>
@@ -983,13 +1039,7 @@ $(document).ready(function() {
 						<div class="displayfile">
 							${itemFile}
 						</div>
-						<input 
-							type="file" 
-							class="form-control" 
-							name="files" 
-							id="files"
-							accept="image/*, .pdf, .doc, .docx">
-						<div class="invalid-feedback d-block" id="invalid-files"></div>
+						${inputFile}
 					</div>
 				</td>
 				<td>
@@ -1037,7 +1087,8 @@ $(document).ready(function() {
 			});
 
 			// QUANTITY
-			$("td .quantity [name=quantity]", this).attr("id", `quantity${i}`);
+			$("td .quantity [name=quantity]", this).attr("id", `quantity${i}project`);
+			$("td .quantity .invalid-feedback", this).attr("id", `invalid-quantity${i}project`);
 			$("td .quantity [name=quantity]", this).attr("project", `true`);
 			
 			// CATEGORY
@@ -1085,7 +1136,8 @@ $(document).ready(function() {
 			});
 
 			// QUANTITY
-			$("td .quantity [name=quantity]", this).attr("id", `quantity${i}`);
+			$("td .quantity [name=quantity]", this).attr("id", `quantity${i}company`);
+			$("td .quantity .invalid-feedback", this).attr("id", `invalid-quantity${i}company`);
 			$("td .quantity [name=quantity]", this).attr("company", `true`);
 			
 			// CATEGORY
@@ -1189,8 +1241,8 @@ $(document).ready(function() {
 			costEstimateID          = "",
 			projectID               = "",
 			purchaseRequestReason   = "",
-			projectTotalAmount      = "0",
-			companyTotalAmount      = "0",
+			projectTotalAmount      = 0,
+			companyTotalAmount      = 0,
 			purchaseRequestRemarks  = "",
 			approversID             = "",
 			approversStatus         = "",
@@ -1202,75 +1254,109 @@ $(document).ready(function() {
 
 		let disabled = readOnly ? "disabled" : "";
 
+		let requestItemsData;
 		let requestProjectItems = "", requestCompanyItems = "";
-		if (purchaseRequestID) {
-			let requestItemsData;
+
+
+		let queryCEID = ceID || costEstimateID;
+		let disabledCE = queryCEID != 0 ? "disabled" : "";
+		if (!queryCEID && !purchaseRequestID) 
+		{
+			requestProjectItems += getItemRow(true);
+			requestCompanyItems += getItemRow(false);
+		} 
+		else if (!queryCEID && purchaseRequestID) 
+		{
 			if (purchaseRequestStatus != 0) {
 				requestItemsData = getTableData(
 					`ims_request_items_tbl AS irit
 						LEFT JOIN ims_inventory_item_tbl AS iitt USING(itemID)`, 
-					`quantity, unitCost, totalCost, files, remarks, irit.itemID, irit.itemName, categoryType AS categoryName, itemUom AS unitOfMeasurementID, categoryType, iitt.createdAt AS itmCreatedAt`, 
+					`irit.requestItemID, quantity, unitCost, totalCost, files, remarks, irit.itemID, irit.itemName, categoryType AS categoryName, itemUom AS unitOfMeasurementID, categoryType, iitt.createdAt AS itmCreatedAt`, 
 					`purchaseRequestID = ${purchaseRequestID}`);
 			} else {
 				requestItemsData = getTableData(
 					`ims_request_items_tbl AS irit
 						LEFT JOIN ims_inventory_item_tbl AS iitt USING(itemID) 
 						LEFT JOIN ims_inventory_category_tbl AS iict USING(categoryID)`, 
-					`quantity, unitCost, totalCost, files, remarks, itemID, iitt.itemName, categoryName, unitOfMeasurementID, categoryType, iitt.createdAt AS itmCreatedAt`, 
+					`irit.requestItemID, quantity, unitCost, totalCost, files, remarks, itemID, iitt.itemName, categoryName, unitOfMeasurementID, categoryType, iitt.createdAt AS itmCreatedAt`, 
 					`purchaseRequestID = ${purchaseRequestID}`);
 			}
+
 			requestItemsData.filter(item => item.categoryType == "project").map(item => {
 				requestProjectItems += getItemRow(true, item, readOnly);
+
+				let quantity = item.quantity;
+				let unitCost = getInventoryPreferredPrice(item.itemID, false, true) || 0;
+				projectTotalAmount += (quantity * unitCost);
 			})
 			requestItemsData.filter(item => item.categoryType == "company").map(item => {
 				requestCompanyItems += getItemRow(false, item, readOnly);
+
+				let quantity = item.quantity;
+				let unitCost = getInventoryPreferredPrice(item.itemID, false, true) || 0;
+				companyTotalAmount += (quantity * unitCost);
 			})
-		} else {
+		} 
+		else if (queryCEID && !purchaseRequestID) 
+		{
+			requestItemsData = getTableData(
+				`ims_request_items_tbl AS irit
+					LEFT JOIN ims_inventory_item_tbl AS iitt USING(itemID)`, 
+				`irit.requestItemID, quantity, unitCost, totalCost, files, remarks, irit.itemID, irit.itemName, categoryType AS categoryName, itemUom AS unitOfMeasurementID, categoryType, iitt.createdAt AS itmCreatedAt`, 
+				`costEstimateID = ${queryCEID}`);
+			
+			requestItemsData.filter(item => item.categoryType == "project").map(item => {
+				requestProjectItems += getItemRow(true, item, readOnly, queryCEID);
 
-			if (ceID) {
+				let quantity = item.quantity;
+				let unitCost = getInventoryPreferredPrice(item.itemID, false, true) || 0;
+				projectTotalAmount += (quantity * unitCost);
+			})
+			requestItemsData.filter(item => item.categoryType == "company").map(item => {
+				requestCompanyItems += getItemRow(false, item, readOnly, queryCEID);
 
-				let requestItemsData;
-				requestItemsData = getTableData(
-					`ims_request_items_tbl AS irit
-						LEFT JOIN ims_inventory_item_tbl AS iitt USING(itemID)`, 
-					`quantity, unitCost, totalCost, files, remarks, irit.itemID, irit.itemName, categoryType AS categoryName, itemUom AS unitOfMeasurementID, categoryType, iitt.createdAt AS itmCreatedAt`, 
-					`costEstimateID = ${ceID}`);
-				requestItemsData.filter(item => item.categoryType == "project").map(item => {
-					requestProjectItems += getItemRow(true, item, readOnly, ceID);
-				})
-				requestItemsData.filter(item => item.categoryType == "company").map(item => {
-					requestCompanyItems += getItemRow(false, item, readOnly, ceID);
-				})
-
-			} else {
-				requestProjectItems += getItemRow(true);
-				requestCompanyItems += getItemRow(false);
-			}
-
+				let quantity = item.quantity;
+				let unitCost = getInventoryPreferredPrice(item.itemID, false, true) || 0;
+				companyTotalAmount += (quantity * unitCost);
+			})
+		} 
+		else if (queryCEID && purchaseRequestID) 
+		{
+			requestItemsData = getTableData(
+				`ims_request_items_tbl AS irit
+					LEFT JOIN ims_inventory_item_tbl AS iitt USING(itemID)`, 
+				`irit.requestItemID, quantity, unitCost, totalCost, files, remarks, irit.itemID, irit.itemName, categoryType AS categoryName, itemUom AS unitOfMeasurementID, categoryType, iitt.createdAt AS itmCreatedAt`, 
+				`purchaseRequestID = ${purchaseRequestID} AND costEstimateID = ${queryCEID}`);
+			requestItemsData.filter(item => item.categoryType == "project").map(item => {
+				requestProjectItems += getItemRow(true, item, readOnly, queryCEID);
+			})
+			requestItemsData.filter(item => item.categoryType == "company").map(item => {
+				requestCompanyItems += getItemRow(false, item, readOnly, queryCEID);
+			})
 		}
 
 		let checkboxProjectHeader = !disabled ? `
 		<th class="text-center">
 			<div class="action">
-				<input type="checkbox" class="checkboxall" project="true">
+				<input type="checkbox" class="checkboxall" project="true" ${disabledCE}>
 			</div>
 		</th>` : ``;
 		let checkboxCompanyHeader = !disabled ? `
 		<th class="text-center">
 			<div class="action">
-				<input type="checkbox" class="checkboxall" company="true">
+				<input type="checkbox" class="checkboxall" company="true" ${disabledCE}>
 			</div>
 		</th>` : ``;
 		let tableProjectRequestItemsName = !disabled ? "tableProjectRequestItems" : "tableProjectRequestItems0";
 		let tableCompanyRequestItemsName = !disabled ? "tableCompanyRequestItems" : "tableCompanyRequestItems0";
 		let buttonProjectAddDeleteRow = !disabled ? `
 		<div class="w-100 text-left my-2">
-			<button class="btn btn-primary btnAddRow" id="btnAddRow" project="true"><i class="fas fa-plus-circle"></i> Add Row</button>
+			<button class="btn btn-primary btnAddRow" id="btnAddRow" project="true" ${disabledCE}><i class="fas fa-plus-circle"></i> Add Row</button>
 			<button class="btn btn-danger btnDeleteRow" id="btnDeleteRow" project="true" disabled><i class="fas fa-minus-circle"></i> Delete Row/s</button>
 		</div>` : "";
 		let buttonCompanyAddDeleteRow = !disabled ? `
 		<div class="w-100 text-left my-2">
-			<button class="btn btn-primary btnAddRow" id="btnAddRow" company="true"><i class="fas fa-plus-circle"></i> Add Row</button>
+			<button class="btn btn-primary btnAddRow" id="btnAddRow" company="true" ${disabledCE}><i class="fas fa-plus-circle"></i> Add Row</button>
 			<button class="btn btn-danger btnDeleteRow" id="btnDeleteRow" company="true" disabled><i class="fas fa-minus-circle"></i> Delete Row/s</button>
 		</div>` : "";
 
@@ -1348,30 +1434,35 @@ $(document).ready(function() {
 		const costEstimateID = $(this).val();
 		const projectID      = $('option:selected', this).attr("projectID");
 		const viewonly       = $(this).attr("viewonly");
+		const status         = $(this).attr("status");
 
-		if (viewonly != "true") {
-			$(`[name="projectID"]`).val(projectID).trigger("change");
-			if (costEstimateID && costEstimateID != 0) {
-				$(`[name="projectID"]`).attr("disabled", true);
-			} else {
-				$(`[name="projectID"]`).removeAttr("disabled");
+		if (status == "false" || status == "0") {
+			if (viewonly != "true") {
+				$(`[name="projectID"]`).val(projectID).trigger("change");
+				if (costEstimateID && costEstimateID != 0) {
+					$(`[name="projectID"]`).attr("disabled", true);
+				} else {
+					$(`[name="projectID"]`).removeAttr("disabled");
+				}
 			}
+	
+			$("#tableMaterialsEquipment").html(preloader);
+			let table = "";
+			if (costEstimateID && costEstimateID != 0) {
+				table = getTableMaterialsEquipment(costEstimateID, false, false);
+			} 
+			else {
+				table = getTableMaterialsEquipment(null, false, false);
+			}
+			setTimeout(() => {
+				table && $("#tableMaterialsEquipment").html(table);
+				initDataTables();
+				updateTableItems();
+				initAll();
+				updateInventoryItemOptions();
+			}, 200);
 		}
 
-		$("#tableMaterialsEquipment").html(preloader);
-		let table = "";
-		if (costEstimateID && costEstimateID != 0) {
-			table = getTableMaterialsEquipment(costEstimateID, false, true);
-		} else {
-			table = getTableMaterialsEquipment(null, false, false);
-		}
-		setTimeout(() => {
-			$("#tableMaterialsEquipment").html(table);
-			initDataTables();
-			updateTableItems();
-			initAll();
-			updateInventoryItemOptions();
-		}, 200);
 	})
 	// ----- END SELECT INVENTORY VALIDATION -----
 
@@ -1421,7 +1512,12 @@ $(document).ready(function() {
 				let oldQty = $(this).closest("tr").find("[name=quantity]").val();
 				oldQty = oldQty != 0 ? oldQty : 1;
 				$(this).closest("tr").find("[name=quantity]").val(oldQty);
-				$(this).closest("tr").find("[name=quantity], [name=files], [name=remarks]").removeAttr("disabled");
+				
+				if ($(this).closest("tr").find("[name=quantity]").attr("ceID") == "true") {
+					$(this).closest("tr").find("[name=files], [name=remarks]").removeAttr("disabled");
+				} else {
+					$(this).closest("tr").find("[name=quantity], [name=files], [name=remarks]").removeAttr("disabled");
+				}
 
 				const unitCost  = getInventoryPreferredPrice(itemID, this, true) || 0;
 				const quantity  = $(this).closest("tr").find("[name=quantity]").val();
@@ -1442,7 +1538,8 @@ $(document).ready(function() {
 		const index     = $(this).closest("tr").first().attr("index");
 		const isProject = $(this).closest("tbody").attr("project") == "true";
 		const attr      = isProject ? "[project=true]" : "[company=true]";
-		const quantity  = +$(`#quantity${index}${attr}`).val();
+		const table     = isProject ? "project" : "company";
+		const quantity  = +$(`#quantity${index}${table}${attr}`).val();
 		const unitcost  = +getNonFormattedAmount($(`#unitcost${index}${attr}`).text());
 		const totalcost = quantity * unitcost;
 		$(`#totalcost${index}${attr}`).text(formatAmount(totalcost, true));
@@ -1571,6 +1668,7 @@ $(document).ready(function() {
 		$("#btnBack").attr("employeeID", employeeID);
 
 		let disabled = readOnly ? "disabled" : "";
+		let disabledReference = costEstimateID && costEstimateID != "0" ? "disabled" : disabled;
 		
 		let button = formButtons(data, isRevise);
 
@@ -1667,11 +1765,12 @@ $(document).ready(function() {
                         name="costEstimateID"
                         id="costEstimateID"
                         style="width: 100%"
+						status="${purchaseRequestStatus}"
                         required
-						${disabled}
-						viewonly="${disabled ? true : false}">
+						viewonly="${disabled ? true : false}"
+						${disabledReference}>
                         <option selected disabled>Select Reference No.</option>
-                        ${getCostEstimateList(costEstimateID)}
+                        ${getCostEstimateList(costEstimateID, purchaseRequestStatus)}
                     </select>
                     <div class="d-block invalid-feedback" id="invalid-costEstimateID"></div>
                 </div>
@@ -1690,7 +1789,7 @@ $(document).ready(function() {
                         id="projectID"
                         style="width: 100%"
                         required
-						${costEstimateID ? "disabled" : disabled}>
+						${costEstimateID && costEstimateID != "0" ? "disabled" : disabled}>
                         ${getProjectList(projectID)}
                     </select>
                     <div class="d-block invalid-feedback" id="invalid-projectID"></div>
@@ -1768,7 +1867,7 @@ $(document).ready(function() {
 			initAll();
 			updateInventoryItemOptions();
 			if (costEstimateID || projectID) {
-				$("[name=costEstimateID]").val(costEstimateID).trigger("change");
+				// $("[name=costEstimateID]").val(costEstimateID).trigger("change");
 				$("[name=projectID]").val(projectID).trigger("change");
 			}
 			return html;
@@ -1837,6 +1936,8 @@ $(document).ready(function() {
 
 		let data = { items: [] }, formData = new FormData;
 		const approversID = method != "approve" && moduleApprover;
+
+		const ceID = $(`[name="costEstimateID"]`).val();
 
 		if (id) {
 			data["purchaseRequestID"] = id;
@@ -1907,6 +2008,8 @@ $(document).ready(function() {
 			}
 
 			$(".itemTableRow").each(function(i, obj) {
+				const requestItemID = $(this).attr('requestItemID');
+
 				const categoryType = 
 					$(this).closest("tbody").attr("project") == "true" ? "project" : "company";
 
@@ -1920,16 +2023,21 @@ $(document).ready(function() {
 				const unitcost  = +getNonFormattedAmount($("td .unitcost", this).text());	
 				const totalcost = quantity * unitcost;
 				const remarks   = $("td [name=remarks]", this).val()?.trim();	
-				const fileID    = $("td [name=files]", this).attr("id");
-				const file      = $(`#${fileID}`)[0].files[0];
-				const fileArr   = file?.name.split(".");
-				const filename  = file ? file?.name : "";
+				
+				let fileID = "", file = "", fileArr = "", filename = "";
+				if (!ceID) {
+					fileID    = $("td [name=files]", this).attr("id");
+					file      = $(`#${fileID}`)[0].files[0];
+					fileArr   = file?.name.split(".");
+					filename  = file ? file?.name : "";
+				}
 
 				let temp = {
 					itemID, quantity, unitcost, totalcost: totalcost.toFixed(2),
 					filename, categoryType
 				};
 
+				formData.append(`items[${i}][requestItemID]`, requestItemID);
 				formData.append(`items[${i}][itemID]`, itemID);
 				formData.append(`items[${i}][itemName]`, itemName?.trim());
 				formData.append(`items[${i}][itemDescription]`, itemDescription);
@@ -2030,7 +2138,8 @@ $(document).ready(function() {
 				data.append("purchaseRequestStatus", 0);
 				data.append("revisePurchaseRequestID", id);
 				data.delete("purchaseRequestID");
-	
+
+				validateItemPrice();
 				savePurchaseRequest(data, "save", null, pageContent);
 			} else {
 				$("#page_content").html(preloader);
@@ -2046,6 +2155,7 @@ $(document).ready(function() {
 			const data   = getPurchaseRequestData(action, "save", "0", id);
 			data.append("purchaseRequestStatus", 0);
 
+			validateItemPrice()
 			savePurchaseRequest(data, "save", null, pageContent);
 		}
 	});
@@ -2066,6 +2176,7 @@ $(document).ready(function() {
 			data.delete("purchaseRequestID");
 		}
 
+		validateItemPrice();
 		savePurchaseRequest(data, "save", null, pageContent);
 	});
 	// ----- END SAVE DOCUMENT -----

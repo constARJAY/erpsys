@@ -45,7 +45,7 @@ class Purchase_request extends CI_Controller {
         $purchaseRequestData = [
             "revisePurchaseRequestID" => $revisePurchaseRequestID,
             "employeeID"              => $employeeID,
-            "costEstimateID"   => $costEstimateID,
+            "costEstimateID"          => $costEstimateID,
             "projectID"               => $projectID,
             "approversID"             => $approversID,
             "approversStatus"         => $approversStatus,
@@ -99,6 +99,8 @@ class Purchase_request extends CI_Controller {
                     $purchaseRequestItems = [];
                     foreach($items as $index => $item) {
                         $temp = [
+                            "requestItemID"     => $item["requestItemID"] != "null" ? $item["requestItemID"] : null,
+                            "costEstimateID"    => $costEstimateID,
                             "purchaseRequestID" => $purchaseRequestID,
                             "itemID"            => $item["itemID"] != "null" ? $item["itemID"] : null,
                             "itemName"          => $item["itemName"] != "null" ? $item["itemName"] : null,
@@ -148,7 +150,7 @@ class Purchase_request extends CI_Controller {
                         // ----- END UPDATE ITEMS FILE -----
                     }
 
-                    $savePurchaseRequestItems = $this->purchaserequest->savePurchaseRequestItems($purchaseRequestItems, $purchaseRequestID);
+                    $savePurchaseRequestItems = $this->purchaserequest->savePurchaseRequestItems($action, $purchaseRequestItems, $purchaseRequestID, $costEstimateID);
                 }
 
             }
