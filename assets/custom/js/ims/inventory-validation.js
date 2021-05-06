@@ -120,7 +120,7 @@ $(document).ready(function() {
 		"itemStatus = 1");
 	const designationList = getTableData("hris_designation_tbl JOIN hris_employee_list_tbl USING(designationID)","designationID, designationName, MAX(employeeHourlyRate) as designationRate", "designationStatus=1","","designationName");
     
-	const inventoryValidationData = getTableData("ims_inventory_validation_tbl");
+	
          
 	// END GLOBAL VARIABLE - REUSABLE 
 
@@ -629,29 +629,27 @@ $(document).ready(function() {
 
     // ----- GET PROJECT LIST -----
     function getReferenceList(type = null, id = null, display = false) {
+		var inventoryValidationData = getTableData("ims_inventory_validation_tbl");
 		let html    = ``;
         let existCE = [];
         let existPR = [];
-        inventoryValidationData.filter(items => items.documentType == 'ce' && (items.inventoryValidationStatus == 2 || items.inventoryValidationStatus == 1)).map(items=>{
-			var tempArr;
-			if(display){
-				var tempArr = id == items.documentID ? "":items.documentID;
-			}else{
-				var tempArr = items.documentID;
-			}
+        inventoryValidationData.filter(items => items.documentType == 'ce' && (items.inventoryValidationStatus == 2 || items.inventoryValidationStatus == 1 || items.inventoryValidationStatus == 0)).map(items=>{
+			var tempArr = id == items.documentID ? "" : items.documentID;
+			
             existCE.push(tempArr);
         });
-        inventoryValidationData.filter(items=> items.documentType == 'pr' && items.inventoryValidationStatus == 2 || items.inventoryValidationStatus == 1).map(items=>{
-            existPR.push(items.documentID);
-        });
-		var sample = inventoryValidationData.filter(items => items.documentType == 'ce' && items.inventoryValidationStatus == '2' && items.inventoryValidationStatus == '1' );
-        // console.log(existCE);
-        // console.log(inventoryValidationData);
-        
 
+        inventoryValidationData.filter(items=> items.documentType == 'pr' && (items.inventoryValidationStatus == 2 || items.inventoryValidationStatus == 1 || items.inventoryValidationStatus == 0)).map(items=>{
+			var tempArr = items.documentID;
+			if(display){
+				 tempArr = id == items.documentID ? "" : items.documentID;
+			}
+            existPR.push(tempArr);
+        });
+        
         let costEstimateData        = getTableData("pms_cost_estimate_tbl","","costEstimateStatus='2'");
         let purchaseRequestData     = getTableData("ims_purchase_request_tbl","","purchaseRequestStatus='2'");
-        
+		
        costEstimateData.map(costEstimateItems=>{
 		   if(!existCE.includes(costEstimateItems.costEstimateID)){
 					let projectList   = getTableData(
@@ -1161,7 +1159,6 @@ $(document).ready(function() {
 		} = data && data[0];
 
 		let requestProjectItems = "", requestCompanyItems = "";
-		// console.log(inventoryValidationID);
 		if (inventoryValidationID) {
             requestProjectItems = requestItemData(documentID, "project", readOnly, `inventoryValidationID = '${inventoryValidationID}'`);
             requestCompanyItems = requestItemData(documentID, "company", readOnly, `inventoryValidationID = '${inventoryValidationID}'`);
@@ -1352,7 +1349,7 @@ $(document).ready(function() {
                         id="documentID"
                         style="width: 100%"
                         required
-						${readOnly || isRevise ? "disabled" : ""}>
+						${inventoryValidationID == "" ? ``: `disabled`}>
                         <option selected disabled>Select Document No.</option>
                         ${getReferenceList(documentType,documentID,readOnly)}
                     </select>
@@ -1419,7 +1416,7 @@ $(document).ready(function() {
                                 <th>Item Name</th>
                                 <th>UOM</th>
                                 <th>Quantity Requested</th>
-                                <th>No of  Issuance ${!disabled ? "<code>*</code>" : ""}</th>
+                                <th>No. of Issuance ${!disabled ? "<code>*</code>" : ""}</th>
                                 <th>For Purchase</th>
                                 <th>File</th>
                             </tr>
@@ -1439,7 +1436,7 @@ $(document).ready(function() {
                                 <th>Item Name</th>
                                 <th>UOM</th>
                                 <th>Quantity Requested</th>
-                                <th>No of  Issuance ${!disabled ? "<code>*</code>" : ""}</th>
+                                <th>No. of Issuance ${!disabled ? "<code>*</code>" : ""}</th>
                                 <th>For Purchase</th>
                                 <th>File</th>
                             </tr>
@@ -1947,7 +1944,7 @@ $(document).ready(function() {
 												<td>
                                                     <div class="qtyrequested">${items.quantity}</div>
                                                 </td>
-                                                <td class="text-center">
+                                                <td>
                                                     <div class="stocks">${items.stocks}</div>
                                                 </td>
                                                 <td>
@@ -1976,7 +1973,7 @@ $(document).ready(function() {
                                                     <div class="stocks">
                                                         <input 
                                                             type="text" 
-                                                            class="form-control validate number text-center"
+                                                            class="form-control validate number"
                                                             data-allowcharacters="[0-9]" 
                                                             max="99999" 
                                                             id="${type}stocks${index}" 

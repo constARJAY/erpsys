@@ -8,7 +8,7 @@ class BillMaterial_model extends CI_Model {
         parent::__construct();
     }
 
-    public function saveBillMaterialData($action, $data, $id = null) 
+    public function saveBillMaterial($action, $data, $id = null) 
     {
         if ($action == "insert") {
             $query = $this->db->insert("pms_bill_material_tbl", $data);
@@ -24,48 +24,100 @@ class BillMaterial_model extends CI_Model {
         return "false|System error: Please contact the system administrator for assistance!";
     }
 
-    public function deleteBillMaterialItems($id) {
-        $query = $this->db->delete("ims_request_items_tbl", ["billMaterialID" => $id]);
-        return $query ? true : false;
+    public function deleteBIllMaterialItems($id) {
+        $queryPersonnel = $this->db->delete("hris_personnel_request_tbl", ["billMaterialID" => $id]) ? true : "";
+        $queryTravel    = $this->db->delete("ims_travel_request_tbl",     ["billMaterialID" => $id]) ? true : "";
+        $queryItems     = $this->db->delete("ims_request_items_tbl",      ["billMaterialID" => $id]) ? true : "";
+        $query          = false;
+        if($queryPersonnel && $queryTravel && $queryItems){
+            $query = true;
+        }
+        return $query;
     }
 
-    public function updateBillMaterialItems($data){
-        // if ($id) {
-        //     $deleteBillMaterialItems = $this->deleteBillMaterialItems($id);
+    public function saveBillMaterialItems($data, $id = null){
+        $personnelData  = [];
+        $travelData     = [];
+        $itemsData      = [];
+
+        if ($id) {
+            $deleteBIllMaterialItems = $this->deleteBIllMaterialItems($id);
+        }
+        // unset($arr['billMaterialID']);
+
+        foreach($data as $index => $item) {
+            if($item["designationID"] != null){
+                $temp = [
+                    "billMaterialID"        => $item["billMaterialID"],
+                    "costEstimateID"        => $item["costEstimateID"],
+                    "designationID"         => $item["designationID"],
+                    "designationName"       => $item["designationName"],
+                    "designationTotalHours" => $item["designationTotalHours"],
+                    "quantity"              => $item["quantity"],
+                    "unitCost"              => $item["unitCost"],
+                    "totalCost"             => $item["totalCost"],
+                    "createdBy"             => $item["createdBy"],
+                    "updatedBy"             => $item["updatedBy"],
+                ];
+                array_push($personnelData, $temp);
+            }elseif($item["travelDescription"] != null){
+                $temp = [
+                    "billMaterialID"        => $item["billMaterialID"],
+                    "costEstimateID"        => $item["costEstimateID"],
+                    "travelDescription"     => $item["travelDescription"],
+                    "unitOfMeasure"         => $item["itemUom"],
+                    "quantity"              => $item["quantity"],
+                    "unitCost"              => $item["unitCost"],
+                    "totalCost"             => $item["totalCost"],
+                    "createdBy"             => $item["createdBy"],
+                    "updatedBy"             => $item["updatedBy"],
+                ];
+                array_push($travelData, $temp);
+            }else{
+                $temp = [
+                    "billMaterialID"        => $item["billMaterialID"],
+                    "costEstimateID"        => $item["costEstimateID"],
+                    "itemID"                => $item["itemID"],
+                    "itemName"	 	        => $item["itemName"],
+                    "itemDescription"       => $item["itemDescription"],
+                    "itemUom"	            => $item["itemUom"],
+                    "categoryType"          => $item["categoryType"],
+                    "quantity"              => $item["quantity"],
+                    "unitCost"              => $item["unitCost"],
+                    "totalCost"             => $item["totalCost"],
+                    "createdBy"             => $item["createdBy"],
+                    "updatedBy"             => $item["updatedBy"],
+                ];
+                array_push($itemsData, $temp);
+            }
+        }
+
+
+        // CHECK IF THE BILL OF MATERIAL IS EXISTING;
+        // $personnelQuery = $this->db->query("SELECT * FROM hris_personnel_request_tbl WHERE billMaterialID = '$id'");
+        // $travelQuery    = $this->db->query("SELECT * FROM ims_travel_request_tbl WHERE billMaterialID = '$id'");
+        // $itemsQuery     = $this->db->query("SELECT * FROM ims_request_items_tbl WHERE billMaterialID = '$id'");
+        
+        // if($personnelQuery->num_rows() > 0){
+        //     $deletePersonnel = $this->db->delete("hris_personnel_request_tbl", ["billMaterialID" => $id]);
+            
+        // }
+        // if($travelQuery->num_rows() > 0){
+        //     $deleteTravel = $this->db->delete("ims_travel_request_tbl", ["billMaterialID" => $id]);
+        // }
+        // if($itemsQuery->num_rows() > 0){
+        //     $deleteItems = $this->db->delete("ims_travel_request_tbl", ["billMaterialID" => $id]);
         // }
 
-        $query = $this->db->update_batch("ims_request_items_tbl", $data, "requestItemID");
-        if ($query) {
-            return "true|Successfully submitted";
-        }
-        return "false|System error: Please contact the system administrator for assistance!";
-    }
-    public function insertBillMaterialItems($data){
-        $query = $this->db->insert_batch("ims_request_items_tbl", $data);
-        if ($query) {
+        $perssonelResult = count($personnelData) > 0 ? $this->db->insert_batch("hris_personnel_request_tbl", $personnelData) : true; 
+        $travelResult    = count($travelData)    > 0 ? $this->db->insert_batch("ims_travel_request_tbl", $travelData)        : true;
+        $itemsResult     = count($itemsData)     > 0 ? $this->db->insert_batch("ims_request_items_tbl", $itemsData)          : true;
+        
+        if ($perssonelResult && $travelResult && $itemsResult) {
             return "true|Successfully submitted";
         }
         return "false|System error: Please contact the system administrator for assistance!";
     }
 
-    public function saveCanvassingData($id){
-        $sql    = "SELECT * FROM pms_bill_material_tbl WHERE billMaterialID = '$id'";
-        $query  = $this->db->query($sql);
-        $result = $query->result_array();
-        $projectID  =  $result[0]["projectID"];
-        $billMaterialID = $id;
-        $createdBy      = $result[0]["createdBy"];
-        $updatedBy      = $result[0]["updatedBy"];
-            $insertSql  = "INSERT INTO ims_inventory_canvassing_tbl SET
-                            `projectID`      = '$projectID',
-                            `billMaterialID` = '$billMaterialID',
-                            `referenceCode`  = '$billMaterialID',
-                            `createdBy`      = '$createdBy',
-                            `updatedBy`      = '$updatedBy',
-                            `inventoryCanvassingStatus` = '5'
-                        ";
-            $insertQuery =  $this->db->query($insertSql);
-            return $insertQuery ? true : false;
-         
-    }
+    
 }

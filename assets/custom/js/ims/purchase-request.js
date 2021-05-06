@@ -657,8 +657,7 @@ $(document).ready(function() {
 	// ----- GET COST ESTIMATE LIST LIST -----
 	function getCostEstimateList(id = null, status = 0, display = true) {
 
-		const createdCEList = getTableData("ims_purchase_request_tbl", "costEstimateID", "purchaseRequestID <> 0").map(ce => ce.costEstimateID);
-		console.log(status);
+		const createdCEList = getTableData("ims_purchase_request_tbl", "costEstimateID", "purchaseRequestStatus <> 3 AND purchaseRequestStatus <> 4").map(ce => ce.costEstimateID);
 		let html = `
 		<option 
 			value     = "0"
@@ -666,8 +665,7 @@ $(document).ready(function() {
 			projectID = "0"
 			${id == "0" && "selected"}>N/A</option>`;
 		if (!status || status == 0) {
-			console.log(costEstimateList);
-			html += costEstimateList.filter(ce => createdCEList.includes(ce.costEstimateID ? -1 : 1)).map(ce => {
+			html += costEstimateList.filter(ce => createdCEList.indexOf(ce.costEstimateID) == -1).map(ce => {
 				return `
 				<option 
 				value     = "${ce.costEstimateID}" 
@@ -1272,14 +1270,14 @@ $(document).ready(function() {
 					`ims_request_items_tbl AS irit
 						LEFT JOIN ims_inventory_item_tbl AS iitt USING(itemID)`, 
 					`irit.requestItemID, quantity, unitCost, totalCost, files, remarks, irit.itemID, irit.itemName, categoryType AS categoryName, itemUom AS unitOfMeasurementID, categoryType, iitt.createdAt AS itmCreatedAt`, 
-					`purchaseRequestID = ${purchaseRequestID}`);
+					`purchaseRequestID = ${purchaseRequestID} AND AND costEstimateID IS NULL`);
 			} else {
 				requestItemsData = getTableData(
 					`ims_request_items_tbl AS irit
 						LEFT JOIN ims_inventory_item_tbl AS iitt USING(itemID) 
 						LEFT JOIN ims_inventory_category_tbl AS iict USING(categoryID)`, 
 					`irit.requestItemID, quantity, unitCost, totalCost, files, remarks, itemID, iitt.itemName, categoryName, unitOfMeasurementID, categoryType, iitt.createdAt AS itmCreatedAt`, 
-					`purchaseRequestID = ${purchaseRequestID}`);
+					`purchaseRequestID = ${purchaseRequestID} AND costEstimateID IS NULL`);
 			}
 
 			requestItemsData.filter(item => item.categoryType == "project").map(item => {
@@ -1303,7 +1301,7 @@ $(document).ready(function() {
 				`ims_request_items_tbl AS irit
 					LEFT JOIN ims_inventory_item_tbl AS iitt USING(itemID)`, 
 				`irit.requestItemID, quantity, unitCost, totalCost, files, remarks, irit.itemID, irit.itemName, categoryType AS categoryName, itemUom AS unitOfMeasurementID, categoryType, iitt.createdAt AS itmCreatedAt`, 
-				`costEstimateID = ${queryCEID}`);
+				`costEstimateID = ${queryCEID} AND purchaseRequestID IS NULL`);
 			
 			requestItemsData.filter(item => item.categoryType == "project").map(item => {
 				requestProjectItems += getItemRow(true, item, readOnly, queryCEID);
@@ -2025,7 +2023,9 @@ $(document).ready(function() {
 				const remarks   = $("td [name=remarks]", this).val()?.trim();	
 				
 				let fileID = "", file = "", fileArr = "", filename = "";
-				if (!ceID) {
+				if (!ceID && ceID != "null") {
+					alert(ceID);
+				
 					fileID    = $("td [name=files]", this).attr("id");
 					file      = $(`#${fileID}`)[0].files[0];
 					fileArr   = file?.name.split(".");

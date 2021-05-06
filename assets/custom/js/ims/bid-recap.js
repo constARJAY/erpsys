@@ -649,11 +649,12 @@ $(document).ready(function() {
     // ----- GET PROJECT LIST -----
     function getReferenceList(id = null, display = false) {
 		let existIVR = [], html = ``;
-		let bidRecapData = getTableData("ims_inventory_validation_tbl", "","inventoryValidationStatus = '2' OR inventoryValidationStatus = '1'");
+		let invValidatrionData = getTableData("ims_inventory_validation_tbl", "","inventoryValidationStatus = '2' OR inventoryValidationStatus = '1'");
+		let bidRecapData = getTableData("ims_bid_recap_tbl");
 		bidRecapData.map(items=>{
-			id ? "":existIVR.push(items.inventoryValidationID);
+			id ? "" : existIVR.push(items.referenceCode);
 		});
-		html += bidRecapData.filter(items => !existIVR.includes(items.referenceCode)).map(items=>{
+		html += invValidatrionData.filter(items => !existIVR.includes(items.inventoryValidationID)).map(items=>{
 			var projectList   = getTableData(
 				"pms_project_list_tbl AS pplt LEFT JOIN pms_client_tbl AS pct ON pct.clientID = pplt.projectListClientID", 
 				"projectListID, projectListCode, projectListName, clientCode, clientName, clientRegion, clientProvince, clientCity, clientBarangay, clientUnitNumber, clientHouseNumber, clientCountry, clientPostalCode",
@@ -1317,7 +1318,7 @@ $(document).ready(function() {
                         id="documentID"
                         style="width: 100%"
                         required
-						${readOnly || isRevise ? "disabled" : ""}
+						${bidRecapID == "" ? `` : `disabled`}
 						>
                         <option selected disabled>Select Document No.</option>
                         ${getReferenceList(referenceCode,readOnly)}

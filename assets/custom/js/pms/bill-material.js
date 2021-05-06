@@ -113,9 +113,12 @@ $(document).ready(function() {
 
 
     // GLOBAL VARIABLE - REUSABLE 
+	const priceListCondition = [];
+
 	const dateToday = () => {
 		return moment(new Date).format("YYYY-MM-DD HH:mm:ss");
 	};
+	
     const billMaterialList = getTableData("pms_bill_material_tbl", "",""); 
 
 	const inventoryItemList = getTableData(
@@ -130,10 +133,8 @@ $(document).ready(function() {
 
     const costEstimateList = getTableData("pms_cost_estimate_tbl JOIN pms_project_list_tbl ON pms_cost_estimate_tbl.projectID = pms_project_list_tbl.projectListID LEFT JOIN pms_client_tbl ON pms_project_list_tbl.projectListClientID = pms_client_tbl.clientID","pms_cost_estimate_tbl.*, projectListID, projectListCode, projectListName, clientCode, clientName, clientRegion, clientProvince, clientCity, clientBarangay, clientUnitNumber, clientHouseNumber, clientCountry, clientPostalCode"
                                             ,"costEstimateStatus='2'");
-
+	   										
 	// END GLOBAL VARIABLE - REUSABLE 
-
-
     // ----- DATATABLES -----
 	function initDataTables() {
 		if ($.fn.DataTable.isDataTable("#tableForApprroval")) {
@@ -666,15 +667,18 @@ $(document).ready(function() {
 					}
 				} else if (billMaterialStatus == 3) {
 					// DENIED - FOR REVISE
-					button = `
-					<button
-						class="btn btn-cancel"
-						id="btnRevise" 
-						billMaterialID="${encryptString(billMaterialID)}"
-						code="${getFormCode("BOM", createdAt, billMaterialID)}"
-						status="${billMaterialStatus}"><i class="fas fa-clone"></i>
-						Revise
-					</button>`;
+					if(!isRevised(billMaterialID)){
+						button = `
+						<button
+							class="btn btn-cancel"
+							id="btnRevise" 
+							billMaterialID="${encryptString(billMaterialID)}"
+							code="${getFormCode("BOM", createdAt, billMaterialID)}"
+							status="${billMaterialStatus}"><i class="fas fa-clone"></i>
+							Revise
+						</button>`;
+					}
+
 				}
 			} else {
 				if (billMaterialStatus == 1) {
@@ -738,9 +742,11 @@ $(document).ready(function() {
     //
     // ----- GET PROJECT LIST -----
     function geCostEstimateList(id= null){
-        let html = "";
-        let existCE = [];
-            billMaterialList.map(items=>{existCE.push(items.referenceCode)});
+        let html 			 = "";
+        let existCE 		 = [];
+		let billMaterialData = getTableData("pms_bill_material_tbl");
+			billMaterialData.map(items=>{existCE.push(items.referenceCode)});
+			
             html += costEstimateList.filter(items => !existCE.includes(items.costEstimateID) || items.costEstimateID == id).map(items=>{
                 let address = `${items.clientUnitNumber && titleCase(items.clientUnitNumber)+", "}${items.clientHouseNumber && items.clientHouseNumber +", "}${items.clientBarangay && titleCase(items.clientBarangay)+", "}${items.clientCity && titleCase(items.clientCity)+", "}${items.clientProvince && titleCase(items.clientProvince)+", "}${items.clientCountry && titleCase(items.clientCountry)+", "}${items.clientPostalCode && titleCase(items.clientPostalCode)}`;
                 let {
@@ -1080,30 +1086,36 @@ $(document).ready(function() {
         $(".itemCompanyTableBody").html('<tr><td colspan="6">'+preloader+'</td></tr>');
         $(".travelTableBody").html('<tr><td colspan="6">'+preloader+'</td></tr>');
 
-		let condition = [];
+	
         let personnelTableBody   = getRequestRow("personnel",thisvalue);
 		let itemProjectTableBody = getRequestRow("project",thisvalue);
         let itemCompanyTableBody = getRequestRow("company",thisvalue);
 		let travelTableBody      = getRequestRow("travel",thisvalue);  
-		
-		itemProjectTableBody == "NONE"?condition.push(itemProjectTableBody):``;
-        itemCompanyTableBody == "NONE"?condition.push(itemCompanyTableBody):``;
-		if(condition.find(items=> items== "NONE")){
-			$(".travelButtons").html("");
-			showNotification("warning","Cannot process. Set a price for each item on the item price list first.")
-			$(".personnelTableBody").html('<tr><td colspan="6" class="text-center font-weight-bold">No Records Found.</td></tr>');
-			$(".itemProjectTableBody").html('<tr><td colspan="6" class="text-center font-weight-bold">No Records Found.</td></tr>');
-			$(".itemCompanyTableBody").html('<tr><td colspan="6" class="text-center font-weight-bold">No Records Found.</td></tr>');
-			$(".travelTableBody").html('<tr><td colspan="6" class="text-center font-weight-bold">No Records Found.</td></tr>');
-		}else{
-			setTimeout(() => {
-				$(".personnelTableBody").html(personnelTableBody);
-				$(".itemProjectTableBody").html(itemProjectTableBody);
-				$(".itemCompanyTableBody").html(itemCompanyTableBody);
-				$(".travelTableBody").html(travelTableBody);
-				initAll();
-			}, 300);
+		let alertConfirmation 	 = ``;
+
+		$("#alert-confirmation").hide();
+		if(priceListCondition.length > 0){
+			var priceListConditionData = [...new Set(priceListCondition)]; 
+			priceListConditionData.map(items=>{
+				showNotification("warning2",
+				`Please set item code <strong>${items}</strong> into inventory price list module to proceed in this proccess`);
+			});
+			alertConfirmation 	 = `<div class="alert alert-warning py-1 text-center" role="alert">
+																			<small class="font-weight-bold"><i class="fa fa-exclamation-circle text-warning font-weight-bold"></i> Cannot process. Set a price for each item on the item price list first.</small>
+																	</div>`;
 		}
+		
+		setTimeout(() => {
+			$("#alert-confirmation").html(alertConfirmation);
+			$("#alert-confirmation").show(500);
+			
+			$(".personnelTableBody").html(personnelTableBody);
+			$(".itemProjectTableBody").html(itemProjectTableBody);
+			$(".itemCompanyTableBody").html(itemCompanyTableBody);
+			$(".travelTableBody").html(travelTableBody);
+			initAll();
+		}, 300);
+		
 		
 			
 		
@@ -1461,7 +1473,7 @@ $(document).ready(function() {
                         id="referenceCode"
                         style="width: 100%"
                         required
-						${disabled}>
+						${billMaterialID == "" ? ``:`disabled`}>
                         <option selected disabled>Select Document No.</option>
                         ${geCostEstimateList(referenceCode)}
                     </select>
@@ -1519,6 +1531,7 @@ $(document).ready(function() {
             
 
             <div class="col-sm-12">
+				<div id="alert-confirmation"></div>
                 <div class="w-100">
 					<hr class="pb-1">
 					<div class="text-primary font-weight-bold" style="font-size: 1.5rem;">Personnel And Laborers</div>
@@ -1527,10 +1540,10 @@ $(document).ready(function() {
                             <tr style="white-space: nowrap">
 								<th>Designation Code</th>
                                 <th>Designation</th>
-                                <th>Quantity</th>
+                                <th class="text-center">Quantity</th>
                                 <th>Total Hours</th>
-                                <th>Hourly Rate</th>
-                                <th>Total Cost</th>
+                                <th class="text-right">Hourly Rate</th>
+                                <th class="text-right">Total Cost</th>
                             </tr>
                         </thead>
                         <tbody class="personnelTableBody" personnel="true">
@@ -1550,10 +1563,10 @@ $(document).ready(function() {
                             <tr style="white-space: nowrap">
                                 <th>Item Code</th>
                                 <th>Item Name </th>
-                                <th>Quantity</th>
+                                <th class="text-center">Quantity</th>
                                 <th>UOM</th>
-                                <th>Unit Price</th>
-                                <th>Total Cost</th>
+                                <th class="text-right">Unit Price</th>
+                                <th class="text-right">Total Cost</th>
                             </tr>
                         </thead>
                         <tbody class="itemProjectTableBody" project="true">
@@ -1573,15 +1586,13 @@ $(document).ready(function() {
                             <tr style="white-space: nowrap">
 								<th>Item Code</th>
                                 <th>Item Name </th>
-                                <th>Quantity</th>
+                                <th class="text-center">Quantity</th>
                                 <th>UOM</th>
-                                <th>Unit Price</th>
-                                <th>Total Cost</th>
+                                <th class="text-right">Unit Price</th>
+                                <th class="text-right">Total Cost</th>
                             </tr>
                         </thead>
-                        <tbody class="itemCompanyTableBody" company="true">
-                          
-                        </tbody>
+                        <tbody class="itemCompanyTableBody" company="true"> </tbody>
                     </table>
                     
 					<div class="w-100 d-flex justify-content-between align-items-center py-2">
@@ -1597,10 +1608,10 @@ $(document).ready(function() {
                             <tr style="white-space: nowrap">
 								${checkboxTravelHeader}
                                 <th>Description ${!disabled ? "<code>*</code>" : ""}</th>
-                                <th>Quantity ${!disabled ? "<code>*</code>" : ""}</th>
+                                <th class="text-center">Quantity ${!disabled ? "<code>*</code>" : ""}</th>
                                 <th>UOM</th>
-                                <th>Unit Price</th>
-                                <th>Total Cost</th>
+                                <th class="text-right">Unit Price</th>
+                                <th class="text-right">Total Cost</th>
                             </tr>
                         </thead>
                         <tbody class="travelTableBody" travel="true">
@@ -1631,10 +1642,10 @@ $(document).ready(function() {
 			${!isRevise  ? getApproversStatus(approversID, approversStatus, approversDate) : ""}
 		</div>`;
 		if (billMaterialID) {
-			requestProjectItems += getRequestRow("project",referenceCode);
-			requestCompanyItems += getRequestRow("company",referenceCode);
-			requestPersonnel 	+= getRequestRow("personnel",referenceCode);
-			requestTravel 		+= getRequestRow("travel",referenceCode, readOnly);   
+			requestProjectItems += getRequestRow("project",referenceCode,"",billMaterialID);
+			requestCompanyItems += getRequestRow("company",referenceCode,"",billMaterialID);
+			requestPersonnel 	+= getRequestRow("personnel",referenceCode,"", billMaterialID);
+			requestTravel 		+= getRequestRow("travel",referenceCode, readOnly, billMaterialID);   
 		}
 
 		setTimeout(() => {
@@ -1644,9 +1655,9 @@ $(document).ready(function() {
 			initAll();
 			updateInventoryItemOptions();
 			projectID && projectID != 0 && $("[name=projectID]").trigger("change");
-			$(".personnelTableBody").html(requestProjectItems);
-			$(".itemProjectTableBody").html(requestCompanyItems);
-			$(".itemCompanyTableBody").html(requestPersonnel);
+			$(".personnelTableBody").html(requestPersonnel);
+			$(".itemProjectTableBody").html(requestProjectItems);
+			$(".itemCompanyTableBody").html(requestCompanyItems);
 			$(".travelTableBody").html(requestTravel);
 			return html;
 		}, 300);
@@ -1712,8 +1723,9 @@ $(document).ready(function() {
 		 * ----- END METHOD -----
 		 */
 
-		let data = { updateItems: [], insertItems:[]};
+		let data = { items: []};
 		const approversID = method != "approve" && moduleApprover;
+
 
 		if (id) {
 			data["billMaterialID"] = id;
@@ -1726,7 +1738,7 @@ $(document).ready(function() {
 		data["action"]                = action;
 		data["method"]                = method;
 		data["updatedBy"]             = sessionID;
-
+		data["costEstimateID"]		  = $("[name=referenceCode]").val();
 		if (currentStatus == "0" && method != "approve") {
 			
 			data["employeeID"]            = sessionID;
@@ -1755,33 +1767,51 @@ $(document).ready(function() {
 			}
 
 			$(".itemTableRow").each(function(i, obj) {
-				if($(this).attr("requestvalue")){
-					var  requestItemID,unitCost,totalCost,travelUnitOfMeasure,quantity;
-					requestItemID 		= $(this).attr("requestvalue");
-					unitCost 	  		= $(this).find(".unitCost").attr("value")  || $(this).find("[name=unitprice]").val();
-					totalCost 	  		= $(this).find(".totalCost").attr("value") || $(this).find(".totalCost").text().replaceAll("₱","").replaceAll(",","");
-					travelUnitOfMeasure	= $(this).find(".totalCost").attr("value") || $(this).find("[name=travelUom]").val();
-					quantity 	  		= $(this).find(".totalCost").attr("value") || $(this).find("[name=quantity]").val();
-					let temp = $(this).find(".unitCost").attr("value") ? {requestItemID,unitCost,totalCost} : {requestItemID,unitCost,totalCost,travelUnitOfMeasure,quantity} ;
-					data["updateItems"].push(temp);
-				}else{
-					if($(this).find("[name=description]")){
-						var  costEstimateID,travelDescription,travelUnitOfMeasure,quantity,unitCost,totalCost;
-						costEstimateID  	= $("#referenceCode").val();
-						travelDescription 	= $(this).find("[name=description]").val(),
-						travelUnitOfMeasure	= $(this).find("[name=travelUom]").val();
-						quantity 	  		= $(this).find("[name=quantity]").val();
-						unitCost 	  		= $(this).find("[name=unitprice]").val();
-						totalCost 	  		= $(this).find(".totalCost").text() != "-" ? $(this).find(".totalCost").text().replaceAll(",","") : "0.00";
-						let temp = {costEstimateID,travelDescription,travelUnitOfMeasure,quantity,unitCost:unitCost.replaceAll("₱",""),totalCost:totalCost.replaceAll("₱","")};
-						data["insertItems"].push(temp);
+				var itemDescription = null, unitCost, totalCost,travelDescription,unitOfMeasure;
+				var itemID 	= $(this).find(".itemcode").attr("value") ?? null;
+					if(itemID){
+						var itemInfoData = getTableData("ims_inventory_item_tbl","itemDescription", "itemID="+itemID);
+						itemDescription  = itemInfoData[0].itemDescription;
 					}
-				}
+
+
+					if($(this).find("[name=description]").val() || $(this).find("[name=description]").val() == ""){
+						travelDescription = $(this).find("[name=description]").val();
+						unitOfMeasure 	  = $("[name=travelUom] option:selected",this).text();
+						unitCost 		  = $(this).find("[name=unitprice]").val().replaceAll(",","");
+						totalCost 		  = $(this).find(".totalCost").text().replaceAll("₱","").replaceAll(",","");
+					}else{
+						travelDescription = $(this).find(".description").text().replaceAll("\n","").replaceAll("\t","").trim();
+						unitOfMeasure 	  = $(this).find(".uom").text().replaceAll("\n","").replaceAll("\t","").trim();
+						unitCost 		  = $(this).find(".unitCost").attr("value");
+						totalCost 		  = $(this).find(".totalCost").attr("value");
+					}
+
+				var temp   = {
+						// FOR DESIGNATION
+							designationID: 	 		$(this).find(".designationcode").attr("value") ?? null,
+							designationName: 		$(this).find(".designation").text().replaceAll("\n","").trim() ?? null,
+							designationTotalHours : $(this).find(".totalhours").text().replaceAll("\n","").trim() ?? null,
+						// FOR ITEMS
+							itemID:					itemID,
+							itemName:				$(this).find(".itemname").text().replaceAll("\n","").replaceAll("\t","").trim() ?? null,
+							itemUom:				unitOfMeasure ?? $(this).find(".uom").text().replaceAll("\n","").replaceAll("\t","").trim(),
+							itemDescription:  		itemDescription,
+							categoryType: 			$(this).attr("category") ?? null,
+						//  FOR TRAVEL
+							travelDescription:		travelDescription == "" || !travelDescription ? null : travelDescription,
+						// FOR ALL
+							quantity:	$(this).find(".quantity").text().replaceAll("\n","").replaceAll("\t","").trim() || $(this).find("[name=quantity]").val(),
+							unitCost: 	unitCost ?? "0",
+							totalCost:  totalCost ?? "0",
+							createdBy: sessionID,
+							updatedBy: sessionID
+					};
+				data["items"].push(temp);
 			});
+
+
 		} 
-
-		
-
 		return data;
 	}
 	// ----- END GET Bill Material DATA -----
@@ -1878,6 +1908,7 @@ $(document).ready(function() {
 			data["reviseBillMaterialID"] = id;
 			delete data["billMaterialID"];
 		}
+		console.log(data);
 		savebillMaterial(data, "save", null, pageContent);
 	});
 	// ----- END SAVE DOCUMENT -----
@@ -1915,7 +1946,16 @@ $(document).ready(function() {
 					employeeID,
 				};
 			}
-			savebillMaterial(data, "submit", notificationData, pageContent);
+			if(priceListCondition.length > 0){
+				var priceListConditionData = [...new Set(priceListCondition)]; 
+				priceListConditionData.map(items=>{
+					showNotification("warning2",
+					`Please set item code <strong>${items}</strong> into inventory price list module to proceed in this proccess`);
+				});
+			}else{
+				savebillMaterial(data, "submit", notificationData, pageContent);
+			}
+			
 		}
 	});
 	// ----- END SUBMIT DOCUMENT -----
@@ -2047,7 +2087,7 @@ $(document).ready(function() {
 				data["approversDate"]		= updateApproveDate(approversDate);
 				data["billMaterialRemarks"]	= $("[name=billMaterialRemarks]").val()?.trim();
 				data["updatedBy"]			= sessionID;
-				console.log(data);
+				
 				let notificationData = {
 					moduleID:                39,
 					tableID: 				 id,
@@ -2216,459 +2256,457 @@ $(document).ready(function() {
 		return html;
 	}
 
-    function getRequestRow(param = null, id = null , readOnly = false){
-       /**
-        * Param -> personnel, project, company, travel
-        * ID -> depends on the Cost estimate Id's
-        */
-        let html = "", tableData = "", tableDataReference="",checkboxTravelHeader="";
-        let totalQty = 0, totalHours =0, totalHourlyRate=0, totalCost=0, totalPrice=0, grandTotalPrice=0;
-        switch(param){
-            case "personnel":
-                
-                tableData = getTableData(`ims_request_items_tbl JOIN hris_employee_list_tbl ON ims_request_items_tbl.designationID = hris_employee_list_tbl.designationID
-                    LEFT JOIN hris_designation_tbl ON ims_request_items_tbl.designationID = hris_designation_tbl.designationID`,
-                    `requestItemID,hris_designation_tbl.designationID as designationID,designationName, designationTotalHours,quantity,MAX(hris_employee_list_tbl.employeeBasicSalary) AS designationRate,hris_designation_tbl.createdAt AS createdAt`,`costEstimateID = '${id}'`,"","hris_designation_tbl.designationName");
-                tableData.map((items,index)=>{
-                    var hourlyRate = (parseFloat(items.designationRate) / 20 ) / 8;
-                    totalQty        += parseFloat(items.quantity);
-                    totalHours      += parseFloat(items.designationTotalHours);
-                    totalHourlyRate += hourlyRate;
-                    totalCost       += (parseFloat(items.designationTotalHours)*parseFloat(hourlyRate)) * parseFloat(items.quantity);
-
-                    // Hourly rate = (Monthly Rate X 12) / total working days in a year/ total working hours per day
-                    html += `   <tr class="itemTableRow" requestvalue="${items.requestItemID}">
-                                    <td>
-                                        <div class="designationcode" value="${items.designationID}">
-                                            ${getFormCode("DSN",moment(items.createdAt),items.designationID)}
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <div class="designation">
-                                            ${items.designationName}
-                                        </div>
-                                    </td>
-                                    <td class="text-center">
-                                        <div class="quantity">
-                                            ${items.quantity}
-                                        </div>
-                                    </td>
-                                    <td class="text-right">
-                                        <div class="totalhours">
-                                            ${items.designationTotalHours}
-                                        </div>
-                                    </td>
-                                    <td class="text-right">
-                                        <div class="hourlyrate text-right unitCost" value="${hourlyRate}">
-                                            ${formatAmount(hourlyRate,true)}
-                                        </div>
-                                    </td>
-                                    <td class="text-right">
-                                        <div class="totalCost text-right" value="${totalCost}">
-                                            ${formatAmount(totalCost,true)}
-                                        </div>
-                                    </td>
-                                </tr>`;
-                });
-                html += `   <tr style= "background-color: rgb(0 0 0 / 5%);">
-                                    <td colspan="2" class="text-danger font-weight-bold">
-                                        SUBTOTAL
-                                    </td>
-                                    <td class="text-center">
-                                        <div class="quantity">
-                                            ${totalQty}
-                                        </div>
-                                    </td>
-                                    <td class="text-right">
-                                        <div class="totalhours">
-                                            ${totalHours}
-                                        </div>
-                                    </td>
-                                    <td class="text-right">
-                                        <div class="hourlyrate">
-                                            ${formatAmount(totalHourlyRate,true)}
-                                        </div>
-                                    </td>
-                                    <td class="text-right">
-                                        <div class="totalcost">
-                                            ${formatAmount(totalCost,true)}
-                                        </div>
-                                    </td>
-                            </tr>`;
-
-                break;
-            case "project":
-					tableDataReference = getTableData("ims_request_items_tbl","",`costEstimateID = '${id}' AND categoryType = 'project' `);
-					tableData = getTableData(
-						`ims_request_items_tbl JOIN ims_inventory_item_tbl USING(itemID) LEFT JOIN ims_inventory_price_list_tbl ON ims_request_items_tbl.itemID = ims_inventory_price_list_tbl.itemID`, 
-						`requestItemID,quantity, unitCost, totalCost, files, remarks, ims_request_items_tbl.itemID AS itemID, itemCode, itemName, unitOfMeasurementID, categoryType, MAX(vendorCurrentPrice) AS higherPrice`, 
-						`costEstimateID = '${id}' AND categoryType = 'project'`,``,`ims_request_items_tbl.itemID`);
-					if(tableDataReference.length === tableData.length){
-						tableData.map((items, index)=>{
-							var totalCost   =  parseFloat(items.higherPrice) * parseFloat(items.quantity);
-							totalQty        += parseFloat(items.quantity) ; 
-							totalPrice      += parseFloat(items.higherPrice); 
-							grandTotalPrice += parseFloat(totalCost);
-										html += `
-										<tr class="itemTableRow" requestvalue="${items.requestItemID}">
-											<td>
-												<div class="itemcode">
-													${items.itemCode}
-												</div>
-											</td>
-											<td>
-												<div class="itemname">
-													${items.itemName}
-												</div>
-											</td>
-											<td class="text-center">
-												<div class="quantity">
-													${items.quantity}
-												</div>
-											</td>
-											<td>
-												<div class="uom">
-													${items.unitOfMeasurementID}
-												</div>
-											</td>
-											<td>
-												<div class="unitCost unitprice text-right" value="${items.higherPrice}">
-													${formatAmount(items.higherPrice,true)}
-												</div>
-											</td>
-											<td>
-												<div class="totalCost text-right" value="${totalCost}">
-													${formatAmount(totalCost,true)}
-												</div>
-											</td>
-										</tr>`;
-						});
-							html += `
-							<tr style= "background-color: rgb(0 0 0 / 5%);">
-								<td colspan="2" class="text-danger font-weight-bold">
-									SUBTOTAL
-								</td>
-								<td class="text-center">
-									<div class="quantity">
-										${totalQty}
-									</div>
-								</td>
-								<td>
-									<div class="uom">-</div>
-								</td>
-								<td>
-									<div class="unitprice text-right">
-										${formatAmount(totalPrice,true)}
-									</div>
-								</td>
-								<td>
-									<div class="totalcost text-right">
-										${formatAmount(grandTotalPrice,true)}
-									</div>
-								</td>
-							</tr>`;
-							if(tableData.find(items=> items.higherPrice === null)) html = "NONE"
-					}else{
-						html = "NONE";
-					}
-                break;
-            case "company":
-                tableDataReference = getTableData("ims_request_items_tbl","",`costEstimateID = '${id}' AND categoryType = 'company' `);
-                tableData = getTableData(
-                    `ims_request_items_tbl JOIN ims_inventory_item_tbl USING(itemID) LEFT JOIN ims_inventory_price_list_tbl ON ims_request_items_tbl.itemID = ims_inventory_price_list_tbl.itemID`, 
-                    `requestItemID,quantity, unitCost, totalCost, files, remarks, ims_request_items_tbl.itemID AS itemID, itemCode, itemName, unitOfMeasurementID, categoryType, MAX(vendorCurrentPrice) AS higherPrice`,
-                    `costEstimateID = '${id}' AND categoryType = 'company' `,``,`ims_request_items_tbl.itemID`);
-					if(tableDataReference.length === tableData.length){
-						tableData.map((items, index)=>{
-							var totalCost   =  parseFloat(items.higherPrice) * parseFloat(items.quantity);
-							totalQty        += parseFloat(items.quantity) ; 
-							totalPrice      += parseFloat(items.higherPrice); 
-							grandTotalPrice += parseFloat(totalCost);
-							html += `
-							<tr class="itemTableRow" requestvalue="${items.requestItemID}">
-								<td>
-									<div class="itemcode">
-										${items.itemCode}
-									</div>
-								</td>
-								<td>
-									<div class="itemname">
-										${items.itemName}
-									</div>
-								</td>
-								<td class="text-center">
-									<div class="quantity">
-										${items.quantity}
-									</div>
-								</td>
-								<td>
-									<div class="uom">
-										${items.unitOfMeasurementID}
-									</div>
-								</td>
-								<td>
-									<div class="unitCost unitprice text-right" value="${items.higherPrice}">
-										${formatAmount(items.higherPrice,true)}
-									</div>
-								</td>
-								<td>
-									<div class="totalCost text-right" value="${totalCost}">
-										${formatAmount(totalCost,true)}
-									</div>
-								</td>
-							</tr>`;
-						});
-							html += `
-							<tr style= "background-color: rgb(0 0 0 / 5%);">
-								<td colspan="2" class="text-danger font-weight-bold"> 
-									SUBTOTAL
-								</td>
-								<td class="text-center">
-									<div class="quantity">
-										${totalQty}
-									</div>
-								</td>
-								<td>
-									<div class="uom">-</div>
-								</td>
-								<td>
-									<div class="unitprice text-right">
-										${formatAmount(totalPrice,true)}
-									</div>
-								</td>
-								<td>
-									<div class="totalcost text-right">
-										${formatAmount(grandTotalPrice,true)}
-									</div>
-								</td>
-							</tr>`;
-							if(tableData.find(items=> items.higherPrice === null)) html = "NONE"
-					}else{
-						html = "NONE";
-					}
-                break;
-            default:
-				     
-                    tableData = getTableData(`ims_request_items_tbl`,
-										`requestItemID,travelDescription,travelUnitOfMeasure,quantity,unitCost,totalCost`,
-										`costEstimateID = ${id} AND (travelDescription !="undefined" AND travelDescription IS NOT NULL)`);
-                    tableData.map((items,index)=>{
-						if(!readOnly){
-							if(index > 0){
-								html += `
-									<tr class="itemTableRow" requestvalue="${items.requestItemID}"  index="${index}">
-										<td class="text-center">
-											<div class="action">
-												<input type="checkbox" class="checkboxrow" id="checkboxrow${index}">
-											</div>
-										</td>
-										<td>
-											<div class="description">
-												<textarea
-													minlength="4" 
-													maxlength="500"
-													rows="2" 
-													style="resize: none" 
-													class="form-control" 
-													name="description" 
-													id="description${index}" required>${items.travelDescription}</textarea>
-												<div class="invalid-feedback d-block" id="invalid-description${index}"></div>
-											</div>
-										</td>
-										<td class="text-center">
-											<div class="quantity">
-												<input 
-													type="text" 
-													class="form-control validate number text-center"
-													data-allowcharacters="[0-9]" 
-													max="999999999" 
-													id="travelQuantity${index}" 
-													name="quantity" 
-													value="${items.quantity}" 
-													minlength="1" 
-													maxlength="20" 
-													required>
-												<div class="invalid-feedback d-block" id="invalid-travelQuantity${index}"></div>
-											</div>
-										</td>
-										<td>
-											<div class="uom">
-												<select
-												class="form-control validate select2"
-												name="travelUom"
-												id="travelUom${index}"
-												style="width: 100%"
-												required
-												travel="true">
-													${unitOfMeasurementOptions(items.travelUnitOfMeasure)}
-												</select>
-												<div class="invalid-feedback d-block" id="invalid-travelUom${index}"></div>
-											</div>
-										</td>
-										<td>
-											<div class="unitprice">
-												<div class="input-group">
-													<div class="input-group-prepend">
-														<span class="input-group-text">₱</span>
-													</div>
-													<input type="text" class="form-control amount" min="0.01" max="9999999999" minlength="1" 
-																maxlength="20" name="unitprice" id="unitprice${index}" value="${items.unitCost}" style="text-align: right;">
-												</div>
-												<div class="invalid-feedback d-block" id="invalid-unitprice${index}"></div>
-											</div>
-										</td>
-										<td>
-											<div class="totalCost text-right">${formatAmount(items.totalCost,true)}</div>
-										</td>
-									</tr>`;
-							}else{
-								html += `
-										<tr class="">
-											${readOnly?'':'<td></td>'}
-											<td>
-												<div class="description">
-													${items.travelDescription}
-												</div>
-											</td>
-											<td class="text-center">
-												<div class="quantity">
-													${items.quantity}
-												</div>
-											</td>
-											<td>
-												<div class="uom">
-													${items.travelUnitOfMeasure}
-												</div>
-											</td>
-											<td>
-												<div class="unitprice text-right">-</div>
-											</td>
-											<td>
-												<div class="totalcost text-right">${items.unitCost || "-"}</div>
-											</td>
-										</tr>`;
-							}
-						}else{
-							html += `
-										<tr class="">
-											${readOnly?'':'<td></td>'}
-											<td>
-												<div class="description">
-													${items.travelDescription}
-												</div>
-											</td>
-											<td class="text-center">
-												<div class="quantity">
-													${items.quantity}
-												</div>
-											</td>
-											<td>
-												<div class="uom">
-													${items.travelUnitOfMeasure}
-												</div>
-											</td>
-											<td>
-												<div class="unitprice text-right">${formatAmount(items.unitCost,true)}</div>
-											</td>
-											<td>
-												<div class="totalcost text-right">${formatAmount(items.totalCost,true)}</div>
-											</td>
-										</tr>`;
-						}
-
-
-						checkboxTravelHeader += !readOnly? ``:``;
-						// ${readOnly?'':'<td></td>'}
-                    });
-
-					if(tableData.length < 2){
-						html += `
-								<tr class="itemTableRow" index="1">
-									<td class="text-center">
-										<div class="action">
-											<input type="checkbox" class="checkboxrow" id="checkboxrow1">
-										</div>
-									</td>
-									<td>
-										<div class="description">
-											<textarea
-												minlength="4" 
-												maxlength="500"
-												rows="2" 
-												style="resize: none" 
-												class="form-control" 
-												name="description" 
-												id="description1" required></textarea>
-											<div class="invalid-feedback d-block" id="invalid-description1"></div>
-										</div>
-									</td>
-									<td class="text-center">
-										<div class="quantity">
-											<input 
-												type="text" 
-												class="form-control validate number text-center"
-												data-allowcharacters="[0-9]" 
-												max="999999999" 
-												id="travelQuantity1" 
-												name="quantity" 
-												value="0" 
-												minlength="1" 
-												maxlength="20" 
-												required>
-											<div class="invalid-feedback d-block" id="invalid-travelQuantity1"></div>
-										</div>
-									</td>
-									<td>
-										<div class="uom">
-											<select
-											class="form-control validate select2"
-											name="travelUom"
-											id="travelUom1"
-											style="width: 100%"
-											required
-											travel="true">
-												${unitOfMeasurementOptions()}
-											</select>
-											<div class="invalid-feedback d-block" id="invalid-travelUom1"></div>
-										</div>
-									</td>
-									<td>
-										<div class="unitprice">
-											<div class="input-group">
-												<div class="input-group-prepend">
-													<span class="input-group-text">₱</span>
-												</div>
-												<input type="text" class="form-control amount" min="0.01" max="9999999999" minlength="1" 
-															maxlength="20" name="unitprice" id="unitprice1" value="${formatAmount(0,true)}" style="text-align: right;">
-											</div>
-											<div class="invalid-feedback d-block" id="invalid-unitprice1"></div>
-										</div>
-									</td>
-									<td>
-										<div class="totalCost text-right">-</div>
-									</td>
-								</tr>`;
-					}
-					let travelButtons = !readOnly ? `<div class="w-100 text-left my-2">
-                                                <button class="btn btn-primary btnAddRow" id="btnAddRow" travel="true"><i class="fas fa-plus-circle"></i> Add Row</button>
-                                                <button class="btn btn-danger btnDeleteRow" id="btnDeleteRow" travel="true" disabled><i class="fas fa-minus-circle"></i> Delete Row/s</button>
-                                            </div>` : "";
-					
-					setTimeout(() => {
-						$(".travelButtons").html(travelButtons);
-						travelTotal();
-					}, 500);
-					
-					
-        }
-
-        return html;   
-    }
-
-
-
-
-
+	function getRequestRow(param = null, referenceCode = null , readOnly = false , id = null){
+		/**
+		 * Param -> personnel, project, company, travel
+		 * ID -> depends on the Cost estimate Id's
+		 */
+		 let html = "", tableData = "", tableDataReference="",checkboxTravelHeader="";
+		 let totalQty = 0, totalHours =0, totalHourlyRate=0, totalCost=0, totalPrice=0, grandTotalPrice=0;
+		 var condition  = id ? `AND billMaterialID=${id}` : "";	 
+		 switch(param){
+			 case "personnel":
+				 
+				 tableData = getTableData(`hris_personnel_request_tbl AS hprt`,
+					 `designationID,
+					 designationName,
+					 designationTotalHours,
+					 quantity,
+					 createdAt,
+					 (SELECT MAX(employeeBasicSalary) FROM hris_employee_list_tbl as helt WHERE helt.designationID = hprt.designationID) AS designationRate,
+					 costEstimateID`,
+					 `costEstimateID = '${referenceCode}' ${condition}`);
+				 tableData.map((items,index)=>{
+					 var hourlyRate  = (parseFloat(items.designationRate || "0") / 20 ) / 8;
+					 totalQty        += parseFloat(items.designationID != "0" ? items.quantity : "0");
+					 totalHours      += parseFloat(items.designationID != "0" ? items.designationTotalHours :"0");
+					 totalHourlyRate += hourlyRate;
+					 totalCost       = (parseFloat(items.designationTotalHours)*parseFloat(hourlyRate)) * parseFloat(items.quantity);
+					 grandTotalPrice += totalCost
+					 // Hourly rate = (Monthly Rate X 12) / total working days in a year/ total working hours per day
+					 html += `   <tr class="itemTableRow" requestvalue="${items.requestItemID}">
+									 <td>
+										 <div class="designationcode" value="${items.designationID}">
+											 ${items.designationID != "0" ? getFormCode("DSN",moment(items.createdAt),items.designationID) :"-"}
+										 </div>
+									 </td>
+									 <td>
+										 <div class="designation">
+											 ${items.designationID != "0" ? items.designationName : `-`}
+										 </div>
+									 </td>
+									 <td class="text-center">
+										 <div class="quantity">
+											 ${items.designationID != "0" ? items.quantity : `-`}
+										 </div>
+									 </td>
+									 <td>
+										 <div class="totalhours">
+											 ${items.designationID != "0" ? items.designationTotalHours : `-`}
+										 </div>
+									 </td>
+									 <td class="text-right">
+										 <div class="hourlyrate text-right unitCost" value="${hourlyRate}">
+											 ${formatAmount(hourlyRate,true)}
+										 </div>
+									 </td>
+									 <td class="text-right">
+										 <div class="totalCost text-right" value="${totalCost}">
+											 ${formatAmount(totalCost,true)}
+										 </div>
+									 </td>
+								 </tr>`;
+				 });
+				 html += `   <tr style= "background-color: rgb(0 0 0 / 5%);">
+									 <td colspan="2" class="text-danger font-weight-bold">
+										 SUBTOTAL
+									 </td>
+									 <td class="text-center">
+										 <div class="quantity">
+											 ${totalQty}
+										 </div>
+									 </td>
+									 <td>
+										 <div class="totalhours">
+											 ${totalHours}
+										 </div>
+									 </td>
+									 <td class="text-right">
+										 <div class="hourlyrate">
+											 ${formatAmount(totalHourlyRate,true)}
+										 </div>
+									 </td>
+									 <td class="totalcost text-right">
+										 <div class="grandTotal">
+											 ${formatAmount(grandTotalPrice,true)}
+										 </div>
+									 </td>
+							 </tr>`;
+	
+				 break;
+			 case "project":
+					 tableDataReference = getTableData("ims_request_items_tbl","",`costEstimateID = '${referenceCode}' AND categoryType = 'project' `);
+					 tableData = getTableData(`ims_request_items_tbl LEFT JOIN ims_inventory_price_list_tbl USING(itemID)`, 
+						 `ims_request_items_tbl.*,  MAX(vendorCurrentPrice) AS higherPrice, (SELECT sub_inv.itemCode FROM ims_inventory_item_tbl as sub_inv WHERE sub_inv.itemID = ims_request_items_tbl.itemID ) AS itemCode`, 
+						 `costEstimateID = '${referenceCode}' AND categoryType = 'project' ${condition}`,``,`itemID`);
+					 
+	
+					 
+						 tableData.map((items, index)=>{
+	
+							 items.higherPrice ? "" : priceListCondition.push(items.itemCode);
+	
+							 var totalCost   =  parseFloat(items.higherPrice || "0") * parseFloat(items.quantity);
+							 totalQty        += parseFloat(items.quantity) ; 
+							 totalPrice      += parseFloat(items.higherPrice || "0"); 
+							 grandTotalPrice += parseFloat(totalCost);
+										 html += `
+										 <tr class="itemTableRow" requestvalue="${items.requestItemID}" category="project">
+											 <td>
+												 <div class="itemcode" value="${items.itemID}">
+													 ${items.itemCode}
+												 </div>
+											 </td>
+											 <td>
+												 <div class="itemname">
+													 ${items.itemName}
+												 </div>
+											 </td>
+											 <td class="text-center">
+												 <div class="quantity">
+													 ${items.quantity}
+												 </div>
+											 </td>
+											 <td>
+												 <div class="uom">
+													 ${items.itemUom}
+												 </div>
+											 </td>
+											 <td>
+												 <div class="unitCost unitprice text-right" value="${items.higherPrice}">
+													 ${formatAmount(items.higherPrice,true)}
+												 </div>
+											 </td>
+											 <td>
+												 <div class="totalCost text-right" value="${totalCost}">
+													 ${formatAmount(totalCost,true)}
+												 </div>
+											 </td>
+										 </tr>`;
+						 });
+							 html += `
+							 <tr style= "background-color: rgb(0 0 0 / 5%);">
+								 <td colspan="2" class="text-danger font-weight-bold">
+									 SUBTOTAL
+								 </td>
+								 <td class="text-center">
+									 <div class="quantity">
+										 ${totalQty}
+									 </div>
+								 </td>
+								 <td>
+									 <div class="uom">-</div>
+								 </td>
+								 <td>
+									 <div class="unitprice text-right">
+										 ${formatAmount(totalPrice,true)}
+									 </div>
+								 </td>
+								 <td>
+									 <div class="totalcost grandTotal text-right">
+										 ${formatAmount(grandTotalPrice,true)}
+									 </div>
+								 </td>
+							 </tr>`;
+					 
+				 break;
+			 case "company":
+				 tableDataReference = getTableData("ims_request_items_tbl","",`costEstimateID = '${referenceCode}' AND categoryType = 'company' `);
+				 tableData = getTableData(
+					 `ims_request_items_tbl LEFT JOIN ims_inventory_price_list_tbl USING(itemID)`, 
+					 `ims_request_items_tbl.*,  MAX(vendorCurrentPrice) AS higherPrice, (SELECT sub_inv.itemCode FROM ims_inventory_item_tbl as sub_inv WHERE sub_inv.itemID = ims_request_items_tbl.itemID ) AS itemCode`, 
+					 `costEstimateID = '${referenceCode}' AND categoryType = 'company' ${condition}`,``,`itemID`);
+						 tableData.map((items, index)=>{
+							 items.higherPrice ? "" : priceListCondition.push(items.itemCode);
+							 var totalCost   =  parseFloat(items.higherPrice || "0") * parseFloat(items.quantity);
+							 totalQty        += parseFloat(items.quantity) ; 
+							 totalPrice      += parseFloat(items.higherPrice || "0"); 
+							 grandTotalPrice += parseFloat(totalCost);
+	
+							 html += `
+							 <tr class="itemTableRow" requestvalue="${items.requestItemID}" category="company">
+								 <td>
+									 <div class="itemcode" value="${items.itemID}">
+										 ${items.itemCode}
+									 </div>
+								 </td>
+								 <td>
+									 <div class="itemname">
+										 ${items.itemName}
+									 </div>
+								 </td>
+								 <td class="text-center">
+									 <div class="quantity">
+										 ${items.quantity}
+									 </div>
+								 </td>
+								 <td>
+									 <div class="uom">
+										 ${items.itemUom}
+									 </div>
+								 </td>
+								 <td>
+									 <div class="unitCost unitprice text-right" value="${items.higherPrice}">
+										 ${formatAmount(items.higherPrice,true)}
+									 </div>
+								 </td>
+								 <td>
+									 <div class="totalCost text-right" value="${totalCost}">
+										 ${formatAmount(totalCost,true)}
+									 </div>
+								 </td>
+							 </tr>`;
+						 });
+							 html += `
+							 <tr style= "background-color: rgb(0 0 0 / 5%);">
+								 <td colspan="2" class="text-danger font-weight-bold"> 
+									 SUBTOTAL
+								 </td>
+								 <td class="text-center">
+									 <div class="quantity">
+										 ${totalQty}
+									 </div>
+								 </td>
+								 <td>
+									 <div class="uom">-</div>
+								 </td>
+								 <td>
+									 <div class="unitprice text-right">
+										 ${formatAmount(totalPrice,true)}
+									 </div>
+								 </td>
+								 <td>
+									 <div class="totalcost grandTotal text-right">
+										 ${formatAmount(grandTotalPrice,true)}
+									 </div>
+								 </td>
+							 </tr>`;
+				 break;
+			 default:
+					 tableData = getTableData(`ims_travel_request_tbl`,
+										 `travelRequestID,travelDescription,	unitOfMeasure,quantity,unitCost,totalCost`,
+										 `costEstimateID = ${referenceCode} ${condition}`);
+					 tableData.map((items,index)=>{
+						 if(!readOnly){
+							 if(index > 0){
+								 console.log(items.unitOfMeasure);
+								 html += `
+									 <tr class="itemTableRow" requestvalue="${items.travelRequestID}"  index="${index}">
+										 <td class="text-center">
+											 <div class="action">
+												 <input type="checkbox" class="checkboxrow" id="checkboxrow${index}">
+											 </div>
+										 </td>
+										 <td>
+											 <div class="description">
+												 <textarea
+													 minlength="4" 
+													 maxlength="500"
+													 rows="2" 
+													 style="resize: none" 
+													 class="form-control" 
+													 name="description" 
+													 id="description${index}" required>${items.travelDescription}</textarea>
+												 <div class="invalid-feedback d-block" id="invalid-description${index}"></div>
+											 </div>
+										 </td>
+										 <td class="text-center">
+											 <div class="quantity"\>
+												 <input 
+													 type="text" 
+													 class="form-control validate number text-center"
+													 data-allowcharacters="[0-9]" 
+													 max="999999999" 
+													 id="travelQuantity${index}" 
+													 name="quantity" 
+													 value="${items.quantity}" 
+													 minlength="1" 
+													 maxlength="20" 
+													 required>
+												 <div class="invalid-feedback d-block" id="invalid-travelQuantity${index}"></div>
+											 </div>
+										 </td>
+										 <td>
+											 <div class="uom">
+												 <select
+												 class="form-control validate select2"
+												 name="travelUom"
+												 id="travelUom${index}"
+												 style="width: 100%"
+												 required
+												 travel="true">
+													 ${unitOfMeasurementOptions(items["unitOfMeasure"].toLowerCase())}
+												 </select>
+												 <div class="invalid-feedback d-block" id="invalid-travelUom${index}"></div>
+											 </div>
+										 </td>
+										 <td>
+											 <div class="unitprice">
+												 <div class="input-group">
+													 <div class="input-group-prepend">
+														 <span class="input-group-text">₱</span>
+													 </div>
+													 <input type="text" class="form-control amount" min="0.01" max="9999999999" minlength="1" 
+																 maxlength="20" name="unitprice" id="unitprice${index}" value="${items.unitCost}" style="text-align: right;">
+												 </div>
+												 <div class="invalid-feedback d-block" id="invalid-unitprice${index}"></div>
+											 </div>
+										 </td>
+										 <td>
+											 <div class="totalCost text-right">${formatAmount(items.totalCost,true)}</div>
+										 </td>
+									 </tr>`;
+							 }else{
+								 html += `
+										 <tr class="itemTableRow">
+											 ${readOnly?'':'<td></td>'}
+											 <td>
+												 <div class="description">
+													 ${items.travelDescription}
+												 </div>
+											 </td>
+											 <td class="text-center">
+												 <div class="quantity">
+													 ${items.quantity}
+												 </div>
+											 </td>
+											 <td>
+												 <div class="uom">
+													 ${items.unitOfMeasure}
+												 </div>
+											 </td>
+											 <td>
+												 <div class="unitprice text-right">-</div>
+											 </td>
+											 <td>
+												 <div class="totalcost text-right">${items.unitCost || "-"}</div>
+											 </td>
+										 </tr>`;
+							 }
+						 }else{
+							 html += `
+										 <tr class="">
+											 ${readOnly?'':'<td></td>'}
+											 <td>
+												 <div class="description">
+													 ${items.travelDescription}
+												 </div>
+											 </td>
+											 <td class="text-center">
+												 <div class="quantity">
+													 ${items.quantity}
+												 </div>
+											 </td>
+											 <td>
+												 <div class="uom">
+													 ${items.unitOfMeasure}
+												 </div>
+											 </td>
+											 <td>
+												 <div class="unitprice text-right">${formatAmount(items.unitCost,true)}</div>
+											 </td>
+											 <td>
+												 <div class="totalcost text-right">${formatAmount(items.totalCost,true)}</div>
+											 </td>
+										 </tr>`;
+						 }
+						 checkboxTravelHeader += !readOnly? ``:``;
+						 // ${readOnly?'':'<td></td>'}
+					 });
+	
+					 if(tableData.length < 2){
+						 html += `
+								 <tr class="itemTableRow" index="1">
+									 <td class="text-center">
+										 <div class="action">
+											 <input type="checkbox" class="checkboxrow" id="checkboxrow1">
+										 </div>
+									 </td>
+									 <td>
+										 <div class="description">
+											 <textarea
+												 minlength="4" 
+												 maxlength="500"
+												 rows="2" 
+												 style="resize: none" 
+												 class="form-control" 
+												 name="description" 
+												 id="description1" required></textarea>
+											 <div class="invalid-feedback d-block" id="invalid-description1"></div>
+										 </div>
+									 </td>
+									 <td class="text-center">
+										 <div class="quantity">
+											 <input 
+												 type="text" 
+												 class="form-control validate number text-center"
+												 data-allowcharacters="[0-9]" 
+												 max="999999999" 
+												 id="travelQuantity1" 
+												 name="quantity" 
+												 value="0" 
+												 minlength="1" 
+												 maxlength="20" 
+												 required>
+											 <div class="invalid-feedback d-block" id="invalid-travelQuantity1"></div>
+										 </div>
+									 </td>
+									 <td>
+										 <div class="uom">
+											 <select
+											 class="form-control validate select2"
+											 name="travelUom"
+											 id="travelUom1"
+											 style="width: 100%"
+											 required
+											 travel="true">
+												 ${unitOfMeasurementOptions()}
+											 </select>
+											 <div class="invalid-feedback d-block" id="invalid-travelUom1"></div>
+										 </div>
+									 </td>
+									 <td>
+										 <div class="unitprice">
+											 <div class="input-group">
+												 <div class="input-group-prepend">
+													 <span class="input-group-text">₱</span>
+												 </div>
+												 <input type="text" class="form-control amount" min="0.01" max="9999999999" minlength="1" 
+															 maxlength="20" name="unitprice" id="unitprice1" value="${formatAmount(0,true)}" style="text-align: right;">
+											 </div>
+											 <div class="invalid-feedback d-block" id="invalid-unitprice1"></div>
+										 </div>
+									 </td>
+									 <td>
+										 <div class="totalCost text-right">-</div>
+									 </td>
+								 </tr>`;
+					 }
+	
+					 let travelButtons = !readOnly ? `<div class="w-100 text-left my-2">
+														<button class="btn btn-primary btnAddRow" id="btnAddRow" travel="true" type="button"><i class="fas fa-plus-circle"></i> Add Row</button>
+														<button class="btn btn-danger btnDeleteRow" id="btnDeleteRow" travel="true" type="button" disabled><i class="fas fa-minus-circle"></i> Delete Row/s</button>
+													</div>` : "";
+					 
+					 setTimeout(() => {
+						$(`[name=travelUom]`).select2({ theme: "bootstrap" });
+						 $(".travelButtons").html(travelButtons);
+						 travelTotal();
+					 }, 500);
+		 }
+	
+		 return html;   
+	 }
 
 
 
@@ -2686,6 +2724,17 @@ $(document).ready(function() {
 
 
 
+
+
+
+	// CHECK IF THE DOCUMENT IS ALREADY REVISED
+	function isRevised(id = null){
+		let revised = false;
+		var tableData = getTableData("pms_bill_material_tbl","reviseBillMaterialID",`reviseBillMaterialID=`+id);
+		revised = tableData.length > 0 ? true : false;
+		return revised; 
+	}
+	// END CHECK IF THE DOCUMENT IS ALREADY REVISED
 
 
 

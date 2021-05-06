@@ -99,7 +99,7 @@ class Purchase_request extends CI_Controller {
                     $purchaseRequestItems = [];
                     foreach($items as $index => $item) {
                         $temp = [
-                            "requestItemID"     => $item["requestItemID"] != "null" ? $item["requestItemID"] : null,
+                            // "requestItemID"     => $item["requestItemID"] != "null" ? $item["requestItemID"] : null,
                             "costEstimateID"    => $costEstimateID,
                             "purchaseRequestID" => $purchaseRequestID,
                             "itemID"            => $item["itemID"] != "null" ? $item["itemID"] : null,

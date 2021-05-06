@@ -35,6 +35,7 @@ $(document).on("click", "#btnAddRow",function(){
     $("#tablePriceList-body").append(html);
     getVendorOptions();
     priceListSelect2();
+    initAmount();
 });
 
 $(document).on("change","[name=inventoryVendorID]",function(){
@@ -468,7 +469,7 @@ function getItemPriceList(itemID){
                                         <th>Vendor Name</th>
                                         <th>Current Price</th>
                                         <th>Date Updated</th>
-                                        <th class="text-center">Preffered</th>
+                                        <th class="text-center">Preferred</th>
                                     </tr>
                                 </thead>
                                 <tbody id="tablePriceList-body" >`;

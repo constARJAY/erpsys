@@ -1795,7 +1795,6 @@ $(document).ready(function() {
 					filename  		= file ? file?.name : "";
 				}else if($(this).closest("tbody").attr("company") == "true"){
 					categoryType 	= "company";
-					
 					itemID     	 	= $("td [name=itemID]", this).val();
 					var inventoryItemListArray = inventoryItemList.filter(items=> items.itemID == itemID);
 					itemName	 	= inventoryItemListArray.length > 0 ? inventoryItemListArray[0].itemName : null;
@@ -1808,9 +1807,9 @@ $(document).ready(function() {
 				}else{
 						if($(this).closest("tbody").attr("personnel") == "true"){
 							designationID 			= $("td [name=designationID]", this).val();
-							var designationListData = designationList.filter(items=>items.designationID);
+							var designationListData = designationList.filter(items=> items.designationID == designationID);
 							designationName 		= designationListData[0].designationName;
-							designationTotalHours	=	$("td [name=employeeTotalHours]", this).val();
+							designationTotalHours	= $("td [name=employeeTotalHours]", this).val();
 						}else{
 							travelDescription = $("td [name=description]", this).val();
 							travelUom 		  = $("td [name=travelUom]", this).val();
