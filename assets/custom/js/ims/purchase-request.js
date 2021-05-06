@@ -656,7 +656,6 @@ $(document).ready(function() {
 
 	// ----- GET COST ESTIMATE LIST LIST -----
 	function getCostEstimateList(id = null, status = 0, display = true) {
-
 		const createdCEList = getTableData("ims_purchase_request_tbl", "costEstimateID", "purchaseRequestStatus <> 3 AND purchaseRequestStatus <> 4").map(ce => ce.costEstimateID);
 		let html = `
 		<option 
@@ -665,7 +664,7 @@ $(document).ready(function() {
 			projectID = "0"
 			${id == "0" && "selected"}>N/A</option>`;
 		if (!status || status == 0) {
-			html += costEstimateList.filter(ce => createdCEList.indexOf(ce.costEstimateID) == -1).map(ce => {
+			html += costEstimateList.filter(ce => createdCEList.indexOf(ce.costEstimateID) == -1 || ce.costEstimateID == id).map(ce => {
 				return `
 				<option 
 				value     = "${ce.costEstimateID}" 

@@ -37,41 +37,13 @@ class PurchaseRequest_model extends CI_Model {
 
     public function savePurchaseRequestItems($action, $data, $purchaseRequestID = null, $costEstimateID = null)
     {
-        // if ($purchaseRequestID && !$costEstimateID) {
-            $deletePurchaseRequestItems = $this->deletePurchaseRequestItems($purchaseRequestID, $costEstimateID);
+        $deletePurchaseRequestItems = $this->deletePurchaseRequestItems($purchaseRequestID, $costEstimateID);
 
-            $query = $this->db->insert_batch("ims_request_items_tbl", $data);
-            if ($query) {
-                return "true|Successfully submitted";
-            }
-        // } else {
-        //     foreach ($data as $item) {
-        //         $requestItemID = $item["requestItemID"];
-        //         if ($requestItemID) {
-        //             unset($item["requestItemID"]);
-        //             $this->db->update(
-        //                 "ims_request_items_tbl", 
-        //                 $item, 
-        //                 ["requestItemID" => $requestItemID]);
-        //         } else {
-        //             $this->db->insert("ims_request_items_tbl", $item);
-        //         }
-        //     }
-        //     return "true|Successfully submitted";
-        // }
+        $query = $this->db->insert_batch("ims_request_items_tbl", $data);
+        if ($query) {
+            return "true|Successfully submitted";
+        }
         return "false|System error: Please contact the system administrator for assistance!";
     }
-
-    // public function savePurchaseRequestItems($action, $data, $purchaseRequestID = null, $costEstimateID = null)
-    // {
-    //     if (($purchaseRequestID && !$costEstimateID)) {
-    //         $deletePurchaseRequestItems = $this->deletePurchaseRequestItems($purchaseRequestID);
-    //     }
-    //     $query = $this->db->insert_batch("ims_request_items_tbl", $data);
-    //     if ($query) {
-    //         return "true|Successfully submitted";
-    //     }
-    //     return "false|System error: Please contact the system administrator for assistance!";
-    // }
 
 }

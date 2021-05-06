@@ -325,7 +325,7 @@ CREATE TABLE `gen_system_notification_tbl` (
   `createdAt` timestamp NOT NULL DEFAULT current_timestamp(),
   `updatedAt` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   PRIMARY KEY (`notificationID`)
-) ENGINE=InnoDB AUTO_INCREMENT=106 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=118 DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -334,7 +334,7 @@ CREATE TABLE `gen_system_notification_tbl` (
 
 LOCK TABLES `gen_system_notification_tbl` WRITE;
 /*!40000 ALTER TABLE `gen_system_notification_tbl` DISABLE KEYS */;
-INSERT INTO `gen_system_notification_tbl` VALUES (1,3,46,1,'Purchase Request','Akosi Admin asked for your approval.',2,1,1,3,'2021-04-18 23:29:09','2021-04-18 23:29:24'),(2,1,46,1,'Purchase Request','PR-21-00001: Your request has been denied.',1,1,3,0,'2021-04-19 00:01:22','2021-04-20 07:11:31'),(3,3,46,4,'Purchase Request','Akosi Admin asked for your approval.',2,1,1,3,'2021-04-19 00:21:05','2021-04-19 00:22:17'),(4,1,46,4,'Purchase Request','PR-21-00004: Your request has been denied.',1,1,3,0,'2021-04-19 00:22:27','2021-04-20 07:11:31'),(5,3,46,6,'Purchase Request','Akosi Admin asked for your approval.',2,0,1,0,'2021-04-19 00:24:17','2021-04-19 00:24:17'),(6,3,46,2,'Purchase Request','Akosi Admin asked for your approval.',2,1,1,3,'2021-04-21 06:17:57','2021-04-21 06:18:14'),(7,1,46,2,'Purchase Request','PR-21-00002: Your request has been denied.',1,0,3,0,'2021-04-21 06:18:23','2021-04-21 06:18:23'),(8,3,46,9,'Purchase Request','Akosi Admin asked for your approval.',2,1,1,3,'2021-04-21 06:18:36','2021-05-05 07:38:58'),(9,3,46,1,'Purchase Request','Akosi Admin asked for your approval.',2,1,1,3,'2021-04-26 01:35:40','2021-04-26 01:42:51'),(10,4,46,1,'Purchase Request','Akosi Admin asked for your approval.',2,1,3,4,'2021-04-26 01:43:01','2021-04-26 01:43:28'),(11,2,46,1,'Purchase Request','Akosi Admin asked for your approval.',2,1,4,2,'2021-04-26 01:43:35','2021-04-26 01:44:09'),(12,1,46,1,'Purchase Request','PR-21-00001: Your request has been approved.',7,1,2,1,'2021-04-26 01:44:18','2021-04-26 01:44:27'),(13,3,46,1,'Purchase Order','Akosi Admin asked for your approval.',2,1,1,3,'2021-04-27 02:39:08','2021-04-27 03:16:33'),(14,3,46,4,'Purchase Order','Akosi Admin asked for your approval.',2,1,1,3,'2021-04-27 03:10:47','2021-04-27 03:15:26'),(15,4,47,1,'Purchase Order','Akosi Admin asked for your approval.',2,1,3,4,'2021-04-27 03:25:43','2021-04-27 03:26:16'),(16,1,47,1,'Purchase Order','P0-21-00001: Your request has been denied.',1,1,4,1,'2021-04-27 05:05:22','2021-04-27 05:08:13'),(17,3,47,6,'Purchase Order','Akosi Admin asked for your approval.',2,0,1,0,'2021-04-27 05:54:06','2021-04-27 05:54:06'),(18,3,47,14,'Purchase Order','Akosi Admin asked for your approval.',2,1,1,3,'2021-04-27 06:43:07','2021-04-27 06:44:15'),(19,1,47,14,'Purchase Order','P0-21-00014: Your request has been denied.',1,0,3,0,'2021-04-27 06:44:27','2021-04-27 06:44:27'),(20,3,47,15,'Purchase Order','Akosi Admin asked for your approval.',2,1,1,3,'2021-04-27 06:56:15','2021-04-27 07:01:25'),(21,3,47,4,'Purchase Order','Akosi Admin asked for your approval.',2,1,1,3,'2021-04-27 06:56:27','2021-04-27 06:56:39'),(22,1,47,4,'Purchase Order','P0-21-00004: Your request has been denied.',1,0,3,0,'2021-04-27 06:56:50','2021-04-27 06:56:50'),(23,3,47,16,'Purchase Order','Akosi Admin asked for your approval.',2,1,1,3,'2021-04-27 07:00:52','2021-04-27 07:01:01'),(24,4,47,16,'Purchase Order','Akosi Admin asked for your approval.',2,1,3,4,'2021-04-27 07:01:08','2021-04-27 07:02:35'),(25,4,47,15,'Purchase Order','Akosi Admin asked for your approval.',2,1,3,4,'2021-04-27 07:01:21','2021-04-27 07:02:26'),(26,2,47,15,'Purchase Order','Akosi Admin asked for your approval.',2,1,4,2,'2021-04-27 07:02:32','2021-04-30 05:57:13'),(27,2,47,16,'Purchase Order','Akosi Admin asked for your approval.',2,1,4,2,'2021-04-27 07:02:42','2021-04-27 07:08:18'),(28,1,47,16,'Purchase Order','P0-21-00016: Your request has been approved.',7,0,2,0,'2021-04-27 07:08:25','2021-04-27 07:08:25'),(29,3,49,5,'Service Requisition','Akosi Admin asked for your approval.',2,0,1,0,'2021-04-30 03:26:44','2021-04-30 03:26:44'),(30,3,49,1,'Service Requisition','Akosi Admin asked for your approval.',2,1,1,3,'2021-04-30 05:10:32','2021-04-30 05:14:10'),(31,4,49,1,'Service Requisition','Akosi Admin asked for your approval.',2,0,3,0,'2021-04-30 05:14:30','2021-04-30 05:14:30'),(32,3,49,1,'Service Requisition','Akosi Admin asked for your approval.',2,1,1,3,'2021-04-30 05:24:05','2021-05-04 00:02:44'),(33,3,49,1,'Service Requisition','Akosi Admin asked for your approval.',2,1,1,3,'2021-04-30 05:28:24','2021-05-04 00:00:51'),(34,3,49,1,'Service Requisition','Akosi Admin asked for your approval.',2,1,1,3,'2021-04-30 05:36:35','2021-04-30 05:58:23'),(35,3,49,3,'Service Requisition','Akosi Admin asked for your approval.',2,1,1,3,'2021-04-30 05:45:14','2021-04-30 05:45:36'),(36,1,49,3,'Service Requisition','SR-21-00003: Your request has been denied.',1,1,3,1,'2021-04-30 05:48:41','2021-04-30 05:49:08'),(37,3,49,4,'Service Requisition','Akosi Admin asked for your approval.',2,1,1,3,'2021-04-30 05:53:28','2021-04-30 05:55:47'),(38,3,49,5,'Service Requisition','Akosi Admin asked for your approval.',2,1,1,3,'2021-04-30 05:55:29','2021-04-30 05:55:52'),(39,4,49,5,'Service Requisition','Akosi Admin asked for your approval.',2,1,3,4,'2021-04-30 05:55:58','2021-04-30 05:56:28'),(40,2,49,5,'Service Requisition','Akosi Admin asked for your approval.',2,1,4,2,'2021-04-30 05:56:35','2021-04-30 05:56:55'),(41,1,49,5,'Service Requisition','SR-21-00005: Your request has been denied.',1,1,2,1,'2021-04-30 05:57:04','2021-04-30 05:57:43'),(42,1,47,15,'Purchase Order','P0-21-00015: Your request has been denied.',1,0,2,0,'2021-04-30 05:57:23','2021-04-30 05:57:23'),(43,3,49,6,'Service Requisition','Akosi Admin asked for your approval.',2,1,1,3,'2021-04-30 05:57:55','2021-04-30 05:58:07'),(44,4,49,6,'Service Requisition','Akosi Admin asked for your approval.',2,1,3,4,'2021-04-30 05:58:13','2021-04-30 05:58:44'),(45,2,49,6,'Service Requisition','Akosi Admin asked for your approval.',2,1,4,2,'2021-04-30 05:58:50','2021-04-30 05:59:02'),(46,1,49,6,'Service Requisition','SR-21-00006: Your request has been approved.',7,1,2,1,'2021-04-30 05:59:08','2021-05-02 23:20:28'),(47,1,41,2,'Service Order','P0-21-00002: Your request has been approved.',7,0,2,0,'2021-05-03 03:17:06','2021-05-03 03:17:06'),(48,4,49,4,'Service Requisition','Akosi Admin asked for your approval.',2,1,3,4,'2021-05-04 00:01:07','2021-05-04 00:01:21'),(49,2,49,4,'Service Requisition','Akosi Admin asked for your approval.',2,1,4,2,'2021-05-04 00:01:28','2021-05-04 00:01:40'),(50,1,49,4,'Service Requisition','SR-21-00004: Your request has been approved.',7,1,2,1,'2021-05-04 00:01:47','2021-05-04 00:02:02'),(51,4,41,10,'Service Order','Akosi Admin asked for your approval.',2,1,3,4,'2021-05-04 00:03:05','2021-05-04 00:03:19'),(52,2,41,10,'Service Order','Akosi Admin asked for your approval.',2,1,4,2,'2021-05-04 00:03:44','2021-05-04 00:03:56'),(53,1,41,10,'Service Order','P0-21-00010: Your request has been approved.',7,1,2,1,'2021-05-04 00:04:03','2021-05-04 00:04:21'),(54,4,128,2,'Service Completion','Akosi Admin asked for your approval.',2,1,1,4,'2021-05-04 03:42:00','2021-05-04 03:42:40'),(55,5,128,2,'Service Completion','- asked for your approval.',2,1,4,5,'2021-05-04 03:42:55','2021-05-04 03:49:39'),(56,2,128,2,'Service Completion','Akosi Admin asked for your approval.',2,1,5,2,'2021-05-04 03:49:46','2021-05-04 03:50:04'),(57,1,128,2,'Service Completion','P0-21-00002: Your request has been approved.',7,0,2,0,'2021-05-04 03:50:09','2021-05-04 03:50:09'),(58,1,128,2,'Service Completion','P0-21-00002: Your request has been denied.',1,0,2,0,'2021-05-04 03:51:48','2021-05-04 03:51:48'),(59,1,128,2,'Service Completion','SC-21-00002: Your request has been denied.',1,1,2,1,'2021-05-04 03:59:07','2021-05-04 04:00:08'),(60,4,128,3,'Service Completion','Akosi Admin asked for your approval.',2,0,1,0,'2021-05-04 04:00:31','2021-05-04 04:00:31'),(61,4,128,10,'Service Completion','Akosi Admin asked for your approval.',2,1,1,4,'2021-05-04 06:02:18','2021-05-04 06:03:07'),(62,5,128,10,'Service Completion','Akosi Admin asked for your approval.',2,1,4,5,'2021-05-04 06:03:15','2021-05-04 06:03:44'),(63,2,128,10,'Service Completion','Akosi Admin asked for your approval.',2,1,5,2,'2021-05-04 06:03:52','2021-05-04 06:04:07'),(64,1,128,10,'Service Completion','SC-21-00010: Your request has been approved.',7,0,2,0,'2021-05-04 06:04:14','2021-05-04 06:04:14'),(65,3,49,1,'Service Requisition','Akosi Admin asked for your approval.',2,0,1,0,'2021-05-04 06:14:02','2021-05-04 06:14:02'),(66,3,49,2,'Service Requisition','Akosi Admin asked for your approval.',2,1,1,3,'2021-05-04 06:14:48','2021-05-04 06:15:20'),(67,4,49,2,'Service Requisition','Akosi Admin asked for your approval.',2,0,3,0,'2021-05-04 06:15:29','2021-05-04 06:15:29'),(68,1,49,1,'Service Requisition','SR-21-00001: Your request has been denied.',1,0,3,0,'2021-05-04 06:16:24','2021-05-04 06:16:24'),(69,3,49,3,'Service Requisition','Akosi Admin asked for your approval.',2,1,1,3,'2021-05-04 06:16:44','2021-05-04 06:17:20'),(70,4,49,3,'Service Requisition','Akosi Admin asked for your approval.',2,1,3,4,'2021-05-04 06:17:08','2021-05-04 06:17:37'),(71,2,49,3,'Service Requisition','Akosi Admin asked for your approval.',2,0,4,0,'2021-05-04 06:17:44','2021-05-04 06:17:44'),(72,2,49,2,'Service Requisition','Akosi Admin asked for your approval.',2,1,4,2,'2021-05-04 06:17:51','2021-05-04 06:18:03'),(73,1,49,2,'Service Requisition','SR-21-00002: Your request has been approved.',7,0,2,0,'2021-05-04 06:18:10','2021-05-04 06:18:10'),(74,1,49,3,'Service Requisition','SR-21-00003: Your request has been approved.',7,0,2,0,'2021-05-04 06:18:19','2021-05-04 06:18:19'),(75,3,41,2,'Service Order','Akosi Admin asked for your approval.',2,1,1,3,'2021-05-04 06:31:09','2021-05-04 06:31:28'),(76,1,41,2,'Service Order','P0-21-00002: Your request has been denied.',1,0,3,0,'2021-05-04 06:31:51','2021-05-04 06:31:51'),(77,3,41,5,'Service Order','Akosi Admin asked for your approval.',2,0,1,0,'2021-05-04 06:48:24','2021-05-04 06:48:24'),(78,3,41,7,'Service Order','Akosi Admin asked for your approval.',2,1,1,3,'2021-05-04 06:51:46','2021-05-05 07:38:05'),(79,4,41,7,'Service Order','Akosi Admin asked for your approval.',2,1,3,4,'2021-05-04 06:52:16','2021-05-04 06:52:29'),(80,2,41,7,'Service Order','Akosi Admin asked for your approval.',2,1,4,2,'2021-05-04 06:52:36','2021-05-04 06:52:48'),(81,1,41,7,'Service Order','P0-21-00007: Your request has been approved.',7,0,2,0,'2021-05-04 06:52:57','2021-05-04 06:52:57'),(82,4,128,2,'Service Completion','Akosi Admin asked for your approval.',2,1,1,4,'2021-05-04 07:00:05','2021-05-04 07:00:21'),(83,1,128,2,'Service Completion','SC-21-00002: Your request has been denied.',1,0,4,0,'2021-05-04 07:00:30','2021-05-04 07:00:30'),(84,4,128,5,'Service Completion','Akosi Admin asked for your approval.',2,0,1,0,'2021-05-04 07:10:54','2021-05-04 07:10:54'),(85,3,49,4,'Service Requisition','Akosi Admin asked for your approval.',2,1,1,3,'2021-05-04 07:12:33','2021-05-04 07:12:54'),(86,4,49,4,'Service Requisition','Akosi Admin asked for your approval.',2,1,3,4,'2021-05-04 07:12:59','2021-05-04 07:13:15'),(87,2,49,4,'Service Requisition','Akosi Admin asked for your approval.',2,1,4,2,'2021-05-04 07:13:22','2021-05-04 07:13:38'),(88,1,49,4,'Service Requisition','SR-21-00004: Your request has been approved.',7,0,2,0,'2021-05-04 07:13:44','2021-05-04 07:13:44'),(89,3,41,8,'Service Order','Akosi Admin asked for your approval.',2,1,1,3,'2021-05-04 07:15:49','2021-05-04 07:16:05'),(90,4,41,8,'Service Order','Akosi Admin asked for your approval.',2,1,3,4,'2021-05-04 07:16:13','2021-05-04 07:16:29'),(91,2,41,8,'Service Order','Akosi Admin asked for your approval.',2,1,4,2,'2021-05-04 07:16:36','2021-05-04 07:16:48'),(92,1,41,8,'Service Order','P0-21-00008: Your request has been approved.',7,1,2,1,'2021-05-04 07:16:54','2021-05-04 07:17:10'),(93,4,128,6,'Service Completion','Akosi Admin asked for your approval.',2,1,1,4,'2021-05-04 07:18:46','2021-05-04 07:19:10'),(94,1,128,6,'Service Completion','SC-21-00006: Your request has been denied.',1,0,4,0,'2021-05-04 07:19:18','2021-05-04 07:19:18'),(95,4,128,7,'Service Completion','Akosi Admin asked for your approval.',2,0,1,0,'2021-05-04 07:29:33','2021-05-04 07:29:33'),(96,3,46,3,'Purchase Request','Akosi Admin asked for your approval.',2,1,1,3,'2021-05-05 06:46:36','2021-05-05 07:37:54'),(97,3,46,6,'Purchase Request','Akosi Admin asked for your approval.',2,1,1,3,'2021-05-05 07:11:00','2021-05-05 07:37:24'),(98,4,46,6,'Purchase Request','Akosi Admin asked for your approval.',2,1,3,4,'2021-05-05 07:37:49','2021-05-05 07:40:18'),(99,4,46,3,'Purchase Request','Akosi Admin asked for your approval.',2,1,3,4,'2021-05-05 07:38:02','2021-05-05 07:40:00'),(100,2,46,3,'Purchase Request','Akosi Admin asked for your approval.',2,0,4,0,'2021-05-05 07:40:13','2021-05-05 07:40:13'),(101,2,46,6,'Purchase Request','Akosi Admin asked for your approval.',2,1,4,2,'2021-05-05 07:40:24','2021-05-05 07:40:48'),(102,1,46,6,'Purchase Request','PR-21-00006: Your request has been approved.',7,0,2,0,'2021-05-05 07:40:55','2021-05-05 07:40:55'),(103,1,46,3,'Purchase Request','PR-21-00003: Your request has been denied.',1,0,2,0,'2021-05-05 07:41:14','2021-05-05 07:41:14'),(104,3,46,7,'Purchase Request','Akosi Admin asked for your approval.',2,0,1,0,'2021-05-05 07:42:46','2021-05-05 07:42:46'),(105,3,46,8,'Purchase Request','Akosi Admin asked for your approval.',2,0,1,0,'2021-05-05 08:02:58','2021-05-05 08:02:58');
+INSERT INTO `gen_system_notification_tbl` VALUES (1,3,46,1,'Purchase Request','Akosi Admin asked for your approval.',2,1,1,3,'2021-04-18 23:29:09','2021-04-18 23:29:24'),(2,1,46,1,'Purchase Request','PR-21-00001: Your request has been denied.',1,1,3,0,'2021-04-19 00:01:22','2021-04-20 07:11:31'),(3,3,46,4,'Purchase Request','Akosi Admin asked for your approval.',2,1,1,3,'2021-04-19 00:21:05','2021-04-19 00:22:17'),(4,1,46,4,'Purchase Request','PR-21-00004: Your request has been denied.',1,1,3,0,'2021-04-19 00:22:27','2021-04-20 07:11:31'),(5,3,46,6,'Purchase Request','Akosi Admin asked for your approval.',2,0,1,0,'2021-04-19 00:24:17','2021-04-19 00:24:17'),(6,3,46,2,'Purchase Request','Akosi Admin asked for your approval.',2,1,1,3,'2021-04-21 06:17:57','2021-04-21 06:18:14'),(7,1,46,2,'Purchase Request','PR-21-00002: Your request has been denied.',1,0,3,0,'2021-04-21 06:18:23','2021-04-21 06:18:23'),(8,3,46,9,'Purchase Request','Akosi Admin asked for your approval.',2,1,1,3,'2021-04-21 06:18:36','2021-05-05 07:38:58'),(9,3,46,1,'Purchase Request','Akosi Admin asked for your approval.',2,1,1,3,'2021-04-26 01:35:40','2021-04-26 01:42:51'),(10,4,46,1,'Purchase Request','Akosi Admin asked for your approval.',2,1,3,4,'2021-04-26 01:43:01','2021-04-26 01:43:28'),(11,2,46,1,'Purchase Request','Akosi Admin asked for your approval.',2,1,4,2,'2021-04-26 01:43:35','2021-04-26 01:44:09'),(12,1,46,1,'Purchase Request','PR-21-00001: Your request has been approved.',7,1,2,1,'2021-04-26 01:44:18','2021-04-26 01:44:27'),(13,3,46,1,'Purchase Order','Akosi Admin asked for your approval.',2,1,1,3,'2021-04-27 02:39:08','2021-04-27 03:16:33'),(14,3,46,4,'Purchase Order','Akosi Admin asked for your approval.',2,1,1,3,'2021-04-27 03:10:47','2021-04-27 03:15:26'),(15,4,47,1,'Purchase Order','Akosi Admin asked for your approval.',2,1,3,4,'2021-04-27 03:25:43','2021-04-27 03:26:16'),(16,1,47,1,'Purchase Order','P0-21-00001: Your request has been denied.',1,1,4,1,'2021-04-27 05:05:22','2021-04-27 05:08:13'),(17,3,47,6,'Purchase Order','Akosi Admin asked for your approval.',2,0,1,0,'2021-04-27 05:54:06','2021-04-27 05:54:06'),(18,3,47,14,'Purchase Order','Akosi Admin asked for your approval.',2,1,1,3,'2021-04-27 06:43:07','2021-04-27 06:44:15'),(19,1,47,14,'Purchase Order','P0-21-00014: Your request has been denied.',1,0,3,0,'2021-04-27 06:44:27','2021-04-27 06:44:27'),(20,3,47,15,'Purchase Order','Akosi Admin asked for your approval.',2,1,1,3,'2021-04-27 06:56:15','2021-04-27 07:01:25'),(21,3,47,4,'Purchase Order','Akosi Admin asked for your approval.',2,1,1,3,'2021-04-27 06:56:27','2021-04-27 06:56:39'),(22,1,47,4,'Purchase Order','P0-21-00004: Your request has been denied.',1,0,3,0,'2021-04-27 06:56:50','2021-04-27 06:56:50'),(23,3,47,16,'Purchase Order','Akosi Admin asked for your approval.',2,1,1,3,'2021-04-27 07:00:52','2021-04-27 07:01:01'),(24,4,47,16,'Purchase Order','Akosi Admin asked for your approval.',2,1,3,4,'2021-04-27 07:01:08','2021-04-27 07:02:35'),(25,4,47,15,'Purchase Order','Akosi Admin asked for your approval.',2,1,3,4,'2021-04-27 07:01:21','2021-04-27 07:02:26'),(26,2,47,15,'Purchase Order','Akosi Admin asked for your approval.',2,1,4,2,'2021-04-27 07:02:32','2021-04-30 05:57:13'),(27,2,47,16,'Purchase Order','Akosi Admin asked for your approval.',2,1,4,2,'2021-04-27 07:02:42','2021-04-27 07:08:18'),(28,1,47,16,'Purchase Order','P0-21-00016: Your request has been approved.',7,0,2,0,'2021-04-27 07:08:25','2021-04-27 07:08:25'),(29,3,49,5,'Service Requisition','Akosi Admin asked for your approval.',2,0,1,0,'2021-04-30 03:26:44','2021-04-30 03:26:44'),(30,3,49,1,'Service Requisition','Akosi Admin asked for your approval.',2,1,1,3,'2021-04-30 05:10:32','2021-04-30 05:14:10'),(31,4,49,1,'Service Requisition','Akosi Admin asked for your approval.',2,0,3,0,'2021-04-30 05:14:30','2021-04-30 05:14:30'),(32,3,49,1,'Service Requisition','Akosi Admin asked for your approval.',2,1,1,3,'2021-04-30 05:24:05','2021-05-04 00:02:44'),(33,3,49,1,'Service Requisition','Akosi Admin asked for your approval.',2,1,1,3,'2021-04-30 05:28:24','2021-05-04 00:00:51'),(34,3,49,1,'Service Requisition','Akosi Admin asked for your approval.',2,1,1,3,'2021-04-30 05:36:35','2021-04-30 05:58:23'),(35,3,49,3,'Service Requisition','Akosi Admin asked for your approval.',2,1,1,3,'2021-04-30 05:45:14','2021-04-30 05:45:36'),(36,1,49,3,'Service Requisition','SR-21-00003: Your request has been denied.',1,1,3,1,'2021-04-30 05:48:41','2021-04-30 05:49:08'),(37,3,49,4,'Service Requisition','Akosi Admin asked for your approval.',2,1,1,3,'2021-04-30 05:53:28','2021-04-30 05:55:47'),(38,3,49,5,'Service Requisition','Akosi Admin asked for your approval.',2,1,1,3,'2021-04-30 05:55:29','2021-04-30 05:55:52'),(39,4,49,5,'Service Requisition','Akosi Admin asked for your approval.',2,1,3,4,'2021-04-30 05:55:58','2021-04-30 05:56:28'),(40,2,49,5,'Service Requisition','Akosi Admin asked for your approval.',2,1,4,2,'2021-04-30 05:56:35','2021-04-30 05:56:55'),(41,1,49,5,'Service Requisition','SR-21-00005: Your request has been denied.',1,1,2,1,'2021-04-30 05:57:04','2021-04-30 05:57:43'),(42,1,47,15,'Purchase Order','P0-21-00015: Your request has been denied.',1,0,2,0,'2021-04-30 05:57:23','2021-04-30 05:57:23'),(43,3,49,6,'Service Requisition','Akosi Admin asked for your approval.',2,1,1,3,'2021-04-30 05:57:55','2021-04-30 05:58:07'),(44,4,49,6,'Service Requisition','Akosi Admin asked for your approval.',2,1,3,4,'2021-04-30 05:58:13','2021-04-30 05:58:44'),(45,2,49,6,'Service Requisition','Akosi Admin asked for your approval.',2,1,4,2,'2021-04-30 05:58:50','2021-04-30 05:59:02'),(46,1,49,6,'Service Requisition','SR-21-00006: Your request has been approved.',7,1,2,1,'2021-04-30 05:59:08','2021-05-02 23:20:28'),(47,1,41,2,'Service Order','P0-21-00002: Your request has been approved.',7,0,2,0,'2021-05-03 03:17:06','2021-05-03 03:17:06'),(48,4,49,4,'Service Requisition','Akosi Admin asked for your approval.',2,1,3,4,'2021-05-04 00:01:07','2021-05-04 00:01:21'),(49,2,49,4,'Service Requisition','Akosi Admin asked for your approval.',2,1,4,2,'2021-05-04 00:01:28','2021-05-04 00:01:40'),(50,1,49,4,'Service Requisition','SR-21-00004: Your request has been approved.',7,1,2,1,'2021-05-04 00:01:47','2021-05-04 00:02:02'),(51,4,41,10,'Service Order','Akosi Admin asked for your approval.',2,1,3,4,'2021-05-04 00:03:05','2021-05-04 00:03:19'),(52,2,41,10,'Service Order','Akosi Admin asked for your approval.',2,1,4,2,'2021-05-04 00:03:44','2021-05-04 00:03:56'),(53,1,41,10,'Service Order','P0-21-00010: Your request has been approved.',7,1,2,1,'2021-05-04 00:04:03','2021-05-04 00:04:21'),(54,4,128,2,'Service Completion','Akosi Admin asked for your approval.',2,1,1,4,'2021-05-04 03:42:00','2021-05-04 03:42:40'),(55,5,128,2,'Service Completion','- asked for your approval.',2,1,4,5,'2021-05-04 03:42:55','2021-05-04 03:49:39'),(56,2,128,2,'Service Completion','Akosi Admin asked for your approval.',2,1,5,2,'2021-05-04 03:49:46','2021-05-04 03:50:04'),(57,1,128,2,'Service Completion','P0-21-00002: Your request has been approved.',7,0,2,0,'2021-05-04 03:50:09','2021-05-04 03:50:09'),(58,1,128,2,'Service Completion','P0-21-00002: Your request has been denied.',1,0,2,0,'2021-05-04 03:51:48','2021-05-04 03:51:48'),(59,1,128,2,'Service Completion','SC-21-00002: Your request has been denied.',1,1,2,1,'2021-05-04 03:59:07','2021-05-04 04:00:08'),(60,4,128,3,'Service Completion','Akosi Admin asked for your approval.',2,0,1,0,'2021-05-04 04:00:31','2021-05-04 04:00:31'),(61,4,128,10,'Service Completion','Akosi Admin asked for your approval.',2,1,1,4,'2021-05-04 06:02:18','2021-05-04 06:03:07'),(62,5,128,10,'Service Completion','Akosi Admin asked for your approval.',2,1,4,5,'2021-05-04 06:03:15','2021-05-04 06:03:44'),(63,2,128,10,'Service Completion','Akosi Admin asked for your approval.',2,1,5,2,'2021-05-04 06:03:52','2021-05-04 06:04:07'),(64,1,128,10,'Service Completion','SC-21-00010: Your request has been approved.',7,0,2,0,'2021-05-04 06:04:14','2021-05-04 06:04:14'),(65,3,49,1,'Service Requisition','Akosi Admin asked for your approval.',2,0,1,0,'2021-05-04 06:14:02','2021-05-04 06:14:02'),(66,3,49,2,'Service Requisition','Akosi Admin asked for your approval.',2,1,1,3,'2021-05-04 06:14:48','2021-05-04 06:15:20'),(67,4,49,2,'Service Requisition','Akosi Admin asked for your approval.',2,0,3,0,'2021-05-04 06:15:29','2021-05-04 06:15:29'),(68,1,49,1,'Service Requisition','SR-21-00001: Your request has been denied.',1,0,3,0,'2021-05-04 06:16:24','2021-05-04 06:16:24'),(69,3,49,3,'Service Requisition','Akosi Admin asked for your approval.',2,1,1,3,'2021-05-04 06:16:44','2021-05-04 06:17:20'),(70,4,49,3,'Service Requisition','Akosi Admin asked for your approval.',2,1,3,4,'2021-05-04 06:17:08','2021-05-04 06:17:37'),(71,2,49,3,'Service Requisition','Akosi Admin asked for your approval.',2,0,4,0,'2021-05-04 06:17:44','2021-05-04 06:17:44'),(72,2,49,2,'Service Requisition','Akosi Admin asked for your approval.',2,1,4,2,'2021-05-04 06:17:51','2021-05-04 06:18:03'),(73,1,49,2,'Service Requisition','SR-21-00002: Your request has been approved.',7,0,2,0,'2021-05-04 06:18:10','2021-05-04 06:18:10'),(74,1,49,3,'Service Requisition','SR-21-00003: Your request has been approved.',7,0,2,0,'2021-05-04 06:18:19','2021-05-04 06:18:19'),(75,3,41,2,'Service Order','Akosi Admin asked for your approval.',2,1,1,3,'2021-05-04 06:31:09','2021-05-04 06:31:28'),(76,1,41,2,'Service Order','P0-21-00002: Your request has been denied.',1,0,3,0,'2021-05-04 06:31:51','2021-05-04 06:31:51'),(77,3,41,5,'Service Order','Akosi Admin asked for your approval.',2,0,1,0,'2021-05-04 06:48:24','2021-05-04 06:48:24'),(78,3,41,7,'Service Order','Akosi Admin asked for your approval.',2,1,1,3,'2021-05-04 06:51:46','2021-05-05 07:38:05'),(79,4,41,7,'Service Order','Akosi Admin asked for your approval.',2,1,3,4,'2021-05-04 06:52:16','2021-05-04 06:52:29'),(80,2,41,7,'Service Order','Akosi Admin asked for your approval.',2,1,4,2,'2021-05-04 06:52:36','2021-05-04 06:52:48'),(81,1,41,7,'Service Order','P0-21-00007: Your request has been approved.',7,0,2,0,'2021-05-04 06:52:57','2021-05-04 06:52:57'),(82,4,128,2,'Service Completion','Akosi Admin asked for your approval.',2,1,1,4,'2021-05-04 07:00:05','2021-05-04 07:00:21'),(83,1,128,2,'Service Completion','SC-21-00002: Your request has been denied.',1,0,4,0,'2021-05-04 07:00:30','2021-05-04 07:00:30'),(84,4,128,5,'Service Completion','Akosi Admin asked for your approval.',2,0,1,0,'2021-05-04 07:10:54','2021-05-04 07:10:54'),(85,3,49,4,'Service Requisition','Akosi Admin asked for your approval.',2,1,1,3,'2021-05-04 07:12:33','2021-05-04 07:12:54'),(86,4,49,4,'Service Requisition','Akosi Admin asked for your approval.',2,1,3,4,'2021-05-04 07:12:59','2021-05-04 07:13:15'),(87,2,49,4,'Service Requisition','Akosi Admin asked for your approval.',2,1,4,2,'2021-05-04 07:13:22','2021-05-04 07:13:38'),(88,1,49,4,'Service Requisition','SR-21-00004: Your request has been approved.',7,0,2,0,'2021-05-04 07:13:44','2021-05-04 07:13:44'),(89,3,41,8,'Service Order','Akosi Admin asked for your approval.',2,1,1,3,'2021-05-04 07:15:49','2021-05-04 07:16:05'),(90,4,41,8,'Service Order','Akosi Admin asked for your approval.',2,1,3,4,'2021-05-04 07:16:13','2021-05-04 07:16:29'),(91,2,41,8,'Service Order','Akosi Admin asked for your approval.',2,1,4,2,'2021-05-04 07:16:36','2021-05-04 07:16:48'),(92,1,41,8,'Service Order','P0-21-00008: Your request has been approved.',7,1,2,1,'2021-05-04 07:16:54','2021-05-04 07:17:10'),(93,4,128,6,'Service Completion','Akosi Admin asked for your approval.',2,1,1,4,'2021-05-04 07:18:46','2021-05-04 07:19:10'),(94,1,128,6,'Service Completion','SC-21-00006: Your request has been denied.',1,0,4,0,'2021-05-04 07:19:18','2021-05-04 07:19:18'),(95,4,128,7,'Service Completion','Akosi Admin asked for your approval.',2,0,1,0,'2021-05-04 07:29:33','2021-05-04 07:29:33'),(96,3,46,3,'Purchase Request','Akosi Admin asked for your approval.',2,1,1,3,'2021-05-05 06:46:36','2021-05-05 07:37:54'),(97,3,46,6,'Purchase Request','Akosi Admin asked for your approval.',2,1,1,3,'2021-05-05 07:11:00','2021-05-05 07:37:24'),(98,4,46,6,'Purchase Request','Akosi Admin asked for your approval.',2,1,3,4,'2021-05-05 07:37:49','2021-05-05 07:40:18'),(99,4,46,3,'Purchase Request','Akosi Admin asked for your approval.',2,1,3,4,'2021-05-05 07:38:02','2021-05-05 07:40:00'),(100,2,46,3,'Purchase Request','Akosi Admin asked for your approval.',2,0,4,0,'2021-05-05 07:40:13','2021-05-05 07:40:13'),(101,2,46,6,'Purchase Request','Akosi Admin asked for your approval.',2,1,4,2,'2021-05-05 07:40:24','2021-05-05 07:40:48'),(102,1,46,6,'Purchase Request','PR-21-00006: Your request has been approved.',7,0,2,0,'2021-05-05 07:40:55','2021-05-05 07:40:55'),(103,1,46,3,'Purchase Request','PR-21-00003: Your request has been denied.',1,0,2,0,'2021-05-05 07:41:14','2021-05-05 07:41:14'),(104,3,46,7,'Purchase Request','Akosi Admin asked for your approval.',2,0,1,0,'2021-05-05 07:42:46','2021-05-05 07:42:46'),(105,3,46,8,'Purchase Request','Akosi Admin asked for your approval.',2,0,1,0,'2021-05-05 08:02:58','2021-05-05 08:02:58'),(106,3,46,9,'Purchase Request','Akosi Admin asked for your approval.',2,0,1,0,'2021-05-06 02:16:17','2021-05-06 02:16:17'),(107,3,46,10,'Purchase Request','Akosi Admin asked for your approval.',2,0,1,0,'2021-05-06 02:34:57','2021-05-06 02:34:57'),(108,3,46,11,'Purchase Request','Akosi Admin asked for your approval.',2,0,1,0,'2021-05-06 02:36:59','2021-05-06 02:36:59'),(109,3,46,1,'Purchase Request','Akosi Admin asked for your approval.',2,0,1,0,'2021-05-06 05:09:30','2021-05-06 05:09:30'),(110,3,46,2,'Purchase Request','Akosi Admin asked for your approval.',2,0,1,0,'2021-05-06 07:00:55','2021-05-06 07:00:55'),(111,3,46,3,'Purchase Request','Akosi Admin asked for your approval.',2,0,1,0,'2021-05-06 07:31:41','2021-05-06 07:31:41'),(112,3,46,5,'Purchase Request','Akosi Admin asked for your approval.',2,0,1,0,'2021-05-06 08:04:42','2021-05-06 08:04:42'),(113,3,46,6,'Purchase Request','Akosi Admin asked for your approval.',2,0,1,0,'2021-05-06 08:05:24','2021-05-06 08:05:24'),(114,3,46,3,'Purchase Request','Akosi Admin asked for your approval.',2,1,1,3,'2021-05-06 08:10:13','2021-05-06 08:11:31'),(115,4,46,3,'Purchase Request','Akosi Admin asked for your approval.',2,1,3,4,'2021-05-06 08:11:37','2021-05-06 08:11:49'),(116,2,46,3,'Purchase Request','Akosi Admin asked for your approval.',2,1,4,2,'2021-05-06 08:11:56','2021-05-06 08:12:08'),(117,1,46,3,'Purchase Request','PR-21-00003: Your request has been approved.',7,0,2,0,'2021-05-06 08:12:13','2021-05-06 08:12:13');
 /*!40000 ALTER TABLE `gen_system_notification_tbl` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -1160,7 +1160,8 @@ DROP TABLE IF EXISTS `hris_personnel_request_tbl`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `hris_personnel_request_tbl` (
   `personnelRequestID` bigint(20) NOT NULL AUTO_INCREMENT,
-  `costEstimateID` bigint(20) NOT NULL,
+  `costEstimateID` bigint(20) DEFAULT NULL,
+  `billMaterialID` bigint(20) DEFAULT NULL,
   `designationID` bigint(20) NOT NULL,
   `designationName` text NOT NULL,
   `designationTotalHours` bigint(20) NOT NULL,
@@ -1181,7 +1182,7 @@ CREATE TABLE `hris_personnel_request_tbl` (
 
 LOCK TABLES `hris_personnel_request_tbl` WRITE;
 /*!40000 ALTER TABLE `hris_personnel_request_tbl` DISABLE KEYS */;
-INSERT INTO `hris_personnel_request_tbl` VALUES (1,1,4,'Administrator',100,15,0.00,0.00,1,1,'2021-05-05 01:58:53','2021-05-05 01:58:53');
+INSERT INTO `hris_personnel_request_tbl` VALUES (1,1,NULL,6,'Administrator',10,10,0.00,0.00,1,1,'2021-05-06 08:08:25','2021-05-06 08:08:25');
 /*!40000 ALTER TABLE `hris_personnel_request_tbl` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -1616,7 +1617,7 @@ CREATE TABLE `ims_inventory_item_tbl` (
   `createdAt` datetime NOT NULL DEFAULT current_timestamp(),
   `updatedAt` datetime NOT NULL DEFAULT current_timestamp(),
   PRIMARY KEY (`itemID`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1625,7 +1626,7 @@ CREATE TABLE `ims_inventory_item_tbl` (
 
 LOCK TABLES `ims_inventory_item_tbl` WRITE;
 /*!40000 ALTER TABLE `ims_inventory_item_tbl` DISABLE KEYS */;
-INSERT INTO `ims_inventory_item_tbl` VALUES (1,'ITM-21-00001','Item 1','Brand 1',1,1,'ExtraSmall','Kg',0.00,10,'','TEST',1,'2021-04-14',1,1,'2021-04-14 09:57:25','2021-04-14 09:57:25'),(2,'ITM-21-00002','This is a long text This is a long text ','Brand 2',2,1,'Small','gallon',0.00,20,'','TEST 2',1,'2021-04-14',1,1,'2021-04-14 09:57:47','2021-04-14 09:57:47'),(3,'ITM-21-00003','Item 3','Brand 3',4,3,'Small','Kg',0.00,30,'','TEST 3',1,'2021-04-14',1,1,'2021-04-14 09:58:08','2021-04-14 09:58:08');
+INSERT INTO `ims_inventory_item_tbl` VALUES (1,'ITM-21-00001','Item 1','Brand 1',1,1,'ExtraSmall','Kg',0.00,10,'','TEST',1,'2021-04-14',1,1,'2021-04-14 09:57:25','2021-04-14 09:57:25'),(2,'ITM-21-00002','This is a long text This is a long text ','Brand 2',2,1,'Small','gallon',0.00,20,'','TEST 2',1,'2021-04-14',1,1,'2021-04-14 09:57:47','2021-04-14 09:57:47'),(3,'ITM-21-00003','Item 3','Brand 3',4,3,'Small','Kg',0.00,30,'','TEST 3',1,'2021-04-14',1,1,'2021-04-14 09:58:08','2021-04-14 09:58:08'),(4,'ITM-21-00004','Item 4','Brand 4',2,2,'Medium','piece',0.00,100,'','This is an example of loooooooooooooooooooooooooooooooooooooooooooooooooonggggggggggggggggggggg item description. ',1,'2021-05-06',1,1,'2021-05-06 15:32:41','2021-05-06 15:32:41'),(5,'ITM-21-00005','Item 5','Barnd 5',1,3,'Small','gram',0.00,500,'','Descriptiiom',1,'2021-05-06',1,1,'2021-05-06 16:07:56','2021-05-06 16:07:56');
 /*!40000 ALTER TABLE `ims_inventory_item_tbl` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -1647,7 +1648,7 @@ CREATE TABLE `ims_inventory_price_list_tbl` (
   `createdAt` timestamp NOT NULL DEFAULT current_timestamp(),
   `updatedAt` datetime NOT NULL,
   PRIMARY KEY (`priceListID`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1656,8 +1657,75 @@ CREATE TABLE `ims_inventory_price_list_tbl` (
 
 LOCK TABLES `ims_inventory_price_list_tbl` WRITE;
 /*!40000 ALTER TABLE `ims_inventory_price_list_tbl` DISABLE KEYS */;
-INSERT INTO `ims_inventory_price_list_tbl` VALUES (1,2,1,1000.00,1,1,1,'2021-05-05 00:53:11','2021-05-05 08:52:50'),(2,1,2,500.00,1,1,1,'2021-05-05 01:23:56','2021-05-05 09:23:52');
+INSERT INTO `ims_inventory_price_list_tbl` VALUES (1,2,1,1000.00,1,1,1,'2021-05-05 00:53:11','2021-05-05 08:52:50'),(2,1,2,500.00,1,1,1,'2021-05-05 01:23:56','2021-05-05 09:23:52'),(4,3,1,1500.00,1,1,1,'2021-05-05 01:23:56','2021-05-05 09:23:52'),(5,4,1,1000.00,1,1,1,'2021-05-06 07:33:07','2021-05-06 03:33:03');
 /*!40000 ALTER TABLE `ims_inventory_price_list_tbl` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `ims_inventory_receiving_details_tbl`
+--
+
+DROP TABLE IF EXISTS `ims_inventory_receiving_details_tbl`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `ims_inventory_receiving_details_tbl` (
+  `inventoryReceivingDetailsID` bigint(20) NOT NULL AUTO_INCREMENT,
+  `inventoryReceivingID` bigint(20) NOT NULL,
+  `itemID` bigint(20) NOT NULL,
+  `received` int(11) DEFAULT NULL,
+  `remarks` longtext DEFAULT NULL,
+  `createdBy` bigint(20) NOT NULL,
+  `updatedBy` bigint(20) NOT NULL,
+  `createdAt` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updatedAt` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`inventoryReceivingDetailsID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `ims_inventory_receiving_details_tbl`
+--
+
+LOCK TABLES `ims_inventory_receiving_details_tbl` WRITE;
+/*!40000 ALTER TABLE `ims_inventory_receiving_details_tbl` DISABLE KEYS */;
+/*!40000 ALTER TABLE `ims_inventory_receiving_details_tbl` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `ims_inventory_receiving_tbl`
+--
+
+DROP TABLE IF EXISTS `ims_inventory_receiving_tbl`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `ims_inventory_receiving_tbl` (
+  `inventoryReceivingID` bigint(20) NOT NULL AUTO_INCREMENT,
+  `reviseInventoryReceivingID` bigint(20) DEFAULT NULL,
+  `employeeID` bigint(20) NOT NULL,
+  `purchaseOrderID` bigint(20) DEFAULT NULL,
+  `dateReceived` date NOT NULL,
+  `approversID` text DEFAULT NULL,
+  `approversStatus` text DEFAULT NULL,
+  `approversDate` text DEFAULT NULL,
+  `inventoryReceivingStatus` int(11) NOT NULL,
+  `inventoryReceivingReason` longtext DEFAULT NULL,
+  `inventoryReceivingRemarks` longtext DEFAULT NULL,
+  `submittedAt` timestamp NULL DEFAULT current_timestamp(),
+  `createdBy` bigint(20) NOT NULL,
+  `updatedBy` bigint(20) NOT NULL,
+  `createdAt` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updatedAt` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`inventoryReceivingID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `ims_inventory_receiving_tbl`
+--
+
+LOCK TABLES `ims_inventory_receiving_tbl` WRITE;
+/*!40000 ALTER TABLE `ims_inventory_receiving_tbl` DISABLE KEYS */;
+/*!40000 ALTER TABLE `ims_inventory_receiving_tbl` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -2030,7 +2098,7 @@ CREATE TABLE `ims_purchase_order_tbl` (
   `createdAt` timestamp NOT NULL DEFAULT current_timestamp(),
   `updatedAt` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   PRIMARY KEY (`purchaseOrderID`)
-) ENGINE=InnoDB AUTO_INCREMENT=17 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2070,7 +2138,7 @@ CREATE TABLE `ims_purchase_request_tbl` (
   `createdAt` timestamp NOT NULL DEFAULT current_timestamp(),
   `updatedAt` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   PRIMARY KEY (`purchaseRequestID`)
-) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2079,8 +2147,38 @@ CREATE TABLE `ims_purchase_request_tbl` (
 
 LOCK TABLES `ims_purchase_request_tbl` WRITE;
 /*!40000 ALTER TABLE `ims_purchase_request_tbl` DISABLE KEYS */;
-INSERT INTO `ims_purchase_request_tbl` VALUES (3,NULL,1,1,5,NULL,'3|4|2','2|2|3','2021-05-05 15:37:59|2021-05-05 15:40:11|2021-05-05 15:41:12',3,'Test Reason',15000.00,35000.00,'TEST DENIED','2021-05-05 06:46:34',1,2,'2021-05-05 06:31:16','2021-05-05 07:41:13'),(4,NULL,1,0,0,NULL,NULL,NULL,NULL,4,'',0.00,0.00,NULL,NULL,1,1,'2021-05-05 06:48:09','2021-05-05 06:48:38'),(5,NULL,1,1,5,NULL,NULL,NULL,NULL,0,'',1000.00,0.00,NULL,NULL,1,1,'2021-05-05 06:58:30','2021-05-05 06:58:58'),(6,NULL,1,0,5,NULL,'3|4|2','2|2|2','2021-05-05 15:37:47|2021-05-05 15:40:23|2021-05-05 15:40:53',2,'Rea',7500.00,25000.00,NULL,'2021-05-05 07:10:58',1,2,'2021-05-05 07:10:58','2021-05-05 07:40:55'),(7,3,1,1,5,NULL,'3|4|2',NULL,NULL,1,'Test Reason',15000.00,35000.00,NULL,'2021-05-05 07:42:44',1,1,'2021-05-05 07:42:44','2021-05-05 07:42:45'),(8,NULL,1,1,5,NULL,'3|4|2',NULL,NULL,1,'TEST REASON',10000.00,20000.00,NULL,'2021-05-05 08:02:56',1,1,'2021-05-05 08:01:54','2021-05-05 08:02:57');
+INSERT INTO `ims_purchase_request_tbl` VALUES (1,NULL,1,1,5,NULL,NULL,NULL,NULL,4,'',7000.00,2000.00,NULL,NULL,1,1,'2021-05-06 08:08:57','2021-05-06 08:09:57'),(2,NULL,1,0,0,NULL,NULL,NULL,NULL,0,'TEST',25000.00,10000.00,NULL,NULL,1,1,'2021-05-06 08:09:39','2021-05-06 08:09:40'),(3,NULL,1,1,5,NULL,'3|4|2','2|2|2','2021-05-06 16:11:35|2021-05-06 16:11:54|2021-05-06 16:12:12',2,'TEST',7000.00,2000.00,NULL,'2021-05-06 08:10:12',1,2,'2021-05-06 08:10:12','2021-05-06 08:12:13');
 /*!40000 ALTER TABLE `ims_purchase_request_tbl` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `ims_receiving_serial_number_tbl`
+--
+
+DROP TABLE IF EXISTS `ims_receiving_serial_number_tbl`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `ims_receiving_serial_number_tbl` (
+  `serialNumberID` bigint(20) NOT NULL AUTO_INCREMENT,
+  `inventoryReceivingID` bigint(20) NOT NULL,
+  `inventoryReceivingDetailsID` bigint(20) NOT NULL,
+  `itemID` bigint(20) NOT NULL,
+  `serialNumber` varchar(255) DEFAULT NULL,
+  `createdBy` bigint(20) NOT NULL,
+  `updatedBy` bigint(20) NOT NULL,
+  `createdAt` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updatedAt` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`serialNumberID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `ims_receiving_serial_number_tbl`
+--
+
+LOCK TABLES `ims_receiving_serial_number_tbl` WRITE;
+/*!40000 ALTER TABLE `ims_receiving_serial_number_tbl` DISABLE KEYS */;
+/*!40000 ALTER TABLE `ims_receiving_serial_number_tbl` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -2109,6 +2207,7 @@ CREATE TABLE `ims_request_items_tbl` (
   `totalCost` decimal(15,2) NOT NULL,
   `files` text DEFAULT NULL,
   `remarks` text DEFAULT NULL,
+  `orderedPending` int(11) DEFAULT NULL,
   `stocks` bigint(20) DEFAULT NULL,
   `forPurchase` bigint(20) DEFAULT NULL,
   `createdBy` bigint(20) NOT NULL,
@@ -2116,7 +2215,7 @@ CREATE TABLE `ims_request_items_tbl` (
   `createdAt` timestamp NOT NULL DEFAULT current_timestamp(),
   `updatedAt` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   PRIMARY KEY (`requestItemID`)
-) ENGINE=InnoDB AUTO_INCREMENT=260 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=24 DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2125,7 +2224,7 @@ CREATE TABLE `ims_request_items_tbl` (
 
 LOCK TABLES `ims_request_items_tbl` WRITE;
 /*!40000 ALTER TABLE `ims_request_items_tbl` DISABLE KEYS */;
-INSERT INTO `ims_request_items_tbl` VALUES (196,1,NULL,NULL,NULL,NULL,NULL,'project',NULL,2,'This is a long text This is a long text ','TEST 2','gallon',10,0.00,0.00,NULL,NULL,NULL,NULL,1,1,'2021-05-05 01:58:53','2021-05-05 01:58:53'),(197,1,NULL,NULL,NULL,NULL,NULL,'project',NULL,3,'Item 3','TEST 3','Kg',11,0.00,0.00,NULL,NULL,NULL,NULL,1,1,'2021-05-05 01:58:53','2021-05-05 01:58:53'),(198,1,NULL,NULL,NULL,NULL,NULL,'company',NULL,2,'This is a long text This is a long text ','TEST 2','gallon',12,0.00,0.00,NULL,NULL,NULL,NULL,1,1,'2021-05-05 01:58:53','2021-05-05 01:58:53'),(199,1,NULL,NULL,NULL,NULL,NULL,'company',NULL,1,'Item 1','TEST','Kg',13,0.00,0.00,NULL,NULL,NULL,NULL,1,1,'2021-05-05 01:58:53','2021-05-05 01:58:53'),(200,1,NULL,NULL,NULL,NULL,NULL,'company',NULL,3,'Item 3','TEST 3','Kg',14,0.00,0.00,NULL,NULL,NULL,NULL,1,1,'2021-05-05 01:58:53','2021-05-05 01:58:53'),(201,1,1,NULL,NULL,NULL,NULL,'project',NULL,2,'This is a long text This is a long text ','TEST 2','gallon',10,0.00,0.00,NULL,NULL,5,5,1,1,'2021-05-05 02:01:49','2021-05-05 02:01:49'),(202,1,1,NULL,NULL,NULL,NULL,'project',NULL,3,'Item 3','TEST 3','Kg',11,0.00,0.00,NULL,NULL,0,11,1,1,'2021-05-05 02:01:49','2021-05-05 02:01:49'),(203,1,1,NULL,NULL,NULL,NULL,'company',NULL,2,'This is a long text This is a long text ','TEST 2','gallon',12,0.00,0.00,NULL,NULL,0,12,1,1,'2021-05-05 02:01:49','2021-05-05 02:01:49'),(204,1,1,NULL,NULL,NULL,NULL,'company',NULL,1,'Item 1','TEST','Kg',13,0.00,0.00,NULL,NULL,0,13,1,1,'2021-05-05 02:01:49','2021-05-05 02:01:49'),(205,1,1,NULL,NULL,NULL,NULL,'company',NULL,3,'Item 3','TEST 3','Kg',14,0.00,0.00,NULL,NULL,1,13,1,1,'2021-05-05 02:01:49','2021-05-05 02:01:49'),(206,NULL,NULL,NULL,2,NULL,NULL,'project',NULL,1,NULL,NULL,NULL,10,0.00,0.00,'01620191810.jpg','RE 1',NULL,NULL,1,1,'2021-05-05 05:16:50','2021-05-05 05:16:50'),(207,NULL,NULL,NULL,2,NULL,NULL,'project',NULL,2,NULL,NULL,NULL,10,0.00,0.00,'11620191810.jpg','RE 2',NULL,NULL,1,1,'2021-05-05 05:16:50','2021-05-05 05:16:50'),(208,NULL,NULL,NULL,2,NULL,NULL,'project',NULL,3,NULL,NULL,NULL,10,0.00,0.00,'21620191810.jpg','RE 3',NULL,NULL,1,1,'2021-05-05 05:16:50','2021-05-05 05:16:50'),(209,NULL,NULL,NULL,2,NULL,NULL,'company',NULL,1,NULL,NULL,NULL,10,0.00,0.00,'31620191810.jpg','RE 4',NULL,NULL,1,1,'2021-05-05 05:16:50','2021-05-05 05:16:50'),(210,NULL,NULL,NULL,2,NULL,NULL,'company',NULL,2,NULL,NULL,NULL,10,0.00,0.00,'41620191810.jpg','RE 5',NULL,NULL,1,1,'2021-05-05 05:16:50','2021-05-05 05:16:50'),(211,NULL,NULL,NULL,2,NULL,NULL,'company',NULL,3,NULL,NULL,NULL,10,0.00,0.00,'51620191810.jpg','RE 6',NULL,NULL,1,1,'2021-05-05 05:16:50','2021-05-05 05:16:50'),(236,NULL,NULL,NULL,3,NULL,NULL,'project',0,1,'Item 1','undefined','Kg',10,500.00,5000.00,'01620196277.jpg','Re 2',NULL,NULL,1,1,'2021-05-05 06:46:35','2021-05-05 06:46:35'),(237,NULL,NULL,NULL,3,NULL,NULL,'project',0,2,'This is a long text This is a long text','undefined','gallon',10,1000.00,10000.00,'11620196277.jpg','RE 2',NULL,NULL,1,1,'2021-05-05 06:46:35','2021-05-05 06:46:35'),(238,NULL,NULL,NULL,3,NULL,NULL,'company',0,2,'This is a long text This is a long text','undefined','gallon',20,1000.00,20000.00,'31620196277.jpg','Re 2',NULL,NULL,1,1,'2021-05-05 06:46:35','2021-05-05 06:46:35'),(239,NULL,NULL,NULL,3,NULL,NULL,'company',0,1,'Item 1','undefined','Kg',30,500.00,15000.00,'41620196277.jpg','Re 3',NULL,NULL,1,1,'2021-05-05 06:46:35','2021-05-05 06:46:35'),(240,NULL,NULL,NULL,3,NULL,NULL,'company',0,0,'N/A','undefined','-',0,0.00,0.00,NULL,NULL,NULL,NULL,1,1,'2021-05-05 06:46:35','2021-05-05 06:46:35'),(243,NULL,NULL,NULL,4,NULL,NULL,'project',0,NULL,'Select Item Name','undefined','undefined',1,0.00,0.00,NULL,NULL,NULL,NULL,1,1,'2021-05-05 06:48:38','2021-05-05 06:48:38'),(244,NULL,NULL,NULL,4,NULL,NULL,'company',0,NULL,'Select Item Name','undefined','undefined',1,0.00,0.00,NULL,NULL,NULL,NULL,1,1,'2021-05-05 06:48:38','2021-05-05 06:48:38'),(247,NULL,NULL,NULL,5,NULL,NULL,'project',0,2,'This is a long text This is a long text','TEST 2','gallon',1,1000.00,1000.00,NULL,NULL,NULL,NULL,1,1,'2021-05-05 06:58:58','2021-05-05 06:58:58'),(248,NULL,NULL,NULL,5,NULL,NULL,'company',0,NULL,'Select Item Name','undefined','undefined',1,0.00,0.00,NULL,NULL,NULL,NULL,1,1,'2021-05-05 06:58:58','2021-05-05 06:58:58'),(249,NULL,NULL,NULL,6,NULL,NULL,'project',0,1,'Item 1','TEST','Kg',15,500.00,7500.00,'01620198659.png','Re 1',NULL,NULL,1,1,'2021-05-05 07:10:59','2021-05-05 07:10:59'),(250,NULL,NULL,NULL,6,NULL,NULL,'company',0,1,'Item 1','TEST','Kg',10,500.00,5000.00,'11620198659.png','Re 2',NULL,NULL,1,1,'2021-05-05 07:10:59','2021-05-05 07:10:59'),(251,NULL,NULL,NULL,6,NULL,NULL,'company',0,2,'This is a long text This is a long text','TEST 2','gallon',20,1000.00,20000.00,'21620198659.jpg','Re 3',NULL,NULL,1,1,'2021-05-05 07:10:59','2021-05-05 07:10:59'),(252,NULL,NULL,NULL,7,NULL,NULL,'project',0,1,'Item 1','undefined','Kg',10,500.00,5000.00,'01620196277.jpg','Re 2',NULL,NULL,1,1,'2021-05-05 07:42:45','2021-05-05 07:42:45'),(253,NULL,NULL,NULL,7,NULL,NULL,'project',0,2,'This is a long text This is a long text','undefined','gallon',10,1000.00,10000.00,'11620196277.jpg','RE 2',NULL,NULL,1,1,'2021-05-05 07:42:45','2021-05-05 07:42:45'),(254,NULL,NULL,NULL,7,NULL,NULL,'company',0,2,'This is a long text This is a long text','TEST 2','gallon',20,1000.00,20000.00,'31620196277.jpg','Re 2',NULL,NULL,1,1,'2021-05-05 07:42:45','2021-05-05 07:42:45'),(255,NULL,NULL,NULL,7,NULL,NULL,'company',0,1,'Item 1','TEST','Kg',30,500.00,15000.00,'41620196277.jpg','Re 3',NULL,NULL,1,1,'2021-05-05 07:42:45','2021-05-05 07:42:45'),(258,NULL,NULL,NULL,8,NULL,NULL,'project',0,2,'This is a long text This is a long text','TEST 2','gallon',10,1000.00,10000.00,NULL,NULL,NULL,NULL,1,1,'2021-05-05 08:02:58','2021-05-05 08:02:58'),(259,NULL,NULL,NULL,8,NULL,NULL,'company',0,2,'This is a long text This is a long text','TEST 2','gallon',20,1000.00,20000.00,NULL,NULL,NULL,NULL,1,1,'2021-05-05 08:02:58','2021-05-05 08:02:58');
+INSERT INTO `ims_request_items_tbl` VALUES (1,1,NULL,NULL,NULL,NULL,NULL,'project',NULL,1,'Item 1','TEST','Kg',10,0.00,0.00,NULL,NULL,NULL,NULL,NULL,1,1,'2021-05-06 08:08:25','2021-05-06 08:08:25'),(2,1,NULL,NULL,NULL,NULL,NULL,'project',NULL,2,'This is a long text This is a long text ','TEST 2','gallon',1,0.00,0.00,NULL,NULL,NULL,NULL,NULL,1,1,'2021-05-06 08:08:25','2021-05-06 08:08:25'),(3,1,NULL,NULL,NULL,NULL,NULL,'project',NULL,4,'Item 4','This is an example of loooooooooooooooooooooooooooooooooooooooooooooooooonggggggggggggggggggggg item description. ','piece',1,0.00,0.00,NULL,NULL,NULL,NULL,NULL,1,1,'2021-05-06 08:08:25','2021-05-06 08:08:25'),(4,1,NULL,NULL,NULL,NULL,NULL,'company',NULL,2,'This is a long text This is a long text ','TEST 2','gallon',1,0.00,0.00,NULL,NULL,NULL,NULL,NULL,1,1,'2021-05-06 08:08:25','2021-05-06 08:08:25'),(5,1,NULL,NULL,NULL,NULL,NULL,'company',NULL,4,'Item 4','This is an example of loooooooooooooooooooooooooooooooooooooooooooooooooonggggggggggggggggggggg item description. ','piece',1,0.00,0.00,NULL,NULL,NULL,NULL,NULL,1,1,'2021-05-06 08:08:25','2021-05-06 08:08:25'),(11,0,NULL,NULL,2,NULL,NULL,'project',0,2,'This is a long text This is a long text','TEST 2','gallon',10,1000.00,10000.00,NULL,'10',NULL,NULL,NULL,1,1,'2021-05-06 08:09:40','2021-05-06 08:09:40'),(12,0,NULL,NULL,2,NULL,NULL,'project',0,3,'Item 3','TEST 3','Kg',10,1500.00,15000.00,NULL,'11',NULL,NULL,NULL,1,1,'2021-05-06 08:09:40','2021-05-06 08:09:40'),(13,0,NULL,NULL,2,NULL,NULL,'company',0,2,'This is a long text This is a long text','TEST 2','gallon',10,1000.00,10000.00,NULL,'12',NULL,NULL,NULL,1,1,'2021-05-06 08:09:40','2021-05-06 08:09:40'),(14,1,NULL,NULL,1,NULL,NULL,'project',0,1,'Item 1','TEST','Kg',10,500.00,5000.00,'','100',NULL,NULL,NULL,1,1,'2021-05-06 08:09:57','2021-05-06 08:09:57'),(15,1,NULL,NULL,1,NULL,NULL,'project',0,2,'This is a long text This is a long text','TEST 2','gallon',1,1000.00,1000.00,'','101',NULL,NULL,NULL,1,1,'2021-05-06 08:09:57','2021-05-06 08:09:57'),(16,1,NULL,NULL,1,NULL,NULL,'project',0,4,'Item 4','This is an example of loooooooooooooooooooooooooooooooooooooooooooooooooonggggggggggggggggggggg item description. ','piece',1,1000.00,1000.00,'','102',NULL,NULL,NULL,1,1,'2021-05-06 08:09:57','2021-05-06 08:09:57'),(17,1,NULL,NULL,1,NULL,NULL,'company',0,2,'This is a long text This is a long text','TEST 2','gallon',1,1000.00,1000.00,'','103',NULL,NULL,NULL,1,1,'2021-05-06 08:09:57','2021-05-06 08:09:57'),(18,1,NULL,NULL,1,NULL,NULL,'company',0,4,'Item 4','This is an example of loooooooooooooooooooooooooooooooooooooooooooooooooonggggggggggggggggggggg item description. ','piece',1,1000.00,1000.00,'','104',NULL,NULL,NULL,1,1,'2021-05-06 08:09:57','2021-05-06 08:09:57'),(19,1,NULL,NULL,3,NULL,NULL,'project',0,1,'Item 1','TEST','Kg',10,500.00,5000.00,'','1',NULL,NULL,NULL,1,1,'2021-05-06 08:10:13','2021-05-06 08:10:13'),(20,1,NULL,NULL,3,NULL,NULL,'project',0,2,'This is a long text This is a long text','TEST 2','gallon',1,1000.00,1000.00,'','2',NULL,NULL,NULL,1,1,'2021-05-06 08:10:13','2021-05-06 08:10:13'),(21,1,NULL,NULL,3,NULL,NULL,'project',0,4,'Item 4','This is an example of loooooooooooooooooooooooooooooooooooooooooooooooooonggggggggggggggggggggg item description. ','piece',1,1000.00,1000.00,'','3',NULL,NULL,NULL,1,1,'2021-05-06 08:10:13','2021-05-06 08:10:13'),(22,1,NULL,NULL,3,NULL,NULL,'company',0,2,'This is a long text This is a long text','TEST 2','gallon',1,1000.00,1000.00,'','4',NULL,NULL,NULL,1,1,'2021-05-06 08:10:13','2021-05-06 08:10:13'),(23,1,NULL,NULL,3,NULL,NULL,'company',0,4,'Item 4','This is an example of loooooooooooooooooooooooooooooooooooooooooooooooooonggggggggggggggggggggg item description. ','piece',1,1000.00,1000.00,'','5',NULL,NULL,NULL,1,1,'2021-05-06 08:10:13','2021-05-06 08:10:13');
 /*!40000 ALTER TABLE `ims_request_items_tbl` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -2499,7 +2598,8 @@ DROP TABLE IF EXISTS `ims_travel_request_tbl`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `ims_travel_request_tbl` (
   `travelRequestID` bigint(20) NOT NULL AUTO_INCREMENT,
-  `costEstimateID` bigint(20) NOT NULL,
+  `costEstimateID` bigint(20) DEFAULT NULL,
+  `billMaterialID` bigint(20) DEFAULT NULL,
   `travelDescription` text NOT NULL,
   `quantity` bigint(20) NOT NULL,
   `unitOfMeasure` text NOT NULL,
@@ -2519,7 +2619,7 @@ CREATE TABLE `ims_travel_request_tbl` (
 
 LOCK TABLES `ims_travel_request_tbl` WRITE;
 /*!40000 ALTER TABLE `ims_travel_request_tbl` DISABLE KEYS */;
-INSERT INTO `ims_travel_request_tbl` VALUES (1,1,'None',10,'cup',0.00,0.00,1,1,'2021-05-05 01:58:53','2021-05-05 01:58:53');
+INSERT INTO `ims_travel_request_tbl` VALUES (1,1,NULL,'TEST',1,'gram',0.00,0.00,1,1,'2021-05-06 08:08:25','2021-05-06 08:08:25');
 /*!40000 ALTER TABLE `ims_travel_request_tbl` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -2548,7 +2648,7 @@ CREATE TABLE `pms_bill_material_tbl` (
   `createdAt` timestamp NOT NULL DEFAULT current_timestamp(),
   `updatedAt` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   PRIMARY KEY (`billMaterialID`)
-) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2670,7 +2770,7 @@ CREATE TABLE `pms_cost_estimate_tbl` (
 
 LOCK TABLES `pms_cost_estimate_tbl` WRITE;
 /*!40000 ALTER TABLE `pms_cost_estimate_tbl` DISABLE KEYS */;
-INSERT INTO `pms_cost_estimate_tbl` VALUES (1,NULL,1,5,NULL,'1','2','2021-05-05 09:58:52',2,'TEST CE',NULL,'2021-05-05 01:58:52',1,1,'2021-05-05 01:58:52','2021-05-05 01:58:53');
+INSERT INTO `pms_cost_estimate_tbl` VALUES (1,NULL,1,5,NULL,'1','2','2021-05-06 16:08:23',2,'TEST',NULL,'2021-05-06 08:08:23',1,1,'2021-05-06 08:08:23','2021-05-06 08:08:24');
 /*!40000 ALTER TABLE `pms_cost_estimate_tbl` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -2761,4 +2861,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2021-05-06  8:57:05
+-- Dump completed on 2021-05-06 16:19:01
