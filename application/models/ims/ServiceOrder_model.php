@@ -156,9 +156,9 @@ class ServiceOrder_model extends CI_Model {
             $insertID = $action == "insert" ? $this->db->insert_id() : $id;
 
             // ----- SAVE TO SERVICE COMPLETION -----
-            if ($data["serviceOrderStatus"] == 2) {
-                $insertToServiceCompletion = $this->saveServiceCompletion($insertID);
-            }
+            // if ($data["serviceOrderStatus"] == 2) {
+            //     $insertToServiceCompletion = $this->saveServiceCompletion($insertID);
+            // }
             // ----- END SAVE TO SERVICE COMPLETION -----
 
             return "true|Successfully submitted|$insertID|".date("Y-m-d");
@@ -190,6 +190,30 @@ class ServiceOrder_model extends CI_Model {
     public function saveScopes($scopes = null)
     {
         $query = $this->db->insert_batch("ims_service_scope_tbl", $scopes);
+        return $query ? true : false;
+    }
+
+    public function deleteScopes($serviceRequisitionID = null, $serviceOrderID = null)
+    {
+        $query = $this->db->delete(
+            "ims_service_scope_tbl", 
+            [
+                "serviceRequisitionID" => $serviceRequisitionID,
+                "serviceOrderID"       => $serviceOrderID,
+                "serviceCompletionID"  => NULL
+            ]);
+        return $query ? true : false;
+    }
+
+    public function deleteServices($serviceRequisitionID, $serviceOrderID)
+    {
+        $query = $this->db->delete(
+            "ims_request_services_tbl", 
+            [
+                "serviceRequisitionID" => $serviceRequisitionID,
+                "serviceOrderID"       => $serviceOrderID,
+                "serviceCompletionID"  => NULL
+            ]);
         return $query ? true : false;
     }
 

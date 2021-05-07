@@ -77,9 +77,9 @@ class ServiceRequisition_model extends CI_Model {
         $query1 = $this->db->delete(
             "ims_request_services_tbl", 
             [
-                "serviceRequisitionID"    => $id,
-                "serviceOrderID IS "      => NULL,
-                "serviceCompletionID IS " => NULL
+                "serviceRequisitionID" => $id,
+                "serviceOrderID"       => NULL,
+                "serviceCompletionID"  => NULL
             ]);
         $query2 = $this->db->delete("ims_service_scope_tbl", ["serviceRequisitionID" => $id]);
         return $query1 && $query2 ? true : false;

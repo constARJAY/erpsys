@@ -45,6 +45,14 @@ class Service_order extends CI_Controller {
         $method                = $this->input->post("method");
         $serviceOrderID        = $this->input->post("serviceOrderID") ?? null;
         $reviseServiceOrderID  = $this->input->post("reviseServiceOrderID") ?? null;
+        $serviceRequisitionID  = $this->input->post("serviceRequisitionID") ?? null;
+        $employeeID            = $this->input->post("employeeID") ?? null;
+        $projectID             = $this->input->post("projectID") ?? null;
+        $clientID              = $this->input->post("clientID") ?? null;
+        $clientName            = $this->input->post("clientName") ?? null;
+        $clientContactDetails  = $this->input->post("clientContactDetails") ?? null;
+        $clientContactPerson   = $this->input->post("clientContactPerson") ?? null;
+        $clientAddress         = $this->input->post("clientAddress") ?? null;
         $paymentTerms          = $this->input->post("paymentTerms") ?? null;
         $scheduleDate          = $this->input->post("scheduleDate") ?? null;
         $total                 = $this->input->post("total") ?? null;
@@ -66,25 +74,33 @@ class Service_order extends CI_Controller {
 
         $serviceOrderData = [
             "reviseServiceOrderID" => $reviseServiceOrderID,
-            "paymentTerms"          => $paymentTerms,
-            "scheduleDate"          => $scheduleDate,
-            "total"                 => $total,
-            "discount"              => $discount,
-            "totalAmount"           => $totalAmount,
-            "vatSales"              => $vatSales,
-            "vat"                   => $vat,
-            "totalVat"              => $totalVat,
-            "lessEwt"               => $lessEwt,
-            "grandTotalAmount"      => $grandTotalAmount,
-            "approversID"           => $approversID,
-            "approversStatus"       => $approversStatus,
-            "approversDate"         => $approversDate,
+            "serviceRequisitionID" => $serviceRequisitionID,
+            "employeeID"           => $employeeID,
+            "projectID"            => $projectID,
+            "clientID"             => $clientID,
+            "clientName"           => $clientName,
+            "clientContactDetails" => $clientContactDetails,
+            "clientContactPerson"  => $clientContactPerson,
+            "clientAddress"        => $clientAddress,
+            "paymentTerms"         => $paymentTerms,
+            "scheduleDate"         => $scheduleDate,
+            "total"                => $total,
+            "discount"             => $discount,
+            "totalAmount"          => $totalAmount,
+            "vatSales"             => $vatSales,
+            "vat"                  => $vat,
+            "totalVat"             => $totalVat,
+            "lessEwt"              => $lessEwt,
+            "grandTotalAmount"     => $grandTotalAmount,
+            "approversID"          => $approversID,
+            "approversStatus"      => $approversStatus,
+            "approversDate"        => $approversDate,
             "serviceOrderStatus"   => $serviceOrderStatus,
-            "submittedAt"           => $submittedAt,
-            "updatedBy"             => $updatedBy,
+            "submittedAt"          => $submittedAt,
+            "createdBy"            => $updatedBy,
+            "updatedBy"            => $updatedBy,
         ];
 
-        $serviceRequisitionID = "";
         if ($reviseServiceOrderID) {
             $soData = $this->serviceorder->getServiceOrder($reviseServiceOrderID);
             if ($soData) {
@@ -102,6 +118,7 @@ class Service_order extends CI_Controller {
 
         if ($action == "update") {
             unset($serviceOrderData["reviseServiceOrderID"]);
+            unset($serviceOrderData["createdBy"]);
 
             if ($method == "cancelform") {
                 $serviceOrderData = [
@@ -133,7 +150,10 @@ class Service_order extends CI_Controller {
             if ($result[0] == "true") {
                 $serviceOrderID = $result[2];
 
-                if ($items) {
+                if ($items && count($items) > 0) {
+                    $deleteServices = $this->serviceorder->deleteServices($serviceRequisitionID, $serviceOrderID);
+                    $deleteScopes   = $this->serviceorder->deleteScopes($serviceRequisitionID, $serviceOrderID);
+
                     foreach($items as $index => $item) {
                         $service = [
                             "serviceRequisitionID" => $serviceRequisitionID,
@@ -144,7 +164,7 @@ class Service_order extends CI_Controller {
                             "createdBy"            => $updatedBy,
                             "updatedBy"            => $updatedBy,
                         ];
-                        $scopes = $item["scopes"];
+                        $scopes = $item["scopes"] ?? [];
 
                         $saveServices = $this->serviceorder->saveServices($service, $scopes, $serviceRequisitionID, $serviceOrderID);
                     }

@@ -786,7 +786,7 @@ $(document).ready(function() {
 
 	// ----- GET INVENTORY PREFERRED PRICE -----
 	function getInventoryPreferredPrice(id = null, input, executeOnce = false) {
-		const errorMsg = `Please set item code <b>${getFormCode("ITM", dateToday(), id)}</b> into inventory price list module to proceed in this proccess`;
+		const errorMsg = `Please set item code <b>${getFormCode("ITM", dateToday(), id)}</b> into item price list module to proceed in this proccess`;
 		if (id && id != "0") {
 			const price = inventoryPriceList.filter(item => item.itemID == id).map(item => {
 				input && $(input).attr("inventoryVendorID", item.inventoryVendorID);

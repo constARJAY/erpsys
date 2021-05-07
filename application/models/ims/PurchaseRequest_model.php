@@ -25,16 +25,16 @@ class PurchaseRequest_model extends CI_Model {
     }
 
     public function deletePurchaseRequestItems($purchaseRequestID, $costEstimateID) {
-        $whereCE = $costEstimateID ?? "IS NULL";
+        $whereCE = $costEstimateID ?? NULL;
         $query = $this->db->delete(
             "ims_request_items_tbl", 
             [
-                "costEstimateID"            => $whereCE,
-                "billMaterialID IS "        => NULL,
-                "purchaseRequestID"         => $purchaseRequestID,
-                "purchaseOrderID IS "       => NULL,
-                "inventoryValidationID IS " => NULL,
-                "bidRecapID IS "            => NULL
+                "costEstimateID"         => $whereCE,
+                "billMaterialID "        => NULL,
+                "purchaseRequestID"      => $purchaseRequestID,
+                "purchaseOrderID "       => NULL,
+                "inventoryValidationID " => NULL,
+                "bidRecapID "            => NULL
             ]);
         return $query ? true : false;
     }
