@@ -678,20 +678,22 @@ $(document).ready(function() {
 				srCode    = "${getFormCode("SR", sr.createdAt, sr.serviceRequisitionID)}"
 				clientID  = "${sr.clientID}"
 				projectID = "${sr.projectID}"
+				reason    = "${sr.serviceRequisitionReason}"
 				${sr.serviceRequisitionID == id && "selected"}>
 				${getFormCode("SR", sr.createdAt, sr.serviceRequisitionID)}
 				</option>`;
 			})
 		} else {
-			html += serviceRequisitionList.map(ce => {
+			html += serviceRequisitionList.map(sr => {
 				return `
 				<option 
-					value     = "${ce.serviceRequisitionID}" 
-					srCode    = "${getFormCode("SR", ce.createdAt, ce.serviceRequisitionID)}"
+					value     = "${sr.servisrRequisitionID}" 
+					srCode    = "${getFormCode("SR", sr.createdAt, sr.serviceRequisitionID)}"
 					clientID  = "${sr.clientID}"
-					projectID = "${ce.projectID}"
-					${ce.serviceRequisitionID == id && "selected"}>
-					${getFormCode("SR", ce.createdAt, ce.serviceRequisitionID)}
+					projectID = "${sr.projectID}"
+					reason    = "${sr.serviceRequisitionReason}"
+					${sr.serviceRequisitionID == id && "selected"}>
+					${getFormCode("SR", sr.createdAt, sr.serviceRequisitionID)}
 				</option>`;
 			})
 		}
@@ -947,7 +949,7 @@ $(document).ready(function() {
 				<tbody class="tableScopeBody">`;
 		if (scopeData.length > 0) {
 			serviceScopes += scopeData.map(scope => {
-				return getServiceScope(scope, readOnly);;
+				return getServiceScope(scope, readOnly);
 			}).join("");
 		} else {
 			serviceScopes += getServiceScope();
@@ -1312,14 +1314,23 @@ $(document).ready(function() {
 
 	// ----- GET CLIENT -----
 	function getClient(clientID = null) {
-		let clientCode = "", clientName = "", clientAddress = "", clientContactDetails = "", clientContactPerson = "";
-		if (client) {
-			clientList.filter(c => {
-				clientCode = getFormCode("CLT", c.clientID, c.createdAt);
-				clientName = c.clientName,
-				clientAddress = ";";
+		let clientCode = "-", clientName = "-", clientAddress = "-", clientContactDetails = "-", clientContactPerson = "-";
+		if (clientID) {
+			clientList.filter(c => c.clientID == clientID).map(c => {
+				clientAddress = `${c.clientUnitNumber && titleCase(c.clientUnitNumber)+", "}${c.clientHouseNumber && c.clientHouseNumber +", "}${c.clientBarangay && titleCase(c.clientBarangay)+", "}${c.clientCity && titleCase(c.clientCity)+", "}${c.clientProvince && titleCase(c.clientProvince)+", "}${c.clientCountry && titleCase(c.clientCountry)+", "}${c.clientPostalCode && titleCase(c.clientPostalCode)}`;
+
+				clientCode           = getFormCode("CLT", c.createdAt, c.clientID);
+				clientName           = c.clientName,
+				clientAddress        = clientAddress.replaceAll("\n", "").trim();
+				clientContactDetails = `${c.client_MobileNo} - ${c.clientTelephoneNo}`;
+				clientContactPerson  = c.clientContactPerson
 			})
 		}
+		$(`[name="clientCode"]`).val(clientCode);
+		$(`[name="clientName"]`).val(clientName);
+		$(`[name="clientAddress"]`).val(clientAddress);
+		$(`[name="clientContactDetails"]`).val(clientContactDetails);
+		$(`[name="clientContactPerson"]`).val(clientContactPerson);
 	}
 	// ----- END GET CLIENT -----
 
@@ -1413,8 +1424,25 @@ $(document).ready(function() {
 		const serviceRequisitionID = $(this).val();
 		const clientID  = $("option:selected", this).attr("clientID");
 		const projectID = $("option:selected", this).attr("projectID");
+		const reason    = $("option:selected", this).attr("reason");
 		$(`[name="projectID"]`).val(projectID).trigger("change");
-
+		getClient(clientID);
+		$(`[name="serviceOrderReason"]`).val(reason);
+		const services = getServicesDisplay([{serviceRequisitionID}]);
+		$(`#tableServiceDisplay`).html(preloader);
+		setTimeout(() => {
+			$(`#tableServiceDisplay`).html(services);
+			initDataTables();
+			initAll();
+			updateTableItems();
+			updateServiceScope();
+			updateServiceOptions();
+			initAmount("#discount", true);
+			initAmount("#lessEwt", true);
+			initAmount("#vat", true);
+			removeIsValid("#tableServiceOrderItems0");
+			costSummary();
+		}, 200);
 	})
 	// ----- END SELECT SERVICE REQUISITION ID -----
 
@@ -1566,11 +1594,20 @@ $(document).ready(function() {
 
 		let requestServiceItems = "";
 		if (serviceRequisitionID) {
-			let requestServicesData = getTableData(
-				`ims_request_services_tbl`,
-				``,
-				`serviceOrderID = ${serviceOrderID}`
-			)
+			let requestServicesData;
+			if (serviceOrderID) {
+				requestServicesData = getTableData(
+					`ims_request_services_tbl`,
+					``,
+					`serviceRequisitionID = ${serviceRequisitionID} AND serviceOrderID = ${serviceOrderID} AND serviceCompletionID IS NULL`
+				)
+			} else {
+				requestServicesData = getTableData(
+					`ims_request_services_tbl`,
+					``,
+					`serviceRequisitionID = ${serviceRequisitionID} AND serviceOrderID IS NULL AND serviceCompletionID IS NULL`
+				);
+			}
 			requestServicesData.map(item => {
 				requestServiceItems += getServiceRow(item, readOnly || serviceOrderStatus != 3);
 			})
@@ -1693,6 +1730,35 @@ $(document).ready(function() {
 	// ----- END GET SERVICES DISPLAY -----
 
 
+	// ----- COST SUMMARY -----
+	function costSummary() {
+		let total = +getNonFormattedAmount($("#total").text());
+		console.log(total);
+		let totalCost = 0;
+		if (total <= 0) {
+			$(".totalcost").each(function(i) {
+				let tempTotalCost = +getNonFormattedAmount($(this).text().trim());
+				totalCost += tempTotalCost;
+			})
+
+			$("#total").text(formatAmount(totalCost, true));
+			$("#discount").val("0.00");
+			$("#totalAmount").text(formatAmount(totalCost, true));
+			const vat = totalCost * 0.12;
+			$("#vat").val(vat);
+			const vatSales = totalCost - vat;
+			$("#vatSales").text(formatAmount(vatSales, true));
+			const totalVat = vat + vatSales;
+			$("#totalVat").text(formatAmount(totalVat, true));
+			const lessEwt = totalVat * 0.01;
+			$("#lessEwt").val(lessEwt);
+			const grandTotalAmount = totalVat - lessEwt;
+			$("#grandTotalAmount").text(formatAmount(grandTotalAmount, true));
+		}
+	}
+	// ----- END COST SUMMARY -----
+
+
     // ----- FORM CONTENT -----
 	function formContent(data = false, readOnly = false, isRevise = false) {
 		$("#page_content").html(preloader);
@@ -1707,6 +1773,7 @@ $(document).ready(function() {
 			projectID                = "",
 			serviceRequisitionID     = "",
 			srCreatedAt              = new Date,
+			clientCode               = "-",
 			clientName               = "-",
 			clientAddress            = "-",
 			clientContactDetails     = "",
@@ -2021,9 +2088,9 @@ $(document).ready(function() {
                 <div class="w-100">
 					<hr class="pb-1">
 					<div class="text-primary font-weight-bold" style="font-size: 1.5rem;">Services </div>
-                    
-					${getServicesDisplay(data, readOnly)}
-					
+                    <div id="tableServiceDisplay">
+						${getServicesDisplay(data, readOnly)}
+					</div>
                 </div>
             </div>
 
@@ -2060,7 +2127,7 @@ $(document).ready(function() {
 				startDate: moment(scheduleDate || new Date),
 			}
 			initDateRangePicker("#scheduleDate", disablePreviousDateOptions);
-
+			costSummary();
 			return html;
 		}, 300);
 	}
