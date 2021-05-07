@@ -941,7 +941,7 @@ $(document).ready(function() {
 								class="form-control validate select2"
 								name="serviceID"
 								id="serviceID"
-								style="width: 100%"
+								style="width: 150px !important"
 								required>
 								${getServiceItem(serviceID)}
 							</select>
@@ -1401,6 +1401,7 @@ $(document).ready(function() {
                     <select class="form-control validate select2" 
                         name="clientID"
                         id="clientID"
+						style="width: 100%"
                         required
 						${disabled}>
                             <option selected disabled>Select Client Name</option>
@@ -1474,7 +1475,7 @@ $(document).ready(function() {
 
                 <div class="w-100">
 					<hr class="pb-1">
-					<div class="text-primary font-weight-bold" style="font-size: 1.5rem;">Services: </div>
+					<div class="text-primary font-weight-bold" style="font-size: 1.5rem;">Services </div>
                     <table class="table table-striped" id="${tableServiceRequisitionItems}">
                         <thead>
                             <tr style="white-space: nowrap">

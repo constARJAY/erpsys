@@ -133,9 +133,15 @@ $(document).ready(function() {
 		return moment(new Date).format("YYYY-MM-DD HH:mm:ss");
 	};
 
+	const serviceRequisitionList = getTableData(
+		`ims_service_requisition_tbl`,
+		"",
+		`serviceRequisitionStatus = 2`
+	)
+
 	const projectList = getTableData(
 		"pms_project_list_tbl", 
-		"projectListID, projectListCode, projectListName, projectListClientID, createdAt",
+		"*",
 		"projectListStatus = 1");
 
 	const clientList = getTableData(
@@ -332,7 +338,8 @@ $(document).ready(function() {
 	function headerButton(isAdd = true, text = "Add", isRevise = false) {
 		let html;
 		if (isAdd) {
-            html = "";
+            html = `
+            <button type="button" class="btn btn-default btn-add" id="btnAdd"><i class="icon-plus"></i> &nbsp;${text}</button>`;
 		} else {
 			html = `
             <button type="button" class="btn btn-default btn-light" id="btnBack" revise="${isRevise}"><i class="fas fa-arrow-left"></i> &nbsp;Back</button>`;
@@ -659,14 +666,49 @@ $(document).ready(function() {
 	// ----- END FORM BUTTONS -----
 
 
+	// ----- GET SERVICE REQUISITION LIST -----
+	function getServiceRequisitionList(id = null, status = 0, display = true) {
+		const createdSRList = getTableData("ims_service_order_tbl", "serviceRequisitionID", "serviceOrderStatus <> 3 AND serviceOrderStatus <> 4").map(sr => sr.serviceRequisitionID);
+		let html = ``;
+		if (!status || status == 0) {
+			html += serviceRequisitionList.filter(sr => createdSRList.indexOf(sr.serviceRequisitionID) == -1 || sr.serviceRequisitionID == id).map(sr => {
+				return `
+				<option 
+				value     = "${sr.serviceRequisitionID}" 
+				srCode    = "${getFormCode("SR", sr.createdAt, sr.serviceRequisitionID)}"
+				clientID  = "${sr.clientID}"
+				projectID = "${sr.projectID}"
+				${sr.serviceRequisitionID == id && "selected"}>
+				${getFormCode("SR", sr.createdAt, sr.serviceRequisitionID)}
+				</option>`;
+			})
+		} else {
+			html += serviceRequisitionList.map(ce => {
+				return `
+				<option 
+					value     = "${ce.serviceRequisitionID}" 
+					srCode    = "${getFormCode("SR", ce.createdAt, ce.serviceRequisitionID)}"
+					clientID  = "${sr.clientID}"
+					projectID = "${ce.projectID}"
+					${ce.serviceRequisitionID == id && "selected"}>
+					${getFormCode("SR", ce.createdAt, ce.serviceRequisitionID)}
+				</option>`;
+			})
+		}
+        return display ? html : serviceRequisitionList;
+
+	}
+	// ----- GET SERVICE REQUISITION LIST -----
+
+
 	// ----- GET PROJECT LIST -----
-    function getProjectList(id = null, clientID = 0, display = true) {
+    function getProjectList(id = null, display = true) {
 		let html = `
 		<option 
 			value       = "0"
 			projectCode = "-"
 			${id == "0" && "selected"}>N/A</option>`;
-        html += projectList.filter(project => project.projectListClientID == clientID).map(project => {
+        html += projectList.map(project => {
             return `
             <option 
                 value       = "${project.projectListID}" 
@@ -1268,6 +1310,20 @@ $(document).ready(function() {
 	// ----- END UPDATE TOTAL AMOUNT -----
 
 
+	// ----- GET CLIENT -----
+	function getClient(clientID = null) {
+		let clientCode = "", clientName = "", clientAddress = "", clientContactDetails = "", clientContactPerson = "";
+		if (client) {
+			clientList.filter(c => {
+				clientCode = getFormCode("CLT", c.clientID, c.createdAt);
+				clientName = c.clientName,
+				clientAddress = ";";
+			})
+		}
+	}
+	// ----- END GET CLIENT -----
+
+
 	// ----- KEYUP QUANTITY OR UNITCOST -----
 	$(document).on("keyup", "[name=quantity], [name=unitCost]", function() {
 		const tableRow  = $(this).closest("tr");
@@ -1350,6 +1406,17 @@ $(document).ready(function() {
 		}
 	})
 	// ----- END UPLOAD CONTRACT -----
+
+
+	// ----- SELECT SERVICE REQUISITION ID -----
+	$(document).on("change", `[name="serviceRequisitionID"]`, function() {
+		const serviceRequisitionID = $(this).val();
+		const clientID  = $("option:selected", this).attr("clientID");
+		const projectID = $("option:selected", this).attr("projectID");
+		$(`[name="projectID"]`).val(projectID).trigger("change");
+
+	})
+	// ----- END SELECT SERVICE REQUISITION ID -----
 
 
 	// ----- GET SERVICE ORDER DATA -----
@@ -1458,6 +1525,172 @@ $(document).ready(function() {
 		return data;
 	} 
 	// ----- END GET SERVICE ORDER DATA -----
+
+
+	// ----- GET SERVICES DISPLAY -----
+	function getServicesDisplay(data = false, readOnly = false) {
+		let disabled = readOnly ? "disabled" : "";
+
+		let {
+			serviceOrderID           = "",
+			reviseServiceOrderID     = "",
+			employeeID               = "",
+			clientID                 = "",
+			projectID                = "",
+			serviceRequisitionID     = "",
+			srCreatedAt              = new Date,
+			clientName               = "-",
+			clientAddress            = "-",
+			clientContactDetails     = "",
+			clientContactPerson      = "",
+			paymentTerms             = "",
+			scheduleDate             = "",
+			serviceRequisitionReason = "",
+			total                    = 0,
+			discount                 = 0,
+			totalAmount              = 0,
+			vatSales                 = 0,
+			vat                      = 0,
+			totalVat                 = 0,
+			lessEwt                  = 0,
+			grandTotalAmount         = 0,
+			serviceOrderRemarks      = "",
+			approversID              = "",
+			approversStatus          = "",
+			approversDate            = "",
+			contractFile		     = "",
+			serviceOrderStatus       = false,
+			submittedAt              = false,
+			createdAt                = false,
+		} = data && data[0];
+
+		let requestServiceItems = "";
+		if (serviceRequisitionID) {
+			let requestServicesData = getTableData(
+				`ims_request_services_tbl`,
+				``,
+				`serviceOrderID = ${serviceOrderID}`
+			)
+			requestServicesData.map(item => {
+				requestServiceItems += getServiceRow(item, readOnly || serviceOrderStatus != 3);
+			})
+		} else {
+			requestServiceItems += getServiceRow();
+		}
+
+		let html = `
+		<table class="table table-striped" id="tableServiceOrderItems0">
+			<thead>
+				<tr style="white-space: nowrap">
+					<th>Service Code</th>
+					<th>Service Name</th>
+					<th>Scope of Work</th>
+					<th>Remarks</th>
+				</tr>
+			</thead>
+			<tbody class="itemServiceTableBody">
+				${requestServiceItems}
+			</tbody>
+		</table>
+		
+		<div class="row py-2">
+			<div class="offset-md-8 col-md-4 col-sm-12 pt-3 pb-2">
+				<div class="row" style="font-size: 1.1rem; font-weight:bold">
+					<div class="col-6 text-right">Total :</div>
+					<div class="col-6 text-right text-danger"
+						style="font-size: 1.05em"
+						id="total">
+						${formatAmount(total, true)}
+					</div>
+				</div>
+				<div class="row" style="font-size: 1.1rem; font-weight:bold">
+					<div class="col-6 text-right">Discount :</div>
+					<div class="col-6 text-right">
+						<input 
+							type="text" 
+							class="form-control-plaintext amount py-0 text-danger border-bottom font-weight-bold"
+							min="0" 
+							max="9999999999"
+							minlength="1"
+							maxlength="20" 
+							name="discount" 
+							id="discount" 
+							style="font-size: 1.02em;"
+							value="${discount}"
+							${disabled}>
+					</div>
+				</div>
+				<div class="row" style="font-size: 1.1rem; font-weight:bold">
+					<div class="col-6 text-right">Total Amount:</div>
+					<div class="col-6 text-right text-danger"
+						id="totalAmount"
+						style="font-size: 1.05em">
+						${formatAmount(totalAmount, true)}
+					</div>
+				</div>
+				<div class="row" style="font-size: 1.1rem; font-weight:bold">
+					<div class="col-6 text-right">Vatable Sales:</div>
+					<div class="col-6 text-right text-danger"
+						id="vatSales"
+						style="font-size: 1.05em">
+						${formatAmount(vatSales, true)}
+					</div>
+				</div>
+				<div class="row" style="font-size: 1.1rem; font-weight:bold">
+					<div class="col-6 text-right">Vat 12%:</div>
+					<div class="col-6 text-right">
+						<input 
+							type="text" 
+							class="form-control-plaintext amount py-0 text-danger border-bottom font-weight-bold"
+							min="0" 
+							max="9999999999"
+							minlength="1"
+							maxlength="20" 
+							name="vat" 
+							id="vat" 
+							style="font-size: 1.02em;"
+							value="${vat}"
+							${disabled}>
+					</div>
+				</div>
+				<div class="row" style="font-size: 1.1rem; font-weight:bold">
+					<div class="col-6 text-right">Total:</div>
+					<div class="col-6 text-right text-danger"
+						id="totalVat"
+						style="font-size: 1.05em">
+						${formatAmount(totalVat, true)}
+					</div>
+				</div>
+				<div class="row" style="font-size: 1.1rem; font-weight:bold">
+					<div class="col-6 text-right">Less EWT:</div>
+					<div class="col-6 text-right">
+						<input 
+							type="text" 
+							class="form-control-plaintext amount py-0 text-danger border-bottom font-weight-bold"
+							min="0" 
+							max="9999999999"
+							minlength="1"
+							maxlength="20" 
+							name="lessEwt" 
+							id="lessEwt" 
+							style="font-size: 1.02em;"
+							value="${lessEwt}"
+							${disabled}>
+					</div>
+				</div>
+				<div class="row" style="font-size: 1.1rem; font-weight:bold">
+					<div class="col-6 text-right">Grand Total:</div>
+					<div class="col-6 text-right text-danger"
+						id="grandTotalAmount"
+						style="font-size: 1.3em">
+						${formatAmount(grandTotalAmount, true)}
+					</div>
+				</div>
+			</div>
+		</div>`;
+		return html;
+	}
+	// ----- END GET SERVICES DISPLAY -----
 
 
     // ----- FORM CONTENT -----
@@ -1655,13 +1888,26 @@ $(document).ready(function() {
         </div>
 
 		<div class="row" id="form_service_order">
-            <div class="col-md-6 col-sm-12">
+            <div class="col-md-4 col-sm-12">
+                <div class="form-group">
+                    <label>Reference No. <code>*</code></label>
+                    <select class="form-control validate select2"
+                        name="serviceRequisitionID"
+                        id="serviceRequisitionID"
+                        style="width: 100%"
+                        required>
+                        <option selected disabled>Select Reference No.</option>
+                        ${getServiceRequisitionList(serviceRequisitionID, serviceOrderStatus)}
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-4 col-sm-12">
                 <div class="form-group">
                     <label>Project Code</label>
                     <input type="text" class="form-control" name="projectCode" disabled value="-">
                 </div>
             </div>
-            <div class="col-md-6 col-sm-12">
+            <div class="col-md-4 col-sm-12">
                 <div class="form-group">
                     <label>Project Name</label>
                     <select class="form-control validate select2"
@@ -1671,39 +1917,39 @@ $(document).ready(function() {
                         required
 						disabled>
                         <option selected disabled>Select Project Name</option>
-                        ${getProjectList(projectID, clientID)}
+                        ${getProjectList(projectID)}
                     </select>
                     <div class="d-block invalid-feedback" id="invalid-projectID"></div>
                 </div>
             </div>
             <div class="col-md-4 col-sm-12">
                 <div class="form-group">
-                    <label>Company Name</label>
+                    <label>Client Code</label>
+                    <input type="text" class="form-control" name="clientCode" disabled value="${clientCode || "-"}">
+                </div>
+            </div>
+            <div class="col-md-4 col-sm-12">
+                <div class="form-group">
+                    <label>Client Name</label>
                     <input type="text" class="form-control" name="clientName" disabled value="${clientName || "-"}">
                 </div>
             </div>
-            <div class="col-md-8 col-sm-12">
-                <div class="form-group">
-                    <label>Company Address</label>
-                    <input type="text" class="form-control" name="clientAddress" disabled value="${clientAddress || "-"}">
-                </div>
-            </div>
-            <div class="col-md-4 col-sm-12">
-                <div class="form-group">
-                    <label>Contact Details</label>
-                    <input type="text" class="form-control" name="clientContactDetails" disabled value="${clientContactDetails || "-"}">
-                </div>
-            </div>
-            <div class="col-md-4 col-sm-12">
+			<div class="col-md-4 col-sm-12">
+				<div class="form-group">
+					<label>Contact Details</label>
+					<input type="text" class="form-control" name="clientContactDetails" disabled value="${clientContactDetails || "-"}">
+				</div>
+			</div>
+			<div class="col-md-4 col-sm-12">
                 <div class="form-group">
                     <label>Contact Person</label>
                     <input type="text" class="form-control" name="clientContactPerson" disabled value="${clientContactPerson || "-"}">
                 </div>
             </div>
-            <div class="col-md-4 col-sm-12">
+            <div class="col-md-8 col-sm-12">
                 <div class="form-group">
-                    <label>Request No.</label>
-                    <input type="text" class="form-control" name="serviceRequisitionID" disabled value="${serviceRequisitionID ? getFormCode("SR", srCreatedAt, serviceRequisitionID) : "-"}">
+                    <label>Client Address</label>
+                    <input type="text" class="form-control" name="clientAddress" disabled value="${clientAddress || "-"}">
                 </div>
             </div>
             <div class="col-md-6 col-sm-12">
@@ -1774,116 +2020,10 @@ $(document).ready(function() {
 			<div class="col-sm-12">
                 <div class="w-100">
 					<hr class="pb-1">
-					<div class="text-primary font-weight-bold" style="font-size: 1.5rem;">Services: </div>
-                    <table class="table table-striped" id="tableServiceOrderItems0">
-                        <thead>
-                            <tr style="white-space: nowrap">
-                                <th>Service Code</th>
-                                <th>Service Name</th>
-                                <th>Scope of Work</th>
-                                <th>Remarks</th>
-                            </tr>
-                        </thead>
-                        <tbody class="itemServiceTableBody">
-                            ${requestServiceItems}
-                        </tbody>
-                    </table>
-
-					<div class="row py-2">
-						<div class="offset-md-8 col-md-4 col-sm-12 pt-3 pb-2">
-							<div class="row" style="font-size: 1.1rem; font-weight:bold">
-								<div class="col-6 text-right">Total :</div>
-								<div class="col-6 text-right text-danger"
-									style="font-size: 1.05em"
-									id="total">
-									${formatAmount(total, true)}
-								</div>
-							</div>
-							<div class="row" style="font-size: 1.1rem; font-weight:bold">
-								<div class="col-6 text-right">Discount :</div>
-								<div class="col-6 text-right">
-									<input 
-										type="text" 
-										class="form-control-plaintext amount py-0 text-danger border-bottom font-weight-bold"
-										min="0" 
-										max="9999999999"
-										minlength="1"
-										maxlength="20" 
-										name="discount" 
-										id="discount" 
-										style="font-size: 1.02em;"
-										value="${discount}"
-										${disabled}>
-								</div>
-							</div>
-							<div class="row" style="font-size: 1.1rem; font-weight:bold">
-								<div class="col-6 text-right">Total Amount:</div>
-								<div class="col-6 text-right text-danger"
-									id="totalAmount"
-									style="font-size: 1.05em">
-									${formatAmount(totalAmount, true)}
-								</div>
-							</div>
-							<div class="row" style="font-size: 1.1rem; font-weight:bold">
-								<div class="col-6 text-right">Vatable Sales:</div>
-								<div class="col-6 text-right text-danger"
-									id="vatSales"
-									style="font-size: 1.05em">
-									${formatAmount(vatSales, true)}
-								</div>
-							</div>
-							<div class="row" style="font-size: 1.1rem; font-weight:bold">
-								<div class="col-6 text-right">Vat 12%:</div>
-								<div class="col-6 text-right">
-									<input 
-										type="text" 
-										class="form-control-plaintext amount py-0 text-danger border-bottom font-weight-bold"
-										min="0" 
-										max="9999999999"
-										minlength="1"
-										maxlength="20" 
-										name="vat" 
-										id="vat" 
-										style="font-size: 1.02em;"
-										value="${vat}"
-										${disabled}>
-								</div>
-							</div>
-							<div class="row" style="font-size: 1.1rem; font-weight:bold">
-								<div class="col-6 text-right">Total:</div>
-								<div class="col-6 text-right text-danger"
-									id="totalVat"
-									style="font-size: 1.05em">
-									${formatAmount(totalVat, true)}
-								</div>
-							</div>
-							<div class="row" style="font-size: 1.1rem; font-weight:bold">
-								<div class="col-6 text-right">Less EWT:</div>
-								<div class="col-6 text-right">
-									<input 
-										type="text" 
-										class="form-control-plaintext amount py-0 text-danger border-bottom font-weight-bold"
-										min="0" 
-										max="9999999999"
-										minlength="1"
-										maxlength="20" 
-										name="lessEwt" 
-										id="lessEwt" 
-										style="font-size: 1.02em;"
-										value="${lessEwt}"
-										${disabled}>
-								</div>
-							</div>
-							<div class="row" style="font-size: 1.1rem; font-weight:bold">
-								<div class="col-6 text-right">Grand Total:</div>
-								<div class="col-6 text-right text-danger"
-									id="grandTotalAmount"
-									style="font-size: 1.3em">
-									${formatAmount(grandTotalAmount, true)}
-								</div>
-							</div>
-						</div>
-					</div>
+					<div class="text-primary font-weight-bold" style="font-size: 1.5rem;">Services </div>
+                    
+					${getServicesDisplay(data, readOnly)}
+					
                 </div>
             </div>
 
@@ -1958,6 +2098,14 @@ $(document).ready(function() {
 	viewDocument();
 	$("#page_content").text().trim().length == 0 && pageContent(); // CHECK IF THERE IS ALREADY LOADED ONE
 	// ----- END PAGE CONTENT -----
+
+
+	// ----- OPEN ADD FORM -----
+	$(document).on("click", "#btnAdd", function () {
+		pageContent(true);
+		updateURL(null, true);
+	});
+	// ----- END OPEN ADD FORM -----
 
 
 	// ----- OPEN EDIT FORM -----

@@ -1800,7 +1800,7 @@ $(document).ready(function() {
 			<div class="col-sm-12">
                 <div class="w-100">
 					<hr class="pb-1">
-					<div class="text-primary font-weight-bold" style="font-size: 1.5rem;">Services: </div>
+					<div class="text-primary font-weight-bold" style="font-size: 1.5rem;">Services </div>
                     <table class="table table-striped" id="tableServiceCompletionItems0">
                         <thead>
                             <tr style="white-space: nowrap">

@@ -2023,7 +2023,6 @@ $(document).ready(function() {
 				
 				let fileID = "", file = "", fileArr = "", filename = "";
 				if (!ceID && ceID != "null") {
-					alert(ceID);
 				
 					fileID    = $("td [name=files]", this).attr("id");
 					file      = $(`#${fileID}`)[0].files[0];

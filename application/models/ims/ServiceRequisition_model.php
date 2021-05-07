@@ -62,9 +62,9 @@ class ServiceRequisition_model extends CI_Model {
             $insertID = $action == "insert" ? $this->db->insert_id() : $id;
 
             // ----- SAVE TO SERVICE ORDER -----
-            if ($data["serviceRequisitionStatus"] == 2) {
-                $insertToServiceOrder = $this->saveServiceOrder($insertID);
-            }
+            // if ($data["serviceRequisitionStatus"] == 2) {
+            //     $insertToServiceOrder = $this->saveServiceOrder($insertID);
+            // }
             // ----- END SAVE TO SERVICE ORDER -----
 
             return "true|Successfully submitted|$insertID|".date("Y-m-d");
@@ -74,7 +74,13 @@ class ServiceRequisition_model extends CI_Model {
 
     public function deleteServicesAndScopes($id = 0)
     {
-        $query1 = $this->db->delete("ims_request_services_tbl", ["serviceRequisitionID" => $id]);
+        $query1 = $this->db->delete(
+            "ims_request_services_tbl", 
+            [
+                "serviceRequisitionID"    => $id,
+                "serviceOrderID IS "      => NULL,
+                "serviceCompletionID IS " => NULL
+            ]);
         $query2 = $this->db->delete("ims_service_scope_tbl", ["serviceRequisitionID" => $id]);
         return $query1 && $query2 ? true : false;
     }
