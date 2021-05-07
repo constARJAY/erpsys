@@ -123,5 +123,27 @@ class ServiceCompletion_model extends CI_Model {
         }
     }
 
+    public function saveServices($serviceData = null) 
+    {
+        if ($serviceData) {
+            $query = $this->db->insert("ims_request_services_tbl", $serviceData);
+            if ($query) {
+                $insertID = $this->db->insert_id();
+                return $insertID;
+            }
+            return null;
+        }
+        return null;
+    }
+
+    public function saveScopes($scopeData = null) 
+    {
+        if ($scopeData) {
+            $query = $this->db->insert_batch("ims_service_scope_tbl", $scopeData);
+            return $query ? true : false;
+        }
+        return false;
+    }
+
 
 }

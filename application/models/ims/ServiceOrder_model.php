@@ -193,26 +193,26 @@ class ServiceOrder_model extends CI_Model {
         return $query ? true : false;
     }
 
-    public function deleteScopes($serviceRequisitionID = null, $serviceOrderID = null)
+    public function deleteScopes($serviceRequisitionID = null, $serviceOrderID = null, $serviceCompletionID = null)
     {
         $query = $this->db->delete(
             "ims_service_scope_tbl", 
             [
                 "serviceRequisitionID" => $serviceRequisitionID,
                 "serviceOrderID"       => $serviceOrderID,
-                "serviceCompletionID"  => NULL
+                "serviceCompletionID"  => $serviceCompletionID
             ]);
         return $query ? true : false;
     }
 
-    public function deleteServices($serviceRequisitionID, $serviceOrderID)
+    public function deleteServices($serviceRequisitionID = null, $serviceOrderID = null, $serviceCompletionID = null)
     {
         $query = $this->db->delete(
             "ims_request_services_tbl", 
             [
                 "serviceRequisitionID" => $serviceRequisitionID,
                 "serviceOrderID"       => $serviceOrderID,
-                "serviceCompletionID"  => NULL
+                "serviceCompletionID"  => $serviceCompletionID
             ]);
         return $query ? true : false;
     }

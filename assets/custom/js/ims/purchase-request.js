@@ -24,6 +24,17 @@ $(document).ready(function() {
 	// ---- END GET EMPLOYEE DATA -----
 
 
+	// ----- IS DOCUMENT REVISED -----
+	function isDocumentRevised(id = null) {
+		if (id) {
+			const revisedDocumentsID = getTableData("ims_purchase_request_tbl", "revisePurchaseRequestID", "revisePurchaseRequestID IS NOT NULL");
+			return revisedDocumentsID.map(item => item.revisePurchaseRequestID).includes(id);
+		}
+		return false;
+	}
+	// ----- END IS DOCUMENT REVISED -----
+
+
     // ----- VIEW DOCUMENT -----
 	function viewDocument(view_id = false, readOnly = false, isRevise = false) {
 		const loadData = (id, isRevise = false) => {
@@ -606,15 +617,17 @@ $(document).ready(function() {
 					}
 				} else if (purchaseRequestStatus == 3) {
 					// DENIED - FOR REVISE
-					button = `
-					<button
-						class="btn btn-cancel"
-						id="btnRevise" 
-						purchaseRequestID="${encryptString(purchaseRequestID)}"
-						code="${getFormCode("PR", createdAt, purchaseRequestID)}"
-						status="${purchaseRequestStatus}"><i class="fas fa-clone"></i>
-						Revise
-					</button>`;
+					if (!isDocumentRevised(purchaseRequestID)) {
+						button = `
+						<button
+							class="btn btn-cancel"
+							id="btnRevise" 
+							purchaseRequestID="${encryptString(purchaseRequestID)}"
+							code="${getFormCode("PR", createdAt, purchaseRequestID)}"
+							status="${purchaseRequestStatus}"><i class="fas fa-clone"></i>
+							Revise
+						</button>`;
+					}
 				}
 			} else {
 				if (purchaseRequestStatus == 1) {
@@ -1433,7 +1446,7 @@ $(document).ready(function() {
 		const viewonly       = $(this).attr("viewonly");
 		const status         = $(this).attr("status");
 
-		if (status == "false" || status == "0") {
+		if (status == "false" || status == "0" || status == "3") {
 			if (viewonly != "true") {
 				$(`[name="projectID"]`).val(projectID).trigger("change");
 				if (costEstimateID && costEstimateID != 0) {

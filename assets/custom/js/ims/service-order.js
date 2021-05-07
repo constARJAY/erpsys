@@ -907,7 +907,6 @@ $(document).ready(function() {
 					</tr>
 				</thead>
 				<tbody class="tableScopeBody">`;
-		console.log(requestServiceID, scopeData);
 		if (scopeData.length > 0) {
 			serviceScopes += scopeData.map(scope => {
 				return getServiceScope(scope, readOnly);
@@ -1566,7 +1565,6 @@ $(document).ready(function() {
 		let requestServiceItems = "";
 		if (serviceRequisitionID) {
 			let requestServicesData;
-			console.log(serviceRequisitionID, serviceOrderID);
 			if (serviceOrderID) {
 				requestServicesData = getTableData(
 					`ims_request_services_tbl`,
@@ -1706,7 +1704,6 @@ $(document).ready(function() {
 	// ----- COST SUMMARY -----
 	function costSummary() {
 		let total = +getNonFormattedAmount($("#total").text());
-		console.log(total);
 		let totalCost = 0;
 		if (total <= 0) {
 			$(".totalcost").each(function(i) {
@@ -1944,6 +1941,7 @@ $(document).ready(function() {
                         <option selected disabled>Select Reference No.</option>
                         ${getServiceRequisitionList(serviceRequisitionID, serviceOrderStatus)}
                     </select>
+					<div class="d-block invalid-feedback" id="invalid-serviceRequisitionID"></div>
                 </div>
             </div>
             <div class="col-md-4 col-sm-12">
@@ -1959,7 +1957,6 @@ $(document).ready(function() {
                         name="projectID"
                         id="projectID"
                         style="width: 100%"
-                        required
 						disabled>
                         <option selected disabled>-</option>
                         ${getProjectList(projectID)}
