@@ -334,7 +334,8 @@ $(document).ready(function() {
 	function headerButton(isAdd = true, text = "Add", isRevise = false) {
 		let html;
 		if (isAdd) {
-            html = "";
+            html = `
+            <button type="button" class="btn btn-default btn-add" id="btnAdd"><i class="icon-plus"></i> &nbsp;${text}</button>`;
 		} else {
 			html = `
             <button type="button" class="btn btn-default btn-light" id="btnBack" revise="${isRevise}"><i class="fas fa-arrow-left"></i> &nbsp;Back</button>`;
@@ -2111,6 +2112,14 @@ $(document).ready(function() {
 	// ----- END PAGE CONTENT -----
 
 
+	// ----- OPEN ADD FORM -----
+	$(document).on("click", "#btnAdd", function () {
+		pageContent(true);
+		updateURL(null, true);
+	});
+	// ----- END OPEN ADD FORM -----
+
+
 	// ----- OPEN EDIT FORM -----
 	$(document).on("click", ".btnEdit", function () {
 		const id = $(this).attr("id");
@@ -2569,11 +2578,13 @@ function savePurchaseOrder(data = null, method = "submit", notificationData = nu
 					}, 500);
 				})
 			} else {
-				if (res.dismiss === "cancel") {
-					if (method != "deny") {
-						callback && callback();
-					} else {
-						$("#modal_purchase_order").text().length > 0 && $("#modal_purchase_order").modal("show");
+				if (res.dismiss == "cancel") {
+					if (method != "submit") {
+						if (method != "deny") {
+							callback && callback();
+						} else {
+							$("#modal_purchase_order").text().length > 0 && $("#modal_purchase_order").modal("show");
+						}
 					}
 				} else if (res.isDismissed) {
 					if (method == "deny") {

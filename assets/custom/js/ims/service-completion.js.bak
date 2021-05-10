@@ -42,13 +42,12 @@ $(document).ready(function() {
 	function viewDocument(view_id = false, readOnly = false, isRevise = false) {
 		const loadData = (id, isRevise = false) => {
             const tableData = getTableData(
-				`ims_service_completion_tbl AS isct
-					LEFT JOIN ims_service_order_tbl AS isot USING(serviceOrderID)
-					LEFT JOIN ims_service_requisition_tbl AS isrt ON isct.serviceRequisitionID = isrt.serviceRequisitionID
-					LEFT JOIN pms_client_tbl AS pct ON isot.clientID = pct.clientID
-					LEFT JOIN pms_project_list_tbl AS pplt ON isot.projectID = pplt.projectListID`,
+                `ims_service_completion_tbl AS isct 
+                    LEFT JOIN ims_service_requisition_tbl AS isrt ON isct.serviceRequisitionID = isrt.serviceRequisitionID 
+                    LEFT JOIN ims_service_order_tbl AS isot ON isct.serviceOrderID = isot.serviceOrderID
+					LEFT JOIN pms_client_tbl AS pct ON isot.clientID = pct.clientID`,
                 `isct.*, 
-                isct.employeeID,
+                isot.employeeID,
 				isot.serviceRequisitionID, 
                 isot.clientID, 
 				pct.createdAt AS pctCreatedAt,
@@ -212,15 +211,14 @@ $(document).ready(function() {
 					{ targets: 1,  width: 150 },
 					{ targets: 2,  width: 150 },
 					{ targets: 3,  width: 150 },
-					{ targets: 4,  width: 150 },
-					{ targets: 5,  width: 100 },
-					{ targets: 6,  width: 150 },
+					{ targets: 4,  width: 100 },
+					{ targets: 5,  width: 150 },
+					{ targets: 6,  width: 200 },
 					{ targets: 7,  width: 200 },
 					{ targets: 8,  width: 200 },
-					{ targets: 9,  width: 200 },
-					{ targets: 10,  width: 80 },
-					{ targets: 11, width: 250 },
-					{ targets: 12, width: 80  },
+					{ targets: 9,  width: 80  },
+					{ targets: 10, width: 250 },
+					{ targets: 11, width: 80  },
 				],
 			});
 
@@ -238,15 +236,14 @@ $(document).ready(function() {
 					{ targets: 1,  width: 150 },
 					{ targets: 2,  width: 150 },
 					{ targets: 3,  width: 150 },
-					{ targets: 4,  width: 150 },
-					{ targets: 5,  width: 100 },
-					{ targets: 6,  width: 150 },
+					{ targets: 4,  width: 100 },
+					{ targets: 5,  width: 150 },
+					{ targets: 6,  width: 200 },
 					{ targets: 7,  width: 200 },
 					{ targets: 8,  width: 200 },
-					{ targets: 9,  width: 200 },
-					{ targets: 10,  width: 80 },
-					{ targets: 11, width: 250 },
-					{ targets: 12, width: 80  },
+					{ targets: 9,  width: 80  },
+					{ targets: 10, width: 250 },
+					{ targets: 11, width: 80  },
 				],
 			});
 
@@ -336,15 +333,15 @@ $(document).ready(function() {
 	function forApprovalContent() {
 		$("#tableForApprovalParent").html(preloader);
 		let serviceCompletionData = getTableData(
-			`ims_service_completion_tbl AS isct
-				LEFT JOIN ims_service_order_tbl AS isot USING(serviceOrderID)
-				LEFT JOIN ims_service_requisition_tbl AS isrt ON isct.serviceRequisitionID = isrt.serviceRequisitionID
+			`ims_service_completion_tbl AS isct 
+                LEFT JOIN ims_service_requisition_tbl AS isrt ON isct.serviceRequisitionID = isrt.serviceRequisitionID
+				LEFT JOIN ims_service_order_tbl AS isot ON isct.serviceOrderID = isot.serviceOrderID
 				LEFT JOIN pms_client_tbl AS pct ON isot.clientID = pct.clientID
-				LEFT JOIN pms_project_list_tbl AS pplt ON isot.projectID = pplt.projectListID
-				LEFT JOIN hris_employee_list_tbl AS helt ON isct.employeeID = helt.employeeID`,
+				LEFT JOIN pms_project_list_tbl AS pplt ON pplt.projectListID = isrt.projectID
+				LEFT JOIN hris_employee_list_tbl AS helt ON isrt.employeeID = helt.employeeID`,
 			`isct.*,  
             CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname, 
-            isct.createdAt AS dateCreated, projectListCode, projectListName, pct.clientName, isot.createdAt AS isotCreatedAt`,
+            isct.createdAt AS dateCreated, projectListCode, projectListName, pct.clientName`,
 			`isct.employeeID != ${sessionID} AND isct.serviceCompletionStatus != 0 AND isct.serviceCompletionStatus != 4`,
 			`FIELD(serviceCompletionStatus, 0, 1, 3, 2, 4), COALESCE(isct.submittedAt, isct.createdAt)`
 		);
@@ -355,7 +352,6 @@ $(document).ready(function() {
 				<tr style="white-space: nowrap">
 					<th>Document No.</th>
 					<th>Employee Name</th>
-					<th>Reference No.</th>
 					<th>Client Name</th>
 					<th>Project Code</th>
 					<th>Project Name</th>
@@ -374,8 +370,6 @@ $(document).ready(function() {
 			let {
 				fullname,
 				serviceCompletionID,
-				serviceOrderID,
-				isotCreatedAt,
 				clientName,
 				projectID,
 				projectListCode,
@@ -407,7 +401,6 @@ $(document).ready(function() {
 			<tr>
 				<td>${getFormCode("SC", createdAt, serviceCompletionID )}</td>
 				<td>${fullname}</td>
-				<td>${serviceOrderID != "0" ? getFormCode("SO", isotCreatedAt, serviceOrderID) : "-"}</td>
 				<td>${clientName   || '-'}</td>
 				<td>${projectListCode || '-'}</td>
 				<td>${projectListName || '-'}</td>
@@ -444,16 +437,16 @@ $(document).ready(function() {
 	function myFormsContent() {
 		$("#tableMyFormsParent").html(preloader);
 		let serviceCompletionData = getTableData(
-			`ims_service_completion_tbl AS isct
-				LEFT JOIN ims_service_order_tbl AS isot USING(serviceOrderID)
-				LEFT JOIN ims_service_requisition_tbl AS isrt ON isct.serviceRequisitionID = isrt.serviceRequisitionID
+			`ims_service_completion_tbl AS isct 
+                LEFT JOIN ims_service_requisition_tbl AS isrt ON isct.serviceRequisitionID = isrt.serviceRequisitionID
+				LEFT JOIN ims_service_order_tbl AS isot ON isct.serviceOrderID = isot.serviceOrderID
 				LEFT JOIN pms_client_tbl AS pct ON isot.clientID = pct.clientID
-				LEFT JOIN pms_project_list_tbl AS pplt ON isot.projectID = pplt.projectListID
-				LEFT JOIN hris_employee_list_tbl AS helt ON isct.employeeID = helt.employeeID`,
+				LEFT JOIN pms_project_list_tbl AS pplt ON pplt.projectListID = isrt.projectID
+				LEFT JOIN hris_employee_list_tbl AS helt ON isrt.employeeID = helt.employeeID`,
 			`isct.*,  
             CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname, 
-            isct.createdAt AS dateCreated, projectListCode, projectListName, pct.clientName, isot.createdAt AS isotCreatedAt`,
-			`isct.employeeID = ${sessionID}`,
+            isct.createdAt AS dateCreated, projectListCode, projectListName, pct.clientName`,
+			`isot.employeeID = ${sessionID}`,
 			`FIELD(serviceCompletionStatus, 0, 1, 3, 2, 4), COALESCE(isct.submittedAt, isct.createdAt)`
 		);
 
@@ -463,7 +456,6 @@ $(document).ready(function() {
 				<tr style="white-space: nowrap">
                     <th>Document No.</th>
                     <th>Employee Name</th>
-                    <th>Reference No.</th>
                     <th>Client Name</th>
                     <th>Project Code</th>
                     <th>Project Name</th>
@@ -482,8 +474,6 @@ $(document).ready(function() {
 			let {
 				fullname,
 				serviceCompletionID,
-				serviceOrderID,
-				isotCreatedAt,
 				clientName,
                 projectID,
                 projectListCode,
@@ -513,11 +503,11 @@ $(document).ready(function() {
                 class="btn btn-edit w-100 btnEdit" 
                 id="${encryptString(serviceCompletionID)}" 
                 code="${getFormCode("SC", createdAt, serviceCompletionID )}"><i class="fas fa-edit"></i> Edit</button>`;
+
 			html += `
             <tr>
                 <td>${getFormCode("SC", createdAt, serviceCompletionID )}</td>
                 <td>${fullname}</td>
-                <td>${serviceOrderID != "0" ? getFormCode("SO", isotCreatedAt, serviceOrderID) : "-"}</td>
                 <td>${clientName   || '-'}</td>
                 <td>${projectListCode || '-'}</td>
                 <td>${projectListName || '-'}</td>
@@ -667,7 +657,7 @@ $(document).ready(function() {
 
 	// ----- GET SERVICE REQUISITION LIST -----
 	function getServiceOrderList(id = null, status = 0, display = true) {
-		const createdORList = getTableData("ims_service_completion_tbl", "serviceOrderID", "serviceCompletionStatus <> 3 AND serviceCompletionStatus <> 4").map(so => so.serviceOrderID);
+		const createdORList = getTableData("ims_service_completion_tbl", "serviceOrderID", "serviceCompletionStatus <> 3 AND serviceCompletionStatus <> 4").map(so => so.serviceCompletionID);
 		let html = ``;
 		if (!status || status == 0) {
 			html += serviceOrderList.filter(so => createdORList.indexOf(so.serviceOrderID) == -1 || so.serviceOrderID == id).map(so => {
@@ -677,7 +667,7 @@ $(document).ready(function() {
 				serviceRequisitionID = "${so.serviceRequisitionID}"
 				soCode       = "${getFormCode("SO", so.createdAt, so.serviceOrderID)}"
 				paymentTerms = "${so.paymentTerms}"
-				scheduleDate = "${moment(so.scheduleDate).format("MMM DD, YYYY")}"
+				scheduleData = "${so.scheduleDate}"
 				clientID     = "${so.clientID}"
 				projectID    = "${so.projectID}"
 				reason       = "${so.serviceRequisitionReason}"
@@ -693,7 +683,7 @@ $(document).ready(function() {
 					serviceRequisitionID = "${so.serviceRequisitionID}"
 					soCode       = "${getFormCode("SO", so.createdAt, so.serviceOrderID)}"
 					paymentTerms = "${so.paymentTerms}"
-					scheduleDate = "${moment(so.scheduleDate).format("MMM DD, YYYY")}"
+					scheduleData = "${so.scheduleDate}"
 					clientID     = "${so.clientID}"
 					projectID    = "${so.projectID}"
 					reason       = "${so.serviceRequisitionReason}"
@@ -823,7 +813,7 @@ $(document).ready(function() {
 		let {
             requestServiceID = "",
             scopeID          = "",
-			description      = "-",
+			description      = "",
 			quantity         = "1",
 			uom              = "pcs",
 			unitCost         = "0",
@@ -948,7 +938,6 @@ $(document).ready(function() {
 			remarks          = "",
 			createdAt        = ""
 		} = item;
-		console.log(readOnly);
 
 		const scopeData = getTableData(
 			`ims_service_scope_tbl`,
@@ -974,7 +963,7 @@ $(document).ready(function() {
 				return getServiceScope(scope, readOnly);;
 			}).join("");
 		} else {
-			serviceScopes += getServiceScope({}, readOnly);
+			serviceScopes += getServiceScope();
 		}
 		serviceScopes += `
 				</tbody>
@@ -983,7 +972,6 @@ $(document).ready(function() {
 
 		let html = "";
 		if (readOnly) {
-			let serviceDate = serviceDateFrom && serviceDateTo ? moment(serviceDateFrom).format("MMM DD, YYYY")+" - "+moment(serviceDateTo).format("MMM DD, YYYY") : "-";
 			html += `
 			<tr class="itemTableRow" 
 			serviceID="${serviceID}" 
@@ -992,7 +980,7 @@ $(document).ready(function() {
 			requestServiceID="${requestServiceID}">
 				<td>
 					<div class="servicecode">
-						${serviceID ? getFormCode("SVC", createdAt, serviceID) : "-"}
+						${getFormCode("SVC", createdAt, serviceID)}
 					</div>
 				</td>
 				<td>
@@ -1002,7 +990,7 @@ $(document).ready(function() {
 				</td>
 				<td>
 					<div class="servicedate">
-						${serviceDate || "-"}
+						${moment(serviceDateFrom).format("MMM DD, YYYY")+" - "+moment(serviceDateTo).format("MMM DD, YYYY") || "-"}
 					</div>
 				</td>
 				<td>
@@ -1025,7 +1013,7 @@ $(document).ready(function() {
 			requestServiceID="${requestServiceID}">
 				<td>
 					<div class="servicecode">
-						${serviceID ? getFormCode("SVC", createdAt, serviceID) : "-"}
+                        ${getFormCode("SVC", createdAt, serviceID)}
                     </div>
 				</td>
 				<td>
@@ -1611,7 +1599,7 @@ $(document).ready(function() {
 			submittedAt               = false,
 			createdAt                 = false,
 		} = data && data[0];
-		console.log(readOnly);
+
 		let requestServiceItems = "";
 		if (serviceRequisitionID && serviceOrderID) {
 			let requestServicesData;
@@ -1619,20 +1607,20 @@ $(document).ready(function() {
 				requestServicesData = getTableData(
 					`ims_request_services_tbl`,
 					``,
-					`serviceRequisitionID = ${serviceRequisitionID} AND serviceOrderID = ${serviceOrderID} AND serviceCompletionID = ${serviceCompletionID}`
+					`serviceRequisitionID = ${serviceRequisitionID} AND serviceOrderID = ${serviceOrderID} AND serviceCompletionID = ${serviceCompletionID} AND serviceCompletionID IS NULL`
 				)
 			} else {
 				requestServicesData = getTableData(
 					`ims_request_services_tbl`,
 					``,
-					`serviceRequisitionID = ${serviceRequisitionID} AND serviceOrderID = ${serviceOrderID} AND serviceCompletionID IS NULL`
+					`serviceRequisitionID = ${serviceRequisitionID} AND serviceOrderID = ${serviceOrderID} AND serviceCompletionID IS NULL AND serviceCompletionID IS NULL`
 				);
 			}
 			requestServicesData.map(item => {
-				requestServiceItems += getServiceRow(item, readOnly);
+				requestServiceItems += getServiceRow(item, readOnly && serviceCompletionStatus != 3);
 			})
 		} else {
-			requestServiceItems += getServiceRow({}, serviceCompletionStatus == 4);
+			requestServiceItems += getServiceRow();
 		}
 
 		let html = `
@@ -1812,6 +1800,7 @@ $(document).ready(function() {
 		formData.append("method", method);
 		formData.append("updatedBy", sessionID);
 
+		console.log(currentStatus);
 		if ((currentStatus == "false" || currentStatus == "0" || currentStatus == "3") && method != "approve") {
 
 			data["employeeID"] = sessionID;
@@ -1900,7 +1889,6 @@ $(document).ready(function() {
 			reviseServiceCompletionID = "",
 			employeeID                = "",
 			clientID                  = "",
-			pctCreatedAt              = new Date,
 			projectID                 = "",
 			serviceOrderID            = "",
 			serviceRequisitionID      = "",
