@@ -42,12 +42,13 @@ $(document).ready(function() {
 	function viewDocument(view_id = false, readOnly = false, isRevise = false) {
 		const loadData = (id, isRevise = false) => {
             const tableData = getTableData(
-                `ims_service_completion_tbl AS isct 
-                    LEFT JOIN ims_service_requisition_tbl AS isrt ON isct.serviceRequisitionID = isrt.serviceRequisitionID 
-                    LEFT JOIN ims_service_order_tbl AS isot ON isct.serviceOrderID = isot.serviceOrderID
-					LEFT JOIN pms_client_tbl AS pct ON isot.clientID = pct.clientID`,
+				`ims_service_completion_tbl AS isct
+					LEFT JOIN ims_service_order_tbl AS isot USING(serviceOrderID)
+					LEFT JOIN ims_service_requisition_tbl AS isrt ON isct.serviceRequisitionID = isrt.serviceRequisitionID
+					LEFT JOIN pms_client_tbl AS pct ON isot.clientID = pct.clientID
+					LEFT JOIN pms_project_list_tbl AS pplt ON isot.projectID = pplt.projectListID`,
                 `isct.*, 
-                isot.employeeID,
+                isct.employeeID,
 				isot.serviceRequisitionID, 
                 isot.clientID, 
 				pct.createdAt AS pctCreatedAt,
@@ -211,14 +212,15 @@ $(document).ready(function() {
 					{ targets: 1,  width: 150 },
 					{ targets: 2,  width: 150 },
 					{ targets: 3,  width: 150 },
-					{ targets: 4,  width: 100 },
-					{ targets: 5,  width: 150 },
-					{ targets: 6,  width: 200 },
+					{ targets: 4,  width: 150 },
+					{ targets: 5,  width: 100 },
+					{ targets: 6,  width: 150 },
 					{ targets: 7,  width: 200 },
 					{ targets: 8,  width: 200 },
-					{ targets: 9,  width: 80  },
-					{ targets: 10, width: 250 },
-					{ targets: 11, width: 80  },
+					{ targets: 9,  width: 200 },
+					{ targets: 10,  width: 80 },
+					{ targets: 11, width: 250 },
+					{ targets: 12, width: 80  },
 				],
 			});
 
@@ -236,14 +238,15 @@ $(document).ready(function() {
 					{ targets: 1,  width: 150 },
 					{ targets: 2,  width: 150 },
 					{ targets: 3,  width: 150 },
-					{ targets: 4,  width: 100 },
-					{ targets: 5,  width: 150 },
-					{ targets: 6,  width: 200 },
+					{ targets: 4,  width: 150 },
+					{ targets: 5,  width: 100 },
+					{ targets: 6,  width: 150 },
 					{ targets: 7,  width: 200 },
 					{ targets: 8,  width: 200 },
-					{ targets: 9,  width: 80  },
-					{ targets: 10, width: 250 },
-					{ targets: 11, width: 80  },
+					{ targets: 9,  width: 200 },
+					{ targets: 10,  width: 80 },
+					{ targets: 11, width: 250 },
+					{ targets: 12, width: 80  },
 				],
 			});
 
@@ -333,15 +336,15 @@ $(document).ready(function() {
 	function forApprovalContent() {
 		$("#tableForApprovalParent").html(preloader);
 		let serviceCompletionData = getTableData(
-			`ims_service_completion_tbl AS isct 
-                LEFT JOIN ims_service_requisition_tbl AS isrt ON isct.serviceRequisitionID = isrt.serviceRequisitionID
-				LEFT JOIN ims_service_order_tbl AS isot ON isct.serviceOrderID = isot.serviceOrderID
+			`ims_service_completion_tbl AS isct
+				LEFT JOIN ims_service_order_tbl AS isot USING(serviceOrderID)
+				LEFT JOIN ims_service_requisition_tbl AS isrt ON isct.serviceRequisitionID = isrt.serviceRequisitionID
 				LEFT JOIN pms_client_tbl AS pct ON isot.clientID = pct.clientID
-				LEFT JOIN pms_project_list_tbl AS pplt ON pplt.projectListID = isrt.projectID
-				LEFT JOIN hris_employee_list_tbl AS helt ON isrt.employeeID = helt.employeeID`,
+				LEFT JOIN pms_project_list_tbl AS pplt ON isot.projectID = pplt.projectListID
+				LEFT JOIN hris_employee_list_tbl AS helt ON isct.employeeID = helt.employeeID`,
 			`isct.*,  
             CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname, 
-            isct.createdAt AS dateCreated, projectListCode, projectListName, pct.clientName`,
+            isct.createdAt AS dateCreated, projectListCode, projectListName, pct.clientName, isot.createdAt AS isotCreatedAt`,
 			`isct.employeeID != ${sessionID} AND isct.serviceCompletionStatus != 0 AND isct.serviceCompletionStatus != 4`,
 			`FIELD(serviceCompletionStatus, 0, 1, 3, 2, 4), COALESCE(isct.submittedAt, isct.createdAt)`
 		);
@@ -352,6 +355,7 @@ $(document).ready(function() {
 				<tr style="white-space: nowrap">
 					<th>Document No.</th>
 					<th>Employee Name</th>
+					<th>Reference No.</th>
 					<th>Client Name</th>
 					<th>Project Code</th>
 					<th>Project Name</th>
@@ -361,7 +365,6 @@ $(document).ready(function() {
 					<th>Date Approved</th>
 					<th>Status</th>
 					<th>Remarks</th>
-					<th>Action</th>
 				</tr>
             </thead>
             <tbody>`;
@@ -370,6 +373,8 @@ $(document).ready(function() {
 			let {
 				fullname,
 				serviceCompletionID,
+				serviceOrderID,
+				isotCreatedAt,
 				clientName,
 				projectID,
 				projectListCode,
@@ -390,6 +395,8 @@ $(document).ready(function() {
 				dateApproved = moment(dateApproved[dateApproved.length - 1]).format("MMMM DD, YYYY hh:mm:ss A");
 			}
 
+			let btnClass = serviceCompletionStatus != 0 ? "btnView" : "btnEdit";
+
 			let button = serviceCompletionStatus != 0 ? `
             <button class="btn btn-view w-100 btnView" id="${encryptString(serviceCompletionID )}"><i class="fas fa-eye"></i> View</button>` : `
             <button 
@@ -398,9 +405,10 @@ $(document).ready(function() {
                 code="${getFormCode("SC", createdAt, serviceCompletionID )}"><i class="fas fa-edit"></i> Edit</button>`;
 
 			html += `
-			<tr>
+			<tr class="${btnClass}" id="${encryptString(serviceCompletionID )}">
 				<td>${getFormCode("SC", createdAt, serviceCompletionID )}</td>
 				<td>${fullname}</td>
+				<td>${serviceOrderID != "0" ? getFormCode("SO", isotCreatedAt, serviceOrderID) : "-"}</td>
 				<td>${clientName   || '-'}</td>
 				<td>${projectListCode || '-'}</td>
 				<td>${projectListName || '-'}</td>
@@ -414,9 +422,6 @@ $(document).ready(function() {
 					${getStatusStyle(serviceCompletionStatus)}
 				</td>
 				<td>${remarks}</td>
-				<td class="text-center">
-					${button}
-				</td>
 			</tr>`;
 		});
 
@@ -437,16 +442,16 @@ $(document).ready(function() {
 	function myFormsContent() {
 		$("#tableMyFormsParent").html(preloader);
 		let serviceCompletionData = getTableData(
-			`ims_service_completion_tbl AS isct 
-                LEFT JOIN ims_service_requisition_tbl AS isrt ON isct.serviceRequisitionID = isrt.serviceRequisitionID
-				LEFT JOIN ims_service_order_tbl AS isot ON isct.serviceOrderID = isot.serviceOrderID
+			`ims_service_completion_tbl AS isct
+				LEFT JOIN ims_service_order_tbl AS isot USING(serviceOrderID)
+				LEFT JOIN ims_service_requisition_tbl AS isrt ON isct.serviceRequisitionID = isrt.serviceRequisitionID
 				LEFT JOIN pms_client_tbl AS pct ON isot.clientID = pct.clientID
-				LEFT JOIN pms_project_list_tbl AS pplt ON pplt.projectListID = isrt.projectID
-				LEFT JOIN hris_employee_list_tbl AS helt ON isrt.employeeID = helt.employeeID`,
+				LEFT JOIN pms_project_list_tbl AS pplt ON isot.projectID = pplt.projectListID
+				LEFT JOIN hris_employee_list_tbl AS helt ON isct.employeeID = helt.employeeID`,
 			`isct.*,  
             CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname, 
-            isct.createdAt AS dateCreated, projectListCode, projectListName, pct.clientName`,
-			`isot.employeeID = ${sessionID}`,
+            isct.createdAt AS dateCreated, projectListCode, projectListName, pct.clientName, isot.createdAt AS isotCreatedAt`,
+			`isct.employeeID = ${sessionID}`,
 			`FIELD(serviceCompletionStatus, 0, 1, 3, 2, 4), COALESCE(isct.submittedAt, isct.createdAt)`
 		);
 
@@ -456,6 +461,7 @@ $(document).ready(function() {
 				<tr style="white-space: nowrap">
                     <th>Document No.</th>
                     <th>Employee Name</th>
+                    <th>Reference No.</th>
                     <th>Client Name</th>
                     <th>Project Code</th>
                     <th>Project Name</th>
@@ -465,7 +471,6 @@ $(document).ready(function() {
                     <th>Date Approved</th>
                     <th>Status</th>
                     <th>Remarks</th>
-                    <th>Action</th>
                 </tr>
             </thead>
             <tbody>`;
@@ -474,6 +479,8 @@ $(document).ready(function() {
 			let {
 				fullname,
 				serviceCompletionID,
+				serviceOrderID,
+				isotCreatedAt,
 				clientName,
                 projectID,
                 projectListCode,
@@ -494,6 +501,8 @@ $(document).ready(function() {
 				dateApproved = moment(dateApproved[dateApproved.length - 1]).format("MMMM DD, YYYY hh:mm:ss A");
 			}
 
+			let btnClass = serviceCompletionStatus != 0 ? "btnView" : "btnEdit";
+
 			let button = serviceCompletionStatus != 0 ? `
             <button class="btn btn-view w-100 btnView" 
                 id="${encryptString(serviceCompletionID )}">
@@ -503,11 +512,11 @@ $(document).ready(function() {
                 class="btn btn-edit w-100 btnEdit" 
                 id="${encryptString(serviceCompletionID)}" 
                 code="${getFormCode("SC", createdAt, serviceCompletionID )}"><i class="fas fa-edit"></i> Edit</button>`;
-
 			html += `
-            <tr>
+            <tr class="${btnClass}" id="${encryptString(serviceCompletionID )}">
                 <td>${getFormCode("SC", createdAt, serviceCompletionID )}</td>
                 <td>${fullname}</td>
+                <td>${serviceOrderID != "0" ? getFormCode("SO", isotCreatedAt, serviceOrderID) : "-"}</td>
                 <td>${clientName   || '-'}</td>
                 <td>${projectListCode || '-'}</td>
                 <td>${projectListName || '-'}</td>
@@ -521,9 +530,6 @@ $(document).ready(function() {
                     ${getStatusStyle(serviceCompletionStatus)}
                 </td>
 				<td>${remarks}</td>
-                <td class="text-center">
-                    ${button}
-                </td>
             </tr>`;
 		});
 
@@ -559,7 +565,7 @@ $(document).ready(function() {
 					// DRAFT
 					button = `
 					<button 
-						class="btn btn-submit" 
+						class="btn btn-submit px-5 p-2"  
 						id="btnSubmit" 
 						serviceCompletionID="${serviceCompletionID}"
 						code="${getFormCode("SC", createdAt, serviceCompletionID)}"
@@ -570,7 +576,7 @@ $(document).ready(function() {
 					if (isRevise) {
 						button += `
 						<button 
-							class="btn btn-cancel" 
+							class="btn btn-cancel btnCancel px-5 p-2" 
 							id="btnCancel"
 							revise="${isRevise}"
 							serviceCompletionID="${serviceCompletionID}"
@@ -622,7 +628,7 @@ $(document).ready(function() {
 					if (isImCurrentApprover(approversID, approversDate)) {
 						button = `
 						<button 
-							class="btn btn-submit" 
+							class="btn btn-submit px-5 p-2"  
 							id="btnApprove" 
 							serviceCompletionID="${encryptString(serviceCompletionID)}"
 							code="${getFormCode("SC", createdAt, serviceCompletionID)}"><i class="fas fa-paper-plane"></i>
@@ -641,11 +647,11 @@ $(document).ready(function() {
 		} else {
 			button = `
 			<button 
-				class="btn btn-submit" 
+				class="btn btn-submit px-5 p-2"  
 				id="btnSubmit"><i class="fas fa-paper-plane"></i> Submit
 			</button>
 			<button 
-				class="btn btn-cancel" 
+				class="btn btn-cancel btnCancel px-5 p-2" 
 				id="btnCancel"><i class="fas fa-ban"></i> 
 				Cancel
 			</button>`;
@@ -657,7 +663,7 @@ $(document).ready(function() {
 
 	// ----- GET SERVICE REQUISITION LIST -----
 	function getServiceOrderList(id = null, status = 0, display = true) {
-		const createdORList = getTableData("ims_service_completion_tbl", "serviceOrderID", "serviceCompletionStatus <> 3 AND serviceCompletionStatus <> 4").map(so => so.serviceCompletionID);
+		const createdORList = getTableData("ims_service_completion_tbl", "serviceOrderID", "serviceCompletionStatus <> 3 AND serviceCompletionStatus <> 4").map(so => so.serviceOrderID);
 		let html = ``;
 		if (!status || status == 0) {
 			html += serviceOrderList.filter(so => createdORList.indexOf(so.serviceOrderID) == -1 || so.serviceOrderID == id).map(so => {
@@ -667,7 +673,7 @@ $(document).ready(function() {
 				serviceRequisitionID = "${so.serviceRequisitionID}"
 				soCode       = "${getFormCode("SO", so.createdAt, so.serviceOrderID)}"
 				paymentTerms = "${so.paymentTerms}"
-				scheduleData = "${so.scheduleDate}"
+				scheduleDate = "${moment(so.scheduleDate).format("MMM DD, YYYY")}"
 				clientID     = "${so.clientID}"
 				projectID    = "${so.projectID}"
 				reason       = "${so.serviceRequisitionReason}"
@@ -683,7 +689,7 @@ $(document).ready(function() {
 					serviceRequisitionID = "${so.serviceRequisitionID}"
 					soCode       = "${getFormCode("SO", so.createdAt, so.serviceOrderID)}"
 					paymentTerms = "${so.paymentTerms}"
-					scheduleData = "${so.scheduleDate}"
+					scheduleDate = "${moment(so.scheduleDate).format("MMM DD, YYYY")}"
 					clientID     = "${so.clientID}"
 					projectID    = "${so.projectID}"
 					reason       = "${so.serviceRequisitionReason}"
@@ -813,7 +819,7 @@ $(document).ready(function() {
 		let {
             requestServiceID = "",
             scopeID          = "",
-			description      = "",
+			description      = "-",
 			quantity         = "1",
 			uom              = "pcs",
 			unitCost         = "0",
@@ -963,7 +969,7 @@ $(document).ready(function() {
 				return getServiceScope(scope, readOnly);;
 			}).join("");
 		} else {
-			serviceScopes += getServiceScope();
+			serviceScopes += getServiceScope({}, readOnly);
 		}
 		serviceScopes += `
 				</tbody>
@@ -972,6 +978,7 @@ $(document).ready(function() {
 
 		let html = "";
 		if (readOnly) {
+			let serviceDate = serviceDateFrom && serviceDateTo ? moment(serviceDateFrom).format("MMM DD, YYYY")+" - "+moment(serviceDateTo).format("MMM DD, YYYY") : "-";
 			html += `
 			<tr class="itemTableRow" 
 			serviceID="${serviceID}" 
@@ -980,7 +987,7 @@ $(document).ready(function() {
 			requestServiceID="${requestServiceID}">
 				<td>
 					<div class="servicecode">
-						${getFormCode("SVC", createdAt, serviceID)}
+						${serviceID ? getFormCode("SVC", createdAt, serviceID) : "-"}
 					</div>
 				</td>
 				<td>
@@ -990,7 +997,7 @@ $(document).ready(function() {
 				</td>
 				<td>
 					<div class="servicedate">
-						${moment(serviceDateFrom).format("MMM DD, YYYY")+" - "+moment(serviceDateTo).format("MMM DD, YYYY") || "-"}
+						${serviceDate || "-"}
 					</div>
 				</td>
 				<td>
@@ -1013,7 +1020,7 @@ $(document).ready(function() {
 			requestServiceID="${requestServiceID}">
 				<td>
 					<div class="servicecode">
-                        ${getFormCode("SVC", createdAt, serviceID)}
+						${serviceID ? getFormCode("SVC", createdAt, serviceID) : "-"}
                     </div>
 				</td>
 				<td>
@@ -1599,7 +1606,7 @@ $(document).ready(function() {
 			submittedAt               = false,
 			createdAt                 = false,
 		} = data && data[0];
-
+		console.log(readOnly);
 		let requestServiceItems = "";
 		if (serviceRequisitionID && serviceOrderID) {
 			let requestServicesData;
@@ -1607,20 +1614,20 @@ $(document).ready(function() {
 				requestServicesData = getTableData(
 					`ims_request_services_tbl`,
 					``,
-					`serviceRequisitionID = ${serviceRequisitionID} AND serviceOrderID = ${serviceOrderID} AND serviceCompletionID = ${serviceCompletionID} AND serviceCompletionID IS NULL`
+					`serviceRequisitionID = ${serviceRequisitionID} AND serviceOrderID = ${serviceOrderID} AND serviceCompletionID = ${serviceCompletionID}`
 				)
 			} else {
 				requestServicesData = getTableData(
 					`ims_request_services_tbl`,
 					``,
-					`serviceRequisitionID = ${serviceRequisitionID} AND serviceOrderID = ${serviceOrderID} AND serviceCompletionID IS NULL AND serviceCompletionID IS NULL`
+					`serviceRequisitionID = ${serviceRequisitionID} AND serviceOrderID = ${serviceOrderID} AND serviceCompletionID IS NULL`
 				);
 			}
 			requestServicesData.map(item => {
-				requestServiceItems += getServiceRow(item, readOnly && serviceCompletionStatus != 3);
+				requestServiceItems += getServiceRow(item, readOnly);
 			})
 		} else {
-			requestServiceItems += getServiceRow();
+			requestServiceItems += getServiceRow({}, serviceCompletionStatus == 4);
 		}
 
 		let html = `
@@ -1800,7 +1807,6 @@ $(document).ready(function() {
 		formData.append("method", method);
 		formData.append("updatedBy", sessionID);
 
-		console.log(currentStatus);
 		if ((currentStatus == "false" || currentStatus == "0" || currentStatus == "3") && method != "approve") {
 
 			data["employeeID"] = sessionID;
@@ -1889,6 +1895,7 @@ $(document).ready(function() {
 			reviseServiceCompletionID = "",
 			employeeID                = "",
 			clientID                  = "",
+			pctCreatedAt              = new Date,
 			projectID                 = "",
 			serviceOrderID            = "",
 			serviceRequisitionID      = "",
@@ -2485,7 +2492,7 @@ $(document).ready(function() {
 			<button class="btn btn-danger" id="btnRejectConfirmation"
 			serviceCompletionID="${id}"
 			code="${feedback}"><i class="far fa-times-circle"></i> Deny</button>
-			<button class="btn btn-cancel" data-dismiss="modal"><i class="fas fa-ban"></i> Cancel</button>
+			<button class="btn btn-cancel btnCancel px-5 p-2" data-dismiss="modal"><i class="fas fa-ban"></i> Cancel</button>
 		</div>`;
 		$("#modal_service_completion_content").html(html);
 	});

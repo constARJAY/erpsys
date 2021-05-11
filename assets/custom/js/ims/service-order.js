@@ -190,7 +190,6 @@ $(document).ready(function() {
 					{ targets: 9,  width: 200 },
 					{ targets: 10,  width: 80  },
 					{ targets: 11, width: 250 },
-					{ targets: 12, width: 80  },
 				],
 			});
 
@@ -216,7 +215,6 @@ $(document).ready(function() {
 					{ targets: 9,  width: 200 },
 					{ targets: 10,  width: 80  },
 					{ targets: 11, width: 250 },
-					{ targets: 12, width: 80  },
 				],
 			});
 
@@ -331,7 +329,6 @@ $(document).ready(function() {
 					<th>Date Approved</th>
 					<th>Status</th>
 					<th>Remarks</th>
-					<th>Action</th>
 				</tr>
             </thead>
             <tbody>`;
@@ -362,6 +359,8 @@ $(document).ready(function() {
 				dateApproved = moment(dateApproved[dateApproved.length - 1]).format("MMMM DD, YYYY hh:mm:ss A");
 			}
 
+			let btnClass = serviceOrderStatus != 0 ? "btnView" : "btnEdit";
+
 			let button = serviceOrderStatus != 0 ? `
             <button class="btn btn-view w-100 btnView" id="${encryptString(serviceOrderID )}"><i class="fas fa-eye"></i> View</button>` : `
             <button 
@@ -370,7 +369,7 @@ $(document).ready(function() {
                 code="${getFormCode("SO", createdAt, serviceOrderID )}"><i class="fas fa-edit"></i> Edit</button>`;
 
 			html += `
-			<tr>
+			<tr class="${btnClass}" id="${encryptString(serviceOrderID )}">
 				<td>${getFormCode("SO", createdAt, serviceOrderID )}</td>
 				<td>${fullname}</td>
 				<td>${serviceRequisitionID != "0" ? getFormCode("SR", isrtCreatedAt, serviceRequisitionID) : "-"}</td>
@@ -387,9 +386,6 @@ $(document).ready(function() {
 					${getStatusStyle(serviceOrderStatus)}
 				</td>
 				<td>${remarks}</td>
-				<td class="text-center">
-					${button}
-				</td>
 			</tr>`;
 		});
 
@@ -436,7 +432,6 @@ $(document).ready(function() {
                     <th>Date Approved</th>
                     <th>Status</th>
                     <th>Remarks</th>
-                    <th>Action</th>
                 </tr>
             </thead>
             <tbody>`;
@@ -467,6 +462,8 @@ $(document).ready(function() {
 				dateApproved = moment(dateApproved[dateApproved.length - 1]).format("MMMM DD, YYYY hh:mm:ss A");
 			}
 
+			let btnClass = serviceOrderStatus != 0 ? "btnView" : "btnEdit";
+
 			let button = serviceOrderStatus != 0 ? `
             <button class="btn btn-view w-100 btnView" id="${encryptString(serviceOrderID )}"><i class="fas fa-eye"></i> View</button>` : `
             <button 
@@ -475,7 +472,7 @@ $(document).ready(function() {
                 code="${getFormCode("SO", createdAt, serviceOrderID )}"><i class="fas fa-edit"></i> Edit</button>`;
 
 			html += `
-            <tr>
+            <tr class="${btnClass}" id="${encryptString(serviceOrderID )}">
                 <td>${getFormCode("SO", createdAt, serviceOrderID )}</td>
                 <td>${fullname}</td>
 				<td>${serviceRequisitionID != "0" ? getFormCode("SR", isrtCreatedAt, serviceRequisitionID) : "-"}</td>
@@ -492,9 +489,6 @@ $(document).ready(function() {
                     ${getStatusStyle(serviceOrderStatus)}
                 </td>
 				<td>${remarks}</td>
-                <td class="text-center">
-                    ${button}
-                </td>
             </tr>`;
 		});
 
@@ -530,7 +524,7 @@ $(document).ready(function() {
 					// DRAFT
 					button = `
 					<button 
-						class="btn btn-submit" 
+						class="btn btn-submit px-5 p-2"  
 						id="btnSubmit" 
 						serviceOrderID="${serviceOrderID}"
 						code="${getFormCode("P0", createdAt, serviceOrderID)}"
@@ -541,7 +535,7 @@ $(document).ready(function() {
 					if (isRevise) {
 						button += `
 						<button 
-							class="btn btn-cancel" 
+							class="btn btn-cancel btnCancel px-5 p-2" 
 							id="btnCancel"
 							revise="${isRevise}"
 							serviceOrderID="${serviceOrderID}"
@@ -593,7 +587,7 @@ $(document).ready(function() {
 					if (isImCurrentApprover(approversID, approversDate)) {
 						button = `
 						<button 
-							class="btn btn-submit" 
+							class="btn btn-submit px-5 p-2"  
 							id="btnApprove" 
 							serviceOrderID="${encryptString(serviceOrderID)}"
 							code="${getFormCode("P0", createdAt, serviceOrderID)}"><i class="fas fa-paper-plane"></i>
@@ -612,11 +606,11 @@ $(document).ready(function() {
 		} else {
 			button = `
 			<button 
-				class="btn btn-submit" 
+				class="btn btn-submit px-5 p-2"  
 				id="btnSubmit"><i class="fas fa-paper-plane"></i> Submit
 			</button>
 			<button 
-				class="btn btn-cancel" 
+				class="btn btn-cancel btnCancel px-5 p-2" 
 				id="btnCancel"><i class="fas fa-ban"></i> 
 				Cancel
 			</button>`;
@@ -2362,7 +2356,7 @@ $(document).ready(function() {
 			<button class="btn btn-danger" id="btnRejectConfirmation"
 			serviceOrderID="${id}"
 			code="${feedback}"><i class="far fa-times-circle"></i> Deny</button>
-			<button class="btn btn-cancel" data-dismiss="modal"><i class="fas fa-ban"></i> Cancel</button>
+			<button class="btn btn-cancel btnCancel px-5 p-2" data-dismiss="modal"><i class="fas fa-ban"></i> Cancel</button>
 		</div>`;
 		$("#modal_service_order_content").html(html);
 	});

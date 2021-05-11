@@ -180,7 +180,6 @@ $(document).ready(function() {
 					{ targets: 8,  width: 200 },
 					{ targets: 9,  width: 80  },
 					{ targets: 10, width: 250 },
-					{ targets: 11, width: 80  },
 				],
 			});
 
@@ -205,7 +204,6 @@ $(document).ready(function() {
 					{ targets: 8,  width: 200 },
 					{ targets: 9,  width: 80  },
 					{ targets: 10, width: 250 },
-					{ targets: 11, width: 80  },
 				],
 			});
 
@@ -378,7 +376,6 @@ $(document).ready(function() {
                     <th>Date Approved</th>
                     <th>Status</th>
                     <th>Remarks</th>
-                    <th>Action</th>
                 </tr>
             </thead>
             <tbody>`;
@@ -408,6 +405,8 @@ $(document).ready(function() {
 				dateApproved = moment(dateApproved[dateApproved.length - 1]).format("MMMM DD, YYYY hh:mm:ss A");
 			}
 
+			let btnClass = purchaseRequestStatus != 0 ? "btnView" : "btnEdit";
+
 			let button = purchaseRequestStatus != 0 ? `
 			<button class="btn btn-view w-100 btnView" id="${encryptString(purchaseRequestID )}"><i class="fas fa-eye"></i> View</button>` : `
 			<button 
@@ -417,7 +416,7 @@ $(document).ready(function() {
 
 			if (isImCurrentApprover(approversID, approversDate, purchaseRequestStatus) || isAlreadyApproved(approversID, approversDate)) {
 				html += `
-				<tr>
+				<tr class="${btnClass}" id="${encryptString(purchaseRequestID )}">
 					<td>${getFormCode("PR", createdAt, purchaseRequestID )}</td>
 					<td>${fullname}</td>
 					<td>${costEstimateID != 0 ? getFormCode("CE", ceCreatedAt, costEstimateID) : '-'}</td>
@@ -433,9 +432,6 @@ $(document).ready(function() {
 						${getStatusStyle(purchaseRequestStatus)}
 					</td>
 					<td>${remarks}</td>
-					<td class="text-center">
-						${button}
-					</td>
 				</tr>`;
 			}
 		});
@@ -481,7 +477,6 @@ $(document).ready(function() {
                     <th>Date Approved</th>
                     <th>Status</th>
                     <th>Remarks</th>
-                    <th>Action</th>
                 </tr>
             </thead>
             <tbody>`;
@@ -511,6 +506,8 @@ $(document).ready(function() {
 				dateApproved = moment(dateApproved[dateApproved.length - 1]).format("MMMM DD, YYYY hh:mm:ss A");
 			}
 
+			let btnClass = purchaseRequestStatus != 0 ? "btnView" : "btnEdit";
+
 			let button = purchaseRequestStatus != 0 ? `
             <button class="btn btn-view w-100 btnView" id="${encryptString(purchaseRequestID )}"><i class="fas fa-eye"></i> View</button>` : `
             <button 
@@ -519,7 +516,7 @@ $(document).ready(function() {
                 code="${getFormCode("PR", createdAt, purchaseRequestID )}"><i class="fas fa-edit"></i> Edit</button>`;
 
 			html += `
-            <tr>
+            <tr class="${btnClass}" id="${encryptString(purchaseRequestID )}">
                 <td>${getFormCode("PR", createdAt, purchaseRequestID )}</td>
                 <td>${fullname}</td>
                 <td>${costEstimateID != 0 ? getFormCode("CE", ceCreatedAt, costEstimateID) : '-'}</td>
@@ -535,9 +532,6 @@ $(document).ready(function() {
                     ${getStatusStyle(purchaseRequestStatus)}
                 </td>
 				<td>${remarks}</td>
-                <td class="text-center">
-                    ${button}
-                </td>
             </tr>`;
 		});
 
@@ -573,7 +567,7 @@ $(document).ready(function() {
 					// DRAFT
 					button = `
 					<button 
-						class="btn btn-submit" 
+						class="btn btn-submit px-5 p-2"  
 						id="btnSubmit" 
 						purchaseRequestID="${purchaseRequestID}"
 						code="${getFormCode("PR", createdAt, purchaseRequestID)}"
@@ -584,7 +578,7 @@ $(document).ready(function() {
 					if (isRevise) {
 						button += `
 						<button 
-							class="btn btn-cancel" 
+							class="btn btn-cancel btnCancel px-5 p-2" 
 							id="btnCancel"
 							revise="${isRevise}"><i class="fas fa-ban"></i> 
 							Cancel
@@ -620,7 +614,7 @@ $(document).ready(function() {
 					if (!isDocumentRevised(purchaseRequestID)) {
 						button = `
 						<button
-							class="btn btn-cancel"
+							class="btn btn-cancel px-5 p-2"
 							id="btnRevise" 
 							purchaseRequestID="${encryptString(purchaseRequestID)}"
 							code="${getFormCode("PR", createdAt, purchaseRequestID)}"
@@ -634,7 +628,7 @@ $(document).ready(function() {
 					if (isImCurrentApprover(approversID, approversDate)) {
 						button = `
 						<button 
-							class="btn btn-submit" 
+							class="btn btn-submit px-5 p-2"  
 							id="btnApprove" 
 							purchaseRequestID="${encryptString(purchaseRequestID)}"
 							code="${getFormCode("PR", createdAt, purchaseRequestID)}"><i class="fas fa-paper-plane"></i>
@@ -653,11 +647,11 @@ $(document).ready(function() {
 		} else {
 			button = `
 			<button 
-				class="btn btn-submit" 
+				class="btn btn-submit px-5 p-2"  
 				id="btnSubmit"><i class="fas fa-paper-plane"></i> Submit
 			</button>
 			<button 
-				class="btn btn-cancel" 
+				class="btn btn-cancel btnCancel px-5 p-2" 
 				id="btnCancel"><i class="fas fa-ban"></i> 
 				Cancel
 			</button>`;
@@ -874,7 +868,7 @@ $(document).ready(function() {
 			itemName      = "",
 			itemID        = null,
 			itmCreatedAt,
-			quantity      = 1,
+			quantity      = 0,
 			categoryName  = "",
 			unitOfMeasurementID: uom = "",
 			unitCost      = 0,
@@ -1520,7 +1514,7 @@ $(document).ready(function() {
 				$(this).closest("tr").find("[name=quantity], [name=files], [name=remarks]").attr("disabled", "true");
 			} else {
 				let oldQty = $(this).closest("tr").find("[name=quantity]").val();
-				oldQty = oldQty != 0 ? oldQty : 1;
+				oldQty = oldQty != 0 ? oldQty : 0;
 				$(this).closest("tr").find("[name=quantity]").val(oldQty);
 				
 				if ($(this).closest("tr").find("[name=quantity]").attr("ceID") == "true") {
@@ -2033,15 +2027,11 @@ $(document).ready(function() {
 				const unitcost  = +getNonFormattedAmount($("td .unitcost", this).text());	
 				const totalcost = quantity * unitcost;
 				const remarks   = $("td [name=remarks]", this).val()?.trim();	
-				
-				let fileID = "", file = "", fileArr = "", filename = "";
-				if (!ceID && ceID != "null") {
-				
-					fileID    = $("td [name=files]", this).attr("id");
-					file      = $(`#${fileID}`)[0].files[0];
-					fileArr   = file?.name.split(".");
-					filename  = file ? file?.name : "";
-				}
+
+				let fileID   = $("td [name=files]", this).attr("id") || "";
+				let file     = $(`#${fileID}`)?.[0]?.files?.[0];
+				let fileArr  = file?.name?.split(".");
+				let filename = file ? file?.name : "";
 
 				let temp = {
 					itemID, quantity, unitcost, totalcost: totalcost.toFixed(2),
@@ -2063,7 +2053,7 @@ $(document).ready(function() {
 				formData.append(`items[${i}][createdBy]`, sessionID);
 				formData.append(`items[${i}][updatedBy]`, sessionID);
 				if (file) {
-					temp["file"] - file;
+					temp["file"] = file;
 					formData.append(`items[${i}][file]`, file, `${i}.${fileArr[1]}`);
 				} else {
 					const isHadExistingFile = $("td .file .displayfile", this).text().trim().length > 0;
@@ -2332,7 +2322,7 @@ $(document).ready(function() {
 			<button class="btn btn-danger" id="btnRejectConfirmation"
 			purchaseRequestID="${id}"
 			code="${feedback}"><i class="far fa-times-circle"></i> Deny</button>
-			<button class="btn btn-cancel" data-dismiss="modal"><i class="fas fa-ban"></i> Cancel</button>
+			<button class="btn btn-cancel btnCancel px-5 p-2" data-dismiss="modal"><i class="fas fa-ban"></i> Cancel</button>
 		</div>`;
 		$("#modal_purchase_request_content").html(html);
 	});
@@ -2572,11 +2562,13 @@ function savePurchaseRequest(data = null, method = "submit", notificationData = 
 					}, 500);
 				})
 			} else {
-				if (res.dismiss === "cancel") {
-					if (method != "deny") {
-						callback && callback();
-					} else {
-						$("#modal_purchase_request").text().length > 0 && $("#modal_purchase_request").modal("show");
+				if (res.dismiss == "cancel") {
+					if (method != "submit") {
+						if (method != "deny") {
+							callback && callback();
+						} else {
+							$("#modal_purchase_request").text().length > 0 && $("#modal_purchase_request").modal("show");
+						}
 					}
 				} else if (res.isDismissed) {
 					if (method == "deny") {

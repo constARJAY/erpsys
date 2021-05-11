@@ -133,6 +133,17 @@ $(document).ready(function() {
 		return moment(new Date).format("YYYY-MM-DD HH:mm:ss");
 	};
 
+	const bidRecapList = getTableData(
+		`ims_bid_recap_tbl AS ibrt
+			LEFT JOIN pms_project_list_tbl AS pplt ON ibrt.projectID = pplt.projectListID`,
+		"ibrt.*, pplt.projectListClientID AS clientID",
+		`bidRecapStatus = 2`
+	)
+
+	const inventoryVendorList = getTableData(
+		`ims_inventory_vendor_tbl`,
+	)
+
 	const inventoryItemList = getTableData(
 		"ims_inventory_item_tbl LEFT JOIN ims_inventory_category_tbl USING(categoryID)", "itemID, itemCode, itemName, categoryName, unitOfMeasurementID",
 		"itemStatus = 1");
@@ -175,7 +186,6 @@ $(document).ready(function() {
 					{ targets: 8,  width: 200 },
 					{ targets: 9,  width: 80  },
 					{ targets: 10, width: 250 },
-					{ targets: 11, width: 80  },
 				],
 			});
 
@@ -200,7 +210,6 @@ $(document).ready(function() {
 					{ targets: 8,  width: 200 },
 					{ targets: 9,  width: 80  },
 					{ targets: 10, width: 250 },
-					{ targets: 11, width: 80  },
 				],
 			});
 
@@ -373,7 +382,6 @@ $(document).ready(function() {
                     <th>Date Approved</th>
                     <th>Status</th>
                     <th>Remarks</th>
-                    <th>Action</th>
                 </tr>
             </thead>
             <tbody>`;
@@ -402,6 +410,8 @@ $(document).ready(function() {
 				dateApproved = moment(dateApproved[dateApproved.length - 1]).format("MMMM DD, YYYY hh:mm:ss A");
 			}
 
+			let btnClass = purchaseOrderStatus != 0 ? "btnView" : "btnEdit";
+
 			let button = purchaseOrderStatus != 0 ? `
             <button class="btn btn-view w-100 btnView" id="${encryptString(purchaseOrderID )}"><i class="fas fa-eye"></i> View</button>` : `
             <button 
@@ -410,7 +420,7 @@ $(document).ready(function() {
                 code="${getFormCode("PO", createdAt, purchaseOrderID )}"><i class="fas fa-edit"></i> Edit</button>`;
 
 			html += `
-            <tr>
+            <tr class="${btnClass}" id="${encryptString(purchaseOrderID )}">
                 <td>${getFormCode("PO", createdAt, purchaseOrderID )}</td>
                 <td>${fullname}</td>
                 <td>${projectListCode || '-'}</td>
@@ -426,9 +436,6 @@ $(document).ready(function() {
                     ${getStatusStyle(purchaseOrderStatus)}
                 </td>
 				<td>${remarks}</td>
-                <td class="text-center">
-                    ${button}
-                </td>
             </tr>`;
 		});
 
@@ -473,7 +480,6 @@ $(document).ready(function() {
                     <th>Date Approved</th>
                     <th>Status</th>
                     <th>Remarks</th>
-                    <th>Action</th>
                 </tr>
             </thead>
             <tbody>`;
@@ -502,6 +508,8 @@ $(document).ready(function() {
 				dateApproved = moment(dateApproved[dateApproved.length - 1]).format("MMMM DD, YYYY hh:mm:ss A");
 			}
 
+			let btnClass = purchaseOrderStatus != 0 ? "btnView" : "btnEdit";
+
 			let button = purchaseOrderStatus != 0 ? `
             <button class="btn btn-view w-100 btnView" id="${encryptString(purchaseOrderID )}"><i class="fas fa-eye"></i> View</button>` : `
             <button 
@@ -510,7 +518,7 @@ $(document).ready(function() {
                 code="${getFormCode("PO", createdAt, purchaseOrderID )}"><i class="fas fa-edit"></i> Edit</button>`;
 
 			html += `
-            <tr>
+            <tr class="${btnClass}" id="${encryptString(purchaseOrderID )}">
                 <td>${getFormCode("PO", createdAt, purchaseOrderID )}</td>
                 <td>${fullname}</td>
                 <td>${projectListCode || '-'}</td>
@@ -526,9 +534,6 @@ $(document).ready(function() {
                     ${getStatusStyle(purchaseOrderStatus)}
                 </td>
 				<td>${remarks}</td>
-                <td class="text-center">
-                    ${button}
-                </td>
             </tr>`;
 		});
 
@@ -564,7 +569,7 @@ $(document).ready(function() {
 					// DRAFT
 					button = `
 					<button 
-						class="btn btn-submit" 
+						class="btn btn-submit px-5 p-2"  
 						id="btnSubmit" 
 						purchaseOrderID="${purchaseOrderID}"
 						code="${getFormCode("P0", createdAt, purchaseOrderID)}"
@@ -575,7 +580,7 @@ $(document).ready(function() {
 					if (isRevise) {
 						button += `
 						<button 
-							class="btn btn-cancel" 
+							class="btn btn-cancel btnCancel px-5 p-2" 
 							id="btnCancel"
 							revise="${isRevise}"
 							purchaseOrderID="${purchaseOrderID}"
@@ -585,7 +590,7 @@ $(document).ready(function() {
 					} else {
 						button += `
 						<button 
-							class="btn btn-cancel"
+							class="btn btn-cancel px-5 p-2"
 							id="btnCancelForm" 
 							purchaseOrderID="${purchaseOrderID}"
 							code="${getFormCode("P0", createdAt, purchaseOrderID)}"
@@ -627,7 +632,7 @@ $(document).ready(function() {
 					if (isImCurrentApprover(approversID, approversDate)) {
 						button = `
 						<button 
-							class="btn btn-submit" 
+							class="btn btn-submit px-5 p-2"  
 							id="btnApprove" 
 							purchaseOrderID="${encryptString(purchaseOrderID)}"
 							code="${getFormCode("P0", createdAt, purchaseOrderID)}"><i class="fas fa-paper-plane"></i>
@@ -646,11 +651,11 @@ $(document).ready(function() {
 		} else {
 			button = `
 			<button 
-				class="btn btn-submit" 
+				class="btn btn-submit px-5 p-2"  
 				id="btnSubmit"><i class="fas fa-paper-plane"></i> Submit
 			</button>
 			<button 
-				class="btn btn-cancel" 
+				class="btn btn-cancel btnCancel px-5 p-2" 
 				id="btnCancel"><i class="fas fa-ban"></i> 
 				Cancel
 			</button>`;
@@ -658,6 +663,98 @@ $(document).ready(function() {
 		return button;
 	}
 	// ----- END FORM BUTTONS -----
+
+
+	// ----- GET BID RECAP LIST -----
+	function getBidRecapList(id = null, status = 0, display = true) {
+		const createdBRList = getTableData("ims_purchase_order_tbl", "bidRecapID", "purchaseOrderStatus <> 3 AND purchaseOrderStatus <> 4").map(br => br.bidRecapID);
+		let html = ``;
+		if (!status || status == 0) {
+			html += bidRecapList.filter(br => createdBRList.indexOf(br.bidRecapID) == -1 || br.bidRecapID == id).map(br => {
+				return `
+				<option 
+				value     = "${br.bidRecapID}" 
+				brCode    = "${getFormCode("BR", br.createdAt, br.bidRecapID)}"
+				clientID  = "${br.clientID}"
+				projectID = "${br.projectID}"
+				purchaseRequestID = "${br.purchaseRequestID}"
+				reason    = "${br.bidRecapReason}"
+				${br.bidRecapID == id && "selected"}>
+				${getFormCode("BR", br.createdAt, br.bidRecapID)}
+				</option>`;
+			})
+		} else {
+			html += bidRecapList.map(br => {
+				return `
+				<option 
+					value     = "${br.servibrRequisitionID}" 
+					brCode    = "${getFormCode("BR", br.createdAt, br.bidRecapID)}"
+					clientID  = "${br.clientID}"
+					projectID = "${br.projectID}"
+					purchaseRequestID = "${br.purchaseRequestID}"
+					reason    = "${br.bidRecapReason}"
+					${br.bidRecapID == id && "selected"}>
+					${getFormCode("BR", br.createdAt, sr.bidRecapID)}
+				</option>`;
+			})
+		}
+        return display ? html : bidRecapList;
+
+	}
+	// ----- END GET BID RECAP LIST -----
+
+
+	// ----- GET INVENTORY VENDOR ON BID RECAP -----
+	function getInventoryVendorOnBidRecap(bidRecapID = null, inventoryVendorID = null) {
+		let html = `<option selected disabled>Select Vendor Code</option>`;
+		if (bidRecapID) {
+			let vendorTable = getTableData(
+				`ims_request_items_tbl AS irit
+					LEFT JOIN ims_inventory_vendor_tbl AS iivt USING(inventoryVendorID)
+				WHERE
+					bidRecapID = ${bidRecapID}
+					GROUP BY irit.inventoryVendorID`,
+				`iivt.*`
+			);
+			if (vendorTable.length > 0) {
+				vendorTable.map(vendor => {
+					const { 
+						inventoryVendorID,
+						inventoryVendorName, 
+						inventoryVendorVAT = 0, 
+						inventoryVendorProvince,
+						inventoryVendorCity,
+						inventoryVendorBarangay,
+						inventoryVendorUnit,
+						inventoryVendorBuilding,
+						inventoryVendorCountry,
+						inventoryVendorZipCode,
+						inventoryVendorPerson,
+						inventoryVendorMobile,
+						inventoryVendorTelephone,
+						createdAt 
+					} = vendor;
+
+					if (inventoryVendorID && inventoryVendorID != "null") {
+						let address = `${inventoryVendorUnit && titleCase(inventoryVendorUnit)+", "}${inventoryVendorBuilding && inventoryVendorBuilding +", "}${inventoryVendorBarangay && titleCase(inventoryVendorBarangay)+", "}${inventoryVendorCity && titleCase(inventoryVendorCity)+", "}${inventoryVendorProvince && titleCase(inventoryVendorProvince)+", "}${inventoryVendorCountry && titleCase(inventoryVendorCountry)+", "}${inventoryVendorZipCode && titleCase(inventoryVendorZipCode)}`;
+						let vendorContactDetails = `${inventoryVendorMobile} - ${inventoryVendorTelephone}`;
+
+						html += `<option 
+							value="${inventoryVendorID}"
+							vendorName="${inventoryVendorName || "-"}"
+							vendorAddress="${address || "-"}"
+							vendorContactPerson="${inventoryVendorPerson || "-"}"
+							vendorContactDetails="${vendorContactDetails}"
+							vatable="${inventoryVendorVAT == 1 ? true : false}">
+							${getFormCode("VEN", createdAt, inventoryVendorID)}
+						</option>`
+					}
+				})
+			}
+		}
+		return html;
+	}
+	// ----- END GET INVENTORY VENDOR ON BID RECAP -----
 
 
 	// ----- GET PROJECT LIST -----
@@ -789,23 +886,25 @@ $(document).ready(function() {
     function getItemRow(isProject = true, item = {}, readOnly = false) {
 		const attr = isProject ? `project="true"` : `company="true"`;
 		let {
-			itemCode     = "",
-			itemName     = "",
-			itemID       = null,
-			quantity     = 1,
-			categoryName = "",
+			requestItemID = "",
+			itemCode      = "",
+			itemName      = "",
+			itemID        = null,
+			forPurchase   = 0,
+			categoryName  = "",
 			unitOfMeasurementID: uom = "",
-			unitCost     = 0,
-			totalCost    = 0,
-			files        = "",
-			remarks      = ""
+			unitCost      = 0,
+			totalCost     = 0,
+			files         = "",
+			remarks       = ""
 		} = item;
 
 		let html = "";
 		if (readOnly) {
 			const itemFIle = files ? `<a href="${base_url+"assets/upload-files/request-items/"+files}" target="_blank">${files}</a>` : `-`;
 			html += `
-			<tr class="itemTableRow">
+			<tr class="itemTableRow"
+				requestItemID="${requestItemID}">
 				<td>
 					<div class="itemcode">
 						${itemCode || "-"}
@@ -817,8 +916,8 @@ $(document).ready(function() {
 					</div>
 				</td>
 				<td class="text-center">
-					<div class="quantity">
-						${quantity}
+					<div class="forPurchase">
+						${forPurchase}
 					</div>
 				</td>
 				<td>
@@ -863,7 +962,8 @@ $(document).ready(function() {
 				<span class="btnRemoveFile" style="cursor: pointer"><i class="fas fa-close"></i></span>
 			</div>` : "-";
 			html += `
-			<tr class="itemTableRow">
+			<tr class="itemTableRow"
+				requestItemID="${requestItemID}">
 				<td>
 					<div class="itemcode">-</div>
 				</td>
@@ -885,20 +985,20 @@ $(document).ready(function() {
 					</div>
 				</td>
 				<td class="text-center">
-					<div class="quantity">
+					<div class="forPurchase">
 						<input 
 							type="text" 
 							class="form-control validate number text-center"
 							min="1" 
 							data-allowcharacters="[0-9]" 
 							max="999999999" 
-							id="quantity" 
-							name="quantity" 
-							value="${quantity}" 
+							id="forPurchase" 
+							name="forPurchase" 
+							value="${forPurchase}" 
 							minlength="1" 
 							maxlength="20" 
 							requred>
-						<div class="invalid-feedback d-block" id="invalid-quantity"></div>
+						<div class="invalid-feedback d-block" id="invalid-forPurchase"></div>
 					</div>
 				</td>
 				<td>
@@ -1112,6 +1212,392 @@ $(document).ready(function() {
 	// ----- END DELETE TABLE ROW -----
 
 
+	// ----- GET CATEGORY TYPE TABLE -----
+	function getCategoryTypeTable(data = false, readOnly = false, isRevise = false) {
+
+		let {
+			purchaseOrderID       = "",
+			bidRecapID            = "",
+			inventoryVendorID     = "",
+			total                 = 0,
+			discount              = 0,
+			totalAmount           = 0,
+			vatSales              = 0,
+			vat                   = 0,
+			totalVat              = 0,
+			lessEwt               = 0,
+			grandTotalAmount      = 0,
+			categoryType          = "",
+		} = data && data[0];
+
+		let disabled = readOnly ? "disabled" : "";
+		let requestProjectItems = "", requestCompanyItems = "";
+
+		if (bidRecapID && inventoryVendorID) {
+			if (purchaseOrderID) {
+				where = `purchaseOrderID = ${purchaseOrderID} AND bidRecapID = ${bidRecapID} AND inventoryVendorID = ${inventoryVendorID}`;
+			} else {
+				where = `purchaseOrderID IS NULL AND bidRecapID = ${bidRecapID} AND inventoryVendorID = ${inventoryVendorID}`;
+			}
+			let requestItemsData = getTableData(
+				`ims_request_items_tbl 
+					LEFT JOIN ims_inventory_item_tbl USING(itemID) 
+					LEFT JOIN ims_inventory_category_tbl USING(categoryID)`, 
+				`requestItemID, quantity, unitCost, totalCost, files, remarks, itemID, itemCode, ims_request_items_tbl.itemName, categoryName, itemUom AS unitOfMeasurementID, categoryType, forPurchase`, 
+				`${where}`);
+			let projectTotalCost = 0, companyTotalCost = 0;
+			requestItemsData.filter(item => item.categoryType == "project").map(item => {
+				requestProjectItems += getItemRow(true, item, !isRevise);
+				// THIS IS FOR CREATION OF P.O.
+				const totalCost = +item.totalCost || 0;
+				projectTotalCost += totalCost;
+			})
+			requestItemsData.filter(item => item.categoryType == "company").map(item => {
+				requestCompanyItems += getItemRow(false, item, !isRevise);
+				// THIS IS FOR CREATION OF P.O.
+				const totalCost = +item.totalCost || 0;
+				companyTotalCost += totalCost;
+			})
+
+			if (total == 0) {
+				total       = categoryType == "project" ? projectTotalCost : companyTotalCost;
+				discount    = 0;
+				totalAmount = total - discount;
+				const vatable = $(`[name="inventoryVendorID"] option:selected`).attr("vatable") == "true";
+				vat      = vatable ? totalAmount * 0.12 : 0;
+				vatSales = totalAmount - vat;
+				totalVat = vat + vatSales;
+				lessEwt  = totalVat * 0.01;
+				grandTotalAmount = totalVat - lessEwt;
+			}
+
+		} else {
+			requestProjectItems += getItemRow(true);
+			requestCompanyItems += getItemRow(false);
+		}
+
+		let html = "";
+		if (categoryType == "project") {
+			html += `
+			<div class="w-100">
+				<hr class="pb-1">
+				<div class="text-primary font-weight-bold" style="font-size: 1.5rem;">Project Materials and Equipment</div>
+				<table class="table table-striped" id="tableProjectOrderItems0">
+					<thead>
+						<tr style="white-space: nowrap">
+							<th>Item Code</th>
+							<th>Item Name</th>
+							<th>Quantity</th>
+							<th>Category</th>
+							<th>UOM</th>
+							<th>Unit Cost</th>
+							<th>Total Cost</th>
+							<th>File</th>
+							<th>Remarks</th>
+						</tr>
+					</thead>
+					<tbody class="itemProjectTableBody" project="true">
+						${requestProjectItems}
+					</tbody>
+				</table>
+				
+				<div class="row py-2">
+					<div class="offset-md-8 col-md-4 col-sm-12 pt-3 pb-2">
+						<div class="row" style="font-size: 1.1rem; font-weight:bold">
+							<div class="col-6 text-right">Total :</div>
+							<div class="col-6 text-right text-danger"
+								project="true"
+								style="font-size: 1.05em"
+								id="total">
+								${formatAmount(total, true)}
+							</div>
+						</div>
+						<div class="row" style="font-size: 1.1rem; font-weight:bold">
+							<div class="col-6 text-right">Discount :</div>
+							<div class="col-6 text-right"
+								project="true">
+								<input 
+									type="text" 
+									class="form-control-plaintext amount py-0 text-danger border-bottom font-weight-bold"
+									min="0" 
+									max="9999999999"
+									minlength="1"
+									maxlength="20" 
+									name="discount" 
+									id="discount" 
+									style="font-size: 1.02em;"
+									value="${discount}"
+									${disabled}>
+							</div>
+						</div>
+						<div class="row" style="font-size: 1.1rem; font-weight:bold">
+							<div class="col-6 text-right">Total Amount:</div>
+							<div class="col-6 text-right text-danger"
+								project="true"
+								id="totalAmount"
+								style="font-size: 1.05em">
+								${formatAmount(totalAmount, true)}
+							</div>
+						</div>
+						<div class="row" style="font-size: 1.1rem; font-weight:bold">
+							<div class="col-6 text-right">Vatable Sales:</div>
+							<div class="col-6 text-right text-danger"
+								project="true"
+								id="vatSales"
+								style="font-size: 1.05em">
+								${formatAmount(vatSales, true)}
+							</div>
+						</div>
+						<div class="row" style="font-size: 1.1rem; font-weight:bold">
+							<div class="col-6 text-right">Vat 12%:</div>
+							<div class="col-6 text-right"
+								project="true">
+								<input 
+									type="text" 
+									class="form-control-plaintext amount py-0 text-danger border-bottom font-weight-bold"
+									min="0" 
+									max="9999999999"
+									minlength="1"
+									maxlength="20" 
+									name="vat" 
+									id="vat" 
+									style="font-size: 1.02em;"
+									value="${vat}"
+									readonly>
+							</div>
+						</div>
+						<div class="row" style="font-size: 1.1rem; font-weight:bold">
+							<div class="col-6 text-right">Total:</div>
+							<div class="col-6 text-right text-danger"
+								project="true"
+								id="totalVat"
+								style="font-size: 1.05em">
+								${formatAmount(totalVat, true)}
+							</div>
+						</div>
+						<div class="row" style="font-size: 1.1rem; font-weight:bold">
+							<div class="col-6 text-right">Less EWT:</div>
+							<div class="col-6 text-right"
+								project="true">
+								<input 
+									type="text" 
+									class="form-control-plaintext amount py-0 text-danger border-bottom font-weight-bold"
+									min="0" 
+									max="9999999999"
+									minlength="1"
+									maxlength="20" 
+									name="lessEwt" 
+									id="lessEwt" 
+									style="font-size: 1.02em;"
+									value="${lessEwt}"
+									${disabled}>
+							</div>
+						</div>
+						<div class="row" style="font-size: 1.1rem; font-weight:bold">
+							<div class="col-6 text-right">Grand Total:</div>
+							<div class="col-6 text-right text-danger"
+								project="true"
+								id="grandTotalAmount"
+								style="font-size: 1.3em">
+								${formatAmount(grandTotalAmount, true)}
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>`;
+		} else if (categoryType == "company") {
+			html += `
+			<div class="w-100">
+				<hr class="pb-1">
+				<div class="text-primary font-weight-bold" style="font-size: 1.5rem;">Company Materials and Equipment</div>
+				<table class="table table-striped" id="tableCompanyOrderItems0">
+					<thead>
+						<tr style="white-space: nowrap">
+							<th>Item Code</th>
+							<th>Item Name</th>
+							<th>Quantity</th>
+							<th>Category</th>
+							<th>UOM</th>
+							<th>Unit Cost</th>
+							<th>Total Cost</th>
+							<th>File</th>
+							<th>Remarks</th>
+						</tr>
+					</thead>
+					<tbody class="itemCompanyTableBody" company="true">
+						${requestCompanyItems}
+					</tbody>
+				</table>
+				
+				<div class="row py-2">
+					<div class="offset-md-8 col-md-4 col-sm-12 pt-3 pb-2">
+						<div class="row" style="font-size: 1.1rem; font-weight:bold">
+							<div class="col-6 text-right">Total :</div>
+							<div class="col-6 text-right text-danger"
+								project="true"
+								style="font-size: 1.05em"
+								id="total">
+								${formatAmount(total, true)}
+							</div>
+						</div>
+						<div class="row" style="font-size: 1.1rem; font-weight:bold">
+							<div class="col-6 text-right">Discount :</div>
+							<div class="col-6 text-right"
+								project="true">
+								<input 
+									type="text" 
+									class="form-control-plaintext amount py-0 text-danger border-bottom font-weight-bold"
+									min="0" 
+									max="9999999999"
+									minlength="1"
+									maxlength="20" 
+									name="discount" 
+									id="discount" 
+									style="font-size: 1.02em;"
+									value="${discount}"
+									${disabled}>
+							</div>
+						</div>
+						<div class="row" style="font-size: 1.1rem; font-weight:bold">
+							<div class="col-6 text-right">Total Amount:</div>
+							<div class="col-6 text-right text-danger"
+								project="true"
+								id="totalAmount"
+								style="font-size: 1.05em">
+								${formatAmount(totalAmount, true)}
+							</div>
+						</div>
+						<div class="row" style="font-size: 1.1rem; font-weight:bold">
+							<div class="col-6 text-right">Vatable Sales:</div>
+							<div class="col-6 text-right text-danger"
+								project="true"
+								id="vatSales"
+								style="font-size: 1.05em">
+								${formatAmount(vatSales, true)}
+							</div>
+						</div>
+						<div class="row" style="font-size: 1.1rem; font-weight:bold">
+							<div class="col-6 text-right">Vat 12%:</div>
+							<div class="col-6 text-right"
+								project="true">
+								<input 
+									type="text" 
+									class="form-control-plaintext amount py-0 text-danger border-bottom font-weight-bold"
+									min="0" 
+									max="9999999999"
+									minlength="1"
+									maxlength="20" 
+									name="vat" 
+									id="vat" 
+									style="font-size: 1.02em;"
+									value="${vat}"
+									readonly>
+							</div>
+						</div>
+						<div class="row" style="font-size: 1.1rem; font-weight:bold">
+							<div class="col-6 text-right">Total:</div>
+							<div class="col-6 text-right text-danger"
+								project="true"
+								id="totalVat"
+								style="font-size: 1.05em">
+								${formatAmount(totalVat, true)}
+							</div>
+						</div>
+						<div class="row" style="font-size: 1.1rem; font-weight:bold">
+							<div class="col-6 text-right">Less EWT:</div>
+							<div class="col-6 text-right"
+								project="true">
+								<input 
+									type="text" 
+									class="form-control-plaintext amount py-0 text-danger border-bottom font-weight-bold"
+									min="0" 
+									max="9999999999"
+									minlength="1"
+									maxlength="20" 
+									name="lessEwt" 
+									id="lessEwt" 
+									style="font-size: 1.02em;"
+									value="${lessEwt}"
+									${disabled}>
+							</div>
+						</div>
+						<div class="row" style="font-size: 1.1rem; font-weight:bold">
+							<div class="col-6 text-right">Grand Total:</div>
+							<div class="col-6 text-right text-danger"
+								project="true"
+								id="grandTotalAmount"
+								style="font-size: 1.05em">
+								${formatAmount(grandTotalAmount, true)}
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>`;
+		}
+		return html;
+	}
+	// ----- END GET CATEGORY TYPE TABLE -----
+
+
+	// ----- GET CATEGORY VALUE -----
+	function getCategoryValue() {
+		const bidRecapID        = $(`[name="bidRecapID"]`).val();
+		const inventoryVendorID = $(`[name="inventoryVendorID"]`).val();
+		const categoryType      = $(`[name="categoryType"]`).val();
+		const table = getCategoryTypeTable([{bidRecapID, inventoryVendorID, categoryType}]);
+		
+		if (bidRecapID && inventoryVendorID && categoryType) {
+			$("#tableRequestItems").html(preloader);
+			setTimeout(() => {
+				$("#tableRequestItems").html(table);
+				initDataTables();
+				updateTableItems();
+				updateInventoryItemOptions();
+				initAmount("#discount", true);
+				initAmount("#lessEwt", true);
+				initAmount("#vat", true);
+			}, 500);
+		}
+	}
+	// ----- END GET CATEGORY VALUE -----
+
+
+	// ----- SELECT REFERENCE NO. -----
+	$(document).on("change", `[name="bidRecapID"]`, function() {
+		const bidRecapID = $(this).val();
+		const projectID = $("option:selected", this).attr("projectID");
+		$(`[name="projectID"]`).val(projectID).trigger("change");
+
+		const vendors = getInventoryVendorOnBidRecap(bidRecapID);
+		$(`[name="inventoryVendorID"]`).html(vendors);
+		getCategoryValue();
+	})
+	// ----- END SELECT REFERENCE NO. -----
+
+
+	// ----- SELECT VENDOR CODE -----
+	$(document).on("change", `[name="inventoryVendorID"]`, function() {
+		const vendorName           = $(`option:selected`, this).attr("vendorName");
+		const vendorAddress        = $(`option:selected`, this).attr("vendorAddress");
+		const vendorContactPerson  = $(`option:selected`, this).attr("vendorContactPerson");
+		const vendorContactDetails = $(`option:selected`, this).attr("vendorContactDetails");
+
+		$(`[name="vendorName"]`).val(vendorName);
+		$(`[name="vendorAddress"]`).val(vendorAddress);
+		$(`[name="vendorContactPerson"]`).val(vendorContactPerson);
+		$(`[name="vendorContactDetails"]`).val(vendorContactDetails);
+		getCategoryValue();
+	})
+	// ----- END SELECT VENDOR CODE -----
+
+
+	// ----- SELECT CATEGORY TYPE -----
+	$(document).on("change", `[name="categoryType"]`, function() {
+		getCategoryValue();
+	})
+	// ----- END SELECT CATEGORY TYPE -----
+
+
 	// ----- SELECT PROJECT LIST -----
     $(document).on("change", "[name=projectID]", function() {
         const projectCode = $('option:selected', this).attr("projectCode");
@@ -1252,7 +1738,7 @@ $(document).ready(function() {
 
 	// ----- GET AMOUNT -----
 	const getNonFormattedAmount = (amount = "₱0.00") => {
-		return +amount.replaceAll(",", "").replace("₱", "");
+		return +amount.replaceAll(",", "").replace("₱", "")?.trim();
 	}
 	// ----- END GET AMOUNT -----
 
@@ -1382,9 +1868,21 @@ $(document).ready(function() {
 		data["method"]    = method;
 		data["updatedBy"] = sessionID;
 
-		if (currentStatus == "0" && method != "approve") {
+		if ((currentStatus == "false" || currentStatus == "0" || currentStatus == "3") && method != "approve") {
+
+			data["employeeID"]       = sessionID;
+			data["bidRecapID"]       = $("[name=bidRecapID]").val();
+			data["purchaseRequestID"] = $(`[name="bidRecapID"] option:selected`).attr("purchaseRequestID");
+			data["categoryType"]     = $("[name=categoryType]").val();
+			data["inventoryVendorID"] = $("[name=inventoryVendorID]").val();
+			
+			data["vendorName"]           = $("[name=vendorName]").val();
+			data["vendorContactDetails"] = $("[name=vendorContactDetails]").val();
+			data["vendorContactPerson"]  = $("[name=vendorContactPerson]").val();
+			data["vendorAddress"]        = $("[name=vendorAddress]").val();
 
 			data["paymentTerms"]     = $("[name=paymentTerms]").val()?.trim();
+			data["purchaseOrderReason"] = $("[name=purchaseOrderReason]").val()?.trim();
 			data["deliveryDate"]     = moment($("[name=deliveryDate]").val()).format("YYYY-MM-DD");
 			data["total"]            = getNonFormattedAmount($("#total").text());
 			data["discount"]         = getNonFormattedAmount($("#discount").val());
@@ -1415,21 +1913,26 @@ $(document).ready(function() {
 				}
 			}
 
-			if (isRevise) {
+			// if (isRevise) {
 				$(".itemTableRow").each(function(i, obj) {
 					const categoryType = $(this).closest("tbody").attr("project") == "true" ? "project" : "company";
+
+					const requestItemID = $(this).attr("requestItemID");
 	
-					const itemID    = $("td [name=itemID]", this).val();	
-					const quantity  = +$("td [name=quantity]", this).val();	
-					const unitcost  = +$("td [name=unitCost]", this).val().replaceAll(",", "");	
-					const totalcost = quantity * unitcost;
-					const remarks   = $("td [name=remarks]", this).val()?.trim();	
+					const itemID      = $("td [name=itemID]", this).val();	
+					const forPurchase = +$("td [name=forPurchase]", this).val() || +getNonFormattedAmount($("td .forPurchase", this).text());	
+					
+					// const unitcost  = +$("td [name=unitCost]", this).val().replaceAll(",", "");	
+					const unitCost  = +getNonFormattedAmount($("td .unitcost", this).text());
+					const totalCost = forPurchase * unitCost;
+					const remarks   = $("td [name=remarks]", this).val()?.trim() || $("td .remarks", this).text()?.trim();	
 	
 					let temp = {
+						requestItemID,
 						itemID, 
-						quantity, 
-						unitcost, 
-						totalcost: totalcost.toFixed(2),
+						forPurchase, 
+						unitCost, 
+						totalCost: totalCost.toFixed(2),
 						categoryType, 
 						remarks, 
 						createdBy: sessionID, 
@@ -1444,7 +1947,7 @@ $(document).ready(function() {
 					}
 					data["items"].push(temp);
 				});
-			}
+			// }
 		} 
 
 		return data;
@@ -1455,8 +1958,7 @@ $(document).ready(function() {
     // ----- FORM CONTENT -----
 	function formContent(data = false, readOnly = false, isRevise = false) {
 		$("#page_content").html(preloader);
-		readOnly     = isRevise ? false : readOnly;
-		let disabled = readOnly ? "disabled" : "";
+		readOnly = isRevise ? false : readOnly;
 
 		let {
 			purchaseOrderID       = "",
@@ -1464,13 +1966,14 @@ $(document).ready(function() {
 			employeeID            = "",
 			projectID             = "",
 			bidRecapID            = "",
+			inventoryVendorID     = "",
 			vendorName            = "",
 			vendorAddress         = "",
 			vendorContactDetails  = "",
 			vendorContactPerson   = "",
 			paymentTerms          = "",
 			deliveryDate          = "",
-			purchaseRequestReason = "",
+			purchaseOrderReason   = "",
 			total                 = 0,
 			discount              = 0,
 			totalAmount           = 0,
@@ -1490,22 +1993,7 @@ $(document).ready(function() {
 			createdAt             = false,
 		} = data && data[0];
 
-		let requestProjectItems = "", requestCompanyItems = "";
-		if (purchaseOrderID) {
-			let requestItemsData = getTableData(
-				`ims_request_items_tbl LEFT JOIN ims_inventory_item_tbl USING(itemID) LEFT JOIN ims_inventory_category_tbl USING(categoryID)`, 
-				`quantity, unitCost, totalCost, files, remarks, itemID, itemCode, ims_request_items_tbl.itemName, categoryName, itemUom AS unitOfMeasurementID, categoryType`, 
-				`purchaseOrderID = ${purchaseOrderID}`);
-			requestItemsData.filter(item => item.categoryType == "project").map(item => {
-				requestProjectItems += getItemRow(true, item, !isRevise);
-			})
-			requestItemsData.filter(item => item.categoryType == "company").map(item => {
-				requestCompanyItems += getItemRow(false, item, !isRevise);
-			})
-		} else {
-			requestProjectItems += getItemRow(true);
-			requestCompanyItems += getItemRow(false);
-		}
+		
 
 		// ----- GET EMPLOYEE DATA -----
 		let {
@@ -1516,6 +2004,9 @@ $(document).ready(function() {
 		// ----- END GET EMPLOYEE DATA -----
 
 		readOnly ? preventRefresh(false) : preventRefresh(true);
+
+		let disabled = readOnly ? "disabled" : "";
+		let disabledReference = bidRecapID && bidRecapID != "0" ? "disabled" : disabled;
 
 		$("#btnBack").attr("purchaseOrderID", purchaseOrderID);
 		$("#btnBack").attr("status", purchaseOrderStatus);
@@ -1647,6 +2138,53 @@ $(document).ready(function() {
 
         <div class="row" id="form_purchase_order">
 
+			<div class="col-md-4 col-sm-12">
+				<div class="form-group">
+					<label>Reference No. ${!disabledReference ? "<code>*</code>" : ""}</label>
+					<select class="form-control validate select2"
+						name="bidRecapID"
+						id="bidRecapID"
+						style="width: 100%"
+						required
+						${disabledReference}>
+						<option selected disabled>Select Reference No.</option>
+						${getBidRecapList(bidRecapID, purchaseOrderStatus)}
+					</select>
+					<div class="d-block invalid-feedback" id="invalid-bidRecapID"></div>
+				</div>
+			</div>
+			<div class="col-md-4 col-sm-12">
+				<div class="form-group">
+					<label>Vendor Code ${!disabledReference ? "<code>*</code>" : ""}</label>
+					<select class="form-control validate select2"
+						name="inventoryVendorID"
+						id="inventoryVendorID"
+						style="width: 100%"
+						required
+						${disabledReference}>
+						${getInventoryVendorOnBidRecap(bidRecapID, inventoryVendorID)}
+					</select>
+					<div class="d-block invalid-feedback" id="invalid-inventoryVendorID"></div>
+				</div>
+			</div>
+			<div class="col-md-4 col-sm-12">
+				<div class="form-group">
+					<label>Category Type ${!disabledReference ? "<code>*</code>" : ""}</label>
+					<select class="form-control validate select2"
+						name="categoryType"
+						id="categoryType"
+						style="width: 100%"
+						required
+						${disabledReference}>
+						<option selected disabled>Select Category Type</option>
+						<option value="project">Project</option>
+						<option value="company">Company</option>
+					</select>
+					<div class="d-block invalid-feedback" id="invalid-categoryType"></div>
+				</div>
+			</div>
+
+
             <div class="col-md-4 col-sm-12">
                 <div class="form-group">
                     <label>Project Code</label>
@@ -1662,7 +2200,7 @@ $(document).ready(function() {
                         style="width: 100%"
                         required
 						disabled>
-                        <option selected disabled>Select Project Name</option>
+                        <option selected disabled>-</option>
                         ${getProjectList(projectID)}
                     </select>
                     <div class="d-block invalid-feedback" id="invalid-projectID"></div>
@@ -1692,13 +2230,7 @@ $(document).ready(function() {
                     <input type="text" class="form-control" name="vendorName" disabled value="${vendorName || "-"}">
                 </div>
             </div>
-            <div class="col-md-8 col-sm-12">
-                <div class="form-group">
-                    <label>Company Address</label>
-                    <input type="text" class="form-control" name="vendorAddress" disabled value="${vendorAddress || "-"}">
-                </div>
-            </div>
-            <div class="col-md-4 col-sm-12">
+			<div class="col-md-4 col-sm-12">
                 <div class="form-group">
                     <label>Contact Details</label>
                     <input type="text" class="form-control" name="vendorContactDetails" disabled value="${vendorContactDetails || "-"}">
@@ -1710,12 +2242,13 @@ $(document).ready(function() {
                     <input type="text" class="form-control" name="vendorContactPerson" disabled value="${vendorContactPerson || "-"}">
                 </div>
             </div>
-            <div class="col-md-4 col-sm-12">
+            <div class="col-md-12 col-sm-12">
                 <div class="form-group">
-                    <label>Reference No.</label>
-                    <input type="text" class="form-control" name="bidRecapID" disabled value="${bidRecapID ? getFormCode("BR", createdAt, bidRecapID) : "-"}">
+                    <label>Company Address</label>
+                    <input type="text" class="form-control" name="vendorAddress" disabled value="${vendorAddress || "-"}">
                 </div>
             </div>
+            
             <div class="col-md-6 col-sm-12">
                 <div class="form-group">
                     <label>Payment Terms <code>*</code></label>
@@ -1765,7 +2298,7 @@ $(document).ready(function() {
             </div>
             <div class="col-md-12 col-sm-12">
                 <div class="form-group">
-                    <label>Reason</label>
+                    <label>Reason <code>*</code></label>
                     <textarea class="form-control validate"
                         data-allowcharacters="[a-z][A-Z][0-9][ ][.][,][-][()]['][/][&]"
                         minlength="1"
@@ -1774,271 +2307,12 @@ $(document).ready(function() {
                         name="purchaseOrderReason"
                         required
                         rows="4"
-                        style="resize:none;"
-						disabled>${purchaseRequestReason}</textarea>
+                        style="resize:none;">${purchaseOrderReason}</textarea>
                     <div class="d-block invalid-feedback" id="invalid-purchaseOrderReason"></div>
                 </div>
             </div>
-			<div class="col-sm-12">`;
-			if (categoryType == "project") {
-				html += `
-				<div class="w-100">
-					<hr class="pb-1">
-					<div class="text-primary font-weight-bold" style="font-size: 1.5rem;">Project Materials and Equipment</div>
-                    <table class="table table-striped" id="tableProjectOrderItems0">
-                        <thead>
-                            <tr style="white-space: nowrap">
-                                <th>Item Code</th>
-                                <th>Item Name</th>
-                                <th>Quantity</th>
-                                <th>Category</th>
-                                <th>UOM</th>
-                                <th>Unit Cost</th>
-                                <th>Total Cost</th>
-                                <th>File</th>
-                                <th>Remarks</th>
-                            </tr>
-                        </thead>
-                        <tbody class="itemProjectTableBody" project="true">
-                            ${requestProjectItems}
-                        </tbody>
-                    </table>
-                    
-					<div class="row py-2">
-						<div class="offset-md-8 col-md-4 col-sm-12 pt-3 pb-2">
-							<div class="row" style="font-size: 1.1rem; font-weight:bold">
-								<div class="col-6 text-right">Total :</div>
-								<div class="col-6 text-right text-danger"
-									project="true"
-									style="font-size: 1.05em"
-									id="total">
-									${formatAmount(total, true)}
-								</div>
-							</div>
-							<div class="row" style="font-size: 1.1rem; font-weight:bold">
-								<div class="col-6 text-right">Discount :</div>
-								<div class="col-6 text-right"
-									project="true">
-									<input 
-										type="text" 
-										class="form-control-plaintext amount py-0 text-danger border-bottom font-weight-bold"
-										min="0" 
-										max="9999999999"
-										minlength="1"
-										maxlength="20" 
-										name="discount" 
-										id="discount" 
-										style="font-size: 1.02em;"
-										value="${discount}"
-										${disabled}>
-								</div>
-							</div>
-							<div class="row" style="font-size: 1.1rem; font-weight:bold">
-								<div class="col-6 text-right">Total Amount:</div>
-								<div class="col-6 text-right text-danger"
-									project="true"
-									id="totalAmount"
-									style="font-size: 1.05em">
-									${formatAmount(totalAmount, true)}
-								</div>
-							</div>
-							<div class="row" style="font-size: 1.1rem; font-weight:bold">
-								<div class="col-6 text-right">Vatable Sales:</div>
-								<div class="col-6 text-right text-danger"
-									project="true"
-									id="vatSales"
-									style="font-size: 1.05em">
-									${formatAmount(vatSales, true)}
-								</div>
-							</div>
-							<div class="row" style="font-size: 1.1rem; font-weight:bold">
-								<div class="col-6 text-right">Vat 12%:</div>
-								<div class="col-6 text-right"
-									project="true">
-									<input 
-										type="text" 
-										class="form-control-plaintext amount py-0 text-danger border-bottom font-weight-bold"
-										min="0" 
-										max="9999999999"
-										minlength="1"
-										maxlength="20" 
-										name="vat" 
-										id="vat" 
-										style="font-size: 1.02em;"
-										value="${vat}"
-										${disabled}>
-								</div>
-							</div>
-							<div class="row" style="font-size: 1.1rem; font-weight:bold">
-								<div class="col-6 text-right">Total:</div>
-								<div class="col-6 text-right text-danger"
-									project="true"
-									id="totalVat"
-									style="font-size: 1.05em">
-									${formatAmount(totalVat, true)}
-								</div>
-							</div>
-							<div class="row" style="font-size: 1.1rem; font-weight:bold">
-								<div class="col-6 text-right">Less EWT:</div>
-								<div class="col-6 text-right"
-									project="true">
-									<input 
-										type="text" 
-										class="form-control-plaintext amount py-0 text-danger border-bottom font-weight-bold"
-										min="0" 
-										max="9999999999"
-										minlength="1"
-										maxlength="20" 
-										name="lessEwt" 
-										id="lessEwt" 
-										style="font-size: 1.02em;"
-										value="${lessEwt}"
-										${disabled}>
-								</div>
-							</div>
-							<div class="row" style="font-size: 1.1rem; font-weight:bold">
-								<div class="col-6 text-right">Grand Total:</div>
-								<div class="col-6 text-right text-danger"
-									project="true"
-									id="grandTotalAmount"
-									style="font-size: 1.3em">
-									${formatAmount(grandTotalAmount, true)}
-								</div>
-							</div>
-						</div>
-					</div>
-                </div>`;
-			} else if (categoryType == "company") {
-				html += `
-				<div class="w-100">
-					<hr class="pb-1">
-					<div class="text-primary font-weight-bold" style="font-size: 1.5rem;">Company Materials and Equipment</div>
-                    <table class="table table-striped" id="tableCompanyOrderItems0">
-                        <thead>
-                            <tr style="white-space: nowrap">
-                                <th>Item Code</th>
-                                <th>Item Name</th>
-                                <th>Quantity</th>
-                                <th>Category</th>
-                                <th>UOM</th>
-                                <th>Unit Cost</th>
-                                <th>Total Cost</th>
-                                <th>File</th>
-                                <th>Remarks</th>
-                            </tr>
-                        </thead>
-                        <tbody class="itemCompanyTableBody" company="true">
-                            ${requestCompanyItems}
-                        </tbody>
-                    </table>
-                    
-					<div class="row py-2">
-						<div class="offset-md-8 col-md-4 col-sm-12 pt-3 pb-2">
-							<div class="row" style="font-size: 1.1rem; font-weight:bold">
-								<div class="col-6 text-right">Total :</div>
-								<div class="col-6 text-right text-danger"
-									project="true"
-									style="font-size: 1.05em"
-									id="total">
-									${formatAmount(total, true)}
-								</div>
-							</div>
-							<div class="row" style="font-size: 1.1rem; font-weight:bold">
-								<div class="col-6 text-right">Discount :</div>
-								<div class="col-6 text-right"
-									project="true">
-									<input 
-										type="text" 
-										class="form-control-plaintext amount py-0 text-danger border-bottom font-weight-bold"
-										min="0" 
-										max="9999999999"
-										minlength="1"
-										maxlength="20" 
-										name="discount" 
-										id="discount" 
-										style="font-size: 1.02em;"
-										value="${discount}"
-										${disabled}>
-								</div>
-							</div>
-							<div class="row" style="font-size: 1.1rem; font-weight:bold">
-								<div class="col-6 text-right">Total Amount:</div>
-								<div class="col-6 text-right text-danger"
-									project="true"
-									id="totalAmount"
-									style="font-size: 1.05em">
-									${formatAmount(totalAmount, true)}
-								</div>
-							</div>
-							<div class="row" style="font-size: 1.1rem; font-weight:bold">
-								<div class="col-6 text-right">Vatable Sales:</div>
-								<div class="col-6 text-right text-danger"
-									project="true"
-									id="vatSales"
-									style="font-size: 1.05em">
-									${formatAmount(vatSales, true)}
-								</div>
-							</div>
-							<div class="row" style="font-size: 1.1rem; font-weight:bold">
-								<div class="col-6 text-right">Vat 12%:</div>
-								<div class="col-6 text-right"
-									project="true">
-									<input 
-										type="text" 
-										class="form-control-plaintext amount py-0 text-danger border-bottom font-weight-bold"
-										min="0" 
-										max="9999999999"
-										minlength="1"
-										maxlength="20" 
-										name="vat" 
-										id="vat" 
-										style="font-size: 1.02em;"
-										value="${vat}"
-										${disabled}>
-								</div>
-							</div>
-							<div class="row" style="font-size: 1.1rem; font-weight:bold">
-								<div class="col-6 text-right">Total:</div>
-								<div class="col-6 text-right text-danger"
-									project="true"
-									id="totalVat"
-									style="font-size: 1.05em">
-									${formatAmount(totalVat, true)}
-								</div>
-							</div>
-							<div class="row" style="font-size: 1.1rem; font-weight:bold">
-								<div class="col-6 text-right">Less EWT:</div>
-								<div class="col-6 text-right"
-									project="true">
-									<input 
-										type="text" 
-										class="form-control-plaintext amount py-0 text-danger border-bottom font-weight-bold"
-										min="0" 
-										max="9999999999"
-										minlength="1"
-										maxlength="20" 
-										name="lessEwt" 
-										id="lessEwt" 
-										style="font-size: 1.02em;"
-										value="${lessEwt}"
-										${disabled}>
-								</div>
-							</div>
-							<div class="row" style="font-size: 1.1rem; font-weight:bold">
-								<div class="col-6 text-right">Grand Total:</div>
-								<div class="col-6 text-right text-danger"
-									project="true"
-									id="grandTotalAmount"
-									style="font-size: 1.05em">
-									${formatAmount(grandTotalAmount, true)}
-								</div>
-							</div>
-						</div>
-					</div>
-                </div>`;
-			}
-			
-		html += `
+			<div class="col-sm-12" id="tableRequestItems">
+				${getCategoryTypeTable(data, readOnly, isRevise)}
 			</div>
 
             <div class="col-md-12 text-right mt-3">
@@ -2201,13 +2475,28 @@ $(document).ready(function() {
 	// ----- END SAVE DOCUMENT -----
 
 
+	// ----- CHECK TABLE MATERIALS AND EQUIPMENT -----
+	function checkTableMaterialsEquipment() {
+		let flag = 0;
+		$(".itemTableRow").each(function(i) {
+			flag++;
+		})
+		if (flag == 0) {
+			showNotification("danger", "Please select correct reference number.");
+		}
+		return flag != 0;
+	}
+	// ----- END CHECK TABLE MATERIALS AND EQUIPMENT -----
+
+
 	// ----- SUBMIT DOCUMENT -----
 	$(document).on("click", "#btnSubmit", function () {
 		const id       = $(this).attr("purchaseOrderID");
 		const revise   = $(this).attr("revise") == "true";
 		const validate = validateForm("form_purchase_order");
+		const isValid  = checkTableMaterialsEquipment();
 
-		if (validate) {
+		if (validate && isValid) {
 			const action = revise && "insert" || (id ? "update" : "insert");
 			const data   = getPurchaseOrderData(action, "submit", "1", id, "0", revise);
 
@@ -2323,7 +2612,7 @@ $(document).ready(function() {
 			<button class="btn btn-danger" id="btnRejectConfirmation"
 			purchaseOrderID="${id}"
 			code="${feedback}"><i class="far fa-times-circle"></i> Deny</button>
-			<button class="btn btn-cancel" data-dismiss="modal"><i class="fas fa-ban"></i> Cancel</button>
+			<button class="btn btn-cancel btnCancel px-5 p-2" data-dismiss="modal"><i class="fas fa-ban"></i> Cancel</button>
 		</div>`;
 		$("#modal_purchase_order_content").html(html);
 	});

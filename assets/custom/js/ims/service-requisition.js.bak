@@ -24,6 +24,17 @@ $(document).ready(function() {
 	// ---- END GET EMPLOYEE DATA -----
 
 
+	// ----- IS DOCUMENT REVISED -----
+	function isDocumentRevised(id = null) {
+		if (id) {
+			const revisedDocumentsID = getTableData("ims_service_requisition_tbl", "reviseServiceRequisitionID", "reviseServiceRequisitionID IS NOT NULL");
+			return revisedDocumentsID.map(item => item.reviseServiceRequisitionID).includes(id);
+		}
+		return false;
+	}
+	// ----- END IS DOCUMENT REVISED -----
+
+
     // ----- VIEW DOCUMENT -----
 	function viewDocument(view_id = false, readOnly = false, isRevise = false) {
 		const loadData = (id, isRevise = false) => {
@@ -208,15 +219,11 @@ $(document).ready(function() {
                 info: false,
 				scrollCollapse: true,
 				columnDefs: [
-					{ targets: 0,  width: 50  },
-					{ targets: 1,  width: 150 },
-					{ targets: 2,  width: 150 },
-					{ targets: 3,  width: 200 },
-					{ targets: 4,  width: 50  },
-					{ targets: 5,  width: 100 },
-					{ targets: 6,  width: 150 },
-					{ targets: 7,  width: 150 },
-					{ targets: 8,  width: 200 },
+					{ targets: 0,  width: 50   },
+					{ targets: 1,  width: 150  },
+					{ targets: 2,  width: 150  },
+					{ targets: 3,  width: 800  },
+					{ targets: 4,  width: 200  },
 				],
 			});
 
@@ -231,66 +238,13 @@ $(document).ready(function() {
 				scrollX: true,
 				scrollCollapse: true,
 				columnDefs: [
-					{ targets: 0,  width: 150 },
-					{ targets: 1,  width: 150 },
-					{ targets: 2,  width: 200 },
-					{ targets: 3,  width: 50  },
-					{ targets: 4,  width: 100 },
-					{ targets: 5,  width: 150 },
-					{ targets: 6,  width: 150 },
-					{ targets: 7,  width: 200 },
+					{ targets: 0,  width: 150  },
+					{ targets: 1,  width: 150  },
+					{ targets: 2,  width: 800  },
+					{ targets: 3,  width: 200  },
 				],
 			});
 
-			var table = $("#tableCompanyRequestItems")
-			.css({ "min-width": "100%" })
-			.removeAttr("width")
-			.DataTable({
-				proccessing: false,
-				serverSide: false,
-				scrollX: true,
-				sorting: false,
-                searching: false,
-                paging: false,
-                ordering: false,
-                info: false,
-				scrollCollapse: true,
-				columnDefs: [
-					{ targets: 0,  width: 50  },
-					{ targets: 1,  width: 150 },
-					{ targets: 2,  width: 150 },
-					{ targets: 3,  width: 50  },
-					{ targets: 4,  width: 120 },
-					{ targets: 5,  width: 80  },
-					{ targets: 6,  width: 150 },
-					{ targets: 7,  width: 150 },
-					{ targets: 8,  width: 150 },
-					{ targets: 9,  width: 200 },
-				],
-			});
-
-			var table = $("#tableCompanyRequestItems0")
-			.css({ "min-width": "100%" })
-			.removeAttr("width")
-			.DataTable({
-				proccessing: false,
-				serverSide: false,
-                paging: false,
-                info: false,
-				scrollX: true,
-				scrollCollapse: true,
-				columnDefs: [
-					{ targets: 0,  width: 150 },
-					{ targets: 1,  width: 150 },
-					{ targets: 2,  width: 50  },
-					{ targets: 3,  width: 120 },
-					{ targets: 4,  width: 80  },
-					{ targets: 5,  width: 150 },
-					{ targets: 6,  width: 150 },
-					{ targets: 7,  width: 150 },
-					{ targets: 8,  width: 200 },
-				],
-			});
 	}
 	// ----- END DATATABLES -----
    
@@ -544,10 +498,10 @@ $(document).ready(function() {
 			let {
 				serviceRequisitionID     = "",
 				serviceRequisitionStatus = "",
-				employeeID            = "",
-				approversID           = "",
-				approversDate         = "",
-				createdAt             = new Date
+				employeeID               = "",
+				approversID              = "",
+				approversDate            = "",
+				createdAt                = new Date
 			} = data && data[0];
 
 			let isOngoing = approversDate ? approversDate.split("|").length > 0 ? true : false : false;
@@ -600,15 +554,17 @@ $(document).ready(function() {
 					}
 				} else if (serviceRequisitionStatus == 3) {
 					// DENIED - FOR REVISE
-					button = `
-					<button
-						class="btn btn-cancel"
-						id="btnRevise" 
-						serviceRequisitionID="${encryptString(serviceRequisitionID)}"
-						code="${getFormCode("SR", createdAt, serviceRequisitionID)}"
-						status="${serviceRequisitionStatus}"><i class="fas fa-clone"></i>
-						Revise
-					</button>`;
+					if (!isDocumentRevised(serviceRequisitionID)) {
+						button = `
+						<button
+							class="btn btn-cancel"
+							id="btnRevise" 
+							serviceRequisitionID="${encryptString(serviceRequisitionID)}"
+							code="${getFormCode("SR", createdAt, serviceRequisitionID)}"
+							status="${serviceRequisitionStatus}"><i class="fas fa-clone"></i>
+							Revise
+						</button>`;
+					}
 				}
 			} else {
 				if (serviceRequisitionStatus == 1) {
@@ -690,16 +646,16 @@ $(document).ready(function() {
                 ${project.projectListID == id && "selected"}>
                 ${project.projectListName}
             </option>`;
-        })
+        }).join("")
         return display ? html : projectList;
     }
     // ----- END GET PROJECT LIST -----
 
 
-	// ----- UPDATE INVENTORYT NAME -----
+	// ----- UPDATE SERVICE OPTIONS -----
 	function updateServiceOptions() {
 		let serviceIDArr = []; // 0 IS THE DEFAULT VALUE
-		let serviceElementID = [], companyElementID = [];
+		let serviceElementID = [];
 
 		$("[name=serviceID]").each(function(i, obj) {
 			serviceIDArr.push($(this).val());
@@ -726,10 +682,10 @@ $(document).ready(function() {
 			$(element).html(html);
 		});
 	}
-	// ----- END UPDATE INVENTORYT NAME -----
+	// ----- END UPDATE SERVICE OPTIONS -----
 
 
-    // ----- GET INVENTORY ITEM -----
+    // ----- GET SERVICE ITEM -----
     function getServiceItem(id = null, display = true) {
         let html   = `<option selected disabled>Select Service Name</option>`;
 
@@ -754,36 +710,130 @@ $(document).ready(function() {
 		
         return display ? html : serviceItemList;
     }
-    // ----- END GET INVENTORY ITEM -----
+    // ----- END GET SERVICE ITEM -----
 
 
 	// ----- GET SERVICE SCOPE -----
-	function getServiceScope(scope = "", readOnly = false) {
+	function getServiceScope(scope = {}, readOnly = false) {
+		let {
+			description = "",
+			quantity    = "1",
+			uom         = "pcs",
+			unitCost    = "0",
+			totalCost   = "0",
+		} = scope;
+
 		let html = "";
 		if (!readOnly) {
 			html = `
-			<div class="input-group mb-0">
-				<input type="text"
-					class="form-control validate"
-					name="serviceDescription"
-					id="serviceDescription"
-					data-allowcharacters="[A-Z][a-z][0-9][ ][@][-][_]['][&][()]"
-					minlength="2"
-					maxlength="75"
-					value="${scope}"
-					required>
-				<div class="input-group-append">
-					<button class="btn btn-sm btn-danger btnDeleteScope">
-						<i class="fas fa-minus"></i>
-					</button>
-				</div>
-				<div class="d-block invalid-feedback mt-0 mb-1" id="invalid-serviceDescription"></div>
-			</div>`;
+			<tr>
+				<td>
+					<div class="servicescope">
+						<div class="input-group mb-0">
+							<div class="input-group-prepend">
+								<button class="btn btn-sm btn-danger btnDeleteScope">
+									<i class="fas fa-minus"></i>
+								</button>
+							</div>
+							<input type="text"
+								class="form-control validate"
+								name="serviceDescription"
+								id="serviceDescription"
+								data-allowcharacters="[A-Z][a-z][0-9][ ][@][-][_]['][&][()]"
+								minlength="2"
+								maxlength="75"
+								value="${description}"
+								autocomplete="off"
+								required>
+							<div class="d-block invalid-feedback mt-0 mb-1" id="invalid-serviceDescription"></div>
+						</div>
+					</div>
+				</td>
+				<td>
+					<div class="quantity">
+						<input 
+							type="text" 
+							class="form-control validate number text-center"
+							data-allowcharacters="[0-9]" 
+							min="1" 
+							max="999999999" 
+							id="quantity" 
+							name="quantity" 
+							autocomplete="off"
+							value="${quantity}" 
+							minlength="1" 
+							maxlength="20" 
+							required>
+						<div class="invalid-feedback d-block" id="invalid-quantity"></div>
+					</div>
+				</td>
+				<td>
+					<div class="uom">
+						<input 
+							type="text" 
+							class="form-control validate number text-center"
+							data-allowcharacters="[a-z][A-Z][0-9][ ][.][,][-]['][()]" 
+							id="serviceUom" 
+							name="serviceUom" 
+							autocomplete="off"
+							minlength="1" 
+							maxlength="20" 
+							value="${uom}"
+							required>
+						<div class="invalid-feedback d-block" id="invalid-serviceUom"></div>
+					</div>
+				</td>
+				<td>
+					<div class="unitcost">
+						<div class="input-group">
+							<div class="input-group-prepend">
+								<span class="input-group-text" >₱</span>
+							</div>
+							<input 
+								type="text" 
+								class="form-control amount"
+								min="1" 
+								max="9999999999"
+								minlength="1"
+								maxlength="20" 
+								name="unitCost" 
+								id="unitCost" 
+								value="${unitCost}">
+						</div>
+						<div class="invalid-feedback d-block" id="invalid-unitCost"></div>
+					</div>
+				</td>
+				<td class="text-right">
+					<div class="totalcost">${formatAmount(totalCost, true)}</div>
+				</td>
+			</tr>`;
 		} else {
 			html = `
-			<div class="mb-0">
-				${scope}
-			</div>`;
+			<tr>
+				<td>
+					<div class="servicescope">
+						${description}
+					</div>
+				</td>
+				<td>
+					<div class="quantity">
+						${quantity}
+					</div>
+				</td>
+				<td>
+					<div class="uom">
+						${uom}
+					</div>
+				</td>
+				<td class="text-right">
+					<div class="unitcost">
+						${formatAmount(unitCost, true)}
+					</div>
+				</td>
+				<td class="text-right">
+					<div class="totalcost">${formatAmount(totalCost, true)}</div>
+				</td>
+			</tr>`;
 		}
 
 		
@@ -802,39 +852,51 @@ $(document).ready(function() {
 	// ----- END UPDATE SERVICE SCOPE -----
 
 
-	// ----- GET ITEM ROW -----
+	// ----- GET SERVICE ROW -----
     function getServiceRow(item = {}, readOnly = false) {
 		let {
 			requestServiceID = 0,
 			serviceID   = "",
 			serviceName = "",
-			serviceUom  = "-",
-			quantity    = 1,
-			unitCost    = 0,
-			totalCost   = 0,
 			remarks     = "",
 			createdAt   = ""
 		} = item;
 
+		const buttonAddRow = !readOnly ? `
+		<button class="btn btn-md btn-primary float-left ml-2 my-1 btnAddScope">
+			<i class="fas fa-plus"></i>
+		</button>` : ""
+
 		const scopeData = getTableData(
 			`ims_service_scope_tbl`,
-			`description`,
+			``,
 			`requestServiceID = ${requestServiceID}`
 		);
-		let serviceScopes = getServiceScope();
+		let serviceScopes = `
+		<div class="table-responsive">
+			<table class="table table-bordered">
+				<thead>
+					<tr>
+						<th style="width: 40%">Description ${!readOnly ? "<code>*</code>" : ""}</th>
+						<th style="width: 12%">Quantity ${!readOnly ? "<code>*</code>" : ""}</th>
+						<th style="width: 12%">UOM ${!readOnly ? "<code>*</code>" : ""}</th>
+						<th style="width: 18%">Unit Cost ${!readOnly ? "<code>*</code>" : ""}</th>
+						<th style="width: 18%">Total Cost</th>
+					</tr>
+				</thead>
+				<tbody class="tableScopeBody">`;
 		if (scopeData.length > 0) {
-			if (readOnly) {
-				serviceScopes = `<ol class="pl-3 mb-0">`
-				serviceScopes += scopeData.map(scope => {
-					return `<li>${getServiceScope(scope.description, readOnly)}</li>`;
-				}).join("");
-				serviceScopes += `</ol>`;
-			} else {
-				serviceScopes = scopeData.map(scope => {
-					return getServiceScope(scope.description, readOnly);
-				}).join("");
-			}
+			serviceScopes += scopeData.map(scope => {
+				return getServiceScope(scope, readOnly);;
+			}).join("");
+		} else {
+			serviceScopes += getServiceScope();
 		}
+		serviceScopes += `
+				</tbody>
+			</table>
+			${buttonAddRow}
+		</div>`;
 
 		let html = "";
 		if (readOnly) {
@@ -853,26 +915,6 @@ $(document).ready(function() {
 				<td>
 					<div class="servicescope">
 						${serviceScopes}
-					</div>
-				</td>
-				<td class="text-center">
-					<div class="quantity">
-						${quantity}
-					</div>
-				</td>
-				<td>
-					<div class="serviceUom">
-						${serviceUom || "-"}
-					</div>
-				</td>
-				<td class="text-right">
-					<div class="unitcost">
-						${formatAmount(unitCost, true)}
-					</div>
-				</td>
-				<td class="text-right">
-					<div class="totalcost">
-						${formatAmount(totalCost, true)}
 					</div>
 				</td>
 				<td>
@@ -899,7 +941,7 @@ $(document).ready(function() {
 								class="form-control validate select2"
 								name="serviceID"
 								id="serviceID"
-								style="width: 100%"
+								style="width: 150px !important"
 								required>
 								${getServiceItem(serviceID)}
 							</select>
@@ -908,66 +950,17 @@ $(document).ready(function() {
 					</div>
 				</td>
                 <td>
-					<div class="servicescope mt-2">
-						${serviceScopes}
-					</div>
-					<button class="btn btn-md btn-primary float-right mb-2 btnAddScope">
-						<i class="fas fa-plus"></i>
-					</button>
-				</td>
-				<td class="text-center">
-					<div class="quantity">
-						<input 
-							type="text" 
-							class="form-control validate number text-center"
-							min="1" 
-							data-allowcharacters="[0-9]" 
-							max="999999999" 
-							id="quantity" 
-							name="quantity" 
-							autocomplete="off"
-							value="${quantity}" 
-							minlength="1" 
-							maxlength="20" 
-							required>
-						<div class="invalid-feedback d-block" id="invalid-quantity"></div>
-					</div>
-				</td>
-				<td>
-					<div class="serviceUom">
-						${serviceUom}
-					</div>
-				</td>
-				<td class="text-right">
-					<div class="unitcost">
-						<div class="input-group">
-							<div class="input-group-prepend">
-								<span class="input-group-text" >₱</span>
-							</div>
-							<input 
-								type="text" 
-								class="form-control amount"
-								min="1" 
-								max="9999999999"
-								minlength="1"
-								maxlength="20" 
-								name="unitCost" 
-								id="unitCost" 
-								value="${unitCost}">
-						</div>
-						<div class="invalid-feedback d-block" id="invalid-unitCost"></div>
-					</div>
-				</td>
-				<td class="text-right">
-					<div class="totalcost">${formatAmount(totalCost, true)}</div>
+					${serviceScopes}
 				</td>
 				<td>
 					<div class="remarks">
 						<textarea 
 							rows="2" 
 							style="resize: none" 
-							class="form-control" 
+							class="form-control validate" 
 							data-allowcharacters="[0-9][a-z][A-Z][ ][.][,][_]['][()][?][-][/]"
+							minlength="1"
+							maxlength="100"
 							name="remarks" 
 							id="remarks">${remarks || ""}</textarea>
 					</div>
@@ -977,7 +970,7 @@ $(document).ready(function() {
 
         return html;
     }
-    // ----- END GET ITEM ROW -----
+    // ----- END GET SERVICE ROW -----
 
 
 	// ----- UPDATE TABLE ITEMS -----
@@ -1117,8 +1110,9 @@ $(document).ready(function() {
 	// ----- ADD SCOPE -----
 	$(document).on("click", ".btnAddScope", function() {
 		let newScope = getServiceScope();
-		$(this).parent().find(".servicescope").append(newScope);
+		$(this).parent().find("table tbody").append(newScope);
 		$(this).parent().find("[name=serviceDescription]").last().focus();
+		initAmount(".amount");
 		updateServiceScope();
 	})
 	// ----- END ADD SCOPE -----
@@ -1126,11 +1120,11 @@ $(document).ready(function() {
 
 	// ----- DELETE SCOPE -----
 	$(document).on("click", ".btnDeleteScope", function() {
-		const isCanDelete = $(this).closest(".servicescope").find(".input-group").length > 1;
+		const isCanDelete = $(this).closest(".tableScopeBody").find("tr").length > 1;
 		if (isCanDelete) {
-			const scopeElement = $(this).closest(".input-group");
+			const scopeElement = $(this).closest("tr");
 			scopeElement.fadeOut(500, function() {
-				$(this).closest(".input-group").remove();
+				$(this).closest("tr").remove();
 			})
 		} else {
 			showNotification("danger", "You must have atleast one scope of work.");
@@ -1158,11 +1152,11 @@ $(document).ready(function() {
 
 	// ----- KEYUP QUANTITY OR UNITCOST -----
 	$(document).on("keyup", "[name=quantity], [name=unitCost]", function() {
-		const index     = $(this).closest("tr").first().attr("index");
-		const quantity  = +$(`#quantity${index}`).val();
-		const unitcost  = +$(`#unitcost${index}`).val().replaceAll(",", "");
+		const tableRow  = $(this).closest("tr");
+		const quantity  = +tableRow.find(`[name="quantity"]`).first().val();
+		const unitcost  = +tableRow.find(`[name="unitCost"]`).first().val().replaceAll(",", "");
 		const totalcost = quantity * unitcost;
-		$(`#totalcost${index}`).text(formatAmount(totalcost, true));
+		tableRow.find(`.totalcost`).first().text(formatAmount(totalcost, true));
 		updateTotalAmount();
 	})
 	// ----- END KEYUP QUANTITY OR UNITCOST -----
@@ -1407,6 +1401,7 @@ $(document).ready(function() {
                     <select class="form-control validate select2" 
                         name="clientID"
                         id="clientID"
+						style="width: 100%"
                         required
 						${disabled}>
                             <option selected disabled>Select Client Name</option>
@@ -1480,18 +1475,14 @@ $(document).ready(function() {
 
                 <div class="w-100">
 					<hr class="pb-1">
-					<div class="text-primary font-weight-bold" style="font-size: 1.5rem;">Services: </div>
+					<div class="text-primary font-weight-bold" style="font-size: 1.5rem;">Services </div>
                     <table class="table table-striped" id="${tableServiceRequisitionItems}">
                         <thead>
                             <tr style="white-space: nowrap">
 								${checkboxServiceRequisitionHeader}
                                 <th>Service Code</th>
                                 <th>Service Name ${!disabled ? "<code>*</code>" : ""}</th>
-                                <th>Scope of Work ${!disabled ? "<code>*</code>" : ""}</th>
-                                <th>Quantity ${!disabled ? "<code>*</code>" : ""}</th>
-                                <th>UOM</th>
-                                <th>Unit Cost ${!disabled ? "<code>*</code>" : ""}</th>
-                                <th>Total Cost</th>
+                                <th>Scope of Work</th>
                                 <th>Remarks</th>
                             </tr>
                         </thead>
@@ -1566,7 +1557,7 @@ $(document).ready(function() {
 	// ----- END PAGE CONTENT -----
 
 
-	// ----- GET PURCHASE REQUEST DATA -----
+	// ----- GET SERVICE REQUISITION DATA -----
 	function getServiceRequisitionData(action = "insert", method = "submit", status = "1", id = null, currentStatus = "0") {
 
 		/**
@@ -1636,26 +1627,26 @@ $(document).ready(function() {
 
 			$(".itemTableRow").each(function(i, obj) {
 				const serviceID   = $("td [name=serviceID]", this).val();	
-				const serviceName = serviceID ? $("td [name=serviceID]", this).find(":selected").text().replaceAll("\n", "").trim() : "";	
-				const quantity  = +$("td [name=quantity]", this).val();	
-				const serviceUom = $("td .serviceUom", this).text().trim();	
-				const unitcost  = +$("td [name=unitCost]", this).val().replaceAll(",", "");	
-				const totalcost = quantity * unitcost;
+				const serviceName = serviceID ? $("td [name=serviceID]", this).find(":selected").text().replaceAll("\n", "").trim() : "";
 				const remarks   = $("td [name=remarks]", this).val()?.trim();	
 
 				let temp = {
 					serviceID, 
 					serviceName,
-					serviceUom,
-					quantity, 
-					unitcost, 
-					totalcost: totalcost.toFixed(2), 
 					remarks,
 					scopes: []
 				};
 
-				$(`td [name="serviceDescription"]`, this).each(function() {
-					const scope = $(this).val()?.trim();
+				$(`td .tableScopeBody tr`, this).each(function() {
+					const quantity = +$(`[name="quantity"]`, this).val();
+					const unitCost = +$(`[name="unitCost"]`, this).val().replaceAll(",", "");
+					let scope = {
+						description: $('[name="serviceDescription"]', this).val()?.trim(),
+						uom:         $(`[name="serviceUom"]`, this).val()?.trim(),
+						quantity,
+						unitCost,
+						totalCost: (quantity * unitCost)
+					}
 					temp["scopes"].push(scope);
 				})
 
@@ -1667,7 +1658,7 @@ $(document).ready(function() {
 
 		return data;
 	}
-	// ----- END GET PURCHASE REQUEST DATA -----
+	// ----- END GET SERVICE REQUISITION DATA -----
 
 
     // ----- OPEN ADD FORM -----
@@ -1872,7 +1863,7 @@ $(document).ready(function() {
 		const feedback = $(this).attr("code") || getFormCode("SR", dateToday(), id);
 
 		$("#modal_service_requisition_content").html(preloader);
-		$("#modal_service_requisition .page-title").text("DENY PURCHASE REQUEST");
+		$("#modal_service_requisition .page-title").text("DENY SERVICE REQUISITION");
 		$("#modal_service_requisition").modal("show");
 		let html = `
 		<div class="modal-body">

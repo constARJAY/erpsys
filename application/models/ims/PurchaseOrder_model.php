@@ -49,6 +49,16 @@ class PurchaseOrder_model extends CI_Model {
         return $query ? $query->row() : false;
     }
 
+    public function getRequestItem($requestItemID = null) 
+    {
+        if ($requestItemID) {
+            $sql   = "SELECT * FROM ims_request_items_tbl WHERE requestItemID = $requestItemID";
+            $query = $this->db->query($sql);
+            return $query ? $query->row() : null;
+        }
+        return null;
+    }
+    
     public function getRequestItems($purchaseRequestID = null, $inventoryVendorID = null, $categoryType = null)
     {
         $sql = "
@@ -62,6 +72,16 @@ class PurchaseOrder_model extends CI_Model {
             categoryType = '$categoryType'";
         $query = $this->db->query($sql);
         return $query ? $query->result_array() : [];
+    }
+
+    public function deleteRequestItems($purchaseRequestID = null, $bidRecapID = null, $purchaseOrderID = null)
+    {
+        $query = $this->db->delete("ims_request_items_tbl", [
+            "purchaseRequestID" => $purchaseRequestID,
+            "bidRecapID"        => $bidRecapID,
+            "purchaseOrderID"   => $purchaseOrderID,
+        ]);
+        return $query ? true : false;
     }
 
     public function insertPurchaseOrder($data = [], $requestItemsID = []) {

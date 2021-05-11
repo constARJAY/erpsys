@@ -345,7 +345,7 @@ $(document).ready(function () {
         </div>
         <div class="modal-footer">
             ${button}
-            <button class="btn btn-cancel btnCancel px-5 p-2" ><i class="fas fa-ban"></i> Cancel</button>
+            <button class="btn btn-cancel btnCancel"><i class="fas fa-ban"></i> Cancel</button>
         </div>`;
 		return html;
 	}

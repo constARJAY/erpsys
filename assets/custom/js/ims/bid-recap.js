@@ -552,17 +552,20 @@ $(document).ready(function() {
 				"pms_project_list_tbl AS pplt LEFT JOIN pms_client_tbl AS pct ON pct.clientID = pplt.projectListClientID", 
 				"projectListID, projectListCode, projectListName, clientCode, clientName, clientRegion, clientProvince, clientCity, clientBarangay, clientUnitNumber, clientHouseNumber, clientCountry, clientPostalCode",
 				"projectListStatus = 1 && projectListID ="+items.projectID);
-			var address       = `${projectList[0].clientUnitNumber && titleCase(projectList[0].clientUnitNumber)+", "}${projectList[0].clientHouseNumber && projectList[0].clientHouseNumber +", "}${projectList[0].clientBarangay && titleCase(projectList[0].clientBarangay)+", "}${projectList[0].clientCity && titleCase(projectList[0].clientCity)+", "}${projectList[0].clientProvince && titleCase(projectList[0].clientProvince)+", "}${projectList[0].clientCountry && titleCase(projectList[0].clientCountry)+", "}${projectList[0].clientPostalCode && titleCase(projectList[0].clientPostalCode)}`;
-			return `<option value            = "${items.inventoryValidationID }" 
-						projectid 			 = "${projectList[0].projectListID}"
-						projectcode          = "${getFormCode("PRO",moment(projectList[0].createdAt),projectList[0].projectListID)}"
-						projectname          = "${projectList[0].projectListName}"
-						clientcode           = "${projectList[0].clientCode}"
-						clientname           = "${projectList[0].clientName}"
-						address              = "${address}"
-						${items.inventoryValidationID == id?"selected":""}>
-						${getFormCode("IVR",moment(items.createdAt), items.inventoryValidationID)}
-				   	</option>`;
+
+			if (projectList.length > 0) {
+				var address       = `${projectList[0].clientUnitNumber && titleCase(projectList[0].clientUnitNumber)+", "}${projectList[0].clientHouseNumber && projectList[0].clientHouseNumber +", "}${projectList[0].clientBarangay && titleCase(projectList[0].clientBarangay)+", "}${projectList[0].clientCity && titleCase(projectList[0].clientCity)+", "}${projectList[0].clientProvince && titleCase(projectList[0].clientProvince)+", "}${projectList[0].clientCountry && titleCase(projectList[0].clientCountry)+", "}${projectList[0].clientPostalCode && titleCase(projectList[0].clientPostalCode)}`;
+				return `<option value            = "${items.inventoryValidationID }" 
+							projectid 			 = "${projectList[0].projectListID}"
+							projectcode          = "${getFormCode("PRO",moment(projectList[0].createdAt),projectList[0].projectListID)}"
+							projectname          = "${projectList[0].projectListName}"
+							clientcode           = "${projectList[0].clientCode}"
+							clientname           = "${projectList[0].clientName}"
+							address              = "${address}"
+							${items.inventoryValidationID == id?"selected":""}>
+							${getFormCode("IVR",moment(items.createdAt), items.inventoryValidationID)}
+						   </option>`;
+			}
 		});
         return html;
         

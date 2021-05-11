@@ -122,7 +122,7 @@ const initAmount = (element = null, displayPrefix = false) => {
 	let elem = getElement(element, ".amount");
 	$(elem).inputmask({
 		alias: "currency",
-		prefix: displayPrefix ? "₱" : "",
+		prefix: displayPrefix ? "₱ " : "",
 		allowMinus: false,
 	});
 };
@@ -812,7 +812,7 @@ const formatAmount = (amount = 0, pesoSign = false) => {
 		currency: "PHP",
 	}).format(amount);
 	currency = currency.replace("₱", "");
-	return !pesoSign ? currency : `₱${currency}`;
+	return !pesoSign ? currency : `₱ ${currency}`;
 };
 // ----- END FORMAT AMOUNT -----
 

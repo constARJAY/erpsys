@@ -119,7 +119,7 @@
         } else {
             // return number_format($floatcurr,$currencies[$curr][0],$currencies[$curr][1],$currencies[$curr][2]);
             // ASSUME THAT THE SYSTEM IS IN THE PHILIPPINES ONLY
-            $prefix = $displayPrefix ? "₱" : "";
+            $prefix = $displayPrefix ? "₱ " : "";
             return $prefix.number_format($floatcurr,$currencies[$curr][0],$currencies[$curr][1],$currencies[$curr][2]);
         }
     }

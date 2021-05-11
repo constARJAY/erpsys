@@ -669,6 +669,7 @@ $(document).ready(function () {
 				initInputmaskTime();
 				$("#changeScheduleDate").val(moment(new Date).format("MMMM DD, YYYY"));
 			}
+			$("#changeScheduleDate").data("daterangepicker").minDate = moment();
 			return html;
 		}, 300);
 	}

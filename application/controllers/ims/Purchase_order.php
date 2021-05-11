@@ -107,6 +107,15 @@ class Purchase_order extends CI_Controller {
         $method                = $this->input->post("method");
         $purchaseOrderID       = $this->input->post("purchaseOrderID") ?? null;
         $revisePurchaseOrderID = $this->input->post("revisePurchaseOrderID") ?? null;
+        $employeeID            = $this->input->post("employeeID") ?? null;
+        $purchaseRequestID     = $this->input->post("purchaseRequestID") ?? null;
+        $bidRecapID            = $this->input->post("bidRecapID") ?? null;
+        $inventoryVendorID     = $this->input->post("inventoryVendorID") ?? null;
+        $vendorName            = $this->input->post("vendorName") ?? null;
+        $vendorContactDetails  = $this->input->post("vendorContactDetails") ?? null;
+        $vendorContactPerson   = $this->input->post("vendorContactPerson") ?? null;
+        $vendorAddress         = $this->input->post("vendorAddress") ?? null;
+        $categoryType          = $this->input->post("categoryType") ?? null;
         $paymentTerms          = $this->input->post("paymentTerms") ?? null;
         $deliveryDate          = $this->input->post("deliveryDate") ?? null;
         $total                 = $this->input->post("total") ?? null;
@@ -120,6 +129,7 @@ class Purchase_order extends CI_Controller {
         $approversID           = $this->input->post("approversID") ?? null;
         $approversStatus       = $this->input->post("approversStatus") ?? null;
         $approversDate         = $this->input->post("approversDate") ?? null;
+        $purchaseOrderReason   = $this->input->post("purchaseOrderReason");
         $purchaseOrderStatus   = $this->input->post("purchaseOrderStatus");
         $purchaseOrderRemarks  = $this->input->post("purchaseOrderRemarks");
         $submittedAt           = $this->input->post("submittedAt") ?? null;
@@ -128,6 +138,15 @@ class Purchase_order extends CI_Controller {
 
         $purchaseOrderData = [
             "revisePurchaseOrderID" => $revisePurchaseOrderID,
+            "employeeID"            => $employeeID,
+            "purchaseRequestID"     => $purchaseRequestID,
+            "bidRecapID"            => $bidRecapID,
+            "inventoryVendorID"     => $inventoryVendorID,
+            "vendorName"            => $vendorName,
+            "vendorContactDetails"  => $vendorContactDetails,
+            "vendorContactPerson"   => $vendorContactPerson,
+            "vendorAddress"         => $vendorAddress,
+            "categoryType"          => $categoryType,
             "paymentTerms"          => $paymentTerms,
             "deliveryDate"          => $deliveryDate,
             "total"                 => $total,
@@ -141,28 +160,29 @@ class Purchase_order extends CI_Controller {
             "approversID"           => $approversID,
             "approversStatus"       => $approversStatus,
             "approversDate"         => $approversDate,
+            "purchaseOrderReason"   => $purchaseOrderReason,
             "purchaseOrderStatus"   => $purchaseOrderStatus,
             "submittedAt"           => $submittedAt,
+            "createdBy"             => $updatedBy,
             "updatedBy"             => $updatedBy,
         ];
 
-        $purchaseRequestID = $inventoryVendorID = "";
-        if ($revisePurchaseOrderID) {
-            $getPurchaseOrder = $this->purchaseorder->getPurchaseOrder($revisePurchaseOrderID);
-            if ($getPurchaseOrder) {
-                $purchaseRequestID = $getPurchaseOrder->purchaseRequestID;
-                $inventoryVendorID = $getPurchaseOrder->inventoryVendorID;
-                $purchaseOrderData["employeeID"]           = $getPurchaseOrder->employeeID;
-                $purchaseOrderData["purchaseRequestID"]    = $purchaseRequestID;
-                $purchaseOrderData["bidRecapID"]           = $getPurchaseOrder->bidRecapID;
-                $purchaseOrderData["categoryType"]         = $getPurchaseOrder->categoryType;
-                $purchaseOrderData["inventoryVendorID"]    = $inventoryVendorID;
-                $purchaseOrderData["vendorName"]           = $getPurchaseOrder->vendorName;
-                $purchaseOrderData["vendorAddress"]        = $getPurchaseOrder->vendorAddress;
-                $purchaseOrderData["vendorContactDetails"] = $getPurchaseOrder->vendorContactDetails;
-                $purchaseOrderData["vendorContactPerson"]  = $getPurchaseOrder->vendorContactPerson;
-            }
-        }
+        // $purchaseRequestID = $inventoryVendorID = "";
+        // if ($revisePurchaseOrderID) {
+        //     $getPurchaseOrder = $this->purchaseorder->getPurchaseOrder($revisePurchaseOrderID);
+        //     if ($getPurchaseOrder) {
+        //         $purchaseRequestID = $getPurchaseOrder->purchaseRequestID;
+        //         $inventoryVendorID = $getPurchaseOrder->inventoryVendorID;
+        //         $purchaseOrderData["purchaseRequestID"]    = $purchaseRequestID;
+        //         $purchaseOrderData["bidRecapID"]           = $getPurchaseOrder->bidRecapID;
+        //         $purchaseOrderData["categoryType"]         = $getPurchaseOrder->categoryType;
+        //         $purchaseOrderData["inventoryVendorID"]    = $inventoryVendorID;
+        //         $purchaseOrderData["vendorName"]           = $getPurchaseOrder->vendorName;
+        //         $purchaseOrderData["vendorAddress"]        = $getPurchaseOrder->vendorAddress;
+        //         $purchaseOrderData["vendorContactDetails"] = $getPurchaseOrder->vendorContactDetails;
+        //         $purchaseOrderData["vendorContactPerson"]  = $getPurchaseOrder->vendorContactPerson;
+        //     }
+        // }
 
         if ($action == "update") {
             unset($purchaseOrderData["revisePurchaseOrderID"]);
@@ -197,56 +217,94 @@ class Purchase_order extends CI_Controller {
             if ($result[0] == "true") {
                 $purchaseOrderID = $result[2];
 
-                if ($items) {
+                if ($items && count($items) > 0) {
+
+                    // DITO NA KO. HINDI DAPAT MADELETE KASI MAWAWALAN NG REFERENCE YUNG GET REQUEST ITEM.
+
                     $purchaseOrderItems = [];
                     foreach($items as $index => $item) {
+                        $requestItemID = $item["requestItemID"];
+                        
+                        $riData = $this->purchaseorder->getRequestItem($requestItemID);
                         $temp = [
-                            "purchaseRequestID" => $purchaseRequestID,
-                            "purchaseOrderID"   => $purchaseOrderID,
-                            "inventoryVendorID" => $inventoryVendorID,
-                            "itemID"            => $item["itemID"] != "null" ? $item["itemID"] : null,
-                            "categoryType"      => $item["categoryType"],
-                            "quantity"          => $item["quantity"],
-                            "unitCost"          => $item["unitcost"],
-                            "totalCost"         => $item["totalcost"],
-                            "files"             => array_key_exists("existingFile", $item) ? $item["existingFile"] : null, 
-                            "remarks"           => $item["remarks"] ? $item["remarks"] : null, 
-                            "createdBy"         => $item["createdBy"],
-                            "updatedBy"         => $item["updatedBy"],
+                            "costEstimateID"           => $riData->costEstimateID,
+                            "inventoryValidationID"    => $riData->inventoryValidationID,
+                            "billMaterialID"           => $riData->billMaterialID,
+                            "purchaseRequestID"        => $riData->purchaseRequestID,
+                            "referencePurchaseOrderID" => $riData->referencePurchaseOrderID,
+                            "purchaseOrderID"          => $purchaseOrderID,
+                            "purchaseRequestID"        => $purchaseRequestID,
+                            "bidRecapID"               => $bidRecapID,
+                            "categoryType"             => $categoryType,
+                            "inventoryVendorID"        => $inventoryVendorID,
+                            "inventoryVendorName"      => $riData->inventoryVendorName,
+                            "itemID"                   => $riData->itemID,
+                            "itemName"                 => $riData->itemName,
+                            "itemDescription"          => $riData->itemDescription,
+                            "itemUom"                  => $riData->itemUom,
+                            "quantity"                 => $riData->quantity,
+                            "unitCost"                 => $item["unitCost"],
+                            "totalCost"                => $item["totalCost"],
+                            "remarks"                  => $item["remarks"],
+                            "files"                    => $riData->files,
+                            "orderedPending"           => $riData->orderedPending,
+                            "stocks"                   => $riData->stocks,
+                            "forPurchase"              => $item["forPurchase"],
+                            "createdBy"                => $updatedBy,
+                            "updatedBy"                => $updatedBy,
                         ];
+
+
+
+                        // $temp = [
+                        //     "purchaseRequestID" => $purchaseRequestID,
+                        //     "purchaseOrderID"   => $purchaseOrderID,
+                        //     "inventoryVendorID" => $inventoryVendorID,
+                        //     "itemID"            => $item["itemID"] != "null" ? $item["itemID"] : null,
+                        //     "categoryType"      => $item["categoryType"],
+                        //     "quantity"          => $item["quantity"],
+                        //     "unitCost"          => $item["unitcost"],
+                        //     "totalCost"         => $item["totalcost"],
+                        //     "files"             => array_key_exists("existingFile", $item) ? $item["existingFile"] : null, 
+                        //     "remarks"           => $item["remarks"] ? $item["remarks"] : null, 
+                        //     "createdBy"         => $item["createdBy"],
+                        //     "updatedBy"         => $item["updatedBy"],
+                        // ];
                         array_push($purchaseOrderItems, $temp);
                     }
                     
-                    if (isset($_FILES["items"])) {
-                        $length = count($_FILES["items"]["name"]);
-                        $keys   = array_keys($_FILES["items"]["name"]);
-                        for ($i=0; $i<$length; $i++) {
-                            $uploadedFile = explode(".", $_FILES["items"]["name"][$keys[$i]]["file"]);
+                    // if (isset($_FILES["items"])) {
+                    //     $length = count($_FILES["items"]["name"]);
+                    //     $keys   = array_keys($_FILES["items"]["name"]);
+                    //     for ($i=0; $i<$length; $i++) {
+                    //         $uploadedFile = explode(".", $_FILES["items"]["name"][$keys[$i]]["file"]);
 
-                            $index     = (int)$uploadedFile[0]; 
-                            $extension = $uploadedFile[1];
-                            $filename  = $i.time().'.'.$extension;
+                    //         $index     = (int)$uploadedFile[0]; 
+                    //         $extension = $uploadedFile[1];
+                    //         $filename  = $i.time().'.'.$extension;
 
-                            $folderDir = "assets/upload-files/request-items/";
-                            if (!is_dir($folderDir)) {
-                                mkdir($folderDir);
-                            }
-                            $targetDir = $folderDir.$filename;
+                    //         $folderDir = "assets/upload-files/request-items/";
+                    //         if (!is_dir($folderDir)) {
+                    //             mkdir($folderDir);
+                    //         }
+                    //         $targetDir = $folderDir.$filename;
 
-                            if (move_uploaded_file($_FILES["items"]["tmp_name"][$index]["file"], $targetDir)) {
-                                $purchaseOrderItems[$index]["files"] = $filename;
-                            }
+                    //         if (move_uploaded_file($_FILES["items"]["tmp_name"][$index]["file"], $targetDir)) {
+                    //             $purchaseOrderItems[$index]["files"] = $filename;
+                    //         }
                             
-                        } 
+                    //     } 
 
-                        // ----- UPDATE ITEMS FILE -----
-                        foreach ($purchaseOrderItems as $key => $prItem) {
-                            if (!array_key_exists("files", $prItem)) {
-                                $purchaseOrderItems[$key]["files"] = null;
-                            }
-                        }
-                        // ----- END UPDATE ITEMS FILE -----
-                    }
+                    //     // ----- UPDATE ITEMS FILE -----
+                    //     foreach ($purchaseOrderItems as $key => $prItem) {
+                    //         if (!array_key_exists("files", $prItem)) {
+                    //             $purchaseOrderItems[$key]["files"] = null;
+                    //         }
+                    //     }
+                    //     // ----- END UPDATE ITEMS FILE -----
+                    // }
+
+                    $deleteRequestItems = $this->purchaseorder->deleteRequestItems($purchaseRequestID, $bidRecapID, $purchaseOrderID);
 
                     $savePurchaseOrderItems = $this->purchaseorder->savePurchaseOrderItems($purchaseOrderItems, $purchaseOrderID);
                 }

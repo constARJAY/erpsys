@@ -142,7 +142,6 @@ $(document).ready(function () {
 					{ targets: 5, width: 200 },
 					{ targets: 6, width: 80  },
 					{ targets: 7, width: 250 },
-					{ targets: 8, width: 80  },
 				],
 			});
 
@@ -164,7 +163,6 @@ $(document).ready(function () {
 					{ targets: 5, width: 200 },
 					{ targets: 6, width: 80  },
 					{ targets: 7, width: 250 },
-					{ targets: 8, width: 80  },
 				],
 			});
 	}
@@ -234,7 +232,6 @@ $(document).ready(function () {
 					<th>Date Approved</th>
                     <th>Status</th>
 					<th>Remarks</th>
-                    <th>Action</th>
                 </tr>
             </thead>
             <tbody>`;
@@ -264,7 +261,7 @@ $(document).ready(function () {
 
 			if (isImCurrentApprover(approversID, approversDate, loanFormStatus) || isAlreadyApproved(approversID, approversDate)) {
 				html += `
-				<tr>
+				<tr class="${button}" id="${encryptString(loanFormID)}">
 					<td>${getFormCode("LNF", dateCreated, loanFormID)}</td>
 					<td>${fullname}</td>
 					<td>
@@ -277,9 +274,6 @@ $(document).ready(function () {
 						${getStatusStyle(loanFormStatus)}
 					</td>
 					<td>${remarks}</td>
-					<td class="text-center">
-						${button}
-					</td>
 				</tr>`;
 			}
 		});
@@ -319,7 +313,6 @@ $(document).ready(function () {
 					<th>Date Approved</th>
                     <th>Status</th>
 					<th>Remarks</th>
-                    <th>Action</th>
                 </tr>
             </thead>
             <tbody>`;
@@ -351,6 +344,8 @@ $(document).ready(function () {
 			};
 			(loanFormStatus == 1 || loanFormStatus == 2) && uniqueData.push(unique);
 
+			let btnClass = loanFormStatus != 0 ? "btnView" : "btnEdit";
+
 			let button =
 				loanFormStatus != 0
 					? `
@@ -361,7 +356,7 @@ $(document).ready(function () {
                 id="${encryptString(loanFormID)}" 
                 code="${getFormCode("LNF", dateCreated, loanFormID)}"><i class="fas fa-edit"></i> Edit</button>`;
 			html += `
-            <tr>
+            <tr class="${btnClass}" id="${encryptString(loanFormID)}">
                 <td>${getFormCode("LNF", dateCreated, loanFormID)}</td>
                 <td>${fullname}</td>
                 <td>
@@ -374,9 +369,6 @@ $(document).ready(function () {
                     ${getStatusStyle(loanFormStatus)}
                 </td>
 				<td>${remarks}</td>
-                <td class="text-center">
-                    ${button}
-                </td>
             </tr>`;
 		});
 
@@ -416,7 +408,7 @@ $(document).ready(function () {
 					// DRAFT
 					button = `
 					<button 
-						class="btn btn-submit" 
+						class="btn btn-submit px-5 p-2"  
 						id="btnSubmit" 
 						loanFormID="${loanFormID}"
 						code="${getFormCode("LNF", createdAt, loanFormID)}"><i class="fas fa-paper-plane"></i>
@@ -446,7 +438,7 @@ $(document).ready(function () {
 					if (isImCurrentApprover(approversID, approversDate)) {
 						button = `
 						<button 
-							class="btn btn-submit" 
+							class="btn btn-submit px-5 p-2"  
 							id="btnApprove" 
 							loanFormID="${encryptString(loanFormID)}"
 							code="${getFormCode("LNF", createdAt, loanFormID)}"><i class="fas fa-paper-plane"></i>
@@ -465,11 +457,11 @@ $(document).ready(function () {
 		} else {
 			button = `
 			<button 
-				class="btn btn-submit" 
+				class="btn btn-submit px-5 p-2"  
 				id="btnSubmit"><i class="fas fa-paper-plane"></i> Submit
 			</button>
 			<button 
-				class="btn btn-cancel" 
+				class="btn btn-cancel btnCancel px-5 p-2" 
 				id="btnCancel"><i class="fas fa-ban"></i> 
 				Cancel
 			</button>`;
@@ -1203,7 +1195,7 @@ $(document).ready(function () {
 			<button class="btn btn-danger" id="btnRejectConfirmation"
 			loanFormID="${id}"
 			code="${feedback}"><i class="far fa-times-circle"></i> Deny</button>
-			<button class="btn btn-cancel" data-dismiss="modal"><i class="fas fa-ban"></i> Cancel</button>
+			<button class="btn btn-cancel btnCancel px-5 p-2" data-dismiss="modal"><i class="fas fa-ban"></i> Cancel</button>
 		</div>`;
 		$("#modal_loan_form_content").html(html);
 	});
