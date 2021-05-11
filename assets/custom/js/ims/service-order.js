@@ -373,7 +373,7 @@ $(document).ready(function() {
 			<tr>
 				<td>${getFormCode("SO", createdAt, serviceOrderID )}</td>
 				<td>${fullname}</td>
-				<td>${serviceRequisitionID  ? getFormCode("SR", isrtCreatedAt, serviceRequisitionID) : "-"}</td>
+				<td>${serviceRequisitionID != "0" ? getFormCode("SR", isrtCreatedAt, serviceRequisitionID) : "-"}</td>
 				<td>${clientName   || '-'}</td>
 				<td>${projectListCode || '-'}</td>
 				<td>${projectListName || '-'}</td>
@@ -478,7 +478,7 @@ $(document).ready(function() {
             <tr>
                 <td>${getFormCode("SO", createdAt, serviceOrderID )}</td>
                 <td>${fullname}</td>
-				<td>${serviceRequisitionID  ? getFormCode("SR", isrtCreatedAt, serviceRequisitionID) : "-"}</td>
+				<td>${serviceRequisitionID != "0" ? getFormCode("SR", isrtCreatedAt, serviceRequisitionID) : "-"}</td>
                 <td>${clientName   || '-'}</td>
                 <td>${projectListCode || '-'}</td>
                 <td>${projectListName || '-'}</td>

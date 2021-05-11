@@ -119,7 +119,7 @@ $(document).ready(function() {
 	const inventoryItemList = getTableData(
 		"ims_inventory_item_tbl LEFT JOIN ims_inventory_category_tbl USING(categoryID)", "ims_inventory_item_tbl.itemID AS itemID, itemCode, itemName, itemDescription ,categoryName, unitOfMeasurementID",
 		"itemStatus = 1");
-	const designationList = getTableData("hris_designation_tbl JOIN hris_employee_list_tbl USING(designationID)","designationID, designationName, MAX(employeeHourlyRate) as designationRate", "designationStatus=1","","designationName");
+	const designationList = getTableData("hris_designation_tbl JOIN hris_employee_list_tbl USING(designationID)","designationID, designationName, MAX(employeeHourlyRate) AS designationRate", "designationStatus=1","","designationName");
 	
 	const itemPriceListData = getTableData("ims_inventory_price_list_tbl");
 	// END GLOBAL VARIABLE - REUSABLE 
@@ -184,114 +184,6 @@ $(document).ready(function() {
 					{ targets: 11, width: 80  },
 				],
 			});
-
-        	var table = $("#tableProjectRequestItems")
-			.css({ "min-width": "100%" })
-			.removeAttr("width")
-			.DataTable({
-				proccessing: false,
-				serverSide: false,
-				scrollX: true,
-				sorting: false,
-                searching: false,
-                paging: false,
-                ordering: false,
-                info: false,
-				scrollCollapse: true,
-				columnDefs: [
-					{ targets: 0,  width: 80  },
-					{ targets: 1,  width: 150 },
-					{ targets: 2,  width: 80 },
-					{ targets: 3,  width: 80  },
-					{ targets: 4,  width: 80  },
-					{ targets: 5,  width: 80  },
-                    { targets: 6,  width: 150 },
-					{ targets: 7,  width: 100 },
-					{ targets: 8,  width: 100 }
-
-				],
-			});
-
-			var table = $("#tableProjectRequestItems0")
-			.css({ "min-width": "100%" })
-			.removeAttr("width")
-			.DataTable({
-				proccessing: false,
-				serverSide: false,
-                paging: false,
-                info: false,
-				scrollX: true,
-				scrollCollapse: true,
-				order: [[ 3, "desc" ]],
-				ordering: false,
-				columnDefs: [
-					{ targets: 0,  width: 80  },
-					{ targets: 1,  width: 150 },
-					{ targets: 2,  width: 80 },
-					{ targets: 3,  width: 80  },
-					{ targets: 4,  width: 80  },
-					{ targets: 5,  width: 80 },
-                    { targets: 6,  width: 150 },
-					{ targets: 7,  width: 100 },
-					{ targets: 8,  width: 100 }
-
-					
-				],
-			});
-
-			var table = $("#tableCompanyRequestItems")
-			.css({ "min-width": "100%" })
-			.removeAttr("width")
-			.DataTable({
-				proccessing: false,
-				serverSide: false,
-				scrollX: true,
-				sorting: false,
-                searching: false,
-                paging: false,
-                ordering: false,
-                info: false,
-				scrollCollapse: true,
-				columnDefs: [
-					{ targets: 0,  width: 80  },
-					{ targets: 1,  width: 150 },
-					{ targets: 2,  width: 80 },
-					{ targets: 3,  width: 80  },
-					{ targets: 4,  width: 80  },
-					{ targets: 5,  width: 80 },
-                    { targets: 6,  width: 150 },
-					{ targets: 7,  width: 100 },
-					{ targets: 8,  width: 100 }
-
-				],
-			});
-
-			var table = $("#tableCompanyRequestItems0")
-			.css({ "min-width": "100%" })
-			.removeAttr("width")
-			.DataTable({
-				proccessing: false,
-				serverSide: false,
-                paging: false,
-                info: false,
-				scrollX: true,
-				scrollCollapse: true,
-				order: [[ 3, "desc" ]],
-				ordering: false,
-				columnDefs: [
-					{ targets: 0,  width: 80  },
-					{ targets: 1,  width: 150 },
-					{ targets: 2,  width: 80 },
-					{ targets: 3,  width: 80  },
-					{ targets: 4,  width: 80  },
-					{ targets: 5,  width: 80 },
-                    { targets: 6,  width: 150 },
-					{ targets: 7,  width: 100 },
-					{ targets: 8,  width: 100 }
-
-				],
-			});
-
 	}
 	// ----- END DATATABLES -----
    
@@ -564,6 +456,7 @@ $(document).ready(function() {
 						button += `
 						<button 
 							class="btn btn-cancel" 
+							bidRecapID="${bidRecapID}"
 							id="btnCancel"
 							revise="${isRevise}"><i class="fas fa-ban"></i> 
 							Cancel
@@ -973,13 +866,13 @@ $(document).ready(function() {
 
 	// ----- SELECT PROJECT LIST -----
     $(document).on("change", "[name=documentID]", function() {
-		const id 					= $(this).val();
-		const projectid 			= $('option:selected',this).attr("projectid");
-        const projectcode           = $('option:selected', this).attr("projectcode");
-        const projectname           = $('option:selected', this).attr("projectname");
-        const clientcode            = $('option:selected', this).attr("clientcode");
-        const clientname            = $('option:selected', this).attr("clientname");
-        const address               = $('option:selected', this).attr("address");
+		const id 			= $(this).val();
+		const projectid 	= $('option:selected',this).attr("projectid");
+        const projectcode   = $('option:selected', this).attr("projectcode");
+        const projectname   = $('option:selected', this).attr("projectname");
+        const clientcode    = $('option:selected', this).attr("clientcode");
+        const clientname    = $('option:selected', this).attr("clientname");
+        const address       = $('option:selected', this).attr("address");
 		$("[name=projectCode]").attr("projectid",projectid);
         $("[name=projectCode]").val(projectcode);
         $("[name=projectName]").val(projectname);
@@ -992,9 +885,22 @@ $(document).ready(function() {
 
         let itemProjectTableBody = requestItemData(id, "project");
 		let itemCompanyTableBody = requestItemData(id, "company");
-		let alertConfirmation 	 = priceListValidation.length > 0 ? `<div class="alert alert-warning py-1 text-center" role="alert">
-																			<small class="font-weight-bold"><i class="fa fa-exclamation-circle text-warning font-weight-bold"></i> Cannot process. Set a price for each item on the item price list first.</small>
-																	</div>` : ``;
+		let alertConfirmation 	 = ``;
+		if(priceListValidation.length > 0){
+			alertConfirmation 	 = `<div class="alert alert-warning py-1 text-center" role="alert">
+											<small class="font-weight-bold"><i class="fa fa-exclamation-circle text-warning font-weight-bold"></i> Cannot process. Set a price for each item on the item price list first.</small>
+										</div>`;
+			let newSetPriceListValidation = [...new Set(priceListValidation)];
+			newSetPriceListValidation.map(items=>{
+				var itemsSplit = items.split("|");
+				showNotification("warning2", 
+				`Please set item code <strong>${getFormCode("ITM",moment(itemsSplit[0]), itemsSplit[1])}</strong> into Item price list module to proceed in this proccess`);
+			});
+		}
+						
+
+
+										
 		$("#alert-confirmation").hide();
         setTimeout(() => {
 			$("#alert-confirmation").html(alertConfirmation);
@@ -1107,13 +1013,19 @@ $(document).ready(function() {
 	// GETTING THE GRAND TOTAL OF TWO CATEGORIES
 		function getGrandTotal(){
 			// itemTableRowTotal
-			let grandTotal = 0;
+			let grandTotal = 0, projectTotal=0, companyTotal=0;
 			$(".itemTableRowTotal").each(function(i, obj) {
-				
 				let totalCost = $(this).find(".totalCost").text().replaceAll("₱","").replaceAll(",","");
+				if($(this).find(".totalCost").attr("category") === "project"){
+					projectTotal += parseFloat(totalCost);
+				}else{
+					companyTotal += parseFloat(totalCost);
+				}
 				grandTotal += parseFloat(totalCost);
 			});
-			
+
+			$("#bidRecapProjectTotal").text(formatAmount(projectTotal,true));
+			$("#bidRecapCompanyTotal").text(formatAmount(companyTotal,true));
 			$("#bidRecapGrandTotal").text(formatAmount(grandTotal,true));
 		}
 	// END GETTING THE GRAND TOTAL OF TWO CATEGORIES
@@ -1361,18 +1273,19 @@ $(document).ready(function() {
 				<div class="w-100">
 					<hr class="pb-1">
 					<div class="text-primary font-weight-bold" style="font-size: 1.5rem;">Project Materials and Equipment</div>
-                    <table class="table table-striped" id="${tableProjectRequestItemsName}">
+                    <table class="table table-striped table-bordered table-responsive-xl">
                         <thead>
-                            <tr style="white-space: nowrap">
-                                <th>Item Code</th>
-                                <th>Item Name</th>
-                                <th>UOM</th>
-                                <th>Requested</th>
-                                <th>Stocked ${!disabled ? "<code>*</code>" : ""}</th>
-                                <th>For Purchase</th>
-                                <th>File</th>
-								<th class="text-right">Unit Cost</th>
-								<th class="text-right">Total Cost</th>
+							<tr style="white-space: nowrap">
+								<th style="width:20%;">Vendor Name</th>
+								<th style="width: 100px">Item Code</th>
+                                <th style="width: 20%">Item Name</th>
+                                <th style="width: 80px">UOM</th>
+                                <th style="width: 80px" class="text-center">Requested</th>
+                                <th style="width: 80px" class="text-center">Stocked</th>
+                                <th style="width: 150px" class="text-center">For Purchase</th>
+                                <th style="width: 80px">File</th>
+								<th style="width: 50px" class="text-right">Unit Cost</th>
+								<th style="width: 50px" class="text-right">Total Cost</th>
                             </tr>
                         </thead>
                         <tbody class="itemProjectTableBody" project="true"></tbody>
@@ -1381,18 +1294,19 @@ $(document).ready(function() {
 				<div class="w-100">
 					<hr class="pb-1">
 					<div class="text-primary font-weight-bold" style="font-size: 1.5rem;">Company Materials and Equipment</div>
-                    <table class="table table-striped" id="${tableCompanyRequestItemsName}">
+                    <table class="table table-striped table-bordered table-responsive-xl">
                         <thead>
-                            <tr style="white-space: nowrap">
-								<th>Item Code</th>
-                                <th>Item Name</th>
-                                <th>UOM</th>
-                                <th>Requested</th>
-                                <th>Stocked ${!disabled ? "<code>*</code>" : ""}</th>
-                                <th>For Purchase</th>
-                                <th>File</th>
-								<th class="text-right">Unit Cost</th>
-								<th class="text-right">Total Cost</th>
+							<tr style="white-space: nowrap">
+								<th style="width:20%;">Vendor Name</th>
+								<th style="width: 100px">Item Code</th>
+                                <th style="width: 20%">Item Name</th>
+                                <th style="width: 80px">UOM</th>
+                                <th style="width: 80px" class="text-center">Requested</th>
+                                <th style="width: 80px" class="text-center">Stocked</th>
+                                <th style="width: 150px" class="text-center">For Purchase</th>
+                                <th style="width: 80px">File</th>
+								<th style="width: 50px" class="text-right">Unit Cost</th>
+								<th style="width: 50px" class="text-right">Total Cost</th>
                             </tr>
                         </thead>
                         <tbody class="itemCompanyTableBody" company="true"></tbody>
@@ -1400,7 +1314,17 @@ $(document).ready(function() {
                 </div>
             </div>
 			<div class="col-sm-12 mt-3">
-				<div class="w-100 d-flex justify-content-end align-items-end py-2">
+				<div class="w-100 text-right py-2">
+					<div class="font-weight-bolder" style="font-size: 1rem;">
+						<span>Project Total Cost: &nbsp;</span>
+						<span class="text-danger" style="font-size: 1.2em" id="bidRecapProjectTotal"></span>
+					</div>
+
+					<div class="font-weight-bolder" style="font-size: 1rem;">
+						<span>Company Total Cost: &nbsp;</span>
+						<span class="text-danger" style="font-size: 1.2em" id="bidRecapCompanyTotal"></span>
+					</div>
+
 					<div class="font-weight-bolder" style="font-size: 1rem;">
 						<span>Grand Total: &nbsp;</span>
 						<span class="text-danger" style="font-size: 1.2em" id="bidRecapGrandTotal"></span>
@@ -1513,6 +1437,8 @@ $(document).ready(function() {
 			data["documentID"] 			  = documentID;
 			data["referenceCode"] 		  = referenceCode;
 			data["bidRecapReason"] 	  	  = $("[name=bidRecapReason]").val()?.trim();
+			data["bidRecapProjectTotal"]  = $("#bidRecapProjectTotal").text().replaceAll("₱","").replaceAll(",","");;
+			data["bidRecapCompanyTotal"]  = $("#bidRecapCompanyTotal").text().replaceAll("₱","").replaceAll(",","");;
 			data["bidRecapGrandTotal"] 	  = $("#bidRecapGrandTotal").text().replaceAll("₱","").replaceAll(",","");
 			
 		
@@ -1538,35 +1464,32 @@ $(document).ready(function() {
 			}
 
 			$(".itemTableRow").each(function(i, obj) {
-				var itemID 	  				= $(this).find(".itemcode").attr("itemid");
-				var inventoryValidationID	= $(this).find(".itemcode").attr("inventoryvalidationid");
-				var itemsTableData 			= inventoryItemList.filter(items=> items.itemID == itemID);
-				var requestItemsData 		= getTableData("ims_request_items_tbl","costEstimateID","	inventoryValidationID="+inventoryValidationID); 
-				
-
+				var requestItemID 			= $(this).find(".itemcode").attr("requestitem");
+				var requestItemsData 		= getTableData("ims_request_items_tbl",
+															`costEstimateID,inventoryValidationID,itemID,itemName,itemDescription,itemUom,quantity,files`,
+															"requestItemID="+requestItemID); 
 				var temp = {
-					requestItemID:			$(this).find(".itemcode").attr("requestitem"),
 					costEstimateID: 		requestItemsData[0].costEstimateID,
-					inventoryValidationID:	inventoryValidationID,
+					inventoryValidationID:	requestItemsData[0].inventoryValidationID,
 					category:				$(this).attr("category"),
-					itemID:					itemID,
-					itemname:				$(this).find(".itemname").text(),
-					itemUom:				$(this).find(".uom").text(),
-					itemDescription:		itemsTableData[0].itemDescription,
-					quantity:				$(this).find(".qtyrequested").text(),
+					inventoryVendorID:		$(this).find(".itemcode").attr("vendorID"),
+					inventoryVendorName:	$(this).find(".itemcode").attr("vendorName"),
+					itemID:					requestItemsData[0].itemID,
+					itemname:				requestItemsData[0].itemName,
+					itemDescription:		requestItemsData[0].itemDescription,
+					itemUom:				requestItemsData[0].itemUom,
+					quantity:				requestItemsData[0].quantity,
 					stocks:					$(this).find(".stocks").text(),
 					forPurchase:			$(this).find(".forpurchase").text(),
-					file:					$(this).find(".file").text(),
+					file:					requestItemsData[0].files,
 					unitCost:				$(this).find(".unitCost").text().replaceAll("₱","").replaceAll(",",""),
 					totalCost:				$(this).find(".totalCost").text().replaceAll("₱","").replaceAll(",",""),
+					createdBy: 				sessionID,
 					updatedBy:				sessionID
 				};
 				data[`items`].push(temp);
 			});
 		} 
-
-		
-
 		return data;
 	}
 	// ----- END GET Inventory Validation DATA -----
@@ -1699,7 +1622,7 @@ $(document).ready(function() {
 				priceListValidation.map(items=>{
 					var splitItems = items.split("|");
 					showNotification("warning2",
-					`Please set item code <strong>${getFormCode("ITM",moment(splitItems[0]), splitItems[1])}</strong> into inventory price list module to proceed in this proccess`)
+					`Please set item code <strong>${getFormCode("ITM",moment(splitItems[0]), splitItems[1])}</strong> into Item price list module to proceed in this proccess`)
 				});
 			}else{
 				savebidRecapID(data, "submit", notificationData, pageContent);
@@ -1901,130 +1824,125 @@ $(document).ready(function() {
 
     // GETTING REQUEST ITEMS 
         function requestItemData(id, type, readOnly = false, requestID = null){
-			let html = "", requestedQty=0, stocksQty=0, forPurchaseQty=0, totalUnitCost=0, grandTotalCost=0;
-			// AND bidRecapID IS NOT NULL
+			let html = "", totalRequestedQty=0, totalStocksQty=0, totalForPurchaseQty=0, totalUnitCost=0, grandTotalCost=0;
+			let joinedTableData = [], vendorArr = [];
 			let condition = requestID ? requestID : `inventoryValidationID='${id}' AND bidRecapID IS NULL`;
             let tableData = getTableData("ims_request_items_tbl JOIN ims_inventory_item_tbl USING(itemID)",
-                                        "requestItemID, inventoryValidationID , bidRecapID, ims_inventory_item_tbl.itemID AS itemID, categoryType ,ims_inventory_item_tbl.createdAt AS createdAt ,ims_request_items_tbl.itemName as itemName, ims_request_items_tbl.itemDescription as itemDescription,itemUom,quantity,stocks,forPurchase,files,unitCost,totalCost",
-                                        `${condition} AND categoryType='${type}'`);
-				tableData.map((items,index)=>{ 
-					let files = items.files ? `<a class="filename" href="${base_url+"assets/upload-files/request-items/"+items.files}" 
-													target="_blank">${items.files}
-											  </a>`:"-";
-                                        if (readOnly) {
-											var unitCost = items.unitCost, totalCost = items.totalCost;
-                                            html += `
-                                            <tr class="itemTableRow" category="${type}">
-                                                <td>
-                                                    <div class="itemcode" requestitem="${items.requestItemID}" itemid="${items.itemID}" inventoryValidationID="${items.inventoryValidationID}">
-														${getFormCode("ITM",moment(items.createdAt), items.itemID)}
-													</div>
-                                                </td>
-                                                <td>
-                                                    <div class="itemname">${items.itemName}</div>
-                                                </td>
-												<td>
-                                                    <div class="uom">${items.itemUom}</div>
-                                                </td>
-												<td class="text-center">
-                                                    <div class="qtyrequested">${items.quantity}</div>
-                                                </td>
-                                                <td class="text-center">
-                                                    <div class="stocks">${items.stocks}</div>
-                                                </td>
-                                                <td class="text-center">
-                                                    <div class="forpurchase">${items.forPurchase}</div>
-                                                </td>
-                                                <td>
-                                                    <div class="file">${files}</div>
-                                                </td>
-												<td class="text-right">
-                                                    <div class="unitCost">${formatAmount(unitCost,true)}</div>
-                                                </td>
-												<td class="text-right">
-                                                    <div class="totalCost">${formatAmount(totalCost,true)}</div>
-                                                </td>
-                                            </tr>`;
-                                        } else {
-											var priceListArray 	= itemPriceListData.filter(priceListItems => priceListItems.itemID == items.itemID  && priceListItems.preferred == 1);
-											if(priceListArray.length < 1){
-												priceListValidation.push(items.createdAt+"|"+items.itemID);
-												var unitCost 		= 0;
-												var totalCost 		= 0;
-												showNotification("warning2", 
-														`Please set item code <strong>${getFormCode("ITM",moment(items.createdAt), items.itemID)}</strong> into inventory price list module to proceed in this proccess`);
-											}else{
-												var unitCost 		= priceListArray[0].vendorCurrentPrice;
-												var totalCost 		= parseFloat(items.forPurchase) * parseFloat(unitCost);
-											}
-
-												html += `
-														<tr class="itemTableRow" category="${type}">
-															<td>
-																<div class="itemcode" requestitem="${items.requestItemID}" itemid="${items.itemID}" inventoryValidationID="${items.inventoryValidationID}">${getFormCode("ITM",moment(items.createdAt), items.itemID)}</div>
-															</td>
-															<td>
-																<div class="itemname">${items.itemName}</div>
-															</td>
-															<td>
-																<div class="uom">${items.itemUom}</div>
-															</td>
-															<td class="text-center">
-																<div class="qtyrequested">${items.quantity}</div>
-															</td>
-															<td class="text-center">
-																<div class="stocks">${items.stocks || "0"}</div>
-															</td>
-															<td class="text-center">
-																<div class="forpurchase">${items.forPurchase || "0"}</div>
-															</td>
-															<td>
-																<div class="file">
-																	${files}
-																</div>
-															</td>
-															<td>
-																<div class="unitCost text-right">${formatAmount(unitCost,true)}</div>
-															</td>
-															<td>
-																<div class="totalCost text-right">${formatAmount(totalCost,true)}</div>
-															</td>
-														</tr>`;
-                                        }
-					requestedQty		+= parseFloat(items.quantity);
-					stocksQty			+= parseFloat(items.stocks || "0");
-					forPurchaseQty		+= parseFloat(items.forPurchase || "0");
-					totalUnitCost		+= parseFloat(unitCost); 
-					grandTotalCost		+= parseFloat(totalCost);
+										`requestItemID, inventoryValidationID , bidRecapID, 
+										ims_inventory_item_tbl.itemID AS itemID, categoryType ,ims_inventory_item_tbl.createdAt AS createdAt ,
+										ims_request_items_tbl.itemName AS itemName, ims_request_items_tbl.itemDescription AS itemDescription,
+										ims_request_items_tbl.inventoryVendorID AS inventoryVendorID, ims_request_items_tbl.inventoryVendorName AS inventoryVendorName,
+										itemUom,quantity,stocks,forPurchase,files,unitCost,totalCost`,
+										`${condition} AND categoryType='${type}'`);
+				tableData.map(items=>{
+					var tempData = items;
+					var priceListArray;
+						if(readOnly){
+							priceListArray = tableData.filter(thisItems => thisItems.itemID == items.itemID);
+						}else{
+							priceListArray = itemPriceListData.filter(priceListItems => priceListItems.itemID == items.itemID  && priceListItems.preferred == 1);	
+						}
+					var priceListCondition          = priceListArray.length < 1;
+					priceListCondition ? priceListValidation.push(tempData.createdAt+"|"+tempData.itemID) : ``;
+					tempData["inventoryVendorID"] 	=  !priceListCondition ? priceListArray[0].inventoryVendorID 	: `-`;
+					tempData["inventoryVendorName"] =  !priceListCondition ? priceListArray[0].inventoryVendorName 	: `-`;
+					tempData["vendorCurrentPrice"] 	=  !priceListCondition ? (priceListArray[0].vendorCurrentPrice || priceListArray[0].unitCost) 	: `0`;
+					!priceListCondition ? vendorArr.push(priceListArray[0].inventoryVendorID) : ``;
+					joinedTableData.push(tempData);
 				});
-			
-				html += `
-							<tr class="itemTableRowTotal mt-2" category="${type}" style="background-color:#f2f2f2;">
-								<th>-</th>
-								<th>-</th>
-								<th>-</th>
-								<th class="text-center mt-2">
-									<div class="qtyrequested text-danger">${requestedQty}</div>
-								</th>
-								<th class="text-center mt-2">
-									<div class="stocks text-danger">${stocksQty}</div>
-								</th>
-								<th class="text-center mt-2">
-									<div class="forpurchase text-danger">${forPurchaseQty}</div>
-								</th>
-								<th class="mt-2 text-danger">-</th>
-								<th class="mt-2">
-									<div class="unitCost text-right text-danger">${formatAmount(totalUnitCost,true)}</div>
-								</th>
-								<th class="mt-2">
-									<div class="totalCost text-right text-danger">${formatAmount(grandTotalCost,true)}</div>
-								</th>
-							</tr>
-						`;
+				let newSetVendorArr = [...new Set(vendorArr)];
+				newSetVendorArr.map((items,index)=>{
+					var vendorRequested=0, vendorStocks=0, vendorForPurchase=0, vendorUnitCost=0, vendorTotalCost=0;
+					let vendorItemsArr 		= joinedTableData.filter(joinedItems => joinedItems.inventoryVendorID == items);
+					let vendorItemsLength 	= vendorItemsArr.length;
+					let vendorRowspanArr	= [];
+					
+						// MAPPING FOR THE ROWSPAN;
+							vendorItemsArr.map((items,index)=>{
+								var tempData = index == 0 ? `<td class="font-weight-bold" rowspan="${vendorItemsLength}">${items.inventoryVendorName}</td>`
+											:``;
+								vendorRowspanArr.push(tempData);
+							});
+						// END MAPPING FOR THE ROWSPAN;
+						
+						// MAPPING THE ITEMS OF TABLE DATA
+							html += vendorItemsArr.map((joinedItems,joinedIndex)=>{
+								var returnData 	= "";
+								var unitCost 	= parseFloat(joinedItems.vendorCurrentPrice);
+								var totalCost 	= parseFloat(joinedItems.forPurchase) * parseFloat(unitCost);
+								var files = items.files ? `<a class="filename" href="${base_url+"assets/upload-files/request-items/"+joinedItems.files}" 
+																	target="_blank">${joinedItems.files}
+															</a>`:"-";
+								
+										returnData += `
+												<tr class="itemTableRow" category="${type}">
+													${vendorRowspanArr[joinedIndex]}
+													<td>
+														<div class="itemcode" 
+														requestitem="${joinedItems.requestItemID}"
+														vendorID="${joinedItems.inventoryVendorID}"
+														vendorName="${joinedItems.inventoryVendorName}"
+														itemid="${joinedItems.itemID}" 
+														inventoryValidationID="${joinedItems.inventoryValidationID}">${getFormCode("ITM",moment(joinedItems.createdAt), joinedItems.itemID)}</div>
+													</td>
+													<td>
+														<div class="itemname">${joinedItems.itemName}</div>
+													</td>
+													<td>
+														<div class="uom">${joinedItems.itemUom}</div>
+													</td>
+													<td class="text-center">
+														<div class="qtyrequested">${joinedItems.quantity}</div>
+													</td>
+													<td class="text-center">
+														<div class="stocks">${joinedItems.stocks || "0"}</div>
+													</td>
+													<td class="text-center">
+														<div class="forpurchase">${joinedItems.forPurchase || "0"}</div>
+													</td>
+													<td>
+														<div class="file">
+															${files}
+														</div>
+													</td>
+													<td>
+														<div class="unitCost text-right">${formatAmount(unitCost,true)}</div>
+													</td>
+													<td>
+														<div class="totalCost text-right">${formatAmount(totalCost,true)}</div>
+													</td>
+												</tr>`;
+
+								// ADD THE FOLLOWING;
+									vendorRequested		+= parseFloat(joinedItems.quantity), 
+									vendorStocks		+= parseFloat(joinedItems.stocks), 
+									vendorForPurchase	+= parseFloat(joinedItems.forPurchase), 
+									vendorUnitCost		+= parseFloat(unitCost), 
+									vendorTotalCost		+= parseFloat(totalCost);
+								return returnData;
+							});
+						// END  MAPPING THE ITEMS OF TABLE DATA
+
+						// TABLE ROW FOR TOTALS
+						html += `
+								<tr class="itemTableRowTotal" category="${type}" style="background-color: #dc3450;">
+									<td class="font-weight-bold text-light" colspan="4">SUBTOTAL</td>
+									<td class="font-weight-bold text-light text-center">${vendorRequested}</td>
+									<td class="font-weight-bold text-light text-center">${vendorStocks}</td>
+									<td class="font-weight-bold text-light text-center">${vendorForPurchase}</td>
+									<td class="font-weight-bold text-light">-</td>
+									<td class="font-weight-bold text-light text-right">${formatAmount(vendorUnitCost,true)}</td>
+									<td class="font-weight-bold text-light text-right"><span class="totalCost" category="${type}">${formatAmount(vendorTotalCost,true)}</span></td>
+								</tr>`;
+						// END TABLE ROW FOR TOTALS
+
+				}) // END MAPPING OF "newSetVendorArr"
+
+
+
             return html;
         }
     // END GETTING REQUEST ITEMS
-
 
 
 	// CHECK IF THE DOCUMENT IS ALREADY REVISED
@@ -2032,6 +1950,7 @@ $(document).ready(function() {
 		let revised = false;
 		var tableData = getTableData("ims_bid_recap_tbl","reviseBidRecapID",`reviseBidRecapID=`+id);
 		revised = tableData.length > 0 ? true : false;
+		console.log(tableData);
 		return revised; 
 	}
 	// END CHECK IF THE DOCUMENT IS ALREADY REVISED

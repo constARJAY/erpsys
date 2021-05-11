@@ -189,18 +189,21 @@ $(document).on("click",".priceListRow-show-more",function(){
               let priceListData =  getTableData("ims_inventory_price_list_tbl","","itemID="+itemID);
               let title         = priceListData.length > 0 ? `UPDATE PRICE LIST`:`ADD PRICE LIST`;
               let text          = priceListData.length > 0 ? `update the price list`:`add a new price list`;
+              let subTitle      = priceListData.length > 0 ? `Update price list`:`Add new price list`;
             let validation  = validateForm("modal_price_list_form");
             if(validation){
                     var arrData = {id:itemID,items:[]};
                     $("#modal_price_list_form")
                         .find("select[required]")
                         .each(function (i) {
-                            var vendorName    = this.value;
+                            var vendorID    = this.value;
+                            var vendorName  = $('option:selected',this).attr("vendorname");
                             var currentPrice  = $(this).closest("tr").find("input[name=vendorCurrentPrice]").val();
                             var preffered     = $(this).closest("tr").find("input[name=preferred]").prop("checked");
                             var dateUpdated   = $(this).closest("tr").find(".dateupdated").text();
                                 arrData[`items[${i}][itemID]`]              = itemID;
-                                arrData[`items[${i}][inventoryVendorID]`]   = vendorName;
+                                arrData[`items[${i}][inventoryVendorID]`]   = vendorID;
+                                arrData[`items[${i}][inventoryVendorName]`] = vendorName;
                                 arrData[`items[${i}][vendorCurrentPrice]`]  = currentPrice.replaceAll(",","");
                                 arrData[`items[${i}][preferred]`]           = preffered ? "1" : "0";
                                 arrData[`items[${i}][updatedAt]`]           = moment(dateUpdated).format("YYYY-MM-DD hh:mm:ss");;
@@ -235,7 +238,7 @@ $(document).on("click",".priceListRow-show-more",function(){
                                     if(condition[0]){
                                         Swal.fire({
                                             icon:  'success',
-                                            title: "Add new price list successfully saved!",
+                                            title: `${subTitle} successfully saved!`,
                                             showConfirmButton: false,
                                             timer: 2000
                                         }).then(reInit(itemID));
@@ -360,7 +363,7 @@ function tableContent(classificationID){
                         // FETCHING DATA FROM PRICE LIST TABLE
                         var priceListDescription = "";
                         var priceListData = getTableData("ims_inventory_price_list_tbl LEFT JOIN ims_inventory_vendor_tbl USING(inventoryVendorID)",
-                                                         "ims_inventory_price_list_tbl.*,inventoryVendorCode,inventoryVendorName","itemID="+item.itemID);
+                                                         "ims_inventory_price_list_tbl.*,inventoryVendorCode","itemID="+item.itemID);
                             if(priceListData.length < 1){
                                 priceListDescription += "<div class='w-100 text-left'>-</div>";
                             }else{
@@ -449,6 +452,7 @@ function getVendorOptions(){
                     <option 
                         value        = "${item.inventoryVendorID}" 
                         vendorcode   = "${item.inventoryVendorCode}"
+                        vendorname   = "${item.inventoryVendorName}"
                         ${item.inventoryVendorID == vendorListArr[index] && "selected"}>
                         ${item.inventoryVendorName} 
                     </option>`;

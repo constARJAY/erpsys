@@ -18,9 +18,13 @@ class BidRecap_model extends CI_Model {
         }
 
         if ($query) {
-            $insertID = $action == "insert" ? $this->db->insert_id() : $id;
+            if($data["bidRecapStatus"] == "2"){
+                $this->creatingPO($id);
+            }
+            $insertID = $action == "insert" ? $this->db->insert_id() : $id;            
             return "true|Successfully submitted|$insertID|".date("Y-m-d");
         }
+
         return "false|System error: Please contact the system administrator for assistance!";
     }
 
@@ -39,6 +43,20 @@ class BidRecap_model extends CI_Model {
             return "true|Successfully submitted";
         }
         return "false|System error: Please contact the system administrator for assistance!";
+    }
+
+    public function creatingPO($id){
+        // WHERE bidRecapID = $id AND inventoryVendorID = $vendorID;
+         $sql            = "SELECT * FROM `ims_request_items_tbl` WHERE bidRecapID = '$id' GROUP BY inventoryVendorID";
+         $query          = $this->db->query($sql);
+         $lastPOQuery    = $this->db->query("SELECT purchaseOrderID FROM ims_request_items_tbl ORDER BY purchaseOrderID  DESC LIMIT 1");
+         $lastPOResult   = $lastPOQuery->result_array();
+         $lastPO         = $lastPOResult[0]["purchaseOrderID"] ? $lastPOResult[0]["purchaseOrderID"] : 1;
+            foreach($query->result_array() as $row){
+                $poID               = $lastPO ++;
+                $inventoryVendorID  = $row["inventoryVendorID"];
+                $itemsQuery         = $this->db->query("UPDATE ims_request_items_tbl SET `purchaseOrderID` = '$poID' WHERE bidRecapID = '$id' AND inventoryVendorID = '$inventoryVendorID'");
+            }
     }
     
 }

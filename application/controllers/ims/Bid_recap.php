@@ -20,22 +20,24 @@ class Bid_recap extends CI_Controller {
     }
 
     public function save_bid_recap(){
-        $action           = $this->input->post("action");
-        $method           = $this->input->post("method");
-        $bidRecapID       = $this->input->post("bidRecapID") ?? null;
-        $reviseBidRecapID = $this->input->post("reviseBidRecapID") ?? null;
-        $employeeID       = $this->input->post("employeeID");
-        $projectID        = $this->input->post("projectID") ?? null;
-        $documentType     = $projectID == null ? "pr":"ce";
-        $documentID       = $this->input->post("documentID") ?? null;
-        $referenceCode    = $this->input->post("referenceCode") ?? null;
-        $approversID      = $this->input->post("approversID") ?? null;
-        $approversStatus  = $this->input->post("approversStatus") ?? null;
-        $approversDate    = $this->input->post("approversDate") ?? null;
-        $bidRecapStatus   = $this->input->post("bidRecapStatus");
-        $bidRecapReason   = $this->input->post("bidRecapReason") ?? null;
-        $bidRecapRemarks  = $this->input->post("bidRecapRemarks") ?? null;
-        $bidRecapGrandTotal = $this->input->post("bidRecapGrandTotal") ?? null;
+        $action               = $this->input->post("action");
+        $method               = $this->input->post("method");
+        $bidRecapID           = $this->input->post("bidRecapID") ?? null;
+        $reviseBidRecapID     = $this->input->post("reviseBidRecapID") ?? null;
+        $employeeID           = $this->input->post("employeeID");
+        $projectID            = $this->input->post("projectID") ?? null;
+        $documentType         = $projectID == null ? "pr":"ce";
+        $documentID           = $this->input->post("documentID") ?? null;
+        $referenceCode        = $this->input->post("referenceCode") ?? null;
+        $approversID          = $this->input->post("approversID") ?? null;
+        $approversStatus      = $this->input->post("approversStatus") ?? null;
+        $approversDate        = $this->input->post("approversDate") ?? null;
+        $bidRecapStatus       = $this->input->post("bidRecapStatus");
+        $bidRecapReason       = $this->input->post("bidRecapReason") ?? null;
+        $bidRecapRemarks      = $this->input->post("bidRecapRemarks") ?? null;
+        $bidRecapProjectTotal = $this->input->post("bidRecapProjectTotal") ?? null;
+        $bidRecapCompanyTotal = $this->input->post("bidRecapCompanyTotal") ?? null;
+        $bidRecapGrandTotal   = $this->input->post("bidRecapGrandTotal") ?? null;
         $submittedAt      = $this->input->post("submittedAt") ?? null;
         $createdBy        = $this->input->post("createdBy");
         $updatedBy        = $this->input->post("updatedBy");
@@ -43,22 +45,24 @@ class Bid_recap extends CI_Controller {
         $items            = $this->input->post("items") ?? null;
 
         $bidRecapData = [
-            "reviseBidRecapID"   => $reviseBidRecapID,
-            "documentType"       => $documentType,
-            "documentID"         => $documentID,
-            "referenceCode"      => $referenceCode,
-            "employeeID"         => $employeeID,
-            "projectID"          => $projectID,
-            "approversID"        => $approversID,
-            "approversStatus"    => $approversStatus,
-            "approversDate"      => $approversDate,
-            "bidRecapStatus"     => $bidRecapStatus,
-            "bidRecapReason"     => $bidRecapReason,
-            "bidRecapGrandTotal" => $bidRecapGrandTotal,
-            "submittedAt"        => $submittedAt,
-            "createdBy"          => $createdBy,
-            "updatedBy"          => $updatedBy,
-            "createdAt"          => $createdAt
+            "reviseBidRecapID"      => $reviseBidRecapID,
+            "documentType"          => $documentType,
+            "documentID"            => $documentID,
+            "referenceCode"         => $referenceCode,
+            "employeeID"            => $employeeID,
+            "projectID"             => $projectID,
+            "approversID"           => $approversID,
+            "approversStatus"       => $approversStatus,
+            "approversDate"         => $approversDate,
+            "bidRecapStatus"        => $bidRecapStatus,
+            "bidRecapReason"        => $bidRecapReason,
+            "bidRecapProjectTotal"  => $bidRecapProjectTotal,
+            "bidRecapCompanyTotal"  => $bidRecapCompanyTotal,
+            "bidRecapGrandTotal"    => $bidRecapGrandTotal,
+            "submittedAt"           => $submittedAt,
+            "createdBy"             => $createdBy,
+            "updatedBy"             => $updatedBy,
+            "createdAt"             => $createdAt
         ];
 
         if ($action == "update") {
@@ -69,22 +73,22 @@ class Bid_recap extends CI_Controller {
             if ($method == "cancelform") {
                 $bidRecapData = [
                     "bidRecapStatus" => 4,
-                    "updatedBy"             => $updatedBy,
+                    "updatedBy"      => $updatedBy,
                 ];
             } else if ($method == "approve") {
                 $bidRecapData = [
-                    "approversStatus"       => $approversStatus,
-                    "approversDate"         => $approversDate,
+                    "approversStatus"=> $approversStatus,
+                    "approversDate"  => $approversDate,
                     "bidRecapStatus" => $bidRecapStatus,
-                    "updatedBy"             => $updatedBy,
+                    "updatedBy"      => $updatedBy,
                 ];
             } else if ($method == "deny") {
                 $bidRecapData = [
-                    "approversStatus"        => $approversStatus,
-                    "approversDate"          => $approversDate,
+                    "approversStatus" => $approversStatus,
+                    "approversDate"   => $approversDate,
                     "bidRecapStatus"  => 3,
                     "bidRecapRemarks" => $bidRecapRemarks,
-                    "updatedBy"              => $updatedBy,
+                    "updatedBy"       => $updatedBy,
                 ];
             }
         }
@@ -102,6 +106,8 @@ class Bid_recap extends CI_Controller {
                             "bidRecapID"            => $bidRecapID,
                             "costEstimateID"        => $item["costEstimateID"],
                             "inventoryValidationID" => $item["inventoryValidationID"],
+                            "inventoryVendorID"     => $item["inventoryVendorID"],
+                            "inventoryVendorName"   => $item["inventoryVendorName"],
                             "categoryType"          => $item["category"],
                             "itemID"                => $item["itemID"],
                             "itemname"              => $item["itemname"],
