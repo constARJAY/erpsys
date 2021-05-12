@@ -1948,13 +1948,25 @@ $(document).ready(function() {
 	});
 	// ----- END SAVE DOCUMENT -----
 
+	// ----- REMOVE IS-VALID IN TABLE -----
+	function removeIsValid(element = "table") {
+		$(element).find(".validated, .is-valid, .no-error").removeClass("validated")
+		.removeClass("is-valid").removeClass("no-error");
+	}
+	// ----- END REMOVE IS-VALID IN TABLE -----
+
 
     // ----- SUBMIT DOCUMENT -----
 	$(document).on("click", "#btnSubmit", function () {
 		const id           = $(this).attr("costEstimateID");
 		const revise       = $(this).attr("revise") == "true";
 		const validate     = validateForm("form_cost_estimate");
-
+		
+		removeIsValid("#tablePersonnelRequest");
+		removeIsValid("#tableProjectRequestItems");
+		removeIsValid("#tableCompanyRequestItems");
+		removeIsValid("#tableTravelRequest");
+		
 		if (validate) {
 			const action = revise && "insert" || (id ? "update" : "insert");
 			const data   = getcostEstimateData(action, "submit", "1", id);
@@ -2308,12 +2320,12 @@ $(document).ready(function() {
 			<tr class="itemTableRow">
 				<td>
 					<div class="itemcode">
-						${itemCode}
+						${itemCode || "-"}
 					</div>
 				</td>
 				<td>
 					<div class="itemname">
-						${itemName}
+						${itemName || "-"}
 					</div>
 				</td>
 				<td class="text-center">
@@ -2323,7 +2335,7 @@ $(document).ready(function() {
 				</td>
 				<td>
 					<div class="uom">
-						${uom}
+						${uom || "-"}
 					</div>
 				</td>
 				<td>

@@ -9,7 +9,7 @@
                         <li class="breadcrumb-item active">Bid Recap</li>
                     </ul>
                     <h1 class="mt-3">Bid Recap</h1>
-                    <span>This module is used to manage inventory validation form details.</span>
+                    <span>This module is used to manage bid recap form details.</span>
                 </div>
                 <div class="col-lg-6 col-md-6 text-right" id="headerButton"></div>
             </div>

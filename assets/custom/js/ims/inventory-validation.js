@@ -333,9 +333,9 @@ $(document).ready(function() {
                 <tr style="white-space: nowrap">
                     <th>Document No.</th>
                     <th>Employee Name</th>
+					<th>Reference No.</th>
                     <th>Project Code</th>
                     <th>Project Name</th>
-					<th>Reference No.</th>
                     <th>Current Approver</th>
                     <th>Date Created</th>
                     <th>Date Submitted</th>
@@ -383,9 +383,9 @@ $(document).ready(function() {
 				<tr>
 					<td>${getFormCode("IVR", createdAt, inventoryValidationID )}</td>
 					<td>${fullname}</td>
+					<td>${referenceNumber}</td>
 					<td>${projectListCode || '-'}</td>
 					<td>${projectListName || '-'}</td>
-					<td>${referenceNumber}</td>
 					<td>
 						${employeeFullname(getCurrentApprover(approversID, approversDate, inventoryValidationStatus, true))}
 					</td>
@@ -432,9 +432,9 @@ $(document).ready(function() {
                 <tr style="white-space: nowrap">
                     <th>Document No.</th>
                     <th>Employee Name</th>
+					<th>Reference No.</th>
                     <th>Project Code</th>
                     <th>Project Name</th>
-					<th>Reference No.</th>
                     <th>Current Approver</th>
                     <th>Date Created</th>
                     <th>Date Submitted</th>
@@ -480,9 +480,9 @@ $(document).ready(function() {
             <tr>
                 <td>${getFormCode("IVR", createdAt, inventoryValidationID )}</td>
                 <td>${fullname}</td>
+				<td>${referenceNumber}</td>
                 <td>${projectListCode || '-'}</td>
                 <td>${projectListName || '-'}</td>
-				<td>${referenceNumber}</td>
                 <td>
                     ${employeeFullname(getCurrentApprover(approversID, approversDate, inventoryValidationStatus, true))}
                 </td>
@@ -1305,7 +1305,7 @@ $(document).ready(function() {
                         style="width: 100%"
                         required
 						${inventoryValidationID == "" ? ``: `disabled`}>
-                        <option selected disabled>Select Document No.</option>
+                        <option selected disabled>Select Reference No.</option>
                         ${getReferenceList(purchaseRequestID,readOnly)}
                     </select>
                     <div class="d-block invalid-feedback" id="invalid-documentID"></div>
@@ -1442,7 +1442,7 @@ $(document).ready(function() {
             </div>`;
 			$("#page_content").html(html);
 
-			headerButton(true, "Add Bid Recap");
+			headerButton(true, "Add Inventory Validation");
 			headerTabContent();
 			myFormsContent();
 			updateURL();
@@ -2126,10 +2126,12 @@ function saveinventoryValidation(data = null, method = "submit", notificationDat
 				})
 			} else {
 				if (res.dismiss === "cancel") {
-					if (method != "deny") {
-						callback && callback();
-					} else {
-						$("#modal_inventory_validation").text().length > 0 && $("#modal_inventory_validation").modal("show");
+					if(method != "submit"){
+						if (method != "deny") {
+							callback && callback();
+						} else {
+							$("#modal_inventory_validation").text().length > 0 && $("#modal_inventory_validation").modal("show");
+						}
 					}
 				} else if (res.isDismissed) {
 					if (method == "deny") {

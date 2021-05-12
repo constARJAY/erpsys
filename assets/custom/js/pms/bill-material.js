@@ -158,14 +158,15 @@ $(document).ready(function() {
 					{ targets: 0,  width: 100 },
 					{ targets: 1,  width: 150 },
 					{ targets: 2,  width: 150 },
-					{ targets: 3,  width: 150 },	
+					{ targets: 3,  width: 150 },
 					{ targets: 4,  width: 150 },
-					{ targets: 5,  width: 200 },
+					{ targets: 5,  width: 150 },
 					{ targets: 6,  width: 200 },
 					{ targets: 7,  width: 200 },
-					{ targets: 8,  width: 80  },
-					{ targets: 9, width: 250 },
-					{ targets: 10, width: 80  },
+					{ targets: 8,  width: 200 },
+					{ targets: 9,  width: 80  },
+					{ targets: 10, width: 250 },
+					{ targets: 11, width: 80  },
 				],
 			});
 
@@ -184,12 +185,13 @@ $(document).ready(function() {
 					{ targets: 2,  width: 150 },
 					{ targets: 3,  width: 150 },
 					{ targets: 4,  width: 150 },
-					{ targets: 5,  width: 200 },
+					{ targets: 5,  width: 150 },
 					{ targets: 6,  width: 200 },
 					{ targets: 7,  width: 200 },
-					{ targets: 8,  width: 80  },
-					{ targets: 9, width: 250 },
-					{ targets: 10, width: 80  },
+					{ targets: 8,  width: 200 },
+					{ targets: 9,  width: 80  },
+					{ targets: 10, width: 250 },
+					{ targets: 11, width: 80  },
 				],
 			});
 
@@ -430,6 +432,7 @@ $(document).ready(function() {
                 <tr style="white-space: nowrap">
                     <th>Document No.</th>
                     <th>Employee Name</th>
+					<th>Reference No.</th>
                     <th>Project Code</th>
                     <th>Project Name</th>
                     <th>Current Approver</th>
@@ -448,6 +451,7 @@ $(document).ready(function() {
 				fullname,
 				billMaterialID,
 				projectID,
+				referenceCode,
 				projectListCode,
 				projectListName,
 				approversID,
@@ -478,6 +482,7 @@ $(document).ready(function() {
 				<tr>
 					<td>${getFormCode("BOM", createdAt, billMaterialID )}</td>
 					<td>${fullname}</td>
+					<td>${getFormCode("IVR",createdAt,referenceCode)}</td>
 					<td>${projectListCode || '-'}</td>
 					<td>${projectListName || '-'}</td>
 					<td>
@@ -526,6 +531,7 @@ $(document).ready(function() {
                 <tr style="white-space: nowrap">
                     <th>Document No.</th>
                     <th>Employee Name</th>
+					<th>Reference No.</th>
                     <th>Project Code</th>
                     <th>Project Name</th>
                     <th>Current Approver</th>
@@ -544,6 +550,7 @@ $(document).ready(function() {
 				fullname,
 				billMaterialID,
                 projectID,
+				referenceCode,
                 projectListCode,
                 projectListName,
 				approversID,
@@ -573,6 +580,7 @@ $(document).ready(function() {
             <tr>
                 <td>${getFormCode("BOM", createdAt, billMaterialID )}</td>
                 <td>${fullname}</td>
+				<td>${getFormCode("IVR",createdAt,referenceCode)}</td>
                 <td>${projectListCode || '-'}</td>
                 <td>${projectListName || '-'}</td>
                 <td>
@@ -1058,6 +1066,16 @@ $(document).ready(function() {
 	}
 	// ----- END UPDATING TRAVEL TOTALS
 
+	// ----- UPDATING TABLES TOTALS
+	function grandTotal(){
+		let grandTotal = 0;
+		$(".tableTotal").each(function(i) {
+			var value = $
+		});
+	}
+	// ----- END UPDATING TABLES TOTALS
+
+
 	// ----- SELECT PROJECT LIST -----
     $(document).on("change", "[name=referenceCode]", function() {
         const thisvalue             = $(this).val();
@@ -1098,7 +1116,7 @@ $(document).ready(function() {
 			var priceListConditionData = [...new Set(priceListCondition)]; 
 			priceListConditionData.map(items=>{
 				showNotification("warning2",
-				`Please set item code <strong>${items}</strong> into inventory price list module to proceed in this proccess`);
+				`Please set item code <strong>${items}</strong> into Item price list module to proceed in this proccess`);
 			});
 			alertConfirmation 	 = `<div class="alert alert-warning py-1 text-center" role="alert">
 																			<small class="font-weight-bold"><i class="fa fa-exclamation-circle text-warning font-weight-bold"></i> Cannot process. Set a price for each item on the item price list first.</small>
@@ -1467,7 +1485,7 @@ $(document).ready(function() {
             </div>
             <div class="col-md-4 col-sm-12">
                 <div class="form-group">
-                    <label>Reference Document No.  ${!disabled ? "<code>*</code>" : ""}</label>
+                    <label>Reference No.  ${!disabled ? "<code>*</code>" : ""}</label>
                     <select class="form-control validate select2"
                         name="referenceCode"
                         id="referenceCode"
@@ -1541,7 +1559,7 @@ $(document).ready(function() {
 								<th>Designation Code</th>
                                 <th>Designation</th>
                                 <th class="text-center">Quantity</th>
-                                <th>Total Hours</th>
+                                <th class="text-center">Total Hours</th>
                                 <th class="text-right">Hourly Rate</th>
                                 <th class="text-right">Total Cost</th>
                             </tr>
@@ -1551,7 +1569,7 @@ $(document).ready(function() {
                         </tbody>
                     </table>
                     
-					<div class="w-100 d-flex justify-content-between align-items-center py-2">
+					<div class="w-100 d-flex justify-content-between align-items-center py-2 tableTotal personnelTotal">
 						
 					</div>
                 </div>
@@ -1574,7 +1592,7 @@ $(document).ready(function() {
                         </tbody>
                     </table>
                     
-					<div class="w-100 d-flex justify-content-between align-items-center py-2">
+					<div class="w-100 d-flex justify-content-between align-items-center py-2 tableTotal projectTotal">
 					
 					</div>
                 </div>
@@ -1595,7 +1613,7 @@ $(document).ready(function() {
                         <tbody class="itemCompanyTableBody" company="true"> </tbody>
                     </table>
                     
-					<div class="w-100 d-flex justify-content-between align-items-center py-2">
+					<div class="w-100 d-flex justify-content-between align-items-center py-2 tableTotal companyTotal">
 						
 					</div>
                 </div>
@@ -1617,18 +1635,9 @@ $(document).ready(function() {
                         <tbody class="travelTableBody" travel="true">
                         
                         </tbody>
-						<tfooter>
-                            <tr style="white-space: nowrap background-color: rgb(0 0 0 / 5%);">
-                                <td class="text-danger font-weight-bold" colspan="${!disabled ? "2" : "1"}">SUBTOTAL</td>
-                                <td class="travel totalQty text-center">-</td>
-                                <td>-</td>
-                                <td class="travel totalUnitPrice text-right">${formatAmount(0,true)}</td>
-                                <td class="travel grandTotal text-right">${formatAmount(0,true)}</td>
-                            </tr>
-                        </tfooter>
                     </table>
                     
-					<div class="w-100 d-flex justify-content-between align-items-center py-2 travelButtons">
+					<div class="w-100 d-flex justify-content-between align-items-center py-2 tableTotal travelButtons">
 						
 					</div>
                 </div>
@@ -1691,6 +1700,11 @@ $(document).ready(function() {
 			headerButton(false, "", isRevise);
 			headerTabContent(false);
 			formContent(data, readOnly, isRevise);
+
+			setTimeout(() => {
+				grandTotal();
+			}, 300);
+
 		}
 	}
 	viewDocument();
@@ -1913,13 +1927,20 @@ $(document).ready(function() {
 	});
 	// ----- END SAVE DOCUMENT -----
 
+	// ----- REMOVE IS-VALID IN TABLE -----
+	function removeIsValid(element = "table") {
+		$(element).find(".validated, .is-valid, .no-error").removeClass("validated")
+		.removeClass("is-valid").removeClass("no-error");
+	}
+	// ----- END REMOVE IS-VALID IN TABLE -----
+
 
     // ----- SUBMIT DOCUMENT -----
 	$(document).on("click", "#btnSubmit", function () {
 		const id           = $(this).attr("billMaterialID");
 		const revise       = $(this).attr("revise") == "true";
 		const validate     = validateForm("form_bill_material");
-
+		removeIsValid("#tableTravelRequest");
 		if (validate) {
 			const action = revise && "insert" || (id ? "update" : "insert");
 			const data   = getbillMaterialData(action, "submit", "1", id);
@@ -1950,7 +1971,7 @@ $(document).ready(function() {
 				var priceListConditionData = [...new Set(priceListCondition)]; 
 				priceListConditionData.map(items=>{
 					showNotification("warning2",
-					`Please set item code <strong>${items}</strong> into inventory price list module to proceed in this proccess`);
+					`Please set item code <strong>${items}</strong> into Item price list module to proceed in this proccess`);
 				});
 			}else{
 				savebillMaterial(data, "submit", notificationData, pageContent);
@@ -2161,7 +2182,7 @@ $(document).ready(function() {
 		let html = "";
 		let {
 			travelDescription 	= "",
-			quantity     		= 1,
+			quantity     		= "",
 			travelUnitOfMeasure = "",
 			unitCost 			= "",
 		} = data;
@@ -2209,8 +2230,9 @@ $(document).ready(function() {
 					<div class="quantity">
 						<input 
 							type="text" 
-							class="form-control validate number text-center"
-							data-allowcharacters="[0-9]" 
+							class="form-control text-center quantity"
+							placeholder="0.00"
+							data-allowcharacters="[0-9][.]" 
 							max="999999999" 
 							id="travelQuantity" 
 							name="quantity" 
@@ -2263,88 +2285,93 @@ $(document).ready(function() {
 		 */
 		 let html = "", tableData = "", tableDataReference="",checkboxTravelHeader="";
 		 let totalQty = 0, totalHours =0, totalHourlyRate=0, totalCost=0, totalPrice=0, grandTotalPrice=0;
-		 var condition  = id ? `AND billMaterialID=${id}` : "";	 
+		 var condition  = id ? `AND billMaterialID=${id}` :``;	 
 		 switch(param){
 			 case "personnel":
-					tableData = getTableData(`hris_personnel_request_tbl AS hprt`,
-						`designationID,
-						designationName,
-						designationTotalHours,
-						quantity,
-						createdAt,
-						(SELECT MAX(employeeBasicSalary) FROM hris_employee_list_tbl as helt WHERE helt.designationID = hprt.designationID) AS designationRate,
-						costEstimateID`,
-						`costEstimateID = '${referenceCode}' ${condition} AND designationID != 0`);
-						if(tableData.length > 0){
-							tableData.map((items,index)=>{
-								var hourlyRate  = (parseFloat(items.designationRate || "0") / 20 ) / 8;
-								totalQty        += parseFloat(items.designationID != "0" ? items.quantity : "0");
-								totalHours      += parseFloat(items.designationID != "0" ? items.designationTotalHours :"0");
-								totalHourlyRate += hourlyRate;
-								totalCost       = (parseFloat(items.designationTotalHours)*parseFloat(hourlyRate)) * parseFloat(items.quantity);
-								grandTotalPrice += totalCost
-								// Hourly rate = (Monthly Rate X 12) / total working days in a year/ total working hours per day
-								html += `   <tr class="itemTableRow" requestvalue="${items.requestItemID}">
-												<td>
-													<div class="designationcode" value="${items.designationID}">
-														${items.designationID != "0" ? getFormCode("DSN",moment(items.createdAt),items.designationID) :"-"}
-													</div>
-												</td>
-												<td>
-													<div class="designation">
-														${items.designationID != "0" ? items.designationName : `-`}
-													</div>
-												</td>
-												<td class="text-center">
-													<div class="quantity">
-														${items.designationID != "0" ? items.quantity : `-`}
-													</div>
-												</td>
-												<td class="text-center">
-													<div class="totalhours">
-														${items.designationID != "0" ? items.designationTotalHours : `-`}
-													</div>
-												</td>
-												<td class="text-right">
-													<div class="hourlyrate text-right unitCost" value="${hourlyRate}">
-														${formatAmount(hourlyRate,true)}
-													</div>
-												</td>
-												<td class="text-right">
-													<div class="totalCost text-right" value="${totalCost}">
-														${formatAmount(totalCost,true)}
-													</div>
-												</td>
-											</tr>`;
-							});
-							html += `   <tr style= "background-color: rgb(0 0 0 / 5%);">
-												<td colspan="2" class="text-danger font-weight-bold">
-													SUBTOTAL
-												</td>
-												<td class="text-center">
-													<div class="quantity">
-														${totalQty}
-													</div>
-												</td>
-												<td class="text-center">
-													<div class="totalhours">
-														${totalHours}
-													</div>
-												</td>
-												<td class="text-right">
-													<div class="hourlyrate">
-														${formatAmount(totalHourlyRate,true)}
-													</div>
-												</td>
-												<td class="totalcost text-right">
-													<div class="grandTotal">
-														${formatAmount(grandTotalPrice,true)}
-													</div>
-												</td>
-										</tr>`;
-						}else{
-							html += `<tr><td class="text-center" colspan="6">No Personnel Requested</td></tr>`;
-						}
+				 
+				 tableData = getTableData(`hris_personnel_request_tbl AS hprt`,
+					 `designationID,
+					 designationName,
+					 designationTotalHours,
+					 quantity,
+					 createdAt,
+					 (SELECT MAX(employeeBasicSalary) FROM hris_employee_list_tbl as helt WHERE helt.designationID = hprt.designationID) AS designationRate,
+					 costEstimateID`,
+					 `costEstimateID = '${referenceCode}' ${condition}` );
+				 tableData.map((items,index)=>{
+					 var hourlyRate  = (parseFloat(items.designationRate || "0") / 20 ) / 8;
+					 totalQty        += parseFloat(items.designationID != "0" ? items.quantity : "0");
+					 totalHours      += parseFloat(items.designationID != "0" ? items.designationTotalHours :"0");
+					 totalHourlyRate += hourlyRate;
+					 totalCost       = (parseFloat(items.designationTotalHours)*parseFloat(hourlyRate)) * parseFloat(items.quantity);
+					 grandTotalPrice += totalCost
+					 // Hourly rate = (Monthly Rate X 12) / total working days in a year/ total working hours per day
+					 html += `   <tr class="itemTableRow" requestvalue="${items.requestItemID}">
+									 <td>
+										 <div class="designationcode" value="${items.designationID}">
+											 ${items.designationID != "0" ? getFormCode("DSN",moment(items.createdAt),items.designationID) :"-"}
+										 </div>
+									 </td>
+									 <td>
+										 <div class="designation">
+											 ${items.designationID != "0" ? items.designationName : `-`}
+										 </div>
+									 </td>
+									 <td class="text-center">
+										 <div class="quantity">
+											 ${items.designationID != "0" ? items.quantity : `-`}
+										 </div>
+									 </td>
+									 <td class="text-center">
+										 <div class="totalhours">
+											 ${items.designationID != "0" ? items.designationTotalHours : `-`}
+										 </div>
+									 </td>
+									 <td class="text-right">
+										 <div class="hourlyrate text-right unitCost" value="${hourlyRate}">
+											 ${formatAmount(hourlyRate,true)}
+										 </div>
+									 </td>
+									 <td class="text-right">
+										 <div class="totalCost text-right" value="${totalCost}">
+											 ${formatAmount(totalCost,true)}
+										 </div>
+									 </td>
+								 </tr>`;
+				 });
+				//  html += `   <tr style= "background-color: rgb(0 0 0 / 5%);">
+				// 					 <td colspan="2" class="text-danger font-weight-bold">
+				// 						 SUBTOTAL
+				// 					 </td>
+				// 					 <td class="text-center">
+				// 						 <div class="quantity">
+				// 							 ${totalQty}
+				// 						 </div>
+				// 					 </td>
+				// 					 <td>
+				// 						 <div class="totalhours">
+				// 							 ${totalHours}
+				// 						 </div>
+				// 					 </td>
+				// 					 <td class="text-right">
+				// 						 <div class="hourlyrate">
+				// 							 ${formatAmount(totalHourlyRate,true)}
+				// 						 </div>
+				// 					 </td>
+				// 					 <td class="totalcost text-right">
+				// 						 <div class="grandTotal">
+				// 							 ${formatAmount(grandTotalPrice,true)}
+				// 						 </div>
+				// 					 </td>
+				// 			 </tr>`;
+				 	let personnelTotal = `<div></div> 
+													<div class="font-weight-bolder" style="font-size: 1rem;">
+														<span>Total Amount: &nbsp;</span>
+														<span class="text-danger" style="font-size: 1.2em">${formatAmount(grandTotalPrice,true)}</span>
+												</div>`;
+					 setTimeout(() => {
+						 $(".personnelTotal").html(personnelTotal);
+					 }, 500);
 				 break;
 			 case "project":
 					 tableDataReference = getTableData("ims_request_items_tbl","",`costEstimateID = '${referenceCode}' AND categoryType = 'project' `);
@@ -2396,30 +2423,38 @@ $(document).ready(function() {
 											 </td>
 										 </tr>`;
 						 });
-							 html += `
-							 <tr style= "background-color: rgb(0 0 0 / 5%);">
-								 <td colspan="2" class="text-danger font-weight-bold">
-									 SUBTOTAL
-								 </td>
-								 <td class="text-center">
-									 <div class="quantity">
-										 ${totalQty}
-									 </div>
-								 </td>
-								 <td>
-									 <div class="uom">-</div>
-								 </td>
-								 <td>
-									 <div class="unitprice text-right">
-										 ${formatAmount(totalPrice,true)}
-									 </div>
-								 </td>
-								 <td>
-									 <div class="totalcost grandTotal text-right">
-										 ${formatAmount(grandTotalPrice,true)}
-									 </div>
-								 </td>
-							 </tr>`;
+							//  html += `
+							//  <tr style= "background-color: rgb(0 0 0 / 5%);">
+							// 	 <td colspan="2" class="text-danger font-weight-bold">
+							// 		 SUBTOTAL
+							// 	 </td>
+							// 	 <td class="text-center">
+							// 		 <div class="quantity">
+							// 			 ${totalQty}
+							// 		 </div>
+							// 	 </td>
+							// 	 <td>
+							// 		 <div class="uom">-</div>
+							// 	 </td>
+							// 	 <td>
+							// 		 <div class="unitprice text-right">
+							// 			 ${formatAmount(totalPrice,true)}
+							// 		 </div>
+							// 	 </td>
+							// 	 <td>
+							// 		 <div class="totalcost grandTotal text-right">
+							// 			 ${formatAmount(grandTotalPrice,true)}
+							// 		 </div>
+							// 	 </td>
+							//  </tr>`;
+					let projectTotal = `<div></div> 
+										<div class="font-weight-bolder" style="font-size: 1rem;">
+											<span>Total Amount: &nbsp;</span>
+											<span class="text-danger" style="font-size: 1.2em">${formatAmount(grandTotalPrice,true)}</span>
+									</div>`;
+					 setTimeout(() => {
+						 $(".projectTotal").html(projectTotal);
+					 }, 500);
 					 
 				 break;
 			 case "company":
@@ -2469,30 +2504,40 @@ $(document).ready(function() {
 								 </td>
 							 </tr>`;
 						 });
-							 html += `
-							 <tr style= "background-color: rgb(0 0 0 / 5%);">
-								 <td colspan="2" class="text-danger font-weight-bold"> 
-									 SUBTOTAL
-								 </td>
-								 <td class="text-center">
-									 <div class="quantity">
-										 ${totalQty}
-									 </div>
-								 </td>
-								 <td>
-									 <div class="uom">-</div>
-								 </td>
-								 <td>
-									 <div class="unitprice text-right">
-										 ${formatAmount(totalPrice,true)}
-									 </div>
-								 </td>
-								 <td>
-									 <div class="totalcost grandTotal text-right">
-										 ${formatAmount(grandTotalPrice,true)}
-									 </div>
-								 </td>
-							 </tr>`;
+							//  html += `
+							//  <tr style= "background-color: rgb(0 0 0 / 5%);">
+							// 	 <td colspan="2" class="text-danger font-weight-bold"> 
+							// 		 SUBTOTAL
+							// 	 </td>
+							// 	 <td class="text-center">
+							// 		 <div class="quantity">
+							// 			 ${totalQty}
+							// 		 </div>
+							// 	 </td>
+							// 	 <td>
+							// 		 <div class="uom">-</div>
+							// 	 </td>
+							// 	 <td>
+							// 		 <div class="unitprice text-right">
+							// 			 ${formatAmount(totalPrice,true)}
+							// 		 </div>
+							// 	 </td>
+							// 	 <td>
+							// 		 <div class="totalcost grandTotal text-right">
+							// 			 ${formatAmount(grandTotalPrice,true)}
+							// 		 </div>
+							// 	 </td>
+							//  </tr>`;
+
+					let companyTotal = `<div></div> 
+										<div class="font-weight-bolder" style="font-size: 1rem;">
+											<span>Total Amount: &nbsp;</span>
+											<span class="text-danger" style="font-size: 1.2em">${formatAmount(grandTotalPrice,true)}</span>
+										</div>`;
+					 setTimeout(() => {
+						 $(".companyTotal").html(companyTotal);
+					 }, 500);
+							 
 				 break;
 			 default:
 					 tableData = getTableData(`ims_travel_request_tbl`,
@@ -2623,7 +2668,6 @@ $(document).ready(function() {
 										 </tr>`;
 						 }
 						 checkboxTravelHeader += !readOnly? ``:``;
-						 // ${readOnly?'':'<td></td>'}
 					 });
 	
 					 if(tableData.length < 2){
@@ -2695,11 +2739,20 @@ $(document).ready(function() {
 								 </tr>`;
 					 }
 	
-					 let travelButtons = !readOnly ? `<div class="w-100 text-left my-2">
+					 let travelButtons = !readOnly ? `<div class="text-left my-2">
 														<button class="btn btn-primary btnAddRow" id="btnAddRow" travel="true" type="button"><i class="fas fa-plus-circle"></i> Add Row</button>
 														<button class="btn btn-danger btnDeleteRow" id="btnDeleteRow" travel="true" type="button" disabled><i class="fas fa-minus-circle"></i> Delete Row/s</button>
-													</div>` : "";
-					 
+													</div>
+													<div class="font-weight-bolder" style="font-size: 1rem;">
+														<span>Total Amount: &nbsp;</span>
+														<span class="text-danger travel grandTotal" style="font-size: 1.2em">₱ 0.00</span>
+													</div>
+													` : 
+													`<div></div> 
+													<div class="font-weight-bolder" style="font-size: 1rem;">
+														<span>Total Amount: &nbsp;</span>
+														<span class="text-danger travel grandTotal" style="font-size: 1.2em">₱ 0.00</span>
+													</div>`;
 					 setTimeout(() => {
 						$(`[name=travelUom]`).select2({ theme: "bootstrap" });
 						 $(".travelButtons").html(travelButtons);
@@ -2752,7 +2805,7 @@ $(document).ready(function() {
 
 // --------------- DATABASE RELATION ---------------
 function getConfirmation(method = "submit") {
-	const title = "Bill Material";
+	const title = "Bill of Material";
 	let swalText, swalImg;
 
 	$("#modal_bill_material").text().length > 0 && $("#modal_bill_material").modal("hide");

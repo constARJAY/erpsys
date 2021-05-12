@@ -62,7 +62,7 @@ $(document).on("keypress","[name=vendorCurrentPrice]",function(){
     $(this).closest("tr").find(".dateupdated").text(datetoday);
     // $(this).closest("tr").find("[name=vendorCurrentPrice").val("");
     $(this).closest("tr").find("[name=preffered]").prop("checked", false);
-   getVendorOptions(); 
+//    getVendorOptions(); 
 });
 
 
@@ -242,7 +242,7 @@ $(document).on("click",".priceListRow-show-more",function(){
                                             icon:  'success',
                                             title: `${subTitle} successfully saved!`,
                                             showConfirmButton: false,
-                                            timer: 2000
+                                            timer: 3500
                                         }).then(reInit(itemID));
                                     }else{
                                         showNotification("danger", condition[1]);
@@ -447,6 +447,8 @@ function getVendorOptions(){
         vendorElementID.push(`#${this.id}[name=inventoryVendorID]`);
         // $(this).val() && $(this).trigger("change");
     });
+    console.log("asdasd");
+    console.log(vendorListArr);
     vendorElementID.map((element,index)=>{
             let html  =  `<option ${vendorListArr[index] || "selected"} disabled>Select Vendor</option>`;
                 html += vendorListData.filter(item => vendorListArr[index] || !vendorListArr.includes(item.inventoryVendorID)).map(item =>{

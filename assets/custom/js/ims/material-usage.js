@@ -960,7 +960,7 @@ $(document).ready(function() {
     // ----- SELECT ITEM NAME -----
     $(document).on("keyup", "[name=utilized]", function() {
 		let thisValue 		= $(this).val();
-		let stockinquantity 	= $(this).closest("tr").find(".stockinquantity").first().text();
+		let stockinquantity = $(this).closest("tr").find(".stockinquantity").first().text();
 		let difference 	    = parseInt(stockinquantity) - parseInt(thisValue);
 		let unused 	        = difference < 1 ? "0" : (difference||"-");
 		$(this).closest("tr").find(".unused").first().text(unused);
@@ -1226,7 +1226,7 @@ $(document).ready(function() {
                         style="width: 100%"
                         required
 						${materialUsageID == "" ? ``: `disabled`}>
-                        <option selected disabled>Select Document No.</option>
+                        <option selected disabled>Select Reference No.</option>
                         ${getReferenceList(referenceCode,readOnly)}
                     </select>
                     <div class="d-block invalid-feedback" id="invalid-referenceCode"></div>
@@ -1292,7 +1292,7 @@ $(document).ready(function() {
                                 <th>Item Name</th>
                                 <th>UOM</th>
                                 <th>Received</th>
-                                <th>Utilized${!disabled ? "<code>*</code>" : ""}</th>
+                                <th>Utilized ${!disabled ? "<code>*</code>" : ""}</th>
                                 <th>Unused</th>
                                 <th>Remarks${!disabled ? "<code>*</code>" : ""}</th>
                             </tr>

@@ -316,8 +316,9 @@ function getApproval(moduleID = null,designationID = null){
                 
                 let approverName            = approvalItems.length > 0 ? approvalItems[0]["employeeFirstname"]+" "+approvalItems[0]["employeeLastname"] : `Level ${index + 1} Approver N / A `;
                 let approverDesignation     = approvalItems.length > 0 ? getTableData("hris_designation_tbl","","designationID="+approvalItems[0].designationID) : "Department";
+                var approverProfile         = approvalItems.length > 0 ? approvalItems[0]["employeeProfile"] : "default.jpg";
                 approvalList    +=   ` <div class="row border rounded m-2 py-1">
-                                            <div class="col-3 col-lg-3 col-xl-1 d-flex align-items-center"><img class="img-fluid rounded-circle" src="${base_url}assets/images/profile-images/default.jpg" alt="avatar" height="70" width="70"></div>
+                                            <div class="col-3 col-lg-3 col-xl-1 d-flex align-items-center"><img class="img-fluid rounded-circle" src="${base_url}assets/upload-files/profile-images/${approverProfile || "default.jpg" }" alt="avatar" height="70" width="70"></div>
                                             <div class="col-5 col-lg-6 col-xl-9 d-flex justify-content-start align-items-center">
                                                 <span>${approverName} <br> <small class="text-primary">${approverDesignation != "Department" ? approverDesignation[0].designationName : approverDesignation}</small>    
                                                 </span>
@@ -332,7 +333,8 @@ function getApproval(moduleID = null,designationID = null){
     }else{  
         for (var i = 0; i < tableData[0]["moduleApprover"]; i++) {
             approvalList    +=   ` <div class="row border rounded m-2 py-1">
-                                        <div class="col-3 col-lg-3 col-xl-1 d-flex align-items-center"><img class="img-fluid rounded-circle" src="assets/images/profile-images/default.jpg" alt="avatar" height="70" width="70"></div>
+                                        <div class="col-3 col-lg-3 col-xl-1 d-flex align-items-center">
+                                            <img class="img-fluid rounded-circle" src="${base_url}assets/upload-files/profile-images/default.jpg" alt="avatar" height="70" width="70"></div>
                                         <div class="col-5 col-lg-6 col-xl-9 d-flex justify-content-start align-items-center">
                                             <span>
                                                 Name of Approver  <br>
