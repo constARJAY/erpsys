@@ -7,8 +7,12 @@ class InventoryStockIn_model extends CI_Model {
     {
         parent::__construct();
     }
-    public function savestockin($itemID, $receivedID, $barcode, $recievedQuantity,$serialnumber,$inventoryStorageID,$manufactureDate,$expirationdate)
+    public function savestockin($itemID, $receivedID,$itemName, $barcode, $recievedQuantity,$serialnumber,$inventoryStorageID,$manufactureDate,$expirationdate)
     {
+    //    $sql = "";
+    //    $query = $this->db->query("SELECT itemID,SUM(quantity) AS quantity FROM ims_stock_in_total_tbl WHERE itemID =$itemID GROUP BY itemID, inventoryStorageID");
+	// 	if($query->num_rows() == 0){
+
         $barcodesample = implode(",", $barcode);
             $record  = array();
             if(is_array($barcode)){ 
@@ -18,6 +22,7 @@ class InventoryStockIn_model extends CI_Model {
                  $record[$count] = array(
                             'inventoryReceivingID'		=> $receivedID,
                             'itemID'		            => $itemID,
+                            'itemName'		            => $itemName,
                             'barcode'		            => $barcode[$count],
                             'stockInSerialNumber'		=>$serialnumber[$count],
                             'stockInQuantity'           =>$recievedQuantity[$count],
@@ -29,7 +34,41 @@ class InventoryStockIn_model extends CI_Model {
                 $this->db->insert_batch('ims_stock_in_tbl', $record);
             }
         }      
-             return "true|Inventory Stock In Successfully";   
+                return "true|Inventory Stock In Successfully";   
+
+    // }else{
+    //     $quantity = $query[0]['quantity'];
+    //     print_r($quantity);
+
+    //     $barcodesample = implode(",", $barcode);
+    //     $record  = array();
+    //     if(is_array($barcode)){ 
+    //         if(count($barcode)!=0){
+    //         for($count = 0; $count<count($barcode); $count++)
+    //         {
+    //          $record[$count] = array(
+    //                     'inventoryReceivingID'		=> $receivedID,
+    //                     'itemID'		            => $itemID,
+    //                     'itemName'		            => $itemName,
+    //                     'barcode'		            => $barcode[$count],
+    //                     'stockInSerialNumber'		=>$serialnumber[$count],
+    //                     'stockInQuantity'           =>$recievedQuantity[$count],
+    //                     'stockInLocationID'         =>$inventoryStorageID[$count],
+    //                     'manufacturedDate'          =>$manufactureDate[$count],
+    //                     'expirationDate'            =>$expirationdate[$count],);
+
+    //         }      
+    //         $this->db->insert_batch('ims_stock_in_tbl', $record);
+    //     }
+    // }   
+    //     $total = array(
+    //         'itemID'		=> $receivedID,
+    //         'itemName'      =>$itemName,
+
+
+    
+    //      return "true|Inventory Stock In Successfully";   
+    // }         
     }
     public function getBarcodes($receivedID,$itemID)
     {

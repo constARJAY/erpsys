@@ -25,7 +25,7 @@ $(document).on("click", "#btnAddRow",function(){
                         <div class="input-group-prepend">
                             <span class="input-group-text">₱</span>
                         </div>
-                        <input type="text" class="form-control validate amount" min="1" max="99999999" data-allowcharacters="[0-9][.]" placeholder="0.00" required="" value="" autocomplete="off"  name="vendorCurrentPrice" id="currentPrice${lastTableRow}" value="0" style="text-align: right;">
+                        <input type="text" class="form-control amount" min="1" max="99999999" data-allowcharacters="[0-9][.]" placeholder="0.00" required="" value="" autocomplete="off"  name="vendorCurrentPrice" id="currentPrice${lastTableRow}" value="0" style="text-align: right;">
                         <div class="invalid-feedback d-block" id="invalid-currentPrice${lastTableRow}"></div>
                     </div>
                 </td>
@@ -33,9 +33,11 @@ $(document).on("click", "#btnAddRow",function(){
                 <td class="text-center align-items-center"><input type="checkbox" name="preferred" id="preferred${lastTableRow}"></td>
             </tr>`;
     $("#tablePriceList-body").append(html);
+    
     getVendorOptions();
     priceListSelect2();
     initAmount();
+    
 });
 
 $(document).on("change","[name=inventoryVendorID]",function(){

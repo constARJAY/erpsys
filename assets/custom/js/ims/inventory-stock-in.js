@@ -46,7 +46,7 @@ $(document).ready(function () {
 			LEFT JOIN ims_inventory_classification_tbl  AS iict ON iii.classificationID = iict.classificationID 
 			LEFT JOIN ims_stock_in_tbl 					AS isi	ON iird.inventoryReceivingID = isi.inventoryReceivingID`,
 			`iird.inventoryReceivingID, iird.itemID,
-			iri.itemName,iri.brandName,iic.categoryName,iict.classificationName,
+			iri.itemName,iii.brandName,iic.categoryName,iict.classificationName,
 			iird.received AS quantity,sum(stockInQuantity) AS receivingQuantity,iir.createdAt`, "iird.inventoryReceivingID=" + id);
 			//const tableData = getTableData("ims_received_tbl","","receivedID=" + id);
 
@@ -544,7 +544,7 @@ $(document).ready(function () {
 			LEFT JOIN ims_inventory_classification_tbl  AS iict ON iii.classificationID = iict.classificationID 
 			LEFT JOIN ims_stock_in_tbl 					AS isi	ON iird.inventoryReceivingID = isi.inventoryReceivingID AND iird.itemID = isi.itemID`,
 			`iird.inventoryReceivingID, iird.itemID,
-			iri.itemName,iri.brandName,iic.categoryName,iict.classificationName,
+			iri.itemName,iii.brandName,iic.categoryName,iict.classificationName,
 			iird.received AS quantity,sum(IFNULL(isi.stockInQuantity,'0')) AS receivingQuantity,iir.createdAt`,
 			`iird.inventoryReceivingID = ${inventoryReceivingID}`,
             ``,
@@ -642,13 +642,13 @@ $(document).ready(function () {
 			LEFT JOIN ims_inventory_category_tbl 			AS iic 	ON iii.categoryID = iic.categoryID
 			LEFT JOIN ims_inventory_classification_tbl  	AS iict ON iii.classificationID = iict.classificationID 
 			LEFT JOIN ims_stock_in_tbl 						AS isi	ON irsn.inventoryReceivingID = isi.inventoryReceivingID AND irsn.itemID = isi.itemID`,
-			`irsn.inventoryReceivingID, IFNULL(irsn.serialNumber,'') AS serialNumber,irsn.itemID,iii.itemCode,iri.itemName,iri.itemDescription,iri.brandName,iird.received`,`irsn.inventoryReceivingID=${inventoryReceivingID} AND irsn.itemID =${itemID}`,
+			`irsn.inventoryReceivingID, IFNULL(irsn.serialNumber,'') AS serialNumber,irsn.itemID,iii.itemCode,iri.itemName,iri.itemDescription,iii.brandName,iird.received`,`irsn.inventoryReceivingID=${inventoryReceivingID} AND irsn.itemID =${itemID}`,
 			``,``);
 			if (tableData) {
 				const content = modalContent(tableData);
 				setTimeout(() => {
 					$("#modal_product_record_content").html(content);
-					$("#receivedQuantity").val(receivingquantity);
+					$("#receivedQuantitytotal").val(receivingquantity);
 					initAll();
 					storageContent();
 					datevalidated();
@@ -790,10 +790,10 @@ $(document).ready(function () {
 								<input 
 									type="text" 
 									class="form-control" 
-									name="receivedQuantity" 
-									id="receivedQuantity"
+									name="receivedQuantitytotal" 
+									id="receivedQuantitytotal"
 									disabled>
-								<div class="invalid-feedback d-block" id="invalid-input_receivedQuantity"></div>
+								<div class="invalid-feedback d-block" id="invalid-input_receivedQuantitytotal"></div>
 							</div>
 						</div>
 						<div class="col-md-4 col-sm-12">
@@ -849,8 +849,10 @@ $(document).ready(function () {
 										id="recievedQuantity${count}"
 										min="1"
 										data-allowcharacters="[0-9]"
-										name="recievedQuantity"required
-										value="${quantity}" disabled>
+										name="recievedQuantity"
+										required
+										value="${quantity}" 
+										disabled>
 										<div class="invalid-feedback d-block" id="invalid-input_recievedQuantity"></div>
 									</td>`;
 									}
@@ -921,23 +923,27 @@ $(document).ready(function () {
 
 	$(document).on("change", ".recievedQuantity1", function() {
 		const val = $(this).val();
+		var totalval = parseInt(val);
 		const orderQuantity = $("#orderQuantity").val();
-		const receivedQuantity = $("#receivedQuantity").val();
+		const receivedQuantity = $("#receivedQuantitytotal").val();
+		const serialnumber = $(".serialnumber").val();
 		var formatvaluereceived =  receivedQuantity ? receivedQuantity : 0;
+		const received = $("#received").val();
+		const receivedtotal = parseInt(received)
+		var totalreceived = parseInt(totalval) + parseInt(formatvaluereceived);
 		var totalquantity = parseInt(val) + parseInt(formatvaluereceived);
-		if(orderQuantity > totalquantity || orderQuantity == totalquantity){
-			$(this).removeClass("is-invalid").addClass("is-valid");
-			$("#invalid-input_recievedQuantity").html("");
-			
-			document.getElementById("btnSave").disabled = false;
-			
-		}else{
-			$(this).removeClass("is-valid").addClass("is-invalid");
-			$("#invalid-input_recievedQuantity").html("Not Equal Order Quantity");
-			document.getElementById("btnSave").disabled = true;
-			//return false;
-			//return false;
-		}
+		if(serialnumber ==""){
+			if(receivedtotal < totalreceived){
+				$(this).removeClass("is-valid").addClass("is-invalid");
+				$("#invalid-input_recievedQuantity").html("Not Equal Order Quantity");
+				document.getElementById("btnSave").disabled = true;
+			}else{
+				$(this).removeClass("is-invalid").addClass("is-valid");
+				$("#invalid-input_recievedQuantity").html("");
+				document.getElementById("btnSave").disabled = false;
+			}
+	}else{
+	}
 	});	
 	$(document).on("change", ".inventoryStorageID", function () {
 		var storageID = $(this).val();
@@ -962,11 +968,14 @@ $(document).ready(function () {
 		var serialnumberlastFive = serialnumber.substr(serialnumber.length - 5); // => "Tabs1 lastfive"
 		const barcode = `${myItemcode}-${myInventorycode}-${serialnumberlastFive}`;
 		$("#barcode" + number).val(barcode);
-	});		
+		
+	});	
+	
 	$(document).on("click", "#btnSave", function () {
 		const validate = validateForm("modal_product_record");
 		if (validate) {
 			var itemID 				=$("#itemID").val();
+			var itemName 			=$("#itemName").val();
 			var receivedID 			= $("#inventoryReceivingID").val();
 			var barcode 			= [];
 			var recievedQuantity 	= [];
@@ -995,6 +1004,8 @@ $(document).ready(function () {
 			$(".expirationdate").each(function () {
 				expirationdate.push($(this).val());
 			});
+			
+			
 			Swal.fire({
 				title: 'ADD INVENTORY STOCK IN',
 				text: 'Are you sure that you want to add a new inventory stock in to the system?',
@@ -1019,7 +1030,8 @@ $(document).ready(function () {
 							itemID: 			itemID, 			receivedID : 			receivedID,
 							barcode: 			barcode,			recievedQuantity: 		recievedQuantity,
 							serialnumber: 		serialnumber,		inventoryStorageID : 	inventoryStorageID,
-							manufactureDate: 	manufactureDate, 	expirationdate : 		expirationdate
+							manufactureDate: 	manufactureDate, 	expirationdate : 		expirationdate,
+							itemName: 			itemName,
 						},
 						async: true,
 						dataType: "json",

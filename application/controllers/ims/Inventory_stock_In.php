@@ -23,6 +23,7 @@ class Inventory_stock_In extends CI_Controller {
     {
         $itemID = $this->input->post("itemID");
         $receivedID = $this->input->post("receivedID");
+        $itemName = $this->input->post("itemName");
         $barcode = $this->input->post("barcode");
         $recievedQuantity = $this->input->post("recievedQuantity");
         $serialnumber = $this->input->post("serialnumber");
@@ -30,7 +31,7 @@ class Inventory_stock_In extends CI_Controller {
         $manufactureDate = $this->input->post("manufactureDate");
         $expirationdate = $this->input->post("expirationdate");
 
-        $savereceivingreport = $this->inventorystockin->savestockin($itemID, $receivedID, $barcode, $recievedQuantity,$serialnumber,$inventoryStorageID,$manufactureDate,$expirationdate);
+        $savereceivingreport = $this->inventorystockin->savestockin($itemID, $receivedID,$itemName, $barcode, $recievedQuantity,$serialnumber,$inventoryStorageID,$manufactureDate,$expirationdate);
         $result = explode("|", $savereceivingreport);
         if ($result[0] == "true") {
             $this->session->set_flashdata('success', $result[1]);
