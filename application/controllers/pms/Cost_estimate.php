@@ -142,7 +142,6 @@ class Cost_estimate extends CI_Controller {
                         }
                         // ----- END UPDATE ITEMS FILE -----
                     }
-
                     $saveCostEstimateItems = $this->costestimate->saveCostEstimateItems($costEstimateItems, $costEstimateID);
                 }
 

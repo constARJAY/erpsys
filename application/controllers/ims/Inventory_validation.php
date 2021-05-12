@@ -26,8 +26,7 @@ class Inventory_validation extends CI_Controller {
         $reviseInventoryValidationID    = $this->input->post("reviseInventoryValidationID") ?? null;
         $employeeID                     = $this->input->post("employeeID");
         $projectID                      = $this->input->post("projectID") ?? null;
-        $documentType                   = $projectID == null ? "pr":"ce";
-        $documentID                     = $this->input->post("documentID") ?? null;
+        $purchaseRequestID              = $this->input->post("documentID") ?? null;
         $approversID                    = $this->input->post("approversID") ?? null;
         $approversStatus                = $this->input->post("approversStatus") ?? null;
         $approversDate                  = $this->input->post("approversDate") ?? null;
@@ -42,8 +41,7 @@ class Inventory_validation extends CI_Controller {
 
         $inventoryValidationData = [
             "reviseInventoryValidationID"   => $reviseInventoryValidationID,
-            "documentType"                  => $documentType,
-            "documentID"                    => $documentID,
+            "purchaseRequestID"             => $purchaseRequestID,
             "employeeID"                    => $employeeID,
             "projectID"                     => $projectID,
             "approversID"                   => $approversID,
@@ -97,6 +95,7 @@ class Inventory_validation extends CI_Controller {
                         $temp = [
                             "inventoryValidationID" => $inventoryValidationID,
                             "costEstimateID"        => $item["costEstimateID"],
+                            "purchaseRequestID"     => $purchaseRequestID,
                             "categoryType"          => $item["category"],
                             "itemID"                => $item["itemID"],
                             "itemname"              => $item["itemname"],
@@ -104,6 +103,7 @@ class Inventory_validation extends CI_Controller {
                             "itemDescription"       => $item["itemDescription"],
                             "quantity"              => $item["quantity"],
                             "stocks"                => $item["stocks"],
+                            "files"                 => $item["files"],
                             "forPurchase"           => $item["forPurchase"],
                             "createdBy"             => $createdBy,
                             "updatedBy"             => $item["updatedBy"],

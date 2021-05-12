@@ -305,7 +305,7 @@ class Purchase_order extends CI_Controller {
                     // }
 
                     $deleteRequestItems = $this->purchaseorder->deleteRequestItems($purchaseRequestID, $bidRecapID, $purchaseOrderID);
-
+                    // var_dump($purchaseOrderItems);
                     $savePurchaseOrderItems = $this->purchaseorder->savePurchaseOrderItems($purchaseOrderItems, $purchaseOrderID);
                 }
 

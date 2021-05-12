@@ -2266,83 +2266,85 @@ $(document).ready(function() {
 		 var condition  = id ? `AND billMaterialID=${id}` : "";	 
 		 switch(param){
 			 case "personnel":
-				 
-				 tableData = getTableData(`hris_personnel_request_tbl AS hprt`,
-					 `designationID,
-					 designationName,
-					 designationTotalHours,
-					 quantity,
-					 createdAt,
-					 (SELECT MAX(employeeBasicSalary) FROM hris_employee_list_tbl as helt WHERE helt.designationID = hprt.designationID) AS designationRate,
-					 costEstimateID`,
-					 `costEstimateID = '${referenceCode}' ${condition}`);
-				 tableData.map((items,index)=>{
-					 var hourlyRate  = (parseFloat(items.designationRate || "0") / 20 ) / 8;
-					 totalQty        += parseFloat(items.designationID != "0" ? items.quantity : "0");
-					 totalHours      += parseFloat(items.designationID != "0" ? items.designationTotalHours :"0");
-					 totalHourlyRate += hourlyRate;
-					 totalCost       = (parseFloat(items.designationTotalHours)*parseFloat(hourlyRate)) * parseFloat(items.quantity);
-					 grandTotalPrice += totalCost
-					 // Hourly rate = (Monthly Rate X 12) / total working days in a year/ total working hours per day
-					 html += `   <tr class="itemTableRow" requestvalue="${items.requestItemID}">
-									 <td>
-										 <div class="designationcode" value="${items.designationID}">
-											 ${items.designationID != "0" ? getFormCode("DSN",moment(items.createdAt),items.designationID) :"-"}
-										 </div>
-									 </td>
-									 <td>
-										 <div class="designation">
-											 ${items.designationID != "0" ? items.designationName : `-`}
-										 </div>
-									 </td>
-									 <td class="text-center">
-										 <div class="quantity">
-											 ${items.designationID != "0" ? items.quantity : `-`}
-										 </div>
-									 </td>
-									 <td>
-										 <div class="totalhours">
-											 ${items.designationID != "0" ? items.designationTotalHours : `-`}
-										 </div>
-									 </td>
-									 <td class="text-right">
-										 <div class="hourlyrate text-right unitCost" value="${hourlyRate}">
-											 ${formatAmount(hourlyRate,true)}
-										 </div>
-									 </td>
-									 <td class="text-right">
-										 <div class="totalCost text-right" value="${totalCost}">
-											 ${formatAmount(totalCost,true)}
-										 </div>
-									 </td>
-								 </tr>`;
-				 });
-				 html += `   <tr style= "background-color: rgb(0 0 0 / 5%);">
-									 <td colspan="2" class="text-danger font-weight-bold">
-										 SUBTOTAL
-									 </td>
-									 <td class="text-center">
-										 <div class="quantity">
-											 ${totalQty}
-										 </div>
-									 </td>
-									 <td>
-										 <div class="totalhours">
-											 ${totalHours}
-										 </div>
-									 </td>
-									 <td class="text-right">
-										 <div class="hourlyrate">
-											 ${formatAmount(totalHourlyRate,true)}
-										 </div>
-									 </td>
-									 <td class="totalcost text-right">
-										 <div class="grandTotal">
-											 ${formatAmount(grandTotalPrice,true)}
-										 </div>
-									 </td>
-							 </tr>`;
-	
+					tableData = getTableData(`hris_personnel_request_tbl AS hprt`,
+						`designationID,
+						designationName,
+						designationTotalHours,
+						quantity,
+						createdAt,
+						(SELECT MAX(employeeBasicSalary) FROM hris_employee_list_tbl as helt WHERE helt.designationID = hprt.designationID) AS designationRate,
+						costEstimateID`,
+						`costEstimateID = '${referenceCode}' ${condition} AND designationID != 0`);
+						if(tableData.length > 0){
+							tableData.map((items,index)=>{
+								var hourlyRate  = (parseFloat(items.designationRate || "0") / 20 ) / 8;
+								totalQty        += parseFloat(items.designationID != "0" ? items.quantity : "0");
+								totalHours      += parseFloat(items.designationID != "0" ? items.designationTotalHours :"0");
+								totalHourlyRate += hourlyRate;
+								totalCost       = (parseFloat(items.designationTotalHours)*parseFloat(hourlyRate)) * parseFloat(items.quantity);
+								grandTotalPrice += totalCost
+								// Hourly rate = (Monthly Rate X 12) / total working days in a year/ total working hours per day
+								html += `   <tr class="itemTableRow" requestvalue="${items.requestItemID}">
+												<td>
+													<div class="designationcode" value="${items.designationID}">
+														${items.designationID != "0" ? getFormCode("DSN",moment(items.createdAt),items.designationID) :"-"}
+													</div>
+												</td>
+												<td>
+													<div class="designation">
+														${items.designationID != "0" ? items.designationName : `-`}
+													</div>
+												</td>
+												<td class="text-center">
+													<div class="quantity">
+														${items.designationID != "0" ? items.quantity : `-`}
+													</div>
+												</td>
+												<td class="text-center">
+													<div class="totalhours">
+														${items.designationID != "0" ? items.designationTotalHours : `-`}
+													</div>
+												</td>
+												<td class="text-right">
+													<div class="hourlyrate text-right unitCost" value="${hourlyRate}">
+														${formatAmount(hourlyRate,true)}
+													</div>
+												</td>
+												<td class="text-right">
+													<div class="totalCost text-right" value="${totalCost}">
+														${formatAmount(totalCost,true)}
+													</div>
+												</td>
+											</tr>`;
+							});
+							html += `   <tr style= "background-color: rgb(0 0 0 / 5%);">
+												<td colspan="2" class="text-danger font-weight-bold">
+													SUBTOTAL
+												</td>
+												<td class="text-center">
+													<div class="quantity">
+														${totalQty}
+													</div>
+												</td>
+												<td class="text-center">
+													<div class="totalhours">
+														${totalHours}
+													</div>
+												</td>
+												<td class="text-right">
+													<div class="hourlyrate">
+														${formatAmount(totalHourlyRate,true)}
+													</div>
+												</td>
+												<td class="totalcost text-right">
+													<div class="grandTotal">
+														${formatAmount(grandTotalPrice,true)}
+													</div>
+												</td>
+										</tr>`;
+						}else{
+							html += `<tr><td class="text-center" colspan="6">No Personnel Requested</td></tr>`;
+						}
 				 break;
 			 case "project":
 					 tableDataReference = getTableData("ims_request_items_tbl","",`costEstimateID = '${referenceCode}' AND categoryType = 'project' `);

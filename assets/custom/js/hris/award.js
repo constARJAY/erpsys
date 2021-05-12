@@ -54,8 +54,8 @@ $(document).on("click",".addAward", function(){
                                                 </form>
                                             </div>
                                             <div class="modal-footer">
-                                                <button class="btn btn-save" id="btnSave" data-awardid=""><i class="fas fa-save"></i>&nbsp;Save</button>
-                                                <button class="btn btn-cancel btnCancel"><i class="fas fa-ban"></i>&nbsp;Cancel</button>
+                                                <button class="btn btn-save px-5 p-2" id="btnSave" data-awardid=""><i class="fas fa-save"></i>&nbsp;Save</button>
+                                                <button class="btn btn-cancel btnCancel px-5 p-2" ><i class="fas fa-ban"></i>&nbsp;Cancel</button>
                                             </div>
                                             `;
     setTimeout(function(){
@@ -117,8 +117,8 @@ $(document).on("click",".editAward", function(){
                                                 </form>
                                             </div>
                                             <div class="modal-footer">
-                                                <button class="btn btn-update" id="btnUpdate" data-awardid="${tableData[0]["awardID"]}"><i class="fas fa-save"></i>&nbsp;Update</button>
-                                                <button class="btn btn-cancel btnCancel"><i class="fas fa-ban"></i>&nbsp;Cancel</button>
+                                                <button class="btn btn-update px-5 p-2" id="btnUpdate" data-awardid="${tableData[0]["awardID"]}"><i class="fas fa-save"></i>&nbsp;Update</button>
+                                                <button class="btn btn-cancel btnCancel px-5 p-2" ><i class="fas fa-ban"></i>&nbsp;Cancel</button>
                                             </div>
                                             
                                     `;

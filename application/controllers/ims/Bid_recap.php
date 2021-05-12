@@ -26,8 +26,6 @@ class Bid_recap extends CI_Controller {
         $reviseBidRecapID     = $this->input->post("reviseBidRecapID") ?? null;
         $employeeID           = $this->input->post("employeeID");
         $projectID            = $this->input->post("projectID") ?? null;
-        $documentType         = $projectID == null ? "pr":"ce";
-        $documentID           = $this->input->post("documentID") ?? null;
         $referenceCode        = $this->input->post("referenceCode") ?? null;
         $approversID          = $this->input->post("approversID") ?? null;
         $approversStatus      = $this->input->post("approversStatus") ?? null;
@@ -46,9 +44,7 @@ class Bid_recap extends CI_Controller {
 
         $bidRecapData = [
             "reviseBidRecapID"      => $reviseBidRecapID,
-            "documentType"          => $documentType,
-            "documentID"            => $documentID,
-            "referenceCode"         => $referenceCode,
+            "purchaseRequestID"     => $referenceCode,
             "employeeID"            => $employeeID,
             "projectID"             => $projectID,
             "approversID"           => $approversID,
@@ -130,6 +126,9 @@ class Bid_recap extends CI_Controller {
 
             }
             
+            if($bidRecapStatus == "2"){
+                $this->bidrecap->creatingPO($bidRecapID);
+            }
         }
         echo json_encode($saveBidRecapData);
     }

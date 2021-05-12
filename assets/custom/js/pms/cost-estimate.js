@@ -1294,7 +1294,7 @@ $(document).ready(function() {
 			let requestDesignationData = getTableData(`hris_designation_tbl JOIN hris_personnel_request_tbl USING(designationID)`,
 										`hris_personnel_request_tbl.designationID AS designationID ,hris_designation_tbl.designationName AS designationName,designationTotalHours,quantity`,`costEstimateID = ${costEstimateID}`);
 			if(requestDesignationData.length < 1){
-				requestPersonnel 	+= getItemRow("personnel");
+				requestPersonnel 	+= getItemRow("personnel",requestDesignationData[0],readOnly);
 			}
 			requestDesignationData.map(item => {
 				requestPersonnel += getItemRow("personnel", item, readOnly);
@@ -1649,6 +1649,7 @@ $(document).ready(function() {
 			initDataTables();
 			updateTableItems();
 			initAll();
+			initAmount();
 			updateInventoryItemOptions();
 			projectID && projectID != 0 && $("[name=projectID]").trigger("change");
 			return html;
@@ -1806,9 +1807,10 @@ $(document).ready(function() {
 					filename  		= file ? file?.name : "";
 				}else{
 						if($(this).closest("tbody").attr("personnel") == "true"){
-							designationID 			= $("td [name=designationID]", this).val();
-							var designationListData = designationList.filter(items=> items.designationID == designationID);
-							designationName 		= designationListData[0].designationName;
+							designationID 			= designationID ? $("td [name=designationID]", this).val() : 0;
+							console.log(designationID);
+							var designationListData = designationID ? designationList.filter(items=> items.designationID == designationID) : "";
+							designationName 		= designationID ? designationListData[0].designationName : "-";
 							designationTotalHours	= $("td [name=employeeTotalHours]", this).val();
 						}else{
 							travelDescription = $("td [name=description]", this).val();
@@ -1835,7 +1837,7 @@ $(document).ready(function() {
 				formData.append(`items[${i}][createdBy]`, sessionID);
 				formData.append(`items[${i}][updatedBy]`, sessionID);
 				if (file) {
-					temp["file"] - file;
+					temp["file"] = file;
 					formData.append(`items[${i}][file]`, file, `${i}.${fileArr[1]}`);
 				} else {
 					const isHadExistingFile = $("td .file .displayfile", this).text().trim().length > 0;
@@ -1979,7 +1981,6 @@ $(document).ready(function() {
 					employeeID,
 				};
 			}
-
 			savecostEstimate(data, "submit", notificationData, pageContent);
 		}
 	});
@@ -2059,7 +2060,7 @@ $(document).ready(function() {
 		const feedback = $(this).attr("code") || getFormCode("CEF", dateToday(), id);
 
 		$("#modal_cost_estimate_content").html(preloader);
-		$("#modal_cost_estimate .page-title").text("DENY Cost Estimate");
+		$("#modal_cost_estimate .page-title").text("DENY COST ESTIMATE");
 		$("#modal_cost_estimate").modal("show");
 		let html = `
 		<div class="modal-body">
@@ -2182,7 +2183,7 @@ $(document).ready(function() {
 			itemCode     = "",
 			itemName     = "",
 			itemID       = "",
-			quantity     = 1,
+			quantity     = "",
 			unitOfMeasurementID: uom = "",
 			files        = ""
 		} = data;
@@ -2256,15 +2257,15 @@ $(document).ready(function() {
 					<div class="quantity">
 						<input 
 							type="text" 
-							class="form-control validate number text-center"
-							data-allowcharacters="[0-9]" 
+							class="form-control text-center amount"
+							data-allowcharacters="[0-9][.]" 
 							max="999999999" 
 							id="projectQuantity" 
 							name="quantity" 
-							value="${quantity}" 
+							value="${quantity}"
+							min="0.00" 
 							minlength="1" 
-							maxlength="20" 
-							required>
+							maxlength="20">
 						<div class="invalid-feedback d-block" id="invalid-projectQuantity"></div>
 					</div>
 				</td>
@@ -2297,7 +2298,7 @@ $(document).ready(function() {
 			itemCode     = "",
 			itemName     = "",
 			itemID       = "",
-			quantity     = 1,
+			quantity     = "",
 			unitOfMeasurementID: uom = "",
 			files        = ""
 		} = data;
@@ -2371,16 +2372,15 @@ $(document).ready(function() {
 					<div class="quantity">
 						<input 
 							type="text" 
-							class="form-control validate number text-center"
-							
-							data-allowcharacters="[0-9]" 
+							class="form-control text-center amount"
+							data-allowcharacters="[0-9][.]" 
+							min="0.00"
 							max="999999999" 
 							id="companyQuantity" 
 							name="quantity" 
 							value="${quantity}" 
 							minlength="1" 
-							maxlength="20" 
-							required>
+							maxlength="20" required>
 						<div class="invalid-feedback d-block" id="invalid-companyQuantity"></div>
 					</div>
 				</td>
@@ -2407,19 +2407,20 @@ $(document).ready(function() {
 	}
 
 	function getPersonnelRow(data={}, readOnly = false){
+		console.log(readOnly);
 		let html = "";
 		let {
 			designationID   = null,
 			designationName = "",
-			quantity     = 1,
-			designationTotalHours = 1
+			quantity     	= "",
+			designationTotalHours = ""
 		} = data;
 		if (readOnly) {
 			html += `
 			<tr class="itemTableRow">
 				<td>
 					<div class="itemcode">
-						${designationID != "" ? getFormCode("DSN",moment(),designationID) : "-"}
+						${designationID > 1 ? getFormCode("DSN",moment(),designationID) : "-"}
 					</div>
 				</td>
 				<td>
@@ -2469,31 +2470,32 @@ $(document).ready(function() {
 					<div class="quantity">
 						<input 
 							type="text" 
-							class="form-control validate number text-center"
-							data-allowcharacters="[0-9]" 
+							class="form-control text-center amount"
+							data-allowcharacters="[0-9][.]" 
+							min="0.00"
 							max="999999999" 
 							id="personnelQuantity" 
 							name="quantity" 
-							value="${quantity}" 
+							value="${quantity}"
 							minlength="1" 
-							maxlength="20" 
-							required>
+							maxlength="20" required>
 						<div class="invalid-feedback d-block" id="invalid-personnelQuantity"></div>
 					</div>
 				</td>
 				<td class="text-center">
 					<div class="totalhours">
-						<input 
+						<input
 							type="text" 
-							class="form-control validate number text-center" 
-							data-allowcharacters="[0-9]" 
+							class="form-control validate text-center" 
+							data-allowcharacters="[0-9][.]"
+							min="0.0" 
 							max="999999999" 
 							id="employeeTotalHours" 
 							name="employeeTotalHours" 
+							placeholder="0.0"
 							value="${designationTotalHours}" 
 							minlength="1" 
-							maxlength="5" 
-							required>
+							maxlength="5">
 						<div class="invalid-feedback d-block" id="invalid-employeeTotalHours"></div>
 					</div>
 				</td>
@@ -2506,8 +2508,8 @@ $(document).ready(function() {
 		let html = "";
 		let {
 			travelDescription 	= "",
-			quantity     		= 1,
-			unitOfMeasure = "",
+			quantity     		= "",
+			unitOfMeasure 		= "",
 		} = data;
 		if (readOnly) {
 			html += `
@@ -2554,12 +2556,13 @@ $(document).ready(function() {
 					<div class="quantity">
 						<input 
 							type="text" 
-							class="form-control validate number text-center"
-							data-allowcharacters="[0-9]" 
+							class="form-control text-center amount"
+							data-allowcharacters="[0-9][.]" 
 							max="999999999" 
 							id="travelQuantity" 
 							name="quantity" 
-							value="${quantity}" 
+							value="${quantity}"
+							min="0.00" 
 							minlength="1" 
 							maxlength="20" 
 							required>
@@ -2765,11 +2768,14 @@ function savecostEstimate(data = null, method = "submit", notificationData = nul
 				})
 			} else {
 				if (res.dismiss === "cancel") {
-					if (method != "deny") {
-						callback && callback();
-					} else {
-						$("#modal_cost_estimate").text().length > 0 && $("#modal_cost_estimate").modal("show");
+					if(method != "submit"){
+						if (method != "deny") {
+							callback && callback();
+						} else {
+							$("#modal_cost_estimate").text().length > 0 && $("#modal_cost_estimate").modal("show");
+						}
 					}
+							
 				} else if (res.isDismissed) {
 					if (method == "deny") {
 						$("#modal_cost_estimate").text().length > 0 && $("#modal_cost_estimate").modal("show");

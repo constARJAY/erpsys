@@ -18,10 +18,10 @@ class BidRecap_model extends CI_Model {
         }
 
         if ($query) {
+            $insertID = $action == "insert" ? $this->db->insert_id() : $id;   
             if($data["bidRecapStatus"] == "2"){
                 $this->creatingPO($id);
-            }
-            $insertID = $action == "insert" ? $this->db->insert_id() : $id;            
+            }         
             return "true|Successfully submitted|$insertID|".date("Y-m-d");
         }
 
@@ -47,16 +47,22 @@ class BidRecap_model extends CI_Model {
 
     public function creatingPO($id){
         // WHERE bidRecapID = $id AND inventoryVendorID = $vendorID;
-         $sql            = "SELECT * FROM `ims_request_items_tbl` WHERE bidRecapID = '$id' GROUP BY inventoryVendorID";
+         $sql            = "SELECT * FROM `ims_request_items_tbl` WHERE bidRecapID = '$id' GROUP BY categoryType, inventoryVendorID";
          $query          = $this->db->query($sql);
-         $lastPOQuery    = $this->db->query("SELECT purchaseOrderID FROM ims_request_items_tbl ORDER BY purchaseOrderID  DESC LIMIT 1");
+         $lastPOQuery    = $this->db->query("SELECT referencePurchaseOrderID FROM ims_request_items_tbl ORDER BY referencePurchaseOrderID  DESC LIMIT 1");
          $lastPOResult   = $lastPOQuery->result_array();
-         $lastPO         = $lastPOResult[0]["purchaseOrderID"] ? $lastPOResult[0]["purchaseOrderID"] : 1;
-            foreach($query->result_array() as $row){
-                $poID               = $lastPO ++;
-                $inventoryVendorID  = $row["inventoryVendorID"];
-                $itemsQuery         = $this->db->query("UPDATE ims_request_items_tbl SET `purchaseOrderID` = '$poID' WHERE bidRecapID = '$id' AND inventoryVendorID = '$inventoryVendorID'");
+         $lastPO         = $lastPOResult[0]["referencePurchaseOrderID"] ? $lastPOResult[0]["referencePurchaseOrderID"] : 0;
+         $categoryArr    = array("company","project");
+            foreach($categoryArr AS $category){
+                $lastPO +=1;
+                foreach($query->result_array() as $row){
+                    $inventoryVendorID  = $row["inventoryVendorID"];
+                    $itemsQuery         = $this->db->query("UPDATE ims_request_items_tbl SET `referencePurchaseOrderID` = '$lastPO' WHERE bidRecapID = '$id' AND inventoryVendorID = '$inventoryVendorID' AND categoryType = '$category' ");
+                }
             }
+
+
+            
     }
     
 }

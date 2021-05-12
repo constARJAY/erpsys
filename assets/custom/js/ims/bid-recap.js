@@ -552,20 +552,17 @@ $(document).ready(function() {
 				"pms_project_list_tbl AS pplt LEFT JOIN pms_client_tbl AS pct ON pct.clientID = pplt.projectListClientID", 
 				"projectListID, projectListCode, projectListName, clientCode, clientName, clientRegion, clientProvince, clientCity, clientBarangay, clientUnitNumber, clientHouseNumber, clientCountry, clientPostalCode",
 				"projectListStatus = 1 && projectListID ="+items.projectID);
-
-			if (projectList.length > 0) {
-				var address       = `${projectList[0].clientUnitNumber && titleCase(projectList[0].clientUnitNumber)+", "}${projectList[0].clientHouseNumber && projectList[0].clientHouseNumber +", "}${projectList[0].clientBarangay && titleCase(projectList[0].clientBarangay)+", "}${projectList[0].clientCity && titleCase(projectList[0].clientCity)+", "}${projectList[0].clientProvince && titleCase(projectList[0].clientProvince)+", "}${projectList[0].clientCountry && titleCase(projectList[0].clientCountry)+", "}${projectList[0].clientPostalCode && titleCase(projectList[0].clientPostalCode)}`;
-				return `<option value            = "${items.inventoryValidationID }" 
-							projectid 			 = "${projectList[0].projectListID}"
-							projectcode          = "${getFormCode("PRO",moment(projectList[0].createdAt),projectList[0].projectListID)}"
-							projectname          = "${projectList[0].projectListName}"
-							clientcode           = "${projectList[0].clientCode}"
-							clientname           = "${projectList[0].clientName}"
-							address              = "${address}"
-							${items.inventoryValidationID == id?"selected":""}>
-							${getFormCode("IVR",moment(items.createdAt), items.inventoryValidationID)}
-						   </option>`;
-			}
+			var address       = `${projectList[0].clientUnitNumber && titleCase(projectList[0].clientUnitNumber)+", "}${projectList[0].clientHouseNumber && projectList[0].clientHouseNumber +", "}${projectList[0].clientBarangay && titleCase(projectList[0].clientBarangay)+", "}${projectList[0].clientCity && titleCase(projectList[0].clientCity)+", "}${projectList[0].clientProvince && titleCase(projectList[0].clientProvince)+", "}${projectList[0].clientCountry && titleCase(projectList[0].clientCountry)+", "}${projectList[0].clientPostalCode && titleCase(projectList[0].clientPostalCode)}`;
+			return `<option value            = "${items.inventoryValidationID }" 
+						projectid 			 = "${projectList[0].projectListID}"
+						projectcode          = "${getFormCode("PRO",moment(projectList[0].createdAt),projectList[0].projectListID)}"
+						projectname          = "${projectList[0].projectListName}"
+						clientcode           = "${projectList[0].clientCode}"
+						clientname           = "${projectList[0].clientName}"
+						address              = "${address}"
+						${items.inventoryValidationID == id?"selected":""}>
+						${getFormCode("IVR",moment(items.createdAt), items.inventoryValidationID)}
+				   	</option>`;
 		});
         return html;
         
@@ -1227,7 +1224,7 @@ $(document).ready(function() {
             </div>
             <div class="col-md-4 col-sm-12">
                 <div class="form-group">
-                    <label>Reference Document No. ${!disabled ? "<code>*</code>" : ""}</label>
+                    <label>Reference No. ${!disabled ? "<code>*</code>" : ""}</label>
                     <select class="form-control validate select2"
                         name="documentID"
                         id="documentID"
@@ -1376,7 +1373,7 @@ $(document).ready(function() {
             </div>`;
 			$("#page_content").html(html);
 
-			headerButton(true, "Add Inventory Validation");
+			headerButton(true, "Add Bid Recap");
 			headerTabContent();
 			myFormsContent();
 			updateURL();
@@ -1873,7 +1870,7 @@ $(document).ready(function() {
 								var returnData 	= "";
 								var unitCost 	= parseFloat(joinedItems.vendorCurrentPrice);
 								var totalCost 	= parseFloat(joinedItems.forPurchase) * parseFloat(unitCost);
-								var files = items.files ? `<a class="filename" href="${base_url+"assets/upload-files/request-items/"+joinedItems.files}" 
+								var files = joinedItems.files ? `<a class="filename" href="${base_url+"assets/upload-files/request-items/"+joinedItems.files}" 
 																	target="_blank">${joinedItems.files}
 															</a>`:"-";
 								
@@ -1930,9 +1927,9 @@ $(document).ready(function() {
 						html += `
 								<tr class="itemTableRowTotal" category="${type}" style="background-color: #dc3450;">
 									<td class="font-weight-bold text-light" colspan="4">SUBTOTAL</td>
-									<td class="font-weight-bold text-light text-center">${vendorRequested}</td>
-									<td class="font-weight-bold text-light text-center">${vendorStocks}</td>
-									<td class="font-weight-bold text-light text-center">${vendorForPurchase}</td>
+									<td class="font-weight-bold text-light text-center">${parseFloat(vendorRequested).toFixed(2)}</td>
+									<td class="font-weight-bold text-light text-center">${parseFloat(vendorStocks).toFixed(2)}</td>
+									<td class="font-weight-bold text-light text-center">${parseFloat(vendorForPurchase).toFixed(2)}</td>
 									<td class="font-weight-bold text-light">-</td>
 									<td class="font-weight-bold text-light text-right">${formatAmount(vendorUnitCost,true)}</td>
 									<td class="font-weight-bold text-light text-right"><span class="totalCost" category="${type}">${formatAmount(vendorTotalCost,true)}</span></td>
@@ -1962,7 +1959,7 @@ $(document).ready(function() {
 
 // --------------- DATABASE RELATION ---------------
 function getConfirmation(method = "submit") {
-	const title = "Inventory Validation";
+	const title = "Bid Recap";
 	let swalText, swalImg;
 
 	$("#modal_bid_recap").text().length > 0 && $("#modal_bid_recap").modal("hide");

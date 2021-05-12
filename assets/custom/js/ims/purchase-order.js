@@ -361,7 +361,7 @@ $(document).ready(function() {
 			`ims_purchase_order_tbl AS ipot 
 				LEFT JOIN ims_purchase_request_tbl AS iprt USING(purchaseRequestID)
 				LEFT JOIN pms_project_list_tbl AS pplt ON pplt.projectListID = iprt.projectID
-				LEFT JOIN hris_employee_list_tbl AS helt ON iprt.employeeID = helt.employeeID`,
+				LEFT JOIN hris_employee_list_tbl AS helt ON ipot.employeeID = helt.employeeID`,
 			`ipot.*, CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname, ipot.createdAt AS dateCreated, projectListCode, projectListName`,
 			`ipot.employeeID != ${sessionID} AND ipot.purchaseOrderStatus != 0 AND ipot.purchaseOrderStatus != 4`,
 			`FIELD(purchaseOrderStatus, 0, 1, 3, 2, 4), COALESCE(ipot.submittedAt, ipot.createdAt)`
@@ -459,7 +459,7 @@ $(document).ready(function() {
 			`ims_purchase_order_tbl AS ipot 
 				LEFT JOIN ims_purchase_request_tbl AS iprt USING(purchaseRequestID)
 				LEFT JOIN pms_project_list_tbl AS pplt ON pplt.projectListID = iprt.projectID
-				LEFT JOIN hris_employee_list_tbl AS helt ON iprt.employeeID = helt.employeeID`,
+				LEFT JOIN hris_employee_list_tbl AS helt ON ipot.employeeID = helt.employeeID`,
 			`ipot.*, CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname, ipot.createdAt AS dateCreated, projectListCode, projectListName`,
 			`ipot.employeeID = ${sessionID}`,
 			`FIELD(purchaseOrderStatus, 0, 1, 3, 2, 4), COALESCE(ipot.submittedAt, ipot.createdAt)`
@@ -705,7 +705,7 @@ $(document).ready(function() {
 
 
 	// ----- GET INVENTORY VENDOR ON BID RECAP -----
-	function getInventoryVendorOnBidRecap(bidRecapID = null, inventoryVendorID = null) {
+	function getInventoryVendorOnBidRecap(bidRecapID = null, invVendorID = null) {
 		let html = `<option selected disabled>Select Vendor Code</option>`;
 		if (bidRecapID) {
 			let vendorTable = getTableData(
@@ -745,7 +745,8 @@ $(document).ready(function() {
 							vendorAddress="${address || "-"}"
 							vendorContactPerson="${inventoryVendorPerson || "-"}"
 							vendorContactDetails="${vendorContactDetails}"
-							vatable="${inventoryVendorVAT == 1 ? true : false}">
+							vatable="${inventoryVendorVAT == 1 ? true : false}"
+							${inventoryVendorID == invVendorID ? "selected" : ""}>
 							${getFormCode("VEN", createdAt, inventoryVendorID)}
 						</option>`
 					}
@@ -1870,10 +1871,10 @@ $(document).ready(function() {
 
 		if ((currentStatus == "false" || currentStatus == "0" || currentStatus == "3") && method != "approve") {
 
-			data["employeeID"]       = sessionID;
-			data["bidRecapID"]       = $("[name=bidRecapID]").val();
+			data["employeeID"]        = sessionID;
+			data["bidRecapID"]        = $("[name=bidRecapID]").val();
 			data["purchaseRequestID"] = $(`[name="bidRecapID"] option:selected`).attr("purchaseRequestID");
-			data["categoryType"]     = $("[name=categoryType]").val();
+			data["categoryType"]      = $("[name=categoryType]").val();
 			data["inventoryVendorID"] = $("[name=inventoryVendorID]").val();
 			
 			data["vendorName"]           = $("[name=vendorName]").val();
@@ -2006,7 +2007,9 @@ $(document).ready(function() {
 		readOnly ? preventRefresh(false) : preventRefresh(true);
 
 		let disabled = readOnly ? "disabled" : "";
-		let disabledReference = bidRecapID && bidRecapID != "0" ? "disabled" : disabled;
+		let disabledReference    = bidRecapID && bidRecapID != "0" ? "disabled" : disabled;
+		let disabledVendorCode   = inventoryVendorID && inventoryVendorID != "0" ? "disabled" : disabled;
+		let disabledCategoryType = categoryType && categoryType != "" ? "disabled" : disabled;
 
 		$("#btnBack").attr("purchaseOrderID", purchaseOrderID);
 		$("#btnBack").attr("status", purchaseOrderStatus);
@@ -2155,13 +2158,13 @@ $(document).ready(function() {
 			</div>
 			<div class="col-md-4 col-sm-12">
 				<div class="form-group">
-					<label>Vendor Code ${!disabledReference ? "<code>*</code>" : ""}</label>
+					<label>Vendor Code ${!disabledVendorCode ? "<code>*</code>" : ""}</label>
 					<select class="form-control validate select2"
 						name="inventoryVendorID"
 						id="inventoryVendorID"
 						style="width: 100%"
 						required
-						${disabledReference}>
+						${disabledVendorCode}>
 						${getInventoryVendorOnBidRecap(bidRecapID, inventoryVendorID)}
 					</select>
 					<div class="d-block invalid-feedback" id="invalid-inventoryVendorID"></div>
@@ -2169,16 +2172,16 @@ $(document).ready(function() {
 			</div>
 			<div class="col-md-4 col-sm-12">
 				<div class="form-group">
-					<label>Category Type ${!disabledReference ? "<code>*</code>" : ""}</label>
+					<label>Category Type ${!disabledCategoryType ? "<code>*</code>" : ""}</label>
 					<select class="form-control validate select2"
 						name="categoryType"
 						id="categoryType"
 						style="width: 100%"
 						required
-						${disabledReference}>
+						${disabledCategoryType}>
 						<option selected disabled>Select Category Type</option>
-						<option value="project">Project</option>
-						<option value="company">Company</option>
+						<option value="project" ${categoryType == "project" ? "selected" : ""}>Project</option>
+						<option value="company" ${categoryType == "company" ? "selected" : ""}>Company</option>
 					</select>
 					<div class="d-block invalid-feedback" id="invalid-categoryType"></div>
 				</div>

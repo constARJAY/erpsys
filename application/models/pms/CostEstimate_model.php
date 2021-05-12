@@ -76,7 +76,7 @@ class CostEstimate_model extends CI_Model {
                     "itemUom"	            => $item["itemUom"],
                     "categoryType"          => $item["categoryType"],
                     "quantity"              => $item["quantity"],
-                    "files"                 => array_key_exists("existingFile", $item) ? $item["existingFile"] : null,
+                    "files"                 => $item["files"],
                     "createdBy"             => $item["createdBy"],
                     "updatedBy"             => $item["updatedBy"],
                 ];

@@ -33,7 +33,7 @@
                                     <div class="container row">
                                         <div class="col-2"></div>
                                         <div class="col-8 text-center">
-                                            <img class="img-fluid" src="http://localhost/erpsys/assets/modal/please-select2.gif" alt="">
+                                            <img class="img-fluid" src="<?=base_url()?>assets/modal/please-select2.gif" alt="">
                                             <h6 class="module-header text-primary text-center font-weight-bold">ITEM PRICE LIST</h6>
                                             <p>Select classification to show price list.</p>
                                         </div>
