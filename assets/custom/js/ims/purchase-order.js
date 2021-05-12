@@ -1271,9 +1271,11 @@ $(document).ready(function() {
 
 		if (bidRecapID && inventoryVendorID) {
 			if (purchaseOrderID) {
-				where = `purchaseOrderID = ${purchaseOrderID} AND bidRecapID = ${bidRecapID} AND inventoryVendorID = ${inventoryVendorID}`;
+				// where = `purchaseOrderID = ${purchaseOrderID} AND bidRecapID = ${bidRecapID} AND inventoryVendorID = ${inventoryVendorID}`;
+				where = `purchaseOrderID = ${purchaseOrderID} AND bidRecapID = ${bidRecapID} AND inventoryVendorID = ${inventoryVendorID} AND forPurchase <> 0`;
 			} else {
-				where = `purchaseOrderID IS NULL AND bidRecapID = ${bidRecapID} AND inventoryVendorID = ${inventoryVendorID}`;
+				// where = `purchaseOrderID IS NULL AND bidRecapID = ${bidRecapID} AND inventoryVendorID = ${inventoryVendorID}`;
+				where = `purchaseOrderID IS NULL AND bidRecapID = ${bidRecapID} AND inventoryVendorID = ${inventoryVendorID} AND forPurchase <> 0`;
 			}
 			let requestItemsData = getTableData(
 				`ims_request_items_tbl 
