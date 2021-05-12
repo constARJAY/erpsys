@@ -168,14 +168,13 @@ $(document).ready(function() {
 					{ targets: 0,  width: 100 },
 					{ targets: 1,  width: 150 },
 					{ targets: 2,  width: 150 },
-					{ targets: 3,  width: 150 },
+					{ targets: 3,  width: 350 },
 					{ targets: 4,  width: 100 },
-					{ targets: 5,  width: 150 },
+					{ targets: 5,  width: 200 },
 					{ targets: 6,  width: 200 },
 					{ targets: 7,  width: 200 },
-					{ targets: 8,  width: 200 },
-					{ targets: 9,  width: 80  },
-					{ targets: 10, width: 250 },
+					{ targets: 8,  width: 80 },
+					{ targets: 9,  width: 200  },
 				],
 			});
 
@@ -192,14 +191,13 @@ $(document).ready(function() {
 					{ targets: 0,  width: 100 },
 					{ targets: 1,  width: 150 },
 					{ targets: 2,  width: 150 },
-					{ targets: 3,  width: 150 },
+					{ targets: 3,  width: 350 },
 					{ targets: 4,  width: 100 },
-					{ targets: 5,  width: 150 },
+					{ targets: 5,  width: 200 },
 					{ targets: 6,  width: 200 },
 					{ targets: 7,  width: 200 },
-					{ targets: 8,  width: 200 },
-					{ targets: 9,  width: 80  },
-					{ targets: 10, width: 250 },
+					{ targets: 8,  width: 80 },
+					{ targets: 9,  width: 200  },
 				],
 			});
 
@@ -305,7 +303,6 @@ $(document).ready(function() {
                     <th>Document No.</th>
                     <th>Employee Name</th>
                     <th>Client Name</th>
-                    <th>Project Code</th>
                     <th>Project Name</th>
                     <th>Current Approver</th>
                     <th>Date Created</th>
@@ -357,8 +354,12 @@ $(document).ready(function() {
 					<td>${getFormCode("SR", createdAt, serviceRequisitionID )}</td>
 					<td>${fullname}</td>
 					<td>${clientName || '-'}</td>
-					<td>${projectListCode || '-'}</td>
-					<td>${projectListName || '-'}</td>
+					<td>
+						<div>
+							${projectListName || '-'}
+						</div>
+						<small style="color:#848482;">${projectListCode || '-'}</small>
+					</td>
 					<td>
 						${employeeFullname(getCurrentApprover(approversID, approversDate, serviceRequisitionStatus, true))}
 					</td>
@@ -406,7 +407,6 @@ $(document).ready(function() {
                     <th>Document No.</th>
                     <th>Employee Name</th>
                     <th>Client Name</th>
-                    <th>Project Code</th>
                     <th>Project Name</th>
                     <th>Current Approver</th>
                     <th>Date Created</th>
@@ -451,23 +451,27 @@ $(document).ready(function() {
                 code="${getFormCode("SR", createdAt, serviceRequisitionID )}"><i class="fas fa-edit"></i> Edit</button>`;
 
 			html += `
-            <tr class="${btnClass}" id="${encryptString(serviceRequisitionID )}">
-                <td>${getFormCode("SR", createdAt, serviceRequisitionID )}</td>
-                <td>${fullname}</td>
-                <td>${clientName || '-'}</td>
-                <td>${projectListCode || '-'}</td>
-                <td>${projectListName || '-'}</td>
-                <td>
-                    ${employeeFullname(getCurrentApprover(approversID, approversDate, serviceRequisitionStatus, true))}
-                </td>
-				<td>${dateCreated}</td>
-				<td>${dateSubmitted}</td>
-				<td>${dateApproved}</td>
-                <td class="text-center">
-                    ${getStatusStyle(serviceRequisitionStatus)}
-                </td>
-				<td>${remarks}</td>
-            </tr>`;
+			<tr class="${btnClass}" id="${encryptString(serviceRequisitionID )}">
+			<td>${getFormCode("SR", createdAt, serviceRequisitionID )}</td>
+			<td>${fullname}</td>
+			<td>${clientName || '-'}</td>
+			<td>
+				<div>
+					${projectListName || '-'}
+				</div>
+				<small style="color:#848482;">${projectListCode || '-'}</small>
+			</td>
+			<td>
+				${employeeFullname(getCurrentApprover(approversID, approversDate, serviceRequisitionStatus, true))}
+			</td>
+			<td>${dateCreated}</td>
+			<td>${dateSubmitted}</td>
+			<td>${dateApproved}</td>
+			<td class="text-center">
+				${getStatusStyle(serviceRequisitionStatus)}
+			</td>
+			<td>${remarks}</td>
+		</tr>`;
 		});
 
 		html += `

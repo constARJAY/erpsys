@@ -177,15 +177,14 @@ $(document).ready(function() {
 				columnDefs: [
 					{ targets: 0,  width: 100 },
 					{ targets: 1,  width: 150 },
-					{ targets: 2,  width: 150 },
-					{ targets: 3,  width: 150 },
-					{ targets: 4,  width: 100 },
-					{ targets: 5,  width: 150 },
+					{ targets: 2,  width: 350 },
+					{ targets: 3,  width: 100 },
+					{ targets: 4,  width: 150 },
+					{ targets: 5,  width: 200 },
 					{ targets: 6,  width: 200 },
 					{ targets: 7,  width: 200 },
-					{ targets: 8,  width: 200 },
-					{ targets: 9,  width: 80  },
-					{ targets: 10, width: 250 },
+					{ targets: 8,  width: 80 },
+					{ targets: 9,  width: 250  },
 				],
 			});
 
@@ -201,15 +200,14 @@ $(document).ready(function() {
 				columnDefs: [
 					{ targets: 0,  width: 100 },
 					{ targets: 1,  width: 150 },
-					{ targets: 2,  width: 150 },
-					{ targets: 3,  width: 150 },
-					{ targets: 4,  width: 100 },
-					{ targets: 5,  width: 150 },
+					{ targets: 2,  width: 350 },
+					{ targets: 3,  width: 100 },
+					{ targets: 4,  width: 150 },
+					{ targets: 5,  width: 200 },
 					{ targets: 6,  width: 200 },
 					{ targets: 7,  width: 200 },
-					{ targets: 8,  width: 200 },
-					{ targets: 9,  width: 80  },
-					{ targets: 10, width: 250 },
+					{ targets: 8,  width: 80 },
+					{ targets: 9,  width: 250  },
 				],
 			});
 
@@ -373,7 +371,6 @@ $(document).ready(function() {
                 <tr style="white-space: nowrap">
                     <th>Document No.</th>
                     <th>Employee Name</th>
-                    <th>Project Code</th>
                     <th>Project Name</th>
                     <th>Reference Code</th>
                     <th>Current Approver</th>
@@ -423,8 +420,12 @@ $(document).ready(function() {
             <tr class="${btnClass}" id="${encryptString(purchaseOrderID )}">
                 <td>${getFormCode("PO", createdAt, purchaseOrderID )}</td>
                 <td>${fullname}</td>
-                <td>${projectListCode || '-'}</td>
-                <td>${projectListName || '-'}</td>
+				<td>
+					<div>
+						${projectListName || '-'}
+					</div>
+					<small style="color:#848482;">${projectListCode || '-'}</small>
+				</td>
                 <td>${referenceCode   || '-'}</td>
                 <td>
                     ${employeeFullname(getCurrentApprover(approversID, approversDate, purchaseOrderStatus, true))}
@@ -471,7 +472,6 @@ $(document).ready(function() {
                 <tr style="white-space: nowrap">
                     <th>Document No.</th>
                     <th>Employee Name</th>
-                    <th>Project Code</th>
                     <th>Project Name</th>
                     <th>Reference Code</th>
                     <th>Current Approver</th>
@@ -521,8 +521,12 @@ $(document).ready(function() {
             <tr class="${btnClass}" id="${encryptString(purchaseOrderID )}">
                 <td>${getFormCode("PO", createdAt, purchaseOrderID )}</td>
                 <td>${fullname}</td>
-                <td>${projectListCode || '-'}</td>
-                <td>${projectListName || '-'}</td>
+				<td>
+					<div>
+						${projectListName || '-'}
+					</div>
+					<small style="color:#848482;">${projectListCode || '-'}</small>
+				</td>
                 <td>${referenceCode   || '-'}</td>
                 <td>
                     ${employeeFullname(getCurrentApprover(approversID, approversDate, purchaseOrderStatus, true))}
@@ -605,7 +609,7 @@ $(document).ready(function() {
 					if (!isOngoing) {
 						button = `
 						<button 
-							class="btn btn-cancel"
+							class="btn btn-cancel px-5 p-2"
 							id="btnCancelForm" 
 							purchaseOrderID="${purchaseOrderID}"
 							code="${getFormCode("P0", createdAt, purchaseOrderID)}"
@@ -618,7 +622,7 @@ $(document).ready(function() {
 					if (!isDocumentRevised(purchaseOrderID)) {
 						button = `
 						<button
-							class="btn btn-cancel"
+							class="btn btn-cancel px-5 p-2"
 							id="btnRevise" 
 							purchaseOrderID="${encryptString(purchaseOrderID)}"
 							code="${getFormCode("P0", createdAt, purchaseOrderID)}"
@@ -639,7 +643,7 @@ $(document).ready(function() {
 							Approve
 						</button>
 						<button 
-							class="btn btn-cancel"
+							class="btn btn-cancel px-5 p-2"
 							id="btnReject" 
 							purchaseOrderID="${encryptString(purchaseOrderID)}"
 							code="${getFormCode("P0", createdAt, purchaseOrderID)}"><i class="fas fa-ban"></i> 
