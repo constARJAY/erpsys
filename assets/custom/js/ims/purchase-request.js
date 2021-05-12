@@ -171,8 +171,8 @@ $(document).ready(function() {
 				columnDefs: [
 					{ targets: 0,  width: 100 },
 					{ targets: 1,  width: 150 },
-					{ targets: 2,  width: 350 },
-					{ targets: 3,  width: 100 },
+					{ targets: 2,  width: 100 },
+					{ targets: 3,  width: 350 },
 					{ targets: 4,  width: 150 },
 					{ targets: 5,  width: 200 },
 					{ targets: 6,  width: 200 },
@@ -194,8 +194,8 @@ $(document).ready(function() {
 				columnDefs: [
 					{ targets: 0,  width: 100 },
 					{ targets: 1,  width: 150 },
-					{ targets: 2,  width: 350 },
-					{ targets: 3,  width: 100 },
+					{ targets: 2,  width: 100 },
+					{ targets: 3,  width: 350 },
 					{ targets: 4,  width: 150 },
 					{ targets: 5,  width: 200 },
 					{ targets: 6,  width: 200 },
@@ -1280,14 +1280,14 @@ $(document).ready(function() {
 					`ims_request_items_tbl AS irit
 						LEFT JOIN ims_inventory_item_tbl AS iitt USING(itemID)`, 
 					`irit.requestItemID, quantity, unitCost, totalCost, files, remarks, irit.itemID, irit.itemName, categoryType AS categoryName, itemUom AS unitOfMeasurementID, categoryType, iitt.createdAt AS itmCreatedAt`, 
-					`purchaseRequestID = ${purchaseRequestID} AND AND costEstimateID IS NULL`);
+					`purchaseRequestID = ${purchaseRequestID} AND AND costEstimateID IS NULL AND inventoryValidationID IS NULL`);
 			} else {
 				requestItemsData = getTableData(
 					`ims_request_items_tbl AS irit
 						LEFT JOIN ims_inventory_item_tbl AS iitt USING(itemID) 
 						LEFT JOIN ims_inventory_category_tbl AS iict USING(categoryID)`, 
 					`irit.requestItemID, quantity, unitCost, totalCost, files, remarks, itemID, iitt.itemName, categoryName, unitOfMeasurementID, categoryType, iitt.createdAt AS itmCreatedAt`, 
-					`purchaseRequestID = ${purchaseRequestID} AND costEstimateID IS NULL`);
+					`purchaseRequestID = ${purchaseRequestID} AND costEstimateID IS NULL AND inventoryValidationID IS NULL`);
 			}
 
 			requestItemsData.filter(item => item.categoryType == "project").map(item => {
@@ -1311,7 +1311,7 @@ $(document).ready(function() {
 				`ims_request_items_tbl AS irit
 					LEFT JOIN ims_inventory_item_tbl AS iitt USING(itemID)`, 
 				`irit.requestItemID, quantity, unitCost, totalCost, files, remarks, irit.itemID, irit.itemName, categoryType AS categoryName, itemUom AS unitOfMeasurementID, categoryType, iitt.createdAt AS itmCreatedAt`, 
-				`costEstimateID = ${queryCEID} AND purchaseRequestID IS NULL`);
+				`costEstimateID = ${queryCEID} AND purchaseRequestID IS NULL AND inventoryValidationID IS NULL`);
 			
 			requestItemsData.filter(item => item.categoryType == "project").map(item => {
 				requestProjectItems += getItemRow(true, item, readOnly, queryCEID);
@@ -1334,7 +1334,7 @@ $(document).ready(function() {
 				`ims_request_items_tbl AS irit
 					LEFT JOIN ims_inventory_item_tbl AS iitt USING(itemID)`, 
 				`irit.requestItemID, quantity, unitCost, totalCost, files, remarks, irit.itemID, irit.itemName, categoryType AS categoryName, itemUom AS unitOfMeasurementID, categoryType, iitt.createdAt AS itmCreatedAt`, 
-				`purchaseRequestID = ${purchaseRequestID} AND costEstimateID = ${queryCEID}`);
+				`purchaseRequestID = ${purchaseRequestID} AND costEstimateID = ${queryCEID} AND inventoryValidationID IS NULL`);
 			requestItemsData.filter(item => item.categoryType == "project").map(item => {
 				requestProjectItems += getItemRow(true, item, readOnly, queryCEID);
 			})
@@ -2033,7 +2033,7 @@ $(document).ready(function() {
 				const remarks   = $("td [name=remarks]", this).val()?.trim();	
 
 				let fileID   = $("td [name=files]", this).attr("id") || "";
-				let file     = $(`#${fileID}`)?.[0]?.files?.[0];
+				let file     = fileID ? $(`#${fileID}`)?.[0]?.files?.[0] : "";
 				let fileArr  = file?.name?.split(".");
 				let filename = file ? file?.name : "";
 

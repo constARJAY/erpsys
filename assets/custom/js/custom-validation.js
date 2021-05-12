@@ -48,6 +48,7 @@ const initAll = () => {
 	initDateRangePicker();
 	initInputmask();
 	initAmount();
+	initQuantity();
 };
 // ----- END REINITIALIZE ALL FUNCTION -----
 
@@ -128,6 +129,19 @@ const initAmount = (element = null, displayPrefix = false) => {
 };
 initAmount();
 // ----- END INITIALIZE AMOUNT FORMAT -----
+
+
+// ----- INITIALIZE QUANTITY FORMAT -----
+const initQuantity = (element = null) => {
+	let elem = getElement(element, ".input-quantity");
+	$(elem).inputmask({
+		alias: "currency",
+		prefix: "",
+		allowMinus: false,
+	});
+};
+initQuantity();
+// ----- END INITIALIZE QUANTITY FORMAT -----
 
 
 // ----- RESET FORM -----
@@ -455,6 +469,61 @@ const checkAmount = (elementID, invalidFeedback, value) => {
 // ----- END VALIDATE CURRENCY -----
 
 
+// ----- VALIDATE QUANTITY -----
+const checkQuantity = (elementID, invalidFeedback, value) => {
+	const validated = $(elementID).hasClass("validated");
+	const min = $(elementID).attr("min") ? +$(elementID).attr("min") : false;
+	const max = $(elementID).attr("max") ? +$(elementID).attr("max") : false;
+	let quantityValue = +value.split(",").join("");
+
+	if (typeof min != "number" && typeof max != "number") {
+		validated
+			? $(elementID).removeClass("is-invalid").addClass("is-valid")
+			: $(elementID).removeClass("is-invalid").removeClass("is-valid");
+		invalidFeedback.text("");
+	} else if (typeof min != "number" && typeof max == "number") {
+		if (quantityValue > max) {
+			$(elementID).removeClass("is-valid").addClass("is-invalid");
+			invalidFeedback.text(`Please input quantity less than ${(max)}`);
+		} else {
+			validated
+				? $(elementID).removeClass("is-invalid").addClass("is-valid")
+				: $(elementID).removeClass("is-invalid").removeClass("is-valid");
+			invalidFeedback.text("");
+		}
+	} else if (typeof min == "number" && typeof max != "number") {
+		if (quantityValue < min) {
+			$(elementID).removeClass("is-valid").addClass("is-invalid");
+			invalidFeedback.text(`Please input quantity greater than ${(min - 0.1)}`);
+		} else {
+			validated
+				? $(elementID).removeClass("is-invalid").addClass("is-valid")
+				: $(elementID).removeClass("is-invalid").removeClass("is-valid");
+			invalidFeedback.text("");
+		}
+	} else if (typeof min == "number" && typeof max == "number") {
+		if (quantityValue >= min && quantityValue > max) {
+			$(elementID).removeClass("is-valid").addClass("is-invalid");
+			invalidFeedback.text(`Please input quantity less than ${(max)}`);
+		} else if (quantityValue >= min && quantityValue <= max) {
+			validated
+				? $(elementID).removeClass("is-invalid").addClass("is-valid")
+				: $(elementID).removeClass("is-invalid").removeClass("is-valid");
+			invalidFeedback.text("");
+		} else if (quantityValue < min && quantityValue <= max) {
+			$(elementID).removeClass("is-valid").addClass("is-invalid");
+			invalidFeedback.text(`Please input quantity greater than ${(min - .01)}`);
+		}
+	} else {
+		validated
+			? $(elementID).removeClass("is-invalid").addClass("is-valid")
+			: $(elementID).removeClass("is-invalid").removeClass("is-valid");
+		invalidFeedback.text("");
+	}
+};
+// ----- END VALIDATE QUANTITY -----
+
+
 // ----- VALIDATE IF EXISTS -----
 const checkExists = (elementID, invalidFeedback) => {
 	let inputs = {};
@@ -634,6 +703,7 @@ const validateInput = (elementID) => {
 	$(elementID).addClass("validated");
 	let currency = $(elementID).hasClass("amount");
 	let number   = $(elementID).hasClass("number");
+	let quantity = $(elementID).hasClass("quantity");
 	let required = $(elementID).attr("required");
 	let disabled = $(elementID).attr("disabled");
 	let value =
@@ -767,6 +837,7 @@ const validateInput = (elementID) => {
 					checkLength(elementID, invalidFeedback);
 					number && checkNumber(elementID, invalidFeedback, value);
 					currency && checkAmount(elementID, invalidFeedback, value);
+					quantity && checkQuantity(elementID, invalidFeedback, value);
 					checkEmail(elementID, invalidFeedback, value);
 					checkURL(elementID, invalidFeedback, value);
 					checkExists(elementID, invalidFeedback);
@@ -776,6 +847,7 @@ const validateInput = (elementID) => {
 				valLength > 0 && checkLength(elementID, invalidFeedback);
 				number && checkNumber(elementID, invalidFeedback, value);
 				currency && checkAmount(elementID, invalidFeedback, value);
+				quantity && checkQuantity(elementID, invalidFeedback, value);
 				checkEmail(elementID, invalidFeedback, value);
 				checkURL(elementID, invalidFeedback, value);
 				checkExists(elementID, invalidFeedback);
@@ -901,6 +973,7 @@ $(function () {
 		let maxLength = $(this).attr("maxlength");
 		let validated = $(this).hasClass("validated");
 		let currency = $(this).hasClass("amount");
+		let quantity = $(this).hasClass("input-quantity");
 		let number = $(this).hasClass("number");
 		let value = $(this).val().trim();
 		let valLength = value.length;
@@ -925,6 +998,7 @@ $(function () {
 			valLength > 0 && checkLength(elementID, invalidFeedback);
 			number && checkNumber(elementID, invalidFeedback, value);
 			currency && checkAmount(elementID, invalidFeedback, value);
+			quantity && checkQuantity(elementID, invalidFeedback, value);
 			checkEmail(elementID, invalidFeedback, value);
 			checkURL(elementID, invalidFeedback, value);
 			checkExists(elementID, invalidFeedback);
@@ -944,6 +1018,7 @@ $(function () {
 				checkLength(elementID, invalidFeedback);
 				number && checkNumber(elementID, invalidFeedback, value);
 				currency && checkAmount(elementID, invalidFeedback, value);
+				quantity && checkQuantity(elementID, invalidFeedback, value);
 				checkEmail(elementID, invalidFeedback, value);
 				checkURL(elementID, invalidFeedback, value);
 				checkExists(elementID, invalidFeedback);
@@ -1142,6 +1217,21 @@ $(function () {
 			? $(elementID).parent().parent().find(".invalid-feedback")
 			: $(elementID).parent().parent().parent().find(".invalid-feedback");
 		checkAmount(elementID, invalidFeedback, value);
+	})
+	// ----- END CHECK AMOUNT KEYUP -----
+
+
+	// ----- CHECK AMOUNT KEYUP -----
+	$(document).on("keyup", ".input-quantity", function() {
+		let value     = $(this).val();
+		let elementID = `#${$(this).attr("id")}`;
+		let invalidFeedback =
+		$(elementID).parent().find(".invalid-feedback").length > 0
+			? $(elementID).parent().find(".invalid-feedback")
+			: $(elementID).parent().parent().find(".invalid-feedback").length > 0
+			? $(elementID).parent().parent().find(".invalid-feedback")
+			: $(elementID).parent().parent().parent().find(".invalid-feedback");
+		checkQuantity(elementID, invalidFeedback, value);
 	})
 	// ----- END CHECK AMOUNT KEYUP -----
 });
