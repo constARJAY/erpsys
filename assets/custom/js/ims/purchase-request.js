@@ -27,7 +27,10 @@ $(document).ready(function() {
 	// ----- IS DOCUMENT REVISED -----
 	function isDocumentRevised(id = null) {
 		if (id) {
-			const revisedDocumentsID = getTableData("ims_purchase_request_tbl", "revisePurchaseRequestID", "revisePurchaseRequestID IS NOT NULL");
+			const revisedDocumentsID = getTableData(
+				"ims_purchase_request_tbl", 
+				"revisePurchaseRequestID", 
+				"revisePurchaseRequestID IS NOT NULL AND purchaseRequestStatus != 4");
 			return revisedDocumentsID.map(item => item.revisePurchaseRequestID).includes(id);
 		}
 		return false;
@@ -584,6 +587,8 @@ $(document).ready(function() {
 						<button 
 							class="btn btn-cancel btnCancel px-5 p-2" 
 							id="btnCancel"
+							purchaseRequestID="${purchaseRequestID}"
+							code="${getFormCode("PR", createdAt, purchaseRequestID)}"
 							revise="${isRevise}"><i class="fas fa-ban"></i> 
 							Cancel
 						</button>`;
@@ -735,13 +740,6 @@ $(document).ready(function() {
 	function updateInventoryItemOptions() {
 		let projectItemIDArr = [], companyItemIDArr = []; // 0 IS THE DEFAULT VALUE
 		let projectElementID = [], companyElementID = [];
-		let optionNone = {
-			itemID:              "0",
-			itemCode:            "-",
-			categoryName:        "-",
-			unitOfMeasurementID: "-",
-			itemName:            "N/A"
-		};
 
 		$("[name=itemID][project=true]").each(function(i, obj) {
 			projectItemIDArr.push($(this).val());
@@ -756,7 +754,7 @@ $(document).ready(function() {
 
 		projectElementID.map((element, index) => {
 			let html = `<option selected disabled>Select Item Name</option>`;
-			let itemList = [optionNone, ...inventoryItemList];
+			let itemList = [...inventoryItemList];
 			html += itemList.filter(item => !projectItemIDArr.includes(item.itemID) || item.itemID == projectItemIDArr[index]).map(item => {
 				return `
 				<option 
@@ -775,7 +773,7 @@ $(document).ready(function() {
 
 		companyElementID.map((element, index) => {
 			let html = `<option selected disabled>Select Item Name</option>`;
-			let itemList = [optionNone, ...inventoryItemList];
+			let itemList = [...inventoryItemList];
 			html += itemList.filter(item => !companyItemIDArr.includes(item.itemID) || item.itemID == companyItemIDArr[index]).map(item => {
 				return `
 				<option 
@@ -827,15 +825,7 @@ $(document).ready(function() {
 			itemIDArr.push($(this).val());
 		}) 
 
-		let optionNone = {
-			itemID:              "0",
-			itemCode:            "-",
-			categoryName:        "-",
-			unitOfMeasurementID: "-",
-			itemName:            "N/A",
-			itemDescription:     ""
-		};
-		let itemList = [optionNone, ...inventoryItemList];
+		let itemList = [...inventoryItemList];
 
 		html += itemList.filter(item => !itemIDArr.includes(item.itemID) || item.itemID == id).map(item => {
             return `
@@ -1012,8 +1002,8 @@ $(document).ready(function() {
 					<div class="quantity">
 						<input 
 							type="text" 
-							class="form-control validate number text-center"
-							min="1" 
+							class="form-control input-quantity text-center"
+							min="0.01" 
 							data-allowcharacters="[0-9]" 
 							max="999999999" 
 							id="quantity" 
@@ -1231,7 +1221,7 @@ $(document).ready(function() {
 	// ----- UPDATE TOTAL AMOUNT -----
 	function updateTotalAmount(isProject = true) {
 		const attr        = isProject ? "[project=true]" : "[company=true]";
-		const quantityArr = $.find(`[name=quantity]${attr}`).map(element => element.value || "0");
+		const quantityArr = $.find(`[name=quantity]${attr}`).map(element => getNonFormattedAmount(element.value) || "0");
 		const unitCostArr = $.find(`.unitcost${attr}`).map(element => getNonFormattedAmount(element.innerText) || "0");
 		const totalAmount = quantityArr.map((qty, index) => +qty * +unitCostArr[index]).reduce((a,b) => a + b, 0);
 		$(`#totalAmount${attr}`).text(formatAmount(totalAmount, true));
@@ -1547,7 +1537,7 @@ $(document).ready(function() {
 		const isProject = $(this).closest("tbody").attr("project") == "true";
 		const attr      = isProject ? "[project=true]" : "[company=true]";
 		const table     = isProject ? "project" : "company";
-		const quantity  = +$(`#quantity${index}${table}${attr}`).val();
+		const quantity  = +getNonFormattedAmount($(`#quantity${index}${table}${attr}`).val());
 		const unitcost  = +getNonFormattedAmount($(`#unitcost${index}${attr}`).text());
 		const totalcost = quantity * unitcost;
 		$(`#totalcost${index}${attr}`).text(formatAmount(totalcost, true));
@@ -1634,6 +1624,7 @@ $(document).ready(function() {
 		updateTableItems();
 		initInputmask();
 		initAmount();
+		initQuantity();
     })
     // ----- END INSERT ROW ITEM -----
 
@@ -2027,7 +2018,7 @@ $(document).ready(function() {
 				const itemUom         = $("td [name=itemID] option:selected", this).attr("uom");	
 				const itemDescription = $("td [name=itemID] option:selected", this).attr("itemDescription");	
 
-				const quantity  = +$("td [name=quantity]", this).val();	
+				const quantity  = +getNonFormattedAmount($("td [name=quantity]", this).val());	
 				const unitcost  = +getNonFormattedAmount($("td .unitcost", this).text());	
 				const totalcost = quantity * unitcost;
 				const remarks   = $("td [name=remarks]", this).val()?.trim();	
@@ -2566,13 +2557,11 @@ function savePurchaseRequest(data = null, method = "submit", notificationData = 
 					}, 500);
 				})
 			} else {
-				if (res.dismiss == "cancel") {
-					if (method != "submit") {
-						if (method != "deny") {
-							callback && callback();
-						} else {
-							$("#modal_purchase_request").text().length > 0 && $("#modal_purchase_request").modal("show");
-						}
+				if (res.dismiss == "cancel" && method != "submit") {
+					if (method != "deny") {
+						callback && callback();
+					} else {
+						$("#modal_purchase_request").text().length > 0 && $("#modal_purchase_request").modal("show");
 					}
 				} else if (res.isDismissed) {
 					if (method == "deny") {

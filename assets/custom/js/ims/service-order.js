@@ -43,8 +43,14 @@ $(document).ready(function() {
 		const loadData = (id, isRevise = false) => {
 			const tableData = getTableData(
 				`ims_service_order_tbl AS isot
-					LEFT JOIN ims_service_requisition_tbl AS isrt USING(serviceRequisitionID)LEFT JOIN pms_client_tbl AS pct ON isot.clientID = pct.clientID`, 
-				`isot.*, isrt.projectID, isrt.serviceRequisitionReason, isrt.createdAt AS srCreatedAt, pct.createdAt AS pctCreatedAt`, 
+					LEFT JOIN ims_service_requisition_tbl AS isrt USING(serviceRequisitionID)
+					LEFT JOIN pms_client_tbl AS pct ON isot.clientID = pct.clientID
+					LEFT JOIN ims_inventory_vendor_tbl AS iivt ON isot.inventoryVendorID = iivt.inventoryVendorID`, 
+				`isot.*, 
+				isrt.projectID, 
+				isrt.createdAt AS srCreatedAt, 
+				pct.createdAt AS pctCreatedAt,
+				iivt.createdAt AS iivtCreatedAt`, 
 				"serviceOrderID=" + id);
 
 			if (tableData.length > 0) {
@@ -137,6 +143,12 @@ $(document).ready(function() {
 		`ims_service_requisition_tbl`,
 		"",
 		`serviceRequisitionStatus = 2`
+	)
+
+	const inventoryVendorList = getTableData(
+		`ims_inventory_vendor_tbl`,
+		``,
+		`inventoryVendorStatus = 1`
 	)
 
 	const projectList = getTableData(
@@ -249,6 +261,8 @@ $(document).ready(function() {
 			.DataTable({
 				proccessing: false,
 				serverSide: false,
+				sorting: false,
+                searching: false,
                 paging: false,
                 info: false,
 				scrollX: true,
@@ -294,6 +308,8 @@ $(document).ready(function() {
 			.DataTable({
 				proccessing: false,
 				serverSide: false,
+                paging: false,
+				searching: false,
                 paging: false,
                 info: false,
 				scrollX: true,
@@ -599,7 +615,7 @@ $(document).ready(function() {
 					} else {
 						button += `
 						<button 
-							class="btn btn-cancel"
+							class="btn btn-cancel px-5 p-2"
 							id="btnCancelForm" 
 							serviceOrderID="${serviceOrderID}"
 							code="${getFormCode("P0", createdAt, serviceOrderID)}"
@@ -614,7 +630,7 @@ $(document).ready(function() {
 					if (!isOngoing) {
 						button = `
 						<button 
-							class="btn btn-cancel"
+							class="btn btn-cancel px-5 p-2"
 							id="btnCancelForm" 
 							serviceOrderID="${serviceOrderID}"
 							code="${getFormCode("P0", createdAt, serviceOrderID)}"
@@ -627,7 +643,7 @@ $(document).ready(function() {
 					if (!isDocumentRevised(serviceOrderID)) {
 						button = `
 						<button
-							class="btn btn-cancel"
+							class="btn btn-cancel px-5 p-2"
 							id="btnRevise" 
 							serviceOrderID="${encryptString(serviceOrderID)}"
 							code="${getFormCode("P0", createdAt, serviceOrderID)}"
@@ -648,7 +664,7 @@ $(document).ready(function() {
 							Approve
 						</button>
 						<button 
-							class="btn btn-cancel"
+							class="btn btn-cancel px-5 p-2"
 							id="btnReject" 
 							serviceOrderID="${encryptString(serviceOrderID)}"
 							code="${getFormCode("P0", createdAt, serviceOrderID)}"><i class="fas fa-ban"></i> 
@@ -686,7 +702,6 @@ $(document).ready(function() {
 				srCode    = "${getFormCode("SR", sr.createdAt, sr.serviceRequisitionID)}"
 				clientID  = "${sr.clientID}"
 				projectID = "${sr.projectID}"
-				reason    = "${sr.serviceRequisitionReason}"
 				${sr.serviceRequisitionID == id && "selected"}>
 				${getFormCode("SR", sr.createdAt, sr.serviceRequisitionID)}
 				</option>`;
@@ -699,7 +714,6 @@ $(document).ready(function() {
 					srCode    = "${getFormCode("SR", sr.createdAt, sr.serviceRequisitionID)}"
 					clientID  = "${sr.clientID}"
 					projectID = "${sr.projectID}"
-					reason    = "${sr.serviceRequisitionReason}"
 					${sr.serviceRequisitionID == id && "selected"}>
 					${getFormCode("SR", sr.createdAt, sr.serviceRequisitionID)}
 				</option>`;
@@ -709,6 +723,57 @@ $(document).ready(function() {
 
 	}
 	// ----- GET SERVICE REQUISITION LIST -----
+
+
+	// ----- GET INVENTORY VENDOR LIST -----
+	function getInventoryVendorList(id = null, display = true) {
+		let html = `
+		<option 
+			value                 = ""
+			companyCode           = "-"
+			companyName           = "-"
+			companyContactDetails = "-"
+			companyContactPerson  = "-"
+			companyAddress        = "-"
+			companyVatable        = "0"
+			selected disabled>Select Company Name</option>`;
+        html += inventoryVendorList.map(vendor => {
+			const { 
+				inventoryVendorID,
+				inventoryVendorName, 
+				inventoryVendorVAT = 0, 
+				inventoryVendorProvince,
+				inventoryVendorCity,
+				inventoryVendorBarangay,
+				inventoryVendorUnit,
+				inventoryVendorBuilding,
+				inventoryVendorCountry,
+				inventoryVendorZipCode,
+				inventoryVendorPerson,
+				inventoryVendorMobile,
+				inventoryVendorTelephone,
+				createdAt 
+			} = vendor;
+
+			let address = `${inventoryVendorUnit && titleCase(inventoryVendorUnit)+", "}${inventoryVendorBuilding && inventoryVendorBuilding +", "}${inventoryVendorBarangay && titleCase(inventoryVendorBarangay)+", "}${inventoryVendorCity && titleCase(inventoryVendorCity)+", "}${inventoryVendorProvince && titleCase(inventoryVendorProvince)+", "}${inventoryVendorCountry && titleCase(inventoryVendorCountry)+", "}${inventoryVendorZipCode && titleCase(inventoryVendorZipCode)}`;
+			let contactDetails = `${inventoryVendorMobile} - ${inventoryVendorTelephone}`;
+
+            return `
+            <option 
+                value                 = "${inventoryVendorID}" 
+                companyCode           = "${getFormCode("VEN", createdAt, inventoryVendorID)}"
+				companyName           = "${inventoryVendorName}"
+				companyContactDetails = "${contactDetails}"
+				companyContactPerson  = "${inventoryVendorPerson}"
+				companyAddress        = "${address}"
+				companyVatable        = "${inventoryVendorVAT}"
+                ${inventoryVendorID == id && "selected"}>
+                ${inventoryVendorName}
+            </option>`;
+        }).join("")
+        return display ? html : inventoryVendorList;
+	}
+	// ----- END GET INVENTORY VENDOR LIST -----
 
 
 	// ----- GET PROJECT LIST -----
@@ -744,7 +809,7 @@ $(document).ready(function() {
 		})
 
 		serviceElementID.map((element, index) => {
-			let html = `<option selected disabled>Select Item Name</option>`;
+			let html = `<option selected disabled>Select Service Name</option>`;
 			let serviceList = [...serviceItemList];
 			html += serviceList.filter(item => !serviceIDArr.includes(item.serviceID) || item.serviceID == serviceIDArr[index]).map(item => {
                 let serviceCode = item.serviceID != "0" ? 
@@ -797,7 +862,7 @@ $(document).ready(function() {
 	function getServiceScope(scope = {}, readOnly = false) {
 		let {
 			description = "-",
-			quantity    = "1",
+			quantity    = "0",
 			uom         = "pcs",
 			unitCost    = "0",
 			totalCost   = "0",
@@ -828,9 +893,9 @@ $(document).ready(function() {
 					<div class="quantity">
 						<input 
 							type="text" 
-							class="form-control validate number text-center"
+							class="form-control input-quantity text-center"
 							data-allowcharacters="[0-9]" 
-							min="1" 
+							min="0.01" 
 							max="999999999" 
 							id="quantity" 
 							name="quantity" 
@@ -846,7 +911,7 @@ $(document).ready(function() {
 					<div class="uom">
 						<input 
 							type="text" 
-							class="form-control validate number text-center"
+							class="form-control validate text-center"
 							data-allowcharacters="[a-z][A-Z][0-9][ ][.][,][-]['][()]" 
 							id="serviceUom" 
 							name="serviceUom" 
@@ -867,7 +932,7 @@ $(document).ready(function() {
 							<input 
 								type="text" 
 								class="form-control amount"
-								min="1" 
+								min="0.01" 
 								max="9999999999"
 								minlength="1"
 								maxlength="20" 
@@ -915,16 +980,6 @@ $(document).ready(function() {
 		return html;
 	}
 	// ----- END GET SERVICE SCOPE -----
-
-
-	// ----- UPDATE SERVICE SCOPE -----
-	function updateServiceScope() {
-		$(`[name="serviceDescription"]`).each(function(i) {
-			$(this).attr("id", `serviceDescription${i}`);
-			$(this).parent().find(".invalid-feedback").attr("id", `invalid-serviceDescription${i}`);
-		})
-	}
-	// ----- END UPDATE SERVICE SCOPE -----
 
 
 	// ----- GET ITEM ROW -----
@@ -1058,71 +1113,28 @@ $(document).ready(function() {
 				}
 			});
 
-			// QUANTITY
-			$("td .quantity [name=quantity]", this).attr("id", `quantity${i}`);
-			$("td .quantity [name=quantity]", this).attr("project", `true`);
-			
-			// CATEGORY
-			$("td .category", this).attr("id", `category${i}`);
+			// SCOPE
+			$("td .tableScopeBody tr", this).each(function(x) {
 
-			// UOM
-			$("td .uom", this).attr("id", `uom${i}`);
+				// DESCRIPTION
+				$("td .servicescope [name=serviceDescription]", this).attr("id", `serviceDescription${i}${x}`);
+				$("td .servicescope .invalid-feedback", this).attr("id", `invalid-serviceDescription${i}${x}`);
 
-			// UNIT COST
-			$("td .unitcost [name=unitCost] ", this).attr("id", `unitcost${i}`);
-			$("td .unitcost [name=unitCost] ", this).attr("project", `true`);
-
-			// TOTAL COST
-			$("td .totalcost", this).attr("id", `totalcost${i}`);
-			$("td .totalcost", this).attr("project", `true`);
-
-			// FILE
-			$("td .file [name=files]", this).attr("id", `files${i}`);
-
-			// REMARKS
-			$("td .remarks [name=remarks]", this).attr("id", `remarks${i}`);
-		})
-
-		$(".itemCompanyTableBody tr").each(function(i) {
-			// ROW ID
-			$(this).attr("id", `tableRow${i}`);
-			$(this).attr("index", `${i}`);
-
-			// CHECKBOX
-			$("td .action .checkboxrow", this).attr("id", `checkboxrow${i}`);
-			$("td .action .checkboxrow", this).attr("company", `true`);
-
-			// ITEMCODE
-			$("td .itemcode", this).attr("id", `itemcode${i}`);
-
-			// ITEMNAME
-			$(this).find("select").each(function(j) {
-				const itemID = $(this).val();
-				$(this).attr("index", `${i}`);
-				$(this).attr("company", `true`);
-				$(this).attr("id", `companycompanyitemid${i}`)
-				if (!$(this).attr("data-select2-id")) {
-					$(this).select2({ theme: "bootstrap" });
-				}
-			});
-
-			// QUANTITY
-			$("td .quantity [name=quantity]", this).attr("id", `quantity${i}`);
-			$("td .quantity [name=quantity]", this).attr("company", `true`);
-			
-			// CATEGORY
-			$("td .category", this).attr("id", `category${i}`);
-
-			// UOM
-			$("td .uom", this).attr("id", `uom${i}`);
-
-			// UNIT COST
-			$("td .unitcost [name=unitCost] ", this).attr("id", `unitcost${i}`);
-			$("td .unitcost [name=unitCost] ", this).attr("company", `true`);
-
-			// TOTAL COST
-			$("td .totalcost", this).attr("id", `totalcost${i}`);
-			$("td .totalcost", this).attr("company", `true`);
+				// QUANTITY
+				$("td .quantity [name=quantity]", this).attr("id", `quantity${i}${x}`);
+				$("td .quantity .invalid-feedback", this).attr("id", `invalid-quantity${i}${x}`);
+	
+				// UOM
+				$("td .uom .serviceUom", this).attr("id", `serviceUom${i}${x}`);
+				$("td .uom .invalid-feedback", this).attr("id", `invalid-serviceUom${i}${x}`);
+	
+				// UNIT COST
+				$("td .unitcost [name=unitCost] ", this).attr("id", `unitcost${i}${x}`);
+				$("td .unitcost .invalid-feedback", this).attr("id", `invalid-unitcost${i}${x}`);
+	
+				// TOTAL COST
+				$("td .totalcost", this).attr("id", `totalcost${i}${x}`);
+			})
 
 			// FILE
 			$("td .file [name=files]", this).attr("id", `files${i}`);
@@ -1218,8 +1230,8 @@ $(document).ready(function() {
 	// ----- KEYUP QUANTITY OR UNITCOST -----
 	$(document).on("keyup", "[name=quantity], [name=unitCost]", function() {
 		const tableRow  = $(this).closest("tr");
-		const quantity  = +tableRow.find(`[name="quantity"]`).first().val();
-		const unitcost  = +tableRow.find(`[name="unitCost"]`).first().val().replaceAll(",", "");
+		const quantity  = +getNonFormattedAmount(tableRow.find(`[name="quantity"]`).first().val());
+		const unitcost  = +getNonFormattedAmount(tableRow.find(`[name="unitCost"]`).first().val());
 		const totalcost = quantity * unitcost;
 		tableRow.find(`.totalcost`).first().text(formatAmount(totalcost, true));
 		updateTotalAmount();
@@ -1297,8 +1309,8 @@ $(document).ready(function() {
 
 	// ----- UPDATE TOTAL AMOUNT -----
 	function updateTotalAmount() {
-		const quantityArr = $.find(`[name=quantity]`).map(element => element.value || "0");
-		const unitCostArr = $.find(`[name=unitCost]`).map(element => element.value.replaceAll(",", "") || "0");
+		const quantityArr = $.find(`[name=quantity]`).map(element => +getNonFormattedAmount(element.value) || "0");
+		const unitCostArr = $.find(`[name=unitCost]`).map(element => +getNonFormattedAmount(element.value) || "0");
 		const total    = quantityArr.map((qty, index) => +qty * +unitCostArr[index]).reduce((a,b) => a + b, 0);
 		$(`#total`).text(formatAmount(total, true));
 		
@@ -1343,18 +1355,6 @@ $(document).ready(function() {
 		$(`[name="clientContactPerson"]`).val(clientContactPerson);
 	}
 	// ----- END GET CLIENT -----
-
-
-	// ----- KEYUP QUANTITY OR UNITCOST -----
-	$(document).on("keyup", "[name=quantity], [name=unitCost]", function() {
-		const tableRow  = $(this).closest("tr");
-		const quantity  = +tableRow.find(`[name="quantity"]`).first().val();
-		const unitcost  = +tableRow.find(`[name="unitCost"]`).first().val().replaceAll(",", "");
-		const totalcost = quantity * unitcost;
-		tableRow.find(`.totalcost`).first().text(formatAmount(totalcost, true));
-		updateTotalAmount();
-	})
-	// ----- END KEYUP QUANTITY OR UNITCOST -----
 
 
 	// ----- KEYUP DISCOUNT -----
@@ -1434,10 +1434,8 @@ $(document).ready(function() {
 		const serviceRequisitionID = $(this).val();
 		const clientID  = $("option:selected", this).attr("clientID");
 		const projectID = $("option:selected", this).attr("projectID");
-		const reason    = $("option:selected", this).attr("reason");
 		projectID && $(`[name="projectID"]`).val(projectID).trigger("change");
 		clientID && getClient(clientID);
-		reason && $(`[name="serviceOrderReason"]`).val(reason);
 		const services = getServicesDisplay([{serviceRequisitionID}]);
 		$(`#tableServiceDisplay`).html(preloader);
 		setTimeout(() => {
@@ -1445,7 +1443,6 @@ $(document).ready(function() {
 			initDataTables();
 			initAll();
 			updateTableItems();
-			updateServiceScope();
 			updateServiceOptions();
 			initAmount("#discount", true);
 			initAmount("#lessEwt", true);
@@ -1455,6 +1452,30 @@ $(document).ready(function() {
 		}, 200);
 	})
 	// ----- END SELECT SERVICE REQUISITION ID -----
+
+
+	// ----- SELECT INVENTORY VENDOR -----
+	$(document).on("change", `[name="inventoryVendorID"]`, function() {
+		const inventoryVendorID     = $(this).val();
+		const companyCode           = $(`option:selected`, this).attr("companyCode");
+		const companyName           = $(`option:selected`, this).attr("companyName");
+		const companyContactDetails = $(`option:selected`, this).attr("companyContactDetails");
+		const companyContactPerson  = $(`option:selected`, this).attr("companyContactPerson");
+		const companyAddress        = $(`option:selected`, this).attr("companyAddress");
+		const companyVatable        = $(`option:selected`, this).attr("companyVatable");
+
+		if (companyVatable == "1") {
+			const total = +getNonFormattedAmount($("#total").text());
+			const vat = total * 0.12;
+			$(`[name="vat"]`).val(vat);
+		}
+
+		$(`[name="companyCode"]`).val(companyCode);
+		$(`[name="companyContactDetails"]`).val(companyContactDetails);
+		$(`[name="companyContactPerson"]`).val(companyContactPerson || "-");
+		$(`[name="companyAddress"]`).val(companyAddress || "-");
+	})
+	// ----- END SELECT INVENTORY VENDOR -----
 
 
 	// ----- GET SERVICE ORDER DATA -----
@@ -1506,16 +1527,23 @@ $(document).ready(function() {
 			data["clientContactPerson"] = $(`[name="clientContactPerson"]`).val()?.trim() || null;
 			data["clientAddress"]    = $(`[name="clientAddress"]`).val()?.trim() || null;
 
+			data["inventoryVendorID"]     = $("[name=inventoryVendorID]").val() || null;
+			data["companyName"]           = $("[name=inventoryVendorID] option:selected").text()?.trim() || null;
+			data["companyContactDetails"] = $(`[name="companyContactDetails"]`).val()?.trim() || null;
+			data["companyContactPerson"]  = $(`[name="companyContactPerson"]`).val()?.trim() || null;
+			data["companyAddress"]        = $(`[name="companyAddress"]`).val()?.trim() || null;
+
 			data["paymentTerms"]     = $("[name=paymentTerms]").val()?.trim();
 			data["scheduleDate"]     = moment($("[name=scheduleDate]").val()).format("YYYY-MM-DD");
-			data["total"]            = getNonFormattedAmount($("#total").text());
-			data["discount"]         = getNonFormattedAmount($("#discount").val());
-			data["totalAmount"]      = getNonFormattedAmount($("#totalAmount").text());
-			data["vatSales"]         = getNonFormattedAmount($("#vatSales").text());
-			data["vat"]              = getNonFormattedAmount($("#vat").val());
-			data["totalVat"]         = getNonFormattedAmount($("#totalVat").text());
-			data["lessEwt"]          = getNonFormattedAmount($("#lessEwt").val());
-			data["grandTotalAmount"] = getNonFormattedAmount($("#grandTotalAmount").text());
+			data["serviceOrderReason"] = $("[name=serviceOrderReason]").val()?.trim();
+			data["total"]            = +getNonFormattedAmount($("#total").text());
+			data["discount"]         = +getNonFormattedAmount($("#discount").val());
+			data["totalAmount"]      = +getNonFormattedAmount($("#totalAmount").text());
+			data["vatSales"]         = +getNonFormattedAmount($("#vatSales").text());
+			data["vat"]              = +getNonFormattedAmount($("#vat").val());
+			data["totalVat"]         = +getNonFormattedAmount($("#totalVat").text());
+			data["lessEwt"]          = +getNonFormattedAmount($("#lessEwt").val());
+			data["grandTotalAmount"] = +getNonFormattedAmount($("#grandTotalAmount").text());
 
 			if (action == "insert") {
 				data["createdBy"] = sessionID;
@@ -1551,7 +1579,7 @@ $(document).ready(function() {
 					};
 	
 					$(`td .tableScopeBody tr`, this).each(function() {
-						const quantity = +$(`[name="quantity"]`, this).val() || +$(`.quantity`, this).text().trim();
+						const quantity = +getNonFormattedAmount($(`[name="quantity"]`, this).val()) || +getNonFormattedAmount($(`.quantity`, this).text());
 						const unitCost = +getNonFormattedAmount($(`[name="unitCost"]`, this).val()) || +getNonFormattedAmount($(`.unitcost`, this).text());
 						let scope = {
 							description: $('[name="serviceDescription"]', this).val()?.trim() || $(`.servicescope`, this).text().trim(),
@@ -1628,7 +1656,6 @@ $(document).ready(function() {
 			}
 			requestServicesData.map(item => {
 				requestServiceItems += getServiceRow(item, readOnly || serviceOrderStatus != 3);
-				// requestServiceItems += getServiceRow(item, readOnly || serviceOrderStatus != 0);
 			})
 		} else {
 			requestServiceItems += getServiceRow();
@@ -1665,7 +1692,7 @@ $(document).ready(function() {
 						<input 
 							type="text" 
 							class="form-control-plaintext amount py-0 text-danger border-bottom font-weight-bold"
-							min="0" 
+							min="0.01" 
 							max="9999999999"
 							minlength="1"
 							maxlength="20" 
@@ -1698,7 +1725,7 @@ $(document).ready(function() {
 						<input 
 							type="text" 
 							class="form-control-plaintext amount py-0 text-danger border-bottom font-weight-bold"
-							min="0" 
+							min="0.01" 
 							max="9999999999"
 							minlength="1"
 							maxlength="20" 
@@ -1706,7 +1733,7 @@ $(document).ready(function() {
 							id="vat" 
 							style="font-size: 1.02em;"
 							value="${vat}"
-							${disabled}>
+							readonly>
 					</div>
 				</div>
 				<div class="row" style="font-size: 1.1rem; font-weight:bold">
@@ -1734,7 +1761,7 @@ $(document).ready(function() {
 							${disabled}>
 					</div>
 				</div>
-				<div class="row" style="font-size: 1.1rem; font-weight:bold">
+				<div class="row" style="font-size: 1.3rem; font-weight:bold; border-bottom: 3px double black;">
 					<div class="col-6 text-right">Grand Total:</div>
 					<div class="col-6 text-right text-danger"
 						id="grandTotalAmount"
@@ -1762,7 +1789,12 @@ $(document).ready(function() {
 			$("#total").text(formatAmount(totalCost, true));
 			$("#discount").val("0.00");
 			$("#totalAmount").text(formatAmount(totalCost, true));
-			const vat = totalCost * 0.12;
+
+			const isVatable = $(`[name="inventoryVendorID"] option:selected`).attr("companyVatable") == "1";
+			let vat = 0;
+			if (isVatable) {
+				vat = totalCost * 0.12;
+			}
 			$("#vat").val(vat);
 			const vatSales = totalCost - vat;
 			$("#vatSales").text(formatAmount(vatSales, true));
@@ -1787,18 +1819,26 @@ $(document).ready(function() {
 			reviseServiceOrderID     = "",
 			employeeID               = "",
 			clientID                 = "",
+			inventoryVendorID        = "",
 			projectID                = "",
 			serviceRequisitionID     = "",
 			srCreatedAt              = new Date,
 			pctCreatedAt             = new Date,
+			iivtCreatedAt            = new Date,
 			clientCode               = "-",
 			clientName               = "-",
 			clientAddress            = "-",
 			clientContactDetails     = "",
 			clientContactPerson      = "",
+			companyCode              = "-",
+			companyName              = "-",
+			companyAddress           = "-",
+			companyContactDetails    = "",
+			companyContactPerson     = "",
 			paymentTerms             = "",
 			scheduleDate             = "",
 			serviceRequisitionReason = "",
+			serviceOrderReason       = "",
 			total                    = 0,
 			discount                 = 0,
 			totalAmount              = 0,
@@ -2042,9 +2082,48 @@ $(document).ready(function() {
                     <input type="text" class="form-control" name="clientAddress" disabled value="${clientAddress || "-"}">
                 </div>
             </div>
+			<hr class="w-100">
+			<div class="col-md-4 col-sm-12">
+                <div class="form-group">
+                    <label>Company Code</label>
+                    <input type="text" class="form-control" name="companyCode" disabled value="${inventoryVendorID && inventoryVendorID != "0" ? getFormCode("VEN", iivtCreatedAt, inventoryVendorID) : "-"}">
+                </div>
+            </div>
+            <div class="col-md-4 col-sm-12">
+                <div class="form-group">
+                    <label>Company Name ${!disabled ? "<code>*</code>" : ""}</label>
+                    <select class="form-control validate select2"
+						name="inventoryVendorID"
+						id="inventoryVendorID"
+						required
+						style="width: 100%"
+						${disabled}>
+						${getInventoryVendorList(inventoryVendorID)}
+					</select>
+                </div>
+            </div>
+			<div class="col-md-4 col-sm-12">
+				<div class="form-group">
+					<label>Contact Details</label>
+					<input type="text" class="form-control" name="companyContactDetails" disabled value="${companyContactDetails || "-"}">
+				</div>
+			</div>
+			<div class="col-md-4 col-sm-12">
+                <div class="form-group">
+                    <label>Contact Person</label>
+                    <input type="text" class="form-control" name="companyContactPerson" disabled value="${companyContactPerson || "-"}">
+                </div>
+            </div>
+            <div class="col-md-8 col-sm-12">
+                <div class="form-group">
+                    <label>Company Address</label>
+                    <input type="text" class="form-control" name="companyAddress" disabled value="${companyAddress || "-"}">
+                </div>
+            </div>
+
             <div class="col-md-6 col-sm-12">
                 <div class="form-group">
-                    <label>Payment Terms <code>*</code></label>
+                    <label>Payment Terms ${!disabled ? "<code>*</code>" : ""}</label>
                     <input type="text" 
 						class="form-control validate" 
 						name="paymentTerms" 
@@ -2061,7 +2140,7 @@ $(document).ready(function() {
             </div>
             <div class="col-md-6 col-sm-12">
                 <div class="form-group">
-                    <label>Schedule <code>*</code></label>
+                    <label>Schedule ${!disabled ? "<code>*</code>" : ""}</label>
                     <input type="button" 
 						class="form-control validate daterange text-left" 
 						name="scheduleDate" 
@@ -2092,7 +2171,7 @@ $(document).ready(function() {
             </div>
             <div class="col-md-12 col-sm-12">
                 <div class="form-group">
-                    <label>Reason</label>
+                    <label>Reason ${!disabled ? "<code>*</code>" : ""}</label>
                     <textarea class="form-control validate"
                         data-allowcharacters="[a-z][A-Z][0-9][ ][.][,][-][()]['][/][&]"
                         minlength="1"
@@ -2102,7 +2181,8 @@ $(document).ready(function() {
                         required
                         rows="4"
                         style="resize:none;"
-						disabled>${serviceRequisitionReason || "-"}</textarea>
+						required
+						${disabled}>${serviceOrderReason}</textarea>
                     <div class="d-block invalid-feedback" id="invalid-serviceOrderReason"></div>
                 </div>
             </div>
@@ -2131,7 +2211,6 @@ $(document).ready(function() {
 			initAll();
 			projectID && projectID != 0 && $("[name=projectID]").trigger("change");
 			updateTableItems();
-			updateServiceScope();
 			updateServiceOptions();
 			initAmount("#discount", true);
 			initAmount("#lessEwt", true);
@@ -2407,7 +2486,7 @@ $(document).ready(function() {
 			</div>
 		</div>
 		<div class="modal-footer text-right">
-			<button class="btn btn-danger" id="btnRejectConfirmation"
+			<button class="btn btn-danger px-5 p-2" id="btnRejectConfirmation"
 			serviceOrderID="${id}"
 			code="${feedback}"><i class="far fa-times-circle"></i> Deny</button>
 			<button class="btn btn-cancel btnCancel px-5 p-2" data-dismiss="modal"><i class="fas fa-ban"></i> Cancel</button>
@@ -2548,7 +2627,7 @@ function getConfirmation(method = "submit") {
 			swalImg   = `${base_url}assets/modal/reject.svg`;
 			break;
 		case "cancelform":
-			swalTitle = `CANCEL ${title.toUpperCase()} DOCUMENT`;
+			swalTitle = `CANCEL ${title.toUpperCase()}`;
 			swalText  = "Are you sure to cancel this document?";
 			swalImg   = `${base_url}assets/modal/cancel.svg`;
 			break;
@@ -2665,7 +2744,7 @@ function saveServiceOrder(data = null, method = "submit", notificationData = nul
 					}, 500);
 				})
 			} else {
-				if (res.dismiss === "cancel") {
+				if (res.dismiss === "cancel" && method != "submit") {
 					if (method != "deny") {
 						callback && callback();
 					} else {

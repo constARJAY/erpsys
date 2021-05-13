@@ -457,7 +457,7 @@ const checkAmount = (elementID, invalidFeedback, value) => {
 			invalidFeedback.text("");
 		} else if (currencyValue < min && currencyValue <= max) {
 			$(elementID).removeClass("is-valid").addClass("is-invalid");
-			invalidFeedback.text(`Please input amount greater than ${formatAmount(min - .01)}`);
+			invalidFeedback.text(`Please input amount greater than ${formatAmount(min - 0.01)}`);
 		}
 	} else {
 		validated
@@ -484,7 +484,7 @@ const checkQuantity = (elementID, invalidFeedback, value) => {
 	} else if (typeof min != "number" && typeof max == "number") {
 		if (quantityValue > max) {
 			$(elementID).removeClass("is-valid").addClass("is-invalid");
-			invalidFeedback.text(`Please input quantity less than ${(max)}`);
+			invalidFeedback.text(`Please input quantity less than ${formatAmount(max)}`);
 		} else {
 			validated
 				? $(elementID).removeClass("is-invalid").addClass("is-valid")
@@ -494,7 +494,7 @@ const checkQuantity = (elementID, invalidFeedback, value) => {
 	} else if (typeof min == "number" && typeof max != "number") {
 		if (quantityValue < min) {
 			$(elementID).removeClass("is-valid").addClass("is-invalid");
-			invalidFeedback.text(`Please input quantity greater than ${(min - 0.1)}`);
+			invalidFeedback.text(`Please input quantity greater than ${formatAmount(min)}`);
 		} else {
 			validated
 				? $(elementID).removeClass("is-invalid").addClass("is-valid")
@@ -504,7 +504,7 @@ const checkQuantity = (elementID, invalidFeedback, value) => {
 	} else if (typeof min == "number" && typeof max == "number") {
 		if (quantityValue >= min && quantityValue > max) {
 			$(elementID).removeClass("is-valid").addClass("is-invalid");
-			invalidFeedback.text(`Please input quantity less than ${(max)}`);
+			invalidFeedback.text(`Please input quantity less than ${formatAmount(max)}`);
 		} else if (quantityValue >= min && quantityValue <= max) {
 			validated
 				? $(elementID).removeClass("is-invalid").addClass("is-valid")
@@ -512,7 +512,7 @@ const checkQuantity = (elementID, invalidFeedback, value) => {
 			invalidFeedback.text("");
 		} else if (quantityValue < min && quantityValue <= max) {
 			$(elementID).removeClass("is-valid").addClass("is-invalid");
-			invalidFeedback.text(`Please input quantity greater than ${(min - .01)}`);
+			invalidFeedback.text(`Please input quantity greater than ${formatAmount(min - 0.01)}`);
 		}
 	} else {
 		validated
@@ -703,7 +703,7 @@ const validateInput = (elementID) => {
 	$(elementID).addClass("validated");
 	let currency = $(elementID).hasClass("amount");
 	let number   = $(elementID).hasClass("number");
-	let quantity = $(elementID).hasClass("quantity");
+	let quantity = $(elementID).hasClass("input-quantity");
 	let required = $(elementID).attr("required");
 	let disabled = $(elementID).attr("disabled");
 	let value =

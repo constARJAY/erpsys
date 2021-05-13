@@ -46,7 +46,8 @@ $(document).ready(function() {
 					LEFT JOIN ims_service_order_tbl AS isot USING(serviceOrderID)
 					LEFT JOIN ims_service_requisition_tbl AS isrt ON isct.serviceRequisitionID = isrt.serviceRequisitionID
 					LEFT JOIN pms_client_tbl AS pct ON isot.clientID = pct.clientID
-					LEFT JOIN pms_project_list_tbl AS pplt ON isot.projectID = pplt.projectListID`,
+					LEFT JOIN pms_project_list_tbl AS pplt ON isot.projectID = pplt.projectListID
+					LEFT JOIN ims_inventory_vendor_tbl AS iivt ON isot.inventoryVendorID = iivt.inventoryVendorID`,
                 `isct.*, 
                 isct.employeeID,
 				isot.serviceRequisitionID, 
@@ -56,6 +57,12 @@ $(document).ready(function() {
                 isot.clientAddress, 
                 isot.clientContactDetails, 
                 isot.clientContactPerson, 
+				isot.inventoryVendorID, 
+				iivt.createdAt AS iivtCreatedAt,
+                isot.companyName, 
+                isot.companyAddress, 
+                isot.companyContactDetails, 
+                isot.companyContactPerson, 
                 isot.paymentTerms, 
                 isot.scheduleDate, 
                 isot.total, 
@@ -163,10 +170,17 @@ $(document).ready(function() {
 
 	const serviceOrderList = getTableData(
 		`ims_service_order_tbl AS isot
-			LEFT JOIN ims_service_requisition_tbl AS isrt USING(serviceRequisitionID)`,
+			LEFT JOIN ims_service_requisition_tbl AS isrt USING(serviceRequisitionID)
+			LEFT JOIN ims_inventory_vendor_tbl AS iivt USING(inventoryVendorID)`,
 		`isot.*,
-		isrt.serviceRequisitionReason`,
+		isrt.serviceRequisitionReason, iivt.createdAt AS iivtCreatedAt`,
 		`serviceOrderStatus = 2`
+	)
+
+	const inventoryVendorList = getTableData(
+		`ims_inventory_vendor_tbl`,
+		``,
+		`inventoryVendorStatus = 1`
 	)
 
 	const projectList = getTableData(
@@ -276,7 +290,10 @@ $(document).ready(function() {
 			.DataTable({
 				proccessing: false,
 				serverSide: false,
+                sorting: false,
+                searching: false,
                 paging: false,
+                ordering: false,
                 info: false,
 				scrollX: true,
 				scrollCollapse: true,
@@ -584,7 +601,7 @@ $(document).ready(function() {
 					} else {
 						button += `
 						<button 
-							class="btn btn-cancel"
+							class="btn btn-cancel px-5 p-2"
 							id="btnCancelForm" 
 							serviceCompletionID="${serviceCompletionID}"
 							code="${getFormCode("SC", createdAt, serviceCompletionID)}"
@@ -599,7 +616,7 @@ $(document).ready(function() {
 					if (!isOngoing) {
 						button = `
 						<button 
-							class="btn btn-cancel"
+							class="btn btn-cancel px-5 p-2"
 							id="btnCancelForm" 
 							serviceCompletionID="${serviceCompletionID}"
 							code="${getFormCode("SC", createdAt, serviceCompletionID)}"
@@ -612,7 +629,7 @@ $(document).ready(function() {
 					if (!isDocumentRevised(serviceCompletionID)) {
 						button = `
 						<button
-							class="btn btn-cancel"
+							class="btn btn-cancel px-5 p-2"
 							id="btnRevise" 
 							serviceCompletionID="${encryptString(serviceCompletionID)}"
 							code="${getFormCode("SC", createdAt, serviceCompletionID)}"
@@ -633,7 +650,7 @@ $(document).ready(function() {
 							Approve
 						</button>
 						<button 
-							class="btn btn-cancel"
+							class="btn btn-cancel px-5 p-2"
 							id="btnReject" 
 							serviceCompletionID="${encryptString(serviceCompletionID)}"
 							code="${getFormCode("SC", createdAt, serviceCompletionID)}"><i class="fas fa-ban"></i> 
@@ -675,6 +692,11 @@ $(document).ready(function() {
 				clientID     = "${so.clientID}"
 				projectID    = "${so.projectID}"
 				reason       = "${so.serviceRequisitionReason}"
+				companyCode  = "${so.inventoryVendorID ? getFormCode("VEN", so.iivtCreatedAt, so.inventoryVendorID) : "-"}"
+				companyName  = "${so.companyName}"
+				companyContactDetails = "${so.companyContactDetails}"
+				companyContactPerson  = "${so.companyContactPerson}"
+				companyAddress        = "${so.companyAddress}"
 				${so.serviceOrderID == id && "selected"}>
 				${getFormCode("SO", so.createdAt, so.serviceOrderID)}
 				</option>`;
@@ -691,6 +713,11 @@ $(document).ready(function() {
 					clientID     = "${so.clientID}"
 					projectID    = "${so.projectID}"
 					reason       = "${so.serviceRequisitionReason}"
+					companyCode  = "${so.inventoryVendorID ? getFormCode("VEN", so.iivtCreatedAt, so.inventoryVendorID) : "-"}"
+					companyName  = "${so.companyName}"
+					companyContactDetails = "${so.companyContactDetails}"
+					companContactPerson   = "${so.companContactPerson}"
+					companyAddress        = "${so.companyAddress}"
 					${so.serviceOrderID == id && "selected"}>
 					${getFormCode("SO", so.createdAt, so.serviceOrderID)}
 				</option>`;
@@ -700,6 +727,57 @@ $(document).ready(function() {
 
 	}
 	// ----- GET SERVICE REQUISITION LIST -----
+
+
+	// ----- GET INVENTORY VENDOR LIST -----
+	function getInventoryVendorList(id = null, display = true) {
+		let html = `
+		<option 
+			value                 = ""
+			companyCode           = "-"
+			companyName           = "-"
+			companyContactDetails = "-"
+			companyContactPerson  = "-"
+			companyAddress        = "-"
+			companyVatable        = "0"
+			selected disabled>Select Company Name</option>`;
+        html += inventoryVendorList.map(vendor => {
+			const { 
+				inventoryVendorID,
+				inventoryVendorName, 
+				inventoryVendorVAT = 0, 
+				inventoryVendorProvince,
+				inventoryVendorCity,
+				inventoryVendorBarangay,
+				inventoryVendorUnit,
+				inventoryVendorBuilding,
+				inventoryVendorCountry,
+				inventoryVendorZipCode,
+				inventoryVendorPerson,
+				inventoryVendorMobile,
+				inventoryVendorTelephone,
+				createdAt 
+			} = vendor;
+
+			let address = `${inventoryVendorUnit && titleCase(inventoryVendorUnit)+", "}${inventoryVendorBuilding && inventoryVendorBuilding +", "}${inventoryVendorBarangay && titleCase(inventoryVendorBarangay)+", "}${inventoryVendorCity && titleCase(inventoryVendorCity)+", "}${inventoryVendorProvince && titleCase(inventoryVendorProvince)+", "}${inventoryVendorCountry && titleCase(inventoryVendorCountry)+", "}${inventoryVendorZipCode && titleCase(inventoryVendorZipCode)}`;
+			let contactDetails = `${inventoryVendorMobile} - ${inventoryVendorTelephone}`;
+
+            return `
+            <option 
+                value                 = "${inventoryVendorID}" 
+                companyCode           = "${getFormCode("VEN", createdAt, inventoryVendorID)}"
+				companyName           = "${inventoryVendorName}"
+				companyContactDetails = "${contactDetails}"
+				companyContactPerson  = "${inventoryVendorPerson}"
+				companyAddress        = "${address}"
+				companyVatable        = "${inventoryVendorVAT}"
+                ${inventoryVendorID == id && "selected"}>
+                ${inventoryVendorName}
+            </option>`;
+        }).join("")
+        return display ? html : inventoryVendorList;
+	}
+	// ----- END GET INVENTORY VENDOR LIST -----
 
 
 	// ----- GET PROJECT LIST -----
@@ -1427,6 +1505,11 @@ $(document).ready(function() {
 		const clientID     = $("option:selected", this).attr("clientID");
 		const projectID    = $("option:selected", this).attr("projectID");
 		const reason       = $("option:selected", this).attr("reason");
+		const companyCode  = $("option:selected", this).attr("companyCode");
+		const companyName  = $("option:selected", this).attr("companyName");
+		const companyContactDetails = $("option:selected", this).attr("companyContactDetails");
+		const companyContactPerson  = $("option:selected", this).attr("companyContactPerson");
+		const companyAddress        = $("option:selected", this).attr("companyAddress");
 		const paymentTerms = $("option:selected", this).attr("paymentTerms");
 		const scheduleDate = $("option:selected", this).attr("scheduleDate");
 		projectID && $(`[name="projectID"]`).val(projectID).trigger("change");
@@ -1434,6 +1517,11 @@ $(document).ready(function() {
 		reason && $(`[name="serviceOrderReason"]`).val(reason);
 		paymentTerms && $(`[name="paymentTerms"]`).val(paymentTerms);
 		scheduleDate && $(`[name="scheduleDate"]`).val(scheduleDate);
+		companyCode && $(`[name="companyCode"]`).val(companyCode);
+		companyName && $(`[name="companyName"]`).val(companyName);
+		companyContactDetails && $(`[name="companyContactDetails"]`).val(companyContactDetails);
+		companyContactPerson && $(`[name="companyContactPerson"]`).val(companyContactPerson);
+		companyAddress && $(`[name="companyAddress"]`).val(companyAddress);
 
 		const data = getTableData(
 			`ims_service_order_tbl`,
@@ -1633,7 +1721,7 @@ $(document).ready(function() {
 				<tr style="white-space: nowrap">
 					<th>Service Code</th>
 					<th>Service Name</th>
-					<th>Service Date</th>
+					<th>Service Date ${!readOnly ? "<code>*</code>" : ""}</th>
 					<th>Scope of Work</th>
 					<th>Remarks</th>
 				</tr>
@@ -1728,7 +1816,7 @@ $(document).ready(function() {
 							disabled>
 					</div>
 				</div>
-				<div class="row" style="font-size: 1.1rem; font-weight:bold">
+				<div class="row" style="font-size: 1.3rem; font-weight:bold; border-bottom: 3px double black;">
 					<div class="col-6 text-right">Grand Total:</div>
 					<div class="col-6 text-right text-danger"
 						id="grandTotalAmount"
@@ -1901,6 +1989,13 @@ $(document).ready(function() {
 			clientAddress             = "-",
 			clientContactDetails      = "",
 			clientContactPerson       = "",
+			inventoryVendorID         = "",
+			iivtCreatedAt             = new Date,
+			companyCode               = "-",
+			companyName               = "-",
+			companyAddress            = "-",
+			companyContactDetails     = "",
+			companyContactPerson      = "",
 			paymentTerms              = "",
 			scheduleDate              = "",
 			serviceRequisitionReason  = "",
@@ -2027,7 +2122,7 @@ $(document).ready(function() {
 
 		<div class="row" id="form_service_completion">
             <div class="col-md-4 col-sm-12">
-                <div class="form-group">
+                <div class="form-group" id="formReferenceNo">
                     <label>Reference No. ${!disabledReference ? "<code>*</code>" : ""}</label>
                     <select class="form-control validate select2"
                         name="serviceOrderID"
@@ -2091,6 +2186,39 @@ $(document).ready(function() {
                     <input type="text" class="form-control" name="clientAddress" disabled value="${clientAddress || "-"}">
                 </div>
             </div>
+
+			<hr class="w-100">
+			<div class="col-md-4 col-sm-12">
+                <div class="form-group">
+                    <label>Company Code</label>
+                    <input type="text" class="form-control" name="companyCode" disabled value="${inventoryVendorID && inventoryVendorID != "0" ? (iivtCreatedAt ? getFormCode("VEN", iivtCreatedAt, inventoryVendorID) : companyCode) : "-"}">
+                </div>
+            </div>
+            <div class="col-md-4 col-sm-12">
+                <div class="form-group">
+                    <label>Company Name</label>
+                    <input type="text" class="form-control" name="companyName" disabled value="${companyName || "-"}">
+                </div>
+            </div>
+			<div class="col-md-4 col-sm-12">
+				<div class="form-group">
+					<label>Contact Details</label>
+					<input type="text" class="form-control" name="companyContactDetails" disabled value="${companyContactDetails || "-"}">
+				</div>
+			</div>
+			<div class="col-md-4 col-sm-12">
+                <div class="form-group">
+                    <label>Contact Person</label>
+                    <input type="text" class="form-control" name="companyContactPerson" disabled value="${companyContactPerson || "-"}">
+                </div>
+            </div>
+            <div class="col-md-8 col-sm-12">
+                <div class="form-group">
+                    <label>Company Address</label>
+                    <input type="text" class="form-control" name="companyAddress" disabled value="${companyAddress || "-"}">
+                </div>
+            </div>
+
             <div class="col-md-6 col-sm-12">
                 <div class="form-group">
                     <label>Payment Terms</label>
@@ -2359,15 +2487,29 @@ $(document).ready(function() {
 	// ----- END VALIDATE SERVICE FILE ----- 
 
 
+	// ----- VALIDATE SERVICE FILE ----- 
+	function validateServiceDate() {
+		let flag = 0;
+		$(`[name="serviceDate"]`).each(function(i) {
+			if (!$(this).val()) {
+				flag++;
+			}
+		})
+		return flag > 0 ? false : true;
+	}
+	// ----- END VALIDATE SERVICE FILE ----- 
+
+
 	// ----- SUBMIT DOCUMENT -----
 	$(document).on("click", "#btnSubmit", function () {
 		const id       = $(this).attr("serviceCompletionID");
 		const revise   = $(this).attr("revise") == "true";
-		const validate = validateForm("form_service_completion");
-		const validateService = validateServiceFile();
+		const validate     = validateForm("formReferenceNo");
+		const validateFile = validateServiceFile();
+		const validateDate = validateServiceDate();
 		removeIsValid("#tableServiceCompletionItems0");
 
-		if (validate && validateService) {
+		if (validate && validateFile && validateDate) {
 			const action = revise && "insert" || (id ? "update" : "insert");
 			const data   = getServiceCompletionData(action, "submit", "1", id, "0", revise);
 
@@ -2486,7 +2628,7 @@ $(document).ready(function() {
 			</div>
 		</div>
 		<div class="modal-footer text-right">
-			<button class="btn btn-danger" id="btnRejectConfirmation"
+			<button class="btn btn-danger px-5 p-2" id="btnRejectConfirmation"
 			serviceCompletionID="${id}"
 			code="${feedback}"><i class="far fa-times-circle"></i> Deny</button>
 			<button class="btn btn-cancel btnCancel px-5 p-2" data-dismiss="modal"><i class="fas fa-ban"></i> Cancel</button>
@@ -2626,7 +2768,7 @@ function getConfirmation(method = "submit") {
 			swalImg   = `${base_url}assets/modal/reject.svg`;
 			break;
 		case "cancelform":
-			swalTitle = `CANCEL ${title.toUpperCase()} DOCUMENT`;
+			swalTitle = `CANCEL ${title.toUpperCase()}`;
 			swalText  = "Are you sure to cancel this document?";
 			swalImg   = `${base_url}assets/modal/cancel.svg`;
 			break;
@@ -2745,7 +2887,7 @@ function saveServiceCompletion(data = null, method = "submit", notificationData 
 					}, 500);
 				})
 			} else {
-				if (res.dismiss === "cancel") {
+				if (res.dismiss === "cancel" && method != "submit") {
 					if (method != "deny") {
 						callback && callback();
 					} else {

@@ -1818,7 +1818,6 @@ $(document).ready(function() {
 			const quantity = +getNonFormattedAmount($(`[name="forPurchase"]`, this).val()) || 0;
 			const unitCost  = +getNonFormattedAmount($(`.unitcost`, this).text());
 			const tempTotal = quantity * unitCost;
-			console.log(tempTotal);
 			total += tempTotal;
 		})
 
@@ -2985,13 +2984,11 @@ function savePurchaseOrder(data = null, method = "submit", notificationData = nu
 					}, 500);
 				})
 			} else {
-				if (res.dismiss == "cancel") {
-					if (method != "submit") {
-						if (method != "deny") {
-							callback && callback();
-						} else {
-							$("#modal_purchase_order").text().length > 0 && $("#modal_purchase_order").modal("show");
-						}
+				if (res.dismiss == "cancel" && method != "submit") {
+					if (method != "deny") {
+						callback && callback();
+					} else {
+						$("#modal_purchase_order").text().length > 0 && $("#modal_purchase_order").modal("show");
 					}
 				} else if (res.isDismissed) {
 					if (method == "deny") {

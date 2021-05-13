@@ -27,7 +27,10 @@ $(document).ready(function() {
 	// ----- IS DOCUMENT REVISED -----
 	function isDocumentRevised(id = null) {
 		if (id) {
-			const revisedDocumentsID = getTableData("ims_service_requisition_tbl", "reviseServiceRequisitionID", "reviseServiceRequisitionID IS NOT NULL");
+			const revisedDocumentsID = getTableData(
+				"ims_service_requisition_tbl", 
+				"reviseServiceRequisitionID", 
+				"reviseServiceRequisitionID IS NOT NULL AND serviceRequisitionStatus != 4");
 			return revisedDocumentsID.map(item => item.reviseServiceRequisitionID).includes(id);
 		}
 		return false;
@@ -229,6 +232,8 @@ $(document).ready(function() {
 			.DataTable({
 				proccessing: false,
 				serverSide: false,
+				sorting: false,
+                searching: false,
                 paging: false,
                 info: false,
 				scrollX: true,
@@ -519,13 +524,15 @@ $(document).ready(function() {
 						<button 
 							class="btn btn-cancel btnCancel px-5 p-2" 
 							id="btnCancel"
+							serviceRequisitionID="${serviceRequisitionID}"
+							code="${getFormCode("SR", createdAt, serviceRequisitionID)}"
 							revise="${isRevise}"><i class="fas fa-ban"></i> 
 							Cancel
 						</button>`;
 					} else {
 						button += `
 						<button 
-							class="btn btn-cancel"
+							class="btn btn-cancel px-5 p-2"
 							id="btnCancelForm" 
 							serviceRequisitionID="${serviceRequisitionID}"
 							code="${getFormCode("SR", createdAt, serviceRequisitionID)}"
@@ -540,7 +547,7 @@ $(document).ready(function() {
 					if (!isOngoing) {
 						button = `
 						<button 
-							class="btn btn-cancel"
+							class="btn btn-cancel px-5 p-2"
 							id="btnCancelForm" 
 							serviceRequisitionID="${serviceRequisitionID}"
 							code="${getFormCode("SR", createdAt, serviceRequisitionID)}"
@@ -553,7 +560,7 @@ $(document).ready(function() {
 					if (!isDocumentRevised(serviceRequisitionID)) {
 						button = `
 						<button
-							class="btn btn-cancel"
+							class="btn btn-cancel px-5 p-2"
 							id="btnRevise" 
 							serviceRequisitionID="${encryptString(serviceRequisitionID)}"
 							code="${getFormCode("SR", createdAt, serviceRequisitionID)}"
@@ -574,7 +581,7 @@ $(document).ready(function() {
 							Approve
 						</button>
 						<button 
-							class="btn btn-cancel"
+							class="btn btn-cancel px-5 p-2"
 							id="btnReject" 
 							serviceRequisitionID="${encryptString(serviceRequisitionID)}"
 							code="${getFormCode("SR", createdAt, serviceRequisitionID)}"><i class="fas fa-ban"></i> 
@@ -660,7 +667,7 @@ $(document).ready(function() {
 		})
 
 		serviceElementID.map((element, index) => {
-			let html = `<option selected disabled>Select Item Name</option>`;
+			let html = `<option selected disabled>Select Service Name</option>`;
 			let serviceList = [...serviceItemList];
 			html += serviceList.filter(item => !serviceIDArr.includes(item.serviceID) || item.serviceID == serviceIDArr[index]).map(item => {
                 let serviceCode = item.serviceID != "0" ? 
@@ -713,7 +720,7 @@ $(document).ready(function() {
 	function getServiceScope(scope = {}, readOnly = false) {
 		let {
 			description = "",
-			quantity    = "1",
+			quantity    = "0",
 			uom         = "pcs",
 			unitCost    = "0",
 			totalCost   = "0",
@@ -749,9 +756,9 @@ $(document).ready(function() {
 					<div class="quantity">
 						<input 
 							type="text" 
-							class="form-control validate number text-center"
+							class="form-control input-quantity text-center"
 							data-allowcharacters="[0-9]" 
-							min="1" 
+							min="0.01" 
 							max="999999999" 
 							id="quantity" 
 							name="quantity" 
@@ -767,7 +774,7 @@ $(document).ready(function() {
 					<div class="uom">
 						<input 
 							type="text" 
-							class="form-control validate number text-center"
+							class="form-control validate text-center serviceUom"
 							data-allowcharacters="[a-z][A-Z][0-9][ ][.][,][-]['][()]" 
 							id="serviceUom" 
 							name="serviceUom" 
@@ -788,7 +795,7 @@ $(document).ready(function() {
 							<input 
 								type="text" 
 								class="form-control amount"
-								min="1" 
+								min="0.01" 
 								max="9999999999"
 								minlength="1"
 								maxlength="20" 
@@ -836,16 +843,6 @@ $(document).ready(function() {
 		return html;
 	}
 	// ----- END GET SERVICE SCOPE -----
-
-
-	// ----- UPDATE SERVICE SCOPE -----
-	function updateServiceScope() {
-		$(`[name="serviceDescription"]`).each(function(i) {
-			$(this).attr("id", `serviceDescription${i}`);
-			$(this).parent().find(".invalid-feedback").attr("id", `invalid-serviceDescription${i}`);
-		})
-	}
-	// ----- END UPDATE SERVICE SCOPE -----
 
 
 	// ----- GET SERVICE ROW -----
@@ -993,23 +990,29 @@ $(document).ready(function() {
 				}
 			});
 
-			// QUANTITY
-			$("td .quantity [name=quantity]", this).attr("id", `quantity${i}`);
-			$("td .quantity [name=quantity]", this).attr("project", `true`);
-			
-			// CATEGORY
-			$("td .category", this).attr("id", `category${i}`);
+			// SCOPE
+			$("td .tableScopeBody tr", this).each(function(x) {
 
-			// UOM
-			$("td .serviceUom", this).attr("id", `serviceUom${i}`);
+				// DESCRIPTION
+				$("td .servicescope [name=serviceDescription]", this).attr("id", `serviceDescription${i}${x}`);
+				$("td .servicescope .invalid-feedback", this).attr("id", `invalid-serviceDescription${i}${x}`);
 
-			// UNIT COST
-			$("td .unitcost [name=unitCost] ", this).attr("id", `unitcost${i}`);
-			$("td .unitcost [name=unitCost] ", this).attr("project", `true`);
+				// QUANTITY
+				$("td .quantity [name=quantity]", this).attr("id", `quantity${i}${x}`);
+				$("td .quantity .invalid-feedback", this).attr("id", `invalid-quantity${i}${x}`);
+	
+				// UOM
+				$("td .uom .serviceUom", this).attr("id", `serviceUom${i}${x}`);
+				$("td .uom .invalid-feedback", this).attr("id", `invalid-serviceUom${i}${x}`);
+	
+				// UNIT COST
+				$("td .unitcost [name=unitCost] ", this).attr("id", `unitcost${i}${x}`);
+				$("td .unitcost .invalid-feedback", this).attr("id", `invalid-unitcost${i}${x}`);
+	
+				// TOTAL COST
+				$("td .totalcost", this).attr("id", `totalcost${i}${x}`);
+			})
 
-			// TOTAL COST
-			$("td .totalcost", this).attr("id", `totalcost${i}`);
-			$("td .totalcost", this).attr("project", `true`);
 
 			// FILE
 			$("td .file [name=files]", this).attr("id", `files${i}`);
@@ -1109,7 +1112,8 @@ $(document).ready(function() {
 		$(this).parent().find("table tbody").append(newScope);
 		$(this).parent().find("[name=serviceDescription]").last().focus();
 		initAmount(".amount");
-		updateServiceScope();
+		initQuantity(".input-quantity");
+		updateTableItems();
 	})
 	// ----- END ADD SCOPE -----
 
@@ -1146,11 +1150,18 @@ $(document).ready(function() {
     // ----- END SELECT SERVICE NAME -----
 
 
+	// ----- GET AMOUNT -----
+	const getNonFormattedAmount = (amount = "₱0.00") => {
+		return +amount.replaceAll(",", "").replace("₱", "")?.trim();
+	}
+	// ----- END GET AMOUNT -----
+
+
 	// ----- KEYUP QUANTITY OR UNITCOST -----
 	$(document).on("keyup", "[name=quantity], [name=unitCost]", function() {
 		const tableRow  = $(this).closest("tr");
-		const quantity  = +tableRow.find(`[name="quantity"]`).first().val();
-		const unitcost  = +tableRow.find(`[name="unitCost"]`).first().val().replaceAll(",", "");
+		const quantity  = +getNonFormattedAmount(tableRow.find(`[name="quantity"]`).first().val());
+		const unitcost  = +getNonFormattedAmount(tableRow.find(`[name="unitCost"]`).first().val());
 		const totalcost = quantity * unitcost;
 		tableRow.find(`.totalcost`).first().text(formatAmount(totalcost, true));
 		updateTotalAmount();
@@ -1216,9 +1227,9 @@ $(document).ready(function() {
         let row = getServiceRow();
 		$(".itemServiceTableBody").append(row);
 		updateTableItems();
-		updateServiceScope();
 		initInputmask();
 		initAmount();
+		initQuantity();
     })
     // ----- END INSERT ROW ITEM -----
 
@@ -1511,7 +1522,6 @@ $(document).ready(function() {
 			initDataTables();
 			updateTableItems();
 			initAll();
-			updateServiceScope();
 			updateServiceOptions();
 			clientID && clientID != 0 && $("[name=clientID]").trigger("change");
 			return html;
@@ -1593,7 +1603,7 @@ $(document).ready(function() {
 		data["method"]    = method;
 		data["updatedBy"] = sessionID;
 
-		if (currentStatus == "0" && method != "approve") {
+		if ((currentStatus == "false" || currentStatus == "0" || currentStatus == "3") && method != "approve") {
 			
 			data["employeeID"] = sessionID;
 			data["projectID"]  = $("[name=projectID]").val() || null;
@@ -1878,7 +1888,7 @@ $(document).ready(function() {
 			</div>
 		</div>
 		<div class="modal-footer text-right">
-			<button class="btn btn-danger" id="btnRejectConfirmation"
+			<button class="btn btn-danger px-5 p-2" id="btnRejectConfirmation"
 			serviceRequisitionID="${id}"
 			code="${feedback}"><i class="far fa-times-circle"></i> Deny</button>
 			<button class="btn btn-cancel btnCancel px-5 p-2" data-dismiss="modal"><i class="fas fa-ban"></i> Cancel</button>
@@ -2006,7 +2016,7 @@ function getConfirmation(method = "submit") {
 			swalImg   = `${base_url}assets/modal/reject.svg`;
 			break;
 		case "cancelform":
-			swalTitle = `CANCEL ${title.toUpperCase()} DOCUMENT`;
+			swalTitle = `CANCEL ${title.toUpperCase()}`;
 			swalText  = "Are you sure to cancel this document?";
 			swalImg   = `${base_url}assets/modal/cancel.svg`;
 			break;
@@ -2117,7 +2127,7 @@ function saveServiceRequisition(data = null, method = "submit", notificationData
 					}, 500);
 				})
 			} else {
-				if (res.dismiss === "cancel") {
+				if (res.dismiss === "cancel" && method != "submit") {
 					if (method != "deny") {
 						callback && callback();
 					} else {

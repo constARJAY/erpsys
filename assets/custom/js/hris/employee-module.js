@@ -244,7 +244,7 @@ $(document).ready(function() {
                 class="rounded rounded-circle"
                 style="width: 50px;
                     height: 50px">`;
-            let address = `${employeeUnit ? titleCase(employeeUnit)+", " : ""}${employeeBuilding +", "}${titleCase(employeeBarangay)+", "}${titleCase(employeeCity)+", "}${titleCase(employeeProvince)+", "}${titleCase(employeeCountry)+", "}${titleCase(employeeZipCode)}`;
+            let address = `${employeeUnit ? titleCase(employeeUnit)+", " : ""}${titleCase(employeeBuilding) +", "}${titleCase(employeeStreet)+", "}${titleCase(employeeSubdivision)+", "}${titleCase(employeeBarangay)+", "}${titleCase(employeeCity)+", "}${titleCase(employeeProvince)+", "}${titleCase(employeeCountry)+", "}${titleCase(employeeZipCode)}`;
 
             html += `
             <tr class="btnEdit" id="${encryptString(employeeID)}">
@@ -565,10 +565,15 @@ $(document).ready(function() {
     function previewImage(input, defaultImage = "default.jpg") {
         if (input.files && input.files[0]) {
             const filesize = input.files[0].size/1024/1024; // Size in MB
+            const filetype = input.files[0].type;
             if (filesize > 10) {
                 $(input).val("");
                 $('#previewImage').attr('src', `${base_url}assets/upload-files/profile-images/${defaultImage}`);
                 showNotification("danger", "File size must be less than or equal to 10mb");
+            } else if (filetype.indexOf("image") == -1) {
+                $(input).val("");
+                $('#previewImage').attr('src', `${base_url}assets/upload-files/profile-images/${defaultImage}`);
+                showNotification("danger", "Invalid file type");
             } else {
                 let reader = new FileReader();
                 reader.onload = function(e) {
@@ -590,6 +595,23 @@ $(document).ready(function() {
         previewImage(this, defaultImage);
     })
     // ----- END SELECT PROFILE IMAGE -----
+
+
+    // ----- SELECT E-SIGNATURE -----
+    $(document).on("change", "[name=employeeSignature]", function() {
+        if (this.files && this.files[0]) {
+            const filesize = this.files[0].size/1024/1024; // Size in MB
+            const filetype = this.files[0].type;
+            if (filesize > 10) {
+                $(this).val("");
+                showNotification("danger", "File size must be less than or equal to 10mb");
+            } else if (filetype.indexOf("image") == -1) {
+                $(this).val("");
+                showNotification("danger", "Invalid file type");
+            }
+        }
+    })
+    // ----- END SELECT E-SIGNATURE -----
 
 
     // ----- REMOVE PROFILE IMAGE -----
@@ -1049,7 +1071,7 @@ $(document).ready(function() {
                 }
             } else {
                 $("#employeeConfirmPassword").removeClass("is-valid").addClass("is-invalid");
-                $("#invalid-employeeConfirmPassword").text("The password confirmation does not match.");
+                $("#invalid-employeeConfirmPassword").text("The password does not match.");
             }
         }
     }
@@ -1144,7 +1166,7 @@ $(document).ready(function() {
                                 <i class="fas fa-lock"></i></span>
                             </div>
                             <input type="password"
-                                class="form-control"
+                                class="form-control validate"
                                 name="employeeConfirmPassword"
                                 id="employeeConfirmPassword"
                                 data-allowcharacters="[a-z][A-Z][0-9][.][,][-][()]['][/][@][_][ ]"
@@ -1429,6 +1451,9 @@ $(document).ready(function() {
                         leaveCredit = leave.leaveCredit;
                     });
                 }
+
+                const max = leaveName.toLowerCase().replaceAll(" ", "")?.trim() == "sickleave" ? 5 : 30;
+
                 return `
                 <tr>
                     <td>${index+1}</td>
@@ -1441,7 +1466,7 @@ $(document).ready(function() {
                                 id="leaveType${index}"
                                 leaveid="${leaveID}"
                                 min="0"
-                                max="30"
+                                max="${max}"
                                 data-allowcharacters="[0-9]"
                                 minlength="1"
                                 maxlength="5"
@@ -2095,7 +2120,7 @@ $(document).ready(function() {
         employeeHiredDate = moment(employeeHiredDate).format("YYYY-MM-DD");
         employeeGender    = employeeGender == "Others" ? $("[name=employeeOtherGender]").val()?.trim() : employeeGender;
         const file = employeeProfile ? $("[name=employeeProfile]")[0].files[0] : null;
-        employeeSignature = employeeSignature ? $("[name=employeeSignature]")[0].files[0] : null;
+        employeeSignature = employeeSignature ? $("[name=employeeSignature]")[0]?.files[0] : null;
         
         return {
             employeeProfile, employeeFirstname, employeeMiddlename, employeeLastname, employeeBirthday, employeeGender, employeeCitizenship, employeeCivilStatus, employeeHiredDate, employeeRegion, employeeProvince, employeeCity, employeeBarangay, employeeUnit, employeeBuilding, employeeStreet, employeeSubdivision, employeeCountry, employeeZipCode, departmentID, designationID, employeeEmail, employeeMobile, employeeStatus, file, employeeSignature
