@@ -166,14 +166,9 @@ $(document).ready(function () {
                         <select 
                             class="form-control select2 validate" 
                             id="projectMilestoneStatus" 
-                            name="projectMilestoneStatus"
-                            required>
-                            <option value="1" ${
-															projectMilestoneStatus == 1 && "selected"
-														}>Active</option>
-                            <option value="0" ${
-															projectMilestoneStatus == 0 && "selected"
-														}>Inactive</option>
+                            name="projectMilestoneStatus">
+                            <option value="1" ${projectMilestoneStatus == 1 && "selected"}>Active</option>
+                            <option value="0" ${projectMilestoneStatus == 0 && "selected"}>Inactive</option>
                         </select>
                         <div class="invalid-feedback d-block" id="invalid-projectMilestoneStatus"></div>
                     </div>

@@ -740,6 +740,13 @@ $(document).ready(function() {
 	function updateInventoryItemOptions() {
 		let projectItemIDArr = [], companyItemIDArr = []; // 0 IS THE DEFAULT VALUE
 		let projectElementID = [], companyElementID = [];
+		let optionNone = {
+			itemID:              "0",
+			itemCode:            "-",
+			categoryName:        "-",
+			unitOfMeasurementID: "-",
+			itemName:            "N/A"
+		};
 
 		$("[name=itemID][project=true]").each(function(i, obj) {
 			projectItemIDArr.push($(this).val());
@@ -754,7 +761,7 @@ $(document).ready(function() {
 
 		projectElementID.map((element, index) => {
 			let html = `<option selected disabled>Select Item Name</option>`;
-			let itemList = [...inventoryItemList];
+			let itemList = [optionNone, ...inventoryItemList];
 			html += itemList.filter(item => !projectItemIDArr.includes(item.itemID) || item.itemID == projectItemIDArr[index]).map(item => {
 				return `
 				<option 
@@ -773,7 +780,7 @@ $(document).ready(function() {
 
 		companyElementID.map((element, index) => {
 			let html = `<option selected disabled>Select Item Name</option>`;
-			let itemList = [...inventoryItemList];
+			let itemList = [optionNone, ...inventoryItemList];
 			html += itemList.filter(item => !companyItemIDArr.includes(item.itemID) || item.itemID == companyItemIDArr[index]).map(item => {
 				return `
 				<option 
@@ -825,7 +832,15 @@ $(document).ready(function() {
 			itemIDArr.push($(this).val());
 		}) 
 
-		let itemList = [...inventoryItemList];
+		let optionNone = {
+			itemID:              "0",
+			itemCode:            "-",
+			categoryName:        "-",
+			unitOfMeasurementID: "-",
+			itemName:            "N/A",
+			itemDescription:     ""
+		};
+		let itemList = [optionNone, ...inventoryItemList];
 
 		html += itemList.filter(item => !itemIDArr.includes(item.itemID) || item.itemID == id).map(item => {
             return `

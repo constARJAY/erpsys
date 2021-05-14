@@ -43,7 +43,7 @@
 
 <!-- ----- ADD MODAL ----- -->
 <div id="modal_project_milestone" class="modal custom-modal fade" data-backdrop="static" data-keyboard="false" role="dialog">
-    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+    <div class="modal-dialog modal-dialog-centered modal-md" role="document">
 		<div class="modal-content">
 			<div class="modal-header bg-primary text-light">
 				<h5 class="page-title font-weight-bold">ADD MILESTONE</h5>

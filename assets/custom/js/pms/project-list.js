@@ -419,7 +419,6 @@ $(document).ready(function () {
 										class="form-control daterange validate text-left" 
 										name="projectListFrom" 
 										id="projectListFrom" 
-										required 
 										value="${projectListFrom && moment(projectListFrom).format("MMMM DD, YYYY")}">
                                 </div>
                             <div class="invalid-feedback d-block" id="invalid-projectListFrom"></div>
@@ -437,7 +436,6 @@ $(document).ready(function () {
 									class="form-control validate text-left" 
 									name="projectListTo" 
 									id="projectListTo" 
-									required 
 									value="${projectListTo && moment(projectListTo).format("MMMM DD, YYYY")}">
                             </div>
                             <div class="invalid-feedback d-block" id="invalid-projectListTo"></div>
@@ -475,15 +473,9 @@ $(document).ready(function () {
                             <label>Priority Level <code>*</code></label>
                             <select class=" form-control show-tick select2 validate" name="projectListPriorityLevel" id="projectListPriorityLevel" autocomplete="off" required>
                                 <option selected disabled>Select Priority Level</option>
-                                <option value="1" ${
-																	projectListPriorityLevel == 1 && "selected"
-																}>High</option>   
-                                <option value="2" ${
-																	projectListPriorityLevel == 2 && "selected"
-																}>Medium</option>
-                                <option value="3" ${
-																	projectListPriorityLevel == 3 && "selected"
-																}>Low</option>  
+                                <option value="1" ${projectListPriorityLevel == 1 && "selected"}>High</option>   
+                                <option value="2" ${projectListPriorityLevel == 2 && "selected"}>Medium</option>
+                                <option value="3" ${projectListPriorityLevel == 3 && "selected"}>Low</option>  
                             </select>
                             <div class="invalid-feedback d-block" id="invalid-projectListPriorityLevel"></div>
                         </div>
@@ -492,18 +484,10 @@ $(document).ready(function () {
                         <div class="form-group">
                             <label>Status <code>*</code></label>
                             <select class=" form-control show-tick select2 validate" name="projectListStatus" id="projectListStatus" autocomplete="off">
-                                <option value="1" ${
-																	projectListStatus == 1 && "selected"
-																}>Active</option>   
-                                <option value="0" ${
-																	projectListStatus == 0 && "selected"
-																}>Inactive</option>
-                                <option value="2" ${
-																	projectListStatus == 2 && "selected"
-																}>Cancelled</option>      
-                                <option value="3" ${
-																	projectListStatus == 3 && "selected"
-																}>Completed</option>
+                                <option value="1" ${projectListStatus == 1 && "selected"}>Active</option>   
+                                <option value="0" ${projectListStatus == 0 && "selected"}>Inactive</option>
+                                <option value="2" ${projectListStatus == 2 && "selected"}>Cancelled</option>      
+                                <option value="3" ${projectListStatus == 3 && "selected"}>Completed</option>
                             </select>
                             <div class="invalid-feedback d-block" id="invalid-projectListStatus"></div>
                         </div>
@@ -512,10 +496,7 @@ $(document).ready(function () {
                         <div class="form-group">
                             <label>Team Members <code>*</code></label>
                             <select class=" form-control show-tick select2 validate" name="projectListMemberID" id="projectListMemberID" autocomplete="off" multiple="multiple" required>
-                            ${getTeamMembers(
-															projectListMemberID &&
-																projectListMemberID.split("|")
-														)}
+                            ${getTeamMembers(projectListMemberID && projectListMemberID.split("|"))}
                             </select>
                             <div class="invalid-feedback d-block" id="invalid-projectListMemberID"></div>
                         </div>

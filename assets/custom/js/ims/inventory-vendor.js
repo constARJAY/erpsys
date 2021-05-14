@@ -213,8 +213,8 @@ $(document).ready(function () {
 					{ targets: 2, width: 300 },
 					{ targets: 3, width: 150 },
 					{ targets: 4, width: 100 },
-					{ targets: 5, width: 110 },
-					{ targets: 6, width: 100 },
+					{ targets: 5, width: 120 },
+					{ targets: 6, width: 120 },
 					{ targets: 7, width: 100 },
 					{ targets: 8, width: 100 },
 					{ targets: 9, width: 150 },
@@ -778,7 +778,7 @@ $(document).ready(function () {
 
 					<div class="col-xl-4 col-lg-6 col-md-6 col-sm-12">
 						<div class="form-group">
-							<label>Fax Number <code>*</code></label>
+							<label>Fax Number</label>
 							<input 
 								type="text" 
 								class="form-control validate" 
@@ -789,8 +789,7 @@ $(document).ready(function () {
 								maxlength="11" 
 								value="${inventoryVendorFaxNumber}"
 								autocomplete="off"
-								mask="99-999-9999"
-								required>
+								mask="99-999-9999">
 							<div class="invalid-feedback d-block" id="invalid-inventoryVendorFaxNumber"></div>
 						</div>
 					</div>

@@ -226,14 +226,13 @@ $(document).ready(function() {
 					{ targets: 1,  width: 150 },
 					{ targets: 2,  width: 150 },
 					{ targets: 3,  width: 150 },
-					{ targets: 4,  width: 150 },
-					{ targets: 5,  width: 100 },
-					{ targets: 6,  width: 150 },
+					{ targets: 4,  width: 100 },
+					{ targets: 5,  width: 150 },
+					{ targets: 6,  width: 200 },
 					{ targets: 7,  width: 200 },
 					{ targets: 8,  width: 200 },
-					{ targets: 9,  width: 200 },
-					{ targets: 10,  width: 80 },
-					{ targets: 11, width: 250 },
+					{ targets: 9,  width: 80  },
+					{ targets: 10, width: 250 },
 				],
 			});
 
@@ -251,14 +250,13 @@ $(document).ready(function() {
 					{ targets: 1,  width: 150 },
 					{ targets: 2,  width: 150 },
 					{ targets: 3,  width: 150 },
-					{ targets: 4,  width: 150 },
-					{ targets: 5,  width: 100 },
-					{ targets: 6,  width: 150 },
+					{ targets: 4,  width: 100 },
+					{ targets: 5,  width: 150 },
+					{ targets: 6,  width: 200 },
 					{ targets: 7,  width: 200 },
 					{ targets: 8,  width: 200 },
-					{ targets: 9,  width: 200 },
-					{ targets: 10,  width: 80 },
-					{ targets: 11, width: 250 },
+					{ targets: 9,  width: 80  },
+					{ targets: 10, width: 250 },
 				],
 			});
 
@@ -372,7 +370,6 @@ $(document).ready(function() {
 					<th>Employee Name</th>
 					<th>Reference No.</th>
 					<th>Client Name</th>
-					<th>Project Code</th>
 					<th>Project Name</th>
 					<th>Current Approver</th>
 					<th>Date Created</th>
@@ -425,8 +422,12 @@ $(document).ready(function() {
 				<td>${fullname}</td>
 				<td>${serviceOrderID != "0" ? getFormCode("SO", isotCreatedAt, serviceOrderID) : "-"}</td>
 				<td>${clientName   || '-'}</td>
-				<td>${projectListCode || '-'}</td>
-				<td>${projectListName || '-'}</td>
+				<td>
+					<div>
+						${projectListName || '-'}
+					</div>
+					<small style="color:#848482;">${projectListCode || '-'}</small>
+				</td>
 				<td>
 					${employeeFullname(getCurrentApprover(approversID, approversDate, serviceCompletionStatus, true))}
 				</td>
@@ -478,7 +479,6 @@ $(document).ready(function() {
                     <th>Employee Name</th>
                     <th>Reference No.</th>
                     <th>Client Name</th>
-                    <th>Project Code</th>
                     <th>Project Name</th>
                     <th>Current Approver</th>
                     <th>Date Created</th>
@@ -533,8 +533,12 @@ $(document).ready(function() {
                 <td>${fullname}</td>
                 <td>${serviceOrderID != "0" ? getFormCode("SO", isotCreatedAt, serviceOrderID) : "-"}</td>
                 <td>${clientName   || '-'}</td>
-                <td>${projectListCode || '-'}</td>
-                <td>${projectListName || '-'}</td>
+                <td>
+					<div>
+						${projectListName || '-'}
+					</div>
+					<small style="color:#848482;">${projectListCode || '-'}</small>
+				</td>
                 <td>
                     ${employeeFullname(getCurrentApprover(approversID, approversDate, serviceCompletionStatus, true))}
                 </td>

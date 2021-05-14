@@ -5,7 +5,7 @@
                 <div class="col-lg-6 col-md-6">
                     <ul class="breadcrumb pl-0 pb-0 ">
                         <li class="breadcrumb-item"><a href="#"><i class="zmdi zmdi-home"></i> Dashboard</a></li>
-						<li class="breadcrumb-item"><i class="fas fa-users"></i> &nbsp;Employee Forms</li>
+						<li class="breadcrumb-item"><i class="fad fa-boxes-alt"></i> &nbsp;Inventory Modules</li>
                         <li class="breadcrumb-item active">Purchase Order</li>
                     </ul>
                     <h1 class="mt-3">Purchase Order</h1>
