@@ -123,6 +123,8 @@ $(document).ready(function () {
 		return html;
 	}
 
+	const inventoryPriceList = getTableData(`ims_inventory_price_list_tbl`, `inventoryVendorID`, `preferred = 1`)?.map(vendor => vendor.inventoryVendorID);
+
 	$(document).on("change", "[name=inventoryVendorRegion]", function () {
 		const region = $(this).val();
 
@@ -175,6 +177,21 @@ $(document).ready(function () {
 		}
 	});
 	// ----- END GET PHILIPPINE ADDRESSES -----
+
+	
+	// ----- SELECT STATUS -----
+	$(document).on("change", `[name="inventoryVendorStatus"]`, function() {
+		const status            = $(this).val();
+		const inventoryVendorID = $(this).attr("inventoryVendorID");
+		if (status == 0) {
+			if (inventoryPriceList.includes(inventoryVendorID)) {
+				showNotification("danger", "Cannot deactivate inventory vendor. Item price list is currently in use.")
+				$(this).val(1).trigger("change");
+			} 
+		}
+	})
+	// ----- END SELECT STATUS -----
+	
 
 	// ----- DATATABLES -----
 	function initDataTables() {
@@ -346,9 +363,10 @@ $(document).ready(function () {
 	// ----- GET BANK NUMBER FORMAT -----
 	function applyBankFormat(format = null) {
 		if (format) {
+			let numbers   = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"];
 			let formatArr = format.split("");
 			let newFormat = formatArr.map(char => {
-				return isFinite(String(char)) ? "9" : char;
+				return numbers.includes(String(char)) ? "9" : char;
 			})
 			return newFormat.join("");
 		}
@@ -365,8 +383,8 @@ $(document).ready(function () {
 		$("[name=inventoryVendorBankAccNo]").attr("mask", newFormat);
 		$("[name=inventoryVendorBankAccNo]").attr("minlength", newFormat.length);
 		$("[name=inventoryVendorBankAccNo]").attr("maxlength", newFormat.length);
+		$(`[name="inventoryVendorBankAccName"], [name="inventoryVendorBankAccNo"]`).removeAttr("disabled");
 		initInputmask("inventoryVendorBankAccNo");
-		initAll();
 	})
 	// ----- END SELECT BANK -----
 
@@ -530,62 +548,40 @@ $(document).ready(function () {
                     </div>
                     <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6">
                         <div class="form-group">
-                            <label>Region</label>
-                            <select class=" form-control show-tick select2 validate" name="inventoryVendorRegion" id="input_inventoryVendorRegion">
-                            <option value="" selected>Select Region</option>
-                            ${getRegionOptions(inventoryVendorRegion)}
+                            <label>Region <code>*</code></label>
+                            <select class=" form-control show-tick select2 validate" name="inventoryVendorRegion" id="input_inventoryVendorRegion" style="width: 100%" required>
+								<option value="" selected>Select Region</option>
+								${getRegionOptions(inventoryVendorRegion)}
                             </select>
                             <div class="invalid-feedback d-block" id="invalid-input_inventoryVendorRegion"></div>
                         </div>
                     </div>
                     <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6">
                         <div class="form-group">
-                            <label>Province </label>
-                            <select class=" form-control show-tick select2 validate" name="inventoryVendorProvince"
-                            id="inventoryVendorProvince">
+                            <label>Province <code>*</code></label>
+                            <select class=" form-control show-tick select2 validate" name="inventoryVendorProvince" id="inventoryVendorProvince" style="width: 100%" required>
                                 <option value="" selected>Select Province</option>
-                                ${
-																	data &&
-																	getProvinceOptions(
-																		inventoryVendorProvince,
-																		inventoryVendorRegion
-																	)
-																}
+                                ${getProvinceOptions(inventoryVendorProvince, inventoryVendorRegion)}
                             </select>
                             <div class="invalid-feedback d-block" id="invalid-inventoryVendorProvince"></div>
                         </div>
                     </div>
                     <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6">
                         <div class="form-group">
-                            <label>City/Municipality</label>
-                            <select class=" form-control show-tick select2" id="inventoryVendorCity" name="inventoryVendorCity">
+                            <label>City/Municipality <code>*</code></label>
+                            <select class=" form-control show-tick select2" id="inventoryVendorCity" name="inventoryVendorCity" style="width: 100%" required>
                                 <option value="" selected>Select City/Municipality</option>
-                                ${
-																	data &&
-																	getMunicipalityOptions(
-																		inventoryVendorCity,
-																		inventoryVendorRegion,
-																		inventoryVendorProvince
-																	)
-																}
+                                ${getMunicipalityOptions(inventoryVendorCity, inventoryVendorRegion, inventoryVendorProvince)}
                             </select> 
                             <div class="invalid-feedback d-block" id="invalid-inventoryVendorCity"></div>
                         </div>
                     </div>
                     <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6">
                         <div class="form-group">
-                            <label>Barangay</label>
-                            <select class=" form-control show-tick select2 validate" name="inventoryVendorBarangay" id="inventoryVendorBarangay">
+                            <label>Barangay <code>*</code></label>
+                            <select class=" form-control show-tick select2 validate" name="inventoryVendorBarangay" id="inventoryVendorBarangay" style="width: 100%" required>
                                 <option value="" selected>Select Barangay</option>
-                                ${
-																	data &&
-																	getBarangayOptions(
-																		inventoryVendorBarangay,
-																		inventoryVendorRegion,
-																		inventoryVendorProvince,
-																		inventoryVendorCity
-																	)
-																}
+                                ${getBarangayOptions(inventoryVendorBarangay, inventoryVendorRegion, inventoryVendorProvince, inventoryVendorCity)}
                             </select>
                             <div class="invalid-feedback d-block" id="invalid-inventoryVendorBarangay"></div>
                         </div>
@@ -594,23 +590,46 @@ $(document).ready(function () {
                         <div class="form-group">
                             <label>Unit Number </label>
                             <input class="form-control validate"
-                            data-allowcharacters="[A-Z][a-z][0-9][.][,][-][()]['][/]"  minlength="2" maxlength="50"  id="unitNumber" value="${inventoryVendorUnit}" name="inventoryVendorUnit" type="text">
+								data-allowcharacters="[A-Z][a-z][0-9][.][,][-][()]['][/]"  
+								minlength="2"
+								maxlength="50"  
+								id="unitNumber" 
+								value="${inventoryVendorUnit}"
+								name="inventoryVendorUnit" 
+								autocomplete="off"
+								type="text">
                             <div class="invalid-feedback d-block" id="invalid-unitNumber"></div>
                         </div>
                     </div>
                     <div class="col-sm-12 col-md-6 col-lg-5 col-xl-5">
                         <div class="form-group">
-                            <label>Building/House Number </label>
+                            <label>Building/House Number <code>*</code></label>
                             <input class="form-control validate"
-                            data-allowcharacters="[A-Z][a-z][0-9][.][,][-][()]['][/][ ]"  minlength="2" maxlength="75" id="input_houseNumber" name="inventoryVendorBuilding" value="${inventoryVendorBuilding}" type="text">
+                            	data-allowcharacters="[A-Z][a-z][0-9][.][,][-][()]['][/][ ]"  
+								minlength="2" 
+								maxlength="75" 
+								id="input_houseNumber" 
+								name="inventoryVendorBuilding" 
+								value="${inventoryVendorBuilding}" 
+								type="text"
+								autocomplete="off"
+								required>
                             <div class="invalid-feedback d-block" id="invalid-input_houseNumber"></div>
                         </div>
                     </div>
                     <div class="col-sm-12 col-md-6 col-lg-5 col-xl-5">
                         <div class="form-group">
-                            <label>Street Name </label>
+                            <label>Street Name <code>*</code></label>
                             <input class="form-control validate"
-                            data-allowcharacters="[A-Z][a-z][0-9][.][,][-][()]['][/][ ]"  minlength="2" maxlength="75" id="input_street" name="inventoryVendorStreet" value="${inventoryVendorStreet}" type="text">
+                            	data-allowcharacters="[A-Z][a-z][0-9][.][,][-][()]['][/][ ]"  
+								minlength="2" 
+								maxlength="75" 
+								id="input_street" 
+								name="inventoryVendorStreet" 
+								value="${inventoryVendorStreet}" 
+								type="text"
+								autocomplete="off"
+								required>
                             <div class="invalid-feedback d-block" id="invalid-input_street"></div>
                         </div>
                     </div>
@@ -618,31 +637,45 @@ $(document).ready(function () {
                         <div class="form-group">
                             <label>Subdivision Name </label>
                             <input class="form-control validate"
-                            data-allowcharacters="[A-Z][a-z][0-9][.][,][-][()]['][/][ ]"  minlength="2" maxlength="75" id="input_subdivision" name="inventoryVendorSubdivision" value="${inventoryVendorSubdivision}" type="text">
+								data-allowcharacters="[A-Z][a-z][0-9][.][,][-][()]['][/][ ]"  
+								minlength="2" 
+								maxlength="75" 
+								id="input_subdivision" 
+								name="inventoryVendorSubdivision" 
+								value="${inventoryVendorSubdivision}" 
+								autocomplete="off"
+								type="text">
                             <div class="invalid-feedback d-block" id="invalid-input_subdivision"></div>
                         </div>
                     </div>
                     <div class="col-sm-12 col-md-6 col-lg-5 col-xl-5">
                         <div class="form-group">
-                            <label>Country </label>
+                            <label>Country <code>*</code></label>
                             <input class="form-control validate"
-                                data-allowcharacters="[a-z][A-Z][ ]" id="inventoryVendorCountry" name="inventoryVendorCountry" minlength="2"
-                                maxlength="75" value="${inventoryVendorCountry}" type="text">
+                                data-allowcharacters="[a-z][A-Z][ ]" 
+								id="inventoryVendorCountry" 
+								name="inventoryVendorCountry" 
+								minlength="2"
+                                maxlength="75" 
+								value="${inventoryVendorCountry}" 
+								type="text"
+								autocomplete="off"
+								required>
+							<div class="invalid-feedback d-block" id="invalid-inventoryVendorCountry"></div>
                         </div>
-                        <div class="invalid-feedback d-block" id="invalid-inventoryVendorCountry"></div>
                     </div>
                     <div class="col-sm-12 col-md-6 col-lg-2 col-xl-2">
                         <div class="form-group">
                             <label>Zip Code </label>
                             <input class="form-control validate"
-                                data-allowcharacters="[0-9]" id="inventoryVendorZipCode" name="inventoryVendorZipCode" minlength="4"
+                                data-allowcharacters="[0-9]" id="inventoryVendorZipCode" name="inventoryVendorZipCode" minlength="4" autocomplete="off"
                                 maxlength="4" value="${inventoryVendorZipCode}" type="text">
+							<div class="invalid-feedback d-block" id="invalid-inventoryVendorZipCode"></div>
                         </div>
-                        <div class="invalid-feedback d-block" id="invalid-inventoryVendorZipCode"></div>
                     </div>
                     <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12">
                         <div class="form-group">
-                            <label>Contact Person </label>
+                            <label>Contact Person <code>*</code></label>
                             <input 
                                 type="text" 
                                 class="form-control validate" 
@@ -652,7 +685,8 @@ $(document).ready(function () {
                                 minlength="2" 
                                 maxlength="75" 
                                 value="${inventoryVendorPerson}"
-                                autocomplete="off">
+                                autocomplete="off"
+								required>
                             <div class="invalid-feedback d-block" id="invalid-inventoryVendorPerson"></div>
                         </div>
                     </div>
@@ -678,7 +712,7 @@ $(document).ready(function () {
                             <label>Tax Identification Number </label>
                             <input 
                                 type="text" 
-                                class="form-control inputmask validate" 
+                                class="form-control inputmask" 
                                 name="inventoryVendorTIN" 
                                 id="inventoryVendorTIN" 
                                 data-allowcharacters="[0-9]" 
@@ -692,17 +726,19 @@ $(document).ready(function () {
                     </div>
                     <div class="col-xl-4 col-lg-6 col-md-6 col-sm-12">
                         <div class="form-group">
-                            <label>Mobile No. </label>
+                            <label>Mobile No. <code>*</code></label>
                                 <input 
                                 type="text" 
-                                class="form-control inputmask validate" 
+                                class="form-control inputmask" 
                                 name="inventoryVendorMobile" 
                                 id="inventoryVendorMobile" 
                                 data-allowcharacters="[0-9]" 
                                 mask="0\\999-9999-999" 
                                 minlength="13" 
                                 maxlength="13"
-                                value="${inventoryVendorMobile}">
+                                value="${inventoryVendorMobile}"
+								autocomplete="off"
+								required>
                             <div class="invalid-feedback d-block" id="invalid-inventoryVendorMobile"></div>
                         </div>
                     </div>
@@ -710,14 +746,15 @@ $(document).ready(function () {
                         <div class="form-group">
                             <label>Telephone No. </label>
                                 <input type="text" 
-                                class="form-control inputmask validate" 
+                                class="form-control inputmask" 
                                 name="inventoryVendorTelephone" 
                                 id="inventoryVendorTelephone" 
                                 data-allowcharacters="[0-9]" 
                                 mask="(99)-9999-9999" 
                                 minlength="14" 
                                 maxlength="14"  
-                                value="${inventoryVendorTelephone}">
+                                value="${inventoryVendorTelephone}"
+								autocomplete="off">
                             <div class="invalid-feedback d-block" id="invalid-inventoryVendorTelephone"></div>
                         </div>
                     </div>
@@ -741,10 +778,10 @@ $(document).ready(function () {
 
 					<div class="col-xl-4 col-lg-6 col-md-6 col-sm-12">
 						<div class="form-group">
-							<label>Fax Number</label>
+							<label>Fax Number <code>*</code></label>
 							<input 
 								type="text" 
-								class="form-control inputmask validate" 
+								class="form-control validate" 
 								name="inventoryVendorFaxNumber" 
 								id="inventoryVendorFaxNumber" 
 								data-allowcharacters="[0-9]"
@@ -752,18 +789,20 @@ $(document).ready(function () {
 								maxlength="11" 
 								value="${inventoryVendorFaxNumber}"
 								autocomplete="off"
-								mask="99-999-9999">
+								mask="99-999-9999"
+								required>
 							<div class="invalid-feedback d-block" id="invalid-inventoryVendorFaxNumber"></div>
 						</div>
 					</div>
 					<div class="col-xl-4 col-lg-6 col-md-6 col-sm-12">
 						<div class="form-group">
-							<label>Industry </label>
+							<label>Industry <code>*</code></label>
 							<select
 								class="form-control validate select2" 
 								name="inventoryVendorIndustry" 
 								id="inventoryVendorIndustry"
-								>
+								style="width: 100%"
+								required>
 								<option disabled selected>Select Enterprise</option>
 								${getIndustry(inventoryVendorIndustry)}
 							</select>
@@ -772,12 +811,13 @@ $(document).ready(function () {
 					</div>
 					<div class="col-xl-4 col-lg-6 col-md-6 col-sm-12">
 						<div class="form-group">
-							<label>Enterprise </label>
+							<label>Enterprise <code>*</code></label>
 							<select
 								class="form-control validate select2" 
 								name="inventoryVendorEnterprise" 
 								id="inventoryVendorEnterprise"
-								>
+								style="width: 100%"
+								required>
 								<option disabled selected>Select Enterprise</option>
 								${getEnterprise(inventoryVendorEnterprise)}
 							</select>
@@ -791,8 +831,8 @@ $(document).ready(function () {
 								class="form-control openingHours" 
 								id="inventoryVendorOpeningHours" 
 								name="inventoryVendorOpeningHours" 
-								required
-								value="${inventoryVendorOpeningHours}">
+								value="${inventoryVendorOpeningHours}"
+								autocomplete="off">
 							<div class="d-block invalid-feedback" id="invalid-inventoryVendorOpeningHours"></div>
 						</div>
 					</div>
@@ -803,8 +843,8 @@ $(document).ready(function () {
 								class="form-control closingHours" 
 								id="inventoryVendorClosingHours" 
 								name="inventoryVendorClosingHours" 
-								required
-								value="${inventoryVendorClosingHours}">
+								value="${inventoryVendorClosingHours}"
+								autocomplete="off">
 							<div class="d-block invalid-feedback" id="invalid-inventoryVendorClosingHours"></div>
 						</div>
 					</div>
@@ -816,6 +856,7 @@ $(document).ready(function () {
 							<select
 								class="form-control validate select2" 
 								name="bankID" 
+								style="width: 100%"
 								id="bankID">
 								<option disabled selected>Select Bank</option>
 								${getBank(bankID)}
@@ -836,7 +877,7 @@ $(document).ready(function () {
 								maxlength="50" 
 								value="${inventoryVendorBankAccName}"
 								autocomplete="off"
-								>
+								disabled>
 							<div class="invalid-feedback d-block" id="invalid-inventoryVendorBankAccName"></div>
 						</div>
 					</div>
@@ -845,7 +886,7 @@ $(document).ready(function () {
 							<label>Bank Account No.</label>
 							<input 
 								type="text" 
-								class="form-control validate" 
+								class="form-control inputmask" 
 								name="inventoryVendorBankAccNo" 
 								id="inventoryVendorBankAccNo" 
 								data-allowcharacters="[0-9]"
@@ -853,13 +894,13 @@ $(document).ready(function () {
 								maxlength="50" 
 								value="${inventoryVendorBankAccNo}"
 								autocomplete="off"
-								>
+								disabled>
 							<div class="invalid-feedback d-block" id="invalid-inventoryVendorBankAccNo"></div>
 						</div>
 					</div>
-                    <div class="col-xl-4 col-lg-3 col-md-6 col-sm-12">
+                    <div class="col-xl-4 col-lg-6 col-md-6 col-sm-12">
                         <div class="form-group">
-                            <label>File <code>*</code></label>
+                            <label>File</label>
                             <input type="file"
 								name="file|vendor"
 								class="form-control validate"
@@ -867,20 +908,26 @@ $(document).ready(function () {
                             <div class="invalid-feedback d-block" id="invalid-inventoryVendorFile"></div>
                         </div>
                     </div>
-                    <div class="col-xl-4 col-lg-3 col-md-6 col-sm-12">
+                    <div class="col-xl-4 col-lg-6 col-md-6 col-sm-12">
                         <div class="form-group">
                             <label>VAT <code>*</code></label>
-                            <select class=" form-control show-tick select2 validate" name="inventoryVendorVAT" id="inventoryVendorVAT" autocomplete="off">
+                            <select class=" form-control show-tick select2 validate" name="inventoryVendorVAT" id="inventoryVendorVAT" autocomplete="off" style="width: 100%">
                                 <option value="1" ${inventoryVendorVAT == 1 && "selected"}>Vatable</option>   
                                 <option value="0" ${inventoryVendorVAT == 0 && "selected"}>Non-Vatable</option>
                             </select>
                             <div class="invalid-feedback d-block" id="invalid-inventoryVendorVAT"></div>
                         </div>
                     </div>
-                    <div class="col-xl-4 col-lg-3 col-md-6 col-sm-12">
+                    <div class="col-xl-4 col-lg-6 col-md-6 col-sm-12">
                         <div class="form-group">
                             <label>Status <code>*</code></label>
-                            <select class=" form-control show-tick select2 validate" name="inventoryVendorStatus" id="inventoryVendorStatus" autocomplete="off" title="Select Status">
+                            <select class=" form-control show-tick select2 validate" 
+								name="inventoryVendorStatus" 
+								id="inventoryVendorStatus" 
+								autocomplete="off" 
+								title="Select Status"
+								style="width: 100%"
+								inventoryVendorID="${inventoryVendorID}">
                                 <option value="1" ${inventoryVendorStatus == 1 && "selected"}>Active</option>   
                                 <option value="0" ${inventoryVendorStatus == 0 && "selected"}>Inactive</option>
                             </select>

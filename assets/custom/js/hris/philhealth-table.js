@@ -11,6 +11,7 @@ $(document).ready(function () {
 			.DataTable({
 				proccessing: false,
 				serverSide: false,
+				paginate: false,
 				// scrollX: true,
 				scrollCollapse: true,
 				columnDefs: [

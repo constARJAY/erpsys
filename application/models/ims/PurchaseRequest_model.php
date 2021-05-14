@@ -8,6 +8,37 @@ class PurchaseRequest_model extends CI_Model {
         parent::__construct();
     }
 
+    public function brandName($itemID = null) 
+    {
+        $sql   = "SELECT brandName FROM ims_inventory_item_tbl WHERE itemID = $itemID";
+        $query = $this->db->query($sql);
+        if ($query) {
+            $result = $query->row();
+            return $result ? $result->brandName : null;
+        }
+        return null;
+    }
+
+    public function updateRequestItemsBrandName($purchaseRequestID = null)
+    {
+        $where = [
+            "inventoryValidationID" => null,
+            "purchaseRequestID"     => $purchaseRequestID,
+            "purchaseOrderID"       => null,
+            "bidRecapID"            => null
+        ];
+        $queryGetRequestItems = $this->db->get_where("ims_request_items_tbl", $where);
+        if ($queryGetRequestItems) {
+            $items = $queryGetRequestItems->result_array();
+            foreach ($items as $item) {
+                $requestItemID = $item["requestItemID"];
+                $itemID        = $item["itemID"];
+                $brandName     = $this->brandName($itemID);
+                $queryQuery    = $this->db->update("ims_request_items_tbl", ["brandName" => $brandName], ["requestItemID" => $requestItemID]);
+            }
+        }
+    }
+    
     public function savePurchaseRequestData($action, $data, $id = null) 
     {
         if ($action == "insert") {

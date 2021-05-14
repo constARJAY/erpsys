@@ -77,6 +77,11 @@ class Purchase_request extends CI_Controller {
                     "purchaseRequestStatus" => $purchaseRequestStatus,
                     "updatedBy"             => $updatedBy,
                 ];
+                // ----- UPDATE BRAND NAME IN REQUEST ITEMS -----
+                if ($purchaseRequestStatus == 2) {
+                    $this->purchaserequest->updateRequestItemsBrandName($purchaseRequestID, $costEstimateID);
+                }
+                // ----- END UPDATE BRAND NAME IN REQUEST ITEMS -----
             } else if ($method == "deny") {
                 $purchaseRequestData = [
                     "approversStatus"        => $approversStatus,

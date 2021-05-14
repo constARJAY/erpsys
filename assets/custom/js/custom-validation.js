@@ -102,12 +102,13 @@ initDateRangePicker();
 const initInputmask = (element = null) => {
 	let elem = getElement(element, ".inputmask");
 	$(elem).each(function () {
-		let mask = $(this).attr("mask");
+		let mask        = $(this).attr("mask");
+		let placeholder = mask?.replaceAll("9", "0")?.replaceAll("\\", "");
 		if (mask) {
 			let id = $(this).attr("id");
 			$("#" + id).inputmask({
 				mask,
-				placeholder: "",
+				placeholder,
 				undoOnEscape: false,
 				clearMaskOnLostFocus: false,
 			});
@@ -1234,4 +1235,19 @@ $(function () {
 		checkQuantity(elementID, invalidFeedback, value);
 	})
 	// ----- END CHECK AMOUNT KEYUP -----
+
+
+	// ----- CHECK INPUTMASK KEYUP -----
+	$(document).on("keyup", ".inputmask", function() {
+		let value     = $(this).val();
+		let elementID = `#${$(this).attr("id")}`;
+		let invalidFeedback =
+		$(elementID).parent().find(".invalid-feedback").length > 0
+			? $(elementID).parent().find(".invalid-feedback")
+			: $(elementID).parent().parent().find(".invalid-feedback").length > 0
+			? $(elementID).parent().parent().find(".invalid-feedback")
+			: $(elementID).parent().parent().parent().find(".invalid-feedback");
+		checkLength(elementID, invalidFeedback);
+	})
+	// ----- END CHECK INPUTMASK KEYUP -----
 });

@@ -1208,9 +1208,10 @@ $(document).ready(function() {
 
     function applyBankFormat(format = null) {
 		if (format) {
+			let numbers   = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"];
 			let formatArr = format.split("");
 			let newFormat = formatArr.map(char => {
-				return isFinite(String(char)) ? "9" : char;
+				return numbers.includes(String(char)) ? "9" : char;
 			})
 			return newFormat.join("");
 		}
@@ -1225,7 +1226,6 @@ $(document).ready(function() {
 		$("[name=employeeBankAccountNo]").attr("minlength", newFormat.length);
 		$("[name=employeeBankAccountNo]").attr("maxlength", newFormat.length);
 		initInputmask("employeeBankAccountNo");
-		initAll();
 	})
     // ----- END BANK NAME OPTIONS -----
 

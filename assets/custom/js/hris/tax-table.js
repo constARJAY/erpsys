@@ -12,6 +12,7 @@ $(document).ready(function () {
 				proccessing: false,
 				serverSide: false,
 				// scrollX:        true,
+				paginate: false,
 				scrollCollapse: true,
 				columnDefs: [{ targets: 0, width: "10px" }],
 			});
