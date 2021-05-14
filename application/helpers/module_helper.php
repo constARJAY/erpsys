@@ -18,13 +18,13 @@
 
         
         $query  = $CI->db->query($sql);
-        // $query2 = $CI->db->query($sql2); // ----- WITH ACCESSBILITY -----
+        $query2 = $CI->db->query($sql2); // ----- WITH ACCESSBILITY -----
         if ($displayModule) {
-            return $query->num_rows() > 0 ? true : false;
-            // return $query->num_rows() > 0 && $query2->num_rows() > 0 ? true : false; // ----- WITH ACCESSBILITY -----
+            // return $query->num_rows() > 0 ? true : false;
+            return $query->num_rows() > 0 && $query2->num_rows() > 0 ? true : false; // ----- WITH ACCESSBILITY -----
         } else {
-            if ($query->num_rows() == 0) {
-            // if ($query->num_rows() == 0 || $query2->num_rows() == 0) { // ----- WITH ACCESSBILITY -----
+            // if ($query->num_rows() == 0) {
+            if ($query->num_rows() == 0 || $query2->num_rows() == 0) { // ----- WITH ACCESSBILITY -----
                 redirect(base_url('denied'));
             }
         }

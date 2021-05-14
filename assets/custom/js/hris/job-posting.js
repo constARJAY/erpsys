@@ -24,10 +24,14 @@ $(document).ready(function(){
           scrollX:        true,
           scrollCollapse: true,
           columnDefs: [
-              { targets: 0, width: "10%"  },
-              { targets: 2, width: "20%" },
-              { targets: 3, width: "20%" },
-              { targets: 7, width: 80  },
+            { targets: 0, width: 100  },
+            { targets: 1, width: 150 },
+            { targets: 2, width: 150 },
+            { targets: 3, width: 350  },
+            { targets: 4, width: 150  },
+            { targets: 5, width: 150  },
+            { targets: 6, width: 100  },
+            { targets: 7, width: 80  }
           ],
       });
   }
@@ -91,7 +95,7 @@ $(document).ready(function(){
                       <td>${item.jobCode}</td>
                       <td>${item.jobCompany}</td>
                       <td>${item.jobTitle}</td>
-                      <td>${item.jobDescription}</td>
+                      <td style="white-space: normal;">${item.jobDescription}</td>
                       <td>${item.jobType}</td>
                       <td>${item.jobCategory}</td>
                       <td class="text-center">${item.jobSlot}</td>

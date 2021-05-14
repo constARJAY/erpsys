@@ -1,4 +1,5 @@
 $(document).ready(function() {
+    const allowedUpdate = isUpdateAllowed(114);
 
     // ----- GLOBAL VARIABLES -----
     let contractAppraisalFilename   = [], contractAppraisalFiles   = [];
@@ -22,11 +23,6 @@ $(document).ready(function() {
         return false;
     }
     // ----- END HIDE THE UPLOAD DOCUMENT FOR NON-HR DESIGNATION -----
-
-
-    // ----- IS UPDATE ALLOWED -----
-    const allowedUpdate = isUpdateAllowed(114);
-    // ----- END IS UPDATE ALLOWED -----
 
 
     // ----- DATATABLES -----
@@ -521,7 +517,7 @@ $(document).ready(function() {
     const designationList = getTableData("hris_designation_tbl", "designationID, designationName, departmentID", "designationStatus = 1");
 
     function designationOptions(id = null, departmentID = null, display = false) {
-        let html = `<option selected disabled>Select Designation</option>`;
+        let html = `<option value="" selected disabled>Select Designation</option>`;
         if (display) {
             html += designationList.filter(designation => designation.departmentID == departmentID).map(designation => {
                 return `
@@ -786,7 +782,7 @@ $(document).ready(function() {
                                             name="employeeCitizenship"
                                             id="employeeCitizenship"
                                             required>
-                                            <option selected disabled>Select Citizenship</option>
+                                            <option value="" selected disabled>Select Citizenship</option>
                                             ${citizenshipOptions(employeeCitizenship)}
                                         </select>
                                         <div class="invalid-feedback d-block" id="invalid-employeeCitizenship"></div>
@@ -799,7 +795,7 @@ $(document).ready(function() {
                                             name="employeeCivilStatus"
                                             id="employeeCivilStatus"
                                             required>
-                                            <option selected disabled>Select Civil Status</option>
+                                            <option value="" selected disabled>Select Civil Status</option>
                                             ${civilStatusOptions(employeeCivilStatus)}
                                         </select>
                                         <div class="invalid-feedback d-block" id="invalid-employeeLastname"></div>
@@ -829,7 +825,7 @@ $(document).ready(function() {
                             name="employeeRegion"
                             id="employeeRegion"
                             required>
-                            <option selected disabled>Select Region</option>
+                            <option value="" selected disabled>Select Region</option>
                             ${regionOptions(employeeRegion)}
                         </select>
                         <div class="invalid-feedback d-block" id="invalid-employeeRegion"></div>
@@ -973,7 +969,7 @@ $(document).ready(function() {
                             name="departmentID"
                             id="departmentID"
                             required>
-                            <option selected disabled>Select Department</option>
+                            <option value="" selected disabled>Select Department</option>
                             ${departmentOptions(departmentID)}
                         </select>
                         <div class="invalid-feedback d-block" id="invalid-departmentID"></div>
@@ -1025,7 +1021,7 @@ $(document).ready(function() {
                     <div class="form-group">
                         <label>Mobile No. <code>*</code></label>
                         <input type="text"
-                            class="form-control validate inputmask"
+                            class="form-control inputmask"
                             mask="0\\999-999-9999"
                             data-allowcharacters="[0-9]"
                             minlength="13"
@@ -1321,7 +1317,7 @@ $(document).ready(function() {
                         <select class="form-control select2 validate"
                             name="bankID"
                             id="bankID">
-                            <option selected disabled>Select Bank Name</option>
+                            <option value="" selected disabled>Select Bank Name</option>
                             ${bankOptions(bankID)}
                         </select>
                         <div class="invalid-feedback d-block" id="invalid-bankID"></div>
@@ -1473,8 +1469,7 @@ $(document).ready(function() {
                                 data-allowcharacters="[0-9]"
                                 minlength="1"
                                 maxlength="5"
-                                value="${leaveCredit}"
-                                required>
+                                value="${leaveCredit}">
                             <div class="d-block invalid-feedback" id="invalid-leaveType${index}"></div>
                         </div> 
                     </td>
@@ -1635,7 +1630,7 @@ $(document).ready(function() {
                             name="scheduleID"
                             id="scheduleID"
                             required>
-                            <option selected disabled>Select Schedule</option>
+                            <option value="" selected disabled>Select Schedule</option>
                             ${scheduleOptions(scheduleID)}
                         </select>
                         <div class="d-block invalid-feedback" id="invalid-scheduleID"></div>

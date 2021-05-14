@@ -24,17 +24,15 @@ $(document).ready(function(){
             scrollX:        true,
             scrollCollapse: true,
             columnDefs: [
-                { targets: 0, width: "10%" },
-                { targets: 1, width: "10%" },
-                { targets: 2, width: "10%" },
-                { targets: 3, width: "10%" },
-                { targets: 4, width: "10%" },
-                { targets: 5, width: "10%" },
-                { targets: 6, width: "5%" },
-                { targets: 7, width: "5%" },
-                { targets: 8, width: "10%" },
-                // { targets: 9, width: "10%" },
-                { targets: 9, width: "10%" },
+                { targets: 0, width: 100 },
+                { targets: 1, width: 150 },
+                { targets: 2, width: 250 },
+                { targets: 3, width: 150 },
+                { targets: 4, width: 150 },
+                { targets: 5, width: 80 },
+                { targets: 6, width: 400 },
+                { targets: 7, width: 150 },
+                { targets: 8, width: 80 },
             ],
         });
     }
@@ -64,7 +62,6 @@ $(document).ready(function(){
                     <thead style="white-space:nowrap">
                         <tr>
                             <th>Item Code</th>
-                            <th>Brand Name</th>
                             <th>Item Name</th>
                             <th>Item Classification</th>
                             <th>Item Category</th>
@@ -100,13 +97,18 @@ $(document).ready(function(){
                     id="${item.itemID}"
                     feedback="${item.itemName}">
                         <td>${item.itemCode}</td>
-                        <td>${item.brandName}</td>
-                        <td>${item.itemName}</td>
+                        <td>
+                            <div>
+                                ${item.itemName}
+                            </div>
+                            <small style="color:#848482;">${item.brandName}</small>
+                           
+                        </td>
                         <td>${item.classificationName}</td>
                         <td>${item.categoryName}</td>
                         <td>${item.itemSize}</td>
                         <td>${unitOfMeasurementValue.charAt(0).toUpperCase() + unitOfMeasurementValue.slice(1)}</td>
-                        <td>${item.itemDescription}</td>
+                        <td style="white-space: normal;">${item.itemDescription}</td>
                         <td>${item.reOrderLevel}</td>
                         <td class="text-center">${status}</td>
                     </tr>`;
@@ -336,9 +338,9 @@ $(document).ready(function(){
                 
                 <div class="col-md-12 col-sm-12">
                         <div class="form-group">
-                            <label>Item Description<span class="text-danger font-weight-bold">*</span></label>
-                            <textarea style="resize:none" row="3" class="form-control validate" name="itemDescription" id="inputItemDescription" 
-                                    data-allowcharacters="[a-z][A-Z][0-9][.][,][-][()]['][/][?][*][!][#][%][&][ ]" minlength="2" maxlength="500" required >${itemDescription}</textarea>
+                            <label>Item Description <span class="text-danger font-weight-bold">*</span></label>
+                            <textarea style="resize:none; white-space:wrap;" row="3" class="form-control validate" name="itemDescription" id="inputItemDescription" 
+                                    data-allowcharacters="[a-z][A-Z][0-9][.][,][-][()]['][/][?][*][!][#][%][&][ ]" minlength="2" maxlength="250" required >${itemDescription}</textarea>
                             <div class="invalid-feedback d-block" id="invalid-inputItemDescription"></div>
                         </div>
                 </div>

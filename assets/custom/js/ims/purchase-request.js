@@ -1509,50 +1509,48 @@ $(document).ready(function() {
 
 		if (selectedItemID != "0") {
 			$(`.btnAddRow${attr}`).removeAttr("disabled");
-
-			getInventoryPreferredPrice(selectedItemID, this);
-
-			$(this).closest("tr").find(`.itemcode`).first().text(itemCode);
-			$(this).closest("tr").find(`.category`).first().text(categoryName);
-			$(this).closest("tr").find(`.uom`).first().text(uom);
-	
-			$(`[name=itemID]${attr}`).each(function(i, obj) {
-				let itemID = $(this).val();
-				if (itemID == "0") {
-					$(this).closest("tr").find("[name=quantity]").removeAttr("required");
-					$(this).closest("tr").find("[name=quantity]").val("0");
-					$(this).closest("tr").find(".unitCost").text(formatAmount("0.00", true));
-					$(this).closest("tr").find(".totalcost").text(formatAmount("0.00", true));
-					$(this).closest("tr").find("[name=files]").val("");
-					$(this).closest("tr").find(".displayfile").empty();
-					$(this).closest("tr").find("[name=remarks]").val("");
-					$(this).closest("tr").find("[name=quantity], [name=files], [name=remarks]").attr("disabled", "true");
-				} else {
-					let oldQty = $(this).closest("tr").find("[name=quantity]").val();
-					oldQty = oldQty != 0 ? oldQty : 0;
-					$(this).closest("tr").find("[name=quantity]").val(oldQty);
-					
-					if ($(this).closest("tr").find("[name=quantity]").attr("ceID") == "true") {
-						$(this).closest("tr").find("[name=files], [name=remarks]").removeAttr("disabled");
-					} else {
-						$(this).closest("tr").find("[name=quantity], [name=files], [name=remarks]").removeAttr("disabled");
-					}
-	
-					const unitCost  = getInventoryPreferredPrice(itemID, this, true) || 0;
-					const quantity  = $(this).closest("tr").find("[name=quantity]").val();
-					const totalCost = quantity * unitCost;
-					$(this).closest("tr").find(`.unitcost`).text(formatAmount(unitCost, true));
-					$(this).closest("tr").find(".totalcost").text(formatAmount(totalCost, true));
-	
-				}
-				$(this).html(getInventoryItem(itemID, isProject));
-			}) 
-			updateTotalAmount(isProject);
 		} else {
 			$(`.btnAddRow${attr}`).attr("disabled", true);
 		}
 
-		
+		getInventoryPreferredPrice(selectedItemID, this);
+
+		$(this).closest("tr").find(`.itemcode`).first().text(itemCode);
+		$(this).closest("tr").find(`.category`).first().text(categoryName);
+		$(this).closest("tr").find(`.uom`).first().text(uom);
+
+		$(`[name=itemID]${attr}`).each(function(i, obj) {
+			let itemID = $(this).val();
+			if (itemID == "0") {
+				$(this).closest("tr").find("[name=quantity]").removeAttr("required");
+				$(this).closest("tr").find("[name=quantity]").val("0");
+				$(this).closest("tr").find(".unitCost").text(formatAmount("0.00", true));
+				$(this).closest("tr").find(".totalcost").text(formatAmount("0.00", true));
+				$(this).closest("tr").find("[name=files]").val("");
+				$(this).closest("tr").find(".displayfile").empty();
+				$(this).closest("tr").find("[name=remarks]").val("");
+				$(this).closest("tr").find("[name=quantity], [name=files], [name=remarks]").attr("disabled", "true");
+			} else {
+				let oldQty = $(this).closest("tr").find("[name=quantity]").val();
+				oldQty = oldQty != 0 ? oldQty : 0;
+				$(this).closest("tr").find("[name=quantity]").val(oldQty);
+				
+				if ($(this).closest("tr").find("[name=quantity]").attr("ceID") == "true") {
+					$(this).closest("tr").find("[name=files], [name=remarks]").removeAttr("disabled");
+				} else {
+					$(this).closest("tr").find("[name=quantity], [name=files], [name=remarks]").removeAttr("disabled");
+				}
+
+				const unitCost  = getInventoryPreferredPrice(itemID, this, true) || 0;
+				const quantity  = $(this).closest("tr").find("[name=quantity]").val();
+				const totalCost = quantity * unitCost;
+				$(this).closest("tr").find(`.unitcost`).text(formatAmount(unitCost, true));
+				$(this).closest("tr").find(".totalcost").text(formatAmount(totalCost, true));
+
+			}
+			$(this).html(getInventoryItem(itemID, isProject));
+		}) 
+		updateTotalAmount(isProject);		
     })
     // ----- END SELECT ITEM NAME -----
 

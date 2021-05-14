@@ -1,4 +1,6 @@
 $(document).ready(function () {
+	const allowedUpdate = isUpdateAllowed(9);
+
 	// ----- DATATABLES -----
 	function initDataTables() {
 		if ($.fn.DataTable.isDataTable("#tableInventoryConditions")) {
@@ -245,6 +247,13 @@ $(document).ready(function () {
 			setTimeout(() => {
 				$("#modal_inventory_condition_content").html(content);
 				initAll();
+
+				if (!allowedUpdate) {
+					$("#modal_inventory_condition_content").find("input, select, textarea").each(function() {
+						$(this).attr("disabled", true);
+					})
+					$("#btnUpdate").hide();
+				}
 			}, 500);
 		}
 	});

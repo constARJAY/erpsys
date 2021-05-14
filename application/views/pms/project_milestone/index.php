@@ -11,10 +11,11 @@
 					<h1 class="mt-3" id="inv_headerID">List of Project Milestone</h1>
 					<span>This module is used to manage project milestone details.</span>
 				</div>
+				<?php if (isCreateAllowed(10)) { ?>
 				<div class="col-lg-6 col-md-6 text-md-right">
-                        <button type="button" class="btn btn-default btn-add" id="btnAdd"> <i class="icon-plus"></i> Add Milestone</button>
-                    </ul>
+					<button type="button" class="btn btn-default btn-add" id="btnAdd"> <i class="icon-plus"></i> Add Milestone</button>
 				</div>
+				<?php } ?>
 			</div>
 		</div>
 	</div>

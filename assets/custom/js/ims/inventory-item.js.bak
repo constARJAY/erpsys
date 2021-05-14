@@ -1,5 +1,17 @@
 $(document).ready(function(){
 
+    	//------ MODULE FUNCTION IS ALLOWED UPDATE-----
+	
+	const allowedUpdate = isUpdateAllowed(4);
+	if(!allowedUpdate){
+		$("#modal_inventory_item_content").find("input, select, textarea").each(function(){
+			$(this).attr("disabled",true);
+		});
+		$("#btnUpdate").hide();
+	}
+
+	//------ END MODULE FUNCTION IS ALLOWED UPDATE-----
+
     // ----- DATATABLES -----
     function initDataTables() {
         if ($.fn.DataTable.isDataTable('#tableInventoryItem')){
@@ -21,8 +33,8 @@ $(document).ready(function(){
                 { targets: 6, width: "5%" },
                 { targets: 7, width: "5%" },
                 { targets: 8, width: "10%" },
+                // { targets: 9, width: "10%" },
                 { targets: 9, width: "10%" },
-                { targets: 10, width: "10%" },
             ],
         });
     }
@@ -60,7 +72,6 @@ $(document).ready(function(){
                             <th>UOM</th>
                             <th>Item Description</th>
                             <th>Re-Order Level</th>
-                            <th>Base Price</th>
                             <th>Status</th>
                         </tr>
                     </thead>
@@ -97,7 +108,6 @@ $(document).ready(function(){
                         <td>${unitOfMeasurementValue.charAt(0).toUpperCase() + unitOfMeasurementValue.slice(1)}</td>
                         <td>${item.itemDescription}</td>
                         <td>${item.reOrderLevel}</td>
-                        <td class="text-right">${formatAmount(item.basePrice, true)}</td>
                         <td class="text-center">${status}</td>
                     </tr>`;
                 })

@@ -17,9 +17,11 @@
 					<h1 class="mt-3" id="inv_headerID">List of Projects</h1>
 					<span>This module is used to manage project details.</span>
 				</div>
+				<?php if (isCreateAllowed(11)) { ?>
 				<div class="col-lg-6 col-md-12 text-md-right">
 					<button class="btn btn-default btn-add" id="btnAdd"><i class="icon-plus"></i> Add Project</button>
 				</div>
+				<?php } ?>
 			</div>
 		</div>
 	</div>

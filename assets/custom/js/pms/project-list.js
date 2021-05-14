@@ -1,4 +1,5 @@
 $(document).ready(function () {
+	const allowedUpdate = isUpdateAllowed(11);
 
 	// ---- GET EMPLOYEE DATA -----
 	const allEmployeeData = getAllEmployeeData();
@@ -658,6 +659,13 @@ $(document).ready(function () {
 				endDate($("[name=projectListTo]").val());
 				multipleSelect2Placeholder();
 				selectEmployee();
+
+				if (!allowedUpdate) {
+					$("#modal_project_list_content").find("input, select, textarea").each(function() {
+						$(this).attr("disabled", true);
+					})
+					$("#btnUpdate").hide();
+				}
 			}, 500);
 		}
 	});

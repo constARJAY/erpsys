@@ -1,4 +1,6 @@
 $(document).ready(function () {
+	const allowedUpdate = isUpdateAllowed(8);
+
 	// ----- GET PHILIPPINE ADDRESSES -----
 	const getPhAddresses = () => {
 		let result = [];
@@ -1010,6 +1012,13 @@ $(document).ready(function () {
 				$("#modal_inventory_vendor_content").html(content);
 				initAll();
 				initInputmaskTime(false);
+
+				if (!allowedUpdate) {
+					$("#modal_inventory_vendor_content").find("input, select, textarea").each(function() {
+						$(this).attr("disabled", true);
+					})
+					$("#btnUpdate").hide();
+				}
 			}, 500);
 		}
 	});

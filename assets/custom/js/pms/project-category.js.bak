@@ -1,5 +1,17 @@
 $(document).ready(function(){
 
+    //------ MODULE FUNCTION IS ALLOWED UPDATE-----
+	
+	const allowedUpdate = isUpdateAllowed(13);
+	if(!allowedUpdate){
+		$("#modalProjectCategoryContent").find("input, select, textarea").each(function(){
+			$(this).attr("disabled",true);
+		});
+		$("#btnUpdate").hide();
+	}
+
+	//------ END MODULE FUNCTION IS ALLOWED UPDATE-----
+
     // ----- DATATABLES -----
     function initDataTables() {
         if ($.fn.DataTable.isDataTable('#tableProjectCategory')){
@@ -34,7 +46,7 @@ $(document).ready(function(){
             method:   'POST',
             async:    false,
             dataType: 'json',
-            data:     {tableName: "pms_category_tbl"},
+            data:     {tableName: "pms_category_tbl as ct LEFT JOIN pms_client_tbl as cl ON ct.companyName = cl.clientID"},
             beforeSend: function() {
                 $("#table_content").html(preloader);
                 // $("#inv_headerID").text("List of Inventory Item");
@@ -90,7 +102,7 @@ $(document).ready(function(){
                     feedback="${item.categoryName}">
                         <td>${item.categoryCode}</td>
                         <td>${item.categoryName}</td>
-                        <td>${theCompanyName}</td>
+                        <td>${item.clientName}</td>
                         <td class="text-center">${status}</td>
                     </tr>`;
                 })
@@ -113,6 +125,21 @@ $(document).ready(function(){
     }
     tableContent();
     // ----- END TABLE CONTENT -----
+
+    // ----- company CONTENT -----
+    function companyContent(param = false) {
+    // getTableData(tableName = null, columnName = “”, WHERE = “”, orderBy = “”) 
+    const data = getTableData("pms_client_tbl", 
+        "clientID  ,clientName", "clientStatus =1", "");
+        
+            let html = ` <option value="" disabled selected ${!param && "selected"}>Select Company Name</option>`;
+            data.map((item, index, array) => {
+                html += `<option value="${item.clientID }" ${param && item.companyName  == param[0].clientID  && "selected"}>${item.clientName}</option>`;
+            })
+            $("#input_companyName").html(html);
+    }
+    companyContent();
+    // ----- END company CONTENT -----
 
      // ----- MODAL CONTENT -----
      function modalContent(data = false) {
@@ -159,20 +186,12 @@ $(document).ready(function(){
                 <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12">
                     <div class="form-group">
                         <label>Company Name <span class="text-danger font-weight-bold">*</span></label>
-                        <select class="form-control select2 validate" name="companyName"  id="input_companyName" autocomplete="off" required >
-                            <option disabled ${companyName != "" ? "" : "selected"}>Select Company Name</option>
-                            <option 
-                                value="BCGI" 
-                                ${data && companyName == "BCGI" && "selected"}>Blackcoders Group Inc.</option>
-                            <option 
-                                value="GTC" 
-                                ${data && companyName == "GTC" && "selected"}>Gatchallan Tangalin and Co., CPA's</option>
-                            <option 
-                                value="CMTLAND" 
-                                ${data && companyName == "CMTLAND" && "selected"}>CMT Land</option>
-                            <option 
-                                value="CMTBUILDERS" 
-                                ${data && companyName == "CMTBUILDER" && "selected"}>CMT Builders</option>
+                        <select 
+                            class="form-control select2 validate" 
+                            id="input_companyName" 
+                            name="companyName"
+                            autocomplete="off"
+                            required>
                         </select>
                         <div class="invalid-feedback d-block" id="invalid-input_companyName"></div>
                     </div>
@@ -214,6 +233,7 @@ $(document).ready(function(){
         const content = modalContent();
         $("#modalProjectCategoryContent").html(content);
         initAll();
+        companyContent();
     });
     // ----- END OPEN ADD MODAL -----
 
@@ -250,6 +270,7 @@ $(document).ready(function(){
             const content = modalContent(tableData);
             setTimeout(() => {
                 $("#modalProjectCategoryContent").html(content);
+                companyContent(tableData);
                 $("#btnSaveConfirmationEdit").attr("rowID", id);
                 $("#btnSaveConfirmationEdit").attr("feedback", feedback);
                 initAll();

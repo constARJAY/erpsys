@@ -11,9 +11,11 @@
 					<h1 class="mt-3" id="invConditionsHeaderID">List of Inventory Condition</h1>
 					<span>This module is used to manage inventory condition details.</span>
 				</div>
+				<?php if (isCreateAllowed(9)) { ?>
 				<div class="col-lg-6 col-md-6 text-md-right">
 					<button class="btn btn-default btn-add" id="btnAdd"><i class="icon-plus"></i> Add Condition</button>
 				</div>
+				<?php } ?>
 			</div>
 		</div>
 	</div>

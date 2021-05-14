@@ -165,7 +165,7 @@ $(document).on("change", "[name=clientCity]", function() {
             columnDefs: [
                 { targets: 0, width: "10%" },
                 { targets: 1, width: "10%" },
-                { targets: 2, width: "300" },
+                { targets: 2, width: "10%" },
                 { targets: 3, width: "10%" },
                 { targets: 4, width: "10%" },
                 { targets: 5, width: "10%" },
@@ -239,7 +239,7 @@ $(document).on("change", "[name=clientCity]", function() {
                     feedback="${item.clientName}">
                         <td>${item.clientCode}</td>
                         <td>${item.clientName}</td>
-                        <td style="white-space: normal">
+                        <td>
                             ${item.clientUnitNumber && titleCase(item.clientUnitNumber)+", "} 
                             ${item.clientHouseNumber && item.clientHouseNumber +", "} 
                             ${item.clientBarangay && titleCase(item.clientBarangay)+", "} 
@@ -300,12 +300,12 @@ $(document).on("change", "[name=clientCity]", function() {
 
         let button = clientID ? `
         <button 
-            class="btn btn-update px-5 p-2" 
+            class="btn btn-update" 
             id="btnUpdate" 
             rowID="${clientID}"><i class="fas fa-save"></i>
             Update
         </button>` : `
-        <button class="btn btn-save px-5 p-2" id="btnSave"><i class="fas fa-save"></i> Save</button>`;
+        <button class="btn btn-save" id="btnSave"><i class="fas fa-save"></i> Save</button>`;
 
         let html = `
 
@@ -501,7 +501,7 @@ $(document).on("change", "[name=clientCity]", function() {
                             <div class="invalid-feedback d-block" id="invalid-input_clientTelephoneNo"></div>
                         </div>
                     </div>
-                    <div class="col-md-8 col-sm-12">
+                    <div class="col-xl-10 col-lg-6 col-md-6 col-sm-12">
                         <div class="form-group">
                             <label>Website <small class="text-muted">(Optional)</small></label>
                             <input 
@@ -517,7 +517,7 @@ $(document).on("change", "[name=clientCity]", function() {
                        
                         </div>
                     </div>
-                    <div class="col-md-4 col-sm-12">
+                    <div class="col-md-6 col-sm-12">
                         <div class="form-group">
                             <label>Status <span class="text-danger font-weight-bold">*</span></label>
                             <select class=" form-control show-tick select2 validate" name="clientStatus" id="input_clientStatus" autocomplete="off" >
@@ -531,7 +531,7 @@ $(document).on("change", "[name=clientCity]", function() {
             </div>
             <div class="modal-footer">
                 ${button}
-                <button class="btn btn-cancel btnCancel px-5 p-2"><i class="fas fa-ban"></i> Cancel</button>
+                <button class="btn btn-cancel btnCancel"><i class="fas fa-ban"></i> Cancel</button>
             </div>`;
 
     
@@ -541,7 +541,7 @@ $(document).on("change", "[name=clientCity]", function() {
 
         // ----- OPEN ADD MODAL -----
     $(document).on("click", "#btnAdd", function() {
-        $("#modalTitleAddClientHeader").text("ADD PROJECT CLIENT");
+        $("#modalTitleAddClientHeader").text("ADD CLIENT");
         $("#modalProjectClient").modal("show");
         $("#modalProjectClientContent").html(preloader);
 

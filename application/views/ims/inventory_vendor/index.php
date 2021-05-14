@@ -12,9 +12,11 @@
 					<h1 class="mt-3" id="invVendoHeaderID">List of Inventory Vendor</h1>
 					<span>This module is used to manage inventory vendor details.</span>
 				</div>
+				<?php if (isCreateAllowed(8)) { ?>
 				<div class="col-lg-6 col-md-6 text-md-right">
 					<button class="btn btn-default btn-add" id="btnAdd"><i class="icon-plus"></i> Add Vendor</button>
 				</div>
+				<?php } ?>
 			</div>
 		</div>
 	</div>

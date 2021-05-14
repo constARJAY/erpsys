@@ -1,4 +1,6 @@
 $(document).ready(function () {
+	const allowedUpdate = isUpdateAllowed(10);
+
 	// ----- DATATABLES -----
 	function initDataTables() {
 		if ($.fn.DataTable.isDataTable("#tableProjectMilestoneTable")) {
@@ -238,6 +240,13 @@ $(document).ready(function () {
 			setTimeout(() => {
 				$("#modal_project_milestone_content").html(content);
 				initAll();
+
+				if (!allowedUpdate) {
+					$("#modal_project_milestone_content").find("input, select, textarea").each(function() {
+						$(this).attr("disabled", true);
+					})
+					$("#btnUpdate").hide();
+				}
 			}, 500);
 		}
 	});
