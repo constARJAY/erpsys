@@ -578,7 +578,7 @@ $(document).ready(function () {
 					invalidFeedback.text("");
 					$("[name=projectListFrom]").val(moment(data).format("MMMM DD, YYYY"));
 
-					endDate(data);
+					endDate(data, data);
 				}
 			}
 		);
@@ -588,11 +588,12 @@ $(document).ready(function () {
 			$("[name=projectListFrom]").val(
 				moment(dateToday).format("MMMM DD, YYYY")
 			);
-			endDate(dateToday);
+			const dateTo = $(`[name="projectListTo"]`).val() || new Date;
+			endDate(dateTo, dateToday);
 		}
 	}
 
-	function endDate(data) {
+	function endDate(dateTo, startDate = new Date) {
 		initDateRangePicker("#projectListTo", {
 			autoUpdateInput: false,
 			singleDatePicker: true,
@@ -601,11 +602,11 @@ $(document).ready(function () {
 			locale: {
 				format: "MMMM DD, YYYY",
 			},
-			startDate: moment(data).format("MMMM DD, YYYY"),
-			minDate: moment(data).format("MMMM DD, YYYY"),
+			startDate: moment(dateTo).format("MMMM DD, YYYY"),
+			minDate: moment(startDate).format("MMMM DD, YYYY"),
 		});
 
-		$("#projectListTo").val(moment(data).format("MMMM DD, YYYY"));
+		$("#projectListTo").val(moment(dateTo).format("MMMM DD, YYYY"));
 	}
 	// ----- END START DATE -----
 

@@ -408,8 +408,8 @@ $(document).ready(function() {
 			let btnClass = purchaseRequestStatus != 0 ? "btnView" : "btnEdit";
 
 			let button = purchaseRequestStatus != 0 ? `
-			<button class="btn btn-view w-100 btnView" id="${encryptString(purchaseRequestID )}"><i class="fas fa-eye"></i> View</button>` : `
-			<button 
+			<button type="button" class="btn btn-view w-100 btnView" id="${encryptString(purchaseRequestID )}"><i class="fas fa-eye"></i> View</button>` : `
+			<button type="button" 
 				class="btn btn-edit w-100 btnEdit" 
 				id="${encryptString(purchaseRequestID )}" 
 				code="${getFormCode("PR", createdAt, purchaseRequestID )}"><i class="fas fa-edit"></i> Edit</button>`;
@@ -512,8 +512,8 @@ $(document).ready(function() {
 			let btnClass = purchaseRequestStatus != 0 ? "btnView" : "btnEdit";
 
 			let button = purchaseRequestStatus != 0 ? `
-            <button class="btn btn-view w-100 btnView" id="${encryptString(purchaseRequestID )}"><i class="fas fa-eye"></i> View</button>` : `
-            <button 
+            <button type="button" class="btn btn-view w-100 btnView" id="${encryptString(purchaseRequestID )}"><i class="fas fa-eye"></i> View</button>` : `
+            <button type="button" 
                 class="btn btn-edit w-100 btnEdit" 
                 id="${encryptString(purchaseRequestID )}" 
                 code="${getFormCode("PR", createdAt, purchaseRequestID )}"><i class="fas fa-edit"></i> Edit</button>`;
@@ -573,7 +573,7 @@ $(document).ready(function() {
 				if (purchaseRequestStatus == 0 || isRevise) {
 					// DRAFT
 					button = `
-					<button 
+					<button type="button" 
 						class="btn btn-submit px-5 p-2"  
 						id="btnSubmit" 
 						purchaseRequestID="${purchaseRequestID}"
@@ -584,7 +584,7 @@ $(document).ready(function() {
 
 					if (isRevise) {
 						button += `
-						<button 
+						<button type="button" 
 							class="btn btn-cancel btnCancel px-5 p-2" 
 							id="btnCancel"
 							purchaseRequestID="${purchaseRequestID}"
@@ -594,7 +594,7 @@ $(document).ready(function() {
 						</button>`;
 					} else {
 						button += `
-						<button 
+						<button type="button" 
 							class="btn btn-cancel px-5 p-2"
 							id="btnCancelForm" 
 							purchaseRequestID="${purchaseRequestID}"
@@ -609,7 +609,7 @@ $(document).ready(function() {
 					// FOR APPROVAL
 					if (!isOngoing) {
 						button = `
-						<button 
+						<button type="button" 
 							class="btn btn-cancel  px-5 p-2"
 							id="btnCancelForm" 
 							purchaseRequestID="${purchaseRequestID}"
@@ -636,14 +636,14 @@ $(document).ready(function() {
 				if (purchaseRequestStatus == 1) {
 					if (isImCurrentApprover(approversID, approversDate)) {
 						button = `
-						<button 
+						<button type="button" 
 							class="btn btn-submit px-5 p-2"  
 							id="btnApprove" 
 							purchaseRequestID="${encryptString(purchaseRequestID)}"
 							code="${getFormCode("PR", createdAt, purchaseRequestID)}"><i class="fas fa-paper-plane"></i>
 							Approve
 						</button>
-						<button 
+						<button type="button" 
 							class="btn btn-cancel  px-5 p-2"
 							id="btnReject" 
 							purchaseRequestID="${encryptString(purchaseRequestID)}"
@@ -655,11 +655,11 @@ $(document).ready(function() {
 			}
 		} else {
 			button = `
-			<button 
+			<button type="button" 
 				class="btn btn-submit px-5 p-2"  
 				id="btnSubmit"><i class="fas fa-paper-plane"></i> Submit
 			</button>
-			<button 
+			<button type="button" 
 				class="btn btn-cancel btnCancel px-5 p-2" 
 				id="btnCancel"><i class="fas fa-ban"></i> 
 				Cancel
@@ -761,7 +761,8 @@ $(document).ready(function() {
 
 		projectElementID.map((element, index) => {
 			let html = `<option selected disabled>Select Item Name</option>`;
-			let itemList = [optionNone, ...inventoryItemList];
+			let itemList = projectItemIDArr.includes("0") ? [...inventoryItemList] : [optionNone, ...inventoryItemList];
+
 			html += itemList.filter(item => !projectItemIDArr.includes(item.itemID) || item.itemID == projectItemIDArr[index]).map(item => {
 				return `
 				<option 
@@ -780,7 +781,7 @@ $(document).ready(function() {
 
 		companyElementID.map((element, index) => {
 			let html = `<option selected disabled>Select Item Name</option>`;
-			let itemList = [optionNone, ...inventoryItemList];
+			let itemList = companyItemIDArr.includes("0") ? [...inventoryItemList] : [optionNone, ...inventoryItemList];
 			html += itemList.filter(item => !companyItemIDArr.includes(item.itemID) || item.itemID == companyItemIDArr[index]).map(item => {
 				return `
 				<option 
@@ -840,7 +841,8 @@ $(document).ready(function() {
 			itemName:            "N/A",
 			itemDescription:     ""
 		};
-		let itemList = [optionNone, ...inventoryItemList];
+		// let itemList = [optionNone, ...inventoryItemList];
+		let itemList = !itemIDArr.includes("0") ? [...inventoryItemList] : [optionNone, ...inventoryItemList];
 
 		html += itemList.filter(item => !itemIDArr.includes(item.itemID) || item.itemID == id).map(item => {
             return `
@@ -1221,6 +1223,7 @@ $(document).ready(function() {
 							}) 
 							updateDeleteButton();
 							updateTotalAmount(isProject);
+							updateInventoryItemOptions();
 						});
 					})
 				}
@@ -1364,13 +1367,13 @@ $(document).ready(function() {
 		let tableCompanyRequestItemsName = !disabled ? "tableCompanyRequestItems" : "tableCompanyRequestItems0";
 		let buttonProjectAddDeleteRow = !disabled ? `
 		<div class="w-100 text-left my-2">
-			<button class="btn btn-primary btnAddRow" id="btnAddRow" project="true" ${disabledCE}><i class="fas fa-plus-circle"></i> Add Row</button>
-			<button class="btn btn-danger btnDeleteRow" id="btnDeleteRow" project="true" disabled><i class="fas fa-minus-circle"></i> Delete Row/s</button>
+			<button type="button" class="btn btn-primary btnAddRow" id="btnAddRow" project="true" ${disabledCE}><i class="fas fa-plus-circle"></i> Add Row</button>
+			<button type="button" class="btn btn-danger btnDeleteRow" id="btnDeleteRow" project="true" disabled><i class="fas fa-minus-circle"></i> Delete Row/s</button>
 		</div>` : "";
 		let buttonCompanyAddDeleteRow = !disabled ? `
 		<div class="w-100 text-left my-2">
-			<button class="btn btn-primary btnAddRow" id="btnAddRow" company="true" ${disabledCE}><i class="fas fa-plus-circle"></i> Add Row</button>
-			<button class="btn btn-danger btnDeleteRow" id="btnDeleteRow" company="true" disabled><i class="fas fa-minus-circle"></i> Delete Row/s</button>
+			<button type="button" class="btn btn-primary btnAddRow" id="btnAddRow" company="true" ${disabledCE}><i class="fas fa-plus-circle"></i> Add Row</button>
+			<button type="button" class="btn btn-danger btnDeleteRow" id="btnDeleteRow" company="true" disabled><i class="fas fa-minus-circle"></i> Delete Row/s</button>
 		</div>` : "";
 
 		let html = `
@@ -1504,44 +1507,52 @@ $(document).ready(function() {
 		const isProject      = $(this).closest("tbody").attr("project") == "true";
 		const attr           = isProject ? "[project=true]" : "[company=true]";
 
-		getInventoryPreferredPrice(selectedItemID, this);
+		if (selectedItemID != "0") {
+			$(`.btnAddRow${attr}`).removeAttr("disabled");
 
-        $(this).closest("tr").find(`.itemcode`).first().text(itemCode);
-        $(this).closest("tr").find(`.category`).first().text(categoryName);
-        $(this).closest("tr").find(`.uom`).first().text(uom);
+			getInventoryPreferredPrice(selectedItemID, this);
 
-		$(`[name=itemID]${attr}`).each(function(i, obj) {
-			let itemID = $(this).val();
-			if (itemID == "0") {
-				$(this).closest("tr").find("[name=quantity]").removeAttr("required");
-				$(this).closest("tr").find("[name=quantity]").val("0");
-				$(this).closest("tr").find(".unitCost").text(formatAmount("0.00", true));
-				$(this).closest("tr").find(".totalcost").text(formatAmount("0.00", true));
-				$(this).closest("tr").find("[name=files]").val("");
-				$(this).closest("tr").find(".displayfile").empty();
-				$(this).closest("tr").find("[name=remarks]").val("");
-				$(this).closest("tr").find("[name=quantity], [name=files], [name=remarks]").attr("disabled", "true");
-			} else {
-				let oldQty = $(this).closest("tr").find("[name=quantity]").val();
-				oldQty = oldQty != 0 ? oldQty : 0;
-				$(this).closest("tr").find("[name=quantity]").val(oldQty);
-				
-				if ($(this).closest("tr").find("[name=quantity]").attr("ceID") == "true") {
-					$(this).closest("tr").find("[name=files], [name=remarks]").removeAttr("disabled");
+			$(this).closest("tr").find(`.itemcode`).first().text(itemCode);
+			$(this).closest("tr").find(`.category`).first().text(categoryName);
+			$(this).closest("tr").find(`.uom`).first().text(uom);
+	
+			$(`[name=itemID]${attr}`).each(function(i, obj) {
+				let itemID = $(this).val();
+				if (itemID == "0") {
+					$(this).closest("tr").find("[name=quantity]").removeAttr("required");
+					$(this).closest("tr").find("[name=quantity]").val("0");
+					$(this).closest("tr").find(".unitCost").text(formatAmount("0.00", true));
+					$(this).closest("tr").find(".totalcost").text(formatAmount("0.00", true));
+					$(this).closest("tr").find("[name=files]").val("");
+					$(this).closest("tr").find(".displayfile").empty();
+					$(this).closest("tr").find("[name=remarks]").val("");
+					$(this).closest("tr").find("[name=quantity], [name=files], [name=remarks]").attr("disabled", "true");
 				} else {
-					$(this).closest("tr").find("[name=quantity], [name=files], [name=remarks]").removeAttr("disabled");
+					let oldQty = $(this).closest("tr").find("[name=quantity]").val();
+					oldQty = oldQty != 0 ? oldQty : 0;
+					$(this).closest("tr").find("[name=quantity]").val(oldQty);
+					
+					if ($(this).closest("tr").find("[name=quantity]").attr("ceID") == "true") {
+						$(this).closest("tr").find("[name=files], [name=remarks]").removeAttr("disabled");
+					} else {
+						$(this).closest("tr").find("[name=quantity], [name=files], [name=remarks]").removeAttr("disabled");
+					}
+	
+					const unitCost  = getInventoryPreferredPrice(itemID, this, true) || 0;
+					const quantity  = $(this).closest("tr").find("[name=quantity]").val();
+					const totalCost = quantity * unitCost;
+					$(this).closest("tr").find(`.unitcost`).text(formatAmount(unitCost, true));
+					$(this).closest("tr").find(".totalcost").text(formatAmount(totalCost, true));
+	
 				}
+				$(this).html(getInventoryItem(itemID, isProject));
+			}) 
+			updateTotalAmount(isProject);
+		} else {
+			$(`.btnAddRow${attr}`).attr("disabled", true);
+		}
 
-				const unitCost  = getInventoryPreferredPrice(itemID, this, true) || 0;
-				const quantity  = $(this).closest("tr").find("[name=quantity]").val();
-				const totalCost = quantity * unitCost;
-				$(this).closest("tr").find(`.unitcost`).text(formatAmount(unitCost, true));
-				$(this).closest("tr").find(".totalcost").text(formatAmount(totalCost, true));
-
-			}
-			$(this).html(getInventoryItem(itemID, isProject));
-		}) 
-		updateTotalAmount(isProject);
+		
     })
     // ----- END SELECT ITEM NAME -----
 
@@ -2329,10 +2340,10 @@ $(document).ready(function() {
 			</div>
 		</div>
 		<div class="modal-footer text-right">
-			<button class="btn btn-danger" id="btnRejectConfirmation"
+			<button type="button" class="btn btn-danger" id="btnRejectConfirmation"
 			purchaseRequestID="${id}"
 			code="${feedback}"><i class="far fa-times-circle"></i> Deny</button>
-			<button class="btn btn-cancel btnCancel px-5 p-2" data-dismiss="modal"><i class="fas fa-ban"></i> Cancel</button>
+			<button type="button" class="btn btn-cancel btnCancel px-5 p-2" data-dismiss="modal"><i class="fas fa-ban"></i> Cancel</button>
 		</div>`;
 		$("#modal_purchase_request_content").html(html);
 	});

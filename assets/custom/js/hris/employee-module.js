@@ -244,7 +244,7 @@ $(document).ready(function() {
                 class="rounded rounded-circle"
                 style="width: 50px;
                     height: 50px">`;
-            let address = `${employeeUnit ? titleCase(employeeUnit)+", " : ""}${titleCase(employeeBuilding) +", "}${titleCase(employeeStreet)+", "}${titleCase(employeeSubdivision)+", "}${titleCase(employeeBarangay)+", "}${titleCase(employeeCity)+", "}${titleCase(employeeProvince)+", "}${titleCase(employeeCountry)+", "}${titleCase(employeeZipCode)}`;
+            let address = `${employeeUnit ? titleCase(employeeUnit)+", " : ""}${titleCase(employeeBuilding) +" "}${titleCase(employeeStreet)+", "}${titleCase(employeeSubdivision)+", "}${titleCase(employeeBarangay)+", "}${titleCase(employeeCity)+", "}${titleCase(employeeProvince)+", "}${titleCase(employeeCountry)+", "}${titleCase(employeeZipCode)}`;
 
             html += `
             <tr class="btnEdit" id="${encryptString(employeeID)}">
@@ -1166,7 +1166,7 @@ $(document).ready(function() {
                                 <i class="fas fa-lock"></i></span>
                             </div>
                             <input type="password"
-                                class="form-control validate"
+                                class="form-control"
                                 name="employeeConfirmPassword"
                                 id="employeeConfirmPassword"
                                 data-allowcharacters="[a-z][A-Z][0-9][.][,][-][()]['][/][@][_][ ]"
@@ -1219,12 +1219,13 @@ $(document).ready(function() {
 	}
 
     $(document).on("change", "[name=bankID]", function() {
-		$("[name=employeeBankAccountNo]").val("");
+		$(`[name="employeeBankAccountNo"]`).val("");
 		const format = $('option:selected', this).attr("format");
 		const newFormat = applyBankFormat(format);
 		$("[name=employeeBankAccountNo]").attr("mask", newFormat);
 		$("[name=employeeBankAccountNo]").attr("minlength", newFormat.length);
 		$("[name=employeeBankAccountNo]").attr("maxlength", newFormat.length);
+        $(`[name="employeeBankAccountName"], [name="employeeBankAccountNo"]`).removeAttr("disabled");
 		initInputmask("employeeBankAccountNo");
 	})
     // ----- END BANK NAME OPTIONS -----
@@ -1336,7 +1337,8 @@ $(document).ready(function() {
                             data-allowcharacters="[a-z][A-Z][.][,][-][ ]"
                             minlength="2"
                             maxlength="50"
-                            value="${employeeBankAccountName ?? ""}">
+                            value="${employeeBankAccountName ?? ""}"
+                            ${bankID ? "" : "disabled"}>
                         <div class="invalid-feedback d-block" id="invalid-employeeBankAccountName"></div>
                     </div>
                 </div>
@@ -1344,13 +1346,14 @@ $(document).ready(function() {
                     <div class="form-group">
                         <label>Bank Account No.</label>
                         <input type="text"
-                            class="form-control validate"
+                            class="form-control inputmask"
                             name="employeeBankAccountNo"
                             id="employeeBankAccountNo"
                             data-allowcharacters="[0-9]"
                             minlength="2"
                             maxlength="50"
-                            value="${employeeBankAccountNo}">
+                            value="${employeeBankAccountNo}"
+                            ${bankID ? "" : "disabled"}>
                         <div class="invalid-feedback d-block" id="invalid-employeeBankAccountNo"></div>
                     </div>
                 </div>
@@ -1358,7 +1361,7 @@ $(document).ready(function() {
                     <div class="form-group">
                         <label>Tax Identification No.</label>
                         <input type="text"
-                            class="form-control validate inputmask"
+                            class="form-control inputmask"
                             mask="999-999-999"
                             name="employeeTIN"
                             id="employeeTIN"
@@ -1374,7 +1377,7 @@ $(document).ready(function() {
                     <div class="form-group">
                         <label>SSS No.</label>
                         <input type="text"
-                            class="form-control validate inputmask"
+                            class="form-control inputmask"
                             mask="99-9999999-9"
                             name="employeeSSS"
                             id="employeeSSS"
@@ -1390,7 +1393,7 @@ $(document).ready(function() {
                     <div class="form-group">
                         <label>PhilHealth No.</label>
                         <input type="text"
-                            class="form-control validate inputmask"
+                            class="form-control inputmask"
                             mask="99-999999999-9"
                             name="employeePhilHealth"
                             id="employeePhilHealth"
@@ -1406,7 +1409,7 @@ $(document).ready(function() {
                     <div class="form-group">
                         <label>Pag-IBIG MID No.</label>
                         <input type="text"
-                            class="form-control validate inputmask"
+                            class="form-control inputmask"
                             mask="9999-9999-9999"
                             name="employeePagibig"
                             id="employeePagibig"
