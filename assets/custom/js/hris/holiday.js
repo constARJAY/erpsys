@@ -154,7 +154,7 @@ $(document).on("click",".editHoliday", function(){
                                             <div class="modal-footer">
                                                 <button class="btn btn-update px-5 p-2" id="btnUpdate" data-holidayid="${tableData[0]["holidayID"]}"><i class="fas fa-save"></i>&nbsp;Update</button>
                                                 <button class="btn btn-cancel btnCancel px-5 p-2" ><i class="fas fa-ban"></i>&nbsp;
-                                                CANCEL</button>
+                                                Cancel</button>
                                             </div>
                                             `;
     setTimeout(function(){

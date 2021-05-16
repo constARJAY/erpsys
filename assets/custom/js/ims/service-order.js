@@ -1441,7 +1441,7 @@ $(document).ready(function() {
 		setTimeout(() => {
 			$(`#tableServiceDisplay`).html(services);
 			initDataTables();
-			initAll();
+			// initAll();
 			updateTableItems();
 			updateServiceOptions();
 			initAmount("#discount", true);

@@ -149,15 +149,13 @@ $(document).ready(function() {
 				columnDefs: [
 					{ targets: 0,  width: 100 },
 					{ targets: 1,  width: 150 },
-					{ targets: 2,  width: 150 },
+					{ targets: 2,  width: 350 },
 					{ targets: 3,  width: 150 },	
-					{ targets: 4,  width: 150 },
+					{ targets: 4,  width: 200 },
 					{ targets: 5,  width: 200 },
 					{ targets: 6,  width: 200 },
-					{ targets: 7,  width: 200 },
-					{ targets: 8,  width: 80  },
-					{ targets: 9, width: 250 },
-					{ targets: 10, width: 80  },
+					{ targets: 7,  width: 80 },
+					{ targets: 8,  width: 250  },
 				],
 			});
 
@@ -173,15 +171,13 @@ $(document).ready(function() {
 				columnDefs: [
 					{ targets: 0,  width: 100 },
 					{ targets: 1,  width: 150 },
-					{ targets: 2,  width: 150 },
-					{ targets: 3,  width: 150 },
-					{ targets: 4,  width: 150 },
+					{ targets: 2,  width: 350 },
+					{ targets: 3,  width: 150 },	
+					{ targets: 4,  width: 200 },
 					{ targets: 5,  width: 200 },
 					{ targets: 6,  width: 200 },
-					{ targets: 7,  width: 200 },
-					{ targets: 8,  width: 80  },
-					{ targets: 9, width: 250 },
-					{ targets: 10, width: 80  },
+					{ targets: 7,  width: 80 },
+					{ targets: 8,  width: 250  },
 				],
 			});
 
@@ -404,17 +400,15 @@ $(document).ready(function() {
         <table class="table table-bordered table-striped table-hover" id="tableForApprroval">
             <thead>
                 <tr style="white-space: nowrap">
-                    <th>Document No.</th>
-                    <th>Employee Name</th>
-                    <th>Project Code</th>
-                    <th>Project Name</th>
-                    <th>Current Approver</th>
-                    <th>Date Created</th>
-                    <th>Date Submitted</th>
-                    <th>Date Approved</th>
-                    <th>Status</th>
-                    <th>Remarks</th>
-                    <th>Action</th>
+					<th>Document No.</th>
+					<th>Employee Name</th>
+					<th>Project Name</th>
+					<th>Current Approver</th>
+					<th>Date Created</th>
+					<th>Date Submitted</th>
+					<th>Date Approved</th>
+					<th>Status</th>
+					<th>Remarks</th>
                 </tr>
             </thead>
             <tbody>`;
@@ -442,6 +436,8 @@ $(document).ready(function() {
 				dateApproved = moment(dateApproved[dateApproved.length - 1]).format("MMMM DD, YYYY hh:mm:ss A");
 			}
 
+			let btnClass = costEstimateStatus != 0 ? "btnView" : "btnEdit";
+
 			let button = costEstimateStatus != 0 ? `
 			<button class="btn btn-view w-100 btnView" id="${encryptString(costEstimateID )}"><i class="fas fa-eye"></i> View</button>` : `
 			<button 
@@ -451,11 +447,15 @@ $(document).ready(function() {
 
 			if (isImCurrentApprover(approversID, approversDate, costEstimateStatus) || isAlreadyApproved(approversID, approversDate)) {
 				html += `
-				<tr>
+				<tr class="${btnClass}" id="${encryptString(costEstimateID )}">
 					<td>${getFormCode("CEF", createdAt, costEstimateID )}</td>
 					<td>${fullname}</td>
-					<td>${projectListCode || '-'}</td>
-					<td>${projectListName || '-'}</td>
+					<td>
+						<div>
+						${projectListName || '-'}
+						</div>
+						<small style="color:#848482;">${projectListCode || '-'}</small>
+					</td>
 					<td>
 						${employeeFullname(getCurrentApprover(approversID, approversDate, costEstimateStatus, true))}
 					</td>
@@ -466,9 +466,6 @@ $(document).ready(function() {
 						${getStatusStyle(costEstimateStatus)}
 					</td>
 					<td>${remarks}</td>
-					<td class="text-center">
-						${button}
-					</td>
 				</tr>`;
 			}
 		});
@@ -495,22 +492,19 @@ $(document).ready(function() {
 			`imrt.employeeID = ${sessionID}`,
 			`FIELD(costEstimateStatus, 0, 1, 3, 2, 4), COALESCE(imrt.submittedAt, imrt.createdAt)`
 		);
-
 		let html = `
         <table class="table table-bordered table-striped table-hover" id="tableMyForms">
             <thead>
                 <tr style="white-space: nowrap">
-                    <th>Document No.</th>
-                    <th>Employee Name</th>
-                    <th>Project Code</th>
-                    <th>Project Name</th>
-                    <th>Current Approver</th>
-                    <th>Date Created</th>
-                    <th>Date Submitted</th>
-                    <th>Date Approved</th>
-                    <th>Status</th>
-                    <th>Remarks</th>
-                    <th>Action</th>
+					<th>Document No.</th>
+					<th>Employee Name</th>
+					<th>Project Name</th>
+					<th>Current Approver</th>
+					<th>Date Created</th>
+					<th>Date Submitted</th>
+					<th>Date Approved</th>
+					<th>Status</th>
+					<th>Remarks</th>
                 </tr>
             </thead>
             <tbody>`;
@@ -538,6 +532,8 @@ $(document).ready(function() {
 				dateApproved = moment(dateApproved[dateApproved.length - 1]).format("MMMM DD, YYYY hh:mm:ss A");
 			}
 
+			let btnClass = costEstimateStatus != 0 ? "btnView" : "btnEdit";
+
 			let button = costEstimateStatus != 0 ? `
             <button class="btn btn-view w-100 btnView" id="${encryptString(costEstimateID )}"><i class="fas fa-eye"></i> View</button>` : `
             <button 
@@ -546,25 +542,26 @@ $(document).ready(function() {
                 code="${getFormCode("CEF", createdAt, costEstimateID )}"><i class="fas fa-edit"></i> Edit</button>`;
 
 			html += `
-            <tr>
-                <td>${getFormCode("CEF", createdAt, costEstimateID )}</td>
-                <td>${fullname}</td>
-                <td>${projectListCode || '-'}</td>
-                <td>${projectListName || '-'}</td>
-                <td>
-                    ${employeeFullname(getCurrentApprover(approversID, approversDate, costEstimateStatus, true))}
-                </td>
+			<tr class="${btnClass}" id="${encryptString(costEstimateID )}">
+				<td>${getFormCode("CEF", createdAt, costEstimateID )}</td>
+				<td>${fullname}</td>
+				<td>
+					<div>
+					${projectListName || '-'}
+					</div>
+					<small style="color:#848482;">${projectListCode || '-'}</small>
+				</td>
+				<td>
+					${employeeFullname(getCurrentApprover(approversID, approversDate, costEstimateStatus, true))}
+				</td>
 				<td>${dateCreated}</td>
 				<td>${dateSubmitted}</td>
 				<td>${dateApproved}</td>
-                <td class="text-center">
-                    ${getStatusStyle(costEstimateStatus)}
-                </td>
+				<td class="text-center">
+					${getStatusStyle(costEstimateStatus)}
+				</td>
 				<td>${remarks}</td>
-                <td class="text-center">
-                    ${button}
-                </td>
-            </tr>`;
+			</tr>`;
 		});
 
 		html += `
@@ -599,7 +596,7 @@ $(document).ready(function() {
 					// DRAFT
 					button = `
 					<button 
-						class="btn btn-submit" 
+						class="btn btn-submit px-5 p-2" 
 						id="btnSubmit" 
 						costEstimateID="${costEstimateID}"
 						code="${getFormCode("CEF", createdAt, costEstimateID)}"
@@ -610,7 +607,7 @@ $(document).ready(function() {
 					if (isRevise) {
 						button += `
 						<button 
-							class="btn btn-cancel" 
+							class="btn btn-cancel px-5 p-2" 
 							id="btnCancel"
 							revise="${isRevise}"><i class="fas fa-ban"></i> 
 							Cancel
@@ -618,7 +615,7 @@ $(document).ready(function() {
 					} else {
 						button += `
 						<button 
-							class="btn btn-cancel"
+							class="btn btn-cancel px-5 p-2"
 							id="btnCancelForm" 
 							costEstimateID="${costEstimateID}"
 							code="${getFormCode("CEF", createdAt, costEstimateID)}"
@@ -633,7 +630,7 @@ $(document).ready(function() {
 					if (!isOngoing) {
 						button = `
 						<button 
-							class="btn btn-cancel"
+							class="btn btn-cancel px-5 p-2"
 							id="btnCancelForm" 
 							costEstimateID="${costEstimateID}"
 							code="${getFormCode("CEF", createdAt, costEstimateID)}"
@@ -647,7 +644,7 @@ $(document).ready(function() {
 					if(!isRevised(costEstimateID)){
 						button = `
 						<button
-							class="btn btn-cancel"
+							class="btn btn-cancel px-5 p-2"
 							id="btnRevise" 
 							costEstimateID="${encryptString(costEstimateID)}"
 							code="${getFormCode("CEF", createdAt, costEstimateID)}"
@@ -662,14 +659,14 @@ $(document).ready(function() {
 					if (isImCurrentApprover(approversID, approversDate)) {
 						button = `
 						<button 
-							class="btn btn-submit" 
+							class="btn btn-submit px-5 p-2" 
 							id="btnApprove" 
 							costEstimateID="${encryptString(costEstimateID)}"
 							code="${getFormCode("CEF", createdAt, costEstimateID)}"><i class="fas fa-paper-plane"></i>
 							Approve
 						</button>
 						<button 
-							class="btn btn-cancel"
+							class="btn btn-cancel px-5 p-2"
 							id="btnReject" 
 							costEstimateID="${encryptString(costEstimateID)}"
 							code="${getFormCode("CEF", createdAt, costEstimateID)}"><i class="fas fa-ban"></i> 
@@ -681,11 +678,11 @@ $(document).ready(function() {
 		} else {
 			button = `
 			<button 
-				class="btn btn-submit" 
+				class="btn btn-submit px-5 p-2" 
 				id="btnSubmit"><i class="fas fa-paper-plane"></i> Submit
 			</button>
 			<button 
-				class="btn btn-cancel" 
+				class="btn btn-cancel px-5 p-2" 
 				id="btnCancel"><i class="fas fa-ban"></i> 
 				Cancel
 			</button>`;
@@ -699,7 +696,7 @@ $(document).ready(function() {
     function getProjectList(id = null, display = true) {
 		let html =``;
         html += projectList.map(project => {
-			let address = `${project.clientUnitNumber && titleCase(project.clientUnitNumber)+", "}${project.clientHouseNumber && project.clientHouseNumber +", "}${project.clientBarangay && titleCase(project.clientBarangay)+", "}${project.clientCity && titleCase(project.clientCity)+", "}${project.clientProvince && titleCase(project.clientProvince)+", "}${project.clientCountry && titleCase(project.clientCountry)+", "}${project.clientPostalCode && titleCase(project.clientPostalCode)}`;
+			let address = `${project.clientUnitNumber && titleCase(project.clientUnitNumber)+" "}${project.clientHouseNumber && project.clientHouseNumber +" "}${project.clientBarangay && titleCase(project.clientBarangay)+", "}${project.clientCity && titleCase(project.clientCity)+", "}${project.clientProvince && titleCase(project.clientProvince)+", "}${project.clientCountry && titleCase(project.clientCountry)+", "}${project.clientPostalCode && titleCase(project.clientPostalCode)}`;
 
             return `
             <option 
@@ -780,12 +777,13 @@ $(document).ready(function() {
 			case "project":
 					attr = "[project=true]";
 					html += `<option selected disabled>Select Item Name</option>`;
-					html += `<option value="-" ${id == "-" ? "selected":""}>None</option>`;
 					 // 0 IS THE DEFAULT VALUE
 					$(`[name=itemID]${attr}`).each(function(i, obj) {
 						itemIDArr.push($(this).val());
 					}) 
-
+					if( id === "-" || !itemIDArr.find(items=> items === "-" )){ 
+						html += `<option value="-" ${id == "-" ? "selected":""}>None</option>`;
+					}
 					html += inventoryItemList.filter(item => !itemIDArr.includes(item.itemID) || item.itemID == id).map(item => {
 						// console.log("project"+id+"|"+item.itemID);
 						return `
@@ -803,10 +801,12 @@ $(document).ready(function() {
 			case "company":
 					attr = "[company=true]"
 					html += `<option selected disabled>Select Item Name</option>`;
-					html += `<option value="-" ${id == "-" && "selected"}>None</option>`;
 					$(`[name=itemID]${attr}`).each(function(i, obj) {
 						itemIDArr.push($(this).val());
 					}) 
+					if( id === "-" || !itemIDArr.find(items=> items === "-" )){ 
+						html += `<option value="-" ${id == "-" ? "selected":""}>None</option>`;
+					}
 					html += inventoryItemList.filter(item => !itemIDArr.includes(item.itemID) || item.itemID == id).map(item => {
 						// console.log("company"+id);
 						return `
@@ -826,9 +826,12 @@ $(document).ready(function() {
 					
 					$(`[name=designationID]${attr}`).each(function(i, obj) {
 						itemIDArr.push($(this).val());
-					}) 
-					html += `<option value="none" ${id === "none" && "selected"}>None</option>`;
-					html += designationList.filter(item => !itemIDArr.includes(item.designationID) || item.designationID == id).map(item => {
+					});
+					if( id === "none" || !itemIDArr.find(items=> items === "none" )){ 
+						html += `<option value="none" ${id === "none" && "selected"}>None</option>`;
+					}
+					
+					html += designationList.filter(item => item.designationID == id || !itemIDArr.includes(item.designationID) ).map(item => {
 						return `
 						<option 
 							value        	= "${item.designationID}" 
@@ -900,6 +903,7 @@ $(document).ready(function() {
 			// QUANTITY
 			$("td .quantity [name=quantity]", this).attr("id", `projectQuantity${i}`);
 			$("td .quantity [name=quantity]", this).attr("project", `true`);
+			$("td .quantity [name=quantity]", this).next().attr("id", `invalid-projectQuantity${i}`);
 			
 			// UOM
 			$("td .uom", this).attr("id", `uom${i}`);
@@ -934,6 +938,7 @@ $(document).ready(function() {
 			// QUANTITY
 			$("td .quantity [name=quantity]", this).attr("id", `companyQuantity${i}`);
 			$("td .quantity [name=quantity]", this).attr("company", `true`);
+			$("td .quantity [name=quantity]", this).next().attr("id", `invalid-companyQuantity${i}`);
 			
 			// UOM
 			$("td .uom", this).attr("id", `uom${i}`);
@@ -968,12 +973,13 @@ $(document).ready(function() {
 			// QUANTITY
 			$("td .quantity [name=quantity]", this).attr("id", `personnelQuantity${i}`);
 			$("td .quantity [name=quantity]", this).attr("personnel", `true`);
-			$("td .quantity [name=quantity]", this).next().attr("id", `personnelQuantity${i}`);
+			$("td .quantity [name=quantity]", this).next().attr("id", `invalid-personnelQuantity${i}`);
 			
 			// TOTAL HOURS
 			$("td .totalhours [name=employeeTotalHours]", this).attr("id", `employeeTotalHours${i}`);
 			$("td .totalhours [name=employeeTotalHours]", this).attr("personnel", `true`);
-			$("td .totalhours [name=employeeTotalHours]", this).next().attr("id", `employeeTotalHours${i}`);
+			$("td .totalhours [name=employeeTotalHours]", this).next().attr("id", `invalid-employeeTotalHours${i}`);
+			
 		})
 
 		$(".travelTableBody tr").each(function(i) {
@@ -1020,12 +1026,29 @@ $(document).ready(function() {
 						];
 		thisArray.map(items=>{
 			var splitItems = items.split("|");
-			 splitItems[1] = 0;
+			 	splitItems[1] = 0;
+			var existNone  = 0;
+			
 			$(".checkboxrow"+splitItems[0]).each(function() {
 				this.checked && splitItems[1]++;
-			})
+			});
 			$(".btnDeleteRow"+splitItems[0]).attr("disabled", splitItems[1] == 0);
+
+			if(splitItems[0]!="[travel=true]"){
+				var optionName = splitItems[0] == "[personnel=true]" ? "designationID" : "itemID";
+				$(`[name=${optionName}]`+splitItems[0]).each(function(){
+					this.value == "none" || this.value == "-" ? existNone += 1 : "";
+				});
+				$(".btnAddRow"+splitItems[0]).attr("disabled", existNone > 0);
+			}else{
+				$(`[name=description][travel=true]`).each(function(){
+					var eachValue = this.value.toLowerCase();
+					eachValue == "none" || eachValue == "n/a" ? existNone += 1 : "";
+				});
+				$(".btnAddRow[travel=true]").attr("disabled",existNone > 0);
+			}
 		});
+		
 	}
 	// ----- END UPDATE DELETE BUTTON -----
 
@@ -1120,13 +1143,82 @@ $(document).ready(function() {
 			let itemID = $(this).val();
 			$(this).html(getInventoryItem(itemID, param));
 		});
-		$(this).closest("tr").find(`.itemcode`).first().text(itemCode);
-		$(this).closest("tr").find(`.category`).first().text(categoryName);
-		$(this).closest("tr").find(`.uom`).first().text(uom);
-
+		
+		setTimeout(() => {
+			$(this).closest("tr").find(`.itemcode`).first().text(itemCode);
+			$(this).closest("tr").find(`.category`).first().text(categoryName);
+			$(this).closest("tr").find(`.uom`).first().text(uom);
+		}, 150);
 		
     })
     // ----- END SELECT ITEM NAME -----
+
+	// ----- SELECT NONE  -----
+	$(document).on("change",".select2",function(){
+		var thisTr 	  	= $(this).closest("tr");
+		var properties 	= thisTr.find(`input[type=text]`);
+		if(this.value == "none" || this.value == "-"){
+			
+			properties.prop("disabled", true);
+			properties.prop("required", false);
+		}else{
+			var properties 	= thisTr.find(`input[type=text]`);
+			properties.prop("disabled", false);
+			properties.prop("required", true);
+		}
+
+		let thisArray = ["itemID|[project=true]|projectCount",
+		"itemID|[company=true]|companyCount",
+		"designationID|[personnel=true]|personnelCount"];
+		thisArray.map(items=>{
+			let arraySplit 		= items.split("|");
+			let optionName 		= arraySplit[0];
+			let optionAttr 		= arraySplit[1];
+			if(optionAttr == "[personnel=true]"){
+				thisTr.find(`.designationcode`).first().text("-");
+				thisTr.find(`[name=quantity]`).first().val("");
+				thisTr.find(`[name=employeeTotalHours]`).first().val("");
+			}else{
+				thisTr.find(`.itemcode`).first().text("-");
+				thisTr.find(`[name=quantity]`).first().val("");
+			}
+			arraySplit[2] = 0;
+			$(`[name=${optionName}]`+optionAttr).each(function(){
+				this.value == "none" || this.value == "-" ? arraySplit[2] += 1 : "";
+			});
+			// console.log(optionAttr+"|"+arraySplit[2]);
+			$(".btnAddRow"+optionAttr).attr("disabled",arraySplit[2] > 0);
+		});
+	});
+	// ----- END SELECT NONE  -----
+	// ----- TEXTAREA NONE -----
+	$(document).on("keyup","[name=description]",function(){
+		let thisValue 	= this.value;
+		let thisUniform = thisValue.toLowerCase();
+		let existNone = 0;
+		var properties 	= $(this).closest(`tr`).find(`input[type=text], select`); 
+		if(thisUniform == "none" || thisUniform == "n/a"){
+			properties.prop("disabled", true);
+			properties.prop("required", false);
+			$(this).closest(`tr`).find(`input[type=text]`).val("");
+			$(this).closest(`tr`).find(`select`).val("none").trigger("change");
+		}else{
+			properties.prop("disabled", false);
+			properties.prop("required", true);
+			$(this).closest(`tr`).find(`select`).prop("required", false);
+			$(this).closest(`tr`).find(`select`).val("").trigger("change");
+			
+		}
+
+		$(`[name=description][travel=true]`).each(function(){
+			var eachValue = this.value.toLowerCase();
+			eachValue == "none" || eachValue == "n/a" ? existNone += 1 : "";
+		});
+		$(this).closest(`tr`).find(`select`).prop("required", true);
+		$(".btnAddRow[travel=true]").attr("disabled",existNone > 0);
+		
+	});
+	// ----- TEXTAREA NONE -----
 
 	// SELECT DESIGNATION NAME
 	$(document).on("change","[name=designationID]", function(){
@@ -1136,6 +1228,7 @@ $(document).ready(function() {
 			let itemID = $(this).val();
 			$(this).html(getInventoryItem(itemID, "personnel"));
 		});
+
 		$(this).closest("tr").find(`.designationcode`).first().text(thisValue!=0?designationCode:"-");
 	});
 	// END SELECT DESIGNATION NAME
@@ -1276,7 +1369,7 @@ $(document).ready(function() {
 			let requestProjectItemsData = getTableData(
 				`ims_request_items_tbl LEFT JOIN ims_inventory_item_tbl USING(itemID)`, 
 				`quantity, unitCost, totalCost, files, remarks, itemID, itemCode, ims_inventory_item_tbl.itemName as itemName, unitOfMeasurementID, categoryType`, 
-				`costEstimateID = ${costEstimateID} AND categoryType = 'project'`);
+				`costEstimateID = ${costEstimateID} AND categoryType = 'project' AND inventoryValidationID IS NULL AND billMaterialID IS NULL AND purchaseRequestID IS NULL AND purchaseOrderID IS NULL AND bidRecapID IS NULL`);
 			
 			requestProjectItemsData.map(item => {
 				requestProjectItems += getItemRow("project", item, readOnly);
@@ -1285,14 +1378,14 @@ $(document).ready(function() {
 			let requestCompanyItemsData = getTableData(
 				`ims_request_items_tbl LEFT JOIN ims_inventory_item_tbl USING(itemID)`, 
 				`quantity, unitCost, totalCost, files, remarks, itemID, itemCode, ims_inventory_item_tbl.itemName as itemName, unitOfMeasurementID, categoryType`, 
-				`costEstimateID = '${costEstimateID}' AND categoryType = 'company' `);
+				`costEstimateID = '${costEstimateID}' AND categoryType = 'company' AND inventoryValidationID IS NULL AND billMaterialID IS NULL AND purchaseRequestID IS NULL AND purchaseOrderID IS NULL AND bidRecapID IS NULL`);
 			
 			requestCompanyItemsData.map(item => {
 				requestCompanyItems += getItemRow("company", item, readOnly);
 			})
 
 			let requestDesignationData = getTableData(`hris_designation_tbl JOIN hris_personnel_request_tbl USING(designationID)`,
-										`hris_personnel_request_tbl.designationID AS designationID ,hris_designation_tbl.designationName AS designationName,designationTotalHours,quantity`,`costEstimateID = ${costEstimateID}`);
+										`hris_personnel_request_tbl.designationID AS designationID ,hris_designation_tbl.designationName AS designationName,designationTotalHours,quantity`,`costEstimateID = ${costEstimateID} AND billMaterialID IS NULL`);
 			if(requestDesignationData.length < 1){
 				requestPersonnel 	+= getItemRow("personnel",requestDesignationData[0],readOnly);
 			}
@@ -1302,7 +1395,7 @@ $(document).ready(function() {
 
 			let requestTravelData = getTableData(`ims_travel_request_tbl`,
 										`travelDescription,unitOfMeasure,quantity`,
-										`costEstimateID = ${costEstimateID}`)
+										`costEstimateID = ${costEstimateID} AND billMaterialID IS NULL`)
 			requestTravelData.map(item => {
 				requestTravel += getItemRow("travel", item, readOnly);
 			})
@@ -1807,10 +1900,10 @@ $(document).ready(function() {
 					filename  		= file ? file?.name : "";
 				}else{
 						if($(this).closest("tbody").attr("personnel") == "true"){
-							designationID 			= designationID ? $("td [name=designationID]", this).val() : 0;
-							console.log(designationID);
-							var designationListData = designationID ? designationList.filter(items=> items.designationID == designationID) : "";
-							designationName 		= designationID ? designationListData[0].designationName : "-";
+							designationID 			= $("td [name=designationID]", this).val() || 0;
+							console.log($("td [name=designationID]", this).val());
+							var designationListData = (designationID != 0 && designationID != "none" ) ? designationList.filter(items=> items.designationID == designationID) : "";
+							designationName 		= (designationID != 0 && designationID != "none" ) ? designationListData[0].designationName : "-";
 							designationTotalHours	= $("td [name=employeeTotalHours]", this).val();
 						}else{
 							travelDescription = $("td [name=description]", this).val();
@@ -1886,7 +1979,7 @@ $(document).ready(function() {
 
     // ----- VIEW DOCUMENT -----
 	$(document).on("click", "#btnRevise", function () {
-		const id = $(this).attr("costEstimateID");
+		const id = $(this).attr("costestimateid");
 		viewDocument(id, false, true);
 	});
 	// ----- END VIEW DOCUMENT -----
@@ -1894,7 +1987,7 @@ $(document).ready(function() {
 
 	// ----- SAVE CLOSE FORM -----
 	$(document).on("click", "#btnBack", function () {
-		const id         = $(this).attr("costEstimateID");
+		const id         = $(this).attr("costestimateid");
 		const revise     = $(this).attr("revise") == "true";
 		const employeeID = $(this).attr("employeeID");
 		const feedback   = $(this).attr("code") || getFormCode("CEF", dateToday(), id);
@@ -1932,7 +2025,7 @@ $(document).ready(function() {
 
     // ----- SAVE DOCUMENT -----
 	$(document).on("click", "#btnSave, #btnCancel", function () {
-		const id       = $(this).attr("costEstimateID");
+		const id       = $(this).attr("costestimateid");
 		const revise   = $(this).attr("revise") == "true";
 		const feedback = $(this).attr("code") || getFormCode("CEF", dateToday(), id);
 		const action   = revise && "insert" || (id && feedback ? "update" : "insert");
@@ -1958,7 +2051,7 @@ $(document).ready(function() {
 
     // ----- SUBMIT DOCUMENT -----
 	$(document).on("click", "#btnSubmit", function () {
-		const id           = $(this).attr("costEstimateID");
+		const id           = $(this).attr("costestimateid");
 		const revise       = $(this).attr("revise") == "true";
 		const validate     = validateForm("form_cost_estimate");
 		
@@ -2001,7 +2094,7 @@ $(document).ready(function() {
 
     // ----- CANCEL DOCUMENT -----
 	$(document).on("click", "#btnCancelForm", function () {
-		const id     = $(this).attr("costEstimateID");
+		const id     = $(this).attr("costestimateid");
 		const status = $(this).attr("status");
 		const action = "update";
 		const data   = getcostEstimateData(action, "cancelform", "4", id, status);
@@ -2068,7 +2161,7 @@ $(document).ready(function() {
 
     // ----- REJECT DOCUMENT -----
 	$(document).on("click", "#btnReject", function () {
-		const id       = $(this).attr("costEstimateID");
+		const id       = $(this).attr("costestimateid");
 		const feedback = $(this).attr("code") || getFormCode("CEF", dateToday(), id);
 
 		$("#modal_cost_estimate_content").html(preloader);
@@ -2094,7 +2187,7 @@ $(document).ready(function() {
 			<button class="btn btn-danger" id="btnRejectConfirmation"
 			costEstimateID="${id}"
 			code="${feedback}"><i class="far fa-times-circle"></i> Deny</button>
-			<button class="btn btn-cancel" data-dismiss="modal"><i class="fas fa-ban"></i> Cancel</button>
+			<button class="btn btn-cancel px-5 p-2" data-dismiss="modal"><i class="fas fa-ban"></i> Cancel</button>
 		</div>`;
 		$("#modal_cost_estimate_content").html(html);
 	});
@@ -2277,7 +2370,7 @@ $(document).ready(function() {
 							value="${quantity}"
 							min="0.00" 
 							minlength="1" 
-							maxlength="20">
+							maxlength="20" required>
 						<div class="invalid-feedback d-block" id="invalid-projectQuantity"></div>
 					</div>
 				</td>
@@ -2432,7 +2525,7 @@ $(document).ready(function() {
 			<tr class="itemTableRow">
 				<td>
 					<div class="itemcode">
-						${designationID > 1 ? getFormCode("DSN",moment(),designationID) : "-"}
+						${designationID > 0 ? getFormCode("DSN",moment(),designationID) : "-"}
 					</div>
 				</td>
 				<td>
@@ -2482,11 +2575,12 @@ $(document).ready(function() {
 					<div class="quantity">
 						<input 
 							type="text" 
-							class="form-control text-center amount"
-							data-allowcharacters="[0-9][.]" 
-							min="0.00"
+							class="form-control validate text-center"
+							data-allowcharacters="[0-9]"
+							placeholder="0" 
+							min="0"
 							max="999999999" 
-							id="personnelQuantity" 
+							id="personnelQuantity"         
 							name="quantity" 
 							value="${quantity}"
 							minlength="1" 
@@ -2507,7 +2601,7 @@ $(document).ready(function() {
 							placeholder="0.0"
 							value="${designationTotalHours}" 
 							minlength="1" 
-							maxlength="5">
+							maxlength="5" required>
 						<div class="invalid-feedback d-block" id="invalid-employeeTotalHours"></div>
 					</div>
 				</td>
@@ -2604,14 +2698,11 @@ $(document).ready(function() {
 	function isRevised(id = null){
 		let revised = false;
 		var tableData = getTableData("pms_cost_estimate_tbl","reviseCostEstimateID",`reviseCostEstimateID=`+id);
+		console.log(tableData);
 		revised = tableData.length > 0 ? true : false;
 		return revised; 
 	}
 	// END CHECK IF THE DOCUMENT IS ALREADY REVISED
-
-
-
-
 
 
 
@@ -2647,7 +2738,7 @@ function getConfirmation(method = "submit") {
 			swalImg   = `${base_url}assets/modal/reject.svg`;
 			break;
 		case "cancelform":
-			swalTitle = `CANCEL ${title.toUpperCase()} DOCUMENT`;
+			swalTitle = `CANCEL ${title.toUpperCase()}`;
 			swalText  = "Are you sure to cancel this document?";
 			swalImg   = `${base_url}assets/modal/cancel.svg`;
 			break;

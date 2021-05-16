@@ -21,18 +21,13 @@ class PurchaseRequest_model extends CI_Model {
 
     public function updateRequestItemsBrandName($purchaseRequestID = null)
     {
-        $sql = "
-        SELECT 
-            * 
-        FROM 
-            ims_request_items_tbl 
-        WHERE 
-            purchaseRequestID = $purchaseRequestID AND
-            inventoryValidationID IS NULL AND
-            purchaseOrderID IS NULL AND 
-            bidRecapID IS NULL AND
-            itemID IS NOT NULL";
-        $queryGetRequestItems = $this->db->query($sql);
+        $where = [
+            "inventoryValidationID" => null,
+            "purchaseRequestID"     => $purchaseRequestID,
+            "purchaseOrderID"       => null,
+            "bidRecapID"            => null
+        ];
+        $queryGetRequestItems = $this->db->get_where("ims_request_items_tbl", $where);
         if ($queryGetRequestItems) {
             $items = $queryGetRequestItems->result_array();
             foreach ($items as $item) {

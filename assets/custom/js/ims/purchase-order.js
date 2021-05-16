@@ -723,7 +723,7 @@ $(document).ready(function() {
 
 	// ----- GET INVENTORY VENDOR ON BID RECAP -----
 	function getInventoryVendorOnBidRecap(bidRecapID = null, invVendorID = null) {
-		let html = `<option selected disabled>Select Vendor Code</option>`;
+		let html = `<option selected disabled>Select Vendor Name</option>`;
 		if (bidRecapID) {
 			let vendorTable = getTableData(
 				`ims_request_items_tbl AS irit
@@ -2271,7 +2271,7 @@ $(document).ready(function() {
 			</div>
 			<div class="col-md-4 col-sm-12">
 				<div class="form-group">
-					<label>Vendor Code ${!disabledVendorCode ? "<code>*</code>" : ""}</label>
+					<label>Vendor Name ${!disabledVendorCode ? "<code>*</code>" : ""}</label>
 					<select class="form-control validate select2"
 						name="inventoryVendorID"
 						id="inventoryVendorID"

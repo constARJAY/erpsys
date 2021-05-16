@@ -213,8 +213,8 @@ $(document).ready(function() {
 					{ targets: 1,  width: 150 },
 					{ targets: 2,  width: 80 },
 					{ targets: 3,  width: 80  },
-					{ targets: 4,  width: 100  },
-                    { targets: 5,  width: 100  }
+					{ targets: 4,  width: 120  },
+                    { targets: 5,  width: 120  }
 				],
 			});
 
@@ -237,8 +237,8 @@ $(document).ready(function() {
 					{ targets: 1,  width: 150 },
 					{ targets: 2,  width: 80 },
 					{ targets: 3,  width: 80  },
-					{ targets: 4,  width: 100  },
-                    { targets: 5,  width: 100  }
+					{ targets: 4,  width: 120  },
+                    { targets: 5,  width: 120  }
 				],
 			});
 
@@ -260,8 +260,8 @@ $(document).ready(function() {
 					{ targets: 1,  width: 150 },
 					{ targets: 2,  width: 80 },
 					{ targets: 3,  width: 80  },
-					{ targets: 4,  width: 100  },
-                    { targets: 5,  width: 100  }
+					{ targets: 4,  width: 120  },
+                    { targets: 5,  width: 120  }
 				],
 			});
 			var table = $("#tableProjectRequestItems0")
@@ -282,8 +282,8 @@ $(document).ready(function() {
 					{ targets: 1,  width: 150 },
 					{ targets: 2,  width: 80 },
 					{ targets: 3,  width: 80  },
-					{ targets: 4,  width: 100  },
-                    { targets: 5,  width: 100  }
+					{ targets: 4,  width: 120  },
+                    { targets: 5,  width: 120  }
 				],
 			});
 
@@ -305,8 +305,8 @@ $(document).ready(function() {
 					{ targets: 1,  width: 150 },
 					{ targets: 2,  width: 80 },
 					{ targets: 3,  width: 80  },
-					{ targets: 4,  width: 100  },
-                    { targets: 5,  width: 100  }
+					{ targets: 4,  width: 120  },
+                    { targets: 5,  width: 120  }
 				],
 			});
 
@@ -351,8 +351,8 @@ $(document).ready(function() {
 					{ targets: 1,  width: 150 },
 					{ targets: 2,  width: 80  },
 					{ targets: 3,  width: 80  },
-                    { targets: 4,  width: 100 },
-                    { targets: 5,  width: 100 }
+                    { targets: 4,  width: 120 },
+                    { targets: 5,  width: 120 }
 				],
 			});
 
@@ -370,8 +370,8 @@ $(document).ready(function() {
 					{ targets: 0,  width: 150 },
 					{ targets: 1,  width: 80  },
 					{ targets: 2,  width: 80  },
-                    { targets: 3,  width: 100 },
-                    { targets: 4,  width: 100 }
+                    { targets: 3,  width: 120 },
+                    { targets: 4,  width: 120 }
 				],
 			});
 	}
@@ -1060,18 +1060,21 @@ $(document).ready(function() {
 			$(".travel.totalQty").text(totalQty || "-");
 			$(".travel.totalUnitPrice").text(formatAmount(totalUnitPrice,true));
 			$(".travel.grandTotal").text(formatAmount(grandTotal,true));
-		
-		
-
+			setTimeout(() => {
+				billMaterialGrandTotal();
+			}, 150);
 	}
 	// ----- END UPDATING TRAVEL TOTALS
 
 	// ----- UPDATING TABLES TOTALS
-	function grandTotal(){
+	function billMaterialGrandTotal(){
 		let grandTotal = 0;
 		$(".tableTotal").each(function(i) {
-			var value = $
+			let thisValue = $(this).text().replaceAll("₱","").replaceAll(",","").trim();
+			grandTotal += parseFloat(thisValue);
+			console.log(grandTotal);
 		});
+		$("#grandTotal").text(formatAmount(grandTotal,true));
 	}
 	// ----- END UPDATING TABLES TOTALS
 
@@ -1568,10 +1571,6 @@ $(document).ready(function() {
                           
                         </tbody>
                     </table>
-                    
-					<div class="w-100 d-flex justify-content-between align-items-center py-2 tableTotal personnelTotal">
-						
-					</div>
                 </div>
 				<div class="w-100">
 					<hr class="pb-1">
@@ -1591,10 +1590,6 @@ $(document).ready(function() {
                         
                         </tbody>
                     </table>
-                    
-					<div class="w-100 d-flex justify-content-between align-items-center py-2 tableTotal projectTotal">
-					
-					</div>
                 </div>
 				<div class="w-100">
 					<hr class="pb-1">
@@ -1612,10 +1607,6 @@ $(document).ready(function() {
                         </thead>
                         <tbody class="itemCompanyTableBody" company="true"> </tbody>
                     </table>
-                    
-					<div class="w-100 d-flex justify-content-between align-items-center py-2 tableTotal companyTotal">
-						
-					</div>
                 </div>
 
 				<div class="w-100">
@@ -1635,14 +1626,40 @@ $(document).ready(function() {
                         <tbody class="travelTableBody" travel="true">
                         
                         </tbody>
-                    </table>
-                    
-					<div class="w-100 d-flex justify-content-between align-items-center py-2 tableTotal travelButtons">
+					</table>
+					<div class="w-100 d-flex justify-content-between align-items-center py-2 travelButtons">
 						
 					</div>
                 </div>
             </div>
+			<div class="col-sm-12 mt-3">
+				<div class="w-100 text-right py-2">
+					<div class="font-weight-bolder" style="font-size: 1rem;">
+						<span>Personnel Total Cost: &nbsp;</span>
+						<span class="text-danger tableTotal personnelTotal" style="font-size: 1.2em">₱ 0.00</span>
+					</div>
 
+					<div class="font-weight-bolder" style="font-size: 1rem;">
+						<span>Project Total Cost: &nbsp;</span>
+						<span class="text-danger tableTotal projectTotal" style="font-size: 1.2em" >₱ 0.00</span>
+					</div>
+
+					<div class="font-weight-bolder" style="font-size: 1rem;">
+						<span>Company Total Cost: &nbsp;</span>
+						<span class="text-danger tableTotal companyTotal" style="font-size: 1.2em" >₱ 0.00</span>
+					</div>
+
+					<div class="font-weight-bolder" style="font-size: 1rem;">
+						<span>Travel Total Cost: &nbsp;</span>
+						<span class="text-danger tableTotal travel grandTotal " style="font-size: 1.2em">₱ 0.00</span>
+					</div>
+
+					<div class="font-weight-bolder" style="font-size: 1.2rem;">
+						<span>Grand Total: &nbsp;</span>
+						<span class="text-danger" style="font-size: 1.4rem" id="grandTotal">₱ 0.00</span>
+					</div>
+				</div>
+            </div>
             <div class="col-md-12 text-right mt-3">
                 ${button}
             </div>
@@ -1692,7 +1709,7 @@ $(document).ready(function() {
             </div>`;
 			$("#page_content").html(html);
 
-			headerButton(true, "Add Bill Material");
+			headerButton(true, "Add Bill of Material");
 			headerTabContent();
 			myFormsContent();
 			updateURL();
@@ -1702,7 +1719,7 @@ $(document).ready(function() {
 			formContent(data, readOnly, isRevise);
 
 			setTimeout(() => {
-				grandTotal();
+				billMaterialGrandTotal();
 			}, 300);
 
 		}
@@ -1712,7 +1729,7 @@ $(document).ready(function() {
 	// ----- END PAGE CONTENT -----
 
 
-	// ----- GET Bill Material DATA -----
+	// ----- GET Bill of Material DATA -----
 	function getbillMaterialData(action = "insert", method = "submit", status = "1", id = null, currentStatus = "0", isObject = false) {
 
 		/**
@@ -1828,7 +1845,7 @@ $(document).ready(function() {
 		} 
 		return data;
 	}
-	// ----- END GET Bill Material DATA -----
+	// ----- END GET Bill of Material DATA -----
 
 
     // ----- OPEN ADD FORM -----
@@ -1961,7 +1978,7 @@ $(document).ready(function() {
 			if (employeeID != sessionID) {
 				notificationData = {
 					moduleID:                39,
-					notificationTitle:       "Bill Material",
+					notificationTitle:       "Bill of Material",
 					notificationDescription: `${employeeFullname(sessionID)} asked for your approval.`,
 					notificationType:        2,
 					employeeID,
@@ -2029,7 +2046,7 @@ $(document).ready(function() {
 				notificationData = {
 					moduleID:                39,
 					tableID:                 id,
-					notificationTitle:       "Bill Material",
+					notificationTitle:       "Bill of Material",
 					notificationDescription: `${feedback}: Your request has been approved.`,
 					notificationType:        7,
 					employeeID,
@@ -2040,7 +2057,7 @@ $(document).ready(function() {
 				notificationData = {
 					moduleID:                39,
 					tableID:                 id,
-					notificationTitle:       "Bill Material",
+					notificationTitle:       "Bill of Material",
 					notificationDescription: `${employeeFullname(employeeID)} asked for your approval.`,
 					notificationType:         2,
 					employeeID:               getNotificationEmployeeID(approversID, dateApproved),
@@ -2062,7 +2079,7 @@ $(document).ready(function() {
 		const feedback = $(this).attr("code") || getFormCode("BOM", dateToday(), id);
 
 		$("#modal_bill_material_content").html(preloader);
-		$("#modal_bill_material .page-title").text("DENY Bill Material");
+		$("#modal_bill_material .page-title").text("DENY BILL OF MATERIAL");
 		$("#modal_bill_material").modal("show");
 		let html = `
 		<div class="modal-body">
@@ -2112,7 +2129,7 @@ $(document).ready(function() {
 				let notificationData = {
 					moduleID:                39,
 					tableID: 				 id,
-					notificationTitle:       "Bill Material",
+					notificationTitle:       "Bill of Material",
 					notificationDescription: `${feedback}: Your request has been denied.`,
 					notificationType:        1,
 					employeeID,
@@ -2364,13 +2381,13 @@ $(document).ready(function() {
 				// 						 </div>
 				// 					 </td>
 				// 			 </tr>`;
-				 	let personnelTotal = `<div></div> 
-													<div class="font-weight-bolder" style="font-size: 1rem;">
-														<span>Total Amount: &nbsp;</span>
-														<span class="text-danger" style="font-size: 1.2em">${formatAmount(grandTotalPrice,true)}</span>
-												</div>`;
-					 setTimeout(() => {
-						 $(".personnelTotal").html(personnelTotal);
+				 	// let personnelTotal = `<div></div> 
+					// 								<div class="font-weight-bolder" style="font-size: 1rem;">
+					// 									<span>Total Amount: &nbsp;</span>
+					// 									<span class="text-danger" style="font-size: 1.2em">${formatAmount(grandTotalPrice,true)}</span>
+					// 							</div>`;
+					  setTimeout(() => {
+						$(`.tableTotal.personnelTotal`).text(formatAmount(grandTotalPrice,true));
 					 }, 500);
 				 break;
 			 case "project":
@@ -2447,13 +2464,13 @@ $(document).ready(function() {
 							// 		 </div>
 							// 	 </td>
 							//  </tr>`;
-					let projectTotal = `<div></div> 
-										<div class="font-weight-bolder" style="font-size: 1rem;">
-											<span>Total Amount: &nbsp;</span>
-											<span class="text-danger" style="font-size: 1.2em">${formatAmount(grandTotalPrice,true)}</span>
-									</div>`;
+					// let projectTotal = `<div></div> 
+					// 					<div class="font-weight-bolder" style="font-size: 1rem;">
+					// 						<span>Total Amount: &nbsp;</span>
+					// 						<span class="text-danger" style="font-size: 1.2em">${formatAmount(grandTotalPrice,true)}</span>
+					// 				</div>`;
 					 setTimeout(() => {
-						 $(".projectTotal").html(projectTotal);
+						 $(".tableTotal.projectTotal").text(formatAmount(grandTotalPrice,true));
 					 }, 500);
 					 
 				 break;
@@ -2529,14 +2546,16 @@ $(document).ready(function() {
 							// 	 </td>
 							//  </tr>`;
 
-					let companyTotal = `<div></div> 
-										<div class="font-weight-bolder" style="font-size: 1rem;">
-											<span>Total Amount: &nbsp;</span>
-											<span class="text-danger" style="font-size: 1.2em">${formatAmount(grandTotalPrice,true)}</span>
-										</div>`;
+					// let companyTotal = `<div></div> 
+					// 					<div class="font-weight-bolder" style="font-size: 1rem;">
+					// 						<span>Total Amount: &nbsp;</span>
+					// 						<span class="text-danger" style="font-size: 1.2em">${formatAmount(grandTotalPrice,true)}</span>
+					// 					</div>`;
 					 setTimeout(() => {
-						 $(".companyTotal").html(companyTotal);
+						//  $(".companyTotal").html(companyTotal);
+						$(`.tableTotal.companyTotal`).text(formatAmount(grandTotalPrice,true));
 					 }, 500);
+
 							 
 				 break;
 			 default:
@@ -2695,7 +2714,7 @@ $(document).ready(function() {
 										 <div class="quantity">
 											 <input 
 												 type="text" 
-												 class="form-control validate number text-center"
+												 class="form-control validate quantity text-center"
 												 data-allowcharacters="[0-9]" 
 												 max="999999999" 
 												 id="travelQuantity1" 
@@ -2739,20 +2758,25 @@ $(document).ready(function() {
 								 </tr>`;
 					 }
 	
-					 let travelButtons = !readOnly ? `<div class="text-left my-2">
+					//  let travelButtons = !readOnly ? `<div class="text-left my-2">
+					// 									<button class="btn btn-primary btnAddRow" id="btnAddRow" travel="true" type="button"><i class="fas fa-plus-circle"></i> Add Row</button>
+					// 									<button class="btn btn-danger btnDeleteRow" id="btnDeleteRow" travel="true" type="button" disabled><i class="fas fa-minus-circle"></i> Delete Row/s</button>
+					// 								</div>
+					// 								<div class="font-weight-bolder" style="font-size: 1rem;">
+					// 									<span>Total Amount: &nbsp;</span>
+					// 									<span class="text-danger travel grandTotal" style="font-size: 1.2em">₱ 0.00</span>
+					// 								</div>
+					// 								` : 
+					// 								`<div></div> 
+					// 								<div class="font-weight-bolder" style="font-size: 1rem;">
+					// 									<span>Total Amount: &nbsp;</span>
+					// 									<span class="text-danger travel grandTotal" style="font-size: 1.2em">₱ 0.00</span>
+					// 								</div>`;
+
+					let travelButtons = !readOnly ? `<div class="text-left my-2">
 														<button class="btn btn-primary btnAddRow" id="btnAddRow" travel="true" type="button"><i class="fas fa-plus-circle"></i> Add Row</button>
 														<button class="btn btn-danger btnDeleteRow" id="btnDeleteRow" travel="true" type="button" disabled><i class="fas fa-minus-circle"></i> Delete Row/s</button>
-													</div>
-													<div class="font-weight-bolder" style="font-size: 1rem;">
-														<span>Total Amount: &nbsp;</span>
-														<span class="text-danger travel grandTotal" style="font-size: 1.2em">₱ 0.00</span>
-													</div>
-													` : 
-													`<div></div> 
-													<div class="font-weight-bolder" style="font-size: 1rem;">
-														<span>Total Amount: &nbsp;</span>
-														<span class="text-danger travel grandTotal" style="font-size: 1.2em">₱ 0.00</span>
-													</div>`;
+													</div>`:``;
 					 setTimeout(() => {
 						$(`[name=travelUom]`).select2({ theme: "bootstrap" });
 						 $(".travelButtons").html(travelButtons);

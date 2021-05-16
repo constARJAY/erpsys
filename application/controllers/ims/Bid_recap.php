@@ -26,7 +26,7 @@ class Bid_recap extends CI_Controller {
         $reviseBidRecapID     = $this->input->post("reviseBidRecapID") ?? null;
         $employeeID           = $this->input->post("employeeID");
         $projectID            = $this->input->post("projectID") ?? null;
-        $referenceCode        = $this->input->post("referenceCode") ?? null;
+        $purchaseRequestID    = $this->input->post("purchaseRequestID") ?? null;
         $approversID          = $this->input->post("approversID") ?? null;
         $approversStatus      = $this->input->post("approversStatus") ?? null;
         $approversDate        = $this->input->post("approversDate") ?? null;
@@ -44,7 +44,7 @@ class Bid_recap extends CI_Controller {
 
         $bidRecapData = [
             "reviseBidRecapID"      => $reviseBidRecapID,
-            "purchaseRequestID"     => $referenceCode,
+            "purchaseRequestID"     => $purchaseRequestID,
             "employeeID"            => $employeeID,
             "projectID"             => $projectID,
             "approversID"           => $approversID,

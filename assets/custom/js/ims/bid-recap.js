@@ -241,10 +241,11 @@ $(document).ready(function() {
             <thead>
                 <tr style="white-space: nowrap">
                     <th>Document No.</th>
-                    <th>Employee Name</th>
+					<th>Employee Name</th>
+					<th>Reference No.</th>
                     <th>Project Code</th>
                     <th>Project Name</th>
-					<th>Reference No.</th>
+					
                     <th>Current Approver</th>
                     <th>Date Created</th>
                     <th>Date Submitted</th>
@@ -264,7 +265,7 @@ $(document).ready(function() {
 				projectListName,
 				documentType,
 				documentID,
-				referenceCode,
+				purchaseRequestID,
 				approversID,
 				approversDate,
 				bidRecapStatus,
@@ -272,7 +273,7 @@ $(document).ready(function() {
 				submittedAt,
 				createdAt,
 			} = item;
-			let referenceNumber = getFormCode("IVR",moment(createdAt),referenceCode);
+			let referenceNumber = getFormCode("IVR",moment(createdAt),purchaseRequestID);
 			
 			let remarks       = bidRecapRemarks ? bidRecapRemarks : "-";
 			let dateCreated   = moment(createdAt).format("MMMM DD, YYYY hh:mm:ss A");
@@ -294,9 +295,10 @@ $(document).ready(function() {
 				<tr>
 					<td>${getFormCode("BRF", createdAt, bidRecapID )}</td>
 					<td>${fullname}</td>
+					<td>${referenceNumber}</td>
 					<td>${projectListCode || '-'}</td>
 					<td>${projectListName || '-'}</td>
-					<td>${referenceNumber}</td>
+					
 					<td>
 						${employeeFullname(getCurrentApprover(approversID, approversDate, bidRecapStatus, true))}
 					</td>
@@ -342,10 +344,11 @@ $(document).ready(function() {
             <thead>
                 <tr style="white-space: nowrap">
                     <th>Document No.</th>
-                    <th>Employee Name</th>
+					<th>Employee Name</th>
+					<th>Reference No.</th>
                     <th>Project Code</th>
                     <th>Project Name</th>
-					<th>Reference No.</th>
+					
                     <th>Current Approver</th>
                     <th>Date Created</th>
                     <th>Date Submitted</th>
@@ -365,7 +368,7 @@ $(document).ready(function() {
                 projectListName,
 				documentType,
 				documentID,
-				referenceCode,
+				purchaseRequestID,
 				approversID,
 				approversDate,
 				bidRecapStatus,
@@ -373,7 +376,7 @@ $(document).ready(function() {
 				submittedAt,
 				createdAt,
 			} = item;
-			let referenceNumber = getFormCode("IVR",moment(createdAt),referenceCode);
+			let referenceNumber = getFormCode("IVR",moment(createdAt),purchaseRequestID);
 			let remarks       = bidRecapRemarks ? bidRecapRemarks : "-";
 			let dateCreated   = moment(createdAt).format("MMMM DD, YYYY hh:mm:ss A");
 			let dateSubmitted = submittedAt ? moment(submittedAt).format("MMMM DD, YYYY hh:mm:ss A") : "-";
@@ -392,10 +395,10 @@ $(document).ready(function() {
 			html += `
             <tr>
                 <td>${getFormCode("BRF", createdAt, bidRecapID )}</td>
-                <td>${fullname}</td>
+				<td>${fullname}</td>
+				<td>${referenceNumber}</td>
                 <td>${projectListCode || '-'}</td>
                 <td>${projectListName || '-'}</td>
-				<td>${referenceNumber}</td>
                 <td>
                     ${employeeFullname(getCurrentApprover(approversID, approversDate, bidRecapStatus, true))}
                 </td>
@@ -542,23 +545,42 @@ $(document).ready(function() {
     // ----- GET PROJECT LIST -----
     function getReferenceList(id = null, display = false) {
 		let existIVR = [], html = ``;
+		let data = [];
 		let invValidatrionData = getTableData("ims_inventory_validation_tbl", "","inventoryValidationStatus = '2' OR inventoryValidationStatus = '1'");
 		let bidRecapData = getTableData("ims_bid_recap_tbl");
 		bidRecapData.map(items=>{
-			id ? "" : existIVR.push(items.referenceCode);
+			id ? "" : existIVR.push(items.purchaseRequestID);
 		});
+
+
 		html += invValidatrionData.filter(items => !existIVR.includes(items.inventoryValidationID)).map(items=>{
 			var projectList   = getTableData(
 				"pms_project_list_tbl AS pplt LEFT JOIN pms_client_tbl AS pct ON pct.clientID = pplt.projectListClientID", 
 				"projectListID, projectListCode, projectListName, clientCode, clientName, clientRegion, clientProvince, clientCity, clientBarangay, clientUnitNumber, clientHouseNumber, clientCountry, clientPostalCode",
 				"projectListStatus = 1 && projectListID ="+items.projectID);
-			var address       = `${projectList[0].clientUnitNumber && titleCase(projectList[0].clientUnitNumber)+", "}${projectList[0].clientHouseNumber && projectList[0].clientHouseNumber +", "}${projectList[0].clientBarangay && titleCase(projectList[0].clientBarangay)+", "}${projectList[0].clientCity && titleCase(projectList[0].clientCity)+", "}${projectList[0].clientProvince && titleCase(projectList[0].clientProvince)+", "}${projectList[0].clientCountry && titleCase(projectList[0].clientCountry)+", "}${projectList[0].clientPostalCode && titleCase(projectList[0].clientPostalCode)}`;
+				if(projectList.length > 0){
+					data["projectid"]			= projectList[0].projectListID;
+					data["projectcode"]			= getFormCode("PRO",moment(projectList[0].createdAt),projectList[0].projectListID);
+					data["projectname"]			= projectList[0].projectListName;
+					data["clientcode"]			= projectList[0].clientCode;
+					data["clientname"]			= projectList[0].clientName;
+					data["address"] 			= `${projectList[0].clientUnitNumber && titleCase(projectList[0].clientUnitNumber)+", "}${projectList[0].clientHouseNumber && projectList[0].clientHouseNumber +", "}${projectList[0].clientBarangay && titleCase(projectList[0].clientBarangay)+", "}${projectList[0].clientCity && titleCase(projectList[0].clientCity)+", "}${projectList[0].clientProvince && titleCase(projectList[0].clientProvince)+", "}${projectList[0].clientCountry && titleCase(projectList[0].clientCountry)+", "}${projectList[0].clientPostalCode && titleCase(projectList[0].clientPostalCode)}`;
+				}
+				
+				let {
+					projectid				=	"0",
+					projectcode				=	"-",
+					projectname				=	"-",
+					clientcode				=	"-",
+					clientname				=	"-",
+					address					=	"-",
+				} = projectList.length > 0 && data;
 			return `<option value            = "${items.inventoryValidationID }" 
-						projectid 			 = "${projectList[0].projectListID}"
-						projectcode          = "${getFormCode("PRO",moment(projectList[0].createdAt),projectList[0].projectListID)}"
-						projectname          = "${projectList[0].projectListName}"
-						clientcode           = "${projectList[0].clientCode}"
-						clientname           = "${projectList[0].clientName}"
+						projectid 			 = "${projectid}"
+						projectcode          = "${projectcode}"
+						projectname          = "${projectname}"
+						clientcode           = "${clientcode}"
+						clientname           = "${clientname}"
 						address              = "${address}"
 						${items.inventoryValidationID == id?"selected":""}>
 						${getFormCode("IVR",moment(items.createdAt), items.inventoryValidationID)}
@@ -1039,8 +1061,7 @@ $(document).ready(function() {
 			reviseBidRecapID 	= "",
 			employeeID          = "",
 			projectID           = "",
-			referenceCode 		= "",
-            documentID          = "",
+			purchaseRequestID 		= "",
             documentType        = "",
 			bidRecapReason   	= "",
 			bidRecapRemarks  	= "",
@@ -1056,26 +1077,43 @@ $(document).ready(function() {
 		let requestProjectItems = "", requestCompanyItems = "";
 		
 		if (bidRecapID) {
-            requestProjectItems = requestItemData(referenceCode, "project", readOnly, `bidRecapID = '${bidRecapID}'`);
-            requestCompanyItems = requestItemData(referenceCode, "company", readOnly, `bidRecapID = '${bidRecapID}'`);
+            requestProjectItems = requestItemData(purchaseRequestID, "project", readOnly, `bidRecapID = '${bidRecapID}'`);
+            requestCompanyItems = requestItemData(purchaseRequestID, "company", readOnly, `bidRecapID = '${bidRecapID}'`);
 		}
-
+		
+		let projectCode = "", projectName="", clientCode="",clientName="", clientAddress="";
 		if(documentType){
-			var projectid="",projectCode="-",projectName="-",clientCode="-",clientName="-",clientAddress="-",requestorName="-",requestorDepartment="-",requestorPosition="-";
-			let bidRecapData        = getTableData("ims_bid_recap_tbl","","bidRecapID="+bidRecapID);
-			
+			var bidRecapItems = [];
+			let bidRecapData   = getTableData("ims_bid_recap_tbl","","bidRecapID="+bidRecapID);
 			bidRecapData.map(bidRecapItems=>{
 					let projectList   = getTableData(
 						"pms_project_list_tbl AS pplt LEFT JOIN pms_client_tbl AS pct ON pct.clientID = pplt.projectListClientID", 
 						"projectListID, projectListCode, projectListName, clientCode, clientName, clientRegion, clientProvince, clientCity, clientBarangay, clientUnitNumber, clientHouseNumber, clientCountry, clientPostalCode",
 						"projectListStatus = 1 && projectListID ="+bidRecapItems.projectID);
-					let address       = `${projectList[0].clientUnitNumber && titleCase(projectList[0].clientUnitNumber)+", "}${projectList[0].clientHouseNumber && projectList[0].clientHouseNumber +", "}${projectList[0].clientBarangay && titleCase(projectList[0].clientBarangay)+", "}${projectList[0].clientCity && titleCase(projectList[0].clientCity)+", "}${projectList[0].clientProvince && titleCase(projectList[0].clientProvince)+", "}${projectList[0].clientCountry && titleCase(projectList[0].clientCountry)+", "}${projectList[0].clientPostalCode && titleCase(projectList[0].clientPostalCode)}`;
+						if(projectList.length > 0){
+							bidRecapItems["projectid"]			= projectList[0].projectListID;
+							bidRecapItems["projectcode"]		= getFormCode("PRO",moment(projectList[0].createdAt),projectList[0].projectListID);
+							bidRecapItems["projectname"]		= projectList[0].projectListName;
+							bidRecapItems["clientcode"]			= projectList[0].clientCode;
+							bidRecapItems["clientname"]			= projectList[0].clientName;
+							bidRecapItems["address"] 			= `${projectList[0].clientUnitNumber && titleCase(projectList[0].clientUnitNumber)+" "}${projectList[0].clientHouseNumber && projectList[0].clientHouseNumber +" "}${projectList[0].clientBarangay && titleCase(projectList[0].clientBarangay)+", "}${projectList[0].clientCity && titleCase(projectList[0].clientCity)+", "}${projectList[0].clientProvince && titleCase(projectList[0].clientProvince)+", "}${projectList[0].clientCountry && titleCase(projectList[0].clientCountry)+", "}${projectList[0].clientPostalCode && titleCase(projectList[0].clientPostalCode)}`;
+						}
+	
+						var {	
+							projectid			="0",
+							projectcode			="-",
+							projectname			="-",
+							clientcode			="-",
+							clientname			="-",
+							address 			="-"
+						}	= projectList.length > 0 && bidRecapItems;
+
 						if(bidRecapItems.bidRecapID	== bidRecapID){
-							projectid 			= projectList[0].projectListID;
-							projectCode			= getFormCode("PRO",moment(projectList[0].createdAt),projectList[0].projectListID);
-							projectName			= projectList[0].projectListName;
-							clientCode			= projectList[0].clientCode;
-							clientName			= projectList[0].clientName;
+							projectID 			= projectid;
+							projectCode			= projectcode;
+							projectName			= projectname;
+							clientCode			= clientcode;
+							clientName			= clientname;
 							clientAddress		= address;
 						}
 				});
@@ -1233,7 +1271,7 @@ $(document).ready(function() {
 						${bidRecapID == "" ? `` : `disabled`}
 						>
                         <option selected disabled>Select Document No.</option>
-                        ${getReferenceList(referenceCode,readOnly)}
+                        ${getReferenceList(purchaseRequestID,readOnly)}
                     </select>
                     <div class="d-block invalid-feedback" id="invalid-documentID"></div>
                 </div>
@@ -1241,7 +1279,7 @@ $(document).ready(function() {
             <div class="col-md-4 col-sm-12">
                 <div class="form-group">
                     <label>Project Code</label>
-                    <input type="text" class="form-control" name="projectCode" projectid="${projectid||""}" disabled value="${projectCode||"-"}">
+                    <input type="text" class="form-control" name="projectCode" projectid="${projectID||""}" disabled value="${projectCode||"-"}">
                 </div>
             </div>
             <div class="col-md-4 col-sm-12">
@@ -1276,16 +1314,16 @@ $(document).ready(function() {
                     <table class="table table-striped table-bordered table-responsive-xl">
                         <thead>
 							<tr style="white-space: nowrap">
-								<th style="width:20%;">Vendor Name</th>
-								<th style="width: 100px">Item Code</th>
-                                <th style="width: 20%">Item Name</th>
-                                <th style="width: 80px">UOM</th>
-                                <th style="width: 80px" class="text-center">Requested</th>
-                                <th style="width: 80px" class="text-center">Stocked</th>
-                                <th style="width: 150px" class="text-center">For Purchase</th>
-                                <th style="width: 80px">File</th>
-								<th style="width: 50px" class="text-right">Unit Cost</th>
-								<th style="width: 50px" class="text-right">Total Cost</th>
+								<th class="th-lg" >Vendor Name</th>
+								<th style="width: 150px" class="pr-xl-4 pr-lg-4 pr-5">Item Code</th>
+                                <th style="width: 150px" class="pr-xl-4 pr-lg-4 pr-5">Item Name</th>
+                                <th class="th-sm" >UOM</th>
+                                <th style="width: 80px"  class="pr-xl-4 pr-lg-4 pr-5">Requested</th>
+                                <th style="width: 80px"  class="pr-xl-4 pr-lg-4 pr-5">No. of Issuance</th>
+                                <th style="width: 150px" class="pr-xl-4 pr-lg-4 pr-5">For Purchase</th>
+                                <th style="width: 80px"  class="pr-xl-4 pr-lg-4 pr-5">File</th>
+								<th style="width: 150px padding-right: 5px" class="pr-md-5" >Unit Cost</th>
+								<th style="width: 150px padding-right: 5px" class="pr-md-5" >Total Cost</th>
                             </tr>
                         </thead>
                         <tbody class="itemProjectTableBody" project="true"></tbody>
@@ -1297,16 +1335,16 @@ $(document).ready(function() {
                     <table class="table table-striped table-bordered table-responsive-xl">
                         <thead>
 							<tr style="white-space: nowrap">
-								<th style="width:20%;">Vendor Name</th>
-								<th style="width: 100px">Item Code</th>
-                                <th style="width: 20%">Item Name</th>
-                                <th style="width: 80px">UOM</th>
-                                <th style="width: 80px" class="text-center">Requested</th>
-                                <th style="width: 80px" class="text-center">Stocked</th>
-                                <th style="width: 150px" class="text-center">For Purchase</th>
-                                <th style="width: 80px">File</th>
-								<th style="width: 50px" class="text-right">Unit Cost</th>
-								<th style="width: 50px" class="text-right">Total Cost</th>
+								<th class="th-lg" >Vendor Name</th>
+								<th style="width: 150px" class="pr-xl-4 pr-lg-4 pr-5">Item Code</th>
+                                <th style="width: 150px" class="pr-xl-4 pr-lg-4 pr-5">Item Name</th>
+                                <th class="th-sm" >UOM</th>
+                                <th style="width: 80px"  class="pr-xl-4 pr-lg-4 pr-5">Requested</th>
+                                <th style="width: 80px"  class="pr-xl-4 pr-lg-4 pr-5">No. of Issuance</th>
+                                <th style="width: 150px" class="pr-xl-4 pr-lg-4 pr-5">For Purchase</th>
+                                <th style="width: 80px"  class="pr-xl-4 pr-lg-4 pr-5">File</th>
+								<th style="width: 150px padding-right: 5px" class="pr-md-5" >Unit Cost</th>
+								<th style="width: 150px padding-right: 5px" class="pr-md-5" >Total Cost</th>
                             </tr>
                         </thead>
                         <tbody class="itemCompanyTableBody" company="true"></tbody>
@@ -1429,13 +1467,10 @@ $(document).ready(function() {
 		data["updatedBy"]             = sessionID;
 
 		if (currentStatus == "0" && method != "approve") {
-		    var referenceCode 			  = $("[name=documentID]").val() || null;
-			var requestItemsData 		  = getTableData("ims_request_items_tbl","costEstimateID","	inventoryValidationID="+referenceCode); 
-			var documentID 				  = requestItemsData.length > 0 ? requestItemsData[0].costEstimateID : null;			 
+		    var purchaseRequestID 		  = $("[name=documentID]").val() || null;	 
 			data["employeeID"]            = sessionID;
 			data["projectID"]             = $("[name=projectCode]").attr("projectid") || null;
-			data["documentID"] 			  = documentID;
-			data["referenceCode"] 		  = referenceCode;
+			data["purchaseRequestID"] 	  = purchaseRequestID;
 			data["bidRecapReason"] 	  	  = $("[name=bidRecapReason]").val()?.trim();
 			data["bidRecapProjectTotal"]  = $("#bidRecapProjectTotal").text().replaceAll("₱","").replaceAll(",","");;
 			data["bidRecapCompanyTotal"]  = $("#bidRecapCompanyTotal").text().replaceAll("₱","").replaceAll(",","");;
@@ -1705,7 +1740,7 @@ $(document).ready(function() {
 		const feedback = $(this).attr("code") || getFormCode("BRF", dateToday(), id);
 
 		$("#modal_bid_recap_content").html(preloader);
-		$("#modal_bid_recap .page-title").text("DENY Inventory Validation");
+		$("#modal_bid_recap .page-title").text("DENY BID RECAP");
 		$("#modal_bid_recap").modal("show");
 		let html = `
 		<div class="modal-body">
@@ -1986,7 +2021,7 @@ function getConfirmation(method = "submit") {
 			swalImg   = `${base_url}assets/modal/reject.svg`;
 			break;
 		case "cancelform":
-			swalTitle = `CANCEL ${title.toUpperCase()} DOCUMENT`;
+			swalTitle = `CANCEL ${title.toUpperCase()}`;
 			swalText  = "Are you sure to cancel this document?";
 			swalImg   = `${base_url}assets/modal/cancel.svg`;
 			break;
@@ -2101,10 +2136,12 @@ function savebidRecapID(data = null, method = "submit", notificationData = null,
 				})
 			} else {
 				if (res.dismiss === "cancel") {
-					if (method != "deny") {
-						callback && callback();
-					} else {
-						$("#modal_bid_recap").text().length > 0 && $("#modal_bid_recap").modal("show");
+					if(method != "submit"){
+						if (method != "deny") {
+							callback && callback();
+						} else {
+							$("#modal_bid_recap").text().length > 0 && $("#modal_bid_recap").modal("show");
+						}
 					}
 				} else if (res.isDismissed) {
 					if (method == "deny") {

@@ -44,7 +44,7 @@ $(document).on("click",".addBranch", function(){
                                             <div class="modal-footer">
                                                 <button class="btn btn-save px-5 p-2" id="btnSave"><i class="fas fa-save"></i>&nbsp;Save</button>
                                                 <button class="btn btn-cancel btnCancel px-5 p-2" ><i class="fas fa-ban"></i>&nbsp;
-                                                CANCEL</button>
+                                                Cancel</button>
                                             </div>
                                             `;
     setTimeout(function(){

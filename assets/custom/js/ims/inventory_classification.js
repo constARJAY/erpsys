@@ -53,7 +53,7 @@ $(document).on("click",".editClassification", function(){
                                             <div class="modal-body">  
                                                 <form id="modal_classification_form"> 
                                                     <div class="col-md-12 col-sm-12">
-                                                        <div class="form-group">
+                                                        <div class="form-group" style="padding-left:0!important;padding-right:0!important">
                                                             <label for="">Classification Name</label>
                                                             <input 
                                                                 type="text" 
@@ -68,7 +68,7 @@ $(document).on("click",".editClassification", function(){
                                                         </div>
                                                     </div>
                                                     <div class="col-md-12 col-sm-12">
-                                                        <div class="form-group">
+                                                        <div class="form-group" style="padding-left:0!important;padding-right:0!important">
                                                             <label for="">Classification Status</label>
                                                             <select class="form-control select2 validate" name="classificationStatus" id="input_classificationStatus" required>
                                                                 ${statusOption}

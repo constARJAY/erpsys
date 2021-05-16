@@ -118,6 +118,7 @@ $(document).ready(function() {
 	const inventoryItemList = getTableData(
 		"ims_inventory_item_tbl LEFT JOIN ims_inventory_category_tbl USING(categoryID)", "ims_inventory_item_tbl.itemID AS itemID, itemCode, itemName, itemDescription ,categoryName, unitOfMeasurementID",
 		"itemStatus = 1");
+
 	const designationList = getTableData("hris_designation_tbl JOIN hris_employee_list_tbl USING(designationID)","designationID, designationName, MAX(employeeHourlyRate) as designationRate", "designationStatus=1","","designationName");
     
 	
@@ -147,16 +148,14 @@ $(document).ready(function() {
 				columnDefs: [
 					{ targets: 0,  width: 100 },
 					{ targets: 1,  width: 150 },
-					{ targets: 2,  width: 150 },
+					{ targets: 2,  width: 100 },
 					{ targets: 3,  width: 150 },
 					{ targets: 4,  width: 150 },
-					{ targets: 5,  width: 150 },
+					{ targets: 5,  width: 200 },
 					{ targets: 6,  width: 200 },
 					{ targets: 7,  width: 200 },
-					{ targets: 8,  width: 200 },
-					{ targets: 9,  width: 80  },
-					{ targets: 10, width: 250 },
-					{ targets: 11, width: 80  },
+					{ targets: 8,  width: 80 },
+					{ targets: 9,  width: 250  },
 				],
 			});
 
@@ -172,16 +171,14 @@ $(document).ready(function() {
 				columnDefs: [
 					{ targets: 0,  width: 100 },
 					{ targets: 1,  width: 150 },
-					{ targets: 2,  width: 150 },
+					{ targets: 2,  width: 100 },
 					{ targets: 3,  width: 150 },
 					{ targets: 4,  width: 150 },
-					{ targets: 5,  width: 150 },
+					{ targets: 5,  width: 200 },
 					{ targets: 6,  width: 200 },
 					{ targets: 7,  width: 200 },
-					{ targets: 8,  width: 200 },
-					{ targets: 9,  width: 80  },
-					{ targets: 10, width: 250 },
-					{ targets: 11, width: 80  },
+					{ targets: 8,  width: 80 },
+					{ targets: 9,  width: 250  },
 				],
 			});
 
@@ -331,18 +328,16 @@ $(document).ready(function() {
         <table class="table table-bordered table-striped table-hover" id="tableForApprroval">
             <thead>
                 <tr style="white-space: nowrap">
-                    <th>Document No.</th>
-                    <th>Employee Name</th>
+					<th>Document No.</th>
+					<th>Employee Name</th>
+					<th>Project Name</th>
 					<th>Reference No.</th>
-                    <th>Project Code</th>
-                    <th>Project Name</th>
-                    <th>Current Approver</th>
-                    <th>Date Created</th>
-                    <th>Date Submitted</th>
-                    <th>Date Approved</th>
-                    <th>Status</th>
-                    <th>Remarks</th>
-                    <th>Action</th>
+					<th>Current Approver</th>
+					<th>Date Created</th>
+					<th>Date Submitted</th>
+					<th>Date Approved</th>
+					<th>Status</th>
+					<th>Remarks</th>
                 </tr>
             </thead>
             <tbody>`;
@@ -371,6 +366,8 @@ $(document).ready(function() {
 				dateApproved = moment(dateApproved[dateApproved.length - 1]).format("MMMM DD, YYYY hh:mm:ss A");
 			}
 
+			let btnClass = inventoryValidationStatus != 0 ? "btnView" : "btnEdit";
+
 			let button = inventoryValidationStatus != 0 ? `
 			<button class="btn btn-view w-100 btnView" id="${encryptString(inventoryValidationID )}"><i class="fas fa-eye"></i> View</button>` : `
 			<button 
@@ -380,12 +377,16 @@ $(document).ready(function() {
 
 			if (isImCurrentApprover(approversID, approversDate, inventoryValidationStatus) || isAlreadyApproved(approversID, approversDate)) {
 				html += `
-				<tr>
+				<tr class="${btnClass}" id="${encryptString(inventoryValidationID )}">
 					<td>${getFormCode("IVR", createdAt, inventoryValidationID )}</td>
 					<td>${fullname}</td>
 					<td>${referenceNumber}</td>
-					<td>${projectListCode || '-'}</td>
-					<td>${projectListName || '-'}</td>
+					<td>
+						<div>
+							${projectListName || '-'}
+						</div>
+						<small style="color:#848482;">${projectListCode || '-'}</small>
+					</td>
 					<td>
 						${employeeFullname(getCurrentApprover(approversID, approversDate, inventoryValidationStatus, true))}
 					</td>
@@ -396,9 +397,6 @@ $(document).ready(function() {
 						${getStatusStyle(inventoryValidationStatus)}
 					</td>
 					<td>${remarks}</td>
-					<td class="text-center">
-						${button}
-					</td>
 				</tr>`;
 			}
 		});
@@ -430,18 +428,16 @@ $(document).ready(function() {
         <table class="table table-bordered table-striped table-hover" id="tableMyForms">
             <thead>
                 <tr style="white-space: nowrap">
-                    <th>Document No.</th>
-                    <th>Employee Name</th>
+					<th>Document No.</th>
+					<th>Employee Name</th>
 					<th>Reference No.</th>
-                    <th>Project Code</th>
-                    <th>Project Name</th>
-                    <th>Current Approver</th>
-                    <th>Date Created</th>
-                    <th>Date Submitted</th>
-                    <th>Date Approved</th>
-                    <th>Status</th>
-                    <th>Remarks</th>
-                    <th>Action</th>
+					<th>Project Name</th>
+					<th>Current Approver</th>
+					<th>Date Created</th>
+					<th>Date Submitted</th>
+					<th>Date Approved</th>
+					<th>Status</th>
+					<th>Remarks</th>
                 </tr>
             </thead>
             <tbody>`;
@@ -469,6 +465,8 @@ $(document).ready(function() {
 				dateApproved = moment(dateApproved[dateApproved.length - 1]).format("MMMM DD, YYYY hh:mm:ss A");
 			}
 
+			let btnClass = inventoryValidationStatus != 0 ? "btnView" : "btnEdit";
+
 			let button = inventoryValidationStatus != 0 ? `
             <button class="btn btn-view w-100 btnView" id="${encryptString(inventoryValidationID )}"><i class="fas fa-eye"></i> View</button>` : `
             <button 
@@ -477,12 +475,16 @@ $(document).ready(function() {
                 code="${getFormCode("IVR", createdAt, inventoryValidationID )}"><i class="fas fa-edit"></i> Edit</button>`;
 
 			html += `
-            <tr>
+            <tr class="${btnClass}" id="${encryptString(inventoryValidationID )}">
                 <td>${getFormCode("IVR", createdAt, inventoryValidationID )}</td>
                 <td>${fullname}</td>
 				<td>${referenceNumber}</td>
-                <td>${projectListCode || '-'}</td>
-                <td>${projectListName || '-'}</td>
+				<td>
+					<div>
+						${projectListName || '-'}
+					</div>
+					<small style="color:#848482;">${projectListCode || '-'}</small>
+				</td>
                 <td>
                     ${employeeFullname(getCurrentApprover(approversID, approversDate, inventoryValidationStatus, true))}
                 </td>
@@ -493,9 +495,6 @@ $(document).ready(function() {
                     ${getStatusStyle(inventoryValidationStatus)}
                 </td>
 				<td>${remarks}</td>
-                <td class="text-center">
-                    ${button}
-                </td>
             </tr>`;
 		});
 
@@ -531,7 +530,7 @@ $(document).ready(function() {
 					// DRAFT
 					button = `
 					<button 
-						class="btn btn-submit" 
+						class="btn btn-submit px-5 p-2" 
 						id="btnSubmit" 
 						inventoryValidationID="${inventoryValidationID}"
 						code="${getFormCode("IVR", createdAt, inventoryValidationID)}"
@@ -542,7 +541,7 @@ $(document).ready(function() {
 					if (isRevise) {
 						button += `
 						<button 
-							class="btn btn-cancel" 
+							class="btn btn-cancel px-5 p-2" 
 							id="btnCancel"
 							revise="${isRevise}"><i class="fas fa-ban"></i> 
 							Cancel
@@ -550,7 +549,7 @@ $(document).ready(function() {
 					} else {
 						button += `
 						<button 
-							class="btn btn-cancel"
+							class="btn btn-cancel px-5 p-2"
 							id="btnCancelForm" 
 							inventoryValidationID="${inventoryValidationID}"
 							code="${getFormCode("IVR", createdAt, inventoryValidationID)}"
@@ -565,7 +564,7 @@ $(document).ready(function() {
 					if (!isOngoing) {
 						button = `
 						<button 
-							class="btn btn-cancel"
+							class="btn btn-cancel px-5 p-2"
 							id="btnCancelForm" 
 							inventoryValidationID="${inventoryValidationID}"
 							code="${getFormCode("IVR", createdAt, inventoryValidationID)}"
@@ -578,7 +577,7 @@ $(document).ready(function() {
 						if(!isRevised(inventoryValidationID)){
 							button = `
 							<button
-								class="btn btn-cancel"
+								class="btn btn-cancel px-5 p-2"
 								id="btnRevise" 
 								inventoryValidationID="${encryptString(inventoryValidationID)}"
 								code="${getFormCode("IVR", createdAt, inventoryValidationID)}"
@@ -592,14 +591,14 @@ $(document).ready(function() {
 					if (isImCurrentApprover(approversID, approversDate)) {
 						button = `
 						<button 
-							class="btn btn-submit" 
+							class="btn btn-submit px-5 p-2" 
 							id="btnApprove" 
 							inventoryValidationID="${encryptString(inventoryValidationID)}"
 							code="${getFormCode("IVR", createdAt, inventoryValidationID)}"><i class="fas fa-paper-plane"></i>
 							Approve
 						</button>
 						<button 
-							class="btn btn-cancel"
+							class="btn btn-cancel px-5 p-2"
 							id="btnReject" 
 							inventoryValidationID="${encryptString(inventoryValidationID)}"
 							code="${getFormCode("IVR", createdAt, inventoryValidationID)}"><i class="fas fa-ban"></i> 
@@ -611,11 +610,11 @@ $(document).ready(function() {
 		} else {
 			button = `
 			<button 
-				class="btn btn-submit" 
+				class="btn btn-submit px-5 p-2" 
 				id="btnSubmit"><i class="fas fa-paper-plane"></i> Submit
 			</button>
 			<button 
-				class="btn btn-cancel" 
+				class="btn btn-cancel px-5 p-2" 
 				id="btnCancel"><i class="fas fa-ban"></i> 
 				Cancel
 			</button>`;
@@ -635,31 +634,47 @@ $(document).ready(function() {
 			var temp = id == items.purchaseRequestID ? "" : items.purchaseRequestID;
 			existPR.push(temp);
 		});
-		console.log(existPR);
 		let purchaseRequestData        = getTableData("ims_purchase_request_tbl","","purchaseRequestStatus='2'");
 		
 	   purchaseRequestData.map(purchaseRequestItems=>{
+		let data = [];
 		   if(!existPR.includes(purchaseRequestItems.purchaseRequestID)){
-					let projectList   = getTableData(
-						"pms_project_list_tbl AS pplt LEFT JOIN pms_client_tbl AS pct ON pct.clientID = pplt.projectListClientID", 
-						"projectListID, projectListCode, projectListName, clientCode, clientName, clientRegion, clientProvince, clientCity, clientBarangay, clientUnitNumber, clientHouseNumber, clientCountry, clientPostalCode",
-						"projectListStatus = 1 && projectListID ="+purchaseRequestItems.projectID);
-					let requestorName = getTableData(`hris_employee_list_tbl JOIN hris_designation_tbl USING(designationID) LEFT JOIN hris_department_tbl ON hris_employee_list_tbl.departmentID = hris_department_tbl.departmentID`, 
-												"CONCAT(employeeFirstname,' ',employeeLastname) as employeeFullname, designationName, departmentName", "employeeID="+purchaseRequestItems.employeeID);
-					let address       = `${projectList[0].clientUnitNumber && titleCase(projectList[0].clientUnitNumber)+", "}${projectList[0].clientHouseNumber && projectList[0].clientHouseNumber +", "}${projectList[0].clientBarangay && titleCase(projectList[0].clientBarangay)+", "}${projectList[0].clientCity && titleCase(projectList[0].clientCity)+", "}${projectList[0].clientProvince && titleCase(projectList[0].clientProvince)+", "}${projectList[0].clientCountry && titleCase(projectList[0].clientCountry)+", "}${projectList[0].clientPostalCode && titleCase(projectList[0].clientPostalCode)}`;
-	
+				let projectList   = getTableData(
+					"pms_project_list_tbl AS pplt LEFT JOIN pms_client_tbl AS pct ON pct.clientID = pplt.projectListClientID", 
+					"projectListID, projectListCode, projectListName, clientCode, clientName, clientRegion, clientProvince, clientCity, clientBarangay, clientUnitNumber, clientHouseNumber, clientCountry, clientPostalCode",
+					"projectListStatus = 1 && projectListID ="+purchaseRequestItems.projectID);
+				let requestorName = getTableData(`hris_employee_list_tbl JOIN hris_designation_tbl USING(designationID) LEFT JOIN hris_department_tbl ON hris_employee_list_tbl.departmentID = hris_department_tbl.departmentID`, 
+											"CONCAT(employeeFirstname,' ',employeeLastname) as employeeFullname, designationName, departmentName", "employeeID="+purchaseRequestItems.employeeID);
+					if(projectList.length > 0){
+						data["projectid"]			= projectList[0].projectListID;
+						data["projectcode"]			= getFormCode("PRO",moment(projectList[0].createdAt),projectList[0].projectListID);
+						data["projectname"]			= projectList[0].projectListName;
+						data["clientcode"]			= projectList[0].clientCode;
+						data["clientname"]			= projectList[0].clientName;
+						data["address"] 			= `${projectList[0].clientUnitNumber && titleCase(projectList[0].clientUnitNumber)+", "}${projectList[0].clientHouseNumber && projectList[0].clientHouseNumber +", "}${projectList[0].clientBarangay && titleCase(projectList[0].clientBarangay)+", "}${projectList[0].clientCity && titleCase(projectList[0].clientCity)+", "}${projectList[0].clientProvince && titleCase(projectList[0].clientProvince)+", "}${projectList[0].clientCountry && titleCase(projectList[0].clientCountry)+", "}${projectList[0].clientPostalCode && titleCase(projectList[0].clientPostalCode)}`;
+					}
+					
+				let {
+					projectid				=	"0",
+					projectcode				=	"-",
+					projectname				=	"-",
+					clientcode				=	"-",
+					clientname				=	"-",
+					address					=	"-",
+				} = projectList.length > 0 && data;
+
 					html +=  `<option 
-									value                = "${purchaseRequestItems.purchaseRequestID }" 
-									projectid 			 = "${projectList[0].projectListID}"
-									projectcode          = "${getFormCode("PRO",moment(projectList[0].createdAt),projectList[0].projectListID)}"
-									projectname          = "${projectList[0].projectListName}"
-									clientcode           = "${projectList[0].clientCode}"
-									clientname           = "${projectList[0].clientName}"
+									value                = "${purchaseRequestItems.purchaseRequestID}" 
+									projectid 			 = "${projectid}"
+									projectcode          = "${projectcode}"
+									projectname          = "${projectname}"
+									clientcode           = "${clientcode}"
+									clientname           = "${clientname}"
 									address              = "${address}"
 									requestorname        = "${requestorName[0].employeeFullname}"
 									requestordesignation = "${requestorName[0].designationName}"
 									requestordepartment  = "${requestorName[0].departmentName}"
-									${purchaseRequestItems.purchaseRequestID== id ? "selected":""}>
+									${purchaseRequestItems.purchaseRequestID == id ? "selected":""}>
 									${getFormCode("PR",moment(purchaseRequestItems.createdAt),purchaseRequestItems.purchaseRequestID)}
 							</option>`;
 			}
@@ -1006,14 +1021,21 @@ $(document).ready(function() {
     })
     // ----- END SELECT PROJECT LIST -----
 
-
     // ----- SELECT ITEM NAME -----
     $(document).on("keyup", "[name=stocks]", function() {
-		let thisValue 			= $(this).val();
-		let quantityRequested 	= $(this).closest("tr").find(".qtyrequested").first().text();
+		let thisID 				= $(this).attr("id");
+		let thisValue 			= $(this).val().replaceAll(",","");
+		let quantityRequested 	= $(this).closest("tr").find(".qtyrequested").first().text().replaceAll(",","");
+		
 		let difference 			= parseFloat(quantityRequested) - parseFloat(thisValue || 0);
-		let forPurchase 		=  parseFloat(difference < 0.01 ? "0" : (difference||"-")).toFixed(2);
+		let forPurchase 		= parseFloat(difference < 0.01 ? "0" : (difference||"-")).toFixed(2);
 		$(this).closest("tr").find(".forpurchase").first().text(forPurchase);
+		if(parseFloat(thisValue || 0) > parseFloat(quantityRequested) ){
+			setTimeout(() => {
+				$("#"+thisID).addClass("is-invalid").removeClass("is-valid");
+				$("#"+thisID).next().text("Insert valid quantity");
+			}, 150);
+		}
     })
     // ----- END SELECT ITEM NAME -----
 
@@ -1110,17 +1132,17 @@ $(document).ready(function() {
 		let {
 			inventoryValidationID       = "",
 			reviseInventoryValidationID = "",
-			employeeID           = "",
-			projectID            = "",
-            purchaseRequestID 	 = "",
+			employeeID           		= "",
+			projectID            		= "",
+            purchaseRequestID 	 		= "",
 			inventoryValidationReason   = "",
 			inventoryValidationRemarks  = "",
-			approversID          = "",
-			approversStatus      = "",
-			approversDate        = "",
+			approversID          		= "",
+			approversStatus      		= "",
+			approversDate        		= "",
 			inventoryValidationStatus   = false,
-			submittedAt          = false,
-			createdAt            = false,
+			submittedAt          		= false,
+			createdAt            		= false,
 		} = data && data[0];
 
 		let requestProjectItems = "", requestCompanyItems = "";
@@ -1128,25 +1150,44 @@ $(document).ready(function() {
             requestProjectItems = requestItemData(purchaseRequestID, "project", readOnly, `inventoryValidationID = '${inventoryValidationID}'`);
             requestCompanyItems = requestItemData(purchaseRequestID, "company", readOnly, `inventoryValidationID = '${inventoryValidationID}'`);
 		}
-		
+		let projectCode="",projectName="",clientCode="",clientName="",clientAddress="";
 		if(purchaseRequestID){
-			var projectid="",projectCode="-",projectName="-",clientCode="-",clientName="-",clientAddress="-",requestorName="-",requestorDepartment="-",requestorPosition="-";
+			var purchaseRequestitems = [];
 			let purchaseRequestData     = getTableData("ims_purchase_request_tbl","","purchaseRequestStatus='2' AND purchaseRequestID="+purchaseRequestID);
 			purchaseRequestData.map(purchaseRequestItems=>{
-				
 					let projectList   = getTableData(
 						"pms_project_list_tbl AS pplt LEFT JOIN pms_client_tbl AS pct ON pct.clientID = pplt.projectListClientID", 
 						"projectListID, projectListCode, projectListName, clientCode, clientName, clientRegion, clientProvince, clientCity, clientBarangay, clientUnitNumber, clientHouseNumber, clientCountry, clientPostalCode",
 						"projectListStatus = 1 && projectListID ="+purchaseRequestItems.projectID);
+					
 					var requestorData = getTableData(`hris_employee_list_tbl JOIN hris_designation_tbl USING(designationID) LEFT JOIN hris_department_tbl ON hris_employee_list_tbl.departmentID = hris_department_tbl.departmentID`, 
 												"CONCAT(employeeFirstname,' ',employeeLastname) as employeeFullname, designationName, departmentName", "employeeID="+purchaseRequestItems.employeeID);
-					let address       = `${projectList[0].clientUnitNumber && titleCase(projectList[0].clientUnitNumber)+", "}${projectList[0].clientHouseNumber && projectList[0].clientHouseNumber +", "}${projectList[0].clientBarangay && titleCase(projectList[0].clientBarangay)+", "}${projectList[0].clientCity && titleCase(projectList[0].clientCity)+", "}${projectList[0].clientProvince && titleCase(projectList[0].clientProvince)+", "}${projectList[0].clientCountry && titleCase(projectList[0].clientCountry)+", "}${projectList[0].clientPostalCode && titleCase(projectList[0].clientPostalCode)}`;
+
+					if(projectList.length > 0){
+						purchaseRequestitems["projectid"]			= projectList[0].projectListID;
+						purchaseRequestitems["projectcode"]			= getFormCode("PRO",moment(projectList[0].createdAt),projectList[0].projectListID);
+						purchaseRequestitems["projectname"]			= projectList[0].projectListName;
+						purchaseRequestitems["clientcode"]			= projectList[0].clientCode;
+						purchaseRequestitems["clientname"]			= projectList[0].clientName;
+						purchaseRequestitems["address"] 			= `${projectList[0].clientUnitNumber && titleCase(projectList[0].clientUnitNumber)+" "}${projectList[0].clientHouseNumber && projectList[0].clientHouseNumber +" "}${projectList[0].clientBarangay && titleCase(projectList[0].clientBarangay)+", "}${projectList[0].clientCity && titleCase(projectList[0].clientCity)+", "}${projectList[0].clientProvince && titleCase(projectList[0].clientProvince)+", "}${projectList[0].clientCountry && titleCase(projectList[0].clientCountry)+", "}${projectList[0].clientPostalCode && titleCase(projectList[0].clientPostalCode)}`;
+					}
+
+					var {	
+						projectid			="0",
+						projectcode			="-",
+						projectname			="-",
+						clientcode			="-",
+						clientname			="-",
+						address 			="-"
+					}	= projectList.length > 0 && purchaseRequestitems;
+					
+					
 						if(purchaseRequestItems.purchaseRequestID	== purchaseRequestID){
-							projectid 			= projectList[0].projectListID;
-							projectCode			= getFormCode("PRO",moment(projectList[0].createdAt),projectList[0].projectListID);
-							projectName			= projectList[0].projectListName;
-							clientCode			= projectList[0].clientCode;
-							clientName			= projectList[0].clientName;
+							projectID 			= projectid;
+							projectCode			= projectcode;
+							projectName			= projectname;
+							clientCode			= clientcode;
+							clientName			= clientname;
 							clientAddress		= address;
 							requestorName		= requestorData[0].employeeFullname;
 							requestorDepartment	= requestorData[0].designationName;
@@ -1314,7 +1355,7 @@ $(document).ready(function() {
             <div class="col-md-4 col-sm-12">
                 <div class="form-group">
                     <label>Project Code</label>
-                    <input type="text" class="form-control" name="projectCode" projectid="${projectid||""}" disabled value="${projectCode||"-"}">
+                    <input type="text" class="form-control" name="projectCode" projectid="${projectID||""}" disabled value="${projectCode||"-"}">
                 </div>
             </div>
             <div class="col-md-4 col-sm-12">
@@ -1645,12 +1686,14 @@ $(document).ready(function() {
 
     // ----- SUBMIT DOCUMENT -----
 	$(document).on("click", "#btnSubmit", function () {
-		const id           = $(this).attr("inventoryValidationID");
-		const revise       = $(this).attr("revise") == "true";
-		const validate     = validateForm("form_inventory_validation");
+		const id           		= $(this).attr("inventoryValidationID");
+		const revise       		= $(this).attr("revise") == "true";
+		const validate     		= validateForm("form_inventory_validation");
+		const validateIssuance	= validateIssuanceQty();
 		removeIsValid("#tableProjectRequestItems");
 		removeIsValid("#tableCompanyRequestItems");
-		if (validate) {
+
+		if (validate && validateIssuance) {
 			const action = revise && "insert" || (id ? "update" : "insert");
 			const data   = getinventoryValidationData(action, "submit", "1", id);
 
@@ -1758,7 +1801,7 @@ $(document).ready(function() {
 		const feedback = $(this).attr("code") || getFormCode("IVR", dateToday(), id);
 
 		$("#modal_inventory_validation_content").html(preloader);
-		$("#modal_inventory_validation .page-title").text("DENY BID RECAP");
+		$("#modal_inventory_validation .page-title").text("DENY INVENTORY VALIDATION");
 		$("#modal_inventory_validation").modal("show");
 		let html = `
 		<div class="modal-body">
@@ -1780,7 +1823,7 @@ $(document).ready(function() {
 			<button class="btn btn-danger" id="btnRejectConfirmation"
 			inventoryValidationID="${id}"
 			code="${feedback}"><i class="far fa-times-circle"></i> Deny</button>
-			<button class="btn btn-cancel" data-dismiss="modal"><i class="fas fa-ban"></i> Cancel</button>
+			<button class="btn btn-cancel px-5 p-2" data-dismiss="modal"><i class="fas fa-ban"></i> Cancel</button>
 		</div>`;
 		$("#modal_inventory_validation_content").html(html);
 	});
@@ -1874,15 +1917,14 @@ $(document).ready(function() {
 	}
 	// ----- END APPROVER STATUS --
 
-
     // GETTING REQUEST ITEMS 
         function requestItemData(id, type, readOnly = false, requestID = null){
 			console.log(id+" | "+type+" | "+readOnly+" | "+requestID);
 			let html = "";
-			let condition = requestID ? requestID : `purchaseRequestID='${id}'`;
+			let condition = requestID ? requestID : `purchaseRequestID='${id}' AND inventoryValidationID IS NULL`;
             let tableData = getTableData("ims_request_items_tbl JOIN ims_inventory_item_tbl USING(itemID)",
                                         "requestItemID, costEstimateID , inventoryValidationID, ims_inventory_item_tbl.itemID AS itemID, categoryType ,ims_inventory_item_tbl.createdAt AS createdAt ,ims_request_items_tbl.itemName as itemName, ims_request_items_tbl.itemDescription as itemDescription,itemUom,quantity,stocks,forPurchase,files",
-                                        `${condition} AND categoryType='${type}' `);
+                                        `${condition} AND categoryType='${type}' AND purchaseOrderID IS NULL AND bidRecapID IS NULL`);
 				tableData.map((items,index)=>{
 					let files = items.files? `<a class="filename" href="${base_url+"assets/upload-files/request-items/"+items.files}" 
 													target="_blank">${items.files}
@@ -1901,13 +1943,13 @@ $(document).ready(function() {
 												<td>
                                                     <div class="uom">${items.itemUom}</div>
                                                 </td>
-												<td>
+												<td class="text-center">
                                                     <div class="qtyrequested">${items.quantity}</div>
                                                 </td>
-                                                <td>
+                                                <td class="text-center">
                                                     <div class="stocks">${items.stocks}</div>
                                                 </td>
-                                                <td>
+                                                <td class="text-center">
                                                     <div class="forpurchase">${items.forPurchase}</div>
                                                 </td>
                                                 <td>
@@ -1926,7 +1968,7 @@ $(document).ready(function() {
 												<td>
                                                     <div class="uom">${items.itemUom}</div>
                                                 </td>
-												<td>
+												<td class="text-center">
                                                     <div class="qtyrequested">${items.quantity}</div>
                                                 </td>
                                                 <td class="text-center">
@@ -1945,7 +1987,7 @@ $(document).ready(function() {
                                                         <div class="invalid-feedback d-block" id="invalid-${type}stocks${index}"></div>
                                                     </div>
                                                 </td>
-                                                <td>
+                                                <td class="text-center">
                                                     <div class="forpurchase">${items.forPurchase || items.quantity}</div>
                                                 </td>
                                                 <td>
@@ -1978,8 +2020,12 @@ $(document).ready(function() {
 	}
 	// ----- END REMOVE IS-VALID IN TABLE -----
 
+	// ----- FOR NO. ISSUANCE VALIDATION
+
 	
 })
+
+
 
 
 // --------------- DATABASE RELATION ---------------
@@ -2145,3 +2191,21 @@ function saveinventoryValidation(data = null, method = "submit", notificationDat
 }
 
 // --------------- END DATABASE RELATION ---------------
+
+
+function validateIssuanceQty(){
+	let returnData = 0;
+	$(`[name=stocks]`).each(function(i){
+		var thisID	 	=	this.id;
+		var thisValue 	=	this.value;
+		var	requestedQty =  $(this).closest("tr").find(".qtyrequested").first().text().replaceAll(",","");
+			console.log(thisValue+"|"+requestedQty);
+			if( parseFloat(thisValue) > parseFloat(requestedQty) ){
+					$("#"+thisID).addClass("is-invalid").removeClass("is-valid");
+					$("#"+thisID).next().text("Insert valid quantity");
+				returnData++;
+			}
+	});
+	return returnData > 0 ? false : true;
+}
+// ----- END FOR NO. ISSUANCE VALIDATIONea
