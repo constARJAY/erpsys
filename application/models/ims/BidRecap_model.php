@@ -21,6 +21,7 @@ class BidRecap_model extends CI_Model {
             $insertID = $action == "insert" ? $this->db->insert_id() : $id;   
             if($data["bidRecapStatus"] == "2"){
                 $this->creatingPO($id);
+                $this->insertBidItems($id);
             }         
             return "true|Successfully submitted|$insertID|".date("Y-m-d");
         }
@@ -61,8 +62,58 @@ class BidRecap_model extends CI_Model {
                 }
             }
 
-
-            
+        
     }
+
+
+
+
+    // ----- INSERT BID ITEMS -----
+    public function getBidItems($bidRecapID = null)
+    {
+        if ($bidRecapID) {
+            $sql   = "
+            SELECT 
+                * 
+            FROM 
+                ims_request_items_tbl 
+            WHERE 
+                referencePurchaseOrderID IS NOT NULL AND
+                bidRecapID = $bidRecapID AND 
+                purchaseOrderID IS NULL 
+            GROUP BY 
+                bidRecapID, inventoryVendorID, categoryType";
+            $query = $this->db->query($sql);
+            return $query ? $query->result_array() : [];
+        }
+        return [];
+    }
+
+    public function insertBidItems($bidRecapID = null)
+    {
+        $sessionID = $this->session->has_userdata("adminSessionID") ? $this->session->userdata("adminSessionID") : 1;
+
+        if ($bidRecapID) {
+            $bidItems = $this->getBidItems($bidRecapID);
+            $data = [];
+            foreach ($bidItems as $item) {
+                $temp = [
+                    "bidRecapID"        => $item["bidRecapID"],
+                    "inventoryVendorID" => $item["inventoryVendorID"],
+                    "categoryType"      => $item["categoryType"],
+                    "bidPoStatus"       => 0,
+                    "createdBy"         => $sessionID,
+                    "updatedBy"         => $sessionID,
+                ];
+                array_push($data, $temp);
+            }
+            if (count($data) > 0) {
+                $query = $this->db->insert_batch("ims_bid_po_tbl", $data);
+                return $query ? true : false;
+            }
+        }
+        return false;
+    }
+    // ----- END INSERT BID ITEMS -----
     
 }

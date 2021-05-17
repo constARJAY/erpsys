@@ -203,7 +203,7 @@ $(document).ready(function() {
 					{ targets: 5,  width: 200 },
 					{ targets: 6,  width: 200 },
 					{ targets: 7,  width: 200 },
-					{ targets: 8,  width: 80 },
+					{ targets: 8,  width: 80  },
 					{ targets: 9,  width: 250  },
 				],
 			});
@@ -226,12 +226,11 @@ $(document).ready(function() {
 					{ targets: 1,  width: 150 },
 					{ targets: 2,  width: 180 },
 					{ targets: 3,  width: 50  },
-					{ targets: 4,  width: 120 },
-					{ targets: 5,  width: 80  },
+					{ targets: 4,  width: 80  },
+					{ targets: 5,  width: 150 },
 					{ targets: 6,  width: 150 },
 					{ targets: 7,  width: 150 },
-					{ targets: 8,  width: 150 },
-					{ targets: 9,  width: 200 },
+					{ targets: 8,  width: 200 },
 				],
 			});
 
@@ -249,12 +248,11 @@ $(document).ready(function() {
 					{ targets: 0,  width: 150 },
 					{ targets: 1,  width: 150 },
 					{ targets: 2,  width: 50  },
-					{ targets: 3,  width: 120 },
-					{ targets: 4,  width: 80  },
+					{ targets: 3,  width: 80  },
+					{ targets: 4,  width: 150 },
 					{ targets: 5,  width: 150 },
 					{ targets: 6,  width: 150 },
-					{ targets: 7,  width: 150 },
-					{ targets: 8,  width: 200 },
+					{ targets: 7,  width: 200 },
 				],
 			});
 
@@ -276,12 +274,11 @@ $(document).ready(function() {
 					{ targets: 1,  width: 150 },
 					{ targets: 2,  width: 150 },
 					{ targets: 3,  width: 50  },
-					{ targets: 4,  width: 120 },
-					{ targets: 5,  width: 80  },
+					{ targets: 4,  width: 80  },
+					{ targets: 5,  width: 150 },
 					{ targets: 6,  width: 150 },
 					{ targets: 7,  width: 150 },
-					{ targets: 8,  width: 150 },
-					{ targets: 9,  width: 200 },
+					{ targets: 8,  width: 200 },
 				],
 			});
 
@@ -299,12 +296,11 @@ $(document).ready(function() {
 					{ targets: 0,  width: 150 },
 					{ targets: 1,  width: 150 },
 					{ targets: 2,  width: 50  },
-					{ targets: 3,  width: 120 },
-					{ targets: 4,  width: 80  },
+					{ targets: 3,  width: 80  },
+					{ targets: 4,  width: 150 },
 					{ targets: 5,  width: 150 },
 					{ targets: 6,  width: 150 },
-					{ targets: 7,  width: 150 },
-					{ targets: 8,  width: 200 },
+					{ targets: 7,  width: 200 },
 				],
 			});
 	}
@@ -912,11 +908,6 @@ $(document).ready(function() {
 					</div>
 				</td>
 				<td>
-					<div class="category">
-						${categoryName || "-"}
-					</div>
-				</td>
-				<td>
 					<div class="uom">
 						${uom || "-"}
 					</div>
@@ -1034,9 +1025,6 @@ $(document).ready(function() {
 							${disabled}>
 						<div class="invalid-feedback d-block" id="invalid-quantity"></div>
 					</div>
-				</td>
-				<td>
-					<div class="category">-</div>
 				</td>
 				<td>
 					<div class="uom">-</div>
@@ -1243,6 +1231,12 @@ $(document).ready(function() {
 		const unitCostArr = $.find(`.unitcost${attr}`).map(element => getNonFormattedAmount(element.innerText) || "0");
 		const totalAmount = quantityArr.map((qty, index) => +qty * +unitCostArr[index]).reduce((a,b) => a + b, 0);
 		$(`#totalAmount${attr}`).text(formatAmount(totalAmount, true));
+
+		const projectTotal = +getNonFormattedAmount($(`#totalAmount[project="true"]`).text()); 
+		const companyTotal = +getNonFormattedAmount($(`#totalAmount[company="true"]`).text()); 
+		const grandTotal   = projectTotal + companyTotal;
+		$("#grandTotalAmount").text(formatAmount(grandTotal, true));
+
 		return totalAmount;
 	}
 	// ----- END UPDATE TOTAL AMOUNT -----
@@ -1274,14 +1268,14 @@ $(document).ready(function() {
 		let requestProjectItems = "", requestCompanyItems = "";
 
 
-		let queryCEID  = ceID || costEstimateID;
-		let disabledCE = queryCEID != "0" ? "disabled" : "";
-		if ((!queryCEID || queryCEID == "0") && !purchaseRequestID) 
+		let queryCEID = ceID || costEstimateID;
+		let disabledCE = queryCEID != 0 ? "disabled" : "";
+		if (!queryCEID && !purchaseRequestID) 
 		{
 			requestProjectItems += getItemRow(true);
 			requestCompanyItems += getItemRow(false);
 		} 
-		else if ((!queryCEID || queryCEID == "0") && purchaseRequestID) 
+		else if (!queryCEID && purchaseRequestID) 
 		{
 			if (purchaseRequestStatus != 0) {
 				requestItemsData = getTableData(
@@ -1313,7 +1307,7 @@ $(document).ready(function() {
 				companyTotalAmount += (quantity * unitCost);
 			})
 		} 
-		else if ((queryCEID || queryCEID != "0") && !purchaseRequestID) 
+		else if (queryCEID && !purchaseRequestID) 
 		{
 			requestItemsData = getTableData(
 				`ims_request_items_tbl AS irit
@@ -1336,7 +1330,7 @@ $(document).ready(function() {
 				companyTotalAmount += (quantity * unitCost);
 			})
 		} 
-		else if ((queryCEID || queryCEID != "0") && purchaseRequestID) 
+		else if (queryCEID && purchaseRequestID) 
 		{
 			requestItemsData = getTableData(
 				`ims_request_items_tbl AS irit
@@ -1365,7 +1359,6 @@ $(document).ready(function() {
 		</th>` : ``;
 		let tableProjectRequestItemsName = !disabled ? "tableProjectRequestItems" : "tableProjectRequestItems0";
 		let tableCompanyRequestItemsName = !disabled ? "tableCompanyRequestItems" : "tableCompanyRequestItems0";
-		alert(disabledCE);
 		let buttonProjectAddDeleteRow = !disabled ? `
 		<div class="w-100 text-left my-2">
 			<button type="button" class="btn btn-primary btnAddRow" id="btnAddRow" project="true" ${disabledCE}><i class="fas fa-plus-circle"></i> Add Row</button>
@@ -1388,7 +1381,6 @@ $(document).ready(function() {
 						<th>Item Code</th>
 						<th>Item Name ${!disabled ? "<code>*</code>" : ""}</th>
 						<th>Quantity ${!disabled ? "<code>*</code>" : ""}</th>
-						<th>Category</th>
 						<th>UOM</th>
 						<th>Unit Cost</th>
 						<th>Total Cost</th>
@@ -1420,7 +1412,6 @@ $(document).ready(function() {
 						<th>Item Code</th>
 						<th>Item Name ${!disabled ? "<code>*</code>" : ""}</th>
 						<th>Quantity ${!disabled ? "<code>*</code>" : ""}</th>
-						<th>Category</th>
 						<th>UOM</th>
 						<th>Unit Cost</th>
 						<th>Total Cost</th>
@@ -1464,14 +1455,13 @@ $(document).ready(function() {
 			}
 	
 			$("#tableMaterialsEquipment").html(preloader);
-			// let table = "";
-			// if (costEstimateID && costEstimateID != 0) {
-			// 	table = getTableMaterialsEquipment(costEstimateID, false, false);
-			// } 
-			// else {
-			// 	table = getTableMaterialsEquipment(null, false, false);
-			// }
-			let table = getTableMaterialsEquipment(costEstimateID, false, false);
+			let table = "";
+			if (costEstimateID && costEstimateID != 0) {
+				table = getTableMaterialsEquipment(costEstimateID, false, false);
+			} 
+			else {
+				table = getTableMaterialsEquipment(null, false, false);
+			}
 			setTimeout(() => {
 				table && $("#tableMaterialsEquipment").html(table);
 				initDataTables();
@@ -1508,8 +1498,9 @@ $(document).ready(function() {
         const uom            = $('option:selected', this).attr("uom");
 		const isProject      = $(this).closest("tbody").attr("project") == "true";
 		const attr           = isProject ? "[project=true]" : "[company=true]";
+		const costEstimateID = $(`[name="costEstimateID"]`).val();
 
-		if (selectedItemID != "0") {
+		if (selectedItemID != "0" && (!costEstimateID || costEstimateID == "0")) {
 			$(`.btnAddRow${attr}`).removeAttr("disabled");
 		} else {
 			$(`.btnAddRow${attr}`).attr("disabled", true);
@@ -1876,6 +1867,21 @@ $(document).ready(function() {
             <div class="col-sm-12" id="tableMaterialsEquipment">
                 ${getTableMaterialsEquipment(null, data, readOnly)}
             </div>
+
+			<div class="col-12">
+				<div class="row py-2">
+					<div class="offset-md-8 col-md-4 col-sm-12 pt-3 pb-2">
+						<div class="row d-flex justify-content-end align-items-end" style="font-size: 1.3rem; font-weight:bold; border-bottom: 3px double black;">
+							<div class="col-6 text-right">Grand Total:</div>
+							<div class="col-6 text-right text-danger"
+								id="grandTotalAmount"
+								style="font-size: 1.3em">
+								${formatAmount("0", true)}
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
 
             <div class="col-md-12 text-right mt-3">
                 ${button}
@@ -2340,7 +2346,7 @@ $(document).ready(function() {
 			</div>
 		</div>
 		<div class="modal-footer text-right">
-			<button type="button" class="btn btn-danger" id="btnRejectConfirmation"
+			<button type="button" class="btn btn-danger px-5 p-2" id="btnRejectConfirmation"
 			purchaseRequestID="${id}"
 			code="${feedback}"><i class="far fa-times-circle"></i> Deny</button>
 			<button type="button" class="btn btn-cancel btnCancel px-5 p-2" data-dismiss="modal"><i class="fas fa-ban"></i> Cancel</button>
@@ -2468,7 +2474,7 @@ function getConfirmation(method = "submit") {
 			swalImg   = `${base_url}assets/modal/reject.svg`;
 			break;
 		case "cancelform":
-			swalTitle = `CANCEL ${title.toUpperCase()} DOCUMENT`;
+			swalTitle = `CANCEL ${title.toUpperCase()}`;
 			swalText  = "Are you sure to cancel this document?";
 			swalImg   = `${base_url}assets/modal/cancel.svg`;
 			break;

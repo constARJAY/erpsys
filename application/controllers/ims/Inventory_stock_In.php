@@ -1,14 +1,14 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
-class Inventory_stock_In extends CI_Controller {
+class Inventory_stock_in extends CI_Controller {
 
     public function __construct()
     {
         parent::__construct();
         $this->load->model("ims/InventoryStockIn_model", "inventorystockin");
         //$this->load->model("ims/PurchaseRequest_model", "purchaserequest");
-        isAllowed(46);
+        isAllowed(129);
     }
 
     public function index()
@@ -16,7 +16,7 @@ class Inventory_stock_In extends CI_Controller {
         $data["title"] = "Inventory Stock In";
 
         $this->load->view("template/header",$data);
-        $this->load->view("ims/Inventory_Stock_In/index");
+        $this->load->view("ims/inventory_stock_in/index");
         $this->load->view("template/footer");
     }
     public function insertbarcode()

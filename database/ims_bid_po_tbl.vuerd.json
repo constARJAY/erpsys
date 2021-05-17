@@ -1,0 +1,297 @@
+{
+  "canvas": {
+    "version": "2.0.13",
+    "width": 2000,
+    "height": 2000,
+    "scrollTop": -1,
+    "scrollLeft": 0,
+    "zoomLevel": 1,
+    "show": {
+      "tableComment": true,
+      "columnComment": true,
+      "columnDataType": true,
+      "columnDefault": true,
+      "columnAutoIncrement": true,
+      "columnPrimaryKey": true,
+      "columnUnique": true,
+      "columnNotNull": true,
+      "relationship": true
+    },
+    "database": "MySQL",
+    "databaseName": "",
+    "canvasType": "ERD",
+    "language": "GraphQL",
+    "tableCase": "pascalCase",
+    "columnCase": "camelCase",
+    "highlightTheme": "VS2015",
+    "bracketType": "none",
+    "setting": {
+      "relationshipDataTypeSync": true,
+      "columnOrder": [
+        "columnName",
+        "columnDataType",
+        "columnNotNull",
+        "columnUnique",
+        "columnAutoIncrement",
+        "columnDefault",
+        "columnComment"
+      ]
+    }
+  },
+  "table": {
+    "tables": [
+      {
+        "name": "ims_bid_po_tbl",
+        "comment": "",
+        "columns": [
+          {
+            "name": "bidPoID",
+            "comment": "",
+            "dataType": "BIGINT(21)",
+            "default": "",
+            "option": {
+              "autoIncrement": true,
+              "primaryKey": true,
+              "unique": false,
+              "notNull": true
+            },
+            "ui": {
+              "active": false,
+              "pk": true,
+              "fk": false,
+              "pfk": false,
+              "widthName": 60,
+              "widthComment": 60,
+              "widthDataType": 68,
+              "widthDefault": 60
+            },
+            "id": "d46c0e69-33be-4a52-8ac8-b0bb5d69e159"
+          },
+          {
+            "name": "purchaseOrderID",
+            "comment": "",
+            "dataType": "BIGINT(21)",
+            "default": "",
+            "option": {
+              "autoIncrement": false,
+              "primaryKey": false,
+              "unique": false,
+              "notNull": false
+            },
+            "ui": {
+              "active": false,
+              "pk": false,
+              "fk": false,
+              "pfk": false,
+              "widthName": 102,
+              "widthComment": 60,
+              "widthDataType": 68,
+              "widthDefault": 60
+            },
+            "id": "be80960f-e0cc-4145-a4d9-03e3263bbe60"
+          },
+          {
+            "name": "bidRecapID",
+            "comment": "",
+            "dataType": "BIGINT(21)",
+            "default": "",
+            "option": {
+              "autoIncrement": false,
+              "primaryKey": false,
+              "unique": false,
+              "notNull": false
+            },
+            "ui": {
+              "active": false,
+              "pk": false,
+              "fk": false,
+              "pfk": false,
+              "widthName": 70,
+              "widthComment": 60,
+              "widthDataType": 68,
+              "widthDefault": 60
+            },
+            "id": "4ea13e1e-ad2f-4c74-bd74-c3f982b160e5"
+          },
+          {
+            "name": "inventoryVendorID",
+            "comment": "",
+            "dataType": "BIGINT(21)",
+            "default": "",
+            "option": {
+              "autoIncrement": false,
+              "primaryKey": false,
+              "unique": false,
+              "notNull": false
+            },
+            "ui": {
+              "active": false,
+              "pk": false,
+              "fk": false,
+              "pfk": false,
+              "widthName": 109,
+              "widthComment": 60,
+              "widthDataType": 68,
+              "widthDefault": 60
+            },
+            "id": "dd3a143b-1475-44d0-b1f3-349aa4f4bc31"
+          },
+          {
+            "name": "categoryType",
+            "comment": "",
+            "dataType": "VARCHAR(100)",
+            "default": "",
+            "option": {
+              "autoIncrement": false,
+              "primaryKey": false,
+              "unique": false,
+              "notNull": false
+            },
+            "ui": {
+              "active": false,
+              "pk": false,
+              "fk": false,
+              "pfk": false,
+              "widthName": 80,
+              "widthComment": 60,
+              "widthDataType": 95,
+              "widthDefault": 60
+            },
+            "id": "082d930b-b84b-4851-b201-1b0dadeb2931"
+          },
+          {
+            "name": "bidPoStatus",
+            "comment": "",
+            "dataType": "INT(10)",
+            "default": "",
+            "option": {
+              "autoIncrement": false,
+              "primaryKey": false,
+              "unique": false,
+              "notNull": false
+            },
+            "ui": {
+              "active": false,
+              "pk": false,
+              "fk": false,
+              "pfk": false,
+              "widthName": 72,
+              "widthComment": 60,
+              "widthDataType": 60,
+              "widthDefault": 60
+            },
+            "id": "e58e9057-3c0b-4d43-9702-f545a54de0f0"
+          },
+          {
+            "name": "createdBy",
+            "comment": "",
+            "dataType": "BIGINT(21)",
+            "default": "",
+            "option": {
+              "autoIncrement": false,
+              "primaryKey": false,
+              "unique": false,
+              "notNull": false
+            },
+            "ui": {
+              "active": false,
+              "pk": false,
+              "fk": false,
+              "pfk": false,
+              "widthName": 61,
+              "widthComment": 60,
+              "widthDataType": 68,
+              "widthDefault": 60
+            },
+            "id": "81bee890-dabe-4708-bae6-3010d4ccc29e"
+          },
+          {
+            "name": "updatedBy",
+            "comment": "",
+            "dataType": "BIGINT(21)",
+            "default": "",
+            "option": {
+              "autoIncrement": false,
+              "primaryKey": false,
+              "unique": false,
+              "notNull": false
+            },
+            "ui": {
+              "active": false,
+              "pk": false,
+              "fk": false,
+              "pfk": false,
+              "widthName": 64,
+              "widthComment": 60,
+              "widthDataType": 68,
+              "widthDefault": 60
+            },
+            "id": "33645c54-7656-47bc-bbcc-109f3fbf68ad"
+          },
+          {
+            "name": "createdAt",
+            "comment": "",
+            "dataType": "TIMESTAMP",
+            "default": "current_timestamp()",
+            "option": {
+              "autoIncrement": false,
+              "primaryKey": false,
+              "unique": false,
+              "notNull": true
+            },
+            "ui": {
+              "active": false,
+              "pk": false,
+              "fk": false,
+              "pfk": false,
+              "widthName": 60,
+              "widthComment": 60,
+              "widthDataType": 77,
+              "widthDefault": 118
+            },
+            "id": "b9fbe146-7c63-4c98-85b3-b34971390e09"
+          },
+          {
+            "name": "updatedAt",
+            "comment": "",
+            "dataType": "TIMESTAMP",
+            "default": "current_timestamp() ON UPDATE current_timestamp()",
+            "option": {
+              "autoIncrement": false,
+              "primaryKey": false,
+              "unique": false,
+              "notNull": true
+            },
+            "ui": {
+              "active": false,
+              "pk": false,
+              "fk": false,
+              "pfk": false,
+              "widthName": 61,
+              "widthComment": 60,
+              "widthDataType": 77,
+              "widthDefault": 317
+            },
+            "id": "12c5431b-3cff-434d-85e0-cbfa81a9274a"
+          }
+        ],
+        "ui": {
+          "active": true,
+          "left": 234,
+          "top": 128,
+          "zIndex": 130,
+          "widthName": 89,
+          "widthComment": 60
+        },
+        "id": "d2389668-e3c1-401a-9a29-1875352bd68d"
+      }
+    ],
+    "indexes": []
+  },
+  "memo": {
+    "memos": []
+  },
+  "relationship": {
+    "relationships": []
+  }
+}

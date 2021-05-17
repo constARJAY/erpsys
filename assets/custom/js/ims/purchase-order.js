@@ -134,10 +134,24 @@ $(document).ready(function() {
 	};
 
 	const bidRecapList = getTableData(
-		`ims_bid_recap_tbl AS ibrt
+		// `ims_bid_recap_tbl AS ibrt
+		// 	LEFT JOIN pms_project_list_tbl AS pplt ON ibrt.projectID = pplt.projectListID`,
+		// "ibrt.*, pplt.projectListClientID AS clientID",
+		// `bidRecapStatus = 2`
+
+		`ims_request_items_tbl AS irit
+			LEFT JOIN ims_bid_recap_tbl AS ibrt USING(bidRecapID)
 			LEFT JOIN pms_project_list_tbl AS pplt ON ibrt.projectID = pplt.projectListID`,
-		"ibrt.*, pplt.projectListClientID AS clientID",
-		`bidRecapStatus = 2`
+		`irit.bidRecapID, 
+		irit.inventoryVendorID, 
+		irit.categoryType, 
+		ibrt.createdAt, 
+		pplt.projectListClientID AS clientID, 
+		ibrt.projectID, 
+		ibrt.purchaseRequestID, 
+		ibrt.bidRecapReason`,
+		`ibrt.bidRecapStatus = 2 AND irit.bidRecapID IS NOT NULL
+		GROUP BY irit.bidRecapID, irit.inventoryVendorID, irit.categoryType`
 	)
 
 	const inventoryPriceList = getTableData(
@@ -425,28 +439,30 @@ $(document).ready(function() {
                 id="${encryptString(purchaseOrderID )}" 
                 code="${getFormCode("PO", createdAt, purchaseOrderID )}"><i class="fas fa-edit"></i> Edit</button>`;
 
-			html += `
-            <tr class="${btnClass}" id="${encryptString(purchaseOrderID )}">
-                <td>${getFormCode("PO", createdAt, purchaseOrderID )}</td>
-                <td>${fullname}</td>
-				<td>${bidRecapID ? getFormCode("BRF", ibrtCreatedAt, bidRecapID) : "-"}</td>
-				<td>
-					<div>
-						${projectListName || '-'}
-					</div>
-					<small style="color:#848482;">${projectListCode || '-'}</small>
-				</td>
-                <td>
-                    ${employeeFullname(getCurrentApprover(approversID, approversDate, purchaseOrderStatus, true))}
-                </td>
-				<td>${dateCreated}</td>
-				<td>${dateSubmitted}</td>
-				<td>${dateApproved}</td>
-                <td class="text-center">
-                    ${getStatusStyle(purchaseOrderStatus)}
-                </td>
-				<td>${remarks}</td>
-            </tr>`;
+			if (isImCurrentApprover(approversID, approversDate, purchaseOrderStatus) || isAlreadyApproved(approversID, approversDate)) {
+				html += `
+				<tr class="${btnClass}" id="${encryptString(purchaseOrderID )}">
+					<td>${getFormCode("PO", createdAt, purchaseOrderID )}</td>
+					<td>${fullname}</td>
+					<td>${bidRecapID ? getFormCode("BRF", ibrtCreatedAt, bidRecapID) : "-"}</td>
+					<td>
+						<div>
+							${projectListName || '-'}
+						</div>
+						<small style="color:#848482;">${projectListCode || '-'}</small>
+					</td>
+					<td>
+						${employeeFullname(getCurrentApprover(approversID, approversDate, purchaseOrderStatus, true))}
+					</td>
+					<td>${dateCreated}</td>
+					<td>${dateSubmitted}</td>
+					<td>${dateApproved}</td>
+					<td class="text-center">
+						${getStatusStyle(purchaseOrderStatus)}
+					</td>
+					<td>${remarks}</td>
+				</tr>`;
+			}
 		});
 
 		html += `
@@ -682,12 +698,56 @@ $(document).ready(function() {
 
 
 	// ----- GET BID RECAP LIST -----
-	function getBidRecapList(id = null, status = 0, display = true) {
+	function getBidRecapList(id = 0, status = 0, display = true) {
 		// const createdBRList = getTableData("ims_purchase_order_tbl", "bidRecapID", "purchaseOrderStatus <> 3 AND purchaseOrderStatus <> 4").map(br => br.bidRecapID);
 		const createdBRList = [];
+
+		const pendingBidRecap = getTableData(
+			`ims_bid_po_tbl AS ibpt 
+				LEFT JOIN ims_bid_recap_tbl AS ibrt USING(bidRecapID)
+				LEFT JOIN pms_project_list_tbl AS pplt ON ibrt.projectID = pplt.projectListID`,
+			`ibpt.bidRecapID, 
+			ibpt.inventoryVendorID, 
+			ibpt.categoryType, 
+			ibrt.createdAt, 
+			pplt.projectListClientID AS clientID, 
+			ibrt.projectID, 
+			ibrt.purchaseRequestID, 
+			ibrt.bidRecapReason`,
+			`ibrt.bidRecapStatus = 2 AND 
+			ibpt.bidPoStatus = 0 OR
+			ibpt.bidRecapID = ${id}
+			GROUP BY ibpt.bidRecapID`
+		);
+
+		// const purchaseOrderList = getTableData(
+		// 	`ims_purchase_order_tbl`,
+		// 	`bidRecapID, inventoryVendorID, categoryType`,
+		// 	`purchaseOrderStatus <> 3 AND purchaseOrderStatus <> 4`);
+
+		// let tempBidRecapList = [], referenceNoList = [];
+		// bidRecapList.map(bidRecap => {
+		// 	const { bidRecapID, inventoryVendorID, categoryType } = bidRecap;
+		// 	if (tempBidRecapList.length > 0) {
+		// 		for(var i=0; i<tempBidRecapList.length; i++) {
+		// 			const tBidRecapID        = tempBidRecapList[i].bidRecapID;
+		// 			const tInventoryVendorID = tempBidRecapList[i].inventoryVendorID;
+		// 			const tCategoryType      = tempBidRecapList[i].categoryType;
+		// 			if (tBidRecapID != bidRecapID && tInventoryVendorID != inventoryVendorID && tCategoryType != categoryType) {
+		// 				tempBidRecapList.push({bidRecapID, inventoryVendorID, categoryType});
+		// 				referenceNoList.push(bidRecapID);
+		// 				break;
+		// 			}
+		// 		}
+		// 	} else {
+		// 		tempBidRecapList.push({bidRecapID, inventoryVendorID, categoryType});
+		// 		referenceNoList.push(bidRecap);
+		// 	}
+		// })
+
 		let html = ``;
 		if (!status || status == 0) {
-			html += bidRecapList.filter(br => createdBRList.indexOf(br.bidRecapID) == -1 || br.bidRecapID == id).map(br => {
+			html += pendingBidRecap.filter(br => createdBRList.indexOf(br.bidRecapID) == -1 || br.bidRecapID == id).map(br => {
 				return `
 				<option 
 				value     = "${br.bidRecapID}" 
@@ -701,7 +761,7 @@ $(document).ready(function() {
 				</option>`;
 			})
 		} else {
-			html += bidRecapList.map(br => {
+			html += pendingBidRecap.map(br => {
 				return `
 				<option 
 					value     = "${br.bidRecapID}" 
@@ -715,7 +775,7 @@ $(document).ready(function() {
 				</option>`;
 			})
 		}
-        return display ? html : bidRecapList;
+        return display ? html : pendingBidRecap;
 
 	}
 	// ----- END GET BID RECAP LIST -----
@@ -723,16 +783,27 @@ $(document).ready(function() {
 
 	// ----- GET INVENTORY VENDOR ON BID RECAP -----
 	function getInventoryVendorOnBidRecap(bidRecapID = null, invVendorID = null) {
-		let html = `<option selected disabled>Select Vendor Name</option>`;
+		let html = `<option selected disabled>Select Vendor Code</option>`;
 		if (bidRecapID) {
+			// let vendorTable = getTableData(
+			// 	`ims_request_items_tbl AS irit
+			// 		LEFT JOIN ims_inventory_vendor_tbl AS iivt USING(inventoryVendorID)
+			// 	WHERE
+			// 		bidRecapID = ${bidRecapID}
+			// 		GROUP BY irit.inventoryVendorID`,
+			// 	`iivt.*`
+			// );
+
 			let vendorTable = getTableData(
-				`ims_request_items_tbl AS irit
+				`ims_bid_po_tbl AS ibpt
 					LEFT JOIN ims_inventory_vendor_tbl AS iivt USING(inventoryVendorID)
-				WHERE
-					bidRecapID = ${bidRecapID}
-					GROUP BY irit.inventoryVendorID`,
+				WHERE 
+					ibpt.bidRecapID = ${bidRecapID} AND 
+					ibpt.bidPoStatus = 0 OR 
+					ibpt.inventoryVendorID = ${invVendorID}
+				GROUP BY ibpt.inventoryVendorID`,
 				`iivt.*`
-			);
+			)
 			if (vendorTable.length > 0) {
 				vendorTable.map(vendor => {
 					const { 
@@ -779,13 +850,23 @@ $(document).ready(function() {
 	function getCategoryType(bidRecapID = null, inventoryVendorID = null, catType = "") {
 		let html = `<option selected disabled>Select Category Type</option>`;
 		if (bidRecapID && inventoryVendorID) {
+			// let requestItems = getTableData(
+			// 	`ims_request_items_tbl
+			// 	WHERE
+			// 		bidRecapID = ${bidRecapID} AND
+			// 		inventoryVendorID = ${inventoryVendorID} AND
+			// 		(categoryType <> '' AND categoryType IS NOT NULL)
+ 			// 		GROUP BY categoryType`,
+			// );
+
 			let requestItems = getTableData(
-				`ims_request_items_tbl
-				WHERE
-					bidRecapID = ${bidRecapID} AND
+				`ims_bid_po_tbl
+				WHERE 
+					bidRecapID = ${bidRecapID} AND 
 					inventoryVendorID = ${inventoryVendorID} AND
-					(categoryType <> '' AND categoryType IS NOT NULL)
- 					GROUP BY categoryType`,
+					bidPoStatus = 0 OR
+					categoryType = '${catType}'
+				GROUP BY categoryType`
 			);
 
 			const purchaseOrderList = getTableData(
@@ -1314,7 +1395,6 @@ $(document).ready(function() {
 				isVatable = $(`[name="inventoryVendorID"] option:selected`).attr("vatable") == "true";
 			}
 			
-
 			if (total == 0 && !isRevise) {
 				total       = categoryType == "project" ? projectTotalCost : companyTotalCost;
 				discount    = 0;
@@ -1324,16 +1404,17 @@ $(document).ready(function() {
 				totalVat = vat + vatSales;
 				lessEwt  = totalVat * 0.01;
 				grandTotalAmount = totalVat - lessEwt;
-			} else if (total && isRevise) {
-				total       = categoryType == "project" ? reviseProjectTotalCost : reviseCompanyTotalCost;
-				discount    = 0;
-				totalAmount = total - discount;
-				vat      = isVatable ? totalAmount * 0.12 : 0;
-				vatSales = totalAmount - vat;
-				totalVat = vat + vatSales;
-				lessEwt  = totalVat * 0.01;
-				grandTotalAmount = totalVat - lessEwt;
-			}
+			} 
+			// else if (total && isRevise) {
+			// 	total       = categoryType == "project" ? reviseProjectTotalCost : reviseCompanyTotalCost;
+			// 	discount    = 0;
+			// 	totalAmount = total - discount;
+			// 	vat      = isVatable ? totalAmount * 0.12 : 0;
+			// 	vatSales = totalAmount - vat;
+			// 	totalVat = vat + vatSales;
+			// 	lessEwt  = totalVat * 0.01;
+			// 	grandTotalAmount = totalVat - lessEwt;
+			// }
 
 		} else {
 			requestProjectItems += getItemRow(true);
@@ -1617,7 +1698,15 @@ $(document).ready(function() {
 		}
 
 		if (!readOnly && (!status || status == "false")) {
-			const table = getCategoryTypeTable([{bidRecapID, inventoryVendorID, categoryType}], readOnly);
+			const purchaseOrderID = $("#btnBack").attr("purchaseOrderID");
+			const data = purchaseOrderID ? 
+				getTableData(
+					`ims_purchase_order_tbl AS ipot
+						LEFT JOIN ims_purchase_request_tbl AS iprt USING(purchaseRequestID)`, 
+					`ipot.*, iprt.projectID, iprt.referenceCode, iprt.purchaseRequestReason`, 
+					"purchaseOrderID=" + purchaseOrderID) : 
+				[{bidRecapID, inventoryVendorID, categoryType}];
+			const table = getCategoryTypeTable(data, readOnly);
 			if (bidRecapID && inventoryVendorID && categoryType) {
 				$("#tableRequestItems").html(preloader);
 				setTimeout(() => {
@@ -1662,11 +1751,13 @@ $(document).ready(function() {
 		const bidRecapID        = $(this).val();
 		const inventoryVendorID = $(`[name="inventoryVendorID"]`).val();
 		const projectID         = $("option:selected", this).attr("projectID");
+		const status            = $(this).attr("status");
 		projectID && $(`[name="projectID"]`).val(projectID).trigger("change");
-
-		const vendors = getInventoryVendorOnBidRecap(bidRecapID, inventoryVendorID);
-		$(`[name="inventoryVendorID"]`).html(vendors);
-		getCategoryValue();
+		if (bidRecapID != null && inventoryVendorID && inventoryVendorID != 0 && inventoryVendorID != "null" || status == "false") {
+			const vendors = getInventoryVendorOnBidRecap(bidRecapID, inventoryVendorID);
+			$(`[name="inventoryVendorID"]`).html(vendors);
+			getCategoryValue();
+		}
 	})
 	// ----- END SELECT REFERENCE NO. -----
 
@@ -2077,7 +2168,7 @@ $(document).ready(function() {
 			revisePurchaseOrderID = "",
 			employeeID            = "",
 			projectID             = "",
-			bidRecapID            = "",
+			bidRecapID            = 0,
 			inventoryVendorID     = "",
 			vendorName            = "",
 			vendorAddress         = "",
@@ -2271,7 +2362,7 @@ $(document).ready(function() {
 			</div>
 			<div class="col-md-4 col-sm-12">
 				<div class="form-group">
-					<label>Vendor Name ${!disabledVendorCode ? "<code>*</code>" : ""}</label>
+					<label>Vendor Code ${!disabledVendorCode ? "<code>*</code>" : ""}</label>
 					<select class="form-control validate select2"
 						name="inventoryVendorID"
 						id="inventoryVendorID"
@@ -2606,12 +2697,22 @@ $(document).ready(function() {
 	// ----- END CHECK TABLE MATERIALS AND EQUIPMENT -----
 
 
+	// ----- REMOVE IS-VALID IN TABLE -----
+	function removeIsValid(element = "table") {
+		$(element).find(".validated, .is-valid, .no-error").removeClass("validated")
+		.removeClass("is-valid").removeClass("no-error");
+	}
+	// ----- END REMOVE IS-VALID IN TABLE -----
+
+
 	// ----- SUBMIT DOCUMENT -----
 	$(document).on("click", "#btnSubmit", function () {
 		const id       = $(this).attr("purchaseOrderID");
 		const revise   = $(this).attr("revise") == "true";
 		const validate = validateForm("form_purchase_order");
 		const isValid  = checkTableMaterialsEquipment();
+		removeIsValid("#tableProjectOrderItems0");
+		removeIsValid("#tableCompanyOrderItems0");
 
 		if (validate && isValid) {
 			const action = revise && "insert" || (id ? "update" : "insert");

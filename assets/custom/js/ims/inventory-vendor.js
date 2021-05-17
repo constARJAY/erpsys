@@ -735,7 +735,7 @@ $(document).ready(function () {
                                 name="inventoryVendorMobile" 
                                 id="inventoryVendorMobile" 
                                 data-allowcharacters="[0-9]" 
-                                mask="0\\999-9999-999" 
+                                mask="0\\999-999-9999" 
                                 minlength="13" 
                                 maxlength="13"
                                 value="${inventoryVendorMobile}"

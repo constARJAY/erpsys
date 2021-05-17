@@ -132,7 +132,7 @@ $(document).ready(function() {
 		LEFT JOIN ims_purchase_request_tbl as iprt ON iprt.purchaseRequestID = ipot.purchaseRequestID
 		LEFT JOIN ims_request_items_tbl as irit ON irit.purchaseRequestID = iprt.purchaseRequestID AND irit.purchaseOrderID = ipot.purchaseOrderID AND ipot.categoryType = irit.categoryType`, 
         "ipot.purchaseOrderID, vendorName,ipot.createdAt",
-        "purchaseOrderStatus = 2 AND purchaseRequestStatus =2 AND (orderedPending !=0)");
+        "purchaseOrderStatus = 2 AND purchaseRequestStatus =2 AND (orderedPending !=0 OR orderedPending IS NULL)");
 	// END GLOBAL VARIABLE - REUSABLE 
 
 
@@ -1289,7 +1289,7 @@ $(document).ready(function() {
 
                 <div class="w-100">
 					<hr class="pb-1">
-					<div class="text-primary font-weight-bold" style="font-size: 1.5rem;">Services: </div>
+					<div class="text-primary font-weight-bold" style="font-size: 1.5rem;">Receiving Item/s: </div>
                     <table class="table table-striped" id="${tableServiceRequisitionItems}">
                         <thead>
                             <tr style="white-space: nowrap">
@@ -1330,7 +1330,7 @@ $(document).ready(function() {
 			// updateServiceOptions();
 			purchaseOrderID && purchaseOrderID != 0 && $("[name=purchaseOrderID]").trigger("change");
             !purchaseOrderID && purchaseOrderID == 0 && $("#dateReceived").val(moment(new Date).format("MMMM DD, YYYY"));
-			$("#dateReceived").data("daterangepicker").minDate = moment();
+			$("#dateReceived").data("daterangepicker").maxDate = moment();
 			return html;
 		}, 300);
 	}

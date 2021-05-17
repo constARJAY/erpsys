@@ -1151,6 +1151,7 @@ $(document).ready(function() {
             requestCompanyItems = requestItemData(purchaseRequestID, "company", readOnly, `inventoryValidationID = '${inventoryValidationID}'`);
 		}
 		let projectCode="",projectName="",clientCode="",clientName="",clientAddress="";
+		var requestorname="",requestordepartment="",requestorposition="";
 		if(purchaseRequestID){
 			var purchaseRequestitems = [];
 			let purchaseRequestData     = getTableData("ims_purchase_request_tbl","","purchaseRequestStatus='2' AND purchaseRequestID="+purchaseRequestID);
@@ -1189,9 +1190,9 @@ $(document).ready(function() {
 							clientCode			= clientcode;
 							clientName			= clientname;
 							clientAddress		= address;
-							requestorName		= requestorData[0].employeeFullname;
-							requestorDepartment	= requestorData[0].designationName;
-							requestorPosition	= requestorData[0].departmentName;
+							requestorname		= requestorData[0].employeeFullname;
+							requestordepartment	= requestorData[0].designationName;
+							requestorposition	= requestorData[0].departmentName;
 						}
 				});
 		}
@@ -1386,19 +1387,19 @@ $(document).ready(function() {
             <div class="col-md-4 col-sm-12">
                 <div class="form-group">
                     <label>Requestor Name</label>
-                    <input type="text" class="form-control" disabled name="requestorName" value="${requestorName||"-"}">
+                    <input type="text" class="form-control" disabled name="requestorName" value="${requestorname||"-"}">
                 </div>
             </div>
             <div class="col-md-4 col-sm-12">
                 <div class="form-group">
                     <label>Department</label>
-                    <input type="text" class="form-control" disabled name="requestorDepartment" value="${requestorDepartment||"-"}">
+                    <input type="text" class="form-control" disabled name="requestorDepartment" value="${requestordepartment||"-"}">
                 </div>
             </div>
             <div class="col-md-4 col-sm-12">
                 <div class="form-group">
                     <label>Position</label>
-                    <input type="text" class="form-control" disabled name="requestorPosition" value="${requestorPosition||"-"}">
+                    <input type="text" class="form-control" disabled name="requestorPosition" value="${requestorposition||"-"}">
                 </div>
             </div>
             <div class="col-sm-12">

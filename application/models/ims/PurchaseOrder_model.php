@@ -213,6 +213,16 @@ class PurchaseOrder_model extends CI_Model {
 
         if ($query) {
             $insertID = $action == "insert" ? $this->db->insert_id() : $id;
+            // ----- UPDATE BID ITEMS -----
+            $poData            = $this->getPurchaseOrder($id);
+            $bidRecapID        = $poData->bidRecapID ?? $data["bidRecapID"];
+            $inventoryVendorID = $poData->inventoryVendorID ?? $data["inventoryVendorID"];
+            $categoryType      = $poData->categoryType ?? $data["categoryType"];
+            $status            = $data["purchaseOrderStatus"];
+            if ($bidRecapID && $bidRecapID != "" && $inventoryVendorID && $inventoryVendorID != "" && $categoryType && $categoryType != "") {
+                $this->db->query("CALL proc_update_bid_po_items($bidRecapID, $inventoryVendorID, '$categoryType', $status)");
+            }
+            // ----- END UPDATE BID ITEMS -----
             return "true|Successfully submitted|$insertID|".date("Y-m-d");
         }
         return "false|System error: Please contact the system administrator for assistance!";

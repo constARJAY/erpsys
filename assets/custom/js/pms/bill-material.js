@@ -482,7 +482,7 @@ $(document).ready(function() {
 				<tr>
 					<td>${getFormCode("BOM", createdAt, billMaterialID )}</td>
 					<td>${fullname}</td>
-					<td>${getFormCode("IVR",createdAt,referenceCode)}</td>
+					<td>${getFormCode("CEF",createdAt,referenceCode)}</td>
 					<td>${projectListCode || '-'}</td>
 					<td>${projectListName || '-'}</td>
 					<td>
@@ -580,7 +580,7 @@ $(document).ready(function() {
             <tr>
                 <td>${getFormCode("BOM", createdAt, billMaterialID )}</td>
                 <td>${fullname}</td>
-				<td>${getFormCode("IVR",createdAt,referenceCode)}</td>
+				<td>${getFormCode("CEF",createdAt,referenceCode)}</td>
                 <td>${projectListCode || '-'}</td>
                 <td>${projectListName || '-'}</td>
                 <td>
