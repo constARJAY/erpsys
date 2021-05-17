@@ -131,7 +131,6 @@ $(document).ready(function () {
 					{ targets: 5, width: 200 },
 					{ targets: 6, width: 80  },
 					{ targets: 7, width: 250 },
-					{ targets: 8, width: 80  },
 				],
 			});
 
@@ -153,7 +152,6 @@ $(document).ready(function () {
 					{ targets: 5, width: 200 },
 					{ targets: 6, width: 80  },
 					{ targets: 7, width: 250 },
-					{ targets: 8, width: 80  },
 				],
 			});
 	}
@@ -223,7 +221,6 @@ $(document).ready(function () {
 					<th>Date Approved</th>
                     <th>Status</th>
 					<th>Remarks</th>
-                    <th>Action</th>
                 </tr>
             </thead>
             <tbody>`;
@@ -253,7 +250,7 @@ $(document).ready(function () {
 
 			if (isImCurrentApprover(approversID, approversDate, changeScheduleStatus) || isAlreadyApproved(approversID, approversDate)) {
 				html += `
-				<tr>
+				<tr class="${button}" id="${encryptString(changeScheduleID)}">
 					<td>${getFormCode("SCH", createdAt, changeScheduleID)}</td>
 					<td>${fullname}</td>
 					<td>
@@ -266,9 +263,6 @@ $(document).ready(function () {
 						${getStatusStyle(changeScheduleStatus)}
 					</td>
 					<td>${remarks}</td>
-					<td class="text-center">
-						${button}
-					</td>
 				</tr>`;
 			}
 		});
@@ -308,7 +302,6 @@ $(document).ready(function () {
 					<th>Date Approved</th>
                     <th>Status</th>
 					<th>Remarks</th>
-                    <th>Action</th>
                 </tr>
             </thead>
             <tbody>`;
@@ -340,6 +333,8 @@ $(document).ready(function () {
 			};
 			(changeScheduleStatus == 1 || changeScheduleStatus == 2) && uniqueData.push(unique);
 
+			let btnClass = changeScheduleStatus != 0 ? "btnView" : "btnEdit";
+
 			let button =
 				changeScheduleStatus != 0
 					? `
@@ -350,7 +345,7 @@ $(document).ready(function () {
                 id="${encryptString(changeScheduleID)}" 
                 code="${getFormCode("SCH", createdAt, changeScheduleID)}"><i class="fas fa-edit"></i> Edit</button>`;
 			html += `
-            <tr>
+            <tr class="${btnClass}" id="${encryptString(changeScheduleID)}">
                 <td>${getFormCode("SCH", createdAt, changeScheduleID)}</td>
                 <td>${fullname}</td>
                 <td>
@@ -363,9 +358,6 @@ $(document).ready(function () {
                     ${getStatusStyle(changeScheduleStatus)}
                 </td>
 				<td>${remarks}</td>
-                <td class="text-center">
-                    ${button}
-                </td>
             </tr>`;
 		});
 
@@ -405,7 +397,7 @@ $(document).ready(function () {
 					// DRAFT
 					button = `
 					<button 
-						class="btn btn-submit" 
+						class="btn btn-submit px-5 p-2"  
 						id="btnSubmit" 
 						changeScheduleID="${changeScheduleID}"
 						code="${getFormCode("SCH", createdAt, changeScheduleID)}"><i class="fas fa-paper-plane"></i>
@@ -435,7 +427,7 @@ $(document).ready(function () {
 					if (isImCurrentApprover(approversID, approversDate)) {
 						button = `
 						<button 
-							class="btn btn-submit" 
+							class="btn btn-submit px-5 p-2"  
 							id="btnApprove" 
 							changeScheduleID="${encryptString(changeScheduleID)}"
 							code="${getFormCode("SCH", createdAt, changeScheduleID)}"><i class="fas fa-paper-plane"></i>
@@ -454,11 +446,11 @@ $(document).ready(function () {
 		} else {
 			button = `
 			<button 
-				class="btn btn-submit" 
+				class="btn btn-submit px-5 p-2"  
 				id="btnSubmit"><i class="fas fa-paper-plane"></i> Submit
 			</button>
 			<button 
-				class="btn btn-cancel" 
+				class="btn btn-cancel btnCancel px-5 p-2" 
 				id="btnCancel"><i class="fas fa-ban"></i> 
 				Cancel
 			</button>`;
@@ -1127,7 +1119,7 @@ $(document).ready(function () {
 			<button class="btn btn-danger" id="btnRejectConfirmation"
 			changeScheduleID="${id}"
 			code="${feedback}"><i class="far fa-times-circle"></i> Deny</button>
-			<button class="btn btn-cancel" data-dismiss="modal"><i class="fas fa-ban"></i> Cancel</button>
+			<button class="btn btn-cancel btnCancel px-5 p-2" data-dismiss="modal"><i class="fas fa-ban"></i> Cancel</button>
 		</div>`;
 		$("#modal_change_schedule_content").html(html);
 	});

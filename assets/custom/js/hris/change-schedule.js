@@ -250,7 +250,7 @@ $(document).ready(function () {
 
 			if (isImCurrentApprover(approversID, approversDate, changeScheduleStatus) || isAlreadyApproved(approversID, approversDate)) {
 				html += `
-				<tr class="${button}" id="${encryptString(changeScheduleID)}">
+				<tr class="${button}">
 					<td>${getFormCode("SCH", createdAt, changeScheduleID)}</td>
 					<td>${fullname}</td>
 					<td>
