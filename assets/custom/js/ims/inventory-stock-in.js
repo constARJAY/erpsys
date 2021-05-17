@@ -538,7 +538,7 @@ $(document).ready(function () {
 			`ims_inventory_receiving_details_tbl 		AS iird
 			LEFT JOIN ims_inventory_receiving_tbl 		AS iir 	ON iird.inventoryReceivingID  = iir.inventoryReceivingID
 			LEFT JOIN ims_purchase_order_tbl 			AS ipo 	ON iir.purchaseOrderID = ipo.purchaseOrderID
-			LEFT JOIN ims_request_items_tbl 			AS iri 	ON  ipo.purchaseOrderID = iri.purchaseOrderID AND iird.itemID = iri.itemID
+			LEFT JOIN ims_request_items_tbl 			AS iri 	ON ipo.purchaseOrderID = iri.purchaseOrderID AND iird.itemID = iri.itemID
 			LEFT JOIN ims_inventory_item_tbl 			AS iii 	ON iird.itemID = iii.itemID
 			LEFT JOIN ims_inventory_category_tbl 		AS iic 	ON iii.categoryID = iic.categoryID
 			LEFT JOIN ims_inventory_classification_tbl  AS iict ON iii.classificationID = iict.classificationID 
@@ -637,7 +637,7 @@ $(document).ready(function () {
 			LEFT JOIN ims_inventory_receiving_tbl 			AS iir 	ON irsn.inventoryReceivingID  = iir.inventoryReceivingID
 			LEFT JOIN ims_inventory_receiving_details_tbl 	AS iird ON irsn.inventoryReceivingID = iird.inventoryReceivingID  AND iird.itemID = irsn.itemID
 			LEFT JOIN ims_purchase_order_tbl 				AS ipo 	ON iir.purchaseOrderID = ipo.purchaseOrderID
-			LEFT JOIN ims_request_items_tbl 				AS iri 	ON  ipo.purchaseOrderID = iir.purchaseOrderID AND irsn.itemID = iri.itemID
+			LEFT JOIN ims_request_items_tbl 				AS iri 	ON ipo.purchaseOrderID = iir.purchaseOrderID AND irsn.itemID = iri.itemID
 			LEFT JOIN ims_inventory_item_tbl 				AS iii 	ON irsn.itemID = iii.itemID
 			LEFT JOIN ims_inventory_category_tbl 			AS iic 	ON iii.categoryID = iic.categoryID
 			LEFT JOIN ims_inventory_classification_tbl  	AS iict ON iii.classificationID = iict.classificationID 
@@ -845,11 +845,12 @@ $(document).ready(function () {
 										var quantity = 1;
 										html +=`
 									<td class="text-center"><input type="text"
-										class="form-control validate number recievedQuantity text-center" 
+										class="form-control validate number recievedQuantity  inventorystorageIDquantity text-center" 
 										id="recievedQuantity${count}"
 										min="1"
 										data-allowcharacters="[0-9]"
 										name="recievedQuantity"
+										
 										required
 										value="${quantity}" 
 										disabled>
@@ -968,6 +969,7 @@ $(document).ready(function () {
 		var serialnumberlastFive = serialnumber.substr(serialnumber.length - 5); // => "Tabs1 lastfive"
 		const barcode = `${myItemcode}-${myInventorycode}-${serialnumberlastFive}`;
 		$("#barcode" + number).val(barcode);
+		//$(".inventorystorageIDquantity"+storageID);
 		
 	});	
 	
@@ -989,9 +991,11 @@ $(document).ready(function () {
 			$(".serialnumber").each(function () {
 				serialnumber.push($(this).val());
 			});
+			
 			$(".inventoryStorageID").each(function () {
 				inventoryStorageID.push($(this).val());
 			});
+			
 			$(".barcode").each(function () {
 				barcode.push($(this).val());
 			});
@@ -1004,7 +1008,7 @@ $(document).ready(function () {
 			$(".expirationdate").each(function () {
 				expirationdate.push($(this).val());
 			});
-			
+
 			
 			Swal.fire({
 				title: 'ADD INVENTORY STOCK IN',

@@ -1274,14 +1274,14 @@ $(document).ready(function() {
 		let requestProjectItems = "", requestCompanyItems = "";
 
 
-		let queryCEID = ceID || costEstimateID;
-		let disabledCE = queryCEID != 0 ? "disabled" : "";
-		if (!queryCEID && !purchaseRequestID) 
+		let queryCEID  = ceID || costEstimateID;
+		let disabledCE = queryCEID != "0" ? "disabled" : "";
+		if ((!queryCEID || queryCEID == "0") && !purchaseRequestID) 
 		{
 			requestProjectItems += getItemRow(true);
 			requestCompanyItems += getItemRow(false);
 		} 
-		else if (!queryCEID && purchaseRequestID) 
+		else if ((!queryCEID || queryCEID == "0") && purchaseRequestID) 
 		{
 			if (purchaseRequestStatus != 0) {
 				requestItemsData = getTableData(
@@ -1313,7 +1313,7 @@ $(document).ready(function() {
 				companyTotalAmount += (quantity * unitCost);
 			})
 		} 
-		else if (queryCEID && !purchaseRequestID) 
+		else if ((queryCEID || queryCEID != "0") && !purchaseRequestID) 
 		{
 			requestItemsData = getTableData(
 				`ims_request_items_tbl AS irit
@@ -1336,7 +1336,7 @@ $(document).ready(function() {
 				companyTotalAmount += (quantity * unitCost);
 			})
 		} 
-		else if (queryCEID && purchaseRequestID) 
+		else if ((queryCEID || queryCEID != "0") && purchaseRequestID) 
 		{
 			requestItemsData = getTableData(
 				`ims_request_items_tbl AS irit
@@ -1463,13 +1463,14 @@ $(document).ready(function() {
 			}
 	
 			$("#tableMaterialsEquipment").html(preloader);
-			let table = "";
-			if (costEstimateID && costEstimateID != 0) {
-				table = getTableMaterialsEquipment(costEstimateID, false, false);
-			} 
-			else {
-				table = getTableMaterialsEquipment(null, false, false);
-			}
+			// let table = "";
+			// if (costEstimateID && costEstimateID != 0) {
+			// 	table = getTableMaterialsEquipment(costEstimateID, false, false);
+			// } 
+			// else {
+			// 	table = getTableMaterialsEquipment(null, false, false);
+			// }
+			let table = getTableMaterialsEquipment(costEstimateID, false, false);
 			setTimeout(() => {
 				table && $("#tableMaterialsEquipment").html(table);
 				initDataTables();

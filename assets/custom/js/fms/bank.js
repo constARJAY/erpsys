@@ -1,17 +1,5 @@
 $(document).ready(function(){
 
-    //------ MODULE FUNCTION IS ALLOWED UPDATE-----
-	
-	const allowedUpdate = isUpdateAllowed(14);
-	if(!allowedUpdate){
-		$("#modal_finance_bank_content").find("input, select, textarea").each(function(){
-			$(this).attr("disabled",true);
-		});
-		$("#btnUpdate").hide();
-	}
-
-	//------ END MODULE FUNCTION IS ALLOWED UPDATE-----
-
     // ----- DATATABLES -----
     function initDataTables() {
         if ($.fn.DataTable.isDataTable('#tableFinanceBank')){
@@ -164,9 +152,9 @@ $(document).ready(function(){
                             class="form-control validate" 
                             name="bankNumber" 
                             id="input_bankNumber" 
-                            data-allowcharacters="[0-9]" 
+                            data-allowcharacters="[0-9][-][ ]" 
                             minlength="8" 
-                            maxlength="16" 
+                            maxlength="19" 
                             required 
                             value="${bankNumber}"
                             autocomplete="off">

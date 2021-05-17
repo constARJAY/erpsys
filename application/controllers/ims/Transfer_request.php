@@ -133,10 +133,12 @@ class Transfer_request extends CI_Controller {
                         $temp = [
                             "transferRequestID" => $transferRequestID,
                             "itemID"            => $item["itemID"] != "null" ? $item["itemID"] : null,
-                            "itemName"            => $item["itemName"] != "null" ? $item["itemName"] : null,
-                            "quantity"          => $item["quantity"],
+                            "itemName"          => $item["itemName"],
                             "brandName"          => $item["brandName"],
-                            "unitOfMeasurementID"          => $item["uom"],
+                            "quantity"          => $item["quantity"],
+                            "barcode"          => $item["barcode"],
+                            "stocks"          => $item["stocks"],
+                            "unitOfMeasurement"          => $item["uom"],
                             "createdBy"         => $item["createdBy"],
                             "updatedBy"         => $item["updatedBy"],
                         ];

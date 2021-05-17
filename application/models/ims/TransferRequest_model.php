@@ -54,53 +54,70 @@ class TransferRequest_model extends CI_Model {
         $getStorageReceiverID = $values['inventoryStorageIDReceiver']; //get the reciever storage id
         $getItemID = $values['itemID'];         //get the item id of the sender/receiver storage name
         $getQuantity = $values['quantity'];   //get the add/deduct quantity for both storage
+        $getBarcode = $values['barcode'];   //get the add/deduct quantity for both storage
         // echo "StorageSender".$getStorageSenderID. "<br>";
         // echo "ItemID".$getItemID. "<br>";
         // echo "requestQuantity".$getQuantity. "<br>";
 
         $getStorageSender = $this->db->query("SELECT 
-        receivingQuantity
-        FROM ims_list_stocks_tbl 
-        LEFT JOIN ims_list_stocks_details_tbl USING(listStocksID) 
-        LEFT JOIN ims_inventory_storage_tbl USING(inventoryStorageID)
+        quantity,itemName
+        FROM ims_stock_in_total_tbl 
         WHERE inventoryStorageID = '$getStorageSenderID' AND itemID = '$getItemID' ");
 
-        $senderQuantity = $getStorageSender->row()->receivingQuantity; // get the old quantity of sender storage 
+        $senderQuantity = $getStorageSender->row()->quantity; // get the old quantity of sender storage 
+        $senderitemName = $getStorageSender->row()->itemName; // get the old itemname of sender storage 
+
 
         $changeStorageSenderQuantity = $senderQuantity - $getQuantity; // deduct the old quantity of sender storage
 
-        $this->db->query("UPDATE ims_list_stocks_tbl   
-        LEFT JOIN ims_list_stocks_details_tbl USING(listStocksID) 
-        LEFT JOIN ims_inventory_storage_tbl USING(inventoryStorageID)
-        SET receivingQuantity = $changeStorageSenderQuantity
-        WHERE inventoryStorageID = '$getStorageSenderID' AND itemID = '$getItemID'");
+       
 
+        if(senderitemName =="" || senderitemName == null){
+            $this->db->insert('ims_stock_in_total_tbl',$data); 
+            
+            $data = array(
+                'itemID'            => $getItemID,
+                'itemName'          => $itemName,
+                'quantity'          => $changeStorageSenderQuantity,
+                'inventoryStorageID'  =>$getStorageSenderID);
+
+        }else{
+            $this->db->query("UPDATE ims_stock_in_total_tbl   
+            SET quantity = $changeStorageSenderQuantity
+            WHERE inventoryStorageID = '$getStorageSenderID' AND itemID = '$getItemID'"); 
+            
+        }   
 
         $getStorageReceiver = $this->db->query("SELECT 
-        receivingQuantity
-        FROM ims_list_stocks_tbl 
-        LEFT JOIN ims_list_stocks_details_tbl USING(listStocksID) 
-        LEFT JOIN ims_inventory_storage_tbl USING(inventoryStorageID)
+        quantity, itemName
+        FROM ims_stock_in_total_tbl 
         WHERE inventoryStorageID = '$getStorageReceiverID' AND itemID = '$getItemID' ");
 
-        $receiverQuantity = $getStorageReceiver->row()->receivingQuantity; // get the old quantity of receiver storage 
+        $receiverQuantity = $getStorageReceiver->row()->quantity; // get the old quantity of sender storage 
+        $receiveritemName = $getStorageReceiver->row()->itemName; // get the old itemname of sender storage  
 
         $changeStorageReceiverQuantity = $receiverQuantity + $getQuantity; // add the old quantity of receiver storage
 
+        if(senderitemName =="" || senderitemName ==NULL){
+            $this->db->insert('ims_stock_in_total_tbl',$data); 
+            
+            $data = array(
+                'itemID'            => $getItemID,
+                'itemName'          => $itemName,
+                'quantity'          => $changeStorageReceiverQuantity,
+                'inventoryStorageID'  =>$getStorageReceiverID);
 
-        $this->db->query("UPDATE ims_list_stocks_tbl   
-        LEFT JOIN ims_list_stocks_details_tbl USING(listStocksID) 
-        LEFT JOIN ims_inventory_storage_tbl USING(inventoryStorageID)
-        SET receivingQuantity = $changeStorageReceiverQuantity
-        WHERE inventoryStorageID = '$getStorageReceiverID' AND itemID = '$getItemID'");
+        }else{
+            $this->db->query("UPDATE ims_stock_in_total_tbl   
+            SET quantity = $changeStorageReceiverQuantity
+            WHERE inventoryStorageID = '$getStorageReceiverID' AND itemID = '$getItemID'"); 
+            
+        }   
 
         // echo "deduct quantity".$changeStorageSenderQuantity."<br>";
 
         // echo "old Storage Sender Quantity".$senderQuantity."<br>";
-
-           
-
-        }
+        }            
         return true;
     }
 

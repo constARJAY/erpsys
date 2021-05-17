@@ -9,66 +9,111 @@ class InventoryStockIn_model extends CI_Model {
     }
     public function savestockin($itemID, $receivedID,$itemName, $barcode, $recievedQuantity,$serialnumber,$inventoryStorageID,$manufactureDate,$expirationdate)
     {
-    //    $sql = "";
-    //    $query = $this->db->query("SELECT itemID,SUM(quantity) AS quantity FROM ims_stock_in_total_tbl WHERE itemID =$itemID GROUP BY itemID, inventoryStorageID");
-	// 	if($query->num_rows() == 0){
 
-        $barcodesample = implode(",", $barcode);
+        $serialnumber       = implode(",", $serialnumber);
+        $inventoryStorageID1 = implode(",", $inventoryStorageID);
+        $insert_id = "";
+        if($serialnumber ==""){
             $record  = array();
+            $insert_id = "";
             if(is_array($barcode)){ 
                 if(count($barcode)!=0){
                 for($count = 0; $count<count($barcode); $count++)
                 {
                  $record[$count] = array(
-                            'inventoryReceivingID'		=> $receivedID,
-                            'itemID'		            => $itemID,
-                            'itemName'		            => $itemName,
-                            'barcode'		            => $barcode[$count],
-                            'stockInSerialNumber'		=>$serialnumber[$count],
+                            'inventoryReceivingID'		=>$receivedID,
+                            'itemID'		            =>$itemID,
+                            'itemName'		            =>$itemName,
+                            'barcode'		            =>$barcode[$count],
+                            'stockInSerialNumber'		=>$serialnumber,
                             'stockInQuantity'           =>$recievedQuantity[$count],
                             'stockInLocationID'         =>$inventoryStorageID[$count],
                             'manufacturedDate'          =>$manufactureDate[$count],
-                            'expirationDate'            =>$expirationdate[$count],);
-
-                }      
+                            'expirationDate'            =>$expirationdate[$count]);
+                } 
                 $this->db->insert_batch('ims_stock_in_tbl', $record);
+                $insert_id = $this->db->insert_id();
             }
-        }      
-                return "true|Inventory Stock In Successfully";   
+        }
+      
+        $query = $this->db->query("SELECT IFNULL(isi.itemID,'0') as itemID, isi.itemName,isit.itemName as totalitemname, (sum(stockInQuantity) + SUM(IFNULL(quantity,0))) AS quantity, stockInLocationID FROM ims_stock_in_tbl AS isi
+        LEFT JOIN ims_stock_in_total_tbl AS isit ON isi.itemID = isit.itemID AND  isi.stockInLocationID = isit.inventoryStorageID WHERE isi.itemID =$itemID AND isi.stockInLocationID IN($inventoryStorageID1) AND isi.stockinID =$insert_id GROUP BY itemID, stockInLocationID");
 
-    // }else{
-    //     $quantity = $query[0]['quantity'];
-    //     print_r($quantity);
+            foreach ($query->result() as $row)
+            {
+                $totalitemname                  =$row->totalitemname;
+                $itemID                        = $row->itemID;
+                $itemName                       = $row->itemName;
+                $quantity                       =$row->quantity;
+                $stockInLocationID              =$row->stockInLocationID;
 
-    //     $barcodesample = implode(",", $barcode);
-    //     $record  = array();
-    //     if(is_array($barcode)){ 
-    //         if(count($barcode)!=0){
-    //         for($count = 0; $count<count($barcode); $count++)
-    //         {
-    //          $record[$count] = array(
-    //                     'inventoryReceivingID'		=> $receivedID,
-    //                     'itemID'		            => $itemID,
-    //                     'itemName'		            => $itemName,
-    //                     'barcode'		            => $barcode[$count],
-    //                     'stockInSerialNumber'		=>$serialnumber[$count],
-    //                     'stockInQuantity'           =>$recievedQuantity[$count],
-    //                     'stockInLocationID'         =>$inventoryStorageID[$count],
-    //                     'manufacturedDate'          =>$manufactureDate[$count],
-    //                     'expirationDate'            =>$expirationdate[$count],);
+                $array = array('itemID' => $row->itemID, 'inventoryStorageID' => $row->stockInLocationID);
+                $data = array(
+                        'itemID'            => $itemID,
+                        'itemName'          => $itemName,
+                        'quantity'          => $quantity,
+                        'inventoryStorageID'  =>$stockInLocationID);
+                        if($row->totalitemname =="" || $row->totalitemname ==NULL){
+                            $this->db->insert('ims_stock_in_total_tbl',$data);   
+                        }else{
+                            $this->db->where($array);  
+                            $this->db->update("ims_stock_in_total_tbl", $data);  
+                            
+                        }            
+            }
+        return "true|Inventory Stock In Successfully";   
+         }else{
+        //kung may serial serial
+        $record  = array();
+        $insert_id = "";
+        if(is_array($barcode)){ 
+            if(count($barcode)!=0){
+            for($count = 0; $count<count($barcode); $count++)
+            {
+             $record[$count] = array(
+                        'inventoryReceivingID'		=>$receivedID,
+                        'itemID'		            =>$itemID,
+                        'itemName'		            =>$itemName,
+                        'barcode'		            =>$barcode[$count],
+                        'stockInSerialNumber'		=>$serialnumber[$count],
+                        'stockInQuantity'           =>$recievedQuantity[$count],
+                        'stockInLocationID'         =>$inventoryStorageID[$count],
+                        'manufacturedDate'          =>$manufactureDate[$count],
+                        'expirationDate'            =>$expirationdate[$count]);
+            } 
+            $this->db->insert_batch('ims_stock_in_tbl', $record);
+           
+        }
+    }
+    $query = $this->db->query("SELECT IFNULL(isi.itemID,'0') as itemID, isi.itemName,isit.itemName as totalitemname, (sum(stockInQuantity) + SUM(IFNULL(quantity,0))) AS quantity, stockInLocationID FROM ims_stock_in_tbl AS isi
+        LEFT JOIN ims_stock_in_total_tbl AS isit ON isi.itemID = isit.itemID AND  isi.stockInLocationID = isit.inventoryStorageID WHERE isi.itemID =$itemID AND isi.stockInLocationID IN($inventoryStorageID1) GROUP BY itemID, stockInLocationID");
 
-    //         }      
-    //         $this->db->insert_batch('ims_stock_in_tbl', $record);
-    //     }
-    // }   
-    //     $total = array(
-    //         'itemID'		=> $receivedID,
-    //         'itemName'      =>$itemName,
+            foreach ($query->result() as $row)
+            {
+                $totalitemname                  =$row->totalitemname;
+                $itemID                        = $row->itemID;
+                $itemName                       = $row->itemName;
+                $quantity                       =$row->quantity;
+                $stockInLocationID              =$row->stockInLocationID;
 
-
-    
-    //      return "true|Inventory Stock In Successfully";   
-    // }         
+                $array = array('itemID' => $row->itemID, 'inventoryStorageID' => $row->stockInLocationID);
+                $data = array(
+                        'itemID'            => $itemID,
+                        'itemName'          => $itemName,
+                        'quantity'          => $quantity,
+                        'inventoryStorageID'  =>$stockInLocationID);
+                        if($row->totalitemname =="" || $row->totalitemname ==NULL){
+                            $this->db->insert('ims_stock_in_total_tbl',$data);   
+                        }else{
+                            $this->db->where($array);  
+                            $this->db->update("ims_stock_in_total_tbl", $data);  
+                            
+                        }            
+            }
+        return "true|Inventory Stock In Successfully";   
+ 
+        }
+       
     }
     public function getBarcodes($receivedID,$itemID)
     {
@@ -79,20 +124,4 @@ class InventoryStockIn_model extends CI_Model {
         return $query->result_array();
 
     }
-  
-
-    // public function getrecievingreportByPO($purchaseOrderID, $itemID)
-    // {
-    //     $query = $this->db->query("SELECT 
-    //     sw.dateReceived AS dateReceived,
-    //     sw.receivedQuantity AS receivedQuantity,
-    //     sw.remainingQuantity AS remainingQuantity,
-    //     ist.inventoryStorageID AS inventoryStorageID,
-    //     ist.inventoryStorageOfficeName
-    //     FROM ims_inventory_received_tbl AS sw
-    //     LEFT JOIN ims_inventory_storage_tbl AS ist
-    //     ON ist.inventoryStorageID = sw.inventoryStorageID
-    //     WHERE purchaseOrderID = ".$purchaseOrderID." AND itemID = ".$itemID." AND isDepartment IS NULL AND inventoryReceivingOutID IS NULL");
-    //     return $query ? $query->result_array() : [];
-    // }
 }    

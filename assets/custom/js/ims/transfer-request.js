@@ -216,10 +216,12 @@ $(document).ready(function() {
 				columnDefs: [
 					{ targets: 0,  width: 50  },
 					{ targets: 1,  width: 150 },
-					{ targets: 2,  width: 150 },
-					{ targets: 3,  width: 50  },
-					{ targets: 4,  width: 120 },
-					{ targets: 5,  width: 120 }
+					{ targets: 2,  width: 120 },
+					{ targets: 3,  width: 140  },
+					{ targets: 4,  width: 50 },
+					{ targets: 5,  width: 100 },
+					{ targets: 6,  width: 140 },
+					{ targets: 7,  width: 50 }
 					// { targets: 9,  width: 200 },
 				],
 			});
@@ -235,11 +237,13 @@ $(document).ready(function() {
 				scrollX: true,
 				scrollCollapse: true,
 				columnDefs: [
-					{ targets: 0,  width: 50  },
-					{ targets: 1,  width: 150 },
-					{ targets: 2,  width: 150 },
+					{ targets: 0,  width: 150  },
+					{ targets: 1,  width: 120 },
+					{ targets: 2,  width: 200 },
 					{ targets: 3,  width: 50  },
-					{ targets: 4,  width: 120 }
+					{ targets: 4,  width: 50 },
+					{ targets: 5,  width: 120 },
+					{ targets: 6,  width: 50 }
 					// { targets: 8,  width: 200 },
 				],
 			});
@@ -736,12 +740,15 @@ $(document).ready(function() {
     function getItemRow(isProject = true, item = {}, readOnly = false) {
 		const attr = isProject ? `project="true"` : ``;
 		let {
-			itemCode     = "",
+			
 			itemName     = "",
 			itemID       = null,
+			barcode      = "",
+			stocks		 = "",
 			quantity     = 1,
-			unitOfMeasurementID: uom = "",
-			brandName = ""
+			unitOfMeasurement: uom = "",
+			brandName = "",
+			createdAt =""
 
 		} = item;
 
@@ -753,13 +760,23 @@ $(document).ready(function() {
 			html += `
 			<tr class="itemTableRow">
 				<td>
+					<div class="barcode">
+						${barcode || "-"}
+					</div>
+				</td>
+				<td>
 					<div class="itemcode">
-						${itemCode || "-"}
+						${getFormCode("ITM",createdAt,itemID) || "-"}
 					</div>
 				</td>
 				<td>
 					<div class="itemname">
 						${itemName || "-"}
+					</div>
+				</td>
+				<td>
+					<div class="stocks text-center">
+						${stocks || "-"}
 					</div>
 				</td>
 				<td class="text-center">
@@ -781,6 +798,19 @@ $(document).ready(function() {
 				</td>
 			</tr>`;
 		} else {
+
+			// <div class="form-group mb-0">
+			// 				<select
+			// 					class="form-control select2"
+			// 					name="itemID"
+			// 					id="itemID"
+			// 					style="width: 100%"
+			// 					required
+			// 					${attr}>
+			// 					${getInventoryItem(itemID, isProject)}
+			// 				</select>
+			// 				<div class="invalid-feedback d-block" id="invalid-itemID"></div>
+			// 			</div>
 		
 			html += `
 			<tr class="itemTableRow">
@@ -789,24 +819,30 @@ $(document).ready(function() {
 						<input type="checkbox" class="checkboxrow">
 					</div>
 				</td>
+				<td class="text-center">
+					<div class="barcode">
+						<input 
+							type="text" 
+							class="form-control number text-center"
+							id="barcode" 
+							name="barcode" 
+							value="${barcode}" 
+							data-allowcharacters="[0-9][a-z][A-Z]" 
+							mask="99999-99999-99999" 
+							minlength="17" 
+							maxlength="17"
+							required>
+						<div class="invalid-feedback d-block" id="invalid-barcode"></div>
+					</div>
+				</td>
 				<td>
 					<div class="itemcode">-</div>
 				</td>
 				<td>
-					<div class="itemname">
-						<div class="form-group mb-0">
-							<select
-								class="form-control select2"
-								name="itemID"
-								id="itemID"
-								style="width: 100%"
-								required
-								${attr}>
-								${getInventoryItem(itemID, isProject)}
-							</select>
-							<div class="invalid-feedback d-block" id="invalid-itemID"></div>
-						</div>
-					</div>
+					<div class="itemname" name="itemname">-</div>
+				</td>
+				<td>
+					<div class="stocks text-center" name="stocks">-</div>
 				</td>
 				<td class="text-center">
 					<div class="quantity">
@@ -821,12 +857,12 @@ $(document).ready(function() {
 							value="${quantity}" 
 							minlength="1" 
 							maxlength="20" 
-							requred>
+							required>
 						<div class="invalid-feedback d-block" id="invalid-quantity"></div>
 					</div>
 				</td>
 				<td>
-					<div class="brand" name="brandName">-</div>
+					<div class="brand" name="brand">-</div>
 				</td>
 				<td>
 					<div class="uom" name="uom">-</div>
@@ -850,19 +886,29 @@ $(document).ready(function() {
 			$("td .action .checkboxrow", this).attr("id", `checkboxrow${i}`);
 			$("td .action .checkboxrow", this).attr("project", `true`);
 
+			// BARCODE
+			$("td .barcode [name=barcode]", this).attr("id", `barcode${i}`);
+			$("td .barcode [name=barcode]", this).attr("project", `true`);
+
 			// ITEMCODE
 			$("td .itemcode", this).attr("id", `itemcode${i}`);
 
 			// ITEMNAME
-			$(this).find("select").each(function(j) {
-				const itemID = $(this).val();
-				$(this).attr("index", `${i}`);
-				$(this).attr("project", `true`);
-				$(this).attr("id", `projectitemid${i}`)
-				if (!$(this).attr("data-select2-id")) {
-					$(this).select2({ theme: "bootstrap" });
-				}
-			});
+			$("td .itemname", this).attr("id", `itemname${i}`);
+
+			// STOCKS
+			$("td .stocks", this).attr("id", `stocks${i}`);
+
+			// ITEMNAME
+			// $(this).find("select").each(function(j) {
+			// 	const itemID = $(this).val();
+			// 	$(this).attr("index", `${i}`);
+			// 	$(this).attr("project", `true`);
+			// 	$(this).attr("id", `projectitemid${i}`)
+			// 	if (!$(this).attr("data-select2-id")) {
+			// 		$(this).select2({ theme: "bootstrap" });
+			// 	}
+			// });
 
 			// QUANTITY
 			$("td .quantity [name=quantity]", this).attr("id", `quantity${i}`);
@@ -1007,64 +1053,126 @@ $(document).ready(function() {
 		}
 		
     })
-
-	// $(document).on("change", "[name=inventoryStorageIDSender]", function() {
-	// 	const inventoryStorageIDSender = $('[name=inventoryStorageIDSender] option:selected').val();
-	// 	const inventoryStorageIDReceiver = $('[name=inventoryStorageIDReceiver] option:selected').val();
-
-	// 	if(inventoryStorageIDSender == inventoryStorageIDReceiver && (inventoryStorageIDReceiver !=0 || inventoryStorageIDSender !=0 ) ){
-	
-	// 		$('[name=inventoryStorageIDSender]').val($('[name=inventoryStorageIDSender] option:first-child').val()).trigger('change');
-	// 		$("[name=inventoryStorageNameSender]").val("-");
-	// 		$("[name=storageDepartmentSender]").val("-");
-	// 		$("[name=storageAddressSender]").val("-");
-	// 		$("[name=officeNameSender]").val("-");
-	// 		$("[name=roomTypeSender]").val("-");
-	// 		$("#invalid-inventoryStorageIDSender").text("Please choose other Storage!");
-			
-	// 	}
-	// });
-
-	// $(document).on("change", "[name=inventoryStorageIDReceiver]", function() {
-	// 	const inventoryStorageIDSender = $('[name=inventoryStorageIDSender] option:selected').val();
-	// 	const inventoryStorageIDReceiver = $('[name=inventoryStorageIDReceiver] option:selected').val();
-
-	// 	if(inventoryStorageIDSender == inventoryStorageIDReceiver && (inventoryStorageIDReceiver !=0 || inventoryStorageIDSender !=0 ) ){
-	
-	// 		$('[name=inventoryStorageIDReceiver]').val($('[name=inventoryStorageIDReceiver] option:first-child').val()).trigger('change');
-	// 		$("[name=inventoryStorageNameReceiver]").val("-");
-	// 		$("[name=storageDepartmentReceiver]").val("-");
-	// 		$("[name=storageAddressReceiver]").val("-");
-	// 		$("[name=officeNameReceiver]").val("-");
-	// 		$("[name=roomTypeReceiver]").val("-");
-	// 	}
-	// });
     // ----- END SELECT PROJECT LIST -----
 
 
     // ----- SELECT ITEM NAME -----
-    $(document).on("change", "[name=itemID]", function() {
-        const itemCode     = $('option:selected', this).attr("itemCode");
-        const categoryName = $('option:selected', this).attr("categoryName");
-        const uom          = $('option:selected', this).attr("uom");
-        const brand          = $('option:selected', this).attr("brand");
-		const isProject    = $(this).closest("tbody").attr("project") == "true";
-		const attr         = isProject ? "[project=true]" : "[company=true]";
+	var barcodeArray =[];
+	var barcodeLocationArray =[];
+    $(document).on("keyup", "[name=barcode]", function() {
+		const barcodeval   = $(this).val(); 
+		const barcodeID   = $(this).attr("id"); 
+		const StorageIDSender  = $("[name=inventoryStorageIDSender]").val();
 
-        $(this).closest("tr").find(`.itemcode`).first().text(itemCode);
-        $(this).closest("tr").find(`.category`).first().text(categoryName);
-        $(this).closest("tr").find(`.uom`).first().text(uom);
-        $(this).closest("tr").find(`.brand`).first().text(brand);
-        $(this).closest("tr").find(`[name=quantity]`).first().val(1);
+		const data = getTableData(`ims_stock_in_total_tbl AS isit
+		LEFT JOIN ims_inventory_item_tbl 				AS iii 	ON isit.itemID = iii.itemID
+		LEFT JOIN ims_inventory_storage_tbl 			AS iis 	ON isit.inventoryStorageID = iis.inventoryStorageID
+		LEFT JOIN ims_transfer_request_tbl 			AS itr 	ON itr.inventoryStorageIDReceiver = iis.inventoryStorageID 	AND itr.transferRequestStatus = 2
+		LEFT JOIN ims_transfer_request_details_tbl 	AS itrd ON itrd.transferRequestID = itr.transferRequestID 			AND itrd.itemID = iii.itemID 
+		LEFT JOIN ims_material_withdrawal_details_tbl 	AS imwd ON imwd.inventoryStorageID = iis.inventoryStorageID 		AND imwd.itemID = iii.itemID
+		LEFT JOIN ims_material_withdrawal_tbl 			AS imw  ON imw.materialWithdrawalID = imwd.materialWithdrawalID 	AND imw.materialWithdrawaltStatus = 2
+		LEFT JOIN ims_inventory_incident_details_tbl 	AS iiid ON iiid.inventoryStorageID = iis.inventoryStorageID     	AND iiid.itemID = iii.itemID
+		LEFT JOIN ims_inventory_incident_tbl 			AS iit  ON iit.incidentID = iiid.incidentID 						AND iit.incidentStatus = 2
+		-- LEFT JOIN ims_borrowing_details_tbl 			AS ibd  ON ibd.inventoryStorageID = isit.inventoryStorageID 		AND ibd.itemID = iii.itemID
+		-- LEFT JOIN ims_borrowing_tbl 					AS ibt  ON ibt.borrowingID = ibd.borrowingID 						AND ibt.borrowingStatus = 2
+		-- LEFT JOIN ims_return_item_details_tbl 			AS iri  ON iri.inventoryStorageID = isit.inventoryStorageID 		AND iri.itemID = iii.itemID
+		LEFT JOIN ims_stock_in_tbl 					AS isi 	ON isit.itemID = isi.itemID AND isit.inventoryStorageID = isi.stockInLocationID`, 
+		`isit.itemID,
+		 iii.itemCode,
+		 iii.createdAt,
+		 isit.itemName,
+		 isi.itemBrandName,
+		 isi.itemUom,
+		 iis.inventoryStorageCode,
+		 iis.inventoryStorageOfficeName,
+		 isi.barcode,
+		 isi.stockInSerialNumber,
+		 (IFNULL(SUM(isit.quantity),0) - IFNULL(SUM(imwd.quantity),0) - IFNULL(SUM(iiid.quantity),0)) AS stocks`,
+		 `isi.barcode = '${barcodeval}' AND isi.stockInLocationID = '${StorageIDSender}'`, // to be continued by adding the item ID 
+		"");
 
-		// $(`[name=itemID]${attr}`).each(function(i, obj) {
-		// 	let itemID = $(this).val();
-		// 	$(this).html(getInventoryItem(itemID, isProject));
-		// }) 
 
-	
+			data.map((item) => {
+				let {
+					itemID ,
+					itemName,
+					brandName,
+					itemUom,
+					createdAt,
+					stocks
+				} = item;
+
+				let item_ID       		= itemID ? itemID : "";
+				let item_Name       		= itemName ? itemName : "";
+				let brand_Name       	= brandName ? brandName : "";
+				let item_Uom       		= itemUom ? itemUom : "";
+				let created_At       	= createdAt ? createdAt : "";
+				let stock       	= stocks ? stocks : "";
+		
+				let	barcodeArrayLength = barcodeArray.length || 0;
+				if(barcodeval.length  ==17){
+
+					
+					if(itemName != null){
+
+						
+						let counter =1;
+						if(barcodeArrayLength !=0){
+							for(var loop1 =0;loop1<barcodeArrayLength; loop1++ ){
+								
+
+								if(barcodeArray[loop1] == barcodeval && barcodeLocationArray[loop1] != barcodeID){
+								
+									$(this).closest("tr").find("[name=barcode]").removeClass("is-valid").addClass("is-invalid");
+									$(this).closest("tr").find("#invalid-barcode").removeClass("is-valid").addClass("is-invalid");
+									$(this).closest("tr").find("#invalid-barcode").text('Barcode '+barcodeval+' already declared!');
+									return false;
+								}else{
+
+									if(counter == barcodeArrayLength){
+										barcodeArray[barcodeArrayLength -1] = barcodeval;
+										barcodeLocationArray[barcodeArrayLength -1] = barcodeID;
+									}
+									
+								}
+								counter++;
+							}
+						}else{
+							barcodeArray[0] = barcodeval;
+							barcodeLocationArray[0] = barcodeID;
+						}
+
+						$(this).closest("tr").find(`.itemcode`).first().text(getFormCode("ITM",created_At,item_ID));
+						$(this).closest("tr").find(`[name=barcode]`).first().attr('itemid',item_ID);
+						$(this).closest("tr").find(`.itemname`).first().text(item_Name);
+						$(this).closest("tr").find(`.uom`).first().text(item_Uom);
+						$(this).closest("tr").find(`.brand`).first().text(brand_Name);
+						$(this).closest("tr").find(`.stocks`).first().text(stock);
+						$(this).closest("tr").find(`[name=quantity]`).first().val(0);
+		
+						$(this).closest("tr").find("[name=barcode]").removeClass("is-invalid");
+						$(this).closest("tr").find("#invalid-barcode").removeClass("is-invalid");
+						$(this).closest("tr").find("#invalid-barcode").text('');
+		
+					}else{
+						$(this).closest("tr").find("[name=barcode]").removeClass("is-valid").addClass("is-invalid");
+						$(this).closest("tr").find("#invalid-barcode").removeClass("is-valid").addClass("is-invalid");
+						$(this).closest("tr").find("#invalid-barcode").text('No Item Available!');
+					}
+
+				}else{
+					$(this).closest("tr").find("[name=barcode]").removeClass("is-valid").addClass("is-invalid");
+					$(this).closest("tr").find("#invalid-barcode").removeClass("is-valid").addClass("is-invalid");
+					$(this).closest("tr").find("#invalid-barcode").text('Please Input exact 17 Characters!');
+				}
+
+
+				
+				})
+
     })
     // ----- END SELECT ITEM NAME -----
+
 
 
 	// ----- KEYUP QUANTITY OR UNITCOST -----
@@ -1072,26 +1180,55 @@ $(document).ready(function() {
 		const index     		= $(this).closest("tr").first().attr("index");
 		const isProject 		= $(this).closest("tbody").attr("project") == "true";
 		const attr      		= isProject ? "[project=true]" : "";
-		const quantity  		= $(`#quantity${index}${attr}`).val();
-        const selectedItemID  	= $(this).closest("tr").find('option:selected').val();
+		const quantity  		= parseFloat($(`#quantity${index}${attr}`).val()) || 0;
+        const barcodeval  	= $(this).closest("tr").find('[name=barcode]').val();
 
-		const data = getTableData("ims_inventory_item_tbl as itm LEFT JOIN ims_list_stocks_details_tbl USING(itemID) LEFT JOIN ims_list_stocks_tbl USING(listStocksID)", 
-        "itemID,receivingQuantity", " itemID ="+ selectedItemID, "");
+		const StorageIDSender  = $("[name=inventoryStorageIDSender]").val();
 
-			if(data.length >0){
+		
+
+		if(StorageIDSender != null ){
+
+			const data = getTableData(`ims_stock_in_total_tbl AS isit
+			LEFT JOIN ims_inventory_item_tbl 				AS iii 	ON isit.itemID = iii.itemID
+			LEFT JOIN ims_inventory_storage_tbl 			AS iis 	ON isit.inventoryStorageID = iis.inventoryStorageID
+			-- LEFT JOIN ims_transfer_request_tbl 			AS itr 	ON itr.inventoryStorageIDReceiver = iis.inventoryStorageID 	AND itr.transferRequestStatus = 2
+			-- LEFT JOIN ims_transfer_request_details_tbl 	AS itrd ON itrd.transferRequestID = itr.transferRequestID 			AND itrd.itemID = iii.itemID
+			LEFT JOIN ims_material_withdrawal_details_tbl 	AS imwd ON imwd.inventoryStorageID = iis.inventoryStorageID 		AND imwd.itemID = iii.itemID
+			LEFT JOIN ims_material_withdrawal_tbl 			AS imw  ON imw.materialWithdrawalID = imwd.materialWithdrawalID 	AND imw.materialWithdrawaltStatus = 2
+			LEFT JOIN ims_inventory_incident_details_tbl 	AS iiid ON iiid.inventoryStorageID = iis.inventoryStorageID     	AND iiid.itemID = iii.itemID
+			LEFT JOIN ims_inventory_incident_tbl 			AS iit  ON iit.incidentID = iiid.incidentID 						AND iit.incidentStatus = 2
+			-- LEFT JOIN ims_borrowing_details_tbl 			AS ibd  ON ibd.inventoryStorageID = isit.inventoryStorageID 		AND ibd.itemID = iii.itemID
+			-- LEFT JOIN ims_borrowing_tbl 					AS ibt  ON ibt.borrowingID = ibd.borrowingID 						AND ibt.borrowingStatus = 2
+			-- LEFT JOIN ims_return_item_details_tbl 			AS iri  ON iri.inventoryStorageID = isit.inventoryStorageID 		AND iri.itemID = iii.itemID
+			LEFT JOIN ims_stock_in_tbl 					AS isi 	ON isit.itemID = isi.itemID AND isit.inventoryStorageID = isi.stockInLocationID`, 
+			`isit.itemID,
+			 iii.itemCode,
+			 iii.createdAt,
+			 isit.itemName,
+			 isi.itemBrandName,
+			 isi.itemUom,
+			 iis.inventoryStorageCode,
+			 iis.inventoryStorageOfficeName,
+			 isi.barcode,
+			 isi.stockInSerialNumber,
+			 (IFNULL(SUM(isit.quantity),0) - IFNULL(SUM(imwd.quantity),0) - IFNULL(SUM(iiid.quantity),0)) AS stocks`,
+			 `isi.barcode = '${barcodeval}' AND isi.stockInLocationID = '${StorageIDSender}'`, // to be continued by adding the item ID 
+			"");
+
+			
+
+			if(data[0].stocks !=""){
 
 				data.map((item) => {
 					let {
-						itemID,
-						receivingQuantity
-					} = item;
-		
-					let item_ID       		= itemID ? itemID : "";
-					let receiving_Quantity  = receivingQuantity ? receivingQuantity : "0";
-		
 				
-						if(item_ID == selectedItemID ){
-							if(receiving_Quantity > quantity || receiving_Quantity == quantity ){
+						stocks
+					} = item;
+				
+					let stock  = stocks ? parseFloat(stocks) || 0 : "0";
+					
+							if(stock > quantity || stock == quantity ){
 								$(`#quantity${index}${attr}`).removeClass("is-invalid").addClass("is-valid");
 								$(this).closest("tr").find("#invalid-quantity").removeClass("is-invalid").addClass("is-valid");
 								$(this).closest("tr").find("#invalid-quantity").text('');
@@ -1101,21 +1238,21 @@ $(document).ready(function() {
 								$(this).closest("tr").find("#invalid-quantity").removeClass("is-valid").addClass("is-invalid");
 								$(this).closest("tr").find("#invalid-quantity").text('Not Enough Quantity!');
 							}
-						}else{
-								$(`#quantity${index}${attr}`).removeClass("is-valid").addClass("is-invalid");
-								$(this).closest("tr").find("#invalid-quantity").removeClass("is-valid").addClass("is-invalid");
-								$(this).closest("tr").find("#invalid-quantity").text('Not Enough Quantity Or No Stocks Available!');
-						}
-		
+					
 					})
 			}else{
 				$(`#quantity${index}${attr}`).removeClass("is-valid").addClass("is-invalid");
 				$(this).closest("tr").find("#invalid-quantity").removeClass("is-valid").addClass("is-invalid");
-				$(this).closest("tr").find("#invalid-quantity").text('No Item Selected');
+				$(this).closest("tr").find("#invalid-quantity").text('Not Enough Quantity Or No Stocks Available!');
 			}
         
-			
-		
+
+		}else{
+			$(`#quantity${index}${attr}`).val(1);
+			$(`#quantity${index}${attr}`).removeClass("is-valid").addClass("is-invalid");
+			$(this).closest("tr").find("#invalid-quantity").removeClass("is-valid").addClass("is-invalid");
+			$(this).closest("tr").find("#invalid-quantity").text('Please Select Storage first!');
+		}
 	})
 	// ----- END KEYUP QUANTITY OR UNITCOST -----
 
@@ -1205,9 +1342,10 @@ $(document).ready(function() {
 		let requestProjectItems = "";
 		if (transferRequestID) {
 			let requestItemsData = getTableData(
-				`ims_transfer_request_tbl LEFT JOIN ims_transfer_request_details_tbl as itrt USING(transferRequestID) LEFT JOIN ims_inventory_item_tbl USING(itemID) LEFT JOIN ims_list_stocks_details_tbl  USING(itemID) LEFT JOIN ims_list_stocks_tbl  USING(listStocksID) LEFT JOIN ims_inventory_storage_tbl  USING(inventoryStorageID)  `, 
-				`itemID, itemCode, itrt.itemName, itrt.unitOfMeasurementID,itrt.brandName`, 
-				`transferRequestID = ${transferRequestID} GROUP BY itemID`);
+				`ims_inventory_item_tbl AS iii
+				LEFT JOIN ims_transfer_request_details_tbl 	AS itrd ON itrd.itemID = iii.itemID`, 
+				`itrd.itemID,itrd.itemName,itrd.brandName,itrd.unitOfMeasurement,itrd.quantity,itrd.barcode,iii.createdAt,itrd.stocks`, 
+				`transferRequestID = ${transferRequestID}`);
 			requestItemsData.map(item => {
 				requestProjectItems += getItemRow(true, item, readOnly);
 			})
@@ -1455,8 +1593,10 @@ $(document).ready(function() {
                         <thead>
                             <tr style="white-space: nowrap">
 								${checkboxProjectHeader}
+                                <th>Barcode</th>
                                 <th>Item Code</th>
                                 <th>Item Name </th>
+                                <th>Stocks </th>
                                 <th>Quantity </th>
                                 <th>Brand </th>
                                 <th>UOM</th>
@@ -1623,22 +1763,26 @@ $(document).ready(function() {
 			$(".itemTableRow").each(function(i, obj) {
 				const categoryType = $(this).closest("tbody").attr("project") == "true" ? "project" : "";
 
-				const itemID    = $("td [name=itemID]", this).val();	
-				const itemName    = $("td [name=itemID] option:selected", this).text().trim();	
+				const itemID    = $("td [name=barcode]", this).attr("itemid");	
+				const itemName    = $("td [name=itemname]", this).text().trim();	
+				const brandName    = $("td [name=brand]", this).text().trim();	
 				const quantity  = +$("td [name=quantity]", this).val();	
-				const brandName  = $("td [name=brandName]", this).text();	
-				const uom  = $("td [name=uom]", this).text();	
+				const uom  = $("td [name=uom]", this).text().trim();	
+				const stocks  = $("td [name=stocks]", this).text().trim();	
+				const barcode  = $("td [name=barcode]", this).val();	
 
 				let temp = {
-					itemID,itemName, quantity,brandName,uom
+					itemID,itemName,brandName,quantity,uom,barcode,stocks
 					
 				};
 
 				formData.append(`items[${i}][itemID]`, itemID);
 				formData.append(`items[${i}][itemName]`, itemName);
-				formData.append(`items[${i}][quantity]`, quantity);
 				formData.append(`items[${i}][brandName]`, brandName);
+				formData.append(`items[${i}][quantity]`, quantity);
 				formData.append(`items[${i}][uom]`, uom);
+				formData.append(`items[${i}][barcode]`, barcode);
+				formData.append(`items[${i}][stocks]`, stocks);
 				formData.append(`items[${i}][createdBy]`, sessionID);
 				formData.append(`items[${i}][updatedBy]`, sessionID);
 			
@@ -1737,8 +1881,9 @@ $(document).ready(function() {
 	$(document).on("click", "#btnSave, #btnCancel", function () {
 
 		let condition = $("[name=quantity]").hasClass("is-invalid");
+		let condition2 = $("[name=barcode]").hasClass("is-invalid");
 
-		if(!condition){
+		if(!condition && !condition2){
 			const id       = $(this).attr("transferRequestID");
 			const revise   = $(this).attr("revise") == "true";
 			const feedback = $(this).attr("code") || getFormCode("TR", dateToday(), id);
@@ -1772,8 +1917,9 @@ $(document).ready(function() {
 		
 
 		let condition = $("[name=quantity]").hasClass("is-invalid");
-
-		if(!condition){
+		let condition2 = $("[name=barcode]").hasClass("is-invalid");
+		console.log(condition +' '+ condition2)
+		if(!condition && !condition2){
 
 			const id           = $(this).attr("transferRequestID");
 			const revise       = $(this).attr("revise") == "true";
@@ -2182,7 +2328,7 @@ function savePurchaseRequest(data = null, method = "submit", notificationData = 
 }
 
 function FunctionlastApproveCondition(transferID = null){
-	let ApprovedtableData  = getTableData("ims_transfer_request_tbl LEFT JOIN ims_transfer_request_details_tbl USING(transferRequestID) ", "", "transferRequestID = " + transferID);
+	let ApprovedtableData  = getTableData("ims_transfer_request_tbl LEFT JOIN ims_transfer_request_details_tbl USING(transferRequestID)", "", "transferRequestID =" + transferID);
 
 	let data = { items: [] }, formData = new FormData;
 
@@ -2193,9 +2339,10 @@ function FunctionlastApproveCondition(transferID = null){
 		const inventoryStorageIDReceiver    = item.inventoryStorageIDReceiver;	
 		const itemID    = item.itemID;	
 		const quantity  = item.quantity;	
+		const barcode  = item.barcode;	
 
 		let temp = {
-			inventoryStorageIDSender,inventoryStorageIDReceiver,itemID,quantity
+			inventoryStorageIDSender,inventoryStorageIDReceiver,itemID,quantity,barcode
 			
 		};
 
@@ -2203,6 +2350,7 @@ function FunctionlastApproveCondition(transferID = null){
 		formData.append(`items[${index}][inventoryStorageIDReceiver]`, inventoryStorageIDReceiver);
 		formData.append(`items[${index}][itemID]`, itemID);
 		formData.append(`items[${index}][quantity]`, quantity);
+		formData.append(`items[${index}][barcode]`, barcode);
 
 		data["items"].push(temp);
 
