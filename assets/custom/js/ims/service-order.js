@@ -955,7 +955,7 @@ $(document).ready(function() {
 						${description || "-"}
 					</div>
 				</td>
-				<td>
+				<td class="text-center">
 					<div class="quantity">
 						${quantity}
 					</div>
@@ -1365,11 +1365,19 @@ $(document).ready(function() {
 		const totalAmount = total - discount;
 		$("#totalAmount").html(formatAmount(totalAmount, true));
 
-		const vat      = getNonFormattedAmount($("[name=vat]").val())
-		const vatSales = totalAmount - vat;
-		$("#vatSales").html(formatAmount(vatSales, true));
+		const isVatable = $(`[name="inventoryVendorID"] option:selected`).attr("companyVatable") == "1";
+		let vat = 0, vatSales = 0;
+		if (isVatable) {
+			vatSales = totalAmount / 1.12;
+			vat      = totalAmount - vatSales;
+		}
 
-		const totalVat = vatSales + vat;
+		// const vat      = getNonFormattedAmount($("[name=vat]").val())
+		// const vatSales = totalAmount - vat;
+		$("#vatSales").html(formatAmount(vatSales, true));
+		$(`[name="vat"]`).val(vat);
+
+		const totalVat = totalAmount;
 		$("#totalVat").html(formatAmount(totalVat, true));
 
 		const lessEwt          = getNonFormattedAmount($("[name=lessEwt]").val());
@@ -1466,7 +1474,9 @@ $(document).ready(function() {
 
 		if (companyVatable == "1") {
 			const total = +getNonFormattedAmount($("#total").text());
-			const vat = total * 0.12;
+			const vatSales = total / 1.12;
+			const vat      = total - vatSales;;
+			$(`#vatSales`).text(formatAmount(vatSales));
 			$(`[name="vat"]`).val(vat);
 		}
 
@@ -1701,6 +1711,7 @@ $(document).ready(function() {
 							style="font-size: 1.02em;"
 							value="${discount}"
 							${disabled}>
+						<div class="invalid-feedback d-block" id="invalid-discount"></div>
 					</div>
 				</div>
 				<div class="row" style="font-size: 1.1rem; font-weight:bold">
@@ -1791,14 +1802,14 @@ $(document).ready(function() {
 			$("#totalAmount").text(formatAmount(totalCost, true));
 
 			const isVatable = $(`[name="inventoryVendorID"] option:selected`).attr("companyVatable") == "1";
-			let vat = 0;
+			let vat = 0, vatSales = 0;
 			if (isVatable) {
-				vat = totalCost * 0.12;
+				vatSales = totalCost / 1.12;
+				vat      = totalCost - vatSales;
 			}
 			$("#vat").val(vat);
-			const vatSales = totalCost - vat;
 			$("#vatSales").text(formatAmount(vatSales, true));
-			const totalVat = vat + vatSales;
+			const totalVat = totalCost;
 			$("#totalVat").text(formatAmount(totalVat, true));
 			const lessEwt = totalVat * 0.01;
 			$("#lessEwt").val(lessEwt);
@@ -2366,14 +2377,36 @@ $(document).ready(function() {
 	// ----- END REMOVE IS-VALID IN TABLE -----
 
 
+	// ----- CHECK COST SUMMARY -----
+	function checkCostSummary() {
+		const total       = getNonFormattedAmount($(`#total`).text());
+		const discount    = getNonFormattedAmount($(`[name="discount"]`).val());
+		const totalAmount = total - discount;
+		const lessEwt     = getNonFormattedAmount($(`[name="lessEwt"]`).val());
+
+		if (discount > total) {
+			showNotification("danger", "Invalid discount value.");
+			$(`[name="discount"]`).focus();
+			return false;
+		} else if (lessEwt > totalAmount) {
+			showNotification("danger", "Invalid less ewt value.");
+			$(`[name="lessEwt"]`).focus();
+			return false;
+		}
+		return true;
+	}
+	// ----- END CHECK COST SUMMARY -----
+
+
 	// ----- SUBMIT DOCUMENT -----
 	$(document).on("click", "#btnSubmit", function () {
 		const id       = $(this).attr("serviceOrderID");
 		const revise   = $(this).attr("revise") == "true";
 		const validate = validateForm("form_service_order");
 		removeIsValid("#tableServiceOrderItems0");
+		const costSummary = checkCostSummary();
 
-		if (validate) {
+		if (validate && costSummary) {
 			const action = revise && "insert" || (id ? "update" : "insert");
 			const data   = getServiceOrderData(action, "submit", "1", id, "0", revise);
 
@@ -2746,7 +2779,9 @@ function saveServiceOrder(data = null, method = "submit", notificationData = nul
 			} else {
 				if (res.dismiss === "cancel" && method != "submit") {
 					if (method != "deny") {
-						callback && callback();
+						if (method != "cancelform") {
+							callback && callback();
+						}
 					} else {
 						$("#modal_service_order").text().length > 0 && $("#modal_service_order").modal("show");
 					}

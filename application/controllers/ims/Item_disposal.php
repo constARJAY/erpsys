@@ -7,7 +7,7 @@ class Item_disposal extends CI_Controller {
     {
         parent::__construct();
         $this->load->model("ims/DisposalItem_model", "disposalitem");
-        isAllowed(37);
+        isAllowed(36);
     }
 
     public function index()
@@ -22,22 +22,22 @@ class Item_disposal extends CI_Controller {
         
     public function saveDisposalItem()
     {
-        $action                  = $this->input->post("action");
-        $method                  = $this->input->post("method");
-        $itemDisposalID          = $this->input->post("itemDisposalID") ?? null;
-        $reviseitemDisposalID    = $this->input->post("reviseitemDisposalID") ?? null;
-        $employeeID              = $this->input->post("employeeID");
-        $approversID             = $this->input->post("approversID") ?? null;
-        $approversStatus         = $this->input->post("approversStatus") ?? null;
-        $approversDate           = $this->input->post("approversDate") ?? null;
-        $itemDisposalStatus      = $this->input->post("itemDisposalStatus");
-        $itemDisposalReason      = $this->input->post("itemDisposalReason") ?? null;
-        $itemDisposalRemarks      = $this->input->post("itemDisposalRemarks") ?? null;
-        $submittedAt             = $this->input->post("submittedAt") ?? null;
-        $createdBy               = $this->input->post("createdBy");
-        $updatedBy               = $this->input->post("updatedBy");
-        $createdAt               = $this->input->post("createdAt");
-        $items                   = $this->input->post("items") ?? null;
+        $action                      = $this->input->post("action");
+        $method                      = $this->input->post("method");
+        $disposalID                  = $this->input->post("disposalID") ?? null;
+        $reviseDisposalID            = $this->input->post("reviseDisposalID") ?? null;
+        $employeeID                  = $this->input->post("employeeID");
+        $approversID                 = $this->input->post("approversID") ?? null;
+        $approversStatus             = $this->input->post("approversStatus") ?? null;
+        $approversDate               = $this->input->post("approversDate") ?? null;
+        $disposalStatus              = $this->input->post("disposalStatus");
+        $disposalReason              = $this->input->post("disposalReason") ?? null;
+        $disposalRemarks             = $this->input->post("disposalRemarks") ?? null;
+        $submittedAt                 = $this->input->post("submittedAt") ?? null;
+        $createdBy                   = $this->input->post("createdBy");
+        $updatedBy                   = $this->input->post("updatedBy");
+        $createdAt                   = $this->input->post("createdAt");
+        $items                       = $this->input->post("items") ?? null;
 
         $disposalItemData = [
             // "revisePurchaseRequestID" => $revisePurchaseRequestID,
@@ -45,8 +45,8 @@ class Item_disposal extends CI_Controller {
             "approversID"             => $approversID,
             "approversStatus"         => $approversStatus,
             "approversDate"           => $approversDate,
-            "itemDisposalStatus"         => $itemDisposalStatus,
-            "itemDisposalReason"         => $itemDisposalReason,
+            "disposalStatus"         => $disposalStatus,
+            "disposalReason"         => $disposalReason,
             // "projectTotalAmount"      => $projectTotalAmount,
             // "companyTotalAmount"      => $companyTotalAmount,
             "submittedAt"             => $submittedAt,
@@ -62,80 +62,55 @@ class Item_disposal extends CI_Controller {
 
             if ($method == "cancelform") {
                 $disposalItemData = [
-                    "itemDisposalStatus" => 4,
+                    "disposalStatus" => 4,
                     "updatedBy"             => $updatedBy,
                 ];
             } else if ($method == "approve") {
                 $disposalItemData = [
                     "approversStatus"       => $approversStatus,
                     "approversDate"         => $approversDate,
-                    "itemDisposalStatus"      => $itemDisposalStatus,
+                    "disposalStatus"      => $disposalStatus,
                     "updatedBy"             => $updatedBy,
                 ];
             } else if ($method == "deny") {
                 $disposalItemData = [
                     "approversStatus"        => $approversStatus,
                     "approversDate"          => $approversDate,
-                    "itemDisposalStatus"  => 3,
-                    "itemDisposalRemarks" => $itemDisposalRemarks,
+                    "disposalStatus"        => 3,
+                    "disposalRemarks"       => $disposalRemarks,
                     "updatedBy"              => $updatedBy,
                 ];
             }
         }
 
-    $saveTransferData = $this->disposalitem->saveDisposalItemData($action, $disposalItemData, $itemDisposalID);
+    $saveTransferData = $this->disposalitem->saveDisposalItemData($action, $disposalItemData, $disposalID,$disposalStatus);
         if ($saveTransferData) {
+            
             $result = explode("|", $saveTransferData);
+            //var_dump("try sample".$approversStatus);
+         
 
             if ($result[0] == "true") {
-                $itemDisposalID  = $result[2];
+                $disposalID  = $result[2];
 
                 if ($items) {
                     $purchaseRequestItems = [];
                     foreach($items as $index => $item) {
                         $temp = [
-                            "itemDisposalID "          => $itemDisposalID ,
-                            "itemID"            => $item["itemID"] != "null" ? $item["itemID"] : null,
-                            "quantity"          => $item["quantity"],
-                            "itemremarks"       => $item["itemremarks"],
-                            "createdBy"         => $item["createdBy"],
-                            "updatedBy"         => $item["updatedBy"],
+                                    "DisposalID"                       => $disposalID,
+                                    "barcode"                           => $item["barcode"],
+                                    "itemID"                            => $item["itemID"] != "null" ? $item["itemID"] : null,
+                                    "itemName"                          => $item["itemName"],
+                                    "inventoryStorageID"                => $item["inventoryStorageID"],
+                                    "serialnumber"                      => $item["serialnumber"],
+                                    "disposalDetailRemarks"             => $item["disposalDetailRemarks"],
+                                    "quantity"                          => $item["quantity"],
+                                    "createdBy"                         => $item["createdBy"],
+                                    "updatedBy"                         => $item["updatedBy"],
                         ];
                         array_push($purchaseRequestItems, $temp);
                     }
-                    
-                    if (isset($_FILES["items"])) {
-                        $length = count($_FILES["items"]["name"]);
-                        $keys   = array_keys($_FILES["items"]["name"]);
-                        for ($i=0; $i<$length; $i++) {
-                            $uploadedFile = explode(".", $_FILES["items"]["name"][$keys[$i]]["file"]);
-
-                            $index     = (int)$uploadedFile[0]; 
-                            $extension = $uploadedFile[1];
-                            $filename  = $i.time().'.'.$extension;
-
-                            $folderDir = "assets/upload-files/request-items/";
-                            if (!is_dir($folderDir)) {
-                                mkdir($folderDir);
-                            }
-                            $targetDir = $folderDir.$filename;
-
-                            if (move_uploaded_file($_FILES["items"]["tmp_name"][$index]["file"], $targetDir)) {
-                                $purchaseRequestItems[$index]["files"] = $filename;
-                            }
-                            
-                        } 
-
-                        // ----- UPDATE ITEMS FILE -----
-                        foreach ($purchaseRequestItems as $key => $prItem) {
-                            if (!array_key_exists("files", $prItem)) {
-                                $purchaseRequestItems[$key]["files"] = null;
-                            }
-                        }
-                        // ----- END UPDATE ITEMS FILE -----
-                    }
-
-                    $saveDisposarecordltItems = $this->disposalitem->saveDisposalItems($purchaseRequestItems, $itemDisposalID );
+                    $saveDisposarecordltItems = $this->disposalitem->saveDisposalItems($purchaseRequestItems, $disposalID,$approversStatus );
                 }
 
             }

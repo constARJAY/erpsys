@@ -2129,7 +2129,9 @@ function saveServiceRequisition(data = null, method = "submit", notificationData
 			} else {
 				if (res.dismiss === "cancel" && method != "submit") {
 					if (method != "deny") {
-						callback && callback();
+						if (method != "cancelform") {
+							callback && callback();
+						}
 					} else {
 						$("#modal_service_requisition").text().length > 0 && $("#modal_service_requisition").modal("show");
 					}

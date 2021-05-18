@@ -27,23 +27,23 @@ $(document).ready(function() {
     // ----- VIEW DOCUMENT -----
 	function viewDocument(view_id = false, readOnly = false, isRevise = false) {
 		const loadData = (id, isRevise = false) => {
-			const tableData = getTableData("ims_item_disposal_tbl", "", "itemDisposalID=" + id);
+			const tableData = getTableData("ims_inventory_disposal_tbl", "", "disposalID=" + id);
 
 			if (tableData.length > 0) {
 				let {
 					employeeID,
-					itemDisposalStatus
+					disposalStatus
 				} = tableData[0];
 
 				let isReadOnly = true, isAllowed = true;
 
 				if (employeeID != sessionID) {
 					isReadOnly = true;
-					if (itemDisposalStatus == 0 || itemDisposalStatus == 4) {
+					if (disposalStatus == 0 || disposalStatus == 4) {
 						isAllowed = false;
 					}
 				} else if (employeeID == sessionID) {
-					if (itemDisposalStatus == 0) {
+					if (disposalStatus == 0) {
 						isReadOnly = false;
 					} else {
 						isReadOnly = true;
@@ -176,7 +176,7 @@ $(document).ready(function() {
 					{ targets: 5,  width: 150 },
 					{ targets: 6,  width: 200 },
 					{ targets: 7,  width: 200 },
-					{ targets: 8,  width: 80  },
+					{ targets: 8,  width: 80  }
 				],
 			});
 
@@ -200,7 +200,9 @@ $(document).ready(function() {
 					{ targets: 3,  width: 50  },
 					{ targets: 4,  width: 120 },
 					{ targets: 5,  width: 120 },
-                    { targets: 6,  width: 120 },
+                    { targets: 6,  width: 110 },
+					{ targets: 7,  width: 120 },
+					{ targets: 8,  width: 120 }
 				],
 			});
 
@@ -220,7 +222,9 @@ $(document).ready(function() {
 					{ targets: 2,  width: 150 },
 					{ targets: 3,  width: 50  },
 					{ targets: 4,  width: 120 },
-					{ targets: 5,  width: 120 }
+					{ targets: 5,  width: 120 },
+					{ targets: 6,  width: 110 },
+					{ targets: 7,  width: 110 }
 					// { targets: 8,  width: 200 },
 				],
 			});
@@ -231,7 +235,7 @@ $(document).ready(function() {
     // ----- HEADER CONTENT -----
 	function headerTabContent(display = true) {
 		if (display) {
-			if (isImModuleApprover("ims_item_disposal_tbl", "approversID")) {
+			if (isImModuleApprover("ims_inventory_disposal_tbl", "approversID")) {
 				let html = `
                 <div class="bh_divider appendHeader"></div>
                 <div class="row clearfix appendHeader">
@@ -270,11 +274,13 @@ $(document).ready(function() {
 	function forApprovalContent() {
 		$("#tableForApprovalParent").html(preloader);
 		let transferRequestData = getTableData(
-			`ims_item_disposal_tbl AS imtrt 
+			`ims_inventory_disposal_tbl AS iid 
             LEFT JOIN hris_employee_list_tbl AS helt USING(employeeID) `,
-			"imtrt.*, CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname, imtrt.createdAt AS dateCreated",
-			`imtrt.employeeID != ${sessionID} AND itemDisposalStatus != 0 AND itemDisposalStatus != 4`,
-			`FIELD(itemDisposalStatus, 0, 1, 3, 2, 4), COALESCE(imtrt.submittedAt, imtrt.createdAt)`
+			`iid.disposalID,iid.revisedisposalID,iid.employeeID,iid.projectID,iid.approversID,iid.approversStatus,iid.approversDate,iid.disposalStatus,iid.disposalReason,
+			iid.disposalRemarks,iid.submittedAt,iid.createdBy,iid.updatedBy,iid.createdAt,iid.updatedAt,
+			 CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname, iid.createdAt AS dateCreated`,
+			`iid.employeeID != ${sessionID} AND disposalStatus != 0 AND disposalStatus != 4`,
+			`FIELD(disposalStatus, 0, 1, 3, 2, 4), COALESCE(iid.submittedAt, iid.createdAt)`
 		);
 
 		let html = `
@@ -297,43 +303,43 @@ $(document).ready(function() {
 		transferRequestData.map((item) => {
 			let {
 				fullname,
-				itemDisposalID,
+				disposalID,
 				approversID,
 				approversDate,
-				itemDisposalStatus,
-				itemDisposalRemarks,
+				disposalStatus,
+				disposalRemarks,
 				submittedAt,
 				createdAt,
 			} = item;
 
-			let remarks       = itemDisposalRemarks ? itemDisposalRemarks : "-";
+			let remarks       = disposalRemarks ? disposalRemarks : "-";
 			let dateCreated   = moment(createdAt).format("MMMM DD, YYYY hh:mm:ss A");
 			let dateSubmitted = submittedAt ? moment(submittedAt).format("MMMM DD, YYYY hh:mm:ss A") : "-";
-			let dateApproved  = itemDisposalStatus == 2 ? approversDate.split("|") : "-";
+			let dateApproved  = disposalStatus == 2 ? approversDate.split("|") : "-";
 			if (dateApproved !== "-") {
 				dateApproved = moment(dateApproved[dateApproved.length - 1]).format("MMMM DD, YYYY hh:mm:ss A");
 			}
 
-			let button = itemDisposalStatus != 0 ? `
-			<button class="btn btn-view w-100 btnView" id="${encryptString(itemDisposalID )}"><i class="fas fa-eye"></i> View</button>` : `
+			let button = disposalStatus != 0 ? `
+			<button class="btn btn-view w-100 btnView" id="${encryptString(disposalID )}"><i class="fas fa-eye"></i> View</button>` : `
 			<button 
 				class="btn btn-edit w-100 btnEdit" 
-				id="${encryptString(itemDisposalID )}" 
-				code="${getFormCode("ADF", createdAt, itemDisposalID )}"><i class="fas fa-edit"></i> Edit</button>`;
+				id="${encryptString(disposalID )}" 
+				code="${getFormCode("ADF", createdAt, disposalID )}"><i class="fas fa-edit"></i> Edit</button>`;
 
-			if (isImCurrentApprover(approversID, approversDate, itemDisposalStatus) || isAlreadyApproved(approversID, approversDate)) {
+			if (isImCurrentApprover(approversID, approversDate, disposalStatus) || isAlreadyApproved(approversID, approversDate)) {
 				html += `
 				<tr>
-					<td>${getFormCode("ADF", createdAt, itemDisposalID )}</td>
+					<td>${getFormCode("ADF", createdAt, disposalID )}</td>
 					<td>${fullname}</td>
 					<td>
-						${employeeFullname(getCurrentApprover(approversID, approversDate, itemDisposalStatus, true))}
+						${employeeFullname(getCurrentApprover(approversID, approversDate, disposalStatus, true))}
 					</td>
 					<td>${dateCreated}</td>
 					<td>${dateSubmitted}</td>
 					<td>${dateApproved}</td>
 					<td class="text-center">
-						${getStatusStyle(itemDisposalStatus)}
+						${getStatusStyle(disposalStatus)}
 					</td>
 					<td>${remarks}</td>
 					<td class="text-center">
@@ -360,10 +366,13 @@ $(document).ready(function() {
 	function myFormsContent() {
 		$("#tableMyFormsParent").html(preloader);
 		let transferRequestData = getTableData(
-			`ims_item_disposal_tbl AS imtrt LEFT JOIN hris_employee_list_tbl AS helt USING(employeeID)`,
-			"imtrt.*, CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname, imtrt.createdAt AS dateCreated",
-			`imtrt.employeeID = ${sessionID}`,
-			`FIELD(itemDisposalStatus, 0, 1, 3, 2, 4), COALESCE(imtrt.submittedAt, imtrt.createdAt)`
+			`ims_inventory_disposal_tbl 		AS iid 
+            LEFT JOIN hris_employee_list_tbl AS helt USING(employeeID)`,
+			`iid.disposalID,iid.revisedisposalID,iid.employeeID,iid.projectID,iid.approversID,iid.approversStatus,iid.approversDate,iid.disposalStatus,iid.disposalReason,
+			iid.disposalRemarks,iid.submittedAt,iid.createdBy,iid.updatedBy,iid.createdAt,iid.updatedAt,
+			 CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname, iid.createdAt AS dateCreated`,
+			`iid.employeeID = ${sessionID}`,
+			`FIELD(disposalStatus, 0, 1, 3, 2, 4), COALESCE(iid.submittedAt, iid.createdAt)`
 		);
 
 		let html = `
@@ -386,42 +395,42 @@ $(document).ready(function() {
 		transferRequestData.map((item) => {
 			let {
 				fullname,
-				itemDisposalID, 
+				disposalID, 
 				approversID,
 				approversDate,
-				itemDisposalStatus,
-				itemDisposalRemarks,
+				disposalStatus,
+				disposalRemarks,
 				submittedAt,
 				createdAt,
 			} = item;
 
-			let remarks       = itemDisposalRemarks ? itemDisposalRemarks : "-";
+			let remarks       = disposalRemarks ? disposalRemarks : "-";
 			let dateCreated   = moment(createdAt).format("MMMM DD, YYYY hh:mm:ss A");
 			let dateSubmitted = submittedAt ? moment(submittedAt).format("MMMM DD, YYYY hh:mm:ss A") : "-";
-			let dateApproved  = itemDisposalStatus == 2 ? approversDate.split("|") : "-";
+			let dateApproved  = disposalStatus == 2 ? approversDate.split("|") : "-";
 			if (dateApproved !== "-") {
 				dateApproved = moment(dateApproved[dateApproved.length - 1]).format("MMMM DD, YYYY hh:mm:ss A");
 			}
 
-			let button = itemDisposalStatus != 0 ? `
-            <button class="btn btn-view w-100 btnView" id="${encryptString(itemDisposalID )}"><i class="fas fa-eye"></i> View</button>` : `
+			let button = disposalStatus != 0 ? `
+            <button class="btn btn-view w-100 btnView" id="${encryptString(disposalID )}"><i class="fas fa-eye"></i> View</button>` : `
             <button 
                 class="btn btn-edit w-100 btnEdit" 
-                id="${encryptString(itemDisposalID )}" 
-                code="${getFormCode("ADF", createdAt, itemDisposalID )}"><i class="fas fa-edit"></i> Edit</button>`;
+                id="${encryptString(disposalID )}" 
+                code="${getFormCode("ADF", createdAt, disposalID )}"><i class="fas fa-edit"></i> Edit</button>`;
 
 			html += `
             <tr>
-                <td>${getFormCode("ADF", createdAt, itemDisposalID )}</td>
+                <td>${getFormCode("ADF", createdAt, disposalID )}</td>
                 <td>${fullname}</td>
                 <td>
-                    ${employeeFullname(getCurrentApprover(approversID, approversDate, itemDisposalStatus, true))}
+                    ${employeeFullname(getCurrentApprover(approversID, approversDate, disposalStatus, true))}
                 </td>
 				<td>${dateCreated}</td>
 				<td>${dateSubmitted}</td>
 				<td>${dateApproved}</td>
                 <td class="text-center">
-                    ${getStatusStyle(itemDisposalStatus)}
+                    ${getStatusStyle(disposalStatus)}
                 </td>
 				<td>${remarks}</td>
                 <td class="text-center">
@@ -448,8 +457,8 @@ $(document).ready(function() {
 		let button = "";
 		if (data) {
 			let {
-				itemDisposalID     = "",
-				itemDisposalStatus = "",
+				disposalID     = "",
+				disposalStatus = "",
 				employeeID            = "",
 				approversID           = "",
 				approversDate         = "",
@@ -458,14 +467,14 @@ $(document).ready(function() {
 
 			let isOngoing = approversDate ? approversDate.split("|").length > 0 ? true : false : false;
 			if (employeeID === sessionID) {
-				if (itemDisposalStatus == 0 || isRevise) {
+				if (disposalStatus == 0 || isRevise) {
 					// DRAFT
 					button = `
 					<button 
-						class="btn btn-submit" 
+						class="btn btn-submit px-5 p-2" 
 						id="btnSubmit" 
-						itemDisposalID="${itemDisposalID}"
-						code="${getFormCode("ADF", createdAt, itemDisposalID)}"
+						disposalID="${disposalID}"
+						code="${getFormCode("ADF", createdAt, disposalID)}"
 						revise=${isRevise}><i class="fas fa-paper-plane"></i>
 						Submit
 					</button>`;
@@ -473,7 +482,7 @@ $(document).ready(function() {
 					if (isRevise) {
 						button += `
 						<button 
-							class="btn btn-cancel" 
+							class="btn btn-cancel btnCancel px-5 p-2" 
 							id="btnCancel"
 							revise="${isRevise}"><i class="fas fa-ban"></i> 
 							Cancel
@@ -483,55 +492,55 @@ $(document).ready(function() {
 						<button 
 							class="btn btn-cancel"
 							id="btnCancelForm" 
-							itemDisposalID="${itemDisposalID}"
-							code="${getFormCode("ADF", createdAt, itemDisposalID)}"
+							disposalID="${disposalID}"
+							code="${getFormCode("ADF", createdAt, disposalID)}"
 							revise=${isRevise}><i class="fas fa-ban"></i> 
 							Cancel
 						</button>`;
 					}
 
 					
-				} else if (itemDisposalStatus == 1) {
+				} else if (disposalStatus == 1) {
 					// FOR APPROVAL
 					if (!isOngoing) {
 						button = `
 						<button 
-							class="btn btn-cancel"
+							class="btn btn-cancel px-5 p-2"
 							id="btnCancelForm" 
-							itemDisposalID="${itemDisposalID}"
-							code="${getFormCode("ADF", createdAt, itemDisposalID)}"
-							status="${itemDisposalStatus}"><i class="fas fa-ban"></i> 
+							disposalID="${disposalID}"
+							code="${getFormCode("ADF", createdAt, disposalID)}"
+							status="${disposalStatus}"><i class="fas fa-ban"></i> 
 							Cancel
 						</button>`;
 					}
-				} else if (itemDisposalStatus == 3) {
+				} else if (disposalStatus == 3) {
 					// DENIED - FOR REVISE
 					button = `
 					<button
-						class="btn btn-cancel"
+						class="btn btn-cancel px-5 p-2"
 						id="btnRevise" 
-						itemDisposalID="${encryptString(itemDisposalID)}"
-						code="${getFormCode("ADF", createdAt, itemDisposalID)}"
-						status="${itemDisposalStatus}"><i class="fas fa-clone"></i>
+						disposalID="${encryptString(disposalID)}"
+						code="${getFormCode("ADF", createdAt, disposalID)}"
+						status="${disposalStatus}"><i class="fas fa-clone"></i>
 						Revise
 					</button>`;
 				}
 			} else {
-				if (itemDisposalStatus == 1) {
+				if (disposalStatus == 1) {
 					if (isImCurrentApprover(approversID, approversDate)) {
 						button = `
 						<button 
-							class="btn btn-submit" 
+							class="btn btn-submit px-5 p-2" 
 							id="btnApprove" 
-							itemDisposalID="${encryptString(itemDisposalID)}"
-							code="${getFormCode("ADF", createdAt, itemDisposalID)}"><i class="fas fa-paper-plane"></i>
+							disposalID="${encryptString(disposalID)}"
+							code="${getFormCode("ADF", createdAt, disposalID)}"><i class="fas fa-paper-plane"></i>
 							Approve
 						</button>
 						<button 
 							class="btn btn-cancel"
 							id="btnReject" 
-							itemDisposalID="${encryptString(itemDisposalID)}"
-							code="${getFormCode("ADF", createdAt, itemDisposalID)}"><i class="fas fa-ban"></i> 
+							disposalID="${encryptString(disposalID)}"
+							code="${getFormCode("ADF", createdAt, disposalID)}"><i class="fas fa-ban"></i> 
 							Deny
 						</button>`;
 					}
@@ -540,11 +549,11 @@ $(document).ready(function() {
 		} else {
 			button = `
 			<button 
-				class="btn btn-submit" 
+				class="btn btn-submit px-5 p-2" 
 				id="btnSubmit"><i class="fas fa-paper-plane"></i> Submit
 			</button>
 			<button 
-				class="btn btn-cancel" 
+				class="btn btn-cancel btnCancel px-5 p-2" 
 				id="btnCancel"><i class="fas fa-ban"></i> 
 				Cancel
 			</button>`;
@@ -629,45 +638,45 @@ $(document).ready(function() {
 
 
     // ----- GET INVENTORY ITEM -----
-    function getInventoryItem(id = null, isProject = true, display = true) {
-        let html   = `<option selected disabled>Select Item Name</option>`;
-		const attr = isProject ? "[project=true]" : "";
+    // function getInventoryItem(id = null, isProject = true, display = true) {
+    //     let html   = `<option selected disabled>Select Item Name</option>`;
+	// 	const attr = isProject ? "[project=true]" : "";
 
-		let itemIDArr = []; // 0 IS THE DEFAULT VALUE
-		$(`[name=itemID]${attr}`).each(function(i, obj) {
-			itemIDArr.push($(this).val());
-		}) 
+	// 	let itemIDArr = []; // 0 IS THE DEFAULT VALUE
+	// 	$(`[name=itemID]${attr}`).each(function(i, obj) {
+	// 		itemIDArr.push($(this).val());
+	// 	}) 
 
-		let optionNone = {
-			itemID:              "0",
-            itemremarks:               "-",
-            location:               "-",
-			itemCode:            "-",
-            serial:               "-",
-			categoryName:        "-",
-			unitOfMeasurementID: "-",
-			itemName:            "N/A",
+	// 	let optionNone = {
+	// 		itemID:              		"0",
+    //         itemremarks:               	"-",
+    //         location:               	"-",
+	// 		itemCode:            		"-",
+    //         serial:               		"-",
+	// 		categoryName:       		 "-",
+	// 		unitOfMeasurementID: 		"-",
+	// 		itemName:            		"N/A",
 
-		};
-		let itemList = [optionNone, ...inventoryItemList];
+	// 	};
+	// 	let itemList = [optionNone, ...inventoryItemList];
 
-		html += itemList.filter(item => !itemIDArr.includes(item.itemID) || item.itemID == id).map(item => {
-            return `
-            <option 
-                value        = "${item.itemID}" 
-                itemremarks       = "${item.itemremarks}" 
-                location      = ""
-                itemCode     = "${item.itemCode}"
-                serial      = ""
-                categoryName = "${item.categoryName}"
-				datereturn          = ""
-                ${item.itemID == id && "selected"}>
-                ${item.itemName}
-            </option>`;
-        })
+	// 	html += itemList.filter(item => !itemIDArr.includes(item.itemID) || item.itemID == id).map(item => {
+    //         return `
+    //         <option 
+    //             value        = "${item.itemID}" 
+    //             itemremarks       = "${item.itemremarks}" 
+    //             location      = ""
+    //             itemCode     = "${item.itemCode}"
+    //             serial      = ""
+    //             categoryName = "${item.categoryName}"
+	// 			datereturn          = ""
+    //             ${item.itemID == id && "selected"}>
+    //             ${item.itemName}
+    //         </option>`;
+    //     })
 		
-        return display ? html : inventoryItemList;
-    }
+    //     return display ? html : inventoryItemList;
+    // }
     // ----- END GET INVENTORY ITEM -----
 
 
@@ -675,13 +684,17 @@ $(document).ready(function() {
     function getItemRow(isProject = true, item = {}, readOnly = false) {
 		const attr = isProject ? `project="true"` : ``;
 		let {
-			itemCode     = "",
-            serial      = "",
-			itemName     = "",
-            itemremarks           ="",
-            location      = "",
-			itemID       = null,
-			quantity     = 1
+			disposalID     				= "",
+            itemID      				= "",
+			itemName     				= "",
+            barcode           			="",
+            serialnumber      			= "",
+			quantity      				= "",
+			disposalDetailRemarks       = "",
+			inventoryStorageID     		= "",
+			inventoryStorageOfficeName 	="",
+			itemcreatedAt 				="",
+			inventorycreatedAt 			=""
            
 
 		} = item;
@@ -694,18 +707,23 @@ $(document).ready(function() {
 			html += `
 			<tr class="itemTableRow">
 				<td>
-					<div class="itemcode">
-						${itemCode || "-"}
+					<div class="barcode">
+						${barcode || "-"}
 					</div>
 				</td>
                 <td>
-                <div class="serial">
-                    ${serial || "-"}
+                <div class="itemCode">
+					${getFormCode("ITM", itemcreatedAt, itemID) || "-"}
                 </div>
                </td> 
 				<td>
-					<div class="itemname">
-						${itemName || "-"}
+					<div class="serialnumber">
+						${serialnumber || "-"}
+					</div>
+				</td>
+				<td>
+					<div class="itemName">
+					${itemName || "-"}
 					</div>
 				</td>
 				<td class="text-center">
@@ -714,13 +732,18 @@ $(document).ready(function() {
 					</div>
 				</td>
 				<td>
-                <div class="location">
-                ${location || "-"}
+               	 <div class="storeCode">
+					${getFormCode("ISM", inventorycreatedAt, inventoryStorageID) || "-"}
                  </div>
-            </td>
+            	</td>
+				<td>
+				<div class="inventoryStorage">
+					${inventoryStorageOfficeName}
+				</div>
+			</td>
                 <td>
-					<div class="itemremarks">
-						${itemremarks}
+					<div class="disposalDetailRemarks">
+						${disposalDetailRemarks}
 					</div>
 				</td>
               
@@ -737,61 +760,61 @@ $(document).ready(function() {
 					</div>
 				</td>
 				<td>
-					<div class="itemcode">-</div>
+					<div class="">
+					<input 
+						type="text" 
+						class="form-control barcode text-center"
+						id="barcode" 
+						name="barcode" 
+						minlength="17" 
+						maxlength="17"  
+						required>
+					<div class="invalid-feedback d-block" id="invalid-barcode"></div>
+				</div>
+				</td>
+				<td>
+					<div class="itemCode">-</div>
 				</td>
                 <td>
-                <div class="serial">-</div>
+                	<div class="serialnumber">-</div>
                 </td>
 				<td>
-					<div class="itemname">
-						<div class="form-group mb-0">
-							<select
-								class="form-control validate select2"
-								name="itemID"
-								id="itemID"
-								style="width: 100%"
-								required
-								${attr}>
-								${getInventoryItem(itemID, isProject)}
-							</select>
-							<div class="invalid-feedback d-block" id="invalid-itemID"></div>
-						</div>
-					</div>
+					<div class="itemName">-</div>
 				</td>
                 <td class="text-center">
-                <div class="">
-                    <input 
-                        type="text" 
-                        class="form-control validate number quantity text-center"
-                        min="1" 
-                        data-allowcharacters="[0-9]" 
-                        max="999999999" 
-                        id="quantity" 
-                        name="quantity" 
-                        value="${quantity}" 
-                        minlength="1" 
-                        maxlength="20" 
-                        requred>
-                    <div class="invalid-feedback d-block" id="invalid-quantity"></div>
-                </div>
+					<div class="">
+					<input 
+						type="text" 
+						class="form-control  number quantity text-center"
+						min="1" 
+						data-allowcharacters="[0-9]" 
+						max="999999999" 
+						id="quantity" 
+						name="quantity" 
+						minlength="1" 
+						maxlength="20" 
+						required>
+					<div class="invalid-feedback d-block" id="invalid-quantity"></div>
+				</div>
             </td>
                  <td>
-				 <div class="location">-</div>
+				 <div class="storeCode">-</div>
               	</td>
                   <td>
-                    <input 
-                    type="text" 
-                    class="form-control validate itemremarks"
-                    min="1" 
-                    data-allowcharacters="[0-9][a-z][A-Z][.][,][-]['][/][&][()]" 
-                    max="200" 
-                    id="itemremarks" 
-                    name="itemremarks" 
-                    value="${itemremarks}" 
-                    minlength="1" 
-                    maxlength="20" 
-                    requred>
-              <div class="invalid-feedback d-block" id="invalid-itemremarks"></div>
+				  	<div class="inventoryStorage">-</div>
+				</td>
+				<td>
+				<div class="">
+					<input 
+						type="text" 
+						class="form-control  disposalDetailRemarks text-center"
+						data-allowcharacters="[0-9]" 
+						max="999999999" 
+						id="disposalDetailRemarks" 
+						name="disposalDetailRemarks" 
+						required>
+					<div class="invalid-feedback d-block" id="invalid-disposalDetailRemarks"></div>
+				</div>
 				</td>
 			</tr>`;
 		}
@@ -811,45 +834,23 @@ $(document).ready(function() {
 			// CHECKBOX
 			$("td .action .checkboxrow", this).attr("id", `checkboxrow${i}`);
 			$("td .action .checkboxrow", this).attr("project", `true`);
-            
-			// ITEMCODE
+
+			$("td .barcode", this).attr("id", `barcode${i}`);
+
 			$("td .itemcode", this).attr("id", `itemcode${i}`);
-              //serial
-              $("td .serial", this).attr("id", `serial${i}`);
-          
-			// ITEMNAME
-			$(this).find("select").each(function(j) {
-				const itemID = $(this).val();
-				$(this).attr("index", `${i}`);
-				$(this).attr("project", `true`);
-				$(this).attr("id", `projectitemid${i}`)
-				if (!$(this).attr("data-select2-id")) {
-					$(this).select2({ theme: "bootstrap" });
-				}
-			});
-			// QUANTITY
-			$("td .quantity [name=quantity]", this).attr("id", `quantity${i}`);
-			$("td .quantity [name=quantity]", this).attr("project", `true`);
-				// remarks
-                $("td .itemremarks", this).attr("id", `itemremarks${i}`);
-              
 
-                 // location
-                 $("td .location", this).attr("id", `location${i}`);
+			$("td .serialnumber", this).attr("id", `serialnumber${i}`);
 
-			// // date
-			// $("td .datereturn", this).attr("id", `datereturn${i}`);
-            
-			// const disabledFutureDates = {
-			// 	autoUpdateInput:  false,
-			// 	singleDatePicker: true,
-			// 	showDropdowns:    true,
-			// 	autoApply:        true,
-			// 	locale: {
-			// 		format: "MMMM DD, YYYY",
-			// 	},
-			// 	maxDate: moment(new Date).format("MMMM DD, YYYY"),
-			// }
+			$("td .itemName", this).attr("id", `itemName${i}`);
+
+			$("td .quantity", this).attr("id", `quantity${i}`);
+
+			$("td .StorageCode", this).attr("id", `StorageCode${i}`);
+
+			$("td .StorageName", this).attr("id", `StorageName${i}`);
+
+			$("td .disposalDetailRemarks", this).attr("id", `disposalDetailRemarks${i}`);
+ 
 		})
 	}
 	// ----- END UPDATE TABLE ITEMS -----
@@ -906,49 +907,143 @@ $(document).ready(function() {
 		}
 	}
 	// ----- END DELETE TABLE ROW -----
-
-    // ----- SELECT ITEM NAME -----
-    $(document).on("change", "[name=itemID]", function() {
-        const itemCode     = $('option:selected', this).attr("itemCode");
-        const serial     = $('option:selected', this).attr("serial");
-        const itemremarks     = $('option:selected', this).attr("itemremarks");
-        const location     = $('option:selected', this).attr("location");
-        const categoryName = $('option:selected', this).attr("categoryName");
-		const datereturn          = $('option:selected', this).attr("datereturn");
-		const isProject    = $(this).closest("tbody").attr("project") == "true";
-		const attr         = isProject ? "[project=true]" : "[company=true]";
-
-        $(this).closest("tr").find(`.itemcode`).first().text(itemCode);
-        $(this).closest("tr").find(`.serial`).first().text(serial);
-        $(this).closest("tr").find(`.category`).first().text(categoryName);
-        $(this).closest("tr").find(`.itemremarks`).first().text(itemremarks);
-        $(this).closest("tr").find(`.location`).first().text(location);
-		$(this).closest("tr").find(`.datereturn`).first().text(datereturn);
-
-
-		$(`[name=itemID]${attr}`).each(function(i, obj) {
-			let itemID = $(this).val();
-			$(this).html(getInventoryItem(itemID, isProject));
-		}) 
-
+		// ----- END UPDATE TABLE ITEMS -----
+		var barcodeArray =[];
+		var barcodeLocationArray =[];
+		$(document).on("keyup", "[name=barcode]", function() {
+			const barcode   = $(this).val(); 
+			const barcodeID   = $(this).attr("id");
+			const data = getTableData
+			(`ims_stock_in_total_tbl AS isit
+			LEFT JOIN ims_inventory_item_tbl 		AS iii 	ON isit.itemID = iii.itemID
+			LEFT JOIN ims_inventory_storage_tbl 	AS iis 	ON isit.inventoryStorageID = iis.inventoryStorageID
+			LEFT JOIN ims_stock_in_tbl AS isi 				ON isit.itemID = isi.itemID AND isit.inventoryStorageID = isi.stockInLocationID`, 
+			`isit.itemID,iii.createdAt,iii.itemCode,isit.itemName,isit.inventoryStorageID,iis.inventoryStorageCode,iis.inventoryStorageOfficeName,isi.barcode,isi.stockInSerialNumber`, `barcode = '${barcode}'`, ``,`itemID`); 
+			data.map((item) => {
+				let {
+					itemID ,
+					itemName,
+					inventoryStorageCode,
+					inventoryStorageOfficeName,
+					stockInSerialNumber,
+					createdAt,
+					inventoryStorageID,
+				} = item;
 	
-    })
-    // ----- END SELECT ITEM NAME -----
+				let item_ID       							= itemID ? itemID : "";
+				let item_Name       						= itemName ? itemName : "";
+				let inventory_Storage_Code       			= inventoryStorageCode ? inventoryStorageCode : "";
+				let inventory_Storage_Office_Name       	= inventoryStorageOfficeName ? inventoryStorageOfficeName : "";
+				//let barcode       							= barcode ? barcode : "";
+				let created_At       	= createdAt ? createdAt : "";
+				let stock_In_Serial_Number       			= stockInSerialNumber ? stockInSerialNumber : "";
+				let inventory_Storage_ID       			= inventoryStorageID ? inventoryStorageID : "";
+	
+		
+				let	barcodeArrayLength = barcodeArray.length || 0;
+				if(barcode.length  ==17){
+	
+					
+					if(itemName != null){
+	
+						
+						let counter =1;
+						if(barcodeArrayLength !=0){
+							for(var loop1 =0;loop1<barcodeArrayLength; loop1++ ){
+								
+	
+								if(barcodeArray[loop1] == barcode && barcodeLocationArray[loop1] != barcodeID){
+									// barcodeArray[loop1] = barcodeval;
+									$(this).closest("tr").find("[name=barcode]").removeClass("is-valid").addClass("is-invalid");
+									$(this).closest("tr").find("#invalid-barcode").removeClass("is-valid").addClass("is-invalid");
+									$(this).closest("tr").find("#invalid-barcode").text('Barcode '+barcode+' already declared!');
+									return false;
+								}else{
+	
+									if(counter == barcodeArrayLength){
+										barcodeArray[barcodeArrayLength -1] = barcode;
+										barcodeLocationArray[barcodeArrayLength -1] = barcodeID;
+									}
+									
+								}
+								counter++;
+							}
+						}else{
+							barcodeArray[0] = barcode;
+							barcodeLocationArray[0] = barcodeID;
+						}
+	
+						$(this).closest("tr").find(`.itemCode`).first().text(getFormCode("ITM",created_At,item_ID));
+						$(this).closest("tr").find(`.itemName`).first().text(item_Name);
+						$(this).closest("tr").find(`[name=barcode]`).first().attr("itemID",item_ID);
+						$(this).closest("tr").find(`[name=barcode]`).first().attr("itemName",item_Name);
+						$(this).closest("tr").find(`[name=barcode]`).first().attr("inventoryStorageID",inventoryStorageID);
+						$(this).closest("tr").find(`[name=barcode]`).first().attr("serialnumber",stock_In_Serial_Number);
+						$(this).closest("tr").find(`.storeCode`).first().text(inventory_Storage_Code);
+						$(this).closest("tr").find(`.inventoryStorage`).first().text(inventory_Storage_Office_Name);
+						$(this).closest("tr").find(`.serialnumber`).first().text(stock_In_Serial_Number);
+						// $(this).closest("tr").find(`[name=quantity]`).first().val(1);
+		
+						$(this).closest("tr").find("[name=barcode]").removeClass("is-invalid");
+						$(this).closest("tr").find("#invalid-barcode").removeClass("is-invalid");
+						$(this).closest("tr").find("#invalid-barcode").text('');
+		
+					}else{
+						$(this).closest("tr").find("[name=barcode]").removeClass("is-valid").addClass("is-invalid");
+						$(this).closest("tr").find("#invalid-barcode").removeClass("is-valid").addClass("is-invalid");
+						$(this).closest("tr").find("#invalid-barcode").text('No Item Available!');
+					}
+				}else{
+					$(this).closest("tr").find("[name=barcode]").removeClass("is-valid").addClass("is-invalid");
+					$(this).closest("tr").find("#invalid-barcode").removeClass("is-valid").addClass("is-invalid");
+					$(this).closest("tr").find("#invalid-barcode").text('Please Input exact 17 Characters!');
+				}
+				
+				})
+		})
 
 
 	// ----- KEYUP QUANTITY OR UNITCOST -----
-	$(document).on("keyup", "[name=quantity]", function() {
-		// const index     = $(this).closest("tr").first().attr("index");
-		// const isProject = $(this).closest("tbody").attr("project") == "true";
-		// const attr      = isProject ? "[project=true]" : "[company=true]";
-		// const quantity  = +$(`#quantity${index}${attr}`).val();
-		// const unitcost  = +$(`#unitcost${index}${attr}`).text().replaceAll(",", "").replace("₱","");
-		
-		// const totalcost = quantity * parseFloat(unitcost);
-		
-		// $(`#totalcost${index}${attr}`).text(formatAmount(totalcost, true));
-		// updateTotalAmount(isProject);
-	})
+	$(document).on("change", "[name=quantity]", function() {
+		const index     		= $(this).closest("tr").first().attr("index");
+		const quantity  		= $(`#quantity${index}`).val();
+        const barcodeval  	= $(this).closest("tr").find('[name=barcode]').val();
+		const data = getTableData
+				 (`ims_stock_in_total_tbl AS isit
+				 LEFT JOIN ims_inventory_item_tbl 		AS iii 	ON isit.itemID = iii.itemID
+				 LEFT JOIN ims_inventory_storage_tbl 	AS iis 	ON isit.inventoryStorageID = iis.inventoryStorageID
+				 LEFT JOIN ims_stock_in_tbl AS isi 				ON isit.itemID = isi.itemID AND isit.inventoryStorageID = isi.stockInLocationID`, 
+				 `isit.itemID,iii.itemCode,isit.itemName,iis.inventoryStorageCode,iis.inventoryStorageOfficeName,isi.barcode,isi.stockInSerialNumber,isit.quantity as stocks`, `barcode = '${barcodeval}'`, ``,`itemID`);
+				 
+				 if(data[0].stocks !=""){
+
+					data.map((item) => {
+						let {
+					
+							stocks
+						} = item;
+			
+					
+						let stock  = stocks ? stocks : "0";
+			
+								if(stock > quantity || stock == quantity ){
+									$(`#quantity${index}`).removeClass("is-invalid").addClass("is-valid");
+									$(this).closest("tr").find("#invalid-quantity").removeClass("is-invalid").addClass("is-valid");
+									$(this).closest("tr").find("#invalid-quantity").text('');
+									removeIsValid("#tableProjectRequestItems");
+								}else{
+									$(`#quantity${index}`).removeClass("is-valid").addClass("is-invalid");
+									$(this).closest("tr").find("#invalid-quantity").removeClass("is-valid").addClass("is-invalid");
+									$(this).closest("tr").find("#invalid-quantity").text('Not Enough Quantity!');
+								}
+						
+						})
+				}else{
+					$(`#quantity${index}`).removeClass("is-valid").addClass("is-invalid");
+					$(this).closest("tr").find("#invalid-quantity").removeClass("is-valid").addClass("is-invalid");
+					$(this).closest("tr").find("#invalid-quantity").text('Not Enough Quantity Or No Stocks Available!');
+				}
+	  });	
 	// ----- END KEYUP QUANTITY OR UNITCOST -----
 
 
@@ -1020,26 +1115,30 @@ $(document).ready(function() {
 		readOnly = isRevise ? false : readOnly;
 
 		let {
-			itemDisposalID       = "",
-			reviseitemDisposalID = "",
+			disposalID       		= "",
+			revisedisposalID 		= "",
 			employeeID              = "",
 			approversID             = "",
 			approversStatus         = "",
 			approversDate           = "",
-			itemDisposalStatus   = false,
-			itemDisposalRemarks   = false,
+			disposalStatus   		= false,
+			disposalReason			= false,
+			disposalRemarks   		= false,
 			submittedAt             = false,
 			createdAt               = false,
 		} = data && data[0];
 		
 		let requestProjectItems = "";
-		if (itemDisposalID) {
+		if (disposalID) {
 			let requestItemsData = getTableData(
-				`ims_item_disposal_tbl 
-				LEFT JOIN ims_item_disposal_details_tbl USING(itemDisposalID)  
-				LEFT JOIN ims_inventory_item_tbl USING(itemID)`, 
-				`itemID, itemCode, itemName,itemremarks`, 
-				`itemDisposalID = ${itemDisposalID}`);
+				`ims_inventory_disposal_details_tbl AS idd
+				LEFT JOIN ims_inventory_disposal_tbl 	AS iid ON	idd.disposalID = iid.disposalID
+				LEFT JOIN ims_stock_in_tbl 				AS isi ON 	idd.itemID = isi.itemID AND idd.barcode = isi.barcode
+				LEFT JOIN ims_inventory_item_tbl		AS iii ON 	idd.itemID = iii.itemID
+				LEFT JOIN ims_inventory_storage_tbl		AS iis ON 	idd.inventoryStorageID = iis.inventoryStorageID`, 
+				`idd.disposalID,idd.itemID,isi.itemName,idd.barcode,idd.serialnumber,idd.quantity,idd.disposalDetailRemarks,idd.inventoryStorageID,
+				iis.inventoryStorageOfficeName,iii.createdAt AS itemcreatedAt, iis.createdAt AS inventorycreatedAt`, 
+				`iid.disposalID = ${disposalID}`);
 			requestItemsData.map(item => {
 				requestProjectItems += getItemRow(true, item, readOnly);
 			})
@@ -1058,8 +1157,8 @@ $(document).ready(function() {
 
 		readOnly ? preventRefresh(false) : preventRefresh(true);
 
-		$("#btnBack").attr("itemDisposalID", itemDisposalID);
-		$("#btnBack").attr("status", itemDisposalStatus);
+		$("#btnBack").attr("disposalID", disposalID);
+		$("#btnBack").attr("status", disposalStatus);
 		$("#btnBack").attr("employeeID", employeeID);
 
 		let disabled = readOnly ? "disabled" : "";
@@ -1080,10 +1179,10 @@ $(document).ready(function() {
 	
 		let button = formButtons(data, isRevise);
 
-		let reviseDocumentNo    = isRevise ? purchaseRequestID : reviseitemDisposalID;
-		let documentHeaderClass = isRevise || reviseitemDisposalID ? "col-lg-4 col-md-4 col-sm-12 px-1" : "col-lg-2 col-md-6 col-sm-12 px-1";
-		let documentDateClass   = isRevise || reviseitemDisposalID ? "col-md-12 col-sm-12 px-0" : "col-lg-8 col-md-12 col-sm-12 px-1";
-		let documentReviseNo    = isRevise || reviseitemDisposalID ?
+		let reviseDocumentNo    = isRevise ? purchaseRequestID : revisedisposalID;
+		let documentHeaderClass = isRevise || revisedisposalID ? "col-lg-4 col-md-4 col-sm-12 px-1" : "col-lg-2 col-md-6 col-sm-12 px-1";
+		let documentDateClass   = isRevise || revisedisposalID ? "col-md-12 col-sm-12 px-0" : "col-lg-8 col-md-12 col-sm-12 px-1";
+		let documentReviseNo    = isRevise || revisedisposalID ?
 		 `
 		<div class="col-lg-4 col-md-4 col-sm-12 px-1">
 			<div class="card">
@@ -1104,7 +1203,7 @@ $(document).ready(function() {
                     <div class="body">
                         <small class="text-small text-muted font-weight-bold">Document No.</small>
                         <h6 class="mt-0 text-danger font-weight-bold">
-							${itemDisposalID && !isRevise ? getFormCode("TR", createdAt, itemDisposalID) : "---"}
+							${disposalID && !isRevise ? getFormCode("TR", createdAt, disposalID) : "---"}
 						</h6>      
                     </div>
                 </div>
@@ -1114,7 +1213,7 @@ $(document).ready(function() {
                     <div class="body">
                         <small class="text-small text-muted font-weight-bold">Status</small>
                         <h6 class="mt-0 font-weight-bold">
-							${itemDisposalStatus && !isRevise ? getStatusStyle(itemDisposalStatus) : "---"}
+							${disposalStatus && !isRevise ? getStatusStyle(disposalStatus) : "---"}
 						</h6>      
                     </div>
                 </div>
@@ -1146,7 +1245,7 @@ $(document).ready(function() {
                         <div class="body">
                             <small class="text-small text-muted font-weight-bold">Date Approved</small>
                             <h6 class="mt-0 font-weight-bold">
-								${getDateApproved(itemDisposalStatus, approversID, approversDate)}
+								${getDateApproved(disposalStatus, approversID, approversDate)}
 							</h6>      
                         </div>
                     </div>
@@ -1158,7 +1257,7 @@ $(document).ready(function() {
                     <div class="body">
                         <small class="text-small text-muted font-weight-bold">Remarks</small>
                         <h6 class="mt-0 font-weight-bold">
-							${itemDisposalRemarks && !isRevise ? itemDisposalRemarks : "---"}
+							${disposalRemarks && !isRevise ? disposalRemarks : "---"}
 						</h6>      
                     </div>
                 </div>
@@ -1183,6 +1282,23 @@ $(document).ready(function() {
                     <input type="text" class="form-control" disabled value="${employeeDesignation}">
                 </div>
             </div>
+			<div class="col-md-12 col-sm-12">
+			<div class="form-group">
+				<label>Reason ${!disabled ? "<code>*</code>" : ""}</label>
+				<textarea class="form-control validate"
+					data-allowcharacters="[a-z][A-Z][0-9][ ][.][,][-][()]['][/][&]"
+					minlength="1"
+					maxlength="200"
+					id="disposalReason"
+					name="disposalReason"
+					required
+					rows="4"
+					style="resize:none;"
+					${disabled}>${disposalReason ?? ""}</textarea>
+				<div class="d-block invalid-feedback" id="invalid-disposalReason"></div>
+			</div>
+		</div>
+
 
             <div class="col-sm-12">
                 <div class="w-100">
@@ -1192,12 +1308,14 @@ $(document).ready(function() {
                         <thead>
                             <tr style="white-space: nowrap">
 								${checkboxProjectHeader}
-                                <th>Item Code</th>
-                                <th>Serial </th>
-                                <th>Item Name </th>
+                                <th>Barcode</th>
+                                <th>Item Number</th>
+                                <th>Serial Number </th>
+								<th>Item Name </th>
                                 <th>Quantity  </th>
-                                <th>location </th>
-                                <th>Remarks </th>
+                                <th>Storage Code </th>
+                                <th>Storage Name</th>
+								<th>Remarks</th>
                             </tr>
                         </thead>
                         <tbody class="itemProjectTableBody" project="true">
@@ -1263,7 +1381,7 @@ $(document).ready(function() {
 
 
 	// ----- GET PURCHASE REQUEST DATA -----
-	function getPurchaseRequestData(action = "insert", method = "submit", status = "1", id = null, currentStatus = "0", isObject = false) {
+	function getDisposalData(action = "insert", method = "submit", status = "1", id = null, currentStatus = "0", isObject = false) {
 
 		/**
 		 * ----- ACTION ---------
@@ -1291,12 +1409,12 @@ $(document).ready(function() {
 		const approversID = method != "approve" && moduleApprover;
 
 		if (id) {
-			data["itemDisposalID"] = id;
-			formData.append("itemDisposalID", id);
+			data["disposalID"] = id;
+			formData.append("disposalID", id);
 
 			if (status != "2") {
-				data["itemDisposalStatus"] = status;
-				formData.append("itemDisposalStatus", status);
+				data["disposalStatus"] = status;
+				formData.append("disposalStatus", status);
 			}
 		}
 
@@ -1311,12 +1429,12 @@ $(document).ready(function() {
 		if (currentStatus == "0" && method != "approve") {
 			
 			data["employeeID"]            = sessionID;
-			data["itemDisposalReason"] = $("[name=itemDisposalReason]").val()?.trim();
+			data["disposalReason"] = $("[name=disposalReason]").val()?.trim();
 			// data["projectTotalAmount"]    = updateTotalAmount(true);
 			// data["companyTotalAmount"]    = updateTotalAmount(false);
 			
 			formData.append("employeeID", sessionID);
-			formData.append("itemDisposalReason", $("[name=itemDisposalReason]").val()?.trim());
+			formData.append("disposalReason", $("[name=disposalReason]").val()?.trim());
 
 			if (action == "insert") {
 				data["createdBy"]   = sessionID;
@@ -1325,9 +1443,9 @@ $(document).ready(function() {
 				formData.append("createdBy", sessionID);
 				formData.append("createdAt", dateToday());
 			} else if (action == "update") {
-				data["itemDisposalID"] = id;
+				data["disposalID"] = id;
 
-				formData.append("itemDisposalID", id);
+				formData.append("disposalID", id);
 			}
 
 			if (method == "submit") {
@@ -1335,43 +1453,54 @@ $(document).ready(function() {
 				formData.append("submittedAt", dateToday());
 				if (approversID) {
 					data["approversID"]           = approversID;
-					data["itemDisposalStatus"] = 1;
+					data["disposalStatus"] = 1;
 
 					formData.append("approversID", approversID);
-					formData.append("itemDisposalStatus", 1);
+					formData.append("disposalStatus", 1);
 				} else {  // AUTO APPROVED - IF NO APPROVERS
 					data["approversID"]           = sessionID;
 					data["approversStatus"]       = 2;
 					data["approversDate"]         = dateToday();
-					data["itemDisposalStatus"] = 2;
+					data["disposalStatus"] = 2;
 
 					formData.append("approversID", sessionID);
 					formData.append("approversStatus", 2);
 					formData.append("approversDate", dateToday());
-					formData.append("itemDisposalStatus", 2);
+					formData.append("disposalStatus", 2);
 				}
 			}
 
 			$(".itemTableRow").each(function(i, obj) {
 				const categoryType = $(this).closest("tbody").attr("project") == "true" ? "project" : "";
 
-				const itemID    = $("td [name=itemID]", this).val();
-				const quantity = +$("td [name=quantity]", this).val();	
-				const itemremarks = $("td [name=itemremarks]", this).val();	
+				const itemID    			= $("td [name=barcode]", this).attr("itemID");
+				const itemName    			= $("td [name=barcode]", this).attr("itemName");
+				const inventoryStorageID   	= $("td [name=barcode]", this).attr("inventoryStorageID");
+				const serialnumber   		= $("td [name=barcode]", this).attr("serialnumber");	
+				const barcode 				= $("td [name=barcode]", this).val();
+				const quantity 				= +$("td [name=quantity]", this).val();	
+				const disposalDetailRemarks = $("td [name=disposalDetailRemarks]", this).val();	
+			
+
+				// const itemID    = $("td [name=itemID]", this).val();
+				// const quantity = +$("td [name=quantity]", this).val();	
+				// const itemremarks = $("td [name=itemremarks]", this).val();	
 				//const quantity = formatdate.format('YYYY-MM-DD');
 			
 				let temp = {
-					itemID, quantity, itemremarks
+					itemID, quantity, disposalDetailRemarks
 					
 				};
-
 				formData.append(`items[${i}][itemID]`, itemID);
+				formData.append(`items[${i}][itemName]`, itemName);
+				formData.append(`items[${i}][inventoryStorageID]`, inventoryStorageID);
+				formData.append(`items[${i}][barcode]`, barcode);
 				formData.append(`items[${i}][quantity]`, quantity);
-				formData.append(`items[${i}][itemremarks]`, itemremarks);
+				formData.append(`items[${i}][serialnumber]`, serialnumber);
+				formData.append(`items[${i}][disposalDetailRemarks]`, disposalDetailRemarks);
 				formData.append(`items[${i}][createdBy]`, sessionID);
 				formData.append(`items[${i}][updatedBy]`, sessionID);
 			
-
 				data["items"].push(temp);
 			});
 		} 
@@ -1406,15 +1535,20 @@ $(document).ready(function() {
 
     // ----- VIEW DOCUMENT -----
 	$(document).on("click", "#btnRevise", function () {
-		const id = $(this).attr("itemDisposalID");
+		const id = $(this).attr("disposalID");
 		viewDocument(id, false, true);
 	});
 	// ----- END VIEW DOCUMENT -----
-
+	// ----- REMOVE IS-VALID IN TABLE -----
+	function removeIsValid(element = "table") {
+		$(element).find(".validated, .is-valid, .no-error").removeClass("validated")
+		.removeClass("is-valid").removeClass("no-error");
+	}
+	// ----- END REMOVE IS-VALID IN TABLE -----
 
 	// ----- SAVE CLOSE FORM -----
 	$(document).on("click", "#btnBack", function () {
-		const id         = $(this).attr("itemDisposalID");
+		const id         = $(this).attr("disposalID");
 		const revise     = $(this).attr("revise") == "true";
 		const employeeID = $(this).attr("employeeID");
 		const feedback   = $(this).attr("code") || getFormCode("ADF", dateToday(), id);
@@ -1424,10 +1558,10 @@ $(document).ready(function() {
 			
 			if (revise) {
 				const action = revise && "insert" || (id && feedback ? "update" : "insert");
-				const data   = getPurchaseRequestData(action, "save", "0", id);
-				data.append("itemDisposalStatus", 0);
-				data.append("reviseitemDisposalID", id);
-				data.delete("itemDisposalID");
+				const data   = getDisposalData(action, "save", "0", id);
+				data.append("disposalStatus", 0);
+				data.append("revisedisposalID", id);
+				data.delete("disposalID");
 	
 				saveDisposalItem(data, "save", null, pageContent);
 			} else {
@@ -1441,8 +1575,8 @@ $(document).ready(function() {
 
 		} else {
 			const action = id && feedback ? "update" : "insert";
-			const data   = getPurchaseRequestData(action, "save", "0", id);
-			data.append("itemDisposalStatus", 0);
+			const data   = getDisposalData(action, "save", "0", id);
+			data.append("disposalStatus", 0);
 
 			saveDisposalItem(data, "save", null, pageContent);
 		}
@@ -1452,16 +1586,16 @@ $(document).ready(function() {
 
     // ----- SAVE DOCUMENT -----
 	$(document).on("click", "#btnSave, #btnCancel", function () {
-		const id       = $(this).attr("itemDisposalID");
+		const id       = $(this).attr("disposalID");
 		const revise   = $(this).attr("revise") == "true";
 		const feedback = $(this).attr("code") || getFormCode("ADF", dateToday(), id);
 		const action   = revise && "insert" || (id && feedback ? "update" : "insert");
-		const data     = getPurchaseRequestData(action, "save", "0", id);
-		data.append("itemDisposalStatus", 0);
+		const data     = getDisposalData(action, "save", "0", id);
+		data.append("disposalStatus", 0);
 
 		if (revise) {
-			data.append("reviseitemDisposalID", id);
-			data.delete("itemDisposalID");
+			data.append("revisedisposalID", id);
+			data.delete("disposalID");
 		}
 
 		saveDisposalItem(data, "save", null, pageContent);
@@ -1471,17 +1605,21 @@ $(document).ready(function() {
 
     // ----- SUBMIT DOCUMENT -----
 	$(document).on("click", "#btnSubmit", function () {
-		const id           = $(this).attr("itemDisposalID");
+		let condition = $("[name=quantity]").hasClass("is-invalid");
+		let condition2 = $("[name=barcode]").hasClass("is-invalid");
+		if(!condition && !condition2){
+
+		const id           = $(this).attr("disposalID");
 		const revise       = $(this).attr("revise") == "true";
 		const validate     = validateForm("form_purchase_request");
 
 		if (validate) {
 			const action = revise && "insert" || (id ? "update" : "insert");
-			const data   = getPurchaseRequestData(action, "submit", "1", id);
+			const data   = getDisposalData(action, "submit", "1", id);
 
 			if (revise) {
-				data.append("reviseitemDisposalID", id);
-				data.delete("itemDisposalID");
+				data.append("revisedisposalID", id);
+				data.delete("disposalID");
 			}
 
 			let approversID = "", approversDate = "";
@@ -1504,16 +1642,19 @@ $(document).ready(function() {
 
 			saveDisposalItem(data, "submit", notificationData, pageContent);
 		}
+	}else{
+		$("[name=quantity]").focus();
+	}
 	});
 	// ----- END SUBMIT DOCUMENT -----
 
 
     // ----- CANCEL DOCUMENT -----
 	$(document).on("click", "#btnCancelForm", function () {
-		const id     = $(this).attr("itemDisposalID");
+		const id     = $(this).attr("disposalID");
 		const status = $(this).attr("status");
 		const action = "update";
-		const data   = getPurchaseRequestData(action, "cancelform", "4", id, status);
+		const data   = getDisposalData(action, "cancelform", "4", id, status);
 
 		saveDisposalItem(data, "cancelform", null, pageContent);
 	});
@@ -1522,9 +1663,9 @@ $(document).ready(function() {
 
     // ----- APPROVE DOCUMENT -----
 	$(document).on("click", "#btnApprove", function () {
-		const id       = decryptString($(this).attr("itemDisposalID"));
-		const feedback = $(this).attr("code") || getFormCode("TR", dateToday(), id);
-		let tableData  = getTableData("ims_item_disposal_tbl", "", "itemDisposalID = " + id);
+		const id       = decryptString($(this).attr("disposalID"));
+		const feedback = $(this).attr("code") || getFormCode("ADF", dateToday(), id);
+		let tableData  = getTableData("ims_inventory_disposal_tbl", "", "disposalID = " + id);
 
 		if (tableData) {
 			let approversID     = tableData[0].approversID;
@@ -1533,7 +1674,7 @@ $(document).ready(function() {
 			let employeeID      = tableData[0].employeeID;
 			let createdAt       = tableData[0].createdAt;
 
-			let data = getPurchaseRequestData("update", "approve", "2", id);
+			let data = getDisposalData("update", "approve", "2", id);
 			data.append("approversStatus", updateApproveStatus(approversStatus, 2));
 			let dateApproved = updateApproveDate(approversDate)
 			data.append("approversDate", dateApproved);
@@ -1561,7 +1702,7 @@ $(document).ready(function() {
 				};
 			}
 
-			data.append("itemDisposalStatus", status);
+			data.append("disposalStatus", status);
 
 			saveDisposalItem(data, "approve", notificationData, pageContent);
 		}
@@ -1571,8 +1712,8 @@ $(document).ready(function() {
 
     // ----- REJECT DOCUMENT -----
 	$(document).on("click", "#btnReject", function () {
-		const id       = $(this).attr("itemDisposalID");
-		const feedback = $(this).attr("code") || getFormCode("TR", dateToday(), id);
+		const id       = $(this).attr("disposalID");
+		const feedback = $(this).attr("code") || getFormCode("ADF", dateToday(), id);
 
 		$("#modal_item_disposal_content").html(preloader);
 		$("#modal_item_disposal .page-title").text("DENY ITEM DISPOSAL");
@@ -1595,20 +1736,20 @@ $(document).ready(function() {
 		</div>
 		<div class="modal-footer text-right">
 			<button class="btn btn-danger" id="btnRejectConfirmation"
-			itemDisposalID="${id}"
+			disposalID="${id}"
 			code="${feedback}"><i class="far fa-times-circle"></i> Deny</button>
-			<button class="btn btn-cancel" data-dismiss="modal"><i class="fas fa-ban"></i> Cancel</button>
+			<button class="btn btn-cancel btnCancel px-5 p-2" data-dismiss="modal"><i class="fas fa-ban"></i> Cancel</button>
 		</div>`;
 		$("#modal_item_disposal_content").html(html);
 	});
 
 	$(document).on("click", "#btnRejectConfirmation", function () {
-		const id       = decryptString($(this).attr("itemDisposalID"));
+		const id       = decryptString($(this).attr("disposalID"));
 		const feedback = $(this).attr("code") || getFormCode("ADF", dateToday(), id);
 
 		const validate = validateForm("modal_item_disposal");
 		if (validate) {
-			let tableData = getTableData("ims_item_disposal_tbl", "", "itemDisposalID = " + id);
+			let tableData = getTableData("ims_inventory_disposal_tbl", "", "disposalID = " + id);
 			if (tableData) {
 				let approversStatus = tableData[0].approversStatus;
 				let approversDate   = tableData[0].approversDate;
@@ -1617,7 +1758,7 @@ $(document).ready(function() {
 				let data = new FormData;
 				data.append("action", "update");
 				data.append("method", "deny");
-				data.append("itemDisposalID", id);
+				data.append("disposalID", id);
 				data.append("approversStatus", updateApproveStatus(approversStatus, 3));
 				data.append("approversDate", updateApproveDate(approversDate));
 				data.append("itemDisposalRemarks", $("[name=itemDisposalRemarks]").val()?.trim());
@@ -1695,7 +1836,7 @@ $(document).ready(function() {
 
 // --------------- DATABASE RELATION ---------------
 function getConfirmation(method = "submit") {
-	const title = "Item Disposal";
+	const title = "Disposal";
 	let swalText, swalImg;
 
 	$("#modal_item_disposal").text().length > 0 && $("#modal_item_disposal").modal("hide");

@@ -2591,7 +2591,9 @@ function savePurchaseRequest(data = null, method = "submit", notificationData = 
 			} else {
 				if (res.dismiss == "cancel" && method != "submit") {
 					if (method != "deny") {
-						callback && callback();
+						if (method != "cancelform") {
+							callback && callback();
+						}
 					} else {
 						$("#modal_purchase_request").text().length > 0 && $("#modal_purchase_request").modal("show");
 					}

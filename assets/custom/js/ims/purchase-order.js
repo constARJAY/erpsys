@@ -1399,8 +1399,8 @@ $(document).ready(function() {
 				total       = categoryType == "project" ? projectTotalCost : companyTotalCost;
 				discount    = 0;
 				totalAmount = total - discount;
-				vat      = isVatable ? totalAmount * 0.12 : 0;
-				vatSales = totalAmount - vat;
+				vatSales = isVatable ? totalAmount / 1.12 : 0;
+				vat      = isVatable ? totalAmount - vatSales : 0;
 				totalVat = vat + vatSales;
 				lessEwt  = totalVat * 0.01;
 				grandTotalAmount = totalVat - lessEwt;
@@ -1968,9 +1968,17 @@ $(document).ready(function() {
 		const totalAmount = total - discount;
 		$("#totalAmount").html(formatAmount(totalAmount, true));
 
-		const vat      = getNonFormattedAmount($("[name=vat]").val())
-		const vatSales = totalAmount - vat;
+		const isVatable = $(`[name="inventoryVendorID"]`).length > 0 ? $(`[name="inventoryVendorID"] option:selected`).attr("vatable") == "true" : false;
+		let vat = 0, vatSales = 0;
+		if (isVatable) {
+			vatSales = totalAmount / 1.12;
+			vat      = totalAmount - vatSales;
+		}
+
+		// const vat      = getNonFormattedAmount($("[name=vat]").val())
+		// const vatSales = totalAmount - vat;
 		$("#vatSales").html(formatAmount(vatSales, true));
+		$(`[name="vat"]`).val(vat);
 
 		const totalVat = vatSales + vat;
 		$("#totalVat").html(formatAmount(totalVat, true));
@@ -2705,6 +2713,27 @@ $(document).ready(function() {
 	// ----- END REMOVE IS-VALID IN TABLE -----
 
 
+	// ----- CHECK COST SUMMARY -----
+	function checkCostSummary() {
+		const total       = getNonFormattedAmount($(`#total`).text());
+		const discount    = getNonFormattedAmount($(`[name="discount"]`).val());
+		const totalAmount = total - discount;
+		const lessEwt     = getNonFormattedAmount($(`[name="lessEwt"]`).val());
+
+		if (discount > total) {
+			showNotification("danger", "Invalid discount value.");
+			$(`[name="discount"]`).focus();
+			return false;
+		} else if (lessEwt > totalAmount) {
+			showNotification("danger", "Invalid less ewt value.");
+			$(`[name="lessEwt"]`).focus();
+			return false;
+		}
+		return true;
+	}
+	// ----- END CHECK COST SUMMARY -----
+
+
 	// ----- SUBMIT DOCUMENT -----
 	$(document).on("click", "#btnSubmit", function () {
 		const id       = $(this).attr("purchaseOrderID");
@@ -2713,8 +2742,9 @@ $(document).ready(function() {
 		const isValid  = checkTableMaterialsEquipment();
 		removeIsValid("#tableProjectOrderItems0");
 		removeIsValid("#tableCompanyOrderItems0");
+		const costSummary = checkCostSummary();
 
-		if (validate && isValid) {
+		if (validate && isValid && costSummary) {
 			const action = revise && "insert" || (id ? "update" : "insert");
 			const data   = getPurchaseOrderData(action, "submit", "1", id, "0", revise);
 
@@ -3087,7 +3117,9 @@ function savePurchaseOrder(data = null, method = "submit", notificationData = nu
 			} else {
 				if (res.dismiss == "cancel" && method != "submit") {
 					if (method != "deny") {
-						callback && callback();
+						if (method != "cancelform") {
+							callback && callback();
+						}
 					} else {
 						$("#modal_purchase_order").text().length > 0 && $("#modal_purchase_order").modal("show");
 					}

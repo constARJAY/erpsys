@@ -18,7 +18,7 @@
       "relationship": true
     },
     "database": "MySQL",
-    "databaseName": "",
+    "databaseName": "erpdb",
     "canvasType": "ERD",
     "language": "GraphQL",
     "tableCase": "pascalCase",
@@ -276,14 +276,75 @@
           }
         ],
         "ui": {
-          "active": true,
-          "left": 234,
-          "top": 128,
-          "zIndex": 130,
+          "active": false,
+          "left": 233,
+          "top": 129,
+          "zIndex": 34,
           "widthName": 89,
           "widthComment": 60
         },
         "id": "d2389668-e3c1-401a-9a29-1875352bd68d"
+      },
+      {
+        "name": "table",
+        "comment": "",
+        "columns": [
+          {
+            "name": "tableID",
+            "comment": "",
+            "dataType": "BIGINT(21)",
+            "default": "",
+            "option": {
+              "autoIncrement": false,
+              "primaryKey": false,
+              "unique": false,
+              "notNull": false
+            },
+            "ui": {
+              "active": false,
+              "pk": false,
+              "fk": false,
+              "pfk": false,
+              "widthName": 60,
+              "widthComment": 60,
+              "widthDataType": 68,
+              "widthDefault": 60
+            },
+            "id": "899385c3-2c58-4b5d-a5c6-ff70b0caf620"
+          },
+          {
+            "name": "bidPoID",
+            "comment": "",
+            "dataType": "BIGINT(21)",
+            "default": "",
+            "option": {
+              "autoIncrement": false,
+              "primaryKey": false,
+              "unique": false,
+              "notNull": true
+            },
+            "ui": {
+              "active": false,
+              "pk": false,
+              "fk": true,
+              "pfk": false,
+              "widthName": 60,
+              "widthComment": 60,
+              "widthDataType": 68,
+              "widthDefault": 60
+            },
+            "id": "ddc304e9-5218-4462-90be-37a382295d09"
+          }
+        ],
+        "ui": {
+          "active": true,
+          "left": 402,
+          "top": 570,
+          "zIndex": 37,
+          "widthName": 60,
+          "widthComment": 60
+        },
+        "id": "dd07fc52-7f45-4df9-913d-41f06f2a4f4d"
       }
     ],
     "indexes": []
@@ -292,6 +353,31 @@
     "memos": []
   },
   "relationship": {
-    "relationships": []
+    "relationships": [
+      {
+        "identification": false,
+        "relationshipType": "OneOnly",
+        "startRelationshipType": "Dash",
+        "start": {
+          "tableId": "d2389668-e3c1-401a-9a29-1875352bd68d",
+          "columnIds": [
+            "d46c0e69-33be-4a52-8ac8-b0bb5d69e159"
+          ],
+          "x": 600.5,
+          "y": 403,
+          "direction": "bottom"
+        },
+        "end": {
+          "tableId": "dd07fc52-7f45-4df9-913d-41f06f2a4f4d",
+          "columnIds": [
+            "ddc304e9-5218-4462-90be-37a382295d09"
+          ],
+          "x": 603,
+          "y": 570,
+          "direction": "top"
+        },
+        "id": "fcd4ff46-8be1-4b58-9f75-98b1bb676901"
+      }
+    ]
   }
 }

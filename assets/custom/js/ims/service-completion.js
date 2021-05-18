@@ -226,7 +226,7 @@ $(document).ready(function() {
 					{ targets: 1,  width: 150 },
 					{ targets: 2,  width: 150 },
 					{ targets: 3,  width: 150 },
-					{ targets: 4,  width: 100 },
+					{ targets: 4,  width: 350 },
 					{ targets: 5,  width: 150 },
 					{ targets: 6,  width: 200 },
 					{ targets: 7,  width: 200 },
@@ -250,7 +250,7 @@ $(document).ready(function() {
 					{ targets: 1,  width: 150 },
 					{ targets: 2,  width: 150 },
 					{ targets: 3,  width: 150 },
-					{ targets: 4,  width: 100 },
+					{ targets: 4,  width: 350 },
 					{ targets: 5,  width: 150 },
 					{ targets: 6,  width: 200 },
 					{ targets: 7,  width: 200 },
@@ -2893,7 +2893,9 @@ function saveServiceCompletion(data = null, method = "submit", notificationData 
 			} else {
 				if (res.dismiss === "cancel" && method != "submit") {
 					if (method != "deny") {
-						callback && callback();
+						if (method != "cancelform") {
+							callback && callback();
+						}
 					} else {
 						$("#modal_service_completion").text().length > 0 && $("#modal_service_completion").modal("show");
 					}
