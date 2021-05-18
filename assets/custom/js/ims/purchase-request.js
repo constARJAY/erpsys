@@ -176,12 +176,13 @@ $(document).ready(function() {
 					{ targets: 1,  width: 150 },
 					{ targets: 2,  width: 100 },
 					{ targets: 3,  width: 350 },
-					{ targets: 4,  width: 150 },
-					{ targets: 5,  width: 200 },
+					{ targets: 4,  width: 350 },
+					{ targets: 5,  width: 150 },
 					{ targets: 6,  width: 200 },
 					{ targets: 7,  width: 200 },
-					{ targets: 8,  width: 80 },
-					{ targets: 9,  width: 250  },
+					{ targets: 8,  width: 200 },
+					{ targets: 9,  width: 80 },
+					{ targets: 10,  width: 250  },
 				],
 			});
 
@@ -199,12 +200,13 @@ $(document).ready(function() {
 					{ targets: 1,  width: 150 },
 					{ targets: 2,  width: 100 },
 					{ targets: 3,  width: 350 },
-					{ targets: 4,  width: 150 },
-					{ targets: 5,  width: 200 },
+					{ targets: 4,  width: 350 },
+					{ targets: 5,  width: 150 },
 					{ targets: 6,  width: 200 },
 					{ targets: 7,  width: 200 },
-					{ targets: 8,  width: 80  },
-					{ targets: 9,  width: 250  },
+					{ targets: 8,  width: 200 },
+					{ targets: 9,  width: 80  },
+					{ targets: 10,  width: 250  },
 				],
 			});
 
@@ -366,6 +368,7 @@ $(document).ready(function() {
                     <th>Employee Name</th>
 					<th>Reference No.</th>
                     <th>Project Name</th>
+                    <th>Reason</th>
                     <th>Current Approver</th>
                     <th>Date Created</th>
                     <th>Date Submitted</th>
@@ -388,6 +391,7 @@ $(document).ready(function() {
 				approversDate,
 				purchaseRequestStatus,
 				purchaseRequestRemarks,
+				purchaseRequestReason,
 				submittedAt,
 				createdAt,
 				ceCreatedAt
@@ -422,6 +426,7 @@ $(document).ready(function() {
 						</div>
 						<small style="color:#848482;">${projectListCode || '-'}</small>
 					</td>
+					<td>${purchaseRequestReason || '-'}</td>
 					<td>
 						${employeeFullname(getCurrentApprover(approversID, approversDate, purchaseRequestStatus, true))}
 					</td>
@@ -470,6 +475,7 @@ $(document).ready(function() {
                     <th>Employee Name</th>
 					<th>Reference No.</th>
                     <th>Project Name</th>
+                    <th>Reason</th>
                     <th>Current Approver</th>
                     <th>Date Created</th>
                     <th>Date Submitted</th>
@@ -492,6 +498,7 @@ $(document).ready(function() {
 				approversDate,
 				purchaseRequestStatus,
 				purchaseRequestRemarks,
+				purchaseRequestReason,
 				submittedAt,
 				createdAt,
 				ceCreatedAt
@@ -525,6 +532,7 @@ $(document).ready(function() {
 					</div>
 					<small style="color:#848482;">${projectListCode || '-'}</small>
 				</td>
+				<td>${purchaseRequestReason || '-'}</td>
                 <td>
                     ${employeeFullname(getCurrentApprover(approversID, approversDate, purchaseRequestStatus, true))}
                 </td>
@@ -861,7 +869,7 @@ $(document).ready(function() {
 
 	// ----- GET NON FORMAT AMOUNT -----
 	const getNonFormattedAmount = (amount = "₱0.00") => {
-		return +amount.replaceAll(",", "").replace("₱", "");
+		return +amount.replaceAll(",", "").replaceAll("₱", "")?.trim();
 	}
 	// ----- END GET NON FORMAT AMOUNT -----
 
@@ -1872,11 +1880,11 @@ $(document).ready(function() {
 				<div class="row py-2">
 					<div class="offset-md-8 col-md-4 col-sm-12 pt-3 pb-2">
 						<div class="row d-flex justify-content-end align-items-end" style="font-size: 1.3rem; font-weight:bold; border-bottom: 3px double black;">
-							<div class="col-6 text-right">Grand Total:</div>
-							<div class="col-6 text-right text-danger"
+							<div class="col-7 text-left">Grand Total:</div>
+							<div class="col-5 text-right text-danger"
 								id="grandTotalAmount"
 								style="font-size: 1.3em">
-								${formatAmount("0", true)}
+								${formatAmount((getNonFormattedAmount(projectTotalAmount) + getNonFormattedAmount(companyTotalAmount)), true)}
 							</div>
 						</div>
 					</div>

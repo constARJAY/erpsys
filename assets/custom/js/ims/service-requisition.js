@@ -172,12 +172,13 @@ $(document).ready(function() {
 					{ targets: 1,  width: 150 },
 					{ targets: 2,  width: 150 },
 					{ targets: 3,  width: 350 },
-					{ targets: 4,  width: 100 },
-					{ targets: 5,  width: 200 },
+					{ targets: 4,  width: 350 },
+					{ targets: 5,  width: 100 },
 					{ targets: 6,  width: 200 },
 					{ targets: 7,  width: 200 },
-					{ targets: 8,  width: 80 },
-					{ targets: 9,  width: 200  },
+					{ targets: 8,  width: 200 },
+					{ targets: 9,  width: 80 },
+					{ targets: 10,  width: 200  },
 				],
 			});
 
@@ -195,12 +196,13 @@ $(document).ready(function() {
 					{ targets: 1,  width: 150 },
 					{ targets: 2,  width: 150 },
 					{ targets: 3,  width: 350 },
-					{ targets: 4,  width: 100 },
-					{ targets: 5,  width: 200 },
+					{ targets: 4,  width: 350 },
+					{ targets: 5,  width: 100 },
 					{ targets: 6,  width: 200 },
 					{ targets: 7,  width: 200 },
-					{ targets: 8,  width: 80 },
-					{ targets: 9,  width: 200  },
+					{ targets: 8,  width: 200 },
+					{ targets: 9,  width: 80 },
+					{ targets: 10,  width: 200  },
 				],
 			});
 
@@ -309,6 +311,7 @@ $(document).ready(function() {
                     <th>Employee Name</th>
                     <th>Client Name</th>
                     <th>Project Name</th>
+                    <th>Reason</th>
                     <th>Current Approver</th>
                     <th>Date Created</th>
                     <th>Date Submitted</th>
@@ -332,6 +335,7 @@ $(document).ready(function() {
 				approversDate,
 				serviceRequisitionStatus,
 				serviceRequisitionRemarks,
+				serviceRequisitionReason,
 				submittedAt,
 				createdAt,
 			} = item;
@@ -365,6 +369,7 @@ $(document).ready(function() {
 						</div>
 						<small style="color:#848482;">${projectListCode || '-'}</small>
 					</td>
+					<td>${serviceRequisitionReason}</td>
 					<td>
 						${employeeFullname(getCurrentApprover(approversID, approversDate, serviceRequisitionStatus, true))}
 					</td>
@@ -413,6 +418,7 @@ $(document).ready(function() {
                     <th>Employee Name</th>
                     <th>Client Name</th>
                     <th>Project Name</th>
+                    <th>Reason</th>
                     <th>Current Approver</th>
                     <th>Date Created</th>
                     <th>Date Submitted</th>
@@ -436,6 +442,7 @@ $(document).ready(function() {
 				approversDate,
 				serviceRequisitionStatus,
 				serviceRequisitionRemarks,
+				serviceRequisitionReason,
 				submittedAt,
 				createdAt,
 			} = item;
@@ -466,6 +473,7 @@ $(document).ready(function() {
 				</div>
 				<small style="color:#848482;">${projectListCode || '-'}</small>
 			</td>
+			<td>${serviceRequisitionReason}</td>
 			<td>
 				${employeeFullname(getCurrentApprover(approversID, approversDate, serviceRequisitionStatus, true))}
 			</td>

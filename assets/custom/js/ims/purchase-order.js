@@ -199,12 +199,13 @@ $(document).ready(function() {
 					{ targets: 1,  width: 150 },
 					{ targets: 2,  width: 100 },
 					{ targets: 3,  width: 350 },
-					{ targets: 4,  width: 150 },
-					{ targets: 5,  width: 200 },
+					{ targets: 4,  width: 350 },
+					{ targets: 5,  width: 150 },
 					{ targets: 6,  width: 200 },
 					{ targets: 7,  width: 200 },
-					{ targets: 8,  width: 80 },
-					{ targets: 9,  width: 250  },
+					{ targets: 8,  width: 200 },
+					{ targets: 9,  width: 80 },
+					{ targets: 10,  width: 250  },
 				],
 			});
 
@@ -222,12 +223,13 @@ $(document).ready(function() {
 					{ targets: 1,  width: 150 },
 					{ targets: 2,  width: 100 },
 					{ targets: 3,  width: 350 },
-					{ targets: 4,  width: 150 },
-					{ targets: 5,  width: 200 },
+					{ targets: 4,  width: 350 },
+					{ targets: 5,  width: 150 },
 					{ targets: 6,  width: 200 },
 					{ targets: 7,  width: 200 },
-					{ targets: 8,  width: 80 },
-					{ targets: 9,  width: 250  },
+					{ targets: 8,  width: 200 },
+					{ targets: 9,  width: 80 },
+					{ targets: 10,  width: 250  },
 				],
 			});
 
@@ -394,6 +396,7 @@ $(document).ready(function() {
                     <th>Employee Name</th>
                     <th>Reference No.</th>
                     <th>Project Name</th>
+                    <th>Reason</th>
                     <th>Current Approver</th>
                     <th>Date Created</th>
                     <th>Date Submitted</th>
@@ -418,6 +421,7 @@ $(document).ready(function() {
 				approversDate,
 				purchaseOrderStatus,
 				purchaseOrderRemarks,
+				purchaseOrderReason,
 				submittedAt,
 				createdAt,
 			} = item;
@@ -451,6 +455,7 @@ $(document).ready(function() {
 						</div>
 						<small style="color:#848482;">${projectListCode || '-'}</small>
 					</td>
+					<td>${purchaseOrderReason || '-'}</td>
 					<td>
 						${employeeFullname(getCurrentApprover(approversID, approversDate, purchaseOrderStatus, true))}
 					</td>
@@ -500,6 +505,7 @@ $(document).ready(function() {
                     <th>Employee Name</th>
                     <th>Reference No.</th>
                     <th>Project Name</th>
+                    <th>Reason</th>
                     <th>Current Approver</th>
                     <th>Date Created</th>
                     <th>Date Submitted</th>
@@ -524,6 +530,7 @@ $(document).ready(function() {
 				approversDate,
 				purchaseOrderStatus,
 				purchaseOrderRemarks,
+				purchaseOrderReason,
 				submittedAt,
 				createdAt,
 			} = item;
@@ -556,6 +563,7 @@ $(document).ready(function() {
 					</div>
 					<small style="color:#848482;">${projectListCode || '-'}</small>
 				</td>
+				<td>${purchaseOrderReason || '-'}</td>
                 <td>
                     ${employeeFullname(getCurrentApprover(approversID, approversDate, purchaseOrderStatus, true))}
                 </td>
@@ -825,7 +833,7 @@ $(document).ready(function() {
 
 					if (inventoryVendorID && inventoryVendorID != "null") {
 						let address = `${inventoryVendorUnit && titleCase(inventoryVendorUnit)+", "}${inventoryVendorBuilding && inventoryVendorBuilding +", "}${inventoryVendorBarangay && titleCase(inventoryVendorBarangay)+", "}${inventoryVendorCity && titleCase(inventoryVendorCity)+", "}${inventoryVendorProvince && titleCase(inventoryVendorProvince)+", "}${inventoryVendorCountry && titleCase(inventoryVendorCountry)+", "}${inventoryVendorZipCode && titleCase(inventoryVendorZipCode)}`;
-						let vendorContactDetails = `${inventoryVendorMobile} - ${inventoryVendorTelephone}`;
+						let vendorContactDetails = `${inventoryVendorMobile} / ${inventoryVendorTelephone}`;
 
 						html += `<option 
 							value="${inventoryVendorID}"
@@ -1402,7 +1410,7 @@ $(document).ready(function() {
 				vatSales = isVatable ? totalAmount / 1.12 : 0;
 				vat      = isVatable ? totalAmount - vatSales : 0;
 				totalVat = vat + vatSales;
-				lessEwt  = totalVat * 0.01;
+				lessEwt  = vatSales != 0 ? vatSales * 0.01 : 0;
 				grandTotalAmount = totalVat - lessEwt;
 			} 
 			// else if (total && isRevise) {
@@ -1539,8 +1547,8 @@ $(document).ready(function() {
 							</div>
 						</div>
 						<div class="row" style="font-size: 1.3rem; font-weight:bold; border-bottom: 3px double black;">
-							<div class="col-6 text-right">Grand Total:</div>
-							<div class="col-6 text-right text-danger"
+							<div class="col-7 text-left">Grand Total:</div>
+							<div class="col-5 text-right text-danger"
 								project="true"
 								id="grandTotalAmount"
 								style="font-size: 1.3em">

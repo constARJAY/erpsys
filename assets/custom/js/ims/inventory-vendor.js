@@ -481,6 +481,64 @@ $(document).ready(function () {
 	// ----- END CUSTOM INPUTMASK ------
 
 
+	// ----- DISPLAY EMPLOYEE SIGNATURE -----
+    function displayFile(file = null, link = true) {
+        let html = ``;
+        if (file && file != null && file != "null") {
+            let otherAttr = link ? `
+            href="${base_url+"assets/upload-files/vendor/"+file}" 
+            target="_blank"` : `href="javascript:void(0)"`;
+            html = `
+            <div class="d-flex justify-content-start align-items-center p-0">
+                <span class="btnRemoveFile pr-2" style="cursor: pointer"><i class="fas fa-close"></i></span>
+                <a class="filename"
+                    title="${file}"
+                    style="display: block;
+                    width: 90%;
+                    overflow: hidden;
+                    white-space: nowrap;
+                    text-overflow: ellipsis;"
+                    ${otherAttr}>
+                    ${file}
+                </a>
+			</div>`
+        }
+        return html;
+    }
+    // ----- END DISPLAY EMPLOYEE SIGNATURE -----
+
+
+	 // ----- REMOVE E-SIGNATURE -----
+	 $(document).on("click", `.btnRemoveFile`, function() {
+        $(`#displayFile`).empty();
+        $(`[name="file|vendor"]`).val("");
+        $(`[name="file|vendor"]`).removeAttr("filename");
+    })
+    // ----- END REMOVE E-SIGNATURE -----
+
+
+	// ----- SELECT FILE -----
+	$(document).on("change", `[name="file|vendor"]`, function() {
+		if (this.files && this.files[0]) {
+            const filesize = this.files[0].size/1024/1024; // Size in MB
+            const filetype = this.files[0].type;
+            const filename = this.files[0].name;
+			const type     = filetype.split("/")?.[1];
+			console.log(filetype, type);
+            if (filesize > 10) {
+                $(this).val("");
+                showNotification("danger", "File size must be less than or equal to 10mb");
+            } else if (!["png", "jpg", "jpeg", "doc", "docx", "pdf"].includes(type)) {
+                $(this).val("");
+                showNotification("danger", "Invalid file type");
+            } else {
+                $(`#displayFile`).html(displayFile(filename, false));
+            }
+        }
+	})
+	// ----- END SELECT FILE -----
+
+
 	// ----- MODAL CONTENT -----
 	function modalContent(data = false) {
 		let {
@@ -513,7 +571,10 @@ $(document).ready(function () {
 			inventoryVendorBankAccNo    = "",
 			inventoryVendorOpeningHours = "",
 			inventoryVendorClosingHours = "",
+			file                        = "",
 		} = data && data[0];
+
+		const bankDetailsAttr = bankID && bankID != "null" ? "" : "disabled";
 
 		let button = data
 			? `
@@ -878,7 +939,7 @@ $(document).ready(function () {
 								maxlength="50" 
 								value="${inventoryVendorBankAccName}"
 								autocomplete="off"
-								disabled>
+								${bankDetailsAttr}>
 							<div class="invalid-feedback d-block" id="invalid-inventoryVendorBankAccName"></div>
 						</div>
 					</div>
@@ -895,17 +956,22 @@ $(document).ready(function () {
 								maxlength="50" 
 								value="${inventoryVendorBankAccNo}"
 								autocomplete="off"
-								disabled>
+								${bankDetailsAttr}>
 							<div class="invalid-feedback d-block" id="invalid-inventoryVendorBankAccNo"></div>
 						</div>
 					</div>
                     <div class="col-xl-4 col-lg-6 col-md-6 col-sm-12">
                         <div class="form-group">
                             <label>File</label>
+							<div id="displayFile">
+								${displayFile(file)}
+							</div>
                             <input type="file"
 								name="file|vendor"
 								class="form-control validate"
-								id="inventoryVendorFile">
+								id="inventoryVendorFile"
+								accept="image/*, .pdf, .docx, .doc"
+								filename="${file}">
                             <div class="invalid-feedback d-block" id="invalid-inventoryVendorFile"></div>
                         </div>
                     </div>
@@ -959,22 +1025,24 @@ $(document).ready(function () {
 		initInputmaskTime();
 	});
 	// ----- END OPEN ADD MODAL -----
+	
 
 	// ----- SAVE MODAL -----
 	$(document).on("click", "#btnSave", function () {
 		const validate = validateForm("modal_inventory_vendor");
 		if (validate) {
-			let data = getFormData("modal_inventory_vendor", true);
-			data["tableData[inventoryVendorCode]"] = generateCode(
-				"VEN",
-				false,
-				"ims_inventory_vendor_tbl",
-				"inventoryVendorCode"
-			);
-			data["tableData[createdBy]"] = sessionID;
-			data["tableData[updatedBy]"] = sessionID;
-			data["tableName"] = "ims_inventory_vendor_tbl";
-			data["feedback"] = $("[name=inventoryVendorName]").val();
+			let data = getFormData("modal_inventory_vendor");
+			
+			if (!$(`[name="file|vendor"]`).attr("filename") || $(`[name="file|vendor"]`).attr("filename") == "") {
+				data.delete("tableData[file]");
+				data.append("tableData[file]", null);
+			}
+
+			data.append("tableData[inventoryVendorCode]", generateCode("VEN", false, "ims_inventory_vendor_tbl", "inventoryVendorCode"))
+			data.append("tableData[createdBy]", sessionID);
+			data.append("tableData[updatedBy]", sessionID);
+			data.append("tableName", "ims_inventory_vendor_tbl");
+			data.append("feedback", $("[name=inventoryVendorName]").val()?.trim());
 
 			sweetAlertConfirmation(
 				"add",
@@ -982,7 +1050,7 @@ $(document).ready(function () {
 				"modal_inventory_vendor",
 				null,
 				data,
-				true,
+				false,
 				tableContent
 			);
 		}
@@ -1024,17 +1092,22 @@ $(document).ready(function () {
 	});
 	// ----- END OPEN EDIT MODAL -----
 
+
 	// ----- UPDATE MODAL -----
 	$(document).on("click", "#btnUpdate", function () {
 		const id = $(this).attr("vendorID");
 
 		const validate = validateForm("modal_inventory_vendor");
 		if (validate) {
-			let data = getFormData("modal_inventory_vendor", true);
-			data["tableData[updatedBy]"] = sessionID;
-			data["tableName"] = "ims_inventory_vendor_tbl";
-			data["whereFilter"] = "inventoryVendorID=" + id;
-			data["feedback"] = $("[name=inventoryVendorName]").val();
+			let data = getFormData("modal_inventory_vendor");
+			if (!$(`[name="file|vendor"]`).attr("filename") || $(`[name="file|vendor"]`).attr("filename") == "") {
+				data.delete("tableData[file]");
+				data.append("tableData[file]", null);
+			}
+			data.append("tableData[updatedBy]", sessionID);
+			data.append("tableName", "ims_inventory_vendor_tbl");
+			data.append("whereFilter", `inventoryVendorID = ${id}`);
+			data.append("feedback", $("[name=inventoryVendorName]").val()?.trim());
 
 			sweetAlertConfirmation(
 				"update",
@@ -1042,7 +1115,7 @@ $(document).ready(function () {
 				"modal_inventory_vendor",
 				"",
 				data,
-				true,
+				false,
 				tableContent
 			);
 		}

@@ -43,6 +43,7 @@ class Employee_module extends CI_Controller {
 
         // INFORMATION
         $employeeProfile     = $this->input->post("employeeProfile");
+        $employeeSignature   = $this->input->post("employeeSignature");
         $employeeFirstname   = $this->input->post("employeeFirstname");
         $employeeMiddlename  = $this->input->post("employeeMiddlename") ?? null;
         $employeeLastname    = $this->input->post("employeeLastname");
@@ -79,6 +80,21 @@ class Employee_module extends CI_Controller {
             $targetDir = $folderDir.$filename;
             if (move_uploaded_file($_FILES["file"]["tmp_name"], $targetDir)) {
                 $employeeProfile = $filename;
+            }
+        }
+        if (isset($_FILES["signatureFile"])) {
+            $uploadedFile = explode(".", $_FILES["signatureFile"]["name"]);
+            $extension    = $uploadedFile[1];
+            $filename     = time().'.'.$extension;
+
+            $folderDir = "assets/upload-files/signatures/";
+            if (!is_dir($folderDir)) {
+                mkdir($folderDir);
+            }
+
+            $targetDir = $folderDir.$filename;
+            if (move_uploaded_file($_FILES["signatureFile"]["tmp_name"], $targetDir)) {
+                $employeeSignature = $filename;
             }
         }
 
@@ -122,6 +138,7 @@ class Employee_module extends CI_Controller {
         // EMPLOYEE DATA
         $employeeData = [
             "employeeProfile"           => $employeeProfile,
+            "employeeSignature"         => $employeeSignature,
             "employeeFirstname"         => $employeeFirstname,
             "employeeMiddlename"        => $employeeMiddlename,
             "employeeLastname"          => $employeeLastname,

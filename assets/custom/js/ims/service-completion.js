@@ -227,12 +227,13 @@ $(document).ready(function() {
 					{ targets: 2,  width: 150 },
 					{ targets: 3,  width: 150 },
 					{ targets: 4,  width: 350 },
-					{ targets: 5,  width: 150 },
-					{ targets: 6,  width: 200 },
+					{ targets: 5,  width: 350 },
+					{ targets: 6,  width: 150 },
 					{ targets: 7,  width: 200 },
 					{ targets: 8,  width: 200 },
-					{ targets: 9,  width: 80  },
-					{ targets: 10, width: 250 },
+					{ targets: 9,  width: 200 },
+					{ targets: 10,  width: 80  },
+					{ targets: 11, width: 250 },
 				],
 			});
 
@@ -251,12 +252,13 @@ $(document).ready(function() {
 					{ targets: 2,  width: 150 },
 					{ targets: 3,  width: 150 },
 					{ targets: 4,  width: 350 },
-					{ targets: 5,  width: 150 },
-					{ targets: 6,  width: 200 },
+					{ targets: 5,  width: 350 },
+					{ targets: 6,  width: 150 },
 					{ targets: 7,  width: 200 },
 					{ targets: 8,  width: 200 },
-					{ targets: 9,  width: 80  },
-					{ targets: 10, width: 250 },
+					{ targets: 9,  width: 200 },
+					{ targets: 10,  width: 80  },
+					{ targets: 11, width: 250 },
 				],
 			});
 
@@ -357,7 +359,8 @@ $(document).ready(function() {
 				LEFT JOIN hris_employee_list_tbl AS helt ON isct.employeeID = helt.employeeID`,
 			`isct.*,  
             CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname, 
-            isct.createdAt AS dateCreated, projectListCode, projectListName, pct.clientName, isot.createdAt AS isotCreatedAt`,
+            isct.createdAt AS dateCreated, projectListCode, projectListName, pct.clientName, isot.createdAt AS isotCreatedAt,
+			isot.serviceOrderReason`,
 			`isct.employeeID != ${sessionID} AND isct.serviceCompletionStatus != 0 AND isct.serviceCompletionStatus != 4`,
 			`FIELD(serviceCompletionStatus, 0, 1, 3, 2, 4), COALESCE(isct.submittedAt, isct.createdAt)`
 		);
@@ -371,6 +374,7 @@ $(document).ready(function() {
 					<th>Reference No.</th>
 					<th>Client Name</th>
 					<th>Project Name</th>
+					<th>Reason</th>
 					<th>Current Approver</th>
 					<th>Date Created</th>
 					<th>Date Submitted</th>
@@ -395,6 +399,7 @@ $(document).ready(function() {
 				approversDate,
 				serviceCompletionStatus,
 				serviceCompletionRemarks,
+				serviceOrderReason,
 				submittedAt,
 				createdAt,
 			} = item;
@@ -428,6 +433,7 @@ $(document).ready(function() {
 					</div>
 					<small style="color:#848482;">${projectListCode || '-'}</small>
 				</td>
+				<td>${serviceOrderReason}</td>
 				<td>
 					${employeeFullname(getCurrentApprover(approversID, approversDate, serviceCompletionStatus, true))}
 				</td>
@@ -466,7 +472,8 @@ $(document).ready(function() {
 				LEFT JOIN hris_employee_list_tbl AS helt ON isct.employeeID = helt.employeeID`,
 			`isct.*,  
             CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname, 
-            isct.createdAt AS dateCreated, projectListCode, projectListName, pct.clientName, isot.createdAt AS isotCreatedAt`,
+            isct.createdAt AS dateCreated, projectListCode, projectListName, pct.clientName, isot.createdAt AS isotCreatedAt,
+			isot.serviceOrderReason`,
 			`isct.employeeID = ${sessionID}`,
 			`FIELD(serviceCompletionStatus, 0, 1, 3, 2, 4), COALESCE(isct.submittedAt, isct.createdAt)`
 		);
@@ -480,6 +487,7 @@ $(document).ready(function() {
                     <th>Reference No.</th>
                     <th>Client Name</th>
                     <th>Project Name</th>
+                    <th>Reason</th>
                     <th>Current Approver</th>
                     <th>Date Created</th>
                     <th>Date Submitted</th>
@@ -504,6 +512,7 @@ $(document).ready(function() {
 				approversDate,
 				serviceCompletionStatus,
 				serviceCompletionRemarks,
+				serviceOrderReason,
 				submittedAt,
 				createdAt,
 			} = item;
@@ -539,6 +548,7 @@ $(document).ready(function() {
 					</div>
 					<small style="color:#848482;">${projectListCode || '-'}</small>
 				</td>
+				<td>${serviceOrderReason}</td>
                 <td>
                     ${employeeFullname(getCurrentApprover(approversID, approversDate, serviceCompletionStatus, true))}
                 </td>

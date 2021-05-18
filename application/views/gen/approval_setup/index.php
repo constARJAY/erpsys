@@ -89,7 +89,7 @@
 								<div class="col-12 col-lg-4 col-xl-4 py-2 text-left">
 									<h6 class="bg-primary text-light p-3"><strong>USER DESIGNATION</strong></h6>
 									<div class="position-list" id="position_form">
-										<div class="card my-0 p-3">
+										<div class="card my-0 p-3" style='box-shadow:none;'>
 											<div class="d-flex justify-content-center align-items-center">
 												<div class="row">
 													<div class="col-2"></div>
@@ -108,7 +108,7 @@
 								<div class="col-12 col-lg-8 col-xl-8 py-2 text-left">
 										<h6 class="bg-primary text-light p-3"><strong>LIST OF APPROVERS</strong></h6>
 
-										<div class="card my-0 p-2 approval-list">
+										<div class="card my-0 p-2 approval-list" style='box-shadow:none;'>
 											<div class="row">
 												<div class="col-4"></div>
 												<div class="col-4 text-center">

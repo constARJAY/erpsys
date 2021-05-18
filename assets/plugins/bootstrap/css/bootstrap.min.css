@@ -503,7 +503,8 @@ mark {
 }
 
 .img-fluid {
-	max-width: 100%;
+	max-width: 90%;
+	padding: 30px;
 	height: auto
 }
 
@@ -5490,7 +5491,8 @@ input[type=submit].btn-block {
 
 .breadcrumb-item {
 	display: -ms-flexbox;
-	display: flex
+	display: flex;
+	align-items: baseline;
 }
 
 .breadcrumb-item+.breadcrumb-item {

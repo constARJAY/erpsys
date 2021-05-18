@@ -175,6 +175,20 @@ const generateNewRolesPermission =() => {
 
 
 $(document).ready(function() {
+
+    // ----- AUTO-PADDING OF HEADER TITLE -----
+    var padding = document.getElementById("leftsidebar").offsetHeight;
+    $(".block-header").css("padding-top",padding + 15);
+
+    $(window).on('resize', function () {
+        setTimeout(doneResizing, 250);
+    });
+    // ----- END AUTO-PADDING OF HEADER TITLE -----
+
+    function doneResizing(){
+        var padding = document.getElementById("leftsidebar").offsetHeight;
+        $(".block-header").css("padding-top",padding + 15);  
+    }
 			
     function getAllModules(data) {
         let html = "";

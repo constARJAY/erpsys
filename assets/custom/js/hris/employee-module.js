@@ -593,17 +593,29 @@ $(document).ready(function() {
     // ----- END SELECT PROFILE IMAGE -----
 
 
+    // ----- REMOVE E-SIGNATURE -----
+    $(document).on("click", `.btnRemoveSignature`, function() {
+        $(`#displaySignature`).empty();
+        $(`[name="employeeSignature"]`).val("");
+        $(`[name="employeeSignature"]`).removeAttr("signature");
+    })
+    // ----- END REMOVE E-SIGNATURE -----
+
+
     // ----- SELECT E-SIGNATURE -----
     $(document).on("change", "[name=employeeSignature]", function() {
         if (this.files && this.files[0]) {
             const filesize = this.files[0].size/1024/1024; // Size in MB
             const filetype = this.files[0].type;
+            const filename = this.files[0].name;
             if (filesize > 10) {
                 $(this).val("");
                 showNotification("danger", "File size must be less than or equal to 10mb");
             } else if (filetype.indexOf("image") == -1) {
                 $(this).val("");
                 showNotification("danger", "Invalid file type");
+            } else {
+                $(`#displaySignature`).html(displayEmployeeSignature(filename, false));
             }
         }
     })
@@ -613,6 +625,7 @@ $(document).ready(function() {
     // ----- REMOVE PROFILE IMAGE -----
     $(document).on("click", "#removeProfile", function() {
         $("[name=employeeProfile]").val("");
+        $(`[name="employeeProfile"]`).attr("default", "default.jpg");
         $('#previewImage').attr('src', `${base_url}assets/upload-files/profile-images/default.jpg`);
 
         if ($("[name=employeeProfile]").val()) {
@@ -622,6 +635,33 @@ $(document).ready(function() {
         }
     })
     // ----- END REMOVE PROFILE IMAGE -----
+
+    
+    // ----- DISPLAY EMPLOYEE SIGNATURE -----
+    function displayEmployeeSignature(employeeSignature = null, link = true) {
+        let html = ``;
+        if (employeeSignature && employeeSignature != null && employeeSignature != "null") {
+            let otherAttr = link ? `
+            href="${base_url+"assets/upload-files/signatures/"+employeeSignature}" 
+            target="_blank"` : `href="javascript:void(0)"`;
+            html = `
+            <div class="d-flex justify-content-start align-items-center p-0">
+                <span class="btnRemoveSignature pr-2" style="cursor: pointer"><i class="fas fa-close"></i></span>
+                <a class="filename"
+                    title="${employeeSignature}"
+                    style="display: block;
+                    width: 90%;
+                    overflow: hidden;
+                    white-space: nowrap;
+                    text-overflow: ellipsis;"
+                    ${otherAttr}>
+                    ${employeeSignature}
+                </a>
+			</div>`
+        }
+        return html;
+    }
+    // ----- END DISPLAY EMPLOYEE SIGNATURE -----
 
 
     // ----- EMPLOYEE INFORMATION TAB -----
@@ -652,6 +692,7 @@ $(document).ready(function() {
             designationID       = "",
             employeeEmail       = "",
             employeeMobile      = "",
+            employeeSignature   = "",
             employeeStatus      = "",
         } = data;
 
@@ -990,10 +1031,14 @@ $(document).ready(function() {
                 <div class="col-lg-3 col-md-6 col-sm-12">
                     <div class="form-group">
                         <label>Signature</label>
+                        <div class="signature" id="displaySignature">
+                            ${displayEmployeeSignature(employeeSignature)}
+                        </div>
                         <input type="file"
                             class="form-control validate"
                             name="employeeSignature"
                             id="employeeSignature"
+                            signature="${employeeSignature}"
                             accept="image/*">
                         <div class="invalid-feedback d-block" id="invalid-employeeSignature"></div>
                     </div>
@@ -1039,7 +1084,8 @@ $(document).ready(function() {
                         <label>Status <code>*</code></label>
                         <select class="form-control validate select2"
                             name="employeeStatus"
-                            id="employeeStatus">
+                            id="employeeStatus"
+                            employeeID="${employeeID}">
                             ${employeeStatuses(employeeStatus)}
                         </select>
                         <div class="invalid-feedback d-block" id="invalid-employeeStatus"></div>
@@ -1662,37 +1708,42 @@ $(document).ready(function() {
                 readStatus   = "checked", 
                 updateStatus = "", 
                 deleteStatus = "", 
-                printStatus  = "";
+                printStatus  = "",
+                disabled     = "";
 
             if (employeeID) {
                 getEmployeeAccessibility
                 .filter(mdl => mdl.moduleID == module.moduleID)
                 .map(mdl2 => {
-                    createStatus = mdl2.createStatus == 1 ? "checked" : "";
-                    readStatus   = mdl2.readStatus   == 1 ? "checked" : "";
-                    updateStatus = mdl2.updateStatus == 1 ? "checked" : "";
-                    deleteStatus = mdl2.deleteStatus == 1 ? "checked" : "";
-                    printStatus  = mdl2.printStatus  == 1 ? "checked" : "";
+                    createStatus = mdl2.createStatus == 1 || employeeID == 1 ? "checked" : "";
+                    readStatus   = mdl2.readStatus   == 1 || employeeID == 1 ? "checked" : "";
+                    updateStatus = mdl2.updateStatus == 1 || employeeID == 1 ? "checked" : "";
+                    deleteStatus = mdl2.deleteStatus == 1 || employeeID == 1 ? "checked" : "";
+                    printStatus  = mdl2.printStatus  == 1 || employeeID == 1 ? "checked" : "";
                 });
+
+                // ----- IF THE USER IS ADMIN -----
+                disabled = employeeID == 1 ? "disabled" : "";
+                // ----- END IF THE USER IS ADMIN -----
             }
 
             return `
             <tr class="module" moduleid="${module.moduleID}">
                 <td>${module.moduleName}</td>
                 <td class="text-center">
-                    <input type="checkbox" name="read" moduleid="${module.moduleID}" ${readStatus}>
+                    <input type="checkbox" name="read" moduleid="${module.moduleID}" ${readStatus} ${disabled}>
                 </td>
                 <td class="text-center">
-                    <input type="checkbox" name="create" moduleid="${module.moduleID}" ${createStatus}>
+                    <input type="checkbox" name="create" moduleid="${module.moduleID}" ${createStatus} ${disabled}>
                 </td>
                 <td class="text-center">
-                    <input type="checkbox" name="update" moduleid="${module.moduleID}" ${updateStatus}>
+                    <input type="checkbox" name="update" moduleid="${module.moduleID}" ${updateStatus} ${disabled}>
                 </td>
                 <td class="text-center">
-                    <input type="checkbox" name="delete" moduleid="${module.moduleID}" ${deleteStatus}>
+                    <input type="checkbox" name="delete" moduleid="${module.moduleID}" ${deleteStatus} ${disabled}>
                 </td>
                 <td class="text-center">
-                    <input type="checkbox" name="print" moduleid="${module.moduleID}" ${printStatus}>
+                    <input type="checkbox" name="print" moduleid="${module.moduleID}" ${printStatus} ${disabled}>
                 </td>
             </tr>`;
         })
@@ -1930,6 +1981,20 @@ $(document).ready(function() {
     // ----- END UPLOAD FILE -----
 
 
+    // ----- CHANGE STATUS -----
+    $(document).on("change", `[name="employeeStatus"]`, function() {
+        const employeeID = $(this).attr("employeeID");
+        const status     = $(this).val();
+        // ----- CHANGING THE STATUS OF ADMIN -----
+        if (employeeID && employeeID == 1 && status != 1) {
+            showNotification("danger", "Administrator status cannot be changed!");
+            $(this).val(1).trigger("change");
+        }
+        // ----- END CHANGING THE STATUS OF ADMIN -----
+    })
+    // ----- END CHANGE STATUS -----
+
+
     // ----- EMPLOYEE DOCUMENTS -----
     function employeeDocuments(data = false) {
         let { employeeID = "" } = data;
@@ -2114,14 +2179,16 @@ $(document).ready(function() {
         let employeeSignature     = $("[name=employeeSignature]").val();
 
         employeeProfile   = employeeProfile && $("[name=employeeProfile]")[0].files[0].name || $("[name=employeeProfile]").attr("default");
+        employeeSignature = employeeSignature && $("[name=employeeSignature]")[0].files[0].name || $("[name=employeeSignature]").attr("signature");
         employeeBirthday  = moment(employeeBirthday).format("YYYY-MM-DD");
         employeeHiredDate = moment(employeeHiredDate).format("YYYY-MM-DD");
         employeeGender    = employeeGender == "Others" ? $("[name=employeeOtherGender]").val()?.trim() : employeeGender;
         const file = employeeProfile ? $("[name=employeeProfile]")[0].files[0] : null;
         employeeSignature = employeeSignature ? $("[name=employeeSignature]")[0]?.files[0] : null;
+        const signatureFile = employeeSignature ? $("[name=employeeSignature]")[0].files[0] : null;
         
         return {
-            employeeProfile, employeeFirstname, employeeMiddlename, employeeLastname, employeeBirthday, employeeGender, employeeCitizenship, employeeCivilStatus, employeeHiredDate, employeeRegion, employeeProvince, employeeCity, employeeBarangay, employeeUnit, employeeBuilding, employeeStreet, employeeSubdivision, employeeCountry, employeeZipCode, departmentID, designationID, employeeEmail, employeeMobile, employeeStatus, file, employeeSignature
+            employeeProfile, employeeFirstname, employeeMiddlename, employeeLastname, employeeBirthday, employeeGender, employeeCitizenship, employeeCivilStatus, employeeHiredDate, employeeRegion, employeeProvince, employeeCity, employeeBarangay, employeeUnit, employeeBuilding, employeeStreet, employeeSubdivision, employeeCountry, employeeZipCode, departmentID, designationID, employeeEmail, employeeMobile, employeeStatus, file, employeeSignature, signatureFile
         };
     }
 

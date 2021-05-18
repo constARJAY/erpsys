@@ -2,16 +2,13 @@
 	<!-- FOOTER -->
 	<div class="container sticky-bottom">
 		<div class="col-md-12 col-lg-12">
-			<div class="card" style='border:0px;margin-bottom:0px;'>
-				<div class="body text-center">
-					<p class="copyright mb-0">Copyright 2021 © All Rights Reserved. <a
-							href="http://theblackcoders.com" target="_blank">BlackCoders</a></p>
-				</div>
+			<div class="body text-center">
+				<p class="copyright mb-0 p-1">Copyright 2021 © All Rights Reserved. <a
+						href="http://theblackcoders.com" target="_blank">BlackCoders</a></p>
 			</div>
 		</div>
 	</div>
 
-	
 	<script src="<?=base_url('assets/bundles/apexcharts.bundle.js')?>"></script>
 	<script src="<?=base_url('assets/bundles/mainscripts.bundle.js')?>"></script>
 	<script src="<?=base_url('assets/js/hospital/index.js')?>"></script>

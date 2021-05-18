@@ -195,12 +195,13 @@ $(document).ready(function() {
 					{ targets: 2,  width: 150 },
 					{ targets: 3,  width: 150 },
 					{ targets: 4,  width: 350 },
-					{ targets: 5,  width: 100 },
-					{ targets: 6,  width: 200 },
+					{ targets: 5,  width: 350 },
+					{ targets: 6,  width: 100 },
 					{ targets: 7,  width: 200 },
 					{ targets: 8,  width: 200 },
-					{ targets: 9,  width: 80 },
-					{ targets: 10,  width: 200  },
+					{ targets: 9,  width: 200 },
+					{ targets: 10,  width: 80 },
+					{ targets: 11,  width: 200  },
 				],
 			});
 
@@ -219,12 +220,13 @@ $(document).ready(function() {
 					{ targets: 2,  width: 150 },
 					{ targets: 3,  width: 150 },
 					{ targets: 4,  width: 350 },
-					{ targets: 5,  width: 100 },
-					{ targets: 6,  width: 200 },
+					{ targets: 5,  width: 350 },
+					{ targets: 6,  width: 100 },
 					{ targets: 7,  width: 200 },
 					{ targets: 8,  width: 200 },
-					{ targets: 9,  width: 80 },
-					{ targets: 10,  width: 200  },
+					{ targets: 9,  width: 200 },
+					{ targets: 10,  width: 80 },
+					{ targets: 11,  width: 200  },
 				],
 			});
 
@@ -386,6 +388,7 @@ $(document).ready(function() {
 					<th>Reference No.</th>
 					<th>Client Name</th>
 					<th>Project Name</th>
+					<th>Reason</th>
 					<th>Current Approver</th>
 					<th>Date Created</th>
 					<th>Date Submitted</th>
@@ -410,6 +413,7 @@ $(document).ready(function() {
 				approversDate,
 				serviceOrderStatus,
 				serviceOrderRemarks,
+				serviceOrderReason,
 				submittedAt,
 				createdAt,
 			} = item;
@@ -443,6 +447,7 @@ $(document).ready(function() {
 					</div>
 					<small style="color:#848482;">${projectListCode || '-'}</small>
 				</td>
+				<td>${serviceOrderReason}</td>
 				<td>
 					${employeeFullname(getCurrentApprover(approversID, approversDate, serviceOrderStatus, true))}
 				</td>
@@ -492,6 +497,7 @@ $(document).ready(function() {
                     <th>Reference No.</th>
                     <th>Client Name</th>
                     <th>Project Name</th>
+                    <th>Reason</th>
                     <th>Current Approver</th>
                     <th>Date Created</th>
                     <th>Date Submitted</th>
@@ -516,6 +522,7 @@ $(document).ready(function() {
 				approversDate,
 				serviceOrderStatus,
 				serviceOrderRemarks,
+				serviceOrderReason,
 				submittedAt,
 				createdAt,
 			} = item;
@@ -549,6 +556,7 @@ $(document).ready(function() {
 					</div>
 					<small style="color:#848482;">${projectListCode || '-'}</small>
 				</td>
+				<td>${serviceOrderReason}</td>
                 <td>
                     ${employeeFullname(getCurrentApprover(approversID, approversDate, serviceOrderStatus, true))}
                 </td>
@@ -756,7 +764,7 @@ $(document).ready(function() {
 			} = vendor;
 
 			let address = `${inventoryVendorUnit && titleCase(inventoryVendorUnit)+", "}${inventoryVendorBuilding && inventoryVendorBuilding +", "}${inventoryVendorBarangay && titleCase(inventoryVendorBarangay)+", "}${inventoryVendorCity && titleCase(inventoryVendorCity)+", "}${inventoryVendorProvince && titleCase(inventoryVendorProvince)+", "}${inventoryVendorCountry && titleCase(inventoryVendorCountry)+", "}${inventoryVendorZipCode && titleCase(inventoryVendorZipCode)}`;
-			let contactDetails = `${inventoryVendorMobile} - ${inventoryVendorTelephone}`;
+			let contactDetails = `${inventoryVendorMobile} / ${inventoryVendorTelephone}`;
 
             return `
             <option 
@@ -1344,7 +1352,7 @@ $(document).ready(function() {
 				clientCode           = getFormCode("CLT", c.createdAt, c.clientID);
 				clientName           = c.clientName,
 				clientAddress        = clientAddress.replaceAll("\n", "").trim();
-				clientContactDetails = `${c.client_MobileNo} - ${c.clientTelephoneNo}`;
+				clientContactDetails = `${c.client_MobileNo} / ${c.clientTelephoneNo}`;
 				clientContactPerson  = c.clientContactPerson
 			})
 		}
@@ -1475,9 +1483,14 @@ $(document).ready(function() {
 		if (companyVatable == "1") {
 			const total = +getNonFormattedAmount($("#total").text());
 			const vatSales = total / 1.12;
-			const vat      = total - vatSales;;
-			$(`#vatSales`).text(formatAmount(vatSales));
+			const vat      = total - vatSales;
+			const lessEwt  = vatSales != 0 ? vatSales * 0.01 : 0;
+			const totalVat = getNonFormattedAmount($(`#totalVat`).text());
+			const grandTotalAmount = totalVat - lessEwt;
+			$(`#vatSales`).text(formatAmount(vatSales, true));
 			$(`[name="vat"]`).val(vat);
+			$(`[name="lessEwt"]`).val(lessEwt);
+			$(`#grandTotalAmount`).text(formatAmount(grandTotalAmount, true))
 		}
 
 		$(`[name="companyCode"]`).val(companyCode);
@@ -1811,7 +1824,7 @@ $(document).ready(function() {
 			$("#vatSales").text(formatAmount(vatSales, true));
 			const totalVat = totalCost;
 			$("#totalVat").text(formatAmount(totalVat, true));
-			const lessEwt = totalVat * 0.01;
+			const lessEwt = vatSales != 0 ? vatSales * 0.01 : 0;
 			$("#lessEwt").val(lessEwt);
 			const grandTotalAmount = totalVat - lessEwt;
 			$("#grandTotalAmount").text(formatAmount(grandTotalAmount, true));
