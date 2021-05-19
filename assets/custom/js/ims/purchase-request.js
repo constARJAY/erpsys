@@ -771,7 +771,7 @@ $(document).ready(function() {
 
 		projectElementID.map((element, index) => {
 			let html = `<option selected disabled>Select Item Name</option>`;
-			let itemList = projectItemIDArr.includes("0") ? [...inventoryItemList] : [optionNone, ...inventoryItemList];
+			let itemList = !projectItemIDArr.includes("0") && $(`.itemProjectTableBody tr`).length > 1 ? [...inventoryItemList] : [optionNone, ...inventoryItemList];
 
 			html += itemList.filter(item => !projectItemIDArr.includes(item.itemID) || item.itemID == projectItemIDArr[index]).map(item => {
 				return `
@@ -791,7 +791,7 @@ $(document).ready(function() {
 
 		companyElementID.map((element, index) => {
 			let html = `<option selected disabled>Select Item Name</option>`;
-			let itemList = companyItemIDArr.includes("0") ? [...inventoryItemList] : [optionNone, ...inventoryItemList];
+			let itemList = !companyItemIDArr.includes("0") && $(`.itemCompanyTableBody tr`).length > 1 ? [...inventoryItemList] : [optionNone, ...inventoryItemList];
 			html += itemList.filter(item => !companyItemIDArr.includes(item.itemID) || item.itemID == companyItemIDArr[index]).map(item => {
 				return `
 				<option 
@@ -835,8 +835,9 @@ $(document).ready(function() {
 
     // ----- GET INVENTORY ITEM -----
     function getInventoryItem(id = null, isProject = true, display = true) {
-        let html   = `<option selected disabled>Select Item Name</option>`;
-		const attr = isProject ? "[project=true]" : "[company=true]";
+        let html    = `<option selected disabled>Select Item Name</option>`;
+		const attr  = isProject ? "[project=true]" : "[company=true]";
+		const table = isProject ? $(`.itemProjectTableBody tr`).length > 1 : $(`.itemCompanyTableBody tr`).length > 1;
 
 		let itemIDArr = []; // 0 IS THE DEFAULT VALUE
 		$(`[name=itemID]${attr}`).each(function(i, obj) {
@@ -852,7 +853,7 @@ $(document).ready(function() {
 			itemDescription:     ""
 		};
 		// let itemList = [optionNone, ...inventoryItemList];
-		let itemList = !itemIDArr.includes("0") ? [...inventoryItemList] : [optionNone, ...inventoryItemList];
+		let itemList = !itemIDArr.includes("0") && table ? [...inventoryItemList] : [optionNone, ...inventoryItemList];
 
 		html += itemList.filter(item => !itemIDArr.includes(item.itemID) || item.itemID == id).map(item => {
             return `
@@ -963,6 +964,7 @@ $(document).ready(function() {
 				if (files) {
 					itemFile = `
 					<a href="${base_url+"assets/upload-files/request-items/"+files}"
+					class="filename"
 					title="${files}" 
 					style="display: block;
 						width: 150px;
@@ -1149,7 +1151,7 @@ $(document).ready(function() {
 				const itemID = $(this).val();
 				$(this).attr("index", `${i}`);
 				$(this).attr("company", `true`);
-				$(this).attr("id", `companycompanyitemid${i}`)
+				$(this).attr("id", `companyitemid${i}`)
 				if (!$(this).attr("data-select2-id")) {
 					$(this).select2({ theme: "bootstrap" });
 				}
@@ -1544,10 +1546,15 @@ $(document).ready(function() {
 			} else {
 				let oldQty = $(this).closest("tr").find("[name=quantity]").val();
 				oldQty = oldQty != 0 ? oldQty : 0;
+				$(this).closest("tr").find("[name=quantity]").attr("required", true);
 				$(this).closest("tr").find("[name=quantity]").val(oldQty);
 				
 				if ($(this).closest("tr").find("[name=quantity]").attr("ceID") == "true") {
-					$(this).closest("tr").find("[name=files], [name=remarks]").removeAttr("disabled");
+					if (costEstimateID && costEstimateID != 0 && costEstimateID != "Select Reference No.") {
+						$(this).closest("tr").find("[name=files], [name=remarks]").removeAttr("disabled");
+					} else {
+						$(this).closest("tr").find("[name=quantity], [name=files], [name=remarks]").removeAttr("disabled");
+					}
 				} else {
 					$(this).closest("tr").find("[name=quantity], [name=files], [name=remarks]").removeAttr("disabled");
 				}
@@ -1657,6 +1664,7 @@ $(document).ready(function() {
 			$(".itemCompanyTableBody").append(row);
 		}
 		updateTableItems();
+		updateInventoryItemOptions();
 		initInputmask();
 		initAmount();
 		initQuantity();
@@ -2252,9 +2260,12 @@ $(document).ready(function() {
 	// ----- VALIDATE TABLE -----
 	function validateTableItems() {
 		let flag = true;
-		$(`[name="itemID"]`).each(function() {
-			flag = !this.value && this.value != "" && this.value?.toLowerCase() != "select item name"; 
-		})
+		if ($(`.itemProjectTableBody tr`).length == 1 && $(`.itemCompanyTableBody tr`).length == 1) {
+			const projectItemID = $(`[name="itemID"][project="true"]`).val() == "0";
+			const companyItemID = $(`[name="itemID"][company="true"]`).val() == "0";
+			flag = !(projectItemID == companyItemID);
+		}
+
 		if (!flag) {
 			showNotification("warning2", "Cannot submit form, kindly input valid items.");
 		}

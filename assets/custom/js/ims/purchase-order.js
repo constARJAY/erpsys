@@ -729,7 +729,7 @@ $(document).ready(function() {
 			ibrt.purchaseRequestID, 
 			ibrt.bidRecapReason`,
 			`ibrt.bidRecapStatus = 2 AND 
-			(ibpt.bidPoStatus = 0 OR (${status != 4 || status != 3 ? "ibpt.bidPoStatus = 1" : "1=1"})) OR
+			(ibpt.bidPoStatus = 0 ${status == 0 || status == "false" || !status ? "" : "AND ibpt.bidPoStatus = 1"}) OR
 			ibpt.bidRecapID = ${id}
 			GROUP BY ibpt.bidRecapID`
 		);
@@ -1594,7 +1594,7 @@ $(document).ready(function() {
 				<div class="row py-2">
 					<div class="offset-md-8 col-md-4 col-sm-12 pt-3 pb-2">
 						<div class="row" style="font-size: 1.1rem; font-weight:bold">
-							<div class="col-6 text-right">Total :</div>
+							<div class="col-6 text-left">Total :</div>
 							<div class="col-6 text-right text-danger"
 								project="true"
 								style="font-size: 1.05em"
@@ -1603,7 +1603,7 @@ $(document).ready(function() {
 							</div>
 						</div>
 						<div class="row" style="font-size: 1.1rem; font-weight:bold">
-							<div class="col-6 text-right">Discount :</div>
+							<div class="col-6 text-left">Discount :</div>
 							<div class="col-6 text-right"
 								project="true">
 								<input 
@@ -1621,7 +1621,7 @@ $(document).ready(function() {
 							</div>
 						</div>
 						<div class="row" style="font-size: 1.1rem; font-weight:bold">
-							<div class="col-6 text-right">Total Amount:</div>
+							<div class="col-6 text-left">Total Amount:</div>
 							<div class="col-6 text-right text-danger"
 								project="true"
 								id="totalAmount"
@@ -1630,7 +1630,7 @@ $(document).ready(function() {
 							</div>
 						</div>
 						<div class="row" style="font-size: 1.1rem; font-weight:bold">
-							<div class="col-6 text-right">Vatable Sales:</div>
+							<div class="col-6 text-left">Vatable Sales:</div>
 							<div class="col-6 text-right text-danger"
 								project="true"
 								id="vatSales"
@@ -1639,7 +1639,7 @@ $(document).ready(function() {
 							</div>
 						</div>
 						<div class="row" style="font-size: 1.1rem; font-weight:bold">
-							<div class="col-6 text-right">Vat 12%:</div>
+							<div class="col-6 text-left">Vat 12%:</div>
 							<div class="col-6 text-right"
 								project="true">
 								<input 
@@ -1657,7 +1657,7 @@ $(document).ready(function() {
 							</div>
 						</div>
 						<div class="row" style="font-size: 1.1rem; font-weight:bold">
-							<div class="col-6 text-right">Total:</div>
+							<div class="col-6 text-left">Total:</div>
 							<div class="col-6 text-right text-danger"
 								project="true"
 								id="totalVat"
@@ -1666,7 +1666,7 @@ $(document).ready(function() {
 							</div>
 						</div>
 						<div class="row" style="font-size: 1.1rem; font-weight:bold">
-							<div class="col-6 text-right">Less EWT:</div>
+							<div class="col-6 text-left">Less EWT:</div>
 							<div class="col-6 text-right"
 								project="true">
 								<input 
@@ -1684,7 +1684,7 @@ $(document).ready(function() {
 							</div>
 						</div>
 						<div class="row" style="font-size: 1.3rem; font-weight:bold; border-bottom: 3px double black;">
-							<div class="col-6 text-right">Grand Total:</div>
+							<div class="col-6 text-left">Grand Total:</div>
 							<div class="col-6 text-right text-danger"
 								project="true"
 								id="grandTotalAmount"

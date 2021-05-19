@@ -722,7 +722,7 @@ $(document).ready(function() {
 			html += serviceRequisitionList.map(sr => {
 				return `
 				<option 
-					value     = "${sr.servisrRequisitionID}" 
+					value     = "${sr.serviceRequisitionID}" 
 					srCode    = "${getFormCode("SR", sr.createdAt, sr.serviceRequisitionID)}"
 					clientID  = "${sr.clientID}"
 					projectID = "${sr.projectID}"

@@ -127,12 +127,18 @@ $(document).ready(function() {
 	};
 
 
-	const projectList = getTableData(
-		`ims_purchase_order_tbl as ipot
-		LEFT JOIN ims_purchase_request_tbl as iprt ON iprt.purchaseRequestID = ipot.purchaseRequestID
-		LEFT JOIN ims_request_items_tbl as irit ON irit.purchaseRequestID = iprt.purchaseRequestID AND irit.purchaseOrderID = ipot.purchaseOrderID AND ipot.categoryType = irit.categoryType`, 
-        "ipot.purchaseOrderID, vendorName,ipot.createdAt",
-        "purchaseOrderStatus = 2 AND purchaseRequestStatus =2 AND (orderedPending !=0 OR orderedPending IS NULL)");
+	// const purchaseOrderList = getTableData(
+	// 	`ims_purchase_order_tbl as ipot
+	// 	LEFT JOIN ims_purchase_request_tbl as iprt ON iprt.purchaseRequestID = ipot.purchaseRequestID
+	// 	LEFT JOIN ims_request_items_tbl as irit ON irit.purchaseRequestID = iprt.purchaseRequestID AND irit.purchaseOrderID = ipot.purchaseOrderID AND ipot.categoryType = irit.categoryType`, 
+    //     "ipot.purchaseOrderID, vendorName,ipot.createdAt",
+    //     "purchaseOrderStatus = 2 AND purchaseRequestStatus =2 AND (orderedPending !=0 OR orderedPending IS NULL)");
+
+	const purchaseOrderList = getTableData(
+		`ims_purchase_order_tbl`,
+		"",
+		`purchaseOrderStatus = 2`
+	)
 	// END GLOBAL VARIABLE - REUSABLE 
 
 
@@ -582,22 +588,34 @@ $(document).ready(function() {
 	}
 	// ----- END FORM BUTTONS -----
 
-    // ----- GET PROJECT LIST -----
-    function getProjectList(id = null, clientID = 0, display = true) {
-		let html ='';
-        html += projectList.map(project => {
-            
-            return `
-            <option 
-                value       = "${project.purchaseOrderID}" 
-                vendorname = "${project.vendorName}"
-                ${project.purchaseOrderID == id && "selected"}>
-                ${getFormCode("PO",moment(project.createdAt),project.purchaseOrderID)}
-            </option>`;
-        })
-        return display ? html : projectList;
+    // ----- GET PURCHASE ORDER LIST -----
+    function getPurchaseOrderList(id = null, status = 0, display = true) {
+		const createdIRList = getTableData("ims_inventory_receiving_tbl", "purchaseOrderID", "inventoryReceivingStatus <> 3 AND inventoryReceivingStatus <> 4").map(po => po.purchaseOrderID);
+		let html = '';
+		if (!status || status == 0) {
+			html += purchaseOrderList.filter(po => createdIRList.indexOf(po.purchaseOrderID) == -1 || po.purchaseOrderID == id).map(po => {
+				return `
+				<option 
+					value      = "${po.purchaseOrderID}" 
+					vendorname = "${po.vendorName}"
+				${po.purchaseOrderID == id && "selected"}>
+				${getFormCode("PO", po.createdAt, po.purchaseOrderID)}
+				</option>`;
+			})
+		} else {
+			html += purchaseOrderList.map(po => {
+				return `
+				<option 
+					value      = "${po.purchaseOrderID}" 
+					vendorname = "${po.vendorName}"
+					${po.purchaseOrderID == id && "selected"}>
+					${getFormCode("PO", po.createdAt, po.purchaseOrderID)}
+				</option>`;
+			})
+		}
+        return display ? html : purchaseOrderList;
     }
-    // ----- END GET PROJECT LIST -----
+    // ----- END GET PURCHASE ORDER LIST -----
 
 
     // ----- GET SERVICE ITEM -----
@@ -689,7 +707,7 @@ $(document).ready(function() {
 
 
 	// ----- GET SERVICE ROW -----
-    function getServiceRow(id, readOnly = false,inventoryReceivingID = "") {
+    function getItemsRow(id, readOnly = false, inventoryReceivingID = "") {
         let html = "";
 		
 		if(inventoryReceivingID != ""){
@@ -697,167 +715,176 @@ $(document).ready(function() {
 		}
 
 
-        let requestServicesData = getTableData(
-            `ims_purchase_order_tbl as ipot
-            LEFT JOIN ims_purchase_request_tbl as iprt ON ipot.purchaseRequestID = iprt.purchaseRequestID 
-            LEFT JOIN ims_request_items_tbl as irit ON irit.purchaseRequestID = iprt.purchaseRequestID  
-            LEFT JOIN ims_inventory_item_tbl as itm ON itm.itemID = irit.itemID
-            LEFT JOIN ims_inventory_receiving_tbl as iirt ON iirt.purchaseOrderID = ipot.purchaseOrderID
-            LEFT JOIN ims_inventory_receiving_details_tbl as iirdt ON iirdt.inventoryReceivingID = iirt.inventoryReceivingID AND irit.itemID = iirdt.itemID `,
-            `iirdt.inventoryReceivingDetailsID, itm.itemID,itm.createdAt,irit.itemName,irit.brandName,irit.itemUom,irit.forPurchase,irit.orderedPending,iirdt.received,iirdt.remarks`,
-            `purchaseRequestStatus =2 AND purchaseOrderStatus =2 AND ipot.purchaseOrderID = ${id}`,
-			``,`irit.itemID`
+        let requestItemsData = getTableData(
+            // `ims_purchase_order_tbl as ipot
+            // LEFT JOIN ims_purchase_request_tbl as iprt ON ipot.purchaseRequestID = iprt.purchaseRequestID 
+            // LEFT JOIN ims_request_items_tbl as irit ON irit.purchaseRequestID = iprt.purchaseRequestID  
+            // LEFT JOIN ims_inventory_item_tbl as itm ON itm.itemID = irit.itemID
+            // LEFT JOIN ims_inventory_receiving_tbl as iirt ON iirt.purchaseOrderID = ipot.purchaseOrderID
+            // LEFT JOIN ims_inventory_receiving_details_tbl as iirdt ON iirdt.inventoryReceivingID = iirt.inventoryReceivingID AND irit.itemID = iirdt.itemID `,
+            // `iirdt.inventoryReceivingDetailsID, itm.itemID,itm.createdAt,irit.itemName,irit.brandName,irit.itemUom,irit.forPurchase,irit.orderedPending,iirdt.received,iirdt.remarks`,
+            // `purchaseRequestStatus =2 AND purchaseOrderStatus =2 AND ipot.purchaseOrderID = ${id}`,
+			// ``,`irit.itemID`
+			"ims_request_items_tbl", 
+			"", 
+			`purchaseOrderID = ${id}`
         )
-        requestServicesData.map(item => {
-       
-            let {
-                inventoryReceivingDetailsID = 0,
-                itemID      ="",
-                itemName      ="",
-                brandName = "",
-                forPurchase ="",
-				orderedPending ="",
-                received = "",
-                itemUom = "",
-                remarks     = "",
-                createdAt   = ""
-            } = item;
 
-            const buttonAddRow = !readOnly ? `
-		<button class="btn btn-md btn-primary float-left ml-2 my-1 btnAddScope">
-			<i class="fas fa-plus"></i>
-		</button>` : ""
-			
-		const scopeData = getTableData(
-			`ims_receiving_serial_number_tbl`,
-			``,
-			`inventoryReceivingDetailsID = ${inventoryReceivingDetailsID}`
-		);
-
-		
-		let serviceScopes = `
-		<div class="table-responsive">
-			<table class="table table-bordered">
-			
-				<tbody class="tableScopeBody">
-				`;
-		if (scopeData.length > 0 && inventoryReceivingID !="") {
-			serviceScopes += scopeData.map(scope => {
-				return getServiceScope(scope, readOnly);
-			}).join("");
-		} else {
-			serviceScopes += getServiceScope();
-		}
-		serviceScopes += `
-				</tbody>
-			</table>
-			${buttonAddRow}
-		</div>`;
-
+		if (requestItemsData.length > 0) {
+			requestItemsData.map(item => {
+		   
+				let {
+					inventoryReceivingDetailsID = 0,
+					itemID                      = "",
+					itemName                    = "",
+					brandName                   = "",
+					forPurchase                 = "",
+					orderedPending              = "",
+					received                    = "",
+					itemUom                     = "",
+					remarks                     = "",
+					createdAt                   = ""
+				} = item;
 	
-		if (readOnly) {
-           
-			html += `
-			<tr class="itemTableRow">
-				<td>
-                    <div class="itemcode" >${getFormCode("ITM",moment(createdAt),itemID)}</div>
-                </td>
-
-                <td>
-                    <div class="itemname">${itemName || "-"}</div>
-                </td>
-
-                <td>
-                    <div class="brandname">${brandName || "-"}</div>
-                </td>
-                
-                <td>
-                        ${serviceScopes}
-                </td>
-
-                <td class="text-center">
-                    <div class="ordered">${orderedPending ? orderedPending : forPurchase}</div>
-                </td>
-
-                <td>
-                    <div class="received">${received || "-"}</div>
-                </td>
-
-                <td>
-                    <div class="uom">${itemUom || "-"}</div>
-                </td>
-
-                <td>
-                <div class="remarks">${remarks || "-"}</div>
-                </td>
-			</tr>`;
-		} else {
-            
-
-			html += `
-			<tr class="itemTableRow">
+				const buttonAddRow = !readOnly ? `
+				<button class="btn btn-md btn-primary float-left ml-2 my-1 btnAddScope">
+					<i class="fas fa-plus"></i>
+				</button>` : ""
+					
+				const scopeData = getTableData(
+					`ims_receiving_serial_number_tbl`,
+					``,
+					`inventoryReceivingDetailsID = ${inventoryReceivingDetailsID}`
+				);
+	
+			
+				let serviceScopes = `
+				<div class="table-responsive">
+					<table class="table table-bordered">
+					
+						<tbody class="tableScopeBody">
+						`;
+				if (scopeData.length > 0 && inventoryReceivingID !="") {
+					serviceScopes += scopeData.map(scope => {
+						return getServiceScope(scope, readOnly);
+					}).join("");
+				} else {
+					serviceScopes += getServiceScope();
+				}
+				serviceScopes += `
+						</tbody>
+					</table>
+					${buttonAddRow}
+				</div>`;
+	
+			
+				if (readOnly) {
 				
-				<td>
-                    <div class="itemcode" name="itemcode" requestitem="${itemID}">${getFormCode("ITM",moment(createdAt), itemID)}</div>
-                </td>
-
-				<td>
-                    <div class="itemname">${itemName || ""}</div>
-                </td>
-
-                <td>
-                    <div class="brandname">${brandName || ""}</div>
-                </td>
-
-                <td>
-					${serviceScopes}
-				</td>
-                
-                <td class="text-center">
-                    <div class="ordered" name="ordered" >${orderedPending ? orderedPending : forPurchase}</div>
-                </td>
-                
-                <td>
-                <div class="received">
-                    <input 
-                            type="text" 
-                            class="form-control number text-center"
-                            data-allowcharacters="[0-9]" 
-                            max="99999" 
-                            id="received" 
-                            name="received" 
-                            value="${inventoryReceivingID ? received : ""}" 
-                            minlength="1" 
-                            maxlength="20" 
-                            >
-                        <div class="invalid-feedback d-block" id="invalid-received"></div>
-                </div>
-                </td>
-
-                <td>
-                    <div class="uom">${itemUom || ""}</div>
-                </td>
-
-				<td>
-					<div class="remarks">
-						<textarea 
-							rows="2" 
-							style="resize: none" 
-							class="form-control" 
-							data-allowcharacters="[0-9][a-z][A-Z][ ][.][,][_]['][()][?][-][/]"
-							minlength="1"
-							maxlength="100"
-							name="remarks" 
-							id="remarks">${inventoryReceivingID  ? remarks : "" }</textarea>
-					</div>
-				</td>
-			</tr>`;
+					html += `
+					<tr class="itemTableRow">
+						<td>
+							<div class="itemcode" >${getFormCode("ITM",moment(createdAt),itemID)}</div>
+						</td>
+	
+						<td>
+							<div class="itemname">${itemName || "-"}</div>
+						</td>
+	
+						<td>
+							<div class="brandname">${brandName || "-"}</div>
+						</td>
+						
+						<td>
+								${serviceScopes}
+						</td>
+	
+						<td class="text-center">
+							<div class="ordered">${orderedPending ? orderedPending : forPurchase}</div>
+						</td>
+	
+						<td>
+							<div class="received">${received || "-"}</div>
+						</td>
+	
+						<td>
+							<div class="uom">${itemUom || "-"}</div>
+						</td>
+	
+						<td>
+						<div class="remarks">${remarks || "-"}</div>
+						</td>
+					</tr>`;
+				} else {
+					
+	
+					html += `
+					<tr class="itemTableRow">
+						
+						<td>
+							<div class="itemcode" name="itemcode" requestitem="${itemID}">${getFormCode("ITM",moment(createdAt), itemID)}</div>
+						</td>
+	
+						<td>
+							<div class="itemname">${itemName || ""}</div>
+						</td>
+	
+						<td>
+							<div class="brandname">${brandName || ""}</div>
+						</td>
+	
+						<td>
+							${serviceScopes}
+						</td>
+						
+						<td class="text-center">
+							<div class="ordered" name="ordered" >${orderedPending ? orderedPending : forPurchase}</div>
+						</td>
+						
+						<td>
+						<div class="received">
+							<input 
+									type="text" 
+									class="form-control number text-center"
+									data-allowcharacters="[0-9]" 
+									max="99999" 
+									id="received" 
+									name="received" 
+									value="${inventoryReceivingID ? received : ""}" 
+									minlength="1" 
+									maxlength="20" 
+									>
+								<div class="invalid-feedback d-block" id="invalid-received"></div>
+						</div>
+						</td>
+	
+						<td>
+							<div class="uom">${itemUom || ""}</div>
+						</td>
+	
+						<td>
+							<div class="remarks">
+								<textarea 
+									rows="2" 
+									style="resize: none" 
+									class="form-control" 
+									data-allowcharacters="[0-9][a-z][A-Z][ ][.][,][_]['][()][?][-][/]"
+									minlength="1"
+									maxlength="100"
+									name="remarks" 
+									id="remarks">${inventoryReceivingID  ? remarks : "" }</textarea>
+							</div>
+						</td>
+					</tr>`;
+				}
+			})
+		} else {
+			html += `
+			<tr class="text-center">
+				<td colspan="9">No data available in table</td>
+			</tr>`
 		}
-    })
+
         return html;
-
-		
-
 		
     }
     // ----- END GET SERVICE ROW -----
@@ -868,18 +895,18 @@ $(document).ready(function() {
         const vendorname = $('option:selected', this).attr("vendorname");
         const id 					= $(this).val();
         const inventoryreceivingid 	= $(this).attr("inventoryreceivingid");
-		var readOnly			= $(this).attr("disabled");
-		if(readOnly =="disabled"){
-			readOnly = true;
-		}else{
-			readOnly = false;
-		}
+		var readOnly			= $(this).attr("disabled") == "disabled";
+		// if(readOnly =="disabled"){
+		// 	readOnly = true;
+		// }else{
+		// 	readOnly = false;
+		// }
 
         $("[name=vendorName]").val(vendorname);
 
         $(".itemServiceTableBody").html('<tr><td colspan="8">'+preloader+'</td></tr>');
 
-        let itemServiceTableBody = getServiceRow(id,readOnly,inventoryreceivingid);
+        let itemServiceTableBody = getItemsRow(id, readOnly, inventoryreceivingid);
       
 
         setTimeout(() => {
@@ -1115,7 +1142,7 @@ $(document).ready(function() {
 		let requestServiceItems = "";
 		if (inventoryReceivingID) {
 			
-				requestServiceItems = getServiceRow(purchaseOrderID, readOnly,inventoryReceivingID);
+				requestServiceItems = getItemsRow(purchaseOrderID, readOnly,inventoryReceivingID);
 		
 		} 
     
@@ -1228,7 +1255,7 @@ $(document).ready(function() {
            
             <div class="col-md-4 col-sm-12">
                 <div class="form-group">
-                    <label>Purchase Order No. ${!disabled ? "<code>*</code>" : ""}</label>
+                    <label>Reference No. ${!disabled ? "<code>*</code>" : ""}</label>
                     <select class="form-control validate select2"
                         name="purchaseOrderID"
                         id="purchaseOrderID"
@@ -1237,8 +1264,8 @@ $(document).ready(function() {
 						inventoryreceivingid ="${inventoryReceivingID}"
 						readonly="${disabled}"
 						${disabled}>
-                        <option selected disabled>Select Purchase Order No.</option>
-                        ${getProjectList(purchaseOrderID)}
+                        <option selected disabled>Select Reference No.</option>
+                        ${getPurchaseOrderList(purchaseOrderID, inventoryReceivingStatus)}
                     </select>
                     <div class="d-block invalid-feedback" id="invalid-purchaseOrderID"></div>
                 </div>
