@@ -98,7 +98,7 @@ class BidRecap_model extends CI_Model {
             $data = [];
             foreach ($bidItems as $item) {
                 $temp = [
-                    "bidRecapID"        => $item["bidRecapID"],
+                    "bidRecapID"        => $bidRecapID,
                     "inventoryVendorID" => $item["inventoryVendorID"],
                     "categoryType"      => $item["categoryType"],
                     "bidPoStatus"       => 0,

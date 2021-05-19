@@ -1062,6 +1062,9 @@ $(document).ready(function() {
 				<td>
 					<div class="remarks">
 						<textarea 
+							class="form-control validate"
+							minlength="0"
+							maxlength="250"
 							rows="2" 
 							style="resize: none" 
 							class="form-control" 
@@ -1123,7 +1126,7 @@ $(document).ready(function() {
 			$("td .totalcost", this).attr("project", `true`);
 
 			// FILE
-			$("td .file [name=files]", this).attr("id", `files${i}`);
+			$("td .file [name=files]", this).attr("id", `filesProject${i}`);
 
 			// REMARKS
 			$("td .remarks [name=remarks]", this).attr("id", `remarks${i}`);
@@ -1172,7 +1175,7 @@ $(document).ready(function() {
 			$("td .totalcost", this).attr("company", `true`);
 
 			// FILE
-			$("td .file [name=files]", this).attr("id", `files${i}`);
+			$("td .file [name=files]", this).attr("id", `filesCompany${i}`);
 
 			// REMARKS
 			$("td .remarks [name=remarks]", this).attr("id", `remarks${i}`);
@@ -1530,13 +1533,14 @@ $(document).ready(function() {
 			let itemID = $(this).val();
 			if (itemID == "0") {
 				$(this).closest("tr").find("[name=quantity]").removeAttr("required");
-				$(this).closest("tr").find("[name=quantity]").val("0");
+				$(this).closest("tr").find("[name=quantity]").val("0").removeClass("is-valid is-invalid has-error no-error");
 				$(this).closest("tr").find(".unitCost").text(formatAmount("0.00", true));
 				$(this).closest("tr").find(".totalcost").text(formatAmount("0.00", true));
-				$(this).closest("tr").find("[name=files]").val("");
+				$(this).closest("tr").find("[name=files]").val("").removeClass("is-valid is-invalid has-error no-error");
 				$(this).closest("tr").find(".displayfile").empty();
-				$(this).closest("tr").find("[name=remarks]").val("");
+				$(this).closest("tr").find("[name=remarks]").val("").removeClass("is-valid is-invalid has-error no-error");
 				$(this).closest("tr").find("[name=quantity], [name=files], [name=remarks]").attr("disabled", "true");
+				$(this).closest("tr").find(".invalid-feedback").empty("");
 			} else {
 				let oldQty = $(this).closest("tr").find("[name=quantity]").val();
 				oldQty = oldQty != 0 ? oldQty : 0;
@@ -1884,7 +1888,7 @@ $(document).ready(function() {
 
 			<div class="col-12">
 				<div class="row py-2">
-					<div class="offset-xl-9 offset-md-8 col-xl-3 col-md-4 col-sm-12 pt-3 pb-2">
+					<div class="offset-xl-8 offset-md-7 col-xl-4 col-md-5 col-sm-12 pt-3 pb-2">
 						<div class="row d-flex justify-content-end align-items-end" style="font-size: 1.3rem; font-weight:bold; border-bottom: 3px double black;">
 							<div class="col-7 text-left">Grand Total:</div>
 							<div class="col-5 text-right text-danger"
@@ -2245,16 +2249,31 @@ $(document).ready(function() {
 	// ----- END REMOVE IS-VALID IN TABLE -----
 
 
+	// ----- VALIDATE TABLE -----
+	function validateTableItems() {
+		let flag = true;
+		$(`[name="itemID"]`).each(function() {
+			flag = !this.value && this.value != "" && this.value?.toLowerCase() != "select item name"; 
+		})
+		if (!flag) {
+			showNotification("warning2", "Cannot submit form, kindly input valid items.");
+		}
+		return flag;
+	}
+	// ----- END VALIDATE TABLE -----
+
+
     // ----- SUBMIT DOCUMENT -----
 	$(document).on("click", "#btnSubmit", function () {
 		const id            = $(this).attr("purchaseRequestID");
 		const revise        = $(this).attr("revise") == "true";
 		const validate      = validateForm("form_purchase_request");
 		const validatePrice = validateItemPrice();
+		const validateItems = validateTableItems();
 		removeIsValid("#tableProjectRequestItems");
 		removeIsValid("#tableCompanyRequestItems");
 
-		if (validate && validatePrice) {
+		if (validate && validatePrice && validateItems) {
 			const action = revise && "insert" || (id ? "update" : "insert");
 			const data   = getPurchaseRequestData(action, "submit", "1", id);
 

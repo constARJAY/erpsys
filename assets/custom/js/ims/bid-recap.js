@@ -1244,22 +1244,6 @@ $(document).ready(function() {
                     <input type="text" class="form-control" disabled value="${employeeDesignation||"-"}">
                 </div>
             </div>
-            <div class="col-md-12 col-sm-12">
-                <div class="form-group">
-                    <label>Reason ${!disabled ? "<code>*</code>" : ""}</label>
-                    <textarea class="form-control validate"
-                        data-allowcharacters="[a-z][A-Z][0-9][ ][.][,][-][()]['][/][&]"
-                        minlength="1"
-                        maxlength="200"
-                        id="bidRecapReason"
-                        name="bidRecapReason"
-                        required
-                        rows="4"
-                        style="resize:none;"
-                        ${disabled}>${bidRecapReason ?? ""}</textarea>
-                    <div class="d-block invalid-feedback" id="invalid-bidRecapReason"></div>
-                </div>
-            </div>
             <div class="col-md-4 col-sm-12">
                 <div class="form-group">
                     <label>Reference No. ${!disabled ? "<code>*</code>" : ""}</label>
@@ -1270,7 +1254,7 @@ $(document).ready(function() {
                         required
 						${bidRecapID == "" ? `` : `disabled`}
 						>
-                        <option selected disabled>Select Document No.</option>
+                        <option selected disabled>Select Reference No.</option>
                         ${getReferenceList(purchaseRequestID,readOnly)}
                     </select>
                     <div class="d-block invalid-feedback" id="invalid-documentID"></div>
@@ -1304,6 +1288,22 @@ $(document).ready(function() {
                 <div class="form-group">
                     <label>Client Address</label>
                     <input type="text" class="form-control" name="clientAddress" disabled value="${clientAddress||"-"}">
+                </div>
+            </div>
+			<div class="col-md-12 col-sm-12">
+                <div class="form-group">
+                    <label>Reason ${!disabled ? "<code>*</code>" : ""}</label>
+                    <textarea class="form-control validate"
+                        data-allowcharacters="[a-z][A-Z][0-9][ ][.][,][-][()]['][/][&]"
+                        minlength="1"
+                        maxlength="200"
+                        id="bidRecapReason"
+                        name="bidRecapReason"
+                        required
+                        rows="4"
+                        style="resize:none;"
+                        ${disabled}>${bidRecapReason ?? ""}</textarea>
+                    <div class="d-block invalid-feedback" id="invalid-bidRecapReason"></div>
                 </div>
             </div>
             <div class="col-sm-12">
@@ -1350,24 +1350,29 @@ $(document).ready(function() {
                         <tbody class="itemCompanyTableBody" company="true"></tbody>
                     </table>
                 </div>
-            </div>
-			<div class="col-sm-12 mt-3">
-				<div class="w-100 text-right py-2">
-					<div class="font-weight-bolder" style="font-size: 1rem;">
-						<span>Project Total Cost: &nbsp;</span>
-						<span class="text-danger" style="font-size: 1.2em" id="bidRecapProjectTotal"></span>
-					</div>
-
-					<div class="font-weight-bolder" style="font-size: 1rem;">
-						<span>Company Total Cost: &nbsp;</span>
-						<span class="text-danger" style="font-size: 1.2em" id="bidRecapCompanyTotal"></span>
-					</div>
-
-					<div class="font-weight-bolder" style="font-size: 1rem;">
-						<span>Grand Total: &nbsp;</span>
-						<span class="text-danger" style="font-size: 1.2em" id="bidRecapGrandTotal"></span>
+				<div class="row py-2">
+					<div class="offset-lg-7 offset-xl-8 col-12 col-sm-12 col-lg-5 col-xl-4 col-xl-4 pt-3 pb-2">
+						<div class="row" style="font-size: 1.1rem; font-weight:bold">
+							<div class="col-6 col-lg-7 text-left">Project Total Cost:</div>
+							<div class="col-6 col-lg-5 text-right text-danger" id="bidRecapProjectTotal" style="font-size: 1.05em">
+								₱ 0.00
+							</div>
+						</div>
+						<div class="row" style="font-size: 1.1rem; font-weight:bold">
+							<div class="col-6 col-lg-7 text-left">Company Total Cost:</div>
+							<div class="col-6 col-lg-5 text-right text-danger" id="bidRecapCompanyTotal" style="font-size: 1.05em">
+								₱ 0.00
+							</div>
+						</div>
+						<div class="row" style="font-size: 1.3rem; font-weight:bold; border-bottom: 3px double black;">
+							<div class="col-6 col-lg-7 text-left">Grand Total:</div>
+							<div class="col-6 col-lg-5 text-right text-danger" id="bidRecapGrandTotal" style="font-size: 1.05em">
+								₱ 0.00
+							</div>
+						</div>
 					</div>
 				</div>
+				
             </div>
             <div class="col-md-12 text-right mt-3">
                 ${button}
@@ -1869,110 +1874,129 @@ $(document).ready(function() {
 										ims_request_items_tbl.inventoryVendorID AS inventoryVendorID, ims_request_items_tbl.inventoryVendorName AS inventoryVendorName,
 										itemUom,quantity,stocks,forPurchase,files,unitCost,totalCost`,
 										`${condition} AND categoryType='${type}'`);
-				tableData.map(items=>{
-					var tempData = items;
-					var priceListArray;
-						if(readOnly){
-							priceListArray = tableData.filter(thisItems => thisItems.itemID == items.itemID);
-						}else{
-							priceListArray = itemPriceListData.filter(priceListItems => priceListItems.itemID == items.itemID  && priceListItems.preferred == 1);	
-						}
-					var priceListCondition          = priceListArray.length < 1;
-					priceListCondition ? priceListValidation.push(tempData.createdAt+"|"+tempData.itemID) : ``;
-					tempData["inventoryVendorID"] 	=  !priceListCondition ? priceListArray[0].inventoryVendorID 	: `-`;
-					tempData["inventoryVendorName"] =  !priceListCondition ? priceListArray[0].inventoryVendorName 	: `-`;
-					tempData["vendorCurrentPrice"] 	=  !priceListCondition ? (priceListArray[0].vendorCurrentPrice || priceListArray[0].unitCost) 	: `0`;
-					!priceListCondition ? vendorArr.push(priceListArray[0].inventoryVendorID) : ``;
-					joinedTableData.push(tempData);
-				});
-				let newSetVendorArr = [...new Set(vendorArr)];
-				newSetVendorArr.map((items,index)=>{
-					var vendorRequested=0, vendorStocks=0, vendorForPurchase=0, vendorUnitCost=0, vendorTotalCost=0;
-					let vendorItemsArr 		= joinedTableData.filter(joinedItems => joinedItems.inventoryVendorID == items);
-					let vendorItemsLength 	= vendorItemsArr.length;
-					let vendorRowspanArr	= [];
-					
-						// MAPPING FOR THE ROWSPAN;
-							vendorItemsArr.map((items,index)=>{
-								var tempData = index == 0 ? `<td class="font-weight-bold" rowspan="${vendorItemsLength}">${items.inventoryVendorName}</td>`
-											:``;
-								vendorRowspanArr.push(tempData);
-							});
-						// END MAPPING FOR THE ROWSPAN;
-						
-						// MAPPING THE ITEMS OF TABLE DATA
-							html += vendorItemsArr.map((joinedItems,joinedIndex)=>{
-								var returnData 	= "";
-								var unitCost 	= parseFloat(joinedItems.vendorCurrentPrice);
-								var totalCost 	= parseFloat(joinedItems.forPurchase) * parseFloat(unitCost);
-								var files = joinedItems.files ? `<a class="filename" href="${base_url+"assets/upload-files/request-items/"+joinedItems.files}" 
-																	target="_blank">${joinedItems.files}
-															</a>`:"-";
+			if(tableData.length > 0){
+						tableData.map(items=>{
+							var tempData = items;
+							var priceListArray;
+								if(readOnly){
+									priceListArray = tableData.filter(thisItems => thisItems.itemID == items.itemID);
+								}else{
+									priceListArray = itemPriceListData.filter(priceListItems => priceListItems.itemID == items.itemID  && priceListItems.preferred == 1);	
+								}
+							var priceListCondition          = priceListArray.length < 1;
+							priceListCondition ? priceListValidation.push(tempData.createdAt+"|"+tempData.itemID) : ``;
+							tempData["inventoryVendorID"] 	=  !priceListCondition ? priceListArray[0].inventoryVendorID 	: `-`;
+							tempData["inventoryVendorName"] =  !priceListCondition ? priceListArray[0].inventoryVendorName 	: `-`;
+							tempData["vendorCurrentPrice"] 	=  !priceListCondition ? (priceListArray[0].vendorCurrentPrice || priceListArray[0].unitCost) 	: `0`;
+							!priceListCondition ? vendorArr.push(priceListArray[0].inventoryVendorID) : ``;
+							joinedTableData.push(tempData);
+						});
+						let newSetVendorArr = [...new Set(vendorArr)];
+						newSetVendorArr.map((items,index)=>{
+							var vendorRequested=0, vendorStocks=0, vendorForPurchase=0, vendorUnitCost=0, vendorTotalCost=0;
+							let vendorItemsArr 		= joinedTableData.filter(joinedItems => joinedItems.inventoryVendorID == items);
+							let vendorItemsLength 	= vendorItemsArr.length;
+							let vendorRowspanArr	= [];
+							let tfooter 			= false;
+							
+								// MAPPING FOR THE ROWSPAN;
+									vendorItemsArr.map((items,index)=>{
+										var tempData = index == 0 ? `<td class="font-weight-bold" rowspan="${vendorItemsLength}">
+																		${items.inventoryVendorName} <br> <small>${getFormCode("VEN", items.createdAt, items.inventoryVendorID)}</small>
+																	</td>`
+													:``;
+										vendorRowspanArr.push(tempData);
+									});
+								// END MAPPING FOR THE ROWSPAN;
 								
-										returnData += `
-												<tr class="itemTableRow" category="${type}">
-													${vendorRowspanArr[joinedIndex]}
-													<td>
-														<div class="itemcode" 
-														requestitem="${joinedItems.requestItemID}"
-														vendorID="${joinedItems.inventoryVendorID}"
-														vendorName="${joinedItems.inventoryVendorName}"
-														itemid="${joinedItems.itemID}" 
-														inventoryValidationID="${joinedItems.inventoryValidationID}">${getFormCode("ITM",moment(joinedItems.createdAt), joinedItems.itemID)}</div>
-													</td>
-													<td>
-														<div class="itemname">${joinedItems.itemName}</div>
-													</td>
-													<td>
-														<div class="uom">${joinedItems.itemUom}</div>
-													</td>
-													<td class="text-center">
-														<div class="qtyrequested">${joinedItems.quantity}</div>
-													</td>
-													<td class="text-center">
-														<div class="stocks">${joinedItems.stocks || "0"}</div>
-													</td>
-													<td class="text-center">
-														<div class="forpurchase">${joinedItems.forPurchase || "0"}</div>
-													</td>
-													<td>
-														<div class="file">
-															${files}
-														</div>
-													</td>
-													<td>
-														<div class="unitCost text-right">${formatAmount(unitCost,true)}</div>
-													</td>
-													<td>
-														<div class="totalCost text-right">${formatAmount(totalCost,true)}</div>
-													</td>
+
+								// MAPPING THE ITEMS OF TABLE DATA
+									html += vendorItemsArr.map((joinedItems,joinedIndex)=>{
+										if(joinedItems.forPurchase > 1){		
+											var returnData 	= "";
+												var unitCost 	= parseFloat(joinedItems.vendorCurrentPrice);
+												var totalCost 	= parseFloat(joinedItems.forPurchase) * parseFloat(unitCost);
+												var files = joinedItems.files ? `<a class="filename" href="${base_url+"assets/upload-files/request-items/"+joinedItems.files}" 
+																					target="_blank">${joinedItems.files}
+																			</a>`:"-";
+												
+														returnData += `
+																<tr class="itemTableRow" category="${type}">
+																	${vendorRowspanArr[joinedIndex]}
+																	<td>
+																		<div class="itemcode" 
+																		requestitem="${joinedItems.requestItemID}"
+																		vendorID="${joinedItems.inventoryVendorID}"
+																		vendorName="${joinedItems.inventoryVendorName}"
+																		itemid="${joinedItems.itemID}" 
+																		inventoryValidationID="${joinedItems.inventoryValidationID}">${getFormCode("ITM",moment(joinedItems.createdAt), joinedItems.itemID)}</div>
+																	</td>
+																	<td>
+																		<div class="itemname">${joinedItems.itemName}</div>
+																	</td>
+																	<td>
+																		<div class="uom">${joinedItems.itemUom}</div>
+																	</td>
+																	<td class="text-center">
+																		<div class="qtyrequested">${joinedItems.quantity}</div>
+																	</td>
+																	<td class="text-center">
+																		<div class="stocks">${joinedItems.stocks || "0"}</div>
+																	</td>
+																	<td class="text-center">
+																		<div class="forpurchase">${joinedItems.forPurchase || "0"}</div>
+																	</td>
+																	<td>
+																		<div class="file">
+																			${files}
+																		</div>
+																	</td>
+																	<td>
+																		<div class="unitCost text-right">${formatAmount(unitCost,true)}</div>
+																	</td>
+																	<td>
+																		<div class="totalCost text-right">${formatAmount(totalCost,true)}</div>
+																	</td>
+																</tr>`;
+
+												// ADD THE FOLLOWING;
+													vendorRequested		+= parseFloat(joinedItems.quantity), 
+													vendorStocks		+= parseFloat(joinedItems.stocks), 
+													vendorForPurchase	+= parseFloat(joinedItems.forPurchase), 
+													vendorUnitCost		+= parseFloat(unitCost), 
+													vendorTotalCost		+= parseFloat(totalCost);
+													tfooter				= true;
+												return returnData;
+												
+											}
+									});
+								// END  MAPPING THE ITEMS OF TABLE DATA
+
+								// TABLE ROW FOR TOTALS
+								if(tfooter){
+									// html += `
+									// 		<tr class="itemTableRowTotal" category="${type}" style="background-color: #dc3450;">
+									// 			<td class="font-weight-bold text-light" colspan="4">SUBTOTAL</td>
+									// 			<td class="font-weight-bold text-light text-center">${parseFloat(vendorRequested).toFixed(2)}</td>
+									// 			<td class="font-weight-bold text-light text-center">${parseFloat(vendorStocks).toFixed(2)}</td>
+									// 			<td class="font-weight-bold text-light text-center">${parseFloat(vendorForPurchase).toFixed(2)}</td>
+									// 			<td class="font-weight-bold text-light">-</td>
+									// 			<td class="font-weight-bold text-light text-right">${formatAmount(vendorUnitCost,true)}</td>
+									// 			<td class="font-weight-bold text-light text-right"><span class="totalCost" category="${type}">${formatAmount(vendorTotalCost,true)}</span></td>
+									// 		</tr>`;
+									html += `	<tr class="itemTableRowTotal" category="${type}" style="background-color: #dc3450;">
+													<td class="font-weight-bold text-light" colspan="9">SUBTOTAL</td>
+													<td class="font-weight-bold text-light text-right"><span class="totalCost" category="${type}">${formatAmount(vendorTotalCost,true)}</span></td>
 												</tr>`;
+								}
+								// END TABLE ROW FOR TOTALS
 
-								// ADD THE FOLLOWING;
-									vendorRequested		+= parseFloat(joinedItems.quantity), 
-									vendorStocks		+= parseFloat(joinedItems.stocks), 
-									vendorForPurchase	+= parseFloat(joinedItems.forPurchase), 
-									vendorUnitCost		+= parseFloat(unitCost), 
-									vendorTotalCost		+= parseFloat(totalCost);
-								return returnData;
-							});
-						// END  MAPPING THE ITEMS OF TABLE DATA
-
-						// TABLE ROW FOR TOTALS
-						html += `
-								<tr class="itemTableRowTotal" category="${type}" style="background-color: #dc3450;">
-									<td class="font-weight-bold text-light" colspan="4">SUBTOTAL</td>
-									<td class="font-weight-bold text-light text-center">${parseFloat(vendorRequested).toFixed(2)}</td>
-									<td class="font-weight-bold text-light text-center">${parseFloat(vendorStocks).toFixed(2)}</td>
-									<td class="font-weight-bold text-light text-center">${parseFloat(vendorForPurchase).toFixed(2)}</td>
-									<td class="font-weight-bold text-light">-</td>
-									<td class="font-weight-bold text-light text-right">${formatAmount(vendorUnitCost,true)}</td>
-									<td class="font-weight-bold text-light text-right"><span class="totalCost" category="${type}">${formatAmount(vendorTotalCost,true)}</span></td>
-								</tr>`;
-						// END TABLE ROW FOR TOTALS
-
-				}) // END MAPPING OF "newSetVendorArr"
-
+						}) // END MAPPING OF "newSetVendorArr"
+			}else{
+				html += `	<tr>
+								<td class="text-dark text-center" colspan="10">No data available in table</td>
+							</tr>`;
+			}
 
 
             return html;
@@ -2135,14 +2159,15 @@ function savebidRecapID(data = null, method = "submit", notificationData = null,
 					}, 500);
 				})
 			} else {
-				if (res.dismiss === "cancel") {
-					if(method != "submit"){
-						if (method != "deny") {
-							callback && callback();
+				if (res.dismiss == "cancel" && method != "submit") {
+					if (method != "deny") {
+							if (method != "cancelform") {
+								callback && callback();
+							}
 						} else {
 							$("#modal_bid_recap").text().length > 0 && $("#modal_bid_recap").modal("show");
 						}
-					}
+					
 				} else if (res.isDismissed) {
 					if (method == "deny") {
 						$("#modal_bid_recap").text().length > 0 && $("#modal_bid_recap").modal("show");

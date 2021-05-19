@@ -177,8 +177,10 @@ const generateNewRolesPermission =() => {
 $(document).ready(function() {
 
     // ----- AUTO-PADDING OF HEADER TITLE -----
-    var padding = document.getElementById("leftsidebar").offsetHeight;
+    var padding = document.getElementById("leftsidebar").clientHeight ;
     $(".block-header").css("padding-top",padding + 15);
+
+    (padding>100) ? $(".body_area").addClass('change') : $(".body_area").removeClass('change');
 
     $(window).on('resize', function () {
         setTimeout(doneResizing, 250);
@@ -186,8 +188,10 @@ $(document).ready(function() {
     // ----- END AUTO-PADDING OF HEADER TITLE -----
 
     function doneResizing(){
-        var padding = document.getElementById("leftsidebar").offsetHeight;
-        $(".block-header").css("padding-top",padding + 15);  
+        var padding = document.getElementById("leftsidebar").clientHeight ;
+        $(".block-header").css("padding-top",padding + 15);
+
+        (padding>100) ? $(".body_area").addClass('change') : $(".body_area").removeClass('change');
     }
 			
     function getAllModules(data) {

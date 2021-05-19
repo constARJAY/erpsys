@@ -964,8 +964,8 @@ $(document).ready(function() {
 							style="resize: none" 
 							class="form-control validate" 
 							data-allowcharacters="[0-9][a-z][A-Z][ ][.][,][_]['][()][?][-][/]"
-							minlength="1"
-							maxlength="100"
+							minlength="0"
+							maxlength="250"
 							name="remarks" 
 							id="remarks">${remarks || ""}</textarea>
 					</div>

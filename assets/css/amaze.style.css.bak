@@ -46,6 +46,29 @@ textarea:focus, input:focus{
 	border: 1px solid #2c8882;
 }
 
+.sticky-bottom{
+	position: fixed;
+	bottom: 0px;
+	background-color: #1a1a1a;
+	z-index: 12;
+	left: 0px;
+	right: 0px;
+	overflow: hidden;
+	margin:0px;
+	max-width: 100% !important;
+}
+
+.copyright{
+	color:white;
+	font-size:10px;
+}
+
+@media only screen and (max-width: 1169px) {
+	.block-header{
+		padding-top: 20px !important;
+	}
+}
+
 .select2-selection.select2-selection--single,
 [aria-labelledby="select2--container"] {
 	height: calc(1.5em + 0.75rem + 5px) !important;
@@ -11809,6 +11832,7 @@ body {
 	font-weight: 400;
 	font-family: "Quicksand", sans-serif;
 	font-size: 15px;
+	margin-bottom: 5px;
 }
 body.font-quicksand {
 	font-family: "Quicksand", sans-serif;
@@ -11825,11 +11849,11 @@ body.font-raleway {
 }
 body.h_menu .sidebar {
 	background: var(--primary-color);
-	position: relative;
+	position: fixed;
 	left: auto;
 	overflow: visible;
 	padding-top: 1px;
-	padding-bottom: 20px;
+	padding-bottom: 11px;
 	min-height: 60px;
 	height: auto;
 	width: 100%;
@@ -12024,10 +12048,10 @@ a:hover {
 .block-header {
 	background: var(--primary-color);
 	color: var(--font-white);
-	margin-bottom: 30px;
+	margin-bottom: 19px;
 
 	/* ----- CHANGE ----- */
-	padding: 25px 0;
+
 	/* ----- END CHANGE ----- */
 
 }
@@ -12064,7 +12088,7 @@ a:hover {
 .block-header .breadcrumb {
 	background: transparent;
 	text-transform: uppercase;
-	font-size: 13px;
+	font-size: 12px;
 	padding: 0;
 	margin: 0;
 }

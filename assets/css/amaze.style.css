@@ -12045,6 +12045,11 @@ a:hover {
 .body_area.after_bg.sm::after {
 	height: 180px;
 }
+
+.body_area.after_bg.change::after {
+	height: 380px;
+}
+
 .block-header {
 	background: var(--primary-color);
 	color: var(--font-white);

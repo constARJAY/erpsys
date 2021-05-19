@@ -141,7 +141,8 @@ $(document).ready(function() {
 					let id = decryptString(arr[1]);
 						id && isFinite(id) && loadData(id, true);
 				} else {
-					pageContent(true);
+					const isAllowed = isCreateAllowed(46);
+					pageContent(isAllowed);
 				}
 			}
 		}
@@ -1749,9 +1750,9 @@ $(document).ready(function() {
 		</table>
 
 		<div class="row py-2">
-			<div class="offset-xl-9 offset-md-8 col-xl-3 col-md-4 col-sm-12 pt-3 pb-2">
+			<div class="offset-xl-8 offset-md-7 col-xl-4 col-md-5 col-sm-12 pt-3 pb-2">
 				<div class="row" style="font-size: 1.1rem; font-weight:bold">
-					<div class="col-6 text-right">Total :</div>
+					<div class="col-6 text-left">Total :</div>
 					<div class="col-6 text-right text-danger"
 						style="font-size: 1.05em"
 						id="total">
@@ -1759,7 +1760,7 @@ $(document).ready(function() {
 					</div>
 				</div>
 				<div class="row" style="font-size: 1.1rem; font-weight:bold">
-					<div class="col-6 text-right">Discount :</div>
+					<div class="col-6 text-left">Discount :</div>
 					<div class="col-6 text-right">
 						<input 
 							type="text" 
@@ -1776,7 +1777,7 @@ $(document).ready(function() {
 					</div>
 				</div>
 				<div class="row" style="font-size: 1.1rem; font-weight:bold">
-					<div class="col-6 text-right">Total Amount:</div>
+					<div class="col-6 text-left">Total Amount:</div>
 					<div class="col-6 text-right text-danger"
 						id="totalAmount"
 						style="font-size: 1.05em">
@@ -1784,7 +1785,7 @@ $(document).ready(function() {
 					</div>
 				</div>
 				<div class="row" style="font-size: 1.1rem; font-weight:bold">
-					<div class="col-6 text-right">Vatable Sales:</div>
+					<div class="col-6 text-left">Vatable Sales:</div>
 					<div class="col-6 text-right text-danger"
 						id="vatSales"
 						style="font-size: 1.05em">
@@ -1792,7 +1793,7 @@ $(document).ready(function() {
 					</div>
 				</div>
 				<div class="row" style="font-size: 1.1rem; font-weight:bold">
-					<div class="col-6 text-right">Vat 12%:</div>
+					<div class="col-6 text-left">Vat 12%:</div>
 					<div class="col-6 text-right">
 						<input 
 							type="text" 
@@ -1809,7 +1810,7 @@ $(document).ready(function() {
 					</div>
 				</div>
 				<div class="row" style="font-size: 1.1rem; font-weight:bold">
-					<div class="col-6 text-right">Total:</div>
+					<div class="col-6 text-left">Total:</div>
 					<div class="col-6 text-right text-danger"
 						id="totalVat"
 						style="font-size: 1.05em">
@@ -1817,7 +1818,7 @@ $(document).ready(function() {
 					</div>
 				</div>
 				<div class="row" style="font-size: 1.1rem; font-weight:bold">
-					<div class="col-6 text-right">Less EWT:</div>
+					<div class="col-6 text-left">Less EWT:</div>
 					<div class="col-6 text-right">
 						<input 
 							type="text" 
@@ -1834,7 +1835,7 @@ $(document).ready(function() {
 					</div>
 				</div>
 				<div class="row" style="font-size: 1.3rem; font-weight:bold; border-bottom: 3px double black;">
-					<div class="col-6 text-right">Grand Total:</div>
+					<div class="col-6 text-left">Grand Total:</div>
 					<div class="col-6 text-right text-danger"
 						id="grandTotalAmount"
 						style="font-size: 1.3em">
@@ -2346,6 +2347,18 @@ $(document).ready(function() {
                 $(this).attr("id", `serviceDate${i}`);
                 serviceDate(this);
             })
+
+			// ----- NOT ALLOWED FOR UPDATE -----
+			if (!allowedUpdate) {
+				$("#page_content").find(`input, select, textarea`).each(function() {
+					if (this.type != "search") {
+						$(this).attr("disabled", true);
+					}
+				})
+				$('#btnBack').attr("status", "2");
+				$(`#btnSubmit, #btnRevise, #btnCancel, #btnCancelForm, .btnAddRow, .btnDeleteRow`).hide();
+			}
+			// ----- END NOT ALLOWED FOR UPDATE -----
 
 			return html;
 		}, 300);
