@@ -524,7 +524,6 @@ $(document).ready(function () {
             const filetype = this.files[0].type;
             const filename = this.files[0].name;
 			const type     = filetype.split("/")?.[1];
-			console.log(filetype, type);
             if (filesize > 10) {
                 $(this).val("");
                 showNotification("danger", "File size must be less than or equal to 10mb");

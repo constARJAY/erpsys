@@ -1,4 +1,7 @@
 $(document).ready(function() {
+	const allowedUpdate = isUpdateAllowed(49);
+
+
     // ----- MODULE APPROVER -----
 	const moduleApprover = getModuleApprover("service requisition");
 	// ----- END MODULE APPROVER -----
@@ -101,7 +104,8 @@ $(document).ready(function() {
 					let id = decryptString(arr[1]);
 						id && isFinite(id) && loadData(id, true);
 				} else {
-					pageContent(true);
+					const isAllowed = isCreateAllowed(49);
+					pageContent(isAllowed);
 				}
 			}
 		}
@@ -1532,6 +1536,19 @@ $(document).ready(function() {
 			initAll();
 			updateServiceOptions();
 			clientID && clientID != 0 && $("[name=clientID]").trigger("change");
+
+			// ----- NOT ALLOWED FOR UPDATE -----
+			if (!allowedUpdate) {
+				$("#page_content").find(`input, select, textarea`).each(function() {
+					if (this.type != "search") {
+						$(this).attr("disabled", true);
+					}
+				})
+				$('#btnBack').attr("status", "2");
+				$(`#btnSubmit, #btnRevise, #btnCancel, #btnCancelForm, .btnAddRow, .btnDeleteRow`).hide();
+			}
+			// ----- END NOT ALLOWED FOR UPDATE -----
+
 			return html;
 		}, 300);
 	}

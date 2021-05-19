@@ -1,4 +1,7 @@
 $(document).ready(function() {
+	const allowedUpdate = isUpdateAllowed(47);
+
+
     // ----- MODULE APPROVER -----
 	const moduleApprover = getModuleApprover("purchase order");
 	// ----- END MODULE APPROVER -----
@@ -105,7 +108,8 @@ $(document).ready(function() {
 					let id = decryptString(arr[1]);
 						id && isFinite(id) && loadData(id, true);
 				} else {
-					pageContent(true);
+					const isAllowed = isCreateAllowed(46);
+					pageContent(isAllowed);
 				}
 			}
 		}
@@ -363,8 +367,10 @@ $(document).ready(function() {
 	function headerButton(isAdd = true, text = "Add", isRevise = false) {
 		let html;
 		if (isAdd) {
-            html = `
-            <button type="button" class="btn btn-default btn-add" id="btnAdd"><i class="icon-plus"></i> &nbsp;${text}</button>`;
+			if (isCreateAllowed(47)) {
+				html = `
+				<button type="button" class="btn btn-default btn-add" id="btnAdd"><i class="icon-plus"></i> &nbsp;${text}</button>`;
+			}
 		} else {
 			html = `
             <button type="button" class="btn btn-default btn-light" id="btnBack" revise="${isRevise}"><i class="fas fa-arrow-left"></i> &nbsp;Back</button>`;
@@ -1455,7 +1461,7 @@ $(document).ready(function() {
 				</table>
 				
 				<div class="row py-2">
-					<div class="offset-md-8 col-md-4 col-sm-12 pt-3 pb-2">
+					<div class="offset-xl-9 offset-md-8 col-xl-3 col-md-4 col-sm-12 pt-3 pb-2">
 						<div class="row" style="font-size: 1.1rem; font-weight:bold">
 							<div class="col-6 text-right">Total :</div>
 							<div class="col-6 text-right text-danger"
@@ -2261,14 +2267,16 @@ $(document).ready(function() {
 				}
 			}
 
-			approvedButton += `
-				<button 
-					class="btn btn-info py-2" 
-					purchaseOrderID="${purchaseOrderID}"
-					id="btnExcel">
-					<i class="fas fa-file-excel"></i> Excel
-				</button>
-			</div>`;
+			if (isPrintAllowed(47)) {
+				approvedButton += `
+					<button 
+						class="btn btn-info py-2" 
+						purchaseOrderID="${purchaseOrderID}"
+						id="btnExcel">
+						<i class="fas fa-file-excel"></i> Excel
+					</button>
+				</div>`;
+			}
 		}
 		// ----- END PRINT BUTTON -----
 
@@ -2570,6 +2578,18 @@ $(document).ready(function() {
 				startDate: moment(deliveryDate || new Date),
 			}
 			initDateRangePicker("#deliveryDate", disablePreviousDateOptions);
+
+			// ----- NOT ALLOWED FOR UPDATE -----
+			if (!allowedUpdate) {
+				$("#page_content").find(`input, select, textarea`).each(function() {
+					if (this.type != "search") {
+						$(this).attr("disabled", true);
+					}
+				})
+				$('#btnBack').attr("status", "2");
+				$(`#btnSubmit, #btnRevise, #btnCancel, #btnCancelForm, .btnAddRow, .btnDeleteRow`).hide();
+			}
+			// ----- END NOT ALLOWED FOR UPDATE -----
 
 			return html;
 		}, 300);

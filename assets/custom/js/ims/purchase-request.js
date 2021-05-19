@@ -1,4 +1,7 @@
 $(document).ready(function() {
+	const allowedUpdate = isUpdateAllowed(46);
+
+
     // ----- MODULE APPROVER -----
 	const moduleApprover = getModuleApprover("purchase request");
 	// ----- END MODULE APPROVER -----
@@ -101,7 +104,8 @@ $(document).ready(function() {
 					let id = decryptString(arr[1]);
 						id && isFinite(id) && loadData(id, true);
 				} else {
-					pageContent(true);
+					const isAllowed = isCreateAllowed(46);
+					pageContent(isAllowed);
 				}
 			}
 		}
@@ -336,8 +340,10 @@ $(document).ready(function() {
 	function headerButton(isAdd = true, text = "Add", isRevise = false) {
 		let html;
 		if (isAdd) {
-            html = `
-            <button type="button" class="btn btn-default btn-add" id="btnAdd"><i class="icon-plus"></i> &nbsp;${text}</button>`;
+			if (isCreateAllowed(46)) {
+				html = `
+				<button type="button" class="btn btn-default btn-add" id="btnAdd"><i class="icon-plus"></i> &nbsp;${text}</button>`;
+			}
 		} else {
 			html = `
             <button type="button" class="btn btn-default btn-light" id="btnBack" revise="${isRevise}"><i class="fas fa-arrow-left"></i> &nbsp;Back</button>`;
@@ -1878,7 +1884,7 @@ $(document).ready(function() {
 
 			<div class="col-12">
 				<div class="row py-2">
-					<div class="offset-md-8 col-md-4 col-sm-12 pt-3 pb-2">
+					<div class="offset-xl-9 offset-md-8 col-xl-3 col-md-4 col-sm-12 pt-3 pb-2">
 						<div class="row d-flex justify-content-end align-items-end" style="font-size: 1.3rem; font-weight:bold; border-bottom: 3px double black;">
 							<div class="col-7 text-left">Grand Total:</div>
 							<div class="col-5 text-right text-danger"
@@ -1909,6 +1915,19 @@ $(document).ready(function() {
 				// $("[name=costEstimateID]").val(costEstimateID).trigger("change");
 				$("[name=projectID]").val(projectID).trigger("change");
 			}
+
+			// ----- NOT ALLOWED FOR UPDATE -----
+			if (!allowedUpdate) {
+				$("#page_content").find(`input, select, textarea`).each(function() {
+					if (this.type != "search") {
+						$(this).attr("disabled", true);
+					}
+				})
+				$('#btnBack').attr("status", "2");
+				$(`#btnSubmit, #btnRevise, #btnCancel, #btnCancelForm, .btnAddRow, .btnDeleteRow`).hide();
+			}
+			// ----- END NOT ALLOWED FOR UPDATE -----
+
 			return html;
 		}, 300);
 	}

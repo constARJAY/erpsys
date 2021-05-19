@@ -1,4 +1,7 @@
 $(document).ready(function() {
+	const allowedUpdate = isUpdateAllowed(41);
+
+
     // ----- MODULE APPROVER -----
 	const moduleApprover = getModuleApprover("service order");
 	// ----- END MODULE APPROVER -----
@@ -111,7 +114,8 @@ $(document).ready(function() {
 					let id = decryptString(arr[1]);
 						id && isFinite(id) && loadData(id, true);
 				} else {
-					pageContent(true);
+					const isAllowed = isCreateAllowed(41);
+					pageContent(isAllowed);
 				}
 			}
 		}
@@ -1700,7 +1704,7 @@ $(document).ready(function() {
 		</table>
 		
 		<div class="row py-2">
-			<div class="offset-md-8 col-md-4 col-sm-12 pt-3 pb-2">
+			<div class="offset-xl-9 offset-md-8 col-xl-3 col-md-4 col-sm-12 pt-3 pb-2">
 				<div class="row" style="font-size: 1.1rem; font-weight:bold">
 					<div class="col-6 text-right">Total :</div>
 					<div class="col-6 text-right text-danger"
@@ -1944,14 +1948,16 @@ $(document).ready(function() {
 				}
 			}
 
-			approvedButton += `
-				<button 
-					class="btn btn-info py-2" 
-					serviceOrderID="${serviceOrderID}"
-					id="btnExcel">
-					<i class="fas fa-file-excel"></i> Excel
-				</button>
-			</div>`;
+			if (isPrintAllowed(41)) {
+				approvedButton += `
+					<button 
+						class="btn btn-info py-2" 
+						serviceOrderID="${serviceOrderID}"
+						id="btnExcel">
+						<i class="fas fa-file-excel"></i> Excel
+					</button>
+				</div>`;
+			}
 		}
 		// ----- END PRINT BUTTON -----
 
@@ -2254,6 +2260,19 @@ $(document).ready(function() {
 			}
 			initDateRangePicker("#scheduleDate", disablePreviousDateOptions);
 			costSummary();
+
+			// ----- NOT ALLOWED FOR UPDATE -----
+			if (!allowedUpdate) {
+				$("#page_content").find(`input, select, textarea`).each(function() {
+					if (this.type != "search") {
+						$(this).attr("disabled", true);
+					}
+				})
+				$('#btnBack').attr("status", "2");
+				$(`#btnSubmit, #btnRevise, #btnCancel, #btnCancelForm, .btnAddRow, .btnDeleteRow`).hide();
+			}
+			// ----- END NOT ALLOWED FOR UPDATE -----
+
 			return html;
 		}, 300);
 	}

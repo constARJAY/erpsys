@@ -1,4 +1,7 @@
 $(document).ready(function() {
+	const allowedUpdate = isUpdateAllowed(128);
+
+
     // ----- MODULE APPROVER -----
 	const moduleApprover = getModuleApprover("service completion");
 	// ----- END MODULE APPROVER -----
@@ -1746,7 +1749,7 @@ $(document).ready(function() {
 		</table>
 
 		<div class="row py-2">
-			<div class="offset-md-8 col-md-4 col-sm-12 pt-3 pb-2">
+			<div class="offset-xl-9 offset-md-8 col-xl-3 col-md-4 col-sm-12 pt-3 pb-2">
 				<div class="row" style="font-size: 1.1rem; font-weight:bold">
 					<div class="col-6 text-right">Total :</div>
 					<div class="col-6 text-right text-danger"
