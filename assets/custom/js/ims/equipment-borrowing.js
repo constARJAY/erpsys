@@ -765,9 +765,7 @@ $(document).ready(function() {
 					   type="button" 
 					   class="form-control  daterange dateBorrowed text-center"
 					   id="dateBorrowed" 
-					   name="dateBorrowed" 
-					   value=""
-					 	></div>
+					   name="dateBorrowed"></div>
 					   <div class="invalid-feedback d-block" id="invalid-dateBorrowed"></div>
 			</div>
         </td>
@@ -828,8 +826,10 @@ $(document).ready(function() {
 				maxDate: moment(new Date).format("MMMM DD, YYYY"),
 			}
 			initDateRangePicker(`#dateBorrowed${i}`);
-			initDateRangePicker(`#datereturn${i}`);
+			//initDateRangePicker(`#datereturn${i}`);
+			$(`#dateBorrowed${i}`).data("daterangepicker").maxDate = moment();
 			$(`#dateBorrowed${i}`).val(moment(new Date).format("MMMM DD, YYYY"));
+			
 		})
 	}
 	// ----- END UPDATE TABLE ITEMS -----
@@ -1338,8 +1338,13 @@ $(document).ready(function() {
 			initAll();
 			updateInventoryItemOptions();
 			projectID && projectID != 0 && $("[name=projectID]").trigger("change");
-			
-				$("#dateBorrowed").val(moment(new Date).format("MMMM DD, YYYY"));
+			if(data){
+
+			}else{
+				$(".dateBorrowed").val(moment(new Date).format("MMMM DD, YYYY"));
+			}
+				//$("#dateBorrowed").val(moment(new Date).format("MMMM DD, YYYY"));
+				$(".dateBorrowed").data("daterangepicker").maxDate = moment();
 			
 			
 			return html;
@@ -1476,8 +1481,8 @@ $(document).ready(function() {
 			$(".itemTableRow").each(function(i, obj) {
 				const categoryType = $(this).closest("tbody").attr("project") == "true" ? "project" : "";
 
-				const itemID    			= $("td [name=barcode]", this).attr("itemID");
-				const inventoryStorageID   	= $("td [name=barcode]", this).attr("inventoryStorageID");
+				const itemID    		= $("td [name=barcode]", this).attr("itemID");
+				const inventoryStorageID  = $("td [name=barcode]", this).attr("inventoryStorageID");
 				const serialnumber   	= $("td [name=barcode]", this).attr("serialnumber");
 				const formatdate   = $("td [name=dateBorrowed]", this).val();	
 				const barcode 		= $("td [name=barcode]", this).val();	

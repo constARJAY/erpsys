@@ -247,10 +247,11 @@ $(document).ready(function () {
 
 			let button = `
 			<button class="btn btn-view w-100 btnView" id="${encryptString(changeScheduleID)}"><i class="fas fa-eye"></i> View</button>`;
+			let btnClass = changeScheduleStatus != 0 ? "btnView" : "btnEdit";
 
 			if (isImCurrentApprover(approversID, approversDate, changeScheduleStatus) || isAlreadyApproved(approversID, approversDate)) {
 				html += `
-				<tr class="${button}">
+				<tr class="${btnClass}" id="${encryptString(changeScheduleID)}">
 					<td>${getFormCode("SCH", createdAt, changeScheduleID)}</td>
 					<td>${fullname}</td>
 					<td>
@@ -404,7 +405,7 @@ $(document).ready(function () {
 						Submit
 					</button>
 					<button 
-						class="btn btn-cancel"
+						class="btn btn-cancel px-5 p-2"
 						id="btnCancelForm" 
 						changeScheduleID="${changeScheduleID}"
 						code="${getFormCode("SCH", createdAt, changeScheduleID)}"><i class="fas fa-ban"></i> 
@@ -414,7 +415,7 @@ $(document).ready(function () {
 					if (!isOngoing) {
 						button = `
 						<button 
-							class="btn btn-cancel"
+							class="btn btn-cancel px-5 p-2"
 							id="btnCancelForm" 
 							changeScheduleID="${changeScheduleID}"
 							code="${getFormCode("SCH", createdAt, changeScheduleID)}"><i class="fas fa-ban"></i> 
@@ -434,7 +435,7 @@ $(document).ready(function () {
 							Approve
 						</button>
 						<button 
-							class="btn btn-cancel"
+							class="btn btn-cancel px-5 p-2"
 							id="btnReject" 
 							changeScheduleID="${encryptString(changeScheduleID)}"
 							code="${getFormCode("SCH", createdAt, changeScheduleID)}"><i class="fas fa-ban"></i> 
@@ -1116,7 +1117,7 @@ $(document).ready(function () {
 			</div>
 		</div>
 		<div class="modal-footer text-right">
-			<button class="btn btn-danger" id="btnRejectConfirmation"
+			<button class="btn btn-danger px-5 p-2" id="btnRejectConfirmation"
 			changeScheduleID="${id}"
 			code="${feedback}"><i class="far fa-times-circle"></i> Deny</button>
 			<button class="btn btn-cancel btnCancel px-5 p-2" data-dismiss="modal"><i class="fas fa-ban"></i> Cancel</button>

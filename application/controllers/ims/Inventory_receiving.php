@@ -6,7 +6,7 @@ class Inventory_receiving extends CI_Controller {
     public function __construct()
     {
         parent::__construct();
-        $this->load->model("ims/InventoryReceiving_model", "servicerequisition");
+        $this->load->model("ims/InventoryReceiving_model", "inventoryreceiving");
         isAllowed(46);
     }
 
@@ -23,11 +23,11 @@ class Inventory_receiving extends CI_Controller {
     {
         $action                     = $this->input->post("action");
         $method                     = $this->input->post("method");
-        $inventoryReceivingID        = $this->input->post("inventoryReceivingID") ?? null;
+        $inventoryReceivingID       = $this->input->post("inventoryReceivingID") ?? null;
         $reviseInventoryReceivingID = $this->input->post("reviseInventoryReceivingID") ?? null;
         $employeeID                 = $this->input->post("employeeID");
-        $purchaseOrderID                   = $this->input->post("purchaseOrderID") ?? null;
-        $dateReceived                 = $this->input->post("dateReceived");
+        $purchaseOrderID            = $this->input->post("purchaseOrderID") ?? null;
+        $dateReceived               = $this->input->post("dateReceived");
         $approversID                = $this->input->post("approversID") ?? null;
         $approversStatus            = $this->input->post("approversStatus") ?? null;
         $approversDate              = $this->input->post("approversDate") ?? null;
@@ -40,17 +40,17 @@ class Inventory_receiving extends CI_Controller {
         $createdAt                  = $this->input->post("createdAt");
         $items                      = $this->input->post("items") ?? null;
 
-        $lastApproveCondition                  = $this->input->post("lastApproveCondition");
+        $lastApproveCondition       = $this->input->post("lastApproveCondition");
 
       
 
 
 
-        $serviceRequisitionData = [
+        $inventoryReceivingData = [
             "reviseInventoryReceivingID" => $reviseInventoryReceivingID,
             "employeeID"                 => $employeeID,
-            "purchaseOrderID"                   => $purchaseOrderID,
-            "dateReceived"                 => $dateReceived,
+            "purchaseOrderID"            => $purchaseOrderID,
+            "dateReceived"               => $dateReceived,
             "approversID"                => $approversID,
             "approversStatus"            => $approversStatus,
             "approversDate"              => $approversDate,
@@ -63,24 +63,24 @@ class Inventory_receiving extends CI_Controller {
         ];
 
         if ($action == "update") {
-            unset($serviceRequisitionData["reviseInventoryReceivingID"]);
-            unset($serviceRequisitionData["createdBy"]);
-            unset($serviceRequisitionData["createdAt"]);
+            unset($inventoryReceivingData["reviseInventoryReceivingID"]);
+            unset($inventoryReceivingData["createdBy"]);
+            unset($inventoryReceivingData["createdAt"]);
 
             if ($method == "cancelform") {
-                $serviceRequisitionData = [
+                $inventoryReceivingData = [
                     "inventoryReceivingStatus" => 4,
                     "updatedBy"                => $updatedBy,
                 ];
             } else if ($method == "approve") {
-                $serviceRequisitionData = [
+                $inventoryReceivingData = [
                     "approversStatus"          => $approversStatus,
                     "approversDate"            => $approversDate,
                     "inventoryReceivingStatus" => $inventoryReceivingStatus,
                     "updatedBy"                => $updatedBy,
                 ];
             } else if ($method == "deny") {
-                $serviceRequisitionData = [
+                $inventoryReceivingData = [
                     "approversStatus"           => $approversStatus,
                     "approversDate"             => $approversDate,
                     "inventoryReceivingStatus"  => 3,
@@ -88,14 +88,14 @@ class Inventory_receiving extends CI_Controller {
                     "updatedBy"                 => $updatedBy,
                 ];
             } else {
-                // $this->servicerequisition->deleteServicesAndScopes($inventoryReceivingID);
+                // $this->inventoryreceiving->deleteServicesAndScopes($inventoryReceivingID);
             }
         }
 
-        $saveServiceRequisitionData = $this->servicerequisition->saveServiceRequisitionData($action, $serviceRequisitionData, $inventoryReceivingID);
+        $saveInventoryReceivingData = $this->inventoryreceiving->saveInventoryReceivingData($action, $inventoryReceivingData, $inventoryReceivingID);
 
-        if ($saveServiceRequisitionData && ($method == "submit" || $method == "save")) {
-            $result = explode("|", $saveServiceRequisitionData);
+        if ($saveInventoryReceivingData && ($method == "submit" || $method == "save")) {
+            $result = explode("|", $saveInventoryReceivingData);
 
             if ($result[0] == "true") {
                 $inventoryReceivingID = $result[2];
@@ -104,25 +104,26 @@ class Inventory_receiving extends CI_Controller {
                     foreach($items as $index => $item) {
                         $service = [
                             "inventoryReceivingID" => $inventoryReceivingID,
-                            "itemID"            => $item["itemID"] != "null" ? $item["itemID"] : null,
-                            "received"          => $item["received"],
+                            "requestItemID"        => $item["requestItemID"] != "null" ? $item["requestItemID"] : null,
+                            "itemID"               => $item["itemID"] != "null" ? $item["itemID"] : null,
+                            "received"             => $item["received"],
                             "remarks"              => $item["remarks"],
                             "createdBy"            => $updatedBy,
                             "updatedBy"            => $updatedBy,
                         ];
                         $scopes = $item["scopes"];
                         
-                        // $saveServices = $this->servicerequisition->saveServices($service, $scopes, $inventoryReceivingID);
-                        if($lastApproveCondition == "false"){ // check if  lastapprover or not
-                            $this->servicerequisition->updateOrderedPending($scopes,$service);
-                        }
+                        // $saveServices = $this->inventoryreceiving->saveServices($service, $scopes, $inventoryReceivingID);
+                        // if($lastApproveCondition == "false"){ // check if  lastapprover or not
+                        //     $this->inventoryreceiving->updateOrderedPending($scopes,$service);
+                        // }
                     }
                 }
 
             }
             
         }
-        echo json_encode($saveServiceRequisitionData);
+        echo json_encode($saveInventoryReceivingData);
     }
 
 }

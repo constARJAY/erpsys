@@ -10,7 +10,7 @@ class InventoryReceiving_model extends CI_Model {
 
 
 
-    public function saveServiceRequisitionData($action, $data, $id = null) 
+    public function saveInventoryReceivingData($action, $data, $id = null) 
     {
         if ($action == "insert") {
             $query = $this->db->insert("ims_inventory_receiving_tbl", $data);
@@ -22,11 +22,11 @@ class InventoryReceiving_model extends CI_Model {
         if ($query) {
             $insertID = $action == "insert" ? $this->db->insert_id() : $id;
 
-            // ----- SAVE TO SERVICE ORDER -----
+            // ----- UPDATE ORDERED PENDING -----
             // if ($data["inventoryReceivingStatus"] == 2) {
             //     $insertToServiceOrder = $this->saveServiceOrder($insertID);
             // }
-            // ----- END SAVE TO SERVICE ORDER -----
+            // ----- END UPDATE ORDERED PENDING -----
 
             return "true|Successfully submitted|$insertID|".date("Y-m-d");
         }

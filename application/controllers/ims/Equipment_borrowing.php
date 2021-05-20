@@ -105,38 +105,6 @@ class Equipment_borrowing extends CI_Controller {
                                 ];
                                 array_push($borrowingItems, $temp);
                             }
-                            
-                            if (isset($_FILES["items"])) {
-                                $length = count($_FILES["items"]["name"]);
-                                $keys   = array_keys($_FILES["items"]["name"]);
-                                for ($i=0; $i<$length; $i++) {
-                                    $uploadedFile = explode(".", $_FILES["items"]["name"][$keys[$i]]["file"]);
-        
-                                    $index     = (int)$uploadedFile[0]; 
-                                    $extension = $uploadedFile[1];
-                                    $filename  = $i.time().'.'.$extension;
-        
-                                    $folderDir = "assets/upload-files/request-items/";
-                                    if (!is_dir($folderDir)) {
-                                        mkdir($folderDir);
-                                    }
-                                    $targetDir = $folderDir.$filename;
-        
-                                    if (move_uploaded_file($_FILES["items"]["tmp_name"][$index]["file"], $targetDir)) {
-                                        $borrowingItems[$index]["files"] = $filename;
-                                    }
-                                    
-                                } 
-        
-                                // ----- UPDATE ITEMS FILE -----
-                                foreach ($borrowingItems as $key => $prItem) {
-                                    if (!array_key_exists("files", $prItem)) {
-                                        $borrowingItems[$key]["files"] = null;
-                                    }
-                                }
-                                // ----- END UPDATE ITEMS FILE -----
-                            }
-        
                             $savePurchTransferstItems = $this->equipmentborrowing->saveBorrowingItems($borrowingItems, $borrowingID);
                         }
         
