@@ -1628,7 +1628,11 @@ $(document).ready(function() {
 				const receivedQuantity = $(`[name="received"]`, this).val() || 0;
 				if ($(`.tableSerialBody tr`, this).length > 1) {
 					let countSerial = $(`.tableSerialBody tr`, this).length;
+
 					if (receivedQuantity != countSerial) {
+						
+						$(`.tableSerialBody tr`, this).find(`.servicescope [name="serialNumber"]`).attr("required", true);
+
 						showNotification("danger", "Serial number is not equal on received items!");
 
 						$(`.received [name="received"]`, this).removeClass("is-valid, no-error").addClass("is-invalid");
@@ -1660,9 +1664,16 @@ $(document).ready(function() {
 							}
 						})
 					}
+				} else {
+					$(`.received [name="received"]`, this).removeClass("is-valid, no-error").removeClass("is-invalid");
+					$(`.received .invalid-feedback`, this).text("");
+
+					$(`.tableSerialBody tr`, this).each(function() {
+						$(`.servicescope [name="serialNumber"]`, this).removeClass("is-valid").removeClass("no-error").removeClass("is-invalid");
+						$(`.servicescope .invalid-feedback`, this).text("");
+					})
 				}
 			})
-			console.log(invalidInputs);
 			// $(`.purchaseOrderItemsBody`).find(`.is-invalid`).first().focus();
 			invalidInputs.length > 0 && $(invalidInputs[0]).focus();
 			return $(`.purchaseOrderItemsBody`).find(`.is-invalid`).length == 0;
