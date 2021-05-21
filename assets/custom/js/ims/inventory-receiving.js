@@ -331,7 +331,7 @@ $(document).ready(function() {
 				inventoryReceivingStatus,
 				inventoryReceivingRemarks,
 				submittedAt,
-				
+				createdAt
 			} = item;
 
 			let remarks       = inventoryReceivingRemarks ? inventoryReceivingRemarks : "-";
@@ -592,7 +592,13 @@ $(document).ready(function() {
 
     // ----- GET PURCHASE ORDER LIST -----
     function getPurchaseOrderList(id = null, status = 0, display = true) {
-		const createdIRList = getTableData("ims_inventory_receiving_tbl", "purchaseOrderID", "inventoryReceivingStatus <> 3 AND inventoryReceivingStatus <> 4").map(po => po.purchaseOrderID);
+		const createdIRList = getTableData(
+			`ims_inventory_receiving_tbl AS iirt
+				LEFT JOIN ims_inventory_receiving_details_tbl AS iirdt USING(inventoryReceivingID)
+				LEFT JOIN ims_request_items_tbl AS irit USING(requestItemID)`, 
+			"iirt.purchaseOrderID", 
+			"iirt.inventoryReceivingStatus <> 3 AND iirt.inventoryReceivingStatus <> 4 AND irit.orderedPending <> 0 AND irit.orderedPending IS NOT NULL"
+		).map(po => po.purchaseOrderID);
 		let html = '';
 		if (!status || status == 0) {
 			html += purchaseOrderList.filter(po => createdIRList.indexOf(po.purchaseOrderID) == -1 || po.purchaseOrderID == id).map(po => {
@@ -715,21 +721,39 @@ $(document).ready(function() {
 		// 	id = `${id} AND iirt.inventoryReceivingID = ${inventoryReceivingID}`;
 		// }
 
-
-        let requestItemsData = getTableData(
-            // `ims_purchase_order_tbl as ipot
-            // LEFT JOIN ims_purchase_request_tbl as iprt ON ipot.purchaseRequestID = iprt.purchaseRequestID 
-            // LEFT JOIN ims_request_items_tbl as irit ON irit.purchaseRequestID = iprt.purchaseRequestID  
-            // LEFT JOIN ims_inventory_item_tbl as itm ON itm.itemID = irit.itemID
-            // LEFT JOIN ims_inventory_receiving_tbl as iirt ON iirt.purchaseOrderID = ipot.purchaseOrderID
-            // LEFT JOIN ims_inventory_receiving_details_tbl as iirdt ON iirdt.inventoryReceivingID = iirt.inventoryReceivingID AND irit.itemID = iirdt.itemID `,
-            // `iirdt.inventoryReceivingDetailsID, itm.itemID,itm.createdAt,irit.itemName,irit.brandName,irit.itemUom,irit.forPurchase,irit.orderedPending,iirdt.received,iirdt.remarks`,
-            // `purchaseRequestStatus =2 AND purchaseOrderStatus =2 AND ipot.purchaseOrderID = ${id}`,
-			// ``,`irit.itemID`
-			"ims_request_items_tbl", 
-			"", 
-			`purchaseOrderID = ${id}`
-        )
+		console.log(inventoryReceivingID);
+		let requestItemsData;	
+		if (inventoryReceivingID) {
+			requestItemsData = getTableData(
+				`ims_inventory_receiving_details_tbl AS iirdt
+					LEFT JOIN ims_request_items_tbl AS irit USING(requestItemID)`,
+				`iirdt.*, 
+				irit.itemName, 
+				irit.forPurchase, 
+				irit.brandName,
+				irit.orderedPending,
+				iirdt.received,
+				irit.itemUom,
+				iirdt.remarks,
+				iirdt.createdAt`,
+				`iirdt.inventoryReceivingID = ${inventoryReceivingID}`
+			)
+		} else {
+			requestItemsData = getTableData(
+				// `ims_purchase_order_tbl as ipot
+				// LEFT JOIN ims_purchase_request_tbl as iprt ON ipot.purchaseRequestID = iprt.purchaseRequestID 
+				// LEFT JOIN ims_request_items_tbl as irit ON irit.purchaseRequestID = iprt.purchaseRequestID  
+				// LEFT JOIN ims_inventory_item_tbl as itm ON itm.itemID = irit.itemID
+				// LEFT JOIN ims_inventory_receiving_tbl as iirt ON iirt.purchaseOrderID = ipot.purchaseOrderID
+				// LEFT JOIN ims_inventory_receiving_details_tbl as iirdt ON iirdt.inventoryReceivingID = iirt.inventoryReceivingID AND irit.itemID = iirdt.itemID `,
+				// `iirdt.inventoryReceivingDetailsID, itm.itemID,itm.createdAt,irit.itemName,irit.brandName,irit.itemUom,irit.forPurchase,irit.orderedPending,iirdt.received,iirdt.remarks`,
+				// `purchaseRequestStatus =2 AND purchaseOrderStatus =2 AND ipot.purchaseOrderID = ${id}`,
+				// ``,`irit.itemID`
+				"ims_request_items_tbl", 
+				"", 
+				`purchaseOrderID = ${id}`
+			)
+		}
 
 		if (requestItemsData.length > 0) {
 			requestItemsData.map(item => {
@@ -803,7 +827,7 @@ $(document).ready(function() {
 								${orderQuantity}
 							</div>
 						</td>
-						<td>
+						<td class="text-center">
 							<div class="received">${received || "-"}</div>
 						</td>
 						<td>
@@ -886,7 +910,7 @@ $(document).ready(function() {
     // ----- END GET SERVICE ROW -----
 
 
-	// ----- SELECT PROJECT LIST -----
+	// ----- SELECT PURCHASE ORDER -----
     $(document).on("change", "[name=purchaseOrderID]", function() {
         const vendorname = $('option:selected', this).attr("vendorname");
         const id 					= $(this).val();
@@ -913,7 +937,7 @@ $(document).ready(function() {
 			// initAll();
 		}, 300);
     })
-    // ----- END SELECT PROJECT LIST -----
+    // ----- END SELECT PURCHASE ORDER -----
 
 	// ----- KEYUP QUANTITY OR UNITCOST -----
 	$(document).on("change", "[name=received],.tableSerialBody", function() {
@@ -1481,7 +1505,7 @@ $(document).ready(function() {
 
 			$(".itemTableRow").each(function(i, obj) {
 				const requestItemID = $(this).attr("requestItemID");
-				const itemID   = $("td [name=itemcode]", this).attr("requestitem");	
+				const itemID    = $("td [name=itemcode]", this).attr("requestitem");	
 				const received  = $("td [name=received]", this).val();	
 				const remarks   = $("td [name=remarks]", this).val()?.trim();	
                
@@ -1561,7 +1585,7 @@ $(document).ready(function() {
 				data["reviseInventoryReceivingID"] = id;
 				delete data["inventoryReceivingID"];
 	
-				saveServiceRequisition(data, "save", null, pageContent);
+				saveInventoryReceiving(data, "save", null, pageContent);
 			} else {
 				$("#page_content").html(preloader);
 				pageContent();
@@ -1576,7 +1600,7 @@ $(document).ready(function() {
 			const data   = getInventoryReceivingData(action, "save", "0", id);
 			data["inventoryReceivingStatus"] = 0;
 
-			saveServiceRequisition(data, "save", null, pageContent);
+			saveInventoryReceiving(data, "save", null, pageContent);
 		}
 	});
 	// ----- END SAVE CLOSE FORM -----
@@ -1601,7 +1625,7 @@ $(document).ready(function() {
 				delete data["inventoryReceivingID"];
 			}
 	
-			saveServiceRequisition(data, "save", null, pageContent);
+			saveInventoryReceiving(data, "save", null, pageContent);
 		}else{
 			$("[name=received]").focus();
 			$("[name=serialNumber]").focus();
@@ -1696,7 +1720,6 @@ $(document).ready(function() {
 			const validateSerial = checkSerialReceivedQuantity();
 			removeIsValid("#tableInventoryReceivingItems");
 
-			console.log(validate+" "+validateSerial);
 			if (validate && validateSerial) {
 				
 				const action = revise && "insert" || (id ? "update" : "insert");
@@ -1714,7 +1737,7 @@ $(document).ready(function() {
 				let notificationData = false;
 				if (employeeID != sessionID) {
 					notificationData = {
-						moduleID:                49,
+						moduleID:                33,
 						notificationTitle:       "Inventory Receiving",
 						notificationDescription: `${employeeFullname(sessionID)} asked for your approval.`,
 						notificationType:        2,
@@ -1722,7 +1745,7 @@ $(document).ready(function() {
 					};
 				}
 
-				saveServiceRequisition(data, "submit", notificationData, pageContent);
+				saveInventoryReceiving(data, "submit", notificationData, pageContent);
 			}
 
 		// }else{
@@ -1740,7 +1763,7 @@ $(document).ready(function() {
 		const action = "update";
 		const data   = getInventoryReceivingData(action, "cancelform", "4", id, status);
 
-		saveServiceRequisition(data, "cancelform", null, pageContent);
+		saveInventoryReceiving(data, "cancelform", null, pageContent);
 	});
 	// ----- END CANCEL DOCUMENT -----
 
@@ -1767,7 +1790,7 @@ $(document).ready(function() {
 			if (isImLastApprover(approversID, approversDate)) {
 				status = 2;
 				notificationData = {
-					moduleID:                49,
+					moduleID:                33,
 					tableID:                 id,
 					notificationTitle:       "Inventory  Receiving",
 					notificationDescription: `${feedback}: Your request has been approved.`,
@@ -1779,7 +1802,7 @@ $(document).ready(function() {
 			} else {
 				status = 1;
 				notificationData = {
-					moduleID:                49,
+					moduleID:                33,
 					tableID:                 id,
 					notificationTitle:       "Inventory  Receiving",
 					notificationDescription: `${employeeFullname(employeeID)} asked for your approval.`,
@@ -1790,7 +1813,7 @@ $(document).ready(function() {
 
 			data["inventoryReceivingStatus"] = status;
 
-			saveServiceRequisition(data, "approve", notificationData, pageContent,lastApproveCondition);
+			saveInventoryReceiving(data, "approve", notificationData, pageContent,lastApproveCondition);
 		}
 	});
 	// ----- END APPROVE DOCUMENT -----
@@ -1851,7 +1874,7 @@ $(document).ready(function() {
 				data["updatedBy"] = sessionID;
 
 				let notificationData = {
-					moduleID:                49,
+					moduleID:                33,
 					tableID: 				 id,
 					notificationTitle:       "Inventory  Receiving",
 					notificationDescription: `${feedback}: Your request has been denied.`,
@@ -1859,7 +1882,7 @@ $(document).ready(function() {
 					employeeID,
 				};
 
-				saveServiceRequisition(data, "deny", notificationData, pageContent);
+				saveInventoryReceiving(data, "deny", notificationData, pageContent);
 				$("[redirect=forApprovalTab]").length > 0 && $("[redirect=forApprovalTab]").trigger("click");
 			} 
 		} 
@@ -1974,7 +1997,7 @@ function getConfirmation(method = "submit") {
 	})
 }
 
-function saveServiceRequisition(data = null, method = "submit", notificationData = null, callback = null,lastApproveCondition =false) {
+function saveInventoryReceiving(data = null, method = "submit", notificationData = null, callback = null,lastApproveCondition =false) {
 
 	data.lastApproveCondition = lastApproveCondition; // inserting object in data object parameter
 

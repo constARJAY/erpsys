@@ -113,7 +113,7 @@ class Inventory_receiving extends CI_Controller {
                         ];
                         $scopes = $item["scopes"];
                         
-                        // $saveServices = $this->inventoryreceiving->saveServices($service, $scopes, $inventoryReceivingID);
+                        $saveServices = $this->inventoryreceiving->saveServices($service, $scopes, $inventoryReceivingID);
                         // if($lastApproveCondition == "false"){ // check if  lastapprover or not
                         //     $this->inventoryreceiving->updateOrderedPending($scopes,$service);
                         // }

@@ -2261,9 +2261,10 @@ $(document).ready(function() {
 	function validateTableItems() {
 		let flag = true;
 		if ($(`.itemProjectTableBody tr`).length == 1 && $(`.itemCompanyTableBody tr`).length == 1) {
-			const projectItemID = $(`[name="itemID"][project="true"]`).val() == "0";
-			const companyItemID = $(`[name="itemID"][company="true"]`).val() == "0";
-			flag = !(projectItemID == companyItemID);
+			const projectItemID = $(`[name="itemID"][project="true"]`).val();
+			const companyItemID = $(`[name="itemID"][company="true"]`).val();
+			flag = !(projectItemID == "0" && companyItemID == "0");
+			// flag = !(projectItemID == companyItemID);
 		}
 
 		if (!flag) {
