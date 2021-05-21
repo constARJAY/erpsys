@@ -3,6 +3,19 @@ $(document).ready(function() {
 	const moduleApprover = getModuleApprover("disposal");
 	// ----- END MODULE APPROVER -----
 
+	
+	// ----- IS DOCUMENT REVISED -----
+	function isDocumentRevised(id = null) {
+		if (id) {
+			const revisedDocumentsID = getTableData(
+				"ims_inventory_disposal_tbl", 
+				"revisedisposalID", 
+				"revisedisposalID IS NOT NULL AND disposalStatus != 4");
+			return revisedDocumentsID.map(item => item.revisedisposalID).includes(id);
+		}
+		return false;
+	}
+	// ----- END IS DOCUMENT REVISED -----
 
 	// ---- GET EMPLOYEE DATA -----
 	const allEmployeeData = getAllEmployeeData();
@@ -148,13 +161,13 @@ $(document).ready(function() {
 				columnDefs: [
 					{ targets: 0,  width: 100 },
 					{ targets: 1,  width: 150 },
-					{ targets: 2,  width: 150 },
+					{ targets: 2,  width: 200 },
 					{ targets: 3,  width: 150 },
-					{ targets: 4,  width: 100 },
-					{ targets: 5,  width: 150 },
+					{ targets: 4,  width: 190 },
+					{ targets: 5,  width: 190 },
 					{ targets: 6,  width: 200 },
 					{ targets: 7,  width: 200 },
-					{ targets: 8,  width: 80  },
+					{ targets: 8,  width: 200 },
 				],
 			});
 
@@ -170,13 +183,13 @@ $(document).ready(function() {
 				columnDefs: [
 					{ targets: 0,  width: 100 },
 					{ targets: 1,  width: 150 },
-					{ targets: 2,  width: 150 },
+					{ targets: 2,  width: 200 },
 					{ targets: 3,  width: 150 },
-					{ targets: 4,  width: 100 },
-					{ targets: 5,  width: 150 },
+					{ targets: 4,  width: 190 },
+					{ targets: 5,  width: 190 },
 					{ targets: 6,  width: 200 },
 					{ targets: 7,  width: 200 },
-					{ targets: 8,  width: 80  }
+					{ targets: 8,  width: 200 },
 				],
 			});
 
@@ -289,13 +302,13 @@ $(document).ready(function() {
                 <tr style="white-space: nowrap">
                     <th>Document No.</th>
                     <th>Employee Name</th>
+					<th>Reason</th>
                     <th>Current Approver</th>
                     <th>Date Created</th>
                     <th>Date Submitted</th>
                     <th>Date Approved</th>
                     <th>Status</th>
                     <th>Remarks</th>
-                    <th>Action</th>
                 </tr>
             </thead>
             <tbody>`;
@@ -304,6 +317,7 @@ $(document).ready(function() {
 			let {
 				fullname,
 				disposalID,
+				disposalReason,
 				approversID,
 				approversDate,
 				disposalStatus,
@@ -320,6 +334,8 @@ $(document).ready(function() {
 				dateApproved = moment(dateApproved[dateApproved.length - 1]).format("MMMM DD, YYYY hh:mm:ss A");
 			}
 
+			let btnClass = disposalStatus != 0 ? "btnView" : "btnEdit";
+
 			let button = disposalStatus != 0 ? `
 			<button class="btn btn-view w-100 btnView" id="${encryptString(disposalID )}"><i class="fas fa-eye"></i> View</button>` : `
 			<button 
@@ -329,9 +345,10 @@ $(document).ready(function() {
 
 			if (isImCurrentApprover(approversID, approversDate, disposalStatus) || isAlreadyApproved(approversID, approversDate)) {
 				html += `
-				<tr>
+				<tr class="${btnClass}" id="${encryptString(disposalID )}">
 					<td>${getFormCode("ADF", createdAt, disposalID )}</td>
 					<td>${fullname}</td>
+					<td>${disposalReason}</td>
 					<td>
 						${employeeFullname(getCurrentApprover(approversID, approversDate, disposalStatus, true))}
 					</td>
@@ -342,9 +359,6 @@ $(document).ready(function() {
 						${getStatusStyle(disposalStatus)}
 					</td>
 					<td>${remarks}</td>
-					<td class="text-center">
-						${button}
-					</td>
 				</tr>`;
 			}
 		});
@@ -381,13 +395,13 @@ $(document).ready(function() {
                 <tr style="white-space: nowrap">
                     <th>Document No.</th>
                     <th>Employee Name</th>
+					<th>Reason</th>
                     <th>Current Approver</th>
                     <th>Date Created</th>
                     <th>Date Submitted</th>
                     <th>Date Approved</th>
                     <th>Status</th>
                     <th>Remarks</th>
-                    <th>Action</th>
                 </tr>
             </thead>
             <tbody>`;
@@ -397,6 +411,7 @@ $(document).ready(function() {
 				fullname,
 				disposalID, 
 				approversID,
+				disposalReason,
 				approversDate,
 				disposalStatus,
 				disposalRemarks,
@@ -412,6 +427,8 @@ $(document).ready(function() {
 				dateApproved = moment(dateApproved[dateApproved.length - 1]).format("MMMM DD, YYYY hh:mm:ss A");
 			}
 
+			let btnClass = disposalStatus != 0 ? "btnView" : "btnEdit";
+
 			let button = disposalStatus != 0 ? `
             <button class="btn btn-view w-100 btnView" id="${encryptString(disposalID )}"><i class="fas fa-eye"></i> View</button>` : `
             <button 
@@ -420,9 +437,10 @@ $(document).ready(function() {
                 code="${getFormCode("ADF", createdAt, disposalID )}"><i class="fas fa-edit"></i> Edit</button>`;
 
 			html += `
-            <tr>
+            <tr class="${btnClass}" id="${encryptString(disposalID )}">
                 <td>${getFormCode("ADF", createdAt, disposalID )}</td>
                 <td>${fullname}</td>
+				<td>${disposalReason}</td>
                 <td>
                     ${employeeFullname(getCurrentApprover(approversID, approversDate, disposalStatus, true))}
                 </td>
@@ -433,9 +451,6 @@ $(document).ready(function() {
                     ${getStatusStyle(disposalStatus)}
                 </td>
 				<td>${remarks}</td>
-                <td class="text-center">
-                    ${button}
-                </td>
             </tr>`;
 		});
 
@@ -457,8 +472,9 @@ $(document).ready(function() {
 		let button = "";
 		if (data) {
 			let {
-				disposalID     = "",
-				disposalStatus = "",
+				disposalID     		= "",
+				revisedisposalID 	="",
+				disposalStatus 		= "",
 				employeeID            = "",
 				approversID           = "",
 				approversDate         = "",
@@ -484,13 +500,15 @@ $(document).ready(function() {
 						<button 
 							class="btn btn-cancel btnCancel px-5 p-2" 
 							id="btnCancel"
+							disposalID="${disposalID}"
+							code="${getFormCode("ADF", createdAt, disposalID)}"
 							revise="${isRevise}"><i class="fas fa-ban"></i> 
 							Cancel
 						</button>`;
 					} else {
 						button += `
 						<button 
-							class="btn btn-cancel"
+							class="btn btn-cancel px-5 p-2"
 							id="btnCancelForm" 
 							disposalID="${disposalID}"
 							code="${getFormCode("ADF", createdAt, disposalID)}"
@@ -515,6 +533,7 @@ $(document).ready(function() {
 					}
 				} else if (disposalStatus == 3) {
 					// DENIED - FOR REVISE
+					if (!isDocumentRevised(disposalID)) {
 					button = `
 					<button
 						class="btn btn-cancel px-5 p-2"
@@ -524,6 +543,7 @@ $(document).ready(function() {
 						status="${disposalStatus}"><i class="fas fa-clone"></i>
 						Revise
 					</button>`;
+					}
 				}
 			} else {
 				if (disposalStatus == 1) {
@@ -537,7 +557,7 @@ $(document).ready(function() {
 							Approve
 						</button>
 						<button 
-							class="btn btn-cancel"
+							class="btn btn-cancel px-5 p-2"
 							id="btnReject" 
 							disposalID="${encryptString(disposalID)}"
 							code="${getFormCode("ADF", createdAt, disposalID)}"><i class="fas fa-ban"></i> 
@@ -635,50 +655,6 @@ $(document).ready(function() {
 		});
 	}
 	// ----- END UPDATE INVENTORYT NAME -----
-
-
-    // ----- GET INVENTORY ITEM -----
-    // function getInventoryItem(id = null, isProject = true, display = true) {
-    //     let html   = `<option selected disabled>Select Item Name</option>`;
-	// 	const attr = isProject ? "[project=true]" : "";
-
-	// 	let itemIDArr = []; // 0 IS THE DEFAULT VALUE
-	// 	$(`[name=itemID]${attr}`).each(function(i, obj) {
-	// 		itemIDArr.push($(this).val());
-	// 	}) 
-
-	// 	let optionNone = {
-	// 		itemID:              		"0",
-    //         itemremarks:               	"-",
-    //         location:               	"-",
-	// 		itemCode:            		"-",
-    //         serial:               		"-",
-	// 		categoryName:       		 "-",
-	// 		unitOfMeasurementID: 		"-",
-	// 		itemName:            		"N/A",
-
-	// 	};
-	// 	let itemList = [optionNone, ...inventoryItemList];
-
-	// 	html += itemList.filter(item => !itemIDArr.includes(item.itemID) || item.itemID == id).map(item => {
-    //         return `
-    //         <option 
-    //             value        = "${item.itemID}" 
-    //             itemremarks       = "${item.itemremarks}" 
-    //             location      = ""
-    //             itemCode     = "${item.itemCode}"
-    //             serial      = ""
-    //             categoryName = "${item.categoryName}"
-	// 			datereturn          = ""
-    //             ${item.itemID == id && "selected"}>
-    //             ${item.itemName}
-    //         </option>`;
-    //     })
-		
-    //     return display ? html : inventoryItemList;
-    // }
-    // ----- END GET INVENTORY ITEM -----
-
 
 	// ----- GET ITEM ROW -----
     function getItemRow(isProject = true, item = {}, readOnly = false) {
@@ -1122,7 +1098,7 @@ $(document).ready(function() {
 			approversStatus         = "",
 			approversDate           = "",
 			disposalStatus   		= false,
-			disposalReason			= false,
+			disposalReason			= "",
 			disposalRemarks   		= false,
 			submittedAt             = false,
 			createdAt               = false,
@@ -1179,7 +1155,7 @@ $(document).ready(function() {
 	
 		let button = formButtons(data, isRevise);
 
-		let reviseDocumentNo    = isRevise ? purchaseRequestID : revisedisposalID;
+		let reviseDocumentNo    = isRevise ? disposalID : revisedisposalID;
 		let documentHeaderClass = isRevise || revisedisposalID ? "col-lg-4 col-md-4 col-sm-12 px-1" : "col-lg-2 col-md-6 col-sm-12 px-1";
 		let documentDateClass   = isRevise || revisedisposalID ? "col-md-12 col-sm-12 px-0" : "col-lg-8 col-md-12 col-sm-12 px-1";
 		let documentReviseNo    = isRevise || revisedisposalID ?
@@ -1189,7 +1165,7 @@ $(document).ready(function() {
 				<div class="body">
 					<small class="text-small text-muted font-weight-bold">Revised Document No.</small>
 					<h6 class="mt-0 text-danger font-weight-bold">
-						${getFormCode("TR", createdAt, reviseDocumentNo)}
+						${getFormCode("ADF", createdAt, reviseDocumentNo)}
 					</h6>      
 				</div>
 			</div>
@@ -1203,7 +1179,7 @@ $(document).ready(function() {
                     <div class="body">
                         <small class="text-small text-muted font-weight-bold">Document No.</small>
                         <h6 class="mt-0 text-danger font-weight-bold">
-							${disposalID && !isRevise ? getFormCode("TR", createdAt, disposalID) : "---"}
+							${disposalID && !isRevise ? getFormCode("", createdAt, disposalID) : "---"}
 						</h6>      
                     </div>
                 </div>
@@ -1303,14 +1279,14 @@ $(document).ready(function() {
             <div class="col-sm-12">
                 <div class="w-100">
 					<hr class="pb-1">
-					<div class="text-primary font-weight-bold" style="font-size: 1.5rem;">Project Materials and Equipment</div>
+					<div class="text-primary font-weight-bold" style="font-size: 1.5rem;">Disposed Item/s</div>
                     <table class="table table-striped" id="${tableProjectRequestItemsName}">
                         <thead>
                             <tr style="white-space: nowrap">
 								${checkboxProjectHeader}
                                 <th>Barcode</th>
                                 <th>Item Number</th>
-                                <th>Serial Number </th>
+                                <th>Serial No. </th>
 								<th>Item Name </th>
                                 <th>Quantity  </th>
                                 <th>Storage Code </th>
@@ -1559,9 +1535,12 @@ $(document).ready(function() {
 			if (revise) {
 				const action = revise && "insert" || (id && feedback ? "update" : "insert");
 				const data   = getDisposalData(action, "save", "0", id);
-				data.append("disposalStatus", 0);
-				data.append("revisedisposalID", id);
-				data.delete("disposalID");
+				data["disposalStatus"]   = 0;
+				data["revisedisposalID"] = id;
+				delete data["disposalID"];
+				// data.append("disposalStatus", 0);
+				// data.append("revisedisposalID", id);
+				// data.delete("disposalID");
 	
 				saveDisposalItem(data, "save", null, pageContent);
 			} else {
@@ -1594,8 +1573,10 @@ $(document).ready(function() {
 		data.append("disposalStatus", 0);
 
 		if (revise) {
-			data.append("revisedisposalID", id);
-			data.delete("disposalID");
+			data["revisedisposalID"] = id;
+			delete data["disposalID"];
+			// data.append("revisedisposalID", id);
+			// data.delete("disposalID");
 		}
 
 		saveDisposalItem(data, "save", null, pageContent);
@@ -1618,8 +1599,10 @@ $(document).ready(function() {
 			const data   = getDisposalData(action, "submit", "1", id);
 
 			if (revise) {
-				data.append("revisedisposalID", id);
-				data.delete("disposalID");
+				data["revisedisposalID"] = id;
+				delete data["disposalID"];
+				// data.append("revisedisposalID", id);
+				// data.delete("disposalID");
 			}
 
 			let approversID = "", approversDate = "";
@@ -1627,7 +1610,6 @@ $(document).ready(function() {
 				if (i[0] == "approversID")   approversID   = i[1];
 				if (i[0] == "approversDate") approversDate = i[1];
 			}
-
 			const employeeID = getNotificationEmployeeID(approversID, approversDate, true);
 			let notificationData = false;
 			if (employeeID != sessionID) {

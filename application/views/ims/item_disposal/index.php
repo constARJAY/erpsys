@@ -5,11 +5,11 @@
                 <div class="col-lg-6 col-md-6">
                     <ul class="breadcrumb pl-0 pb-0 ">
                         <li class="breadcrumb-item"><a href="#"><i class="zmdi zmdi-home"></i> Dashboard</a></li>
-						<li class="breadcrumb-item"><i class="fas fa-users"></i> &nbsp;Employee Forms</li>
+						<li class="breadcrumb-item"><i class="fad fa-boxes-alt"></i> &nbsp;Inventory Modules</li>
                         <li class="breadcrumb-item active">Item Disposal</li>
                     </ul>
                     <h1 class="mt-3">Item Disposal</h1>
-                    <span>This module is used to manage item disposal form details.</span>
+                    <span>This module is used to manage the submission and approval of item disposal.</span>
                 </div>
                 <div class="col-lg-6 col-md-6 text-right" id="headerButton"></div>
             </div>

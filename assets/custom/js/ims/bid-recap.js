@@ -150,13 +150,11 @@ $(document).ready(function() {
 					{ targets: 2,  width: 150 },
 					{ targets: 3,  width: 150 },
 					{ targets: 4,  width: 150 },
-					{ targets: 5,  width: 150 },
+					{ targets: 5,  width: 200 },
 					{ targets: 6,  width: 200 },
 					{ targets: 7,  width: 200 },
-					{ targets: 8,  width: 200 },
-					{ targets: 9,  width: 80  },
-					{ targets: 10, width: 250 },
-					{ targets: 11, width: 80  },
+					{ targets: 8,  width: 80 },
+					{ targets: 9,  width: 250  },
 				],
 			});
 
@@ -175,13 +173,11 @@ $(document).ready(function() {
 					{ targets: 2,  width: 150 },
 					{ targets: 3,  width: 150 },
 					{ targets: 4,  width: 150 },
-					{ targets: 5,  width: 150 },
+					{ targets: 5,  width: 200 },
 					{ targets: 6,  width: 200 },
 					{ targets: 7,  width: 200 },
-					{ targets: 8,  width: 200 },
-					{ targets: 9,  width: 80  },
-					{ targets: 10, width: 250 },
-					{ targets: 11, width: 80  },
+					{ targets: 8,  width: 80 },
+					{ targets: 9,  width: 250  },
 				],
 			});
 	}
@@ -240,19 +236,16 @@ $(document).ready(function() {
         <table class="table table-bordered table-striped table-hover" id="tableForApprroval">
             <thead>
                 <tr style="white-space: nowrap">
-                    <th>Document No.</th>
-					<th>Employee Name</th>
-					<th>Reference No.</th>
-                    <th>Project Code</th>
-                    <th>Project Name</th>
-					
-                    <th>Current Approver</th>
-                    <th>Date Created</th>
-                    <th>Date Submitted</th>
-                    <th>Date Approved</th>
-                    <th>Status</th>
-                    <th>Remarks</th>
-                    <th>Action</th>
+                     	<th>Document No.</th>
+						<th>Employee Name</th>
+						<th>Reference No.</th>
+						<th>Project Name</th>
+						<th>Current Approver</th>
+						<th>Date Created</th>
+						<th>Date Submitted</th>
+						<th>Date Approved</th>
+						<th>Status</th>
+						<th>Remarks</th>
                 </tr>
             </thead>
             <tbody>`;
@@ -273,6 +266,7 @@ $(document).ready(function() {
 				submittedAt,
 				createdAt,
 			} = item;
+
 			let referenceNumber = getFormCode("IVR",moment(createdAt),purchaseRequestID);
 			
 			let remarks       = bidRecapRemarks ? bidRecapRemarks : "-";
@@ -283,6 +277,8 @@ $(document).ready(function() {
 				dateApproved = moment(dateApproved[dateApproved.length - 1]).format("MMMM DD, YYYY hh:mm:ss A");
 			}
 
+			let btnClass = bidRecapStatus != 0 ? "btnView" : "btnEdit";
+
 			let button = bidRecapStatus != 0 ? `
 			<button class="btn btn-view w-100 btnView" id="${encryptString(bidRecapID )}"><i class="fas fa-eye"></i> View</button>` : `
 			<button 
@@ -292,13 +288,16 @@ $(document).ready(function() {
 
 			if (isImCurrentApprover(approversID, approversDate, bidRecapStatus) || isAlreadyApproved(approversID, approversDate)) {
 				html += `
-				<tr>
+				<tr class="${btnClass}" id="${encryptString(bidRecapID )}">
 					<td>${getFormCode("BRF", createdAt, bidRecapID )}</td>
 					<td>${fullname}</td>
 					<td>${referenceNumber}</td>
-					<td>${projectListCode || '-'}</td>
-					<td>${projectListName || '-'}</td>
-					
+					<td>
+						<div>
+							${projectListName || '-'}
+						</div>
+						<small style="color:#848482;">${projectListCode || '-'}</small>
+					</td>
 					<td>
 						${employeeFullname(getCurrentApprover(approversID, approversDate, bidRecapStatus, true))}
 					</td>
@@ -309,9 +308,7 @@ $(document).ready(function() {
 						${getStatusStyle(bidRecapStatus)}
 					</td>
 					<td>${remarks}</td>
-					<td class="text-center">
-						${button}
-					</td>
+					
 				</tr>`;
 			}
 		});
@@ -346,16 +343,13 @@ $(document).ready(function() {
                     <th>Document No.</th>
 					<th>Employee Name</th>
 					<th>Reference No.</th>
-                    <th>Project Code</th>
-                    <th>Project Name</th>
-					
-                    <th>Current Approver</th>
-                    <th>Date Created</th>
-                    <th>Date Submitted</th>
-                    <th>Date Approved</th>
-                    <th>Status</th>
-                    <th>Remarks</th>
-                    <th>Action</th>
+					<th>Project Name</th>
+					<th>Current Approver</th>
+					<th>Date Created</th>
+					<th>Date Submitted</th>
+					<th>Date Approved</th>
+					<th>Status</th>
+					<th>Remarks</th>
                 </tr>
             </thead>
             <tbody>`;
@@ -385,6 +379,8 @@ $(document).ready(function() {
 				dateApproved = moment(dateApproved[dateApproved.length - 1]).format("MMMM DD, YYYY hh:mm:ss A");
 			}
 
+			let btnClass = bidRecapStatus != 0 ? "btnView" : "btnEdit";
+
 			let button = bidRecapStatus != 0 ? `
             <button class="btn btn-view w-100 btnView" id="${encryptString(bidRecapID )}"><i class="fas fa-eye"></i> View</button>` : `
             <button 
@@ -393,12 +389,16 @@ $(document).ready(function() {
                 code="${getFormCode("BRF", createdAt, bidRecapID )}"><i class="fas fa-edit"></i> Edit</button>`;
 
 			html += `
-            <tr>
+            <tr  class="${btnClass}" id="${encryptString(bidRecapID )}">
                 <td>${getFormCode("BRF", createdAt, bidRecapID )}</td>
 				<td>${fullname}</td>
 				<td>${referenceNumber}</td>
-                <td>${projectListCode || '-'}</td>
-                <td>${projectListName || '-'}</td>
+				<td>
+					<div>
+						${projectListName || '-'}
+					</div>
+					<small style="color:#848482;">${projectListCode || '-'}</small>
+				</td>
                 <td>
                     ${employeeFullname(getCurrentApprover(approversID, approversDate, bidRecapStatus, true))}
                 </td>
@@ -409,9 +409,6 @@ $(document).ready(function() {
                     ${getStatusStyle(bidRecapStatus)}
                 </td>
 				<td>${remarks}</td>
-                <td class="text-center">
-                    ${button}
-                </td>
             </tr>`;
 		});
 
@@ -546,14 +543,12 @@ $(document).ready(function() {
     function getReferenceList(id = null, display = false) {
 		let existIVR = [], html = ``;
 		let data = [];
-		let invValidatrionData = getTableData("ims_inventory_validation_tbl", "","inventoryValidationStatus = '2' OR inventoryValidationStatus = '1'");
+		let invValidationData = getTableData("ims_inventory_validation_tbl", "","inventoryValidationStatus = '2'");
 		let bidRecapData = getTableData("ims_bid_recap_tbl");
 		bidRecapData.map(items=>{
 			id ? "" : existIVR.push(items.purchaseRequestID);
 		});
-
-
-		html += invValidatrionData.filter(items => !existIVR.includes(items.inventoryValidationID)).map(items=>{
+		html += invValidationData.filter(items => !existIVR.includes(items.inventoryValidationID)).map(items=>{
 			var projectList   = getTableData(
 				"pms_project_list_tbl AS pplt LEFT JOIN pms_client_tbl AS pct ON pct.clientID = pplt.projectListClientID", 
 				"projectListID, projectListCode, projectListName, clientCode, clientName, clientRegion, clientProvince, clientCity, clientBarangay, clientUnitNumber, clientHouseNumber, clientCountry, clientPostalCode",
@@ -901,7 +896,7 @@ $(document).ready(function() {
         $("[name=clientCode]").val(clientcode);
         $("[name=clientName]").val(clientname);
         $("[name=clientAddress]").val(address);
-
+		console.log(id);
         $(".itemProjectTableBody").html('<tr><td colspan="7">'+preloader+'</td></tr>');
         $(".itemCompanyTableBody").html('<tr><td colspan="7">'+preloader+'</td></tr>');
 
@@ -1061,7 +1056,7 @@ $(document).ready(function() {
 			reviseBidRecapID 	= "",
 			employeeID          = "",
 			projectID           = "",
-			purchaseRequestID 		= "",
+			purchaseRequestID 	= "",
             documentType        = "",
 			bidRecapReason   	= "",
 			bidRecapRemarks  	= "",
@@ -1226,24 +1221,7 @@ $(document).ready(function() {
         </div>
 
         <div class="row" id="form_bid_recap">
-            <div class="col-md-4 col-sm-12">
-                <div class="form-group">
-                    <label>Employee Name</label>
-                    <input type="text" class="form-control" disabled value="${employeeFullname||"-"}">
-                </div>
-            </div>
-            <div class="col-md-4 col-sm-12">
-                <div class="form-group">
-                    <label>Department</label>
-                    <input type="text" class="form-control" disabled value="${employeeDepartment||"-"}">
-                </div>
-            </div>
-            <div class="col-md-4 col-sm-12">
-                <div class="form-group">
-                    <label>Position</label>
-                    <input type="text" class="form-control" disabled value="${employeeDesignation||"-"}">
-                </div>
-            </div>
+            
             <div class="col-md-4 col-sm-12">
                 <div class="form-group">
                     <label>Reference No. ${!disabled ? "<code>*</code>" : ""}</label>
@@ -1288,6 +1266,24 @@ $(document).ready(function() {
                 <div class="form-group">
                     <label>Client Address</label>
                     <input type="text" class="form-control" name="clientAddress" disabled value="${clientAddress||"-"}">
+                </div>
+            </div>
+			<div class="col-md-4 col-sm-12">
+                <div class="form-group">
+                    <label>Employee Name</label>
+                    <input type="text" class="form-control" disabled value="${employeeFullname||"-"}">
+                </div>
+            </div>
+            <div class="col-md-4 col-sm-12">
+                <div class="form-group">
+                    <label>Department</label>
+                    <input type="text" class="form-control" disabled value="${employeeDepartment||"-"}">
+                </div>
+            </div>
+            <div class="col-md-4 col-sm-12">
+                <div class="form-group">
+                    <label>Position</label>
+                    <input type="text" class="form-control" disabled value="${employeeDesignation||"-"}">
                 </div>
             </div>
 			<div class="col-md-12 col-sm-12">
@@ -1354,17 +1350,17 @@ $(document).ready(function() {
 					<div class="offset-lg-7 offset-xl-8 col-12 col-sm-12 col-lg-5 col-xl-4 col-xl-4 pt-3 pb-2">
 						<div class="row" style="font-size: 1.1rem; font-weight:bold">
 							<div class="col-6 col-lg-7 text-left">Project Total Cost:</div>
-							<div class="col-6 col-lg-5 text-right text-danger" id="bidRecapProjectTotal" style="font-size: 1.05em">
+							<div class="col-6 col-lg-5 text-right text-dark" id="bidRecapProjectTotal" style="font-size: 1.05em">
 								₱ 0.00
 							</div>
 						</div>
-						<div class="row" style="font-size: 1.1rem; font-weight:bold">
+						<div class="row pb-2" style="font-size: 1.1rem; font-weight:bold">
 							<div class="col-6 col-lg-7 text-left">Company Total Cost:</div>
-							<div class="col-6 col-lg-5 text-right text-danger" id="bidRecapCompanyTotal" style="font-size: 1.05em">
+							<div class="col-6 col-lg-5 text-right text-dark" id="bidRecapCompanyTotal" style="font-size: 1.05em">
 								₱ 0.00
 							</div>
 						</div>
-						<div class="row" style="font-size: 1.3rem; font-weight:bold; border-bottom: 3px double black;">
+						<div class="row pt-1" style="font-size: 1.3rem; font-weight:bold; border-bottom: 3px double black; border-top: 1px solid black">
 							<div class="col-6 col-lg-7 text-left">Grand Total:</div>
 							<div class="col-6 col-lg-5 text-right text-danger" id="bidRecapGrandTotal" style="font-size: 1.05em">
 								₱ 0.00
@@ -1506,7 +1502,7 @@ $(document).ready(function() {
 			$(".itemTableRow").each(function(i, obj) {
 				var requestItemID 			= $(this).find(".itemcode").attr("requestitem");
 				var requestItemsData 		= getTableData("ims_request_items_tbl",
-															`costEstimateID,inventoryValidationID,itemID,itemName,itemDescription,itemUom,quantity,files`,
+															`costEstimateID,inventoryValidationID,itemID,itemName,itemDescription,itemUom,quantity,files,brandName`,
 															"requestItemID="+requestItemID); 
 				var temp = {
 					costEstimateID: 		requestItemsData[0].costEstimateID,
@@ -1519,6 +1515,7 @@ $(document).ready(function() {
 					itemDescription:		requestItemsData[0].itemDescription,
 					itemUom:				requestItemsData[0].itemUom,
 					quantity:				requestItemsData[0].quantity,
+					brandName:				requestItemsData[0].brandName,
 					stocks:					$(this).find(".stocks").text(),
 					forPurchase:			$(this).find(".forpurchase").text(),
 					file:					requestItemsData[0].files,
@@ -1867,6 +1864,7 @@ $(document).ready(function() {
 			let html = "", totalRequestedQty=0, totalStocksQty=0, totalForPurchaseQty=0, totalUnitCost=0, grandTotalCost=0;
 			let joinedTableData = [], vendorArr = [];
 			let condition = requestID ? requestID : `inventoryValidationID='${id}' AND bidRecapID IS NULL`;
+			console.log(condition);
             let tableData = getTableData("ims_request_items_tbl JOIN ims_inventory_item_tbl USING(itemID)",
 										`requestItemID, inventoryValidationID , bidRecapID, 
 										ims_inventory_item_tbl.itemID AS itemID, categoryType ,ims_inventory_item_tbl.createdAt AS createdAt ,
@@ -1874,6 +1872,7 @@ $(document).ready(function() {
 										ims_request_items_tbl.inventoryVendorID AS inventoryVendorID, ims_request_items_tbl.inventoryVendorName AS inventoryVendorName,
 										itemUom,quantity,stocks,forPurchase,files,unitCost,totalCost`,
 										`${condition} AND categoryType='${type}'`);
+										console.log(tableData);
 			if(tableData.length > 0){
 						tableData.map(items=>{
 							var tempData = items;

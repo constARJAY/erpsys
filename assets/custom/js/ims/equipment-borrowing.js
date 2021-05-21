@@ -148,13 +148,13 @@ $(document).ready(function() {
 				columnDefs: [
 					{ targets: 0,  width: 100 },
 					{ targets: 1,  width: 150 },
-					{ targets: 2,  width: 100 },
-					{ targets: 3,  width: 150 },
+					{ targets: 2,  width: 350 },
+					{ targets: 3,  width: 200 },
 					{ targets: 4,  width: 200 },
 					{ targets: 5,  width: 200 },
-					{ targets: 6,  width: 80  },
-					{ targets: 7, width: 250 },
-					{ targets: 8, width: 80  },
+					{ targets: 6,  width: 200 },
+					{ targets: 7, width: 80 },
+					{ targets: 8, width: 250 },
 				],
 			});
 
@@ -170,13 +170,13 @@ $(document).ready(function() {
 				columnDefs: [
 					{ targets: 0,  width: 100 },
 					{ targets: 1,  width: 150 },
-					{ targets: 2,  width: 100 },
-					{ targets: 3,  width: 150 },
+					{ targets: 2,  width: 350 },
+					{ targets: 3,  width: 250 },
 					{ targets: 4,  width: 200 },
 					{ targets: 5,  width: 200 },
-					{ targets: 6,  width: 80  },
-					{ targets: 7, width: 250 },
-					{ targets: 8, width: 80  },
+					{ targets: 6,  width: 200 },
+					{ targets: 7, width: 80 },
+					{ targets: 8, width: 250 },
 				],
 			});
 
@@ -197,9 +197,9 @@ $(document).ready(function() {
 					{ targets: 0,  width: 100  },
 					{ targets: 1,  width: 150 },
 					{ targets: 2,  width: 150 },
-					{ targets: 3,  width: 50  },
+					{ targets: 3,  width: 220  },
 					{ targets: 4,  width: 120 },
-					{ targets: 5,  width: 120 },
+					{ targets: 5,  width: 200 },
                     { targets: 6,  width: 80 },
                     { targets: 7,  width: 80 },
                     { targets: 8,  width: 80 },
@@ -219,10 +219,16 @@ $(document).ready(function() {
 				scrollCollapse: true,
 				columnDefs: [
 					{ targets: 0,  width: 100  },
-					{ targets: 1,  width: 150 },
+					{ targets: 1,  width: 130 },
 					{ targets: 2,  width: 150 },
-					{ targets: 3,  width: 50  },
-					{ targets: 4,  width: 120 }
+					{ targets: 3,  width: 200  },
+					{ targets: 4,  width: 180 },
+					{ targets: 5,  width: 120 },
+                    { targets: 6,  width: 80 },
+                    { targets: 7,  width: 80 },
+                    { targets: 8,  width: 80 },
+					{ targets: 9,  width: 80 },
+					{ targets: 10,  width: 80 },
 					// { targets: 8,  width: 200 },
 				],
 			});
@@ -287,13 +293,13 @@ $(document).ready(function() {
                 <tr style="white-space: nowrap">
                     <th>Document No.</th>
                     <th>Employee Name</th>
+					<th>Reason</th>
                     <th>Current Approver</th>
                     <th>Date Created</th>
                     <th>Date Submitted</th>
                     <th>Date Approved</th>
                     <th>Status</th>
                     <th>Remarks</th>
-                    <th>Action</th>
                 </tr>
             </thead>
             <tbody>`;
@@ -302,6 +308,7 @@ $(document).ready(function() {
 			let {
 				fullname,
 				borrowingID,
+				borrowingReason,
 				approversID,
 				approversDate,
 				borrowingStatus,
@@ -317,7 +324,7 @@ $(document).ready(function() {
 			if (dateApproved !== "-") {
 				dateApproved = moment(dateApproved[dateApproved.length - 1]).format("MMMM DD, YYYY hh:mm:ss A");
 			}
-
+			let btnClass = borrowingStatus != 0 ? "btnView" : "btnEdit";
 			let button = borrowingStatus != 0 ? `
 			<button class="btn btn-view w-100 btnView" id="${encryptString(borrowingID)}"><i class="fas fa-eye"></i> View</button>` : `
 			<button 
@@ -327,9 +334,10 @@ $(document).ready(function() {
 
 			if (isImCurrentApprover(approversID, approversDate, borrowingStatus) || isAlreadyApproved(approversID, approversDate)) {
 				html += `
-				<tr>
+				<tr class="${btnClass}" id="${encryptString(borrowingID )}">
 					<td>${getFormCode("EBF-YR", createdAt, borrowingID)}</td>
 					<td>${fullname}</td>
+					<td>${borrowingReason}</td>
 					<td>
 						${employeeFullname(getCurrentApprover(approversID, approversDate, borrowingStatus, true))}
 					</td>
@@ -340,9 +348,6 @@ $(document).ready(function() {
 						${getStatusStyle(borrowingStatus)}
 					</td>
 					<td>${remarks}</td>
-					<td class="text-center">
-						${button}
-					</td>
 				</tr>`;
 			}
 		});
@@ -379,13 +384,13 @@ $(document).ready(function() {
                 <tr style="white-space: nowrap">
                     <th>Document No.</th>
                     <th>Employee Name</th>
+					<th>Reason</th>
                     <th>Current Approver</th>
                     <th>Date Created</th>
                     <th>Date Submitted</th>
                     <th>Date Approved</th>
                     <th>Status</th>
                     <th>Remarks</th>
-                    <th>Action</th>
                 </tr>
             </thead>
             <tbody>`;
@@ -394,8 +399,8 @@ $(document).ready(function() {
 			let {
 				fullname,
 				borrowingID,
+				borrowingReason,
                 projectID,
-               
 				approversID,
 				approversDate,
 				borrowingStatus,
@@ -411,7 +416,7 @@ $(document).ready(function() {
 			if (dateApproved !== "-") {
 				dateApproved = moment(dateApproved[dateApproved.length - 1]).format("MMMM DD, YYYY hh:mm:ss A");
 			}
-
+			let btnClass = borrowingStatus != 0 ? "btnView" : "btnEdit";
 			let button = borrowingStatus != 0 ? `
             <button class="btn btn-view w-100 btnView" id="${encryptString(borrowingID)}"><i class="fas fa-eye"></i> View</button>` : `
             <button 
@@ -420,10 +425,10 @@ $(document).ready(function() {
                 code="${getFormCode("EBF", createdAt, borrowingID)}"><i class="fas fa-edit"></i> Edit</button>`;
 
 			html += `
-            <tr>
+            <tr class="${btnClass}" id="${encryptString(borrowingID )}">
                 <td>${getFormCode("EBF", createdAt, borrowingID)}</td>
                 <td>${fullname}</td>
-               
+				<td>${borrowingReason}</td>
                 <td>
                     ${employeeFullname(getCurrentApprover(approversID, approversDate, borrowingStatus, true))}
                 </td>
@@ -434,9 +439,6 @@ $(document).ready(function() {
                     ${getStatusStyle(borrowingStatus)}
                 </td>
 				<td>${remarks}</td>
-                <td class="text-center">
-                    ${button}
-                </td>
             </tr>`;
 		});
 
@@ -1104,15 +1106,16 @@ $(document).ready(function() {
 		readOnly = isRevise ? false : readOnly;
 
 		let {
-			borrowingID       = "",
-			reviseborrowingID = "",
+			borrowingID       		= "",
+			reviseborrowingID 		= "",
 			employeeID              = "",
-			projectID 		= "",
+			projectID 				= "",
 			approversID             = "",
 			approversStatus         = "",
 			approversDate           = "",
-			borrowingStatus   = false,
-			borrowingRemarks   = false,
+			borrowingReason			="",
+			borrowingStatus   		= false,
+			borrowingRemarks   		= false,
 			submittedAt             = false,
 			createdAt               = false,
 		} = data && data[0];
@@ -1167,7 +1170,7 @@ $(document).ready(function() {
 	
 		let button = formButtons(data, isRevise);
 
-		let reviseDocumentNo    = isRevise ? purchaseRequestID : reviseborrowingID;
+		let reviseDocumentNo    = isRevise ? borrowingID : reviseborrowingID;
 		let documentHeaderClass = isRevise || reviseborrowingID ? "col-lg-4 col-md-4 col-sm-12 px-1" : "col-lg-2 col-md-6 col-sm-12 px-1";
 		let documentDateClass   = isRevise || reviseborrowingID ? "col-md-12 col-sm-12 px-0" : "col-lg-8 col-md-12 col-sm-12 px-1";
 		let documentReviseNo    = isRevise || reviseborrowingID ?
@@ -1274,7 +1277,26 @@ $(document).ready(function() {
 		</select>
 		<div class="d-block invalid-feedback" id="invalid-projectID"></div>
 	</div>
+	</div>
+	<div class="col-md-3 col-sm-12">
+	<div class="form-group">
+		<label>Client Code</label>
+		<input type="text" class="form-control" name="clientCode" disabled value="-">
+	</div>
 </div>
+<div class="col-md-3 col-sm-12">
+	<div class="form-group">
+		<label>Client Name</label>
+		<input type="text" class="form-control" name="clientName" disabled value="-">
+	</div>
+</div>
+<div class="col-md-6 col-sm-12">
+	<div class="form-group">
+		<label>Client Address</label>
+		<input type="text" class="form-control" name="clientAddress" disabled value="-">
+	</div>
+</div>
+		
             <div class="col-md-4 col-sm-12">
                 <div class="form-group">
                     <label>Employee Name</label>
@@ -1293,6 +1315,23 @@ $(document).ready(function() {
                     <input type="text" class="form-control" disabled value="${employeeDesignation}">
                 </div>
             </div>
+			<div class="col-md-12 col-sm-12">
+			<div class="form-group">
+				<label>Reason ${!disabled ? "<code>*</code>" : ""}</label>
+				<textarea class="form-control validate"
+					data-allowcharacters="[a-z][A-Z][0-9][ ][.][,][-][()]['][/][&]"
+					minlength="1"
+					maxlength="200"
+					id="borrowingReason"
+					name="borrowingReason"
+					required
+					rows="4"
+					style="resize:none;"
+					${disabled}>${borrowingReason ?? ""}</textarea>
+				<div class="d-block invalid-feedback" id="invalid-disposalReason"></div>
+			</div>
+		</div>
+
 
             <div class="col-sm-12">
                 <div class="w-100">
@@ -1306,13 +1345,13 @@ $(document).ready(function() {
                                 <th>Item Name </th>
                                 <th>Storage Code </th>
 								<th>Storage Name</th>
-								<th>Barcode</th>
+								<th>Barcode ${!disabled ? "<code>*</code>" : ""}</th>
                                 <th>Serial No.</th>
-								<th>Qty</th>
-                                <th>Purpose </th>
-                                <th>Date Borowed</th>
+								<th>Quantity ${!disabled ? "<code>*</code>" : ""}</th>
+                                <th>Purpose ${!disabled ? "<code>*</code>" : ""}</th>
+                                <th>Date Borrowed ${!disabled ? "<code>*</code>" : ""}</th>
                                 <th>Date Return</th>
-                                <th>Qty</th>
+                                <th>Quantity Return</th>
                             </tr>
                         </thead>
                         <tbody class="itemProjectTableBody" project="true">
@@ -1370,7 +1409,7 @@ $(document).ready(function() {
                 </div>
             </div>`;
 			$("#page_content").html(html);
-			headerButton(true, "Add Quipment Borrowing");
+			headerButton(true, "Add Equipment Borrowing");
 			headerTabContent();
 			myFormsContent();
 			updateURL();

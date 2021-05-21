@@ -158,15 +158,13 @@ $(document).ready(function() {
 					{ targets: 0,  width: 100 },
 					{ targets: 1,  width: 150 },
 					{ targets: 2,  width: 150 },
-					{ targets: 3,  width: 150 },
+					{ targets: 3,  width: 200 },
 					{ targets: 4,  width: 150 },
-					{ targets: 5,  width: 150 },
+					{ targets: 5,  width: 200 },
 					{ targets: 6,  width: 200 },
 					{ targets: 7,  width: 200 },
-					{ targets: 8,  width: 200 },
-					{ targets: 9,  width: 80  },
-					{ targets: 10, width: 250 },
-					{ targets: 11, width: 80  },
+					{ targets: 8,  width: 80  },
+					{ targets: 9, width: 250 },
 				],
 			});
 
@@ -183,15 +181,13 @@ $(document).ready(function() {
 					{ targets: 0,  width: 100 },
 					{ targets: 1,  width: 150 },
 					{ targets: 2,  width: 150 },
-					{ targets: 3,  width: 150 },
+					{ targets: 3,  width: 200 },
 					{ targets: 4,  width: 150 },
-					{ targets: 5,  width: 150 },
+					{ targets: 5,  width: 200 },
 					{ targets: 6,  width: 200 },
 					{ targets: 7,  width: 200 },
-					{ targets: 8,  width: 200 },
-					{ targets: 9,  width: 80  },
-					{ targets: 10, width: 250 },
-					{ targets: 11, width: 80  },
+					{ targets: 8,  width: 80  },
+					{ targets: 9, width: 250 },
 				],
 			});
 
@@ -433,7 +429,6 @@ $(document).ready(function() {
                     <th>Document No.</th>
                     <th>Employee Name</th>
 					<th>Reference No.</th>
-                    <th>Project Code</th>
                     <th>Project Name</th>
                     <th>Current Approver</th>
                     <th>Date Created</th>
@@ -441,7 +436,6 @@ $(document).ready(function() {
                     <th>Date Approved</th>
                     <th>Status</th>
                     <th>Remarks</th>
-                    <th>Action</th>
                 </tr>
             </thead>
             <tbody>`;
@@ -470,6 +464,8 @@ $(document).ready(function() {
 				dateApproved = moment(dateApproved[dateApproved.length - 1]).format("MMMM DD, YYYY hh:mm:ss A");
 			}
 
+			let btnClass = billMaterialStatus != 0 ? "btnView" : "btnEdit";
+
 			let button = billMaterialStatus != 0 ? `
 			<button class="btn btn-view w-100 btnView" id="${encryptString(billMaterialID )}"><i class="fas fa-eye"></i> View</button>` : `
 			<button 
@@ -479,12 +475,16 @@ $(document).ready(function() {
 
 			if (isImCurrentApprover(approversID, approversDate, billMaterialStatus) || isAlreadyApproved(approversID, approversDate)) {
 				html += `
-				<tr>
+				<tr class="${btnClass}" id="${encryptString(billMaterialID )}" code="${billMaterialID? getFormCode("BOM", createdAt, billMaterialID ):""}">>
 					<td>${getFormCode("BOM", createdAt, billMaterialID )}</td>
 					<td>${fullname}</td>
-					<td>${getFormCode("CEF",createdAt,referenceCode)}</td>
-					<td>${projectListCode || '-'}</td>
-					<td>${projectListName || '-'}</td>
+					<td>${referenceCode ? getFormCode("CEF",createdAt,referenceCode) : "-"}</td>
+					<td>
+						<div>
+							${projectListName || '-'}
+						</div>
+						<small style="color:#848482;">${projectListCode || '-'}</small>
+					</td>
 					<td>
 						${employeeFullname(getCurrentApprover(approversID, approversDate, billMaterialStatus, true))}
 					</td>
@@ -495,9 +495,6 @@ $(document).ready(function() {
 						${getStatusStyle(billMaterialStatus)}
 					</td>
 					<td>${remarks}</td>
-					<td class="text-center">
-						${button}
-					</td>
 				</tr>`;
 			}
 		});
@@ -532,7 +529,6 @@ $(document).ready(function() {
                     <th>Document No.</th>
                     <th>Employee Name</th>
 					<th>Reference No.</th>
-                    <th>Project Code</th>
                     <th>Project Name</th>
                     <th>Current Approver</th>
                     <th>Date Created</th>
@@ -540,7 +536,6 @@ $(document).ready(function() {
                     <th>Date Approved</th>
                     <th>Status</th>
                     <th>Remarks</th>
-                    <th>Action</th>
                 </tr>
             </thead>
             <tbody>`;
@@ -569,6 +564,8 @@ $(document).ready(function() {
 				dateApproved = moment(dateApproved[dateApproved.length - 1]).format("MMMM DD, YYYY hh:mm:ss A");
 			}
 
+			let btnClass = billMaterialStatus != 0 ? "btnView" : "btnEdit";
+
 			let button = billMaterialStatus != 0 ? `
             <button class="btn btn-view w-100 btnView" id="${encryptString(billMaterialID )}"><i class="fas fa-eye"></i> View</button>` : `
             <button 
@@ -577,12 +574,16 @@ $(document).ready(function() {
                 code="${getFormCode("BOM", createdAt, billMaterialID )}"><i class="fas fa-edit"></i> Edit</button>`;
 
 			html += `
-            <tr>
+            <tr class="${btnClass}" id="${encryptString(billMaterialID )}">
                 <td>${getFormCode("BOM", createdAt, billMaterialID )}</td>
                 <td>${fullname}</td>
-				<td>${getFormCode("CEF",createdAt,referenceCode)}</td>
-                <td>${projectListCode || '-'}</td>
-                <td>${projectListName || '-'}</td>
+				<td>${referenceCode ? getFormCode("CEF",createdAt,referenceCode) : "-"}</td>
+                <td>
+					<div>
+						${projectListName || '-'}
+					</div>
+					<small style="color:#848482;">${projectListCode || '-'}</small>
+				</td>
                 <td>
                     ${employeeFullname(getCurrentApprover(approversID, approversDate, billMaterialStatus, true))}
                 </td>
@@ -593,9 +594,6 @@ $(document).ready(function() {
                     ${getStatusStyle(billMaterialStatus)}
                 </td>
 				<td>${remarks}</td>
-                <td class="text-center">
-                    ${button}
-                </td>
             </tr>`;
 		});
 
@@ -1273,6 +1271,7 @@ $(document).ready(function() {
 		updateTableItems();
 		initInputmask();
 		initAmount();
+		initQuantity();
 		travelTotal();
 		
 		
@@ -1561,10 +1560,10 @@ $(document).ready(function() {
                             <tr style="white-space: nowrap">
 								<th>Designation Code</th>
                                 <th>Designation</th>
-                                <th class="text-center">Quantity</th>
-                                <th class="text-center">Total Hours</th>
-                                <th class="text-right">Hourly Rate</th>
-                                <th class="text-right">Total Cost</th>
+                                <th>Quantity</th>
+                                <th>Total Hours</th>
+                                <th>Hourly Rate</th>
+                                <th>Total Cost</th>
                             </tr>
                         </thead>
                         <tbody class="personnelTableBody" personnel="true">
@@ -1580,10 +1579,10 @@ $(document).ready(function() {
                             <tr style="white-space: nowrap">
                                 <th>Item Code</th>
                                 <th>Item Name </th>
-                                <th class="text-center">Quantity</th>
+                                <th>Quantity</th>
                                 <th>UOM</th>
-                                <th class="text-right">Unit Price</th>
-                                <th class="text-right">Total Cost</th>
+                                <th>Unit Price</th>
+                                <th>Total Cost</th>
                             </tr>
                         </thead>
                         <tbody class="itemProjectTableBody" project="true">
@@ -1599,10 +1598,10 @@ $(document).ready(function() {
                             <tr style="white-space: nowrap">
 								<th>Item Code</th>
                                 <th>Item Name </th>
-                                <th class="text-center">Quantity</th>
+                                <th>Quantity</th>
                                 <th>UOM</th>
-                                <th class="text-right">Unit Price</th>
-                                <th class="text-right">Total Cost</th>
+                                <th>Unit Price</th>
+                                <th>Total Cost</th>
                             </tr>
                         </thead>
                         <tbody class="itemCompanyTableBody" company="true"> </tbody>
@@ -1617,10 +1616,10 @@ $(document).ready(function() {
                             <tr style="white-space: nowrap">
 								${checkboxTravelHeader}
                                 <th>Description ${!disabled ? "<code>*</code>" : ""}</th>
-                                <th class="text-center">Quantity ${!disabled ? "<code>*</code>" : ""}</th>
+                                <th>Quantity ${!disabled ? "<code>*</code>" : ""}</th>
                                 <th>UOM</th>
-                                <th class="text-right">Unit Price</th>
-                                <th class="text-right">Total Cost</th>
+                                <th>Unit Price</th>
+                                <th>Total Cost</th>
                             </tr>
                         </thead>
                         <tbody class="travelTableBody" travel="true">
@@ -1631,35 +1630,44 @@ $(document).ready(function() {
 						
 					</div>
                 </div>
-            </div>
-			<div class="col-sm-12 mt-3">
-				<div class="w-100 text-right py-2">
-					<div class="font-weight-bolder" style="font-size: 1rem;">
-						<span>Personnel Total Cost: &nbsp;</span>
-						<span class="text-danger tableTotal personnelTotal" style="font-size: 1.2em">₱ 0.00</span>
-					</div>
+				<div class="row py-2">
+					<div class="offset-lg-7 offset-xl-8 col-12 col-sm-12 col-lg-5 col-xl-4 col-xl-4 pt-3 pb-2">
+						<div class="row" style="font-size: 1.1rem; font-weight:bold">
+							<div class="col-6 col-lg-7 text-left">Personnel Total Cost:</div>
+							<div class="col-6 col-lg-5 text-right text-danger tableTotal personnelTotal" style="font-size: 1.05em">
+								₱ 0.00
+							</div>
+						</div>
+						<div class="row" style="font-size: 1.1rem; font-weight:bold">
+							<div class="col-6 col-lg-7 text-left">Project Total Cost:</div>
+							<div class="col-6 col-lg-5 text-right text-danger tableTotal projectTotal" style="font-size: 1.05em">
+								₱ 0.00
+							</div>
+						</div>
+						<div class="row" style="font-size: 1.1rem; font-weight:bold">
+							<div class="col-6 col-lg-7 text-left">Company Total Cost:</div>
+							<div class="col-6 col-lg-5 text-right text-danger tableTotal companyTotal" style="font-size: 1.05em">
+								₱ 0.00
+							</div>
+						</div>
+						<div class="row pb-2" style="font-size: 1.1rem; font-weight:bold">
+							<div class="col-6 col-lg-7 text-left">Travel Total Cost:</div>
+							<div class="col-6 col-lg-5 text-right text-danger tableTotal travel grandTotal " style="font-size: 1.05em">
+								₱ 0.00
+							</div>
+						</div>
 
-					<div class="font-weight-bolder" style="font-size: 1rem;">
-						<span>Project Total Cost: &nbsp;</span>
-						<span class="text-danger tableTotal projectTotal" style="font-size: 1.2em" >₱ 0.00</span>
-					</div>
-
-					<div class="font-weight-bolder" style="font-size: 1rem;">
-						<span>Company Total Cost: &nbsp;</span>
-						<span class="text-danger tableTotal companyTotal" style="font-size: 1.2em" >₱ 0.00</span>
-					</div>
-
-					<div class="font-weight-bolder" style="font-size: 1rem;">
-						<span>Travel Total Cost: &nbsp;</span>
-						<span class="text-danger tableTotal travel grandTotal " style="font-size: 1.2em">₱ 0.00</span>
-					</div>
-
-					<div class="font-weight-bolder" style="font-size: 1.2rem;">
-						<span>Grand Total: &nbsp;</span>
-						<span class="text-danger" style="font-size: 1.4rem" id="grandTotal">₱ 0.00</span>
+						<div class="row pt-1" style="font-size: 1.3rem; font-weight:bold; border-bottom: 3px double black; border-top: 1px solid black">
+							<div class="col-6 col-lg-7 text-left">Grand Total:</div>
+							<div class="col-6 col-lg-5 text-right text-danger" id="grandTotal" style="font-size: 1.05em">
+								₱ 0.00
+							</div>
+						</div>
 					</div>
 				</div>
             </div>
+
+			
             <div class="col-md-12 text-right mt-3">
                 ${button}
             </div>
@@ -2199,7 +2207,7 @@ $(document).ready(function() {
 		let html = "";
 		let {
 			travelDescription 	= "",
-			quantity     		= "",
+			quantity     		= "0.00",
 			travelUnitOfMeasure = "",
 			unitCost 			= "",
 		} = data;
@@ -2247,9 +2255,10 @@ $(document).ready(function() {
 					<div class="quantity">
 						<input 
 							type="text" 
-							class="form-control text-center quantity"
+							class="form-control text-center input-quantity"
 							placeholder="0.00"
 							data-allowcharacters="[0-9][.]" 
+							min="0.00" 
 							max="999999999" 
 							id="travelQuantity" 
 							name="quantity" 
@@ -2280,7 +2289,7 @@ $(document).ready(function() {
 							<div class="input-group-prepend">
 								<span class="input-group-text">₱</span>
 							</div>
-							<input type="text" class="form-control amount" min="0.01" max="9999999999" minlength="1" 
+							<input type="text" class="form-control amount" min="0.00" max="9999999999" minlength="1" 
 										maxlength="20" name="unitprice" id="unitprice" value="${unitCost}" project="true" style="text-align: right;">
 						</div>
 						<div class="invalid-feedback d-block" id="invalid-unitprice"></div>
@@ -2356,36 +2365,6 @@ $(document).ready(function() {
 									 </td>
 								 </tr>`;
 				 });
-				//  html += `   <tr style= "background-color: rgb(0 0 0 / 5%);">
-				// 					 <td colspan="2" class="text-danger font-weight-bold">
-				// 						 SUBTOTAL
-				// 					 </td>
-				// 					 <td class="text-center">
-				// 						 <div class="quantity">
-				// 							 ${totalQty}
-				// 						 </div>
-				// 					 </td>
-				// 					 <td>
-				// 						 <div class="totalhours">
-				// 							 ${totalHours}
-				// 						 </div>
-				// 					 </td>
-				// 					 <td class="text-right">
-				// 						 <div class="hourlyrate">
-				// 							 ${formatAmount(totalHourlyRate,true)}
-				// 						 </div>
-				// 					 </td>
-				// 					 <td class="totalcost text-right">
-				// 						 <div class="grandTotal">
-				// 							 ${formatAmount(grandTotalPrice,true)}
-				// 						 </div>
-				// 					 </td>
-				// 			 </tr>`;
-				 	// let personnelTotal = `<div></div> 
-					// 								<div class="font-weight-bolder" style="font-size: 1rem;">
-					// 									<span>Total Amount: &nbsp;</span>
-					// 									<span class="text-danger" style="font-size: 1.2em">${formatAmount(grandTotalPrice,true)}</span>
-					// 							</div>`;
 					  setTimeout(() => {
 						$(`.tableTotal.personnelTotal`).text(formatAmount(grandTotalPrice,true));
 					 }, 500);
@@ -2395,8 +2374,6 @@ $(document).ready(function() {
 					 tableData = getTableData(`ims_request_items_tbl LEFT JOIN ims_inventory_price_list_tbl USING(itemID)`, 
 						 `ims_request_items_tbl.*,  MAX(vendorCurrentPrice) AS higherPrice, (SELECT sub_inv.itemCode FROM ims_inventory_item_tbl as sub_inv WHERE sub_inv.itemID = ims_request_items_tbl.itemID ) AS itemCode`, 
 						 `costEstimateID = '${referenceCode}' AND categoryType = 'project' ${condition}`,``,`itemID`);
-					 
-	
 					 
 						 tableData.map((items, index)=>{
 	
@@ -2440,35 +2417,6 @@ $(document).ready(function() {
 											 </td>
 										 </tr>`;
 						 });
-							//  html += `
-							//  <tr style= "background-color: rgb(0 0 0 / 5%);">
-							// 	 <td colspan="2" class="text-danger font-weight-bold">
-							// 		 SUBTOTAL
-							// 	 </td>
-							// 	 <td class="text-center">
-							// 		 <div class="quantity">
-							// 			 ${totalQty}
-							// 		 </div>
-							// 	 </td>
-							// 	 <td>
-							// 		 <div class="uom">-</div>
-							// 	 </td>
-							// 	 <td>
-							// 		 <div class="unitprice text-right">
-							// 			 ${formatAmount(totalPrice,true)}
-							// 		 </div>
-							// 	 </td>
-							// 	 <td>
-							// 		 <div class="totalcost grandTotal text-right">
-							// 			 ${formatAmount(grandTotalPrice,true)}
-							// 		 </div>
-							// 	 </td>
-							//  </tr>`;
-					// let projectTotal = `<div></div> 
-					// 					<div class="font-weight-bolder" style="font-size: 1rem;">
-					// 						<span>Total Amount: &nbsp;</span>
-					// 						<span class="text-danger" style="font-size: 1.2em">${formatAmount(grandTotalPrice,true)}</span>
-					// 				</div>`;
 					 setTimeout(() => {
 						 $(".tableTotal.projectTotal").text(formatAmount(grandTotalPrice,true));
 					 }, 500);
@@ -2521,38 +2469,7 @@ $(document).ready(function() {
 								 </td>
 							 </tr>`;
 						 });
-							//  html += `
-							//  <tr style= "background-color: rgb(0 0 0 / 5%);">
-							// 	 <td colspan="2" class="text-danger font-weight-bold"> 
-							// 		 SUBTOTAL
-							// 	 </td>
-							// 	 <td class="text-center">
-							// 		 <div class="quantity">
-							// 			 ${totalQty}
-							// 		 </div>
-							// 	 </td>
-							// 	 <td>
-							// 		 <div class="uom">-</div>
-							// 	 </td>
-							// 	 <td>
-							// 		 <div class="unitprice text-right">
-							// 			 ${formatAmount(totalPrice,true)}
-							// 		 </div>
-							// 	 </td>
-							// 	 <td>
-							// 		 <div class="totalcost grandTotal text-right">
-							// 			 ${formatAmount(grandTotalPrice,true)}
-							// 		 </div>
-							// 	 </td>
-							//  </tr>`;
-
-					// let companyTotal = `<div></div> 
-					// 					<div class="font-weight-bolder" style="font-size: 1rem;">
-					// 						<span>Total Amount: &nbsp;</span>
-					// 						<span class="text-danger" style="font-size: 1.2em">${formatAmount(grandTotalPrice,true)}</span>
-					// 					</div>`;
 					 setTimeout(() => {
-						//  $(".companyTotal").html(companyTotal);
 						$(`.tableTotal.companyTotal`).text(formatAmount(grandTotalPrice,true));
 					 }, 500);
 
@@ -2587,11 +2504,12 @@ $(document).ready(function() {
 											 </div>
 										 </td>
 										 <td class="text-center">
-											 <div class="quantity"\>
+											 <div class="quantity">
 												 <input 
 													 type="text" 
-													 class="form-control validate number text-center"
-													 data-allowcharacters="[0-9]" 
+													 class="form-control input-quantity text-center"
+													 data-allowcharacters="[0-9]"
+													 min="0.00" 
 													 max="999999999" 
 													 id="travelQuantity${index}" 
 													 name="quantity" 
@@ -2622,7 +2540,7 @@ $(document).ready(function() {
 													 <div class="input-group-prepend">
 														 <span class="input-group-text">₱</span>
 													 </div>
-													 <input type="text" class="form-control amount" min="0.01" max="9999999999" minlength="1" 
+													 <input type="text" class="form-control amount" min="0.00" max="9999999999" minlength="1" 
 																 maxlength="20" name="unitprice" id="unitprice${index}" value="${items.unitCost}" style="text-align: right;">
 												 </div>
 												 <div class="invalid-feedback d-block" id="invalid-unitprice${index}"></div>
@@ -2714,12 +2632,13 @@ $(document).ready(function() {
 										 <div class="quantity">
 											 <input 
 												 type="text" 
-												 class="form-control validate quantity text-center"
+												 class="form-control input-quantity text-center"
 												 data-allowcharacters="[0-9]" 
+												 min="0.00" 
 												 max="999999999" 
 												 id="travelQuantity1" 
 												 name="quantity" 
-												 value="0" 
+												 value="0.00" 
 												 minlength="1" 
 												 maxlength="20" 
 												 required>
@@ -2746,7 +2665,7 @@ $(document).ready(function() {
 												 <div class="input-group-prepend">
 													 <span class="input-group-text">₱</span>
 												 </div>
-												 <input type="text" class="form-control amount" min="0.01" max="9999999999" minlength="1" 
+												 <input type="text" class="form-control amount" min="0.00" max="9999999999" minlength="1" 
 															 maxlength="20" name="unitprice" id="unitprice1" value="${formatAmount(0,true)}" style="text-align: right;">
 											 </div>
 											 <div class="invalid-feedback d-block" id="invalid-unitprice1"></div>
@@ -2757,22 +2676,6 @@ $(document).ready(function() {
 									 </td>
 								 </tr>`;
 					 }
-	
-					//  let travelButtons = !readOnly ? `<div class="text-left my-2">
-					// 									<button class="btn btn-primary btnAddRow" id="btnAddRow" travel="true" type="button"><i class="fas fa-plus-circle"></i> Add Row</button>
-					// 									<button class="btn btn-danger btnDeleteRow" id="btnDeleteRow" travel="true" type="button" disabled><i class="fas fa-minus-circle"></i> Delete Row/s</button>
-					// 								</div>
-					// 								<div class="font-weight-bolder" style="font-size: 1rem;">
-					// 									<span>Total Amount: &nbsp;</span>
-					// 									<span class="text-danger travel grandTotal" style="font-size: 1.2em">₱ 0.00</span>
-					// 								</div>
-					// 								` : 
-					// 								`<div></div> 
-					// 								<div class="font-weight-bolder" style="font-size: 1rem;">
-					// 									<span>Total Amount: &nbsp;</span>
-					// 									<span class="text-danger travel grandTotal" style="font-size: 1.2em">₱ 0.00</span>
-					// 								</div>`;
-
 					let travelButtons = !readOnly ? `<div class="text-left my-2">
 														<button class="btn btn-primary btnAddRow" id="btnAddRow" travel="true" type="button"><i class="fas fa-plus-circle"></i> Add Row</button>
 														<button class="btn btn-danger btnDeleteRow" id="btnDeleteRow" travel="true" type="button" disabled><i class="fas fa-minus-circle"></i> Delete Row/s</button>
@@ -2781,6 +2684,7 @@ $(document).ready(function() {
 						$(`[name=travelUom]`).select2({ theme: "bootstrap" });
 						 $(".travelButtons").html(travelButtons);
 						 travelTotal();
+						 initQuantity();
 					 }, 500);
 		 }
 	
@@ -2974,9 +2878,11 @@ function savebillMaterial(data = null, method = "submit", notificationData = nul
 					}, 500);
 				})
 			} else {
-				if (res.dismiss === "cancel") {
+				if (res.dismiss == "cancel" && method != "submit") {
 					if (method != "deny") {
-						callback && callback();
+						if (method != "cancelform") {
+							callback && callback();
+						}
 					} else {
 						$("#modal_bill_material").text().length > 0 && $("#modal_bill_material").modal("show");
 					}

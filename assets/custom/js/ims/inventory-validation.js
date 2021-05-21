@@ -149,7 +149,7 @@ $(document).ready(function() {
 					{ targets: 0,  width: 100 },
 					{ targets: 1,  width: 150 },
 					{ targets: 2,  width: 100 },
-					{ targets: 3,  width: 150 },
+					{ targets: 3,  width: 200 },
 					{ targets: 4,  width: 150 },
 					{ targets: 5,  width: 200 },
 					{ targets: 6,  width: 200 },
@@ -172,7 +172,7 @@ $(document).ready(function() {
 					{ targets: 0,  width: 100 },
 					{ targets: 1,  width: 150 },
 					{ targets: 2,  width: 100 },
-					{ targets: 3,  width: 150 },
+					{ targets: 3,  width: 200 },
 					{ targets: 4,  width: 150 },
 					{ targets: 5,  width: 200 },
 					{ targets: 6,  width: 200 },
@@ -330,8 +330,8 @@ $(document).ready(function() {
                 <tr style="white-space: nowrap">
 					<th>Document No.</th>
 					<th>Employee Name</th>
-					<th>Project Name</th>
 					<th>Reference No.</th>
+					<th>Project Name</th>
 					<th>Current Approver</th>
 					<th>Date Created</th>
 					<th>Date Submitted</th>
@@ -1033,7 +1033,7 @@ $(document).ready(function() {
 		if(parseFloat(thisValue || 0) > parseFloat(quantityRequested) ){
 			setTimeout(() => {
 				$("#"+thisID).addClass("is-invalid").removeClass("is-valid");
-				$("#"+thisID).next().text("Insert valid quantity");
+				$("#"+thisID).next().text("Too much quantity to be issued!");
 			}, 150);
 		}
     })
@@ -1580,6 +1580,7 @@ $(document).ready(function() {
 					itemID:			itemID,
 					itemname:		tableData[0].itemName,
 					itemUom:		tableData[0].unitOfMeasurementID,
+					brandName: 		tableData[0].brandName,
 					itemDescription:tableData[0].itemDescription,
 					quantity:		$(this).find(".qtyrequested").text(),
 					stocks:			$(this).find("[name=stocks]").val(),
@@ -1821,7 +1822,7 @@ $(document).ready(function() {
 			</div>
 		</div>
 		<div class="modal-footer text-right">
-			<button class="btn btn-danger" id="btnRejectConfirmation"
+			<button class="btn btn-danger px-5 p-2" id="btnRejectConfirmation"
 			inventoryValidationID="${id}"
 			code="${feedback}"><i class="far fa-times-circle"></i> Deny</button>
 			<button class="btn btn-cancel px-5 p-2" data-dismiss="modal"><i class="fas fa-ban"></i> Cancel</button>
@@ -2172,13 +2173,13 @@ function saveinventoryValidation(data = null, method = "submit", notificationDat
 					}, 500);
 				})
 			} else {
-				if (res.dismiss === "cancel") {
-					if(method != "submit"){
-						if (method != "deny") {
+				if (res.dismiss == "cancel" && method != "submit") {
+					if (method != "deny") {
+						if (method != "cancelform") {
 							callback && callback();
-						} else {
-							$("#modal_inventory_validation").text().length > 0 && $("#modal_inventory_validation").modal("show");
 						}
+					} else {
+						$("#modal_inventory_validation").text().length > 0 && $("#modal_inventory_validation").modal("show");
 					}
 				} else if (res.isDismissed) {
 					if (method == "deny") {
@@ -2203,10 +2204,10 @@ function validateIssuanceQty(){
 			console.log(thisValue+"|"+requestedQty);
 			if( parseFloat(thisValue) > parseFloat(requestedQty) ){
 					$("#"+thisID).addClass("is-invalid").removeClass("is-valid");
-					$("#"+thisID).next().text("Insert valid quantity");
+					$("#"+thisID).next().text("Too much quantity to be issued!");
 				returnData++;
 			}
 	});
 	return returnData > 0 ? false : true;
 }
-// ----- END FOR NO. ISSUANCE VALIDATIONea
+// ----- END FOR NO. ISSUANCE VALIDATION

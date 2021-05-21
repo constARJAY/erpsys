@@ -322,7 +322,7 @@ $(document).ready(function() {
 					{ targets: 0,  width: "5%"},
 					{ targets: 1,  width: 150 },
 					{ targets: 2,  width: "10%" },
-					{ targets: 3,  width: "10%"  }
+					{ targets: 3,  width: "15%"  }
 				],
 			});
 
@@ -769,7 +769,7 @@ $(document).ready(function() {
 
     // ----- GET INVENTORY ITEM -----
     function getInventoryItem(id = null, param, display = true) {
-        let html		= "";
+        let html = "", table = "";
 		let itemIDArr 	= []; // 0 IS THE DEFAULT VALUE
 		// const attr = isProject ? "[project=true]" : "[company=true]";
 		let attr;
@@ -780,44 +780,49 @@ $(document).ready(function() {
 					 // 0 IS THE DEFAULT VALUE
 					$(`[name=itemID]${attr}`).each(function(i, obj) {
 						itemIDArr.push($(this).val());
-					}) 
-					if( id === "-" || !itemIDArr.find(items=> items === "-" )){ 
-						html += `<option value="-" ${id == "-" ? "selected":""}>None</option>`;
-					}
-					html += inventoryItemList.filter(item => !itemIDArr.includes(item.itemID) || item.itemID == id).map(item => {
-						// console.log("project"+id+"|"+item.itemID);
-						return `
-						<option 
-							value        = "${item.itemID}" 
-							itemCode     = "${item.itemCode}"
-							categoryName = "${item.categoryName}"
-							uom          = "${item.unitOfMeasurementID}"
-							${item.itemID == id && "selected"}>
-							${item.itemName}
-						</option>`;
 					});
-					
+
+					if(itemIDArr.length < 2){
+						if( id === "-" || !itemIDArr.find(items=> items === "-" )){ 
+							html += `<option value="-" ${id == "-" ? "selected":""}>None</option>`;
+						}
+					}
+						html += inventoryItemList.filter(item => !itemIDArr.includes(item.itemID) || item.itemID == id).map((item, index) => {
+								return `
+										<option 
+											value        = "${item.itemID}" 
+											itemCode     = "${item.itemCode}"
+											categoryName = "${item.categoryName}"
+											uom          = "${item.unitOfMeasurementID}"
+											${item.itemID == id && "selected"}>
+											${item.itemName}
+										</option>
+										`;
+						});
 				break;
+
 			case "company":
 					attr = "[company=true]"
 					html += `<option selected disabled>Select Item Name</option>`;
 					$(`[name=itemID]${attr}`).each(function(i, obj) {
 						itemIDArr.push($(this).val());
+						
 					}) 
-					if( id === "-" || !itemIDArr.find(items=> items === "-" )){ 
-						html += `<option value="-" ${id == "-" ? "selected":""}>None</option>`;
+					if(itemIDArr.length < 2){
+						if( id === "-" || !itemIDArr.find(items=> items === "-" )){ 
+							html += `<option value="-" ${id == "-" ? "selected":""}>None</option>`;
+						}
 					}
-					html += inventoryItemList.filter(item => !itemIDArr.includes(item.itemID) || item.itemID == id).map(item => {
-						// console.log("company"+id);
-						return `
-						<option 
-							value        = "${item.itemID}" 
-							itemCode     = "${item.itemCode}"
-							categoryName = "${item.categoryName}"
-							uom          = "${item.unitOfMeasurementID}"
-							${item.itemID == id && "selected"}>
-							${item.itemName}
-						</option>`;
+					html += inventoryItemList.filter(item => (!itemIDArr.includes(item.itemID) || item.itemID == id)).map(item => {
+						return			`	<option 
+												value        = "${item.itemID}" 
+												itemCode     = "${item.itemCode}"
+												categoryName = "${item.categoryName}"
+												uom          = "${item.unitOfMeasurementID}"
+												${item.itemID == id && "selected"}>
+												${item.itemName}
+											</option>`;
+						 
 					});
 				break;
 			case "personnel":
@@ -827,10 +832,12 @@ $(document).ready(function() {
 					$(`[name=designationID]${attr}`).each(function(i, obj) {
 						itemIDArr.push($(this).val());
 					});
-					if( id === "none" || !itemIDArr.find(items=> items === "none" )){ 
-						html += `<option value="none" ${id === "none" && "selected"}>None</option>`;
+
+					if(itemIDArr.length < 2){
+						if( id === "none" || !itemIDArr.find(items=> items === "none" )){ 
+							html += `<option value="none" ${id === "none" && "selected"}>None</option>`;
+						}
 					}
-					
 					html += designationList.filter(item => item.designationID == id || !itemIDArr.includes(item.designationID) ).map(item => {
 						return `
 						<option 
@@ -1048,7 +1055,9 @@ $(document).ready(function() {
 				$(".btnAddRow[travel=true]").attr("disabled",existNone > 0);
 			}
 		});
-		
+		setTimeout(() => {
+			initAll();
+		}, 300);
 	}
 	// ----- END UPDATE DELETE BUTTON -----
 
@@ -1121,7 +1130,46 @@ $(document).ready(function() {
         $("[name=clientAddress]").val(address);
     })
     // ----- END SELECT PROJECT LIST -----
-
+	
+	// ----- SELECT NONE  -----
+	$(document).on("change",".select2",function(){
+		if(!$(this).attr("travel")){
+			var thisTr 	  	= $(this).closest("tr");
+			var properties 	= thisTr.find(`input[type=text], input[type=file]`);
+			if(this.value == "none" || this.value == "-" || this.value == "Select Item Name"){
+				properties.prop("disabled", true);
+				properties.prop("required", false);
+				properties.removeClass("is-invalid")
+				properties.next().text("");
+			}else{
+				var properties 	= thisTr.find(`input[type=text]`);
+				properties.prop("disabled", false);
+				properties.prop("required", true);
+			}
+			let thisArray = ["itemID|[project=true]|projectCount",
+							"itemID|[company=true]|companyCount",
+							"designationID|[personnel=true]|personnelCount"];
+			thisArray.map(items=>{
+				let arraySplit 		= items.split("|");
+				let optionName 		= arraySplit[0];
+				let optionAttr 		= arraySplit[1];
+				if(optionAttr == "[personnel=true]"){
+					thisTr.find(`.designationcode`).first().text("-");
+					thisTr.find(`[name=quantity]`).first().val("");
+					thisTr.find(`[name=employeeTotalHours]`).first().val("");
+				}else{
+						thisTr.find(`.itemcode`).first().text("-");
+						thisTr.find(`[name=quantity]`).first().val("");
+				}
+				arraySplit[2] = 0;
+				$(`[name=${optionName}]`+optionAttr).each(function(){
+					this.value == "none" || this.value == "-" ? arraySplit[2] += 1 : "";
+				});
+				$(".btnAddRow"+optionAttr).attr("disabled",arraySplit[2] > 0);
+			});
+		}
+	});
+	// ----- END SELECT NONE  -----
 
     // ----- SELECT ITEM NAME -----
     $(document).on("change", "[name=itemID]", function() {
@@ -1153,44 +1201,24 @@ $(document).ready(function() {
     })
     // ----- END SELECT ITEM NAME -----
 
-	// ----- SELECT NONE  -----
-	$(document).on("change",".select2",function(){
-		var thisTr 	  	= $(this).closest("tr");
-		var properties 	= thisTr.find(`input[type=text]`);
-		if(this.value == "none" || this.value == "-"){
-			
-			properties.prop("disabled", true);
-			properties.prop("required", false);
-		}else{
-			var properties 	= thisTr.find(`input[type=text]`);
-			properties.prop("disabled", false);
-			properties.prop("required", true);
+	// ----- QUANTITY PERSONNEL KEYUP -----
+	$(document).on("keyup",".input-personnel", function(){
+		let thisValue	= this.value.replaceAll(",","");
+		let minValue	= $(this).attr("min");
+		
+		if(parseFloat(thisValue) < parseFloat(minValue)){
+			$(this).addClass("is-invalid").removeClass("is-valid");
+			$(this).next().text("Please input quantity greater than minValue");
 		}
-
-		let thisArray = ["itemID|[project=true]|projectCount",
-		"itemID|[company=true]|companyCount",
-		"designationID|[personnel=true]|personnelCount"];
-		thisArray.map(items=>{
-			let arraySplit 		= items.split("|");
-			let optionName 		= arraySplit[0];
-			let optionAttr 		= arraySplit[1];
-			if(optionAttr == "[personnel=true]"){
-				thisTr.find(`.designationcode`).first().text("-");
-				thisTr.find(`[name=quantity]`).first().val("");
-				thisTr.find(`[name=employeeTotalHours]`).first().val("");
-			}else{
-				thisTr.find(`.itemcode`).first().text("-");
-				thisTr.find(`[name=quantity]`).first().val("");
-			}
-			arraySplit[2] = 0;
-			$(`[name=${optionName}]`+optionAttr).each(function(){
-				this.value == "none" || this.value == "-" ? arraySplit[2] += 1 : "";
-			});
-			// console.log(optionAttr+"|"+arraySplit[2]);
-			$(".btnAddRow"+optionAttr).attr("disabled",arraySplit[2] > 0);
-		});
+		let returnData 	= thousands_separators(thisValue);
+		$(this).val(returnData);
 	});
-	// ----- END SELECT NONE  -----
+	// ----- END QUANTITY PERSONNEL KEYUP -----
+
+
+
+
+	
 	// ----- TEXTAREA NONE -----
 	$(document).on("keyup","[name=description]",function(){
 		let thisValue 	= this.value;
@@ -1206,7 +1234,7 @@ $(document).ready(function() {
 			properties.prop("disabled", false);
 			properties.prop("required", true);
 			$(this).closest(`tr`).find(`select`).prop("required", false);
-			$(this).closest(`tr`).find(`select`).val("").trigger("change");
+			// $(this).closest(`tr`).find(`select`).val("").trigger("change");
 			
 		}
 
@@ -1325,9 +1353,14 @@ $(document).ready(function() {
 			row	= getItemRow("travel");
 			$(".travelTableBody").append(row);
 		}
-		updateTableItems();
-		initInputmask();
-		initAmount();
+
+
+			updateTableItems();
+			initInputmask();
+			initAmount();
+			initAll();
+			
+			
     })
     // ----- END INSERT ROW ITEM -----
 
@@ -1385,7 +1418,8 @@ $(document).ready(function() {
 			})
 
 			let requestDesignationData = getTableData(`hris_designation_tbl JOIN hris_personnel_request_tbl USING(designationID)`,
-										`hris_personnel_request_tbl.designationID AS designationID ,hris_designation_tbl.designationName AS designationName,designationTotalHours,quantity`,`costEstimateID = ${costEstimateID} AND billMaterialID IS NULL`);
+										`hris_personnel_request_tbl.designationID AS designationID ,hris_designation_tbl.designationName AS designationName,designationTotalHours,quantity`,`costEstimateID = '${costEstimateID}' AND billMaterialID IS NULL`);
+			// console.log(costEstimateID);
 			if(requestDesignationData.length < 1){
 				requestPersonnel 	+= getItemRow("personnel",requestDesignationData[0],readOnly);
 			}
@@ -1742,11 +1776,17 @@ $(document).ready(function() {
 			initDataTables();
 			updateTableItems();
 			initAll();
-			initAmount();
+			// initQuantity();
+			// initAmount();
 			updateInventoryItemOptions();
+			triggerItemQty();
 			projectID && projectID != 0 && $("[name=projectID]").trigger("change");
+			console.log(isRevise);
+			if(isRevise){
+				changingOptions();
+			}
 			return html;
-		}, 300);
+		}, 120);
 	}
 	// ----- END FORM CONTENT -----
 
@@ -1901,7 +1941,7 @@ $(document).ready(function() {
 				}else{
 						if($(this).closest("tbody").attr("personnel") == "true"){
 							designationID 			= $("td [name=designationID]", this).val() || 0;
-							console.log($("td [name=designationID]", this).val());
+							// console.log($("td [name=designationID]", this).val());
 							var designationListData = (designationID != 0 && designationID != "none" ) ? designationList.filter(items=> items.designationID == designationID) : "";
 							designationName 		= (designationID != 0 && designationID != "none" ) ? designationListData[0].designationName : "-";
 							designationTotalHours	= $("td [name=employeeTotalHours]", this).val();
@@ -2051,42 +2091,46 @@ $(document).ready(function() {
 
     // ----- SUBMIT DOCUMENT -----
 	$(document).on("click", "#btnSubmit", function () {
-		const id           = $(this).attr("costestimateid");
-		const revise       = $(this).attr("revise") == "true";
-		const validate     = validateForm("form_cost_estimate");
+		const id           	= $(this).attr("costestimateid");
+		const revise       	= $(this).attr("revise") == "true";
+		const validate     	= validateForm("form_cost_estimate");
+		const validateForms = validateNoneForm();
 		
 		removeIsValid("#tablePersonnelRequest");
 		removeIsValid("#tableProjectRequestItems");
 		removeIsValid("#tableCompanyRequestItems");
 		removeIsValid("#tableTravelRequest");
-		
 		if (validate) {
-			const action = revise && "insert" || (id ? "update" : "insert");
-			const data   = getcostEstimateData(action, "submit", "1", id);
-
-			if (revise) {
-				data.append("reviseCostEstimateID", id);
-				data.delete("costEstimateID");
+			if(validateForms){
+				const action = revise && "insert" || (id ? "update" : "insert");
+				const data   = getcostEstimateData(action, "submit", "1", id);
+	
+				if (revise) {
+					data.append("reviseCostEstimateID", id);
+					data.delete("costEstimateID");
+				}
+	
+				let approversID = "", approversDate = "";
+				for (var i of data) {
+					if (i[0] == "approversID")   approversID   = i[1];
+					if (i[0] == "approversDate") approversDate = i[1];
+				}
+	
+				const employeeID = getNotificationEmployeeID(approversID, approversDate, true);
+				let notificationData = false;
+				if (employeeID != sessionID) {
+					notificationData = {
+						moduleID:                38,
+						notificationTitle:       "Cost Estimate",
+						notificationDescription: `${employeeFullname(sessionID)} asked for your approval.`,
+						notificationType:        2,
+						employeeID,
+					};
+				}
+				savecostEstimate(data, "submit", notificationData, pageContent);
+			}else{
+				showNotification("warning2","Cannot submit form, kindly input valid items")
 			}
-
-			let approversID = "", approversDate = "";
-			for (var i of data) {
-				if (i[0] == "approversID")   approversID   = i[1];
-				if (i[0] == "approversDate") approversDate = i[1];
-			}
-
-			const employeeID = getNotificationEmployeeID(approversID, approversDate, true);
-			let notificationData = false;
-			if (employeeID != sessionID) {
-				notificationData = {
-					moduleID:                38,
-					notificationTitle:       "Cost Estimate",
-					notificationDescription: `${employeeFullname(sessionID)} asked for your approval.`,
-					notificationType:        2,
-					employeeID,
-				};
-			}
-			savecostEstimate(data, "submit", notificationData, pageContent);
 		}
 	});
 	// ----- END SUBMIT DOCUMENT -----
@@ -2184,7 +2228,7 @@ $(document).ready(function() {
 			</div>
 		</div>
 		<div class="modal-footer text-right">
-			<button class="btn btn-danger" id="btnRejectConfirmation"
+			<button class="btn btn-danger px-5 p-2" id="btnRejectConfirmation"
 			costEstimateID="${id}"
 			code="${feedback}"><i class="far fa-times-circle"></i> Deny</button>
 			<button class="btn btn-cancel px-5 p-2" data-dismiss="modal"><i class="fas fa-ban"></i> Cancel</button>
@@ -2292,6 +2336,7 @@ $(document).ready(function() {
 			unitOfMeasurementID: uom = "",
 			files        = ""
 		} = data;
+
 		if (readOnly) {
 			const itemFIle = files ? `<a href="${base_url+"assets/upload-files/request-items/"+files}" target="_blank">${files}</a>` : `-`;
 			html += `
@@ -2323,6 +2368,10 @@ $(document).ready(function() {
 				</td>
 			</tr>`;
 		} else {
+				if(itemID < 1 && itemID){
+					var optinoDisabled = "disabled"
+					otherItemID = "-"
+				}
 			const itemFile = files ? `
 			<div class="d-flex justify-content-between align-items-center py-2">
 				<a class="filename"
@@ -2352,7 +2401,7 @@ $(document).ready(function() {
 								style="width: 400px"
 								required
 								project="true">
-								${getInventoryItem(itemID, "project")}
+								${getInventoryItem((itemID < 1 && itemID != "" ? otherItemID : itemID), "project")}
 							</select>
 							<div class="invalid-feedback d-block" id="invalid-itemID"></div>
 						</div>
@@ -2362,15 +2411,15 @@ $(document).ready(function() {
 					<div class="quantity">
 						<input 
 							type="text" 
-							class="form-control text-center amount"
+							class="form-control text-center input-quantity"
 							data-allowcharacters="[0-9][.]" 
 							max="999999999" 
 							id="projectQuantity" 
-							name="quantity" 
+							name="quantity"
 							value="${quantity}"
 							min="0.00" 
 							minlength="1" 
-							maxlength="20" required>
+							maxlength="20" required ${optinoDisabled}>
 						<div class="invalid-feedback d-block" id="invalid-projectQuantity"></div>
 					</div>
 				</td>
@@ -2387,13 +2436,14 @@ $(document).ready(function() {
 							class="form-control" 
 							name="files" 
 							id="projectFiles"
-							accept="image/*, .pdf, .doc, .docx">
+							accept="image/*, .pdf, .doc, .docx" ${optinoDisabled}>
 						<div class="invalid-feedback d-block" id="invalid-projectFiles"></div>
 					</div>
 				</td>
 			</tr>`;
 		}
 		return html;
+
 
 	}
 
@@ -2407,6 +2457,7 @@ $(document).ready(function() {
 			unitOfMeasurementID: uom = "",
 			files        = ""
 		} = data;
+		// console.log(data);
 		if (readOnly) {
 			const itemFIle = files ? `<a href="${base_url+"assets/upload-files/request-items/"+files}" target="_blank">${files}</a>` : `-`;
 			html += `
@@ -2438,6 +2489,10 @@ $(document).ready(function() {
 				</td>
 			</tr>`;
 		} else {
+			if(itemID < 1 && itemID){
+				var optinoDisabled = "disabled"
+				otherItemID = "-"
+			}
 			const itemFile = files ? `
 			<div class="d-flex justify-content-between align-items-center py-2">
 				<a class="filename"
@@ -2462,12 +2517,9 @@ $(document).ready(function() {
 						<div class="form-group mb-0">
 							<select
 								class="form-control validate select2"
-								name="itemID"
-								id="itemID"
-								style="width: 400px"
-								required
+								name="itemID" id="itemID" style="width: 400px" required
 								company="true">
-								${getInventoryItem(itemID, "company")}
+									${getInventoryItem((itemID < 1 && itemID != "" ? otherItemID : itemID), "company")}
 							</select>
 							<div class="invalid-feedback d-block" id="invalid-itemID"></div>
 						</div>
@@ -2477,7 +2529,7 @@ $(document).ready(function() {
 					<div class="quantity">
 						<input 
 							type="text" 
-							class="form-control text-center amount"
+							class="form-control text-center input-quantity"
 							data-allowcharacters="[0-9][.]" 
 							min="0.00"
 							max="999999999" 
@@ -2485,7 +2537,7 @@ $(document).ready(function() {
 							name="quantity" 
 							value="${quantity}" 
 							minlength="1" 
-							maxlength="20" required>
+							maxlength="20" required ${optinoDisabled}>
 						<div class="invalid-feedback d-block" id="invalid-companyQuantity"></div>
 					</div>
 				</td>
@@ -2502,7 +2554,7 @@ $(document).ready(function() {
 							class="form-control" 
 							name="files" 
 							id="companyFiles"
-							accept="image/*, .pdf, .doc, .docx">
+							accept="image/*, .pdf, .doc, .docx" ${optinoDisabled}>
 						<div class="invalid-feedback d-block" id="invalid-companyFiles"></div>
 					</div>
 				</td>
@@ -2512,14 +2564,15 @@ $(document).ready(function() {
 	}
 
 	function getPersonnelRow(data={}, readOnly = false){
-		console.log(readOnly);
+		// console.log(readOnly);
 		let html = "";
 		let {
-			designationID   = null,
+			designationID   = "",
 			designationName = "",
 			quantity     	= "",
 			designationTotalHours = ""
 		} = data;
+		console.log(data);
 		if (readOnly) {
 			html += `
 			<tr class="itemTableRow">
@@ -2545,6 +2598,13 @@ $(document).ready(function() {
 				</td>
 			</tr>`;
 		} else {
+			if(designationID < 1 || designationID){
+				var optinoDisabled = "disabled"
+				otherDesignationID = "none"
+			}
+			console.log("DESIGNATION");
+			console.log(designationTotalHours);
+
 			html += `
 			<tr class="itemTableRow">
 				<td class="text-center">
@@ -2553,7 +2613,7 @@ $(document).ready(function() {
 					</div>
 				</td>
 				<td>
-					<div class="designationcode">${!designationID ? "-" : getFormCode("DSN",moment(),designationID) }</div>
+					<div class="designationcode">${(!designationID || designationID == "none" ) ? "-" : getFormCode("DSN",moment(),designationID) }</div>
 				</td>
 				<td>
 					<div class="designationname">
@@ -2564,8 +2624,8 @@ $(document).ready(function() {
 								id="designationID"
 								style="width: 100%"
 								required
-								personnel="true">
-								${getInventoryItem(designationID, "personnel")}
+								personnel="true" >
+								${getInventoryItem((designationID || "none") , "personnel")}
 							</select>
 							<div class="invalid-feedback d-block" id="invalid-designationID"></div>
 						</div>
@@ -2575,8 +2635,8 @@ $(document).ready(function() {
 					<div class="quantity">
 						<input 
 							type="text" 
-							class="form-control validate text-center"
-							data-allowcharacters="[0-9]"
+							class="form-control validate text-center input-personnel"
+							data-allowcharacters="[0-9][,]"
 							placeholder="0" 
 							min="0"
 							max="999999999" 
@@ -2584,7 +2644,7 @@ $(document).ready(function() {
 							name="quantity" 
 							value="${quantity}"
 							minlength="1" 
-							maxlength="20" required>
+							maxlength="20" required ${optinoDisabled}>
 						<div class="invalid-feedback d-block" id="invalid-personnelQuantity"></div>
 					</div>
 				</td>
@@ -2592,8 +2652,8 @@ $(document).ready(function() {
 					<div class="totalhours">
 						<input
 							type="text" 
-							class="form-control validate text-center" 
-							data-allowcharacters="[0-9][.]"
+							class="form-control validate text-center input-personnel" 
+							data-allowcharacters="[0-9][,][.]"
 							min="0.0" 
 							max="999999999" 
 							id="employeeTotalHours" 
@@ -2601,7 +2661,7 @@ $(document).ready(function() {
 							placeholder="0.0"
 							value="${designationTotalHours}" 
 							minlength="1" 
-							maxlength="5" required>
+							maxlength="10" required ${optinoDisabled}>
 						<div class="invalid-feedback d-block" id="invalid-employeeTotalHours"></div>
 					</div>
 				</td>
@@ -2637,6 +2697,10 @@ $(document).ready(function() {
 				</td>
 			</tr>`;
 		} else {
+			var uniformDescription = travelDescription.toLowerCase();
+			if((uniformDescription == "none" ||  uniformDescription == "n/a") && travelDescription){
+				var optinoDisabled = "disabled"
+			}
 			html += `
 			<tr class="itemTableRow">
 				<td class="text-center">
@@ -2654,7 +2718,7 @@ $(document).ready(function() {
 							class="form-control validate" 
 							data-allowcharacters="[0-9][a-z][A-Z][ ][.][,][_]['][()][?][-][/]"
 							name="description" 
-							id="description" required>${travelDescription || ""}</textarea>
+							id="description" required >${travelDescription || ""}</textarea>
 						<div class="invalid-feedback d-block" id="invalid-description"></div>
 					</div>
 				</td>
@@ -2671,7 +2735,7 @@ $(document).ready(function() {
 							min="0.00" 
 							minlength="1" 
 							maxlength="20" 
-							required>
+							required ${optinoDisabled}>
 						<div class="invalid-feedback d-block" id="invalid-quantity"></div>
 					</div>
 				</td>
@@ -2683,7 +2747,7 @@ $(document).ready(function() {
 						id="travelUom"
 						style="width: 100%"
 						required
-						travel="true">
+						travel="true" ${optinoDisabled}>
 							${unitOfMeasurementOptions(unitOfMeasure)}
 						</select>
 						<div class="invalid-feedback d-block" id="invalid-travelUom"></div>
@@ -2698,11 +2762,12 @@ $(document).ready(function() {
 	function isRevised(id = null){
 		let revised = false;
 		var tableData = getTableData("pms_cost_estimate_tbl","reviseCostEstimateID",`reviseCostEstimateID=`+id);
-		console.log(tableData);
+		// console.log(tableData);
 		revised = tableData.length > 0 ? true : false;
 		return revised; 
 	}
 	// END CHECK IF THE DOCUMENT IS ALREADY REVISED
+
 
 
 
@@ -2841,9 +2906,6 @@ function savecostEstimate(data = null, method = "submit", notificationData = nul
 									// 		},
 									// 	});
 									// }
-									
-
-
 
 							}, 500);
 						} else {
@@ -2891,3 +2953,69 @@ function savecostEstimate(data = null, method = "submit", notificationData = nul
 }
 
 // --------------- END DATABASE RELATION ---------------
+
+
+function triggerItemQty(){
+	$("[name=quantity]").each(function(i, obj) {
+		$("#"+this.id).val($("#"+this.id).attr("value"));
+	}) 
+}
+
+
+function validateNoneForm(){
+	var thisArray = ["itemID|[project=true]",
+					 "itemID|[company=true]",
+				     "designationID|[personnel=true]",
+					 "description|[travel=true]"];
+	var returnData = 0;
+	thisArray.map(items=>{
+		var itemsSplit 	= items.split("|");
+		var optionName 	= itemsSplit[0];
+		var optionAttr 	= itemsSplit[1];
+	    $(`[name=${optionName}]${optionAttr}`).each(function(){
+			var unifiedValue = this.value.toLowerCase();
+			if(unifiedValue== "none" || unifiedValue== "-" || unifiedValue == "n/a"){
+				returnData += 1;
+			}
+		});
+	});
+	return returnData < 4 ? true : false;
+}
+
+
+function changingOptions(){
+	var thisArray = ["itemID|[project=true]",
+					 "itemID|[company=true]",
+				     "designationID|[personnel=true]"];
+	thisArray.map(items=>{
+		var itemsSplit 	= items.split("|");
+		var optionName 	= itemsSplit[0];
+		var optionAttr 	= itemsSplit[1];
+
+	    $(`[name=${optionName}]${optionAttr}`).each(function(){
+			if(this.value=="Select Item Name"){
+				$("#"+this.id).val("-").trigger("change");
+			}
+		});
+
+		$(`[name=designationID][personnel=true]`).each(function(){
+			if(this.value=="Select Designation"){
+				$("#"+this.id).val("none").trigger("change");
+			}
+		});
+		$(`[name=description][travel=true]`).each(function(){
+			var thisValue = this.value.toLowerCase();
+			if(thisValue =="none" || thisValue == "n/a"){
+				$("#"+this.id).val("none").trigger("keyup");
+			}
+		});
+	});
+}
+
+  
+function thousands_separators(num)
+  {
+    var num_parts = num.toString().split(".");
+    num_parts[0] = num_parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    return num_parts.join(".");
+  }
