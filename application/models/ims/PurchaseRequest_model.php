@@ -60,13 +60,12 @@ class PurchaseRequest_model extends CI_Model {
         return "false|System error: Please contact the system administrator for assistance!";
     }
 
-    public function deletePurchaseRequestItems($purchaseRequestID, $costEstimateID) {
-        $whereCE = $costEstimateID ?? NULL;
+    public function deletePurchaseRequestItems($purchaseRequestID, $billMaterialID) {
+        $whereBOM = $billMaterialID ?? NULL;
         $query = $this->db->delete(
             "ims_request_items_tbl", 
             [
-                "costEstimateID"         => $whereCE,
-                "billMaterialID "        => NULL,
+                "billMaterialID"         => $whereBOM,
                 "purchaseRequestID"      => $purchaseRequestID,
                 "purchaseOrderID "       => NULL,
                 "inventoryValidationID " => NULL,
@@ -75,9 +74,9 @@ class PurchaseRequest_model extends CI_Model {
         return $query ? true : false;
     }
 
-    public function savePurchaseRequestItems($action, $data, $purchaseRequestID = null, $costEstimateID = null)
+    public function savePurchaseRequestItems($action, $data, $purchaseRequestID = null, $billMaterialID = null)
     {
-        $deletePurchaseRequestItems = $this->deletePurchaseRequestItems($purchaseRequestID, $costEstimateID);
+        $deletePurchaseRequestItems = $this->deletePurchaseRequestItems($purchaseRequestID, $billMaterialID);
 
         $query = $this->db->insert_batch("ims_request_items_tbl", $data);
         if ($query) {

@@ -25,14 +25,11 @@
             </div>
         </div>
 	</div>
-
-
-    
 </div>
 
 
 <!-- ----- MODAL ----- -->
-<div id="modal_inventory_validation" class="modal custom-modal fade" data-backdrop="static" data-keyboard="false" role="dialog">
+<div id="modal_inventory_receiving" class="modal custom-modal fade" data-backdrop="static" data-keyboard="false" role="dialog">
     <div class="modal-dialog modal-dialog-centered modal-md" role="document">
 		<div class="modal-content">
 			<div class="modal-header bg-primary text-light">
@@ -41,8 +38,7 @@
 					<span class="text-light" aria-hidden="true">&times;</span>
 				</button>
 			</div>
-
-            <div id="modal_inventory_validation_content"></div>
+            <div id="modal_inventory_receiving_content"></div>
         </div>
 	</div>
 </div>

@@ -482,6 +482,8 @@ function getStatusStyle(status = 1) {
 			return `<span class="badge badge-danger w-100">Denied</span>`;
 		case "4":
 			return `<span class="badge badge-primary w-100">Cancelled</span>`;
+		case "5":
+			return `<span class="badge badge-secondary w-100">Dropped</span>`;
 		case "0":
 		default:
 			return `<span class="badge badge-warning w-100">Draft</span>`;

@@ -126,21 +126,14 @@ $(document).ready(function() {
 		return moment(new Date).format("YYYY-MM-DD HH:mm:ss");
 	};
 
-
 	// const purchaseOrderList = getTableData(
-	// 	`ims_purchase_order_tbl as ipot
-	// 	LEFT JOIN ims_purchase_request_tbl as iprt ON iprt.purchaseRequestID = ipot.purchaseRequestID
-	// 	LEFT JOIN ims_request_items_tbl as irit ON irit.purchaseRequestID = iprt.purchaseRequestID AND irit.purchaseOrderID = ipot.purchaseOrderID AND ipot.categoryType = irit.categoryType`, 
-    //     "ipot.purchaseOrderID, vendorName,ipot.createdAt",
-    //     "purchaseOrderStatus = 2 AND purchaseRequestStatus =2 AND (orderedPending !=0 OR orderedPending IS NULL)");
-
-	const purchaseOrderList = getTableData(
-		`ims_purchase_order_tbl AS ipot
-			LEFT JOIN ims_request_items_tbl AS irit USING(purchaseOrderID)`,
-		"ipot.*",
-		`ipot.purchaseOrderStatus = 2 AND 
-		irit.orderedPending IS NULL OR irit.orderedPending <> 0`
-	)
+	// 	`ims_purchase_order_tbl AS ipot
+	// 		LEFT JOIN ims_request_items_tbl AS irit USING(purchaseOrderID)`,
+	// 	"ipot.*",
+	// 	`ipot.purchaseOrderStatus = 2 AND 
+	// 	irit.orderedPending IS NULL OR irit.orderedPending <> 0
+	// 	GROUP BY irit.purchaseOrderID`
+	// )
 	// END GLOBAL VARIABLE - REUSABLE 
 
 
@@ -172,8 +165,7 @@ $(document).ready(function() {
 					{ targets: 5,  width: 200 },
 					{ targets: 6,  width: 200 },
 					{ targets: 7,  width: 80  },
-					{ targets: 8, width: 250 },
-					{ targets: 9, width: 80  },
+					{ targets: 8, width: 250  },
 				],
 			});
 
@@ -195,8 +187,7 @@ $(document).ready(function() {
 					{ targets: 5,  width: 200 },
 					{ targets: 6,  width: 200 },
 					{ targets: 7,  width: 80  },
-					{ targets: 8, width: 250 },
-					{ targets: 9, width: 80  },
+					{ targets: 8, width: 250  },
 				],
 			});
 
@@ -220,8 +211,9 @@ $(document).ready(function() {
 					{ targets: 3,  width: 250 },
 					{ targets: 4,  width: 80  },
 					{ targets: 5,  width: 80  },
-					{ targets: 6,  width: 50  },
-					{ targets: 7,  width: 300 },
+					{ targets: 6,  width: 80  },
+					{ targets: 7,  width: 50  },
+					{ targets: 8,  width: 300 },
 				],
 			});
 
@@ -243,7 +235,8 @@ $(document).ready(function() {
 					{ targets: 4,  width: 80  },
 					{ targets: 5,  width: 80  },
 					{ targets: 6,  width: 50  },
-					{ targets: 7,  width: 300 },
+					{ targets: 7,  width: 50  },
+					{ targets: 8,  width: 300 },
 				],
 			});
 
@@ -292,7 +285,7 @@ $(document).ready(function() {
     // ----- FOR APPROVAL CONTENT -----
 	function forApprovalContent() {
 		$("#tableForApprovalParent").html(preloader);
-		let serviceRequisitionData = getTableData(
+		let inventoryReceivingData = getTableData(
 			`ims_inventory_receiving_tbl AS isrt 
 				LEFT JOIN hris_employee_list_tbl AS helt USING(employeeID) 
 				LEFT JOIN ims_purchase_order_tbl AS pct ON isrt.purchaseOrderID = pct.purchaseOrderID`,
@@ -307,19 +300,18 @@ $(document).ready(function() {
                 <tr style="white-space: nowrap">
                     <th>Document No.</th>
                     <th>Employee Name</th>
-                    <th>Purchase Order No.</th>
+                    <th>Reference No.</th>
                     <th>Current Approver</th>
                     <th>Date Created</th>
                     <th>Date Submitted</th>
                     <th>Date Approved</th>
                     <th>Status</th>
                     <th>Remarks</th>
-                    <th>Action</th>
                 </tr>
             </thead>
             <tbody>`;
 
-		serviceRequisitionData.map((item) => {
+		inventoryReceivingData.map((item) => {
 			let {
 				fullname,
 				inventoryReceivingID,
@@ -349,9 +341,11 @@ $(document).ready(function() {
 				id="${encryptString(inventoryReceivingID)}" 
 				code="${getFormCode("INRR", dateCreatedIR, inventoryReceivingID)}"><i class="fas fa-edit"></i> Edit</button>`;
 
+			let btnClass =  inventoryReceivingStatus != 0 ? `btnView` : `btnEdit`;
+
 			if (isImCurrentApprover(approversID, approversDate, inventoryReceivingStatus) || isAlreadyApproved(approversID, approversDate)) {
 				html += `
-				<tr>
+				<tr class="${btnClass}" id="${encryptString(inventoryReceivingID)}">
 					<td>${getFormCode("INRR", createdAt, inventoryReceivingID)}</td>
 					<td>${fullname}</td>
 					<td>${getFormCode("PO", dateCreatedPO, purchaseOrderID)}</td>
@@ -365,9 +359,6 @@ $(document).ready(function() {
 						${getStatusStyle(inventoryReceivingStatus)}
 					</td>
 					<td>${remarks}</td>
-					<td class="text-center">
-						${button}
-					</td>
 				</tr>`;
 			}
 		});
@@ -388,7 +379,7 @@ $(document).ready(function() {
     // ----- MY FORMS CONTENT -----
 	function myFormsContent() {
 		$("#tableMyFormsParent").html(preloader);
-		let serviceRequisitionData = getTableData(
+		let inventoryReceivingData = getTableData(
             `ims_inventory_receiving_tbl AS isrt 
             LEFT JOIN hris_employee_list_tbl AS helt USING(employeeID) 
             LEFT JOIN ims_purchase_order_tbl AS pct ON isrt.purchaseOrderID = pct.purchaseOrderID`,
@@ -403,19 +394,18 @@ $(document).ready(function() {
                 <tr style="white-space: nowrap">
                     <th>Document No.</th>
                     <th>Employee Name</th>
-                    <th>Purchase Order No.</th>
+                    <th>Reference No.</th>
                     <th>Current Approver</th>
                     <th>Date Created</th>
                     <th>Date Submitted</th>
                     <th>Date Approved</th>
                     <th>Status</th>
                     <th>Remarks</th>
-                    <th>Action</th>
                 </tr>
             </thead>
             <tbody>`;
 
-		serviceRequisitionData.map((item) => {
+		inventoryReceivingData.map((item) => {
 			let {
 				fullname,
 				inventoryReceivingID,
@@ -444,8 +434,10 @@ $(document).ready(function() {
                 id="${encryptString(inventoryReceivingID)}" 
                 code="${getFormCode("INRR", dateCreatedIR, inventoryReceivingID)}"><i class="fas fa-edit"></i> Edit</button>`;
 
+			let btnClass =  inventoryReceivingStatus != 0 ? `btnView` : `btnEdit`;
+
 			html += `
-            <tr>
+            <tr class="${btnClass}" id="${encryptString(inventoryReceivingID)}">
                 <td>${getFormCode("INRR", dateCreatedIR, inventoryReceivingID)}</td>
                 <td>${fullname}</td>
                 <td>${getFormCode("PO", dateCreatedPO, purchaseOrderID)}</td>
@@ -459,9 +451,6 @@ $(document).ready(function() {
                     ${getStatusStyle(inventoryReceivingStatus)}
                 </td>
 				<td>${remarks}</td>
-                <td class="text-center">
-                    ${button}
-                </td>
             </tr>`;
 		});
 
@@ -590,14 +579,26 @@ $(document).ready(function() {
 	}
 	// ----- END FORM BUTTONS -----
 
+
     // ----- GET PURCHASE ORDER LIST -----
     function getPurchaseOrderList(id = null, status = 0, display = true) {
+		const purchaseOrderList = getTableData(
+			`ims_purchase_order_tbl AS ipot
+				LEFT JOIN ims_request_items_tbl AS irit USING(purchaseOrderID)`,
+			"ipot.*",
+			`ipot.purchaseOrderStatus = 2 AND 
+			irit.orderedPending IS NULL OR irit.orderedPending <> 0
+			GROUP BY irit.purchaseOrderID`
+		)
+
 		const createdIRList = getTableData(
 			`ims_inventory_receiving_tbl AS iirt
 				LEFT JOIN ims_inventory_receiving_details_tbl AS iirdt USING(inventoryReceivingID)
 				LEFT JOIN ims_request_items_tbl AS irit USING(requestItemID)`, 
 			"iirt.purchaseOrderID", 
-			"iirt.inventoryReceivingStatus <> 3 AND iirt.inventoryReceivingStatus <> 4 AND irit.orderedPending <> 0 AND irit.orderedPending IS NOT NULL"
+			`iirt.inventoryReceivingStatus <> 3 AND 
+			iirt.inventoryReceivingStatus <> 4 AND 
+			(irit.orderedPending IS NOT NULL AND irit.orderedPending >= irit.forPurchase)`
 		).map(po => po.purchaseOrderID);
 		let html = '';
 		if (!status || status == 0) {
@@ -626,34 +627,6 @@ $(document).ready(function() {
     // ----- END GET PURCHASE ORDER LIST -----
 
 
-    // ----- GET SERVICE ITEM -----
-    // function getServiceItem(id = null, display = true) {
-    //     let html   = `<option selected disabled>Select Service Name</option>`;
-
-	// 	let serviceIDArr = []; // 0 IS THE DEFAULT VALUE
-	// 	$(`[name=serviceID]`).each(function(i, obj) {
-	// 		serviceIDArr.push($(this).val());
-	// 	}) 
-	// 	let serviceList = [...serviceItemList];
-
-	// 	html += serviceList.filter(item => !serviceIDArr.includes(item.serviceID) || item.serviceID == id).map(item => {
-    //         let serviceCode = item.serviceID != "0" ? 
-    //             `${getFormCode("SVC", item.createdAt, item.serviceID)}` : "-"
-    //         return `
-    //         <option 
-    //             value       = "${item.serviceID}" 
-    //             serviceCode = "${serviceCode}"
-    //             serviceUom  = "${item.serviceUom}"
-    //             ${item.serviceID == id && "selected"}>
-    //             ${item.serviceName}
-    //         </option>`;
-    //     })
-		
-    //     return display ? html : serviceItemList;
-    // }
-    // ----- END GET SERVICE ITEM -----
-
-
 	// ----- GET SERIAL NUMBER -----
 	function getSerialNumber(scope = {}, readOnly = false) {
 		let {
@@ -668,7 +641,7 @@ $(document).ready(function() {
 					<div class="servicescope">
 						<div class="input-group mb-0">
 							<div class="input-group-prepend">
-								<button class="btn btn-sm btn-danger btnDeleteScope">
+								<button class="btn btn-sm btn-danger btnDeleteSerial">
 									<i class="fas fa-minus"></i>
 								</button>
 							</div>
@@ -691,7 +664,7 @@ $(document).ready(function() {
 			<tr>
 				<td>
 					<div class="servicescope">
-						${serialNumber}
+						${serialNumber || "-"}
 					</div>
 				</td>
 			</tr>`;
@@ -709,6 +682,10 @@ $(document).ready(function() {
 			$(this).attr("id", `serialNumber${i}`);
 			$(this).parent().find(".invalid-feedback").attr("id", `invalid-serialNumber${i}`);
 		})
+		$(`[name="received"]`).each(function(i) {
+			$(this).attr("id", `received${i}`);
+			$(this).parent().find(".invalid-feedback").attr("id", `invalid-received${i}`);
+		})
 	}
 	// ----- END UPDATE SERIAL NUMBER -----
 
@@ -716,12 +693,6 @@ $(document).ready(function() {
 	// ----- GET SERVICE ROW -----
     function getItemsRow(id, readOnly = false, inventoryReceivingID = "") {
         let html = "";
-		
-		// if(inventoryReceivingID != ""){
-		// 	id = `${id} AND iirt.inventoryReceivingID = ${inventoryReceivingID}`;
-		// }
-
-		console.log(inventoryReceivingID);
 		let requestItemsData;	
 		if (inventoryReceivingID) {
 			requestItemsData = getTableData(
@@ -740,18 +711,9 @@ $(document).ready(function() {
 			)
 		} else {
 			requestItemsData = getTableData(
-				// `ims_purchase_order_tbl as ipot
-				// LEFT JOIN ims_purchase_request_tbl as iprt ON ipot.purchaseRequestID = iprt.purchaseRequestID 
-				// LEFT JOIN ims_request_items_tbl as irit ON irit.purchaseRequestID = iprt.purchaseRequestID  
-				// LEFT JOIN ims_inventory_item_tbl as itm ON itm.itemID = irit.itemID
-				// LEFT JOIN ims_inventory_receiving_tbl as iirt ON iirt.purchaseOrderID = ipot.purchaseOrderID
-				// LEFT JOIN ims_inventory_receiving_details_tbl as iirdt ON iirdt.inventoryReceivingID = iirt.inventoryReceivingID AND irit.itemID = iirdt.itemID `,
-				// `iirdt.inventoryReceivingDetailsID, itm.itemID,itm.createdAt,irit.itemName,irit.brandName,irit.itemUom,irit.forPurchase,irit.orderedPending,iirdt.received,iirdt.remarks`,
-				// `purchaseRequestStatus =2 AND purchaseOrderStatus =2 AND ipot.purchaseOrderID = ${id}`,
-				// ``,`irit.itemID`
 				"ims_request_items_tbl", 
 				"", 
-				`purchaseOrderID = ${id}`
+				`purchaseOrderID = ${id} AND orderedPending <> 0`
 			)
 		}
 
@@ -772,7 +734,7 @@ $(document).ready(function() {
 					createdAt                   = ""
 				} = item;
 
-				let orderQuantity = orderedPending ? orderedPending : forPurchase;
+				let pending = orderedPending ? orderedPending : forPurchase;
 	
 				const buttonAddRow = !readOnly ? `
 				<button class="btn btn-md btn-primary float-left ml-2 my-1 btnAddSerial">
@@ -805,9 +767,7 @@ $(document).ready(function() {
 					${buttonAddRow}
 				</div>`;
 	
-			
 				if (readOnly) {
-				
 					html += `
 					<tr class="itemTableRow" requestItemID="${requestItemID}">
 						<td>
@@ -824,8 +784,11 @@ $(document).ready(function() {
 						</td>
 						<td class="text-center">
 							<div class="ordered">
-								${orderQuantity}
+								${forPurchase}
 							</div>
+						</td>
+						<td class="text-center">
+							<div class="pending">${pending || "-"}</div>
 						</td>
 						<td class="text-center">
 							<div class="received">${received || "-"}</div>
@@ -838,8 +801,6 @@ $(document).ready(function() {
 						</td>
 					</tr>`;
 				} else {
-					
-	
 					html += `
 					<tr class="itemTableRow" requestItemID="${requestItemID}">
 						<td>
@@ -856,8 +817,11 @@ $(document).ready(function() {
 						</td>
 						<td class="text-center">
 							<div class="ordered" name="ordered">
-								${orderQuantity}
+								${forPurchase}
 							</div>
+						</td>
+						<td class="text-center">
+							<div class="pending">${pending || "-"}</div>
 						</td>
 						<td>
 						<div class="received">
@@ -866,7 +830,7 @@ $(document).ready(function() {
 									class="form-control input-quantity text-center"
 									data-allowcharacters="[0-9]" 
 									min="1"
-									max="${orderQuantity}" 
+									max="${pending}" 
 									id="received" 
 									name="received" 
 									value="${inventoryReceivingID ? received : ""}" 
@@ -876,11 +840,9 @@ $(document).ready(function() {
 								<div class="invalid-feedback d-block" id="invalid-received"></div>
 						</div>
 						</td>
-	
 						<td>
 							<div class="uom">${itemUom || ""}</div>
 						</td>
-	
 						<td>
 							<div class="remarks">
 								<textarea 
@@ -914,118 +876,24 @@ $(document).ready(function() {
     $(document).on("change", "[name=purchaseOrderID]", function() {
         const vendorname = $('option:selected', this).attr("vendorname");
         const id 					= $(this).val();
-        const inventoryreceivingid 	= $(this).attr("inventoryreceivingid");
-		var readOnly			= $(this).attr("disabled") == "disabled";
-		// if(readOnly =="disabled"){
-		// 	readOnly = true;
-		// }else{
-		// 	readOnly = false;
-		// }
+        let inventoryreceivingid 	= $(this).attr("inventoryreceivingid");
+        let executeonce 	        = $(this).attr("executeonce") == "true";
+		var readOnly			    = $(this).attr("disabled") == "disabled";
+		const status                = $(this).attr("status");
+		inventoryreceivingid        = executeonce ? inventoryreceivingid : null;
 
         $("[name=vendorName]").val(vendorname);
-
         $(".purchaseOrderItemsBody").html('<tr><td colspan="8">'+preloader+'</td></tr>');
 
         let purchaseOrderItemsBody = getItemsRow(id, readOnly, inventoryreceivingid);
-      
-
         setTimeout(() => {
 			$(".purchaseOrderItemsBody").html(purchaseOrderItemsBody);
 			initQuantity();
-
-			// initDataTables();
-			// initAll();
+			updateSerialNumber();
+			$(this).removeAttr("executeonce");
 		}, 300);
     })
     // ----- END SELECT PURCHASE ORDER -----
-
-	// ----- KEYUP QUANTITY OR UNITCOST -----
-	$(document).on("change", "[name=received],.tableSerialBody", function() {
-
-		// const received = parseFloat($(this).closest("tr").find('[name=received]').val().replaceAll(",","")) || 0;
-		// const ordered = parseFloat($(this).closest("tr").find('[name=ordered]').text().replaceAll(",",""));
-		// const serialNoLength = parseFloat($(this).closest("tr").find('.tableSerialBody tr').length) || 0;
-		// flag = false;
-		// for(var loop1 = 0; loop1<serialNoLength; loop1++){
-		// 	var findVal = $(this).closest("tr").find('.tableSerialBody tr').find("[name=serialNumber]").eq(loop1).val();
-		// 	if(findVal !="" || findVal !=0){
-		// 		flag = true;
-		// 	}
-		// }
-	
-		// 	if(flag){
-
-		// 		if(serialNoLength < ordered || serialNoLength == ordered ){
-		// 			$(this).closest("tr").find('.tableSerialBody tr [name=serialNumber]').removeClass("is-invalid").addClass("is-valid");
-		// 			$(this).closest("tr").find(".tableSerialBody tr #invalid-serialNumber").removeClass("is-invalid").addClass("is-valid");
-		// 			$(this).closest("tr").find(" .tableSerialBody tr td div .invalid-feedback").text('');
-		// 			removeIsValid("#tableInventoryReceivingItems");
-
-		// 			// CHECK IF THE SERIAL NUMBER AND RECEIVED ORDER HAS THE SAME VALUE
-		
-		// 				if(received != serialNoLength){
-
-		// 					$(this).closest("tr").find('.tableSerialBody tr [name=serialNumber]').removeClass("is-valid").addClass("is-invalid");
-		// 					$(this).closest("tr").find(" .tableSerialBody tr  #invalid-serialNumber").removeClass("is-valid").addClass("is-invalid");
-		// 					$(this).closest("tr").find(".tableSerialBody tr td div .invalid-feedback").text('Serial number not equal on received items!')
-							
-		// 					$(this).closest("tr").find("#received").removeClass("is-valid").addClass("is-invalid");
-		// 					$(this).closest("tr").find("#invalid-received").removeClass("is-valid").addClass("is-invalid");
-		// 					$(this).closest("tr").find("#invalid-received").text('Received items not equal on serial number!');
-		// 				}
-					
-		// 			// END CHECK IF THE SERIAL NUMBER AND RECEIVED ORDER HAS THE SAME VALUE
-
-		// 		}else{
-		// 			$(this).closest("tr").find('.tableSerialBody tr [name=serialNumber]').removeClass("is-valid").addClass("is-invalid");
-		// 			$(this).closest("tr").find(" .tableSerialBody tr  #invalid-serialNumber").removeClass("is-valid").addClass("is-invalid");
-		// 			$(this).closest("tr").find(".tableSerialBody tr td div .invalid-feedback").text('Exceed Serial Number of Items!')
-		// 		}
-			
-		// 		if( received < ordered || received == ordered ){
-		// 			$(this).closest("tr").find("#received").removeClass("is-invalid").addClass("is-valid");
-		// 			$(this).closest("tr").find("#invalid-received").removeClass("is-invalid").addClass("is-valid");
-		// 			$(this).closest("tr").find("#invalid-received").text('');
-		// 			removeIsValid("#tableInventoryReceivingItems");
-
-		// 				// CHECK IF THE SERIAL NUMBER AND RECEIVED ORDER HAS THE SAME VALUE
-			
-		// 				if(received != serialNoLength){
-
-		// 					$(this).closest("tr").find('.tableSerialBody tr [name=serialNumber]').removeClass("is-valid").addClass("is-invalid");
-		// 					$(this).closest("tr").find(" .tableSerialBody tr  #invalid-serialNumber").removeClass("is-valid").addClass("is-invalid");
-		// 					$(this).closest("tr").find(".tableSerialBody tr td div .invalid-feedback").text('Serial number not equal on received items!')
-							
-		// 					$(this).closest("tr").find("#received").removeClass("is-valid").addClass("is-invalid");
-		// 					$(this).closest("tr").find("#invalid-received").removeClass("is-valid").addClass("is-invalid");
-		// 					$(this).closest("tr").find("#invalid-received").text('Received items not equal on serial number!');
-		// 				}
-					
-		// 				// END CHECK IF THE SERIAL NUMBER AND RECEIVED ORDER HAS THE SAME VALUE
-
-		// 		}else{
-		// 			$(this).closest("tr").find("#received").removeClass("is-valid").addClass("is-invalid");
-		// 			$(this).closest("tr").find("#invalid-received").removeClass("is-valid").addClass("is-invalid");
-		// 			$(this).closest("tr").find("#invalid-received").text('Exceed Items!');
-		// 		}
-
-		// 	}else{
-		// 		if( received < ordered || received == ordered ){
-		// 			$(this).closest("tr").find("#received").removeClass("is-invalid").addClass("is-valid");
-		// 			$(this).closest("tr").find("#invalid-received").removeClass("is-invalid").addClass("is-valid");
-		// 			$(this).closest("tr").find("#invalid-received").text('');
-		// 			removeIsValid("#tableInventoryReceivingItems");
-
-		// 		}else{
-		// 			$(this).closest("tr").find("#received").removeClass("is-valid").addClass("is-invalid");
-		// 			$(this).closest("tr").find("#invalid-received").removeClass("is-valid").addClass("is-invalid");
-		// 			$(this).closest("tr").find("#invalid-received").text('Exceed Items!');
-		// 		}
-
-		// 	}
-			
-	})
-	// ----- END KEYUP QUANTITY OR UNITCOST -----
 
 
 	// ----- CHECK SERIAL ROW AND RECEIVED -----
@@ -1033,6 +901,7 @@ $(document).ready(function() {
 		if (parentTable) {
 			const serialRow        = $(`.tableSerialBody tr`, parentTable).length;
 			const receivedQuantity = +$(`.received [name="received"]`, parentTable).val() || 0;
+			console.log(serialRow, receivedQuantity);
 			if (serialRow == receivedQuantity) {
 				$(`.received [name="received"]`, parentTable).removeClass("is-valid, no-error").removeClass("is-invalid");
 				$(`.received .invalid-feedback`, parentTable).text("");
@@ -1052,7 +921,6 @@ $(document).ready(function() {
 		let newSerial = getSerialNumber();
 		$(this).parent().find("table tbody").append(newSerial);
 		$(this).parent().find("[name=serialNumber]").last().focus();
-		// initAmount(".amount");
 		updateSerialNumber();
 
 		const parentTable = $(this).closest("tr.itemTableRow");
@@ -1062,99 +930,18 @@ $(document).ready(function() {
 
 
 	// ----- DELETE SERIAL -----
-	$(document).on("click", ".btnDeleteScope", function() {
+	$(document).on("click", ".btnDeleteSerial", function() {
 		const isCanDelete = $(this).closest(".tableSerialBody").find("tr").length > 1;
 		
 		if (isCanDelete) {
 			const scopeElement = $(this).closest("tr");
-
-			const received = parseFloat($(this).closest(".purchaseOrderItemsBody > tr").find("td > div ").find("[name='received']").val().replaceAll(",","")) || 0;
-			const ordered = parseFloat($(this).closest(".purchaseOrderItemsBody > tr").find("td > [name='ordered']").text());
-			const serialNoLength = parseFloat($(this).closest(".tableSerialBody").find("tr").length -1) || 0;
-
-			flag = false;
-			for(var loop1 = 0; loop1<serialNoLength; loop1++){
-				var findVal = $(this).closest("tr").find('.tableSerialBody tr').find("[name=serialNumber]").eq(loop1).val();
-				if(findVal !="" || findVal !=0){
-					flag = true;
-				}
-			}
-
-
-			if(flag){
-
-				// if(serialNoLength < ordered || serialNoLength == ordered ){
-				// 	$(this).closest(".tableSerialBody").find("tr [name=serialNumber]").removeClass("is-invalid").addClass("is-valid");
-				// 	$(this).closest(".tableSerialBody").find("tr .invalid-feedback").removeClass("is-invalid").addClass("is-valid");
-				// 	$(this).closest(".tableSerialBody").find("tr .invalid-feedback").text('');
-				// 	removeIsValid("#tableInventoryReceivingItems");
-
-				// 	// CHECK IF THE SERIAL NUMBER AND RECEIVED ORDER HAS THE SAME VALUE
-					
-				// 		if(received != serialNoLength){
-
-				// 			$(this).closest(".tableSerialBody").find("tr [name=serialNumber]").removeClass("is-valid").addClass("is-invalid");
-				// 			$(this).closest(".tableSerialBody").find("tr .invalid-feedback").removeClass("is-valid").addClass("is-invalid");
-				// 			$(this).closest(".tableSerialBody").find("tr .invalid-feedback").text('Serial number not equal on received items!');
-							
-				// 			$(this).closest(".purchaseOrderItemsBody > tr").find("td > div ").find("[name='received']").addClass("is-invalid");
-				// 			$(this).closest(".purchaseOrderItemsBody > tr").find("td > div").find("[name='received']").closest("div").find(".invalid-feedback").addClass("is-invalid");
-				// 			$(this).closest(".purchaseOrderItemsBody > tr").find("td > div").find("[name='received']").closest("div").find(".invalid-feedback").text('Received items not equal on serial number!');
-				// 		}
-					
-				// 	// END CHECK IF THE SERIAL NUMBER AND RECEIVED ORDER HAS THE SAME VALUE
-				// }else{
-				// 	$(this).closest(".tableSerialBody").find("tr [name=serialNumber]").removeClass("is-valid").addClass("is-invalid");
-				// 	$(this).closest(".tableSerialBody").find("tr .invalid-feedback").removeClass("is-valid").addClass("is-invalid");
-				// 	$(this).closest(".tableSerialBody").find("tr .invalid-feedback").text('Exceed Serial Number of Items!');
-				// }
-				// console.log(received +" < "+ ordered +" | "+ received +" ==  "+ordered )
-				// if( received < ordered || received == ordered ){
-				// 	$(this).closest(".purchaseOrderItemsBody > tr").find("td > div ").find("[name='received']").removeClass("is-invalid").addClass("is-valid");
-				// 	$(this).closest(".purchaseOrderItemsBody > tr").find("td > div").find("[name='received']").closest("div").find(".invalid-feedback").removeClass("is-invalid").addClass("is-valid");
-				// 	$(this).closest(".purchaseOrderItemsBody > tr").find("td > div").find("[name='received']").closest("div").find(".invalid-feedback").text('');
-				// 	removeIsValid("#tableInventoryReceivingItems");
-
-				// 	// CHECK IF THE SERIAL NUMBER AND RECEIVED ORDER HAS THE SAME VALUE
-					
-				// 		if(received != serialNoLength){
-
-				// 			$(this).closest(".tableSerialBody").find("tr [name=serialNumber]").removeClass("is-valid").addClass("is-invalid");
-				// 			$(this).closest(".tableSerialBody").find("tr .invalid-feedback").removeClass("is-valid").addClass("is-invalid");
-				// 			$(this).closest(".tableSerialBody").find("tr .invalid-feedback").text('Serial number not equal on received items!');
-							
-				// 			$(this).closest(".purchaseOrderItemsBody > tr").find("td > div ").find("[name='received']").addClass("is-invalid");
-				// 			$(this).closest(".purchaseOrderItemsBody > tr").find("td > div").find("[name='received']").closest("div").find(".invalid-feedback").addClass("is-invalid");
-				// 			$(this).closest(".purchaseOrderItemsBody > tr").find("td > div").find("[name='received']").closest("div").find(".invalid-feedback").text('Received items not equal on serial number!');
-				// 		}
-					
-				// 	// END CHECK IF THE SERIAL NUMBER AND RECEIVED ORDER HAS THE SAME VALUE
-
-				// }else{
-				// 	$(this).closest(".purchaseOrderItemsBody > tr").find("td > div ").find("[name='received']").addClass("is-invalid");
-				// 	$(this).closest(".purchaseOrderItemsBody > tr").find("td > div").find("[name='received']").closest("div").find(".invalid-feedback").addClass("is-invalid");
-				// 	$(this).closest(".purchaseOrderItemsBody > tr").find("td > div").find("[name='received']").closest("div").find(".invalid-feedback").text('Exceed Items!');
-				// }
-
-			}else{
-				if( received < ordered || received == ordered ){
-					$(this).closest(".purchaseOrderItemsBody > tr").find("td > div ").find("[name='received']").removeClass("is-invalid").addClass("is-valid");
-					$(this).closest(".purchaseOrderItemsBody > tr").find("td > div").find("[name='received']").closest("div").find(".invalid-feedback").removeClass("is-invalid").addClass("is-valid");
-					$(this).closest(".purchaseOrderItemsBody > tr").find("td > div").find("[name='received']").closest("div").find(".invalid-feedback").text('');
-					removeIsValid("#tableInventoryReceivingItems");
-
-				}else{
-					$(this).closest(".purchaseOrderItemsBody > tr").find("td > div ").find("[name='received']").addClass("is-invalid");
-					$(this).closest(".purchaseOrderItemsBody > tr").find("td > div").find("[name='received']").closest("div").find(".invalid-feedback").addClass("is-invalid");
-					$(this).closest(".purchaseOrderItemsBody > tr").find("td > div").find("[name='received']").closest("div").find(".invalid-feedback").text('Exceed Items!');
-				}
-			}
-
 			scopeElement.fadeOut(500, function() {
+				const parentTable = $(this).closest("tr.itemTableRow");
 				$(this).closest("tr").remove();
+				checkSerialRowReceived(parentTable);
 			})
 		} else {
-			showNotification("danger", "You must have atleast one scope of work.");
+			showNotification("danger", "You must have atleast one serial number.");
 		}
 	})
 	// ----- END DELETE SERIAL -----
@@ -1200,6 +987,7 @@ $(document).ready(function() {
 		$("#btnBack").attr("employeeID", employeeID);
 
 		let disabled = readOnly ? "disabled" : "";
+		let disabledReference = purchaseOrderID && purchaseOrderID != "0" ? "disabled" : disabled;
 
 		let tableInventoryReceivingItems = !disabled ? "tableInventoryReceivingItems" : "tableInventoryReceivingItems0";
 
@@ -1291,7 +1079,6 @@ $(document).ready(function() {
 
         <div class="row" id="form_inventory_receiving">
 
-           
             <div class="col-md-4 col-sm-12">
                 <div class="form-group">
                     <label>Reference No. ${!disabled ? "<code>*</code>" : ""}</label>
@@ -1302,6 +1089,8 @@ $(document).ready(function() {
                         required
 						inventoryreceivingid ="${inventoryReceivingID}"
 						readonly="${disabled}"
+						status="${inventoryReceivingStatus}"
+						executeonce="${inventoryReceivingStatus ? true : false}"
 						${disabled}>
                         <option selected disabled>Select Reference No.</option>
                         ${getPurchaseOrderList(purchaseOrderID, inventoryReceivingStatus)}
@@ -1364,6 +1153,7 @@ $(document).ready(function() {
                                 <th>Brand</th>
                                 <th>Serial No.</th>
                                 <th>Ordered</th>
+                                <th>Pending</th>
                                 <th>Received</th>
                                 <th>UOM</th>
                                 <th>Remarks</th>
@@ -1390,10 +1180,8 @@ $(document).ready(function() {
 		setTimeout(() => {
 			$("#page_content").html(html);
 			initDataTables();
-			// updateTableItems();
 			initAll();
 			updateSerialNumber();
-			// updateServiceOptions();
 			purchaseOrderID && purchaseOrderID != 0 && $("[name=purchaseOrderID]").trigger("change");
             !purchaseOrderID && purchaseOrderID == 0 && $("#dateReceived").val(moment(new Date).format("MMMM DD, YYYY"));
 			$("#dateReceived").data("daterangepicker").maxDate = moment();
@@ -1654,9 +1442,6 @@ $(document).ready(function() {
 					let countSerial = $(`.tableSerialBody tr`, this).length;
 
 					if (receivedQuantity != countSerial) {
-						
-						$(`.tableSerialBody tr`, this).find(`.servicescope [name="serialNumber"]`).attr("required", true);
-
 						showNotification("danger", "Serial number is not equal on received items!");
 
 						$(`.received [name="received"]`, this).removeClass("is-valid, no-error").addClass("is-invalid");
@@ -1682,23 +1467,29 @@ $(document).ready(function() {
 						$(`.tableSerialBody tr`, this).each(function() {
 							if ($(`.servicescope [name="serialNumber"]`, this).val()?.trim() == "") {
 								$(`.servicescope [name="serialNumber"]`, this).removeClass("is-valid").removeClass("no-error").addClass("is-invalid");
-								$(`.servicescope .invalid-feedback`, this).text("Serial number is not equal on received items!");
+								$(`.servicescope .invalid-feedback`, this).text("Please input serial number");
 								const id = "#"+$(`.servicescope [name="serialNumber"]`, this).attr("id");
 								invalidInputs.push(id);
 							}
 						})
 					}
 				} else {
-					$(`.received [name="received"]`, this).removeClass("is-valid, no-error").removeClass("is-invalid");
-					$(`.received .invalid-feedback`, this).text("");
-
-					$(`.tableSerialBody tr`, this).each(function() {
+					if ($(`.servicescope [name="serialNumber"]`, this).val() != "") {
+						$(`.received [name="received"]`, this).removeClass("is-valid, no-error").addClass("is-invalid");
+						$(`.received .invalid-feedback`, this).text("Serial number is not equal on received items!");
+						$(`.servicescope [name="serialNumber"]`, this).removeClass("is-valid").removeClass("no-error").addClass("is-invalid");
+						$(`.servicescope .invalid-feedback`, this).text("Serial number is not equal on received items!");
+						const id = "#"+$(`.servicescope [name="serialNumber"]`, this).attr("id");
+						invalidInputs.push(id);
+					} else {
+						// $(`.received [name="received"]`, this).removeClass("is-valid, no-error").removeClass("is-invalid");
+						// $(`.received .invalid-feedback`, this).text("");
 						$(`.servicescope [name="serialNumber"]`, this).removeClass("is-valid").removeClass("no-error").removeClass("is-invalid");
 						$(`.servicescope .invalid-feedback`, this).text("");
-					})
+					}
+
 				}
 			})
-			// $(`.purchaseOrderItemsBody`).find(`.is-invalid`).first().focus();
 			invalidInputs.length > 0 && $(invalidInputs[0]).focus();
 			return $(`.purchaseOrderItemsBody`).find(`.is-invalid`).length == 0;
 		}
@@ -1709,49 +1500,39 @@ $(document).ready(function() {
 
     // ----- SUBMIT DOCUMENT -----
 	$(document).on("click", "#btnSubmit", function () {
+		const id             = $(this).attr("inventoryReceivingID");
+		const revise         = $(this).attr("revise") == "true";
+		const validate       = validateForm("form_inventory_receiving");
+		const validateSerial = checkSerialReceivedQuantity();
+		removeIsValid("#tableInventoryReceivingItems");
 
-		let receivedCondition     = $("[name=received]").hasClass("is-invalid");
-		let serialNumberCondition = $("[name=serialNumber]").hasClass("is-invalid");
+		if (validate && validateSerial) {
+			
+			const action = revise && "insert" || (id ? "update" : "insert");
+			const data   = getInventoryReceivingData(action, "submit", "1", id);
 
-		// if(!receivedCondition && !serialNumberCondition){
-			const id             = $(this).attr("inventoryReceivingID");
-			const revise         = $(this).attr("revise") == "true";
-			const validate       = validateForm("form_inventory_receiving");
-			const validateSerial = checkSerialReceivedQuantity();
-			removeIsValid("#tableInventoryReceivingItems");
-
-			if (validate && validateSerial) {
-				
-				const action = revise && "insert" || (id ? "update" : "insert");
-				const data   = getInventoryReceivingData(action, "submit", "1", id);
-
-				if (revise) {
-					data["reviseInventoryReceivingID"] = id;
-					delete data["inventoryReceivingID"];
-				}
-
-				let approversID   = data["approversID"], 
-					approversDate = data["approversDate"];
-
-				const employeeID = getNotificationEmployeeID(approversID, approversDate, true);
-				let notificationData = false;
-				if (employeeID != sessionID) {
-					notificationData = {
-						moduleID:                33,
-						notificationTitle:       "Inventory Receiving",
-						notificationDescription: `${employeeFullname(sessionID)} asked for your approval.`,
-						notificationType:        2,
-						employeeID,
-					};
-				}
-
-				saveInventoryReceiving(data, "submit", notificationData, pageContent);
+			if (revise) {
+				data["reviseInventoryReceivingID"] = id;
+				delete data["inventoryReceivingID"];
 			}
 
-		// }else{
-		// 	$("[name=received]").focus();
-		// 	$("[name=serialNumber]").focus();
-		// }	
+			let approversID   = data["approversID"], 
+				approversDate = data["approversDate"];
+
+			const employeeID = getNotificationEmployeeID(approversID, approversDate, true);
+			let notificationData = false;
+			if (employeeID != sessionID) {
+				notificationData = {
+					moduleID:                33,
+					notificationTitle:       "Inventory Receiving",
+					notificationDescription: `${employeeFullname(sessionID)} asked for your approval.`,
+					notificationType:        2,
+					employeeID,
+				};
+			}
+
+			saveInventoryReceiving(data, "submit", notificationData, pageContent);
+		}	
 	});
 	// ----- END SUBMIT DOCUMENT -----
 
@@ -1824,9 +1605,9 @@ $(document).ready(function() {
 		const id       = $(this).attr("inventoryReceivingID");
 		const feedback = $(this).attr("code") || getFormCode("INRR", dateToday(), id);
 
-		$("#modal_service_requisition_content").html(preloader);
-		$("#modal_service_requisition .page-title").text("DENY PURCHASE REQUEST");
-		$("#modal_service_requisition").modal("show");
+		$("#modal_inventory_receiving_content").html(preloader);
+		$("#modal_inventory_receiving .page-title").text("DENY PURCHASE REQUEST");
+		$("#modal_inventory_receiving").modal("show");
 		let html = `
 		<div class="modal-body">
 			<div class="form-group">
@@ -1844,19 +1625,19 @@ $(document).ready(function() {
 			</div>
 		</div>
 		<div class="modal-footer text-right">
-			<button class="btn btn-danger" id="btnRejectConfirmation"
+			<button class="btn btn-danger px-5 p-2" id="btnRejectConfirmation"
 			inventoryReceivingID="${id}"
 			code="${feedback}"><i class="far fa-times-circle"></i> Deny</button>
-			<button class="btn btn-cancel" data-dismiss="modal"><i class="fas fa-ban"></i> Cancel</button>
+			<button class="btn btn-cancel px-5 p-2" data-dismiss="modal"><i class="fas fa-ban"></i> Cancel</button>
 		</div>`;
-		$("#modal_service_requisition_content").html(html);
+		$("#modal_inventory_receiving_content").html(html);
 	});
 
 	$(document).on("click", "#btnRejectConfirmation", function () {
 		const id       = decryptString($(this).attr("inventoryReceivingID"));
 		const feedback = $(this).attr("code") || getFormCode("INRR", dateToday(), id);
 
-		const validate = validateForm("modal_service_requisition");
+		const validate = validateForm("modal_inventory_receiving");
 		if (validate) {
 			let tableData = getTableData("ims_inventory_receiving_tbl", "", "inventoryReceivingID = " + id);
 			if (tableData) {
@@ -1945,10 +1726,10 @@ $(document).ready(function() {
 
 // --------------- DATABASE RELATION ---------------
 function getConfirmation(method = "submit") {
-	const title = "Inventory  Receiving";
+	const title = "Inventory Receiving";
 	let swalText, swalImg;
 
-	$("#modal_service_requisition").text().length > 0 && $("#modal_service_requisition").modal("hide");
+	$("#modal_inventory_receiving").text().length > 0 && $("#modal_inventory_receiving").modal("hide");
 
 	switch (method) {
 		case "save":
@@ -1972,7 +1753,7 @@ function getConfirmation(method = "submit") {
 			swalImg   = `${base_url}assets/modal/reject.svg`;
 			break;
 		case "cancelform":
-			swalTitle = `CANCEL ${title.toUpperCase()} DOCUMENT`;
+			swalTitle = `CANCEL ${title.toUpperCase()}`;
 			swalText  = "Are you sure to cancel this document?";
 			swalImg   = `${base_url}assets/modal/cancel.svg`;
 			break;
@@ -2086,15 +1867,17 @@ function saveInventoryReceiving(data = null, method = "submit", notificationData
 					}, 500);
 				})
 			} else {
-				if (res.dismiss === "cancel") {
+				if (res.dismiss === "cancel" && method != "submit") {
 					if (method != "deny") {
-						callback && callback();
+						if (method != "cancelform") {
+							callback && callback();
+						}
 					} else {
-						$("#modal_service_requisition").text().length > 0 && $("#modal_service_requisition").modal("show");
+						$("#modal_inventory_receiving").text().length > 0 && $("#modal_inventory_receiving").modal("show");
 					}
 				} else if (res.isDismissed) {
 					if (method == "deny") {
-						$("#modal_service_requisition").text().length > 0 && $("#modal_service_requisition").modal("show");
+						$("#modal_inventory_receiving").text().length > 0 && $("#modal_inventory_receiving").modal("show");
 					}
 				}
 			}

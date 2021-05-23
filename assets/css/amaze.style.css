@@ -63,6 +63,10 @@ textarea:focus, input:focus{
 	font-size:10px;
 }
 
+tr.btnView, tr.btnEdit {
+	cursor: pointer;
+}
+
 @media only screen and (max-width: 1169px) {
 	.block-header{
 		padding-top: 20px !important;

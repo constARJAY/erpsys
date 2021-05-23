@@ -34,6 +34,7 @@ $(document).ready(function() {
 				"ims_purchase_order_tbl", 
 				"revisePurchaseOrderID", 
 				"revisePurchaseOrderID IS NOT NULL AND purchaseOrderStatus != 4");
+
 			return revisedDocumentsID.map(item => item.revisePurchaseOrderID).includes(id);
 		}
 		return false;
@@ -42,8 +43,8 @@ $(document).ready(function() {
 
 
     // ----- VIEW DOCUMENT -----
-	function viewDocument(view_id = false, readOnly = false, isRevise = false) {
-		const loadData = (id, isRevise = false) => {
+	function viewDocument(view_id = false, readOnly = false, isRevise = false, isFromCancelledDocument = false) {
+		const loadData = (id, isRevise = false, isFromCancelledDocument = false) => {
 			const tableData = getTableData(
 				`ims_purchase_order_tbl AS ipot
 					LEFT JOIN ims_purchase_request_tbl AS iprt USING(purchaseRequestID)`, 
@@ -75,7 +76,7 @@ $(document).ready(function() {
 
 				if (isAllowed) {
 					if (isRevise && employeeID == sessionID) {
-						pageContent(true, tableData, isReadOnly, true);
+						pageContent(true, tableData, isReadOnly, true, isFromCancelledDocument);
 						updateURL(encryptString(id), true, true);
 					} else {
 						pageContent(true, tableData, isReadOnly);
@@ -93,8 +94,8 @@ $(document).ready(function() {
 		}
 
 		if (view_id) {
-			let id = decryptString(view_id);
-				id && isFinite(id) && loadData(id, isRevise);
+			let id = view_id;
+				id && isFinite(id) && loadData(id, isRevise, isFromCancelledDocument);
 		} else {
 			let url   = window.document.URL;
 			let arr   = url.split("?view_id=");
@@ -199,17 +200,18 @@ $(document).ready(function() {
 				sorting: [],
 				scrollCollapse: true,
 				columnDefs: [
-					{ targets: 0,  width: 100 },
-					{ targets: 1,  width: 150 },
-					{ targets: 2,  width: 100 },
-					{ targets: 3,  width: 350 },
-					{ targets: 4,  width: 350 },
-					{ targets: 5,  width: 150 },
-					{ targets: 6,  width: 200 },
-					{ targets: 7,  width: 200 },
-					{ targets: 8,  width: 200 },
-					{ targets: 9,  width: 80 },
-					{ targets: 10,  width: 250  },
+					{ targets: 0,  width: 100  },
+					{ targets: 1,  width: 150  },
+					{ targets: 2,  width: 100  },
+					{ targets: 3,  width: 150  },
+					{ targets: 4,  width: 350  },
+					{ targets: 5,  width: 350  },
+					{ targets: 6,  width: 150  },
+					{ targets: 7,  width: 200  },
+					{ targets: 8,  width: 200  },
+					{ targets: 9,  width: 200  },
+					{ targets: 10, width: 80   },
+					{ targets: 11, width: 250  },
 				],
 			});
 
@@ -223,17 +225,18 @@ $(document).ready(function() {
 				sorting: [],
 				scrollCollapse: true,
 				columnDefs: [
-					{ targets: 0,  width: 100 },
-					{ targets: 1,  width: 150 },
-					{ targets: 2,  width: 100 },
-					{ targets: 3,  width: 350 },
-					{ targets: 4,  width: 350 },
-					{ targets: 5,  width: 150 },
-					{ targets: 6,  width: 200 },
-					{ targets: 7,  width: 200 },
-					{ targets: 8,  width: 200 },
-					{ targets: 9,  width: 80 },
-					{ targets: 10,  width: 250  },
+					{ targets: 0,  width: 100  },
+					{ targets: 1,  width: 150  },
+					{ targets: 2,  width: 100  },
+					{ targets: 3,  width: 150  },
+					{ targets: 4,  width: 350  },
+					{ targets: 5,  width: 350  },
+					{ targets: 6,  width: 150  },
+					{ targets: 7,  width: 200  },
+					{ targets: 8,  width: 200  },
+					{ targets: 9,  width: 200  },
+					{ targets: 10, width: 80   },
+					{ targets: 11, width: 250  },
 				],
 			});
 
@@ -364,7 +367,7 @@ $(document).ready(function() {
 
 
     // ----- HEADER BUTTON -----
-	function headerButton(isAdd = true, text = "Add", isRevise = false) {
+	function headerButton(isAdd = true, text = "Add", isRevise = false, isFromCancelledDocument = false) {
 		let html;
 		if (isAdd) {
 			if (isCreateAllowed(47)) {
@@ -373,7 +376,11 @@ $(document).ready(function() {
 			}
 		} else {
 			html = `
-            <button type="button" class="btn btn-default btn-light" id="btnBack" revise="${isRevise}"><i class="fas fa-arrow-left"></i> &nbsp;Back</button>`;
+            <button type="button" 
+				class="btn btn-default btn-light" 
+				id="btnBack" 
+				revise="${isRevise}"
+				cancel="${isFromCancelledDocument}"><i class="fas fa-arrow-left"></i> &nbsp;Back</button>`;
 		}
 		$("#headerButton").html(html);
 	}
@@ -389,9 +396,9 @@ $(document).ready(function() {
 				LEFT JOIN ims_bid_recap_tbl AS ibrt USING(bidRecapID)
 				LEFT JOIN pms_project_list_tbl AS pplt ON pplt.projectListID = ibrt.projectID
 				LEFT JOIN hris_employee_list_tbl AS helt ON ipot.employeeID = helt.employeeID`,
-			`ipot.*, CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname, ipot.createdAt AS dateCreated, projectListCode, projectListName, ibrt.bidRecapID, ibrt.createdAt AS ibrtCreatedAt`,
+			`ipot.*, CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname, ipot.createdAt AS dateCreated, projectListCode, projectListName, ibrt.bidRecapID, ibrt.createdAt AS ibrtCreatedAt, iprt.createdAt AS iprtCreatedAt`,
 			`ipot.employeeID != ${sessionID} AND ipot.purchaseOrderStatus != 0 AND ipot.purchaseOrderStatus != 4`,
-			`FIELD(purchaseOrderStatus, 0, 1, 3, 2, 4), COALESCE(ipot.submittedAt, ipot.createdAt)`
+			`FIELD(purchaseOrderStatus, 0, 1, 3, 2, 4, 5), COALESCE(ipot.submittedAt, ipot.createdAt)`
 		);
 
 		let html = `
@@ -399,10 +406,11 @@ $(document).ready(function() {
             <thead>
                 <tr style="white-space: nowrap">
                     <th>Document No.</th>
-                    <th>Employee Name</th>
+                    <th>Prepared By</th>
                     <th>Reference No.</th>
+                    <th>Purchase Request Code</th>
                     <th>Project Name</th>
-                    <th>Reason</th>
+                    <th>Description</th>
                     <th>Current Approver</th>
                     <th>Date Created</th>
                     <th>Date Submitted</th>
@@ -419,6 +427,8 @@ $(document).ready(function() {
 				purchaseOrderID,
 				bidRecapID,
 				ibrtCreatedAt,
+				purchaseRequestID,
+				iprtCreatedAt,
                 projectID,
                 projectListCode,
                 projectListName,
@@ -435,7 +445,7 @@ $(document).ready(function() {
 			let remarks       = purchaseOrderRemarks ? purchaseOrderRemarks : "-";
 			let dateCreated   = moment(createdAt).format("MMMM DD, YYYY hh:mm:ss A");
 			let dateSubmitted = submittedAt ? moment(submittedAt).format("MMMM DD, YYYY hh:mm:ss A") : "-";
-			let dateApproved  = purchaseOrderStatus == 2 ? approversDate.split("|") : "-";
+			let dateApproved  = purchaseOrderStatus == 2 || purchaseOrderStatus == 5 ? approversDate.split("|") : "-";
 			if (dateApproved !== "-") {
 				dateApproved = moment(dateApproved[dateApproved.length - 1]).format("MMMM DD, YYYY hh:mm:ss A");
 			}
@@ -455,6 +465,7 @@ $(document).ready(function() {
 					<td>${getFormCode("PO", createdAt, purchaseOrderID )}</td>
 					<td>${fullname}</td>
 					<td>${bidRecapID ? getFormCode("BRF", ibrtCreatedAt, bidRecapID) : "-"}</td>
+					<td>${purchaseRequestID ? getFormCode("PR", iprtCreatedAt, purchaseRequestID) : "-"}</td>
 					<td>
 						<div>
 							${projectListName || '-'}
@@ -498,9 +509,9 @@ $(document).ready(function() {
 				LEFT JOIN ims_bid_recap_tbl AS ibrt USING(bidRecapID)
 				LEFT JOIN pms_project_list_tbl AS pplt ON pplt.projectListID = ibrt.projectID
 				LEFT JOIN hris_employee_list_tbl AS helt ON ipot.employeeID = helt.employeeID`,
-			`ipot.*, CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname, ipot.createdAt AS dateCreated, projectListCode, projectListName, ibrt.bidRecapID, ibrt.createdAt AS ibrtCreatedAt`,
+			`ipot.*, CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname, ipot.createdAt AS dateCreated, projectListCode, projectListName, ibrt.bidRecapID, ibrt.createdAt AS ibrtCreatedAt, iprt.createdAt AS iprtCreatedAt`,
 			`ipot.employeeID = ${sessionID}`,
-			`FIELD(purchaseOrderStatus, 0, 1, 3, 2, 4), COALESCE(ipot.submittedAt, ipot.createdAt)`
+			`FIELD(purchaseOrderStatus, 0, 1, 3, 2, 4, 5), COALESCE(ipot.submittedAt, ipot.createdAt)`
 		);
 
 		let html = `
@@ -508,10 +519,11 @@ $(document).ready(function() {
             <thead>
                 <tr style="white-space: nowrap">
                     <th>Document No.</th>
-                    <th>Employee Name</th>
+                    <th>Prepared By</th>
                     <th>Reference No.</th>
+                    <th>Purchase Request Code</th>
                     <th>Project Name</th>
-                    <th>Reason</th>
+                    <th>Description</th>
                     <th>Current Approver</th>
                     <th>Date Created</th>
                     <th>Date Submitted</th>
@@ -528,6 +540,8 @@ $(document).ready(function() {
 				purchaseOrderID,
 				bidRecapID,
 				ibrtCreatedAt,
+				purchaseRequestID,
+				iprtCreatedAt,
                 projectID,
                 projectListCode,
                 projectListName,
@@ -544,7 +558,7 @@ $(document).ready(function() {
 			let remarks       = purchaseOrderRemarks ? purchaseOrderRemarks : "-";
 			let dateCreated   = moment(createdAt).format("MMMM DD, YYYY hh:mm:ss A");
 			let dateSubmitted = submittedAt ? moment(submittedAt).format("MMMM DD, YYYY hh:mm:ss A") : "-";
-			let dateApproved  = purchaseOrderStatus == 2 ? approversDate.split("|") : "-";
+			let dateApproved  = purchaseOrderStatus == 2 || purchaseOrderStatus == 5 ? approversDate.split("|") : "-";
 			if (dateApproved !== "-") {
 				dateApproved = moment(dateApproved[dateApproved.length - 1]).format("MMMM DD, YYYY hh:mm:ss A");
 			}
@@ -563,6 +577,7 @@ $(document).ready(function() {
                 <td>${getFormCode("PO", createdAt, purchaseOrderID )}</td>
                 <td>${fullname}</td>
 				<td>${bidRecapID ? getFormCode("BRF", ibrtCreatedAt, bidRecapID) : "-"}</td>
+				<td>${purchaseRequestID ? getFormCode("PR", iprtCreatedAt, purchaseRequestID) : "-"}</td>
 				<td>
 					<div>
 						${projectListName || '-'}
@@ -597,7 +612,7 @@ $(document).ready(function() {
 
 
     // ----- FORM BUTTONS -----
-	function formButtons(data = false, isRevise = false) {
+	function formButtons(data = false, isRevise = false, isFromCancelledDocument = false) {
 		let button = "";
 		if (data) {
 			let {
@@ -617,9 +632,10 @@ $(document).ready(function() {
 					<button 
 						class="btn btn-submit px-5 p-2"  
 						id="btnSubmit" 
-						purchaseOrderID="${purchaseOrderID}"
+						purchaseOrderID="${encryptString(purchaseOrderID)}"
 						code="${getFormCode("P0", createdAt, purchaseOrderID)}"
-						revise=${isRevise}><i class="fas fa-paper-plane"></i>
+						revise="${isRevise}"
+						cancel="${isFromCancelledDocument}"><i class="fas fa-paper-plane"></i>
 						Submit
 					</button>`;
 
@@ -629,8 +645,10 @@ $(document).ready(function() {
 							class="btn btn-cancel btnCancel px-5 p-2" 
 							id="btnCancel"
 							revise="${isRevise}"
-							purchaseOrderID="${purchaseOrderID}"
-							code="${getFormCode("P0", createdAt, purchaseOrderID)}"><i class="fas fa-ban"></i> 
+							purchaseOrderID="${encryptString(purchaseOrderID)}"
+							code="${getFormCode("P0", createdAt, purchaseOrderID)}"
+							revise="${isRevise}"
+							cancel="${isFromCancelledDocument}"><i class="fas fa-ban"></i> 
 							Cancel
 						</button>`;
 					} else {
@@ -638,7 +656,7 @@ $(document).ready(function() {
 						<button 
 							class="btn btn-cancel px-5 p-2"
 							id="btnCancelForm" 
-							purchaseOrderID="${purchaseOrderID}"
+							purchaseOrderID="${encryptString(purchaseOrderID)}"
 							code="${getFormCode("P0", createdAt, purchaseOrderID)}"
 							revise=${isRevise}><i class="fas fa-ban"></i> 
 							Cancel
@@ -653,12 +671,23 @@ $(document).ready(function() {
 						<button 
 							class="btn btn-cancel px-5 p-2"
 							id="btnCancelForm" 
-							purchaseOrderID="${purchaseOrderID}"
+							purchaseOrderID="${encryptString(purchaseOrderID)}"
 							code="${getFormCode("P0", createdAt, purchaseOrderID)}"
 							status="${purchaseOrderStatus}"><i class="fas fa-ban"></i> 
 							Cancel
 						</button>`;
 					}
+				} else if (purchaseOrderStatus == 2) {
+					// DROP
+					button = `
+					<button type="button" 
+						class="btn btn-cancel px-5 p-2"
+						id="btnDrop" 
+						purchaseOrderID="${encryptString(purchaseOrderID)}"
+						code="${getFormCode("P0", createdAt, purchaseOrderID)}"
+						status="${purchaseOrderStatus}"><i class="fas fa-ban"></i> 
+						Drop
+					</button>`;
 				} else if (purchaseOrderStatus == 3) {
 					// DENIED - FOR REVISE
 					if (!isDocumentRevised(purchaseOrderID)) {
@@ -669,6 +698,32 @@ $(document).ready(function() {
 							purchaseOrderID="${encryptString(purchaseOrderID)}"
 							code="${getFormCode("P0", createdAt, purchaseOrderID)}"
 							status="${purchaseOrderStatus}"><i class="fas fa-clone"></i>
+							Revise
+						</button>`;
+					}
+				} else if (purchaseOrderStatus == 4) {
+					// CANCELLED - FOR REVISE
+					const data = getTableData(
+						`ims_purchase_order_tbl`,
+						`bidRecapID, inventoryVendorID, categoryType`,
+						`purchaseOrderID = ${purchaseOrderID}`,
+					);
+					const { bidRecapID, inventoryVendorID, categoryType } = data && data[0];
+					const isAllowedForRevise = getTableDataLength(
+						`ims_purchase_order_tbl`,
+						`purchaseOrderID`,
+						`bidRecapID = ${bidRecapID} AND inventoryVendorID = ${inventoryVendorID} AND categoryType = "${categoryType}" AND purchaseOrderStatus <> 3 AND purchaseOrderStatus <> 4`
+					);
+
+					if (!isDocumentRevised(purchaseOrderID) && isAllowedForRevise == 0) {
+						button = `
+						<button
+							class="btn btn-cancel px-5 p-2"
+							id="btnRevise" 
+							purchaseOrderID="${encryptString(purchaseOrderID)}"
+							code="${getFormCode("P0", createdAt, purchaseOrderID)}"
+							status="${purchaseOrderStatus}"
+							cancel="true"><i class="fas fa-clone"></i>
 							Revise
 						</button>`;
 					}
@@ -713,7 +768,6 @@ $(document).ready(function() {
 
 	// ----- GET BID RECAP LIST -----
 	function getBidRecapList(id = 0, status = 0, display = true) {
-		// const createdBRList = getTableData("ims_purchase_order_tbl", "bidRecapID", "purchaseOrderStatus <> 3 AND purchaseOrderStatus <> 4").map(br => br.bidRecapID);
 		const createdBRList = [];
 
 		const pendingBidRecap = getTableData(
@@ -733,31 +787,6 @@ $(document).ready(function() {
 			ibpt.bidRecapID = ${id}
 			GROUP BY ibpt.bidRecapID`
 		);
-
-		// const purchaseOrderList = getTableData(
-		// 	`ims_purchase_order_tbl`,
-		// 	`bidRecapID, inventoryVendorID, categoryType`,
-		// 	`purchaseOrderStatus <> 3 AND purchaseOrderStatus <> 4`);
-
-		// let tempBidRecapList = [], referenceNoList = [];
-		// bidRecapList.map(bidRecap => {
-		// 	const { bidRecapID, inventoryVendorID, categoryType } = bidRecap;
-		// 	if (tempBidRecapList.length > 0) {
-		// 		for(var i=0; i<tempBidRecapList.length; i++) {
-		// 			const tBidRecapID        = tempBidRecapList[i].bidRecapID;
-		// 			const tInventoryVendorID = tempBidRecapList[i].inventoryVendorID;
-		// 			const tCategoryType      = tempBidRecapList[i].categoryType;
-		// 			if (tBidRecapID != bidRecapID && tInventoryVendorID != inventoryVendorID && tCategoryType != categoryType) {
-		// 				tempBidRecapList.push({bidRecapID, inventoryVendorID, categoryType});
-		// 				referenceNoList.push(bidRecapID);
-		// 				break;
-		// 			}
-		// 		}
-		// 	} else {
-		// 		tempBidRecapList.push({bidRecapID, inventoryVendorID, categoryType});
-		// 		referenceNoList.push(bidRecap);
-		// 	}
-		// })
 
 		let html = ``;
 		if (!status || status == 0) {
@@ -799,15 +828,6 @@ $(document).ready(function() {
 	function getInventoryVendorOnBidRecap(bidRecapID = null, invVendorID = null) {
 		let html = `<option selected disabled>Select Vendor Code</option>`;
 		if (bidRecapID) {
-			// let vendorTable = getTableData(
-			// 	`ims_request_items_tbl AS irit
-			// 		LEFT JOIN ims_inventory_vendor_tbl AS iivt USING(inventoryVendorID)
-			// 	WHERE
-			// 		bidRecapID = ${bidRecapID}
-			// 		GROUP BY irit.inventoryVendorID`,
-			// 	`iivt.*`
-			// );
-
 			let vendorTable = getTableData(
 				`ims_bid_po_tbl AS ibpt
 					LEFT JOIN ims_inventory_vendor_tbl AS iivt USING(inventoryVendorID)
@@ -1035,7 +1055,7 @@ $(document).ready(function() {
 
 
 	// ----- GET ITEM ROW -----
-    function getItemRow(isProject = true, item = {}, readOnly = false) {
+    function getItemRow(isProject = true, item = {}, readOnly = false, isFromCancelledDocument = false) {
 		const attr = isProject ? `project="true"` : `company="true"`;
 		let {
 			requestItemID = "",
@@ -1141,7 +1161,8 @@ $(document).ready(function() {
 							value="${forPurchase}" 
 							minlength="1" 
 							maxlength="20" 
-							requred>
+							requred
+							${isFromCancelledDocument ? "disabled" : ""}>
 						<div class="invalid-feedback d-block" id="invalid-forPurchase"></div>
 					</div>
 				</td>
@@ -1349,7 +1370,7 @@ $(document).ready(function() {
 
 
 	// ----- GET CATEGORY TYPE TABLE -----
-	function getCategoryTypeTable(data = false, readOnly = false, isRevise = false) {
+	function getCategoryTypeTable(data = false, readOnly = false, isRevise = false, isFromCancelledDocument = false) {
 		let {
 			purchaseOrderID       = "",
 			bidRecapID            = "",
@@ -1384,7 +1405,7 @@ $(document).ready(function() {
 			let projectTotalCost = 0, companyTotalCost = 0;
 			let reviseProjectTotalCost = 0, reviseCompanyTotalCost = 0;
 			requestItemsData.filter(item => item.categoryType == "project").map(item => {
-				requestProjectItems += getItemRow(true, item, !isRevise);
+				requestProjectItems += getItemRow(true, item, !isRevise, isFromCancelledDocument);
 				// THIS IS FOR CREATION OF P.O.
 				const totalCost = +item.totalCost || 0;
 				projectTotalCost += totalCost;
@@ -1394,7 +1415,7 @@ $(document).ready(function() {
 				reviseProjectTotalCost += (unitCost * forPurchase);
 			})
 			requestItemsData.filter(item => item.categoryType == "company").map(item => {
-				requestCompanyItems += getItemRow(false, item, !isRevise);
+				requestCompanyItems += getItemRow(false, item, !isRevise, isFromCancelledDocument);
 				// THIS IS FOR CREATION OF P.O.
 				const totalCost = +item.totalCost || 0;
 				companyTotalCost += totalCost;
@@ -1422,16 +1443,6 @@ $(document).ready(function() {
 				lessEwt  = vatSales != 0 ? vatSales * 0.01 : 0;
 				grandTotalAmount = totalVat - lessEwt;
 			} 
-			// else if (total && isRevise) {
-			// 	total       = categoryType == "project" ? reviseProjectTotalCost : reviseCompanyTotalCost;
-			// 	discount    = 0;
-			// 	totalAmount = total - discount;
-			// 	vat      = isVatable ? totalAmount * 0.12 : 0;
-			// 	vatSales = totalAmount - vat;
-			// 	totalVat = vat + vatSales;
-			// 	lessEwt  = totalVat * 0.01;
-			// 	grandTotalAmount = totalVat - lessEwt;
-			// }
 
 		} else {
 			requestProjectItems += getItemRow(true);
@@ -1463,105 +1474,107 @@ $(document).ready(function() {
 					</tbody>
 				</table>
 				
-				<div class="row py-2">
-					<div class="offset-xl-8 offset-md-7 col-xl-4 col-md-5 col-sm-12 pt-3 pb-2">
-						<div class="row" style="font-size: 1.1rem; font-weight:bold">
-							<div class="col-6 text-left">Total :</div>
-							<div class="col-6 text-right text-danger"
-								project="true"
-								style="font-size: 1.05em"
-								id="total">
-								${formatAmount(total, true)}
+				<div class="col-12">
+					<div class="row py-2">
+						<div class="offset-lg-7 offset-xl-8 col-12 col-sm-12 col-lg-5 col-xl-4 col-xl-4 pt-3 pb-2">
+							<div class="row" style="font-size: 1.1rem">
+								<div class="col-6 col-lg-7 text-left">Total :</div>
+								<div class="col-6 col-lg-5 text-right text-dark"
+									project="true"
+									style="font-size: 1.05em"
+									id="total">
+									${formatAmount(total, true)}
+								</div>
 							</div>
-						</div>
-						<div class="row" style="font-size: 1.1rem; font-weight:bold">
-							<div class="col-6 text-left">Discount :</div>
-							<div class="col-6 text-right"
-								project="true">
-								<input 
-									type="text" 
-									class="form-control-plaintext amount py-0 text-danger border-bottom font-weight-bold"
-									min="0" 
-									max="9999999999"
-									minlength="1"
-									maxlength="20" 
-									name="discount" 
-									id="discount" 
-									style="font-size: 1.02em;"
-									value="${discount}"
-									${disabled}>
+							<div class="row" style="font-size: 1.1rem">
+								<div class="col-6 col-lg-7 text-left">Discount :</div>
+								<div class="col-6 col-lg-5 text-right text-dark"
+									project="true">
+									<input 
+										type="text" 
+										class="form-control-plaintext amount py-0 text-dark border-bottom"
+										min="0" 
+										max="9999999999"
+										minlength="1"
+										maxlength="20" 
+										name="discount" 
+										id="discount" 
+										style="font-size: 1.02em;"
+										value="${discount}"
+										${disabled}>
+								</div>
 							</div>
-						</div>
-						<div class="row" style="font-size: 1.1rem; font-weight:bold">
-							<div class="col-6 text-left">Total Amount:</div>
-							<div class="col-6 text-right text-danger"
-								project="true"
-								id="totalAmount"
-								style="font-size: 1.05em">
-								${formatAmount(totalAmount, true)}
+							<div class="row" style="font-size: 1.1rem">
+								<div class="col-6 col-lg-7 text-left">Total Amount:</div>
+								<div class="col-6 col-lg-5 text-right text-dark"
+									project="true"
+									id="totalAmount"
+									style="font-size: 1.05em">
+									${formatAmount(totalAmount, true)}
+								</div>
 							</div>
-						</div>
-						<div class="row" style="font-size: 1.1rem; font-weight:bold">
-							<div class="col-6 text-left">Vatable Sales:</div>
-							<div class="col-6 text-right text-danger"
-								project="true"
-								id="vatSales"
-								style="font-size: 1.05em">
-								${formatAmount(vatSales, true)}
+							<div class="row" style="font-size: 1.1rem">
+								<div class="col-6 col-lg-7 text-left">Vatable Sales:</div>
+								<div class="col-6 col-lg-5 text-right text-dark"
+									project="true"
+									id="vatSales"
+									style="font-size: 1.05em">
+									${formatAmount(vatSales, true)}
+								</div>
 							</div>
-						</div>
-						<div class="row" style="font-size: 1.1rem; font-weight:bold">
-							<div class="col-6 text-left">Vat 12%:</div>
-							<div class="col-6 text-right"
-								project="true">
-								<input 
-									type="text" 
-									class="form-control-plaintext amount py-0 text-danger border-bottom font-weight-bold"
-									min="0" 
-									max="9999999999"
-									minlength="1"
-									maxlength="20" 
-									name="vat" 
-									id="vat" 
-									style="font-size: 1.02em;"
-									value="${vat}"
-									readonly>
+							<div class="row" style="font-size: 1.1rem">
+								<div class="col-6 col-lg-7 text-left">Vat 12%:</div>
+								<div class="col-6 col-lg-5 text-right text-dark"
+									project="true">
+									<input 
+										type="text" 
+										class="form-control-plaintext amount py-0 text-dark border-bottom"
+										min="0" 
+										max="9999999999"
+										minlength="1"
+										maxlength="20" 
+										name="vat" 
+										id="vat" 
+										style="font-size: 1.02em;"
+										value="${vat}"
+										readonly>
+								</div>
 							</div>
-						</div>
-						<div class="row" style="font-size: 1.1rem; font-weight:bold">
-							<div class="col-6 text-left">Total:</div>
-							<div class="col-6 text-right text-danger"
-								project="true"
-								id="totalVat"
-								style="font-size: 1.05em">
-								${formatAmount(totalVat, true)}
+							<div class="row" style="font-size: 1.1rem">
+								<div class="col-6 col-lg-7 text-left">Total:</div>
+								<div class="col-6 col-lg-5 text-right text-dark"
+									project="true"
+									id="totalVat"
+									style="font-size: 1.05em">
+									${formatAmount(totalVat, true)}
+								</div>
 							</div>
-						</div>
-						<div class="row" style="font-size: 1.1rem; font-weight:bold">
-							<div class="col-6 text-left">Less EWT:</div>
-							<div class="col-6 text-right"
-								project="true">
-								<input 
-									type="text" 
-									class="form-control-plaintext amount py-0 text-danger border-bottom font-weight-bold"
-									min="0" 
-									max="9999999999"
-									minlength="1"
-									maxlength="20" 
-									name="lessEwt" 
-									id="lessEwt" 
-									style="font-size: 1.02em;"
-									value="${lessEwt}"
-									${disabled}>
+							<div class="row" style="font-size: 1.1rem">
+								<div class="col-6 col-lg-7 text-left">Less EWT:</div>
+								<div class="col-6 col-lg-5 text-right text-dark"
+									project="true">
+									<input 
+										type="text" 
+										class="form-control-plaintext amount py-0 text-dark border-bottom"
+										min="0" 
+										max="9999999999"
+										minlength="1"
+										maxlength="20" 
+										name="lessEwt" 
+										id="lessEwt" 
+										style="font-size: 1.02em;"
+										value="${lessEwt}"
+										${disabled}>
+								</div>
 							</div>
-						</div>
-						<div class="row" style="font-size: 1.3rem; font-weight:bold; border-bottom: 3px double black;">
-							<div class="col-7 text-left">Grand Total:</div>
-							<div class="col-5 text-right text-danger"
-								project="true"
-								id="grandTotalAmount"
-								style="font-size: 1.3em">
-								${formatAmount(grandTotalAmount, true)}
+							<div class="row pt-1" style="font-size: 1.3rem;; border-bottom: 3px double black; border-top: 1px solid black">
+								<div class="col-6 col-lg-7 text-left font-weight-bolder">Grand Total:</div>
+								<div class="col-6 col-lg-5 text-right text-danger font-weight-bolder"
+									project="true"
+									id="grandTotalAmount"
+									style="font-size: 1.3em">
+									${formatAmount(grandTotalAmount, true)}
+								</div>
 							</div>
 						</div>
 					</div>
@@ -1590,25 +1603,25 @@ $(document).ready(function() {
 						${requestCompanyItems}
 					</tbody>
 				</table>
-				
+
 				<div class="row py-2">
-					<div class="offset-md-8 col-md-4 col-sm-12 pt-3 pb-2">
-						<div class="row" style="font-size: 1.1rem; font-weight:bold">
-							<div class="col-6 text-left">Total :</div>
-							<div class="col-6 text-right text-danger"
-								project="true"
+					<div class="offset-lg-7 offset-xl-8 col-12 col-sm-12 col-lg-5 col-xl-4 col-xl-4 pt-3 pb-2">
+						<div class="row" style="font-size: 1.1rem">
+							<div class="col-6 col-lg-7 text-left">Total :</div>
+							<div class="col-6 col-lg-5 text-right text-dark"
+								company="true"
 								style="font-size: 1.05em"
 								id="total">
 								${formatAmount(total, true)}
 							</div>
 						</div>
-						<div class="row" style="font-size: 1.1rem; font-weight:bold">
-							<div class="col-6 text-left">Discount :</div>
-							<div class="col-6 text-right"
-								project="true">
+						<div class="row" style="font-size: 1.1rem">
+							<div class="col-6 col-lg-7 text-left">Discount :</div>
+							<div class="col-6 col-lg-5 text-right text-dark"
+								company="true">
 								<input 
 									type="text" 
-									class="form-control-plaintext amount py-0 text-danger border-bottom font-weight-bold"
+									class="form-control-plaintext amount py-0 text-dark border-bottom"
 									min="0" 
 									max="9999999999"
 									minlength="1"
@@ -1620,31 +1633,31 @@ $(document).ready(function() {
 									${disabled}>
 							</div>
 						</div>
-						<div class="row" style="font-size: 1.1rem; font-weight:bold">
-							<div class="col-6 text-left">Total Amount:</div>
-							<div class="col-6 text-right text-danger"
-								project="true"
+						<div class="row" style="font-size: 1.1rem">
+							<div class="col-6 col-lg-7 text-left">Total Amount:</div>
+							<div class="col-6 col-lg-5 text-right text-dark"
+								company="true"
 								id="totalAmount"
 								style="font-size: 1.05em">
 								${formatAmount(totalAmount, true)}
 							</div>
 						</div>
-						<div class="row" style="font-size: 1.1rem; font-weight:bold">
-							<div class="col-6 text-left">Vatable Sales:</div>
-							<div class="col-6 text-right text-danger"
-								project="true"
+						<div class="row" style="font-size: 1.1rem">
+							<div class="col-6 col-lg-7 text-left">Vatable Sales:</div>
+							<div class="col-6 col-lg-5 text-right text-dark"
+								company="true"
 								id="vatSales"
 								style="font-size: 1.05em">
 								${formatAmount(vatSales, true)}
 							</div>
 						</div>
-						<div class="row" style="font-size: 1.1rem; font-weight:bold">
-							<div class="col-6 text-left">Vat 12%:</div>
-							<div class="col-6 text-right"
-								project="true">
+						<div class="row" style="font-size: 1.1rem">
+							<div class="col-6 col-lg-7 text-left">Vat 12%:</div>
+							<div class="col-6 col-lg-5 text-right text-dark"
+								company="true">
 								<input 
 									type="text" 
-									class="form-control-plaintext amount py-0 text-danger border-bottom font-weight-bold"
+									class="form-control-plaintext amount py-0 text-dark border-bottom"
 									min="0" 
 									max="9999999999"
 									minlength="1"
@@ -1656,22 +1669,22 @@ $(document).ready(function() {
 									readonly>
 							</div>
 						</div>
-						<div class="row" style="font-size: 1.1rem; font-weight:bold">
-							<div class="col-6 text-left">Total:</div>
-							<div class="col-6 text-right text-danger"
-								project="true"
+						<div class="row" style="font-size: 1.1rem">
+							<div class="col-6 col-lg-7 text-left">Total:</div>
+							<div class="col-6 col-lg-5 text-right text-dark"
+								company="true"
 								id="totalVat"
 								style="font-size: 1.05em">
 								${formatAmount(totalVat, true)}
 							</div>
 						</div>
-						<div class="row" style="font-size: 1.1rem; font-weight:bold">
-							<div class="col-6 text-left">Less EWT:</div>
-							<div class="col-6 text-right"
-								project="true">
+						<div class="row" style="font-size: 1.1rem">
+							<div class="col-6 col-lg-7 text-left">Less EWT:</div>
+							<div class="col-6 col-lg-5 text-right text-dark"
+								company="true">
 								<input 
 									type="text" 
-									class="form-control-plaintext amount py-0 text-danger border-bottom font-weight-bold"
+									class="form-control-plaintext amount py-0 text-dark border-bottom"
 									min="0" 
 									max="9999999999"
 									minlength="1"
@@ -1683,12 +1696,12 @@ $(document).ready(function() {
 									${disabled}>
 							</div>
 						</div>
-						<div class="row" style="font-size: 1.3rem; font-weight:bold; border-bottom: 3px double black;">
-							<div class="col-6 text-left">Grand Total:</div>
-							<div class="col-6 text-right text-danger"
-								project="true"
+						<div class="row pt-1" style="font-size: 1.3rem;; border-bottom: 3px double black; border-top: 1px solid black">
+							<div class="col-6 col-lg-7 text-left font-weight-bolder">Grand Total:</div>
+							<div class="col-6 col-lg-5 text-right text-danger font-weight-bolder"
+								company="true"
 								id="grandTotalAmount"
-								style="font-size: 1.05em">
+								style="font-size: 1.3em">
 								${formatAmount(grandTotalAmount, true)}
 							</div>
 						</div>
@@ -1916,20 +1929,14 @@ $(document).ready(function() {
 
 	// ----- UPDATE TOTAL AMOUNT -----
 	function updateTotalAmount(isProject = true) {
-		// const attr        = isProject ? "[project=true]" : "[company=true]";
-		// const quantityArr = $.find(`[name=quantity]${attr}`).map(element => element.value || "0");
-		// const unitCostArr = $.find(`[name=unitCost]${attr}`).map(element => element.value.replaceAll(",", "") || "0");
-		// const total = quantityArr.map((qty, index) => +qty * +unitCostArr[index]).reduce((a,b) => a + b, 0);
-
 		let total = 0;
 		$(".itemTableRow").each(function() {
-			const quantity = +getNonFormattedAmount($(`[name="forPurchase"]`, this).val()) || 0;
+			const quantity  = +getNonFormattedAmount($(`[name="forPurchase"]`, this).val()) || 0;
 			const unitCost  = +getNonFormattedAmount($(`.unitcost`, this).text());
 			const tempTotal = quantity * unitCost;
 			total += tempTotal;
 		})
 
-		// $(`#total${attr}`).text(formatAmount(total, true));
 		$(`#total`).text(formatAmount(total, true));
 
 		const discount    = getNonFormattedAmount($("#discount").val());
@@ -1968,10 +1975,6 @@ $(document).ready(function() {
 		const totalCost = quantity * unitCost;
 		$(this).closest("tr").find(".totalcost").text(formatAmount(totalCost, true));
 
-		// const quantity  = +$(`#quantity${index}${attr}`).val();
-		// const unitcost  = +$(`#unitcost${index}${attr}`).val().replaceAll(",", "");
-		// const totalcost = quantity * unitcost;
-		// $(`#totalcost${index}${attr}`).text(formatAmount(totalcost, true));
 		updateTotalAmount(isProject);
 	})
 	// ----- END KEYUP QUANTITY OR UNITCOST -----
@@ -1985,15 +1988,14 @@ $(document).ready(function() {
 		const totalAmount = total - discount;
 		$("#totalAmount").html(formatAmount(totalAmount, true));
 
-		const isVatable = $(`[name="inventoryVendorID"]`).length > 0 ? $(`[name="inventoryVendorID"] option:selected`).attr("vatable") == "true" : false;
+		const isVatable = $(`[name="inventoryVendorID"]`).length > 0 ? 
+			$(`[name="inventoryVendorID"] option:selected`).attr("vatable") == "true" : false;
 		let vat = 0, vatSales = 0;
 		if (isVatable) {
 			vatSales = totalAmount / 1.12;
 			vat      = totalAmount - vatSales;
 		}
 
-		// const vat      = getNonFormattedAmount($("[name=vat]").val())
-		// const vatSales = totalAmount - vat;
 		$("#vatSales").html(formatAmount(vatSales, true));
 		$(`[name="vat"]`).val(vat);
 
@@ -2035,7 +2037,7 @@ $(document).ready(function() {
 	})
 
 	$(document).on("change", "[name=contractFile]", function(e) {
-		const purchaseOrderID = $(this).attr("purchaseOrderID");
+		const purchaseOrderID = decryptString($(this).attr("purchaseOrderID"));
 		const files        = this.files || false;
 		if (files) {
 			const filesize    = files[0].size/1024/1024;
@@ -2184,7 +2186,7 @@ $(document).ready(function() {
 
 
     // ----- FORM CONTENT -----
-	function formContent(data = false, readOnly = false, isRevise = false) {
+	function formContent(data = false, readOnly = false, isRevise = false, isFromCancelledDocument = false) {
 		$("#page_content").html(preloader);
 		readOnly = isRevise ? false : readOnly;
 
@@ -2242,7 +2244,7 @@ $(document).ready(function() {
 		$("#btnBack").attr("status", purchaseOrderStatus);
 		$("#btnBack").attr("employeeID", employeeID);
 
-		let button = formButtons(data, isRevise);
+		let button = formButtons(data, isRevise, isFromCancelledDocument);
 
 		// ----- PRINT BUTTON -----
 		let approvedButton = '';
@@ -2258,12 +2260,12 @@ $(document).ready(function() {
 					<input type="file"
 						id="contractFile"
 						name="contractFile"
-						purchaseOrderID="${purchaseOrderID}"
+						purchaseOrderID="${encryptString(purchaseOrderID)}"
 						class="d-none"
 						accept="image/*, .pdf, .docx, .doc">
 					<button 
 						class="btn btn-secondary py-2" 
-						purchaseOrderID="${purchaseOrderID}"
+						purchaseOrderID="${encryptString(purchaseOrderID)}"
 						id="btnUploadContract">
 						<i class="fas fa-file-upload"></i> Upload Contract
 					</button>`;
@@ -2274,7 +2276,7 @@ $(document).ready(function() {
 				approvedButton += `
 					<button 
 						class="btn btn-info py-2" 
-						purchaseOrderID="${purchaseOrderID}"
+						purchaseOrderID="${encryptString(purchaseOrderID)}"
 						id="btnExcel">
 						<i class="fas fa-file-excel"></i> Excel
 					</button>
@@ -2513,7 +2515,7 @@ $(document).ready(function() {
             </div>
             <div class="col-md-4 col-sm-12">
                 <div class="form-group">
-                    <label>Employee Name</label>
+                    <label>Prepared By</label>
                     <input type="text" class="form-control" disabled value="${employeeFullname}">
                 </div>
             </div>
@@ -2531,7 +2533,7 @@ $(document).ready(function() {
             </div>
             <div class="col-md-12 col-sm-12">
                 <div class="form-group">
-                    <label>Reason ${!disabled ? "<code>*</code>" : ""}</label>
+                    <label>Description ${!disabled ? "<code>*</code>" : ""}</label>
                     <textarea class="form-control validate"
                         data-allowcharacters="[a-z][A-Z][0-9][ ][.][,][-][()]['][/][&]"
                         minlength="1"
@@ -2546,7 +2548,7 @@ $(document).ready(function() {
                 </div>
             </div>
 			<div class="col-sm-12" id="tableRequestItems">
-				${getCategoryTypeTable(data, readOnly, isRevise)}
+				${getCategoryTypeTable(data, readOnly, isRevise, isFromCancelledDocument)}
 			</div>
 
             <div class="col-md-12 text-right mt-3">
@@ -2601,7 +2603,7 @@ $(document).ready(function() {
 
 
     // ----- PAGE CONTENT -----
-	function pageContent(isForm = false, data = false, readOnly = false, isRevise = false) {
+	function pageContent(isForm = false, data = false, readOnly = false, isRevise = false, isFromCancelledDocument = false) {
 		$("#page_content").html(preloader);
 		if (!isForm) {
 			preventRefresh(false);
@@ -2623,9 +2625,9 @@ $(document).ready(function() {
 			myFormsContent();
 			updateURL();
 		} else {
-			headerButton(false, "", isRevise);
+			headerButton(false, "", isRevise, isFromCancelledDocument);
 			headerTabContent(false);
-			formContent(data, readOnly, isRevise);
+			formContent(data, readOnly, isRevise, isFromCancelledDocument);
 		}
 	}
 	viewDocument();
@@ -2643,7 +2645,7 @@ $(document).ready(function() {
 
 	// ----- OPEN EDIT FORM -----
 	$(document).on("click", ".btnEdit", function () {
-		const id = $(this).attr("id");
+		const id = decryptString($(this).attr("id"));
 		viewDocument(id);
 	});
 	// ----- END OPEN EDIT FORM -----
@@ -2651,7 +2653,7 @@ $(document).ready(function() {
 
 	// ----- VIEW DOCUMENT -----
 	$(document).on("click", ".btnView", function () {
-		const id = $(this).attr("id");
+		const id = decryptString($(this).attr("id"));
 		viewDocument(id, true);
 	});
 	// ----- END VIEW DOCUMENT -----
@@ -2659,15 +2661,17 @@ $(document).ready(function() {
 
 	// ----- VIEW DOCUMENT -----
 	$(document).on("click", "#btnRevise", function () {
-		const id = $(this).attr("purchaseOrderID");
-		viewDocument(id, false, true);
+		const id                    = decryptString($(this).attr("purchaseOrderID"));
+		const fromCancelledDocument = $(this).attr("cancel") == "true";
+		viewDocument(id, false, true, fromCancelledDocument);
 	});
 	// ----- END VIEW DOCUMENT -----
 
 
 	// ----- SAVE CLOSE FORM -----
 	$(document).on("click", "#btnBack", function () {
-		const id         = $(this).attr("purchaseOrderID");
+		const id         = decryptString($(this).attr("purchaseOrderID"));
+		const fromCancelledDocument = $(this).attr("cancel") == "true";
 		const revise     = $(this).attr("revise") == "true";
 		const employeeID = $(this).attr("employeeID");
 		const feedback   = $(this).attr("code") || getFormCode("PO", dateToday(), id);
@@ -2676,11 +2680,16 @@ $(document).ready(function() {
 		if (status != "false" && status != 0) {
 			
 			if (revise) {
-				const action = revise && "insert" || (id && feedback ? "update" : "insert");
+				const action = revise && !fromCancelledDocument && "insert" || (id ? "update" : "insert");
 				const data   = getPurchaseOrderData(action, "save", "0", id, status, revise);
-				data["purchaseOrderStatus"]   = 0;
-				data["revisePurchaseOrderID"] = id;
-				delete data["purchaseOrderID"];
+				if (!fromCancelledDocument) {
+					delete data["purchaseOrderID"];
+					data["revisePurchaseOrderID"] = id;
+				} else {
+					delete data["action"];
+					data["purchaseOrderStatus"] = 0;
+					data["action"]              = "update";
+				}
 	
 				savePurchaseOrder(data, "save", null, pageContent);
 			} else {
@@ -2705,16 +2714,23 @@ $(document).ready(function() {
 
 	// ----- SAVE DOCUMENT -----
 	$(document).on("click", "#btnSave, #btnCancel", function () {
-		const id       = $(this).attr("purchaseOrderID");
+		const id       = decryptString($(this).attr("purchaseOrderID"));
+		const isFromCancelledDocument = $(this).attr("cancel") == "true";
 		const revise   = $(this).attr("revise") == "true";
 		const feedback = $(this).attr("code") || getFormCode("PO", dateToday(), id);
-		const action   = revise && "insert" || (id && feedback ? "update" : "insert");
+		const action   = revise && !isFromCancelledDocument && "insert" || (id ? "update" : "insert");
 		const data     = getPurchaseOrderData(action, "save", "0", id, "0", revise);
 		data["purchaseOrderStatus"] = 0;
 
 		if (revise) {
-			data["revisePurchaseOrderID"] = id;
-			delete data["purchaseOrderID"];
+			if (!isFromCancelledDocument) {
+				delete data["purchaseOrderID"];
+				data["revisePurchaseOrderID"] = id;
+			} else {
+				delete data["action"];
+				data["purchaseOrderStatus"] = 0;
+				data["action"]              = "update";
+			}
 		}
 
 		savePurchaseOrder(data, "save", null, pageContent);
@@ -2767,7 +2783,8 @@ $(document).ready(function() {
 
 	// ----- SUBMIT DOCUMENT -----
 	$(document).on("click", "#btnSubmit", function () {
-		const id       = $(this).attr("purchaseOrderID");
+		const id       = decryptString($(this).attr("purchaseOrderID"));
+		const isFromCancelledDocument = $(this).attr("cancel") == "true";
 		const revise   = $(this).attr("revise") == "true";
 		const validate = validateForm("form_purchase_order");
 		const isValid  = checkTableMaterialsEquipment();
@@ -2776,12 +2793,14 @@ $(document).ready(function() {
 		const costSummary = checkCostSummary();
 
 		if (validate && isValid && costSummary) {
-			const action = revise && "insert" || (id ? "update" : "insert");
+			const action = revise && !isFromCancelledDocument && "insert" || (id ? "update" : "insert");
 			const data   = getPurchaseOrderData(action, "submit", "1", id, "0", revise);
 
 			if (revise) {
-				data["revisePurchaseOrderID"] = id;
-				delete data["purchaseOrderID"];
+				if (!isFromCancelledDocument) {
+					delete data["purchaseOrderID"];
+					data["revisePurchaseOrderID"] = id;
+				}
 			}
 
 			const employeeID = getNotificationEmployeeID(data["approversID"], data["approversDate"], true);
@@ -2804,7 +2823,7 @@ $(document).ready(function() {
 
 	// ----- CANCEL DOCUMENT -----
 	$(document).on("click", "#btnCancelForm", function () {
-		const id     = $(this).attr("purchaseOrderID");
+		const id     = decryptString($(this).attr("purchaseOrderID"));
 		const status = $(this).attr("status");
 		const action = "update";
 		const data   = getPurchaseOrderData(action, "cancelform", "4", id, status);
@@ -2816,7 +2835,7 @@ $(document).ready(function() {
 
 	// ----- APPROVE DOCUMENT -----
 	$(document).on("click", "#btnApprove", function () {
-		const id       = decryptString($(this).attr("purchaseOrderID"));
+		const id       = decryptString(decryptString($(this).attr("purchaseOrderID")));
 		const feedback = $(this).attr("code") || getFormCode("PO", dateToday(), id);
 		let tableData  = getTableData("ims_purchase_order_tbl", "", "purchaseOrderID = " + id);
 
@@ -2865,7 +2884,7 @@ $(document).ready(function() {
 
 	// ----- REJECT DOCUMENT -----
 	$(document).on("click", "#btnReject", function () {
-		const id       = $(this).attr("purchaseOrderID");
+		const id       = decryptString($(this).attr("purchaseOrderID"));
 		const feedback = $(this).attr("code") || getFormCode("PO", dateToday(), id);
 
 		$("#modal_purchase_order_content").html(preloader);
@@ -2897,7 +2916,7 @@ $(document).ready(function() {
 	});
 
 	$(document).on("click", "#btnRejectConfirmation", function () {
-		const id       = decryptString($(this).attr("purchaseOrderID"));
+		const id       = decryptString(decryptString($(this).attr("purchaseOrderID")));
 		const feedback = $(this).attr("code") || getFormCode("PO", dateToday(), id);
 
 		const validate = validateForm("modal_purchase_order");
@@ -2933,6 +2952,23 @@ $(document).ready(function() {
 		} 
 	});
 	// ----- END REJECT DOCUMENT -----
+
+
+	// ----- DROP DOCUMENT -----
+	$(document).on("click", "#btnDrop", function() {
+		const purchaseOrderID = decryptString($(this).attr("purchaseOrderID"));
+		const feedback          = $(this).attr("code") || getFormCode("PO", dateToday(), id);
+
+		const id = decryptString($(this).attr("purchaseOrderID"));
+		let data = {};
+		data["purchaseOrderID"] = purchaseOrderID;
+		data["action"] = "update";
+		data["method"] = "drop";
+		data["updatedBy"] = sessionID;
+
+		savePurchaseOrder(data, "drop", null, pageContent);
+	})
+	// ----- END DROP DOCUMENT -----
 
 
 	// ----- NAV LINK -----
@@ -2989,7 +3025,7 @@ $(document).ready(function() {
 
 	// ----- DOWNLOAD EXCEL -----
 	$(document).on("click", "#btnExcel", function() {
-		const purchaseOrderID = $(this).attr("purchaseorderid");
+		const purchaseOrderID = decryptString($(this).attr("purchaseOrderID"));
 		const url = `${base_url}ims/purchase_order/downloadExcel?id=${purchaseOrderID}`;
 		window.location.replace(url); 
 	})
@@ -3032,6 +3068,11 @@ function getConfirmation(method = "submit") {
 			swalTitle = `CANCEL ${title.toUpperCase()}`;
 			swalText  = "Are you sure to cancel this document?";
 			swalImg   = `${base_url}assets/modal/cancel.svg`;
+			break;
+		case "drop":
+			swalTitle = `DROP ${title.toUpperCase()}`;
+			swalText  = "Are you sure to drop this document?";
+			swalImg   = `${base_url}assets/modal/drop.svg`;
 			break;
 		case "uploadcontract":
 			swalTitle = `UPLOAD CONTRACT`;
@@ -3093,7 +3134,9 @@ function savePurchaseOrder(data = null, method = "submit", notificationData = nu
 							swalTitle = `${getFormCode("PO", dateCreated, insertedID)} approved successfully!`;
 						} else if (method == "deny") {
 							swalTitle = `${getFormCode("PO", dateCreated, insertedID)} denied successfully!`;
-						}	
+						} else if (method == "drop") {
+							swalTitle = `${getFormCode("PO", dateCreated, insertedID)} dropped successfully!`;
+						}
 		
 						if (isSuccess == "true") {
 							setTimeout(() => {

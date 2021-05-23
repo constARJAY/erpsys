@@ -33,7 +33,7 @@ class InventoryReceiving_model extends CI_Model {
         return "false|System error: Please contact the system administrator for assistance!";
     }
 
-    public function deleteServicesAndScopes($id = 0)
+    public function deleteItemAndSerial($id = 0)
     {
         $query1 = $this->db->delete("ims_inventory_receiving_details_tbl", ["inventoryReceivingID" => $id]);
         $query2 = $this->db->delete("ims_receiving_serial_number_tbl", ["inventoryReceivingID" => $id]);
@@ -74,32 +74,6 @@ class InventoryReceiving_model extends CI_Model {
         return false;
     }
 
-    // public function updateOrderedPending($scopes,$service){
-
-    //     $itemID =  $service[0]["itemID"];
-    //     $purchaseOrderID =   $service[0]["purchaseOrderID"];
-
-        
-    //     $query = $this->db->query("SELECT orderedPending
-    //     FROM ims_request_items_tbl as irit  
-    //     LEFT JOIN  ims_purchase_request_tbl as iprt ON iprt.purchaseRequestID  = irit.purchaseRequestID
-    //     LEFT JOIN  ims_purchase_order_tbl as ipot ON ipot.purchaseRequestID =  iprt.purchaseRequestID 
-    //     WHERE
-    //     ipot.purchaseOrderID = $purchaseOrderID AND irit.itemID = $itemID;
-    //     ");
-
-    //     $getOrderedPendingOld = $query->row()->orderedPending; // get the old orderedPending
-
-    //     $passedRemainingOrdered = $getOrderedPendingOld - $service[0]['itemID'];
-
-    //     $query = $this->db->query("UPDATE ims_request_items_tbl as irit  
-    //     LEFT JOIN  ims_purchase_request_tbl as iprt ON iprt.purchaseRequestID  = irit.purchaseRequestID
-    //     LEFT JOIN  ims_purchase_order_tbl as ipot ON ipot.purchaseRequestID =  iprt.purchaseRequestID 
-    //     SET orderedPending = $passedRemainingOrdered;
-    //     WHERE ipot.purchaseOrderID = $purchaseOrderID AND irit.itemID= $itemID;
-    //     ");
-    // }
-
     public function updateOrderedPending($inventoryReceivingID = null)
     {
         if ($inventoryReceivingID) {
@@ -109,17 +83,17 @@ class InventoryReceiving_model extends CI_Model {
             foreach ($result as $res) {
                 $requestItemID = $res["requestItemID"];
                 $received      = $res["received"];
-                $sql2 = "SELECT orderedPending, forPurchase FROM ims_request_items_tbl WHERE requestItemID = $requestItemID";
-                $query2 = $this->db->query($sql2);
+                $sql2    = "SELECT orderedPending, forPurchase FROM ims_request_items_tbl WHERE requestItemID = $requestItemID";
+                $query2  = $this->db->query($sql2);
                 $result2 = $query2 ? $query2->row() : false;
                 if ($result2) {
-                    $oldOrderedPending = $result2->orderedPending ?? $result->forPurchase;
+                    $oldOrderedPending = $result2->orderedPending && $result2->orderedPending != null ? $result2->orderedPending : $result2->forPurchase;
                     $newOrderedPending = $oldOrderedPending - $received;
-                    $data = ["orderedPending" => $newOrderedPending];
+                    $data   = ["orderedPending" => $newOrderedPending];
                     $query3 = $this->db->update("ims_request_items_tbl", $data, ["requestItemID" => $requestItemID]);
-                    return $query3 ? true : false;
                 }
             }
+            return true;
         }
         return false;
     }

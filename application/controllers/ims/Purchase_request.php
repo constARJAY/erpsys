@@ -26,7 +26,7 @@ class Purchase_request extends CI_Controller {
         $purchaseRequestID       = $this->input->post("purchaseRequestID") ?? null;
         $revisePurchaseRequestID = $this->input->post("revisePurchaseRequestID") ?? null;
         $employeeID              = $this->input->post("employeeID");
-        $costEstimateID          = $this->input->post("costEstimateID") ?? null;
+        $billMaterialID          = $this->input->post("billMaterialID") ?? null;
         $projectID               = $this->input->post("projectID") ?? null;
         $approversID             = $this->input->post("approversID") ?? null;
         $approversStatus         = $this->input->post("approversStatus") ?? null;
@@ -45,7 +45,7 @@ class Purchase_request extends CI_Controller {
         $purchaseRequestData = [
             "revisePurchaseRequestID" => $revisePurchaseRequestID,
             "employeeID"              => $employeeID,
-            "costEstimateID"          => $costEstimateID,
+            "billMaterialID"          => $billMaterialID,
             "projectID"               => $projectID,
             "approversID"             => $approversID,
             "approversStatus"         => $approversStatus,
@@ -79,7 +79,7 @@ class Purchase_request extends CI_Controller {
                 ];
                 // ----- UPDATE BRAND NAME IN REQUEST ITEMS -----
                 if ($purchaseRequestStatus == 2) {
-                    $this->purchaserequest->updateRequestItemsBrandName($purchaseRequestID, $costEstimateID);
+                    $this->purchaserequest->updateRequestItemsBrandName($purchaseRequestID, $billMaterialID);
                 }
                 // ----- END UPDATE BRAND NAME IN REQUEST ITEMS -----
             } else if ($method == "deny") {
@@ -90,6 +90,12 @@ class Purchase_request extends CI_Controller {
                     "purchaseRequestRemarks" => $purchaseRequestRemarks,
                     "updatedBy"              => $updatedBy,
                 ];
+            } else if ($method == "drop") {
+                $purchaseRequestData = [
+                    "revisePurchaseRequestID" => $revisePurchaseRequestID,
+                    "purchaseRequestStatus"   => 5,
+                    "updatedBy"               => $updatedBy,
+                ]; 
             }
         }
 
@@ -105,7 +111,7 @@ class Purchase_request extends CI_Controller {
                     foreach($items as $index => $item) {
                         $temp = [
                             // "requestItemID"     => $item["requestItemID"] != "null" ? $item["requestItemID"] : null,
-                            "costEstimateID"    => $costEstimateID,
+                            "billMaterialID"    => $billMaterialID,
                             "purchaseRequestID" => $purchaseRequestID,
                             "itemID"            => $item["itemID"] != "null" ? $item["itemID"] : null,
                             "itemName"          => $item["itemName"] != "null" ? $item["itemName"] : null,
@@ -155,7 +161,7 @@ class Purchase_request extends CI_Controller {
                         // ----- END UPDATE ITEMS FILE -----
                     }
 
-                    $savePurchaseRequestItems = $this->purchaserequest->savePurchaseRequestItems($action, $purchaseRequestItems, $purchaseRequestID, $costEstimateID);
+                    $savePurchaseRequestItems = $this->purchaserequest->savePurchaseRequestItems($action, $purchaseRequestItems, $purchaseRequestID, $billMaterialID);
                 }
 
             }

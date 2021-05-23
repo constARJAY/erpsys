@@ -167,23 +167,6 @@ class Purchase_order extends CI_Controller {
             "updatedBy"             => $updatedBy,
         ];
 
-        // $purchaseRequestID = $inventoryVendorID = "";
-        // if ($revisePurchaseOrderID) {
-        //     $getPurchaseOrder = $this->purchaseorder->getPurchaseOrder($revisePurchaseOrderID);
-        //     if ($getPurchaseOrder) {
-        //         $purchaseRequestID = $getPurchaseOrder->purchaseRequestID;
-        //         $inventoryVendorID = $getPurchaseOrder->inventoryVendorID;
-        //         $purchaseOrderData["purchaseRequestID"]    = $purchaseRequestID;
-        //         $purchaseOrderData["bidRecapID"]           = $getPurchaseOrder->bidRecapID;
-        //         $purchaseOrderData["categoryType"]         = $getPurchaseOrder->categoryType;
-        //         $purchaseOrderData["inventoryVendorID"]    = $inventoryVendorID;
-        //         $purchaseOrderData["vendorName"]           = $getPurchaseOrder->vendorName;
-        //         $purchaseOrderData["vendorAddress"]        = $getPurchaseOrder->vendorAddress;
-        //         $purchaseOrderData["vendorContactDetails"] = $getPurchaseOrder->vendorContactDetails;
-        //         $purchaseOrderData["vendorContactPerson"]  = $getPurchaseOrder->vendorContactPerson;
-        //     }
-        // }
-
         if ($action == "update") {
             unset($purchaseOrderData["revisePurchaseOrderID"]);
 
@@ -207,6 +190,12 @@ class Purchase_order extends CI_Controller {
                     "purchaseOrderRemarks" => $purchaseOrderRemarks,
                     "updatedBy"            => $updatedBy,
                 ];
+            } else if ($method == "drop") {
+                $purchaseOrderData = [
+                    "revisePurchaseOrderID" => $revisePurchaseOrderID,
+                    "purchaseOrderStatus"   => 5,
+                    "updatedBy"             => $updatedBy,
+                ]; 
             }
         }
 
@@ -708,6 +697,11 @@ class Purchase_order extends CI_Controller {
         header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         header('Content-Disposition: attachment; filename="'. urlencode($fileName).'"');
         $writer->save('php://output');
+        // $reader = new Xlsx();
+        // $reader->setReadDataOnly(false);
+        // header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        // header('Content-Disposition: attachment; filename="'. urlencode($fileName).'"');
+        // $writer->save('php://output');
     }
 
     public function downloadExcel()
