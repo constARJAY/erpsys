@@ -128,10 +128,22 @@ $(document).ready(function() {
 		return moment(new Date).format("YYYY-MM-DD HH:mm:ss");
 	};
 
-        const inventoryStorageList = getTableData(
-            "ims_inventory_storage_tbl LEFT JOIN  ims_list_stocks_tbl USING(inventoryStorageID) LEFT JOIN ims_list_stocks_details_tbl USING(listStocksID) LEFT JOIN ims_inventory_item_tbl USING(itemID)", 
-			"inventoryStorageID,inventoryStorageCode,inventoryStorageOfficeName,itemID, receivingQuantity",
-            "itemStatus = 1 AND inventoryStorageStatus =1");
+        // const inventoryStorageList = getTableData(
+        //     "ims_inventory_storage_tbl LEFT JOIN  ims_list_stocks_tbl USING(inventoryStorageID) LEFT JOIN ims_list_stocks_details_tbl USING(listStocksID) LEFT JOIN ims_inventory_item_tbl USING(itemID)", 
+		// 	"inventoryStorageID,inventoryStorageCode,inventoryStorageOfficeName,itemID, receivingQuantity",
+        //     "itemStatus = 1 AND inventoryStorageStatus =1");
+
+		const inventoryStorageList = getTableData(`ims_stock_in_total_tbl AS isit
+			LEFT JOIN ims_inventory_item_tbl 				AS iii 	ON isit.itemID = iii.itemID
+			LEFT JOIN ims_inventory_storage_tbl 			AS iis 	ON isit.inventoryStorageID = iis.inventoryStorageID
+			LEFT JOIN ims_stock_in_tbl 					AS isi 	ON isit.itemID = isi.itemID`, 
+			`
+			isi.barcode,
+			iis.inventoryStorageID,
+			iis.inventoryStorageCode,
+			iis.inventoryStorageOfficeName`,
+			``, // to be continued by adding the item ID
+			"");
 
         const inventoryItemList = getTableData(
             "ims_inventory_item_tbl LEFT JOIN ims_inventory_classification_tbl USING(classificationID)", 
@@ -210,15 +222,16 @@ $(document).ready(function() {
 				scrollCollapse: true,
 				columnDefs: [
 					{ targets: 0,  width: 50  },
-					{ targets: 1,  width: 120 },
-					{ targets: 2,  width: 280 },
-					{ targets: 3,  width: 150  },
-					{ targets: 4,  width: 120 },
-					{ targets: 5,  width: 280 },
-					{ targets: 6,  width: 40 },
-					{ targets: 7,  width: 40 },
-					{ targets: 8,  width: 200 },
+					{ targets: 1,  width: 150 },
+					{ targets: 2,  width: 120 },
+					{ targets: 3,  width: 280 },
+					{ targets: 4,  width: 150  },
+					{ targets: 5,  width: 120 },
+					{ targets: 6,  width: 280 },
+					{ targets: 7,  width: 100 },
+					{ targets: 8,  width: 60 },
 					{ targets: 9,  width: 200 },
+					{ targets: 10,  width: 200 },
 
 					// { targets: 0,  width: 150 },
 					// { targets: 1,  width: 150 },
@@ -243,15 +256,16 @@ $(document).ready(function() {
 				scrollX: true,
 				scrollCollapse: true,
 				columnDefs: [
-					{ targets: 0,  width: 120 },
-					{ targets: 1,  width: 280 },
-					{ targets: 2,  width: 150  },
-					{ targets: 3,  width: 120 },
-					{ targets: 4,  width: 280  },
-					{ targets: 5,  width: 40 },
-					{ targets: 6,  width: 40 },
-					{ targets: 7,  width: 200 },
-					{ targets: 8,  width: 200 }, 
+					{ targets: 0,  width: 150 },
+					{ targets: 1,  width: 120 },
+					{ targets: 2,  width: 280 },
+					{ targets: 3,  width: 150  },
+					{ targets: 4,  width: 120 },
+					{ targets: 5,  width: 280  },
+					{ targets: 6,  width: 100 },
+					{ targets: 7,  width: 60 },
+					{ targets: 8,  width: 200 },
+					{ targets: 9,  width: 200 }, 
 				],
 			});
 	}
@@ -590,37 +604,37 @@ $(document).ready(function() {
 	}
 	// ----- END FORM BUTTONS -----
 
-	// ----- UPDATE INVENTORYT NAME -----
-	function updateInventoryItemOptions() {
-		let projectItemIDArr = []; // 0 IS THE DEFAULT VALUE
-		let projectElementID = [];
+	// // ----- UPDATE INVENTORYT NAME -----
+	// function updateInventoryItemOptions() {
+	// 	let projectItemIDArr = []; // 0 IS THE DEFAULT VALUE
+	// 	let projectElementID = [];
 
-		$("[name=itemID][project=true]").each(function(i, obj) {
-			projectItemIDArr.push($(this).val());
-			projectElementID.push(`#${this.id}[project=true]`);
-			$(this).val() && $(this).trigger("change");
-		}) 
+	// 	$("[name=itemID][project=true]").each(function(i, obj) {
+	// 		projectItemIDArr.push($(this).val());
+	// 		projectElementID.push(`#${this.id}[project=true]`);
+	// 		$(this).val() && $(this).trigger("change");
+	// 	}) 
 		
 
-		projectElementID.map((element, index) => {
-			let html = `<option selected disabled>Select Item Name</option>`;
-			let itemList = [...inventoryItemList];
-			html += itemList.filter(item => !projectItemIDArr.includes(item.itemID) || item.itemID == projectItemIDArr[index]).map(item => {
-				return `
-				<option 
-					value        = "${item.itemID}" 
-					itemCode     = "${item.itemCode}"
-					categoryName = "${item.categoryName}"
-					uom          = "${item.unitOfMeasurementID}"
-					classificationname  = "${item.classificationName}"
-					${item.itemID == projectItemIDArr[index] && "selected"}>
-					${item.itemName}
-				</option>`;
-			})
-			$(element).html(html);
-		});
-	}
-	// ----- END UPDATE INVENTORYT NAME -----
+	// 	projectElementID.map((element, index) => {
+	// 		let html = `<option selected disabled>Select Item Name</option>`;
+	// 		let itemList = [...inventoryItemList];
+	// 		html += itemList.filter(item => !projectItemIDArr.includes(item.itemID) || item.itemID == projectItemIDArr[index]).map(item => {
+	// 			return `
+	// 			<option 
+	// 				value        = "${item.itemID}" 
+	// 				itemCode     = "${item.itemCode}"
+				
+	// 				uom          = "${item.unitOfMeasurementID}"
+	// 				classificationname  = "${item.classificationName}"
+	// 				${item.itemID == projectItemIDArr[index] && "selected"}>
+	// 				${item.itemName}
+	// 			</option>`;
+	// 		})
+	// 		$(element).html(html);
+	// 	});
+	// }
+	// // ----- END UPDATE INVENTORYT NAME -----
 
 
     // ----- GET INVENTORY ITEM -----
@@ -640,7 +654,7 @@ $(document).ready(function() {
             <option 
                 value        = "${item.itemID}" 
                 itemCode     = "${item.itemCode}"
-                categoryName = "${item.categoryName}"
+          
                 uom          = "${item.unitOfMeasurementID}"
                 classificationName          = "${item.classificationName}"
                 ${item.itemID == id && "selected"}>
@@ -684,9 +698,9 @@ $(document).ready(function() {
 
 
     // ----- GET STORAGE -----
-    function getStorage(id = null, isProject = true, display = true, itemID = null) {
+    function getStorage(id = null, isProject = true, display = true, barcodeval = null) {
        
-        let html   = `<option selected disabled>Select Storage Name</option>`;
+       
 		const attr = isProject ? "[project=true]" : "";
 
         let itemIDArr = []; // 0 IS THE DEFAULT VALUE
@@ -696,25 +710,22 @@ $(document).ready(function() {
 
 
 		let storageList = [ ...inventoryStorageList];
-		
-            html += storageList.map(item => {
+		let html   = `<option selected disabled>Select Storage Name</option>`;
+		html += storageList.map(item => {
                 
-            if( itemID == null){
+            if( barcodeval == null || barcodeval == "" ){
                 return `
                 <option 
                     value        = "${item.inventoryStorageID}" 
-                    storageCode     = "${item.inventoryStorageCode}"
-                    liststocks = "${item.receivingQuantity}"
-                    ${item.inventoryStorageID == id && "selected"}>
+                    storageCode     = "${item.inventoryStorageCode}">
                     ${item.inventoryStorageOfficeName}
                 </option>`;
             }else{
-                if(item.itemID == itemID ){
+                if(item.barcode === barcodeval ){
                     return `
                     <option 
                         value        = "${item.inventoryStorageID}" 
                         storageCode     = "${item.inventoryStorageCode}"
-                        liststocks = "${item.receivingQuantity}"
                         ${item.inventoryStorageID == id && "selected"}>
                         ${item.inventoryStorageOfficeName}
                     </option>`;
@@ -737,14 +748,15 @@ $(document).ready(function() {
             inventoryStorageID          = null,
 			itemCode                    = "",
 			itemName                    = "",
-			classificationName             = "",
-            inventoryStorageCode                 = "",
-			inventoryStorageOfficeName                 = "",
+			barcode      				= "",
+			classificationName          = "",
+            inventoryStorageOfficeCode  = "",
+			inventoryStorageOfficeName  = "",
 			itemID                      = null,
 			quantity                    = 1,
-			unitOfMeasurementID: uom    = "",
-			incidentInformation       = "",
-			incidentRecommendation       = ""
+			unitOfMeasurement: uom      = "",
+			incidentInformation         = "",
+			incidentRecommendation      = ""
 
 		} = item;
 
@@ -754,6 +766,11 @@ $(document).ready(function() {
 		
 			html += `
 			<tr class="itemTableRow">
+				<td>
+					<div class="barcode">
+						${barcode || "-"}
+					</div>
+				</td>
                 <td>
 					<div class="itemcode">
 						${itemCode || "-"}
@@ -773,7 +790,7 @@ $(document).ready(function() {
 
                 <td>
 					<div class="storagecode">
-						${inventoryStorageCode || "-"}
+						${inventoryStorageOfficeCode || "-"}
 					</div>
 				</td>
 				<td>
@@ -816,27 +833,33 @@ $(document).ready(function() {
 						<input type="checkbox" class="checkboxrow">
 					</div>
 				</td>
+				
+				<td class="text-center">
+					<div class="barcode">
+						<input 
+							type="text" 
+							class="form-control number text-center"
+							id="barcode" 
+							name="barcode" 
+							value="${barcode || ""}" 
+							data-allowcharacters="[0-9][a-z][A-Z]" 
+							mask="99999-99999-99999" 
+							minlength="17" 
+							maxlength="17"
+							required>
+						<div class="invalid-feedback d-block" id="invalid-barcode"></div>
+					</div>
+				</td>
                
 				<td>
 					<div class="itemcode">-</div>
 				</td>
+				
 				<td>
-					<div class="itemname">
-						<div class="form-group mb-0">
-							<select
-								class="form-control select2"
-								name="itemID"
-								id="itemID"
-								style="width: 100%"
-								required
-								${attr}>
-								${getInventoryItem(itemID, isProject)}
-							</select>
-							<div class="invalid-feedback d-block" id="invalid-itemID"></div>
-						</div>
-					</div>
+					<div class="itemname" name="itemname">-</div>
 				</td>
-                <td>
+                
+				<td>
 					<div class="classificationname" name="classificationname">-</div>
 				</td>
 
@@ -854,7 +877,7 @@ $(document).ready(function() {
 								required
 								disabled
 								${attr}>
-								${getStorage(inventoryStorageID, isProject,true,itemID)}
+								${getStorage(inventoryStorageID, isProject,true,barcode)}
 							</select>
 							<div class="invalid-feedback d-block" id="invalid-inventoryStorageID"></div>
 						</div>
@@ -929,19 +952,15 @@ $(document).ready(function() {
 			$("td .action .checkboxrow", this).attr("id", `checkboxrow${i}`);
 			$("td .action .checkboxrow", this).attr("project", `true`);
 
+			// BARCODE
+			$("td .barcode [name=barcode]", this).attr("id", `barcode${i}`);
+			$("td .barcode [name=barcode]", this).attr("project", `true`);
+
 			// ITEMCODE
 			$("td .itemcode", this).attr("id", `itemcode${i}`);
 
 			// ITEMNAME
-			$(this).find("select").eq(1).each(function(j) {
-				const itemID = $(this).val();
-				$(this).attr("index", `${i}`);
-				$(this).attr("project", `true`);
-				$(this).attr("id", `projectitemid${i}`)
-				if (!$(this).attr("data-select2-id")) {
-					$(this).select2({ theme: "bootstrap" });
-				}
-			});
+			$("td .itemname", this).attr("id", `itemname${i}`);
 
             // CLASSIFICATION
 			$("td .classificationname", this).attr("id", `classificationname${i}`);
@@ -1017,9 +1036,9 @@ $(document).ready(function() {
 						tableRow.fadeOut(500, function (){
 							$(this).closest("tr").remove();
 							updateTableItems();
-							$(`[name=itemID]${attr}`).each(function(i, obj) {
-								let itemID = $(this).val();
-								$(this).html(getInventoryItem(itemID, isProject));
+							$(`[name=barcode]${attr}`).each(function(i, obj) {
+								let barcode = $(this).val();
+								$(this).html(getInventoryItem(barcode, isProject));
 							}) 
                             // $(this).find(`[name=inventoryStorageID]${attr}`).each(function(i, obj) {
 							// 	let inventoryStorageID = $(this).val();
@@ -1053,43 +1072,39 @@ $(document).ready(function() {
     // ----- END SELECT PROJECT LIST -----
 
 
-    // ----- SELECT ITEM NAME -----
-    $(document).on("change", "[name=itemID]", function() {
-        const itemID     = $('option:selected', this).val();
-        const itemCode     = $('option:selected', this).attr("itemCode");
-        const categoryName = $('option:selected', this).attr("categoryName");
-        const uom          = $('option:selected', this).attr("uom");
-        const classificationName          = $('option:selected', this).attr("classificationname");
-		const isProject    = $(this).closest("tbody").attr("project") == "true";
-		const attr         = isProject ? "[project=true]" : "[company=true]";
+    // // ----- SELECT ITEM NAME -----
+    // $(document).on("change", "[name=itemID]", function() {
+    //     const itemID     = $('option:selected', this).val();
+    //     const itemCode     = $('option:selected', this).attr("itemCode");
+    //     const categoryName = $('option:selected', this).attr("categoryName");
+    //     const uom          = $('option:selected', this).attr("uom");
+    //     const classificationName          = $('option:selected', this).attr("classificationname");
+	// 	const isProject    = $(this).closest("tbody").attr("project") == "true";
+	// 	const attr         = isProject ? "[project=true]" : "[company=true]";
 
-        $(this).closest("tr").find(`.itemcode`).first().text(itemCode);
-        $(this).closest("tr").find(`.category`).first().text(categoryName);
-        $(this).closest("tr").find(`.uom`).first().text(uom);
-        $(this).closest("tr").find(`.classificationname`).first().text(classificationName);
+    //     $(this).closest("tr").find(`.itemcode`).first().text(itemCode);
+    //     $(this).closest("tr").find(`.category`).first().text(categoryName);
+    //     $(this).closest("tr").find(`.uom`).first().text(uom);
+    //     $(this).closest("tr").find(`.classificationname`).first().text(classificationName);
 
+    //     // Storage Field
+    //     $(this).closest("tr").find(`[name=quantity]`).first().val(1);
+    //     $(this).closest("tr").find(`.storagecode`).first().text('-');
+    //     $(this).closest("tr").find(`.liststocks`).first().text('-');
 
-		$(`[name=itemID]${attr}`).each(function(i, obj) {
-			let itemID = $(this).val();
-			$(this).html(getInventoryItem(itemID, isProject));
-		}) 
+	// 	$(`[name=itemID]${attr}`).each(function(i, obj) {
+	// 		let itemID = $(this).val();
+	// 		$(this).html(getInventoryItem(itemID, isProject));
+	// 	}) 
 
-        $(this).closest("tr").find(`[name=inventoryStorageID]${attr}`).each(function(i, obj) {
-			let inventoryStorageID = $(this).val();
-			$(this).html(getStorage(inventoryStorageID,isProject,true,itemID));
-			$(this).prop("disabled",false);
-		}) 
-
-		var tmp_StorageID =  $(this).closest("tr").find(`[name=inventoryStorageID]`).val();
-
-		if(tmp_StorageID  == null){
-		// Storage Field
-				$(this).closest("tr").find(`[name=quantity]`).first().val(1);
-				$(this).closest("tr").find(`.storagecode`).first().text('-');
-		}
+    //     $(this).closest("tr").find(`[name=inventoryStorageID]${attr}`).each(function(i, obj) {
+	// 		let inventoryStorageID = $(this).val();
+	// 		$(this).html(getStorage(inventoryStorageID,isProject,true,itemID));
+	// 		$(this).prop("disabled",false);
+	// 	}) 
 	
-    })
-    // ----- END SELECT ITEM NAME -----
+    // })
+    // // ----- END SELECT ITEM NAME -----
 
      // ----- SELECT STORAGE NAME -----
      $(document).on("change", "[name=inventoryStorageID]", function() {
@@ -1100,7 +1115,7 @@ $(document).ready(function() {
 		const attr         = isProject ? "[project=true]" : "[company=true]";
 
         $(this).closest("tr").find(`.storagecode`).first().text(storagecode);
-        $(this).closest("tr").find(`.liststocks`).first().text(liststocks);
+        // $(this).closest("tr").find(`.liststocks`).first().text(liststocks);
 
         // $(`[name=inventoryStorageID]${attr}`).each(function(i, obj) {
 		// 	let inventoryStorageID = $(this).val();
@@ -1110,16 +1125,163 @@ $(document).ready(function() {
     })
     // ----- END SELECT STORAGE NAME -----
 
+	// ----- BARCODE -----
+	var barcodeArray =[];
+	var barcodeLocationArray =[];
+    $(document).on("keyup change", "[name=barcode]", function() {
+		
+		const barcodeval   = $(this).val(); 
+		const barcodeID   = $(this).attr("id"); 
+		const StorageIDSender  = $("[name=inventoryStorageIDSender]").val();
+		const isProject    = $(this).closest("tbody").attr("project") == "true";
+		const attr         = isProject ? "[project=true]" : "[company=true]";
+
+		const data = getTableData(`ims_stock_in_total_tbl AS isit
+		LEFT JOIN ims_inventory_item_tbl 				AS iii 	ON isit.itemID = iii.itemID
+		LEFT JOIN ims_stock_in_tbl 					AS isi 	ON isit.itemID = isi.itemID
+		LEFT JOIN ims_inventory_classification_tbl AS iict ON iict.classificationID = iii.classificationID`, 
+		`isit.itemID,
+		 iii.createdAt,
+		 isit.itemName,
+		 isi.itemBrandName,
+		 isi.itemUom,
+		 isi.barcode,
+		 isi.stockInSerialNumber,
+		 iict.classificationName`,
+		 `isi.barcode = '${barcodeval}' GROUP BY isit.itemID`, // to be continued by adding the item ID 
+		"");
+
+			if(data.length !=0){
+				data.map((item) => {
+					let {
+						itemID ,
+						itemName,
+						itemUom,
+						createdAt,
+						classificationName
+					} = item;
+
+					let item_ID       		= itemID ? itemID : "";
+					let item_Name       		= itemName ? itemName : "";
+					let item_Uom       		= itemUom ? itemUom : "";
+					let created_At       	= createdAt ? createdAt : "";
+					let classification_Name = classificationName? classificationName :"";
+			
+					let	barcodeArrayLength = barcodeArray.length || 0;
+					if(barcodeval.length  ==17){
+
+						
+						if(itemName != null){
+
+							
+							let counter =1;
+							if(barcodeArrayLength !=0){
+								for(var loop1 =0;loop1<barcodeArrayLength; loop1++ ){
+									
+
+									if(barcodeArray[loop1] == barcodeval && barcodeLocationArray[loop1] != barcodeID){
+									
+										$(this).closest("tr").find("[name=barcode]").removeClass("is-valid").addClass("is-invalid");
+										$(this).closest("tr").find("#invalid-barcode").removeClass("is-valid").addClass("is-invalid");
+										$(this).closest("tr").find("#invalid-barcode").text('Barcode '+barcodeval+' already declared!');
+										return false;
+									}else{
+
+										if(counter == barcodeArrayLength){
+											barcodeArray[barcodeArrayLength -1] = barcodeval;
+											barcodeLocationArray[barcodeArrayLength -1] = barcodeID;
+										}
+										
+									}
+									counter++;
+								}
+							}else{
+								barcodeArray[0] = barcodeval;
+								barcodeLocationArray[0] = barcodeID;
+							}
+
+							$(this).closest("tr").find(`.itemcode`).first().text(getFormCode("ITM",created_At,item_ID));
+							$(this).closest("tr").find(`[name=barcode]`).first().attr('itemid',item_ID);
+							$(this).closest("tr").find(`.itemname`).first().text(item_Name);
+							$(this).closest("tr").find(`.uom`).first().text(item_Uom);
+							$(this).closest("tr").find(`.classificationname`).first().text(classification_Name);
+						
+
+							// Storage Field
+							
+							let url   = window.document.URL;
+							let arr   = url.split("?view_id=");
+							let isAdd = url.indexOf("?add");
+
+							if(isAdd != -1){
+								arr = url.split("?add=");
+								if (arr.length > 1) {
+									$(this).closest("tr").find(`[name=quantity]`).first().val(0);
+									$(this).closest("tr").find(`.storagecode`).first().text('-');
+								} 
+							}
+							
+
+
+							$(this).closest("tr").find(`[name=inventoryStorageID]${attr}`).each(function(i, obj) {
+								let inventoryStorageID = $(this).val();
+								$(this).html(getStorage(inventoryStorageID,isProject,true,barcodeval));
+								$(this).prop("disabled",false);
+							}) 
+			
+							$(this).closest("tr").find("[name=barcode]").removeClass("is-invalid");
+							$(this).closest("tr").find("#invalid-barcode").removeClass("is-invalid");
+							$(this).closest("tr").find("#invalid-barcode").text('');
+			
+						}else{
+							$(this).closest("tr").find("[name=barcode]").removeClass("is-valid").addClass("is-invalid");
+							$(this).closest("tr").find("#invalid-barcode").removeClass("is-valid").addClass("is-invalid");
+							$(this).closest("tr").find("#invalid-barcode").text('No Item Available!');
+						}
+
+					}else{
+						$(this).closest("tr").find("[name=barcode]").removeClass("is-valid").addClass("is-invalid");
+						$(this).closest("tr").find("#invalid-barcode").removeClass("is-valid").addClass("is-invalid");
+						$(this).closest("tr").find("#invalid-barcode").text('Please Input exact 17 Characters!');
+					}
+				})
+			}
+			else if(data.length == 0){
+				$(this).closest("tr").find(`.itemcode`).first().text("-");
+					$(this).closest("tr").find(`[name=barcode]`).first().attr('itemid',"-");
+					$(this).closest("tr").find(`.itemname`).first().text("-");
+					$(this).closest("tr").find(`.uom`).first().text("-");
+					$(this).closest("tr").find(`.classificationname`).first().text("-");
+					$(this).closest("tr").find(`[name=quantity]`).first().val(0);
+					$(this).closest("tr").find(`.storagecode`).first().text('-');
+					$(this).closest("tr").find(`[name=inventoryStorageID]`)
+
+					$(this).closest("tr").find("[name=barcode]").removeClass("is-valid").addClass("is-invalid");
+					$(this).closest("tr").find("#invalid-barcode").removeClass("is-valid").addClass("is-invalid");
+					$(this).closest("tr").find("#invalid-barcode").text('No Item Available!');
+			}else{
+					$(this).closest("tr").find("[name=barcode]").removeClass("is-invalid");
+					$(this).closest("tr").find("#invalid-barcode").removeClass("is-invalid");
+					$(this).closest("tr").find("#invalid-barcode").text('');
+			}
+
+    })
+    // ----- END BARCODE -----
+
 	// ----- KEYUP QUANTITY OR UNITCOST -----
 	$(document).on("change", "[name=quantity]", function() {
         const index     		= $(this).closest("tr").first().attr("index");
 		const isProject 		= $(this).closest("tbody").attr("project") == "true";
 		const attr      		= isProject ? "[project=true]" : "";
 		const quantity  		= $(`#quantity${index}${attr}`).val();
-        const selectedItemID  	= $(this).closest("tr").find('option:selected').val();
+        const selectedItemID  	= $(this).closest("tr").find('[name=barcode]').attr("itemid") || 0;
+        const inventoryStorageID  	= $(this).closest("tr").find('[name=inventoryStorageID]').val() || 0;
 
-		const data = getTableData("ims_inventory_item_tbl as itm LEFT JOIN ims_list_stocks_details_tbl as stcks USING(itemID) LEFT JOIN ims_list_stocks_tbl USING(listStocksID) LEFT JOIN ims_inventory_storage_tbl as isr USING(inventoryStorageID)", 
-        "itemID,receivingQuantity", "itemID ="+ selectedItemID, "");
+		const data = getTableData(`ims_inventory_item_tbl as itm 
+								LEFT JOIN ims_list_stocks_details_tbl as stcks USING(itemID) 
+								LEFT JOIN ims_list_stocks_tbl USING(listStocksID) 
+								LEFT JOIN ims_inventory_storage_tbl as isr USING(inventoryStorageID)`, 
+								"itemID,receivingQuantity", "itemID ="+ selectedItemID, "");
 
 			if(data.length >0){
 
@@ -1246,12 +1408,20 @@ $(document).ready(function() {
 				`ims_inventory_incident_details_tbl as imwd 
 				LEFT JOIN ims_inventory_item_tbl as iiit USING(itemID) 
 				LEFT JOIN ims_inventory_storage_tbl as iist ON imwd.inventoryStorageID =iist.inventoryStorageID
-				LEFT JOIN ims_list_stocks_tbl as ilst ON imwd.inventoryStorageID= ilst.inventoryStorageID
-                AND iist.inventoryStorageID = ilst.inventoryStorageID
-				LEFT JOIN ims_list_stocks_details_tbl as ilsdt  ON imwd.itemID = ilsdt.itemID
-                AND ilst.listStocksID = ilsdt.listStocksID
                 LEFT JOIN ims_inventory_classification_tbl USING(classificationID)`, 
-				`quantity, iiit.itemID, itemCode, imwd.itemName, imwd.unitOfMeasurementID,iist.inventoryStorageID,inventoryStorageCode,imwd.inventoryStorageOfficeName,receivingQuantity,quantity,incidentInformation,incidentRecommendation,imwd.classificationName`, 
+				`imwd.barcode,
+				 imwd.quantity,
+				 imwd.itemID,
+				 imwd.itemCode,
+				 imwd.itemName,
+				 imwd.unitOfMeasurement,
+				 imwd.inventoryStorageID,
+				 imwd.inventoryStorageOfficeCode,
+				 imwd.inventoryStorageOfficeName,
+				 imwd.quantity,
+				 imwd.incidentInformation,
+				 imwd.incidentRecommendation,
+				 imwd.classificationName`, 
 				`incidentID= ${incidentID} GROUP BY incidentDetailsID  ASC`);
 			requestItemsData.map(item => {
 				requestProjectItems += getItemRow(true, item, readOnly);
@@ -1444,8 +1614,9 @@ $(document).ready(function() {
 					<div class="text-primary font-weight-bold" style="font-size: 1.5rem;">Inventory Incident Materials and Equipment</div>
                     <table class="table table-striped" id="${tableProjectRequestItemsName}">
                         <thead>
-                            <tr style="white-space: nowrap" >
+                            <tr>
 								${checkboxProjectHeader}
+								<th>Barcode</th>
                                 <th>Item Code</th>
                                 <th>Item Name ${!disabled ? "<code>*</code>" : ""}</th>
                                 <th>Classification Name</th>
@@ -1480,10 +1651,11 @@ $(document).ready(function() {
 			updateTableItems();
 			initAll();
 			
-			updateInventoryItemOptions();
+			// updateInventoryItemOptions();
 			updateInventoryStorageOptions();
 			// projectID && projectID != 0 && $("[name=projectID]").trigger("change");
-			incidentID && incidentID != 0 &&  $("[name=itemID]").trigger("change");
+			// incidentID && incidentID != 0 &&  $("[name=itemID]").trigger("change");
+			incidentID && incidentID != 0 &&  $("[name=barcode]").trigger("change");
 			!incidentID && incidentID == 0 && $("#incidentTargetCompletion").val(moment(new Date).format("MMMM DD, YYYY"));
 			$("#incidentTargetCompletion").data("daterangepicker").minDate = moment();
 			return html;
@@ -1628,28 +1800,34 @@ $(document).ready(function() {
 			$(".itemTableRow").each(function(i, obj) {
 				const categoryType = $(this).closest("tbody").attr("project") == "true" ? "project" : "";
 
-				const itemID    = $("td [name=itemID]", this).val();	
-				const itemName    = $("td [name=itemID] option:selected", this).text().trim();		
-				const classificationname  = $("td [name=classificationname]", this).text();	
+				const barcode  = $("td [name=barcode]", this).val();
+				const itemCode    = $("td .itemcode", this).text().trim();	
+				const itemID    = $("td [name=barcode]", this).attr("itemid");	
+				const itemName    = $("td [name=itemname]", this).text().trim();		
+				const classificationname    = $("td [name=classificationname]", this).text().trim();		
 				const quantity  = +$("td [name=quantity]", this).val();	
-				const uom  = $("td [name=uom]", this).text();	
-				const inventoryStorageID  = +$("td [name=inventoryStorageID]", this).val();	
-				const inventoryStorageName    = $("td [name=inventoryStorageID] option:selected", this).text().trim();
+				const uom  = $("td [name=uom]", this).text().trim();
+				const inventoryStorageID  = +$("td [name=inventoryStorageID]", this).val();
+				const storagecode  = $("td .storagecode", this).text().trim();	
+				const storageName  = $("td [name=inventoryStorageID] option:selected", this).text().trim();		
 				const incidentInformation  = $("td [name=incidentInformation]", this).val()?.trim();	 
 				const incidentRecommendation  = $("td [name=incidentRecommendation]", this).val()?.trim();	
 
 				let temp = {
-					itemID,itemName,classificationname ,quantity,uom ,inventoryStorageID,inventoryStorageName,incidentInformation,incidentRecommendation
+					barcode,itemCode,itemID,itemName,classificationname,quantity,uom, inventoryStorageID,storagecode,storageName,incidentInformation,incidentRecommendation
 					
 				};
 
+				formData.append(`items[${i}][barcode]`, barcode);
+				formData.append(`items[${i}][itemCode]`, itemCode);
 				formData.append(`items[${i}][itemID]`, itemID);
 				formData.append(`items[${i}][itemName]`, itemName);
 				formData.append(`items[${i}][classificationname]`, classificationname);
 				formData.append(`items[${i}][quantity]`, quantity);
 				formData.append(`items[${i}][uom]`, uom);
 				formData.append(`items[${i}][inventoryStorageID]`, inventoryStorageID);
-				formData.append(`items[${i}][inventoryStorageName]`, inventoryStorageName);
+				formData.append(`items[${i}][storagecode]`, storagecode);
+				formData.append(`items[${i}][storageName]`, storageName);
 				formData.append(`items[${i}][incidentInformation]`, incidentInformation);
 				formData.append(`items[${i}][incidentRecommendation]`, incidentRecommendation);
 				formData.append(`items[${i}][createdBy]`, sessionID);

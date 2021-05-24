@@ -75,9 +75,14 @@ function formConfirmation(
 				swalImg   = `${base_url}assets/modal/reject.svg`;
 				break;
 			case "cancelform":
-				swalTitle = `CANCEL ${title.toUpperCase()} DOCUMENT`;
+				swalTitle = `CANCEL ${title.toUpperCase()}`;
 				swalText  = "Are you sure to cancel this document?";
 				swalImg   = `${base_url}assets/modal/cancel.svg`;
+				break;
+			case "drop":
+				swalTitle = `DROP ${title.toUpperCase()}`;
+				swalText  = "Are you sure to drop this document?";
+				swalImg   = `${base_url}assets/modal/drop.svg`;
 				break;
 			default:
 				swalTitle = `CANCEL ${title.toUpperCase()}`;
@@ -195,40 +200,6 @@ function cancelForm(
 			if (result.isConfirmed) {
 				const feedback = data["feedback"].split("-");
 				const overrideSuccessConfirmation = feedback[2] == "00000" && `${feedback[0]}-${feedback[1]}`;
-
-				/**
-				 * 
-				 *  I THINK IF IT'S A DRAFT DOCUMENT, NO NEED TO VALIDATE
-				 * 
-				 */
-
-				// const formID   = modalID ? modalID : containerID;
-				// const validate = validateForm(formID);
-				// if (validate) {
-				// 	let saveData = saveFormData(
-				// 		action,
-				// 		method,
-				// 		data,
-				// 		isObject,
-				// 		`SAVE ${title.toUpperCase()}`,
-				// 		overrideSuccessConfirmation
-				// 	);
-				// 	saveData.then((res) => {
-				// 		if (res) {
-				// 			callback && callback();
-				// 		} else {
-				// 			Swal.fire({
-				// 				icon:             "danger",
-				// 				title:            "Failed!",
-				// 				text:              res[1],
-				// 				showConfirmButton: false,
-				// 				timer:             2000,
-				// 			});
-				// 		}
-				// 	});
-				// } else {
-				// 	modalID && $("#" + modalID).modal("show");
-				// }
 
 				let saveData = saveFormData(
 					action,

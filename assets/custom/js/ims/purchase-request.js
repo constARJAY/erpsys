@@ -88,7 +88,6 @@ $(document).ready(function() {
 			}
 		}
 		if (view_id) {
-			// let id = decryptString(view_id);
 			let id = view_id;
 				id && isFinite(id) && loadData(id, isRevise, isFromCancelledDocument);
 		} else {
@@ -1725,7 +1724,7 @@ $(document).ready(function() {
 			purchaseRequestID       = "",
 			revisePurchaseRequestID = "",
 			employeeID              = "",
-			billMaterialID   = "",
+			billMaterialID          = "",
 			projectID               = "",
 			purchaseRequestReason   = "",
 			projectTotalAmount      = "0",
@@ -1754,7 +1753,7 @@ $(document).ready(function() {
 		$("#btnBack").attr("employeeID", employeeID);
 		$("#btnBack").attr("cancel", isFromCancelledDocument);
 
-		let disabled = readOnly ? "disabled" : "";
+		let disabled          = readOnly ? "disabled" : "";
 		let disabledReference = billMaterialID && billMaterialID != "0" ? "disabled" : disabled;
 		
 		let button = formButtons(data, isRevise, isFromCancelledDocument);
@@ -2236,13 +2235,13 @@ $(document).ready(function() {
 	// ----- END VIEW DOCUMENT -----
 
 
-    // ----- VIEW DOCUMENT -----
+    // ----- REVISE DOCUMENT -----
 	$(document).on("click", "#btnRevise", function () {
 		const id                    = decryptString($(this).attr("purchaseRequestID"));
 		const fromCancelledDocument = $(this).attr("cancel") == "true";
 		viewDocument(id, false, true, fromCancelledDocument);
 	});
-	// ----- END VIEW DOCUMENT -----
+	// ----- END REVISE DOCUMENT -----
 
 
 	// ----- SAVE CLOSE FORM -----
@@ -2478,7 +2477,7 @@ $(document).ready(function() {
 		</div>
 		<div class="modal-footer text-right">
 			<button type="button" class="btn btn-danger px-5 p-2" id="btnRejectConfirmation"
-			purchaseRequestID="${id}"
+			purchaseRequestID="${encryptString(id)}"
 			code="${feedback}"><i class="far fa-times-circle"></i> Deny</button>
 			<button type="button" class="btn btn-cancel btnCancel px-5 p-2" data-dismiss="modal"><i class="fas fa-ban"></i> Cancel</button>
 		</div>`;

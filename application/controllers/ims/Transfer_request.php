@@ -133,6 +133,7 @@ class Transfer_request extends CI_Controller {
                         $temp = [
                             "transferRequestID" => $transferRequestID,
                             "itemID"            => $item["itemID"] != "null" ? $item["itemID"] : null,
+                            "itemCode"          => $item["itemCode"],
                             "itemName"          => $item["itemName"],
                             "brandName"          => $item["brandName"],
                             "quantity"          => $item["quantity"],
@@ -185,12 +186,12 @@ class Transfer_request extends CI_Controller {
         echo json_encode($saveTransferData);
     }
 
-    function updateStorage(){
+    // function updateStorage(){
 
-        $saveupdateStorage = $this->purchaserequest->updateStorage();
-        echo json_encode($saveupdateStorage);
+    //     $saveupdateStorage = $this->purchaserequest->updateStorage();
+    //     echo json_encode($saveupdateStorage);
         
-    }
+    // }
 
 }
 ?>

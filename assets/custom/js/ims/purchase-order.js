@@ -48,7 +48,7 @@ $(document).ready(function() {
 			const tableData = getTableData(
 				`ims_purchase_order_tbl AS ipot
 					LEFT JOIN ims_purchase_request_tbl AS iprt USING(purchaseRequestID)`, 
-				`ipot.*, iprt.projectID, iprt.referenceCode, iprt.purchaseRequestReason`, 
+				`ipot.*, iprt.projectID, iprt.referenceCode, iprt.purchaseRequestReason, iprt.createdAt AS iprtCreatedAt`, 
 				"purchaseOrderID=" + id);
 
 			if (tableData.length > 0) {
@@ -1375,6 +1375,8 @@ $(document).ready(function() {
 			purchaseOrderID       = "",
 			bidRecapID            = "",
 			inventoryVendorID     = "",
+			purchaseOrderStatus   = "",
+			discountType          = "",
 			total                 = 0,
 			discount              = 0,
 			totalAmount           = 0,
@@ -1450,6 +1452,45 @@ $(document).ready(function() {
 		}
 
 		let html = "";
+
+		let discountDisplay = "";
+		if (purchaseOrderStatus && purchaseOrderStatus != "0" && purchaseOrderStatus != "4") {
+			discountDisplay = discountType == "percent" ? `
+			<div class="py-0 text-dark border-bottom">${formatAmount(discount)} %</div>` :
+			`<div class="py-0 text-dark border-bottom">${formatAmount(discount, true)}</div>`;
+		} else {
+			if (purchaseOrderStatus == "4" && !isFromCancelledDocument) {
+				discountDisplay = discountType == "percent" ? `
+				<div class="py-0 text-dark border-bottom">${formatAmount(discount)} %</div>` :
+				`<div class="py-0 text-dark border-bottom">${formatAmount(discount, true)}</div>`;
+			} else {
+				discountDisplay = `
+				<div class="input-group">
+					<div class="input-group-prepend">
+						<select class="select2"
+							name="discountType"
+							id="discountType"
+							style="width: 52px !important;">
+							<option value="amount" ${discountType == "amount" ? "selected" : ""}>₱</option>
+							<option value="percent" ${discountType == "percent" ? "selected" : ""}>%</option>
+						</select>
+					</div>
+					<input 
+						type="text" 
+						class="form-control-plaintext amount py-0 text-dark border-bottom"
+						min="0" 
+						max="${discountType == "percent" ? "100" : total}"
+						minlength="1"
+						maxlength="${formatAmount(discountType == "percent" ? "100" : total).length}" 
+						name="discount" 
+						id="discount" 
+						style="font-size: 1.02em;"
+						value="${discount}"
+						${disabled}>
+				</div>`;
+			}
+		}
+
 		if (categoryType == "project") {
 			html += `
 			<div class="w-100">
@@ -1490,18 +1531,7 @@ $(document).ready(function() {
 								<div class="col-6 col-lg-7 text-left">Discount :</div>
 								<div class="col-6 col-lg-5 text-right text-dark"
 									project="true">
-									<input 
-										type="text" 
-										class="form-control-plaintext amount py-0 text-dark border-bottom"
-										min="0" 
-										max="9999999999"
-										minlength="1"
-										maxlength="20" 
-										name="discount" 
-										id="discount" 
-										style="font-size: 1.02em;"
-										value="${discount}"
-										${disabled}>
+									${discountDisplay}
 								</div>
 							</div>
 							<div class="row" style="font-size: 1.1rem">
@@ -1618,19 +1648,8 @@ $(document).ready(function() {
 						<div class="row" style="font-size: 1.1rem">
 							<div class="col-6 col-lg-7 text-left">Discount :</div>
 							<div class="col-6 col-lg-5 text-right text-dark"
-								company="true">
-								<input 
-									type="text" 
-									class="form-control-plaintext amount py-0 text-dark border-bottom"
-									min="0" 
-									max="9999999999"
-									minlength="1"
-									maxlength="20" 
-									name="discount" 
-									id="discount" 
-									style="font-size: 1.02em;"
-									value="${discount}"
-									${disabled}>
+								project="true">
+								${discountDisplay}
 							</div>
 						</div>
 						<div class="row" style="font-size: 1.1rem">
@@ -1741,10 +1760,11 @@ $(document).ready(function() {
 				$("#tableRequestItems").html(preloader);
 				setTimeout(() => {
 					$("#tableRequestItems").html(table);
+					initAll();
 					initDataTables();
 					updateTableItems();
 					updateInventoryItemOptions();
-					initAmount("#discount", true);
+					initAmount("#discount", false);
 					initAmount("#lessEwt", true);
 					initAmount("#vat", true);
 				}, 500);
@@ -1927,6 +1947,23 @@ $(document).ready(function() {
     // ----- END INSERT ROW ITEM -----
 
 
+	// ----- SELECT DISCOUNT TYPE -----
+	$(document).on("change", `[name="discountType"]`, function() {
+		const discountType = $(this).val();
+		const totalAmount  = getNonFormattedAmount($(`#total`).text());
+		$(`[name="discount"]`).val("0").trigger("keyup");
+		if (discountType == "percent") {
+			$(`[name="discount"]`).attr("max", "100");
+			$(`[name="discount"]`).attr("maxlength", "6");
+		} else {
+			$(`[name="discount"]`).attr("max", totalAmount);
+			$(`[name="discount"]`).attr("maxlength", formatAmount(totalAmount).length);
+		}
+		initAmount("#discount");
+	})
+	// ----- END SELECT DISCOUNT TYPE -----
+
+
 	// ----- UPDATE TOTAL AMOUNT -----
 	function updateTotalAmount(isProject = true) {
 		let total = 0;
@@ -1940,7 +1977,12 @@ $(document).ready(function() {
 		$(`#total`).text(formatAmount(total, true));
 
 		const discount    = getNonFormattedAmount($("#discount").val());
-		const totalAmount = total - discount;
+		let totalAmount = total - discount;
+		const discountType = $(`[name="discountType"]`).val();
+		if (discountType == "percent") {
+			totalAmount = total - (total * (discount / 100));
+		}
+
 		$("#totalAmount").html(formatAmount(totalAmount, true));
 
 		const vat      = getNonFormattedAmount($("[name=vat]").val())
@@ -1985,7 +2027,11 @@ $(document).ready(function() {
 		const discount = getNonFormattedAmount($(this).val());
 		const total    = getNonFormattedAmount($("#total").text());
 		
-		const totalAmount = total - discount;
+		let totalAmount = total - discount;
+		const discountType = $(`[name="discountType"]`).val();
+		if (discountType == "percent") {
+			totalAmount = total - (total * (discount / 100));
+		}
 		$("#totalAmount").html(formatAmount(totalAmount, true));
 
 		const isVatable = $(`[name="inventoryVendorID"]`).length > 0 ? 
@@ -2112,6 +2158,8 @@ $(document).ready(function() {
 			data["vendorAddress"]        = $("[name=vendorAddress]").val();
 
 			data["paymentTerms"]     = $("[name=paymentTerms]").val()?.trim();
+			data["deliveryTerm"]     = $("[name=deliveryTerm]").val();
+			data["discountType"]     = $("[name=discountType]").val();
 			data["purchaseOrderReason"] = $("[name=purchaseOrderReason]").val()?.trim();
 			data["deliveryDate"]     = moment($("[name=deliveryDate]").val()).format("YYYY-MM-DD");
 			data["total"]            = getNonFormattedAmount($("#total").text());
@@ -2194,6 +2242,8 @@ $(document).ready(function() {
 			purchaseOrderID       = "",
 			revisePurchaseOrderID = "",
 			employeeID            = "",
+			purchaseRequestID     = "",
+			iprtCreatedAt         = "",
 			projectID             = "",
 			bidRecapID            = 0,
 			inventoryVendorID     = "",
@@ -2202,6 +2252,7 @@ $(document).ready(function() {
 			vendorContactDetails  = "",
 			vendorContactPerson   = "",
 			paymentTerms          = "",
+			deliveryTerm          = "",
 			deliveryDate          = "",
 			purchaseOrderReason   = "",
 			total                 = 0,
@@ -2286,10 +2337,10 @@ $(document).ready(function() {
 		// ----- END PRINT BUTTON -----
 
 		let reviseDocumentNo    = isRevise ? purchaseOrderID : revisePurchaseOrderID;
-		let documentHeaderClass = isRevise || revisePurchaseOrderID ? "col-lg-4 col-md-4 col-sm-12 px-1" : "col-lg-2 col-md-6 col-sm-12 px-1";
-		let documentDateClass   = isRevise || revisePurchaseOrderID ? "col-md-12 col-sm-12 px-0" : "col-lg-8 col-md-12 col-sm-12 px-1";
+		let documentHeaderClass = isRevise || revisePurchaseOrderID ? "col-lg-3 col-md-3 col-sm-12 px-1" : "col-lg-4 col-md-4 col-sm-12 px-1";
+		let documentDateClass   = isRevise || revisePurchaseOrderID ? "col-md-12 col-sm-12 px-0" : "col-12 px-1";
 		let documentReviseNo    = isRevise || revisePurchaseOrderID ? `
-		<div class="col-lg-4 col-md-4 col-sm-12 px-1">
+		<div class="col-lg-3 col-md-3 col-sm-12 px-1">
 			<div class="card">
 				<div class="body">
 					<small class="text-small text-muted font-weight-bold">Revised Document No.</small>
@@ -2310,6 +2361,16 @@ $(document).ready(function() {
                         <small class="text-small text-muted font-weight-bold">Document No.</small>
                         <h6 class="mt-0 text-danger font-weight-bold">
 							${purchaseOrderID && !isRevise ? getFormCode("PO", createdAt, purchaseOrderID) : "---"}
+						</h6>      
+                    </div>
+                </div>
+            </div>
+            <div class="${documentHeaderClass}">
+                <div class="card">
+                    <div class="body">
+                        <small class="text-small text-muted font-weight-bold">Purchase Request Code</small>
+                        <h6 class="mt-0 text-danger font-weight-bold">
+							${purchaseRequestID ? getFormCode("PR", iprtCreatedAt, purchaseRequestID) : "---"}
 						</h6>      
                     </div>
                 </div>
@@ -2483,7 +2544,7 @@ $(document).ready(function() {
                 </div>
             </div>
             
-            <div class="col-md-6 col-sm-12">
+            <div class="col-md-4 col-sm-12">
                 <div class="form-group">
                     <label>Payment Terms ${!disabled ? "<code>*</code>" : ""}</label>
                     <input type="text" 
@@ -2500,7 +2561,23 @@ $(document).ready(function() {
 					<div class="d-block invalid-feedback" id="invalid-paymentTerms"></div>
                 </div>
             </div>
-            <div class="col-md-6 col-sm-12">
+			<div class="col-md-4 col-sm-12">
+                <div class="form-group">
+                    <label>Delivery Term ${!disabled ? "<code>*</code>" : ""}</label>
+					<select class="form-control select2 validate"
+						name="deliveryTerm"
+						id="deliveryTerm"
+						style="width: 100%"
+						required
+						${disabled}>
+						<option selected disabled>${!disabled ? "Select Delivery Term" : "-"}</option>
+						<option value="Meet-up" ${deliveryTerm == "Meet-up" ? "selected" : ""}>Meet-up</option>
+						<option value="Delivery" ${deliveryTerm == "Delivery" ? "selected" : ""}>Delivery</option>
+					</select>
+					<div class="d-block invalid-feedback" id="invalid-deliveryTerm"></div>
+                </div>
+            </div>
+            <div class="col-md-4 col-sm-12">
                 <div class="form-group">
                     <label>Delivery Date ${!disabled ? "<code>*</code>" : ""}</label>
                     <input type="button" 
@@ -2567,7 +2644,7 @@ $(document).ready(function() {
 			updateInventoryItemOptions();
 			// projectID && projectID != 0 && $("[name=projectID]").trigger("change");
 			bidRecapID && bidRecapID != 0 && $(`[name="bidRecapID"]`).trigger("change");
-			initAmount("#discount", true);
+			initAmount("#discount", false);
 			initAmount("#lessEwt", true);
 			initAmount("#vat", true);
 
@@ -2764,10 +2841,14 @@ $(document).ready(function() {
 	function checkCostSummary() {
 		const total       = getNonFormattedAmount($(`#total`).text());
 		const discount    = getNonFormattedAmount($(`[name="discount"]`).val());
-		const totalAmount = total - discount;
 		const lessEwt     = getNonFormattedAmount($(`[name="lessEwt"]`).val());
+		const discountType = $(`[name="discountType"]`).val();
+		let totalAmount = total - discount;
+		if (discountType == "percent") {
+			totalAmount = total - (total * (discount / 100));
+		}
 
-		if (discount > total) {
+		if (totalAmount < 0) {
 			showNotification("danger", "Invalid discount value.");
 			$(`[name="discount"]`).focus();
 			return false;
@@ -2835,7 +2916,7 @@ $(document).ready(function() {
 
 	// ----- APPROVE DOCUMENT -----
 	$(document).on("click", "#btnApprove", function () {
-		const id       = decryptString(decryptString($(this).attr("purchaseOrderID")));
+		const id       = decryptString($(this).attr("purchaseOrderID"));
 		const feedback = $(this).attr("code") || getFormCode("PO", dateToday(), id);
 		let tableData  = getTableData("ims_purchase_order_tbl", "", "purchaseOrderID = " + id);
 
@@ -2916,7 +2997,7 @@ $(document).ready(function() {
 	});
 
 	$(document).on("click", "#btnRejectConfirmation", function () {
-		const id       = decryptString(decryptString($(this).attr("purchaseOrderID")));
+		const id       = decryptString($(this).attr("purchaseOrderID"));
 		const feedback = $(this).attr("code") || getFormCode("PO", dateToday(), id);
 
 		const validate = validateForm("modal_purchase_order");

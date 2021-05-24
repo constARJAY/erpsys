@@ -106,7 +106,13 @@ class PurchaseOrder_model extends CI_Model {
     public function getPurchaseOrder($id = null)
     {
         if ($id) {
-            $sql = "SELECT * FROM ims_purchase_order_tbl WHERE purchaseOrderID = $id";
+            $sql = "
+            SELECT 
+                ipot.*, ibrt.createdAt AS ibrtCreatedAt 
+            FROM 
+                ims_purchase_order_tbl AS ipot 
+                LEFT JOIN ims_bid_recap_tbl AS ibrt USING(bidRecapID)
+            WHERE ipot.purchaseOrderID = $id";
             $query = $this->db->query($sql);
             return $query ? $query->row() : false;
         }
@@ -150,7 +156,7 @@ class PurchaseOrder_model extends CI_Model {
                 $data["contactDetails"]   = $purchaseOrderData->vendorContactDetails ?? "-";
                 $data["contactPerson"]    = $purchaseOrderData->vendorContactPerson ?? "-";
                 $data["dateAproved"]      = date("F d, Y", strtotime($purchaseOrderData->submittedAt)) ?? "-";
-                $data["referenceNo"]      = $purchaseOrderData->bidRecapID ?? "-";
+                $data["referenceNo"]      = $purchaseOrderData->bidRecapID ? getFormCode("BRF", $purchaseOrderData->ibrtCreatedAt, $purchaseOrderData->bidRecapID) : "-";
                 $data["paymentTerms"]     = $purchaseOrderData->paymentTerms ?? "-";
                 $data["deliveryDate"]     = date("F d, Y", strtotime($purchaseOrderData->deliveryDate)) ?? "-";
                 $data["total"]            = $purchaseOrderData->total ?? "0";

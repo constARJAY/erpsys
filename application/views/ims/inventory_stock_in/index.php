@@ -11,7 +11,7 @@
                     <h1 class="mt-3">Inventory Stock In</h1>
                     <span>This module is used to manage inventory stock in details.</span>
                 </div>
-                <!-- <div class="col-lg-6 col-md-6 text-right" id="headerButton"></div> -->
+                <div class="col-lg-6 col-md-6 text-right" id="headerButton"></div>
             </div>
         </div>
     </div>

@@ -748,7 +748,7 @@ $(document).ready(function() {
 			quantity     = 1,
 			unitOfMeasurement: uom = "",
 			brandName = "",
-			createdAt =""
+			itemCode =""
 
 		} = item;
 
@@ -766,7 +766,7 @@ $(document).ready(function() {
 				</td>
 				<td>
 					<div class="itemcode">
-						${getFormCode("ITM",createdAt,itemID) || "-"}
+						${itemCode || "-"}
 					</div>
 				</td>
 				<td>
@@ -1069,13 +1069,6 @@ $(document).ready(function() {
 		LEFT JOIN ims_inventory_storage_tbl 			AS iis 	ON isit.inventoryStorageID = iis.inventoryStorageID
 		LEFT JOIN ims_transfer_request_tbl 			AS itr 	ON itr.inventoryStorageIDReceiver = iis.inventoryStorageID 	AND itr.transferRequestStatus = 2
 		LEFT JOIN ims_transfer_request_details_tbl 	AS itrd ON itrd.transferRequestID = itr.transferRequestID 			AND itrd.itemID = iii.itemID 
-		LEFT JOIN ims_material_withdrawal_details_tbl 	AS imwd ON imwd.inventoryStorageID = iis.inventoryStorageID 		AND imwd.itemID = iii.itemID
-		LEFT JOIN ims_material_withdrawal_tbl 			AS imw  ON imw.materialWithdrawalID = imwd.materialWithdrawalID 	AND imw.materialWithdrawaltStatus = 2
-		LEFT JOIN ims_inventory_incident_details_tbl 	AS iiid ON iiid.inventoryStorageID = iis.inventoryStorageID     	AND iiid.itemID = iii.itemID
-		LEFT JOIN ims_inventory_incident_tbl 			AS iit  ON iit.incidentID = iiid.incidentID 						AND iit.incidentStatus = 2
-		-- LEFT JOIN ims_borrowing_details_tbl 			AS ibd  ON ibd.inventoryStorageID = isit.inventoryStorageID 		AND ibd.itemID = iii.itemID
-		-- LEFT JOIN ims_borrowing_tbl 					AS ibt  ON ibt.borrowingID = ibd.borrowingID 						AND ibt.borrowingStatus = 2
-		-- LEFT JOIN ims_return_item_details_tbl 			AS iri  ON iri.inventoryStorageID = isit.inventoryStorageID 		AND iri.itemID = iii.itemID
 		LEFT JOIN ims_stock_in_tbl 					AS isi 	ON isit.itemID = isi.itemID AND isit.inventoryStorageID = isi.stockInLocationID`, 
 		`isit.itemID,
 		 iii.itemCode,
@@ -1087,7 +1080,7 @@ $(document).ready(function() {
 		 iis.inventoryStorageOfficeName,
 		 isi.barcode,
 		 isi.stockInSerialNumber,
-		 (IFNULL(SUM(isit.quantity),0) - IFNULL(SUM(imwd.quantity),0) - IFNULL(SUM(iiid.quantity),0)) AS stocks`,
+		 SUM(isit.quantity)  AS stocks`,
 		 `isi.barcode = '${barcodeval}' AND isi.stockInLocationID = '${StorageIDSender}'`, // to be continued by adding the item ID 
 		"");
 
@@ -1190,29 +1183,10 @@ $(document).ready(function() {
 		if(StorageIDSender != null ){
 
 			const data = getTableData(`ims_stock_in_total_tbl AS isit
-			LEFT JOIN ims_inventory_item_tbl 				AS iii 	ON isit.itemID = iii.itemID
-			LEFT JOIN ims_inventory_storage_tbl 			AS iis 	ON isit.inventoryStorageID = iis.inventoryStorageID
-			-- LEFT JOIN ims_transfer_request_tbl 			AS itr 	ON itr.inventoryStorageIDReceiver = iis.inventoryStorageID 	AND itr.transferRequestStatus = 2
-			-- LEFT JOIN ims_transfer_request_details_tbl 	AS itrd ON itrd.transferRequestID = itr.transferRequestID 			AND itrd.itemID = iii.itemID
-			LEFT JOIN ims_material_withdrawal_details_tbl 	AS imwd ON imwd.inventoryStorageID = iis.inventoryStorageID 		AND imwd.itemID = iii.itemID
-			LEFT JOIN ims_material_withdrawal_tbl 			AS imw  ON imw.materialWithdrawalID = imwd.materialWithdrawalID 	AND imw.materialWithdrawaltStatus = 2
-			LEFT JOIN ims_inventory_incident_details_tbl 	AS iiid ON iiid.inventoryStorageID = iis.inventoryStorageID     	AND iiid.itemID = iii.itemID
-			LEFT JOIN ims_inventory_incident_tbl 			AS iit  ON iit.incidentID = iiid.incidentID 						AND iit.incidentStatus = 2
-			-- LEFT JOIN ims_borrowing_details_tbl 			AS ibd  ON ibd.inventoryStorageID = isit.inventoryStorageID 		AND ibd.itemID = iii.itemID
-			-- LEFT JOIN ims_borrowing_tbl 					AS ibt  ON ibt.borrowingID = ibd.borrowingID 						AND ibt.borrowingStatus = 2
-			-- LEFT JOIN ims_return_item_details_tbl 			AS iri  ON iri.inventoryStorageID = isit.inventoryStorageID 		AND iri.itemID = iii.itemID
-			LEFT JOIN ims_stock_in_tbl 					AS isi 	ON isit.itemID = isi.itemID AND isit.inventoryStorageID = isi.stockInLocationID`, 
-			`isit.itemID,
-			 iii.itemCode,
-			 iii.createdAt,
-			 isit.itemName,
-			 isi.itemBrandName,
-			 isi.itemUom,
-			 iis.inventoryStorageCode,
-			 iis.inventoryStorageOfficeName,
-			 isi.barcode,
-			 isi.stockInSerialNumber,
-			 (IFNULL(SUM(isit.quantity),0) - IFNULL(SUM(imwd.quantity),0) - IFNULL(SUM(iiid.quantity),0)) AS stocks`,
+			LEFT JOIN ims_inventory_item_tbl 		AS iii 	ON isit.itemID = iii.itemID
+			LEFT JOIN ims_inventory_storage_tbl 	AS iis 	ON isit.inventoryStorageID = iis.inventoryStorageID
+			LEFT JOIN ims_stock_in_tbl AS isi 				ON isit.itemID = isi.itemID AND isit.inventoryStorageID = isi.stockInLocationID`,
+			`SUM(isit.quantity)  AS stocks`,
 			 `isi.barcode = '${barcodeval}' AND isi.stockInLocationID = '${StorageIDSender}'`, // to be continued by adding the item ID 
 			"");
 
@@ -1344,7 +1318,7 @@ $(document).ready(function() {
 			let requestItemsData = getTableData(
 				`ims_inventory_item_tbl AS iii
 				LEFT JOIN ims_transfer_request_details_tbl 	AS itrd ON itrd.itemID = iii.itemID`, 
-				`itrd.itemID,itrd.itemName,itrd.brandName,itrd.unitOfMeasurement,itrd.quantity,itrd.barcode,iii.createdAt,itrd.stocks`, 
+				`itrd.itemID,itrd.itemCode,itrd.itemName,itrd.brandName,itrd.unitOfMeasurement,itrd.quantity,itrd.barcode,itrd.stocks`, 
 				`transferRequestID = ${transferRequestID}`);
 			requestItemsData.map(item => {
 				requestProjectItems += getItemRow(true, item, readOnly);
@@ -1764,6 +1738,7 @@ $(document).ready(function() {
 				const categoryType = $(this).closest("tbody").attr("project") == "true" ? "project" : "";
 
 				const itemID    = $("td [name=barcode]", this).attr("itemid");	
+				const itemCode    = $("td .itemcode", this).text().trim();	
 				const itemName    = $("td [name=itemname]", this).text().trim();	
 				const brandName    = $("td [name=brand]", this).text().trim();	
 				const quantity  = +$("td [name=quantity]", this).val();	
@@ -1772,11 +1747,12 @@ $(document).ready(function() {
 				const barcode  = $("td [name=barcode]", this).val();	
 
 				let temp = {
-					itemID,itemName,brandName,quantity,uom,barcode,stocks
+					itemID,itemCode,itemName,brandName,quantity,uom,barcode,stocks
 					
 				};
 
 				formData.append(`items[${i}][itemID]`, itemID);
+				formData.append(`items[${i}][itemCode]`, itemCode);
 				formData.append(`items[${i}][itemName]`, itemName);
 				formData.append(`items[${i}][brandName]`, brandName);
 				formData.append(`items[${i}][quantity]`, quantity);

@@ -204,8 +204,7 @@ $(document).ready(function () {
 	function headerButton(isAdd = true, text = "Add") {
 		let html;
 		if (isAdd) {
-			html = `
-            <button type="button" class="btn btn-default btn-add" id="btnAdd"><i class="icon-plus"></i> &nbsp;${text}</button>`;
+			html = ``;
 		} else {
 			html = `
             <button type="button" class="btn btn-default btn-light" id="btnBack"><i class="fas fa-arrow-left"></i> &nbsp;Back</button>`;
@@ -392,11 +391,11 @@ $(document).ready(function () {
                 </div>
             </div>`;
 			$("#page_content").html(html);
-            headerButton(false);
+            headerButton(true);
 			myFormsContent();
 			updateURL();
 		} else {
-            headerButton(false);
+            headerButton(false, "");
 			formContent(data, readOnly);
 
 		}
@@ -452,7 +451,7 @@ $(document).ready(function () {
 		readOnly ? preventRefresh(false) : preventRefresh(true);
 
 		$("#btnBack").attr("inventoryReceivingID", inventoryReceivingID);
-		$("#btnBack").attr("status", inventoryReceivingStatus);
+		$("#btnBack").attr("status", 2);
 		$("#btnBack").attr("employeeID", employeeID);
 
 		let disabled = readOnly ? "disabled" : "";
@@ -1125,24 +1124,7 @@ $(document).ready(function () {
 			if (employeeID != sessionID) {
 				$("[redirect=forApprovalTab]").length > 0 && $("[redirect=forApprovalTab]").trigger("click");
 			}	
-		} else {
-			const action = id && feedback ? "update" : "insert";
-
-			const data = getData(action, 0, "save", feedback, id);
-
-			setTimeout(() => {
-				cancelForm(
-					"save",
-					action,
-					"OFFICIAL BUSINESS",
-					"",
-					"form_official_business",
-					data,
-					true,
-					pageContent
-				);
-			}, 300);
-		}
+		} 
 
 	});
 	// ----- END CLOSE FORM -----

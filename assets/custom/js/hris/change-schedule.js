@@ -1,4 +1,6 @@
 $(document).ready(function () {
+	const allowedUpdate = isUpdateAllowed(60);
+
 
 	// ----- MODULE APPROVER -----
 	const moduleApprover = getModuleApprover("change schedule");
@@ -25,9 +27,23 @@ $(document).ready(function () {
 	// ---- END GET EMPLOYEE DATA -----
 
 
+	// ----- IS DOCUMENT REVISED -----
+	function isDocumentRevised(id = null) {
+		if (id) {
+			const revisedDocumentsID = getTableData(
+				"hris_change_schedule_tbl", 
+				"reviseChangeScheduleID", 
+				"reviseChangeScheduleID IS NOT NULL AND changeScheduleID != 4");
+			return revisedDocumentsID.map(item => item.reviseChangeScheduleID).includes(id);
+		}
+		return false;
+	}
+	// ----- END IS DOCUMENT REVISED -----
+
+
 	// ----- VIEW DOCUMENT -----
-	function viewDocument(view_id = false, readOnly = false) {
-		const loadData = (id) => {
+	function viewDocument(view_id = false, readOnly = false, isRevise = false, isFromCancelledDocument = false) {
+		const loadData = (id, isRevise = false, isFromCancelledDocument = false) => {
 			const tableData = getTableData("hris_change_schedule_tbl", "", "changeScheduleID=" + id);
 
 			if (tableData.length > 0) {
@@ -54,8 +70,13 @@ $(document).ready(function () {
 				}
 
 				if (isAllowed) {
-					pageContent(true, tableData, isReadOnly);
-					updateURL(encryptString(id));
+					if (isRevise && employeeID == sessionID) {
+						pageContent(true, tableData, isReadOnly, true, isFromCancelledDocument);
+						updateURL(encryptString(id), true, true);
+					} else {
+						pageContent(true, tableData, isReadOnly);
+						updateURL(encryptString(id));
+					}
 				} else {
 					pageContent();
 					updateURL();
@@ -68,8 +89,8 @@ $(document).ready(function () {
 		}
 
 		if (view_id) {
-			let id = decryptString(view_id);
-				id && isFinite(id) && loadData(id);
+			let id = view_id;
+				id && isFinite(id) && loadData(id, isRevise, isFromCancelledDocument);
 		} else {
 			let url   = window.document.URL;
 			let arr   = url.split("?view_id=");
@@ -78,17 +99,28 @@ $(document).ready(function () {
 				let id = decryptString(arr[1]);
 					id && isFinite(id) && loadData(id);
 			} else if (isAdd != -1) {
-				pageContent(true);
+				arr = url.split("?add=");
+				if (arr.length > 1) {
+					let id = decryptString(arr[1]);
+						id && isFinite(id) && loadData(id, true);
+				} else {
+					const isAllowed = isCreateAllowed(46);
+					pageContent(isAllowed);
+				}
 			}
 		}
 		
 	}
 
-	function updateURL(view_id = 0, isAdd = false) {
+	function updateURL(view_id = 0, isAdd = false, isRevise = false) { 
 		if (view_id && !isAdd) {
 			window.history.pushState("", "", `${base_url}hris/change_schedule?view_id=${view_id}`);
-		} else if (!view_id && isAdd) {
-			window.history.pushState("", "", `${base_url}hris/change_schedule?add`);
+		} else if (isAdd) {
+			if (view_id && isRevise) {
+				window.history.pushState("", "", `${base_url}hris/change_schedule?add=${view_id}`);
+			} else {
+				window.history.pushState("", "", `${base_url}hris/change_schedule?add`);
+			}
 		} else {
 			window.history.pushState("", "", `${base_url}hris/change_schedule`);
 		}
@@ -182,7 +214,7 @@ $(document).ready(function () {
 
 
 	// ----- HEADER BUTTON -----
-	function headerButton(isAdd = true, text = "Add") {
+	function headerButton(isAdd = true, text = "Add", isRevise = false, isFromCancelledDocument = false) {
 		let html;
 		if (isAdd) {
 			if (isCreateAllowed(60)) {
@@ -191,7 +223,11 @@ $(document).ready(function () {
 			}
 		} else {
 			html = `
-            <button type="button" class="btn btn-default btn-light" id="btnBack"><i class="fas fa-arrow-left"></i> &nbsp;Back</button>`;
+            <button type="button" 
+				class="btn btn-default btn-light" 
+				id="btnBack"
+				revise="${isRevise}" 
+				cancel="${isFromCancelledDocument}"><i class="fas fa-arrow-left"></i> &nbsp;Back</button>`;
 		}
 		$("#headerButton").html(html);
 	}
@@ -203,7 +239,8 @@ $(document).ready(function () {
 		$("#tableForApprovalParent").html(preloader);
 
 		let scheduleData = getTableData(
-			"hris_change_schedule_tbl LEFT JOIN hris_employee_list_tbl USING(employeeID)",
+			`hris_change_schedule_tbl 
+				LEFT JOIN hris_employee_list_tbl USING(employeeID)`,
 			"hris_change_schedule_tbl.*, CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname",
 			`employeeID != ${sessionID} AND changeScheduleStatus != 0 AND changeScheduleStatus != 4`,
 			`FIELD(changeScheduleStatus, 0, 1, 3, 2, 4), COALESCE(hris_change_schedule_tbl.submittedAt, hris_change_schedule_tbl.createdAt)`
@@ -240,7 +277,7 @@ $(document).ready(function () {
 			let remarks       = changeScheduleRemarks ? changeScheduleRemarks : "-";
 			let dateCreated   = moment(createdAt).format("MMMM DD, YYYY hh:mm:ss A");
 			let dateSubmitted = submittedAt	? moment(submittedAt).format("MMMM DD, YYYY hh:mm:ss A") : "-";
-			let dateApproved  = changeScheduleStatus == 2 ? approversDate.split("|") : "-";
+			let dateApproved  = changeScheduleStatus == 2 || changeScheduleStatus == 5 ? approversDate.split("|") : "-";
 			if (dateApproved !== "-") {
 				dateApproved = moment(dateApproved[dateApproved.length - 1]).format("MMMM DD, YYYY hh:mm:ss A");
 			}
@@ -323,7 +360,7 @@ $(document).ready(function () {
 			let remarks       = changeScheduleRemarks ? changeScheduleRemarks : "-";
 			let dateCreated   = moment(createdAt).format("MMMM DD, YYYY hh:mm:ss A");
 			let dateSubmitted = submittedAt ? moment(submittedAt).format("MMMM DD, YYYY hh:mm:ss A") : "-";
-			let dateApproved  = changeScheduleStatus == 2 ? approversDate.split("|") : "-";
+			let dateApproved  = changeScheduleStatus == 2 || changeScheduleStatus == 5 ? approversDate.split("|") : "-";
 			if (dateApproved !== "-") {
 				dateApproved = moment(dateApproved[dateApproved.length - 1]).format("MMMM DD, YYYY hh:mm:ss A");
 			}
@@ -376,7 +413,7 @@ $(document).ready(function () {
 
 
 	// ----- FORM BUTTONS -----
-	function formButtons(data = false) {
+	function formButtons(data = false, isRevise = false, isFromCancelledDocument = false) {
 		let button = "";
 		if (data) {
 			let {
@@ -388,38 +425,93 @@ $(document).ready(function () {
 				createdAt            = new Date
 			} = data && data[0];
 
-			let isOngoing = approversDate
-				? approversDate.split("|").length > 0
-					? true
-					: false
-				: false;
+			let isOngoing = approversDate ? approversDate.split("|").length > 0 ? true : false : false;
 			if (employeeID === sessionID) {
-				if (changeScheduleStatus == 0) {
+				if (changeScheduleStatus == 0 || isRevise) {
 					// DRAFT
 					button = `
 					<button 
 						class="btn btn-submit px-5 p-2"  
 						id="btnSubmit" 
-						changeScheduleID="${changeScheduleID}"
-						code="${getFormCode("SCH", createdAt, changeScheduleID)}"><i class="fas fa-paper-plane"></i>
+						changeScheduleID="${encryptString(changeScheduleID)}"
+						code="${getFormCode("SCH", createdAt, changeScheduleID)}"
+						revise="${isRevise}"
+						cancel="${isFromCancelledDocument}"><i class="fas fa-paper-plane"></i>
 						Submit
-					</button>
-					<button 
-						class="btn btn-cancel px-5 p-2"
-						id="btnCancelForm" 
-						changeScheduleID="${changeScheduleID}"
-						code="${getFormCode("SCH", createdAt, changeScheduleID)}"><i class="fas fa-ban"></i> 
-						Cancel
 					</button>`;
+
+					if (isRevise) {
+						button += `
+						<button 
+							class="btn btn-cancel px-5 p-2"
+							id="btnCancel" 
+							changeScheduleID="${encryptString(changeScheduleID)}"
+							code="${getFormCode("SCH", createdAt, changeScheduleID)}"
+							revise="${isRevise}"
+							cancel="${isFromCancelledDocument}"><i class="fas fa-ban"></i> 
+							Cancel
+						</button>`;
+					} else {
+						button += `
+						<button type="button" 
+							class="btn btn-cancel px-5 p-2"
+							id="btnCancelForm" 
+							changeScheduleID="${encryptString(changeScheduleID)}"
+							code="${getFormCode("SCH", createdAt, changeScheduleID)}"
+							revise="${isRevise}"><i class="fas fa-ban"></i> 
+							Cancel
+						</button>`;
+					}
+
 				} else if (changeScheduleStatus == 1) {
+					// FOR APPROVAL
 					if (!isOngoing) {
 						button = `
 						<button 
 							class="btn btn-cancel px-5 p-2"
 							id="btnCancelForm" 
-							changeScheduleID="${changeScheduleID}"
-							code="${getFormCode("SCH", createdAt, changeScheduleID)}"><i class="fas fa-ban"></i> 
+							changeScheduleID="${encryptString(changeScheduleID)}"
+							code="${getFormCode("SCH", createdAt, changeScheduleID)}"
+							status="${changeScheduleStatus}"><i class="fas fa-ban"></i> 
 							Cancel
+						</button>`;
+					}
+				} else if (changeScheduleStatus == 2) {
+					// DROP
+					button = `
+					<button type="button" 
+						class="btn btn-cancel px-5 p-2"
+						id="btnDrop" 
+						changeScheduleID="${encryptString(changeScheduleID)}"
+						code="${getFormCode("SCH", createdAt, changeScheduleID)}"
+						status="${changeScheduleStatus}"><i class="fas fa-ban"></i> 
+						Drop
+					</button>`;
+				} else if (changeScheduleStatus == 3) {
+					// DENIED - FOR REVISE
+					if (!isDocumentRevised(changeScheduleID)) {
+						button = `
+						<button
+							class="btn btn-cancel px-5 p-2"
+							id="btnRevise" 
+							changeScheduleID="${encryptString(changeScheduleID)}"
+							code="${getFormCode("SCH", createdAt, changeScheduleID)}"
+							status="${changeScheduleStatus}"><i class="fas fa-clone"></i>
+							Revise
+						</button>`;
+					}
+				} else if (changeScheduleStatus == 4) {
+					// CANCELLED - FOR REVISE
+					if (!isDocumentRevised(changeScheduleID)) {
+						button = `
+						<button
+							class="btn btn-cancel px-5 p-2"
+							id="btnRevise" 
+							changeScheduleID="${encryptString(changeScheduleID)}"
+							code="${getFormCode("SCH", createdAt, changeScheduleID)}"
+							status="${changeScheduleStatus}"
+							cancel="true"><i class="fas fa-clone"></i>
+							Revise
 						</button>`;
 					}
 				}
@@ -462,11 +554,13 @@ $(document).ready(function () {
 
 
 	// ----- FORM CONTENT -----
-	function formContent(data = false, readOnly = false) {
+	function formContent(data = false, readOnly = false, isRevise = false, isFromCancelledDocument = false) {
 		$("#page_content").html(preloader);
+		readOnly = isRevise ? false : readOnly;
 
 		let {
 			changeScheduleID      = "",
+			reviseChangeScheduleID = "",
 			employeeID            = "",
 			changeScheduleDate    = "",
 			changeScheduleTimeIn  = "",
@@ -491,43 +585,60 @@ $(document).ready(function () {
 
 		readOnly ? preventRefresh(false) : preventRefresh(true);
 
-		$("#btnBack").attr("changeScheduleID", changeScheduleID);
+		$("#btnBack").attr("changeScheduleID", encryptString(changeScheduleID));
 		$("#btnBack").attr("status", changeScheduleStatus);
 		$("#btnBack").attr("employeeID", employeeID);
+		$("#btnBack").attr("cancel", isFromCancelledDocument);
 
 		let disabled = readOnly ? "disabled" : "";
-		let button   = formButtons(data);
+		let button   = formButtons(data, isRevise, isFromCancelledDocument);
+
+		let reviseDocumentNo    = isRevise ? changeScheduleID : reviseChangeScheduleID;
+		let documentHeaderClass = isRevise || reviseChangeScheduleID ? "col-lg-4 col-md-4 col-sm-12 px-1" : "col-lg-2 col-md-6 col-sm-12 px-1";
+		let documentDateClass   = isRevise || reviseChangeScheduleID ? "col-md-12 col-sm-12 px-0" : "col-lg-8 col-md-12 col-sm-12 px-1";
+		let documentReviseNo    = isRevise || reviseChangeScheduleID ? `
+		<div class="col-lg-4 col-md-4 col-sm-12 px-1">
+			<div class="card">
+				<div class="body">
+					<small class="text-small text-muted font-weight-bold">Revised Document No.</small>
+					<h6 class="mt-0 text-danger font-weight-bold">
+						${getFormCode("PR", createdAt, reviseDocumentNo)}
+					</h6>      
+				</div>
+			</div>
+		</div>` : "";
 
 		let html = `
         <div class="row px-2">
-            <div class="col-lg-2 col-md-6 col-sm-12 px-1">
+			${documentReviseNo}
+            <div class="${documentHeaderClass}">
                 <div class="card">
                     <div class="body">
                         <small class="text-small text-muted font-weight-bold">Document No.</small>
                         <h6 class="mt-0 text-danger font-weight-bold">
-							${changeScheduleID ? getFormCode("SCH", createdAt, changeScheduleID) : "---"}
+							${changeScheduleID && !isRevise ? getFormCode("SCH", createdAt, changeScheduleID) : "---"}
 						</h6>      
                     </div>
                 </div>
             </div>
-            <div class="col-lg-2 col-md-6 col-sm-12 px-1">
+            <div class="${documentHeaderClass}">
                 <div class="card">
                     <div class="body">
                         <small class="text-small text-muted font-weight-bold">Status</small>
                         <h6 class="mt-0 font-weight-bold">
-							${changeScheduleStatus ? getStatusStyle(changeScheduleStatus) : "---"}
+							${changeScheduleStatus && !isRevise ? getStatusStyle(changeScheduleStatus) : "---"}
 						</h6>      
                     </div>
                 </div>
             </div>
-            <div class="col-lg-8 col-md-12 col-sm-12 px-1">
+            <div class="${documentDateClass}">
                 <div class="row m-0">
                 <div class="col-lg-4 col-md-4 col-sm-12 px-1">
                     <div class="card">
                         <div class="body">
                             <small class="text-small text-muted font-weight-bold">Date Created</small>
                             <h6 class="mt-0 font-weight-bold">
-								${createdAt ? moment(createdAt).format("MMMM DD, YYYY hh:mm:ss A") : "---"}
+								${createdAt && !isRevise ? moment(createdAt).format("MMMM DD, YYYY hh:mm:ss A") : "---"}
                             </h6>      
                         </div>
                     </div>
@@ -537,7 +648,7 @@ $(document).ready(function () {
                         <div class="body">
                             <small class="text-small text-muted font-weight-bold">Date Submitted</small>
                             <h6 class="mt-0 font-weight-bold">
-								${submittedAt ? moment(submittedAt).format("MMMM DD, YYYY hh:mm:ss A") : "---"}
+								${submittedAt && !isRevise && !isRevise ? moment(submittedAt).format("MMMM DD, YYYY hh:mm:ss A") : "---"}
 							</h6>      
                         </div>
                     </div>
@@ -559,7 +670,7 @@ $(document).ready(function () {
                     <div class="body">
                         <small class="text-small text-muted font-weight-bold">Remarks</small>
                         <h6 class="mt-0 font-weight-bold">
-							${changeScheduleRemarks ? changeScheduleRemarks : "---"}
+							${changeScheduleRemarks && !isRevise ? changeScheduleRemarks : "---"}
 						</h6>      
                     </div>
                 </div>
@@ -595,7 +706,7 @@ $(document).ready(function () {
                         name="changeScheduleDate"
                         value="${changeScheduleDate && moment(changeScheduleDate).format("MMMM DD, YYYY")}"
 						${disabled}
-						unique="${changeScheduleID}"
+						unique="${encryptString(changeScheduleID)}"
 						title="Date">
                     <div class="d-block invalid-feedback" id="invalid-changeScheduleDate"></div>
                 </div>
@@ -663,6 +774,18 @@ $(document).ready(function () {
 				$("#changeScheduleDate").val(moment(new Date).format("MMMM DD, YYYY"));
 			}
 			$("#changeScheduleDate").data("daterangepicker").minDate = moment();
+
+			// ----- NOT ALLOWED FOR UPDATE -----
+			if (!allowedUpdate) {
+				$("#page_content").find(`input, select, textarea`).each(function() {
+					if (this.type != "search") {
+						$(this).attr("disabled", true);
+					}
+				})
+				$('#btnBack').attr("status", "2");
+				$(`#btnSubmit, #btnRevise, #btnCancel, #btnCancelForm, .btnAddRow, .btnDeleteRow`).hide();
+			}
+			// ----- END NOT ALLOWED FOR UPDATE -----
 			return html;
 		}, 300);
 	}
@@ -670,7 +793,7 @@ $(document).ready(function () {
 
 
 	// ----- PAGE CONTENT -----
-	function pageContent(isForm = false, data = false, readOnly = false) {
+	function pageContent(isForm = false, data = false, readOnly = false, isRevise = false, isFromCancelledDocument = false) {
 		$("#page_content").html(preloader);
 		if (!isForm) {
 			preventRefresh(false);
@@ -689,13 +812,12 @@ $(document).ready(function () {
 
 			headerButton(true, "Add Change Schedule");
 			headerTabContent();
-			// forApprovalContent();
 			myFormsContent();
 			updateURL();
 		} else {
-			headerButton(false);
+			headerButton(false, "", isRevise, isFromCancelledDocument);
 			headerTabContent(false);
-			formContent(data, readOnly);
+			formContent(data, readOnly, isRevise, isFromCancelledDocument);
 		}
 	}
 	viewDocument();
@@ -825,7 +947,7 @@ $(document).ready(function () {
 
 	// ----- CHANGE TIME TO -----
 	$(document).on("keyup", ".timeOut", function () {
-		// checkTimeRange($(this).attr("id"));
+		// checkTimeRange(decryptString($(this).attr("id")));
 	});
 	// ----- END CHANGE TIME TO -----
 
@@ -838,23 +960,79 @@ $(document).ready(function () {
 	// ----- END OPEN ADD FORM -----
 
 
-	// ----- CLOSE FORM -----
+	// ----- OPEN EDIT MODAL -----
+	$(document).on("click", ".btnEdit", function () {
+		const id = decryptString($(this).attr("id"));
+		viewDocument(id);
+	});
+	// ----- END OPEN EDIT MODAL -----
+
+
+	// ----- VIEW DOCUMENT -----
+	$(document).on("click", ".btnView", function () {
+		const id = decryptString($(this).attr("id"));
+		viewDocument(id, true);
+	});
+	// ----- END VIEW DOCUMENT -----
+
+
+	// ----- REVISE DOCUMENT -----
+	$(document).on("click", "#btnRevise", function () {
+		const id                    = decryptString($(this).attr("changeScheduleID"));
+		const fromCancelledDocument = $(this).attr("cancel") == "true";
+		viewDocument(id, false, true, fromCancelledDocument);
+	});
+	// ----- END REVISE DOCUMENT -----
+
+
+	// ----- SAVE CLOSE FORM -----
 	$(document).on("click", "#btnBack", function () {
-		const id         = $(this).attr("changeScheduleID");
+		const id         = decryptString($(this).attr("changeScheduleID"));
+		const isFromCancelledDocument = $(this).attr("cancel") == "true";
+		const revise     = $(this).attr("revise") == "true";
 		const employeeID = $(this).attr("employeeID");
 		const feedback   = $(this).attr("code") || getFormCode("SCH", dateToday(), id);
 		const status     = $(this).attr("status");
 
 		if (status != "false" && status != 0) {
-			$("#page_content").html(preloader);
-			pageContent();
 
-			if (employeeID != sessionID) {
-				$("[redirect=forApprovalTab]").length > 0 && $("[redirect=forApprovalTab]").trigger("click");
+			if (revise) {
+				const action = revise && !isFromCancelledDocument && "insert" || (id ? "update" : "insert");
+				const data   = getData(action, 0, "save", feedback, id);
+				data[`tableData[changeScheduleStatus]`] = 0;
+				if (!isFromCancelledDocument) {
+					delete data[`changeScheduleID`];
+					data[`tableData[reviseChangeScheduleID]`] = id;
+				} else {
+					delete data[`action`];
+					data[`tableData[changeScheduleID]`] = id;
+					data[`action`] = "update";
+				}
+
+				setTimeout(() => {
+					cancelForm(
+						"save",
+						action,
+						"CHANGE SCHEDULE",
+						"",
+						"form_change_schedule",
+						data,
+						true,
+						pageContent
+					);
+				}, 300);
+			} else {
+				$("#page_content").html(preloader);
+				pageContent();
+	
+				if (employeeID != sessionID) {
+					$("[redirect=forApprovalTab]").length > 0 && $("[redirect=forApprovalTab]").trigger("click");
+				}
 			}
 		} else {
 			const action   = id && feedback ? "update" : "insert";
 			const data     = getData(action, 0, "save", feedback, id);
+			data[`tableData[changeScheduleStatus]`] = 0;
 
 			setTimeout(() => {
 				cancelForm(
@@ -870,64 +1048,36 @@ $(document).ready(function () {
 			}, 300);
 		}
 	});
-	// ----- END CLOSE FORM -----
-
-
-	// ----- OPEN EDIT MODAL -----
-	$(document).on("click", ".btnEdit", function () {
-		const id = $(this).attr("id");
-		// const tableData = getTableData("hris_change_schedule_tbl", "", "changeScheduleID=" + id);
-		// pageContent(true, tableData);
-		viewDocument(id);
-	});
-	// ----- END OPEN EDIT MODAL -----
-
-
-	// ----- VIEW DOCUMENT -----
-	$(document).on("click", ".btnView", function () {
-		const id = $(this).attr("id");
-		// const tableData = getTableData("hris_change_schedule_tbl", "", "changeScheduleID=" + id);
-		// pageContent(true, tableData, true);
-		viewDocument(id, true);
-	});
-	// ----- END VIEW DOCUMENT -----
+	// ----- END SAVE CLOSE FORM -----
 
 
 	// ----- SAVE DOCUMENT -----
-	$(document).on("click", "#btnSave", function () {
-		/**
-		 * 
-		 * 	I THINK IF IT'S A DRAFT DOCUMENT, NO NEED TO VALIDATE...
-		 * 
-		 */
-		// const validate     = validateForm("form_change_schedule");
-		// const validateTime = checkTimeRange(false, true);
-
-		// if (validate && validateTime) {
-		// 	const action   = "insert"; 
-		// 	const feedback = getFormCode("SCH", dateToday()); // SCH-20-00000
-
-		// 	const data = getData(action, 0, "save", feedback);
-
-		// 	formConfirmation(
-		// 		"save",
-		// 		"insert",
-		// 		"CHANGE SCHEDULE",
-		// 		"",
-		// 		"form_change_schedule",
-		// 		data,
-		// 		true,
-		// 		myFormsContent
-		// 	);
-		// }
-
-		const action   = "insert"; 
-		const feedback = getFormCode("SCH", dateToday()); 
+	$(document).on("click", "#btnSave, #btnCancel", function () {
+		const id       = decryptString($(this).attr("changeScheduleID"));
+		const isFromCancelledDocument = $(this).attr("cancel") == "true";
+		const revise   = $(this).attr("revise") == "true";
+		// const action   = "insert"; 
+		// const feedback = getFormCode("SCH", dateToday()); 
+		const feedback = $(this).attr("code") || getFormCode("SCH", dateToday(), id);
+		const action   = revise && !isFromCancelledDocument && "insert" || (id && feedback ? "update" : "insert");
 		const data     = getData(action, 0, "save", feedback);
+		data[`tableData[changeScheduleStatus]`] = 0;
+
+		if (revise) {
+			if (!isFromCancelledDocument) {
+				data[`tableData[reviseChangeScheduleID]`] = id;
+				data[`whereFilter`] = `changeScheduleID=${id}`;
+				delete data[`tableData[changeScheduleID]`];
+			} else {
+				data[`tableData[changeScheduleID]`] = id;
+				delete data[`action`];
+				data[`action`] = "update";
+			}
+		}
 
 		formConfirmation(
 			"save",
-			"insert",
+			action,
 			"CHANGE SCHEDULE",
 			"",
 			"form_change_schedule",
@@ -941,14 +1091,23 @@ $(document).ready(function () {
 
 	// ----- SUBMIT DOCUMENT -----
 	$(document).on("click", "#btnSubmit", function () {
-		const id           = $(this).attr("changeScheduleID");
+		const id           = decryptString($(this).attr("changeScheduleID"));
+		const isFromCancelledDocument = $(this).attr("cancel") == "true";
+		const revise       = $(this).attr("revise") == "true";
 		const validate     = validateForm("form_change_schedule");
 		// const validateTime = checkTimeRange(false, true);
 
 		if (validate) {
 			const feedback = $(this).attr("code") || getFormCode("SCH", dateToday(), id);
-			const action   = id && feedback ? "update" : "insert";
+			const action   = revise && !isFromCancelledDocument && "insert" || (id ? "update" : "insert");
 			const data     = getData(action, 1, "submit", feedback, id);
+
+			if (revise) {
+				if (!isFromCancelledDocument) {
+					data[`tableData[reviseChangeScheduleID]`] = id;
+					delete data[`tableData[changeScheduleID]`];
+				}
+			}
 
 			const employeeID = getNotificationEmployeeID(
 				data["tableData[approversID]"],
@@ -960,7 +1119,6 @@ $(document).ready(function () {
 			if (employeeID != sessionID) {
 				notificationData = {
 					moduleID:                60,
-					// tableID:                 1, // AUTO FILL
 					notificationTitle:       "Change Schedule Form",
 					notificationDescription: `${employeeFullname(sessionID)} asked for your approval.`,
 					notificationType:        2,
@@ -988,34 +1146,13 @@ $(document).ready(function () {
 
 	// ----- CANCEL DOCUMENT -----
 	$(document).on("click", "#btnCancelForm", function () {
-		const id       = $(this).attr("changeScheduleID");
+		const id       = decryptString($(this).attr("changeScheduleID"));
 		const feedback = $(this).attr("code") || getFormCode("SCH", dateToday(), id);
 		const action   = "update";
 		const data     = getData(action, 4, "cancelform", feedback, id);
 
 		formConfirmation(
 			"cancelform",
-			action,
-			"CHANGE SCHEDULE",
-			"",
-			"form_change_schedule",
-			data,
-			true,
-			pageContent
-		);
-	});
-	// ----- END CANCEL DOCUMENT -----
-
-
-	// ----- CANCEL DOCUMENT -----
-	$(document).on("click", "#btnCancel", function () {
-		const id       = $(this).attr("changeScheduleID");
-		const feedback = $(this).attr("code") || getFormCode("SCH", dateToday(), id);
-		const action   = id && feedback ? "update" : "insert";
-		const data     = getData(action, 0, "save", feedback, id);
-
-		cancelForm(
-			"save",
 			action,
 			"CHANGE SCHEDULE",
 			"",
@@ -1092,13 +1229,11 @@ $(document).ready(function () {
 
 	// ----- REJECT DOCUMENT -----
 	$(document).on("click", "#btnReject", function () {
-		const id       = $(this).attr("changeScheduleID");
+		const id       = decryptString($(this).attr("changeScheduleID"));
 		const feedback = $(this).attr("code") || getFormCode("SCH", dateToday(), id);
 
 		$("#modal_change_schedule_content").html(preloader);
-		$("#modal_change_schedule .page-title").text(
-			"DENY CHANGE SCHEDULE DOCUMENT"
-		);
+		$("#modal_change_schedule .page-title").text("DENY CHANGE SCHEDULE");
 		$("#modal_change_schedule").modal("show");
 		let html = `
 		<div class="modal-body">
@@ -1118,7 +1253,7 @@ $(document).ready(function () {
 		</div>
 		<div class="modal-footer text-right">
 			<button class="btn btn-danger px-5 p-2" id="btnRejectConfirmation"
-			changeScheduleID="${id}"
+			changeScheduleID="${encryptString(id)}"
 			code="${feedback}"><i class="far fa-times-circle"></i> Deny</button>
 			<button class="btn btn-cancel btnCancel px-5 p-2" data-dismiss="modal"><i class="fas fa-ban"></i> Cancel</button>
 		</div>`;
@@ -1171,6 +1306,35 @@ $(document).ready(function () {
 		} 
 	});
 	// ----- END REJECT DOCUMENT -----
+
+
+	// ----- DROP DOCUMENT -----
+	$(document).on("click", "#btnDrop", function() {
+		const changeScheduleID = decryptString($(this).attr("changeScheduleID"));
+		const feedback          = $(this).attr("code") || getFormCode("SCH", dateToday(), id);
+
+		const id = decryptString($(this).attr("changeScheduleID"));
+		let data = {};
+		data["tableData[changeScheduleID]"]     = changeScheduleID;
+		data["tableData[changeScheduleStatus]"] = 5;
+		data["action"]                          = "update";
+		data["method"]                          = "drop";
+		data["tableData[updatedBy]"]            = sessionID;
+
+		setTimeout(() => {
+			formConfirmation(
+				"submit",
+				"drop",
+				"CHANGE SCHEDULE",
+				"",
+				"form_change_schedule",
+				data,
+				true,
+				pageContent
+			);
+		}, 300);
+	})
+	// ----- END DROP DOCUMENT -----
 
 
 	// ----- NAV LINK -----

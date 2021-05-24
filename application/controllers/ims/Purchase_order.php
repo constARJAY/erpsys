@@ -117,6 +117,8 @@ class Purchase_order extends CI_Controller {
         $vendorAddress         = $this->input->post("vendorAddress") ?? null;
         $categoryType          = $this->input->post("categoryType") ?? null;
         $paymentTerms          = $this->input->post("paymentTerms") ?? null;
+        $deliveryTerm          = $this->input->post("deliveryTerm") ?? null;
+        $discountType          = $this->input->post("discountType") ?? null;
         $deliveryDate          = $this->input->post("deliveryDate") ?? null;
         $total                 = $this->input->post("total") ?? null;
         $discount              = $this->input->post("discount") ?? null;
@@ -148,6 +150,8 @@ class Purchase_order extends CI_Controller {
             "vendorAddress"         => $vendorAddress,
             "categoryType"          => $categoryType,
             "paymentTerms"          => $paymentTerms,
+            "deliveryTerm"          => $deliveryTerm,
+            "discountType"          => $discountType,
             "deliveryDate"          => $deliveryDate,
             "total"                 => $total,
             "discount"              => $discount,
@@ -207,9 +211,6 @@ class Purchase_order extends CI_Controller {
                 $purchaseOrderID = $result[2];
 
                 if ($items && count($items) > 0) {
-
-                    // DITO NA KO. HINDI DAPAT MADELETE KASI MAWAWALAN NG REFERENCE YUNG GET REQUEST ITEM.
-
                     $purchaseOrderItems = [];
                     foreach($items as $index => $item) {
                         $requestItemID = $item["requestItemID"];
@@ -242,59 +243,10 @@ class Purchase_order extends CI_Controller {
                             "createdBy"                => $updatedBy,
                             "updatedBy"                => $updatedBy,
                         ];
-
-
-
-                        // $temp = [
-                        //     "purchaseRequestID" => $purchaseRequestID,
-                        //     "purchaseOrderID"   => $purchaseOrderID,
-                        //     "inventoryVendorID" => $inventoryVendorID,
-                        //     "itemID"            => $item["itemID"] != "null" ? $item["itemID"] : null,
-                        //     "categoryType"      => $item["categoryType"],
-                        //     "quantity"          => $item["quantity"],
-                        //     "unitCost"          => $item["unitcost"],
-                        //     "totalCost"         => $item["totalcost"],
-                        //     "files"             => array_key_exists("existingFile", $item) ? $item["existingFile"] : null, 
-                        //     "remarks"           => $item["remarks"] ? $item["remarks"] : null, 
-                        //     "createdBy"         => $item["createdBy"],
-                        //     "updatedBy"         => $item["updatedBy"],
-                        // ];
                         array_push($purchaseOrderItems, $temp);
                     }
-                    
-                    // if (isset($_FILES["items"])) {
-                    //     $length = count($_FILES["items"]["name"]);
-                    //     $keys   = array_keys($_FILES["items"]["name"]);
-                    //     for ($i=0; $i<$length; $i++) {
-                    //         $uploadedFile = explode(".", $_FILES["items"]["name"][$keys[$i]]["file"]);
 
-                    //         $index     = (int)$uploadedFile[0]; 
-                    //         $extension = $uploadedFile[1];
-                    //         $filename  = $i.time().'.'.$extension;
-
-                    //         $folderDir = "assets/upload-files/request-items/";
-                    //         if (!is_dir($folderDir)) {
-                    //             mkdir($folderDir);
-                    //         }
-                    //         $targetDir = $folderDir.$filename;
-
-                    //         if (move_uploaded_file($_FILES["items"]["tmp_name"][$index]["file"], $targetDir)) {
-                    //             $purchaseOrderItems[$index]["files"] = $filename;
-                    //         }
-                            
-                    //     } 
-
-                    //     // ----- UPDATE ITEMS FILE -----
-                    //     foreach ($purchaseOrderItems as $key => $prItem) {
-                    //         if (!array_key_exists("files", $prItem)) {
-                    //             $purchaseOrderItems[$key]["files"] = null;
-                    //         }
-                    //     }
-                    //     // ----- END UPDATE ITEMS FILE -----
-                    // }
-
-                    $deleteRequestItems = $this->purchaseorder->deleteRequestItems($purchaseRequestID, $bidRecapID, $purchaseOrderID);
-                    // var_dump($purchaseOrderItems);
+                    $deleteRequestItems     = $this->purchaseorder->deleteRequestItems($purchaseRequestID, $bidRecapID, $purchaseOrderID);
                     $savePurchaseOrderItems = $this->purchaseorder->savePurchaseOrderItems($purchaseOrderItems, $purchaseOrderID);
                 }
 
@@ -305,7 +257,10 @@ class Purchase_order extends CI_Controller {
     }
 
     public function purchaseOrderExcel($data) {
-        $fileName    = "PurchaseOrder.xlsx";
+        $id        = $data["purchaseOrderID"];
+        $createdAt = $data["createdAt"];
+        $code      = getFormCode("PO", $createdAt, $id);
+        $fileName    = "$code.xlsx";
         $spreadsheet = new Spreadsheet();
         $sheet       = $spreadsheet->getActiveSheet();
 
@@ -697,11 +652,6 @@ class Purchase_order extends CI_Controller {
         header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         header('Content-Disposition: attachment; filename="'. urlencode($fileName).'"');
         $writer->save('php://output');
-        // $reader = new Xlsx();
-        // $reader->setReadDataOnly(false);
-        // header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-        // header('Content-Disposition: attachment; filename="'. urlencode($fileName).'"');
-        // $writer->save('php://output');
     }
 
     public function downloadExcel()
