@@ -1066,10 +1066,11 @@ $(document).ready(function () {
 		if (revise) {
 			if (!isFromCancelledDocument) {
 				data[`tableData[reviseChangeScheduleID]`] = id;
-				data[`whereFilter`] = `changeScheduleID=${id}`;
+				data[`whereFilter`] = `changeScheduleID = ${id}`;
 				delete data[`tableData[changeScheduleID]`];
 			} else {
 				data[`tableData[changeScheduleID]`] = id;
+				data[`whereFilter`] = `changeScheduleID = ${id}`;
 				delete data[`action`];
 				data[`action`] = "update";
 			}
@@ -1105,6 +1106,7 @@ $(document).ready(function () {
 			if (revise) {
 				if (!isFromCancelledDocument) {
 					data[`tableData[reviseChangeScheduleID]`] = id;
+					data[`whereFilter`] = `changeScheduleID = ${id}`;
 					delete data[`tableData[changeScheduleID]`];
 				}
 			}
