@@ -8,12 +8,12 @@ class ReturnItem_model extends CI_Model {
         parent::__construct();
     }
 
-    public function savePurchaseRequestData($action, $data, $id = null) 
+    public function saveReturnApprovalData($action, $data, $id = null) 
     {
         if ($action == "insert") {
             $query = $this->db->insert("ims_return_item_tbl", $data);
         } else {
-            $where = ["returnID" => $id];
+            $where = ["returnItemID" => $id];
             $query = $this->db->update("ims_return_item_tbl", $data, $where);
         }
 
@@ -24,15 +24,16 @@ class ReturnItem_model extends CI_Model {
         return "false|System error: Please contact the system administrator for assistance!";
     }
 
-    public function deletePurchaseRequestItems($id) {
-        $query = $this->db->delete("ims_return_item_details_tbl", ["returnID" => $id]);
+    public function deleteReturnItems($id) 
+    {
+        $query = $this->db->delete("ims_return_item_details_tbl", ["returnItemID" => $id]);
         return $query ? true : false;
     }
 
-    public function savePurchaseRequestItems($data, $id = null)
+    public function saveReturnItemsData($data, $id = null)
     {
         if ($id) {
-            $deletePurchaseRequestItems = $this->deletePurchaseRequestItems($id);
+            $deletePurchaseRequestItems = $this->deleteReturnItems($id);
         }
 
         $query = $this->db->insert_batch("ims_return_item_details_tbl", $data);

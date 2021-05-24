@@ -162,12 +162,12 @@ $(document).ready(function() {
 					{ targets: 0,  width: 100 },
 					{ targets: 1,  width: 150 },
 					{ targets: 2,  width: 200 },
-					{ targets: 3,  width: 150 },
+					{ targets: 3,  width: 200 },
 					{ targets: 4,  width: 190 },
 					{ targets: 5,  width: 190 },
 					{ targets: 6,  width: 200 },
 					{ targets: 7,  width: 200 },
-					{ targets: 8,  width: 200 },
+					{ targets: 8,  width: 250 },
 				],
 			});
 
@@ -184,12 +184,12 @@ $(document).ready(function() {
 					{ targets: 0,  width: 100 },
 					{ targets: 1,  width: 150 },
 					{ targets: 2,  width: 200 },
-					{ targets: 3,  width: 150 },
+					{ targets: 3,  width: 200 },
 					{ targets: 4,  width: 190 },
 					{ targets: 5,  width: 190 },
 					{ targets: 6,  width: 200 },
 					{ targets: 7,  width: 200 },
-					{ targets: 8,  width: 200 },
+					{ targets: 8,  width: 250 },
 				],
 			});
 
@@ -210,11 +210,11 @@ $(document).ready(function() {
 					{ targets: 0,  width: 100  },
 					{ targets: 1,  width: 150 },
 					{ targets: 2,  width: 150 },
-					{ targets: 3,  width: 50  },
+					{ targets: 3,  width: 170  },
 					{ targets: 4,  width: 120 },
 					{ targets: 5,  width: 120 },
                     { targets: 6,  width: 110 },
-					{ targets: 7,  width: 120 },
+					{ targets: 7,  width: 150 },
 					{ targets: 8,  width: 120 }
 				],
 			});
@@ -230,13 +230,13 @@ $(document).ready(function() {
 				scrollX: true,
 				scrollCollapse: true,
 				columnDefs: [
-					{ targets: 0,  width: 100  },
+					{ targets: 0,  width: 150  },
 					{ targets: 1,  width: 150 },
 					{ targets: 2,  width: 150 },
-					{ targets: 3,  width: 50  },
+					{ targets: 3,  width: 170  },
 					{ targets: 4,  width: 120 },
 					{ targets: 5,  width: 120 },
-					{ targets: 6,  width: 110 },
+					{ targets: 6,  width: 150 },
 					{ targets: 7,  width: 110 }
 					// { targets: 8,  width: 200 },
 				],
@@ -301,8 +301,8 @@ $(document).ready(function() {
             <thead>
                 <tr style="white-space: nowrap">
                     <th>Document No.</th>
-                    <th>Employee Name</th>
-					<th>Reason</th>
+                    <th>Prepared By</th>
+					<th>Description</th>
                     <th>Current Approver</th>
                     <th>Date Created</th>
                     <th>Date Submitted</th>
@@ -394,8 +394,8 @@ $(document).ready(function() {
             <thead>
                 <tr style="white-space: nowrap">
                     <th>Document No.</th>
-                    <th>Employee Name</th>
-					<th>Reason</th>
+                    <th>Prepared By</th>
+					<th>Description</th>
                     <th>Current Approver</th>
                     <th>Date Created</th>
                     <th>Date Submitted</th>
@@ -693,14 +693,14 @@ $(document).ready(function() {
                 </div>
                </td> 
 				<td>
-					<div class="serialnumber">
-						${serialnumber || "-"}
-					</div>
-				</td>
-				<td>
 					<div class="itemName">
 					${itemName || "-"}
 					</div>
+				</td>
+				<td>
+				<div class="serialnumber">
+					${serialnumber || "-"}
+				</div>
 				</td>
 				<td class="text-center">
 					<div class="quantity">
@@ -751,11 +751,11 @@ $(document).ready(function() {
 				<td>
 					<div class="itemCode">-</div>
 				</td>
-                <td>
-                	<div class="serialnumber">-</div>
-                </td>
 				<td>
 					<div class="itemName">-</div>
+				</td>
+				<td>
+					<div class="serialnumber">-</div>
 				</td>
                 <td class="text-center">
 					<div class="">
@@ -814,17 +814,11 @@ $(document).ready(function() {
 			$("td .barcode", this).attr("id", `barcode${i}`);
 
 			$("td .itemcode", this).attr("id", `itemcode${i}`);
-
-			$("td .serialnumber", this).attr("id", `serialnumber${i}`);
-
 			$("td .itemName", this).attr("id", `itemName${i}`);
-
+			$("td .serialnumber", this).attr("id", `serialnumber${i}`);
 			$("td .quantity", this).attr("id", `quantity${i}`);
-
 			$("td .StorageCode", this).attr("id", `StorageCode${i}`);
-
 			$("td .StorageName", this).attr("id", `StorageName${i}`);
-
 			$("td .disposalDetailRemarks", this).attr("id", `disposalDetailRemarks${i}`);
  
 		})
@@ -1179,7 +1173,8 @@ $(document).ready(function() {
                     <div class="body">
                         <small class="text-small text-muted font-weight-bold">Document No.</small>
                         <h6 class="mt-0 text-danger font-weight-bold">
-							${disposalID && !isRevise ? getFormCode("", createdAt, disposalID) : "---"}
+							${disposalID && !isRevise ? getFormCode("ADF", createdAt, disposalID) : "---"}
+							
 						</h6>      
                     </div>
                 </div>
@@ -1242,7 +1237,7 @@ $(document).ready(function() {
         <div class="row" id="form_purchase_request">
             <div class="col-md-4 col-sm-12">
                 <div class="form-group">
-                    <label>Employee Name</label>
+                    <label>Prepared By</label>
                     <input type="text" class="form-control" disabled value="${employeeFullname}">
                 </div>
             </div>
@@ -1260,7 +1255,7 @@ $(document).ready(function() {
             </div>
 			<div class="col-md-12 col-sm-12">
 			<div class="form-group">
-				<label>Reason ${!disabled ? "<code>*</code>" : ""}</label>
+				<label>Description ${!disabled ? "<code>*</code>" : ""}</label>
 				<textarea class="form-control validate"
 					data-allowcharacters="[a-z][A-Z][0-9][ ][.][,][-][()]['][/][&]"
 					minlength="1"
@@ -1285,9 +1280,9 @@ $(document).ready(function() {
                             <tr style="white-space: nowrap">
 								${checkboxProjectHeader}
                                 <th>Barcode</th>
-                                <th>Item Number</th>
-                                <th>Serial No. </th>
+                                <th>Item Code</th>
 								<th>Item Name </th>
+                                <th>Serial No. </th>
                                 <th>Quantity  </th>
                                 <th>Storage Code </th>
                                 <th>Storage Name</th>
@@ -1846,7 +1841,7 @@ function getConfirmation(method = "submit") {
 			swalImg   = `${base_url}assets/modal/reject.svg`;
 			break;
 		case "cancelform":
-			swalTitle = `CANCEL ${title.toUpperCase()} DOCUMENT`;
+			swalTitle = `CANCEL ${title.toUpperCase()}	`;
 			swalText  = "Are you sure to cancel this document?";
 			swalImg   = `${base_url}assets/modal/cancel.svg`;
 			break;

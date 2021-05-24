@@ -140,11 +140,11 @@ $(document).ready(function () {
 				scrollCollapse: true,
 				columnDefs: [
                     { targets: 0,  width: 100 },
-		 			{ targets: 1,  width: 150 },
+					{ targets: 1,  width: 100 },
 		 			{ targets: 2,  width: 150 },
 		 			{ targets: 3,  width: 150 },
-		 			{ targets: 4,  width: 100 },
-		 			{ targets: 5,  width: 150 },
+		 			{ targets: 4,  width: 150 },
+		 			{ targets: 5,  width: 100 },
                 ],     
 			});
 
@@ -192,7 +192,7 @@ $(document).ready(function () {
 					{ targets: 2,  width: 150 },
 					{ targets: 3,  width: 150 },
 					{ targets: 4,  width: 100 },
-					{ targets: 5,  width: 150 },
+					{ targets: 5,  width: 80 },
 				],
 			});
 
@@ -217,24 +217,28 @@ $(document).ready(function () {
 		$("#tableMyFormsParent").html(preloader);
 		let receivingReportData = getTableData(
 			`ims_inventory_receiving_tbl AS r 
-			LEFT JOIN hris_employee_list_tbl 	AS emp USING(employeeID)
-			LEFT JOIN hris_designation_tbl 		AS dtn USING(designationID)`,
+			LEFT JOIN hris_employee_list_tbl 				AS emp USING(employeeID)
+			LEFT JOIN hris_designation_tbl 					AS dtn USING(designationID)
+			LEFT JOIN ims_inventory_receiving_details_tbl	AS iird ON r.inventoryReceivingID =iird.inventoryReceivingID
+			LEFT JOIN ims_stock_in_tbl						AS isi ON r.inventoryReceivingID = isi.inventoryReceivingID
+			LEFT JOIN ims_purchase_order_tbl				AS ipo ON r.purchaseOrderID = ipo.purchaseOrderID`,
 			`r.inventoryReceivingID,	r.inventoryReceivingStatus,	r.inventoryReceivingRemarks, 
 			CONCAT(emp.employeeFirstname, ' ', emp.employeeLastname) AS fullname, 
-            r.createdAt,dtn.designationName,approversDate,	r.submittedAt`,
+            r.purchaseOrderID,r.createdAt,ipo.createdAt AS pocreatedAt,dtn.designationName,r.approversDate,	r.submittedAt,ROUND(sum(IFNULL(isi.stockInQuantity,'0.00')),2) AS receivingQuantity,
+			iird.received AS quantity`,
 			`inventoryReceivingStatus = 2`,
-			`FIELD(r.approversStatus, 2), COALESCE(r.submittedAt, r.createdAt)`
+			``,`r.inventoryReceivingID`
 		);
 		let html = `
         <table class="table table-bordered table-striped table-hover" id="tableMyForms">
             <thead>
                 <tr style="white-space: nowrap">
                     <th>Document No.</th>
+					<th>Purchase No.</th>
                     <th>Preparer Name</th>
                     <th>Position</th>
                     <th>Date Submitted</th>
                     <th>Status</th>
-                    <th>Action</th>
                 </tr>
             </thead>
             <tbody>`;
@@ -249,8 +253,17 @@ $(document).ready(function () {
 				inventoryReceivingStatus,
 				submittedAt,
 				createdAt,
-			} = item;
+				quantity,
+				receivingQuantity,
+				purchaseOrderID,
+				pocreatedAt,
 
+			} = item;
+			//var quantity = item.quantity;
+			var formatquantity = parseFloat(quantity).toFixed(2);
+		//	var receivingQuantity = item.receivingQuantity;
+			var formatreceivingQuantity = parseFloat(receivingQuantity).toFixed(2);
+			let btnClass = inventoryReceivingStatus != 0 ? "btnView" : "btnEdit";
 			// let remarks       = purchaseRequestRemarks ? purchaseRequestRemarks : "-";
 			let dateCreated = moment(createdAt).format("MMMM DD, YYYY hh:mm:ss A");
 			let dateSubmitted = submittedAt ? moment(submittedAt).format("MMMM DD, YYYY hh:mm:ss A") : "-";
@@ -266,18 +279,20 @@ $(document).ready(function () {
             <button class="btn btn-view w-100 btnView" id="${encryptString(inventoryReceivingID)}"><i class="fas fa-eye"></i> View</button>`;
 		
 			html += `
-            <tr>
+            <tr class="${btnClass}" id="${encryptString(inventoryReceivingID )}">
                
                 <td>${getFormCode("IRR", dateCreated, inventoryReceivingID)}</td>
+				<td>${getFormCode("PO", pocreatedAt, purchaseOrderID)}</td>
                 <td>${fullname}</td>
                 <td>${designationName}</td>
 				<td>${dateSubmitted}</td>
-                <td class="text-center">
-                ${getStatusStyle(inventoryReceivingStatus)}
-                </td>
-                <td class="text-center">
-                    ${button}
-                </td>
+                <td class="text-center">`;
+				if (formatquantity < formatreceivingQuantity || formatquantity == formatreceivingQuantity) {
+					html += `<span class="badge badge-success w-100">Completed</span>`;
+				}else{
+					html += `<span class="badge badge-outline-warning w-100">Pending</span>`;
+				}	
+				html += ` </td>
             </tr>`;
 		});
 
@@ -506,14 +521,6 @@ $(document).ready(function () {
                 </div>
                 </div>
                 </div>
-                <div class="col-sm-12 px-1">
-                <div class="card">
-                    <div class="body">
-                        <small class="text-small text-muted font-weight-bold">Reference	</small>
-                        <h6 class="mt-0 font-weight-bold"></h6>      
-                    </div>
-                </div>
-       </div>
         </div>
         <div class="row" id="form_purchase_request">
             <div class="col-sm-12">
@@ -532,6 +539,7 @@ $(document).ready(function () {
                             </tr>
                         </thead>
                         <tbody class="">`;
+						
 
 		let ItemData = getTableData(
 			`ims_inventory_receiving_details_tbl 		AS iird
@@ -544,7 +552,7 @@ $(document).ready(function () {
 			LEFT JOIN ims_stock_in_tbl 					AS isi	ON iird.inventoryReceivingID = isi.inventoryReceivingID AND iird.itemID = isi.itemID`,
 			`iird.inventoryReceivingID, iird.itemID,
 			iri.itemName,iii.brandName,iic.categoryName,iict.classificationName,
-			iird.received AS quantity,sum(IFNULL(isi.stockInQuantity,'0')) AS receivingQuantity,iir.createdAt`,
+			iird.received AS quantity,ROUND(sum(IFNULL(isi.stockInQuantity,'0.00')),2) AS receivingQuantity,iir.createdAt`,
 			`iird.inventoryReceivingID = ${inventoryReceivingID}`,
             ``,
 			"iird.inventoryReceivingID,iird.itemID"
@@ -553,12 +561,13 @@ $(document).ready(function () {
 		//var received_quantity = "received_quantity";
 		ItemData.map((item) => {
             var quantity = item.quantity;
+			var formatquantity = parseFloat(quantity).toFixed(2);
 			var receivingQuantity = item.receivingQuantity;
-			//var receivedID = item.receivedID;
-			//alert(item.receivedID);
+			var formatreceivingQuantity = parseFloat(receivingQuantity).toFixed(2);
+		
 			++count;
 			html += `        
-			<tr class="">
+			<tr>
             <td>${getFormCode("IRR", item.createdAt, item.inventoryReceivingID)}</td>
             <td>${item.itemName}</td>
             <td>${item.classificationName}</td>
@@ -577,7 +586,8 @@ $(document).ready(function () {
 			style="min-width: 70px; max-width: 110px;">
             <i class="fas fa-barcode" style="font-size: .8rem"></i> Barcode
             </a>`;
-			if (item.quantity < item.receivingQuantity || item.quantity == item.receivingQuantity) {
+			if (formatquantity < formatreceivingQuantity || formatquantity == formatreceivingQuantity) {
+				
 				html += `<a class="btn btn-success py-0"
 					href="javascript:void(0);" 
 					style="min-width: 80px; cursor: default;">
@@ -586,14 +596,14 @@ $(document).ready(function () {
 			} else {
 				html += `<a class="btn btn-secondary p-0 btnRecord" 
 				href="javascript:void(0);" 
-				data-inventoryReceivingID="${item.inventoryReceivingID}" 
-				data-itemID="${item.itemID}"
-				data-itemName="${item.itemName}"
-				data-classificationName ="${item.classificationName}"
-				data-categoryName="${item.categoryName}"
-				data-brandName="${item.brandName}"
-				data-orderQuantity="${item.quantity}"
-				data-receivingQuantity="${item.receivingQuantity}"
+				inventoryreceivingid="${item.inventoryReceivingID}" 
+				itemID="${item.itemID}"
+				itemName="${item.itemName}"
+				classificationName ="${item.classificationName}"
+				categoryName="${item.categoryName}"
+				brandName="${item.brandName}"
+				orderQuantity="${item.quantity}"
+				receivingQuantity="${item.receivingQuantity}"
 				style="min-width: 80px">
 					<i class="fas fa-pencil-alt" style="font-size: .8rem"></i>Record
 				</a>`;
@@ -624,29 +634,28 @@ $(document).ready(function () {
 	}
 	$(document).on("click", ".btnRecord", function () {
 		
-		var inventoryReceivingID = $(this).data("inventoryreceivingid");
-		var itemID = $(this).data("itemid");
-		var receivingquantity = $(this).data("receivingquantity");
+		//var inventoryReceivingID = $(attr)("inventoryReceivingid");
+		const inventoryReceivingID 	= $(this).attr("inventoryReceivingid");
+		const itemID 	= $(this).attr("itemid");
+		//var receivingquantity = $(this).data("receivingquantity");
+		const receivingquantity 	= $(this).attr("receivingQuantity");
 		$("#modal_product_record").modal("show");
 		// Display preloader while waiting for the completion of getting the data
 		$("#modal_product_record_content").html(preloader);
 	
 		const tableData = getTableData(
 			`ims_receiving_serial_number_tbl 				AS irsn
-			LEFT JOIN ims_inventory_receiving_tbl 			AS iir 	ON irsn.inventoryReceivingID  = iir.inventoryReceivingID
-			LEFT JOIN ims_inventory_receiving_details_tbl 	AS iird ON irsn.inventoryReceivingID = iird.inventoryReceivingID  AND iird.itemID = irsn.itemID
-			LEFT JOIN ims_purchase_order_tbl 				AS ipo 	ON iir.purchaseOrderID = ipo.purchaseOrderID
-			LEFT JOIN ims_request_items_tbl 				AS iri 	ON ipo.purchaseOrderID = iir.purchaseOrderID AND irsn.itemID = iri.itemID
-			LEFT JOIN ims_inventory_item_tbl 				AS iii 	ON irsn.itemID = iii.itemID
-			LEFT JOIN ims_inventory_category_tbl 			AS iic 	ON iii.categoryID = iic.categoryID
-			LEFT JOIN ims_inventory_classification_tbl  	AS iict ON iii.classificationID = iict.classificationID 
-			LEFT JOIN ims_stock_in_tbl 						AS isi	ON irsn.inventoryReceivingID = isi.inventoryReceivingID AND irsn.itemID = isi.itemID`,
-			`irsn.inventoryReceivingID, IFNULL(irsn.serialNumber,'') AS serialNumber,irsn.itemID,iii.itemCode,iri.itemName,iri.itemDescription,iii.brandName,iird.received`,`irsn.inventoryReceivingID=${inventoryReceivingID} AND irsn.itemID =${itemID}`,
-			``,``);
+			LEFT JOIN ims_inventory_receiving_details_tbl 	AS iird ON irsn.inventoryReceivingID =iird.inventoryReceivingID
+			LEFT JOIN ims_request_items_tbl 				AS iri ON iird.requestItemID=iri.requestItemID 
+			LEFT JOIN ims_inventory_item_tbl 				AS iii ON irsn.itemID = iii.itemID`,
+			`irsn.inventoryReceivingID,IFNULL(irsn.serialNumber,'') AS serialNumber,irsn.itemID,iri.itemName,iird.received AS quantity
+			,concat('ITM-',LEFT(iii.createdAt,2),'-',LPAD(iii.itemID,5,'0')) AS itemCode,iri.itemDescription,IFNULL(iri.brandNAme,'') AS brandName`,`irsn.inventoryReceivingID=${inventoryReceivingID} AND irsn.itemID =${itemID}`,
+			``,`irsn.serialNumber,irsn.itemID,irsn.inventoryReceivingID`);
 			if (tableData) {
 				const content = modalContent(tableData);
 				setTimeout(() => {
 					$("#modal_product_record_content").html(content);
+					$("#receivedQuantitytotal").val(receivingquantity);
 					$("#receivedQuantitytotal").val(receivingquantity);
 					initAll();
 					storageContent();
@@ -685,9 +694,11 @@ $(document).ready(function () {
 					itemCode 				="",
 					itemDescription 		="",
 					brandName				="",
-					received 				="",
+					quantity 				="",
 					serialNumber 			="",
 					itemName				="",
+					receivingQuantity		=""
+
 
 			} = data && data[0];
 			// classificationContent(data);
@@ -778,7 +789,7 @@ $(document).ready(function () {
 									class="form-control" 
 									name="received" 
 									id="received"
-									value="${received}"
+									value="${quantity}"
 									disabled>
 								<div class="invalid-feedback d-block" id="invalid-input_orderQuantity"></div>
 							</div>
@@ -791,6 +802,7 @@ $(document).ready(function () {
 									class="form-control" 
 									name="receivedQuantitytotal" 
 									id="receivedQuantitytotal"
+									value="${receivingQuantity}"
 									disabled>
 								<div class="invalid-feedback d-block" id="invalid-input_receivedQuantitytotal"></div>
 							</div>
@@ -1048,8 +1060,8 @@ $(document).ready(function () {
 					});
 				} else {
 					preventRefresh(false);
-					containerID && $("#" + containerID).show();
-					$("#" + modalID).modal("show");
+					// containerID && $("#" + containerID).show();
+					// $("#" + modalID).modal("show");
 				}
 			});
 

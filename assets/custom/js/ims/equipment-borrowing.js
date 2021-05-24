@@ -149,12 +149,16 @@ $(document).ready(function() {
 					{ targets: 0,  width: 100 },
 					{ targets: 1,  width: 150 },
 					{ targets: 2,  width: 350 },
-					{ targets: 3,  width: 200 },
+					{ targets: 3,  width: 150 },
 					{ targets: 4,  width: 200 },
 					{ targets: 5,  width: 200 },
 					{ targets: 6,  width: 200 },
-					{ targets: 7, width: 80 },
-					{ targets: 8, width: 250 },
+					{ targets: 7, width: 200 },
+					{ targets: 8, width: 80 },
+					{ targets: 9, width: 250 },
+
+
+					
 				],
 			});
 
@@ -171,12 +175,14 @@ $(document).ready(function() {
 					{ targets: 0,  width: 100 },
 					{ targets: 1,  width: 150 },
 					{ targets: 2,  width: 350 },
-					{ targets: 3,  width: 250 },
+					{ targets: 3,  width: 150 },
 					{ targets: 4,  width: 200 },
 					{ targets: 5,  width: 200 },
 					{ targets: 6,  width: 200 },
-					{ targets: 7, width: 80 },
-					{ targets: 8, width: 250 },
+					{ targets: 7, width: 200 },
+					{ targets: 8, width: 80 },
+					{ targets: 9, width: 250 },
+
 				],
 			});
 
@@ -195,15 +201,15 @@ $(document).ready(function() {
 				scrollCollapse: true,
 				columnDefs: [
 					{ targets: 0,  width: 100  },
-					{ targets: 1,  width: 150 },
+					{ targets: 1,  width: 200 },
 					{ targets: 2,  width: 150 },
 					{ targets: 3,  width: 220  },
-					{ targets: 4,  width: 120 },
+					{ targets: 4,  width: 190 },
 					{ targets: 5,  width: 200 },
-                    { targets: 6,  width: 80 },
-                    { targets: 7,  width: 80 },
-                    { targets: 8,  width: 80 },
-					{ targets: 9,  width: 80 },
+                    { targets: 6,  width: 150 },
+                    { targets: 7,  width: 150 },
+                    { targets: 8,  width: 100 },
+					{ targets: 9,  width: 100 },
 				],
 			});
 
@@ -218,17 +224,17 @@ $(document).ready(function() {
 				scrollX: true,
 				scrollCollapse: true,
 				columnDefs: [
-					{ targets: 0,  width: 100  },
-					{ targets: 1,  width: 130 },
+					{ targets: 0,  width: 200  },
+					{ targets: 1,  width: 150 },
 					{ targets: 2,  width: 150 },
 					{ targets: 3,  width: 200  },
 					{ targets: 4,  width: 180 },
-					{ targets: 5,  width: 120 },
-                    { targets: 6,  width: 80 },
-                    { targets: 7,  width: 80 },
-                    { targets: 8,  width: 80 },
-					{ targets: 9,  width: 80 },
-					{ targets: 10,  width: 80 },
+					{ targets: 5,  width: 190 },
+                    { targets: 6,  width: 90 },
+                    { targets: 7,  width: 150 },
+                    { targets: 8,  width: 150 },
+					{ targets: 9,  width: 100 },
+					{ targets: 10,  width: 100 },
 					// { targets: 8,  width: 200 },
 				],
 			});
@@ -292,8 +298,9 @@ $(document).ready(function() {
             <thead>
                 <tr style="white-space: nowrap">
                     <th>Document No.</th>
-                    <th>Employee Name</th>
-					<th>Reason</th>
+                    <th>Prepared By</th>
+					<th>Project Name</th>
+					<th>Description</th>
                     <th>Current Approver</th>
                     <th>Date Created</th>
                     <th>Date Submitted</th>
@@ -308,6 +315,7 @@ $(document).ready(function() {
 			let {
 				fullname,
 				borrowingID,
+				projectListName,
 				borrowingReason,
 				approversID,
 				approversDate,
@@ -337,6 +345,7 @@ $(document).ready(function() {
 				<tr class="${btnClass}" id="${encryptString(borrowingID )}">
 					<td>${getFormCode("EBF-YR", createdAt, borrowingID)}</td>
 					<td>${fullname}</td>
+					<td>${projectListName}</td>
 					<td>${borrowingReason}</td>
 					<td>
 						${employeeFullname(getCurrentApprover(approversID, approversDate, borrowingStatus, true))}
@@ -383,8 +392,9 @@ $(document).ready(function() {
             <thead>
                 <tr style="white-space: nowrap">
                     <th>Document No.</th>
-                    <th>Employee Name</th>
-					<th>Reason</th>
+                    <th>Prepared By</th>
+					<th>Project Name</th>
+					<th>Description</th>
                     <th>Current Approver</th>
                     <th>Date Created</th>
                     <th>Date Submitted</th>
@@ -407,6 +417,7 @@ $(document).ready(function() {
 				borrowingRemarks,
 				submittedAt,
 				createdAt,
+				projectListName,
 			} = item;
 
 			let remarks       = borrowingRemarks ? borrowingRemarks : "-";
@@ -428,6 +439,7 @@ $(document).ready(function() {
             <tr class="${btnClass}" id="${encryptString(borrowingID )}">
                 <td>${getFormCode("EBF", createdAt, borrowingID)}</td>
                 <td>${fullname}</td>
+				<td>${projectListName}</td>
 				<td>${borrowingReason}</td>
                 <td>
                     ${employeeFullname(getCurrentApprover(approversID, approversDate, borrowingStatus, true))}
@@ -641,6 +653,11 @@ $(document).ready(function() {
 			html += `
 			<tr class="itemTableRow">
 				<td>
+					<div class="barcode">
+						${barcode || "-"}
+					</div>
+				</td>
+				<td>
 					<div class="itemcode">
 					${getFormCode("ITM", createdAt, itemID) || "-"}
 					</div>
@@ -660,18 +677,13 @@ $(document).ready(function() {
 					${inventoryStorageOfficeName || "-"}
 					</div>
 				</td>
-				<td>
-					<div class="barcode">
-					${barcode || "-"}
-					</div>
-				</td>
 			<td>
 			<div class="serialnumber">
 				${serialnumber || "-"}
 			</div>
 		   </td> 
 			 <td>
-                <div class="quantity">
+                <div class="quantity text-center">
                     ${quantity || "-"}
                 </div>
                </td> 
@@ -707,6 +719,19 @@ $(document).ready(function() {
 					</div>
 				</td>
 				<td>
+				<div class="">
+						<input 
+							type="text" 
+							class="form-control  barcode text-center"
+							id="barcode" 
+							name="barcode" 
+							minlength="17" 
+							maxlength="17"  
+							required>
+						<div class="invalid-feedback d-block" id="invalid-barcode"></div>
+					</div>
+				</td>
+				<td>
 					<div class="itemcode">-</div>
 				</td>
 				<td>
@@ -718,19 +743,6 @@ $(document).ready(function() {
                 <td>
 					<div class="StorageName">-</div>
                  </td>
-                 <td>
-                    <div class="">
-                            <input 
-                                type="text" 
-                                class="form-control  barcode text-center"
-                                id="barcode" 
-                                name="barcode" 
-								minlength="17" 
-								maxlength="17"  
-								required>
-                            <div class="invalid-feedback d-block" id="invalid-barcode"></div>
-                        </div>
-                    </td>
                  <td>
 				 	<div class="serialnumber">-</div>
                  </td>
@@ -790,7 +802,7 @@ $(document).ready(function() {
 			// ROW ID
 			$(this).attr("id", `tableRow${i}`);
 			$(this).attr("index", `${i}`);
-
+			$("td .barcode", this).attr("id", `barcode${i}`);
 			// CHECKBOX
 			$("td .action .checkboxrow", this).attr("id", `checkboxrow${i}`);
 			$("td .action .checkboxrow", this).attr("project", `true`);
@@ -804,7 +816,7 @@ $(document).ready(function() {
 
 			$("td .StorageName", this).attr("id", `StorageName${i}`);
 
-			$("td .barcode", this).attr("id", `barcode${i}`);
+		
 
 			$("td .serialnumber", this).attr("id", `serialnumber${i}`);
 
@@ -829,7 +841,7 @@ $(document).ready(function() {
 			}
 			initDateRangePicker(`#dateBorrowed${i}`);
 			//initDateRangePicker(`#datereturn${i}`);
-			$(`#dateBorrowed${i}`).data("daterangepicker").maxDate = moment();
+			$(`#dateBorrowed${i}`).data("daterangepicker").minDate = moment();
 			$(`#dateBorrowed${i}`).val(moment(new Date).format("MMMM DD, YYYY"));
 			
 		})
@@ -883,7 +895,7 @@ $(document).ready(function() {
 								// barcodeArray[loop1] = barcodeval;
 								$(this).closest("tr").find("[name=barcode]").removeClass("is-valid").addClass("is-invalid");
 								$(this).closest("tr").find("#invalid-barcode").removeClass("is-valid").addClass("is-invalid");
-								$(this).closest("tr").find("#invalid-barcode").text('Barcode '+barcode+' already declared!');
+								$(this).closest("tr").find("#invalid-barcode").text('Barcode '+barcode+' Data already exists!');
 								return false;
 							}else{
 
@@ -1299,7 +1311,7 @@ $(document).ready(function() {
 		
             <div class="col-md-4 col-sm-12">
                 <div class="form-group">
-                    <label>Employee Name</label>
+                    <label>Prepared By</label>
                     <input type="text" class="form-control" disabled value="${employeeFullname}">
                 </div>
             </div>
@@ -1317,7 +1329,7 @@ $(document).ready(function() {
             </div>
 			<div class="col-md-12 col-sm-12">
 			<div class="form-group">
-				<label>Reason ${!disabled ? "<code>*</code>" : ""}</label>
+				<label>Description ${!disabled ? "<code>*</code>" : ""}</label>
 				<textarea class="form-control validate"
 					data-allowcharacters="[a-z][A-Z][0-9][ ][.][,][-][()]['][/][&]"
 					minlength="1"
@@ -1341,11 +1353,11 @@ $(document).ready(function() {
                         <thead>
                             <tr style="white-space: nowrap">
 								${checkboxProjectHeader}
+								<th>Barcode ${!disabled ? "<code>*</code>" : ""}</th>
                                 <th>Item Code</th>
                                 <th>Item Name </th>
                                 <th>Storage Code </th>
 								<th>Storage Name</th>
-								<th>Barcode ${!disabled ? "<code>*</code>" : ""}</th>
                                 <th>Serial No.</th>
 								<th>Quantity ${!disabled ? "<code>*</code>" : ""}</th>
                                 <th>Purpose ${!disabled ? "<code>*</code>" : ""}</th>
@@ -1383,7 +1395,7 @@ $(document).ready(function() {
 				$(".dateBorrowed").val(moment(new Date).format("MMMM DD, YYYY"));
 			}
 				//$("#dateBorrowed").val(moment(new Date).format("MMMM DD, YYYY"));
-				$(".dateBorrowed").data("daterangepicker").maxDate = moment();
+				$(".dateBorrowed").data("daterangepicker").minDate = moment();
 			
 			
 			return html;
@@ -1890,7 +1902,7 @@ $(document).ready(function() {
 
 // --------------- DATABASE RELATION ---------------
 function getConfirmation(method = "submit") {
-	const title = "Borrowing Item";
+	const title = "EQUIPMENT BORROWING";
 	let swalText, swalImg;
 
 	$("#modal_equipment_borrowing").text().length > 0 && $("#modal_equipment_borrowing").modal("hide");

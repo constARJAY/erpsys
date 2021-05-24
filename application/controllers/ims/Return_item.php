@@ -24,7 +24,8 @@ class Return_item extends CI_Controller {
     {
         $action                  = $this->input->post("action");
         $method                  = $this->input->post("method");
-        $returnID                = $this->input->post("returnID") ?? null;
+        $returnItemID            = $this->input->post("returnItemID") ?? null;
+        $borrowingID            = $this->input->post("borrowingID") ?? null;
         $reviseReturnItemID      = $this->input->post("reviseReturnItemID") ?? null;
         $employeeID              = $this->input->post("employeeID");
         $projectID              = $this->input->post("projectID") ?? null;
@@ -40,10 +41,11 @@ class Return_item extends CI_Controller {
         $createdAt               = $this->input->post("createdAt");
         $items                   = $this->input->post("items") ?? null;
 
-        $purchaseRequestData = [
+        $returnItemData = [
             // "revisePurchaseRequestID" => $revisePurchaseRequestID,
             "employeeID"              => $employeeID,
             "projectID "                => $projectID ,
+            "borrowingID "             => $borrowingID ,
             "approversID"             => $approversID,
             "approversStatus"         => $approversStatus,
             "approversDate"           => $approversDate,
@@ -59,23 +61,23 @@ class Return_item extends CI_Controller {
 
         if ($action == "update") {
             // unset($purchaseRequestData["revisePurchaseRequestID"]);
-            unset($purchaseRequestData["createdBy"]);
-            unset($purchaseRequestData["createdAt"]);
+            unset($returnItemData["createdBy"]);
+            unset($returnItemData["createdAt"]);
 
             if ($method == "cancelform") {
-                $purchaseRequestData = [
+                $returnItemData = [
                     "returnItemStatus" => 4,
                     "updatedBy"             => $updatedBy,
                 ];
             } else if ($method == "approve") {
-                $purchaseRequestData = [
+                $returnItemData = [
                     "approversStatus"       => $approversStatus,
                     "approversDate"         => $approversDate,
                     "returnItemStatus"      => $returnItemStatus,
                     "updatedBy"             => $updatedBy,
                 ];
             } else if ($method == "deny") {
-                $purchaseRequestData = [
+                $returnItemData = [
                     "approversStatus"        => $approversStatus,
                     "approversDate"          => $approversDate,
                     "returnItemStatus"  => 3,
@@ -85,65 +87,39 @@ class Return_item extends CI_Controller {
             }
         }
 
-    $saveTransferData = $this->returnitem->savePurchaseRequestData($action, $purchaseRequestData, $returnID);
-        if ($saveTransferData) {
-            $result = explode("|", $saveTransferData);
+    $saveReturnData = $this->returnitem->saveReturnApprovalData($action, $returnItemData, $returnItemID);
+        if ($saveReturnData) {
+            $result = explode("|", $saveReturnData);
 
             if ($result[0] == "true") {
-                $returnID = $result[2];
+                $returnItemID = $result[2];
 
                 if ($items) {
-                    $purchaseRequestItems = [];
+                    $returnItems = [];
                     foreach($items as $index => $item) {
                         $temp = [
-                            "returnID"          => $returnID,
-                            "itemID"            => $item["itemID"] != "null" ? $item["itemID"] : null,
-                            "quantity"          => $item["quantity"],
-                            "dateBorrowed"      => $item["dateBorrowed"],
-                            "createdBy"         => $item["createdBy"],
-                            "updatedBy"         => $item["updatedBy"],
+                            "returnItemID"          => $returnItemID,
+                            "borrowingDetailID"     => $item["borrowingDetailID"],
+                            "inventoryStorageID"    => $item["inventoryStorageID"],
+                            "itemID"                => $item["itemID"] != "null" ? $item["itemID"] : null,
+                            "itemName"              => $item["itemName"],
+                            "barcode"               => $item["barcode"],
+                            "serialnumber"          => $item["serialnumber"],
+                            "dateBorrowed"          => $item["dateBorrowed"],
+                            "quantityBorrowed"      => $item["quantityBorrowed"],
+                            "returnItemDate"        => $item["returnItemDate"],
+                            "returnItemQuantity"    => $item["returnItemQuantity"],
                         ];
-                        array_push($purchaseRequestItems, $temp);
+                        array_push($returnItems, $temp);
                     }
                     
-                    if (isset($_FILES["items"])) {
-                        $length = count($_FILES["items"]["name"]);
-                        $keys   = array_keys($_FILES["items"]["name"]);
-                        for ($i=0; $i<$length; $i++) {
-                            $uploadedFile = explode(".", $_FILES["items"]["name"][$keys[$i]]["file"]);
-
-                            $index     = (int)$uploadedFile[0]; 
-                            $extension = $uploadedFile[1];
-                            $filename  = $i.time().'.'.$extension;
-
-                            $folderDir = "assets/upload-files/request-items/";
-                            if (!is_dir($folderDir)) {
-                                mkdir($folderDir);
-                            }
-                            $targetDir = $folderDir.$filename;
-
-                            if (move_uploaded_file($_FILES["items"]["tmp_name"][$index]["file"], $targetDir)) {
-                                $purchaseRequestItems[$index]["files"] = $filename;
-                            }
-                            
-                        } 
-
-                        // ----- UPDATE ITEMS FILE -----
-                        foreach ($purchaseRequestItems as $key => $prItem) {
-                            if (!array_key_exists("files", $prItem)) {
-                                $purchaseRequestItems[$key]["files"] = null;
-                            }
-                        }
-                        // ----- END UPDATE ITEMS FILE -----
-                    }
-
-                    $savePurchTransferstItems = $this->returnitem->savePurchaseRequestItems($purchaseRequestItems, $returnID);
+                    $saveReturnItems = $this->returnitem->saveReturnItemsData($returnItems, $returnItemID);
                 }
 
             }
             
         }
-        echo json_encode($saveTransferData);  
+        echo json_encode($saveReturnData);  
         
     }    
 

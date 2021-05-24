@@ -83,8 +83,8 @@ $(document).ready(function(){
                             <th>Item Classification</th>
                             <th>UOM</th>
                             <th class="text-center">Item List Description</th>
-                            <th>End Qty</th>
-                            <th>Total </th>
+                            <th>End Quantity</th>
+                            <th>Total</th>
                             <th>Reorder Point</th>
                         </tr>
                     </thead>
@@ -149,9 +149,9 @@ $(document).ready(function(){
                     <td>${item["classificationName"]}</td>
                     <td>${item["unitOfMeasurementID"]}</td>
                     <td class="text-center">${Discription}</td>
-                    <td>${item["quantity"]}</td>
-                    <td>${item["reOrderLevel"]}</td>
-                    <td>${item["reOrderLevel"]}</td>
+                    <td class="text-center">${item["quantity"]}</td>
+                    <td class="text-center">${item["reOrderLevel"]}</td>
+                    <td class="text-center">${item["reOrderLevel"]}</td>
                 </tr>`;
                     
                 }) 

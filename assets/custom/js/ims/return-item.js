@@ -147,14 +147,18 @@ $(document).ready(function() {
 				sorting: [],
 				scrollCollapse: true,
 				columnDefs: [
+					
+
+
 					{ targets: 0,  width: 100 },
 					{ targets: 1,  width: 150 },
-					{ targets: 2,  width: 100 },
+					{ targets: 2,  width: 250 },
 					{ targets: 3,  width: 150 },
 					{ targets: 4,  width: 200 },
 					{ targets: 5,  width: 200 },
-					{ targets: 6,  width: 80  },
-					{ targets: 7, width: 250 },
+					{ targets: 6,  width: 200 },
+					{ targets: 7, width: 100 },
+					{ targets: 8, width: 250 },
 				],
 			});
 
@@ -170,12 +174,13 @@ $(document).ready(function() {
 				columnDefs: [
 					{ targets: 0,  width: 100 },
 					{ targets: 1,  width: 150 },
-					{ targets: 2,  width: 100 },
+					{ targets: 2,  width: 250 },
 					{ targets: 3,  width: 150 },
 					{ targets: 4,  width: 200 },
 					{ targets: 5,  width: 200 },
-					{ targets: 6,  width: 80  },
-					{ targets: 7, width: 250 },
+					{ targets: 6,  width: 200 },
+					{ targets: 7, width: 100 },
+					{ targets: 8, width: 250 },
 				],
 			});
 
@@ -193,13 +198,13 @@ $(document).ready(function() {
                 info: false,
 				scrollCollapse: true,
 				columnDefs: [
-					{ targets: 0,  width: 100  },
+					{ targets: 0,  width: 190  },
 					{ targets: 1,  width: 150 },
 					{ targets: 2,  width: 150 },
 					{ targets: 3,  width: 200  },
 					{ targets: 4,  width: 170 },
 					{ targets: 5,  width: 120 },
-                    { targets: 6,  width: 80 },
+                    { targets: 6,  width: 200 },
                     { targets: 7,  width: 80 },
                     { targets: 8,  width: 80 },
 					{ targets: 9,  width: 80 },
@@ -218,13 +223,13 @@ $(document).ready(function() {
 				scrollX: true,
 				scrollCollapse: true,
 				columnDefs: [
-					{ targets: 0,  width: 100  },
+					{ targets: 0,  width: 190  },
 					{ targets: 1,  width: 150 },
 					{ targets: 2,  width: 200 },
 					{ targets: 3,  width: 170  },
-					{ targets: 4,  width: 120 },
+					{ targets: 4,  width: 180 },
 					{ targets: 5,  width: 120 },
-                    { targets: 6,  width: 80 },
+                    { targets: 6,  width: 200 },
                     { targets: 7,  width: 80 },
                     { targets: 8,  width: 80 },
 					{ targets: 9,  width: 80 },
@@ -291,7 +296,8 @@ $(document).ready(function() {
             <thead>
                 <tr style="white-space: nowrap">
                     <th>Document No.</th>
-                    <th>Employee Name</th>
+                    <th>Prepared By</th>
+					<th>Description</th>
                     <th>Current Approver</th>
                     <th>Date Created</th>
                     <th>Date Submitted</th>
@@ -306,6 +312,7 @@ $(document).ready(function() {
 			let {
 				fullname,
 				returnItemID,
+				returnItemReason,
 				projectID,
 				projectListCode,
 				projectListName,
@@ -338,6 +345,7 @@ $(document).ready(function() {
 				<tr class="${btnClass}" id="${encryptString(returnItemID )}">
 					<td>${getFormCode("RI", createdAt, returnItemID )}</td>
 					<td>${fullname}</td>
+					<td>${returnItemReason}</td>
 					<td>
 						${employeeFullname(getCurrentApprover(approversID, approversDate, returnItemStatus, true))}
 					</td>
@@ -431,7 +439,8 @@ $(document).ready(function() {
             <thead>
                 <tr style="white-space: nowrap">
                     <th>Document No.</th>
-                    <th>Employee Name</th>
+                    <th>Prepared By</th>
+					<th>Description</th>
                     <th>Current Approver</th>
                     <th>Date Created</th>
                     <th>Date Submitted</th>
@@ -447,7 +456,7 @@ $(document).ready(function() {
 				fullname,
 				returnItemID,
                 projectID,
-               
+				returnItemReason,
 				approversID,
 				approversDate,
 				returnItemStatus,
@@ -475,7 +484,7 @@ $(document).ready(function() {
             <tr class="${btnClass}" id="${encryptString(returnItemID )}">
                 <td>${getFormCode("RI", createdAt, returnItemID )}</td>
                 <td>${fullname}</td>
-               
+               <td>${returnItemReason}</td>
                 <td>
                     ${employeeFullname(getCurrentApprover(approversID, approversDate, returnItemStatus, true))}
                 </td>
@@ -771,13 +780,19 @@ $(document).ready(function() {
 			borrowedpurpose 			="",
 			dateBorrowed 				="",
 			returnItemDate					="",
-			returnItemQuantity				=""
+			returnItemQuantity				="",
+			inventoryCode				=""
 		} = item;
 		
 		if (readOnly) {
 			
 			html += `
 			<tr class="itemTableRow">
+			<td>
+				<div class="barcode">
+				${barcode || "-"}	
+				</div>
+			</td>
 				<td>
 					<div class="itemCode">
 					${itemCode || "-"}
@@ -788,9 +803,9 @@ $(document).ready(function() {
 					${itemName || "-"}
 					</div>
 				</td>
-                <td>
-					<div class="barcode">
-					${barcode || "-"}	
+				<td>
+					<div class="inventoryCode">
+					${inventoryCode || "-"}
 					</div>
 				</td>
 				<td>
@@ -798,24 +813,19 @@ $(document).ready(function() {
 					${inventoryStorageOfficeName || "-"}
 					</div>
 				</td>
-				<td>
-					<div class="barcode">
-					${barcode || "-"}
-					</div>
-				</td>
 			<td>
 			<div class="serialnumber">
 				${serialnumber || "-"}
 			</div>
 		   </td> 
+		   <td>
+		   <div class="borrowedpurpose">
+			   ${borrowedpurpose || "-"}
+		   </div>
+		  </td> 
 			 <td>
                 <div class="borrowedquantity">
                     ${quantity || "-"}
-                </div>
-               </td> 
-                <td>
-                <div class="borrowedpurpose">
-                    ${borrowedpurpose || "-"}
                 </div>
                </td> 
                <td>
@@ -842,6 +852,11 @@ $(document).ready(function() {
 		html += `
 			<tr class="itemTableRow">
 			<td>
+				<div class="barcode">
+				${barcode || "-"}
+				</div>
+			</td>
+			<td>
 				<div class="itemcode" itemID ="${itemID}" inventoryLocationID="${inventoryStorageID}" borrowingDetailID="${borrowingDetailID}">
 				${itemCode || "-"}
 				</div>
@@ -852,8 +867,8 @@ $(document).ready(function() {
 				</div>
 			</td>
 			<td>
-				<div class="barcode">
-				${barcode || "-"}	
+				<div class="inventoryCode">
+				${inventoryCode || "-"}	
 				</div>
 			</td>
 			<td>
@@ -861,24 +876,19 @@ $(document).ready(function() {
 				${inventoryStorageOfficeName || "-"}
 				</div>
 			</td>
-			<td>
-				<div class="barcode">
-				${barcode || "-"}
-				</div>
-			</td>
 		<td>
 		<div class="serialnumber">
 			${serialnumber || "-"}
 		</div>
 	   </td> 
+	   <td>
+			<div class="borrowedpurpose">
+				${borrowedpurpose || "-"}
+			</div>
+		   </td> 
 		 <td>
 			<div class="borrowedquantity" id="borrowedquantity${index}">
 				${quantity}
-			</div>
-		   </td> 
-			<td>
-			<div class="borrowedpurpose">
-				${borrowedpurpose || "-"}
 			</div>
 		   </td> 
 		   <td>
@@ -1043,6 +1053,7 @@ $(document).ready(function() {
 			approversID             = "",
 			approversStatus         = "",
 			approversDate           = "",
+			returnItemReason		="",
 			returnItemStatus  		= false,
 			transferRequestRemarks  = false,
 			submittedAt             = false,
@@ -1170,7 +1181,7 @@ $(document).ready(function() {
 			style="width: 100%"
 			required
 			${disabled}>
-			<option selected disabled>Select Equipment Borrowing</option>
+			<option selected disabled>Select Reference No.</option>
 			${getBorroiwngList(borrowingID)}
 		</select>
 	</div>
@@ -1200,7 +1211,7 @@ $(document).ready(function() {
 </div>
             <div class="col-md-4 col-sm-12">
                 <div class="form-group">
-                    <label>Employee Name</label>
+                    <label>Prepared by</label>
                     <input type="text" class="form-control" disabled value="${employeeFullname}">
                 </div>
             </div>
@@ -1216,6 +1227,22 @@ $(document).ready(function() {
                     <input type="text" class="form-control" disabled value="${employeeDesignation}">
                 </div>
             </div>
+			<div class="col-md-12 col-sm-12">
+			<div class="form-group">
+				<label>Description ${!disabled ? "<code>*</code>" : ""}</label>
+				<textarea class="form-control validate"
+					data-allowcharacters="[a-z][A-Z][0-9][ ][.][,][-][()]['][/][&]"
+					minlength="1"
+					maxlength="200"
+					id="returnItemReason"
+					name="returnItemReason"
+					required
+					rows="4"
+					style="resize:none;"
+					${disabled}>${returnItemReason ?? ""}</textarea>
+				<div class="d-block invalid-feedback" id="invalid-returnItemReason"></div>
+			</div>
+		</div>
 
             <div class="col-sm-12">
                 <div class="w-100">
@@ -1224,17 +1251,17 @@ $(document).ready(function() {
                     <table class="table table-striped" id="${tableProjectRequestItemsName}">
                         <thead>
                             <tr style="white-space: nowrap">
+								<th>Barcode</th>
 								<th>Item Code</th>
 								<th>Item Name </th>
 								<th>Storage Code </th>
 								<th>Storage Name</th>
-								<th>Barcode</th>
 								<th>Serial No.</th>
-								<th>Qty</th>
 								<th>Purpose </th>
+								<th>Quantity Borrowed</th>
 								<th>Date Borrowed</th>
 								<th>Date Return</th>
-								<th>Qty</th>
+								<th>Quantity Return</th>
                             </tr>
                         </thead>
                         <tbody class="itemProjectTableBody" project="true">
@@ -1353,14 +1380,14 @@ $(document).ready(function() {
 			
 			data["employeeID"]            = sessionID;
 			data["projectID"]    = $("[name=projectID]").val() || null;
-			data["transferRequestReason"] = $("[name=transferRequestReason]").val()?.trim();
+			data["returnItemReason"] = $("[name=returnItemReason]").val()?.trim();
 			//data["borrowingID"]  = $("[name=borrowingID]").val() || null;
 
 
 			formData.append("employeeID", sessionID);
 			formData.append("projectID", $("[name=projectID]").val() || null);
 			formData.append("borrowingID", $("[name=borrowingID]").val() || null);
-			//formData.append("transferRequestReason", $("[name=transferRequestReason]").val()?.trim());
+			formData.append("returnItemReason", $("[name=returnItemReason]").val()?.trim());
 
 			if (action == "insert") {
 				data["createdBy"]   = sessionID;
