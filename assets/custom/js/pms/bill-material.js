@@ -1,5 +1,5 @@
-+
 $(document).ready(function() {
+	const allowedUpdate = isUpdateAllowed(39);
     // ----- MODULE APPROVER -----
 	const moduleApprover = getModuleApprover(39);
 	// ----- END MODULE APPROVER -----
@@ -24,11 +24,23 @@ $(document).ready(function() {
 		return "-";
 	}
 	// ---- END GET EMPLOYEE DATA -----
-
+	
+	// ----- IS DOCUMENT REVISED -----
+	function isDocumentRevised(id = null) {
+		if (id) {
+			const revisedDocumentsID = getTableData(
+				"pms_bill_material_tbl", 
+				"reviseBillMaterialID", 
+				"reviseBillMaterialID IS NOT NULL AND billMaterialStatus != 4");
+			return revisedDocumentsID.map(item => item.reviseBillMaterialID).includes(id);
+		}
+		return false;
+	}
+	// ----- END IS DOCUMENT REVISED -----
 
     // ----- VIEW DOCUMENT -----
-	function viewDocument(view_id = false, readOnly = false, isRevise = false) {
-		const loadData = (id, isRevise = false) => {
+	function viewDocument(view_id = false, readOnly = false, isRevise = false, isFromCancelledDocument = false) {
+		const loadData = (id, isRevise = false, isFromCancelledDocument = false) => {
 			const tableData = getTableData("pms_bill_material_tbl", "", "billMaterialID=" + id);
 
 			if (tableData.length > 0) {
@@ -56,7 +68,7 @@ $(document).ready(function() {
 
 				if (isAllowed) {
 					if (isRevise && employeeID == sessionID) {
-						pageContent(true, tableData, isReadOnly, true);
+						pageContent(true, tableData, isReadOnly, true, isFromCancelledDocument = false);
 						updateURL(encryptString(id), true, true);
 					} else {
 						pageContent(true, tableData, isReadOnly);
@@ -74,8 +86,9 @@ $(document).ready(function() {
 		}
 
 		if (view_id) {
-			let id = decryptString(view_id);
-				id && isFinite(id) && loadData(id, isRevise);
+			// let id = decryptString(view_id);
+			let id	= view_id;
+				id && isFinite(id) && loadData(id, isRevise, isFromCancelledDocument);
 		} else {
 			let url   = window.document.URL;
 			let arr   = url.split("?view_id=");
@@ -98,15 +111,15 @@ $(document).ready(function() {
 
 	function updateURL(view_id = 0, isAdd = false, isRevise = false) {
 		if (view_id && !isAdd) {
-			window.history.pushState("", "", `${base_url}pms/bill_material?view_id=${view_id}`);
+			window.history.pushState("", "", `${base_url}pms/project_budget_rational?view_id=${view_id}`);
 		} else if (isAdd) {
 			if (view_id && isRevise) {
-				window.history.pushState("", "", `${base_url}pms/bill_material?add=${view_id}`);
+				window.history.pushState("", "", `${base_url}pms/project_budget_rational?add=${view_id}`);
 			} else {
-				window.history.pushState("", "", `${base_url}pms/bill_material?add`);
+				window.history.pushState("", "", `${base_url}pms/project_budget_rational?add`);
 			}
 		} else {
-			window.history.pushState("", "", `${base_url}pms/bill_material`);
+			window.history.pushState("", "", `${base_url}pms/project_budget_rational`);
 		}
 	}
 	// ----- END VIEW DOCUMENT -----
@@ -131,7 +144,8 @@ $(document).ready(function() {
 		"projectListID, projectListCode, projectListName, clientCode, clientName, clientRegion, clientProvince, clientCity, clientBarangay, clientUnitNumber, clientHouseNumber, clientCountry, clientPostalCode",
 		"projectListStatus = 1");
 
-    const costEstimateList = getTableData("pms_cost_estimate_tbl JOIN pms_project_list_tbl ON pms_cost_estimate_tbl.projectID = pms_project_list_tbl.projectListID LEFT JOIN pms_client_tbl ON pms_project_list_tbl.projectListClientID = pms_client_tbl.clientID","pms_cost_estimate_tbl.*, projectListID, projectListCode, projectListName, clientCode, clientName, clientRegion, clientProvince, clientCity, clientBarangay, clientUnitNumber, clientHouseNumber, clientCountry, clientPostalCode"
+    const costEstimateList = getTableData("pms_cost_estimate_tbl JOIN pms_project_list_tbl ON pms_cost_estimate_tbl.projectID = pms_project_list_tbl.projectListID LEFT JOIN pms_client_tbl ON pms_project_list_tbl.projectListClientID = pms_client_tbl.clientID",
+										"pms_cost_estimate_tbl.*, projectListID, projectListCode, projectListName, clientCode, clientName, clientRegion, clientProvince, clientCity, clientBarangay, clientUnitNumber, clientHouseNumber, clientCountry, clientPostalCode"
                                             ,"costEstimateStatus='2'");
 	   										
 	// END GLOBAL VARIABLE - REUSABLE 
@@ -158,13 +172,14 @@ $(document).ready(function() {
 					{ targets: 0,  width: 100 },
 					{ targets: 1,  width: 150 },
 					{ targets: 2,  width: 150 },
-					{ targets: 3,  width: 200 },
-					{ targets: 4,  width: 150 },
-					{ targets: 5,  width: 200 },
+					{ targets: 3,  width: 350 },
+					{ targets: 4,  width: 350 },
+					{ targets: 5,  width: 150 },
 					{ targets: 6,  width: 200 },
 					{ targets: 7,  width: 200 },
-					{ targets: 8,  width: 80  },
-					{ targets: 9, width: 250 },
+					{ targets: 8,  width: 200 },
+					{ targets: 9,  width: 80  },
+					{ targets: 10, width: 250 },
 				],
 			});
 
@@ -181,13 +196,14 @@ $(document).ready(function() {
 					{ targets: 0,  width: 100 },
 					{ targets: 1,  width: 150 },
 					{ targets: 2,  width: 150 },
-					{ targets: 3,  width: 200 },
-					{ targets: 4,  width: 150 },
-					{ targets: 5,  width: 200 },
+					{ targets: 3,  width: 350 },
+					{ targets: 4,  width: 350 },
+					{ targets: 5,  width: 150 },
 					{ targets: 6,  width: 200 },
 					{ targets: 7,  width: 200 },
-					{ targets: 8,  width: 80  },
-					{ targets: 9, width: 250 },
+					{ targets: 8,  width: 200 },
+					{ targets: 9,  width: 80  },
+					{ targets: 10, width: 250 },
 				],
 			});
 
@@ -207,10 +223,9 @@ $(document).ready(function() {
 				columnDefs: [
 					{ targets: 0,  width: 100},
 					{ targets: 1,  width: 150 },
-					{ targets: 2,  width: 80 },
-					{ targets: 3,  width: 80  },
-					{ targets: 4,  width: 120  },
-                    { targets: 5,  width: 120  }
+					{ targets: 2,  width: 80  },
+					{ targets: 3,  width: 120  },
+                    { targets: 4,  width: 120  }
 				],
 			});
 
@@ -233,8 +248,7 @@ $(document).ready(function() {
 					{ targets: 1,  width: 150 },
 					{ targets: 2,  width: 80 },
 					{ targets: 3,  width: 80  },
-					{ targets: 4,  width: 120  },
-                    { targets: 5,  width: 120  }
+					{ targets: 4,  width: 120  }
 				],
 			});
 
@@ -359,7 +373,8 @@ $(document).ready(function() {
 				proccessing: false,
 				serverSide: false,
                 paging: false,
-                info: false,
+				info: false,
+				searching: false,
 				scrollX: true,
 				scrollCollapse: true,
 				columnDefs: [
@@ -398,14 +413,17 @@ $(document).ready(function() {
 
 
     // ----- HEADER BUTTON -----
-	function headerButton(isAdd = true, text = "Add", isRevise = false) {
+	function headerButton(isAdd = true, text = "Add", isRevise = false, isFromCancelledDocument = false) {
 		let html;
 		if (isAdd) {
-            html = `
-            <button type="button" class="btn btn-default btn-add" id="btnAdd"><i class="icon-plus"></i> &nbsp;${text}</button>`;
+			if(isCreateAllowed(39)){
+				html = `
+            	<button type="button" class="btn btn-default btn-add" id="btnAdd"><i class="icon-plus"></i> &nbsp;${text}</button>`;
+			}
 		} else {
 			html = `
-            <button type="button" class="btn btn-default btn-light" id="btnBack" revise="${isRevise}"><i class="fas fa-arrow-left"></i> &nbsp;Back</button>`;
+            <button type="button" class="btn btn-default btn-light" id="btnBack" 
+			revise="${isRevise}" cancel="${isFromCancelledDocument}"><i class="fas fa-arrow-left"></i> &nbsp;Back</button>`;
 		}
 		$("#headerButton").html(html);
 	}
@@ -419,7 +437,7 @@ $(document).ready(function() {
 			"pms_bill_material_tbl AS imrt LEFT JOIN hris_employee_list_tbl AS helt USING(employeeID) LEFT JOIN pms_project_list_tbl AS pplt ON pplt.projectListID = imrt.projectID",
 			"imrt.*, CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname, imrt.createdAt AS dateCreated, projectListCode, projectListName",
 			`imrt.employeeID != ${sessionID} AND billMaterialStatus != 0 AND billMaterialStatus != 4`,
-			`FIELD(billMaterialStatus, 0, 1, 3, 2, 4), COALESCE(imrt.submittedAt, imrt.createdAt)`
+			`FIELD(billMaterialStatus, 0, 1, 3, 2, 4, 5), COALESCE(imrt.submittedAt, imrt.createdAt)`
 		);
 
 		let html = `
@@ -427,9 +445,10 @@ $(document).ready(function() {
             <thead>
                 <tr style="white-space: nowrap">
                     <th>Document No.</th>
-                    <th>Employee Name</th>
+                    <th>Prepared By</th>
 					<th>Reference No.</th>
                     <th>Project Name</th>
+					<th>Description</th>
                     <th>Current Approver</th>
                     <th>Date Created</th>
                     <th>Date Submitted</th>
@@ -452,6 +471,7 @@ $(document).ready(function() {
 				approversDate,
 				billMaterialStatus,
 				billMaterialRemarks,
+				billMaterialReason,
 				submittedAt,
 				createdAt,
 			} = item;
@@ -459,7 +479,7 @@ $(document).ready(function() {
 			let remarks       = billMaterialRemarks ? billMaterialRemarks : "-";
 			let dateCreated   = moment(createdAt).format("MMMM DD, YYYY hh:mm:ss A");
 			let dateSubmitted = submittedAt ? moment(submittedAt).format("MMMM DD, YYYY hh:mm:ss A") : "-";
-			let dateApproved  = billMaterialStatus == 2 ? approversDate.split("|") : "-";
+			let dateApproved  = billMaterialStatus == 2 || billMaterialStatus == 5 ? approversDate.split("|") : "-";
 			if (dateApproved !== "-") {
 				dateApproved = moment(dateApproved[dateApproved.length - 1]).format("MMMM DD, YYYY hh:mm:ss A");
 			}
@@ -471,12 +491,12 @@ $(document).ready(function() {
 			<button 
 				class="btn btn-edit w-100 btnEdit" 
 				id="${encryptString(billMaterialID )}" 
-				code="${getFormCode("BOM", createdAt, billMaterialID )}"><i class="fas fa-edit"></i> Edit</button>`;
+				code="${getFormCode("PBR", createdAt, billMaterialID )}"><i class="fas fa-edit"></i> Edit</button>`;
 
 			if (isImCurrentApprover(approversID, approversDate, billMaterialStatus) || isAlreadyApproved(approversID, approversDate)) {
 				html += `
-				<tr class="${btnClass}" id="${encryptString(billMaterialID )}" code="${billMaterialID? getFormCode("BOM", createdAt, billMaterialID ):""}">>
-					<td>${getFormCode("BOM", createdAt, billMaterialID )}</td>
+				<tr class="${btnClass}" id="${encryptString(billMaterialID )}" code="${billMaterialID? getFormCode("PBR", createdAt, billMaterialID ):""}">>
+					<td>${getFormCode("PBR", createdAt, billMaterialID )}</td>
 					<td>${fullname}</td>
 					<td>${referenceCode ? getFormCode("CEF",createdAt,referenceCode) : "-"}</td>
 					<td>
@@ -485,6 +505,7 @@ $(document).ready(function() {
 						</div>
 						<small style="color:#848482;">${projectListCode || '-'}</small>
 					</td>
+					<td>${billMaterialReason}</td>
 					<td>
 						${employeeFullname(getCurrentApprover(approversID, approversDate, billMaterialStatus, true))}
 					</td>
@@ -519,7 +540,7 @@ $(document).ready(function() {
 			"pms_bill_material_tbl AS imrt LEFT JOIN hris_employee_list_tbl AS helt USING(employeeID) LEFT JOIN pms_project_list_tbl AS pplt ON pplt.projectListID = imrt.projectID",
 			"imrt.*, CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname, imrt.createdAt AS dateCreated, projectListCode, projectListName",
 			`imrt.employeeID = ${sessionID}`,
-			`FIELD(billMaterialStatus, 0, 1, 3, 2, 4), COALESCE(imrt.submittedAt, imrt.createdAt)`
+			`FIELD(billMaterialStatus, 0, 1, 3, 2, 4, 5), COALESCE(imrt.submittedAt, imrt.createdAt)`
 		);
 
 		let html = `
@@ -527,9 +548,10 @@ $(document).ready(function() {
             <thead>
                 <tr style="white-space: nowrap">
                     <th>Document No.</th>
-                    <th>Employee Name</th>
+                    <th>Prepared By</th>
 					<th>Reference No.</th>
                     <th>Project Name</th>
+					<th>Description</th>
                     <th>Current Approver</th>
                     <th>Date Created</th>
                     <th>Date Submitted</th>
@@ -552,6 +574,7 @@ $(document).ready(function() {
 				approversDate,
 				billMaterialStatus,
 				billMaterialRemarks,
+				billMaterialReason,
 				submittedAt,
 				createdAt,
 			} = item;
@@ -559,7 +582,7 @@ $(document).ready(function() {
 			let remarks       = billMaterialRemarks ? billMaterialRemarks : "-";
 			let dateCreated   = moment(createdAt).format("MMMM DD, YYYY hh:mm:ss A");
 			let dateSubmitted = submittedAt ? moment(submittedAt).format("MMMM DD, YYYY hh:mm:ss A") : "-";
-			let dateApproved  = billMaterialStatus == 2 ? approversDate.split("|") : "-";
+			let dateApproved  = billMaterialStatus == 2 || billMaterialStatus == 5 ? approversDate.split("|") : "-";
 			if (dateApproved !== "-") {
 				dateApproved = moment(dateApproved[dateApproved.length - 1]).format("MMMM DD, YYYY hh:mm:ss A");
 			}
@@ -571,11 +594,11 @@ $(document).ready(function() {
             <button 
                 class="btn btn-edit w-100 btnEdit" 
                 id="${encryptString(billMaterialID )}" 
-                code="${getFormCode("BOM", createdAt, billMaterialID )}"><i class="fas fa-edit"></i> Edit</button>`;
+                code="${getFormCode("PBR", createdAt, billMaterialID )}"><i class="fas fa-edit"></i> Edit</button>`;
 
 			html += `
             <tr class="${btnClass}" id="${encryptString(billMaterialID )}">
-                <td>${getFormCode("BOM", createdAt, billMaterialID )}</td>
+                <td>${getFormCode("PBR", createdAt, billMaterialID )}</td>
                 <td>${fullname}</td>
 				<td>${referenceCode ? getFormCode("CEF",createdAt,referenceCode) : "-"}</td>
                 <td>
@@ -584,6 +607,7 @@ $(document).ready(function() {
 					</div>
 					<small style="color:#848482;">${projectListCode || '-'}</small>
 				</td>
+				<td>${billMaterialReason}</td>
                 <td>
                     ${employeeFullname(getCurrentApprover(approversID, approversDate, billMaterialStatus, true))}
                 </td>
@@ -611,7 +635,7 @@ $(document).ready(function() {
 
 
     // ----- FORM BUTTONS -----
-	function formButtons(data = false, isRevise = false) {
+	function formButtons(data = false, isRevise = false, isFromCancelledDocument = false) {
 		let button = "";
 		if (data) {
 			let {
@@ -631,9 +655,9 @@ $(document).ready(function() {
 					<button 
 						class="btn btn-submit" 
 						id="btnSubmit" 
-						billMaterialID="${billMaterialID}"
-						code="${getFormCode("BOM", createdAt, billMaterialID)}"
-						revise=${isRevise}><i class="fas fa-paper-plane"></i>
+						billMaterialID="${encryptString(billMaterialID)}"
+						code="${getFormCode("PBR", createdAt, billMaterialID)}"
+						revise="${isRevise}" cancel="${isFromCancelledDocument}"><i class="fas fa-paper-plane"></i>
 						Submit
 					</button>`;
 
@@ -650,8 +674,8 @@ $(document).ready(function() {
 						<button 
 							class="btn btn-cancel"
 							id="btnCancelForm" 
-							billMaterialID="${billMaterialID}"
-							code="${getFormCode("BOM", createdAt, billMaterialID)}"
+							billMaterialID="${encryptString(billMaterialID)}"
+							code="${getFormCode("PBR", createdAt, billMaterialID)}"
 							revise=${isRevise}><i class="fas fa-ban"></i> 
 							Cancel
 						</button>`;
@@ -665,12 +689,23 @@ $(document).ready(function() {
 						<button 
 							class="btn btn-cancel"
 							id="btnCancelForm" 
-							billMaterialID="${billMaterialID}"
-							code="${getFormCode("BOM", createdAt, billMaterialID)}"
+							billMaterialID="${encryptString(billMaterialID)}"
+							code="${getFormCode("PBR", createdAt, billMaterialID)}"
 							status="${billMaterialStatus}"><i class="fas fa-ban"></i> 
 							Cancel
 						</button>`;
 					}
+				} else if(billMaterialStatus == 2){
+					// DROP
+					button = `
+					<button type="button" 
+						class="btn btn-cancel px-5 p-2"
+						id="btnDrop" 
+						billMaterialID="${encryptString(billMaterialID)}"
+						code="${getFormCode("PBR", createdAt, billMaterialID)}"
+						status="${billMaterialStatus}"><i class="fas fa-ban"></i> 
+						Drop
+					</button>`;
 				} else if (billMaterialStatus == 3) {
 					// DENIED - FOR REVISE
 					if(!isRevised(billMaterialID)){
@@ -679,12 +714,26 @@ $(document).ready(function() {
 							class="btn btn-cancel"
 							id="btnRevise" 
 							billMaterialID="${encryptString(billMaterialID)}"
-							code="${getFormCode("BOM", createdAt, billMaterialID)}"
+							code="${getFormCode("PBR", createdAt, billMaterialID)}"
 							status="${billMaterialStatus}"><i class="fas fa-clone"></i>
 							Revise
 						</button>`;
 					}
 
+				} else if (billMaterialStatus == 4) {
+					// CANCELLED - FOR REVISE
+					if (!isDocumentRevised(billMaterialID)) {
+						button = `
+						<button
+							class="btn btn-cancel px-5 p-2"
+							id="btnRevise" 
+							billMaterialID="${encryptString(billMaterialID)}"
+							code="${getFormCode("CEF", createdAt, billMaterialID)}"
+							status="${billMaterialStatus}"
+							cancel="true"><i class="fas fa-clone"></i>
+							Revise
+						</button>`;
+					}
 				}
 			} else {
 				if (billMaterialStatus == 1) {
@@ -694,14 +743,14 @@ $(document).ready(function() {
 							class="btn btn-submit" 
 							id="btnApprove" 
 							billMaterialID="${encryptString(billMaterialID)}"
-							code="${getFormCode("BOM", createdAt, billMaterialID)}"><i class="fas fa-paper-plane"></i>
+							code="${getFormCode("PBR", createdAt, billMaterialID)}"><i class="fas fa-paper-plane"></i>
 							Approve
 						</button>
 						<button 
 							class="btn btn-cancel"
 							id="btnReject" 
 							billMaterialID="${encryptString(billMaterialID)}"
-							code="${getFormCode("BOM", createdAt, billMaterialID)}"><i class="fas fa-ban"></i> 
+							code="${getFormCode("PBR", createdAt, billMaterialID)}"><i class="fas fa-ban"></i> 
 							Deny
 						</button>`;
 					}
@@ -772,6 +821,7 @@ $(document).ready(function() {
                             requestorname        = "${employeeFullname}"
                             requestordeparment   = "${employeeDepartment}"
                             requestordesignation = "${employeeDesignation}"
+							reasons 			 = "${items.costEstimateReason}"
                             ${items.costEstimateID == id && "selected"}>
                             ${getFormCode("CEF",moment(items.createdAt),items.costEstimateID)}
                         </option>`;
@@ -1063,6 +1113,30 @@ $(document).ready(function() {
 			}, 150);
 	}
 	// ----- END UPDATING TRAVEL TOTALS
+	
+	// ----- UPDATING PERSONNEL TOTALS
+	function personnelTotal(){
+		let grandTotal=0;
+		$(".personnelTableBody tr").each(function(){
+			var totalhours 	= $(this).find(".totalhours").text().trim();
+			var unitprice	= $(this).find("[name=personnel_unitprice]").val() ? 
+									$(this).find("[name=personnel_unitprice]").val().replaceAll(",","") :
+									$(this).find(".unitCost").attr("value").trim();
+			var totalCost 	= parseFloat(totalhours) * parseFloat(unitprice);
+			$(this).find(".totalCost").text(formatAmount(totalCost || 0,true));
+			grandTotal += parseFloat(totalCost || 0);
+		});
+
+		$(".personnelTotal").text(formatAmount(grandTotal, true));
+		setTimeout(() => {
+			billMaterialGrandTotal();
+		}, 150);
+	}
+	// ----- END UPDATING PERSONNEL TOTALS
+
+
+
+
 
 	// ----- UPDATING TABLES TOTALS
 	function billMaterialGrandTotal(){
@@ -1090,6 +1164,7 @@ $(document).ready(function() {
         const requestorname         = $('option:selected', this).attr("requestorname");
         const requestordeparment    = $('option:selected', this).attr("requestordeparment");
         const requestordesignation  = $('option:selected', this).attr("requestordesignation");
+		const billMaterialReason	= $('option:selected', this).attr("reasons")
         $("[name=projectname]").attr("projectid",projectID);
         $("[name=projectCode]").val(projectcode);
         $("[name=projectname]").val(projectname);
@@ -1099,6 +1174,7 @@ $(document).ready(function() {
         $("[name=requestorname]").val(requestorname);
         $("[name=requestordepartment]").val(requestordeparment);
         $("[name=requestordesignation]").val(requestordesignation);
+		$("[name=billMaterialReason]").val(billMaterialReason);
 
         $(".personnelTableBody").html('<tr><td colspan="6">'+preloader+'</td></tr>');
         $(".itemProjectTableBody").html('<tr><td colspan="6">'+preloader+'</td></tr>');
@@ -1143,9 +1219,17 @@ $(document).ready(function() {
 
 	// -------- TRIGGER TO CHANGE THE TRAVEL TOTALS
 	$(document).on("keyup","[name=unitprice],[name=quantity]", function(){
-		travelTotal();
+			travelTotal();
 	});
-	// -------- TRIGGER TO CHANGE THE TRAVEL TOTALS
+	// -------- END TRIGGER TO CHANGE THE TRAVEL TOTALS
+
+	// -------- TRIGGER TO CHANGE THE PERSONNEL TOTALS
+	$(document).on("keyup","[name=personnel_unitprice]", function(){
+		personnelTotal();
+	});
+	// -------- END TRIGGER TO CHANGE THE PERSONNEL TOTALS
+
+
 
     // ----- SELECT ITEM NAME -----
     $(document).on("change", "[name=itemID]", function() {
@@ -1292,7 +1376,7 @@ $(document).ready(function() {
 
 
     // ----- FORM CONTENT -----
-	function formContent(data = false, readOnly = false, isRevise = false) {
+	function formContent(data = false, readOnly = false, isRevise = false, isFromCancelledDocument = false) {
 		$("#page_content").html(preloader);
 		readOnly = isRevise ? false : readOnly;
 
@@ -1323,9 +1407,10 @@ $(document).ready(function() {
 
 		readOnly ? preventRefresh(false) : preventRefresh(true);
 
-		$("#btnBack").attr("billMaterialID", billMaterialID);
+		$("#btnBack").attr("billMaterialID", encryptString(billMaterialID));
 		$("#btnBack").attr("status", billMaterialStatus);
 		$("#btnBack").attr("employeeID", employeeID);
+		$("#btnBack").attr("cancel", isFromCancelledDocument);
 
 		let disabled = readOnly ? "disabled" : "";
 		let checkboxTravelHeader = !disabled ? `
@@ -1364,7 +1449,7 @@ $(document).ready(function() {
 		}
 
 
-		let button = formButtons(data, isRevise);
+		let button = formButtons(data, isRevise, isFromCancelledDocument);
 
 		let reviseDocumentNo    = isRevise ? billMaterialID : reviseBillMaterialID;
 		let documentHeaderClass = isRevise || reviseBillMaterialID ? "col-lg-4 col-md-4 col-sm-12 px-1" : "col-lg-2 col-md-6 col-sm-12 px-1";
@@ -1375,7 +1460,7 @@ $(document).ready(function() {
 				<div class="body">
 					<small class="text-small text-muted font-weight-bold">Revised Document No.</small>
 					<h6 class="mt-0 text-danger font-weight-bold">
-						${getFormCode("BOM", createdAt, reviseDocumentNo)}
+						${getFormCode("PBR", createdAt, reviseDocumentNo)}
 					</h6>      
 				</div>
 			</div>
@@ -1389,7 +1474,7 @@ $(document).ready(function() {
                     <div class="body">
                         <small class="text-small text-muted font-weight-bold">Document No.</small>
                         <h6 class="mt-0 text-danger font-weight-bold">
-							${billMaterialID && !isRevise ? getFormCode("BOM", createdAt, billMaterialID) : "---"}
+							${billMaterialID && !isRevise ? getFormCode("PBR", createdAt, billMaterialID) : "---"}
 						</h6>      
                     </div>
                 </div>
@@ -1453,7 +1538,7 @@ $(document).ready(function() {
         <div class="row" id="form_bill_material">
             <div class="col-md-4 col-sm-12">
                 <div class="form-group">
-                    <label>Employee Name</label>
+                    <label>Prepared By</label>
                     <input type="text" class="form-control" disabled value="${employeeFullname}">
                 </div>
             </div>
@@ -1471,7 +1556,7 @@ $(document).ready(function() {
             </div>
             <div class="col-md-12 col-sm-12">
                 <div class="form-group">
-                    <label>Reason ${!disabled ? "<code>*</code>" : ""}</label>
+                    <label>Description</label>
                     <textarea class="form-control validate"
                         data-allowcharacters="[a-z][A-Z][0-9][ ][.][,][-][()]['][/][&]"
                         minlength="1"
@@ -1481,7 +1566,7 @@ $(document).ready(function() {
                         required
                         rows="4"
                         style="resize:none;"
-						${disabled}>${billMaterialReason ?? ""}</textarea>
+						disabled >${billMaterialReason ?? ""}</textarea>
                     <div class="d-block invalid-feedback" id="invalid-billMaterialReason"></div>
                 </div>
             </div>
@@ -1494,7 +1579,7 @@ $(document).ready(function() {
                         style="width: 100%"
                         required
 						${billMaterialID == "" ? ``:`disabled`}>
-                        <option selected disabled>Select Document No.</option>
+                        <option selected disabled>Select Reference No.</option>
                         ${geCostEstimateList(referenceCode)}
                     </select>
                     <div class="d-block invalid-feedback" id="invalid-referenceCode"></div>
@@ -1560,14 +1645,13 @@ $(document).ready(function() {
                             <tr style="white-space: nowrap">
 								<th>Designation Code</th>
                                 <th>Designation</th>
-                                <th>Quantity</th>
                                 <th>Total Hours</th>
                                 <th>Hourly Rate</th>
                                 <th>Total Cost</th>
                             </tr>
                         </thead>
                         <tbody class="personnelTableBody" personnel="true">
-                          
+                         
                         </tbody>
                     </table>
                 </div>
@@ -1678,7 +1762,7 @@ $(document).ready(function() {
 		if (billMaterialID) {
 			requestProjectItems += getRequestRow("project",referenceCode,"",billMaterialID);
 			requestCompanyItems += getRequestRow("company",referenceCode,"",billMaterialID);
-			requestPersonnel 	+= getRequestRow("personnel",referenceCode,"", billMaterialID);
+			requestPersonnel 	+= getRequestRow("personnel",referenceCode,readOnly, billMaterialID);
 			requestTravel 		+= getRequestRow("travel",referenceCode, readOnly, billMaterialID);   
 		}
 
@@ -1693,6 +1777,17 @@ $(document).ready(function() {
 			$(".itemProjectTableBody").html(requestProjectItems);
 			$(".itemCompanyTableBody").html(requestCompanyItems);
 			$(".travelTableBody").html(requestTravel);
+			// ----- NOT ALLOWED FOR UPDATE -----
+			if (!allowedUpdate) {
+				$("#page_content").find(`input, select, textarea`).each(function() {
+					if (this.type != "search") {
+						$(this).attr("disabled", true);
+					}
+				})
+				$('#btnBack').attr("status", "2");
+				$(`#btnSubmit, #btnRevise, #btnCancel, #btnCancelForm, .btnAddRow, .btnDeleteRow`).hide();
+			}
+			// ----- END NOT ALLOWED FOR UPDATE -----
 			return html;
 		}, 300);
 	}
@@ -1700,7 +1795,7 @@ $(document).ready(function() {
 
 
     // ----- PAGE CONTENT -----
-	function pageContent(isForm = false, data = false, readOnly = false, isRevise = false) {
+	function pageContent(isForm = false, data = false, readOnly = false, isRevise = false, isFromCancelledDocument = false) {
 		$("#page_content").html(preloader);
 		if (!isForm) {
 			preventRefresh(false);
@@ -1717,14 +1812,14 @@ $(document).ready(function() {
             </div>`;
 			$("#page_content").html(html);
 
-			headerButton(true, "Add Bill of Material");
+			headerButton(true, "Add Project Budget Rationale");
 			headerTabContent();
 			myFormsContent();
 			updateURL();
 		} else {
-			headerButton(false, "", isRevise);
+			headerButton(false, "", isRevise, isFromCancelledDocument);
 			headerTabContent(false);
-			formContent(data, readOnly, isRevise);
+			formContent(data, readOnly, isRevise, isFromCancelledDocument);
 
 			setTimeout(() => {
 				billMaterialGrandTotal();
@@ -1737,7 +1832,7 @@ $(document).ready(function() {
 	// ----- END PAGE CONTENT -----
 
 
-	// ----- GET Bill of Material DATA -----
+	// ----- GET Project Budget Rationale DATA -----
 	function getbillMaterialData(action = "insert", method = "submit", status = "1", id = null, currentStatus = "0", isObject = false) {
 
 		/**
@@ -1822,8 +1917,14 @@ $(document).ready(function() {
 					}else{
 						travelDescription = $(this).find(".description").text().replaceAll("\n","").replaceAll("\t","").trim();
 						unitOfMeasure 	  = $(this).find(".uom").text().replaceAll("\n","").replaceAll("\t","").trim();
-						unitCost 		  = $(this).find(".unitCost").attr("value");
-						totalCost 		  = $(this).find(".totalCost").attr("value");
+						if($(this).find("[name=personnel_unitprice]").val()){
+							unitCost 		  = $(this).find("[name=personnel_unitprice]").val().replaceAll(",","");
+							totalCost 		  = $(this).find(".totalCost").text().replaceAll("₱","").replaceAll(",","").trim();
+						}else{
+							unitCost 		  = $(this).find(".unitCost").attr("value");
+							totalCost 		  = $(this).find(".totalCost").attr("value");
+						}
+						
 					}
 
 				var temp   = {
@@ -1840,7 +1941,7 @@ $(document).ready(function() {
 						//  FOR TRAVEL
 							travelDescription:		travelDescription == "" || !travelDescription ? null : travelDescription,
 						// FOR ALL
-							quantity:	$(this).find(".quantity").text().replaceAll("\n","").replaceAll("\t","").trim() || $(this).find("[name=quantity]").val(),
+							quantity:	$(this).find(".quantity").text().replaceAll("\n","").replaceAll("\t","").trim() || ($(this).find("[name=quantity]").val() || "0"),
 							unitCost: 	unitCost ?? "0",
 							totalCost:  totalCost ?? "0",
 							createdBy: sessionID,
@@ -1853,7 +1954,7 @@ $(document).ready(function() {
 		} 
 		return data;
 	}
-	// ----- END GET Bill of Material DATA -----
+	// ----- END GET Project Budget Rationale DATA -----
 
 
     // ----- OPEN ADD FORM -----
@@ -1866,7 +1967,7 @@ $(document).ready(function() {
 
     // ----- OPEN EDIT FORM -----
 	$(document).on("click", ".btnEdit", function () {
-		const id = $(this).attr("id");
+		const id = decryptString($(this).attr("id"));
 		viewDocument(id);
 	});
 	// ----- END OPEN EDIT FORM -----
@@ -1874,7 +1975,7 @@ $(document).ready(function() {
 
     // ----- VIEW DOCUMENT -----
 	$(document).on("click", ".btnView", function () {
-		const id = $(this).attr("id");
+		const id = decryptString($(this).attr("id"));
 		viewDocument(id, true);
 	});
 	// ----- END VIEW DOCUMENT -----
@@ -1882,28 +1983,37 @@ $(document).ready(function() {
 
     // ----- VIEW DOCUMENT -----
 	$(document).on("click", "#btnRevise", function () {
-		const id = $(this).attr("billMaterialID");
-		viewDocument(id, false, true);
+		const id = decryptString($(this).attr("billMaterialID"));
+		const fromCancelledDocument = $(this).attr("cancel")== "true";
+		viewDocument(id, false, true, fromCancelledDocument);
 	});
 	// ----- END VIEW DOCUMENT -----
 
 
 	// ----- SAVE CLOSE FORM -----
 	$(document).on("click", "#btnBack", function () {
-		const id         = $(this).attr("billMaterialID");
-		const revise     = $(this).attr("revise") == "true";
-		const employeeID = $(this).attr("employeeID");
-		const feedback   = $(this).attr("code") || getFormCode("BOM", dateToday(), id);
-		const status     = $(this).attr("status");
+		const id         				= decryptString($(this).attr("billMaterialID"));
+		const isFromCancelledDocument 	= $(this).attr("cancel") == "true";
+		const revise     				= $(this).attr("revise") == "true";
+		const employeeID 				= $(this).attr("employeeID");
+		const feedback   				= $(this).attr("code") || getFormCode("PBR", dateToday(), id);
+		const status     				= $(this).attr("status");
 
 		if (status != "false" && status != 0) {
 			
 			if (revise) {
-				const action = revise && "insert" || (id && feedback ? "update" : "insert");
+				const action = revise && !isFromCancelledDocument &&  "insert" || (id && feedback ? "update" : "insert");
 				const data   = getbillMaterialData(action, "save", "0", id);
 				data["billMaterialStatus"] = 0;
-				data["reviseBillMaterialID"] = id;
-				delete data["billMaterialID"];
+				if(!isFromCancelledDocument){
+					data["reviseBillMaterialID"] = id;
+					delete data["billMaterialID"];
+				}else{
+					data["billMaterialID"] = id;
+					delete data["action"];
+					data["action"] = "update";
+				}
+				
 
 				// data.append("billMaterialStatus", 0);
 				// data.append("reviseBillMaterialID", id);
@@ -1933,19 +2043,24 @@ $(document).ready(function() {
 
     // ----- SAVE DOCUMENT -----
 	$(document).on("click", "#btnSave, #btnCancel", function () {
-		const id       = $(this).attr("billMaterialID");
-		const revise   = $(this).attr("revise") == "true";
-		const feedback = $(this).attr("code") || getFormCode("BOM", dateToday(), id);
-		const action   = revise && "insert" || (id && feedback ? "update" : "insert");
-		const data     = getbillMaterialData(action, "save", "0", id);
-		data["billMaterialStatus"] = 0;
+		const id       					= decryptString($(this).attr("billMaterialID"));
+		const isFromCancelledDocument 	= $(this).attr("cancel") == "true";
+		const revise   					= $(this).attr("revise") == "true";
+		const feedback 					= $(this).attr("code") || getFormCode("PBR", dateToday(), id);
+		const action   					= revise && "insert" || (id && feedback ? "update" : "insert");
+		const data     					= getbillMaterialData(action, "save", "0", id);
+		data["billMaterialStatus"] 		= 0;
 		// data.append("billMaterialStatus", 0);
 
 		if (revise) {
-			// data.append("reviseBillMaterialID", id);
-			// data.delete("billMaterialID");
-			data["reviseBillMaterialID"] = id;
-			delete data["billMaterialID"];
+			if(!isFromCancelledDocument){
+				data["reviseBillMaterialID"] = id;
+				delete data["billMaterialID"];
+			}else{
+				data["billMaterialID"] = id;
+				delete data["action"];
+				data["action"] = "update";
+			}
 		}
 		console.log(data);
 		savebillMaterial(data, "save", null, pageContent);
@@ -1962,17 +2077,21 @@ $(document).ready(function() {
 
     // ----- SUBMIT DOCUMENT -----
 	$(document).on("click", "#btnSubmit", function () {
-		const id           = $(this).attr("billMaterialID");
-		const revise       = $(this).attr("revise") == "true";
-		const validate     = validateForm("form_bill_material");
+		const id           				= decryptString($(this).attr("billMaterialID"));
+		const isFromCancelledDocument 	= $(this).attr("cancel") == "true";
+		const revise       				= $(this).attr("revise") == "true";
+		const validate     				= validateForm("form_bill_material");
 		removeIsValid("#tableTravelRequest");
+		removeIsValid("#tablePersonnelRequest");
 		if (validate) {
 			const action = revise && "insert" || (id ? "update" : "insert");
 			const data   = getbillMaterialData(action, "submit", "1", id);
 
 			if (revise) {
-				data["reviseBillMaterialID"] = id;
-				delete data["billMaterialID"];
+				if(!isFromCancelledDocument){
+					data["reviseBillMaterialID"] = id;
+					delete data["billMaterialID"];
+				}
 			}
 
 			let approversID = "", approversDate = "";
@@ -1986,7 +2105,7 @@ $(document).ready(function() {
 			if (employeeID != sessionID) {
 				notificationData = {
 					moduleID:                39,
-					notificationTitle:       "Bill of Material",
+					notificationTitle:       "Project Budget Rationale",
 					notificationDescription: `${employeeFullname(sessionID)} asked for your approval.`,
 					notificationType:        2,
 					employeeID,
@@ -2009,7 +2128,7 @@ $(document).ready(function() {
 
     // ----- CANCEL DOCUMENT -----
 	$(document).on("click", "#btnCancelForm", function () {
-		const id     = $(this).attr("billMaterialID");
+		const id     = decryptString( $(this).attr("billMaterialID"));
 		const status = $(this).attr("status");
 		const action = "update";
 		const data   = getbillMaterialData(action, "cancelform", "4", id, status);
@@ -2054,7 +2173,7 @@ $(document).ready(function() {
 				notificationData = {
 					moduleID:                39,
 					tableID:                 id,
-					notificationTitle:       "Bill of Material",
+					notificationTitle:       "Project Budget Rationale",
 					notificationDescription: `${feedback}: Your request has been approved.`,
 					notificationType:        7,
 					employeeID,
@@ -2065,7 +2184,7 @@ $(document).ready(function() {
 				notificationData = {
 					moduleID:                39,
 					tableID:                 id,
-					notificationTitle:       "Bill of Material",
+					notificationTitle:       "Project Budget Rationale",
 					notificationDescription: `${employeeFullname(employeeID)} asked for your approval.`,
 					notificationType:         2,
 					employeeID:               getNotificationEmployeeID(approversID, dateApproved),
@@ -2083,11 +2202,11 @@ $(document).ready(function() {
 
     // ----- REJECT DOCUMENT -----
 	$(document).on("click", "#btnReject", function () {
-		const id       = $(this).attr("billMaterialID");
-		const feedback = $(this).attr("code") || getFormCode("BOM", dateToday(), id);
+		const id       = decryptString($(this).attr("billMaterialID"));
+		const feedback = $(this).attr("code") || getFormCode("PBR", dateToday(), id);
 
 		$("#modal_bill_material_content").html(preloader);
-		$("#modal_bill_material .page-title").text("DENY BILL OF MATERIAL");
+		$("#modal_bill_material .page-title").text("DENY PROJECT BUDGET RATIONAL");
 		$("#modal_bill_material").modal("show");
 		let html = `
 		<div class="modal-body">
@@ -2116,7 +2235,7 @@ $(document).ready(function() {
 
 	$(document).on("click", "#btnRejectConfirmation", function () {
 		const id       = decryptString($(this).attr("billMaterialID"));
-		const feedback = $(this).attr("code") || getFormCode("BOM", dateToday(), id);
+		const feedback = $(this).attr("code") || getFormCode("PBR", dateToday(), id);
 
 		const validate = validateForm("modal_bill_material");
 		if (validate) {
@@ -2137,7 +2256,7 @@ $(document).ready(function() {
 				let notificationData = {
 					moduleID:                39,
 					tableID: 				 id,
-					notificationTitle:       "Bill of Material",
+					notificationTitle:       "Project Budget Rationale",
 					notificationDescription: `${feedback}: Your request has been denied.`,
 					notificationType:        1,
 					employeeID,
@@ -2149,6 +2268,22 @@ $(document).ready(function() {
 		} 
 	});
 	// ----- END REJECT DOCUMENT -----
+
+
+
+	// ----- DROP DOCUMENT -----
+	$(document).on("click", "#btnDrop", function() {
+		const billMaterialID = decryptString($(this).attr("billMaterialID"));
+		const feedback       = $(this).attr("code") || getFormCode("PBR", dateToday(), id);
+
+		const id = decryptString($(this).attr("billMaterialID"));
+		let data = {
+			billMaterialID, action:"update", method:  "drop", updatedBy: sessionID
+		};
+
+		savebillMaterial(data, "drop", null, pageContent);
+	})
+	// ----- END DROP DOCUMENT -----
 
 
     // ----- NAV LINK -----
@@ -2314,109 +2449,153 @@ $(document).ready(function() {
 		 var condition  = id ? `AND billMaterialID=${id}` :``;	 
 		 switch(param){
 			 case "personnel":
-				 
-				 tableData = getTableData(`hris_personnel_request_tbl AS hprt`,
-					 `designationID,
-					 designationName,
-					 designationTotalHours,
-					 quantity,
-					 createdAt,
-					 (SELECT MAX(employeeBasicSalary) FROM hris_employee_list_tbl as helt WHERE helt.designationID = hprt.designationID) AS designationRate,
-					 costEstimateID`,
-					 `costEstimateID = '${referenceCode}' ${condition}` );
-				 tableData.map((items,index)=>{
-					 var hourlyRate  = (parseFloat(items.designationRate || "0") / 20 ) / 8;
-					 totalQty        += parseFloat(items.designationID != "0" ? items.quantity : "0");
-					 totalHours      += parseFloat(items.designationID != "0" ? items.designationTotalHours :"0");
-					 totalHourlyRate += hourlyRate;
-					 totalCost       = (parseFloat(items.designationTotalHours)*parseFloat(hourlyRate)) * parseFloat(items.quantity);
-					 grandTotalPrice += totalCost
-					 // Hourly rate = (Monthly Rate X 12) / total working days in a year/ total working hours per day
-					 html += `   <tr class="itemTableRow" requestvalue="${items.requestItemID}">
-									 <td>
-										 <div class="designationcode" value="${items.designationID}">
-											 ${items.designationID != "0" ? getFormCode("DSN",moment(items.createdAt),items.designationID) :"-"}
-										 </div>
-									 </td>
-									 <td>
-										 <div class="designation">
-											 ${items.designationID != "0" ? items.designationName : `-`}
-										 </div>
-									 </td>
-									 <td class="text-center">
-										 <div class="quantity">
-											 ${items.designationID != "0" ? items.quantity : `-`}
-										 </div>
-									 </td>
-									 <td class="text-center">
-										 <div class="totalhours">
-											 ${items.designationID != "0" ? items.designationTotalHours : `-`}
-										 </div>
-									 </td>
-									 <td class="text-right">
-										 <div class="hourlyrate text-right unitCost" value="${hourlyRate}">
-											 ${formatAmount(hourlyRate,true)}
-										 </div>
-									 </td>
-									 <td class="text-right">
-										 <div class="totalCost text-right" value="${totalCost}">
-											 ${formatAmount(totalCost,true)}
-										 </div>
-									 </td>
-								 </tr>`;
-				 });
+				tableDataReference = getTableData("hris_personnel_request_tbl","",`costEstimateID = '${referenceCode}' `);
+				if(tableDataReference[0].designationID){
+					tableData = getTableData(`hris_personnel_request_tbl AS hprt JOIN hris_designation_tbl AS hdt USING(designationID)`,
+						`hprt.designationID AS designationID, hprt.designationName AS designationName, hprt.unitCost AS unitCost,
+						designationTotalHours, quantity,
+						hdt.createdAt AS createdAt, costEstimateID`,
+						`costEstimateID = '${referenceCode}' ${condition}` );
+
+							tableData.map((items,index)=>{
+								if(readOnly){
+									html += `   <tr class="itemTableRow" requestvalue="${items.requestItemID}">
+												<td>
+													<div class="designationcode" value="${items.designationID}">
+														${items.designationID != "0" ? getFormCode("DSN",moment(items.createdAt),items.designationID) :"-"}
+													</div>
+												</td>
+												<td>
+													<div class="designation">
+														${items.designationID != "0" ? items.designationName : `-`}
+													</div>
+												</td>
+												<td class="text-center">
+													<div class="totalhours">
+														${items.designationID != "0" ? items.designationTotalHours : `-`}
+													</div>
+												</td>
+												<td class="text-right">
+													<div class="text-right unitCost" value="${items.unitCost}">
+														${formatAmount(items.unitCost,true)}
+													</div>
+												</td>
+												<td class="text-right">
+													<div class="totalCost text-right" value="${totalCost}">
+														${formatAmount(totalCost,true)}
+													</div>
+												</td>
+											</tr>`;
+								}else{
+									html += `   <tr class="itemTableRow" requestvalue="${items.requestItemID}">
+										<td>
+											<div class="designationcode" value="${items.designationID}">
+												${items.designationID != "0" ? getFormCode("DSN",moment(items.createdAt),items.designationID) :"-"}
+											</div>
+										</td>
+										<td>
+											<div class="designation">
+												${items.designationID != "0" ? items.designationName : `-`}
+											</div>
+										</td>
+										<td class="text-center">
+											<div class="totalhours">
+												${items.designationID != "0" ? items.designationTotalHours : `-`}
+											</div>
+										</td>
+										<td class="text-right">
+											<div class="unitprice">
+												<div class="input-group">
+													<div class="input-group-prepend">
+														<span class="input-group-text">₱</span>
+													</div>
+													<input type="text" class="form-control amount" min="0.01" max="9999999999" minlength="1" 
+																maxlength="20" name="personnel_unitprice" id="personnel_unitprice${index}" value="${items.unitCost}" personnel=true style="text-align: right;" required>
+												</div>
+												<div class="invalid-feedback d-block" id="invalid-personnel_unitprice${index}"></div>
+											</div>
+										</td>
+										<td class="text-right">
+											<div class="totalCost text-right" value="${items.totalCost}">
+												${formatAmount(items.totalCost,true)}
+											</div>
+										</td>
+									</tr>`;
+									
+								}
+								setTimeout(() => {
+									initAmount();
+									personnelTotal();
+								}, 800);
+							});
+				}else{
+					html += `
+							<tr class="">
+								<td class="text-center" colspan="5">No matching records found</td>
+							</tr>`;
+				}
+				
+				
 					  setTimeout(() => {
 						$(`.tableTotal.personnelTotal`).text(formatAmount(grandTotalPrice,true));
 					 }, 500);
 				 break;
 			 case "project":
 					 tableDataReference = getTableData("ims_request_items_tbl","",`costEstimateID = '${referenceCode}' AND categoryType = 'project' `);
-					 tableData = getTableData(`ims_request_items_tbl LEFT JOIN ims_inventory_price_list_tbl USING(itemID)`, 
-						 `ims_request_items_tbl.*,  MAX(vendorCurrentPrice) AS higherPrice, (SELECT sub_inv.itemCode FROM ims_inventory_item_tbl as sub_inv WHERE sub_inv.itemID = ims_request_items_tbl.itemID ) AS itemCode`, 
-						 `costEstimateID = '${referenceCode}' AND categoryType = 'project' ${condition}`,``,`itemID`);
+					 if(tableDataReference.length > 0){
+						tableData = getTableData(`ims_request_items_tbl LEFT JOIN ims_inventory_price_list_tbl USING(itemID)`, 
+						`ims_request_items_tbl.*,  MAX(vendorCurrentPrice) AS higherPrice, (SELECT sub_inv.itemCode FROM ims_inventory_item_tbl as sub_inv WHERE sub_inv.itemID = ims_request_items_tbl.itemID ) AS itemCode`, 
+						`costEstimateID = '${referenceCode}' AND categoryType = 'project' ${condition}`,``,`itemID`);
+					
+						tableData.map((items, index)=>{
+   
+							items.higherPrice ? "" : priceListCondition.push(items.itemCode);
+   
+							var totalCost   =  parseFloat(items.higherPrice || "0") * parseFloat(items.quantity);
+							totalQty        += parseFloat(items.quantity) ; 
+							totalPrice      += parseFloat(items.higherPrice || "0"); 
+							grandTotalPrice += parseFloat(totalCost);
+										html += `
+										<tr class="itemTableRow" requestvalue="${items.requestItemID}" category="project">
+											<td>
+												<div class="itemcode" value="${items.itemID}">
+													${items.itemCode}
+												</div>
+											</td>
+											<td>
+												<div class="itemname">
+													${items.itemName}
+												</div>
+											</td>
+											<td class="text-center">
+												<div class="quantity">
+													${items.quantity}
+												</div>
+											</td>
+											<td>
+												<div class="uom">
+													${items.itemUom}
+												</div>
+											</td>
+											<td>
+												<div class="unitCost unitprice text-right" value="${items.higherPrice}">
+													${formatAmount(items.higherPrice,true)}
+												</div>
+											</td>
+											<td>
+												<div class="totalCost text-right" value="${totalCost}">
+													${formatAmount(totalCost,true)}
+												</div>
+											</td>
+										</tr>`;
+						});
+					 }else{
+						html += `
+								<tr class="">
+									<td class="text-center" colspan="6">No matching records found</td>
+								</tr>`;
+				 	 }
 					 
-						 tableData.map((items, index)=>{
-	
-							 items.higherPrice ? "" : priceListCondition.push(items.itemCode);
-	
-							 var totalCost   =  parseFloat(items.higherPrice || "0") * parseFloat(items.quantity);
-							 totalQty        += parseFloat(items.quantity) ; 
-							 totalPrice      += parseFloat(items.higherPrice || "0"); 
-							 grandTotalPrice += parseFloat(totalCost);
-										 html += `
-										 <tr class="itemTableRow" requestvalue="${items.requestItemID}" category="project">
-											 <td>
-												 <div class="itemcode" value="${items.itemID}">
-													 ${items.itemCode}
-												 </div>
-											 </td>
-											 <td>
-												 <div class="itemname">
-													 ${items.itemName}
-												 </div>
-											 </td>
-											 <td class="text-center">
-												 <div class="quantity">
-													 ${items.quantity}
-												 </div>
-											 </td>
-											 <td>
-												 <div class="uom">
-													 ${items.itemUom}
-												 </div>
-											 </td>
-											 <td>
-												 <div class="unitCost unitprice text-right" value="${items.higherPrice}">
-													 ${formatAmount(items.higherPrice,true)}
-												 </div>
-											 </td>
-											 <td>
-												 <div class="totalCost text-right" value="${totalCost}">
-													 ${formatAmount(totalCost,true)}
-												 </div>
-											 </td>
-										 </tr>`;
-						 });
 					 setTimeout(() => {
 						 $(".tableTotal.projectTotal").text(formatAmount(grandTotalPrice,true));
 					 }, 500);
@@ -2424,6 +2603,7 @@ $(document).ready(function() {
 				 break;
 			 case "company":
 				 tableDataReference = getTableData("ims_request_items_tbl","",`costEstimateID = '${referenceCode}' AND categoryType = 'company' `);
+				if(tableDataReference.length > 0){
 				 tableData = getTableData(
 					 `ims_request_items_tbl LEFT JOIN ims_inventory_price_list_tbl USING(itemID)`, 
 					 `ims_request_items_tbl.*,  MAX(vendorCurrentPrice) AS higherPrice, (SELECT sub_inv.itemCode FROM ims_inventory_item_tbl as sub_inv WHERE sub_inv.itemID = ims_request_items_tbl.itemID ) AS itemCode`, 
@@ -2469,6 +2649,13 @@ $(document).ready(function() {
 								 </td>
 							 </tr>`;
 						 });
+				}else{
+					html += `
+							<tr class="">
+								<td class="text-center" colspan="6">No matching records found</td>
+							</tr>`;
+				 }
+				
 					 setTimeout(() => {
 						$(`.tableTotal.companyTotal`).text(formatAmount(grandTotalPrice,true));
 					 }, 500);
@@ -2477,215 +2664,224 @@ $(document).ready(function() {
 				 break;
 			 default:
 					 tableData = getTableData(`ims_travel_request_tbl`,
-										 `travelRequestID,travelDescription,	unitOfMeasure,quantity,unitCost,totalCost`,
+										 `travelRequestID,travelDescription,unitOfMeasure,quantity,unitCost,totalCost`,
 										 `costEstimateID = ${referenceCode} ${condition}`);
-					 tableData.map((items,index)=>{
-						 if(!readOnly){
-							 if(index > 0){
-								 console.log(items.unitOfMeasure);
-								 html += `
-									 <tr class="itemTableRow" requestvalue="${items.travelRequestID}"  index="${index}">
-										 <td class="text-center">
-											 <div class="action">
-												 <input type="checkbox" class="checkboxrow" id="checkboxrow${index}">
-											 </div>
-										 </td>
-										 <td>
-											 <div class="description">
-												 <textarea
-													 minlength="4" 
-													 maxlength="500"
-													 rows="2" 
-													 style="resize: none" 
-													 class="form-control" 
-													 name="description" 
-													 id="description${index}" required>${items.travelDescription}</textarea>
-												 <div class="invalid-feedback d-block" id="invalid-description${index}"></div>
-											 </div>
-										 </td>
-										 <td class="text-center">
-											 <div class="quantity">
-												 <input 
-													 type="text" 
-													 class="form-control input-quantity text-center"
-													 data-allowcharacters="[0-9]"
-													 min="0.00" 
-													 max="999999999" 
-													 id="travelQuantity${index}" 
-													 name="quantity" 
-													 value="${items.quantity}" 
-													 minlength="1" 
-													 maxlength="20" 
-													 required>
-												 <div class="invalid-feedback d-block" id="invalid-travelQuantity${index}"></div>
-											 </div>
-										 </td>
-										 <td>
-											 <div class="uom">
-												 <select
-												 class="form-control validate select2"
-												 name="travelUom"
-												 id="travelUom${index}"
-												 style="width: 100%"
-												 required
-												 travel="true">
-													 ${unitOfMeasurementOptions(items["unitOfMeasure"].toLowerCase())}
-												 </select>
-												 <div class="invalid-feedback d-block" id="invalid-travelUom${index}"></div>
-											 </div>
-										 </td>
-										 <td>
-											 <div class="unitprice">
-												 <div class="input-group">
-													 <div class="input-group-prepend">
-														 <span class="input-group-text">₱</span>
-													 </div>
-													 <input type="text" class="form-control amount" min="0.00" max="9999999999" minlength="1" 
-																 maxlength="20" name="unitprice" id="unitprice${index}" value="${items.unitCost}" style="text-align: right;">
-												 </div>
-												 <div class="invalid-feedback d-block" id="invalid-unitprice${index}"></div>
-											 </div>
-										 </td>
-										 <td>
-											 <div class="totalCost text-right">${formatAmount(items.totalCost,true)}</div>
-										 </td>
-									 </tr>`;
-							 }else{
-								 html += `
-										 <tr class="itemTableRow">
-											 ${readOnly?'':'<td></td>'}
-											 <td>
-												 <div class="description">
-													 ${items.travelDescription}
-												 </div>
-											 </td>
-											 <td class="text-center">
-												 <div class="quantity">
-													 ${items.quantity}
-												 </div>
-											 </td>
-											 <td>
-												 <div class="uom">
-													 ${items.unitOfMeasure}
-												 </div>
-											 </td>
-											 <td>
-												 <div class="unitprice text-right">-</div>
-											 </td>
-											 <td>
-												 <div class="totalcost text-right">${items.unitCost || "-"}</div>
-											 </td>
-										 </tr>`;
-							 }
-						 }else{
-							 html += `
-										 <tr class="">
-											 ${readOnly?'':'<td></td>'}
-											 <td>
-												 <div class="description">
-													 ${items.travelDescription}
-												 </div>
-											 </td>
-											 <td class="text-center">
-												 <div class="quantity">
-													 ${items.quantity}
-												 </div>
-											 </td>
-											 <td>
-												 <div class="uom">
-													 ${items.unitOfMeasure}
-												 </div>
-											 </td>
-											 <td>
-												 <div class="unitprice text-right">${formatAmount(items.unitCost,true)}</div>
-											 </td>
-											 <td>
-												 <div class="totalcost text-right">${formatAmount(items.totalCost,true)}</div>
-											 </td>
-										 </tr>`;
-						 }
-						 checkboxTravelHeader += !readOnly? ``:``;
-					 });
-	
-					 if(tableData.length < 2){
-						 html += `
-								 <tr class="itemTableRow" index="1">
-									 <td class="text-center">
-										 <div class="action">
-											 <input type="checkbox" class="checkboxrow" id="checkboxrow1">
-										 </div>
-									 </td>
-									 <td>
-										 <div class="description">
-											 <textarea
-												 minlength="4" 
-												 maxlength="500"
-												 rows="2" 
-												 style="resize: none" 
-												 class="form-control" 
-												 name="description" 
-												 id="description1" required></textarea>
-											 <div class="invalid-feedback d-block" id="invalid-description1"></div>
-										 </div>
-									 </td>
-									 <td class="text-center">
-										 <div class="quantity">
-											 <input 
-												 type="text" 
-												 class="form-control input-quantity text-center"
-												 data-allowcharacters="[0-9]" 
-												 min="0.00" 
-												 max="999999999" 
-												 id="travelQuantity1" 
-												 name="quantity" 
-												 value="0.00" 
-												 minlength="1" 
-												 maxlength="20" 
-												 required>
-											 <div class="invalid-feedback d-block" id="invalid-travelQuantity1"></div>
-										 </div>
-									 </td>
-									 <td>
-										 <div class="uom">
-											 <select
-											 class="form-control validate select2"
-											 name="travelUom"
-											 id="travelUom1"
-											 style="width: 100%"
-											 required
-											 travel="true">
-												 ${unitOfMeasurementOptions()}
-											 </select>
-											 <div class="invalid-feedback d-block" id="invalid-travelUom1"></div>
-										 </div>
-									 </td>
-									 <td>
-										 <div class="unitprice">
-											 <div class="input-group">
-												 <div class="input-group-prepend">
-													 <span class="input-group-text">₱</span>
-												 </div>
-												 <input type="text" class="form-control amount" min="0.00" max="9999999999" minlength="1" 
-															 maxlength="20" name="unitprice" id="unitprice1" value="${formatAmount(0,true)}" style="text-align: right;">
-											 </div>
-											 <div class="invalid-feedback d-block" id="invalid-unitprice1"></div>
-										 </div>
-									 </td>
-									 <td>
-										 <div class="totalCost text-right">-</div>
-									 </td>
-								 </tr>`;
+					var tableDataDescirption = tableData.length > 0 ? tableData[0]["travelDescription"].toLowerCase(): "none";
+					if(tableData.length > 0 ){
+						tableData.map((items,index)=>{
+							if(!readOnly){
+								if(index > 0){
+									html += `
+										<tr class="itemTableRow" requestvalue="${items.travelRequestID}"  index="${index}">
+											<td class="text-center">
+												<div class="action">
+													<input type="checkbox" class="checkboxrow" id="checkboxrow${index}">
+												</div>
+											</td>
+											<td>
+												<div class="description">
+													<textarea
+														minlength="4" 
+														maxlength="500"
+														rows="2" 
+														style="resize: none" 
+														class="form-control" 
+														name="description" 
+														id="description${index}" required>${items.travelDescription}</textarea>
+													<div class="invalid-feedback d-block" id="invalid-description${index}"></div>
+												</div>
+											</td>
+											<td class="text-center">
+												<div class="quantity">
+													<input 
+														type="text" 
+														class="form-control input-quantity text-center"
+														data-allowcharacters="[0-9]"
+														min="0.00" 
+														max="999999999" 
+														id="travelQuantity${index}" 
+														name="quantity" 
+														value="${items.quantity}" 
+														minlength="1" 
+														maxlength="20" 
+														required>
+													<div class="invalid-feedback d-block" id="invalid-travelQuantity${index}"></div>
+												</div>
+											</td>
+											<td>
+												<div class="uom">
+													<select
+													class="form-control validate select2"
+													name="travelUom"
+													id="travelUom${index}"
+													style="width: 100%"
+													required
+													travel="true">
+														${unitOfMeasurementOptions(items["unitOfMeasure"].toLowerCase())}
+													</select>
+													<div class="invalid-feedback d-block" id="invalid-travelUom${index}"></div>
+												</div>
+											</td>
+											<td>
+												<div class="unitprice">
+													<div class="input-group">
+														<div class="input-group-prepend">
+															<span class="input-group-text">₱</span>
+														</div>
+														<input type="text" class="form-control amount" min="0.00" max="9999999999" minlength="1" 
+																	maxlength="20" name="unitprice" id="unitprice${index}" value="${items.unitCost}" style="text-align: right;">
+													</div>
+													<div class="invalid-feedback d-block" id="invalid-unitprice${index}"></div>
+												</div>
+											</td>
+											<td>
+												<div class="totalCost text-right">${formatAmount(items.totalCost,true)}</div>
+											</td>
+										</tr>`;
+								}else{
+									html += `
+											<tr class="itemTableRow">
+												${readOnly?'':'<td></td>'}
+												<td>
+													<div class="description">
+														${items.travelDescription}
+													</div>
+												</td>
+												<td class="text-center">
+													<div class="quantity">
+														${items.quantity}
+													</div>
+												</td>
+												<td>
+													<div class="uom">
+														${items.unitOfMeasure}
+													</div>
+												</td>
+												<td>
+													<div class="unitprice text-right">-</div>
+												</td>
+												<td>
+													<div class="totalcost text-right">${items.unitCost || "-"}</div>
+												</td>
+											</tr>`;
+								}
+							}else{
+								html += `
+											<tr class="">
+												${readOnly?'':'<td></td>'}
+												<td>
+													<div class="description">
+														${items.travelDescription}
+													</div>
+												</td>
+												<td class="text-center">
+													<div class="quantity">
+														${items.quantity}
+													</div>
+												</td>
+												<td>
+													<div class="uom">
+														${items.unitOfMeasure}
+													</div>
+												</td>
+												<td>
+													<div class="unitprice text-right">${formatAmount(items.unitCost,true)}</div>
+												</td>
+												<td>
+													<div class="totalcost text-right">${formatAmount(items.totalCost,true)}</div>
+												</td>
+											</tr>`;
+							}
+							checkboxTravelHeader += !readOnly? ``:``;
+						});
+		
+						if(tableData.length < 2){
+							html += `
+									<tr class="itemTableRow" index="1">
+										<td class="text-center">
+											<div class="action">
+												<input type="checkbox" class="checkboxrow" id="checkboxrow1">
+											</div>
+										</td>
+										<td>
+											<div class="description">
+												<textarea
+													minlength="4" 
+													maxlength="500"
+													rows="2" 
+													style="resize: none" 
+													class="form-control" 
+													name="description" 
+													id="description1" required></textarea>
+												<div class="invalid-feedback d-block" id="invalid-description1"></div>
+											</div>
+										</td>
+										<td class="text-center">
+											<div class="quantity">
+												<input 
+													type="text" 
+													class="form-control input-quantity text-center"
+													data-allowcharacters="[0-9]" 
+													min="0.00" 
+													max="999999999" 
+													id="travelQuantity1" 
+													name="quantity" 
+													value="0.00" 
+													minlength="1" 
+													maxlength="20" 
+													required>
+												<div class="invalid-feedback d-block" id="invalid-travelQuantity1"></div>
+											</div>
+										</td>
+										<td>
+											<div class="uom">
+												<select
+												class="form-control validate select2"
+												name="travelUom"
+												id="travelUom1"
+												style="width: 100%"
+												required
+												travel="true">
+													${unitOfMeasurementOptions()}
+												</select>
+												<div class="invalid-feedback d-block" id="invalid-travelUom1"></div>
+											</div>
+										</td>
+										<td>
+											<div class="unitprice">
+												<div class="input-group">
+													<div class="input-group-prepend">
+														<span class="input-group-text">₱</span>
+													</div>
+													<input type="text" class="form-control amount" min="0.00" max="9999999999" minlength="1" 
+																maxlength="20" name="unitprice" id="unitprice1" value="${formatAmount(0,true)}" style="text-align: right;">
+												</div>
+												<div class="invalid-feedback d-block" id="invalid-unitprice1"></div>
+											</div>
+										</td>
+										<td>
+											<div class="totalCost text-right">-</div>
+										</td>
+									</tr>`;
+						}
+						let travelButtons = !readOnly ? `<div class="text-left my-2">
+															<button class="btn btn-primary btnAddRow" id="btnAddRow" travel="true" type="button"><i class="fas fa-plus-circle"></i> Add Row</button>
+															<button class="btn btn-danger btnDeleteRow" id="btnDeleteRow" travel="true" type="button" disabled><i class="fas fa-minus-circle"></i> Delete Row/s</button>
+														</div>`:``;
+						setTimeout(() => {
+							$(`[name=travelUom]`).select2({ theme: "bootstrap" });
+							$(".travelButtons").html(travelButtons);
+							travelTotal();
+							initQuantity();
+						}, 500);
+		 			}else{
+						//  5 
+						html += `
+								<tr class="">
+									<td class="text-center" colspan="${readOnly?'5':'6'}">No matching records found</td>
+								</tr>`;
 					 }
-					let travelButtons = !readOnly ? `<div class="text-left my-2">
-														<button class="btn btn-primary btnAddRow" id="btnAddRow" travel="true" type="button"><i class="fas fa-plus-circle"></i> Add Row</button>
-														<button class="btn btn-danger btnDeleteRow" id="btnDeleteRow" travel="true" type="button" disabled><i class="fas fa-minus-circle"></i> Delete Row/s</button>
-													</div>`:``;
-					 setTimeout(() => {
-						$(`[name=travelUom]`).select2({ theme: "bootstrap" });
-						 $(".travelButtons").html(travelButtons);
-						 travelTotal();
-						 initQuantity();
-					 }, 500);
+				
 		 }
 	
 		 return html;   
@@ -2733,7 +2929,7 @@ $(document).ready(function() {
 
 // --------------- DATABASE RELATION ---------------
 function getConfirmation(method = "submit") {
-	const title = "Bill of Material";
+	const title = "Project Budget Rationale";
 	let swalText, swalImg;
 
 	$("#modal_bill_material").text().length > 0 && $("#modal_bill_material").modal("hide");
@@ -2764,6 +2960,11 @@ function getConfirmation(method = "submit") {
 			swalText  = "Are you sure to cancel this document?";
 			swalImg   = `${base_url}assets/modal/cancel.svg`;
 			break;
+		case "drop":
+			swalTitle = `DROP ${title.toUpperCase()}`;
+			swalText  = "Are you sure to drop this document?";
+			swalImg   = `${base_url}assets/modal/drop.svg`;
+			break;
 		default:
 			swalTitle = `CANCEL ${title.toUpperCase()}`;
 			swalText  = "Are you sure that you want to cancel this process?";
@@ -2793,7 +2994,7 @@ function savebillMaterial(data = null, method = "submit", notificationData = nul
 			if (res.isConfirmed) {
 				$.ajax({
 					method:      "POST",
-					url:         `bill_material/saveBillMaterial`,
+					url:         `project_budget_rational/saveBillMaterial`,
 					data,
 					async:       false,
 					dataType:    "json",
@@ -2810,16 +3011,18 @@ function savebillMaterial(data = null, method = "submit", notificationData = nul
 
 						let swalTitle;
 						if (method == "submit") {
-							swalTitle = `${getFormCode("BOM", dateCreated, insertedID)} submitted successfully!`;
+							swalTitle = `${getFormCode("PBR", dateCreated, insertedID)} submitted successfully!`;
 						} else if (method == "save") {
-							swalTitle = `${getFormCode("BOM", dateCreated, insertedID)} saved successfully!`;
+							swalTitle = `${getFormCode("PBR", dateCreated, insertedID)} saved successfully!`;
 						} else if (method == "cancelform") {
-							swalTitle = `${getFormCode("BOM", dateCreated, insertedID)} cancelled successfully!`;
+							swalTitle = `${getFormCode("PBR", dateCreated, insertedID)} cancelled successfully!`;
 						} else if (method == "approve") {
-							swalTitle = `${getFormCode("BOM", dateCreated, insertedID)} approved successfully!`;
+							swalTitle = `${getFormCode("PBR", dateCreated, insertedID)} approved successfully!`;
 						} else if (method == "deny") {
-							swalTitle = `${getFormCode("BOM", dateCreated, insertedID)} denied successfully!`;
-						}	
+							swalTitle = `${getFormCode("PBR", dateCreated, insertedID)} denied successfully!`;
+						} else if (method == "drop") {
+							swalTitle = `${getFormCode("PBR", dateCreated, insertedID)} dropped successfully!`;
+						}
 		
 						if (isSuccess == "true") {
 							setTimeout(() => {

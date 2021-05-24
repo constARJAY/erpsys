@@ -62,23 +62,29 @@ class Cost_estimate extends CI_Controller {
             if ($method == "cancelform") {
                 $costEstimateData = [
                     "costEstimateStatus" => 4,
-                    "updatedBy"             => $updatedBy,
+                    "updatedBy"          => $updatedBy,
                 ];
             } else if ($method == "approve") {
                 $costEstimateData = [
-                    "approversStatus"       => $approversStatus,
-                    "approversDate"         => $approversDate,
+                    "approversStatus"    => $approversStatus,
+                    "approversDate"      => $approversDate,
                     "costEstimateStatus" => $costEstimateStatus,
-                    "updatedBy"             => $updatedBy,
+                    "updatedBy"          => $updatedBy,
                 ];
             } else if ($method == "deny") {
                 $costEstimateData = [
-                    "approversStatus"        => $approversStatus,
-                    "approversDate"          => $approversDate,
+                    "approversStatus"     => $approversStatus,
+                    "approversDate"       => $approversDate,
                     "costEstimateStatus"  => 3,
                     "costEstimateRemarks" => $costEstimateRemarks,
-                    "updatedBy"              => $updatedBy,
+                    "updatedBy"           => $updatedBy,
                 ];
+            }   else if ($method == "drop") {
+                $costEstimateData = [
+                    "reviseCostEstimateID" => $reviseCostEstimateID,
+                    "costEstimateStatus"   => 5,
+                    "updatedBy"            => $updatedBy,
+                ]; 
             }
         }
 
