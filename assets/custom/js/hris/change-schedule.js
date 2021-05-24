@@ -1084,7 +1084,7 @@ $(document).ready(function () {
 			"form_change_schedule",
 			data,
 			true,
-			myFormsContent
+			pageContent
 		);
 	});
 	// ----- END SAVE DOCUMENT -----
@@ -1106,8 +1106,10 @@ $(document).ready(function () {
 			if (revise) {
 				if (!isFromCancelledDocument) {
 					data[`tableData[reviseChangeScheduleID]`] = id;
-					data[`whereFilter`] = `changeScheduleID = ${id}`;
 					delete data[`tableData[changeScheduleID]`];
+					data["feedback"] = `SCH-${moment("YY")}-00000`;
+				} else {
+					data[`whereFilter`] = `changeScheduleID = ${id}`;
 				}
 			}
 
