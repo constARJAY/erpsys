@@ -160,17 +160,14 @@ $(document).ready(function() {
 				columnDefs: [
 					{ targets: 0,  width: 100 },
 					{ targets: 1,  width: 150 },
-					{ targets: 2,  width: 100 },
+					{ targets: 2,  width: 150 },
 					{ targets: 3,  width: 150 },
-					{ targets: 4,  width: 100 },
-					{ targets: 5,  width: 150 },
-					{ targets: 6,  width: 150 },
+					{ targets: 4,  width: 150 },
+					{ targets: 5,  width: 180 },
+					{ targets: 6,  width: 180 },
 					{ targets: 7,  width: 180 },
-					{ targets: 8,  width: 180 },
-					{ targets: 9,  width: 180 },
-					{ targets: 10,  width: 80  },
-					{ targets: 11, width: 300 },
-					{ targets: 12, width: 80  },
+					{ targets: 8,  width: 80  },
+					{ targets: 9, width: 250 },
 				],
 			});
 
@@ -186,17 +183,14 @@ $(document).ready(function() {
 				columnDefs: [
 					{ targets: 0,  width: 100 },
 					{ targets: 1,  width: 150 },
-					{ targets: 2,  width: 100 },
+					{ targets: 2,  width: 150 },
 					{ targets: 3,  width: 150 },
-					{ targets: 4,  width: 100 },
-					{ targets: 5,  width: 150 },
-					{ targets: 6,  width: 150 },
+					{ targets: 4,  width: 150 },
+					{ targets: 5,  width: 180 },
+					{ targets: 6,  width: 180 },
 					{ targets: 7,  width: 180 },
-					{ targets: 8,  width: 180 },
-					{ targets: 9,  width: 180 },
-					{ targets: 10,  width: 80  },
-					{ targets: 11, width: 300 },
-					{ targets: 12, width: 80  },
+					{ targets: 8,  width: 80  },
+					{ targets: 9, width: 250 },
 				],
 			});
 
@@ -305,19 +299,16 @@ $(document).ready(function() {
         <table class="table table-bordered table-striped table-hover" id="tableForApprroval">
             <thead>
                 <tr style="white-space: nowrap">
-                    <th>Document No.</th>
-                    <th>Employee Name</th>
-                    <th>Storage Code</th>
-                    <th>Storage Name(Sender)</th>
-					<th>Storage Code</th>
-                    <th>Storage Name(Receiver)</th>
-                    <th>Current Approver</th>
-                    <th>Date Created</th>
-                    <th>Date Submitted</th>
-                    <th>Date Approved</th>
-                    <th>Status</th>
-                    <th>Remarks</th>
-                    <th>Action</th>
+					<th>Document No.</th>
+					<th>Employee Name</th>
+					<th>Storage Name(Sender)</th>
+					<th>Storage Name(Receiver)</th>
+					<th>Current Approver</th>
+					<th>Date Created</th>
+					<th>Date Submitted</th>
+					<th>Date Approved</th>
+					<th>Status</th>
+					<th>Remarks</th>
                 </tr>
             </thead>
             <tbody>`;
@@ -348,6 +339,8 @@ $(document).ready(function() {
 				dateApproved = moment(dateApproved[dateApproved.length - 1]).format("MMMM DD, YYYY hh:mm:ss A");
 			}
 
+			let btnClass = transferRequestStatus != 0 ? "btnView" : "btnEdit";
+
 			let button = transferRequestStatus != 0 ? `
 			<button class="btn btn-view w-100 btnView" id="${encryptString(transferRequestID )}"><i class="fas fa-eye"></i> View</button>` : `
 			<button 
@@ -357,13 +350,21 @@ $(document).ready(function() {
 
 			if (isImCurrentApprover(approversID, approversDate, transferRequestStatus) || isAlreadyApproved(approversID, approversDate)) {
 				html += `
-				<tr>
+				<tr class="${btnClass}" id="${encryptString(transferRequestID )}">
 					<td>${getFormCode("TR", createdAt, transferRequestID )}</td>
 					<td>${fullname}</td>
-					<td>${inventoryStorageCode1 || '-'}</td>
-					<td>${inventoryStorageOfficeName1 || '-'}</td>
-					<td>${inventoryStorageCode2 || '-'}</td>
-					<td>${inventoryStorageOfficeName2 || '-'}</td>
+					<td>
+						<div>
+							${inventoryStorageOfficeName1 || '-'}
+						</div>
+						<small style="color:#848482;">${inventoryStorageCode1 || '-'}</small>
+					</td>
+					<td>
+						<div>
+							${inventoryStorageOfficeName2 || '-'}
+						</div>
+						<small style="color:#848482;">${inventoryStorageCode2 || '-'}</small>
+					</td>
 					<td>
 						${employeeFullname(getCurrentApprover(approversID, approversDate, transferRequestStatus, true))}
 					</td>
@@ -374,9 +375,6 @@ $(document).ready(function() {
 						${getStatusStyle(transferRequestStatus)}
 					</td>
 					<td>${remarks}</td>
-					<td class="text-center">
-						${button}
-					</td>
 				</tr>`;
 			}
 		});
@@ -408,19 +406,16 @@ $(document).ready(function() {
         <table class="table table-bordered table-striped table-hover" id="tableMyForms">
             <thead>
                 <tr style="white-space: nowrap">
-                    <th>Document No.</th>
-                    <th>Employee Name</th>
-                    <th>Storage Code</th>
-                    <th>Storage Name(Sender)</th>
-					<th>Storage Code</th>
-                    <th>Storage Name(Receiver)</th>
-                    <th>Current Approver</th>
-                    <th>Date Created</th>
-                    <th>Date Submitted</th>
-                    <th>Date Approved</th>
-                    <th>Status</th>
-                    <th>Remarks</th>
-                    <th>Action</th>
+				<th>Document No.</th>
+				<th>Employee Name</th>
+				<th>Storage Name(Sender)</th>
+				<th>Storage Name(Receiver)</th>
+				<th>Current Approver</th>
+				<th>Date Created</th>
+				<th>Date Submitted</th>
+				<th>Date Approved</th>
+				<th>Status</th>
+				<th>Remarks</th>
                 </tr>
             </thead>
             <tbody>`;
@@ -451,6 +446,8 @@ $(document).ready(function() {
 				dateApproved = moment(dateApproved[dateApproved.length - 1]).format("MMMM DD, YYYY hh:mm:ss A");
 			}
 
+			let btnClass = transferRequestStatus != 0 ? "btnView" : "btnEdit";
+
 			let button = transferRequestStatus != 0 ? `
             <button class="btn btn-view w-100 btnView" id="${encryptString(transferRequestID )}"><i class="fas fa-eye"></i> View</button>` : `
             <button 
@@ -459,13 +456,21 @@ $(document).ready(function() {
                 code="${getFormCode("TR", createdAt, transferRequestID )}"><i class="fas fa-edit"></i> Edit</button>`;
 
 			html += `
-            <tr>
+            <tr class="${btnClass}" id="${encryptString(transferRequestID )}">
                 <td>${getFormCode("TR", createdAt, transferRequestID )}</td>
                 <td>${fullname}</td>
-                <td>${inventoryStorageCode1 || '-'}</td>
-                <td>${inventoryStorageOfficeName1 || '-'}</td>
-				<td>${inventoryStorageCode2 || '-'}</td>
-                <td>${inventoryStorageOfficeName2 || '-'}</td>
+				<td>
+					<div>
+						${inventoryStorageOfficeName1 || '-'}
+					</div>
+					<small style="color:#848482;">${inventoryStorageCode1 || '-'}</small>
+				</td>
+				<td>
+					<div>
+						${inventoryStorageOfficeName2 || '-'}
+					</div>
+					<small style="color:#848482;">${inventoryStorageCode2 || '-'}</small>
+				</td>
                
                 <td>
                     ${employeeFullname(getCurrentApprover(approversID, approversDate, transferRequestStatus, true))}
@@ -477,9 +482,6 @@ $(document).ready(function() {
                     ${getStatusStyle(transferRequestStatus)}
                 </td>
 				<td>${remarks}</td>
-                <td class="text-center">
-                    ${button}
-                </td>
             </tr>`;
 		});
 
@@ -515,7 +517,7 @@ $(document).ready(function() {
 					// DRAFT
 					button = `
 					<button 
-						class="btn btn-submit" 
+						class="btn btn-submit px-5 p-2" 
 						id="btnSubmit" 
 						transferRequestID="${transferRequestID}"
 						code="${getFormCode("TR", createdAt, transferRequestID)}"
@@ -526,7 +528,7 @@ $(document).ready(function() {
 					if (isRevise) {
 						button += `
 						<button 
-							class="btn btn-cancel" 
+							class="btn btn-cancel px-5 p-2" 
 							id="btnCancel"
 							revise="${isRevise}"><i class="fas fa-ban"></i> 
 							Cancel
@@ -534,7 +536,7 @@ $(document).ready(function() {
 					} else {
 						button += `
 						<button 
-							class="btn btn-cancel"
+							class="btn btn-cancel px-5 p-2"
 							id="btnCancelForm" 
 							transferRequestID="${transferRequestID}"
 							code="${getFormCode("TR", createdAt, transferRequestID)}"
@@ -549,7 +551,7 @@ $(document).ready(function() {
 					if (!isOngoing) {
 						button = `
 						<button 
-							class="btn btn-cancel"
+							class="btn btn-cancel px-5 p-2"
 							id="btnCancelForm" 
 							transferRequestID="${transferRequestID}"
 							code="${getFormCode("TR", createdAt, transferRequestID)}"
@@ -561,7 +563,7 @@ $(document).ready(function() {
 					// DENIED - FOR REVISE
 					button = `
 					<button
-						class="btn btn-cancel"
+						class="btn btn-cancel px-5 p-2"
 						id="btnRevise" 
 						transferRequestID="${encryptString(transferRequestID)}"
 						code="${getFormCode("TR", createdAt, transferRequestID)}"
@@ -574,14 +576,14 @@ $(document).ready(function() {
 					if (isImCurrentApprover(approversID, approversDate)) {
 						button = `
 						<button 
-							class="btn btn-submit" 
+							class="btn btn-submit px-5 p-2" 
 							id="btnApprove" 
 							transferRequestID="${encryptString(transferRequestID)}"
 							code="${getFormCode("TR", createdAt, transferRequestID)}"><i class="fas fa-paper-plane"></i>
 							Approve
 						</button>
 						<button 
-							class="btn btn-cancel"
+							class="btn btn-cancel px-5 p-2"
 							id="btnReject" 
 							transferRequestID="${encryptString(transferRequestID)}"
 							code="${getFormCode("TR", createdAt, transferRequestID)}"><i class="fas fa-ban"></i> 
@@ -593,11 +595,11 @@ $(document).ready(function() {
 		} else {
 			button = `
 			<button 
-				class="btn btn-submit" 
+				class="btn btn-submit px-5 p-2" 
 				id="btnSubmit"><i class="fas fa-paper-plane"></i> Submit
 			</button>
 			<button 
-				class="btn btn-cancel" 
+				class="btn btn-cancel px-5 p-2" 
 				id="btnCancel"><i class="fas fa-ban"></i> 
 				Cancel
 			</button>`;
@@ -2031,7 +2033,7 @@ $(document).ready(function() {
 			<button class="btn btn-danger" id="btnRejectConfirmation"
 			transferRequestID="${id}"
 			code="${feedback}"><i class="far fa-times-circle"></i> Deny</button>
-			<button class="btn btn-cancel" data-dismiss="modal"><i class="fas fa-ban"></i> Cancel</button>
+			<button class="btn btn-cancel px-5 p-2" data-dismiss="modal"><i class="fas fa-ban"></i> Cancel</button>
 		</div>`;
 		$("#modal_purchase_request_content").html(html);
 	});
