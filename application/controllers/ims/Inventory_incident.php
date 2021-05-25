@@ -87,6 +87,12 @@ class Inventory_incident extends CI_Controller {
                     "incidentRemarks" => $incidentRemarks,
                     "updatedBy"              => $updatedBy,
                 ];
+            } else if ($method == "drop") {
+                $purchaseRequestData = [
+                    "reviseIncidentID" => $reviseIncidentID,
+                    "incidentStatus"   => 5,
+                    "updatedBy"               => $updatedBy,
+                ]; 
             }
         }
 

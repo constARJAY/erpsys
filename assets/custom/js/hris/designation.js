@@ -194,6 +194,7 @@ $(document).ready(function(){
                             id="input_designationStatus" 
                             name="designationStatus"
                             autocomplete="off"
+                            getdesignationid="${designationID}"
                             >
                             <option 
                                 value="1" 
@@ -310,5 +311,35 @@ $(document).ready(function(){
 		}
     });
     // -------- END CANCEL MODAL-----------
+
+        // ------ CHECK INVENTORY ITEM STATUS -------
+    $(document).on("change","#input_designationStatus",function(){
+        var tempCategoryStatus = $(this).find("option:selected").val()
+        var getdesignationID = $(this).attr("getdesignationid") ;
+        var employeeData = getTableData("hris_employee_list_tbl INNER JOIN hris_designation_tbl USING(designationID)", 
+        "designationStatus", "designationStatus = 1 AND designationID ="+getdesignationID, "");
+
+        if(employeeData.length != 0){
+            if(tempCategoryStatus == 0 ){
+                setTimeout(function(){
+                    $(this).removeClass("is-valid").addClass("is-invalid");
+                    $("#invalid-input_designationStatus").removeClass("is-valid").addClass("is-invalid");
+                    $("#invalid-input_designationStatus").text('This record is currently in use!');
+                    document.getElementById("btnUpdate").disabled = true;
+                    
+                },200)
+                        
+                            
+            }
+            else{
+                $(this).removeClass("is-invalid").addClass("is-valid");
+                $("#invalid-input_designationStatus").removeClass("is-invalid").addClass("is-valid");
+                $("#invalid-input_designationStatus").text('');
+                document.getElementById("btnUpdate").disabled = false;
+            }
+        }
+
+    });
+    // ------ END CHECK INVENTORY ITEM STATUS -------
 
 });

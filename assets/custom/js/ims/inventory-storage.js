@@ -555,7 +555,7 @@ $(document).ready(function () {
                         </div>
                         <div class="col-md-6 col-lg-6">
                             <div class="form-group">
-                                <label for="">Department </label>
+                                <label for="">Department <span class="text-danger">*</span></label>
 								<select 
 									class="form-control validate select2" 
 									id="input_departmentStorage" 

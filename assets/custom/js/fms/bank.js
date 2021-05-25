@@ -171,10 +171,11 @@ $(document).ready(function(){
                         id="input_bankStatus" 
                         name="bankStatus"
                         autocomplete="off"
+                        getbankid = "${bankID}"
                         >
                         <option 
                             value="1" 
-                            ${data && bankStatus == "1" && "selected"} >Active</option>
+                            ${data && bankStatus == "1" && "selected"}>Active</option>
                         <option 
                             value="0" 
                             ${data && bankStatus == "0" && "selected"}>Inactive</option>
@@ -285,5 +286,35 @@ $(document).ready(function(){
 		}
     });
     // -------- END CANCEL MODAL-----------
+
+// ------ CHECK BANK ITEM STATUS -------
+$(document).on("change","#input_bankStatus",function(){
+    var tempCategoryStatus = $(this).find("option:selected").val()
+    var getbankID = $(this).attr("getbankid") ;
+    var bankData = getTableData("ims_inventory_vendor_tbl INNER JOIN fms_bank_tbl USING(bankID)", 
+    "bankStatus", "bankStatus = 1 AND bankID ="+getbankID, "");
+
+    if(bankData.length != 0){
+        if(tempCategoryStatus == 0 ){
+            setTimeout(function(){
+                $(this).removeClass("is-valid").addClass("is-invalid");
+                $("#invalid-input_bankStatus").removeClass("is-valid").addClass("is-invalid");
+                $("#invalid-input_bankStatus").text('This record is currently in use!');
+                document.getElementById("btnUpdate").disabled = true;
+                
+            },200)
+                    
+                        
+        }
+        else{
+            $(this).removeClass("is-invalid").addClass("is-valid");
+            $("#invalid-input_bankStatus").removeClass("is-invalid").addClass("is-valid");
+            $("#invalid-input_bankStatus").text('');
+            document.getElementById("btnUpdate").disabled = false;
+        }
+    }
+
+});
+// ------ END CHECK BANK ITEM STATUS -------
       
 });

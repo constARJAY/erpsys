@@ -193,13 +193,20 @@ $(document).ready(function(){
         var getdepartmentID = $(this).attr("getdepartmentid") ;
         var itemData = getTableData("hris_designation_tbl INNER JOIN hris_department_tbl USING(departmentID)", 
         "departmentStatus", "departmentStatus = 1 AND departmentID ="+getdepartmentID, "");
+        var storageData = getTableData("ims_inventory_storage_tbl INNER JOIN hris_department_tbl ON ims_inventory_storage_tbl.inventoryStorageDepartment = hris_department_tbl.departmentID", 
+        "departmentStatus", "departmentStatus = 1 AND departmentID ="+getdepartmentID, "");
+        var employeeData = getTableData("hris_employee_list_tbl INNER JOIN hris_department_tbl USING(departmentID)", 
+        "departmentStatus", "departmentStatus = 1 AND departmentID ="+getdepartmentID, "");
 
-        if(itemData.length != 0 ){
+        if(itemData.length != 0 || storageData.length != 0 || employeeData.length != 0 ){
             if(tempCategoryStatus == 0 ){
-                $(this).removeClass("is-valid").addClass("is-invalid");
-                $("#invalid-input_departmentStatus").removeClass("is-valid").addClass("is-invalid");
-                            $("#invalid-input_departmentStatus").text('There is active designation in this department! ');
-                            
+                setTimeout(function(){
+                    $(this).removeClass("is-valid").addClass("is-invalid");
+                    $("#invalid-input_departmentStatus").removeClass("is-valid").addClass("is-invalid");
+                    $("#invalid-input_departmentStatus").text('This record is currently in use!');
+                    document.getElementById("btnUpdate").disabled = true;
+                    
+                },200)
                         
                             
             }
@@ -207,6 +214,7 @@ $(document).ready(function(){
                 $(this).removeClass("is-invalid").addClass("is-valid");
                 $("#invalid-input_departmentStatus").removeClass("is-invalid").addClass("is-valid");
                 $("#invalid-input_departmentStatus").text('');
+                document.getElementById("btnUpdate").disabled = false;
             }
         }
 

@@ -515,14 +515,25 @@ $(document).on("change", "[name=clientCity]", function() {
                        
                         </div>
                     </div>
+
                     <div class="col-md-4 col-sm-12">
                         <div class="form-group">
                             <label>Status <span class="text-danger font-weight-bold">*</span></label>
-                            <select class=" form-control show-tick select2 validate" name="clientStatus" id="input_clientStatus" autocomplete="off" >
-                                <option ${data && clientStatus == "1" && "selected"} value="1">Active</option>   
-                                <option ${data && clientStatus == "0" && "selected"} value="0">Inactive</option>
-                                <div class="invalid-feedback d-block" id="invalid-input_clientStatus"></div>
+                            <select 
+                                class="form-control select2 validate" 
+                                id="input_clientStatus" 
+                                name="clientStatus"
+                                autocomplete="off"
+                                getclientid = "${clientID}"
+                                >
+                                <option 
+                                    value="1" 
+                                    ${data && clientStatus == "1" && "selected"}>Active</option>
+                                <option 
+                                    value="0" 
+                                    ${data && clientStatus == "0" && "selected"}>Inactive</option>
                             </select>
+                            <div class="invalid-feedback d-block" id="invalid-input_clientStatus"></div>
                         </div>
                     </div>
                 </div>
@@ -628,5 +639,35 @@ $(document).on("change", "[name=clientCity]", function() {
 		}
     });
     // -------- END CANCEL MODAL-----------
+
+    // ------ CHECK CLIENT STATUS -------
+    $(document).on("change","#input_clientStatus",function(){
+    var tempCategoryStatus = $(this).find("option:selected").val()
+    var getclientID = $(this).attr("getclientid") ;
+    var itemData = getTableData("pms_category_tbl INNER JOIN pms_client_tbl ON pms_category_tbl.companyName = pms_client_tbl.clientID", 
+    "clientStatus", "clientStatus = 1 AND clientID ="+getclientID, "");
+
+    if(itemData.length != 0){
+        if(tempCategoryStatus == 0 ){
+            setTimeout(function(){
+                $(this).removeClass("is-valid").addClass("is-invalid");
+                $("#invalid-input_clientStatus").removeClass("is-valid").addClass("is-invalid");
+                $("#invalid-input_clientStatus").text('This record is currently in use!');
+                document.getElementById("btnUpdate").disabled = true;
+                
+            },200)
+                    
+                        
+        }
+        else{
+            $(this).removeClass("is-invalid").addClass("is-valid");
+            $("#invalid-input_clientStatus").removeClass("is-invalid").addClass("is-valid");
+            $("#invalid-input_clientStatus").text('');
+            document.getElementById("btnUpdate").disabled = false;
+        }
+    }
+
+});
+// ------ END CHECK CLIENT STATUS -------
 
 });

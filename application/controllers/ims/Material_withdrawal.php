@@ -30,7 +30,7 @@ class Material_withdrawal extends CI_Controller {
         $approversID             = $this->input->post("approversID") ?? null;
         $approversStatus         = $this->input->post("approversStatus") ?? null;
         $approversDate           = $this->input->post("approversDate") ?? null;
-        $materialWithdrawaltStatus   = $this->input->post("materialWithdrawaltStatus");
+        $materialWithdrawalStatus   = $this->input->post("materialWithdrawalStatus");
         $materialWithdrawalReason   = $this->input->post("materialWithdrawalReason") ?? null;
         $materialWithdrawalRemarks  = $this->input->post("materialWithdrawalRemarks") ?? null;
         $materialWithdrawalPurpose  = $this->input->post("materialWithdrawalPurpose") ?? null;
@@ -42,13 +42,13 @@ class Material_withdrawal extends CI_Controller {
 
 
         $purchaseRequestData = [
-            // "revisePurchaseRequestID" => $revisePurchaseRequestID,
+            "reviseMaterialWithdrawalID" => $reviseMaterialWithdrawalID,
             "employeeID"              => $employeeID,
             "projectID"               => $projectID ,
             "approversID"             => $approversID,
             "approversStatus"         => $approversStatus,
             "approversDate"           => $approversDate,
-            "materialWithdrawaltStatus"   => $materialWithdrawaltStatus,
+            "materialWithdrawalStatus"   => $materialWithdrawalStatus,
             "materialWithdrawalReason"   => $materialWithdrawalReason,
             "materialWithdrawalPurpose"   => $materialWithdrawalPurpose,
             // "projectTotalAmount"      => $projectTotalAmount,
@@ -66,24 +66,30 @@ class Material_withdrawal extends CI_Controller {
 
             if ($method == "cancelform") {
                 $purchaseRequestData = [
-                    "materialWithdrawaltStatus" => 4,
+                    "materialWithdrawalStatus" => 4,
                     "updatedBy"             => $updatedBy,
                 ];
             } else if ($method == "approve") {
                 $purchaseRequestData = [
                     "approversStatus"       => $approversStatus,
                     "approversDate"         => $approversDate,
-                    "materialWithdrawaltStatus" => $materialWithdrawaltStatus,
+                    "materialWithdrawalStatus" => $materialWithdrawalStatus,
                     "updatedBy"             => $updatedBy,
                 ];
             } else if ($method == "deny") {
                 $purchaseRequestData = [
                     "approversStatus"        => $approversStatus,
                     "approversDate"          => $approversDate,
-                    "materialWithdrawaltStatus"  => 3,
+                    "materialWithdrawalStatus"  => 3,
                     "materialWithdrawalRemarks" => $materialWithdrawalRemarks,
                     "updatedBy"              => $updatedBy,
                 ];
+            } else if ($method == "drop") {
+                $purchaseRequestData = [
+                    "reviseMaterialWithdrawalID" => $reviseMaterialWithdrawalID,
+                    "materialWithdrawalStatus"   => 5,
+                    "updatedBy"               => $updatedBy,
+                ]; 
             }
         }
 
@@ -105,7 +111,7 @@ class Material_withdrawal extends CI_Controller {
                             "itemName"            => $item["itemName"],
                             "itemDescription"            => $item["itemDescription"],
                             "unitOfMeasurement"            => $item["itemUom"],
-                            "listStocks"            => $item["liststocks"],
+                            // "listStocks"            => $item["liststocks"],
                             "inventoryStorageID"            => $item["inventoryStorageID"] != "null" ? $item["inventoryStorageID"] : null,
                             "inventoryStorageOfficeCode"          => $item["storagecode"],
                             "inventoryStorageOfficeName"          => $item["storageName"],

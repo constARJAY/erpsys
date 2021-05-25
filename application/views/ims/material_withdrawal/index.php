@@ -9,7 +9,7 @@
                         <li class="breadcrumb-item active">Material Withdrawal</li>
                     </ul>
                     <h1 class="mt-3">Material Withdrawal</h1>
-                    <span>This module is used to manage material withdrawal form details.</span>
+                    <span class="title_content">This module is used to manage material withdrawal form details.</span>
                 </div>
                 <?php if(isCreateAllowed(42)){ ?>
                 <div class="col-lg-6 col-md-6 text-right" id="headerButton"></div>

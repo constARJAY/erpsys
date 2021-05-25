@@ -74,8 +74,13 @@ class Transfer_request extends CI_Controller {
         $createdAt               = $this->input->post("createdAt");
         $items                   = $this->input->post("items") ?? null;
 
+        // echo "<pre>";
+        // print_r($_POST);
+        // exit;
+     
+
         $purchaseRequestData = [
-            // "revisePurchaseRequestID" => $revisePurchaseRequestID,
+            "reviseTransferRequestID" => $reviseTransferRequestID,
             "employeeID"              => $employeeID,
             "inventoryStorageIDSender"     => $inventoryStorageIDSender,
             "inventoryStorageIDReceiver"     => $inventoryStorageIDReceiver,
@@ -117,6 +122,12 @@ class Transfer_request extends CI_Controller {
                     "transferRequestRemarks" => $transferRequestRemarks,
                     "updatedBy"              => $updatedBy,
                 ];
+            } else if ($method == "drop") {
+                $purchaseRequestData = [
+                    "reviseTransferRequestID" => $reviseTransferRequestID,
+                    "transferRequestStatus"   => 5,
+                    "updatedBy"               => $updatedBy,
+                ]; 
             }
         }
 

@@ -201,7 +201,8 @@ $(document).on("change","#input_uomStatus",function(){
             setTimeout(function(){
                 $("#input_uomStatus").removeClass("is-valid").addClass("is-invalid");
                 $("#invalid-input_uomStatus").removeClass("is-valid").addClass("is-invalid");
-                $("#invalid-input_uomStatus").text('There is active item in this unit of measurement! ');        
+                $("#invalid-input_uomStatus").text('There is active item in this unit of measurement! ');    
+                document.getElementById("btnUpdate").disabled = true;    
             },200)
             
                   
@@ -210,6 +211,7 @@ $(document).on("change","#input_uomStatus",function(){
             $("#input_uomStatus").removeClass("is-invalid").addClass("is-valid");
             $("#invalid-input_uomStatus").removeClass("is-invalid").addClass("is-valid");
             $("#invalid-input_uomStatus").text('');
+            document.getElementById("btnUpdate").disabled = false;
         }
     }
 
