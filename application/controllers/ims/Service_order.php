@@ -59,6 +59,7 @@ class Service_order extends CI_Controller {
         $companyContactPerson  = $this->input->post("companyContactPerson") ?? null;
         $companyAddress        = $this->input->post("companyAddress") ?? null;
         $paymentTerms          = $this->input->post("paymentTerms") ?? null;
+        $discountType          = $this->input->post("discountType") ?? null;
         $scheduleDate          = $this->input->post("scheduleDate") ?? null;
         $serviceOrderReason    = $this->input->post("serviceOrderReason") ?? null;
         $total                 = $this->input->post("total") ?? null;
@@ -94,6 +95,7 @@ class Service_order extends CI_Controller {
             "companyContactPerson"  => $companyContactPerson,
             "companyAddress"        => $companyAddress,
             "paymentTerms"          => $paymentTerms,
+            "discountType"          => $discountType,
             "scheduleDate"          => $scheduleDate,
             "serviceOrderReason"    => $serviceOrderReason,
             "total"                 => $total,

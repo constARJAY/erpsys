@@ -171,6 +171,12 @@ $(document).ready(function() {
 		"*",
 		"serviceStatus = 1"
 	);
+
+	const uomList = getTableData(
+		`ims_uom_tbl`,
+		``,
+		`uomStatus = 1`
+	)
 	// END GLOBAL VARIABLE - REUSABLE 
 
 
@@ -671,7 +677,19 @@ $(document).ready(function() {
 					}
 				} else if (serviceOrderStatus == 4) {
 					// CANCELLED - FOR REVISE
-					if (!isDocumentRevised(serviceOrderID)) {
+					const data = getTableData(
+						`ims_service_order_tbl`,
+						`serviceRequisitionID`,
+						`serviceOrderID = ${serviceOrderID}`
+					);
+					const { serviceRequisitionID } = data && data[0];
+					const isAllowedForRevise = getTableDataLength(
+						`ims_service_order_tbl`,
+						`serviceOrderID`,
+						`serviceRequisitionID = ${serviceRequisitionID} AND serviceOrderStatus <> 3 AND serviceOrderStatus <> 4`
+					);
+
+					if (!isDocumentRevised(serviceOrderID) && isAllowedForRevise == 0) {
 						button = `
 						<button
 							class="btn btn-cancel px-5 p-2"
@@ -890,6 +908,21 @@ $(document).ready(function() {
     // ----- END GET SERVICE ITEM -----
 
 
+	// ----- GET UOM LIST -----
+	function getUomList(uomName = null) {
+		let html = `<option disabled selected>Select UOM</option>`;
+		if (uomName) {
+			uomList.map(uom => {
+				html += `
+				<option value="${uom.uomName}"
+					${uomName == uom.uomName ? "selected" : ""}>${uom.uomName}</option>`;
+			})
+		}
+		return html;
+	}
+	// ----- END GET UOM LIST -----
+
+
 	// ----- GET SERVICE SCOPE -----
 	function getServiceScope(scope = {}, readOnly = false) {
 		let {
@@ -941,7 +974,13 @@ $(document).ready(function() {
 				</td>
 				<td>
 					<div class="uom">
-						<input 
+						<select class="form-control validate select2"
+							name="serviceUom"
+							id="serviceUom"
+							required>
+							${getUomList(uom)}
+						</select>
+						<!-- <input 
 							type="text" 
 							class="form-control validate text-center"
 							data-allowcharacters="[a-z][A-Z][0-9][ ][.][,][-]['][()]" 
@@ -951,7 +990,7 @@ $(document).ready(function() {
 							minlength="1" 
 							maxlength="20" 
 							value="${uom}"
-							required>
+							required> -->
 						<div class="invalid-feedback d-block" id="invalid-serviceUom"></div>
 					</div>
 				</td>
@@ -1339,6 +1378,23 @@ $(document).ready(function() {
 	// ----- END GET AMOUNT -----
 
 
+	// ----- SELECT DISCOUNT TYPE -----
+	$(document).on("change", `[name="discountType"]`, function() {
+		const discountType = $(this).val();
+		const totalAmount  = getNonFormattedAmount($(`#total`).text());
+		$(`[name="discount"]`).val("0").trigger("keyup");
+		if (discountType == "percent") {
+			$(`[name="discount"]`).attr("max", "100");
+			$(`[name="discount"]`).attr("maxlength", "6");
+		} else {
+			$(`[name="discount"]`).attr("max", totalAmount);
+			$(`[name="discount"]`).attr("maxlength", formatAmount(totalAmount).length);
+		}
+		initAmount("#discount");
+	})
+	// ----- END SELECT DISCOUNT TYPE -----
+
+
 	// ----- UPDATE TOTAL AMOUNT -----
 	function updateTotalAmount() {
 		const quantityArr = $.find(`[name=quantity]`).map(element => +getNonFormattedAmount(element.value) || "0");
@@ -1347,7 +1403,11 @@ $(document).ready(function() {
 		$(`#total`).text(formatAmount(total, true));
 		
 		const discount = getNonFormattedAmount($("#discount").val());
-		const totalAmount = total - discount;
+		let totalAmount = total - discount;
+		if (discountType == "percent") {
+			totalAmount = total - (total * (discount / 100));
+		}
+
 		$(`#totalAmount`).text(formatAmount(totalAmount, true));
 
 		const vat = getNonFormattedAmount($("#vat").val());
@@ -1394,7 +1454,11 @@ $(document).ready(function() {
 		const discount = getNonFormattedAmount($(this).val());
 		const total    = getNonFormattedAmount($("#total").text());
 		
-		const totalAmount = total - discount;
+		let totalAmount = total - discount;
+		const discountType = $(`[name="discountType"]`).val();
+		if (discountType == "percent") {
+			totalAmount = total - (total * (discount / 100));
+		}
 		$("#totalAmount").html(formatAmount(totalAmount, true));
 
 		const isVatable = $(`[name="inventoryVendorID"] option:selected`).attr("companyVatable") == "1";
@@ -1482,13 +1546,26 @@ $(document).ready(function() {
 			$(`#tableServiceDisplay`).html(services);
 			initDataTables();
 			// initAll();
+			initSelect2("#discountType");
 			updateTableItems();
 			updateServiceOptions();
-			initAmount("#discount", true);
 			initAmount("#lessEwt", true);
 			initAmount("#vat", true);
 			removeIsValid("#tableServiceOrderItems0");
 			costSummary();
+
+			const discountType = $(`[name="discountType"]`).val();
+			const totalAmount  = getNonFormattedAmount($(`#total`).text());
+			console.log(discountType, totalAmount);
+			$(`[name="discount"]`).val("0").trigger("keyup");
+			if (discountType == "percent") {
+				$(`[name="discount"]`).attr("max", "100");
+				$(`[name="discount"]`).attr("maxlength", "6");
+			} else {
+				$(`[name="discount"]`).attr("max", totalAmount);
+				$(`[name="discount"]`).attr("maxlength", formatAmount(totalAmount).length);
+			}
+			initAmount("#discount", false);
 		}, 200);
 	})
 	// ----- END SELECT SERVICE REQUISITION ID -----
@@ -1563,7 +1640,7 @@ $(document).ready(function() {
 		data["action"]     = action;
 		data["method"]     = method;
 		data["updatedBy"]  = sessionID;
-		if ((currentStatus == "false" || currentStatus == "0" || currentStatus == "3") && method != "approve") {
+		if ((currentStatus == "false" || currentStatus == "0" || currentStatus == "3" || (currentStatus == "4" && isRevise)) && method != "approve") {
 
 			data["serviceRequisitionID"]  = $("[name=serviceRequisitionID]").val() || null;
 			data["employeeID"] = sessionID;
@@ -1571,8 +1648,8 @@ $(document).ready(function() {
 			data["clientID"]   = $("[name=serviceRequisitionID] option:selected").attr("clientID") || null;
 			data["clientName"] = $(`[name="clientName"]`).val()?.trim() || null;
 			data["clientContactDetails"] = $(`[name="clientContactDetails"]`).val()?.trim() || null;
-			data["clientContactPerson"] = $(`[name="clientContactPerson"]`).val()?.trim() || null;
-			data["clientAddress"]    = $(`[name="clientAddress"]`).val()?.trim() || null;
+			data["clientContactPerson"]  = $(`[name="clientContactPerson"]`).val()?.trim() || null;
+			data["clientAddress"]        = $(`[name="clientAddress"]`).val()?.trim() || null;
 
 			data["inventoryVendorID"]     = $("[name=inventoryVendorID]").val() || null;
 			data["companyName"]           = $("[name=inventoryVendorID] option:selected").text()?.trim() || null;
@@ -1581,6 +1658,7 @@ $(document).ready(function() {
 			data["companyAddress"]        = $(`[name="companyAddress"]`).val()?.trim() || null;
 
 			data["paymentTerms"]     = $("[name=paymentTerms]").val()?.trim();
+			data["discountType"]     = $("[name=discountType]").val();
 			data["scheduleDate"]     = moment($("[name=scheduleDate]").val()).format("YYYY-MM-DD");
 			data["serviceOrderReason"] = $("[name=serviceOrderReason]").val()?.trim();
 			data["total"]            = +getNonFormattedAmount($("#total").text());
@@ -1649,7 +1727,7 @@ $(document).ready(function() {
 
 
 	// ----- GET SERVICES DISPLAY -----
-	function getServicesDisplay(data = false, readOnly = false) {
+	function getServicesDisplay(data = false, readOnly = false, isFromCancelledDocument = false) {
 		let disabled = readOnly ? "disabled" : "";
 
 		let {
@@ -1667,6 +1745,7 @@ $(document).ready(function() {
 			paymentTerms             = "",
 			scheduleDate             = "",
 			serviceRequisitionReason = "",
+			discountType             = "",
 			total                    = 0,
 			discount                 = 0,
 			totalAmount              = 0,
@@ -1684,6 +1763,7 @@ $(document).ready(function() {
 			submittedAt              = false,
 			createdAt                = false,
 		} = data && data[0];
+		console.log(total);
 
 		let requestServiceItems = "";
 		if (serviceRequisitionID) {
@@ -1708,6 +1788,44 @@ $(document).ready(function() {
 			requestServiceItems += getServiceRow();
 		}
 
+		let discountDisplay = "";
+		if (serviceOrderStatus && serviceOrderStatus != "0" && serviceOrderStatus != "4") {
+			discountDisplay = discountType == "percent" ? `
+			<div class="py-0 text-dark border-bottom">${formatAmount(discount)} %</div>` :
+			`<div class="py-0 text-dark border-bottom">${formatAmount(discount, true)}</div>`;
+		} else {
+			if (serviceOrderStatus == "4" && !isFromCancelledDocument) {
+				discountDisplay = discountType == "percent" ? `
+				<div class="py-0 text-dark border-bottom">${formatAmount(discount)} %</div>` :
+				`<div class="py-0 text-dark border-bottom">${formatAmount(discount, true)}</div>`;
+			} else {
+				discountDisplay = `
+				<div class="input-group">
+					<div class="input-group-prepend">
+						<select class="select2"
+							name="discountType"
+							id="discountType"
+							style="width: 52px !important;">
+							<option value="amount" ${discountType == "amount" ? "selected" : ""}>₱</option>
+							<option value="percent" ${discountType == "percent" ? "selected" : ""}>%</option>
+						</select>
+					</div>
+					<input 
+						type="text" 
+						class="form-control-plaintext amount py-0 text-dark border-bottom"
+						min="0" 
+						max="${discountType == "percent" ? "100" : total}"
+						minlength="1"
+						maxlength="${formatAmount(discountType == "percent" ? "100" : total).length}" 
+						name="discount" 
+						id="discount" 
+						style="font-size: 1.02em;"
+						value="${discount}"
+						${disabled}>
+				</div>`;
+			}
+		}
+
 		let html = `
 		<table class="table table-striped" id="tableServiceOrderItems0">
 			<thead>
@@ -1722,8 +1840,96 @@ $(document).ready(function() {
 				${requestServiceItems}
 			</tbody>
 		</table>
+
+		<div class="col-12">
+			<div class="row py-2">
+				<div class="offset-lg-7 offset-xl-8 col-12 col-sm-12 col-lg-5 col-xl-4 col-xl-4 pt-3 pb-2">
+					<div class="row" style="font-size: 1.1rem">
+						<div class="col-6 col-lg-7 text-left">Total :</div>
+						<div class="col-6 col-lg-5 text-right text-dark"
+							style="font-size: 1.05em"
+							id="total">
+							${formatAmount(total, true)}
+						</div>
+					</div>
+					<div class="row" style="font-size: 1.1rem">
+						<div class="col-6 col-lg-7 text-left">Discount :</div>
+						<div class="col-6 col-lg-5 text-right text-dark">
+							${discountDisplay}
+						</div>
+					</div>
+					<div class="row" style="font-size: 1.1rem">
+						<div class="col-6 col-lg-7 text-left">Total Amount:</div>
+						<div class="col-6 col-lg-5 text-right text-dark"
+							id="totalAmount"
+							style="font-size: 1.05em">
+							${formatAmount(totalAmount, true)}
+						</div>
+					</div>
+					<div class="row" style="font-size: 1.1rem">
+						<div class="col-6 col-lg-7 text-left">Vatable Sales:</div>
+						<div class="col-6 col-lg-5 text-right text-dark"
+							id="vatSales"
+							style="font-size: 1.05em">
+							${formatAmount(vatSales, true)}
+						</div>
+					</div>
+					<div class="row" style="font-size: 1.1rem">
+						<div class="col-6 col-lg-7 text-left">Vat 12%:</div>
+						<div class="col-6 col-lg-5 text-right text-dark">
+							<input 
+								type="text" 
+								class="form-control-plaintext amount py-0 text-dark border-bottom"
+								min="0" 
+								max="9999999999"
+								minlength="1"
+								maxlength="20" 
+								name="vat" 
+								id="vat" 
+								style="font-size: 1.02em;"
+								value="${vat}"
+								readonly>
+						</div>
+					</div>
+					<div class="row" style="font-size: 1.1rem">
+						<div class="col-6 col-lg-7 text-left">Total:</div>
+						<div class="col-6 col-lg-5 text-right text-dark"
+							id="totalVat"
+							style="font-size: 1.05em">
+							${formatAmount(totalVat, true)}
+						</div>
+					</div>
+					<div class="row" style="font-size: 1.1rem">
+						<div class="col-6 col-lg-7 text-left">Less EWT:</div>
+						<div class="col-6 col-lg-5 text-right text-dark">
+							<input 
+								type="text" 
+								class="form-control-plaintext amount py-0 text-dark border-bottom"
+								min="0" 
+								max="9999999999"
+								minlength="1"
+								maxlength="20" 
+								name="lessEwt" 
+								id="lessEwt" 
+								style="font-size: 1.02em;"
+								value="${lessEwt}"
+								${disabled}>
+						</div>
+					</div>
+					<div class="row pt-1" style="font-size: 1.3rem;; border-bottom: 3px double black; border-top: 1px solid black">
+						<div class="col-6 col-lg-7 text-left font-weight-bolder">Grand Total:</div>
+						<div class="col-6 col-lg-5 text-right text-danger font-weight-bolder"
+							id="grandTotalAmount"
+							style="font-size: 1.3em">
+							${formatAmount(grandTotalAmount, true)}
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
 		
-		<div class="row py-2">
+		
+		<!-- <div class="row py-2">
 			<div class="offset-xl-8 offset-md-7 col-xl-4 col-md-5 col-sm-12 pt-3 pb-2">
 				<div class="row" style="font-size: 1.1rem; font-weight:bold">
 					<div class="col-6 text-left">Total :</div>
@@ -1817,7 +2023,8 @@ $(document).ready(function() {
 						${formatAmount(grandTotalAmount, true)}
 					</div>
 				</div>
-			</div>
+			</div> -->
+
 		</div>`;
 		return html;
 	}
@@ -2243,7 +2450,7 @@ $(document).ready(function() {
 					<hr class="pb-1">
 					<div class="text-primary font-weight-bold" style="font-size: 1.5rem;">Services </div>
                     <div id="tableServiceDisplay">
-						${getServicesDisplay(data, readOnly)}
+						${getServicesDisplay(data, readOnly, isFromCancelledDocument)}
 					</div>
                 </div>
             </div>
@@ -2263,7 +2470,7 @@ $(document).ready(function() {
 			projectID && projectID != 0 && $("[name=projectID]").trigger("change");
 			updateTableItems();
 			updateServiceOptions();
-			initAmount("#discount", true);
+			initAmount("#discount", false);
 			initAmount("#lessEwt", true);
 			initAmount("#vat", true);
 			removeIsValid("#tableServiceOrderItems0");
@@ -2448,10 +2655,14 @@ $(document).ready(function() {
 	function checkCostSummary() {
 		const total       = getNonFormattedAmount($(`#total`).text());
 		const discount    = getNonFormattedAmount($(`[name="discount"]`).val());
-		const totalAmount = total - discount;
 		const lessEwt     = getNonFormattedAmount($(`[name="lessEwt"]`).val());
+		const discountType = $(`[name="discountType"]`).val();
+		let totalAmount = total - discount;
+		if (discountType == "percent") {
+			totalAmount = total - (total * (discount / 100));
+		}
 
-		if (discount > total) {
+		if (totalAmount < 0) {
 			showNotification("danger", "Invalid discount value.");
 			$(`[name="discount"]`).focus();
 			return false;

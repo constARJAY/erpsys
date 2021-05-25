@@ -139,11 +139,6 @@ $(document).ready(function() {
 	};
 
 	const bidRecapList = getTableData(
-		// `ims_bid_recap_tbl AS ibrt
-		// 	LEFT JOIN pms_project_list_tbl AS pplt ON ibrt.projectID = pplt.projectListID`,
-		// "ibrt.*, pplt.projectListClientID AS clientID",
-		// `bidRecapStatus = 2`
-
 		`ims_request_items_tbl AS irit
 			LEFT JOIN ims_bid_recap_tbl AS ibrt USING(bidRecapID)
 			LEFT JOIN pms_project_list_tbl AS pplt ON ibrt.projectID = pplt.projectListID`,
@@ -2645,7 +2640,6 @@ $(document).ready(function() {
 			updateTableItems();
 			initAll();
 			updateInventoryItemOptions();
-			// projectID && projectID != 0 && $("[name=projectID]").trigger("change");
 			bidRecapID && bidRecapID != 0 && $(`[name="bidRecapID"]`).trigger("change");
 			initAmount("#discount", false);
 			initAmount("#lessEwt", true);
