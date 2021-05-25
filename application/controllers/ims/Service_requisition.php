@@ -102,7 +102,7 @@ class Service_requisition extends CI_Controller {
             if ($result[0] == "true") {
                 $serviceRequisitionID = $result[2];
 
-                if ($items) {
+                if ($items && count($items) > 0) {
                     foreach($items as $index => $item) {
                         $service = [
                             "serviceRequisitionID" => $serviceRequisitionID,

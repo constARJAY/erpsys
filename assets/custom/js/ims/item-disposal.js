@@ -1,4 +1,5 @@
 $(document).ready(function() {
+	const allowedUpdate = isUpdateAllowed(36);
     // ----- MODULE APPROVER -----
 	const moduleApprover = getModuleApprover("disposal");
 	// ----- END MODULE APPROVER -----
@@ -9,9 +10,9 @@ $(document).ready(function() {
 		if (id) {
 			const revisedDocumentsID = getTableData(
 				"ims_inventory_disposal_tbl", 
-				"revisedisposalID", 
-				"revisedisposalID IS NOT NULL AND disposalStatus != 4");
-			return revisedDocumentsID.map(item => item.revisedisposalID).includes(id);
+				"reviseDisposalID", 
+				"reviseDisposalID IS NOT NULL AND disposalStatus != 4");
+			return revisedDocumentsID.map(item => item.reviseDisposalID).includes(id);
 		}
 		return false;
 	}
@@ -36,12 +37,11 @@ $(document).ready(function() {
 	}
 	// ---- END GET EMPLOYEE DATA -----
 
-
     // ----- VIEW DOCUMENT -----
-	function viewDocument(view_id = false, readOnly = false, isRevise = false) {
-		const loadData = (id, isRevise = false) => {
+	function viewDocument(view_id = false, readOnly = false, isRevise = false, isFromCancelledDocument = false) {
+		const loadData = (id, isRevise = false, isFromCancelledDocument = false) => {
+		//const loadData = (id, isRevise = false) => {
 			const tableData = getTableData("ims_inventory_disposal_tbl", "", "disposalID=" + id);
-
 			if (tableData.length > 0) {
 				let {
 					employeeID,
@@ -64,10 +64,9 @@ $(document).ready(function() {
 				} else {
 					isReadOnly = readOnly;
 				}
-
 				if (isAllowed) {
 					if (isRevise && employeeID == sessionID) {
-						pageContent(true, tableData, isReadOnly, true);
+						pageContent(true, tableData, isReadOnly, true, isFromCancelledDocument);
 						updateURL(encryptString(id), true, true);
 					} else {
 						pageContent(true, tableData, isReadOnly);
@@ -83,10 +82,11 @@ $(document).ready(function() {
 				updateURL();
 			}
 		}
-
 		if (view_id) {
-			let id = decryptString(view_id);
-				id && isFinite(id) && loadData(id, isRevise);
+			//console.log(view_id);
+			// let id = decryptString(view_id);
+			let id = view_id;
+				id && isFinite(id) && loadData(id, isRevise, isFromCancelledDocument);
 		} else {
 			let url   = window.document.URL;
 			let arr   = url.split("?view_id=");
@@ -100,13 +100,13 @@ $(document).ready(function() {
 					let id = decryptString(arr[1]);
 						id && isFinite(id) && loadData(id, true);
 				} else {
-					pageContent(true);
+					const isAllowed = isCreateAllowed(36);
+					pageContent(isAllowed);
 				}
 			}
 		}
 		
 	}
-
 	function updateURL(view_id = 0, isAdd = false, isRevise = false) {
 		if (view_id && !isAdd) {
 			window.history.pushState("", "", `${base_url}ims/item_disposal?view_id=${view_id}`);
@@ -120,7 +120,6 @@ $(document).ready(function() {
 			window.history.pushState("", "", `${base_url}ims/item_disposal`);
 		}
 	}
-	// ----- END VIEW DOCUMENT -----
 
 
     // GLOBAL VARIABLE - REUSABLE 
@@ -208,7 +207,7 @@ $(document).ready(function() {
 				scrollCollapse: true,
 				columnDefs: [
 					{ targets: 0,  width: 100  },
-					{ targets: 1,  width: 150 },
+					{ targets: 1,  width: 200 },
 					{ targets: 2,  width: 150 },
 					{ targets: 3,  width: 170  },
 					{ targets: 4,  width: 120 },
@@ -230,7 +229,7 @@ $(document).ready(function() {
 				scrollX: true,
 				scrollCollapse: true,
 				columnDefs: [
-					{ targets: 0,  width: 150  },
+					{ targets: 0,  width: 200  },
 					{ targets: 1,  width: 150 },
 					{ targets: 2,  width: 150 },
 					{ targets: 3,  width: 170  },
@@ -267,16 +266,21 @@ $(document).ready(function() {
 	}
 	// ----- END HEADER CONTENT -----
 
-
     // ----- HEADER BUTTON -----
-	function headerButton(isAdd = true, text = "Add", isRevise = false) {
+	function headerButton(isAdd = true, text = "Add", isRevise = false, isFromCancelledDocument = false) {
 		let html;
 		if (isAdd) {
-            html = `
-            <button type="button" class="btn btn-default btn-add" id="btnAdd"><i class="icon-plus"></i> &nbsp;${text}</button>`;
+			if (isCreateAllowed(36)) {
+				html = `
+				<button type="button" class="btn btn-default btn-add" id="btnAdd"><i class="icon-plus"></i> &nbsp;${text}</button>`;
+			}
 		} else {
 			html = `
-            <button type="button" class="btn btn-default btn-light" id="btnBack" revise="${isRevise}"><i class="fas fa-arrow-left"></i> &nbsp;Back</button>`;
+            <button type="button" 
+				class="btn btn-default btn-light" 
+				id="btnBack" 
+				revise="${isRevise}" 
+				cancel="${isFromCancelledDocument}"><i class="fas fa-arrow-left"></i> &nbsp;Back</button>`;
 		}
 		$("#headerButton").html(html);
 	}
@@ -289,7 +293,7 @@ $(document).ready(function() {
 		let transferRequestData = getTableData(
 			`ims_inventory_disposal_tbl AS iid 
             LEFT JOIN hris_employee_list_tbl AS helt USING(employeeID) `,
-			`iid.disposalID,iid.revisedisposalID,iid.employeeID,iid.projectID,iid.approversID,iid.approversStatus,iid.approversDate,iid.disposalStatus,iid.disposalReason,
+			`iid.disposalID,iid.reviseDisposalID,iid.employeeID,iid.projectID,iid.approversID,iid.approversStatus,iid.approversDate,iid.disposalStatus,iid.disposalReason,
 			iid.disposalRemarks,iid.submittedAt,iid.createdBy,iid.updatedBy,iid.createdAt,iid.updatedAt,
 			 CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname, iid.createdAt AS dateCreated`,
 			`iid.employeeID != ${sessionID} AND disposalStatus != 0 AND disposalStatus != 4`,
@@ -345,7 +349,7 @@ $(document).ready(function() {
 
 			if (isImCurrentApprover(approversID, approversDate, disposalStatus) || isAlreadyApproved(approversID, approversDate)) {
 				html += `
-				<tr class="${btnClass}" id="${encryptString(disposalID )}">
+				<tr class="${btnClass}" id="${encryptString(disposalID)}">
 					<td>${getFormCode("ADF", createdAt, disposalID )}</td>
 					<td>${fullname}</td>
 					<td>${disposalReason}</td>
@@ -382,7 +386,7 @@ $(document).ready(function() {
 		let transferRequestData = getTableData(
 			`ims_inventory_disposal_tbl 		AS iid 
             LEFT JOIN hris_employee_list_tbl AS helt USING(employeeID)`,
-			`iid.disposalID,iid.revisedisposalID,iid.employeeID,iid.projectID,iid.approversID,iid.approversStatus,iid.approversDate,iid.disposalStatus,iid.disposalReason,
+			`iid.disposalID,iid.reviseDisposalID,iid.employeeID,iid.projectID,iid.approversID,iid.approversStatus,iid.approversDate,iid.disposalStatus,iid.disposalReason,
 			iid.disposalRemarks,iid.submittedAt,iid.createdBy,iid.updatedBy,iid.createdAt,iid.updatedAt,
 			 CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname, iid.createdAt AS dateCreated`,
 			`iid.employeeID = ${sessionID}`,
@@ -437,7 +441,7 @@ $(document).ready(function() {
                 code="${getFormCode("ADF", createdAt, disposalID )}"><i class="fas fa-edit"></i> Edit</button>`;
 
 			html += `
-            <tr class="${btnClass}" id="${encryptString(disposalID )}">
+            <tr class="${btnClass}" id="${encryptString(disposalID)}">
                 <td>${getFormCode("ADF", createdAt, disposalID )}</td>
                 <td>${fullname}</td>
 				<td>${disposalReason}</td>
@@ -468,12 +472,11 @@ $(document).ready(function() {
 
 
     // ----- FORM BUTTONS -----
-	function formButtons(data = false, isRevise = false) {
+	function formButtons(data = false, isRevise = false, isFromCancelledDocument = false) {
 		let button = "";
 		if (data) {
 			let {
 				disposalID     		= "",
-				revisedisposalID 	="",
 				disposalStatus 		= "",
 				employeeID            = "",
 				approversID           = "",
@@ -486,31 +489,32 @@ $(document).ready(function() {
 				if (disposalStatus == 0 || isRevise) {
 					// DRAFT
 					button = `
-					<button 
+					<button type="button"
 						class="btn btn-submit px-5 p-2" 
 						id="btnSubmit" 
-						disposalID="${disposalID}"
+						disposalID="${encryptString(disposalID)}"
 						code="${getFormCode("ADF", createdAt, disposalID)}"
-						revise=${isRevise}><i class="fas fa-paper-plane"></i>
+						revise="${isRevise}"
+						cancel="${isFromCancelledDocument}"><i class="fas fa-paper-plane"></i>
 						Submit
 					</button>`;
-
 					if (isRevise) {
 						button += `
-						<button 
+						<button type="button"
 							class="btn btn-cancel btnCancel px-5 p-2" 
 							id="btnCancel"
-							disposalID="${disposalID}"
+							disposalID="${encryptString(disposalID)}"
 							code="${getFormCode("ADF", createdAt, disposalID)}"
-							revise="${isRevise}"><i class="fas fa-ban"></i> 
+							revise="${isRevise}"
+							cancel="${isFromCancelledDocument}"><i class="fas fa-paper-plane"></i>
 							Cancel
 						</button>`;
 					} else {
 						button += `
-						<button 
+						<button type="button"
 							class="btn btn-cancel px-5 p-2"
 							id="btnCancelForm" 
-							disposalID="${disposalID}"
+							disposalID="${encryptString(disposalID)}"
 							code="${getFormCode("ADF", createdAt, disposalID)}"
 							revise=${isRevise}><i class="fas fa-ban"></i> 
 							Cancel
@@ -522,20 +526,31 @@ $(document).ready(function() {
 					// FOR APPROVAL
 					if (!isOngoing) {
 						button = `
-						<button 
+						<button type="button"
 							class="btn btn-cancel px-5 p-2"
 							id="btnCancelForm" 
-							disposalID="${disposalID}"
+							disposalID="${encryptString(disposalID)}"
 							code="${getFormCode("ADF", createdAt, disposalID)}"
 							status="${disposalStatus}"><i class="fas fa-ban"></i> 
 							Cancel
 						</button>`;
 					}
-				} else if (disposalStatus == 3) {
+				} else if (disposalStatus == 2) {
+					// DROP
+					button = `
+					<button type="button" 
+						class="btn btn-cancel px-5 p-2"
+						id="btnDrop" 
+						disposalID="${encryptString(disposalID)}"
+						code="${getFormCode("ADF", createdAt, disposalID)}"
+						status="${disposalStatus}"><i class="fas fa-ban"></i> 
+						Drop
+					</button>`;
+				}else if (disposalStatus == 3) {
 					// DENIED - FOR REVISE
 					if (!isDocumentRevised(disposalID)) {
 					button = `
-					<button
+					<button 
 						class="btn btn-cancel px-5 p-2"
 						id="btnRevise" 
 						disposalID="${encryptString(disposalID)}"
@@ -544,7 +559,21 @@ $(document).ready(function() {
 						Revise
 					</button>`;
 					}
-				}
+				} else if (disposalStatus == 4) {
+					// CANCELLED - FOR REVISE
+					if (!isDocumentRevised(disposalID)) {
+						button = `
+						<button
+							class="btn btn-cancel px-5 p-2"
+							id="btnRevise" 
+							disposalID="${encryptString(disposalID)}"
+							code="${getFormCode("ADF", createdAt, disposalID)}"
+							status="${disposalStatus}"
+							cancel="true"><i class="fas fa-clone"></i>
+							Revise
+						</button>`;
+					}
+				}	
 			} else {
 				if (disposalStatus == 1) {
 					if (isImCurrentApprover(approversID, approversDate)) {
@@ -744,15 +773,20 @@ $(document).ready(function() {
 						name="barcode" 
 						minlength="17" 
 						maxlength="17"  
+						value="${barcode}"
+						itemID="${itemID}"
+						itemName="${itemName}"
+						inventoryStorageID="${inventoryStorageID}"
+						serialnumber="${serialnumber}"
 						required>
 					<div class="invalid-feedback d-block" id="invalid-barcode"></div>
 				</div>
 				</td>
 				<td>
-					<div class="itemCode">-</div>
+					<div class="itemCode">${getFormCode("ITM", itemcreatedAt, itemID) || "-"}</div>
 				</td>
 				<td>
-					<div class="itemName">-</div>
+					<div class="itemName">${itemName || "-"}</div>
 				</td>
 				<td>
 					<div class="serialnumber">-</div>
@@ -766,7 +800,8 @@ $(document).ready(function() {
 						data-allowcharacters="[0-9]" 
 						max="999999999" 
 						id="quantity" 
-						name="quantity" 
+						name="quantity"
+						value="${quantity}" 
 						minlength="1" 
 						maxlength="20" 
 						required>
@@ -774,10 +809,12 @@ $(document).ready(function() {
 				</div>
             </td>
                  <td>
-				 <div class="storeCode">-</div>
+				 <div class="storeCode">
+				 ${getFormCode("ISM", inventorycreatedAt, inventoryStorageID) || "-"}
+				 </div>
               	</td>
                   <td>
-				  	<div class="inventoryStorage">-</div>
+				  	<div class="inventoryStorage">${inventoryStorageOfficeName || "-"}</div>
 				</td>
 				<td>
 				<div class="">
@@ -788,6 +825,7 @@ $(document).ready(function() {
 						max="999999999" 
 						id="disposalDetailRemarks" 
 						name="disposalDetailRemarks" 
+						value="${disposalDetailRemarks}"
 						required>
 					<div class="invalid-feedback d-block" id="invalid-disposalDetailRemarks"></div>
 				</div>
@@ -1079,14 +1117,13 @@ $(document).ready(function() {
 
 
     // ----- FORM CONTENT -----
-	function formContent(data = false, readOnly = false, isRevise = false) {
-		
+	function formContent(data = false, readOnly = false, isRevise = false, isFromCancelledDocument = false) {
 		$("#page_content").html(preloader);
 		readOnly = isRevise ? false : readOnly;
 
 		let {
 			disposalID       		= "",
-			revisedisposalID 		= "",
+			reviseDisposalID 		= "",
 			employeeID              = "",
 			approversID             = "",
 			approversStatus         = "",
@@ -1127,9 +1164,10 @@ $(document).ready(function() {
 
 		readOnly ? preventRefresh(false) : preventRefresh(true);
 
-		$("#btnBack").attr("disposalID", disposalID);
+		$("#btnBack").attr("disposalID", encryptString(disposalID));
 		$("#btnBack").attr("status", disposalStatus);
 		$("#btnBack").attr("employeeID", employeeID);
+		$("#btnBack").attr("cancel", isFromCancelledDocument);
 
 		let disabled = readOnly ? "disabled" : "";
 		let checkboxProjectHeader = !disabled ? `
@@ -1147,12 +1185,12 @@ $(document).ready(function() {
 			<button class="btn btn-danger btnDeleteRow" id="btnDeleteRow" project="true" disabled><i class="fas fa-minus-circle"></i> Delete Row/s</button>
 		</div>` : "";
 	
-		let button = formButtons(data, isRevise);
+		let button = formButtons(data, isRevise, isFromCancelledDocument);
 
-		let reviseDocumentNo    = isRevise ? disposalID : revisedisposalID;
-		let documentHeaderClass = isRevise || revisedisposalID ? "col-lg-4 col-md-4 col-sm-12 px-1" : "col-lg-2 col-md-6 col-sm-12 px-1";
-		let documentDateClass   = isRevise || revisedisposalID ? "col-md-12 col-sm-12 px-0" : "col-lg-8 col-md-12 col-sm-12 px-1";
-		let documentReviseNo    = isRevise || revisedisposalID ?
+		let reviseDocumentNo    = isRevise ? disposalID : reviseDisposalID;
+		let documentHeaderClass = isRevise || reviseDisposalID ? "col-lg-4 col-md-4 col-sm-12 px-1" : "col-lg-2 col-md-6 col-sm-12 px-1";
+		let documentDateClass   = isRevise || reviseDisposalID ? "col-md-12 col-sm-12 px-0" : "col-lg-8 col-md-12 col-sm-12 px-1";
+		let documentReviseNo    = isRevise || reviseDisposalID ?
 		 `
 		<div class="col-lg-4 col-md-4 col-sm-12 px-1">
 			<div class="card">
@@ -1312,6 +1350,17 @@ $(document).ready(function() {
 			updateTableItems();
 			initAll();
 			updateInventoryItemOptions();
+			// ----- NOT ALLOWED FOR UPDATE -----
+			if (!allowedUpdate) {
+				$("#page_content").find(`input, select, textarea`).each(function() {
+					if (this.type != "search") {
+						$(this).attr("disabled", true);
+					}
+				})
+				$('#btnBack').attr("status", "2");
+				$(`#btnSubmit, #btnRevise, #btnCancel, #btnCancelForm, .btnAddRow, .btnDeleteRow`).hide();
+			}
+			// ----- END NOT ALLOWED FOR UPDATE -----
 			return html;
 		}, 300);
 	}
@@ -1319,7 +1368,7 @@ $(document).ready(function() {
 
 
     // ----- PAGE CONTENT -----
-	function pageContent(isForm = false, data = false, readOnly = false, isRevise = false) {
+	function pageContent(isForm = false, data = false, readOnly = false, isRevise = false, isFromCancelledDocument = false) {
 		$("#page_content").html(preloader);
 		if (!isForm) {
 			preventRefresh(false);
@@ -1341,9 +1390,12 @@ $(document).ready(function() {
 			myFormsContent();
 			updateURL();
 		} else {
-			headerButton(false, "", isRevise);
+			headerButton(false, "", isRevise, isFromCancelledDocument);
 			headerTabContent(false);
-			formContent(data, readOnly, isRevise);
+			formContent(data, readOnly, isRevise, isFromCancelledDocument);
+			// headerButton(false, "", isRevise);
+			// headerTabContent(false);
+			// formContent(data, readOnly, isRevise);
 		}
 	}
 	viewDocument();
@@ -1490,7 +1542,7 @@ $(document).ready(function() {
 
     // ----- OPEN EDIT FORM -----
 	$(document).on("click", ".btnEdit", function () {
-		const id = $(this).attr("id");
+		const id = decryptString($(this).attr("id"));
 		viewDocument(id);
 	});
 	// ----- END OPEN EDIT FORM -----
@@ -1498,7 +1550,7 @@ $(document).ready(function() {
 
     // ----- VIEW DOCUMENT -----
 	$(document).on("click", ".btnView", function () {
-		const id = $(this).attr("id");
+		const id = decryptString($(this).attr("id"));
 		viewDocument(id, true);
 	});
 	// ----- END VIEW DOCUMENT -----
@@ -1506,8 +1558,10 @@ $(document).ready(function() {
 
     // ----- VIEW DOCUMENT -----
 	$(document).on("click", "#btnRevise", function () {
-		const id = $(this).attr("disposalID");
-		viewDocument(id, false, true);
+		const id                    = decryptString($(this).attr("disposalID"));
+		const fromCancelledDocument = $(this).attr("cancel") == "true";
+		//const id = $(this).attr("disposalID");
+		viewDocument(id, false, true, fromCancelledDocument);
 	});
 	// ----- END VIEW DOCUMENT -----
 	// ----- REMOVE IS-VALID IN TABLE -----
@@ -1519,7 +1573,8 @@ $(document).ready(function() {
 
 	// ----- SAVE CLOSE FORM -----
 	$(document).on("click", "#btnBack", function () {
-		const id         = $(this).attr("disposalID");
+		const id         = decryptString($(this).attr("disposalID"));
+		//const id         = $(this).attr("disposalID");
 		const revise     = $(this).attr("revise") == "true";
 		const employeeID = $(this).attr("employeeID");
 		const feedback   = $(this).attr("code") || getFormCode("ADF", dateToday(), id);
@@ -1531,7 +1586,7 @@ $(document).ready(function() {
 				const action = revise && "insert" || (id && feedback ? "update" : "insert");
 				const data   = getDisposalData(action, "save", "0", id);
 				data["disposalStatus"]   = 0;
-				data["revisedisposalID"] = id;
+				data["reviseDisposalID"] = id;
 				delete data["disposalID"];
 				// data.append("disposalStatus", 0);
 				// data.append("revisedisposalID", id);
@@ -1550,7 +1605,8 @@ $(document).ready(function() {
 		} else {
 			const action = id && feedback ? "update" : "insert";
 			const data   = getDisposalData(action, "save", "0", id);
-			data.append("disposalStatus", 0);
+			data["disposalStatus"] = 0;
+			//data.append("disposalStatus", 0);
 
 			saveDisposalItem(data, "save", null, pageContent);
 		}
@@ -1560,16 +1616,29 @@ $(document).ready(function() {
 
     // ----- SAVE DOCUMENT -----
 	$(document).on("click", "#btnSave, #btnCancel", function () {
-		const id       = $(this).attr("disposalID");
+		const id       = decryptString($(this).attr("disposalID"));
+		const isFromCancelledDocument = $(this).attr("cancel") == "true";
+		//const id       = $(this).attr("disposalID");
 		const revise   = $(this).attr("revise") == "true";
 		const feedback = $(this).attr("code") || getFormCode("ADF", dateToday(), id);
-		const action   = revise && "insert" || (id && feedback ? "update" : "insert");
+		const action   = revise && !isFromCancelledDocument && "insert" || (id && feedback ? "update" : "insert");
+		//const action   = revise && "insert" || (id && feedback ? "update" : "insert");
 		const data     = getDisposalData(action, "save", "0", id);
+		//data.append("disposalStatus", 0);
+		//data["disposalStatus"] = 0;
 		data.append("disposalStatus", 0);
 
 		if (revise) {
-			data["revisedisposalID"] = id;
-			delete data["disposalID"];
+			if (!isFromCancelledDocument) {
+				data.append("reviseDisposalID", id);
+				data.delete("disposalID");
+			// data["revisedisposalID"] = id;
+			// delete data["disposalID"];
+		} else {
+			data.append("reviseDisposalID", id);
+			data.delete("action");
+			data.append("action", "update");
+		}
 			// data.append("revisedisposalID", id);
 			// data.delete("disposalID");
 		}
@@ -1581,25 +1650,34 @@ $(document).ready(function() {
 
     // ----- SUBMIT DOCUMENT -----
 	$(document).on("click", "#btnSubmit", function () {
+
 		let condition = $("[name=quantity]").hasClass("is-invalid");
 		let condition2 = $("[name=barcode]").hasClass("is-invalid");
 		if(!condition && !condition2){
-
-		const id           = $(this).attr("disposalID");
+		const id           = decryptString($(this).attr("disposalID"));
+		//alert(id);
 		const revise       = $(this).attr("revise") == "true";
+		const isFromCancelledDocument = $(this).attr("cancel") == "true";
 		const validate     = validateForm("form_purchase_request");
-
 		if (validate) {
-			const action = revise && "insert" || (id ? "update" : "insert");
+			const action = revise && !isFromCancelledDocument && "insert" || (id ? "update" : "insert");
 			const data   = getDisposalData(action, "submit", "1", id);
 
-			if (revise) {
-				data["revisedisposalID"] = id;
-				delete data["disposalID"];
-				// data.append("revisedisposalID", id);
-				// data.delete("disposalID");
-			}
+			// const action = revise && "insert" || (id ? "update" : "insert");
+			// const data   = getDisposalData(action, "submit", "1", id);
 
+			if (revise) {
+				if (!isFromCancelledDocument) {
+				//const action = revise && !isFromCancelledDocument && "insert" || (id ? "update" : "insert");
+				//alert(id);
+				// data["reviseDisposalID"] = id;
+				// delete data["disposalID"];
+				data.append("reviseDisposalID", id);
+				data.delete("disposalID");
+				}
+			}
+			// let approversID   = data["approversID"], 
+			// 	approversDate = data["approversDate"];
 			let approversID = "", approversDate = "";
 			for (var i of data) {
 				if (i[0] == "approversID")   approversID   = i[1];
@@ -1622,13 +1700,53 @@ $(document).ready(function() {
 	}else{
 		$("[name=quantity]").focus();
 	}
+	// 	let condition = $("[name=quantity]").hasClass("is-invalid");
+	// 	let condition2 = $("[name=barcode]").hasClass("is-invalid");
+	// 	const id            = decryptString($(this).attr("disposalID"));
+	// 	const isFromCancelledDocument = $(this).attr("cancel") == "true";
+	// 	const revise       = $(this).attr("revise") == "true";
+	// 	const validate     = validateForm("form_purchase_request");
+	// 	removeIsValid(".itemProjectTableBody");
+	// 	if(validate && condition && condition2){
+	// 		const action = revise && !isFromCancelledDocument && "insert" || (id ? "update" : "insert");
+			
+	// 		const data   = getDisposalData(action, "submit", "1", id);
+
+
+	// 		if (revise) {
+	// 			if (!isFromCancelledDocument) {
+	// 				data.append("revisedisposalID", id);
+	// 				data.delete("disposalID");
+	// 			}
+	// 		}
+
+	// 		let approversID = "", approversDate = "";
+	// 		for (var i of data) {
+	// 			if (i[0] == "approversID")   approversID   = i[1];
+	// 			if (i[0] == "approversDate") approversDate = i[1];
+	// 		}
+	// 		const employeeID = getNotificationEmployeeID(approversID, approversDate, true);
+	// 		let notificationData = false;
+	// 		if (employeeID != sessionID) {
+	// 			notificationData = {
+	// 				moduleID:                36,
+	// 				notificationTitle:       "Item Disposal",
+	// 				notificationDescription: `${employeeFullname(sessionID)} asked for your approval.`,
+	// 				notificationType:        2,
+	// 				employeeID,
+	// 			};
+	// 		}
+
+	// 		saveDisposalItem(data, "submit", notificationData, pageContent);
+	// }
+	// alert("222");
 	});
 	// ----- END SUBMIT DOCUMENT -----
 
 
     // ----- CANCEL DOCUMENT -----
 	$(document).on("click", "#btnCancelForm", function () {
-		const id     = $(this).attr("disposalID");
+		const id     = decryptString($(this).attr("disposalID"));
 		const status = $(this).attr("status");
 		const action = "update";
 		const data   = getDisposalData(action, "cancelform", "4", id, status);
@@ -1689,13 +1807,16 @@ $(document).ready(function() {
 
     // ----- REJECT DOCUMENT -----
 	$(document).on("click", "#btnReject", function () {
-		const id       = $(this).attr("disposalID");
+		const id       = decryptString($(this).attr("disposalID"));
+		//alert(id);
+		//const id       = $(this).attr("disposalID");
 		const feedback = $(this).attr("code") || getFormCode("ADF", dateToday(), id);
 
 		$("#modal_item_disposal_content").html(preloader);
 		$("#modal_item_disposal .page-title").text("DENY ITEM DISPOSAL");
 		$("#modal_item_disposal").modal("show");
 		let html = `
+		
 		<div class="modal-body">
 			<div class="form-group">
 				<label>Remarks <code>*</code></label>
@@ -1712,8 +1833,7 @@ $(document).ready(function() {
 			</div>
 		</div>
 		<div class="modal-footer text-right">
-			<button class="btn btn-danger" id="btnRejectConfirmation"
-			disposalID="${id}"
+			<button class="btn btn-danger" id="btnRejectConfirmation" disposalID="${encryptString(id)}"
 			code="${feedback}"><i class="far fa-times-circle"></i> Deny</button>
 			<button class="btn btn-cancel btnCancel px-5 p-2" data-dismiss="modal"><i class="fas fa-ban"></i> Cancel</button>
 		</div>`;
@@ -1738,7 +1858,7 @@ $(document).ready(function() {
 				data.append("disposalID", id);
 				data.append("approversStatus", updateApproveStatus(approversStatus, 3));
 				data.append("approversDate", updateApproveDate(approversDate));
-				data.append("itemDisposalRemarks", $("[name=itemDisposalRemarks]").val()?.trim());
+				data.append("disposalRemarks", $("[name=itemDisposalRemarks]").val()?.trim());
 				data.append("updatedBy", sessionID);
 
 				let notificationData = {
@@ -1756,6 +1876,23 @@ $(document).ready(function() {
 		} 
 	});
 	// ----- END REJECT DOCUMENT -----
+	
+
+	// ----- DROP DOCUMENT -----
+	$(document).on("click", "#btnDrop", function() {
+		const disposalID = decryptString($(this).attr("disposalID"));
+		const feedback          = $(this).attr("code") || getFormCode("ADF", dateToday(), id);
+
+		const id = decryptString($(this).attr("disposalID"));
+		let data = new FormData;
+		data.append("disposalID", disposalID);
+		data.append("action", "update");
+		data.append("method", "drop");
+		data.append("updatedBy", sessionID);
+
+		savePurchaseRequest(data, "drop", null, pageContent);
+	})
+	// ----- END DROP DOCUMENT -----
 
 
     // ----- NAV LINK -----
@@ -1904,6 +2041,8 @@ function saveDisposalItem(data = null, method = "submit", notificationData = nul
 							swalTitle = `${getFormCode("ADF", dateCreated, insertedID)} approved successfully!`;
 						} else if (method == "deny") {
 							swalTitle = `${getFormCode("ADF", dateCreated, insertedID)} denied successfully!`;
+						} else if (method == "drop") {
+							swalTitle = `${getFormCode("ADF", dateCreated, insertedID)} dropped successfully!`;
 						}	
 		
 						if (isSuccess == "true") {

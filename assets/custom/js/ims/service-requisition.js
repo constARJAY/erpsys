@@ -233,7 +233,7 @@ $(document).ready(function() {
 					{ targets: 0,  width: 50   },
 					{ targets: 1,  width: 150  },
 					{ targets: 2,  width: 150  },
-					{ targets: 3,  width: 800  },
+					{ targets: 3,  width: 1000 },
 					{ targets: 4,  width: 200  },
 				],
 			});
@@ -253,7 +253,7 @@ $(document).ready(function() {
 				columnDefs: [
 					{ targets: 0,  width: 150  },
 					{ targets: 1,  width: 150  },
-					{ targets: 2,  width: 800  },
+					{ targets: 2,  width: 1000 },
 					{ targets: 3,  width: 200  },
 				],
 			});
@@ -770,7 +770,7 @@ $(document).ready(function() {
 	// ----- GET UOM LIST -----
 	function getUomList(uomName = null) {
 		let html = `<option disabled selected>Select UOM</option>`;
-		if (uom) {
+		if (uomName) {
 			uomList.map(uom => {
 				html += `
 				<option value="${uom.uomName}"
@@ -838,13 +838,13 @@ $(document).ready(function() {
 				</td>
 				<td>
 					<div class="uom">
-						<select class="form-control validate"
+						<select class="form-control validate select2"
 							name="serviceUom"
 							id="serviceUom"
 							required>
 							${getUomList(uom)}
 						</select>
-						<input 
+						<!-- <input 
 							type="text" 
 							class="form-control validate text-center serviceUom"
 							data-allowcharacters="[a-z][A-Z][0-9][ ][.][,][-]['][()]" 
@@ -854,7 +854,7 @@ $(document).ready(function() {
 							minlength="1" 
 							maxlength="20" 
 							value="${uom}"
-							required>
+							required> -->
 						<div class="invalid-feedback d-block" id="invalid-serviceUom"></div>
 					</div>
 				</td>
@@ -892,7 +892,7 @@ $(document).ready(function() {
 				</td>
 				<td class="text-center">
 					<div class="quantity">
-						${quantity}
+						${formatAmount(quantity)}
 					</div>
 				</td>
 				<td>
@@ -938,15 +938,15 @@ $(document).ready(function() {
 			`requestServiceID = ${requestServiceID}`
 		);
 		let serviceScopes = `
-		<div class="table-responsive">
+		<div class="container-fluid">
 			<table class="table table-bordered">
 				<thead>
 					<tr>
 						<th style="width: 40%">Description ${!readOnly ? "<code>*</code>" : ""}</th>
 						<th style="width: 12%">Quantity ${!readOnly ? "<code>*</code>" : ""}</th>
-						<th style="width: 12%">UOM ${!readOnly ? "<code>*</code>" : ""}</th>
-						<th style="width: 18%">Unit Cost ${!readOnly ? "<code>*</code>" : ""}</th>
-						<th style="width: 18%">Total Cost</th>
+						<th style="width: 16%">UOM ${!readOnly ? "<code>*</code>" : ""}</th>
+						<th style="width: 16%">Unit Cost ${!readOnly ? "<code>*</code>" : ""}</th>
+						<th style="width: 16%">Total Cost</th>
 					</tr>
 				</thead>
 				<tbody class="tableScopeBody">`;
@@ -1056,7 +1056,7 @@ $(document).ready(function() {
 				const serviceID = $(this).val();
 				$(this).attr("index", `${i}`);
 				$(this).attr("project", `true`);
-				$(this).attr("id", `projectitemid${i}`)
+				$(this).attr("id", `projectitemid${j}${i}`)
 				if (!$(this).attr("data-select2-id")) {
 					$(this).select2({ theme: "bootstrap" });
 				}
@@ -1185,6 +1185,7 @@ $(document).ready(function() {
 		$(this).parent().find("[name=serviceDescription]").last().focus();
 		initAmount(".amount");
 		initQuantity(".input-quantity");
+		// initSelect2();
 		updateTableItems();
 	})
 	// ----- END ADD SCOPE -----
@@ -1197,6 +1198,7 @@ $(document).ready(function() {
 			const scopeElement = $(this).closest("tr");
 			scopeElement.fadeOut(500, function() {
 				$(this).closest("tr").remove();
+				updateTableItems();
 			})
 		} else {
 			showNotification("danger", "You must have atleast one scope of work.");
@@ -1308,8 +1310,8 @@ $(document).ready(function() {
 
 	// ----- UPDATE TOTAL AMOUNT -----
 	function updateTotalAmount() {
-		const quantityArr = $.find(`[name=quantity]`).map(element => element.value || "0");
-		const unitCostArr = $.find(`[name=unitCost]`).map(element => element.value.replaceAll(",", "") || "0");
+		const quantityArr = $.find(`[name=quantity]`).map(element => getNonFormattedAmount(element.value) || "0");
+		const unitCostArr = $.find(`[name=unitCost]`).map(element => getNonFormattedAmount(element.value) || "0");
 		const totalAmount = quantityArr.map((qty, index) => +qty * +unitCostArr[index]).reduce((a,b) => a + b, 0);
 		$(`#totalAmount`).text(formatAmount(totalAmount, true));
 		return totalAmount;
@@ -1730,11 +1732,11 @@ $(document).ready(function() {
 				};
 
 				$(`td .tableScopeBody tr`, this).each(function() {
-					const quantity = +$(`[name="quantity"]`, this).val();
-					const unitCost = +$(`[name="unitCost"]`, this).val().replaceAll(",", "");
+					const quantity = +getNonFormattedAmount($(`[name="quantity"]`, this).val());
+					const unitCost = +getNonFormattedAmount($(`[name="unitCost"]`, this).val());
 					let scope = {
 						description: $('[name="serviceDescription"]', this).val()?.trim(),
-						uom:         $(`[name="serviceUom"]`, this).val()?.trim(),
+						uom:         $(`[name="serviceUom"]`, this).val(),
 						quantity,
 						unitCost,
 						totalCost: (quantity * unitCost)

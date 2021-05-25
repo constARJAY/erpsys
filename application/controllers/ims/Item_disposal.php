@@ -19,7 +19,6 @@ class Item_disposal extends CI_Controller {
         $this->load->view("template/footer");
     }
 
-        
     public function saveDisposalItem()
     {
         $action                      = $this->input->post("action");
@@ -40,7 +39,7 @@ class Item_disposal extends CI_Controller {
         $items                       = $this->input->post("items") ?? null;
 
         $disposalItemData = [
-            // "revisePurchaseRequestID" => $revisePurchaseRequestID,
+            "reviseDisposalID"        => $reviseDisposalID,
             "employeeID"              => $employeeID,
             "approversID"             => $approversID,
             "approversStatus"         => $approversStatus,
@@ -56,13 +55,13 @@ class Item_disposal extends CI_Controller {
         ];
 
         if ($action == "update") {
-            // unset($disposalItemData["revisePurchaseRequestID"]);
+            unset($disposalItemData["reviseDisposalID"]);
             unset($disposalItemData["createdBy"]);
             unset($disposalItemData["createdAt"]);
 
             if ($method == "cancelform") {
                 $disposalItemData = [
-                    "disposalStatus" => 4,
+                    "disposalStatus"        => 4,
                     "updatedBy"             => $updatedBy,
                 ];
             } else if ($method == "approve") {
@@ -80,7 +79,14 @@ class Item_disposal extends CI_Controller {
                     "disposalRemarks"       => $disposalRemarks,
                     "updatedBy"              => $updatedBy,
                 ];
+            } else if ($method == "drop") {
+                $disposalItemData = [
+                    "reviseDisposalID"        => $reviseDisposalID,
+                    "disposalStatus"          => 5,
+                    "updatedBy"               => $updatedBy,
+                ]; 
             }
+            
         }
 
     $saveTransferData = $this->disposalitem->saveDisposalItemData($action, $disposalItemData, $disposalID,$disposalStatus);
