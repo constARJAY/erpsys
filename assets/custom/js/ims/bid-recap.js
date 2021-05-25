@@ -1,4 +1,5 @@
 $(document).ready(function() {
+	const allowedUpdate = isUpdateAllowed(40);
     // ----- MODULE APPROVER -----
 	const moduleApprover = getModuleApprover(40);
 	// ----- END MODULE APPROVER -----
@@ -23,10 +24,23 @@ $(document).ready(function() {
 	}
 	// ---- END GET EMPLOYEE DATA -----
 
+	// ----- IS DOCUMENT REVISED -----
+	function isDocumentRevised(id = null) {
+		if (id) {
+			const revisedDocumentsID = getTableData(
+				"ims_bid_recap_tbl", 
+				"reviseBidRecapID", 
+				"reviseBidRecapID IS NOT NULL AND bidRecapStatus != 4");
+			return revisedDocumentsID.map(item => item.reviseBidRecapID).includes(id);
+		}
+		return false;
+	}
+	// ----- END IS DOCUMENT REVISED -----
+
 
     // ----- VIEW DOCUMENT -----
-	function viewDocument(view_id = false, readOnly = false, isRevise = false) {
-		const loadData = (id, isRevise = false) => {
+	function viewDocument(view_id = false, readOnly = false, isRevise = false, isFromCancelledDocument = false) {
+		const loadData = (id, isRevise = false, isFromCancelledDocument = false) => {
 			const tableData = getTableData("ims_bid_recap_tbl", "", "bidRecapID=" + id);
 
 			if (tableData.length > 0) {
@@ -54,7 +68,7 @@ $(document).ready(function() {
 
 				if (isAllowed) {
 					if (isRevise && employeeID == sessionID) {
-						pageContent(true, tableData, isReadOnly, true);
+						pageContent(true, tableData, isReadOnly, true, isFromCancelledDocument);
 						updateURL(encryptString(id), true, true);
 					} else {
 						pageContent(true, tableData, isReadOnly);
@@ -72,8 +86,9 @@ $(document).ready(function() {
 		}
 
 		if (view_id) {
-			let id = decryptString(view_id);
-				id && isFinite(id) && loadData(id, isRevise);
+			// let id = decryptString(view_id);
+			let id = view_id;
+				id && isFinite(id) && loadData(id, isRevise, isFromCancelledDocument);
 		} else {
 			let url   = window.document.URL;
 			let arr   = url.split("?view_id=");
@@ -147,14 +162,15 @@ $(document).ready(function() {
 				columnDefs: [
 					{ targets: 0,  width: 100 },
 					{ targets: 1,  width: 150 },
-					{ targets: 2,  width: 150 },
-					{ targets: 3,  width: 150 },
-					{ targets: 4,  width: 150 },
-					{ targets: 5,  width: 200 },
+					{ targets: 2,  width: 100 },
+					{ targets: 3,  width: 350 },
+					{ targets: 4,  width: 350 },
+					{ targets: 5,  width: 150 },
 					{ targets: 6,  width: 200 },
 					{ targets: 7,  width: 200 },
-					{ targets: 8,  width: 80 },
-					{ targets: 9,  width: 250  },
+					{ targets: 8,  width: 200 },
+					{ targets: 9,  width: 80 },
+					{ targets: 10,  width: 250  },
 				],
 			});
 
@@ -170,14 +186,15 @@ $(document).ready(function() {
 				columnDefs: [
 					{ targets: 0,  width: 100 },
 					{ targets: 1,  width: 150 },
-					{ targets: 2,  width: 150 },
-					{ targets: 3,  width: 150 },
-					{ targets: 4,  width: 150 },
-					{ targets: 5,  width: 200 },
+					{ targets: 2,  width: 100 },
+					{ targets: 3,  width: 350 },
+					{ targets: 4,  width: 350 },
+					{ targets: 5,  width: 150 },
 					{ targets: 6,  width: 200 },
 					{ targets: 7,  width: 200 },
-					{ targets: 8,  width: 80 },
-					{ targets: 9,  width: 250  },
+					{ targets: 8,  width: 200 },
+					{ targets: 9,  width: 80 },
+					{ targets: 10,  width: 250  },
 				],
 			});
 	}
@@ -208,14 +225,16 @@ $(document).ready(function() {
 
 
     // ----- HEADER BUTTON -----
-	function headerButton(isAdd = true, text = "Add", isRevise = false) {
+	function headerButton(isAdd = true, text = "Add", isRevise = false, isFromCancelledDocument = false) {
 		let html;
 		if (isAdd) {
-            html = `
-            <button type="button" class="btn btn-default btn-add" id="btnAdd"><i class="icon-plus"></i> &nbsp;${text}</button>`;
+			if(isCreateAllowed(40)){
+				html = `
+            		<button type="button" class="btn btn-default btn-add" id="btnAdd"><i class="icon-plus"></i> &nbsp;${text}</button>`;
+			}
 		} else {
 			html = `
-            <button type="button" class="btn btn-default btn-light" id="btnBack" revise="${isRevise}"><i class="fas fa-arrow-left"></i> &nbsp;Back</button>`;
+            <button type="button" class="btn btn-default btn-light" id="btnBack" revise="${isRevise}" cancel="${isFromCancelledDocument}"><i class="fas fa-arrow-left"></i> &nbsp;Back</button>`;
 		}
 		$("#headerButton").html(html);
 	}
@@ -229,7 +248,7 @@ $(document).ready(function() {
 			"ims_bid_recap_tbl AS ibrt LEFT JOIN hris_employee_list_tbl AS helt USING(employeeID) LEFT JOIN pms_project_list_tbl AS pplt ON pplt.projectListID = ibrt.projectID",
 			"ibrt.*, CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname, ibrt.createdAt AS dateCreated, projectListCode, projectListName",
 			`ibrt.employeeID != ${sessionID} AND bidRecapStatus != 0 AND bidRecapStatus != 4`,
-			`FIELD(bidRecapStatus, 0, 1, 3, 2, 4), COALESCE(ibrt.submittedAt, ibrt.createdAt)`
+			`FIELD(bidRecapStatus, 0, 1, 3, 2, 4, 5), COALESCE(ibrt.submittedAt, ibrt.createdAt)`
 		);
 
 		let html = `
@@ -237,9 +256,10 @@ $(document).ready(function() {
             <thead>
                 <tr style="white-space: nowrap">
                      	<th>Document No.</th>
-						<th>Employee Name</th>
+						<th>Prepared By</th>
 						<th>Reference No.</th>
 						<th>Project Name</th>
+						<th>Description</th>
 						<th>Current Approver</th>
 						<th>Date Created</th>
 						<th>Date Submitted</th>
@@ -256,9 +276,11 @@ $(document).ready(function() {
 				bidRecapID,
 				projectListCode,
 				projectListName,
+				bidRecapReason,
 				documentType,
 				documentID,
 				purchaseRequestID,
+				inventoryValidationID,
 				approversID,
 				approversDate,
 				bidRecapStatus,
@@ -267,12 +289,12 @@ $(document).ready(function() {
 				createdAt,
 			} = item;
 
-			let referenceNumber = getFormCode("IVR",moment(createdAt),purchaseRequestID);
+			let referenceNumber = getFormCode("IVR",moment(createdAt),inventoryValidationID);
 			
 			let remarks       = bidRecapRemarks ? bidRecapRemarks : "-";
 			let dateCreated   = moment(createdAt).format("MMMM DD, YYYY hh:mm:ss A");
 			let dateSubmitted = submittedAt ? moment(submittedAt).format("MMMM DD, YYYY hh:mm:ss A") : "-";
-			let dateApproved  = bidRecapStatus == 2 ? approversDate.split("|") : "-";
+			let dateApproved  = bidRecapStatus == 2 || bidRecapStatus == 5 ? approversDate.split("|") : "-";
 			if (dateApproved !== "-") {
 				dateApproved = moment(dateApproved[dateApproved.length - 1]).format("MMMM DD, YYYY hh:mm:ss A");
 			}
@@ -298,6 +320,7 @@ $(document).ready(function() {
 						</div>
 						<small style="color:#848482;">${projectListCode || '-'}</small>
 					</td>
+					<td>${bidRecapReason || "-"}</td>
 					<td>
 						${employeeFullname(getCurrentApprover(approversID, approversDate, bidRecapStatus, true))}
 					</td>
@@ -333,7 +356,7 @@ $(document).ready(function() {
 			"ims_bid_recap_tbl AS ibrt LEFT JOIN hris_employee_list_tbl AS helt USING(employeeID) LEFT JOIN pms_project_list_tbl AS pplt ON pplt.projectListID = ibrt.projectID",
 			"ibrt.*, CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname, ibrt.createdAt AS dateCreated, projectListCode, projectListName",
 			`ibrt.employeeID = ${sessionID}`,
-			`FIELD(bidRecapStatus, 0, 1, 3, 2, 4), COALESCE(ibrt.submittedAt, ibrt.createdAt)`
+			`FIELD(bidRecapStatus, 0, 1, 3, 2, 4, 5), COALESCE(ibrt.submittedAt, ibrt.createdAt)`
 		);
 
 		let html = `
@@ -341,15 +364,16 @@ $(document).ready(function() {
             <thead>
                 <tr style="white-space: nowrap">
                     <th>Document No.</th>
-					<th>Employee Name</th>
+                    <th>Prepared By</th>
 					<th>Reference No.</th>
-					<th>Project Name</th>
-					<th>Current Approver</th>
-					<th>Date Created</th>
-					<th>Date Submitted</th>
-					<th>Date Approved</th>
-					<th>Status</th>
-					<th>Remarks</th>
+                    <th>Project Name</th>
+                    <th>Description</th>
+                    <th>Current Approver</th>
+                    <th>Date Created</th>
+                    <th>Date Submitted</th>
+                    <th>Date Approved</th>
+                    <th>Status</th>
+                    <th>Remarks</th>
                 </tr>
             </thead>
             <tbody>`;
@@ -363,18 +387,20 @@ $(document).ready(function() {
 				documentType,
 				documentID,
 				purchaseRequestID,
+				inventoryValidationID,
 				approversID,
 				approversDate,
 				bidRecapStatus,
 				bidRecapRemarks,
+				bidRecapReason,
 				submittedAt,
 				createdAt,
 			} = item;
-			let referenceNumber = getFormCode("IVR",moment(createdAt),purchaseRequestID);
+			let referenceNumber = getFormCode("IVR",moment(createdAt),inventoryValidationID);
 			let remarks       = bidRecapRemarks ? bidRecapRemarks : "-";
 			let dateCreated   = moment(createdAt).format("MMMM DD, YYYY hh:mm:ss A");
 			let dateSubmitted = submittedAt ? moment(submittedAt).format("MMMM DD, YYYY hh:mm:ss A") : "-";
-			let dateApproved  = bidRecapStatus == 2 ? approversDate.split("|") : "-";
+			let dateApproved  = bidRecapStatus == 2 || bidRecapStatus == 5 ? approversDate.split("|") : "-";
 			if (dateApproved !== "-") {
 				dateApproved = moment(dateApproved[dateApproved.length - 1]).format("MMMM DD, YYYY hh:mm:ss A");
 			}
@@ -399,6 +425,7 @@ $(document).ready(function() {
 					</div>
 					<small style="color:#848482;">${projectListCode || '-'}</small>
 				</td>
+				<td>${bidRecapReason ||  "-"}</td>
                 <td>
                     ${employeeFullname(getCurrentApprover(approversID, approversDate, bidRecapStatus, true))}
                 </td>
@@ -426,7 +453,7 @@ $(document).ready(function() {
 
 
     // ----- FORM BUTTONS -----
-	function formButtons(data = false, isRevise = false) {
+	function formButtons(data = false, isRevise = false, isFromCancelledDocument = false) {
 		let button = "";
 		if (data) {
 			let {
@@ -444,29 +471,31 @@ $(document).ready(function() {
 					// DRAFT
 					button = `
 					<button 
-						class="btn btn-submit" 
+						class="btn btn-submit px-5 p-2" 
 						id="btnSubmit" 
-						bidRecapID="${bidRecapID}"
+						bidRecapID="${encryptString(bidRecapID)}"
 						code="${getFormCode("BRF", createdAt, bidRecapID)}"
-						revise=${isRevise}><i class="fas fa-paper-plane"></i>
+						revise=${isRevise} 
+						cancel="${isFromCancelledDocument}"><i class="fas fa-paper-plane"></i>
 						Submit
 					</button>`;
 
 					if (isRevise) {
 						button += `
 						<button 
-							class="btn btn-cancel" 
-							bidRecapID="${bidRecapID}"
+							class="btn btn-cancel btnCancel px-5 p-2" 
 							id="btnCancel"
-							revise="${isRevise}"><i class="fas fa-ban"></i> 
+							bidRecapID="${encryptString(bidRecapID)}"
+							code="${getFormCode("BRF", createdAt, bidRecapID)}"
+							revise="${isRevise}" cancel="${isFromCancelledDocument}><i class="fas fa-ban"></i> 
 							Cancel
 						</button>`;
 					} else {
 						button += `
 						<button 
-							class="btn btn-cancel"
+							class="btn btn-cancel px-5 p-2"
 							id="btnCancelForm" 
-							bidRecapID="${bidRecapID}"
+							bidRecapID="${encryptString(bidRecapID)}"
 							code="${getFormCode("BRF", createdAt, bidRecapID)}"
 							revise=${isRevise}><i class="fas fa-ban"></i> 
 							Cancel
@@ -479,41 +508,66 @@ $(document).ready(function() {
 					if (!isOngoing) {
 						button = `
 						<button 
-							class="btn btn-cancel"
+							class="btn btn-cancel px-5 p-2"
 							id="btnCancelForm" 
-							bidRecapID="${bidRecapID}"
+							bidRecapID="${encryptString(bidRecapID)}"
 							code="${getFormCode("BRF", createdAt, bidRecapID)}"
 							status="${bidRecapStatus}"><i class="fas fa-ban"></i> 
 							Cancel
 						</button>`;
 					}
+				} else if(bidRecapStatus == 2){
+					// DROP
+					button = `
+					<button type="button" 
+						class="btn btn-cancel px-5 p-2"
+						id="btnDrop" 
+						bidRecapID="${encryptString(bidRecapID)}"
+						code="${getFormCode("BRF", createdAt, bidRecapID)}"
+						status="${bidRecapStatus}"><i class="fas fa-ban"></i> 
+						Drop
+					</button>`;
 				} else if (bidRecapStatus == 3) {
 					// DENIED - FOR REVISE
-						if(!isRevised(bidRecapID)){
+						if(!isDocumentRevised(bidRecapID)){
 							button = `
 							<button
-								class="btn btn-cancel"
+								class="btn btn-cancel px-5 p-2"
 								id="btnRevise" 
 								bidRecapID="${encryptString(bidRecapID)}"
 								code="${getFormCode("BRF", createdAt, bidRecapID)}"
-								status="${bidRecapStatus}"><i class="fas fa-clone"></i>
+								status="${bidRecapStatus}" ><i class="fas fa-clone"></i>
 								Revise
 							</button>`;
 						}
+				} else if (bidRecapStatus == 4) {
+					// CANCELLED - FOR REVISE
+					if (!isDocumentRevised(bidRecapID)) {
+						button = `
+						<button
+							class="btn btn-cancel px-5 p-2"
+							id="btnRevise" 
+							bidRecapID="${encryptString(bidRecapID)}"
+							code="${getFormCode("BRF", createdAt, bidRecapID)}"
+							status="${bidRecapStatus}"
+							cancel="true"><i class="fas fa-clone"></i>
+							Revise
+						</button>`;
+					}
 				}
 			} else {
 				if (bidRecapStatus == 1) {
 					if (isImCurrentApprover(approversID, approversDate)) {
 						button = `
 						<button 
-							class="btn btn-submit" 
+							class="btn btn-submit px-5 p-2" 
 							id="btnApprove" 
 							bidRecapID="${encryptString(bidRecapID)}"
 							code="${getFormCode("BRF", createdAt, bidRecapID)}"><i class="fas fa-paper-plane"></i>
 							Approve
 						</button>
 						<button 
-							class="btn btn-cancel"
+							class="btn btn-cancel px-5 p-2"
 							id="btnReject" 
 							bidRecapID="${encryptString(bidRecapID)}"
 							code="${getFormCode("BRF", createdAt, bidRecapID)}"><i class="fas fa-ban"></i> 
@@ -525,11 +579,11 @@ $(document).ready(function() {
 		} else {
 			button = `
 			<button 
-				class="btn btn-submit" 
+				class="btn btn-submit px-5 p-2" 
 				id="btnSubmit"><i class="fas fa-paper-plane"></i> Submit
 			</button>
 			<button 
-				class="btn btn-cancel" 
+				class="btn btn-cancel btnCancel px-5 p-2" 
 				id="btnCancel"><i class="fas fa-ban"></i> 
 				Cancel
 			</button>`;
@@ -543,10 +597,10 @@ $(document).ready(function() {
     function getReferenceList(id = null, display = false) {
 		let existIVR = [], html = ``;
 		let data = [];
-		let invValidationData = getTableData("ims_inventory_validation_tbl", "","inventoryValidationStatus = '2'");
+		let invValidationData = getTableData("ims_inventory_validation_tbl","","inventoryValidationStatus = '2'");
 		let bidRecapData = getTableData("ims_bid_recap_tbl");
 		bidRecapData.map(items=>{
-			id ? "" : existIVR.push(items.purchaseRequestID);
+			id ? "" : existIVR.push(items.inventoryValidationID);
 		});
 		html += invValidationData.filter(items => !existIVR.includes(items.inventoryValidationID)).map(items=>{
 			var projectList   = getTableData(
@@ -570,7 +624,8 @@ $(document).ready(function() {
 					clientname				=	"-",
 					address					=	"-",
 				} = projectList.length > 0 && data;
-			return `<option value            = "${items.inventoryValidationID }" 
+			return `<option value            = "${items.inventoryValidationID}"
+						purchaserequest 	 = "${items.purchaseRequestID}"
 						projectid 			 = "${projectid}"
 						projectcode          = "${projectcode}"
 						projectname          = "${projectname}"
@@ -884,12 +939,14 @@ $(document).ready(function() {
 	// ----- SELECT PROJECT LIST -----
     $(document).on("change", "[name=documentID]", function() {
 		const id 			= $(this).val();
+		const purchaserequest = $('option:selected', this).attr("purchaserequest");
 		const projectid 	= $('option:selected',this).attr("projectid");
         const projectcode   = $('option:selected', this).attr("projectcode");
         const projectname   = $('option:selected', this).attr("projectname");
         const clientcode    = $('option:selected', this).attr("clientcode");
         const clientname    = $('option:selected', this).attr("clientname");
         const address       = $('option:selected', this).attr("address");
+		$("[name=projectCode]").attr("purchaserequest",purchaserequest);
 		$("[name=projectCode]").attr("projectid",projectid);
         $("[name=projectCode]").val(projectcode);
         $("[name=projectName]").val(projectname);
@@ -1048,7 +1105,7 @@ $(document).ready(function() {
 	// END GETTING THE GRAND TOTAL OF TWO CATEGORIES
 
     // ----- FORM CONTENT -----
-	function formContent(data = false, readOnly = false, isRevise = false) {
+	function formContent(data = false, readOnly = false, isRevise = false, isFromCancelledDocument = false) {
 		$("#page_content").html(preloader);
 		readOnly = isRevise ? false : readOnly;
 		let {
@@ -1057,6 +1114,7 @@ $(document).ready(function() {
 			employeeID          = "",
 			projectID           = "",
 			purchaseRequestID 	= "",
+			inventoryValidationID = "",
             documentType        = "",
 			bidRecapReason   	= "",
 			bidRecapRemarks  	= "",
@@ -1072,8 +1130,8 @@ $(document).ready(function() {
 		let requestProjectItems = "", requestCompanyItems = "";
 		
 		if (bidRecapID) {
-            requestProjectItems = requestItemData(purchaseRequestID, "project", readOnly, `bidRecapID = '${bidRecapID}'`);
-            requestCompanyItems = requestItemData(purchaseRequestID, "company", readOnly, `bidRecapID = '${bidRecapID}'`);
+            requestProjectItems = requestItemData(inventoryValidationID, "project", readOnly, `bidRecapID = '${bidRecapID}'`);
+            requestCompanyItems = requestItemData(inventoryValidationID, "company", readOnly, `bidRecapID = '${bidRecapID}'`);
 		}
 		
 		let projectCode = "", projectName="", clientCode="",clientName="", clientAddress="";
@@ -1124,9 +1182,10 @@ $(document).ready(function() {
 
 		readOnly ? preventRefresh(false) : preventRefresh(true);
 
-		$("#btnBack").attr("bidRecapID", bidRecapID);
+		$("#btnBack").attr("bidRecapID", encryptString(bidRecapID));
 		$("#btnBack").attr("status", bidRecapStatus);
 		$("#btnBack").attr("employeeID", employeeID);
+		$("#btnBack").attr("cancel", isFromCancelledDocument);
 
 		let disabled = readOnly ? "disabled" : "";
 		
@@ -1134,7 +1193,7 @@ $(document).ready(function() {
 		let tableProjectRequestItemsName = !disabled ? "tableProjectRequestItems" : "tableProjectRequestItems0";
 		let tableCompanyRequestItemsName = !disabled ? "tableCompanyRequestItems" : "tableCompanyRequestItems0";
 
-		let button = formButtons(data, isRevise);
+		let button = formButtons(data, isRevise, isFromCancelledDocument);
 
 		let reviseDocumentNo    = isRevise ? bidRecapID : reviseBidRecapID;
 		let documentHeaderClass = isRevise || reviseBidRecapID ? "col-lg-4 col-md-4 col-sm-12 px-1" : "col-lg-2 col-md-6 col-sm-12 px-1";
@@ -1233,7 +1292,7 @@ $(document).ready(function() {
 						${bidRecapID == "" ? `` : `disabled`}
 						>
                         <option selected disabled>Select Reference No.</option>
-                        ${getReferenceList(purchaseRequestID,readOnly)}
+                        ${getReferenceList(inventoryValidationID,readOnly)}
                     </select>
                     <div class="d-block invalid-feedback" id="invalid-documentID"></div>
                 </div>
@@ -1241,7 +1300,7 @@ $(document).ready(function() {
             <div class="col-md-4 col-sm-12">
                 <div class="form-group">
                     <label>Project Code</label>
-                    <input type="text" class="form-control" name="projectCode" projectid="${projectID||""}" disabled value="${projectCode||"-"}">
+                    <input type="text" class="form-control" name="projectCode" purchaserequest="${purchaseRequestID || ""}" projectid="${projectID||""}" disabled value="${projectCode||"-"}">
                 </div>
             </div>
             <div class="col-md-4 col-sm-12">
@@ -1288,7 +1347,7 @@ $(document).ready(function() {
             </div>
 			<div class="col-md-12 col-sm-12">
                 <div class="form-group">
-                    <label>Reason ${!disabled ? "<code>*</code>" : ""}</label>
+                    <label>Description ${!disabled ? "<code>*</code>" : ""}</label>
                     <textarea class="form-control validate"
                         data-allowcharacters="[a-z][A-Z][0-9][ ][.][,][-][()]['][/][&]"
                         minlength="1"
@@ -1388,6 +1447,17 @@ $(document).ready(function() {
 			initAll();
 			updateInventoryItemOptions();
 			projectID && projectID != 0 && $("[name=projectID]").trigger("change");
+			// ----- NOT ALLOWED FOR UPDATE -----
+			if (!allowedUpdate) {
+				$("#page_content").find(`input, select, textarea`).each(function() {
+					if (this.type != "search") {
+						$(this).attr("disabled", true);
+					}
+				})
+				$('#btnBack').attr("status", "2");
+				$(`#btnSubmit, #btnRevise, #btnCancel, #btnCancelForm, .btnAddRow, .btnDeleteRow`).hide();
+			}
+			// ----- END NOT ALLOWED FOR UPDATE -----
 			return html;
 		}, 300);
 	}
@@ -1395,7 +1465,7 @@ $(document).ready(function() {
 
 
     // ----- PAGE CONTENT -----
-	function pageContent(isForm = false, data = false, readOnly = false, isRevise = false) {
+	function pageContent(isForm = false, data = false, readOnly = false, isRevise = false, isFromCancelledDocument = false) {
 		$("#page_content").html(preloader);
 		if (!isForm) {
 			preventRefresh(false);
@@ -1417,9 +1487,9 @@ $(document).ready(function() {
 			myFormsContent();
 			updateURL();
 		} else {
-			headerButton(false, "", isRevise);
+			headerButton(false, "", isRevise, isFromCancelledDocument);
 			headerTabContent(false);
-			formContent(data, readOnly, isRevise);
+			formContent(data, readOnly, isRevise, isFromCancelledDocument);
 		}
 	}
 	viewDocument();
@@ -1468,9 +1538,11 @@ $(document).ready(function() {
 		data["updatedBy"]             = sessionID;
 
 		if (currentStatus == "0" && method != "approve") {
-		    var purchaseRequestID 		  = $("[name=documentID]").val() || null;	 
+			var inventoryValidationID 	  = $("[name=documentID]").val() || null;	
+		    var purchaseRequestID 		  = $("[name=projectCode]").attr("purchaserequest") || null;	 
 			data["employeeID"]            = sessionID;
 			data["projectID"]             = $("[name=projectCode]").attr("projectid") || null;
+			data["inventoryValidationID"] = inventoryValidationID;
 			data["purchaseRequestID"] 	  = purchaseRequestID;
 			data["bidRecapReason"] 	  	  = $("[name=bidRecapReason]").val()?.trim();
 			data["bidRecapProjectTotal"]  = $("#bidRecapProjectTotal").text().replaceAll("₱","").replaceAll(",","");;
@@ -1542,7 +1614,7 @@ $(document).ready(function() {
 
     // ----- OPEN EDIT FORM -----
 	$(document).on("click", ".btnEdit", function () {
-		const id = $(this).attr("id");
+		const id = decryptString($(this).attr("id"));
 		viewDocument(id);
 	});
 	// ----- END OPEN EDIT FORM -----
@@ -1550,7 +1622,7 @@ $(document).ready(function() {
 
     // ----- VIEW DOCUMENT -----
 	$(document).on("click", ".btnView", function () {
-		const id = $(this).attr("id");
+		const id = decryptString($(this).attr("id"));
 		viewDocument(id, true);
 	});
 	// ----- END VIEW DOCUMENT -----
@@ -1558,28 +1630,36 @@ $(document).ready(function() {
 
     // ----- VIEW DOCUMENT -----
 	$(document).on("click", "#btnRevise", function () {
-		const id = $(this).attr("bidRecapID");
-		viewDocument(id, false, true);
+		const id = decryptString($(this).attr("bidRecapID")); 
+		const fromCancelledDocument = $(this).attr("cancel") == "true";
+		viewDocument(id, false, true, fromCancelledDocument);
 	});
 	// ----- END VIEW DOCUMENT -----
 
 
 	// ----- SAVE CLOSE FORM -----
 	$(document).on("click", "#btnBack", function () {
-		const id         = $(this).attr("bidRecapID");
-		const revise     = $(this).attr("revise") == "true";
-		const employeeID = $(this).attr("employeeID");
-		const feedback   = $(this).attr("code") || getFormCode("BRF", dateToday(), id);
-		const status     = $(this).attr("status");
+		const id         				= decryptString($(this).attr("bidRecapID"));
+		const isFromCancelledDocument 	= $(this).attr("cancel") == "true";
+		const revise     				= $(this).attr("revise") == "true";
+		const employeeID 				= $(this).attr("employeeID");
+		const feedback   				= $(this).attr("code") || getFormCode("BRF", dateToday(), id);
+		const status     				= $(this).attr("status");
 
 		if (status != "false" && status != 0) {
 			
 			if (revise) {
-				const action = revise && "insert" || (id && feedback ? "update" : "insert");
+				const action = revise && !isFromCancelledDocument &&  "insert" || (id && feedback ? "update" : "insert");
 				const data   = getbidRecapData(action, "save", "0", id);
 				data["bidRecapStatus"] 	=	0;
-				data["reviseBidRecapID"] = id;
-				delete data["bidRecapID"]; 
+				if(!isFromCancelledDocument){
+					data["reviseBidRecapID"] = id;
+					delete data["bidRecapID"]; 
+				}else{
+					data["bidRecapID"] 	= id;
+					delete data["action"];
+					data["action"] 	= "update"; 
+				}
 	
 				savebidRecapID(data, "save", null, pageContent);
 			} else {
@@ -1604,15 +1684,22 @@ $(document).ready(function() {
 
     // ----- SAVE DOCUMENT -----
 	$(document).on("click", "#btnSave, #btnCancel", function () {
-		const id       = $(this).attr("bidRecapID");
-		const revise   = $(this).attr("revise") == "true";
-		const feedback = $(this).attr("code") || getFormCode("BRF", dateToday(), id);
-		const action   = revise && "insert" || (id && feedback ? "update" : "insert");
-		const data     = getbidRecapData(action, "save", "0", id);
+		const id       					= decryptString($(this).attr("bidRecapID"));
+		const isFromCancelledDocument 	= $(this).attr("cancel") == "true";
+		const revise   					= $(this).attr("revise") == "true";
+		const feedback 					= $(this).attr("code") || getFormCode("BRF", dateToday(), id);
+		const action   					= revise && !isFromCancelledDocument && "insert" || (id && feedback ? "update" : "insert");
+		const data     					= getbidRecapData(action, "save", "0", id);
 		data["bidRecapStatus"] 	=	0;
 		if (revise) {
-			data["reviseBidRecapID"] = id;
-			delete data["bidRecapID"];  
+			if(!isFromCancelledDocument){
+				data["reviseBidRecapID"] = id;
+				delete data["bidRecapID"]; 
+			}else{
+				data["bidRecapID"] 	= id;
+				delete data["action"];
+				data["action"] 	= "update"; 
+			}
 		}	
 		savebidRecapID(data, "save", null, pageContent);
 	});
@@ -1621,20 +1708,20 @@ $(document).ready(function() {
 
     // ----- SUBMIT DOCUMENT -----
 	$(document).on("click", "#btnSubmit", function () {
-		const id           = $(this).attr("bidRecapID");
-		const revise       = $(this).attr("revise") == "true";
-		const validate     = validateForm("form_bid_recap");
+		const id           				= decryptString($(this).attr("bidRecapID"));
+		const isFromCancelledDocument 	= $(this).attr("cancel") == "true";
+		const revise       				= $(this).attr("revise") == "true";
+		const validate     				= validateForm("form_bid_recap");
 
 		if (validate) {
-			const action = revise && "insert" || (id ? "update" : "insert");
+			const action = revise && !isFromCancelledDocument && "insert" || (id ? "update" : "insert");
 			const data   = getbidRecapData(action, "submit", "1", id);
 
 			if (revise) {
-				data["reviseBidRecapID"] = id;
-				delete data["bidRecapID"];  
-				
-				// data.append("reviseBidRecapID", id);
-				// data.delete("bidRecapID");
+				if(!isFromCancelledDocument){
+					data["reviseBidRecapID"] = id;
+					delete data["bidRecapID"];  
+				}
 			}
 
 			let approversID = "", approversDate = "";
@@ -1671,7 +1758,7 @@ $(document).ready(function() {
 
     // ----- CANCEL DOCUMENT -----
 	$(document).on("click", "#btnCancelForm", function () {
-		const id     = $(this).attr("bidRecapID");
+		const id     = decryptString($(this).attr("bidRecapID"));
 		const status = $(this).attr("status");
 		const action = "update";
 		const data   = getbidRecapData(action, "cancelform", "4", id, status);
@@ -1738,7 +1825,7 @@ $(document).ready(function() {
 
     // ----- REJECT DOCUMENT -----
 	$(document).on("click", "#btnReject", function () {
-		const id       = $(this).attr("bidRecapID");
+		const id       = decryptString($(this).attr("bidRecapID"));
 		const feedback = $(this).attr("code") || getFormCode("BRF", dateToday(), id);
 
 		$("#modal_bid_recap_content").html(preloader);
@@ -1782,13 +1869,13 @@ $(document).ready(function() {
 				let employeeID      = tableData[0].employeeID;
 
 				let data = {};
-				data["action"]						= "update";
-				data["method"]						= "deny";
+				data["action"]			= "update";
+				data["method"]			= "deny";
 				data["bidRecapID"]		= id;
-				data["approversStatus"]				= updateApproveStatus(approversStatus, 3);
-				data["approversDate"]				= updateApproveDate(approversDate);
+				data["approversStatus"]	= updateApproveStatus(approversStatus, 3);
+				data["approversDate"]	= updateApproveDate(approversDate);
 				data["bidRecapRemarks"]	= $("[name=bidRecapRemarks]").val()?.trim();
-				data["updatedBy"]					= sessionID;
+				data["updatedBy"]		= sessionID;
 
 				let notificationData = {
 					moduleID:                40,
@@ -1805,6 +1892,20 @@ $(document).ready(function() {
 		} 
 	});
 	// ----- END REJECT DOCUMENT -----
+
+	// ----- DROP DOCUMENT -----
+	$(document).on("click", "#btnDrop", function() {
+		const bidRecapID = decryptString($(this).attr("bidRecapID"));
+		const feedback       = $(this).attr("code") || getFormCode("BRF", dateToday(), id);
+
+		const id = decryptString($(this).attr("bidRecapID"));
+		let data = {
+			bidRecapID : id, action:"update", method: "drop", updatedBy: sessionID
+		};
+
+		savebidRecapID(data, "drop", null, pageContent);
+	})
+	// ----- END DROP DOCUMENT -----
 
 
     // ----- NAV LINK -----
@@ -2048,6 +2149,11 @@ function getConfirmation(method = "submit") {
 			swalText  = "Are you sure to cancel this document?";
 			swalImg   = `${base_url}assets/modal/cancel.svg`;
 			break;
+		case "drop":
+			swalTitle = `DROP ${title.toUpperCase()}`;
+			swalText  = "Are you sure to drop this document?";
+			swalImg   = `${base_url}assets/modal/drop.svg`;
+			break;
 		default:
 			swalTitle = `CANCEL ${title.toUpperCase()}`;
 			swalText  = "Are you sure that you want to cancel this process?";
@@ -2103,7 +2209,9 @@ function savebidRecapID(data = null, method = "submit", notificationData = null,
 							swalTitle = `${getFormCode("BRF", dateCreated, insertedID)} approved successfully!`;
 						} else if (method == "deny") {
 							swalTitle = `${getFormCode("BRF", dateCreated, insertedID)} denied successfully!`;
-						}	
+						} else if (method == "drop") {
+							swalTitle = `${getFormCode("BRF", dateCreated, insertedID)} dropped successfully!`;
+						}
 		
 						if (isSuccess == "true") {
 							setTimeout(() => {

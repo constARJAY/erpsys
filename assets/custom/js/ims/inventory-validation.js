@@ -1359,7 +1359,7 @@ $(document).ready(function() {
         <div class="row" id="form_inventory_validation">
             <div class="col-md-4 col-sm-12">
                 <div class="form-group">
-                    <label>Employee Name</label>
+                    <label>Prepared By</label>
                     <input type="text" class="form-control" disabled value="${employeeFullname||"-"}">
                 </div>
             </div>
@@ -1377,7 +1377,7 @@ $(document).ready(function() {
             </div>
             <div class="col-md-12 col-sm-12">
                 <div class="form-group">
-                    <label>Reason ${!disabled ? "<code>*</code>" : ""}</label>
+                    <label>Description ${!disabled ? "<code>*</code>" : ""}</label>
                     <textarea class="form-control validate"
                         data-allowcharacters="[a-z][A-Z][0-9][ ][.][,][-][()]['][/][&]"
                         minlength="1"
@@ -1748,7 +1748,7 @@ $(document).ready(function() {
 		const isFromCancelledDocument 	= $(this).attr("cancel") == "true";
 		const revise   					= $(this).attr("revise") == "true";
 		const feedback 					= $(this).attr("code") || getFormCode("IVR", dateToday(), id);
-		const action   					= revise && "insert" || (id && feedback ? "update" : "insert");
+		const action   					= revise && !isFromCancelledDocument && "insert" || (id && feedback ? "update" : "insert");
 		const data     					= getinventoryValidationData(action, "save", "0", id);
 		data["inventoryValidationStatus"] 	=	0;
 		if (revise) {
@@ -1777,7 +1777,7 @@ $(document).ready(function() {
 		removeIsValid("#tableCompanyRequestItems");
 
 		if (validate && validateIssuance) {
-			const action = revise && "insert" || (id ? "update" : "insert");
+			const action = revise && !isFromCancelledDocument && "insert" || (id ? "update" : "insert");
 			const data   = getinventoryValidationData(action, "submit", "1", id);
 
 			if (revise) {

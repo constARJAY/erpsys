@@ -42,8 +42,6 @@ $(document).on("click", "#btnAddRow",function(){
 
 $(document).on("change","[name=inventoryVendorID]",function(){
     let vendorcode  = $('option:selected', this).attr("vendorcode");
-    // console.log(vendorcode);
-    // console.log(this);
     let datetoday   = moment(new Date()).format("MMMM DD, YYYY hh:mm:ss A");
     $(this).closest("tr").find(".vendorcode").text(vendorcode);
     $(this).closest("tr").find(".dateupdated").text(datetoday);
@@ -53,10 +51,8 @@ $(document).on("change","[name=inventoryVendorID]",function(){
 });
 
 
-$(document).on("keypress","[name=vendorCurrentPrice]",function(){
+$(document).on("keyup","[name=vendorCurrentPrice]",function(){
     let vendorcode  = $('option:selected', this).attr("vendorcode");
-    // console.log(vendorcode);
-    // console.log(this);
     let datetoday   = moment(new Date()).format("MMMM DD, YYYY hh:mm:ss A");
     $(this).closest("tr").find(".vendorcode").text(vendorcode);
     $(this).closest("tr").find(".dateupdated").text(datetoday);
@@ -136,6 +132,8 @@ $(document).on("click",".editPriceList", function(){
     $("#modal_price_list_content").html(preloader);
     let modal_price_list_content    =   `   
                                             <div class="modal-body">  
+                                            <h5 class="font-weight-bold">${tableData[0].itemName}</h5>
+                                            <p><small class="text-danger">${getFormCode("ITM", tableData[0].createdAt, tableData[0].itemID)}</small></p>
                                                 <form id="modal_price_list_form"> 
                                                     ${getItemPriceList(itemID)}
                                                 </form>
@@ -144,12 +142,7 @@ $(document).on("click",".editPriceList", function(){
                                                 <button class="btn btn-update" id="btnUpdate" data-itemid="${itemID}"><i class="fas fa-save"></i>&nbsp;${buttonText}</button>
                                                 <button class="btn btn-cancel btnCancel"><i class="fas fa-ban"></i>&nbsp;Cancel</button>
                                             </div>  
-                                            `;
-        // if(){
-        //     $("#btnUpdate").html(`<i class="fas fa-save"></i>&nbsp;Save`);
-        // }else{
-        //     $("#btnUpdate").html(`<i class="fas fa-save"></i>&nbsp;Save`);
-        // }                                 
+                                            `;                         
     setTimeout(function(){
         $("#modal_price_list_content").html(modal_price_list_content);
         getVendorOptions();
@@ -279,7 +272,6 @@ function reInit(id){
     initDataTables();
     tableContent(classificationID);
     $("#modal_price_list").modal("hide");
-    console.log(id);
     setTimeout(() => {
         $(".price-list-description-row").hide();
         $("#priceListRow"+id).addClass("show").removeClass("hide");
@@ -326,11 +318,11 @@ function initDataTables() {
 				scrollCollapse: true,
 				columnDefs: [
 					{ targets: 0,  width: "5%"},
-					{ targets: 1,  width: 150 },
+					{ targets: 1,  width: 100 },
 					{ targets: 2,  width: 100 },
 					{ targets: 3,  width: 100 },
-                    { targets: 4,  width: 100 },
-                    { targets: 5,  width: "7%" },
+                    { targets: 4,  width: 120 },
+                    { targets: 5,  width: "10%" },
 				],
 			});
 }
@@ -369,6 +361,15 @@ function tableContent(classificationID){
                             if(priceListData.length < 1){
                                 priceListDescription += "<div class='w-100 text-left'>-</div>";
                             }else{
+                                let firstColumn = "";
+                                 priceListData.filter(items=> items.preferred != 0).map((priceListItems, index)=>{
+                                   
+                                        firstColumn += `   <div class="col-3 py-2 text-left">${priceListItems["inventoryVendorCode"]}</div>
+                                                                <div class="col-3 py-2 text-left">${priceListItems["inventoryVendorName"]}</div>
+                                                                <div class="col-3 py-2 text-right">${formatAmount(priceListItems["vendorCurrentPrice"], true)}</div>
+                                                                <div class="col-3 py-2 text-left">${moment(priceListItems["updatedAt"]).format("MMMM DD, YYYY hh:mm:ss A")}</div>`;
+                                });
+                                
                                 priceListDescription += `   <div class="container-fluid">
                                                                 <div class="row">
                                                                     <div class="col-3 text-left border rounded-left py-2 font-weight-bold" style="border-color:${isEven?"#f2f2f2":"white"} !important">Vendor Code</div>
@@ -376,19 +377,26 @@ function tableContent(classificationID){
                                                                     <div class="col-3 text-left border py-2 font-weight-bold" style="border-color:${isEven?"#f2f2f2":"white"} !important">Current Price</div>
                                                                     <div class="col-3 text-left border rounded-right py-2 font-weight-bold" style="border-color:${isEven?"#f2f2f2":"white"} !important">Date Updated</div>
                                                                 </div>
+                                                                <div class="row">
+                                                                    ${firstColumn}
+                                                                </div>
                                                                 <div class="row price-list-description-row hide" id="priceListRow${item.itemID}">
                                                                        `;
-                                                priceListData.map(priceListItems=>{
-                                                    priceListDescription += `   <div class="col-3 py-2 text-left">${priceListItems["inventoryVendorCode"]}</div>
-                                                                                <div class="col-3 py-2 text-left">${priceListItems["inventoryVendorName"]}</div>
-                                                                                <div class="col-3 py-2 text-right">${formatAmount(priceListItems["vendorCurrentPrice"], true)}</div>
-                                                                                <div class="col-3 py-2 text-left">${moment(priceListItems["updatedAt"]).format("MMMM DD, YYYY hh:mm:ss A")}</div>`;
-                                                                });
+                                                priceListData.map((priceListItems, index)=>{
+                                                        if(index > 1){
+                                                            priceListDescription += `   <div class="col-3 py-2 text-left">${priceListItems["inventoryVendorCode"]}</div>
+                                                                                        <div class="col-3 py-2 text-left">${priceListItems["inventoryVendorName"]}</div>
+                                                                                        <div class="col-3 py-2 text-right">${formatAmount(priceListItems["vendorCurrentPrice"], true)}</div>
+                                                                                        <div class="col-3 py-2 text-left">${moment(priceListItems["updatedAt"]).format("MMMM DD, YYYY hh:mm:ss A")}</div>`;
+                                                        }
+                                                    });
+                                let button = priceListData.length > 1 ? `<button class="btn btn-default btn-add waves-effect d-flex align-items-center priceListRow-show-more" id="showMore${item.itemID}" target="#priceListRow${item.itemID}" type="button">
+                                                                            <i class="zmdi zmdi-caret-down"></i>&nbsp; <span>Show More</span>
+                                                                        </button>`: ``;
+                               
                                 priceListDescription +=`        </div>   
                                                                 <div class="w-100 d-flex justify-content-end">
-                                                                    <button class="btn btn-default btn-add waves-effect d-flex align-items-center priceListRow-show-more" id="showMore${item.itemID}" target="#priceListRow${item.itemID}" type="button">
-                                                                        <i class="zmdi zmdi-caret-down"></i>&nbsp; <span>Show More</span>
-                                                                    </button>
+                                                                    ${button}
                                                                 </div>    
                                                             </div>`;  
                             }
@@ -441,29 +449,41 @@ function classificationData(classificationID = false){
 
 function getVendorOptions(){
     let vendorListData = getTableData("ims_inventory_vendor_tbl","","inventoryVendorStatus='1'");
-    let vendorListArr = [], vendorElementID = [];
+    let vendorListArr = [], vendorElementID = [], existVendor = []; 
     $(".select2[name=inventoryVendorID]").each(function(){
         vendorListArr.push($(this).val());
         vendorElementID.push(`#${this.id}[name=inventoryVendorID]`);
         // $(this).val() && $(this).trigger("change");
     });
-    console.log("asdasd");
-    console.log(vendorListArr);
+    
     vendorElementID.map((element,index)=>{
-            let html  =  `<option ${vendorListArr[index] || "selected"} disabled>Select Vendor</option>`;
-                html += vendorListData.filter(item => vendorListArr[index] || !vendorListArr.includes(item.inventoryVendorID)).map(item =>{
-                return `
-                    <option 
-                        value        = "${item.inventoryVendorID}" 
-                        vendorcode   = "${item.inventoryVendorCode}"
-                        vendorname   = "${item.inventoryVendorName}"
-                        ${item.inventoryVendorID == vendorListArr[index] && "selected"}>
-                        ${item.inventoryVendorName} 
-                    </option>`;
-            })
+            let html  =  `<option ${vendorListArr[index] || "selected" } disabled>Select Vendor</option>`;
+            html += vendorListData.filter(item => item.inventoryVendorID === vendorListArr[index]).map(items=>{
+                    return `
+                            <option 
+                                value        = "${items.inventoryVendorID}" 
+                                vendorcode   = "${items.inventoryVendorCode}"
+                                vendorname   = "${items.inventoryVendorName}" selected>
+                                ${items.inventoryVendorName} 
+                            </option>
+                            `;
+            });
+            vendorListData.filter(item => !vendorListArr.includes(item.inventoryVendorID)).map(item =>{
+                                html +=  `
+                                <option 
+                                    value        = "${item.inventoryVendorID}" 
+                                    vendorcode   = "${item.inventoryVendorCode}"
+                                    vendorname   = "${item.inventoryVendorName}"
+                                    ${item.inventoryVendorID == vendorListArr[index] && "selected"}>
+                                    ${item.inventoryVendorName} 
+                                </option>`;
+                        
+                });
+
+            
+            
             $(element).html(html);
     })
-    
 }
 
 function getItemPriceList(itemID){
@@ -474,10 +494,10 @@ function getItemPriceList(itemID){
                                     <tr>
                                         <th class="text-center align-items-center"><input type="checkbox" id="checkAll"></th>
                                         <th>Vendor Code</th>
-                                        <th>Vendor Name</th>
-                                        <th>Current Price</th>
+                                        <th>Vendor Name <code>*</code></th>
+                                        <th>Current Price <code>*</code></th>
                                         <th>Date Updated</th>
-                                        <th class="text-center">Preferred</th>
+                                        <th class="text-center">Preferred <code>*</code></th>
                                     </tr>
                                 </thead>
                                 <tbody id="tablePriceList-body" >`;
@@ -555,3 +575,20 @@ function getItemPriceList(itemID){
 function priceListSelect2(){
 	$(".select2[name=inventoryVendorID]").select2({ theme: "bootstrap" });
 }
+
+
+// ----- GET FORM CODE -----
+function getFormCode(str = null, date = null, id = 0) {
+	if (str && date) {
+		let codeID = id ? id.toString() : "0";
+		codeID =
+			codeID.length < 5 ? "0".repeat(5 - codeID.length) + codeID : codeID;
+		let codeDate = moment(date);
+		codeDate = codeDate.isValid()
+			? codeDate.format("YY")
+			: moment().format("YY");
+		return `${str}-${codeDate}-${codeID}`;
+	}
+	return null;
+}
+// ----- END GET FORM CODE -----

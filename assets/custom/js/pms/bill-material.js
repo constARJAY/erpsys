@@ -4,7 +4,6 @@ $(document).ready(function() {
 	const moduleApprover = getModuleApprover(39);
 	// ----- END MODULE APPROVER -----
 
-
 	// ---- GET EMPLOYEE DATA -----
 	const allEmployeeData = getAllEmployeeData();
 	const employeeData = (id) => {
@@ -708,7 +707,7 @@ $(document).ready(function() {
 					</button>`;
 				} else if (billMaterialStatus == 3) {
 					// DENIED - FOR REVISE
-					if(!isRevised(billMaterialID)){
+					if(!isDocumentRevised(billMaterialID)){
 						button = `
 						<button
 							class="btn btn-cancel"
@@ -1718,25 +1717,25 @@ $(document).ready(function() {
 					<div class="offset-lg-7 offset-xl-8 col-12 col-sm-12 col-lg-5 col-xl-4 col-xl-4 pt-3 pb-2">
 						<div class="row" style="font-size: 1.1rem; font-weight:bold">
 							<div class="col-6 col-lg-7 text-left">Personnel Total Cost:</div>
-							<div class="col-6 col-lg-5 text-right text-danger tableTotal personnelTotal" style="font-size: 1.05em">
+							<div class="col-6 col-lg-5 text-right tableTotal personnelTotal" style="font-size: 1.05em">
 								₱ 0.00
 							</div>
 						</div>
 						<div class="row" style="font-size: 1.1rem; font-weight:bold">
 							<div class="col-6 col-lg-7 text-left">Project Total Cost:</div>
-							<div class="col-6 col-lg-5 text-right text-danger tableTotal projectTotal" style="font-size: 1.05em">
+							<div class="col-6 col-lg-5 text-right tableTotal projectTotal" style="font-size: 1.05em">
 								₱ 0.00
 							</div>
 						</div>
 						<div class="row" style="font-size: 1.1rem; font-weight:bold">
 							<div class="col-6 col-lg-7 text-left">Company Total Cost:</div>
-							<div class="col-6 col-lg-5 text-right text-danger tableTotal companyTotal" style="font-size: 1.05em">
+							<div class="col-6 col-lg-5 text-right tableTotal companyTotal" style="font-size: 1.05em">
 								₱ 0.00
 							</div>
 						</div>
 						<div class="row pb-2" style="font-size: 1.1rem; font-weight:bold">
 							<div class="col-6 col-lg-7 text-left">Travel Total Cost:</div>
-							<div class="col-6 col-lg-5 text-right text-danger tableTotal travel grandTotal " style="font-size: 1.05em">
+							<div class="col-6 col-lg-5 text-right tableTotal travel grandTotal " style="font-size: 1.05em">
 								₱ 0.00
 							</div>
 						</div>
@@ -2047,7 +2046,7 @@ $(document).ready(function() {
 		const isFromCancelledDocument 	= $(this).attr("cancel") == "true";
 		const revise   					= $(this).attr("revise") == "true";
 		const feedback 					= $(this).attr("code") || getFormCode("PBR", dateToday(), id);
-		const action   					= revise && "insert" || (id && feedback ? "update" : "insert");
+		const action   					= revise && !isFromCancelledDocument && "insert" || (id && feedback ? "update" : "insert");
 		const data     					= getbillMaterialData(action, "save", "0", id);
 		data["billMaterialStatus"] 		= 0;
 		// data.append("billMaterialStatus", 0);
@@ -2084,7 +2083,7 @@ $(document).ready(function() {
 		removeIsValid("#tableTravelRequest");
 		removeIsValid("#tablePersonnelRequest");
 		if (validate) {
-			const action = revise && "insert" || (id ? "update" : "insert");
+			const action = revise && !isFromCancelledDocument && "insert" || (id ? "update" : "insert");
 			const data   = getbillMaterialData(action, "submit", "1", id);
 
 			if (revise) {

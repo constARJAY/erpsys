@@ -46,7 +46,7 @@ class CostEstimate_model extends CI_Model {
 
 
         foreach($data as $index => $item) {
-            if($item["designationID"] != 'undefined'){
+            if($item["designationID"] != 'undefined' && $item["designationID"] != 0 ){
                 $temp = [
                     "costEstimateID"        => $item["costEstimateID"],
                     "designationID"         => $item["designationID"],
@@ -57,7 +57,7 @@ class CostEstimate_model extends CI_Model {
                     "updatedBy"             => $item["updatedBy"],
                 ];
                 array_push($personnelData, $temp);
-            }elseif($item["travelDescription"] != 'undefined'){
+            }else if($item["travelDescription"] != 'undefined' && $item["travelDescription"] != ''){
                 $temp = [
                     "costEstimateID"        => $item["costEstimateID"],
                     "travelDescription"     => $item["travelDescription"],
@@ -67,7 +67,7 @@ class CostEstimate_model extends CI_Model {
                     "updatedBy"             => $item["updatedBy"],
                 ];
                 array_push($travelData, $temp);
-            }else{
+            }else if($item['itemID'] != "null" && $item['itemID'] != 'undefined' ){
                 $temp = [
                     "costEstimateID"        => $item["costEstimateID"],
                     "itemID"                => $item["itemID"],
@@ -82,16 +82,16 @@ class CostEstimate_model extends CI_Model {
                 ];
                 array_push($itemsData, $temp);
             }
-        }
-
+        } 
+        // echo count($personnelData)."+".count($travelData)."+".count($itemsData);
         $perssonelQuery = count($personnelData)   > 0 ? $this->savePersonnel($personnelData) : true; 
-        $travelQuery    = count($travelData)      > 0 ? $this->db->insert_batch("ims_travel_request_tbl", $travelData)        : true;
-        $itemsQuery     = count($itemsData)       > 0 ? $this->db->insert_batch("ims_request_items_tbl", $itemsData)          : true;
+        $travelQuery    = count($travelData)      > 0 ? $this->db->insert_batch("ims_travel_request_tbl", $travelData) : true;
+        $itemsQuery     = count($itemsData)       > 0 ? $this->db->insert_batch("ims_request_items_tbl", $itemsData)   : true;
         
         if ($perssonelQuery && $travelQuery && $itemsQuery) {
             return "true|Successfully submitted";
         }
-        return "false|System error: Please contact the system administrator for assistance!";
+        return "false|System error: Please contact the system administrator for assistance 2nd part!";
     }
 
     public function savePersonnel($personnelData){

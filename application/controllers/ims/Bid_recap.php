@@ -20,45 +20,47 @@ class Bid_recap extends CI_Controller {
     }
 
     public function save_bid_recap(){
-        $action               = $this->input->post("action");
-        $method               = $this->input->post("method");
-        $bidRecapID           = $this->input->post("bidRecapID") ?? null;
-        $reviseBidRecapID     = $this->input->post("reviseBidRecapID") ?? null;
-        $employeeID           = $this->input->post("employeeID");
-        $projectID            = $this->input->post("projectID") ?? null;
-        $purchaseRequestID    = $this->input->post("purchaseRequestID") ?? null;
-        $approversID          = $this->input->post("approversID") ?? null;
-        $approversStatus      = $this->input->post("approversStatus") ?? null;
-        $approversDate        = $this->input->post("approversDate") ?? null;
-        $bidRecapStatus       = $this->input->post("bidRecapStatus");
-        $bidRecapReason       = $this->input->post("bidRecapReason") ?? null;
-        $bidRecapRemarks      = $this->input->post("bidRecapRemarks") ?? null;
-        $bidRecapProjectTotal = $this->input->post("bidRecapProjectTotal") ?? null;
-        $bidRecapCompanyTotal = $this->input->post("bidRecapCompanyTotal") ?? null;
-        $bidRecapGrandTotal   = $this->input->post("bidRecapGrandTotal") ?? null;
-        $submittedAt      = $this->input->post("submittedAt") ?? null;
-        $createdBy        = $this->input->post("createdBy");
-        $updatedBy        = $this->input->post("updatedBy");
-        $createdAt        = $this->input->post("createdAt");
-        $items            = $this->input->post("items") ?? null;
+        $action                   = $this->input->post("action");
+        $method                   = $this->input->post("method");
+        $bidRecapID               = $this->input->post("bidRecapID") ?? null;
+        $reviseBidRecapID         = $this->input->post("reviseBidRecapID") ?? null;
+        $employeeID               = $this->input->post("employeeID");
+        $projectID                = $this->input->post("projectID") ?? null;
+        $inventoryValidationID    = $this->input->post("inventoryValidationID") ?? null;
+        $purchaseRequestID        = $this->input->post("purchaseRequestID") ?? null;
+        $approversID              = $this->input->post("approversID") ?? null;
+        $approversStatus          = $this->input->post("approversStatus") ?? null;
+        $approversDate            = $this->input->post("approversDate") ?? null;
+        $bidRecapStatus           = $this->input->post("bidRecapStatus");
+        $bidRecapReason           = $this->input->post("bidRecapReason") ?? null;
+        $bidRecapRemarks          = $this->input->post("bidRecapRemarks") ?? null;
+        $bidRecapProjectTotal     = $this->input->post("bidRecapProjectTotal") ?? null;
+        $bidRecapCompanyTotal     = $this->input->post("bidRecapCompanyTotal") ?? null;
+        $bidRecapGrandTotal       = $this->input->post("bidRecapGrandTotal") ?? null;
+        $submittedAt              = $this->input->post("submittedAt") ?? null;
+        $createdBy                = $this->input->post("createdBy");
+        $updatedBy                = $this->input->post("updatedBy");
+        $createdAt                = $this->input->post("createdAt");
+        $items                    = $this->input->post("items") ?? null;
 
         $bidRecapData = [
-            "reviseBidRecapID"      => $reviseBidRecapID,
-            "purchaseRequestID"     => $purchaseRequestID,
-            "employeeID"            => $employeeID,
-            "projectID"             => $projectID,
-            "approversID"           => $approversID,
-            "approversStatus"       => $approversStatus,
-            "approversDate"         => $approversDate,
-            "bidRecapStatus"        => $bidRecapStatus,
-            "bidRecapReason"        => $bidRecapReason,
-            "bidRecapProjectTotal"  => $bidRecapProjectTotal,
-            "bidRecapCompanyTotal"  => $bidRecapCompanyTotal,
-            "bidRecapGrandTotal"    => $bidRecapGrandTotal,
-            "submittedAt"           => $submittedAt,
-            "createdBy"             => $createdBy,
-            "updatedBy"             => $updatedBy,
-            "createdAt"             => $createdAt
+            "reviseBidRecapID"          => $reviseBidRecapID,
+            "inventoryValidationID"     => $inventoryValidationID,
+            "purchaseRequestID"         => $purchaseRequestID,
+            "employeeID"                => $employeeID,
+            "projectID"                 => $projectID,
+            "approversID"               => $approversID,
+            "approversStatus"           => $approversStatus,
+            "approversDate"             => $approversDate,
+            "bidRecapStatus"            => $bidRecapStatus,
+            "bidRecapReason"            => $bidRecapReason,
+            "bidRecapProjectTotal"      => $bidRecapProjectTotal,
+            "bidRecapCompanyTotal"      => $bidRecapCompanyTotal,
+            "bidRecapGrandTotal"        => $bidRecapGrandTotal,
+            "submittedAt"               => $submittedAt,
+            "createdBy"                 => $createdBy,
+            "updatedBy"                 => $updatedBy,
+            "createdAt"                 => $createdAt
         ];
 
         if ($action == "update") {
@@ -86,6 +88,12 @@ class Bid_recap extends CI_Controller {
                     "bidRecapRemarks" => $bidRecapRemarks,
                     "updatedBy"       => $updatedBy,
                 ];
+            } else if ($method == "drop") {
+                $bidRecapData = [
+                    "reviseBidRecapID"   => $reviseBidRecapID,
+                    "bidRecapStatus"     => 5,
+                    "updatedBy"          => $updatedBy,
+                ]; 
             }
         }
 
@@ -115,7 +123,7 @@ class Bid_recap extends CI_Controller {
                             "files"                 => $item["file"],
                             "unitCost"              => $item["unitCost"],
                             "totalCost"             => $item["totalCost"],
-                            "createdBy"             => $createdBy,
+                            "createdBy"             => $item["createdBy"],
                             "updatedBy"             => $item["updatedBy"],
                         ];
                         array_push($bidRecapItems, $temp);

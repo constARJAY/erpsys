@@ -685,7 +685,7 @@ $(document).ready(function() {
 					</button>`;
 				}else if (costEstimateStatus == 3) {
 					// DENIED - FOR REVISE
-					if(!isRevised(costEstimateID)){
+					if(!isDocumentRevised(costEstimateID)){
 						button = `
 						<button
 							class="btn btn-cancel px-5 p-2"
@@ -2090,8 +2090,8 @@ $(document).ready(function() {
 
     // ----- VIEW DOCUMENT -----
 	$(document).on("click", "#btnRevise", function () {
-		const id 					= decryptString($(this).attr("costestimateid"));
-		const fromCancelledDocument = $(this).attr("cancel")== "true";
+		const id 					= decryptString($(this).attr("costEstimateID"));
+		const fromCancelledDocument = $(this).attr("cancel" ) == "true";
 		viewDocument(id, false, true, fromCancelledDocument);
 	});
 	// ----- END VIEW DOCUMENT -----
@@ -2099,7 +2099,7 @@ $(document).ready(function() {
 
 	// ----- SAVE CLOSE FORM -----
 	$(document).on("click", "#btnBack", function () {
-		const id         				= decryptString($(this).attr("costestimateid"));
+		const id         				= decryptString($(this).attr("costEstimateID"));
 		const isFromCancelledDocument 	= $(this).attr("cancel") == "true";
 		const revise     				= $(this).attr("revise") == "true";
 		const employeeID 				= $(this).attr("employeeID");
@@ -2121,7 +2121,6 @@ $(document).ready(function() {
 					data.append("action", "update");
 				}
 				
-	
 				savecostEstimate(data, "save", null, pageContent);
 			} else {
 				$("#page_content").html(preloader);
@@ -2145,11 +2144,11 @@ $(document).ready(function() {
 
     // ----- SAVE DOCUMENT -----
 	$(document).on("click", "#btnSave, #btnCancel", function () {
-		const id       					= decryptString($(this).attr("costestimateid"));
+		const id       					= decryptString($(this).attr("costEstimateID"));
 		const isFromCancelledDocument 	= $(this).attr("cancel") == "true";
 		const revise   					= $(this).attr("revise") == "true";
 		const feedback 					= $(this).attr("code") || getFormCode("CEF", dateToday(), id);
-		const action   					= revise && "insert" || (id && feedback ? "update" : "insert");
+		const action   					= revise && !isFromCancelledDocument && "insert" || (id && feedback ? "update" : "insert");
 		const data     					= getcostEstimateData(action, "save", "0", id);
 		data.append("costEstimateStatus", 0);
 
@@ -2176,10 +2175,9 @@ $(document).ready(function() {
 	}
 	// ----- END REMOVE IS-VALID IN TABLE -----
 
-
     // ----- SUBMIT DOCUMENT -----
 	$(document).on("click", "#btnSubmit", function () {
-		const id           				= decryptString($(this).attr("costestimateid"));
+		const id           				= decryptString($(this).attr("costEstimateID"));
 		const isFromCancelledDocument 	= $(this).attr("cancel") == "true";
 		const revise       				= $(this).attr("revise") == "true";
 		const validate     				= validateForm("form_cost_estimate");
@@ -2191,7 +2189,8 @@ $(document).ready(function() {
 		removeIsValid("#tableTravelRequest");
 		if (validate) {
 			if(validateForms){
-				const action = revise && "insert" || (id ? "update" : "insert");
+				const action = revise && !isFromCancelledDocument && "insert" || (id ? "update" : "insert");
+				console.log(action);
 				const data   = getcostEstimateData(action, "submit", "1", id);
 	
 				if (revise) {
@@ -2218,6 +2217,7 @@ $(document).ready(function() {
 						employeeID,
 					};
 				}
+				
 				savecostEstimate(data, "submit", notificationData, pageContent);
 			}else{
 				showNotification("warning2","Cannot submit form, kindly input valid items")
@@ -2229,7 +2229,7 @@ $(document).ready(function() {
 
     // ----- CANCEL DOCUMENT -----
 	$(document).on("click", "#btnCancelForm", function () {
-		const id     = decryptString($(this).attr("costestimateid"));
+		const id     = decryptString($(this).attr("costEstimateID"));
 		const status = $(this).attr("status");
 		const action = "update";
 		const data   = getcostEstimateData(action, "cancelform", "4", id, status);
@@ -2296,7 +2296,7 @@ $(document).ready(function() {
 
     // ----- REJECT DOCUMENT -----
 	$(document).on("click", "#btnReject", function () {
-		const id       = decryptString($(this).attr("costestimateid"));
+		const id       = decryptString($(this).attr("costEstimateID"));
 		const feedback = $(this).attr("code") || getFormCode("CEF", dateToday(), id);
 
 		$("#modal_cost_estimate_content").html(preloader);
@@ -2320,7 +2320,7 @@ $(document).ready(function() {
 		</div>
 		<div class="modal-footer text-right">
 			<button class="btn btn-danger px-5 p-2" id="btnRejectConfirmation"
-			costEstimateID="${id}"
+			costEstimateID="${encryptString(id)}"
 			code="${feedback}"><i class="far fa-times-circle"></i> Deny</button>
 			<button class="btn btn-cancel px-5 p-2" data-dismiss="modal"><i class="fas fa-ban"></i> Cancel</button>
 		</div>`;
