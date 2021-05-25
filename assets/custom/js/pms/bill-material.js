@@ -67,7 +67,7 @@ $(document).ready(function() {
 
 				if (isAllowed) {
 					if (isRevise && employeeID == sessionID) {
-						pageContent(true, tableData, isReadOnly, true, isFromCancelledDocument = false);
+						pageContent(true, tableData, isReadOnly, true, isFromCancelledDocument);
 						updateURL(encryptString(id), true, true);
 					} else {
 						pageContent(true, tableData, isReadOnly);
@@ -110,22 +110,22 @@ $(document).ready(function() {
 
 	function updateURL(view_id = 0, isAdd = false, isRevise = false) {
 		if (view_id && !isAdd) {
-			window.history.pushState("", "", `${base_url}pms/project_budget_rational?view_id=${view_id}`);
+			window.history.pushState("", "", `${base_url}pms/project_budget_rationale?view_id=${view_id}`);
 		} else if (isAdd) {
 			if (view_id && isRevise) {
-				window.history.pushState("", "", `${base_url}pms/project_budget_rational?add=${view_id}`);
+				window.history.pushState("", "", `${base_url}pms/project_budget_rationale?add=${view_id}`);
 			} else {
-				window.history.pushState("", "", `${base_url}pms/project_budget_rational?add`);
+				window.history.pushState("", "", `${base_url}pms/project_budget_rationale?add`);
 			}
 		} else {
-			window.history.pushState("", "", `${base_url}pms/project_budget_rational`);
+			window.history.pushState("", "", `${base_url}pms/project_budget_rationale`);
 		}
 	}
 	// ----- END VIEW DOCUMENT -----
 
 
     // GLOBAL VARIABLE - REUSABLE 
-	const priceListCondition = [];
+	const priceListCondition = [], itemPriceTotal = [];
 
 	const dateToday = () => {
 		return moment(new Date).format("YYYY-MM-DD HH:mm:ss");
@@ -652,7 +652,7 @@ $(document).ready(function() {
 					// DRAFT
 					button = `
 					<button 
-						class="btn btn-submit" 
+						class="btn btn-submit px-5 p-2" 
 						id="btnSubmit" 
 						billMaterialID="${encryptString(billMaterialID)}"
 						code="${getFormCode("PBR", createdAt, billMaterialID)}"
@@ -663,15 +663,18 @@ $(document).ready(function() {
 					if (isRevise) {
 						button += `
 						<button 
-							class="btn btn-cancel" 
+							class="btn btn-cancel btnCancel px-5 p-2" 
 							id="btnCancel"
-							revise="${isRevise}"><i class="fas fa-ban"></i> 
+							billMaterialID="${encryptString(billMaterialID)}"
+							code="${getFormCode("PBR",createdAt, billMaterialID)}"
+							revise="${isRevise}"
+							cancel=${isFromCancelledDocument}><i class="fas fa-ban"></i> 
 							Cancel
 						</button>`;
 					} else {
 						button += `
 						<button 
-							class="btn btn-cancel"
+							class="btn btn-cancel px-5 p-2"
 							id="btnCancelForm" 
 							billMaterialID="${encryptString(billMaterialID)}"
 							code="${getFormCode("PBR", createdAt, billMaterialID)}"
@@ -686,7 +689,7 @@ $(document).ready(function() {
 					if (!isOngoing) {
 						button = `
 						<button 
-							class="btn btn-cancel"
+							class="btn btn-cancel px-5 p-2"
 							id="btnCancelForm" 
 							billMaterialID="${encryptString(billMaterialID)}"
 							code="${getFormCode("PBR", createdAt, billMaterialID)}"
@@ -710,7 +713,7 @@ $(document).ready(function() {
 					if(!isDocumentRevised(billMaterialID)){
 						button = `
 						<button
-							class="btn btn-cancel"
+							class="btn btn-cancel px-5 p-2"
 							id="btnRevise" 
 							billMaterialID="${encryptString(billMaterialID)}"
 							code="${getFormCode("PBR", createdAt, billMaterialID)}"
@@ -724,7 +727,7 @@ $(document).ready(function() {
 					if (!isDocumentRevised(billMaterialID)) {
 						button = `
 						<button
-							class="btn btn-cancel px-5 p-2"
+							class="btn btn-cancel px-5 p-2 px-5 p-2"
 							id="btnRevise" 
 							billMaterialID="${encryptString(billMaterialID)}"
 							code="${getFormCode("CEF", createdAt, billMaterialID)}"
@@ -739,14 +742,14 @@ $(document).ready(function() {
 					if (isImCurrentApprover(approversID, approversDate)) {
 						button = `
 						<button 
-							class="btn btn-submit" 
+							class="btn btn-submit px-5 p-2" 
 							id="btnApprove" 
 							billMaterialID="${encryptString(billMaterialID)}"
 							code="${getFormCode("PBR", createdAt, billMaterialID)}"><i class="fas fa-paper-plane"></i>
 							Approve
 						</button>
 						<button 
-							class="btn btn-cancel"
+							class="btn btn-cancel px-5 p-2"
 							id="btnReject" 
 							billMaterialID="${encryptString(billMaterialID)}"
 							code="${getFormCode("PBR", createdAt, billMaterialID)}"><i class="fas fa-ban"></i> 
@@ -758,11 +761,11 @@ $(document).ready(function() {
 		} else {
 			button = `
 			<button 
-				class="btn btn-submit" 
+				class="btn btn-submit px-5 p-2" 
 				id="btnSubmit"><i class="fas fa-paper-plane"></i> Submit
 			</button>
 			<button 
-				class="btn btn-cancel" 
+				class="btn btn-cancel btnCancel px-5 p-2" 
 				id="btnCancel"><i class="fas fa-ban"></i> 
 				Cancel
 			</button>`;
@@ -1133,6 +1136,12 @@ $(document).ready(function() {
 	}
 	// ----- END UPDATING PERSONNEL TOTALS
 
+	// ----- UPDATING ITEMS TOTALS
+	function itemsTotal(){
+		$(`.tableTotal.companyTotal`).text(formatAmount(itemPriceTotal["companyTotal"],true));
+		$(".tableTotal.projectTotal").text(formatAmount(itemPriceTotal["projectTotal"],true));
+	}
+	// ----- UPDATING ITEMS TOTALS
 
 
 
@@ -1776,6 +1785,9 @@ $(document).ready(function() {
 			$(".itemProjectTableBody").html(requestProjectItems);
 			$(".itemCompanyTableBody").html(requestCompanyItems);
 			$(".travelTableBody").html(requestTravel);
+			if(readOnly){
+				itemsTotal();
+			}
 			// ----- NOT ALLOWED FOR UPDATE -----
 			if (!allowedUpdate) {
 				$("#page_content").find(`input, select, textarea`).each(function() {
@@ -2224,10 +2236,10 @@ $(document).ready(function() {
 			</div>
 		</div>
 		<div class="modal-footer text-right">
-			<button class="btn btn-danger" id="btnRejectConfirmation"
-			billMaterialID="${id}"
+			<button class="btn btn-danger px-5 p-2" id="btnRejectConfirmation"
+			billMaterialID="${encryptString(id)}"
 			code="${feedback}"><i class="far fa-times-circle"></i> Deny</button>
-			<button class="btn btn-cancel" data-dismiss="modal"><i class="fas fa-ban"></i> Cancel</button>
+			<button class="btn btn-cancel btnCancel px-5 p-2" data-dismiss="modal"><i class="fas fa-ban"></i> Cancel</button>
 		</div>`;
 		$("#modal_bill_material_content").html(html);
 	});
@@ -2449,7 +2461,7 @@ $(document).ready(function() {
 		 switch(param){
 			 case "personnel":
 				tableDataReference = getTableData("hris_personnel_request_tbl","",`costEstimateID = '${referenceCode}' `);
-				if(tableDataReference[0].designationID){
+				if(tableDataReference,length > 0 ){
 					tableData = getTableData(`hris_personnel_request_tbl AS hprt JOIN hris_designation_tbl AS hdt USING(designationID)`,
 						`hprt.designationID AS designationID, hprt.designationName AS designationName, hprt.unitCost AS unitCost,
 						designationTotalHours, quantity,
@@ -2594,7 +2606,7 @@ $(document).ready(function() {
 									<td class="text-center" colspan="6">No matching records found</td>
 								</tr>`;
 				 	 }
-					 
+					  itemPriceTotal["projectTotal"] = grandTotalPrice;
 					 setTimeout(() => {
 						 $(".tableTotal.projectTotal").text(formatAmount(grandTotalPrice,true));
 					 }, 500);
@@ -2654,7 +2666,7 @@ $(document).ready(function() {
 								<td class="text-center" colspan="6">No matching records found</td>
 							</tr>`;
 				 }
-				
+				 	itemPriceTotal["companyTotal"] = grandTotalPrice;
 					 setTimeout(() => {
 						$(`.tableTotal.companyTotal`).text(formatAmount(grandTotalPrice,true));
 					 }, 500);
@@ -2670,73 +2682,73 @@ $(document).ready(function() {
 						tableData.map((items,index)=>{
 							if(!readOnly){
 								if(index > 0){
-									html += `
-										<tr class="itemTableRow" requestvalue="${items.travelRequestID}"  index="${index}">
-											<td class="text-center">
-												<div class="action">
-													<input type="checkbox" class="checkboxrow" id="checkboxrow${index}">
-												</div>
-											</td>
-											<td>
-												<div class="description">
-													<textarea
-														minlength="4" 
-														maxlength="500"
-														rows="2" 
-														style="resize: none" 
-														class="form-control" 
-														name="description" 
-														id="description${index}" required>${items.travelDescription}</textarea>
-													<div class="invalid-feedback d-block" id="invalid-description${index}"></div>
-												</div>
-											</td>
-											<td class="text-center">
-												<div class="quantity">
-													<input 
-														type="text" 
-														class="form-control input-quantity text-center"
-														data-allowcharacters="[0-9]"
-														min="0.00" 
-														max="999999999" 
-														id="travelQuantity${index}" 
-														name="quantity" 
-														value="${items.quantity}" 
-														minlength="1" 
-														maxlength="20" 
-														required>
-													<div class="invalid-feedback d-block" id="invalid-travelQuantity${index}"></div>
-												</div>
-											</td>
-											<td>
-												<div class="uom">
-													<select
-													class="form-control validate select2"
-													name="travelUom"
-													id="travelUom${index}"
-													style="width: 100%"
-													required
-													travel="true">
-														${unitOfMeasurementOptions(items["unitOfMeasure"].toLowerCase())}
-													</select>
-													<div class="invalid-feedback d-block" id="invalid-travelUom${index}"></div>
-												</div>
-											</td>
-											<td>
-												<div class="unitprice">
-													<div class="input-group">
-														<div class="input-group-prepend">
-															<span class="input-group-text">₱</span>
-														</div>
-														<input type="text" class="form-control amount" min="0.00" max="9999999999" minlength="1" 
-																	maxlength="20" name="unitprice" id="unitprice${index}" value="${items.unitCost}" style="text-align: right;">
+										html += `
+											<tr class="itemTableRow" requestvalue="${items.travelRequestID}"  index="${index}">
+												<td class="text-center">
+													<div class="action">
+														<input type="checkbox" class="checkboxrow" id="checkboxrow${index}">
 													</div>
-													<div class="invalid-feedback d-block" id="invalid-unitprice${index}"></div>
-												</div>
-											</td>
-											<td>
-												<div class="totalCost text-right">${formatAmount(items.totalCost,true)}</div>
-											</td>
-										</tr>`;
+												</td>
+												<td>
+													<div class="description">
+														<textarea
+															minlength="4" 
+															maxlength="500"
+															rows="2" 
+															style="resize: none" 
+															class="form-control" 
+															name="description" 
+															id="description${index}" required>${items.travelDescription}</textarea>
+														<div class="invalid-feedback d-block" id="invalid-description${index}"></div>
+													</div>
+												</td>
+												<td class="text-center">
+													<div class="quantity">
+														<input 
+															type="text" 
+															class="form-control input-quantity text-center"
+															data-allowcharacters="[0-9]"
+															min="0.00" 
+															max="999999999" 
+															id="travelQuantity${index}" 
+															name="quantity" 
+															value="${items.quantity}" 
+															minlength="1" 
+															maxlength="20" 
+															required>
+														<div class="invalid-feedback d-block" id="invalid-travelQuantity${index}"></div>
+													</div>
+												</td>
+												<td>
+													<div class="uom">
+														<select
+														class="form-control validate select2"
+														name="travelUom"
+														id="travelUom${index}"
+														style="width: 100%"
+														required
+														travel="true">
+															${unitOfMeasurementOptions(items["unitOfMeasure"].toLowerCase())}
+														</select>
+														<div class="invalid-feedback d-block" id="invalid-travelUom${index}"></div>
+													</div>
+												</td>
+												<td>
+													<div class="unitprice">
+														<div class="input-group">
+															<div class="input-group-prepend">
+																<span class="input-group-text">₱</span>
+															</div>
+															<input type="text" class="form-control amount" min="0.00" max="9999999999" minlength="1" 
+																		maxlength="20" name="unitprice" id="unitprice${index}" value="${items.unitCost}" style="text-align: right;">
+														</div>
+														<div class="invalid-feedback d-block" id="invalid-unitprice${index}"></div>
+													</div>
+												</td>
+												<td>
+													<div class="totalCost text-right">${formatAmount(items.totalCost,true)}</div>
+												</td>
+											</tr>`;
 								}else{
 									html += `
 											<tr class="itemTableRow">
@@ -2794,7 +2806,7 @@ $(document).ready(function() {
 							checkboxTravelHeader += !readOnly? ``:``;
 						});
 		
-						if(tableData.length < 2){
+						if(tableData.length < 2 && tableData[0].travelDescription != "none" ){
 							html += `
 									<tr class="itemTableRow" index="1">
 										<td class="text-center">
@@ -2863,7 +2875,7 @@ $(document).ready(function() {
 										</td>
 									</tr>`;
 						}
-						let travelButtons = !readOnly ? `<div class="text-left my-2">
+						let travelButtons = !readOnly  && tableData[0].travelDescription != "none" ? `<div class="text-left my-2">
 															<button class="btn btn-primary btnAddRow" id="btnAddRow" travel="true" type="button"><i class="fas fa-plus-circle"></i> Add Row</button>
 															<button class="btn btn-danger btnDeleteRow" id="btnDeleteRow" travel="true" type="button" disabled><i class="fas fa-minus-circle"></i> Delete Row/s</button>
 														</div>`:``;
@@ -2993,7 +3005,7 @@ function savebillMaterial(data = null, method = "submit", notificationData = nul
 			if (res.isConfirmed) {
 				$.ajax({
 					method:      "POST",
-					url:         `project_budget_rational/saveBillMaterial`,
+					url:         `project_budget_rationale/saveBillMaterial`,
 					data,
 					async:       false,
 					dataType:    "json",

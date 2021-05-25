@@ -1,7 +1,7 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
-class Project_budget_rational extends CI_Controller {
+class Project_budget_rationale extends CI_Controller {
 
     public function __construct()
     {
@@ -11,7 +11,7 @@ class Project_budget_rational extends CI_Controller {
     }
 
     public function index(){
-        $data["title"] = "Project Budget Rational Form";
+        $data["title"] = "Project Budget Rationale Form";
 
         $this->load->view("template/header",$data);
         $this->load->view("pms/bill_material/index");

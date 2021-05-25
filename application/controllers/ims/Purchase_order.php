@@ -173,6 +173,8 @@ class Purchase_order extends CI_Controller {
 
         if ($action == "update") {
             unset($purchaseOrderData["revisePurchaseOrderID"]);
+            unset($purchaseOrderData["createdBy"]);
+            unset($purchaseOrderData["createdAt"]);
 
             if ($method == "cancelform") {
                 $purchaseOrderData = [

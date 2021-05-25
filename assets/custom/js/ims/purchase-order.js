@@ -1747,7 +1747,7 @@ $(document).ready(function() {
 		}
 
 		if (!readOnly && (!status || status == "false")) {
-			const purchaseOrderID = $("#btnBack").attr("purchaseOrderID");
+			const purchaseOrderID = decryptString($("#btnBack").attr("purchaseOrderID"));
 			const data = purchaseOrderID ? 
 				getTableData(
 					`ims_purchase_order_tbl AS ipot
@@ -1761,6 +1761,7 @@ $(document).ready(function() {
 				setTimeout(() => {
 					$("#tableRequestItems").html(table);
 					// initAll();
+					initSelect2("#discountType");
 					initDataTables();
 					updateTableItems();
 					updateInventoryItemOptions();
@@ -2107,6 +2108,7 @@ $(document).ready(function() {
 
 	// ----- GET PURCHASE ORDER DATA -----
 	function getPurchaseOrderData(action = "insert", method = "submit", status = "1", id = null, currentStatus = "0", isRevise = false) {
+		console.log(currentStatus);
 		/**
 		 * ----- ACTION ---------
 		 *    > insert
@@ -2144,7 +2146,7 @@ $(document).ready(function() {
 		data["method"]    = method;
 		data["updatedBy"] = sessionID;
 
-		if ((currentStatus == "false" || currentStatus == "0" || currentStatus == "3") && method != "approve") {
+		if ((currentStatus == "false" || currentStatus == "0" || currentStatus == "3" || (currentStatus == "4" && isRevise)) && method != "approve") {
 
 			data["employeeID"]        = sessionID;
 			data["bidRecapID"]        = $("[name=bidRecapID]").val();
@@ -2291,9 +2293,10 @@ $(document).ready(function() {
 		let disabledVendorCode   = inventoryVendorID && inventoryVendorID != "0" ? "disabled" : disabled;
 		let disabledCategoryType = categoryType && categoryType != "" ? "disabled" : disabled;
 
-		$("#btnBack").attr("purchaseOrderID", purchaseOrderID);
+		$("#btnBack").attr("purchaseOrderID", encryptString(purchaseOrderID));
 		$("#btnBack").attr("status", purchaseOrderStatus);
 		$("#btnBack").attr("employeeID", employeeID);
+		$("#btnBack").attr("cancel", isFromCancelledDocument);
 
 		let button = formButtons(data, isRevise, isFromCancelledDocument);
 
@@ -2370,7 +2373,7 @@ $(document).ready(function() {
                     <div class="body">
                         <small class="text-small text-muted font-weight-bold">Purchase Request Code</small>
                         <h6 class="mt-0 text-danger font-weight-bold">
-							${purchaseRequestID ? getFormCode("PR", iprtCreatedAt, purchaseRequestID) : "---"}
+							${purchaseRequestID && !isRevise ? getFormCode("PR", iprtCreatedAt, purchaseRequestID) : "---"}
 						</h6>      
                     </div>
                 </div>

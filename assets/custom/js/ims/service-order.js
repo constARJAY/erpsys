@@ -42,8 +42,8 @@ $(document).ready(function() {
 
 
     // ----- VIEW DOCUMENT -----
-	function viewDocument(view_id = false, readOnly = false, isRevise = false) {
-		const loadData = (id, isRevise = false) => {
+	function viewDocument(view_id = false, readOnly = false, isRevise = false, isFromCancelledDocument = false) {
+		const loadData = (id, isRevise = false, isFromCancelledDocument = false) => {
 			const tableData = getTableData(
 				`ims_service_order_tbl AS isot
 					LEFT JOIN ims_service_requisition_tbl AS isrt USING(serviceRequisitionID)
@@ -81,7 +81,7 @@ $(document).ready(function() {
 
 				if (isAllowed) {
 					if (isRevise && employeeID == sessionID) {
-						pageContent(true, tableData, isReadOnly, true);
+						pageContent(true, tableData, isReadOnly, true, isFromCancelledDocument);
 						updateURL(encryptString(id), true, true);
 					} else {
 						pageContent(true, tableData, isReadOnly);
@@ -99,8 +99,8 @@ $(document).ready(function() {
 		}
 
 		if (view_id) {
-			let id = decryptString(view_id);
-				id && isFinite(id) && loadData(id, isRevise);
+			let id = view_id;
+				id && isFinite(id) && loadData(id, isRevise, isFromCancelledDocument);
 		} else {
 			let url   = window.document.URL;
 			let arr   = url.split("?view_id=");
@@ -204,8 +204,8 @@ $(document).ready(function() {
 					{ targets: 7,  width: 200 },
 					{ targets: 8,  width: 200 },
 					{ targets: 9,  width: 200 },
-					{ targets: 10,  width: 80 },
-					{ targets: 11,  width: 200  },
+					{ targets: 10, width: 80  },
+					{ targets: 11, width: 200 },
 				],
 			});
 
@@ -229,8 +229,8 @@ $(document).ready(function() {
 					{ targets: 7,  width: 200 },
 					{ targets: 8,  width: 200 },
 					{ targets: 9,  width: 200 },
-					{ targets: 10,  width: 80 },
-					{ targets: 11,  width: 200  },
+					{ targets: 10, width: 80  },
+					{ targets: 11, width: 200 },
 				],
 			});
 
@@ -355,14 +355,20 @@ $(document).ready(function() {
 
 
     // ----- HEADER BUTTON -----
-	function headerButton(isAdd = true, text = "Add", isRevise = false) {
+	function headerButton(isAdd = true, text = "Add", isRevise = false, isFromCancelledDocument = false) {
 		let html;
 		if (isAdd) {
-            html = `
-            <button type="button" class="btn btn-default btn-add" id="btnAdd"><i class="icon-plus"></i> &nbsp;${text}</button>`;
+			if (isCreateAllowed(41)) {
+				html = `
+				<button type="button" class="btn btn-default btn-add" id="btnAdd"><i class="icon-plus"></i> &nbsp;${text}</button>`;
+			}
 		} else {
 			html = `
-            <button type="button" class="btn btn-default btn-light" id="btnBack" revise="${isRevise}"><i class="fas fa-arrow-left"></i> &nbsp;Back</button>`;
+            <button type="button" 
+				class="btn btn-default btn-light" 
+				id="btnBack" 
+				revise="${isRevise}"
+				cancel="${isFromCancelledDocument}"><i class="fas fa-arrow-left"></i> &nbsp;Back</button>`;
 		}
 		$("#headerButton").html(html);
 	}
@@ -380,7 +386,7 @@ $(document).ready(function() {
 				LEFT JOIN hris_employee_list_tbl AS helt ON isot.employeeID = helt.employeeID`,
 			`isot.*, CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname, isot.createdAt AS dateCreated, projectListCode, projectListName, pct.clientName, isrt.createdAt AS isrtCreatedAt`,
 			`isot.employeeID != ${sessionID} AND isot.serviceOrderStatus != 0 AND isot.serviceOrderStatus != 4`,
-			`FIELD(serviceOrderStatus, 0, 1, 3, 2, 4), COALESCE(isot.submittedAt, isot.createdAt)`
+			`FIELD(serviceOrderStatus, 0, 1, 3, 2, 4, 5), COALESCE(isot.submittedAt, isot.createdAt)`
 		);
 
 		let html = `
@@ -425,44 +431,38 @@ $(document).ready(function() {
 			let remarks       = serviceOrderRemarks ? serviceOrderRemarks : "-";
 			let dateCreated   = moment(createdAt).format("MMMM DD, YYYY hh:mm:ss A");
 			let dateSubmitted = submittedAt ? moment(submittedAt).format("MMMM DD, YYYY hh:mm:ss A") : "-";
-			let dateApproved  = serviceOrderStatus == 2 ? approversDate.split("|") : "-";
+			let dateApproved  = serviceOrderStatus == 2 || serviceOrderStatus == 5 ? approversDate.split("|") : "-";
 			if (dateApproved !== "-") {
 				dateApproved = moment(dateApproved[dateApproved.length - 1]).format("MMMM DD, YYYY hh:mm:ss A");
 			}
 
 			let btnClass = serviceOrderStatus != 0 ? "btnView" : "btnEdit";
-
-			let button = serviceOrderStatus != 0 ? `
-            <button class="btn btn-view w-100 btnView" id="${encryptString(serviceOrderID )}"><i class="fas fa-eye"></i> View</button>` : `
-            <button 
-                class="btn btn-edit w-100 btnEdit" 
-                id="${encryptString(serviceOrderID )}" 
-                code="${getFormCode("SO", createdAt, serviceOrderID )}"><i class="fas fa-edit"></i> Edit</button>`;
-
-			html += `
-			<tr class="${btnClass}" id="${encryptString(serviceOrderID )}">
-				<td>${getFormCode("SO", createdAt, serviceOrderID )}</td>
-				<td>${fullname}</td>
-				<td>${serviceRequisitionID != "0" ? getFormCode("SR", isrtCreatedAt, serviceRequisitionID) : "-"}</td>
-				<td>${clientName   || '-'}</td>
-				<td>
-					<div>
-						${projectListName || '-'}
-					</div>
-					<small style="color:#848482;">${projectListCode || '-'}</small>
-				</td>
-				<td>${serviceOrderReason}</td>
-				<td>
-					${employeeFullname(getCurrentApprover(approversID, approversDate, serviceOrderStatus, true))}
-				</td>
-				<td>${dateCreated}</td>
-				<td>${dateSubmitted}</td>
-				<td>${dateApproved}</td>
-				<td class="text-center">
-					${getStatusStyle(serviceOrderStatus)}
-				</td>
-				<td>${remarks}</td>
-			</tr>`;
+			if (isImCurrentApprover(approversID, approversDate, serviceOrderStatus) || isAlreadyApproved(approversID, approversDate)) {
+				html += `
+				<tr class="${btnClass}" id="${encryptString(serviceOrderID )}">
+					<td>${getFormCode("SO", createdAt, serviceOrderID )}</td>
+					<td>${fullname}</td>
+					<td>${serviceRequisitionID != "0" ? getFormCode("SR", isrtCreatedAt, serviceRequisitionID) : "-"}</td>
+					<td>${clientName   || '-'}</td>
+					<td>
+						<div>
+							${projectListName || '-'}
+						</div>
+						<small style="color:#848482;">${projectListCode || '-'}</small>
+					</td>
+					<td>${serviceOrderReason}</td>
+					<td>
+						${employeeFullname(getCurrentApprover(approversID, approversDate, serviceOrderStatus, true))}
+					</td>
+					<td>${dateCreated}</td>
+					<td>${dateSubmitted}</td>
+					<td>${dateApproved}</td>
+					<td class="text-center">
+						${getStatusStyle(serviceOrderStatus)}
+					</td>
+					<td>${remarks}</td>
+				</tr>`;
+			}
 		});
 
 		html += `
@@ -489,7 +489,7 @@ $(document).ready(function() {
 				LEFT JOIN hris_employee_list_tbl AS helt ON isot.employeeID = helt.employeeID`,
 			`isot.*, CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname, isot.createdAt AS dateCreated, projectListCode, projectListName, pct.clientName, isrt.createdAt AS isrtCreatedAt`,
 			`isot.employeeID = ${sessionID}`,
-			`FIELD(serviceOrderStatus, 0, 1, 3, 2, 4), COALESCE(isot.submittedAt, isot.createdAt)`
+			`FIELD(serviceOrderStatus, 0, 1, 3, 2, 4, 5), COALESCE(isot.submittedAt, isot.createdAt)`
 		);
 
 		let html = `
@@ -540,14 +540,6 @@ $(document).ready(function() {
 			}
 
 			let btnClass = serviceOrderStatus != 0 ? "btnView" : "btnEdit";
-
-			let button = serviceOrderStatus != 0 ? `
-            <button class="btn btn-view w-100 btnView" id="${encryptString(serviceOrderID )}"><i class="fas fa-eye"></i> View</button>` : `
-            <button 
-                class="btn btn-edit w-100 btnEdit" 
-                id="${encryptString(serviceOrderID)}" 
-                code="${getFormCode("SO", createdAt, serviceOrderID )}"><i class="fas fa-edit"></i> Edit</button>`;
-
 			html += `
             <tr class="${btnClass}" id="${encryptString(serviceOrderID )}">
                 <td>${getFormCode("SO", createdAt, serviceOrderID )}</td>
@@ -588,7 +580,7 @@ $(document).ready(function() {
 
 
     // ----- FORM BUTTONS -----
-	function formButtons(data = false, isRevise = false) {
+	function formButtons(data = false, isRevise = false, isFromCancelledDocument = false) {
 		let button = "";
 		if (data) {
 			let {
@@ -608,9 +600,10 @@ $(document).ready(function() {
 					<button 
 						class="btn btn-submit px-5 p-2"  
 						id="btnSubmit" 
-						serviceOrderID="${serviceOrderID}"
-						code="${getFormCode("P0", createdAt, serviceOrderID)}"
-						revise=${isRevise}><i class="fas fa-paper-plane"></i>
+						serviceOrderID="${encryptString(serviceOrderID)}"
+						code="${getFormCode("S0", createdAt, serviceOrderID)}"
+						revise="${isRevise}"
+						cancel="${isFromCancelledDocument}"><i class="fas fa-paper-plane"></i>
 						Submit
 					</button>`;
 
@@ -620,8 +613,10 @@ $(document).ready(function() {
 							class="btn btn-cancel btnCancel px-5 p-2" 
 							id="btnCancel"
 							revise="${isRevise}"
-							serviceOrderID="${serviceOrderID}"
-							code="${getFormCode("P0", createdAt, serviceOrderID)}"><i class="fas fa-ban"></i> 
+							serviceOrderID="${encryptString(serviceOrderID)}"
+							code="${getFormCode("S0", createdAt, serviceOrderID)}"
+							revise="${isRevise}"
+							cancel="${isFromCancelledDocument}"><i class="fas fa-ban"></i> 
 							Cancel
 						</button>`;
 					} else {
@@ -629,8 +624,8 @@ $(document).ready(function() {
 						<button 
 							class="btn btn-cancel px-5 p-2"
 							id="btnCancelForm" 
-							serviceOrderID="${serviceOrderID}"
-							code="${getFormCode("P0", createdAt, serviceOrderID)}"
+							serviceOrderID="${encryptString(serviceOrderID)}"
+							code="${getFormCode("S0", createdAt, serviceOrderID)}"
 							revise=${isRevise}><i class="fas fa-ban"></i> 
 							Cancel
 						</button>`;
@@ -644,12 +639,23 @@ $(document).ready(function() {
 						<button 
 							class="btn btn-cancel px-5 p-2"
 							id="btnCancelForm" 
-							serviceOrderID="${serviceOrderID}"
-							code="${getFormCode("P0", createdAt, serviceOrderID)}"
+							serviceOrderID="${encryptString(serviceOrderID)}"
+							code="${getFormCode("S0", createdAt, serviceOrderID)}"
 							status="${serviceOrderStatus}"><i class="fas fa-ban"></i> 
 							Cancel
 						</button>`;
 					}
+				} else if (serviceOrderStatus == 2) {
+					// DROP
+					button = `
+					<button type="button" 
+						class="btn btn-cancel px-5 p-2"
+						id="btnDrop" 
+						serviceOrderID="${encryptString(serviceOrderID)}"
+						code="${getFormCode("SR", createdAt, serviceOrderID)}"
+						status="${serviceOrderStatus}"><i class="fas fa-ban"></i> 
+						Drop
+					</button>`;
 				} else if (serviceOrderStatus == 3) {
 					// DENIED - FOR REVISE
 					if (!isDocumentRevised(serviceOrderID)) {
@@ -658,8 +664,22 @@ $(document).ready(function() {
 							class="btn btn-cancel px-5 p-2"
 							id="btnRevise" 
 							serviceOrderID="${encryptString(serviceOrderID)}"
-							code="${getFormCode("P0", createdAt, serviceOrderID)}"
+							code="${getFormCode("S0", createdAt, serviceOrderID)}"
 							status="${serviceOrderStatus}"><i class="fas fa-clone"></i>
+							Revise
+						</button>`;
+					}
+				} else if (serviceOrderStatus == 4) {
+					// CANCELLED - FOR REVISE
+					if (!isDocumentRevised(serviceOrderID)) {
+						button = `
+						<button
+							class="btn btn-cancel px-5 p-2"
+							id="btnRevise" 
+							serviceOrderID="${encryptString(serviceOrderID)}"
+							code="${getFormCode("SO", createdAt, serviceOrderID)}"
+							status="${serviceOrderStatus}"
+							cancel="true"><i class="fas fa-clone"></i>
 							Revise
 						</button>`;
 					}
@@ -672,14 +692,14 @@ $(document).ready(function() {
 							class="btn btn-submit px-5 p-2"  
 							id="btnApprove" 
 							serviceOrderID="${encryptString(serviceOrderID)}"
-							code="${getFormCode("P0", createdAt, serviceOrderID)}"><i class="fas fa-paper-plane"></i>
+							code="${getFormCode("S0", createdAt, serviceOrderID)}"><i class="fas fa-paper-plane"></i>
 							Approve
 						</button>
 						<button 
 							class="btn btn-cancel px-5 p-2"
 							id="btnReject" 
 							serviceOrderID="${encryptString(serviceOrderID)}"
-							code="${getFormCode("P0", createdAt, serviceOrderID)}"><i class="fas fa-ban"></i> 
+							code="${getFormCode("S0", createdAt, serviceOrderID)}"><i class="fas fa-ban"></i> 
 							Deny
 						</button>`;
 					}
@@ -1427,7 +1447,7 @@ $(document).ready(function() {
 	})
 
 	$(document).on("change", "[name=contractFile]", function(e) {
-		const serviceOrderID = $(this).attr("serviceOrderID");
+		const serviceOrderID = decryptString($(this).attr("serviceOrderID"));
 		const files        = this.files || false;
 		if (files) {
 			const filesize    = files[0].size/1024/1024;
@@ -1838,7 +1858,7 @@ $(document).ready(function() {
 
 
     // ----- FORM CONTENT -----
-	function formContent(data = false, readOnly = false, isRevise = false) {
+	function formContent(data = false, readOnly = false, isRevise = false, isFromCancelledDocument = false) {
 		$("#page_content").html(preloader);
 		readOnly     = isRevise ? false : readOnly;
 
@@ -1910,14 +1930,15 @@ $(document).ready(function() {
 
 		readOnly ? preventRefresh(false) : preventRefresh(true);
 
-		$("#btnBack").attr("serviceOrderID", serviceOrderID);
+		$("#btnBack").attr("serviceOrderID", encryptString(serviceOrderID));
 		$("#btnBack").attr("status", serviceOrderStatus);
 		$("#btnBack").attr("employeeID", employeeID);
+		$("#btnBack").attr("cancel", isFromCancelledDocument);
 
 		let disabled = readOnly ? "disabled" : "";
 		let disabledReference = serviceRequisitionID && serviceRequisitionID != "0" ? "disabled" : disabled;
 
-		let button = formButtons(data, isRevise);
+		let button = formButtons(data, isRevise, isFromCancelledDocument);
 
 		// ----- PRINT BUTTON -----
 		let approvedButton = '';
@@ -1936,12 +1957,12 @@ $(document).ready(function() {
 					<input type="file"
 						id="contractFile"
 						name="contractFile"
-						serviceOrderID="${serviceOrderID}"
+						serviceOrderID="${encryptString(serviceOrderID)}"
 						class="d-none"
 						accept="image/*, .pdf, .docx, .doc">
 					<button 
 						class="btn btn-secondary py-2" 
-						serviceOrderID="${serviceOrderID}"
+						serviceOrderID="${encryptString(serviceOrderID)}"
 						id="btnUploadContract">
 						<i class="fas fa-file-upload"></i> Upload Contract
 					</button>`;
@@ -1952,7 +1973,7 @@ $(document).ready(function() {
 				approvedButton += `
 					<button 
 						class="btn btn-info py-2" 
-						serviceOrderID="${serviceOrderID}"
+						serviceOrderID="${encryptString(serviceOrderID)}"
 						id="btnExcel">
 						<i class="fas fa-file-excel"></i> Excel
 					</button>
@@ -2280,7 +2301,7 @@ $(document).ready(function() {
 
 
     // ----- PAGE CONTENT -----
-	function pageContent(isForm = false, data = false, readOnly = false, isRevise = false) {
+	function pageContent(isForm = false, data = false, readOnly = false, isRevise = false, isFromCancelledDocument = false) {
 		$("#page_content").html(preloader);
 		if (!isForm) {
 			preventRefresh(false);
@@ -2302,9 +2323,9 @@ $(document).ready(function() {
 			myFormsContent();
 			updateURL();
 		} else {
-			headerButton(false, "", isRevise);
+			headerButton(false, "", isRevise, isFromCancelledDocument);
 			headerTabContent(false);
-			formContent(data, readOnly, isRevise);
+			formContent(data, readOnly, isRevise, isFromCancelledDocument);
 		}
 	}
 	viewDocument();
@@ -2322,7 +2343,7 @@ $(document).ready(function() {
 
 	// ----- OPEN EDIT FORM -----
 	$(document).on("click", ".btnEdit", function () {
-		const id = $(this).attr("id");
+		const id = decryptString($(this).attr("id"));
 		viewDocument(id);
 	});
 	// ----- END OPEN EDIT FORM -----
@@ -2330,7 +2351,7 @@ $(document).ready(function() {
 
 	// ----- VIEW DOCUMENT -----
 	$(document).on("click", ".btnView", function () {
-		const id = $(this).attr("id");
+		const id = decryptString($(this).attr("id"));
 		viewDocument(id, true);
 	});
 	// ----- END VIEW DOCUMENT -----
@@ -2338,15 +2359,17 @@ $(document).ready(function() {
 
 	// ----- VIEW DOCUMENT -----
 	$(document).on("click", "#btnRevise", function () {
-		const id = $(this).attr("serviceOrderID");
-		viewDocument(id, false, true);
+		const id                    = decryptString($(this).attr("serviceOrderID"));
+		const fromCancelledDocument = $(this).attr("cancel") == "true";
+		viewDocument(id, false, true, fromCancelledDocument);
 	});
 	// ----- END VIEW DOCUMENT -----
 
 
 	// ----- SAVE CLOSE FORM -----
 	$(document).on("click", "#btnBack", function () {
-		const id         = $(this).attr("serviceOrderID");
+		const id         = decryptString($(this).attr("serviceOrderID"));
+		const isFromCancelledDocument = $(this).attr("cancel") == "true";
 		const revise     = $(this).attr("revise") == "true";
 		const employeeID = $(this).attr("employeeID");
 		const feedback   = $(this).attr("code") || getFormCode("SO", dateToday(), id);
@@ -2355,11 +2378,16 @@ $(document).ready(function() {
 		if (status != "false" && status != 0) {
 			
 			if (revise) {
-				const action = revise && "insert" || (id && feedback ? "update" : "insert");
+				const action = revise && !isFromCancelledDocument && "insert" || (id ? "update" : "insert");
 				const data   = getServiceOrderData(action, "save", "0", id, status, revise);
-				data["serviceOrderStatus"]   = 0;
-				data["reviseServiceOrderID"] = id;
-				delete data["serviceOrderID"];
+				if (!isFromCancelledDocument) {
+					delete data["serviceOrderID"];
+					data["reviseServiceOrderID"] = id;
+				} else {
+					delete data["action"];
+					data["serviceOrderStatus"] = 0;
+					data["action"]             = "update";
+				}
 	
 				saveServiceOrder(data, "save", null, pageContent);
 			} else {
@@ -2384,16 +2412,23 @@ $(document).ready(function() {
 
 	// ----- SAVE DOCUMENT -----
 	$(document).on("click", "#btnSave, #btnCancel", function () {
-		const id       = $(this).attr("serviceOrderID");
+		const id       = decryptString($(this).attr("serviceOrderID"));
+		const isFromCancelledDocument = $(this).attr("cancel") == "true";
 		const revise   = $(this).attr("revise") == "true";
 		const feedback = $(this).attr("code") || getFormCode("SO", dateToday(), id);
-		const action   = revise && "insert" || (id && feedback ? "update" : "insert");
+		const action   = revise && !isFromCancelledDocument && "insert" || (id && feedback ? "update" : "insert");
 		const data     = getServiceOrderData(action, "save", "0", id, "0", revise);
 		data["serviceOrderStatus"] = 0;
 
 		if (revise) {
-			data["reviseServiceOrderID"] = id;
-			delete data["serviceOrderID"];
+			if (!isFromCancelledDocument) {
+				data["reviseServiceOrderID"] = id;
+				delete data["serviceOrderID"];
+			} else {
+				data["serviceOrderID"] = id;
+				delete data["action"];
+				data["action"] = "update";
+			}
 		}
 
 		saveServiceOrder(data, "save", null, pageContent);
@@ -2432,19 +2467,23 @@ $(document).ready(function() {
 
 	// ----- SUBMIT DOCUMENT -----
 	$(document).on("click", "#btnSubmit", function () {
-		const id       = $(this).attr("serviceOrderID");
+		const id       = decryptString($(this).attr("serviceOrderID"));
+		const isFromCancelledDocument = $(this).attr("cancel") == "true";
 		const revise   = $(this).attr("revise") == "true";
 		const validate = validateForm("form_service_order");
 		removeIsValid("#tableServiceOrderItems0");
 		const costSummary = checkCostSummary();
 
 		if (validate && costSummary) {
-			const action = revise && "insert" || (id ? "update" : "insert");
+
+			const action = revise && !isFromCancelledDocument && "insert" || (id ? "update" : "insert");
 			const data   = getServiceOrderData(action, "submit", "1", id, "0", revise);
 
 			if (revise) {
-				data["reviseServiceOrderID"] = id;
-				delete data["serviceOrderID"];
+				if (!isFromCancelledDocument) {
+					delete data["serviceOrderID"];
+					data["reviseServiceOrderID"] = id;
+				}
 			}
 
 			const employeeID = getNotificationEmployeeID(data["approversID"], data["approversDate"], true);
@@ -2467,7 +2506,7 @@ $(document).ready(function() {
 
 	// ----- CANCEL DOCUMENT -----
 	$(document).on("click", "#btnCancelForm", function () {
-		const id     = $(this).attr("serviceOrderID");
+		const id     = decryptString($(this).attr("serviceOrderID"));
 		const status = $(this).attr("status");
 		const action = "update";
 		const data   = getServiceOrderData(action, "cancelform", "4", id, status);
@@ -2528,7 +2567,7 @@ $(document).ready(function() {
 
 	// ----- REJECT DOCUMENT -----
 	$(document).on("click", "#btnReject", function () {
-		const id       = $(this).attr("serviceOrderID");
+		const id       = decryptString($(this).attr("serviceOrderID"));
 		const feedback = $(this).attr("code") || getFormCode("SO", dateToday(), id);
 
 		$("#modal_service_order_content").html(preloader);
@@ -2552,7 +2591,7 @@ $(document).ready(function() {
 		</div>
 		<div class="modal-footer text-right">
 			<button class="btn btn-danger px-5 p-2" id="btnRejectConfirmation"
-			serviceOrderID="${id}"
+			serviceOrderID="${encryptString(id)}"
 			code="${feedback}"><i class="far fa-times-circle"></i> Deny</button>
 			<button class="btn btn-cancel btnCancel px-5 p-2" data-dismiss="modal"><i class="fas fa-ban"></i> Cancel</button>
 		</div>`;
@@ -2572,13 +2611,13 @@ $(document).ready(function() {
 				let employeeID      = tableData[0].employeeID;
 
 				let data = {
-					action:               "update",
-					method:               "deny",
+					action:              "update",
+					method:              "deny",
 					serviceOrderID:      id,
-					approversStatus:      updateApproveStatus(approversStatus, 3),
-					approversDate:        updateApproveDate(approversDate),
+					approversStatus:     updateApproveStatus(approversStatus, 3),
+					approversDate:       updateApproveDate(approversDate),
 					serviceOrderRemarks: $("[name=serviceOrderRemarks]").val()?.trim(),
-					updatedBy:            sessionID
+					updatedBy:           sessionID
 				};
 
 				let notificationData = {
@@ -2596,6 +2635,20 @@ $(document).ready(function() {
 		} 
 	});
 	// ----- END REJECT DOCUMENT -----
+
+
+	// ----- DROP DOCUMENT -----
+	$(document).on("click", "#btnDrop", function() {
+		const id = decryptString($(this).attr("serviceOrderID"));
+		let data = {};
+		data["serviceOrderID"] = id;
+		data["action"]         = "update";
+		data["method"]         = "drop";
+		data["updatedBy"]      = sessionID;
+
+		saveServiceOrder(data, "drop", null, pageContent);
+	})
+	// ----- END DROP DOCUMENT -----
 
 
 	// ----- NAV LINK -----
@@ -2696,6 +2749,11 @@ function getConfirmation(method = "submit") {
 			swalText  = "Are you sure to cancel this document?";
 			swalImg   = `${base_url}assets/modal/cancel.svg`;
 			break;
+		case "drop":
+			swalTitle = `DROP ${title.toUpperCase()}`;
+			swalText  = "Are you sure to drop this document?";
+			swalImg   = `${base_url}assets/modal/drop.svg`;
+			break;
 		case "uploadcontract":
 			swalTitle = `UPLOAD CONTRACT`;
 			swalText  = "Are you sure to upload this contract?";
@@ -2756,6 +2814,8 @@ function saveServiceOrder(data = null, method = "submit", notificationData = nul
 							swalTitle = `${getFormCode("SO", dateCreated, insertedID)} approved successfully!`;
 						} else if (method == "deny") {
 							swalTitle = `${getFormCode("SO", dateCreated, insertedID)} denied successfully!`;
+						} else if (method == "drop") {
+							swalTitle = `${getFormCode("SO", dateCreated, insertedID)} dropped successfully!`;
 						}	
 		
 						if (isSuccess == "true") {

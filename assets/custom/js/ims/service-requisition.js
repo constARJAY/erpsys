@@ -365,14 +365,6 @@ $(document).ready(function() {
 			}
 
 			let btnClass = serviceRequisitionStatus != 0 ? "btnView" : "btnEdit";
-
-			let button = serviceRequisitionStatus != 0 ? `
-			<button class="btn btn-view w-100 btnView" id="${encryptString(serviceRequisitionID )}"><i class="fas fa-eye"></i> View</button>` : `
-			<button 
-				class="btn btn-edit w-100 btnEdit" 
-				id="${encryptString(serviceRequisitionID )}" 
-				code="${getFormCode("SR", createdAt, serviceRequisitionID )}"><i class="fas fa-edit"></i> Edit</button>`;
-
 			if (isImCurrentApprover(approversID, approversDate, serviceRequisitionStatus) || isAlreadyApproved(approversID, approversDate)) {
 				html += `
 				<tr class="${btnClass}" id="${encryptString(serviceRequisitionID )}">
@@ -1221,7 +1213,7 @@ $(document).ready(function() {
 
 	// ----- GET AMOUNT -----
 	const getNonFormattedAmount = (amount = "₱0.00") => {
-		return +amount.replaceAll(",", "").replace("₱", "")?.trim();
+		return +amount.replaceAll(",", "").replaceAll("₱", "")?.trim();
 	}
 	// ----- END GET AMOUNT -----
 
@@ -1918,7 +1910,7 @@ $(document).ready(function() {
     // ----- APPROVE DOCUMENT -----
 	$(document).on("click", "#btnApprove", function () {
 		const id       = decryptString($(this).attr("serviceRequisitionID"));
-		const feedback = $(this).attr("code") || getFormCode("SCH", dateToday(), id);
+		const feedback = $(this).attr("code") || getFormCode("SR", dateToday(), id);
 		let tableData  = getTableData("ims_service_requisition_tbl", "", "serviceRequisitionID = " + id);
 
 		if (tableData) {

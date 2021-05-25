@@ -2478,7 +2478,7 @@ $(document).ready(function() {
 			</tr>`;
 		} else {
 				if(itemID < 1 && itemID){
-					var optinoDisabled = "disabled"
+					var optionDisabled = "disabled"
 					otherItemID = "-"
 				}
 			const itemFile = files ? `
@@ -2528,7 +2528,7 @@ $(document).ready(function() {
 							value="${quantity}"
 							min="0.00" 
 							minlength="1" 
-							maxlength="20" required ${optinoDisabled}>
+							maxlength="20" required ${optionDisabled}>
 						<div class="invalid-feedback d-block" id="invalid-projectQuantity"></div>
 					</div>
 				</td>
@@ -2545,7 +2545,7 @@ $(document).ready(function() {
 							class="form-control" 
 							name="files" 
 							id="projectFiles"
-							accept="image/*, .pdf, .doc, .docx" ${optinoDisabled}>
+							accept="image/*, .pdf, .doc, .docx" ${optionDisabled}>
 						<div class="invalid-feedback d-block" id="invalid-projectFiles"></div>
 					</div>
 				</td>
@@ -2599,7 +2599,7 @@ $(document).ready(function() {
 			</tr>`;
 		} else {
 			if(itemID < 1 && itemID){
-				var optinoDisabled = "disabled"
+				var optionDisabled = "disabled"
 				otherItemID = "-"
 			}
 			const itemFile = files ? `
@@ -2646,7 +2646,7 @@ $(document).ready(function() {
 							name="quantity" 
 							value="${quantity}" 
 							minlength="1" 
-							maxlength="20" required ${optinoDisabled}>
+							maxlength="20" required ${optionDisabled}>
 						<div class="invalid-feedback d-block" id="invalid-companyQuantity"></div>
 					</div>
 				</td>
@@ -2663,7 +2663,7 @@ $(document).ready(function() {
 							class="form-control" 
 							name="files" 
 							id="companyFiles"
-							accept="image/*, .pdf, .doc, .docx" ${optinoDisabled}>
+							accept="image/*, .pdf, .doc, .docx" ${optionDisabled}>
 						<div class="invalid-feedback d-block" id="invalid-companyFiles"></div>
 					</div>
 				</td>
@@ -2710,7 +2710,7 @@ $(document).ready(function() {
 			console.log(designationID);
 			if(designationID){
 				if(designationID < 1){
-					var optinoDisabled = "disabled"
+					var optionDisabled = "disabled"
 					otherDesignationID = "none"
 				}
 			}
@@ -2754,7 +2754,7 @@ $(document).ready(function() {
 							name="quantity" 
 							value="${quantity}"
 							minlength="1" 
-							maxlength="20" required ${optinoDisabled}>
+							maxlength="20" required ${optionDisabled}>
 						<div class="invalid-feedback d-block" id="invalid-personnelQuantity"></div>
 					</div>
 				</td>
@@ -2771,7 +2771,7 @@ $(document).ready(function() {
 							placeholder="0.0"
 							value="${designationTotalHours}" 
 							minlength="1" 
-							maxlength="10" required ${optinoDisabled}>
+							maxlength="10" required ${optionDisabled}>
 						<div class="invalid-feedback d-block" id="invalid-employeeTotalHours"></div>
 					</div>
 				</td>
@@ -2809,7 +2809,7 @@ $(document).ready(function() {
 		} else {
 			var uniformDescription = travelDescription.toLowerCase();
 			if((uniformDescription == "none" ||  uniformDescription == "n/a") && travelDescription){
-				var optinoDisabled = "disabled"
+				var optionDisabled = "disabled"
 			}
 			html += `
 			<tr class="itemTableRow">
@@ -2845,7 +2845,7 @@ $(document).ready(function() {
 							min="0.00" 
 							minlength="1" 
 							maxlength="20" 
-							required ${optinoDisabled}>
+							required ${optionDisabled}>
 						<div class="invalid-feedback d-block" id="invalid-quantity"></div>
 					</div>
 				</td>
@@ -2857,8 +2857,8 @@ $(document).ready(function() {
 						id="travelUom"
 						style="width: 100%"
 						required
-						travel="true" ${optinoDisabled}>
-							${unitOfMeasurementOptions(unitOfMeasure)}
+						travel="true" ${optionDisabled}>
+							${unitOfMeasurementOptions(unitOfMeasure, true)}
 						</select>
 						<div class="invalid-feedback d-block" id="invalid-travelUom"></div>
 					</div>

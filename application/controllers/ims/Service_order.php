@@ -131,6 +131,7 @@ class Service_order extends CI_Controller {
         if ($action == "update") {
             unset($serviceOrderData["reviseServiceOrderID"]);
             unset($serviceOrderData["createdBy"]);
+            unset($serviceOrderData["createdAt"]);
 
             if ($method == "cancelform") {
                 $serviceOrderData = [
@@ -152,7 +153,13 @@ class Service_order extends CI_Controller {
                     "serviceOrderRemarks" => $serviceOrderRemarks,
                     "updatedBy"            => $updatedBy,
                 ];
-            }
+            } else if ($method == "drop") {
+                $serviceOrderData = [
+                    "reviseServiceOrderID" => $reviseServiceOrderID,
+                    "serviceOrderStatus"   => 5,
+                    "updatedBy"            => $updatedBy,
+                ]; 
+            } 
         }
 
         $saveServiceOrderData = $this->serviceorder->saveServiceOrderData($action, $serviceOrderData, $serviceOrderID);
