@@ -52,7 +52,7 @@ class Inventory_stock_in extends CI_Controller {
             $data["barcodes"] = $this->inventorystockin->getBarcodes($receivedID,$itemID);
 			//$data["barcodes"] = $this->input->post("data");
 			$data["title"] = "PRINT BARCODES";
-			return $this->load->view("ims/Inventory_Stock_In/print",$data);
+			return $this->load->view("ims/inventory_stock_in/print",$data);
 		}
 
         // public function getStockinWarehouseByPO()

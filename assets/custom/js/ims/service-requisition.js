@@ -726,9 +726,8 @@ $(document).ready(function() {
 
 				return `
 				<option 
-					value        = "${item.serviceID}" 
-					serviceCode     = "${serviceCode}"
-					serviceUom          = "${item.serviceUom}"
+					value       = "${item.serviceID}" 
+					serviceCode = "${serviceCode}"
 					${item.serviceID == serviceIDArr[index] && "selected"}>
 					${item.serviceName}
 				</option>`;
@@ -756,7 +755,6 @@ $(document).ready(function() {
             <option 
                 value       = "${item.serviceID}" 
                 serviceCode = "${serviceCode}"
-                serviceUom  = "${item.serviceUom}"
                 ${item.serviceID == id && "selected"}>
                 ${item.serviceName}
             </option>`;
@@ -1210,10 +1208,7 @@ $(document).ready(function() {
     // ----- SELECT SERVICE NAME -----
     $(document).on("change", "[name=serviceID]", function() {
         const serviceCode = $('option:selected', this).attr("serviceCode");
-        const serviceUom  = $('option:selected', this).attr("serviceUom");
-
         $(this).closest("tr").find(`.servicecode`).first().text(serviceCode);
-        $(this).closest("tr").find(`.serviceUom`).first().text(serviceUom);
 
 		$(`[name=serviceID]`).each(function(i, obj) {
 			let serviceID = $(this).val();

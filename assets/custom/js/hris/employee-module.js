@@ -60,11 +60,12 @@ $(document).ready(function() {
 					{ targets: 1, width: 200 },
 					{ targets: 2, width: 150 },
 					{ targets: 3, width: 150 },
-					{ targets: 4, width: 300 },
-					{ targets: 5, width: 150 },
+					{ targets: 4, width: 150 },
+					{ targets: 5, width: 300 },
 					{ targets: 6, width: 150 },
-					{ targets: 7, width: 110 },
-					{ targets: 8, width: 80  },
+					{ targets: 7, width: 150 },
+					{ targets: 8, width: 110 },
+					{ targets: 9, width: 80  },
 				],
 			});
 
@@ -163,6 +164,7 @@ $(document).ready(function() {
             employeeHiredDate,
             departmentName,
             designationName,
+            employeeHourlyRate,
             employeeStatus`
         );
 
@@ -192,6 +194,7 @@ $(document).ready(function() {
                     <th>Fullname</th>
                     <th>Department</th>
                     <th>Designation</th>
+                    <th>Hourly Rate</th>
                     <th>Address</th>
                     <th>Mobile No.</th>
                     <th>Email Address</th>
@@ -219,11 +222,12 @@ $(document).ready(function() {
                 employeeMobile,
                 employeeUsername,
                 employeeEmail,
-                employeeProfile = "default.jpg",
                 employeeHiredDate,
-                departmentName = "-",
-                designationName = "-",
-                employeeStatus = 0,
+                employeeProfile    = "default.jpg",
+                departmentName     = "-",
+                designationName    = "-",
+                employeeHourlyRate = 0,
+                employeeStatus     = 0,
             } = employee;
 
             let unique = {
@@ -248,6 +252,7 @@ $(document).ready(function() {
                 <td>${profileImg} <span class="ml-2">${fullname}<span></td>
                 <td>${departmentName}</td>
                 <td>${designationName}</td>
+                <td class="text-right">${formatAmount(employeeHourlyRate, true)}</td>
                 <td>${address}</td>
                 <td>${employeeMobile}</td>
                 <td>${employeeEmail}</td>
@@ -1100,8 +1105,8 @@ $(document).ready(function() {
 
     // ----- CONFIRM PASSWORD -----
     function comparePassword() {
-        const password        = $("[name=employeePassword]").val()?.trim();
-        const confirmPassword = $("[name=employeeConfirmPassword]").val()?.trim();
+        const password        = $("[name=employeePassword]").val();
+        const confirmPassword = $("[name=employeeConfirmPassword]").val();
         const validated = $("[name=employeeConfirmPassword]").hasClass("validated");
         if (password.length > 0) {
             if (password == confirmPassword) {
@@ -1275,9 +1280,11 @@ $(document).ready(function() {
 
     // ----- CHANGE BASIC SALARY -----
     $(document).on("keyup", "[name=employeeBasicSalary]", function() {
-        const salary    = +$(this).val().replaceAll(",", "");
-        const dailyRate = salary / 22;
+        const salary     = +$(this).val().replaceAll(",", "");
+        const dailyRate  = salary / 22;
+        const hourlyRate = dailyRate / 8;
         $("[name=employeeDailyRate]").val(dailyRate.toFixed(2));
+        $("[name=employeeHourlyRate]").val(hourlyRate.toFixed(2));
     })
     // ----- END CHANGE BASIC SALARY -----
 
@@ -1288,6 +1295,7 @@ $(document).ready(function() {
         let {
             employeeBasicSalary     = "",
             employeeDailyRate       = "",
+            employeeHourlyRate      = "",
             employeeAllowance       = "",
             bankID                  = "",
             employeeBankAccountName = "",
@@ -1301,7 +1309,7 @@ $(document).ready(function() {
         let html = `
         <div class="forms-group">
             <div class="row">
-                <div class="col-lg-4 col-md-4 col-sm-12">
+                <div class="col-lg-3 col-md-3 col-sm-12">
                     <div class="form-group">
                         <label>Basic Salary <code>*</code></label>
                         <div class="input-group">
@@ -1320,12 +1328,12 @@ $(document).ready(function() {
                         <div class="invalid-feedback d-block" id="invalid-employeeBasicSalary"></div>
                     </div>
                 </div>
-                <div class="col-lg-4 col-md-4 col-sm-12">
+                <div class="col-lg-3 col-md-3 col-sm-12">
                     <div class="form-group">
                         <label>Daily Rate</label>
                         <div class="input-group">
                             <div class="input-group-prepend bg-transparent">
-                            <span class="input-group-text bg-transparent border-right-0">₱</span>
+                                <span class="input-group-text bg-transparent border-right-0">₱</span>
                             </div>
                             <input type="text"
                                 class="form-control amount"
@@ -1339,7 +1347,26 @@ $(document).ready(function() {
                         <div class="invalid-feedback d-block" id="invalid-employeeDailyRate"></div>
                     </div>
                 </div>
-                <div class="col-lg-4 col-md-4 col-sm-12">
+                <div class="col-lg-3 col-md-3 col-sm-12">
+                    <div class="form-group">
+                        <label>Hourly Rate</label>
+                        <div class="input-group">
+                            <div class="input-group-prepend bg-transparent">
+                                <span class="input-group-text bg-transparent border-right-0">₱</span>
+                            </div>
+                            <input type="text"
+                                class="form-control amount"
+                                name="employeeHourlyRate"
+                                id="employeeHourlyRate"
+                                min="0"
+                                max="9999999999"
+                                disabled
+                                value="${employeeHourlyRate}">
+                        </div>
+                        <div class="invalid-feedback d-block" id="invalid-employeeHourlyRate"></div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-3 col-sm-12">
                     <div class="form-group">
                         <label>Allowance</label>
                         <div class="input-group">
@@ -2445,8 +2472,10 @@ $(document).ready(function() {
                         },
                         maxDate: moment(new Date).format("MMMM DD, YYYY"),
                     }
-                    initDateRangePicker("#employeeBirthday", disabledFutureDates);
-                    initDateRangePicker("#employeeHiredDate", disabledFutureDates);
+                    const daterangepickerBirthday  = { ...disabledFutureDates, startDate: moment(employeeData[0]?.employeeBirthday)  };
+                    const daterangepickerHireddate = { ...disabledFutureDates, startDate: moment(employeeData[0]?.employeeHiredDate) };
+                    initDateRangePicker("#employeeBirthday", daterangepickerBirthday);
+                    initDateRangePicker("#employeeHiredDate", daterangepickerHireddate);
                     initDataTables();
 
                     if (!allowedUpdate) {
