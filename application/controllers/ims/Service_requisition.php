@@ -83,6 +83,12 @@ class Service_requisition extends CI_Controller {
                     "serviceRequisitionRemarks" => $serviceRequisitionRemarks,
                     "updatedBy"                 => $updatedBy,
                 ];
+            } else if ($method == "drop") {
+                $serviceRequisitionData = [
+                    "reviseServiceRequisitionID" => $reviseServiceRequisitionID,
+                    "serviceRequisitionStatus"   => 5,
+                    "updatedBy"                  => $updatedBy,
+                ]; 
             } else {
                 $this->servicerequisition->deleteServicesAndScopes($serviceRequisitionID);
             }

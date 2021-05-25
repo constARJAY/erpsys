@@ -1978,7 +1978,6 @@ $(document).ready(function() {
 			initAll();
 			updateInventoryItemOptions();
 			if (billMaterialID || projectID) {
-				// $("[name=billMaterialID]").val(billMaterialID).trigger("change");
 				$("[name=projectID]").val(projectID).trigger("change");
 			}
 
@@ -2297,7 +2296,7 @@ $(document).ready(function() {
 		const isFromCancelledDocument = $(this).attr("cancel") == "true";
 		const revise   = $(this).attr("revise") == "true";
 		const feedback = $(this).attr("code") || getFormCode("PR", dateToday(), id);
-		const action   = revise && !isFromCancelledDocument && "insert" || (id && feedback ? "update" : "insert");
+		const action   = revise && !isFromCancelledDocument && "insert" || (id ? "update" : "insert");
 		const data     = getPurchaseRequestData(action, "save", "0", id);
 		data.append("purchaseRequestStatus", 0);
 
@@ -2524,12 +2523,9 @@ $(document).ready(function() {
 
 	// ----- DROP DOCUMENT -----
 	$(document).on("click", "#btnDrop", function() {
-		const purchaseRequestID = decryptString($(this).attr("purchaseRequestID"));
-		const feedback          = $(this).attr("code") || getFormCode("PR", dateToday(), id);
-
 		const id = decryptString($(this).attr("purchaseRequestID"));
 		let data = new FormData;
-		data.append("purchaseRequestID", purchaseRequestID);
+		data.append("purchaseRequestID", id);
 		data.append("action", "update");
 		data.append("method", "drop");
 		data.append("updatedBy", sessionID);

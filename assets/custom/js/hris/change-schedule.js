@@ -157,12 +157,13 @@ $(document).ready(function () {
 				columnDefs: [
 					{ targets: 0, width: 100 },
 					{ targets: 1, width: 150 },
-					{ targets: 2, width: 150 },
-					{ targets: 3, width: 200 },
+					{ targets: 2, width: 350 },
+					{ targets: 3, width: 150 },
 					{ targets: 4, width: 200 },
 					{ targets: 5, width: 200 },
-					{ targets: 6, width: 80  },
-					{ targets: 7, width: 250 },
+					{ targets: 6, width: 200 },
+					{ targets: 7, width: 80  },
+					{ targets: 8, width: 250 },
 				],
 			});
 
@@ -178,12 +179,13 @@ $(document).ready(function () {
 				columnDefs: [
 					{ targets: 0, width: 100 },
 					{ targets: 1, width: 150 },
-					{ targets: 2, width: 150 },
-					{ targets: 3, width: 200 },
+					{ targets: 2, width: 350 },
+					{ targets: 3, width: 150 },
 					{ targets: 4, width: 200 },
 					{ targets: 5, width: 200 },
-					{ targets: 6, width: 80  },
-					{ targets: 7, width: 250 },
+					{ targets: 6, width: 200 },
+					{ targets: 7, width: 80  },
+					{ targets: 8, width: 250 },
 				],
 			});
 	}
@@ -252,6 +254,7 @@ $(document).ready(function () {
                 <tr style="white-space: nowrap">
                     <th>Document No.</th>
                     <th>Employee Name</th>
+                    <th>Description</th>
 					<th>Current Approver</th>
 					<th>Date Created</th>
 					<th>Date Submitted</th>
@@ -269,6 +272,7 @@ $(document).ready(function () {
 				approversID,
 				approversDate,
 				changeScheduleStatus,
+				changeScheduleReason,
 				changeScheduleRemarks,
 				submittedAt,
 				createdAt,
@@ -291,6 +295,7 @@ $(document).ready(function () {
 				<tr class="${btnClass}" id="${encryptString(changeScheduleID)}">
 					<td>${getFormCode("SCH", createdAt, changeScheduleID)}</td>
 					<td>${fullname}</td>
+					<td>${changeScheduleReason || "-"}</td>
 					<td>
 						${employeeFullname(getCurrentApprover(approversID, approversDate, changeScheduleStatus, true))}
 					</td>
@@ -334,6 +339,7 @@ $(document).ready(function () {
                 <tr style="white-space: nowrap">
                     <th>Document No.</th>
                     <th>Employee Name</th>
+                    <th>Description</th>
                     <th>Current Approver</th>
 					<th>Date Created</th>
 					<th>Date Submitted</th>
@@ -351,6 +357,7 @@ $(document).ready(function () {
 				changeScheduleDate,
 				approversID,
 				approversDate,
+				changeScheduleReason,
 				changeScheduleStatus,
 				changeScheduleRemarks,
 				submittedAt,
@@ -386,6 +393,7 @@ $(document).ready(function () {
             <tr class="${btnClass}" id="${encryptString(changeScheduleID)}">
                 <td>${getFormCode("SCH", createdAt, changeScheduleID)}</td>
                 <td>${fullname}</td>
+				<td>${changeScheduleReason || "-"}</td>
                 <td>
                     ${employeeFullname(getCurrentApprover(approversID, approversDate, changeScheduleStatus, true))}
                 </td>
@@ -739,7 +747,7 @@ $(document).ready(function () {
             </div>
             <div class="col-md-12 col-sm-12">
                 <div class="form-group">
-                    <label>Reason ${!disabled ? "<code>*</code>" : ""}</label>
+                    <label>Description ${!disabled ? "<code>*</code>" : ""}</label>
                     <textarea class="form-control validate"
                         data-allowcharacters="[a-z][A-Z][0-9][ ][.][,][-][()]['][/][&]"
                         minlength="1"

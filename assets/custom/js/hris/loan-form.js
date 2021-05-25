@@ -36,10 +36,24 @@ const employeeFullname = (id) => {
 }
 // ---- END GET EMPLOYEE DATA -----
 
+	// ----- IS DOCUMENT REVISED -----
+function isDocumentRevised(id = null) {
+	if (id) {
+		const revisedDocumentsID = getTableData(
+			"hris_loan_form_tbl", 
+			"reviseLoanFormID", 
+			"reviseLoanFormID IS NOT NULL AND loanFormStatus != 4");
+		return revisedDocumentsID.map(item => item.reviseLoanFormID).includes(id);
+	}
+	return false;
+}
+// ----- END IS DOCUMENT REVISED -----
+
 
 // ----- VIEW DOCUMENT -----
-function viewDocument(view_id = false, readOnly = false, isRevise = false) {
-	const loadData = (id, isRevise = false) => {
+function viewDocument(view_id = false, readOnly = false, isRevise = false, isFromCancelledDocument = false) {
+	console.log(view_id)
+	const loadData = (id, isRevise = false, isFromCancelledDocument = false) => {
 		const tableData = getTableData("hris_loan_form_tbl", "", "loanFormID=" + id);
 
 		if (tableData.length > 0) {
@@ -70,7 +84,7 @@ function viewDocument(view_id = false, readOnly = false, isRevise = false) {
 				// updateURL(encryptString(id));
 
 				if (isRevise && employeeID == sessionID) {
-					pageContent(true, tableData, isReadOnly, true);
+					pageContent(true, tableData, isReadOnly, true, isFromCancelledDocument);
 					updateURL(encryptString(id), true, true);
 				} else {
 					pageContent(true, tableData, isReadOnly);
@@ -89,8 +103,8 @@ function viewDocument(view_id = false, readOnly = false, isRevise = false) {
 	}
 
 	if (view_id) {
-		let id = decryptString(view_id);
-			id && isFinite(id) && loadData(id, isRevise);
+		let id = view_id;
+			id && isFinite(id) && loadData(id, isRevise, isFromCancelledDocument);
 	} else {
 		let url   = window.document.URL;
 		let arr   = url.split("?view_id=");
@@ -216,7 +230,7 @@ function headerTabContent(display = true) {
 
 
 // ----- HEADER BUTTON -----
-function headerButton(isAdd = true, text = "Add", isRevise = false) {
+function headerButton(isAdd = true, text = "Add", isRevise = false, isFromCancelledDocument = false) {
 	let html;
 	if (isAdd) {
 		if (isCreateAllowed(59)) {
@@ -225,7 +239,7 @@ function headerButton(isAdd = true, text = "Add", isRevise = false) {
 		}
 	} else {
 		html = `
-		<button type="button" class="btn btn-default btn-light" id="btnBack" revise="${isRevise}"><i class="fas fa-arrow-left"></i> &nbsp;Back</button>`;
+		<button type="button" class="btn btn-default btn-light" id="btnBack" revise="${isRevise}" cancel="${isFromCancelledDocument}"><i class="fas fa-arrow-left"></i> &nbsp;Back</button>`;
 	}
 	$("#headerButton").html(html);
 }
@@ -409,11 +423,12 @@ function myFormsContent() {
 
 
 // ----- FORM BUTTONS -----
-function formButtons(data = false, isRevise = false) {
+function formButtons(data = false, isRevise = false, isFromCancelledDocument = false) {
 	let button = "";
 	if (data) {
 		let {
 			loanFormID     = "",
+			reviseLoanFormID     = "",
 			loanFormStatus = "",
 			employeeID           = "",
 			approversID          = "",
@@ -433,14 +448,14 @@ function formButtons(data = false, isRevise = false) {
 				<button 
 					class="btn btn-submit px-5 p-2"  
 					id="btnSubmit" 
-					loanFormID="${loanFormID}"
-					code="${getFormCode("LNF", createdAt, loanFormID)}" revise=${isRevise}><i class="fas fa-paper-plane"></i>
+					loanFormID="${encryptString(loanFormID)}"
+					code="${getFormCode("LNF", createdAt, loanFormID)}" revise="${isRevise}" cancel="${isFromCancelledDocument}"><i class="fas fa-paper-plane"></i>
 					Submit
 				</button>`;
 				// <button 
 				// 	class="btn btn-cancel px-5 p-2"
 				// 	id="btnCancelForm" 
-				// 	loanFormID="${loanFormID}"
+				// 	loanFormID="${encryptString(loanFormID)}"
 				// 	code="${getFormCode("LNF", createdAt, loanFormID)}" revise="${isRevise}"><i class="fas fa-ban"></i> 
 				// 	Cancel
 				// </button>`;
@@ -450,7 +465,8 @@ function formButtons(data = false, isRevise = false) {
 					<button 
 						class="btn btn-cancel px-5 p-2" 
 						id="btnCancel"
-						revise="${isRevise}"><i class="fas fa-ban"></i> 
+						revise="${isRevise}"
+						cancel="${isFromCancelledDocument}"><i class="fas fa-ban"></i> 
 						Cancel
 					</button>`;
 				} else {
@@ -458,7 +474,7 @@ function formButtons(data = false, isRevise = false) {
 					<button 
 						class="btn btn-cancel px-5 p-2"
 						id="btnCancelForm" 
-						loanFormID="${loanFormID}"
+						loanFormID="${encryptString(loanFormID)}"
 						code="${getFormCode("LNF", createdAt, loanFormID)}" revise="${isRevise}"><i class="fas fa-ban"></i> 
 						Cancel
 					</button>`;
@@ -469,24 +485,52 @@ function formButtons(data = false, isRevise = false) {
 					<button 
 						class="btn btn-cancel px-5 p-2"
 						id="btnCancelForm" 
-						loanFormID="${loanFormID}"
+						loanFormID="${encryptString(loanFormID)}"
 						code="${getFormCode("LNF", createdAt, loanFormID)}"><i class="fas fa-ban"></i> 
 						Cancel
 					</button>`;
 				}
-			} else if (loanFormStatus == 2) {
+			}  else if (loanFormStatus == 2) {
 				
 					// DROP
 					button = `
 					<button type="button" 
 						class="btn btn-cancel px-5 p-2"
 						id="btnDrop" 
-						loanFormID="${loanFormID}"
+						loanFormID="${encryptString(loanFormID)}"
 						code="${getFormCode("LNF", createdAt, loanFormID)}"
 						status="${loanFormStatus}"><i class="fas fa-ban"></i> 
 						Drop
 					</button>`;
-			}
+			} else if (loanFormStatus == 3) {
+				// DENIED - FOR REVISE
+				if (!isDocumentRevised(loanFormID)) {
+					button = `
+					<button
+						class="btn btn-cancel px-5 p-2"
+						id="btnRevise" 
+						loanFormID="${encryptString(loanFormID)}"
+						code="${getFormCode("LNF", createdAt, loanFormID)}"
+						status="${loanFormStatus}"><i class="fas fa-clone"></i>
+						Revise
+					</button>`;
+				}
+			} else if (loanFormStatus == 4) {
+				
+				// CANCELLED - FOR REVISE
+				if (!isDocumentRevised(loanFormID)) {
+					button = `
+					<button
+						class="btn btn-cancel px-5 p-2"
+						id="btnRevise" 
+						loanFormID="${encryptString(loanFormID)}"
+						code="${getFormCode("LNF", createdAt, loanFormID)}"
+						status="${loanFormStatus}"
+						cancel="true"><i class="fas fa-clone"></i>
+						Revise
+					</button>`;
+				}
+		}
 		} else {
 			if (loanFormStatus == 1) {
 				if (isImCurrentApprover(approversID, approversDate)) {
@@ -526,7 +570,7 @@ function formButtons(data = false, isRevise = false) {
 
 
 // ----- FORM CONTENT -----
-function formContent(data = false, readOnly = false, isRevise = false) {
+function formContent(data = false, readOnly = false, isRevise = false, isFromCancelledDocument = false) {
 	$("#page_content").html(preloader);
 	readOnly = isRevise ? false : readOnly;
 
@@ -563,9 +607,10 @@ function formContent(data = false, readOnly = false, isRevise = false) {
 	$("#btnBack").attr("loanFormID", loanFormID);
 	$("#btnBack").attr("status", loanFormStatus);
 	$("#btnBack").attr("employeeID", employeeID);
+	$("#btnBack").attr("cancel", isFromCancelledDocument);
 
 	let disabled = readOnly ? "disabled" : "";
-	let button   = formButtons(data, isRevise);
+	let button   = formButtons(data, isRevise, isFromCancelledDocument);
 
 	let loanType        =   getTableData("hris_loan_tbl","","loanStatus != 0");
 	let optionLoanType  =   `<option value="" disabled selected>Select Loan Type</option>`;
@@ -764,7 +809,7 @@ function formContent(data = false, readOnly = false, isRevise = false) {
 
 
 // ----- PAGE CONTENT -----
-function pageContent(isForm = false, data = false, readOnly = false, isRevise = false) {
+function pageContent(isForm = false, data = false, readOnly = false, isRevise = false, isFromCancelledDocument = false) {
 	$("#page_content").html(preloader);
 	if (!isForm) {
 		preventRefresh(false);
@@ -787,9 +832,9 @@ function pageContent(isForm = false, data = false, readOnly = false, isRevise = 
 		myFormsContent();
 		updateURL();
 	} else {
-		headerButton(false, "", isRevise);
+		headerButton(false, "", isRevise, isFromCancelledDocument);
 		headerTabContent(false);
-		formContent(data, readOnly, isRevise);
+		formContent(data, readOnly, isRevise, isFromCancelledDocument);
 	}
 }
 viewDocument();
@@ -935,6 +980,8 @@ $(document).on("click", "#btnAdd", function () {
 // ----- CLOSE FORM -----
 $(document).on("click", "#btnBack", function () {
 	const id         = $(this).attr("loanFormID");
+	const isFromCancelledDocument = $(this).attr("cancel") == "true";
+	const revise     = $(this).attr("revise") == "true";
 	const employeeID = $(this).attr("employeeID");
 	const feedback   = $(this).attr("code") || getFormCode("LNF", dateToday(), id);
 	const status     = $(this).attr("status");
@@ -943,9 +990,55 @@ $(document).on("click", "#btnBack", function () {
 		$("#page_content").html(preloader);
 		pageContent();
 
-		if (employeeID != sessionID) {
-			$("[redirect=forApprovalTab]").length > 0 && $("[redirect=forApprovalTab]").trigger("click");
-		}
+	
+        if (revise) {
+
+            // const action   = id && feedback ? "update" : "insert";
+            const action = revise && !isFromCancelledDocument && "insert" || (id ? "update" : "insert");
+            const data     = getData(action, 0, "save", feedback, id);
+            data.append("loanFormStatus", 0);
+
+            if (!isFromCancelledDocument) {
+                data.append("reviseLoanFormID", id);
+                data.delete("loanFormID");
+            } else {
+                data.append("loanFormID", id);
+                data.delete("action");
+                data.append("action", "update");
+            }
+
+            // ---------- CONVERT VALUE WITH COMMA BEFORE SENDING IN CONTROLLER --------------------
+            let loanFormAmount = data["tableData"]["loanFormAmount"].replaceAll(",","");
+            let loanFormDeductionAmount = data["tableData"]["loanFormDeductionAmount"].replaceAll(",","");
+
+            data["tableData"]["loanFormAmount"] = loanFormAmount;
+            data["tableData"]["loanFormDeductionAmount"] = loanFormDeductionAmount;
+
+            // ---------- CONVERT VALUE WITH COMMA BEFORE SENDING IN CONTROLLER --------------------
+
+            setTimeout(() => {
+                cancelForm(
+                    "save",
+                    action,
+                    "LOAN",
+                    "",
+                    "form_loan_form",
+                    data,
+                    true,
+                    pageContent
+                );
+            }, 300);
+    
+        } else {
+            $("#page_content").html(preloader);
+            pageContent();
+
+            if (employeeID != sessionID) {
+                $("[redirect=forApprovalTab]").length > 0 && $("[redirect=forApprovalTab]").trigger("click");
+            }
+        }
+
+		
 	} else {
 		const action   = id && feedback ? "update" : "insert";
 		const data     = getData(action, 0, "save", feedback, id);
@@ -995,37 +1088,36 @@ $(document).on("click", ".btnView", function () {
 });
 // ----- END VIEW DOCUMENT -----
 
+// ----- REVISE DOCUMENT -----
+$(document).on("click", "#btnRevise", function () {
+	
+	const id                    = decryptString($(this).attr("loanFormID"));
+	const fromCancelledDocument = $(this).attr("cancel") == "true";
+
+	viewDocument(id, false, true, fromCancelledDocument);
+});
+// ----- END REVISE DOCUMENT -----
+
 
 // ----- SAVE DOCUMENT -----
 $(document).on("click", "#btnSave", function () {
-	/**
-	 * 
-	 * 	I THINK IF IT'S A DRAFT DOCUMENT, NO NEED TO VALIDATE...
-	 * 
-	 */
-	// const validate     = validateForm("form_loan_form");
-	// const validateTime = checkTimeRange(false, true);
-
-	// if (validate && validateTime) {
-	// 	const action   = "insert"; 
-	// 	const feedback = getFormCode("LNF", dateToday()); // OTR-20-00000
-
-	// 	const data = getData(action, 0, "save", feedback);
-
-	// 	formConfirmation(
-	// 		"save",
-	// 		"insert",
-	// 		"LOAN",
-	// 		"",
-	// 		"form_loan_form",
-	// 		data,
-	// 		true,
-	// 		myFormsContent
-	// 	);
-	// }
-	const action   = "insert"; 
+	
+    const action   = revise && !isFromCancelledDocument && "insert" || (id && feedback ? "update" : "insert");
+    const isFromCancelledDocument = $(this).attr("cancel") == "true";
+    const revise   = $(this).attr("revise") == "true";
 	const feedback = getFormCode("LNF", dateToday()); 
 	const data     = getData(action, 0, "save", feedback);
+    data.append("loanFormStatus", 0);
+    if (revise) {
+        if (!isFromCancelledDocument) {
+            data.append("reviseLoanFormID", id);
+            data.delete("loanFormID");
+        } else {
+            data.append("loanFormID", id);
+            data.delete("action");
+            data.append("action", "update");
+        }
+    }
 
 	// ---------- CONVERT VALUE WITH COMMA BEFORE SENDING IN CONTROLLER --------------------
 	let loanFormAmount = data["tableData"]["loanFormAmount"].replaceAll(",","");
@@ -1053,14 +1145,28 @@ $(document).on("click", "#btnSave", function () {
 // ----- SUBMIT DOCUMENT -----
 $(document).on("click", "#btnSubmit", function () {
 	const id           = $(this).attr("loanFormID");
+    const isFromCancelledDocument = $(this).attr("cancel") == "true";
+    const revise        = $(this).attr("revise") == "true";
 	const validate     = validateForm("form_loan_form");
 	const validateTime = checkTimeRange(false, true);
 
 	if (validate && validateTime) {
 		const feedback = $(this).attr("code") || getFormCode("LNF", dateToday(), id);
-		const action   = id && feedback ? "update" : "insert";
+        const action = revise && !isFromCancelledDocument && "insert" || (id ? "update" : "insert");
 		const data     = getData(action, 1, "submit", feedback, id);
 
+        if (revise) {
+            if (!isFromCancelledDocument) {
+                data.append("reviseLoanFormID", id);
+                data.delete("loanFormID");
+            }
+        }
+
+        let approversID = "", approversDate = "";
+			for (var i of data) {
+				if (i[0] == "approversID")   approversID   = i[1];
+				if (i[0] == "approversDate") approversDate = i[1];
+			}
 		// ---------- CONVERT VALUE WITH COMMA BEFORE SENDING IN CONTROLLER --------------------
 		let loanFormAmount = data["tableData"]["loanFormAmount"].replaceAll(",","");
 		let loanFormDeductionAmount = data["tableData"]["loanFormDeductionAmount"].replaceAll(",","");
@@ -1069,7 +1175,7 @@ $(document).on("click", "#btnSubmit", function () {
 		data["tableData"]["loanFormDeductionAmount"] = loanFormDeductionAmount;
 
 		// ---------- CONVERT VALUE WITH COMMA BEFORE SENDING IN CONTROLLER --------------------
-
+        // const employeeID = getNotificationEmployeeID(approversID, approversDate, true);
 		const employeeID = getNotificationEmployeeID(
 			data["tableData[approversID]"],
 			data["tableData[approversDate]"],
@@ -1171,9 +1277,23 @@ $(document).on("click", "#btnCancelForm", function () {
 $(document).on("click", "#btnCancel", function () {
 	const id       = $(this).attr("loanFormID");
 	const feedback = $(this).attr("code") || getFormCode("LNF", dateToday(), id);
-	const action   = id && feedback ? "update" : "insert";
+	const action   = revise && !isFromCancelledDocument && "insert" || (id && feedback ? "update" : "insert");
+    const isFromCancelledDocument = $(this).attr("cancel") == "true";
+    const revise   = $(this).attr("revise") == "true";
 	const data     = getData(action, 0, "save", feedback, id);
+    data.append("loanFormStatus", 0);
 
+    if (revise) {
+        if (!isFromCancelledDocument) {
+            data.append("reviseLoanFormID", id);
+            data.delete("loanFormID");
+        } else {
+            data.append("loanFormID", id);
+            data.delete("action");
+            data.append("action", "update");
+        }
+    }
+    
 	// ---------- CONVERT VALUE WITH COMMA BEFORE SENDING IN CONTROLLER --------------------
 	let loanFormAmount = data["tableData"]["loanFormAmount"].replaceAll(",","");
 	let loanFormDeductionAmount = data["tableData"]["loanFormDeductionAmount"].replaceAll(",","");

@@ -1760,7 +1760,7 @@ $(document).ready(function() {
 				$("#tableRequestItems").html(preloader);
 				setTimeout(() => {
 					$("#tableRequestItems").html(table);
-					initAll();
+					// initAll();
 					initDataTables();
 					updateTableItems();
 					updateInventoryItemOptions();
@@ -2989,7 +2989,7 @@ $(document).ready(function() {
 		</div>
 		<div class="modal-footer text-right">
 			<button class="btn btn-danger px-5 p-2" id="btnRejectConfirmation"
-			purchaseOrderID="${id}"
+			purchaseOrderID="${encryptString(id)}"
 			code="${feedback}"><i class="far fa-times-circle"></i> Deny</button>
 			<button class="btn btn-cancel btnCancel px-5 p-2" data-dismiss="modal"><i class="fas fa-ban"></i> Cancel</button>
 		</div>`;

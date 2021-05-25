@@ -713,7 +713,7 @@ $(document).ready(function() {
 			requestItemsData = getTableData(
 				"ims_request_items_tbl", 
 				"", 
-				`purchaseOrderID = ${id} AND orderedPending <> 0`
+				`purchaseOrderID = ${id} AND (orderedPending <> 0 OR orderedPending IS NULL ) `
 			)
 		}
 
@@ -1076,9 +1076,7 @@ $(document).ready(function() {
                 </div>
             </div>
         </div>
-
         <div class="row" id="form_inventory_receiving">
-
             <div class="col-md-4 col-sm-12">
                 <div class="form-group">
                     <label>Reference No. ${!disabled ? "<code>*</code>" : ""}</label>
@@ -1098,14 +1096,12 @@ $(document).ready(function() {
                     <div class="d-block invalid-feedback" id="invalid-purchaseOrderID"></div>
                 </div>
             </div>
-
             <div class="col-md-4 col-sm-12">
                 <div class="form-group">
                     <label>Vendor Name</label>
                     <input type="text" class="form-control" name="vendorName" disabled value="-">
                 </div>
             </div>
-
             <div class="col-md-4 col-sm-12">
 				 <div class="form-group">
                     <label>Date Received ${!disabled ? "<code>*</code>" : ""}</label>
@@ -1120,7 +1116,6 @@ $(document).ready(function() {
                     <div class="d-block invalid-feedback" id="invalid-dateReceived"></div>
                 </div>
             </div>
-
             <div class="col-md-4 col-sm-12">
                 <div class="form-group">
                     <label>Employee Name</label>
@@ -1139,9 +1134,7 @@ $(document).ready(function() {
                     <input type="text" class="form-control" disabled value="${employeeDesignation}">
                 </div>
             </div>
-
             <div class="col-sm-12">
-
                 <div class="w-100">
 					<hr class="pb-1">
 					<div class="text-primary font-weight-bold" style="font-size: 1.5rem;">Receiving Item/s: </div>
@@ -1166,9 +1159,7 @@ $(document).ready(function() {
                     
 					
                 </div>
-
             </div>
-
             <div class="col-md-12 text-right mt-3">
                 ${button}
             </div>

@@ -1,4 +1,5 @@
 $(document).ready(function() {
+	const allowedUpdate = isUpdateAllowed(126);
     // ----- MODULE APPROVER -----
 	const moduleApprover = getModuleApprover(126);
 	// ----- END MODULE APPROVER -----
@@ -23,10 +24,23 @@ $(document).ready(function() {
 	}
 	// ---- END GET EMPLOYEE DATA -----
 
+	// ----- IS DOCUMENT REVISED -----
+	function isDocumentRevised(id = null) {
+		if (id) {
+			const revisedDocumentsID = getTableData(
+				"ims_inventory_validation_tbl", 
+				"reviseInventoryValidationID", 
+				"reviseInventoryValidationID IS NOT NULL AND inventoryValidationStatus != 4");
+			return revisedDocumentsID.map(item => item.reviseInventoryValidationID).includes(id);
+		}
+		return false;
+	}
+	// ----- END IS DOCUMENT REVISED -----
+
 
     // ----- VIEW DOCUMENT -----
-	function viewDocument(view_id = false, readOnly = false, isRevise = false) {
-		const loadData = (id, isRevise = false) => {
+	function viewDocument(view_id = false, readOnly = false, isRevise = false, isFromCancelledDocument = false) {
+		const loadData = (id, isRevise = false, isFromCancelledDocument = false) => {
 			const tableData = getTableData("ims_inventory_validation_tbl", "", "inventoryValidationID=" + id);
 
 			if (tableData.length > 0) {
@@ -54,7 +68,7 @@ $(document).ready(function() {
 
 				if (isAllowed) {
 					if (isRevise && employeeID == sessionID) {
-						pageContent(true, tableData, isReadOnly, true);
+						pageContent(true, tableData, isReadOnly, true, isFromCancelledDocument = false);
 						updateURL(encryptString(id), true, true);
 					} else {
 						pageContent(true, tableData, isReadOnly);
@@ -72,8 +86,9 @@ $(document).ready(function() {
 		}
 
 		if (view_id) {
-			let id = decryptString(view_id);
-				id && isFinite(id) && loadData(id, isRevise);
+			// let id = decryptString(view_id);
+			let id = view_id;
+				id && isFinite(id) && loadData(id, isRevise, isFromCancelledDocument);
 		} else {
 			let url   = window.document.URL;
 			let arr   = url.split("?view_id=");
@@ -149,13 +164,14 @@ $(document).ready(function() {
 					{ targets: 0,  width: 100 },
 					{ targets: 1,  width: 150 },
 					{ targets: 2,  width: 100 },
-					{ targets: 3,  width: 200 },
-					{ targets: 4,  width: 150 },
-					{ targets: 5,  width: 200 },
+					{ targets: 3,  width: 350 },
+					{ targets: 4,  width: 350 },
+					{ targets: 5,  width: 150 },
 					{ targets: 6,  width: 200 },
 					{ targets: 7,  width: 200 },
-					{ targets: 8,  width: 80 },
-					{ targets: 9,  width: 250  },
+					{ targets: 8,  width: 200 },
+					{ targets: 9,  width: 80 },
+					{ targets: 10,  width: 250  },
 				],
 			});
 
@@ -172,13 +188,14 @@ $(document).ready(function() {
 					{ targets: 0,  width: 100 },
 					{ targets: 1,  width: 150 },
 					{ targets: 2,  width: 100 },
-					{ targets: 3,  width: 200 },
-					{ targets: 4,  width: 150 },
-					{ targets: 5,  width: 200 },
+					{ targets: 3,  width: 350 },
+					{ targets: 4,  width: 350 },
+					{ targets: 5,  width: 150 },
 					{ targets: 6,  width: 200 },
 					{ targets: 7,  width: 200 },
-					{ targets: 8,  width: 80 },
-					{ targets: 9,  width: 250  },
+					{ targets: 8,  width: 200 },
+					{ targets: 9,  width: 80 },
+					{ targets: 10,  width: 250 },
 				],
 			});
 
@@ -300,14 +317,18 @@ $(document).ready(function() {
 
 
     // ----- HEADER BUTTON -----
-	function headerButton(isAdd = true, text = "Add", isRevise = false) {
+	function headerButton(isAdd = true, text = "Add", isRevise = false, isFromCancelledDocument = false) {
 		let html;
 		if (isAdd) {
-            html = `
-            <button type="button" class="btn btn-default btn-add" id="btnAdd"><i class="icon-plus"></i> &nbsp;${text}</button>`;
-		} else {
+			if(isCreateAllowed(129)){
+				html = `
+				<button type="button" class="btn btn-default btn-add" id="btnAdd"><i class="icon-plus"></i> &nbsp;${text}</button>`;	
+			}
+        } else {
 			html = `
-            <button type="button" class="btn btn-default btn-light" id="btnBack" revise="${isRevise}"><i class="fas fa-arrow-left"></i> &nbsp;Back</button>`;
+            <button type="button" class="btn btn-default btn-light" id="btnBack" 
+			revise="${isRevise}" cancel="${isFromCancelledDocument}">
+			<i class="fas fa-arrow-left"></i> &nbsp;Back</button>`;
 		}
 		$("#headerButton").html(html);
 	}
@@ -321,7 +342,7 @@ $(document).ready(function() {
 			"ims_inventory_validation_tbl AS imrt LEFT JOIN hris_employee_list_tbl AS helt USING(employeeID) LEFT JOIN pms_project_list_tbl AS pplt ON pplt.projectListID = imrt.projectID",
 			"imrt.*, CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname, imrt.createdAt AS dateCreated, projectListCode, projectListName",
 			`imrt.employeeID != ${sessionID} AND inventoryValidationStatus != 0 AND inventoryValidationStatus != 4`,
-			`FIELD(inventoryValidationStatus, 0, 1, 3, 2, 4), COALESCE(imrt.submittedAt, imrt.createdAt)`
+			`FIELD(inventoryValidationStatus, 0, 1, 3, 2, 4, 5), COALESCE(imrt.submittedAt, imrt.createdAt)`
 		);
 
 		let html = `
@@ -329,15 +350,16 @@ $(document).ready(function() {
             <thead>
                 <tr style="white-space: nowrap">
 					<th>Document No.</th>
-					<th>Employee Name</th>
+                    <th>Prepared By</th>
 					<th>Reference No.</th>
-					<th>Project Name</th>
-					<th>Current Approver</th>
-					<th>Date Created</th>
-					<th>Date Submitted</th>
-					<th>Date Approved</th>
-					<th>Status</th>
-					<th>Remarks</th>
+                    <th>Project Name</th>
+                    <th>Description</th>
+                    <th>Current Approver</th>
+                    <th>Date Created</th>
+                    <th>Date Submitted</th>
+                    <th>Date Approved</th>
+                    <th>Status</th>
+                    <th>Remarks</th>
                 </tr>
             </thead>
             <tbody>`;
@@ -353,6 +375,7 @@ $(document).ready(function() {
 				approversDate,
 				inventoryValidationStatus,
 				inventoryValidationRemarks,
+				inventoryValidationReason,
 				submittedAt,
 				createdAt,
 			} = item;
@@ -361,7 +384,7 @@ $(document).ready(function() {
 			let remarks       = inventoryValidationRemarks ? inventoryValidationRemarks : "-";
 			let dateCreated   = moment(createdAt).format("MMMM DD, YYYY hh:mm:ss A");
 			let dateSubmitted = submittedAt ? moment(submittedAt).format("MMMM DD, YYYY hh:mm:ss A") : "-";
-			let dateApproved  = inventoryValidationStatus == 2 ? approversDate.split("|") : "-";
+			let dateApproved  = inventoryValidationStatus == 2 || inventoryValidationStatus == 5 ? approversDate.split("|") : "-";
 			if (dateApproved !== "-") {
 				dateApproved = moment(dateApproved[dateApproved.length - 1]).format("MMMM DD, YYYY hh:mm:ss A");
 			}
@@ -387,6 +410,7 @@ $(document).ready(function() {
 						</div>
 						<small style="color:#848482;">${projectListCode || '-'}</small>
 					</td>
+					<td>${inventoryValidationReason || "-"}</td>
 					<td>
 						${employeeFullname(getCurrentApprover(approversID, approversDate, inventoryValidationStatus, true))}
 					</td>
@@ -421,7 +445,7 @@ $(document).ready(function() {
 			"ims_inventory_validation_tbl AS imrt LEFT JOIN hris_employee_list_tbl AS helt USING(employeeID) LEFT JOIN pms_project_list_tbl AS pplt ON pplt.projectListID = imrt.projectID",
 			"imrt.*, CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname, imrt.createdAt AS dateCreated, projectListCode, projectListName",
 			`imrt.employeeID = ${sessionID}`,
-			`FIELD(inventoryValidationStatus, 0, 1, 3, 2, 4), COALESCE(imrt.submittedAt, imrt.createdAt)`
+			`FIELD(inventoryValidationStatus, 0, 1, 3, 2, 4, 5), COALESCE(imrt.submittedAt, imrt.createdAt)`
 		);
 
 		let html = `
@@ -429,15 +453,16 @@ $(document).ready(function() {
             <thead>
                 <tr style="white-space: nowrap">
 					<th>Document No.</th>
-					<th>Employee Name</th>
+                    <th>Prepared By</th>
 					<th>Reference No.</th>
-					<th>Project Name</th>
-					<th>Current Approver</th>
-					<th>Date Created</th>
-					<th>Date Submitted</th>
-					<th>Date Approved</th>
-					<th>Status</th>
-					<th>Remarks</th>
+                    <th>Project Name</th>
+                    <th>Description</th>
+                    <th>Current Approver</th>
+                    <th>Date Created</th>
+                    <th>Date Submitted</th>
+                    <th>Date Approved</th>
+                    <th>Status</th>
+                    <th>Remarks</th>
                 </tr>
             </thead>
             <tbody>`;
@@ -453,6 +478,7 @@ $(document).ready(function() {
 				approversDate,
 				inventoryValidationStatus,
 				inventoryValidationRemarks,
+				inventoryValidationReasons,
 				submittedAt,
 				createdAt,
 			} = item;
@@ -460,7 +486,7 @@ $(document).ready(function() {
 			let remarks       = inventoryValidationRemarks ? inventoryValidationRemarks : "-";
 			let dateCreated   = moment(createdAt).format("MMMM DD, YYYY hh:mm:ss A");
 			let dateSubmitted = submittedAt ? moment(submittedAt).format("MMMM DD, YYYY hh:mm:ss A") : "-";
-			let dateApproved  = inventoryValidationStatus == 2 ? approversDate.split("|") : "-";
+			let dateApproved  = inventoryValidationStatus == 2 || inventoryValidationStatus == 5 ? approversDate.split("|") : "-";
 			if (dateApproved !== "-") {
 				dateApproved = moment(dateApproved[dateApproved.length - 1]).format("MMMM DD, YYYY hh:mm:ss A");
 			}
@@ -485,6 +511,7 @@ $(document).ready(function() {
 					</div>
 					<small style="color:#848482;">${projectListCode || '-'}</small>
 				</td>
+				<td>${inventoryValidationReasons || "-"}</td>
                 <td>
                     ${employeeFullname(getCurrentApprover(approversID, approversDate, inventoryValidationStatus, true))}
                 </td>
@@ -512,7 +539,7 @@ $(document).ready(function() {
 
 
     // ----- FORM BUTTONS -----
-	function formButtons(data = false, isRevise = false) {
+	function formButtons(data = false, isRevise = false, isFromCancelledDocument = false) {
 		let button = "";
 		if (data) {
 			let {
@@ -532,9 +559,9 @@ $(document).ready(function() {
 					<button 
 						class="btn btn-submit px-5 p-2" 
 						id="btnSubmit" 
-						inventoryValidationID="${inventoryValidationID}"
+						inventoryValidationID="${encryptString(inventoryValidationID)}"
 						code="${getFormCode("IVR", createdAt, inventoryValidationID)}"
-						revise=${isRevise}><i class="fas fa-paper-plane"></i>
+						revise="${isRevise}" cancel="${isFromCancelledDocument}"><i class="fas fa-paper-plane"></i>
 						Submit
 					</button>`;
 
@@ -551,9 +578,9 @@ $(document).ready(function() {
 						<button 
 							class="btn btn-cancel px-5 p-2"
 							id="btnCancelForm" 
-							inventoryValidationID="${inventoryValidationID}"
+							inventoryValidationID="${encryptString(inventoryValidationID)}"
 							code="${getFormCode("IVR", createdAt, inventoryValidationID)}"
-							revise=${isRevise}><i class="fas fa-ban"></i> 
+							revise="${isRevise}"><i class="fas fa-ban"></i> 
 							Cancel
 						</button>`;
 					}
@@ -566,15 +593,26 @@ $(document).ready(function() {
 						<button 
 							class="btn btn-cancel px-5 p-2"
 							id="btnCancelForm" 
-							inventoryValidationID="${inventoryValidationID}"
+							inventoryValidationID="${encryptString(inventoryValidationID)}"
 							code="${getFormCode("IVR", createdAt, inventoryValidationID)}"
 							status="${inventoryValidationStatus}"><i class="fas fa-ban"></i> 
 							Cancel
 						</button>`;
 					}
+				} else if(inventoryValidationStatus == 2){
+					// DROP
+					button = `
+					<button type="button" 
+						class="btn btn-cancel px-5 p-2"
+						id="btnDrop" 
+						inventoryValidationID="${encryptString(inventoryValidationID)}"
+						code="${getFormCode("IVR", createdAt, inventoryValidationID)}"
+						status="${inventoryValidationStatus}"><i class="fas fa-ban"></i> 
+						Drop
+					</button>`;
 				} else if (inventoryValidationStatus == 3) {
 					// DENIED - FOR REVISE
-						if(!isRevised(inventoryValidationID)){
+						if(!isDocumentRevised(inventoryValidationID)){
 							button = `
 							<button
 								class="btn btn-cancel px-5 p-2"
@@ -585,6 +623,20 @@ $(document).ready(function() {
 								Revise
 							</button>`;
 						}
+				} else if (inventoryValidationStatus == 4) {
+					// CANCELLED - FOR REVISE
+					if (!isDocumentRevised(inventoryValidationID)) {
+						button = `
+						<button
+							class="btn btn-cancel px-5 p-2"
+							id="btnRevise" 
+							inventoryValidationID="${encryptString(inventoryValidationID)}"
+							code="${getFormCode("CEF", createdAt, inventoryValidationID)}"
+							status="${inventoryValidationStatus}"
+							cancel="true"><i class="fas fa-clone"></i>
+							Revise
+						</button>`;
+					}
 				}
 			} else {
 				if (inventoryValidationStatus == 1) {
@@ -1126,7 +1178,7 @@ $(document).ready(function() {
 
 
     // ----- FORM CONTENT -----
-	function formContent(data = false, readOnly = false, isRevise = false) {
+	function formContent(data = false, readOnly = false, isRevise = false, isFromCancelledDocument = false) {
 		$("#page_content").html(preloader);
 		readOnly = isRevise ? false : readOnly;
 		let {
@@ -1207,9 +1259,10 @@ $(document).ready(function() {
 
 		readOnly ? preventRefresh(false) : preventRefresh(true);
 
-		$("#btnBack").attr("inventoryValidationID", inventoryValidationID);
+		$("#btnBack").attr("inventoryValidationID", encryptString(inventoryValidationID));
 		$("#btnBack").attr("status", inventoryValidationStatus);
 		$("#btnBack").attr("employeeID", employeeID);
+		$("#btnBack").attr("cancel", isFromCancelledDocument);
 
 		let disabled = readOnly ? "disabled" : "";
 		
@@ -1217,7 +1270,7 @@ $(document).ready(function() {
 		let tableProjectRequestItemsName = !disabled ? "tableProjectRequestItems" : "tableProjectRequestItems0";
 		let tableCompanyRequestItemsName = !disabled ? "tableCompanyRequestItems" : "tableCompanyRequestItems0";
 
-		let button = formButtons(data, isRevise);
+		let button = formButtons(data, isRevise, isFromCancelledDocument);
 
 		let reviseDocumentNo    = isRevise ? inventoryValidationID : reviseInventoryValidationID;
 		let documentHeaderClass = isRevise || reviseInventoryValidationID ? "col-lg-4 col-md-4 col-sm-12 px-1" : "col-lg-2 col-md-6 col-sm-12 px-1";
@@ -1460,6 +1513,17 @@ $(document).ready(function() {
 			initAmount();
 			updateInventoryItemOptions();
 			projectID && projectID != 0 && $("[name=projectID]").trigger("change");
+			// ----- NOT ALLOWED FOR UPDATE -----
+			if (!allowedUpdate) {
+				$("#page_content").find(`input, select, textarea`).each(function() {
+					if (this.type != "search") {
+						$(this).attr("disabled", true);
+					}
+				})
+				$('#btnBack').attr("status", "2");
+				$(`#btnSubmit, #btnRevise, #btnCancel, #btnCancelForm, .btnAddRow, .btnDeleteRow`).hide();
+			}
+			// ----- END NOT ALLOWED FOR UPDATE -----
 			return html;
 		}, 300);
 	}
@@ -1467,7 +1531,7 @@ $(document).ready(function() {
 
 
     // ----- PAGE CONTENT -----
-	function pageContent(isForm = false, data = false, readOnly = false, isRevise = false) {
+	function pageContent(isForm = false, data = false, readOnly = false, isRevise = false, isFromCancelledDocument = false) {
 		$("#page_content").html(preloader);
 		if (!isForm) {
 			preventRefresh(false);
@@ -1489,9 +1553,9 @@ $(document).ready(function() {
 			myFormsContent();
 			updateURL();
 		} else {
-			headerButton(false, "", isRevise);
+			headerButton(false, "", isRevise, isFromCancelledDocument);
 			headerTabContent(false);
-			formContent(data, readOnly, isRevise);
+			formContent(data, readOnly, isRevise, isFromCancelledDocument);
 		}
 	}
 	viewDocument();
@@ -1609,7 +1673,7 @@ $(document).ready(function() {
 
     // ----- OPEN EDIT FORM -----
 	$(document).on("click", ".btnEdit", function () {
-		const id = $(this).attr("id");
+		const id = decryptString($(this).attr("id"));
 		viewDocument(id);
 	});
 	// ----- END OPEN EDIT FORM -----
@@ -1617,7 +1681,7 @@ $(document).ready(function() {
 
     // ----- VIEW DOCUMENT -----
 	$(document).on("click", ".btnView", function () {
-		const id = $(this).attr("id");
+		const id = decryptString($(this).attr("id"));
 		viewDocument(id, true);
 	});
 	// ----- END VIEW DOCUMENT -----
@@ -1625,28 +1689,37 @@ $(document).ready(function() {
 
     // ----- VIEW DOCUMENT -----
 	$(document).on("click", "#btnRevise", function () {
-		const id = $(this).attr("inventoryValidationID");
-		viewDocument(id, false, true);
+		const id = decryptString($(this).attr("inventoryValidationID"));
+		const fromCancelledDocument = $(this).attr("cancel")== "true";
+		viewDocument(id, false, true, fromCancelledDocument);
 	});
 	// ----- END VIEW DOCUMENT -----
 
 
 	// ----- SAVE CLOSE FORM -----
 	$(document).on("click", "#btnBack", function () {
-		const id         = $(this).attr("inventoryValidationID");
-		const revise     = $(this).attr("revise") == "true";
-		const employeeID = $(this).attr("employeeID");
-		const feedback   = $(this).attr("code") || getFormCode("IVR", dateToday(), id);
-		const status     = $(this).attr("status");
+		const id         				= decryptString($(this).attr("inventoryValidationID"));
+		const isFromCancelledDocument 	= $(this).attr("cancel") == "true";
+		const revise     				= $(this).attr("revise") == "true";
+		const employeeID 				= $(this).attr("employeeID");
+		const feedback   				= $(this).attr("code") || getFormCode("IVR", dateToday(), id);
+		const status     				= $(this).attr("status");
 
 		if (status != "false" && status != 0) {
 			
 			if (revise) {
-				const action = revise && "insert" || (id && feedback ? "update" : "insert");
+				const action = revise && !isFromCancelledDocument && "insert" || (id && feedback ? "update" : "insert");
 				const data   = getinventoryValidationData(action, "save", "0", id);
 				data["inventoryValidationStatus"] 	=	0;
-				data["reviseInventoryValidationID"] = id;
-				delete data["inventoryValidationID"]; 
+				if(!isFromCancelledDocument){
+					data["reviseInventoryValidationID"] = id;
+					delete data["inventoryValidationID"]; 
+				}else{
+					data["inventoryValidationID"] = id;
+					delete data["action"];
+					data["action"] = "update";
+				}
+				
 	
 				saveinventoryValidation(data, "save", null, pageContent);
 			} else {
@@ -1671,15 +1744,22 @@ $(document).ready(function() {
 
     // ----- SAVE DOCUMENT -----
 	$(document).on("click", "#btnSave, #btnCancel", function () {
-		const id       = $(this).attr("inventoryValidationID");
-		const revise   = $(this).attr("revise") == "true";
-		const feedback = $(this).attr("code") || getFormCode("IVR", dateToday(), id);
-		const action   = revise && "insert" || (id && feedback ? "update" : "insert");
-		const data     = getinventoryValidationData(action, "save", "0", id);
+		const id       					= decryptString($(this).attr("inventoryValidationID"));
+		const isFromCancelledDocument 	= $(this).attr("cancel") == "true";
+		const revise   					= $(this).attr("revise") == "true";
+		const feedback 					= $(this).attr("code") || getFormCode("IVR", dateToday(), id);
+		const action   					= revise && "insert" || (id && feedback ? "update" : "insert");
+		const data     					= getinventoryValidationData(action, "save", "0", id);
 		data["inventoryValidationStatus"] 	=	0;
 		if (revise) {
-			data["reviseInventoryValidationID"] = id;
-			delete data["inventoryValidationID"];  
+			if(!isFromCancelledDocument){
+				data["reviseInventoryValidationID"] = id;
+				delete data["inventoryValidationID"]; 
+			}else{
+				data["inventoryValidationID"] = id;
+				delete data["action"];
+				data["action"] = "update";
+			}	
 		}	
 		saveinventoryValidation(data, "save", null, pageContent);
 	});
@@ -1688,10 +1768,11 @@ $(document).ready(function() {
 
     // ----- SUBMIT DOCUMENT -----
 	$(document).on("click", "#btnSubmit", function () {
-		const id           		= $(this).attr("inventoryValidationID");
-		const revise       		= $(this).attr("revise") == "true";
-		const validate     		= validateForm("form_inventory_validation");
-		const validateIssuance	= validateIssuanceQty();
+		const id           				= decryptString($(this).attr("inventoryValidationID"));
+		const isFromCancelledDocument 	= $(this).attr("cancel") == "true";
+		const revise       				= $(this).attr("revise") == "true";
+		const validate     				= validateForm("form_inventory_validation");
+		const validateIssuance			= validateIssuanceQty();
 		removeIsValid("#tableProjectRequestItems");
 		removeIsValid("#tableCompanyRequestItems");
 
@@ -1700,11 +1781,10 @@ $(document).ready(function() {
 			const data   = getinventoryValidationData(action, "submit", "1", id);
 
 			if (revise) {
-				data["reviseInventoryValidationID"] = id;
-				delete data["inventoryValidationID"];  
-				
-				// data.append("reviseInventoryValidationID", id);
-				// data.delete("inventoryValidationID");
+				if(!isFromCancelledDocument){
+					data["reviseInventoryValidationID"] = id;
+					delete data["inventoryValidationID"];  
+				}
 			}
 
 			let approversID = "", approversDate = "";
@@ -1732,7 +1812,7 @@ $(document).ready(function() {
 
     // ----- CANCEL DOCUMENT -----
 	$(document).on("click", "#btnCancelForm", function () {
-		const id     = $(this).attr("inventoryValidationID");
+		const id     = decryptString($(this).attr("inventoryValidationID"));
 		const status = $(this).attr("status");
 		const action = "update";
 		const data   = getinventoryValidationData(action, "cancelform", "4", id, status);
@@ -1799,7 +1879,7 @@ $(document).ready(function() {
 
     // ----- REJECT DOCUMENT -----
 	$(document).on("click", "#btnReject", function () {
-		const id       = $(this).attr("inventoryValidationID");
+		const id       = decryptString($(this).attr("inventoryValidationID"));
 		const feedback = $(this).attr("code") || getFormCode("IVR", dateToday(), id);
 
 		$("#modal_inventory_validation_content").html(preloader);
@@ -1866,6 +1946,20 @@ $(document).ready(function() {
 		} 
 	});
 	// ----- END REJECT DOCUMENT -----
+
+	// ----- DROP DOCUMENT -----
+	$(document).on("click", "#btnDrop", function() {
+		const inventoryValidationID = decryptString($(this).attr("inventoryValidationID"));
+		const feedback       		= $(this).attr("code") || getFormCode("IVR", dateToday(), id);
+
+		const id = decryptString($(this).attr("inventoryValidationID"));
+		let data = {
+			inventoryValidationID, action:"update", method:  "drop", updatedBy: sessionID
+		};
+
+		saveinventoryValidation(data, "drop", null, pageContent);
+	})
+	// ----- END DROP DOCUMENT -----
 
 
     // ----- NAV LINK -----
@@ -2063,6 +2157,11 @@ function getConfirmation(method = "submit") {
 			swalText  = "Are you sure to cancel this document?";
 			swalImg   = `${base_url}assets/modal/cancel.svg`;
 			break;
+		case "drop":
+			swalTitle = `DROP ${title.toUpperCase()}`;
+			swalText  = "Are you sure to drop this document?";
+			swalImg   = `${base_url}assets/modal/drop.svg`;
+			break;
 		default:
 			swalTitle = `CANCEL ${title.toUpperCase()}`;
 			swalText  = "Are you sure that you want to cancel this process?";
@@ -2118,7 +2217,9 @@ function saveinventoryValidation(data = null, method = "submit", notificationDat
 							swalTitle = `${getFormCode("IVR", dateCreated, insertedID)} approved successfully!`;
 						} else if (method == "deny") {
 							swalTitle = `${getFormCode("IVR", dateCreated, insertedID)} denied successfully!`;
-						}	
+						} else if (method == "drop") {
+							swalTitle = `${getFormCode("IVR", dateCreated, insertedID)} dropped successfully!`;
+						}
 		
 						if (isSuccess == "true") {
 							setTimeout(() => {

@@ -80,6 +80,12 @@ class Inventory_validation extends CI_Controller {
                     "inventoryValidationRemarks" => $inventoryValidationRemarks,
                     "updatedBy"              => $updatedBy,
                 ];
+            } else if ($method == "drop") {
+                $inventoryValidationData = [
+                    "reviseInventoryValidationID" => $reviseInventoryValidationID,
+                    "inventoryValidationStatus"   => 5,
+                    "updatedBy"                   => $updatedBy,
+                ]; 
             }
         }
 

@@ -160,14 +160,17 @@ $(document).ready(function() {
 				columnDefs: [
 					{ targets: 0,  width: 100 },
 					{ targets: 1,  width: 150 },
-					{ targets: 2,  width: 150 },
+					{ targets: 2,  width: 100 },
 					{ targets: 3,  width: 150 },
-					{ targets: 4,  width: 150 },
-					{ targets: 5,  width: 180 },
-					{ targets: 6,  width: 180 },
+					{ targets: 4,  width: 100 },
+					{ targets: 5,  width: 150 },
+					{ targets: 6,  width: 150 },
 					{ targets: 7,  width: 180 },
-					{ targets: 8,  width: 80  },
-					{ targets: 9, width: 250 },
+					{ targets: 8,  width: 180 },
+					{ targets: 9,  width: 180 },
+					{ targets: 10,  width: 80  },
+					{ targets: 11, width: 300 },
+					{ targets: 12, width: 80  },
 				],
 			});
 
@@ -183,14 +186,17 @@ $(document).ready(function() {
 				columnDefs: [
 					{ targets: 0,  width: 100 },
 					{ targets: 1,  width: 150 },
-					{ targets: 2,  width: 150 },
+					{ targets: 2,  width: 100 },
 					{ targets: 3,  width: 150 },
-					{ targets: 4,  width: 150 },
-					{ targets: 5,  width: 180 },
-					{ targets: 6,  width: 180 },
+					{ targets: 4,  width: 100 },
+					{ targets: 5,  width: 150 },
+					{ targets: 6,  width: 150 },
 					{ targets: 7,  width: 180 },
-					{ targets: 8,  width: 80  },
-					{ targets: 9, width: 250 },
+					{ targets: 8,  width: 180 },
+					{ targets: 9,  width: 180 },
+					{ targets: 10,  width: 80  },
+					{ targets: 11, width: 300 },
+					{ targets: 12, width: 80  },
 				],
 			});
 
@@ -299,16 +305,19 @@ $(document).ready(function() {
         <table class="table table-bordered table-striped table-hover" id="tableForApprroval">
             <thead>
                 <tr style="white-space: nowrap">
-					<th>Document No.</th>
-					<th>Employee Name</th>
-					<th>Storage Name(Sender)</th>
-					<th>Storage Name(Receiver)</th>
-					<th>Current Approver</th>
-					<th>Date Created</th>
-					<th>Date Submitted</th>
-					<th>Date Approved</th>
-					<th>Status</th>
-					<th>Remarks</th>
+                    <th>Document No.</th>
+                    <th>Prepared By</th>
+                    <th>Storage Code</th>
+                    <th>Storage Name(Sender)</th>
+					<th>Storage Code</th>
+                    <th>Storage Name(Receiver)</th>
+                    <th>Current Approver</th>
+                    <th>Date Created</th>
+                    <th>Date Submitted</th>
+                    <th>Date Approved</th>
+                    <th>Status</th>
+                    <th>Remarks</th>
+                    <th>Action</th>
                 </tr>
             </thead>
             <tbody>`;
@@ -339,8 +348,6 @@ $(document).ready(function() {
 				dateApproved = moment(dateApproved[dateApproved.length - 1]).format("MMMM DD, YYYY hh:mm:ss A");
 			}
 
-			let btnClass = transferRequestStatus != 0 ? "btnView" : "btnEdit";
-
 			let button = transferRequestStatus != 0 ? `
 			<button class="btn btn-view w-100 btnView" id="${encryptString(transferRequestID )}"><i class="fas fa-eye"></i> View</button>` : `
 			<button 
@@ -350,21 +357,13 @@ $(document).ready(function() {
 
 			if (isImCurrentApprover(approversID, approversDate, transferRequestStatus) || isAlreadyApproved(approversID, approversDate)) {
 				html += `
-				<tr class="${btnClass}" id="${encryptString(transferRequestID )}">
+				<tr>
 					<td>${getFormCode("TR", createdAt, transferRequestID )}</td>
 					<td>${fullname}</td>
-					<td>
-						<div>
-							${inventoryStorageOfficeName1 || '-'}
-						</div>
-						<small style="color:#848482;">${inventoryStorageCode1 || '-'}</small>
-					</td>
-					<td>
-						<div>
-							${inventoryStorageOfficeName2 || '-'}
-						</div>
-						<small style="color:#848482;">${inventoryStorageCode2 || '-'}</small>
-					</td>
+					<td>${inventoryStorageCode1 || '-'}</td>
+					<td>${inventoryStorageOfficeName1 || '-'}</td>
+					<td>${inventoryStorageCode2 || '-'}</td>
+					<td>${inventoryStorageOfficeName2 || '-'}</td>
 					<td>
 						${employeeFullname(getCurrentApprover(approversID, approversDate, transferRequestStatus, true))}
 					</td>
@@ -375,6 +374,9 @@ $(document).ready(function() {
 						${getStatusStyle(transferRequestStatus)}
 					</td>
 					<td>${remarks}</td>
+					<td class="text-center">
+						${button}
+					</td>
 				</tr>`;
 			}
 		});
@@ -406,16 +408,19 @@ $(document).ready(function() {
         <table class="table table-bordered table-striped table-hover" id="tableMyForms">
             <thead>
                 <tr style="white-space: nowrap">
-				<th>Document No.</th>
-				<th>Employee Name</th>
-				<th>Storage Name(Sender)</th>
-				<th>Storage Name(Receiver)</th>
-				<th>Current Approver</th>
-				<th>Date Created</th>
-				<th>Date Submitted</th>
-				<th>Date Approved</th>
-				<th>Status</th>
-				<th>Remarks</th>
+                    <th>Document No.</th>
+                    <th>Prepared By</th>
+                    <th>Storage Code</th>
+                    <th>Storage Name(Sender)</th>
+					<th>Storage Code</th>
+                    <th>Storage Name(Receiver)</th>
+                    <th>Current Approver</th>
+                    <th>Date Created</th>
+                    <th>Date Submitted</th>
+                    <th>Date Approved</th>
+                    <th>Status</th>
+                    <th>Remarks</th>
+                    <th>Action</th>
                 </tr>
             </thead>
             <tbody>`;
@@ -446,8 +451,6 @@ $(document).ready(function() {
 				dateApproved = moment(dateApproved[dateApproved.length - 1]).format("MMMM DD, YYYY hh:mm:ss A");
 			}
 
-			let btnClass = transferRequestStatus != 0 ? "btnView" : "btnEdit";
-
 			let button = transferRequestStatus != 0 ? `
             <button class="btn btn-view w-100 btnView" id="${encryptString(transferRequestID )}"><i class="fas fa-eye"></i> View</button>` : `
             <button 
@@ -456,21 +459,13 @@ $(document).ready(function() {
                 code="${getFormCode("TR", createdAt, transferRequestID )}"><i class="fas fa-edit"></i> Edit</button>`;
 
 			html += `
-            <tr class="${btnClass}" id="${encryptString(transferRequestID )}">
+            <tr>
                 <td>${getFormCode("TR", createdAt, transferRequestID )}</td>
                 <td>${fullname}</td>
-				<td>
-					<div>
-						${inventoryStorageOfficeName1 || '-'}
-					</div>
-					<small style="color:#848482;">${inventoryStorageCode1 || '-'}</small>
-				</td>
-				<td>
-					<div>
-						${inventoryStorageOfficeName2 || '-'}
-					</div>
-					<small style="color:#848482;">${inventoryStorageCode2 || '-'}</small>
-				</td>
+                <td>${inventoryStorageCode1 || '-'}</td>
+                <td>${inventoryStorageOfficeName1 || '-'}</td>
+				<td>${inventoryStorageCode2 || '-'}</td>
+                <td>${inventoryStorageOfficeName2 || '-'}</td>
                
                 <td>
                     ${employeeFullname(getCurrentApprover(approversID, approversDate, transferRequestStatus, true))}
@@ -482,6 +477,9 @@ $(document).ready(function() {
                     ${getStatusStyle(transferRequestStatus)}
                 </td>
 				<td>${remarks}</td>
+                <td class="text-center">
+                    ${button}
+                </td>
             </tr>`;
 		});
 
@@ -517,7 +515,7 @@ $(document).ready(function() {
 					// DRAFT
 					button = `
 					<button 
-						class="btn btn-submit px-5 p-2" 
+						class="btn btn-submit" 
 						id="btnSubmit" 
 						transferRequestID="${transferRequestID}"
 						code="${getFormCode("TR", createdAt, transferRequestID)}"
@@ -528,7 +526,7 @@ $(document).ready(function() {
 					if (isRevise) {
 						button += `
 						<button 
-							class="btn btn-cancel px-5 p-2" 
+							class="btn btn-cancel" 
 							id="btnCancel"
 							revise="${isRevise}"><i class="fas fa-ban"></i> 
 							Cancel
@@ -536,7 +534,7 @@ $(document).ready(function() {
 					} else {
 						button += `
 						<button 
-							class="btn btn-cancel px-5 p-2"
+							class="btn btn-cancel"
 							id="btnCancelForm" 
 							transferRequestID="${transferRequestID}"
 							code="${getFormCode("TR", createdAt, transferRequestID)}"
@@ -551,7 +549,7 @@ $(document).ready(function() {
 					if (!isOngoing) {
 						button = `
 						<button 
-							class="btn btn-cancel px-5 p-2"
+							class="btn btn-cancel"
 							id="btnCancelForm" 
 							transferRequestID="${transferRequestID}"
 							code="${getFormCode("TR", createdAt, transferRequestID)}"
@@ -563,7 +561,7 @@ $(document).ready(function() {
 					// DENIED - FOR REVISE
 					button = `
 					<button
-						class="btn btn-cancel px-5 p-2"
+						class="btn btn-cancel"
 						id="btnRevise" 
 						transferRequestID="${encryptString(transferRequestID)}"
 						code="${getFormCode("TR", createdAt, transferRequestID)}"
@@ -576,14 +574,14 @@ $(document).ready(function() {
 					if (isImCurrentApprover(approversID, approversDate)) {
 						button = `
 						<button 
-							class="btn btn-submit px-5 p-2" 
+							class="btn btn-submit" 
 							id="btnApprove" 
 							transferRequestID="${encryptString(transferRequestID)}"
 							code="${getFormCode("TR", createdAt, transferRequestID)}"><i class="fas fa-paper-plane"></i>
 							Approve
 						</button>
 						<button 
-							class="btn btn-cancel px-5 p-2"
+							class="btn btn-cancel"
 							id="btnReject" 
 							transferRequestID="${encryptString(transferRequestID)}"
 							code="${getFormCode("TR", createdAt, transferRequestID)}"><i class="fas fa-ban"></i> 
@@ -595,11 +593,11 @@ $(document).ready(function() {
 		} else {
 			button = `
 			<button 
-				class="btn btn-submit px-5 p-2" 
+				class="btn btn-submit" 
 				id="btnSubmit"><i class="fas fa-paper-plane"></i> Submit
 			</button>
 			<button 
-				class="btn btn-cancel px-5 p-2" 
+				class="btn btn-cancel" 
 				id="btnCancel"><i class="fas fa-ban"></i> 
 				Cancel
 			</button>`;
@@ -750,7 +748,7 @@ $(document).ready(function() {
 			quantity     = 1,
 			unitOfMeasurement: uom = "",
 			brandName = "",
-			itemCode =""
+			createdAt =""
 
 		} = item;
 
@@ -768,7 +766,7 @@ $(document).ready(function() {
 				</td>
 				<td>
 					<div class="itemcode">
-						${itemCode || "-"}
+						${getFormCode("ITM",createdAt,itemID) || "-"}
 					</div>
 				</td>
 				<td>
@@ -1071,6 +1069,13 @@ $(document).ready(function() {
 		LEFT JOIN ims_inventory_storage_tbl 			AS iis 	ON isit.inventoryStorageID = iis.inventoryStorageID
 		LEFT JOIN ims_transfer_request_tbl 			AS itr 	ON itr.inventoryStorageIDReceiver = iis.inventoryStorageID 	AND itr.transferRequestStatus = 2
 		LEFT JOIN ims_transfer_request_details_tbl 	AS itrd ON itrd.transferRequestID = itr.transferRequestID 			AND itrd.itemID = iii.itemID 
+		LEFT JOIN ims_material_withdrawal_details_tbl 	AS imwd ON imwd.inventoryStorageID = iis.inventoryStorageID 		AND imwd.itemID = iii.itemID
+		LEFT JOIN ims_material_withdrawal_tbl 			AS imw  ON imw.materialWithdrawalID = imwd.materialWithdrawalID 	AND imw.materialWithdrawaltStatus = 2
+		LEFT JOIN ims_inventory_incident_details_tbl 	AS iiid ON iiid.inventoryStorageID = iis.inventoryStorageID     	AND iiid.itemID = iii.itemID
+		LEFT JOIN ims_inventory_incident_tbl 			AS iit  ON iit.incidentID = iiid.incidentID 						AND iit.incidentStatus = 2
+		-- LEFT JOIN ims_borrowing_details_tbl 			AS ibd  ON ibd.inventoryStorageID = isit.inventoryStorageID 		AND ibd.itemID = iii.itemID
+		-- LEFT JOIN ims_borrowing_tbl 					AS ibt  ON ibt.borrowingID = ibd.borrowingID 						AND ibt.borrowingStatus = 2
+		-- LEFT JOIN ims_return_item_details_tbl 			AS iri  ON iri.inventoryStorageID = isit.inventoryStorageID 		AND iri.itemID = iii.itemID
 		LEFT JOIN ims_stock_in_tbl 					AS isi 	ON isit.itemID = isi.itemID AND isit.inventoryStorageID = isi.stockInLocationID`, 
 		`isit.itemID,
 		 iii.itemCode,
@@ -1082,7 +1087,7 @@ $(document).ready(function() {
 		 iis.inventoryStorageOfficeName,
 		 isi.barcode,
 		 isi.stockInSerialNumber,
-		 SUM(isit.quantity)  AS stocks`,
+		 (IFNULL(SUM(isit.quantity),0) - IFNULL(SUM(imwd.quantity),0) - IFNULL(SUM(iiid.quantity),0)) AS stocks`,
 		 `isi.barcode = '${barcodeval}' AND isi.stockInLocationID = '${StorageIDSender}'`, // to be continued by adding the item ID 
 		"");
 
@@ -1185,10 +1190,29 @@ $(document).ready(function() {
 		if(StorageIDSender != null ){
 
 			const data = getTableData(`ims_stock_in_total_tbl AS isit
-			LEFT JOIN ims_inventory_item_tbl 		AS iii 	ON isit.itemID = iii.itemID
-			LEFT JOIN ims_inventory_storage_tbl 	AS iis 	ON isit.inventoryStorageID = iis.inventoryStorageID
-			LEFT JOIN ims_stock_in_tbl AS isi 				ON isit.itemID = isi.itemID AND isit.inventoryStorageID = isi.stockInLocationID`,
-			`SUM(isit.quantity)  AS stocks`,
+			LEFT JOIN ims_inventory_item_tbl 				AS iii 	ON isit.itemID = iii.itemID
+			LEFT JOIN ims_inventory_storage_tbl 			AS iis 	ON isit.inventoryStorageID = iis.inventoryStorageID
+			-- LEFT JOIN ims_transfer_request_tbl 			AS itr 	ON itr.inventoryStorageIDReceiver = iis.inventoryStorageID 	AND itr.transferRequestStatus = 2
+			-- LEFT JOIN ims_transfer_request_details_tbl 	AS itrd ON itrd.transferRequestID = itr.transferRequestID 			AND itrd.itemID = iii.itemID
+			LEFT JOIN ims_material_withdrawal_details_tbl 	AS imwd ON imwd.inventoryStorageID = iis.inventoryStorageID 		AND imwd.itemID = iii.itemID
+			LEFT JOIN ims_material_withdrawal_tbl 			AS imw  ON imw.materialWithdrawalID = imwd.materialWithdrawalID 	AND imw.materialWithdrawaltStatus = 2
+			LEFT JOIN ims_inventory_incident_details_tbl 	AS iiid ON iiid.inventoryStorageID = iis.inventoryStorageID     	AND iiid.itemID = iii.itemID
+			LEFT JOIN ims_inventory_incident_tbl 			AS iit  ON iit.incidentID = iiid.incidentID 						AND iit.incidentStatus = 2
+			-- LEFT JOIN ims_borrowing_details_tbl 			AS ibd  ON ibd.inventoryStorageID = isit.inventoryStorageID 		AND ibd.itemID = iii.itemID
+			-- LEFT JOIN ims_borrowing_tbl 					AS ibt  ON ibt.borrowingID = ibd.borrowingID 						AND ibt.borrowingStatus = 2
+			-- LEFT JOIN ims_return_item_details_tbl 			AS iri  ON iri.inventoryStorageID = isit.inventoryStorageID 		AND iri.itemID = iii.itemID
+			LEFT JOIN ims_stock_in_tbl 					AS isi 	ON isit.itemID = isi.itemID AND isit.inventoryStorageID = isi.stockInLocationID`, 
+			`isit.itemID,
+			 iii.itemCode,
+			 iii.createdAt,
+			 isit.itemName,
+			 isi.itemBrandName,
+			 isi.itemUom,
+			 iis.inventoryStorageCode,
+			 iis.inventoryStorageOfficeName,
+			 isi.barcode,
+			 isi.stockInSerialNumber,
+			 (IFNULL(SUM(isit.quantity),0) - IFNULL(SUM(imwd.quantity),0) - IFNULL(SUM(iiid.quantity),0)) AS stocks`,
 			 `isi.barcode = '${barcodeval}' AND isi.stockInLocationID = '${StorageIDSender}'`, // to be continued by adding the item ID 
 			"");
 
@@ -1320,7 +1344,7 @@ $(document).ready(function() {
 			let requestItemsData = getTableData(
 				`ims_inventory_item_tbl AS iii
 				LEFT JOIN ims_transfer_request_details_tbl 	AS itrd ON itrd.itemID = iii.itemID`, 
-				`itrd.itemID,itrd.itemCode,itrd.itemName,itrd.brandName,itrd.unitOfMeasurement,itrd.quantity,itrd.barcode,itrd.stocks`, 
+				`itrd.itemID,itrd.itemName,itrd.brandName,itrd.unitOfMeasurement,itrd.quantity,itrd.barcode,iii.createdAt,itrd.stocks`, 
 				`transferRequestID = ${transferRequestID}`);
 			requestItemsData.map(item => {
 				requestProjectItems += getItemRow(true, item, readOnly);
@@ -1544,7 +1568,7 @@ $(document).ready(function() {
 
             <div class="col-md-4 col-sm-12">
                 <div class="form-group">
-                    <label>Employee Name</label>
+                    <label>Prepared By</label>
                     <input type="text" class="form-control" disabled value="${employeeFullname}">
                 </div>
             </div>
@@ -1740,7 +1764,6 @@ $(document).ready(function() {
 				const categoryType = $(this).closest("tbody").attr("project") == "true" ? "project" : "";
 
 				const itemID    = $("td [name=barcode]", this).attr("itemid");	
-				const itemCode    = $("td .itemcode", this).text().trim();	
 				const itemName    = $("td [name=itemname]", this).text().trim();	
 				const brandName    = $("td [name=brand]", this).text().trim();	
 				const quantity  = +$("td [name=quantity]", this).val();	
@@ -1749,12 +1772,11 @@ $(document).ready(function() {
 				const barcode  = $("td [name=barcode]", this).val();	
 
 				let temp = {
-					itemID,itemCode,itemName,brandName,quantity,uom,barcode,stocks
+					itemID,itemName,brandName,quantity,uom,barcode,stocks
 					
 				};
 
 				formData.append(`items[${i}][itemID]`, itemID);
-				formData.append(`items[${i}][itemCode]`, itemCode);
 				formData.append(`items[${i}][itemName]`, itemName);
 				formData.append(`items[${i}][brandName]`, brandName);
 				formData.append(`items[${i}][quantity]`, quantity);
@@ -2033,7 +2055,7 @@ $(document).ready(function() {
 			<button class="btn btn-danger" id="btnRejectConfirmation"
 			transferRequestID="${id}"
 			code="${feedback}"><i class="far fa-times-circle"></i> Deny</button>
-			<button class="btn btn-cancel px-5 p-2" data-dismiss="modal"><i class="fas fa-ban"></i> Cancel</button>
+			<button class="btn btn-cancel" data-dismiss="modal"><i class="fas fa-ban"></i> Cancel</button>
 		</div>`;
 		$("#modal_purchase_request_content").html(html);
 	});

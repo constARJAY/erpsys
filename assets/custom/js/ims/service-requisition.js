@@ -42,8 +42,8 @@ $(document).ready(function() {
 
 
     // ----- VIEW DOCUMENT -----
-	function viewDocument(view_id = false, readOnly = false, isRevise = false) {
-		const loadData = (id, isRevise = false) => {
+	function viewDocument(view_id = false, readOnly = false, isRevise = false, isFromCancelledDocument = false) {
+		const loadData = (id, isRevise = false, isFromCancelledDocument = false) => {
 			const tableData = getTableData("ims_service_requisition_tbl", "", "serviceRequisitionID=" + id);
 
 			if (tableData.length > 0) {
@@ -71,7 +71,7 @@ $(document).ready(function() {
 
 				if (isAllowed) {
 					if (isRevise && employeeID == sessionID) {
-						pageContent(true, tableData, isReadOnly, true);
+						pageContent(true, tableData, isReadOnly, true, isFromCancelledDocument);
 						updateURL(encryptString(id), true, true);
 					} else {
 						pageContent(true, tableData, isReadOnly);
@@ -89,8 +89,8 @@ $(document).ready(function() {
 		}
 
 		if (view_id) {
-			let id = decryptString(view_id);
-				id && isFinite(id) && loadData(id, isRevise);
+			let id = view_id;
+				id && isFinite(id) && loadData(id, isRevise, isFromCancelledDocument);
 		} else {
 			let url   = window.document.URL;
 			let arr   = url.split("?view_id=");
@@ -149,6 +149,12 @@ $(document).ready(function() {
         "*",
         "serviceStatus = 1"
     );
+
+	const uomList = getTableData(
+		`ims_uom_tbl`,
+		``,
+		`uomStatus = 1`
+	)
 	// END GLOBAL VARIABLE - REUSABLE 
 
 
@@ -181,8 +187,8 @@ $(document).ready(function() {
 					{ targets: 6,  width: 200 },
 					{ targets: 7,  width: 200 },
 					{ targets: 8,  width: 200 },
-					{ targets: 9,  width: 80 },
-					{ targets: 10,  width: 200  },
+					{ targets: 9,  width: 80  },
+					{ targets: 10, width: 200 },
 				],
 			});
 
@@ -205,8 +211,8 @@ $(document).ready(function() {
 					{ targets: 6,  width: 200 },
 					{ targets: 7,  width: 200 },
 					{ targets: 8,  width: 200 },
-					{ targets: 9,  width: 80 },
-					{ targets: 10,  width: 200  },
+					{ targets: 9,  width: 80  },
+					{ targets: 10, width: 200 },
 				],
 			});
 
@@ -280,14 +286,20 @@ $(document).ready(function() {
 
 
     // ----- HEADER BUTTON -----
-	function headerButton(isAdd = true, text = "Add", isRevise = false) {
+	function headerButton(isAdd = true, text = "Add", isRevise = false, isFromCancelledDocument = false) {
 		let html;
 		if (isAdd) {
-            html = `
-            <button type="button" class="btn btn-default btn-add" id="btnAdd"><i class="icon-plus"></i> &nbsp;${text}</button>`;
+			if (isCreateAllowed(49)) {
+				html = `
+				<button type="button" class="btn btn-default btn-add" id="btnAdd"><i class="icon-plus"></i> &nbsp;${text}</button>`;
+			}
 		} else {
 			html = `
-            <button type="button" class="btn btn-default btn-light" id="btnBack" revise="${isRevise}"><i class="fas fa-arrow-left"></i> &nbsp;Back</button>`;
+            <button type="button" 
+				class="btn btn-default btn-light" 
+				id="btnBack" 
+				revise="${isRevise}"
+				cancel="${isFromCancelledDocument}"><i class="fas fa-arrow-left"></i> &nbsp;Back</button>`;
 		}
 		$("#headerButton").html(html);
 	}
@@ -304,7 +316,7 @@ $(document).ready(function() {
 				LEFT JOIN pms_client_tbl AS pct ON isrt.clientID = pct.clientID`,
 			"isrt.*, CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname, isrt.createdAt AS dateCreated, projectListCode, projectListName, clientName",
 			`isrt.employeeID != ${sessionID} AND serviceRequisitionStatus != 0 AND serviceRequisitionStatus != 4`,
-			`FIELD(serviceRequisitionStatus, 0, 1, 3, 2, 4), COALESCE(isrt.submittedAt, isrt.createdAt)`
+			`FIELD(serviceRequisitionStatus, 0, 1, 3, 2, 4, 5), COALESCE(isrt.submittedAt, isrt.createdAt)`
 		);
 
 		let html = `
@@ -312,10 +324,10 @@ $(document).ready(function() {
             <thead>
                 <tr style="white-space: nowrap">
                     <th>Document No.</th>
-                    <th>Employee Name</th>
+                    <th>Prepared By</th>
                     <th>Client Name</th>
                     <th>Project Name</th>
-                    <th>Reason</th>
+                    <th>Description</th>
                     <th>Current Approver</th>
                     <th>Date Created</th>
                     <th>Date Submitted</th>
@@ -347,7 +359,7 @@ $(document).ready(function() {
 			let remarks       = serviceRequisitionRemarks ? serviceRequisitionRemarks : "-";
 			let dateCreated   = moment(createdAt).format("MMMM DD, YYYY hh:mm:ss A");
 			let dateSubmitted = submittedAt ? moment(submittedAt).format("MMMM DD, YYYY hh:mm:ss A") : "-";
-			let dateApproved  = serviceRequisitionStatus == 2 ? approversDate.split("|") : "-";
+			let dateApproved  = serviceRequisitionStatus == 2 || serviceRequisitionStatus == 5 ? approversDate.split("|") : "-";
 			if (dateApproved !== "-") {
 				dateApproved = moment(dateApproved[dateApproved.length - 1]).format("MMMM DD, YYYY hh:mm:ss A");
 			}
@@ -411,7 +423,7 @@ $(document).ready(function() {
 				LEFT JOIN pms_client_tbl AS pct ON isrt.clientID = pct.clientID`,
 			"isrt.*, CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname, isrt.createdAt AS dateCreated, projectListCode, projectListName, clientName",
 			`isrt.employeeID = ${sessionID}`,
-			`FIELD(serviceRequisitionStatus, 0, 1, 3, 2, 4), COALESCE(isrt.submittedAt, isrt.createdAt)`
+			`FIELD(serviceRequisitionStatus, 0, 1, 3, 2, 4, 5), COALESCE(isrt.submittedAt, isrt.createdAt)`
 		);
 
 		let html = `
@@ -419,10 +431,10 @@ $(document).ready(function() {
             <thead>
                 <tr style="white-space: nowrap">
                     <th>Document No.</th>
-                    <th>Employee Name</th>
+                    <th>Prepared By</th>
                     <th>Client Name</th>
                     <th>Project Name</th>
-                    <th>Reason</th>
+                    <th>Description</th>
                     <th>Current Approver</th>
                     <th>Date Created</th>
                     <th>Date Submitted</th>
@@ -454,7 +466,7 @@ $(document).ready(function() {
 			let remarks       = serviceRequisitionRemarks ? serviceRequisitionRemarks : "-";
 			let dateCreated   = moment(createdAt).format("MMMM DD, YYYY hh:mm:ss A");
 			let dateSubmitted = submittedAt ? moment(submittedAt).format("MMMM DD, YYYY hh:mm:ss A") : "-";
-			let dateApproved  = serviceRequisitionStatus == 2 ? approversDate.split("|") : "-";
+			let dateApproved  = serviceRequisitionStatus == 2 || serviceRequisitionStatus == 5 ? approversDate.split("|") : "-";
 			if (dateApproved !== "-") {
 				dateApproved = moment(dateApproved[dateApproved.length - 1]).format("MMMM DD, YYYY hh:mm:ss A");
 			}
@@ -505,7 +517,7 @@ $(document).ready(function() {
 
 
     // ----- FORM BUTTONS -----
-	function formButtons(data = false, isRevise = false) {
+	function formButtons(data = false, isRevise = false, isFromCancelledDocument = false) {
 		let button = "";
 		if (data) {
 			let {
@@ -525,9 +537,10 @@ $(document).ready(function() {
 					<button 
 						class="btn btn-submit px-5 p-2"  
 						id="btnSubmit" 
-						serviceRequisitionID="${serviceRequisitionID}"
+						serviceRequisitionID="${encryptString(serviceRequisitionID)}"
 						code="${getFormCode("SR", createdAt, serviceRequisitionID)}"
-						revise=${isRevise}><i class="fas fa-paper-plane"></i>
+						revise="${isRevise}"
+						cancel="${isFromCancelledDocument}"><i class="fas fa-paper-plane"></i>
 						Submit
 					</button>`;
 
@@ -536,9 +549,10 @@ $(document).ready(function() {
 						<button 
 							class="btn btn-cancel btnCancel px-5 p-2" 
 							id="btnCancel"
-							serviceRequisitionID="${serviceRequisitionID}"
+							serviceRequisitionID="${encryptString(serviceRequisitionID)}"
 							code="${getFormCode("SR", createdAt, serviceRequisitionID)}"
-							revise="${isRevise}"><i class="fas fa-ban"></i> 
+							revise="${isRevise}"
+							cancel="${isFromCancelledDocument}"><i class="fas fa-ban"></i> 
 							Cancel
 						</button>`;
 					} else {
@@ -546,7 +560,7 @@ $(document).ready(function() {
 						<button 
 							class="btn btn-cancel px-5 p-2"
 							id="btnCancelForm" 
-							serviceRequisitionID="${serviceRequisitionID}"
+							serviceRequisitionID="${encryptString(serviceRequisitionID)}"
 							code="${getFormCode("SR", createdAt, serviceRequisitionID)}"
 							revise=${isRevise}><i class="fas fa-ban"></i> 
 							Cancel
@@ -561,12 +575,23 @@ $(document).ready(function() {
 						<button 
 							class="btn btn-cancel px-5 p-2"
 							id="btnCancelForm" 
-							serviceRequisitionID="${serviceRequisitionID}"
+							serviceRequisitionID="${encryptString(serviceRequisitionID)}"
 							code="${getFormCode("SR", createdAt, serviceRequisitionID)}"
 							status="${serviceRequisitionStatus}"><i class="fas fa-ban"></i> 
 							Cancel
 						</button>`;
 					}
+				} else if (serviceRequisitionStatus == 2) {
+					// DROP
+					button = `
+					<button type="button" 
+						class="btn btn-cancel px-5 p-2"
+						id="btnDrop" 
+						serviceRequisitionID="${encryptString(serviceRequisitionID)}"
+						code="${getFormCode("SR", createdAt, serviceRequisitionID)}"
+						status="${serviceRequisitionStatus}"><i class="fas fa-ban"></i> 
+						Drop
+					</button>`;
 				} else if (serviceRequisitionStatus == 3) {
 					// DENIED - FOR REVISE
 					if (!isDocumentRevised(serviceRequisitionID)) {
@@ -577,6 +602,20 @@ $(document).ready(function() {
 							serviceRequisitionID="${encryptString(serviceRequisitionID)}"
 							code="${getFormCode("SR", createdAt, serviceRequisitionID)}"
 							status="${serviceRequisitionStatus}"><i class="fas fa-clone"></i>
+							Revise
+						</button>`;
+					}
+				} else if (serviceRequisitionStatus == 4) {
+					// CANCELLED - FOR REVISE
+					if (!isDocumentRevised(serviceRequisitionID)) {
+						button = `
+						<button
+							class="btn btn-cancel px-5 p-2"
+							id="btnRevise" 
+							serviceRequisitionID="${encryptString(serviceRequisitionID)}"
+							code="${getFormCode("SR", createdAt, serviceRequisitionID)}"
+							status="${serviceRequisitionStatus}"
+							cancel="true"><i class="fas fa-clone"></i>
 							Revise
 						</button>`;
 					}
@@ -728,6 +767,21 @@ $(document).ready(function() {
     // ----- END GET SERVICE ITEM -----
 
 
+	// ----- GET UOM LIST -----
+	function getUomList(uomName = null) {
+		let html = `<option disabled selected>Select UOM</option>`;
+		if (uom) {
+			uomList.map(uom => {
+				html += `
+				<option value="${uom.uomName}"
+					${uomName == uom.uomName ? "selected" : ""}>${uom.uomName}</option>`;
+			})
+		}
+		return html;
+	}
+	// ----- END GET UOM LIST -----
+
+
 	// ----- GET SERVICE SCOPE -----
 	function getServiceScope(scope = {}, readOnly = false) {
 		let {
@@ -784,6 +838,12 @@ $(document).ready(function() {
 				</td>
 				<td>
 					<div class="uom">
+						<select class="form-control validate"
+							name="serviceUom"
+							id="serviceUom"
+							required>
+							${getUomList(uom)}
+						</select>
 						<input 
 							type="text" 
 							class="form-control validate text-center serviceUom"
@@ -830,7 +890,7 @@ $(document).ready(function() {
 						${description}
 					</div>
 				</td>
-				<td>
+				<td class="text-center">
 					<div class="quantity">
 						${quantity}
 					</div>
@@ -1258,25 +1318,25 @@ $(document).ready(function() {
 
 
     // ----- FORM CONTENT -----
-	function formContent(data = false, readOnly = false, isRevise = false) {
+	function formContent(data = false, readOnly = false, isRevise = false, isFromCancelledDocument = false) {
 		$("#page_content").html(preloader);
 		readOnly = isRevise ? false : readOnly;
 
 		let {
-			serviceRequisitionID       = "",
-			reviseServiceRequisitionID = "",
-			employeeID              = "",
-            clientID = "",
-			projectID               = "",
-			serviceRequisitionReason   = "",
-			serviceRequisitionRemarks  = "",
-			serviceRequisitionTotalAmount      = "0",
-			approversID             = "",
-			approversStatus         = "",
-			approversDate           = "",
-			serviceRequisitionStatus   = false,
-			submittedAt             = false,
-			createdAt               = false,
+			serviceRequisitionID          = "",
+			reviseServiceRequisitionID    = "",
+			employeeID                    = "",
+            clientID                      = "",
+			projectID                     = "",
+			serviceRequisitionReason      = "",
+			serviceRequisitionRemarks     = "",
+			serviceRequisitionTotalAmount = "0",
+			approversID                   = "",
+			approversStatus               = "",
+			approversDate                 = "",
+			serviceRequisitionStatus      = false,
+			submittedAt                   = false,
+			createdAt                     = false,
 		} = data && data[0];
 
 		let requestServiceItems = "";
@@ -1303,9 +1363,10 @@ $(document).ready(function() {
 
 		readOnly ? preventRefresh(false) : preventRefresh(true);
 
-		$("#btnBack").attr("serviceRequisitionID", serviceRequisitionID);
+		$("#btnBack").attr("serviceRequisitionID", encryptString(serviceRequisitionID));
 		$("#btnBack").attr("status", serviceRequisitionStatus);
 		$("#btnBack").attr("employeeID", employeeID);
+		$("#btnBack").attr("cancel", isFromCancelledDocument);
 
 		let disabled = readOnly ? "disabled" : "";
 		let checkboxServiceRequisitionHeader = !disabled ? `
@@ -1320,7 +1381,7 @@ $(document).ready(function() {
 			<button class="btn btn-primary btnAddRow" id="btnAddRow"><i class="fas fa-plus-circle"></i> Add Row</button>
 			<button class="btn btn-danger btnDeleteRow" id="btnDeleteRow" disabled><i class="fas fa-minus-circle"></i> Delete Row/s</button>
 		</div>` : "";
-		let button = formButtons(data, isRevise);
+		let button = formButtons(data, isRevise, isFromCancelledDocument);
 
 		let reviseDocumentNo    = isRevise ? serviceRequisitionID : reviseServiceRequisitionID;
 		let documentHeaderClass = isRevise || reviseServiceRequisitionID ? "col-lg-4 col-md-4 col-sm-12 px-1" : "col-lg-2 col-md-6 col-sm-12 px-1";
@@ -1457,7 +1518,7 @@ $(document).ready(function() {
             </div>
             <div class="col-md-4 col-sm-12">
                 <div class="form-group">
-                    <label>Employee Name</label>
+                    <label>Prepared By</label>
                     <input type="text" class="form-control" disabled value="${employeeFullname}">
                 </div>
             </div>
@@ -1475,7 +1536,7 @@ $(document).ready(function() {
             </div>
             <div class="col-md-12 col-sm-12">
                 <div class="form-group">
-                    <label>Reason ${!disabled ? "<code>*</code>" : ""}</label>
+                    <label>Description ${!disabled ? "<code>*</code>" : ""}</label>
                     <textarea class="form-control validate"
                         data-allowcharacters="[a-z][A-Z][0-9][ ][.][,][-][()]['][/][&]"
                         minlength="1"
@@ -1556,7 +1617,7 @@ $(document).ready(function() {
 
 
     // ----- PAGE CONTENT -----
-	function pageContent(isForm = false, data = false, readOnly = false, isRevise = false) {
+	function pageContent(isForm = false, data = false, readOnly = false, isRevise = false, isFromCancelledDocument = false) {
 		$("#page_content").html(preloader);
 		if (!isForm) {
 			preventRefresh(false);
@@ -1578,9 +1639,9 @@ $(document).ready(function() {
 			myFormsContent();
 			updateURL();
 		} else {
-			headerButton(false, "", isRevise);
+			headerButton(false, "", isRevise, isFromCancelledDocument);
 			headerTabContent(false);
-			formContent(data, readOnly, isRevise);
+			formContent(data, readOnly, isRevise, isFromCancelledDocument);
 		}
 	}
 	viewDocument();
@@ -1702,7 +1763,7 @@ $(document).ready(function() {
 
     // ----- OPEN EDIT FORM -----
 	$(document).on("click", ".btnEdit", function () {
-		const id = $(this).attr("id");
+		const id = decryptString($(this).attr("id"));
 		viewDocument(id);
 	});
 	// ----- END OPEN EDIT FORM -----
@@ -1710,7 +1771,7 @@ $(document).ready(function() {
 
     // ----- VIEW DOCUMENT -----
 	$(document).on("click", ".btnView", function () {
-		const id = $(this).attr("id");
+		const id = decryptString($(this).attr("id"));
 		viewDocument(id, true);
 	});
 	// ----- END VIEW DOCUMENT -----
@@ -1718,15 +1779,17 @@ $(document).ready(function() {
 
     // ----- VIEW DOCUMENT -----
 	$(document).on("click", "#btnRevise", function () {
-		const id = $(this).attr("serviceRequisitionID");
-		viewDocument(id, false, true);
+		const id                    = decryptString($(this).attr("serviceRequisitionID"));
+		const fromCancelledDocument = $(this).attr("cancel") == "true";
+		viewDocument(id, false, true, fromCancelledDocument);
 	});
 	// ----- END VIEW DOCUMENT -----
 
 
 	// ----- SAVE CLOSE FORM -----
 	$(document).on("click", "#btnBack", function () {
-		const id         = $(this).attr("serviceRequisitionID");
+		const id         = decryptString($(this).attr("serviceRequisitionID"));
+		const isFromCancelledDocument = $(this).attr("cancel") == "true";
 		const revise     = $(this).attr("revise") == "true";
 		const employeeID = $(this).attr("employeeID");
 		const feedback   = $(this).attr("code") || getFormCode("SR", dateToday(), id);
@@ -1735,11 +1798,17 @@ $(document).ready(function() {
 		if (status != "false" && status != 0) {
 			
 			if (revise) {
-				const action = revise && "insert" || (id && feedback ? "update" : "insert");
+				const action = revise && !isFromCancelledDocument && "insert" || (id ? "update" : "insert");
 				const data   = getServiceRequisitionData(action, "save", "0", id);
-				data["serviceRequisitionStatus"]   = 0;
-				data["reviseServiceRequisitionID"] = id;
-				delete data["serviceRequisitionID"];
+				data["serviceRequisitionStatus"] = 0;
+				if (!isFromCancelledDocument) {
+					data["reviseServiceRequisitionID"] = id;
+					delete data["serviceRequisitionID"];
+				} else {
+					data["serviceRequisitionID"] = id;
+					delete data["action"];
+					data["action"] = "update";
+				}
 	
 				saveServiceRequisition(data, "save", null, pageContent);
 			} else {
@@ -1764,16 +1833,23 @@ $(document).ready(function() {
 
     // ----- SAVE DOCUMENT -----
 	$(document).on("click", "#btnSave, #btnCancel", function () {
-		const id       = $(this).attr("serviceRequisitionID");
+		const id       = decryptString($(this).attr("serviceRequisitionID"));
+		const isFromCancelledDocument = $(this).attr("cancel") == "true";
 		const revise   = $(this).attr("revise") == "true";
 		const feedback = $(this).attr("code") || getFormCode("SR", dateToday(), id);
-		const action   = revise && "insert" || (id && feedback ? "update" : "insert");
+		const action   = revise && !isFromCancelledDocument && "insert" || (id ? "update" : "insert");
 		const data     = getServiceRequisitionData(action, "save", "0", id);
 		data["serviceRequisitionStatus"] = 0;
 
 		if (revise) {
-			data["reviseServiceRequisitionID"] = id;
-			delete data["serviceRequisitionID"];
+			if (!isFromCancelledDocument) {
+				data["reviseServiceRequisitionID"] = id;
+				delete data["serviceRequisitionID"];
+			} else {
+				data["serviceRequisitionID"] = id;
+				delete data["action"];
+				data["action"] = "update";
+			}
 		}
 
 		saveServiceRequisition(data, "save", null, pageContent);
@@ -1791,19 +1867,22 @@ $(document).ready(function() {
 
     // ----- SUBMIT DOCUMENT -----
 	$(document).on("click", "#btnSubmit", function () {
-		const id           = $(this).attr("serviceRequisitionID");
+		const id           = decryptString($(this).attr("serviceRequisitionID"));
+		const isFromCancelledDocument = $(this).attr("cancel") == "true";
 		const revise       = $(this).attr("revise") == "true";
 		const validate     = validateForm("form_service_requisition");
 		removeIsValid("#tableServiceRequisitionItems");
 
 		if (validate) {
 			
-			const action = revise && "insert" || (id ? "update" : "insert");
+			const action = revise && !isFromCancelledDocument && "insert" || (id ? "update" : "insert");
 			const data   = getServiceRequisitionData(action, "submit", "1", id);
 
 			if (revise) {
-				data["reviseServiceRequisitionID"] = id;
-				delete data["serviceRequisitionID"];
+				if (!isFromCancelledDocument) {
+					data["reviseServiceRequisitionID"] = id;
+					delete data["serviceRequisitionID"];
+				}
 			}
 
 			let approversID   = data["approversID"], 
@@ -1829,7 +1908,7 @@ $(document).ready(function() {
 
     // ----- CANCEL DOCUMENT -----
 	$(document).on("click", "#btnCancelForm", function () {
-		const id     = $(this).attr("serviceRequisitionID");
+		const id     = decryptString($(this).attr("serviceRequisitionID"));
 		const status = $(this).attr("status");
 		const action = "update";
 		const data   = getServiceRequisitionData(action, "cancelform", "4", id, status);
@@ -1890,7 +1969,7 @@ $(document).ready(function() {
 
     // ----- REJECT DOCUMENT -----
 	$(document).on("click", "#btnReject", function () {
-		const id       = $(this).attr("serviceRequisitionID");
+		const id       = decryptString($(this).attr("serviceRequisitionID"));
 		const feedback = $(this).attr("code") || getFormCode("SR", dateToday(), id);
 
 		$("#modal_service_requisition_content").html(preloader);
@@ -1914,7 +1993,7 @@ $(document).ready(function() {
 		</div>
 		<div class="modal-footer text-right">
 			<button class="btn btn-danger px-5 p-2" id="btnRejectConfirmation"
-			serviceRequisitionID="${id}"
+			serviceRequisitionID="${encryptString(id)}"
 			code="${feedback}"><i class="far fa-times-circle"></i> Deny</button>
 			<button class="btn btn-cancel btnCancel px-5 p-2" data-dismiss="modal"><i class="fas fa-ban"></i> Cancel</button>
 		</div>`;
@@ -1934,11 +2013,11 @@ $(document).ready(function() {
 				let employeeID      = tableData[0].employeeID;
 
 				let data = {};
-				data["action"] = "update";
-				data["method"] = "deny";
+				data["action"]               = "update";
+				data["method"]               = "deny";
 				data["serviceRequisitionID"] = id;
-				data["approversStatus"] = updateApproveStatus(approversStatus, 3);
-				data["approversDate"]   = updateApproveDate(approversDate);
+				data["approversStatus"]      = updateApproveStatus(approversStatus, 3);
+				data["approversDate"]        = updateApproveDate(approversDate);
 				data["serviceRequisitionRemarks"] = $("[name=serviceRequisitionRemarks]").val()?.trim();
 				data["updatedBy"] = sessionID;
 
@@ -1957,6 +2036,20 @@ $(document).ready(function() {
 		} 
 	});
 	// ----- END REJECT DOCUMENT -----
+
+
+	// ----- DROP DOCUMENT -----
+	$(document).on("click", "#btnDrop", function() {
+		const id = decryptString($(this).attr("serviceRequisitionID"));
+		let data = {};
+		data["serviceRequisitionID"] = id;
+		data["action"]               = "update";
+		data["method"]               = "drop";
+		data["updatedBy"]            = sessionID;
+
+		saveServiceRequisition(data, "drop", null, pageContent);
+	})
+	// ----- END DROP DOCUMENT -----
 
 
     // ----- NAV LINK -----
@@ -2045,6 +2138,11 @@ function getConfirmation(method = "submit") {
 			swalText  = "Are you sure to cancel this document?";
 			swalImg   = `${base_url}assets/modal/cancel.svg`;
 			break;
+		case "drop":
+			swalTitle = `DROP ${title.toUpperCase()}`;
+			swalText  = "Are you sure to drop this document?";
+			swalImg   = `${base_url}assets/modal/drop.svg`;
+			break;
 		default:
 			swalTitle = `CANCEL ${title.toUpperCase()}`;
 			swalText  = "Are you sure that you want to cancel this process?";
@@ -2099,6 +2197,8 @@ function saveServiceRequisition(data = null, method = "submit", notificationData
 							swalTitle = `${getFormCode("SR", dateCreated, insertedID)} approved successfully!`;
 						} else if (method == "deny") {
 							swalTitle = `${getFormCode("SR", dateCreated, insertedID)} denied successfully!`;
+						} else if (method == "drop") {
+							swalTitle = `${getFormCode("SR", dateCreated, insertedID)} dropped successfully!`;
 						}	
 		
 						if (isSuccess == "true") {

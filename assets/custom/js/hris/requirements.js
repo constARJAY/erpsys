@@ -54,11 +54,11 @@ $(document).ready(function(){
             success: function(data) {
                 console.log(data);
                 let html = `
-                <table class="table table-bordered table-striped table-hover nowrap" id="tableHRISRequirements">
+                <table class="table table-bordered table-striped table-hover" id="tableHRISRequirements">
                     <thead>
                     <tr class="text-left">
                         <th>Requirement Code</th>
-                        <th>Requirement Name</th>
+                        <th style="width: 300px;">Requirement Name</th>
                         <th>Description</th>
                         <th>Status</th>
                     </tr>

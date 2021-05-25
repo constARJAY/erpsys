@@ -130,12 +130,11 @@ $(document).ready(function () {
 					// { targets: 5,  width: 200 },
 					// { targets: 6,  width: 100 },
 					// { targets: 7,  width: 150 },
-					{ targets: 8,  width: 200 },
-					{ targets: 9,  width: 200 },
-					{ targets: 10, width: 200 },
-					{ targets: 11, width: 80  },
-					{ targets: 12, width: 250 },
-					{ targets: 13, width: 80  },
+					{ targets: 3,  width: 200 },
+					{ targets: 4,  width: 200 },
+					{ targets: 5, width: 200 },
+					{ targets: 6, width: 80  },
+					{ targets: 7, width: 250 },
 				],
 			});
 
@@ -159,12 +158,11 @@ $(document).ready(function () {
 					// { targets: 5,  width: 200 },
 					// { targets: 6,  width: 100 },
 					// { targets: 7,  width: 150 },
-					{ targets: 8,  width: 200 },
-					{ targets: 9,  width: 200 },
-					{ targets: 10, width: 200 },
-					{ targets: 11, width: 80  },
-					{ targets: 12, width: 250 },
-					{ targets: 13, width: 80  },
+					{ targets: 3,  width: 200 },
+					{ targets: 4,  width: 200 },
+					{ targets: 5, width: 200 },
+					{ targets: 6, width: 80  },
+					{ targets: 7, width: 250 },
 				],
 			});
 	}
@@ -242,7 +240,6 @@ $(document).ready(function () {
 
 					<th>Status</th>
 					<th>Remarks</th>
-					<th>Action</th>
                 </tr>
             </thead>
             <tbody>`;
@@ -278,7 +275,7 @@ $(document).ready(function () {
 
 			if (isImCurrentApprover(approversID, approversDate, officialBusinessStatus) || isAlreadyApproved(approversID, approversDate)) {
 				html += `
-				<tr>
+				<tr class="${button}" id="${encryptString(item.officialBusinessID)}">
 					<td>${getFormCode("OBF", dateCreated, officialBusinessID)}</td>
 					<td>${fullname}</td>
 					<td>
@@ -291,9 +288,6 @@ $(document).ready(function () {
 
 					<td class="text-center">${getStatusStyle(officialBusinessStatus)}</td>
 					<td>${remarks}</td>
-					<td class="text-center">
-						${button}
-					</td>
 				</tr>`;
 			}
 
@@ -348,7 +342,6 @@ $(document).ready(function () {
 
                     <th>Status</th>
                     <th>Remarks</th>
-                    <th>Action</th>
                 </tr>
             </thead>
             <tbody>`;
@@ -389,6 +382,7 @@ $(document).ready(function () {
 			};
 			(officialBusinessStatus == 1 || officialBusinessStatus == 2) && uniqueData.push(unique);
 			
+			let btnClass = officialBusinessStatus != 0 ? "btnView" : "btnEdit";
 
 			let button =
 				officialBusinessStatus != 0 ?
@@ -400,7 +394,7 @@ $(document).ready(function () {
                 id="${encryptString(officialBusinessID)}" 
                 code="${getFormCode("OBF", dateCreated, officialBusinessID)}"><i class="fas fa-edit"></i> Edit</button>`;
 			html += `
-            <tr>
+            <tr class="${btnClass}" id="${encryptString(officialBusinessID)}">
                 <td>${getFormCode("OBF", dateCreated, officialBusinessID)}</td>
                 <td>${fullname}</td>
 				<td>
@@ -413,9 +407,6 @@ $(document).ready(function () {
 
                 <td class="text-center">${getStatusStyle(officialBusinessStatus)}</td>
                 <td>${remarks}</td>
-                <td class="text-center">
-                    ${button}
-                </td>
             </tr>`;
 		});
 
@@ -450,14 +441,14 @@ $(document).ready(function () {
 					// DRAFT
 					button = `
 					<button 
-						class="btn btn-submit" 
+						class="btn btn-submit px-5 p-2"  
 						id="btnSubmit" 
 						officialBusinessID="${officialBusinessID}"
 						code="${getFormCode("OBF", createdAt, officialBusinessID)}"><i class="fas fa-paper-plane"></i>
 						Submit
 					</button>
 					<button 
-						class="btn btn-cancel"
+						class="btn btn-cancel px-5 p-2"
 						id="btnCancelForm" 
 						officialBusinessID="${officialBusinessID}"
 						code="${getFormCode("OBF", createdAt, officialBusinessID)}"><i class="fas fa-ban"></i> 
@@ -467,7 +458,7 @@ $(document).ready(function () {
 					if (!isOngoing) {
 						button = `
 						<button 
-							class="btn btn-cancel"
+							class="btn btn-cancel px-5 p-2"
 							id="btnCancelForm" 
 							officialBusinessID="${officialBusinessID}"
 							code="${getFormCode("OBF", createdAt, officialBusinessID)}"><i class="fas fa-ban"></i> 
@@ -480,14 +471,14 @@ $(document).ready(function () {
 					if (isImCurrentApprover(approversID, approversDate)) {
 						button = `
 						<button 
-							class="btn btn-submit" 
+							class="btn btn-submit px-5 p-2"  
 							id="btnApprove" 
 							officialBusinessID="${encryptString(officialBusinessID)}"
 							code="${getFormCode("OBF", createdAt, officialBusinessID)}"><i class="fas fa-paper-plane"></i>
 							Approve
 						</button>
 						<button 
-							class="btn btn-cancel"
+							class="btn btn-cancel px-5 p-2"
 							id="btnReject" 
 							officialBusinessID="${encryptString(officialBusinessID)}"
 							code="${getFormCode("OBF", createdAt, officialBusinessID)}"><i class="fas fa-ban"></i> 
@@ -500,11 +491,11 @@ $(document).ready(function () {
 		} else {
 			button = `
 			<button 
-				class="btn btn-submit" 
+				class="btn btn-submit px-5 p-2"  
 				id="btnSubmit"><i class="fas fa-paper-plane"></i> Submit
 			</button>
 			<button 
-				class="btn btn-cancel" 
+				class="btn btn-cancel btnCancel px-5 p-2" 
 				id="btnCancel"><i class="fas fa-ban"></i> 
 				Cancel
 			</button>`;
@@ -1293,7 +1284,7 @@ $(document).ready(function () {
 			<button class="btn btn-danger" id="btnRejectConfirmation"
 			officialBusinessID="${id}"
 			officialBusinessCode="${feedback}"><i class="far fa-times-circle"></i> Deny</button>
-			<button class="btn btn-cancel" data-dismiss="modal"><i class="fas fa-ban"></i> Cancel</button>
+			<button class="btn btn-cancel btnCancel px-5 p-2" data-dismiss="modal"><i class="fas fa-ban"></i> Cancel</button>
 		</div>`;
 		$("#modal_change_schedule_content").html(html);
 	})

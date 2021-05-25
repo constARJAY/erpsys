@@ -379,17 +379,15 @@ $(document).on("change", "[name=clientCity]", function() {
                     </div>
                     <div class="col-sm-12 col-md-6 col-lg-2 col-xl-2">
                         <div class="form-group">
-                            <label>Unit Number <span
-                                    class="text-danger font-weight-bold">*</span></label>
-                            <input class="form-control validate" required=""
+                            <label>Unit Number </label>
+                            <input class="form-control validate"
                             data-allowcharacters="[0-9]" minlength="1" maxlength="35"  id="input_clientUnitNumber" name="clientUnitNumber" value="${clientUnitNumber}" type="text">
                             <div class="invalid-feedback d-block" id="invalid-input_clientUnitNumber"></div>
                         </div>
                     </div>
                     <div class="col-sm-12 col-md-6 col-lg-4 col-xl-4">
                         <div class="form-group">
-                            <label>Building/House Number <span
-                                    class="text-danger font-weight-bold">*</span></label>
+                            <label>Building/House Number <span class="text-danger font-weight-bold">*</span></label>
                             <input class="form-control validate" required=""
                             data-allowcharacters="[a-z][A-Z][.][,][-]['][#][0-9][ ]" minlength="1" maxlength="35" id="input_clientHouseNumber" name="clientHouseNumber" value="${clientHouseNumber}" type="text">
                             <div class="invalid-feedback d-block" id="invalid-input_clientHouseNumber"></div>
@@ -434,7 +432,7 @@ $(document).on("change", "[name=clientCity]", function() {
                     </div>
                     <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12">
                         <div class="form-group">
-                            <label>Email Address <span class="text-danger font-weight-bold">*</span></label>
+                            <label>Email Address </label>
                             <input 
                                 type="email" 
                                 class="form-control validate" 
@@ -455,15 +453,15 @@ $(document).on("change", "[name=clientCity]", function() {
                             <label>Tax Identification Number <span class="text-danger font-weight-bold">*</span></label>
                             <input 
                                 type="text" 
-                                class="form-control validate inputmask" 
+                                class="form-control inputmask" 
                                 name="clientTin" 
                                 id="input_clientTin" 
-                                data-allowcharacters="[0-9][ ]" 
+                                data-allowcharacters="[0-9]" 
                                 minlength="15" 
                                 maxlength="15" 
                                 value="${clientTin}"
                                 required
-                                mask="999 999 999 999"
+                                mask="999-999-999-999"
                                 autocomplete="off">
                             <div class="invalid-feedback d-block" id="invalid-input_clientTin"></div>
                         </div>
@@ -473,11 +471,11 @@ $(document).on("change", "[name=clientCity]", function() {
                             <label>Mobile No. <span class="text-danger font-weight-bold">*</span></label>
                                 <input 
                                 type="text" 
-                                class="form-control validate inputmask" 
+                                class="form-control inputmask" 
                                 name="client_MobileNo" 
                                 id="input_clientMobileNo" 
                                 data-allowcharacters="[0-9]" 
-                                mask="9999 9999 999" 
+                                mask="0\\999-999-9999"  
                                 minlength="13" 
                                 maxlength="13" 
                                 value="${client_MobileNo}"
@@ -489,13 +487,13 @@ $(document).on("change", "[name=clientCity]", function() {
                         <div class="form-group">
                             <label>Telephone No. <span class="text-danger font-weight-bold">*</span></label>
                                 <input type="text" 
-                                class="form-control validate inputmask" 
+                                class="form-control inputmask" 
                                 name="clientTelephoneNo" 
                                 id="input_clientTelephoneNo" 
                                 data-allowcharacters="[0-9]" 
-                                mask="(99) 9999 9999" 
+                                mask="(99)-9999-9999" 
                                 minlength="13" 
-                                maxlength="13" 
+                                maxlength="18" 
                                 required="" 
                                 value="${clientTelephoneNo}">
                             <div class="invalid-feedback d-block" id="invalid-input_clientTelephoneNo"></div>

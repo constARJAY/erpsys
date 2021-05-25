@@ -59,7 +59,7 @@ $(document).ready(function(){
                     <tr class="text-left">
                         <th>Category Code</th>
                         <th>Category Name</th>
-                        <th>Company Name</th>
+                        <th>Client</th>
                         <th>Status</th>
                     </tr>
                     </thead>
@@ -185,7 +185,7 @@ $(document).ready(function(){
                 </div>
                 <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12">
                     <div class="form-group">
-                        <label>Company Name <span class="text-danger font-weight-bold">*</span></label>
+                        <label>Client <span class="text-danger font-weight-bold">*</span></label>
                         <select 
                             class="form-control select2 validate" 
                             id="input_companyName" 
