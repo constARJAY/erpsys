@@ -198,7 +198,10 @@ class Service_order extends CI_Controller {
     }
 
     public function serviceOrderExcel($data) {
-        $fileName    = "ServiceOrder.xlsx";
+        $id        = $data["serviceOrderID"];
+        $createdAt = $data["createdAt"];
+        $code      = getFormCode("SO", $createdAt, $id);
+        $fileName    = "$code.xlsx";
         $spreadsheet = new Spreadsheet();
         $sheet       = $spreadsheet->getActiveSheet();
 

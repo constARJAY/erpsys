@@ -2303,7 +2303,8 @@ $(document).ready(function() {
 				approvedButton += contractFile ? `
 				<a href="${base_url}assets/upload-files/contracts/${contractFile}" 
 					class="pr-3" 
-					id="displayContract">${contractFile}</a>` : "";
+					id="displayContract"
+					target="_blank">${contractFile}</a>` : "";
 				if (employeeID == sessionID) {
 					approvedButton += `
 					<input type="file"

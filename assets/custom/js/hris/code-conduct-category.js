@@ -125,7 +125,9 @@ $(document).on("click", "#btnUpdate", function(){
             data["feedback"]                 =  $("#inputcodeConductCategoryName").val();
             sweetAlertConfirmation("update", "Category","modal_codeConductCategory", null , data, true, tableContent);
         }
-    }else{$("#inputcodeConductCategoryStatus").select2('focus');}
+    }else{
+        $("#inputcodeConductCategoryStatus").select2('focus');
+    }
     
 });
 
@@ -140,16 +142,7 @@ $(document).on("click",".btnCancel", function(){
 });
 
 
-$(document).on("change", "#inputcodeConductCategoryStatus", function(){
-    if($(this).data("codeconductcategoryid")){
-        let thisID      =   $(this).data("codeconductcategoryid");
-        let thisValue   =   $(this).val();
-        let tableData   =   getTableData("hris_code_conduct_section_tbl","","codeConductCategoryID="+thisID);
-        tableData.length > 0 && thisValue == 0 ? $(this).addClass("is-invalid") : $(this).removeClass("is-invalid");
-        let textAlert   =   tableData.length > 0 && thisValue == 0 ? "There is active code of conduct section in this category" : "";
-        $("#invalid-inputcodeConductCategoryStatus").text(textAlert);
-    }
-});
+
 
 
 // FUNCTIONS
@@ -231,3 +224,23 @@ function tableContent(){
             })
 }
 
+$(document).on("change", "[name=codeConductCategoryStatus]", function(){
+    if($(this).data("codeconductcategoryid")){
+        let thisID      =   $(this).data("codeconductcategoryid");
+        let thisValue   =   $(this).val();
+        let tableData   =   getTableData("hris_code_conduct_section_tbl","","codeConductCategoryID="+thisID);
+        let attrID      =   $(this).attr("id");
+        if(tableData.length > 0 && thisValue == 0){
+            setTimeout(function(){
+                $("#"+attrID).removeClass("is-valid").removeClass("validated").addClass("is-invalid");
+                $(".select2-selection").removeClass("no-error").addClass("has-error");
+                $("#invalid-inputcodeConductCategoryStatus").text(`This record is currently in use!`);
+                $("#btnUpdate").prop("disabled", true);
+            },180);
+        }else{
+            $("#btnUpdate").prop("disabled", false);
+            $('#'+attrID).removeClass("is-invalid");
+            $(".select2-selection").addClass("no-error").removeClass("has-error");
+        }
+    }
+});

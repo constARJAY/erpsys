@@ -382,13 +382,13 @@ function tableContent(classificationID){
                                                                 </div>
                                                                 <div class="row price-list-description-row hide" id="priceListRow${item.itemID}">
                                                                        `;
-                                                priceListData.map((priceListItems, index)=>{
-                                                        if(index > 1){
+                                                priceListData.filter(items=> items.preferred == 0).map((priceListItems, index)=>{
+                                                       
                                                             priceListDescription += `   <div class="col-3 py-2 text-left">${priceListItems["inventoryVendorCode"]}</div>
                                                                                         <div class="col-3 py-2 text-left">${priceListItems["inventoryVendorName"]}</div>
                                                                                         <div class="col-3 py-2 text-right">${formatAmount(priceListItems["vendorCurrentPrice"], true)}</div>
                                                                                         <div class="col-3 py-2 text-left">${moment(priceListItems["updatedAt"]).format("MMMM DD, YYYY hh:mm:ss A")}</div>`;
-                                                        }
+                                                        
                                                     });
                                 let button = priceListData.length > 1 ? `<button class="btn btn-default btn-add waves-effect d-flex align-items-center priceListRow-show-more" id="showMore${item.itemID}" target="#priceListRow${item.itemID}" type="button">
                                                                             <i class="zmdi zmdi-caret-down"></i>&nbsp; <span>Show More</span>
@@ -501,7 +501,7 @@ function getItemPriceList(itemID){
                                     </tr>
                                 </thead>
                                 <tbody id="tablePriceList-body" >`;
-    let tableData  = getTableData("ims_inventory_price_list_tbl LEFT JOIN ims_inventory_vendor_tbl USING(inventoryVendorID)","","itemID="+itemID);
+    let tableData  = getTableData("ims_inventory_price_list_tbl LEFT JOIN ims_inventory_vendor_tbl USING(inventoryVendorID)","ims_inventory_price_list_tbl.*, ims_inventory_vendor_tbl.inventoryVendorCode as inventoryVendorCode","itemID="+itemID);
     if(tableData.length < 1){
         returnData += `<tr class="price-list-row" row="0">
                             <td class="text-center align-items-center"><input type="checkbox" name="checklist-delete"></td>

@@ -34,7 +34,19 @@ $(document).ready(function() {
 				"ims_service_order_tbl", 
 				"reviseServiceOrderID", 
 				"reviseServiceOrderID IS NOT NULL AND serviceOrderStatus != 4");
-			return revisedDocumentsID.map(item => item.reviseServiceOrderID).includes(id);
+
+			const data = getTableData(
+				`ims_service_order_tbl`,
+				`serviceRequisitionID`,
+				`serviceOrderID = ${id}`
+			);
+			const { serviceRequisitionID } = data && data[0];
+			const isAllowedForRevise = getTableDataLength(
+				`ims_service_order_tbl`,
+				`serviceOrderID`,
+				`serviceRequisitionID = ${serviceRequisitionID} AND serviceOrderStatus <> 3 AND serviceOrderStatus <> 4`
+			);
+			return revisedDocumentsID.map(item => item.reviseServiceOrderID).includes(id) || isAllowedForRevise != 0;
 		}
 		return false;
 	}
@@ -309,7 +321,7 @@ $(document).ready(function() {
 					{ targets: 0,  width: 50   },
 					{ targets: 1,  width: 150  },
 					{ targets: 2,  width: 150  },
-					{ targets: 3,  width: 800  },
+					{ targets: 3,  width: 1000 },
 					{ targets: 4,  width: 200  },
 				],
 			});
@@ -329,7 +341,7 @@ $(document).ready(function() {
 				columnDefs: [
 					{ targets: 0,  width: 150  },
 					{ targets: 1,  width: 150  },
-					{ targets: 2,  width: 800  },
+					{ targets: 2,  width: 1000 },
 					{ targets: 3,  width: 200  },
 				],
 			});
@@ -400,11 +412,11 @@ $(document).ready(function() {
             <thead>
 				<tr style="white-space: nowrap">
 					<th>Document No.</th>
-					<th>Employee Name</th>
+					<th>Prepared By</th>
 					<th>Reference No.</th>
 					<th>Client Name</th>
 					<th>Project Name</th>
-					<th>Reason</th>
+					<th>Description</th>
 					<th>Current Approver</th>
 					<th>Date Created</th>
 					<th>Date Submitted</th>
@@ -503,11 +515,11 @@ $(document).ready(function() {
             <thead>
 				<tr style="white-space: nowrap">
                     <th>Document No.</th>
-                    <th>Employee Name</th>
+                    <th>Prepared By</th>
                     <th>Reference No.</th>
                     <th>Client Name</th>
                     <th>Project Name</th>
-                    <th>Reason</th>
+                    <th>Description</th>
                     <th>Current Approver</th>
                     <th>Date Created</th>
                     <th>Date Submitted</th>
@@ -677,19 +689,7 @@ $(document).ready(function() {
 					}
 				} else if (serviceOrderStatus == 4) {
 					// CANCELLED - FOR REVISE
-					const data = getTableData(
-						`ims_service_order_tbl`,
-						`serviceRequisitionID`,
-						`serviceOrderID = ${serviceOrderID}`
-					);
-					const { serviceRequisitionID } = data && data[0];
-					const isAllowedForRevise = getTableDataLength(
-						`ims_service_order_tbl`,
-						`serviceOrderID`,
-						`serviceRequisitionID = ${serviceRequisitionID} AND serviceOrderStatus <> 3 AND serviceOrderStatus <> 4`
-					);
-
-					if (!isDocumentRevised(serviceOrderID) && isAllowedForRevise == 0) {
+					if (!isDocumentRevised(serviceOrderID)) {
 						button = `
 						<button
 							class="btn btn-cancel px-5 p-2"
@@ -867,9 +867,9 @@ $(document).ready(function() {
 
 				return `
 				<option 
-					value        = "${item.serviceID}" 
-					serviceCode     = "${serviceCode}"
-					serviceUom          = "${item.serviceUom}"
+					value       = "${item.serviceID}" 
+					serviceCode = "${serviceCode}"
+					serviceUom  = "${item.serviceUom}"
 					${item.serviceID == serviceIDArr[index] && "selected"}>
 					${item.serviceName}
 				</option>`;
@@ -975,6 +975,7 @@ $(document).ready(function() {
 				<td>
 					<div class="uom">
 						<select class="form-control validate select2"
+							style="width: 100%"
 							name="serviceUom"
 							id="serviceUom"
 							required>
@@ -1028,12 +1029,12 @@ $(document).ready(function() {
 				</td>
 				<td class="text-center">
 					<div class="quantity">
-						${quantity}
+						${formatAmount(quantity)}
 					</div>
 				</td>
 				<td>
 					<div class="uom">
-						${uom.replaceAll(" ", "").toLowerCase() == `selectuomliterpieceselectuom` ? uom : "-"}
+						${!uom || uom.replaceAll(" ", "").toLowerCase() == `selectuomliterpieceselectuom` ? "-" : uom}
 					</div>
 				</td>
 				<td class="text-right">
@@ -1069,15 +1070,15 @@ $(document).ready(function() {
 			`requestServiceID = ${requestServiceID}`
 		);
 		let serviceScopes = `
-		<div class="table-responsive">
+		<div class="container-fluid">
 			<table class="table table-bordered">
 				<thead>
 					<tr>
 						<th style="width: 40%">Description ${!readOnly ? "<code>*</code>" : ""}</th>
 						<th style="width: 12%">Quantity ${!readOnly ? "<code>*</code>" : ""}</th>
-						<th style="width: 12%">UOM ${!readOnly ? "<code>*</code>" : ""}</th>
-						<th style="width: 18%">Unit Cost ${!readOnly ? "<code>*</code>" : ""}</th>
-						<th style="width: 18%">Total Cost</th>
+						<th style="width: 16%">UOM ${!readOnly ? "<code>*</code>" : ""}</th>
+						<th style="width: 16%">Unit Cost ${!readOnly ? "<code>*</code>" : ""}</th>
+						<th style="width: 16%">Total Cost</th>
 					</tr>
 				</thead>
 				<tbody class="tableScopeBody">`;
@@ -1177,8 +1178,7 @@ $(document).ready(function() {
 			$(this).find("select").each(function(j) {
 				const itemID = $(this).val();
 				$(this).attr("index", `${i}`);
-				$(this).attr("project", `true`);
-				$(this).attr("id", `projectitemid${i}`)
+				$(this).attr("id", `serviceUom${i}${j}`)
 				if (!$(this).attr("data-select2-id")) {
 					$(this).select2({ theme: "bootstrap" });
 				}
@@ -1468,8 +1468,6 @@ $(document).ready(function() {
 			vat      = totalAmount - vatSales;
 		}
 
-		// const vat      = getNonFormattedAmount($("[name=vat]").val())
-		// const vatSales = totalAmount - vat;
 		$("#vatSales").html(formatAmount(vatSales, true));
 		$(`[name="vat"]`).val(vat);
 
@@ -1545,7 +1543,6 @@ $(document).ready(function() {
 		setTimeout(() => {
 			$(`#tableServiceDisplay`).html(services);
 			initDataTables();
-			// initAll();
 			initSelect2("#discountType");
 			updateTableItems();
 			updateServiceOptions();
@@ -1556,7 +1553,6 @@ $(document).ready(function() {
 
 			const discountType = $(`[name="discountType"]`).val();
 			const totalAmount  = getNonFormattedAmount($(`#total`).text());
-			console.log(discountType, totalAmount);
 			$(`[name="discount"]`).val("0").trigger("keyup");
 			if (discountType == "percent") {
 				$(`[name="discount"]`).attr("max", "100");
@@ -1585,7 +1581,7 @@ $(document).ready(function() {
 			const total = +getNonFormattedAmount($("#total").text());
 			const vatSales = total / 1.12;
 			const vat      = total - vatSales;
-			const lessEwt  = vatSales != 0 ? vatSales * 0.01 : 0;
+			const lessEwt  = vatSales != 0 ? vatSales * 0.02 : 0;
 			const totalVat = getNonFormattedAmount($(`#totalVat`).text());
 			const grandTotalAmount = totalVat - lessEwt;
 			$(`#vatSales`).text(formatAmount(vatSales, true));
@@ -1763,7 +1759,6 @@ $(document).ready(function() {
 			submittedAt              = false,
 			createdAt                = false,
 		} = data && data[0];
-		console.log(total);
 
 		let requestServiceItems = "";
 		if (serviceRequisitionID) {
@@ -2158,6 +2153,7 @@ $(document).ready(function() {
 				approvedButton += `
 				<a href="${path}" 
 					class="pr-3" 
+					target="_blank"
 					id="displayContract">${file}</a>`;
 				if (employeeID == sessionID) {
 					approvedButton += `
@@ -2411,7 +2407,7 @@ $(document).ready(function() {
             </div>
             <div class="col-md-4 col-sm-12">
                 <div class="form-group">
-                    <label>Employee Name</label>
+                    <label>Prepared By</label>
                     <input type="text" class="form-control" disabled value="${employeeFullname}">
                 </div>
             </div>
@@ -2429,7 +2425,7 @@ $(document).ready(function() {
             </div>
             <div class="col-md-12 col-sm-12">
                 <div class="form-group">
-                    <label>Reason ${!disabled ? "<code>*</code>" : ""}</label>
+                    <label>Description ${!disabled ? "<code>*</code>" : ""}</label>
                     <textarea class="form-control validate"
                         data-allowcharacters="[a-z][A-Z][0-9][ ][.][,][-][()]['][/][&]"
                         minlength="1"
@@ -2916,7 +2912,7 @@ $(document).ready(function() {
 
 	// ----- DOWNLOAD EXCEL -----
 	$(document).on("click", "#btnExcel", function() {
-		const serviceOrderID = $(this).attr("serviceorderid");
+		const serviceOrderID = decryptString($(this).attr("serviceorderid"));
 		const url = `${base_url}ims/service_order/downloadExcel?id=${serviceOrderID}`;
 		window.location.replace(url); 
 	})

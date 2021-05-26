@@ -52,7 +52,7 @@ function isDocumentRevised(id = null) {
 
 // ----- VIEW DOCUMENT -----
 function viewDocument(view_id = false, readOnly = false, isRevise = false, isFromCancelledDocument = false) {
-	console.log(view_id)
+	
 	const loadData = (id, isRevise = false, isFromCancelledDocument = false) => {
 		const tableData = getTableData("hris_loan_form_tbl", "", "loanFormID=" + id);
 
@@ -103,7 +103,7 @@ function viewDocument(view_id = false, readOnly = false, isRevise = false, isFro
 	}
 
 	if (view_id) {
-		let id = view_id;
+		let id = decryptString(view_id);
 			id && isFinite(id) && loadData(id, isRevise, isFromCancelledDocument);
 	} else {
 		let url   = window.document.URL;
@@ -262,7 +262,7 @@ function forApprovalContent() {
 		<thead>
 			<tr style="white-space: nowrap">
 				<th>Document No.</th>
-				<th>Prepared By</th>
+				<th>Employee Name</th>
 				<th>Current Approver</th>
 				<th>Date Created</th>
 				<th>Date Submitted</th>
@@ -343,7 +343,7 @@ function myFormsContent() {
 		<thead>
 			<tr style="white-space: nowrap">
 				<th>Document No.</th>
-				<th>Prepared By</th>
+				<th>Employee Name</th>
 				<th>Current Approver</th>
 				<th>Date Created</th>
 				<th>Date Submitted</th>
@@ -612,7 +612,7 @@ function formContent(data = false, readOnly = false, isRevise = false, isFromCan
 	let disabled = readOnly ? "disabled" : "";
 	let button   = formButtons(data, isRevise, isFromCancelledDocument);
 
-	let loanType        =   getTableData("hris_loan_tbl","","loanStatus != 0");
+	let loanType        =   getTableData("hris_loan_tbl","","loanStatus =1");
 	let optionLoanType  =   `<option value="" disabled selected>Select Loan Type</option>`;
 	loanType.map((loanTypeItems, loanTypeIndex) =>{
 		var isSelected = loanTypeItems["loanID"] == loanID ? "selected" : "";
@@ -706,7 +706,7 @@ function formContent(data = false, readOnly = false, isRevise = false, isFromCan
 	<div class="row" id="form_loan_form">
 		<div class="col-md-4 col-sm-12">
 			<div class="form-group">
-				<label>Prepared By</label>
+				<label>Employee Name</label>
 				<input type="text" class="form-control" disabled value="${employeeFullname}">
 			</div>
 		</div>
@@ -1091,7 +1091,7 @@ $(document).on("click", ".btnView", function () {
 // ----- REVISE DOCUMENT -----
 $(document).on("click", "#btnRevise", function () {
 	
-	const id                    = decryptString($(this).attr("loanFormID"));
+	const id                    = $(this).attr("loanFormID");
 	const fromCancelledDocument = $(this).attr("cancel") == "true";
 
 	viewDocument(id, false, true, fromCancelledDocument);
@@ -1144,7 +1144,7 @@ $(document).on("click", "#btnSave", function () {
 
 // ----- SUBMIT DOCUMENT -----
 $(document).on("click", "#btnSubmit", function () {
-	const id           = $(this).attr("loanFormID");
+	const id           = decryptString($(this).attr("loanFormID"));
     const isFromCancelledDocument = $(this).attr("cancel") == "true";
     const revise        = $(this).attr("revise") == "true";
 	const validate     = validateForm("form_loan_form");
@@ -1162,11 +1162,11 @@ $(document).on("click", "#btnSubmit", function () {
             }
         }
 
-        let approversID = "", approversDate = "";
-			for (var i of data) {
-				if (i[0] == "approversID")   approversID   = i[1];
-				if (i[0] == "approversDate") approversDate = i[1];
-			}
+        // let approversID = "", approversDate = "";
+		// 	for (var i of data) {
+		// 		if (i[0] == "approversID")   approversID   = i[1];
+		// 		if (i[0] == "approversDate") approversDate = i[1];
+		// 	}
 		// ---------- CONVERT VALUE WITH COMMA BEFORE SENDING IN CONTROLLER --------------------
 		let loanFormAmount = data["tableData"]["loanFormAmount"].replaceAll(",","");
 		let loanFormDeductionAmount = data["tableData"]["loanFormDeductionAmount"].replaceAll(",","");
@@ -1244,7 +1244,7 @@ $(document).on("click", "#btnDrop", function() {
 
 // ----- CANCEL DOCUMENT -----
 $(document).on("click", "#btnCancelForm", function () {
-	const id       = $(this).attr("loanFormID");
+	const id       = decryptString($(this).attr("loanFormID"));
 	const feedback = $(this).attr("code") || getFormCode("LNF", dateToday(), id);
 	const action   = "update";
 	const data     = getData(action, 4, "cancelform", feedback, id);
@@ -1275,7 +1275,7 @@ $(document).on("click", "#btnCancelForm", function () {
 
 // ----- CANCEL DOCUMENT -----
 $(document).on("click", "#btnCancel", function () {
-	const id       = $(this).attr("loanFormID");
+	const id       = decryptString($(this).attr("loanFormID"));
 	const feedback = $(this).attr("code") || getFormCode("LNF", dateToday(), id);
 	const action   = revise && !isFromCancelledDocument && "insert" || (id && feedback ? "update" : "insert");
     const isFromCancelledDocument = $(this).attr("cancel") == "true";

@@ -132,12 +132,12 @@ class ServiceOrder_model extends CI_Model {
                     array_push($scopes, $temp);
                 }
 
-                $temp = [
+                $item = [
                     "serviceCode" => getFormCode("SVC", $item["istCreatedAt"], $item["serviceID"]),
                     "serviceName" => $item["serviceName"],
                     "scopes"      => $scopes
                 ];
-                array_push($data["items"], $temp);
+                array_push($data["items"], $item);
             }
         }
         return $data;

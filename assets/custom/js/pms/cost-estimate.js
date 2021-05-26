@@ -1460,20 +1460,25 @@ $(document).ready(function() {
 				`ims_request_items_tbl LEFT JOIN ims_inventory_item_tbl USING(itemID)`, 
 				`quantity, unitCost, totalCost, files, remarks, itemID, itemCode, ims_inventory_item_tbl.itemName as itemName, unitOfMeasurementID, categoryType`, 
 				`costEstimateID = ${costEstimateID} AND categoryType = 'project' AND inventoryValidationID IS NULL AND billMaterialID IS NULL AND purchaseRequestID IS NULL AND purchaseOrderID IS NULL AND bidRecapID IS NULL`);
-			
-			requestProjectItemsData.map(item => {
-				requestProjectItems += getItemRow("project", item, readOnly);
-			})
-
+					if(requestProjectItemsData.length < 1){
+						requestProjectItems += getItemRow("project");
+					}else{
+						requestProjectItemsData.map(item => {
+							requestProjectItems += getItemRow("project", item, readOnly);
+						});
+					}
 			let requestCompanyItemsData = getTableData(
 				`ims_request_items_tbl LEFT JOIN ims_inventory_item_tbl USING(itemID)`, 
 				`quantity, unitCost, totalCost, files, remarks, itemID, itemCode, ims_inventory_item_tbl.itemName as itemName, unitOfMeasurementID, categoryType`, 
 				`costEstimateID = '${costEstimateID}' AND categoryType = 'company' AND inventoryValidationID IS NULL AND billMaterialID IS NULL AND purchaseRequestID IS NULL AND purchaseOrderID IS NULL AND bidRecapID IS NULL`);
 			
-			requestCompanyItemsData.map(item => {
-				requestCompanyItems += getItemRow("company", item, readOnly);
-			})
-
+				if(requestCompanyItemsData.length < 1){
+					requestCompanyItems += getItemRow("company");
+				}else{
+					requestCompanyItemsData.map(item => {
+						requestCompanyItems += getItemRow("company", item, readOnly);
+					})					
+				}
 			let requestDesignationData = getTableData(`hris_designation_tbl JOIN hris_personnel_request_tbl USING(designationID)`,
 										`hris_personnel_request_tbl.designationID AS designationID ,hris_designation_tbl.designationName AS designationName,designationTotalHours,quantity`,
 										`costEstimateID = '${costEstimateID}' AND billMaterialID IS NULL`,
@@ -1489,9 +1494,13 @@ $(document).ready(function() {
 			let requestTravelData = getTableData(`ims_travel_request_tbl`,
 										`travelDescription,unitOfMeasure,quantity`,
 										`costEstimateID = ${costEstimateID} AND billMaterialID IS NULL`)
-			requestTravelData.map(item => {
-				requestTravel += getItemRow("travel", item, readOnly);
-			})
+				if(requestTravel.length < 1){
+					requestTravel 		+= getItemRow("travel");
+				}else{
+					requestTravelData.map(item => {
+						requestTravel += getItemRow("travel", item, readOnly);
+					})
+				}
 		} else {
 			requestProjectItems += getItemRow("project");
 			requestCompanyItems += getItemRow("company");
@@ -2681,7 +2690,6 @@ $(document).ready(function() {
 			quantity     	= "",
 			designationTotalHours = ""
 		} = data;
-		console.log(data);
 		if (readOnly) {
 			html += `
 			<tr class="itemTableRow">

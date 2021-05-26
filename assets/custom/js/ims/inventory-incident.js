@@ -162,6 +162,11 @@ $(document).ready(function() {
             "ims_inventory_item_tbl LEFT JOIN ims_inventory_classification_tbl USING(classificationID)", 
 			"itemID, itemCode, itemName, unitOfMeasurementID,classificationName",
             "itemStatus = 1");
+			
+		 const employeeList = getTableData(
+            "hris_employee_list_tbl", 
+			"CONCAT(employeeFirstname,' ',employeeMiddlename,' ',employeeLastname) as fullname,employeeID",
+            "employeeStatus = 1 OR employeeStatus = 2 OR employeeStatus = 5");
 
 	// END GLOBAL VARIABLE - REUSABLE 
 
@@ -640,37 +645,24 @@ $(document).ready(function() {
 	}
 	// ----- END FORM BUTTONS -----
 
-	// // ----- UPDATE INVENTORYT NAME -----
-	// function updateInventoryItemOptions() {
-	// 	let projectItemIDArr = []; // 0 IS THE DEFAULT VALUE
-	// 	let projectElementID = [];
 
-	// 	$("[name=itemID][project=true]").each(function(i, obj) {
-	// 		projectItemIDArr.push($(this).val());
-	// 		projectElementID.push(`#${this.id}[project=true]`);
-	// 		$(this).val() && $(this).trigger("change");
-	// 	}) 
-		
+    // ----- GET PROJECT LIST -----
+    function getEmployeeList(id = null, display = true) {
+		let html ='';
+        html += employeeList.map(employee => {
+			let fullname = `${employee.fullname}`;
+			let employeeid = `${employee.employeeID}`;
 
-	// 	projectElementID.map((element, index) => {
-	// 		let html = `<option selected disabled>Select Item Name</option>`;
-	// 		let itemList = [...inventoryItemList];
-	// 		html += itemList.filter(item => !projectItemIDArr.includes(item.itemID) || item.itemID == projectItemIDArr[index]).map(item => {
-	// 			return `
-	// 			<option 
-	// 				value        = "${item.itemID}" 
-	// 				itemCode     = "${item.itemCode}"
-				
-	// 				uom          = "${item.unitOfMeasurementID}"
-	// 				classificationname  = "${item.classificationName}"
-	// 				${item.itemID == projectItemIDArr[index] && "selected"}>
-	// 				${item.itemName}
-	// 			</option>`;
-	// 		})
-	// 		$(element).html(html);
-	// 	});
-	// }
-	// // ----- END UPDATE INVENTORYT NAME -----
+            return `
+            <option 
+                value       = "${employee.employeeID}" 
+                ${employee.employeeID == id && "selected"}>
+                ${employee.fullname}
+            </option>`;
+        })
+        return display ? html : employeeList;
+    }
+    // ----- END GET PROJECT LIST -----
 
 
     // ----- GET INVENTORY ITEM -----
@@ -1428,7 +1420,7 @@ $(document).ready(function() {
 			approversStatus         = "",
 			approversDate           = "",
 			incidentActionPlan           = "",
-			incidentAccountablePerson    = "",
+			incidentEmployeeID    = "",
 			incidentTargetCompletion    = "",
 			incidentStatus   = false,
 			incidentRemarks   = false,
@@ -1617,15 +1609,18 @@ $(document).ready(function() {
                 </div>
             </div>
             <div class="col-md-4 col-sm-12">
-                <div class="form-group">
-                    <label>Accountable Person ${!disabled ? "<code>*</code>" : ""}</label>
-                    <input type="text" class="form-control validate"
-					data-allowcharacters="[a-z][A-Z][0-9][ ][.][,][-][()]['][/][&]"
-					id="incidentAccountablePerson"
-					name="incidentAccountablePerson"
-					required
-					value="${incidentAccountablePerson ?? ""}" ${disabled} >
-					<div class="d-block invalid-feedback" id="invalid-incidentAccountablePerson"></div>
+				<div class="form-group">
+					<label>Accountable Person ${!disabled ? "<code>*</code>" : ""}</label>
+                    <select class="form-control validate select2"
+                        name="incidentEmployeeID"
+                        id="incidentEmployeeID"
+                        style="width: 100%"
+                        required
+						${disabled}>
+                        <option selected disabled>Select Employee Name</option>
+                        ${getEmployeeList(incidentEmployeeID)}
+                    </select>
+                    <div class="d-block invalid-feedback" id="invalid-incidentEmployeeID"></div>
                 </div>
             </div>
             <div class="col-md-4 col-sm-12">
@@ -1785,7 +1780,7 @@ $(document).ready(function() {
 			data["incidentReason"] = $("[name=incidentReason]").val()?.trim();
 			data["incidentRemarks"] = $("[name=incidentRemarks]").val()?.trim();
 			data["incidentActionPlan"] = $("[name=incidentActionPlan]").val()?.trim();
-			data["incidentAccountablePerson"] = $("[name=incidentAccountablePerson]").val()?.trim();
+			data["incidentEmployeeID"] = $("[name=incidentEmployeeID]").val()?.trim();
 			data["incidentTargetCompletion"] = moment($("[name=incidentTargetCompletion]").val()?.trim()).format("YYYY-MM-DD");
 			// data["projectTotalAmount"]    = updateTotalAmount(true);
 			// data["companyTotalAmount"]    = updateTotalAmount(false);
@@ -1795,7 +1790,7 @@ $(document).ready(function() {
 			formData.append("incidentReason", $("[name=incidentReason]").val()?.trim());
 			formData.append("incidentRemarks", $("[name=incidentRemarks]").val()?.trim());
 			formData.append("incidentActionPlan", $("[name=incidentActionPlan]").val()?.trim());
-			formData.append("incidentAccountablePerson", $("[name=incidentAccountablePerson]").val()?.trim());
+			formData.append("incidentEmployeeID", $("[name=incidentEmployeeID]").val()?.trim());
 			formData.append("incidentTargetCompletion", moment($("[name=incidentTargetCompletion]").val()?.trim()).format("YYYY-MM-DD"));
 
 			if (action == "insert") {
