@@ -20,7 +20,7 @@ class Return_item extends CI_Controller {
     }
 
     
-    public function saveTransferRequest()
+    public function saveReturnItem()
     {
         $action                  = $this->input->post("action");
         $method                  = $this->input->post("method");
@@ -103,7 +103,7 @@ class Return_item extends CI_Controller {
                 if ($items) {
                     $returnItems = [];
                     foreach($items as $index => $item) {
-                        
+
                         $temp = [
                             "returnItemID"          => $returnItemID,
                             "borrowingDetailID"     => $item["borrowingDetailID"],
