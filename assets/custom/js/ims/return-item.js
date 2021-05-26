@@ -135,10 +135,10 @@ $(document).ready(function() {
 		LEFT JOIN ims_borrowing_details_tbl AS ibd ON ibd.borrowingID = ib.borrowingID`, `ib.borrowingID,ib.createdAt`,
 		"borrowingStatus = 2");
 
-    const projectList = getTableData(
-        "pms_project_list_tbl AS pplt LEFT JOIN pms_client_tbl AS pct ON pct.clientID = pplt.projectListClientID", 
-        "projectListID, projectListCode, projectListName, clientCode, clientName, clientRegion, clientProvince, clientCity, clientBarangay, clientUnitNumber, clientHouseNumber, clientCountry, clientPostalCode",
-        "projectListStatus = 1");
+    // const projectList = getTableData(
+    //     "pms_project_list_tbl AS pplt LEFT JOIN pms_client_tbl AS pct ON pct.clientID = pplt.projectListClientID", 
+    //     "projectListID, projectListCode, projectListName, clientCode, clientName, clientRegion, clientProvince, clientCity, clientBarangay, clientUnitNumber, clientHouseNumber, clientCountry, clientPostalCode",
+    //     "projectListStatus = 1");
 	// END GLOBAL VARIABLE - REUSABLE 
 
 
@@ -218,11 +218,11 @@ $(document).ready(function() {
 					{ targets: 2,  width: 150 },
 					{ targets: 3,  width: 200  },
 					{ targets: 4,  width: 170 },
-					{ targets: 5,  width: 120 },
+					{ targets: 5,  width: 190 },
                     { targets: 6,  width: 200 },
                     { targets: 7,  width: 80 },
                     { targets: 8,  width: 80 },
-					{ targets: 9,  width: 80 },
+					{ targets: 9,  width: 120 },
 					{ targets: 10,  width: 80 },
 				],
 			});
@@ -242,12 +242,12 @@ $(document).ready(function() {
 					{ targets: 1,  width: 150 },
 					{ targets: 2,  width: 200 },
 					{ targets: 3,  width: 170  },
-					{ targets: 4,  width: 180 },
+					{ targets: 4,  width: 190 },
 					{ targets: 5,  width: 120 },
                     { targets: 6,  width: 200 },
                     { targets: 7,  width: 80 },
                     { targets: 8,  width: 80 },
-					{ targets: 9,  width: 80 },
+					{ targets: 9,  width: 120 },
 					{ targets: 10,  width: 80 },
 					// { targets: 8,  width: 200 },
 				],
@@ -678,31 +678,31 @@ $(document).ready(function() {
 
     
     // ----- GET PROJECT LIST -----
-    function getProjectList(id = null, display = true) {
-		let html = `
-		<option 
-			value       = "0"
-			projectCode = "-"
-			clientCode  = "-"
-			clientName  = "-"
-			address     = "-"
-			${id == "0" && "selected"}>N/A</option>`;
-        html += projectList.map(project => {
-			let address = `${project.clientUnitNumber && titleCase(project.clientUnitNumber)+", "}${project.clientHouseNumber && project.clientHouseNumber +", "}${project.clientBarangay && titleCase(project.clientBarangay)+", "}${project.clientCity && titleCase(project.clientCity)+", "}${project.clientProvince && titleCase(project.clientProvince)+", "}${project.clientCountry && titleCase(project.clientCountry)+", "}${project.clientPostalCode && titleCase(project.clientPostalCode)}`;
+    // function getProjectList(id = null, display = true) {
+	// 	let html = `
+	// 	<option 
+	// 		value       = "0"
+	// 		projectCode = "-"
+	// 		clientCode  = "-"
+	// 		clientName  = "-"
+	// 		address     = "-"
+	// 		${id == "0" && "selected"}>N/A</option>`;
+    //     html += projectList.map(project => {
+	// 		let address = `${project.clientUnitNumber && titleCase(project.clientUnitNumber)+", "}${project.clientHouseNumber && project.clientHouseNumber +", "}${project.clientBarangay && titleCase(project.clientBarangay)+", "}${project.clientCity && titleCase(project.clientCity)+", "}${project.clientProvince && titleCase(project.clientProvince)+", "}${project.clientCountry && titleCase(project.clientCountry)+", "}${project.clientPostalCode && titleCase(project.clientPostalCode)}`;
 
-            return `
-            <option 
-                value       = "${project.projectListID}" 
-                projectCode = "${project.projectListCode}"
-                clientCode  = "${project.clientCode}"
-                clientName  = "${project.clientName}"
-				address     = "${address}"
-                ${project.projectListID == id && "selected"}>
-                ${project.projectListName}
-            </option>`;
-        })
-        return display ? html : projectList;
-    }
+    //         return `
+    //         <option 
+    //             value       = "${project.projectListID}" 
+    //             projectCode = "${project.projectListCode}"
+    //             clientCode  = "${project.clientCode}"
+    //             clientName  = "${project.clientName}"
+	// 			address     = "${address}"
+    //             ${project.projectListID == id && "selected"}>
+    //             ${project.projectListName}
+    //         </option>`;
+    //     })
+    //     return display ? html : projectList;
+    // }
     // ----- END GET PROJECT LIST -----
 
 	// ----- UPDATE INVENTORYT NAME -----
@@ -803,22 +803,28 @@ $(document).ready(function() {
 		let html = "";
 		if(inventoryborrowingid != ""){
 			id = `${id}`;
-			//alert(id);
 		}
 		//alert(inventoryborrowingid);
 
 		let BorrowingData = getTableData(`ims_borrowing_details_tbl AS ibd
 		LEFT JOIN ims_borrowing_tbl 								AS  ib 	ON ibd.borrowingID = ib.borrowingID
 		LEFT JOIN ims_inventory_item_tbl 							AS iii 	ON iii.itemID = ibd.itemID
-		LEFT JOIN ims_return_item_details_tbl 						AS irid	ON ibd.borrowingDetailID = irid.borrowingDetailID
-		LEFT JOIN ims_inventory_storage_tbl 						AS iis 	ON ibd.inventoryStorageID = iis.inventoryStorageID`,
+		LEFT JOIN pms_project_list_tbl 								AS pplt ON ib.projectID = pplt.projectListID
+		LEFT JOIN pms_client_tbl									AS pct ON pct.clientID = pplt.projectListClientID
+		LEFT JOIN ims_inventory_storage_tbl 						AS iis 	ON ibd.inventoryStorageID = iis.inventoryStorageID
+		LEFT JOIN ims_return_item_details_tbl						AS irid ON ibd.borrowingDetailID =irid.borrowingDetailID `,
 		`concat('ITM-',LEFT(iii.createdAt,2),'-',LPAD(iii.itemID,5,'0')) AS itemCode,iii.itemName,
 		concat('ISM-',LEFT(iis.createdAt,2),'-',LPAD(iis.inventoryStorageID,5,'0')) AS inventoryCode,iis.inventoryStorageOfficeName,
-		irid.returnItemQuantity,irid.returnItemDate,ibd.borrowingDetailID,ibd.itemID,ibd.inventoryStorageID,iii.itemName,ibd.barcode,ibd.serialnumber,ibd.quantity,ibd.borrowedpurpose,ibd.dateBorrowed`,
-		`ib.borrowingStatus = 2 AND ib.borrowingID = ${id}`,``,``);
+		IFNULL(irid.returnItemQuantity,'0') AS returnItemQuantity,IFNULL(irid.returnItemDate,'') AS returnItemDate,ibd.borrowingDetailID,ibd.itemID,ibd.inventoryStorageID,iii.itemName,ibd.barcode,ibd.serialnumber,ibd.quantity,ibd.borrowedPurpose,ibd.dateBorrowed,
+		pplt.projectListCode, pplt.projectListName, pct.clientCode, pct.clientName, pct.clientRegion, pct.clientProvince, pct.clientCity, pct.clientBarangay, pct.clientUnitNumber, pct.clientHouseNumber, pct.clientCountry, pct.clientPostalCode`,
+		`ib.borrowingStatus = 2 AND ib.borrowingID = ${id}`,``,`ibd.borrowingDetailID`);
 		
 		BorrowingData.map((item, index) => {
-		let {	
+			let address = `${item.clientUnitNumber && titleCase(item.clientUnitNumber)+", "}${item.clientHouseNumber && item.clientHouseNumber +", "}${item.clientBarangay && titleCase(item.clientBarangay)+", "}${item.clientCity && titleCase(item.clientCity)+", "}${item.clientProvince && titleCase(item.clientProvince)+", "}${item.clientCountry && titleCase(item.clientCountry)+", "}${item.clientPostalCode && titleCase(item.clientPostalCode)}`;
+			let clientCode =`${item.clientCode}`;
+			let clientName =`${item.clientName}`;
+			let projectListName =`${item.projectListName}`;
+			let {	
 			borrowingDetailID			="",
 			itemID						="",
 			inventoryStorageID			="",
@@ -828,12 +834,17 @@ $(document).ready(function() {
 			barcode 					="",
 			serialnumber 				="",
 			quantity 					="",
-			borrowedpurpose 			="",
+			borrowedPurpose 			="",
 			dateBorrowed 				="",
-			returnItemDate					="",
-			returnItemQuantity				="",
-			inventoryCode				=""
+			inventoryCode				="",
+			returnItemQuantity			="",
+			returnItemDate				=""
 		} = item;
+
+		$("#clientAddress").val(address);
+		$("#clientCode").val(clientCode);
+		$("#clientName").val(clientName);
+		$("#projectID").val(projectListName);
 		
 		if (readOnly) {
 			
@@ -855,6 +866,11 @@ $(document).ready(function() {
 					</div>
 				</td>
 				<td>
+					<div class="serialnumber">
+						${serialnumber || "-"}
+					</div>
+		   		</td> 
+				<td>
 					<div class="inventoryCode">
 					${inventoryCode || "-"}
 					</div>
@@ -864,35 +880,30 @@ $(document).ready(function() {
 					${inventoryStorageOfficeName || "-"}
 					</div>
 				</td>
-			<td>
-			<div class="serialnumber">
-				${serialnumber || "-"}
-			</div>
-		   </td> 
 		   <td>
-		   <div class="borrowedpurpose">
-			   ${borrowedpurpose || "-"}
+		   <div class="borrowedPurpose">
+			   ${borrowedPurpose || "-"}
 		   </div>
 		  </td> 
-			 <td>
-                <div class="borrowedquantity">
-                    ${quantity || "-"}
-                </div>
-               </td> 
                <td>
                 <div class="dateBorrowed">
 				${dateBorrowed && moment(dateBorrowed).format("MMMM DD, YYYY") || "-"}
                  </div>
             </td>
+			<td class="text-center">
+			<div class="borrowedquantity">
+				${quantity || "-"}
+			</div>
+		   </td> 
 			<td>
 			<div class="returnItemDate">
-				${returnItemDate && moment(returnItemDate).format("MMMM DD, YYYY") || "-"}
+				${returnItemDate}
 			</div>
 		   </td> 
 
 				<td class="text-center">
 					<div class="returnItemQuantity">
-					${returnItemQuantity || "-"}
+					${returnItemQuantity}
 					</div>
 				</td>
 			</tr>`;
@@ -918,6 +929,11 @@ $(document).ready(function() {
 				</div>
 			</td>
 			<td>
+			<div class="serialnumber">
+				${serialnumber || "-"}
+			</div>
+		   </td> 
+			<td>
 				<div class="inventoryCode">
 				${inventoryCode || "-"}	
 				</div>
@@ -927,19 +943,9 @@ $(document).ready(function() {
 				${inventoryStorageOfficeName || "-"}
 				</div>
 			</td>
-		<td>
-		<div class="serialnumber">
-			${serialnumber || "-"}
-		</div>
-	   </td> 
 	   <td>
-			<div class="borrowedpurpose">
-				${borrowedpurpose || "-"}
-			</div>
-		   </td> 
-		 <td>
-			<div class="borrowedquantity" id="borrowedquantity${index}">
-				${quantity}
+			<div class="borrowedPurpose">
+				${borrowedPurpose || "-"}
 			</div>
 		   </td> 
 		   <td>
@@ -947,13 +953,18 @@ $(document).ready(function() {
 			${dateBorrowed && moment(dateBorrowed).format("MMMM DD, YYYY") || "-"}
 			 </div>
 		</td>
+		<td class="text-center">
+		<div class="borrowedquantity" id="borrowedquantity${index}">
+			${quantity}
+		</div>
+	   </td> 
 		<td>
 			<input type="button" 
 			class="form-control daterange returnItemDate text-left"
 			required
 			id="returnItemDate${index}"
 			name="returnItemDate"
-			value="${returnItemDate && moment(returnItemDate).format("MMMM DD, YYYY")}"
+			value=""
 			title="Date">
 			<div class="d-block invalid-feedback" id="invalid-returnItemDate"></div>
 	   </td> 
@@ -967,7 +978,7 @@ $(document).ready(function() {
 				id="returnItemQuantity${index}" 
 				name="returnItemQuantity"
 				count="${index}" 
-				value="${returnItemQuantity}" 
+				value="" 
 				minlength="1" 
 				maxlength="20" 
 				requred>
@@ -986,7 +997,7 @@ $(document).ready(function() {
 	$(document).on("change", "[name=returnItemDate]", function() {
 		const id 	= $(this).attr("id");
 		const value = $(this).val();
-		console.log(value);
+		//console.log(value);
 
 
 	})	
@@ -1226,7 +1237,7 @@ $(document).ready(function() {
         <div class="row" id="form_purchase_request">
 		<div class="col-md-4 col-sm-12">
 		<div class="form-group">
-			<label>Equipment Borrowing No.</label>
+			<label>Reference No.</label>
 			<select class="form-control validate select2"
 			name="borrowingID"
 			id="borrowingID"
@@ -1239,26 +1250,28 @@ $(document).ready(function() {
 	</div>
 	</div>
 
-		<div class="col-md-4 col-sm-12">
-		<div class="form-group">
-				<label>Project Code</label>
-				<input type="text" class="form-control" name="projectCode" disabled value="-">
-	</div>
-	</div>
-
-	<div class="col-md-4 col-sm-12">
+	<div class="col-md-8 col-sm-12">
 	<div class="form-group">
-		<label>Project Name ${!disabled ? "<code>*</code>" : ""}</label>
-		<select class="form-control validate select2"
-			name="projectID"
-			id="projectID"
-			style="width: 100%"
-			required
-			${disabled}>
-			<option selected disabled>Select Project Name</option>
-			${getProjectList(projectID)}
-		</select>
-		<div class="d-block invalid-feedback" id="invalid-projectID"></div>
+		<label>Project Name</label>
+		<input type="text" class="form-control" id="projectID" name="projectID" disabled value="-">
+	</div>
+	</div>
+	<div class="col-md-3 col-sm-12">
+	<div class="form-group">
+		<label>Client Code</label>
+		<input type="text" class="form-control" id="clientCode" name="clientCode" disabled value="-">
+	</div>
+</div>
+<div class="col-md-3 col-sm-12">
+	<div class="form-group">
+		<label>Client Name</label>
+		<input type="text" class="form-control" id="clientName" name="clientName" disabled value="-">
+	</div>
+</div>
+<div class="col-md-6 col-sm-12">
+	<div class="form-group">
+		<label>Client Address</label>
+		<input type="text" class="form-control" id="clientAddress" name="clientAddress" disabled value="-">
 	</div>
 </div>
             <div class="col-md-4 col-sm-12">
@@ -1306,14 +1319,14 @@ $(document).ready(function() {
 								<th>Barcode</th>
 								<th>Item Code</th>
 								<th>Item Name </th>
+								<th>Serial No.</th>
 								<th>Storage Code </th>
 								<th>Storage Name</th>
-								<th>Serial No.</th>
 								<th>Purpose </th>
-								<th>Quantity Borrowed</th>
 								<th>Date Borrowed</th>
-								<th>Date Return</th>
-								<th>Quantity Return</th>
+								<th>Quantity</th>
+								<th>Date Returned</th>
+								<th>Quantity</th>
                             </tr>
                         </thead>
                         <tbody class="itemProjectTableBody" project="true">
@@ -1497,7 +1510,7 @@ $(document).ready(function() {
 				const dateBorrowed 			= moment(formatdateboorowed).format("YYYY-MM-DD HH:mm:ss");
 				// end of borrowed
 				const quantityBorrowed 		= $("td .borrowedquantity", this).text();	
-				const borrowedpurpose   	= $("td .borrowedpurpose", this).text();
+				const borrowedPurpose   	= $("td .borrowedPurpose", this).text();
 				// return date format	
 				const formatreturnItemDate  = $("td [name=returnItemDate]", this).val();	
 				const returnItemDate 		= moment(formatreturnItemDate).format("YYYY-MM-DD HH:mm:ss");
@@ -1516,6 +1529,7 @@ $(document).ready(function() {
 				formData.append(`items[${i}][itemName]`, itemName);
 				formData.append(`items[${i}][barcode]`, barcode);
 				formData.append(`items[${i}][serialnumber]`, serialnumber);
+				formData.append(`items[${i}][borrowedPurpose]`, borrowedPurpose);
 				formData.append(`items[${i}][dateBorrowed]`, dateBorrowed);
 				formData.append(`items[${i}][quantityBorrowed]`, quantityBorrowed);
 				formData.append(`items[${i}][returnItemDate]`, returnItemDate);

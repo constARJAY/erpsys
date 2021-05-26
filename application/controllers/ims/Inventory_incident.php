@@ -34,7 +34,7 @@ class Inventory_incident extends CI_Controller {
         $incidentReason   = $this->input->post("incidentReason") ?? null;
         $incidentRemarks  = $this->input->post("incidentRemarks") ?? null;
         $incidentActionPlan  = $this->input->post("incidentActionPlan") ?? null;
-        $incidentAccountablePerson  = $this->input->post("incidentAccountablePerson") ?? null;
+        $incidentEmployeeID  = $this->input->post("incidentEmployeeID") ?? null;
         $incidentTargetCompletion  = $this->input->post("incidentTargetCompletion") ?? null;
         $submittedAt             = $this->input->post("submittedAt") ?? null;
         $createdBy               = $this->input->post("createdBy");
@@ -52,7 +52,7 @@ class Inventory_incident extends CI_Controller {
             "incidentStatus"   => $incidentStatus,
             "incidentReason"   => $incidentReason,
             "incidentActionPlan"   => $incidentActionPlan,
-            "incidentAccountablePerson"   => $incidentAccountablePerson,
+            "incidentEmployeeID"   => $incidentEmployeeID,
             "incidentTargetCompletion"   => $incidentTargetCompletion,
             // "projectTotalAmount"      => $projectTotalAmount,
             // "companyTotalAmount"      => $companyTotalAmount,

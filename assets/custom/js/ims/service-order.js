@@ -670,7 +670,7 @@ $(document).ready(function() {
 						class="btn btn-cancel px-5 p-2"
 						id="btnDrop" 
 						serviceOrderID="${encryptString(serviceOrderID)}"
-						code="${getFormCode("SR", createdAt, serviceOrderID)}"
+						code="${getFormCode("SO", createdAt, serviceOrderID)}"
 						status="${serviceOrderStatus}"><i class="fas fa-ban"></i> 
 						Drop
 					</button>`;
@@ -1921,105 +1921,6 @@ $(document).ready(function() {
 					</div>
 				</div>
 			</div>
-		</div>
-		
-		
-		<!-- <div class="row py-2">
-			<div class="offset-xl-8 offset-md-7 col-xl-4 col-md-5 col-sm-12 pt-3 pb-2">
-				<div class="row" style="font-size: 1.1rem; font-weight:bold">
-					<div class="col-6 text-left">Total :</div>
-					<div class="col-6 text-right text-danger"
-						style="font-size: 1.05em"
-						id="total">
-						${formatAmount(total, true)}
-					</div>
-				</div>
-				<div class="row" style="font-size: 1.1rem; font-weight:bold">
-					<div class="col-6 text-left">Discount :</div>
-					<div class="col-6 text-right">
-						<input 
-							type="text" 
-							class="form-control-plaintext amount py-0 text-danger border-bottom font-weight-bold"
-							min="0.01" 
-							max="9999999999"
-							minlength="1"
-							maxlength="20" 
-							name="discount" 
-							id="discount" 
-							style="font-size: 1.02em;"
-							value="${discount}"
-							${disabled}>
-						<div class="invalid-feedback d-block" id="invalid-discount"></div>
-					</div>
-				</div>
-				<div class="row" style="font-size: 1.1rem; font-weight:bold">
-					<div class="col-6 text-left">Total Amount:</div>
-					<div class="col-6 text-right text-danger"
-						id="totalAmount"
-						style="font-size: 1.05em">
-						${formatAmount(totalAmount, true)}
-					</div>
-				</div>
-				<div class="row" style="font-size: 1.1rem; font-weight:bold">
-					<div class="col-6 text-left">Vatable Sales:</div>
-					<div class="col-6 text-right text-danger"
-						id="vatSales"
-						style="font-size: 1.05em">
-						${formatAmount(vatSales, true)}
-					</div>
-				</div>
-				<div class="row" style="font-size: 1.1rem; font-weight:bold">
-					<div class="col-6 text-left">Vat 12%:</div>
-					<div class="col-6 text-right">
-						<input 
-							type="text" 
-							class="form-control-plaintext amount py-0 text-danger border-bottom font-weight-bold"
-							min="0.01" 
-							max="9999999999"
-							minlength="1"
-							maxlength="20" 
-							name="vat" 
-							id="vat" 
-							style="font-size: 1.02em;"
-							value="${vat}"
-							readonly>
-					</div>
-				</div>
-				<div class="row" style="font-size: 1.1rem; font-weight:bold">
-					<div class="col-6 text-left">Total:</div>
-					<div class="col-6 text-right text-danger"
-						id="totalVat"
-						style="font-size: 1.05em">
-						${formatAmount(totalVat, true)}
-					</div>
-				</div>
-				<div class="row" style="font-size: 1.1rem; font-weight:bold">
-					<div class="col-6 text-left">Less EWT:</div>
-					<div class="col-6 text-right">
-						<input 
-							type="text" 
-							class="form-control-plaintext amount py-0 text-danger border-bottom font-weight-bold"
-							min="0" 
-							max="9999999999"
-							minlength="1"
-							maxlength="20" 
-							name="lessEwt" 
-							id="lessEwt" 
-							style="font-size: 1.02em;"
-							value="${lessEwt}"
-							${disabled}>
-					</div>
-				</div>
-				<div class="row" style="font-size: 1.3rem; font-weight:bold; border-bottom: 3px double black;">
-					<div class="col-6 text-left">Grand Total:</div>
-					<div class="col-6 text-right text-danger"
-						id="grandTotalAmount"
-						style="font-size: 1.3em">
-						${formatAmount(grandTotalAmount, true)}
-					</div>
-				</div>
-			</div> -->
-
 		</div>`;
 		return html;
 	}

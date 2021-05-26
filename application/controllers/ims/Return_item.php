@@ -103,6 +103,7 @@ class Return_item extends CI_Controller {
                 if ($items) {
                     $returnItems = [];
                     foreach($items as $index => $item) {
+                        
                         $temp = [
                             "returnItemID"          => $returnItemID,
                             "borrowingDetailID"     => $item["borrowingDetailID"],
@@ -112,7 +113,7 @@ class Return_item extends CI_Controller {
                             "barcode"               => $item["barcode"],
                             "serialnumber"          => $item["serialnumber"],
                             "dateBorrowed"          => $item["dateBorrowed"],
-                            "borrowedpurpose"       => $item["borrowedpurpose"],
+                            "borrowedPurpose"       => $item["borrowedPurpose"],
                             "quantityBorrowed"      => $item["quantityBorrowed"],
                             "returnItemDate"        => $item["returnItemDate"],
                             "returnItemQuantity"    => $item["returnItemQuantity"],
