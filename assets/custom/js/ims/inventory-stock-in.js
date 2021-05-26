@@ -171,27 +171,34 @@ $(document).ready(function () {
 			});
 
 			
-			var table = $("#tableItems")
-			.css({ "min-width": "100%" })
-			.removeAttr("width")
-			.DataTable({
-				proccessing: false,
-				serverSide: false,
-				scrollX: true,
-				sorting: [],
-				scrollCollapse: true,
-				columnDefs: [
-					{ targets: 0,  width: 190 },
-		 			{ targets: 1,  width: 150 },
-		 			{ targets: 2,  width: 150 },
-		 			{ targets: 3,  width: 200 },
-		 			{ targets: 4,  width: 100 },
-		 			{ targets: 5,  width: 150 },
-
-				],
-			});
 
 
+	}
+
+	function initDataTables1() {
+
+		if ($.fn.DataTable.isDataTable("#tableMyForms")) {
+			$("#tableMyForms").DataTable().destroy();
+		}
+	var table = $("#tableItems")
+	.css({ "min-width": "100%" })
+	.removeAttr("width")
+	.DataTable({
+		proccessing: false,
+		serverSide: false,
+		scrollX: true,
+		sorting: [],
+		scrollCollapse: true,
+		columnDefs: [
+			{ targets: 0,  width: 190 },
+			 { targets: 1,  width: 150 },
+			 { targets: 2,  width: 150 },
+			 { targets: 3,  width: 200 },
+			 { targets: 4,  width: 100 },
+			 { targets: 5,  width: 150 },
+
+		],
+	});
 	}
 	// ----- END DATATABLES -----
  
@@ -276,7 +283,7 @@ $(document).ready(function () {
 			html += `
             <tr class="${btnClass}" id="${encryptString(inventoryReceivingID )}">
                
-                <td>${getFormCode("IRR", dateCreated, inventoryReceivingID)}</td>
+                <td>${getFormCode("INRR", dateCreated, inventoryReceivingID)}</td>
 				<td>${getFormCode("PO", pocreatedAt, purchaseOrderID)}</td>
                 <td>${fullname}</td>
                 <td>${designationName}</td>
@@ -325,14 +332,14 @@ $(document).ready(function () {
 						class="btn btn-submit" 
 						id="btnSubmit" 
 						inventoryReceivingID="${inventoryReceivingID}"
-						code="${getFormCode("IRR", createdAt, inventoryReceivingID)}"><i class="fas fa-paper-plane"></i>
+						code="${getFormCode("INRR", createdAt, inventoryReceivingID)}"><i class="fas fa-paper-plane"></i>
 						Submit
 					</button>
 					<button 
 						class="btn btn-cancel"
 						id="btnCancelForm" 
 						inventoryReceivingID="${inventoryReceivingID}"
-						code="${getFormCode("IRR", createdAt, inventoryReceivingID)}"><i class="fas fa-ban"></i> 
+						code="${getFormCode("INRR", createdAt, inventoryReceivingID)}"><i class="fas fa-ban"></i> 
 						Cancel
 					</button>`;
 				} else if (inventoryReceivingStatus == 1) {
@@ -342,7 +349,7 @@ $(document).ready(function () {
 							class="btn btn-cancel"
 							id="btnCancelForm" 
 							inventoryReceivingID="${inventoryReceivingID}"
-							code="${getFormCode("IRR", createdAt, inventoryReceivingID)}"><i class="fas fa-ban"></i> 
+							code="${getFormCode("INRR", createdAt, inventoryReceivingID)}"><i class="fas fa-ban"></i> 
 							Cancel
 						</button>`;
 					}
@@ -355,14 +362,14 @@ $(document).ready(function () {
 							class="btn btn-submit" 
 							id="btnApprove" 
 							inventoryReceivingID="${encryptString(inventoryReceivingID)}"
-							code="${getFormCode("IRR", createdAt, inventoryReceivingID)}"><i class="fas fa-paper-plane"></i>
+							code="${getFormCode("INRR", createdAt, inventoryReceivingID)}"><i class="fas fa-paper-plane"></i>
 							Approve
 						</button>
 						<button 
 							class="btn btn-cancel"
 							id="btnReject" 
 							inventoryReceivingID="${encryptString(inventoryReceivingID)}"
-							code="${getFormCode("IRR", createdAt, inventoryReceivingID)}"><i class="fas fa-ban"></i> 
+							code="${getFormCode("INRR", createdAt, inventoryReceivingID)}"><i class="fas fa-ban"></i> 
 							Deny
 						</button>`;
 					}
@@ -475,7 +482,7 @@ $(document).ready(function () {
                 <div class="body">
                     <small class="text-small text-muted font-weight-bold">Document No.</small>
                     <h6 class="mt-0 text-danger font-weight-bold">
-                    ${inventoryReceivingID ? getFormCode("IRR", createdAt, inventoryReceivingID) : "---"}
+                    ${inventoryReceivingID ? getFormCode("INRR", createdAt, inventoryReceivingID) : "---"}
                     </h6>      
                 </div>
             </div>
@@ -566,7 +573,7 @@ $(document).ready(function () {
 			++count;
 			html += `        
 			<tr>
-            <td>${getFormCode("INRR", item.createdAt, item.inventoryReceivingID)}</td>
+            <td>${getFormCode("ITM", item.createdAt, item.inventoryReceivingID)}</td>
             <td>${item.itemName}</td>
             <td>${item.classificationName}</td>
             <td>${item.categoryName}</td>
@@ -662,7 +669,8 @@ $(document).ready(function () {
 					initAll();
 					storageContent();
 					datevalidated();
-					initDataTables();
+					//initDataTables();
+					initDataTables1();
 					
 					//getItemRow();
 	
@@ -1003,9 +1011,10 @@ $(document).ready(function () {
 			$(".recievedQuantity").each(function () {
 				recievedQuantity.push($(this).val());
 			});
-			$(".serialnumber").each(function () {
+			$("[name=serialnumber]").each(function () {
 				serialnumber.push($(this).val());
 			});
+			
 			
 			$(".inventoryStorageID").each(function () {
 				inventoryStorageID.push($(this).val());
@@ -1130,7 +1139,7 @@ $(document).ready(function () {
 	$(document).on("click", "#btnBack", function () {
 		const id 			= $(this).attr("inventoryReceivingID");
 		const employeeID 	= $(this).attr("employeeID");
-		const feedback   	= $(this).attr("code") || getFormCode("IRR", dateToday(), id);
+		const feedback   	= $(this).attr("code") || getFormCode("INRR", dateToday(), id);
 		const status 		= $(this).attr("status");
 
 		if (status != "false" && status != 0) {

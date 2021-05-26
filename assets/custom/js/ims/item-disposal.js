@@ -1847,7 +1847,7 @@ $(document).ready(function() {
 		data.append("method", "drop");
 		data.append("updatedBy", sessionID);
 
-		savePurchaseRequest(data, "drop", null, pageContent);
+		saveDisposalItem(data, "drop", null, pageContent);
 	})
 	// ----- END DROP DOCUMENT -----
 

@@ -450,7 +450,7 @@ $(document).ready(function() {
 			LEFT JOIN pms_project_list_tbl AS imsr ON imsr.projectListID  = imtrt.projectID`,
 			"imtrt.*, CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname, imtrt.createdAt AS dateCreated,imsr.projectListCode,imsr.projectListName",
 			`imtrt.employeeID = ${sessionID}`,
-			`FIELD(returnItemStatus, 0, 1, 3, 2, 4), COALESCE(imtrt.submittedAt, imtrt.createdAt)`
+			`FIELD(returnItemStatus, 0, 1, 3, 2, 4, 5), COALESCE(imtrt.submittedAt, imtrt.createdAt)`
 		);
 
 		let html = `
@@ -820,6 +820,7 @@ $(document).ready(function() {
 			let address = `${item.clientUnitNumber && titleCase(item.clientUnitNumber)+", "}${item.clientHouseNumber && item.clientHouseNumber +", "}${item.clientBarangay && titleCase(item.clientBarangay)+", "}${item.clientCity && titleCase(item.clientCity)+", "}${item.clientProvince && titleCase(item.clientProvince)+", "}${item.clientCountry && titleCase(item.clientCountry)+", "}${item.clientPostalCode && titleCase(item.clientPostalCode)}`;
 			let clientCode =`${item.clientCode}`;
 			let clientName =`${item.clientName}`;
+			let projectCode =`${item.projectListCode}`;
 			let projectListName =`${item.projectListName}`;
 			let {	
 			borrowingDetailID			="",
@@ -841,6 +842,7 @@ $(document).ready(function() {
 		$("#clientAddress").val(address);
 		$("#clientCode").val(clientCode);
 		$("#clientName").val(clientName);
+		$("#projectCode").val(projectCode);
 		$("#projectID").val(projectListName);
 		
 		if (readOnly) {
@@ -1247,10 +1249,16 @@ $(document).ready(function() {
 	</div>
 	</div>
 
-	<div class="col-md-8 col-sm-12">
+	<div class="col-md-4 col-sm-12">
 	<div class="form-group">
 		<label>Project Name</label>
 		<input type="text" class="form-control" id="projectID" name="projectID" disabled value="-">
+	</div>
+	</div>
+	<div class="col-md-4 col-sm-12">
+	<div class="form-group">
+		<label>Project Code</label>
+		<input type="text" class="form-control" id="projectCode" name="projectCode" disabled value="-">
 	</div>
 	</div>
 	<div class="col-md-3 col-sm-12">
@@ -1428,8 +1436,9 @@ $(document).ready(function() {
 		const approversID = method != "approve" && moduleApprover;
 
 		if (id) {
+			//data["returnItemID"] = id;
+			//formData.append("returnItemID", id);
 			data["returnItemID"] = id;
-			formData.append("returnItemID", id);
 			formData.append("returnItemID", id);
 
 			if (status != "2") {
@@ -1467,7 +1476,6 @@ $(document).ready(function() {
 				formData.append("createdAt", dateToday());
 			} else if (action == "update") {
 				data["returnItemID"] = id;
-
 				formData.append("returnItemID", id);
 			}
 
@@ -1767,7 +1775,7 @@ $(document).ready(function() {
 		const feedback = $(this).attr("code") || getFormCode("RI", dateToday(), id);
 
 		$("#modal_return_item_content").html(preloader);
-		$("#modal_return_item .page-title").text("DENY TRNASFER REQUEST");
+		$("#modal_return_item .page-title").text("DENY Return Item");
 		$("#modal_return_item").modal("show");
 		let html = `
 		<div class="modal-body">
@@ -1834,7 +1842,7 @@ $(document).ready(function() {
 	$(document).on("click", "#btnDrop", function() {
 		const returnItemID = decryptString($(this).attr("returnItemID"));
 		const feedback          = $(this).attr("code") || getFormCode("ADF", dateToday(), id);
-		//const id = decryptString($(this).attr("returnItemID"));
+		const id = decryptString($(this).attr("returnItemID"));
 		let data = new FormData;
 		data.append("returnItemID", returnItemID);
 		data.append("action", "update");
@@ -1929,7 +1937,7 @@ function getConfirmation(method = "submit") {
 			swalImg   = `${base_url}assets/modal/reject.svg`;
 			break;
 		case "cancelform":
-			swalTitle = `CANCEL ${title.toUpperCase()} DOCUMENT`;
+			swalTitle = `CANCEL ${title.toUpperCase()}`;
 			swalText  = "Are you sure to cancel this document?";
 			swalImg   = `${base_url}assets/modal/cancel.svg`;
 			break;

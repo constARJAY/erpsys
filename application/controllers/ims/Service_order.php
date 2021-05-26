@@ -198,9 +198,9 @@ class Service_order extends CI_Controller {
     }
 
     public function serviceOrderExcel($data) {
-        $id        = $data["serviceOrderID"];
-        $createdAt = $data["createdAt"];
-        $code      = getFormCode("SO", $createdAt, $id);
+        $id          = $data["serviceOrderID"];
+        $createdAt   = $data["createdAt"];
+        $code        = getFormCode("SO", $createdAt, $id);
         $fileName    = "$code.xlsx";
         $spreadsheet = new Spreadsheet();
         $sheet       = $spreadsheet->getActiveSheet();
@@ -563,10 +563,12 @@ class Service_order extends CI_Controller {
 
         $employees      = $data["employees"];
         $countEmployees = count($employees);
-        if ($countEmployees > 3) {
-            $columns = [["B", "F"], ["G", "K"]];
-        } else {
+        if ($countEmployees == 1 ) {
+            $columns = [["B", "K"]];
+        } else if ($countEmployees == 3) {
             $columns = [["B", "E"], ["F", "H"], ["I", "K"]];
+        } else {
+            $columns = [["B", "F"], ["G", "K"]];
         }
 
         foreach ($employees as $index => $employee) {

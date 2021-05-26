@@ -9,6 +9,13 @@ $(document).ready(function() {
     // ----- END GLOBAL VARIABLES -----
 
 
+    // ----- CHANGE LEAVE BALANCE WHEN RESIZING -----
+    $( window ).resize(function() {
+        console.log($(window).width());
+    });
+    // ----- END CHANGE LEAVE BALANCE WHEN RESIZING -----
+
+
     // ----- HIDE THE UPLOAD DOCUMENT FOR NON-HR DESIGNATION -----
     const getDesignationName = getTableData("hris_designation_tbl", "designationName", `designationID = ${sessionDesignationID}`);
     function isImHumanResource() {

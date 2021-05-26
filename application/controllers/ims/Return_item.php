@@ -66,7 +66,7 @@ class Return_item extends CI_Controller {
 
             if ($method == "cancelform") {
                 $returnItemData = [
-                    "returnItemStatus" => 4,
+                    "returnItemStatus"      => 4,
                     "updatedBy"             => $updatedBy,
                 ];
             } else if ($method == "approve") {
@@ -80,7 +80,7 @@ class Return_item extends CI_Controller {
                 $returnItemData = [
                     "approversStatus"        => $approversStatus,
                     "approversDate"          => $approversDate,
-                    "returnItemStatus"  => 3,
+                    "returnItemStatus"       => 3,
                     "returnItemRemarks" => $returnItemRemarks,
                     "updatedBy"              => $updatedBy,
                 ];

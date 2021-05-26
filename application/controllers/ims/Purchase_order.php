@@ -259,18 +259,30 @@ class Purchase_order extends CI_Controller {
     }
 
     public function purchaseOrderExcel($data) {
-        $id        = $data["purchaseOrderID"];
-        $createdAt = $data["createdAt"];
-        $code      = getFormCode("PO", $createdAt, $id);
+        $id          = $data["purchaseOrderID"];
+        $createdAt   = $data["createdAt"];
+        $code        = getFormCode("PO", $createdAt, $id);
         $fileName    = "$code.xlsx";
         $spreadsheet = new Spreadsheet();
         $sheet       = $spreadsheet->getActiveSheet();
+
+        // DISABLE EDIT
+        $spreadsheet->getActiveSheet()->getProtection()->setSheet(true);
 
         $spreadsheet->getDefaultStyle()->getFont()->setName('Segoe UI');
         $spreadsheet->getDefaultStyle()->getFont()->setSize(9);
         $spreadsheet->getDefaultStyle()->getAlignment()->setVertical(Alignment::VERTICAL_BOTTOM);
         $spreadsheet->getDefaultStyle()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
         $spreadsheet->getActiveSheet()->getDefaultRowDimension()->setRowHeight(16);
+
+        $drawing = new Drawing();
+        $drawing->setDescription('Header Logo');
+        $drawing->setPath("assets/images/company-logo/excel-header.png");
+        $drawing->setCoordinates('A1');
+        $drawing->getShadow()->setVisible(true);
+        $drawing->setWidthAndHeight(10000, 147);
+        $drawing->setResizeProportional(true);
+        $drawing->setWorksheet($spreadsheet->getActiveSheet());
 
         $sheet->getColumnDimension('A')->setWidth(3 * 1.139);
         $sheet->getColumnDimension('B')->setWidth(12 * 1.139);
@@ -422,69 +434,69 @@ class Purchase_order extends CI_Controller {
         // ----- END STYLES -----
 
         // ----- TITLE -----
-        $sheet->mergeCells('A1:K1');
-        $sheet->setCellValue('A1', getFormCode("PO", $data["createdAt"], $data["purchaseOrderID"]));
-        $sheet->getStyle('A1')->applyFromArray($documentNoStyle);
-        $sheet->mergeCells('A2:K2');
-        $sheet->setCellValue('A2', "PURCHASE ORDER");
-        $sheet->getStyle('A2')->applyFromArray($titleStyle);
+        $sheet->mergeCells('A6:K6');
+        $sheet->setCellValue('A6', getFormCode("PO", $data["createdAt"], $data["purchaseOrderID"]));
+        $sheet->getStyle('A6')->applyFromArray($documentNoStyle);
+        $sheet->mergeCells('A7:K7');
+        $sheet->setCellValue('A7', "PURCHASE ORDER");
+        $sheet->getStyle('A7')->applyFromArray($titleStyle);
         // ----- END TITLE -----
 
         // ----- HEADER -----
-        $sheet->mergeCells('B3:C3');
-        $sheet->setCellValue('B3', "Company Name: ");
-        $sheet->mergeCells('D3:G3');
-        $sheet->setCellValue('D3', $data["companyName"]);
-        $sheet->mergeCells('H3:I3');
-        $sheet->setCellValue('H3', "Date: ");
-        $sheet->mergeCells('J3:K3');
-        $sheet->setCellValue('J3', $data["dateAproved"]);
+        $sheet->mergeCells('B8:C8');
+        $sheet->setCellValue('B8', "Company Name: ");
+        $sheet->mergeCells('D8:G8');
+        $sheet->setCellValue('D8', $data["companyName"]);
+        $sheet->mergeCells('H8:I8');
+        $sheet->setCellValue('H8', "Date: ");
+        $sheet->mergeCells('J8:K8');
+        $sheet->setCellValue('J8', $data["dateAproved"]);
 
-        $sheet->mergeCells('B4:C4');
-        $sheet->setCellValue('B4', "Address: ");
-        $sheet->mergeCells('D4:G4');
-        $sheet->setCellValue('D4', $data["address"]);
-        $sheet->mergeCells('H4:I4');
-        $sheet->setCellValue('H4', "Reference No.: ");
-        $sheet->mergeCells('J4:K4');
-        $sheet->setCellValue('J4', $data["referenceNo"]);
-        $sheet->getRowDimension('4')->setRowHeight(26.25);
+        $sheet->mergeCells('B9:C9');
+        $sheet->setCellValue('B9', "Address: ");
+        $sheet->mergeCells('D9:G9');
+        $sheet->setCellValue('D9', $data["address"]);
+        $sheet->mergeCells('H9:I9');
+        $sheet->setCellValue('H9', "Reference No.: ");
+        $sheet->mergeCells('J9:K9');
+        $sheet->setCellValue('J9', $data["referenceNo"]);
+        $sheet->getRowDimension('9')->setRowHeight(26.25);
 
-        $sheet->mergeCells('B5:C5');
-        $sheet->setCellValue('B5', "Contact Details: ");
-        $sheet->mergeCells('D5:G5');
-        $sheet->setCellValue('D5', $data["contactDetails"]);
-        $sheet->mergeCells('H5:I5');
-        $sheet->setCellValue('H5', "Payment Terms: ");
-        $sheet->mergeCells('J5:K5');
-        $sheet->setCellValue('J5', $data["paymentTerms"]);
+        $sheet->mergeCells('B10:C10');
+        $sheet->setCellValue('B10', "Contact Details: ");
+        $sheet->mergeCells('D10:G10');
+        $sheet->setCellValue('D10', $data["contactDetails"]);
+        $sheet->mergeCells('H10:I10');
+        $sheet->setCellValue('H10', "Payment Terms: ");
+        $sheet->mergeCells('J10:K10');
+        $sheet->setCellValue('J10', $data["paymentTerms"]);
 
-        $sheet->mergeCells('B6:C6');
-        $sheet->setCellValue('B6', "Contact Person: ");
-        $sheet->mergeCells('D6:G6');
-        $sheet->setCellValue('D6', $data["contactPerson"]);
-        $sheet->mergeCells('H6:I6');
-        $sheet->setCellValue('H6', "Delivery Date: ");
-        $sheet->mergeCells('J6:K6');
-        $sheet->setCellValue('J6', $data["deliveryDate"]);
+        $sheet->mergeCells('B11:C11');
+        $sheet->setCellValue('B11', "Contact Person: ");
+        $sheet->mergeCells('D11:G11');
+        $sheet->setCellValue('D11', $data["contactPerson"]);
+        $sheet->mergeCells('H11:I11');
+        $sheet->setCellValue('H11', "Delivery Date: ");
+        $sheet->mergeCells('J11:K11');
+        $sheet->setCellValue('J11', $data["deliveryDate"]);
 
-        $sheet->getStyle("B3:C6")->applyFromArray($labelFillStyle);
-        $sheet->getStyle("H3:I6")->applyFromArray($labelFillStyle);
-        $sheet->getStyle("A3:K6")->applyFromArray($allBorderStyle);
+        $sheet->getStyle("B8:C11")->applyFromArray($labelFillStyle);
+        $sheet->getStyle("H8:I11")->applyFromArray($labelFillStyle);
+        $sheet->getStyle("A8:K11")->applyFromArray($allBorderStyle);
         // ----- END HEADER -----
 
         // ----- REQUEST ITEMS -----
-        $sheet->setCellValue('B8', "Code");
-        $sheet->mergeCells('C8:G8');
-        $sheet->setCellValue('C8', "Item Description");
-        $sheet->setCellValue('H8', "Qty");
-        $sheet->setCellValue('I8', "Unit");
-        $sheet->setCellValue('J8', "Unit Cost");
-        $sheet->setCellValue('K8', "Total Amount");
-        $sheet->getStyle("B8:K8")->applyFromArray($labelFillStyle);
-        $sheet->getStyle("B8:K8")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $sheet->setCellValue('B13', "Code");
+        $sheet->mergeCells('C13:G13');
+        $sheet->setCellValue('C13', "Item Description");
+        $sheet->setCellValue('H13', "Qty");
+        $sheet->setCellValue('I13', "Unit");
+        $sheet->setCellValue('J13', "Unit Cost");
+        $sheet->setCellValue('K13', "Total Amount");
+        $sheet->getStyle("B13:K13")->applyFromArray($labelFillStyle);
+        $sheet->getStyle("B13:K13")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
-        $rowNumber = 9;
+        $rowNumber = 14;
         $requestItems = $data["items"];
         $limit = count($requestItems) <= 20 ? 20 : count($requestItems);
         for ($i=0; $i<$limit; $i++) { 
@@ -596,10 +608,12 @@ class Purchase_order extends CI_Controller {
 
         $employees      = $data["employees"];
         $countEmployees = count($employees);
-        if ($countEmployees > 3) {
-            $columns = [["B", "F"], ["G", "K"]];
-        } else {
+        if ($countEmployees == 1 ) {
+            $columns = [["B", "K"]];
+        } else if ($countEmployees == 3) {
             $columns = [["B", "E"], ["F", "H"], ["I", "K"]];
+        } else {
+            $columns = [["B", "F"], ["G", "K"]];
         }
 
         foreach ($employees as $index => $employee) {
@@ -649,6 +663,15 @@ class Purchase_order extends CI_Controller {
         $sheet->getRowDimension("$rowNumber")->setRowHeight(17*2);
         $sheet->getStyle("B$rowNumber:K$rowNumber")->getFont()->setBold(true);
         // ----- END FOOTER -----
+
+        $drawing = new Drawing();
+        $drawing->setDescription('Footer Logo');
+        $drawing->setPath("assets/images/company-logo/excel-footer.png");
+        $drawing->setCoordinates("A".($rowNumber+2));
+        $drawing->getShadow()->setVisible(true);
+        $drawing->setWidthAndHeight(3800, 60);
+        $drawing->setResizeProportional(true);
+        $drawing->setWorksheet($spreadsheet->getActiveSheet());
 
         $writer = new Xlsx($spreadsheet);
         header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');

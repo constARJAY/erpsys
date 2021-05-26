@@ -359,12 +359,12 @@ $(document).ready(function() {
 			<button 
 				class="btn btn-edit w-100 btnEdit" 
 				id="${encryptString(borrowingID)}" 
-				code="${getFormCode("EBF-YR", createdAt, borrowingID)}"><i class="fas fa-edit"></i> Edit</button>`;
+				code="${getFormCode("EBF", createdAt, borrowingID)}"><i class="fas fa-edit"></i> Edit</button>`;
 
 			if (isImCurrentApprover(approversID, approversDate, borrowingStatus) || isAlreadyApproved(approversID, approversDate)) {
 				html += `
 				<tr class="${btnClass}" id="${encryptString(borrowingID )}">
-					<td>${getFormCode("EBF-YR", createdAt, borrowingID)}</td>
+					<td>${getFormCode("EBF", createdAt, borrowingID)}</td>
 					<td>${fullname}</td>
 					<td>${projectListName}</td>
 					<td>${borrowingReason}</td>
@@ -902,7 +902,7 @@ $(document).ready(function() {
 			}
 			initDateRangePicker(`#dateBorrowed${i}`);
 			//initDateRangePicker(`#datereturn${i}`);
-			$(`#dateBorrowed${i}`).data("daterangepicker").minDate = moment();
+			//$(`#dateBorrowed${i}`).data("daterangepicker").minDate = moment();
 			$(`#dateBorrowed${i}`).val(moment(new Date).format("MMMM DD, YYYY"));
 			
 		})
@@ -956,7 +956,7 @@ $(document).ready(function() {
 								// barcodeArray[loop1] = barcodeval;
 								$(this).closest("tr").find("[name=barcode]").removeClass("is-valid").addClass("is-invalid");
 								$(this).closest("tr").find("#invalid-barcode").removeClass("is-valid").addClass("is-invalid");
-								$(this).closest("tr").find("#invalid-barcode").text('Barcode '+barcode+' Data already exists!');
+								$(this).closest("tr").find("#invalid-barcode").text('Data already exists!');
 								return false;
 							}else{
 
@@ -974,7 +974,7 @@ $(document).ready(function() {
 					}
 
 					$(this).closest("tr").find(`.itemcode`).first().text(getFormCode("ITM",created_At,item_ID));
-					$(this).closest("tr").find(`.itemname`).first().text(item_Name);
+					$(this).closest("tr").find(`.itemName`).first().text(item_Name);
 					$(this).closest("tr").find(`[name=barcode]`).first().attr("itemID",item_ID);
 					$(this).closest("tr").find(`[name=barcode]`).first().attr("inventoryStorageID",inventoryStorageID);
 					$(this).closest("tr").find(`[name=barcode]`).first().attr("serialnumber",stock_In_Serial_Number);
@@ -1412,7 +1412,7 @@ $(document).ready(function() {
                 <div class="w-100">
 					<hr class="pb-1">
 					<div class="text-primary font-weight-bold" style="font-size: 1.5rem;">Materials and Equipment Borrowing</div>
-                    <table class="table table-striped" id="${tableProjectRequestItemsName}">
+                    <table class="table table-bordered table-striped table-hover" id="${tableProjectRequestItemsName}">
                         <thead>
                             <tr style="white-space: nowrap">
 								${checkboxProjectHeader}
