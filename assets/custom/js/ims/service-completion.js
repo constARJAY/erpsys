@@ -38,7 +38,7 @@ $(document).ready(function() {
 			const data = getTableData(
 				`ims_service_completion_tbl`,
 				`serviceOrderID`,
-				`serviceOrderID = ${id}`
+				`serviceCompletionID = ${id}`
 			);
 			const { serviceOrderID } = data && data[0];
 			const isAllowedForRevise = getTableDataLength(
@@ -393,11 +393,11 @@ $(document).ready(function() {
             <thead>
 				<tr style="white-space: nowrap">
 					<th>Document No.</th>
-					<th>Employee Name</th>
+					<th>Prepared By</th>
 					<th>Reference No.</th>
 					<th>Client Name</th>
 					<th>Project Name</th>
-					<th>Reason</th>
+					<th>Description</th>
 					<th>Current Approver</th>
 					<th>Date Created</th>
 					<th>Date Submitted</th>
@@ -500,11 +500,11 @@ $(document).ready(function() {
             <thead>
 				<tr style="white-space: nowrap">
                     <th>Document No.</th>
-                    <th>Employee Name</th>
+                    <th>Prepared By</th>
                     <th>Reference No.</th>
                     <th>Client Name</th>
                     <th>Project Name</th>
-                    <th>Reason</th>
+                    <th>Description</th>
                     <th>Current Approver</th>
                     <th>Date Created</th>
                     <th>Date Submitted</th>
@@ -727,7 +727,6 @@ $(document).ready(function() {
 	// ----- GET SERVICE REQUISITION LIST -----
 	function getServiceOrderList(id = null, status = 0, display = true) {
 		const createdORList = getTableData("ims_service_completion_tbl", "serviceOrderID", "serviceCompletionStatus <> 3 AND serviceCompletionStatus <> 4").map(so => so.serviceOrderID);
-		console.log(id);
 		let html = ``;
 		if (!status || status == 0) {
 			html += serviceOrderList.filter(so => createdORList.indexOf(so.serviceOrderID) == -1 || so.serviceOrderID == id).map(so => {
@@ -1726,7 +1725,7 @@ $(document).ready(function() {
 			</tbody>
 		</table>
 
-		<div class="col-12">
+		<!-- <div class="col-12">
 			<div class="row py-2">
 				<div class="offset-lg-7 offset-xl-8 col-12 col-sm-12 col-lg-5 col-xl-4 col-xl-4 pt-3 pb-2">
 					<div class="row" style="font-size: 1.1rem">
@@ -1808,102 +1807,6 @@ $(document).ready(function() {
 							style="font-size: 1.3em">
 							${formatAmount(grandTotalAmount, true)}
 						</div>
-					</div>
-				</div>
-			</div>
-		</div>
-
-		<!-- <div class="row py-2">
-			<div class="offset-xl-8 offset-md-7 col-xl-4 col-md-5 col-sm-12 pt-3 pb-2">
-				<div class="row" style="font-size: 1.1rem; font-weight:bold">
-					<div class="col-6 text-left">Total :</div>
-					<div class="col-6 text-right text-danger"
-						style="font-size: 1.05em"
-						id="total">
-						${formatAmount(total, true)}
-					</div>
-				</div>
-				<div class="row" style="font-size: 1.1rem; font-weight:bold">
-					<div class="col-6 text-left">Discount :</div>
-					<div class="col-6 text-right">
-						<input 
-							type="text" 
-							class="form-control-plaintext amount py-0 text-danger border-bottom font-weight-bold"
-							min="0" 
-							max="9999999999"
-							minlength="1"
-							maxlength="20" 
-							name="discount" 
-							id="discount" 
-							style="font-size: 1.02em;"
-							value="${discount}"
-							disabled>
-					</div>
-				</div>
-				<div class="row" style="font-size: 1.1rem; font-weight:bold">
-					<div class="col-6 text-left">Total Amount:</div>
-					<div class="col-6 text-right text-danger"
-						id="totalAmount"
-						style="font-size: 1.05em">
-						${formatAmount(totalAmount, true)}
-					</div>
-				</div>
-				<div class="row" style="font-size: 1.1rem; font-weight:bold">
-					<div class="col-6 text-left">Vatable Sales:</div>
-					<div class="col-6 text-right text-danger"
-						id="vatSales"
-						style="font-size: 1.05em">
-						${formatAmount(vatSales, true)}
-					</div>
-				</div>
-				<div class="row" style="font-size: 1.1rem; font-weight:bold">
-					<div class="col-6 text-left">Vat 12%:</div>
-					<div class="col-6 text-right">
-						<input 
-							type="text" 
-							class="form-control-plaintext amount py-0 text-danger border-bottom font-weight-bold"
-							min="0" 
-							max="9999999999"
-							minlength="1"
-							maxlength="20" 
-							name="vat" 
-							id="vat" 
-							style="font-size: 1.02em;"
-							value="${vat}"
-							disabled>
-					</div>
-				</div>
-				<div class="row" style="font-size: 1.1rem; font-weight:bold">
-					<div class="col-6 text-left">Total:</div>
-					<div class="col-6 text-right text-danger"
-						id="totalVat"
-						style="font-size: 1.05em">
-						${formatAmount(totalVat, true)}
-					</div>
-				</div>
-				<div class="row" style="font-size: 1.1rem; font-weight:bold">
-					<div class="col-6 text-left">Less EWT:</div>
-					<div class="col-6 text-right">
-						<input 
-							type="text" 
-							class="form-control-plaintext amount py-0 text-danger border-bottom font-weight-bold"
-							min="0" 
-							max="9999999999"
-							minlength="1"
-							maxlength="20" 
-							name="lessEwt" 
-							id="lessEwt" 
-							style="font-size: 1.02em;"
-							value="${lessEwt}"
-							disabled>
-					</div>
-				</div>
-				<div class="row" style="font-size: 1.3rem; font-weight:bold; border-bottom: 3px double black;">
-					<div class="col-6 text-left">Grand Total:</div>
-					<div class="col-6 text-right text-danger"
-						id="grandTotalAmount"
-						style="font-size: 1.3em">
-						${formatAmount(grandTotalAmount, true)}
 					</div>
 				</div>
 			</div>
@@ -2048,7 +1951,6 @@ $(document).ready(function() {
 			});
 
 		} 
-		console.log(data);
 		return formData;
 	} 
 	// ----- END GET SERVICE COMPLETION DATA -----
@@ -2335,7 +2237,7 @@ $(document).ready(function() {
             </div>
             <div class="col-md-4 col-sm-12">
                 <div class="form-group">
-                    <label>Employee Name</label>
+                    <label>Prepared By</label>
                     <input type="text" class="form-control" disabled value="${employeeFullname}">
                 </div>
             </div>
@@ -2353,7 +2255,7 @@ $(document).ready(function() {
             </div>
             <div class="col-md-12 col-sm-12">
                 <div class="form-group">
-                    <label>Reason</label>
+                    <label>Description</label>
                     <textarea class="form-control validate"
                         data-allowcharacters="[a-z][A-Z][0-9][ ][.][,][-][()]['][/][&]"
                         minlength="1"
@@ -2524,7 +2426,7 @@ $(document).ready(function() {
 					data.append("action", "update");
 				}
 	
-				// saveServiceCompletion(data, "save", null, pageContent);
+				saveServiceCompletion(data, "save", null, pageContent);
 			} else {
 				$("#page_content").html(preloader);
 				pageContent();
