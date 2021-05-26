@@ -23,7 +23,19 @@ $(document).ready(function() {
 		return "-";
 	}
 	// ---- END GET EMPLOYEE DATA -----
-
+	
+	// ----- IS DOCUMENT REVISED -----
+	function isDocumentRevised(id = null) {
+		if (id) {
+			const revisedDocumentsID = getTableData(
+				"ims_material_usage_tbl", 
+				"reviseMaterialUsageID", 
+				"reviseMaterialUsageID IS NOT NULL AND materialUsageStatus != 4");
+			return revisedDocumentsID.map(item => item.reviseMaterialUsageID).includes(id);
+		}
+		return false;
+	}
+	// ----- END IS DOCUMENT REVISED -----
 
     // ----- VIEW DOCUMENT -----
 	function viewDocument(view_id = false, readOnly = false, isRevise = false, isFromCancelledDocument = false) {
@@ -433,7 +445,7 @@ $(document).ready(function() {
             //     class="btn btn-edit w-100 btnEdit" 
             //     id="${encryptString(materialUsageID )}" 
             //     code="${getFormCode("MUF", createdAt, materialUsageID )}"><i class="fas fa-edit"></i> Edit</button>`;
-			let btnClass = meterialUsageStatus != 0 ? `btnView` : `btnEdit`;
+			let btnClass = materialUsageStatus != 0 ? `btnView` : `btnEdit`;
 			html += `
             <tr class="${btnClass}" id="${encryptString(materialUsageID )}">
                 	<td>${getFormCode("MUF", createdAt, materialUsageID )}</td>
@@ -507,8 +519,7 @@ $(document).ready(function() {
 							id="btnCancel"
 							materialUsageID="${encryptString(materialUsageID)}"
 							revise="${isRevise}"
-							code="${getFormCode("MUF", createdAt, materialUsageID)}"
-							cancel="${isFromCancelledDocument}"><i class="fas fa-ban"></i> 
+							code="${getFormCode("MUF", createdAt, materialUsageID)}" cancel="${isFromCancelledDocument}"><i class="fas fa-ban"></i> 
 							Cancel
 						</button>`;
 					} else {
@@ -539,7 +550,7 @@ $(document).ready(function() {
 					}
 				} else if (materialUsageStatus == 3) {
 					// DENIED - FOR REVISE
-						if(!isRevised(materialUsageID)){
+						if(!isDocumentRevised(materialUsageID)){
 							button = `
 							<button
 								class="btn btn-cancel"
@@ -617,18 +628,29 @@ $(document).ready(function() {
 		
        materialWithdrawalData.map(materialWithdrawalItems=>{
 		   if(!existWithdrawal.includes(materialWithdrawalItems.materialWithdrawalID)){
-					let projectList   = getTableData(
-						"pms_project_list_tbl AS pplt LEFT JOIN pms_client_tbl AS pct ON pct.clientID = pplt.projectListClientID", 
-						"projectListID, projectListCode, projectListName, clientCode, clientName, clientRegion, clientProvince, clientCity, clientBarangay, clientUnitNumber, clientHouseNumber, clientCountry, clientPostalCode",
-						"projectListStatus = 1 && projectListID ="+materialWithdrawalItems.projectID);
-					let requestorName = getTableData(`hris_employee_list_tbl JOIN hris_designation_tbl USING(designationID) LEFT JOIN hris_department_tbl ON hris_employee_list_tbl.departmentID = hris_department_tbl.departmentID`, 
-												"CONCAT(employeeFirstname,' ',employeeLastname) as employeeFullname, designationName, departmentName", "employeeID="+materialWithdrawalItems.employeeID);
-					let address       = `${projectList[0].clientUnitNumber && titleCase(projectList[0].clientUnitNumber)+", "}${projectList[0].clientHouseNumber && projectList[0].clientHouseNumber +", "}${projectList[0].clientBarangay && titleCase(projectList[0].clientBarangay)+", "}${projectList[0].clientCity && titleCase(projectList[0].clientCity)+", "}${projectList[0].clientProvince && titleCase(projectList[0].clientProvince)+", "}${projectList[0].clientCountry && titleCase(projectList[0].clientCountry)+", "}${projectList[0].clientPostalCode && titleCase(projectList[0].clientPostalCode)}`;
-
+			   let projectlist, requestorname, address;
+					if(materialWithdrawalItems.projectID > 0){
+						projectList   = getTableData(
+							"pms_project_list_tbl AS pplt LEFT JOIN pms_client_tbl AS pct ON pct.clientID = pplt.projectListClientID", 
+							"projectListID, projectListCode, projectListName, clientCode, clientName, clientRegion, clientProvince, clientCity, clientBarangay, clientUnitNumber, clientHouseNumber, clientCountry, clientPostalCode",
+							"projectListStatus = 1 && projectListID ="+materialWithdrawalItems.projectID);
+						console.log(projectList);
+						address       = `${projectList[0].clientUnitNumber && titleCase(projectList[0].clientUnitNumber)+", "}${projectList[0].clientHouseNumber && projectList[0].clientHouseNumber +", "}${projectList[0].clientBarangay && titleCase(projectList[0].clientBarangay)+", "}${projectList[0].clientCity && titleCase(projectList[0].clientCity)+", "}${projectList[0].clientProvince && titleCase(projectList[0].clientProvince)+", "}${projectList[0].clientCountry && titleCase(projectList[0].clientCountry)+", "}${projectList[0].clientPostalCode && titleCase(projectList[0].clientPostalCode)}`;
+					}else{
+						projectList = [{ projectListID : "0",
+										 projectListName: "-",
+										 clientCode: "-",
+										 clientName:"-",
+										}];
+						address		= "-";
+					}
+					requestorName = getTableData(`hris_employee_list_tbl JOIN hris_designation_tbl USING(designationID) LEFT JOIN hris_department_tbl ON hris_employee_list_tbl.departmentID = hris_department_tbl.departmentID`, 
+													"CONCAT(employeeFirstname,' ',employeeLastname) as employeeFullname, designationName, departmentName", "employeeID="+materialWithdrawalItems.employeeID);
+						
 					html +=  `<option 
 									value                = "${materialWithdrawalItems.materialWithdrawalID }" 
 									projectid 			 = "${projectList[0].projectListID}"
-									projectcode          = "${getFormCode("PRO",moment(projectList[0].createdAt),projectList[0].projectListID)}"
+									projectcode          = "${ projectList[0].projectListID > 0 ? getFormCode("PRO",moment(projectList[0].createdAt),projectList[0].projectListID): "-"}"
 									projectname          = "${projectList[0].projectListName}"
 									clientcode           = "${projectList[0].clientCode}"
 									clientname           = "${projectList[0].clientName}"
@@ -971,6 +993,7 @@ $(document).ready(function() {
 			$(".itemProjectTableBody").html(itemProjectTableBody);
 			// initDataTables();
 			// initAll();
+			initQuantity();
 		}, 300);
 
 
@@ -983,10 +1006,22 @@ $(document).ready(function() {
     // ----- SELECT ITEM NAME -----
     $(document).on("keyup", "[name=utilized]", function() {
 		let thisValue 		= $(this).val();
+		let thisID 			= $(this).attr("id");
 		let stockinquantity = $(this).closest("tr").find(".stockinquantity").first().text();
-		let difference 	    = parseInt(stockinquantity) - parseInt(thisValue);
-		let unused 	        = difference < 1 ? "0" : (difference||"-");
+		let difference 	    = parseFloat(stockinquantity) - parseFloat(thisValue);
+		let unused 	        = difference < 0.01 ? "0" : (difference || 0);
 		$(this).closest("tr").find(".unused").first().text(unused);
+		if(parseFloat(stockinquantity) < parseFloat(thisValue)){
+			setTimeout(() => {
+				$("#"+thisID).addClass("is-invalid").removeClass("is-valid");
+				$("#"+thisID).next().text("Too much quantity to be issued!");
+			}, 150);
+		}else{
+			setTimeout(() => {
+				$("#"+thisID).removeClass("is-invalid").removeClass("is-valid");
+				$("#"+thisID).next().text(``);
+			}, 150);
+		}
     })
     // ----- END SELECT ITEM NAME -----
 
@@ -1120,7 +1155,7 @@ $(document).ready(function() {
 		let tableProjectRequestItemsName = !disabled ? "tableProjectRequestItems" : "tableProjectRequestItems0";
 		let tableCompanyRequestItemsName = !disabled ? "tableCompanyRequestItems" : "tableCompanyRequestItems0";
 
-		let button = formButtons(data, isRevise);
+		let button = formButtons(data, isRevise, isFromCancelledDocument);
 
 		let reviseDocumentNo    = isRevise ? materialUsageID : reviseMaterialUsageID;
 		let documentHeaderClass = isRevise || reviseMaterialUsageID ? "col-lg-4 col-md-4 col-sm-12 px-1" : "col-lg-2 col-md-6 col-sm-12 px-1";
@@ -1227,7 +1262,7 @@ $(document).ready(function() {
             </div>
             <div class="col-md-12 col-sm-12">
                 <div class="form-group">
-                    <label>Reason ${!disabled ? "<code>*</code>" : ""}</label>
+                    <label>Description ${!disabled ? "<code>*</code>" : ""}</label>
                     <textarea class="form-control validate"
                         data-allowcharacters="[a-z][A-Z][0-9][ ][.][,][-][()]['][/][&]"
                         minlength="1"
@@ -1341,8 +1376,17 @@ $(document).ready(function() {
 			initDataTables();
 			updateTableItems();
 			initAll();
+			initQuantity();
 			updateInventoryItemOptions();
-			// projectID && projectID != 0 && $("[name=projectID]").trigger("change");
+			if (!allowedUpdate) {
+				$("#page_content").find(`input, select, textarea`).each(function() {
+					if (this.type != "search") {
+						$(this).attr("disabled", true);
+					}
+				})
+				$('#btnBack').attr("status", "2");
+				$(`#btnSubmit, #btnRevise, #btnCancel, #btnCancelForm, .btnAddRow, .btnDeleteRow`).hide();
+			}
 			return html;
 		}, 300);
 	}
@@ -1461,7 +1505,7 @@ $(document).ready(function() {
 					inventoryStorageOfficeName:		tableData[0].inventoryStorageOfficeName,
 					itemID:			                tableData[0].itemID,
 					itemname:		                tableData[0].itemName,
-					unitOfMeasurementID:		    tableData[0].unitOfMeasurementID,
+					unitOfMeasurement:		    	tableData[0].unitOfMeasurement,
 					itemDescription:                tableData[0].itemDescription,
                     itemWithdrawalRemarks:          tableData[0].itemWithdrawalRemarks,
 					receivingQuantity:		        tableData[0].receivingQuantity,
@@ -1509,7 +1553,7 @@ $(document).ready(function() {
 
     // ----- VIEW DOCUMENT -----
 	$(document).on("click", "#btnRevise", function () {
-		const id = $(this).attr("materialUsageID");
+		const id = decryptString($(this).attr("materialUsageID"));
 		const fromCancelledDocument = $(this).attr("cancel") == "true";
 		viewDocument(id, false, true, fromCancelledDocument);
 	});
@@ -1588,41 +1632,46 @@ $(document).ready(function() {
 
     // ----- SUBMIT DOCUMENT -----
 	$(document).on("click", "#btnSubmit", function () {
-		const id           = decryptString($(this).attr("materialUsageID"));
+		const id           		= decryptString($(this).attr("materialUsageID"));
 		const isFromCancelledDocument = $(this).attr("cancel") == "true";
-		const revise       = $(this).attr("revise") == "true";
-		const validate     = validateForm("form_material_usage");
-		removeIsValid("#tableProjectRequestItems");
-		removeIsValid("#tableCompanyRequestItems");
-		if (validate) {
-			const action = revise && !isFromCancelledDocument && "insert" || (id ? "update" : "insert");
-			const data   = getmaterialUsageData(action, "submit", "1", id);
+		const revise       		= $(this).attr("revise") == "true";
+		const validateIsInvalid = validateHasError();
+		if(!validateIsInvalid){	
+			const validate     = validateForm("form_material_usage");
+			removeIsValid("#tableProjectRequestItems");
+			removeIsValid("#tableCompanyRequestItems");
+			if (validate) {
+				const action = revise && !isFromCancelledDocument && "insert" || (id ? "update" : "insert");
+				const data   = getmaterialUsageData(action, "submit", "1", id);
 
-			if (revise) {
-				if(!isFromCancelledDocument){
-					data["reviseMaterialUsageID"] = id;
-					delete data["materialUsageID"];  
+				if (revise) {
+					if(!isFromCancelledDocument){
+						data["reviseMaterialUsageID"] = id;
+						delete data["materialUsageID"];  
+					}
 				}
-			}
 
-			let approversID = "", approversDate = "";
-			for (var i of Object.keys(data)) {
-				if (i[0] == "approversID")   approversID   = i[1];
-				if (i[0] == "approversDate") approversDate = i[1];
+				let approversID = "", approversDate = "";
+				for (var i of Object.keys(data)) {
+					if (i[0] == "approversID")   approversID   = i[1];
+					if (i[0] == "approversDate") approversDate = i[1];
+				}
+				
+				const employeeID = getNotificationEmployeeID(approversID, approversDate, true);
+				let notificationData = false;
+				if (employeeID != sessionID) {
+					notificationData = {
+						moduleID:                45,
+						notificationTitle:       "Material Usage",
+						notificationDescription: `${employeeFullname(sessionID)} asked for your approval.`,
+						notificationType:        2,
+						employeeID,
+					};
+				}
+				savematerialUsage(data, "submit", notificationData, pageContent);
 			}
-			
-			const employeeID = getNotificationEmployeeID(approversID, approversDate, true);
-			let notificationData = false;
-			if (employeeID != sessionID) {
-				notificationData = {
-					moduleID:                45,
-					notificationTitle:       "Material Usage",
-					notificationDescription: `${employeeFullname(sessionID)} asked for your approval.`,
-					notificationType:        2,
-					employeeID,
-				};
-			}
-			savematerialUsage(data, "submit", notificationData, pageContent);
+		}else{
+			$("#tableProjectRequestItems").find(`.quantity.is-invalid`).first().focus();
 		}
 	});
 	// ----- END SUBMIT DOCUMENT -----
@@ -1826,7 +1875,7 @@ $(document).ready(function() {
                                         `materialWithdrawalDetailsID, materialWithdrawalID , materialUsageID, ims_inventory_item_tbl.itemID AS itemID, 
                                         ims_inventory_item_tbl.createdAt AS createdAt ,ims_material_withdrawal_details_tbl.itemName as itemName, 
                                         ims_material_withdrawal_details_tbl.itemDescription as itemDescription,itemUsageRemarks, ims_material_withdrawal_details_tbl.quantity as quantity,
-                                        ims_material_withdrawal_details_tbl.unitOfMeasurementID AS unitOfMeasurementID,utilized,unused`,
+                                        ims_material_withdrawal_details_tbl.unitOfMeasurement AS unitOfMeasurement,utilized,unused`,
                                         `${condition}`);
 				tableData.map((items,index)=>{
                                         if (readOnly) {
@@ -1841,7 +1890,7 @@ $(document).ready(function() {
                                                     <div class="itemname">${items.itemName}</div>
                                                 </td>
 												<td>
-                                                    <div class="uom">${items.unitOfMeasurementID}</div>
+                                                    <div class="uom">${items.unitOfMeasurement}</div>
                                                 </td>
 												<td>
                                                     <div class="stockinquantity">${items.quantity}</div>
@@ -1868,7 +1917,7 @@ $(document).ready(function() {
                                                     <div class="itemname">${items.itemName}</div>
                                                 </td>
 												<td>
-                                                    <div class="uom">${items.unitOfMeasurementID}</div>
+                                                    <div class="uom">${items.unitOfMeasurement}</div>
                                                 </td>
 												<td>
                                                     <div class="stockinquantity">${items.quantity}</div>
@@ -1877,7 +1926,7 @@ $(document).ready(function() {
                                                     <div class="utilized">
                                                         <input 
                                                             type="text" 
-                                                            class="form-control validate number"
+                                                            class="form-control quantity input-quantity"
                                                             data-allowcharacters="[0-9]" 
                                                             max="99999" 
                                                             id="utilized${index}"
@@ -1897,7 +1946,7 @@ $(document).ready(function() {
                                                         <textarea minlength="4" maxlength="500" rows="2" style="resize: none" 
                                                                   class="form-control validate" name="remarks" id="remarks${index}" 
                                                                   data-allowcharacters="[a-z][A-Z][0-9][.][,][-][()]['][/][?][*][!][#][%][&][ ]" 
-                                                                  required>${items.itemUsageRemarks}</textarea>
+                                                                  required>${items.itemUsageRemarks || ""}</textarea>
                                                         <div class="invalid-feedback d-block" id="invalid-remarks${index}"></div>
                                                     </div>
                                                 </td>
@@ -2091,3 +2140,15 @@ function savematerialUsage(data = null, method = "submit", notificationData = nu
 }
 
 // --------------- END DATABASE RELATION ---------------
+
+function validateHasError(){
+	returnData = 0;
+	$("#tableProjectRequestItems").each(function(){
+		var quantity = $(this).find(".quantity");
+		if(quantity.hasClass("is-invalid")){
+			returnData += 1;
+		}
+	});
+
+	return returnData > 0? true : false;
+}

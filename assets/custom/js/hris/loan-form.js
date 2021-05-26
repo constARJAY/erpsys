@@ -987,8 +987,8 @@ $(document).on("click", "#btnBack", function () {
 	const status     = $(this).attr("status");
 
 	if (status != "false" && status != 0) {
-		$("#page_content").html(preloader);
-		pageContent();
+		// $("#page_content").html(preloader);
+		// pageContent();
 
 	
         if (revise) {
@@ -996,15 +996,24 @@ $(document).on("click", "#btnBack", function () {
             // const action   = id && feedback ? "update" : "insert";
             const action = revise && !isFromCancelledDocument && "insert" || (id ? "update" : "insert");
             const data     = getData(action, 0, "save", feedback, id);
-            data.append("loanFormStatus", 0);
+            // data.append("loanFormStatus", 0);
 
             if (!isFromCancelledDocument) {
-                data.append("reviseLoanFormID", id);
-                data.delete("loanFormID");
+                // data.append("reviseLoanFormID", id);
+                // data.delete("loanFormID");
+
+				data["tableData"]["reviseLoanFormID"] = id;
+				delete data["tableData"].loanFormID;
+		
             } else {
-                data.append("loanFormID", id);
-                data.delete("action");
-                data.append("action", "update");
+				// data.append("loanFormID", id);
+                // data.delete("action");
+                // data.append("action", "update");
+
+				data["tableData"]["loanFormID"] = id;
+				delete data["tableData"].action;
+				data["tableData"]["action"] = "update";
+
             }
 
             // ---------- CONVERT VALUE WITH COMMA BEFORE SENDING IN CONTROLLER --------------------
@@ -1102,20 +1111,28 @@ $(document).on("click", "#btnRevise", function () {
 // ----- SAVE DOCUMENT -----
 $(document).on("click", "#btnSave", function () {
 	
-    const action   = revise && !isFromCancelledDocument && "insert" || (id && feedback ? "update" : "insert");
     const isFromCancelledDocument = $(this).attr("cancel") == "true";
     const revise   = $(this).attr("revise") == "true";
+    const action   = revise && !isFromCancelledDocument && "insert" || (id && feedback ? "update" : "insert");
 	const feedback = getFormCode("LNF", dateToday()); 
 	const data     = getData(action, 0, "save", feedback);
-    data.append("loanFormStatus", 0);
+    // data.append("loanFormStatus", 0);
     if (revise) {
         if (!isFromCancelledDocument) {
-            data.append("reviseLoanFormID", id);
-            data.delete("loanFormID");
+            // data.append("reviseLoanFormID", id);
+            // data.delete("loanFormID");
+
+			data["tableData"]["reviseLoanFormID"] = id;
+			delete data["tableData"].loanFormID;
+
         } else {
-            data.append("loanFormID", id);
-            data.delete("action");
-            data.append("action", "update");
+            // data.append("loanFormID", id);
+            // data.delete("action");
+            // data.append("action", "update");
+
+			data["tableData"]["loanFormID"] = id;
+			delete data["tableData"].action;
+			data["tableData"]["action"] = "update";
         }
     }
 
@@ -1157,8 +1174,11 @@ $(document).on("click", "#btnSubmit", function () {
 
         if (revise) {
             if (!isFromCancelledDocument) {
-                data.append("reviseLoanFormID", id);
-                data.delete("loanFormID");
+                // data.append("reviseLoanFormID", id);
+                // data.delete("loanFormID");
+
+				data["tableData"]["reviseLoanFormID"] = id;
+				delete data["tableData"].loanFormID;
             }
         }
 
@@ -1213,7 +1233,7 @@ $(document).on("click", "#btnSubmit", function () {
 
 // ----- DROP DOCUMENT -----
 $(document).on("click", "#btnDrop", function() {
-	const id       = $(this).attr("loanFormID");
+	const id       = decryptString($(this).attr("loanFormID"));
 	const feedback = $(this).attr("code") || getFormCode("LNF", dateToday(), id);
 	const action   = "update";
 	const data     = getData(action, 5, "drop", feedback, id);
@@ -1277,20 +1297,28 @@ $(document).on("click", "#btnCancelForm", function () {
 $(document).on("click", "#btnCancel", function () {
 	const id       = decryptString($(this).attr("loanFormID"));
 	const feedback = $(this).attr("code") || getFormCode("LNF", dateToday(), id);
-	const action   = revise && !isFromCancelledDocument && "insert" || (id && feedback ? "update" : "insert");
     const isFromCancelledDocument = $(this).attr("cancel") == "true";
     const revise   = $(this).attr("revise") == "true";
+	const action   = revise && !isFromCancelledDocument && "insert" || (id && feedback ? "update" : "insert");
+
 	const data     = getData(action, 0, "save", feedback, id);
-    data.append("loanFormStatus", 0);
+    // data.append("loanFormStatus", 0);
 
     if (revise) {
         if (!isFromCancelledDocument) {
-            data.append("reviseLoanFormID", id);
-            data.delete("loanFormID");
+            // data.append("reviseLoanFormID", id);
+            // data.delete("loanFormID");
+
+			data["tableData"]["reviseLoanFormID"] = id;
+			delete data["tableData"].loanFormID;
         } else {
-            data.append("loanFormID", id);
-            data.delete("action");
-            data.append("action", "update");
+            // data.append("loanFormID", id);
+            // data.delete("action");
+            // data.append("action", "update");
+
+			data["tableData"]["loanFormID"] = id;
+			delete data["tableData"].action;
+			data["tableData"]["action"] = "update";
         }
     }
     
@@ -1385,7 +1413,7 @@ $(document).on("click", "#btnReject", function () {
 
 	$("#modal_loan_form_content").html(preloader);
 	$("#modal_loan_form .page-title").text(
-		"DENY LOAN DOCUMENT"
+		"DENY LOAN"
 	);
 	$("#modal_loan_form").modal("show");
 	let html = `
@@ -1405,7 +1433,7 @@ $(document).on("click", "#btnReject", function () {
 		</div>
 	</div>
 	<div class="modal-footer text-right">
-		<button class="btn btn-danger" id="btnRejectConfirmation"
+		<button class="btn btn-danger px-5 p-2" id="btnRejectConfirmation"
 		loanFormID="${id}"
 		code="${feedback}"><i class="far fa-times-circle"></i> Deny</button>
 		<button class="btn btn-cancel btnCancel px-5 p-2" data-dismiss="modal"><i class="fas fa-ban"></i> Cancel</button>
