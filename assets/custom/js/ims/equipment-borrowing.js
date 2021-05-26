@@ -2094,19 +2094,32 @@ function saveReturnItem(data = null, method = "submit", notificationData = null,
 
 						let swalTitle;
 						if (method == "submit") {
-							swalTitle = `${getFormCode("TR", dateCreated, insertedID)} submitted successfully!`;
+							swalTitle = `${getFormCode("EBF", dateCreated, insertedID)} submitted successfully!`;
 						} else if (method == "save") {
-							swalTitle = `${getFormCode("TR", dateCreated, insertedID)} saved successfully!`;
+							swalTitle = `${getFormCode("EBF", dateCreated, insertedID)} saved successfully!`;
 						} else if (method == "cancelform") {
-							swalTitle = `${getFormCode("TR", dateCreated, insertedID)} cancelled successfully!`;
+							swalTitle = `${getFormCode("EBF", dateCreated, insertedID)} cancelled successfully!`;
 						} else if (method == "approve") {
-							swalTitle = `${getFormCode("TR", dateCreated, insertedID)} approved successfully!`;
+							swalTitle = `${getFormCode("EBF", dateCreated, insertedID)} approved successfully!`;
 						} else if (method == "deny") {
-							swalTitle = `${getFormCode("TR", dateCreated, insertedID)} denied successfully!`;
+							swalTitle = `${getFormCode("EBF", dateCreated, insertedID)} denied successfully!`;
+						} else if (method == "drop") {
+							swalTitle = `${getFormCode("EBF", dateCreated, insertedID)} dropped successfully!`;
 						}	
 		
 						if (isSuccess == "true") {
 							setTimeout(() => {
+								// ----- SAVE NOTIFICATION -----
+								if (notificationData) {
+									if (Object.keys(notificationData).includes("tableID")) {
+										insertNotificationData(notificationData);
+									} else {
+										notificationData["tableID"] = insertedID;
+										insertNotificationData(notificationData);
+									}
+								}
+								// ----- END SAVE NOTIFICATION -----
+
 								$("#loader").hide();
 								closeModals();
 								Swal.fire({
@@ -2120,17 +2133,6 @@ function saveReturnItem(data = null, method = "submit", notificationData = null,
 								if (method == "approve" || method == "deny") {
 									$("[redirect=forApprovalTab]").length > 0 && $("[redirect=forApprovalTab]").trigger("click")
 								}
-
-								// ----- SAVE NOTIFICATION -----
-								if (notificationData) {
-									if (Object.keys(notificationData).includes("tableID")) {
-										insertNotificationData(notificationData);
-									} else {
-										notificationData["tableID"] = insertedID;
-										insertNotificationData(notificationData);
-									}
-								}
-								// ----- END SAVE NOTIFICATION -----
 							}, 500);
 						} else {
 							setTimeout(() => {
@@ -2156,9 +2158,11 @@ function saveReturnItem(data = null, method = "submit", notificationData = null,
 					}, 500);
 				})
 			} else {
-				if (res.dismiss === "cancel") {
+				if (res.dismiss == "cancel" && method != "submit") {
 					if (method != "deny") {
-						callback && callback();
+						if (method != "cancelform") {
+							callback && callback();
+						}
 					} else {
 						$("#modal_equipment_borrowing").text().length > 0 && $("#modal_equipment_borrowing").modal("show");
 					}

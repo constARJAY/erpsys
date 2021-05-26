@@ -604,7 +604,7 @@ $(document).ready(function() {
 						id="btnDrop" 
 						returnItemID="${encryptString(returnItemID)}"
 						code="${getFormCode("RI", createdAt, returnItemID)}"
-						status="${disposalStatus}"><i class="fas fa-ban"></i> 
+						status="${returnItemStatus}"><i class="fas fa-ban"></i> 
 						Drop
 					</button>`;
 				} else if (returnItemStatus == 3) {
@@ -1234,7 +1234,7 @@ $(document).ready(function() {
         <div class="row" id="form_purchase_request">
 		<div class="col-md-4 col-sm-12">
 		<div class="form-group">
-			<label>Reference No.</label>
+			<label>Reference No. ${!disabled ? "<code>*</code>" : ""}</label>
 			<select class="form-control validate select2"
 			name="borrowingID"
 			id="borrowingID"

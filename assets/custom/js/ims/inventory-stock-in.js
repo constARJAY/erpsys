@@ -149,19 +149,13 @@ $(document).ready(function () {
 			});
 
 		var table = $("#tableListItems")
-			.css({
-				"min-width": "100%"
-			})
-			.removeAttr("width")
+		.css({ "min-width": "100%" })
+		.removeAttr("width")
 			.DataTable({
 				proccessing: false,
 				serverSide: false,
 				scrollX: true,
-				sorting: false,
-				searching: false,
-				paging: true,
-				ordering: false,
-				info: false,
+				sorting: [],
 				scrollCollapse: true,
 				columnDefs: [
 					{ targets: 0,  width: 100 },
@@ -187,12 +181,13 @@ $(document).ready(function () {
 				sorting: [],
 				scrollCollapse: true,
 				columnDefs: [
-					{ targets: 0,  width: 100 },
-					{ targets: 1,  width: 150 },
-					{ targets: 2,  width: 150 },
-					{ targets: 3,  width: 150 },
-					{ targets: 4,  width: 100 },
-					{ targets: 5,  width: 80 },
+					{ targets: 0,  width: 190 },
+		 			{ targets: 1,  width: 150 },
+		 			{ targets: 2,  width: 150 },
+		 			{ targets: 3,  width: 200 },
+		 			{ targets: 4,  width: 100 },
+		 			{ targets: 5,  width: 150 },
+
 				],
 			});
 
@@ -525,7 +520,7 @@ $(document).ready(function () {
         <div class="row" id="form_purchase_request">
             <div class="col-sm-12">
                 <div class="container-fluid">
-                    <table class="table table-striped" id="tableListItems">
+                    <table class="table table-bordered table-striped table-hover" id="tableListItems">
                         <thead>
                             <tr style="white-space: nowrap">
                                 <th>Item Code</th>
@@ -552,7 +547,7 @@ $(document).ready(function () {
 			LEFT JOIN ims_stock_in_tbl 					AS isi	ON iird.inventoryReceivingID = isi.inventoryReceivingID AND iird.itemID = isi.itemID`,
 			`iird.inventoryReceivingID, iird.itemID,
 			iri.itemName,iii.brandName,iic.categoryName,iict.classificationName,
-			iird.received AS quantity,ROUND(sum(IFNULL(isi.stockInQuantity,'0.00')),2) AS receivingQuantity,iir.createdAt`,
+			iird.received AS quantity,ROUND(sum(IFNULL(isi.stockInQuantity,'0.00')),2) AS receivingQuantity, iir.createdAt`,
 			`iird.inventoryReceivingID = ${inventoryReceivingID}`,
             ``,
 			"iird.inventoryReceivingID,iird.itemID"
@@ -564,48 +559,49 @@ $(document).ready(function () {
 			var formatquantity = parseFloat(quantity).toFixed(2);
 			var receivingQuantity = item.receivingQuantity;
 			var formatreceivingQuantity = parseFloat(receivingQuantity).toFixed(2);
+			var totalreceiving1 = (quantity) - (receivingQuantity);
+			var totalreceiving = parseFloat(totalreceiving1).toFixed(2);
+			//alert(totalreceiving);
 		
 			++count;
 			html += `        
 			<tr>
-            <td>${getFormCode("IRR", item.createdAt, item.inventoryReceivingID)}</td>
+            <td>${getFormCode("INRR", item.createdAt, item.inventoryReceivingID)}</td>
             <td>${item.itemName}</td>
             <td>${item.classificationName}</td>
             <td>${item.categoryName}</td>
 			<td>${item.brandName}</td>
-            <td>${item.quantity}</td>
-            <td>${item.receivingQuantity}</td>
+            <td class="text-center">${item.quantity}</td>
+            <td  class="text-center">${item.receivingQuantity}</td>
             <td class="text-center">
             <input type="hidden" id="totalquantity1${count}">
             <div id="actionbutton"></div>
-			<a class="btn btn-primary py-0 btn-barcode" 
+			<a class="btn btn-primary btn-barcode p-1" 
 			href="javascript:void(0);" 
 			number="${count}" 
 			data-inventoryReceivingID="${item.inventoryReceivingID}" 
-			data-itemID="${item.itemID}" 
-			style="min-width: 70px; max-width: 110px;">
-            <i class="fas fa-barcode" style="font-size: .8rem"></i> Barcode
+			data-itemID="${item.itemID}">
+            <i class="fas fa-barcode"></i> Barcode
             </a>`;
 			if (formatquantity < formatreceivingQuantity || formatquantity == formatreceivingQuantity) {
 				
-				html += `<a class="btn btn-success py-0"
-					href="javascript:void(0);" 
-					style="min-width: 80px; cursor: default;">
-					<i class="fas fa-check" style="font-size: .8rem"></i> Settled
+				html += `<a class="btn btn-success p-1"
+					href="javascript:void(0);">
+					<i class="fas fa-check"></i> Settled
 					</a>`;
 			} else {
-				html += `<a class="btn btn-secondary p-0 btnRecord" 
+				html += `<a class="btn btn-secondary btnRecord p-1" 
 				href="javascript:void(0);" 
 				inventoryreceivingid="${item.inventoryReceivingID}" 
 				itemID="${item.itemID}"
 				itemName="${item.itemName}"
 				classificationName ="${item.classificationName}"
 				categoryName="${item.categoryName}"
+				totalreceiving="${totalreceiving}"
 				brandName="${item.brandName}"
 				orderQuantity="${item.quantity}"
-				receivingQuantity="${item.receivingQuantity}"
-				style="min-width: 80px">
-					<i class="fas fa-pencil-alt" style="font-size: .8rem"></i>Record
+				receivingQuantity="${item.receivingQuantity}">
+					<i class="fas fa-pencil-alt"></i>Record
 				</a>`;
 			}
 			html += ` </td>
@@ -621,6 +617,7 @@ $(document).ready(function () {
 
 		setTimeout(() => {
 			$("#page_content").html(html);
+			initDataTables();
 			//initDataTables();
 			 storageContent();
 			// updateTableItems();
@@ -639,6 +636,9 @@ $(document).ready(function () {
 		const itemID 	= $(this).attr("itemid");
 		//var receivingquantity = $(this).data("receivingquantity");
 		const receivingquantity 	= $(this).attr("receivingQuantity");
+		const brandName 	= $(this).attr("brandName");
+		const totalreceiving 	= $(this).attr("totalreceiving");
+
 		$("#modal_product_record").modal("show");
 		// Display preloader while waiting for the completion of getting the data
 		$("#modal_product_record_content").html(preloader);
@@ -657,9 +657,12 @@ $(document).ready(function () {
 					$("#modal_product_record_content").html(content);
 					$("#receivedQuantitytotal").val(receivingquantity);
 					$("#receivedQuantitytotal").val(receivingquantity);
+					$("#brandName").val(brandName);
+					$("#remainingQuantity").val(totalreceiving);
 					initAll();
 					storageContent();
 					datevalidated();
+					initDataTables();
 					
 					//getItemRow();
 	
@@ -823,13 +826,13 @@ $(document).ready(function () {
 					   
 						<div class="col-sm-12">
 							<div class="container-fluid">
-								<table class="table table-striped" id="tableItems">
+								<table class="table table-bordered table-striped table-hover" id="tableItems">
 									<thead>
 										<tr style="white-space: nowrap">    
+											<th>Barcode</th>
 											<th>Received Quantity</th>
 											<th>Serial Number</th>
-											<th>Storage</th>
-											<th>Barcode</th>
+											<th>Storage <code>*</code></th>
 											<th>Manufactured Date</th>
 											<th>Expiration Date</th>
 										</tr>
@@ -842,6 +845,15 @@ $(document).ready(function () {
 										
 									++count;
 									html +=`<tr>`;
+									html +=`<td>
+									<input 
+										type="text" 
+										class="form-control barcode" 
+										number="${count}"
+										name="barcode" 
+										id="barcode${count}"
+										disabled>
+									</td>`;
 									if(!item.serialNumber){
 									html +=`
 									<td class="text-center"><input type="text"
@@ -888,15 +900,6 @@ $(document).ready(function () {
 										</select>
 										<div class="invalid-feedback d-block" id="invalid-input_inventoryStorageID"></div>
 									</td>
-									<td>
-										<input 
-										type="text" 
-										class="form-control barcode" 
-										number="${count}"
-										name="barcode" 
-										id="barcode${count}"
-										disabled>
-									</td>
 									<td> 
 										<input 
 										type="date" 
@@ -927,7 +930,8 @@ $(document).ready(function () {
 				
 				<div class="modal-footer">
 					${button}
-					<button class="btn btn-cancel px-5 p-2 btnCancel"><i class="fas fa-ban"></i> Cancel</button>
+					<button class="btn btn-cancel btnCancel" data-dismiss="modal"><i class="fas fa-ban"></i> Cancel</button>
+					
 				</div>`;
 			return html;
 	
@@ -1039,7 +1043,7 @@ $(document).ready(function () {
 					preventRefresh(false);
 					//let swalTitle = success_title.toUpperCase();
 					$.ajax({
-						url: `${base_url}ims/Inventory_stock_In/insertbarcode`,
+						url: `${base_url}ims/inventory_stock_in/insertbarcode`,
 						method: "POST",
 						data: {
 							itemID: 			itemID, 			receivedID : 			receivedID,
@@ -1079,7 +1083,7 @@ $(document).ready(function () {
 		const data = {receivedID, itemID};
 		// console.log(data);
 		$.ajax({
-			url: `${base_url}ims/Inventory_stock_In/printStockInBarcode`,
+			url: `${base_url}ims/inventory_stock_in/printStockInBarcode`,
 			method: "POST",
 			data: {
 				receivedID: receivedID, itemID: itemID

@@ -193,14 +193,14 @@ $(document).ready(function () {
 		let button = scheduleID
 			? `
         <button 
-            class="btn btn-update"
+            class="btn btn-update px-5 p-2"
             id="btnUpdate"
             scheduleID="${scheduleID}"><i class="fas fa-save"></i>
             Update
         </button>`
 			: `
         <button 
-            class="btn btn-save"
+            class="btn btn-save px-5 p-2"
             id="btnSave"><i class="fas fa-save"></i>
             Save
         </button>`;

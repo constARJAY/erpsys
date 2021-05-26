@@ -760,13 +760,13 @@ $(document).ready(function() {
 	// ----- GET UOM LIST -----
 	function getUomList(uomName = null) {
 		let html = `<option disabled selected>Select UOM</option>`;
-		if (uomName) {
+		// if (uomName) {
 			uomList.map(uom => {
 				html += `
 				<option value="${uom.uomName}"
 					${uomName == uom.uomName ? "selected" : ""}>${uom.uomName}</option>`;
 			})
-		}
+		// }
 		return html;
 	}
 	// ----- END GET UOM LIST -----
@@ -887,7 +887,7 @@ $(document).ready(function() {
 				</td>
 				<td>
 					<div class="uom">
-						${uom}
+						${uom || "-"}
 					</div>
 				</td>
 				<td class="text-right">

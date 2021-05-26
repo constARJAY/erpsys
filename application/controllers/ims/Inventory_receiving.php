@@ -26,6 +26,7 @@ class Inventory_receiving extends CI_Controller {
         $inventoryReceivingID       = $this->input->post("inventoryReceivingID") ?? null;
         $reviseInventoryReceivingID = $this->input->post("reviseInventoryReceivingID") ?? null;
         $employeeID                 = $this->input->post("employeeID");
+        $receiptNo                 = $this->input->post("receiptNo");
         $purchaseOrderID            = $this->input->post("purchaseOrderID") ?? null;
         $dateReceived               = $this->input->post("dateReceived");
         $approversID                = $this->input->post("approversID") ?? null;
@@ -45,6 +46,7 @@ class Inventory_receiving extends CI_Controller {
         $inventoryReceivingData = [
             "reviseInventoryReceivingID" => $reviseInventoryReceivingID,
             "employeeID"                 => $employeeID,
+            "receiptNo"                 => $receiptNo,
             "purchaseOrderID"            => $purchaseOrderID,
             "dateReceived"               => $dateReceived,
             "approversID"                => $approversID,

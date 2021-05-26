@@ -44,7 +44,7 @@ class MaterialWithdrawal_model extends CI_Model {
 
     public function updateStorage() {
         $items = $this->input->post("items");
-
+        $materialWithdrawalID = $items[0]['materialWithdrawalID']; 
         // foreach($items as  $values){
        
         // $getStorageID = $values['inventoryStorageID']; 
@@ -75,7 +75,7 @@ class MaterialWithdrawal_model extends CI_Model {
         FROM ims_material_withdrawal_details_tbl AS iidd
         LEFT JOIN ims_material_withdrawal_tbl AS iid ON iidd.materialWithdrawalID  = iid.materialWithdrawalID 
         LEFT JOIN ims_stock_in_total_tbl AS  isit ON iidd.itemID = isit.itemID AND iidd.inventoryStorageID = isit.inventoryStorageID 
-        WHERE iid.materialWithdrawalID = $insertID AND iid.materialWithdrawalStatus =2");
+        WHERE iid.materialWithdrawalID = $materialWithdrawalID AND iid.materialWithdrawalStatus =2");
         foreach ($sql->result() as $row)
         {
             $quantity                           =$row->totalquantity;

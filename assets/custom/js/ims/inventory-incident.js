@@ -343,7 +343,7 @@ $(document).ready(function() {
             <thead>
                 <tr style="white-space: nowrap">
 					<th>Document No.</th>
-					<th>Employee Name</th>
+					<th>Prepared By</th>
 					<th>Current Approver</th>
 					<th>Date Created</th>
 					<th>Date Submitted</th>
@@ -433,7 +433,7 @@ $(document).ready(function() {
             <thead>
                 <tr style="white-space: nowrap">
 					<th>Document No.</th>
-					<th>Employee Name</th>
+					<th>Prepared By</th>
 					<th>Current Approver</th>
 					<th>Date Created</th>
 					<th>Date Submitted</th>
@@ -905,10 +905,10 @@ $(document).ready(function() {
 					<div class="quantity">
 						<input 
 							type="text" 
-							class="form-control number text-center"
-							min="1" 
+							class="form-control input-quantity text-center"
+							min="0.01" 
+							max="999999999"
 							data-allowcharacters="[0-9]" 
-							max="999999999" 
 							id="quantity" 
 							name="quantity" 
 							value="${quantity}" 
@@ -1211,13 +1211,13 @@ $(document).ready(function() {
 										return false;
 									}else{
 
-										if(counter == barcodeArrayLength){
-											barcodeArray[barcodeArrayLength -1] = barcodeval;
-											barcodeLocationArray[barcodeArrayLength -1] = barcodeID;
-										}
+										// if(counter == barcodeArrayLength){
+											barcodeArray[barcodeArrayLength] = barcodeval;
+											barcodeLocationArray[barcodeArrayLength] = barcodeID;
+										// }
 										
 									}
-									counter++;
+									// counter++;
 								}
 							}else{
 								barcodeArray[0] = barcodeval;
@@ -1294,6 +1294,7 @@ $(document).ready(function() {
 
     })
     // ----- END BARCODE -----
+	
 
 	// ----- KEYUP QUANTITY OR UNITCOST -----
 	$(document).on("change", "[name=quantity]", function() {
@@ -1389,6 +1390,7 @@ $(document).ready(function() {
 		updateTableItems();
 		initInputmask();
 		initAmount();
+		initQuantity();
     })
     // ----- END INSERT ROW ITEM -----
 
@@ -1579,7 +1581,7 @@ $(document).ready(function() {
 
             <div class="col-md-4 col-sm-12">
                 <div class="form-group">
-                    <label>Reported By</label>
+                    <label>Prepared By</label>
                     <input type="text" class="form-control" disabled value="${employeeFullname}">
                 </div>
             </div>
@@ -1680,7 +1682,7 @@ $(document).ready(function() {
 			initDataTables();
 			updateTableItems();
 			initAll();
-			
+			initQuantity(".input-quantity");
 			// updateInventoryItemOptions();
 			updateInventoryStorageOptions();
 			// projectID && projectID != 0 && $("[name=projectID]").trigger("change");
@@ -2119,7 +2121,7 @@ $(document).ready(function() {
 		const feedback = $(this).attr("code") || getFormCode("IR", dateToday(), id);
 
 		$("#modal_purchase_request_content").html(preloader);
-		$("#modal_purchase_request .page-title").text("DENY TRNASFER REQUEST");
+		$("#modal_purchase_request .page-title").text("DENY INVENTORY INCIDENT");
 		$("#modal_purchase_request").modal("show");
 		let html = `
 		<div class="modal-body">
@@ -2138,7 +2140,7 @@ $(document).ready(function() {
 			</div>
 		</div>
 		<div class="modal-footer text-right">
-			<button class="btn btn-danger" id="btnRejectConfirmation"
+			<button class="btn btn-danger px-5 p-2" id="btnRejectConfirmation"
 			incidentID="${id}"
 			code="${feedback}"><i class="far fa-times-circle"></i> Deny</button>
 			<button class="btn btn-cancel px-5 p-2" data-dismiss="modal"><i class="fas fa-ban"></i> Cancel</button>
@@ -2284,7 +2286,7 @@ function getConfirmation(method = "submit") {
 			swalImg   = `${base_url}assets/modal/reject.svg`;
 			break;
 		case "cancelform":
-			swalTitle = `CANCEL ${title.toUpperCase()} DOCUMENT`;
+			swalTitle = `CANCEL ${title.toUpperCase()}`;
 			swalText  = "Are you sure to cancel this document?";
 			swalImg   = `${base_url}assets/modal/cancel.svg`;
 			break;
@@ -2352,7 +2354,7 @@ function savePurchaseRequest(data = null, method = "submit", notificationData = 
 						} else if (method == "deny") {
 							swalTitle = `${getFormCode("IR", dateCreated, insertedID)} denied successfully!`;
 						} else if (method == "drop") {
-							swalTitle = `${getFormCode("TR", dateCreated, insertedID)} dropped successfully!`;
+							swalTitle = `${getFormCode("IR", dateCreated, insertedID)} dropped successfully!`;
 						}
 		
 						if (isSuccess == "true") {

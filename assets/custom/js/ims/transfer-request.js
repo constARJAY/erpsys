@@ -140,9 +140,9 @@ $(document).ready(function() {
 		return moment(new Date).format("YYYY-MM-DD HH:mm:ss");
 	};
 
-	const inventoryItemList = getTableData(
-		"ims_inventory_item_tbl LEFT JOIN  ims_list_stocks_details_tbl USING(itemID) LEFT JOIN  ims_list_stocks_tbl USING(listStocksID) LEFT JOIN ims_inventory_storage_tbl USING(inventoryStorageID)", "itemID, itemCode, itemName, unitOfMeasurementID,brandName,inventoryStorageID ",
-		"itemStatus = 1  GROUP BY itemID");
+	// const inventoryItemList = getTableData(
+	// 	"ims_inventory_item_tbl LEFT JOIN  ims_list_stocks_details_tbl USING(itemID) LEFT JOIN  ims_list_stocks_tbl USING(listStocksID) LEFT JOIN ims_inventory_storage_tbl USING(inventoryStorageID)", "itemID, itemCode, itemName, unitOfMeasurementID,brandName,inventoryStorageID ",
+	// 	"itemStatus = 1  GROUP BY itemID");
 
 	const projectList = getTableData(
 		"ims_inventory_storage_tbl AS storage LEFT JOIN hris_department_tbl AS department ON storage.inventoryStorageDepartment = department.departmentID", 
@@ -313,7 +313,7 @@ $(document).ready(function() {
             <thead>
                 <tr style="white-space: nowrap">
 					<th>Document No.</th>
-					<th>Employee Name</th>
+					<th>Prepared By</th>
 					<th>Storage Name(Sender)</th>
 					<th>Storage Name(Receiver)</th>
 					<th>Current Approver</th>
@@ -420,7 +420,7 @@ $(document).ready(function() {
             <thead>
                 <tr style="white-space: nowrap">
 				<th>Document No.</th>
-				<th>Employee Name</th>
+				<th>Prepared By</th>
 				<th>Storage Name(Sender)</th>
 				<th>Storage Name(Receiver)</th>
 				<th>Current Approver</th>
@@ -682,100 +682,100 @@ $(document).ready(function() {
     // ----- END GET PROJECT LIST -----
 
 	// ----- UPDATE INVENTORYT NAME -----
-	function updateInventoryItemOptions() {
-		let projectItemIDArr = [], companyItemIDArr = []; // 0 IS THE DEFAULT VALUE
-		let projectElementID = [], companyElementID = [];
-		// let optionNone = {
-		// 	itemID:              "0",
-		// 	itemCode:            "-",
-		// 	categoryName:        "-",
-		// 	unitOfMeasurementID: "-",
-		// 	itemName:            "N/A",
-		// 	brand:            	 "-"
-		// };
+	// function updateInventoryItemOptions() {
+	// 	let projectItemIDArr = [], companyItemIDArr = []; // 0 IS THE DEFAULT VALUE
+	// 	let projectElementID = [], companyElementID = [];
+	// 	// let optionNone = {
+	// 	// 	itemID:              "0",
+	// 	// 	itemCode:            "-",
+	// 	// 	categoryName:        "-",
+	// 	// 	unitOfMeasurementID: "-",
+	// 	// 	itemName:            "N/A",
+	// 	// 	brand:            	 "-"
+	// 	// };
 
-		$("[name=itemID][project=true]").each(function(i, obj) {
-			projectItemIDArr.push($(this).val());
-			projectElementID.push(`#${this.id}[project=true]`);
-			$(this).val() && $(this).trigger("change");
-		}) 
+	// 	$("[name=itemID][project=true]").each(function(i, obj) {
+	// 		projectItemIDArr.push($(this).val());
+	// 		projectElementID.push(`#${this.id}[project=true]`);
+	// 		$(this).val() && $(this).trigger("change");
+	// 	}) 
 		
 
-		projectElementID.map((element, index) => {
-			let html = `<option selected disabled>Select Item Name</option>`;
-			let itemList = [...inventoryItemList];
-			html += itemList.filter(item => !projectItemIDArr.includes(item.itemID) || item.itemID == projectItemIDArr[index]).map(item => {
-				return `
-				<option 
-					value        = "${item.itemID}" 
-					itemCode     = "${item.itemCode}"
-					categoryName = "${item.categoryName}"
-					uom          = "${item.unitOfMeasurementID}"
-					brand          = "${item.brandName}"
-					${item.itemID == projectItemIDArr[index] && "selected"}>
-					${item.itemName}
-				</option>`;
-			})
-			$(element).html(html);
-		});
-	}
+	// 	projectElementID.map((element, index) => {
+	// 		let html = `<option selected disabled>Select Item Name</option>`;
+	// 		let itemList = [...inventoryItemList];
+	// 		html += itemList.filter(item => !projectItemIDArr.includes(item.itemID) || item.itemID == projectItemIDArr[index]).map(item => {
+	// 			return `
+	// 			<option 
+	// 				value        = "${item.itemID}" 
+	// 				itemCode     = "${item.itemCode}"
+	// 				categoryName = "${item.categoryName}"
+	// 				uom          = "${item.unitOfMeasurementID}"
+	// 				brand          = "${item.brandName}"
+	// 				${item.itemID == projectItemIDArr[index] && "selected"}>
+	// 				${item.itemName}
+	// 			</option>`;
+	// 		})
+	// 		$(element).html(html);
+	// 	});
+	// }
 	// ----- END UPDATE INVENTORYT NAME -----
 
 
     // ----- GET INVENTORY ITEM -----
-    function getInventoryItem(id = null, isProject = true, display = true ,storageID = null) {
-        let html   = `<option selected disabled>Select Item Name</option>`;
-		const attr = isProject ? "[project=true]" : "";
+    // function getInventoryItem(id = null, isProject = true, display = true ,storageID = null) {
+    //     let html   = `<option selected disabled>Select Item Name</option>`;
+	// 	const attr = isProject ? "[project=true]" : "";
 
-		let itemIDArr = []; // 0 IS THE DEFAULT VALUE
-		$(`[name=itemID]${attr}`).each(function(i, obj) {
-			itemIDArr.push($(this).val());
-		}) 
+	// 	let itemIDArr = []; // 0 IS THE DEFAULT VALUE
+	// 	$(`[name=itemID]${attr}`).each(function(i, obj) {
+	// 		itemIDArr.push($(this).val());
+	// 	}) 
 
-		// let optionNone = {
-		// 	itemID:              "0",
-		// 	itemCode:            "-",
-		// 	categoryName:        "-",
-		// 	unitOfMeasurementID: "-",
-		// 	itemName:            "N/A",
-		// 	brandName:        	 "-"
+	// 	// let optionNone = {
+	// 	// 	itemID:              "0",
+	// 	// 	itemCode:            "-",
+	// 	// 	categoryName:        "-",
+	// 	// 	unitOfMeasurementID: "-",
+	// 	// 	itemName:            "N/A",
+	// 	// 	brandName:        	 "-"
 
-		// };
-		let itemList = [...inventoryItemList];
+	// 	// };
+	// 	let itemList = [...inventoryItemList];
 
 		
-		html += itemList.filter(item => !itemIDArr.includes(item.itemID) || item.itemID == id).map(item => {
+	// 	html += itemList.filter(item => !itemIDArr.includes(item.itemID) || item.itemID == id).map(item => {
 		
-			// if( storageID != null && storageID == item.inventoryStorageID ){
+	// 		// if( storageID != null && storageID == item.inventoryStorageID ){
 			
-				return `
-				<option 
-					value        = "${item.itemID}" 
-					itemCode     = "${item.itemCode}"
-					categoryName = "${item.categoryName}"
-					uom          = "${item.unitOfMeasurementID}"
-					brand          = "${item.brandName}"
-					${item.itemID == id && "selected"}>
-					${item.itemName}
-				</option>`;
+	// 			return `
+	// 			<option 
+	// 				value        = "${item.itemID}" 
+	// 				itemCode     = "${item.itemCode}"
+	// 				categoryName = "${item.categoryName}"
+	// 				uom          = "${item.unitOfMeasurementID}"
+	// 				brand          = "${item.brandName}"
+	// 				${item.itemID == id && "selected"}>
+	// 				${item.itemName}
+	// 			</option>`;
 			
-			// }
-			// if(storageID == null){
+	// 		// }
+	// 		// if(storageID == null){
 		
-			// 	return `
-			// 	<option 
-			// 		value        = "${item.itemID}" 
-			// 		itemCode     = "${item.itemCode}"
-			// 		categoryName = "${item.categoryName}"
-			// 		uom          = "${item.unitOfMeasurementID}"
-			// 		brand          = "${item.brandName}"
-			// 		${item.itemID == id && "selected"}>
-			// 		${item.itemName}
-			// 	</option>`;
-			// }
-		})
-        return display ? html : inventoryItemList;
-    }
+	// 		// 	return `
+	// 		// 	<option 
+	// 		// 		value        = "${item.itemID}" 
+	// 		// 		itemCode     = "${item.itemCode}"
+	// 		// 		categoryName = "${item.categoryName}"
+	// 		// 		uom          = "${item.unitOfMeasurementID}"
+	// 		// 		brand          = "${item.brandName}"
+	// 		// 		${item.itemID == id && "selected"}>
+	// 		// 		${item.itemName}
+	// 		// 	</option>`;
+	// 		// }
+	// 	})
+    //     return display ? html : inventoryItemList;
+    // }
     // ----- END GET INVENTORY ITEM -----
 
 
@@ -1008,7 +1008,7 @@ $(document).ready(function() {
 							updateTableItems();
 							$(`[name=itemID]${attr}`).each(function(i, obj) {
 								let itemID = $(this).val();
-								$(this).html(getInventoryItem(itemID, isProject));
+								// $(this).html(getInventoryItem(itemID, isProject));
 							}) 
 							updateDeleteButton();
 						});
@@ -1062,6 +1062,12 @@ $(document).ready(function() {
 			// $("#invalid-inventoryStorageIDSender").text("Please choose other Storage!");
 			
 		}
+		else{
+			$(".invalid-feedback").eq(0).text("");
+			$(".invalid-feedback").eq(1).text("");
+			$('[name=inventoryStorageIDSender]').removeClass("is-invalid").addClass("is-valid");
+			$('[name=inventoryStorageIDReceiver]').removeClass("is-invalid").addClass("is-valid");
+		}
 		
     })
 
@@ -1094,6 +1100,12 @@ $(document).ready(function() {
 			$(".invalid-feedback").eq(1).text("Please choose other Storage!");
 			$('[name=inventoryStorageIDSender]').addClass("is-invalid");
 
+		}
+		else{
+			$(".invalid-feedback").eq(0).text("");
+			$(".invalid-feedback").eq(1).text("");
+			$('[name=inventoryStorageIDSender]').removeClass("is-invalid").addClass("is-valid");
+			$('[name=inventoryStorageIDReceiver]').removeClass("is-invalid").addClass("is-valid");
 		}
 		
     })
@@ -1502,7 +1514,7 @@ $(document).ready(function() {
 			<div class="col-md-4 col-sm-12">
 				<div class="form-group">
 					<label>Storage Code ${!disabled ? "<code>*</code>" : ""}</label>
-					<select class="form-control validate select2"
+					<select class="form-control  validate select2"
 						name="inventoryStorageIDSender"
 						id="inventoryStorageIDSender"
 						style="width: 100%"
@@ -1591,7 +1603,7 @@ $(document).ready(function() {
 
             <div class="col-md-4 col-sm-12">
                 <div class="form-group">
-                    <label>Employee Name</label>
+                    <label>Prepared By</label>
                     <input type="text" class="form-control" disabled value="${employeeFullname}">
                 </div>
             </div>
@@ -1649,9 +1661,11 @@ $(document).ready(function() {
 			initQuantity(".input-quantity");
 			
 			// initAll();
-			updateInventoryItemOptions();
+			// updateInventoryItemOptions();
 			inventoryStorageIDSender && inventoryStorageIDSender != 0 && $("[name=inventoryStorageIDSender]").trigger("change");
 			inventoryStorageIDReceiver && inventoryStorageIDReceiver != 0 && $("[name=inventoryStorageIDReceiver]").trigger("change");
+			$('[name=inventoryStorageIDSender]').removeClass("is-invalid").removeClass("is-valid");
+			$('[name=inventoryStorageIDReceiver]').removeClass("is-invalid").removeClass("is-valid");
 			return html;
 		}, 300);
 	}
@@ -2087,7 +2101,7 @@ $(document).ready(function() {
 		const feedback = $(this).attr("code") || getFormCode("TR", dateToday(), id);
 
 		$("#modal_purchase_request_content").html(preloader);
-		$("#modal_purchase_request .page-title").text("DENY TRNASFER REQUEST");
+		$("#modal_purchase_request .page-title").text("DENY TRANSFER REQUEST");
 		$("#modal_purchase_request").modal("show");
 		let html = `
 		<div class="modal-body">
@@ -2106,7 +2120,7 @@ $(document).ready(function() {
 			</div>
 		</div>
 		<div class="modal-footer text-right">
-			<button class="btn btn-danger" id="btnRejectConfirmation"
+			<button class="btn btn-danger px-5 p-2" id="btnRejectConfirmation"
 			transferRequestID="${id}"
 			code="${feedback}"><i class="far fa-times-circle"></i> Deny</button>
 			<button class="btn btn-cancel px-5 p-2" data-dismiss="modal"><i class="fas fa-ban"></i> Cancel</button>
@@ -2252,7 +2266,7 @@ function getConfirmation(method = "submit") {
 			swalImg   = `${base_url}assets/modal/reject.svg`;
 			break;
 		case "cancelform":
-			swalTitle = `CANCEL ${title.toUpperCase()} DOCUMENT`;
+			swalTitle = `CANCEL ${title.toUpperCase()}`;
 			swalText  = "Are you sure to cancel this document?";
 			swalImg   = `${base_url}assets/modal/cancel.svg`;
 			break;

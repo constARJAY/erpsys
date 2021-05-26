@@ -516,7 +516,7 @@ $(document).ready(function() {
 							id="btnCancelForm" 
 							disposalID="${encryptString(disposalID)}"
 							code="${getFormCode("ADF", createdAt, disposalID)}"
-							revise=${isRevise}><i class="fas fa-ban"></i> 
+							revise="${isRevise}"><i class="fas fa-ban"></i> 
 							Cancel
 						</button>`;
 					}
@@ -1574,7 +1574,6 @@ $(document).ready(function() {
 	// ----- SAVE CLOSE FORM -----
 	$(document).on("click", "#btnBack", function () {
 		const id         = decryptString($(this).attr("disposalID"));
-		//const id         = $(this).attr("disposalID");
 		const revise     = $(this).attr("revise") == "true";
 		const employeeID = $(this).attr("employeeID");
 		const feedback   = $(this).attr("code") || getFormCode("ADF", dateToday(), id);
@@ -1655,7 +1654,6 @@ $(document).ready(function() {
 		let condition2 = $("[name=barcode]").hasClass("is-invalid");
 		if(!condition && !condition2){
 		const id           = decryptString($(this).attr("disposalID"));
-		//alert(id);
 		const revise       = $(this).attr("revise") == "true";
 		const isFromCancelledDocument = $(this).attr("cancel") == "true";
 		const validate     = validateForm("form_purchase_request");
@@ -1700,46 +1698,6 @@ $(document).ready(function() {
 	}else{
 		$("[name=quantity]").focus();
 	}
-	// 	let condition = $("[name=quantity]").hasClass("is-invalid");
-	// 	let condition2 = $("[name=barcode]").hasClass("is-invalid");
-	// 	const id            = decryptString($(this).attr("disposalID"));
-	// 	const isFromCancelledDocument = $(this).attr("cancel") == "true";
-	// 	const revise       = $(this).attr("revise") == "true";
-	// 	const validate     = validateForm("form_purchase_request");
-	// 	removeIsValid(".itemProjectTableBody");
-	// 	if(validate && condition && condition2){
-	// 		const action = revise && !isFromCancelledDocument && "insert" || (id ? "update" : "insert");
-			
-	// 		const data   = getDisposalData(action, "submit", "1", id);
-
-
-	// 		if (revise) {
-	// 			if (!isFromCancelledDocument) {
-	// 				data.append("revisedisposalID", id);
-	// 				data.delete("disposalID");
-	// 			}
-	// 		}
-
-	// 		let approversID = "", approversDate = "";
-	// 		for (var i of data) {
-	// 			if (i[0] == "approversID")   approversID   = i[1];
-	// 			if (i[0] == "approversDate") approversDate = i[1];
-	// 		}
-	// 		const employeeID = getNotificationEmployeeID(approversID, approversDate, true);
-	// 		let notificationData = false;
-	// 		if (employeeID != sessionID) {
-	// 			notificationData = {
-	// 				moduleID:                36,
-	// 				notificationTitle:       "Item Disposal",
-	// 				notificationDescription: `${employeeFullname(sessionID)} asked for your approval.`,
-	// 				notificationType:        2,
-	// 				employeeID,
-	// 			};
-	// 		}
-
-	// 		saveDisposalItem(data, "submit", notificationData, pageContent);
-	// }
-	// alert("222");
 	});
 	// ----- END SUBMIT DOCUMENT -----
 
@@ -1882,7 +1840,6 @@ $(document).ready(function() {
 	$(document).on("click", "#btnDrop", function() {
 		const disposalID = decryptString($(this).attr("disposalID"));
 		const feedback          = $(this).attr("code") || getFormCode("ADF", dateToday(), id);
-
 		const id = decryptString($(this).attr("disposalID"));
 		let data = new FormData;
 		data.append("disposalID", disposalID);
@@ -2023,7 +1980,6 @@ function saveDisposalItem(data = null, method = "submit", notificationData = nul
 					},
 					success: function(data) {
 						let result = data.split("|");
-					
 		
 						let isSuccess   = result[0];
 						let message     = result[1];
@@ -2047,6 +2003,17 @@ function saveDisposalItem(data = null, method = "submit", notificationData = nul
 		
 						if (isSuccess == "true") {
 							setTimeout(() => {
+								// ----- SAVE NOTIFICATION -----
+								if (notificationData) {
+									if (Object.keys(notificationData).includes("tableID")) {
+										insertNotificationData(notificationData);
+									} else {
+										notificationData["tableID"] = insertedID;
+										insertNotificationData(notificationData);
+									}
+								}
+								// ----- END SAVE NOTIFICATION -----
+
 								$("#loader").hide();
 								closeModals();
 								Swal.fire({
@@ -2060,17 +2027,6 @@ function saveDisposalItem(data = null, method = "submit", notificationData = nul
 								if (method == "approve" || method == "deny") {
 									$("[redirect=forApprovalTab]").length > 0 && $("[redirect=forApprovalTab]").trigger("click")
 								}
-
-								// ----- SAVE NOTIFICATION -----
-								if (notificationData) {
-									if (Object.keys(notificationData).includes("tableID")) {
-										insertNotificationData(notificationData);
-									} else {
-										notificationData["tableID"] = insertedID;
-										insertNotificationData(notificationData);
-									}
-								}
-								// ----- END SAVE NOTIFICATION -----
 							}, 500);
 						} else {
 							setTimeout(() => {
@@ -2093,14 +2049,14 @@ function saveDisposalItem(data = null, method = "submit", notificationData = nul
 				}).done(function() {
 					setTimeout(() => {
 						$("#loader").hide();
-						
-						
 					}, 500);
 				})
 			} else {
-				if (res.dismiss === "cancel") {
+				if (res.dismiss == "cancel" && method != "submit") {
 					if (method != "deny") {
-						callback && callback();
+						if (method != "cancelform") {
+							callback && callback();
+						}
 					} else {
 						$("#modal_item_disposal").text().length > 0 && $("#modal_item_disposal").modal("show");
 					}

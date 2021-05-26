@@ -549,7 +549,7 @@ const checkExists = (elementID, invalidFeedback) => {
 		let multiple = {};
 		$("select[unique], input[unique], textarea[unique]").each(function () {
 			let key   = $(this).attr("name");
-			let value = $(this).val();
+			let value = $(this).val()?.trim();
 			keys.push(key);
 			values.push(value);
 			if (isMultiple > 0) {

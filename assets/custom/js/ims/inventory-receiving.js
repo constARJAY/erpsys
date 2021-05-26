@@ -584,10 +584,12 @@ $(document).ready(function() {
     function getPurchaseOrderList(id = null, status = 0, display = true) {
 		const purchaseOrderList = getTableData(
 			`ims_purchase_order_tbl AS ipot
-				LEFT JOIN ims_request_items_tbl AS irit USING(purchaseOrderID)`,
+				LEFT JOIN ims_request_items_tbl AS irit USING(purchaseOrderID)
+				LEFT JOIN ims_inventory_receiving_tbl AS iir ON iir.purchaseOrderID = ipot.purchaseOrderID`,
 			"ipot.*",
-			`ipot.purchaseOrderStatus = 2 AND 
-			irit.orderedPending IS NULL OR irit.orderedPending <> 0
+			`(ipot.purchaseOrderStatus = 2 AND ( (iir.inventoryReceivingStatus != 1 AND iir.inventoryReceivingStatus != 0 AND iir.inventoryReceivingStatus != 3 AND iir.inventoryReceivingStatus != 4 AND iir.inventoryReceivingStatus != 5) OR (iir.inventoryReceivingStatus IS NULL) ))  
+				AND 
+			 (irit.orderedPending IS NULL OR irit.orderedPending <> 0)
 			GROUP BY irit.purchaseOrderID`
 		)
 
@@ -674,6 +676,41 @@ $(document).ready(function() {
 		return html;
 	}
 	// ----- END GET SERIAL NUMBER -----
+	var serialArray =[];
+	var serialLocationArray =[];
+	
+	$(document).on("change","[name='serialNumber']",function(){
+
+		const serialval   = $(this).val(); 
+		const serialID   = $(this).attr("id");
+		
+		let	serialArrayLength = serialArray.length || 0;
+
+			if(serialArrayLength !=0){
+				for(var loop1 =0;loop1<serialArrayLength; loop1++ ){
+					
+
+					if(serialArray[loop1] == serialval && serialLocationArray[loop1] != serialID){
+					
+						$(this).closest("tr").find("[name=serialNumber]").removeClass("is-valid").addClass("is-invalid");
+						$(this).closest("tr").find("div > #invalid-serialNumber").removeClass("is-valid").addClass("is-invalid");
+						$(this).closest("tr").find(" div > #invalid-serialNumber").text('Serial '+serialval+' already declared!');
+						return false;
+					}else{
+				
+							serialArray[serialArrayLength] = serialval;
+							serialLocationArray[serialArrayLength] = serialID;
+						}
+						
+				
+				}
+			}else{
+				serialArray[0] = serialval;
+				serialLocationArray[0] = serialID;
+			}
+							
+					
+	});
 
 
 	// ----- UPDATE SERIAL NUMBER -----
@@ -901,7 +938,7 @@ $(document).ready(function() {
 		if (parentTable) {
 			const serialRow        = $(`.tableSerialBody tr`, parentTable).length;
 			const receivedQuantity = +$(`.received [name="received"]`, parentTable).val() || 0;
-			console.log(serialRow, receivedQuantity);
+		
 			if (serialRow == receivedQuantity) {
 				$(`.received [name="received"]`, parentTable).removeClass("is-valid, no-error").removeClass("is-invalid");
 				$(`.received .invalid-feedback`, parentTable).text("");
@@ -957,6 +994,7 @@ $(document).ready(function() {
 			reviseinventoryReceivingID  = "",
 			employeeID              = "",
 			purchaseOrderID               = "",
+			receiptNo               = "",
 			dateReceived               = "",
 			inventoryReceivingRemarks  = "",
 			approversID             = "",
@@ -1077,7 +1115,7 @@ $(document).ready(function() {
             </div>
         </div>
         <div class="row" id="form_inventory_receiving">
-            <div class="col-md-4 col-sm-12">
+            <div class="col-md-3 col-sm-12">
                 <div class="form-group">
                     <label>Reference No. ${!disabled ? "<code>*</code>" : ""}</label>
                     <select class="form-control validate select2"
@@ -1096,13 +1134,29 @@ $(document).ready(function() {
                     <div class="d-block invalid-feedback" id="invalid-purchaseOrderID"></div>
                 </div>
             </div>
-            <div class="col-md-4 col-sm-12">
+			<div class="col-md-3 col-sm-12">
+                <div class="form-group">
+                    <label>Receipt No. ${!disabled ? "<code>*</code>" : ""}</label>
+                    <input type="text" class="form-control" 
+					name="receiptNo" 
+					id="receiptNo" 
+					data-allowcharacters="[0-9][a-z][A-Z][-]"
+					minlength="5"
+					maxlength="20"
+					required 
+					value="${receiptNo}" 
+					${disabled}
+					>
+					<div class="d-block invalid-feedback" id="invalid-receiptNo"></div>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-12">
                 <div class="form-group">
                     <label>Vendor Name</label>
                     <input type="text" class="form-control" name="vendorName" disabled value="-">
                 </div>
             </div>
-            <div class="col-md-4 col-sm-12">
+            <div class="col-md-3 col-sm-12">
 				 <div class="form-group">
                     <label>Date Received ${!disabled ? "<code>*</code>" : ""}</label>
                     <input type="button" 
@@ -1147,7 +1201,7 @@ $(document).ready(function() {
                                 <th>Serial No.</th>
                                 <th>Ordered</th>
                                 <th>Pending</th>
-                                <th>Received</th>
+                                <th>Received ${!disabled ? "<code>*</code>" : ""}</th>
                                 <th>UOM</th>
                                 <th>Remarks</th>
                             </tr>
@@ -1259,6 +1313,7 @@ $(document).ready(function() {
 			
 			data["employeeID"] = sessionID;
 			data["purchaseOrderID"]  = $("[name=purchaseOrderID]").val() || null;
+			data["receiptNo"]  = $("[name=receiptNo]").val() || null;
 			data["dateReceived"]     =  moment($("[name=dateReceived]").val()?.trim()).format("YYYY-MM-DD");
 			data["inventoryReceivingReason"] = $("[name=inventoryReceivingReason]").val()?.trim();
 
@@ -1428,10 +1483,11 @@ $(document).ready(function() {
 		if ($(`.purchaseOrderItemsBody tr.itemTableRow`).length > 0) {
 			let invalidInputs = [];
 			$(`.itemTableRow`).each(function() {
-				const receivedQuantity = $(`[name="received"]`, this).val() || 0;
-				if ($(`.tableSerialBody tr`, this).length > 1) {
+				const receivedQuantity = parseFloat($(`[name="received"]`, this).val()) || 0;
+				
+				if ($(`.tableSerialBody tr`, this).length >= 1) {
 					let countSerial = $(`.tableSerialBody tr`, this).length;
-
+				
 					if (receivedQuantity != countSerial) {
 						showNotification("danger", "Serial number is not equal on received items!");
 
@@ -1597,7 +1653,7 @@ $(document).ready(function() {
 		const feedback = $(this).attr("code") || getFormCode("INRR", dateToday(), id);
 
 		$("#modal_inventory_receiving_content").html(preloader);
-		$("#modal_inventory_receiving .page-title").text("DENY PURCHASE REQUEST");
+		$("#modal_inventory_receiving .page-title").text("DENY INVENTORY RECEIVING");
 		$("#modal_inventory_receiving").modal("show");
 		let html = `
 		<div class="modal-body">

@@ -209,7 +209,11 @@ $(document).ready(function() {
         let moduleName = $(this).val();
         if (moduleName.length > 0 && e.which == 13) {
             if (moduleData.includes(moduleName.toLowerCase())) {
-                const getController = getTableData("gen_module_list_tbl", "moduleController", "moduleName LIKE '%"+moduleName+"%'");
+                const getController = getTableData(
+                    `gen_module_list_tbl
+                        WHERE LOWER(moduleName) = BINARY '${moduleName.toLowerCase()}'`, 
+                    `moduleController`)
+
                 const controllerName = getController[0]["moduleController"].toLowerCase();
                 window.location.href = base_url+controllerName;
             } else {
@@ -232,7 +236,6 @@ $(document).ready(function() {
             success: function(data) {
                 if (data) {
                     window.location.href = base_url+controller+"?view_id="+table;
-                    // window.location.href = base_url+controller;
                 }
             }
         })

@@ -333,7 +333,7 @@ $(document).ready(function() {
             <thead>
                 <tr style="white-space: nowrap">
 					<th>Document No.</th>
-					<th>Employee Name</th>
+					<th>Prepared By</th>
 					<th>Project Name</th>
 					<th>Current Approver</th>
 					<th>Date Created</th>
@@ -431,7 +431,7 @@ $(document).ready(function() {
             <thead>
                 <tr style="white-space: nowrap">
 					<th>Document No.</th>
-					<th>Employee Name</th>
+					<th>Prepared By</th>
 					<th>Project Name</th>
 					<th>Current Approver</th>
 					<th>Date Created</th>
@@ -655,7 +655,14 @@ $(document).ready(function() {
 
     // ----- GET PROJECT LIST -----
     function getProjectList(id = null, display = true) {
-		let html ='';
+		let html = `
+		<option 
+			value       = "0"
+			projectCode = "-"
+			clientCode  = "-"
+			clientName  = "-"
+			address     = "-"
+			${id == "0" && "selected"}>N/A</option>`;
         html += projectList.map(project => {
 			let address = `${project.clientUnitNumber && titleCase(project.clientUnitNumber)+", "}${project.clientHouseNumber && project.clientHouseNumber +", "}${project.clientBarangay && titleCase(project.clientBarangay)+", "}${project.clientCity && titleCase(project.clientCity)+", "}${project.clientProvince && titleCase(project.clientProvince)+", "}${project.clientCountry && titleCase(project.clientCountry)+", "}${project.clientPostalCode && titleCase(project.clientPostalCode)}`;
 
@@ -940,10 +947,10 @@ $(document).ready(function() {
 					<div class="quantity">
 						<input 
 							type="text" 
-							class="form-control number text-center"
-							min="1" 
-							data-allowcharacters="[0-9]" 
+							class="form-control input-quantity text-center"
+							min="0.01" 
 							max="999999999" 
+							data-allowcharacters="[0-9]" 
 							id="quantity" 
 							name="quantity" 
 							value="${quantity}" 
@@ -1332,7 +1339,7 @@ $(document).ready(function() {
         const index     		= $(this).closest("tr").first().attr("index");
 		const isProject 		= $(this).closest("tbody").attr("project") == "true";
 		const attr      		= isProject ? "[project=true]" : "";
-		const quantity  		= $(`#quantity${index}${attr}`).val();
+		const quantity  		= parseFloat($(`#quantity${index}${attr}`).val()) || 0;
         const barcodeval  	= $(this).closest("tr").find('[name=barcode]').val();
 
 		const data = getTableData
@@ -1350,7 +1357,7 @@ $(document).ready(function() {
 						stocks
 					} = item;
 		
-					let receiving_Quantity  = stocks ? stocks : "0";
+					let receiving_Quantity  = stocks ? parseFloat(stocks) : "0";
 				
 						if(barcodeval !="" ){
 							if(receiving_Quantity > quantity || receiving_Quantity == quantity ){
@@ -1420,6 +1427,7 @@ $(document).ready(function() {
 		updateTableItems();
 		initInputmask();
 		initAmount();
+		initQuantity();
     })
     // ----- END INSERT ROW ITEM -----
 
@@ -1644,7 +1652,7 @@ $(document).ready(function() {
             </div>
             <div class="col-md-4 col-sm-12">
                 <div class="form-group">
-                    <label>Employee Name</label>
+                    <label>Prepared By</label>
                     <input type="text" class="form-control" disabled value="${employeeFullname}">
                 </div>
             </div>
@@ -1717,6 +1725,7 @@ $(document).ready(function() {
 			initDataTables();
 			updateTableItems();
 			initAll();
+			initQuantity(".input-quantity");
 			updateInventoryItemOptions();
 			updateInventoryStorageOptions();
 			projectID && projectID != 0 && $("[name=projectID]").trigger("change");
@@ -2149,7 +2158,7 @@ $(document).ready(function() {
 		const feedback = $(this).attr("code") || getFormCode("MWF", dateToday(), id);
 
 		$("#modal_purchase_request_content").html(preloader);
-		$("#modal_purchase_request .page-title").text("DENY TRNASFER REQUEST");
+		$("#modal_purchase_request .page-title").text("DENY MATERIAL WITHDRAWAL");
 		$("#modal_purchase_request").modal("show");
 		let html = `
 		<div class="modal-body">
@@ -2168,7 +2177,7 @@ $(document).ready(function() {
 			</div>
 		</div>
 		<div class="modal-footer text-right">
-			<button class="btn btn-danger" id="btnRejectConfirmation"
+			<button class="btn btn-danger px-5 p-2" id="btnRejectConfirmation"
 			materialWithdrawalID="${id}"
 			code="${feedback}"><i class="far fa-times-circle"></i> Deny</button>
 			<button class="btn btn-cancel px-5 p-2" data-dismiss="modal"><i class="fas fa-ban"></i> Cancel</button>
@@ -2313,7 +2322,7 @@ function getConfirmation(method = "submit") {
 			swalImg   = `${base_url}assets/modal/reject.svg`;
 			break;
 		case "cancelform":
-			swalTitle = `CANCEL ${title.toUpperCase()} DOCUMENT`;
+			swalTitle = `CANCEL ${title.toUpperCase()}`;
 			swalText  = "Are you sure to cancel this document?";
 			swalImg   = `${base_url}assets/modal/cancel.svg`;
 			break;
@@ -2384,7 +2393,7 @@ function savePurchaseRequest(data = null, method = "submit", notificationData = 
 							} else if (method == "deny") {
 								swalTitle = `${getFormCode("MWF", dateCreated, insertedID)} denied successfully!`;
 							} else if (method == "drop") {
-								swalTitle = `${getFormCode("TR", dateCreated, insertedID)} dropped successfully!`;
+								swalTitle = `${getFormCode("MWF", dateCreated, insertedID)} dropped successfully!`;
 							}	
 			
 							if (isSuccess == "true") {
@@ -2489,6 +2498,7 @@ function FunctionlastApproveCondition(materialWithdrawalID = null){
 		formData.append(`items[${index}][inventoryStorageID]`, inventoryStorageID);
 		formData.append(`items[${index}][itemID]`, itemID);
 		formData.append(`items[${index}][quantity]`, quantity);
+		formData.append(`items[${index}][materialWithdrawalID]`, materialWithdrawalID);
 
 		data["items"].push(temp);
 
