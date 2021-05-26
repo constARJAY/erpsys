@@ -610,7 +610,7 @@ $(document).ready(function () {
 				<div class="body">
 					<small class="text-small text-muted font-weight-bold">Revised Document No.</small>
 					<h6 class="mt-0 text-danger font-weight-bold">
-						${getFormCode("PR", createdAt, reviseDocumentNo)}
+						${getFormCode("SCH", createdAt, reviseDocumentNo)}
 					</h6>      
 				</div>
 			</div>

@@ -42,7 +42,7 @@ class Return_item extends CI_Controller {
         $items                   = $this->input->post("items") ?? null;
 
         $returnItemData = [
-            // "revisePurchaseRequestID" => $revisePurchaseRequestID,
+            "reviseReturnItemID"      => $reviseReturnItemID,
             "employeeID"              => $employeeID,
             "projectID "                => $projectID ,
             "borrowingID "             => $borrowingID ,
@@ -60,7 +60,7 @@ class Return_item extends CI_Controller {
         ];
 
         if ($action == "update") {
-            // unset($purchaseRequestData["revisePurchaseRequestID"]);
+            unset($returnItemData["reviseReturnItemID"]);
             unset($returnItemData["createdBy"]);
             unset($returnItemData["createdAt"]);
 
@@ -84,6 +84,12 @@ class Return_item extends CI_Controller {
                     "returnItemRemarks" => $returnItemRemarks,
                     "updatedBy"              => $updatedBy,
                 ];
+            } else if ($method == "drop") {
+                $disposalItemData = [
+                    "reviseReturnItemID"        => $reviseReturnItemID,
+                    "returnItemStatus"          => 5,
+                    "updatedBy"               => $updatedBy,
+                ]; 
             }
         }
 
@@ -106,6 +112,7 @@ class Return_item extends CI_Controller {
                             "barcode"               => $item["barcode"],
                             "serialnumber"          => $item["serialnumber"],
                             "dateBorrowed"          => $item["dateBorrowed"],
+                            "borrowedpurpose"       => $item["borrowedpurpose"],
                             "quantityBorrowed"      => $item["quantityBorrowed"],
                             "returnItemDate"        => $item["returnItemDate"],
                             "returnItemQuantity"    => $item["returnItemQuantity"],

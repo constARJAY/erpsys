@@ -1,7 +1,21 @@
 $(document).ready(function() {
+	const allowedUpdate = isUpdateAllowed(35);
     // ----- MODULE APPROVER -----
 	const moduleApprover = getModuleApprover("return item");
 	// ----- END MODULE APPROVER -----
+
+	// ----- IS DOCUMENT REVISED -----
+	function isDocumentRevised(id = null) {
+		if (id) {
+			const revisedDocumentsID = getTableData(
+				"ims_return_item_tbl", 
+				"reviseReturnItemID", 
+				"reviseReturnItemID IS NOT NULL AND returnItemStatus != 4");
+			return revisedDocumentsID.map(item => item.reviseReturnItemID).includes(id);
+		}
+		return false;
+	}
+	// ----- END IS DOCUMENT REVISED -----
 
 
 	// ---- GET EMPLOYEE DATA -----
@@ -24,11 +38,11 @@ $(document).ready(function() {
 	// ---- END GET EMPLOYEE DATA -----
 
 
-    // ----- VIEW DOCUMENT -----
-	function viewDocument(view_id = false, readOnly = false, isRevise = false) {
-		const loadData = (id, isRevise = false) => {
+   // ----- VIEW DOCUMENT -----
+	function viewDocument(view_id = false, readOnly = false, isRevise = false, isFromCancelledDocument = false) {
+		const loadData = (id, isRevise = false, isFromCancelledDocument = false) => {
+		//const loadData = (id, isRevise = false) => {
 			const tableData = getTableData("ims_return_item_tbl", "", "returnItemID=" + id);
-
 			if (tableData.length > 0) {
 				let {
 					employeeID,
@@ -51,10 +65,9 @@ $(document).ready(function() {
 				} else {
 					isReadOnly = readOnly;
 				}
-
 				if (isAllowed) {
 					if (isRevise && employeeID == sessionID) {
-						pageContent(true, tableData, isReadOnly, true);
+						pageContent(true, tableData, isReadOnly, true, isFromCancelledDocument);
 						updateURL(encryptString(id), true, true);
 					} else {
 						pageContent(true, tableData, isReadOnly);
@@ -70,10 +83,11 @@ $(document).ready(function() {
 				updateURL();
 			}
 		}
-
 		if (view_id) {
-			let id = decryptString(view_id);
-				id && isFinite(id) && loadData(id, isRevise);
+			//console.log(view_id);
+			// let id = decryptString(view_id);
+			let id = view_id;
+				id && isFinite(id) && loadData(id, isRevise, isFromCancelledDocument);
 		} else {
 			let url   = window.document.URL;
 			let arr   = url.split("?view_id=");
@@ -87,7 +101,8 @@ $(document).ready(function() {
 					let id = decryptString(arr[1]);
 						id && isFinite(id) && loadData(id, true);
 				} else {
-					pageContent(true);
+					const isAllowed = isCreateAllowed(36);
+					pageContent(isAllowed);
 				}
 			}
 		}
@@ -264,19 +279,26 @@ $(document).ready(function() {
 	// ----- END HEADER CONTENT -----
 
 
-    // ----- HEADER BUTTON -----
-	function headerButton(isAdd = true, text = "Add", isRevise = false) {
+     // ----- HEADER BUTTON -----
+	function headerButton(isAdd = true, text = "Add", isRevise = false, isFromCancelledDocument = false) {
 		let html;
 		if (isAdd) {
-            html = `
-            <button type="button" class="btn btn-default btn-add" id="btnAdd"><i class="icon-plus"></i> &nbsp;${text}</button>`;
+			if (isCreateAllowed(35)) {
+				html = `
+				<button type="button" class="btn btn-default btn-add" id="btnAdd"><i class="icon-plus"></i> &nbsp;${text}</button>`;
+			}
 		} else {
 			html = `
-            <button type="button" class="btn btn-default btn-light" id="btnBack" revise="${isRevise}"><i class="fas fa-arrow-left"></i> &nbsp;Back</button>`;
+            <button type="button" 
+				class="btn btn-default btn-light" 
+				id="btnBack" 
+				revise="${isRevise}" 
+				cancel="${isFromCancelledDocument}"><i class="fas fa-arrow-left"></i> &nbsp;Back</button>`;
 		}
 		$("#headerButton").html(html);
 	}
 	// ----- END HEADER BUTTON -----
+
 
 
     // ----- FOR APPROVAL CONTENT -----
@@ -513,7 +535,7 @@ $(document).ready(function() {
 
 
     // ----- FORM BUTTONS -----
-	function formButtons(data = false, isRevise = false) {
+	function formButtons(data = false, isRevise = false, isFromCancelledDocument = false) {
 		let button = "";
 		if (data) {
 			let {
@@ -533,9 +555,10 @@ $(document).ready(function() {
 					<button 
 						class="btn btn-submit" 
 						id="btnSubmit" 
-						returnItemID="${returnItemID}"
-						code="${getFormCode("TR", createdAt, returnItemID)}"
-						revise=${isRevise}><i class="fas fa-paper-plane"></i>
+						returnItemID="${encryptString(returnItemID)}"
+						code="${getFormCode("RI", createdAt, returnItemID)}"
+						revise="${isRevise}"
+						cancel="${isFromCancelledDocument}"><i class="fas fa-paper-plane"></i>
 						Submit
 					</button>`;
 
@@ -544,9 +567,10 @@ $(document).ready(function() {
 						<button 
 							class="btn btn-cancel" 
 							id="btnCancel"
-							returnItemID="${returnItemID}"
-							code="${getFormCode("TR", createdAt, returnItemID)}"
-							revise="${isRevise}"><i class="fas fa-ban"></i> 
+							returnItemID="${encryptString(returnItemID)}"
+							code="${getFormCode("RI", createdAt, returnItemID)}"
+							revise="${isRevise}"
+							cancel="${isFromCancelledDocument}"><i class="fas fa-paper-plane"></i>
 							Cancel
 						</button>`;
 					} else {
@@ -554,9 +578,9 @@ $(document).ready(function() {
 						<button 
 							class="btn btn-cancel"
 							id="btnCancelForm" 
-							returnItemID="${returnItemID}"
+							returnItemID="${encryptString(returnItemID)}"
 							code="${getFormCode("RI", createdAt, returnItemID)}"
-							revise=${isRevise}><i class="fas fa-ban"></i> 
+							revise="${isRevise}"><i class="fas fa-ban"></i> 
 							Cancel
 						</button>`;
 					}
@@ -569,14 +593,26 @@ $(document).ready(function() {
 						<button 
 							class="btn btn-cancel"
 							id="btnCancelForm" 
-							returnItemID="${returnItemID}"
+							returnItemID="${encryptString(returnItemID)}"
 							code="${getFormCode("RI", createdAt, returnItemID)}"
 							status="${returnItemStatus}"><i class="fas fa-ban"></i> 
 							Cancel
 						</button>`;
 					}
+				} else if (returnItemStatus == 2) {
+					// DROP
+					button = `
+					<button type="button" 
+						class="btn btn-cancel px-5 p-2"
+						id="btnDrop" 
+						returnItemID="${encryptString(returnItemID)}"
+						code="${getFormCode("RI", createdAt, returnItemID)}"
+						status="${disposalStatus}"><i class="fas fa-ban"></i> 
+						Drop
+					</button>`;
 				} else if (returnItemStatus == 3) {
 					// DENIED - FOR REVISE
+					if (!isDocumentRevised(returnItemID)) {
 					button = `
 					<button
 						class="btn btn-cancel"
@@ -587,6 +623,21 @@ $(document).ready(function() {
 						Revise
 					</button>`;
 				}
+			} else if (returnItemStatus == 4) {
+				// CANCELLED - FOR REVISE
+				if (!isDocumentRevised(returnItemID)) {
+					button = `
+					<button
+						class="btn btn-cancel px-5 p-2"
+						id="btnRevise" 
+						returnItemID="${encryptString(returnItemID)}"
+						code="${getFormCode("RI", createdAt, returnItemID)}"
+						status="${returnItemStatus}"
+						cancel="true"><i class="fas fa-clone"></i>
+						Revise
+					</button>`;
+				}
+			}		
 			} else {
 				if (returnItemStatus == 1) {
 					if (isImCurrentApprover(approversID, approversDate)) {
@@ -1040,14 +1091,14 @@ $(document).ready(function() {
 
 
     // ----- FORM CONTENT -----
-	function formContent(data = false, readOnly = false, isRevise = false) {
+	function formContent(data = false, readOnly = false, isRevise = false, isFromCancelledDocument = false) {
 		$("#page_content").html(preloader);
 		readOnly = isRevise ? false : readOnly;
 
 		let {
 			returnItemID       		= "",
 			borrowingID				="",
-			revisereturnItemID 		= "",
+			reviseReturnItemID 		= "",
 			employeeID              = "",
 			projectID 				= "",
 			approversID             = "",
@@ -1075,21 +1126,22 @@ $(document).ready(function() {
 
 		readOnly ? preventRefresh(false) : preventRefresh(true);
 
-		$("#btnBack").attr("returnItemID", returnItemID);
+		$("#btnBack").attr("returnItemID", encryptString(returnItemID));
 		$("#btnBack").attr("status", returnItemStatus);
 		$("#btnBack").attr("employeeID", employeeID);
+		$("#btnBack").attr("cancel", isFromCancelledDocument);
 
 		let disabled = readOnly ? "disabled" : "";
 
 		let tableProjectRequestItemsName = !disabled ? "tableProjectRequestItems" : "tableProjectRequestItems0";
 	
 	
-		let button = formButtons(data, isRevise);
+		let button = formButtons(data, isRevise, isFromCancelledDocument);
 
-		let reviseDocumentNo    = isRevise ? returnItemID : revisereturnItemID;
-		let documentHeaderClass = isRevise || revisereturnItemID ? "col-lg-4 col-md-4 col-sm-12 px-1" : "col-lg-2 col-md-6 col-sm-12 px-1";
-		let documentDateClass   = isRevise || revisereturnItemID ? "col-md-12 col-sm-12 px-0" : "col-lg-8 col-md-12 col-sm-12 px-1";
-		let documentReviseNo    = isRevise || revisereturnItemID ?
+		let reviseDocumentNo    = isRevise ? returnItemID : reviseReturnItemID;
+		let documentHeaderClass = isRevise || reviseReturnItemID ? "col-lg-4 col-md-4 col-sm-12 px-1" : "col-lg-2 col-md-6 col-sm-12 px-1";
+		let documentDateClass   = isRevise || reviseReturnItemID ? "col-md-12 col-sm-12 px-0" : "col-lg-8 col-md-12 col-sm-12 px-1";
+		let documentReviseNo    = isRevise || reviseReturnItemID ?
 		 `
 		<div class="col-lg-4 col-md-4 col-sm-12 px-1">
 			<div class="card">
@@ -1288,7 +1340,15 @@ $(document).ready(function() {
 			updateInventoryItemOptions();
 			projectID && projectID != 0 && $("[name=projectID]").trigger("change");
 			borrowingID && borrowingID != 0 && $("[name=borrowingID]").trigger("change");
-				
+			if (!allowedUpdate) {
+				$("#page_content").find(`input, select, textarea`).each(function() {
+					if (this.type != "search") {
+						$(this).attr("disabled", true);
+					}
+				})
+				$('#btnBack').attr("status", "2");
+				$(`#btnSubmit, #btnRevise, #btnCancel, #btnCancelForm, .btnAddRow, .btnDeleteRow`).hide();
+			}
 			
 			return html;
 		}, 300);
@@ -1297,7 +1357,7 @@ $(document).ready(function() {
 
 
     // ----- PAGE CONTENT -----
-	function pageContent(isForm = false, data = false, readOnly = false, isRevise = false) {
+	function pageContent(isForm = false, data = false, readOnly = false, isRevise = false, isFromCancelledDocument = false) {
 		$("#page_content").html(preloader);
 		if (!isForm) {
 			preventRefresh(false);
@@ -1319,9 +1379,9 @@ $(document).ready(function() {
 			myFormsContent();
 			updateURL();
 		} else {
-			headerButton(false, "", isRevise);
+			headerButton(false, "", isRevise, isFromCancelledDocument);
 			headerTabContent(false);
-			formContent(data, readOnly, isRevise);
+			formContent(data, readOnly, isRevise, isFromCancelledDocument);
 		}
 	}
 	viewDocument();
@@ -1479,7 +1539,7 @@ $(document).ready(function() {
 
     // ----- OPEN EDIT FORM -----
 	$(document).on("click", ".btnEdit", function () {
-		const id = $(this).attr("id");
+		const id = decryptString($(this).attr("id"));
 		viewDocument(id);
 	});
 	// ----- END OPEN EDIT FORM -----
@@ -1487,7 +1547,7 @@ $(document).ready(function() {
 
     // ----- VIEW DOCUMENT -----
 	$(document).on("click", ".btnView", function () {
-		const id = $(this).attr("id");
+		const id = decryptString($(this).attr("id"));
 		viewDocument(id, true);
 	});
 	// ----- END VIEW DOCUMENT -----
@@ -1495,18 +1555,19 @@ $(document).ready(function() {
 
     // ----- VIEW DOCUMENT -----
 	$(document).on("click", "#btnRevise", function () {
-		const id = $(this).attr("returnItemID");
-		viewDocument(id, false, true);
+		const id = decryptString($(this).attr("returnItemID"));
+		const fromCancelledDocument = $(this).attr("cancel") == "true";
+		viewDocument(id, false, true, fromCancelledDocument);
 	});
 	// ----- END VIEW DOCUMENT -----
 
 
 	// ----- SAVE CLOSE FORM -----
 	$(document).on("click", "#btnBack", function () {
-		const id         = $(this).attr("returnItemID");
+		const id         = decryptString($(this).attr("returnItemID"));
 		const revise     = $(this).attr("revise") == "true";
 		const employeeID = $(this).attr("employeeID");
-		const feedback   = $(this).attr("code") || getFormCode("TR", dateToday(), id);
+		const feedback   = $(this).attr("code") || getFormCode("RI", dateToday(), id);
 		const status     = $(this).attr("status");
 
 		if (status != "false" && status != 0) {
@@ -1515,7 +1576,7 @@ $(document).ready(function() {
 				const action = revise && "insert" || (id && feedback ? "update" : "insert");
 				const data   = getReturnItemData(action, "save", "0", id);
 				data["returnItemStatus"]   = 0;
-				data["revisereturnItemID"] = id;
+				data["reviseReturnItemID"] = id;
 				delete data["returnItemID"];
 
 				// data.append("returnItemStatus", 0);
@@ -1545,16 +1606,25 @@ $(document).ready(function() {
 
     // ----- SAVE DOCUMENT -----
 	$(document).on("click", "#btnSave, #btnCancel", function () {
-		const id       = $(this).attr("returnItemID");
+		const id       = decryptString($(this).attr("returnItemID"));
+		const isFromCancelledDocument = $(this).attr("cancel") == "true";
 		const revise   = $(this).attr("revise") == "true";
 		const feedback = $(this).attr("code") || getFormCode("TR", dateToday(), id);
-		const action   = revise && "insert" || (id && feedback ? "update" : "insert");
+		const action   = revise && !isFromCancelledDocument && "insert" || (id && feedback ? "update" : "insert");
 		const data     = getReturnItemData(action, "save", "0", id);
 		data.append("returnItemStatus", 0);
 
 		if (revise) {
-			data["revisereturnItemID"] = id;
-			delete data["returnItemID"];
+			if (!isFromCancelledDocument) {
+			// data["revisereturnItemID"] = id;
+			// delete data["returnItemID"];
+			data.append("reviseReturnItemID", id);
+			data.delete("returnItemID");
+			}else{
+			data.append("reviseReturnItemID", id);
+			data.delete("action");
+			data.append("action", "update");
+			}
 			// data.append("revisereturnItemID", id);
 			// data.delete("returnItemID");
 		}
@@ -1573,19 +1643,22 @@ $(document).ready(function() {
 	$(document).on("click", "#btnSubmit", function () {
 		let condition = $("[name=returnItemQuantity]").hasClass("is-invalid");
 		if(!condition){
-		const id           = $(this).attr("returnItemID");
+		const id           = decryptString($(this).attr("returnItemID"));
 		const revise       = $(this).attr("revise") == "true";
+		const isFromCancelledDocument = $(this).attr("cancel") == "true";
 		const validate     = validateForm("form_purchase_request");
 		removeIsValid("#tableProjectRequestItems");
 		if (validate) {
-			const action = revise && "insert" || (id ? "update" : "insert");
+			const action = revise && !isFromCancelledDocument && "insert" || (id ? "update" : "insert");
 			const data   = getReturnItemData(action, "submit", "1", id);
 
 			if (revise) {
-				data["revisereturnItemID"] = id;
-				delete data["returnItemID"];
-				// data.append("revisereturnItemID", id);
-				// data.delete("returnItemID");
+				if (!isFromCancelledDocument) {
+				// data["revisereturnItemID"] = id;
+				// delete data["returnItemID"];
+				data.append("reviseReturnItemID", id);
+				data.delete("returnItemID");
+				}
 			}
 
 			let approversID = "", approversDate = "";
@@ -1618,7 +1691,7 @@ $(document).ready(function() {
 
     // ----- CANCEL DOCUMENT -----
 	$(document).on("click", "#btnCancelForm", function () {
-		const id     = $(this).attr("returnItemID");
+		const id     = decryptString($(this).attr("returnItemID"));
 		const status = $(this).attr("status");
 		const action = "update";
 		const data   = getReturnItemData(action, "cancelform", "4", id, status);
@@ -1631,7 +1704,7 @@ $(document).ready(function() {
     // ----- APPROVE DOCUMENT -----
 	$(document).on("click", "#btnApprove", function () {
 		const id       = decryptString($(this).attr("returnItemID"));
-		const feedback = $(this).attr("code") || getFormCode("TR", dateToday(), id);
+		const feedback = $(this).attr("code") || getFormCode("RI", dateToday(), id);
 		let tableData  = getTableData("ims_return_item_tbl", "", "returnItemID = " + id);
 
 		if (tableData) {
@@ -1679,8 +1752,8 @@ $(document).ready(function() {
 
     // ----- REJECT DOCUMENT -----
 	$(document).on("click", "#btnReject", function () {
-		const id       = $(this).attr("returnItemID");
-		const feedback = $(this).attr("code") || getFormCode("TR", dateToday(), id);
+		const id       = decryptString($(this).attr("returnItemID"));
+		const feedback = $(this).attr("code") || getFormCode("RI", dateToday(), id);
 
 		$("#modal_purchase_request_content").html(preloader);
 		$("#modal_purchase_request .page-title").text("DENY TRNASFER REQUEST");
@@ -1703,7 +1776,7 @@ $(document).ready(function() {
 		</div>
 		<div class="modal-footer text-right">
 			<button class="btn btn-danger" id="btnRejectConfirmation"
-			returnItemID="${id}"
+			returnItemID="${encryptString(id)}"
 			code="${feedback}"><i class="far fa-times-circle"></i> Deny</button>
 			<button class="btn btn-cancel" data-dismiss="modal"><i class="fas fa-ban"></i> Cancel</button>
 		</div>`;
@@ -1712,7 +1785,7 @@ $(document).ready(function() {
 
 	$(document).on("click", "#btnRejectConfirmation", function () {
 		const id       = decryptString($(this).attr("returnItemID"));
-		const feedback = $(this).attr("code") || getFormCode(" TR", dateToday(), id);
+		const feedback = $(this).attr("code") || getFormCode(" RI", dateToday(), id);
 
 		const validate = validateForm("modal_purchase_request");
 		if (validate) {
@@ -1746,6 +1819,20 @@ $(document).ready(function() {
 		} 
 	});
 	// ----- END REJECT DOCUMENT -----
+	// ----- DROP DOCUMENT -----
+	$(document).on("click", "#btnDrop", function() {
+		const returnItemID = decryptString($(this).attr("returnItemID"));
+		const feedback          = $(this).attr("code") || getFormCode("ADF", dateToday(), id);
+		//const id = decryptString($(this).attr("returnItemID"));
+		let data = new FormData;
+		data.append("returnItemID", returnItemID);
+		data.append("action", "update");
+		data.append("method", "drop");
+		data.append("updatedBy", sessionID);
+
+		saveReturnItem(data, "drop", null, pageContent);
+	})
+	// ----- END DROP DOCUMENT -----
 
 
     // ----- NAV LINK -----

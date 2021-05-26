@@ -1033,7 +1033,7 @@ $(document).ready(function() {
 				</td>
 				<td>
 					<div class="uom">
-						${uom}
+						${uom.replaceAll(" ", "").toLowerCase() == `selectuomliterpieceselectuom` ? uom : "-"}
 					</div>
 				</td>
 				<td class="text-right">

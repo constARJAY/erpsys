@@ -1,8 +1,22 @@
 $(document).ready(function() {
+	const allowedUpdate = isUpdateAllowed(43);
     // ----- MODULE APPROVER -----
 	const moduleApprover = getModuleApprover("equipment borrowing");
 	// ----- END MODULE APPROVER -----
 
+		
+	// ----- IS DOCUMENT REVISED -----
+	function isDocumentRevised(id = null) {
+		if (id) {
+			const revisedDocumentsID = getTableData(
+				"ims_borrowing_tbl", 
+				"reviseBorrowingID", 
+				"reviseBorrowingID IS NOT NULL AND borrowingStatus != 4");
+			return revisedDocumentsID.map(item => item.reviseBorrowingID).includes(id);
+		}
+		return false;
+	}
+	// ----- END IS DOCUMENT REVISED -----
 
 	// ---- GET EMPLOYEE DATA -----
 	const allEmployeeData = getAllEmployeeData();
@@ -24,75 +38,76 @@ $(document).ready(function() {
 	// ---- END GET EMPLOYEE DATA -----
 
 
-    // ----- VIEW DOCUMENT -----
-	function viewDocument(view_id = false, readOnly = false, isRevise = false) {
-		const loadData = (id, isRevise = false) => {
-			const tableData = getTableData("ims_borrowing_tbl", "", "borrowingID=" + id);
-
-			if (tableData.length > 0) {
-				let {
-					employeeID,
-					borrowingStatus
-				} = tableData[0];
-
-				let isReadOnly = true, isAllowed = true;
-
-				if (employeeID != sessionID) {
-					isReadOnly = true;
-					if (borrowingStatus == 0 || borrowingStatus == 4) {
-						isAllowed = false;
-					}
-				} else if (employeeID == sessionID) {
-					if (borrowingStatus == 0) {
-						isReadOnly = false;
-					} else {
+	    // ----- VIEW DOCUMENT -----
+		function viewDocument(view_id = false, readOnly = false, isRevise = false, isFromCancelledDocument = false) {
+			const loadData = (id, isRevise = false, isFromCancelledDocument = false) => {
+			//const loadData = (id, isRevise = false) => {
+				const tableData = getTableData("ims_borrowing_tbl", "", "borrowingID=" + id);
+				if (tableData.length > 0) {
+					let {
+						employeeID,
+						borrowingStatus
+					} = tableData[0];
+	
+					let isReadOnly = true, isAllowed = true;
+	
+					if (employeeID != sessionID) {
 						isReadOnly = true;
-					}
-				} else {
-					isReadOnly = readOnly;
-				}
-
-				if (isAllowed) {
-					if (isRevise && employeeID == sessionID) {
-						pageContent(true, tableData, isReadOnly, true);
-						updateURL(encryptString(id), true, true);
+						if (borrowingStatus == 0 || borrowingStatus == 4) {
+							isAllowed = false;
+						}
+					} else if (employeeID == sessionID) {
+						if (borrowingStatus == 0) {
+							isReadOnly = false;
+						} else {
+							isReadOnly = true;
+						}
 					} else {
-						pageContent(true, tableData, isReadOnly);
-						updateURL(encryptString(id));
+						isReadOnly = readOnly;
 					}
+					if (isAllowed) {
+						if (isRevise && employeeID == sessionID) {
+							pageContent(true, tableData, isReadOnly, true, isFromCancelledDocument);
+							updateURL(encryptString(id), true, true);
+						} else {
+							pageContent(true, tableData, isReadOnly);
+							updateURL(encryptString(id));
+						}
+					} else {
+						pageContent();
+						updateURL();
+					}
+					
 				} else {
 					pageContent();
 					updateURL();
 				}
-				
-			} else {
-				pageContent();
-				updateURL();
 			}
-		}
-
-		if (view_id) {
-			let id = decryptString(view_id);
-				id && isFinite(id) && loadData(id, isRevise);
-		} else {
-			let url   = window.document.URL;
-			let arr   = url.split("?view_id=");
-			let isAdd = url.indexOf("?add");
-			if (arr.length > 1) {
-				let id = decryptString(arr[1]);
-					id && isFinite(id) && loadData(id);
-			} else if (isAdd != -1) {
-				arr = url.split("?add=");
+			if (view_id) {
+				//console.log(view_id);
+				// let id = decryptString(view_id);
+				let id = view_id;
+					id && isFinite(id) && loadData(id, isRevise, isFromCancelledDocument);
+			} else {
+				let url   = window.document.URL;
+				let arr   = url.split("?view_id=");
+				let isAdd = url.indexOf("?add");
 				if (arr.length > 1) {
 					let id = decryptString(arr[1]);
-						id && isFinite(id) && loadData(id, true);
-				} else {
-					pageContent(true);
+						id && isFinite(id) && loadData(id);
+				} else if (isAdd != -1) {
+					arr = url.split("?add=");
+					if (arr.length > 1) {
+						let id = decryptString(arr[1]);
+							id && isFinite(id) && loadData(id, true);
+					} else {
+						const isAllowed = isCreateAllowed(36);
+						pageContent(isAllowed);
+					}
 				}
 			}
+			
 		}
-		
-	}
 
 	function updateURL(view_id = 0, isAdd = false, isRevise = false) {
 		if (view_id && !isAdd) {
@@ -266,14 +281,20 @@ $(document).ready(function() {
 
 
     // ----- HEADER BUTTON -----
-	function headerButton(isAdd = true, text = "Add", isRevise = false) {
+	function headerButton(isAdd = true, text = "Add", isRevise = false, isFromCancelledDocument = false) {
 		let html;
 		if (isAdd) {
-            html = `
-            <button type="button" class="btn btn-default btn-add" id="btnAdd"><i class="icon-plus"></i> &nbsp;${text}</button>`;
+			if (isCreateAllowed(43)) {
+				html = `
+				<button type="button" class="btn btn-default btn-add" id="btnAdd"><i class="icon-plus"></i> &nbsp;${text}</button>`;
+			}
 		} else {
 			html = `
-            <button type="button" class="btn btn-default btn-light" id="btnBack" revise="${isRevise}"><i class="fas fa-arrow-left"></i> &nbsp;Back</button>`;
+            <button type="button" 
+				class="btn btn-default btn-light" 
+				id="btnBack" 
+				revise="${isRevise}" 
+				cancel="${isFromCancelledDocument}"><i class="fas fa-arrow-left"></i> &nbsp;Back</button>`;
 		}
 		$("#headerButton").html(html);
 	}
@@ -468,7 +489,7 @@ $(document).ready(function() {
 
 
     // ----- FORM BUTTONS -----
-	function formButtons(data = false, isRevise = false) {
+	function formButtons(data = false, isRevise = false, isFromCancelledDocument = false) {
 		let button = "";
 		if (data) {
 			let {
@@ -485,31 +506,35 @@ $(document).ready(function() {
 				if (borrowingStatus == 0 || isRevise) {
 					// DRAFT
 					button = `
-					<button 
+					<button type="button"
 						class="btn btn-submit" 
 						id="btnSubmit" 
-						borrowingID="${borrowingID}"
+						borrowingID="${encryptString(borrowingID)}"
 						code="${getFormCode("EBF", createdAt, borrowingID)}"
-						revise=${isRevise}><i class="fas fa-paper-plane"></i>
+						revise="${isRevise}"
+						cancel="${isFromCancelledDocument}"><i class="fas fa-paper-plane"></i>
 						Submit
 					</button>`;
 
 					if (isRevise) {
 						button += `
-						<button 
-							class="btn btn-cancel" 
+						<button type="button"
+							class="btn btn-cancel px-5 p-2" 
 							id="btnCancel"
-							revise="${isRevise}"><i class="fas fa-ban"></i> 
+							borrowingID="${encryptString(borrowingID)}"
+							code="${getFormCode("EBF", createdAt, borrowingID)}"
+							revise="${isRevise}"
+							cancel="${isFromCancelledDocument}"><i class="fas fa-paper-plane"></i>
 							Cancel
 						</button>`;
 					} else {
 						button += `
-						<button 
-							class="btn btn-cancel"
+						<button type="button"
+							class="btn btn-cancel px-5 p-2"
 							id="btnCancelForm" 
-							borrowingID="${borrowingID}"
+							borrowingID="${encryptString(borrowingID)}"
 							code="${getFormCode("EBF", createdAt, borrowingID)}"
-							revise=${isRevise}><i class="fas fa-ban"></i> 
+							revise="${isRevise}"><i class="fas fa-ban"></i> 
 							Cancel
 						</button>`;
 					}
@@ -519,16 +544,28 @@ $(document).ready(function() {
 					// FOR APPROVAL
 					if (!isOngoing) {
 						button = `
-						<button 
-							class="btn btn-cancel"
+						<button type="button"
+							class="btn btn-cancel  px-5 p-2"
 							id="btnCancelForm" 
-							borrowingID="${borrowingID}"
+							borrowingID="${encryptString(borrowingID)}"
 							code="${getFormCode("EBF", createdAt, borrowingID)}"
 							status="${borrowingStatus}"><i class="fas fa-ban"></i> 
 							Cancel
 						</button>`;
 					}
+				} else if (borrowingStatus == 2) {
+					// DROP
+					button = `
+					<button type="button" 
+						class="btn btn-cancel px-5 p-2"
+						id="btnDrop" 
+						borrowingID="${encryptString(borrowingID)}"
+						code="${getFormCode("EBF", createdAt, borrowingID)}"
+						status="${borrowingStatus}"><i class="fas fa-ban"></i> 
+						Drop
+					</button>`;	
 				} else if (borrowingStatus == 3) {
+					if (!isDocumentRevised(borrowingID)) {
 					// DENIED - FOR REVISE
 					button = `
 					<button
@@ -540,6 +577,21 @@ $(document).ready(function() {
 						Revise
 					</button>`;
 				}
+			} else if (borrowingStatus == 4) {
+				// CANCELLED - FOR REVISE
+				if (!isDocumentRevised(borrowingID)) {
+					button = `
+					<button
+						class="btn btn-cancel px-5 p-2"
+						id="btnRevise" 
+						borrowingID="${encryptString(borrowingID)}"
+						code="${getFormCode("EBF", createdAt, borrowingID)}"
+						status="${borrowingStatus}"
+						cancel="true"><i class="fas fa-clone"></i>
+						Revise
+					</button>`;
+				}
+			}	
 			} else {
 				if (borrowingStatus == 1) {
 					if (isImCurrentApprover(approversID, approversDate)) {
@@ -617,7 +669,7 @@ $(document).ready(function() {
 			inventoryStorageOfficeName:	"-",
 			barcode:					"-",
             serial:              		"-",
-            purpose:             		"-",
+            borrowedPurpose:             "-",
             dateBorrowed:        		"-",
 			itemCode:            		"-",
 			categoryName:        		"-",
@@ -639,7 +691,7 @@ $(document).ready(function() {
             quantity      				= "",
 			inventoryStorageID			="",
 			inventoryCode				="",
-            purpose      				= "",
+            borrowedPurpose      		= "",
 			createdAt					="",
 			inventoryStorageOfficeName	="",
 			datereturn      			= "",
@@ -667,6 +719,11 @@ $(document).ready(function() {
 					${itemName || "-"}
 					</div>
 				</td>
+				<td>
+				<div class="serialnumber">
+					${serialnumber || "-"}
+				</div>
+			   </td> 
                 <td>
 					<div class="inventoryStorageCode">
 					${getFormCode("ISM", inventoryCode, inventoryStorageID) || "-"}
@@ -677,19 +734,9 @@ $(document).ready(function() {
 					${inventoryStorageOfficeName || "-"}
 					</div>
 				</td>
-			<td>
-			<div class="serialnumber">
-				${serialnumber || "-"}
-			</div>
-		   </td> 
-			 <td>
-                <div class="quantity text-center">
-                    ${quantity || "-"}
-                </div>
-               </td> 
                 <td>
-                <div class="purpose">
-                    ${purpose || "-"}
+                <div class="borrowedPurpose">
+                    ${borrowedPurpose || "-"}
                 </div>
                </td> 
                <td>
@@ -697,6 +744,11 @@ $(document).ready(function() {
 				${dateBorrowed && moment(dateBorrowed).format("MMMM DD, YYYY") || "-"}
                  </div>
             </td>
+			 <td>
+                <div class="quantity text-center">
+                    ${quantity || "-"}
+                </div>
+               </td> 
 			<td>
 			<div class="datereturn">
 				${datereturn || "-"}
@@ -726,51 +778,41 @@ $(document).ready(function() {
 							id="barcode" 
 							name="barcode" 
 							minlength="17" 
-							maxlength="17"  
+							maxlength="17"
+							value="${barcode}"
+							itemID="${itemID}"
+							itemName="${itemName}" 
+							inventoryStorageID="${inventoryStorageID}"
+							serialnumber="${serialnumber}"
 							required>
 						<div class="invalid-feedback d-block" id="invalid-barcode"></div>
 					</div>
 				</td>
 				<td>
-					<div class="itemcode">-</div>
+					<div class="itemcode">${getFormCode("ITM", createdAt, itemID) || "-"}</div>
 				</td>
 				<td>
-					<div class="itemName">-</div>
+					<div class="itemName">${itemName || "-"}</div>
+				</td>
+				<td>
+					<div class="serialnumber">${serialnumber || "-"}</div>
 				</td>
                 <td>
-					<div class="StorageCode">-</div>
+					<div class="StorageCode">${getFormCode("ISM", inventoryCode, inventoryStorageID) || "-"}</div>
 				</td>
                 <td>
-					<div class="StorageName">-</div>
+					<div class="StorageName">${inventoryStorageOfficeName || "-"}</div>
                  </td>
-                 <td>
-				 	<div class="serialnumber">-</div>
-                 </td>
-                <td>
-                    <div class="">
-                    <input 
-                        type="text" 
-                        class="form-control  number quantity text-center"
-                        min="1" 
-                        data-allowcharacters="[0-9]" 
-                        max="999999999" 
-                        id="quantity" 
-                        name="quantity" 
-                        minlength="1" 
-                        maxlength="20" 
-                        required>
-                    <div class="invalid-feedback d-block" id="invalid-quantity"></div>
-                </div>
-                </td>
 				<td>
 					<div class="">
 					<input 
 						type="text" 
-						class="form-control  purpose text-center"
-						id="purpose" 
-						name="purpose" 
+						class="form-control  borrowedPurpose text-center"
+						id="borrowedPurpose" 
+						name="borrowedPurpose" 
+						value="${borrowedPurpose}"
 						requred>
-					<div class="invalid-feedback d-block" id="invalid-purpose"></div>
+					<div class="invalid-feedback d-block" id="invalid-borrowedPurpose"></div>
 					</div>
 			</td>
 			<td>
@@ -779,15 +821,34 @@ $(document).ready(function() {
 					   type="button" 
 					   class="form-control  daterange dateBorrowed text-center"
 					   id="dateBorrowed" 
-					   name="dateBorrowed"></div>
+					   name="dateBorrowed"
+					   value="${dateBorrowed && moment(dateBorrowed).format("MMMM DD, YYYY")}">
+					   </div>
 					   <div class="invalid-feedback d-block" id="invalid-dateBorrowed"></div>
 			</div>
         </td>
+			<td>
+			<div class="">
+			<input 
+				type="text" 
+				class="form-control  number quantity text-center"
+				min="1" 
+				data-allowcharacters="[0-9]" 
+				max="999999999" 
+				id="quantity" 
+				name="quantity" 
+				minlength="1" 
+				maxlength="20"
+				value="${quantity}" 
+				required>
+			<div class="invalid-feedback d-block" id="invalid-quantity"></div>
+		</div>
+		</td>
 		<td>
-				<div class="datereturn">-</div>	
+				<div class="datereturn">${datereturn || "-"}</div>	
 		</td>
 				<td>
-					<div class="quantityreturn">-</div>	
+					<div class="quantityreturn">${quantityreturn || "-"}</div>	
 				</td>
 			</tr>`;
 		}
@@ -822,7 +883,7 @@ $(document).ready(function() {
 
 			$("td .quantity", this).attr("id", `quantity${i}`);
 
-			$("td .purpose", this).attr("id", `purpose${i}`);
+			$("td .borrowedPurpose", this).attr("id", `borrowedPurpose${i}`);
 
 			$("td .dateBorrowed", this).attr("id", `dateBorrowed${i}`);
 
@@ -1112,14 +1173,14 @@ $(document).ready(function() {
 
 
     // ----- FORM CONTENT -----
-	function formContent(data = false, readOnly = false, isRevise = false) {
+	function formContent(data = false, readOnly = false, isRevise = false, isFromCancelledDocument = false) {
 		
 		$("#page_content").html(preloader);
 		readOnly = isRevise ? false : readOnly;
 
 		let {
 			borrowingID       		= "",
-			reviseborrowingID 		= "",
+			reviseBorrowingID 		= "",
 			employeeID              = "",
 			projectID 				= "",
 			approversID             = "",
@@ -1140,7 +1201,7 @@ $(document).ready(function() {
 				LEFT JOIN ims_stock_in_total_tbl 		AS isn ON ibd.itemID = isn.itemID AND ibd.inventoryStorageID = isn.inventoryStorageID
 				LEFT JOIN ims_inventory_storage_tbl 	AS iis ON ibd.inventoryStorageID = iis.inventoryStorageID 
 				LEFT JOIN ims_inventory_item_tbl 		AS iii ON ibd.itemID = iii.itemID`, 
-				`isn.itemID,isn.itemName,ibd.barcode,ibd.serialnumber,ibd.dateBorrowed,ibd.quantity,iis.inventoryStorageID,iis.createdAt AS inventoryCode,iis.inventoryStorageCode,iis.inventoryStorageOfficeName,iii.createdAt`, 
+				`isn.itemID,isn.itemName,ibd.barcode,ibd.serialnumber,ibd.dateBorrowed,ibd.quantity,ibd.borrowedPurpose,iis.inventoryStorageID,iis.createdAt AS inventoryCode,iis.inventoryStorageCode,iis.inventoryStorageOfficeName,iii.createdAt`, 
 				`ibd.borrowingID = ${borrowingID}`);
 			requestItemsData.map(item => {
 				requestProjectItems += getItemRow(true, item, readOnly);
@@ -1160,9 +1221,10 @@ $(document).ready(function() {
 
 		readOnly ? preventRefresh(false) : preventRefresh(true);
 
-		$("#btnBack").attr("borrowingID", borrowingID);
+		$("#btnBack").attr("borrowingID", encryptString(borrowingID));
 		$("#btnBack").attr("status", borrowingStatus);
 		$("#btnBack").attr("employeeID", employeeID);
+		$("#btnBack").attr("cancel", isFromCancelledDocument);
 
 		let disabled = readOnly ? "disabled" : "";
 		let checkboxProjectHeader = !disabled ? `
@@ -1180,12 +1242,13 @@ $(document).ready(function() {
 			<button class="btn btn-danger btnDeleteRow" id="btnDeleteRow" project="true" disabled><i class="fas fa-minus-circle"></i> Delete Row/s</button>
 		</div>` : "";
 	
-		let button = formButtons(data, isRevise);
+			
+		let button = formButtons(data, isRevise, isFromCancelledDocument);
 
-		let reviseDocumentNo    = isRevise ? borrowingID : reviseborrowingID;
-		let documentHeaderClass = isRevise || reviseborrowingID ? "col-lg-4 col-md-4 col-sm-12 px-1" : "col-lg-2 col-md-6 col-sm-12 px-1";
-		let documentDateClass   = isRevise || reviseborrowingID ? "col-md-12 col-sm-12 px-0" : "col-lg-8 col-md-12 col-sm-12 px-1";
-		let documentReviseNo    = isRevise || reviseborrowingID ?
+		let reviseDocumentNo    = isRevise ? borrowingID : reviseBorrowingID;
+		let documentHeaderClass = isRevise || reviseBorrowingID ? "col-lg-4 col-md-4 col-sm-12 px-1" : "col-lg-2 col-md-6 col-sm-12 px-1";
+		let documentDateClass   = isRevise || reviseBorrowingID ? "col-md-12 col-sm-12 px-0" : "col-lg-8 col-md-12 col-sm-12 px-1";
+		let documentReviseNo    = isRevise || reviseBorrowingID ?
 		 `
 		<div class="col-lg-4 col-md-4 col-sm-12 px-1">
 			<div class="card">
@@ -1206,7 +1269,7 @@ $(document).ready(function() {
                     <div class="body">
                         <small class="text-small text-muted font-weight-bold">Document No.</small>
                         <h6 class="mt-0 text-danger font-weight-bold">
-							${borrowingID && !isRevise ? getFormCode("TR", createdAt, borrowingID) : "---"}
+							${borrowingID && !isRevise ? getFormCode("EBF", createdAt, borrowingID) : "---"}
 						</h6>      
                     </div>
                 </div>
@@ -1356,14 +1419,14 @@ $(document).ready(function() {
 								<th>Barcode ${!disabled ? "<code>*</code>" : ""}</th>
                                 <th>Item Code</th>
                                 <th>Item Name </th>
+								<th>Serial No.</th>
                                 <th>Storage Code </th>
 								<th>Storage Name</th>
-                                <th>Serial No.</th>
-								<th>Quantity ${!disabled ? "<code>*</code>" : ""}</th>
-                                <th>Purpose ${!disabled ? "<code>*</code>" : ""}</th>
+								<th>Purpose ${!disabled ? "<code>*</code>" : ""}</th>
                                 <th>Date Borrowed ${!disabled ? "<code>*</code>" : ""}</th>
-                                <th>Date Return</th>
-                                <th>Quantity Return</th>
+								<th>Quantity ${!disabled ? "<code>*</code>" : ""}</th>
+                                <th>Date Returned</th>
+                                <th>Quantity</th>
                             </tr>
                         </thead>
                         <tbody class="itemProjectTableBody" project="true">
@@ -1389,13 +1452,25 @@ $(document).ready(function() {
 			initAll();
 			updateInventoryItemOptions();
 			projectID && projectID != 0 && $("[name=projectID]").trigger("change");
-			if(data){
 
-			}else{
-				$(".dateBorrowed").val(moment(new Date).format("MMMM DD, YYYY"));
+			if (!allowedUpdate) {
+				$("#page_content").find(`input, select, textarea`).each(function() {
+					if (this.type != "search") {
+						$(this).attr("disabled", true);
+					}
+				})
+				//$(".dateBorrowed").val(moment(new Date).format("MMMM DD, YYYY"));
+				$('#btnBack').attr("status", "2");
+				$(`#btnSubmit, #btnRevise, #btnCancel, #btnCancelForm, .btnAddRow, .btnDeleteRow`).hide();
 			}
-				//$("#dateBorrowed").val(moment(new Date).format("MMMM DD, YYYY"));
-				$(".dateBorrowed").data("daterangepicker").minDate = moment();
+			//$(".dateBorrowed").data("daterangepicker").minDate = moment();
+
+			// if(data){
+
+			// }else{
+			// 	$(".dateBorrowed").val(moment(new Date).format("MMMM DD, YYYY"));
+			// }
+			// 	$(".dateBorrowed").data("daterangepicker").minDate = moment();
 			
 			
 			return html;
@@ -1405,7 +1480,7 @@ $(document).ready(function() {
 
 
     // ----- PAGE CONTENT -----
-	function pageContent(isForm = false, data = false, readOnly = false, isRevise = false) {
+	function pageContent(isForm = false, data = false, readOnly = false, isRevise = false, isFromCancelledDocument = false) {
 		$("#page_content").html(preloader);
 		if (!isForm) {
 			preventRefresh(false);
@@ -1426,9 +1501,9 @@ $(document).ready(function() {
 			myFormsContent();
 			updateURL();
 		} else {
-			headerButton(false, "", isRevise);
+			headerButton(false, "", isRevise, isFromCancelledDocument);
 			headerTabContent(false);
-			formContent(data, readOnly, isRevise);
+			formContent(data, readOnly, isRevise, isFromCancelledDocument);
 		}
 	}
 	viewDocument();
@@ -1437,7 +1512,7 @@ $(document).ready(function() {
 
 
 	// ----- GET PURCHASE REQUEST DATA -----
-	function getPurchaseRequestData(action = "insert", method = "submit", status = "1", id = null, currentStatus = "0", isObject = false) {
+	function getBorrowingData(action = "insert", method = "submit", status = "1", id = null, currentStatus = "0", isObject = false) {
 
 		/**
 		 * ----- ACTION ---------
@@ -1533,11 +1608,13 @@ $(document).ready(function() {
 				const categoryType = $(this).closest("tbody").attr("project") == "true" ? "project" : "";
 
 				const itemID    		= $("td [name=barcode]", this).attr("itemID");
+				const itemName    		= $("td [name=itemName]", this).text();	
 				const inventoryStorageID  = $("td [name=barcode]", this).attr("inventoryStorageID");
 				const serialnumber   	= $("td [name=barcode]", this).attr("serialnumber");
 				const formatdate   = $("td [name=dateBorrowed]", this).val();	
 				const barcode 		= $("td [name=barcode]", this).val();	
 				const quantity 		= +$("td [name=quantity]", this).val();	
+				const borrowedPurpose   = $("td [name=borrowedPurpose]", this).val();	
 				//const serialnumber 	= $("td [name=serialnumber]", this).val();	
 				//const borrowedquantity = formatdate.format('YYYY-MM-DD');
 
@@ -1550,11 +1627,13 @@ $(document).ready(function() {
 				};
 
 				formData.append(`items[${i}][itemID]`, itemID);
+				formData.append(`items[${i}][itemName]`, itemName);
 				formData.append(`items[${i}][inventoryStorageID]`, inventoryStorageID);
 				formData.append(`items[${i}][barcode]`, barcode);
 				formData.append(`items[${i}][dateBorrowed]`, dateBorrowed);
 				formData.append(`items[${i}][quantity]`, quantity);
 				formData.append(`items[${i}][serialnumber]`, serialnumber);
+				formData.append(`items[${i}][borrowedPurpose]`, borrowedPurpose);
 				formData.append(`items[${i}][createdBy]`, sessionID);
 				formData.append(`items[${i}][updatedBy]`, sessionID);
 			
@@ -1577,7 +1656,7 @@ $(document).ready(function() {
 
     // ----- OPEN EDIT FORM -----
 	$(document).on("click", ".btnEdit", function () {
-		const id = $(this).attr("id");
+		const id = decryptString($(this).attr("id"));
 		viewDocument(id);
 	});
 	// ----- END OPEN EDIT FORM -----
@@ -1585,7 +1664,7 @@ $(document).ready(function() {
 
     // ----- VIEW DOCUMENT -----
 	$(document).on("click", ".btnView", function () {
-		const id = $(this).attr("id");
+		const id = decryptString($(this).attr("id"));
 		viewDocument(id, true);
 	});
 	// ----- END VIEW DOCUMENT -----
@@ -1593,8 +1672,9 @@ $(document).ready(function() {
 
     // ----- VIEW DOCUMENT -----
 	$(document).on("click", "#btnRevise", function () {
-		const id = $(this).attr("borrowingID");
-		viewDocument(id, false, true);
+		const id = decryptString($(this).attr("borrowingID"));
+		const fromCancelledDocument = $(this).attr("cancel") == "true";
+		viewDocument(id, false, true, fromCancelledDocument);
 	});
 	// ----- END VIEW DOCUMENT -----
 
@@ -1609,20 +1689,23 @@ $(document).ready(function() {
 
 	// ----- SAVE CLOSE FORM -----
 	$(document).on("click", "#btnBack", function () {
-		const id         = $(this).attr("borrowingID");
+		const id         = decryptString($(this).attr("borrowingID"));
 		const revise     = $(this).attr("revise") == "true";
 		const employeeID = $(this).attr("employeeID");
-		const feedback   = $(this).attr("code") || getFormCode("TR", dateToday(), id);
+		const feedback   = $(this).attr("code") || getFormCode("EBF", dateToday(), id);
 		const status     = $(this).attr("status");
 
 		if (status != "false" && status != 0) {
 			
 			if (revise) {
 				const action = revise && "insert" || (id && feedback ? "update" : "insert");
-				const data   = getPurchaseRequestData(action, "save", "0", id);
-				data.append("borrowingStatus", 0);
-				data.append("reviseborrowingID", id);
-				data.delete("borrowingID");
+				const data   = getBorrowingData(action, "save", "0", id);
+				data["borrowingStatus"]   = 0;
+				data["reviseBorrowingID"] = id;
+				delete data["borrowingID"];
+				// data.append("borrowingStatus", 0);
+				// data.append("reviseborrowingID", id);
+				// data.delete("borrowingID");
 	
 				saveReturnItem(data, "save", null, pageContent);
 			} else {
@@ -1636,8 +1719,9 @@ $(document).ready(function() {
 
 		} else {
 			const action = id && feedback ? "update" : "insert";
-			const data   = getPurchaseRequestData(action, "save", "0", id);
-			data.append("borrowingStatus", 0);
+			const data   = getBorrowingData(action, "save", "0", id);
+			//data.append("borrowingStatus", 0);
+			data["borrowingStatus"] = 0;
 
 			saveReturnItem(data, "save", null, pageContent);
 		}
@@ -1645,17 +1729,25 @@ $(document).ready(function() {
 	// ----- END SAVE CLOSE FORM -----
     // ----- SAVE DOCUMENT -----
 	$(document).on("click", "#btnSave, #btnCancel", function () {
-		const id       = $(this).attr("borrowingID");
+		const id       = decryptString($(this).attr("borrowingID"));
+		const isFromCancelledDocument = $(this).attr("cancel") == "true";
 		const revise   = $(this).attr("revise") == "true";
-		const feedback = $(this).attr("code") || getFormCode("TR", dateToday(), id);
-		const action   = revise && "insert" || (id && feedback ? "update" : "insert");
-		const data     = getPurchaseRequestData(action, "save", "0", id);
+		const feedback = $(this).attr("code") || getFormCode("EBF", dateToday(), id);
+		const action   = revise && !isFromCancelledDocument && "insert" || (id && feedback ? "update" : "insert");
+		const data     = getBorrowingData(action, "save", "0", id);
 		data.append("borrowingStatus", 0);
 
 		if (revise) {
-			data.append("reviseborrowingID", id);
+			if (!isFromCancelledDocument) {
+			data.append("reviseBorrowingID", id);
 			data.delete("borrowingID");
+		}else{
+			data.append("reviseBorrowingID", id);
+			data.delete("action");
+			data.append("action", "update");
+
 		}
+		}	
 
 		saveReturnItem(data, "save", null, pageContent);
 	});
@@ -1670,19 +1762,22 @@ $(document).ready(function() {
 
 		if(!condition && !condition2){
 
-			const id           = $(this).attr("borrowingID");
+			const id           = decryptString($(this).attr("borrowingID"));
 			const revise       = $(this).attr("revise") == "true";
+			const isFromCancelledDocument = $(this).attr("cancel") == "true";
 			const validate     = validateForm("form_purchase_request");
 			
 			removeIsValid("#tableProjectRequestItems");
 
 			if (validate) {
-				const action = revise && "insert" || (id ? "update" : "insert");
-				const data   = getPurchaseRequestData(action, "submit", "1", id);
+				const action = revise && !isFromCancelledDocument && "insert" || (id ? "update" : "insert");
+				const data   = getBorrowingData(action, "submit", "1", id);
 	
 				if (revise) {
-					data.append("reviseborrowingID", id);
+					if (!isFromCancelledDocument) {
+					data.append("reviseBorrowingID", id);
 					data.delete("borrowingID");
+					}
 				}
 	
 				let approversID = "", approversDate = "";
@@ -1718,10 +1813,10 @@ $(document).ready(function() {
 
     // ----- CANCEL DOCUMENT -----
 	$(document).on("click", "#btnCancelForm", function () {
-		const id     = $(this).attr("borrowingID");
+		const id     = decryptString($(this).attr("borrowingID"));
 		const status = $(this).attr("status");
 		const action = "update";
-		const data   = getPurchaseRequestData(action, "cancelform", "4", id, status);
+		const data   = getBorrowingData(action, "cancelform", "4", id, status);
 
 		saveReturnItem(data, "cancelform", null, pageContent);
 	});
@@ -1731,7 +1826,7 @@ $(document).ready(function() {
     // ----- APPROVE DOCUMENT -----
 	$(document).on("click", "#btnApprove", function () {
 		const id       = decryptString($(this).attr("borrowingID"));
-		const feedback = $(this).attr("code") || getFormCode("TR", dateToday(), id);
+		const feedback = $(this).attr("code") || getFormCode("EBF", dateToday(), id);
 		let tableData  = getTableData("ims_borrowing_tbl", "", "borrowingID = " + id);
 
 		if (tableData) {
@@ -1741,7 +1836,7 @@ $(document).ready(function() {
 			let employeeID      = tableData[0].employeeID;
 			let createdAt       = tableData[0].createdAt;
 
-			let data = getPurchaseRequestData("update", "approve", "2", id);
+			let data = getBorrowingData("update", "approve", "2", id);
 			data.append("approversStatus", updateApproveStatus(approversStatus, 2));
 			let dateApproved = updateApproveDate(approversDate)
 			data.append("approversDate", dateApproved);
@@ -1778,8 +1873,8 @@ $(document).ready(function() {
 
     // ----- REJECT DOCUMENT -----
 	$(document).on("click", "#btnReject", function () {
-		const id       = $(this).attr("borrowingID");
-		const feedback = $(this).attr("code") || getFormCode("TR", dateToday(), id);
+		const id       = decryptString($(this).attr("borrowingID"));
+		const feedback = $(this).attr("code") || getFormCode("EBF", dateToday(), id);
 
 		$("#modal_equipment_borrowing_content").html(preloader);
 		$("#modal_equipment_borrowing .page-title").text("DENY EQUIPMENT BORROWING");
@@ -1802,7 +1897,7 @@ $(document).ready(function() {
 		</div>
 		<div class="modal-footer text-right">
 			<button class="btn btn-danger" id="btnRejectConfirmation"
-			borrowingID="${id}"
+			borrowingID="${encryptString(id)}"
 			code="${feedback}"><i class="far fa-times-circle"></i> Deny</button>
 			<button class="btn btn-cancel" data-dismiss="modal"><i class="fas fa-ban"></i> Cancel</button>
 		</div>`;
@@ -1811,7 +1906,7 @@ $(document).ready(function() {
 
 	$(document).on("click", "#btnRejectConfirmation", function () {
 		const id       = decryptString($(this).attr("borrowingID"));
-		const feedback = $(this).attr("code") || getFormCode(" TR", dateToday(), id);
+		const feedback = $(this).attr("code") || getFormCode(" EBF", dateToday(), id);
 
 		const validate = validateForm("modal_equipment_borrowing");
 		if (validate) {
@@ -1845,6 +1940,22 @@ $(document).ready(function() {
 		} 
 	});
 	// ----- END REJECT DOCUMENT -----
+
+	
+	// ----- DROP DOCUMENT -----
+	$(document).on("click", "#btnDrop", function() {
+		const borrowingID = decryptString($(this).attr("borrowingID"));
+		const feedback          = $(this).attr("code") || getFormCode("ADF", dateToday(), id);
+		//const id = decryptString($(this).attr("borrowingID"));
+		let data = new FormData;
+		data.append("borrowingID", borrowingID);
+		data.append("action", "update");
+		data.append("method", "drop");
+		data.append("updatedBy", sessionID);
+
+		saveReturnItem(data, "drop", null, pageContent);
+	})
+	// ----- END DROP DOCUMENT -----
 
 
     // ----- NAV LINK -----

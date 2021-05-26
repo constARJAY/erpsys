@@ -39,7 +39,7 @@ class Equipment_borrowing extends CI_Controller {
         $items                   = $this->input->post("items") ?? null;
 
         $borrowingData = [
-            // "revisePurchaseRequestID" => $revisePurchaseRequestID,
+            "reviseBorrowingID"      => $reviseBorrowingID,
             "employeeID"              => $employeeID,
             "projectID "                => $projectID ,
             "approversID"             => $approversID,
@@ -56,6 +56,7 @@ class Equipment_borrowing extends CI_Controller {
         ];
         if ($action == "update") {
             // unset($purchaseRequestData["revisePurchaseRequestID"]);
+            unset($borrowingData["reviseBorrowingID"]);
             unset($borrowingData["createdBy"]);
             unset($borrowingData["createdAt"]);
 
@@ -79,6 +80,12 @@ class Equipment_borrowing extends CI_Controller {
                     "borrowingRemarks"      =>$borrowingRemarks,
                     "updatedBy"              =>$updatedBy,
                 ];
+            } else if ($method == "drop") {
+                $borrowingData = [
+                    "reviseBorrowingID"        => $reviseBorrowingID,
+                    "borrowingStatus"          => 5,
+                    "updatedBy"               => $updatedBy,
+                ]; 
             }
         }     
 
@@ -96,8 +103,10 @@ class Equipment_borrowing extends CI_Controller {
                                     "borrowingID"                       => $borrowingID,
                                     "barcode"                           => $item["barcode"],
                                     "itemID"                            => $item["itemID"] != "null" ? $item["itemID"] : null,
+                                    "itemName"                          => $item["itemName"],
                                     "inventoryStorageID"                => $item["inventoryStorageID"],
                                     "serialnumber"                      => $item["serialnumber"],
+                                    "borrowedPurpose"                   => $item["borrowedPurpose"],
                                     "dateBorrowed"                      => $item["dateBorrowed"],
                                     "quantity"                          => $item["quantity"],
                                     "createdBy"                         => $item["createdBy"],
