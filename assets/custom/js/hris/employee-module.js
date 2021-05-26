@@ -11,7 +11,12 @@ $(document).ready(function() {
 
     // ----- CHANGE LEAVE BALANCE WHEN RESIZING -----
     $( window ).resize(function() {
-        console.log($(window).width());
+        const width = $(window).width();
+        if (width < 1200) {
+            $(`[href="#leave-balance-tab"]`).text("Leave");
+        } else {
+            $(`[href="#leave-balance-tab"]`).text("Leave Balance");
+        }
     });
     // ----- END CHANGE LEAVE BALANCE WHEN RESIZING -----
 
