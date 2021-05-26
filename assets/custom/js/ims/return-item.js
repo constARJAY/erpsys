@@ -162,9 +162,6 @@ $(document).ready(function() {
 				sorting: [],
 				scrollCollapse: true,
 				columnDefs: [
-					
-
-
 					{ targets: 0,  width: 100 },
 					{ targets: 1,  width: 150 },
 					{ targets: 2,  width: 250 },
@@ -1769,9 +1766,9 @@ $(document).ready(function() {
 		const id       = decryptString($(this).attr("returnItemID"));
 		const feedback = $(this).attr("code") || getFormCode("RI", dateToday(), id);
 
-		$("#modal_purchase_request_content").html(preloader);
-		$("#modal_purchase_request .page-title").text("DENY TRNASFER REQUEST");
-		$("#modal_purchase_request").modal("show");
+		$("#modal_return_item_content").html(preloader);
+		$("#modal_return_item .page-title").text("DENY TRNASFER REQUEST");
+		$("#modal_return_item").modal("show");
 		let html = `
 		<div class="modal-body">
 			<div class="form-group">
@@ -1794,14 +1791,14 @@ $(document).ready(function() {
 			code="${feedback}"><i class="far fa-times-circle"></i> Deny</button>
 			<button class="btn btn-cancel" data-dismiss="modal"><i class="fas fa-ban"></i> Cancel</button>
 		</div>`;
-		$("#modal_purchase_request_content").html(html);
+		$("#modal_return_item_content").html(html);
 	});
 
 	$(document).on("click", "#btnRejectConfirmation", function () {
 		const id       = decryptString($(this).attr("returnItemID"));
 		const feedback = $(this).attr("code") || getFormCode(" RI", dateToday(), id);
 
-		const validate = validateForm("modal_purchase_request");
+		const validate = validateForm("modal_return_item");
 		if (validate) {
 			let tableData = getTableData("ims_return_item_tbl", "", "returnItemID = " + id);
 			if (tableData) {
@@ -1907,7 +1904,7 @@ function getConfirmation(method = "submit") {
 	const title = "Return Item";
 	let swalText, swalImg;
 
-	$("#modal_purchase_request").text().length > 0 && $("#modal_purchase_request").modal("hide");
+	$("#modal_return_item").text().length > 0 && $("#modal_return_item").modal("hide");
 
 	switch (method) {
 		case "save":
@@ -1964,7 +1961,7 @@ function saveReturnItem(data = null, method = "submit", notificationData = null,
 			if (res.isConfirmed) {
 				$.ajax({
 					method:      "POST",
-					url:         `return_item/saveTransferRequest`,
+					url:         `return_item/saveReturnItem`,
 					data,
 					processData: false,
 					contentType: false,
@@ -1985,19 +1982,32 @@ function saveReturnItem(data = null, method = "submit", notificationData = null,
 
 						let swalTitle;
 						if (method == "submit") {
-							swalTitle = `${getFormCode("TR", dateCreated, insertedID)} submitted successfully!`;
+							swalTitle = `${getFormCode("RI", dateCreated, insertedID)} submitted successfully!`;
 						} else if (method == "save") {
-							swalTitle = `${getFormCode("TR", dateCreated, insertedID)} saved successfully!`;
+							swalTitle = `${getFormCode("RI", dateCreated, insertedID)} saved successfully!`;
 						} else if (method == "cancelform") {
-							swalTitle = `${getFormCode("TR", dateCreated, insertedID)} cancelled successfully!`;
+							swalTitle = `${getFormCode("RI", dateCreated, insertedID)} cancelled successfully!`;
 						} else if (method == "approve") {
-							swalTitle = `${getFormCode("TR", dateCreated, insertedID)} approved successfully!`;
+							swalTitle = `${getFormCode("RI", dateCreated, insertedID)} approved successfully!`;
 						} else if (method == "deny") {
-							swalTitle = `${getFormCode("TR", dateCreated, insertedID)} denied successfully!`;
+							swalTitle = `${getFormCode("RI", dateCreated, insertedID)} denied successfully!`;
+						} else if (method == "drop") {
+							swalTitle = `${getFormCode("RI", dateCreated, insertedID)} dropped successfully!`;
 						}	
 		
 						if (isSuccess == "true") {
 							setTimeout(() => {
+								// ----- SAVE NOTIFICATION -----
+								if (notificationData) {
+									if (Object.keys(notificationData).includes("tableID")) {
+										insertNotificationData(notificationData);
+									} else {
+										notificationData["tableID"] = insertedID;
+										insertNotificationData(notificationData);
+									}
+								}
+								// ----- END SAVE NOTIFICATION -----
+
 								$("#loader").hide();
 								closeModals();
 								Swal.fire({
@@ -2011,17 +2021,6 @@ function saveReturnItem(data = null, method = "submit", notificationData = null,
 								if (method == "approve" || method == "deny") {
 									$("[redirect=forApprovalTab]").length > 0 && $("[redirect=forApprovalTab]").trigger("click")
 								}
-
-								// ----- SAVE NOTIFICATION -----
-								if (notificationData) {
-									if (Object.keys(notificationData).includes("tableID")) {
-										insertNotificationData(notificationData);
-									} else {
-										notificationData["tableID"] = insertedID;
-										insertNotificationData(notificationData);
-									}
-								}
-								// ----- END SAVE NOTIFICATION -----
 							}, 500);
 						} else {
 							setTimeout(() => {
@@ -2047,15 +2046,17 @@ function saveReturnItem(data = null, method = "submit", notificationData = null,
 					}, 500);
 				})
 			} else {
-				if (res.dismiss === "cancel") {
+				if (res.dismiss == "cancel" && method != "submit") {
 					if (method != "deny") {
-						callback && callback();
+						if (method != "cancelform") {
+							callback && callback();
+						}
 					} else {
-						$("#modal_purchase_request").text().length > 0 && $("#modal_purchase_request").modal("show");
+						$("#modal_return_item").text().length > 0 && $("#modal_return_item").modal("show");
 					}
 				} else if (res.isDismissed) {
 					if (method == "deny") {
-						$("#modal_purchase_request").text().length > 0 && $("#modal_purchase_request").modal("show");
+						$("#modal_return_item").text().length > 0 && $("#modal_return_item").modal("show");
 					}
 				}
 			}
@@ -2065,5 +2066,6 @@ function saveReturnItem(data = null, method = "submit", notificationData = null,
 	}
 	return false;
 }
+
 
 // --------------- END DATABASE RELATION ---------------

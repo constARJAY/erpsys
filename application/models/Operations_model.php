@@ -23,6 +23,8 @@ class Operations_model extends CI_Model {
                     return "$feedback approved successfully!";
                 case "reject":
                     return "$feedback denied successfully!";
+                case "drop":
+                    return "$feedback dropped successfully!";
                 case "cancelform":
                 default:
                     return "$feedback cancelled successfully!";

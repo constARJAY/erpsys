@@ -1200,9 +1200,10 @@ $(document).ready(function() {
 				properties.removeClass("is-invalid")
 				properties.next().text("");
 			}else{
-				var properties 	= thisTr.find(`input[type=text]`);
+				var properties 	= thisTr.find(`input[type=text], input[type=file]`);
 				properties.prop("disabled", false);
 				properties.prop("required", true);
+				thisTr.find(`input[type=file]`).prop("required", false);
 			}
 			let thisArray = ["itemID|[project=true]|projectCount",
 							"itemID|[company=true]|companyCount",
@@ -1287,6 +1288,8 @@ $(document).ready(function() {
 			properties.prop("disabled", true);
 			properties.prop("required", false);
 			$(this).closest(`tr`).find(`input[type=text]`).val("");
+			$(this).closest(`tr`).find(`input[type=text]`).removeClass("is-invalid");
+			$(this).closest(`tr`).find(`input[type=text]`).next().text("");
 			$(this).closest(`tr`).find(`select`).val("none").trigger("change");
 		}else{
 			properties.prop("disabled", false);
@@ -1461,7 +1464,7 @@ $(document).ready(function() {
 				`quantity, unitCost, totalCost, files, remarks, itemID, itemCode, ims_inventory_item_tbl.itemName as itemName, unitOfMeasurementID, categoryType`, 
 				`costEstimateID = ${costEstimateID} AND categoryType = 'project' AND inventoryValidationID IS NULL AND billMaterialID IS NULL AND purchaseRequestID IS NULL AND purchaseOrderID IS NULL AND bidRecapID IS NULL`);
 					if(requestProjectItemsData.length < 1){
-						requestProjectItems += getItemRow("project");
+						requestProjectItems += getItemRow("project", requestProjectItemsData[0], readOnly);
 					}else{
 						requestProjectItemsData.map(item => {
 							requestProjectItems += getItemRow("project", item, readOnly);
@@ -1473,7 +1476,7 @@ $(document).ready(function() {
 				`costEstimateID = '${costEstimateID}' AND categoryType = 'company' AND inventoryValidationID IS NULL AND billMaterialID IS NULL AND purchaseRequestID IS NULL AND purchaseOrderID IS NULL AND bidRecapID IS NULL`);
 			
 				if(requestCompanyItemsData.length < 1){
-					requestCompanyItems += getItemRow("company");
+					requestCompanyItems += getItemRow("company", requestCompanyItemsData[0], readOnly);
 				}else{
 					requestCompanyItemsData.map(item => {
 						requestCompanyItems += getItemRow("company", item, readOnly);
@@ -1495,7 +1498,7 @@ $(document).ready(function() {
 										`travelDescription,unitOfMeasure,quantity`,
 										`costEstimateID = ${costEstimateID} AND billMaterialID IS NULL`)
 				if(requestTravel.length < 1){
-					requestTravel 		+= getItemRow("travel");
+					requestTravel 		+= getItemRow("travel", requestTravelData[0], readOnly);
 				}else{
 					requestTravelData.map(item => {
 						requestTravel += getItemRow("travel", item, readOnly);
@@ -2471,7 +2474,7 @@ $(document).ready(function() {
 				</td>
 				<td class="text-center">
 					<div class="quantity">
-						${quantity}
+						${quantity < 1 ? "-" : quantity}
 					</div>
 				</td>
 				<td>
@@ -2592,7 +2595,7 @@ $(document).ready(function() {
 				</td>
 				<td class="text-center">
 					<div class="quantity">
-						${quantity}
+						${quantity < 1 ? "-" : quantity}
 					</div>
 				</td>
 				<td>
@@ -2705,7 +2708,7 @@ $(document).ready(function() {
 				</td>
 				<td class="text-center">
 					<div class="quantity">
-						${quantity || "-"}
+						${quantity < 1 ? "-" : quantity}
 					</div>
 				</td>
 				<td class="text-center">
@@ -2805,7 +2808,7 @@ $(document).ready(function() {
 				</td>
 				<td class="text-center">
 					<div class="quantity">
-						${quantity}
+						${quantity < 1 ? "-" : quantity}
 					</div>
 				</td>
 				<td>

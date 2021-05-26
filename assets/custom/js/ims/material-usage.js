@@ -1,4 +1,5 @@
 $(document).ready(function() {
+	const allowedUpdate = isUpdateAllowed(45);
     // ----- MODULE APPROVER -----
 	const moduleApprover = getModuleApprover(45);
 	// ----- END MODULE APPROVER -----
@@ -25,8 +26,8 @@ $(document).ready(function() {
 
 
     // ----- VIEW DOCUMENT -----
-	function viewDocument(view_id = false, readOnly = false, isRevise = false) {
-		const loadData = (id, isRevise = false) => {
+	function viewDocument(view_id = false, readOnly = false, isRevise = false, isFromCancelledDocument = false) {
+		const loadData = (id, isRevise = false, isFromCancelledDocument = false) => {
 			const tableData = getTableData("ims_material_usage_tbl", "", "materialUsageID=" + id);
 
 			if (tableData.length > 0) {
@@ -54,7 +55,7 @@ $(document).ready(function() {
 
 				if (isAllowed) {
 					if (isRevise && employeeID == sessionID) {
-						pageContent(true, tableData, isReadOnly, true);
+						pageContent(true, tableData, isReadOnly, true, isFromCancelledDocument);
 						updateURL(encryptString(id), true, true);
 					} else {
 						pageContent(true, tableData, isReadOnly);
@@ -72,8 +73,9 @@ $(document).ready(function() {
 		}
 
 		if (view_id) {
-			let id = decryptString(view_id);
-				id && isFinite(id) && loadData(id, isRevise);
+			// let id = decryptString(view_id);
+			let id = view_id;
+				id && isFinite(id) && loadData(id, isRevise, isFromCancelledDocument);
 		} else {
 			let url   = window.document.URL;
 			let arr   = url.split("?view_id=");
@@ -147,16 +149,15 @@ $(document).ready(function() {
 				columnDefs: [
 					{ targets: 0,  width: 100 },
 					{ targets: 1,  width: 150 },
-					{ targets: 2,  width: 150 },
-					{ targets: 3,  width: 150 },
-					{ targets: 4,  width: 150 },
+					{ targets: 2,  width: 100 },
+					{ targets: 3,  width: 350 },
+					{ targets: 4,  width: 350 },
 					{ targets: 5,  width: 150 },
 					{ targets: 6,  width: 200 },
 					{ targets: 7,  width: 200 },
 					{ targets: 8,  width: 200 },
-					{ targets: 9,  width: 80  },
-					{ targets: 10, width: 250 },
-					{ targets: 11, width: 80  },
+					{ targets: 9,  width: 80 },
+					{ targets: 10,  width: 250  },
 				],
 			});
 
@@ -172,16 +173,15 @@ $(document).ready(function() {
 				columnDefs: [
 					{ targets: 0,  width: 100 },
 					{ targets: 1,  width: 150 },
-					{ targets: 2,  width: 150 },
-					{ targets: 3,  width: 150 },
-					{ targets: 4,  width: 150 },
+					{ targets: 2,  width: 100 },
+					{ targets: 3,  width: 350 },
+					{ targets: 4,  width: 350 },
 					{ targets: 5,  width: 150 },
 					{ targets: 6,  width: 200 },
 					{ targets: 7,  width: 200 },
 					{ targets: 8,  width: 200 },
-					{ targets: 9,  width: 80  },
-					{ targets: 10, width: 250 },
-					{ targets: 11, width: 80  },
+					{ targets: 9,  width: 80 },
+					{ targets: 10,  width: 250  },
 				],
 			});
 
@@ -258,14 +258,15 @@ $(document).ready(function() {
 
 
     // ----- HEADER BUTTON -----
-	function headerButton(isAdd = true, text = "Add", isRevise = false) {
+	function headerButton(isAdd = true, text = "Add", isRevise = false, isFromCancelledDocument = false) {
 		let html;
 		if (isAdd) {
-            html = `
-            <button type="button" class="btn btn-default btn-add" id="btnAdd"><i class="icon-plus"></i> &nbsp;${text}</button>`;
+			if(isCreateAllowed(45)){
+				html = `<button type="button" class="btn btn-default btn-add" id="btnAdd"><i class="icon-plus"></i> &nbsp;${text}</button>`;
+			}
 		} else {
 			html = `
-            <button type="button" class="btn btn-default btn-light" id="btnBack" revise="${isRevise}"><i class="fas fa-arrow-left"></i> &nbsp;Back</button>`;
+            <button type="button" class="btn btn-default btn-light" id="btnBack" revise="${isRevise}" cancel="${isFromCancelledDocument}"><i class="fas fa-arrow-left"></i> &nbsp;Back</button>`;
 		}
 		$("#headerButton").html(html);
 	}
@@ -279,7 +280,7 @@ $(document).ready(function() {
 			"ims_material_usage_tbl AS imrt LEFT JOIN hris_employee_list_tbl AS helt USING(employeeID) LEFT JOIN pms_project_list_tbl AS pplt ON pplt.projectListID = imrt.projectID",
 			"imrt.*, CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname, imrt.createdAt AS dateCreated, projectListCode, projectListName",
 			`imrt.employeeID != ${sessionID} AND materialUsageStatus != 0 AND materialUsageStatus != 4`,
-			`FIELD(materialUsageStatus, 0, 1, 3, 2, 4), COALESCE(imrt.submittedAt, imrt.createdAt)`
+			`FIELD(materialUsageStatus, 0, 1, 3, 2, 4, 5), COALESCE(imrt.submittedAt, imrt.createdAt)`
 		);
 
 		let html = `
@@ -287,17 +288,16 @@ $(document).ready(function() {
             <thead>
                 <tr style="white-space: nowrap">
                     <th>Document No.</th>
-                    <th>Employee Name</th>
-                    <th>Project Code</th>
-                    <th>Project Name</th>
+                    <th>Prepared By</th>
 					<th>Reference No.</th>
+                    <th>Project Name</th>
+                    <th>Description</th>
                     <th>Current Approver</th>
                     <th>Date Created</th>
                     <th>Date Submitted</th>
                     <th>Date Approved</th>
                     <th>Status</th>
                     <th>Remarks</th>
-                    <th>Action</th>
                 </tr>
             </thead>
             <tbody>`;
@@ -313,6 +313,7 @@ $(document).ready(function() {
 				approversDate,
 				materialUsageStatus,
 				materialUsageRemarks,
+				materialUsageReason,
 				submittedAt,
 				createdAt,
 			} = item;
@@ -326,21 +327,26 @@ $(document).ready(function() {
 				dateApproved = moment(dateApproved[dateApproved.length - 1]).format("MMMM DD, YYYY hh:mm:ss A");
 			}
 
-			let button = materialUsageStatus != 0 ? `
-			<button class="btn btn-view w-100 btnView" id="${encryptString(materialUsageID )}"><i class="fas fa-eye"></i> View</button>` : `
-			<button 
-				class="btn btn-edit w-100 btnEdit" 
-				id="${encryptString(materialUsageID )}" 
-				code="${getFormCode("MUF", createdAt, materialUsageID )}"><i class="fas fa-edit"></i> Edit</button>`;
-
+			// let button = materialUsageStatus != 0 ? `
+			// <button class="btn btn-view w-100 btnView" id="${encryptString(materialUsageID )}"><i class="fas fa-eye"></i> View</button>` : `
+			// <button 
+			// 	class="btn btn-edit w-100 btnEdit" 
+			// 	id="${encryptString(materialUsageID )}" 
+			// 	code="${getFormCode("MUF", createdAt, materialUsageID )}"><i class="fas fa-edit"></i> Edit</button>`;
+			let btnClass = materialUsageStatus != 0 ? `btnView` : `btnEdit`;
 			if (isImCurrentApprover(approversID, approversDate, materialUsageStatus) || isAlreadyApproved(approversID, approversDate)) {
 				html += `
-				<tr>
+				<tr class="${btnClass}" id="${encryptString(materialUsageID )}">
 					<td>${getFormCode("MUF", createdAt, materialUsageID )}</td>
 					<td>${fullname}</td>
-					<td>${projectListCode || '-'}</td>
-					<td>${projectListName || '-'}</td>
 					<td>${referenceNumber}</td>
+					<td>
+						<div>
+						${projectListName || '-'}
+						</div>
+						<small style="color:#848482;">${projectListCode || '-'}</small>
+					</td>
+					<td>${materialUsageReason}</td>
 					<td>
 						${employeeFullname(getCurrentApprover(approversID, approversDate, materialUsageStatus, true))}
 					</td>
@@ -351,9 +357,6 @@ $(document).ready(function() {
 						${getStatusStyle(materialUsageStatus)}
 					</td>
 					<td>${remarks}</td>
-					<td class="text-center">
-						${button}
-					</td>
 				</tr>`;
 			}
 		});
@@ -378,7 +381,7 @@ $(document).ready(function() {
 			"ims_material_usage_tbl AS imrt LEFT JOIN hris_employee_list_tbl AS helt USING(employeeID) LEFT JOIN pms_project_list_tbl AS pplt ON pplt.projectListID = imrt.projectID",
 			"imrt.*, CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname, imrt.createdAt AS dateCreated, projectListCode, projectListName",
 			`imrt.employeeID = ${sessionID}`,
-			`FIELD(materialUsageStatus, 0, 1, 3, 2, 4), COALESCE(imrt.submittedAt, imrt.createdAt)`
+			`FIELD(materialUsageStatus, 0, 1, 3, 2, 4, 5), COALESCE(imrt.submittedAt, imrt.createdAt)`
 		);
 
 		let html = `
@@ -386,17 +389,16 @@ $(document).ready(function() {
             <thead>
                 <tr style="white-space: nowrap">
                     <th>Document No.</th>
-                    <th>Employee Name</th>
-                    <th>Project Code</th>
-                    <th>Project Name</th>
+                    <th>Prepared By</th>
 					<th>Reference No.</th>
+                    <th>Project Name</th>
+                    <th>Description</th>
                     <th>Current Approver</th>
                     <th>Date Created</th>
                     <th>Date Submitted</th>
                     <th>Date Approved</th>
                     <th>Status</th>
                     <th>Remarks</th>
-                    <th>Action</th>
                 </tr>
             </thead>
             <tbody>`;
@@ -412,6 +414,7 @@ $(document).ready(function() {
 				approversDate,
 				materialUsageStatus,
 				materialUsageRemarks,
+				materialUsageReason,
 				submittedAt,
 				createdAt,
 			} = item;
@@ -424,33 +427,35 @@ $(document).ready(function() {
 				dateApproved = moment(dateApproved[dateApproved.length - 1]).format("MMMM DD, YYYY hh:mm:ss A");
 			}
 
-			let button = materialUsageStatus != 0 ? `
-            <button class="btn btn-view w-100 btnView" id="${encryptString(materialUsageID )}"><i class="fas fa-eye"></i> View</button>` : `
-            <button 
-                class="btn btn-edit w-100 btnEdit" 
-                id="${encryptString(materialUsageID )}" 
-                code="${getFormCode("MUF", createdAt, materialUsageID )}"><i class="fas fa-edit"></i> Edit</button>`;
-
+			// let button = materialUsageStatus != 0 ? `
+            // <button class="btn btn-view w-100 btnView" id="${encryptString(materialUsageID )}"><i class="fas fa-eye"></i> View</button>` : `
+            // <button 
+            //     class="btn btn-edit w-100 btnEdit" 
+            //     id="${encryptString(materialUsageID )}" 
+            //     code="${getFormCode("MUF", createdAt, materialUsageID )}"><i class="fas fa-edit"></i> Edit</button>`;
+			let btnClass = meterialUsageStatus != 0 ? `btnView` : `btnEdit`;
 			html += `
-            <tr>
-                <td>${getFormCode("MUF", createdAt, materialUsageID )}</td>
-                <td>${fullname}</td>
-                <td>${projectListCode || '-'}</td>
-                <td>${projectListName || '-'}</td>
-				<td>${referenceNumber}</td>
-                <td>
-                    ${employeeFullname(getCurrentApprover(approversID, approversDate, materialUsageStatus, true))}
-                </td>
-				<td>${dateCreated}</td>
-				<td>${dateSubmitted}</td>
-				<td>${dateApproved}</td>
-                <td class="text-center">
-                    ${getStatusStyle(materialUsageStatus)}
-                </td>
-				<td>${remarks}</td>
-                <td class="text-center">
-                    ${button}
-                </td>
+            <tr class="${btnClass}" id="${encryptString(materialUsageID )}">
+                	<td>${getFormCode("MUF", createdAt, materialUsageID )}</td>
+					<td>${fullname}</td>
+					<td>${referenceNumber}</td>
+					<td>
+						<div>
+						${projectListName || '-'}
+						</div>
+						<small style="color:#848482;">${projectListCode || '-'}</small>
+					</td>
+					<td>${materialUsageReason}</td>
+					<td>
+						${employeeFullname(getCurrentApprover(approversID, approversDate, materialUsageStatus, true))}
+					</td>
+					<td>${dateCreated}</td>
+					<td>${dateSubmitted}</td>
+					<td>${dateApproved}</td>
+					<td class="text-center">
+						${getStatusStyle(materialUsageStatus)}
+					</td>
+					<td>${remarks}</td>
             </tr>`;
 		});
 
@@ -468,7 +473,7 @@ $(document).ready(function() {
 
 
     // ----- FORM BUTTONS -----
-	function formButtons(data = false, isRevise = false) {
+	function formButtons(data = false, isRevise = false, isFromCancelledDocument = false) {
 		let button = "";
 		if (data) {
 			let {
@@ -488,9 +493,10 @@ $(document).ready(function() {
 					<button 
 						class="btn btn-submit" 
 						id="btnSubmit" 
-						materialUsageID="${materialUsageID}"
+						materialUsageID="${encryptString(materialUsageID)}"
 						code="${getFormCode("MUF", createdAt, materialUsageID)}"
-						revise=${isRevise}><i class="fas fa-paper-plane"></i>
+						revise=${isRevise}
+						cancel="${isFromCancelledDocument}"><i class="fas fa-paper-plane"></i>
 						Submit
 					</button>`;
 
@@ -499,7 +505,10 @@ $(document).ready(function() {
 						<button 
 							class="btn btn-cancel" 
 							id="btnCancel"
-							revise="${isRevise}"><i class="fas fa-ban"></i> 
+							materialUsageID="${encryptString(materialUsageID)}"
+							revise="${isRevise}"
+							code="${getFormCode("MUF", createdAt, materialUsageID)}"
+							cancel="${isFromCancelledDocument}"><i class="fas fa-ban"></i> 
 							Cancel
 						</button>`;
 					} else {
@@ -507,7 +516,7 @@ $(document).ready(function() {
 						<button 
 							class="btn btn-cancel"
 							id="btnCancelForm" 
-							materialUsageID="${materialUsageID}"
+							materialUsageID="${encryptString(materialUsageID)}"
 							code="${getFormCode("MUF", createdAt, materialUsageID)}"
 							revise=${isRevise}><i class="fas fa-ban"></i> 
 							Cancel
@@ -522,7 +531,7 @@ $(document).ready(function() {
 						<button 
 							class="btn btn-cancel"
 							id="btnCancelForm" 
-							materialUsageID="${materialUsageID}"
+							materialUsageID="${encryptString(materialUsageID)}"
 							code="${getFormCode("MUF", createdAt, materialUsageID)}"
 							status="${materialUsageStatus}"><i class="fas fa-ban"></i> 
 							Cancel
@@ -541,6 +550,20 @@ $(document).ready(function() {
 								Revise
 							</button>`;
 						}
+				} else if (materialUsageStatus == 4) {
+					// CANCELLED - FOR REVISE
+					if (!isDocumentRevised(materialUsageID)) {
+						button = `
+						<button
+							class="btn btn-cancel px-5 p-2"
+							id="btnRevise" 
+							materialUsageID="${encryptString(materialUsageID)}"
+							code="${getFormCode("PR", createdAt, materialUsageID)}"
+							status="${materialUsageStatus}"
+							cancel="true"><i class="fas fa-clone"></i>
+							Revise
+						</button>`;
+					}
 				}
 			} else {
 				if (materialUsageStatus == 1) {
@@ -1027,7 +1050,7 @@ $(document).ready(function() {
 
 
     // ----- FORM CONTENT -----
-	function formContent(data = false, readOnly = false, isRevise = false) {
+	function formContent(data = false, readOnly = false, isRevise = false, isFromCancelledDocument = false) {
 		$("#page_content").html(preloader);
 		readOnly = isRevise ? false : readOnly;
 		let {
@@ -1087,9 +1110,10 @@ $(document).ready(function() {
 
 		readOnly ? preventRefresh(false) : preventRefresh(true);
 
-		$("#btnBack").attr("materialUsageID", materialUsageID);
+		$("#btnBack").attr("materialUsageID", encryptString(materialUsageID));
 		$("#btnBack").attr("status", materialUsageStatus);
 		$("#btnBack").attr("employeeID", employeeID);
+		$("#btnBack").attr("cancel", isFromCancelledDocument);
 
 		let disabled = readOnly ? "disabled" : "";
 	
@@ -1185,7 +1209,7 @@ $(document).ready(function() {
         <div class="row" id="form_material_usage">
             <div class="col-md-4 col-sm-12">
                 <div class="form-group">
-                    <label>Employee Name</label>
+                    <label>Prepared By</label>
                     <input type="text" class="form-control" disabled value="${employeeFullname||"-"}">
                 </div>
             </div>
@@ -1326,7 +1350,7 @@ $(document).ready(function() {
 
 
     // ----- PAGE CONTENT -----
-	function pageContent(isForm = false, data = false, readOnly = false, isRevise = false) {
+	function pageContent(isForm = false, data = false, readOnly = false, isRevise = false, isFromCancelledDocument = false) {
 		$("#page_content").html(preloader);
 		if (!isForm) {
 			preventRefresh(false);
@@ -1348,9 +1372,9 @@ $(document).ready(function() {
 			myFormsContent();
 			updateURL();
 		} else {
-			headerButton(false, "", isRevise);
+			headerButton(false, "", isRevise, isFromCancelledDocument);
 			headerTabContent(false);
-			formContent(data, readOnly, isRevise);
+			formContent(data, readOnly, isRevise, isFromCancelledDocument);
 		}
 	}
 	viewDocument();
@@ -1441,7 +1465,7 @@ $(document).ready(function() {
 					itemDescription:                tableData[0].itemDescription,
                     itemWithdrawalRemarks:          tableData[0].itemWithdrawalRemarks,
 					receivingQuantity:		        tableData[0].receivingQuantity,
-                    stockInQuantity:		        tableData[0].stockInQuantity,
+                    quantity:		        		tableData[0].quantity,
 					utilized:			            $(this).find("[name=utilized]").val(),
 					unused:	                        $(this).find(".unused").text() == "-"? "0": $(this).find(".unused").text(),
 					itemUsageRemarks:	            $(this).find("[name=remarks]").val(),
@@ -1469,7 +1493,7 @@ $(document).ready(function() {
 
     // ----- OPEN EDIT FORM -----
 	$(document).on("click", ".btnEdit", function () {
-		const id = $(this).attr("id");
+		const id = decryptString($(this).attr("id"));
 		viewDocument(id);
 	});
 	// ----- END OPEN EDIT FORM -----
@@ -1477,7 +1501,7 @@ $(document).ready(function() {
 
     // ----- VIEW DOCUMENT -----
 	$(document).on("click", ".btnView", function () {
-		const id = $(this).attr("id");
+		const id = decryptString($(this).attr("id"));
 		viewDocument(id, true);
 	});
 	// ----- END VIEW DOCUMENT -----
@@ -1486,14 +1510,16 @@ $(document).ready(function() {
     // ----- VIEW DOCUMENT -----
 	$(document).on("click", "#btnRevise", function () {
 		const id = $(this).attr("materialUsageID");
-		viewDocument(id, false, true);
+		const fromCancelledDocument = $(this).attr("cancel") == "true";
+		viewDocument(id, false, true, fromCancelledDocument);
 	});
 	// ----- END VIEW DOCUMENT -----
 
 
 	// ----- SAVE CLOSE FORM -----
 	$(document).on("click", "#btnBack", function () {
-		const id         = $(this).attr("materialUsageID");
+		const id         = decryptString($(this).attr("materialUsageID"));
+		const isFromCancelledDocument = $(this).attr("cancel") == "true";
 		const revise     = $(this).attr("revise") == "true";
 		const employeeID = $(this).attr("employeeID");
 		const feedback   = $(this).attr("code") || getFormCode("MUF", dateToday(), id);
@@ -1502,11 +1528,18 @@ $(document).ready(function() {
 		if (status != "false" && status != 0) {
 			
 			if (revise) {
-				const action = revise && "insert" || (id && feedback ? "update" : "insert");
+				const action = revise && !isFromCancelledDocument && "insert" || (id && feedback ? "update" : "insert");
 				const data   = getmaterialUsageData(action, "save", "0", id);
 				data["materialUsageStatus"] 	=	0;
-				data["reviseMaterialUsageID"] = id;
-				delete data["materialUsageID"]; 
+				if(!isFromCancelledDocument){
+					data["reviseMaterialUsageID"] = id;
+					delete data["materialUsageID"]; 
+				}else{
+					data["reviseMaterialUsageID"] = id;
+					delete data["action"]; 
+					data["action"] = "update";
+				}
+				
 	
 				savematerialUsage(data, "save", null, pageContent);
 			} else {
@@ -1531,15 +1564,22 @@ $(document).ready(function() {
 
     // ----- SAVE DOCUMENT -----
 	$(document).on("click", "#btnSave, #btnCancel", function () {
-		const id       = $(this).attr("materialUsageID");
+		const id       = decryptString($(this).attr("materialUsageID"));
+		const isFromCancelledDocument = $(this).attr("cancel") == "true";
 		const revise   = $(this).attr("revise") == "true";
 		const feedback = $(this).attr("code") || getFormCode("MUF", dateToday(), id);
-		const action   = revise && "insert" || (id && feedback ? "update" : "insert");
+		const action   = revise && !isFromCancelledDocument && "insert" || (id && feedback ? "update" : "insert");
 		const data     = getmaterialUsageData(action, "save", "0", id);
 		data["materialUsageStatus"] 	=	0;
 		if (revise) {
-			data["reviseMaterialUsageID"] = id;
-			delete data["materialUsageID"];  
+			if(!isFromCancelledDocument){
+				data["reviseMaterialUsageID"] = id;
+				delete data["materialUsageID"]; 
+			}else{
+				data["reviseMaterialUsageID"] = id;
+				delete data["action"]; 
+				data["action"] = "update";
+			}
 		}	
 		savematerialUsage(data, "save", null, pageContent);
 	});
@@ -1548,21 +1588,21 @@ $(document).ready(function() {
 
     // ----- SUBMIT DOCUMENT -----
 	$(document).on("click", "#btnSubmit", function () {
-		const id           = $(this).attr("materialUsageID");
+		const id           = decryptString($(this).attr("materialUsageID"));
+		const isFromCancelledDocument = $(this).attr("cancel") == "true";
 		const revise       = $(this).attr("revise") == "true";
 		const validate     = validateForm("form_material_usage");
 		removeIsValid("#tableProjectRequestItems");
 		removeIsValid("#tableCompanyRequestItems");
 		if (validate) {
-			const action = revise && "insert" || (id ? "update" : "insert");
+			const action = revise && !isFromCancelledDocument && "insert" || (id ? "update" : "insert");
 			const data   = getmaterialUsageData(action, "submit", "1", id);
 
 			if (revise) {
-				data["reviseMaterialUsageID"] = id;
-				delete data["materialUsageID"];  
-				
-				// data.append("reviseMaterialUsageID", id);
-				// data.delete("materialUsageID");
+				if(!isFromCancelledDocument){
+					data["reviseMaterialUsageID"] = id;
+					delete data["materialUsageID"];  
+				}
 			}
 
 			let approversID = "", approversDate = "";
@@ -1590,7 +1630,7 @@ $(document).ready(function() {
 
     // ----- CANCEL DOCUMENT -----
 	$(document).on("click", "#btnCancelForm", function () {
-		const id     = $(this).attr("materialUsageID");
+		const id     = decryptString($(this).attr("materialUsageID"));
 		const status = $(this).attr("status");
 		const action = "update";
 		const data   = getmaterialUsageData(action, "cancelform", "4", id, status);
@@ -1657,7 +1697,7 @@ $(document).ready(function() {
 
     // ----- REJECT DOCUMENT -----
 	$(document).on("click", "#btnReject", function () {
-		const id       = $(this).attr("materialUsageID");
+		const id       = decryptString($(this).attr("materialUsageID"));
 		const feedback = $(this).attr("code") || getFormCode("MUF", dateToday(), id);
 
 		$("#modal_material_usage_content").html(preloader);
@@ -1681,7 +1721,7 @@ $(document).ready(function() {
 		</div>
 		<div class="modal-footer text-right">
 			<button class="btn btn-danger" id="btnRejectConfirmation"
-			materialUsageID="${id}"
+			materialUsageID="${encryptString(id)}"
 			code="${feedback}"><i class="far fa-times-circle"></i> Deny</button>
 			<button class="btn btn-cancel" data-dismiss="modal"><i class="fas fa-ban"></i> Cancel</button>
 		</div>`;
@@ -1785,8 +1825,8 @@ $(document).ready(function() {
             let tableData = getTableData("ims_material_withdrawal_details_tbl JOIN ims_inventory_item_tbl USING(itemID)",
                                         `materialWithdrawalDetailsID, materialWithdrawalID , materialUsageID, ims_inventory_item_tbl.itemID AS itemID, 
                                         ims_inventory_item_tbl.createdAt AS createdAt ,ims_material_withdrawal_details_tbl.itemName as itemName, 
-                                        ims_material_withdrawal_details_tbl.itemDescription as itemDescription,itemUsageRemarks,stockInQuantity,
-                                        ims_material_withdrawal_details_tbl.unitOfMeasurementID AS unitOfMeasurementID,stockInQuantity,utilized,unused`,
+                                        ims_material_withdrawal_details_tbl.itemDescription as itemDescription,itemUsageRemarks, ims_material_withdrawal_details_tbl.quantity as quantity,
+                                        ims_material_withdrawal_details_tbl.unitOfMeasurementID AS unitOfMeasurementID,utilized,unused`,
                                         `${condition}`);
 				tableData.map((items,index)=>{
                                         if (readOnly) {
@@ -1804,7 +1844,7 @@ $(document).ready(function() {
                                                     <div class="uom">${items.unitOfMeasurementID}</div>
                                                 </td>
 												<td>
-                                                    <div class="stockinquantity">${items.stockInQuantity}</div>
+                                                    <div class="stockinquantity">${items.quantity}</div>
                                                 </td>
                                                 <td>
                                                     <div class="utilized">${items.utilized}</div>
@@ -1831,7 +1871,7 @@ $(document).ready(function() {
                                                     <div class="uom">${items.unitOfMeasurementID}</div>
                                                 </td>
 												<td>
-                                                    <div class="stockinquantity">${items.stockInQuantity}</div>
+                                                    <div class="stockinquantity">${items.quantity}</div>
                                                 </td>
                                                 <td class="text-center">
                                                     <div class="utilized">

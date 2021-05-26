@@ -144,25 +144,26 @@ $(document).on("click",".btnCancel", function(){
 });
 
 $(document).on("change", "[name=leaveStatus]", function(){
-    let leaveID = $(this).attr("leaveid");
-    let attrID  = $(this).attr("id");
-    let thisValue = $(this).val();
-    let employeeCondition  = getTableData("hris_employee_leave_tbl", "COUNT(employeeLeaveID) AS employeeLength", `leaveID = '${leaveID}' AND leaveCredit != '0'`);
-    let leaveFormCondition = getTableData("hris_leave_request_tbl", "COUNT(leaveRequestID) AS formLength", `leaveID = '${leaveID}'`);
-    console.log(employeeCondition[0].employeeLength +" | "+ leaveFormCondition[0].formLength);
+    if($(this).attr("leaveid")){
+        let leaveID = $(this).attr("leaveid");
+        let attrID  = $(this).attr("id");
+        let thisValue = $(this).val();
+        let employeeCondition  = getTableData("hris_employee_leave_tbl", "COUNT(employeeLeaveID) AS employeeLength", `leaveID = '${leaveID}' AND leaveCredit != '0'`);
+        let leaveFormCondition = getTableData("hris_leave_request_tbl", "COUNT(leaveRequestID) AS formLength", `leaveID = '${leaveID}'`);
 
-    if((employeeCondition[0].employeeLength > 0 || leaveFormCondition[0].formLength > 0 ) && thisValue == 0){
-        setTimeout(function(){
-            $("#"+attrID).removeClass("is-valid").removeClass("validated").addClass("is-invalid");
-            $(".select2-selection").removeClass("no-error").addClass("has-error");
-            $("#invalid-inputleaveStatus").text(`This record is currently in use!`);
-        },180);
-        $("#btnUpdate").prop("disabled", true);
-    }else{
-        $("#"+attrID).removeClass("is-invalid");
-        $("#invalid-inputleaveStatus").text(``);
-        $("#btnUpdate").prop("disabled", false);
-        $(".select2-selection").addClass("no-error").removeClass("has-error");
+        if((employeeCondition[0].employeeLength > 0 || leaveFormCondition[0].formLength > 0 ) && thisValue == 0){
+            setTimeout(function(){
+                $("#"+attrID).removeClass("is-valid").removeClass("validated").addClass("is-invalid");
+                $(".select2-selection").removeClass("no-error").addClass("has-error");
+                $("#invalid-inputleaveStatus").text(`This record is currently in use!`);
+            },180);
+            $("#btnUpdate").prop("disabled", true);
+        }else{
+            $("#"+attrID).removeClass("is-invalid");
+            $("#invalid-inputleaveStatus").text(``);
+            $("#btnUpdate").prop("disabled", false);
+            $(".select2-selection").addClass("no-error").removeClass("has-error");
+        }  
     }
 
 });

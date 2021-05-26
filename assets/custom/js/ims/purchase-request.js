@@ -428,7 +428,7 @@ $(document).ready(function() {
 				<tr class="${btnClass}" id="${encryptString(purchaseRequestID )}">
 					<td>${getFormCode("PR", createdAt, purchaseRequestID )}</td>
 					<td>${fullname}</td>
-					<td>${billMaterialID && billMaterialID != 0 ? getFormCode("BOM", ceCreatedAt, billMaterialID) : '-'}</td>
+					<td>${billMaterialID && billMaterialID != 0 ? getFormCode("PBR", ceCreatedAt, billMaterialID) : '-'}</td>
 					<td>
 						<div>
 							${projectListName || '-'}
@@ -534,7 +534,7 @@ $(document).ready(function() {
             <tr class="${btnClass}" id="${encryptString(purchaseRequestID )}">
                 <td>${getFormCode("PR", createdAt, purchaseRequestID )}</td>
                 <td>${fullname}</td>
-				<td>${billMaterialID && billMaterialID != 0 ? getFormCode("BOM", ceCreatedAt, billMaterialID) : '-'}</td>
+				<td>${billMaterialID && billMaterialID != 0 ? getFormCode("PBR", ceCreatedAt, billMaterialID) : '-'}</td>
 				<td>
 					<div>
 						${projectListName || '-'}
@@ -724,10 +724,10 @@ $(document).ready(function() {
 				return `
 				<option 
 				value     = "${bom.billMaterialID}" 
-				bomCode    = "${getFormCode("BOM", bom.createdAt, bom.billMaterialID)}"
+				bomCode    = "${getFormCode("PBR", bom.createdAt, bom.billMaterialID)}"
 				projectID = "${bom.projectID}"
 				${bom.billMaterialID == id && "selected"}>
-				${getFormCode("BOM", bom.createdAt, bom.billMaterialID)}
+				${getFormCode("PBR", bom.createdAt, bom.billMaterialID)}
 				</option>`;
 			})
 		} else {
@@ -735,10 +735,10 @@ $(document).ready(function() {
 				return `
 				<option 
 					value     = "${bom.billMaterialID}" 
-					bomCode    = "${getFormCode("BOM", bom.createdAt, bom.billMaterialID)}"
+					bomCode    = "${getFormCode("PBR", bom.createdAt, bom.billMaterialID)}"
 					projectID = "${bom.projectID}"
 					${bom.billMaterialID == id && "selected"}>
-					${getFormCode("BOM", bom.createdAt, bom.billMaterialID)}
+					${getFormCode("PBR", bom.createdAt, bom.billMaterialID)}
 				</option>`;
 			})
 		}

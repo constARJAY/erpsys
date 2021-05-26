@@ -1,7 +1,7 @@
 $(document).ready(function(){
     initDataTables();
     tableContent();
-
+});
 
 // OPENING ADD & EDIT MODAL
 $(document).on("click",".addLoan", function(){
@@ -76,7 +76,7 @@ $(document).on("click",".editloan", function(){
                                                         <div class="col-md-12 col-sm-12">
                                                             <div class="form-group">
                                                                 <label for="">Status <strong class="text-danger">*</strong></label>
-                                                                <select class="form-control select2 validate" name="loanStatus" id="inputloanStatus" getloanid="${tableData[0]["loanID"]}">
+                                                                <select class="form-control select2 validate" name="loanStatus" loanid="${loanID}" id="inputloanStatus">
                                                                     ${statusOption}
                                                                 </select>
                                                                 <div class="invalid-feedback d-block" id="invalid-inputloanStatus"></div>
@@ -140,6 +140,28 @@ $(document).on("click",".btnCancel", function(){
     }
 });
 
+
+$(document).on("change", "[name=loanStatus]", function(){
+    if($(this).attr("loanid")){
+        let loanID      = $(this).attr("loanid");
+        let attrID      = $(this).attr("id");
+        let thisValue   = $(this).val();
+        let loanFormCondition = getTableData("hris_loan_form_tbl", "COUNT(loanFormID) as loanLength", "loanID="+loanID);
+        if(loanFormCondition[0].loanLength > 0 && thisValue == 0){
+            setTimeout(function(){
+                $("#"+attrID).removeClass("is-valid").removeClass("validated").addClass("is-invalid");
+                $(".select2-selection").removeClass("no-error").addClass("has-error");
+                $("#invalid-inputloanStatus").text(`This record is currently in use!`);
+            },180);
+            $("#btnUpdate").prop("disabled", true);
+        }else{
+            $("#"+attrID).removeClass("is-invalid");
+            $("#invalid-inputloanStatus").text(``);
+            $("#btnUpdate").prop("disabled", false);
+            $(".select2-selection").addClass("no-error").removeClass("has-error");
+        }
+    }
+});
 // FUNCTIONS
 
 function initDataTables() {
@@ -216,35 +238,3 @@ function tableContent(){
                 }
             })
 }
-
-    // ------ CHECK LOAN TYPE STATUS -------
-    $(document).on("change","#inputloanStatus",function(){
-        var tempCategoryStatus = $(this).find("option:selected").val()
-        var getloanID = $(this).attr("getloanid") ;
-        var itemData = getTableData("hris_loan_form_tbl INNER JOIN hris_loan_tbl USING(loanID)", 
-        "loanStatus", "loanStatus = 1 AND loanID ="+getloanID, "");
-
-        if(itemData.length != 0){
-            if(tempCategoryStatus == 0 ){
-                setTimeout(function(){
-                    $(this).removeClass("is-valid").addClass("is-invalid");
-                    $("#invalid-inputloanStatus").removeClass("is-valid").addClass("is-invalid");
-                    $("#invalid-inputloanStatus").text('This record is currently in use!');
-                    document.getElementById("btnUpdate").disabled = true;
-                    
-                },200)
-                        
-                            
-            }
-            else{
-                $(this).removeClass("is-invalid").addClass("is-valid");
-                $("#invalid-inputloanStatus").removeClass("is-invalid").addClass("is-valid");
-                $("#invalid-inputloanStatus").text('');
-                document.getElementById("btnUpdate").disabled = false;
-            }
-        }
-
-    });
-    // ------ END CHECK LOAN TYPE STATUS -------
-
-});

@@ -33,7 +33,7 @@ async function saveFormData(
 
 // ----- FORM/DOCUMENT CONFIRMATION -----
 function formConfirmation(
-	method           = "", // save|cancelform|approve|reject|submit|cancel
+	method           = "", // save|cancelform|approve|reject|submit|cancel|drop
 	action           = "",
 	title            = "",
 	modalID          = "",

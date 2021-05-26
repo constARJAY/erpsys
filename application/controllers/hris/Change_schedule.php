@@ -11,7 +11,7 @@ class Change_schedule extends CI_Controller {
 
     public function index($id = "")
     {
-        $data["title"] = "Change Schedule Form";
+        $data["title"] = "Change Schedule";
         $this->load->view("template/header", $data);
         $this->load->view("hris/change_schedule/index");
         $this->load->view("template/footer");

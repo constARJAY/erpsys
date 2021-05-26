@@ -245,7 +245,7 @@ $(document).ready(function () {
 				LEFT JOIN hris_employee_list_tbl USING(employeeID)`,
 			"hris_change_schedule_tbl.*, CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname",
 			`employeeID != ${sessionID} AND changeScheduleStatus != 0 AND changeScheduleStatus != 4`,
-			`FIELD(changeScheduleStatus, 0, 1, 3, 2, 4), COALESCE(hris_change_schedule_tbl.submittedAt, hris_change_schedule_tbl.createdAt)`
+			`FIELD(changeScheduleStatus, 0, 1, 3, 2, 4, 5), COALESCE(hris_change_schedule_tbl.submittedAt, hris_change_schedule_tbl.createdAt)`
 		);
 
 		let html = `
@@ -325,12 +325,14 @@ $(document).ready(function () {
 
 	// ----- MY FORMS CONTENT -----
 	function myFormsContent() {
+		uniqueData = [];
+
 		$("#tableMyFormsParent").html(preloader);
 		let scheduleData = getTableData(
 			"hris_change_schedule_tbl LEFT JOIN hris_employee_list_tbl USING(employeeID)",
 			"hris_change_schedule_tbl.*, CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname, hris_change_schedule_tbl.createdAt AS dateCreated",
 			`hris_change_schedule_tbl.employeeID = ${sessionID}`,
-			`FIELD(changeScheduleStatus, 0, 1, 3, 2, 4), COALESCE(hris_change_schedule_tbl.submittedAt, hris_change_schedule_tbl.createdAt)`
+			`FIELD(changeScheduleStatus, 0, 1, 3, 2, 4, 5), COALESCE(hris_change_schedule_tbl.submittedAt, hris_change_schedule_tbl.createdAt)`
 		);
 
 		let html = `
@@ -580,7 +582,7 @@ $(document).ready(function () {
 			approversDate         = "",
 			changeScheduleStatus  = false,
 			submittedAt           = false,
-			createdAt             = false,
+			createdAt             = new Date,
 		} = data && data[0];
 
 		// ----- GET EMPLOYEE DATA -----
@@ -594,6 +596,7 @@ $(document).ready(function () {
 		readOnly ? preventRefresh(false) : preventRefresh(true);
 
 		$("#btnBack").attr("changeScheduleID", encryptString(changeScheduleID));
+		$("#btnBack").attr("code", getFormCode("SCH", moment(createdAt), changeScheduleID));
 		$("#btnBack").attr("status", changeScheduleStatus);
 		$("#btnBack").attr("employeeID", employeeID);
 		$("#btnBack").attr("cancel", isFromCancelledDocument);
@@ -766,7 +769,7 @@ $(document).ready(function () {
             </div>
         </div>
 		<div class="approvers">
-			${getApproversStatus(approversID, approversStatus, approversDate)}
+			${!isRevise ? getApproversStatus(approversID, approversStatus, approversDate) : ""}
 		</div>`;
 
 		setTimeout(() => {
@@ -1131,7 +1134,7 @@ $(document).ready(function () {
 			if (employeeID != sessionID) {
 				notificationData = {
 					moduleID:                60,
-					notificationTitle:       "Change Schedule Form",
+					notificationTitle:       "Change Schedule",
 					notificationDescription: `${employeeFullname(sessionID)} asked for your approval.`,
 					notificationType:        2,
 					employeeID,
@@ -1201,7 +1204,7 @@ $(document).ready(function () {
 				notificationData = {
 					moduleID:                60,
 					tableID:                 id,
-					notificationTitle:       "Change Schedule Form",
+					notificationTitle:       "Change Schedule",
 					notificationDescription: `${getFormCode("SCH", createdAt, id)}: Your request has been approved.`,
 					notificationType:        7,
 					employeeID,
@@ -1211,7 +1214,7 @@ $(document).ready(function () {
 				notificationData = {
 					moduleID:                60,
 					tableID:                 id,
-					notificationTitle:       "Change Schedule Form",
+					notificationTitle:       "Change Schedule",
 					notificationDescription: `${employeeFullname(employeeID)} asked for your approval.`,
 					notificationType:         2,
 					employeeID:               getNotificationEmployeeID(approversID, dateApproved),
@@ -1294,7 +1297,7 @@ $(document).ready(function () {
 				let notificationData = {
 					moduleID:                60,
 					tableID: 				 id,
-					notificationTitle:       "Change Schedule Form",
+					notificationTitle:       "Change Schedule",
 					notificationDescription: `${getFormCode("SCH", createdAt, id)}: Your request has been denied.`,
 					notificationType:        1,
 					employeeID,
@@ -1323,20 +1326,22 @@ $(document).ready(function () {
 	// ----- DROP DOCUMENT -----
 	$(document).on("click", "#btnDrop", function() {
 		const changeScheduleID = decryptString($(this).attr("changeScheduleID"));
-		const feedback          = $(this).attr("code") || getFormCode("SCH", dateToday(), id);
+		const feedback         = $(this).attr("code") || getFormCode("SCH", dateToday(), id);
 
 		const id = decryptString($(this).attr("changeScheduleID"));
 		let data = {};
-		data["tableData[changeScheduleID]"]     = changeScheduleID;
+		data["tableName"]                       = "hris_change_schedule_tbl";
+		data["whereFilter"]                     = `changeScheduleID = ${changeScheduleID}`;
 		data["tableData[changeScheduleStatus]"] = 5;
 		data["action"]                          = "update";
 		data["method"]                          = "drop";
+		data["feedback"]                        = feedback;
 		data["tableData[updatedBy]"]            = sessionID;
 
 		setTimeout(() => {
 			formConfirmation(
-				"submit",
 				"drop",
+				"update",
 				"CHANGE SCHEDULE",
 				"",
 				"form_change_schedule",
