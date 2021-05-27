@@ -1525,7 +1525,8 @@ $(document).ready(function() {
     function employeeLeaveBalance(data = false) {
         
         let {
-            employeeID = ""
+            employeeID      = "",
+            employeeRanking = null
         } = data;
 
         let getLeaveBalance = [];
@@ -1555,7 +1556,7 @@ $(document).ready(function() {
                     <td>
                         <div class="form-group">
                             <input type="text"
-                                class="form-control validate number"
+                                class="form-control input-quantity text-left"
                                 name="leaveType"
                                 id="leaveType${index}"
                                 leaveid="${leaveID}"
@@ -1574,13 +1575,32 @@ $(document).ready(function() {
         }
 
         const getRanking = (employeeRanking = null) => {
-            let html = "";
+            let html = "<option selected disabled>Select Ranking</option>";
             let rankingOptions = [
-                // "Rank and Balance": 
-            ]
-            if (employeeRanking) {
-
-            }
+                {
+                    name:    "Rank and File",
+                    balance: 5
+                },
+                {
+                    name:    "Officer",
+                    balance: 7
+                },
+                {
+                    name:    "Managerial",
+                    balance: 9
+                },
+                {
+                    name:    "Executive",
+                    balance: 11
+                },
+            ];
+            rankingOptions.map(rank => {
+                html += `<option 
+                    value   = "${rank.name}" 
+                    balance = "${rank.balance}"
+                    ${rank.name == employeeRanking ? "selected" : ""}>${rank.name}</option>`;
+            })
+            return html;
         }
 
         let html = `
@@ -1589,9 +1609,13 @@ $(document).ready(function() {
                 <div class="col-12">
                     <div class="form-group">
                         <label>Ranking <code>*</code></label>
-                        <select class="form-control validate select2">
-                            ${getRanking()}
+                        <select class="form-control validate select2"
+                            name="employeeRanking"
+                            id="employeeRanking"
+                            required>
+                            ${getRanking(employeeRanking)}
                         </select>
+                        <div class="invalid-feedback d-block" id="invalid-employeeRanking"></div>
                     </div>
                 </div>
                 <div class="col-12">
@@ -2289,6 +2313,8 @@ $(document).ready(function() {
     }
 
     function getEmployeeLeaveBalanceData() {
+        const employeeRanking       = $(`[name="employeeRanking"]`).val();
+        const employeeRankingCredit = $(`[name="employeeRanking"] option:selected`).attr("balance");
         let result = [];
         $("[name=leaveType]").each(function() {
             let temp = {
@@ -2297,7 +2323,7 @@ $(document).ready(function() {
             }
             result.push(temp);
         })
-        return result;
+        return { employeeRanking, employeeRankingCredit, balance: result};
     }
 
     function getEmployeeScheduleData() {
@@ -2333,7 +2359,9 @@ $(document).ready(function() {
             formData.append(payrollKey, payrollData[payrollKey]);
         })
         const leaveBalanceData = getEmployeeLeaveBalanceData();
-        leaveBalanceData.map((leave, index) => {
+        formData.append(`employeeRanking`, leaveBalanceData.employeeRanking);
+        formData.append(`employeeRankingCredit`, leaveBalanceData.employeeRankingCredit);
+        leaveBalanceData.balance.map((leave, index) => {
             const { leaveTypeID, leaveBalance } = leave;
             formData.append(`leaveCredit[${index}][leaveTypeID]`, leaveTypeID);
             formData.append(`leaveCredit[${index}][leaveBalance]`, leaveBalance);

@@ -21,6 +21,13 @@ class EmployeeModule_model extends CI_Model {
         return $query ? $query->result_array() : [];
     }
 
+    // ----- UPDATE LEAVE CREDIT -----
+    public function updateLeaveCredit()
+    {
+        
+    }
+    // ----- UPDATE LEAVE CREDIT -----
+
     // ----- GENERATE PERMISSION -----
     public function generateEmployeePermission()
     {

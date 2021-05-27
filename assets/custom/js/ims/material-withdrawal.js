@@ -1670,7 +1670,7 @@ $(document).ready(function() {
             </div>
             <div class="col-md-12 col-sm-12">
                 <div class="form-group">
-                    <label>Reason ${!disabled ? "<code>*</code>" : ""}</label>
+                    <label>Description ${!disabled ? "<code>*</code>" : ""}</label>
                     <textarea class="form-control validate"
                         data-allowcharacters="[a-z][A-Z][0-9][ ][.][,][-][()]['][/][&]"
                         minlength="1"
@@ -1914,7 +1914,6 @@ $(document).ready(function() {
 	$(document).on("click", "#btnAdd", function () {
 		pageContent(true);
 		updateURL(null, true);
-		$(".title_content").text("This module is used to manage material withdrawal form details.");
 	});
 	// ----- END OPEN ADD FORM -----
 
@@ -2243,11 +2242,9 @@ $(document).ready(function() {
 		const tab = $(this).attr("href");
 		if (tab == "#forApprovalTab") {
 			forApprovalContent();
-			$(".title_content").text("This module is used to manage the submission and approval of material withdrawal.");
 		}
 		if (tab == "#myFormsTab") {
 			myFormsContent();
-			$(".title_content").text("This module is used to manage material withdrawal form details.");
 		}
 	});
 	// ----- END NAV LINK -----

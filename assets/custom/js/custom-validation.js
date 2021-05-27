@@ -126,6 +126,7 @@ const initAmount = (element = null, displayPrefix = false) => {
 		alias: "currency",
 		prefix: displayPrefix ? "₱ " : "",
 		allowMinus: false,
+		allowPlus:  false,
 	});
 };
 initAmount();
@@ -139,6 +140,7 @@ const initQuantity = (element = null) => {
 		alias: "currency",
 		prefix: "",
 		allowMinus: false,
+		allowPlus:  false,
 	});
 };
 initQuantity();

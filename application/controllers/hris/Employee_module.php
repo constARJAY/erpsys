@@ -19,6 +19,11 @@ class Employee_module extends CI_Controller {
         $this->load->view("template/footer");
     }
 
+    public function updateLeaveCredit()
+    {
+        $this->employeemodule->updateLeaveCredit();
+    }
+
     public function generateEmployeePermission() 
     {
         echo json_encode($this->employeemodule->generateEmployeePermission());
@@ -117,7 +122,9 @@ class Employee_module extends CI_Controller {
         $employeePagibig         = $this->input->post("employeePagibig") ?? null;
 
         // LEAVE BALANCE
-        $leaveCredit = $this->input->post("leaveCredit");
+        $employeeRanking       = $this->input->post("employeeRanking");
+        $employeeRankingCredit = $this->input->post("employeeRankingCredit");
+        $leaveCredit           = $this->input->post("leaveCredit");
 
         // SCHEDULE
         $scheduleID = $this->input->post("scheduleID");
@@ -142,6 +149,8 @@ class Employee_module extends CI_Controller {
             "employeeFirstname"         => $employeeFirstname,
             "employeeMiddlename"        => $employeeMiddlename,
             "employeeLastname"          => $employeeLastname,
+            "employeeRanking"           => $employeeRanking,
+            "employeeRankingCredit"     => $employeeRankingCredit,
             "employeeBirthday"          => $employeeBirthday,
             "employeeGender"            => $employeeGender,
             "employeeCitizenship"       => $employeeCitizenship,

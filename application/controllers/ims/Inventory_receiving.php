@@ -85,6 +85,12 @@ class Inventory_receiving extends CI_Controller {
                     "inventoryReceivingRemarks" => $inventoryReceivingRemarks,
                     "updatedBy"                 => $updatedBy,
                 ];
+            } else if ($method == "drop") {
+                $purchaseRequestData = [
+                    "reviseInventoryReceivingID" => $reviseInventoryReceivingID,
+                    "inventoryReceivingStatus"   => 5,
+                    "updatedBy"               => $updatedBy,
+                ]; 
             } else {
                 $this->inventoryreceiving->deleteItemAndSerial($inventoryReceivingID);
             }

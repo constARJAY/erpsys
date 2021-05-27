@@ -36,8 +36,8 @@ $(document).ready(function() {
 
 
     // ----- VIEW DOCUMENT -----
-	function viewDocument(view_id = false, readOnly = false, isRevise = false) {
-		const loadData = (id, isRevise = false) => {
+	function viewDocument(view_id = false, readOnly = false, isRevise = false, isFromCancelledDocument = false) {
+		const loadData = (id, isRevise = false, isFromCancelledDocument = false) => {
 			const tableData = getTableData("ims_inventory_receiving_tbl", "", "inventoryReceivingID=" + id);
 
 			if (tableData.length > 0) {
@@ -65,7 +65,7 @@ $(document).ready(function() {
 
 				if (isAllowed) {
 					if (isRevise && employeeID == sessionID) {
-						pageContent(true, tableData, isReadOnly, true);
+						pageContent(true, tableData, isReadOnly, true, isFromCancelledDocument);
 						updateURL(encryptString(id), true, true);
 					} else {
 						pageContent(true, tableData, isReadOnly);
@@ -84,7 +84,7 @@ $(document).ready(function() {
 
 		if (view_id) {
 			let id = decryptString(view_id);
-				id && isFinite(id) && loadData(id, isRevise);
+				id && isFinite(id) && loadData(id, isRevise, isFromCancelledDocument);
 		} else {
 			let url   = window.document.URL;
 			let arr   = url.split("?view_id=");
@@ -268,14 +268,14 @@ $(document).ready(function() {
 
 
     // ----- HEADER BUTTON -----
-	function headerButton(isAdd = true, text = "Add", isRevise = false) {
+	function headerButton(isAdd = true, text = "Add", isRevise = false, isFromCancelledDocument = false) {
 		let html;
 		if (isAdd) {
             html = `
             <button type="button" class="btn btn-default btn-add" id="btnAdd"><i class="icon-plus"></i> &nbsp;${text}</button>`;
 		} else {
 			html = `
-            <button type="button" class="btn btn-default btn-light" id="btnBack" revise="${isRevise}"><i class="fas fa-arrow-left"></i> &nbsp;Back</button>`;
+            <button type="button" class="btn btn-default btn-light" id="btnBack" revise="${isRevise}" cancel="${isFromCancelledDocument}"><i class="fas fa-arrow-left"></i> &nbsp;Back</button>`;
 		}
 		$("#headerButton").html(html);
 	}
@@ -291,7 +291,7 @@ $(document).ready(function() {
 				LEFT JOIN ims_purchase_order_tbl AS pct ON isrt.purchaseOrderID = pct.purchaseOrderID`,
 			"isrt.*, CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname,isrt.inventoryReceivingID ,isrt.createdAt AS dateCreatedIR, pct.purchaseOrderID, pct.createdAt AS dateCreatedPO",
 			`isrt.employeeID != ${sessionID} AND inventoryReceivingStatus != 0 AND inventoryReceivingStatus != 4`,
-			`FIELD(inventoryReceivingStatus, 0, 1, 3, 2, 4), COALESCE(isrt.submittedAt, isrt.createdAt)`
+			`FIELD(inventoryReceivingStatus, 0, 1, 3, 2, 4, 5), COALESCE(isrt.submittedAt, isrt.createdAt)`
 		);
 
 		let html = `
@@ -329,7 +329,7 @@ $(document).ready(function() {
 			let remarks       = inventoryReceivingRemarks ? inventoryReceivingRemarks : "-";
 			let dateCreated   = moment(createdAt).format("MMMM DD, YYYY hh:mm:ss A");
 			let dateSubmitted = submittedAt ? moment(submittedAt).format("MMMM DD, YYYY hh:mm:ss A") : "-";
-			let dateApproved  = inventoryReceivingStatus == 2 ? approversDate.split("|") : "-";
+			let dateApproved  = inventoryReceivingStatus == 2 || inventoryReceivingStatus == 5 ? approversDate.split("|") : "-";
 			if (dateApproved !== "-") {
 				dateApproved = moment(dateApproved[dateApproved.length - 1]).format("MMMM DD, YYYY hh:mm:ss A");
 			}
@@ -385,7 +385,7 @@ $(document).ready(function() {
             LEFT JOIN ims_purchase_order_tbl AS pct ON isrt.purchaseOrderID = pct.purchaseOrderID`,
             "isrt.*, CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname,isrt.inventoryReceivingID ,isrt.createdAt AS dateCreatedIR, pct.purchaseOrderID, pct.createdAt AS dateCreatedPO",
 			`isrt.employeeID = ${sessionID}`,
-			`FIELD(inventoryReceivingStatus, 0, 1, 3, 2, 4), COALESCE(isrt.submittedAt, isrt.createdAt)`
+			`FIELD(inventoryReceivingStatus, 0, 1, 3, 2, 4, 5), COALESCE(isrt.submittedAt, isrt.createdAt)`
 		);
 
 		let html = `
@@ -422,7 +422,7 @@ $(document).ready(function() {
 			let remarks       = inventoryReceivingRemarks ? inventoryReceivingRemarks : "-";
 			let dateCreated   = moment(dateCreatedIR).format("MMMM DD, YYYY hh:mm:ss A");
 			let dateSubmitted = submittedAt ? moment(submittedAt).format("MMMM DD, YYYY hh:mm:ss A") : "-";
-			let dateApproved  = inventoryReceivingStatus == 2 ? approversDate.split("|") : "-";
+			let dateApproved  = inventoryReceivingStatus == 2 || inventoryReceivingStatus == 5 ? approversDate.split("|") : "-";
 			if (dateApproved !== "-") {
 				dateApproved = moment(dateApproved[dateApproved.length - 1]).format("MMMM DD, YYYY hh:mm:ss A");
 			}
@@ -468,7 +468,7 @@ $(document).ready(function() {
 
 
     // ----- FORM BUTTONS -----
-	function formButtons(data = false, isRevise = false) {
+	function formButtons(data = false, isRevise = false, isFromCancelledDocument = false) {
 		let button = "";
 		if (data) {
 			let {
@@ -490,7 +490,7 @@ $(document).ready(function() {
 						id="btnSubmit" 
 						inventoryReceivingID="${inventoryReceivingID}"
 						code="${getFormCode("INRR", createdAt, inventoryReceivingID)}"
-						revise=${isRevise}><i class="fas fa-paper-plane"></i>
+						revise="${isRevise}" cancel="${isFromCancelledDocument}"><i class="fas fa-paper-plane"></i>
 						Submit
 					</button>`;
 
@@ -499,7 +499,7 @@ $(document).ready(function() {
 						<button 
 							class="btn btn-cancel  px-5 p-2" 
 							id="btnCancel"
-							revise="${isRevise}"><i class="fas fa-ban"></i> 
+							revise="${isRevise}" cancel="${isFromCancelledDocument}"><i class="fas fa-ban"></i> 
 							Cancel
 						</button>`;
 					} else {
@@ -528,6 +528,18 @@ $(document).ready(function() {
 							Cancel
 						</button>`;
 					}
+				} else if (inventoryReceivingStatus == 2) {
+					// DROP
+					button = `
+					<button type="button" 
+						class="btn btn-cancel px-5 p-2"
+						id="btnDrop" 
+						inventoryReceivingID="${encryptString(inventoryReceivingID)}"
+						code="${getFormCode("INRR", createdAt, inventoryReceivingID)}"
+						status="${inventoryReceivingStatus}"><i class="fas fa-ban"></i> 
+						Drop
+					</button>`;
+					
 				} else if (inventoryReceivingStatus == 3) {
 					// DENIED - FOR REVISE
 					if (!isDocumentRevised(inventoryReceivingID)) {
@@ -538,6 +550,20 @@ $(document).ready(function() {
 							inventoryReceivingID="${encryptString(inventoryReceivingID)}"
 							code="${getFormCode("INRR", createdAt, inventoryReceivingID)}"
 							status="${inventoryReceivingStatus}"><i class="fas fa-clone"></i>
+							Revise
+						</button>`;
+					}
+				} else if (inventoryReceivingStatus == 4) {
+					// CANCELLED - FOR REVISE
+					if (!isDocumentRevised(inventoryReceivingID)) {
+						button = `
+						<button
+							class="btn btn-cancel px-5 p-2"
+							id="btnRevise" 
+							inventoryReceivingID="${encryptString(inventoryReceivingID)}"
+							code="${getFormCode("INRR", createdAt, inventoryReceivingID)}"
+							status="${inventoryReceivingStatus}"
+							cancel="true"><i class="fas fa-clone"></i>
 							Revise
 						</button>`;
 					}
@@ -985,7 +1011,7 @@ $(document).ready(function() {
 
 
     // ----- FORM CONTENT -----
-	function formContent(data = false, readOnly = false, isRevise = false) {
+	function formContent(data = false, readOnly = false, isRevise = false, isFromCancelledDocument = false) {
 		$("#page_content").html(preloader);
 		readOnly = isRevise ? false : readOnly;
 
@@ -1023,13 +1049,14 @@ $(document).ready(function() {
 		$("#btnBack").attr("inventoryReceivingID", inventoryReceivingID);
 		$("#btnBack").attr("status", inventoryReceivingStatus);
 		$("#btnBack").attr("employeeID", employeeID);
+		$("#btnBack").attr("cancel", isFromCancelledDocument);
 
 		let disabled = readOnly ? "disabled" : "";
 		let disabledReference = purchaseOrderID && purchaseOrderID != "0" ? "disabled" : disabled;
 
 		let tableInventoryReceivingItems = !disabled ? "tableInventoryReceivingItems" : "tableInventoryReceivingItems0";
 
-		let button = formButtons(data, isRevise);
+		let button = formButtons(data, isRevise, isFromCancelledDocument);
 
 		let reviseDocumentNo    = isRevise ? inventoryReceivingID  : reviseinventoryReceivingID ;
 		let documentHeaderClass = isRevise || reviseinventoryReceivingID  ? "col-lg-4 col-md-4 col-sm-12 px-1" : "col-lg-2 col-md-6 col-sm-12 px-1";
@@ -1137,10 +1164,10 @@ $(document).ready(function() {
 			<div class="col-md-3 col-sm-12">
                 <div class="form-group">
                     <label>Receipt No. ${!disabled ? "<code>*</code>" : ""}</label>
-                    <input type="text" class="form-control" 
+                    <input type="text" class="form-control validate" 
 					name="receiptNo" 
 					id="receiptNo" 
-					data-allowcharacters="[0-9][a-z][A-Z][-]"
+					data-allowcharacters="[0-9][-]"
 					minlength="5"
 					maxlength="20"
 					required 
@@ -1237,7 +1264,7 @@ $(document).ready(function() {
 
 
     // ----- PAGE CONTENT -----
-	function pageContent(isForm = false, data = false, readOnly = false, isRevise = false) {
+	function pageContent(isForm = false, data = false, readOnly = false, isRevise = false, isFromCancelledDocument = false) {
 		$("#page_content").html(preloader);
 		if (!isForm) {
 			preventRefresh(false);
@@ -1259,9 +1286,9 @@ $(document).ready(function() {
 			myFormsContent();
 			updateURL();
 		} else {
-			headerButton(false, "", isRevise);
+			headerButton(false, "", isRevise, isFromCancelledDocument);
 			headerTabContent(false);
-			formContent(data, readOnly, isRevise);
+			formContent(data, readOnly, isRevise, isFromCancelledDocument);
 		}
 	}
 	viewDocument();
@@ -1405,6 +1432,7 @@ $(document).ready(function() {
 	// ----- SAVE CLOSE FORM -----
 	$(document).on("click", "#btnBack", function () {
 		const id         = $(this).attr("inventoryReceivingID");
+		const isFromCancelledDocument = $(this).attr("cancel") == "true";
 		const revise     = $(this).attr("revise") == "true";
 		const employeeID = $(this).attr("employeeID");
 		const feedback   = $(this).attr("code") || getFormCode("INRR", dateToday(), id);
@@ -1413,11 +1441,22 @@ $(document).ready(function() {
 		if (status != "false" && status != 0) {
 			
 			if (revise) {
-				const action = revise && "insert" || (id && feedback ? "update" : "insert");
+				// const action = revise && "insert" || (id && feedback ? "update" : "insert");
+				const action = revise && !isFromCancelledDocument && "insert" || (id ? "update" : "insert");
 				const data   = getInventoryReceivingData(action, "save", "0", id);
-				data["inventoryReceivingStatus"]   = 0;
-				data["reviseInventoryReceivingID"] = id;
-				delete data["inventoryReceivingID"];
+				// data["inventoryReceivingStatus"]   = 0;
+				data.append("inventoryReceivingStatus", 0);
+				// data["reviseInventoryReceivingID"] = id;
+				// delete data["inventoryReceivingID"];
+
+				if (!isFromCancelledDocument) {
+					data.append("reviseInventoryReceivingID", id);
+					data.delete("inventoryReceivingID");
+				} else {
+					data.append("inventoryReceivingID", id);
+					data.delete("action");
+					data.append("action", "update");
+				}
 	
 				saveInventoryReceiving(data, "save", null, pageContent);
 			} else {
@@ -1448,15 +1487,26 @@ $(document).ready(function() {
 		if(!receivedCondition && !serialNumberCondition){
 
 			const id       = $(this).attr("inventoryReceivingID");
+			const isFromCancelledDocument = $(this).attr("cancel") == "true";
 			const revise   = $(this).attr("revise") == "true";
 			const feedback = $(this).attr("code") || getFormCode("INRR", dateToday(), id);
 			const action   = revise && "insert" || (id && feedback ? "update" : "insert");
 			const data     = getInventoryReceivingData(action, "save", "0", id);
-			data["inventoryReceivingStatus"] = 0;
+			// data["inventoryReceivingStatus"] = 0;
+			data.append("inventoryReceivingStatus", 0);
 	
 			if (revise) {
-				data["reviseInventoryReceivingID"] = id;
-				delete data["inventoryReceivingID"];
+				// data["reviseInventoryReceivingID"] = id;
+				// delete data["inventoryReceivingID"];
+
+				if (!isFromCancelledDocument) {
+					data.append("reviseInventoryReceivingID", id);
+					data.delete("inventoryReceivingID");
+				} else {
+					data.append("inventoryReceivingID", id);
+					data.delete("action");
+					data.append("action", "update");
+				}
 			}
 	
 			saveInventoryReceiving(data, "save", null, pageContent);
@@ -1487,9 +1537,10 @@ $(document).ready(function() {
 				
 				if ($(`.tableSerialBody tr`, this).length >= 1) {
 					let countSerial = $(`.tableSerialBody tr`, this).length;
+					let serialVal = $(`.tableSerialBody tr`, this).val();
 				
-					if (receivedQuantity != countSerial) {
-						showNotification("danger", "Serial number is not equal on received items!");
+					if (receivedQuantity != countSerial && (countSerial >1 || serialVal !="")) {
+						// showNotification("danger", "Serial number is not equal on received items!");
 
 						$(`.received [name="received"]`, this).removeClass("is-valid, no-error").addClass("is-invalid");
 						$(`.received .invalid-feedback`, this).text("Serial number is not equal on received items!");
@@ -1511,14 +1562,14 @@ $(document).ready(function() {
 							$(`.servicescope .invalid-feedback`, this).text("");
 						})
 
-						$(`.tableSerialBody tr`, this).each(function() {
-							if ($(`.servicescope [name="serialNumber"]`, this).val()?.trim() == "") {
-								$(`.servicescope [name="serialNumber"]`, this).removeClass("is-valid").removeClass("no-error").addClass("is-invalid");
-								$(`.servicescope .invalid-feedback`, this).text("Please input serial number");
-								const id = "#"+$(`.servicescope [name="serialNumber"]`, this).attr("id");
-								invalidInputs.push(id);
-							}
-						})
+						// $(`.tableSerialBody tr`, this).each(function() {
+						// 	if ($(`.servicescope [name="serialNumber"]`, this).val()?.trim() == "") {
+						// 		$(`.servicescope [name="serialNumber"]`, this).removeClass("is-valid").removeClass("no-error").addClass("is-invalid");
+						// 		$(`.servicescope .invalid-feedback`, this).text("Please input serial number");
+						// 		const id = "#"+$(`.servicescope [name="serialNumber"]`, this).attr("id");
+						// 		invalidInputs.push(id);
+						// 	}
+						// })
 					}
 				} else {
 					if ($(`.servicescope [name="serialNumber"]`, this).val() != "") {
@@ -1717,6 +1768,22 @@ $(document).ready(function() {
 	});
 	// ----- END REJECT DOCUMENT -----
 
+	// ----- DROP DOCUMENT -----
+	$(document).on("click", "#btnDrop", function() {
+		const inventoryReceivingID = decryptString($(this).attr("inventoryReceivingID"));
+		const feedback          = $(this).attr("code") || getFormCode("TR", dateToday(), id);
+
+		const id = decryptString($(this).attr("inventoryReceivingID"));
+		let data = new FormData;
+		data.append("inventoryReceivingID", inventoryReceivingID);
+		data.append("action", "update");
+		data.append("method", "drop");
+		data.append("updatedBy", sessionID);
+
+		savePurchaseRequest(data, "drop", null, pageContent);
+	})
+	// ----- END DROP DOCUMENT -----
+
 
     // ----- NAV LINK -----
 	$(document).on("click", ".nav-link", function () {
@@ -1804,6 +1871,11 @@ function getConfirmation(method = "submit") {
 			swalText  = "Are you sure to cancel this document?";
 			swalImg   = `${base_url}assets/modal/cancel.svg`;
 			break;
+		case "drop":
+			swalTitle = `DROP ${title.toUpperCase()}`;
+			swalText  = "Are you sure to drop this document?";
+			swalImg   = `${base_url}assets/modal/drop.svg`;
+			break;
 		default:
 			swalTitle = `CANCEL ${title.toUpperCase()}`;
 			swalText  = "Are you sure that you want to cancel this process?";
@@ -1861,6 +1933,8 @@ function saveInventoryReceiving(data = null, method = "submit", notificationData
 							swalTitle = `${getFormCode("INRR", dateCreated, insertedID)} approved successfully!`;
 						} else if (method == "deny") {
 							swalTitle = `${getFormCode("INRR", dateCreated, insertedID)} denied successfully!`;
+						} else if (method == "drop") {
+							swalTitle = `${getFormCode("INRR", dateCreated, insertedID)} dropped successfully!`;
 						}	
 		
 						if (isSuccess == "true") {

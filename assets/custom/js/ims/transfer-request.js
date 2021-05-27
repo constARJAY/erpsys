@@ -1367,6 +1367,7 @@ $(document).ready(function() {
 			approversID             = "",
 			approversStatus         = "",
 			approversDate           = "",
+			transferRequestReason	="",
 			transferRequestStatus   = false,
 			transferRequestRemarks   = false,
 			submittedAt             = false,
@@ -1620,6 +1621,23 @@ $(document).ready(function() {
                 </div>
             </div>
 
+			<div class="col-md-12 col-sm-12">
+                <div class="form-group">
+                    <label>Description ${!disabled ? "<code>*</code>" : ""}</label>
+                    <textarea class="form-control validate"
+                        data-allowcharacters="[a-z][A-Z][0-9][ ][.][,][-][()]['][/][&]"
+                        minlength="1"
+                        maxlength="200"
+                        id="transferRequestReason"
+                        name="transferRequestReason"
+                        required
+                        rows="4"
+                        style="resize:none;"
+						${disabled}>${transferRequestReason ?? ""}</textarea>
+                    <div class="d-block invalid-feedback" id="invalid-transferRequestReason"></div>
+                </div>
+            </div>
+
             <div class="col-sm-12">
                 <div class="w-100">
 					<hr class="pb-1">
@@ -1843,7 +1861,6 @@ $(document).ready(function() {
 	$(document).on("click", "#btnAdd", function () {
 		pageContent(true);
 		updateURL(null, true);
-		$(".title_content").text("This module is used to manage transfer request form details.");
 	});
 	// ----- END OPEN ADD FORM -----
 
@@ -2187,11 +2204,9 @@ $(document).ready(function() {
 		const tab = $(this).attr("href");
 		if (tab == "#forApprovalTab") {
 			forApprovalContent();
-			$(".title_content").text("This module is used to manage the submission and approval of transfer request.");
 		}
 		if (tab == "#myFormsTab") {
 			myFormsContent();
-			$(".title_content").text("This module is used to manage transfer request form details.");
 		}
 	});
 	// ----- END NAV LINK -----
