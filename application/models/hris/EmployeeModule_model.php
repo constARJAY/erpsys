@@ -24,7 +24,14 @@ class EmployeeModule_model extends CI_Model {
     // ----- UPDATE LEAVE CREDIT -----
     public function updateLeaveCredit()
     {
-        
+        $result = [];
+        $dateToday = date("Y-m-d H:i:s");
+        $employees = $this->getAllEmployee();
+        foreach ($employees as $emp) {
+            $employeeID        = $emp["employeeID"];
+            $employeeHiredDate = $emp["employeeHiredDate"];
+
+        }
     }
     // ----- UPDATE LEAVE CREDIT -----
 
