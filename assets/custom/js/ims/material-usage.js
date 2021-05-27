@@ -1356,7 +1356,7 @@ $(document).ready(function() {
                                 <th>Withdrawn</th>
                                 <th>Utilized ${!disabled ? "<code>*</code>" : ""}</th>
                                 <th>Unused</th>
-                                <th>Remarks${!disabled ? "<code>*</code>" : ""}</th>
+                                <th>Remarks ${!disabled ? "<code>*</code>" : ""}</th>
                             </tr>
                         </thead>
                         <tbody class="itemProjectTableBody" project="true">

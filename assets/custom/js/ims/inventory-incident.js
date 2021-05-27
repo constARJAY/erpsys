@@ -1301,7 +1301,7 @@ $(document).ready(function() {
         const index     		= $(this).closest("tr").first().attr("index");
 		const isProject 		= $(this).closest("tbody").attr("project") == "true";
 		const attr      		= isProject ? "[project=true]" : "";
-		const quantity  		= $(`#quantity${index}${attr}`).val();
+		const quantity  		= parseInt($(`#quantity${index}${attr}`).val().replaceAll(",", ""))|| 0;
         const barcodeval  	= $(this).closest("tr").find('[name=barcode]').val();
 
 		const data = getTableData
@@ -1319,11 +1319,11 @@ $(document).ready(function() {
 					} = item;
 		
 					
-					let receiving_Quantity  = stocks ? stocks : "0";
+					let receiving_Quantity  = stocks ? parseInt(stocks) : "0";
 		
 				
 						if(barcodeval !="" ){
-							if(receiving_Quantity > quantity || receiving_Quantity == quantity ){
+							if(receiving_Quantity >= quantity ){
 								$(`#quantity${index}${attr}`).removeClass("is-invalid").addClass("is-valid");
 								$(this).closest("tr").find("#invalid-quantity").removeClass("is-invalid").addClass("is-valid");
 								$(this).closest("tr").find("#invalid-quantity").text('');

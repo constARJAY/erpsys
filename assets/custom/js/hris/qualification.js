@@ -53,6 +53,8 @@ $(document).on("click",".addQualification", function(){
 });
 
 $(document).on("click",".editQualification", function(){
+    const allowedUpdate = isUpdateAllowed(26);
+    let asterisk    =   !allowedUpdate ? `` : `<strong class="text-danger">*</strong>`;
     $(".modal_qualification_header").text("EDIT QUALIFICATION");
     let qualificationID =  $(this).data("qualificationid");
     let tableData       =  getTableData("hris_qualification_tbl","","qualificationID="+qualificationID);
@@ -66,7 +68,7 @@ $(document).on("click",".editQualification", function(){
                                                     <div class="row"> 
                                                         <div class="col-md-12 col-sm-12">
                                                             <div class="form-group">
-                                                                <label for="">Qualification<strong class="text-danger">*</strong></label>
+                                                                <label for="">Qualification ${asterisk}</label>
                                                                 <input type="text" class="form-control validate" name="qualificationName" id="inputqualification" 
                                                                     data-allowcharacters="[A-Z][ ][a-z][0-9][.][,][-][()]['][/][?][*][!][#][%]" minlength="2" maxlength="150" unique="${tableData[0]["qualificationID"]}" value="${tableData[0]["qualificationName"]}" required >
                                                                 <div class="invalid-feedback d-block" id="invalid-inputqualification"></div>
@@ -74,7 +76,7 @@ $(document).on("click",".editQualification", function(){
                                                         </div>
                                                         <div class="col-md-12 col-sm-12">
                                                             <div class="form-group">
-                                                                <label for="">Status <strong class="text-danger">*</strong></label>
+                                                                <label for="">Status ${asterisk}</label>
                                                                 <select class="form-control select2 validate" name="qualificationStatus" id="inputqualificationStatus">
                                                                     ${statusOption}
                                                                 </select>
@@ -92,6 +94,12 @@ $(document).on("click",".editQualification", function(){
     setTimeout(function(){
         $("#modal_qualification_content").html(modal_qualification_content);
         initAll();
+        if (!allowedUpdate) {
+            $("#modal_qualification_content").find("input, select, textarea").each(function() {
+                $(this).attr("disabled", true);
+            })
+            $("#btnUpdate").hide();
+        }
     },500);
             
       

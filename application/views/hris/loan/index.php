@@ -11,9 +11,11 @@
                     <h1 class="mt-3">List of Loan Types</h1>
                     <span>This module is used to manage the loan type details.</span>
                 </div>
-                <div class="col-sm-12 col-md-4 d-flex justify-content-end align-items-start">
-                    <button class="btn btn-default btn-add ml-2 d-flex justify-content-center align-items-center addLoan"><i class="icon-plus px-2"></i> Add Loan Type</button>
-                </div>
+                <?php if(isCreateAllowed(22)):?>
+                    <div class="col-sm-12 col-md-4 d-flex justify-content-end align-items-start">
+                        <button class="btn btn-default btn-add ml-2 d-flex justify-content-center align-items-center addLoan"><i class="icon-plus px-2"></i> Add Loan Type</button>
+                    </div>
+                <?php endif;?>
             </div>
         </div>
     </div>

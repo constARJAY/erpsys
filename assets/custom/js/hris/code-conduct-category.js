@@ -5,6 +5,7 @@ $(document).ready(function(){
 
 // OPENING ADD & EDIT MODAL
 $(document).on("click",".addCodeConductCategory", function(){
+    
     $("#modal_codeConductCategory").modal("show");
     $(".modal_codeConductCategory_header").text("ADD CODE OF CONDUCT CATEGORY");
     $("#modal_codeConductCategory_content").html(preloader);
@@ -14,7 +15,7 @@ $(document).on("click",".addCodeConductCategory", function(){
                                                     <div class="row"> 
                                                         <div class="col-md-12 col-sm-12">
                                                             <div class="form-group">
-                                                                <label for="">Code of Conduct Category Name <span class="text-danger">*</span></label>
+                                                                <label for="">Code of Conduct Category Name <strong class="text-danger">*</strong></label>
                                                                 <input 
                                                                     type="text" 
                                                                     class="form-control validate" 
@@ -53,11 +54,11 @@ $(document).on("click",".addCodeConductCategory", function(){
 });
 
 $(document).on("click",".editCodeConductCategory", function(){
+    const allowedUpdate = isUpdateAllowed(23);
     $(".modal_codeConductCategory_header").text("EDIT CODE OF CONDUCT CATEGORY");
     let codeConductCategoryID       =   $(this).data("codeconductcategoryid");
     let tableData       =   getTableData("hris_code_conduct_category_tbl","","codeConductCategoryID="+codeConductCategoryID);
-
-    // console.log(rowContent);
+    let asterisk      =   !allowedUpdate ? `` : `<strong class="text-danger">*</strong>`;
     $("#modal_codeConductCategory").modal("show");
     $("#modal_codeConductCategory_content").html(preloader);
     let statusOption        = tableData[0]["codeConductCategoryStatus"] == "1" ?`<option value="1" selected>Active</option> <option value="0" >Inactive</option>` : `<option value="1" >Active</option> <option value="0" selected>Inactive</option>`;
@@ -67,7 +68,7 @@ $(document).on("click",".editCodeConductCategory", function(){
                                                     <div class="row"> 
                                                         <div class="col-md-12 col-sm-12">
                                                             <div class="form-group">
-                                                                <label for="">Code of Conduct Category Name <strong class="text-danger">*</strong></label>
+                                                                <label for="">Code of Conduct Category Name ${asterisk}</label>
                                                                 <input type="text" class="form-control validate" name="codeConductCategoryName" id="inputcodeConductCategoryName" 
                                                                     data-allowcharacters="[a-z][A-Z][0-9][ ][.][,][-][()]['][/]" minlength="2" maxlength="150" unique="${tableData[0]["codeConductCategoryID"]}" value="${tableData[0]["codeConductCategoryName"]}" required >
                                                                 <div class="invalid-feedback d-block" id="invalid-inputcodeConductCategoryName"></div>
@@ -75,7 +76,7 @@ $(document).on("click",".editCodeConductCategory", function(){
                                                         </div>
                                                         <div class="col-md-12 col-sm-12">
                                                             <div class="form-group">
-                                                                <label for="">Status <strong class="text-danger">*</strong></label>
+                                                                <label for="">Status ${asterisk}</label>
                                                                 <select class="form-control select2 validate" name="codeConductCategoryStatus" id="inputcodeConductCategoryStatus" data-codeconductcategoryid="${tableData[0]["codeConductCategoryID"]}">
                                                                     ${statusOption}
                                                                 </select>
@@ -93,6 +94,12 @@ $(document).on("click",".editCodeConductCategory", function(){
     setTimeout(function(){
         $("#modal_codeConductCategory_content").html(modal_codeConductCategory_content);
         initAll();
+        if (!allowedUpdate) {
+            $("#modal_codeConductCategory_content").find("input, select, textarea").each(function() {
+                $(this).attr("disabled", true);
+            })
+            $("#btnUpdate").hide();
+        }
     },500);
             
       

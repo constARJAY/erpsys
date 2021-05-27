@@ -11,9 +11,11 @@
                     <h1 class="mt-3">List of Code of Conduct Section</h1>
                     <span>This module is used to manage the code of conduct section details.</span>
                 </div>
-                <div class="col-sm-12 col-md-4 d-flex justify-content-end align-items-start">
-                    <button class="btn btn-default btn-add ml-2 d-flex justify-content-center align-items-center addCodeConductSection"><i class="icon-plus px-2"></i> Add Section</button>
-                </div>
+                <?php if(isCreateAllowed(24)):?>
+                    <div class="col-sm-12 col-md-4 d-flex justify-content-end align-items-start">
+                        <button class="btn btn-default btn-add ml-2 d-flex justify-content-center align-items-center addCodeConductSection"><i class="icon-plus px-2"></i> Add Section</button>
+                    </div>
+                <?php endif;?>
             </div>
         </div>
     </div>

@@ -130,6 +130,7 @@ $(document).ready(function(){
 
      // ----- MODAL CONTENT -----
      function modalContent(data = false) {
+        let asterisk                   =   !allowedUpdate ? `` : `<strong class="text-danger">*</strong>`;
         let designationID              = data ? (data[0].designationID            ? data[0].designationID        : "") : "",
         departmentID             = data ? (data[0].departmentID       ? data[0].departmentID   : "") : "",
         designationName                = data ? (data[0].designationName          ? data[0].designationName      : "") : "",
@@ -153,7 +154,7 @@ $(document).ready(function(){
             <div class="row">
                 <div class="col-md-12 col-sm-12">
                     <div class="form-group">
-                        <label>Department Name <span class="text-danger font-weight-bold">*</span></label>
+                        <label>Department Name ${asterisk}</label>
                         <select 
                             class="form-control select2 validate" 
                             id="input_departmentID" 
@@ -168,7 +169,7 @@ $(document).ready(function(){
             <div class="row">
                 <div class="col-md-12 col-sm-12">
                     <div class="form-group">
-                        <label>Designation Name <span class="text-danger font-weight-bold">*</span></label>
+                        <label>Designation Name ${asterisk}</label>
                         <input 
                             type="text" 
                             class="form-control validate" 
@@ -188,7 +189,7 @@ $(document).ready(function(){
             <div class="row">
                 <div class="col-md-12 col-sm-12">
                     <div class="form-group">
-                        <label>Status <span class="text-danger font-weight-bold">*</span></label>
+                        <label>Status ${asterisk}</label>
                         <select 
                             class="form-control select2 validate" 
                             id="input_designationStatus" 

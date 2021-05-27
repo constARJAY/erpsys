@@ -58,10 +58,12 @@ $(document).on("click",".addCodeConductSection", function(){
 });
 
 $(document).on("click",".editCodeConductSection", function(){
+    const allowedUpdate = isUpdateAllowed(24);
     $(".modal_codeConductSection_header").text("EDIT CODE OF CONDUCT SECTION");
     let codeConductSectionID       =   $(this).data("codeconductsectionid");
     let tableData                  =   getTableData("hris_code_conduct_section_tbl","","codeConductSectionID="+codeConductSectionID);
     let codeConductCategoryID      =   tableData[0]["codeConductCategoryID"];
+    let asterisk                   =   !allowedUpdate ? `` : `<strong class="text-danger">*</strong>`;
 
     $("#modal_codeConductSection").modal("show");
     $("#modal_codeConductSection_content").html(preloader);
@@ -84,7 +86,7 @@ $(document).on("click",".editCodeConductSection", function(){
                                                     <div class="row"> 
                                                         <div class="col-md-12 col-sm-12">
                                                             <div class="form-group">
-                                                                <label for="">Code of Conduct Category <strong class="text-danger">*</strong></label>
+                                                                <label for="">Code of Conduct Category ${asterisk}</label>
                                                                 <select class="form-control select2 validate" name="codeConductCategoryID" id="inputcodeConductCategoryID" required>
                                                                     ${codeOfConductCategory}
                                                                 </select>
@@ -93,14 +95,14 @@ $(document).on("click",".editCodeConductSection", function(){
                                                         </div>
                                                         <div class="col-md-12 col-sm-12">
                                                             <div class="form-group">
-                                                                <label for="">Code of Conduct Description <strong class="text-danger">*</strong></label>
+                                                                <label for="">Code of Conduct Description ${asterisk}</label>
                                                                 <textarea class="form-control validate" data-allowcharacters="[a-z][A-Z][0-9][.][,][-][()]['][/][?][*][!][#][%][&][ ]" style="resize:none" name="codeConductSectionDescription" id="inputcodeConductSectionDescription" minlength="5" maxlength="500" required>${tableData[0]["codeConductSectionDescription"]}</textarea>
                                                                 <div class="invalid-feedback d-block" id="invalid-inputcodeConductSectionDescription"></div>
                                                             </div>
                                                         </div>
                                                         <div class="col-md-12 col-sm-12">
                                                             <div class="form-group">
-                                                                <label for="">Status <strong class="text-danger">*</strong></label>
+                                                                <label for="">Status ${asterisk}</label>
                                                                 <select class="form-control select2 validate" name="codeConductSectionStatus" id="inputcodeConductSectionStatus">
                                                                     ${statusOption}
                                                                 </select>
@@ -118,6 +120,12 @@ $(document).on("click",".editCodeConductSection", function(){
     setTimeout(function(){
         $("#modal_codeConductSection_content").html(modal_codeConductSection_content);
         initAll();
+        if (!allowedUpdate) {
+            $("#modal_codeConductSection_content").find("input, select, textarea").each(function() {
+                $(this).attr("disabled", true);
+            })
+            $("#btnUpdate").hide();
+        }
     },500);
             
       

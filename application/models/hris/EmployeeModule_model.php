@@ -25,12 +25,21 @@ class EmployeeModule_model extends CI_Model {
     public function updateLeaveCredit()
     {
         $result = [];
-        $dateToday = date("Y-m-d H:i:s");
-        $employees = $this->getAllEmployee();
+        $todayDate  = date("Y-m-d H:i:s");
+        $todayYear  = date("Y");
+        $todayMonth = (float)date("m");
+        $todayDay   = date("d");
+        $employees  = $this->getAllEmployee();
         foreach ($employees as $emp) {
             $employeeID        = $emp["employeeID"];
             $employeeHiredDate = $emp["employeeHiredDate"];
+            
+            $hiredYear  = date("Y", strtotime($employeeHiredDate));
+            $hiredMonth = (float)date("m", strtotime($employeeHiredDate));
+            $hiredDay   = date("d", strtotime($employeeHiredDate));
 
+            // if ($hiredMonth != 12)
+            
         }
     }
     // ----- UPDATE LEAVE CREDIT -----

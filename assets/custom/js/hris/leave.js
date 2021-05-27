@@ -53,10 +53,11 @@ $(document).on("click",".addLeave", function(){
 });
 
 $(document).on("click",".editleave", function(){
+    const allowedUpdate = isUpdateAllowed(21);
     $(".modal_leave_header").text("EDIT LEAVE TYPE");
-    let leaveID       =   $(this).data("leaveid");
-    let tableData       =   getTableData("hris_leave_tbl","","leaveID="+leaveID);
-
+    let leaveID     =   $(this).data("leaveid");
+    let tableData   =   getTableData("hris_leave_tbl","","leaveID="+leaveID);
+    let asterisk    =   !allowedUpdate ? `` : `<strong class="text-danger">*</strong>`;
     // console.log(rowContent);
     $("#modal_leave").modal("show");
     $("#modal_leave_content").html(preloader);
@@ -68,7 +69,7 @@ $(document).on("click",".editleave", function(){
                                                     <div class="row"> 
                                                         <div class="col-md-12 col-sm-12">
                                                             <div class="form-group">
-                                                                <label for="">Leave Type Name <strong class="text-danger">*</strong></label>
+                                                                <label for="">Leave Type Name ${asterisk}</label>
                                                                 <input type="text" class="form-control validate" name="leaveName" id="inputleaveName" 
                                                                     data-allowcharacters="[a-z][A-Z][0-9][ ][.][,][-][()]['][/]" minlength="2" maxlength="150" unique="${tableData[0]["leaveID"]}" value="${tableData[0]["leaveName"]}" required >
                                                                 <div class="invalid-feedback d-block" id="invalid-inputleaveName"></div>
@@ -76,7 +77,7 @@ $(document).on("click",".editleave", function(){
                                                         </div>
                                                         <div class="col-md-12 col-sm-12">
                                                             <div class="form-group">
-                                                                <label for="">Status <strong class="text-danger">*</strong></label>
+                                                                <label for="">Status ${asterisk}</label>
                                                                 <select class="form-control select2 validate" name="leaveStatus" id="inputleaveStatus" leaveid="${leaveID}">
                                                                     ${statusOption}
                                                                 </select>
@@ -94,6 +95,12 @@ $(document).on("click",".editleave", function(){
     setTimeout(function(){
         $("#modal_leave_content").html(modal_leave_content);
         initAll();
+        if (!allowedUpdate) {
+            $("#modal_leave_content").find("input, select, textarea").each(function() {
+                $(this).attr("disabled", true);
+            })
+            $("#btnUpdate").hide();
+        }
     },500);
             
       

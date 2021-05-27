@@ -2343,7 +2343,6 @@ $(document).ready(function() {
         })
         return result;
     }
-
     async function getEmployeeData() {
         let formData = new FormData();
         const informationData = getEmployeeInformationData();

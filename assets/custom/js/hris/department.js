@@ -113,6 +113,7 @@ $(document).ready(function(){
 
      // ----- MODAL CONTENT -----
      function modalContent(data = false) {
+        let asterisk                   =   !allowedUpdate ? `` : `<strong class="text-danger">*</strong>`;
         let departmentID              = data ? (data[0].departmentID            ? data[0].departmentID        : "") : "",
         departmentName                = data ? (data[0].departmentName          ? data[0].departmentName      : "") : "",
         departmentStatus      = data ? (data[0].departmentStatus? data[0].departmentStatus         : "") : "";
@@ -137,7 +138,7 @@ $(document).ready(function(){
             <div class="row">
                 <div class="col-md-12 col-sm-12">
                     <div class="form-group">
-                        <label>Department Name <span class="text-danger font-weight-bold">*</span></label>
+                        <label>Department Name ${asterisk}</label>
                         <input 
                             type="text" 
                             class="form-control validate" 
@@ -157,7 +158,7 @@ $(document).ready(function(){
             <div class="row">
                 <div class="col-md-12 col-sm-12">
                     <div class="form-group">
-                        <label>Status <span class="text-danger font-weight-bold">*</span></label>
+                        <label>Status ${asterisk}</label>
                         <select 
                             class="form-control select2 validate" 
                             id="input_departmentStatus" 

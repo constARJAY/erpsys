@@ -54,11 +54,11 @@ $(document).on("click",".addBranch", function(){
 });
 
 $(document).on("click",".editBranch", function(){
+    const allowedUpdate = isUpdateAllowed(25);
     $(".modal_branch_header").text("EDIT BRANCH");
-    let branchID       =   $(this).data("branchid");
-    let tableData       =   getTableData("hris_branch_tbl","","branchID="+branchID);
-
-    // console.log(rowContent);
+    let branchID      =   $(this).data("branchid");
+    let tableData     =   getTableData("hris_branch_tbl","","branchID="+branchID);
+    let asterisk      =   !allowedUpdate ? `` : `<strong class="text-danger">*</strong>`;
     $("#modal_branch").modal("show");
     $("#modal_branch_content").html(preloader);
     let statusOption        = tableData[0]["branchStatus"] == "1" ?`<option value="1" selected>Active</option> <option value="0" >Inactive</option>` : `<option value="1" >Active</option> <option value="0" selected>Inactive</option>`;
@@ -67,7 +67,7 @@ $(document).on("click",".editBranch", function(){
                                                     <div class="row"> 
                                                         <div class="col-md-12 col-sm-12">
                                                             <div class="form-group">
-                                                                <label for="">Branch Name <strong class="text-danger">*</strong></label>
+                                                                <label for="">Branch Name ${asterisk}</label>
                                                                 <input type="text" class="form-control validate" name="branchName" id="inputbranchName" 
                                                                     data-allowcharacters="[a-z][A-Z][0-9][ ][.][,][-][()]['][/]" minlength="2" maxlength="150" unique="${tableData[0]["branchID"]}" value="${tableData[0]["branchName"]}" required >
                                                                 <div class="invalid-feedback d-block" id="invalid-inputbranchName"></div>
@@ -75,7 +75,7 @@ $(document).on("click",".editBranch", function(){
                                                         </div>
                                                         <div class="col-md-12 col-sm-12">
                                                             <div class="form-group">
-                                                                <label for="">Status <strong class="text-danger">*</strong></label>
+                                                                <label for="">Status ${asterisk}</label>
                                                                 <select class="form-control select2 validate" name="branchStatus" id="inputbranchStatus">
                                                                     ${statusOption}
                                                                 </select>
@@ -93,6 +93,12 @@ $(document).on("click",".editBranch", function(){
     setTimeout(function(){
         $("#modal_branch_content").html(modal_branch_content);
         initAll();
+        if (!allowedUpdate) {
+            $("#modal_branch_content").find("input, select, textarea").each(function() {
+                $(this).attr("disabled", true);
+            })
+            $("#btnUpdate").hide();
+        }
     },500);
             
       

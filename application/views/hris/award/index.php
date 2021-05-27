@@ -11,12 +11,15 @@
                     <h1 class="mt-3">List of Awards</h1>
                     <span>This modules is used to manage the award details.</span>
                 </div>
-                <div class="col-sm-12 col-md-4 d-flex justify-content-end align-items-start">
-                    <button class="btn btn-default btn-add ml-2 d-flex justify-content-center align-items-center addAward">
-                        <i class="icon-plus px-2"></i> 
-                        <span class="d-none d-sm-none d-md-block d-lg-block d-xl-block">Add&nbsp;</span> Award
-                    </button>
-                </div>
+                <?php if(isCreateAllowed(27)):?>
+                    <div class="col-sm-12 col-md-4 d-flex justify-content-end align-items-start">
+                        <button class="btn btn-default btn-add ml-2 d-flex justify-content-center align-items-center addAward">
+                            <i class="icon-plus px-2"></i> 
+                            <span class="d-none d-sm-none d-md-block d-lg-block d-xl-block">Add&nbsp;</span> Award
+                        </button>
+                    </div>
+                <?php endif;?>
+
             </div>
         </div>
     </div>

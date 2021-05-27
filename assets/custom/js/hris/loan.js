@@ -53,6 +53,8 @@ $(document).on("click",".addLoan", function(){
 });
 
 $(document).on("click",".editloan", function(){
+    const allowedUpdate = isUpdateAllowed(22);
+    let asterisk    =   !allowedUpdate ? `` : `<strong class="text-danger">*</strong>`;
     $(".modal_loan_header").text("EDIT LOAN TYPE");
     let loanID       =   $(this).data("loanid");
     let tableData       =   getTableData("hris_loan_tbl","","loanID="+loanID);
@@ -67,7 +69,7 @@ $(document).on("click",".editloan", function(){
                                                     <div class="row"> 
                                                         <div class="col-md-12 col-sm-12">
                                                             <div class="form-group">
-                                                                <label for="">Loan Type Name <span class="text-danger">*</span></label>
+                                                                <label for="">Loan Type Name ${asterisk}</label>
                                                                 <input type="text" class="form-control validate" name="loanName" id="inputloanName" 
                                                                     data-allowcharacters="[a-z][A-Z][0-9][ ][.][,][-][()]['][/]" minlength="2" maxlength="50" unique="${tableData[0]["loanID"]}" value="${tableData[0]["loanName"]}" required >
                                                                 <div class="invalid-feedback d-block" id="invalid-inputloanName"></div>
@@ -75,7 +77,7 @@ $(document).on("click",".editloan", function(){
                                                         </div>
                                                         <div class="col-md-12 col-sm-12">
                                                             <div class="form-group">
-                                                                <label for="">Status <strong class="text-danger">*</strong></label>
+                                                                <label for="">Status ${asterisk}</label>
                                                                 <select class="form-control select2 validate" name="loanStatus" loanid="${loanID}" id="inputloanStatus">
                                                                     ${statusOption}
                                                                 </select>
@@ -93,6 +95,12 @@ $(document).on("click",".editloan", function(){
     setTimeout(function(){
         $("#modal_loan_content").html(modal_loan_content);
         initAll();
+        if (!allowedUpdate) {
+            $("#modal_loan_content").find("input, select, textarea").each(function() {
+                $(this).attr("disabled", true);
+            })
+            $("#btnUpdate").hide();
+        }
     },500);
             
       

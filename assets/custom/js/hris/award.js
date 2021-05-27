@@ -1,6 +1,7 @@
 $(document).ready(function(){
     initDataTables();
     tableContent();
+    
 });
 
 // OPENING ADD & EDIT MODAL
@@ -61,24 +62,26 @@ $(document).on("click",".addAward", function(){
     setTimeout(function(){
         $("#modal_award_content").html(modal_award_content);
         $("#awardSignatories").select2({ placeholder: "Select Signatories", theme: "bootstrap" });
+        initAll();
     },500); 
 });
 
 $(document).on("click",".editAward", function(){
+    const allowedUpdate = isUpdateAllowed(27);
     $(".modal_award_header").text("EDIT AWARD");
     let awardID       =   $(this).data("awardid");
-    let tableData       =   getTableData("hris_award_tbl","","awardID="+awardID);
-
+    let tableData     =   getTableData("hris_award_tbl","","awardID="+awardID);
+    let asterisk      =   !allowedUpdate ? `` : `<strong class="text-danger">*</strong>`;
     // console.log(rowContent);
     $("#modal_award").modal("show");
     $("#modal_award_content").html(preloader);
     let statusOption        = tableData[0]["awardStatus"] == "1" ?`<option value="1" selected>Active</option> <option value="0" >Inactive</option>` : `<option value="1" >Active</option> <option value="0" selected>Inactive</option>`;
-    let modal_award_content    =    `        <div class="modal-body">  
+    let modal_award_content    =    `       <div class="modal-body">  
                                                 <form id="modal_award_form">
                                                     <div class="row"> 
                                                         <div class="col-md-12 col-sm-12">
                                                             <div class="form-group">
-                                                                <label for="">Award Title <strong class="text-danger">*</strong></label>
+                                                                <label for="">Award Title ${asterisk}</label>
                                                                 <input type="text" class="form-control validate" name="awardTitle" id="inputawardTitle" 
                                                                     data-allowcharacters="[a-z][A-Z][0-9][ ][.][,][-][()]['][/]" minlength="2" maxlength="150" unique="${tableData[0]["awardID"]}" value="${tableData[0]["awardTitle"]}" required >
                                                                 <div class="invalid-feedback d-block" id="invalid-inputawardTitle"></div>
@@ -86,7 +89,7 @@ $(document).on("click",".editAward", function(){
                                                         </div>
                                                         <div class="col-md-12 col-sm-12">
                                                             <div class="form-group">
-                                                                <label for="">Award Description <strong class="text-danger">*</strong></label>
+                                                                <label for="">Award Description ${asterisk}</label>
                                                                 <textarea style="resize:none" row="3" class="form-control validate" name="awardDescription" id="inputawardDescription" 
                                                                     data-allowcharacters="[a-z][A-Z][0-9][.][,][-][()]['][/][?][*][!][#][%][&][ ]" minlength="2" maxlength="500" required >${tableData[0]["awardDescription"]}</textarea>
                                                                 <div class="invalid-feedback d-block" id="invalid-inputawardDescription"></div>
@@ -95,7 +98,7 @@ $(document).on("click",".editAward", function(){
 
                                                         <div class="col-md-12 col-sm-12">
                                                             <div class="form-group">
-                                                                <label for="">Signatories <strong class="text-danger">*</strong></label>
+                                                                <label for="">Signatories ${asterisk}</label>
                                                                 <select class="form-control select2 validate" multiple="multiple" name="awardSignatories" id="awardSignatories" required>
                                                                     ${userAccountOption(tableData[0]["awardSignatories"])}
                                                                 </select>
@@ -105,7 +108,7 @@ $(document).on("click",".editAward", function(){
 
                                                         <div class="col-md-12 col-sm-12">
                                                             <div class="form-group">
-                                                                <label for="">Status <strong class="text-danger">*</strong></label>
+                                                                <label for="">Status ${asterisk}</label>
                                                                 <select class="form-control select2 validate" name="awardStatus" id="awardStatus">
                                                                     ${statusOption}
                                                                 </select>
@@ -119,15 +122,19 @@ $(document).on("click",".editAward", function(){
                                             <div class="modal-footer">
                                                 <button class="btn btn-update px-5 p-2" id="btnUpdate" data-awardid="${tableData[0]["awardID"]}"><i class="fas fa-save"></i>&nbsp;Update</button>
                                                 <button class="btn btn-cancel btnCancel px-5 p-2" ><i class="fas fa-ban"></i>&nbsp;Cancel</button>
-                                            </div>
-                                            
+                                            </div>   
                                     `;
     setTimeout(function(){
         $("#modal_award_content").html(modal_award_content);
+        initAll();
         $("#awardSignatories").select2({ placeholder: "Select Signatories", theme: "bootstrap" });
+        if (!allowedUpdate){
+            $("#modal_award_content").find("input, select, textarea").each(function() {
+                $(this).attr("disabled", true);
+            });
+            $("#btnUpdate").hide();
+        }
     },500);
-            
-      
 });
 
 // ACTION EVENTS BUTTONS

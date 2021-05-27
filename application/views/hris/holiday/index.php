@@ -11,9 +11,11 @@
                     <h1 class="mt-3">List of Holidays</h1>
                     <span>This module is to manage the holiday details.</span>
                 </div>
-                <div class="col-sm-12 col-md-4 d-flex justify-content-end align-items-start">
-                    <button class="btn btn-default btn-add ml-2 d-flex justify-content-center align-items-center addHoliday"><i class="icon-plus px-2"></i> <span class="d-none d-sm-none d-md-block d-lg-block d-xl-block">Add&nbsp;</span> Holiday</button>
-                </div>
+                <?php if(isCreateAllowed(20)):?>
+                    <div class="col-sm-12 col-md-4 d-flex justify-content-end align-items-start">
+                        <button class="btn btn-default btn-add ml-2 d-flex justify-content-center align-items-center addHoliday"><i class="icon-plus px-2"></i> <span class="d-none d-sm-none d-md-block d-lg-block d-xl-block">Add&nbsp;</span> Holiday</button>
+                    </div>
+                <?php endif;?>
             </div>
         </div>
     </div>

@@ -84,10 +84,11 @@ $(document).on("click",".addHoliday", function(){
 });
 
 $(document).on("click",".editHoliday", function(){
+    const allowedUpdate = isUpdateAllowed(20);
     $(".modal_holiday_header").text("EDIT HOLIDAY");
     let holidayID       =   $(this).data("holidayid");
     let tableData       =   getTableData("hris_holiday_tbl","","holidayID="+holidayID);
-
+    let asterisk        =   !allowedUpdate ? `` : `<strong class="text-danger">*</strong>`;
     // console.log(rowContent);
     $("#modal_holiday").modal("show");
     $("#modal_holiday_content").html(preloader);
@@ -116,7 +117,7 @@ $(document).on("click",".editHoliday", function(){
                                                     <div class="row"> 
                                                         <div class="col-md-12 col-sm-12">
                                                             <div class="form-group">
-                                                                <label for="">Holiday Name <strong class="text-danger">*</strong></label>
+                                                                <label for="">Holiday Name ${asterisk}</label>
                                                                 <input type="text" class="form-control validate" name="holidayName" id="inputholidayName" 
                                                                     data-allowcharacters="[a-z][A-Z][0-9][ ][.][,][-][()]['][/]" minlength="2" maxlength="150" unique="${tableData[0]["holidayID"]}" value="${tableData[0]["holidayName"]}" required >
                                                                 <div class="invalid-feedback d-block" id="invalid-inputholidayName"></div>
@@ -124,7 +125,7 @@ $(document).on("click",".editHoliday", function(){
                                                         </div>
                                                         <div class="col-md-12 col-sm-12">
                                                             <div class="form-group">
-                                                                <label for="">Holiday Date <strong class="text-danger">*</strong></label>
+                                                                <label for="">Holiday Date ${asterisk}</label>
                                                                 <input type="button" class="form-control text-left daterange validate" name="holidayDate" id="inputholidayDate" data-allowcharacters="[A-Z][ ][,][a-z][0-9]" 
                                                                     minlength="5"  maxlength="20" unique="${tableData[0]["holidayID"]}" value="${moment(tableData[0]["holidayDate"]).format("MMMM DD, YYYY")}" required >
                                                                 <div class="invalid-feedback d-block" id="invalid-inputholidayDate"></div>
@@ -132,7 +133,7 @@ $(document).on("click",".editHoliday", function(){
                                                         </div>
                                                         <div class="col-md-6 col-sm-6">
                                                             <div class="form-group">
-                                                                <label for="">Holiday Type <strong class="text-danger">*</strong></label>
+                                                                <label for="">Holiday Type ${asterisk}</label>
                                                                 <select class="form-control select2 validate" name="holidayType" id="inputholidayType" required>
                                                                     ${holidayTypeOption}
                                                                 </select>
@@ -141,7 +142,7 @@ $(document).on("click",".editHoliday", function(){
                                                         </div>
                                                         <div class="col-md-6 col-sm-6">
                                                             <div class="form-group">
-                                                                <label for="">Status <strong class="text-danger">*</strong></label>
+                                                                <label for="">Status ${asterisk}</label>
                                                                 <select class="form-control select2 validate" name="holidayStatus" id="inputholidayStatus">
                                                                     ${statusOption}
                                                                 </select>
@@ -162,6 +163,12 @@ $(document).on("click",".editHoliday", function(){
         initAll();
         $("#inputholidayDate").data("daterangepicker").startDate = moment(tableData[0]["holidayDate"],"YYYY-MM-DD");
         $("#inputholidayDate").data("daterangepicker").endDate 	= moment(tableData[0]["holidayDate"],"YYYY-MM-DD");
+        if (!allowedUpdate) {
+            $("#modal_holiday_content").find("input, select, textarea").each(function() {
+                $(this).attr("disabled", true);
+            })
+            $("#btnUpdate").hide();
+        }
     },500);
             
       
