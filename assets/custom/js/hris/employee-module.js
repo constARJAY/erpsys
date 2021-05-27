@@ -657,7 +657,7 @@ $(document).ready(function() {
     // ----- DISPLAY EMPLOYEE SIGNATURE -----
     function displayEmployeeSignature(employeeSignature = null, link = true) {
         let html = ``;
-        if (employeeSignature && employeeSignature != null && employeeSignature != "null") {
+        if (employeeSignature && employeeSignature != null && employeeSignature != "null" && employeeSignature != "undefined") {
             let otherAttr = link ? `
             href="${base_url+"assets/upload-files/signatures/"+employeeSignature}" 
             target="_blank"` : `href="javascript:void(0)"`;

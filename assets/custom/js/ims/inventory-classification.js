@@ -142,12 +142,25 @@ $(document).on("click",".btnCancel", function(){
 
 $(document).on("change", "#input_classificationStatus", function(){
     if($(this).data("classificationid")){
-        let thisID      =   $(this).data("classificationid");
-        let thisValue   =   $(this).val();
-        let tableData   =   getTableData("ims_inventory_category_tbl","","classificationID="+thisID);
-        tableData.length > 0 && thisValue == 0 ? $(this).addClass("is-invalid") : $(this).removeClass("is-invalid");
-        let textAlert   =   tableData.length > 0 && thisValue == 0 ? "There is active inventory category in this classifications" : "";
-        $("#invalid-input_classificationStatus").text(textAlert);
+        let thisID              =   $(this).data("classificationid");
+        let thisValue           =   $(this).val();
+        let attrID              =   $(this).attr("id");
+        let categoryCondition   =   getTableData("ims_inventory_category_tbl",`COUNT(categoryID) AS categoryLength`,`classificationID='${thisID}' AND categoryStatus = '1' `);
+        let itemCondition       =   getTableData("ims_inventory_item_tbl", `COUNT(itemID) AS itemLength`, `classificationID='${thisID}' AND itemStatus = '1' `)
+        console.log(categoryCondition[0].categoryLength+" | "+ itemCondition[0].itemLength);
+        if((categoryCondition[0].categoryLength > 0 || itemCondition[0].itemLength > 0) && thisValue == 0 ){
+            setTimeout(function(){
+                $("#"+attrID).removeClass("is-valid").removeClass("validated").addClass("is-invalid");
+                $(".select2-selection").removeClass("no-error").addClass("has-error");
+                $("#invalid-input_classificationStatus").text(`This record is currently in use!`);
+            },180);
+            $("#btnUpdate").prop("disabled", true);
+        }else{
+            $("#"+attrID).removeClass("is-invalid");
+            $("#invalid-input_classificationStatus").text(``);
+            $("#btnUpdate").prop("disabled", false);
+            $(".select2-selection").addClass("no-error").removeClass("has-error");
+        }
     }
 
 });

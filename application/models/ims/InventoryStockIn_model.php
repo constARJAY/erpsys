@@ -10,10 +10,10 @@ class InventoryStockIn_model extends CI_Model {
     public function savestockin($itemID, $receivedID,$itemName, $barcode, $recievedQuantity,$serialnumber,$inventoryStorageID,$manufactureDate,$expirationdate)
     {
 
-        $serialnumber       = implode(",", $serialnumber);
+        $serialnumber1       = implode(",", $serialnumber);
         $inventoryStorageID1 = implode(",", $inventoryStorageID);
         $insert_id = "";
-        if($serialnumber ==""){
+        if($serialnumber1 ==""){
             $record  = array();
             $insert_id = "";
             if(is_array($barcode)){ 
@@ -25,7 +25,7 @@ class InventoryStockIn_model extends CI_Model {
                             'itemID'		            =>$itemID,
                             'itemName'		            =>$itemName,
                             'barcode'		            =>$barcode[$count],
-                            'stockInSerialNumber'		=>$serialnumber,
+                            'stockInSerialNumber'		=>"",
                             'stockInQuantity'           =>$recievedQuantity[$count],
                             'stockInLocationID'         =>$inventoryStorageID[$count],
                             'manufacturedDate'          =>$manufactureDate[$count],

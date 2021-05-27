@@ -1,4 +1,7 @@
 $(document).ready(function () {
+	const allowedUpdate = isUpdateAllowed(101);
+
+
 	// ----- DATATABLES -----
 	function initDataTables() {
 		if ($.fn.DataTable.isDataTable("#tableSssTable")) {
@@ -164,30 +167,30 @@ $(document).ready(function () {
 	// ----- MODAL CONTENT -----
 	function modalContent(data = false) {
 		let {
-			scheduleID = "",
-			scheduleName = "",
-			scheduleStatus = "1",
-			mondayFrom = "",
-			mondayTo = "",
-			mondayStatus = "",
-			tuesdayFrom = "",
-			tuesdayTo = "",
-			tuesdayStatus = "",
-			wednesdayFrom = "",
-			wednesdayTo = "",
+			scheduleID      = "",
+			scheduleName    = "",
+			scheduleStatus  = "1",
+			mondayFrom      = "",
+			mondayTo        = "",
+			mondayStatus    = "",
+			tuesdayFrom     = "",
+			tuesdayTo       = "",
+			tuesdayStatus   = "",
+			wednesdayFrom   = "",
+			wednesdayTo     = "",
 			wednesdayStatus = "",
-			thursdayFrom = "",
-			thursdayTo = "",
-			thursdayStatus = "",
-			fridayFrom = "",
-			fridayTo = "",
-			fridayStatus = "",
-			saturdayFrom = "",
-			saturdayTo = "",
-			saturdayStatus = "",
-			sundayFrom = "",
-			sundayTo = "",
-			sundayStatus = "",
+			thursdayFrom    = "",
+			thursdayTo      = "",
+			thursdayStatus  = "",
+			fridayFrom      = "",
+			fridayTo        = "",
+			fridayStatus    = "",
+			saturdayFrom    = "",
+			saturdayTo      = "",
+			saturdayStatus  = "",
+			sundayFrom      = "",
+			sundayTo        = "",
+			sundayStatus    = "",
 		} = data && data[0];
 
 		let button = scheduleID
@@ -330,13 +333,9 @@ $(document).ready(function () {
                 <div class="col-12">
                     <div class="form-group">
                         <label>Status <code>*</code></label>
-                        <select class="form-control select2" id="scheduleStatus" name="scheduleStatus">
-                            <option value="1" ${
-															scheduleStatus == 1 && "selected"
-														}>Active</option>
-                            <option value="0" ${
-															scheduleStatus == 0 && "selected"
-														}>Inactive</option>
+                        <select class="form-control select2" id="scheduleStatus" name="scheduleStatus" scheduleID="${scheduleID}">
+                            <option value="1" ${scheduleStatus == 1 && "selected"}>Active</option>
+                            <option value="0" ${scheduleStatus == 0 && "selected"}>Inactive</option>
                         </select>
                         <div class="d-block invalid-feedback" id="invalid-scheduleStatus"></div>
                     </div>
@@ -482,6 +481,13 @@ $(document).ready(function () {
 				$("#modal_schedule_setup_content").html(content);
 				initAll();
 				initInputmaskTime(false);
+
+				if (!allowedUpdate) {
+					$("#modal_schedule_setup_content").find("input, select, textarea").each(function() {
+						$(this).attr("disabled", true);
+					})
+					$("#btnUpdate").hide();
+				}
 			}, 500);
 		}
 	});
@@ -512,6 +518,7 @@ $(document).ready(function () {
 	});
 	// ----- END UPDATE MODAL -----
 
+
 	// ------- CANCEL MODAL--------
 	$(document).on("click", ".btnCancel", function () {
 		let formEmpty = isFormEmpty("modal_schedule_setup");
@@ -523,4 +530,35 @@ $(document).ready(function () {
 		}
 	});
 	// -------- END CANCEL MODAL-----------
+
+
+	// ------ CHECK SCHEDULE SETUP STATUS -------
+	$(document).on("change", "#scheduleStatus", function(){
+		const status     = $(this).val();
+		const scheduleID = $(this).attr("scheduleID");
+
+		if (scheduleID) {
+			const data = getTableData(
+				`hris_employee_list_tbl`,
+				`scheduleID`,
+				`employeeStatus = 1 AND scheduleID = ${scheduleID}`
+			);
+			if (data && data.length > 0 && status == 0) {
+				setTimeout(() => {
+					$(this).removeClass("is-valid").addClass("is-invalid");
+					// $(this).parent().find(".selection").children().removeClass("no-error").addClass("has-error");
+					$(this).parent().find(".invalid-feedback").text("This record is currently in use!");
+					document.getElementById("btnUpdate").disabled = true;
+				}, 10);
+			} else {
+				setTimeout(() => {
+					$(this).removeClass("is-invalid").addClass("is-valid");
+					// $(this).parent().find(".selection").children().removeClass("has-error").addClass("no-error");
+					$(this).parent().find(".invalid-feedback").text("");
+					document.getElementById("btnUpdate").disabled = false;
+				}, 10);
+			}
+		}
+    });
+    // ------ END CHECK SCHEDULE SETUP STATUS -------
 });

@@ -503,7 +503,7 @@ $(document).ready(function() {
 					// DRAFT
 					button = `
 					<button 
-						class="btn btn-submit" 
+						class="btn btn-submit px-5 p-2" 
 						id="btnSubmit" 
 						materialUsageID="${encryptString(materialUsageID)}"
 						code="${getFormCode("MUF", createdAt, materialUsageID)}"
@@ -515,7 +515,7 @@ $(document).ready(function() {
 					if (isRevise) {
 						button += `
 						<button 
-							class="btn btn-cancel" 
+							class="btn btn-cancel px-5 p-2" 
 							id="btnCancel"
 							materialUsageID="${encryptString(materialUsageID)}"
 							revise="${isRevise}"
@@ -525,7 +525,7 @@ $(document).ready(function() {
 					} else {
 						button += `
 						<button 
-							class="btn btn-cancel"
+							class="btn btn-cancel px-5 p-2"
 							id="btnCancelForm" 
 							materialUsageID="${encryptString(materialUsageID)}"
 							code="${getFormCode("MUF", createdAt, materialUsageID)}"
@@ -540,7 +540,7 @@ $(document).ready(function() {
 					if (!isOngoing) {
 						button = `
 						<button 
-							class="btn btn-cancel"
+							class="btn btn-cancel px-5 p-2"
 							id="btnCancelForm" 
 							materialUsageID="${encryptString(materialUsageID)}"
 							code="${getFormCode("MUF", createdAt, materialUsageID)}"
@@ -553,7 +553,7 @@ $(document).ready(function() {
 						if(!isDocumentRevised(materialUsageID)){
 							button = `
 							<button
-								class="btn btn-cancel"
+								class="btn btn-cancel px-5 p-2"
 								id="btnRevise" 
 								materialUsageID="${encryptString(materialUsageID)}"
 								code="${getFormCode("MUF", createdAt, materialUsageID)}"
@@ -581,14 +581,14 @@ $(document).ready(function() {
 					if (isImCurrentApprover(approversID, approversDate)) {
 						button = `
 						<button 
-							class="btn btn-submit" 
+							class="btn btn-submit px-5 p-2" 
 							id="btnApprove" 
 							materialUsageID="${encryptString(materialUsageID)}"
 							code="${getFormCode("MUF", createdAt, materialUsageID)}"><i class="fas fa-paper-plane"></i>
 							Approve
 						</button>
 						<button 
-							class="btn btn-cancel"
+							class="btn btn-cancel px-5 p-2"
 							id="btnReject" 
 							materialUsageID="${encryptString(materialUsageID)}"
 							code="${getFormCode("MUF", createdAt, materialUsageID)}"><i class="fas fa-ban"></i> 
@@ -600,11 +600,11 @@ $(document).ready(function() {
 		} else {
 			button = `
 			<button 
-				class="btn btn-submit" 
+				class="btn btn-submit px-5 p-2" 
 				id="btnSubmit"><i class="fas fa-paper-plane"></i> Submit
 			</button>
 			<button 
-				class="btn btn-cancel" 
+				class="btn btn-cancel px-5 p-2" 
 				id="btnCancel"><i class="fas fa-ban"></i> 
 				Cancel
 			</button>`;
@@ -1350,7 +1350,7 @@ $(document).ready(function() {
                                 <th>Item Code</th>
                                 <th>Item Name</th>
                                 <th>UOM</th>
-                                <th>Received</th>
+                                <th>Withdrawn</th>
                                 <th>Utilized ${!disabled ? "<code>*</code>" : ""}</th>
                                 <th>Unused</th>
                                 <th>Remarks${!disabled ? "<code>*</code>" : ""}</th>
@@ -1769,10 +1769,10 @@ $(document).ready(function() {
 			</div>
 		</div>
 		<div class="modal-footer text-right">
-			<button class="btn btn-danger" id="btnRejectConfirmation"
+			<button class="btn btn-danger px-5 p-2" id="btnRejectConfirmation"
 			materialUsageID="${encryptString(id)}"
 			code="${feedback}"><i class="far fa-times-circle"></i> Deny</button>
-			<button class="btn btn-cancel" data-dismiss="modal"><i class="fas fa-ban"></i> Cancel</button>
+			<button class="btn btn-cancel px-5 p-2" data-dismiss="modal"><i class="fas fa-ban"></i> Cancel</button>
 		</div>`;
 		$("#modal_material_usage_content").html(html);
 	});

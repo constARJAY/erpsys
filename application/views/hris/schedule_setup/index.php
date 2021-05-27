@@ -11,9 +11,11 @@
                     <h1 class="mt-3">List of Schedule</h1>
                     <span>This module is used to manage the schedule details.</span>
                 </div>
-                <div class="col-lg-4 col-sm-12 text-right">
-                    <button type="button" class="btn btn-default btn-add" id="btnAdd"> <i class="icon-plus"></i> &nbsp;Add Schedule</button>
-                </div>
+				<?php if(isCreateAllowed(101)) { ?>
+					<div class="col-lg-4 col-sm-12 text-right">
+						<button type="button" class="btn btn-default btn-add" id="btnAdd"> <i class="icon-plus"></i> &nbsp;Add Schedule</button>
+					</div>
+				<?php } ?>
             </div>
         </div>
     </div>

@@ -1,7 +1,7 @@
 $(document).ready(function() {
 	const allowedUpdate = isUpdateAllowed(38);
     // ----- MODULE APPROVER -----
-	const moduleApprover = getModuleApprover("cost estimate");
+	const moduleApprover = getModuleApprover(38);
 	// ----- END MODULE APPROVER -----
 
 
