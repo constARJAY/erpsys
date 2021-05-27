@@ -68,7 +68,7 @@ $(document).ready(function() {
 
 				if (isAllowed) {
 					if (isRevise && employeeID == sessionID) {
-						pageContent(true, tableData, isReadOnly, true, isFromCancelledDocument = false);
+						pageContent(true, tableData, isReadOnly, true, isFromCancelledDocument);
 						updateURL(encryptString(id), true, true);
 					} else {
 						pageContent(true, tableData, isReadOnly);
@@ -544,6 +544,7 @@ $(document).ready(function() {
 		if (data) {
 			let {
 				inventoryValidationID     = "",
+				purchaseRequestID 		  = "",
 				inventoryValidationStatus = "",
 				employeeID            = "",
 				approversID           = "",
@@ -570,7 +571,10 @@ $(document).ready(function() {
 						<button 
 							class="btn btn-cancel px-5 p-2" 
 							id="btnCancel"
-							revise="${isRevise}"><i class="fas fa-ban"></i> 
+							inventoryValidationID="${encryptString(inventoryValidationID)}"
+							code="${getFormCode("IVR", createdAt, inventoryValidationID)}"
+							revise="${isRevise}"
+							cancel="${isFromCancelledDocument}"><i class="fas fa-ban"></i> 
 							Cancel
 						</button>`;
 					} else {
@@ -626,16 +630,18 @@ $(document).ready(function() {
 				} else if (inventoryValidationStatus == 4) {
 					// CANCELLED - FOR REVISE
 					if (!isDocumentRevised(inventoryValidationID)) {
-						button = `
-						<button
-							class="btn btn-cancel px-5 p-2"
-							id="btnRevise" 
-							inventoryValidationID="${encryptString(inventoryValidationID)}"
-							code="${getFormCode("CEF", createdAt, inventoryValidationID)}"
-							status="${inventoryValidationStatus}"
-							cancel="true"><i class="fas fa-clone"></i>
-							Revise
-						</button>`;
+						if(!isRevised(purchaseRequestID)){
+							button = `
+							<button
+								class="btn btn-cancel px-5 p-2"
+								id="btnRevise" 
+								inventoryValidationID="${encryptString(inventoryValidationID)}"
+								code="${getFormCode("CEF", createdAt, inventoryValidationID)}"
+								status="${inventoryValidationStatus}"
+								cancel="true"><i class="fas fa-clone"></i>
+								Revise
+							</button>`;
+						}
 					}
 				}
 			} else {
@@ -1078,7 +1084,6 @@ $(document).ready(function() {
 		let thisID 				= $(this).attr("id");
 		let thisValue 			= $(this).val().replaceAll(",","");
 		let quantityRequested 	= $(this).closest("tr").find(".qtyrequested").first().text().replaceAll(",","");
-		
 		let difference 			= parseFloat(quantityRequested) - parseFloat(thisValue || 0);
 		let forPurchase 		= parseFloat(difference < 0.01 ? "0" : (difference||"-")).toFixed(2);
 		$(this).closest("tr").find(".forpurchase").first().text(forPurchase);
@@ -1775,7 +1780,7 @@ $(document).ready(function() {
 		const validateIssuance			= validateIssuanceQty();
 		removeIsValid("#tableProjectRequestItems");
 		removeIsValid("#tableCompanyRequestItems");
-
+		
 		if (validate && validateIssuance) {
 			const action = revise && !isFromCancelledDocument && "insert" || (id ? "update" : "insert");
 			const data   = getinventoryValidationData(action, "submit", "1", id);
@@ -2015,7 +2020,7 @@ $(document).ready(function() {
 
     // GETTING REQUEST ITEMS 
         function requestItemData(id, type, readOnly = false, requestID = null){
-			console.log(id+" | "+type+" | "+readOnly+" | "+requestID);
+			// console.log(id+" | "+type+" | "+readOnly+" | "+requestID);
 			let html = "";
 			let condition = requestID ? requestID : `purchaseRequestID='${id}' AND inventoryValidationID IS NULL`;
             let tableData = getTableData("ims_request_items_tbl JOIN ims_inventory_item_tbl USING(itemID)",
@@ -2103,7 +2108,7 @@ $(document).ready(function() {
 	// CHECK IF THE DOCUMENT IS ALREADY REVISED
 	function isRevised(id = null){
 		let revised = false;
-		var tableData = getTableData("ims_inventory_validation_tbl","reviseInventoryValidationID",`reviseInventoryValidationID=`+id);
+		var tableData = getTableData("ims_inventory_validation_tbl","purchaseRequestID",`purchaseRequestID='${id}' AND inventoryValidationStatus != '4'`);
 		revised = tableData.length > 0 ? true : false;
 		return revised; 
 	}
@@ -2120,7 +2125,6 @@ $(document).ready(function() {
 
 	
 })
-
 
 
 
@@ -2153,7 +2157,7 @@ function getConfirmation(method = "submit") {
 			swalImg   = `${base_url}assets/modal/reject.svg`;
 			break;
 		case "cancelform":
-			swalTitle = `CANCEL ${title.toUpperCase()} DOCUMENT`;
+			swalTitle = `CANCEL ${title.toUpperCase()}`;
 			swalText  = "Are you sure to cancel this document?";
 			swalImg   = `${base_url}assets/modal/cancel.svg`;
 			break;
@@ -2300,13 +2304,12 @@ function validateIssuanceQty(){
 	let returnData = 0;
 	$(`[name=stocks]`).each(function(i){
 		var thisID	 	=	this.id;
-		var thisValue 	=	this.value;
+		var thisValue 	=	this.value.replaceAll(",","");
 		var	requestedQty =  $(this).closest("tr").find(".qtyrequested").first().text().replaceAll(",","");
-			console.log(thisValue+"|"+requestedQty);
 			if( parseFloat(thisValue) > parseFloat(requestedQty) ){
 					$("#"+thisID).addClass("is-invalid").removeClass("is-valid");
 					$("#"+thisID).next().text("Too much quantity to be issued!");
-				returnData++;
+				returnData += 1;
 			}
 	});
 	return returnData > 0 ? false : true;

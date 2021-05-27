@@ -2,8 +2,8 @@ $(document).ready(function () {
 	const allowedUpdate = isUpdateAllowed(11);
 
 	// ---- GET EMPLOYEE DATA -----
-	const allEmployeeData = getAllEmployeeData();
 	const employeeData = (id) => {
+		const allEmployeeData = getAllEmployeeData(id);
 		if (id) {
 			let data = allEmployeeData.filter(employee => employee.employeeID == id);
 			let { employeeID, fullname, designation, department } = data && data[0];
@@ -211,7 +211,7 @@ $(document).ready(function () {
 		const employees = getTableData(
 			"hris_employee_list_tbl",
 			"employeeID, CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname",
-			`employeeStatus = 1 AND employeeID NOT IN (${selectedEmployee}) ${andWhere}`
+			`employeeID NOT IN (${selectedEmployee}) AND (employeeStatus = 1 OR employeeStatus = 2) ${andWhere}`
 		);
 
 		employees &&
@@ -238,7 +238,7 @@ $(document).ready(function () {
 		const employees = getTableData(
 			"hris_employee_list_tbl",
 			"employeeID, CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname",
-			`employeeStatus = 1 AND employeeID NOT IN (${selectedEmployee}) ${andWhere}`
+			`employeeID NOT IN (${selectedEmployee}) AND (employeeStatus = 1 OR employeeStatus = 2) ${andWhere}`
 		);
 
 		employees &&
@@ -266,7 +266,7 @@ $(document).ready(function () {
 		const employees = getTableData(
 			"hris_employee_list_tbl",
 			"employeeID, CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname",
-			`employeeStatus = 1 AND employeeID NOT IN (${selectedEmployee}) ${andWhere}`
+			`employeeID NOT IN (${selectedEmployee}) AND (employeeStatus = 1 OR employeeStatus = 2) ${andWhere}`
 		);
 
 		employees &&

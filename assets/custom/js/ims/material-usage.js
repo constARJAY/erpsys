@@ -491,6 +491,7 @@ $(document).ready(function() {
 			let {
 				materialUsageID     = "",
 				materialUsageStatus = "",
+				referenceCode 		= "",
 				employeeID            = "",
 				approversID           = "",
 				approversDate         = "",
@@ -564,16 +565,18 @@ $(document).ready(function() {
 				} else if (materialUsageStatus == 4) {
 					// CANCELLED - FOR REVISE
 					if (!isDocumentRevised(materialUsageID)) {
-						button = `
-						<button
-							class="btn btn-cancel px-5 p-2"
-							id="btnRevise" 
-							materialUsageID="${encryptString(materialUsageID)}"
-							code="${getFormCode("PR", createdAt, materialUsageID)}"
-							status="${materialUsageStatus}"
-							cancel="true"><i class="fas fa-clone"></i>
-							Revise
-						</button>`;
+						if(!isRevised(referenceCode)){
+							button = `
+								<button
+									class="btn btn-cancel px-5 p-2"
+									id="btnRevise" 
+									materialUsageID="${encryptString(materialUsageID)}"
+									code="${getFormCode("PR", createdAt, materialUsageID)}"
+									status="${materialUsageStatus}"
+									cancel="true"><i class="fas fa-clone"></i>
+									Revise
+								</button>`;
+						}
 					}
 				}
 			} else {
@@ -1962,7 +1965,7 @@ $(document).ready(function() {
 	// CHECK IF THE DOCUMENT IS ALREADY REVISED
 	function isRevised(id = null){
 		let revised = false;
-		var tableData = getTableData("ims_material_usage_tbl","reviseMaterialUsageID",`reviseMaterialUsageID=`+id);
+		var tableData = getTableData("ims_material_usage_tbl","referenceCode",`	referenceCode='${id}' AND  materialUsageStatus != '4' `);
 		revised = tableData.length > 0 ? true : false;
 		return revised; 
 	}
@@ -2008,7 +2011,7 @@ function getConfirmation(method = "submit") {
 			swalImg   = `${base_url}assets/modal/reject.svg`;
 			break;
 		case "cancelform":
-			swalTitle = `CANCEL ${title.toUpperCase()} DOCUMENT`;
+			swalTitle = `CANCEL ${title.toUpperCase()}`;
 			swalText  = "Are you sure to cancel this document?";
 			swalImg   = `${base_url}assets/modal/cancel.svg`;
 			break;

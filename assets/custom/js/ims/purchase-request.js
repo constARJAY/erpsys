@@ -949,7 +949,7 @@ $(document).ready(function() {
 				</td>
 				<td class="text-center">
 					<div class="quantity">
-						${quantity}
+						${itemID && itemID != 0 ? formatAmount(quantity) : "-"}
 					</div>
 				</td>
 				<td>
@@ -959,12 +959,12 @@ $(document).ready(function() {
 				</td>
 				<td class="text-right">
 					<div class="unitcost">
-						${formatAmount(unitCost, true)}
+						${itemID && itemID != 0 ? formatAmount(unitCost, true) : "-"}
 					</div>
 				</td>
 				<td class="text-right">
 					<div class="totalcost">
-						${formatAmount(totalCost, true)}
+						${itemID && itemID != 0 ? formatAmount(totalCost, true) : "-"}
 					</div>
 				</td>
 				<td>

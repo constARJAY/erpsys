@@ -1853,7 +1853,6 @@ $(document).ready(function() {
 			updateInventoryItemOptions();
 			triggerItemQty();
 			projectID && projectID != 0 && $("[name=projectID]").trigger("change");
-			console.log(isRevise);
 			if(isRevise){
 				changingOptions();
 			}
@@ -2718,7 +2717,6 @@ $(document).ready(function() {
 				</td>
 			</tr>`;
 		} else {
-			console.log(designationID);
 			if(designationID){
 				if(designationID < 1){
 					var optionDisabled = "disabled"

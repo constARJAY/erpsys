@@ -596,18 +596,17 @@ const insertNotificationData = (data) => {
 // ----- END INSERT NOTIFICATION -----
 
 // ----- GET EMPLOYEE DATA -----
-const getAllEmployeeData = () => {
+const getAllEmployeeData = (employeeID = null) => {
+	const whereEmployee = employeeID ? `employeeID = ${employeeID}` : "1=1";
 	const data = getTableData(
-		`
-		hris_employee_list_tbl AS helt
+		`hris_employee_list_tbl AS helt
 			LEFT JOIN hris_department_tbl USING(departmentID)
 			LEFT JOIN hris_designation_tbl USING(designationID)`,
-		`
-		employeeID,
+		`employeeID,
 		CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname,
 		departmentName AS department,
 		designationName AS designation`,
-		"employeeStatus = 1"
+		`employeeStatus = 1 OR employeeStatus = 2 OR ${whereEmployee}`
 	);
 	return data || [];
 };

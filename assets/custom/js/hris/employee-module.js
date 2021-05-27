@@ -837,6 +837,7 @@ $(document).ready(function() {
                                     <div class="form-group">
                                         <label>Citizenship <code>*</code></label>
                                         <select class="form-control validate select2"
+                                            style="width: 100%"
                                             name="employeeCitizenship"
                                             id="employeeCitizenship"
                                             required>
@@ -850,6 +851,7 @@ $(document).ready(function() {
                                     <div class="form-group">
                                         <label>Civil Status <code>*</code></label>
                                         <select class="form-control validate select2"
+                                            style="width: 100%"
                                             name="employeeCivilStatus"
                                             id="employeeCivilStatus"
                                             required>
@@ -880,6 +882,7 @@ $(document).ready(function() {
                     <div class="form-group">
                         <label>Region <code>*</code></label>
                         <select class="form-control validate select2"
+                            style="width: 100%"
                             name="employeeRegion"
                             id="employeeRegion"
                             required>
@@ -893,6 +896,7 @@ $(document).ready(function() {
                     <div class="form-group">
                         <label>Province <code>*</code></label>
                         <select class="form-control validate select2"
+                            style="width: 100%"
                             name="employeeProvince"
                             id="employeeProvince"
                             required>
@@ -905,6 +909,7 @@ $(document).ready(function() {
                     <div class="form-group">
                         <label>City/Municipality <code>*</code></label>
                         <select class="form-control validate select2"
+                            style="width: 100%"
                             name="employeeCity"
                             id="employeeCity"
                             required>
@@ -917,6 +922,7 @@ $(document).ready(function() {
                     <div class="form-group">
                         <label>Barangay <code>*</code></label>
                         <select class="form-control validate select2"
+                            style="width: 100%"
                             name="employeeBarangay"
                             id="employeeBarangay"
                             required>
@@ -1024,6 +1030,7 @@ $(document).ready(function() {
                     <div class="form-group">
                         <label>Department <code>*</code></label>
                         <select class="form-control validate select2"
+                            style="width: 100%"
                             name="departmentID"
                             id="departmentID"
                             required>
@@ -1037,6 +1044,7 @@ $(document).ready(function() {
                     <div class="form-group">
                         <label>Designation <code>*</code></label>
                         <select class="form-control validate select2"
+                            style="width: 100%"
                             name="designationID"
                             id="designationID"
                             required>
@@ -1100,6 +1108,7 @@ $(document).ready(function() {
                     <div class="form-group">
                         <label>Status <code>*</code></label>
                         <select class="form-control validate select2"
+                            style="width: 100%"
                             name="employeeStatus"
                             id="employeeStatus"
                             employeeID="${employeeID}">
@@ -1400,6 +1409,7 @@ $(document).ready(function() {
                     <div class="form-group">
                         <label>Bank Name</label>
                         <select class="form-control select2 validate"
+                            style="width: 100%"
                             name="bankID"
                             id="bankID">
                             <option value="" selected disabled>Select Bank Name</option>
@@ -1563,9 +1573,27 @@ $(document).ready(function() {
             return html.join("");
         }
 
+        const getRanking = (employeeRanking = null) => {
+            let html = "";
+            let rankingOptions = [
+                // "Rank and Balance": 
+            ]
+            if (employeeRanking) {
+
+            }
+        }
+
         let html = `
         <div class="forms-group">
             <div class="row">
+                <div class="col-12">
+                    <div class="form-group">
+                        <label>Ranking <code>*</code></label>
+                        <select class="form-control validate select2">
+                            ${getRanking()}
+                        </select>
+                    </div>
+                </div>
                 <div class="col-12">
                     <div class="table-responsive">
                         <table class="table table-striped table-bordered" id="tableLeaveBalance">
@@ -1712,6 +1740,7 @@ $(document).ready(function() {
                     <div class="form-group">
                         <label>Schedule <code>*</code></label>
                         <select class="form-control validate select2"
+                            style="width: 100%"
                             name="scheduleID"
                             id="scheduleID"
                             required>

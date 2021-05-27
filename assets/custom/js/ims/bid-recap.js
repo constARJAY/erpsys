@@ -459,6 +459,7 @@ $(document).ready(function() {
 			let {
 				bidRecapID     = "",
 				bidRecapStatus = "",
+				inventoryValidationID ="",
 				employeeID            = "",
 				approversID           = "",
 				approversDate         = "",
@@ -543,16 +544,18 @@ $(document).ready(function() {
 				} else if (bidRecapStatus == 4) {
 					// CANCELLED - FOR REVISE
 					if (!isDocumentRevised(bidRecapID)) {
-						button = `
-						<button
-							class="btn btn-cancel px-5 p-2"
-							id="btnRevise" 
-							bidRecapID="${encryptString(bidRecapID)}"
-							code="${getFormCode("BRF", createdAt, bidRecapID)}"
-							status="${bidRecapStatus}"
-							cancel="true"><i class="fas fa-clone"></i>
-							Revise
-						</button>`;
+						if(!isRevised(inventoryValidationID)){
+							button = `
+								<button
+									class="btn btn-cancel px-5 p-2"
+									id="btnRevise" 
+									bidRecapID="${encryptString(bidRecapID)}"
+									code="${getFormCode("BRF", createdAt, bidRecapID)}"
+									status="${bidRecapStatus}"
+									cancel="true"><i class="fas fa-clone"></i>
+									Revise
+								</button>`;
+						}
 					}
 				}
 			} else {
@@ -598,7 +601,7 @@ $(document).ready(function() {
 		let existIVR = [], html = ``;
 		let data = [];
 		let invValidationData = getTableData("ims_inventory_validation_tbl","","inventoryValidationStatus = '2'");
-		let bidRecapData = getTableData("ims_bid_recap_tbl");
+		let bidRecapData = getTableData("ims_bid_recap_tbl","","bidRecapStatus != '4'");
 		bidRecapData.map(items=>{
 			id ? "" : existIVR.push(items.inventoryValidationID);
 		});
@@ -953,7 +956,6 @@ $(document).ready(function() {
         $("[name=clientCode]").val(clientcode);
         $("[name=clientName]").val(clientname);
         $("[name=clientAddress]").val(address);
-		console.log(id);
         $(".itemProjectTableBody").html('<tr><td colspan="7">'+preloader+'</td></tr>');
         $(".itemCompanyTableBody").html('<tr><td colspan="7">'+preloader+'</td></tr>');
 
@@ -1965,7 +1967,6 @@ $(document).ready(function() {
 			let html = "", totalRequestedQty=0, totalStocksQty=0, totalForPurchaseQty=0, totalUnitCost=0, grandTotalCost=0;
 			let joinedTableData = [], vendorArr = [];
 			let condition = requestID ? requestID : `inventoryValidationID='${id}' AND bidRecapID IS NULL`;
-			console.log(condition);
             let tableData = getTableData("ims_request_items_tbl JOIN ims_inventory_item_tbl USING(itemID)",
 										`requestItemID, inventoryValidationID , bidRecapID, 
 										ims_inventory_item_tbl.itemID AS itemID, categoryType ,ims_inventory_item_tbl.createdAt AS createdAt ,
@@ -1973,7 +1974,6 @@ $(document).ready(function() {
 										ims_request_items_tbl.inventoryVendorID AS inventoryVendorID, ims_request_items_tbl.inventoryVendorName AS inventoryVendorName,
 										itemUom,quantity,stocks,forPurchase,files,unitCost,totalCost`,
 										`${condition} AND categoryType='${type}'`);
-										console.log(tableData);
 			if(tableData.length > 0){
 						tableData.map(items=>{
 							var tempData = items;
@@ -1994,17 +1994,17 @@ $(document).ready(function() {
 						let newSetVendorArr = [...new Set(vendorArr)];
 						newSetVendorArr.map((items,index)=>{
 							var vendorRequested=0, vendorStocks=0, vendorForPurchase=0, vendorUnitCost=0, vendorTotalCost=0;
-							let vendorItemsArr 		= joinedTableData.filter(joinedItems => joinedItems.inventoryVendorID == items);
+							let vendorItemsArr 		= joinedTableData.filter(joinedItems => joinedItems.inventoryVendorID == items && joinedItems.forPurchase > 0.00);
 							let vendorItemsLength 	= vendorItemsArr.length;
 							let vendorRowspanArr	= [];
 							let tfooter 			= false;
 							
 								// MAPPING FOR THE ROWSPAN;
+								
 									vendorItemsArr.map((items,index)=>{
-										var tempData = index == 0 ? `<td class="font-weight-bold" rowspan="${vendorItemsLength}">
+										var tempData = index == 0 && items.forPurchase > 0.00 ? `<td class="font-weight-bold" rowspan="${vendorItemsLength}">
 																		${items.inventoryVendorName} <br> <small>${getFormCode("VEN", items.createdAt, items.inventoryVendorID)}</small>
-																	</td>`
-													:``;
+																		</td>` : ``;
 										vendorRowspanArr.push(tempData);
 									});
 								// END MAPPING FOR THE ROWSPAN;
@@ -2098,8 +2098,10 @@ $(document).ready(function() {
 							</tr>`;
 			}
 
-
-            return html;
+			var noData = `	<tr>
+								<td class="text-dark text-center" colspan="10">No data available in table</td>
+							</tr>`;
+            return html || noData;
         }
     // END GETTING REQUEST ITEMS
 
@@ -2107,9 +2109,9 @@ $(document).ready(function() {
 	// CHECK IF THE DOCUMENT IS ALREADY REVISED
 	function isRevised(id = null){
 		let revised = false;
-		var tableData = getTableData("ims_bid_recap_tbl","reviseBidRecapID",`reviseBidRecapID=`+id);
+		var tableData = getTableData("ims_bid_recap_tbl","inventoryValidationID",`inventoryValidationID='${id}' AND  bidRecapStatus != '4'`);
 		revised = tableData.length > 0 ? true : false;
-		console.log(tableData);
+		// console.log(tableData);
 		return revised; 
 	}
 	// END CHECK IF THE DOCUMENT IS ALREADY REVISED
