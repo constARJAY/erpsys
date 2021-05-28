@@ -309,7 +309,7 @@ $(document).ready(function() {
             LEFT JOIN hris_employee_list_tbl AS helt USING(employeeID) 
             LEFT JOIN pms_project_list_tbl AS imsr ON imsr.projectListID  = ieb.projectID `,
 			`ieb.borrowingID,ieb.borrowingStatus,ieb.approversDate,ieb.borrowingRemarks,ieb.borrowingReason,ieb.submittedAt,ieb.createdBy,ieb.updatedBy,ieb.createdAt,ieb.updatedAt,ieb.approversID,
-            CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname, ieb.createdAt AS dateCreated,imsr.projectListCode,imsr.projectListName`,
+            CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname, ieb.createdAt AS dateCreated,imsr.projectListCode,imsr.projectListName,approversID`,
 			`ieb.employeeID != ${sessionID} AND ieb.borrowingStatus != 0 AND ieb.borrowingStatus != 4`,
 			`FIELD(ieb.borrowingStatus, 0, 1, 3, 2, 4), COALESCE(ieb.submittedAt, ieb.createdAt)`
 		);
@@ -366,7 +366,7 @@ $(document).ready(function() {
 				<tr class="${btnClass}" id="${encryptString(borrowingID )}">
 					<td>${getFormCode("EBF", createdAt, borrowingID)}</td>
 					<td>${fullname}</td>
-					<td>${projectListName}</td>
+					<td>${projectListName || "-"}</td>
 					<td>${borrowingReason}</td>
 					<td>
 						${employeeFullname(getCurrentApprover(approversID, approversDate, borrowingStatus, true))}
@@ -403,7 +403,7 @@ $(document).ready(function() {
             LEFT JOIN hris_employee_list_tbl AS helt USING(employeeID) 
             LEFT JOIN pms_project_list_tbl AS imsr ON imsr.projectListID  = ieb.projectID`,
 			`ieb.borrowingID,ieb.borrowingStatus,ieb.approversDate,ieb.borrowingRemarks,ieb.borrowingReason,ieb.submittedAt,ieb.createdBy,ieb.updatedBy,ieb.createdAt,ieb.updatedAt,
-            CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname, ieb.createdAt AS dateCreated,imsr.projectListCode,imsr.projectListName`,
+            CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname, ieb.createdAt AS dateCreated,imsr.projectListCode,imsr.projectListName,approversID`,
 			`ieb.employeeID = ${sessionID}`,
 			`FIELD(borrowingStatus, 0, 1, 3, 2, 4), COALESCE(ieb.submittedAt, ieb.createdAt)`
 		);
@@ -460,7 +460,7 @@ $(document).ready(function() {
             <tr class="${btnClass}" id="${encryptString(borrowingID )}">
                 <td>${getFormCode("EBF", createdAt, borrowingID)}</td>
                 <td>${fullname}</td>
-				<td>${projectListName}</td>
+				<td>${projectListName || "-"}</td>
 				<td>${borrowingReason}</td>
                 <td>
                     ${employeeFullname(getCurrentApprover(approversID, approversDate, borrowingStatus, true))}
@@ -2044,6 +2044,11 @@ function getConfirmation(method = "submit") {
 			swalTitle = `CANCEL ${title.toUpperCase()} DOCUMENT`;
 			swalText  = "Are you sure to cancel this document?";
 			swalImg   = `${base_url}assets/modal/cancel.svg`;
+			break;
+		case "drop":
+			swalTitle = `DROP ${title.toUpperCase()}`;
+			swalText  = "Are you sure to drop this document?";
+			swalImg   = `${base_url}assets/modal/drop.svg`;
 			break;
 		default:
 			swalTitle = `CANCEL ${title.toUpperCase()}`;

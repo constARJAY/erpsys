@@ -90,7 +90,7 @@
                             </div>
                             <div class="col-md-3 col-sm-12">
                                 <div class="form-group">
-                                <button type="button" class="btn btn-success w-100 p-2 mt-4 ml-2"  id="btnSearch"><i class="icon-magnifier"></i> &nbsp;Search</button>
+                                <button type="button" class="btn btn-primary w-100 p-2 mt-4 ml-2"  id="btnSearch"><i class="icon-magnifier"></i> &nbsp;Search</button>
                                 </div>
                             </div>         
                             <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12">

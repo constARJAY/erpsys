@@ -85,12 +85,20 @@ class EmployeeModule_model extends CI_Model {
 
                 $accumulatedLeave     = $employeeRankingCredit / 12;
                 $sickLeaveAccumulated = $employeeSLAccumulated > 0 ? $employeeSLAccumulated + $accumulatedLeave : $employeeSLAccumulated + ($accumulatedLeave * ($month % 12));
+                /**
+                 *  ----- NOTE -----
+                 *  1. HIRED DATE SHOULD NOT BE CHANGE IF THE LEAVE BALANCE IS BASED ON IT
+                 *  2. IF HIRED DATE WAS CHANGED, IT ONLY ACCUMULATE 1 MONTH OR 1 VALUE OF RANKING PLUS THE CURRENT ACCUMULATED LEAVE
+                 *  3. SICK LEAVE BALANCE WILL FORFEITED WHEN THE ANNIV OF EMPLOYMENT COMES
+                 *  4. AFTER RESET OF SL, THE ACCUMULATED SL VALUE WILL BE THE SL BALANCE
+                 *  5. EVERY ANNIV, VL = OLD VL + RANKING VALUE
+                 */
                 // $vacationLeaveAccumulated = $employeeVLAccumulated > 0 ? $employeeVLAccumulated + $accumulatedLeave : $employeeVLAccumulated + ($accumulatedLeave * ($month % 12));
 
                 // ----- ANNIVERSARY -----
                 if ($month % 12 == 0) {
                     $employeeSLCredit = $month == 12 ? $employeeRankingCredit : $sickLeaveAccumulated - $accumulatedLeave;
-                    $employeeVLCredit = $employeeRankingCredit;
+                    $employeeVLCredit = $employeeLeaveInterval < $month ? $employeeVLCredit + $employeeRankingCredit : $employeeVLCredit;
                     
                     // ----- RESET ACCUMULATED LEAVE -----
                     $sickLeaveAccumulated = 0;

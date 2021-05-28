@@ -795,7 +795,7 @@ $(document).ready(function() {
 					<div class="">
 					<input 
 						type="text" 
-						class="form-control  number quantity text-center"
+						class="form-control  number quantity input-quantity text-center"
 						min="1" 
 						data-allowcharacters="[0-9]" 
 						max="999999999" 
@@ -820,9 +820,10 @@ $(document).ready(function() {
 				<div class="">
 					<input 
 						type="text" 
-						class="form-control  disposalDetailRemarks text-center"
-						data-allowcharacters="[0-9]" 
-						max="999999999" 
+						class="form-control validate disposalDetailRemarks text-center"
+						data-allowcharacters="[a-z][A-Z][0-9][ ][.][,][-][()]['][/]" 
+						min="2"
+						max="250" 
 						id="disposalDetailRemarks" 
 						name="disposalDetailRemarks" 
 						value="${disposalDetailRemarks}"
@@ -1100,6 +1101,7 @@ $(document).ready(function() {
 		updateTableItems();
 		initInputmask();
 		initAmount();
+		initQuantity();
     })
     // ----- END INSERT ROW ITEM -----
 
@@ -1501,7 +1503,7 @@ $(document).ready(function() {
 				const inventoryStorageID   	= $("td [name=barcode]", this).attr("inventoryStorageID");
 				const serialnumber   		= $("td [name=barcode]", this).attr("serialnumber");	
 				const barcode 				= $("td [name=barcode]", this).val();
-				const quantity 				= +$("td [name=quantity]", this).val();	
+				const quantity 				= $("td [name=quantity]", this).val().replaceAll(",","");	
 				const disposalDetailRemarks = $("td [name=disposalDetailRemarks]", this).val();	
 			
 
@@ -1791,7 +1793,7 @@ $(document).ready(function() {
 			</div>
 		</div>
 		<div class="modal-footer text-right">
-			<button class="btn btn-danger" id="btnRejectConfirmation" disposalID="${encryptString(id)}"
+			<button class="btn btn-danger px-5 p-2" id="btnRejectConfirmation" disposalID="${encryptString(id)}"
 			code="${feedback}"><i class="far fa-times-circle"></i> Deny</button>
 			<button class="btn btn-cancel btnCancel px-5 p-2" data-dismiss="modal"><i class="fas fa-ban"></i> Cancel</button>
 		</div>`;

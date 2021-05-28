@@ -964,7 +964,7 @@ $(document).ready(function() {
 			id="returnItemDate${index}"
 			name="returnItemDate"
 			value=""
-			title="Date">
+			title="Date" required>
 			<div class="d-block invalid-feedback" id="invalid-returnItemDate"></div>
 	   </td> 
 			<td class="text-center">
@@ -980,7 +980,7 @@ $(document).ready(function() {
 				value="" 
 				minlength="1" 
 				maxlength="20" 
-				requred>
+				required>
 				<div class="invalid-feedback d-block" id="invalid-returnItemQuantity${index}"></div>
 			</td>
 		</tr>`;	
@@ -1941,6 +1941,11 @@ function getConfirmation(method = "submit") {
 			swalText  = "Are you sure to cancel this document?";
 			swalImg   = `${base_url}assets/modal/cancel.svg`;
 			break;
+		case "drop":
+			swalTitle = `DROP ${title.toUpperCase()}`;
+			swalText  = "Are you sure to drop this document?";
+			swalImg   = `${base_url}assets/modal/drop.svg`;
+			break;
 		default:
 			swalTitle = `CANCEL ${title.toUpperCase()}`;
 			swalText  = "Are you sure that you want to cancel this process?";
@@ -2054,14 +2059,21 @@ function saveReturnItem(data = null, method = "submit", notificationData = null,
 					}, 500);
 				})
 			} else {
-				if (res.dismiss == "cancel" && method != "submit") {
-					if (method != "deny") {
-						if (method != "cancelform") {
+				if (res.dismiss === "cancel") {
+					if(method != "submit"){
+						if (method != "deny") {
 							callback && callback();
+						} else {
+							$("#modal_return_item").text().length > 0 && $("#modal_return_item").modal("show");
 						}
-					} else {
-						$("#modal_return_item").text().length > 0 && $("#modal_return_item").modal("show");
 					}
+					// if (method != "deny") {
+					// 	if (method != "cancelform") {
+					// 		callback && callback();
+					// 	}
+					// } else {
+					// 	$("#modal_return_item").text().length > 0 && $("#modal_return_item").modal("show");
+					// }
 				} else if (res.isDismissed) {
 					if (method == "deny") {
 						$("#modal_return_item").text().length > 0 && $("#modal_return_item").modal("show");

@@ -82,7 +82,7 @@ $(document).ready(function(){
                             <th>Item Name</th>
                             <th>Item Classification</th>
                             <th>UOM</th>
-                            <th class="text-center">Item List Description</th>
+                            <th class="text-center">Inventory Movement</th>
                             <th>End Quantity</th>
                             <th>Total</th>
                             <th>Reorder Point</th>
@@ -113,12 +113,12 @@ $(document).ready(function(){
                         <div class="  text-center border  font-weight-bold" style="border-color:${isEven?"#f2f2f2":"white"} !important;width:7%;">Stock In</div>
                         <div class="  text-center border  font-weight-bold" style="border-color:${isEven?"#f2f2f2":"white"} !important;width:7%;">Withdrawn</div>
                         <div class="  text-center border  font-weight-bold" style="border-color:${isEven?"#f2f2f2":"white"} !important;width:5%;">Unused</div>
-                        <div class=" text-center border  font-weight-bold" style="border-color:${isEven?"#f2f2f2":"white"} !important;width:10%;">Borrowed Item</div>
-                        <div class="  text-center border font-weight-bold" style="border-color:${isEven?"#f2f2f2":"white"} !important;width:10%;">Returned Item</div>
+                        <div class=" text-center border   font-weight-bold" style="border-color:${isEven?"#f2f2f2":"white"} !important;width:10%;">Borrowed Item</div>
+                        <div class="  text-center border  font-weight-bold" style="border-color:${isEven?"#f2f2f2":"white"} !important;width:10%;">Returned Item</div>
                         <div class="  text-center border  font-weight-bold" style="border-color:${isEven?"#f2f2f2":"white"} !important;width:10%;">Transferred Item</div>
-                        <div class=" text-center border  font-weight-bold" style="border-color:${isEven?"#f2f2f2":"white"} !important;width:10%;">Disposed Item</div>
+                        <div class=" text-center border   font-weight-bold" style="border-color:${isEven?"#f2f2f2":"white"} !important;width:10%;">Disposed Item</div>
                     </div>
-                    <div class="row price-list-description-row hide" id="priceListRow${item.itemID}">`;
+                    <div class="row price-list-description-row" id="priceListRow${item.itemID}">`;
                     DiscriptionListData.map(barcodeItems=>{
                         //alert( `${barcodeItems["stockInLocationID"]}`);
                     Discription += `<div class="  text-left"style="width:12%;">${barcodeItems["barcode"]}</div>
@@ -132,14 +132,15 @@ $(document).ready(function(){
                     <div class="  text-left"style="width:10%;">${barcodeItems["TransferredItem"]}</div>
                     <div class=" text-left"style="width:10%;">${barcodeItems["disposalName"]}</div>`;
                     });
-        Discription +=` </div>   
-                            <div class="w-100 d-flex justify-content-end">
-                                <button class="btn btn-default btn-add waves-effect d-flex align-items-center priceListRow-show-more" id="showMore${item.itemID}" target="#priceListRow${item.itemID}" type="button">
-                                    <i class="zmdi zmdi-caret-down"></i>&nbsp; <span>Show More</span>
-                                </button>
-                            </div>    
-                         </div>
-                         </div>`;   
+                    Discription += `</div>`;
+        // Discription +=` </div>   
+        //                     <div class="w-100 d-flex justify-content-end">
+        //                         <button class="btn btn-default btn-add waves-effect d-flex align-items-center priceListRow-show-more" id="showMore${item.itemID}" target="#priceListRow${item.itemID}" type="button">
+        //                             <i class="zmdi zmdi-caret-down"></i>&nbsp; <span>Show More</span>
+        //                         </button>
+        //                     </div>    
+        //                  </div>
+        //                  </div>`;   
                     
                 }   
                 html += `
@@ -149,9 +150,9 @@ $(document).ready(function(){
                     <td>${item["classificationName"]}</td>
                     <td>${item["unitOfMeasurementID"]}</td>
                     <td class="text-center">${Discription}</td>
-                    <td class="text-center">${item["quantity"]}</td>
-                    <td class="text-center">${item["reOrderLevel"]}</td>
-                    <td class="text-center">${item["reOrderLevel"]}</td>
+                    <td class="text-center">${item["quantity"] ? displayQuantity(item["quantity"]) : "-"}</td>
+                    <td class="text-center">${item["reOrderLevel"] ? displayQuantity(item["reOrderLevel"]) : "-" }</td>
+                    <td class="text-center">${item["reOrderLevel"] ? displayQuantity(item["reOrderLevel"]) : "-"}</td>
                 </tr>`;
                     
                 }) 
@@ -161,7 +162,7 @@ $(document).ready(function(){
                 setTimeout(() => {
                     $("#table_content").html(html);
                     initDataTables();
-                    $(".price-list-description-row").hide();
+                    // $(".price-list-description-row").hide();
                 }, 500);   
 
         },
@@ -178,3 +179,9 @@ $(document).ready(function(){
     
       
 }); 
+
+
+
+function displayQuantity(string){
+   return formatAmount(string,true).replaceAll("₱","").trim();
+}

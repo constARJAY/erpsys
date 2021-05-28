@@ -7,20 +7,26 @@ $(document).ready(function () {
 	// ---- GET EMPLOYEE DATA -----
 	const allEmployeeData = getAllEmployeeData();
 	const employeeData = (id) => {
+		// if (id) {
+		// 	let data = allEmployeeData.filter(employee => employee.employeeID == id);
+		// 	let {
+		// 		employeeID,
+		// 		fullname,
+		// 		designation,
+		// 		department
+		// 	} = data && data[0];
+		// 	return {
+		// 		employeeID,
+		// 		fullname,
+		// 		designation,
+		// 		department
+		// 	};
+		// }
+		// return {};
 		if (id) {
 			let data = allEmployeeData.filter(employee => employee.employeeID == id);
-			let {
-				employeeID,
-				fullname,
-				designation,
-				department
-			} = data && data[0];
-			return {
-				employeeID,
-				fullname,
-				designation,
-				department
-			};
+			let { employeeID, fullname, designation, department } = data && data[0];
+			return { employeeID, fullname, designation, department };
 		}
 		return {};
 	}
@@ -231,6 +237,11 @@ $(document).ready(function () {
 			.DataTable({
 				proccessing: false,
 				serverSide: false,
+				sorting: false,
+                searching: false,
+                paging: false,
+                ordering: false,
+                info: false,
 				scrollX: true,
 				sorting: [],
 				scrollCollapse: true,
@@ -539,56 +550,56 @@ $(document).ready(function () {
 
 		let html = `
         <div class="row px-2">
-        <div class="col-lg-2 col-md-6 col-sm-12 px-1">
-            <div class="card">
-                <div class="body">
-                    <small class="text-small text-muted font-weight-bold">Document No.</small>
-                    <h6 class="mt-0 text-danger font-weight-bold">
-                    ${inventoryReceivingID ? getFormCode("INRR", createdAt, inventoryReceivingID) : "---"}
-                    </h6>      
-                </div>
-            </div>
+			<div class="col-lg-2 col-md-6 col-sm-12 px-1">
+				<div class="card">
+					<div class="body">
+						<small class="text-small text-muted font-weight-bold">Document No.</small>
+						<h6 class="mt-0 text-danger font-weight-bold">
+						${inventoryReceivingID ? getFormCode("INRR", createdAt, inventoryReceivingID) : "---"}
+						</h6>      
+					</div>
+				</div>
+			</div>
+			<div class="col-lg-2 col-md-6 col-sm-12 px-1">
+				<div class="card">
+					<div class="body">
+						<small class="text-small text-muted font-weight-bold">Status</small>
+						<h6 class="mt-0 font-weight-bold">${inventoryReceivingStatus ? getStatusStyle(inventoryReceivingStatus) : "---"}</h6>      
+					</div>
+				</div>
+			</div>
+			<div class="col-lg-8 col-md-12 col-sm-12 px-1">
+				<div class="row m-0">
+					<div class="col-lg-4 col-md-4 col-sm-12 px-1">
+						<div class="card">
+							<div class="body">
+								<small class="text-small text-muted font-weight-bold">Date Created</small>
+								<h6 class="mt-0 font-weight-bold">${createdAt ? moment(createdAt).format("MMMM DD, YYYY hh:mm:ss A") : "---"}</h6>      
+							</div>
+						</div>
+					</div>
+					<div class="col-lg-4 col-md-4 col-sm-12 px-1">
+						<div class="card">
+							<div class="body">
+								<small class="text-small text-muted font-weight-bold">Preparer Name</small>
+								<h6 class="mt-0 font-weight-bold" id="preparedname">${employeeFullname}</h6>      
+							</div>
+						</div>
+					</div>
+					<div class="col-lg-4 col-md-4 col-sm-12 px-1">
+						<div class="card">
+							<div class="body">
+								<small class="text-small text-muted font-weight-bold">Position</small>
+								<h6 class="mt-0 font-weight-bold">${designationName}</h6>      
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
         </div>
-        <div class="col-lg-2 col-md-6 col-sm-12 px-1">
-            <div class="card">
-                <div class="body">
-                    <small class="text-small text-muted font-weight-bold">Status</small>
-                    <h6 class="mt-0 font-weight-bold">${inventoryReceivingStatus ? getStatusStyle(inventoryReceivingStatus) : "---"}</h6>      
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-8 col-md-12 col-sm-12 px-1">
-            <div class="row m-0">
-            <div class="col-lg-4 col-md-4 col-sm-12 px-1">
-                <div class="card">
-                    <div class="body">
-                        <small class="text-small text-muted font-weight-bold">Date Created</small>
-                        <h6 class="mt-0 font-weight-bold">${createdAt ? moment(createdAt).format("MMMM DD, YYYY hh:mm:ss A") : "---"}</h6>      
-                    </div>
-                </div>
-            </div>
-            <div class="col-lg-4 col-md-4 col-sm-12 px-1">
-                <div class="card">
-                    <div class="body">
-                        <small class="text-small text-muted font-weight-bold">Preparer Name</small>
-                        <h6 class="mt-0 font-weight-bold" id="preparedname">${employeeFullname}</h6>      
-                    </div>
-                </div>
-            </div>
-            <div class="col-lg-4 col-md-4 col-sm-12 px-1">
-                <div class="card">
-                    <div class="body">
-                        <small class="text-small text-muted font-weight-bold">Position</small>
-                        <h6 class="mt-0 font-weight-bold">${designationName}</h6>      
-                    </div>
-                </div>
-                </div>
-                </div>
-                </div>
-        </div>
-        <div class="row" id="form_purchase_request">
-            <div class="col-sm-12">
-                <div class="container-fluid">
+        <div class="" id="form_purchase_request">
+            <div class="col-sm-12 px-0">
+                <div class="w-100">
                     <table class="table table-bordered table-striped table-hover" id="tableListItems">
                         <thead>
                             <tr style="white-space: nowrap">
@@ -754,7 +765,7 @@ $(document).ready(function () {
 		const data = getTableData("ims_inventory_storage_tbl",
 			"inventoryStorageID  ,inventoryStorageOfficeName", "inventoryStorageStatus=1", "");
 
-		let html = ` <option value="" disabled selected ${!param && "selected"}>Select Storage Code</option>`;
+		let html = ` <option value="" disabled selected ${!param && "selected"}>Select Storage Name</option>`;
 		data.map((item, index, array) => {
 			html += `<option value="${item.inventoryStorageID}" ${param && item.inventoryStorageID == param[0].inventoryStorageID && "selected"}>${item.inventoryStorageOfficeName}</option>`;
 		})
@@ -900,7 +911,7 @@ $(document).ready(function () {
 							</div>
 						</div>
 					   
-						<div class="col-sm-12">
+						<div class="col-sm-12 px-0">
 							<div class="container-fluid">
 								<table class="table table-bordered table-striped table-hover" id="tableItems">
 									<thead>
@@ -931,9 +942,10 @@ $(document).ready(function () {
 										disabled>
 									</td>`;
 					if (!item.serialNumber) {
+						// REMOVING CLASS OF (validate number) ;
 						html += `
 									<td class="text-center"><input type="text"
-										class="form-control validate number recievedQuantity text-center recievedQuantity1 input-quantity" 
+										class="form-control recievedQuantity text-center recievedQuantity1 input-quantity" 
 										id="recievedQuantity${count}"
 										min="0.01"
 										data-allowcharacters="[0-9]" 
@@ -1161,7 +1173,7 @@ $(document).ready(function () {
 							$("#loader").hide();
 							$("#modal_product_record").hide();
 							setTimeout(() => {
-								let swalTitle = "submitted successfully!";
+								let swalTitle = "Inventory stock in successfully saved!";
 								Swal.fire({
 									icon: "success",
 									title: swalTitle,

@@ -265,7 +265,7 @@ $(document).ready(function () {
 				<tr>
 					<td>${getFormCode("LRF", dateCreated, leaveRequestID)}</td>
 					<td>${fullname}</td>
-					<td>${leaveID != 0 ? leaveType[0].leaveName : "No selected Leave type" }</td>
+					<td>${leaveID != 0 ? leaveType[0].leaveName : "-" }</td>
 					<td>${leaveDate}</td>
 					<td>
 						${employeeFullname(getCurrentApprover(approversID, approversDate, leaveRequestStatus, true))}
@@ -370,7 +370,7 @@ $(document).ready(function () {
             <tr>
                 <td>${getFormCode("LRF", dateCreated, leaveRequestID)}</td>
                 <td>${fullname}</td>
-				<td>${leaveID != 0 ? leaveType[0].leaveName : "No selected Leave type" }</td>
+				<td>${leaveID != 0 ? leaveType[0].leaveName : "-" }</td>
 				<td>${leaveDate}</td>
                 <td>
                     ${employeeFullname(getCurrentApprover(approversID, approversDate, leaveRequestStatus, true))}

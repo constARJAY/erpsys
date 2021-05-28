@@ -85,10 +85,10 @@ class Return_item extends CI_Controller {
                     "updatedBy"              => $updatedBy,
                 ];
             } else if ($method == "drop") {
-                $disposalItemData = [
+                $returnItemData = [
                     "reviseReturnItemID"        => $reviseReturnItemID,
                     "returnItemStatus"          => 5,
-                    "updatedBy"               => $updatedBy,
+                    "updatedBy"                 => $updatedBy,
                 ]; 
             }
         }
