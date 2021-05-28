@@ -83,9 +83,9 @@ class EmployeeModule_model extends CI_Model {
                     }
                 }
 
-                $accumulatedLeave         = $employeeRankingCredit / 12;
-                $sickLeaveAccumulated     = $employeeSLAccumulated > 0 ? $employeeSLAccumulated + $accumulatedLeave : $employeeSLAccumulated + ($accumulatedLeave * ($month % 12));
-                $vacationLeaveAccumulated = $employeeVLAccumulated > 0 ? $employeeVLAccumulated + $accumulatedLeave : $employeeVLAccumulated + ($accumulatedLeave * ($month % 12));
+                $accumulatedLeave     = $employeeRankingCredit / 12;
+                $sickLeaveAccumulated = $employeeSLAccumulated > 0 ? $employeeSLAccumulated + $accumulatedLeave : $employeeSLAccumulated + ($accumulatedLeave * ($month % 12));
+                // $vacationLeaveAccumulated = $employeeVLAccumulated > 0 ? $employeeVLAccumulated + $accumulatedLeave : $employeeVLAccumulated + ($accumulatedLeave * ($month % 12));
 
                 // ----- ANNIVERSARY -----
                 if ($month % 12 == 0) {
@@ -93,7 +93,7 @@ class EmployeeModule_model extends CI_Model {
                     $employeeVLCredit = $employeeRankingCredit;
                     
                     // ----- RESET ACCUMULATED LEAVE -----
-                    $sickLeaveAccumulated = $vacationLeaveAccumulated = 0;
+                    $sickLeaveAccumulated = 0;
                     // ----- END RESET ACCUMULATED LEAVE -----
                 }
                 // ----- END ANNIVERSARY -----
@@ -106,7 +106,7 @@ class EmployeeModule_model extends CI_Model {
                 $vacationLeave = [
                     "employeeLeaveID"  => $employeeVLID,
                     "leaveCredit"      => $employeeVLCredit,
-                    "leaveAccumulated" => $vacationLeaveAccumulated
+                    // "leaveAccumulated" => $vacationLeaveAccumulated
                 ];
                 array_push($employeeLeave, $sickLeave);
                 array_push($employeeLeave, $vacationLeave);

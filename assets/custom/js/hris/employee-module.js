@@ -1523,9 +1523,10 @@ $(document).ready(function() {
 
     // ----- KEYUP LEAVE CREDIT -----
     $(document).on("keyup", `[name="leaveCredit"]`, function() {
-        const tableRow         = $(this).closest("tr");
-        const leaveCredit      = +$(this).val()?.replaceAll(",", "");
-        const leaveAccumulated = +tableRow.find(`[name="leaveAccumulated"]`).val()?.replaceAll(",", "");
+        const tableRow       = $(this).closest("tr");
+        const leaveCredit    = +$(this).val()?.replaceAll(",", "");
+        let leaveAccumulated = tableRow.find(`[name="leaveAccumulated"]`).val()?.replaceAll(",", "");
+            leaveAccumulated = leaveAccumulated == "-" ? 0 : +leaveAccumulated;
         const totalLeave       = leaveCredit + leaveAccumulated;
         tableRow.find(`[name="leaveType"]`).val(totalLeave);
     })
@@ -1563,6 +1564,7 @@ $(document).ready(function() {
 
                 // const max = leaveName.toLowerCase().replaceAll(" ", "")?.trim() == "sickleave" ? 5 : 30;
                 const max = 30;
+                let displayLeaveAccumulated = leaveID != 1 ? "-" : leaveAccumulated.toFixed(2);
 
                 return `
                 <tr class="leaveTypeTable"
@@ -1572,7 +1574,7 @@ $(document).ready(function() {
                     <td>
                         <div class="form-group">
                             <input type="text"
-                                class="form-control input-quantity text-center"
+                                class="form-control text-center"
                                 name="leaveAccumulated"
                                 id="leaveAccumulated${index}"
                                 leaveid="${leaveID}"
@@ -1581,7 +1583,7 @@ $(document).ready(function() {
                                 data-allowcharacters="[0-9]"
                                 minlength="1"
                                 maxlength="5"
-                                value="${leaveAccumulated}"
+                                value="${displayLeaveAccumulated}"
                                 disabled>
                             <div class="d-block invalid-feedback" id="invalid-leaveAccumulated${index}"></div>
                         </div> 
@@ -2370,21 +2372,16 @@ $(document).ready(function() {
         const employeeRankingCredit = $(`[name="employeeRanking"] option:selected`).attr("balance");
         let result = [];
         $(`tr.leaveTypeTable`).each(function() {
+            let leaveAccumulated = $(`[name="leaveAccumulated"]`, this).val();
+                leaveAccumulated = leaveAccumulated == "-" ? 0 : leaveAccumulated?.replaceAll(",", "");
             let temp = {
                 leaveTypeID:      $(this).attr("leaveID"),
                 leaveBalance:     $(`[name="leaveCredit"]`, this).val()?.replaceAll(",", ""),
-                leaveAccumulated: $(`[name="leaveAccumulated"]`, this).val()?.replaceAll(",", ""),
+                leaveAccumulated,
             };
             result.push(temp);
         })
 
-        // $("[name=leaveType]").each(function() {
-        //     let temp = {
-        //         leaveTypeID:  $(this).attr("leaveid"),
-        //         leaveBalance: $(this).val()
-        //     }
-        //     result.push(temp);
-        // })
         return { employeeRanking, employeeRankingCredit, balance: result};
     }
 

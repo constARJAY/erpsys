@@ -1333,19 +1333,19 @@ $(document).ready(function() {
 							}else{
 								$(`#quantity${index}${attr}`).removeClass("is-valid").addClass("is-invalid");
 								$(this).closest("tr").find("#invalid-quantity").removeClass("is-valid").addClass("is-invalid");
-								$(this).closest("tr").find("#invalid-quantity").text('Not Enough Quantity!');
+								$(this).closest("tr").find("#invalid-quantity").text('Too much quantity!');
 							}
 						}else{
 								$(`#quantity${index}${attr}`).removeClass("is-valid").addClass("is-invalid");
 								$(this).closest("tr").find("#invalid-quantity").removeClass("is-valid").addClass("is-invalid");
-								$(this).closest("tr").find("#invalid-quantity").text('Not Enough Quantity Or No Stocks Available!');
+								$(this).closest("tr").find("#invalid-quantity").text('Too much quantity or no stocks available!');
 						}
 		
 					})
 			}else{
 				$(`#quantity${index}${attr}`).removeClass("is-valid").addClass("is-invalid");
 				$(this).closest("tr").find("#invalid-quantity").removeClass("is-valid").addClass("is-invalid");
-				$(this).closest("tr").find("#invalid-quantity").text('No Item Selected');
+				$(this).closest("tr").find("#invalid-quantity").text('no item selected');
 			}
 	})
 	// ----- END KEYUP QUANTITY OR UNITCOST -----
