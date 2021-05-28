@@ -438,6 +438,7 @@ $(document).ready(function() {
 
 			// initDataTables();
 			// initAll();
+			initQuantity();
 		}, 300);
     })
     // ----- END SELECT PROJECT LIST -----
@@ -970,7 +971,7 @@ $(document).ready(function() {
 			<td class="text-center">
 			<input 
 				type="text" 
-				class="form-control input-returnItemQuantity returnItemQuantity text-center"
+				class="form-control input-returnItemQuantity returnItemQuantity input-quantity text-center"
 				min="0.01" 
 				data-allowcharacters="[0-9]" 
 				max="999999999" 
@@ -1330,8 +1331,8 @@ $(document).ready(function() {
 								<th>Purpose </th>
 								<th>Date Borrowed</th>
 								<th>Quantity</th>
-								<th>Date Returned</th>
-								<th>Quantity</th>
+								<th>Date Returned <strong class="text-danger">*</strong></th>
+								<th>Quantity <strong class="text-danger">*</strong></th>
                             </tr>
                         </thead>
                         <tbody class="itemProjectTableBody" project="true">
@@ -1520,7 +1521,7 @@ $(document).ready(function() {
 				const formatreturnItemDate  = $("td [name=returnItemDate]", this).val();	
 				const returnItemDate 		= moment(formatreturnItemDate).format("YYYY-MM-DD HH:mm:ss");
 				// end of date return
-				const returnItemQuantity 		= +$("td [name=returnItemQuantity]", this).val();	
+				const returnItemQuantity 		= +$("td [name=returnItemQuantity]", this).val().replaceAll(",","");	
 			
 
 				let temp = {

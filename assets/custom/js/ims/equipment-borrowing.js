@@ -507,7 +507,7 @@ $(document).ready(function() {
 					// DRAFT
 					button = `
 					<button type="button"
-						class="btn btn-submit" 
+						class="btn btn-submit px-5 p-2" 
 						id="btnSubmit" 
 						borrowingID="${encryptString(borrowingID)}"
 						code="${getFormCode("EBF", createdAt, borrowingID)}"
@@ -545,7 +545,7 @@ $(document).ready(function() {
 					if (!isOngoing) {
 						button = `
 						<button type="button"
-							class="btn btn-cancel  px-5 p-2"
+							class="btn btn-cancel px-5 p-2"
 							id="btnCancelForm" 
 							borrowingID="${encryptString(borrowingID)}"
 							code="${getFormCode("EBF", createdAt, borrowingID)}"
@@ -569,7 +569,7 @@ $(document).ready(function() {
 					// DENIED - FOR REVISE
 					button = `
 					<button
-						class="btn btn-cancel"
+						class="btn btn-cancel px-5 p-2"
 						id="btnRevise" 
 						borrowingID="${encryptString(borrowingID)}"
 						code="${getFormCode("EBF", createdAt, borrowingID)}"
@@ -597,14 +597,14 @@ $(document).ready(function() {
 					if (isImCurrentApprover(approversID, approversDate)) {
 						button = `
 						<button 
-							class="btn btn-submit" 
+							class="btn btn-submit px-5 p-2" 
 							id="btnApprove" 
 							borrowingID="${encryptString(borrowingID)}"
 							code="${getFormCode("EBF", createdAt, borrowingID)}"><i class="fas fa-paper-plane"></i>
 							Approve
 						</button>
 						<button 
-							class="btn btn-cancel"
+							class="btn btn-cancel px-5 p-2"
 							id="btnReject" 
 							borrowingID="${encryptString(borrowingID)}"
 							code="${getFormCode("EBF", createdAt, borrowingID)}"><i class="fas fa-ban"></i> 
@@ -616,11 +616,11 @@ $(document).ready(function() {
 		} else {
 			button = `
 			<button 
-				class="btn btn-submit" 
+				class="btn btn-submit px-5 p-2" 
 				id="btnSubmit"><i class="fas fa-paper-plane"></i> Submit
 			</button>
 			<button 
-				class="btn btn-cancel" 
+				class="btn btn-cancel px-5 p-2" 
 				id="btnCancel"><i class="fas fa-ban"></i> 
 				Cancel
 			</button>`;
@@ -1896,10 +1896,10 @@ $(document).ready(function() {
 			</div>
 		</div>
 		<div class="modal-footer text-right">
-			<button class="btn btn-danger" id="btnRejectConfirmation"
+			<button class="btn btn-danger px-5 p-2" id="btnRejectConfirmation"
 			borrowingID="${encryptString(id)}"
 			code="${feedback}"><i class="far fa-times-circle"></i> Deny</button>
-			<button class="btn btn-cancel" data-dismiss="modal"><i class="fas fa-ban"></i> Cancel</button>
+			<button class="btn btn-cancel px-5 p-2" data-dismiss="modal"><i class="fas fa-ban"></i> Cancel</button>
 		</div>`;
 		$("#modal_equipment_borrowing_content").html(html);
 	});

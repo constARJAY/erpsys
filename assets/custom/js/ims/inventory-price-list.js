@@ -139,8 +139,8 @@ $(document).on("click",".editPriceList", function(){
                                                 </form>
                                             </div>
                                             <div class="modal-footer">
-                                                <button class="btn btn-update" id="btnUpdate" data-itemid="${itemID}"><i class="fas fa-save"></i>&nbsp;${buttonText}</button>
-                                                <button class="btn btn-cancel btnCancel"><i class="fas fa-ban"></i>&nbsp;Cancel</button>
+                                                <button class="btn btn-update px-5 p-2" id="btnUpdate" data-itemid="${itemID}"><i class="fas fa-save"></i>&nbsp;${buttonText}</button>
+                                                <button class="btn btn-cancel px-5 p-2 btnCancel"><i class="fas fa-ban"></i>&nbsp;Cancel</button>
                                             </div>  
                                             `;                         
     setTimeout(function(){
@@ -155,7 +155,9 @@ $(document).on("click",".editPriceList", function(){
 });
 // END OPENING MODAL
 
-$(document).on("click",".priceListRow-show-more",function(){
+$(document).on("click",".priceListRow-show-more",function(e){
+    e.stopPropagation();
+
     let target = $(this).attr("target");
     if($(target).hasClass("hide")){
         $(this).find("i").addClass("zmdi-caret-up").removeClass("zmdi-caret-down");
@@ -296,7 +298,6 @@ function initDataTables() {
                     { targets: 0, width: 150  },
                     { targets: 1, width: 150  },
                     { targets: 2, width: 1200 },
-                    { targets: 3, width: 80}
                 ],
             });
 
@@ -347,7 +348,6 @@ function tableContent(classificationID){
                                 <th>Item Code</th>
                                 <th>Item Name</th>
                                 <th>Price List Description</th>
-                                <th>Action</th>
                             </tr>
                         </thead>
                         <tbody>`;
@@ -403,13 +403,10 @@ function tableContent(classificationID){
                         // END FETCHING DATA FROM PRICE LIST TABLE
                         
                         html += `
-                        <tr>
+                        <tr class="btnView btnEdit editPriceList" data-itemid="${item["itemID"]}">
                             <td>${item["itemCode"]}</td>
                             <td>${item["itemName"]}</td>
                             <td class="text-center">${priceListDescription}</td>
-                            <td>
-                                <button class="btn btn-view w-100 btnView btnEdit editPriceList" data-itemid="${item["itemID"]}"><i class="fas fa-eye"></i> View</button>
-                            </td>
                         </tr>`;
                     })
                     html += `</tbody>

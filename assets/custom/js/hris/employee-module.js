@@ -716,6 +716,8 @@ $(document).ready(function() {
         } = data;
 
         let profile = employeeProfile != null ? employeeProfile : "default.jpg";
+        // const disabledHiredDate = employeeHiredDate ? "disabled" : "";
+        const disabledHiredDate = "";
 
         let html = `
         <div class="forms-group">
@@ -872,7 +874,8 @@ $(document).ready(function() {
                                             id="employeeHiredDate"
                                             autocomplete="off"
                                             required
-                                            value="${employeeHiredDate ? moment(employeeHiredDate).format("MMMM DD, YYYY") : ""}">
+                                            value="${employeeHiredDate ? moment(employeeHiredDate).format("MMMM DD, YYYY") : ""}"
+                                            ${disabledHiredDate}>
                                         <div class="invalid-feedback d-block" id="invalid-employeeHiredDate"></div>
                                     </div>
                                 </div>
