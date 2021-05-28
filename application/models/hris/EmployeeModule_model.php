@@ -24,23 +24,45 @@ class EmployeeModule_model extends CI_Model {
     // ----- UPDATE LEAVE CREDIT -----
     public function updateLeaveCredit()
     {
-        $result = [];
+        $employeeData = [], $employeeLeave = [];
         $todayDate  = date("Y-m-d H:i:s");
         $todayYear  = date("Y");
         $todayMonth = (float)date("m");
         $todayDay   = date("d");
         $employees  = $this->getAllEmployee();
         foreach ($employees as $emp) {
-            $employeeID        = $emp["employeeID"];
-            $employeeHiredDate = $emp["employeeHiredDate"];
+            $employeeID            = $emp["employeeID"];
+            $employeeHiredDate     = $emp["employeeHiredDate"];
+            $employeeStatus        = $emp["employeeStatus"];
+            $employeeLeaveInterval = $emp["employeeLeaveInterval"];
+            $employeeRankingCredit = $emp["employeeRankingCredit"];
+
+            $date1    = new DateTime();
+            $date2    = new DateTime($employeeHiredDate);
+            $interval = $date1->diff($date2);
+            $month    = abs($interval->format("%m"));
+
+            if ($month >= 12 && $employeeStatus == 1) {
+                $employeeData["employeeLeaveInterval"] = $month;
+
+                // ----- FIRST YEAR -----
+                if ($month == 12) {
+
+                }
+                // ----- END FIRST YEAR -----
+            }
             
             $hiredYear  = date("Y", strtotime($employeeHiredDate));
             $hiredMonth = (float)date("m", strtotime($employeeHiredDate));
             $hiredDay   = date("d", strtotime($employeeHiredDate));
 
             // if ($hiredMonth != 12)
-            
+            array_push($employeeData, [
+                "employeeID" => $employeeID,
+                "month"      => $month,
+            ]);
         }
+        return $data;
     }
     // ----- UPDATE LEAVE CREDIT -----
 

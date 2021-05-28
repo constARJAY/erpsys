@@ -929,9 +929,10 @@ $(document).ready(function() {
 							maxlength="250"
 							rows="2" 
 							style="resize: none" 
-							class="form-control" 
+							class="form-control validate" 
 							name="incidentInformation" 
-							id="incidentInformation">${incidentInformation || ""}</textarea>
+							id="incidentInformation"
+							required>${incidentInformation || ""}</textarea>
 							<div class="invalid-feedback d-block" id="invalid-incidentInformation"></div>
 					</div>
 				</td>
@@ -944,9 +945,10 @@ $(document).ready(function() {
 							maxlength="250"
 							rows="2" 
 							style="resize: none" 
-							class="form-control" 
+							class="form-control validate" 
 							name="incidentRecommendation" 
-							id="incidentRecommendation">${incidentRecommendation || ""}</textarea>
+							id="incidentRecommendation"
+							required>${incidentRecommendation || ""}</textarea>
 							<div class="invalid-feedback d-block" id="invalid-incidentRecommendation"></div>
 					</div>
 				</td>
@@ -1301,9 +1303,9 @@ $(document).ready(function() {
         const index     		= $(this).closest("tr").first().attr("index");
 		const isProject 		= $(this).closest("tbody").attr("project") == "true";
 		const attr      		= isProject ? "[project=true]" : "";
-		const quantity  		= parseInt($(`#quantity${index}${attr}`).val().replaceAll(",", ""))|| 0;
+		const quantity  		= parseInt($(`#quantity${index}${attr}`).val().replaceAll(",","")) || 0;
         const barcodeval  	= $(this).closest("tr").find('[name=barcode]').val();
-
+		
 		const data = getTableData
 				 (`ims_stock_in_total_tbl AS isit
 				 LEFT JOIN ims_inventory_item_tbl 		AS iii 	ON isit.itemID = iii.itemID
@@ -1319,11 +1321,11 @@ $(document).ready(function() {
 					} = item;
 		
 					
-					let receiving_Quantity  = stocks ? parseInt(stocks) : "0";
+					let receiving_Quantity  = parseInt(stocks) || 0 ? stocks : "0";
 		
 				
 						if(barcodeval !="" ){
-							if(receiving_Quantity >= quantity ){
+							if(receiving_Quantity >= quantity){
 								$(`#quantity${index}${attr}`).removeClass("is-invalid").addClass("is-valid");
 								$(this).closest("tr").find("#invalid-quantity").removeClass("is-invalid").addClass("is-valid");
 								$(this).closest("tr").find("#invalid-quantity").text('');
@@ -1837,7 +1839,7 @@ $(document).ready(function() {
 				const itemID    = $("td [name=barcode]", this).attr("itemid");	
 				const itemName    = $("td [name=itemname]", this).text().trim();		
 				const classificationname    = $("td [name=classificationname]", this).text().trim();		
-				const quantity  = +$("td [name=quantity]", this).val();	
+				const quantity  = +$("td [name=quantity]", this).val().replaceAll(",","");	
 				const uom  = $("td [name=uom]", this).text().trim();
 				const inventoryStorageID  = $("td [name=barcode]", this).attr("storageid");
 				const storagecode  = $("td .storagecode", this).text().trim();	

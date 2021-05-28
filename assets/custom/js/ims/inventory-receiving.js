@@ -1367,7 +1367,7 @@ $(document).ready(function() {
 			$(".itemTableRow").each(function(i, obj) {
 				const requestItemID = $(this).attr("requestItemID");
 				const itemID    = $("td [name=itemcode]", this).attr("requestitem");	
-				const received  = $("td [name=received]", this).val();	
+				const received  = $("td [name=received]", this).val().replaceAll(",","");	
 				const remarks   = $("td [name=remarks]", this).val()?.trim();	
                
 				let temp = {
@@ -1700,6 +1700,7 @@ $(document).ready(function() {
 
     // ----- REJECT DOCUMENT -----
 	$(document).on("click", "#btnReject", function () {
+	
 		const id       = $(this).attr("inventoryReceivingID");
 		const feedback = $(this).attr("code") || getFormCode("INRR", dateToday(), id);
 

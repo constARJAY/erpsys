@@ -1775,7 +1775,7 @@ $(document).ready(function() {
 		const feedback = $(this).attr("code") || getFormCode("RI", dateToday(), id);
 
 		$("#modal_return_item_content").html(preloader);
-		$("#modal_return_item .page-title").text("DENY Return Item");
+		$("#modal_return_item .page-title").text("DENY RETURN ITEM");
 		$("#modal_return_item").modal("show");
 		let html = `
 		<div class="modal-body">

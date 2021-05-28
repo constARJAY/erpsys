@@ -1926,7 +1926,6 @@ function getConfirmation(method = "submit") {
 		case "approve":
 			swalTitle = `APPROVE ${title.toUpperCase()}`;
 			swalText  = "Are you sure to approve this document?";
-			
 			swalImg   = `${base_url}assets/modal/approve.svg`;
 			break;
 		case "deny":
@@ -1935,9 +1934,14 @@ function getConfirmation(method = "submit") {
 			swalImg   = `${base_url}assets/modal/reject.svg`;
 			break;
 		case "cancelform":
-			swalTitle = `CANCEL ${title.toUpperCase()}	`;
+			swalTitle = `CANCEL ${title.toUpperCase()}`;
 			swalText  = "Are you sure to cancel this document?";
 			swalImg   = `${base_url}assets/modal/cancel.svg`;
+			break;
+		case "drop":
+			swalTitle = `DROP ${title.toUpperCase()}`;
+			swalText  = "Are you sure to drop this document?";
+			swalImg   = `${base_url}assets/modal/drop.svg`;
 			break;
 		default:
 			swalTitle = `CANCEL ${title.toUpperCase()}`;

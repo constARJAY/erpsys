@@ -1,6 +1,6 @@
 $(document).ready(function () {
 
-    // ----- MODULE APPROVER -----
+	// ----- MODULE APPROVER -----
 	//const moduleApprover = getModuleApprover("inventory stock in");
 	// ----- END MODULE APPROVER ----
 
@@ -36,7 +36,7 @@ $(document).ready(function () {
 	// ----- VIEW DOCUMENT -----
 	function viewDocument(view_id = false, readOnly = false) {
 		const loadData = (id) => {
-            const tableData = getTableData(`
+			const tableData = getTableData(`
 			ims_inventory_receiving_details_tbl 		AS iird
 			LEFT JOIN ims_inventory_receiving_tbl 		AS iir 	ON iird.inventoryReceivingID  = iir.inventoryReceivingID
 			LEFT JOIN ims_purchase_order_tbl 			AS ipo 	ON iir.purchaseOrderID = ipo.purchaseOrderID
@@ -45,7 +45,7 @@ $(document).ready(function () {
 			LEFT JOIN ims_inventory_category_tbl 		AS iic 	ON iii.categoryID = iic.categoryID
 			LEFT JOIN ims_inventory_classification_tbl  AS iict ON iii.classificationID = iict.classificationID 
 			LEFT JOIN ims_stock_in_tbl 					AS isi	ON iird.inventoryReceivingID = isi.inventoryReceivingID`,
-			`iird.inventoryReceivingID, iird.itemID,
+				`iird.inventoryReceivingID, iird.itemID,
 			iri.itemName,iii.brandName,iic.categoryName,iict.classificationName,
 			iird.received AS quantity,sum(stockInQuantity) AS receivingQuantity,iir.createdAt`, "iird.inventoryReceivingID=" + id);
 			//const tableData = getTableData("ims_received_tbl","","receivedID=" + id);
@@ -104,6 +104,7 @@ $(document).ready(function () {
 		}
 
 	}
+
 	function updateURL(view_id = 0, isAdd = false) {
 		if (view_id && !isAdd) {
 			window.history.pushState("", "", `${base_url}ims/inventory_stock_in?view_id=${view_id}`);
@@ -138,39 +139,81 @@ $(document).ready(function () {
 				scrollX: true,
 				sorting: [],
 				scrollCollapse: true,
-				columnDefs: [
-                    { targets: 0,  width: 100 },
-					{ targets: 1,  width: 100 },
-		 			{ targets: 2,  width: 150 },
-		 			{ targets: 3,  width: 150 },
-		 			{ targets: 4,  width: 150 },
-		 			{ targets: 5,  width: 100 },
-                ],     
+				columnDefs: [{
+						targets: 0,
+						width: 100
+					},
+					{
+						targets: 1,
+						width: 100
+					},
+					{
+						targets: 2,
+						width: 150
+					},
+					{
+						targets: 3,
+						width: 150
+					},
+					{
+						targets: 4,
+						width: 150
+					},
+					{
+						targets: 5,
+						width: 100
+					},
+				],
 			});
 
 		var table = $("#tableListItems")
-		.css({ "min-width": "100%" })
-		.removeAttr("width")
+			.css({
+				"min-width": "100%"
+			})
+			.removeAttr("width")
 			.DataTable({
 				proccessing: false,
 				serverSide: false,
 				scrollX: true,
 				sorting: [],
 				scrollCollapse: true,
-				columnDefs: [
-					{ targets: 0,  width: 100 },
-		 			{ targets: 1,  width: 150 },
-		 			{ targets: 2,  width: 150 },
-		 			{ targets: 3,  width: 150 },
-		 			{ targets: 4,  width: 100 },
-		 			{ targets: 5,  width: 150 },
-		 			{ targets: 6,  width: 200 },
-		 			{ targets: 7,  width: 100 },
+				columnDefs: [{
+						targets: 0,
+						width: 100
+					},
+					{
+						targets: 1,
+						width: 150
+					},
+					{
+						targets: 2,
+						width: 150
+					},
+					{
+						targets: 3,
+						width: 150
+					},
+					{
+						targets: 4,
+						width: 100
+					},
+					{
+						targets: 5,
+						width: 150
+					},
+					{
+						targets: 6,
+						width: 200
+					},
+					{
+						targets: 7,
+						width: 110
+					},
 
 				],
 			});
 
-			
+
 
 
 	}
@@ -180,28 +223,47 @@ $(document).ready(function () {
 		if ($.fn.DataTable.isDataTable("#tableMyForms")) {
 			$("#tableMyForms").DataTable().destroy();
 		}
-	var table = $("#tableItems")
-	.css({ "min-width": "100%" })
-	.removeAttr("width")
-	.DataTable({
-		proccessing: false,
-		serverSide: false,
-		scrollX: true,
-		sorting: [],
-		scrollCollapse: true,
-		columnDefs: [
-			{ targets: 0,  width: 190 },
-			 { targets: 1,  width: 150 },
-			 { targets: 2,  width: 150 },
-			 { targets: 3,  width: 200 },
-			 { targets: 4,  width: 100 },
-			 { targets: 5,  width: 150 },
+		var table = $("#tableItems")
+			.css({
+				"min-width": "100%"
+			})
+			.removeAttr("width")
+			.DataTable({
+				proccessing: false,
+				serverSide: false,
+				scrollX: true,
+				sorting: [],
+				scrollCollapse: true,
+				columnDefs: [{
+						targets: 0,
+						width: 190
+					},
+					{
+						targets: 1,
+						width: 150
+					},
+					{
+						targets: 2,
+						width: 150
+					},
+					{
+						targets: 3,
+						width: 200
+					},
+					{
+						targets: 4,
+						width: 100
+					},
+					{
+						targets: 5,
+						width: 150
+					},
 
-		],
-	});
+				],
+			});
 	}
 	// ----- END DATATABLES -----
- 
+
 	// ----- HEADER BUTTON -----
 	function headerButton(isAdd = true, text = "Add") {
 		let html;
@@ -229,7 +291,7 @@ $(document).ready(function () {
             r.purchaseOrderID,r.createdAt,ipo.createdAt AS pocreatedAt,dtn.designationName,r.approversDate,	r.submittedAt,ROUND(sum(IFNULL(isi.stockInQuantity,'0.00')),2) AS receivingQuantity,
 			iird.received AS quantity`,
 			`inventoryReceivingStatus = 2`,
-			``,`r.inventoryReceivingID`
+			``, `r.inventoryReceivingID`
 		);
 		let html = `
         <table class="table table-bordered table-striped table-hover" id="tableMyForms">
@@ -247,7 +309,7 @@ $(document).ready(function () {
 
 		receivingReportData.map((item) => {
 			let {
-                inventoryReceivingID,
+				inventoryReceivingID,
 				fullname,
 				approversID,
 				approversDate,
@@ -263,7 +325,7 @@ $(document).ready(function () {
 			} = item;
 			//var quantity = item.quantity;
 			var formatquantity = parseFloat(quantity).toFixed(2);
-		//	var receivingQuantity = item.receivingQuantity;
+			//	var receivingQuantity = item.receivingQuantity;
 			var formatreceivingQuantity = parseFloat(receivingQuantity).toFixed(2);
 			let btnClass = inventoryReceivingStatus != 0 ? "btnView" : "btnEdit";
 			// let remarks       = purchaseRequestRemarks ? purchaseRequestRemarks : "-";
@@ -275,11 +337,11 @@ $(document).ready(function () {
 			}
 
 			// let button = receivedStatus != 0 ? `
-			let button = 
-            //officialBusinessStatus != 0 ?
+			let button =
+				//officialBusinessStatus != 0 ?
 				`
             <button class="btn btn-view w-100 btnView" id="${encryptString(inventoryReceivingID)}"><i class="fas fa-eye"></i> View</button>`;
-		
+
 			html += `
             <tr class="${btnClass}" id="${encryptString(inventoryReceivingID )}">
                
@@ -289,12 +351,12 @@ $(document).ready(function () {
                 <td>${designationName}</td>
 				<td>${dateSubmitted}</td>
                 <td class="text-center">`;
-				if (formatquantity < formatreceivingQuantity || formatquantity == formatreceivingQuantity) {
-					html += `<span class="badge badge-success w-100">Completed</span>`;
-				}else{
-					html += `<span class="badge badge-outline-warning w-100">Pending</span>`;
-				}	
-				html += ` </td>
+			if (formatquantity < formatreceivingQuantity || formatquantity == formatreceivingQuantity) {
+				html += `<span class="badge badge-success w-100">Completed</span>`;
+			} else {
+				html += `<span class="badge badge-outline-warning w-100">Pending</span>`;
+			}
+			html += ` </td>
             </tr>`;
 		});
 
@@ -311,12 +373,12 @@ $(document).ready(function () {
 	}
 	// ----- END MY FORMS CONTENT -----
 
-    	// ----- FORM BUTTONS -----
+	// ----- FORM BUTTONS -----
 	function formButtons(data = false) {
 		let button = "";
 		if (data) {
 			let {
-					inventoryReceivingID = "",
+				inventoryReceivingID = "",
 					inventoryReceivingStatus = "",
 					employeeID = "",
 					approversID = "",
@@ -391,7 +453,7 @@ $(document).ready(function () {
 	}
 	// ----- END FORM BUTTONS -----
 
-    // ----- PAGE CONTENT -----
+	// ----- PAGE CONTENT -----
 	function pageContent(isForm = false, data = false, readOnly = false) {
 		$("#page_content").html(preloader);
 		if (!isForm) {
@@ -408,19 +470,19 @@ $(document).ready(function () {
                 </div>
             </div>`;
 			$("#page_content").html(html);
-            headerButton(true);
+			headerButton(true);
 			myFormsContent();
 			updateURL();
 		} else {
-            headerButton(false, "");
+			headerButton(false, "");
 			formContent(data, readOnly);
 
 		}
 	}
 	viewDocument();
-    $("#page_content").text().trim().length == 0 && pageContent(); // CHECK IF THERE IS ALREADY LOADED ONE
+	$("#page_content").text().trim().length == 0 && pageContent(); // CHECK IF THERE IS ALREADY LOADED ONE
 
-    	// ----- VIEW DOCUMENT -----
+	// ----- VIEW DOCUMENT -----
 	$(document).on("click", ".btnView", function () {
 		const id = $(this).attr("id");
 		viewDocument(id, true);
@@ -434,17 +496,16 @@ $(document).ready(function () {
 	});
 	// ----- END VIEW DOCUMENT -----
 
-    // ----- FORM CONTENT -----
+	// ----- FORM CONTENT -----
 	function formContent(data = false, readOnly = false) {
 		$("#page_content").html(preloader);
 		storageContent();
 		let {
-				inventoryReceivingID = "",
+			inventoryReceivingID = "",
 				employeeID = "",
-                approversID = "",
-                approversDate ="",
-                designationName ="",
-                fullname = "",
+				approversID = "",
+				approversDate = "",
+				designationName = "",
 				inventoryReceivingStatus = false,
 				submittedAt = false,
 				createdAt = false,
@@ -456,7 +517,7 @@ $(document).ready(function () {
 		// 		``,``,``);
 		// }
 
-		
+
 		// ----- GET EMPLOYEE DATA -----
 		let {
 			fullname: employeeFullname = "",
@@ -466,13 +527,14 @@ $(document).ready(function () {
 		// ----- END GET EMPLOYEE DATA -----
 
 		readOnly ? preventRefresh(false) : preventRefresh(true);
+		//alert(fullname);
 
 		$("#btnBack").attr("inventoryReceivingID", inventoryReceivingID);
 		$("#btnBack").attr("status", 2);
 		$("#btnBack").attr("employeeID", employeeID);
 
 		let disabled = readOnly ? "disabled" : "";
-		
+
 		let button = formButtons(data);
 
 		let html = `
@@ -509,7 +571,7 @@ $(document).ready(function () {
                 <div class="card">
                     <div class="body">
                         <small class="text-small text-muted font-weight-bold">Preparer Name</small>
-                        <h6 class="mt-0 font-weight-bold">${fullname}</h6>      
+                        <h6 class="mt-0 font-weight-bold" id="preparedname">${employeeFullname}</h6>      
                     </div>
                 </div>
             </div>
@@ -541,7 +603,7 @@ $(document).ready(function () {
                             </tr>
                         </thead>
                         <tbody class="">`;
-						
+
 
 		let ItemData = getTableData(
 			`ims_inventory_receiving_details_tbl 		AS iird
@@ -556,20 +618,20 @@ $(document).ready(function () {
 			iri.itemName,iii.brandName,iic.categoryName,iict.classificationName,
 			iird.received AS quantity,ROUND(sum(IFNULL(isi.stockInQuantity,'0.00')),2) AS receivingQuantity, iir.createdAt`,
 			`iird.inventoryReceivingID = ${inventoryReceivingID}`,
-            ``,
+			``,
 			"iird.inventoryReceivingID,iird.itemID"
 		);
 		var count = 0;
 		//var received_quantity = "received_quantity";
 		ItemData.map((item) => {
-            var quantity = item.quantity;
+			var quantity = item.quantity;
 			var formatquantity = parseFloat(quantity).toFixed(2);
 			var receivingQuantity = item.receivingQuantity;
 			var formatreceivingQuantity = parseFloat(receivingQuantity).toFixed(2);
 			var totalreceiving1 = (quantity) - (receivingQuantity);
 			var totalreceiving = parseFloat(totalreceiving1).toFixed(2);
 			//alert(totalreceiving);
-		
+
 			++count;
 			html += `        
 			<tr>
@@ -583,7 +645,8 @@ $(document).ready(function () {
             <td class="text-center">
             <input type="hidden" id="totalquantity1${count}">
             <div id="actionbutton"></div>
-			<a class="btn btn-primary btn-barcode p-1" 
+			<div class="span2">
+			<a class="btn btn-primary btn-barcode btn-sm btn-block" 
 			href="javascript:void(0);" 
 			number="${count}" 
 			data-inventoryReceivingID="${item.inventoryReceivingID}" 
@@ -591,13 +654,13 @@ $(document).ready(function () {
             <i class="fas fa-barcode"></i> Barcode
             </a>`;
 			if (formatquantity < formatreceivingQuantity || formatquantity == formatreceivingQuantity) {
-				
-				html += `<a class="btn btn-success p-1"
+
+				html += `<a class="btn btn-success btn-sm btn-block"
 					href="javascript:void(0);">
 					<i class="fas fa-check"></i> Settled
 					</a>`;
 			} else {
-				html += `<a class="btn btn-secondary btnRecord p-1" 
+				html += `<a class="btn btn-secondary btnRecord btn-sm btn-block" 
 				href="javascript:void(0);" 
 				inventoryreceivingid="${item.inventoryReceivingID}" 
 				itemID="${item.itemID}"
@@ -609,7 +672,8 @@ $(document).ready(function () {
 				orderQuantity="${item.quantity}"
 				receivingQuantity="${item.receivingQuantity}">
 					<i class="fas fa-pencil-alt"></i>Record
-				</a>`;
+				</a>
+				<div class="span2">`;
 			}
 			html += ` </td>
         </tr>`;
@@ -626,9 +690,10 @@ $(document).ready(function () {
 			$("#page_content").html(html);
 			initDataTables();
 			//initDataTables();
-			 storageContent();
+			storageContent();
 			// updateTableItems();
-			 datevalidated();
+			datevalidated();
+			initQuantity();
 			// expirationdatevalue();
 			initAll();
 			return html;
@@ -637,48 +702,50 @@ $(document).ready(function () {
 
 	}
 	$(document).on("click", ".btnRecord", function () {
-		
+
 		//var inventoryReceivingID = $(attr)("inventoryReceivingid");
-		const inventoryReceivingID 	= $(this).attr("inventoryReceivingid");
-		const itemID 	= $(this).attr("itemid");
+		const inventoryReceivingID = $(this).attr("inventoryReceivingid");
+		const itemID = $(this).attr("itemid");
 		//var receivingquantity = $(this).data("receivingquantity");
-		const receivingquantity 	= $(this).attr("receivingQuantity");
-		const brandName 	= $(this).attr("brandName");
-		const totalreceiving 	= $(this).attr("totalreceiving");
+		const receivingquantity = $(this).attr("receivingQuantity");
+		const brandName = $(this).attr("brandName");
+		const totalreceiving = $(this).attr("totalreceiving");
 
 		$("#modal_product_record").modal("show");
 		// Display preloader while waiting for the completion of getting the data
 		$("#modal_product_record_content").html(preloader);
-	
+
 		const tableData = getTableData(
 			`ims_receiving_serial_number_tbl 				AS irsn
 			LEFT JOIN ims_inventory_receiving_details_tbl 	AS iird ON irsn.inventoryReceivingID =iird.inventoryReceivingID
 			LEFT JOIN ims_request_items_tbl 				AS iri ON iird.requestItemID=iri.requestItemID 
 			LEFT JOIN ims_inventory_item_tbl 				AS iii ON irsn.itemID = iii.itemID`,
 			`irsn.inventoryReceivingID,IFNULL(irsn.serialNumber,'') AS serialNumber,irsn.itemID,iri.itemName,iird.received AS quantity
-			,concat('ITM-',LEFT(iii.createdAt,2),'-',LPAD(iii.itemID,5,'0')) AS itemCode,iri.itemDescription,IFNULL(iri.brandNAme,'') AS brandName`,`irsn.inventoryReceivingID=${inventoryReceivingID} AND irsn.itemID =${itemID}`,
-			``,`irsn.serialNumber,irsn.itemID,irsn.inventoryReceivingID`);
-			if (tableData) {
-				const content = modalContent(tableData);
-				setTimeout(() => {
-					$("#modal_product_record_content").html(content);
-					$("#receivedQuantitytotal").val(receivingquantity);
-					$("#receivedQuantitytotal").val(receivingquantity);
-					$("#brandName").val(brandName);
-					$("#remainingQuantity").val(totalreceiving);
-					initAll();
-					storageContent();
-					datevalidated();
-					//initDataTables();
-					initDataTables1();
-					
-					//getItemRow();
-	
-				}, 500);
-	
-			}
+			,concat('ITM-',LEFT(iii.createdAt,2),'-',LPAD(iii.itemID,5,'0')) AS itemCode,iri.itemDescription,IFNULL(iri.brandNAme,'') AS brandName`, `irsn.inventoryReceivingID=${inventoryReceivingID} AND irsn.itemID =${itemID}`,
+			``, `irsn.serialNumber,irsn.itemID,irsn.inventoryReceivingID`);
+		if (tableData) {
+			const content = modalContent(tableData);
+			setTimeout(() => {
+				$("#modal_product_record_content").html(content);
+				$("#receivedQuantitytotal").val(receivingquantity);
+				$("#receivedQuantitytotal").val(receivingquantity);
+				$("#brandName").val(brandName);
+				$("#remainingQuantity").val(totalreceiving);
+				initAll();
+				initQuantity();
+				storageContent();
+				datevalidated();
+
+				//initDataTables();
+				initDataTables1();
+
+				//getItemRow();
+
+			}, 500);
+
+		}
 	});
-	
+
 	// ----- STORAGE CONTENT -----
 	function storageContent(param = false) {
 
@@ -695,25 +762,25 @@ $(document).ready(function () {
 
 	}
 
-		// ----- MODAL CONTENT -----
-		function modalContent(data = false, readOnly = false) {
-		
+	// ----- MODAL CONTENT -----
+	function modalContent(data = false, readOnly = false) {
+		//initQuantity();
 
-			let {	
-					inventoryReceivingID 	="",
-					itemID 					= "",
-					itemCode 				="",
-					itemDescription 		="",
-					brandName				="",
-					quantity 				="",
-					serialNumber 			="",
-					itemName				="",
-					receivingQuantity		=""
+		let {
+			inventoryReceivingID = "",
+				itemID = "",
+				itemCode = "",
+				itemDescription = "",
+				brandName = "",
+				quantity = "",
+				serialNumber = "",
+				itemName = "",
+				receivingQuantity = ""
 
 
-			} = data && data[0];
-			// classificationContent(data);
-			let button = itemID ? `
+		} = data && data[0];
+		// classificationContent(data);
+		let button = itemID ? `
 			<button 
 				class="btn btn-update px-5 p-2" 
 				id="btnSave" 
@@ -728,15 +795,15 @@ $(document).ready(function () {
 				id="btnSave"><i class="fas fa-save"></i>
 				Save
 			</button>`;
-			readOnly ? preventRefresh(false) : preventRefresh(true);
-			let disabled = readOnly ? "disabled" : "";
-			let checkboxProjectHeader = !disabled ? `
+		readOnly ? preventRefresh(false) : preventRefresh(true);
+		let disabled = readOnly ? "disabled" : "";
+		let checkboxProjectHeader = !disabled ? `
 			<th class="text-center">
 				<div class="action">
 					<input type="checkbox" class="checkboxall" project="true">
 				</div>
 			</th>` : ``;
-			let html = `
+		let html = `
 				<div class="modal-body">
 					<div class="row">
 						<div class="col-md-4 col-sm-12">
@@ -814,6 +881,7 @@ $(document).ready(function () {
 									name="receivedQuantitytotal" 
 									id="receivedQuantitytotal"
 									value="${receivingQuantity}"
+									autocomplete="off"
 									disabled>
 								<div class="invalid-feedback d-block" id="invalid-input_receivedQuantitytotal"></div>
 							</div>
@@ -838,7 +906,7 @@ $(document).ready(function () {
 									<thead>
 										<tr style="white-space: nowrap">    
 											<th>Barcode</th>
-											<th>Received Quantity</th>
+											<th>Received Quantity <code>*</code></th>
 											<th>Serial Number</th>
 											<th>Storage <code>*</code></th>
 											<th>Manufactured Date</th>
@@ -847,13 +915,13 @@ $(document).ready(function () {
 									</thead>
 									
 									<tbody class="tableRowItems">`;
-									var count = 0;
-									var totalquantity = 0;
-									data.map((item) => {
-										
-									++count;
-									html +=`<tr>`;
-									html +=`<td>
+					var count = 0;
+					var totalquantity = 0;
+					data.map((item) => {
+
+						++count;
+						html += `<tr>`;
+						html += `<td>
 									<input 
 										type="text" 
 										class="form-control barcode" 
@@ -862,33 +930,40 @@ $(document).ready(function () {
 										id="barcode${count}"
 										disabled>
 									</td>`;
-									if(!item.serialNumber){
-									html +=`
+					if (!item.serialNumber) {
+						html += `
 									<td class="text-center"><input type="text"
-										class="form-control validate number recievedQuantity text-center recievedQuantity1" 
+										class="form-control validate number recievedQuantity text-center recievedQuantity1 input-quantity" 
 										id="recievedQuantity${count}"
-										min="1"
-										data-allowcharacters="[0-9]"
+										min="0.01"
+										data-allowcharacters="[0-9]" 
+										max="999999999" 
+										minlength="1" 
+										maxlength="20" 
+										autocomplete="off"
 										name="recievedQuantity"required>
 										<div class="invalid-feedback d-block" id="invalid-input_recievedQuantity"></div>
 									</td>`;
-									}else{
-										var quantity = 1;
-										html +=`
+						} else {
+							var quantity = 1;
+							html += `
 									<td class="text-center"><input type="text"
-										class="form-control validate number recievedQuantity  inventorystorageIDquantity text-center" 
+										class="form-control validate recievedQuantity  inventorystorageIDquantity text-center input-quantity" 
 										id="recievedQuantity${count}"
-										min="1"
-										data-allowcharacters="[0-9]"
+										min="0.01"
+										data-allowcharacters="[0-9]" 
+										max="999999999" 
 										name="recievedQuantity"
-										
+										minlength="1" 
+										maxlength="20" 
+										autocomplete="off"
 										required
 										value="${quantity}" 
 										disabled>
 										<div class="invalid-feedback d-block" id="invalid-input_recievedQuantity"></div>
 									</td>`;
-									}
-									html +=`
+						}
+						html += `
 									<td>
 									<input 
 										type="text" 
@@ -910,7 +985,7 @@ $(document).ready(function () {
 									</td>
 									<td> 
 										<input 
-										type="date" 
+										type="button" 
 										class="form-control manufactureDate" 
 										number="${count}"
 										name="manufactureDate" 
@@ -918,7 +993,7 @@ $(document).ready(function () {
 									</td>
 									<td>
 										<input 
-										type="date" 
+										type="button" 
 										class="form-control expirationdate expirationdateoncheck" 
 										number="${count}"
 										name="expirationdate" 
@@ -926,8 +1001,8 @@ $(document).ready(function () {
 										
 									</td>
 									</tr>`;
-									});
-									html +=`
+		});
+		html += `
 									</tbody>
 								</table>
 							</div>
@@ -941,40 +1016,39 @@ $(document).ready(function () {
 					<button class="btn btn-cancel btnCancel" data-dismiss="modal"><i class="fas fa-ban"></i> Cancel</button>
 					
 				</div>`;
-			return html;
-	
-		}
+		return html;
 
-	$(document).on("change", ".recievedQuantity1", function() {
+	}
+
+	$(document).on("change", ".recievedQuantity1", function () {
 		const val = $(this).val();
 		var totalval = parseInt(val);
 		const orderQuantity = $("#orderQuantity").val();
 		const receivedQuantity = $("#receivedQuantitytotal").val();
 		const serialnumber = $(".serialnumber").val();
-		var formatvaluereceived =  receivedQuantity ? receivedQuantity : 0;
+		var formatvaluereceived = receivedQuantity ? receivedQuantity : 0;
 		const received = $("#received").val();
 		const receivedtotal = parseInt(received)
 		var totalreceived = parseInt(totalval) + parseInt(formatvaluereceived);
 		var totalquantity = parseInt(val) + parseInt(formatvaluereceived);
-		if(serialnumber ==""){
-			if(receivedtotal < totalreceived){
+		if (serialnumber == "") {
+			if (receivedtotal < totalreceived) {
 				$(this).removeClass("is-valid").addClass("is-invalid");
 				$("#invalid-input_recievedQuantity").html("Not Equal Order Quantity");
 				document.getElementById("btnSave").disabled = true;
-			}else{
+			} else {
 				$(this).removeClass("is-invalid").addClass("is-valid");
 				$("#invalid-input_recievedQuantity").html("");
 				document.getElementById("btnSave").disabled = false;
 			}
-	}else{
-	}
-	});	
+		} else {}
+	});
 	$(document).on("change", ".inventoryStorageID", function () {
 		var storageID = $(this).val();
 		const number = $(this).attr("number");
-		var inventoryStorageID ="";
+		var inventoryStorageID = "";
 		const data = getTableData("ims_inventory_storage_tbl",
-		"inventoryStorageID  ,inventoryStorageOfficeName,inventoryStorageCode", `inventoryStorageStatus=1 AND inventoryStorageID =${storageID}`, "");
+			"inventoryStorageID  ,inventoryStorageOfficeName,inventoryStorageCode", `inventoryStorageStatus=1 AND inventoryStorageID =${storageID}`, "");
 		data.map((item) => {
 			inventoryStorageCode = item.inventoryStorageCode;
 		});
@@ -982,58 +1056,70 @@ $(document).ready(function () {
 		const myItemcode = itemcodeSplit[2];
 		const inventoryStorageCodeSplit = inventoryStorageCode.split("-");
 		const myInventorycode = inventoryStorageCodeSplit[2];
-		var serialnumberretrive  = $(`#serialnumber${number}`).val();
-		var serialnumber ="000000000000";
-		if(serialnumberretrive ==""){
-			serialnumber ="000000000000";
-		}else{
+		var serialnumberretrive = $(`#serialnumber${number}`).val();
+		var serialnumber = "000000000000";
+		if (serialnumberretrive == "") {
+			serialnumber = "000000000000";
+		} else {
 			serialnumber = serialnumberretrive;
 		}
 		var serialnumberlastFive = serialnumber.substr(serialnumber.length - 5); // => "Tabs1 lastfive"
 		const barcode = `${myItemcode}-${myInventorycode}-${serialnumberlastFive}`;
 		$("#barcode" + number).val(barcode);
 		//$(".inventorystorageIDquantity"+storageID);
-		
-	});	
-	
+
+	});
+
 	$(document).on("click", "#btnSave", function () {
 		const validate = validateForm("modal_product_record");
 		if (validate) {
-			var itemID 				=$("#itemID").val();
-			var itemName 			=$("#itemName").val();
-			var receivedID 			= $("#inventoryReceivingID").val();
-			var barcode 			= [];
-			var recievedQuantity 	= [];
-			var serialnumber 		= [];
-			var inventoryStorageID 	= [];
-			var manufactureDate 	= [];
-			var expirationdate 		= [];
+			var itemID = $("#itemID").val();
+			var itemName = $("#itemName").val();
+			var receivedID = $("#inventoryReceivingID").val();
+			var barcode = [];
+			var recievedQuantity = [];
+			var serialnumber = [];
+			var inventoryStorageID = [];
+			var manufactureDate1 = [];
+			const manufactureDate = [];
+			var expirationdate1 = [];
+			var expirationdate = [];
 			$(".recievedQuantity").each(function () {
 				recievedQuantity.push($(this).val());
 			});
 			$("[name=serialnumber]").each(function () {
 				serialnumber.push($(this).val());
 			});
-			
-			
+
+
 			$(".inventoryStorageID").each(function () {
 				inventoryStorageID.push($(this).val());
 			});
-			
+
 			$(".barcode").each(function () {
 				barcode.push($(this).val());
 			});
 			$(".manufactureDate").each(function () {
 				manufactureDate.push($(this).val());
+				//manufactureDate = moment(manufactureDate1).format("YYYY-MM-DD HH:mm:ss");
 			});
-			$(".manufactureDate").each(function () {
-				manufactureDate.push($(this).val());
-			});
+			// $(".manufactureDate").each(function () {
+			// 	manufactureDate.push($(this).val());
+			// 	const returnItemDate = moment(manufactureDate).format("YYYY-MM-DD HH:mm:ss");
+
+			// });
 			$(".expirationdate").each(function () {
 				expirationdate.push($(this).val());
+				//expirationdate.moment(expirationdate).format("YYYY-MM-DD");
+				//	expirationdate.moment(push($(this).val().format("YYYY-MM-DD")));
+				//expirationdate = moment(expirationdate1).format("YYYY-MM-DD");
+
+				//alert(expirationdate);
 			});
 
-			
+			//alert(expirationdate);
+
+
 			Swal.fire({
 				title: 'ADD INVENTORY STOCK IN',
 				text: 'Are you sure that you want to add a new inventory stock in to the system?',
@@ -1048,6 +1134,7 @@ $(document).ready(function () {
 				confirmButtonText: 'Yes',
 				allowOutsideClick: false
 			}).then((result) => {
+
 				if (result.isConfirmed) {
 					preventRefresh(false);
 					//let swalTitle = success_title.toUpperCase();
@@ -1055,11 +1142,15 @@ $(document).ready(function () {
 						url: `${base_url}ims/inventory_stock_in/insertbarcode`,
 						method: "POST",
 						data: {
-							itemID: 			itemID, 			receivedID : 			receivedID,
-							barcode: 			barcode,			recievedQuantity: 		recievedQuantity,
-							serialnumber: 		serialnumber,		inventoryStorageID : 	inventoryStorageID,
-							manufactureDate: 	manufactureDate, 	expirationdate : 		expirationdate,
-							itemName: 			itemName,
+							itemID: itemID,
+							receivedID: receivedID,
+							barcode: barcode,
+							recievedQuantity: recievedQuantity,
+							serialnumber: serialnumber,
+							inventoryStorageID: inventoryStorageID,
+							manufactureDate: manufactureDate,
+							expirationdate: expirationdate,
+							itemName: itemName,
 						},
 						async: true,
 						dataType: "json",
@@ -1067,8 +1158,24 @@ $(document).ready(function () {
 							$("#loader").show();
 						},
 						success: function (data) {
-							// window.location.replace(`${base_url}ims/inventory_recieving_report`);
-							window.location.reload();
+							$("#loader").hide();
+							$("#modal_product_record").hide();
+							setTimeout(() => {
+								let swalTitle = "submitted successfully!";
+								Swal.fire({
+									icon: "success",
+									title: swalTitle,
+									showConfirmButton: false,
+									timer: 2000,
+								}).then(() => {
+									window.location.reload();
+								})
+								// 	setTimeout(() => {
+								// }, 1000)
+
+								// window.location.replace(`${base_url}ims/inventory_recieving_report`);
+							}, 100);
+
 						},
 					});
 				} else {
@@ -1079,42 +1186,48 @@ $(document).ready(function () {
 			});
 
 
-	
+
 			//alert(recievedQuantity);
 
 		}
-	});	
-	
+	});
+
 	$(document).on("click", ".btn-barcode", function () {
 		var receivedID = $(this).data("inventoryreceivingid");
 		// /alert(receivedID);
 		var itemID = $(this).data("itemid");
-		const data = {receivedID, itemID};
+		const data = {
+			receivedID,
+			itemID
+		};
 		// console.log(data);
 		$.ajax({
 			url: `${base_url}ims/inventory_stock_in/printStockInBarcode`,
 			method: "POST",
 			data: {
-				receivedID: receivedID, itemID: itemID
-				
+				receivedID: receivedID,
+				itemID: itemID
+
 			},
-			success: function(data) {
-			  var left  = ($(window).width()/2)-(900/2),
-				top   = ($(window).height()/2)-(600/2),
-				mywindow = window.open ("", "PRINT", "width=900, height=600, top="+top+", left="+left);
+			success: function (data) {
+				var left = ($(window).width() / 2) - (900 / 2),
+					top = ($(window).height() / 2) - (600 / 2),
+					mywindow = window.open("", "PRINT", "width=900, height=600, top=" + top + ", left=" + left);
 
-			  mywindow.document.write(data);
+				mywindow.document.write(data);
 
-			  mywindow.document.close(); 
-			  mywindow.focus();
+				mywindow.document.close();
+				mywindow.focus();
 			}
-		  })
+		})
 
-	});	
-			
+	});
+
 
 	function datevalidated() {
 		var dtToday = new Date();
+		// var number  = $(this).attr(number);
+		// alert(number);
 
 		var month = dtToday.getMonth() + 1;
 		var day = dtToday.getDate();
@@ -1130,17 +1243,45 @@ $(document).ready(function () {
 
 		var today = year + '-' + month + '-' + day;
 		var expirationDate = year + '-' + month + '-' + expirationDay;
-		$('.manufactureDate').attr('max', today);
-		$('.expirationdateoncheck').attr('min', expirationDate);
+
+		$(".manufactureDate").each(function () {
+			const id = $(this).attr("id");
+			$(`#${id}`).attr('max', today);
+			initDateRangePicker(`#${id}`, {
+				autoUpdateInput: false,
+				singleDatePicker: true,
+				showDropdowns: true,
+				autoApply: true,
+				locale: {
+					format: "MMMM DD, YYYY",
+				},
+				maxDate: moment()
+			})
+		})
+		$(".expirationdate").each(function () {
+			const id = $(this).attr("id");
+			$(`#${id}`).attr('min', today);
+			initDateRangePicker(`#${id}`, {
+				autoUpdateInput: false,
+				singleDatePicker: true,
+				showDropdowns: true,
+				autoApply: true,
+				locale: {
+					format: "MMMM DD, YYYY",
+				},
+				minDate: moment()
+			})
+		})
+		//$('.expirationdateoncheck').attr('min', expirationDate);
 
 	}
 
 	// ----- CLOSE FORM -----
 	$(document).on("click", "#btnBack", function () {
-		const id 			= $(this).attr("inventoryReceivingID");
-		const employeeID 	= $(this).attr("employeeID");
-		const feedback   	= $(this).attr("code") || getFormCode("INRR", dateToday(), id);
-		const status 		= $(this).attr("status");
+		const id = $(this).attr("inventoryReceivingID");
+		const employeeID = $(this).attr("employeeID");
+		const feedback = $(this).attr("code") || getFormCode("INRR", dateToday(), id);
+		const status = $(this).attr("status");
 
 		if (status != "false" && status != 0) {
 			$("#page_content").html(preloader);
@@ -1148,15 +1289,15 @@ $(document).ready(function () {
 
 			if (employeeID != sessionID) {
 				$("[redirect=forApprovalTab]").length > 0 && $("[redirect=forApprovalTab]").trigger("click");
-			}	
-		} 
+			}
+		}
 
 	});
 	// ----- END CLOSE FORM -----
 
-    
 
-    
 
-	
+
+
+
 });

@@ -1230,7 +1230,7 @@ $(document).ready(function() {
 		const index     		= $(this).closest("tr").first().attr("index");
 		const isProject 		= $(this).closest("tbody").attr("project") == "true";
 		const attr      		= isProject ? "[project=true]" : "";
-		const quantity  		= parseFloat($(`#quantity${index}${attr}`).val()) || 0;
+		const quantity  		= parseInt($(`#quantity${index}${attr}`).val().replaceAll(",","")) || 0;
         const barcodeval  	= $(this).closest("tr").find('[name=barcode]').val();
 
 		const StorageIDSender  = $("[name=inventoryStorageIDSender]").val();
@@ -1257,7 +1257,7 @@ $(document).ready(function() {
 						stocks
 					} = item;
 				
-					let stock  = stocks ? parseFloat(stocks) || 0 : "0";
+					let stock  = stocks ? parseInt(stocks) || 0 : "0";
 					
 							if(stock > quantity || stock == quantity ){
 								$(`#quantity${index}${attr}`).removeClass("is-invalid").addClass("is-valid");
@@ -1824,7 +1824,7 @@ $(document).ready(function() {
 				const itemCode    = $("td .itemcode", this).text().trim();	
 				const itemName    = $("td [name=itemname]", this).text().trim();	
 				const brandName    = $("td [name=brand]", this).text().trim();	
-				const quantity  = +$("td [name=quantity]", this).val();	
+				const quantity  = +$("td [name=quantity]", this).val().replaceAll(",","");	
 				const uom  = $("td [name=uom]", this).text().trim();	
 				const stocks  = $("td [name=stocks]", this).text().trim();	
 				const barcode  = $("td [name=barcode]", this).val();	

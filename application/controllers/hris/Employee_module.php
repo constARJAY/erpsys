@@ -21,7 +21,7 @@ class Employee_module extends CI_Controller {
 
     public function updateLeaveCredit()
     {
-        $this->employeemodule->updateLeaveCredit();
+        echo json_encode($this->employeemodule->updateLeaveCredit());
     }
 
     public function generateEmployeePermission() 

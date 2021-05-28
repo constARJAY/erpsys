@@ -1339,7 +1339,7 @@ $(document).ready(function() {
         const index     		= $(this).closest("tr").first().attr("index");
 		const isProject 		= $(this).closest("tbody").attr("project") == "true";
 		const attr      		= isProject ? "[project=true]" : "";
-		const quantity  		= parseFloat($(`#quantity${index}${attr}`).val()) || 0;
+		const quantity  		= parseInt($(`#quantity${index}${attr}`).val().replaceAll(",","")) || 0;
         const barcodeval  	= $(this).closest("tr").find('[name=barcode]').val();
 
 		const data = getTableData
@@ -1357,7 +1357,7 @@ $(document).ready(function() {
 						stocks
 					} = item;
 		
-					let receiving_Quantity  = stocks ? parseFloat(stocks) : "0";
+					let receiving_Quantity  = stocks ? parseInt(stocks) || 0 : "0";
 				
 						if(barcodeval !="" ){
 							if(receiving_Quantity > quantity || receiving_Quantity == quantity ){
@@ -1872,7 +1872,7 @@ $(document).ready(function() {
 				const itemName  = $("td [name=itemname]", this).text().trim();
 				const itemDescription    = $("td .itemdescription", this).text().trim();	
 				const itemUom    = $("td .uom", this).text().trim();	
-				const quantity  = $("td [name=quantity]", this).val();	
+				const quantity  = $("td [name=quantity]", this).val().replaceAll(",","");	
 				const inventoryStorageID  = $("td [name=barcode]", this).attr("storageid");
 				const storagecode  = $("td .storagecode", this).text().trim();	
 				const storageName  = $("td .storagename", this).text().trim();		
@@ -2480,7 +2480,6 @@ function FunctionlastApproveCondition(materialWithdrawalID = null){
 
 	let data = { items: [] }, formData = new FormData;
 
-
 	ApprovedtableData.map((item, index) => {
 
 		const inventoryStorageID    = item.inventoryStorageID;		
@@ -2488,7 +2487,7 @@ function FunctionlastApproveCondition(materialWithdrawalID = null){
 		const quantity  = item.quantity;	
 
 		let temp = {
-			inventoryStorageID,itemID,quantity
+			inventoryStorageID,itemID,quantity,materialWithdrawalID
 			
 		};
 

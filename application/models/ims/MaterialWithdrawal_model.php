@@ -44,7 +44,9 @@ class MaterialWithdrawal_model extends CI_Model {
 
     public function updateStorage() {
         $items = $this->input->post("items");
+       
         $materialWithdrawalID = $items[0]['materialWithdrawalID']; 
+ 
         // foreach($items as  $values){
        
         // $getStorageID = $values['inventoryStorageID']; 
