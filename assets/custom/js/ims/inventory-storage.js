@@ -649,6 +649,12 @@ $(document).ready(function () {
 		const id = $(this).attr("id");
 		const feedback = $(this).attr("feedback");
 		$("#modal_inventory_storage").modal("show");
+
+		var tempUniqueData = [];
+		uniqueData.filter(items => items["multiple"].id != id).map(items=>{
+			tempUniqueData.push(items);
+		});
+		uniqueData = tempUniqueData;
 		$("#inventory_storage_modalheader").text("EDIT INVENTORY STORAGE");
 		// Display preloader while waiting for the completion of getting the data
 		$("#modal_inventory_storage_content").html(preloader);
@@ -673,7 +679,6 @@ $(document).ready(function () {
 		const validate = validateForm("modal_inventory_storage");
 
 		const id = $(this).attr("rowID");
-
 		if (validate) {
 			let data = getFormData("modal_inventory_storage", true);
 			data["tableData[updatedBy]"] = sessionID;
@@ -709,6 +714,7 @@ $(document).ready(function () {
             preventRefresh(false);
 			$("#modal_inventory_storage").modal("hide");
 		}
+		
 	});
 
 	// -------- END CANCEL MODAL-----------

@@ -270,7 +270,6 @@ $(document).ready(function(){
         data["tableData[updatedBy]"] = sessionID;
         data["tableName"]            = "ims_inventory_category_tbl";
         data["feedback"]             = $("[name=categoryName]").val();
-
         sweetAlertConfirmation("add", "Inventory Category", "modal_inventory_category", null, data, true, tableContent);
             
         }
@@ -283,7 +282,11 @@ $(document).ready(function(){
         const feedback = $(this).attr("feedback");
         $("#inventory_category_modalheader").text("EDIT INVENTORY CATEGORY");
         $("#modal_inventory_category").modal("show");
-
+        var tempUniqueData = [];
+		uniqueData.filter(items => items["multiple"].id != id).map(items=>{
+			tempUniqueData.push(items);
+		});
+		uniqueData = tempUniqueData;
         // Display preloader while waiting for the completion of getting the data
         $("#modal_inventory_category_content").html(preloader); 
 

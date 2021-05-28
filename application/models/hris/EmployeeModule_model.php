@@ -14,6 +14,16 @@ class EmployeeModule_model extends CI_Model {
         return $query ? $query->result_array() : [];
     }
 
+    public function getEmployee($employeeID = null)
+    {
+        if ($employeeID) {
+            $sql = "SELECT * FROM hris_employee_list_tbl WHERE employeeID = $employeeID";
+            $query = $this->db->query($sql);
+            return $query ? $query->result_array() : [];
+        }
+        return [];
+    }
+
     public function getAllModules()
     {
         $sql = "SELECT * FROM gen_module_list_tbl";
@@ -22,14 +32,29 @@ class EmployeeModule_model extends CI_Model {
     }
 
     // ----- UPDATE LEAVE CREDIT -----
-    public function updateLeaveCredit()
+    public function getEmployeeLeave($employeeID = null)
     {
-        $employeeData = [], $employeeLeave = [];
-        $todayDate  = date("Y-m-d H:i:s");
-        $todayYear  = date("Y");
-        $todayMonth = (float)date("m");
-        $todayDay   = date("d");
-        $employees  = $this->getAllEmployee();
+        if ($employeeID) {
+            $sql    = "SELECT employeeLeaveID, leaveID, leaveCredit, leaveAccumulated FROM hris_employee_leave_tbl WHERE employeeID = $employeeID";
+            $query  = $this->db->query($sql);
+            return $query->result_array();
+        }
+        return [];
+    }
+
+    public function resetEmployeeField($column = null)
+    {
+        if ($column) {
+            $query = $this->db->update("hris_employee_list_tbl", [$column => 0], ["employeeID <>" => 0]);
+            return $query ? true : false;
+        }
+        return false;
+    } 
+
+    public function updateLeaveCredit($id = null)
+    {
+        $employeeData = $employeeLeave = [];
+        $employees    = $id ? $this->getEmployee($id) : $this->getAllEmployee();
         foreach ($employees as $emp) {
             $employeeID            = $emp["employeeID"];
             $employeeHiredDate     = $emp["employeeHiredDate"];
@@ -40,31 +65,66 @@ class EmployeeModule_model extends CI_Model {
             $date1    = new DateTime();
             $date2    = new DateTime($employeeHiredDate);
             $interval = $date1->diff($date2);
-            $month    = abs($interval->format("%m"));
+            $month    = $interval->format("%y") * 12 + $interval->format("%m");
 
-            if ($month >= 12 && $employeeStatus == 1) {
-                $employeeData["employeeLeaveInterval"] = $month;
-
-                // ----- FIRST YEAR -----
-                if ($month == 12) {
-
+            if ($employeeLeaveInterval < $month && $month >= 12 && $employeeStatus == 1) {
+                $employeeSLID = $employeeVLID = $employeeSLCredit = $employeeVLCredit = $employeeSLAccumulated = $employeeVLAccumulated = 0;
+                $leaveData = $this->getEmployeeLeave($employeeID);
+                foreach ($leaveData as $leave) {
+                    if ($leave["leaveID"] == 1) {
+                        $employeeSLID          = $leave["employeeLeaveID"];
+                        $employeeSLCredit      = $leave["leaveCredit"];
+                        $employeeSLAccumulated = $leave["leaveAccumulated"];
+                    }
+                    if ($leave["leaveID"] == 2) {
+                        $employeeVLID          = $leave["employeeLeaveID"];
+                        $employeeVLCredit      = $leave["leaveCredit"];
+                        $employeeVLAccumulated = $leave["leaveAccumulated"];
+                    }
                 }
-                // ----- END FIRST YEAR -----
-            }
-            
-            $hiredYear  = date("Y", strtotime($employeeHiredDate));
-            $hiredMonth = (float)date("m", strtotime($employeeHiredDate));
-            $hiredDay   = date("d", strtotime($employeeHiredDate));
 
-            // if ($hiredMonth != 12)
-            array_push($employeeData, [
-                "employeeID" => $employeeID,
-                "month"      => $month,
-            ]);
+                $accumulatedLeave         = $employeeRankingCredit / 12;
+                $sickLeaveAccumulated     = $employeeSLAccumulated != 0 ? $employeeSLAccumulated + $accumulatedLeave : $employeeSLAccumulated + ($accumulatedLeave * $month);
+                $vacationLeaveAccumulated = $employeeVLAccumulated != 0 ? $employeeVLAccumulated + $accumulatedLeave : $employeeVLAccumulated + ($accumulatedLeave * $month);
+
+                // ----- ANNIVERSARY -----
+                if ($month % 12 == 0) {
+                    $employeeSLCredit = $month == 12 ? $employeeRankingCredit : $sickLeaveAccumulated;
+                    $employeeVLCredit = $employeeRankingCredit;
+                    
+                    // ----- RESET ACCUMULATED LEAVE -----
+                    $sickLeaveAccumulated = $vacationLeaveAccumulated = 0;
+                    // ----- END RESET ACCUMULATED LEAVE -----
+                }
+                // ----- END ANNIVERSARY -----
+
+                $sickLeave = [
+                    "employeeLeaveID"  => $employeeSLID,
+                    "leaveCredit"      => $employeeSLCredit,
+                    "leaveAccumulated" => $sickLeaveAccumulated
+                ];
+                $vacationLeave = [
+                    "employeeLeaveID"  => $employeeVLID,
+                    "leaveCredit"      => $employeeVLCredit,
+                    "leaveAccumulated" => $vacationLeaveAccumulated
+                ];
+                array_push($employeeLeave, $sickLeave);
+                array_push($employeeLeave, $vacationLeave);
+            }
+
+            $employee = [
+                "employeeID"            => $employeeID,
+                "employeeLeaveInterval" => $month,
+            ];
+            array_push($employeeData, $employee);
         }
-        return $data;
+
+        $queryEmployeeData  = count($employeeData) > 0 ? $this->db->update_batch("hris_employee_list_tbl", $employeeData, "employeeID") : true;
+        $queryEmployeeLeave = count($employeeLeave) > 0 ? $this->db->update_batch("hris_employee_leave_tbl", $employeeLeave, "employeeLeaveID"): true;
+        return $queryEmployeeData && $queryEmployeeLeave;
     }
     // ----- UPDATE LEAVE CREDIT -----
+
 
     // ----- GENERATE PERMISSION -----
     public function generateEmployeePermission()
@@ -162,7 +222,11 @@ class EmployeeModule_model extends CI_Model {
         $deleteLeaveCredit = $this->db->delete("hris_employee_leave_tbl", ["employeeID" => $employeeID]);
         if ($deleteLeaveCredit) {
             $query = $this->db->insert_batch("hris_employee_leave_tbl", $data);
-            return $query ? true : false;
+            if ($query) {
+                $this->updateLeaveCredit($employeeID);
+                return true;
+            }
+            return false;
         } else {
             return false;
         }

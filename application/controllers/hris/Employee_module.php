@@ -13,6 +13,7 @@ class Employee_module extends CI_Controller {
     public function index()
     {
         $data["title"] = "Employee Module";
+        $this->employeemodule->updateLeaveCredit();
 
         $this->load->view("template/header",$data);
         $this->load->view("hris/employee_module/index");
@@ -369,11 +370,12 @@ class Employee_module extends CI_Controller {
             $leaveData = [];
             foreach ($leaveCredit as $index => $leave) {
                 $temp = [
-                    "employeeID"  => $employeeID,
-                    "leaveID"     => $leave["leaveTypeID"],
-                    "leaveCredit" => $leave["leaveBalance"] ?? 0,
-                    "createdBy"   => $createdBy,
-                    "updatedBy"   => $updatedBy,
+                    "employeeID"       => $employeeID,
+                    "leaveID"          => $leave["leaveTypeID"],
+                    "leaveCredit"      => $leave["leaveBalance"] ?? 0,
+                    "leaveAccumulated" => $leave["leaveAccumulated"] ?? 0,
+                    "createdBy"        => $createdBy,
+                    "updatedBy"        => $updatedBy,
                 ];
                 array_push($leaveData, $temp);
             }

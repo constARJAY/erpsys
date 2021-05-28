@@ -213,30 +213,33 @@ return html;
 
 // ------ CHECK INVENTORY ITEM STATUS -------
 $(document).on("change","#input_serviceStatus",function(){
-    var tempCategoryStatus = $(this).find("option:selected").val()
-    var getserviceID = $(this).attr("getserviceid") ;
-    var itemData = getTableData("ims_service_scope_tbl INNER JOIN ims_services_tbl ON ims_service_scope_tbl.requestServiceID = ims_services_tbl.serviceID", 
-    "serviceStatus", "serviceStatus = 1 AND serviceID ="+getserviceID, "");
+    if($(this).attr("getserviceid")){
+        var thisValue       = $(this).val();
+        var attrID          = $(this).attr("id");
+        var getserviceID    = $(this).attr("getserviceid");
 
-    if(itemData.length != 0){
-        if(tempCategoryStatus == 0 ){
-            setTimeout(function(){
-                $(this).removeClass("is-valid").addClass("is-invalid");
-                $("#invalid-input_serviceStatus").removeClass("is-valid").addClass("is-invalid");
-                $("#invalid-input_serviceStatus").text('This record is currently in use!');
-                document.getElementById("btnUpdate").disabled = true;
-                
-            },200)
-                    
-                        
-        }
-        else{
-            $(this).removeClass("is-invalid").addClass("is-valid");
-            $("#invalid-input_serviceStatus").removeClass("is-invalid").addClass("is-valid");
-            $("#invalid-input_serviceStatus").text('');
-            document.getElementById("btnUpdate").disabled = false;
-        }
+        var itemData = getTableData("ims_service_scope_tbl", 
+                                    "COUNT(requestServiceID) AS serviceLength", 
+                                    "requestServiceID = "+getserviceID,);
+            if(thisValue == 0 && itemData[0].serviceLength > 0 ){
+                setTimeout(function(){
+                    $(this).removeClass("is-valid").addClass("is-invalid");
+                    $("#invalid-input_serviceStatus").removeClass("is-valid").addClass("is-invalid");
+                    $("#invalid-input_serviceStatus").text('This record is currently in use!');
+                    $(".select2-selection").addClass("has-error").removeClass("no-error");
+                    document.getElementById("btnUpdate").disabled = true;
+                },200)           
+            }
+            else{
+                $(this).removeClass("is-invalid").addClass("is-valid");
+                $("#invalid-input_serviceStatus").removeClass("is-invalid").addClass("is-valid");
+                $("#invalid-input_serviceStatus").text('');
+                $(".select2-selection").removeClass("has-error").addClass("no-error");
+                document.getElementById("btnUpdate").disabled = false;
+            }
+        
     }
+    
 
 });
 // ------ END CHECK INVENTORY ITEM STATUS -------
@@ -257,14 +260,12 @@ $(document).on("click", "#btnAdd", function() {
 $(document).on("click", "#btnSave", function() {
 const validate = validateForm("modal_ims_service");
 if (validate) {
-
     let data = getFormData("modal_ims_service", true);
     data["tableData[serviceCode]"] = generateCode("SVC", false, "ims_services_tbl", "serviceCode");
     data["tableData[createdBy]"] = sessionID;
     data["tableData[updatedBy]"] = sessionID;
     data["tableName"]            = "ims_services_tbl";
     data["feedback"]             = $("[name=serviceName]").val();
-
     sweetAlertConfirmation("add", "Service", "modal_ims_service", null, data, true, tableContent);
     }
 });

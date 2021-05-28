@@ -1,8 +1,7 @@
 $(document).ready(function(){
 
     //------ MODULE FUNCTION IS ALLOWED UPDATE-----
-
-const allowedUpdate = isUpdateAllowed(18);
+    const allowedUpdate = isUpdateAllowed(130);
 if(!allowedUpdate){
     $("#modal_ims_uom_content").find("input, select, textarea").each(function(){
         $(this).attr("disabled",true);
@@ -116,12 +115,14 @@ tableContent();
     let uomID             = data ? (data[0].uomID            ? data[0].uomID        : "") : "",
     uomName               = data ? (data[0].uomName          ? data[0].uomName      : "") : "",
     uomStatus             = data ? (data[0].uomStatus        ? data[0].uomStatus    : "") : "";
-      
+    let asterisk          = allowedUpdate ? `<strong class="text-danger">*</strong>` : ``; 
+    let disabled          = isCurrentlyInUse(uomName) ? "disabled" : ``;
+    let noteDisabled      = isCurrentlyInUse(uomName) ? `<small class="text-warning"><strong>Note:</strong> This record is currently in use!</small>` : ``;
     let button = uomID ? `
     <button 
         class="btn btn-update px-5 p-2" 
         id="btnUpdate" 
-        rowID="${uomID}">
+        rowID="${uomID}" ${disabled}>
         <i class="fas fa-save"></i>
         Update
     </button>` : `
@@ -137,19 +138,20 @@ tableContent();
         <div class="row">
             <div class="col-md-12 col-sm-12">
                 <div class="form-group">
-                    <label>Unit of Measurement Name <span class="text-danger font-weight-bold">*</span></label>
+                    <label>Unit of Measurement Name ${disabled ? `` : asterisk}</label>
                     <input 
                         type="text" 
                         class="form-control validate" 
                         name="uomName" 
                         id="input_uomName" 
-                        data-allowcharacters="[A-Z][a-z]" 
+                        data-allowcharacters="[A-Z][a-z][ ][-][/][()]" 
                         minlength="2" 
                         maxlength="25" 
                         required 
                         unique="${uomID}"  
                         value="${uomName}"
-                        autocomplete="off">
+                        autocomplete="off"
+                        ${disabled}>
                     <div class="invalid-feedback d-block" id="invalid-input_uomName"></div>
                 </div>
             </div>
@@ -157,13 +159,14 @@ tableContent();
         <div class="row">
             <div class="col-md-12 col-sm-12">
                 <div class="form-group">
-                    <label>Status <span class="text-danger font-weight-bold">*</span></label>
+                    <label>Status ${disabled ? `` : asterisk}</label>
                     <select 
                         class="form-control select2 validate" 
                         id="input_uomStatus" 
                         name="uomStatus"
                         autocomplete="off"
-                        getuomid = "${uomID}"
+                        getuomid = "${uomID}" ${disabled}
+                        ${data ? `uomname=${uomName}` : `` }
                         >
                         <option 
                             value="1" 
@@ -174,6 +177,12 @@ tableContent();
                     </select>
                     <div class="invalid-feedback d-block" id="invalid-input_uomStatus"></div>
                 </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-12 col-sm-12">
+                ${allowedUpdate? noteDisabled : ``}
             </div>
         </div>
 
@@ -188,34 +197,7 @@ return html;
 
 
 // ------ CHECK INVENTORY ITEM STATUS -------
-$(document).on("change","#input_uomStatus",function(){
-    var tempCategoryStatus = $(this).find("option:selected").val()
-    var getuomID = $(this).attr("getuomid") ;
-    var itemData = getTableData("ims_inventory_item_tbl INNER JOIN ims_uom_tbl ON ims_inventory_item_tbl.unitOfMeasurementID = ims_uom_tbl.uomID", 
-    "uomStatus", "uomStatus = 1 AND uomID ="+getuomID, "");
 
-  
-
-    if(itemData.length != 0 ){
-        if(tempCategoryStatus == 0 ){
-            setTimeout(function(){
-                $("#input_uomStatus").removeClass("is-valid").addClass("is-invalid");
-                $("#invalid-input_uomStatus").removeClass("is-valid").addClass("is-invalid");
-                $("#invalid-input_uomStatus").text('There is active item in this unit of measurement! ');    
-                document.getElementById("btnUpdate").disabled = true;    
-            },200)
-            
-                  
-        }
-        else{
-            $("#input_uomStatus").removeClass("is-invalid").addClass("is-valid");
-            $("#invalid-input_uomStatus").removeClass("is-invalid").addClass("is-valid");
-            $("#invalid-input_uomStatus").text('');
-            document.getElementById("btnUpdate").disabled = false;
-        }
-    }
-
-});
 // ------ END CHECK INVENTORY ITEM STATUS -------
 
 // ----- OPEN ADD MODAL -----
@@ -251,6 +233,7 @@ if (validate) {
 $(document).on("click", ".btnEdit", function() {
     const id       = $(this).attr("id");
     const feedback = $(this).attr("feedback");
+   
     $("#ims_uom_modalheader").text("EDIT UNIT OF MEASUREMENT");
     $("#modal_ims_uom").modal("show");
 
@@ -265,6 +248,13 @@ $(document).on("click", ".btnEdit", function() {
             $("#btnSaveConfirmationEdit").attr("rowID", id);
             $("#btnSaveConfirmationEdit").attr("feedback", feedback);
             initAll();
+            if (!allowedUpdate) {
+                $("#modal_ims_uom_content").find("input, select, textarea").each(function() {
+                    $(this).attr("disabled", true);
+                })
+                $("#btnUpdate").hide();
+                $("strong .text-danger").hide();
+            }
         }, 500);
     }
 });
@@ -319,3 +309,20 @@ $(document).on("click", ".btnCancel", function () {
 
 
 });
+
+
+
+function isCurrentlyInUse(string = null){
+    let returnData = false;
+    if(string){
+        var itemDataCondition   = getTableData("ims_inventory_item_tbl","COUNT(itemID) as itemLength",  
+                                                `LOWER(unitOfMeasurementID) =  BINARY LOWER ("${string.toLowerCase()}") AND itemStatus = '1' `);
+        var travelDataCondition = getTableData("ims_travel_request_tbl", "COUNT(travelRequestID) as travelLength", `LOWER(unitOfMeasure) = BINARY LOWER ("${string.toLowerCase()}") `); 
+        console.log(travelDataCondition);
+        console.log(itemDataCondition);
+        if(itemDataCondition[0].itemLength > 0 || travelDataCondition[0].travelLength > 0 ) {
+            returnData = true;
+        }
+    }
+  return returnData;
+}

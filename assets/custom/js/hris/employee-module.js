@@ -96,8 +96,10 @@ $(document).ready(function() {
                 info: false,
 				columnDefs: [
 					{ targets: 0, width: "5%"  },
-					{ targets: 1, width: "70%" },
-					{ targets: 2, width: "30%" },
+					{ targets: 1, width: "50%" },
+					{ targets: 2, width: "15%" },
+					{ targets: 3, width: "15%" },
+					{ targets: 4, width: "15%" },
 				],
 			});
 
@@ -1519,6 +1521,17 @@ $(document).ready(function() {
     // ----- END EMPLOYEE PAYROLL TAB -----
 
 
+    // ----- KEYUP LEAVE CREDIT -----
+    $(document).on("keyup", `[name="leaveCredit"]`, function() {
+        const tableRow         = $(this).closest("tr");
+        const leaveCredit      = +$(this).val()?.replaceAll(",", "");
+        const leaveAccumulated = +tableRow.find(`[name="leaveAccumulated"]`).val()?.replaceAll(",", "");
+        const totalLeave       = leaveCredit + leaveAccumulated;
+        tableRow.find(`[name="leaveType"]`).val(totalLeave);
+    })
+    // ----- END KEYUP LEAVE CREDIT -----
+
+
     // ----- EMPLOYEE LEAVE BALANCE -----
     const leaveTypeList = getTableData("hris_leave_tbl", "leaveID, leaveName", "leaveStatus = 1");
 
@@ -1540,23 +1553,60 @@ $(document).ready(function() {
         const leaveBalance = () => {
             let html = leaveTypeList.map((leave, index) => {
                 let { leaveName, leaveID } = leave;
-                let leaveCredit = 0;
+                let leaveCredit = 0, leaveAccumulated = 0;
                 if (data) {
                     getLeaveBalance.filter(lv => lv.leaveID == leaveID).map(leave => {
-                        leaveCredit = leave.leaveCredit;
+                        leaveCredit      = +leave.leaveCredit;
+                        leaveAccumulated = +leave.leaveAccumulated;
                     });
                 }
 
-                const max = leaveName.toLowerCase().replaceAll(" ", "")?.trim() == "sickleave" ? 5 : 30;
+                // const max = leaveName.toLowerCase().replaceAll(" ", "")?.trim() == "sickleave" ? 5 : 30;
+                const max = 30;
 
                 return `
-                <tr>
+                <tr class="leaveTypeTable"
+                    leaveID="${leaveID}">
                     <td>${index+1}</td>
                     <td>${leaveName}</td>
                     <td>
                         <div class="form-group">
                             <input type="text"
-                                class="form-control input-quantity text-left"
+                                class="form-control input-quantity text-center"
+                                name="leaveAccumulated"
+                                id="leaveAccumulated${index}"
+                                leaveid="${leaveID}"
+                                min="0"
+                                max="${max}"
+                                data-allowcharacters="[0-9]"
+                                minlength="1"
+                                maxlength="5"
+                                value="${leaveAccumulated}"
+                                disabled>
+                            <div class="d-block invalid-feedback" id="invalid-leaveAccumulated${index}"></div>
+                        </div> 
+                    </td>
+                    <td>
+                        <div class="form-group">
+                            <input type="text"
+                                class="form-control input-quantity text-center"
+                                name="leaveCredit"
+                                id="leaveCredit${index}"
+                                leaveid="${leaveID}"
+                                min="0"
+                                max="${max}"
+                                data-allowcharacters="[0-9]"
+                                minlength="1"
+                                maxlength="5"
+                                value="${leaveCredit}"
+                                ${leaveID == 1 || leaveID == 2 ? "disabled" : ""}>
+                            <div class="d-block invalid-feedback" id="invalid-leaveCredit${index}"></div>
+                        </div> 
+                    </td>
+                    <td>
+                        <div class="form-group">
+                            <input type="text"
+                                class="form-control input-quantity text-center"
                                 name="leaveType"
                                 id="leaveType${index}"
                                 leaveid="${leaveID}"
@@ -1565,7 +1615,8 @@ $(document).ready(function() {
                                 data-allowcharacters="[0-9]"
                                 minlength="1"
                                 maxlength="5"
-                                value="${leaveCredit}">
+                                value="${(leaveCredit + leaveAccumulated).toFixed(2)}"
+                                disabled>
                             <div class="d-block invalid-feedback" id="invalid-leaveType${index}"></div>
                         </div> 
                     </td>
@@ -1625,6 +1676,8 @@ $(document).ready(function() {
                                 <tr>
                                     <th>No.</th>
                                     <th>Leave Type</th>
+                                    <th>Accumulated</th>
+                                    <th>Leave Count</th>
                                     <th>Total Leave</th>
                                 </tr>
                             </thead>
@@ -2316,13 +2369,22 @@ $(document).ready(function() {
         const employeeRanking       = $(`[name="employeeRanking"]`).val();
         const employeeRankingCredit = $(`[name="employeeRanking"] option:selected`).attr("balance");
         let result = [];
-        $("[name=leaveType]").each(function() {
+        $(`tr.leaveTypeTable`).each(function() {
             let temp = {
-                leaveTypeID:  $(this).attr("leaveid"),
-                leaveBalance: $(this).val()
-            }
+                leaveTypeID:      $(this).attr("leaveID"),
+                leaveBalance:     $(`[name="leaveCredit"]`, this).val()?.replaceAll(",", ""),
+                leaveAccumulated: $(`[name="leaveAccumulated"]`, this).val()?.replaceAll(",", ""),
+            };
             result.push(temp);
         })
+
+        // $("[name=leaveType]").each(function() {
+        //     let temp = {
+        //         leaveTypeID:  $(this).attr("leaveid"),
+        //         leaveBalance: $(this).val()
+        //     }
+        //     result.push(temp);
+        // })
         return { employeeRanking, employeeRankingCredit, balance: result};
     }
 
@@ -2361,9 +2423,10 @@ $(document).ready(function() {
         formData.append(`employeeRanking`, leaveBalanceData.employeeRanking);
         formData.append(`employeeRankingCredit`, leaveBalanceData.employeeRankingCredit);
         leaveBalanceData.balance.map((leave, index) => {
-            const { leaveTypeID, leaveBalance } = leave;
+            const { leaveTypeID, leaveBalance, leaveAccumulated } = leave;
             formData.append(`leaveCredit[${index}][leaveTypeID]`, leaveTypeID);
             formData.append(`leaveCredit[${index}][leaveBalance]`, leaveBalance);
+            formData.append(`leaveCredit[${index}][leaveAccumulated]`, leaveAccumulated);
         })
         formData.append("scheduleID", getEmployeeScheduleData());
         const accessiblityData = getEmployeeAccessibilityData();
