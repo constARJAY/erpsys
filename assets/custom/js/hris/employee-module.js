@@ -2323,13 +2323,13 @@ $(document).ready(function() {
         const employeeStatus      = $("[name=employeeStatus]").val();
         let employeeSignature     = $("[name=employeeSignature]").val();
 
-        employeeProfile   = employeeProfile && $("[name=employeeProfile]")[0].files[0].name || $("[name=employeeProfile]").attr("default");
-        employeeSignature = employeeSignature && $("[name=employeeSignature]")[0].files[0].name || $("[name=employeeSignature]").attr("signature");
+        employeeProfile   = employeeProfile ? $("[name=employeeProfile]")[0].files[0].name : $("[name=employeeProfile]").attr("default");
+        employeeSignature = employeeSignature ? $("[name=employeeSignature]")[0].files[0].name : $("[name=employeeSignature]").attr("signature");
         employeeBirthday  = moment(employeeBirthday).format("YYYY-MM-DD");
         employeeHiredDate = moment(employeeHiredDate).format("YYYY-MM-DD");
         employeeGender    = employeeGender == "Others" ? $("[name=employeeOtherGender]").val()?.trim() : employeeGender;
-        const file = employeeProfile ? $("[name=employeeProfile]")[0].files[0] : null;
-        employeeSignature = employeeSignature ? $("[name=employeeSignature]")[0]?.files[0] : null;
+        // employeeSignature = employeeSignature ? $("[name=employeeSignature]")[0]?.files[0] : null;
+        const file          = employeeProfile   ? $("[name=employeeProfile]")[0].files[0]   : null;
         const signatureFile = employeeSignature ? $("[name=employeeSignature]")[0].files[0] : null;
         
         return {
@@ -2501,6 +2501,10 @@ $(document).ready(function() {
         const tabID = input.closest(".tab-pane").attr("id");
         $(`a[href="#${tabID}"]`).tab("show");
         input.focus();
+
+        $("#tableLeaveBalance").DataTable().columns.adjust().draw();
+        $("#tableAccessibility").DataTable().columns.adjust().draw();
+        $("#tableSchedule").DataTable().columns.adjust().draw();
     }
     // ----- END FOCUS ERROR FORM -----
 

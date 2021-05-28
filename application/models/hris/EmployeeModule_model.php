@@ -57,7 +57,7 @@ class EmployeeModule_model extends CI_Model {
         $employees    = $id ? $this->getEmployee($id) : $this->getAllEmployee();
         foreach ($employees as $emp) {
             $employeeID            = $emp["employeeID"];
-            $employeeHiredDate     = $emp["employeeHiredDate"];
+            $employeeHiredDate     = date("Y-m-d", strtotime("-1 day", strtotime($emp["employeeHiredDate"])));
             $employeeStatus        = $emp["employeeStatus"];
             $employeeLeaveInterval = $emp["employeeLeaveInterval"];
             $employeeRankingCredit = $emp["employeeRankingCredit"];
@@ -67,29 +67,29 @@ class EmployeeModule_model extends CI_Model {
             $interval = $date1->diff($date2);
             $month    = $interval->format("%y") * 12 + $interval->format("%m");
 
-            if ($employeeLeaveInterval < $month && $month >= 12 && $employeeStatus == 1) {
+            if ($employeeLeaveInterval <= $month && $month >= 12 && $employeeStatus == 1) {
                 $employeeSLID = $employeeVLID = $employeeSLCredit = $employeeVLCredit = $employeeSLAccumulated = $employeeVLAccumulated = 0;
                 $leaveData = $this->getEmployeeLeave($employeeID);
                 foreach ($leaveData as $leave) {
                     if ($leave["leaveID"] == 1) {
                         $employeeSLID          = $leave["employeeLeaveID"];
-                        $employeeSLCredit      = $leave["leaveCredit"];
-                        $employeeSLAccumulated = $leave["leaveAccumulated"];
+                        $employeeSLCredit      = $leave["leaveCredit"] ?? 0;
+                        $employeeSLAccumulated = $leave["leaveAccumulated"] ?? 0;
                     }
                     if ($leave["leaveID"] == 2) {
                         $employeeVLID          = $leave["employeeLeaveID"];
-                        $employeeVLCredit      = $leave["leaveCredit"];
-                        $employeeVLAccumulated = $leave["leaveAccumulated"];
+                        $employeeVLCredit      = $leave["leaveCredit"] ?? 0;
+                        $employeeVLAccumulated = $leave["leaveAccumulated"] ?? 0;
                     }
                 }
 
                 $accumulatedLeave         = $employeeRankingCredit / 12;
-                $sickLeaveAccumulated     = $employeeSLAccumulated != 0 ? $employeeSLAccumulated + $accumulatedLeave : $employeeSLAccumulated + ($accumulatedLeave * $month);
-                $vacationLeaveAccumulated = $employeeVLAccumulated != 0 ? $employeeVLAccumulated + $accumulatedLeave : $employeeVLAccumulated + ($accumulatedLeave * $month);
+                $sickLeaveAccumulated     = $employeeSLAccumulated > 0 ? $employeeSLAccumulated + $accumulatedLeave : $employeeSLAccumulated + ($accumulatedLeave * ($month % 12));
+                $vacationLeaveAccumulated = $employeeVLAccumulated > 0 ? $employeeVLAccumulated + $accumulatedLeave : $employeeVLAccumulated + ($accumulatedLeave * ($month % 12));
 
                 // ----- ANNIVERSARY -----
                 if ($month % 12 == 0) {
-                    $employeeSLCredit = $month == 12 ? $employeeRankingCredit : $sickLeaveAccumulated;
+                    $employeeSLCredit = $month == 12 ? $employeeRankingCredit : $sickLeaveAccumulated - $accumulatedLeave;
                     $employeeVLCredit = $employeeRankingCredit;
                     
                     // ----- RESET ACCUMULATED LEAVE -----
