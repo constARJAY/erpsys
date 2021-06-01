@@ -123,7 +123,7 @@ $(document).ready(function(){
                                          <td class="text-center">${item["transferredQuantity"]}</td>
                                          <td class="text-center">${item["disposalQuantity"]}</td>
                                          <td class="text-center">${item["stockIN"]}</td>    
-                                         <td class="text-center">0.00</td>
+                                         <td class="text-center">${item["stockIN"]}</td>
                                          <td class="text-center">${item["reorderpoint"]}</td>
 
                                          </tr>`;
