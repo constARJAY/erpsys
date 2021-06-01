@@ -2461,7 +2461,7 @@ $(document).ready(function() {
 		 switch(param){
 			 case "personnel":
 				tableDataReference = getTableData("hris_personnel_request_tbl","",`costEstimateID = '${referenceCode}' `);
-				if(tableDataReference,length > 0 ){
+				if(tableDataReference.length > 0 ){
 					tableData = getTableData(`hris_personnel_request_tbl AS hprt JOIN hris_designation_tbl AS hdt USING(designationID)`,
 						`hprt.designationID AS designationID, hprt.designationName AS designationName, hprt.unitCost AS unitCost,
 						designationTotalHours, quantity,
@@ -2560,37 +2560,37 @@ $(document).ready(function() {
 					
 						tableData.map((items, index)=>{
    
-							items.higherPrice ? "" : priceListCondition.push(items.itemCode);
+							items.higherPrice ? "" : (items.itemCode ? priceListCondition.push(items.itemCode) : "");
    
 							var totalCost   =  parseFloat(items.higherPrice || "0") * parseFloat(items.quantity);
 							totalQty        += parseFloat(items.quantity) ; 
 							totalPrice      += parseFloat(items.higherPrice || "0"); 
 							grandTotalPrice += parseFloat(totalCost);
 										html += `
-										<tr class="itemTableRow" requestvalue="${items.requestItemID}" category="project">
+										<tr class="itemTableRow" requestvalue="${items.requestItemID}" category="company">
 											<td>
 												<div class="itemcode" value="${items.itemID}">
-													${items.itemCode}
+													${items.itemCode || "-"}
 												</div>
 											</td>
 											<td>
 												<div class="itemname">
-													${items.itemName}
+													${items.itemCode ? items.itemName : "-"}
 												</div>
 											</td>
 											<td class="text-center">
 												<div class="quantity">
-													${items.quantity}
+													${items.itemCode ? items.quantity : "-"}
 												</div>
 											</td>
 											<td>
 												<div class="uom">
-													${items.itemUom}
+													${items.itemCode ? items.itemUom : "-"}
 												</div>
 											</td>
 											<td>
-												<div class="unitCost unitprice text-right" value="${items.higherPrice}">
-													${formatAmount(items.higherPrice,true)}
+												<div class="unitCost unitprice text-right" value="${items.itemCode ? items.higherPrice : "0"}">
+													${items.itemCode ? formatAmount(items.higherPrice,true) : "-"}
 												</div>
 											</td>
 											<td>
@@ -2620,7 +2620,7 @@ $(document).ready(function() {
 					 `ims_request_items_tbl.*,  MAX(vendorCurrentPrice) AS higherPrice, (SELECT sub_inv.itemCode FROM ims_inventory_item_tbl as sub_inv WHERE sub_inv.itemID = ims_request_items_tbl.itemID ) AS itemCode`, 
 					 `costEstimateID = '${referenceCode}' AND categoryType = 'company' ${condition}`,``,`itemID`);
 						 tableData.map((items, index)=>{
-							 items.higherPrice ? "" : priceListCondition.push(items.itemCode);
+							items.higherPrice ? "" : (items.itemCode ? priceListCondition.push(items.itemCode) : "");
 							 var totalCost   =  parseFloat(items.higherPrice || "0") * parseFloat(items.quantity);
 							 totalQty        += parseFloat(items.quantity) ; 
 							 totalPrice      += parseFloat(items.higherPrice || "0"); 
@@ -2630,27 +2630,27 @@ $(document).ready(function() {
 							 <tr class="itemTableRow" requestvalue="${items.requestItemID}" category="company">
 								 <td>
 									 <div class="itemcode" value="${items.itemID}">
-										 ${items.itemCode}
+										 ${items.itemCode || "-"}
 									 </div>
 								 </td>
 								 <td>
 									 <div class="itemname">
-										 ${items.itemName}
+										 ${items.itemCode ? items.itemName : "-"}
 									 </div>
 								 </td>
 								 <td class="text-center">
 									 <div class="quantity">
-										 ${items.quantity}
+										 ${items.itemCode ? items.quantity : "-"}
 									 </div>
 								 </td>
 								 <td>
 									 <div class="uom">
-										 ${items.itemUom}
+										 ${items.itemCode ? items.itemUom : "-"}
 									 </div>
 								 </td>
 								 <td>
-									 <div class="unitCost unitprice text-right" value="${items.higherPrice}">
-										 ${formatAmount(items.higherPrice,true)}
+									 <div class="unitCost unitprice text-right" value="${items.itemCode ? items.higherPrice : "0"}">
+										 ${items.itemCode ? formatAmount(items.higherPrice,true) : "-"}
 									 </div>
 								 </td>
 								 <td>
@@ -2805,8 +2805,9 @@ $(document).ready(function() {
 							}
 							checkboxTravelHeader += !readOnly? ``:``;
 						});
-		
-						if(tableData.length < 2 && tableData[0].travelDescription != "none" ){
+						
+						var globalDescriptionCondition = tableData[0]["travelDescription"].toLowerCase();
+						if(tableData.length < 2 && globalDescriptionCondition != "none" ){
 							html += `
 									<tr class="itemTableRow" index="1">
 										<td class="text-center">
@@ -2875,7 +2876,7 @@ $(document).ready(function() {
 										</td>
 									</tr>`;
 						}
-						let travelButtons = !readOnly  && tableData[0].travelDescription != "none" ? `<div class="text-left my-2">
+						let travelButtons = !readOnly  && globalDescriptionCondition != "none" ? `<div class="text-left my-2">
 															<button class="btn btn-primary btnAddRow" id="btnAddRow" travel="true" type="button"><i class="fas fa-plus-circle"></i> Add Row</button>
 															<button class="btn btn-danger btnDeleteRow" id="btnDeleteRow" travel="true" type="button" disabled><i class="fas fa-minus-circle"></i> Delete Row/s</button>
 														</div>`:``;
@@ -2886,7 +2887,6 @@ $(document).ready(function() {
 							initQuantity();
 						}, 500);
 		 			}else{
-						//  5 
 						html += `
 								<tr class="">
 									<td class="text-center" colspan="${readOnly?'5':'6'}">No matching records found</td>
