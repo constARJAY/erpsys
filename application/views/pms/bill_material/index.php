@@ -5,7 +5,7 @@
                 <div class="col-lg-6 col-md-6">
                     <ul class="breadcrumb pl-0 pb-0 ">
                         <li class="breadcrumb-item"><a href="#"><i class="zmdi zmdi-home"></i> Dashboard</a></li>
-						<li class="breadcrumb-item"><i class="fas fa-rulers"></i> &nbsp;Project Modules</li>
+						<li class="breadcrumb-item"><i class="fas fa-folder-open"></i>&nbsp;Project Modules</li>
                         <li class="breadcrumb-item active">Project Budget Rationale</li>
                     </ul>
                     <h1 class="mt-3">Project Budget Rationale</h1>

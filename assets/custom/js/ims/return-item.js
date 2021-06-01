@@ -562,10 +562,10 @@ $(document).ready(function() {
 			let {
 				returnItemID     = "",
 				returnItemStatus = "",
-				employeeID            = "",
-				approversID           = "",
-				approversDate         = "",
-				createdAt             = new Date
+				employeeID       = "",
+				approversID      = "",
+				approversDate    = "",
+				createdAt        = new Date
 			} = data && data[0];
 
 			let isOngoing = approversDate ? approversDate.split("|").length > 0 ? true : false : false;
@@ -842,11 +842,11 @@ $(document).ready(function() {
 		`ib.borrowingStatus = 2 AND ib.borrowingID = ${id}`,``,`ibd.borrowingDetailID`);
 		
 		BorrowingData.map((item, index) => {
-			let address = `${item.clientUnitNumber && titleCase(item.clientUnitNumber)+", "}${item.clientHouseNumber && item.clientHouseNumber +", "}${item.clientBarangay && titleCase(item.clientBarangay)+", "}${item.clientCity && titleCase(item.clientCity)+", "}${item.clientProvince && titleCase(item.clientProvince)+", "}${item.clientCountry && titleCase(item.clientCountry)+", "}${item.clientPostalCode && titleCase(item.clientPostalCode)}`;
-			let clientCode =`${item.clientCode}`;
-			let clientName =`${item.clientName}`;
-			let projectCode =`${item.projectListCode}`;
-			let projectListName =`${item.projectListName}`;
+			let address = `${item.clientUnitNumber ? titleCase(item.clientUnitNumber)+", " : ""}${item.clientHouseNumber ? item.clientHouseNumber +", " : ""}${item.clientBarangay ? titleCase(item.clientBarangay)+", " : ""}${item.clientCity ? titleCase(item.clientCity)+", " : ""}${item.clientProvince ? titleCase(item.clientProvince)+", " : ""}${item.clientCountry ? titleCase(item.clientCountry)+", " : ""}${item.clientPostalCode ? titleCase(item.clientPostalCode) : ""}`;
+			let clientCode =`${item.clientCode ?? "-"}`;
+			let clientName =`${item.clientName ?? "-"}`;
+			let projectCode =`${item.projectListCode ?? "-"}`;
+			let projectListName =`${item.projectListName ?? "-"}`;
 			let projectID =`${item.projectID}`;
 			let {	
 			borrowingDetailID			="",
@@ -993,7 +993,7 @@ $(document).ready(function() {
 			required
 			id="returnItemDate${index}"
 			name="returnItemDate"
-			value=""
+			value="${moment(dateBorrowed).format("MMMM DD, YYYY")}"
 			dateBorrowed="${dateBorrowed}"
 			title="Date" required>
 			<div class="d-block invalid-feedback" id="invalid-returnItemDate"></div>
@@ -1316,17 +1316,17 @@ $(document).ready(function() {
 	</div>
 
 	<div class="col-md-4 col-sm-12">
-	<div class="form-group">
-		<label>Project Name</label>
-		<input type="text" class="form-control" id="projectID" name="projectID" disabled value="-">
-		<input type="hidden" class="form-control" id="projectrecordID" name="projectrecordID">
-	</div>
+		<div class="form-group">
+			<label>Project Code</label>
+			<input type="text" class="form-control" id="projectCode" name="projectCode" disabled value="-">
+		</div>
 	</div>
 	<div class="col-md-4 col-sm-12">
-	<div class="form-group">
-		<label>Project Code</label>
-		<input type="text" class="form-control" id="projectCode" name="projectCode" disabled value="-">
-	</div>
+		<div class="form-group">
+			<label>Project Name</label>
+			<input type="text" class="form-control" id="projectID" name="projectID" disabled value="-">
+			<input type="hidden" class="form-control" id="projectrecordID" name="projectrecordID">
+		</div>
 	</div>
 	<div class="col-md-3 col-sm-12">
 	<div class="form-group">
@@ -1770,7 +1770,7 @@ $(document).ready(function() {
 			saveReturnItem(data, "submit", notificationData, pageContent);
 		}
 		}else{
-			$("[name=returnItemQuantity]").focus();
+			$("[name=returnItemQuantity].is-invalid").first().focus();
 
 		}
 	});

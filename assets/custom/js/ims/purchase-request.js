@@ -1286,8 +1286,8 @@ $(document).ready(function() {
 			$("#purchaseRequestCompanyTotal").text(formatAmount(totalAmount, true));
 		}
 
-		const projectTotal = +getNonFormattedAmount($(`#totalAmount[project="true"]`).text()); 
-		const companyTotal = +getNonFormattedAmount($(`#totalAmount[company="true"]`).text()); 
+		const projectTotal = +getNonFormattedAmount($(`#purchaseRequestProjectTotal`).text()); 
+		const companyTotal = +getNonFormattedAmount($(`#purchaseRequestCompanyTotal`).text()); 
 		const grandTotal   = projectTotal + companyTotal;
 		$("#purchaseRequestGrandTotal").text(formatAmount(grandTotal, true));
 
@@ -1457,10 +1457,10 @@ $(document).ready(function() {
 				<div>
 					${buttonProjectAddDeleteRow}
 				</div>
-				<div class="font-weight-bolder align-self-start" style="font-size: 1rem;">
+				<!-- <div class="font-weight-bolder align-self-start" style="font-size: 1rem;">
 					<span>Total Amount: &nbsp;</span>
 					<span class="text-dark" style="font-size: 1.2em" id="totalAmount" project="true">${formatAmount(projectTotalAmount, true)}</span>
-				</div>
+				</div> -->
 			</div>
 		</div>
 
@@ -1488,10 +1488,10 @@ $(document).ready(function() {
 			
 			<div class="w-100 d-flex justify-content-between align-items-center py-2">
 				<div>${buttonCompanyAddDeleteRow}</div>
-				<div class="font-weight-bolder align-self-start" style="font-size: 1rem;">
+				<!-- <div class="font-weight-bolder align-self-start" style="font-size: 1rem;">
 					<span>Total Amount: &nbsp;</span>
 					<span class="text-dark" style="font-size: 1.2em" id="totalAmount" company="true">${formatAmount(companyTotalAmount, true)}</span>
-				</div>
+				</div> -->
 			</div>
 		</div>`;
 		return  html;
