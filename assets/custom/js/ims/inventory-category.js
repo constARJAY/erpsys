@@ -152,24 +152,35 @@ $(document).ready(function(){
             id="btnSave"><i class="fas fa-save"></i>
             Save
         </button>`;
-
+    //     <select
+    //     class="form-control validate select2" 
+    //     name="categoryName" 
+    //     data-allowcharacters="[A-Z][a-z][0-9][/][.][-][:]" 
+    //     id="input_categoryName" 
+    //     required 
+    //     unique="${categoryID}" >
+    //     <option selected disabled>Select Category Name</option>
+    //     <option value="Project" ${categoryName == "Project" && "selected"}>Project</option>
+    //     <option value="Equipment" ${categoryName == "Equipment" && "selected"}>Equipment</option>
+    //     <option value="Purchase" ${categoryName == "Purchase" && "selected"}>Purchase</option>
+    // </select>
         let html = `
         <div class="modal-body">
             <div class="row">
                 <div class="col-md-12 col-sm-12">
                     <div class="form-group">
                         <label>Category Name <span class="text-danger font-weight-bold">*</span></label>
-                        <select
-                            class="form-control validate select2" 
-                            name="categoryName" 
-                            id="input_categoryName" 
-                            required 
-                            unique="${categoryID}" >
-                            <option selected disabled>Select Category Name</option>
-                            <option value="Project" ${categoryName == "Project" && "selected"}>Project</option>
-                            <option value="Equipment" ${categoryName == "Equipment" && "selected"}>Equipment</option>
-                            <option value="Purchase" ${categoryName == "Purchase" && "selected"}>Purchase</option>
-                        </select>
+                        <input 
+                                type="text" 
+                                class="form-control validate" 
+                                name="categoryName" 
+                                id="input_categoryName" 
+                                data-allowcharacters="[A-Z][a-z][0-9][.][,][-][()]['][/][@][_][ ]" 
+                                minlength="2" 
+                                maxlength="150" 
+                                value="${categoryName}"
+                                unique="${categoryID}"
+                                autocomplete="off">
                         <div class="invalid-feedback d-block" id="invalid-input_categoryName"></div>
                     </div>
                 </div>
@@ -222,24 +233,23 @@ $(document).ready(function(){
 
         // ------ CHECK INVENTORY ITEM STATUS -------
         $(document).on("change","#input_categoryStatus",function(){
-            var tempCategoryStatus = $(this).find("option:selected").val()
-           var getCategoryID = $(this).attr("getcategoryid") ;
-            var itemData = getTableData("ims_inventory_item_tbl INNER JOIN ims_inventory_category_tbl USING(categoryID)", 
-            "itemStatus", "itemStatus = 1 AND categoryID ="+getCategoryID, "");
-    
-            if(itemData.length != 0 ){
-                if(tempCategoryStatus == 0 ){
-                    $(this).removeClass("is-valid").addClass("is-invalid");
-                    $("#invalid-input_categoryStatus").removeClass("is-valid").addClass("is-invalid");
-                                $("#invalid-input_categoryStatus").text('There is active inventory item in this category! ');
-                               
-                            
-                              
-                }
-                else{
-                    $(this).removeClass("is-invalid").addClass("is-valid");
-                    $("#invalid-input_categoryStatus").removeClass("is-invalid").addClass("is-valid");
-                    $("#invalid-input_categoryStatus").text('');
+            var tempCategoryStatus = $(this).find("option:selected").val();
+            if($(this).attr("getcategoryid")){
+                var getCategoryID = $(this).attr("getcategoryid");
+                var itemData = getTableData("ims_inventory_item_tbl INNER JOIN ims_inventory_category_tbl USING(categoryID)", 
+                "itemStatus", "itemStatus = 1 AND categoryID ="+getCategoryID, "");
+        
+                if(itemData.length != 0 ){
+                    if(tempCategoryStatus == 0 ){
+                        $(this).removeClass("is-valid").addClass("is-invalid");
+                        $("#invalid-input_categoryStatus").removeClass("is-valid").addClass("is-invalid");
+                        $("#invalid-input_categoryStatus").text('There is active inventory item in this category! ');          
+                    }
+                    else{
+                        $(this).removeClass("is-invalid").addClass("is-valid");
+                        $("#invalid-input_categoryStatus").removeClass("is-invalid").addClass("is-valid");
+                        $("#invalid-input_categoryStatus").text('');
+                    }
                 }
             }
     
@@ -354,5 +364,7 @@ $(document).ready(function(){
     });
     
     // -------- END CANCEL MODAL-----------
+
+
       
 });

@@ -242,7 +242,7 @@ $(document).ready(function(){
         data["tableName"]            = "hris_designation_tbl";
         data["feedback"]             = $("[name=designationName]").val();
 
-        sweetAlertConfirmation("add", "Designation Masterfile", "modal_hris_designation", null, data, true, tableContent);
+        sweetAlertConfirmation("add", "Designation", "modal_hris_designation", null, data, true, tableContent);
         }
     });
     // ----- END SAVE MODAL -----

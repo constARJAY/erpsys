@@ -795,7 +795,6 @@ $(document).ready(function() {
 
 		} = item;
 
-		
 
 		let html = "";
 		if (readOnly) {
@@ -1207,9 +1206,8 @@ $(document).ready(function() {
 					}else{
 						$(this).closest("tr").find("[name=barcode]").removeClass("is-valid").addClass("is-invalid");
 						$(this).closest("tr").find("#invalid-barcode").removeClass("is-valid").addClass("is-invalid");
-						$(this).closest("tr").find("#invalid-barcode").text('No Item Available!');
+						$(this).closest("tr").find("#invalid-barcode").text('No item available!');
 					}
-
 				}else{
 					$(this).closest("tr").find("[name=barcode]").removeClass("is-valid").addClass("is-invalid");
 					$(this).closest("tr").find("#invalid-barcode").removeClass("is-valid").addClass("is-invalid");
@@ -1646,11 +1644,11 @@ $(document).ready(function() {
                         <thead>
                             <tr style="white-space: nowrap">
 								${checkboxProjectHeader}
-                                <th>Barcode</th>
+                                <th>Barcode ${!disabled ? "<code>*</code>" : ""}</th>
                                 <th>Item Code</th>
                                 <th>Item Name </th>
                                 <th>Stocks </th>
-                                <th>Quantity </th>
+                                <th>Quantity ${!disabled ? "<code>*</code>" : ""}</th>
                                 <th>Brand </th>
                                 <th>UOM</th>
                             </tr>
@@ -1722,6 +1720,9 @@ $(document).ready(function() {
 	$("#page_content").text().trim().length == 0 && pageContent(); // CHECK IF THERE IS ALREADY LOADED ONE
 	// ----- END PAGE CONTENT -----
 
+
+
+	
 
 	// ----- GET PURCHASE REQUEST DATA -----
 	function getPurchaseRequestData(action = "insert", method = "submit", status = "1", id = null, currentStatus = "0", isObject = false) {

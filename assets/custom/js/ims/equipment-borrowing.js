@@ -223,7 +223,7 @@ $(document).ready(function() {
 					{ targets: 5,  width: 200 },
                     { targets: 6,  width: 150 },
                     { targets: 7,  width: 150 },
-                    { targets: 8,  width: 100 },
+					{ targets: 8,  width: 100 },
 					{ targets: 9,  width: 100 },
 				],
 			});
@@ -245,11 +245,10 @@ $(document).ready(function() {
 					{ targets: 3,  width: 200  },
 					{ targets: 4,  width: 180 },
 					{ targets: 5,  width: 190 },
-                    { targets: 6,  width: 90 },
+                    { targets: 6,  width: 150 },
                     { targets: 7,  width: 150 },
-                    { targets: 8,  width: 150 },
+					{ targets: 8,  width: 100 },
 					{ targets: 9,  width: 100 },
-					{ targets: 10,  width: 100 },
 					// { targets: 8,  width: 200 },
 				],
 			});
@@ -669,7 +668,6 @@ $(document).ready(function() {
 			inventoryStorageOfficeName:	"-",
 			barcode:					"-",
             serial:              		"-",
-            borrowedPurpose:             "-",
             dateBorrowed:        		"-",
 			itemCode:            		"-",
 			categoryName:        		"-",
@@ -691,11 +689,11 @@ $(document).ready(function() {
             quantity      				= "",
 			inventoryStorageID			="",
 			inventoryCode				="",
-            borrowedPurpose      		= "",
 			createdAt					="",
 			inventoryStorageOfficeName	="",
 			datereturn      			= "",
-			quantityreturn      		= ""
+			quantityreturn      		= "",
+			unitOfMeasurement			=""
 		} = item;
 
 		
@@ -734,11 +732,6 @@ $(document).ready(function() {
 					${inventoryStorageOfficeName || "-"}
 					</div>
 				</td>
-                <td>
-                <div class="borrowedPurpose">
-                    ${borrowedPurpose || "-"}
-                </div>
-               </td> 
                <td>
                 <div class="dateBorrowed">
 				${dateBorrowed && moment(dateBorrowed).format("MMMM DD, YYYY") || "-"}
@@ -749,6 +742,10 @@ $(document).ready(function() {
                     ${quantity || "-"}
                 </div>
                </td> 
+			  <td>
+			  <div class="unitOfMeasurement" name="unitOfMeasurement">
+			 	 ${unitOfMeasurement || "-"}
+			  </td>
 			<td>
 			<div class="datereturn">
 				${datereturn || "-"}
@@ -803,18 +800,6 @@ $(document).ready(function() {
                 <td>
 					<div class="StorageName">${inventoryStorageOfficeName || "-"}</div>
                  </td>
-				<td>
-					<div class="">
-					<input 
-						type="text" 
-						class="form-control  borrowedPurpose text-center"
-						id="borrowedPurpose" 
-						name="borrowedPurpose" 
-						value="${borrowedPurpose}"
-						requred>
-					<div class="invalid-feedback d-block" id="invalid-borrowedPurpose"></div>
-					</div>
-			</td>
 			<td>
 			<div class="">
 			<input 
@@ -831,7 +816,7 @@ $(document).ready(function() {
 			<div class="">
 			<input 
 				type="text" 
-				class="form-control  number quantity text-center"
+				class="form-control  number quantity  input-quantity text-center"
 				min="1" 
 				data-allowcharacters="[0-9]" 
 				max="999999999" 
@@ -843,6 +828,9 @@ $(document).ready(function() {
 				required>
 			<div class="invalid-feedback d-block" id="invalid-quantity"></div>
 		</div>
+		</td>
+		<td>
+			<div class="unitOfMeasurement" name="unitOfMeasurement">${unitOfMeasurement || "-"}</div>
 		</td>
 		<td>
 				<div class="datereturn">${datereturn || "-"}</div>	
@@ -882,8 +870,7 @@ $(document).ready(function() {
 			$("td .serialnumber", this).attr("id", `serialnumber${i}`);
 
 			$("td .quantity", this).attr("id", `quantity${i}`);
-
-			$("td .borrowedPurpose", this).attr("id", `borrowedPurpose${i}`);
+			$("td .unitOfMeasurement", this).attr("id", `unitOfMeasurement${i}`);
 
 			$("td .dateBorrowed", this).attr("id", `dateBorrowed${i}`);
 
@@ -903,14 +890,14 @@ $(document).ready(function() {
 			initDateRangePicker(`#dateBorrowed${i}`);
 			//initDateRangePicker(`#datereturn${i}`);
 			//$(`#dateBorrowed${i}`).data("daterangepicker").minDate = moment();
-			$(`#dateBorrowed${i}`).val(moment(new Date).format("MMMM DD, YYYY"));
-			
+			//$(`#dateBorrowed${i}`).val(moment(new Date).format("MMMM DD, YYYY"));
+
 		})
 	}
 	// ----- END UPDATE TABLE ITEMS -----
 	var barcodeArray =[];
 	var barcodeLocationArray =[];
-	$(document).on("keyup", "[name=barcode]", function() {
+	$(document).on("keyup change", "[name=barcode]", function() {
 		const barcode   = $(this).val(); 
 		const barcodeID   = $(this).attr("id");
 		const data = getTableData
@@ -918,7 +905,8 @@ $(document).ready(function() {
 		LEFT JOIN ims_inventory_item_tbl 		AS iii 	ON isit.itemID = iii.itemID
 		LEFT JOIN ims_inventory_storage_tbl 	AS iis 	ON isit.inventoryStorageID = iis.inventoryStorageID
 		LEFT JOIN ims_stock_in_tbl AS isi 				ON isit.itemID = isi.itemID AND isit.inventoryStorageID = isi.stockInLocationID`, 
-		`isit.itemID,iii.createdAt,iii.itemCode,isit.itemName,isit.inventoryStorageID,iis.inventoryStorageCode,iis.inventoryStorageOfficeName,isi.barcode,isi.stockInSerialNumber`, `barcode = '${barcode}'`, ``,`itemID`); 
+		`isit.itemID,iii.createdAt,iii.itemCode,isit.itemName,iii.unitOfMeasurementID ,isit.inventoryStorageID,iis.inventoryStorageCode,iis.inventoryStorageOfficeName,isi.barcode,isi.stockInSerialNumber`, `barcode = '${barcode}'`, ``,`itemID`); 
+		if(data.length != 0){
 		data.map((item) => {
 			let {
 				itemID ,
@@ -928,12 +916,14 @@ $(document).ready(function() {
 				stockInSerialNumber,
 				createdAt,
 				inventoryStorageID,
+				unitOfMeasurementID,
 			} = item;
 
 			let item_ID       							= itemID ? itemID : "";
 			let item_Name       						= itemName ? itemName : "";
 			let inventory_Storage_Code       			= inventoryStorageCode ? inventoryStorageCode : "";
 			let inventory_Storage_Office_Name       	= inventoryStorageOfficeName ? inventoryStorageOfficeName : "";
+			let unit_of_measurement       				= unitOfMeasurementID ? unitOfMeasurementID : "";
 			//let barcode       							= barcode ? barcode : "";
 			let created_At       	= createdAt ? createdAt : "";
 			let stock_In_Serial_Number       			= stockInSerialNumber ? stockInSerialNumber : "";
@@ -978,6 +968,8 @@ $(document).ready(function() {
 					$(this).closest("tr").find(`[name=barcode]`).first().attr("itemID",item_ID);
 					$(this).closest("tr").find(`[name=barcode]`).first().attr("inventoryStorageID",inventoryStorageID);
 					$(this).closest("tr").find(`[name=barcode]`).first().attr("serialnumber",stock_In_Serial_Number);
+					$(this).closest("tr").find(`[name=barcode]`).first().attr("unitOfMeasurement",unit_of_measurement);
+					$(this).closest("tr").find(`[name=unitOfMeasurement]`).first().text(unit_of_measurement);
 					$(this).closest("tr").find(`.StorageCode`).first().text(inventory_Storage_Code);
 					$(this).closest("tr").find(`.StorageName`).first().text(inventory_Storage_Office_Name);
 					$(this).closest("tr").find(`.serialnumber`).first().text(stock_In_Serial_Number);
@@ -998,12 +990,36 @@ $(document).ready(function() {
 				$(this).closest("tr").find("#invalid-barcode").text('Please Input exact 17 Characters!');
 			}
 			
+			
 			})
+		}
+		else if(data.length == 0){
+			$(this).closest("tr").find(`.itemcode`).first().text("-");
+				$(this).closest("tr").find(`[name=barcode]`).first().attr('itemID',"-");
+				$(this).closest("tr").find(`[name=barcode]`).first().attr('inventoryStorageID',"-");
+				$(this).closest("tr").find(`[name=barcode]`).first().attr('serialnumber',"-");
+				$(this).closest("tr").find(`[name=barcode]`).first().attr('unitOfMeasurement',"-");
+				$(this).closest("tr").find(`.itemName`).first().text("-");
+				$(this).closest("tr").find(`[name=unitOfMeasurement]`).first().text("-");
+				$(this).closest("tr").find(`.StorageCode`).first().text("-");
+				$(this).closest("tr").find(`.StorageName`).first().text("-");
+				$(this).closest("tr").find(`.serialnumber`).first().text("-");
+
+				$(this).closest("tr").find("[name=barcode]").removeClass("is-valid").addClass("is-invalid");
+				$(this).closest("tr").find("#invalid-barcode").removeClass("is-valid").addClass("is-invalid");
+				$(this).closest("tr").find("#invalid-barcode").text('No Item Available!');
+		}else{
+				$(this).closest("tr").find("[name=barcode]").removeClass("is-invalid");
+				$(this).closest("tr").find("#invalid-barcode").removeClass("is-invalid");
+				$(this).closest("tr").find("#invalid-barcode").text('');
+				
+		}
+
 	})	
 		
 	  $(document).on("change", "[name=quantity]", function() {
 		const index     		= $(this).closest("tr").first().attr("index");
-		const quantity  		= $(`#quantity${index}`).val();
+		const quantity  			= parseInt($(`#quantity${index}`).val().replaceAll(",","")) || 0;
         const barcodeval  	= $(this).closest("tr").find('[name=barcode]').val();
 		const data = getTableData
 				 (`ims_stock_in_total_tbl AS isit
@@ -1012,7 +1028,7 @@ $(document).ready(function() {
 				 LEFT JOIN ims_stock_in_tbl AS isi 				ON isit.itemID = isi.itemID AND isit.inventoryStorageID = isi.stockInLocationID`, 
 				 `isit.itemID,iii.itemCode,isit.itemName,iis.inventoryStorageCode,iis.inventoryStorageOfficeName,isi.barcode,isi.stockInSerialNumber,isit.quantity as stocks`, `barcode = '${barcodeval}'`, ``,`itemID`);
 				 
-				 if(data[0].stocks !=""){
+				 if(data.length >0){
 
 					data.map((item) => {
 						let {
@@ -1021,8 +1037,10 @@ $(document).ready(function() {
 						} = item;
 			
 					
-						let stock  = stocks ? stocks : "0";
-			
+						//let stock  = stocks ? stocks : "0";
+						let stock  = stocks ? parseInt(stocks) || 0 : "0";
+					
+						if(barcodeval !="" ){
 								if(stock > quantity || stock == quantity ){
 									$(`#quantity${index}`).removeClass("is-invalid").addClass("is-valid");
 									$(this).closest("tr").find("#invalid-quantity").removeClass("is-invalid").addClass("is-valid");
@@ -1033,14 +1051,21 @@ $(document).ready(function() {
 									$(this).closest("tr").find("#invalid-quantity").removeClass("is-valid").addClass("is-invalid");
 									$(this).closest("tr").find("#invalid-quantity").text('Not Enough Quantity!');
 								}
-						
+							}else{
+								$(`#quantity${index}`).removeClass("is-valid").addClass("is-invalid");
+								$(this).closest("tr").find("#invalid-quantity").removeClass("is-valid").addClass("is-invalid");
+								$(this).closest("tr").find("#invalid-quantity").text('Not Enough Quantity Or No Stocks Available!');
+						}
+					
+
 						})
 				}else{
 					$(`#quantity${index}`).removeClass("is-valid").addClass("is-invalid");
 					$(this).closest("tr").find("#invalid-quantity").removeClass("is-valid").addClass("is-invalid");
-					$(this).closest("tr").find("#invalid-quantity").text('Not Enough Quantity Or No Stocks Available!');
-				}
-	  });	
+					$(this).closest("tr").find("#invalid-quantity").text('No Item Selected');
+				}	
+	  })
+
 
 
 
@@ -1156,6 +1181,7 @@ $(document).ready(function() {
 		updateTableItems();
 		initInputmask();
 		initAmount();
+		initQuantity();
     })
     // ----- END INSERT ROW ITEM -----
 
@@ -1201,7 +1227,7 @@ $(document).ready(function() {
 				LEFT JOIN ims_stock_in_total_tbl 		AS isn ON ibd.itemID = isn.itemID AND ibd.inventoryStorageID = isn.inventoryStorageID
 				LEFT JOIN ims_inventory_storage_tbl 	AS iis ON ibd.inventoryStorageID = iis.inventoryStorageID 
 				LEFT JOIN ims_inventory_item_tbl 		AS iii ON ibd.itemID = iii.itemID`, 
-				`isn.itemID,isn.itemName,ibd.barcode,ibd.serialnumber,ibd.dateBorrowed,ibd.quantity,ibd.borrowedPurpose,iis.inventoryStorageID,iis.createdAt AS inventoryCode,iis.inventoryStorageCode,iis.inventoryStorageOfficeName,iii.createdAt`, 
+				`isn.itemID,isn.itemName,ibd.barcode,ibd.serialnumber,ibd.unitOfMeasurement ,ibd.dateBorrowed,ibd.quantity,ibd.borrowedPurpose,iis.inventoryStorageID,iis.createdAt AS inventoryCode,iis.inventoryStorageCode,iis.inventoryStorageOfficeName,iii.createdAt`, 
 				`ibd.borrowingID = ${borrowingID}`);
 			requestItemsData.map(item => {
 				requestProjectItems += getItemRow(true, item, readOnly);
@@ -1422,9 +1448,9 @@ $(document).ready(function() {
 								<th>Serial No.</th>
                                 <th>Storage Code </th>
 								<th>Storage Name</th>
-								<th>Purpose ${!disabled ? "<code>*</code>" : ""}</th>
                                 <th>Date Borrowed ${!disabled ? "<code>*</code>" : ""}</th>
 								<th>Quantity ${!disabled ? "<code>*</code>" : ""}</th>
+								<th>UOM</th>
                                 <th>Date Returned</th>
                                 <th>Quantity</th>
                             </tr>
@@ -1577,7 +1603,6 @@ $(document).ready(function() {
 				formData.append("createdAt", dateToday());
 			} else if (action == "update") {
 				data["borrowingID"] = id;
-
 				formData.append("borrowingID", id);
 			}
 
@@ -1587,8 +1612,8 @@ $(document).ready(function() {
 				if (approversID) {
 					data["approversID"]           = approversID;
 					data["borrowingStatus"] 		= 1;
-					data["approversStatus"]       = 1;
-					formData.append("approversStatus", 1);
+					//data["approversStatus"]       = 1;
+					//formData.append("approversStatus", 1);
 					formData.append("approversID", approversID);
 					formData.append("borrowingStatus", 1);
 				} else {  // AUTO APPROVED - IF NO APPROVERS
@@ -1607,14 +1632,15 @@ $(document).ready(function() {
 			$(".itemTableRow").each(function(i, obj) {
 				const categoryType = $(this).closest("tbody").attr("project") == "true" ? "project" : "";
 
-				const itemID    		= $("td [name=barcode]", this).attr("itemID");
-				const itemName    		= $("td [name=itemName]", this).text();	
-				const inventoryStorageID  = $("td [name=barcode]", this).attr("inventoryStorageID");
-				const serialnumber   	= $("td [name=barcode]", this).attr("serialnumber");
-				const formatdate   = $("td [name=dateBorrowed]", this).val();	
-				const barcode 		= $("td [name=barcode]", this).val();	
-				const quantity 		= +$("td [name=quantity]", this).val();	
-				const borrowedPurpose   = $("td [name=borrowedPurpose]", this).val();	
+				const itemID    			= $("td [name=barcode]", this).attr("itemID");
+				const itemName    			= $("td [name=itemName]", this).text();	
+				const inventoryStorageID 	 = $("td [name=barcode]", this).attr("inventoryStorageID");
+				const serialnumber   		= $("td [name=barcode]", this).attr("serialnumber");
+
+				const formatdate   			= $("td [name=dateBorrowed]", this).val();	
+				const barcode 				= $("td [name=barcode]", this).val();	
+				const quantity 				= +$("td [name=quantity]", this).val();	
+				const unitofmeasurement 	= $("td [name=barcode]", this).attr("unitofmeasurement");
 				//const serialnumber 	= $("td [name=serialnumber]", this).val();	
 				//const borrowedquantity = formatdate.format('YYYY-MM-DD');
 
@@ -1633,7 +1659,7 @@ $(document).ready(function() {
 				formData.append(`items[${i}][dateBorrowed]`, dateBorrowed);
 				formData.append(`items[${i}][quantity]`, quantity);
 				formData.append(`items[${i}][serialnumber]`, serialnumber);
-				formData.append(`items[${i}][borrowedPurpose]`, borrowedPurpose);
+				formData.append(`items[${i}][unitofmeasurement]`, unitofmeasurement);
 				formData.append(`items[${i}][createdBy]`, sessionID);
 				formData.append(`items[${i}][updatedBy]`, sessionID);
 			
@@ -1757,10 +1783,10 @@ $(document).ready(function() {
     // ----- SUBMIT DOCUMENT -----
 	$(document).on("click", "#btnSubmit", function () {
 
-		let condition = $("[name=quantity]").hasClass("is-invalid");
+		//let condition = $("[name=borrowedPurpose]").hasClass("is-invalid");
 		let condition2 = $("[name=barcode]").hasClass("is-invalid");
 
-		if(!condition && !condition2){
+		if(!condition2){
 
 			const id           = decryptString($(this).attr("borrowingID"));
 			const revise       = $(this).attr("revise") == "true";

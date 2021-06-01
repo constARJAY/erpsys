@@ -1527,18 +1527,19 @@ CREATE TABLE `ims_borrowing_details_tbl` (
   `borrowingID` bigint(20) NOT NULL,
   `inventoryStorageID` bigint(50) NOT NULL,
   `itemID` bigint(50) NOT NULL,
-  `itemName` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `barcode` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `serialnumber` varchar(60) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `itemName` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `barcode` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `serialnumber` varchar(60) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `dateBorrowed` date NOT NULL,
   `quantity` int(50) NOT NULL,
-  `borrowedPurpose` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `unitOfMeasurement` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `borrowedPurpose` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `createdBy` bigint(20) NOT NULL,
   `updatedBy` bigint(20) NOT NULL,
   `createdAt` timestamp NOT NULL DEFAULT current_timestamp(),
   `updatedAt` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   PRIMARY KEY (`borrowingDetailID`)
-) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1547,7 +1548,6 @@ CREATE TABLE `ims_borrowing_details_tbl` (
 
 LOCK TABLES `ims_borrowing_details_tbl` WRITE;
 /*!40000 ALTER TABLE `ims_borrowing_details_tbl` DISABLE KEYS */;
-INSERT INTO `ims_borrowing_details_tbl` VALUES (1,1,1,1,'','00001-00001-00000','','2021-05-27',1,'For project',1,1,'2021-05-27 03:58:30','2021-05-27 03:58:30'),(2,1,1,2,'','00002-00001-00000','','2021-05-27',2,'For project',1,1,'2021-05-27 03:58:30','2021-05-27 03:58:30'),(3,1,1,3,'','00003-00001-00000','','2021-05-27',2,'For project',1,1,'2021-05-27 03:58:30','2021-05-27 03:58:30'),(4,1,2,2,'','00002-00002-00000','','2021-05-27',2,'For project',1,1,'2021-05-27 03:58:30','2021-05-27 03:58:30'),(5,2,1,2,'','00002-00001-00000','','2021-05-27',2,'For project',1,1,'2021-05-27 04:01:42','2021-05-27 04:01:42'),(6,2,1,1,'','00001-00001-00000','','2021-05-27',2,'For project',1,1,'2021-05-27 04:01:42','2021-05-27 04:01:42'),(7,3,1,1,'','00001-00001-00000','','2021-05-27',5,'test',1,1,'2021-05-27 06:26:29','2021-05-27 06:26:29'),(8,4,2,3,'','00003-00002--cxf1','dsf3-dgd2-gfh4-jfg5-cxf1','2021-06-16',0,'purpose deluxe',1,1,'2021-05-27 07:54:00','2021-05-27 07:54:00'),(9,5,3,1,'','00001-00003-L8O94','G8F5H3D2N4L8O94','2021-05-28',1,'For project',1,1,'2021-05-28 03:51:53','2021-05-28 03:51:53'),(10,5,3,1,'','00001-00003-L8O95','G8F5H3D2N4L8O95','2021-05-28',1,'For project',1,1,'2021-05-28 03:51:53','2021-05-28 03:51:53'),(11,5,3,2,'','00002-00003-KL-Q7','L10J11L12-BCGI53JKL-Q7','2021-05-28',1,'For project',1,1,'2021-05-28 03:51:53','2021-05-28 03:51:53'),(12,6,3,1,'','00001-00003-L8O94','G8F5H3D2N4L8O94','2021-05-28',1,'For project',1,1,'2021-05-28 07:41:47','2021-05-28 07:41:47');
 /*!40000 ALTER TABLE `ims_borrowing_details_tbl` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -1563,19 +1563,19 @@ CREATE TABLE `ims_borrowing_tbl` (
   `reviseBorrowingID` bigint(20) DEFAULT NULL,
   `employeeID` bigint(20) NOT NULL,
   `projectID` bigint(20) DEFAULT NULL,
-  `approversID` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `approversStatus` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `approversDate` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `approversID` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `approversStatus` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `approversDate` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `borrowingStatus` int(11) NOT NULL,
-  `borrowingReason` longtext COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `borrowingRemarks` longtext COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `borrowingReason` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `borrowingRemarks` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `submittedAt` timestamp NULL DEFAULT NULL,
   `createdBy` bigint(20) NOT NULL,
   `updatedBy` bigint(20) NOT NULL,
   `createdAt` timestamp NOT NULL DEFAULT current_timestamp(),
   `updatedAt` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   PRIMARY KEY (`borrowingID`)
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1584,7 +1584,6 @@ CREATE TABLE `ims_borrowing_tbl` (
 
 LOCK TABLES `ims_borrowing_tbl` WRITE;
 /*!40000 ALTER TABLE `ims_borrowing_tbl` DISABLE KEYS */;
-INSERT INTO `ims_borrowing_tbl` VALUES (1,NULL,1,0,'4|2|5','1|2|2|2','2021-05-28 14:29:29|2021-05-28 14:37:17|2021-05-28 14:46:56',2,'test',NULL,'2021-05-27 11:58:27',1,5,'2021-05-27 11:58:27','2021-05-28 06:47:00'),(2,NULL,1,0,'4|2|5','1|2|2|2','2021-05-28 14:29:45|2021-05-28 14:41:15|2021-05-28 14:47:22',2,'test',NULL,'2021-05-27 12:01:40',1,5,'2021-05-27 12:01:40','2021-05-28 06:47:25'),(3,NULL,1,1,'4|2|5','1|2|2|2','2021-05-27 14:28:56|2021-05-27 14:29:42|2021-05-27 14:30:26',2,'test',NULL,'2021-05-27 14:26:27',1,5,'2021-05-27 14:26:27','2021-05-27 06:30:33'),(4,NULL,1,4,'4|2|5','1|2|2|2','2021-05-28 14:29:59|2021-05-28 14:45:48|2021-05-28 14:47:09',2,'for demacia.',NULL,'2021-05-27 15:53:58',1,5,'2021-05-27 15:53:58','2021-05-28 06:47:12'),(5,NULL,1,1,'4|2|5','1|3','2021-05-28 14:31:46',3,'For project purpose','test','2021-05-28 11:51:49',1,4,'2021-05-28 11:51:49','2021-05-28 06:31:50'),(6,NULL,1,0,'4|2|5','1',NULL,1,'test',NULL,'2021-05-28 15:41:44',1,1,'2021-05-28 15:41:44','2021-05-28 07:41:47');
 /*!40000 ALTER TABLE `ims_borrowing_tbl` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -1692,17 +1691,18 @@ CREATE TABLE `ims_inventory_disposal_details_tbl` (
   `disposalID` bigint(20) NOT NULL,
   `inventoryStorageID` bigint(50) NOT NULL,
   `itemID` bigint(50) NOT NULL,
-  `itemName` text COLLATE utf8mb4_unicode_ci NOT NULL,
-  `barcode` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `serialnumber` varchar(60) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `itemName` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `barcode` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `serialnumber` varchar(60) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `quantity` int(50) NOT NULL,
-  `disposalDetailRemarks` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `unitOfMeasurement` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `disposalDetailRemarks` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `createdBy` bigint(20) NOT NULL,
   `updatedBy` bigint(20) NOT NULL,
   `createdAt` timestamp NOT NULL DEFAULT current_timestamp(),
   `updatedAt` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   PRIMARY KEY (`disposalDetailID`)
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1711,7 +1711,6 @@ CREATE TABLE `ims_inventory_disposal_details_tbl` (
 
 LOCK TABLES `ims_inventory_disposal_details_tbl` WRITE;
 /*!40000 ALTER TABLE `ims_inventory_disposal_details_tbl` DISABLE KEYS */;
-INSERT INTO `ims_inventory_disposal_details_tbl` VALUES (1,1,2,1,'Ballpen-Black','00001-00002--cxf2','dsf3-dgd2-gfh4-jfg5-cxf2',2,'test',1,1,'2021-05-27 06:23:28','2021-05-27 06:23:28'),(2,1,2,3,'Ballpen-Black','00003-00002--cxf1','dsf3-dgd2-gfh4-jfg5-cxf1',1,'test',1,1,'2021-05-27 06:23:28','2021-05-27 06:23:28'),(3,1,2,2,'Ballpen-Red','00002-00002-00000','',1,'test',1,1,'2021-05-27 06:23:28','2021-05-27 06:23:28'),(4,1,2,1,'Ballpen-Black','00001-00002--cxf9','dsf3-dgd2-gfh4-jfg5-cxf9',1,'test',1,1,'2021-05-27 06:23:28','2021-05-27 06:23:28'),(6,2,1,1,'Ballpen-Black','00001-00001-00000','',5,'test',1,1,'2021-05-27 07:20:47','2021-05-27 07:20:47');
 /*!40000 ALTER TABLE `ims_inventory_disposal_details_tbl` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -1727,19 +1726,19 @@ CREATE TABLE `ims_inventory_disposal_tbl` (
   `reviseDisposalID` bigint(20) DEFAULT NULL,
   `employeeID` bigint(20) NOT NULL,
   `projectID` bigint(20) DEFAULT NULL,
-  `approversID` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `approversStatus` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `approversDate` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `approversID` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `approversStatus` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `approversDate` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `disposalStatus` int(11) NOT NULL,
-  `disposalReason` longtext COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `disposalRemarks` longtext COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `disposalReason` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `disposalRemarks` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `submittedAt` timestamp NULL DEFAULT NULL,
   `createdBy` bigint(20) NOT NULL,
   `updatedBy` bigint(20) NOT NULL,
   `createdAt` timestamp NOT NULL DEFAULT current_timestamp(),
   `updatedAt` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   PRIMARY KEY (`disposalID`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1748,7 +1747,6 @@ CREATE TABLE `ims_inventory_disposal_tbl` (
 
 LOCK TABLES `ims_inventory_disposal_tbl` WRITE;
 /*!40000 ALTER TABLE `ims_inventory_disposal_tbl` DISABLE KEYS */;
-INSERT INTO `ims_inventory_disposal_tbl` VALUES (1,NULL,1,NULL,'2|3|4','2|2|2','2021-05-27 14:25:23|2021-05-27 14:27:42|2021-05-27 14:31:18',5,'for testing purposes only.',NULL,'2021-05-27 14:23:27',1,1,'2021-05-27 14:23:27','2021-05-27 06:32:37'),(2,NULL,1,NULL,'2|3|4','2|2|2','2021-05-28 10:37:10|2021-05-28 10:37:53|2021-05-28 10:38:37',5,'test',NULL,'2021-05-27 15:20:46',1,1,'2021-05-27 15:19:58','2021-05-28 03:19:24');
 /*!40000 ALTER TABLE `ims_inventory_disposal_tbl` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -3013,6 +3011,8 @@ CREATE TABLE `pms_client_tbl` (
   `clientBarangay` varchar(255) NOT NULL,
   `clientUnitNumber` varchar(255) NOT NULL,
   `clientHouseNumber` varchar(255) NOT NULL,
+  `clientStreetName` text DEFAULT NULL,
+  `clientSubdivisionName` text DEFAULT NULL,
   `clientCountry` varchar(255) NOT NULL,
   `clientPostalCode` int(50) NOT NULL,
   `clientContactPerson` varchar(255) NOT NULL,
@@ -3025,7 +3025,7 @@ CREATE TABLE `pms_client_tbl` (
   `createdBy` bigint(20) NOT NULL,
   `updatedBy` bigint(20) NOT NULL,
   `createdAt` datetime NOT NULL DEFAULT current_timestamp(),
-  `updatedAt` datetime NOT NULL DEFAULT '0000-00-00 00:00:00' ON UPDATE current_timestamp(),
+  `updatedAt` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   PRIMARY KEY (`clientID`)
 ) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -3036,7 +3036,7 @@ CREATE TABLE `pms_client_tbl` (
 
 LOCK TABLES `pms_client_tbl` WRITE;
 /*!40000 ALTER TABLE `pms_client_tbl` DISABLE KEYS */;
-INSERT INTO `pms_client_tbl` VALUES (1,'CLT-21-00001','DeltaMike Security Inc.','NCR','NATIONAL CAPITAL REGION - SECOND DISTRICT','QUEZON CITY','DOÑA IMELDA','547','96 Guirayan Street','Philippines',1113,'Noemi Gaylan','noemiegaylan@tactics.com.ph','686-474-574-575','0977-801-1202','(02)-8709-5430','https://deltamikesecurity.com/',0,1,1,'2021-04-15 00:02:09','2021-05-28 01:59:22'),(2,'CLT-21-00002','Ricardo\'s Coffee + Classic Cuisine','4A','CAVITE','AMADEO','DAGATAN','','Cristanto M. Delos Reyes, Higway, Brgy. Dagatan','Philippines',4119,'Serafino Juliano','maryanne.concio@powerhouse-academy.com','','0917 8862 210','(02) 8171 433','',1,1,1,'2021-04-15 00:26:19','0000-00-00 00:00:00'),(3,'CLT-21-00003','Powerhouse (PDCA)','NCR','NATIONAL CAPITAL REGION - SECOND DISTRICT','QUEZON CITY','BAGUMBAYAN','','28D Eastwood Excelsior Eastwood Avenue, Eastwood City','Philippines',1110,'Mary Ann Consio','maryanne.concio@powerhouse-academy.com','','0917 8862 210','','http://www.powerhouse-academy.com',1,1,1,'2021-04-15 00:47:21','0000-00-00 00:00:00'),(4,'CLT-21-00004','Gatchallan Tangalin and Co CPAs','NCR','NATIONAL CAPITAL REGION - SECOND DISTRICT','CITY OF PASIG','SAN ANTONIO','1709','Antel Global Corporate Center','Philippines',1605,'Kaycee Allen Tangalin','gtc.cpas@gmail.com','667-576-565-645','0995-078-2845','(02)-5310-2930','http://www.gtcnow.com',1,1,1,'2021-04-15 02:42:10','2021-05-28 01:59:27'),(5,'CLT-21-00005','Esquared Universal Company','01','ILOCOS SUR','VIGAN CITY','BARANGAY I (POB.)','1','Antel global corporate center','Philippines',1533,'Carlota Montefalco','carly.monty@gmail.com','324-830-402-704','0993-320-0133','(21)-1231-3540','',0,1,1,'2021-05-18 07:01:52','2021-05-26 08:08:04');
+INSERT INTO `pms_client_tbl` VALUES (1,'CLT-21-00001','DeltaMike Security Inc.','NCR','NATIONAL CAPITAL REGION - SECOND DISTRICT','QUEZON CITY','DOÑA IMELDA','547','96 Guirayan Street',NULL,NULL,'Philippines',1113,'Noemi Gaylan','noemiegaylan@tactics.com.ph','686-474-574-575','0977-801-1202','(02)-8709-5430','https://deltamikesecurity.com/',0,1,1,'2021-04-15 00:02:09','2021-05-28 01:59:22'),(2,'CLT-21-00002','Ricardo\'s Coffee + Classic Cuisine','4A','CAVITE','AMADEO','DAGATAN','','Cristanto M. Delos Reyes, Higway, Brgy. Dagatan',NULL,NULL,'Philippines',4119,'Serafino Juliano','maryanne.concio@powerhouse-academy.com','','0917 8862 210','(02) 8171 433','',1,1,1,'2021-04-15 00:26:19','0000-00-00 00:00:00'),(3,'CLT-21-00003','Powerhouse (PDCA)','NCR','NATIONAL CAPITAL REGION - SECOND DISTRICT','QUEZON CITY','BAGUMBAYAN','','28D Eastwood Excelsior Eastwood Avenue, Eastwood City',NULL,NULL,'Philippines',1110,'Mary Ann Consio','maryanne.concio@powerhouse-academy.com','','0917 8862 210','','http://www.powerhouse-academy.com',1,1,1,'2021-04-15 00:47:21','0000-00-00 00:00:00'),(4,'CLT-21-00004','Gatchallan Tangalin and Co CPAs','NCR','NATIONAL CAPITAL REGION - SECOND DISTRICT','CITY OF PASIG','SAN ANTONIO','1709','Antel Global Corporate Center',NULL,NULL,'Philippines',1605,'Kaycee Allen Tangalin','gtc.cpas@gmail.com','667-576-565-645','0995-078-2845','(02)-5310-2930','http://www.gtcnow.com',1,1,1,'2021-04-15 02:42:10','2021-05-28 01:59:27'),(5,'CLT-21-00005','Esquared Universal Company','01','ILOCOS SUR','VIGAN CITY','BARANGAY I (POB.)','1','Antel global corporate center',NULL,NULL,'Philippines',1533,'Carlota Montefalco','carly.monty@gmail.com','324-830-402-704','0993-320-0133','(21)-1231-3540','',0,1,1,'2021-05-18 07:01:52','2021-05-26 08:08:04');
 /*!40000 ALTER TABLE `pms_client_tbl` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -3196,4 +3196,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2021-05-28 16:03:42
+-- Dump completed on 2021-06-01  7:30:30

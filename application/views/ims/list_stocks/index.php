@@ -30,9 +30,6 @@
 		<div class="row clearfix">
 			<div class="col-lg-12">
 				<div class="card">
-                    <div class="card-header">
-                        <h3>List of Stock</h3>
-                    </div>
 					<div class="header text-right p-0">
 						<div class="closeBtn"></div>
 					</div>
@@ -52,7 +49,7 @@
                             <!-- <div id="filterdata">
                             </div> -->
                             
-                            <div class="col-md-3 col-sm-12">
+                            <div class="col-md-4">
                                 <div class="form-group">
                                     <label>Classification Name <span class="text-danger font-weight-bold">*</span></label>
                                     <select
@@ -64,7 +61,7 @@
                                     <div class="invalid-feedback d-block" id="invalid-input_classificationID"></div>
                                 </div>
                             </div>    
-                            <div class="col-md-3 col-sm-12">
+                            <div class="col-md-4">
                                 <div class="form-group">
                                     <label>Category Name <span class="text-danger font-weight-bold">*</span></label>
                                     <select
@@ -72,23 +69,12 @@
                                         id="input_categoryID"
                                         name="CategoryID"
                                         required>
+                                        <option value=""selected disabled>Select Category Name</option>
                                     </select>
                                     <div class="invalid-feedback d-block" id="invalid-input_input_categoryID"></div>
                                 </div>
                             </div> 
-                            <div class="col-md-3 col-sm-12">
-                                <div class="form-group">
-                                    <label>Inventory Storage <span class="text-danger font-weight-bold">*</span></label>
-                                    <select
-                                        class="form-control select2 validate"
-                                        id="input_inventoryStorageID"
-                                        name="InventoryStorageID"
-                                        required>
-                                    </select>
-                                    <div class="invalid-feedback d-block" id="invalid-input_input_InventoryStorageID"></div>
-                                </div>
-                            </div>
-                            <div class="col-md-3 col-sm-12">
+                            <div class="col-md-3 p-1">
                                 <div class="form-group">
                                 <button type="button" class="btn btn-primary w-100 p-2 mt-4 ml-2"  id="btnSearch"><i class="icon-magnifier"></i> &nbsp;Search</button>
                                 </div>

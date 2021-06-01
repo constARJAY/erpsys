@@ -111,6 +111,7 @@ class Item_disposal extends CI_Controller {
                                     "serialnumber"                      => $item["serialnumber"],
                                     "disposalDetailRemarks"             => $item["disposalDetailRemarks"],
                                     "quantity"                          => $item["quantity"],
+                                    "unitOfMeasurement"                 => $item["unitofmeasurement"],
                                     "createdBy"                         => $item["createdBy"],
                                     "updatedBy"                         => $item["updatedBy"],
                         ];

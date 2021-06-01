@@ -325,11 +325,6 @@ $(document).ready(function(){
                     name="unitOfMeasurementID"
                     autocomplete="off"
                     required>
-                    <option 
-                        value="" 
-                        disabled 
-                        selected
-                        ${!data && "selected"} >Select Unit of Measurement</option>
                     ${unitOfMeasurementOptions(unitOfMeasurementID)}
                 </select>
                 <div class="invalid-feedback d-block" id="invalid-unitOfMeasurementID"></div>
@@ -500,16 +495,6 @@ $(document).ready(function(){
     });
 
 
-    function unitOfMeasurementOptions(value){
-        let data = ["N/A","gallon","piece","gram","cup",
-            "inch","pound","ounces","litre","bag",
-            "bucket","bundle","box","case","pack",
-            "rack","roll","sheet","yard"];
-        let returnData;
-        data.map(items=>{
-            returnData +=  `<option value="${items}" ${value == items ? "selected" : ""}>${items.charAt(0).toUpperCase() + items.slice(1)}</option>`;
-        });
-        return returnData;
-    }
+  
 });
 

@@ -1013,7 +1013,7 @@ $(document).ready(function() {
 		let stockinquantity = $(this).closest("tr").find(".stockinquantity").first().text();
 		let difference 	    = parseFloat(stockinquantity) - parseFloat(thisValue);
 		let unused 	        = difference < 0.01 ? "0" : (difference || 0);
-		$(this).closest("tr").find(".unused").first().text(unused);
+		$(this).closest("tr").find(".unused").first().text(unused.toFixed(2));
 		if(parseFloat(stockinquantity) < parseFloat(thisValue)){
 			setTimeout(() => {
 				$("#"+thisID).addClass("is-invalid").removeClass("is-valid");
@@ -1118,15 +1118,26 @@ $(document).ready(function() {
                 let materialWithdrawalData        = getTableData("ims_material_withdrawal_tbl","","materialWithdrawalStatus='2' AND materialWithdrawalID="+referenceCode);
                console.log(materialWithdrawalData);
                 materialWithdrawalData.map(materialWithdrawalItems=>{
+						let address = "-";
                         let projectList   = getTableData(
                             "pms_project_list_tbl AS pplt LEFT JOIN pms_client_tbl AS pct ON pct.clientID = pplt.projectListClientID", 
                             "projectListID, projectListCode, projectListName, clientCode, clientName, clientRegion, clientProvince, clientCity, clientBarangay, clientUnitNumber, clientHouseNumber, clientCountry, clientPostalCode",
                             "projectListStatus = 1 && projectListID ="+materialWithdrawalItems.projectID);
+							if(projectList.length > 0 ){
+								address         = `${projectList[0].clientUnitNumber && titleCase(projectList[0].clientUnitNumber)+", "}${projectList[0].clientHouseNumber && projectList[0].clientHouseNumber +", "}${projectList[0].clientBarangay && titleCase(projectList[0].clientBarangay)+", "}${projectList[0].clientCity && titleCase(projectList[0].clientCity)+", "}${projectList[0].clientProvince && titleCase(projectList[0].clientProvince)+", "}${projectList[0].clientCountry && titleCase(projectList[0].clientCountry)+", "}${projectList[0].clientPostalCode && titleCase(projectList[0].clientPostalCode)}`;
+							}else{
+								var temp = {
+									projectListID: 		"0",
+									projectListName: 	"-",
+									clientCode: 		"-",
+									clientName: 		"-"
+								}	
+								projectList.push(temp);
+							}
                         var requestorData = getTableData(`hris_employee_list_tbl JOIN hris_designation_tbl USING(designationID) LEFT JOIN hris_department_tbl ON hris_employee_list_tbl.departmentID = hris_department_tbl.departmentID`, 
                                                     "CONCAT(employeeFirstname,' ',employeeLastname) as employeeFullname, designationName, departmentName", "employeeID="+materialWithdrawalItems.employeeID);
-                        let address         = `${projectList[0].clientUnitNumber && titleCase(projectList[0].clientUnitNumber)+", "}${projectList[0].clientHouseNumber && projectList[0].clientHouseNumber +", "}${projectList[0].clientBarangay && titleCase(projectList[0].clientBarangay)+", "}${projectList[0].clientCity && titleCase(projectList[0].clientCity)+", "}${projectList[0].clientProvince && titleCase(projectList[0].clientProvince)+", "}${projectList[0].clientCountry && titleCase(projectList[0].clientCountry)+", "}${projectList[0].clientPostalCode && titleCase(projectList[0].clientPostalCode)}`;
                         projectid 			= projectList[0].projectListID;
-                        projectCode			= getFormCode("PRO",moment(projectList[0].createdAt),projectList[0].projectListID);
+                        projectCode			= projectList[0].projectListID > 0 ? getFormCode("PRO",moment(projectList[0].createdAt),projectList[0].projectListID) : "-";
                         projectName			= projectList[0].projectListName;
                         clientCode			= projectList[0].clientCode;
                         clientName			= projectList[0].clientName;
@@ -1895,13 +1906,13 @@ $(document).ready(function() {
 												<td>
                                                     <div class="uom">${items.unitOfMeasurement}</div>
                                                 </td>
-												<td>
+												<td class="text-center">
                                                     <div class="stockinquantity">${items.quantity}</div>
                                                 </td>
-                                                <td>
+                                                <td class="text-center">
                                                     <div class="utilized">${items.utilized}</div>
                                                 </td>
-                                                <td>
+                                                <td class="text-center">
                                                     <div class="unused">${items.unused}</div>
                                                 </td>
                                                 <td>
@@ -1922,7 +1933,7 @@ $(document).ready(function() {
 												<td>
                                                     <div class="uom">${items.unitOfMeasurement}</div>
                                                 </td>
-												<td>
+												<td class="text-center">
                                                     <div class="stockinquantity">${items.quantity}</div>
                                                 </td>
                                                 <td class="text-center">
@@ -1941,7 +1952,7 @@ $(document).ready(function() {
                                                         <div class="invalid-feedback d-block" id="invalid-utilized${index}"></div>
                                                     </div>
                                                 </td>
-                                                <td>
+                                                <td class="text-center">
                                                     <div class="unused">${items.unused || "0"}</div>
                                                 </td>
                                                 <td>

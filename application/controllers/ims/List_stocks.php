@@ -23,11 +23,11 @@ class List_stocks extends CI_Controller {
     {
         $classificationID                  = $this->input->post("classificationID");
         $categoryID                        = $this->input->post("categoryID");
-        $inventoryStorageID                = $this->input->post("inventoryStorageID");
-        echo json_encode($this->list_stock->getListStock($classificationID, $categoryID, $inventoryStorageID));
+        echo json_encode($this->list_stock->getListStock($classificationID, $categoryID));
 
 
     }
+
 
     // public function getTableData() 
     // {

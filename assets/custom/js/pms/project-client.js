@@ -241,7 +241,9 @@ $(document).on("change", "[name=clientCity]", function() {
                         <td>${item.clientName}</td>
                         <td style="white-space: normal">
                             ${item.clientUnitNumber && titleCase(item.clientUnitNumber)+", "} 
-                            ${item.clientHouseNumber && item.clientHouseNumber +", "} 
+                            ${item.clientHouseNumber && item.clientHouseNumber +", "}
+                            ${item.clientStreetName && titleCase(item.clientStreetName)+", "}
+                            ${item.clientSubdivisionName && titleCase(item.clientSubdivisionName)+", "}  
                             ${item.clientBarangay && titleCase(item.clientBarangay)+", "} 
                             ${item.clientCity && titleCase(item.clientCity)+", "} 
                             ${item.clientProvince && titleCase(item.clientProvince)+", "}
@@ -280,23 +282,25 @@ $(document).on("change", "[name=clientCity]", function() {
      // ----- MODAL CONTENT -----
      function modalContent(data = false) {
          
-        let {clientID       = "",
-        clientName          ="",
-        clientRegion        =false,
-        clientProvince      =false,
-        clientCity          =false,
-        clientBarangay      =false,
-        clientUnitNumber    ="",
-        clientHouseNumber   ="",
-        clientCountry       ="",
-        clientPostalCode    ="",
-        clientContactPerson ="",
-        clientEmailAddress  ="",
-        clientTin           ="",
-        client_MobileNo     ="",
-        clientTelephoneNo   ="",
-        clientBrandName     = "",
-        clientStatus        ="" }= data && data[0];
+        let {clientID           = "",
+        clientName              ="",
+        clientRegion            =false,
+        clientProvince          =false,
+        clientCity              =false,
+        clientBarangay          =false,
+        clientUnitNumber        ="",
+        clientHouseNumber       ="",
+        clientStreetName        ="",
+        clientSubdivisionName   = "",
+        clientCountry           ="",
+        clientPostalCode        ="",
+        clientContactPerson     ="",
+        clientEmailAddress      ="",
+        clientTin               ="",
+        client_MobileNo         ="",
+        clientTelephoneNo       ="",
+        clientBrandName         = "",
+        clientStatus            ="" }= data && data[0];
 
         let button = clientID ? `
         <button 
@@ -357,7 +361,7 @@ $(document).on("change", "[name=clientCity]", function() {
                     </div>
                     <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6">
                         <div class="form-group">
-                            <label>City <span
+                            <label>City/Municipality <span
                                     class="text-danger font-weight-bold validate">*</span></label>
                             <select class=" form-control show-tick select2" required="" id="input_clientCity" name="clientCity" readonly="">
                             <option value="" disabled selected>Select City/Municipality</option>
@@ -391,6 +395,22 @@ $(document).on("change", "[name=clientCity]", function() {
                             <input class="form-control validate" required=""
                             data-allowcharacters="[a-z][A-Z][.][,][-]['][#][0-9][ ]" minlength="1" maxlength="35" id="input_clientHouseNumber" name="clientHouseNumber" value="${clientHouseNumber}" type="text">
                             <div class="invalid-feedback d-block" id="invalid-input_clientHouseNumber"></div>
+                        </div>
+                    </div>
+                    <div class="col-sm-12 col-md-6 col-lg-3 col-xl-3">
+                        <div class="form-group">
+                            <label>Street Name <span class="text-danger font-weight-bold">*</span></label>
+                            <input class="form-control validate" required
+                            data-allowcharacters="[a-z][A-Z][0-9][.][,][-][()]['][/][ ]" minlength="2" maxlength="75"  id="input_clientStreetName" name="clientStreetName" value="${clientStreetName}" type="text">
+                            <div class="invalid-feedback d-block" id="invalid-input_clientStreetName"></div>
+                        </div>
+                    </div>
+                    <div class="col-sm-12 col-md-6 col-lg-3 col-xl-3">
+                        <div class="form-group">
+                            <label>Subdivision Name <span class="text-danger font-weight-bold">*</span></label>
+                            <input class="form-control validate" required
+                            data-allowcharacters="[a-z][A-Z][0-9][.][,][-][()]['][/][ ]" minlength="2" maxlength="75" id="input_clientSubdivisionName" name="clientSubdivisionName" value="${clientSubdivisionName}" type="text">
+                            <div class="invalid-feedback d-block" id="invalid-input_clientSubdivisionName"></div>
                         </div>
                     </div>
                     <div class="col-sm-12 col-md-6 col-lg-3 col-xl-3">
@@ -448,7 +468,7 @@ $(document).on("change", "[name=clientCity]", function() {
                             <div class="invalid-feedback d-block" id="invalid-input_clientEmailAddress"></div>
                         </div>
                     </div>
-                    <div class="col-xl-4 col-lg-6 col-md-6 col-sm-12">
+                    <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12">
                         <div class="form-group">
                             <label>Tax Identification Number <span class="text-danger font-weight-bold">*</span></label>
                             <input 
@@ -466,7 +486,7 @@ $(document).on("change", "[name=clientCity]", function() {
                             <div class="invalid-feedback d-block" id="invalid-input_clientTin"></div>
                         </div>
                     </div>
-                    <div class="col-xl-4 col-lg-6 col-md-6 col-sm-12">
+                    <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12">
                         <div class="form-group">
                             <label>Mobile No. <span class="text-danger font-weight-bold">*</span></label>
                                 <input 
@@ -483,7 +503,7 @@ $(document).on("change", "[name=clientCity]", function() {
                             <div class="invalid-feedback d-block" id="invalid-input_clientMobileNo"></div>
                         </div>
                     </div>
-                    <div class="col-xl-4 col-lg-6 col-md-6 col-sm-12">
+                    <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12">
                         <div class="form-group">
                             <label>Telephone No. <span class="text-danger font-weight-bold">*</span></label>
                                 <input type="text" 
@@ -499,7 +519,7 @@ $(document).on("change", "[name=clientCity]", function() {
                             <div class="invalid-feedback d-block" id="invalid-input_clientTelephoneNo"></div>
                         </div>
                     </div>
-                    <div class="col-md-8 col-sm-12">
+                    <div class="col-md-6 col-sm-12">
                         <div class="form-group">
                             <label>Website <small class="text-muted">(Optional)</small></label>
                             <input 
@@ -669,5 +689,37 @@ $(document).on("change", "[name=clientCity]", function() {
 
 });
 // ------ END CHECK CLIENT STATUS -------
+
+
+
+
+
+
+// CHANGING STATUS;
+$(document).on("change", "#input_clientStatus", function(){
+    if($(this).attr("getclientid")){    
+        let thisClass   =   $(this).parent().children();
+        let thisID      =   $(this).attr("getclientid");
+        let thisValue   =   $(this).val();
+        let tableData   =   getTableData("pms_project_list_tbl","COUNT(projectListID) AS tableDataLength","projectListClientID="+thisID);
+        let attrID      =   $(this).attr("id");
+        if(tableData[0].tableDataLength > 0 && thisValue == 0){
+            setTimeout(function(){
+                $("#"+attrID).removeClass("is-valid").removeClass("validated").addClass("is-invalid");
+                thisClass.find(".select2-selection").removeClass("no-error").addClass("has-error");
+                $("#invalid-input_clientStatus").text(`This record is currently in use!`);
+                $("#btnUpdate").prop("disabled", true);
+            },180);
+        }else{
+            $("#btnUpdate").prop("disabled", false);
+            $('#'+attrID).removeClass("is-invalid");
+            thisClass.find(".select2-selection").addClass("no-error").removeClass("has-error");
+        }
+    } 
+});
+
+
+
+
 
 });
