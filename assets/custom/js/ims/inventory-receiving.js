@@ -616,8 +616,15 @@ $(document).ready(function() {
 
     // ----- GET PURCHASE ORDER LIST -----
     function getPurchaseOrderList(id = null, status = 0, display = true) {
-
+		var exist = [];
 		var condition  ="";
+		const receivingList = getTableData(
+			`ims_inventory_receiving_tbl`,
+			"purchaseOrderID ",`inventoryReceivingStatus = 1`
+		);
+		receivingList.map(items=>{
+			exist.push(items.purchaseOrderID);
+		})
 
 		if(status === false){
 			
@@ -629,6 +636,14 @@ $(document).ready(function() {
 					iir.inventoryReceivingStatus != 5) OR 
 					(iir.inventoryReceivingStatus IS NULL))) AND 
 					(irit.orderedPending IS NULL OR irit.orderedPending > 0) `;
+
+			// condition  =`(ipot.purchaseOrderStatus = 2 AND 
+			// 		((iir.inventoryReceivingStatus IS NULL))) AND 
+			// 		(irit.orderedPending IS NULL OR (CASE WHEN iir.inventoryReceivingStatus != 1 AND 
+			// 		iir.inventoryReceivingStatus != 0 AND 
+			// 		iir.inventoryReceivingStatus != 3 AND 
+			// 		iir.inventoryReceivingStatus != 4 AND 
+			// 		iir.inventoryReceivingStatus != 5 THEN irit.orderedPending > 0 Else '' END) ) `;
 		}
 		else{
 			
@@ -654,7 +669,9 @@ $(document).ready(function() {
 		).map(po => po.purchaseOrderID);
 		let html = '';
 		if (!status || status == 0) {
-			html += purchaseOrderList.filter(po => createdIRList.indexOf(po.purchaseOrderID) == -1 || po.purchaseOrderID == id).map(po => {
+			// html += purchaseOrderList.filter(po => createdIRList.indexOf(po.purchaseOrderID) == -1 || po.purchaseOrderID == id).map(po => {
+			
+			html += purchaseOrderList.filter(po => !exist.includes(po.purchaseOrderID) || po.purchaseOrderID == id).map(po => {
 				return `
 				<option 
 					value      = "${po.purchaseOrderID}" 
@@ -1528,7 +1545,6 @@ $(document).ready(function() {
 	$(document).on("click", "#btnSave, #btnCancel", function () {
 		let receivedCondition = $("[name=received]").hasClass("is-invalid");
 		let serialNumberCondition = $("[name=serialNumber]").hasClass("is-invalid");
-
 		if(!receivedCondition && !serialNumberCondition){
 
 			const id       = $(this).attr("inventoryReceivingID");
@@ -1538,7 +1554,7 @@ $(document).ready(function() {
 			const action   = revise && "insert" || (id && feedback ? "update" : "insert");
 			const data     = getInventoryReceivingData(action, "save", "0", id);
 			data["inventoryReceivingStatus"] = 0;
-	
+			
 			if (revise) {
 				// data["reviseInventoryReceivingID"] = id;
 				// delete data["inventoryReceivingID"];
@@ -1558,7 +1574,6 @@ $(document).ready(function() {
 			$("[name=received]").focus();
 			$("[name=serialNumber]").focus();
 		}
-
 		
 	});
 	// ----- END SAVE DOCUMENT -----
