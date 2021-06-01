@@ -115,14 +115,14 @@ $(document).ready(function(){
                                          <td>${item["barcode"]}</td>
                                          <td>${item["storageCode"]}</td>
                                          <td>${item["StorageName"]}</td>
-                                         <td class="text-center">${item["stockIN"]}</td>
+                                         <td class="text-center">${item["stockInQuantity"]}</td>
                                          <td class="text-center">${item["widhdrawn"]}</td>
                                          <td class="text-center">${item["unusedQuantity"]}</td>
                                          <td class="text-center">${item["borrowedQuantity"]}</td>
                                          <td class="text-center">${item["returnQuantity"]}</td>
                                          <td class="text-center">${item["transferredQuantity"]}</td>
                                          <td class="text-center">${item["disposalQuantity"]}</td>
-                                         <td class="text-center">${item["endQuantity"]}</td>
+                                         <td class="text-center">${item["stockIN"]}</td>    
                                          <td class="text-center">0.00</td>
                                          <td class="text-center">${item["reorderpoint"]}</td>
 

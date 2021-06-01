@@ -305,7 +305,7 @@ $(document).ready(function() {
     // ----- FOR APPROVAL CONTENT -----
 	function forApprovalContent() {
 		$("#tableForApprovalParent").html(preloader);
-		let transferRequestData = getTableData(
+		let returnItemData = getTableData(
 			`ims_return_item_tbl AS imtrt 
             LEFT JOIN hris_employee_list_tbl AS helt USING(employeeID) 
             LEFT JOIN pms_project_list_tbl AS imsr ON imsr.projectListID  = imtrt.projectID 
@@ -334,7 +334,7 @@ $(document).ready(function() {
             </thead>
             <tbody>`;
 
-		transferRequestData.map((item) => {
+		returnItemData.map((item) => {
 			let {
 				fullname,
 				returnItemID,
@@ -346,14 +346,14 @@ $(document).ready(function() {
 				approversID,
 				approversDate,
 				returnItemStatus,
-				transferRequestRemarks,
+				returnItemRemarks,
 				submittedAt,
 				createdAt,
 				borrowingID,
 				createdAtborrowing,
 			} = item;
 
-			let remarks       = transferRequestRemarks ? transferRequestRemarks : "-";
+			let remarks       = returnItemRemarks ? returnItemRemarks : "-";
 			let dateCreated   = moment(createdAt).format("MMMM DD, YYYY hh:mm:ss A");
 			let dateSubmitted = submittedAt ? moment(submittedAt).format("MMMM DD, YYYY hh:mm:ss A") : "-";
 			let dateApproved  = returnItemStatus == 2 ? approversDate.split("|") : "-";
@@ -374,7 +374,7 @@ $(document).ready(function() {
 					<td>${getFormCode("RI", createdAt, returnItemID )}</td>
 					<td>${fullname}</td>
 					<td>${getFormCode("EBF", createdAtborrowing, borrowingID )}</td>
-					<td>${projectListName}</td>
+					<td>${projectListName || "-"}</td>
 					<td>${returnItemReason}</td>
 					<td>
 						${employeeFullname(getCurrentApprover(approversID, approversDate, returnItemStatus, true))}
@@ -458,7 +458,7 @@ $(document).ready(function() {
     // ----- MY FORMS CONTENT -----
 	function myFormsContent() {
 		$("#tableMyFormsParent").html(preloader);
-		let transferRequestData = getTableData(
+		let returnItemData = getTableData(
 			`ims_return_item_tbl AS imtrt 
 			LEFT JOIN hris_employee_list_tbl AS helt USING(employeeID) 
 			LEFT JOIN pms_project_list_tbl AS imsr ON imsr.projectListID  = imtrt.projectID
@@ -487,7 +487,8 @@ $(document).ready(function() {
             </thead>
             <tbody>`;
 
-		transferRequestData.map((item) => {
+		console.log(returnItemData);
+		returnItemData.map((item) => {
 			let {
 				fullname,
 				returnItemID,
@@ -496,7 +497,7 @@ $(document).ready(function() {
 				approversID,
 				approversDate,
 				returnItemStatus,
-				transferRequestRemarks,
+				returnItemRemarks,
 				submittedAt,
 				createdAt,
 				borrowingID,
@@ -505,7 +506,7 @@ $(document).ready(function() {
 
 			} = item;
 
-			let remarks       = transferRequestRemarks ? transferRequestRemarks : "-";
+			let remarks       = returnItemRemarks ? returnItemRemarks : "-";
 			let dateCreated   = moment(createdAt).format("MMMM DD, YYYY hh:mm:ss A");
 			let dateSubmitted = submittedAt ? moment(submittedAt).format("MMMM DD, YYYY hh:mm:ss A") : "-";
 			let dateApproved  = returnItemStatus == 2 ? approversDate.split("|") : "-";
@@ -525,7 +526,7 @@ $(document).ready(function() {
                 <td>${getFormCode("RI", createdAt, returnItemID )}</td>
                 <td>${fullname}</td>
 				<td>${getFormCode("EBF", createdAtborrowing, borrowingID )}</td>
-				<td>${projectListName}</td>
+				<td>${projectListName || "-"}</td>
                <td>${returnItemReason}</td>
                 <td>
                     ${employeeFullname(getCurrentApprover(approversID, approversDate, returnItemStatus, true))}
@@ -915,7 +916,7 @@ $(document).ready(function() {
             </td>
 			<td class="text-center">
 			<div class="borrowedquantity">
-				${quantity || "-"}
+				${formatAmount(quantity) || "-"}
 			</div>
 		   </td> 
 		   <td class="">
@@ -931,7 +932,7 @@ $(document).ready(function() {
 
 				<td class="text-center">
 					<div class="returnItemQuantity">
-					${returnItemQuantity}
+					${formatAmount(returnItemQuantity)}
 					</div>
 				</td>
 			</tr>`;
@@ -978,7 +979,7 @@ $(document).ready(function() {
 		</td>
 		<td class="text-center">
 		<div class="borrowedquantity" id="borrowedquantity${index}">
-			${quantity}
+			${formatAmount(quantity)}
 		</div>
 	   </td> 
 	   <td class="">
@@ -1181,7 +1182,7 @@ $(document).ready(function() {
 			approversDate           = "",
 			returnItemReason		="",
 			returnItemStatus  		= false,
-			transferRequestRemarks  = false,
+			returnItemRemarks  = false,
 			submittedAt             = false,
 			createdAt               = false,
 		} = data && data[0];
@@ -1291,7 +1292,7 @@ $(document).ready(function() {
                     <div class="body">
                         <small class="text-small text-muted font-weight-bold">Remarks</small>
                         <h6 class="mt-0 font-weight-bold">
-							${transferRequestRemarks && !isRevise ? transferRequestRemarks : "---"}
+							${returnItemRemarks && !isRevise ? returnItemRemarks : "---"}
 						</h6>      
                     </div>
                 </div>
@@ -1853,12 +1854,12 @@ $(document).ready(function() {
 					data-allowcharacters="[0-9][a-z][A-Z][ ][.][,][_]['][()][?][-][/]"
 					minlength="2"
 					maxlength="250"
-					id="transferRequestRemarks"
-					name="transferRequestRemarks"
+					id="returnItemRemarks"
+					name="returnItemRemarks"
 					rows="4"
 					style="resize: none"
 					required></textarea>
-				<div class="d-block invalid-feedback" id="invalid-transferRequestRemarks"></div>
+				<div class="d-block invalid-feedback" id="invalid-returnItemRemarks"></div>
 			</div>
 		</div>
 		<div class="modal-footer text-right">
@@ -1888,7 +1889,7 @@ $(document).ready(function() {
 				data.append("returnItemID", id);
 				data.append("approversStatus", updateApproveStatus(approversStatus, 3));
 				data.append("approversDate", updateApproveDate(approversDate));
-				data.append("transferRequestRemarks", $("[name=transferRequestRemarks]").val()?.trim());
+				data.append("returnItemRemarks", $("[name=returnItemRemarks]").val()?.trim());
 				data.append("updatedBy", sessionID);
 
 				let notificationData = {

@@ -744,7 +744,7 @@ $(document).ready(function () {
 			LEFT JOIN ims_inventory_item_tbl 				AS iii ON irsn.itemID = iii.itemID`,
 			`irsn.inventoryReceivingID,IFNULL(irsn.serialNumber,'') AS serialNumber,irsn.itemID,iri.itemName,iird.received AS quantity
 			,concat('ITM-',LEFT(iii.createdAt,2),'-',LPAD(iii.itemID,5,'0')) AS itemCode,iri.itemDescription,IFNULL(iri.brandNAme,'') AS brandName`, `irsn.inventoryReceivingID=${inventoryReceivingID} AND irsn.itemID =${itemID}`,
-			``, `irsn.serialNumber,irsn.itemID,irsn.inventoryReceivingID`);
+			``, `irsn.serialnumberID,irsn.inventoryReceivingID`);
 		if (tableData) {
 			const content = modalContent(tableData);
 			setTimeout(() => {

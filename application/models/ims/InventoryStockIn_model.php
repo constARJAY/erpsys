@@ -85,8 +85,9 @@ class InventoryStockIn_model extends CI_Model {
            
         }
     }
+    $id = $this->db->insert_id();
     $query = $this->db->query("SELECT IFNULL(isi.itemID,'0') as itemID, isi.itemName,isit.itemName as totalitemname, (sum(stockInQuantity) + SUM(IFNULL(quantity,0))) AS quantity, stockInLocationID FROM ims_stock_in_tbl AS isi
-        LEFT JOIN ims_stock_in_total_tbl AS isit ON isi.itemID = isit.itemID AND  isi.stockInLocationID = isit.inventoryStorageID WHERE isi.itemID =$itemID AND isi.stockInLocationID IN($inventoryStorageID1) GROUP BY itemID, stockInLocationID");
+        LEFT JOIN ims_stock_in_total_tbl AS isit ON isi.itemID = isit.itemID AND  isi.stockInLocationID = isit.inventoryStorageID WHERE isi.stockinID =$id GROUP BY itemID, stockInLocationID");
 
             foreach ($query->result() as $row)
             {

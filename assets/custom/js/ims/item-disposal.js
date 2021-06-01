@@ -1055,7 +1055,7 @@ $(document).ready(function() {
 	// ----- KEYUP QUANTITY OR UNITCOST -----
 	$(document).on("change", "[name=quantity]", function() {
 		const index     		= $(this).closest("tr").first().attr("index");
-		const quantity  		= $(`#quantity${index}`).val();
+		const quantity  		= parseInt($(`#quantity${index}`).val());
         const barcodeval  	= $(this).closest("tr").find('[name=barcode]').val();
 		const data = getTableData
 				 (`ims_stock_in_total_tbl AS isit
@@ -1183,7 +1183,7 @@ $(document).ready(function() {
 		
 		let requestProjectItems = "";
 		if (disposalID) {
-			let requestItemsData = getTableData(
+			let disposalItemsData = getTableData(
 				`ims_inventory_disposal_details_tbl AS idd
 				LEFT JOIN ims_inventory_disposal_tbl 	AS iid ON	idd.disposalID = iid.disposalID
 				LEFT JOIN ims_stock_in_tbl 				AS isi ON 	idd.itemID = isi.itemID AND idd.barcode = isi.barcode
@@ -1191,8 +1191,8 @@ $(document).ready(function() {
 				LEFT JOIN ims_inventory_storage_tbl		AS iis ON 	idd.inventoryStorageID = iis.inventoryStorageID`, 
 				`idd.disposalID,idd.itemID,isi.itemName,idd.barcode,idd.serialnumber,FORMAT(idd.quantity,2) AS quantity,idd.disposalDetailRemarks,idd.inventoryStorageID,
 				iis.inventoryStorageOfficeName,iii.createdAt AS itemcreatedAt,idd.unitOfMeasurement, iis.createdAt AS inventorycreatedAt`, 
-				`iid.disposalID = ${disposalID}`);
-			requestItemsData.map(item => {
+				`iid.disposalID = ${disposalID}`,``,`idd.disposalID`);
+				disposalItemsData.map(item => {
 				requestProjectItems += getItemRow(true, item, readOnly);
 			})
 			// requestProjectItems += getItemRow(true);
