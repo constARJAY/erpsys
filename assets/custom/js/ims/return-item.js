@@ -165,12 +165,14 @@ $(document).ready(function() {
 					{ targets: 0,  width: 100 },
 					{ targets: 1,  width: 150 },
 					{ targets: 2,  width: 250 },
-					{ targets: 3,  width: 150 },
+					{ targets: 3,  width: 350 },
 					{ targets: 4,  width: 200 },
 					{ targets: 5,  width: 200 },
 					{ targets: 6,  width: 200 },
-					{ targets: 7, width: 100 },
+					{ targets: 7, width: 200 },
 					{ targets: 8, width: 250 },
+					{ targets: 9, width: 80 },
+					{ targets: 10, width: 250 },
 				],
 			});
 
@@ -187,12 +189,14 @@ $(document).ready(function() {
 					{ targets: 0,  width: 100 },
 					{ targets: 1,  width: 150 },
 					{ targets: 2,  width: 250 },
-					{ targets: 3,  width: 150 },
+					{ targets: 3,  width: 350 },
 					{ targets: 4,  width: 200 },
 					{ targets: 5,  width: 200 },
 					{ targets: 6,  width: 200 },
-					{ targets: 7, width: 100 },
+					{ targets: 7, width: 200 },
 					{ targets: 8, width: 250 },
+					{ targets: 9, width: 80 },
+					{ targets: 10, width: 250 },
 				],
 			});
 
@@ -215,12 +219,12 @@ $(document).ready(function() {
 					{ targets: 2,  width: 150 },
 					{ targets: 3,  width: 200  },
 					{ targets: 4,  width: 170 },
-					{ targets: 5,  width: 190 },
-                    { targets: 6,  width: 200 },
+                    { targets: 5,  width: 200 },
+                    { targets: 6,  width: 80 },
                     { targets: 7,  width: 80 },
-                    { targets: 8,  width: 80 },
+					{ targets: 8,  width: 120 },
 					{ targets: 9,  width: 120 },
-					{ targets: 10,  width: 80 },
+					{ targets: 10,  width: 120 },
 				],
 			});
 
@@ -237,15 +241,15 @@ $(document).ready(function() {
 				columnDefs: [
 					{ targets: 0,  width: 190  },
 					{ targets: 1,  width: 150 },
-					{ targets: 2,  width: 200 },
-					{ targets: 3,  width: 170  },
-					{ targets: 4,  width: 190 },
-					{ targets: 5,  width: 120 },
-                    { targets: 6,  width: 200 },
+					{ targets: 2,  width: 150 },
+					{ targets: 3,  width: 200  },
+					{ targets: 4,  width: 170 },
+                    { targets: 5,  width: 200 },
+                    { targets: 6,  width: 80 },
                     { targets: 7,  width: 80 },
-                    { targets: 8,  width: 80 },
+					{ targets: 8,  width: 120 },
 					{ targets: 9,  width: 120 },
-					{ targets: 10,  width: 80 },
+					{ targets: 10,  width: 120 },
 					// { targets: 8,  width: 200 },
 				],
 			});
@@ -304,8 +308,9 @@ $(document).ready(function() {
 		let transferRequestData = getTableData(
 			`ims_return_item_tbl AS imtrt 
             LEFT JOIN hris_employee_list_tbl AS helt USING(employeeID) 
-            LEFT JOIN pms_project_list_tbl AS imsr ON imsr.projectListID  = imtrt.projectID `,
-			"imtrt.*, CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname, imtrt.createdAt AS dateCreated,imsr.projectListCode,imsr.projectListName",
+            LEFT JOIN pms_project_list_tbl AS imsr ON imsr.projectListID  = imtrt.projectID 
+			LEFT JOIN ims_borrowing_tbl AS ib ON imtrt.borrowingID = ib.borrowingID`,
+			"imtrt.*, CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname, imtrt.createdAt AS dateCreated,imsr.projectListCode,imsr.projectListName,ib.createdAt as createdAtborrowing",
 			`imtrt.employeeID != ${sessionID} AND returnItemStatus != 0 AND returnItemStatus != 4`,
 			`FIELD(returnItemStatus, 0, 1, 3, 2, 4), COALESCE(imtrt.submittedAt, imtrt.createdAt)`
 		);
@@ -316,6 +321,8 @@ $(document).ready(function() {
                 <tr style="white-space: nowrap">
                     <th>Document No.</th>
                     <th>Prepared By</th>
+					<th>Reference No.</th>
+					<th>Project Name</th>
 					<th>Description</th>
                     <th>Current Approver</th>
                     <th>Date Created</th>
@@ -342,6 +349,8 @@ $(document).ready(function() {
 				transferRequestRemarks,
 				submittedAt,
 				createdAt,
+				borrowingID,
+				createdAtborrowing,
 			} = item;
 
 			let remarks       = transferRequestRemarks ? transferRequestRemarks : "-";
@@ -364,6 +373,8 @@ $(document).ready(function() {
 				<tr class="${btnClass}" id="${encryptString(returnItemID )}">
 					<td>${getFormCode("RI", createdAt, returnItemID )}</td>
 					<td>${fullname}</td>
+					<td>${getFormCode("EBF", createdAtborrowing, borrowingID )}</td>
+					<td>${projectListName}</td>
 					<td>${returnItemReason}</td>
 					<td>
 						${employeeFullname(getCurrentApprover(approversID, approversDate, returnItemStatus, true))}
@@ -433,9 +444,10 @@ $(document).ready(function() {
 				locale: {
 					format: "MMMM DD, YYYY",
 				},
-				minDate: moment()
+			
 			})
-
+			datevalidated();
+		
 			// initDataTables();
 			// initAll();
 			initQuantity();
@@ -447,9 +459,11 @@ $(document).ready(function() {
 	function myFormsContent() {
 		$("#tableMyFormsParent").html(preloader);
 		let transferRequestData = getTableData(
-			`ims_return_item_tbl AS imtrt LEFT JOIN hris_employee_list_tbl AS helt USING(employeeID) 
-			LEFT JOIN pms_project_list_tbl AS imsr ON imsr.projectListID  = imtrt.projectID`,
-			"imtrt.*, CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname, imtrt.createdAt AS dateCreated,imsr.projectListCode,imsr.projectListName",
+			`ims_return_item_tbl AS imtrt 
+			LEFT JOIN hris_employee_list_tbl AS helt USING(employeeID) 
+			LEFT JOIN pms_project_list_tbl AS imsr ON imsr.projectListID  = imtrt.projectID
+			LEFT JOIN ims_borrowing_tbl AS ib ON imtrt.borrowingID = ib.borrowingID`,
+			"imtrt.*, CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname, imtrt.createdAt AS dateCreated,imsr.projectListCode,imsr.projectListName,ib.createdAt as createdAtborrowing",
 			`imtrt.employeeID = ${sessionID}`,
 			`FIELD(returnItemStatus, 0, 1, 3, 2, 4, 5), COALESCE(imtrt.submittedAt, imtrt.createdAt)`
 		);
@@ -460,6 +474,8 @@ $(document).ready(function() {
                 <tr style="white-space: nowrap">
                     <th>Document No.</th>
                     <th>Prepared By</th>
+					<th>Reference No.</th>
+					<th>Project Name</th>
 					<th>Description</th>
                     <th>Current Approver</th>
                     <th>Date Created</th>
@@ -483,6 +499,10 @@ $(document).ready(function() {
 				transferRequestRemarks,
 				submittedAt,
 				createdAt,
+				borrowingID,
+				createdAtborrowing,
+				projectListName,
+
 			} = item;
 
 			let remarks       = transferRequestRemarks ? transferRequestRemarks : "-";
@@ -504,6 +524,8 @@ $(document).ready(function() {
             <tr class="${btnClass}" id="${encryptString(returnItemID )}">
                 <td>${getFormCode("RI", createdAt, returnItemID )}</td>
                 <td>${fullname}</td>
+				<td>${getFormCode("EBF", createdAtborrowing, borrowingID )}</td>
+				<td>${projectListName}</td>
                <td>${returnItemReason}</td>
                 <td>
                     ${employeeFullname(getCurrentApprover(approversID, approversDate, returnItemStatus, true))}
@@ -798,12 +820,13 @@ $(document).ready(function() {
 
 	// ----- GET ITEM ROW -----
 	function getBorrowedRow(id, readOnly = false,inventoryborrowingid = "") {
+	
 		let html = "";
 		if(inventoryborrowingid != ""){
 			id = `${id}`;
 		}
 		//alert(inventoryborrowingid);
-
+		datevalidated();
 		let BorrowingData = getTableData(`ims_borrowing_details_tbl AS ibd
 		LEFT JOIN ims_borrowing_tbl 								AS  ib 	ON ibd.borrowingID = ib.borrowingID
 		LEFT JOIN ims_inventory_item_tbl 							AS iii 	ON iii.itemID = ibd.itemID
@@ -814,7 +837,7 @@ $(document).ready(function() {
 		`concat('ITM-',LEFT(iii.createdAt,2),'-',LPAD(iii.itemID,5,'0')) AS itemCode,iii.itemName,
 		concat('ISM-',LEFT(iis.createdAt,2),'-',LPAD(iis.inventoryStorageID,5,'0')) AS inventoryCode,iis.inventoryStorageOfficeName,
 		IFNULL(irid.returnItemQuantity,'0') AS returnItemQuantity,IFNULL(irid.returnItemDate,'') AS returnItemDate,ibd.borrowingDetailID,ibd.itemID,ibd.inventoryStorageID,iii.itemName,ibd.barcode,ibd.serialnumber,ibd.quantity,ibd.borrowedPurpose,ibd.dateBorrowed,
-		pplt.projectListCode, pplt.projectListName, pct.clientCode, pct.clientName, pct.clientRegion, pct.clientProvince, pct.clientCity, pct.clientBarangay, pct.clientUnitNumber, pct.clientHouseNumber, pct.clientCountry, pct.clientPostalCode`,
+		ib.projectID,pplt.projectListCode, pplt.projectListName, pct.clientCode, pct.clientName,ibd.unitOfMeasurement, pct.clientRegion, pct.clientProvince, pct.clientCity, pct.clientBarangay, pct.clientUnitNumber, pct.clientHouseNumber, pct.clientCountry, pct.clientPostalCode`,
 		`ib.borrowingStatus = 2 AND ib.borrowingID = ${id}`,``,`ibd.borrowingDetailID`);
 		
 		BorrowingData.map((item, index) => {
@@ -823,6 +846,7 @@ $(document).ready(function() {
 			let clientName =`${item.clientName}`;
 			let projectCode =`${item.projectListCode}`;
 			let projectListName =`${item.projectListName}`;
+			let projectID =`${item.projectID}`;
 			let {	
 			borrowingDetailID			="",
 			itemID						="",
@@ -837,7 +861,8 @@ $(document).ready(function() {
 			dateBorrowed 				="",
 			inventoryCode				="",
 			returnItemQuantity			="",
-			returnItemDate				=""
+			returnItemDate				="",
+			unitOfMeasurement			=""
 		} = item;
 
 		$("#clientAddress").val(address);
@@ -845,6 +870,9 @@ $(document).ready(function() {
 		$("#clientName").val(clientName);
 		$("#projectCode").val(projectCode);
 		$("#projectID").val(projectListName);
+		//$("#projectID").attr("ID",projectID);
+		$("#projectrecordID").val(projectID);
+		
 		
 		if (readOnly) {
 			
@@ -880,11 +908,6 @@ $(document).ready(function() {
 					${inventoryStorageOfficeName || "-"}
 					</div>
 				</td>
-		   <td>
-		   <div class="borrowedPurpose">
-			   ${borrowedPurpose || "-"}
-		   </div>
-		  </td> 
                <td>
                 <div class="dateBorrowed">
 				${dateBorrowed && moment(dateBorrowed).format("MMMM DD, YYYY") || "-"}
@@ -895,8 +918,13 @@ $(document).ready(function() {
 				${quantity || "-"}
 			</div>
 		   </td> 
+		   <td class="">
+			<div class="unitOfMeasurement">
+				${unitOfMeasurement || "-"}
+			</div>
+		   </td> 
 			<td>
-			<div class="returnItemDate">
+			<div class="returnItemDate"dateBorrowed="${dateBorrowed}">
 				${returnItemDate}
 			</div>
 		   </td> 
@@ -943,11 +971,6 @@ $(document).ready(function() {
 				${inventoryStorageOfficeName || "-"}
 				</div>
 			</td>
-	   <td>
-			<div class="borrowedPurpose">
-				${borrowedPurpose || "-"}
-			</div>
-		   </td> 
 		   <td>
 			<div class="dateBorrowed">
 			${dateBorrowed && moment(dateBorrowed).format("MMMM DD, YYYY") || "-"}
@@ -958,13 +981,19 @@ $(document).ready(function() {
 			${quantity}
 		</div>
 	   </td> 
+	   <td class="">
+		<div class="unitOfMeasurement" id="unitOfMeasurement${index}">
+			${unitOfMeasurement}
+		</div>
+	   </td> 
 		<td>
 			<input type="button" 
-			class="form-control daterange returnItemDate text-left"
+			class="form-control daterange returnItemDate  text-left"
 			required
 			id="returnItemDate${index}"
 			name="returnItemDate"
 			value=""
+			dateBorrowed="${dateBorrowed}"
 			title="Date" required>
 			<div class="d-block invalid-feedback" id="invalid-returnItemDate"></div>
 	   </td> 
@@ -991,16 +1020,54 @@ $(document).ready(function() {
 
 
 		});	
+		//datevalidated();
 	return html;
 
+
     }
-	$(document).on("change", "[name=returnItemDate]", function() {
-		const id 	= $(this).attr("id");
-		const value = $(this).val();
-		//console.log(value);
+
+	function datevalidated() {
+		//alert("1");
+		$(".returnItemDate").each(function () {
+			const id = $(this).attr("id");
+			//alert(id);
+			const today = $(this).attr("dateBorrowed");
+			//alert(today);
+			$(`#${id}`).attr('min', today);
+			initDateRangePicker(`#${id}`, {
+				autoUpdateInput: false,
+				singleDatePicker: true,
+				showDropdowns: true,
+				autoApply: true,
+				locale: {
+					format: "MMMM DD, YYYY",
+				},
+				minDate: moment()
+			})
+		}) 
+	}	
+//	$(document).on("change", "[name=returnItemDate]", function() {
+		// const id 	= $(this).attr("id");
+		// const borrowedate = $(this).attr("dateBorrowed");
+		// $(".returnItemDate").each(function () {
+		// 	const id = $(this).attr("id");
+		// 	$(`#${id}`).attr('max', borrowedate);
+		// 	initDateRangePicker(`#${id}`, {
+		// 		autoUpdateInput: false,
+		// 		singleDatePicker: true,
+		// 		showDropdowns: true,
+		// 		autoApply: true,
+		// 		locale: {
+		// 			format: "MMMM DD, YYYY",
+		// 		},
+		// 		maxDate: moment()
+		// 	})
+		// })
 
 
-	})	
+	// })	
+
+
 	$(document).on("change", ".returnItemQuantity", function() {
 		var number 	= $(this).attr("count");
 		const val = $(this).val();
@@ -1254,6 +1321,7 @@ $(document).ready(function() {
 	<div class="form-group">
 		<label>Project Name</label>
 		<input type="text" class="form-control" id="projectID" name="projectID" disabled value="-">
+		<input type="hidden" class="form-control" id="projectrecordID" name="projectrecordID">
 	</div>
 	</div>
 	<div class="col-md-4 col-sm-12">
@@ -1328,9 +1396,9 @@ $(document).ready(function() {
 								<th>Serial No.</th>
 								<th>Storage Code </th>
 								<th>Storage Name</th>
-								<th>Purpose </th>
 								<th>Date Borrowed</th>
 								<th>Quantity</th>
+								<th>UOM</th>
 								<th>Date Returned <strong class="text-danger">*</strong></th>
 								<th>Quantity <strong class="text-danger">*</strong></th>
                             </tr>
@@ -1459,13 +1527,17 @@ $(document).ready(function() {
 		if (currentStatus == "0" && method != "approve") {
 			
 			data["employeeID"]            = sessionID;
-			data["projectID"]    = $("[name=projectID]").val() || null;
+			//data["projectID"]    = $("[name=projectID]").val() || null;
+			//data["projectID"]	 = $("[name=projectID]", this).attr("ID");projectrecordID
+			//alert($("[name=projectID]", this).attr("projectid"));
 			data["returnItemReason"] = $("[name=returnItemReason]").val()?.trim();
+			data["projectID"] = $("[name=projectrecordID]").val()?.trim();
 			//data["borrowingID"]  = $("[name=borrowingID]").val() || null;
 
-
 			formData.append("employeeID", sessionID);
-			formData.append("projectID", $("[name=projectID]").val() || null);
+			//formData.append("projectID", $("[name=projectID]").val() || null);
+			formData.append("projectID", $("[name=projectrecordID]").val() || null);
+			//formData.append("projectID", $("[name=projectrecordID]", this).attr("ID"));
 			formData.append("borrowingID", $("[name=borrowingID]").val() || null);
 			formData.append("returnItemReason", $("[name=returnItemReason]").val()?.trim());
 
@@ -1522,11 +1594,8 @@ $(document).ready(function() {
 				const returnItemDate 		= moment(formatreturnItemDate).format("YYYY-MM-DD HH:mm:ss");
 				// end of date return
 				const returnItemQuantity 		= +$("td [name=returnItemQuantity]", this).val().replaceAll(",","");	
-			
-
 				let temp = {
 					itemID, returnItemQuantity
-					
 				};
 
 				formData.append(`items[${i}][borrowingDetailID]`, borrowingDetailID);
