@@ -982,7 +982,7 @@ $(document).ready(function() {
 				}else{
 					$(this).closest("tr").find("[name=barcode]").removeClass("is-valid").addClass("is-invalid");
 					$(this).closest("tr").find("#invalid-barcode").removeClass("is-valid").addClass("is-invalid");
-					$(this).closest("tr").find("#invalid-barcode").text('No Item Available!');
+					$(this).closest("tr").find("#invalid-barcode").text('No item available!');
 				}
 			}else{
 				$(this).closest("tr").find("[name=barcode]").removeClass("is-valid").addClass("is-invalid");
@@ -1007,7 +1007,7 @@ $(document).ready(function() {
 
 				$(this).closest("tr").find("[name=barcode]").removeClass("is-valid").addClass("is-invalid");
 				$(this).closest("tr").find("#invalid-barcode").removeClass("is-valid").addClass("is-invalid");
-				$(this).closest("tr").find("#invalid-barcode").text('No Item Available!');
+				$(this).closest("tr").find("#invalid-barcode").text('No item available!');
 		}else{
 				$(this).closest("tr").find("[name=barcode]").removeClass("is-invalid");
 				$(this).closest("tr").find("#invalid-barcode").removeClass("is-invalid");
@@ -1049,12 +1049,12 @@ $(document).ready(function() {
 								}else{
 									$(`#quantity${index}`).removeClass("is-valid").addClass("is-invalid");
 									$(this).closest("tr").find("#invalid-quantity").removeClass("is-valid").addClass("is-invalid");
-									$(this).closest("tr").find("#invalid-quantity").text('Not Enough Quantity!');
+									$(this).closest("tr").find("#invalid-quantity").text('Not enough quantity!');
 								}
 							}else{
 								$(`#quantity${index}`).removeClass("is-valid").addClass("is-invalid");
 								$(this).closest("tr").find("#invalid-quantity").removeClass("is-valid").addClass("is-invalid");
-								$(this).closest("tr").find("#invalid-quantity").text('Not Enough Quantity Or No Stocks Available!');
+								$(this).closest("tr").find("#invalid-quantity").text('Not enough quantity or no stocks available!');
 						}
 					
 

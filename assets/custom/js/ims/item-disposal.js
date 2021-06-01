@@ -1017,7 +1017,7 @@ $(document).ready(function() {
 					}else{
 						$(this).closest("tr").find("[name=barcode]").removeClass("is-valid").addClass("is-invalid");
 						$(this).closest("tr").find("#invalid-barcode").removeClass("is-valid").addClass("is-invalid");
-						$(this).closest("tr").find("#invalid-barcode").text('No Item Available!');
+						$(this).closest("tr").find("#invalid-barcode").text('No item available!');
 					}
 				}else{
 					$(this).closest("tr").find("[name=barcode]").removeClass("is-valid").addClass("is-invalid");
@@ -1042,7 +1042,7 @@ $(document).ready(function() {
 	
 					$(this).closest("tr").find("[name=barcode]").removeClass("is-valid").addClass("is-invalid");
 					$(this).closest("tr").find("#invalid-barcode").removeClass("is-valid").addClass("is-invalid");
-					$(this).closest("tr").find("#invalid-barcode").text('No Item Available!');
+					$(this).closest("tr").find("#invalid-barcode").text('No item available!');
 			}else{
 					$(this).closest("tr").find("[name=barcode]").removeClass("is-invalid");
 					$(this).closest("tr").find("#invalid-barcode").removeClass("is-invalid");

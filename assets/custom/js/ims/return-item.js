@@ -573,7 +573,7 @@ $(document).ready(function() {
 					// DRAFT
 					button = `
 					<button 
-						class="btn btn-submit" 
+						class="btn btn-submit px-5 p-2" 
 						id="btnSubmit" 
 						returnItemID="${encryptString(returnItemID)}"
 						code="${getFormCode("RI", createdAt, returnItemID)}"
@@ -585,7 +585,7 @@ $(document).ready(function() {
 					if (isRevise) {
 						button += `
 						<button 
-							class="btn btn-cancel" 
+							class="btn btn-cancel px-5 p-2" 
 							id="btnCancel"
 							returnItemID="${encryptString(returnItemID)}"
 							code="${getFormCode("RI", createdAt, returnItemID)}"
@@ -596,7 +596,7 @@ $(document).ready(function() {
 					} else {
 						button += `
 						<button 
-							class="btn btn-cancel"
+							class="btn btn-cancel px-5 p-2"
 							id="btnCancelForm" 
 							returnItemID="${encryptString(returnItemID)}"
 							code="${getFormCode("RI", createdAt, returnItemID)}"
@@ -611,7 +611,7 @@ $(document).ready(function() {
 					if (!isOngoing) {
 						button = `
 						<button 
-							class="btn btn-cancel"
+							class="btn btn-cancel px-5 p-2"
 							id="btnCancelForm" 
 							returnItemID="${encryptString(returnItemID)}"
 							code="${getFormCode("RI", createdAt, returnItemID)}"
@@ -635,7 +635,7 @@ $(document).ready(function() {
 					if (!isDocumentRevised(returnItemID)) {
 					button = `
 					<button
-						class="btn btn-cancel"
+						class="btn btn-cancel px-5 p-2"
 						id="btnRevise" 
 						returnItemID="${encryptString(returnItemID)}"
 						code="${getFormCode("RI", createdAt, returnItemID)}"
@@ -663,14 +663,14 @@ $(document).ready(function() {
 					if (isImCurrentApprover(approversID, approversDate)) {
 						button = `
 						<button 
-							class="btn btn-submit" 
+							class="btn btn-submit px-5 p-2" 
 							id="btnApprove" 
 							returnItemID="${encryptString(returnItemID)}"
 							code="${getFormCode("RI", createdAt, returnItemID)}"><i class="fas fa-paper-plane"></i>
 							Approve
 						</button>
 						<button 
-							class="btn btn-cancel"
+							class="btn btn-cancel px-5 p-2"
 							id="btnReject" 
 							returnItemID="${encryptString(returnItemID)}"
 							code="${getFormCode("RI", createdAt, returnItemID)}"><i class="fas fa-ban"></i> 
@@ -682,11 +682,11 @@ $(document).ready(function() {
 		} else {
 			button = `
 			<button 
-				class="btn btn-submit" 
+				class="btn btn-submit px-5 p-2" 
 				id="btnSubmit"><i class="fas fa-paper-plane"></i> Submit
 			</button>
 			<button 
-				class="btn btn-cancel" 
+				class="btn btn-cancel px-5 p-2" 
 				id="btnCancel"><i class="fas fa-ban"></i> 
 				Cancel
 			</button>`;
@@ -1862,10 +1862,10 @@ $(document).ready(function() {
 			</div>
 		</div>
 		<div class="modal-footer text-right">
-			<button class="btn btn-danger" id="btnRejectConfirmation"
+			<button class="btn btn-danger px-5 p-2" id="btnRejectConfirmation"
 			returnItemID="${encryptString(id)}"
 			code="${feedback}"><i class="far fa-times-circle"></i> Deny</button>
-			<button class="btn btn-cancel" data-dismiss="modal"><i class="fas fa-ban"></i> Cancel</button>
+			<button class="btn btn-cancel px-5 p-2" data-dismiss="modal"><i class="fas fa-ban"></i> Cancel</button>
 		</div>`;
 		$("#modal_return_item_content").html(html);
 	});

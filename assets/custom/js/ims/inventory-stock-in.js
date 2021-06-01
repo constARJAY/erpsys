@@ -51,7 +51,7 @@ $(document).ready(function () {
 			LEFT JOIN ims_inventory_category_tbl 		AS iic 	ON iii.categoryID = iic.categoryID
 			LEFT JOIN ims_inventory_classification_tbl  AS iict ON iii.classificationID = iict.classificationID 
 			LEFT JOIN ims_stock_in_tbl 					AS isi	ON iird.inventoryReceivingID = isi.inventoryReceivingID`,
-				`iird.inventoryReceivingID, iird.itemID,
+				`iird.inventoryReceivingID, iird.itemID, iir.employeeID,
 			iri.itemName,iii.brandName,iic.categoryName,iict.classificationName,
 			iird.received AS quantity,sum(stockInQuantity) AS receivingQuantity,iir.createdAt`, "iird.inventoryReceivingID=" + id);
 			//const tableData = getTableData("ims_received_tbl","","receivedID=" + id);
@@ -518,6 +518,8 @@ $(document).ready(function () {
 				approversDate = "",
 				designationName = "",
 				inventoryReceivingStatus = false,
+				quantity,
+				receivingQuantity,
 				submittedAt = false,
 				createdAt = false,
 		} = data && data[0];
@@ -527,6 +529,15 @@ $(document).ready(function () {
 		// 	let requestItemsData = getTableData(
 		// 		``,``,``);
 		// }
+
+		var formatquantity = parseFloat(quantity).toFixed(2);
+		var formatreceivingQuantity = parseFloat(receivingQuantity).toFixed(2);
+		let statusDisplay = "";
+		if (formatquantity < formatreceivingQuantity || formatquantity == formatreceivingQuantity) {
+			statusDisplay = `<span class="badge badge-outline-warning w-100">Pending</span>`;
+		} else {
+			statusDisplay = `<span class="badge badge-success w-100">Completed</span>`;
+		}
 
 
 		// ----- GET EMPLOYEE DATA -----
@@ -564,7 +575,7 @@ $(document).ready(function () {
 				<div class="card">
 					<div class="body">
 						<small class="text-small text-muted font-weight-bold">Status</small>
-						<h6 class="mt-0 font-weight-bold">${inventoryReceivingStatus ? getStatusStyle(inventoryReceivingStatus) : "---"}</h6>      
+						<h6 class="mt-0 font-weight-bold">${statusDisplay}</h6>      
 					</div>
 				</div>
 			</div>
@@ -590,7 +601,7 @@ $(document).ready(function () {
 						<div class="card">
 							<div class="body">
 								<small class="text-small text-muted font-weight-bold">Position</small>
-								<h6 class="mt-0 font-weight-bold">${designationName}</h6>      
+								<h6 class="mt-0 font-weight-bold">${employeeDesignation}</h6>      
 							</div>
 						</div>
 					</div>
