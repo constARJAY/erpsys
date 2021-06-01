@@ -110,6 +110,7 @@ class Inventory_validation extends CI_Controller {
                             "quantity"              => $item["quantity"],
                             "stocks"                => $item["stocks"],
                             "files"                 => $item["files"],
+                            "brandName"             => $item["brandName"],
                             "forPurchase"           => $item["forPurchase"],
                             "createdBy"             => $createdBy,
                             "updatedBy"             => $item["updatedBy"],

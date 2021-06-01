@@ -111,6 +111,7 @@ class Cost_estimate extends CI_Controller {
                             "travelUnitOfMeasure"   => $item["travelUnitOfMeasure"],
                             "categoryType"          => $item["categoryType"],
                             "quantity"              => $item["quantity"],
+                            "brandName"             => $item["brandName"],
                             "files"                 => array_key_exists("existingFile", $item) ? $item["existingFile"] : null,
                             "createdBy"             => $item["createdBy"],
                             "updatedBy"             => $item["updatedBy"],

@@ -74,6 +74,7 @@ class CostEstimate_model extends CI_Model {
                     "itemName"	 	        => $item["itemName"],
                     "itemDescription"       => $item["itemDescription"],
                     "itemUom"	            => $item["itemUom"],
+                    "brandName"             => $item["brandName"],
                     "categoryType"          => $item["categoryType"],
                     "quantity"              => $item["quantity"],
                     "files"                 => $item["files"],

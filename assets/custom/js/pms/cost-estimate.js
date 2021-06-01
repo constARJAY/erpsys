@@ -133,7 +133,7 @@ $(document).ready(function() {
 	};
 
 	const inventoryItemList = getTableData(
-		"ims_inventory_item_tbl LEFT JOIN ims_inventory_category_tbl USING(categoryID)", "itemID, itemCode, itemName, categoryName, itemDescription, unitOfMeasurementID",
+		"ims_inventory_item_tbl LEFT JOIN ims_inventory_category_tbl USING(categoryID)", "itemID, itemCode, itemName, categoryName, itemDescription, unitOfMeasurementID, brandName",
 		"itemStatus = 1");
 	const designationList = getTableData("hris_designation_tbl JOIN hris_employee_list_tbl USING(designationID)","designationID, designationName, MAX(employeeHourlyRate) as designationRate", "designationStatus=1","","designationName");
 	
@@ -1996,7 +1996,7 @@ $(document).ready(function() {
 			}
 
 			$(".itemTableRow").each(function(i, obj) {
-				var  categoryType,itemID,itemName, itemDescription, itemUom, designationID,designationName,travelDescription,designationTotalHours, travelUom;
+				var  categoryType,itemID,itemName, itemDescription, itemUom, designationID,designationName,travelDescription,designationTotalHours, travelUom, brandName;
 				var fileID, file, fileArr, filename ;
 				if($(this).closest("tbody").attr("project") == "true"){
 					categoryType 	= "project";
@@ -2005,6 +2005,7 @@ $(document).ready(function() {
 					itemName	 	= inventoryItemListArray.length > 0 ? inventoryItemListArray[0].itemName : null;
 					itemDescription = inventoryItemListArray.length > 0 ?inventoryItemListArray[0].itemDescription : null;
 					itemUom			= inventoryItemListArray.length > 0 ?inventoryItemListArray[0].unitOfMeasurementID :null;
+					brandName 		= inventoryItemListArray.length > 0 ?inventoryItemListArray[0].brandName :null;
 					fileID    		= $("td [name=files]", this).attr("id");
 					file      		= $(`#${fileID}`)[0].files[0];
 					fileArr   		= file?.name.split(".");
@@ -2016,6 +2017,7 @@ $(document).ready(function() {
 					itemName	 	= inventoryItemListArray.length > 0 ? inventoryItemListArray[0].itemName : null;
 					itemDescription = inventoryItemListArray.length > 0 ?inventoryItemListArray[0].itemDescription : null;
 					itemUom			= inventoryItemListArray.length > 0 ?inventoryItemListArray[0].unitOfMeasurementID :null;
+					brandName 		= inventoryItemListArray.length > 0 ?inventoryItemListArray[0].brandName :null;
 					fileID    	 	= $("td [name=files]", this).attr("id");
 					file      	 	= $(`#${fileID}`)[0].files[0];
 					fileArr   	 	= file?.name.split(".");
@@ -2035,7 +2037,7 @@ $(document).ready(function() {
 				const quantity  = +$("td [name=quantity]", this).val();	
 				let temp = {
 					itemID, itemName, itemDescription,itemUom,quantity, filename, categoryType,categoryType,
-					designationID,designationName,travelDescription,designationTotalHours, travelUom,
+					designationID,designationName,travelDescription,designationTotalHours, travelUom, brandName
 				};
 				formData.append(`items[${i}][itemID]`, itemID);
 				formData.append(`items[${i}][itemName]`, itemName);
@@ -2047,6 +2049,7 @@ $(document).ready(function() {
 				formData.append(`items[${i}][travelDescription]`, travelDescription);
 				formData.append(`items[${i}][travelUnitOfMeasure]`, travelUom);
 				formData.append(`items[${i}][categoryType]`, categoryType);
+				formData.append(`items[${i}][brandName]`, brandName);
 				formData.append(`items[${i}][quantity]`, quantity);
 				formData.append(`items[${i}][filename]`, filename);
 				formData.append(`items[${i}][createdBy]`, sessionID);

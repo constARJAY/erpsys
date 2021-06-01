@@ -2002,7 +2002,7 @@ $(document).ready(function() {
 								// MAPPING FOR THE ROWSPAN;
 								
 									vendorItemsArr.map((items,index)=>{
-										var tempData = index == 0 && items.forPurchase > 0.00 ? `<td class="font-weight-bold" rowspan="${vendorItemsLength}">
+										var tempData = index == 0 && items.forPurchase > 0.01 ? `<td class="font-weight-bold" rowspan="${vendorItemsLength}">
 																		${items.inventoryVendorName} <br> <small>${getFormCode("VEN", items.createdAt, items.inventoryVendorID)}</small>
 																		</td>` : ``;
 										vendorRowspanArr.push(tempData);
@@ -2012,7 +2012,7 @@ $(document).ready(function() {
 
 								// MAPPING THE ITEMS OF TABLE DATA
 									html += vendorItemsArr.map((joinedItems,joinedIndex)=>{
-										if(joinedItems.forPurchase > 1){		
+										if(joinedItems.forPurchase > 0.01){		
 											var returnData 	= "";
 												var unitCost 	= parseFloat(joinedItems.vendorCurrentPrice);
 												var totalCost 	= parseFloat(joinedItems.forPurchase) * parseFloat(unitCost);

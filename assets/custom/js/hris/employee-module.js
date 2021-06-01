@@ -716,8 +716,8 @@ $(document).ready(function() {
         } = data;
 
         let profile = employeeProfile != null ? employeeProfile : "default.jpg";
-        // const disabledHiredDate = employeeHiredDate ? "disabled" : "";
-        const disabledHiredDate = "";
+        const disabledHiredDate = employeeHiredDate ? "disabled" : "";
+        // const disabledHiredDate = "";
 
         let html = `
         <div class="forms-group">

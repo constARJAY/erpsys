@@ -120,6 +120,7 @@ class Bid_recap extends CI_Controller {
                             "quantity"              => $item["quantity"],
                             "stocks"                => $item["stocks"],
                             "forPurchase"           => $item["forPurchase"],
+                            "brandName"             => $item["brandName"],
                             "files"                 => $item["file"],
                             "unitCost"              => $item["unitCost"],
                             "totalCost"             => $item["totalCost"],

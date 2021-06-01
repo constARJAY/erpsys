@@ -1003,7 +1003,7 @@ $(document).ready(function() {
 				class="form-control input-returnItemQuantity returnItemQuantity input-quantity text-center"
 				min="0.01" 
 				data-allowcharacters="[0-9]" 
-				max="999999999" 
+				max="${quantity}" 
 				id="returnItemQuantity${index}" 
 				name="returnItemQuantity"
 				count="${index}" 
@@ -1079,7 +1079,7 @@ $(document).ready(function() {
 		}else{
 			$(`#returnItemQuantity${number}`).removeClass("is-valid").addClass("is-invalid");
 			$(this).closest("tr").find(`#invalid-returnItemQuantity${number}`).addClass("is-invalid");
-			$(`#invalid-returnItemQuantity${number}`).html("Not Equal Order Quantity");
+			$(`#invalid-returnItemQuantity${number}`).html("Not equal order quantity");
 		}
 
 	});	
