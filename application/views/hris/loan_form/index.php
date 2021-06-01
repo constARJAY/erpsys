@@ -12,10 +12,7 @@
                     <span>This module is used to manage the submission and approval of loan requests.</span>
 				</div>
 				<div class="col-lg-6 col-md-12 text-md-right">
-						<?php if(isCreateAllowed(59)){ ?>
-							<div class="text-right" id="headerButton"></div>
-						<?php  } ?>
-               
+                <div class="text-right" id="headerButton"></div>
                     </ul>
 				</div>
 			</div>
@@ -50,6 +47,23 @@
 	</div>
 </div>
 <!-- ----- END MODAL ----- -->
+
+<!-- ----- AMMORTIZATION MODAL ----- -->
+<div id="modal_ammortization" class="modal custom-modal fade" data-backdrop="static" data-keyboard="false" role="dialog">
+    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+		<div class="modal-content">
+			<div class="modal-header bg-primary text-light">
+				<h6 class="page-title font-weight-bold">Loan Amortization Schedule</h6>
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span class="text-light" aria-hidden="true">&times;</span>
+				</button>
+			</div>
+
+            <div id="modal_ammortization_content"></div>
+        </div>
+	</div>
+</div>
+<!-- ----- END AMMORTIZATION MODAL ----- -->
 
 
 <script src="<?= base_url('assets/custom/js/gen/approver-function.js') ?>"></script>

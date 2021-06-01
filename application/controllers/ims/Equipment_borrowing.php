@@ -106,7 +106,6 @@ class Equipment_borrowing extends CI_Controller {
                                     "itemName"                          => $item["itemName"],
                                     "inventoryStorageID"                => $item["inventoryStorageID"],
                                     "serialnumber"                      => $item["serialnumber"],
-                                    "borrowedPurpose"                   => $item["borrowedPurpose"],
                                     "dateBorrowed"                      => $item["dateBorrowed"],
                                     "quantity"                          => $item["quantity"],
                                     "unitOfMeasurement"                 => $item["unitofmeasurement"],

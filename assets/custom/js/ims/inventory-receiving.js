@@ -160,12 +160,13 @@ $(document).ready(function() {
 					{ targets: 0,  width: 100 },
 					{ targets: 1,  width: 150 },
 					{ targets: 2,  width: 100 },
-					{ targets: 3,  width: 150 },
-					{ targets: 4,  width: 200 },
+					{ targets: 3,  width: 250 },
+					{ targets: 4,  width: 150 },
 					{ targets: 5,  width: 200 },
 					{ targets: 6,  width: 200 },
-					{ targets: 7,  width: 80  },
-					{ targets: 8, width: 250  },
+					{ targets: 7,  width: 200 },
+					{ targets: 8,  width: 80  },
+					{ targets: 9, width: 250  },
 				],
 			});
 
@@ -182,12 +183,13 @@ $(document).ready(function() {
 					{ targets: 0,  width: 100 },
 					{ targets: 1,  width: 150 },
 					{ targets: 2,  width: 100 },
-					{ targets: 3,  width: 150 },
-					{ targets: 4,  width: 200 },
+					{ targets: 3,  width: 250 },
+					{ targets: 4,  width: 150 },
 					{ targets: 5,  width: 200 },
 					{ targets: 6,  width: 200 },
-					{ targets: 7,  width: 80  },
-					{ targets: 8, width: 250  },
+					{ targets: 7,  width: 200 },
+					{ targets: 8,  width: 80  },
+					{ targets: 9, width: 250  },
 				],
 			});
 
@@ -301,6 +303,7 @@ $(document).ready(function() {
                     <th>Document No.</th>
                     <th>Employee Name</th>
                     <th>Reference No.</th>
+                    <th>Description</th>
                     <th>Current Approver</th>
                     <th>Date Created</th>
                     <th>Date Submitted</th>
@@ -322,6 +325,7 @@ $(document).ready(function() {
 				approversDate,
 				inventoryReceivingStatus,
 				inventoryReceivingRemarks,
+				inventoryReceivingReason,
 				submittedAt,
 				createdAt
 			} = item;
@@ -349,6 +353,7 @@ $(document).ready(function() {
 					<td>${getFormCode("INRR", createdAt, inventoryReceivingID)}</td>
 					<td>${fullname}</td>
 					<td>${getFormCode("PO", dateCreatedPO, purchaseOrderID)}</td>
+					<td>${inventoryReceivingReason}</td>
 					<td>
 						${employeeFullname(getCurrentApprover(approversID, approversDate, inventoryReceivingStatus, true))}
 					</td>
@@ -395,6 +400,7 @@ $(document).ready(function() {
                     <th>Document No.</th>
                     <th>Employee Name</th>
                     <th>Reference No.</th>
+                    <th>Description</th>
                     <th>Current Approver</th>
                     <th>Date Created</th>
                     <th>Date Submitted</th>
@@ -416,6 +422,7 @@ $(document).ready(function() {
 				approversDate,
 				inventoryReceivingStatus,
 				inventoryReceivingRemarks,
+				inventoryReceivingReason,
 				submittedAt,
 			} = item;
 
@@ -441,6 +448,7 @@ $(document).ready(function() {
                 <td>${getFormCode("INRR", dateCreatedIR, inventoryReceivingID)}</td>
                 <td>${fullname}</td>
                 <td>${getFormCode("PO", dateCreatedPO, purchaseOrderID)}</td>
+				<td>${inventoryReceivingReason}</td>
                 <td>
                     ${employeeFullname(getCurrentApprover(approversID, approversDate, inventoryReceivingStatus, true))}
                 </td>
@@ -622,7 +630,7 @@ $(document).ready(function() {
 					iir.inventoryReceivingStatus != 4 AND 
 					iir.inventoryReceivingStatus != 5) OR 
 					(iir.inventoryReceivingStatus IS NULL))) AND 
-					(irit.orderedPending IS NULL OR irit.orderedPending != 0) `;
+					(irit.orderedPending IS NULL OR irit.orderedPending > 0) `;
 		}
 		else{
 			attached ="";
@@ -738,7 +746,7 @@ $(document).ready(function() {
 					
 						$(this).closest("tr").find("[name=serialNumber]").removeClass("is-valid").addClass("is-invalid");
 						$(this).closest("tr").find(".invalid-feedback").removeClass("is-valid").addClass("is-invalid");
-						$(this).closest("tr").find(".invalid-feedback").text('Serial '+serialval+' already declared!');
+						$(this).closest("tr").find(".invalid-feedback").text('Data already exist!');
 						return false;
 					}else{
 				
@@ -1045,6 +1053,7 @@ $(document).ready(function() {
 			purchaseOrderID               = "",
 			receiptNo               = "",
 			dateReceived               = "",
+			inventoryReceivingReason ="",
 			inventoryReceivingRemarks  = "",
 			approversID             = "",
 			approversStatus         = "",
@@ -1236,6 +1245,22 @@ $(document).ready(function() {
                 <div class="form-group">
                     <label>Position</label>
                     <input type="text" class="form-control" disabled value="${employeeDesignation}">
+                </div>
+            </div>
+			<div class="col-md-12 col-sm-12">
+                <div class="form-group">
+                    <label>Description ${!disabled ? "<code>*</code>" : ""}</label>
+                    <textarea class="form-control validate"
+                        data-allowcharacters="[a-z][A-Z][0-9][ ][.][,][-][()]['][/][&]"
+                        minlength="1"
+                        maxlength="200"
+                        id="inventoryReceivingReason"
+                        name="inventoryReceivingReason"
+                        required
+                        rows="4"
+                        style="resize:none;"
+						${disabled}>${inventoryReceivingReason ?? ""}</textarea>
+                    <div class="d-block invalid-feedback" id="invalid-inventoryReceivingReason"></div>
                 </div>
             </div>
             <div class="col-sm-12">

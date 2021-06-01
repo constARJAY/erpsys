@@ -193,12 +193,13 @@ $(document).ready(function() {
 				columnDefs: [
 					{ targets: 0,  width: 100 },
 					{ targets: 1,  width: 150 },
-					{ targets: 2,  width: 150 },
-					{ targets: 3,  width: 180 },
+					{ targets: 2,  width: 250 },
+					{ targets: 3,  width: 150 },
 					{ targets: 4,  width: 180 },
 					{ targets: 5,  width: 180 },
-					{ targets: 6,  width: 80  },
-					// { targets: 7, width: 300 },
+					{ targets: 6,  width: 180 },
+					{ targets: 7,  width: 80  },
+					{ targets: 8, width: 250 },
 				],
 			});
 
@@ -214,12 +215,13 @@ $(document).ready(function() {
 				columnDefs: [
 					{ targets: 0,  width: 100 },
 					{ targets: 1,  width: 150 },
-					{ targets: 2,  width: 150 },
-					{ targets: 3,  width: 180 },
+					{ targets: 2,  width: 250 },
+					{ targets: 3,  width: 150 },
 					{ targets: 4,  width: 180 },
 					{ targets: 5,  width: 180 },
-					{ targets: 6,  width: 80  },
-					// { targets: 7, width: 300 },
+					{ targets: 6,  width: 180 },
+					{ targets: 7,  width: 80  },
+					{ targets: 8, width: 250 },
 				],
 			});
 
@@ -344,6 +346,7 @@ $(document).ready(function() {
                 <tr style="white-space: nowrap">
 					<th>Document No.</th>
 					<th>Prepared By</th>
+					<th>Description</th>
 					<th>Current Approver</th>
 					<th>Date Created</th>
 					<th>Date Submitted</th>
@@ -359,8 +362,7 @@ $(document).ready(function() {
 				fullname,
 				incidentID,
 				projectID,
-		
-			
+				incidentReason,
 				approversID,
 				approversDate,
 				incidentStatus,
@@ -391,6 +393,7 @@ $(document).ready(function() {
 				<tr class="${btnClass}" id="${encryptString(incidentID)}">
 					<td>${getFormCode("IR", createdAt, incidentID)}</td>
 					<td>${fullname}</td>
+					<td>${incidentReason}</td>
 					<td>
 						${employeeFullname(getCurrentApprover(approversID, approversDate, incidentStatus, true))}
 					</td>
@@ -434,6 +437,7 @@ $(document).ready(function() {
                 <tr style="white-space: nowrap">
 					<th>Document No.</th>
 					<th>Prepared By</th>
+					<th>Description</th>
 					<th>Current Approver</th>
 					<th>Date Created</th>
 					<th>Date Submitted</th>
@@ -449,7 +453,7 @@ $(document).ready(function() {
 				fullname,
 				incidentID,
                 projectID,
-               
+				incidentReason,
 				approversID,
 				approversDate,
 				incidentStatus,
@@ -479,7 +483,7 @@ $(document).ready(function() {
             <tr class="${btnClass}" id="${encryptString(incidentID)}">
                 <td>${getFormCode("IR", createdAt, incidentID)}</td>
                 <td>${fullname}</td>
-               
+				<td>${incidentReason}</td>
                 <td>
                     ${employeeFullname(getCurrentApprover(approversID, approversDate, incidentStatus, true))}
                 </td>
@@ -1426,6 +1430,7 @@ $(document).ready(function() {
 			incidentActionPlan           = "",
 			incidentEmployeeID    = "",
 			incidentTargetCompletion    = "",
+			incidentReason	="",
 			incidentStatus   = false,
 			incidentRemarks   = false,
 			submittedAt             = false,
@@ -1641,6 +1646,22 @@ $(document).ready(function() {
                     <div class="d-block invalid-feedback" id="invalid-incidentTargetCompletion"></div>
                 </div>
             </div>
+			<div class="col-md-12 col-sm-12">
+			<div class="form-group">
+				<label>Description ${!disabled ? "<code>*</code>" : ""}</label>
+				<textarea class="form-control validate"
+					data-allowcharacters="[a-z][A-Z][0-9][ ][.][,][-][()]['][/][&]"
+					minlength="1"
+					maxlength="200"
+					id="incidentReason"
+					name="incidentReason"
+					required
+					rows="4"
+					style="resize:none;"
+					${disabled}>${incidentReason ?? ""}</textarea>
+				<div class="d-block invalid-feedback" id="invalid-incidentReason"></div>
+			</div>
+		</div>
 
             <div class="col-sm-12">
                 <div class="w-100">

@@ -153,6 +153,11 @@ const dateToday = () => {
 
 // ----- DATATABLES -----
 function initDataTables() {
+
+	if ($.fn.DataTable.isDataTable("#tableAmmortization")) {
+		$("#tableAmmortization").DataTable().destroy();
+	}
+	 
 	if ($.fn.DataTable.isDataTable("#tableForApprroval")) {
 		$("#tableForApprroval").DataTable().destroy();
 	}
@@ -160,6 +165,8 @@ function initDataTables() {
 	if ($.fn.DataTable.isDataTable("#tableMyForms")) {
 		$("#tableMyForms").DataTable().destroy();
 	}
+
+	
 
 	var table = $("#tableForApprroval")
 		.css({ "min-width": "100%" })
@@ -200,6 +207,24 @@ function initDataTables() {
 				{ targets: 5, width: 200 },
 				{ targets: 6, width: 80  },
 				{ targets: 7, width: 250 },
+			],
+		});
+
+		var table = $("#tableAmmortization")
+		.css({ "min-width": "100%" })
+		.removeAttr("width")
+		.DataTable({
+			proccessing: false,
+			serverSide: false,
+			scrollX: true,
+			sorting: [],
+			scrollCollapse: true,
+			columnDefs: [
+				{ targets: 0, width: 10 },
+				{ targets: 1, width: 100 },
+				{ targets: 2, width: 100 },
+				{ targets: 3, width: 50 },
+				
 			],
 		});
 }
@@ -258,7 +283,7 @@ function forApprovalContent() {
 	);
 
 	let html = `
-	<table class="table table-bordered table-striped table-hover" id="tableForApprroval">
+	<table class="table  table-bordered table-striped table-hover" id="tableForApprroval">
 		<thead>
 			<tr style="white-space: nowrap">
 				<th>Document No.</th>
@@ -383,19 +408,14 @@ function myFormsContent() {
 
 		let btnClass = loanFormStatus != 0 ? "btnView" : "btnEdit";
 
-		let button =
-			loanFormStatus != 0
-				? `
-		<button class="btn btn-view w-100 btnView" id="${encryptString(loanFormID)}"><i class="fas fa-eye"></i> View</button>`
-				: `
-		<button 
-			class="btn btn-edit w-100 btnEdit" 
-			id="${encryptString(loanFormID)}" 
-			code="${getFormCode("LNF", dateCreated, loanFormID)}"><i class="fas fa-edit"></i> Edit</button>`;
+		let fullnameBtn =
+			loanFormStatus == 2
+				? ` <button class="ammortization_link text-danger btn btn-primary-outline p-0"><b>${fullname}</b></button>`
+				: fullname;
 		html += `
 		<tr class="${btnClass}" id="${encryptString(loanFormID)}">
 			<td>${getFormCode("LNF", dateCreated, loanFormID)}</td>
-			<td>${fullname}</td>
+			<td>${fullnameBtn}</td>
 			<td>
 				${employeeFullname(getCurrentApprover(approversID, approversDate, loanFormStatus, true))}
 			</td>
@@ -1079,7 +1099,8 @@ $(document).on("click", "#btnBack", function () {
 
 
 // ----- OPEN EDIT MODAL -----
-$(document).on("click", ".btnEdit", function () {
+$(document).on("click", ".btnEdit", function (e) {
+	e.stopPropagation();
 	const id = $(this).attr("id");
 	// const tableData = getTableData("hris_loan_form_tbl", "", "loanFormID=" + id);
 	// pageContent(true, tableData);
@@ -1089,7 +1110,8 @@ $(document).on("click", ".btnEdit", function () {
 
 
 // ----- VIEW DOCUMENT -----
-$(document).on("click", ".btnView", function () {
+$(document).on("click", ".btnView", function (e) {
+	e.stopPropagation();
 	const id = $(this).attr("id");
 	// const tableData = getTableData("hris_loan_form_tbl", "", "loanFormID=" + id);
 	// pageContent(true, tableData, true);
@@ -1551,14 +1573,16 @@ var loanAmount = parseFloat($("#input_loanFormAmount").val().replaceAll(",",""))
 var loanType = $("#loanFormLoanID").val();
 var loanTermPayment = $("#loanFormTermPayment").val();
 // var loanNoOfDays = $("#loanFormNoOfDays").val();
-var loanInterest = $("#loanFormInterest").val();
+var tmp_loanInterest = $("#loanFormInterest").val() || 0;
+var loanInterest = tmp_loanInterest/100;
 
 
 	let thisValue       =   $("#loanFormDate").val();
 	let thisValueSplit  =   thisValue.split(" - ");
 	let fromDate        =  new Date(thisValueSplit[0]); 	
 	let toDate          =  new Date(thisValueSplit[1]);
-	loanNoOfDays    =  Math.round((toDate-fromDate)/(1000*60*60*24));
+	loanNoOfDays    =  Math.round(moment(toDate).diff(moment(fromDate), 'months', true)) || 0;
+	console.log(loanNoOfDays)
 
 
 
@@ -1568,7 +1592,7 @@ if(loanType == null || loanTermPayment == null || loanNoOfDays == 0 || loanInter
 }else{
 
 
-	var computeDeductionAmount = ((loanAmount*loanInterest)+loanAmount) /loanNoOfDays/loanTermPayment;
+	var computeDeductionAmount = (((loanAmount*loanInterest)+loanAmount) /loanNoOfDays)/loanTermPayment;
 
 	$("#input_loanFormDeductionAmount").val(computeDeductionAmount);
 
@@ -1632,4 +1656,111 @@ $('#loanFormDate').daterangepicker({
 	  'Annual': [moment(), moment().add(1, 'years')]
 	}
 });
+
+
+
+// ----- AMMORTIZATION MODAL -----
+$(document).on("click", ".ammortization_link", function (e) {
+	e.stopImmediatePropagation();
+	// const id       = $(this).attr("loanFormID");
+	// const feedback = $(this).attr("code") || getFormCode("LNF", dateToday(), id);
+
+	$("#modal_ammortization_content").html(preloader);
+	$("#modal_ammortization .page-title").text(
+		"Loan Amortization Schedule"
+	);
+	$("#modal_ammortization").modal("show");
+	// let html = `
+	// <div class="modal-body">
+	// 	<div class="form-group">
+	// 		<label>Remarks <code>*</code></label>
+	// 		<textarea class="form-control validate"
+	// 			data-allowcharacters="[0-9][a-z][A-Z][ ][.][,][_]['][()][?][-][/]"
+	// 			minlength="2"
+	// 			maxlength="250"
+	// 			id="loanFormRemarks"
+	// 			name="loanFormRemarks"
+	// 			rows="4"
+	// 			style="resize: none"
+	// 			required></textarea>
+	// 		<div class="d-block invalid-feedback" id="invalid-loanFormRemarks"></div>
+	// 	</div>
+	// </div>
+	// `;
+	// $("#modal_ammortization_content").html(html);
+	ammortizationContent();
+});
+
+// ----- MY FORMS CONTENT -----
+function ammortizationContent() {
+	$("#modal_ammortization_content").html(preloader);
+	let scheduleData = getTableData(
+		"hris_loan_form_tbl LEFT JOIN hris_employee_list_tbl USING(employeeID)",
+		"hris_loan_form_tbl.*, CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname, hris_loan_form_tbl.createdAt AS dateCreated",
+		`hris_loan_form_tbl.employeeID = ${sessionID}`,
+		`FIELD(loanFormStatus, 0, 1, 3, 2, 4, 5), COALESCE(hris_loan_form_tbl.submittedAt, hris_loan_form_tbl.createdAt)`
+	);
+
+	let html = `
+	<table class="table table-bordered table-striped table-hover pr-2 pl-2" id="tableAmmortization">
+		<thead>
+			<tr style="white-space: nowrap">
+				<th>#</th>
+				<th>Deduction Date</th>
+				<th>Amount</th>
+				<th>Status</th>
+			</tr>
+		</thead>
+		<tbody>`;
+
+	scheduleData.map((item) => {
+		let {
+			fullname,
+			loanFormID,
+			loanFormDate,
+			approversID,
+			approversDate,
+			loanFormStatus,
+			loanFormRemarks,
+			submittedAt,
+			createdAt,
+		} = item;
+
+
+		let remarks       = loanFormRemarks ? loanFormRemarks : "-";
+		let dateCreated   = moment(createdAt).format("MMMM DD, YYYY hh:mm:ss A");
+		let dateSubmitted = submittedAt ? moment(submittedAt).format("MMMM DD, YYYY hh:mm:ss A") : "-";
+		let dateApproved  = loanFormStatus == 2 || loanFormStatus == 5 ? approversDate.split("|") : "-";
+		if (dateApproved !== "-") {
+			dateApproved = moment(dateApproved[dateApproved.length - 1]).format("MMMM DD, YYYY hh:mm:ss A");
+		}
+		let status ='';
+		if(loanFormStatus == 1){
+			status =`<span class="badge badge-info w-100">Paid</span>` ;
+		}else{
+			status=`<span class="badge badge-danger w-100">Unpaid</span>`;
+		}	
+
+		html += `
+		<tr>
+			<td>1</td>
+			<td>Oct 15, 2020</td>
+			<td>278.1700</td>
+			<td>${status}</td>
+			
+		</tr>`;
+	});
+
+	html += `
+		</tbody>
+	</table>`;
+
+	setTimeout(() => {
+		$("#modal_ammortization_content").html(html);
+		// initDataTables();
+		return html;
+	}, 300);
+}
+// ----- END MY FORMS CONTENT -----
+
 }

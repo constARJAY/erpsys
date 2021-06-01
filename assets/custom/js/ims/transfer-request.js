@@ -175,12 +175,13 @@ $(document).ready(function() {
 					{ targets: 1,  width: 150 },
 					{ targets: 2,  width: 150 },
 					{ targets: 3,  width: 150 },
-					{ targets: 4,  width: 150 },
-					{ targets: 5,  width: 180 },
+					{ targets: 4, width: 250 },	
+					{ targets: 5,  width: 150 },
 					{ targets: 6,  width: 180 },
 					{ targets: 7,  width: 180 },
-					{ targets: 8,  width: 80  },
-					{ targets: 9, width: 250 },
+					{ targets: 8,  width: 180 },
+					{ targets: 9,  width: 80  },
+					{ targets: 10, width: 250 }
 				],
 			});
 
@@ -198,12 +199,13 @@ $(document).ready(function() {
 					{ targets: 1,  width: 150 },
 					{ targets: 2,  width: 150 },
 					{ targets: 3,  width: 150 },
-					{ targets: 4,  width: 150 },
-					{ targets: 5,  width: 180 },
+					{ targets: 4, width: 250 },	
+					{ targets: 5,  width: 150 },
 					{ targets: 6,  width: 180 },
 					{ targets: 7,  width: 180 },
-					{ targets: 8,  width: 80  },
-					{ targets: 9, width: 250 },
+					{ targets: 8,  width: 180 },
+					{ targets: 9,  width: 80  },
+					{ targets: 10, width: 250 }
 				],
 			});
 
@@ -316,6 +318,7 @@ $(document).ready(function() {
 					<th>Prepared By</th>
 					<th>Storage Name(Sender)</th>
 					<th>Storage Name(Receiver)</th>
+					<th>Description</th>
 					<th>Current Approver</th>
 					<th>Date Created</th>
 					<th>Date Submitted</th>
@@ -335,7 +338,7 @@ $(document).ready(function() {
                 inventoryStorageOfficeName1,
 				inventoryStorageCode2,
                 inventoryStorageOfficeName2,
-			
+				transferRequestReason,
 				approversID,
 				approversDate,
 				transferRequestStatus,
@@ -378,6 +381,7 @@ $(document).ready(function() {
 						</div>
 						<small style="color:#848482;">${inventoryStorageCode2 || '-'}</small>
 					</td>
+					<td>${transferRequestReason}</td>
 					<td>
 						${employeeFullname(getCurrentApprover(approversID, approversDate, transferRequestStatus, true))}
 					</td>
@@ -423,6 +427,7 @@ $(document).ready(function() {
 				<th>Prepared By</th>
 				<th>Storage Name(Sender)</th>
 				<th>Storage Name(Receiver)</th>
+				<th>Description</th>
 				<th>Current Approver</th>
 				<th>Date Created</th>
 				<th>Date Submitted</th>
@@ -442,7 +447,7 @@ $(document).ready(function() {
                 inventoryStorageOfficeName1,
 				inventoryStorageCode2,
                 inventoryStorageOfficeName2,
-               
+				transferRequestReason,
 				approversID,
 				approversDate,
 				transferRequestStatus,
@@ -484,7 +489,7 @@ $(document).ready(function() {
 					</div>
 					<small style="color:#848482;">${inventoryStorageCode2 || '-'}</small>
 				</td>
-               
+				<td>${transferRequestReason}</td>
                 <td>
                     ${employeeFullname(getCurrentApprover(approversID, approversDate, transferRequestStatus, true))}
                 </td>

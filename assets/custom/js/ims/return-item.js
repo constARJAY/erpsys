@@ -436,16 +436,16 @@ $(document).ready(function() {
         setTimeout(() => {
 			$(".itemProjectTableBody").html(itemProjectTableBody);
 
-			initDateRangePicker(".returnItemDate", {
-				autoUpdateInput: false,
-				singleDatePicker: true,
-				showDropdowns: true,
-				autoApply: true,
-				locale: {
-					format: "MMMM DD, YYYY",
-				},
+			// initDateRangePicker(".returnItemDate", {
+			// 	autoUpdateInput: false,
+			// 	singleDatePicker: true,
+			// 	showDropdowns: true,
+			// 	autoApply: true,
+			// 	locale: {
+			// 		format: "MMMM DD, YYYY",
+			// 	},
 			
-			})
+			// })
 			datevalidated();
 		
 			// initDataTables();
@@ -1027,24 +1027,21 @@ $(document).ready(function() {
     }
 
 	function datevalidated() {
-		//alert("1");
-		$(".returnItemDate").each(function () {
-			const id = $(this).attr("id");
-			//alert(id);
-			const today = $(this).attr("dateBorrowed");
-			//alert(today);
-			$(`#${id}`).attr('min', today);
-			initDateRangePicker(`#${id}`, {
-				autoUpdateInput: false,
+		$(".returnItemDate").each(function() {
+			const elementID    = $(this).attr("id");
+			const dateBorrowed = `#${$(this).attr("dateBorrowed")}`;
+			const minDateOptions = {
+				autoUpdateInput:  false,
 				singleDatePicker: true,
-				showDropdowns: true,
-				autoApply: true,
+				showDropdowns:    true,
+				autoApply:        true,
 				locale: {
 					format: "MMMM DD, YYYY",
 				},
-				minDate: moment()
-			})
-		}) 
+				minDate: moment(dateBorrowed).format("MMMM DD, YYYY"),
+			}
+			initDateRangePicker(elementID, minDateOptions);
+		})
 	}	
 //	$(document).on("change", "[name=returnItemDate]", function() {
 		// const id 	= $(this).attr("id");
@@ -1399,8 +1396,8 @@ $(document).ready(function() {
 								<th>Date Borrowed</th>
 								<th>Quantity</th>
 								<th>UOM</th>
-								<th>Date Returned <strong class="text-danger">*</strong></th>
-								<th>Quantity <strong class="text-danger">*</strong></th>
+								<th>Date Returned <code>*</code></th>
+								<th>Quantity <code>*</code></th>
                             </tr>
                         </thead>
                         <tbody class="itemProjectTableBody" project="true">
@@ -1427,6 +1424,7 @@ $(document).ready(function() {
 			updateInventoryItemOptions();
 			projectID && projectID != 0 && $("[name=projectID]").trigger("change");
 			borrowingID && borrowingID != 0 && $("[name=borrowingID]").trigger("change");
+
 			if (!allowedUpdate) {
 				$("#page_content").find(`input, select, textarea`).each(function() {
 					if (this.type != "search") {
