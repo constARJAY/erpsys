@@ -297,8 +297,8 @@ $(document).ready(function(){
                         value="" 
                         ${data && itemSize == "N/A" && "selected"} > N/A</option>
                     <option 
-                        value="ExtraSmall" 
-                        ${data && itemSize == "ExtraSmall" && "selected"} > ExtraSmall</option>
+                        value="Extra Small" 
+                        ${data && itemSize == "Extra Small" && "selected"} > Extra Small</option>
                     <option 
                         value="Small" 
                         ${data && itemSize == "Small" && "selected"} >Small</option>

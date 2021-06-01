@@ -52,7 +52,6 @@ function isDocumentRevised(id = null) {
 
 // ----- VIEW DOCUMENT -----
 function viewDocument(view_id = false, readOnly = false, isRevise = false, isFromCancelledDocument = false) {
-	
 	const loadData = (id, isRevise = false, isFromCancelledDocument = false) => {
 		const tableData = getTableData("hris_loan_form_tbl", "", "loanFormID=" + id);
 
@@ -485,6 +484,7 @@ function formButtons(data = false, isRevise = false, isFromCancelledDocument = f
 					<button 
 						class="btn btn-cancel px-5 p-2" 
 						id="btnCancel"
+						loanFormID="${encryptString(loanFormID)}"
 						revise="${isRevise}"
 						cancel="${isFromCancelledDocument}"><i class="fas fa-ban"></i> 
 						Cancel
@@ -625,6 +625,7 @@ function formContent(data = false, readOnly = false, isRevise = false, isFromCan
 	readOnly ? preventRefresh(false) : preventRefresh(true);
 
 	$("#btnBack").attr("loanFormID", loanFormID);
+	$("#btnBack").attr("code", getFormCode("LNF", moment(createdAt), loanFormID));
 	$("#btnBack").attr("status", loanFormStatus);
 	$("#btnBack").attr("employeeID", employeeID);
 	$("#btnBack").attr("cancel", isFromCancelledDocument);
@@ -744,7 +745,7 @@ function formContent(data = false, readOnly = false, isRevise = false, isFromCan
 		</div>
 		<div class="col-md-3 col-sm-12">
 			<div class="form-group">
-				<label>Loan Type <code>*</code></label>
+				<label>Loan Type ${!disabled ? "<code>*</code>" : ""}</label>
 				<select class="form-control select2 text-left" required id="loanFormLoanID" name="loanID" ${disabled}>
 					${optionLoanType}
 				</select>
@@ -753,7 +754,7 @@ function formContent(data = false, readOnly = false, isRevise = false, isFromCan
 		</div>
 		<div class="col-md-3 col-sm-12">
 			<div class="form-group">
-				<label>Term of Payment <code>*</code></label>
+				<label>Term of Payment ${!disabled ? "<code>*</code>" : ""}</label>
 				<select class="form-control select2 text-left" required id="loanFormTermPayment" name="loanFormTermPayment" ${disabled}>
 					${optionLoanFormTermPayment}
 				</select>
@@ -762,7 +763,7 @@ function formContent(data = false, readOnly = false, isRevise = false, isFromCan
 		</div>
 		<div class="col-md-3 col-sm-12">
 			<div class="form-group">
-				<label>Start Date - End Date <code>*</code></label>
+				<label>Start Date - End Date ${!disabled ? "<code>*</code>" : ""}</label>
 				<input type="button" class="form-control validate text-left" required id="loanFormDate"
 						name="loanFormDate" value="${loanFormDate && loanFormDate}"
 						 title="Date" ${disabled}>
@@ -771,7 +772,7 @@ function formContent(data = false, readOnly = false, isRevise = false, isFromCan
 		</div>
 		<div class="col-md-3 col-sm-12">
 			<div class="form-group">
-				<label>Interest (%) <code>*</code></label>
+				<label>Interest (%) ${!disabled ? "<code>*</code>" : ""}</label>
 				<input type="text" class="form-control validate " name="loanFormInterest" 
 				id="loanFormInterest" data-allowcharacters="[0-9][.]" minlength="1" 
 				maxlength="50" required  value="${loanFormInterest}" autocomplete="off"  ${disabled}>
@@ -779,7 +780,7 @@ function formContent(data = false, readOnly = false, isRevise = false, isFromCan
 			</div>
 		</div>
 		<div class="col-md-6 col-sm-12">
-		<label>Loan Amount <code>*</code></label>
+		<label>Loan Amount ${!disabled ? "<code>*</code>" : ""}</label>
 			<div class="input-group">
 				<div class="input-group-prepend">
 					<span class="input-group-text">₱</span>
@@ -790,7 +791,7 @@ function formContent(data = false, readOnly = false, isRevise = false, isFromCan
 			</div>
 		</div>
 		<div class="col-md-6 col-sm-12">
-		<label>Loan Deduction Amount <code>*</code></label>
+		<label>Loan Deduction Amount ${!disabled ? "<code>*</code>" : ""}</label>
 			<div class="input-group">
 				<div class="input-group-prepend">
 					<span class="input-group-text">₱</span>
@@ -1017,22 +1018,22 @@ $(document).on("click", "#btnBack", function () {
             const action = revise && !isFromCancelledDocument && "insert" || (id ? "update" : "insert");
             const data     = getData(action, 0, "save", feedback, id);
             // data.append("loanFormStatus", 0);
-
+			data[`tableData[loanFormStatus]`] = 0;
             if (!isFromCancelledDocument) {
                 // data.append("reviseLoanFormID", id);
                 // data.delete("loanFormID");
 
-				data["tableData"]["reviseLoanFormID"] = id;
 				delete data["tableData"].loanFormID;
+				data["tableData"]["reviseLoanFormID"] = id;
 		
             } else {
 				// data.append("loanFormID", id);
                 // data.delete("action");
                 // data.append("action", "update");
 
-				data["tableData"]["loanFormID"] = id;
-				delete data["tableData"].action;
-				data["tableData"]["action"] = "update";
+				delete data[`action`];
+				data[`tableData[loanFormID]`] = id;
+				data[`action`] = "update";
 
             }
 
@@ -1132,7 +1133,7 @@ $(document).on("click", "#btnRevise", function () {
 
 // ----- SAVE DOCUMENT -----
 $(document).on("click", "#btnSave", function () {
-	
+	const id       = decryptString($(this).attr("loanFormID"));
     const isFromCancelledDocument = $(this).attr("cancel") == "true";
     const revise   = $(this).attr("revise") == "true";
     const action   = revise && !isFromCancelledDocument && "insert" || (id && feedback ? "update" : "insert");
@@ -1144,17 +1145,19 @@ $(document).on("click", "#btnSave", function () {
             // data.append("reviseLoanFormID", id);
             // data.delete("loanFormID");
 
-			data["tableData"]["reviseLoanFormID"] = id;
-			delete data["tableData"].loanFormID;
+			data[`tableData[reviseLoanFormID]`] = id;
+			data[`whereFilter`] = `loanFormID = ${id}`;
+			delete data[`tableData[loanFormID]`];
 
         } else {
             // data.append("loanFormID", id);
             // data.delete("action");
             // data.append("action", "update");
 
-			data["tableData"]["loanFormID"] = id;
-			delete data["tableData"].action;
-			data["tableData"]["action"] = "update";
+			data[`tableData[loanFormID]`] = id;
+			data[`whereFilter`] = `loanFormID = ${id}`;
+			delete data[`action`];
+			data[`action`] = "update";
         }
     }
 
@@ -1201,7 +1204,13 @@ $(document).on("click", "#btnSubmit", function () {
 
 				data["tableData"]["reviseLoanFormID"] = id;
 				delete data["tableData"].loanFormID;
-            }
+
+				data[`tableData[reviseLoanFormID]`] = id;
+				delete data[`tableData[loanFormID]`];
+				data["feedback"] = `LNF-${moment("YY")}-00000`;
+            }else {
+				data[`whereFilter`] = `loanFormID = ${id}`;
+			}
         }
 
         // let approversID = "", approversDate = "";
@@ -1325,22 +1334,24 @@ $(document).on("click", "#btnCancel", function () {
 
 	const data     = getData(action, 0, "save", feedback, id);
     // data.append("loanFormStatus", 0);
-
+	data[`tableData[loanFormStatus]`] = 0;
     if (revise) {
         if (!isFromCancelledDocument) {
             // data.append("reviseLoanFormID", id);
             // data.delete("loanFormID");
 
-			data["tableData"]["reviseLoanFormID"] = id;
-			delete data["tableData"].loanFormID;
+			data[`tableData[reviseLoanFormID]`] = id;
+			data[`whereFilter`] = `loanFormID = ${id}`;
+			delete data[`tableData[loanFormID]`];
         } else {
             // data.append("loanFormID", id);
             // data.delete("action");
             // data.append("action", "update");
 
-			data["tableData"]["loanFormID"] = id;
-			delete data["tableData"].action;
-			data["tableData"]["action"] = "update";
+			data[`tableData[loanFormID]`] = id;
+			data[`whereFilter`] = `loanFormID = ${id}`;
+			delete data[`action`];
+			data[`action`] = "update";
         }
     }
     
@@ -1607,7 +1618,7 @@ if(loanType == null || loanTermPayment == null || loanNoOfDays == 0 || loanInter
 
 	}else{
 	
-		$("#input_loanFormAmount").removeClass("is-invalid").addClass("is-valid");
+		$("#input_loanFormAmount").removeClass("is-invalid");
 		// $("#input_loanFormDeductionAmount").removeClass("is-invalid").addClass("is-valid");
 
 		$("#invalid-input_loanFormAmount").text("");

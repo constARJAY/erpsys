@@ -233,23 +233,33 @@ $(document).ready(function(){
 
         // ------ CHECK INVENTORY ITEM STATUS -------
         $(document).on("change","#input_categoryStatus",function(){
-            var tempCategoryStatus = $(this).find("option:selected").val();
+            
+            // if($(this).attr("getcategoryid")){
+            //     let thisID      =   $(this).attr("getcategoryid");
+            //     let thisValue   =   $(this).val();
+            //     let tableData   =   getTableData("ims_inventory_item_tbl INNER JOIN ims_inventory_category_tbl USING(categoryID)","","itemStatus = 1 AND categoryID ="+thisID);
+            //     tableData.length > 0 && thisValue == 0 ? $(this).addClass("is-invalid") : $(this).removeClass("is-invalid");
+            //     let textAlert   =   tableData.length > 0 && thisValue == 0 ? "There is active inventory item in this category!" : "";
+            //     console.log(textAlert)
+            //     $("#invalid-input_categoryStatus").text(textAlert);
+            // }
+
             if($(this).attr("getcategoryid")){
-                var getCategoryID = $(this).attr("getcategoryid");
-                var itemData = getTableData("ims_inventory_item_tbl INNER JOIN ims_inventory_category_tbl USING(categoryID)", 
-                "itemStatus", "itemStatus = 1 AND categoryID ="+getCategoryID, "");
-        
-                if(itemData.length != 0 ){
-                    if(tempCategoryStatus == 0 ){
-                        $(this).removeClass("is-valid").addClass("is-invalid");
-                        $("#invalid-input_categoryStatus").removeClass("is-valid").addClass("is-invalid");
-                        $("#invalid-input_categoryStatus").text('There is active inventory item in this category! ');          
-                    }
-                    else{
-                        $(this).removeClass("is-invalid").addClass("is-valid");
-                        $("#invalid-input_categoryStatus").removeClass("is-invalid").addClass("is-valid");
-                        $("#invalid-input_categoryStatus").text('');
-                    }
+                let thisID      =   $(this).attr("getcategoryid");
+                let thisValue   =   $(this).val();
+                let tableData   =   getTableData("ims_inventory_item_tbl INNER JOIN ims_inventory_category_tbl USING(categoryID)","","itemStatus = 1 AND categoryID ="+thisID);
+                let attrID      =   $(this).attr("id");
+                if(tableData.length > 0 && thisValue == 0){
+                    setTimeout(function(){
+                        $("#"+attrID).removeClass("is-valid").removeClass("validated").addClass("is-invalid");
+                        $(".select2-selection").removeClass("no-error").addClass("has-error");
+                        $("#invalid-input_categoryStatus").text(`This record is currently in use!`);
+                        $("#btnUpdate").prop("disabled", true);
+                    },180);
+                }else{
+                    $("#btnUpdate").prop("disabled", false);
+                    $('#'+attrID).removeClass("is-invalid");
+                    $(".select2-selection").addClass("no-error").removeClass("has-error");
                 }
             }
     

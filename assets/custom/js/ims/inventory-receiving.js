@@ -617,12 +617,10 @@ $(document).ready(function() {
     // ----- GET PURCHASE ORDER LIST -----
     function getPurchaseOrderList(id = null, status = 0, display = true) {
 
-
-		var attached = "";
 		var condition  ="";
 
 		if(status === false){
-			 attached   = `LEFT JOIN ims_inventory_receiving_tbl AS iir ON iir.purchaseOrderID = ipot.purchaseOrderID`;
+			
 			 condition  =`(ipot.purchaseOrderStatus = 2 AND 
 				((iir.inventoryReceivingStatus != 1 AND 
 					iir.inventoryReceivingStatus != 0 AND 
@@ -633,7 +631,7 @@ $(document).ready(function() {
 					(irit.orderedPending IS NULL OR irit.orderedPending > 0) `;
 		}
 		else{
-			attached ="";
+			
 			condition  =`(ipot.purchaseOrderStatus = 2 AND iir.purchaseOrderID =${id} )`;
 		}
 
