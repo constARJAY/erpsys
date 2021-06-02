@@ -1584,16 +1584,15 @@ var loanAmount = parseFloat($("#input_loanFormAmount").val().replaceAll(",",""))
 var loanType = $("#loanFormLoanID").val();
 var loanTermPayment = $("#loanFormTermPayment").val();
 // var loanNoOfDays = $("#loanFormNoOfDays").val();
-var tmp_loanInterest = $("#loanFormInterest").val() || 0;
-var loanInterest = tmp_loanInterest/100;
-
+var loanInterest = $("#loanFormInterest").val() || 0;
+console.log(loanInterest)
 
 	let thisValue       =   $("#loanFormDate").val();
 	let thisValueSplit  =   thisValue.split(" - ");
 	let fromDate        =  new Date(thisValueSplit[0]); 	
 	let toDate          =  new Date(thisValueSplit[1]);
 	loanNoOfDays    =  Math.round(moment(toDate).diff(moment(fromDate), 'months', true)) || 0;
-	console.log(loanNoOfDays)
+
 
 
 
@@ -1603,7 +1602,7 @@ if(loanType == null || loanTermPayment == null || loanNoOfDays == 0 || loanInter
 }else{
 
 
-	var computeDeductionAmount = (((loanAmount*loanInterest)+loanAmount) /loanNoOfDays)/loanTermPayment;
+	var computeDeductionAmount = ((loanAmount + (loanAmount*(loanInterest/100))) /loanNoOfDays)/loanTermPayment;
 
 	$("#input_loanFormDeductionAmount").val(computeDeductionAmount);
 

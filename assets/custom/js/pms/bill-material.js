@@ -494,7 +494,7 @@ $(document).ready(function() {
 
 			if (isImCurrentApprover(approversID, approversDate, billMaterialStatus) || isAlreadyApproved(approversID, approversDate)) {
 				html += `
-				<tr class="${btnClass}" id="${encryptString(billMaterialID )}" code="${billMaterialID? getFormCode("PBR", createdAt, billMaterialID ):""}">>
+				<tr class="${btnClass}" id="${encryptString(billMaterialID )}" code="${billMaterialID? getFormCode("PBR", createdAt, billMaterialID ):""}">
 					<td>${getFormCode("PBR", createdAt, billMaterialID )}</td>
 					<td>${fullname}</td>
 					<td>${referenceCode ? getFormCode("CEF",createdAt,referenceCode) : "-"}</td>
@@ -2107,8 +2107,8 @@ $(document).ready(function() {
 
 			let approversID = "", approversDate = "";
 			for (var i of Object.keys(data)) {
-				if (i[0] == "approversID")   approversID   = i[1];
-				if (i[0] == "approversDate") approversDate = i[1];
+				if (i == "approversID")   approversID   = data[i];
+				if (i == "approversDate") approversDate = data[i];
 			}
 
 			const employeeID = getNotificationEmployeeID(approversID, approversDate, true);
@@ -2568,7 +2568,7 @@ $(document).ready(function() {
 								totalPrice      += parseFloat(items.higherPrice || "0"); 
 								grandTotalPrice += parseFloat(totalCost);
 											html += `
-											<tr class="itemTableRow" requestvalue="${items.requestItemID}" category="company">
+											<tr class="itemTableRow" requestvalue="${items.requestItemID}" category="project">
 												<td>
 													<div class="itemcode" value="${items.itemID || ""}">
 														${items.itemCode || "-"}

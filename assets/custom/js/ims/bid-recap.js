@@ -1728,8 +1728,8 @@ $(document).ready(function() {
 
 			let approversID = "", approversDate = "";
 			for (var i of Object.keys(data)) {
-				if (i[0] == "approversID")   approversID   = i[1];
-				if (i[0] == "approversDate") approversDate = i[1];
+				if (i == "approversID")   approversID   = data[i];
+				if (i == "approversDate") approversDate = data[i];
 			}
 
 			const employeeID = getNotificationEmployeeID(approversID, approversDate, true);

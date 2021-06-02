@@ -1128,12 +1128,19 @@ $(document).ready(function() {
 			$("td .itemcode", this).attr("id", `itemcode${i}`);
 
 			// ITEMNAME
+			$(this).find("select").each(function(x) {
+				if ($(this).hasClass("select2-hidden-accessible")) {
+					$(this).select2("destroy");
+				}
+			})
+
 			$(this).find("select").each(function(j) {
 				const itemID = $(this).val();
 				$(this).attr("index", `${i}`);
 				$(this).attr("project", `true`);
-				$(this).attr("id", `projectitemid${i}`)
-				if (!$(this).attr("data-select2-id")) {
+				$(this).attr("id", `projectitemid${i}`);
+				$(this).attr("data-select2-id", `projectitemid${i}`);
+				if (!$(this).hasClass("select2-hidden-accessible")) {
 					$(this).select2({ theme: "bootstrap" });
 				}
 			});
@@ -1177,12 +1184,19 @@ $(document).ready(function() {
 			$("td .itemcode", this).attr("id", `itemcode${i}`);
 
 			// ITEMNAME
+			$(this).find("select").each(function(x) {
+				if ($(this).hasClass("select2-hidden-accessible")) {
+					$(this).select2("destroy");
+				}
+			})
+
 			$(this).find("select").each(function(j) {
 				const itemID = $(this).val();
 				$(this).attr("index", `${i}`);
 				$(this).attr("company", `true`);
-				$(this).attr("id", `companyitemid${i}`)
-				if (!$(this).attr("data-select2-id")) {
+				$(this).attr("id", `companyitemid${i}`);
+				$(this).attr("data-select2-id", `companyitemid${i}`);
+				if (!$(this).hasClass("select2-hidden-accessible")) {
 					$(this).select2({ theme: "bootstrap" });
 				}
 			});
@@ -1701,6 +1715,7 @@ $(document).ready(function() {
     $(document).on("click", ".btnAddRow", function() {
 		let isProject = $(this).attr("project") == "true";
         let row = getItemRow(isProject);
+		updateTableItems();
 		if (isProject) {
 			$(".itemProjectTableBody").append(row);
 		} else {

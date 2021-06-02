@@ -41,26 +41,26 @@ $(document).ready(function () {
 
 	// ----- VIEW DOCUMENT -----
 	function viewDocument(view_id = false, readOnly = false) {
+		var quantity1 ='0.00';
 		const loadData = (id) => {
-			const tableData = getTableData(`
-			ims_inventory_receiving_details_tbl 		AS iird
-			LEFT JOIN ims_inventory_receiving_tbl 		AS iir 	ON iird.inventoryReceivingID  = iir.inventoryReceivingID
-			LEFT JOIN ims_purchase_order_tbl 			AS ipo 	ON iir.purchaseOrderID = ipo.purchaseOrderID
-			LEFT JOIN ims_request_items_tbl 			AS iri 	ON  ipo.purchaseOrderID = iri.purchaseOrderID
-			LEFT JOIN ims_inventory_item_tbl 			AS iii 	ON iird.itemID = iird.itemID
-			LEFT JOIN ims_inventory_category_tbl 		AS iic 	ON iii.categoryID = iic.categoryID
-			LEFT JOIN ims_inventory_classification_tbl  AS iict ON iii.classificationID = iict.classificationID 
-			LEFT JOIN ims_stock_in_tbl 					AS isi	ON iird.inventoryReceivingID = isi.inventoryReceivingID`,
-				`iird.inventoryReceivingID, iird.itemID, iir.employeeID,
-			iri.itemName,iii.brandName,iic.categoryName,iict.classificationName,
-			iird.received AS quantity,sum(stockInQuantity) AS receivingQuantity,iir.createdAt`, "iird.inventoryReceivingID=" + id);
-			//const tableData = getTableData("ims_received_tbl","","receivedID=" + id);
 
+			const tableData1 = getTableData(`ims_stock_in_tbl
+			`,` FORMAT(sum(stockInQuantity),2) AS quantity , '' as received, '' AS employeeID, '' inventoryReceivingID`,`inventoryReceivingID =${id}`);
+			tableData1.map((item) => {
+				quantity1 = item.quantity;
+			});	
+
+			const tableData = getTableData(`
+			ims_inventory_receiving_details_tbl  as  iird
+ 			LEFT JOIN ims_inventory_receiving_tbl AS iir ON iird.inventoryReceivingID  = iir.inventoryReceivingID`,
+				`${quantity1} as quantity ,SUM(received) as received,iir.employeeID,iir.inventoryReceivingID, iir.createdAt`, "iird.inventoryReceivingID=" + id);
+			//const tableData = getTableData("ims_received_tbl","","receivedID=" + id);
+			console.log(tableData);
 			if (tableData.length > 0) {
 				let {
 					employeeID,
 					receivedStatus
-				} = tableData[0];
+				} = tableData[0]; 
 
 				let isReadOnly = true,
 					isAllowed = true;
@@ -335,9 +335,9 @@ $(document).ready(function () {
 
 			} = item;
 			//var quantity = item.quantity;
-			var formatquantity = parseFloat(quantity).toFixed(2);
+			var formatquantity = parseFloat(quantity);
 			//	var receivingQuantity = item.receivingQuantity;
-			var formatreceivingQuantity = parseFloat(receivingQuantity).toFixed(2);
+			var formatreceivingQuantity = parseFloat(receivingQuantity);
 			let btnClass = inventoryReceivingStatus != 0 ? "btnView" : "btnEdit";
 			// let remarks       = purchaseRequestRemarks ? purchaseRequestRemarks : "-";
 			let dateCreated = moment(createdAt).format("MMMM DD, YYYY hh:mm:ss A");
@@ -512,14 +512,14 @@ $(document).ready(function () {
 		$("#page_content").html(preloader);
 		storageContent();
 		let {
-			inventoryReceivingID = "",
+				inventoryReceivingID = "",
 				employeeID = "",
 				approversID = "",
 				approversDate = "",
 				designationName = "",
 				inventoryReceivingStatus = false,
 				quantity,
-				receivingQuantity,
+				received,
 				submittedAt = false,
 				createdAt = false,
 		} = data && data[0];
@@ -529,14 +529,20 @@ $(document).ready(function () {
 		// 	let requestItemsData = getTableData(
 		// 		``,``,``);
 		// }
-
-		var formatquantity = parseFloat(quantity).toFixed(2);
-		var formatreceivingQuantity = parseFloat(receivingQuantity).toFixed(2);
+		
+		formatquantity = parseFloat(quantity) || 0;
+		//alert(formatquantity);
+		//var formatquantity = parseFloat(quantity);
+		//alert(formatquantity);
+		var formatreceivingQuantity = parseFloat(received) || 0;
+		//alert( formatquantity +" " +formatreceivingQuantity);
 		let statusDisplay = "";
-		if (formatquantity < formatreceivingQuantity || formatquantity == formatreceivingQuantity) {
-			statusDisplay = `<span class="badge badge-outline-warning w-100">Pending</span>`;
-		} else {
+		if (formatquantity == formatreceivingQuantity) {
 			statusDisplay = `<span class="badge badge-success w-100">Completed</span>`;
+		} else {
+			
+			statusDisplay = `<span class="badge badge-outline-warning w-100">Pending</span>`;
+			
 		}
 
 
@@ -647,9 +653,9 @@ $(document).ready(function () {
 		//var received_quantity = "received_quantity";
 		ItemData.map((item) => {
 			var quantity = item.quantity;
-			var formatquantity = parseFloat(quantity).toFixed(2);
+			var formatquantity = parseFloat(quantity);
 			var receivingQuantity = item.receivingQuantity;
-			var formatreceivingQuantity = parseFloat(receivingQuantity).toFixed(2);
+			var formatreceivingQuantity = parseFloat(receivingQuantity);
 			var totalreceiving1 = (quantity) - (receivingQuantity);
 			var totalreceiving = parseFloat(totalreceiving1).toFixed(2);
 			//alert(totalreceiving);
@@ -727,7 +733,8 @@ $(document).ready(function () {
 
 		//var inventoryReceivingID = $(attr)("inventoryReceivingid");
 		const inventoryReceivingID = $(this).attr("inventoryReceivingid");
-		const itemID = $(this).attr("itemid");
+		const itemID = $(this).attr("itemid"); 
+		const orderquantity = $(this).attr("orderQuantity");
 		//var receivingquantity = $(this).data("receivingquantity");
 		const receivingquantity = $(this).attr("receivingQuantity");
 		const brandName = $(this).attr("brandName");
@@ -749,7 +756,7 @@ $(document).ready(function () {
 			const content = modalContent(tableData);
 			setTimeout(() => {
 				$("#modal_product_record_content").html(content);
-				$("#receivedQuantitytotal").val(receivingquantity);
+				$("#received").val(orderquantity);
 				$("#receivedQuantitytotal").val(receivingquantity);
 				$("#brandName").val(brandName);
 				$("#remainingQuantity").val(totalreceiving);

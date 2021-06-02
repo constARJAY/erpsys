@@ -130,10 +130,7 @@ $(document).ready(function() {
 		return moment(new Date).format("YYYY-MM-DD HH:mm:ss");
 	};
 
-    const borrowingItemList = getTableData(
-		`ims_borrowing_tbl AS ib
-		LEFT JOIN ims_borrowing_details_tbl AS ibd ON ibd.borrowingID = ib.borrowingID`, `ib.borrowingID,ib.createdAt`,
-		"borrowingStatus = 2");
+
 
     // const projectList = getTableData(
     //     "pms_project_list_tbl AS pplt LEFT JOIN pms_client_tbl AS pct ON pct.clientID = pplt.projectListClientID", 
@@ -373,7 +370,7 @@ $(document).ready(function() {
 				<tr class="${btnClass}" id="${encryptString(returnItemID )}">
 					<td>${getFormCode("RI", createdAt, returnItemID )}</td>
 					<td>${fullname}</td>
-					<td>${getFormCode("EBF", createdAtborrowing, borrowingID )}</td>
+					<td>${borrowingID ? getFormCode("EBF", createdAtborrowing, borrowingID ) : "-"}</td>
 					<td>${projectListName || "-"}</td>
 					<td>${returnItemReason}</td>
 					<td>
@@ -402,18 +399,71 @@ $(document).ready(function() {
 	}
 	// ----- END FOR APPROVAL CONTENT -----
 
+	const borrowingItemList = getTableData(
+		`ims_borrowing_tbl AS ib
+		LEFT JOIN ims_borrowing_details_tbl AS ibd ON ibd.borrowingID = ib.borrowingID`, `ib.borrowingID,ib.createdAt`,
+		"borrowingStatus = 2 GROUP BY borrowingID");
+
+
+
 	function getBorroiwngList(id = null, clientID = 0, display = true) {
 		let html ='';
-        html += borrowingItemList.map(borrowing => {
+		var exist =[];
+
+		const borrowingItemAllList = getTableData(
+			`ims_borrowing_tbl AS ib
+			LEFT JOIN ims_borrowing_details_tbl AS ibd ON ibd.borrowingID = ib.borrowingID`, `ib.borrowingID,ibd.quantity`,
+			"borrowingStatus = 2");
+
+		const returnItemList = getTableData(
+			`ims_return_item_tbl AS iri
+			LEFT JOIN ims_return_item_details_tbl AS irid ON irid.returnItemID = iri.returnItemID`, `irid.returnItemID,irid.borrowingDetailID,SUM(irid.quantityBorrowed) AS quantity ,iri.createdAt, iri.returnItemStatus`,
+			"returnItemStatus = 1 OR returnItemStatus = 0 GROUP BY irid.barcode" );
+
+		const defaultReturnItemList = getTableData(
+			`ims_return_item_tbl AS iri
+			LEFT JOIN ims_return_item_details_tbl AS irid ON irid.returnItemID = iri.returnItemID`, `irid.returnItemID,irid.borrowingDetailID`,
+			"" );
+
+		var returnItemLength =returnItemList.length;
+
+		defaultReturnItemList.map(items=>{
+			exist.push(items.borrowingDetailID);
+		})
+
+		console.log(borrowingItemList)
+
+		html += borrowingItemList.map((borrowing,index) => {
+          
+			for(var loop =0; loop<returnItemLength;loop++){
+				
+					if(borrowing.borrowingID == returnItemList[loop]["borrowingDetailID"] && parseFloat(borrowing.quantity) !=parseFloat(returnItemList[loop]["quantity"]) ){
+				
+						if(returnItemList[loop]["returnItemStatus"] != 0 || returnItemList[loop]["returnItemStatus"] != 1){
+				
+							return `
+				<option 
+					value       = "${borrowing.borrowingID}" 
+					${borrowing.borrowingID == id && "selected"}>
+					${getFormCode("EBF",moment(borrowing.createdAt),borrowing.borrowingID)}
+				</option>`;
+						}
+					
+					}
+			}
+	})
+
+	
+        // html += borrowingItemList.map(borrowing => {
             
-            return `
-            <option 
-                value       = "${borrowing.borrowingID}" 
-                ${borrowing.borrowingID == id && "selected"}>
-                ${getFormCode("EBF",moment(borrowing.createdAt),borrowing.borrowingID)}
-            </option>`;
+        //     return `
+        //     <option 
+        //         value       = "${borrowing.borrowingID}" 
+        //         ${borrowing.borrowingID == id && "selected"}>
+        //         ${getFormCode("EBF",moment(borrowing.createdAt),borrowing.borrowingID)}
+        //     </option>`;
 			
-        })
+        // })
         return display ? html : borrowingItemList;
     }
 
@@ -525,7 +575,7 @@ $(document).ready(function() {
             <tr class="${btnClass}" id="${encryptString(returnItemID )}">
                 <td>${getFormCode("RI", createdAt, returnItemID )}</td>
                 <td>${fullname}</td>
-				<td>${getFormCode("EBF", createdAtborrowing, borrowingID )}</td>
+				<td>${borrowingID ? getFormCode("EBF", createdAtborrowing, borrowingID ) : "-"}</td>
 				<td>${projectListName || "-"}</td>
                <td>${returnItemReason}</td>
                 <td>
