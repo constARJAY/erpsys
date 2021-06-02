@@ -1042,15 +1042,46 @@ $(document).ready(function() {
 			$("td .servicecode", this).attr("id", `servicecode${i}`);
 
 			// ITEMNAME
-			$(this).find("select").each(function(j) {
-				const serviceID = $(this).val();
+			$(this).find(`[name="serviceID"]`).each(function() {
+				if ($(this).hasClass("select2-hidden-accessible")) {
+					$(this).select2("destroy");
+				}
+			})
+
+			$(`[name="serviceID"]`, this).each(function(j) {
 				$(this).attr("index", `${i}`);
 				$(this).attr("project", `true`);
 				$(this).attr("id", `projectitemid${j}${i}`)
-				if (!$(this).attr("data-select2-id")) {
+				$(this).attr("data-select2-id", `projectitemid${i}`);
+				if (!$(this).hasClass("select2-hidden-accessible")) {
 					$(this).select2({ theme: "bootstrap" });
 				}
-			});
+			})
+
+			$(this).find(`[name="serviceUom"]`).each(function() {
+				if ($(this).hasClass("select2-hidden-accessible")) {
+					$(this).select2("destroy");
+				}
+			})
+
+			$(`[name="serviceUom"]`, this).each(function(x) {
+				$(this).attr("index", `${x}`);
+				$(this).attr("id", `serviceUom${i}${x}`)
+				$(this).attr("data-select2-id", `serviceUom${i}${x}`);
+				if (!$(this).hasClass("select2-hidden-accessible")) {
+					$(this).select2({ theme: "bootstrap" });
+				}
+			})
+
+			// $(this).find("select").each(function(j) {
+			// 	$(this).attr("index", `${i}`);
+			// 	$(this).attr("project", `true`);
+			// 	$(this).attr("id", `projectitemid${j}${i}`)
+			// 	$(this).attr("data-select2-id", `projectitemid${i}`);
+			// 	if (!$(this).hasClass("select2-hidden-accessible")) {
+			// 		$(this).select2({ theme: "bootstrap" });
+			// 	}
+			// });
 
 			// SCOPE
 			$("td .tableScopeBody tr", this).each(function(x) {
@@ -1286,6 +1317,7 @@ $(document).ready(function() {
     // ----- INSERT ROW ITEM -----
     $(document).on("click", ".btnAddRow", function() {
         let row = getServiceRow();
+		updateTableItems();
 		$(".itemServiceTableBody").append(row);
 		updateTableItems();
 		initInputmask();
