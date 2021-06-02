@@ -1723,7 +1723,7 @@ $(document).ready(function() {
 					</div>
                 </div>
 				<div class="row py-2">
-					<div class="offset-lg-7 offset-xl-8 col-12 col-sm-12 col-lg-5 col-xl-4 col-xl-4 pt-3 pb-2">
+					<div class="offset-lg-6 col-lg-6 offset-md-3 col-md-9 col-sm-12 pt-3 pb-2">
 						<div class="row" style="font-size: 1.1rem; font-weight:bold">
 							<div class="col-6 col-lg-7 text-left">Personnel Total Cost:</div>
 							<div class="col-6 col-lg-5 text-right tableTotal personnelTotal" style="font-size: 1.05em">
