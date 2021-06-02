@@ -40,7 +40,7 @@ class Project_budget_rationale extends CI_Controller {
         $items                      = $this->input->post("items") ?? null;
 
         $billMaterialData = [
-            "reviseBillMaterialID" => $reviseBillMaterialID,
+            "reviseBillMaterialID"  => $reviseBillMaterialID,
             "employeeID"              => $employeeID,
             "projectID"               => $projectID,
             "referenceCode"           => $costEstimateID,
@@ -100,6 +100,7 @@ class Project_budget_rationale extends CI_Controller {
                     $billMaterialItems = [];
                     foreach($items as $index => $item) {
                         $temp = [
+                            "requestItemID"         => $item["requestItemID"],
                             "billMaterialID"        => $billMaterialID,
                             "costEstimateID"        => $costEstimateID,
                             "designationID"         => $item["designationID"],

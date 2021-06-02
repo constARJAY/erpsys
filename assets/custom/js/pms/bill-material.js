@@ -1949,6 +1949,7 @@ $(document).ready(function() {
 							itemUom:				unitOfMeasure ?? $(this).find(".uom").text().replaceAll("\n","").replaceAll("\t","").trim(),
 							itemDescription:  		itemDescription,
 							categoryType: 			$(this).attr("category") ?? null,
+							requestItemID: 			$(this).attr("requestvalue") ?? null,
 						//  FOR TRAVEL
 							travelDescription:		travelDescription == "" || !travelDescription ? null : travelDescription,
 						// FOR ALL

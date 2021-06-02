@@ -218,8 +218,9 @@ $(document).ready(function() {
 					{ targets: 2,  width: 80 },
 					{ targets: 3,  width: 80  },
 					{ targets: 4,  width: 80  },
-					{ targets: 5,  width: 80 },
-                    { targets: 6,  width: 150 }
+					{ targets: 5,  width: 80  },
+					{ targets: 6,  width: 80 },
+                    { targets: 7,  width: 150 }
 				],
 			});
 
@@ -239,8 +240,9 @@ $(document).ready(function() {
 					{ targets: 2,  width: 80 },
 					{ targets: 3,  width: 80  },
 					{ targets: 4,  width: 80  },
-					{ targets: 5,  width: 80 },
-                    { targets: 6,  width: 150 }
+					{ targets: 5,  width: 80  },
+					{ targets: 6,  width: 80 },
+                    { targets: 7,  width: 150 }
 				],
 			});
 
@@ -263,8 +265,9 @@ $(document).ready(function() {
 					{ targets: 2,  width: 80 },
 					{ targets: 3,  width: 80  },
 					{ targets: 4,  width: 80  },
-					{ targets: 5,  width: 80 },
-                    { targets: 6,  width: 150 }
+					{ targets: 5,  width: 80  },
+					{ targets: 6,  width: 80 },
+                    { targets: 7,  width: 150 }
 				],
 			});
 
@@ -284,8 +287,9 @@ $(document).ready(function() {
 					{ targets: 2,  width: 80 },
 					{ targets: 3,  width: 80  },
 					{ targets: 4,  width: 80  },
-					{ targets: 5,  width: 80 },
-                    { targets: 6,  width: 150 }
+					{ targets: 5,  width: 80  },
+					{ targets: 6,  width: 80 },
+                    { targets: 7,  width: 150 }
 				],
 			});
 
@@ -478,7 +482,7 @@ $(document).ready(function() {
 				approversDate,
 				inventoryValidationStatus,
 				inventoryValidationRemarks,
-				inventoryValidationReasons,
+				inventoryValidationReason,
 				submittedAt,
 				createdAt,
 			} = item;
@@ -511,7 +515,7 @@ $(document).ready(function() {
 					</div>
 					<small style="color:#848482;">${projectListCode || '-'}</small>
 				</td>
-				<td>${inventoryValidationReasons || "-"}</td>
+				<td>${inventoryValidationReason || "-"}</td>
                 <td>
                     ${employeeFullname(getCurrentApprover(approversID, approversDate, inventoryValidationStatus, true))}
                 </td>
@@ -1471,6 +1475,7 @@ $(document).ready(function() {
                                 <th>Item Name</th>
                                 <th>UOM</th>
                                 <th>Quantity Requested</th>
+								<th>Available Stocks</th>
                                 <th>No. of Issuance ${!disabled ? "<code>*</code>" : ""}</th>
                                 <th>For Purchase</th>
                                 <th>File</th>
@@ -1491,6 +1496,7 @@ $(document).ready(function() {
                                 <th>Item Name</th>
                                 <th>UOM</th>
                                 <th>Quantity Requested</th>
+								<th>Available Stocks</th>
                                 <th>No. of Issuance ${!disabled ? "<code>*</code>" : ""}</th>
                                 <th>For Purchase</th>
                                 <th>File</th>
@@ -2024,7 +2030,10 @@ $(document).ready(function() {
 			let html = "";
 			let condition = requestID ? requestID : `purchaseRequestID='${id}' AND inventoryValidationID IS NULL`;
             let tableData = getTableData("ims_request_items_tbl JOIN ims_inventory_item_tbl USING(itemID)",
-                                        "requestItemID, costEstimateID , inventoryValidationID, ims_inventory_item_tbl.itemID AS itemID, categoryType ,ims_inventory_item_tbl.createdAt AS createdAt ,ims_request_items_tbl.itemName as itemName, ims_request_items_tbl.itemDescription as itemDescription,itemUom,quantity,stocks,forPurchase,files",
+                                        `requestItemID, costEstimateID , inventoryValidationID, ims_inventory_item_tbl.itemID AS itemID,
+										 categoryType ,ims_inventory_item_tbl.createdAt AS createdAt ,ims_request_items_tbl.itemName as itemName, 
+										 ims_request_items_tbl.itemDescription as itemDescription,itemUom,quantity,stocks,forPurchase,files,
+										 (SELECT SUM(ims_stock_in_total_tbl.quantity) FROM ims_stock_in_total_tbl WHERE itemID = ims_inventory_item_tbl.itemID) AS availableStocks`,
                                         `${condition} AND categoryType='${type}' AND purchaseOrderID IS NULL AND bidRecapID IS NULL`);
 				tableData.map((items,index)=>{
 					let files = items.files? `<a class="filename" href="${base_url+"assets/upload-files/request-items/"+items.files}" 
@@ -2046,6 +2055,9 @@ $(document).ready(function() {
                                                 </td>
 												<td class="text-center">
                                                     <div class="qtyrequested">${items.quantity}</div>
+                                                </td>
+												<td class="text-center">
+                                                    <div class="availablestocks">${items.availableStocks ? formatAmount(items.availableStocks, true).replaceAll("₱","") : "0"}</div>
                                                 </td>
                                                 <td class="text-center">
                                                     <div class="stocks">${items.stocks}</div>
@@ -2071,6 +2083,9 @@ $(document).ready(function() {
                                                 </td>
 												<td class="text-center">
                                                     <div class="qtyrequested">${items.quantity}</div>
+                                                </td>
+												<td class="text-center">
+                                                    <div class="availablestocks">${items.availableStocks ? formatAmount(items.availableStocks, true).replaceAll("₱","") : "0"}</div>
                                                 </td>
                                                 <td class="text-center">
                                                     <div class="stocks">

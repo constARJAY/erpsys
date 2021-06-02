@@ -719,8 +719,8 @@ $(document).ready(function() {
 								name="serialNumber"
 								id="serialNumber"
 								data-allowcharacters="[A-Z][a-z][0-9][-]"
-								minlength="2"
-								maxlength="75"
+								minlength="17"
+								maxlength="17"
 								value="${serialNumber}"
 								autocomplete="off">
 							<div class="d-block invalid-feedback mt-0 mb-1" id="invalid-serialNumber"></div>
@@ -745,38 +745,63 @@ $(document).ready(function() {
 	// ----- END GET SERIAL NUMBER -----
 	var serialArray =[];
 	var serialLocationArray =[];
+
+	function hasDuplicates(arr) {
+		return new Set(arr).size !== arr.length;
+	}
+
+	function countDuplicates(original) {
+		const uniqueItems = new Set();
+		const duplicates = new Set();
+		for (const value of original) {
+		  if (uniqueItems.has(value)) {
+			duplicates.add(value);
+			uniqueItems.delete(value);
+		  } else {
+			uniqueItems.add(value);
+		  }
+		}
+		return duplicates.size;
+	  }
+
 	
-	$(document).on("change","[name=serialNumber]",function(){
-
+	
+	$(document).on("keyup change","[name=serialNumber]",function(){
 		const serialval   = $(this).val(); 
-		const serialID   = $(this).attr("id");
-		
-		let	serialArrayLength = serialArray.length || 0;
+		const addressID = $(this).attr("id");
+		var $parent = $(this);
+		var flag = ["true"];
 
-			if(serialArrayLength !=0){
-				for(var loop1 =0;loop1<serialArrayLength; loop1++ ){
-					
-
-					if(serialArray[loop1] == serialval && serialLocationArray[loop1] != serialID){
-					
-						$(this).closest("tr").find("[name=serialNumber]").removeClass("is-valid").addClass("is-invalid");
-						$(this).closest("tr").find(".invalid-feedback").removeClass("is-valid").addClass("is-invalid");
-						$(this).closest("tr").find(".invalid-feedback").text('Data already exist!');
-						return false;
-					}else{
-				
-							serialArray[serialArrayLength] = serialval;
-							serialLocationArray[serialArrayLength] = serialID;
+		if(serialval.length ==17){
+			$(`[name="serialNumber"]`).each(function(i) {
+				var tmp_Checkserial = $(this).val();
+				var tmp_addressID = $(this).attr("id");
+					if(addressID !=  tmp_addressID){
+						if(tmp_Checkserial == serialval){
+							$parent.removeClass("is-valid").addClass("is-invalid");
+							$parent.closest("tr").find(".invalid-feedback").text('Data already exist!');
+							flag[0]= false;
 						}
+					}
+			})
+	
+			if(flag[0] == "true"){
+	
+			$(`[name="serialNumber"]`).each(function(i) {
+				var tmp_Checkserial = $(this).val();
+				var tmp_addressID = $(this).attr("id");
+				console.log(addressID +" != "+  tmp_addressID)
+					if(addressID !=  tmp_addressID){
+						if(tmp_Checkserial == serialval){
+							$parent.removeClass("is-valid").addClass("is-invalid");
+							$parent.closest("tr").find(".invalid-feedback").text('Data already exist!');
 						
+						}
+					}
 				
-				}
-			}else{
-				serialArray[0] = serialval;
-				serialLocationArray[0] = serialID;
+			})
 			}
-							
-					
+		}
 	});
 
 
@@ -817,7 +842,7 @@ $(document).ready(function() {
 			requestItemsData = getTableData(
 				"ims_request_items_tbl", 
 				"", 
-				`purchaseOrderID = ${id} AND (orderedPending != 0 OR orderedPending IS NULL ) `
+				`purchaseOrderID = ${id} AND (orderedPending != 0 OR orderedPending IS NULL) `
 			)
 		}
 
@@ -1016,8 +1041,10 @@ $(document).ready(function() {
 				$(`.received .invalid-feedback`, parentTable).text("");
 
 				$(`.tableSerialBody tr`, parentTable).each(function() {
+					if($(`.servicescope .invalid-feedback`, this).text() != "Data already exist!"){
 					$(`.servicescope [name="serialNumber"]`, this).removeClass("is-valid").removeClass("no-error").removeClass("is-invalid");
 					$(`.servicescope .invalid-feedback`, this).text("");
+					}
 				})
 			}
 		}
@@ -1606,9 +1633,24 @@ $(document).ready(function() {
 						})
 
 							if(tmpSerialStorage.length == 0 && receivedQuantity !=0 ){
+								$(`.tableSerialBody tr`, this).each(function() {
+									if($(`.servicescope .invalid-feedback`, this).text() !="Data already exist!"){
+										$(`.servicescope [name="serialNumber"]`, this).removeClass("is-invalid");
+										$(`.servicescope .invalid-feedback`, this).text("");
+									}
+								
+									
+							})
 								flag[0] = true;
 							}
 							if(tmpSerialStorage.length >= 1 && receivedQuantity !=0 && countSerial == receivedQuantity ){
+								$(`.tableSerialBody tr`, this).each(function() {
+									if($(`.servicescope .invalid-feedback`, this).text() !="Data already exist!"){
+									$(`.servicescope [name="serialNumber"]`, this).removeClass("is-invalid");
+									$(`.servicescope .invalid-feedback`, this).text("");
+									}
+									
+							})
 								flag[0] = true;
 							}
 							if(tmpSerialStorage.length !=0  && countSerial != receivedQuantity || receivedQuantity ==0 ){ // exisitng all value
@@ -1628,11 +1670,13 @@ $(document).ready(function() {
 								$(`.received .invalid-feedback`, this).text("");
 
 								$(`.tableSerialBody tr`, this).each(function() {
-
+									if($(`.servicescope .invalid-feedback`, this).text() !="Data already exist!"){
 										$(`.servicescope [name="serialNumber"]`, this).removeClass("is-invalid");
 										$(`.servicescope .invalid-feedback`, this).text("");
-								flag[0] = true;		
+									}
+										
 								})
+								flag[0] = true;
 							}
 				}
 			})
@@ -1648,12 +1692,15 @@ $(document).ready(function() {
 	
 
 		const validateDuplicateSerial  = $("[name=serialNumber]").hasClass("is-invalid") ;
-		
-		if(!validateDuplicateSerial){
+		const validateSerialMessage  = $(".invalid-feedback").text() ;
+		console.log("validateDuplicateSerial: "+ validateDuplicateSerial)
+		// if(!validateDuplicateSerial || validateSerialMessage != "Data already exist!"){
+			if(!validateDuplicateSerial){
 			const validateSerial = checkSerialReceivedQuantity();
+			console.log("validateSerial: "+ validateSerial)
 			if (validateSerial != "false") {
-
 				const validate       = validateForm("form_inventory_receiving");
+				console.log("validate: "+ validate)
 				removeIsValid("#tableInventoryReceivingItems");
 				if(validate){
 					

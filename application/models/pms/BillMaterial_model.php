@@ -74,6 +74,10 @@ class BillMaterial_model extends CI_Model {
                 ];
                 array_push($travelData, $temp);
             }else{
+                $requestItemID  = $item["requestItemID"];
+                $sql    = "SELECT files FROM ims_request_items_tbl WHERE requestItemID = '$requestItemID'";
+                $query  = $this->db->query($sql);
+                $result = $query->result_array();
                 $temp = [
                     "billMaterialID"        => $item["billMaterialID"],
                     "costEstimateID"        => $item["costEstimateID"],
@@ -85,6 +89,7 @@ class BillMaterial_model extends CI_Model {
                     "quantity"              => $item["quantity"],
                     "unitCost"              => $item["unitCost"],
                     "totalCost"             => $item["totalCost"],
+                    "files"                 => $result[0]["files"],
                     "createdBy"             => $item["createdBy"],
                     "updatedBy"             => $item["updatedBy"],
                 ];

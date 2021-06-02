@@ -239,6 +239,7 @@ class Purchase_order extends CI_Controller {
                             "totalCost"                => $item["totalCost"],
                             "remarks"                  => $item["remarks"],
                             "files"                    => $riData->files,
+                            "brandName"                => $riData->brandName,
                             "orderedPending"           => $riData->orderedPending,
                             "stocks"                   => $riData->stocks,
                             "forPurchase"              => $item["forPurchase"],

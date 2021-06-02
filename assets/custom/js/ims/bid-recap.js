@@ -1291,8 +1291,7 @@ $(document).ready(function() {
                         id="documentID"
                         style="width: 100%"
                         required
-						${bidRecapID == "" ? `` : `disabled`}
-						>
+						${bidRecapID == "" ? `` : `disabled`}>
                         <option selected disabled>Select Reference No.</option>
                         ${getReferenceList(inventoryValidationID,readOnly)}
                     </select>
