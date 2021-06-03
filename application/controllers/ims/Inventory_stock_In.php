@@ -61,5 +61,12 @@ class Inventory_stock_in extends CI_Controller {
 		// 	$itemID = $this->input->post("itemID");
 		// 	echo json_encode($this->inventorystockin->getrecievingreportByPO($purchaseOrderID, $itemID));
 		// }
+
+public function getvalue()
+{
+    $inventoryReceivingID = $this->input->post("id");
+    echo json_encode($this->inventorystockin->getvalueData($inventoryReceivingID));
 }
+}
+
 ?>

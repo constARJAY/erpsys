@@ -1812,7 +1812,7 @@ $(document).ready(function() {
 					if (i[0] == "approversDate") approversDate = i[1];
 				}
 	
-				const employeeID = getNotificationEmployeeID(approversID, approversDate, true);
+				const employeeID = getNotificationEmployeeID(data["approversID"], data["approversDate"], true);
 				console.log(employeeID);
 				let notificationData = false;
 				if (employeeID != sessionID) {

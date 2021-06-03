@@ -1,19 +1,27 @@
 $(document).ready(function(){
 
 
-    // ----- DATATABLES -----
-    function initDataTables() {
+        
 
+
+
+    // ----- DATATABLES -----
+    function initDataTables(data) {
+       // data
         if ($.fn.DataTable.isDataTable('#tableListStocks')){
             $('#tableListStocks').DataTable().destroy();
+            
         }
         
         var table = $("#tableListStocks").css({"min-width": "100%"}).removeAttr('width').DataTable({
+            
+           data,
             proccessing:    false,
             serverSide:     false,
             scrollX:        true,
             scrollCollapse: true,
-	    searching: true,
+	        searching: true,
+          
 	    paging: true,
             columnDefs: [
                 { targets: 0, width: 100},
@@ -35,7 +43,45 @@ $(document).ready(function(){
                 { targets: 16, width: 150},
                 
             ],
+          
+           
+          
+            // rowsGroup: [
+            //   'qw:name',
+              
+            // ],
+          
+           
+          
         });
+       
+        
+      
+
+    // var tableRows = $("#tableListStocks tbody tr");
+    // var id = '';
+//    tableRows.each(function(n){
+//       id = this.id;
+
+//       alert(id.join('')); 
+//       var row = $(this).html();
+//      // alert(id);
+
+//          if(this.id != id){
+//             $this = $(this);
+            
+//            // alert($this);
+//            $this.css('backgroundColor', 'black');
+
+//             if ($this.html() == row){
+//                 alert("1");
+//                $this.css('backgroundColor', 'black');
+//             }
+//           }
+//     //    });
+//    });
+        
+       // console.log(data);
     }
   
     // ----- END DATATABLES -----
@@ -46,7 +92,7 @@ $(document).ready(function(){
         var classificationID    =$("#input_classificationID").val();
         var categoryID          = $("#input_categoryID").val();
        // var inventoryStorageID  = $("#input_inventoryStorageID").val();
-        initDataTables();
+       // initDataTables();
         tableContent(classificationID,categoryID);          
     });
     $(document).on("click",".priceListRow-show-more",function(){
@@ -63,10 +109,9 @@ $(document).ready(function(){
             $(target).addClass("hide").removeClass("show");
         }
     });
-
-    
     function tableContent(classificationID,categoryID){
-
+    //    / var data =[];
+    var id = [];
         $.ajax({
             url: `${base_url}ims/list_stocks/getliststocks`,
             method: "POST",
@@ -79,38 +124,45 @@ $(document).ready(function(){
             beforeSend: function() {
             $("#table_content").html(preloader);
             },
+         
             success: function(data) {
+
+            
+                
                           let html = `
                              <table class="table table-bordered table-striped table-hover" id="tableListStocks">
-                                 <thead>
-                                     <tr>
-                                        <th>Item Code</th>
-                                        <th>Item Name</th>
-                                        <th>Item Classification</th>
-                                        <th>UOM</th>
-                                        <th>Barcode</th>
-                                        <th>Strorage Code</th>
-                                        <th>Storage Name</th>
-                                        <th>Stock In</th>
-                                        <th>Withdrawn Quantity</th>
-                                        <th>Unused Quantity</th>
-                                        <th>Borrowed Quantity</th>
-                                        <th>Returned Quantity</th>
-                                        <th>Transferred Quantity</th>
-                                        <th>Disposed Quantity</th>
-                                        <th>End Quantity</th>
-                                        <th>Total</th>
-                                        <th>Reorder Point</th>
-                                     </tr>
-                                </thead>
+                             <thead>
+                             <tr>
+                                <th>Item Code</th>
+                                <th>Item Name</th>
+                                <th>Item Classification</th>
+                                <th>UOM</th>
+                                <th>Barcode</th>
+                                <th>Strorage Code</th>
+                                <th>Storage Name</th>
+                                <th>Stock In</th>
+                                <th>Withdrawn Quantity</th>
+                                <th>Unused Quantity</th>
+                                <th>Borrowed Quantity</th>
+                                <th>Returned Quantity</th>
+                                <th>Transferred Quantity</th>
+                                <th>Disposed Quantity</th>
+                                <th>End Quantity</th>
+                                <th>Total</th>
+                                <th>Reorder Point</th>
+                             </tr>
+                        </thead>
                                     <tbody>`;
-
+                                   
+                                 
                                     data.map((item, index, array) => { 
+                                     
+                                        
                                         html += `
                                         <tr> 
                                          <td>${item["itemCode"]}</td> 
                                          <td>${item["itemName"]}</td> 
-                                         <td>${item["itemClassification"]}</td>
+                                         <td class='buildname'>${item["itemClassification"]}</td>
                                          <td>${item["UOM"]}</td>
                                          <td>${item["barcode"]}</td>
                                          <td>${item["storageCode"]}</td>
@@ -125,16 +177,16 @@ $(document).ready(function(){
                                          <td class="text-center">${item["stockIN"]}</td>    
                                          <td class="text-center">${item["stockIN"]}</td>
                                          <td class="text-center">${item["reorderpoint"]}</td>
-
                                          </tr>`;
+                                        // initDataTables(item);
                                     })
                                     html += `</tbody>
                                     </table>`;
-                                    initDataTables();
+                                  initDataTables();
                                     setTimeout(() => {
                                         $("#table_content").html(html);
                                         initDataTables();
-                                        $(".price-list-description-row").hide();
+                                        //$(".price-list-description-row").hide();
                                     }, 500);   
                     
                             },
@@ -150,5 +202,10 @@ $(document).ready(function(){
     
         }); 
     }
+    
+  
+       
+    
+
 })
 

@@ -1012,8 +1012,8 @@ $(document).ready(function() {
 		let thisID 			= $(this).attr("id");
 		let stockinquantity = $(this).closest("tr").find(".stockinquantity").first().text();
 		let difference 	    = parseFloat(stockinquantity) - parseFloat(thisValue);
-		let unused 	        = difference < 0.01 ? "0" : (difference || 0);
-		$(this).closest("tr").find(".unused").first().text(unused.toFixed(2));
+		let unused 	        = difference < 0.01 ? 0 : (difference || 0);
+		$(this).closest("tr").find(".unused").first().text(unused?.toFixed(2));
 		if(parseFloat(stockinquantity) < parseFloat(thisValue)){
 			setTimeout(() => {
 				$("#"+thisID).addClass("is-invalid").removeClass("is-valid");
@@ -1665,13 +1665,13 @@ $(document).ready(function() {
 					}
 				}
 
-				let approversID = "", approversDate = "";
-				for (var i of Object.keys(data)) {
-					if (i[0] == "approversID")   approversID   = i[1];
-					if (i[0] == "approversDate") approversDate = i[1];
-				}
+				// let approversID = "", approversDate = "";
+				// for (var i of Object.keys(data)) {
+				// 	if (i[0] == "approversID")   approversID   = i[1];
+				// 	if (i[0] == "approversDate") approversDate = i[1];
+				// }
 				
-				const employeeID = getNotificationEmployeeID(approversID, approversDate, true);
+				const employeeID = getNotificationEmployeeID(data["approversID"], data["approversDate"], true);
 				let notificationData = false;
 				if (employeeID != sessionID) {
 					notificationData = {
@@ -1940,7 +1940,7 @@ $(document).ready(function() {
                                                     <div class="utilized">
                                                         <input 
                                                             type="text" 
-                                                            class="form-control quantity input-quantity"
+                                                            class="form-control quantity input-quantity text-center"
                                                             data-allowcharacters="[0-9]" 
                                                             max="99999" 
                                                             id="utilized${index}"

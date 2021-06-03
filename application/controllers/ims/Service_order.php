@@ -207,6 +207,14 @@ class Service_order extends CI_Controller {
 
         // DISABLE EDIT
         $spreadsheet->getActiveSheet()->getProtection()->setSheet(true);
+
+        // SET PASSWORD
+        $protection = $spreadsheet->getActiveSheet()->getProtection();
+        $protection->setPassword('BCGI');
+        $protection->setSheet(true);
+        $protection->setSort(true);
+        $protection->setInsertRows(true);
+        $protection->setFormatCells(true);
         
         $spreadsheet->getDefaultStyle()->getFont()->setName('Segoe UI');
         $spreadsheet->getDefaultStyle()->getFont()->setSize(9);
@@ -669,7 +677,6 @@ class Service_order extends CI_Controller {
 
             $targetDir = $folderDir.$filename;
             if (move_uploaded_file($_FILES["files"]["tmp_name"], $targetDir)) {
-                $employeeProfile = $filename;
 
                 $saveServiceOrderContract = $this->serviceorder->saveServiceOrderContract($serviceOrderID, $filename);
                 echo json_encode($saveServiceOrderContract);

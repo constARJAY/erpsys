@@ -76,7 +76,7 @@ class ListStock_model extends CI_Model {
             LEFT JOIN ims_inventory_item_tbl AS iii ON iidd.itemID =iii.itemID 
             WHERE iid.disposalStatus = 2 and iii.classificationID = '$classificationID' AND iii.categoryID = '$categoryID'
             GROUP BY iidd.itemID AND iidd.inventoryStorageID
-        )a GROUP BY itemID, inventoryStorageID";
+        )a GROUP BY itemID,inventoryStorageID";
         return $this->db->query($sql)->result_array();
 
     }

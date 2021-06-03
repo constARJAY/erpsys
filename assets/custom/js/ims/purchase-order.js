@@ -2230,6 +2230,25 @@ $(document).ready(function() {
 	// ----- END GET PURCHASE ORDER DATA -----
 
 
+	// ----- DISPLAY CONTRACT -----
+	function displayContract(filename = null, link = false) {
+		let result = "";
+		if (filename) {
+			if (link) {
+				result = `<a 
+					href="${base_url}assets/upload-files/contracts/${filename}"
+					class="pr-3"
+					target="_blank"
+					id="displayContract">${filename}</a>`;
+			} else {
+				result = `<div class="pr-3">${filename}<div>`
+			}
+		}
+		return result;
+	}
+	// ----- END DISPLAY CONTRACT -----
+
+
     // ----- FORM CONTENT -----
 	function formContent(data = false, readOnly = false, isRevise = false, isFromCancelledDocument = false) {
 		$("#page_content").html(preloader);
@@ -2300,11 +2319,18 @@ $(document).ready(function() {
 		if (purchaseOrderStatus == 2) {
 			approvedButton += `<div class="w-100 text-right pb-4">`;
 			if (grandTotalAmount > 150000) {
-				approvedButton += contractFile ? `
-				<a href="${base_url}assets/upload-files/contracts/${contractFile}" 
-					class="pr-3" 
-					id="displayContract"
-					target="_blank">${contractFile}</a>` : "";
+				const file = contractFile || "";
+				// approvedButton += contractFile ? `
+				// <a href="${base_url}assets/upload-files/contracts/${contractFile}" 
+				// 	class="pr-3" 
+				// 	id="displayContract"
+				// 	target="_blank">${contractFile}</a>` : "";
+
+				approvedButton += `
+				<span id="displayContractParent">
+					${displayContract(file, file ? true : false)}
+				</span>`;
+
 				if (employeeID == sessionID) {
 					approvedButton += `
 					<input type="file"
@@ -3323,7 +3349,7 @@ function savePurchaseOrderContract(data = null, filename = null) {
 									showConfirmButton: false,
 									timer:             2000,
 								});
-								$("#displayContract").text(filename);
+								$("#displayContract").text(message);
 							}, 500);
 						} else {
 							setTimeout(() => {

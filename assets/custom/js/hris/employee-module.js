@@ -70,14 +70,13 @@ $(document).ready(function() {
 				columnDefs: [
 					{ targets: 0, width: 50  },
 					{ targets: 1, width: 200 },
-					{ targets: 2, width: 150 },
+					{ targets: 2, width: 200 },
 					{ targets: 3, width: 150 },
-					{ targets: 4, width: 150 },
-					{ targets: 5, width: 300 },
+					{ targets: 4, width: 300 },
+					{ targets: 5, width: 150 },
 					{ targets: 6, width: 150 },
-					{ targets: 7, width: 150 },
-					{ targets: 8, width: 110 },
-					{ targets: 9, width: 80  },
+					{ targets: 7, width: 110 },
+					{ targets: 8, width: 80  },
 				],
 			});
 
@@ -206,7 +205,7 @@ $(document).ready(function() {
                 <tr style="white-space:nowrap">
                     <th>Employee Code</th>
                     <th>Fullname</th>
-                    <th>Department</th>
+                    <!-- <th>Department</th> -->
                     <th>Designation</th>
                     <th>Hourly Rate</th>
                     <th>Address</th>
@@ -264,9 +263,15 @@ $(document).ready(function() {
             <tr class="btnEdit" id="${encryptString(employeeID)}">
                 <td>${getFormCode("EMP", "2021-04-12", employeeID)}</td>
                 <td>${profileImg} <span class="ml-2">${fullname}<span></td>
-                <td>${departmentName}</td>
-                <td>${designationName}</td>
-                <td class="text-right">${formatAmount(employeeHourlyRate, true)}</td>
+                <!-- <td>${departmentName}</td>
+                <td>${designationName}</td> -->
+                <td>
+                    <div>
+                        ${designationName || '-'}
+                    </div>
+                    <small style="color:#848482;">${departmentName || '-'}</small>
+                </td>
+                <td class="text-right font-weight-bold">${formatAmount(employeeHourlyRate, true)}</td>
                 <td>${address}</td>
                 <td>${employeeMobile}</td>
                 <td>${employeeEmail}</td>
@@ -2617,6 +2622,7 @@ $(document).ready(function() {
                         $("#modal_employee_module_content").find("input, select, textarea").each(function() {
                             $(this).attr("disabled", true);
                         })
+                        $("#modal_employee_module_content").find(`<code>*</code>`).hide();
                         $("#btnUpdate").hide();
                     }
 

@@ -682,11 +682,6 @@ $(document).ready(function () {
             <i class="fas fa-barcode"></i> Barcode
             </a>`;
 			if (formatquantity < formatreceivingQuantity || formatquantity == formatreceivingQuantity) {
-
-				html += `<a class="btn btn-success btn-sm btn-block"
-					href="javascript:void(0);">
-					<i class="fas fa-check"></i> Settled
-					</a>`;
 			} else {
 				html += `<a class="btn btn-secondary btnRecord btn-sm btn-block" 
 				href="javascript:void(0);" 
@@ -1198,6 +1193,7 @@ $(document).ready(function () {
 									showConfirmButton: false,
 									timer: 2000,
 								}).then(() => {
+									$("#loader").show();
 									window.location.reload();
 								})
 								// 	setTimeout(() => {

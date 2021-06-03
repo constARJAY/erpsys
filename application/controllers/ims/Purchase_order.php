@@ -270,11 +270,20 @@ class Purchase_order extends CI_Controller {
         // DISABLE EDIT
         $spreadsheet->getActiveSheet()->getProtection()->setSheet(true);
 
+        // SET PASSWORD
+        $protection = $spreadsheet->getActiveSheet()->getProtection();
+        $protection->setPassword('BCGI');
+        $protection->setSheet(true);
+        $protection->setSort(true);
+        $protection->setInsertRows(true);
+        $protection->setFormatCells(true);
+
         $spreadsheet->getDefaultStyle()->getFont()->setName('Segoe UI');
         $spreadsheet->getDefaultStyle()->getFont()->setSize(9);
         $spreadsheet->getDefaultStyle()->getAlignment()->setVertical(Alignment::VERTICAL_BOTTOM);
         $spreadsheet->getDefaultStyle()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
         $spreadsheet->getActiveSheet()->getDefaultRowDimension()->setRowHeight(16);
+        
 
         // $drawing = new Drawing();
         // $drawing->setDescription('Header Logo');
@@ -715,8 +724,7 @@ class Purchase_order extends CI_Controller {
 
             $targetDir = $folderDir.$filename;
             if (move_uploaded_file($_FILES["files"]["tmp_name"], $targetDir)) {
-                $employeeProfile = $filename;
-
+                
                 $savePurchaseOrderContract = $this->purchaseorder->savePurchaseOrderContract($purchaseOrderID, $filename);
                 echo json_encode($savePurchaseOrderContract);
             }

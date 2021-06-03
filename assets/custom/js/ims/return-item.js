@@ -406,7 +406,7 @@ $(document).ready(function() {
 
 
 
-	function getBorroiwngList(id = null, clientID = 0, display = true) {
+	function getBorroiwngList(id = null, clientID = 0, display = false) {
 		let html ='';
 		var exist =[];
 
@@ -451,7 +451,8 @@ $(document).ready(function() {
 					
 					}
 			}
-	})
+		})
+		console.log(html);
 
 	
         // html += borrowingItemList.map(borrowing => {

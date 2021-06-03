@@ -1960,6 +1960,25 @@ $(document).ready(function() {
 	// ----- END COST SUMMARY -----
 
 
+	// ----- DISPLAY CONTRACT -----
+	function displayContract(filename = null, link = false) {
+		let result = "";
+		if (filename) {
+			if (link) {
+				result = `<a 
+					href="${base_url}assets/upload-files/contracts/${filename}"
+					class="pr-3"
+					target="_blank"
+					id="displayContract">${filename}</a>`;
+			} else {
+				result = `<div class="pr-3">${filename}<div>`
+			}
+		}
+		return result;
+	}
+	// ----- END DISPLAY CONTRACT -----
+
+
     // ----- FORM CONTENT -----
 	function formContent(data = false, readOnly = false, isRevise = false, isFromCancelledDocument = false) {
 		$("#page_content").html(preloader);
@@ -2051,11 +2070,16 @@ $(document).ready(function() {
 				const file = contractFile || "";
 				const path = file ? `${base_url}assets/upload-files/contracts/${file}` : "javascript:void(0)";
 
+				// approvedButton += `
+				// <a href="${path}" 
+				// 	class="pr-3" 
+				// 	target="_blank"
+				// 	id="displayContract">${file}</a>`;
 				approvedButton += `
-				<a href="${path}" 
-					class="pr-3" 
-					target="_blank"
-					id="displayContract">${file}</a>`;
+				<span id="displayContractParent">
+					${displayContract(file, file ? true : false)}
+				</span>`;
+
 				if (employeeID == sessionID) {
 					approvedButton += `
 					<input type="file"
@@ -3032,7 +3056,7 @@ function saveServiceOrderContract(data = null, filename = null) {
 									showConfirmButton: false,
 									timer:             2000,
 								});
-								$("#displayContract").text(filename);
+								$("#displayContract").text(message, true);
 							}, 500);
 						} else {
 							setTimeout(() => {

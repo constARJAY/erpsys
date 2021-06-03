@@ -182,7 +182,7 @@ class ServiceOrder_model extends CI_Model {
             ["contractFile" => $filename],
             ["serviceOrderID" => $serviceOrderID]);
         if ($query) {
-            return "true|Successfully submitted|$serviceOrderID|".date("Y-m-d");
+            return "true|$filename|$serviceOrderID|".date("Y-m-d");
         }
         return "false|System error: Please contact the system administrator for assistance!";
     }

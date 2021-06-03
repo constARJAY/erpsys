@@ -244,8 +244,8 @@ $(document).ready(function() {
 					{ targets: 3,  width: 280  },
 					{ targets: 4,  width: 300  },
 					{ targets: 5,  width: 120 },
-					{ targets: 6,  width: 280 },
-					{ targets: 7,  width: 40 },
+					{ targets: 6,  width: 250 },
+					{ targets: 7,  width: 100 },
 					{ targets: 8,  width: 40 }
 					// { targets: 9,  width: 40 }
 					// { targets: 9,  width: 200 },
@@ -268,8 +268,8 @@ $(document).ready(function() {
 					{ targets: 2,  width: 280  },
 					{ targets: 3,  width: 300  },
 					{ targets: 4,  width: 120 },
-					{ targets: 5,  width: 280 },
-					{ targets: 6,  width: 40 },
+					{ targets: 5,  width: 250 },
+					{ targets: 6,  width: 100 },
 					{ targets: 7,  width: 40 }
 					// { targets: 9,  width: 200 },
 				],
@@ -1693,13 +1693,13 @@ $(document).ready(function() {
                         <thead>
                             <tr>
 								${checkboxProjectHeader}
-                                <th>Barcode </th>
+                                <th>Barcode ${!disabled ? "<code>*</code>" : ""}</th>
                                 <th>Item Code </th>
                                 <th>Item Name </th>
-                                <th>Item Description</th>
+                                <th>Serial No.</th>
                                 <th>Storage Code </th>
                                 <th>Storage Name </th>
-                                <th>Quantity </th>
+                                <th>Quantity ${!disabled ? "<code>*</code>" : ""}</th>
                                 <th>UOM </th>
                             </tr>
                         </thead>

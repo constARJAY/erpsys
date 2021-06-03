@@ -125,4 +125,24 @@ class InventoryStockIn_model extends CI_Model {
         return $query->result_array();
 
     }
+
+    public function  getvalueData($inventoryReceivingID)
+    {
+        $sql = " select sum(quantity) as quantity ,sum(received) as received, employeeID, inventoryReceivingID from 
+        (
+        SELECT '' as quantity ,SUM(received) as received,iir.employeeID,iir.inventoryReceivingID
+        FROM ims_inventory_receiving_details_tbl  as  iird
+        LEFT JOIN ims_inventory_receiving_tbl AS iir ON iird.inventoryReceivingID  = iir.inventoryReceivingID
+         where iir.inventoryReceivingID  =9
+          union all
+         SELECT sum(stockInQuantity) AS quantity , '' as received, '' AS employeeID, '' inventoryReceivingID
+        FROM ims_stock_in_tbl
+        where  inventoryReceivingID =9
+         )a
+        
+        ";
+        $query = $this->db->query($sql);
+        //return $query->result($query);
+        return $query->result_array();
+    }
 }    

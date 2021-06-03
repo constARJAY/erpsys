@@ -250,7 +250,7 @@ class PurchaseOrder_model extends CI_Model {
             ["contractFile" => $filename],
             ["purchaseOrderID" => $purchaseOrderID]);
         if ($query) {
-            return "true|Successfully submitted|$purchaseOrderID|".date("Y-m-d");
+            return "true|$filename|$purchaseOrderID|".date("Y-m-d");
         }
         return "false|System error: Please contact the system administrator for assistance!";
     }
