@@ -2582,63 +2582,67 @@ $(document).ready(function() {
 
 		const id = decryptString($(this).attr("id"));
 		$("#modal_employee_module .page-title").text("EDIT EMPLOYEE");
-		$("#modal_employee_module").modal("show");
-
+        $("#modal_employee_module").modal("show");
 		$("#modal_employee_module_content").html(preloader);
 
-        const employeeData = getTableData(
-            `hris_employee_list_tbl`,
-            `*`,
-            `employeeID = ${id}`
-        );
-
-		if (employeeData) {
-			
-            try {
-                const content = modalContent(employeeData[0]);
-                setTimeout(() => {
-                    $("#modal_employee_module_content").html(content);
-                    initAll();
-                    employeeData[0].bankID && employeeData[0].bankID != 0 && $("[name=bankID]").trigger("change");
-                    $("[name=employeeBankAccountNo]").val(employeeData[0].employeeBankAccountNo);
-                    employeeData[0].scheduleID && employeeData[0].scheduleID != 0 && $("[name=scheduleID]").trigger("change");
-                    const disabledFutureDates = {
-                        autoUpdateInput:  false,
-                        singleDatePicker: true,
-                        showDropdowns:    true,
-                        autoApply:        true,
-                        locale: {
-                            format: "MMMM DD, YYYY",
-                        },
-                        maxDate: moment(new Date).format("MMMM DD, YYYY"),
+        setTimeout(() => {
+            if ($('#modal_employee_module').hasClass('show')) {
+                const employeeData = getTableData(
+                    `hris_employee_list_tbl`,
+                    `*`,
+                    `employeeID = ${id}`
+                );
+                
+                if (employeeData) {
+                    
+                    try {
+                        const content = modalContent(employeeData[0]);
+                        setTimeout(() => {
+                            $("#modal_employee_module_content").html(content);
+                            initAll();
+                            employeeData[0].bankID && employeeData[0].bankID != 0 && $("[name=bankID]").trigger("change");
+                            $("[name=employeeBankAccountNo]").val(employeeData[0].employeeBankAccountNo);
+                            employeeData[0].scheduleID && employeeData[0].scheduleID != 0 && $("[name=scheduleID]").trigger("change");
+                            const disabledFutureDates = {
+                                autoUpdateInput:  false,
+                                singleDatePicker: true,
+                                showDropdowns:    true,
+                                autoApply:        true,
+                                locale: {
+                                    format: "MMMM DD, YYYY",
+                                },
+                                maxDate: moment(new Date).format("MMMM DD, YYYY"),
+                            }
+                            const daterangepickerBirthday  = { ...disabledFutureDates, startDate: moment(employeeData[0]?.employeeBirthday)  };
+                            const daterangepickerHireddate = { ...disabledFutureDates, startDate: moment(employeeData[0]?.employeeHiredDate) };
+                            initDateRangePicker("#employeeBirthday", daterangepickerBirthday);
+                            initDateRangePicker("#employeeHiredDate", daterangepickerHireddate);
+                            initDataTables();
+        
+                            if (!allowedUpdate) {
+                                $("#modal_employee_module_content").find("input, select, textarea").each(function() {
+                                    $(this).attr("disabled", true);
+                                })
+                                $("#modal_employee_module_content").find(`<code>*</code>`).hide();
+                                $("#btnUpdate").hide();
+                            }
+        
+                        }, 500);
+                    } catch (error) {
+                        showNotification("danger", `${error}`);
+                        let html = `
+                        <div class="w-100 text-center text-danger py-5">
+                            <h5 style="font-weight: bold; font-size: 1.2rem;">${error}</h5>
+                        </div>`;
+                        $("#modal_employee_module_content").html(html);
                     }
-                    const daterangepickerBirthday  = { ...disabledFutureDates, startDate: moment(employeeData[0]?.employeeBirthday)  };
-                    const daterangepickerHireddate = { ...disabledFutureDates, startDate: moment(employeeData[0]?.employeeHiredDate) };
-                    initDateRangePicker("#employeeBirthday", daterangepickerBirthday);
-                    initDateRangePicker("#employeeHiredDate", daterangepickerHireddate);
-                    initDataTables();
-
-                    if (!allowedUpdate) {
-                        $("#modal_employee_module_content").find("input, select, textarea").each(function() {
-                            $(this).attr("disabled", true);
-                        })
-                        $("#modal_employee_module_content").find(`<code>*</code>`).hide();
-                        $("#btnUpdate").hide();
-                    }
-
-                }, 500);
-            } catch (error) {
-                showNotification("danger", `${error}`);
-                let html = `
-                <div class="w-100 text-center text-danger py-5">
-                    <h5 style="font-weight: bold; font-size: 1.2rem;">${error}</h5>
-                </div>`;
-                $("#modal_employee_module_content").html(html);
+        
+                } else {
+                    showNotification("danger", "There was an error fetching employee data.");
+                }
             }
-
-		} else {
-            showNotification("danger", "There was an error fetching employee data.");
-        }
+        }, 500);
+        
 	});
 	// ----- END OPEN EDIT MODAL -----
 
@@ -2702,69 +2706,72 @@ $(document).ready(function() {
             const confirmation = getConfirmation(method);
             confirmation.then(res => {
                 if (res.isConfirmed) {
-                    $.ajax({
-                        method:      "POST",
-                        url:         `${base_url}hris/employee_module/saveEmployeeData`,
-                        data,
-                        processData: false,
-                        contentType: false,
-                        global:      false,
-                        cache:       false,
-                        async:       false,
-                        dataType:    "json",
-                        beforeSend: function() {
-                            $("#loader").show();
-                        },
-                        success: function(data) {
-                            let result = data.split("|");
-            
-                            let isSuccess   = result[0];
-                            let message     = result[1];
-                            let insertedID  = result[2];
-                            let dateCreated = result[3];
-    
-                            let swalTitle;
-                            if (method == "add") {
-                            	swalTitle = `${getFormCode("EMP", dateCreated, insertedID)} added successfully!`;
-                            } else if (method == "edit") {
-                            	swalTitle = `${getFormCode("EMP", dateCreated, insertedID)} updated successfully!`;
-                            } 
-            
-                            if (isSuccess == "true") {
-                            	setTimeout(() => {
-                            		$("#loader").hide();
-                            		closeModals();
-                            		Swal.fire({
-                            			icon:              "success",
-                            			title:             swalTitle,
-                            			showConfirmButton: false,
-                            			timer:             2000,
-                            		});
-                            		callback && callback();
-                            	}, 500);
-                            } else {
-                            	setTimeout(() => {
-                            		$("#loader").hide();
-                            		Swal.fire({
-                            			icon:              "danger",
-                            			title:             message,
-                            			showConfirmButton: false,
-                            			timer:             2000,
-                            		});
-                            	}, 500);
+                    $("#loader").show();
+                    setTimeout(() => {
+                        $.ajax({
+                            method:      "POST",
+                            url:         `${base_url}hris/employee_module/saveEmployeeData`,
+                            data,
+                            processData: false,
+                            contentType: false,
+                            global:      false,
+                            cache:       false,
+                            async:       false,
+                            dataType:    "json",
+                            beforeSend: function() {
+                                $("#loader").show();
+                            },
+                            success: function(data) {
+                                let result = data.split("|");
+                
+                                let isSuccess   = result[0];
+                                let message     = result[1];
+                                let insertedID  = result[2];
+                                let dateCreated = result[3];
+        
+                                let swalTitle;
+                                if (method == "add") {
+                                    swalTitle = `${getFormCode("EMP", dateCreated, insertedID)} added successfully!`;
+                                } else if (method == "edit") {
+                                    swalTitle = `${getFormCode("EMP", dateCreated, insertedID)} updated successfully!`;
+                                } 
+                
+                                if (isSuccess == "true") {
+                                    setTimeout(() => {
+                                        $("#loader").hide();
+                                        closeModals();
+                                        Swal.fire({
+                                            icon:              "success",
+                                            title:             swalTitle,
+                                            showConfirmButton: false,
+                                            timer:             2000,
+                                        });
+                                        callback && callback();
+                                    }, 500);
+                                } else {
+                                    setTimeout(() => {
+                                        $("#loader").hide();
+                                        Swal.fire({
+                                            icon:              "danger",
+                                            title:             message,
+                                            showConfirmButton: false,
+                                            timer:             2000,
+                                        });
+                                    }, 500);
+                                }
+                            },
+                            error: function() {
+                                setTimeout(() => {
+                                    $("#loader").hide();
+                                    showNotification("danger", "System error: Please contact the system administrator for assistance!");
+                                }, 500);
                             }
-                        },
-                        error: function() {
+                        }).done(function() {
                             setTimeout(() => {
                                 $("#loader").hide();
-                                showNotification("danger", "System error: Please contact the system administrator for assistance!");
                             }, 500);
-                        }
-                    }).done(function() {
-                        setTimeout(() => {
-                            $("#loader").hide();
-                        }, 500);
-                    })
+                        })
+                    }, 500);
                 } else {
                     if (res.isDismissed) {
                         $("#modal_employee_module").modal("show");
