@@ -11,7 +11,7 @@ class ListStock_model extends CI_Model {
 
         $sql = "
         SELECT itemID, inventoryStorageID, itemCode,itemName,itemClassification,UOM,barcode,storageCode,StorageName,
-        FORMAT(sum(stockIN),2) AS stockIN,FORMAT(SUM(widhdrawn),2) AS widhdrawn,FORMAT(SUM(unusedQuantity),2) AS unusedQuantity,FORMAT(sum(borrowedQuantity),2) AS borrowedQuantity,FORMAT(SUM(returnQuantity),2) AS returnQuantity,FORMAT(SUM(transferredQuantity),2) AS transferredQuantity,
+        FORMAT(sum(stockIN) + SUM(unusedQuantity),2) AS stockIN,FORMAT(SUM(widhdrawn),2) AS widhdrawn,FORMAT(SUM(unusedQuantity),2) AS unusedQuantity,FORMAT(sum(borrowedQuantity),2) AS borrowedQuantity,FORMAT(SUM(returnQuantity),2) AS returnQuantity,FORMAT(SUM(transferredQuantity),2) AS transferredQuantity,
         FORMAT(SUM(disposalQuantity),2) AS disposalQuantity,FORMAT(SUM(endQuantity),2) AS endQuantity,
         FORMAT(reorderpoint,2) AS reorderpoint, format(stockInQuantity,2) AS stockInQuantity FROM
         (
@@ -32,7 +32,7 @@ class ListStock_model extends CI_Model {
             UNION  ALL 
             /*  Start material_usage*/
             select imwd.itemID,imwd.inventoryStorageID,'' AS itemCode, '' AS itemName, '' AS itemClassification , '' AS UOM, '' AS barcode,
-            '' AS storageCode, '' AS StorageName, '' AS stockIN, ROUND(sum(imwd.quantity),2) AS widhdrawn, ROUND(sum(imwd.Unused),2)  AS unusedQuantity,
+            '' AS storageCode, '' AS StorageName, '' AS stockIN, '' AS widhdrawn, ROUND(sum(imwd.Unused),2)  AS unusedQuantity,
             '' AS borrowedQuantity, '' AS returnQuantity, '' AS transferredQuantity, '' AS disposalQuantity, '' As endQuantity,
             '' AS reorderpoint, '' as stockInQuantity
             FROM ims_material_usage_tbl AS  imu
@@ -41,6 +41,18 @@ class ListStock_model extends CI_Model {
             WHERE  imu.materialUsageStatus = 2  and iii.classificationID = '$classificationID' AND iii.categoryID = '$categoryID'
             GROUP BY imwd.itemID AND imwd.inventoryStorageID
             /* End material_usage */
+            UNION ALL
+            /*  Start material withdrawal*/
+            select imwd.itemID,imwd.inventoryStorageID,'' AS itemCode, '' AS itemName, '' AS itemClassification , '' AS UOM, '' AS barcode,
+            '' AS storageCode, '' AS StorageName, '' AS stockIN, ROUND(sum(imwd.quantity),2) AS widhdrawn, ROUND(sum(imwd.Unused),2)  AS unusedQuantity,
+            '' AS borrowedQuantity, '' AS returnQuantity, '' AS transferredQuantity, '' AS disposalQuantity, '' As endQuantity,
+            '' AS reorderpoint, '' as stockInQuantity
+            FROM ims_material_withdrawal_tbl AS  imu
+            LEFT JOIN ims_material_withdrawal_details_tbl AS imwd ON imwd.materialWithdrawalID = imu.materialWithdrawalID
+            LEFT JOIN ims_inventory_item_tbl AS iii ON imwd.itemID =iii.itemID 
+            WHERE  imu.materialWithdrawalStatus = 2  and iii.classificationID = '$classificationID' AND iii.categoryID = '$categoryID' AND materialUsageID is null
+            GROUP BY imwd.itemID AND imwd.inventoryStorageID
+            /* End material Withdrawal */
             UNION ALL
             /*Start borrowing query */
             select ibd.itemID,ibd.inventoryStorageID, '' AS itemCode, '' AS itemName, '' AS itemClassification , '' AS UOM, '' AS barcode,
