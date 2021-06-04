@@ -11,6 +11,7 @@ class InventoryStockIn_model extends CI_Model {
     {
 
         $serialnumber1       = implode(",", $serialnumber);
+       
         $inventoryStorageID1 = implode(",", $inventoryStorageID);
         $insert_id = "";
         if($serialnumber1 ==""){
@@ -37,7 +38,7 @@ class InventoryStockIn_model extends CI_Model {
         }
       
         $query = $this->db->query("SELECT IFNULL(isi.itemID,'0') as itemID, isi.itemName,isit.itemName as totalitemname, (sum(stockInQuantity) + SUM(IFNULL(quantity,0))) AS quantity, stockInLocationID FROM ims_stock_in_tbl AS isi
-        LEFT JOIN ims_stock_in_total_tbl AS isit ON isi.itemID = isit.itemID AND  isi.stockInLocationID = isit.inventoryStorageID WHERE isi.itemID =$itemID AND isi.stockInLocationID IN($inventoryStorageID1) AND isi.stockinID =$insert_id GROUP BY itemID, stockInLocationID");
+        LEFT JOIN ims_stock_in_total_tbl AS isit ON isi.itemID = isit.itemID AND  isi.stockInLocationID = isit.inventoryStorageID WHERE isi.stockinID =$insert_id GROUP BY itemID, stockInLocationID");
 
             foreach ($query->result() as $row)
             {
@@ -63,6 +64,9 @@ class InventoryStockIn_model extends CI_Model {
             }
         return "true|Inventory Stock In Successfully";   
          }else{
+            //print_r("wilson");
+            //exit;
+        //kung may serial serial
         //kung may serial serial
         $record  = array();
         $insert_id = "";
@@ -82,36 +86,38 @@ class InventoryStockIn_model extends CI_Model {
                         'expirationDate'            =>$expirationdate[$count]);
             } 
             $this->db->insert_batch('ims_stock_in_tbl', $record);
-           
+            $id = $this->db->insert_id();
+
+            $query = $this->db->query("SELECT IFNULL(isi.itemID,'0') as itemID, isi.itemName,isit.itemName as totalitemname, (sum(stockInQuantity) + SUM(IFNULL(quantity,0))) AS quantity, stockInLocationID FROM ims_stock_in_tbl AS isi
+            LEFT JOIN ims_stock_in_total_tbl AS isit ON isi.itemID = isit.itemID AND  isi.stockInLocationID = isit.inventoryStorageID WHERE isi.inventoryReceivingID =$receivedID GROUP BY itemID, stockInLocationID");
+    
+                foreach ($query->result() as $row)
+                {
+                    $totalitemname                  =$row->totalitemname;
+                    $itemID                        = $row->itemID;
+                    $itemName                       = $row->itemName;
+                    $quantity                       =$row->quantity;
+                    $stockInLocationID              =$row->stockInLocationID;
+    
+                    $array = array('itemID' => $row->itemID, 'inventoryStorageID' => $row->stockInLocationID);
+                    $data = array(
+                            'itemID'            => $itemID,
+                            'itemName'          => $itemName,
+                            'quantity'          => $quantity,
+                            'inventoryStorageID'  =>$stockInLocationID);
+                            if($row->totalitemname =="" || $row->totalitemname ==NULL){
+                                $this->db->insert('ims_stock_in_total_tbl',$data);   
+                            }else{
+                                $this->db->where($array);  
+                                $this->db->update("ims_stock_in_total_tbl", $data);  
+                                
+                            }            
+                }
+            return "true|Inventory Stock In Successfully";   
         }
     }
-    $id = $this->db->insert_id();
-    $query = $this->db->query("SELECT IFNULL(isi.itemID,'0') as itemID, isi.itemName,isit.itemName as totalitemname, (sum(stockInQuantity) + SUM(IFNULL(quantity,0))) AS quantity, stockInLocationID FROM ims_stock_in_tbl AS isi
-        LEFT JOIN ims_stock_in_total_tbl AS isit ON isi.itemID = isit.itemID AND  isi.stockInLocationID = isit.inventoryStorageID WHERE isi.stockinID =$id GROUP BY itemID, stockInLocationID");
-
-            foreach ($query->result() as $row)
-            {
-                $totalitemname                  =$row->totalitemname;
-                $itemID                        = $row->itemID;
-                $itemName                       = $row->itemName;
-                $quantity                       =$row->quantity;
-                $stockInLocationID              =$row->stockInLocationID;
-
-                $array = array('itemID' => $row->itemID, 'inventoryStorageID' => $row->stockInLocationID);
-                $data = array(
-                        'itemID'            => $itemID,
-                        'itemName'          => $itemName,
-                        'quantity'          => $quantity,
-                        'inventoryStorageID'  =>$stockInLocationID);
-                        if($row->totalitemname =="" || $row->totalitemname ==NULL){
-                            $this->db->insert('ims_stock_in_total_tbl',$data);   
-                        }else{
-                            $this->db->where($array);  
-                            $this->db->update("ims_stock_in_total_tbl", $data);  
-                            
-                        }            
-            }
-        return "true|Inventory Stock In Successfully";   
+  
+   
  
         }
        

@@ -481,6 +481,7 @@ $(document).ready(function() {
 		setTimeout(() => {
 			$("#tableMyFormsParent").html(html);
 			initDataTables();
+			
 			return html;
 		}, 300);
 	}
@@ -846,9 +847,11 @@ $(document).ready(function() {
     // ----- END GET ITEM ROW -----
 
 	// ----- UPDATE TABLE ITEMS -----
+	//var i  = [0];
 	function updateTableItems() {
 		$(".itemProjectTableBody tr").each(function(i) {
-			// ROW ID
+			var rowCount = $('.itemProjectTableBody tr').length;
+			var rowcountminus = rowCount - 1;
 			$(this).attr("id", `tableRow${i}`);
 			$(this).attr("index", `${i}`);
 			$("td .barcode", this).attr("id", `barcode${i}`);
@@ -865,8 +868,6 @@ $(document).ready(function() {
 
 			$("td .StorageName", this).attr("id", `StorageName${i}`);
 
-		
-
 			$("td .serialnumber", this).attr("id", `serialnumber${i}`);
 
 			$("td .quantity", this).attr("id", `quantity${i}`);
@@ -877,22 +878,60 @@ $(document).ready(function() {
 			$("td .datereturn", this).attr("id", `datereturn${i}`);
 
 			$("td .quantityreturn", this).attr("id", `quantityreturn${i}`);
-			const disabledFutureDates = {
-				autoUpdateInput:  false,
-				singleDatePicker: true,
-				showDropdowns:    true,
-				autoApply:        true,
-				locale: {
-					format: "MMMM DD, YYYY",
-				},
-				maxDate: moment(new Date).format("MMMM DD, YYYY"),
-			}
-			initDateRangePicker(`#dateBorrowed${i}`);
+			
+			$(".dateBorrowed").each(function () {
+				const id = $(this).attr("id");
+				const value = $(this).val() || new Date;
+				//$(`#dateBorrowed${id}`).val(moment(new Date).format("MMMM DD, YYYY"));
+				initDateRangePicker(`#${id}`, {
+					autoUpdateInput: false,
+					singleDatePicker: true,
+					showDropdowns: true,
+					autoApply: true,
+					locale: {
+						format: "MMMM DD, YYYY",
+					},
+				})	
+			})
+			// }
+			$(`#dateBorrowed${rowcountminus}`).val(moment(new Date).format("MMMM DD, YYYY"));
+			//initDateRangePicker(`#dateBorrowed${i}`);
+
+			// initDateRangePicker(`#dateBorrowed${i}`, {
+			// 	autoUpdateInput: false,
+			// 	singleDatePicker: true,
+			// 	showDropdowns: true,
+			// 	autoApply: true,
+			// 	locale: {
+			// 		format: "MMMM DD, YYYY",
+			// 	},
+			// })	
+
+			// $(".dateBorrowed").each(function () {
+			// 	const id = $(this).attr("id");
+			// 	const value = $(this).val() || new Date;
+			// 	//$(`#dateBorrowed${id}`).val(moment(new Date).format("MMMM DD, YYYY"));
+			// 	initDateRangePicker(`#${id}`, {
+			// 		autoUpdateInput: false,
+			// 		singleDatePicker: true,
+			// 		showDropdowns: true,
+			// 		autoApply: true,
+			// 		locale: {
+			// 			format: "MMMM DD, YYYY",
+			// 		},
+			// 		minDate: moment(value)
+			// 	})	
+			// })
+			//$(`#dateBorrowed${i}`).val(moment(new Date).format("MMMM DD, YYYY"));
+			// $(`#dateBorrowed${i}`).val(moment(new Date).format("MMMM DD, YYYY"));
+		
+			
 			//initDateRangePicker(`#datereturn${i}`);
 			//$(`#dateBorrowed${i}`).data("daterangepicker").minDate = moment();
-			//$(`#dateBorrowed${i}`).val(moment(new Date).format("MMMM DD, YYYY"));
-
+			
 		})
+
+	
 	}
 	// ----- END UPDATE TABLE ITEMS -----
 	var barcodeArray =[];
@@ -1172,6 +1211,8 @@ $(document).ready(function() {
     // ----- INSERT ROW ITEM -----
     $(document).on("click", ".btnAddRow", function() {
 		let isProject = $(this).attr("project") == "true";
+		
+		//$(`.dateBorrowed`).val(moment(new Date).format("MMMM DD, YYYY"));
         let row = getItemRow(isProject);
 		if (isProject) {
 			$(".itemProjectTableBody").append(row);
@@ -1494,7 +1535,7 @@ $(document).ready(function() {
 			// if(data){
 
 			// }else{
-			// 	$(".dateBorrowed").val(moment(new Date).format("MMMM DD, YYYY"));
+				$(".dateBorrowed").val(moment(new Date).format("MMMM DD, YYYY"));
 			// }
 			// 	$(".dateBorrowed").data("daterangepicker").minDate = moment();
 			

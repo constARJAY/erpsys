@@ -5,15 +5,14 @@
                 <div class="col-lg-6 col-md-6">
                     <ul class="breadcrumb pl-0 pb-0 ">
                         <li class="breadcrumb-item"><a href="#"><i class="zmdi zmdi-home"></i> Dashboard</a></li>
-						<li class="breadcrumb-item"><i class="zmdi zmdi-folder"></i> &nbsp;Project Modules</li>
+						<li class="breadcrumb-item"><i class="fas fa-folder-open"></i>&nbsp;Project Modules</li>
                         <li class="breadcrumb-item active">Manage Project Budget</li>
                     </ul>
                     <h1 class="mt-3">Manage Project Budget</h1>
                     <span>This module is used to manage manage project budget details.</span>
 				</div>
 				<div class="col-lg-6 col-md-12 text-md-right">
-                <!-- <div class="text-right" id="headerButton"></div> -->
-                <button type="button" class="btn btn-default btn-add" id="btnAdd" data-toggle="tab" href="#addPhaseForm"><i class="icon-plus"></i> &nbsp;Show Budget</button>
+                    <button type="button" class="btn btn-default btn-add" id="btnAdd" data-toggle="tab" href="#addPhaseForm"><i class="icon-plus"></i> &nbsp;Show Budget</button>
                 </div>
             </div>
             <div class="bh_divider appendHeader"></div>
@@ -24,6 +23,7 @@
     <div class="container">
 		<div class="row clearfix row-deck mx-1">
             <div class="card col-md-12">
+                <div class="card-body" id="page_content"></div>
                 <div class="tab-content mt-3">
                     <div role="tabpanel" class="tab-pane" id="milestoneList">                   
                         <div class="card-body">
@@ -301,14 +301,9 @@
                     </div>
                 </div>
             </div>
-
-            
         </div>
 	</div>
-</div>
-    
 
-    
 </div>
 
 
@@ -331,8 +326,7 @@
 
 
 <script src="<?= base_url('assets/custom/js/gen/approver-function.js') ?>"></script>
-<!-- <script src="<?= base_url('assets/custom/js/fms/petty-cash-request.js') ?>"></script> -->
-<script>
+<!-- <script>
     $(document).ready(function () {
         $("#milestoneList").show();
         $("#addPhaseForm").hide();
@@ -344,4 +338,4 @@
 
 
 	});
-</script>
+</script> -->

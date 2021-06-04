@@ -15,7 +15,7 @@ class ListStock_model extends CI_Model {
         FORMAT(SUM(disposalQuantity),2) AS disposalQuantity,FORMAT(SUM(endQuantity),2) AS endQuantity,
         FORMAT(reorderpoint,2) AS reorderpoint, format(stockInQuantity,2) AS stockInQuantity FROM
         (
-            select isit.itemID,isit.inventoryStorageID,concat('ITM-',LEFT(iii.createdAt,2),'-',LPAD(iii.itemId,5,'0')) AS itemCode, isit.itemName, 
+            select isit.itemID,isit.inventoryStorageID,concat('ITM-',LEFT(iii.createdAt,2),'-',LPAD(isit.itemID,5,'0')) AS itemCode, iii.itemName, 
             iic.classificationName AS itemClassification , iii.unitOfMeasurementID AS UOM, isi.barcode,
             concat('ISM-',LEFT(iis.createdAt,2),'-',LPAD(iis.inventoryStorageID,5,'0')) AS storageCode, iis.inventoryStorageOfficeName AS StorageName,
             ROUND(isit.quantity,2) AS stockIN, '' AS widhdrawn, '' AS unusedQuantity,
@@ -53,7 +53,7 @@ class ListStock_model extends CI_Model {
             WHERE borrowingStatus = 2 and iii.classificationID = '$classificationID' AND iii.categoryID = '$categoryID'
             GROUP BY ibd.itemID AND ibd.inventoryStorageID
             /*End borrowing query */
-            UNION 
+            UNION ALL
             /* Start return query */
             select irid.itemID,irid.inventoryStorageID, '' AS itemCode, '' AS itemName, '' AS itemClassification , '' AS UOM, '' AS barcode,
             '' AS storageCode, '' AS StorageName, '' AS stockIN, '' AS widhdrawn, '' AS unusedQuantity,
