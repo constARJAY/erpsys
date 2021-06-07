@@ -188,6 +188,10 @@ $(document).ready(function() {
 			$("#tableTimeline").DataTable().destroy();
 		}
 
+        if ($.fn.DataTable.isDataTable("#projectTimeline")) {
+			$("#projectTimeline").DataTable().destroy();
+		}
+
         var table = $("#tableTimeline")
 			.css({ "min-width": "100%" })
 			.removeAttr("width")
@@ -205,6 +209,30 @@ $(document).ready(function() {
 					{ targets: 4, width: 180 },
 				],
 			});
+
+        var table = $("#projectTimeline")
+			.css({ "min-width": "100%" })
+			.removeAttr("width")
+			.DataTable({
+				proccessing:    false,
+				serverSide:     false,
+				scrollX:        true,
+                sorting:        false,
+                searching:      false,
+                paging:         false,
+                ordering:       false,
+                info:           false,
+				scrollCollapse: true,
+				columnDefs: [
+					{ targets: 0, width: 250 },
+					{ targets: 1, width: 250 },
+					{ targets: 2, width: 250 },
+					{ targets: 3, width: 120 },
+					{ targets: 4, width: 150 },
+					{ targets: 5, width: 150 },
+					{ targets: 6, width: 250 },
+				],
+			});
     }
     // ----- END DATATABLES -----
 
@@ -220,7 +248,7 @@ $(document).ready(function() {
 			html = `
             <button type="button" 
 				class="btn btn-default btn-light" 
-				id="btnBack"><i class="fas fa-arrow-left"></i> &nbsp;Back</button>`;
+				id="btnBack"><i class="fas fa-arrow-left"></i>&nbsp;Back</button>`;
 		}
 		$("#headerButton").html(html);
 	}
@@ -297,12 +325,12 @@ $(document).ready(function() {
         $("#page_content").html(preloader);
 
         let html = `
-        <div class="card-body">
+        <div class="">
             <div class="row px-2">
                 <div class="col-lg-2 col-md-6 col-sm-12 px-1">
                     <div class="card">
                         <div class="body">
-                            <small class="text-small text-muted font-weight-bold">Control No.</small>
+                            <small class="text-small text-muted font-weight-bold">Document No.</small>
                             <h6 class="mt-0 text-danger font-weight-bold">
                             MPB-21-00001
                             </h6>      
@@ -312,7 +340,7 @@ $(document).ready(function() {
                 <div class="col-lg-2 col-md-6 col-sm-12 px-1">
                     <div class="card">
                         <div class="body">
-                            <small class="text-small text-muted font-weight-bold">Status</small>
+                            <small class="text-small text-muted font-weight-bold">Budget Status</small>
                             <h6 class="mt-0 font-weight-bold">
                                 <span class="badge badge-outline-info w-100">For Approval</span>
                             </h6>      
@@ -398,7 +426,46 @@ $(document).ready(function() {
                 </div>
                 <div class="col-md-4 col-sm-12">
                     <div class="form-group">
-                        <label>Executive Name</label>
+                        <label>Start Date & End Date</label>
+                        <input type="text" class="form-control" disabled value="May 12, 2020 - June 19, 2020">
+                    </div>
+                </div>
+                <div class="col-md-4 col-sm-12">
+                    <div class="form-group">
+                        <label>Priority Level</label>
+                        <input type="text" class="form-control" disabled value="High">
+                    </div>
+                </div>
+                <div class="col-md-4 col-sm-12">
+                    <div class="form-group">
+                        <label>Issued</label>
+                        <input type="text" class="form-control" disabled value="For Development">
+                    </div>
+                </div>
+
+                <div class="col-12">
+                    <div class="row">
+                        <div class="col-md-6 col-sm-12">
+                            <div class="form-group">
+                                <label>Project Manager</label>
+                                <input type="text" class="form-control" disabled value="Robinjamin Gelilop">
+                            </div>
+                            <div class="form-group">
+                                <label>Team Leader</label>
+                                <input type="text" class="form-control" disabled value="Arjay Diangzon">
+                            </div>
+                        </div>
+                        <div class="col-md-6 col-sm-12">
+                            <div class="form-group">
+                                <label>Team Member</label>
+                                <textarea type="text" class="form-control" rows="5" style="resize: none" disabled>Wilson Parajas, Charles Verdadero, Mark Nieto</textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 col-sm-12">
+                    <div class="form-group">
+                        <label>Prepared By</label>
                         <input type="text" class="form-control" disabled value="Kay-Cee Allen Y. Tangalin">
                     </div>
                 </div>
@@ -410,40 +477,16 @@ $(document).ready(function() {
                 </div>
                 <div class="col-md-4 col-sm-12">
                     <div class="form-group">
-                        <label>Designation</label>
+                        <label>Position</label>
                         <input type="text" class="form-control" disabled value="Chief Finance Officer">
                     </div>
                 </div>
                 <div class="col-md-12 col-sm-12">
                     <div class="form-group">
-                    <label>Remarks</label>
+                    <label>Description</label>
                         <div class="remarks">
                             <textarea rows="4" style="resize: none" class="form-control" name="remarks" id="remarks"></textarea>
                         </div>
-                    </div>
-                </div>
-                <div class="col-md-6 col-sm-12">
-                    <div class="form-group">
-                        <label>Budget (Proposed)</label>
-                        <div class="input-group">
-                            <div class="input-group-prepend">
-                                <span class="input-group-text">₱</span>
-                            </div>
-                            <input type="text" class="form-control proposedBudget" min="0.1" max="999999" minlength="1" maxlength="20" name="proposedBudget" id="proposedBudget" value="0" project="true" style="text-align: right;" disabled>
-                        </div>
-                        <div class="invalid-feedback d-block" id="invalid-proposedBudget"></div> 
-                    </div>
-                </div>
-                <div class="col-md-6 col-sm-12">
-                    <div class="file">
-                        <label>Budget</label>
-                        <div class="input-group">
-                            <div class="input-group-prepend">
-                                <span class="input-group-text">₱</span>
-                            </div>
-                            <input type="text" class="form-control approvedBudget" min="0.1" max="999999" minlength="1" maxlength="20" name="approvedBudget" id="approvedBudget" value="0" project="true" style="text-align: right;">
-                        </div>
-                        <div class="invalid-feedback d-block" id="invalid-approvedBudget"></div> 
                     </div>
                 </div>
             </div>    
@@ -452,86 +495,117 @@ $(document).ready(function() {
             <table class="table table-striped" id="projectTimeline">
                 <thead>
                     <tr style="white-space: nowrap">
-                        <th class="text-center">
-                            <div class="action">
-                                <input type="checkbox" class="checkboxall" project="true">
-                            </div>
-                        </th>
-                        <th>Phase & Milestone</th>
-                        <th>Tasks Name</th>
-                        <th>Total Hour/s Alotted</th>
+                        <th>Phase</th>
+                        <th>Milestone</th>
+                        <th>Task Name</th>
+                        <th>Alotted Hours</th>
                         <th>Start Date</th>
                         <th>End Date</th>
-                        <th>Status</th>
                         <th>Remarks</th>
                     </tr>
                 </thead>
-                <tbody class="itemProjectTableBody" project="true">
+                <tbody class="itemProjectTableBody">
                     <tr>
-                        <td class="text-center">
-                            <div class="action">
-                                <input type="checkbox" class="checkboxrow" id="checkboxrow0" company="true">
-                            </div>
+                        <td>
+                            <input type="text" 
+                                class = "form-control" 
+                                value = "Sample Phase"
+                                disabled>
                         </td>
                         <td>
-                            <div class="form-group mt-2">
-                                <select class="form-control validate select2"
-                                    name="phaseMilestone"
-                                    id="input_phaseMilestone"
-                                    style="width: 100%"
-                                    required
-                                    disabled>
-                                    <option selected disabled>Select Phase & Milestone</option>             
-                                </select>
-                            </div>
+                            <input type="text" 
+                                class = "form-control" 
+                                value = "Sample Milestone"
+                                disabled>
                         </td>
                         <td>
-                            <div class="form-group mt-2">
-                                <input type="text" class="form-control" disabled min="" max="" minlength="1" maxlength="250" name="milestoneName" id="milestoneName" value="">
-                            </div>
+                            <input type="text" 
+                                class = "form-control" 
+                                value = "Task Name"
+                                disabled>
                         </td>
                         <td>
-                            <div class="form-group mt-2">
-                                <input type="text" class="form-control" disabled min="" max="" minlength="1" maxlength="250" name="milestoneName" id="milestoneName" value="">
-                            </div>
+                            <input type="text" 
+                                class = "form-control" 
+                                value = "Alotted Hours"
+                                disabled>
                         </td>
                         <td>
-                            <div class="form-group mt-2">
-                                <input type="date" class="form-control" disabled min="" max="" minlength="1" maxlength="250" name="milestoneName" id="milestoneName" value="">
-                            </div>
+                            <input type="text" 
+                                class = "form-control" 
+                                value = "Start Date"
+                                disabled>
                         </td>
                         <td>
-                            <div class="form-group mt-2">
-                                <input type="date" class="form-control" disabled min="" max="" minlength="1" maxlength="250" name="milestoneName" id="milestoneName" value="">
-                            </div>
+                            <input type="text" 
+                                class = "form-control" 
+                                value = "End Date"
+                                disabled>
                         </td>
                         <td>
-                            <div class="form-group mt-2">
-                                <select class="form-control validate select2"
-                                    name="project5"
-                                    id="input_phaseMilestone"
-                                    style="width: 100%"
-                                    required
-                                    disabled>
-                                    <option selected disabled>To Do</option>             
-                                </select>
-                            </div>    
+                            <input type="text" 
+                                class = "form-control" 
+                                value = "Sample Remarks"
+                                disabled>
                         </td>
-                        <td>
-                            <div class="remarks">
-                                <textarea rows="2" style="resize: none" class="form-control" name="remarks" id="remarks" disabled></textarea>
-                            </div>
-                        </td>
+                        
                     </tr>
                 </tbody>
             </table>
-            <div class="w-100 d-flex justify-content-between align-items-center py-2 addReq">
+
+            <div class="row mt-4">
+                <div class="col-md-6 col-sm-12">
+                    <div class="form-group">
+                        <label>Proposed Budget</label>
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text">₱</span>
+                            </div>
+                            <input type="text" 
+                                class="form-control text-right proposedBudget amount" 
+                                min="0.1" 
+                                max="999999" 
+                                minlength="1" 
+                                maxlength="20" 
+                                name="proposedBudget" 
+                                id="proposedBudget" 
+                                value="0"
+                                disabled>
+                        </div>
+                        <div class="invalid-feedback d-block" id="invalid-proposedBudget"></div> 
+                    </div>
+                </div>
+                <div class="col-md-6 col-sm-12">
+                    <div class="form-group">
+                        <label>Allocated Budget <code>*</code></label>
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text">₱</span>
+                            </div>
+                            <input type="text" 
+                                class="form-control amount text-right allocatedBudget" 
+                                min="0.01" 
+                                max="999999" 
+                                minlength="1" 
+                                maxlength="20" 
+                                name="allocatedBudget" 
+                                id="allocatedBudget" 
+                                value="0">
+                        </div>
+                        <div class="invalid-feedback d-block" id="invalid-allocatedBudget"></div> 
+                    </div>
+                </div>
+                
             </div>
+
             <div class="col-md-12 text-right mt-3 mb-3 addReq">
-                <button class="btn btn-submit px-5 p-2" id="btnSubmit"><i class="fas fa-paper-plane"></i>Approve
+                <button class="btn btn-submit px-5 p-2" 
+                    id="btnSubmit">
+                    <i class="fas fa-paper-plane"></i> Submit
                 </button>
-                <button class="btn btn-cancel px-5 p-2" id="btnCancel"><i class="fas fa-ban"></i> 
-                    Deny
+                <button class="btn btn-cancel px-5 p-2" 
+                    id="btnCancel">
+                    <i class="fas fa-ban"></i> Cancel
                 </button>
             </div>
         </div>`;

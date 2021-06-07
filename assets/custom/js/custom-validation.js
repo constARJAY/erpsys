@@ -49,6 +49,7 @@ const initAll = () => {
 	initInputmask();
 	initAmount();
 	initQuantity();
+	initHours();
 };
 // ----- END REINITIALIZE ALL FUNCTION -----
 
@@ -145,6 +146,20 @@ const initQuantity = (element = null) => {
 };
 initQuantity();
 // ----- END INITIALIZE QUANTITY FORMAT -----
+
+
+// ----- INITIALIZE HOURSE FORMAT -----
+const initHours = (element = null) => {
+	let elem = getElement(element, ".input-hours");
+	$(elem).inputmask({
+		alias: "currency",
+		prefix: "",
+		allowMinus: false,
+		allowPlus:  false,
+	});
+};
+initHours();
+// ----- END INITIALIZE HOURSE FORMAT -----
 
 
 // ----- RESET FORM -----
@@ -527,6 +542,61 @@ const checkQuantity = (elementID, invalidFeedback, value) => {
 // ----- END VALIDATE QUANTITY -----
 
 
+// ----- VALIDATE HOURS -----
+const checkHours = (elementID, invalidFeedback, value) => {
+	const validated = $(elementID).hasClass("validated");
+	const min = $(elementID).attr("min") ? +$(elementID).attr("min") : false;
+	const max = $(elementID).attr("max") ? +$(elementID).attr("max") : false;
+	let hourValue = +value.split(",").join("");
+
+	if (typeof min != "number" && typeof max != "number") {
+		validated
+			? $(elementID).removeClass("is-invalid").addClass("is-valid")
+			: $(elementID).removeClass("is-invalid").removeClass("is-valid");
+		invalidFeedback.text("");
+	} else if (typeof min != "number" && typeof max == "number") {
+		if (hourValue > max) {
+			$(elementID).removeClass("is-valid").addClass("is-invalid");
+			invalidFeedback.text(`Please input hour less than ${formatAmount(max)}`);
+		} else {
+			validated
+				? $(elementID).removeClass("is-invalid").addClass("is-valid")
+				: $(elementID).removeClass("is-invalid").removeClass("is-valid");
+			invalidFeedback.text("");
+		}
+	} else if (typeof min == "number" && typeof max != "number") {
+		if (hourValue < min) {
+			$(elementID).removeClass("is-valid").addClass("is-invalid");
+			invalidFeedback.text(`Please input hour greater than ${formatAmount(min)}`);
+		} else {
+			validated
+				? $(elementID).removeClass("is-invalid").addClass("is-valid")
+				: $(elementID).removeClass("is-invalid").removeClass("is-valid");
+			invalidFeedback.text("");
+		}
+	} else if (typeof min == "number" && typeof max == "number") {
+		if (hourValue >= min && hourValue > max) {
+			$(elementID).removeClass("is-valid").addClass("is-invalid");
+			invalidFeedback.text(`Please input hour less than ${formatAmount(max)}`);
+		} else if (hourValue >= min && hourValue <= max) {
+			validated
+				? $(elementID).removeClass("is-invalid").addClass("is-valid")
+				: $(elementID).removeClass("is-invalid").removeClass("is-valid");
+			invalidFeedback.text("");
+		} else if (hourValue < min && hourValue <= max) {
+			$(elementID).removeClass("is-valid").addClass("is-invalid");
+			invalidFeedback.text(`Please input hour greater than ${formatAmount(min - 0.01)}`);
+		}
+	} else {
+		validated
+			? $(elementID).removeClass("is-invalid").addClass("is-valid")
+			: $(elementID).removeClass("is-invalid").removeClass("is-valid");
+		invalidFeedback.text("");
+	}
+};
+// ----- END VALIDATE HOURS -----
+
+
 // ----- VALIDATE IF EXISTS -----
 const checkExists = (elementID, invalidFeedback) => {
 	let inputs = {};
@@ -707,6 +777,7 @@ const validateInput = (elementID) => {
 	let currency = $(elementID).hasClass("amount");
 	let number   = $(elementID).hasClass("number");
 	let quantity = $(elementID).hasClass("input-quantity");
+	let hours    = $(elementID).hasClass("input-hours");
 	let required = $(elementID).attr("required");
 	let disabled = $(elementID).attr("disabled");
 	let value =
@@ -841,6 +912,7 @@ const validateInput = (elementID) => {
 					number && checkNumber(elementID, invalidFeedback, value);
 					currency && checkAmount(elementID, invalidFeedback, value);
 					quantity && checkQuantity(elementID, invalidFeedback, value);
+					hours && checkHours(elementID, invalidFeedback, value);
 					checkEmail(elementID, invalidFeedback, value);
 					checkURL(elementID, invalidFeedback, value);
 					checkExists(elementID, invalidFeedback);
@@ -851,6 +923,7 @@ const validateInput = (elementID) => {
 				number && checkNumber(elementID, invalidFeedback, value);
 				currency && checkAmount(elementID, invalidFeedback, value);
 				quantity && checkQuantity(elementID, invalidFeedback, value);
+				hours && checkHours(elementID, invalidFeedback, value);
 				checkEmail(elementID, invalidFeedback, value);
 				checkURL(elementID, invalidFeedback, value);
 				checkExists(elementID, invalidFeedback);
@@ -1002,6 +1075,7 @@ $(function () {
 			number && checkNumber(elementID, invalidFeedback, value);
 			currency && checkAmount(elementID, invalidFeedback, value);
 			quantity && checkQuantity(elementID, invalidFeedback, value);
+			hours && checkHours(elementID, invalidFeedback, value);
 			checkEmail(elementID, invalidFeedback, value);
 			checkURL(elementID, invalidFeedback, value);
 			checkExists(elementID, invalidFeedback);
@@ -1022,6 +1096,7 @@ $(function () {
 				number && checkNumber(elementID, invalidFeedback, value);
 				currency && checkAmount(elementID, invalidFeedback, value);
 				quantity && checkQuantity(elementID, invalidFeedback, value);
+				hours && checkHours(elementID, invalidFeedback, value);
 				checkEmail(elementID, invalidFeedback, value);
 				checkURL(elementID, invalidFeedback, value);
 				checkExists(elementID, invalidFeedback);
@@ -1235,6 +1310,21 @@ $(function () {
 			? $(elementID).parent().parent().find(".invalid-feedback")
 			: $(elementID).parent().parent().parent().find(".invalid-feedback");
 		checkQuantity(elementID, invalidFeedback, value);
+	})
+	// ----- END CHECK AMOUNT KEYUP -----
+
+
+	// ----- CHECK AMOUNT KEYUP -----
+	$(document).on("keyup", ".input-hours", function() {
+		let value     = $(this).val();
+		let elementID = `#${$(this).attr("id")}`;
+		let invalidFeedback =
+		$(elementID).parent().find(".invalid-feedback").length > 0
+			? $(elementID).parent().find(".invalid-feedback")
+			: $(elementID).parent().parent().find(".invalid-feedback").length > 0
+			? $(elementID).parent().parent().find(".invalid-feedback")
+			: $(elementID).parent().parent().parent().find(".invalid-feedback");
+		checkHours(elementID, invalidFeedback, value);
 	})
 	// ----- END CHECK AMOUNT KEYUP -----
 
