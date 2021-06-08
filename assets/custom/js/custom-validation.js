@@ -1041,17 +1041,18 @@ $(function () {
 
 	// ----- CHECK IF THE INPUTS IS VALID OR INVALID BASED ON THE LENGTH -----
 	$(document).on("keyup", ".validate", function (e) {
-		let name = $(this).attr("name");
+		let name      = $(this).attr("name");
 		let elementID = $(this).attr("id");
-		elementID = `#${$(this).attr("id")}`;
-		let required = $(this).attr("required");
+			elementID = `#${$(this).attr("id")}`;
+		let required  = $(this).attr("required");
 		let minLength = $(this).attr("minlength");
 		let maxLength = $(this).attr("maxlength");
 		let validated = $(this).hasClass("validated");
-		let currency = $(this).hasClass("amount");
-		let quantity = $(this).hasClass("input-quantity");
-		let number = $(this).hasClass("number");
-		let value = $(this).val().trim();
+		let currency  = $(this).hasClass("amount");
+		let quantity  = $(this).hasClass("input-quantity");
+		let hours     = $(this).hasClass("input-hours");
+		let number    = $(this).hasClass("number");
+		let value     = $(this).val().trim();
 		let valLength = value.length;
 		let invalidFeedback =
 			$(elementID).parent().find(".invalid-feedback").length > 0

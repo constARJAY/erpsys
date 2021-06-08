@@ -132,9 +132,6 @@ const sweetAlertConfirmation = (
                         showConfirmButton: false,
                         timer: 2000
                     });
-                        if(modalID == "isNotModal" ){
-                            callback && callback();
-                        }
                 }
             } else {
                 preventRefresh(false);

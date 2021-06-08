@@ -406,7 +406,7 @@ $(document).ready(function() {
 
     // ----- CLICK TASK NAME OR CARET -----
     $(document).on("click", ".btnCaret", function() {
-        const $parent  = $(this).closest("tr");
+        $parent  = $(this).closest("tr");
         const taskName = $(this).attr("taskName");
         const phase    = $(this).attr("phase");
         const display  = $(this).attr("display") == "true";
@@ -456,10 +456,10 @@ $(document).ready(function() {
 
 
     // ----- SELECT ASSIGNED EMPLOYEE -----
-    const getAssignedEmployee = (taskName = null) => {
+    const getAssignedEmployee = (phase = null, taskName = null) => {
         let employees = [];
-        if (taskName) {
-            $(`[name="assignEmployee"][taskName="${taskName}"]`).each(function() {
+        if (phase && taskName) {
+            $(`[name="assignEmployee"][phase="${phase}"][taskName="${taskName}"]`).each(function() {
                 const employeeID = $(this).val();
                 if (employeeID && employeeID.length > 0) {
                     employeeID.map(tempID => {
@@ -478,9 +478,20 @@ $(document).ready(function() {
     }
 
     $(document).on("change", `[name="assignEmployee"]`, function() {
+        const phase     = $(this).attr("phase");
         const taskName  = $(this).attr("taskName");
-        const employees = getAssignedEmployee(taskName);
+        const employees = getAssignedEmployee(phase, taskName);
         displayAssignedEmployee(employees, taskName);
+        
+        $parent = $(this).closest(".form-group");
+        $(this).parent()
+            .find(".selection")
+            .children()
+            .removeClass("is-invalid")
+            .removeClass("is-valid")
+            .removeClass("no-error")
+            .removeClass("has-error");
+            $parent.find(".invalid-feedback").text("");
     })
     // ----- END SELECT ASSIGNED EMPLOYEE -----
 
@@ -524,17 +535,17 @@ $(document).ready(function() {
     
                 taskManHoursContent += `
                 <div class="form-group my-1">
-                    <input class="form-control input-hours text-center"
+                    <input class="form-control custom-input-hours text-center"
                         value="0"
                         name="manHours"
                         min="0.00"
-                        max="${manHours}"
+                        max="9999999999"
                         minlength="1"
                         maxlength="10"
                         taskName="${taskName}"
                         phase="${phaseCode}"
                         required>
-                    <div class="invalid-feedback"></div>
+                    <div class="invalid-feedback d-block"></div>
                 </div>`;
     
                 const teamMemberOptions = teamMembers.map(member => {
@@ -553,12 +564,11 @@ $(document).ready(function() {
                         name="assignEmployee"
                         multiple="multiple"
                         phase="${phaseCode}"
-                        taskName="${taskName}"
-                        required>
+                        taskName="${taskName}">
                         <option disabled>Select Employee</option>
                         ${teamMemberOptions}
                     </select>
-                    <div class="invalid-feedback"></div>
+                    <div class="invalid-feedback d-block"></div>
                 </div>`;
             })
 
@@ -686,41 +696,19 @@ $(document).ready(function() {
     function updateTables() {
         $(`[name="manHours"]`).each(function(index) {
             $parent = $(this).closest(".form-group");
+            $(this).attr("index", index);
             $(this).attr("id", `manHours${index}`);
             $parent.find(".invalid-feedback").attr("id", `invalid-manHours${index}`);
         })
+
+        $(`[name="assignEmployee"]`).each(function(index) {
+            $parent = $(this).closest(".form-group");
+            $(this).attr("index", index);
+            $(this).attr("id", `assignEmployee${index}`);
+            $parent.find(".invalid-feedback").attr("id", `invalid-assignEmployee${index}`);
+        })
     }
     // ----- END UPDATE TABLE -----
-
-
-    // DITO NA AKOOOOOOOO
-    // ----- VALIDATE MAN HOURS -----
-    function validateManHours(phase = "", taskName = "", elementID = null) {
-        if (phase && taskName) {
-            const $parent = $(elementID).closest(".form-group");
-            const basisManHours = getNonFormattedAmount($(`[phase="${phase}"][taskName="${taskName}"][basis="true"]`).val());
-
-            let totalManHours = 0;
-            $(`[name="manHours"][phase="${phase}"][taskName="${taskName}"]`).each(function() {
-                const manHours = getNonFormattedAmount($(this).val()) || 0;
-                totalManHours += manHours;
-            })
-
-            console.log(parent, elementID, totalManHours, basisManHours);
-            if (totalManHours > basisManHours) {
-                setTimeout(() => {
-                    $(elementID).removeClass("is-valid").addClass("is-invalid");
-                    $parent.find(".invalid-feedback").text("Excessive amount of hours.");
-                }, 50);
-            } else {
-                setTimeout(() => {
-                    $(elementID).removeClass("is-valid").removeClass("is-invalid");
-                    $parent.find(".invalid-feedback").text("");
-                }, 50);
-            }
-        }
-    }
-    // ----- END VALIDATE MAN HOURS -----
 
 
     // ----- KEYUP MAN HOURS -----
@@ -774,6 +762,18 @@ $(document).ready(function() {
         return button;
     }
     // ----- END FORM BUTTON -----
+
+
+    // ----- INPUTMASK HOURS -----
+    function inputmaskHours() {
+        $(".custom-input-hours").inputmask({
+            alias: "currency",
+            prefix: "",
+            allowMinus: false,
+            allowPlus:  false,
+        });
+    }
+    // ----- END INPUTMASK HOURS -----
 
 
     // ----- FORM CONTENT -----
@@ -840,6 +840,7 @@ $(document).ready(function() {
             updateTables();
             initAll();
             multipleSelect2Placeholder();
+            inputmaskHours();
         }, 50);
     }
     // ----- END FORM CONTENT -----
@@ -884,71 +885,191 @@ $(document).ready(function() {
 		const status = $(this).attr("status");
 
 		if (status != "false" && status != 0) {
-			
-		// 	if (revise) {
-		// 		const action = revise && !fromCancelledDocument && "insert" || (id ? "update" : "insert");
-		// 		const data   = getPurchaseOrderData(action, "save", "0", id, status, revise);
-		// 		if (!fromCancelledDocument) {
-		// 			delete data["timelineBuilderID"];
-		// 			data["revisePurchaseOrderID"] = id;
-		// 		} else {
-		// 			delete data["action"];
-		// 			data["purchaseOrderStatus"] = 0;
-		// 			data["action"]              = "update";
-		// 		}
-	
-		// 		savePurchaseOrder(data, "save", null, pageContent);
-		// 	} else {
-		// 		$("#page_content").html(preloader);
-		// 		pageContent();
-	
-		// 		if (employeeID != sessionID) {
-		// 			$("[redirect=forApprovalTab]").length > 0 && $("[redirect=forApprovalTab]").trigger("click");
-		// 		}
-		// 	}
-
-		} else {
-			const action = id ? "update" : "insert";
-		// 	const data   = getPurchaseOrderData(action, "save", "0", id, status, revise);
-		// 	data["purchaseOrderStatus"] = 0;
-
-		// 	savePurchaseOrder(data, "save", null, pageContent);
             $("#page_content").html(preloader);
             setTimeout(() => {
                 pageContent();
             }, 50);
+
+		} else {
+            saveProjectBoard("save", pageContent);
 		}
 	});
 	// ----- END CLICK BUTTON BACK -----
 
 
+    // ----- VALIDATE MAN HOURS -----
+    function validateManHours(phase = "", taskName = "", elementID = null) {
+        const checkManHours = (phase, taskName, elementID, all = false) => {
+            const $parent = $(elementID).closest(".form-group");
+            const basisManHours = getNonFormattedAmount($(`[phase="${phase}"][taskName="${taskName}"][basis="true"]`).val());
+
+            let totalManHours = 0;
+            $(`[name="manHours"][phase="${phase}"][taskName="${taskName}"]`).each(function() {
+                const manHours = getNonFormattedAmount($(this).val()) || 0;
+                totalManHours += manHours;
+            })
+
+            let condition = all ? 
+                totalManHours != basisManHours : totalManHours > basisManHours;
+            if (condition) {
+                let msg = all ? "Invalid man hours value." : "Excessive amount of hours.";
+                $(elementID).removeClass("is-valid").addClass("is-invalid");
+                $parent.find(".invalid-feedback").text(msg);
+            } else {
+                $(`[name="manHours"][phase="${phase}"][taskName="${taskName}"]`).each(function() {
+                    const $myParent = $(this).closest(".form-group");
+                    const id = "#"+$(this).attr("id");
+                    $(id).removeClass("is-valid").removeClass("is-invalid");
+                    $myParent.find(".invalid-feedback").text("");
+                });
+            }
+        }
+
+        if (phase && taskName && elementID) {
+            checkManHours(phase, taskName, elementID)
+        } else {
+            $(`[name="manHours"]`).each(function() {
+                const id       = "#"+$(this).attr("id");
+                const phase    = $(this).attr("phase");
+                const taskName = $(this).attr("taskName");
+                checkManHours(phase, taskName, id, true);
+            })
+        }
+    }
+    // ----- END VALIDATE MAN HOURS -----
+
+
+    // ----- VALIDATE ASSIGNEE -----
+    function validateAssignee() {
+        $(`[name="assignEmployee"]`).each(function() {
+            $parent = $(this).closest(".form-group");
+            const index    = $(this).attr("index");
+            const phase    = $(this).attr("phase");
+            const taskName = $(this).attr("taskName");
+            const employeeIDArr = $(this).val();
+
+            const manHours = getNonFormattedAmount($(`[name="manHours"][phase="${phase}"][taskName="${taskName}"][index="${index}"]`).val());
+            if (manHours > 0 && employeeIDArr.length == 0) {
+                $(this).parent()
+                    .find(".selection")
+                    .children()
+                    .removeClass("is-invalid")
+                    .removeClass("is-valid")
+                    .removeClass("no-error")
+                    .addClass("has-error");
+                    $parent.find(".invalid-feedback").text("This field is required!");
+            } else {
+                $(this).parent()
+                    .find(".selection")
+                    .children()
+                    .removeClass("is-invalid")
+                    .removeClass("is-valid")
+                    .removeClass("no-error")
+                    .removeClass("has-error");
+                    $parent.find(".invalid-feedback").text("");
+            }
+        })
+    }
+    // ----- VALIDATE ASSIGNEE -----
+
+
+    // ----- FOCUS ON ERROR -----
+    async function validateInputs() {
+        const checkManHours = validateManHours();
+        const checkAssignee = validateAssignee();
+        
+        $(`[name="manHours"]`).each(function() {
+            $parent = $(this).closest("tr");
+            const hasInvalid = $(this).hasClass("is-invalid");
+            if (hasInvalid) {
+                const displayed = $parent.find(".btnCaret").attr("display") == "true";
+                if (!displayed) {
+                    $parent.find(".btnCaret").trigger("click");
+                }
+            }
+        })
+
+        $(`[name="assignEmployee"]`).each(function() {
+            $parent = $(this).closest("tr");
+            const hasInvalid = $(this).parent().find(".selection").children().hasClass("has-error");
+            if (hasInvalid) {
+                const displayed = $parent.find(".btnCaret").attr("display") == "true";
+                if (!displayed) {
+                    $parent.find(".btnCaret").trigger("click");
+                }
+            }
+        })
+
+        if ($(`.is-invalid, .has-error`).length > 0) {
+            $(`.is-invalid, .has-error`).first().focus();
+            return false;
+        }
+        return true;
+    }
+    // ----- END FOCUS ON ERROR -----
+
+
+    // ----- CLICK BUTTON SUBMIT -----
+	$(document).on("click", "#btnSubmit", function () {
+        formButtonHTML(this);
+		const id = decryptString($(this).attr("timelineBuilderID"));
+
+        setTimeout(() => {
+            validateInputs().then(res => {
+                if (res) {
+                    saveProjectBoard("submit", pageContent);
+                }
+                formButtonHTML(this, false);
+            });
+        }, 10);
+        
+        // const checkInputs   = validateInputs();
+        // if (checkInputs) {
+
+        // } else {
+        //     setTimeout(() => {
+                
+        //     }, 10);
+        // }
+
+		// const validate = validateForm("form_purchase_order");
+		// const isValid  = checkTableMaterialsEquipment();
+		// removeIsValid("#tableProjectOrderItems0");
+		// removeIsValid("#tableCompanyOrderItems0");
+		// const costSummary = checkCostSummary();
+
+		// if (validate && isValid && costSummary) {
+		// 	const action = revise && !isFromCancelledDocument && "insert" || (id ? "update" : "insert");
+		// 	const data   = getPurchaseOrderData(action, "submit", "1", id, "0", revise);
+
+		// 	if (revise) {
+		// 		if (!isFromCancelledDocument) {
+		// 			delete data["timelineBuilderID"];
+		// 			data["revisePurchaseOrderID"] = id;
+		// 		}
+		// 	}
+
+		// 	const employeeID = getNotificationEmployeeID(data["approversID"], data["approversDate"], true);
+		// 	let notificationData = false;
+		// 	if (employeeID != sessionID) {
+		// 		notificationData = {
+		// 			moduleID:                47,
+		// 			notificationTitle:       "Purchase Order",
+		// 			notificationDescription: `${employeeFullname(sessionID)} asked for your approval.`,
+		// 			notificationType:        2,
+		// 			employeeID,
+		// 		};
+		// 	}
+
+		// 	savePurchaseOrder(data, "submit", notificationData, pageContent);
+		// }
+	});
+	// ----- END CLICK BUTTON SUBMIT -----
+
+
     // ----- CLICK BUTTON CANCEL -----
     $(document).on("click", "#btnCancel", function() {
-        Swal.fire({
-            title:              "DISCARD PROJECT BOARD", 
-            text:               "Are you sure to discard this process?",
-            imageUrl:          `${base_url}assets/modal/cancel.svg`,
-            imageWidth:         200,
-            imageHeight:        200,
-            imageAlt:           'Custom image',
-            showCancelButton:   true,
-            confirmButtonColor: '#dc3545',
-            cancelButtonColor:  '#1a1a1a',
-            cancelButtonText:   'No',
-            confirmButtonText:  'Yes',
-            allowOutsideClick:  true
-        }).then((result) => {
-            if (result.isConfirmed) {
-                pageContent();
-                Swal.fire({
-                    icon:              'success',
-                    title:             "Process successfully discarded!",
-                    showConfirmButton: false,
-                    timer:             2000
-                });
-                
-            }
-        });
+        saveProjectBoard("cancel", pageContent);
     })
     // ----- END CLICK BUTTON CANCEL -----
 
@@ -1015,104 +1136,105 @@ $(document).ready(function() {
         })
     }
 
-    function saveProjectBoard(data = null, method = "submit", callback = null) {
-        if (data) {
-            const confirmation = getConfirmation(method);
-            confirmation.then(res => {
-                if (res.isConfirmed) {
+    function saveProjectBoard(method = "submit", callback = null) {
+        const confirmation = getConfirmation(method);
+        confirmation.then(res => {
+            if (res.isConfirmed) {
 
-                    if (method == "cancel") {
-                        $("#page_content").html(preloader);
-                        setTimeout(() => {
-                            pageContent();
-                        }, 50);
-                    } else {
-                        $.ajax({
-                            method:      "POST",
-                            url:         `purchase_order/savePurchaseOrder`,
-                            data,
-                            cache:       false,
-                            async:       false,
-                            dataType:    "json",
-                            beforeSend: function() {
-                                $("#loader").show();
-                            },
-                            success: function(data) {
-                                let result = data.split("|");
-                
-                                let isSuccess   = result[0];
-                                let message     = result[1];
-                                let insertedID  = result[2];
-                                let dateCreated = result[3];
-        
-                                let swalTitle;
-                                if (method == "submit") {
-                                    swalTitle = `${getFormCode("PO", dateCreated, insertedID)} submitted successfully!`;
-                                } else if (method == "save") {
-                                    swalTitle = `${getFormCode("PO", dateCreated, insertedID)} saved successfully!`;
-                                } else if (method == "cancelform") {
-                                    swalTitle = `${getFormCode("PO", dateCreated, insertedID)} cancelled successfully!`;
-                                } else if (method == "approve") {
-                                    swalTitle = `${getFormCode("PO", dateCreated, insertedID)} approved successfully!`;
-                                } else if (method == "deny") {
-                                    swalTitle = `${getFormCode("PO", dateCreated, insertedID)} denied successfully!`;
-                                } else if (method == "drop") {
-                                    swalTitle = `${getFormCode("PO", dateCreated, insertedID)} dropped successfully!`;
-                                }
-                
-                                if (isSuccess == "true") {
-                                    setTimeout(() => {
-                                        $("#loader").hide();
-                                        closeModals();
-                                        callback && callback();
-                                        Swal.fire({
-                                            icon:              "success",
-                                            title:             swalTitle,
-                                            showConfirmButton: false,
-                                            timer:             2000,
-                                        });
-                                    }, 500);
-                                } else {
-                                    setTimeout(() => {
-                                        $("#loader").hide();
-                                        Swal.fire({
-                                            icon:              "danger",
-                                            title:             message,
-                                            showConfirmButton: false,
-                                            timer:             2000,
-                                        });
-                                    }, 500);
-                                }
-                            },
-                            error: function() {
+                if (method == "cancel") {
+                    callback && callback();
+                    Swal.fire({
+                        icon:              'success',
+                        title:             "Process successfully discarded!",
+                        showConfirmButton: false,
+                        timer:             2000
+                    });
+                } else {
+                    $.ajax({
+                        method:      "POST",
+                        url:         `project_management_board/saveProjectBoard`,
+                        data,
+                        cache:       false,
+                        async:       false,
+                        dataType:    "json",
+                        beforeSend: function() {
+                            $("#loader").show();
+                        },
+                        success: function(data) {
+                            let result = data.split("|");
+            
+                            let isSuccess   = result[0];
+                            let message     = result[1];
+                            let insertedID  = result[2];
+                            let dateCreated = result[3];
+    
+                            let swalTitle;
+                            if (method == "submit") {
+                                swalTitle = `${getFormCode("PO", dateCreated, insertedID)} submitted successfully!`;
+                            } else if (method == "save") {
+                                swalTitle = `${getFormCode("PO", dateCreated, insertedID)} saved successfully!`;
+                            } else if (method == "cancelform") {
+                                swalTitle = `${getFormCode("PO", dateCreated, insertedID)} cancelled successfully!`;
+                            } else if (method == "approve") {
+                                swalTitle = `${getFormCode("PO", dateCreated, insertedID)} approved successfully!`;
+                            } else if (method == "deny") {
+                                swalTitle = `${getFormCode("PO", dateCreated, insertedID)} denied successfully!`;
+                            } else if (method == "drop") {
+                                swalTitle = `${getFormCode("PO", dateCreated, insertedID)} dropped successfully!`;
+                            }
+            
+                            if (isSuccess == "true") {
                                 setTimeout(() => {
                                     $("#loader").hide();
-                                    showNotification("danger", "System error: Please contact the system administrator for assistance!");
+                                    closeModals();
+                                    callback && callback();
+                                    Swal.fire({
+                                        icon:              "success",
+                                        title:             swalTitle,
+                                        showConfirmButton: false,
+                                        timer:             2000,
+                                    });
+                                }, 500);
+                            } else {
+                                setTimeout(() => {
+                                    $("#loader").hide();
+                                    Swal.fire({
+                                        icon:              "danger",
+                                        title:             message,
+                                        showConfirmButton: false,
+                                        timer:             2000,
+                                    });
                                 }, 500);
                             }
-                        }).done(function() {
+                        },
+                        error: function() {
                             setTimeout(() => {
                                 $("#loader").hide();
+                                showNotification("danger", "System error: Please contact the system administrator for assistance!");
                             }, 500);
-                        })
+                        }
+                    }).done(function() {
+                        setTimeout(() => {
+                            $("#loader").hide();
+                        }, 500);
+                    })
+                }
+            } else {
+                if (res.dismiss == "cancel" && method != "submit") {
+                    if (method != "deny") {
+                        if (method != "cancelform") {
+                            callback && callback();
+                        }
+                    } else {
+                        
                     }
-                } else {
-                    if (res.dismiss == "cancel" && method != "submit") {
-                        if (method != "deny") {
-                            if (method != "cancelform") {
-                                callback && callback();
-                            }
-                        } else {
-                            
-                        }
-                    } else if (res.isDismissed) {
-                        if (method == "deny") {
-                            
-                        }
+                } else if (res.isDismissed) {
+                    if (method == "deny") {
+                        
                     }
                 }
-            });
-        }
+            }
+        });
     }
     // ----- END DATABASE RELATION -----
 
