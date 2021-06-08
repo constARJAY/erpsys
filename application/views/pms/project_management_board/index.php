@@ -9,7 +9,7 @@
                         <li class="breadcrumb-item active">Project Management Board</li>
                     </ul>
                     <h1 class="mt-3">Project Management Board</h1>
-                    <span>This module is used to manage  project management board details.</span>
+                    <span>This module is used to manage the submission of project timelines and milestones with man hours.</span>
 				</div>
 				<div class="col-lg-6 col-md-12 text-md-right" id="headerButton">
 				</div>

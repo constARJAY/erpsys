@@ -7,7 +7,7 @@ $(document).ready(function() {
 
             const tableData = [
                 {
-                    timelineID:             1,
+                    timelineBuilderID:      "1",
                     employeeID:             1,
                     projectID:              1,
                     projectCreatedAt:       moment(new Date).add(-31, 'days').format("MMMM DD, YYYY"),
@@ -21,9 +21,9 @@ $(document).ready(function() {
                     timelineDesign:         "",
                     timelineProposedBudget: 150000,
                     timelineBudgetStatus:   0,
-                    timelineReason:         "Sample Reason",
-                    timelineRemarks:        "",
-                    timelineStatus:         1,
+                    timelineBuilderReason:  "Sample Reason",
+                    timelineBuilderRemarks: "",
+                    timelineBuilderStatus:  0,
                     approversID:            "1|2|3",
                     approversDate:          "2021-01-01 10:11:11|2021-01-01 10:11:11|2021-01-01 10:11:11",
                     approversStatus:        2,
@@ -137,18 +137,18 @@ $(document).ready(function() {
             if (tableData.length > 0) {
                 let {
                     employeeID,
-                    timelineStatus
+                    timelineBuilderStatus
                 } = tableData[0];
 
                 let isReadOnly = true, isAllowed = true;
 
                 if (employeeID != sessionID) {
                     isReadOnly = true;
-                    if (timelineStatus == 0 || timelineStatus == 4) {
+                    if (timelineBuilderStatus == 0 || timelineBuilderStatus == 4) {
                         isAllowed = false;
                     }
                 } else if (employeeID == sessionID) {
-                    if (timelineStatus == 0) {
+                    if (timelineBuilderStatus == 0) {
                         isReadOnly = false;
                     } else {
                         isReadOnly = true;
@@ -205,9 +205,9 @@ $(document).ready(function() {
             window.history.pushState("", "", `${base_url}pms/project_management_board?view_id=${view_id}`);
         } else if (isAdd) {
             if (view_id) {
-                window.history.pushState("", "", `${base_url}pms/project_management_board?add=${view_id}`);
+                window.history.pushState("", "", `${base_url}pms/project_management_board?view_id=${view_id}`);
             } else {
-                window.history.pushState("", "", `${base_url}pms/project_management_board?add`);
+                // window.history.pushState("", "", `${base_url}pms/project_management_board?add`);
             }
         } else {
             window.history.pushState("", "", `${base_url}pms/project_management_board`);
@@ -219,7 +219,7 @@ $(document).ready(function() {
     // ----- TIMELINE DATA -----
     const timelineData = [
         {
-            timelineID:      1,
+            timelineBuilderID:      1,
             projectID:       1,
             projectName:     "ERP System",
             projectCode:     "PRJ-21-00001",
@@ -230,7 +230,7 @@ $(document).ready(function() {
             budgetStatus:    0 // 0 - For Proposal, 1 - For Assessment
         },
         {
-            timelineID:      2,
+            timelineBuilderID:      2,
             projectID:       1,
             projectName:     "TACS",
             projectCode:     "PRJ-21-00001",
@@ -241,7 +241,7 @@ $(document).ready(function() {
             budgetStatus:    0 // 0 - For Proposal, 1 - For Assessment
         },
         {
-            timelineID:      3,
+            timelineBuilderID:      3,
             projectID:       1,
             projectName:     "Point of Sale",
             projectCode:     "PRJ-21-00003",
@@ -259,6 +259,10 @@ $(document).ready(function() {
 	const getNonFormattedAmount = (amount = "₱0.00") => {
 		return +amount.replaceAll(",", "").replace("₱", "")?.trim();
 	}
+
+    const dateToday = () => {
+		return moment(new Date).format("YYYY-MM-DD HH:mm:ss");
+	};
     // ----- END REUSABLE VARIABLE/FUNCTIONS -----
     
 
@@ -321,7 +325,7 @@ $(document).ready(function() {
 	function headerButton(isAdd = true, text = "Add") {
 		let html;
 		if (isAdd) {
-			if (isCreateAllowed(60)) {
+			if (isCreateAllowed(92)) {
 				html = ``;
 			}
 		} else {
@@ -354,7 +358,7 @@ $(document).ready(function() {
         timelineData.map(timeline => {
 
             const { 
-                timelineID      = 0,
+                timelineBuilderID      = 0,
                 projectName     = "",
                 projectCode     = "",
                 projectCategory = "",
@@ -369,7 +373,7 @@ $(document).ready(function() {
                 `<span class="badge badge-outline-primary w-100">For Assessment</span>`;
 
             html += `
-            <tr class="btnView" id="${encryptString(timelineID.toString())}">
+            <tr class="btnView" id="${encryptString(timelineBuilderID.toString())}">
                 <td>
                     <div>${projectName}</div>
                     <small style="color:#848482;">${projectCode}</small>
@@ -393,7 +397,7 @@ $(document).ready(function() {
         setTimeout(() => {
             $("#page_content").html(html);
             initDatatables();
-        }, 500);
+        }, 50);
 
         return html;
     }
@@ -523,7 +527,7 @@ $(document).ready(function() {
                     <input class="form-control input-hours text-center"
                         value="0"
                         name="manHours"
-                        min="0.01"
+                        min="0.00"
                         max="${manHours}"
                         minlength="1"
                         maxlength="10"
@@ -704,21 +708,15 @@ $(document).ready(function() {
 
             console.log(parent, elementID, totalManHours, basisManHours);
             if (totalManHours > basisManHours) {
-                // $(`[name="manHours"][phase="${phase}"][taskName="${taskName}"]`).each(function() {
-                //     const $parent = $(this).closest(".form-group");
-                //     $(this).removeClass("is-valid").addClass("is-invalid");
-                //     $parent.find(".invalid-feedback").text("Invalid man hours value!");
-                // })
-                $(elementID).removeClass("is-valid").addClass("is-invalid");
-                $parent.find(".invalid-feedback").text("Invalid man hours value!");
+                setTimeout(() => {
+                    $(elementID).removeClass("is-valid").addClass("is-invalid");
+                    $parent.find(".invalid-feedback").text("Excessive amount of hours.");
+                }, 50);
             } else {
-                // $(`[name="manHours"][phase="${phase}"][taskName="${taskName}"]`).each(function() {
-                //     const $parent = $(this).closest(".form-group");
-                //     $(this).removeClass("is-invalid").removeClass("is-valid");
-                //     $parent.find(".invalid-feedback").text("");
-                // })
-                $(elementID).removeClass("is-valid").removeClass("is-invalid");
-                $parent.find(".invalid-feedback").text("");
+                setTimeout(() => {
+                    $(elementID).removeClass("is-valid").removeClass("is-invalid");
+                    $parent.find(".invalid-feedback").text("");
+                }, 50);
             }
         }
     }
@@ -736,15 +734,60 @@ $(document).ready(function() {
     // ----- END KEYUP MAN HOURS -----
 
 
+    // ----- FORM BUTTON -----
+    function formButtons(data = false) {
+        let button = "";
+        if (data) {
+            const {
+                timelineBuilderID     = "",
+                timelineBuilderStatus = "",
+                employeeID            = "",
+                approversID           = "",
+                approversDate         = "",
+                createdAt              = new Date
+            } = data && data[0];
+
+            if (timelineBuilderStatus == 0) { // DRAFT
+
+                // DRAFT
+                button = `
+                <button 
+                    class="btn btn-submit px-5 p-2"  
+                    id="btnSubmit" 
+                    timelineBuilderID="${encryptString(timelineBuilderID)}"
+                    code="${getFormCode("TL", createdAt, timelineBuilderID)}">
+                    <i class="fas fa-paper-plane"></i> Submit
+                </button>
+                <button 
+                    class="btn btn-cancel px-5 p-2"
+                    id="btnCancel" 
+                    timelineBuilderID="${encryptString(timelineBuilderID)}"
+                    code="${getFormCode("TL", createdAt, timelineBuilderID)}">
+                    <i class="fas fa-ban"></i> Cancel
+                </button>`;
+
+            } else if (timelineBuilderStatus == 2) { // SUBMITTED
+
+            }
+        }
+
+        return button;
+    }
+    // ----- END FORM BUTTON -----
+
+
     // ----- FORM CONTENT -----
     function formContent(data = false, readOnly = false) {
         console.log(data);
         $("#page_content").html(preloader);
 
         const {
+            timelineBuilderID,
+            employeeID,
             projectName,
             projectCreatedAt,
             teamMembersID,
+            timelineBuilderStatus,
             phases = []
         } = data && data[0];
 
@@ -758,7 +801,7 @@ $(document).ready(function() {
                 employeeID, 
                 employeeFirstname, 
                 employeeLastname, 
-                employeeProfile 
+                employeeProfile = "default.jpg"
             } = member;
             return {
                 id:       employeeID,
@@ -766,6 +809,11 @@ $(document).ready(function() {
                 image:    `${base_url}/assets/upload-files/profile-images/${employeeProfile}`
             }
         });
+
+        $("#btnBack").attr("timelineBuilderID", encryptString(timelineBuilderID));
+		$("#btnBack").attr("status", timelineBuilderStatus);
+
+        let button = formButtons(data);
 
         let phaseHTML = "";
         phases.map((phase, index) => {
@@ -778,7 +826,12 @@ $(document).ready(function() {
                 <span>Finance Management System</span>
                 <span class="text-danger font-weight-bold mb-1 float-right" style="font-size: 1.5rem;">PRJ-21-00001</span>
             </div>
-            ${phaseHTML}
+            <div>
+                ${phaseHTML}
+            </div>
+            <div class="col-md-12 text-right mt-3">
+                ${button}
+            </div>
         </div>`;
 
         setTimeout(() => {
@@ -787,14 +840,16 @@ $(document).ready(function() {
             updateTables();
             initAll();
             multipleSelect2Placeholder();
-        }, 500);
+        }, 50);
     }
     // ----- END FORM CONTENT -----
     
 
     // ----- PAGE CONTENT -----
     function pageContent(isForm = false, data = false, readOnly = false) {
-        $("#page_content").html(preloader);
+        if ($(`#page_content .loader`).text().length == 0) {
+            $("#page_content").html(preloader);
+        }
         if (!isForm) {
             preventRefresh(false);
             headerButton(true, "");
@@ -805,23 +860,260 @@ $(document).ready(function() {
             formContent(data, readOnly);
         }
     }
-    pageContent();
+    viewDocument();
+	$("#page_content").text().trim().length == 0 && pageContent(); // CHECK IF THERE IS ALREADY LOADED ONE
     // ----- END PAGE CONTENT -----
 
 
     // ----- CLICK TIMELINE ROW -----
     $(document).on("click", ".btnView", function() {
         $("#page_content").html(preloader);
-        const timelineID = decryptString($(this).attr("id"));
-        viewDocument(timelineID);
+        const timelineBuilderID = decryptString($(this).attr("id"));
+        setTimeout(() => {
+            viewDocument(timelineBuilderID);
+        }, 50);
     })
     // ----- END CLICK TIMELINE ROW -----
 
 
     // ----- CLICK BUTTON BACK -----
 	$(document).on("click", "#btnBack", function () {
-		pageContent();
+		// pageContent();
+
+        const id     = decryptString($(this).attr("timelineBuilderID"));
+		const status = $(this).attr("status");
+
+		if (status != "false" && status != 0) {
+			
+		// 	if (revise) {
+		// 		const action = revise && !fromCancelledDocument && "insert" || (id ? "update" : "insert");
+		// 		const data   = getPurchaseOrderData(action, "save", "0", id, status, revise);
+		// 		if (!fromCancelledDocument) {
+		// 			delete data["timelineBuilderID"];
+		// 			data["revisePurchaseOrderID"] = id;
+		// 		} else {
+		// 			delete data["action"];
+		// 			data["purchaseOrderStatus"] = 0;
+		// 			data["action"]              = "update";
+		// 		}
+	
+		// 		savePurchaseOrder(data, "save", null, pageContent);
+		// 	} else {
+		// 		$("#page_content").html(preloader);
+		// 		pageContent();
+	
+		// 		if (employeeID != sessionID) {
+		// 			$("[redirect=forApprovalTab]").length > 0 && $("[redirect=forApprovalTab]").trigger("click");
+		// 		}
+		// 	}
+
+		} else {
+			const action = id ? "update" : "insert";
+		// 	const data   = getPurchaseOrderData(action, "save", "0", id, status, revise);
+		// 	data["purchaseOrderStatus"] = 0;
+
+		// 	savePurchaseOrder(data, "save", null, pageContent);
+            $("#page_content").html(preloader);
+            setTimeout(() => {
+                pageContent();
+            }, 50);
+		}
 	});
 	// ----- END CLICK BUTTON BACK -----
+
+
+    // ----- CLICK BUTTON CANCEL -----
+    $(document).on("click", "#btnCancel", function() {
+        Swal.fire({
+            title:              "DISCARD PROJECT BOARD", 
+            text:               "Are you sure to discard this process?",
+            imageUrl:          `${base_url}assets/modal/cancel.svg`,
+            imageWidth:         200,
+            imageHeight:        200,
+            imageAlt:           'Custom image',
+            showCancelButton:   true,
+            confirmButtonColor: '#dc3545',
+            cancelButtonColor:  '#1a1a1a',
+            cancelButtonText:   'No',
+            confirmButtonText:  'Yes',
+            allowOutsideClick:  true
+        }).then((result) => {
+            if (result.isConfirmed) {
+                pageContent();
+                Swal.fire({
+                    icon:              'success',
+                    title:             "Process successfully discarded!",
+                    showConfirmButton: false,
+                    timer:             2000
+                });
+                
+            }
+        });
+    })
+    // ----- END CLICK BUTTON CANCEL -----
+
+
+    // ----- DATABASE RELATION -----
+    const getConfirmation = method => {
+        const title = "Project Board";
+        let swalText, swalImg;
+
+        switch (method) {
+            case "save":
+                swalTitle = `SAVE ${title.toUpperCase()}`;
+                swalText  = "Are you sure to save this document?";
+                swalImg   = `${base_url}assets/modal/draft.svg`;
+                break;
+            case "submit":
+                swalTitle = `SUBMIT ${title.toUpperCase()}`;
+                swalText  = "Are you sure to submit these tasks with man hours to employee taskboard?";
+                swalImg   = `${base_url}assets/modal/add.svg`;
+                break;
+            case "approve":
+                swalTitle = `APPROVE ${title.toUpperCase()}`;
+                swalText  = "Are you sure to approve this document?";
+                swalImg   = `${base_url}assets/modal/approve.svg`;
+                break;
+            case "deny":
+                swalTitle = `DENY ${title.toUpperCase()}`;
+                swalText  = "Are you sure to deny this document?";
+                swalImg   = `${base_url}assets/modal/reject.svg`;
+                break;
+            case "cancelform":
+                swalTitle = `CANCEL ${title.toUpperCase()}`;
+                swalText  = "Are you sure to cancel this document?";
+                swalImg   = `${base_url}assets/modal/cancel.svg`;
+                break;
+            case "drop":
+                swalTitle = `DROP ${title.toUpperCase()}`;
+                swalText  = "Are you sure to drop this document?";
+                swalImg   = `${base_url}assets/modal/drop.svg`;
+                break;
+            case "uploadcontract":
+                swalTitle = `UPLOAD CONTRACT`;
+                swalText  = "Are you sure to upload this contract?";
+                swalImg   = `${base_url}assets/modal/add.svg`;
+                break;
+            default:
+                swalTitle = `DISCARD ${title.toUpperCase()}`;
+                swalText  = "Are you sure to discard this process?";
+                swalImg   = `${base_url}assets/modal/cancel.svg`;
+                break;
+        }
+        return Swal.fire({
+            title:              swalTitle,
+            text:               swalText,
+            imageUrl:           swalImg,
+            imageWidth:         200,
+            imageHeight:        200,
+            imageAlt:           "Custom image",
+            showCancelButton:   true,
+            confirmButtonColor: "#dc3545",
+            cancelButtonColor:  "#1a1a1a",
+            cancelButtonText:   "No",
+            confirmButtonText:  "Yes"
+        })
+    }
+
+    function saveProjectBoard(data = null, method = "submit", callback = null) {
+        if (data) {
+            const confirmation = getConfirmation(method);
+            confirmation.then(res => {
+                if (res.isConfirmed) {
+
+                    if (method == "cancel") {
+                        $("#page_content").html(preloader);
+                        setTimeout(() => {
+                            pageContent();
+                        }, 50);
+                    } else {
+                        $.ajax({
+                            method:      "POST",
+                            url:         `purchase_order/savePurchaseOrder`,
+                            data,
+                            cache:       false,
+                            async:       false,
+                            dataType:    "json",
+                            beforeSend: function() {
+                                $("#loader").show();
+                            },
+                            success: function(data) {
+                                let result = data.split("|");
+                
+                                let isSuccess   = result[0];
+                                let message     = result[1];
+                                let insertedID  = result[2];
+                                let dateCreated = result[3];
+        
+                                let swalTitle;
+                                if (method == "submit") {
+                                    swalTitle = `${getFormCode("PO", dateCreated, insertedID)} submitted successfully!`;
+                                } else if (method == "save") {
+                                    swalTitle = `${getFormCode("PO", dateCreated, insertedID)} saved successfully!`;
+                                } else if (method == "cancelform") {
+                                    swalTitle = `${getFormCode("PO", dateCreated, insertedID)} cancelled successfully!`;
+                                } else if (method == "approve") {
+                                    swalTitle = `${getFormCode("PO", dateCreated, insertedID)} approved successfully!`;
+                                } else if (method == "deny") {
+                                    swalTitle = `${getFormCode("PO", dateCreated, insertedID)} denied successfully!`;
+                                } else if (method == "drop") {
+                                    swalTitle = `${getFormCode("PO", dateCreated, insertedID)} dropped successfully!`;
+                                }
+                
+                                if (isSuccess == "true") {
+                                    setTimeout(() => {
+                                        $("#loader").hide();
+                                        closeModals();
+                                        callback && callback();
+                                        Swal.fire({
+                                            icon:              "success",
+                                            title:             swalTitle,
+                                            showConfirmButton: false,
+                                            timer:             2000,
+                                        });
+                                    }, 500);
+                                } else {
+                                    setTimeout(() => {
+                                        $("#loader").hide();
+                                        Swal.fire({
+                                            icon:              "danger",
+                                            title:             message,
+                                            showConfirmButton: false,
+                                            timer:             2000,
+                                        });
+                                    }, 500);
+                                }
+                            },
+                            error: function() {
+                                setTimeout(() => {
+                                    $("#loader").hide();
+                                    showNotification("danger", "System error: Please contact the system administrator for assistance!");
+                                }, 500);
+                            }
+                        }).done(function() {
+                            setTimeout(() => {
+                                $("#loader").hide();
+                            }, 500);
+                        })
+                    }
+                } else {
+                    if (res.dismiss == "cancel" && method != "submit") {
+                        if (method != "deny") {
+                            if (method != "cancelform") {
+                                callback && callback();
+                            }
+                        } else {
+                            
+                        }
+                    } else if (res.isDismissed) {
+                        if (method == "deny") {
+                            
+                        }
+                    }
+                }
+            });
+        }
+    }
+    // ----- END DATABASE RELATION -----
 
 })
