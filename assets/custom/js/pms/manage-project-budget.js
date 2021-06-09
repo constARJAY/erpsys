@@ -1,106 +1,129 @@
 $(document).ready(function() {
 
     // ----- VIEW DOCUMENT -----
+    const getTimelineContent = async (timelineBuilderID) => {
+        let result = false;
+        $.ajax({
+            method:   "POST",
+            url:      "manage_project_budget/getTimelineContent",
+            data:     { timelineBuilderID },
+            async:    false,
+            dataType: "json",
+            success: function(data) {
+                result = [data];
+            }
+        })
+        return await result;
+    }
+
     function viewDocument(view_id = false, readOnly = false) {
         const loadData = (id) => {
-            // const tableData = getTableData("hris_change_schedule_tbl", "", "changeScheduleID=" + id);
-
-            const tableData = [
-                {
-                    timelineID:             1,
-                    employeeID:             1,
-                    projectID:              1,
-                    projectCreatedAt:       moment(new Date).add(-31, 'days').format("MMMM DD, YYYY"),
-                    projectName:            "Project Name",
-                    projectCategory:        "Project Category",
-                    clientID:               1,
-                    clientCreatedAt:        moment(new Date).add(-31, 'days').format("MMMM DD, YYYY"),
-                    clientAddress:          "1701 Antel Bldg, Pasig City",
-                    startDate:              moment(new Date).format("MMMM DD, YYYY"),
-                    endDate:                moment(new Date).add(31, 'days').format("MMMM DD, YYYYY"),
-                    timelineDesign:         "",
-                    timelineProposedBudget: 150000,
-                    timelineBudgetStatus:   0,
-                    timelineReason:         "Sample Reason",
-                    timelineRemarks:        "",
-                    timelineStatus:         1,
-                    approversID:            "1|2|3",
-                    approversDate:          "2021-01-01 10:11:11|2021-01-01 10:11:11|2021-01-01 10:11:11",
-                    approversStatus:        2,
-                    createdBy:              1,
-                    submittedAt:            moment(new Date).format("MMMM DD, YYYY"),
-                    createdAt:              moment(new Date).add(-5, 'days').format("MMMM DD, YYYY"),
-                    tasks: [
-                        {
-                            phase: "Phase 1",
-                            milestone: [
-                                {
-                                    milestoneName:   "Milestone 1",
-                                    taskName:        "Task name",
-                                    allotedHours:    150,
-                                    startDate:       moment(new Date).format("MMMM DD, YYYY"),
-                                    endDate:         moment(new Date).add(31, 'days').format("MMMM DD, YYYYY"),
-                                    milestoneStatus: 0 
-                                }
-                            ]
-                        },
-                        {
-                            phase: "Phase 2",
-                            milestone: [
-                                {
-                                    milestoneName:   "Milestone 2",
-                                    taskName:        "Task name 2",
-                                    allotedHours:    160,
-                                    startDate:       moment(new Date).format("MMMM DD, YYYY"),
-                                    endDate:         moment(new Date).add(31, 'days').format("MMMM DD, YYYYY"),
-                                    milestoneStatus: 0 
-                                }
-                            ]
-                        },
-                    ]
-                }
-            ]
-
-            if (tableData.length > 0) {
-                let {
-                    employeeID,
-                    timelineStatus
-                } = tableData[0];
-
-                let isReadOnly = true, isAllowed = true;
-
-                if (employeeID != sessionID) {
-                    isReadOnly = true;
-                    if (timelineStatus == 0 || timelineStatus == 4) {
-                        isAllowed = false;
-                    }
-                } else if (employeeID == sessionID) {
-                    if (timelineStatus == 0) {
-                        isReadOnly = false;
+            const data = getTimelineContent(id);
+            data.then(res => {
+                if (res) {
+                    const tableData = res;
+                    // const tableData = [
+                    //     {
+                    //         timelineBuilderID:             "1",
+                    //         employeeID:             1,
+                    //         projectID:              1,
+                    //         projectCreatedAt:       moment(new Date).add(-31, 'days').format("MMMM DD, YYYY"),
+                    //         projectName:            "Project Name",
+                    //         projectCategory:        "Project Category",
+                    //         clientID:               1,
+                    //         clientCreatedAt:        moment(new Date).add(-31, 'days').format("MMMM DD, YYYY"),
+                    //         clientAddress:          "1701 Antel Bldg, Pasig City",
+                    //         startDate:              moment(new Date).format("MMMM DD, YYYY"),
+                    //         endDate:                moment(new Date).add(31, 'days').format("MMMM DD, YYYYY"),
+                    //         timelineDesign:         "",
+                    //         timelineProposedBudget: 150000,
+                    //         timelineBudgetStatus:   0,
+                    //         timelineReason:         "Sample Reason",
+                    //         timelineRemarks:        "",
+                    //         timelineStatus:         1,
+                    //         approversID:            "1|2|3",
+                    //         approversDate:          "2021-01-01 10:11:11|2021-01-01 10:11:11|2021-01-01 10:11:11",
+                    //         approversStatus:        2,
+                    //         createdBy:              1,
+                    //         submittedAt:            moment(new Date).format("MMMM DD, YYYY"),
+                    //         createdAt:              moment(new Date).add(-5, 'days').format("MMMM DD, YYYY"),
+                    //         tasks: [
+                    //             {
+                    //                 phase: "Phase 1",
+                    //                 milestone: [
+                    //                     {
+                    //                         milestoneName:   "Milestone 1",
+                    //                         taskName:        "Task name",
+                    //                         allotedHours:    150,
+                    //                         startDate:       moment(new Date).format("MMMM DD, YYYY"),
+                    //                         endDate:         moment(new Date).add(31, 'days').format("MMMM DD, YYYYY"),
+                    //                         milestoneStatus: 0 
+                    //                     }
+                    //                 ]
+                    //             },
+                    //             {
+                    //                 phase: "Phase 2",
+                    //                 milestone: [
+                    //                     {
+                    //                         milestoneName:   "Milestone 2",
+                    //                         taskName:        "Task name 2",
+                    //                         allotedHours:    160,
+                    //                         startDate:       moment(new Date).format("MMMM DD, YYYY"),
+                    //                         endDate:         moment(new Date).add(31, 'days').format("MMMM DD, YYYYY"),
+                    //                         milestoneStatus: 0 
+                    //                     }
+                    //                 ]
+                    //             },
+                    //         ]
+                    //     }
+                    // ]
+        
+                    if (tableData.length > 0) {
+                        let {
+                            employeeID,
+                            timelineStatus
+                        } = tableData[0];
+        
+                        let isReadOnly = true, isAllowed = true;
+        
+                        if (employeeID != sessionID) {
+                            isReadOnly = true;
+                            if (timelineStatus == 0 || timelineStatus == 4) {
+                                isAllowed = false;
+                            }
+                        } else if (employeeID == sessionID) {
+                            if (timelineStatus == 0) {
+                                isReadOnly = false;
+                            } else {
+                                isReadOnly = true;
+                            }
+                        } else {
+                            isReadOnly = readOnly;
+                        }
+        
+                        if (isAllowed) {
+                            if (employeeID == sessionID) {
+                                pageContent(true, tableData, isReadOnly);
+                                updateURL(encryptString(id), true, true);
+                            } else {
+                                pageContent(true, tableData, isReadOnly);
+                                updateURL(encryptString(id));
+                            }
+                        } else {
+                            pageContent();
+                            updateURL();
+                        }
+                        
                     } else {
-                        isReadOnly = true;
+                        pageContent();
+                        updateURL();
                     }
                 } else {
-                    isReadOnly = readOnly;
-                }
-
-                if (isAllowed) {
-                    if (employeeID == sessionID) {
-                        pageContent(true, tableData, isReadOnly);
-                        updateURL(encryptString(id), true, true);
-                    } else {
-                        pageContent(true, tableData, isReadOnly);
-                        updateURL(encryptString(id));
-                    }
-                } else {
+                    showNotification("danger", "There was an error fetching the data.");
                     pageContent();
                     updateURL();
                 }
-                
-            } else {
-                pageContent();
-                updateURL();
-            }
+            });
         }
 
         if (view_id) {
@@ -119,7 +142,7 @@ $(document).ready(function() {
                     let id = decryptString(arr[1]);
                         id && isFinite(id) && loadData(id);
                 } else {
-                    const isAllowed = isCreateAllowed(46);
+                    const isAllowed = isCreateAllowed(91);
                     pageContent(isAllowed);
                 }
             }
@@ -132,9 +155,9 @@ $(document).ready(function() {
             window.history.pushState("", "", `${base_url}pms/manage_project_budget?view_id=${view_id}`);
         } else if (isAdd) {
             if (view_id) {
-                window.history.pushState("", "", `${base_url}pms/manage_project_budget?add=${view_id}`);
+                window.history.pushState("", "", `${base_url}pms/manage_project_budget?view_id=${view_id}`);
             } else {
-                window.history.pushState("", "", `${base_url}pms/manage_project_budget?add`);
+                // window.history.pushState("", "", `${base_url}pms/manage_project_budget?add`);
             }
         } else {
             window.history.pushState("", "", `${base_url}pms/manage_project_budget`);
@@ -144,41 +167,62 @@ $(document).ready(function() {
 
 
     // ----- TIMELINE DATA -----
-    const timelineData = [
-        {
-            timelineID:      1,
-            projectID:       1,
-            projectName:     "ERP System",
-            projectCode:     "PRJ-21-00001",
-            projectCategory: "Sample Category",
-            projectManager:  "Arjay Diangzon",
-            departmentName:  "Admin Department",
-            designationName: "IT Admin",
-            budgetStatus:    0 // 0 - For Proposal, 1 - For Assessment
-        },
-        {
-            timelineID:      2,
-            projectID:       1,
-            projectName:     "TACS",
-            projectCode:     "PRJ-21-00001",
-            projectCategory: "Sample Category 1",
-            projectManager:  "Mark Nieto",
-            departmentName:  "Finance",
-            designationName: "Human Resource",
-            budgetStatus:    0 // 0 - For Proposal, 1 - For Assessment
-        },
-        {
-            timelineID:      3,
-            projectID:       1,
-            projectName:     "Point of Sale",
-            projectCode:     "PRJ-21-00003",
-            projectCategory: "Sample Category 2",
-            projectManager:  "Wilson Parajas",
-            departmentName:  "Operations",
-            designationName: "Developer",
-            budgetStatus:    0 // 0 - For Proposal, 1 - For Assessment
-        },
-    ];
+    const getTimelineData = () => {
+        const data = getTableData(
+            `pms_timeline_builder_tbl AS ptbt
+            LEFT JOIN pms_project_list_tbl AS pplt ON ptbt.projectID = pplt.projectListID
+            LEFT JOIN pms_category_tbl AS pct ON pplt.categoryID = pct.categoryID
+            LEFT JOIN hris_employee_list_tbl AS helt ON ptbt.timelineProjectManager = helt.employeeID
+            LEFT JOIN hris_department_tbl AS hdt ON helt.departmentID = hdt.departmentID
+            LEFT JOIN hris_designation_tbl AS hdt2 ON helt.designationID = hdt2.designationID`,
+            `ptbt.timelineBuilderID,
+            pplt.projectListName AS projectName,
+            pplt.projectListCode AS projectCode,
+            pct.categoryName AS projectCategory,
+            CONCAT(helt.employeeFirstname, ' ', helt.employeeLastname) AS projectManager,
+            hdt.departmentName,
+            hdt2.designationName,
+            ptbt.timelineBudgetStatus AS budgetStatus`,
+            `ptbt.timelineBuilderStatus <> 0 AND 
+            ptbt.timelineBuilderStatus <> 4`);
+        return data;
+    }
+
+    // const timelineData = [
+    //     {
+    //         timelineBuilderID:      "1",
+    //         projectID:       1,
+    //         projectName:     "ERP System",
+    //         projectCode:     "PRJ-21-00001",
+    //         projectCategory: "Sample Category",
+    //         projectManager:  "Arjay Diangzon",
+    //         departmentName:  "Admin Department",
+    //         designationName: "IT Admin",
+    //         budgetStatus:    0 // 0 - For Proposal, 1 - For Assessment
+    //     },
+    //     {
+    //         timelineBuilderID:      "2",
+    //         projectID:       1,
+    //         projectName:     "TACS",
+    //         projectCode:     "PRJ-21-00001",
+    //         projectCategory: "Sample Category 1",
+    //         projectManager:  "Mark Nieto",
+    //         departmentName:  "Finance",
+    //         designationName: "Human Resource",
+    //         budgetStatus:    0 // 0 - For Proposal, 1 - For Assessment
+    //     },
+    //     {
+    //         timelineBuilderID:      "3",
+    //         projectID:       1,
+    //         projectName:     "Point of Sale",
+    //         projectCode:     "PRJ-21-00003",
+    //         projectCategory: "Sample Category 2",
+    //         projectManager:  "Wilson Parajas",
+    //         departmentName:  "Operations",
+    //         designationName: "Developer",
+    //         budgetStatus:    0 // 0 - For Proposal, 1 - For Assessment
+    //     },
+    // ];
     // ----- END TIMELINE DATA -----
 
 
@@ -257,6 +301,8 @@ $(document).ready(function() {
 
     // ----- TIMELINE CONTENT ------
     function timelineContent() {
+        const timelineData = getTimelineData();
+
         let html = `
         <div class="table-responsive">
             <table class="table table-bordered table-striped table-hover js-basic-example dataTable" id="tableTimeline">
@@ -274,22 +320,22 @@ $(document).ready(function() {
         timelineData.map(timeline => {
 
             const { 
-                timelineID      = 0,
-                projectName     = "",
-                projectCode     = "",
-                projectCategory = "",
-                projectManager  = "",
-                departmentName  = "",
-                designationName = "",
-                budgetStatus    = 0
+                timelineBuilderID = 0,
+                projectName       = "",
+                projectCode       = "",
+                projectCategory   = "",
+                projectManager    = "",
+                departmentName    = "",
+                designationName   = "",
+                budgetStatus      = 0
             } = timeline;
 
             const statusStyle = budgetStatus == 0 ? 
                 `<span class="badge badge-outline-info w-100">For Proposal</span>` :
-                `<span class="badge badge-outline-primary w-100">For Assessment</span>`;
+                `<span class="badge badge-outline-primary w-100">Allocated</span>`;
 
             html += `
-            <tr class="btnView" id="${encryptString(timelineID.toString())}">
+            <tr class="btnView" id="${encryptString(timelineBuilderID)}">
                 <td>
                     <div>${projectName}</div>
                     <small style="color:#848482;">${projectCode}</small>
@@ -323,6 +369,39 @@ $(document).ready(function() {
     // ----- FORM CONTENT -----
     function formContent(data = false, readOnly = false) {
         $("#page_content").html(preloader);
+        console.log(data);
+
+        const {
+            timelineBuilderID,
+            budgetStatus,
+            createdAt,
+            submittedAt,
+            approversID,
+            approversDate,
+            approversStatus,
+            timelineBuilderStatus,
+            timelineBuilderRemarks,
+            preparedBy,
+            departmentName,
+            designationName,
+            timelineDescription,
+            projectCode,
+            projectName,
+            projectCategory,
+            clientName,
+            clientAddress,
+            timelineDate,
+            timelinePriority,
+            timelineIssued,
+            projectManager,
+            teamLeader,
+            teamMember,
+            proposedBudget
+        } = data && data[0]
+
+        const budgetStatusDisplay = budgetStatus == 1 ? `
+        <span class="badge badge-outline-secondary w-100">Allocated</span>` : `
+        <span class="badge badge-outline-info w-100">For Proposal</span>`;
 
         let html = `
         <div class="">
@@ -332,7 +411,7 @@ $(document).ready(function() {
                         <div class="body">
                             <small class="text-small text-muted font-weight-bold">Document No.</small>
                             <h6 class="mt-0 text-danger font-weight-bold">
-                            MPB-21-00001
+                                ${getFormCode("PTB", createdAt, timelineBuilderID)}
                             </h6>      
                         </div>
                     </div>
@@ -342,7 +421,7 @@ $(document).ready(function() {
                         <div class="body">
                             <small class="text-small text-muted font-weight-bold">Budget Status</small>
                             <h6 class="mt-0 font-weight-bold">
-                                <span class="badge badge-outline-info w-100">For Approval</span>
+                                ${budgetStatusDisplay}
                             </h6>      
                         </div>
                     </div>
@@ -354,7 +433,7 @@ $(document).ready(function() {
                                 <div class="body">
                                     <small class="text-small text-muted font-weight-bold">Date Created</small>
                                     <h6 class="mt-0 font-weight-bold">
-                                        ---
+                                        ${createdAt}
                                     </h6>      
                                 </div>
                             </div>
@@ -364,7 +443,7 @@ $(document).ready(function() {
                                 <div class="body">
                                     <small class="text-small text-muted font-weight-bold">Date Submitted</small>
                                     <h6 class="mt-0 font-weight-bold">
-                                        ---
+                                        ${submittedAt || "---"}
                                     </h6>      
                                 </div>
                             </div>
@@ -374,7 +453,7 @@ $(document).ready(function() {
                                 <div class="body">
                                     <small class="text-small text-muted font-weight-bold">Date Approved</small>
                                     <h6 class="mt-0 font-weight-bold">
-                                        ---
+                                        ${getDateApproved(timelineBuilderStatus, approversID, approversDate)}
                                     </h6>      
                                 </div>
                             </div>
@@ -386,7 +465,7 @@ $(document).ready(function() {
                         <div class="body">
                             <small class="text-small text-muted font-weight-bold">Remarks</small>
                             <h6 class="mt-0 font-weight-bold">
-                                ---
+                                ${timelineBuilderRemarks || "---"}
                             </h6>      
                         </div>
                     </div>
@@ -396,50 +475,83 @@ $(document).ready(function() {
             <div class="row">
                 <div class="col-md-4 col-sm-12">
                     <div class="form-group">
+                        <label>Prepared By</label>
+                        <input type="text" class="form-control" disabled value="${preparedBy}">
+                    </div>
+                </div>
+                <div class="col-md-4 col-sm-12">
+                    <div class="form-group">
+                        <label>Department</label>
+                        <input type="text" class="form-control" disabled value="${departmentName}">
+                    </div>
+                </div>
+                <div class="col-md-4 col-sm-12">
+                    <div class="form-group">
+                        <label>Position</label>
+                        <input type="text" class="form-control" disabled value="${designationName}">
+                    </div>
+                </div>
+                <div class="col-md-12 col-sm-12">
+                    <div class="form-group">
+                        <label>Description</label>
+                        <textarea rows="4" 
+                            class="form-control validate"
+                            data-allowcharacters="[0-9][a-z][A-Z][ ][.][,][_]['][()][?][-][/]"
+                            minlength="0"
+                            maxlength="250"
+                            style="resize: none" 
+                            name="remarks" 
+                            id="remarks"
+                            disabled>${timelineDescription}</textarea>
+                        <div class="invalid-feedback d-block"></div>
+                    </div>
+                </div>
+                <div class="col-md-4 col-sm-12">
+                    <div class="form-group">
                         <label>Project Code</label>
-                        <input type="text" class="form-control" data-allowcharacters="[A-Z][a-z][0-9][.][,][-][(][)]['][/][@][_][ ]" disabled minlength="2" maxlength="150"  value="HMS-21-00001">
+                        <input type="text" class="form-control" data-allowcharacters="[A-Z][a-z][0-9][.][,][-][(][)]['][/][@][_][ ]" disabled minlength="2" maxlength="150"  value="${projectCode}">
                     </div>
                 </div>
                 <div class="col-md-4 col-sm-12">
                     <div class="form-group">
                         <label>Project Name</label>
-                        <input type="text" class="form-control" data-allowcharacters="[A-Z][a-z][0-9][.][,][-][(][)]['][/][@][_][ ]" disabled minlength="2" maxlength="150"  value="Hotel Management System">
+                        <input type="text" class="form-control" data-allowcharacters="[A-Z][a-z][0-9][.][,][-][(][)]['][/][@][_][ ]" disabled minlength="2" maxlength="150"  value="${projectName}">
                     </div>
                 </div>
                 <div class="col-md-4 col-sm-12">
                     <div class="form-group">
                         <label>Project Category</label>
-                        <input type="text" class="form-control" data-allowcharacters="[A-Z][a-z][0-9][.][,][-][(][)]['][/][@][_][ ]" disabled minlength="2" maxlength="150"  value="Software">
+                        <input type="text" class="form-control" data-allowcharacters="[A-Z][a-z][0-9][.][,][-][(][)]['][/][@][_][ ]" disabled minlength="2" maxlength="150"  value="${projectCategory}">
                     </div>
                 </div>
                 <div class="col-md-4 col-sm-12">
                     <div class="form-group">
                         <label>Client Name</label>
-                        <input type="text" class="form-control" data-allowcharacters="[A-Z][a-z][0-9][.][,][-][(][)]['][/][@][_][ ]" disabled minlength="2" maxlength="150"  value="Hotel Mercante">
+                        <input type="text" class="form-control" data-allowcharacters="[A-Z][a-z][0-9][.][,][-][(][)]['][/][@][_][ ]" disabled minlength="2" maxlength="150"  value="${clientName}">
                     </div>
                 </div>
                 <div class="col-md-8 col-sm-12">
                     <div class="form-group">
                         <label>Client Address</label>
-                        <input type="text" class="form-control" disabled value="Bonifacio corner Plaridel Street, Barangay I, Vigan, Ilocos Sur">
+                        <input type="text" class="form-control" disabled value="${clientAddress}">
                     </div>
                 </div>
                 <div class="col-md-4 col-sm-12">
                     <div class="form-group">
                         <label>Start Date & End Date</label>
-                        <input type="text" class="form-control" disabled value="May 12, 2020 - June 19, 2020">
+                        <input type="text" class="form-control" disabled value="${timelineDate}">
                     </div>
                 </div>
                 <div class="col-md-4 col-sm-12">
                     <div class="form-group">
                         <label>Priority Level</label>
-                        <input type="text" class="form-control" disabled value="High">
+                        <input type="text" class="form-control" disabled value="${timelinePriority}">
                     </div>
                 </div>
                 <div class="col-md-4 col-sm-12">
                     <div class="form-group">
                         <label>Issued</label>
-                        <input type="text" class="form-control" disabled value="For Development">
+                        <input type="text" class="form-control" disabled value="${timelineIssued}">
                     </div>
                 </div>
 
@@ -448,44 +560,18 @@ $(document).ready(function() {
                         <div class="col-md-6 col-sm-12">
                             <div class="form-group">
                                 <label>Project Manager</label>
-                                <input type="text" class="form-control" disabled value="Robinjamin Gelilop">
+                                <input type="text" class="form-control" disabled value="${projectManager}">
                             </div>
                             <div class="form-group">
                                 <label>Team Leader</label>
-                                <input type="text" class="form-control" disabled value="Arjay Diangzon">
+                                <input type="text" class="form-control" disabled value="${teamLeader}">
                             </div>
                         </div>
                         <div class="col-md-6 col-sm-12">
                             <div class="form-group">
                                 <label>Team Member</label>
-                                <textarea type="text" class="form-control" rows="5" style="resize: none" disabled>Wilson Parajas, Charles Verdadero, Mark Nieto</textarea>
+                                <textarea type="text" class="form-control" rows="5" style="resize: none" disabled>${teamMember}</textarea>
                             </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4 col-sm-12">
-                    <div class="form-group">
-                        <label>Prepared By</label>
-                        <input type="text" class="form-control" disabled value="Kay-Cee Allen Y. Tangalin">
-                    </div>
-                </div>
-                <div class="col-md-4 col-sm-12">
-                    <div class="form-group">
-                        <label>Department</label>
-                        <input type="text" class="form-control" disabled value="Executives">
-                    </div>
-                </div>
-                <div class="col-md-4 col-sm-12">
-                    <div class="form-group">
-                        <label>Position</label>
-                        <input type="text" class="form-control" disabled value="Chief Finance Officer">
-                    </div>
-                </div>
-                <div class="col-md-12 col-sm-12">
-                    <div class="form-group">
-                    <label>Description</label>
-                        <div class="remarks">
-                            <textarea rows="4" style="resize: none" class="form-control" name="remarks" id="remarks"></textarea>
                         </div>
                     </div>
                 </div>
@@ -562,14 +648,14 @@ $(document).ready(function() {
                                 <span class="input-group-text">₱</span>
                             </div>
                             <input type="text" 
-                                class="form-control text-right proposedBudget amount" 
+                                class="form-control text-right amount" 
                                 min="0.1" 
                                 max="999999" 
                                 minlength="1" 
                                 maxlength="20" 
                                 name="proposedBudget" 
                                 id="proposedBudget" 
-                                value="0"
+                                value="${proposedBudget}"
                                 disabled>
                         </div>
                         <div class="invalid-feedback d-block" id="invalid-proposedBudget"></div> 
@@ -583,9 +669,9 @@ $(document).ready(function() {
                                 <span class="input-group-text">₱</span>
                             </div>
                             <input type="text" 
-                                class="form-control amount text-right allocatedBudget" 
+                                class="form-control amount text-right" 
                                 min="0.01" 
-                                max="999999" 
+                                max="9999999999" 
                                 minlength="1" 
                                 maxlength="20" 
                                 name="allocatedBudget" 
@@ -600,7 +686,8 @@ $(document).ready(function() {
 
             <div class="col-md-12 text-right mt-3 mb-3 addReq">
                 <button class="btn btn-submit px-5 p-2" 
-                    id="btnSubmit">
+                    id="btnSubmit"
+                    timelineBuilderID="${timelineBuilderID}">
                     <i class="fas fa-paper-plane"></i> Submit
                 </button>
                 <button class="btn btn-cancel px-5 p-2" 
@@ -613,6 +700,7 @@ $(document).ready(function() {
         setTimeout(() => {
             $("#page_content").html(html);
             initDatatables();
+            initAll();
         }, 500);
     }
     // ----- END FORM CONTENT -----
@@ -638,16 +726,205 @@ $(document).ready(function() {
     // ----- CLICK TIMELINE ROW -----
     $(document).on("click", ".btnView", function() {
         $("#page_content").html(preloader);
-        const timelineID = decryptString($(this).attr("id"));
-        viewDocument(timelineID);
+        const timelineBuilderID = decryptString($(this).attr("id"));
+        viewDocument(timelineBuilderID);
     })
     // ----- END CLICK TIMELINE ROW -----
 
 
-    // ----- CLICK BUTTON BACK -----
-	$(document).on("click", "#btnBack", function () {
-		pageContent();
-	});
-	// ----- END CLICK BUTTON BACK -----
+    // ----- CLICK BUTTON SUBMIT -----
+	$(document).on("click", "#btnSubmit", function () {
+        const validateInputs = validateForm("page_content");
+        if (validateInputs) {
+
+        }
+
+        // formButtonHTML(this);
+		// const id = decryptString($(this).attr("timelineBuilderID"));
+
+        // setTimeout(() => {
+        //     validateInputs().then(res => {
+        //         if (res) {
+        //             saveProjectBoard("submit", pageContent);
+        //         }
+        //         formButtonHTML(this, false);
+        //     });
+        // }, 10);
+    });
+
+
+    // ----- CLICK BUTTON CANCEL OR BACK -----
+    $(document).on("click", "#btnCancel, #btnBack", function() {
+        saveProjectBudget("cancel", pageContent);
+    })
+    // ----- END CLICK BUTTON CANCEL OR BACK -----
+
+
+    // ----- CONFIRMATION -----
+    const getConfirmation = method => {
+        const title = "Project Board";
+        let swalText, swalImg;
+
+        switch (method) {
+            case "save":
+                swalTitle = `SAVE ${title.toUpperCase()}`;
+                swalText  = "Are you sure to save this document?";
+                swalImg   = `${base_url}assets/modal/draft.svg`;
+                break;
+            case "submit":
+                swalTitle = `SUBMIT ${title.toUpperCase()}`;
+                swalText  = "Are you sure to submit these tasks with man hours to employee taskboard?";
+                swalImg   = `${base_url}assets/modal/add.svg`;
+                break;
+            case "approve":
+                swalTitle = `APPROVE ${title.toUpperCase()}`;
+                swalText  = "Are you sure to approve this document?";
+                swalImg   = `${base_url}assets/modal/approve.svg`;
+                break;
+            case "deny":
+                swalTitle = `DENY ${title.toUpperCase()}`;
+                swalText  = "Are you sure to deny this document?";
+                swalImg   = `${base_url}assets/modal/reject.svg`;
+                break;
+            case "cancelform":
+                swalTitle = `CANCEL ${title.toUpperCase()}`;
+                swalText  = "Are you sure to cancel this document?";
+                swalImg   = `${base_url}assets/modal/cancel.svg`;
+                break;
+            case "drop":
+                swalTitle = `DROP ${title.toUpperCase()}`;
+                swalText  = "Are you sure to drop this document?";
+                swalImg   = `${base_url}assets/modal/drop.svg`;
+                break;
+            case "uploadcontract":
+                swalTitle = `UPLOAD CONTRACT`;
+                swalText  = "Are you sure to upload this contract?";
+                swalImg   = `${base_url}assets/modal/add.svg`;
+                break;
+            default:
+                swalTitle = `DISCARD ${title.toUpperCase()}`;
+                swalText  = "Are you sure to discard this process?";
+                swalImg   = `${base_url}assets/modal/cancel.svg`;
+                break;
+        }
+        return Swal.fire({
+            title:              swalTitle,
+            text:               swalText,
+            imageUrl:           swalImg,
+            imageWidth:         200,
+            imageHeight:        200,
+            imageAlt:           "Custom image",
+            showCancelButton:   true,
+            confirmButtonColor: "#dc3545",
+            cancelButtonColor:  "#1a1a1a",
+            cancelButtonText:   "No",
+            confirmButtonText:  "Yes"
+        })
+    }
+    // ----- END CONFIRMATION -----
+
+
+    // ----- SAVE PROJECT BUDGET -----
+    function saveProjectBudget(method = "submit", callback = null) {
+        const confirmation = getConfirmation(method);
+        confirmation.then(res => {
+            if (res.isConfirmed) {
+
+                if (method == "cancel") {
+                    callback && callback();
+                    Swal.fire({
+                        icon:              'success',
+                        title:             "Process successfully discarded!",
+                        showConfirmButton: false,
+                        timer:             2000
+                    });
+                } else {
+                    $.ajax({
+                        method:      "POST",
+                        url:         `project_management_board/saveProjectBoard`,
+                        data,
+                        cache:       false,
+                        async:       false,
+                        dataType:    "json",
+                        beforeSend: function() {
+                            $("#loader").show();
+                        },
+                        success: function(data) {
+                            let result = data.split("|");
+            
+                            let isSuccess   = result[0];
+                            let message     = result[1];
+                            let insertedID  = result[2];
+                            let dateCreated = result[3];
+    
+                            let swalTitle;
+                            if (method == "submit") {
+                                swalTitle = `${getFormCode("PO", dateCreated, insertedID)} submitted successfully!`;
+                            } else if (method == "save") {
+                                swalTitle = `${getFormCode("PO", dateCreated, insertedID)} saved successfully!`;
+                            } else if (method == "cancelform") {
+                                swalTitle = `${getFormCode("PO", dateCreated, insertedID)} cancelled successfully!`;
+                            } else if (method == "approve") {
+                                swalTitle = `${getFormCode("PO", dateCreated, insertedID)} approved successfully!`;
+                            } else if (method == "deny") {
+                                swalTitle = `${getFormCode("PO", dateCreated, insertedID)} denied successfully!`;
+                            } else if (method == "drop") {
+                                swalTitle = `${getFormCode("PO", dateCreated, insertedID)} dropped successfully!`;
+                            }
+            
+                            if (isSuccess == "true") {
+                                setTimeout(() => {
+                                    $("#loader").hide();
+                                    closeModals();
+                                    callback && callback();
+                                    Swal.fire({
+                                        icon:              "success",
+                                        title:             swalTitle,
+                                        showConfirmButton: false,
+                                        timer:             2000,
+                                    });
+                                }, 500);
+                            } else {
+                                setTimeout(() => {
+                                    $("#loader").hide();
+                                    Swal.fire({
+                                        icon:              "danger",
+                                        title:             message,
+                                        showConfirmButton: false,
+                                        timer:             2000,
+                                    });
+                                }, 500);
+                            }
+                        },
+                        error: function() {
+                            setTimeout(() => {
+                                $("#loader").hide();
+                                showNotification("danger", "System error: Please contact the system administrator for assistance!");
+                            }, 500);
+                        }
+                    }).done(function() {
+                        setTimeout(() => {
+                            $("#loader").hide();
+                        }, 500);
+                    })
+                }
+            } else {
+                if (res.dismiss == "cancel" && method != "submit") {
+                    if (method != "deny") {
+                        if (method != "cancelform") {
+                            // callback && callback();
+                        }
+                    } else {
+                        
+                    }
+                } else if (res.isDismissed) {
+                    if (method == "deny") {
+                        
+                    }
+                }
+            }
+        });
+    }
+    // ----- END SAVE PROJECT BUDGET -----
 
 })

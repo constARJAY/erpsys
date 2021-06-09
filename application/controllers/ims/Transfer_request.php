@@ -12,7 +12,7 @@ class Transfer_request extends CI_Controller {
 
     public function index()
     {
-        $data["title"] = "Transfer Request";
+        $data["title"] = "Inventory Request";
 
         $this->load->view("template/header",$data);
         $this->load->view("ims/transfer_request/index");
@@ -68,6 +68,7 @@ class Transfer_request extends CI_Controller {
         $transferRequestStatus   = $this->input->post("transferRequestStatus");
         $transferRequestReason   = $this->input->post("transferRequestReason") ?? null;
         $transferRequestRemarks  = $this->input->post("transferRequestRemarks") ?? null;
+        $transferDate  = $this->input->post("transferDate") ?? null;
         $submittedAt             = $this->input->post("submittedAt") ?? null;
         $createdBy               = $this->input->post("createdBy");
         $updatedBy               = $this->input->post("updatedBy");
@@ -89,6 +90,7 @@ class Transfer_request extends CI_Controller {
             "approversDate"           => $approversDate,
             "transferRequestStatus"   => $transferRequestStatus,
             "transferRequestReason"   => $transferRequestReason,
+            "transferDate"              => $transferDate,
             // "projectTotalAmount"      => $projectTotalAmount,
             // "companyTotalAmount"      => $companyTotalAmount,
             "submittedAt"             => $submittedAt,
@@ -131,7 +133,7 @@ class Transfer_request extends CI_Controller {
             }
         }
 
-        $saveTransferData = $this->purchaserequest->savePurchaseRequestData($action, $purchaseRequestData, $transferRequestID);
+        $saveTransferData = $this->purchaserequest->savePurchaseRequestData($action, $purchaseRequestData, $transferRequestID,$inventoryStorageIDSender);
         if ($saveTransferData) {
             $result = explode("|", $saveTransferData);
 

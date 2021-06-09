@@ -9,7 +9,7 @@
                         <li class="breadcrumb-item active">Manage Project Budget</li>
                     </ul>
                     <h1 class="mt-3">Manage Project Budget</h1>
-                    <span>This module is used to manage the submission and approval of project timelines.</span>
+                    <span>This module is used to manage the monitoring and assigning of project budget.</span>
 				</div>
 				<div class="col-lg-6 col-md-12 text-md-right" id="headerButton">
                     <!-- <button type="button" class="btn btn-default btn-add" id="btnAdd" data-toggle="tab" href="#addPhaseForm"><i class="icon-plus"></i> &nbsp;Show Budget</button> -->

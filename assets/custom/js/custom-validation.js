@@ -447,7 +447,7 @@ const checkAmount = (elementID, invalidFeedback, value) => {
 	} else if (typeof min != "number" && typeof max == "number") {
 		if (currencyValue > max) {
 			$(elementID).removeClass("is-valid").addClass("is-invalid");
-			invalidFeedback.text(`Please input amount less than ${formatAmount(max)}`);
+			invalidFeedback.text(`Please input amount less than ${formatAmount(max, true)}`);
 		} else {
 			validated
 				? $(elementID).removeClass("is-invalid").addClass("is-valid")
@@ -457,7 +457,7 @@ const checkAmount = (elementID, invalidFeedback, value) => {
 	} else if (typeof min == "number" && typeof max != "number") {
 		if (currencyValue < min) {
 			$(elementID).removeClass("is-valid").addClass("is-invalid");
-			invalidFeedback.text(`Please input amount greater than ${formatAmount(min)}`);
+			invalidFeedback.text(`Please input amount greater than ${formatAmount(min, true)}`);
 		} else {
 			validated
 				? $(elementID).removeClass("is-invalid").addClass("is-valid")
@@ -467,7 +467,7 @@ const checkAmount = (elementID, invalidFeedback, value) => {
 	} else if (typeof min == "number" && typeof max == "number") {
 		if (currencyValue >= min && currencyValue > max) {
 			$(elementID).removeClass("is-valid").addClass("is-invalid");
-			invalidFeedback.text(`Please input amount less than ${formatAmount(max)}`);
+			invalidFeedback.text(`Please input amount less than ${formatAmount(max, true)}`);
 		} else if (currencyValue >= min && currencyValue <= max) {
 			validated
 				? $(elementID).removeClass("is-invalid").addClass("is-valid")
@@ -475,7 +475,7 @@ const checkAmount = (elementID, invalidFeedback, value) => {
 			invalidFeedback.text("");
 		} else if (currencyValue < min && currencyValue <= max) {
 			$(elementID).removeClass("is-valid").addClass("is-invalid");
-			invalidFeedback.text(`Please input amount greater than ${formatAmount(min - 0.01)}`);
+			invalidFeedback.text(`Please input amount greater than ${formatAmount(min - 0.01, true)}`);
 		}
 	} else {
 		validated

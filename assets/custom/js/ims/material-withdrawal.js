@@ -244,8 +244,8 @@ $(document).ready(function() {
 					{ targets: 3,  width: 280  },
 					{ targets: 4,  width: 300  },
 					{ targets: 5,  width: 120 },
-					{ targets: 6,  width: 250 },
-					{ targets: 7,  width: 100 },
+					{ targets: 6,  width: 280 },
+					{ targets: 7,  width: 40 },
 					{ targets: 8,  width: 40 }
 					// { targets: 9,  width: 40 }
 					// { targets: 9,  width: 200 },
@@ -263,13 +263,13 @@ $(document).ready(function() {
 				scrollX: true,
 				scrollCollapse: true,
 				columnDefs: [
-					{ targets: 0,  width: 50  },
+					{ targets: 0,  width: 140  },
 					{ targets: 1,  width: 120  },
 					{ targets: 2,  width: 280  },
 					{ targets: 3,  width: 300  },
 					{ targets: 4,  width: 120 },
-					{ targets: 5,  width: 250 },
-					{ targets: 6,  width: 100 },
+					{ targets: 5,  width: 280 },
+					{ targets: 6,  width: 40 },
 					{ targets: 7,  width: 40 }
 					// { targets: 9,  width: 200 },
 				],
@@ -1159,177 +1159,164 @@ $(document).ready(function() {
 		const StorageIDSender  = $("[name=inventoryStorageIDSender]").val();
 		const isProject    = $(this).closest("tbody").attr("project") == "true";
 		const attr         = isProject ? "[project=true]" : "[company=true]";
+		if(barcodeval.length == 17){
+			const data = getTableData
+				(`ims_stock_in_total_tbl AS isit
+				LEFT JOIN ims_inventory_item_tbl 					AS iii 	ON isit.itemID = iii.itemID
+				LEFT JOIN ims_inventory_storage_tbl 				AS iis 	ON isit.inventoryStorageID = iis.inventoryStorageID
+				LEFT JOIN ims_stock_in_tbl 							AS isi  ON isit.itemID = isi.itemID AND isit.inventoryStorageID = isi.stockInLocationID
+				LEFT JOIN ims_inventory_receiving_details_tbl 		AS iird ON iird.inventoryReceivingID = isi.inventoryReceivingID AND iird.itemID = isi.itemID
+				LEFT JOIN ims_inventory_receiving_tbl 				AS iir 	ON iir.inventoryReceivingID = iird.inventoryReceivingID AND iir.inventoryReceivingStatus = 2 
+				LEFT JOIN ims_request_items_tbl 					AS iri 	ON iri.requestItemID  = iird.requestItemID`, 
+				`isit.itemID,
+				iii.createdAt as itemdate,
+				iis.createdAt as storagedate,
+				isit.itemName,
+				iri.brandName as itemBrandName,
+				iri.itemUom,
+				iii.itemDescription,
+				isit.inventoryStorageID,
+				iis.inventoryStorageCode,
+				iis.inventoryStorageOfficeName,
+				isi.barcode,
+				isi.stockInSerialNumber`,
+				`isi.barcode = '${barcodeval}'`, ``,`isit.itemID`); 
 
-		const data = getTableData
-			(`ims_stock_in_total_tbl AS isit
-			LEFT JOIN ims_inventory_item_tbl 					AS iii 	ON isit.itemID = iii.itemID
-			LEFT JOIN ims_inventory_storage_tbl 				AS iis 	ON isit.inventoryStorageID = iis.inventoryStorageID
-			LEFT JOIN ims_stock_in_tbl 							AS isi  ON isit.itemID = isi.itemID AND isit.inventoryStorageID = isi.stockInLocationID
-			LEFT JOIN ims_inventory_receiving_details_tbl 		AS iird ON iird.inventoryReceivingID = isi.inventoryReceivingID AND iird.itemID = isi.itemID
-			LEFT JOIN ims_inventory_receiving_tbl 				AS iir 	ON iir.inventoryReceivingID = iird.inventoryReceivingID AND iir.inventoryReceivingStatus = 2 
-			LEFT JOIN ims_request_items_tbl 					AS iri 	ON iri.requestItemID  = iird.requestItemID`, 
-			`isit.itemID,
-			iii.createdAt as itemdate,
-			iis.createdAt as storagedate,
-			isit.itemName,
-			iri.brandName as itemBrandName,
-			iri.itemUom,
-			iii.itemDescription,
-			isit.inventoryStorageID,
-			iis.inventoryStorageCode,
-			iis.inventoryStorageOfficeName,
-			isi.barcode,
-			isi.stockInSerialNumber`,
-			 `isi.barcode = '${barcodeval}'`, ``,`isit.itemID`); 
+				if(data.length != 0){
+					data.map((item) => {
+						let {
+							itemID ,
+							itemName,
+							itemUom,
+							itemDescription,
+							itemdate,
+							storagedate,
+							classificationName,
+							quantity,
+							inventoryStorageCode,
+							inventoryStorageOfficeName,
+							inventoryStorageID
+						} = item;
 
-		// const data = getTableData(`ims_stock_in_total_tbl 	AS isit
-		// LEFT JOIN ims_inventory_item_tbl 					AS iii 	ON isit.itemID = iii.itemID
-		// LEFT JOIN ims_inventory_classification_tbl 			AS iict ON iict.classificationID = iii.classificationID
-		// LEFT JOIN ims_stock_in_tbl 							AS isi 	ON isit.itemID = isi.itemID
-		// LEFT JOIN ims_inventory_receiving_details_tbl 		AS iird ON iird.inventoryReceivingID = isi.inventoryReceivingID AND iird.itemID = isi.itemID
-		// LEFT JOIN ims_inventory_receiving_tbl 				AS iir 	ON iir.inventoryReceivingID = iird.inventoryReceivingID AND iir.inventoryReceivingStatus = 2 
-		// LEFT JOIN ims_request_items_tbl 					AS iri 	ON iri.requestItemID  = iird.requestItemID`, 
-		// `isit.itemID,
-		//  iii.createdAt,
-		//  isit.itemName,
-		//  iri.brandName as itemBrandName,
-		//  iri.itemUom,
-		//  iii.itemDescription,
-		//  isi.barcode,
-		//  isi.stockInSerialNumber,
-		//  iict.classificationName`,
-		//  `isi.barcode = '${barcodeval}' GROUP BY isit.itemID`, // to be continued by adding the item ID 
-		// "");
+						let item_ID       		= itemID ? itemID : "";
+						let item_Name       		= itemName ? itemName : "";
+						let item_Uom       		= itemUom ? itemUom : "";
+						let item_Description       		= itemDescription ? itemDescription : "";
+						let item_date       	= itemdate ? itemdate : "";
+						let storage_date       	= storagedate ? storagedate : "";
+						let inventory_Storage_Office_Name       	= inventoryStorageOfficeName ? inventoryStorageOfficeName : "";
+						let inventory_Storage_ID       			= inventoryStorageID ? inventoryStorageID : "";
 
-			if(data.length != 0){
-				data.map((item) => {
-					let {
-						itemID ,
-						itemName,
-						itemUom,
-						itemDescription,
-						itemdate,
-						storagedate,
-						classificationName,
-						quantity,
-						inventoryStorageCode,
-						inventoryStorageOfficeName,
-						inventoryStorageID
-					} = item;
-
-					let item_ID       		= itemID ? itemID : "";
-					let item_Name       		= itemName ? itemName : "";
-					let item_Uom       		= itemUom ? itemUom : "";
-					let item_Description       		= itemDescription ? itemDescription : "";
-					let item_date       	= itemdate ? itemdate : "";
-					let storage_date       	= storagedate ? storagedate : "";
-					let inventory_Storage_Office_Name       	= inventoryStorageOfficeName ? inventoryStorageOfficeName : "";
-					let inventory_Storage_ID       			= inventoryStorageID ? inventoryStorageID : "";
-
-					// let classification_Name = classificationName? classificationName :"";
-			
-					let	barcodeArrayLength = barcodeArray.length || 0;
-					if(barcodeval.length  ==17){
-
-						
-						if(itemName != null){
+						// let classification_Name = classificationName? classificationName :"";
+				
+						let	barcodeArrayLength = barcodeArray.length || 0;
+						if(barcodeval.length  ==17){
 
 							
-							let counter =1;
-							if(barcodeArrayLength !=0){
-								for(var loop1 =0;loop1<barcodeArrayLength; loop1++ ){
-									
+							if(itemName != null){
 
-									if(barcodeArray[loop1] == barcodeval && barcodeLocationArray[loop1] != barcodeID){
-									
-										$(this).closest("tr").find("[name=barcode]").removeClass("is-valid").addClass("is-invalid");
-										$(this).closest("tr").find("#invalid-barcode").removeClass("is-valid").addClass("is-invalid");
-										$(this).closest("tr").find("#invalid-barcode").text('Barcode '+barcodeval+' already declared!');
-										return false;
-									}else{
-
-										if(counter == barcodeArrayLength){
-											barcodeArray[barcodeArrayLength -1] = barcodeval;
-											barcodeLocationArray[barcodeArrayLength -1] = barcodeID;
-										}
+								
+								let counter =1;
+								if(barcodeArrayLength !=0){
+									for(var loop1 =0;loop1<barcodeArrayLength; loop1++ ){
 										
+
+										if(barcodeArray[loop1] == barcodeval && barcodeLocationArray[loop1] != barcodeID){
+										
+											$(this).closest("tr").find("[name=barcode]").removeClass("is-valid").addClass("is-invalid");
+											$(this).closest("tr").find("#invalid-barcode").removeClass("is-valid").addClass("is-invalid");
+											$(this).closest("tr").find("#invalid-barcode").text('Data already exist!');
+											return false;
+										}else{
+
+											if(counter == barcodeArrayLength){
+												barcodeArray[barcodeArrayLength -1] = barcodeval;
+												barcodeLocationArray[barcodeArrayLength -1] = barcodeID;
+											}
+											
+										}
+										counter++;
 									}
-									counter++;
+								}else{
+									barcodeArray[0] = barcodeval;
+									barcodeLocationArray[0] = barcodeID;
 								}
+
+								$(this).closest("tr").find(`.itemcode`).first().text(getFormCode("ITM",item_date,item_ID));
+								$(this).closest("tr").find(`[name=barcode]`).first().attr('itemid',item_ID);
+								$(this).closest("tr").find(`[name=barcode]`).first().attr('storageid',inventory_Storage_ID);
+								$(this).closest("tr").find(`.itemname`).first().text(item_Name);
+								$(this).closest("tr").find(`.uom`).first().text(item_Uom);
+								$(this).closest("tr").find(`.itemdescription`).first().text(item_Description);
+								$(this).closest("tr").find(`.storagecode`).first().text(getFormCode("ISM",storage_date,inventory_Storage_ID));
+								$(this).closest("tr").find(`.storagename`).first().text(inventory_Storage_Office_Name);
+								// $(this).closest("tr").find(`.liststocks`).first().text("-");
+								// Storage Field
+								
+								// let url   = window.document.URL;
+								// let arr   = url.split("?view_id=");
+								// let isAdd = url.indexOf("?add");
+
+								// if(isAdd != -1){
+								// 	arr = url.split("?add=");
+								// 	if (arr.length > 1) {
+								// 		$(this).closest("tr").find(`[name=quantity]`).first().val(0);
+								// 		$(this).closest("tr").find(`.storagecode`).first().text('-');
+								// 	} 
+								// }
+								
+
+
+								// $(this).closest("tr").find(`[name=inventoryStorageID]${attr}`).each(function(i, obj) {
+								// 	let inventoryStorageID = $(this).val();
+								// 	$(this).html(getStorage(inventoryStorageID,isProject,true,barcodeval));
+								// 	$(this).prop("disabled",false);
+								// }) 
+				
+								$(this).closest("tr").find("[name=barcode]").removeClass("is-invalid");
+								$(this).closest("tr").find("#invalid-barcode").removeClass("is-invalid");
+								$(this).closest("tr").find("#invalid-barcode").text('');
+				
 							}else{
-								barcodeArray[0] = barcodeval;
-								barcodeLocationArray[0] = barcodeID;
+								$(this).closest("tr").find("[name=barcode]").removeClass("is-valid").addClass("is-invalid");
+								$(this).closest("tr").find("#invalid-barcode").removeClass("is-valid").addClass("is-invalid");
+								$(this).closest("tr").find("#invalid-barcode").text('No Item Available!');
 							}
 
-							$(this).closest("tr").find(`.itemcode`).first().text(getFormCode("ITM",item_date,item_ID));
-							$(this).closest("tr").find(`[name=barcode]`).first().attr('itemid',item_ID);
-							$(this).closest("tr").find(`[name=barcode]`).first().attr('storageid',inventory_Storage_ID);
-							$(this).closest("tr").find(`.itemname`).first().text(item_Name);
-							$(this).closest("tr").find(`.uom`).first().text(item_Uom);
-							$(this).closest("tr").find(`.itemdescription`).first().text(item_Description);
-							$(this).closest("tr").find(`.storagecode`).first().text(getFormCode("ISM",storage_date,inventory_Storage_ID));
-							$(this).closest("tr").find(`.storagename`).first().text(inventory_Storage_Office_Name);
-							// $(this).closest("tr").find(`.liststocks`).first().text("-");
-							// Storage Field
-							
-							// let url   = window.document.URL;
-							// let arr   = url.split("?view_id=");
-							// let isAdd = url.indexOf("?add");
-
-							// if(isAdd != -1){
-							// 	arr = url.split("?add=");
-							// 	if (arr.length > 1) {
-							// 		$(this).closest("tr").find(`[name=quantity]`).first().val(0);
-							// 		$(this).closest("tr").find(`.storagecode`).first().text('-');
-							// 	} 
-							// }
-							
-
-
-							// $(this).closest("tr").find(`[name=inventoryStorageID]${attr}`).each(function(i, obj) {
-							// 	let inventoryStorageID = $(this).val();
-							// 	$(this).html(getStorage(inventoryStorageID,isProject,true,barcodeval));
-							// 	$(this).prop("disabled",false);
-							// }) 
-			
-							$(this).closest("tr").find("[name=barcode]").removeClass("is-invalid");
-							$(this).closest("tr").find("#invalid-barcode").removeClass("is-invalid");
-							$(this).closest("tr").find("#invalid-barcode").text('');
-			
 						}else{
 							$(this).closest("tr").find("[name=barcode]").removeClass("is-valid").addClass("is-invalid");
 							$(this).closest("tr").find("#invalid-barcode").removeClass("is-valid").addClass("is-invalid");
-							$(this).closest("tr").find("#invalid-barcode").text('No Item Available!');
+							$(this).closest("tr").find("#invalid-barcode").text('Please Input exact 17 Characters!');
 						}
 
-					}else{
+					})
+				}
+				else if(data.length == 0){
+					$(this).closest("tr").find(`.itemcode`).first().text("-");
+						$(this).closest("tr").find(`[name=barcode]`).first().attr('itemid',"-");
+						$(this).closest("tr").find(`.itemname`).first().text("-");
+						$(this).closest("tr").find(`.uom`).first().text("-");
+						$(this).closest("tr").find(`.itemdescription`).first().text("-");
+						// $(this).closest("tr").find(`.liststocks`).first().text("-");
+						$(this).closest("tr").find(`[name=quantity]`).first().val(0);
+						$(this).closest("tr").find(`.storagecode`).first().text('-');
+						$(this).closest("tr").find(`[name=inventoryStorageID]`)
+
 						$(this).closest("tr").find("[name=barcode]").removeClass("is-valid").addClass("is-invalid");
 						$(this).closest("tr").find("#invalid-barcode").removeClass("is-valid").addClass("is-invalid");
-						$(this).closest("tr").find("#invalid-barcode").text('Please Input exact 17 Characters!');
-					}
+						$(this).closest("tr").find("#invalid-barcode").text('No Item Available!');
+				}else{
+						$(this).closest("tr").find("[name=barcode]").removeClass("is-invalid");
+						$(this).closest("tr").find("#invalid-barcode").removeClass("is-invalid");
+						$(this).closest("tr").find("#invalid-barcode").text('');
+						
+				}
 
-				})
-			}
-			else if(data.length == 0){
-				$(this).closest("tr").find(`.itemcode`).first().text("-");
-					$(this).closest("tr").find(`[name=barcode]`).first().attr('itemid',"-");
-					$(this).closest("tr").find(`.itemname`).first().text("-");
-					$(this).closest("tr").find(`.uom`).first().text("-");
-					$(this).closest("tr").find(`.itemdescription`).first().text("-");
-					// $(this).closest("tr").find(`.liststocks`).first().text("-");
-					$(this).closest("tr").find(`[name=quantity]`).first().val(0);
-					$(this).closest("tr").find(`.storagecode`).first().text('-');
-					$(this).closest("tr").find(`[name=inventoryStorageID]`)
-
-					$(this).closest("tr").find("[name=barcode]").removeClass("is-valid").addClass("is-invalid");
-					$(this).closest("tr").find("#invalid-barcode").removeClass("is-valid").addClass("is-invalid");
-					$(this).closest("tr").find("#invalid-barcode").text('No Item Available!');
-			}else{
-					$(this).closest("tr").find("[name=barcode]").removeClass("is-invalid");
-					$(this).closest("tr").find("#invalid-barcode").removeClass("is-invalid");
-					$(this).closest("tr").find("#invalid-barcode").text('');
-					
-			}
+		}else{
+			$(this).closest("tr").find("[name=barcode]").removeClass("is-valid").addClass("is-invalid");
+			$(this).closest("tr").find("#invalid-barcode").removeClass("is-valid").addClass("is-invalid");
+			$(this).closest("tr").find("#invalid-barcode").text('Please Input exact 17 Characters!');
+		}
 
     })
     // ----- END BARCODE -----
@@ -1693,13 +1680,13 @@ $(document).ready(function() {
                         <thead>
                             <tr>
 								${checkboxProjectHeader}
-                                <th>Barcode ${!disabled ? "<code>*</code>" : ""}</th>
+                                <th>Barcode </th>
                                 <th>Item Code </th>
                                 <th>Item Name </th>
-                                <th>Serial No.</th>
+                                <th>Item Description</th>
                                 <th>Storage Code </th>
                                 <th>Storage Name </th>
-                                <th>Quantity ${!disabled ? "<code>*</code>" : ""}</th>
+                                <th>Quantity </th>
                                 <th>UOM </th>
                             </tr>
                         </thead>

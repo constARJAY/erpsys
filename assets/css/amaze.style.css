@@ -115,6 +115,17 @@ tr.btnView, tr.btnEdit {
 	overflow: auto !important;
 }
 
+/**
+*	FOR DOCUMENT HEADER
+**/
+.row .col-lg-2.col-md-6.col-sm-12.px-1 .card .body,
+.row .col-lg-4.col-md-4.col-sm-12.px-1 .card .body,
+.row .col-sm-12.px-1 .card .body {
+	min-height: 88px;
+    height: 100%;
+    max-height: 88px;
+}
+
 @media only screen and (max-width: 1280px) {
 	.listamenities {
 		border: 2px solid #ccc !important;

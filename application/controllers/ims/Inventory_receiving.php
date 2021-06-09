@@ -7,7 +7,7 @@ class Inventory_receiving extends CI_Controller {
     {
         parent::__construct();
         $this->load->model("ims/InventoryReceiving_model", "inventoryreceiving");
-        isAllowed(46);
+        isAllowed(33);
     }
 
     public function index()
