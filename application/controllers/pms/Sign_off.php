@@ -7,7 +7,7 @@ class Sign_off extends CI_Controller {
     {
         parent::__construct();
         // $this->load->model("Companysetup_model", "company_setup");
-        isAllowed(15);
+        isAllowed(52);
     }
 
     public function index()

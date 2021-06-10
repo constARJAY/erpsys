@@ -146,6 +146,7 @@ $(document).ready(function(){
         let categoryID              = data ? (data[0].categoryID     ? data[0].categoryID     : "") : "",
         categoryName                = data ? (data[0].categoryName   ? data[0].categoryName   : "") : "",
         companyName                 = data ? (data[0].companyName    ? data[0].companyName    : "") : "",
+        categoryShortcut                 = data ? (data[0].categoryShortcut    ? data[0].categoryShortcut    : "") : "",
         categoryStatus              = data ? (data[0].categoryStatus ? data[0].categoryStatus : "") : "";
           
         let button = categoryID ? `
@@ -165,7 +166,7 @@ $(document).ready(function(){
         let html = `
         <div class="modal-body">
             <div class="row">
-                <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12">
+                <div class="col-xl-7 col-lg-7 col-md-7 col-sm-7">
                     <div class="form-group">
                         <label>Category Name <span class="text-danger font-weight-bold">*</span></label>
                         <input 
@@ -181,6 +182,24 @@ $(document).ready(function(){
                             value="${categoryName}"
                             autocomplete="off">
                         <div class="invalid-feedback d-block" id="invalid-input_categoryName"></div>
+                    </div>
+                </div>
+                <div class="col-xl-5 col-lg-5 col-md-5 col-sm-5">
+                    <div class="form-group">
+                        <label>Category Shortcut <span class="text-danger font-weight-bold">*</span></label>
+                        <input 
+                            type="text" 
+                            class="form-control validate" 
+                            name="categoryShortcut" 
+                            id="input_categoryShortcut" 
+                            data-allowcharacters="[A-Z][a-z]" 
+                            minlength="2" 
+                            maxlength="3" 
+                            required 
+                            unique="${categoryID}" 
+                            value="${categoryShortcut}"
+                            autocomplete="off">
+                        <div class="invalid-feedback d-block" id="invalid-input_categoryShortcut"></div>
                     </div>
                 </div>
                 <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12">

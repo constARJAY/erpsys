@@ -8,8 +8,8 @@
 						<li class="breadcrumb-item"><i class="fad fa-boxes-alt"></i> &nbsp;Inventory Modules</li>
                         <li class="breadcrumb-item active">Inventory Request</li>
                     </ul>
-                    <h1 class="mt-3">Inventory Request</h1>
-                    <span>This module is used to manage the submission and approval of inventory request.</span>
+                    <h1 class="mt-3">Inventory Transfer</h1>
+                    <span>This module is used to manage the submission and approval of inventory transfer.</span>
                 </div>
                 <?php if(isCreateAllowed(37)){ ?>
                 <div class="col-lg-6 col-md-6 text-right" id="headerButton"></div>
@@ -36,7 +36,7 @@
     <div class="modal-dialog modal-dialog-centered modal-md" role="document">
 		<div class="modal-content">
 			<div class="modal-header bg-primary text-light">
-				<h6 class="page-title font-weight-bold">ADD INVENTORY REQUEST</h6>
+				<h6 class="page-title font-weight-bold">ADD INVENTORY TRANSFER</h6>
 				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
 					<span class="text-light" aria-hidden="true">&times;</span>
 				</button>

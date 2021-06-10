@@ -977,6 +977,10 @@ $(document).ready(function() {
                 </div>
             </div>
 
+			<div class="col-md-12 col-sm-12 mb-0">
+			<label class="font-weight-bold">NATURE OF REQUEST:</label>
+			</div>
+
             <div class="col-md-4 col-sm-12 mb-3">
                 <div class="form-group">
                     <label class="c_checkbox">
@@ -1933,7 +1937,7 @@ function savePurchaseRequest(data = null, method = "submit", notificationData = 
 			if (res.isConfirmed) {
 				$.ajax({
 					method:      "POST",
-					url:         `Personel_requisition/savePersonnelRequisition`,
+					url:         `Personnel_requisition/savePersonnelRequisition`,
 					data,
 					processData: false,
 					contentType: false,

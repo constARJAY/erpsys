@@ -204,7 +204,7 @@ $(document).ready(function() {
             <thead>
                 <tr style="white-space:nowrap">
                     <th>Employee Code</th>
-                    <th>Fullname</th>
+                    <th>Full Name</th>
                     <!-- <th>Department</th> -->
                     <th>Designation</th>
                     <th>Hourly Rate</th>

@@ -1262,7 +1262,7 @@ $(document).ready(function() {
 					}else{
 						$(this).closest("tr").find("[name=barcode]").removeClass("is-valid").addClass("is-invalid");
 						$(this).closest("tr").find("#invalid-barcode").removeClass("is-valid").addClass("is-invalid");
-						$(this).closest("tr").find("#invalid-barcode").text('Please Input exact 17 Characters!');
+						$(this).closest("tr").find("#invalid-barcode").text('Please input exact 17 characters!');
 					}
 	
 	
@@ -1271,7 +1271,7 @@ $(document).ready(function() {
 		}else{
 			$(this).closest("tr").find("[name=barcode]").removeClass("is-valid").addClass("is-invalid");
 			$(this).closest("tr").find("#invalid-barcode").removeClass("is-valid").addClass("is-invalid");
-			$(this).closest("tr").find("#invalid-barcode").text('Please Input exact 17 Characters!');
+			$(this).closest("tr").find("#invalid-barcode").text('Please input exact 17 characters!');
 		}
 
 	

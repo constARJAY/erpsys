@@ -36,6 +36,7 @@ class ProjectManagementBoard_model extends CI_Model {
             ptbt.employeeID,
             ptbt.timelineTeamMember AS teamMember,
             ptbt.timelineBuilderStatus,
+            ptbt.timelineManagementStatus,
             pplt.projectListCode AS projectCode,
             pplt.projectListName AS projectName
         FROM 
@@ -65,6 +66,24 @@ class ProjectManagementBoard_model extends CI_Model {
         return $output;
     }
 
+    public function getTimelineBoard($timelineBuilderID = 0, $taskID = 0)
+    {
+        $output = [];
+        $sql    = "SELECT * FROM pms_timeline_management_tbl WHERE timelineBuilderID = $timelineBuilderID AND taskID = $taskID";
+        $query  = $this->db->query($sql);
+        $milestones = $query ? $query->result_array() : [];
+        foreach ($milestones as $milestone) {
+            $temp = [
+                "timelineManagementID" => $milestone["timelineManagementID"],
+                "milestoneID"          => $milestone["projectMilestoneID"],
+                "manHours"             => $milestone["manHours"],
+                "assignedEmployee"     => $milestone["assignedEmployee"]
+            ];
+            array_push($output, $temp);
+        }
+        return $output;
+    }
+
     public function getTaskList($timelineBuilderID = 0, $milestoneBuilderID = 0)
     {
         $output = [];
@@ -73,11 +92,12 @@ class ProjectManagementBoard_model extends CI_Model {
         $tasks  = $query ? $query->result_array() : [];
         foreach ($tasks as $task) {
             $temp = [
-                "taskID"             => $task["taskID"],
-                "taskName"           => $task["taskName"],
-                "manHours"           => $task["allottedHours"],
-                "taskStartDate"      => date("M d, Y", strtotime($task["taskStartDate"])),
-                "taskEndDate"        => date("M d, Y", strtotime($task["taskEndDate"]))
+                "taskID"        => $task["taskID"],
+                "taskName"      => $task["taskName"],
+                "manHours"      => $task["allottedHours"],
+                "taskStartDate" => date("M d, Y", strtotime($task["taskStartDate"])),
+                "taskEndDate"   => date("M d, Y", strtotime($task["taskEndDate"])),
+                "milestoneTask" => $this->getTimelineBoard($timelineBuilderID, $task["taskID"])
             ];
             array_push($output, $temp);
         }
@@ -125,7 +145,7 @@ class ProjectManagementBoard_model extends CI_Model {
             $output["teamMember"]        = $projectDetails->teamMember;
             $output["projectName"]       = $projectDetails->projectName;
             $output["projectCode"]       = $projectDetails->projectCode;
-            $output["timelineStatus"]    = $projectDetails->timelineBuilderStatus;
+            $output["timelineStatus"]    = $projectDetails->timelineManagementStatus;
 
             $output["phases"] = $this->getTimelinePhases($timelineBuilderID);
         }

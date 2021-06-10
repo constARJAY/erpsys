@@ -80,175 +80,6 @@ $(document).ready(function() {
                     updateURL();
                 }
             });
-
-            // const tableData = [
-            //     {
-            //         timelineBuilderID:      "1",
-            //         employeeID:             1,
-            //         projectID:              1,
-            //         projectCreatedAt:       moment(new Date).add(-31, 'days').format("MMMM DD, YYYY"),
-            //         projectName:            "Project Name",
-            //         projectCategory:        "Project Category",
-            //         clientID:               1,
-            //         clientCreatedAt:        moment(new Date).add(-31, 'days').format("MMMM DD, YYYY"),
-            //         clientAddress:          "1701 Antel Bldg, Pasig City",
-            //         startDate:              moment(new Date).format("MMMM DD, YYYY"),
-            //         endDate:                moment(new Date).add(31, 'days').format("MMMM DD, YYYYY"),
-            //         timelineDesign:         "",
-            //         timelineProposedBudget: 150000,
-            //         timelineBudgetStatus:   0,
-            //         timelineBuilderReason:  "Sample Reason",
-            //         timelineBuilderRemarks: "",
-            //         timelineBuilderStatus:  0,
-            //         approversID:            "1|2|3",
-            //         approversDate:          "2021-01-01 10:11:11|2021-01-01 10:11:11|2021-01-01 10:11:11",
-            //         approversStatus:        2,
-            //         createdBy:              1,
-            //         submittedAt:            moment(new Date).format("MMMM DD, YYYY"),
-            //         createdAt:              moment(new Date).add(-5, 'days').format("MMMM DD, YYYY"),
-            //         projectManagerID:       1,
-            //         teamLeaderID:           2,
-            //         teamMembersID:          "3|4|5|6",
-            //         phases: [
-            //             {
-            //                 phaseDescription: "Phase Name 1",
-            //                 phaseCode:        "sample code",
-            //                 milestones: [
-            //                     {
-            //                         milestoneName: "User Stories",
-            //                     },
-            //                     {
-            //                         milestoneName: "Development",
-            //                     },
-            //                     {
-            //                         milestoneName: "Bug Fixing",
-            //                     },
-            //                     {
-            //                         milestoneName: "Deployment",
-            //                     }
-            //                 ],
-            //                 tasks: [
-            //                     {
-            //                         taskName: "Bank Masterfile",
-            //                         manHours: 25,
-            //                     },
-            //                     {
-            //                         taskName: "Load Masterfile",
-            //                         manHours: 25,
-            //                     },
-            //                     {
-            //                         taskName: "Menu Item",
-            //                         manHours: 25,
-            //                     },
-            //                 ]
-            //             },
-            //             {
-            //                 phaseDescription: "Phase Name 2",
-            //                 phaseCode:        "sample code 2",
-            //                 milestones: [
-            //                     {
-            //                         milestoneName: "User Stories",
-            //                     },
-            //                     {
-            //                         milestoneName: "Development",
-            //                     },
-            //                     {
-            //                         milestoneName: "Bug Fixing",
-            //                     },
-            //                     {
-            //                         milestoneName: "Deployment",
-            //                     }
-            //                 ],
-            //                 tasks: [
-            //                     {
-            //                         taskName: "Task Name 1",
-            //                         manHours: 25,
-            //                     },
-            //                     {
-            //                         taskName: "Change Scheudlee",
-            //                         manHours: 25,
-            //                     },
-            //                     {
-            //                         taskName: "Purchase Request",
-            //                         manHours: 25,
-            //                     },
-            //                 ]
-            //             },
-            //             {
-            //                 phaseDescription: "Phase Name 3",
-            //                 phaseCode:        "sample code 3",
-            //                 milestones: [
-            //                     {
-            //                         milestoneName: "User Stories",
-            //                     },
-            //                     {
-            //                         milestoneName: "Development",
-            //                     },
-            //                     {
-            //                         milestoneName: "Bug Fixing",
-            //                     },
-            //                     {
-            //                         milestoneName: "Deployment",
-            //                     }
-            //                 ],
-            //                 tasks: [
-            //                     {
-            //                         taskName: "Purchase Order",
-            //                         manHours: 25,
-            //                     },
-            //                     {
-            //                         taskName: "Service Requisition",
-            //                         manHours: 25,
-            //                     },
-            //                     {
-            //                         taskName: "Service Completion",
-            //                         manHours: 25,
-            //                     },
-            //                 ]
-            //             },
-            //         ],
-            //     }
-            // ]
-            // if (tableData.length > 0) {
-            //     let {
-            //         employeeID,
-            //         timelineBuilderStatus
-            //     } = tableData[0];
-
-            //     let isReadOnly = true, isAllowed = true;
-
-            //     if (employeeID != sessionID) {
-            //         isReadOnly = true;
-            //         if (timelineBuilderStatus == 0 || timelineBuilderStatus == 4) {
-            //             isAllowed = false;
-            //         }
-            //     } else if (employeeID == sessionID) {
-            //         if (timelineBuilderStatus == 0) {
-            //             isReadOnly = false;
-            //         } else {
-            //             isReadOnly = true;
-            //         }
-            //     } else {
-            //         isReadOnly = readOnly;
-            //     }
-
-            //     if (isAllowed) {
-            //         if (employeeID == sessionID) {
-            //             pageContent(true, tableData, isReadOnly);
-            //             updateURL(encryptString(id), true, true);
-            //         } else {
-            //             pageContent(true, tableData, isReadOnly);
-            //             updateURL(encryptString(id));
-            //         }
-            //     } else {
-            //         pageContent();
-            //         updateURL();
-            //     }
-                
-            // } else {
-            //     pageContent();
-            //     updateURL();
-            // }
         }
 
         if (view_id) {
@@ -313,42 +144,6 @@ $(document).ready(function() {
             `ptbt.timelineBuilderStatus = 2`);
         return data;
     }
-
-    // const timelineData = [
-    //     {
-    //         timelineBuilderID:      1,
-    //         projectID:       1,
-    //         projectName:     "ERP System",
-    //         projectCode:     "PRJ-21-00001",
-    //         projectCategory: "Sample Category",
-    //         projectManager:  "Arjay Diangzon",
-    //         departmentName:  "Admin Department",
-    //         designationName: "IT Admin",
-    //         budgetStatus:    0 // 0 - For Proposal, 1 - For Assessment
-    //     },
-    //     {
-    //         timelineBuilderID:      2,
-    //         projectID:       1,
-    //         projectName:     "TACS",
-    //         projectCode:     "PRJ-21-00001",
-    //         projectCategory: "Sample Category 1",
-    //         projectManager:  "Mark Nieto",
-    //         departmentName:  "Finance",
-    //         designationName: "Human Resource",
-    //         budgetStatus:    0 // 0 - For Proposal, 1 - For Assessment
-    //     },
-    //     {
-    //         timelineBuilderID:      3,
-    //         projectID:       1,
-    //         projectName:     "Point of Sale",
-    //         projectCode:     "PRJ-21-00003",
-    //         projectCategory: "Sample Category 2",
-    //         projectManager:  "Wilson Parajas",
-    //         departmentName:  "Operations",
-    //         designationName: "Developer",
-    //         budgetStatus:    0 // 0 - For Proposal, 1 - For Assessment
-    //     },
-    // ];
     // ----- END TIMELINE DATA -----
     
 
@@ -457,15 +252,11 @@ $(document).ready(function() {
                 timelineManagementStatus = 0
             } = timeline;
 
-            // const statusStyle = budgetStatus == 0 ? 
-            //     `<span class="badge badge-outline-info w-100">For Proposal</span>` :
-            //     `<span class="badge badge-outline-primary w-100">For Assessment</span>`;
             const managementStatusDisplay = timelineManagementStatus == 0 ?
                 `<span class="badge badge-warning w-100">Draft</span>` : (
                     timelineManagementStatus == 2 ? `<span class="badge badge-outline-success w-100" style="width: 100% !important">Assessed</span>` :
                     `<span class="badge badge-outline-info w-100">For Assessment</span>`
                 );
-            console.log(timelineManagementStatus);
 
             html += `
             <tr class="btnView" id="${encryptString(timelineBuilderID.toString())}">
@@ -605,7 +396,7 @@ $(document).ready(function() {
 
 
     // ----- DISPLAY PHASE -----
-    function displayPhase(teamMembers = {}, phase = {}, index = 0) {
+    function displayPhase(teamMembers = {}, phase = {}, index = 0, disabled) {
         const {
             phaseDescription,
             phaseCode,
@@ -613,13 +404,24 @@ $(document).ready(function() {
             tasks      = []
         } = phase;
 
-        const getTaskContent = (taskID = null, taskName = null, manHours = 0) => {
+        const getTaskContent = (taskID = null, taskName = null, milestoneTask = []) => {
             let taskNameContent     = ""; 
             let taskManHoursContent = ""; 
             let taskAssigneeContent = "";
 
+            const taskData = (milestoneID = null) => {
+                let data = milestoneTask.filter(mt => mt.milestoneID == milestoneID);
+                let manHours = "0", assignedEmployee = "";
+                if (data && data.length > 0) {
+                    manHours         = data[0]?.manHours;
+                    assignedEmployee = data[0]?.assignedEmployee;
+                }
+                return {manHours, assignedEmployee};
+            };
+
             milestones.map(milestone => {
                 const { milestoneID, milestoneName } = milestone;
+                const { manHours, assignedEmployee } = taskData(milestoneID);
     
                 taskNameContent += `
                 <div class="form-group my-1">
@@ -634,7 +436,7 @@ $(document).ready(function() {
                 taskManHoursContent += `
                 <div class="form-group my-1">
                     <input class="form-control custom-input-hours text-center"
-                        value="0"
+                        value="${manHours}"
                         name="manHours"
                         min="0.00"
                         max="9999999999"
@@ -642,6 +444,7 @@ $(document).ready(function() {
                         maxlength="10"
                         taskName="${taskName}"
                         phase="${phaseCode}"
+                        ${disabled}
                         required>
                     <div class="invalid-feedback d-block"></div>
                 </div>`;
@@ -662,7 +465,9 @@ $(document).ready(function() {
                         name="assignEmployee"
                         multiple="multiple"
                         phase="${phaseCode}"
-                        taskName="${taskName}">
+                        taskName="${taskName}"
+                        assignedEmployee="${assignedEmployee}"
+                        ${disabled}>
                         <option disabled>Select Employee</option>
                         ${teamMemberOptions}
                     </select>
@@ -675,9 +480,9 @@ $(document).ready(function() {
 
         let taskHTML = "";
         tasks.map(task => {
-            const { taskID, taskName, manHours } = task;
+            const { taskID, taskName, manHours, milestoneTask = [] } = task;
 
-            const taskContent = getTaskContent(taskID, taskName, manHours);
+            const taskContent = getTaskContent(taskID, taskName, milestoneTask);
 
             taskHTML += `
             <tr>   
@@ -881,7 +686,6 @@ $(document).ready(function() {
 
     // ----- FORM CONTENT -----
     function formContent(data = false, readOnly = false) {
-        console.log(data);
         $("#page_content").html(preloader);
 
         const {
@@ -918,11 +722,13 @@ $(document).ready(function() {
         $("#btnBack").attr("timelineBuilderID", encryptString(timelineBuilderID));
 		$("#btnBack").attr("status", timelineBuilderStatus);
 
+        const disabled = readOnly ? "disabled" : "";
+
         let button = formButtons(data);
 
         let phaseHTML = "";
         phases.map((phase, index) => {
-            phaseHTML += displayPhase(teamMembers, phase, index);
+            phaseHTML += displayPhase(teamMembers, phase, index, disabled);
         })
 
         let html = `
@@ -946,6 +752,12 @@ $(document).ready(function() {
             initAll();
             multipleSelect2Placeholder();
             inputmaskHours();
+
+            $(`[name="assignEmployee"]`).each(function() {
+                $assignedEmployee = $(this).attr("assignedEmployee");
+                const assignedEmployeeArr = $assignedEmployee?.split("|");
+                $assignedEmployee && $(this).val(assignedEmployeeArr).trigger("change");
+            })
         }, 50);
     }
     // ----- END FORM CONTENT -----

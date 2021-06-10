@@ -300,6 +300,7 @@ $(document).on("change", "[name=clientCity]", function() {
         client_MobileNo         ="",
         clientTelephoneNo       ="",
         clientBrandName         = "",
+        clientShortcut          = "",
         clientStatus            ="" }= data && data[0];
 
         let button = clientID ? `
@@ -317,7 +318,7 @@ $(document).on("change", "[name=clientCity]", function() {
                 <div class="row" id="pre-loader"></div>
                 <div class="row" id="modal_form">
                    
-                    <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12">
+                    <div class="col-xl-8 col-lg-8 col-md-8 col-sm-8">
                         <div class="form-group">
                             <label>Client Name <span class="text-danger font-weight-bold">*</span></label>
                             <input 
@@ -333,6 +334,24 @@ $(document).on("change", "[name=clientCity]", function() {
                                 value="${clientName}"
                                 autocomplete="off">
                             <div class="invalid-feedback d-block" id="invalidInputClientName"></div>
+                        </div>
+                    </div>
+                    <div class="col-xl-4 col-lg-4 col-md-4 col-sm-4">
+                        <div class="form-group">
+                            <label>Client Shortcut <span class="text-danger font-weight-bold">*</span></label>
+                            <input 
+                                type="text" 
+                                class="form-control validate" 
+                                name="clientShortcut" 
+                                id="clienShortcut" 
+                                data-allowcharacters="[A-Z][a-z]" 
+                                minlength="2" 
+                                maxlength="3" 
+                                required 
+                                unique="${clientID}"
+                                value="${clientShortcut}"
+                                autocomplete="off">
+                            <div class="invalid-feedback d-block" id="invalidInputClientShortcut"></div>
                         </div>
                     </div>
                     <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6">
