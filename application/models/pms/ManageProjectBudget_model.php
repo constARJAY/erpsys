@@ -9,7 +9,25 @@ class ManageProjectBudget_model extends CI_Model {
         parent::__construct();
     }
 
-    // ----- SAMPLE QUERY -----
+    public function saveProjectBudget($timelineBuilderID = null, $allocatedBudget = null)
+    {
+        $sessionID = $this->session->has_userdata("adminSessionID") ? $this->session->userdata("adminSessionID") : 1;
+
+        if ($timelineBuilderID && $allocatedBudget) {
+            $data = [
+                "timelineAllocatedBudget" => $allocatedBudget,
+                "timelineBudgetStatus"    => 1, // ALLOCATED
+                "timelineBuilderStatus"   => 7, // REASSESSMENT
+                "allocatedBudgetBy"       => $sessionID,
+                "updatedBy"               => $sessionID
+            ];
+            $query = $this->db->update("pms_timeline_builder_tbl", $data, ["timelineBuilderID" => $timelineBuilderID]);
+            return $query ? "true|Successfully submitted|$timelineBuilderID|".date("Y-m-d") : "false|System error: Please contact the system administrator for assistance!";
+        }
+        return "false|System error: Please contact the system administrator for assistance!";
+    }
+
+    // ----- GET TIMELINE CONTENT -----
     public function getTimelineData($timelineBuilderID = 0)
     {
         $sql = "
@@ -33,6 +51,7 @@ class ManageProjectBudget_model extends CI_Model {
             ptbt.timelineStartDate,
             ptbt.timelineEndDate,
             ptbt.timelineProposedBudget AS proposedBudget,
+            ptbt.timelineAllocatedBudget AS allocatedBudget,
             (CASE
                 WHEN ptbt.timelinePriorityLevel = 1 THEN 'Medium'
                 WHEN ptbt.timelinePriorityLevel = 2 THEN 'High'
@@ -117,8 +136,8 @@ class ManageProjectBudget_model extends CI_Model {
 
             $output["timelineBuilderID"]   = $timelineHeader->timelineBuilderID;
             $output["budgetStatus"]        = $timelineHeader->budgetStatus;
-            $output["createdAt"]       = date("M d, Y H:i:s", strtotime($timelineHeader->ptbtCreatedAt));
-            $output["submittedAt"]         = date("M d, Y H:i:s", strtotime($timelineHeader->submittedAt));
+            $output["createdAt"]           = date("M d, Y h:i:s A", strtotime($timelineHeader->ptbtCreatedAt));
+            $output["submittedAt"]         = date("M d, Y h:i:s A", strtotime($timelineHeader->submittedAt));
             $output["approversID"]         = $timelineHeader->approversID;
             $output["approversDate"]       = $timelineHeader->approversDate;
             $output["approversStatus"]     = $timelineHeader->approversStatus;
@@ -137,13 +156,14 @@ class ManageProjectBudget_model extends CI_Model {
             $output["timelinePriority"]    = $timelineHeader->timelinePriority;
             $output["timelineIssued"]      = $timelineHeader->timelineIssued;
             $output["proposedBudget"]      = $timelineHeader->proposedBudget;
+            $output["allocatedBudget"]     = $timelineHeader->allocatedBudget;
             $output["projectManager"]      = $projectManager;
             $output["teamLeader"]          = $teamLeader;
             $output["teamMember"]          = $teamMember;
         }
         return $output;
     }
-    // ----- END SAMPLE QUERY -----
+    // ----- END GET TIMELINE CONTENT -----
 
 }
 

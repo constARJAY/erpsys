@@ -1,179 +1,254 @@
 $(document).ready(function() {
 
+    // ----- REUSABLE VARIABLE/FUNCTIONS -----
+	const getNonFormattedAmount = (amount = "₱0.00") => {
+		return +amount.replaceAll(",", "").replace("₱", "")?.trim();
+	}
+
+    const dateToday = () => {
+		return moment(new Date).format("YYYY-MM-DD HH:mm:ss");
+	};
+    // ----- END REUSABLE VARIABLE/FUNCTIONS -----
+
+
     // ----- VIEW DOCUMENT -----
+    const getTimelineContent = async (timelineBuilderID) => {
+        let result = false;
+        $.ajax({
+            method:   "POST",
+            url:      "project_management_board/getTimelineContent",
+            data:     { timelineBuilderID },
+            async:    false,
+            dataType: "json",
+            success: function(data) {
+                result = [data];
+            }
+        })
+        return await result;
+    }
+
     function viewDocument(view_id = false, readOnly = false) {
         const loadData = (id) => {
-            // const tableData = getTableData("hris_change_schedule_tbl", "", "changeScheduleID=" + id);
-
-            const tableData = [
-                {
-                    timelineBuilderID:      "1",
-                    employeeID:             1,
-                    projectID:              1,
-                    projectCreatedAt:       moment(new Date).add(-31, 'days').format("MMMM DD, YYYY"),
-                    projectName:            "Project Name",
-                    projectCategory:        "Project Category",
-                    clientID:               1,
-                    clientCreatedAt:        moment(new Date).add(-31, 'days').format("MMMM DD, YYYY"),
-                    clientAddress:          "1701 Antel Bldg, Pasig City",
-                    startDate:              moment(new Date).format("MMMM DD, YYYY"),
-                    endDate:                moment(new Date).add(31, 'days').format("MMMM DD, YYYYY"),
-                    timelineDesign:         "",
-                    timelineProposedBudget: 150000,
-                    timelineBudgetStatus:   0,
-                    timelineBuilderReason:  "Sample Reason",
-                    timelineBuilderRemarks: "",
-                    timelineBuilderStatus:  0,
-                    approversID:            "1|2|3",
-                    approversDate:          "2021-01-01 10:11:11|2021-01-01 10:11:11|2021-01-01 10:11:11",
-                    approversStatus:        2,
-                    createdBy:              1,
-                    submittedAt:            moment(new Date).format("MMMM DD, YYYY"),
-                    createdAt:              moment(new Date).add(-5, 'days').format("MMMM DD, YYYY"),
-                    projectManagerID:       1,
-                    teamLeaderID:           2,
-                    teamMembersID:          "3|4|5|6",
-                    phases: [
-                        {
-                            phaseDescription: "Phase Name 1",
-                            phaseCode:        "sample code",
-                            milestones: [
-                                {
-                                    milestoneName: "User Stories",
-                                },
-                                {
-                                    milestoneName: "Development",
-                                },
-                                {
-                                    milestoneName: "Bug Fixing",
-                                },
-                                {
-                                    milestoneName: "Deployment",
-                                }
-                            ],
-                            tasks: [
-                                {
-                                    taskName: "Bank Masterfile",
-                                    manHours: 25,
-                                },
-                                {
-                                    taskName: "Load Masterfile",
-                                    manHours: 25,
-                                },
-                                {
-                                    taskName: "Menu Item",
-                                    manHours: 25,
-                                },
-                            ]
-                        },
-                        {
-                            phaseDescription: "Phase Name 2",
-                            phaseCode:        "sample code 2",
-                            milestones: [
-                                {
-                                    milestoneName: "User Stories",
-                                },
-                                {
-                                    milestoneName: "Development",
-                                },
-                                {
-                                    milestoneName: "Bug Fixing",
-                                },
-                                {
-                                    milestoneName: "Deployment",
-                                }
-                            ],
-                            tasks: [
-                                {
-                                    taskName: "Task Name 1",
-                                    manHours: 25,
-                                },
-                                {
-                                    taskName: "Change Scheudlee",
-                                    manHours: 25,
-                                },
-                                {
-                                    taskName: "Purchase Request",
-                                    manHours: 25,
-                                },
-                            ]
-                        },
-                        {
-                            phaseDescription: "Phase Name 3",
-                            phaseCode:        "sample code 3",
-                            milestones: [
-                                {
-                                    milestoneName: "User Stories",
-                                },
-                                {
-                                    milestoneName: "Development",
-                                },
-                                {
-                                    milestoneName: "Bug Fixing",
-                                },
-                                {
-                                    milestoneName: "Deployment",
-                                }
-                            ],
-                            tasks: [
-                                {
-                                    taskName: "Purchase Order",
-                                    manHours: 25,
-                                },
-                                {
-                                    taskName: "Service Requisition",
-                                    manHours: 25,
-                                },
-                                {
-                                    taskName: "Service Completion",
-                                    manHours: 25,
-                                },
-                            ]
-                        },
-                    ],
-                }
-            ]
-
-            if (tableData.length > 0) {
-                let {
-                    employeeID,
-                    timelineBuilderStatus
-                } = tableData[0];
-
-                let isReadOnly = true, isAllowed = true;
-
-                if (employeeID != sessionID) {
-                    isReadOnly = true;
-                    if (timelineBuilderStatus == 0 || timelineBuilderStatus == 4) {
-                        isAllowed = false;
-                    }
-                } else if (employeeID == sessionID) {
-                    if (timelineBuilderStatus == 0) {
-                        isReadOnly = false;
+            const data = getTimelineContent(id);
+            data.then(res => {
+                if (res) {
+                    const tableData = res;
+        
+                    if (tableData.length > 0) {
+                        let {
+                            employeeID,
+                            timelineStatus
+                        } = tableData[0];
+        
+                        let isReadOnly = true, isAllowed = true;
+        
+                        if (employeeID != sessionID) {
+                            isReadOnly = true;
+                            if (timelineStatus == 0 || timelineStatus == 4) {
+                                isAllowed = false;
+                            }
+                        } else if (employeeID == sessionID) {
+                            if (timelineStatus == 0) {
+                                isReadOnly = false;
+                            } else {
+                                isReadOnly = true;
+                            }
+                        } else {
+                            isReadOnly = readOnly;
+                        }
+        
+                        if (isAllowed) {
+                            if (employeeID == sessionID) {
+                                pageContent(true, tableData, isReadOnly);
+                                updateURL(encryptString(id), true, true);
+                            } else {
+                                pageContent(true, tableData, isReadOnly);
+                                updateURL(encryptString(id));
+                            }
+                        } else {
+                            pageContent();
+                            updateURL();
+                        }
+                        
                     } else {
-                        isReadOnly = true;
+                        pageContent();
+                        updateURL();
                     }
                 } else {
-                    isReadOnly = readOnly;
-                }
-
-                if (isAllowed) {
-                    if (employeeID == sessionID) {
-                        pageContent(true, tableData, isReadOnly);
-                        updateURL(encryptString(id), true, true);
-                    } else {
-                        pageContent(true, tableData, isReadOnly);
-                        updateURL(encryptString(id));
-                    }
-                } else {
+                    showNotification("danger", "There was an error fetching the data.");
                     pageContent();
                     updateURL();
                 }
+            });
+
+            // const tableData = [
+            //     {
+            //         timelineBuilderID:      "1",
+            //         employeeID:             1,
+            //         projectID:              1,
+            //         projectCreatedAt:       moment(new Date).add(-31, 'days').format("MMMM DD, YYYY"),
+            //         projectName:            "Project Name",
+            //         projectCategory:        "Project Category",
+            //         clientID:               1,
+            //         clientCreatedAt:        moment(new Date).add(-31, 'days').format("MMMM DD, YYYY"),
+            //         clientAddress:          "1701 Antel Bldg, Pasig City",
+            //         startDate:              moment(new Date).format("MMMM DD, YYYY"),
+            //         endDate:                moment(new Date).add(31, 'days').format("MMMM DD, YYYYY"),
+            //         timelineDesign:         "",
+            //         timelineProposedBudget: 150000,
+            //         timelineBudgetStatus:   0,
+            //         timelineBuilderReason:  "Sample Reason",
+            //         timelineBuilderRemarks: "",
+            //         timelineBuilderStatus:  0,
+            //         approversID:            "1|2|3",
+            //         approversDate:          "2021-01-01 10:11:11|2021-01-01 10:11:11|2021-01-01 10:11:11",
+            //         approversStatus:        2,
+            //         createdBy:              1,
+            //         submittedAt:            moment(new Date).format("MMMM DD, YYYY"),
+            //         createdAt:              moment(new Date).add(-5, 'days').format("MMMM DD, YYYY"),
+            //         projectManagerID:       1,
+            //         teamLeaderID:           2,
+            //         teamMembersID:          "3|4|5|6",
+            //         phases: [
+            //             {
+            //                 phaseDescription: "Phase Name 1",
+            //                 phaseCode:        "sample code",
+            //                 milestones: [
+            //                     {
+            //                         milestoneName: "User Stories",
+            //                     },
+            //                     {
+            //                         milestoneName: "Development",
+            //                     },
+            //                     {
+            //                         milestoneName: "Bug Fixing",
+            //                     },
+            //                     {
+            //                         milestoneName: "Deployment",
+            //                     }
+            //                 ],
+            //                 tasks: [
+            //                     {
+            //                         taskName: "Bank Masterfile",
+            //                         manHours: 25,
+            //                     },
+            //                     {
+            //                         taskName: "Load Masterfile",
+            //                         manHours: 25,
+            //                     },
+            //                     {
+            //                         taskName: "Menu Item",
+            //                         manHours: 25,
+            //                     },
+            //                 ]
+            //             },
+            //             {
+            //                 phaseDescription: "Phase Name 2",
+            //                 phaseCode:        "sample code 2",
+            //                 milestones: [
+            //                     {
+            //                         milestoneName: "User Stories",
+            //                     },
+            //                     {
+            //                         milestoneName: "Development",
+            //                     },
+            //                     {
+            //                         milestoneName: "Bug Fixing",
+            //                     },
+            //                     {
+            //                         milestoneName: "Deployment",
+            //                     }
+            //                 ],
+            //                 tasks: [
+            //                     {
+            //                         taskName: "Task Name 1",
+            //                         manHours: 25,
+            //                     },
+            //                     {
+            //                         taskName: "Change Scheudlee",
+            //                         manHours: 25,
+            //                     },
+            //                     {
+            //                         taskName: "Purchase Request",
+            //                         manHours: 25,
+            //                     },
+            //                 ]
+            //             },
+            //             {
+            //                 phaseDescription: "Phase Name 3",
+            //                 phaseCode:        "sample code 3",
+            //                 milestones: [
+            //                     {
+            //                         milestoneName: "User Stories",
+            //                     },
+            //                     {
+            //                         milestoneName: "Development",
+            //                     },
+            //                     {
+            //                         milestoneName: "Bug Fixing",
+            //                     },
+            //                     {
+            //                         milestoneName: "Deployment",
+            //                     }
+            //                 ],
+            //                 tasks: [
+            //                     {
+            //                         taskName: "Purchase Order",
+            //                         manHours: 25,
+            //                     },
+            //                     {
+            //                         taskName: "Service Requisition",
+            //                         manHours: 25,
+            //                     },
+            //                     {
+            //                         taskName: "Service Completion",
+            //                         manHours: 25,
+            //                     },
+            //                 ]
+            //             },
+            //         ],
+            //     }
+            // ]
+            // if (tableData.length > 0) {
+            //     let {
+            //         employeeID,
+            //         timelineBuilderStatus
+            //     } = tableData[0];
+
+            //     let isReadOnly = true, isAllowed = true;
+
+            //     if (employeeID != sessionID) {
+            //         isReadOnly = true;
+            //         if (timelineBuilderStatus == 0 || timelineBuilderStatus == 4) {
+            //             isAllowed = false;
+            //         }
+            //     } else if (employeeID == sessionID) {
+            //         if (timelineBuilderStatus == 0) {
+            //             isReadOnly = false;
+            //         } else {
+            //             isReadOnly = true;
+            //         }
+            //     } else {
+            //         isReadOnly = readOnly;
+            //     }
+
+            //     if (isAllowed) {
+            //         if (employeeID == sessionID) {
+            //             pageContent(true, tableData, isReadOnly);
+            //             updateURL(encryptString(id), true, true);
+            //         } else {
+            //             pageContent(true, tableData, isReadOnly);
+            //             updateURL(encryptString(id));
+            //         }
+            //     } else {
+            //         pageContent();
+            //         updateURL();
+            //     }
                 
-            } else {
-                pageContent();
-                updateURL();
-            }
+            // } else {
+            //     pageContent();
+            //     updateURL();
+            // }
         }
 
         if (view_id) {
@@ -217,53 +292,64 @@ $(document).ready(function() {
 
 
     // ----- TIMELINE DATA -----
-    const timelineData = [
-        {
-            timelineBuilderID:      1,
-            projectID:       1,
-            projectName:     "ERP System",
-            projectCode:     "PRJ-21-00001",
-            projectCategory: "Sample Category",
-            projectManager:  "Arjay Diangzon",
-            departmentName:  "Admin Department",
-            designationName: "IT Admin",
-            budgetStatus:    0 // 0 - For Proposal, 1 - For Assessment
-        },
-        {
-            timelineBuilderID:      2,
-            projectID:       1,
-            projectName:     "TACS",
-            projectCode:     "PRJ-21-00001",
-            projectCategory: "Sample Category 1",
-            projectManager:  "Mark Nieto",
-            departmentName:  "Finance",
-            designationName: "Human Resource",
-            budgetStatus:    0 // 0 - For Proposal, 1 - For Assessment
-        },
-        {
-            timelineBuilderID:      3,
-            projectID:       1,
-            projectName:     "Point of Sale",
-            projectCode:     "PRJ-21-00003",
-            projectCategory: "Sample Category 2",
-            projectManager:  "Wilson Parajas",
-            departmentName:  "Operations",
-            designationName: "Developer",
-            budgetStatus:    0 // 0 - For Proposal, 1 - For Assessment
-        },
-    ];
+    const getTimelineData = () => {
+        const data = getTableData(
+            `pms_timeline_builder_tbl AS ptbt
+            LEFT JOIN pms_project_list_tbl AS pplt ON ptbt.projectID = pplt.projectListID
+            LEFT JOIN pms_category_tbl AS pct ON pplt.categoryID = pct.categoryID
+            LEFT JOIN hris_employee_list_tbl AS helt ON ptbt.timelineProjectManager = helt.employeeID
+            LEFT JOIN hris_department_tbl AS hdt ON helt.departmentID = hdt.departmentID
+            LEFT JOIN hris_designation_tbl AS hdt2 ON helt.designationID = hdt2.designationID`,
+            `ptbt.timelineBuilderID,
+            pplt.projectListName AS projectName,
+            pplt.projectListCode AS projectCode,
+            pct.categoryName AS projectCategory,
+            CONCAT(helt.employeeFirstname, ' ', helt.employeeLastname) AS projectManager,
+            hdt.departmentName,
+            hdt2.designationName,
+            ptbt.timelineBudgetStatus AS budgetStatus,
+            ptbt.timelineManagementStatus,
+            ptbt.timelineBuilderStatus`,
+            `ptbt.timelineBuilderStatus = 2`);
+        return data;
+    }
+
+    // const timelineData = [
+    //     {
+    //         timelineBuilderID:      1,
+    //         projectID:       1,
+    //         projectName:     "ERP System",
+    //         projectCode:     "PRJ-21-00001",
+    //         projectCategory: "Sample Category",
+    //         projectManager:  "Arjay Diangzon",
+    //         departmentName:  "Admin Department",
+    //         designationName: "IT Admin",
+    //         budgetStatus:    0 // 0 - For Proposal, 1 - For Assessment
+    //     },
+    //     {
+    //         timelineBuilderID:      2,
+    //         projectID:       1,
+    //         projectName:     "TACS",
+    //         projectCode:     "PRJ-21-00001",
+    //         projectCategory: "Sample Category 1",
+    //         projectManager:  "Mark Nieto",
+    //         departmentName:  "Finance",
+    //         designationName: "Human Resource",
+    //         budgetStatus:    0 // 0 - For Proposal, 1 - For Assessment
+    //     },
+    //     {
+    //         timelineBuilderID:      3,
+    //         projectID:       1,
+    //         projectName:     "Point of Sale",
+    //         projectCode:     "PRJ-21-00003",
+    //         projectCategory: "Sample Category 2",
+    //         projectManager:  "Wilson Parajas",
+    //         departmentName:  "Operations",
+    //         designationName: "Developer",
+    //         budgetStatus:    0 // 0 - For Proposal, 1 - For Assessment
+    //     },
+    // ];
     // ----- END TIMELINE DATA -----
-
-
-    // ----- REUSABLE VARIABLE/FUNCTIONS -----
-	const getNonFormattedAmount = (amount = "₱0.00") => {
-		return +amount.replaceAll(",", "").replace("₱", "")?.trim();
-	}
-
-    const dateToday = () => {
-		return moment(new Date).format("YYYY-MM-DD HH:mm:ss");
-	};
-    // ----- END REUSABLE VARIABLE/FUNCTIONS -----
     
 
     // ----- DATATABLES -----
@@ -341,6 +427,8 @@ $(document).ready(function() {
 
     // ----- TIMELINE CONTENT ------
     function timelineContent() {
+        const timelineData = getTimelineData();
+
         let html = `
         <div class="table-responsive">
             <table class="table table-bordered table-striped table-hover js-basic-example dataTable" id="tableTimeline">
@@ -358,19 +446,26 @@ $(document).ready(function() {
         timelineData.map(timeline => {
 
             const { 
-                timelineBuilderID      = 0,
-                projectName     = "",
-                projectCode     = "",
-                projectCategory = "",
-                projectManager  = "",
-                departmentName  = "",
-                designationName = "",
-                budgetStatus    = 0
+                timelineBuilderID     = 0,
+                projectName           = "",
+                projectCode           = "",
+                projectCategory       = "",
+                projectManager        = "",
+                departmentName        = "",
+                designationName       = "",
+                budgetStatus          = 0,
+                timelineManagementStatus = 0
             } = timeline;
 
-            const statusStyle = budgetStatus == 0 ? 
-                `<span class="badge badge-outline-info w-100">For Proposal</span>` :
-                `<span class="badge badge-outline-primary w-100">For Assessment</span>`;
+            // const statusStyle = budgetStatus == 0 ? 
+            //     `<span class="badge badge-outline-info w-100">For Proposal</span>` :
+            //     `<span class="badge badge-outline-primary w-100">For Assessment</span>`;
+            const managementStatusDisplay = timelineManagementStatus == 0 ?
+                `<span class="badge badge-warning w-100">Draft</span>` : (
+                    timelineManagementStatus == 2 ? `<span class="badge badge-outline-success w-100" style="width: 100% !important">Assessed</span>` :
+                    `<span class="badge badge-outline-info w-100">For Assessment</span>`
+                );
+            console.log(timelineManagementStatus);
 
             html += `
             <tr class="btnView" id="${encryptString(timelineBuilderID.toString())}">
@@ -384,7 +479,7 @@ $(document).ready(function() {
                     <div>${designationName}</div>
                     <small style="color:#848482;">${departmentName}</small>
                 </td>
-                <td>${getStatusStyle(budgetStatus)}</td>
+                <td>${managementStatusDisplay}</td>
             </tr>`
         });
 
@@ -518,17 +613,20 @@ $(document).ready(function() {
             tasks      = []
         } = phase;
 
-        const getTaskContent = (taskName = null, manHours = 0) => {
+        const getTaskContent = (taskID = null, taskName = null, manHours = 0) => {
             let taskNameContent     = ""; 
             let taskManHoursContent = ""; 
             let taskAssigneeContent = "";
 
             milestones.map(milestone => {
-                const { milestoneName } = milestone;
+                const { milestoneID, milestoneName } = milestone;
     
                 taskNameContent += `
                 <div class="form-group my-1">
                     <input class="form-control"
+                        name="milestoneName"
+                        taskID="${taskID}"
+                        projectMilestoneID="${milestoneID}"
                         value="&emsp;&emsp;${milestoneName}"
                         disabled>
                 </div>`;
@@ -577,9 +675,9 @@ $(document).ready(function() {
 
         let taskHTML = "";
         tasks.map(task => {
-            const { taskName, manHours } = task;
+            const { taskID, taskName, manHours } = task;
 
-            const taskContent = getTaskContent(taskName, manHours);
+            const taskContent = getTaskContent(taskID, taskName, manHours);
 
             taskHTML += `
             <tr>   
@@ -694,6 +792,11 @@ $(document).ready(function() {
 
     // ----- UPDATE TABLE -----
     function updateTables() {
+        $(`[name="milestoneName"]`).each(function(index) {
+            $(this).attr("index", index);
+            $(this).attr("id", `milestoneName${index}`);
+        })
+
         $(`[name="manHours"]`).each(function(index) {
             $parent = $(this).closest(".form-group");
             $(this).attr("index", index);
@@ -783,15 +886,17 @@ $(document).ready(function() {
 
         const {
             timelineBuilderID,
-            employeeID,
             projectName,
+            projectCode,
+            teamMember,
+            employeeID,
             projectCreatedAt,
             teamMembersID,
             timelineBuilderStatus,
-            phases = []
+            phases
         } = data && data[0];
 
-        let membersID = teamMembersID ? teamMembersID.replaceAll("|", ",") : "0";
+        let membersID = teamMember ? teamMember.replaceAll("|", ",") : "0";
         const teamMembers = getTableData(
             `hris_employee_list_tbl`,
             `employeeID, employeeFirstname, employeeLastname, employeeProfile`,
@@ -823,8 +928,8 @@ $(document).ready(function() {
         let html = `
         <div class="">
             <div class="text-primary font-weight-bold mb-2" style="font-size: 1.5rem;">
-                <span>Finance Management System</span>
-                <span class="text-danger font-weight-bold mb-1 float-right" style="font-size: 1.5rem;">PRJ-21-00001</span>
+                <span>${projectName}</span>
+                <span class="text-danger font-weight-bold mb-1 float-right" style="font-size: 1.5rem;">${projectCode}</span>
             </div>
             <div>
                 ${phaseHTML}
@@ -891,7 +996,7 @@ $(document).ready(function() {
             }, 50);
 
 		} else {
-            saveProjectBoard("save", pageContent);
+            saveProjectBoard("save", id, pageContent);
 		}
 	});
 	// ----- END CLICK BUTTON BACK -----
@@ -1017,61 +1122,45 @@ $(document).ready(function() {
         setTimeout(() => {
             validateInputs().then(res => {
                 if (res) {
-                    saveProjectBoard("submit", pageContent);
+                    saveProjectBoard("submit", id, pageContent);
                 }
                 formButtonHTML(this, false);
             });
         }, 10);
-        
-        // const checkInputs   = validateInputs();
-        // if (checkInputs) {
-
-        // } else {
-        //     setTimeout(() => {
-                
-        //     }, 10);
-        // }
-
-		// const validate = validateForm("form_purchase_order");
-		// const isValid  = checkTableMaterialsEquipment();
-		// removeIsValid("#tableProjectOrderItems0");
-		// removeIsValid("#tableCompanyOrderItems0");
-		// const costSummary = checkCostSummary();
-
-		// if (validate && isValid && costSummary) {
-		// 	const action = revise && !isFromCancelledDocument && "insert" || (id ? "update" : "insert");
-		// 	const data   = getPurchaseOrderData(action, "submit", "1", id, "0", revise);
-
-		// 	if (revise) {
-		// 		if (!isFromCancelledDocument) {
-		// 			delete data["timelineBuilderID"];
-		// 			data["revisePurchaseOrderID"] = id;
-		// 		}
-		// 	}
-
-		// 	const employeeID = getNotificationEmployeeID(data["approversID"], data["approversDate"], true);
-		// 	let notificationData = false;
-		// 	if (employeeID != sessionID) {
-		// 		notificationData = {
-		// 			moduleID:                47,
-		// 			notificationTitle:       "Purchase Order",
-		// 			notificationDescription: `${employeeFullname(sessionID)} asked for your approval.`,
-		// 			notificationType:        2,
-		// 			employeeID,
-		// 		};
-		// 	}
-
-		// 	savePurchaseOrder(data, "submit", notificationData, pageContent);
-		// }
 	});
 	// ----- END CLICK BUTTON SUBMIT -----
 
 
     // ----- CLICK BUTTON CANCEL -----
     $(document).on("click", "#btnCancel", function() {
-        saveProjectBoard("cancel", pageContent);
+        saveProjectBoard("cancel", null, pageContent);
     })
     // ----- END CLICK BUTTON CANCEL -----
+
+
+    // ----- GET PROJECT BOARD DATA -----
+    const getProjectBoardData = (timelineBuilderID = 0, method = "save") => {
+        let data = {
+            timelineBuilderID,
+            timelineManagementStatus: method == "save" ? 0 : (method == "submit" ? 2 : 1),
+            tasks: []
+        };
+
+        $(`[name="milestoneName"]`).each(function(i) {
+            const index = $(this).attr("index");
+
+            const taskID = $(`[name="milestoneName"][index="${index}"]`).attr("taskID");
+            const projectMilestoneID = $(`[name="milestoneName"][index="${index}"]`).attr("projectMilestoneID");
+            const manHours       = $(`[name="manHours"][index="${index}"]`).val();
+            const assignEmployee = $(`[name="assignEmployee"][index="${index}"]`).val()?.join("|");
+            const temp = {
+                taskID, projectMilestoneID, manHours, assignEmployee
+            };
+            data.tasks.push(temp);
+        })
+        return data;
+    }
+    // ----- END GET PROJECT BOARD DATA -----
 
 
     // ----- DATABASE RELATION -----
@@ -1136,7 +1225,7 @@ $(document).ready(function() {
         })
     }
 
-    function saveProjectBoard(method = "submit", callback = null) {
+    function saveProjectBoard(method = "submit", id = 0, callback = null) {
         const confirmation = getConfirmation(method);
         confirmation.then(res => {
             if (res.isConfirmed) {
@@ -1150,6 +1239,8 @@ $(document).ready(function() {
                         timer:             2000
                     });
                 } else {
+
+                    const data = getProjectBoardData(id, method);
                     $.ajax({
                         method:      "POST",
                         url:         `project_management_board/saveProjectBoard`,
@@ -1170,7 +1261,7 @@ $(document).ready(function() {
     
                             let swalTitle;
                             if (method == "submit") {
-                                swalTitle = `${getFormCode("PO", dateCreated, insertedID)} submitted successfully!`;
+                                swalTitle = `Project Board submitted successfully!`;
                             } else if (method == "save") {
                                 swalTitle = `${getFormCode("PO", dateCreated, insertedID)} saved successfully!`;
                             } else if (method == "cancelform") {

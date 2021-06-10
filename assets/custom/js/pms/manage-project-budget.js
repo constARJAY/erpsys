@@ -1,5 +1,12 @@
 $(document).ready(function() {
 
+    // ----- GLOBAL VARIABLE -----
+	const getNonFormattedAmount = (amount = "₱0.00") => {
+		return +amount.replaceAll(",", "").replaceAll("₱", "")?.trim();
+	}
+    // ----- END GLOBAL VARIABLE -----
+
+
     // ----- VIEW DOCUMENT -----
     const getTimelineContent = async (timelineBuilderID) => {
         let result = false;
@@ -22,61 +29,6 @@ $(document).ready(function() {
             data.then(res => {
                 if (res) {
                     const tableData = res;
-                    // const tableData = [
-                    //     {
-                    //         timelineBuilderID:             "1",
-                    //         employeeID:             1,
-                    //         projectID:              1,
-                    //         projectCreatedAt:       moment(new Date).add(-31, 'days').format("MMMM DD, YYYY"),
-                    //         projectName:            "Project Name",
-                    //         projectCategory:        "Project Category",
-                    //         clientID:               1,
-                    //         clientCreatedAt:        moment(new Date).add(-31, 'days').format("MMMM DD, YYYY"),
-                    //         clientAddress:          "1701 Antel Bldg, Pasig City",
-                    //         startDate:              moment(new Date).format("MMMM DD, YYYY"),
-                    //         endDate:                moment(new Date).add(31, 'days').format("MMMM DD, YYYYY"),
-                    //         timelineDesign:         "",
-                    //         timelineProposedBudget: 150000,
-                    //         timelineBudgetStatus:   0,
-                    //         timelineReason:         "Sample Reason",
-                    //         timelineRemarks:        "",
-                    //         timelineStatus:         1,
-                    //         approversID:            "1|2|3",
-                    //         approversDate:          "2021-01-01 10:11:11|2021-01-01 10:11:11|2021-01-01 10:11:11",
-                    //         approversStatus:        2,
-                    //         createdBy:              1,
-                    //         submittedAt:            moment(new Date).format("MMMM DD, YYYY"),
-                    //         createdAt:              moment(new Date).add(-5, 'days').format("MMMM DD, YYYY"),
-                    //         tasks: [
-                    //             {
-                    //                 phase: "Phase 1",
-                    //                 milestone: [
-                    //                     {
-                    //                         milestoneName:   "Milestone 1",
-                    //                         taskName:        "Task name",
-                    //                         allotedHours:    150,
-                    //                         startDate:       moment(new Date).format("MMMM DD, YYYY"),
-                    //                         endDate:         moment(new Date).add(31, 'days').format("MMMM DD, YYYYY"),
-                    //                         milestoneStatus: 0 
-                    //                     }
-                    //                 ]
-                    //             },
-                    //             {
-                    //                 phase: "Phase 2",
-                    //                 milestone: [
-                    //                     {
-                    //                         milestoneName:   "Milestone 2",
-                    //                         taskName:        "Task name 2",
-                    //                         allotedHours:    160,
-                    //                         startDate:       moment(new Date).format("MMMM DD, YYYY"),
-                    //                         endDate:         moment(new Date).add(31, 'days').format("MMMM DD, YYYYY"),
-                    //                         milestoneStatus: 0 
-                    //                     }
-                    //                 ]
-                    //             },
-                    //         ]
-                    //     }
-                    // ]
         
                     if (tableData.length > 0) {
                         let {
@@ -183,50 +135,11 @@ $(document).ready(function() {
             hdt.departmentName,
             hdt2.designationName,
             ptbt.timelineBudgetStatus AS budgetStatus`,
-            `ptbt.timelineBuilderStatus <> 0 AND 
-            ptbt.timelineBuilderStatus <> 4`);
+            `ptbt.timelineBuilderStatus = 2`);
         return data;
     }
-
-    // const timelineData = [
-    //     {
-    //         timelineBuilderID:      "1",
-    //         projectID:       1,
-    //         projectName:     "ERP System",
-    //         projectCode:     "PRJ-21-00001",
-    //         projectCategory: "Sample Category",
-    //         projectManager:  "Arjay Diangzon",
-    //         departmentName:  "Admin Department",
-    //         designationName: "IT Admin",
-    //         budgetStatus:    0 // 0 - For Proposal, 1 - For Assessment
-    //     },
-    //     {
-    //         timelineBuilderID:      "2",
-    //         projectID:       1,
-    //         projectName:     "TACS",
-    //         projectCode:     "PRJ-21-00001",
-    //         projectCategory: "Sample Category 1",
-    //         projectManager:  "Mark Nieto",
-    //         departmentName:  "Finance",
-    //         designationName: "Human Resource",
-    //         budgetStatus:    0 // 0 - For Proposal, 1 - For Assessment
-    //     },
-    //     {
-    //         timelineBuilderID:      "3",
-    //         projectID:       1,
-    //         projectName:     "Point of Sale",
-    //         projectCode:     "PRJ-21-00003",
-    //         projectCategory: "Sample Category 2",
-    //         projectManager:  "Wilson Parajas",
-    //         departmentName:  "Operations",
-    //         designationName: "Developer",
-    //         budgetStatus:    0 // 0 - For Proposal, 1 - For Assessment
-    //     },
-    // ];
     // ----- END TIMELINE DATA -----
 
-
-    // ----- DATATABLES -----
     function initDatatables() {
         if ($.fn.DataTable.isDataTable("#tableTimeline")) {
 			$("#tableTimeline").DataTable().destroy();
@@ -285,7 +198,7 @@ $(document).ready(function() {
 	function headerButton(isAdd = true, text = "Add") {
 		let html;
 		if (isAdd) {
-			if (isCreateAllowed(60)) {
+			if (isCreateAllowed(91)) {
 				html = ``;
 			}
 		} else {
@@ -332,7 +245,7 @@ $(document).ready(function() {
 
             const statusStyle = budgetStatus == 0 ? 
                 `<span class="badge badge-outline-info w-100">For Proposal</span>` :
-                `<span class="badge badge-outline-primary w-100">Allocated</span>`;
+                `<span class="badge badge-outline-success w-100" style="width: 100% !important">Allocated</span>`;
 
             html += `
             <tr class="btnView" id="${encryptString(timelineBuilderID)}">
@@ -396,12 +309,27 @@ $(document).ready(function() {
             projectManager,
             teamLeader,
             teamMember,
-            proposedBudget
-        } = data && data[0]
+            proposedBudget,
+            allocatedBudget
+        } = data && data[0];
 
+        $("#btnBack").attr("status", budgetStatus);
+
+        const disabled = budgetStatus == 1 ? "disabled" : "";
         const budgetStatusDisplay = budgetStatus == 1 ? `
-        <span class="badge badge-outline-secondary w-100">Allocated</span>` : `
+        <span class="badge badge-outline-success w-100" style="width: 100% !important">Allocated</span>` : `
         <span class="badge badge-outline-info w-100">For Proposal</span>`;
+        const buttonDisplay = !disabled ? `
+        <button class="btn btn-submit px-5 p-2" 
+            id="btnSubmit"
+            timelineBuilderID="${timelineBuilderID}">
+            <i class="fas fa-paper-plane"></i> Submit
+        </button>
+        <button class="btn btn-cancel px-5 p-2" 
+            id="btnCancel"
+            status="${budgetStatus}">
+            <i class="fas fa-ban"></i> Cancel
+        </button>` : "";
 
         let html = `
         <div class="">
@@ -663,7 +591,7 @@ $(document).ready(function() {
                 </div>
                 <div class="col-md-6 col-sm-12">
                     <div class="form-group">
-                        <label>Allocated Budget <code>*</code></label>
+                        <label>Allocated Budget ${!disabled ? "<code>*</code>" : ""}</label>
                         <div class="input-group">
                             <div class="input-group-prepend">
                                 <span class="input-group-text">₱</span>
@@ -673,10 +601,11 @@ $(document).ready(function() {
                                 min="0.01" 
                                 max="9999999999" 
                                 minlength="1" 
-                                maxlength="20" 
+                                maxlength="13" 
                                 name="allocatedBudget" 
                                 id="allocatedBudget" 
-                                value="0">
+                                value="${allocatedBudget}"
+                                ${disabled}>
                         </div>
                         <div class="invalid-feedback d-block" id="invalid-allocatedBudget"></div> 
                     </div>
@@ -684,16 +613,8 @@ $(document).ready(function() {
                 
             </div>
 
-            <div class="col-md-12 text-right mt-3 mb-3 addReq">
-                <button class="btn btn-submit px-5 p-2" 
-                    id="btnSubmit"
-                    timelineBuilderID="${timelineBuilderID}">
-                    <i class="fas fa-paper-plane"></i> Submit
-                </button>
-                <button class="btn btn-cancel px-5 p-2" 
-                    id="btnCancel">
-                    <i class="fas fa-ban"></i> Cancel
-                </button>
+            <div class="col-md-12 text-right mt-3 mb-3">
+                ${buttonDisplay}
             </div>
         </div>`;
 
@@ -734,9 +655,10 @@ $(document).ready(function() {
 
     // ----- CLICK BUTTON SUBMIT -----
 	$(document).on("click", "#btnSubmit", function () {
-        const validateInputs = validateForm("page_content");
+        const timelineBuilderID = $(this).attr("timelineBuilderID");
+        const validateInputs    = validateForm("page_content");
         if (validateInputs) {
-
+            saveProjectBudget("submit", timelineBuilderID, pageContent);
         }
 
         // formButtonHTML(this);
@@ -755,7 +677,12 @@ $(document).ready(function() {
 
     // ----- CLICK BUTTON CANCEL OR BACK -----
     $(document).on("click", "#btnCancel, #btnBack", function() {
-        saveProjectBudget("cancel", pageContent);
+        const status = $(this).attr("status");
+        if (status == 0) {
+            saveProjectBudget("cancel", null, pageContent);
+        } else {
+            pageContent();
+        }
     })
     // ----- END CLICK BUTTON CANCEL OR BACK -----
 
@@ -773,7 +700,7 @@ $(document).ready(function() {
                 break;
             case "submit":
                 swalTitle = `SUBMIT ${title.toUpperCase()}`;
-                swalText  = "Are you sure to submit these tasks with man hours to employee taskboard?";
+                swalText  = "Are you sure to submit this document?";
                 swalImg   = `${base_url}assets/modal/add.svg`;
                 break;
             case "approve":
@@ -825,7 +752,7 @@ $(document).ready(function() {
 
 
     // ----- SAVE PROJECT BUDGET -----
-    function saveProjectBudget(method = "submit", callback = null) {
+    function saveProjectBudget(method = "submit", id = null, callback = null) {
         const confirmation = getConfirmation(method);
         confirmation.then(res => {
             if (res.isConfirmed) {
@@ -839,9 +766,15 @@ $(document).ready(function() {
                         timer:             2000
                     });
                 } else {
+
+                    const data = {
+                        timelineBuilderID: id,
+                        allocatedBudget:   getNonFormattedAmount($(`[name="allocatedBudget"]`).val())
+                    };
+
                     $.ajax({
                         method:      "POST",
-                        url:         `project_management_board/saveProjectBoard`,
+                        url:         `manage_project_budget/saveProjectBudget`,
                         data,
                         cache:       false,
                         async:       false,
@@ -859,17 +792,17 @@ $(document).ready(function() {
     
                             let swalTitle;
                             if (method == "submit") {
-                                swalTitle = `${getFormCode("PO", dateCreated, insertedID)} submitted successfully!`;
+                                swalTitle = `Project Budget submitted successfully!`;
                             } else if (method == "save") {
-                                swalTitle = `${getFormCode("PO", dateCreated, insertedID)} saved successfully!`;
+                                swalTitle = `${getFormCode("PTB", dateCreated, insertedID)} saved successfully!`;
                             } else if (method == "cancelform") {
-                                swalTitle = `${getFormCode("PO", dateCreated, insertedID)} cancelled successfully!`;
+                                swalTitle = `${getFormCode("PTB", dateCreated, insertedID)} cancelled successfully!`;
                             } else if (method == "approve") {
-                                swalTitle = `${getFormCode("PO", dateCreated, insertedID)} approved successfully!`;
+                                swalTitle = `${getFormCode("PTB", dateCreated, insertedID)} approved successfully!`;
                             } else if (method == "deny") {
-                                swalTitle = `${getFormCode("PO", dateCreated, insertedID)} denied successfully!`;
+                                swalTitle = `${getFormCode("PTB", dateCreated, insertedID)} denied successfully!`;
                             } else if (method == "drop") {
-                                swalTitle = `${getFormCode("PO", dateCreated, insertedID)} dropped successfully!`;
+                                swalTitle = `${getFormCode("PTB", dateCreated, insertedID)} dropped successfully!`;
                             }
             
                             if (isSuccess == "true") {

@@ -45,7 +45,8 @@ class Milestone_builder extends CI_Controller {
                     foreach($list as $index => $item) {
                         $temp = [
                             "milestoneBuilderID"    => $result[2],
-                            "milestoneName"         => $item["milestoneName"],
+                            "projectMilestoneID"    => $item["projectMilestoneID"],
+                            "projectMilestoneName"  => $item["projectMilestoneName"],
                             "milestoneNotes"	 	=> $item["milestoneNotes"],
                             "createdBy"             => $createdBy,
                             "updatedBy"             => $updatedBy

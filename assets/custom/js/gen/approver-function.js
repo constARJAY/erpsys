@@ -455,6 +455,12 @@ function getStatusStyle(status = 1) {
 			return `<span class="badge badge-primary w-100">Cancelled</span>`;
 		case "5":
 			return `<span class="badge badge-secondary w-100">Dropped</span>`;
+		case "6":
+			return `<span class="badge badge-outline-info w-100">For Proposal</span>`;
+		case "7":
+			return `<span class="badge badge-outline-info w-100">Reassessment</span>`;
+		case "7":
+			return `<span class="badge badge-outline-success w-100" style="width: 100% !important">Assessed</span>`;
 		case "0":
 		default:
 			return `<span class="badge badge-warning w-100">Draft</span>`;

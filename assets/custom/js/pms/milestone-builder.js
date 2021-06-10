@@ -3,7 +3,8 @@ $(document).ready(function () {
     const isEdit        = thisURL.split("?edit_id=");
     const isAdd         = thisURL.split("?");
     const milestoneBuilderData = getTableData("pms_milestone_builder_tbl JOIN pms_category_tbl USING(categoryID)","pms_milestone_builder_tbl.*, pms_category_tbl.categoryName AS categoryName");
-            
+    const projectMilestoneData = getTableData("pms_project_milestone_tbl", "projectMilestoneID,projectMilestoneName", "projectMilestoneStatus = 1" );
+                
 
     if(isEdit.length >= 2){
         var thisID = decryptString(isEdit[1]);
@@ -42,6 +43,7 @@ $(document).ready(function () {
             let row = listOfMilestone();
             $(".itemProjectTableBody").append(row);  
             updateTableRows();
+
           
         });
 
@@ -87,6 +89,10 @@ $(document).ready(function () {
         });
     /** END OF CHECKBOX */
 
+        $(document).on("change", "[name=tasksName]", function(){
+            updateProjectMilestoneOptions();
+        });
+
     // DATATABLES
     function initDataTables() {
         if ($.fn.DataTable.isDataTable('#tableMilestoneBuilder')){
@@ -122,13 +128,6 @@ $(document).ready(function () {
         let isAdd = false;
         var thisURL       = window.document.URL;
         var isEdit        = thisURL.split("?edit_id=");
-        // if(!isBack){
-        //     if(isEdit.length >= 2){
-        //         isForm = true;
-        //         isAdd = false;
-        //         id    = decryptString(isEdit[1]);
-        //     }
-        // }
 
         if(isForm){
             isAdd = true;
@@ -145,7 +144,8 @@ $(document).ready(function () {
             });
 
             if(id){
-                data  = milestoneBuilderData.filter(items => items.milestoneBuilderID == id);
+                 data =  getTableData("pms_milestone_builder_tbl JOIN pms_category_tbl USING(categoryID)","pms_milestone_builder_tbl.*, pms_category_tbl.categoryName AS categoryName",`milestoneBuilderID = ${id}` );
+                // data  = milestoneBuilderData.filter(items => items.milestoneBuilderID == id);
                 isAdd = false;
             }
             let headerButton = `
@@ -185,8 +185,8 @@ $(document).ready(function () {
                             <thead>
                                 <tr class="text-left">
                                     <th>Phase Code</th>
-                                    <th>Project Category</th>
                                     <th>Phase Name</th>
+                                    <th>Project Category</th>
                                 </tr>
                             </thead>
                             <tbody>`;
@@ -195,8 +195,9 @@ $(document).ready(function () {
                         html += `
                                 <tr class="editMilestoneBuilder" milestonebuilderid="${item["milestoneBuilderID"]}">
                                     <td>${item["phaseCode"]}</td> 
-                                    <td>${item["categoryName"]}</td>
                                     <td>${item["phaseDescription"]}</td>
+                                    <td>${item["categoryName"]}</td>
+                                    
                                 </tr>`;
                     });
 
@@ -301,6 +302,7 @@ $(document).ready(function () {
         setTimeout(() => {
             $("#page_content").html(html);
             initAll();
+            updateProjectMilestoneOptions();
         }, 500);
 
     }
@@ -337,7 +339,11 @@ $(document).ready(function () {
                                 <td class="rowLetter text-center">${lettersCode(parseFloat(index)+1)}</td>
                                 <td>
                                     <div class="form-group mt-2">
-                                        <input type="text" class="form-control" minlength="2" maxlength="50" name="tasksName" id="tasksName${index}" value="${items.milestoneName}">
+                                        <select class="form-control validate select2"
+                                            name="tasksName" id="tasksName${index}"
+                                            style="width: 100%" required>
+                                            ${getProjectMilestone(items.projectMilestoneID)}
+                                        </select>
                                         <div class="invalid-feedback d-block" id="invalid-tasksName${index}"></div>
                                     </div>
                                 </td>
@@ -360,7 +366,12 @@ $(document).ready(function () {
                                 <td class="rowLetter text-center">${lettersCode(1)}</td>
                                 <td>
                                     <div class="form-group mt-2">
-                                        <input type="text" class="form-control validate" minlength="2" maxlength="50" data-allowcharacters="[a-z][A-Z][0-9][ ][.][,][?][!][/][;][:][-][_][()][%][&][*]" name="tasksName" id="tasksName0" value="" required>
+                                        <select class="form-control validate select2"
+                                            name="tasksName" id="tasksName0"
+                                            style="width: 100%" required >
+                                            ${getProjectMilestone()}
+                                        </select>
+
                                         <div class="invalid-feedback d-block" id="invalid-tasksName0"></div>
                                     </div>
                                 </td>
@@ -392,6 +403,25 @@ $(document).ready(function () {
             // LETTERSCODE
             var rowLetter = lettersCode(i+1);
             $(".rowLetter", this).text(rowLetter);
+
+            // INITIALIZE SELECT 2
+			$(this).find("select").each(function(x) {
+				if ($(this).hasClass("select2-hidden-accessible")) {
+					$(this).select2("destroy");
+				}
+			})
+
+			$(this).find("select").each(function(j) {
+				var thisValue = $(this).val();
+				$(this).attr("index", `${i}`);
+				$(this).attr("id", `tasksName${i}`);
+				$(this).attr("data-select2-id", `tasksName${i}`);
+				if (!$(this).hasClass("select2-hidden-accessible")) {
+					$(this).select2({ theme: "bootstrap" });
+				}
+			});
+
+
         });
     }   
 
@@ -425,6 +455,10 @@ $(document).ready(function () {
 							$(this).closest("tr").remove();
 							updateTableRows();
 							updateDeleteButton();
+                            $(`[name=tasksName]`).each(function(i, obj) {
+                                let thisValue = this.value;
+                                $(this).html(getProjectMilestone(thisValue));
+                            });
 						});
 					})
 				}
@@ -448,8 +482,10 @@ $(document).ready(function () {
 		data["updatedBy"]         = sessionID;
 
 			$(".milestone-list-row").each(function(i, obj) {
+                var thisTaskName = $(this).find("[name=tasksName]");
 				var temp = {
-					milestoneName:			$(this).find("[name=tasksName]").val(),
+                    projectMilestoneID:     thisTaskName.val(),
+					projectMilestoneName:	$('option:selected', thisTaskName).attr("projectMilestoneName"),
                     milestoneNotes:			$(this).find("[name=notes]").val()
 				};
 				data[`list`].push(temp);
@@ -603,6 +639,37 @@ $(document).ready(function () {
             
             return code+"-"+str; 
         }
+    }
+
+    function getProjectMilestone(id = null){
+        
+        let taskValueArr = [], html = ``;
+        $("[name=tasksName]").each(function(){
+            taskValueArr.push(this.value);
+        });
+        
+        if(projectMilestoneData.length > 0){
+                html = `<option value="" disabled ${!id?"selected":''}>Please select a milestone</option>`;
+                html +=  projectMilestoneData.filter(items => !taskValueArr.includes(items.projectMilestoneID) || items.projectMilestoneID == id ).map((items,index)=>{
+                    return `
+                    <option 
+                        value       		= "${items.projectMilestoneID }"
+                        projectMilestoneName = "${items.projectMilestoneName}"
+                        ${items.projectMilestoneID  == id && "selected"}>
+                        ${items.projectMilestoneName}
+                    </option>`;
+                });
+        }
+        
+        return html;
+    }
+
+    function updateProjectMilestoneOptions(){
+        $(`[name=tasksName]`).each(function(i, obj) {
+            let thisValue = this.value;
+            $(this).html(getProjectMilestone(thisValue));
+        });
+
     }
 });
 

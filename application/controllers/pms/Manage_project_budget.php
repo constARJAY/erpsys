@@ -30,4 +30,11 @@ class Manage_project_budget extends CI_Controller {
         echo json_encode($this->manageprojectbudget->getTimelineContent($timelineBuilderID));
     }
 
+    public function saveProjectBudget()
+    {
+        $timelineBuilderID = $this->input->post("timelineBuilderID");
+        $allocatedBudget   = $this->input->post("allocatedBudget");
+        echo json_encode($this->manageprojectbudget->saveProjectBudget($timelineBuilderID, $allocatedBudget));
+    }
+
 }
