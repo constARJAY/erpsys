@@ -384,8 +384,9 @@ $(document).ready(function() {
 
     // ----- SELECT2 MULTIPLE PLACEHOLDER -----
 	function multipleSelect2Placeholder() {
+        const isDisabled = $(`[name="assignEmployee"]`).attr("disabled");
 		$(`.select2[name="assignEmployee"]`).select2({
-			placeholder: "Select Team Members",
+			placeholder: !isDisabled ? "Select Team Members" : "-",
 			theme:       "bootstrap",
 			allowClear:  true,
 			multiple:    true,
@@ -468,7 +469,7 @@ $(document).ready(function() {
                         taskName="${taskName}"
                         assignedEmployee="${assignedEmployee}"
                         ${disabled}>
-                        <option disabled>Select Employee</option>
+                        <option disabled>${!disabled ? "Select Employee" : "-"}</option>
                         ${teamMemberOptions}
                     </select>
                     <div class="invalid-feedback d-block"></div>
@@ -724,7 +725,7 @@ $(document).ready(function() {
 
         const disabled = readOnly ? "disabled" : "";
 
-        let button = formButtons(data);
+        let button = !disabled ? formButtons(data) : "";
 
         let phaseHTML = "";
         phases.map((phase, index) => {
