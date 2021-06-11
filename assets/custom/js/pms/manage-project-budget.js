@@ -135,7 +135,7 @@ $(document).ready(function() {
             hdt.departmentName,
             hdt2.designationName,
             ptbt.timelineBudgetStatus AS budgetStatus`,
-            `ptbt.timelineBuilderStatus = 2`);
+            `ptbt.timelineBuilderStatus <> 0`);
         return data;
     }
     // ----- END TIMELINE DATA -----
