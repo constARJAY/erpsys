@@ -37,18 +37,18 @@ $(document).ready(function() {
                     if (tableData.length > 0) {
                         let {
                             employeeID,
-                            timelineStatus
+                            timelineManagementStatus
                         } = tableData[0];
         
                         let isReadOnly = true, isAllowed = true;
         
                         if (employeeID != sessionID) {
                             isReadOnly = true;
-                            if (timelineStatus == 0 || timelineStatus == 4) {
+                            if (timelineManagementStatus == 0 || timelineManagementStatus == 4) {
                                 isAllowed = false;
                             }
                         } else if (employeeID == sessionID) {
-                            if (timelineStatus == 0) {
+                            if (timelineManagementStatus == 0 || timelineManagementStatus == 1) {
                                 isReadOnly = false;
                             } else {
                                 isReadOnly = true;
@@ -166,8 +166,7 @@ $(document).ready(function() {
 					{ targets: 0, width: 250 },
 					{ targets: 1, width: 250 },
 					{ targets: 2, width: 250 },
-					{ targets: 3, width: 250 },
-					{ targets: 4, width: 180 },
+					{ targets: 3, width: 150 },
 				],
 			});
 
@@ -192,8 +191,8 @@ $(document).ready(function() {
                     info:           false,
                     scrollCollapse: true,
                     columnDefs: [
-                        { targets: 0, width: 500 },
-                        { targets: 1, width: 100 },
+                        { targets: 0, width: 480 },
+                        { targets: 1, width: 90  },
                         { targets: 2, width: 400 },
                     ],
                 });
@@ -232,7 +231,6 @@ $(document).ready(function() {
                         <th>Project Name</th>
                         <th>Project Category</th>
                         <th>Project Manager</th>
-                        <th>Designation</th>
                         <th>Status</th>
                     </tr>
                 </thead>
@@ -259,17 +257,13 @@ $(document).ready(function() {
                 );
 
             html += `
-            <tr class="btnView" id="${encryptString(timelineBuilderID.toString())}">
+            <tr class="btnView" id="${encryptString(timelineBuilderID)}">
                 <td>
                     <div>${projectName}</div>
                     <small style="color:#848482;">${projectCode}</small>
                 </td>
                 <td>${projectCategory}</td>
                 <td>${projectManager}</td>
-                <td>
-                    <div>${designationName}</div>
-                    <small style="color:#848482;">${departmentName}</small>
-                </td>
                 <td>${managementStatusDisplay}</td>
             </tr>`
         });
@@ -581,7 +575,7 @@ $(document).ready(function() {
                             <tr class="bg-dark">
                                 <th class="text-white">Tasks</th>
                                 <th class="text-white">Man Hours</th>
-                                <th class="text-white">Assignee</th>
+                                <th class="text-white">Assignees</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -637,16 +631,14 @@ $(document).ready(function() {
         if (data) {
             const {
                 timelineBuilderID     = "",
-                timelineBuilderStatus = "",
+                timelineManagementStatus = "",
                 employeeID            = "",
                 approversID           = "",
                 approversDate         = "",
                 createdAt              = new Date
             } = data && data[0];
 
-            if (timelineBuilderStatus == 0) { // DRAFT
-
-                // DRAFT
+            if (timelineManagementStatus == 0 || timelineManagementStatus == 1) { // DRAFT OR FOR ASSESSMENT
                 button = `
                 <button 
                     class="btn btn-submit px-5 p-2"  
@@ -663,9 +655,7 @@ $(document).ready(function() {
                     <i class="fas fa-ban"></i> Cancel
                 </button>`;
 
-            } else if (timelineBuilderStatus == 2) { // SUBMITTED
-
-            }
+            } 
         }
 
         return button;
@@ -697,7 +687,7 @@ $(document).ready(function() {
             employeeID,
             projectCreatedAt,
             teamMembersID,
-            timelineBuilderStatus,
+            timelineManagementStatus,
             phases
         } = data && data[0];
 
@@ -721,7 +711,7 @@ $(document).ready(function() {
         });
 
         $("#btnBack").attr("timelineBuilderID", encryptString(timelineBuilderID));
-		$("#btnBack").attr("status", timelineBuilderStatus);
+		$("#btnBack").attr("status", timelineManagementStatus);
 
         const disabled = readOnly ? "disabled" : "";
 
@@ -797,12 +787,10 @@ $(document).ready(function() {
 
     // ----- CLICK BUTTON BACK -----
 	$(document).on("click", "#btnBack", function () {
-		// pageContent();
-
         const id     = decryptString($(this).attr("timelineBuilderID"));
 		const status = $(this).attr("status");
 
-		if (status != "false" && status != 0) {
+		if (status != "false" && status != 0 && status != 1) {
             $("#page_content").html(preloader);
             setTimeout(() => {
                 pageContent();
@@ -830,7 +818,7 @@ $(document).ready(function() {
             let condition = all ? 
                 totalManHours != basisManHours : totalManHours > basisManHours;
             if (condition) {
-                let msg = all ? "Invalid man hours value." : "Excessive amount of hours.";
+                let msg = all ? "Insufficient amount of hours." : "Excessive amount of hours.";
                 $(elementID).removeClass("is-valid").addClass("is-invalid");
                 $parent.find(".invalid-feedback").text(msg);
             } else {
@@ -1076,7 +1064,7 @@ $(document).ready(function() {
                             if (method == "submit") {
                                 swalTitle = `Project Board submitted successfully!`;
                             } else if (method == "save") {
-                                swalTitle = `${getFormCode("PO", dateCreated, insertedID)} saved successfully!`;
+                                swalTitle = `Project Board saved successfully!`;
                             } else if (method == "cancelform") {
                                 swalTitle = `${getFormCode("PO", dateCreated, insertedID)} cancelled successfully!`;
                             } else if (method == "approve") {

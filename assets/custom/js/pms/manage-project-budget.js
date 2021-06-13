@@ -124,18 +124,21 @@ $(document).ready(function() {
             `pms_timeline_builder_tbl AS ptbt
             LEFT JOIN pms_project_list_tbl AS pplt ON ptbt.projectID = pplt.projectListID
             LEFT JOIN pms_category_tbl AS pct ON pplt.categoryID = pct.categoryID
-            LEFT JOIN hris_employee_list_tbl AS helt ON ptbt.timelineProjectManager = helt.employeeID
+            LEFT JOIN hris_employee_list_tbl AS helt ON ptbt.employeeID = helt.employeeID
             LEFT JOIN hris_department_tbl AS hdt ON helt.departmentID = hdt.departmentID
             LEFT JOIN hris_designation_tbl AS hdt2 ON helt.designationID = hdt2.designationID`,
             `ptbt.timelineBuilderID,
+            ptbt.createdAt,
+            CONCAT(helt.employeeFirstname, ' ', helt.employeeLastname) AS preparedBy,
             pplt.projectListName AS projectName,
             pplt.projectListCode AS projectCode,
             pct.categoryName AS projectCategory,
-            CONCAT(helt.employeeFirstname, ' ', helt.employeeLastname) AS projectManager,
+            ptbt.timelineProposedBudget AS proposedBudget,
+            ptbt.timelineAllocatedBudget AS allocatedBudget,
             hdt.departmentName,
             hdt2.designationName,
             ptbt.timelineBudgetStatus AS budgetStatus`,
-            `ptbt.timelineBuilderStatus <> 0`);
+            `ptbt.timelineBuilderStatus <> 0 AND ptbt.timelineBuilderStatus <> 4`);
         return data;
     }
     // ----- END TIMELINE DATA -----
@@ -159,11 +162,13 @@ $(document).ready(function() {
 				sorting:        [],
 				scrollCollapse: true,
 				columnDefs: [
-					{ targets: 0, width: 250 },
-					{ targets: 1, width: 250 },
+					{ targets: 0, width: 100 },
+					{ targets: 1, width: 150 },
 					{ targets: 2, width: 250 },
-					{ targets: 3, width: 250 },
-					{ targets: 4, width: 180 },
+					{ targets: 3, width: 150 },
+					{ targets: 4, width: 150 },
+					{ targets: 5, width: 150 },
+					{ targets: 6, width: 150 },
 				],
 			});
 
@@ -221,10 +226,12 @@ $(document).ready(function() {
             <table class="table table-bordered table-striped table-hover js-basic-example dataTable" id="tableTimeline">
                 <thead>
                     <tr>
+                        <th>Document No.</th>
+                        <th>Prepared By</th>
                         <th>Project Name</th>
                         <th>Project Category</th>
-                        <th>Project Manager</th>
-                        <th>Designation</th>
+                        <th>Proposed Budget</th>
+                        <th>Allocated Budget</th>
                         <th>Budget Status</th>
                     </tr>
                 </thead>
@@ -234,13 +241,14 @@ $(document).ready(function() {
 
             const { 
                 timelineBuilderID = 0,
+                createdAt,
+                preparedBy,
                 projectName       = "",
                 projectCode       = "",
                 projectCategory   = "",
-                projectManager    = "",
-                departmentName    = "",
-                designationName   = "",
-                budgetStatus      = 0
+                proposedBudget,
+                allocatedBudget,
+                budgetStatus = 0
             } = timeline;
 
             const statusStyle = budgetStatus == 0 ? 
@@ -249,16 +257,15 @@ $(document).ready(function() {
 
             html += `
             <tr class="btnView" id="${encryptString(timelineBuilderID)}">
+                <td>${getFormCode("PTB", createdAt, timelineBuilderID)}</td>
+                <td>${preparedBy}</td>
                 <td>
                     <div>${projectName}</div>
                     <small style="color:#848482;">${projectCode}</small>
                 </td>
                 <td>${projectCategory}</td>
-                <td>${projectManager}</td>
-                <td>
-                    <div>${designationName}</div>
-                    <small style="color:#848482;">${departmentName}</small>
-                </td>
+                <td>${proposedBudget && formatAmount(proposedBudget, true) || "-"}</td>
+                <td>${allocatedBudget && formatAmount(allocatedBudget, true) || "-"}</td>
                 <td>${statusStyle}</td>
             </tr>`
         });

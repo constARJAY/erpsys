@@ -22,8 +22,8 @@ class Project_management_board extends CI_Controller {
     public function getTimelineContent()
     {
         $timelineBuilderID = $this->input->post("timelineBuilderID");
-        // echo json_encode($this->projectmanagementboard->getTimelineContent($timelineBuilderID));
-        echo json_encode($this->projectmanagementboard->getTimelineContent(1));
+        echo json_encode($this->projectmanagementboard->getTimelineContent($timelineBuilderID));
+        // echo json_encode($this->projectmanagementboard->getTimelineContent(1));
     }
 
     public function saveProjectBoard()

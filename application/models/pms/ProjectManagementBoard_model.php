@@ -145,7 +145,7 @@ class ProjectManagementBoard_model extends CI_Model {
             $output["teamMember"]        = $projectDetails->teamMember;
             $output["projectName"]       = $projectDetails->projectName;
             $output["projectCode"]       = $projectDetails->projectCode;
-            $output["timelineStatus"]    = $projectDetails->timelineManagementStatus;
+            $output["timelineManagementStatus"] = $projectDetails->timelineManagementStatus;
 
             $output["phases"] = $this->getTimelinePhases($timelineBuilderID);
         }

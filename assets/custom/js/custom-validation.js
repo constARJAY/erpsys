@@ -1011,8 +1011,8 @@ $(function () {
 		// ----- END KEYCODE -----
 
 		let keyCode = e.keyCode;
-		let key = e.key;
-		let flag = 0;
+		let key     = e.key;
+		let flag    = 0;
 
 		let allowCharacters = $(this).data("allowcharacters");
 		if (allowCharacters) {
@@ -1030,6 +1030,7 @@ $(function () {
 				item == "A-Z" && keyCode >= 65 && keyCode <= 90 && flag++;
 				item == "a-z" && keyCode >= 97 && keyCode <= 122 && flag++;
 				item == "()" && keyCode >= 40 && keyCode <= 41 && flag++;
+				item == "''" && keyCode == 34 && flag++;
 				item == key && flag++;
 			});
 
