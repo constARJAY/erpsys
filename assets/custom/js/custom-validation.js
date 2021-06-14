@@ -1034,6 +1034,10 @@ $(function () {
 				item == key && flag++;
 			});
 
+			if ($(this)[0].nodeName == "TEXTAREA") {
+				keyCode == "13" && flag++; // ALLOWED ENTER
+			}
+
 			return flag > 0 ? true : false;
 		}
 	});

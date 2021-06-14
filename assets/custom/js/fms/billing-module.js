@@ -1,41 +1,69 @@
 $(document).ready(function() {
 
     // ----- GLOBAL VARIABLE -----
+    const allowedUpdate = isUpdateAllowed(99);
+
+
     const getNonFormattedAmount = (amount = "₱0.00") => {
         return +amount.replaceAll(",", "").replaceAll("₱", "")?.trim();
     }
+
+    const allEmployeeData = getAllEmployeeData();
+    const employeeData = (id) => {
+        if (id) {
+            let data = allEmployeeData.filter(employee => employee.employeeID == id);
+            let { employeeID, fullname, designation, department } = data && data[0];
+            return { employeeID, fullname, designation, department };
+        }
+        return {};
+    }
+
+    const employeeFullname = (id) => {
+        if (id != "-") {
+            let data = employeeData(id);
+            return data.fullname || "-";
+        }
+        return "-";
+    }
+
+    const clientList = getTableData(
+        `pms_client_tbl`, 
+        `*`,
+        `clientStatus = 1`).map(client => {
+            const {
+                clientID,
+                clientName,
+                clientUnitNumber,
+                clientHouseNumber,
+                clientStreetName,
+                clientSubdivisionName,
+                clientBarangay,
+                clientCity,
+                clientProvince,
+                clientCountry,
+                clientPostalCode
+            } = client;
+
+            const clientAddress = (clientUnitNumber ? titleCase(clientUnitNumber)+", " : "")+(clientHouseNumber ? titleCase(clientHouseNumber)+", " : "")+(clientStreetName ? titleCase(clientStreetName)+", " : "")+(clientSubdivisionName ? titleCase(clientSubdivisionName)+", " : "")+(clientBarangay ? titleCase(clientBarangay)+", " : "")+(clientCity ? titleCase(clientCity)+", " : "")+(clientProvince ? titleCase(clientProvince)+", " : "")+(clientCountry ? titleCase(clientCountry)+", " : "")+(clientPostalCode ? titleCase(clientPostalCode) : "");
+            return { clientID, clientName, clientAddress };
+        })
     // ----- END GLOBAL VARIABLE -----
 
 
     // ----- VIEW DOCUMENT -----
-    const getBillingContent = async (timelineBuilderID = null) => {
-        // let result = false;
-        // $.ajax({
-        //     method:   "POST",
-        //     url:      "manage_project_budget/getBillingContent",
-        //     data:     { timelineBuilderID },
-        //     async:    false,
-        //     dataType: "json",
-        //     success: function(data) {
-        //         result = [data];
-        //     }
-        // })
-        // return await result;
-
-        const data = [
-            {
-                billingID:  "1",
-                createdAt:  "2021-05-13",
-                preparedBy: "Arjay P. Diangzon",
-                billedTo:   "BlackCoders Group Inc.",
-                address:    "Antel Global, Pasig City",
-                grandTotal: 15000,
-                dateBilled: "2021-05-15",
-                status:     0,
-
-            },
-        ];
-        return data;
+    const getBillingContent = async (billingID = 0) => {
+        let result = false;
+        $.ajax({
+            method:   "POST",
+            url:      "billing_module/getBillingContent",
+            data:     { billingID },
+            async:    false,
+            dataType: "json",
+            success: function(data) {
+                result = [data];
+            }
+        })
+        return await result;
     }
 
     function viewDocument(view_id = false, readOnly = false) {
@@ -48,18 +76,19 @@ $(document).ready(function() {
                     if (tableData.length > 0) {
                         let {
                             employeeID,
-                            timelineStatus
+                            billingStatus
                         } = tableData[0];
         
                         let isReadOnly = true, isAllowed = true;
         
                         if (employeeID != sessionID) {
                             isReadOnly = true;
-                            if (timelineStatus == 0 || timelineStatus == 4) {
+                            // DRAFT OR CANCEL
+                            if (billingStatus == 0 || billingStatus == 2) { 
                                 isAllowed = false;
                             }
                         } else if (employeeID == sessionID) {
-                            if (timelineStatus == 0) {
+                            if (billingStatus == 0) {
                                 isReadOnly = false;
                             } else {
                                 isReadOnly = true;
@@ -109,7 +138,7 @@ $(document).ready(function() {
                     let id = decryptString(arr[1]);
                         id && isFinite(id) && loadData(id);
                 } else {
-                    const isAllowed = isCreateAllowed(91);
+                    const isAllowed = isCreateAllowed(99);
                     pageContent(isAllowed);
                 }
             }
@@ -135,27 +164,6 @@ $(document).ready(function() {
 
     // ----- BILLING DATA -----
     const getBillingData = () => {
-        // const data = getTableData(
-        //     `pms_timeline_builder_tbl AS ptbt
-        //     LEFT JOIN pms_project_list_tbl AS pplt ON ptbt.projectID = pplt.projectListID
-        //     LEFT JOIN pms_category_tbl AS pct ON pplt.categoryID = pct.categoryID
-        //     LEFT JOIN hris_employee_list_tbl AS helt ON ptbt.employeeID = helt.employeeID
-        //     LEFT JOIN hris_department_tbl AS hdt ON helt.departmentID = hdt.departmentID
-        //     LEFT JOIN hris_designation_tbl AS hdt2 ON helt.designationID = hdt2.designationID`,
-        //     `ptbt.timelineBuilderID,
-        //     ptbt.createdAt,
-        //     CONCAT(helt.employeeFirstname, ' ', helt.employeeLastname) AS preparedBy,
-        //     pplt.projectListName AS projectName,
-        //     pplt.projectListCode AS projectCode,
-        //     pct.categoryName AS projectCategory,
-        //     ptbt.timelineProposedBudget AS proposedBudget,
-        //     ptbt.timelineAllocatedBudget AS allocatedBudget,
-        //     hdt.departmentName,
-        //     hdt2.designationName,
-        //     ptbt.timelineBudgetStatus AS budgetStatus`,
-        //     `ptbt.timelineBuilderStatus <> 0 AND ptbt.timelineBuilderStatus <> 4`);
-        // return data;
-
         /**
          * ===== STATUS =====
          * 0 - Draft
@@ -163,38 +171,19 @@ $(document).ready(function() {
          * 2 - Cancelled
          */
 
-        const data = [
-            {
-                billingID:  "1",
-                createdAt:  "2021-05-13",
-                preparedBy: "Arjay P. Diangzon",
-                billedTo:   "BlackCoders Group Inc.",
-                address:    "Antel Global, Pasig City",
-                grandTotal: 15000,
-                dateBilled: "2021-05-15",
-                status:     0
-            },
-            {
-                billingID:  "2",
-                createdAt:  "2021-05-11",
-                preparedBy: "Charles P. Diangzon",
-                billedTo:   "Gatchalian Group Inc.",
-                address:    "One Corporate Global, Pasig City",
-                grandTotal: 16000,
-                dateBilled: "2021-05-19",
-                status:     1
-            },
-            {
-                billingID:  "2",
-                createdAt:  "2021-05-15",
-                preparedBy: "Joseph P. Diangzon",
-                billedTo:   "Carl Mark Group Inc.",
-                address:    "Julia Global, Pasig City",
-                grandTotal: 19000,
-                dateBilled: "2021-05-15",
-                status:     2
-            },
-        ];
+        const data = getTableData(
+            `fms_billing_tbl AS fbt
+            LEFT JOIN hris_employee_list_tbl AS helt ON fbt.employeeID = helt.employeeID`,
+            `fbt.billingID,
+            fbt.createdAt,
+            CONCAT(helt.employeeFirstname, ' ', helt.employeeLastname) AS preparedBy,
+            fbt.clientName AS billedTo,
+            fbt.clientAddress AS address,
+            fbt.billingGrandTotal AS grandTotal,
+            fbt.submittedAt AS dateBilled,
+            fbt.billingStatus AS status`,
+            `fbt.billingStatus = 1 OR fbt.employeeID = ${sessionID}`
+        );
         return data;
     }
     // ----- END BILLING DATA -----
@@ -206,8 +195,12 @@ $(document).ready(function() {
             $("#tableBilling").DataTable().destroy();
         }
 
-        if ($.fn.DataTable.isDataTable("#projectTimeline")) {
-            $("#projectTimeline").DataTable().destroy();
+        if ($.fn.DataTable.isDataTable("#tableBillingContent")) {
+            $("#tableBillingContent").DataTable().destroy();
+        }
+
+        if ($.fn.DataTable.isDataTable("#tableBillingContent0")) {
+            $("#tableBillingContent0").DataTable().destroy();
         }
 
         var table = $("#tableBilling")
@@ -230,7 +223,7 @@ $(document).ready(function() {
                 ],
             });
 
-        var table = $("#projectTimeline")
+        var table = $("#tableBillingContent")
             .css({ "min-width": "100%" })
             .removeAttr("width")
             .DataTable({
@@ -244,13 +237,32 @@ $(document).ready(function() {
                 info:           false,
                 scrollCollapse: true,
                 columnDefs: [
-                    { targets: 0, width: 250 },
-                    { targets: 1, width: 250 },
-                    { targets: 2, width: 250 },
-                    { targets: 3, width: 120 },
-                    { targets: 4, width: 150 },
-                    { targets: 5, width: 150 },
-                    { targets: 6, width: 250 },
+                    { targets: 0, width: 50  },
+                    { targets: 1, width: 350 },
+                    { targets: 2, width: 100 },
+                    { targets: 3, width: 100 },
+                    { targets: 4, width: 100 },
+                ],
+            });
+
+        var table = $("#tableBillingContent0")
+            .css({ "min-width": "100%" })
+            .removeAttr("width")
+            .DataTable({
+                proccessing:    false,
+                serverSide:     false,
+                scrollX:        true,
+                sorting:        false,
+                searching:      false,
+                paging:         false,
+                ordering:       false,
+                info:           false,
+                scrollCollapse: true,
+                columnDefs: [
+                    { targets: 0, width: 350 },
+                    { targets: 1, width: 100 },
+                    { targets: 2, width: 100 },
+                    { targets: 3, width: 100 },
                 ],
             });
     }
@@ -276,6 +288,21 @@ $(document).ready(function() {
     // ----- END HEADER BUTTON -----
 
 
+    // ----- STATUS STYLE -----
+    function statusStyle(status) {
+        let html = "";
+        if (status == 0) {
+            html = `<span class="badge badge-warning w-100">Draft</span>`;
+        } else if (status == 1) {
+            html = `<span class="badge badge-outline-success w-100" style="width: 100% !important">Saved</span>`;
+        } else if (status == 2) {
+            html = `<span class="badge badge-primary w-100">Cancelled</span>`;
+        }
+        return html;
+    }
+    // ----- END STATUS STYLE -----
+
+
     // ----- BILLING CONTENT ------
     function billingContent() {
         const billingData = getBillingData();
@@ -299,29 +326,25 @@ $(document).ready(function() {
         billingData.map(timeline => {
 
             const { 
-                billingID  = 2,
-                createdAt  = "2021-06-11",
-                preparedBy = "Joseph P. Diangzon",
-                billedTo   = "Carl Mark Group Inc.",
-                address    = "Julia Global, Pasig City",
-                grandTotal = 19000,
-                dateBilled = "2021-05-12",
-                status     = 2,
+                billingID,
+                createdAt,
+                preparedBy,
+                billedTo,
+                address,
+                grandTotal = 0,
+                dateBilled,
+                status
             } = timeline;
-
-            const statusStyle = status == 0 ? 
-                `<span class="badge badge-warning w-100">Draft</span>` : (status == 1 ?
-                    `<span class="badge badge-outline-success w-100" style="width: 100% !important">Saved</span>` : `<span class="badge badge-primary w-100">Cancelled</span>`);
 
             html += `
             <tr class="btnView" id="${encryptString(billingID)}">
-                <th>${getFormCode("BIL", createdAt, billingID)}</th>
-                <th>${preparedBy}</th>
-                <th>${billedTo}</th>
-                <th>${address}</th>
-                <th class="text-right">${formatAmount(grandTotal, true)}</th>
-                <th>${moment(dateBilled).format("MMMM DD, YYYY hh:mm:ss A")}</th>
-                <th>${statusStyle}</th>
+                <td>${getFormCode("BIL", createdAt, billingID)}</td>
+                <td>${preparedBy}</td>
+                <td>${billedTo || "-"}</td>
+                <td>${address || "-"}</td>
+                <td class="text-right">${formatAmount(grandTotal, true)}</td>
+                <td>${dateBilled ? moment(dateBilled).format("MMMM DD, YYYY hh:mm:ss A") : "-"}</td>
+                <td>${statusStyle(status)}</td>
             </tr>`
         });
 
@@ -341,56 +364,99 @@ $(document).ready(function() {
     // ----- END BILLING CONTENT ------
 
 
+    // ----- GET CLIENT LIST -----
+    const getClientList = (id = null, name = "", status = 0) => {
+        let html = "";
+        if (name && status == 1) {
+            html = `<option value="${id}" selected>${name}</option>`
+        } else {
+            clientList.map(client => {
+                const { clientID, clientName, clientAddress } = client;
+                html += `
+                <option value     = "${clientID}"
+                    clientName    = "${clientName}"
+                    clientAddress = "${clientAddress}"
+                    ${clientID == id ? "selected" : ""}>${clientName}</option>`;
+            })
+        }
+        return html;
+    }
+    // ----- END GET CLIENT LIST -----
+
+
     // ----- FORM CONTENT -----
     function formContent(data = false, readOnly = false) {
         $("#page_content").html(preloader);
+        readOnly ? preventRefresh(false) : preventRefresh(true);
+        console.log(data);
 
         const {
-            timelineBuilderID,
-            budgetStatus,
+            billingID,
             createdAt,
-            submittedAt,
-            approversID,
-            approversDate,
-            approversStatus,
-            timelineBuilderStatus,
-            timelineBuilderRemarks,
-            preparedBy,
-            departmentName,
-            designationName,
-            timelineDescription,
-            projectCode,
-            projectName,
-            projectCategory,
-            clientName,
-            clientAddress,
-            timelineDate,
-            timelinePriority,
-            timelineIssued,
-            projectManager,
-            teamLeader,
-            teamMember,
-            proposedBudget,
-            allocatedBudget
+            employeeID,
+            billingStatus     = "",
+            submittedAt       = "",
+            preparedBy        = "",
+            departmentName    = "",
+            designationName   = "",
+            billingReason     = "",
+            clientID          = "",
+            clientName        = "",
+            clientAddress     = "",
+            billingComment    = "",
+            billingSubtotal   = 0,
+            billingVatAmount  = 0,
+            billingGrandTotal = 0,
+            activities        = [],
         } = data && data[0];
 
-        $("#btnBack").attr("status", budgetStatus);
+        let {
+			fullname:    employeeFullname    = "",
+			department:  employeeDepartment  = "",
+			designation: employeeDesignation = "",
+		} = employeeData(data ? employeeID : sessionID);
 
-        const disabled = budgetStatus == 1 ? "disabled" : "";
-        const budgetStatusDisplay = budgetStatus == 1 ? `
-        <span class="badge badge-outline-success w-100" style="width: 100% !important">Allocated</span>` : `
-        <span class="badge badge-outline-info w-100">For Proposal</span>`;
+        $("#btnBack").attr("status", billingStatus);
+        $("#btnBack").attr("billingID", encryptString(billingID));
+
+        const disabled = readOnly ? "disabled" : "";
+        const billingStatusDisplay = billingID ? statusStyle(billingStatus) : "----";
         const buttonDisplay = !disabled ? `
         <button class="btn btn-submit px-5 p-2" 
             id="btnSubmit"
-            timelineBuilderID="${timelineBuilderID}">
+            billingID="${billingID}">
             <i class="fas fa-paper-plane"></i> Submit
         </button>
         <button class="btn btn-cancel px-5 p-2" 
             id="btnCancel"
-            status="${budgetStatus}">
+            status="${billingStatus}">
             <i class="fas fa-ban"></i> Cancel
         </button>` : "";
+
+        let activityContent = "";
+        if (activities.length > 0) {
+            activities.map(activity => {
+                activityContent += getItemRow(activity, readOnly);
+            })
+        } else {
+            activityContent += getItemRow();
+        }
+
+        let tableCheckbox = !readOnly ? `
+        <th class="text-center">
+            <div class="action">
+                <input type="checkbox" class="checkboxall">
+            </div>
+        </th>` : "";
+        let buttonAddDeleteRow = !readOnly ? `
+        <div>
+            <button type="button" class="btn btn-primary btnAddRow" id="btnAddRow"><i class="fas fa-plus-circle"></i> Add Row</button>
+            <button type="button" class="btn btn-danger btnDeleteRow" id="btnDeleteRow" disabled><i class="fas fa-minus-circle"></i> Delete Row/s</button>
+        </div>` : "";
+        let billingVat = !readOnly ? `
+        <input type="checkbox" 
+            id="billingVat" 
+            ${billingVatAmount > 0 ? "checked" : ""}>` : ""
 
         let html = `
         <div class="">
@@ -399,7 +465,9 @@ $(document).ready(function() {
                     <div class="card">
                         <div class="body">
                             <small class="text-small text-muted font-weight-bold">Document No.</small>
-                            <h6 class="mt-0 text-danger font-weight-bold">BIL-21-00001</h6>      
+                            <h6 class="mt-0 text-danger font-weight-bold">
+                                ${billingID ? getFormCode("BIL", createdAt, billingID) : "----"}
+                            </h6>      
                         </div>
                     </div>
                 </div>
@@ -408,7 +476,7 @@ $(document).ready(function() {
                         <div class="body">
                             <small class="text-small text-muted font-weight-bold">Status</small>
                             <h6 class="mt-0 text-danger font-weight-bold">
-                                <span class="badge badge-primary w-100">Saved</span>
+                                ${billingStatusDisplay}
                             </h6>      
                         </div>
                     </div>
@@ -417,7 +485,9 @@ $(document).ready(function() {
                     <div class="card">
                         <div class="body">
                             <small class="text-small text-muted font-weight-bold">Date Created</small>
-                            <h6 class="mt-0 text-danger font-weight-bold">May 12, 2021 12:00:00 AM</h6>      
+                            <h6 class="mt-0 font-weight-bold">
+                                ${createdAt ? moment(createdAt).format("MMMM DD, YYYY hh:mm:ss A") : "----"}
+                            </h6>      
                         </div>
                     </div>
                 </div>
@@ -425,100 +495,143 @@ $(document).ready(function() {
                     <div class="card">
                         <div class="body">
                             <small class="text-small text-muted font-weight-bold">Date Billed</small>
-                            <h6 class="mt-0 text-danger font-weight-bold">May 31, 2021 01:23:42 PM</h6>      
+                            <h6 class="mt-0 font-weight-bold">
+                                ${submittedAt ? moment(submittedAt).format("MMMM DD, YYYY hh:mm:ss A") : "----"}
+                            </h6>      
                         </div>
                     </div>
                 </div>
             </div>
 
             <div class="row">
-                <div class="col-md-6 col-sm-12">
+                <div class="col-md-4 col-sm-12">
                     <div class="form-group">
-                        <label>Prepared By <code>*</code></label>
-                            <input type="text" class="form-control" disabled="" value="">
+                        <label>Prepared By</label>
+                        <input type="text" class="form-control" disabled value="${employeeFullname}">
                     </div>
                 </div>
-                <div class="col-md-6 col-sm-12">
+                <div class="col-md-4 col-sm-12">
                     <div class="form-group">
-                        <label>Bill To <code>*</code></label>
-                            <input type="text" class="form-control" disabled="" value="">
+                        <label>Department</label>
+                        <input type="text" class="form-control" disabled value="${employeeDepartment}">
+                    </div>
+                </div>
+                <div class="col-md-4 col-sm-12">
+                    <div class="form-group">
+                        <label>Position</label>
+                        <input type="text" class="form-control" disabled value="${employeeDesignation}">
                     </div>
                 </div>
                 <div class="col-md-12 col-sm-12">
                     <div class="form-group">
-                        <label>Address</label>
-                        <input type="text" class="form-control" disabled="" value="">
+                        <label>Description ${!disabled ? "<code>*</code>" : ""}</label>
+                        <textarea class="form-control validate" 
+                            data-allowcharacters="[a-z][A-Z][0-9][.][,][?][!][/][;][:]['][''][-][_][(][)][%][&][*][ ]" 
+                            minlength="2" 
+                            maxlength="325" 
+                            id="billingReason" 
+                            name="billingReason" 
+                            required 
+                            rows="4" 
+                            style="resize:none;"
+                            ${disabled}>${billingReason}</textarea>
+                        <div class="d-block invalid-feedback" id="invalid-billingReason"></div>
                     </div>
                 </div>
-            </div>
-            <br>
-            <br>    
-            <table class="table table-striped table-hover" id="tableForApprroval" role="grid">
-                <thead>
-                    <tr style="white-space: nowrap">
-                        <th class="text-center" width="50">
-                            <div class="action">
-                                <input type="checkbox" class="checkboxall" project="true">
-                            </div>
-                        </th>
-                        <th>Desciption</th>
-                        <th>Unit</th>
-                        <th>Amount</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td class="text-center">
-                            <div class="action">
-                                <input type="checkbox" class="checkboxrow" id="checkboxrow0" company="true">
-                            </div>
-                        </td>
-                        <td>
-                            <textarea rows="2" style="resize: none" class="form-control" name="purpose" id="input_Purpose" data-allowcharacters="[a-z][A-Z][0-9][ ][.][,][-][()]['][/][&amp;]"></textarea>
-                        </td>
-                        <td><input type="text" class="form-control" data-allowcharacters="[A-Z][ ]" value=""></td>
-                        <td>
-                            <div class="input-group">
-                                <div class="input-group-prepend">
-                                    <span class="input-group-text">₱</span>
-                                </div>
-                                <input type="text" class="form-control amount" min="0.1" max="999999" minlength="1" maxlength="20" name="amount" id="amount0" value="0" project="true" style="text-align: right;">
-                            </div>
-                            <div class="invalid-feedback d-block" id="invalid-amount"></div>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-            <div class="w-100 d-flex justify-content-between align-items-center py-2 addReq">
-                <div class="w-100 text-left my-2 addReq">
-                    <button class="btn btn-primary btnAddRow" id="btnAddRow" project="true"><i class="fas fa-plus-circle"></i> Add Row</button>
-                    <button class="btn btn-danger btnDeleteRow" id="btnDeleteRow" project="true" disabled=""><i class="fas fa-minus-circle"></i> Delete Row/s</button>
+
+                <div class="col-md-4 col-sm-12">
+                    <div class="form-group">
+                        <label>Bill To ${!disabled ? "<code>*</code>" : ""}</label>
+                        <select class="form-control select2"
+                            name="clientID"
+                            id="clientID"
+                            required
+                            ${disabled}>
+                            <option selected disabled>Select Bill To</option>    
+                            ${getClientList(clientID, clientName, billingStatus)}
+                        </select>
+                        <div class="d-block invalid-feedback" id="invalid-clientID"></div>
+                    </div>
                 </div>
-            </div>
-            <div class="row" style="padding-left:15px;padding-right:15px;">
                 <div class="col-md-8 col-sm-12">
-                    <h5>Other Comments:</h5>
-                    <textarea rows="5" style="resize: none" class="form-control" name="purpose" id="input_Purpose" data-allowcharacters="[a-z][A-Z][0-9][ ][.][,][-][()]['][/][&amp;]"></textarea>
+                    <div class="form-group">
+                        <label>Address</label>
+                        <input class="form-control"
+                            id="clientAddress"
+                            name="clientAddress"
+                            value="${clientAddress || "-"}"
+                            disabled>
+                    </div>
                 </div>
-                <div class="col-md-4 col-sm-12 pt-3 pb-2 mt-4">
-                    <div class="row" style="font-size: 1.1rem; font-weight:bold">
-                        <div class="col-6 text-right">Subtotal:</div>
-                        <div class="col-6 text-right">
-                            <input type="text" class="form-control-plaintext amount py-0 text-danger font-weight-bold" min="0" max="9999999999" minlength="1" maxlength="20" name="vat" id="vat" style="font-size: 1.02em; text-align: right;" value="0.00" disabled="">
+            </div>
+
+            <div class="row">
+                <div class="col-12 w-100">
+                    <table class="table table-striped" id="${!readOnly ? "tableBillingContent" : "tableBillingContent0"}">
+                        <thead>
+                            <tr style="white-space: nowrap">
+                                ${tableCheckbox}
+                                <th>Activity ${!disabled ? "<code>*</code>" : ""}</th>
+                                <th>Quantity ${!disabled ? "<code>*</code>" : ""}</th>
+                                <th>Amount ${!disabled ? "<code>*</code>" : ""}</th>
+                                <th>Total Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody class="activityTableBody" id="activityTableBody">
+                            ${activityContent}
+                        </tbody>
+                    </table>
+
+                    <div class="d-flex flex-column justify-content-start text-left my-2">
+                        ${buttonAddDeleteRow}
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row mt-4">
+                <div class="col-md-8 col-sm-12">
+                    <div class="form-group">
+                        <label><h5>Other Comments: </h5></label>
+                        <textarea rows="5" 
+                            data-allowcharacters="[a-z][A-Z][0-9][.][,][?][!][/][;][:]['][''][-][_][(][)][%][&][*][ ]"
+                            minlength="0"
+                            maxlength="99999"
+                            class="form-control validate" 
+                            name="billingComment" 
+                            id="billingComment" 
+                            style="resize: none"
+                            ${disabled}>${billingComment}</textarea>
+                        <div class="d-block invalid-feedback" id="invalid-billingComment"></div>
+                    </div>
+                </div>
+                <div class="col-md-4 col-sm-12 pt-3 pb-2 align-self-center">
+                    <div class="row" style="font-size: 1.1rem">
+                        <div class="col-6 col-lg-7 text-left">Subtotal: </div>
+                        <div class="col-6 col-lg-5 text-right text-dark"
+                            style="font-size: 1.05em"
+                            id="billingSubtotal">
+                            ${formatAmount(billingSubtotal, true)}
                         </div>
                     </div>
-                    <div class="row" style="font-size: 1.1rem; font-weight:bold">
-                        <div class="col-6 text-right">Vat 12%:</div>
-                        <div class="col-6 text-right">
-                            <input type="text" class="form-control-plaintext amount py-0 text-danger border-bottom font-weight-bold" min="0" max="9999999999" minlength="1" maxlength="20" name="vat" id="vat" style="font-size: 1.02em; text-align: right;" value="0.00" disabled="">
+                    <div class="row" style="font-size: 1.1rem">
+                        <div class="col-6 col-lg-7 text-left">12% VAT: </div>
+                        <div class="col-6 col-lg-5 text-right text-dark">
+                            ${billingVat}
+                            <span id="billingVatAmount">${formatAmount(billingVatAmount, true)}</span>
                         </div>
                     </div>
-                    <div class="row" style="font-size: 1.1rem; font-weight:bold">
-                        <div class="col-6 text-right">Total:</div>
-                        <div class="col-6 text-right text-danger" id="grandTotalAmount" style="font-size: 1.3em">
-                            ₱0.00
+                    <div class="row pt-1" style="font-size: 1.3rem;; border-bottom: 3px double black; border-top: 1px solid black">
+                        <div class="col-6 col-lg-7 text-left font-weight-bolder mt-1">Grand Total:</div>
+                        <div class="col-6 col-lg-5 text-right text-danger font-weight-bolder"
+                            id="billingGrandTotal"
+                            style="font-size: 1.3em">
+                            ${formatAmount(billingGrandTotal, true)}
                         </div>
                     </div>
+                </div>
+
+                <div class="col-md-12 text-right mt-3">
+                    ${buttonDisplay}
                 </div>
             </div>
         </div>`;
@@ -527,6 +640,7 @@ $(document).ready(function() {
             $("#page_content").html(html);
             initDatatables();
             initAll();
+            updateTableItems();
         }, 500);
     }
     // ----- END FORM CONTENT -----
@@ -545,8 +659,270 @@ $(document).ready(function() {
             formContent(data, readOnly);
         }
     }
-    pageContent();
+    viewDocument();
+	$("#page_content").text().trim().length == 0 && pageContent(); // CHECK IF THERE IS ALREADY LOADED ONE
     // ----- END PAGE CONTENT -----
+
+
+    // ----- UPDATE TABLE ITEMS -----
+    function updateTableItems() {
+        $("#activityTableBody tr").each(function(i) {
+            // ROW ID
+			$(this).attr("id", `tableRow${i}`);
+			$(this).attr("index", `${i}`);
+
+			// CHECKBOX
+			$("td .action .checkboxrow", this).attr("id", `checkboxrow${i}`);
+
+            // ACTIVITY
+            $(`td .billingActivityParent [name="billingActivity"]`, this).attr("id", `billingActivity${i}`);
+            $(`td .billingActivityParent .invalid-feedback`, this).attr("id", `invalid-billingActivity${i}`);
+
+            // QUANTITY
+            $(`td .billingQuantityParent [name="billingQuantity"]`, this).attr("id", `billingQuantity${i}`);
+            $(`td .billingQuantityParent .invalid-feedback`, this).attr("id", `invalid-billingQuantity${i}`);
+
+            // AMOUNT
+            $(`td .billingAmountParent [name="billingAmount"]`, this).attr("id", `billingAmount${i}`);
+            $(`td .billingAmountParent .invalid-feedback`, this).attr("id", `invalid-billingAmount${i}`);
+
+            // TOTAL AMOUNT
+            $(`td .billingTotalAmount`, this).attr("id", `billingTotalAmount${i}`);
+        })
+    }
+    // ----- END UPDATE TABLE ITEMS -----
+
+
+    // ----- GET ITEM ROW -----
+    function getItemRow(data = false, readOnly = false) {
+        const {
+            activity    = "",
+            quantity    = 0.00,
+            amount      = 0.00,
+            totalAmount = 0.00
+        } = data;
+
+        let html = "";
+        if (readOnly) {
+            html += `
+            <tr>
+                <td>
+                    ${activity}
+                </td>
+                <td class="text-center">
+                    ${formatAmount(quantity)} 
+                </td>
+                <td class="text-right">
+                    ${formatAmount(amount, true)}
+                </td>
+                <td class="text-right">
+                    ${formatAmount(totalAmount, true)}
+                </td>
+            </tr>`;
+        } else {
+            html += `
+            <tr>
+                <td class="text-center">
+                    <div class="action">
+                        <input type="checkbox" class="checkboxrow">
+                    </div>
+                </td>
+                <td>
+                    <div class="form-group billingActivityParent mb-0">
+                        <textarea rows="2" 
+                            class="form-control validate" 
+                            name="billingActivity" 
+                            id="billingActivity" 
+                            data-allowcharacters="[a-z][A-Z][0-9][.][,][?][!][/][;][:]['][''][-][_][(][)][%][&][*][ ]"
+                            minlength="2"
+                            maxlength="325"
+                            style="resize: none" 
+                            required>${activity}</textarea>
+                        <div class="d-block invalid-feedback"></div>
+                    </div>
+                </td>
+                <td>
+                    <div class="form-group billingQuantityParent mb-0">
+                        <input type="text" 
+                            class="form-control input-quantity text-center"
+                            name="billingQuantity"
+                            id="billingQuantity"
+                            min="0.01"
+                            max="999999"
+                            minlength="1"
+                            maxlength="20"
+                            value="${quantity}"
+                            required>
+                        <div class="d-block invalid-feedback"></div>
+                    </div>
+                </td>
+                <td>
+                    <div class="form-group billingAmountParent mb-0">
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text">₱</span>
+                            </div>
+                            <input type="text" 
+                                class="form-control amount text-right" 
+                                name="billingAmount"
+                                id="billingAmount"
+                                min="0.01" 
+                                max="999999" 
+                                minlength="1" 
+                                maxlength="20"
+                                value="${amount}"
+                                required>
+                        </div>
+                        <div class="d-block invalid-feedback"></div>
+                    </div>
+                </td>
+                <td class="text-right">
+                    <div class="billingTotalAmount">${formatAmount(totalAmount, true)}</div>
+                </td>
+            </tr>`;
+        }
+        return html;
+    }
+    // ----- END GET ITEM ROW -----
+
+
+    // ----- UPDATE TOTAL AMOUNT -----
+	function updateTotalAmount() {
+		const quantityArr = $.find(`[name="billingQuantity"]`).map(element => getNonFormattedAmount(element.value) || "0");
+		const unitCostArr = $.find(`[name="billingAmount"]`).map(element => getNonFormattedAmount(element.value) || "0");
+		const totalAmount = quantityArr.map((qty, index) => +qty * +unitCostArr[index]).reduce((a,b) => a + b, 0);
+		$(`#billingSubtotal`).text(formatAmount(totalAmount, true));
+
+        const vatAmount = getNonFormattedAmount($("#billingVatAmount").text());
+        const grandTotal = totalAmount - vatAmount;
+        $("#billingGrandTotal").text(formatAmount(grandTotal, true));
+		return grandTotal;
+	}
+	// ----- END UPDATE TOTAL AMOUNT -----
+
+
+    // ----- DELETE TABLE ROW -----
+	function deleteTableRow() {
+		if ($(`.checkboxrow:checked`).length != $(`.checkboxrow`).length) {
+			Swal.fire({
+				title:              "DELETE ROWS",
+				text:               "Are you sure to delete these rows?",
+				imageUrl:           `${base_url}assets/modal/delete.svg`,
+				imageWidth:         200,
+				imageHeight:        200,
+				imageAlt:           "Custom image",
+				showCancelButton:   true,
+				confirmButtonColor: "#dc3545",
+				cancelButtonColor:  "#1a1a1a",
+				cancelButtonText:   "No",
+				confirmButtonText:  "Yes"
+			}).then((result) => {
+				if (result.isConfirmed) {
+					$(`.checkboxrow:checked`).each(function(i, obj) {
+						var tableRow = $(this).closest('tr');
+						tableRow.fadeOut(500, function (){
+							$(this).closest("tr").remove();
+							updateTableItems();
+							updateDeleteButton();
+							updateTotalAmount();
+						});
+					})
+				}
+			});
+			
+		} else {
+			showNotification("danger", "You must have atleast one or more services.");
+		}
+	}
+	// ----- END DELETE TABLE ROW -----
+
+
+    // ----- UPDATE DELETE BUTTON -----
+	function updateDeleteButton() {
+		let checkedCount = 0;
+		$(".checkboxrow").each(function() {
+			this.checked && checkedCount++;
+		})
+		$(".btnDeleteRow").attr("disabled", checkedCount == 0);
+	}
+	// ----- END UPDATE DELETE BUTTON -----
+
+
+    // ----- SELECT CLIENT NAME -----
+    $(document).on("change", `[name="clientID"]`, function() {
+        const address = $(`option:selected`, this).attr("clientAddress");
+        $(`[name="clientAddress"]`).val(address);
+    })
+    // ----- END SELECT CLIENT NAME -----
+
+
+    // ----- CLICK VATABLE -----
+    $(document).on("change", `#billingVat`, function() {
+        const isChecked = this.checked;
+        const subtotal  = getNonFormattedAmount($("#billingSubtotal").text());
+
+        let vatAmount = 0;
+        if (isChecked && subtotal > 0) {
+            vatAmount = subtotal * 0.12;
+        }
+        $("#billingVatAmount").text(formatAmount(vatAmount, true));
+        updateTotalAmount();
+    })
+    // ----- END CLICK VATABLE -----
+
+
+    // ----- KEYUP QUANTITY OR AMOUNT -----
+	$(document).on("keyup", `[name="billingQuantity"], [name="billingAmount"]`, function() {
+		const index     = $(this).closest("tr").first().attr("index");
+		const quantity  = +getNonFormattedAmount($(`#billingQuantity${index}`).val());
+		const unitcost  = +getNonFormattedAmount($(`#billingAmount${index}`).val());
+		const totalcost = quantity * unitcost;
+		$(`#billingTotalAmount${index}`).text(formatAmount(totalcost, true));
+
+        // DITO NA
+        // let vatAmount = $("#billingVat").checked ? totalcost * 0.12 : 0;
+        // $("#billingVatAmount").text(formatAmount(vatAmount, true));
+
+		updateTotalAmount();
+	})
+	// ----- END KEYUP QUANTITY OR AMOUNT -----
+
+
+    // ----- CLICK DELETE ROW -----
+	$(document).on("click", ".btnDeleteRow", function(){
+		deleteTableRow();
+	})
+	// ----- END CLICK DELETE ROW -----
+
+
+	// ----- CHECKBOX EVENT -----
+	$(document).on("click", "[type=checkbox]", function() {
+		updateDeleteButton();
+	})
+	// ----- END CHECKBOX EVENT -----
+
+
+	// ----- CHECK ALL -----
+	$(document).on("change", ".checkboxall", function() {
+		const isChecked = $(this).prop("checked");
+        $(".checkboxrow").each(function(i, obj) {
+            $(this).prop("checked", isChecked);
+        });
+		updateDeleteButton();
+	})
+	// ----- END CHECK ALL -----
+
+
+    // ----- INSERT ROW ITEM -----
+    $(document).on("click", ".btnAddRow", function() {
+        let row = getItemRow();
+        $("#activityTableBody").append(row);
+        $(`[name="billingActivity"]`).last().focus();
+		updateTableItems();
+		initAmount();
+        initQuantity();
+    })
+    // ----- END INSERT ROW ITEM -----
 
 
     // ----- OPEN ADD FORM -----
@@ -561,39 +937,38 @@ $(document).ready(function() {
     // ----- CLICK TIMELINE ROW -----
     $(document).on("click", ".btnView", function() {
         $("#page_content").html(preloader);
-        const timelineBuilderID = decryptString($(this).attr("id"));
-        viewDocument(timelineBuilderID);
+        const billingID = decryptString($(this).attr("id"));
+        viewDocument(billingID);
     })
     // ----- END CLICK TIMELINE ROW -----
 
 
     // ----- CLICK BUTTON SUBMIT -----
     $(document).on("click", "#btnSubmit", function () {
-        const timelineBuilderID = $(this).attr("timelineBuilderID");
-        const validateInputs    = validateForm("page_content");
+        const billingID      = $(this).attr("billingID");
+        const validateInputs = validateForm("page_content");
         if (validateInputs) {
-            saveProjectBudget("submit", timelineBuilderID, pageContent);
+            saveBilling("submit", billingID, pageContent);
         }
-
-        // formButtonHTML(this);
-        // const id = decryptString($(this).attr("timelineBuilderID"));
-
-        // setTimeout(() => {
-        //     validateInputs().then(res => {
-        //         if (res) {
-        //             saveProjectBoard("submit", pageContent);
-        //         }
-        //         formButtonHTML(this, false);
-        //     });
-        // }, 10);
     });
 
 
     // ----- CLICK BUTTON CANCEL OR BACK -----
-    $(document).on("click", "#btnCancel, #btnBack", function() {
-        const status = $(this).attr("status");
-        if (status == 0) {
-            saveProjectBudget("cancel", null, pageContent);
+    $(document).on("click", "#btnBack", function() {
+        const status    = $(this).attr("status");
+        const billingID = decryptString($(this).attr("billingID"));
+        if (status == "1") {
+            pageContent();
+        } else {
+            saveBilling("save", billingID, pageContent);
+        }
+    })
+
+    $(document).on("click", "#btnCancel", function() {
+        const status    = $(this).attr("status");
+        const billingID = $(this).attr("billingID");
+        if (status == "0") {
+            saveBilling("cancel", null, pageContent);
         } else {
             pageContent();
         }
@@ -601,20 +976,58 @@ $(document).ready(function() {
     // ----- END CLICK BUTTON CANCEL OR BACK -----
 
 
+    // ----- GET BILLING INPUT DATA -----
+    function getBillingInputData(id = null, method = null) {
+        const getStatus = status => {
+            return status == "save" ? 0 : (status == "submit" ? 1 : 2);
+        }
+
+        let activities = [];
+        $(`.activityTableBody tr`).each(function() {
+            const activity = $(`[name="billingActivity"]`, this).val()?.trim();
+            const quantity = getNonFormattedAmount($(`[name="billingQuantity"]`, this).val());
+            const amount   = getNonFormattedAmount($(`[name="billingAmount"]`, this).val());
+            const totalAmount = quantity * amount;
+            activities.push({
+                activity, quantity, amount, totalAmount
+            });
+        })
+
+        let data = {
+            billingID:         id,
+            billingStatus:     getStatus(method),
+            submittedAt:       method == "submit",
+            employeeID:        sessionID,
+            billingReason:     $(`[name="billingReason"]`).val()?.trim(),
+            clientID:          $(`[name="clientID"]`).val(),
+            clientName:        $(`[name="clientID"] option:selected`).attr("clientName"),
+            clientAddress:     $(`[name="clientID"] option:selected`).attr("clientAddress"),
+            billingComment:    $(`[name="billingComment"]`).val()?.trim(),
+            billingSubtotal:   getNonFormattedAmount($(`#billingSubtotal`).text()),
+            billingVatAmount:  getNonFormattedAmount($(`#billingVatAmount`).text()),
+            billingGrandTotal: getNonFormattedAmount($(`#billingGrandTotal`).text()),
+            activities
+        };
+
+        return data;
+    }
+    // ----- END GET BILLING INPUT DATA -----
+
+
     // ----- CONFIRMATION -----
     const getConfirmation = method => {
-        const title = "Project Board";
+        const title = "Billing";
         let swalText, swalImg;
 
         switch (method) {
             case "save":
-                swalTitle = `SAVE ${title.toUpperCase()}`;
-                swalText  = "Are you sure to save this document?";
+                swalTitle = `SAVE DRAFT`;
+                swalText  = "Do you want to save your changes for this billing?";
                 swalImg   = `${base_url}assets/modal/draft.svg`;
                 break;
             case "submit":
                 swalTitle = `SUBMIT ${title.toUpperCase()}`;
-                swalText  = "Are you sure to submit this document?";
+                swalText  = "Are you sure to save this document?";
                 swalImg   = `${base_url}assets/modal/add.svg`;
                 break;
             case "approve":
@@ -666,7 +1079,7 @@ $(document).ready(function() {
 
 
     // ----- SAVE PROJECT BUDGET -----
-    function saveProjectBudget(method = "submit", id = null, callback = null) {
+    function saveBilling(method = "submit", id = null, callback = null) {
         const confirmation = getConfirmation(method);
         confirmation.then(res => {
             if (res.isConfirmed) {
@@ -681,14 +1094,10 @@ $(document).ready(function() {
                     });
                 } else {
 
-                    const data = {
-                        timelineBuilderID: id,
-                        allocatedBudget:   getNonFormattedAmount($(`[name="allocatedBudget"]`).val())
-                    };
-
+                    const data = getBillingInputData(id, method);
                     $.ajax({
                         method:      "POST",
-                        url:         `manage_project_budget/saveProjectBudget`,
+                        url:         `billing_module/saveBilling`,
                         data,
                         cache:       false,
                         async:       false,
@@ -706,9 +1115,9 @@ $(document).ready(function() {
 
                             let swalTitle;
                             if (method == "submit") {
-                                swalTitle = `Project Budget submitted successfully!`;
+                                swalTitle = `Billing saved successfully!`;
                             } else if (method == "save") {
-                                swalTitle = `${getFormCode("PTB", dateCreated, insertedID)} saved successfully!`;
+                                swalTitle = `Billing saved successfully!`;
                             } else if (method == "cancelform") {
                                 swalTitle = `${getFormCode("PTB", dateCreated, insertedID)} cancelled successfully!`;
                             } else if (method == "approve") {
@@ -759,7 +1168,7 @@ $(document).ready(function() {
                 if (res.dismiss == "cancel" && method != "submit") {
                     if (method != "deny") {
                         if (method != "cancelform") {
-                            // callback && callback();
+                            callback && callback();
                         }
                     } else {
                         
