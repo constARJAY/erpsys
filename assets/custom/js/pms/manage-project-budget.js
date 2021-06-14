@@ -636,7 +636,9 @@ $(document).ready(function() {
 
     // ----- PAGE CONTENT -----
     function pageContent(isForm = false, data = false, readOnly = false) {
-        $("#page_content").html(preloader);
+        if ($(`#page_content .loader`).text().length == 0) {
+            $("#page_content").html(preloader);
+        }
         if (!isForm) {
             preventRefresh(false);
             headerButton(true, "");
