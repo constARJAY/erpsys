@@ -26,6 +26,7 @@ $(document).ready(function() {
         return "-";
     }
 
+    // ASSUME THAT ALL CLIENT HAD PASSED ALL DOCUMENTS
     const clientList = getTableData(
         `pms_client_tbl`, 
         `*`,
@@ -66,8 +67,8 @@ $(document).ready(function() {
         return await result;
     }
 
-    function viewDocument(view_id = false, readOnly = false) {
-        const loadData = (id) => {
+    function viewDocument(view_id = false, readOnly = false, isRevise = false) {
+        const loadData = (id, isRevise = false) => {
             const data = getBillingContent(id);
             data.then(res => {
                 if (res) {
@@ -98,8 +99,8 @@ $(document).ready(function() {
                         }
         
                         if (isAllowed) {
-                            if (employeeID == sessionID) {
-                                pageContent(true, tableData, isReadOnly);
+                            if (isRevise && employeeID == sessionID) {
+                                pageContent(true, tableData, isReadOnly, true);
                                 updateURL(encryptString(id), true, true);
                             } else {
                                 pageContent(true, tableData, isReadOnly);
@@ -124,7 +125,7 @@ $(document).ready(function() {
 
         if (view_id) {
             let id = view_id;
-                id && isFinite(id) && loadData(id);
+                id && isFinite(id) && loadData(id, isRevise);
         } else {
             let url   = window.document.URL;
             let arr   = url.split("?view_id=");
@@ -151,7 +152,7 @@ $(document).ready(function() {
             window.history.pushState("", "", `${base_url}fms/billing_module?view_id=${view_id}`);
         } else if (isAdd) {
             if (view_id) {
-                window.history.pushState("", "", `${base_url}fms/billing_module?view_id=${view_id}`);
+                window.history.pushState("", "", `${base_url}fms/billing_module?add=${view_id}`);
             } else {
                 window.history.pushState("", "", `${base_url}fms/billing_module?add`);
             }
@@ -384,21 +385,76 @@ $(document).ready(function() {
     // ----- END GET CLIENT LIST -----
 
 
+    // ----- FORM BUTTONS -----
+    function formButtons(data = false, readOnly = false, isRevise = false) {
+        const {
+            billingID,
+            billingStatus = false,
+        } = data && data[0];
+
+        let button = "";
+        if (!billingStatus || billingStatus == "0") {
+            const btnCancelID = billingID ? "btnCancelForm" : "btnCancel";
+            button = !readOnly ? `
+            <button class="btn btn-submit px-5 p-2" 
+                id="btnSubmit"
+                billingID="${encryptString(billingID)}"
+                status="${billingStatus}">
+                <i class="fas fa-paper-plane"></i> Submit
+            </button>
+            <button class="btn btn-cancel px-5 p-2" 
+                id="${btnCancelID}"
+                billingID="${encryptString(billingID)}"
+                status="${billingStatus}">
+                <i class="fas fa-ban"></i> Cancel
+            </button>` : "";
+        } else if (billingStatus == "2") {
+            if (isRevise) {
+                const btnCancelID = billingID && !isRevise ? "btnCancelForm" : "btnCancel";
+                button = !readOnly ? `
+                <button class="btn btn-submit px-5 p-2" 
+                    id="btnSubmit"
+                    billingID="${encryptString(billingID)}"
+                    status="${billingStatus}"
+                    revise="true">
+                    <i class="fas fa-paper-plane"></i> Submit
+                </button>
+                <button class="btn btn-cancel px-5 p-2" 
+                    id="${btnCancelID}"
+                    billingID="${encryptString(billingID)}"
+                    status="${billingStatus}"
+                    revise="true">
+                    <i class="fas fa-ban"></i> Cancel
+                </button>` : "";
+            } else {
+                // CANCEL
+                button = `
+                <button
+                    class="btn btn-cancel px-5 p-2"
+                    id="btnRevise" 
+                    billingID="${encryptString(billingID)}"
+                    status="${billingStatus}"><i class="fas fa-clone"></i>
+                    Revise
+                </button>`;
+            }
+        }
+        return button;
+    }
+    // ----- END FORM BUTTONS -----
+
+
     // ----- FORM CONTENT -----
-    function formContent(data = false, readOnly = false) {
+    function formContent(data = false, readOnly = false, isRevise = false) {
         $("#page_content").html(preloader);
+        readOnly = isRevise ? false : readOnly;
         readOnly ? preventRefresh(false) : preventRefresh(true);
-        console.log(data);
 
         const {
             billingID,
             createdAt,
             employeeID,
-            billingStatus     = "",
+            billingStatus     = false,
             submittedAt       = "",
-            preparedBy        = "",
-            departmentName    = "",
-            designationName   = "",
             billingReason     = "",
             clientID          = "",
             clientName        = "",
@@ -418,20 +474,11 @@ $(document).ready(function() {
 
         $("#btnBack").attr("status", billingStatus);
         $("#btnBack").attr("billingID", encryptString(billingID));
+        $("#btnBack").attr("revise", isRevise);
 
         const disabled = readOnly ? "disabled" : "";
-        const billingStatusDisplay = billingID ? statusStyle(billingStatus) : "----";
-        const buttonDisplay = !disabled ? `
-        <button class="btn btn-submit px-5 p-2" 
-            id="btnSubmit"
-            billingID="${billingID}">
-            <i class="fas fa-paper-plane"></i> Submit
-        </button>
-        <button class="btn btn-cancel px-5 p-2" 
-            id="btnCancel"
-            status="${billingStatus}">
-            <i class="fas fa-ban"></i> Cancel
-        </button>` : "";
+        const billingStatusDisplay = billingID && !isRevise ? statusStyle(billingStatus) : "----";
+        const buttonDisplay = formButtons(data, readOnly, isRevise);
 
         let activityContent = "";
         if (activities.length > 0) {
@@ -647,7 +694,7 @@ $(document).ready(function() {
 
 
     // ----- PAGE CONTENT -----
-    function pageContent(isForm = false, data = false, readOnly = false) {
+    function pageContent(isForm = false, data = false, readOnly = false, isRevise = false) {
         $("#page_content").html(preloader);
         if (!isForm) {
             preventRefresh(false);
@@ -656,7 +703,7 @@ $(document).ready(function() {
             updateURL();
         } else {
             headerButton(false, "");
-            formContent(data, readOnly);
+            formContent(data, readOnly, isRevise);
         }
     }
     viewDocument();
@@ -793,7 +840,10 @@ $(document).ready(function() {
 		const totalAmount = quantityArr.map((qty, index) => +qty * +unitCostArr[index]).reduce((a,b) => a + b, 0);
 		$(`#billingSubtotal`).text(formatAmount(totalAmount, true));
 
-        const vatAmount = getNonFormattedAmount($("#billingVatAmount").text());
+        const isChecked = $(`#billingVat`).prop("checked");
+        const vatAmount = isChecked ? (totalAmount * 0.12) : 0;
+        $("#billingVatAmount").text(formatAmount(vatAmount, true));
+
         const grandTotal = totalAmount - vatAmount;
         $("#billingGrandTotal").text(formatAmount(grandTotal, true));
 		return grandTotal;
@@ -858,14 +908,6 @@ $(document).ready(function() {
 
     // ----- CLICK VATABLE -----
     $(document).on("change", `#billingVat`, function() {
-        const isChecked = this.checked;
-        const subtotal  = getNonFormattedAmount($("#billingSubtotal").text());
-
-        let vatAmount = 0;
-        if (isChecked && subtotal > 0) {
-            vatAmount = subtotal * 0.12;
-        }
-        $("#billingVatAmount").text(formatAmount(vatAmount, true));
         updateTotalAmount();
     })
     // ----- END CLICK VATABLE -----
@@ -878,10 +920,6 @@ $(document).ready(function() {
 		const unitcost  = +getNonFormattedAmount($(`#billingAmount${index}`).val());
 		const totalcost = quantity * unitcost;
 		$(`#billingTotalAmount${index}`).text(formatAmount(totalcost, true));
-
-        // DITO NA
-        // let vatAmount = $("#billingVat").checked ? totalcost * 0.12 : 0;
-        // $("#billingVatAmount").text(formatAmount(vatAmount, true));
 
 		updateTotalAmount();
 	})
@@ -943,9 +981,17 @@ $(document).ready(function() {
     // ----- END CLICK TIMELINE ROW -----
 
 
+    // ----- REVISE DOCUMENT -----
+	$(document).on("click", "#btnRevise", function () {
+		const billingID = decryptString($(this).attr("billingID"));
+		viewDocument(billingID, false, true);
+	});
+	// ----- END REVISE DOCUMENT -----
+
+
     // ----- CLICK BUTTON SUBMIT -----
     $(document).on("click", "#btnSubmit", function () {
-        const billingID      = $(this).attr("billingID");
+        const billingID      = decryptString($(this).attr("billingID"));
         const validateInputs = validateForm("page_content");
         if (validateInputs) {
             saveBilling("submit", billingID, pageContent);
@@ -954,26 +1000,25 @@ $(document).ready(function() {
 
 
     // ----- CLICK BUTTON CANCEL OR BACK -----
-    $(document).on("click", "#btnBack", function() {
-        const status    = $(this).attr("status");
+    $(document).on("click", "#btnBack, #btnCancel", function() {
         const billingID = decryptString($(this).attr("billingID"));
-        if (status == "1") {
-            pageContent();
-        } else {
-            saveBilling("save", billingID, pageContent);
-        }
-    })
-
-    $(document).on("click", "#btnCancel", function() {
         const status    = $(this).attr("status");
-        const billingID = $(this).attr("billingID");
-        if (status == "0") {
-            saveBilling("cancel", null, pageContent);
+        const revise    = $(this).attr("revise");
+        if (status == "false" || status == "0" || revise == "true") {
+            saveBilling("save", billingID, pageContent);
         } else {
             pageContent();
         }
     })
     // ----- END CLICK BUTTON CANCEL OR BACK -----
+
+
+    // ----- CANCEL DOCUMENT -----
+	$(document).on("click", "#btnCancelForm", function () {
+		const billingID = decryptString($(this).attr("billingID"));
+		saveBilling("cancelform", billingID, pageContent);
+	});
+	// ----- END CANCEL DOCUMENT -----
 
 
     // ----- GET BILLING INPUT DATA -----
@@ -1119,7 +1164,7 @@ $(document).ready(function() {
                             } else if (method == "save") {
                                 swalTitle = `Billing saved successfully!`;
                             } else if (method == "cancelform") {
-                                swalTitle = `${getFormCode("PTB", dateCreated, insertedID)} cancelled successfully!`;
+                                swalTitle = `Billing cancelled successfully!`;
                             } else if (method == "approve") {
                                 swalTitle = `${getFormCode("PTB", dateCreated, insertedID)} approved successfully!`;
                             } else if (method == "deny") {
