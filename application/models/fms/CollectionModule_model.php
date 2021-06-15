@@ -8,6 +8,45 @@ class CollectionModule_model extends CI_Model {
         parent::__construct();
     }
 
+    // ----- GET BILLING CONTENT -----
+    public function getBillingActivity($billingID = 0)
+    {
+        $sql   = "SELECT * FROM fms_billing_items_tbl WHERE billingID = $billingID";
+        $query = $this->db->query($sql);
+        return $query ? $query->result_array() : [];
+    }
+
+    public function getBillingContent($clientID = 0, $dateFrom = '2021-05-12', $dateTo = '2021-05-12')
+    {
+        $data = [];
+        if ($clientID && $dateFrom && $dateTo) {
+            $sql = "
+            SELECT 
+                * 
+            FROM 
+                fms_billing_tbl 
+            WHERE 
+                clientID = $clientID AND 
+                billingStatus = 1 AND
+                submittedAt BETWEEN '$dateFrom 00:00:00' AND '$dateTo 23:59:59'";
+            $query  = $this->db->query($sql);
+            $result = $query ? $query->result_array() : [];
+
+            
+            foreach ($result as $res) {
+                $temp = [
+                    "billingID"        => $res["billingID"],
+                    "billingVatAmount" => $res["billingVatAmount"],
+                    "billingActivity"  => $this->getBillingActivity($res["billingID"]),
+                ];
+                array_push($data, $temp);
+            }
+        }
+        return $data;
+    }
+    // ----- END GET BILLING CONTENT -----
+
+
     // ----- GET COLLECTION DATA -----
     public function getCollectionActivities($billingID = 0) 
     {

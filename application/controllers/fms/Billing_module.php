@@ -39,7 +39,7 @@ class Billing_module extends CI_Controller {
         $clientAddress     = $this->input->post("clientAddress");
         $billingComment    = $this->input->post("billingComment");
         $billingSubtotal   = $this->input->post("billingSubtotal");
-        $billingVatAmount  = $this->input->post("billingVatAmount");
+        $billingVatAmount  = $this->input->post("billingVatAmount") ?? 0;
         $billingGrandTotal = $this->input->post("billingGrandTotal");
         $activities        = $this->input->post("activities");
 

@@ -42,22 +42,27 @@ $(document).ready(function() {
                 clientCity,
                 clientProvince,
                 clientCountry,
-                clientPostalCode
+                clientPostalCode,
+                client_MobileNo,
+                createdAt
             } = client;
 
             const clientAddress = (clientUnitNumber ? titleCase(clientUnitNumber)+", " : "")+(clientHouseNumber ? titleCase(clientHouseNumber)+", " : "")+(clientStreetName ? titleCase(clientStreetName)+", " : "")+(clientSubdivisionName ? titleCase(clientSubdivisionName)+", " : "")+(clientBarangay ? titleCase(clientBarangay)+", " : "")+(clientCity ? titleCase(clientCity)+", " : "")+(clientProvince ? titleCase(clientProvince)+", " : "")+(clientCountry ? titleCase(clientCountry)+", " : "")+(clientPostalCode ? titleCase(clientPostalCode) : "");
-            return { clientID, clientName, clientAddress };
+            const clientCode = getFormCode("CLT", createdAt, clientID);
+            const clientContactNumber = client_MobileNo;
+
+            return { clientID, clientCode, clientName, clientContactNumber, clientAddress };
         })
     // ----- END GLOBAL VARIABLE -----
 
 
     // ----- VIEW DOCUMENT -----
-    const getBillingContent = async (billingID = 0) => {
+    const getCollectionContent = async (collectionID = 0) => {
         let result = false;
         $.ajax({
             method:   "POST",
-            url:      "billing_module/getBillingContent",
-            data:     { billingID },
+            url:      "collection_module/getCollectionContent",
+            data:     { collectionID },
             async:    false,
             dataType: "json",
             success: function(data) {
@@ -69,7 +74,7 @@ $(document).ready(function() {
 
     function viewDocument(view_id = false, readOnly = false, isRevise = false) {
         const loadData = (id, isRevise = false) => {
-            const data = getBillingContent(id);
+            const data = getCollectionContent(id);
             data.then(res => {
                 if (res) {
                     const tableData = res;
@@ -77,7 +82,7 @@ $(document).ready(function() {
                     if (tableData.length > 0) {
                         let {
                             employeeID,
-                            billingStatus
+                            collectionStatus
                         } = tableData[0];
         
                         let isReadOnly = true, isAllowed = true;
@@ -85,11 +90,11 @@ $(document).ready(function() {
                         if (employeeID != sessionID) {
                             isReadOnly = true;
                             // DRAFT OR CANCEL
-                            if (billingStatus == 0 || billingStatus == 2) { 
+                            if (collectionStatus == 0 || collectionStatus == 2) { 
                                 isAllowed = false;
                             }
                         } else if (employeeID == sessionID) {
-                            if (billingStatus == 0) {
+                            if (collectionStatus == 0) {
                                 isReadOnly = false;
                             } else {
                                 isReadOnly = true;
@@ -149,62 +154,63 @@ $(document).ready(function() {
 
     function updateURL(view_id = 0, isAdd = false) { 
         if (view_id && !isAdd) {
-            window.history.pushState("", "", `${base_url}fms/billing_module?view_id=${view_id}`);
+            window.history.pushState("", "", `${base_url}fms/collection_module?view_id=${view_id}`);
         } else if (isAdd) {
             if (view_id) {
-                window.history.pushState("", "", `${base_url}fms/billing_module?add=${view_id}`);
+                window.history.pushState("", "", `${base_url}fms/collection_module?add=${view_id}`);
             } else {
-                window.history.pushState("", "", `${base_url}fms/billing_module?add`);
+                window.history.pushState("", "", `${base_url}fms/collection_module?add`);
             }
         } else {
-            window.history.pushState("", "", `${base_url}fms/billing_module`);
+            window.history.pushState("", "", `${base_url}fms/collection_module`);
         }
     }
     // ----- END VIEW DOCUMENT -----
 
 
-    // ----- BILLING DATA -----
-    const getBillingData = () => {
+    // ----- COLLECTION DATA -----
+    const getCollectionData = () => {
         /**
          * ===== STATUS =====
          * 0 - Draft
-         * 1 - Saved
+         * 1 - Collected
          * 2 - Cancelled
          */
 
         const data = getTableData(
-            `fms_billing_tbl AS fbt
-            LEFT JOIN hris_employee_list_tbl AS helt ON fbt.employeeID = helt.employeeID`,
-            `fbt.billingID,
-            fbt.createdAt,
+            `fms_collection_tbl AS fct
+            LEFT JOIN hris_employee_list_tbl AS helt ON fct.employeeID = helt.employeeID`,
+            `fct.collectionID,
+            fct.createdAt,
             CONCAT(helt.employeeFirstname, ' ', helt.employeeLastname) AS preparedBy,
-            fbt.clientName AS billedTo,
-            fbt.clientAddress AS address,
-            fbt.billingGrandTotal AS grandTotal,
-            fbt.submittedAt AS dateBilled,
-            fbt.billingStatus AS status`,
-            `fbt.billingStatus = 1 OR fbt.employeeID = ${sessionID}`
+            fct.clientName AS collectedTo,
+            fct.clientAddress AS address,
+            fct.collectionGrandTotal AS grandTotal,
+            fct.collectionPaymentMethod AS paymentMethod,
+            fct.submittedAt AS dateCollected,
+            fct.collectionStatus AS status`,
+            `fct.collectionStatus = 1 OR fct.employeeID = ${sessionID}`
         );
         return data;
     }
-    // ----- END BILLING DATA -----
+    // ----- END COLLECTION DATA -----
 
 
     // ----- DATATABLES -----
     function initDatatables() {
-        if ($.fn.DataTable.isDataTable("#tableBilling")) {
-            $("#tableBilling").DataTable().destroy();
+        if ($.fn.DataTable.isDataTable("#tableCollection")) {
+            $("#tableCollection").DataTable().destroy();
         }
 
-        if ($.fn.DataTable.isDataTable("#tableBillingContent")) {
-            $("#tableBillingContent").DataTable().destroy();
+        if ($.fn.DataTable.isDataTable("#tableCollectionContent")) {
+            $("#tableCollectionContent").DataTable().destroy();
         }
 
-        if ($.fn.DataTable.isDataTable("#tableBillingContent0")) {
-            $("#tableBillingContent0").DataTable().destroy();
+        if ($.fn.DataTable.isDataTable("#tableCollectionContent0")) {
+            $("#tableCollectionContent0").DataTable().destroy();
         }
 
-        var table = $("#tableBilling")
+        var table = $("#tableCollection")
             .css({ "min-width": "100%" })
             .removeAttr("width")
             .DataTable({
@@ -221,10 +227,11 @@ $(document).ready(function() {
                     { targets: 4, width: 150 },
                     { targets: 5, width: 150 },
                     { targets: 6, width: 150 },
+                    { targets: 7, width: 140 },
                 ],
             });
 
-        var table = $("#tableBillingContent")
+        var table = $("#tableCollectionContent")
             .css({ "min-width": "100%" })
             .removeAttr("width")
             .DataTable({
@@ -240,13 +247,17 @@ $(document).ready(function() {
                 columnDefs: [
                     { targets: 0, width: 50  },
                     { targets: 1, width: 350 },
-                    { targets: 2, width: 100 },
-                    { targets: 3, width: 100 },
-                    { targets: 4, width: 100 },
+                    { targets: 2, width: 150 },
+                    { targets: 3, width: 150 },
+                    { targets: 4, width: 150 },
+                    { targets: 5, width: 150 },
+                    { targets: 6, width: 150 },
+                    { targets: 7, width: 200 },
+                    { targets: 8, width: 250 },
                 ],
             });
 
-        var table = $("#tableBillingContent0")
+        var table = $("#tableCollectionContent0")
             .css({ "min-width": "100%" })
             .removeAttr("width")
             .DataTable({
@@ -261,9 +272,13 @@ $(document).ready(function() {
                 scrollCollapse: true,
                 columnDefs: [
                     { targets: 0, width: 350 },
-                    { targets: 1, width: 100 },
-                    { targets: 2, width: 100 },
-                    { targets: 3, width: 100 },
+                    { targets: 1, width: 150 },
+                    { targets: 2, width: 150 },
+                    { targets: 3, width: 150 },
+                    { targets: 4, width: 150 },
+                    { targets: 5, width: 150 },
+                    { targets: 6, width: 200 },
+                    { targets: 6, width: 250 },
                 ],
             });
     }
@@ -304,47 +319,50 @@ $(document).ready(function() {
     // ----- END STATUS STYLE -----
 
 
-    // ----- BILLING CONTENT ------
-    function billingContent() {
-        const billingData = getBillingData();
+    // ----- COLLECTION CONTENT ------
+    function collectionContent() {
+        const collectionData = getCollectionData();
 
         let html = `
         <div class="table-responsive">
-            <table class="table table-bordered table-striped table-hover js-basic-example dataTable" id="tableBilling">
+            <table class="table table-bordered table-striped table-hover js-basic-example dataTable" id="tableCollection">
                 <thead>
                     <tr>
                         <th>Document No.</th>
                         <th>Prepared By</th>
-                        <th>Billed To</th>
+                        <th>Collected To</th>
                         <th>Address</th>
+                        <th>Payment Method</th>
                         <th>Grand Total</th>
-                        <th>Date Billed</th>
+                        <th>Date Collected</th>
                         <th>Status</th>
                     </tr>
                 </thead>
                 <tbody>`;
 
-        billingData.map(timeline => {
+        collectionData.map(collection => {
 
             const { 
-                billingID,
+                collectionID,
                 createdAt,
                 preparedBy,
-                billedTo,
+                collectedTo,
                 address,
-                grandTotal = 0,
-                dateBilled,
+                paymentMethod = "",
+                grandTotal    = 0,
+                dateCollected,
                 status
-            } = timeline;
+            } = collection;
 
             html += `
-            <tr class="btnView" id="${encryptString(billingID)}">
-                <td>${getFormCode("BIL", createdAt, billingID)}</td>
+            <tr class="btnView" id="${encryptString(collectionID)}">
+                <td>${getFormCode("COL", createdAt, collectionID)}</td>
                 <td>${preparedBy}</td>
-                <td>${billedTo || "-"}</td>
+                <td>${collectedTo || "-"}</td>
                 <td>${address || "-"}</td>
+                <td>${paymentMethod || "-"}</td>
                 <td class="text-right">${formatAmount(grandTotal, true)}</td>
-                <td>${dateBilled ? moment(dateBilled).format("MMMM DD, YYYY hh:mm:ss A") : "-"}</td>
+                <td>${dateCollected ? moment(dateCollected).format("MMMM DD, YYYY hh:mm:ss A") : "-"}</td>
                 <td>${statusStyle(status)}</td>
             </tr>`
         });
@@ -362,7 +380,7 @@ $(document).ready(function() {
 
         return html;
     }
-    // ----- END BILLING CONTENT ------
+    // ----- END COLLECTION CONTENT ------
 
 
     // ----- GET CLIENT LIST -----
@@ -372,11 +390,13 @@ $(document).ready(function() {
             html = `<option value="${id}" selected>${name}</option>`
         } else {
             clientList.map(client => {
-                const { clientID, clientName, clientAddress } = client;
+                const { clientID, clientCode, clientName, clientContactNumber, clientAddress } = client;
                 html += `
-                <option value     = "${clientID}"
-                    clientName    = "${clientName}"
-                    clientAddress = "${clientAddress}"
+                <option value           = "${clientID}"
+                    clientCode          = "${clientCode}"
+                    clientName          = "${clientName}"
+                    clientContactNumber = "${clientContactNumber}"
+                    clientAddress       = "${clientAddress}"
                     ${clientID == id ? "selected" : ""}>${clientName}</option>`;
             })
         }
@@ -388,41 +408,41 @@ $(document).ready(function() {
     // ----- FORM BUTTONS -----
     function formButtons(data = false, readOnly = false, isRevise = false) {
         const {
-            billingID,
-            billingStatus = false,
+            collectionID,
+            collectionStatus = false,
         } = data && data[0];
 
         let button = "";
-        if (!billingStatus || billingStatus == "0") {
-            const btnCancelID = billingID ? "btnCancelForm" : "btnCancel";
+        if (!collectionStatus || collectionStatus == "0") {
+            const btnCancelID = collectionID ? "btnCancelForm" : "btnCancel";
             button = !readOnly ? `
             <button class="btn btn-submit px-5 p-2" 
                 id="btnSubmit"
-                billingID="${encryptString(billingID)}"
-                status="${billingStatus}">
+                collectionID="${encryptString(collectionID)}"
+                status="${collectionStatus}">
                 <i class="fas fa-paper-plane"></i> Submit
             </button>
             <button class="btn btn-cancel px-5 p-2" 
                 id="${btnCancelID}"
-                billingID="${encryptString(billingID)}"
-                status="${billingStatus}">
+                collectionID="${encryptString(collectionID)}"
+                status="${collectionStatus}">
                 <i class="fas fa-ban"></i> Cancel
             </button>` : "";
-        } else if (billingStatus == "2") {
+        } else if (collectionStatus == "2") {
             if (isRevise) {
-                const btnCancelID = billingID && !isRevise ? "btnCancelForm" : "btnCancel";
+                const btnCancelID = collectionID && !isRevise ? "btnCancelForm" : "btnCancel";
                 button = !readOnly ? `
                 <button class="btn btn-submit px-5 p-2" 
                     id="btnSubmit"
-                    billingID="${encryptString(billingID)}"
-                    status="${billingStatus}"
+                    collectionID="${encryptString(collectionID)}"
+                    status="${collectionStatus}"
                     revise="true">
                     <i class="fas fa-paper-plane"></i> Submit
                 </button>
                 <button class="btn btn-cancel px-5 p-2" 
                     id="${btnCancelID}"
-                    billingID="${encryptString(billingID)}"
-                    status="${billingStatus}"
+                    collectionID="${encryptString(collectionID)}"
+                    status="${collectionStatus}"
                     revise="true">
                     <i class="fas fa-ban"></i> Cancel
                 </button>` : "";
@@ -432,8 +452,8 @@ $(document).ready(function() {
                 <button
                     class="btn btn-cancel px-5 p-2"
                     id="btnRevise" 
-                    billingID="${encryptString(billingID)}"
-                    status="${billingStatus}"><i class="fas fa-clone"></i>
+                    collectionID="${encryptString(collectionID)}"
+                    status="${collectionStatus}"><i class="fas fa-clone"></i>
                     Revise
                 </button>`;
             }
@@ -443,6 +463,242 @@ $(document).ready(function() {
     // ----- END FORM BUTTONS -----
 
 
+    // ----- GET PAYMENT METHOD -----
+    function getPaymentMethod(name = "", status = 0) {
+        let options = ["Cash", "Cheque", "Card"];
+        let html = "";
+        if (name && status == 1) {
+            html = `<option value="${name}" selected>${name}</option>`
+        } else {
+            options.map(option => {
+                html += `
+                <option value = "${option}"
+                    ${option == name ? "selected" : ""}>${option}</option>`;
+            })
+        }
+        return html;
+    }
+    // ----- END GET PAYMENT METHOD -----
+
+
+    // ----- DATERANGEPICKER -----
+    function dateRangePicker(dateFrom = new Date, dateTo = new Date) {
+        $("#dateFilter").daterangepicker({
+            autoUpdateInput: false,
+            showDropdowns: true,
+            autoApply: true,
+            locale: {
+                format: "MMMM DD, YYYY",
+            },
+            maxDate:   moment(),
+            startDate: moment(dateFrom),
+            endDate:   moment(dateTo)
+        }, function(start, end) {
+            let dateFilter = `${start.format("MMMM DD, YYYY")} - ${end.format("MMMM DD, YYYY")}`;
+            $("#dateFilter").val(dateFilter);
+            $("#dateFilter").attr("dateFrom", start.format("YYYY-MM-DD"));
+            $("#dateFilter").attr("dateTo", end.format("YYYY-MM-DD"));
+
+            let loading = `<tr class="text-center"><td colspan="9">${preloader}</td></tr>`;
+            $("#activityTableBody").html(loading);
+            const data = getBillingContentDisplay();
+            setTimeout(() => {
+                let html = data ? data : `<tr class="text-center"><td colspan="9">No data available in table.</td></tr>`;
+                $("#activityTableBody").html(html);
+                initSelect2();
+            }, 100);
+        })
+    }
+    // ----- END DATERANGEPICKER -----
+
+
+    // ----- GET BILLING CONTENT -----
+    function getBillingContent(argClientID = false, argDateFrom = false, argDateTo = false) {
+
+        const clientID = argClientID || $(`[name="clientID"]`).val();
+        const dateFrom = argDateFrom || $(`[name="dateFilter"]`).attr("dateFrom");
+        const dateTo   = argDateTo || $(`[name="dateFilter"]`).attr("dateTo");
+
+        let result = false;
+        $.ajax({
+            method:   "POST",
+            url:      "collection_module/getBillingContent",
+            data:     { clientID, dateFrom, dateTo },
+            async:    false,
+            dataType: "json",
+            success: function(data) {
+                result = data;
+            }
+        })
+        return result;
+    }
+    // ----- END GET BILLING CONTENT -----
+
+
+    // ----- GET BILLING CONTENT DISPLAY -----
+    function getBillingContentDisplay(argClientID = false, argDateFrom = false, argDateTo = false) {
+        const billingContent = getBillingContent(argClientID, argDateFrom, argDateTo);
+
+        let html = "";
+        if (billingContent && billingContent.length > 0) {
+            billingContent.map(bill => {
+
+                const { 
+                    billingID,
+                    billingActivity = []
+                } = bill;
+
+                let activityHTML = "";
+                billingActivity.map(act => {
+                    const {
+                        activity,
+                        billingItemID,
+                        totalAmount,
+                        pendingAmount,
+                    } = act;
+                    activityHTML += `
+                    <tr>
+                        <td>
+                            <textarea class="form-control"
+                                name="activity"
+                                id="activity${billingID}${billingItemID}"
+                                billingID="${billingID}"
+                                billingItemID="${billingItemID}"
+                                rows="3"
+                                style="resize: none;"
+                                disabled>${activity}</textarea>
+                        </td>
+                        <td>
+                            <div class="form-group mb-0">
+                                <input type="text"
+                                    class="form-control validate"
+                                    data=allowcharacters="[a-z][A-Z][0-9][.][,][?][!][/][;][:]['][''][-][_][(][)][%][&][*][ ]"
+                                    minlength="2"
+                                    maxlength="75"
+                                    name="type"
+                                    id="type${billingID}${billingItemID}"
+                                    billingID="${billingID}"
+                                    billingItemID="${billingItemID}"
+                                    required>
+                                <div class="d-block invalid-feedback" id="type${billingID}${billingItemID}"></div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="form-group mb-0">
+                                <input type="text"
+                                    class="form-control validate text-center"
+                                    data=allowcharacters="[0-9][-]"
+                                    minlength="4"
+                                    maxlength="12"
+                                    name="checkNumber"
+                                    id="checkNumber${billingID}${billingItemID}"
+                                    billingID="${billingID}"
+                                    billingItemID="${billingItemID}"
+                                    required>
+                                <div class="d-block invalid-feedback" id="checkNumber${billingID}${billingItemID}"></div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="form-group mb-0">
+                                <input type="button"
+                                    class="form-control validate daterange"
+                                    data=allowcharacters="[a-z][A-Z][0-9][.][,][?][!][/][;][:]['][''][-][_][(][)][%][&][*][ ]"
+                                    minlength="4"
+                                    maxlength="12"
+                                    name="checkDate"
+                                    id="checkDate${billingID}${billingItemID}"
+                                    billingID="${billingID}"
+                                    billingItemID="${billingItemID}"
+                                    required>
+                                <div class="d-block invalid-feedback" id="checkDate${billingID}${billingItemID}"></div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="form-group mb-0">
+                                <input type="text"
+                                    class="form-control validate"
+                                    data=allowcharacters="[a-z][A-Z][0-9][.][,][?][!][/][;][:]['][''][-][_][(][)][%][&][*][ ]"
+                                    minlength="2"
+                                    maxlength="75"
+                                    name="depositoryAccount"
+                                    id="depositoryAccount${billingID}${billingItemID}"
+                                    billingID="${billingID}"
+                                    billingItemID="${billingItemID}"
+                                    required>
+                                <div class="d-block invalid-feedback" id="depositoryAccount${billingID}${billingItemID}"></div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="form-group mb-0">
+                                <select class="form-control select2"
+                                    name="termPayment"
+                                    id="termPayment${billingID}${billingItemID}"
+                                    billingID="${billingID}"
+                                    billingItemID="${billingItemID}"
+                                    required>
+                                    <option selected disabled>Select Payment Method</option>
+                                    <option value="Partial">Partial</option>
+                                    <option value="Full">Full</option>
+                                </select>
+                                <div class="d-block invalid-feedback" id="termPayment${billingID}${billingItemID}"></div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="form-group mb-0">
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text">₱</span>
+                                    </div>
+                                    <input type="text"
+                                        class="form-control amount"
+                                        minlength="2"
+                                        maxlength="75"
+                                        min="0.01"
+                                        max="${pendingAmount}"
+                                        name="amount"
+                                        id="amount${billingID}${billingItemID}"
+                                        billingID="${billingID}"
+                                        billingItemID="${billingItemID}"
+                                        required>
+                                </div>
+                                <div class="d-block invalid-feedback" id="amount${billingID}${billingItemID}"></div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="form-group mb-0">
+                                <textarea class="form-control validate"
+                                    data=allowcharacters="[a-z][A-Z][0-9][.][,][?][!][/][;][:]['][''][-][_][(][)][%][&][*][ ]"
+                                    minlength="0"
+                                    maxlength="9999"
+                                    name="remarks"
+                                    id="remarks${billingID}${billingItemID}"
+                                    billingID="${billingID}"
+                                    billingItemID="${billingItemID}"
+                                    rows="3"
+                                    style="resize: none;"></textarea>
+                                <div class="d-block invalid-feedback" id="remarks${billingID}${billingItemID}"></div>
+                            </div>
+                        </td>
+                    </tr>`;
+                })
+
+                html += `
+                <tr billingID="${billingID}">
+                    <td class="text-center" 
+                        rowspan="${billingActivity.length + 1}">
+                        <div class="action">
+                            <input type="checkbox" class="checkboxrow">
+                        </div>
+                    </td>
+                </tr>
+                ${activityHTML}`;
+            })
+        }
+        return html;
+    }
+    // ----- END GET BILLING CONTENT DISPLAY -----
+
+
     // ----- FORM CONTENT -----
     function formContent(data = false, readOnly = false, isRevise = false) {
         $("#page_content").html(preloader);
@@ -450,20 +706,25 @@ $(document).ready(function() {
         readOnly ? preventRefresh(false) : preventRefresh(true);
 
         const {
-            billingID,
+            collectionID,
             createdAt,
             employeeID,
-            billingStatus     = false,
-            submittedAt       = "",
-            billingReason     = "",
-            clientID          = "",
-            clientName        = "",
-            clientAddress     = "",
-            billingComment    = "",
-            billingSubtotal   = 0,
-            billingVatAmount  = 0,
-            billingGrandTotal = 0,
-            activities        = [],
+            dateFrom                = new Date,
+            dateTo                  = new Date,
+            collectionStatus        = false,
+            submittedAt             = "",
+            collectionReason        = "",
+            clientID                = "",
+            clientCode              = "",
+            clientName              = "",
+            clientContactNumber     = "",
+            clientAddress           = "",
+            collectionPaymentMethod = "",
+            collectionComment       = "",
+            collectionSubtotal      = 0,
+            collectionVatAmount     = 0,
+            collectionGrandTotal    = 0,
+            activities              = [],
         } = data && data[0];
 
         let {
@@ -472,12 +733,12 @@ $(document).ready(function() {
 			designation: employeeDesignation = "",
 		} = employeeData(data ? employeeID : sessionID);
 
-        $("#btnBack").attr("status", billingStatus);
-        $("#btnBack").attr("billingID", encryptString(billingID));
+        $("#btnBack").attr("status", collectionStatus);
+        $("#btnBack").attr("collectionID", encryptString(collectionID));
         $("#btnBack").attr("revise", isRevise);
 
         const disabled = readOnly ? "disabled" : "";
-        const billingStatusDisplay = billingID && !isRevise ? statusStyle(billingStatus) : "----";
+        const collectionStatusDisplay = collectionID && !isRevise ? statusStyle(collectionStatus) : "----";
         const buttonDisplay = formButtons(data, readOnly, isRevise);
 
         let activityContent = "";
@@ -495,15 +756,10 @@ $(document).ready(function() {
                 <input type="checkbox" class="checkboxall">
             </div>
         </th>` : "";
-        let buttonAddDeleteRow = !readOnly ? `
-        <div>
-            <button type="button" class="btn btn-primary btnAddRow" id="btnAddRow"><i class="fas fa-plus-circle"></i> Add Row</button>
-            <button type="button" class="btn btn-danger btnDeleteRow" id="btnDeleteRow" disabled><i class="fas fa-minus-circle"></i> Delete Row/s</button>
-        </div>` : "";
-        let billingVat = !readOnly ? `
+        let collectionVat = !readOnly ? `
         <input type="checkbox" 
-            id="billingVat" 
-            ${billingVatAmount > 0 ? "checked" : ""}>` : ""
+            id="collectionVat" 
+            ${collectionVatAmount > 0 ? "checked" : ""}>` : ""
 
         let html = `
         <div class="">
@@ -513,7 +769,7 @@ $(document).ready(function() {
                         <div class="body">
                             <small class="text-small text-muted font-weight-bold">Document No.</small>
                             <h6 class="mt-0 text-danger font-weight-bold">
-                                ${billingID ? getFormCode("BIL", createdAt, billingID) : "----"}
+                                ${collectionID ? getFormCode("COL", createdAt, collectionID) : "----"}
                             </h6>      
                         </div>
                     </div>
@@ -522,8 +778,8 @@ $(document).ready(function() {
                     <div class="card">
                         <div class="body">
                             <small class="text-small text-muted font-weight-bold">Status</small>
-                            <h6 class="mt-0 text-danger font-weight-bold">
-                                ${billingStatusDisplay}
+                            <h6 class="mt-0 font-weight-bold">
+                                ${collectionStatusDisplay}
                             </h6>      
                         </div>
                     </div>
@@ -541,7 +797,7 @@ $(document).ready(function() {
                 <div class="col-lg-3 col-md-6 col-sm-12 px-1">
                     <div class="card">
                         <div class="body">
-                            <small class="text-small text-muted font-weight-bold">Date Billed</small>
+                            <small class="text-small text-muted font-weight-bold">Date Collected</small>
                             <h6 class="mt-0 font-weight-bold">
                                 ${submittedAt ? moment(submittedAt).format("MMMM DD, YYYY hh:mm:ss A") : "----"}
                             </h6>      
@@ -576,62 +832,120 @@ $(document).ready(function() {
                             data-allowcharacters="[a-z][A-Z][0-9][.][,][?][!][/][;][:]['][''][-][_][(][)][%][&][*][ ]" 
                             minlength="2" 
                             maxlength="325" 
-                            id="billingReason" 
-                            name="billingReason" 
+                            id="collectionReason" 
+                            name="collectionReason" 
                             required 
                             rows="4" 
                             style="resize:none;"
-                            ${disabled}>${billingReason}</textarea>
-                        <div class="d-block invalid-feedback" id="invalid-billingReason"></div>
+                            ${disabled}>${collectionReason}</textarea>
+                        <div class="d-block invalid-feedback" id="invalid-collectionReason"></div>
                     </div>
                 </div>
 
-                <div class="col-md-4 col-sm-12">
+                <div class="col-sm-12 border-top mb-4 mt-2"></div>
+                
+                <div class="col-md-3 col-sm-12">
                     <div class="form-group">
-                        <label>Bill To ${!disabled ? "<code>*</code>" : ""}</label>
+                        <label>Client Code</label>
+                        <input type="text" 
+                            class="form-control" 
+                            name="clientCode"
+                            id="clientCode"
+                            value="${clientCode || "-"}"
+                            disabled>
+                        <div class="d-block invalid-feedback" id="invalid-clientCode"></div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-sm-12">
+                    <div class="form-group">
+                        <label>Client Name ${!disabled ? "<code>*</code>" : ""}</label>
                         <select class="form-control select2"
                             name="clientID"
                             id="clientID"
+                            style="width: 100% !important"
                             required
                             ${disabled}>
-                            <option selected disabled>Select Bill To</option>    
-                            ${getClientList(clientID, clientName, billingStatus)}
+                            <option selected disabled>Select Client Name</option>    
+                            ${getClientList(clientID, clientName, collectionStatus)}
                         </select>
                         <div class="d-block invalid-feedback" id="invalid-clientID"></div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-sm-12">
+                    <div class="form-group">
+                        <label>Contact No.</label>
+                        <input type="text" 
+                            class="form-control" 
+                            name="clientContactNumber"
+                            id="clientContactNumber"
+                            value="${clientContactNumber || "-"}"
+                            disabled>
+                        <div class="d-block invalid-feedback" id="invalid-clientContactNumber"></div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-sm-12">
+                    <div class="form-group">
+                        <label>Payment Method ${!disabled ? "<code>*</code>" : ""}</label>
+                        <select class="form-control select2"
+                            name="collectionPaymentMethod"
+                            id="collectionPaymentMethod"
+                            style="width: 100% !important"
+                            required
+                            ${disabled}>
+                            <option selected disabled>Select Payment Method</option>    
+                            ${getPaymentMethod(collectionPaymentMethod, collectionStatus)}
+                        </select>
+                        <div class="d-block invalid-feedback" id="invalid-collectionPaymentMethod"></div>
                     </div>
                 </div>
                 <div class="col-md-8 col-sm-12">
                     <div class="form-group">
                         <label>Address</label>
-                        <input class="form-control"
-                            id="clientAddress"
+                        <input type="text" 
+                            class="form-control" 
                             name="clientAddress"
+                            id="clientAddress"
                             value="${clientAddress || "-"}"
                             disabled>
+                        <div class="d-block invalid-feedback" id="invalid-clientAddress"></div>
+                    </div>
+                </div>
+                <div class="col-md-4 col-sm-12">
+                    <div class="form-group">
+                        <label>Date ${!disabled ? "<code>*</code>" : ""}</label>
+                        <input type="button" 
+                            class="form-control text-left" 
+                            name="dateFilter"
+                            id="dateFilter"
+                            value="${moment(dateFrom).format("MMMM DD, YYYY")} - ${moment(dateTo).format("MMMM DD, YYYY")}"
+                            dateFrom="${moment(dateFrom).format("YYYY-MM-DD")}"
+                            dateTo="${moment(dateTo).format("YYYY-MM-DD")}"
+                            style="width: 100% !important">
+                        <div class="d-block invalid-feedback" id="invalid-dateFilter"></div>
                     </div>
                 </div>
             </div>
 
             <div class="row">
                 <div class="col-12 w-100">
-                    <table class="table table-striped" id="${!readOnly ? "tableBillingContent" : "tableBillingContent0"}">
+                    <table class="table table-striped" id="${!readOnly ? "tableCollectionContent" : "tableCollectionContent0"}">
                         <thead>
                             <tr style="white-space: nowrap">
                                 ${tableCheckbox}
-                                <th>Activity ${!disabled ? "<code>*</code>" : ""}</th>
-                                <th>Quantity ${!disabled ? "<code>*</code>" : ""}</th>
+                                <th>Activity</th>
+                                <th>Type ${!disabled ? "<code>*</code>" : ""}</th>
+                                <th>Check No. ${!disabled ? "<code>*</code>" : ""}</th>
+                                <th>Check Date ${!disabled ? "<code>*</code>" : ""}</th>
+                                <th>Depository Account ${!disabled ? "<code>*</code>" : ""}</th>
+                                <th>Term of Payment ${!disabled ? "<code>*</code>" : ""}</th>
                                 <th>Amount ${!disabled ? "<code>*</code>" : ""}</th>
-                                <th>Total Amount</th>
+                                <th>Remarks</th>
                             </tr>
                         </thead>
                         <tbody class="activityTableBody" id="activityTableBody">
-                            ${activityContent}
+                            ${getBillingContentDisplay(clientID, dateFrom, dateTo)}
                         </tbody>
                     </table>
-
-                    <div class="d-flex flex-column justify-content-start text-left my-2">
-                        ${buttonAddDeleteRow}
-                    </div>
                 </div>
             </div>
             
@@ -644,11 +958,11 @@ $(document).ready(function() {
                             minlength="0"
                             maxlength="99999"
                             class="form-control validate" 
-                            name="billingComment" 
-                            id="billingComment" 
+                            name="collectionComment" 
+                            id="collectionComment" 
                             style="resize: none"
-                            ${disabled}>${billingComment}</textarea>
-                        <div class="d-block invalid-feedback" id="invalid-billingComment"></div>
+                            ${disabled}>${collectionComment}</textarea>
+                        <div class="d-block invalid-feedback" id="invalid-collectionComment"></div>
                     </div>
                 </div>
                 <div class="col-md-4 col-sm-12 pt-3 pb-2 align-self-center">
@@ -656,22 +970,22 @@ $(document).ready(function() {
                         <div class="col-6 col-lg-7 text-left">Subtotal: </div>
                         <div class="col-6 col-lg-5 text-right text-dark"
                             style="font-size: 1.05em"
-                            id="billingSubtotal">
-                            ${formatAmount(billingSubtotal, true)}
+                            id="collectionSubtotal">
+                            ${formatAmount(collectionSubtotal, true)}
                         </div>
                     </div>
                     <div class="row" style="font-size: 1.1rem">
-                        <div class="col-6 col-lg-7 text-left">${billingVat} 12% VAT: </div>
+                        <div class="col-6 col-lg-7 text-left">${collectionVat} 12% VAT: </div>
                         <div class="col-6 col-lg-5 text-right text-dark">
-                            <span id="billingVatAmount">${formatAmount(billingVatAmount, true)}</span>
+                            <span id="collectionVatAmount">${formatAmount(collectionVatAmount, true)}</span>
                         </div>
                     </div>
                     <div class="row pt-1" style="font-size: 1.3rem;; border-bottom: 3px double black; border-top: 1px solid black">
                         <div class="col-6 col-lg-7 text-left font-weight-bolder mt-1">Grand Total:</div>
                         <div class="col-6 col-lg-5 text-right text-danger font-weight-bolder"
-                            id="billingGrandTotal"
+                            id="collectionGrandTotal"
                             style="font-size: 1.3em">
-                            ${formatAmount(billingGrandTotal, true)}
+                            ${formatAmount(collectionGrandTotal, true)}
                         </div>
                     </div>
                 </div>
@@ -687,6 +1001,11 @@ $(document).ready(function() {
             initDatatables();
             initAll();
             updateTableItems();
+
+            let start = dateFrom || new Date;
+            let end   = dateTo   || new Date;
+            dateRangePicker(start, end); 
+
         }, 500);
     }
     // ----- END FORM CONTENT -----
@@ -698,7 +1017,7 @@ $(document).ready(function() {
         if (!isForm) {
             preventRefresh(false);
             headerButton(true, "Add Collection");
-            billingContent();
+            collectionContent();
             updateURL();
         } else {
             headerButton(false, "");
@@ -721,19 +1040,19 @@ $(document).ready(function() {
 			$("td .action .checkboxrow", this).attr("id", `checkboxrow${i}`);
 
             // ACTIVITY
-            $(`td .billingActivityParent [name="billingActivity"]`, this).attr("id", `billingActivity${i}`);
-            $(`td .billingActivityParent .invalid-feedback`, this).attr("id", `invalid-billingActivity${i}`);
+            $(`td .collectionActivityParent [name="collectionActivity"]`, this).attr("id", `collectionActivity${i}`);
+            $(`td .collectionActivityParent .invalid-feedback`, this).attr("id", `invalid-collectionActivity${i}`);
 
             // QUANTITY
-            $(`td .billingQuantityParent [name="billingQuantity"]`, this).attr("id", `billingQuantity${i}`);
-            $(`td .billingQuantityParent .invalid-feedback`, this).attr("id", `invalid-billingQuantity${i}`);
+            $(`td .collectionQuantityParent [name="collectionQuantity"]`, this).attr("id", `collectionQuantity${i}`);
+            $(`td .collectionQuantityParent .invalid-feedback`, this).attr("id", `invalid-collectionQuantity${i}`);
 
             // AMOUNT
-            $(`td .billingAmountParent [name="billingAmount"]`, this).attr("id", `billingAmount${i}`);
-            $(`td .billingAmountParent .invalid-feedback`, this).attr("id", `invalid-billingAmount${i}`);
+            $(`td .collectionAmountParent [name="collectionAmount"]`, this).attr("id", `collectionAmount${i}`);
+            $(`td .collectionAmountParent .invalid-feedback`, this).attr("id", `invalid-collectionAmount${i}`);
 
             // TOTAL AMOUNT
-            $(`td .billingTotalAmount`, this).attr("id", `billingTotalAmount${i}`);
+            $(`td .collectionTotalAmount`, this).attr("id", `collectionTotalAmount${i}`);
         })
     }
     // ----- END UPDATE TABLE ITEMS -----
@@ -774,11 +1093,11 @@ $(document).ready(function() {
                     </div>
                 </td>
                 <td>
-                    <div class="form-group billingActivityParent mb-0">
+                    <div class="form-group collectionActivityParent mb-0">
                         <textarea rows="2" 
                             class="form-control validate" 
-                            name="billingActivity" 
-                            id="billingActivity" 
+                            name="collectionActivity" 
+                            id="collectionActivity" 
                             data-allowcharacters="[a-z][A-Z][0-9][.][,][?][!][/][;][:]['][''][-][_][(][)][%][&][*][ ]"
                             minlength="2"
                             maxlength="325"
@@ -788,11 +1107,11 @@ $(document).ready(function() {
                     </div>
                 </td>
                 <td>
-                    <div class="form-group billingQuantityParent mb-0">
+                    <div class="form-group collectionQuantityParent mb-0">
                         <input type="text" 
                             class="form-control input-quantity text-center"
-                            name="billingQuantity"
-                            id="billingQuantity"
+                            name="collectionQuantity"
+                            id="collectionQuantity"
                             min="0.01"
                             max="999999"
                             minlength="1"
@@ -803,15 +1122,15 @@ $(document).ready(function() {
                     </div>
                 </td>
                 <td>
-                    <div class="form-group billingAmountParent mb-0">
+                    <div class="form-group collectionAmountParent mb-0">
                         <div class="input-group">
                             <div class="input-group-prepend">
                                 <span class="input-group-text">₱</span>
                             </div>
                             <input type="text" 
                                 class="form-control amount text-right" 
-                                name="billingAmount"
-                                id="billingAmount"
+                                name="collectionAmount"
+                                id="collectionAmount"
                                 min="0.01" 
                                 max="999999" 
                                 minlength="1" 
@@ -823,7 +1142,7 @@ $(document).ready(function() {
                     </div>
                 </td>
                 <td class="text-right">
-                    <div class="billingTotalAmount">${formatAmount(totalAmount, true)}</div>
+                    <div class="collectionTotalAmount">${formatAmount(totalAmount, true)}</div>
                 </td>
             </tr>`;
         }
@@ -834,17 +1153,17 @@ $(document).ready(function() {
 
     // ----- UPDATE TOTAL AMOUNT -----
 	function updateTotalAmount() {
-		const quantityArr = $.find(`[name="billingQuantity"]`).map(element => getNonFormattedAmount(element.value) || "0");
-		const unitCostArr = $.find(`[name="billingAmount"]`).map(element => getNonFormattedAmount(element.value) || "0");
+		const quantityArr = $.find(`[name="collectionQuantity"]`).map(element => getNonFormattedAmount(element.value) || "0");
+		const unitCostArr = $.find(`[name="collectionAmount"]`).map(element => getNonFormattedAmount(element.value) || "0");
 		const totalAmount = quantityArr.map((qty, index) => +qty * +unitCostArr[index]).reduce((a,b) => a + b, 0);
-		$(`#billingSubtotal`).text(formatAmount(totalAmount, true));
+		$(`#collectionSubtotal`).text(formatAmount(totalAmount, true));
 
-        const isChecked = $(`#billingVat`).prop("checked");
+        const isChecked = $(`#collectionVat`).prop("checked");
         const vatAmount = isChecked ? (totalAmount * 0.12) : 0;
-        $("#billingVatAmount").text(formatAmount(vatAmount, true));
+        $("#collectionVatAmount").text(formatAmount(vatAmount, true));
 
         const grandTotal = totalAmount - vatAmount;
-        $("#billingGrandTotal").text(formatAmount(grandTotal, true));
+        $("#collectionGrandTotal").text(formatAmount(grandTotal, true));
 		return grandTotal;
 	}
 	// ----- END UPDATE TOTAL AMOUNT -----
@@ -897,28 +1216,61 @@ $(document).ready(function() {
 	// ----- END UPDATE DELETE BUTTON -----
 
 
+    // ----- SELECT TERM PAYMENT -----
+    $(document).on("change", `[name="termPayment"]`, function() {
+        const termPayment   = $(this).val();
+        const billingID     = $(this).attr("billingID");
+        const billingItemID = $(this).attr("billingItemID");
+
+        $amount = $(`[name="amount"][billingID="${billingID}"][billingItemID="${billingItemID}"]`);
+        const pendingTotal = $amount.attr("max");
+        if (termPayment == "Full") {
+            $amount.attr("min", pendingTotal);
+        } else {
+            $amount.attr("min", "0.01");
+        }
+        $amount.trigger("keyup");
+        initAmount();
+    })
+    // ----- END SELECT TERM PAYMENT -----
+
+
     // ----- SELECT CLIENT NAME -----
     $(document).on("change", `[name="clientID"]`, function() {
-        const address = $(`option:selected`, this).attr("clientAddress");
+        const code          = $(`option:selected`, this).attr("clientCode");
+        const contactNumber = $(`option:selected`, this).attr("clientContactNumber");
+        const address       = $(`option:selected`, this).attr("clientAddress");
+        $(`[name="clientCode"]`).val(code);
         $(`[name="clientAddress"]`).val(address);
+        $(`[name="clientContactNumber"]`).val(contactNumber);
+
+        let loading = `<tr class="text-center"><td colspan="9">${preloader}</td></tr>`;
+        $("#activityTableBody").html(loading);
+        const data = getBillingContentDisplay();
+        setTimeout(() => {
+            let html = data ? data : `<tr class="text-center"><td colspan="9">No data available in table.</td></tr>`;
+            $("#activityTableBody").html(html);
+            initSelect2();
+            initAmount();
+        }, 100);
     })
     // ----- END SELECT CLIENT NAME -----
 
 
     // ----- CLICK VATABLE -----
-    $(document).on("change", `#billingVat`, function() {
+    $(document).on("change", `#collectionVat`, function() {
         updateTotalAmount();
     })
     // ----- END CLICK VATABLE -----
 
 
     // ----- KEYUP QUANTITY OR AMOUNT -----
-	$(document).on("keyup", `[name="billingQuantity"], [name="billingAmount"]`, function() {
+	$(document).on("keyup", `[name="collectionQuantity"], [name="collectionAmount"]`, function() {
 		const index     = $(this).closest("tr").first().attr("index");
-		const quantity  = +getNonFormattedAmount($(`#billingQuantity${index}`).val());
-		const unitcost  = +getNonFormattedAmount($(`#billingAmount${index}`).val());
+		const quantity  = +getNonFormattedAmount($(`#collectionQuantity${index}`).val());
+		const unitcost  = +getNonFormattedAmount($(`#collectionAmount${index}`).val());
 		const totalcost = quantity * unitcost;
-		$(`#billingTotalAmount${index}`).text(formatAmount(totalcost, true));
+		$(`#collectionTotalAmount${index}`).text(formatAmount(totalcost, true));
 
 		updateTotalAmount();
 	})
@@ -954,7 +1306,7 @@ $(document).ready(function() {
     $(document).on("click", ".btnAddRow", function() {
         let row = getItemRow();
         $("#activityTableBody").append(row);
-        $(`[name="billingActivity"]`).last().focus();
+        $(`[name="collectionActivity"]`).last().focus();
 		updateTableItems();
 		initAmount();
         initQuantity();
@@ -974,37 +1326,37 @@ $(document).ready(function() {
     // ----- CLICK TIMELINE ROW -----
     $(document).on("click", ".btnView", function() {
         $("#page_content").html(preloader);
-        const billingID = decryptString($(this).attr("id"));
-        viewDocument(billingID);
+        const collectionID = decryptString($(this).attr("id"));
+        viewDocument(collectionID);
     })
     // ----- END CLICK TIMELINE ROW -----
 
 
     // ----- REVISE DOCUMENT -----
 	$(document).on("click", "#btnRevise", function () {
-		const billingID = decryptString($(this).attr("billingID"));
-		viewDocument(billingID, false, true);
+		const collectionID = decryptString($(this).attr("collectionID"));
+		viewDocument(collectionID, false, true);
 	});
 	// ----- END REVISE DOCUMENT -----
 
 
     // ----- CLICK BUTTON SUBMIT -----
     $(document).on("click", "#btnSubmit", function () {
-        const billingID      = decryptString($(this).attr("billingID"));
+        const collectionID      = decryptString($(this).attr("collectionID"));
         const validateInputs = validateForm("page_content");
         if (validateInputs) {
-            saveBilling("submit", billingID, pageContent);
+            saveBilling("submit", collectionID, pageContent);
         }
     });
 
 
     // ----- CLICK BUTTON CANCEL OR BACK -----
     $(document).on("click", "#btnBack, #btnCancel", function() {
-        const billingID = decryptString($(this).attr("billingID"));
+        const collectionID = decryptString($(this).attr("collectionID"));
         const status    = $(this).attr("status");
         const revise    = $(this).attr("revise");
         if (status == "false" || status == "0" || revise == "true") {
-            saveBilling("save", billingID, pageContent);
+            saveBilling("save", collectionID, pageContent);
         } else {
             pageContent();
         }
@@ -1014,13 +1366,13 @@ $(document).ready(function() {
 
     // ----- CANCEL DOCUMENT -----
 	$(document).on("click", "#btnCancelForm", function () {
-		const billingID = decryptString($(this).attr("billingID"));
-		saveBilling("cancelform", billingID, pageContent);
+		const collectionID = decryptString($(this).attr("collectionID"));
+		saveBilling("cancelform", collectionID, pageContent);
 	});
 	// ----- END CANCEL DOCUMENT -----
 
 
-    // ----- GET BILLING INPUT DATA -----
+    // ----- GET COLLECTION INPUT DATA -----
     function getBillingInputData(id = null, method = null) {
         const getStatus = status => {
             return status == "save" ? 0 : (status == "submit" ? 1 : 2);
@@ -1028,9 +1380,9 @@ $(document).ready(function() {
 
         let activities = [];
         $(`.activityTableBody tr`).each(function() {
-            const activity = $(`[name="billingActivity"]`, this).val()?.trim();
-            const quantity = getNonFormattedAmount($(`[name="billingQuantity"]`, this).val());
-            const amount   = getNonFormattedAmount($(`[name="billingAmount"]`, this).val());
+            const activity = $(`[name="collectionActivity"]`, this).val()?.trim();
+            const quantity = getNonFormattedAmount($(`[name="collectionQuantity"]`, this).val());
+            const amount   = getNonFormattedAmount($(`[name="collectionAmount"]`, this).val());
             const totalAmount = quantity * amount;
             activities.push({
                 activity, quantity, amount, totalAmount
@@ -1038,24 +1390,24 @@ $(document).ready(function() {
         })
 
         let data = {
-            billingID:         id,
-            billingStatus:     getStatus(method),
+            collectionID:         id,
+            collectionStatus:     getStatus(method),
             submittedAt:       method == "submit",
             employeeID:        sessionID,
-            billingReason:     $(`[name="billingReason"]`).val()?.trim(),
+            collectionReason:     $(`[name="collectionReason"]`).val()?.trim(),
             clientID:          $(`[name="clientID"]`).val(),
             clientName:        $(`[name="clientID"] option:selected`).attr("clientName"),
             clientAddress:     $(`[name="clientID"] option:selected`).attr("clientAddress"),
-            billingComment:    $(`[name="billingComment"]`).val()?.trim(),
-            billingSubtotal:   getNonFormattedAmount($(`#billingSubtotal`).text()),
-            billingVatAmount:  getNonFormattedAmount($(`#billingVatAmount`).text()),
-            billingGrandTotal: getNonFormattedAmount($(`#billingGrandTotal`).text()),
+            collectionComment:    $(`[name="collectionComment"]`).val()?.trim(),
+            collectionSubtotal:   getNonFormattedAmount($(`#collectionSubtotal`).text()),
+            collectionVatAmount:  getNonFormattedAmount($(`#collectionVatAmount`).text()),
+            collectionGrandTotal: getNonFormattedAmount($(`#collectionGrandTotal`).text()),
             activities
         };
 
         return data;
     }
-    // ----- END GET BILLING INPUT DATA -----
+    // ----- END GET COLLECTION INPUT DATA -----
 
 
     // ----- CONFIRMATION -----
@@ -1066,7 +1418,7 @@ $(document).ready(function() {
         switch (method) {
             case "save":
                 swalTitle = `SAVE DRAFT`;
-                swalText  = "Do you want to save your changes for this billing?";
+                swalText  = "Do you want to save your changes for this collection?";
                 swalImg   = `${base_url}assets/modal/draft.svg`;
                 break;
             case "submit":
@@ -1141,7 +1493,7 @@ $(document).ready(function() {
                     const data = getBillingInputData(id, method);
                     $.ajax({
                         method:      "POST",
-                        url:         `billing_module/saveBilling`,
+                        url:         `collection_module/saveBilling`,
                         data,
                         cache:       false,
                         async:       false,

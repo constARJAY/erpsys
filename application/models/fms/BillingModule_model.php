@@ -86,21 +86,25 @@ class BillingModule_model extends CI_Model {
             $deleteActivity = $this->deleteActivity($billingID);
         }
 
-        $data = [];
+        $billingVatAmount = $data["billingVatAmount"];
+        $activityData = [];
         foreach ($activities as $activity) {
+            $totalAmount   = $activity["totalAmount"];
+            $pendingAmount = $billingVatAmount > 0 ? ($totalAmount - ($totalAmount * 0.12)) : $totalAmount;
             $temp = [
-                "billingID"   => $billingID,
-                "activity"    => $activity["activity"],
-                "quantity"    => $activity["quantity"],
-                "amount"      => $activity["amount"],
-                "totalAmount" => $activity["totalAmount"],
-                "createdBy"   => $sessionID,
-                "updatedBy"   => $sessionID,
+                "billingID"     => $billingID,
+                "activity"      => $activity["activity"],
+                "quantity"      => $activity["quantity"],
+                "amount"        => $activity["amount"],
+                "totalAmount"   => $totalAmount,
+                "pendingAmount" => $pendingAmount,
+                "createdBy"     => $sessionID,
+                "updatedBy"     => $sessionID,
             ];
-            array_push($data, $temp);
+            array_push($activityData, $temp);
         }
 
-        $query = $this->insertActivity($data);
+        $query = $this->insertActivity($activityData);
         return $query ? "true|Successfully submitted|$billingID|".date("Y-m-d") : "false|System error: Please contact the system administrator for assistance!";
     }
     // ----- END SAVE BILLING DATA -----

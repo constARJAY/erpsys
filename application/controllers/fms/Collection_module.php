@@ -62,4 +62,12 @@ class Collection_module extends CI_Controller {
         echo json_encode($this->collectionmodule->saveCollection($collectionID, $data, $activities));
     }
 
+    public function getBillingContent()
+    {
+        $clientID = $this->input->post("clientID");
+        $dateFrom = $this->input->post("dateFrom");
+        $dateTo   = $this->input->post("dateTo");
+        echo json_encode($this->collectionmodule->getBillingContent($clientID, $dateFrom, $dateTo));
+    }
+
 }
