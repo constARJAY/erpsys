@@ -6,14 +6,12 @@
                     <ul class="breadcrumb pl-0 pb-0 ">
                         <li class="breadcrumb-item"><a href="#"><i class="zmdi zmdi-home"></i> Dashboard</a></li>
 						<li class="breadcrumb-item"><i class="fas fa-file-invoice-dollar"></i>&nbsp;Finance Modules</li>
-                        <li class="breadcrumb-item active">Billing Module</li>
+                        <li class="breadcrumb-item active">Collection Module</li>
                     </ul>
-                    <h1 class="mt-3">List of Billing</h1>
-                    <span>This module is used to manage the creation and monitoring of billing for every clients.</span>
+                    <h1 class="mt-3">List of Collection</h1>
+                    <span>This module is used to manage the creation and monitoring of collection of billing for every clients.</span>
 				</div>
-				<div class="col-lg-6 col-md-12 text-md-right" id="headerButton">
-                    <!-- <button type="button" class="btn btn-default btn-add" id="btnAdd" data-toggle="tab" href="#addPhaseForm"><i class="icon-plus"></i> &nbsp;Show Budget</button> -->
-                </div>
+				<div class="col-lg-6 col-md-12 text-md-right" id="headerButton"></div>
             </div>
             <div class="bh_divider appendHeader"></div>
            
@@ -32,17 +30,17 @@
 
 
 <!-- ----- MODAL ----- -->
-<div id="modal_billing" class="modal custom-modal fade" data-backdrop="static" data-keyboard="false" role="dialog">
+<div id="modal_collection_module" class="modal custom-modal fade" data-backdrop="static" data-keyboard="false" role="dialog">
     <div class="modal-dialog modal-dialog-centered modal-md" role="document">
 		<div class="modal-content">
 			<div class="modal-header bg-primary text-light">
-				<h6 class="page-title font-weight-bold">ADD BILLING</h6>
+				<h6 class="page-title font-weight-bold">ADD COLLECTION</h6>
 				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
 					<span class="text-light" aria-hidden="true">&times;</span>
 				</button>
 			</div>
 
-            <div id="modal_billing_content"></div>
+            <div id="modal_collection_module_content"></div>
         </div>
 	</div>
 </div>
@@ -50,4 +48,4 @@
 
 
 <script src="<?= base_url('assets/custom/js/gen/approver-function.js') ?>"></script>
-<script src="<?= base_url('assets/custom/js/fms/billing-module.js') ?>"></script>
+<script src="<?= base_url('assets/custom/js/fms/collection-module.js') ?>"></script>

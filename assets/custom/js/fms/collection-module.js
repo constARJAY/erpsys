@@ -697,7 +697,7 @@ $(document).ready(function() {
         $("#page_content").html(preloader);
         if (!isForm) {
             preventRefresh(false);
-            headerButton(true, "Add Billing");
+            headerButton(true, "Add Collection");
             billingContent();
             updateURL();
         } else {

@@ -7,7 +7,7 @@ class Milestone_builder extends CI_Controller {
     {
         parent::__construct();
         $this->load->model("pms/MilestoneBuilder_model", "milestone_builder");
-        isAllowed(10);
+        isAllowed(89);
     }
 
     public function index()
