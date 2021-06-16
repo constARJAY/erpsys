@@ -419,7 +419,8 @@ $(document).ready(function() {
             <button class="btn btn-submit px-5 p-2" 
                 id="btnSubmit"
                 collectionID="${encryptString(collectionID)}"
-                status="${collectionStatus}">
+                status="${collectionStatus}"
+                disabled>
                 <i class="fas fa-paper-plane"></i> Submit
             </button>
             <button class="btn btn-cancel px-5 p-2" 
@@ -436,7 +437,8 @@ $(document).ready(function() {
                     id="btnSubmit"
                     collectionID="${encryptString(collectionID)}"
                     status="${collectionStatus}"
-                    revise="true">
+                    revise="true"
+                    disabled>
                     <i class="fas fa-paper-plane"></i> Submit
                 </button>
                 <button class="btn btn-cancel px-5 p-2" 
@@ -465,7 +467,7 @@ $(document).ready(function() {
 
     // ----- GET PAYMENT METHOD -----
     function getPaymentMethod(name = "", status = 0) {
-        let options = ["Cash", "Cheque", "Card"];
+        let options = ["Cash", "Check"];
         let html = "";
         if (name && status == 1) {
             html = `<option value="${name}" selected>${name}</option>`
@@ -506,6 +508,17 @@ $(document).ready(function() {
                 let html = data ? data : `<tr class="text-center"><td colspan="9">No data available in table.</td></tr>`;
                 $("#activityTableBody").html(html);
                 initSelect2();
+                initAmount();
+                initDateRangePicker(".checkDate", {
+                    autoUpdateInput:  false,
+                    singleDatePicker: true,
+                    showDropdowns:    true,
+                    autoApply:        true,
+                    locale: {
+                        format: "MMMM DD, YYYY",
+                    },
+                    maxDate: moment(),
+                });
             }, 100);
         })
     }
@@ -549,7 +562,7 @@ $(document).ready(function() {
                 } = bill;
 
                 let activityHTML = "";
-                billingActivity.map(act => {
+                billingActivity.map((act) => {
                     const {
                         activity,
                         billingItemID,
@@ -572,7 +585,7 @@ $(document).ready(function() {
                             <div class="form-group mb-0">
                                 <input type="text"
                                     class="form-control validate"
-                                    data=allowcharacters="[a-z][A-Z][0-9][.][,][?][!][/][;][:]['][''][-][_][(][)][%][&][*][ ]"
+                                    data-allowcharacters="[a-z][A-Z][0-9][.][,][?][!][/][;][:]['][''][-][_][(][)][%][&][*][ ]"
                                     minlength="2"
                                     maxlength="75"
                                     name="type"
@@ -587,7 +600,7 @@ $(document).ready(function() {
                             <div class="form-group mb-0">
                                 <input type="text"
                                     class="form-control validate text-center"
-                                    data=allowcharacters="[0-9][-]"
+                                    data-allowcharacters="[0-9][-]"
                                     minlength="4"
                                     maxlength="12"
                                     name="checkNumber"
@@ -601,8 +614,8 @@ $(document).ready(function() {
                         <td>
                             <div class="form-group mb-0">
                                 <input type="button"
-                                    class="form-control validate daterange"
-                                    data=allowcharacters="[a-z][A-Z][0-9][.][,][?][!][/][;][:]['][''][-][_][(][)][%][&][*][ ]"
+                                    class="form-control validate checkDate"
+                                    data-allowcharacters="[a-z][A-Z][0-9][.][,][?][!][/][;][:]['][''][-][_][(][)][%][&][*][ ]"
                                     minlength="4"
                                     maxlength="12"
                                     name="checkDate"
@@ -617,7 +630,7 @@ $(document).ready(function() {
                             <div class="form-group mb-0">
                                 <input type="text"
                                     class="form-control validate"
-                                    data=allowcharacters="[a-z][A-Z][0-9][.][,][?][!][/][;][:]['][''][-][_][(][)][%][&][*][ ]"
+                                    data-allowcharacters="[a-z][A-Z][0-9][.][,][?][!][/][;][:]['][''][-][_][(][)][%][&][*][ ]"
                                     minlength="2"
                                     maxlength="75"
                                     name="depositoryAccount"
@@ -652,7 +665,7 @@ $(document).ready(function() {
                                     <input type="text"
                                         class="form-control amount"
                                         minlength="2"
-                                        maxlength="75"
+                                        maxlength="12"
                                         min="0.01"
                                         max="${pendingAmount}"
                                         name="amount"
@@ -667,7 +680,7 @@ $(document).ready(function() {
                         <td>
                             <div class="form-group mb-0">
                                 <textarea class="form-control validate"
-                                    data=allowcharacters="[a-z][A-Z][0-9][.][,][?][!][/][;][:]['][''][-][_][(][)][%][&][*][ ]"
+                                    data-allowcharacters="[a-z][A-Z][0-9][.][,][?][!][/][;][:]['][''][-][_][(][)][%][&][*][ ]"
                                     minlength="0"
                                     maxlength="9999"
                                     name="remarks"
@@ -687,7 +700,9 @@ $(document).ready(function() {
                     <td class="text-center" 
                         rowspan="${billingActivity.length + 1}">
                         <div class="action">
-                            <input type="checkbox" class="checkboxrow">
+                            <input type="checkbox" 
+                                class="checkboxrow"
+                                billingID="${billingID}">
                         </div>
                     </td>
                 </tr>
@@ -1001,6 +1016,16 @@ $(document).ready(function() {
             initDatatables();
             initAll();
             updateTableItems();
+            initDateRangePicker(".checkDate", {
+				autoUpdateInput:  false,
+				singleDatePicker: true,
+				showDropdowns:    true,
+				autoApply:        true,
+				locale: {
+					format: "MMMM DD, YYYY",
+				},
+				maxDate: moment(),
+            });
 
             let start = dateFrom || new Date;
             let end   = dateTo   || new Date;
@@ -1153,9 +1178,8 @@ $(document).ready(function() {
 
     // ----- UPDATE TOTAL AMOUNT -----
 	function updateTotalAmount() {
-		const quantityArr = $.find(`[name="collectionQuantity"]`).map(element => getNonFormattedAmount(element.value) || "0");
-		const unitCostArr = $.find(`[name="collectionAmount"]`).map(element => getNonFormattedAmount(element.value) || "0");
-		const totalAmount = quantityArr.map((qty, index) => +qty * +unitCostArr[index]).reduce((a,b) => a + b, 0);
+		const amount = $.find(`[name="amount"]`).map(element => getNonFormattedAmount(element.value) || 0);
+		const totalAmount = amount.reduce((a,b) => a + b, 0);
 		$(`#collectionSubtotal`).text(formatAmount(totalAmount, true));
 
         const isChecked = $(`#collectionVat`).prop("checked");
@@ -1211,7 +1235,7 @@ $(document).ready(function() {
 		$(".checkboxrow").each(function() {
 			this.checked && checkedCount++;
 		})
-		$(".btnDeleteRow").attr("disabled", checkedCount == 0);
+		$("#btnSubmit").attr("disabled", checkedCount == 0);
 	}
 	// ----- END UPDATE DELETE BUTTON -----
 
@@ -1252,6 +1276,16 @@ $(document).ready(function() {
             $("#activityTableBody").html(html);
             initSelect2();
             initAmount();
+            initDateRangePicker(".checkDate", {
+				autoUpdateInput:  false,
+				singleDatePicker: true,
+				showDropdowns:    true,
+				autoApply:        true,
+				locale: {
+					format: "MMMM DD, YYYY",
+				},
+				maxDate: moment(),
+            });
         }, 100);
     })
     // ----- END SELECT CLIENT NAME -----
@@ -1265,13 +1299,7 @@ $(document).ready(function() {
 
 
     // ----- KEYUP QUANTITY OR AMOUNT -----
-	$(document).on("keyup", `[name="collectionQuantity"], [name="collectionAmount"]`, function() {
-		const index     = $(this).closest("tr").first().attr("index");
-		const quantity  = +getNonFormattedAmount($(`#collectionQuantity${index}`).val());
-		const unitcost  = +getNonFormattedAmount($(`#collectionAmount${index}`).val());
-		const totalcost = quantity * unitcost;
-		$(`#collectionTotalAmount${index}`).text(formatAmount(totalcost, true));
-
+	$(document).on("keyup", `[name="amount"]`, function() {
 		updateTotalAmount();
 	})
 	// ----- END KEYUP QUANTITY OR AMOUNT -----
@@ -1373,36 +1401,52 @@ $(document).ready(function() {
 
 
     // ----- GET COLLECTION INPUT DATA -----
-    function getBillingInputData(id = null, method = null) {
+    function getCollectionInputData(id = null, method = null) {
         const getStatus = status => {
             return status == "save" ? 0 : (status == "submit" ? 1 : 2);
         }
 
         let activities = [];
-        $(`.activityTableBody tr`).each(function() {
-            const activity = $(`[name="collectionActivity"]`, this).val()?.trim();
-            const quantity = getNonFormattedAmount($(`[name="collectionQuantity"]`, this).val());
-            const amount   = getNonFormattedAmount($(`[name="collectionAmount"]`, this).val());
-            const totalAmount = quantity * amount;
-            activities.push({
-                activity, quantity, amount, totalAmount
+        $(`.activityTableBody checkboxrow:checked`).each(function() {
+            const billingID = $(this).attr("billingID");
+
+            $(`[name="activity"][billingID="${billingID}"]`).each(function() {
+                const billingItemID = $(this).attr("billingItemID");
+
+                const activity          = $(this).val()?.trim();
+                const type              = $(`#type${billingID}${billingItemID}`).val()?.trim();
+                const checkNumber       = $(`#checkNumber${billingID}${billingItemID}`).val()?.trim();
+                const checkDate         = $(`#checkDate${billingID}${billingItemID}`).val();
+                const depositoryAccount = $(`#depositoryAccount${billingID}${billingItemID}`).val()?.trim();
+                const termPayment       = $(`#termPayment${billingID}${billingItemID}`).val();
+                const amount            = getNonFormattedAmount($(`#amount${billingID}${billingItemID}`).val());
+                const remarks           = $(`#remarks${billingID}${billingItemID}`).val()?.trim();
+
+                activities.push({
+                    billingItemID, activity, type, checkNumber, checkDate, depositoryAccount, termPayment, amount, remarks
+                })
             });
         })
 
         let data = {
-            collectionID:         id,
-            collectionStatus:     getStatus(method),
-            submittedAt:       method == "submit",
-            employeeID:        sessionID,
-            collectionReason:     $(`[name="collectionReason"]`).val()?.trim(),
-            clientID:          $(`[name="clientID"]`).val(),
-            clientName:        $(`[name="clientID"] option:selected`).attr("clientName"),
-            clientAddress:     $(`[name="clientID"] option:selected`).attr("clientAddress"),
-            collectionComment:    $(`[name="collectionComment"]`).val()?.trim(),
-            collectionSubtotal:   getNonFormattedAmount($(`#collectionSubtotal`).text()),
-            collectionVatAmount:  getNonFormattedAmount($(`#collectionVatAmount`).text()),
-            collectionGrandTotal: getNonFormattedAmount($(`#collectionGrandTotal`).text()),
-            activities
+            collectionID:            id,
+            collectionStatus:        getStatus(method),
+            submittedAt:             method == "submit",
+            employeeID:              sessionID,
+            collectionReason:        $(`[name="collectionReason"]`).val()?.trim(),
+            clientID:                $(`[name="clientID"]`).val(),
+            clientCode:              $(`[name="clientID"] option:selected`).attr("clientCode"),
+            clientName:              $(`[name="clientID"] option:selected`).attr("clientName"),
+            clientContactNumber:     $(`[name="clientID"] option:selected`).attr("clientContactNumber"),
+            clientAddress:           $(`[name="clientID"] option:selected`).attr("clientAddress"),
+            collectionPaymentMethod: $(`[name="collectionPaymentMethod"]`).val(),
+            dateFrom:                $(`[name="dateFilter"]`).attr("dateFrom"),
+            dateTo:                  $(`[name="dateFilter"]`).attr("dateTo"),
+            collectionComment:       $(`[name="collectionComment"]`).val()?.trim(),
+            collectionSubtotal:      getNonFormattedAmount($(`#collectionSubtotal`).text()),
+            collectionVatAmount:     getNonFormattedAmount($(`#collectionVatAmount`).text()),
+            collectionGrandTotal:    getNonFormattedAmount($(`#collectionGrandTotal`).text()),
+            activities   
         };
 
         return data;
@@ -1490,75 +1534,76 @@ $(document).ready(function() {
                     });
                 } else {
 
-                    const data = getBillingInputData(id, method);
-                    $.ajax({
-                        method:      "POST",
-                        url:         `collection_module/saveBilling`,
-                        data,
-                        cache:       false,
-                        async:       false,
-                        dataType:    "json",
-                        beforeSend: function() {
-                            $("#loader").show();
-                        },
-                        success: function(data) {
-                            let result = data.split("|");
+                    const data = getCollectionInputData(id, method);
+                    console.log(data);
+                    // $.ajax({
+                    //     method:      "POST",
+                    //     url:         `collection_module/saveBilling`,
+                    //     data,
+                    //     cache:       false,
+                    //     async:       false,
+                    //     dataType:    "json",
+                    //     beforeSend: function() {
+                    //         $("#loader").show();
+                    //     },
+                    //     success: function(data) {
+                    //         let result = data.split("|");
             
-                            let isSuccess   = result[0];
-                            let message     = result[1];
-                            let insertedID  = result[2];
-                            let dateCreated = result[3];
+                    //         let isSuccess   = result[0];
+                    //         let message     = result[1];
+                    //         let insertedID  = result[2];
+                    //         let dateCreated = result[3];
 
-                            let swalTitle;
-                            if (method == "submit") {
-                                swalTitle = `Billing saved successfully!`;
-                            } else if (method == "save") {
-                                swalTitle = `Billing saved successfully!`;
-                            } else if (method == "cancelform") {
-                                swalTitle = `Billing cancelled successfully!`;
-                            } else if (method == "approve") {
-                                swalTitle = `${getFormCode("PTB", dateCreated, insertedID)} approved successfully!`;
-                            } else if (method == "deny") {
-                                swalTitle = `${getFormCode("PTB", dateCreated, insertedID)} denied successfully!`;
-                            } else if (method == "drop") {
-                                swalTitle = `${getFormCode("PTB", dateCreated, insertedID)} dropped successfully!`;
-                            }
+                    //         let swalTitle;
+                    //         if (method == "submit") {
+                    //             swalTitle = `Billing saved successfully!`;
+                    //         } else if (method == "save") {
+                    //             swalTitle = `Billing saved successfully!`;
+                    //         } else if (method == "cancelform") {
+                    //             swalTitle = `Billing cancelled successfully!`;
+                    //         } else if (method == "approve") {
+                    //             swalTitle = `${getFormCode("PTB", dateCreated, insertedID)} approved successfully!`;
+                    //         } else if (method == "deny") {
+                    //             swalTitle = `${getFormCode("PTB", dateCreated, insertedID)} denied successfully!`;
+                    //         } else if (method == "drop") {
+                    //             swalTitle = `${getFormCode("PTB", dateCreated, insertedID)} dropped successfully!`;
+                    //         }
             
-                            if (isSuccess == "true") {
-                                setTimeout(() => {
-                                    $("#loader").hide();
-                                    closeModals();
-                                    callback && callback();
-                                    Swal.fire({
-                                        icon:              "success",
-                                        title:             swalTitle,
-                                        showConfirmButton: false,
-                                        timer:             2000,
-                                    });
-                                }, 500);
-                            } else {
-                                setTimeout(() => {
-                                    $("#loader").hide();
-                                    Swal.fire({
-                                        icon:              "danger",
-                                        title:             message,
-                                        showConfirmButton: false,
-                                        timer:             2000,
-                                    });
-                                }, 500);
-                            }
-                        },
-                        error: function() {
-                            setTimeout(() => {
-                                $("#loader").hide();
-                                showNotification("danger", "System error: Please contact the system administrator for assistance!");
-                            }, 500);
-                        }
-                    }).done(function() {
-                        setTimeout(() => {
-                            $("#loader").hide();
-                        }, 500);
-                    })
+                    //         if (isSuccess == "true") {
+                    //             setTimeout(() => {
+                    //                 $("#loader").hide();
+                    //                 closeModals();
+                    //                 callback && callback();
+                    //                 Swal.fire({
+                    //                     icon:              "success",
+                    //                     title:             swalTitle,
+                    //                     showConfirmButton: false,
+                    //                     timer:             2000,
+                    //                 });
+                    //             }, 500);
+                    //         } else {
+                    //             setTimeout(() => {
+                    //                 $("#loader").hide();
+                    //                 Swal.fire({
+                    //                     icon:              "danger",
+                    //                     title:             message,
+                    //                     showConfirmButton: false,
+                    //                     timer:             2000,
+                    //                 });
+                    //             }, 500);
+                    //         }
+                    //     },
+                    //     error: function() {
+                    //         setTimeout(() => {
+                    //             $("#loader").hide();
+                    //             showNotification("danger", "System error: Please contact the system administrator for assistance!");
+                    //         }, 500);
+                    //     }
+                    // }).done(function() {
+                    //     setTimeout(() => {
+                    //         $("#loader").hide();
+                    //     }, 500);
+                    // })
                 }
             } else {
                 if (res.dismiss == "cancel" && method != "submit") {

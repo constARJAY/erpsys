@@ -522,7 +522,7 @@ $(document).ready(function() {
                     <div class="card">
                         <div class="body">
                             <small class="text-small text-muted font-weight-bold">Status</small>
-                            <h6 class="mt-0 text-danger font-weight-bold">
+                            <h6 class="mt-0 font-weight-bold">
                                 ${billingStatusDisplay}
                             </h6>      
                         </div>
@@ -834,8 +834,8 @@ $(document).ready(function() {
 
     // ----- UPDATE TOTAL AMOUNT -----
 	function updateTotalAmount() {
-		const quantityArr = $.find(`[name="billingQuantity"]`).map(element => getNonFormattedAmount(element.value) || "0");
-		const unitCostArr = $.find(`[name="billingAmount"]`).map(element => getNonFormattedAmount(element.value) || "0");
+		const quantityArr = $.find(`[name="billingQuantity"]`).map(element => getNonFormattedAmount(element.value) || 0);
+		const unitCostArr = $.find(`[name="billingAmount"]`).map(element => getNonFormattedAmount(element.value) || 0);
 		const totalAmount = quantityArr.map((qty, index) => +qty * +unitCostArr[index]).reduce((a,b) => a + b, 0);
 		$(`#billingSubtotal`).text(formatAmount(totalAmount, true));
 
