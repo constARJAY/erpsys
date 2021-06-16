@@ -282,6 +282,73 @@ $(document).ready(function() {
     // ----- END TIMELINE CONTENT ------
 
 
+    // ----- GET PROJECT TASK DISPLAY -----
+    function getProjectTaskDisplay(phases = []) {
+        let html = "";
+        if (phases && phases.length > 0) {
+            phases.map(phase => {
+
+                const {
+                    phaseName  = "",
+                    milestones = [],
+                    tasks      = []
+                } = phase;
+
+                let milestoneList = `<ol class="pl-3">`;
+                milestones.map(milestone => {
+                    const { milestoneName = "" } = milestone;
+                    milestoneList += `<li>${milestoneName}</li>`;
+                })
+                milestoneList += `</ol>`;
+
+                let tasksList = "";  
+                tasks.map(task => {
+                    const {
+                        taskName      = "",
+                        allottedHours = "",
+                        taskRemarks   = "",
+                        taskStartDate,
+                        taskEndDate
+                    } = task;
+
+                    tasksList += `
+                    <tr>
+                        <td>${taskName}</td>
+                        <td class="text-center">${formatAmount(allottedHours)}</td>
+                        <td>${moment(taskStartDate).format("MMMM DD, YYYY")}</td>
+                        <td>${moment(taskEndDate).format("MMMM DD, YYYY")}</td>
+                        <td>${taskRemarks || "-"}</td>
+                    </tr>`;
+                })
+
+                html += `
+                <tr>
+                    <td>${phaseName}</td>
+                    <td>${milestoneList}</td>
+                    <td>
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th style="width:25%;">Task Name</th>
+                                    <th style="width:20%;">Allotted Hours</th>
+                                    <th style="width:15%;">Start Date</th>
+                                    <th style="width:15%;">End Date</th>
+                                    <th style="width:25%;">Remarks</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${tasksList}
+                            </tbody>
+                        </table>
+                    </td>
+                </tr>`
+            })
+        }
+        return html;
+    }
+    // ----- END GET PROJECT TASK DISPLAY -----
+
+
     // ----- FORM CONTENT -----
     function formContent(data = false, readOnly = false) {
         $("#page_content").html(preloader);
@@ -313,7 +380,8 @@ $(document).ready(function() {
             teamLeader,
             teamMember,
             proposedBudget,
-            allocatedBudget
+            allocatedBudget,
+            phases = []
         } = data && data[0];
 
         $("#btnBack").attr("status", budgetStatus);
@@ -517,57 +585,8 @@ $(document).ready(function() {
                         <th>Task/s</th>
                     </tr>
                 </thead>
-                <tbody class="itemProjectTableBody">
-                    <tr>
-                        <td>
-                            <input type="text" 
-                                class = "form-control" 
-                                value = "Sample Phase"
-                                disabled>
-                        </td>
-                        <td>
-                            <input type="text" 
-                                class = "form-control" 
-                                value = "Sample Milestone"
-                                disabled>
-                        </td>
-                        <td>
-                            <table class="table">
-                                <thead>
-                                    <tr>
-                                        <th style="width:25%;">Task Name</th>
-                                        <th style="width:20%;">Allotted Hours</th>
-                                        <th style="width:15%;">Start Date</th>
-                                        <th style="width:15%;">End Date</th>
-                                        <th style="width:25%;">Remarks</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td>1</td>
-                                        <td>2</td>
-                                        <td>3</td>
-                                        <td>4</td>
-                                        <td>5</td>
-                                    </tr>
-                                    <tr>
-                                        <td>1</td>
-                                        <td>2</td>
-                                        <td>3</td>
-                                        <td>4</td>
-                                        <td>5</td>
-                                    </tr>
-                                    <tr>
-                                        <td>1</td>
-                                        <td>2</td>
-                                        <td>3</td>
-                                        <td>4</td>
-                                        <td>5</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </td>
-                    </tr>
+                <tbody>
+                    ${getProjectTaskDisplay(phases)}
                 </tbody>
             </table>
 

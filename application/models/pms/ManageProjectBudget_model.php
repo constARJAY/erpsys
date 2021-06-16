@@ -108,7 +108,14 @@ class ManageProjectBudget_model extends CI_Model {
 
     public function getMilestoneBuilder($milestoneBuilderID = 0)
     {
-        $sql = "SELECT projectMilestoneName FROM pms_milestone_list_tbl; WHERE milestoneBuilderID = $milestoneBuilderID";
+        $sql = "SELECT phaseDescription FROM pms_milestone_builder_tbl WHERE milestoneBuilderID = $milestoneBuilderID";
+        $query = $this->db->query($sql);
+        return $query ? $query->row()->phaseDescription : "";
+    }
+
+    public function getMilestoneList($milestoneBuilderID = 0)
+    {
+        $sql = "SELECT projectMilestoneName AS milestoneName FROM pms_milestone_list_tbl WHERE milestoneBuilderID = $milestoneBuilderID";
         $query = $this->db->query($sql);
         return $query ? $query->result_array() : [];
     }
@@ -120,7 +127,8 @@ class ManageProjectBudget_model extends CI_Model {
             taskName,
             allottedHours,
             taskStartDate,
-            taskEndDate
+            taskEndDate,
+            taskRemarks
         FROM 
             pms_timeline_task_list_tbl 
         WHERE 
@@ -138,9 +146,9 @@ class ManageProjectBudget_model extends CI_Model {
         $data = [];
         foreach ($result as $res) {
             $milestoneBuilderID = $res["milestoneBuilderID"];
-            $milestoneList = $this->getMilestoneBuilder($milestoneBuilderID);
             $temp = [
-                "milestones" => $milestoneList,
+                "phaseName"  => $this->getMilestoneBuilder($milestoneBuilderID),
+                "milestones" => $this->getMilestoneList($milestoneBuilderID),
                 "tasks"      => $this->getTask($timelineBuilderID, $milestoneBuilderID)
             ];
             array_push($data, $temp);
@@ -202,7 +210,7 @@ class ManageProjectBudget_model extends CI_Model {
             $output["projectManager"]      = $projectManager;
             $output["teamLeader"]          = $teamLeader;
             $output["teamMember"]          = $teamMember;
-            $output["tasks"] = $this->getTimelineTasks($timelineBuilderID);
+            $output["phases"] = $this->getTimelineTasks($timelineBuilderID);
         }
         return $output;
     }
