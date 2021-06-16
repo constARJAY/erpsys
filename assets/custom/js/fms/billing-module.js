@@ -988,10 +988,19 @@ $(document).ready(function() {
 	// ----- END REVISE DOCUMENT -----
 
 
+    // ----- REMOVE IS-VALID IN TABLE -----
+	function removeIsValid(element = "table") {
+		$(element).find(".validated, .is-valid, .no-error").removeClass("validated")
+		.removeClass("is-valid").removeClass("no-error");
+	}
+	// ----- END REMOVE IS-VALID IN TABLE -----
+
+
     // ----- CLICK BUTTON SUBMIT -----
     $(document).on("click", "#btnSubmit", function () {
         const billingID      = decryptString($(this).attr("billingID"));
         const validateInputs = validateForm("page_content");
+        removeIsValid("#tableBillingContent");
         if (validateInputs) {
             saveBilling("submit", billingID, pageContent);
         }
@@ -1159,11 +1168,11 @@ $(document).ready(function() {
 
                             let swalTitle;
                             if (method == "submit") {
-                                swalTitle = `Billing saved successfully!`;
+                                swalTitle = `${getFormCode("BIL", dateCreated, insertedID)} saved successfully!`;
                             } else if (method == "save") {
-                                swalTitle = `Billing saved successfully!`;
+                                swalTitle = `${getFormCode("BIL", dateCreated, insertedID)} saved successfully!`;
                             } else if (method == "cancelform") {
-                                swalTitle = `Billing cancelled successfully!`;
+                                swalTitle = `${getFormCode("BIL", dateCreated, insertedID)} cancelled successfully!`;
                             } else if (method == "approve") {
                                 swalTitle = `${getFormCode("PTB", dateCreated, insertedID)} approved successfully!`;
                             } else if (method == "deny") {

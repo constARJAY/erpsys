@@ -1331,8 +1331,8 @@ $(document).ready(function() {
 		if(tableData.length > 0){
 			tableData.map((items,index)=>{
 				var milestoneListData = milestoneList.filter(milestoneList => milestoneList.milestoneBuilderID == items.milestoneBuilderID).map((items,index)=>{
-					return items["projectMilestoneName"];
-				}).join();
+					return `<li>${items["projectMilestoneName"]}</li>`;
+				}).join("");
 				html += `<tr class="task-list-row">
 					${!readOnly ? 
 						`<td class="text-center">
@@ -1353,7 +1353,7 @@ $(document).ready(function() {
 
 						</td>
 						<td class="milestone-list" projectmilestoneid="">
-							${milestoneListData.replaceAll(",",`<br>`)}
+							<ol>${milestoneListData}</ol>
 						</td>
 
 						<td class="task-list">

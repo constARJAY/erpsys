@@ -226,8 +226,8 @@ $(document).ready(function() {
                     { targets: 3, width: 250 },
                     { targets: 4, width: 150 },
                     { targets: 5, width: 150 },
-                    { targets: 6, width: 150 },
-                    { targets: 7, width: 140 },
+                    { targets: 6, width: 200 },
+                    { targets: 7, width: 150 },
                 ],
             });
 
@@ -278,7 +278,7 @@ $(document).ready(function() {
                     { targets: 4, width: 150 },
                     { targets: 5, width: 150 },
                     { targets: 6, width: 200 },
-                    { targets: 6, width: 250 },
+                    { targets: 7, width: 250 },
                 ],
             });
     }
@@ -310,7 +310,7 @@ $(document).ready(function() {
         if (status == 0) {
             html = `<span class="badge badge-warning w-100">Draft</span>`;
         } else if (status == 1) {
-            html = `<span class="badge badge-outline-success w-100" style="width: 100% !important">Saved</span>`;
+            html = `<span class="badge badge-outline-success w-100" style="width: 100% !important">Collected</span>`;
         } else if (status == 2) {
             html = `<span class="badge badge-primary w-100">Cancelled</span>`;
         }
@@ -483,6 +483,28 @@ $(document).ready(function() {
     // ----- END GET PAYMENT METHOD -----
 
 
+    // ---- CHECK DATE PICKER -----
+    function checkDatePicker() {
+        $(".checkDate").each(function() {
+            const id = $(this).attr("id");
+            const date = $(this).val() || new Date;
+            $(this).val(moment(date).format("MMMM DD, YYYY"));
+            initDateRangePicker(`${id}`, {
+                autoUpdateInput:  false,
+                singleDatePicker: true,
+                showDropdowns:    true,
+                autoApply:        true,
+                locale: {
+                    format: "MMMM DD, YYYY",
+                },
+                maxDate: moment(),
+                startDate: moment(date),
+            });
+        })
+    }
+    // ---- END CHECK DATE PICKER -----
+
+
     // ----- DATERANGEPICKER -----
     function dateRangePicker(dateFrom = new Date, dateTo = new Date) {
         $("#dateFilter").daterangepicker({
@@ -507,18 +529,9 @@ $(document).ready(function() {
             setTimeout(() => {
                 let html = data ? data : `<tr class="text-center"><td colspan="9">No data available in table.</td></tr>`;
                 $("#activityTableBody").html(html);
-                initSelect2();
-                initAmount();
-                initDateRangePicker(".checkDate", {
-                    autoUpdateInput:  false,
-                    singleDatePicker: true,
-                    showDropdowns:    true,
-                    autoApply:        true,
-                    locale: {
-                        format: "MMMM DD, YYYY",
-                    },
-                    maxDate: moment(),
-                });
+                initAll();
+                checkDatePicker();
+                updateTotalAmount();
             }, 100);
         })
     }
@@ -526,7 +539,7 @@ $(document).ready(function() {
 
 
     // ----- GET BILLING CONTENT -----
-    function getBillingContent(argClientID = false, argDateFrom = false, argDateTo = false) {
+    function getBillingContent(argCollectionID = 0, argClientID = false, argDateFrom = false, argDateTo = false) {
 
         const clientID = argClientID || $(`[name="clientID"]`).val();
         const dateFrom = argDateFrom || $(`[name="dateFilter"]`).attr("dateFrom");
@@ -536,7 +549,7 @@ $(document).ready(function() {
         $.ajax({
             method:   "POST",
             url:      "collection_module/getBillingContent",
-            data:     { clientID, dateFrom, dateTo },
+            data:     { collectionID: argCollectionID, clientID, dateFrom, dateTo },
             async:    false,
             dataType: "json",
             success: function(data) {
@@ -549,11 +562,12 @@ $(document).ready(function() {
 
 
     // ----- GET BILLING CONTENT DISPLAY -----
-    function getBillingContentDisplay(argClientID = false, argDateFrom = false, argDateTo = false) {
-        const billingContent = getBillingContent(argClientID, argDateFrom, argDateTo);
+    function getBillingContentDisplay(argCollectionID = 0, argClientID = false, argDateFrom = false, argDateTo = false, readOnly = false, activities = []) {
+        const billingContent = readOnly && activities ? [activities] : getBillingContent(argCollectionID, argClientID, argDateFrom, argDateTo);
 
         let html = "";
         if (billingContent && billingContent.length > 0) {
+            const disabled = readOnly ? "disabled" : "";
             billingContent.map(bill => {
 
                 const { 
@@ -564,138 +578,195 @@ $(document).ready(function() {
                 let activityHTML = "";
                 billingActivity.map((act) => {
                     const {
-                        activity,
                         billingItemID,
-                        totalAmount,
+                        activity    = "",
+                        type        = "",
+                        checkNumber = "",
+                        checkDate   = new Date,
                         pendingAmount,
+                        depositoryAccount = "",
+                        termPayment,
+                        inputAmount = 0,
+                        amount      = 0,
+                        remarks = "",
                     } = act;
-                    activityHTML += `
-                    <tr>
-                        <td>
-                            <textarea class="form-control"
-                                name="activity"
-                                id="activity${billingID}${billingItemID}"
-                                billingID="${billingID}"
-                                billingItemID="${billingItemID}"
-                                rows="3"
-                                style="resize: none;"
-                                disabled>${activity}</textarea>
-                        </td>
-                        <td>
-                            <div class="form-group mb-0">
-                                <input type="text"
-                                    class="form-control validate"
-                                    data-allowcharacters="[a-z][A-Z][0-9][.][,][?][!][/][;][:]['][''][-][_][(][)][%][&][*][ ]"
-                                    minlength="2"
-                                    maxlength="75"
-                                    name="type"
-                                    id="type${billingID}${billingItemID}"
-                                    billingID="${billingID}"
-                                    billingItemID="${billingItemID}"
-                                    required>
-                                <div class="d-block invalid-feedback" id="type${billingID}${billingItemID}"></div>
-                            </div>
-                        </td>
-                        <td>
-                            <div class="form-group mb-0">
-                                <input type="text"
-                                    class="form-control validate text-center"
-                                    data-allowcharacters="[0-9][-]"
-                                    minlength="4"
-                                    maxlength="12"
-                                    name="checkNumber"
-                                    id="checkNumber${billingID}${billingItemID}"
-                                    billingID="${billingID}"
-                                    billingItemID="${billingItemID}"
-                                    required>
-                                <div class="d-block invalid-feedback" id="checkNumber${billingID}${billingItemID}"></div>
-                            </div>
-                        </td>
-                        <td>
-                            <div class="form-group mb-0">
-                                <input type="button"
-                                    class="form-control validate checkDate"
-                                    data-allowcharacters="[a-z][A-Z][0-9][.][,][?][!][/][;][:]['][''][-][_][(][)][%][&][*][ ]"
-                                    minlength="4"
-                                    maxlength="12"
-                                    name="checkDate"
-                                    id="checkDate${billingID}${billingItemID}"
-                                    billingID="${billingID}"
-                                    billingItemID="${billingItemID}"
-                                    required>
-                                <div class="d-block invalid-feedback" id="checkDate${billingID}${billingItemID}"></div>
-                            </div>
-                        </td>
-                        <td>
-                            <div class="form-group mb-0">
-                                <input type="text"
-                                    class="form-control validate"
-                                    data-allowcharacters="[a-z][A-Z][0-9][.][,][?][!][/][;][:]['][''][-][_][(][)][%][&][*][ ]"
-                                    minlength="2"
-                                    maxlength="75"
-                                    name="depositoryAccount"
-                                    id="depositoryAccount${billingID}${billingItemID}"
-                                    billingID="${billingID}"
-                                    billingItemID="${billingItemID}"
-                                    required>
-                                <div class="d-block invalid-feedback" id="depositoryAccount${billingID}${billingItemID}"></div>
-                            </div>
-                        </td>
-                        <td>
-                            <div class="form-group mb-0">
-                                <select class="form-control select2"
-                                    name="termPayment"
-                                    id="termPayment${billingID}${billingItemID}"
-                                    billingID="${billingID}"
-                                    billingItemID="${billingItemID}"
-                                    required>
-                                    <option selected disabled>Select Payment Method</option>
-                                    <option value="Partial">Partial</option>
-                                    <option value="Full">Full</option>
-                                </select>
-                                <div class="d-block invalid-feedback" id="termPayment${billingID}${billingItemID}"></div>
-                            </div>
-                        </td>
-                        <td>
-                            <div class="form-group mb-0">
-                                <div class="input-group">
-                                    <div class="input-group-prepend">
-                                        <span class="input-group-text">₱</span>
-                                    </div>
-                                    <input type="text"
-                                        class="form-control amount"
-                                        minlength="2"
-                                        maxlength="12"
-                                        min="0.01"
-                                        max="${pendingAmount}"
-                                        name="amount"
-                                        id="amount${billingID}${billingItemID}"
-                                        billingID="${billingID}"
-                                        billingItemID="${billingItemID}"
-                                        required>
-                                </div>
-                                <div class="d-block invalid-feedback" id="amount${billingID}${billingItemID}"></div>
-                            </div>
-                        </td>
-                        <td>
-                            <div class="form-group mb-0">
-                                <textarea class="form-control validate"
-                                    data-allowcharacters="[a-z][A-Z][0-9][.][,][?][!][/][;][:]['][''][-][_][(][)][%][&][*][ ]"
-                                    minlength="0"
-                                    maxlength="9999"
-                                    name="remarks"
-                                    id="remarks${billingID}${billingItemID}"
+
+                    const getTermPayment = (termPayment = "", readOnly = false) => {
+                        let options = ["Full", "Partial"];
+
+                        let html = "";
+                        if (readOnly && (termPayment == "" || termPayment == "Select Term Payment")) {
+                            html = `<option selected>-</option>`;
+                        } else {
+                            options.map(option => {
+                                html += `
+                                <option value="${option}"
+                                    ${option == termPayment ? "selected" : ""}>${option}</option>`;
+                            })
+                        }
+                        return html;
+                    }
+
+                    if (readOnly) {
+                        activityHTML += `
+                        <tr>
+                            <td>${activity}</td>
+                            <td>${type}</td>
+                            <td class="text-center">${checkNumber}</td>
+                            <td class="text-center">${moment(checkDate || new Date).format("MMMM DD, YYYY")}</td>
+                            <td>${depositoryAccount}</td>
+                            <td>${termPayment}</td>
+                            <td class="text-right">${formatAmount(inputAmount || amount, true)}</td>
+                            <td>${remarks}</td>
+                        </tr>`;
+                    } else {
+                        activityHTML += `
+                        <tr>
+                            <td>
+                                <textarea class="form-control"
+                                    name="activity"
+                                    id="activity${billingID}${billingItemID}"
                                     billingID="${billingID}"
                                     billingItemID="${billingItemID}"
                                     rows="3"
-                                    style="resize: none;"></textarea>
-                                <div class="d-block invalid-feedback" id="remarks${billingID}${billingItemID}"></div>
-                            </div>
-                        </td>
-                    </tr>`;
+                                    style="resize: none;"
+                                    disabled>${activity}</textarea>
+                            </td>
+                            <td>
+                                <div class="form-group mb-0">
+                                    <input type="text"
+                                        class="form-control validate"
+                                        data-allowcharacters="[a-z][A-Z][0-9][.][,][?][!][/][;][:]['][''][-][_][(][)][%][&][*][ ]"
+                                        minlength="2"
+                                        maxlength="75"
+                                        name="type"
+                                        id="type${billingID}${billingItemID}"
+                                        billingID="${billingID}"
+                                        billingItemID="${billingItemID}"
+                                        value="${type}"
+                                        ${disabled}>
+                                    <div class="d-block invalid-feedback" 
+                                        billingID="${billingID}"
+                                        id="invalid-type${billingID}${billingItemID}"></div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="form-group mb-0">
+                                    <input type="text"
+                                        class="form-control validate text-center"
+                                        data-allowcharacters="[0-9][-]"
+                                        minlength="4"
+                                        maxlength="12"
+                                        name="checkNumber"
+                                        id="checkNumber${billingID}${billingItemID}"
+                                        billingID="${billingID}"
+                                        billingItemID="${billingItemID}"
+                                        value="${checkNumber}"
+                                        ${disabled}>
+                                    <div class="d-block invalid-feedback" 
+                                        billingID="${billingID}"
+                                        id="invalid-checkNumber${billingID}${billingItemID}"></div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="form-group mb-0">
+                                    <input type="button"
+                                        class="form-control validate checkDate"
+                                        data-allowcharacters="[a-z][A-Z][0-9][.][,][?][!][/][;][:]['][''][-][_][(][)][%][&][*][ ]"
+                                        minlength="4"
+                                        maxlength="12"
+                                        name="checkDate"
+                                        id="checkDate${billingID}${billingItemID}"
+                                        billingID="${billingID}"
+                                        billingItemID="${billingItemID}"
+                                        value="${moment(checkDate || new Date).format("MMMM DD, YYYY")}"
+                                        ${disabled}>
+                                    <div class="d-block invalid-feedback" 
+                                        billingID="${billingID}"
+                                        id="invalid-checkDate${billingID}${billingItemID}"></div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="form-group mb-0">
+                                    <input type="text"
+                                        class="form-control validate"
+                                        data-allowcharacters="[a-z][A-Z][0-9][.][,][?][!][/][;][:]['][''][-][_][(][)][%][&][*][ ]"
+                                        minlength="2"
+                                        maxlength="75"
+                                        name="depositoryAccount"
+                                        id="depositoryAccount${billingID}${billingItemID}"
+                                        billingID="${billingID}"
+                                        billingItemID="${billingItemID}"
+                                        value="${depositoryAccount}"
+                                        ${disabled}>
+                                    <div class="d-block invalid-feedback" 
+                                        billingID="${billingID}"
+                                        id="invalid-depositoryAccount${billingID}${billingItemID}"></div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="form-group mb-0">
+                                    <select class="form-control select2"
+                                        name="termPayment"
+                                        id="termPayment${billingID}${billingItemID}"
+                                        billingID="${billingID}"
+                                        billingItemID="${billingItemID}"
+                                        ${disabled}>
+                                        <option selected disabled>Select Payment Method</option>
+                                        ${getTermPayment(termPayment, readOnly)}
+                                    </select>
+                                    <div class="d-block invalid-feedback" 
+                                        billingID="${billingID}"
+                                        id="invalid-termPayment${billingID}${billingItemID}"></div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="form-group mb-0">
+                                    <div class="input-group">
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text">₱</span>
+                                        </div>
+                                        <input type="text"
+                                            class="form-control amount"
+                                            minlength="2"
+                                            maxlength="12"
+                                            min="0.00"
+                                            max="${pendingAmount}"
+                                            name="amount"
+                                            id="amount${billingID}${billingItemID}"
+                                            billingID="${billingID}"
+                                            billingItemID="${billingItemID}"
+                                            value="${inputAmount || 0}"
+                                            ${disabled}>
+                                    </div>
+                                    <div class="d-block invalid-feedback"
+                                        billingID="${billingID}"
+                                        id="invalid-amount${billingID}${billingItemID}"></div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="form-group mb-0">
+                                    <textarea class="form-control validate"
+                                        data-allowcharacters="[a-z][A-Z][0-9][.][,][?][!][/][;][:]['][''][-][_][(][)][%][&][*][ ]"
+                                        minlength="0"
+                                        maxlength="9999"
+                                        name="remarks"
+                                        id="remarks${billingID}${billingItemID}"
+                                        billingID="${billingID}"
+                                        billingItemID="${billingItemID}"
+                                        rows="3"
+                                        ${disabled}
+                                        style="resize: none;">${remarks}</textarea>
+                                    <div class="d-block invalid-feedback" 
+                                        billingID="${billingID}"
+                                        id="invalid-remarks${billingID}${billingItemID}"></div>
+                                </div>
+                            </td>
+                        </tr>`;
+                    }
                 })
 
-                html += `
+                let checkboxHTML = !disabled && billingActivity.length > 0 ? `
                 <tr billingID="${billingID}">
                     <td class="text-center" 
                         rowspan="${billingActivity.length + 1}">
@@ -705,9 +776,15 @@ $(document).ready(function() {
                                 billingID="${billingID}">
                         </div>
                     </td>
-                </tr>
+                </tr>` : "";
+
+                html += `
+                ${checkboxHTML}
                 ${activityHTML}`;
             })
+        } else {
+            const colspan = readOnly ? "8" : "9";
+            html = `<tr><td colspan="${colspan}" class="text-center">No data available in table.</td></tr>`;
         }
         return html;
     }
@@ -755,15 +832,6 @@ $(document).ready(function() {
         const disabled = readOnly ? "disabled" : "";
         const collectionStatusDisplay = collectionID && !isRevise ? statusStyle(collectionStatus) : "----";
         const buttonDisplay = formButtons(data, readOnly, isRevise);
-
-        let activityContent = "";
-        if (activities.length > 0) {
-            activities.map(activity => {
-                activityContent += getItemRow(activity, readOnly);
-            })
-        } else {
-            activityContent += getItemRow();
-        }
 
         let tableCheckbox = !readOnly ? `
         <th class="text-center">
@@ -935,7 +1003,8 @@ $(document).ready(function() {
                             value="${moment(dateFrom).format("MMMM DD, YYYY")} - ${moment(dateTo).format("MMMM DD, YYYY")}"
                             dateFrom="${moment(dateFrom).format("YYYY-MM-DD")}"
                             dateTo="${moment(dateTo).format("YYYY-MM-DD")}"
-                            style="width: 100% !important">
+                            style="width: 100% !important"
+                            ${disabled}>
                         <div class="d-block invalid-feedback" id="invalid-dateFilter"></div>
                     </div>
                 </div>
@@ -957,9 +1026,7 @@ $(document).ready(function() {
                                 <th>Remarks</th>
                             </tr>
                         </thead>
-                        <tbody class="activityTableBody" id="activityTableBody">
-                            ${getBillingContentDisplay(clientID, dateFrom, dateTo)}
-                        </tbody>
+                        <tbody class="activityTableBody" id="activityTableBody"></tbody>
                     </table>
                 </div>
             </div>
@@ -1013,23 +1080,21 @@ $(document).ready(function() {
 
         setTimeout(() => {
             $("#page_content").html(html);
-            initDatatables();
             initAll();
-            updateTableItems();
-            initDateRangePicker(".checkDate", {
-				autoUpdateInput:  false,
-				singleDatePicker: true,
-				showDropdowns:    true,
-				autoApply:        true,
-				locale: {
-					format: "MMMM DD, YYYY",
-				},
-				maxDate: moment(),
-            });
-
+            initDatatables();
             let start = dateFrom || new Date;
             let end   = dateTo   || new Date;
             dateRangePicker(start, end); 
+
+            let loading = `<tr class="text-center"><td colspan="9">${preloader}</td></tr>`;
+            $("#activityTableBody").html(loading);
+            setTimeout(() => {
+                $("#activityTableBody").html(getBillingContentDisplay(collectionID, clientID, dateFrom, dateTo, readOnly, activities));
+                initAll();
+                checkDatePicker();
+                collectionStatus != 1 && updateTotalAmount();
+                updateTableItems();
+            }, 100);
 
         }, 500);
     }
@@ -1128,7 +1193,7 @@ $(document).ready(function() {
                             maxlength="325"
                             style="resize: none" 
                             required>${activity}</textarea>
-                        <div class="d-block invalid-feedback"></div>
+                        <div class="d-block invalid-feedback" id="invalid-collectionActivity"></div>
                     </div>
                 </td>
                 <td>
@@ -1143,7 +1208,7 @@ $(document).ready(function() {
                             maxlength="20"
                             value="${quantity}"
                             required>
-                        <div class="d-block invalid-feedback"></div>
+                        <div class="d-block invalid-feedback" id="invalid-collectionQuantity"></div>
                     </div>
                 </td>
                 <td>
@@ -1163,7 +1228,7 @@ $(document).ready(function() {
                                 value="${amount}"
                                 required>
                         </div>
-                        <div class="d-block invalid-feedback"></div>
+                        <div class="d-block invalid-feedback" id="invalid-collectionAmount"></div>
                     </div>
                 </td>
                 <td class="text-right">
@@ -1178,7 +1243,17 @@ $(document).ready(function() {
 
     // ----- UPDATE TOTAL AMOUNT -----
 	function updateTotalAmount() {
-		const amount = $.find(`[name="amount"]`).map(element => getNonFormattedAmount(element.value) || 0);
+		// const amount = $.find(`[name="amount"]`).map(element => getNonFormattedAmount(element.value) || 0);
+
+        let amount = [];
+        $(`.checkboxrow:checked`).each(function() {
+            const billingID = $(this).attr("billingID");
+            $(`[name="amount"][billingID="${billingID}"]`).each(function() {
+                const val = getNonFormattedAmount($(this).val()) || 0;
+                amount.push(val);
+            })
+        })
+
 		const totalAmount = amount.reduce((a,b) => a + b, 0);
 		$(`#collectionSubtotal`).text(formatAmount(totalAmount, true));
 
@@ -1274,18 +1349,9 @@ $(document).ready(function() {
         setTimeout(() => {
             let html = data ? data : `<tr class="text-center"><td colspan="9">No data available in table.</td></tr>`;
             $("#activityTableBody").html(html);
-            initSelect2();
-            initAmount();
-            initDateRangePicker(".checkDate", {
-				autoUpdateInput:  false,
-				singleDatePicker: true,
-				showDropdowns:    true,
-				autoApply:        true,
-				locale: {
-					format: "MMMM DD, YYYY",
-				},
-				maxDate: moment(),
-            });
+            initAll();
+            checkDatePicker();
+            updateTotalAmount();
         }, 100);
     })
     // ----- END SELECT CLIENT NAME -----
@@ -1314,6 +1380,35 @@ $(document).ready(function() {
 
 	// ----- CHECKBOX EVENT -----
 	$(document).on("click", "[type=checkbox]", function() {
+        const billingID = $(this).attr("billingID");
+        const isChecked = this.checked;
+        if (isChecked) {
+            $(`[name="type"][billingID="${billingID}"]`).attr("required", true);
+            $(`[name="checkNumber"][billingID="${billingID}"]`).attr("required", true);
+            $(`[name="checkDate"][billingID="${billingID}"]`).attr("required", true);
+            $(`[name="depositoryAccount"][billingID="${billingID}"]`).attr("required", true);
+            $(`[name="termPayment"][billingID="${billingID}"]`).attr("required", true);
+            $(`[name="amount"][billingID="${billingID}"]`).attr("required", true);
+            $(`[name="amount"][billingID="${billingID}"]`).attr("min", "0.01");
+        } else {
+            $(`[name="type"][billingID="${billingID}"]`).removeAttr("required");
+            $(`[name="checkNumber"][billingID="${billingID}"]`).removeAttr("required");
+            $(`[name="checkDate"][billingID="${billingID}"]`).removeAttr("required");
+            $(`[name="depositoryAccount"][billingID="${billingID}"]`).removeAttr("required");
+            $(`[name="termPayment"][billingID="${billingID}"]`).removeAttr("required");
+            $(`[name="amount"][billingID="${billingID}"]`).removeAttr("required");
+            $(`[name="amount"][billingID="${billingID}"]`).attr("min", "0.00");
+
+            $(`[name="type"][billingID="${billingID}"]`).removeClass("is-invalid").removeClass("is-valid");
+            $(`[name="checkNumber"][billingID="${billingID}"]`).removeClass("is-invalid").removeClass("is-valid");
+            $(`[name="checkDate"][billingID="${billingID}"]`).removeClass("is-invalid").removeClass("is-valid");
+            $(`[name="depositoryAccount"][billingID="${billingID}"]`).removeClass("is-invalid").removeClass("is-valid");
+            $(`[name="termPayment"][billingID="${billingID}"]`).removeClass("is-invalid").removeClass("is-valid");
+            $(`[name="termPayment"][billingID="${billingID}"]`).parent().find(".selection").children().removeClass("has-error").removeClass("no-error");
+            $(`[name="amount"][billingID="${billingID}"]`).removeClass("is-invalid").removeClass("is-valid");
+            $(`.invalid-feedback[billingID="${billingID}"]`).text("");
+        }
+        updateTotalAmount();
 		updateDeleteButton();
 	})
 	// ----- END CHECKBOX EVENT -----
@@ -1368,12 +1463,56 @@ $(document).ready(function() {
 	// ----- END REVISE DOCUMENT -----
 
 
+    // ----- CHECK AMOUNT -----
+    function checkAmount() {
+        $(`[name="amount"]`).each(function() {
+            $parent = $(this).closest("tr");
+            const termPayment = $parent.find(`[name="termPayment"]`).val();
+            if (termPayment) {
+                const amount = getNonFormattedAmount($(this).val());
+                const max    = $(this).attr("max");
+                const id     = $(this).attr("id");
+
+                if (amount > max) {
+                    $(this).removeClass("is-valid").addClass("is-invalid");
+                    $(`#invalid-${id}`).text("Excessive amount, please reflect the billing.");
+                }
+
+                if (termPayment == "Partial") {
+                    if (amount == max) {
+                        $(this).removeClass("is-valid").addClass("is-invalid");
+                        $(`#invalid-${id}`).text("You must collect less than the total amount of this activity.");
+                    }
+                }
+            }
+        })
+        $(`.is-invalid`).first().focus();
+        return $(`.is-invalid`).length == 0;
+    }
+    // ----- END CHECK AMOUNT -----
+
+
+    // ----- REMOVE IS-VALID IN TABLE -----
+	function removeIsValid(element = "table") {
+		$(element).find(".validated, .is-valid, .no-error").removeClass("validated")
+		.removeClass("is-valid").removeClass("no-error");
+	}
+	// ----- END REMOVE IS-VALID IN TABLE -----
+
+
     // ----- CLICK BUTTON SUBMIT -----
     $(document).on("click", "#btnSubmit", function () {
-        const collectionID      = decryptString($(this).attr("collectionID"));
+        const collectionID   = decryptString($(this).attr("collectionID"));
         const validateInputs = validateForm("page_content");
-        if (validateInputs) {
-            saveBilling("submit", collectionID, pageContent);
+        const validateAmount = checkAmount();
+        removeIsValid("#tableCollectionContent");
+
+        if (validateInputs && validateAmount) {
+            if ($(`.checkboxrow:checked`).length > 0) {
+                saveBilling("submit", collectionID, pageContent);
+            } else {
+                showNotification("danger", "You must select at least one service to be collected!");
+            }
         }
     });
 
@@ -1405,9 +1544,9 @@ $(document).ready(function() {
         const getStatus = status => {
             return status == "save" ? 0 : (status == "submit" ? 1 : 2);
         }
-
         let activities = [];
-        $(`.activityTableBody checkboxrow:checked`).each(function() {
+        const element = method == "submit" ? ".checkboxrow:checked" : ".checkboxrow";
+        $(element).each(function() {
             const billingID = $(this).attr("billingID");
 
             $(`[name="activity"][billingID="${billingID}"]`).each(function() {
@@ -1416,14 +1555,22 @@ $(document).ready(function() {
                 const activity          = $(this).val()?.trim();
                 const type              = $(`#type${billingID}${billingItemID}`).val()?.trim();
                 const checkNumber       = $(`#checkNumber${billingID}${billingItemID}`).val()?.trim();
-                const checkDate         = $(`#checkDate${billingID}${billingItemID}`).val();
+                const checkDate         = moment($(`#checkDate${billingID}${billingItemID}`).val()).format("YYYY-MM-DD");
                 const depositoryAccount = $(`#depositoryAccount${billingID}${billingItemID}`).val()?.trim();
                 const termPayment       = $(`#termPayment${billingID}${billingItemID}`).val();
                 const amount            = getNonFormattedAmount($(`#amount${billingID}${billingItemID}`).val());
                 const remarks           = $(`#remarks${billingID}${billingItemID}`).val()?.trim();
 
                 activities.push({
-                    billingItemID, activity, type, checkNumber, checkDate, depositoryAccount, termPayment, amount, remarks
+                    billingItemID, 
+                    activity, 
+                    type, 
+                    checkNumber, 
+                    checkDate, 
+                    depositoryAccount, 
+                    termPayment, 
+                    amount, 
+                    remarks
                 })
             });
         })
@@ -1456,7 +1603,7 @@ $(document).ready(function() {
 
     // ----- CONFIRMATION -----
     const getConfirmation = method => {
-        const title = "Billing";
+        const title = "Collection";
         let swalText, swalImg;
 
         switch (method) {
@@ -1466,7 +1613,7 @@ $(document).ready(function() {
                 swalImg   = `${base_url}assets/modal/draft.svg`;
                 break;
             case "submit":
-                swalTitle = `SUBMIT ${title.toUpperCase()}`;
+                swalTitle = `SAVE ${title.toUpperCase()}`;
                 swalText  = "Are you sure to save this document?";
                 swalImg   = `${base_url}assets/modal/add.svg`;
                 break;
@@ -1535,75 +1682,74 @@ $(document).ready(function() {
                 } else {
 
                     const data = getCollectionInputData(id, method);
-                    console.log(data);
-                    // $.ajax({
-                    //     method:      "POST",
-                    //     url:         `collection_module/saveBilling`,
-                    //     data,
-                    //     cache:       false,
-                    //     async:       false,
-                    //     dataType:    "json",
-                    //     beforeSend: function() {
-                    //         $("#loader").show();
-                    //     },
-                    //     success: function(data) {
-                    //         let result = data.split("|");
+                    $.ajax({
+                        method:      "POST",
+                        url:         `collection_module/saveCollection`,
+                        data,
+                        cache:       false,
+                        async:       false,
+                        dataType:    "json",
+                        beforeSend: function() {
+                            $("#loader").show();
+                        },
+                        success: function(data) {
+                            let result = data.split("|");
             
-                    //         let isSuccess   = result[0];
-                    //         let message     = result[1];
-                    //         let insertedID  = result[2];
-                    //         let dateCreated = result[3];
+                            let isSuccess   = result[0];
+                            let message     = result[1];
+                            let insertedID  = result[2];
+                            let dateCreated = result[3];
 
-                    //         let swalTitle;
-                    //         if (method == "submit") {
-                    //             swalTitle = `Billing saved successfully!`;
-                    //         } else if (method == "save") {
-                    //             swalTitle = `Billing saved successfully!`;
-                    //         } else if (method == "cancelform") {
-                    //             swalTitle = `Billing cancelled successfully!`;
-                    //         } else if (method == "approve") {
-                    //             swalTitle = `${getFormCode("PTB", dateCreated, insertedID)} approved successfully!`;
-                    //         } else if (method == "deny") {
-                    //             swalTitle = `${getFormCode("PTB", dateCreated, insertedID)} denied successfully!`;
-                    //         } else if (method == "drop") {
-                    //             swalTitle = `${getFormCode("PTB", dateCreated, insertedID)} dropped successfully!`;
-                    //         }
+                            let swalTitle;
+                            if (method == "submit") {
+                                swalTitle = `${getFormCode("COL", dateCreated, insertedID)} saved successfully!`;
+                            } else if (method == "save") {
+                                swalTitle = `${getFormCode("COL", dateCreated, insertedID)} saved successfully!`;
+                            } else if (method == "cancelform") {
+                                swalTitle = `${getFormCode("COL", dateCreated, insertedID)} cancelled successfully!`;
+                            } else if (method == "approve") {
+                                swalTitle = `${getFormCode("PTB", dateCreated, insertedID)} approved successfully!`;
+                            } else if (method == "deny") {
+                                swalTitle = `${getFormCode("PTB", dateCreated, insertedID)} denied successfully!`;
+                            } else if (method == "drop") {
+                                swalTitle = `${getFormCode("PTB", dateCreated, insertedID)} dropped successfully!`;
+                            }
             
-                    //         if (isSuccess == "true") {
-                    //             setTimeout(() => {
-                    //                 $("#loader").hide();
-                    //                 closeModals();
-                    //                 callback && callback();
-                    //                 Swal.fire({
-                    //                     icon:              "success",
-                    //                     title:             swalTitle,
-                    //                     showConfirmButton: false,
-                    //                     timer:             2000,
-                    //                 });
-                    //             }, 500);
-                    //         } else {
-                    //             setTimeout(() => {
-                    //                 $("#loader").hide();
-                    //                 Swal.fire({
-                    //                     icon:              "danger",
-                    //                     title:             message,
-                    //                     showConfirmButton: false,
-                    //                     timer:             2000,
-                    //                 });
-                    //             }, 500);
-                    //         }
-                    //     },
-                    //     error: function() {
-                    //         setTimeout(() => {
-                    //             $("#loader").hide();
-                    //             showNotification("danger", "System error: Please contact the system administrator for assistance!");
-                    //         }, 500);
-                    //     }
-                    // }).done(function() {
-                    //     setTimeout(() => {
-                    //         $("#loader").hide();
-                    //     }, 500);
-                    // })
+                            if (isSuccess == "true") {
+                                setTimeout(() => {
+                                    $("#loader").hide();
+                                    closeModals();
+                                    callback && callback();
+                                    Swal.fire({
+                                        icon:              "success",
+                                        title:             swalTitle,
+                                        showConfirmButton: false,
+                                        timer:             2000,
+                                    });
+                                }, 500);
+                            } else {
+                                setTimeout(() => {
+                                    $("#loader").hide();
+                                    Swal.fire({
+                                        icon:              "danger",
+                                        title:             message,
+                                        showConfirmButton: false,
+                                        timer:             2000,
+                                    });
+                                }, 500);
+                            }
+                        },
+                        error: function() {
+                            setTimeout(() => {
+                                $("#loader").hide();
+                                showNotification("danger", "System error: Please contact the system administrator for assistance!");
+                            }, 500);
+                        }
+                    }).done(function() {
+                        setTimeout(() => {
+                            $("#loader").hide();
+                        }, 500);
+                    })
                 }
             } else {
                 if (res.dismiss == "cancel" && method != "submit") {

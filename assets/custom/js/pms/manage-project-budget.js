@@ -186,13 +186,9 @@ $(document).ready(function() {
                 info:           false,
 				scrollCollapse: true,
 				columnDefs: [
-					{ targets: 0, width: 250 },
-					{ targets: 1, width: 250 },
-					{ targets: 2, width: 250 },
-					{ targets: 3, width: 120 },
-					{ targets: 4, width: 150 },
-					{ targets: 5, width: 150 },
-					{ targets: 6, width: 250 },
+					{ targets: 0,  width: 150 },
+					{ targets: 1,  width: 150 },
+					{ targets: 2,  width: 500 }
 				],
 			});
     }
@@ -518,11 +514,7 @@ $(document).ready(function() {
                     <tr style="white-space: nowrap">
                         <th>Phase</th>
                         <th>Milestone</th>
-                        <th>Task Name</th>
-                        <th>Alotted Hours</th>
-                        <th>Start Date</th>
-                        <th>End Date</th>
-                        <th>Remarks</th>
+                        <th>Task/s</th>
                     </tr>
                 </thead>
                 <tbody class="itemProjectTableBody">
@@ -540,36 +532,41 @@ $(document).ready(function() {
                                 disabled>
                         </td>
                         <td>
-                            <input type="text" 
-                                class = "form-control" 
-                                value = "Task Name"
-                                disabled>
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th style="width:25%;">Task Name</th>
+                                        <th style="width:20%;">Allotted Hours</th>
+                                        <th style="width:15%;">Start Date</th>
+                                        <th style="width:15%;">End Date</th>
+                                        <th style="width:25%;">Remarks</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>1</td>
+                                        <td>2</td>
+                                        <td>3</td>
+                                        <td>4</td>
+                                        <td>5</td>
+                                    </tr>
+                                    <tr>
+                                        <td>1</td>
+                                        <td>2</td>
+                                        <td>3</td>
+                                        <td>4</td>
+                                        <td>5</td>
+                                    </tr>
+                                    <tr>
+                                        <td>1</td>
+                                        <td>2</td>
+                                        <td>3</td>
+                                        <td>4</td>
+                                        <td>5</td>
+                                    </tr>
+                                </tbody>
+                            </table>
                         </td>
-                        <td>
-                            <input type="text" 
-                                class = "form-control" 
-                                value = "Alotted Hours"
-                                disabled>
-                        </td>
-                        <td>
-                            <input type="text" 
-                                class = "form-control" 
-                                value = "Start Date"
-                                disabled>
-                        </td>
-                        <td>
-                            <input type="text" 
-                                class = "form-control" 
-                                value = "End Date"
-                                disabled>
-                        </td>
-                        <td>
-                            <input type="text" 
-                                class = "form-control" 
-                                value = "Sample Remarks"
-                                disabled>
-                        </td>
-                        
                     </tr>
                 </tbody>
             </table>
@@ -649,7 +646,8 @@ $(document).ready(function() {
             formContent(data, readOnly);
         }
     }
-    pageContent();
+    viewDocument();
+	$("#page_content").text().trim().length == 0 && pageContent(); // CHECK IF THERE IS ALREADY LOADED ONE
     // ----- END PAGE CONTENT -----
 
 

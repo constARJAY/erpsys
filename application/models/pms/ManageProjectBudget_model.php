@@ -106,6 +106,48 @@ class ManageProjectBudget_model extends CI_Model {
         return $result;
 	}
 
+    public function getMilestoneBuilder($milestoneBuilderID = 0)
+    {
+        $sql = "SELECT projectMilestoneName FROM pms_milestone_list_tbl; WHERE milestoneBuilderID = $milestoneBuilderID";
+        $query = $this->db->query($sql);
+        return $query ? $query->result_array() : [];
+    }
+
+    public function getTask($timelineBuilderID = 0, $milestoneBuilderID = 0)
+    {
+        $sql = "
+        SELECT 
+            taskName,
+            allottedHours,
+            taskStartDate,
+            taskEndDate
+        FROM 
+            pms_timeline_task_list_tbl 
+        WHERE 
+            timelineBuilderID = $timelineBuilderID AND 
+            milestoneBuilderID = $milestoneBuilderID";
+        $query = $this->db->query($sql);
+        return $query ? $query->result_array() : [];
+    }
+
+    public function getTimelineTasks($timelineBuilderID = 0)
+    {
+        $sql = "SELECT * FROM pms_timeline_task_list_tbl WHERE timelineBuilderID = $timelineBuilderID GROUP BY milestoneBuilderID";
+        $query = $this->db->query($sql);
+        $result = $query ? $query->result_array() : [];
+        $data = [];
+        foreach ($result as $res) {
+            $milestoneBuilderID = $res["milestoneBuilderID"];
+            $milestoneList = $this->getMilestoneBuilder($milestoneBuilderID);
+            $temp = [
+                "milestones" => $milestoneList,
+                "tasks"      => $this->getTask($timelineBuilderID, $milestoneBuilderID)
+            ];
+            array_push($data, $temp);
+        }
+        return $data;
+    }
+
     public function getTimelineContent($timelineBuilderID = 1)
     {
         $output = [];
@@ -160,6 +202,7 @@ class ManageProjectBudget_model extends CI_Model {
             $output["projectManager"]      = $projectManager;
             $output["teamLeader"]          = $teamLeader;
             $output["teamMember"]          = $teamMember;
+            $output["tasks"] = $this->getTimelineTasks($timelineBuilderID);
         }
         return $output;
     }
