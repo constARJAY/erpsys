@@ -220,32 +220,62 @@ class Service_order extends CI_Controller {
         $spreadsheet->getDefaultStyle()->getFont()->setSize(9);
         $spreadsheet->getDefaultStyle()->getAlignment()->setVertical(Alignment::VERTICAL_BOTTOM);
         $spreadsheet->getDefaultStyle()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
-        $spreadsheet->getActiveSheet()->getDefaultRowDimension()->setRowHeight(16);
+        $spreadsheet->getActiveSheet()->getDefaultRowDimension()->setRowHeight(17);
 
-        // $drawing = new Drawing();
-        // $drawing->setDescription('Header Logo');
-        // $drawing->setPath("assets/images/company-logo/excel-header.png");
-        // $drawing->setCoordinates('A1');
-        // $drawing->getShadow()->setVisible(true);
-        // $drawing->setWidthAndHeight(10000, 147);
-        // $drawing->setResizeProportional(true);
-        // $drawing->setWorksheet($spreadsheet->getActiveSheet());
 
-        $sheet->getColumnDimension('A')->setWidth(3 * 1.139);
-        $sheet->getColumnDimension('B')->setWidth(12 * 1.139);
-        $sheet->getColumnDimension('C')->setWidth(8 * 1.139);
-        $sheet->getColumnDimension('D')->setWidth(8 * 1.139);
-        $sheet->getColumnDimension('E')->setWidth(8 * 1.139);
-        $sheet->getColumnDimension('F')->setWidth(8 * 1.139);
-        $sheet->getColumnDimension('G')->setWidth(9 * 1.139);
-        $sheet->getColumnDimension('H')->setWidth(9 * 1.139);
-        $sheet->getColumnDimension('I')->setWidth(7 * 1.139);
-        $sheet->getColumnDimension('J')->setWidth(14 * 1.139);
-        $sheet->getColumnDimension('K')->setWidth(14 * 1.139);
+        // ----- PAGE SETUP -----
+        $spreadsheet->getActiveSheet()
+            ->getPageSetup()
+            ->setOrientation(\PhpOffice\PhpSpreadsheet\Worksheet\PageSetup::ORIENTATION_PORTRAIT);
+        $spreadsheet->getActiveSheet()
+            ->getPageSetup()
+            ->setPaperSize(\PhpOffice\PhpSpreadsheet\Worksheet\PageSetup::PAPERSIZE_A4);
+
+        $spreadsheet->getActiveSheet()->getPageMargins()->setTop(1.60416666666667);
+        $spreadsheet->getActiveSheet()->getPageMargins()->setRight(0.0104166666666667);
+        $spreadsheet->getActiveSheet()->getPageMargins()->setLeft(0.0104166666666667);
+        $spreadsheet->getActiveSheet()->getPageMargins()->setBottom(0.760416666666667);
+        $spreadsheet->getActiveSheet()->getPageMargins()->setHeader(0.0104166666666667);
+        $spreadsheet->getActiveSheet()->getPageMargins()->setFooter(0.0104166666666667);
+
+        $spreadsheet->getActiveSheet()->getPageSetup()->setFitToWidth(0);
+        $spreadsheet->getActiveSheet()->getPageSetup()->setFitToHeight(1);
+
+        $spreadsheet->getActiveSheet()->getPageSetup()->setHorizontalCentered(true);
+
+        $headerLogo = new \PhpOffice\PhpSpreadsheet\Worksheet\HeaderFooterDrawing();
+        $footerLogo = new \PhpOffice\PhpSpreadsheet\Worksheet\HeaderFooterDrawing();
+
+        $headerLogo->setName('Header logo');
+        $headerLogo->setPath("assets/images/company-logo/excel-header.png");
+        $headerLogo->setHeight(150);
+        $spreadsheet->getActiveSheet()->getHeaderFooter()->addImage($headerLogo, \PhpOffice\PhpSpreadsheet\Worksheet\HeaderFooter::IMAGE_HEADER_CENTER);
+        $spreadsheet->getActiveSheet()->getHeaderFooter()->setOddHeader('&C&G');
+        
+        $footerLogo->setName('Footer logo');
+        $footerLogo->setPath("assets/images/company-logo/excel-footer.png");
+        $footerLogo->setHeight(60);
+        $spreadsheet->getActiveSheet()->getHeaderFooter()->addImage($footerLogo, \PhpOffice\PhpSpreadsheet\Worksheet\HeaderFooter::IMAGE_FOOTER_CENTER);
+        $spreadsheet->getActiveSheet()->getHeaderFooter()->setOddFooter('&C&G');
+        // ----- END PAGE SETUP -----
+
+
+        $sheet->getColumnDimension('A')->setWidth(2);
+        $sheet->getColumnDimension('B')->setWidth(13);
+        $sheet->getColumnDimension('C')->setWidth(9);
+        $sheet->getColumnDimension('D')->setWidth(9);
+        $sheet->getColumnDimension('E')->setWidth(9);
+        $sheet->getColumnDimension('F')->setWidth(9);
+        $sheet->getColumnDimension('G')->setWidth(10);
+        $sheet->getColumnDimension('H')->setWidth(10);
+        $sheet->getColumnDimension('I')->setWidth(8);
+        $sheet->getColumnDimension('J')->setWidth(15);
+        $sheet->getColumnDimension('K')->setWidth(15);
+        $sheet->getColumnDimension('L')->setWidth(2);
 
         $sheet->getRowDimension('1')->setRowHeight(19);
         $sheet->getRowDimension('2')->setRowHeight(17);
-        $sheet->getRowDimension('3')->setRowHeight(27);
+        $sheet->getRowDimension('3')->setRowHeight(17);
         $sheet->getRowDimension('4')->setRowHeight(17);
         $sheet->getRowDimension('5')->setRowHeight(17);
         $sheet->getRowDimension('6')->setRowHeight(17);
@@ -356,6 +386,20 @@ class Service_order extends CI_Controller {
             ],
         ];
 
+        $boldStyle = [
+            "font" => [
+                "bold" => true,
+            ],
+        ];
+
+        $amountFigureStyle = [
+            "alignment" => [
+                "vertical"   => Alignment::VERTICAL_CENTER,
+                "horizontal" => Alignment::HORIZONTAL_RIGHT,
+                "wrapText"   => true
+            ],
+        ];
+
         $allBorderStyle = [
             'borders' => [
                 'allBorders' => [
@@ -389,12 +433,12 @@ class Service_order extends CI_Controller {
         // ----- END STYLES -----
 
         // ----- TITLE -----
-        $sheet->mergeCells('A1:K1');
-        $sheet->setCellValue('A1', getFormCode("SO", $data["createdAt"], $data["serviceOrderID"]));
-        $sheet->getStyle('A1')->applyFromArray($documentNoStyle);
-        $sheet->mergeCells('A2:K2');
-        $sheet->setCellValue('A2', "SERVICE ORDER");
-        $sheet->getStyle('A2')->applyFromArray($titleStyle);
+        $sheet->mergeCells('B1:K1');
+        $sheet->setCellValue('B1', getFormCode("SO", $data["createdAt"], $data["serviceOrderID"]));
+        $sheet->getStyle('B1')->applyFromArray($documentNoStyle);
+        $sheet->mergeCells('B2:K2');
+        $sheet->setCellValue('B2', "SERVICE ORDER");
+        $sheet->getStyle('B2')->applyFromArray($titleStyle);
         // ----- END TITLE -----
 
         // ----- HEADER -----
@@ -437,7 +481,7 @@ class Service_order extends CI_Controller {
 
         $sheet->getStyle("B3:C6")->applyFromArray($labelFillStyle);
         $sheet->getStyle("H3:I6")->applyFromArray($labelFillStyle);
-        $sheet->getStyle("A3:K6")->applyFromArray($allBorderStyle);
+        $sheet->getStyle("B3:K6")->applyFromArray($allBorderStyle);
         $sheet->getStyle("D4")->applyFromArray($wrapTextCenter);
         // ----- END HEADER -----
 
@@ -454,9 +498,9 @@ class Service_order extends CI_Controller {
 
         $rowNumber = 9;
         $requestItems = $data["items"];
-        $limit = count($requestItems) <= 20 ? 20 : count($requestItems);
+        $limit = count($requestItems) <= 10 ? 10 : count($requestItems);
         for ($i=0; $i<$limit; $i++) { 
-            $sheet->getRowDimension("$rowNumber")->setRowHeight(17);
+            $sheet->getRowDimension("$rowNumber")->setRowHeight(15);
 
             $serviceCode = $serviceName = $qty = $unit = $unitcost = $totalamount = "";
             $scopes = [];
@@ -480,7 +524,7 @@ class Service_order extends CI_Controller {
 
             foreach ($scopes as $scope) {
                 $rowNumber++;
-                $sheet->getRowDimension("$rowNumber")->setRowHeight(17);
+                $sheet->getRowDimension("$rowNumber")->setRowHeight(15);
 
                 $sheet->mergeCells("C$rowNumber:G$rowNumber");
                 $sheet->setCellValue("C$rowNumber", $scope["description"]);
@@ -496,6 +540,7 @@ class Service_order extends CI_Controller {
                 $sheet->getStyle("J$rowNumber")->applyFromArray($sideBorderStyle);
                 $sheet->getStyle("K$rowNumber")->applyFromArray($sideBorderStyle);
 
+                $sheet->getStyle("H$rowNumber")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
                 $sheet->getStyle("J$rowNumber")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
                 $sheet->getStyle("K$rowNumber")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
             }
@@ -513,8 +558,9 @@ class Service_order extends CI_Controller {
         $sheet->getStyle("J$rowNumber")->applyFromArray($sideBorderStyle);
         $sheet->setCellValue("K$rowNumber", formatAmount($data["total"] ?? 0.00, true));
         $sheet->getStyle("K$rowNumber")->applyFromArray($sideBorderStyle);
-        $sheet->getStyle("K$rowNumber")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
-        $sheet->getRowDimension("$rowNumber")->setRowHeight(17);
+        $sheet->getStyle("K$rowNumber")->applyFromArray($amountFigureStyle);
+        $sheet->getStyle("K$rowNumber")->applyFromArray($boldStyle);
+        $sheet->getRowDimension("$rowNumber")->setRowHeight(15);
         $sheet->getStyle("J$rowNumber:J".($rowNumber+7))->applyFromArray($labelBoldStyle);
         $rowNumber++;
         $commentInstructionText = "1. Service Order must appear in all documents.\n2. The price of the Services stated in this service order shall be the price agreed upon in writing by the Company and the Supplier.\n3. Services are subject to inspection upon completion. Services must conform to description and specification set above, otherwise this will be resolve at the supplier's expenses.\n4. Original receipt left with Receiving Clerk to facilitate payment.";
@@ -525,29 +571,30 @@ class Service_order extends CI_Controller {
         $sheet->getStyle("J$rowNumber")->applyFromArray($sideBorderStyle);
         $sheet->setCellValue("K$rowNumber", formatAmount($data["discount"] ?? 0.00, true));
         $sheet->getStyle("K$rowNumber")->applyFromArray($sideBorderStyle);
-        $sheet->getStyle("K$rowNumber")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
-        $sheet->getRowDimension("$rowNumber")->setRowHeight(17);
+        $sheet->getStyle("K$rowNumber")->applyFromArray($amountFigureStyle);
+        $sheet->getRowDimension("$rowNumber")->setRowHeight(15);
         $rowNumber++;
         $sheet->setCellValue("J$rowNumber", "Total Amount");
         $sheet->getStyle("J$rowNumber")->applyFromArray($sideBorderStyle);
         $sheet->setCellValue("K$rowNumber", formatAmount($data["totalAmount"] ?? 0.00, true));
         $sheet->getStyle("K$rowNumber")->applyFromArray($sideBorderStyle);
-        $sheet->getStyle("K$rowNumber")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
-        $sheet->getRowDimension("$rowNumber")->setRowHeight(17);
+        $sheet->getStyle("K$rowNumber")->applyFromArray($amountFigureStyle);
+        $sheet->getStyle("K$rowNumber")->applyFromArray($boldStyle);
+        $sheet->getRowDimension("$rowNumber")->setRowHeight(15);
         $rowNumber++;
         $sheet->setCellValue("J$rowNumber", "Vatable Sales");
         $sheet->getStyle("J$rowNumber")->applyFromArray($sideBorderStyle);
         $sheet->setCellValue("K$rowNumber", formatAmount($data["vatSales"] ?? 0.00, true));
         $sheet->getStyle("K$rowNumber")->applyFromArray($sideBorderStyle);
-        $sheet->getStyle("K$rowNumber")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
-        $sheet->getRowDimension("$rowNumber")->setRowHeight(17);
+        $sheet->getStyle("K$rowNumber")->applyFromArray($amountFigureStyle);
+        $sheet->getRowDimension("$rowNumber")->setRowHeight(15);
         $rowNumber++;
         $sheet->setCellValue("J$rowNumber", "Vat 12%");
         $sheet->getStyle("J$rowNumber")->applyFromArray($sideBorderStyle);
         $sheet->setCellValue("K$rowNumber", formatAmount($data["vat"] ?? 0.00, true));
         $sheet->getStyle("K$rowNumber")->applyFromArray($sideBorderStyle);
-        $sheet->getStyle("K$rowNumber")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
-        $sheet->getRowDimension("$rowNumber")->setRowHeight(17);
+        $sheet->getStyle("K$rowNumber")->applyFromArray($amountFigureStyle);
+        $sheet->getRowDimension("$rowNumber")->setRowHeight(15);
         $rowNumber++;
         
         $sheet->mergeCells("B$rowNumber:I$rowNumber");
@@ -557,8 +604,9 @@ class Service_order extends CI_Controller {
         $sheet->getStyle("J$rowNumber")->applyFromArray($sideBorderStyle);
         $sheet->setCellValue("K$rowNumber", formatAmount($data["totalVat"] ?? 0.00, true));
         $sheet->getStyle("K$rowNumber")->applyFromArray($sideBorderStyle);
-        $sheet->getStyle("K$rowNumber")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
-        $sheet->getRowDimension("$rowNumber")->setRowHeight(17);
+        $sheet->getStyle("K$rowNumber")->applyFromArray($amountFigureStyle);
+        $sheet->getStyle("K$rowNumber")->applyFromArray($boldStyle);
+        $sheet->getRowDimension("$rowNumber")->setRowHeight(15);
         $rowNumber++;
         $sheet->mergeCells("B$rowNumber:I".($rowNumber+1));
         $sheet->setCellValue("B$rowNumber", $data["grandTotalAmount"] != null ? convertNumberToWords($data["grandTotalAmount"] ?? "0") : "");
@@ -567,15 +615,16 @@ class Service_order extends CI_Controller {
         $sheet->getStyle("J$rowNumber")->applyFromArray($sideBorderStyle);
         $sheet->setCellValue("K$rowNumber", formatAmount($data["lessEwt"] ?? 0.00, true));
         $sheet->getStyle("K$rowNumber")->applyFromArray($sideBorderStyle);
-        $sheet->getStyle("K$rowNumber")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
-        $sheet->getRowDimension("$rowNumber")->setRowHeight(17);
+        $sheet->getStyle("K$rowNumber")->applyFromArray($amountFigureStyle);
+        $sheet->getRowDimension("$rowNumber")->setRowHeight(15);
         $rowNumber++;
         $sheet->setCellValue("J$rowNumber", "Grand Total");
         $sheet->getStyle("J$rowNumber")->applyFromArray($sideBorderStyle);
         $sheet->setCellValue("K$rowNumber", formatAmount($data["grandTotalAmount"] ?? 0.00, true));
         $sheet->getStyle("K$rowNumber")->applyFromArray($sideBorderStyle);
-        $sheet->getStyle("K$rowNumber")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
-        $sheet->getRowDimension("$rowNumber")->setRowHeight(17);
+        $sheet->getStyle("K$rowNumber")->applyFromArray($amountFigureStyle);
+        $sheet->getStyle("K$rowNumber")->applyFromArray($boldStyle);
+        $sheet->getRowDimension("$rowNumber")->setRowHeight(15);
         $rowNumber++;
 
         $employees      = $data["employees"];
@@ -644,6 +693,10 @@ class Service_order extends CI_Controller {
         // $drawing->setWidthAndHeight(3800, 60);
         // $drawing->setResizeProportional(true);
         // $drawing->setWorksheet($spreadsheet->getActiveSheet());
+
+        // ----- PRINTING AREA -----
+        $spreadsheet->getActiveSheet()->getPageSetup()->setPrintArea("B1:K$rowNumber");
+        // ----- END PRINTING AREA -----
 
         $writer = new Xlsx($spreadsheet);
         header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');

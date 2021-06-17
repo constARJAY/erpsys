@@ -46,7 +46,8 @@ class ServiceOrder_model extends CI_Model {
                 ist.createdAt AS istCreatedAt
             FROM ims_request_services_tbl AS irst 
                 LEFT JOIN ims_services_tbl AS ist USING(serviceID)
-            WHERE serviceOrderID = $id";
+            WHERE serviceOrderID = $id AND
+                serviceCompletionID IS NULL";
             $query = $this->db->query($sql);
             return $query ? $query->result_array() : [];
         }
