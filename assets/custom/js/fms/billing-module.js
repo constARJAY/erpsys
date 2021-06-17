@@ -592,6 +592,7 @@ $(document).ready(function() {
                         <select class="form-control select2"
                             name="clientID"
                             id="clientID"
+                            style="width: 100%"
                             required
                             ${disabled}>
                             <option selected disabled>Select Bill To</option>    

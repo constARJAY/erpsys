@@ -40,8 +40,8 @@ const employeeFullname = (id) => {
 // ----- IS DOCUMENT REVISED -----
 function isDocumentRevised(id = null) {
     if (id) {
-        const revisedDocumentsID = getTableData("ims_inventory_receiving_tbl", "reviseInventoryReceivingID", "reviseInventoryReceivingID IS NOT NULL");
-        return revisedDocumentsID.map(item => item.reviseInventoryReceivingID).includes(id);
+        const revisedDocumentsID = getTableData("fms_check_voucher_tbl", "revisevoucherID", "revisevoucherID IS NOT NULL");
+        return revisedDocumentsID.map(item => item.revisevoucherID).includes(id);
     }
     return false;
 }
@@ -51,23 +51,23 @@ function isDocumentRevised(id = null) {
 // ----- VIEW DOCUMENT -----
 function viewDocument(view_id = false, readOnly = false, isRevise = false, isFromCancelledDocument = false) {
     const loadData = (id, isRevise = false, isFromCancelledDocument = false) => {
-        const tableData = getTableData("ims_inventory_receiving_tbl", "", "inventoryReceivingID=" + id);
+        const tableData = getTableData("fms_check_voucher_tbl", "", "voucherID=" + id);
 
         if (tableData.length > 0) {
             let {
                 employeeID,
-                inventoryReceivingStatus
+                voucherStatus
             } = tableData[0];
 
             let isReadOnly = true, isAllowed = true;
 
             if (employeeID != sessionID) {
                 isReadOnly = true;
-                if (inventoryReceivingStatus == 0 || inventoryReceivingStatus == 4) {
+                if (voucherStatus == 0 || voucherStatus == 4) {
                     isAllowed = false;
                 }
             } else if (employeeID == sessionID) {
-                if (inventoryReceivingStatus == 0) {
+                if (voucherStatus == 0) {
                     isReadOnly = false;
                 } else {
                     isReadOnly = true;
@@ -133,22 +133,16 @@ function updateURL(view_id = 0, isAdd = false, isRevise = false) {
 }
 // ----- END VIEW DOCUMENT -----
 
+// const bankList = getTableData(
+//     "fms_bank_tbl", 
+//     "bankName,bankID",
+//     "bankStatus = 1");
+
 
 // GLOBAL VARIABLE - REUSABLE 
 const dateToday = () => {
     return moment(new Date).format("YYYY-MM-DD HH:mm:ss");
 };
-
-// const purchaseOrderList = getTableData(
-// 	`ims_purchase_order_tbl AS ipot
-// 		LEFT JOIN ims_request_items_tbl AS irit USING(purchaseOrderID)`,
-// 	"ipot.*",
-// 	`ipot.purchaseOrderStatus = 2 AND 
-// 	irit.orderedPending IS NULL OR irit.orderedPending <> 0
-// 	GROUP BY irit.purchaseOrderID`
-// )
-// END GLOBAL VARIABLE - REUSABLE 
-
 
 // ----- DATATABLES -----
 function initDataTables() {
@@ -224,8 +218,7 @@ function initDataTables() {
                 { targets: 1,  width: 150 },
                 { targets: 2,  width: 120 },
                 { targets: 3,  width: 120 },
-                { targets: 4,  width: 120  },
-                { targets: 5,  width: 120  },
+                { targets: 4,  width: 120  }
                 
             ],
         });
@@ -245,8 +238,8 @@ function initDataTables() {
                 { targets: 1,  width: 150 },
                 { targets: 2,  width: 120 },
                 { targets: 3,  width: 120 },
-                { targets: 4,  width: 120  },
-                { targets: 5,  width: 120  },
+                { targets: 4,  width: 120  }
+              
     
             ],
         });
@@ -258,7 +251,7 @@ function initDataTables() {
 // ----- HEADER CONTENT -----
 function headerTabContent(display = true) {
     if (display) {
-        if (isImModuleApprover("ims_inventory_receiving_tbl", "approversID")) {
+        if (isImModuleApprover("fms_check_voucher_tbl", "approversID")) {
             let html = `
             <div class="bh_divider appendHeader"></div>
             <div class="row clearfix appendHeader">
@@ -299,12 +292,12 @@ function headerButton(isAdd = true, text = "Add", isRevise = false, isFromCancel
 function forApprovalContent() {
     $("#tableForApprovalParent").html(preloader);
     let inventoryReceivingData = getTableData(
-        `ims_inventory_receiving_tbl AS isrt 
+        `fms_check_voucher_tbl AS isrt 
             LEFT JOIN hris_employee_list_tbl AS helt USING(employeeID) 
-            LEFT JOIN ims_purchase_order_tbl AS pct ON isrt.purchaseOrderID = pct.purchaseOrderID`,
-        "isrt.*, CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname,isrt.inventoryReceivingID ,isrt.createdAt AS dateCreatedIR, pct.purchaseOrderID, pct.createdAt AS dateCreatedPO",
-        `isrt.employeeID != ${sessionID} AND inventoryReceivingStatus != 0 AND inventoryReceivingStatus != 4`,
-        `FIELD(inventoryReceivingStatus, 0, 1, 3, 2, 4, 5), COALESCE(isrt.submittedAt, isrt.createdAt)`
+            LEFT JOIN fms_payment_request_tbl AS pct ON isrt.paymentID  = pct.paymentID `,
+        "isrt.*, CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname,isrt.voucherID ,isrt.createdAt AS dateCreatedVoucher, pct.paymentID , pct.createdAt AS dateCreatedPayment",
+        `isrt.employeeID != ${sessionID} AND voucherStatus != 0 AND voucherStatus != 4`,
+        `FIELD(voucherStatus, 0, 1, 3, 2, 4, 5), COALESCE(isrt.submittedAt, isrt.createdAt)`
     );
 
     let html = `
@@ -328,51 +321,51 @@ function forApprovalContent() {
     inventoryReceivingData.map((item) => {
         let {
             fullname,
-            inventoryReceivingID,
-            dateCreatedIR,
-            purchaseOrderID,
-            dateCreatedPO,
+            voucherID,
+            dateCreatedVoucher,
+            paymentID,
+            dateCreatedPayment,
             approversID,
             approversDate,
-            inventoryReceivingStatus,
-            inventoryReceivingRemarks,
-            inventoryReceivingReason,
+            voucherStatus,
+            voucherRemarks,
+            voucherDescription,
             submittedAt,
             createdAt
         } = item;
 
-        let remarks       = inventoryReceivingRemarks ? inventoryReceivingRemarks : "-";
+        let remarks       = voucherRemarks ? voucherRemarks : "-";
         let dateCreated   = moment(createdAt).format("MMMM DD, YYYY hh:mm:ss A");
         let dateSubmitted = submittedAt ? moment(submittedAt).format("MMMM DD, YYYY hh:mm:ss A") : "-";
-        let dateApproved  = inventoryReceivingStatus == 2 || inventoryReceivingStatus == 5 ? approversDate.split("|") : "-";
+        let dateApproved  = voucherStatus == 2 || voucherStatus == 5 ? approversDate.split("|") : "-";
         if (dateApproved !== "-") {
             dateApproved = moment(dateApproved[dateApproved.length - 1]).format("MMMM DD, YYYY hh:mm:ss A");
         }
 
-        let button = inventoryReceivingStatus != 0 ? `
-        <button class="btn btn-view w-100 btnView" id="${encryptString(inventoryReceivingID)}"><i class="fas fa-eye"></i> View</button>` : `
+        let button = voucherStatus != 0 ? `
+        <button class="btn btn-view w-100 btnView" id="${encryptString(voucherID)}"><i class="fas fa-eye"></i> View</button>` : `
         <button 
             class="btn btn-edit w-100 btnEdit" 
-            id="${encryptString(inventoryReceivingID)}" 
-            code="${getFormCode("CV", dateCreatedIR, inventoryReceivingID)}"><i class="fas fa-edit"></i> Edit</button>`;
+            id="${encryptString(voucherID)}" 
+            code="${getFormCode("CV", dateCreatedVoucher, voucherID)}"><i class="fas fa-edit"></i> Edit</button>`;
 
-        let btnClass =  inventoryReceivingStatus != 0 ? `btnView` : `btnEdit`;
+        let btnClass =  voucherStatus != 0 ? `btnView` : `btnEdit`;
 
-        if (isImCurrentApprover(approversID, approversDate, inventoryReceivingStatus) || isAlreadyApproved(approversID, approversDate)) {
+        if (isImCurrentApprover(approversID, approversDate, voucherStatus) || isAlreadyApproved(approversID, approversDate)) {
             html += `
-            <tr class="${btnClass}" id="${encryptString(inventoryReceivingID)}">
-                <td>${getFormCode("CV", createdAt, inventoryReceivingID)}</td>
+            <tr class="${btnClass}" id="${encryptString(voucherID)}">
+                <td>${getFormCode("CV", createdAt, voucherID)}</td>
                 <td>${fullname}</td>
-                <td>${getFormCode("PO", dateCreatedPO, purchaseOrderID)}</td>
-                <td>${inventoryReceivingReason}</td>
+                <td>${getFormCode("PYRF", dateCreatedPayment, paymentID)}</td>
+                <td>${voucherDescription}</td>
                 <td>
-                    ${employeeFullname(getCurrentApprover(approversID, approversDate, inventoryReceivingStatus, true))}
+                    ${employeeFullname(getCurrentApprover(approversID, approversDate, voucherStatus, true))}
                 </td>
                 <td>${dateCreated}</td>
                 <td>${dateSubmitted}</td>
                 <td>${dateApproved}</td>
                 <td class="text-center">
-                    ${getStatusStyle(inventoryReceivingStatus)}
+                    ${getStatusStyle(voucherStatus)}
                 </td>
                 <td>${remarks}</td>
             </tr>`;
@@ -396,12 +389,12 @@ function forApprovalContent() {
 function myFormsContent() {
     $("#tableMyFormsParent").html(preloader);
     let inventoryReceivingData = getTableData(
-        `ims_inventory_receiving_tbl AS isrt 
+        `fms_check_voucher_tbl AS isrt 
         LEFT JOIN hris_employee_list_tbl AS helt USING(employeeID) 
-        LEFT JOIN ims_purchase_order_tbl AS pct ON isrt.purchaseOrderID = pct.purchaseOrderID`,
-        "isrt.*, CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname,isrt.inventoryReceivingID ,isrt.createdAt AS dateCreatedIR, pct.purchaseOrderID, pct.createdAt AS dateCreatedPO",
+        LEFT JOIN fms_payment_request_tbl AS pct ON isrt.paymentID = pct.paymentID`,
+        "isrt.*, CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname,isrt.voucherID ,isrt.createdAt AS dateCreatedVoucher, pct.paymentID, pct.createdAt AS dateCreatedPayment",
         `isrt.employeeID = ${sessionID}`,
-        `FIELD(inventoryReceivingStatus, 0, 1, 3, 2, 4, 5), COALESCE(isrt.submittedAt, isrt.createdAt)`
+        `FIELD(voucherStatus, 0, 1, 3, 2, 4, 5), COALESCE(isrt.submittedAt, isrt.createdAt)`
     );
 
     let html = `
@@ -425,49 +418,49 @@ function myFormsContent() {
     inventoryReceivingData.map((item) => {
         let {
             fullname,
-            inventoryReceivingID,
-            dateCreatedIR,
-            purchaseOrderID,
-            dateCreatedPO,
+            voucherID,
+            dateCreatedVoucher,
+            paymentID,
+            dateCreatedPayment,
             approversID,
             approversDate,
-            inventoryReceivingStatus,
-            inventoryReceivingRemarks,
-            inventoryReceivingReason,
+            voucherStatus,
+            voucherRemarks,
+            voucherDescription,
             submittedAt,
         } = item;
 
-        let remarks       = inventoryReceivingRemarks ? inventoryReceivingRemarks : "-";
-        let dateCreated   = moment(dateCreatedIR).format("MMMM DD, YYYY hh:mm:ss A");
+        let remarks       = voucherRemarks ? voucherRemarks : "-";
+        let dateCreated   = moment(dateCreatedVoucher).format("MMMM DD, YYYY hh:mm:ss A");
         let dateSubmitted = submittedAt ? moment(submittedAt).format("MMMM DD, YYYY hh:mm:ss A") : "-";
-        let dateApproved  = inventoryReceivingStatus == 2 || inventoryReceivingStatus == 5 ? approversDate.split("|") : "-";
+        let dateApproved  = voucherStatus == 2 || voucherStatus == 5 ? approversDate.split("|") : "-";
         if (dateApproved !== "-") {
             dateApproved = moment(dateApproved[dateApproved.length - 1]).format("MMMM DD, YYYY hh:mm:ss A");
         }
 
-        let button = inventoryReceivingStatus != 0 ? `
-        <button class="btn btn-view w-100 btnView" id="${encryptString(inventoryReceivingID)}"><i class="fas fa-eye"></i> View</button>` : `
+        let button = voucherStatus != 0 ? `
+        <button class="btn btn-view w-100 btnView" id="${encryptString(voucherID)}"><i class="fas fa-eye"></i> View</button>` : `
         <button 
             class="btn btn-edit w-100 btnEdit" 
-            id="${encryptString(inventoryReceivingID)}" 
-            code="${getFormCode("CV", dateCreatedIR, inventoryReceivingID)}"><i class="fas fa-edit"></i> Edit</button>`;
+            id="${encryptString(voucherID)}" 
+            code="${getFormCode("CV", dateCreatedVoucher, voucherID)}"><i class="fas fa-edit"></i> Edit</button>`;
 
-        let btnClass =  inventoryReceivingStatus != 0 ? `btnView` : `btnEdit`;
+        let btnClass =  voucherStatus != 0 ? `btnView` : `btnEdit`;
 
         html += `
-        <tr class="${btnClass}" id="${encryptString(inventoryReceivingID)}">
-            <td>${getFormCode("CV", dateCreatedIR, inventoryReceivingID)}</td>
+        <tr class="${btnClass}" id="${encryptString(voucherID)}">
+            <td>${getFormCode("CV", dateCreatedVoucher, voucherID)}</td>
             <td>${fullname}</td>
-            <td>${getFormCode("PO", dateCreatedPO, purchaseOrderID)}</td>
-            <td>${inventoryReceivingReason}</td>
+            <td>${getFormCode("PYRF", dateCreatedPayment, paymentID)}</td>
+            <td>${voucherDescription}</td>
             <td>
-                ${employeeFullname(getCurrentApprover(approversID, approversDate, inventoryReceivingStatus, true))}
+                ${employeeFullname(getCurrentApprover(approversID, approversDate, voucherStatus, true))}
             </td>
             <td>${dateCreated}</td>
             <td>${dateSubmitted}</td>
             <td>${dateApproved}</td>
             <td class="text-center">
-                ${getStatusStyle(inventoryReceivingStatus)}
+                ${getStatusStyle(voucherStatus)}
             </td>
             <td>${remarks}</td>
         </tr>`;
@@ -491,8 +484,8 @@ function formButtons(data = false, isRevise = false, isFromCancelledDocument = f
     let button = "";
     if (data) {
         let {
-            inventoryReceivingID     = "",
-            inventoryReceivingStatus = "",
+            voucherID     = "",
+            voucherStatus = "",
             employeeID               = "",
             approversID              = "",
             approversDate            = "",
@@ -501,14 +494,14 @@ function formButtons(data = false, isRevise = false, isFromCancelledDocument = f
 
         let isOngoing = approversDate ? approversDate.split("|").length > 0 ? true : false : false;
         if (employeeID === sessionID) {
-            if (inventoryReceivingStatus == 0 || isRevise) {
+            if (voucherStatus == 0 || isRevise) {
                 // DRAFT
                 button = `
                 <button 
                     class="btn btn-submit px-5 p-2" 
                     id="btnSubmit" 
-                    inventoryReceivingID="${inventoryReceivingID}"
-                    code="${getFormCode("CV", createdAt, inventoryReceivingID)}"
+                    voucherID="${voucherID}"
+                    code="${getFormCode("CV", createdAt, voucherID)}"
                     revise="${isRevise}" cancel="${isFromCancelledDocument}"><i class="fas fa-paper-plane"></i>
                     Submit
                 </button>`;
@@ -526,83 +519,83 @@ function formButtons(data = false, isRevise = false, isFromCancelledDocument = f
                     <button 
                         class="btn btn-cancel px-5 p-2"
                         id="btnCancelForm" 
-                        inventoryReceivingID="${inventoryReceivingID}"
-                        code="${getFormCode("CV", createdAt, inventoryReceivingID)}"
+                        voucherID="${voucherID}"
+                        code="${getFormCode("CV", createdAt, voucherID)}"
                         revise=${isRevise}><i class="fas fa-ban"></i> 
                         Cancel
                     </button>`;
                 }
 
                 
-            } else if (inventoryReceivingStatus == 1) {
+            } else if (voucherStatus == 1) {
                 // FOR APPROVAL
                 if (!isOngoing) {
                     button = `
                     <button 
                         class="btn btn-cancel px-5 p-2"
                         id="btnCancelForm" 
-                        inventoryReceivingID="${inventoryReceivingID}"
-                        code="${getFormCode("CV", createdAt, inventoryReceivingID)}"
-                        status="${inventoryReceivingStatus}"><i class="fas fa-ban"></i> 
+                        voucherID="${voucherID}"
+                        code="${getFormCode("CV", createdAt, voucherID)}"
+                        status="${voucherStatus}"><i class="fas fa-ban"></i> 
                         Cancel
                     </button>`;
                 }
-            } else if (inventoryReceivingStatus == 2) {
+            } else if (voucherStatus == 2) {
                 // DROP
                 button = `
                 <button type="button" 
                     class="btn btn-cancel px-5 p-2"
                     id="btnDrop" 
-                    inventoryReceivingID="${encryptString(inventoryReceivingID)}"
-                    code="${getFormCode("CV", createdAt, inventoryReceivingID)}"
-                    status="${inventoryReceivingStatus}"><i class="fas fa-ban"></i> 
+                    voucherID="${encryptString(voucherID)}"
+                    code="${getFormCode("CV", createdAt, voucherID)}"
+                    status="${voucherStatus}"><i class="fas fa-ban"></i> 
                     Drop
                 </button>`;
                 
-            } else if (inventoryReceivingStatus == 3) {
+            } else if (voucherStatus == 3) {
                 // DENIED - FOR REVISE
-                if (!isDocumentRevised(inventoryReceivingID)) {
+                if (!isDocumentRevised(voucherID)) {
                     button = `
                     <button
                         class="btn btn-cancel px-5 p-2"
                         id="btnRevise" 
-                        inventoryReceivingID="${encryptString(inventoryReceivingID)}"
-                        code="${getFormCode("CV", createdAt, inventoryReceivingID)}"
-                        status="${inventoryReceivingStatus}"><i class="fas fa-clone"></i>
+                        voucherID="${encryptString(voucherID)}"
+                        code="${getFormCode("CV", createdAt, voucherID)}"
+                        status="${voucherStatus}"><i class="fas fa-clone"></i>
                         Revise
                     </button>`;
                 }
-            } else if (inventoryReceivingStatus == 4) {
+            } else if (voucherStatus == 4) {
                 // CANCELLED - FOR REVISE
-                if (!isDocumentRevised(inventoryReceivingID)) {
+                if (!isDocumentRevised(voucherID)) {
                     button = `
                     <button
                         class="btn btn-cancel px-5 p-2"
                         id="btnRevise" 
-                        inventoryReceivingID="${encryptString(inventoryReceivingID)}"
-                        code="${getFormCode("CV", createdAt, inventoryReceivingID)}"
-                        status="${inventoryReceivingStatus}"
+                        voucherID="${encryptString(voucherID)}"
+                        code="${getFormCode("CV", createdAt, voucherID)}"
+                        status="${voucherStatus}"
                         cancel="true"><i class="fas fa-clone"></i>
                         Revise
                     </button>`;
                 }
             }
         } else {
-            if (inventoryReceivingStatus == 1) {
+            if (voucherStatus == 1) {
                 if (isImCurrentApprover(approversID, approversDate)) {
                     button = `
                     <button 
                         class="btn btn-submit px-5 p-2" 
                         id="btnApprove" 
-                        inventoryReceivingID="${encryptString(inventoryReceivingID)}"
-                        code="${getFormCode("CV", createdAt, inventoryReceivingID)}"><i class="fas fa-paper-plane"></i>
+                        voucherID="${encryptString(voucherID)}"
+                        code="${getFormCode("CV", createdAt, voucherID)}"><i class="fas fa-paper-plane"></i>
                         Approve
                     </button>
                     <button 
                         class="btn btn-cancel px-5 p-2"
                         id="btnReject" 
-                        inventoryReceivingID="${encryptString(inventoryReceivingID)}"
-                        code="${getFormCode("CV", createdAt, inventoryReceivingID)}"><i class="fas fa-ban"></i> 
+                        voucherID="${encryptString(voucherID)}"
+                        code="${getFormCode("CV", createdAt, voucherID)}"><i class="fas fa-ban"></i> 
                         Deny
                     </button>`;
                 }
@@ -625,343 +618,297 @@ function formButtons(data = false, isRevise = false, isFromCancelledDocument = f
 // ----- END FORM BUTTONS -----
 
 
+
+
 // ----- GET PURCHASE ORDER LIST -----
-function getPurchaseOrderList(id = null, status = 0, display = true) {
+function getPaymentRequestList(id = null, status = 0, display = true , voucherid= null) {
     var exist = [];
     var condition  ="";
-    const receivingList = getTableData(
-        `ims_inventory_receiving_tbl`,
-        "purchaseOrderID ",`inventoryReceivingStatus = 1`
+    
+    const paymentList = getTableData(
+        `fms_payment_request_tbl`,
+        "paymentID ",`paymentStatus = 1`
     );
-    receivingList.map(items=>{
-        exist.push(items.purchaseOrderID);
+    paymentList.map(items=>{
+        exist.push(items.paymentID);
     })
 
     if(status === false){
         
-         condition  =`(ipot.purchaseOrderStatus = 2 AND 
-            ((iir.inventoryReceivingStatus != 1 AND 
-                iir.inventoryReceivingStatus != 0 AND 
-                iir.inventoryReceivingStatus != 3 AND 
-                iir.inventoryReceivingStatus != 4 AND 
-                iir.inventoryReceivingStatus != 5) OR 
-                (iir.inventoryReceivingStatus IS NULL))) AND 
-                (irit.orderedPending IS NULL OR irit.orderedPending > 0) `;
+         condition  =`(ipot.paymentStatus = 2 AND 
+            ((iir.voucherStatus != 1 AND 
+                iir.voucherStatus != 0 AND 
+                iir.voucherStatus != 3 AND 
+                iir.voucherStatus != 4 AND 
+                iir.voucherStatus != 5) OR 
+                (iir.voucherStatus IS NULL))) AND 
+                (irit.maintainBalance IS NULL OR irit.maintainBalance > 0) `;
 
         // condition  =`(ipot.purchaseOrderStatus = 2 AND 
-        // 		((iir.inventoryReceivingStatus IS NULL))) AND 
-        // 		(irit.orderedPending IS NULL OR (CASE WHEN iir.inventoryReceivingStatus != 1 AND 
-        // 		iir.inventoryReceivingStatus != 0 AND 
-        // 		iir.inventoryReceivingStatus != 3 AND 
-        // 		iir.inventoryReceivingStatus != 4 AND 
-        // 		iir.inventoryReceivingStatus != 5 THEN irit.orderedPending > 0 Else '' END) ) `;
+        // 		((iir.voucherStatus IS NULL))) AND 
+        // 		(irit.orderedPending IS NULL OR (CASE WHEN iir.voucherStatus != 1 AND 
+        // 		iir.voucherStatus != 0 AND 
+        // 		iir.voucherStatus != 3 AND 
+        // 		iir.voucherStatus != 4 AND 
+        // 		iir.voucherStatus != 5 THEN irit.orderedPending > 0 Else '' END) ) `;
     }
     else{
         
-        condition  =`(ipot.purchaseOrderStatus = 2 AND iir.purchaseOrderID =${id} )`;
+        condition  =`(ipot.paymentStatus = 2 AND iir.paymentID =${id} )`;
     }
 
-    const purchaseOrderList = getTableData(
-        `ims_purchase_order_tbl AS ipot
-            LEFT JOIN ims_request_items_tbl AS irit USING(purchaseOrderID)
-            LEFT JOIN ims_inventory_receiving_tbl AS iir ON iir.purchaseOrderID = ipot.purchaseOrderID`,
-        "ipot.*",
-        `${condition} GROUP BY irit.purchaseOrderID`
+    const paymentRequestList = getTableData(
+        `fms_payment_request_tbl AS ipot
+            LEFT JOIN fms_payment_request_details_tbl AS irit USING(paymentID)
+            LEFT JOIN fms_petty_cash_replenishment_tbl AS pettyrep ON pettyrep.pettyRepID = ipot.pettyRepID
+            LEFT JOIN hris_employee_list_tbl AS helt  ON helt.employeeID = pettyrep.requestorID
+            LEFT JOIN hris_department_tbl AS dept ON dept.departmentID = helt.departmentID
+            LEFT JOIN hris_designation_tbl AS dsg ON dsg.designationID = helt.designationID
+            LEFT JOIN fms_check_voucher_tbl AS iir ON iir.paymentID = ipot.paymentID`,
+        `ipot.*, CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname, dept.departmentName, dsg.designationName, 
+        helt.employeeUnit,
+        helt.employeeBuilding,
+        helt.employeeBarangay,
+        helt.employeeCity,
+        helt.employeeProvince,
+        helt.employeeCountry,
+        helt.employeeZipCode,
+        DATE_FORMAT(pettyrep.createdAt, '%M% %d, %Y') as requestorDate`,
+        `${condition} GROUP BY irit.paymentID`
     )
 
-    const createdIRList = getTableData(
-        `ims_inventory_receiving_tbl AS iirt
-            LEFT JOIN ims_inventory_receiving_details_tbl AS iirdt USING(inventoryReceivingID)
-            LEFT JOIN ims_request_items_tbl AS irit USING(requestItemID)`, 
-        "iirt.purchaseOrderID", 
-        `iirt.inventoryReceivingStatus <> 3 AND 
-        iirt.inventoryReceivingStatus <> 4 AND 
-        (irit.orderedPending IS NOT NULL AND irit.orderedPending >= irit.forPurchase)`
-    ).map(po => po.purchaseOrderID);
+  
     let html = '';
     if (!status || status == 0) {
-        // html += purchaseOrderList.filter(po => createdIRList.indexOf(po.purchaseOrderID) == -1 || po.purchaseOrderID == id).map(po => {
+        // html += paymentRequestList.filter(po => createdIRList.indexOf(po.purchaseOrderID) == -1 || po.purchaseOrderID == id).map(po => {
         
-        html += purchaseOrderList.filter(po => !exist.includes(po.purchaseOrderID) || po.purchaseOrderID == id).map(po => {
+        html += paymentRequestList.filter(payment => !exist.includes(payment.paymentID) || payment.paymentID == id).map(payment => {
+			let address = `${payment.employeeUnit && titleCase(payment.employeeUnit)+" "}${payment.employeeBuilding && payment.employeeBuilding +" "}${payment.employeeBarangay && titleCase(payment.employeeBarangay)+", "}${payment.employeeCity && titleCase(payment.employeeCity)+", "}${payment.employeeProvince && titleCase(payment.employeeProvince)+", "}${payment.employeeCountry && titleCase(payment.employeeCountry)+", "}${payment.employeeZipCode && titleCase(payment.employeeZipCode)}`;
+
             return `
             <option 
-                value      = "${po.purchaseOrderID}" 
-                vendorname = "${po.vendorName}"
-            ${po.purchaseOrderID == id && "selected"}>
-            ${getFormCode("PO", po.createdAt, po.purchaseOrderID)}
+                value      = "${payment.paymentID}" 
+                requestorname = "${payment.fullname}"
+                department = "${payment.departmentName}"
+                designation = "${payment.designationName}"
+                address     = "${address}"
+                checkvoucherid     = "${voucherid}"
+                requestordate     = "${payment.requestorDate}"
+            ${payment.paymentID == id && "selected"}>
+            ${getFormCode("PYRF", payment.createdAt, payment.paymentID)}
             </option>`;
         })
     } else {
-        html += purchaseOrderList.map(po => {
+        html += paymentRequestList.map(payment => {
+			let address = `${payment.employeeUnit && titleCase(payment.employeeUnit)+" "}${payment.employeeBuilding && payment.employeeBuilding +" "}${payment.employeeBarangay && titleCase(payment.employeeBarangay)+", "}${payment.employeeCity && titleCase(payment.employeeCity)+", "}${payment.employeeProvince && titleCase(payment.employeeProvince)+", "}${payment.employeeCountry && titleCase(payment.employeeCountry)+", "}${payment.employeeZipCode && titleCase(payment.employeeZipCode)}`;
+
             return `
             <option 
-                value      = "${po.purchaseOrderID}" 
-                vendorname = "${po.vendorName}"
-                ${po.purchaseOrderID == id && "selected"}>
-                ${getFormCode("PO", po.createdAt, po.purchaseOrderID)}
+            value      = "${payment.paymentID}" 
+            requestorname = "${payment.fullname}"
+            department = "${payment.departmentName}"
+            designation = "${payment.designationName}"
+            address     = "${address}"
+            checkvoucherid     = "${voucherid}"
+            requestordate     = "${payment.requestorDate}"
+            ${payment.paymentID == id && "selected"}>
+            ${getFormCode("PYRF", payment.createdAt, payment.paymentID)}
             </option>`;
         })
     }
-    return display ? html : purchaseOrderList;
+    return display ? html : paymentRequestList;
 }
 // ----- END GET PURCHASE ORDER LIST -----
 
 
-// ----- GET SERIAL NUMBER -----
-function getSerialNumber(scope = {}, readOnly = false) {
-    let {
-        serialNumber = "",
-    } = scope;
+// ----- GET BUDGET SOURCE LIST -----
+function getBudgetSourceList(id = null, status = 0, display = true , voucherid= null) {
+  
+    const budgetSourceList = getTableData(
+        `fms_chart_of_accounts_tbl AS chart 
+        LEFT JOIN fms_check_voucher_tbl AS fcv ON fcv.voucherBudgetSource = chart.chartOfAccountID `,
+        `chart.chartOfAccountID ,chart.accountName,chart.accountCode`,
+        `accountBudgetSource = 1 AND accountStatus =1`
+    )
 
-    let html = "";
-    if (!readOnly) {
-        html = `
-        <tr>
-            <td>
-                <div class="servicescope">
-                    <div class="input-group mb-0">
-                        <div class="input-group-prepend">
-                            <button class="btn btn-sm btn-danger btnDeleteSerial">
-                                <i class="fas fa-minus"></i>
-                            </button>
-                        </div>
-                        <input type="text"
-                            class="form-control validate"
-                            name="serialNumber"
-                            id="serialNumber"
-                            data-allowcharacters="[A-Z][a-z][0-9][-]"
-                            minlength="17"
-                            maxlength="17"
-                            value="${serialNumber}"
-                            autocomplete="off">
-                        <div class="d-block invalid-feedback mt-0 mb-1" id="invalid-serialNumber"></div>
-                    </div>
-                </div>
-            </td>
-        </tr>`;
-    } else {
-        html = `
-        <tr>
-            <td>
-                <div class="servicescope">
-                    ${serialNumber || "-"}
-                </div>
-            </td>
-        </tr>`;
-    }
+    let html = '';
+   
+        html += budgetSourceList.map(budget => {
 
+            return `
+            <option 
+            value      = "${budget.chartOfAccountID}" 
+            accountname = "${budget.accountName}"
+            accountcode = "${budget.accountCode}"
+            checkvoucherid     = "${voucherid}"
+            ${budget.chartOfAccountID == id && "selected"}>
+            ${budget.accountName}
+            </option>`;
+        })
     
-    return html;
+    return display ? html : budgetSourceList;
 }
-// ----- END GET SERIAL NUMBER -----
-var serialArray =[];
-var serialLocationArray =[];
+// ----- END GET BUDGET SOURCE LIST -----
 
-function hasDuplicates(arr) {
-    return new Set(arr).size !== arr.length;
-}
+    // // ----- GET BANK LIST -----
+    // function getBankList(id = null, display = true) {
+    //     let html = `
+	// 	<option 
+	// 		value       = "0"
+	// 		${id == "0" && "selected"}>Cash</option>`;
+    //     html += bankList.map(employee => {
+	// 		let bankName = `${employee.bankName}`;
+	// 		let bankID = `${employee.bankID}`;
 
-function countDuplicates(original) {
-    const uniqueItems = new Set();
-    const duplicates = new Set();
-    for (const value of original) {
-      if (uniqueItems.has(value)) {
-        duplicates.add(value);
-        uniqueItems.delete(value);
-      } else {
-        uniqueItems.add(value);
-      }
-    }
-    return duplicates.size;
-  }
-
-
-
-$(document).on("keyup change","[name=serialNumber]",function(){
-    const serialval   = $(this).val(); 
-    const addressID = $(this).attr("id");
-    var $parent = $(this);
-    var flag = ["true"];
-
-    if(serialval.length ==17){
-        $(`[name="serialNumber"]`).each(function(i) {
-            var tmp_Checkserial = $(this).val();
-            var tmp_addressID = $(this).attr("id");
-                if(addressID !=  tmp_addressID){
-                    if(tmp_Checkserial == serialval){
-                        $parent.removeClass("is-valid").addClass("is-invalid");
-                        $parent.closest("tr").find(".invalid-feedback").text('Data already exist!');
-                        flag[0]= false;
-                    }
-                }
-        })
-
-        if(flag[0] == "true"){
-
-        $(`[name="serialNumber"]`).each(function(i) {
-            var tmp_Checkserial = $(this).val();
-            var tmp_addressID = $(this).attr("id");
-            console.log(addressID +" != "+  tmp_addressID)
-                if(addressID !=  tmp_addressID){
-                    if(tmp_Checkserial == serialval){
-                        $parent.removeClass("is-valid").addClass("is-invalid");
-                        $parent.closest("tr").find(".invalid-feedback").text('Data already exist!');
-                    
-                    }
-                }
-            
-        })
-        }
-    }
-});
+    //         return `
+    //         <option 
+    //             value       = "${employee.bankID}" 
+    //             ${employee.bankID == id && "selected"}>
+    //             ${employee.bankName}
+    //         </option>`;
+    //     })
+    //     return display ? html : bankList;
+    // }
+    // // ----- END GET BANK LIST -----
 
 
-// ----- UPDATE SERIAL NUMBER -----
-function updateSerialNumber() {
-    $(`[name="serialNumber"]`).each(function(i) {
-        $(this).attr("id", `serialNumber${i}`);
-        $(this).parent().find(".invalid-feedback").attr("id", `invalid-serialNumber${i}`);
-    })
-    $(`[name="received"]`).each(function(i) {
-        $(this).attr("id", `received${i}`);
-        $(this).parent().find(".invalid-feedback").attr("id", `invalid-received${i}`);
-    })
-}
-// ----- END UPDATE SERIAL NUMBER -----
+
 
 
 // ----- GET SERVICE ROW -----
-function getItemsRow(id, readOnly = false, inventoryReceivingID = "") {
+function getItemsRow(id, readOnly = false, voucherID = "") {
     let html = "";
     let requestItemsData;	
-    if (inventoryReceivingID) {
+    if (voucherID) {
         requestItemsData = getTableData(
-            `ims_inventory_receiving_details_tbl AS iirdt
-            LEFT JOIN ims_request_items_tbl AS irit USING(requestItemID)`,
-            `iirdt.*, 
-            irit.itemName, 
-            irit.forPurchase, 
-            irit.brandName,
-            irit.orderedPending,
-            iirdt.received,
-            irit.itemUom,
-            iirdt.remarks,
-            iirdt.createdAt`,
-            `iirdt.inventoryReceivingID = ${inventoryReceivingID}`
+            `fms_check_voucher_details_tbl AS voucherdet
+            LEFT JOIN fms_check_voucher_tbl AS voucher USING(voucherID)`,
+            `voucher.paymentID,
+            voucherdet.accountCode,
+            voucherdet.accountName,
+            voucherdet.debit,
+            voucherdet.credit,
+            voucher.voucherBudgetSource as chartOfAccountID,
+            voucherdet.balance`,
+            `voucherdet.voucherID = ${voucherID}`
         )
     } else {
         requestItemsData = getTableData(
-            "ims_request_items_tbl", 
-            "", 
-            `purchaseOrderID = ${id} AND (orderedPending != 0 OR orderedPending IS NULL) `
+            `fms_payment_request_tbl as  payment
+                LEFT JOIN fms_petty_cash_replenishment_details_tbl AS  pettyrep ON pettyrep.pettyRepID = payment.pettyRepID
+                LEFT JOIN fms_chart_of_accounts_tbl as chart ON chart.chartOfAccountID  = pettyrep.chartOfAccountID   `, 
+            "payment.paymentID,chart.accountCode, chart.accountName,chart.chartOfAccountID,pettyrep.amount", 
+            `paymentID = ${id} AND paymentStatus=2 `
         )
     }
-
     if (requestItemsData.length > 0) {
-        requestItemsData.map(item => {
+        requestItemsData.map((item, index) => {
        
             let {
-                requestItemID               = "",
-                inventoryReceivingDetailsID = 0,
-                itemID                      = "",
-                itemName                    = "",
-                brandName                   = "",
-                forPurchase                 = "",
-                orderedPending              = "",
-                received                    = "",
-                itemUom                     = "",
-                remarks                     = "",
-                createdAt                   = ""
+                paymentID               = "",
+                chartOfAccountID = "",
+                accountCode                      = "",
+                accountName                    = "",
+                balance = "",
+                debit="",
+                credit="",
+                amount = 0
             } = item;
 
-            let pending = orderedPending ? orderedPending : forPurchase;
-
-            const buttonAddRow = !readOnly ? `
-            <button class="btn btn-md btn-primary float-left ml-2 my-1 btnAddSerial">
-                <i class="fas fa-plus"></i>
-            </button>` : ""
-                
-            const scopeData = getTableData(
-                `ims_receiving_serial_number_tbl`,
-                ``,
-                `inventoryReceivingDetailsID = ${inventoryReceivingDetailsID}`
-            );
-
-        
-            let itemSerialNumbers = `
-            <div class="table-responsive">
-                <table class="table table-bordered">
-                
-                    <tbody class="tableSerialBody">
-                    `;
-            if (scopeData.length > 0 && inventoryReceivingID != "") {
-                itemSerialNumbers += scopeData.map(scope => {
-                    return getSerialNumber(scope, readOnly);
-                }).join("");
-            } else {
-                itemSerialNumbers += getSerialNumber();
-            }
-            itemSerialNumbers += `
-                    </tbody>
-                </table>
-                ${buttonAddRow}
-            </div>`;
+            console.log(item)
 
             if (readOnly) {
                 html += `
-                <tr class="itemTableRow" requestItemID="${requestItemID}">
+                <tr class="itemTableRow" paymentID="${paymentID}">
                     <td>
-                        <div class="itemcode" >${getFormCode("ITM",moment(createdAt),itemID)}</div>
+                        <div class="accountcode" accountid="${chartOfAccountID}"> ${accountCode || "-"}</div>
                     </td>
+
                     <td>
-                        <div class="itemname">${itemName || "-"}</div>
+                        <div class="accountname">${accountName || "-"}</div>
                     </td>
+
                     <td>
-                        <div class="brandname">${brandName || "-"}</div>
+                        <div class="debit  text-right">${debit || "-"}</div>
+                        <input type="hidden" name="debit" value="${debit || 0}">
                     </td>
+
                     <td>
-                        ${itemSerialNumbers}
+                        <div class="credit text-right" name="credit">${credit || "-"}</div>
+                        <input type="hidden" name="credit" value="${credit || 0}">
                     </td>
+
                     <td>
-                        ${itemSerialNumbers}
+                    <div class="balance text-right">${balance || "-"}</div>
                     </td>
-                    <td>
-                        ${itemSerialNumbers}
-                    </td>
+                   
 
                 </tr>`;
             } else {
                 html += `
-                <tr class="itemTableRow">
+                <tr class="itemTableRow" paymentID="${paymentID}" >
 			
                 <td>
-                    <div class="storagecode">${"" || "-"}</div>
+                    <div class="accountcode" name="accountcode" accountid="${chartOfAccountID}" ${voucherID ? prevbudgetsource="${chartOfAccountID}" : ""} >${ accountCode || "-"}</div>
                 </td>
 
                 <td>
-                    <div class="storagecode">${"" || "-"}</div>
+                    <div class="accountname" name="accountname">${ accountName || "-"}</div>
                 </td>
                
 				<td>
-                    <div class="storagecode">${"" || "-"}</div>
+                <div class="form-group">
+                    <input 
+                        type="text" 
+                        class="form-control amount text-right"
+                        data-allowcharacters="[0-9]" 
+                       min="0" max="${voucherID ? debit : amount}"
+                        id="debit${index}" 
+                        name="debit" 
+                        value="${voucherID ? debit : amount}" 
+                        ${credit !=0 ? "" : "disabled"} 
+                        >
+                    <div class="invalid-feedback d-block" id="invalid-debit${index}"></div>
+                </div>
                 </td>
 
                 <td>
-                    <div class="storagecode">${"" || "-"}</div>
+                <div class="form-group">
+                    <input 
+                        type="text" 
+                        class="form-control amount text-right"
+                        data-allowcharacters="[0-9]" 
+                       min="0" max="${voucherID ? credit :"" }"
+                        id="credit${index}" 
+                        name="credit" 
+                        value="${voucherID ? credit : ""}" 
+                        >
+        
+                </div>
                 </td>
 
                 <td>
-                    <div class="storagecode">${"" || "-"}</div>
-                </td>
-
-                <td>
-                    <div class="storagecode">${"" || "-"}</div>
+                <div class="form-group">
+                    <input 
+                        type="text" 
+                        class="form-control amount text-right"
+                        data-allowcharacters="[0-9]" 
+                       min="0" max="${voucherID ? balance : ""}"
+                        id="balance${index}" 
+                        name="balance" 
+                        value="${voucherID ? balance : ""}" 
+                       
+                        >
+                    <div class="invalid-feedback d-block" id="invalid-balance${index}"></div>
+                </div>
                 </td>
 
 			</tr>`;
 
             }
         })
+       
+        
     } else {
         html += `
         <tr class="text-center">
@@ -974,82 +921,355 @@ function getItemsRow(id, readOnly = false, inventoryReceivingID = "") {
 }
 // ----- END GET SERVICE ROW -----
 
+// ----- GET SERVICE ROW CREDIT -----
+function getItemsRowCredit(id, readOnly = false, voucherID = "") {
+    let html = "";
+    let chartOfAcccts;	
+    // if (voucherID) {
+
+
+        // chartOfAcccts = getTableData(
+        //     `fms_check_voucher_details_tbl AS voucherdet
+        //     LEFT JOIN fms_check_voucher_tbl AS voucher USING(voucherID)`,
+        //     `voucher.paymentID,
+        //     voucherdet.accountCode,
+        //     voucherdet.accountName,
+        //     voucherdet.debit,
+        //     voucherdet.credit,
+        //     voucherdet.balance`,
+        //     `voucherdet.voucherID = ${voucherID}`
+        // )
+    // } else {
+        chartOfAcccts = getTableData(  
+            `fms_chart_of_accounts_tbl `, 
+            "accountCode, accountName,chartOfAccountID", 
+            `chartOfAccountID  = ${id} AND accountStatus=1 AND accountBudgetSource =1 `
+        )
+    // }
+    
+        chartOfAcccts.map((item, index) => {
+       
+            let {
+              
+                chartOfAccountID = "",
+                accountCode                      = "",
+                accountName                    = "",
+                balance = "",
+                debit="",
+                credit=""
+            } = item;
+
+            if (readOnly) {
+                html += `
+                <tr class="itemTableRow">
+                    <td>
+                        <div class="accountcode" accountid="${chartOfAccountID}" prevbudgetsource="${chartOfAccountID}"> ${accountCode || "-"}</div>
+                    </td>
+
+                    <td>
+                        <div class="accountname">${accountName || "-"}</div>
+                    </td>
+
+                    <td>
+                        <div class="debit  text-right">${debit || "-"}</div>
+                        <input type="hidden" name="debit" value="${debit || 0}">
+                    </td>
+
+                    <td>
+                        <div class="credit text-right" name="credit">${credit || "-"}</div>
+                        <input type="hidden" name="credit" value="${credit || 0}">
+                    </td>
+
+                    <td>
+                    <div class="balance text-right">${balance || "-"}</div>
+                    </td>
+                   
+
+                </tr>`;
+            } else {
+                html += `
+                <tr class="itemTableRow">
+			
+                <td>
+                    <div class="accountcode" name="accountcode" accountid="${chartOfAccountID}" prevbudgetsource="${chartOfAccountID}">${ accountCode || "-"}</div>
+                </td>
+
+                <td>
+                    <div class="accountname" name="accountname">${ accountName || "-"}</div>
+                </td>
+               
+				<td>
+                <div class="form-group">
+                    <input 
+                        type="text" 
+                        class="form-control amount text-right"
+                        data-allowcharacters="[0-9]" 
+                       min="0" max="${voucherID ? debit : ""}"
+                        id="debits${index}" 
+                        name="debit" 
+                        value="${voucherID ? debit : ""}" 
+                       
+                        >
+                    <div class="invalid-feedback d-block" id="invalid-debits${index}"></div>
+                </div>
+                </td>
+
+                <td>
+                <div class="form-group">
+                    <input 
+                        type="text" 
+                        class="form-control amount text-right"
+                        data-allowcharacters="[0-9]" 
+                       min="0" max="${voucherID ? credit : ""}"
+                        id="credits${index}" 
+                        name="credit" 
+                        value="${voucherID ? credit : ""}" 
+                    
+                        >
+                    <div class="invalid-feedback d-block" id="invalid-credits${index}"></div>
+                </div>
+                </td>
+
+                <td>
+                <div class="form-group">
+                    <input 
+                        type="text" 
+                        class="form-control amount text-right"
+                        data-allowcharacters="[0-9]" 
+                       min="0" max="${voucherID ? balance : ""}"
+                        id="balances${index}" 
+                        name="balance" 
+                        value="${voucherID ? balance : ""}" 
+                      
+                        >
+                    <div class="invalid-feedback d-block" id="invalid-balances${index}"></div>
+                </div>
+                </td>
+
+			</tr>`;
+
+            }
+        })
+        
+    
+    return html;
+    
+}
+// ----- END GET SERVICE ROW CREDIT -----
 
 // ----- SELECT PURCHASE ORDER -----
-$(document).on("change", "[name=purchaseOrderID]", function() {
-    const vendorname = $('option:selected', this).attr("vendorname");
+$(document).on("change", "[name=voucherBudgetSource]", function() {
+    const accountname = $('option:selected', this).attr("accountname");
+    const accountcode = $('option:selected', this).attr("accountcode");
     const id 					= $(this).val();
-    let inventoryreceivingid 	= $(this).attr("inventoryreceivingid");
+    let checkvoucherid 	= $('option:selected', this).attr("checkvoucherid");
     let executeonce 	        = $(this).attr("executeonce") == "true";
     var readOnly			    = $(this).attr("disabled") == "disabled";
     const status                = $(this).attr("status");
-    inventoryreceivingid        = executeonce ? inventoryreceivingid : null;
+    checkvoucherid        = executeonce ? checkvoucherid : null;
 
-    $("[name=vendorName]").val(vendorname);
-    $(".purchaseOrderItemsBody").html('<tr><td colspan="8">'+preloader+'</td></tr>');
+    var prevBudgetSource = $(".purchaseOrderItemsBody").find("tr:last").find("td [name=accountcode]").attr("prevbudgetsource") || 0;
+    if(prevBudgetSource != id && prevBudgetSource != 0 ){
+        $(".purchaseOrderItemsBody").find("tr:last").remove(); // remove last child in table
+    }
 
-    let purchaseOrderItemsBody = getItemsRow(id, readOnly, inventoryreceivingid);
+    if(id ==1){
+        $("[name=checkNo]").prop("disabled",true);
+        $("[name=checkNo]").val("");
+        $("[name=checkNo]").removeAttr("required");
+        $("[name=checkNo]").removeClass("is-invalid").removeClass("is-valid");
+        $("#invalid-checkNo").text("");
+    }else{
+        $("[name=checkNo]").prop("disabled",false);
+        $("[name=checkNo]").val("");
+        $("[name=checkNo]").attr("required",true);
+        $("#invalid-checkNo").text("");
+
+
+
+    }
+
+  
+    
+
+    // $("[name=requestorName]").val(requestorname);
+    // $("[name=requestorPosition]").val(designation);
+    // $("[name=requestorDepartment]").val(department);
+    // $("[name=requestorAddress]").val(address);
+    // $("[name=requestorDate]").val(requestordate);
+    // $(".purchaseOrderItemsBody").html('<tr><td colspan="8">'+preloader+'</td></tr>');
+
+    let purchaseOrderItemsBody = getItemsRowCredit(id, readOnly, checkvoucherid);
     setTimeout(() => {
-        $(".purchaseOrderItemsBody").html(purchaseOrderItemsBody);
-        initQuantity();
-        updateSerialNumber();
+        $(".purchaseOrderItemsBody").append(purchaseOrderItemsBody);
+        initAll();
+        updateTotalDebit();
+        updateTotalCredit();
         $(this).removeAttr("executeonce");
     }, 300);
 })
 // ----- END SELECT PURCHASE ORDER -----
 
 
-// ----- CHECK SERIAL ROW AND RECEIVED -----
-function checkSerialRowReceived(parentTable = null) {
-    if (parentTable) {
-        const serialRow        = $(`.tableSerialBody tr`, parentTable).length;
-        const receivedQuantity = +$(`.received [name="received"]`, parentTable).val() || 0;
-    
-        if (serialRow == receivedQuantity) {
-            $(`.received [name="received"]`, parentTable).removeClass("is-valid, no-error").removeClass("is-invalid");
-            $(`.received .invalid-feedback`, parentTable).text("");
+// ----- SELECT PURCHASE ORDER -----
+$(document).on("change", "[name=paymentID]", function() {
+    const department = $('option:selected', this).attr("department");
+    const designation = $('option:selected', this).attr("designation");
+    const address = $('option:selected', this).attr("address");
+    const requestorname = $('option:selected', this).attr("requestorname");
+    const requestordate = $('option:selected', this).attr("requestordate");
+    const id 					= $(this).val();
+    let checkvoucherid 	= $('option:selected', this).attr("checkvoucherid");
+    let executeonce 	        = $(this).attr("executeonce") == "true";
+    var readOnly			    = $(this).attr("disabled") == "disabled";
+    const status                = $(this).attr("status");
+    checkvoucherid        = executeonce ? checkvoucherid : null;
+    var prevPaymentID = $(this).attr("prevPaymentID") ||0;
+    console.log(prevPaymentID)
+    if(prevPaymentID != 0){
+        $('#voucherBudgetSource').val($('#voucherBudgetSource option:first-child').val()).trigger('change');
+    }
+    $(this).attr("prevPaymentID",id);
 
-            $(`.tableSerialBody tr`, parentTable).each(function() {
-                if($(`.servicescope .invalid-feedback`, this).text() != "Data already exist!"){
-                $(`.servicescope [name="serialNumber"]`, this).removeClass("is-valid").removeClass("no-error").removeClass("is-invalid");
-                $(`.servicescope .invalid-feedback`, this).text("");
-                }
-            })
+    $("#invalid-voucherBudgetSource").text("");
+    $("[name=requestorName]").val(requestorname);
+    $("[name=requestorPosition]").val(designation);
+    $("[name=requestorDepartment]").val(department);
+    $("[name=requestorAddress]").val(address);
+    $("[name=requestorDate]").val(requestordate);
+    $(".purchaseOrderItemsBody").html('<tr><td colspan="8">'+preloader+'</td></tr>');
+
+    let purchaseOrderItemsBody = getItemsRow(id, readOnly, checkvoucherid);
+    setTimeout(() => {
+        $(".purchaseOrderItemsBody").html(purchaseOrderItemsBody);
+        initAll();
+        updateTotalDebit();
+        updateTotalCredit();
+        $(this).removeAttr("executeonce");
+    }, 300);
+})
+// ----- END SELECT PURCHASE ORDER -----
+
+	// ----- GET AMOUNT -----
+	const getNonFormattedAmount = (amount = "₱0.00") => {
+		return +amount.replaceAll(",", "").replaceAll("₱", "")?.trim();
+	}
+	// ----- END GET AMOUNT -----
+
+
+	// ----- KEYUP QUANTITY OR UNITCOST -----
+	$(document).on("keyup", "[name=debit]", function() {
+		// const tableRow  = $(this).closest("tr");
+		// const quantity  = +getNonFormattedAmount(tableRow.find(`[name="quantity"]`).first().val());
+		// const unitcost  = +getNonFormattedAmount(tableRow.find(`[name="unitCost"]`).first().val());
+		// const totalcost = quantity * unitcost;
+		// tableRow.find(`.totalcost`).first().text(formatAmount(totalcost, true));
+        updateTotalDebit();
+        updateTotalCredit();
+	})
+	// ----- END KEYUP QUANTITY OR UNITCOST -----
+
+        // ----- UPDATE TOTAL DEBIT -----
+	function updateTotalDebit() {
+		const debitArr = $.find(`[name=debit]`).map(element => getNonFormattedAmount(element.value) || "0");
+		const creditArr = $.find(`[name=credit]`).map(element => getNonFormattedAmount(element.value) || "0");
+		const totalDebit = debitArr.map((dbt) => +dbt ).reduce((a,b) => a + b, 0);
+		const totalCredit = creditArr.map((cdt) => +cdt ).reduce((a,b) => a + b, 0);
+		// $(`#totalAmount`).text(formatAmount(totalAmount, true));
+        console.log(debitArr)
+        $(".computedebit").text(formatAmount(totalDebit, true));
+
+        if(parseFloat(totalDebit) != parseFloat(totalCredit) ){
+              // $("[name=debit] :last").each(function(){
+            //     if($(this).val() != 0){
+                $("[name=debit] :last").addClass("is-invalid");
+                //     }
+                // });
+    
+                // $("[name=credit] :last").each(function(){
+                //     if($(this).val() != 0){
+                        $("[name=credit] :last").addClass("is-invalid");
+                //     }
+                // });
+            $("#invalid-totalDebit").text("Should be equal to credit!");
+        }else{
+            $("[name=debit]").each(function(){
+              
+                $(this).removeClass("is-invalid");
+            
+        });
+
+        $("[name=credit]").each(function(){
+          
+                $(this).removeClass("is-invalid");
+            
+        });
+
+            $("#invalid-totalDebit").text("");
         }
-    }
-}
-// ----- END CHECK SERIAL ROW AND RECEIVED -----
+      
+		return totalDebit;
+
+       
+	}
+	// ----- END UPDATE TOTAL DEBIT -----
+
+    	// ----- KEYUP QUANTITY OR UNITCOST -----
+	$(document).on("keyup", "[name=credit]", function() {
+		// const tableRow  = $(this).closest("tr");
+		// const quantity  = +getNonFormattedAmount(tableRow.find(`[name="quantity"]`).first().val());
+		// const unitcost  = +getNonFormattedAmount(tableRow.find(`[name="unitCost"]`).first().val());
+		// const totalcost = quantity * unitcost;
+		// tableRow.find(`.totalcost`).first().text(formatAmount(totalcost, true));
+		updateTotalDebit();
+        updateTotalCredit();
+	})
+	// ----- END KEYUP QUANTITY OR UNITCOST -----
+
+        // ----- UPDATE TOTAL DEBIT -----
+	function updateTotalCredit() {
+		const debitArr = $.find(`[name=debit]`).map(element => getNonFormattedAmount(element.value) || "0");
+		const creditArr = $.find(`[name=credit]`).map(element => getNonFormattedAmount(element.value) || "0");
+		const totalDebit = debitArr.map((dbt) => +dbt ).reduce((a,b) => a + b, 0);
+		const totalCredit = creditArr.map((cdt) => +cdt ).reduce((a,b) => a + b, 0);
+		// $(`#totalAmount`).text(formatAmount(totalAmount, true));
+        $(".computecredit").text(formatAmount(totalCredit, true));
+
+        if(parseFloat(totalDebit) != parseFloat(totalCredit) ){
+            // $("[name=debit] :last").each(function(){
+            //     if($(this).val() != 0){
+                    $("[name=debit]:last").addClass("is-invalid");
+            //     }
+            // });
+
+            // $("[name=credit] :last").each(function(){
+            //     if($(this).val() != 0){
+                    $("[name=credit]:last").addClass("is-invalid");
+            //     }
+            // });
+            $("#invalid-totalCredit").text("Should be equal to debit!");
+        }else{
+            $("[name=debit]").each(function(){
+              
+                    $(this).removeClass("is-invalid");
+                
+            });
+
+            $("[name=credit]").each(function(){
+              
+                    $(this).removeClass("is-invalid");
+                
+            });
+            $("#invalid-totalCredit").text("");
+        }
+      
+		return totalCredit;
+
+       
+	}
+	// ----- END UPDATE TOTAL DEBIT -----
 
 
-// ----- ADD SERIAL -----
-$(document).on("click", ".btnAddSerial", function() {
-    let newSerial = getSerialNumber();
-    $(this).parent().find("table tbody").append(newSerial);
-    $(this).parent().find("[name=serialNumber]").last().focus();
-    updateSerialNumber();
-
-    const parentTable = $(this).closest("tr.itemTableRow");
-    checkSerialRowReceived(parentTable);
-})
-// ----- END ADD SERIAL -----
-
-
-// ----- DELETE SERIAL -----
-$(document).on("click", ".btnDeleteSerial", function() {
-    const isCanDelete = $(this).closest(".tableSerialBody").find("tr").length > 1;
-    
-    if (isCanDelete) {
-        const scopeElement = $(this).closest("tr");
-        scopeElement.fadeOut(500, function() {
-            const parentTable = $(this).closest("tr.itemTableRow");
-            $(this).closest("tr").remove();
-            checkSerialRowReceived(parentTable);
-        })
-    } else {
-        showNotification("danger", "You must have atleast one serial number.");
-    }
-})
-// ----- END DELETE SERIAL -----
 
 
 // ----- FORM CONTENT -----
@@ -1058,26 +1278,27 @@ function formContent(data = false, readOnly = false, isRevise = false, isFromCan
     readOnly = isRevise ? false : readOnly;
 
     let {
-        inventoryReceivingID        = "",
-        reviseInventoryReceivingID  = "",
+        voucherID        = "",
+        reviseVoucherID  = "",
         employeeID              = "",
-        purchaseOrderID               = "",
-        receiptNo               = "",
-        dateReceived               = "",
-        inventoryReceivingReason ="",
-        inventoryReceivingRemarks  = "",
+        paymentID               = "",
+        voucherBudgetSource	 ="",
+        voucherRemarks  = "",
+        checkNo  = "",
+        voucherTinPayee ="",
+        voucherDescription  = "",
         approversID             = "",
         approversStatus         = "",
         approversDate           = "",
-        inventoryReceivingStatus   = false,
+        voucherStatus   = false,
         submittedAt             = false,
         createdAt               = false,
     } = data && data[0];
 
 
     let purchaseOrderItems = "";
-    if (inventoryReceivingID) {
-        purchaseOrderItems = getItemsRow(purchaseOrderID, readOnly, inventoryReceivingID);
+    if (voucherID) {
+        purchaseOrderItems = getItemsRow(paymentID, readOnly, voucherID);
     } 
 
     // ----- GET EMPLOYEE DATA -----
@@ -1090,23 +1311,23 @@ function formContent(data = false, readOnly = false, isRevise = false, isFromCan
 
     readOnly ? preventRefresh(false) : preventRefresh(true);
 
-    $("#btnBack").attr("inventoryReceivingID", inventoryReceivingID);
-    $("#btnBack").attr("status", inventoryReceivingStatus);
+    $("#btnBack").attr("voucherID", voucherID);
+    $("#btnBack").attr("status", voucherStatus);
     $("#btnBack").attr("employeeID", employeeID);
     $("#btnBack").attr("cancel", isFromCancelledDocument);
 
     let disabled = readOnly ? "disabled" : "";
 	
 
-    let disabledReference = purchaseOrderID && purchaseOrderID != "0" ? "disabled" : disabled;
+    // let disabledReference = purchaseOrderID && purchaseOrderID != "0" ? "disabled" : disabled;
 
     let tableInventoryReceivingItems = !disabled ? "tableInventoryReceivingItems" : "tableInventoryReceivingItems0";
 
     let button = formButtons(data, isRevise, isFromCancelledDocument);
-    let reviseDocumentNo    = isRevise ? inventoryReceivingID  : reviseInventoryReceivingID ;
-    let documentHeaderClass = isRevise || reviseInventoryReceivingID  ? "col-lg-4 col-md-4 col-sm-12 px-1" : "col-lg-2 col-md-6 col-sm-12 px-1";
-    let documentDateClass   = isRevise || reviseInventoryReceivingID  ? "col-md-12 col-sm-12 px-0" : "col-lg-8 col-md-12 col-sm-12 px-1";
-    let documentReviseNo    = isRevise || reviseInventoryReceivingID  ? `
+    let reviseDocumentNo    = isRevise ? voucherID  : reviseVoucherID ;
+    let documentHeaderClass = isRevise || reviseVoucherID  ? "col-lg-4 col-md-4 col-sm-12 px-1" : "col-lg-2 col-md-6 col-sm-12 px-1";
+    let documentDateClass   = isRevise || reviseVoucherID  ? "col-md-12 col-sm-12 px-0" : "col-lg-8 col-md-12 col-sm-12 px-1";
+    let documentReviseNo    = isRevise || reviseVoucherID  ? `
     <div class="col-lg-4 col-md-4 col-sm-12 px-1">
         <div class="card">
             <div class="body">
@@ -1126,7 +1347,7 @@ function formContent(data = false, readOnly = false, isRevise = false, isFromCan
                 <div class="body">
                     <small class="text-small text-muted font-weight-bold">Document No.</small>
                     <h6 class="mt-0 text-danger font-weight-bold">
-                        ${inventoryReceivingID  && !isRevise ? getFormCode("CV", createdAt, inventoryReceivingID) : "---"}
+                        ${voucherID  && !isRevise ? getFormCode("CV", createdAt, voucherID) : "---"}
                     </h6>      
                 </div>
             </div>
@@ -1136,7 +1357,7 @@ function formContent(data = false, readOnly = false, isRevise = false, isFromCan
                 <div class="body">
                     <small class="text-small text-muted font-weight-bold">Status</small>
                     <h6 class="mt-0 font-weight-bold">
-                        ${inventoryReceivingStatus && !isRevise ? getStatusStyle(inventoryReceivingStatus) : "---"}
+                        ${voucherStatus && !isRevise ? getStatusStyle(voucherStatus) : "---"}
                     </h6>      
                 </div>
             </div>
@@ -1168,7 +1389,7 @@ function formContent(data = false, readOnly = false, isRevise = false, isFromCan
                     <div class="body">
                         <small class="text-small text-muted font-weight-bold">Date Approved</small>
                         <h6 class="mt-0 font-weight-bold">
-                            ${getDateApproved(inventoryReceivingStatus, approversID, approversDate)}
+                            ${getDateApproved(voucherStatus, approversID, approversDate)}
                         </h6>      
                     </div>
                 </div>
@@ -1180,7 +1401,7 @@ function formContent(data = false, readOnly = false, isRevise = false, isFromCan
                 <div class="body">
                     <small class="text-small text-muted font-weight-bold">Remarks</small>
                     <h6 class="mt-0 font-weight-bold">
-                        ${inventoryReceivingRemarks && !isRevise ? inventoryReceivingRemarks : "---"}
+                        ${voucherRemarks && !isRevise ? voucherRemarks : "---"}
                     </h6>      
                 </div>
             </div>
@@ -1214,68 +1435,73 @@ function formContent(data = false, readOnly = false, isRevise = false, isFromCan
             <div class="form-group">
                 <label>Payment Request No. ${!disabled ? "<code>*</code>" : ""}</label>
                 <select class="form-control validate select2"
-                    name="checkPaymentRequest"
-                    id="checkPaymentRequest"
+                    name="paymentID"
+                    id="paymentID"
                     style="width: 100%"
                     required
-                    ${disabled}>
-                    <option selected disabled>Select Payment Request</option>             
+                    ${disabled}
+                    voucherID ="${voucherID}"
+                    readonly="${disabled}"
+                    status="${voucherStatus}"
+                    executeonce="${voucherStatus ? true : false}"
+                   >
+                    <option selected disabled>Select Payment Request</option>
+                    ${getPaymentRequestList(paymentID, voucherStatus,true,voucherID)}           
                 </select>
-                <div class="d-block invalid-feedback" id="invalid-checkPaymentRequest"></div>
+                <div class="d-block invalid-feedback" id="invalid-paymentID"></div>
             </div>
         </div>
 
         <div class="col-md-3 col-sm-12">
             <div class="form-group">
                 <label>Requestor</label>
-                <input type="text" class="form-control" disabled value="">
+                <input type="text" class="form-control" name="requestorName" disabled value="">
             </div>
         </div>
 
         <div class="col-md-3 col-sm-12">
             <div class="form-group">
                 <label>Position</label>
-                <input type="text" class="form-control" disabled value="">
+                <input type="text" class="form-control" name="requestorPosition" disabled value="">
             </div>
         </div>
 
         <div class="col-md-3 col-sm-12">
             <div class="form-group">
                 <label>Department</label>
-                <input type="text" class="form-control" disabled value="">
+                <input type="text" class="form-control" name="requestorDepartment" disabled value="">
             </div>
         </div>
 
         <div class="col-md-4 col-sm-12">
             <div class="form-group">
                 <label>Address</label>
-                <input type="text" class="form-control" disabled value="">
+                <input type="text" class="form-control" name="requestorAddress" disabled value="">
             </div>
         </div>
 
         <div class="col-md-4 col-sm-12">
             <div class="form-group">
-                <label>TIN of Payee ${!disabled ? "<code>*</code>" : ""}</label>
+                <label>TIN of Payee</label>
                 <input 
                 type="text" 
                 class="form-control inputmask" 
-                id="checkTinPayee"
-                name="checkTinPayee"
-                value=""
-                required
+                id="voucherTinPayee"
+                name="voucherTinPayee"
+                value="${voucherTinPayee}"
                 data-allowcharacters="[0-9]" 
                 minlength="15" 
                 maxlength="15" 
                 mask="999-999-999-999"
                 ${disabled}>
-                <div class="d-block invalid-feedback" id="invalid-checkTinPayee"></div>
+             
             </div>
         </div>
 
         <div class="col-md-4 col-sm-12">
                 <div class="form-group">
                 <label>Date</label>
-                <input type="text" class="form-control" disabled value="">
+                <input type="text" class="form-control" name="requestorDate" disabled value="">
             </div>
         </div>
 
@@ -1287,15 +1513,15 @@ function formContent(data = false, readOnly = false, isRevise = false, isFromCan
                 <textarea 
                 rows="2" 
                 style="resize: none" 
-                class="form-control" 
-                name="checkDescription" 
-                id="checkDescription" 
-                data-allowcharacters="[.][,][?][!][/][;][:][']["][-][_][(][)][%][&][*][ ]"
+                class="form-control validate" 
+                name="voucherDescription" 
+                id="voucherDescription" 
+                data-allowcharacters="[A-Z][a-z][0-9][.][,][?][!][/][;][:]['][''][-][_][(][)][%][&][*][ ]"
                 minlength="2"
                 maxlength="150"
                 required
-                ${disabled}></textarea>
-                <div class="d-block invalid-feedback" id="invalid-checkDescription"></div>
+                ${disabled}>${ voucherDescription || ""}</textarea>
+                <div class="d-block invalid-feedback" id="invalid-voucherDescription"></div>
             </div>
         </div>
 
@@ -1303,20 +1529,26 @@ function formContent(data = false, readOnly = false, isRevise = false, isFromCan
             <div class="form-group">
                 <label>Budget Source ${!disabled ? "<code>*</code>" : ""}</label>
                 <select class="form-control validate select2"
-                    name="checkBudgetSource"
-                    id="checkBudgetSource"
+                    name="voucherBudgetSource"
+                    id="voucherBudgetSource"
                     style="width: 100%"
                     required
-                    ${disabled}>
+                    voucherID ="${voucherID}"
+                    readonly="${disabled}"
+                    status="${voucherStatus}"
+                    executeonce="${voucherStatus ? true : false}"
+                    ${disabled}
+                    >
                     <option selected disabled>Select Budget Source</option>
-                    <div class="d-block invalid-feedback" id="invalid-checkBudgetSource"></div>             
+                    ${getBudgetSourceList(voucherBudgetSource,voucherStatus,true,voucherID)}     
                 </select>
+                <div class="d-block invalid-feedback" id="invalid-voucherBudgetSource"></div> 
             </div>
         </div>
 
         <div class="col-md-6 col-sm-12">
             <div class="form-group">
-                <label>Check No. ${!disabled ? "<code>*</code>" : ""}</label>
+                <label>Check No.</label>
                 <input 
                 type="text" 
                 class="form-control validate" 
@@ -1325,15 +1557,14 @@ function formContent(data = false, readOnly = false, isRevise = false, isFromCan
                 data-allowcharacters="[0-9][-]"
                 minlength="7"
                 maxlength="10"
-                value=""
-                required
-                ${disabled}>
+                value="${checkNo || ""}"
+                ${voucherBudgetSource == 1 ? "disabled" :"required"}
+                ${disabled}
+               >
                 <div class="d-block invalid-feedback" id="invalid-checkNo"></div>
             </div>
         </div>
-        
-        
-    </div>    
+
         <div class="col-sm-12">
             <div class="w-100">
                 <hr class="pb-1">
@@ -1346,17 +1577,34 @@ function formContent(data = false, readOnly = false, isRevise = false, isFromCan
                             <th>Debit</th>
                             <th>Credit</th>
                             <th>Balance</th>
-                            <th>Total</th>
                         </tr>
                     </thead>
                     <tbody class="purchaseOrderItemsBody">
                         ${purchaseOrderItems}
+                    </tbody>
+                    <tbody>
+                    <tr class="text-center">
+                        <td  style="font-size: 1.1rem; font-weight:bold" class="text-left">Total:</td>
+                        <td></td>
+                        
+                        <td class="text-right text-danger" style="font-size: 1.0rem; font-weight:bold"><span class="computedebit">₱0.00</span> 
+                        <div class=" d-block" id="invalid-totalDebit"></div></td>
+                        
+                        <td class="text-right text-danger" style="font-size: 1.0rem; font-weight:bold"><span class="computecredit">₱0.00</span> 
+                        <div class=" d-block" id="invalid-totalCredit"></div></td>
+                    
+                        <td></td>
+                    </tr>
                     </tbody>
                 </table>
                 
                 
             </div>
         </div>
+        
+        
+    </div>    
+        
         <div class="col-md-12 text-right mt-3">
             ${button}
         </div>
@@ -1370,7 +1618,8 @@ function formContent(data = false, readOnly = false, isRevise = false, isFromCan
         initDataTables();
         initAll();
         // updateSerialNumber();
-        // purchaseOrderID && purchaseOrderID != 0 && $("[name=purchaseOrderID]").trigger("change");
+        paymentID && paymentID != 0 && $("[name=paymentID]").trigger("change");
+        
         // !purchaseOrderID && purchaseOrderID == 0 && $("#dateReceived").val(moment(new Date).format("MMMM DD, YYYY"));
         // $("#dateReceived").data("daterangepicker").maxDate = moment();
         return html;
@@ -1413,7 +1662,7 @@ $("#page_content").text().trim().length == 0 && pageContent(); // CHECK IF THERE
 
 
 // ----- GET INVENTORY RECEIVING DATA -----
-function getInventoryReceivingData(action = "insert", method = "submit", status = "1", id = null, currentStatus = "0") {
+function getInventoryReceivingData(action = "insert", method = "submit", status = "1", id = null, currentStatus = "0", isObject = false) {
 
     /**
      * ----- ACTION ---------
@@ -1436,15 +1685,18 @@ function getInventoryReceivingData(action = "insert", method = "submit", status 
      *    > approve
      * ----- END METHOD -----
      */
-
-    let data = { items: [] };
+console.log("id "+ id)
+console.log("status "+ status)
+     let data = { items: [] }, formData = new FormData;
     const approversID = method != "approve" && moduleApprover;
 
     if (id) {
-        data["inventoryReceivingID"] = id;
+        data["voucherID"] = id;
+        formData.append("voucherID", id);
 
         if (status != "2") {
-            data["inventoryReceivingStatus"] = status;
+            data["voucherStatus"] = status;
+            formData.append("voucherStatus", status);
         }
     }
 
@@ -1452,55 +1704,89 @@ function getInventoryReceivingData(action = "insert", method = "submit", status 
     data["method"]    = method;
     data["updatedBy"] = sessionID;
 
+    formData.append("action", action);
+    formData.append("method", method);
+    formData.append("updatedBy", sessionID);
+
     if (currentStatus == "0" && method != "approve") {
         
         data["employeeID"] = sessionID;
-        data["purchaseOrderID"]  = $("[name=purchaseOrderID]").val() || null;
-        data["receiptNo"]  = $("[name=receiptNo]").val() || null;
-        data["dateReceived"]     =  moment($("[name=dateReceived]").val()?.trim()).format("YYYY-MM-DD");
-        data["inventoryReceivingReason"] = $("[name=inventoryReceivingReason]").val()?.trim();
+        data["paymentID"]  = $("[name=paymentID]").val() || null;
+        data["voucherTinPayee"]  = $("[name=voucherTinPayee]").val() || null;
+        data["voucherDescription"]  = $("[name=voucherDescription]").val()?.trim() || null;
+        data["voucherBudgetSource"]  = $("[name=voucherBudgetSource]").val() || null;
+        data["checkNo"]  = $("[name=checkNo]").val() || null;
+        data["voucherAmount"]  = $(".computecredit").text().replaceAll(",","").replaceAll("₱","")?.trim() || null;
+
+        formData.append("employeeID", sessionID);
+        formData.append("paymentID", $("[name=paymentID]").val() || null);
+        formData.append("voucherTinPayee", $("[name=voucherTinPayee]").val() || null);
+        formData.append("voucherDescription", $("[name=voucherDescription]").val()?.trim());
+        formData.append("voucherBudgetSource", $("[name=voucherBudgetSource]").val()?.trim());
+        formData.append("checkNo", $("[name=checkNo]").val()?.trim());
+        formData.append("voucherAmount", $(".computecredit").text().replaceAll(",","").replaceAll("₱","")?.trim());
 
         if (action == "insert") {
             data["createdBy"] = sessionID;
             data["createdAt"] = dateToday();
+
+            formData.append("createdBy", sessionID);
+            formData.append("createdAt", dateToday());
         } else if (action == "update") {
-            data["inventoryReceivingID"] = id;
+            data["voucherID"] = id;
+
+            formData.append("voucherID", id);
         }
 
         if (method == "submit") {
             data["submittedAt"] = dateToday();
+            formData.append("submittedAt", dateToday());
             if (approversID) {
                 data["approversID"] = approversID;
-                data["inventoryReceivingStatus"] = 1;
+                data["voucherStatus"] = 1;
+
+                formData.append("approversID", approversID);
+                formData.append("voucherStatus", 1);
             } else {  // AUTO APPROVED - IF NO APPROVERS
                 data["approversID"]     = sessionID;
                 data["approversStatus"] = 2;
                 data["approversDate"]   = dateToday();
-                data["inventoryReceivingStatus"] = 2;
+                data["voucherStatus"] = 2;
+
+                formData.append("approversID", sessionID);
+                formData.append("approversStatus", 2);
+                formData.append("approversDate", dateToday());
+                formData.append("voucherStatus", 2);
             }
         }
 
         $(".itemTableRow").each(function(i, obj) {
-            const requestItemID = $(this).attr("requestItemID");
-            const itemID    = $("td [name=itemcode]", this).attr("requestitem");	
-            const received  = $("td [name=received]", this).val().replaceAll(",","");	
-            const remarks   = $("td [name=remarks]", this).val()?.trim();	
+            const paymentID = $(this).attr("paymentID");
+            const chartOfAccountID     = $("td [name=accountcode]", this).attr("accountid");	
+            const accountCode  = $("td [name=accountcode]", this).text().trim();	
+            const accountName  = $("td [name=accountname]", this).text().trim();	
+            const debit  = $("td [name=debit]", this).val().replaceAll(",","");	
+            const credit  = $("td [name=credit]", this).val().replaceAll(",","");	
+            const balance  = $("td [name=balance]", this).val().replaceAll(",","");	
            
             let temp = {
-                requestItemID,
-                itemID, 
-                received,
-                remarks,
-                scopes: []
+                paymentID,
+                chartOfAccountID,
+                accountCode,
+                accountName,
+                debit,
+                credit,
+                balance
             };
 
-            $(`td .tableSerialBody tr`, this).each(function() {
-                let scope = {
-                    serialNumber: $('[name="serialNumber"]', this).val()?.trim(),
-                    itemID:       itemID,
-                }
-                temp["scopes"].push(scope);
-            })
+            formData.append(`items[${i}][paymentID]`, paymentID);
+            formData.append(`items[${i}][chartOfAccountID]`, chartOfAccountID);
+            formData.append(`items[${i}][accountCode]`, accountCode);
+            formData.append(`items[${i}][accountName]`, accountName);
+            formData.append(`items[${i}][debit]`, debit);
+            formData.append(`items[${i}][credit]`, credit);
+            formData.append(`items[${i}][balance]`, balance);
+           
 
             data["items"].push(temp);
         });
@@ -1508,7 +1794,7 @@ function getInventoryReceivingData(action = "insert", method = "submit", status 
 
     
 
-    return data;
+    return isObject ? data : formData;
 }
 // ----- END GET INVENTORY RECEIVING DATA -----
 
@@ -1539,7 +1825,7 @@ $(document).on("click", ".btnView", function () {
 
 // ----- VIEW DOCUMENT -----
 $(document).on("click", "#btnRevise", function () {
-    const id = $(this).attr("inventoryReceivingID");
+    const id = $(this).attr("voucherID");
     viewDocument(id, false, true);
 });
 // ----- END VIEW DOCUMENT -----
@@ -1547,7 +1833,7 @@ $(document).on("click", "#btnRevise", function () {
 
 // ----- SAVE CLOSE FORM -----
 $(document).on("click", "#btnBack", function () {
-    const id         = $(this).attr("inventoryReceivingID");
+    const id         = $(this).attr("voucherID");
     const isFromCancelledDocument = $(this).attr("cancel") == "true";
     const revise     = $(this).attr("revise") == "true";
     const employeeID = $(this).attr("employeeID");
@@ -1560,15 +1846,15 @@ $(document).on("click", "#btnBack", function () {
             // const action = revise && "insert" || (id && feedback ? "update" : "insert");
             const action = revise && !isFromCancelledDocument && "insert" || (id ? "update" : "insert");
             const data   = getInventoryReceivingData(action, "save", "0", id);
-            data["inventoryReceivingStatus"]   = 0;
-            // data["reviseInventoryReceivingID"] = id;
-            // delete data["inventoryReceivingID"];
+            data["voucherStatus"]   = 0;
+            // data["revisevoucherID"] = id;
+            // delete data["voucherID"];
 
             if (!isFromCancelledDocument) {
-                data["reviseInventoryReceivingID"] = id;
-                delete data["inventoryReceivingID"];
+                data["revisevoucherID"] = id;
+                delete data["voucherID"];
             } else {
-                delete data["inventoryReceivingID"];
+                delete data["voucherID"];
                 delete data["action"];
                 data["action"] = update;
             }
@@ -1586,7 +1872,7 @@ $(document).on("click", "#btnBack", function () {
     } else {
         const action = id && feedback ? "update" : "insert";
         const data   = getInventoryReceivingData(action, "save", "0", id);
-        data["inventoryReceivingStatus"] = 0;
+        data["voucherStatus"] = 0;
 
         saveInventoryReceiving(data, "save", null, pageContent);
     }
@@ -1600,23 +1886,24 @@ $(document).on("click", "#btnSave, #btnCancel", function () {
     let serialNumberCondition = $("[name=serialNumber]").hasClass("is-invalid");
     if(!receivedCondition && !serialNumberCondition){
 
-        const id       = $(this).attr("inventoryReceivingID");
+        const id       = $(this).attr("voucherID");
         const isFromCancelledDocument = $(this).attr("cancel") == "true";
         const revise   = $(this).attr("revise") == "true";
         const feedback = $(this).attr("code") || getFormCode("CV", dateToday(), id);
         const action   = revise && "insert" || (id && feedback ? "update" : "insert");
         const data     = getInventoryReceivingData(action, "save", "0", id);
-        data["inventoryReceivingStatus"] = 0;
+        data["voucherStatus"] = 0;
+        data.append("voucherStatus", 0);
         
         if (revise) {
-            // data["reviseInventoryReceivingID"] = id;
-            // delete data["inventoryReceivingID"];
+            // data["revisevoucherID"] = id;
+            // delete data["voucherID"];
 
             if (!isFromCancelledDocument) {
-                data["reviseInventoryReceivingID"] = id;
-                delete data["inventoryReceivingID"];
+                data["revisevoucherID"] = id;
+                delete data["voucherID"];
             } else {
-                delete data["inventoryReceivingID"];
+                delete data["voucherID"];
                 delete data["action"];
                 data["action"] = update;
             }
@@ -1640,147 +1927,60 @@ function removeIsValid(element = "table") {
 // ----- END REMOVE IS-VALID IN TABLE -----
 
 
-// ----- CHECK IF THE SERIAL IS CONNECTED TO RECEIVED QUANTITY -----
-function checkSerialReceivedQuantity() {
-    var flag = ['false'];
-    if ($(`.purchaseOrderItemsBody tr.itemTableRow`).length > 0) {
-        $(`.itemTableRow`).each(function() {
-            const receivedQuantity = parseFloat($(`[name="received"]`, this).val()) || 0;
-        
-            if ($(`.tableSerialBody tr`, this).length >= 1) {
-                let countSerial = $(`.tableSerialBody tr`, this).length;
-                var tmpSerialStorage =[];
-                var counter =0;
-                    $(`.tableSerialBody tr`, this).each(function() {
-                        var conSerail = $(this).find("[name=serialNumber]").val() || "";
-                        if(conSerail !=""){
-                            tmpSerialStorage[counter++] = $(this).find("[name=serialNumber]").val();
-                        }	
-                    })
-
-                        if(tmpSerialStorage.length == 0 && receivedQuantity !=0 ){
-                            $(`.tableSerialBody tr`, this).each(function() {
-                                if($(`.servicescope .invalid-feedback`, this).text() !="Data already exist!"){
-                                    $(`.servicescope [name="serialNumber"]`, this).removeClass("is-invalid");
-                                    $(`.servicescope .invalid-feedback`, this).text("");
-                                }
-                            
-                                
-                        })
-                            flag[0] = true;
-                        }
-                        if(tmpSerialStorage.length >= 1 && receivedQuantity !=0 && countSerial == receivedQuantity ){
-                            $(`.tableSerialBody tr`, this).each(function() {
-                                if($(`.servicescope .invalid-feedback`, this).text() !="Data already exist!"){
-                                $(`.servicescope [name="serialNumber"]`, this).removeClass("is-invalid");
-                                $(`.servicescope .invalid-feedback`, this).text("");
-                                }
-                                
-                        })
-                            flag[0] = true;
-                        }
-                        if(tmpSerialStorage.length !=0  && countSerial != receivedQuantity || receivedQuantity ==0 ){ // exisitng all value
-                            $(`.received [name="received"]`, this).removeClass("is-valid, no-error").addClass("is-invalid");
-                            $(`.received .invalid-feedback`, this).text("Serial number is not equal on received items!");
-
-                            $(`.tableSerialBody tr`, this).each(function() {
-
-                                    $(`.servicescope [name="serialNumber"]`, this).removeClass("is-valid").addClass("is-invalid");
-                                    $(`.servicescope .invalid-feedback`, this).text("Serial number is not equal on received items!");
-                                        
-                            })
-                            
-                            flag[0] = false;
-                        }else{
-                            $(`.received [name="received"]`, this).removeClass("is-invalid");
-                            $(`.received .invalid-feedback`, this).text("");
-
-                            $(`.tableSerialBody tr`, this).each(function() {
-                                if($(`.servicescope .invalid-feedback`, this).text() !="Data already exist!"){
-                                    $(`.servicescope [name="serialNumber"]`, this).removeClass("is-invalid");
-                                    $(`.servicescope .invalid-feedback`, this).text("");
-                                }
-                                    
-                            })
-                            flag[0] = true;
-                        }
-            }
-        })
-        return flag;
-    }
-    
-}
-// ----- END CHECK IF THE SERIAL IS CONNECTED TO RECEIVED QUANTITY -----
 
 
 // ----- SUBMIT DOCUMENT -----
 $(document).on("click", "#btnSubmit", function () {
 
+            var debitValidate = $("[name=debit]").hasClass("is-invalid");
+            var creditValidate = $("[name=credit]").hasClass("is-invalid");
 
-    const validateDuplicateSerial  = $("[name=serialNumber]").hasClass("is-invalid") ;
-    const validateSerialMessage  = $(".invalid-feedback").text() ;
-    console.log("validateDuplicateSerial: "+ validateDuplicateSerial)
-    // if(!validateDuplicateSerial || validateSerialMessage != "Data already exist!"){
-        if(!validateDuplicateSerial){
-        const validateSerial = checkSerialReceivedQuantity();
-        console.log("validateSerial: "+ validateSerial)
-        if (validateSerial != "false") {
-            const validate       = validateForm("form_inventory_receiving");
-            console.log("validate: "+ validate)
-            removeIsValid("#tableInventoryReceivingItems");
-            if(validate){
-                
-                
+            if(!debitValidate && !creditValidate){
 
-                const id             = $(this).attr("inventoryReceivingID");
-                const revise         = $(this).attr("revise") == "true";
-                const action = revise && "insert" || (id ? "update" : "insert");
-                const data   = getInventoryReceivingData(action, "submit", "1", id);
-    
-                if (revise) {
-                    data["reviseInventoryReceivingID"] = id;
-                    delete data["inventoryReceivingID"];
-                }
-    
-                let approversID   = data["approversID"], 
-                    approversDate = data["approversDate"];
-    
-                const employeeID = getNotificationEmployeeID(approversID, approversDate, true);
-                let notificationData = false;
-                if (employeeID != sessionID) {
-                    notificationData = {
-                        moduleID:                96,
-                        notificationTitle:       "Check Voucher",
-                        notificationDescription: `${employeeFullname(sessionID)} asked for your approval.`,
-                        notificationType:        2,
-                        employeeID,
-                    };
-                }
-    
-                saveInventoryReceiving(data, "submit", notificationData, pageContent);
+                const validate       = validateForm("page_content");
+                removeIsValid("#tableInventoryReceivingItems");
+               if(validate){
+                   
+                   
+   
+                   const id             = $(this).attr("voucherID");
+                   const revise         = $(this).attr("revise") == "true";
+                   const action = revise && "insert" || (id ? "update" : "insert");
+                   const data   = getInventoryReceivingData(action, "submit", "1", id);
+       
+                   if (revise) {
+                       data["revisevoucherID"] = id;
+                       delete data["voucherID"];
+                   }
+       
+                   let approversID   = data["approversID"], 
+                       approversDate = data["approversDate"];
+       
+                   const employeeID = getNotificationEmployeeID(approversID, approversDate, true);
+                   let notificationData = false;
+                   if (employeeID != sessionID) {
+                       notificationData = {
+                           moduleID:                96,
+                           notificationTitle:       "Check Voucher",
+                           notificationDescription: `${employeeFullname(sessionID)} asked for your approval.`,
+                           notificationType:        2,
+                           employeeID,
+                       };
+                   }
+       
+                   saveInventoryReceiving(data, "submit", notificationData, pageContent);
+               }
+                
+            }else{
+                $(".is-invalid").focus(); 
             }
-            
-        }
-        else{
-            
-            $(".is-invalid").focus();
-
-        }
-    }
-
-        
-    else{
-        $(".is-invalid").focus();
-
-    }
-
 });
 // ----- END SUBMIT DOCUMENT -----
 
 
 // ----- CANCEL DOCUMENT -----
 $(document).on("click", "#btnCancelForm", function () {
-    const id     = $(this).attr("inventoryReceivingID");
+    const id     = $(this).attr("voucherID");
     const status = $(this).attr("status");
     const action = "update";
     const data   = getInventoryReceivingData(action, "cancelform", "4", id, status);
@@ -1792,9 +1992,9 @@ $(document).on("click", "#btnCancelForm", function () {
 
 // ----- APPROVE DOCUMENT -----
 $(document).on("click", "#btnApprove", function () {
-    const id       = decryptString($(this).attr("inventoryReceivingID"));
-    const feedback = $(this).attr("code") || getFormCode("SCH", dateToday(), id);
-    let tableData  = getTableData("ims_inventory_receiving_tbl", "", "inventoryReceivingID = " + id);
+    const id       = decryptString($(this).attr("voucherID"));
+    const feedback = $(this).attr("code") || getFormCode("CV", dateToday(), id);
+    let tableData  = getTableData("fms_check_voucher_tbl", "", "voucherID = " + id);
 
     if (tableData) {
         let approversID     = tableData[0].approversID;
@@ -1814,7 +2014,7 @@ $(document).on("click", "#btnApprove", function () {
             notificationData = {
                 moduleID:                96,
                 tableID:                 id,
-                notificationTitle:       "Inventory  Receiving",
+                notificationTitle:       "Check Voucher",
                 notificationDescription: `${feedback}: Your request has been approved.`,
                 notificationType:        7,
                 employeeID,
@@ -1826,14 +2026,14 @@ $(document).on("click", "#btnApprove", function () {
             notificationData = {
                 moduleID:                96,
                 tableID:                 id,
-                notificationTitle:       "Inventory  Receiving",
+                notificationTitle:       "Check Voucher",
                 notificationDescription: `${employeeFullname(employeeID)} asked for your approval.`,
                 notificationType:         2,
                 employeeID:               getNotificationEmployeeID(approversID, dateApproved),
             };
         }
 
-        data["inventoryReceivingStatus"] = status;
+        data["voucherStatus"] = status;
 
         saveInventoryReceiving(data, "approve", notificationData, pageContent,lastApproveCondition);
     }
@@ -1844,7 +2044,7 @@ $(document).on("click", "#btnApprove", function () {
 // ----- REJECT DOCUMENT -----
 $(document).on("click", "#btnReject", function () {
 
-    const id       = $(this).attr("inventoryReceivingID");
+    const id       = $(this).attr("voucherID");
     const feedback = $(this).attr("code") || getFormCode("CV", dateToday(), id);
 
     $("#modal_inventory_receiving_content").html(preloader);
@@ -1858,17 +2058,17 @@ $(document).on("click", "#btnReject", function () {
                 data-allowcharacters="[0-9][a-z][A-Z][ ][.][,][_]['][()][?][-][/]"
                 minlength="2"
                 maxlength="250"
-                id="inventoryReceivingRemarks"
-                name="inventoryReceivingRemarks"
+                id="voucherRemarks"
+                name="voucherRemarks"
                 rows="4"
                 style="resize: none"
                 required></textarea>
-            <div class="d-block invalid-feedback" id="invalid-inventoryReceivingRemarks"></div>
+            <div class="d-block invalid-feedback" id="invalid-voucherRemarks"></div>
         </div>
     </div>
     <div class="modal-footer text-right">
         <button class="btn btn-danger px-5 p-2" id="btnRejectConfirmation"
-        inventoryReceivingID="${id}"
+        voucherID="${id}"
         code="${feedback}"><i class="far fa-times-circle"></i> Deny</button>
         <button class="btn btn-cancel px-5 p-2" data-dismiss="modal"><i class="fas fa-ban"></i> Cancel</button>
     </div>`;
@@ -1876,12 +2076,12 @@ $(document).on("click", "#btnReject", function () {
 });
 
 $(document).on("click", "#btnRejectConfirmation", function () {
-    const id       = decryptString($(this).attr("inventoryReceivingID"));
+    const id       = decryptString($(this).attr("voucherID"));
     const feedback = $(this).attr("code") || getFormCode("CV", dateToday(), id);
 
     const validate = validateForm("modal_inventory_receiving");
     if (validate) {
-        let tableData = getTableData("ims_inventory_receiving_tbl", "", "inventoryReceivingID = " + id);
+        let tableData = getTableData("fms_check_voucher_tbl", "", "voucherID = " + id);
         if (tableData) {
             let approversStatus = tableData[0].approversStatus;
             let approversDate   = tableData[0].approversDate;
@@ -1890,16 +2090,16 @@ $(document).on("click", "#btnRejectConfirmation", function () {
             let data = {};
             data["action"] = "update";
             data["method"] = "deny";
-            data["inventoryReceivingID"] = id;
+            data["voucherID"] = id;
             data["approversStatus"] = updateApproveStatus(approversStatus, 3);
             data["approversDate"]   = updateApproveDate(approversDate);
-            data["inventoryReceivingRemarks"] = $("[name=inventoryReceivingRemarks]").val()?.trim();
+            data["voucherRemarks"] = $("[name=voucherRemarks]").val()?.trim();
             data["updatedBy"] = sessionID;
 
             let notificationData = {
                 moduleID:                96,
                 tableID: 				 id,
-                notificationTitle:       "Inventory  Receiving",
+                notificationTitle:       "Check Voucher",
                 notificationDescription: `${feedback}: Your request has been denied.`,
                 notificationType:        1,
                 employeeID,
@@ -1914,17 +2114,17 @@ $(document).on("click", "#btnRejectConfirmation", function () {
 
 // ----- DROP DOCUMENT -----
 $(document).on("click", "#btnDrop", function() {
-    const inventoryReceivingID = decryptString($(this).attr("inventoryReceivingID"));
+    const voucherID = decryptString($(this).attr("voucherID"));
     const feedback          = $(this).attr("code") || getFormCode("TR", dateToday(), id);
 
-    const id = decryptString($(this).attr("inventoryReceivingID"));
+    const id = decryptString($(this).attr("voucherID"));
     let data = new FormData;
-    data.append("inventoryReceivingID", inventoryReceivingID);
+    data.append("voucherID", voucherID);
     data.append("action", "update");
     data.append("method", "drop");
     data.append("updatedBy", sessionID);
 
-    savePurchaseRequest(data, "drop", null, pageContent);
+    saveInventoryReceiving(data, "drop", null, pageContent);
 })
 // ----- END DROP DOCUMENT -----
 
@@ -2043,16 +2243,21 @@ return Swal.fire({
 
 function saveInventoryReceiving(data = null, method = "submit", notificationData = null, callback = null,lastApproveCondition =false) {
 
-data.lastApproveCondition = lastApproveCondition; // inserting object in data object parameter
-
+// data.lastApproveCondition = lastApproveCondition; // inserting object in data object parameter
+    // console.log(data);
+    // return false;
 if (data) {
     const confirmation = getConfirmation(method);
     confirmation.then(res => {
         if (res.isConfirmed) {
             $.ajax({
                 method:      "POST",
-                url:         `inventory_receiving/saveInventoryReceiving`,
+                url:         `Check_voucher/saveCheckVoucher`,
                 data,
+                processData: false,
+                contentType: false,
+                global:      false,
+                cache:       false,
                 async:       false,
                 dataType:    "json",
                 beforeSend: function() {
@@ -2083,17 +2288,6 @@ if (data) {
     
                     if (isSuccess == "true") {
                         setTimeout(() => {
-                            // ----- SAVE NOTIFICATION -----
-                            if (notificationData) {
-                                if (Object.keys(notificationData).includes("tableID")) {
-                                    insertNotificationData(notificationData);
-                                } else {
-                                    notificationData["tableID"] = insertedID;
-                                    insertNotificationData(notificationData);
-                                }
-                            }
-                            // ----- END SAVE NOTIFICATION -----
-
                             $("#loader").hide();
                             closeModals();
                             Swal.fire({
@@ -2107,7 +2301,20 @@ if (data) {
                             if (method == "approve" || method == "deny") {
                                 $("[redirect=forApprovalTab]").length > 0 && $("[redirect=forApprovalTab]").trigger("click")
                             }
+
+                            // ----- SAVE NOTIFICATION -----
+                            if (notificationData) {
+                                if (Object.keys(notificationData).includes("tableID")) {
+                                    insertNotificationData(notificationData);
+                                } else {
+                                    notificationData["tableID"] = insertedID;
+                                    insertNotificationData(notificationData);
+                                }
+                            }
+                            // ----- END SAVE NOTIFICATION -----
                         }, 500);
+
+
                     } else {
                         setTimeout(() => {
                             $("#loader").hide();
@@ -2119,6 +2326,8 @@ if (data) {
                             });
                         }, 500);
                     }
+
+                    
                 },
                 error: function() {
                     setTimeout(() => {

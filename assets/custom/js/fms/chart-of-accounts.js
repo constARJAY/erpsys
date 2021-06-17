@@ -176,6 +176,7 @@ $(document).ready(function(){
         financialStatement    = data ? (data[0].financialStatement      ? data[0].financialStatement     : "") : "",
         bankID      = data ? (data[0].bankID        ? data[0].bankID       : "") : "",
         accountStatus      = data ? (data[0].accountStatus        ? data[0].accountStatus       : "") : "";
+        accountBudgetSource      = data ? (data[0].accountBudgetSource        ? data[0].accountBudgetSource       : "") : "";
           
         let button = chartOfAccountID ? `
         <button 
@@ -391,6 +392,22 @@ $(document).ready(function(){
                         <div class="invalid-feedback d-block" id="invalid-input_accountStatus"></div>
                     </div>
                 </div>
+
+                <div class="col-md-6 col-sm-12">
+                    <div class="form-group p-4 mt-3 ml-2">
+                        <label class="c_checkbox">
+                            <input type="checkbox"  
+                            name="accountBudgetSource" 
+                            value="1" 
+                            class=""
+                            id="accountBudgetSource"
+                            ${accountBudgetSource == 1  ? "checked":""}
+                            >
+                            <span class="checkmark"></span>
+                            <span class="ml-3">Budget Source</span>
+                        </label>
+                    </div>
+            </div>
 
             </div>
         </div>

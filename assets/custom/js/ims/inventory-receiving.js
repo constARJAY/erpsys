@@ -1402,7 +1402,7 @@ $(document).ready(function() {
 
 
 	// ----- GET INVENTORY RECEIVING DATA -----
-	function getInventoryReceivingData(action = "insert", method = "submit", status = "1", id = null, currentStatus = "0") {
+	function getInventoryReceivingData(action = "insert", method = "submit", status = "1", id = null, currentStatus = "0", isObject = false) {
 
 		/**
 		 * ----- ACTION ---------
@@ -1425,21 +1425,30 @@ $(document).ready(function() {
 		 *    > approve
 		 * ----- END METHOD -----
 		 */
-
-		let data = { items: [] };
+		 console.log("id "+ id)
+		 console.log("status "+ status)
+		 let data = { items: [] }, formData = new FormData;
 		const approversID = method != "approve" && moduleApprover;
 
 		if (id) {
 			data["inventoryReceivingID"] = id;
+			formData.append("inventoryReceivingID", id);
+
 
 			if (status != "2") {
 				data["inventoryReceivingStatus"] = status;
+				formData.append("inventoryReceivingStatus", status);
+
 			}
 		}
 
 		data["action"]    = action;
 		data["method"]    = method;
 		data["updatedBy"] = sessionID;
+
+		formData.append("action", action);
+		formData.append("method", method);
+		formData.append("updatedBy", sessionID);
 
 		if (currentStatus == "0" && method != "approve") {
 			
@@ -1449,23 +1458,41 @@ $(document).ready(function() {
 			data["dateReceived"]     =  moment($("[name=dateReceived]").val()?.trim()).format("YYYY-MM-DD");
 			data["inventoryReceivingReason"] = $("[name=inventoryReceivingReason]").val()?.trim();
 
+			formData.append("employeeID", sessionID);
+			formData.append("purchaseOrderID", $("[name=purchaseOrderID]").val() || null);
+			formData.append("receiptNo", $("[name=receiptNo]").val() || null);
+			formData.append("inventoryReceivingReason", $("[name=inventoryReceivingReason]").val()?.trim());
+			formData.append("dateReceived", moment($("[name=dateReceived]").val() ?.trim()).format("YYYY-MM-DD"));
+
 			if (action == "insert") {
 				data["createdBy"] = sessionID;
 				data["createdAt"] = dateToday();
+
+				formData.append("createdBy", sessionID);
+				formData.append("createdAt", dateToday());
 			} else if (action == "update") {
 				data["inventoryReceivingID"] = id;
+				formData.append("inventoryReceivingID", id);
 			}
 
 			if (method == "submit") {
 				data["submittedAt"] = dateToday();
+				formData.append("submittedAt", dateToday());
 				if (approversID) {
 					data["approversID"] = approversID;
 					data["inventoryReceivingStatus"] = 1;
+					formData.append("approversID", approversID);
+					formData.append("inventoryReceivingStatus", 1);
 				} else {  // AUTO APPROVED - IF NO APPROVERS
 					data["approversID"]     = sessionID;
 					data["approversStatus"] = 2;
 					data["approversDate"]   = dateToday();
 					data["inventoryReceivingStatus"] = 2;
+
+					formData.append("approversID", sessionID);
+					formData.append("approversStatus", 2);
+					formData.append("approversDate", dateToday());
+					formData.append("inventoryReceivingStatus", 2);
 				}
 			}
 
@@ -1483,11 +1510,21 @@ $(document).ready(function() {
 					scopes: []
 				};
 
+				formData.append(`items[${i}][requestItemID]`, requestItemID);
+				formData.append(`items[${i}][itemID]`, itemID);
+				formData.append(`items[${i}][received]`, received);
+				formData.append(`items[${i}][remarks]`, remarks);
+			
+			
+
 				$(`td .tableSerialBody tr`, this).each(function() {
 					let scope = {
 						serialNumber: $('[name="serialNumber"]', this).val()?.trim(),
 						itemID:       itemID,
 					}
+
+					formData.append(`scopes[${i}][serialNumber]`, serialNumber);
+					formData.append(`scopes[${i}][itemID]`, itemID);
 					temp["scopes"].push(scope);
 				})
 
@@ -1497,7 +1534,7 @@ $(document).ready(function() {
 
 		
 
-		return data;
+		return isObject ? data : formData;
 	}
 	// ----- END GET INVENTORY RECEIVING DATA -----
 
@@ -1596,6 +1633,7 @@ $(document).ready(function() {
 			const action   = revise && "insert" || (id && feedback ? "update" : "insert");
 			const data     = getInventoryReceivingData(action, "save", "0", id);
 			data["inventoryReceivingStatus"] = 0;
+			data.append("inventoryReceivingStatus", 0);
 			
 			if (revise) {
 				// data["reviseInventoryReceivingID"] = id;
@@ -1913,7 +1951,7 @@ $(document).ready(function() {
 		data.append("method", "drop");
 		data.append("updatedBy", sessionID);
 
-		savePurchaseRequest(data, "drop", null, pageContent);
+		saveInventoryReceiving(data, "drop", null, pageContent);
 	})
 	// ----- END DROP DOCUMENT -----
 
@@ -2042,6 +2080,10 @@ function saveInventoryReceiving(data = null, method = "submit", notificationData
 					method:      "POST",
 					url:         `inventory_receiving/saveInventoryReceiving`,
 					data,
+					processData: false,
+					contentType: false,
+					global:      false,
+					cache:       false,
 					async:       false,
 					dataType:    "json",
 					beforeSend: function() {

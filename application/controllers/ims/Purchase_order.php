@@ -18,6 +18,7 @@ use PhpOffice\PhpSpreadsheet\Style\Protection;
 use PhpOffice\PhpSpreadsheet\Worksheet\Drawing;
 use PhpOffice\PhpSpreadsheet\Worksheet\PageSetup;
 use PhpOffice\PhpSpreadsheet\Worksheet\ColumnDimension;
+use PhpOffice\PhpSpreadsheet\Worksheet\HeaderFooterDrawing;
 use PhpOffice\PhpSpreadsheet\Worksheet;
 
 class Purchase_order extends CI_Controller {
@@ -283,7 +284,27 @@ class Purchase_order extends CI_Controller {
         $spreadsheet->getDefaultStyle()->getAlignment()->setVertical(Alignment::VERTICAL_BOTTOM);
         $spreadsheet->getDefaultStyle()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
         $spreadsheet->getActiveSheet()->getDefaultRowDimension()->setRowHeight(16);
-        
+
+        // ---------------------------
+
+        // $spreadsheet->getActiveSheet()->getPageSetup()->setHorizontalCentered(true);
+        // $spreadsheet->getActiveSheet()->getHeaderFooter()
+        //     ->setOddHeader('&C&HPlease treat this document as confidential!');
+        // $spreadsheet->getActiveSheet()->getHeaderFooter()
+        //     ->setOddFooter('&L&B' . $spreadsheet->getProperties()->getTitle() . '&RPage &P of &N');
+
+        // $spreadsheet->getActiveSheet()->getPageMargins()->setTop(3.96);
+        // $spreadsheet->getActiveSheet()->getPageMargins()->setRight(0.00);
+        // $spreadsheet->getActiveSheet()->getPageMargins()->setLeft(0.00);
+        // $spreadsheet->getActiveSheet()->getPageMargins()->setBottom(1.75);
+
+        // $drawing = new HeaderFooterDrawing();
+        // $drawing->setName('PhpSpreadsheet logo');
+        // $drawing->setPath("assets/images/company-logo/excel-header.png");
+        // $drawing->setHeight(36);
+        // $spreadsheet->getActiveSheet()->getHeaderFooter()->addImage($drawing, \PhpOffice\PhpSpreadsheet\Worksheet\HeaderFooter::IMAGE_HEADER_LEFT);
+
+        // ---------------------------
 
         // $drawing = new Drawing();
         // $drawing->setDescription('Header Logo');
