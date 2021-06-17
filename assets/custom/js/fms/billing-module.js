@@ -503,10 +503,20 @@ $(document).ready(function() {
         let billingVat = !readOnly ? `
         <input type="checkbox" 
             id="billingVat" 
-            ${billingVatAmount > 0 ? "checked" : ""}>` : ""
+            ${billingVatAmount > 0 ? "checked" : ""}>` : "";
+        let buttonExcel = billingStatus == 1 ? `
+        <div class="w-100 text-right pb-4">
+            <button 
+                class="btn btn-info py-2" 
+                billingID="${encryptString(billingID)}"
+                id="btnExcel">
+                <i class="fas fa-file-excel"></i> Excel
+            </button>
+        </div>` : "";
 
         let html = `
         <div class="">
+            ${buttonExcel}
             <div class="row px-2">
                 <div class="col-lg-3 col-md-6 col-sm-12 px-1">
                     <div class="card">
@@ -837,15 +847,16 @@ $(document).ready(function() {
 	function updateTotalAmount() {
 		const quantityArr = $.find(`[name="billingQuantity"]`).map(element => getNonFormattedAmount(element.value) || 0);
 		const unitCostArr = $.find(`[name="billingAmount"]`).map(element => getNonFormattedAmount(element.value) || 0);
-		const totalAmount = quantityArr.map((qty, index) => +qty * +unitCostArr[index]).reduce((a,b) => a + b, 0);
-		$(`#billingSubtotal`).text(formatAmount(totalAmount, true));
+        const grandTotal = quantityArr.map((qty, index) => +qty * +unitCostArr[index]).reduce((a,b) => a + b, 0);
+        $("#billingGrandTotal").text(formatAmount(grandTotal, true));
 
         const isChecked = $(`#billingVat`).prop("checked");
-        const vatAmount = isChecked ? (totalAmount * 0.12) : 0;
+        const vatAmount = isChecked ? (grandTotal * 0.12) : 0;
         $("#billingVatAmount").text(formatAmount(vatAmount, true));
 
-        const grandTotal = totalAmount - vatAmount;
-        $("#billingGrandTotal").text(formatAmount(grandTotal, true));
+		const totalAmount = grandTotal - vatAmount;
+		$(`#billingSubtotal`).text(formatAmount(totalAmount, true));
+        
 		return grandTotal;
 	}
 	// ----- END UPDATE TOTAL AMOUNT -----
@@ -1028,6 +1039,15 @@ $(document).ready(function() {
 		saveBilling("cancelform", billingID, pageContent);
 	});
 	// ----- END CANCEL DOCUMENT -----
+
+
+    // ----- DOWNLOAD EXCEL -----
+	$(document).on("click", "#btnExcel", function() {
+		const billingID = decryptString($(this).attr("billingID"));
+		const url = `${base_url}fms/billing_module/downloadExcel?id=${billingID}`;
+		window.location.replace(url); 
+	})
+	// ----- END DOWNLOAD EXCEL -----
 
 
     // ----- GET BILLING INPUT DATA -----

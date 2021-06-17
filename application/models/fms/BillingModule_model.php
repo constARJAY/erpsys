@@ -40,6 +40,9 @@ class BillingModule_model extends CI_Model {
                 "billingID"         => $result->billingID,
                 "createdAt"         => $result->createdAt,
                 "employeeID"        => $result->employeeID,
+                "preparedBy"        => $result->preparedBy,
+                "departmentName"    => $result->departmentName,
+                "designationName"   => $result->designationName,
                 "billingStatus"     => $result->billingStatus,
                 "submittedAt"       => $result->submittedAt,
                 "billingReason"     => $result->billingReason,
@@ -99,7 +102,7 @@ class BillingModule_model extends CI_Model {
                 "amount"        => $activity["amount"],
                 "totalAmount"   => $totalAmount,
                 "vatAmount"     => $vatAmount,
-                "pendingAmount" => $pendingAmount,
+                "pendingAmount" => $totalAmount,
                 "createdBy"     => $sessionID,
                 "updatedBy"     => $sessionID,
             ];

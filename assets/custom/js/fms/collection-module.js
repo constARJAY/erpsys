@@ -1254,15 +1254,16 @@ $(document).ready(function() {
             })
         })
 
-		const totalAmount = amount.reduce((a,b) => a + b, 0);
-		$(`#collectionSubtotal`).text(formatAmount(totalAmount, true));
+        const grandTotal = amount.reduce((a,b) => a + b, 0);
+        $("#collectionGrandTotal").text(formatAmount(grandTotal, true));
 
         const isChecked = $(`#collectionVat`).prop("checked");
-        const vatAmount = isChecked ? (totalAmount * 0.12) : 0;
+        const vatAmount = isChecked ? (grandTotal * 0.12) : 0;
         $("#collectionVatAmount").text(formatAmount(vatAmount, true));
 
-        const grandTotal = totalAmount - vatAmount;
-        $("#collectionGrandTotal").text(formatAmount(grandTotal, true));
+		const totalAmount = grandTotal - vatAmount;
+		$(`#collectionSubtotal`).text(formatAmount(totalAmount, true));
+
 		return grandTotal;
 	}
 	// ----- END UPDATE TOTAL AMOUNT -----
