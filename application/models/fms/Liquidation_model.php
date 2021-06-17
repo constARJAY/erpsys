@@ -1,37 +1,42 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
-class ClientFundRequest_model extends CI_Model {
+class Liquidation_model extends CI_Model {
 
     public function __construct()
     {
         parent::__construct();
     }
-    public function saveClientFundRequestData($action, $data, $id = null) 
+
+    public function saveliquidationData($action, $data, $id = null, $pettyCashRequestID) 
     {
         if ($action == "insert") {
-            $query = $this->db->insert("fms_client_fund_request_tbl", $data);
+            $query = $this->db->insert("fms_liquidation_tbl", $data);
         } else {
-            $where = ["clientFundRequestID" => $id];
-            $query = $this->db->update("fms_client_fund_request_tbl", $data, $where);
+            $where = ["liquidationID" => $id];
+            $query = $this->db->update("fms_liquidation_tbl", $data, $where);
         }
 
         if ($query) {
             $insertID = $action == "insert" ? $this->db->insert_id() : $id;
+            $updateDate = array(
+                'pettyCashLiquidationStatus'  =>'1');
+                $where1 = ["pettyCashRequestID " => $pettyCashRequestID];
+                $query = $this->db->update("fms_petty_cash_request_tbl", $updateDate, $where1);
+
             return "true|Successfully submitted|$insertID|".date("Y-m-d");
         }
         return "false|System error: Please contact the system administrator for assistance!";
     }
-
-    public function deleteClientFundRequestItems($id) {
-        $query = $this->db->delete("fms_finance_request_details_tbl", ["clientFundRequestID" => $id]);
+    public function deleteLiquidationItems($id) {
+        $query = $this->db->delete("fms_finance_request_details_tbl", ["liquidationID " => $id]);
         return $query ? true : false;
     }
 
-    public function saveClientFundRequestItems($action, $data, $id = null)
+    public function saveLiquidationItems($action, $data, $id = null)
     {
             if ($id) {
-                $deletePettyCashRequestItems = $this->deleteClientFundRequestItems($id);
+                $deleteLiquidationItems = $this->deleteLiquidationItems($id);
             }
             $query = $this->db->insert_batch("fms_finance_request_details_tbl", $data);
             if ($query) {
@@ -41,4 +46,4 @@ class ClientFundRequest_model extends CI_Model {
        
     }
 
-}    
+}

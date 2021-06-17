@@ -24,7 +24,7 @@ class Client_fund_request extends CI_Controller {
         $method                                 = $this->input->post("method");
         $clientFundRequestID                    = $this->input->post("clientFundRequestID") ?? null;
         $reviseClientFundRequestID              = $this->input->post("reviseClientFundRequestID") ?? null;
-        $ClientFundRequestAmount                = $this->input->post("ClientFundRequestAmount") ?? null;
+        $clientFundRequestAmount                = $this->input->post("clientFundRequestAmount") ?? null;
         $clientFundRequestDate                  = $this->input->post("clientFundRequestDate") ?? null;
         $projectID                              = $this->input->post("projectID") ?? null;
         $chartOfAccountID                       = $this->input->post("chartOfAccountID") ?? null;
@@ -50,7 +50,7 @@ class Client_fund_request extends CI_Controller {
             "chartOfAccountID"                  => $chartOfAccountID,
             "clientFundRequestDate"             => $clientFundRequestDate,
             "clientFundRequestStatus"           => $clientFundRequestStatus,
-            "ClientFundRequestAmount"           => $ClientFundRequestAmount,
+            "clientFundRequestAmount"           => $clientFundRequestAmount,
             "submittedAt"                       => $submittedAt,
             "createdBy"                         => $createdBy,
             "updatedBy"                         => $updatedBy,
@@ -106,7 +106,8 @@ class Client_fund_request extends CI_Controller {
                             // "requestItemID"     => $item["requestItemID"] != "null" ? $item["requestItemID"] : null,
                             "clientFundRequestID" => $clientFundRequestID,
                            // "chartOfAccountID"  => $item["chartOfAccountID"] != "null" ? $item["chartOfAccountID"] : null,
-                            "clientFundRequestDetailsDescription"   => $item["clientFundRequestDetailsDescription"] != "null" ? $item["clientFundRequestDetailsDescription"] : null,
+                            "description"   => $item["description"] != "null" ? $item["description"] : null,
+                            "quantity"          => $item["quantity"] != "null" ? $item["quantity"] : null,
                             "amount"           => $item["amount"] != "null" ? $item["amount"] : null,
                             "files"             => array_key_exists("existingFile", $item) ? $item["existingFile"] : null, 
                             "createdBy"         => $item["createdBy"],

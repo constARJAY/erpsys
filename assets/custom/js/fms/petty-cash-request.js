@@ -224,8 +224,9 @@ $(document).ready(function() {
 				columnDefs: [
 					{ targets: 0,  width: 50  },
 					{ targets: 1,  width: 100 },
-					{ targets: 2,  width: 180 },
-					{ targets: 3,  width: 100  },
+					{ targets: 2,  width: 150 },
+					{ targets: 3,  width: 180 },
+					{ targets: 4,  width: 100  },
 				],
 			});
 
@@ -242,7 +243,8 @@ $(document).ready(function() {
 				columnDefs: [
 					{ targets: 0,  width: 150 },
 					{ targets: 1,  width: 150 },
-					{ targets: 2,  width: 50  },
+					{ targets: 2,  width: 150 },
+					{ targets: 3,  width: 50  },
 				],
 			});
 	}
@@ -390,8 +392,10 @@ $(document).ready(function() {
 		let pettyCashRequest = getTableData(
 			`fms_petty_cash_request_tbl AS pcr 
 			LEFT JOIN hris_employee_list_tbl AS helt USING(employeeID) `,
-			`pcr.*, 
+			`pcr.*,
+			DATE_FORMAT(pcr.pettyCashRequestDate,'%M %d, %Y') AS dateformat, 
             CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname, 
+			concat('PCR-',LEFT(pcr.createdAt,2),'-',LPAD(pcr.pettyCashRequestID,5,'0')) AS pettyCashCode,
             pcr.createdAt AS dateCreated`,
 			`pcr.employeeID = ${sessionID}`,
 			`FIELD(pettyCashRequestStatus, 0, 1, 3, 2, 4, 5), COALESCE(pcr.submittedAt, pcr.createdAt)`
@@ -426,6 +430,10 @@ $(document).ready(function() {
 				createdAt,
 				createdBy,
 				pettyCashLiquidationStatus,
+				pettyCashCode,
+				pettyCashRequestDate,
+				dateformat,
+				pettyCashRequestAmount
 			} = item;
 
 			let remarks       = pettyCashRequestRemarks ? pettyCashRequestRemarks : "-";
@@ -462,7 +470,7 @@ $(document).ready(function() {
 				<td> 
 				${button}`;
 				if(pettyCashRequestStatus ==2 && createdBy == `${sessionID}` && pettyCashLiquidationStatus ==0){
-					html += ` <a href="${base_url}fms/liquidation?add=${pettyCashRequestID}"><button type="button" class="btn btn-default w-100 btn-add"<i class="icon-plus"></i> Create Liquidation</button></a>`;
+					html += ` <a href="${base_url}fms/liquidation?add=${pettyCashRequestID}=${pettyCashCode}=${pettyCashRequestDate}=${pettyCashRequestAmount}"><button type="button" class="btn btn-default w-100 btn-add"<i class="icon-plus"></i> Create Liquidation</button></a>`;
 				
 				}
 				html +=`</td>
@@ -753,8 +761,9 @@ $(document).ready(function() {
 		let {
 			requestItemID                       = "",
 			chartOfAccountID                    = "",
-			pettyCashRequestDetailsDescription  = "",
-			amount                              = 0,
+			description  						= "",
+			quantity  							= "",
+			amount                              = "",
 			files                               = ""
 		} = item;
 
@@ -766,12 +775,17 @@ $(document).ready(function() {
 			<tr class="itemTableRow" requestItemID="${requestItemID}">
 				
                 <td>
-					<div class="pettyCashRequestDetailsDescription">
-						${pettyCashRequestDetailsDescription || "-"}
+					<div class="description">
+						${description || "-"}
+					</div>
+				</td>
+				<td>
+					<div class="quantity text-center">
+						${quantity || "-"}
 					</div>
 				</td>
 				<td class="text-right">
-                ${amount || "-"}
+                ${formatAmount(amount, true) || "-"}
 				</td>
 				<td>
 					<div class="file">
@@ -836,30 +850,50 @@ $(document).ready(function() {
                     <td>
 					<div>
 						<textarea 
-							class="form-control validate pettyCashRequestDetailsDescription"
+							class="form-control validate description"
 							minlength="0"
 							maxlength="250"
 							rows="2" 
 							style="resize: none" 
 							class="form-control" 
 							data-allowcharacters="[a-z][A-Z][0-9][.][,][?][!][/][;][:][''][-][_][(][)][%][&][*][ ]"
-							name="pettyCashRequestDetailsDescription"
+							name="description"
                             required 
-                            value="${pettyCashRequestDetailsDescription}"
-							id="pettyCashRequestDetailsDescription"></textarea>
-                            <div class="invalid-feedback d-block" id="invalid-pettyCashRequestDetailsDescription"></div>
+                            value="${description}"
+							id="description"
+							ceID="${ceID ? true : false}"
+							${disabled}></textarea>
+                            <div class="invalid-feedback d-block" id="invalid-description"></div>
                         </div>
                    </td> 
+				   <td>
+				   		<div class="quantity">
+						<input 
+						type="text" 
+						class="form-control input-quantity text-right "
+						min="0.01" 
+						max="999999999" 
+						data-allowcharacters="[0-9]"
+						id="quantity" 
+						name="quantity" 
+						value="${quantity}" 
+						minlength="1" 
+						maxlength="20" 
+						autocomplete="off"
+						ceID="${ceID ? true : false}"
+						${disabled}>
+					<div class="invalid-feedback d-block" id="invalid-quantity"></div>
+					</div>
+				   </td>
                     <td>
-					<div class="quantity">
+					<div class="amountvalue">
 					<div class="input-group">
 					<div class="input-group-prepend">
 						<span class="input-group-text">₱</span>
 					</div>
-					
 						<input 
 							type="text" 
-							class="form-control input-quantity text-right"
+							class="form-control input-quantity text-right "
 							min="0.00" 
 							data-allowcharacters="[0-9]" 
 							max="999999999" 
@@ -873,7 +907,7 @@ $(document).ready(function() {
 							${disabled}>
 						<div class="invalid-feedback d-block" id="invalid-amount"></div>
 					</div>
-					</div>
+				</div>	
 				</td>
 				<td>
 					<div class="file">
@@ -922,69 +956,19 @@ $(document).ready(function() {
 			// });
 
 			// QUANTITY
-			$("td .quantity [name=amount]", this).attr("id", `amount${i}`);			
+			$("td .amountvalue [name=amount]", this).attr("id", `amount${i}`);	
+			
+			// QUANTITY
+			$("td .quantity [name=quantity]", this).attr("id", `quantity${i}`);
+			$("td .quantity [name=quantity]", this).attr("project", `true`);
 			// TOTAL COST
-			$("td .pettyCashRequestDetailsDescription", this).attr("id", `pettyCashRequestDetailsDescription${i}`);
-            $("td .pettyCashRequestDetailsDescription .invalid-feedback", this).attr("id", `invalid-pettyCashRequestDetailsDescription${i}`);
-			$("td .pettyCashRequestDetailsDescription [name=pettyCashRequestDetailsDescription]", this).attr("company", `true`);
+			$("td .description", this).attr("id", `description${i}`);
+            $("td .description .invalid-feedback", this).attr("id", `invalid-description${i}`);
+			$("td .description [name=description]", this).attr("company", `true`);
 
 			// FILE
 			$("td .file [name=files]", this).attr("id", `filesProject${i}`);
 
-		})
-
-		$(".itemCompanyTableBody tr").each(function(i) {
-            
-			// // ROW ID
-			// $(this).attr("id", `tableRow${i}`);
-			// $(this).attr("index", `${i}`);
-
-			// // CHECKBOX
-			// $("td .action .checkboxrow", this).attr("id", `checkboxrow${i}`);
-			// $("td .action .checkboxrow", this).attr("company", `true`);
-
-			// // ITEMNAME
-			// $(this).find("select").each(function(x) {
-			// 	if ($(this).hasClass("select2-hidden-accessible")) {
-			// 		$(this).select2("destroy");
-			// 	}
-			// })
-
-			// $(this).find("select").each(function(j) {
-			// 	const itemID = $(this).val();
-			// 	$(this).attr("index", `${i}`);
-			// 	$(this).attr("company", `true`);
-			// 	$(this).attr("id", `companyitemid${i}`);
-			// 	$(this).attr("data-select2-id", `companyitemid${i}`);
-			// 	if (!$(this).hasClass("select2-hidden-accessible")) {
-			// 		$(this).select2({ theme: "bootstrap" });
-			// 	}
-			// });
-
-			// // QUANTITY
-			// $("td .quantity [name=quantity]", this).attr("id", `quantity${i}company`);
-			// $("td .quantity .invalid-feedback", this).attr("id", `invalid-quantity${i}company`);
-			// $("td .quantity [name=quantity]", this).attr("company", `true`);
-			
-			// // CATEGORY
-			// $("td .category", this).attr("id", `category${i}`);
-
-			// // UOM
-			// $("td .uom", this).attr("id", `uom${i}`);
-
-			// // UNIT COST
-			// $("td .unitcost", this).attr("id", `unitcost${i}`);
-			// $("td .unitcost", this).attr("company", `true`);
-
-			// // TOTAL COST
-			// $("td .totalcost", this).attr("id", `totalcost${i}`);
-			// $("td .totalcost", this).attr("company", `true`);
-
-			// // FILE
-			// $("td .file [name=files]", this).attr("id", `filesCompany${i}`);
-
-			// // REMARKS
-			// $("td .remarks [name=remarks]", this).attr("id", `remarks${i}`);
 		})
 	}
 	// ----- END UPDATE TABLE ITEMS -----
@@ -1107,7 +1091,7 @@ $(document).ready(function() {
 	function getTableMaterialsEquipment(ceID = null, data = false, readOnly = false) {
 		let {
 			pettyCashRequestID       = "",
-			revisePurchaseRequestID = "",
+			revisePettyCashRequestID = "",
 			employeeID              = "",
 			projectID               = "",
 			purchaseRequestReason   = "",
@@ -1303,7 +1287,7 @@ $(document).ready(function() {
 
 		let {
 			pettyCashRequestID       = "",
-			revisePurchaseRequestID = "",
+			revisePettyCashRequestID = "",
 			employeeID              = "",
 			projectTotalAmount      = "0",
 			pettyCashRequestDate	="",
@@ -1322,13 +1306,14 @@ $(document).ready(function() {
         let pettyCashRequestItems = "";
         if (pettyCashRequestID) {
             let pettyCashRequestData = getTableData(
-                `fms_petty_cash_request_details_tbl AS pcrd
+                `fms_finance_request_details_tbl AS pcrd
                 LEFT JOIN fms_petty_cash_request_tbl          AS pcr ON pcrd.pettyCashRequestID = pcr.pettyCashRequestID`,
                 `pcrd.pettyCashRequestID,
-                pcrd.pettyCashRequestDetailsDescription,
+                pcrd.description,
+				pcrd.quantity,
                 pcrd.amount,
                 pcrd.files`,
-                `pcrd.pettyCashRequestID = ${pettyCashRequestID}`,``,`pcrd.pettyCashRequestDetailsID`);
+                `pcrd.pettyCashRequestID = ${pettyCashRequestID}`,``,`pcrd.financeRequestID`);
                 pettyCashRequestData.map(item => {
                     pettyCashRequestItems += getItemRow(true, item, readOnly)
             })    
@@ -1369,10 +1354,10 @@ $(document).ready(function() {
 		
 		let button = formButtons(data, isRevise, isFromCancelledDocument);
 
-		let reviseDocumentNo    = isRevise ? pettyCashRequestID : revisePurchaseRequestID;
-		let documentHeaderClass = isRevise || revisePurchaseRequestID ? "col-lg-4 col-md-4 col-sm-12 px-1" : "col-lg-2 col-md-6 col-sm-12 px-1";
-		let documentDateClass   = isRevise || revisePurchaseRequestID ? "col-md-12 col-sm-12 px-0" : "col-lg-8 col-md-12 col-sm-12 px-1";
-		let documentReviseNo    = isRevise || revisePurchaseRequestID ? `
+		let reviseDocumentNo    = isRevise ? pettyCashRequestID : revisePettyCashRequestID;
+		let documentHeaderClass = isRevise || revisePettyCashRequestID ? "col-lg-4 col-md-4 col-sm-12 px-1" : "col-lg-2 col-md-6 col-sm-12 px-1";
+		let documentDateClass   = isRevise || revisePettyCashRequestID ? "col-md-12 col-sm-12 px-0" : "col-lg-8 col-md-12 col-sm-12 px-1";
+		let documentReviseNo    = isRevise || revisePettyCashRequestID ? `
 		<div class="col-lg-4 col-md-4 col-sm-12 px-1">
 			<div class="card">
 				<div class="body">
@@ -1507,6 +1492,7 @@ $(document).ready(function() {
                         <tr style="white-space: nowrap">
                             ${checkboxProjectHeader}
                             <th>Description ${!disabled ? "<code>*</code>" : ""}</th>
+							<th>Quantity</th>
                             <th>Amount</th>
                             <th>File</th>
                         </tr>
@@ -1554,7 +1540,7 @@ $(document).ready(function() {
 					}
 				})
 				$('#btnBack').attr("status", "2");
-				$(`#btnSubmit, #btnRevise, #btnCancel, #btnCancelForm, .btnAddRow, .btnDeleteRow`).hide();
+				$(`#btnSubmit, #btnRevise, #btnCancel, .btnAddRow, .btnDeleteRow`).hide();
 			}
 			// ----- END NOT ALLOWED FOR UPDATE -----
 
@@ -1599,7 +1585,7 @@ $(document).ready(function() {
 
 
 	// ----- GET PURCHASE REQUEST DATA -----
-	function getPurchaseRequestData(action = "insert", method = "submit", status = "1", id = null, currentStatus = "0", isObject = false) {
+	function getPettyCashRequestData(action = "insert", method = "submit", status = "1", id = null, currentStatus = "0", isObject = false) {
 
 		/**
 		 * ----- ACTION ---------
@@ -1699,7 +1685,8 @@ $(document).ready(function() {
 					$(this).closest("tbody").attr("project") == "true" ? "project" : "company";
 
 				//const chartOfAccountID                              = $("td [name=chartOfAccountID]", this).val();
-                const pettyCashRequestDetailsDescription          = $("td [name=pettyCashRequestDetailsDescription]", this).val();	
+                const description          = $("td [name=description]", this).val();	
+				const quantity 				= $("td [name=quantity]", this).val().replaceAll(",","");
 				//const itemDescription = $("td [name=itemID] option:selected", this).attr("itemDescription");	
 
 				//const amount  = +getNonFormattedAmount($("td [name=amount]", this).val());	
@@ -1714,12 +1701,13 @@ $(document).ready(function() {
 				let filename = file ? file?.name : "";
 
 				let temp = {
-						pettyCashRequestDetailsDescription, amount,
+						description, quantity, amount,
 					filename
 				};
 
 				//formData.append(`items[${i}][chartOfAccountID]`, chartOfAccountID);
-				formData.append(`items[${i}][pettyCashRequestDetailsDescription]`, pettyCashRequestDetailsDescription);
+				formData.append(`items[${i}][description]`, description);
+				formData.append(`items[${i}][quantity]`, quantity);
 				formData.append(`items[${i}][amount]`, amount);
 				formData.append(`items[${i}][filename]`, filename);
 				formData.append(`items[${i}][createdBy]`, sessionID);
@@ -1789,9 +1777,9 @@ $(document).ready(function() {
 
     // ----- REVISE DOCUMENT -----
 	$(document).on("click", "#btnRevise", function () {
-		const id                    = decryptString($(this).attr("pettyCashRequestID"));
-		const fromCancelledDocument = $(this).attr("cancel") == "true";
-		viewDocument(id, false, true, fromCancelledDocument);
+		const id              = decryptString($(this).attr("pettyCashRequestID"));
+		//const fromCancelledDocument = $(this).attr("cancel") == "true";
+		viewDocument(id, false, true);
 	});
 	// ----- END REVISE DOCUMENT -----
 
@@ -1809,10 +1797,10 @@ $(document).ready(function() {
 			
 			if (revise) {
 				const action = revise && !isFromCancelledDocument && "insert" || (id ? "update" : "insert");
-				const data   = getPurchaseRequestData(action, "save", "0", id);
+				const data   = getPettyCashRequestData(action, "save", "0", id);
 				data.append("pettyCashRequestStatus", 0);
 				if (!isFromCancelledDocument) {
-					data.append("revisePurchaseRequestID", id);
+					data.append("revisePettyCashRequestID", id);
 					data.delete("pettyCashRequestID");
 				} else {
 					data.append("pettyCashRequestID", id);
@@ -1833,7 +1821,7 @@ $(document).ready(function() {
 
 		} else {
 			const action = id && feedback ? "update" : "insert";
-			const data   = getPurchaseRequestData(action, "save", "0", id);
+			const data   = getPettyCashRequestData(action, "save", "0", id);
 			data.append("pettyCashRequestStatus", 0);
 
 			//validateItemPrice()
@@ -1850,12 +1838,12 @@ $(document).ready(function() {
 		const revise   = $(this).attr("revise") == "true";
 		const feedback = $(this).attr("code") || getFormCode("PCR", dateToday(), id);
 		const action   = revise && !isFromCancelledDocument && "insert" || (id ? "update" : "insert");
-		const data     = getPurchaseRequestData(action, "save", "0", id);
+		const data     = getPettyCashRequestData(action, "save", "0", id);
 		data.append("pettyCashRequestStatus", 0);
 
 		if (revise) {
 			if (!isFromCancelledDocument) {
-				data.append("revisePurchaseRequestID", id);
+				data.append("revisePettyCashRequestID", id);
 				data.delete("pettyCashRequestID");
 			} else {
 				data.append("pettyCashRequestID", id);
@@ -1909,11 +1897,11 @@ $(document).ready(function() {
 		//removeIsValid("#tableCompanyRequestItems");
 			if (validate && validateamount && validateItems) {
 				const action = revise && !isFromCancelledDocument && "insert" || (id ? "update" : "insert");
-				const data   = getPurchaseRequestData(action, "submit", "1", id);
+				const data   = getPettyCashRequestData(action, "submit", "1", id);
 	
 				if (revise) {
 					if (!isFromCancelledDocument) {
-						data.append("revisePurchaseRequestID", id);
+						data.append("revisePettyCashRequestID", id);
 						data.delete("pettyCashRequestID");
 					}
 				}
@@ -1948,7 +1936,7 @@ $(document).ready(function() {
 		const id     = decryptString($(this).attr("pettyCashRequestID"));
 		const status = $(this).attr("status");
 		const action = "update";
-		const data   = getPurchaseRequestData(action, "cancelform", "4", id, status);
+		const data   = getPettyCashRequestData(action, "cancelform", "4", id, status);
 
 		savePettyCashRequest(data, "cancelform", null, pageContent);
 	});
@@ -1968,7 +1956,7 @@ $(document).ready(function() {
 			let employeeID      = tableData[0].employeeID;
 			let createdAt       = tableData[0].createdAt;
 
-			let data = getPurchaseRequestData("update", "approve", "2", id);
+			let data = getPettyCashRequestData("update", "approve", "2", id);
 			data.append("approversStatus", updateApproveStatus(approversStatus, 2));
 			let dateApproved = updateApproveDate(approversDate)
 			data.append("approversDate", dateApproved);

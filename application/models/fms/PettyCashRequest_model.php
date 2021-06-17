@@ -25,7 +25,7 @@ class PettyCashRequest_model extends CI_Model {
     }
 
     public function deletePettyCashRequestItems($id) {
-        $query = $this->db->delete("fms_petty_cash_request_details_tbl", ["pettyCashRequestID" => $id]);
+        $query = $this->db->delete("fms_finance_request_details_tbl", ["pettyCashRequestID" => $id]);
         return $query ? true : false;
     }
 
@@ -34,7 +34,7 @@ class PettyCashRequest_model extends CI_Model {
             if ($id) {
                 $deletePettyCashRequestItems = $this->deletePettyCashRequestItems($id);
             }
-            $query = $this->db->insert_batch("fms_petty_cash_request_details_tbl", $data);
+            $query = $this->db->insert_batch("fms_finance_request_details_tbl", $data);
             if ($query) {
                 return "true|Successfully submitted";
             }

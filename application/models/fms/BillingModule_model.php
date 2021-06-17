@@ -23,6 +23,7 @@ class BillingModule_model extends CI_Model {
         SELECT 
             fbt.*,
             CONCAT(helt.employeeFirstname, ' ', helt.employeeLastname) AS preparedBy,
+            employeeSignature,
             hdt.departmentName,
             hdt2.designationName
         FROM 
@@ -41,6 +42,7 @@ class BillingModule_model extends CI_Model {
                 "createdAt"         => $result->createdAt,
                 "employeeID"        => $result->employeeID,
                 "preparedBy"        => $result->preparedBy,
+                "signature"         => $result->employeeSignature,
                 "departmentName"    => $result->departmentName,
                 "designationName"   => $result->designationName,
                 "billingStatus"     => $result->billingStatus,

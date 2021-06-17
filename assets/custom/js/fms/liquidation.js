@@ -1,9 +1,9 @@
 $(document).ready(function() {
-	const allowedUpdate = isUpdateAllowed(54);
+	const allowedUpdate = isUpdateAllowed(132);
 
 
     // ----- MODULE APPROVER -----
-	const moduleApprover = getModuleApprover("client fund request");
+	const moduleApprover = getModuleApprover("liquidation");
 	// ----- END MODULE APPROVER -----
 
 
@@ -31,10 +31,10 @@ $(document).ready(function() {
 	function isDocumentRevised(id = null) {
 		if (id) {
 			const revisedDocumentsID = getTableData(
-				"fms_client_fund_request_tbl", 
-				"reviseClientFundRequestID", 
-				"reviseClientFundRequestID IS NOT NULL AND clientFundRequestStatus != 4");
-			return revisedDocumentsID.map(item => item.revisePettyCashRequestID).includes(id);
+				"fms_liquidation_tbl", 
+				"reviseLiquidationID", 
+				"reviseLiquidationID IS NOT NULL AND liquidationStatus != 4");
+			return revisedDocumentsID.map(item => item.reviseLiquidationID).includes(id);
 		}
 		return false;
 	}
@@ -44,23 +44,25 @@ $(document).ready(function() {
     // ----- VIEW DOCUMENT -----
 	function viewDocument(view_id = false, readOnly = false, isRevise = false, isFromCancelledDocument = false) {
 		const loadData = (id, isRevise = false, isFromCancelledDocument = false) => {
-			const tableData = getTableData("fms_client_fund_request_tbl", "", "clientFundRequestID=" + id);
+			//alert(pettycashID);
+			//alert(pettycashID);
+			const tableData = getTableData("fms_liquidation_tbl", "", "liquidationID=" + id);
 
 			if (tableData.length > 0) {
 				let {
 					employeeID,
-					clientFundRequestStatus
+					liquidationStatus
 				} = tableData[0];
 
 				let isReadOnly = true, isAllowed = true;
 
 				if (employeeID != sessionID) {
 					isReadOnly = true;
-					if (clientFundRequestStatus == 0 || clientFundRequestStatus == 4) {
+					if (liquidationStatus == 0 || liquidationStatus == 4) {
 						isAllowed = false;
 					}
 				} else if (employeeID == sessionID) {
-					if (clientFundRequestStatus == 0) {
+					if (liquidationStatus == 0) {
 						isReadOnly = false;
 					} else {
 						isReadOnly = true;
@@ -94,16 +96,38 @@ $(document).ready(function() {
 			let url   = window.document.URL;
 			let arr   = url.split("?view_id=");
 			let isAdd = url.indexOf("?add");
+			//let pettycashID = "";
 			if (arr.length > 1) {
 				let id = decryptString(arr[1]);
 					id && isFinite(id) && loadData(id);
 			} else if (isAdd != -1) {
 				arr = url.split("?add=");
+				// let liquidationID = url.substring(url.lastIndexOf('=') + 1);				
+				// let itemProjectTableBody = formContent('','','','',liquidationID);
+
+				var url1 	= url.substring(url.lastIndexOf());
+				var ids 	= url1.split('=');
+				let liquidationDataID = ids[1];
+				var pettycashCode = ids[2];
+				var pettyCashDate = ids[3];
+				var pettyCashAmount = ids[4];
+				//alert(pettyCashDate);
+				//alert(liquidationDataID);
+				//alert(liquidationDataID);
+				let itemProjectTableBody = formContent('','','','', liquidationDataID, pettycashCode, pettyCashDate, pettyCashAmount);
+				// var idtwo = ids[2];
+				
+				// alert(liquidationID);
+				// let liquidationID = decryptString(descrypliquidationID);
+
+				//pettycashID = formContent('','','','',pettycashID);
+				//iquidationID = getPettyCashRow(liquidationID,readOnly,'');
+			
 				if (arr.length > 1) {
 					let id = decryptString(arr[1]);
 						id && isFinite(id) && loadData(id, true);
 				} else {
-					const isAllowed = isCreateAllowed(46);
+					const isAllowed = isCreateAllowed(132);
 					pageContent(isAllowed);
 				}
 			}
@@ -113,15 +137,15 @@ $(document).ready(function() {
 
 	function updateURL(view_id = 0, isAdd = false, isRevise = false) {
 		if (view_id && !isAdd) {
-			window.history.pushState("", "", `${base_url}fms/client_fund_request?view_id=${view_id}`);
+			window.history.pushState("", "", `${base_url}fms/liquidation?view_id=${view_id}`);
 		} else if (isAdd) {
 			if (view_id && isRevise) {
-				window.history.pushState("", "", `${base_url}fms/client_fund_request?add=${view_id}`);
+				window.history.pushState("", "", `${base_url}fms/liquidation?add=${view_id}`);
 			} else {
-				window.history.pushState("", "", `${base_url}fms/client_fund_request?add`);
+				window.history.pushState("", "", `${base_url}fms/liquidation?add`);
 			}
 		} else {
-			window.history.pushState("", "", `${base_url}fms/client_fund_request`);
+			window.history.pushState("", "", `${base_url}fms/liquidation`);
 		}
 	}
 	// ----- END VIEW DOCUMENT -----
@@ -132,26 +156,14 @@ $(document).ready(function() {
 		return moment(new Date).format("YYYY-MM-DD HH:mm:ss");
 	};
 
-	const inventoryItemList = getTableData(
+	const ChartOfAccountList = getTableData(
 		"fms_chart_of_accounts_tbl ", "chartOfAccountID , accountCode, accountName, accountDescription, createdAt",
 		"accountStatus = 1");
 
-	const inventoryPriceList = getTableData(
-		`ims_inventory_price_list_tbl`,
-		``,
-		`preferred = 1`
-	);
-
-	const billMaterialList = getTableData(
-		`pms_bill_material_tbl`,
-		"",
-		`billMaterialStatus = 2`
-	);
-
-	const projectList = getTableData(
-		"pms_project_list_tbl AS pplt LEFT JOIN pms_client_tbl AS pct ON pct.clientID = pplt.projectListClientID", 
-		"projectListID, projectListCode, projectListName, clientCode, clientName, clientRegion, clientProvince, clientCity, clientBarangay, clientUnitNumber, clientHouseNumber, clientCountry, clientPostalCode",
-		"projectListStatus = 1");
+	const clientList = getTableData(
+		"pms_client_tbl", 
+		"clientID , clientCode, clientName",
+		"	clientStatus = 1");
 	// END GLOBAL VARIABLE - REUSABLE 
 
 
@@ -221,11 +233,15 @@ $(document).ready(function() {
                 info: false,
 				scrollCollapse: true,
 				columnDefs: [
-					{ targets: 0,  width: 50  },
-					{ targets: 1,  width: 100 },
-					{ targets: 2,  width: 150 },
-					{ targets: 3,  width: 180 },
-					{ targets: 4,  width: 100  },
+					{ targets: 0,  width: 200 },
+					{ targets: 1,  width: 180 },
+					{ targets: 2,  width: 180  },
+                    { targets: 3,  width: 180  },
+					{ targets: 4,  width: 280  },
+					{ targets: 5,  width: 150  },
+					{ targets: 6,  width: 280  },
+					{ targets: 7,  width: 150  },
+					{ targets: 8,  width: 150  },
 				],
 			});
 
@@ -240,10 +256,15 @@ $(document).ready(function() {
 				scrollX: true,
 				scrollCollapse: true,
 				columnDefs: [
-					{ targets: 0,  width: 150 },
-					{ targets: 1,  width: 150 },
-					{ targets: 2,  width: 150 },
-					{ targets: 3,  width: 50  },
+					{ targets: 0,  width: 200 },
+					{ targets: 1,  width: 180 },
+					{ targets: 2,  width: 180  },
+                    { targets: 3,  width: 180  },
+					{ targets: 4,  width: 280  },
+					{ targets: 5,  width: 150  },
+					{ targets: 6,  width: 180  },
+					{ targets: 7,  width: 150  },
+					{ targets: 8,  width: 150  },
 				],
 			});
 	}
@@ -253,7 +274,7 @@ $(document).ready(function() {
     // ----- HEADER CONTENT -----
 	function headerTabContent(display = true) {
 		if (display) {
-			if (isImModuleApprover("fms_client_fund_request_tbl", "approversID")) {
+			if (isImModuleApprover("fms_liquidation_tbl", "approversID")) {
 				let html = `
                 <div class="bh_divider appendHeader"></div>
                 <div class="row clearfix appendHeader">
@@ -277,9 +298,8 @@ $(document).ready(function() {
 	function headerButton(isAdd = true, text = "Add", isRevise = false, isFromCancelledDocument = false) {
 		let html;
 		if (isAdd) {
-			if (isCreateAllowed(54)) {
-				html = `
-				<button type="button" class="btn btn-default btn-add" id="btnAdd"><i class="icon-plus"></i> &nbsp;${text}</button>`;
+			if (isCreateAllowed(132)) {
+				html = ``;
 			}
 		} else {
 			html = `
@@ -298,13 +318,13 @@ $(document).ready(function() {
 	function forApprovalContent() {
 		$("#tableForApprovalParent").html(preloader);
 		let pettyCashRequest = getTableData(
-			`fms_client_fund_request_tbl AS cfr 
+			`fms_liquidation_tbl AS ld 
 			LEFT JOIN hris_employee_list_tbl AS helt USING(employeeID) `,
-			`cfr.*, 
+			`ld.*, 
             CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname, 
-            cfr.createdAt AS dateCreated`,
-			`cfr.employeeID != ${sessionID} AND clientFundRequestStatus != 0 AND clientFundRequestStatus != 4`,
-			`FIELD(clientFundRequestStatus, 0, 1, 3, 2, 4, 5), COALESCE(cfr.submittedAt, cfr.createdAt)`
+            ld.createdAt AS dateCreated`,
+			`ld.employeeID != ${sessionID} AND liquidationStatus != 0 AND liquidationStatus != 4`,
+			`FIELD(liquidationStatus, 0, 1, 3, 2, 4, 5), COALESCE(ld.submittedAt, ld.createdAt)`
 		);
 
 		let html = `
@@ -326,46 +346,46 @@ $(document).ready(function() {
 		pettyCashRequest.map((item) => {
 			let {
 				fullname,
-				clientFundRequestID,
+				liquidationID,
 				approversID,
 				approversDate,
-				clientFundRequestStatus,
-				clientFundRequestRemarks,
+				liquidationStatus,
+				liquidationRemarks,
 				submittedAt,
 				createdAt,
 				ceCreatedAt
 			} = item;
 
-			let remarks       = 	clientFundRequestRemarks ? 	clientFundRequestRemarks : "-";
+			let remarks       = 	liquidationRemarks ? 	liquidationRemarks : "-";
 			let dateCreated   = moment(createdAt).format("MMMM DD, YYYY hh:mm:ss A");
 			let dateSubmitted = submittedAt ? moment(submittedAt).format("MMMM DD, YYYY hh:mm:ss A") : "-";
-			let dateApproved  = clientFundRequestStatus == 2 || clientFundRequestStatus == 5 ? approversDate.split("|") : "-";
+			let dateApproved  = liquidationStatus == 2 || liquidationStatus == 5 ? approversDate.split("|") : "-";
 			if (dateApproved !== "-") {
 				dateApproved = moment(dateApproved[dateApproved.length - 1]).format("MMMM DD, YYYY hh:mm:ss A");
 			}
 
-			let btnClass = clientFundRequestStatus != 0 ? "btnView" : "btnEdit";
+			let btnClass = liquidationStatus != 0 ? "btnView" : "btnEdit";
 
-			let button = clientFundRequestStatus != 0 ? `
-			<button type="button" class="btn btn-view w-100 btnView" id="${encryptString(clientFundRequestID)}"><i class="fas fa-eye"></i> View</button>` : `
+			let button = liquidationStatus != 0 ? `
+			<button type="button" class="btn btn-view w-100 btnView" id="${encryptString(liquidationID)}"><i class="fas fa-eye"></i> View</button>` : `
 			<button type="button" 
 				class="btn btn-edit w-100 btnEdit" 
-				id="${encryptString(clientFundRequestID )}" 
-				code="${getFormCode("CFR", createdAt, clientFundRequestID)}"><i class="fas fa-edit"></i> Edit</button>`;
+				id="${encryptString(liquidationID )}" 
+				code="${getFormCode("PCR", createdAt, liquidationID)}"><i class="fas fa-edit"></i> Edit</button>`;
 
-			if (isImCurrentApprover(approversID, approversDate, clientFundRequestStatus) || isAlreadyApproved(approversID, approversDate)) {
+			if (isImCurrentApprover(approversID, approversDate, liquidationStatus) || isAlreadyApproved(approversID, approversDate)) {
 				html += `
-				<tr class="${btnClass}" id="${encryptString(clientFundRequestID )}">
-					<td>${getFormCode("CFR", createdAt, clientFundRequestID )}</td>
+				<tr class="${btnClass}" id="${encryptString(liquidationID)}">
+					<td>${getFormCode("PCR", createdAt, liquidationID)}</td>
 					<td>${fullname}</td>
 					<td>
-						${employeeFullname(getCurrentApprover(approversID, approversDate, clientFundRequestStatus, true))}
+						${employeeFullname(getCurrentApprover(approversID, approversDate, liquidationStatus, true))}
 					</td>
 					<td>${dateCreated}</td>
 					<td>${dateSubmitted}</td>
 					<td>${dateApproved}</td>
 					<td class="text-center">
-						${getStatusStyle(clientFundRequestStatus)}
+						${getStatusStyle(liquidationStatus)}
 					</td>
 					<td>${remarks}</td>
 				</tr>`;
@@ -389,13 +409,13 @@ $(document).ready(function() {
 	function myFormsContent() {
 		$("#tableMyFormsParent").html(preloader);
 		let pettyCashRequest = getTableData(
-			`fms_client_fund_request_tbl AS cfr 
+			`fms_liquidation_tbl AS cfr 
 			LEFT JOIN hris_employee_list_tbl AS helt USING(employeeID) `,
 			`cfr.*, 
             CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname, 
             cfr.createdAt AS dateCreated`,
 			`cfr.employeeID = ${sessionID}`,
-			`FIELD(clientFundRequestStatus, 0, 1, 3, 2, 4, 5), COALESCE(cfr.submittedAt, cfr.createdAt)`
+			`FIELD(liquidationStatus, 0, 1, 3, 2, 4, 5), COALESCE(cfr.submittedAt, cfr.createdAt)`
 		);
 
 		let html = `
@@ -417,45 +437,45 @@ $(document).ready(function() {
 		pettyCashRequest.map((item) => {
 			let {
 				fullname,
-				clientFundRequestID,
+				liquidationID,
 				approversID,
 				approversDate,
-				clientFundRequestStatus,
-				clientFundRequestRemarks,
+				liquidationStatus,
+				liquidationRemarks,
 				submittedAt,
 				createdAt,
 				ceCreatedAt
 			} = item;
 
-			let remarks       = clientFundRequestRemarks ? clientFundRequestRemarks : "-";
+			let remarks       = liquidationRemarks ? liquidationRemarks : "-";
 			let dateCreated   = moment(createdAt).format("MMMM DD, YYYY hh:mm:ss A");
 			let dateSubmitted = submittedAt ? moment(submittedAt).format("MMMM DD, YYYY hh:mm:ss A") : "-";
-			let dateApproved  = clientFundRequestStatus == 2 || clientFundRequestStatus == 5 ? approversDate.split("|") : "-";
+			let dateApproved  = liquidationStatus == 2 || liquidationStatus == 5 ? approversDate.split("|") : "-";
 			if (dateApproved !== "-") {
 				dateApproved = moment(dateApproved[dateApproved.length - 1]).format("MMMM DD, YYYY hh:mm:ss A");
 			}
 
-			let btnClass = clientFundRequestStatus != 0 ? "btnView" : "btnEdit";
+			let btnClass = liquidationStatus != 0 ? "btnView" : "btnEdit";
 
-			let button = clientFundRequestStatus != 0 ? `
-            <button type="button" class="btn btn-view w-100 btnView" id="${encryptString(clientFundRequestID)}"><i class="fas fa-eye"></i> View</button>` : `
+			let button = liquidationStatus != 0 ? `
+            <button type="button" class="btn btn-view w-100 btnView" id="${encryptString(liquidationID)}"><i class="fas fa-eye"></i> View</button>` : `
             <button type="button" 
                 class="btn btn-edit w-100 btnEdit" 
-                id="${encryptString(clientFundRequestID )}" 
-                code="${getFormCode("CFR", createdAt, clientFundRequestID )}"><i class="fas fa-edit"></i> Edit</button>`;
+                id="${encryptString(liquidationID )}" 
+                code="${getFormCode("PCR", createdAt, liquidationID )}"><i class="fas fa-edit"></i> Edit</button>`;
 
 			html += `
-            <tr class="${btnClass}" id="${encryptString(clientFundRequestID )}">
-                <td>${getFormCode("CFR", createdAt, clientFundRequestID )}</td>
+            <tr class="${btnClass}" id="${encryptString(liquidationID )}">
+                <td>${getFormCode("PCR", createdAt, liquidationID )}</td>
                 <td>${fullname}</td>
                 <td>
-                    ${employeeFullname(getCurrentApprover(approversID, approversDate, clientFundRequestStatus, true))}
+                    ${employeeFullname(getCurrentApprover(approversID, approversDate, liquidationStatus, true))}
                 </td>
 				<td>${dateCreated}</td>
 				<td>${dateSubmitted}</td>
 				<td>${dateApproved}</td>
                 <td class="text-center">
-                    ${getStatusStyle(clientFundRequestStatus)}
+                    ${getStatusStyle(liquidationStatus)}
                 </td>
 				<td>${remarks}</td>
             </tr>`;
@@ -479,8 +499,8 @@ $(document).ready(function() {
 		let button = "";
 		if (data) {
 			let {
-				clientFundRequestID     = "",
-				clientFundRequestStatus = "",
+				liquidationID     = "",
+				liquidationStatus = "",
 				employeeID            = "",
 				approversID           = "",
 				approversDate         = "",
@@ -489,14 +509,14 @@ $(document).ready(function() {
 
 			let isOngoing = approversDate ? approversDate.split("|").length > 0 ? true : false : false;
 			if (employeeID === sessionID) {
-				if (clientFundRequestStatus == 0 || isRevise) {
+				if (liquidationStatus == 0 || isRevise) {
 					// DRAFT
 					button = `
 					<button type="button" 
 						class="btn btn-submit px-5 p-2"  
 						id="btnSubmit" 
-						clientFundRequestID="${encryptString(clientFundRequestID)}"
-						code="${getFormCode("CFR", createdAt, clientFundRequestID)}"
+						liquidationID="${encryptString(liquidationID)}"
+						code="${getFormCode("PCR", createdAt, liquidationID)}"
 						revise="${isRevise}"
 						cancel="${isFromCancelledDocument}"><i class="fas fa-paper-plane"></i>
 						Submit
@@ -507,8 +527,8 @@ $(document).ready(function() {
 						<button type="button" 
 							class="btn btn-cancel btnCancel px-5 p-2" 
 							id="btnCancel"
-							clientFundRequestID="${encryptString(clientFundRequestID)}"
-							code="${getFormCode("CFR", createdAt, clientFundRequestID)}"
+							liquidationID="${encryptString(liquidationID)}"
+							code="${getFormCode("PCR", createdAt, liquidationID)}"
 							revise="${isRevise}"
 							cancel="${isFromCancelledDocument}"><i class="fas fa-ban"></i> 
 							Cancel
@@ -518,82 +538,82 @@ $(document).ready(function() {
 						<button type="button" 
 							class="btn btn-cancel px-5 p-2"
 							id="btnCancelForm" 
-							clientFundRequestID="${encryptString(clientFundRequestID)}"
-							code="${getFormCode("CFR", createdAt, clientFundRequestID)}"
+							liquidationID="${encryptString(liquidationID)}"
+							code="${getFormCode("PCR", createdAt, liquidationID)}"
 							revise=${isRevise}><i class="fas fa-ban"></i> 
 							Cancel
 						</button>`;
 					}
 
 					
-				} else if (clientFundRequestStatus == 1) {
+				} else if (liquidationStatus == 1) {
 					// FOR APPROVAL
 					if (!isOngoing) {
 						button = `
 						<button type="button" 
 							class="btn btn-cancel  px-5 p-2"
 							id="btnCancelForm" 
-							clientFundRequestID="${encryptString(clientFundRequestID)}"
-							code="${getFormCode("CFR", createdAt, clientFundRequestID)}"
-							status="${clientFundRequestStatus}"><i class="fas fa-ban"></i> 
+							liquidationID="${encryptString(liquidationID)}"
+							code="${getFormCode("PCR", createdAt, liquidationID)}"
+							status="${liquidationStatus}"><i class="fas fa-ban"></i> 
 							Cancel
 						</button>`;
 					}
-				} else if (clientFundRequestStatus == 2) {
+				} else if (liquidationStatus == 2) {
 					// DROP
 					button = `
 					<button type="button" 
 						class="btn btn-cancel px-5 p-2"
 						id="btnDrop" 
-						clientFundRequestID="${encryptString(clientFundRequestID)}"
-						code="${getFormCode("CFR", createdAt, clientFundRequestID)}"
-						status="${clientFundRequestStatus}"><i class="fas fa-ban"></i> 
+						liquidationID="${encryptString(liquidationID)}"
+						code="${getFormCode("PCR", createdAt, liquidationID)}"
+						status="${liquidationStatus}"><i class="fas fa-ban"></i> 
 						Drop
 					</button>`;
-				} else if (clientFundRequestStatus == 3) {
+				} else if (liquidationStatus == 3) {
 					// DENIED - FOR REVISE
-					if (!isDocumentRevised(clientFundRequestID)) {
+					if (!isDocumentRevised(liquidationID)) {
 						button = `
 						<button
 							class="btn btn-cancel px-5 p-2"
 							id="btnRevise" 
-							clientFundRequestID="${encryptString(clientFundRequestID)}"
-							code="${getFormCode("CFR", createdAt, clientFundRequestID)}"
-							status="${clientFundRequestStatus}"><i class="fas fa-clone"></i>
+							liquidationID="${encryptString(liquidationID)}"
+							code="${getFormCode("PCR", createdAt, liquidationID)}"
+							status="${liquidationStatus}"><i class="fas fa-clone"></i>
 							Revise
 						</button>`;
 					}
-				} else if (clientFundRequestStatus == 4) {
+				} else if (liquidationStatus == 4) {
 					// CANCELLED - FOR REVISE
-					if (!isDocumentRevised(clientFundRequestID)) {
+					if (!isDocumentRevised(liquidationID)) {
 						button = `
 						<button
 							class="btn btn-cancel px-5 p-2"
 							id="btnRevise" 
-							clientFundRequestID="${encryptString(clientFundRequestID)}"
-							code="${getFormCode("CFR", createdAt, clientFundRequestID)}"
-							status="${clientFundRequestStatus}"
+							liquidationID="${encryptString(liquidationID)}"
+							code="${getFormCode("PCR", createdAt, liquidationID)}"
+							status="${liquidationStatus}"
 							cancel="true"><i class="fas fa-clone"></i>
 							Revise
 						</button>`;
 					}
 				}
 			} else {
-				if (clientFundRequestStatus == 1) {
+				if (liquidationStatus == 1) {
 					if (isImCurrentApprover(approversID, approversDate)) {
 						button = `
 						<button type="button" 
 							class="btn btn-submit px-5 p-2"  
 							id="btnApprove" 
-							clientFundRequestID="${encryptString(clientFundRequestID)}"
-							code="${getFormCode("CFR", createdAt, clientFundRequestID)}"><i class="fas fa-paper-plane"></i>
+							liquidationID="${encryptString(liquidationID)}"
+							code="${getFormCode("PCR", createdAt, liquidationID)}"><i class="fas fa-paper-plane"></i>
 							Approve
 						</button>
 						<button type="button" 
 							class="btn btn-cancel  px-5 p-2"
 							id="btnReject" 
-							clientFundRequestID="${encryptString(clientFundRequestID)}"
-							code="${getFormCode("CFR", createdAt, clientFundRequestID)}"><i class="fas fa-ban"></i> 
+							liquidationID="${encryptString(liquidationID)}"
+							code="${getFormCode("PCR", createdAt, liquidationID)}"><i class="fas fa-ban"></i> 
 							Deny
 						</button>`;
 					}
@@ -615,33 +635,6 @@ $(document).ready(function() {
 	}
 	// ----- END FORM BUTTONS -----
 
-        // ----- GET PROJECT LIST -----
-        function getProjectList(id = null, display = true) {
-            let html = `
-            <option 
-                value       = "0"
-                projectCode = "-"
-                clientCode  = "-"
-                clientName  = "-"
-                address     = "-"
-                ${id == "0" && "selected"}>N/A</option>`;
-            html += projectList.map(project => {
-                let address = `${project.clientUnitNumber && titleCase(project.clientUnitNumber)+", "}${project.clientHouseNumber && project.clientHouseNumber +", "}${project.clientBarangay && titleCase(project.clientBarangay)+", "}${project.clientCity && titleCase(project.clientCity)+", "}${project.clientProvince && titleCase(project.clientProvince)+", "}${project.clientCountry && titleCase(project.clientCountry)+", "}${project.clientPostalCode && titleCase(project.clientPostalCode)}`;
-    
-                return `
-                <option 
-                    value       = "${project.projectListID}" 
-                    projectCode = "${project.projectListCode}"
-                    clientCode  = "${project.clientCode}"
-                    clientName  = "${project.clientName}"
-                    address     = "${address}"
-                    ${project.projectListID == id && "selected"}>
-                    ${project.projectListName}
-                </option>`;
-            })
-            return display ? html : projectList;
-        }
-        // ----- END GET PROJECT LIST -----
 
 	// ----- UPDATE INVENTORYT NAME -----
 	function updateInventoryItemOptions() {
@@ -682,6 +675,22 @@ $(document).ready(function() {
 			})
 			$(element).html(html);
 		});
+
+		// companyElementID.map((element, index) => {
+		// 	let html = `<option selected disabled>Select Item Name</option>`;
+		// 	let itemList = !companyItemIDArr.includes("0") && $(`.itemCompanyTableBody tr`).length > 1 ? [...inventoryItemList] : [optionNone, ...inventoryItemList];
+		// 	html += itemList.filter(item => !companyItemIDArr.includes(item.itemID) || item.itemID == companyItemIDArr[index]).map(item => {
+		// 		return `
+		// 		<option 
+		// 			value           = "${item.chartOfAccountID}"
+		// 			itemDescription = "${item.accountName}"
+		// 			createdAt       = "${item.createdAt}"
+		// 			${item.chartOfAccountID == companyItemIDArr[index] && "selected"}>
+		// 			${item.accountName}
+		// 		</option>`;
+		// 	})
+		// 	$(element).html(html);
+		// });
 	}
 	// ----- END UPDATE INVENTORYT NAME -----
 
@@ -709,7 +718,7 @@ $(document).ready(function() {
 
 
     // ----- GET INVENTORY ITEM -----
-    function getInventoryItem(id = null, isProject = true, display = true) {
+    function getChartofAccount(id = null, isProject = true, display = true) {
         let html    = `<option selected disabled>Select Chart of Account</option>`;
 		const attr  = isProject ? "[project=true]" : "[company=true]";
 		const table = isProject ? $(`.itemProjectTableBody tr`).length > 1 : $(`.itemCompanyTableBody tr`).length > 1;
@@ -724,7 +733,7 @@ $(document).ready(function() {
 			accountName:            "N/A"
 		};
 		// let itemList = [optionNone, ...inventoryItemList];
-		let itemList = !itemIDArr.includes("0") && table ? [...inventoryItemList] : [optionNone, ...inventoryItemList];
+		let itemList = !itemIDArr.includes("0") && table ? [...ChartOfAccountList] : [optionNone, ...ChartOfAccountList];
 
 		html += itemList.filter(item => !itemIDArr.includes(item.chartOfAccountID) || item.chartOfAccountID == id).map(item => {
             return `
@@ -736,9 +745,42 @@ $(document).ready(function() {
             </option>`;
         })
 		
-        return display ? html : inventoryItemList;
+        return display ? html : ChartOfAccountList;
     }
     // ----- END GET INVENTORY ITEM -----
+
+	    // ----- GET INVENTORY ITEM -----
+		function getClient(id = null, isProject = true, display = true) {
+			console.log(id);
+			let html    = `<option selected disabled>Select Client</option>`;
+			const attr  = isProject ? "[project=true]" : "[company=true]";
+			const table = isProject ? $(`.itemProjectTableBody tr`).length > 1 : $(`.itemCompanyTableBody tr`).length > 1;
+	
+			let itemIDArr = []; // 0 IS THE DEFAULT VALUE
+			$(`[name=clientID]${attr}`).each(function(i, obj) {
+				itemIDArr.push($(this).val());
+			}) 
+	
+			let optionNone = {
+				clientID:       "0",
+				clientName:     "N/A"
+			};
+			// let itemList = [optionNone, ...inventoryItemList];
+			let itemList = !itemIDArr.includes("0") && table ? [...clientList] : [optionNone, ...clientList];
+	
+			html += itemList.filter(item => !itemIDArr.includes(item.clientList) || item.clientList == id).map(item => {
+				return `
+				<option 
+					value           = "${item.clientID}" 
+					itemDescription = "${item.clientName}"
+					${item.clientID == id && "selected"}>
+					${item.clientName}
+				</option>`;
+			})
+			
+			return display ? html : clientList;
+		}
+		// ----- END GET INVENTORY ITEM -----
 
 
 	// ----- GET NON FORMAT AMOUNT -----
@@ -749,223 +791,272 @@ $(document).ready(function() {
 
 
 	// ----- GET ITEM ROW -----
-    function getItemRow(isProject = true, item = {}, readOnly = false, ceID = null) {
-		const attr = isProject ? `project="true"` : `company="true"`;
+    function getItemRow(pettyCashID, isProject = true, item = {}, readOnly) {
+		const attr = isProject ? `project="true"` : ``;
+	
 		let {
-			requestItemID                       = "",
-			chartOfAccountID                    = "",
-			description  						= "",
-			quantity							="",
-			amount                              = 0,
-			files                               = ""
+			liquidationID                    							= "",
+			description                               					= "",
+			amount                               						= "",
+			vatSales                               						= "",
+			vat                               							= "",
+			clientID													="",
+			srfNumber                               					= "",
+			chartOfAccountID                          					= "",
+			remark                               						= "",
+			receiptNumber                              					= "",
+			accountName													="",
+			clientName													="",
 		} = item;
+		
 
 		let html = "";
 		if (readOnly) {
-			const itemFIle = files ? `<a href="${base_url+"assets/upload-files/petty-cash-request/"+files}" target="_blank">${files}</a>` : `-`;
+		
 			html += `
-			<tr class="itemTableRow">
-				
-                <td>
-					<div class="description">
-						${description || "-"}
-					</div>
-				</td>
-				<td>
-					<div class="quantity text-center">
-						${quantity || "-"}
-					</div>
-				</td>
-				<td class="text-right">
+			<td>
+				<div class="description">
+				${description || "-"}
+				</div>
+			</td>
+			<td>
+				<div class="text-right">
 				${formatAmount(amount, true) || "-"}
-				</td>
-				<td>
-					<div class="file">
-						${itemFIle}
-					</div>
-				</td>
+				</div>
+			</td>
+			<td>
+				<div class="vatSales text-right" >
+				${formatAmount(vatSales, true) || "-"}
+				</div>	
+			</td>
+			<td>
+				<div class="vat text-right">
+				${formatAmount(vat, true) || "-"}
+				</div>
+			</td>
+			<td>
+				<div class="client ">
+				${clientName || "-"}
+				</div>
+			</td>
+			<td>
+				<div class="srfNumber">
+				${srfNumber || "-"}
+				</div>
+			</td>
+			<td>
+				<div class="chartofaccount ">
+				${accountName || "-"}
+				</div>
+			</td>	
+			<td>	
+				<div class="">
+				${remark || "-"}
+				</div>
+			</td>
+			<td>
+				<div class="receiptNumber">
+				${receiptNumber || "-"}
+				</div>
+			</td>
+			
+			
 			</tr>`;
-		} else {
-			const disabled  = ceID && ceID != "0" ? "disabled" : "";
-			const inputFile = ceID && ceID != "0" ? "" : `
-			<input 
-				type="file" 
-				class="form-control" 
-				name="files" 
-				id="files"
-				accept="image/*, .pdf, .doc, .docx">
-			<div class="invalid-feedback d-block" id="invalid-files"></div>`;
+		}else{
+			//let disabled = readOnly ? "disabled " : "";
+			
+			let disposalItemsData = getTableData(
+				`fms_finance_request_details_tbl`,
+					`financeRequestID,
+					clientFundRequestID,
+					pettyCashRequestID,	
+					voucherID,
+					description,
+					quantity,
+					amount,
+					liquidationID,
+					vatSales,
+					vat,
+					srfNumber,
+					chartOfAccountID,
+					remark,
+					receiptNumber`,
+				 	`pettyCashRequestID = ${pettyCashID}`);
+				disposalItemsData.map((item, index) => {
 
-			let itemFile  = "";
-			if (ceID && ceID != "0") {
-				if (files) {
-					itemFile = `
-					<a href="${base_url+"assets/upload-files/petty-cash-request/"+files}"
-					class="filename"
-					title="${files}" 
-					style="display: block;
-						width: 150px;
-						overflow: hidden;
-						white-space: nowrap;
-						text-overflow: ellipsis;"
-					target="_blank">${files}</a>`;
-				} else {
-					itemFile = "-";
-				}
-			} else {
-				if (files) {
-					itemFile = `
-					<div class="d-flex justify-content-between align-items-center py-2">
-						<a class="filename"
-						title="${files}"
-						style="display: block;
-							width: 150px;
-							overflow: hidden;
-							white-space: nowrap;
-							text-overflow: ellipsis;"
-						href="${base_url+"assets/upload-files/petty-cash-request/"+files}" 
-						target="_blank">
-						${files}
-						</a>
-						<span class="btnRemoveFile" style="cursor: pointer"><i class="fas fa-close"></i></span>
-					</div>`;
-				}
-			}
-
+					let {
+						amount,
+						financeRequestID,
+						description
+					} = item;
+				//$("#totalAmount").val(pettyCashRequestAmount);
 			html += `
 			<tr class="itemTableRow">
-				<td class="text-center">
-					<div class="action">
-						<input type="checkbox" class="checkboxrow" ${disabled}>
-					</div>
-				</td>
                     <td>
-					<div>
-						<textarea 
-							class="form-control validate description"
-							minlength="0"
-							maxlength="250"
-							rows="2" 
-							style="resize: none" 
-							class="form-control" 
-							data-allowcharacters="[0-9][a-z][A-Z][ ][.][,][_]['][()][?][-][/]"
-							name="description"
-                            required 
-                            value="${description}"
-							id="description"
-							ceID="${ceID ? true : false}"
-							${disabled}>
-							</textarea>
-                            <div class="invalid-feedback d-block" id="invalid-description"></div>
-                        </div>
+					<div class="description" name="description" descriptionValue="${description}" financeRequestID="${financeRequestID}">
+							${description || "-"}
+					</div>
                    </td> 
-				   <td>
-						<div class="quantity">
-							<input 
-							type="text" 
-							class="form-control input-quantity text-right "
-							min="0.01" 
-							max="999999999" 
-							data-allowcharacters="[0-9]"
-							id="quantity" 
-							name="quantity" 
-							value="${quantity}" 
-							minlength="1" 
-							maxlength="20" 
-							autocomplete="off"
-							ceID="${ceID ? true : false}"
-							${disabled}>
-					<div class="invalid-feedback d-block" id="invalid-quantity"></div>
-					</div>
-		   			</td>
                     <td>
-					<div class="amountvalue">
-					<div class="input-group">
-					<div class="input-group-prepend">
-						<span class="input-group-text">₱</span>
-					</div>
-					
-						<input 
-							type="text" 
-							class="form-control input-quantity text-right"
-							min="0.00" 
-							data-allowcharacters="[0-9]" 
-							max="999999999" 
-							id="amount" 
-							name="amount" 
-							value="${amount}" 
-							minlength="1" 
-							maxlength="20" 
-							autocomplete="off"
-							ceID="${ceID ? true : false}"
-							${disabled}>
-						<div class="invalid-feedback d-block" id="invalid-amount"></div>
-					</div>
+					<div class="amount" name="amount" amountValue="${amount}">
+							${amount || "-"}
 					</div>
 				</td>
 				<td>
-					<div class="file">
-						<div class="displayfile">
-							${itemFile}
-						</div>
-						${inputFile}
-					</div>
+				<div class="quantity">
+				<div class="input-group">
+				<div class="input-group-prepend">
+					<span class="input-group-text">₱</span>
+				</div>
+					<input 
+						type="text" 
+						class="form-control input-quantity text-right vatSales"
+						min="0.00" 
+						data-allowcharacters="[0-9]" 
+						max="999999999" 
+						id="vatSales${index}" 
+						name="vatSales" 
+						minlength="1" 
+						maxlength="20"
+						value="${vatSales}" 
+						autocomplete="off">
+					<div class="invalid-feedback d-block" id="invalid-vatSales"></div>
+				</div>
+				</div>
+			</td>
+			<td>
+				<div class="quantity">
+				<div class="input-group">
+				<div class="input-group-prepend">
+					<span class="input-group-text">₱</span>
+				</div>
+					<input 
+						type="text" 
+						class="form-control input-quantity text-right"
+						min="0.00" 
+						data-allowcharacters="[0-9]" 
+						max="999999999" 
+						id="vat${index}" 
+						name="vat" 
+						value="${vat}"
+						minlength="1" 
+						maxlength="20" 
+						autocomplete="off"
+						
+					<div class="invalid-feedback d-block" id="invalid-vat"></div>
+				</div>
+				</div>
+			</td>
+			<td>
+				<div class="clientID">
+				<select
+					class="form-control select2"
+					data-allowcharacters="[0-9][a-z][A-Z][.][,][?][!][/][;][:][''][-][_][(][)][%][&][*][ ]"
+					name="clientID"
+					id="clientID${index}">
+					${getClient(clientID)}
+				</select>
+					<div class="invalid-feedback d-block" id="invalid-clientID"></div>
+				</div>
+			</td>
+			<td>
+				<div class="quantity">
+					<input 
+						type="text" 
+						class="form-control text-right"
+						min="0.00" 
+						data-allowcharacters="[0-9]" 
+						max="999999999" 
+						id="srfNumber${index}" 
+						name="srfNumber" 
+						value="${srfNumber}"
+						minlength="1" 
+						maxlength="20" 
+						autocomplete="off"
+						>
+					<div class="invalid-feedback d-block" id="invalid-srfNumber"></div>
+				</div>
+			</td>
+			<td>
+				<div class="chartOfAccountID">
+				<select
+				class="form-control select2"
+				name="chartOfAccountID"
+				id="chartOfAccountID${index}">
+				${getChartofAccount(chartOfAccountID)}
+			</select>
+			<div class="invalid-feedback d-block" id="invalid-chartOfAccountID"></div>		
+			</div>
+			</td>
+			<td>
+				<div class="remark">
+					<textarea 
+						class="form-control"
+						data-allowcharacters="[0-9][a-z][A-Z][.][,][?][!][/][;][:][']["][-][_][(][)][%][&][*][ ]"
+						minlength="0"
+						maxlength="250"
+						rows="2" 
+						style="resize: none" 
+						class="form-control" 
+						data-allowcharacters="[0-9][a-z][A-Z][ ][.][,][_]['][()][?][-][/]"
+						id="remark${index}"
+						name="remark">${remark}</textarea>
+				</div>
 				</td>
+			<td>
+			<div class="receiptNumber">
+				<input type="text"
+				data-allowcharacters="[0-9][a-z][A-Z][-]"
+				class="form-control"
+				id="receiptNumber" 
+				name="receiptNumber"
+				value="${receiptNumber}">
+			</div>	
+			</td>
 			</tr>`;
+			//$("#totalAmount").text("seds");
+			//$(`#totalAmount`).text(formatAmount(pettyCashRequestAmount, true));
+		})
+		
 		}
 
         return html;
     }
-    // ----- END GET ITEM ROW -----
+
+	
+	$(document).on("keyup", ".liquidationBudget", function() {
+		//console.log("44");
+		var totalbudget = parseFloat($("#liquidationBudget").val().replace(/,/g, ''));
+		var pettyCashAmountValue = parseFloat($("#liquidationBudget").attr("pettyCashAmountValue").replace(/,/g, ''));
+		var munustotal =  pettyCashAmountValue - totalbudget;
+		var totalamount = formatAmount(munustotal, true);
+		$("#liquidationExcessOrShortage").text((totalamount));
+	//alert(totalbudget1);
+
+	})	
+	// 	$(document).on("keyup change", "[name=vatSales]", function() {
+	// 	//const index     		= $(this).closest("tr").first().attr("index");
+	// 	var rowCount = $('.itemProjectTableBody tr').length;
+		
+	// 	var totalcost = 0;
+	// 	for(var i=0; i<rowCount; i++) {
+	// 	 totalcost += parseFloat($(`#vatSales${i}`).val().replace(/,/g, ''));
+	// 	  if(isNaN(totalcost)){
+	// 		 totalcost=0;
+	// 	  }
+ 	// 	}       
+	
+	// 	//$("#totalAmount").css('background-color', '#FFFFFF');
+	// 	$(`#totalAmount`).text(formatAmount(totalcost, true));
+	// 	// document.getElementById("invalid-message").style.visibility = "hidden";
+	// 	// document.getElementById('invalid-message').innerHTML = '';
+	// 	// $("#totalAmount").attr("totalValue","1");
+	// 	$("#totalAmount").attr("ClientFundRequestAmount",totalcost);
+	// 	//totalCashAmount("1");
+	// 	//return true;
 
 
-	// ----- UPDATE TABLE ITEMS -----
-	function updateTableItems() {
-		$(".itemProjectTableBody tr").each(function(i) {
-			// ROW ID
-			$(this).attr("id", `tableRow${i}`);
-			$(this).attr("index", `${i}`);
-
-			// CHECKBOX
-			$("td .action .checkboxrow", this).attr("id", `checkboxrow${i}`);
-			$("td .action .checkboxrow", this).attr("project", `true`);
-
-
-			// ITEMNAME
-			// $(this).find("select").each(function(x) {
-			// 	if ($(this).hasClass("select2-hidden-accessible")) {
-			// 		$(this).select2("destroy");
-			// 	}
-			// })
-
-			// $(this).find("select").each(function(j) {
-			// 	const chartOfAccountID = $(this).val();
-			// 	$(this).attr("index", `${i}`);
-			// 	$(this).attr("project", `true`);
-			// 	$(this).attr("id", `chartOfAccountID${i}`);
-			// 	$(this).attr("data-select2-id", `chartOfAccountID${i}`);
-			// 	if (!$(this).hasClass("select2-hidden-accessible")) {
-			// 		$(this).select2({ theme: "bootstrap" });
-			// 	}
-			// });
-
-			// QUANTITY
-			$("td .amountvalue [name=amount]", this).attr("id", `amount${i}`);		
-			// QUANTITY
-			$("td .quantity [name=quantity]", this).attr("id", `quantity${i}`);
-			$("td .quantity [name=quantity]", this).attr("project", `true`);
-			
-			// TOTAL COST
-			$("td .description", this).attr("id", `description${i}`);
-            $("td .description .invalid-feedback", this).attr("id", `invalid-description${i}`);
-			$("td .description [name=description]", this).attr("company", `true`);
-
-			// FILE
-			$("td .file [name=files]", this).attr("id", `filesProject${i}`);
-
-		})
-	}
-	// ----- END UPDATE TABLE ITEMS -----
+	// });	
 
 
 	// ----- UPDATE DELETE BUTTON -----
@@ -1005,7 +1096,6 @@ $(document).ready(function() {
 						var tableRow = $(this).closest('tr');
 						tableRow.fadeOut(500, function (){
 							$(this).closest("tr").remove();
-							updateTableItems();
 							// $(`[name=chartOfAccountID]${attr}`).each(function(i, obj) {
 							// 	let chartOfAccountID = $(this).val();
 							// 	$(this).html(getInventoryItem(chartOfAccountID, isProject));
@@ -1023,141 +1113,7 @@ $(document).ready(function() {
 		}
 	}
 	// ----- END DELETE TABLE ROW -----
-	
-	$(document).on("keyup change", "[name=amount]", function() {
-		//const index     		= $(this).closest("tr").first().attr("index");
-		var rowCount = $('.itemProjectTableBody tr').length;
-		var totalcost = 0;
-		for(var i=0; i<rowCount; i++) {
-		 totalcost += parseFloat($(`#amount${i}`).val().replace(/,/g, ''));
-		  if(isNaN(totalcost)){
-			 totalcost=0;
-		  }
- 		}       
-	 if(totalcost <= 2000){
-		$("#totalAmount").css('background-color', '#FFFFFF');
-		$(`#totalAmount`).text(formatAmount(totalcost, true));
-		document.getElementById("invalid-message").style.visibility = "hidden";
-		document.getElementById('invalid-message').innerHTML = '';
-		$("#totalAmount").attr("totalValue","1");
-		$("#totalAmount").attr("clientFundRequestAmount",totalcost);
-		//totalCashAmount("1");
-		//return true;
-	 }else{
-		 $("#totalAmount").css('background-color', '#FF0000');
-		$(`#totalAmount`).text(formatAmount(totalcost, true));
-		document.getElementById('invalid-message').innerHTML = 'Invalid request! Can only request ₱ 2,000 and below.';
-		document.getElementById("invalid-message").style.visibility = "visible";
-		$("#totalAmount").attr("totalValue","");
-		$("#totalAmount").attr("clientFundRequestAmount",totalcost);
-		//totalCashAmount("0");
-		//return false;
-	 }
 
-
-	});	
-
-	// ----- UPDATE TOTAL AMOUNT -----
-	function updateTotalAmount(isProject = true) {
-		const attr        = isProject ? "[project=true]" : "[company=true]";
-		const quantityArr = $.find(`[name=amount]${attr}`).map(element => getNonFormattedAmount(element.value) || "0");
-		const unitCostArr = $.find(`.unitcost${attr}`).map(element => getNonFormattedAmount(element.innerText) || "0");
-		const totalAmount = quantityArr.map((qty, index) => +qty * +unitCostArr[index]).reduce((a,b) => a + b, 0);
-		console.log(totalAmount);
-		$(`#totalAmount${attr}`).text(formatAmount(totalAmount, true));
-		if (isProject) {
-			$("#purchaseRequestProjectTotal").text(formatAmount(totalAmount, true));
-		} else {
-			$("#purchaseRequestCompanyTotal").text(formatAmount(totalAmount, true));
-		}
-
-		const projectTotal = +getNonFormattedAmount($(`#purchaseRequestProjectTotal`).text()); 
-		const companyTotal = +getNonFormattedAmount($(`#purchaseRequestCompanyTotal`).text()); 
-		const grandTotal   = projectTotal + companyTotal;
-		$("#purchaseRequestGrandTotal").text(formatAmount(grandTotal, true));
-
-		return totalAmount;
-	}
-	// ----- END UPDATE TOTAL AMOUNT -----
-
-
-	// ----- GET TABLE MATERIALS AND EQUIPMENT -----
-	function getTableMaterialsEquipment(ceID = null, data = false, readOnly = false) {
-		let {
-			clientFundRequestID       = "",
-			reviseClientFundRequestID = "",
-			employeeID              = "",
-			projectID               = "",
-			purchaseRequestReason   = "",
-			projectTotalAmount      = 0,
-			companyTotalAmount      = 0,
-				clientFundRequestRemarks  = "",
-			approversID             = "",
-			approversStatus         = "",
-			approversDate           = "",
-			clientFundRequestStatus   = false,
-			submittedAt             = false,
-			createdAt               = false,
-		} = data && data[0];
-
-		let disabled = readOnly ? "disabled" : "";
-
-		let requestItemsData;
-		
-
-		let checkboxProjectHeader = !disabled ? `
-		<th class="text-center">
-			<div class="action">
-				<input type="checkbox" class="checkboxall" project="true" >
-			</div>
-		</th>` : ``;
-		let checkboxCompanyHeader = !disabled ? `
-		<th class="text-center">
-			<div class="action">
-				<input type="checkbox" class="checkboxall" company="true" >
-			</div>
-		</th>` : ``;
-		let tableProjectRequestItemsName = !disabled ? "tableProjectRequestItems" : "tableProjectRequestItems0";
-		let buttonProjectAddDeleteRow = !disabled ? `
-		<div class="d-flex flex-column justify-content-start text-left my-2">
-			<div>
-				<button type="button" class="btn btn-primary btnAddRow" id="btnAddRow" project="true" ><i class="fas fa-plus-circle"></i> Add Row</button>
-				<button type="button" class="btn btn-danger btnDeleteRow" id="btnDeleteRow" project="true" disabled><i class="fas fa-minus-circle"></i> Delete Row/s</button>
-			</div>
-		</div>` : "";
-		let html = `
-		<div class="w-100">
-			<hr class="pb-1">
-			<div class="text-primary font-weight-bold" style="font-size: 1.5rem;">Petty Cash Request</div>
-			<table class="table table-striped" id="${tableProjectRequestItemsName}">
-				<thead>
-					<tr style="white-space: nowrap">
-						${checkboxProjectHeader}
-						<th>Chart of Account ${!disabled ? "<code>*</code>" : ""}</th>
-						<th>Description ${!disabled ? "<code>*</code>" : ""}</th>
-						<th>Quantity</th>
-						<th>Amount</th>
-						<th>File</th>
-					</tr>
-				</thead>
-				<tbody class="itemProjectTableBody" project="true">
-					${requestProjectItems}
-				</tbody>
-			</table>
-			
-			<div class="w-100 d-flex justify-content-between align-items-center py-2">
-				<div>
-					${buttonProjectAddDeleteRow}
-				</div>
-				<div class="font-weight-bolder " style="font-size: 1rem;">
-					<span>Total Amount: &nbsp;</span>
-					<span class="text-dark TotalAmount"color="" style="font-size: 1.2em" id="totalAmount" name="totalAmount" project="true">${formatAmount(projectTotalAmount, true)}</span>
-				</div>
-				
-			</div>
-		</div>`;
-		return  html;
-	}
 	// ----- END GET TABLE MATERIALS AND EQUIPMENT -----
 
 	// ----- SELECT PROJECT LIST -----
@@ -1174,150 +1130,75 @@ $(document).ready(function() {
     })
     // ----- END SELECT PROJECT LIST -----
 
-	// ----- KEYUP QUANTITY OR UNITCOST -----
-	$(document).on("keyup", "[name=quantity]", function() {
-		const index     = $(this).closest("tr").first().attr("index");
-		const isProject = $(this).closest("tbody").attr("project") == "true";
-		const attr      = isProject ? "[project=true]" : "[company=true]";
-		const table     = isProject ? "project" : "company";
-		const quantity  = +getNonFormattedAmount($(`#quantity${index}${table}${attr}`).val());
-		const unitcost  = +getNonFormattedAmount($(`#unitcost${index}${attr}`).text());
-		const totalcost = quantity * unitcost;
-		$(`#totalcost${index}${attr}`).text(formatAmount(totalcost, true));
-		updateTotalAmount(isProject);
-	})
-	// ----- END KEYUP QUANTITY OR UNITCOST -----
-
-
-	// ----- SELECT FILE -----
-	$(document).on("change", "[name=files]", function(e) {
-		const filename = this.files[0].name;
-		const filesize = this.files[0].size/1024/1024; // Size in MB
-		if (filesize > 10) {
-			$(this).val("");
-			$(this).parent().parent().find(".displayfile").empty();
-			showNotification("danger", "File size must be less than or equal to 10mb");
-		} else {
-			let html = `
-			<div class="d-flex justify-content-between align-items-center py-2">
-				<span class="filename"
-					style="display: block;
-						width: 180px;
-						overflow: hidden;
-						white-space: nowrap;
-						text-overflow: ellipsis;">${filename}</span>
-				<span class="btnRemoveFile" style="cursor: pointer"><i class="fas fa-close"></i></span>
-			</div>`;
-			$(this).parent().find(".displayfile").first().html(html);
-		}
-	})
-	// ----- END SELECT FILE -----
-
-
-	// ----- REMOVE FILE -----
-	$(document).on("click", ".btnRemoveFile", function() {
-		$(this).parent().parent().parent().find("[name=files]").first().val("");
-		$(this).closest(".displayfile").empty();
-	})
-	// ----- END REMOVE FILE -----
-
-
-	// ----- CLICK DELETE ROW -----
-	$(document).on("click", ".btnDeleteRow", function(){
-		const isProject = $(this).attr("project") == "true";
-		deleteTableRow(isProject);
-	})
-	// ----- END CLICK DELETE ROW -----
-
-
-	// ----- CHECKBOX EVENT -----
-	$(document).on("click", "[type=checkbox]", function() {
-		updateDeleteButton();
-	})
-	// ----- END CHECKBOX EVENT -----
-
-
-	// ----- CHECK ALL -----
-	$(document).on("change", ".checkboxall", function() {
-		const isChecked = $(this).prop("checked");
-		const isProject = $(this).attr("project") == "true";
-		if (isProject) {
-			$(".checkboxrow[project=true]").each(function(i, obj) {
-				$(this).prop("checked", isChecked);
-			});
-		} else {
-			$(".checkboxrow[company=true]").each(function(i, obj) {
-				$(this).prop("checked", isChecked);
-			});
-		}
-		updateDeleteButton();
-	})
-	// ----- END CHECK ALL -----
-
-
-    // ----- INSERT ROW ITEM -----
-    $(document).on("click", ".btnAddRow", function() {
-		let isProject = $(this).attr("project") == "true";
-        let row = getItemRow(isProject);
-		updateTableItems();
-		if (isProject) {
-			$(".itemProjectTableBody").append(row);
-		} else {
-			$(".itemCompanyTableBody").append(row);
-            
-		}
-		updateTableItems();
-		updateInventoryItemOptions();
-		initInputmask();
-		initAmount();
-		initQuantity();
-    })
-    // ----- END INSERT ROW ITEM -----
-
-
     // ----- FORM CONTENT -----
-	function formContent(data = false, readOnly = false, isRevise = false, isFromCancelledDocument = false) {
+	function formContent(data = false, readOnly = false, isRevise = false, isFromCancelledDocument = false,liquidationDataID, pettycashCode, pettyCashDate, pettyCashAmount) {
+		//alert(pettycashID);
 		$("#page_content").html(preloader);
+		let datewithrecord = moment(pettyCashDate).format("MMMM DD, YYYY");
 		readOnly = isRevise ? false : readOnly;
-
+		let pettyCashID = '';
 		let {
-			clientFundRequestID       = "",
-			reviseClientFundRequestID = "",
+			liquidationID      		= "",
+			reviseLiquidationID 	= "",
+			pettyCashRequestID		="",
+			liquidationPurpose		="",
 			employeeID              = "",
 			projectTotalAmount      = "0",
 			clientFundRequestDate	="",
 			chartOfAccountID		="",
 			companyTotalAmount      = "0",
-			clientFundRequestRemarks  = "",
+			liquidationRemarks  	= "",
 			approversID             = "",
             projectID               ="",
-			clientFundRequestAmount	= "0",
+			ClientFundRequestAmount	= "0",
+			liquidationReferenceNumber ="",
+			liquidationExpenses			="",
+			liquidationBudget			="",
+			liquidationExcessOrShortage	="",
+			liquidationDispositionofExcessOrShortage="",
+			liquidationDate			="",
 			approversStatus         = "",
 			approversDate           = "",
-			clientFundRequestStatus   = false,
+			liquidationStatus   	= false,
 			submittedAt             = false,
 			createdAt               = false,
 		} = data && data[0];
 
+			if(liquidationID){
+				pettyCashID = liquidationID;
+			}else{
+				pettyCashID = liquidationDataID;
+			}
+			//alert(pettyCashID);
         let clientFundRequestItems = "";
-        if (clientFundRequestID) {
-            let clientFundRequestData = getTableData(
-                `fms_finance_request_details_tbl AS cfrd
-                LEFT JOIN fms_client_fund_request_tbl          AS cfr ON cfrd.clientFundRequestID = cfr.clientFundRequestID`,
-                `cfrd.clientFundRequestID,
-                cfrd.description,
-				cfrd.quantity,
-                cfrd.amount,
-                cfrd.files`,
-                `cfrd.clientFundRequestID = ${clientFundRequestID}`,``,`cfrd.financeRequestID`);
-                clientFundRequestData.map(item => {
-                    clientFundRequestItems += getItemRow(true, item, readOnly)
-            })    
-        }else{
-            clientFundRequestItems += getItemRow(true);
-        } 
-
-		// ----- GET EMPLOYEE DATA -----
+		if (liquidationID) {
+		let pettyCashRequestData = getTableData(
+			`fms_finance_request_details_tbl 			AS frd
+			LEFT JOIN fms_liquidation_tbl         	 	AS lt ON frd.liquidationID = lt.liquidationID
+			LEFT JOIN fms_chart_of_accounts_tbl			AS fcoa ON frd.chartOfAccountID = fcoa.chartOfAccountID
+			LEFT JOIN pms_client_tbl					AS pct ON  frd.clientID = pct.clientID`,
+			`frd.liquidationID,
+			frd.description,
+			frd.amount,
+			frd.vatSales,
+			frd.vat,
+			frd.clientID,
+			frd.srfNumber,
+			frd.chartOfAccountID,
+			frd.remark,
+			frd.receiptNumber,
+			fcoa.accountName,
+			pct.clientName`,
+			`frd.liquidationID  = ${liquidationID}`);
+			pettyCashRequestData.map(item => {
+				clientFundRequestItems += getItemRow(pettyCashID, true, item, readOnly)
+				//console.log(clientFundRequestItems);
+		})    
+		}else{
+			
+			clientFundRequestItems += getItemRow(pettyCashID, true, "", false);
+	} 
+		
 		let {
 			fullname:    employeeFullname    = "",
 			department:  employeeDepartment  = "",
@@ -1327,39 +1208,30 @@ $(document).ready(function() {
 
 		readOnly ? preventRefresh(false) : preventRefresh(true);
 
-		$("#btnBack").attr("clientFundRequestID", encryptString(clientFundRequestID));
-		$("#btnBack").attr("status", clientFundRequestStatus);
+		$("#btnBack").attr("liquidationID", encryptString(liquidationID));
+		$("#btnBack").attr("status", liquidationStatus);
 		$("#btnBack").attr("employeeID", employeeID);
 		$("#btnBack").attr("cancel", isFromCancelledDocument);
 
 		let disabled          = readOnly ? "disabled" : "";
-        let checkboxProjectHeader = !disabled ? `
-		<th class="text-center">
-			<div class="action">
-				<input type="checkbox" class="checkboxall" project="true">
-			</div>
-		</th>` : ``;
+        
         let tableProjectRequestItemsName = !disabled ? "tableProjectRequestItems" : "tableProjectRequestItems0";
-        let buttonProjectAddDeleteRow = !disabled ? `
-		<div class="w-100 text-left my-2">
-			<button class="btn btn-primary btnAddRow" id="btnAddRow" project="true"><i class="fas fa-plus-circle"></i> Add Row</button>
-			<button class="btn btn-danger btnDeleteRow" id="btnDeleteRow" project="true" disabled><i class="fas fa-minus-circle"></i> Delete Row/s</button>
-		</div>` : "";
+        
 
 		//let disabledReference = billMaterialID && billMaterialID != "0" ? "disabled" : disabled;
 		
 		let button = formButtons(data, isRevise, isFromCancelledDocument);
 
-		let reviseDocumentNo    = isRevise ? clientFundRequestID : reviseClientFundRequestID;
-		let documentHeaderClass = isRevise || reviseClientFundRequestID ? "col-lg-4 col-md-4 col-sm-12 px-1" : "col-lg-2 col-md-6 col-sm-12 px-1";
-		let documentDateClass   = isRevise || reviseClientFundRequestID ? "col-md-12 col-sm-12 px-0" : "col-lg-8 col-md-12 col-sm-12 px-1";
-		let documentReviseNo    = isRevise || reviseClientFundRequestID ? `
+		let reviseDocumentNo    = isRevise ? liquidationID : reviseLiquidationID;
+		let documentHeaderClass = isRevise || reviseLiquidationID ? "col-lg-4 col-md-4 col-sm-12 px-1" : "col-lg-2 col-md-6 col-sm-12 px-1";
+		let documentDateClass   = isRevise || reviseLiquidationID ? "col-md-12 col-sm-12 px-0" : "col-lg-8 col-md-12 col-sm-12 px-1";
+		let documentReviseNo    = isRevise || reviseLiquidationID ? `
 		<div class="col-lg-4 col-md-4 col-sm-12 px-1">
 			<div class="card">
 				<div class="body">
 					<small class="text-small text-muted font-weight-bold">Revised Document No.</small>
 					<h6 class="mt-0 text-danger font-weight-bold">
-						${getFormCode("CFR", createdAt, reviseDocumentNo)}
+						${getFormCode("PCR", createdAt, reviseDocumentNo)}
 					</h6>      
 				</div>
 			</div>
@@ -1373,7 +1245,7 @@ $(document).ready(function() {
                     <div class="body">
                         <small class="text-small text-muted font-weight-bold">Document No.</small>
                         <h6 class="mt-0 text-danger font-weight-bold">
-							${clientFundRequestID && !isRevise ? getFormCode("CFR", createdAt, clientFundRequestID) : "---"}
+							${liquidationID && !isRevise ? getFormCode("PCR", createdAt, liquidationID) : "---"}
 						</h6>      
                     </div>
                 </div>
@@ -1383,7 +1255,7 @@ $(document).ready(function() {
                     <div class="body">
                         <small class="text-small text-muted font-weight-bold">Status</small>
                         <h6 class="mt-0 font-weight-bold">
-							${clientFundRequestStatus && !isRevise ? getStatusStyle(clientFundRequestStatus) : "---"}
+							${liquidationStatus && !isRevise ? getStatusStyle(liquidationStatus) : "---"}
 						</h6>      
                     </div>
                 </div>
@@ -1415,7 +1287,7 @@ $(document).ready(function() {
                         <div class="body">
                             <small class="text-small text-muted font-weight-bold">Date Approved</small>
                             <h6 class="mt-0 font-weight-bold">
-								${getDateApproved(clientFundRequestStatus, approversID, approversDate)}
+								${getDateApproved(liquidationStatus, approversID, approversDate)}
 							</h6>      
                         </div>
                     </div>
@@ -1427,45 +1299,20 @@ $(document).ready(function() {
                     <div class="body">
                         <small class="text-small text-muted font-weight-bold">Remarks</small>
                         <h6 class="mt-0 font-weight-bold">
-							${clientFundRequestRemarks && !isRevise ? clientFundRequestRemarks : "---"}
+							${liquidationRemarks && !isRevise ? liquidationRemarks : "---"}
 						</h6>      
                     </div>
                 </div>
             </div>
         </div>
-            <div class="row" id="form_petty_cash_request">
-                <div class="col-md-6 col-sm-12">
-                    <div class="form-group">
-                        <label>Project Name ${!disabled ? "<code>*</code>" : ""}</label>
-                        <select class="form-control validate select2"
-                        name="projectID"
-                        id="projectID"
-                        style="width: 100%"
-                        required
-                        ${disabled}>
-                        <option selected disabled>Select Project Name</option>
-                        ${getProjectList(projectID)}
-                    </select>
-                    </div>
-                </div>
-                <div class="col-md-6 col-sm-12">
-                    <div class="form-group">
-                        <label>Client Code</label>
-                        <input type="text" class="form-control" name="clientCode" disabled value="">
-                    </div>
-                </div>
-                <div class="col-md-6 col-sm-12">
-                    <div class="form-group">
-                        <label>Client Name</label>
-                        <input type="text" class="form-control" name="clientName" disabled value="">
-                    </div>
-                </div>
-                <div class="col-md-6 col-sm-12">
-                <div class="form-group">
-                    <label>Client Address</label>
-                    <input type="text" class="form-control" name="clientAddress" disabled value="">
-                </div>
-            </div>
+            <div class="row" id="form_liquidation">
+				<div class="col-md-4 col-sm-12">
+					<div class="form-group">
+						<label class="text-dark">Reference Number</label>
+						<input type="text" class="form-control liquidationReferenceNumber" id="liquidationReferenceNumber" 
+						name="liquidationReferenceNumber" value="${liquidationReferenceNumber || `${pettycashCode}`}" disabled>
+					</div>
+				</div>
                 <div class="col-md-4 col-sm-12">
                     <div class="form-group">
                         <label class="text-dark">Requestor</label>
@@ -1484,45 +1331,50 @@ $(document).ready(function() {
                     <input type="text" class="form-control" disabled value="${employeeDepartment}">
                 </div>
             </div>
-				<div class="col-md-6 col-sm-12">
+				<div class="col-md-4 col-sm-12">
 				<div class="form-group">
-				   <label>Date ${!disabled ? "<code>*</code>" : ""}</label>
+				   <label>Date</label>
 				   <input type="button" 
-					   class="form-control validate daterange text-left"
+					   class="form-control text-left"
 					   required
-					   id="clientFundRequestDate"
-					   name="clientFundRequestDate"
-					   value="${clientFundRequestDate && moment(clientFundRequestDate).format("MMMM DD, YYYY")}"
-					   ${disabled}
-					   >
-				   <div class="d-block invalid-feedback" id="invalid-clientFundRequestDate"></div>
+					   id="liquidationDate"
+					   name="liquidationDate"
+					   value="${liquidationDate || `${datewithrecord}`}"
+					   disabled>
 			   </div>	
 			</div>
-				<div class="col-md-6 col-sm-12">
+				<div class="col-md-4 col-sm-12">
 					<div class="form-group">
-					<label>Chart of Account ${!disabled ? "<code>*</code>" : ""}</label>
-						<select
-							class="form-control validate select2"
-							name="chartOfAccountID"
-							id="chartOfAccountID"
-							required
-							${disabled}>
-							${getInventoryItem(chartOfAccountID)}
-						</select>
-						<div class="invalid-feedback d-block" id="invalid-chartOfAccountID"></div>
+					<label>Purpose ${!disabled ? "<code>*</code>" : ""}</label>
+					<textarea class="form-control validate liquidationPurpose"
+						minlength="0"
+						maxlength="250"
+						rows="2" 
+						style="resize: none" 
+						class="form-control" 
+						data-allowcharacters="[0-9][a-z][A-Z][.][,][?][!][/][;][:]['][-][_][(][)][%][&][*][ ]"
+						name="liquidationPurpose"
+						required 
+						id="liquidationPurpose"${disabled}>${liquidationPurpose ?? ""}
+					</textarea>
+					<div class="invalid-feedback d-block" id="invalid-liquidationPurpose"></div>
 					</div>
 				</div>
                 <div class="w-100">
                 <hr class="pb-1">
-                <div class="text-primary font-weight-bold" style="font-size: 1.5rem;">Client Fund Request</div>
+                <div class="text-primary font-weight-bold" style="font-size: 1.5rem;">Liquidation</div>
                 <table class="table table-striped" id="${tableProjectRequestItemsName}">
                     <thead>
                         <tr style="white-space: nowrap">
-                            ${checkboxProjectHeader}
                             <th>Description ${!disabled ? "<code>*</code>" : ""}</th>
-							<th>Quantity</th>
                             <th>Amount</th>
-                            <th>File</th>
+							<th>VAT Sales</th>
+							<th>VAT</th>
+							<th>Client</th>
+							<th>SRF Number</th>
+							<th>Chart of Account</th>
+							<th>Remarks</th>
+							<th>Receipt Number</th>
                         </tr>
                     </thead>
                     <tbody class="itemProjectTableBody" project="true">
@@ -1532,14 +1384,52 @@ $(document).ready(function() {
                 
                 <div class="w-100 d-flex justify-content-between align-items-center py-2">
                     <div>
-                        ${buttonProjectAddDeleteRow}
+                       
                     </div>
-                    <div class="font-weight-bolder align-self-start" style="font-size: 1rem;">
-                        <span>Total Amount: &nbsp;</span>
-                        <span class="text-dark" style="font-size: 1.2em" id="totalAmount" name="totalAmount" project="true">${formatAmount(clientFundRequestAmount, true)}</span>
-						<p class="text-danger" id="invalid-message" style="font-size:9px;color:red;"></p>
+					<div class="col-12">
+                    <div class="row py-2">
+					<div class="offset-lg-7 col-lg-6 offset-md-3 col-md-9 col-sm-12 pt-3 pb-2">
+						<div class="row pb-1" style="font-size: 1.1rem;">
+							<div class="col-7 col-lg-5 text-left">Total Expenses:</div>
+							<span class="col-7 col-lg-5 text-right text-dark" id="liquidationExpenses" name="liquidationExpenses" style="font-size: 1.05em">${formatAmount(liquidationExpenses || `${pettyCashAmount}`, true)} 
+							</span>
 						</div>
-                </div>
+						<div class="row pb-1" style="font-size: 1.1rem;">
+							<div class="col-7 col-lg-5 text-left">Budget:</div>
+							<div class="col-7 col-lg-5 text-right text-dark">
+							<input type="text" class="form-control-plaintext amount py-0 text-dark border-bottom liquidationBudget"  pettyCashAmountValue="${pettyCashAmount}"
+							min="0" 
+							max="9999999999"
+							minlength="1"
+							maxlength="20" 
+							id="liquidationBudget" 
+							name="liquidationBudget" 
+							value="${formatAmount(liquidationBudget, true)}"
+							style="font-size: 1.02em;">
+							</div>
+						</div>
+						<div class="row pb-1" style="font-size: 1.1rem;">
+							<div class="col-7 col-lg-5 text-left">Excess(Shortage):</div>
+							<spn class="col-7 col-lg-5 text-right text-dark" id="liquidationExcessOrShortage" name="liquidationExcessOrShortage" style="font-size: 1.05em">
+							${formatAmount(liquidationExcessOrShortage, true) ?? ""}
+							</span>
+						</div>
+						<div class="row pb-1" style="font-size: 1.1rem;">
+							<div class="col-7 col-lg-5 text-left ">Disposition of Excess/(Shortage):</div>
+							<div class="col-7 col-lg-5 text-right text-danger" id="purchaseRequestGrandTotal">
+								<input type="text"class="form-control-plaintext py-0 text-dark border-bottom" 
+								id="liquidationDispositionofExcessOrShortage" 
+								name="liquidationDispositionofExcessOrShortage"
+								value="${liquidationDispositionofExcessOrShortage ?? ""}" 
+								style="font-size: 1.02em;">
+							</div>
+						</div
+							
+							</div>
+						</div>
+					</div>
+				</div>
+				</div>
             </div>
             <div class="col-md-12 text-right mt-3">
                 ${button}
@@ -1552,10 +1442,9 @@ $(document).ready(function() {
 		setTimeout(() => {
 			$("#page_content").html(html);
 			initDataTables();
-			updateTableItems();
 			initAll();
 			updateInventoryItemOptions();
-			!clientFundRequestID && clientFundRequestID == 0 && $("#clientFundRequestDate").val(moment(new Date).format("MMMM DD, YYYY"));
+			//!liquidationID && liquidationID == 0 && $("#liquidationDate").val(moment(new Date).format("MMMM DD, YYYY"));
             projectID && projectID != 0 && $("[name=projectID]").trigger("change");
 			// if (billMaterialID || projectID) {
 			// 	$("[name=projectID]").val(projectID).trigger("change");
@@ -1569,7 +1458,7 @@ $(document).ready(function() {
 					}
 				})
 				$('#btnBack').attr("status", "2");
-				$(`#btnSubmit, #btnRevise, #btnCancel, #btnCancelForm, .btnAddRow, .btnDeleteRow`).hide();
+				$(`#btnSubmit, #btnRevise, #btnCancel, #btnCancelForm`).hide();
 			}
 			// ----- END NOT ALLOWED FOR UPDATE -----
 
@@ -1577,7 +1466,6 @@ $(document).ready(function() {
 		}, 300);
 	}
 	// ----- END FORM CONTENT -----
-
 
     // ----- PAGE CONTENT -----
 	function pageContent(isForm = false, data = false, readOnly = false, isRevise = false, isFromCancelledDocument = false) {
@@ -1613,7 +1501,7 @@ $(document).ready(function() {
 
 
 	// ----- GET PURCHASE REQUEST DATA -----
-	function getClientFundRequestData(action = "insert", method = "submit", status = "1", id = null, currentStatus = "0", isObject = false) {
+	function getLiquidationData(action = "insert", method = "submit", status = "1", id = null, currentStatus = "0", isObject = false) {
 
 		/**
 		 * ----- ACTION ---------
@@ -1643,12 +1531,12 @@ $(document).ready(function() {
 		//const ceID = $(`[name="billMaterialID"]`).val();
 
 		if (id) {
-			data["clientFundRequestID"] = id;
-			formData.append("clientFundRequestID", id);
+			data["liquidationID"] = id;
+			formData.append("liquidationID", id);
 
 			if (status != "2") {
-				data["clientFundRequestStatus"] = status;
-				formData.append("clientFundRequestStatus", status);
+				data["liquidationStatus"] = status;
+				formData.append("liquidationStatus", status);
 			}
 		}
 
@@ -1663,17 +1551,28 @@ $(document).ready(function() {
 		if (currentStatus == "0" && method != "approve") {
 			
 			data["employeeID"]            = sessionID;
-            data["projectID"]    = $("[name=projectID]").val() || null;
-			data["clientFundRequestAmount"]    =$("[name=totalAmount]").attr('clientFundRequestAmount');
-			data["clientFundRequestDate"] = moment($("[name=clientFundRequestDate]").val()?.trim()).format("YYYY-MM-DD");
-			data["chartOfAccountID"] = $("[name=chartOfAccountID]").val()?.trim();
-
-
+            data["projectID"]    	   											= $("[name=projectID]").val() || null;
+			data['liquidationReferenceNumber']									= $("#liquidationReferenceNumber").val();
+			data['liquidationDate']												= $("#liquidationDate").val();
+			data["liquidationPurpose"] 											= $("[name=liquidationPurpose]").val()?.trim();
+			data['liquidationAmount']											= getNonFormattedAmount($("#liquidationAmount").text());
+			data['liquidationExpenses'] 										= getNonFormattedAmount($("#liquidationExpenses").text());
+			data['liquidationBudget']											= $("#liquidationBudget").val();
+			data['liquidationExcessOrShortage'] 								= getNonFormattedAmount($("#liquidationExcessOrShortage").text());
+			data['liquidationDispositionofExcessOrShortage'] 					= $("#liquidationDispositionofExcessOrShortage").val();
+			data["pettyCashRequestID"] 											= $(".description").attr("pettyCashRequestID");
 			formData.append("employeeID", sessionID);
             formData.append("projectID", $("[name=projectID]").val() || null);
-			formData.append("clientFundRequestAmount", $("[name=totalAmount]").attr('clientFundRequestAmount'));
-			formData.append("clientFundRequestDate", moment($("[name=clientFundRequestDate]").val()?.trim()).format("YYYY-MM-DD"));
-			formData.append("chartOfAccountID", $("[name=chartOfAccountID]").val()?.trim());
+			//alert(getNonFormattedAmount($("#liquidationAmount").text()));
+			formData.append("liquidationAmount", getNonFormattedAmount($("#liquidationAmount").text()));
+			formData.append("liquidationExpenses", getNonFormattedAmount($("#liquidationExpenses").text()));
+			formData.append("liquidationDate", $("#liquidationDate").val());
+			formData.append("liquidationReferenceNumber", $("#liquidationReferenceNumber").val());
+			formData.append("liquidationBudget", $("#liquidationBudget").val());
+			formData.append("liquidationExcessOrShortage", getNonFormattedAmount($("#liquidationExcessOrShortage").text()));
+			formData.append("liquidationDispositionofExcessOrShortage", $("#liquidationDispositionofExcessOrShortage").val());
+			formData.append("liquidationPurpose", $("[name=liquidationPurpose]").val()?.trim());
+			formData.append("pettyCashRequestID", $(".description").attr("pettyCashRequestid"));
 			if (action == "insert") {
 				data["createdBy"]   = sessionID;
 				data["createdAt"]   = dateToday();
@@ -1681,9 +1580,9 @@ $(document).ready(function() {
 				formData.append("createdBy", sessionID);
 				formData.append("createdAt", dateToday());
 			} else if (action == "update") {
-				data["clientFundRequestID"] = id;
+				data["liquidationID"] = id;
 
-				formData.append("clientFundRequestID", id);
+				formData.append("liquidationID", id);
 			}
 
 			if (method == "submit") {
@@ -1691,69 +1590,56 @@ $(document).ready(function() {
 				formData.append("submittedAt", dateToday());
 				if (approversID) {
 					data["approversID"]           = approversID;
-					data["clientFundRequestStatus"] = 1;
+					data["liquidationStatus"] = 1;
 
 					formData.append("approversID", approversID);
-					formData.append("clientFundRequestStatus", 1);
+					formData.append("liquidationStatus", 1);
 				} else {  // AUTO APPROVED - IF NO APPROVERS
 					data["approversID"]           = sessionID;
 					data["approversStatus"]       = 2;
 					data["approversDate"]         = dateToday();
-					data["clientFundRequestStatus"] = 2;
+					data["liquidationStatus"] = 2;
 
 					formData.append("approversID", sessionID);
 					formData.append("approversStatus", 2);
 					formData.append("approversDate", dateToday());
-					formData.append("clientFundRequestStatus", 2);
+					formData.append("liquidationStatus", 2);
 				}
 			}
 
 			$(".itemTableRow").each(function(i, obj) {
-				const requestItemID = $(this).attr('requestItemID');
-
+				const liquidationID = $(this).attr('liquidationID');
 				const categoryType = 
-					$(this).closest("tbody").attr("project") == "true" ? "project" : "company";
-
-				//const chartOfAccountID                              = $("td [name=chartOfAccountID]", this).val();
-                const description          = $("td [name=description]", this).val();
-				const quantity 				= $("td [name=quantity]", this).val().replaceAll(",","");	
-				//const itemDescription = $("td [name=itemID] option:selected", this).attr("itemDescription");	
-
-				//const amount  = +getNonFormattedAmount($("td [name=amount]", this).val());	
-                const amount 				= $("td [name=amount]", this).val().replaceAll(",","");
-				//const amount 				= $("td [name=amount]", this).val().replaceAll(",","");
-				//const unitcost  = +getNonFormattedAmount($("td .unitcost", this).text());	
-				//const totalcost = quantity * unitcost;
-
-				let fileID   = $("td [name=files]", this).attr("id") || "";
-				let file     = fileID ? $(`#${fileID}`)?.[0]?.files?.[0] : "";
-				let fileArr  = file?.name?.split(".");
-				let filename = file ? file?.name : "";
+				$(this).closest("tbody").attr("project") == "true" ? "project" : "company";
+				const description    						= $("td [name=description]", this).attr("descriptionValue");	
+				const amount   		 						= $("td [name=amount]", this).attr("amountValue");
+				const vatSales 								= $("td [name=vatSales]", this).val();
+				const vat 									= $("td [name=vat]", this).val();	
+				const clientID 								= $("td [name=clientID]", this).val();
+				const srfNumber 							= $("td [name=srfNumber]", this).val();
+				const chartOfAccountID 						= $("td [name=chartOfAccountID]", this).val();
+				const remark 								= $("td [name=remark]", this).val();
+				const receiptNumber 						= $("td [name=receiptNumber]", this).val();
+				
+				
 
 				let temp = {
-						description, quantity, amount,
-					filename
+					description, amount,vatSales,vat,
+					clientID, srfNumber, chartOfAccountID, remark
 				};
 
 				//formData.append(`items[${i}][chartOfAccountID]`, chartOfAccountID);
 				formData.append(`items[${i}][description]`, description);
-				formData.append(`items[${i}][quantity]`, quantity);
 				formData.append(`items[${i}][amount]`, amount);
-				formData.append(`items[${i}][filename]`, filename);
+				formData.append(`items[${i}][vatSales]`, vatSales);
+				formData.append(`items[${i}][vat]`, vat);
+				formData.append(`items[${i}][clientID]`, clientID);
+				formData.append(`items[${i}][srfNumber]`, srfNumber);
+				formData.append(`items[${i}][chartOfAccountID]`, chartOfAccountID);
+				formData.append(`items[${i}][remark]`, remark);
+				formData.append(`items[${i}][receiptNumber]`, receiptNumber);
 				formData.append(`items[${i}][createdBy]`, sessionID);
 				formData.append(`items[${i}][updatedBy]`, sessionID);
-				if (file) {
-					temp["file"] = file;
-					formData.append(`items[${i}][file]`, file, `${i}.${fileArr[1]}`);
-				} else {
-					const isHadExistingFile = $("td .file .displayfile", this).text().trim().length > 0;
-					if (isHadExistingFile) {
-						const filename = $("td .file .displayfile .filename", this).text().trim();
-
-						temp["existingFile"] = filename;
-						formData.append(`items[${i}][existingFile]`, filename);
-					}
-				}
 
 				data["items"].push(temp);
 			});
@@ -1807,7 +1693,7 @@ $(document).ready(function() {
 
     // ----- REVISE DOCUMENT -----
 	$(document).on("click", "#btnRevise", function () {
-		const id                    = decryptString($(this).attr("clientFundRequestID"));
+		const id                    = decryptString($(this).attr("liquidationID"));
 		//const fromCancelledDocument = $(this).attr("cancel") == "true";
 		viewDocument(id, false, true);
 	});
@@ -1816,30 +1702,30 @@ $(document).ready(function() {
 
 	// ----- SAVE CLOSE FORM -----
 	$(document).on("click", "#btnBack", function () {
-		const id         = decryptString($(this).attr("clientFundRequestID"));
+		const id         = decryptString($(this).attr("liquidationID"));
 		const isFromCancelledDocument = $(this).attr("cancel") == "true";
 		const revise     = $(this).attr("revise") == "true";
 		const employeeID = $(this).attr("employeeID");
-		const feedback   = $(this).attr("code") || getFormCode("CFR", dateToday(), id);
+		const feedback   = $(this).attr("code") || getFormCode("PCR", dateToday(), id);
 		const status     = $(this).attr("status");
 
 		if (status != "false" && status != 0) {
 			
 			if (revise) {
 				const action = revise && !isFromCancelledDocument && "insert" || (id ? "update" : "insert");
-				const data   = getClientFundRequestData(action, "save", "0", id);
-				data.append("clientFundRequestStatus", 0);
+				const data   = getLiquidationData(action, "save", "0", id);
+				data.append("liquidationStatus", 0);
 				if (!isFromCancelledDocument) {
-					data.append("reviseClientFundRequestID", id);
-					data.delete("clientFundRequestID");
+					data.append("reviseLiquidationID", id);
+					data.delete("liquidationID");
 				} else {
-					data.append("clientFundRequestID", id);
+					data.append("liquidationID", id);
 					data.delete("action");
 					data.append("action", "update");
 				}
 
 				//validateItemPrice();
-				saveClientFundRequest(data, "save", null, pageContent);
+				saveLiquidation(data, "save", null, pageContent);
 			} else {
 				$("#page_content").html(preloader);
 				pageContent();
@@ -1851,11 +1737,11 @@ $(document).ready(function() {
 
 		} else {
 			const action = id && feedback ? "update" : "insert";
-			const data   = getClientFundRequestData(action, "save", "0", id);
-			data.append("clientFundRequestStatus", 0);
+			const data   = getLiquidationData(action, "save", "0", id);
+			data.append("liquidationStatus", 0);
 
 			//validateItemPrice()
-			saveClientFundRequest(data, "save", null, pageContent);
+			saveLiquidation(data, "save", null, pageContent);
 		}
 	});
 	// ----- END SAVE CLOSE FORM -----
@@ -1863,27 +1749,27 @@ $(document).ready(function() {
 
     // ----- SAVE DOCUMENT -----
 	$(document).on("click", "#btnSave, #btnCancel", function () {
-		const id       = decryptString($(this).attr("clientFundRequestID"));
+		const id       = decryptString($(this).attr("liquidationID"));
 		const isFromCancelledDocument = $(this).attr("cancel") == "true";
 		const revise   = $(this).attr("revise") == "true";
-		const feedback = $(this).attr("code") || getFormCode("CFR", dateToday(), id);
+		const feedback = $(this).attr("code") || getFormCode("PCR", dateToday(), id);
 		const action   = revise && !isFromCancelledDocument && "insert" || (id ? "update" : "insert");
-		const data     = getClientFundRequestData(action, "save", "0", id);
-		data.append("clientFundRequestStatus", 0);
+		const data     = getLiquidationData(action, "save", "0", id);
+		data.append("liquidationStatus", 0);
 
 		if (revise) {
 			if (!isFromCancelledDocument) {
-				data.append("reviseClientFundRequestID", id);
-				data.delete("clientFundRequestID");
+				data.append("reviseLiquidationID", id);
+				data.delete("liquidationID");
 			} else {
-				data.append("clientFundRequestID", id);
+				data.append("liquidationID", id);
 				data.delete("action");
 				data.append("action", "update");
 			}
 		}
 
 		//validateItemPrice();
-		saveClientFundRequest(data, "save", null, pageContent);
+		saveLiquidation(data, "save", null, pageContent);
 	});
 	// ----- END SAVE DOCUMENT -----
 
@@ -1896,43 +1782,25 @@ $(document).ready(function() {
 	// ----- END REMOVE IS-VALID IN TABLE -----
 
 
-	// ----- VALIDATE TABLE -----
-	function validateTableItems() {
-		let flag = true;
-		if ($(`.itemProjectTableBody tr`).length == 1 && $(`.itemCompanyTableBody tr`).length == 1) {
-			const projectItemID = $(`[name="itemID"][project="true"]`).val();
-			const companyItemID = $(`[name="itemID"][company="true"]`).val();
-			flag = !(projectItemID == "0" && companyItemID == "0");
-			// flag = !(projectItemID == companyItemID);
-		}
-
-		if (!flag) {
-			showNotification("warning2", "Cannot submit form, kindly input valid items.");
-		}
-		return flag;
-	}
-	// ----- END VALIDATE TABLE -----
-
-
     // ----- SUBMIT DOCUMENT -----
 	$(document).on("click", "#btnSubmit", function () {
-		const id            = decryptString($(this).attr("clientFundRequestID"));
+		const id            = decryptString($(this).attr("liquidationID"));
 		const isFromCancelledDocument = $(this).attr("cancel") == "true";
 		const revise        = $(this).attr("revise") == "true";
-		const validate      = validateForm("form_petty_cash_request");
-		let validateamount = $("[name=totalAmount]").attr("totalvalue");
-		const validatePrice = validateItemPrice();
-		const validateItems = validateTableItems();
+		const validate      = validateForm("form_liquidation");
+		//let validateamount = $("[name=totalAmount]").attr("totalvalue");
+		//const validatePrice = validateItemPrice();
+		//const validateItems = validateTableItems();
 		removeIsValid("#tableProjectRequestItems");
 		//removeIsValid("#tableCompanyRequestItems");
-			if (validate && validateamount && validateItems) {
+			if (validate) {
 				const action = revise && !isFromCancelledDocument && "insert" || (id ? "update" : "insert");
-				const data   = getClientFundRequestData(action, "submit", "1", id);
+				const data   = getLiquidationData(action, "submit", "1", id);
 	
 				if (revise) {
 					if (!isFromCancelledDocument) {
-						data.append("reviseClientFundRequestID", id);
-						data.delete("clientFundRequestID");
+						data.append("reviseLiquidationID", id);
+						data.delete("liquidationID");
 					}
 				}
 	
@@ -1946,15 +1814,15 @@ $(document).ready(function() {
 				let notificationData = false;
 				if (employeeID != sessionID) {
 					notificationData = {
-						moduleID:                54,
-						notificationTitle:       "Client Fund Request",
+						moduleID:                132,
+						notificationTitle:       "Liquidation",
 						notificationDescription: `${employeeFullname(sessionID)} asked for your approval.`,
 						notificationType:        2,
 						employeeID,
 					};
 				}
 	
-				saveClientFundRequest(data, "submit", notificationData, pageContent);
+				saveLiquidation(data, "submit", notificationData, pageContent);
 			}
 		
 	});
@@ -1963,21 +1831,21 @@ $(document).ready(function() {
 
     // ----- CANCEL DOCUMENT -----
 	$(document).on("click", "#btnCancelForm", function () {
-		const id     = decryptString($(this).attr("clientFundRequestID"));
+		const id     = decryptString($(this).attr("liquidationID"));
 		const status = $(this).attr("status");
 		const action = "update";
-		const data   = getClientFundRequestData(action, "cancelform", "4", id, status);
+		const data   = getLiquidationData(action, "cancelform", "4", id, status);
 
-		saveClientFundRequest(data, "cancelform", null, pageContent);
+		saveLiquidation(data, "cancelform", null, pageContent);
 	});
 	// ----- END CANCEL DOCUMENT -----
 
 
     // ----- APPROVE DOCUMENT -----
 	$(document).on("click", "#btnApprove", function () {
-		const id       = decryptString($(this).attr("clientFundRequestID"));
-		const feedback = $(this).attr("code") || getFormCode("CFR", dateToday(), id);
-		let tableData  = getTableData("fms_client_fund_request_tbl", "", "clientFundRequestID = " + id);
+		const id       = decryptString($(this).attr("liquidationID"));
+		const feedback = $(this).attr("code") || getFormCode("PCR", dateToday(), id);
+		let tableData  = getTableData("fms_liquidation_tbl", "", "liquidationID = " + id);
 
 		if (tableData) {
 			let approversID     = tableData[0].approversID;
@@ -1986,7 +1854,7 @@ $(document).ready(function() {
 			let employeeID      = tableData[0].employeeID;
 			let createdAt       = tableData[0].createdAt;
 
-			let data = getClientFundRequestData("update", "approve", "2", id);
+			let data = getLiquidationData("update", "approve", "2", id);
 			data.append("approversStatus", updateApproveStatus(approversStatus, 2));
 			let dateApproved = updateApproveDate(approversDate)
 			data.append("approversDate", dateApproved);
@@ -1995,9 +1863,9 @@ $(document).ready(function() {
 			if (isImLastApprover(approversID, approversDate)) {
 				status = 2;
 				notificationData = {
-					moduleID:                54,
+					moduleID:                132,
 					tableID:                 id,
-					notificationTitle:       "Client Fund Request",
+					notificationTitle:       "Liquidation",
 					notificationDescription: `${feedback}: Your request has been approved.`,
 					notificationType:        7,
 					employeeID,
@@ -2005,18 +1873,18 @@ $(document).ready(function() {
 			} else {
 				status = 1;
 				notificationData = {
-					moduleID:                54,
+					moduleID:                132,
 					tableID:                 id,
-					notificationTitle:       "Client Fund Request",
+					notificationTitle:       "Liquidation",
 					notificationDescription: `${employeeFullname(employeeID)} asked for your approval.`,
 					notificationType:         2,
 					employeeID:               getNotificationEmployeeID(approversID, dateApproved),
 				};
 			}
 
-			data.append("clientFundRequestStatus", status);
+			data.append("liquidationStatus", status);
 
-			saveClientFundRequest(data, "approve", notificationData, pageContent);
+			saveLiquidation(data, "approve", notificationData, pageContent);
 		}
 	});
 	// ----- END APPROVE DOCUMENT -----
@@ -2024,12 +1892,12 @@ $(document).ready(function() {
 
     // ----- REJECT DOCUMENT -----
 	$(document).on("click", "#btnReject", function () {
-		const id       = decryptString($(this).attr("clientFundRequestID"));
-		const feedback = $(this).attr("code") || getFormCode("CFR", dateToday(), id);
+		const id       = decryptString($(this).attr("liquidationID"));
+		const feedback = $(this).attr("code") || getFormCode("PCR", dateToday(), id);
 
-		$("#modal_client_fund_request_content").html(preloader);
-		$("#modal_client_fund_request .page-title").text("DENY CLIENT FUND REQUEST");
-		$("#modal_client_fund_request").modal("show");
+		$("#modal_liquidation_content").html(preloader);
+		$("#modal_liquidation .page-title").text("DENY CLIENT FUND REQUEST");
+		$("#modal_liquidation").modal("show");
 		let html = `
 		<div class="modal-body">
 			<div class="form-group">
@@ -2038,30 +1906,30 @@ $(document).ready(function() {
 					data-allowcharacters="[0-9][a-z][A-Z][ ][.][,][_]['][()][?][-][/]"
 					minlength="2"
 					maxlength="250"
-					id="clientFundRequestRemarks"
-					name="clientFundRequestRemarks"
+					id="liquidationRemarks"
+					name="liquidationRemarks"
 					rows="4"
 					style="resize: none"
 					required></textarea>
-				<div class="d-block invalid-feedback" id="invalid-clientFundRequestRemarks"></div>
+				<div class="d-block invalid-feedback" id="invalid-liquidationRemarks"></div>
 			</div>
 		</div>
 		<div class="modal-footer text-right">
 			<button type="button" class="btn btn-danger px-5 p-2" id="btnRejectConfirmation"
-			clientFundRequestID="${encryptString(id)}"
+			liquidationID="${encryptString(id)}"
 			code="${feedback}"><i class="far fa-times-circle"></i> Deny</button>
 			<button type="button" class="btn btn-cancel btnCancel px-5 p-2" data-dismiss="modal"><i class="fas fa-ban"></i> Cancel</button>
 		</div>`;
-		$("#modal_client_fund_request_content").html(html);
+		$("#modal_liquidation_content").html(html);
 	});
 
 	$(document).on("click", "#btnRejectConfirmation", function () {
-		const id       = decryptString($(this).attr("clientFundRequestID"));
-		const feedback = $(this).attr("code") || getFormCode("CFR", dateToday(), id);
+		const id       = decryptString($(this).attr("liquidationID"));
+		const feedback = $(this).attr("code") || getFormCode("PCR", dateToday(), id);
 
-		const validate = validateForm("modal_client_fund_request_content");
+		const validate = validateForm("modal_liquidation_content");
 		if (validate) {
-			let tableData = getTableData("fms_client_fund_request_tbl", "", "clientFundRequestID = " + id);
+			let tableData = getTableData("fms_liquidation_tbl", "", "liquidationID = " + id);
 			if (tableData) {
 				let approversStatus = tableData[0].approversStatus;
 				let approversDate   = tableData[0].approversDate;
@@ -2070,22 +1938,22 @@ $(document).ready(function() {
 				let data = new FormData;
 				data.append("action", "update");
 				data.append("method", "deny");
-				data.append("clientFundRequestID", id);
+				data.append("liquidationID", id);
 				data.append("approversStatus", updateApproveStatus(approversStatus, 3));
 				data.append("approversDate", updateApproveDate(approversDate));
-				data.append("clientFundRequestRemarks", $("[name=clientFundRequestRemarks]").val()?.trim());
+				data.append("liquidationRemarks", $("[name=liquidationRemarks]").val()?.trim());
 				data.append("updatedBy", sessionID);
 
 				let notificationData = {
-					moduleID:                54,
+					moduleID:                132,
 					tableID: 				 id,
-					notificationTitle:       "Client Fund Request",
+					notificationTitle:       "Liquidation",
 					notificationDescription: `${feedback}: Your request has been denied.`,
 					notificationType:        1,
 					employeeID,
 				};
 
-				saveClientFundRequest(data, "deny", notificationData, pageContent);
+				saveLiquidation(data, "deny", notificationData, pageContent);
 				$("[redirect=forApprovalTab]").length > 0 && $("[redirect=forApprovalTab]").trigger("click");
 			} 
 		} 
@@ -2095,14 +1963,14 @@ $(document).ready(function() {
 
 	// ----- DROP DOCUMENT -----
 	$(document).on("click", "#btnDrop", function() {
-		const id = decryptString($(this).attr("clientFundRequestID"));
+		const id = decryptString($(this).attr("liquidationID"));
 		let data = new FormData;
-		data.append("clientFundRequestID", id);
+		data.append("liquidationID", id);
 		data.append("action", "update");
 		data.append("method", "drop");
 		data.append("updatedBy", sessionID);
 
-		saveClientFundRequest(data, "drop", null, pageContent);
+		saveLiquidation(data, "drop", null, pageContent);
 	})
 	// ----- END DROP DOCUMENT -----
 
@@ -2161,10 +2029,10 @@ $(document).ready(function() {
 
 // --------------- DATABASE RELATION ---------------
 function getConfirmation(method = "submit") {
-	const title = "Client Fund Request";
+	const title = "Liquidation";
 	let swalText, swalImg;
 
-	$("#modal_client_fund_request").text().length > 0 && $("#modal_client_fund_request").modal("hide");
+	$("#modal_liquidation").text().length > 0 && $("#modal_liquidation").modal("hide");
 
 	switch (method) {
 		case "save":
@@ -2218,14 +2086,14 @@ function getConfirmation(method = "submit") {
 	})
 }
 
-function saveClientFundRequest(data = null, method = "submit", notificationData = null, callback = null) {
+function saveLiquidation(data = null, method = "submit", notificationData = null, callback = null) {
 	if (data) {
 		const confirmation = getConfirmation(method);
 		confirmation.then(res => {
 			if (res.isConfirmed) {
 				$.ajax({
 					method:      "POST",
-					url:         `client_fund_request/saveClientFundRequest`,
+					url:         `liquidation/saveLiquidation`,
 					data,
 					processData: false,
 					contentType: false,
@@ -2246,17 +2114,17 @@ function saveClientFundRequest(data = null, method = "submit", notificationData 
 
 						let swalTitle;
 						if (method == "submit") {
-							swalTitle = `${getFormCode("CFR", dateCreated, insertedID)} submitted successfully!`;
+							swalTitle = `${getFormCode("PCR", dateCreated, insertedID)} submitted successfully!`;
 						} else if (method == "save") {
-							swalTitle = `${getFormCode("CFR", dateCreated, insertedID)} saved successfully!`;
+							swalTitle = `${getFormCode("PCR", dateCreated, insertedID)} saved successfully!`;
 						} else if (method == "cancelform") {
-							swalTitle = `${getFormCode("CFR", dateCreated, insertedID)} cancelled successfully!`;
+							swalTitle = `${getFormCode("PCR", dateCreated, insertedID)} cancelled successfully!`;
 						} else if (method == "approve") {
-							swalTitle = `${getFormCode("CFR", dateCreated, insertedID)} approved successfully!`;
+							swalTitle = `${getFormCode("PCR", dateCreated, insertedID)} approved successfully!`;
 						} else if (method == "deny") {
-							swalTitle = `${getFormCode("CFR", dateCreated, insertedID)} denied successfully!`;
+							swalTitle = `${getFormCode("PCR", dateCreated, insertedID)} denied successfully!`;
 						} else if (method == "drop") {
-							swalTitle = `${getFormCode("CFR", dateCreated, insertedID)} dropped successfully!`;
+							swalTitle = `${getFormCode("PCR", dateCreated, insertedID)} dropped successfully!`;
 						}	
 		
 						if (isSuccess == "true") {
@@ -2316,11 +2184,11 @@ function saveClientFundRequest(data = null, method = "submit", notificationData 
 							callback && callback();
 						}
 					} else {
-						$("#modal_client_fund_request").text().length > 0 && $("#modal_client_fund_request").modal("show");
+						$("#modal_liquidation").text().length > 0 && $("#modal_liquidation").modal("show");
 					}
 				} else if (res.isDismissed) {
 					if (method == "deny") {
-						$("#modal_client_fund_request").text().length > 0 && $("#modal_client_fund_request").modal("show");
+						$("#modal_liquidation").text().length > 0 && $("#modal_liquidation").modal("show");
 					}
 				}
 			}

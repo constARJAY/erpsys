@@ -475,14 +475,32 @@ class Billing_module extends CI_Controller {
 
         $richText = new RichText();
         $richText->createText('');
-        $cellText = $richText->createTextRun($titleName);
-        $cellText->getFont()->setBold(true);
-        $richText->createText("\n$position");
+        $cellTextName = $richText->createTextRun($titleName);
+        $cellTextName->getFont()->setBold(true);
+        $cellTextPosition = $richText->createTextRun("\n$position");
+        $cellTextPosition->getFont()->setSize(8);
 
         $sheet->mergeCells("A$rowNumber:E$rowNumber");
         $sheet->setCellValue("A$rowNumber", "Prepared By: ");
         $sheet->getStyle("A$rowNumber")->applyFromArray($labelBold);
         $rowNumber+=2;
+
+        $signature = $data["signature"];
+        if ($signature && $signature != "null" && $signature != "undefined") {
+            $cellNumber = $rowNumber - 2;
+            $drawing = new Drawing();
+            $drawing->setName('Signature');
+            $drawing->setDescription('Signature');
+            $drawing->setPath("assets/upload-files/signatures/$signature");
+            $drawing->setCoordinates("C$cellNumber");
+            $drawing->setWidthAndHeight(250, 80);
+            // $drawing->setOffsetX(60);
+            // $drawing->setRotation(25);
+            $drawing->getShadow()->setVisible(true);
+            // $drawing->getShadow()->setDirection(15);
+            $drawing->setWorksheet($spreadsheet->getActiveSheet());
+        }
+
         $sheet->getRowDimension($rowNumber)->setRowHeight($space * 2);
         $sheet->mergeCells("A$rowNumber:E$rowNumber");
         $sheet->getStyle("A$rowNumber:E$rowNumber")->applyFromArray($borderBottomStyle);
@@ -506,6 +524,11 @@ class Billing_module extends CI_Controller {
         $rowNumber++;
 
         // ----- END FOOTER -----
+
+
+        $spreadsheet->getActiveSheet()->getProtection()->setSheet(true);
+        $spreadsheet->getDefaultStyle()->getProtection()->setLocked(false);
+        $sheet->getStyle("A1:H$rowNumber")->getProtection()->setLocked(\PhpOffice\PhpSpreadsheet\Style\Protection::PROTECTION_PROTECTED);
 
 
         // ----- PRINTING AREA -----
