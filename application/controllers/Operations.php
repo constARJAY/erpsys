@@ -46,30 +46,33 @@ class Operations extends CI_Controller {
         if (is_array($_FILES)) {
             if (count($_FILES) > 0) {
                 $keys = array_keys($_FILES["tableData"]["name"]);
-                $fileKeyStr = $keys[0];
-                $fileKeyArr = explode("|", $keys[0]);
-                $fileKey    = $fileKeyArr[0];
-                $folder     = $fileKeyArr[1] ? $fileKeyArr[1] : "";
-                $fileName   = "";
-                $fileLength = count($_FILES["tableData"]["name"][$fileKeyStr]);
-                for($i=0; $i<$fileLength; $i++) {
-                    $target_dir = "assets/upload-files/$folder/";
-                    if (!is_dir($target_dir)) {
-                        mkdir($target_dir);
-                    }
-                    $keyArr = explode(".", $_FILES["tableData"]["name"][$fileKeyStr][$i]);
-                    $fileType = pathinfo(basename($_FILES["tableData"]["name"][$fileKeyStr][$i]),PATHINFO_EXTENSION);
-                    $target_file = $target_dir.$i.time().'.'.$fileType;
-        
-                    if (move_uploaded_file($_FILES["tableData"]["tmp_name"][$fileKeyStr][$i], $target_file)) {
-                        $temp = $i.time().'.'.$fileType;
-                        $fileName = $fileName ? $fileName."|".$temp : $temp;
-                        
+                for($x=0; $x<count($keys); $x++) {
+                    $fileKeyStr = $keys[$x];
+                    $fileKeyArr = explode("|", $keys[$x]);
+                    $fileKey    = $fileKeyArr[0];
+                    $folder     = $fileKeyArr[1] ? $fileKeyArr[1] : "";
+                    $fileName   = "";
+                    $fileLength = count($_FILES["tableData"]["name"][$fileKeyStr]);
+                    for($i=0; $i<$fileLength; $i++) {
+                        $target_dir = "assets/upload-files/$folder/";
+                        if (!is_dir($target_dir)) {
+                            mkdir($target_dir);
+                        }
+                        $keyArr = explode(".", $_FILES["tableData"]["name"][$fileKeyStr][$i]);
+                        $fileType = pathinfo(basename($_FILES["tableData"]["name"][$fileKeyStr][$i]),PATHINFO_EXTENSION);
+                        $target_file = $target_dir.$i.time().'.'.$fileType;
+            
+                        if (move_uploaded_file($_FILES["tableData"]["tmp_name"][$fileKeyStr][$i], $target_file)) {
+                            $temp = $i.time().'.'.$fileType;
+                            $fileName = $fileName ? $fileName."|".$temp : $temp;
+                            
+                        }
+                        $data[$fileKey] = $fileName;
                     }
                 }
-                $data[$fileKey] = $fileName;
             }
         }
+        // var_dump($data);
         return $data;
     }
 

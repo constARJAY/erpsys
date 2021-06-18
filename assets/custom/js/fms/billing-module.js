@@ -30,7 +30,11 @@ $(document).ready(function() {
     const clientList = getTableData(
         `pms_client_tbl`, 
         `*`,
-        `clientStatus = 1`).map(client => {
+        `clientStatus = 1 AND
+        clientContract <> '' AND clientContract IS NOT NULL AND
+        clientJobOrder <> '' AND clientJobOrder IS NOT NULL AND
+        clientEngagementLetter <> '' AND clientEngagementLetter IS NOT NULL`)
+        .map(client => {
             const {
                 clientID,
                 clientName,

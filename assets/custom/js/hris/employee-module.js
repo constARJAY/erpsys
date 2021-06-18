@@ -2105,7 +2105,7 @@ $(document).ready(function() {
                 const filetypeArr = files[i].type.split("/");
                 const filetype    = filetypeArr[0];
                 if (filesize > 10) {
-                    showNotification("danger", `${filenameArr.join(".")} size must be less than or equal to 10mb`);
+                    showNotification("danger", `File size must be less than or equal to 10mb`);
                 } else {
                     let html = getFileTypeDisplay(filetype, filenameArr.join("."), documentType);
                     let hasContent = $(`#${contentID}`).find("[files=none]").length > 0;

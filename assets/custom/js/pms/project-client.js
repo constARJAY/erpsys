@@ -151,8 +151,8 @@ $(document).on("change", "[name=clientCity]", function() {
 
 
 
-          // ----- DATATABLES -----
-      function initDataTables() {
+    // ----- DATATABLES -----
+    function initDataTables() {
         if ($.fn.DataTable.isDataTable('#tableProjectClient')){
             $('#tableProjectClient').DataTable().destroy();
         }
@@ -184,9 +184,6 @@ $(document).on("change", "[name=clientCity]", function() {
         // Reset the unique datas
         uniqueData = []; 
 
-                // getTableData(tableName = null, columnName = “”, WHERE = “”, orderBy = “”) 
-                // const data = getTableData("pms_client_tbl", "*", "", "");
-
         $.ajax({
             url:      `${base_url}operations/getTableData`,
             method:   'POST',
@@ -195,7 +192,6 @@ $(document).on("change", "[name=clientCity]", function() {
             data:     {tableName: "pms_client_tbl "},
             beforeSend: function() {
                 $("#table_content").html(preloader);
-                // $("#inv_headerID").text("List of Inventory Item");
             },
             success: function(data) {
                 console.log(data);
@@ -282,26 +278,31 @@ $(document).on("change", "[name=clientCity]", function() {
      // ----- MODAL CONTENT -----
      function modalContent(data = false) {
          
-        let {clientID           = "",
-        clientName              ="",
-        clientRegion            =false,
-        clientProvince          =false,
-        clientCity              =false,
-        clientBarangay          =false,
-        clientUnitNumber        ="",
-        clientHouseNumber       ="",
-        clientStreetName        ="",
-        clientSubdivisionName   = "",
-        clientCountry           ="",
-        clientPostalCode        ="",
-        clientContactPerson     ="",
-        clientEmailAddress      ="",
-        clientTin               ="",
-        client_MobileNo         ="",
-        clientTelephoneNo       ="",
-        clientBrandName         = "",
-        clientShortcut          = "",
-        clientStatus            ="" }= data && data[0];
+        let {
+            clientID                = "",
+            clientName              = "",
+            clientRegion            = false,
+            clientProvince          = false,
+            clientCity              = false,
+            clientBarangay          = false,
+            clientUnitNumber        = "",
+            clientHouseNumber       = "",
+            clientStreetName        = "",
+            clientSubdivisionName   =  "",
+            clientCountry           = "",
+            clientPostalCode        = "",
+            clientContactPerson     = "",
+            clientEmailAddress      = "",
+            clientTin               = "",
+            client_MobileNo         = "",
+            clientTelephoneNo       = "",
+            clientBrandName         = "",
+            clientShortcut          = "",
+            clientContract          = "",
+            clientJobOrder          = "",
+            clientEngagementLetter  = "",
+            clientStatus            = "" 
+        } = data && data[0];
 
         let button = clientID ? `
         <button 
@@ -391,9 +392,9 @@ $(document).on("change", "[name=clientCity]", function() {
                     </div>
                     <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6">
                         <div class="form-group">
-                            <label>Barangay</label>
-                            <select class=" form-control show-tick select2 validate" name="clientBarangay" required=""
-                                id="input_clientBarangay" readonly="">
+                            <label>Barangay <code>*</code></label>
+                            <select class=" form-control show-tick select2 validate" name="clientBarangay" required
+                                id="input_clientBarangay" >
                                 <option value="" disabled selected>Select Barangay</option>
                                 ${data && getBarangayOptions(clientBarangay, clientRegion, clientProvince, clientCity)}
                                 </select>
@@ -439,8 +440,8 @@ $(document).on("change", "[name=clientCity]", function() {
                             <input class="form-control validate" required=""
                                 data-allowcharacters="[a-z][A-Z][ ]" id="input_clientCountry" name="clientCountry" minlength="6"
                                 maxlength="50" value="${clientCountry}" type="text">
+                            <div class="invalid-feedback d-block" id="invalid-input_clientCountry"></div>
                         </div>
-                        <div class="invalid-feedback d-block" id="invalid-input_clientCountry"></div>
                     </div>
                     <div class="col-sm-12 col-md-6 col-lg-3 col-xl-3">
                         <div class="form-group">
@@ -449,8 +450,8 @@ $(document).on("change", "[name=clientCity]", function() {
                             <input class="form-control validate" required=""
                                 data-allowcharacters="[0-9]" id="input_clientPostalCode" name="clientPostalCode" minlength="4"
                                 maxlength="4" value="${clientPostalCode}" type="text">
+                            <div class="invalid-feedback d-block" id="invalid-input_clientPostalCode"></div>
                         </div>
-                        <div class="invalid-feedback d-block" id="invalid-input_clientPostalCode"></div>
                     </div>
                     <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12">
                         <div class="form-group">
@@ -482,7 +483,7 @@ $(document).on("change", "[name=clientCity]", function() {
                                 maxlength="50" 
                                 unique="${clientID}"
                                 value="${clientEmailAddress}"
-                                autocomplete="off" unique
+                                autocomplete="off"
                                 placeholder="sample@email.com">
                             <div class="invalid-feedback d-block" id="invalid-input_clientEmailAddress"></div>
                         </div>
@@ -551,11 +552,57 @@ $(document).on("change", "[name=clientCity]", function() {
                                 maxlength="30" 
                                 value="${clientBrandName}"
                                 autocomplete="off">
-                       
+                            <div class="invalid-feedback d-block" id="invalid-input_clientBrandName"></div>
                         </div>
                     </div>
 
-                    <div class="col-md-4 col-sm-12">
+                    <div class="col-md-6 col-sm-12">
+                        <div class="form-group">
+                            <label>Contract</label>
+                            <div class="displayfile" id="displayContract">
+                                ${clientContract && getFileDisplay(clientContract)}
+                            </div>
+                            <input 
+                                type="file" 
+                                class="form-control file" 
+                                name="clientContract|clients" 
+                                id="clientContract"
+                                file="${clientContract}"
+                                autocomplete="off">
+                        </div>
+                    </div>
+                    <div class="col-md-6 col-sm-12">
+                        <div class="form-group">
+                            <label>Job Order</label>
+                            <div class="displayfile" id="displayJobOrder">
+                                ${clientJobOrder && getFileDisplay(clientJobOrder)}
+                            </div>
+                            <input 
+                                type="file" 
+                                class="form-control file" 
+                                name="clientJobOrder|clients" 
+                                id="clientJobOrder"
+                                file="${clientJobOrder}"
+                                autocomplete="off">
+                        </div>
+                    </div>
+                    <div class="col-md-6 col-sm-12">
+                        <div class="form-group">
+                            <label>Engagement Letter</label>
+                            <div class="displayfile" id="displayEngagementLetter">
+                                ${clientEngagementLetter && getFileDisplay(clientEngagementLetter)}
+                            </div>
+                            <input 
+                                type="file" 
+                                class="form-control file" 
+                                name="clientEngagementLetter|clients" 
+                                id="clientEngagementLetter"
+                                file="${clientEngagementLetter}"
+                                autocomplete="off">
+                        </div>
+                    </div>
+
+                    <div class="col-md-6 col-sm-12">
                         <div class="form-group">
                             <label>Status <span class="text-danger font-weight-bold">*</span></label>
                             <select 
@@ -563,8 +610,7 @@ $(document).on("change", "[name=clientCity]", function() {
                                 id="input_clientStatus" 
                                 name="clientStatus"
                                 autocomplete="off"
-                                getclientid = "${clientID}"
-                                >
+                                getclientid = "${clientID}">
                                 <option 
                                     value="1" 
                                     ${data && clientStatus == "1" && "selected"}>Active</option>
@@ -587,6 +633,64 @@ $(document).on("change", "[name=clientCity]", function() {
     } 
     // ----- END MODAL CONTENT ----
 
+    
+    // ----- CHOOSE FILE -----
+    function getFileDisplay(filename = null, link = true) {
+        let text = link ? `
+        <a class="filename" title="${filename}" style="display: block;
+            width: 90%;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;" href="${base_url}assets/upload-files/clients/${filename}" target="_blank">
+            ${filename}
+        </a>` : `
+        <span class="filename" title="${filename}" style="display: block;
+            width: 90%;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;">
+            ${filename}
+        </span>`;
+
+        let html = `
+        <div class="d-flex justify-content-start align-items-center p-0">
+            <span class="btnRemoveFile pr-2" style="cursor: pointer"><i class="fas fa-close"></i></span>
+            ${text}
+        </div>`;
+
+        return html;
+    }
+
+    $(document).on("change", `[type="file"]`, function() {
+        $parent = $(this).closest(".form-group");
+
+        if (this.files && this.files[0]) {
+            const filesize = this.files[0].size/1024/1024; // Size in MB
+            const filetype = this.files[0].type;
+            const filename = this.files[0].name;
+            if (filesize > 10) {
+                $(this).val("");
+                showNotification("danger", "File size must be less than or equal to 10mb");
+            } else {
+                $parent.find(`[type="file"]`).attr("file", filename);
+                $parent.find(".displayfile").html(getFileDisplay(filename, false));
+            }
+        }
+    })
+    // ----- END CHOOSE FILE -----
+
+
+    // ----- REMOVE FILE -----
+    $(document).on("click", `.btnRemoveFile`, function() {
+        $parent = $(this).closest(".form-group");
+
+        $parent.find(`[type="file"]`).val("");
+        $parent.find(`[type="file"]`).removeAttr("file");
+        $parent.find(".displayfile").children().remove();
+    })
+    // ----- END REMOVE FILE -----
+
+
         // ----- OPEN ADD MODAL -----
     $(document).on("click", "#btnAdd", function() {
         $("#modalTitleAddClientHeader").text("ADD PROJECT CLIENT");
@@ -603,17 +707,24 @@ $(document).on("change", "[name=clientCity]", function() {
 
     // ----- SAVE MODAL -----
     $(document).on("click", "#btnSave", function() {
-    const validate = validateForm("modalProjectClient");
-    if (validate) {
+        const validate = validateForm("modalProjectClient");
+        if (validate) {
 
-        let data = getFormData("modalProjectClient", true);
-        data["tableData[clientCode]"] = generateCode("CLT", false, "pms_client_tbl", "clientCode");
-        data["tableData[createdBy]"] = sessionID;
-        data["tableData[updatedBy]"] = sessionID;
-        data["tableName"]            = "pms_client_tbl";
-        data["feedback"]             = $("[name=clientName]").val();
+            let data = getFormData("modalProjectClient");
+            data.append(`tableData[clientCode]`, generateCode("CLT", false, "pms_client_tbl", "clientCode"));
+            data.append(`tableData[createdBy]`, sessionID);
+            data.append(`tableData[updatedBy]`, sessionID);
+            data.append(`tableName`, `pms_client_tbl`);
+            data.append(`feedback`, $("[name=clientName]").val()?.trim());
 
-        sweetAlertConfirmation("add", "Client", "modalProjectClient", null, data, true, tableContent);
+            const clientContract = $("#clientContract").attr("file");
+            const clientJobOrder = $("#clientJobOrder").attr("file");
+            const clientEngagementLetter = $("#clientEngagementLetter").attr("file");
+            !clientContract && data.append(`tableData[clientContract]`, "");
+            !clientJobOrder && data.append(`tableData[clientJobOrder]`, "");
+            !clientEngagementLetter && data.append(`tableData[clientEngagementLetter]`, "");
+
+            sweetAlertConfirmation("add", "Client", "modalProjectClient", null, data, false, tableContent);
         }
     });
     // ----- END SAVE MODAL -----
@@ -622,7 +733,7 @@ $(document).on("change", "[name=clientCity]", function() {
     $(document).on("click", ".btnEdit", function() {
         const id       = $(this).attr("id");
         const feedback = $(this).attr("feedback");
-        $("#modalTitleAddClientHeader").text("VIEW CLIENT");
+        $("#modalTitleAddClientHeader").text("EDIT CLIENT");
         $("#modalProjectClient").modal("show")
 
         // Display preloader while waiting for the completion of getting the data
@@ -640,16 +751,22 @@ $(document).on("change", "[name=clientCity]", function() {
     // ----- UPDATE MODAL -----
     $(document).on("click", "#btnUpdate", function() {
         const validate = validateForm("modalProjectClient");
-        let rowID           = $(this).attr("rowID");
-        let genCode         = getTableData("pms_client_tbl","clientCode","clientID="+rowID,"clientCode DESC");
+        let rowID      = $(this).attr("rowID");
 
         if (validate) {
 
-            let data = getFormData("modalProjectClient", true);
-			data["tableData[updatedBy]"] = sessionID;
-			data["tableName"]            = "pms_client_tbl";
-			data["whereFilter"]          ="clientID="+rowID;
-			data["feedback"]             = $("[name=clientName]").val();
+            let data = getFormData("modalProjectClient");
+            data.append(`tableData[updatedBy]`, sessionID);
+            data.append(`tableName`, `pms_client_tbl`);
+            data.append(`whereFilter`, `clientID=${rowID}`);
+            data.append(`feedback`, $("[name=clientName]").val()?.trim());
+
+            const clientContract = $("#clientContract").attr("file");
+            const clientJobOrder = $("#clientJobOrder").attr("file");
+            const clientEngagementLetter = $("#clientEngagementLetter").attr("file");
+            !clientContract && data.append(`tableData[clientContract]`, "");
+            !clientJobOrder && data.append(`tableData[clientJobOrder]`, "");
+            !clientEngagementLetter && data.append(`tableData[clientEngagementLetter]`, "");   
 
 			sweetAlertConfirmation(
 				"update",
@@ -657,7 +774,7 @@ $(document).on("change", "[name=clientCity]", function() {
 				"modalProjectClient",
 				"",
 				data,
-				true,
+				false,
 				tableContent
 			);
         }
