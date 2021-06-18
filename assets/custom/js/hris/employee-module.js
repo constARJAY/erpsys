@@ -1636,7 +1636,7 @@ $(document).ready(function() {
         }
 
         const getRanking = (employeeRanking = null) => {
-            let html = "<option selected disabled>Select Ranking</option>";
+            let html = "<option selected disabled>Select Job Level</option>";
             let rankingOptions = [
                 {
                     name:    "Rank and File",
@@ -1669,7 +1669,7 @@ $(document).ready(function() {
             <div class="row">
                 <div class="col-12">
                     <div class="form-group">
-                        <label>Ranking <code>*</code></label>
+                        <label>Job Level <code>*</code></label>
                         <select class="form-control validate select2"
                             name="employeeRanking"
                             id="employeeRanking"
