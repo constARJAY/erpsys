@@ -34,6 +34,7 @@ class ProjectManagementBoard_model extends CI_Model {
         SELECT 
             ptbt.timelineBuilderID,
             ptbt.employeeID,
+            ptbt.timelineManagementBy,
             ptbt.timelineTeamMember AS teamMember,
             ptbt.timelineBuilderStatus,
             ptbt.timelineManagementStatus,
@@ -140,11 +141,12 @@ class ProjectManagementBoard_model extends CI_Model {
         $output = [];
         $projectDetails = $this->getProjectDetails($timelineBuilderID);
         if ($projectDetails) {
-            $output["timelineBuilderID"] = $projectDetails->timelineBuilderID;
-            $output["employeeID"]        = $projectDetails->employeeID;
-            $output["teamMember"]        = $projectDetails->teamMember;
-            $output["projectName"]       = $projectDetails->projectName;
-            $output["projectCode"]       = $projectDetails->projectCode;
+            $output["timelineBuilderID"]    = $projectDetails->timelineBuilderID;
+            $output["employeeID"]           = $projectDetails->employeeID;
+            $output["timelineManagementBy"] = $projectDetails->timelineManagementBy;
+            $output["teamMember"]           = $projectDetails->teamMember;
+            $output["projectName"]          = $projectDetails->projectName;
+            $output["projectCode"]          = $projectDetails->projectCode;
             $output["timelineManagementStatus"] = $projectDetails->timelineManagementStatus;
 
             $output["phases"] = $this->getTimelinePhases($timelineBuilderID);
@@ -162,7 +164,15 @@ class ProjectManagementBoard_model extends CI_Model {
 
     public function updateProjectBuilder($timelineBuilderID, $timelineManagementStatus)
     {
-        $query = $this->db->update("pms_timeline_builder_tbl", ["timelineManagementStatus" => $timelineManagementStatus], ["timelineBuilderID" => $timelineBuilderID]);
+        $sessionID = $this->session->has_userdata("adminSessionID") ? $this->session->userdata("adminSessionID") : 1;
+
+        $query = $this->db->update(
+            "pms_timeline_builder_tbl", 
+            [
+                "timelineManagementBy"     => $sessionID,
+                "timelineManagementStatus" => $timelineManagementStatus
+            ], 
+            ["timelineBuilderID" => $timelineBuilderID]);
         return $query ? true : false;
     }
 

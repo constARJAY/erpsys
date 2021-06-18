@@ -1,6 +1,8 @@
 $(document).ready(function() {
 
     // ----- REUSABLE VARIABLE/FUNCTIONS -----
+    const allowedUpdate = isUpdateAllowed(92);
+
 	const getNonFormattedAmount = (amount = "₱0.00") => {
 		return +amount.replaceAll(",", "").replace("₱", "")?.trim();
 	}
@@ -36,19 +38,20 @@ $(document).ready(function() {
         
                     if (tableData.length > 0) {
                         let {
-                            employeeID,
+                            timelineManagementBy,
                             timelineManagementStatus
                         } = tableData[0];
         
                         let isReadOnly = true, isAllowed = true;
         
-                        if (employeeID != sessionID) {
+                        if (timelineManagementBy != sessionID) {
                             isReadOnly = true;
-                            if (timelineManagementStatus == 0 || timelineManagementStatus == 4) {
-                                isAllowed = false;
-                            }
-                        } else if (employeeID == sessionID) {
+                            isAllowed = timelineManagementBy ? true : false
                             if (timelineManagementStatus == 0 || timelineManagementStatus == 1) {
+                                isReadOnly = false;
+                            }
+                        } else if (timelineManagementBy == sessionID) {
+                            if (timelineManagementBy && timelineManagementStatus == 0 || timelineManagementStatus == 1) {
                                 isReadOnly = false;
                             } else {
                                 isReadOnly = true;
@@ -58,7 +61,7 @@ $(document).ready(function() {
                         }
         
                         if (isAllowed) {
-                            if (employeeID == sessionID) {
+                            if (timelineManagementBy && timelineManagementBy == sessionID) {
                                 pageContent(true, tableData, isReadOnly);
                                 updateURL(encryptString(id), true, true);
                             } else {
@@ -98,7 +101,7 @@ $(document).ready(function() {
                     let id = decryptString(arr[1]);
                         id && isFinite(id) && loadData(id);
                 } else {
-                    const isAllowed = isCreateAllowed(46);
+                    const isAllowed = isCreateAllowed(92);
                     pageContent(isAllowed);
                 }
             }
@@ -141,7 +144,8 @@ $(document).ready(function() {
             ptbt.timelineBudgetStatus AS budgetStatus,
             ptbt.timelineManagementStatus,
             ptbt.timelineBuilderStatus`,
-            `ptbt.timelineBuilderStatus = 2`);
+            `(ptbt.timelineManagementStatus = 2 AND ptbt.timelineBuilderStatus = 2) OR
+            (ptbt.timelineBuilderStatus = 2 AND ptbt.timelineManagementBy = ${sessionID} OR ptbt.timelineManagementBy IS NULL OR ptbt.timelineManagementBy = '')`);
         return data;
     }
     // ----- END TIMELINE DATA -----
@@ -221,6 +225,15 @@ $(document).ready(function() {
 
     // ----- TIMELINE CONTENT ------
     function timelineContent() {
+
+        /**
+        ----- TIMELINE MANAGEMENT STATUS -----
+        0. Draft
+        1. For Assessment
+        2. Assessed
+        ----- END TIMELINE MANAGEMENT STATUS -----
+        */
+
         const timelineData = getTimelineData();
 
         let html = `
@@ -287,17 +300,17 @@ $(document).ready(function() {
     // ----- CLICK TASK NAME OR CARET -----
     $(document).on("click", ".btnCaret", function() {
         $parent  = $(this).closest("tr");
-        const taskName = $(this).attr("taskName");
+        const taskID   = $(this).attr("taskID");
         const phase    = $(this).attr("phase");
         const display  = $(this).attr("display") == "true";
         const myCaret  = display => !display ? "fa-caret-up" : "fa-caret-down";
         $(this).attr("display", !display);
         if (display) {
-            $parent.find(`.taskContent[taskName="${taskName}"][phase="${phase}"]`).slideUp(500, function() {
+            $parent.find(`.taskContent[taskID="${taskID}"][phase="${phase}"]`).slideUp(500, function() {
                 $(this).addClass("d-none");
             });
         } else {
-            $parent.find(`.taskContent[taskName="${taskName}"][phase="${phase}"]`).hide().removeClass("d-none").slideDown(500);
+            $parent.find(`.taskContent[taskID="${taskID}"][phase="${phase}"]`).hide().removeClass("d-none").slideDown(500);
         }
         $parent.find(`i[caret="true"]`).removeClass(myCaret(!display)).addClass(myCaret(display));
     })
@@ -305,9 +318,9 @@ $(document).ready(function() {
 
 
     // ----- DISPLAY ASSIGNED EMPLOYEE -----
-    const displayAssignedEmployee = (employees = [], taskName = null) => {
+    const displayAssignedEmployee = (employees = [], phase = null, taskID = null) => {
         let html = "";
-        if (employees.length > 0 && taskName) {
+        if (employees.length > 0 && phase && taskID) {
             employees.map((employee, index) => {
                 const { id, fullname, image } = employee;
                 if (index <= 5) {
@@ -330,16 +343,16 @@ $(document).ready(function() {
         } else {
             html += `<span>No data available yet.</span>`;
         }
-        $(`.assignedMembers[taskName="${taskName}"]`).html(html);
+        $(`.assignedMembers[phase="${phase}"][taskID="${taskID}"]`).html(html);
     }
     // ----- END DISPLAY ASSIGNED EMPLOYEE -----
 
 
     // ----- SELECT ASSIGNED EMPLOYEE -----
-    const getAssignedEmployee = (phase = null, taskName = null) => {
+    const getAssignedEmployee = (phase = null, taskID = null) => {
         let employees = [];
-        if (phase && taskName) {
-            $(`[name="assignEmployee"][phase="${phase}"][taskName="${taskName}"]`).each(function() {
+        if (phase && taskID) {
+            $(`[name="assignEmployee"][phase="${phase}"][taskID="${taskID}"]`).each(function() {
                 const employeeID = $(this).val();
                 if (employeeID && employeeID.length > 0) {
                     employeeID.map(tempID => {
@@ -358,10 +371,10 @@ $(document).ready(function() {
     }
 
     $(document).on("change", `[name="assignEmployee"]`, function() {
-        const phase     = $(this).attr("phase");
-        const taskName  = $(this).attr("taskName");
-        const employees = getAssignedEmployee(phase, taskName);
-        displayAssignedEmployee(employees, taskName);
+        const phase   = $(this).attr("phase");
+        const taskID  = $(this).attr("taskID");
+        const employees = getAssignedEmployee(phase, taskID);
+        displayAssignedEmployee(employees, phase, taskID);
         
         $parent = $(this).closest(".form-group");
         $(this).parent()
@@ -437,7 +450,7 @@ $(document).ready(function() {
                         max="9999999999"
                         minlength="1"
                         maxlength="10"
-                        taskName="${taskName}"
+                        taskID="${taskID}"
                         phase="${phaseCode}"
                         ${disabled}
                         required>
@@ -460,7 +473,7 @@ $(document).ready(function() {
                         name="assignEmployee"
                         multiple="multiple"
                         phase="${phaseCode}"
-                        taskName="${taskName}"
+                        taskID="${taskID}"
                         assignedEmployee="${assignedEmployee}"
                         ${disabled}>
                         <option disabled>${!disabled ? "Select Employee" : "-"}</option>
@@ -484,7 +497,7 @@ $(document).ready(function() {
                 <td style="position: relative;">    
                     <div class="d-flex align-items-center justify-content-between btnCaret" 
                         phase    = "${phaseCode}"
-                        taskName = "${taskName}"
+                        taskID="${taskID}"
                         display="false"
                         style="cursor: pointer;
                             min-height: 70px;
@@ -499,7 +512,7 @@ $(document).ready(function() {
                     </div>
                     <div class="d-none taskContent" 
                         phase    = "${phaseCode}"
-                        taskName = "${taskName}"
+                        taskID="${taskID}"
                         style    = "margin-top: 70px;">
                         ${taskContent[0]}
                     </div>
@@ -507,7 +520,7 @@ $(document).ready(function() {
                 <td style="position: relative;">
                     <div class="d-flex align-items-center" 
                         phase    = "${phaseCode}"
-                        taskName = "${taskName}"
+                        taskID="${taskID}"
                         style="
                             min-height: 70px;
                             height: auto;
@@ -520,12 +533,12 @@ $(document).ready(function() {
                             value="${manHours}" 
                             basis    = "true"
                             phase    = "${phaseCode}"
-                            taskName = "${taskName}"
+                            taskID="${taskID}"
                             disabled>
                     </div>
                     <div class="d-none taskContent" 
                         phase    = "${phaseCode}"
-                        taskName = "${taskName}"
+                        taskID="${taskID}"
                         style    = "margin-top: 70px;">
                         ${taskContent[1]}
                     </div>
@@ -533,7 +546,7 @@ $(document).ready(function() {
                 <td style="position: relative;">
                     <div class="d-flex align-items-center justify-content-start" 
                         phase    = "${phaseCode}"
-                        taskName = "${taskName}"
+                        taskID="${taskID}"
                         style="
                             min-height: 70px;
                             height: auto;
@@ -541,7 +554,7 @@ $(document).ready(function() {
                             padding: 1rem;
                             top: 0">
                         <div class="assignedMembers" 
-                            taskName="${taskName}" 
+                            taskID="${taskID}" 
                             phase="${phaseCode}"
                             style="position: absolute;
                                 top: 0;
@@ -552,7 +565,7 @@ $(document).ready(function() {
                     
                     <div class="d-none taskContent" 
                         phase    = "${phaseCode}"
-                        taskName = "${taskName}">
+                        taskID="${taskID}">
                         ${taskContent[2]}
                     </div>
                 </td>
@@ -617,10 +630,10 @@ $(document).ready(function() {
     // ----- KEYUP MAN HOURS -----
     $(document).on("keyup", `[name="manHours"]`, function() {
         const phase     = $(this).attr("phase");
-        const taskName  = $(this).attr("taskName");
+        const taskID    = $(this).attr("taskID");
         const elementID = "#"+$(this).attr("id");
 
-        validateManHours(phase, taskName, elementID);
+        validateManHours(phase, taskID, elementID);
     })
     // ----- END KEYUP MAN HOURS -----
 
@@ -631,7 +644,7 @@ $(document).ready(function() {
         if (data) {
             const {
                 timelineBuilderID     = "",
-                timelineManagementStatus = "",
+                timelineManagementStatus = false,
                 employeeID            = "",
                 approversID           = "",
                 approversDate         = "",
@@ -644,14 +657,16 @@ $(document).ready(function() {
                     class="btn btn-submit px-5 p-2"  
                     id="btnSubmit" 
                     timelineBuilderID="${encryptString(timelineBuilderID)}"
-                    code="${getFormCode("TL", createdAt, timelineBuilderID)}">
+                    code="${getFormCode("TL", createdAt, timelineBuilderID)}"
+                    status="${timelineManagementStatus}">
                     <i class="fas fa-paper-plane"></i> Submit
                 </button>
                 <button 
                     class="btn btn-cancel px-5 p-2"
                     id="btnCancel" 
                     timelineBuilderID="${encryptString(timelineBuilderID)}"
-                    code="${getFormCode("TL", createdAt, timelineBuilderID)}">
+                    code="${getFormCode("TL", createdAt, timelineBuilderID)}"
+                    status="${timelineManagementStatus}">
                     <i class="fas fa-ban"></i> Cancel
                 </button>`;
 
@@ -678,6 +693,7 @@ $(document).ready(function() {
     // ----- FORM CONTENT -----
     function formContent(data = false, readOnly = false) {
         $("#page_content").html(preloader);
+        readOnly ? preventRefresh(false) : preventRefresh(true);
 
         const {
             timelineBuilderID,
@@ -749,6 +765,19 @@ $(document).ready(function() {
                 const assignedEmployeeArr = $assignedEmployee?.split("|");
                 $assignedEmployee && $(this).val(assignedEmployeeArr).trigger("change");
             })
+
+            // ----- NOT ALLOWED FOR UPDATE -----
+			if (!allowedUpdate) {
+				$("#page_content").find(`input, select, textarea`).each(function() {
+					if (this.type != "search") {
+						$(this).attr("disabled", true);
+					}
+				})
+				$('#btnBack').attr("status", "2");
+				$(`#btnSubmit, #btnRevise, #btnCancel, #btnCancelForm, .btnAddRow, .btnDeleteRow`).hide();
+			}
+			// ----- END NOT ALLOWED FOR UPDATE -----
+
         }, 50);
     }
     // ----- END FORM CONTENT -----
@@ -786,7 +815,7 @@ $(document).ready(function() {
 
 
     // ----- CLICK BUTTON BACK -----
-	$(document).on("click", "#btnBack", function () {
+	$(document).on("click", "#btnBack, #btnCancel", function () {
         const id     = decryptString($(this).attr("timelineBuilderID"));
 		const status = $(this).attr("status");
 
@@ -804,13 +833,13 @@ $(document).ready(function() {
 
 
     // ----- VALIDATE MAN HOURS -----
-    function validateManHours(phase = "", taskName = "", elementID = null) {
-        const checkManHours = (phase, taskName, elementID, all = false) => {
+    function validateManHours(phase = "", taskID = "", elementID = null) {
+        const checkManHours = (phase, taskID, elementID, all = false) => {
             const $parent = $(elementID).closest(".form-group");
-            const basisManHours = getNonFormattedAmount($(`[phase="${phase}"][taskName="${taskName}"][basis="true"]`).val());
+            const basisManHours = getNonFormattedAmount($(`[phase="${phase}"][taskID="${taskID}"][basis="true"]`).val());
 
             let totalManHours = 0;
-            $(`[name="manHours"][phase="${phase}"][taskName="${taskName}"]`).each(function() {
+            $(`[name="manHours"][phase="${phase}"][taskID="${taskID}"]`).each(function() {
                 const manHours = getNonFormattedAmount($(this).val()) || 0;
                 totalManHours += manHours;
             })
@@ -822,7 +851,7 @@ $(document).ready(function() {
                 $(elementID).removeClass("is-valid").addClass("is-invalid");
                 $parent.find(".invalid-feedback").text(msg);
             } else {
-                $(`[name="manHours"][phase="${phase}"][taskName="${taskName}"]`).each(function() {
+                $(`[name="manHours"][phase="${phase}"][taskID="${taskID}"]`).each(function() {
                     const $myParent = $(this).closest(".form-group");
                     const id = "#"+$(this).attr("id");
                     $(id).removeClass("is-valid").removeClass("is-invalid");
@@ -831,14 +860,14 @@ $(document).ready(function() {
             }
         }
 
-        if (phase && taskName && elementID) {
-            checkManHours(phase, taskName, elementID)
+        if (phase && taskID && elementID) {
+            checkManHours(phase, taskID, elementID)
         } else {
             $(`[name="manHours"]`).each(function() {
                 const id       = "#"+$(this).attr("id");
                 const phase    = $(this).attr("phase");
-                const taskName = $(this).attr("taskName");
-                checkManHours(phase, taskName, id, true);
+                const taskID = $(this).attr("taskID");
+                checkManHours(phase, taskID, id, true);
             })
         }
     }
@@ -851,10 +880,10 @@ $(document).ready(function() {
             $parent = $(this).closest(".form-group");
             const index    = $(this).attr("index");
             const phase    = $(this).attr("phase");
-            const taskName = $(this).attr("taskName");
+            const taskID   = $(this).attr("taskID");
             const employeeIDArr = $(this).val();
 
-            const manHours = getNonFormattedAmount($(`[name="manHours"][phase="${phase}"][taskName="${taskName}"][index="${index}"]`).val());
+            const manHours = getNonFormattedAmount($(`[name="manHours"][phase="${phase}"][taskID="${taskID}"][index="${index}"]`).val());
             if (manHours > 0 && employeeIDArr.length == 0) {
                 $(this).parent()
                     .find(".selection")
@@ -933,9 +962,9 @@ $(document).ready(function() {
 
 
     // ----- CLICK BUTTON CANCEL -----
-    $(document).on("click", "#btnCancel", function() {
-        saveProjectBoard("cancel", null, pageContent);
-    })
+    // $(document).on("click", "#btnCancel", function() {
+    //     saveProjectBoard("cancel", null, pageContent);
+    // })
     // ----- END CLICK BUTTON CANCEL -----
 
 
@@ -952,7 +981,7 @@ $(document).ready(function() {
 
             const taskID = $(`[name="milestoneName"][index="${index}"]`).attr("taskID");
             const projectMilestoneID = $(`[name="milestoneName"][index="${index}"]`).attr("projectMilestoneID");
-            const manHours       = $(`[name="manHours"][index="${index}"]`).val();
+            const manHours       = getNonFormattedAmount($(`[name="manHours"][index="${index}"]`).val());
             const assignEmployee = $(`[name="assignEmployee"][index="${index}"]`).val()?.join("|");
             const temp = {
                 taskID, projectMilestoneID, manHours, assignEmployee
@@ -1116,6 +1145,12 @@ $(document).ready(function() {
                     if (method != "deny") {
                         if (method != "cancelform") {
                             callback && callback();
+                            Swal.fire({
+                                icon:              'success',
+                                title:             "Process successfully discarded!",
+                                showConfirmButton: false,
+                                timer:             2000
+                            });
                         }
                     } else {
                         

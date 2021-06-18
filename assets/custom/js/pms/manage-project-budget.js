@@ -354,7 +354,7 @@ $(document).ready(function() {
     // ----- FORM CONTENT -----
     function formContent(data = false, readOnly = false) {
         $("#page_content").html(preloader);
-        console.log(data);
+        readOnly ? preventRefresh(false) : preventRefresh(true);
 
         const {
             timelineBuilderID,
