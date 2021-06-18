@@ -1,6 +1,8 @@
 $(document).ready(function() {
-
+    
     // ----- GLOBAL VARIABLE -----
+    const allowedUpdate = isUpdateAllowed(91);
+
 	const getNonFormattedAmount = (amount = "₱0.00") => {
 		return +amount.replaceAll(",", "").replaceAll("₱", "")?.trim();
 	}
@@ -645,6 +647,19 @@ $(document).ready(function() {
             $("#page_content").html(html);
             initDatatables();
             initAll();
+
+            // ----- NOT ALLOWED FOR UPDATE -----
+			if (!allowedUpdate) {
+				$("#page_content").find(`input, select, textarea`).each(function() {
+					if (this.type != "search") {
+						$(this).attr("disabled", true);
+					}
+				})
+				$('#btnBack').attr("status", "2");
+				$(`#btnSubmit, #btnRevise, #btnCancel, #btnCancelForm, .btnAddRow, .btnDeleteRow`).hide();
+			}
+			// ----- END NOT ALLOWED FOR UPDATE -----
+
         }, 500);
     }
     // ----- END FORM CONTENT -----

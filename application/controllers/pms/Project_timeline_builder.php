@@ -49,10 +49,14 @@ class Project_timeline_builder extends CI_Controller {
         $updatedBy                  = $this->input->post("updatedBy");
         $createdAt                  = $this->input->post("createdAt");
         $tasks                      = $this->input->post("tasks") ?? null;
+
+        $projectCode             = $this->projecttimeline->getClientCount($clientID);
+
         $timelineBuilderData = [
             "reviseTimelineBuilderID" => $reviseTimelineBuilderID,
             "employeeID"              => $employeeID,
             "projectID"               => $projectID,
+            "projectCode"             => $projectCode,
             "clientID"                => $clientID,
             "timelineStartDate"       => $timelineStartDate,
             "timelineEndDate"         => $timelineEndDate,
@@ -133,6 +137,7 @@ class Project_timeline_builder extends CI_Controller {
                 if ($tasks) {
                     $timelineBuilderITasks = [];
                     foreach($tasks as $index => $task) {
+                        $createdByAlt = $createdBy ? $createdBy : $updatedBy;
                         $temp = [
                             "timelineBuilderID"     => $timelineBuilderID,
                             "milestoneBuilderID"    => $task["milestoneBuilderID"],
@@ -142,7 +147,7 @@ class Project_timeline_builder extends CI_Controller {
                             "taskStartDate"         => $task["taskStartDate"],
                             "taskEndDate"           => $task["taskEndDate"],
                             "taskRemarks"           => $task["taskRemarks"] ?? null,
-                            "createdBy"             => $createdBy,
+                            "createdBy"             => $createdByAlt,
                             "updatedBy"             => $updatedBy,
                         ];
                         array_push($timelineBuilderITasks, $temp);

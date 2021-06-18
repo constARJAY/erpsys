@@ -61,6 +61,9 @@ $(document).ready(function() {
 				} else if (employeeID == sessionID) {
 					if (timelineBuilderStatus == 0) {
 						isReadOnly = false;
+					}else if(timelineBuilderStatus == 7){
+						isReadOnly = false;
+						isRevise = true;
 					} else {
 						isReadOnly = true;
 					}
@@ -298,7 +301,7 @@ $(document).ready(function() {
 			"pms_timeline_builder_tbl AS pptb LEFT JOIN hris_employee_list_tbl AS helt USING(employeeID) LEFT JOIN pms_project_list_tbl AS pplt ON pplt.projectListID = pptb.projectID",
 			"pptb.*, CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname, pptb.createdAt AS dateCreated, projectListCode, projectListName",
 			`pptb.employeeID != ${sessionID} AND timelineBuilderStatus != 0 AND timelineBuilderStatus != 4`,
-			`FIELD(timelineBuilderStatus, 0, 1, 3, 2, 4, 5), COALESCE(pptb.submittedAt, pptb.createdAt)`
+			`FIELD(timelineBuilderStatus, 0, 1, 3, 2, 4, 5, 6, 7), COALESCE(pptb.submittedAt, pptb.createdAt)`
 		);
 
 		let html = `
@@ -329,6 +332,7 @@ $(document).ready(function() {
 				timelineBuilderID,
 				projectID,
 				projectListCode,
+				projectCode,
 				projectListName,
 				timelineProposedBudget,
 				timelineAllocatedBudget,
@@ -371,7 +375,7 @@ $(document).ready(function() {
 						<div>
 						${projectListName || '-'}
 						</div>
-						<small style="color:#848482;">${projectListCode || '-'}</small>
+						<small style="color:#848482;">${projectCode || '-'}</small>
 					</td>
 					<td>${projectCategory}</td>
 					<td class="text-right">${timelineProposedBudget ? formatAmount(timelineProposedBudget, true) : "-"}</td>
@@ -412,7 +416,7 @@ $(document).ready(function() {
 			"pms_timeline_builder_tbl AS pptb LEFT JOIN hris_employee_list_tbl AS helt USING(employeeID) LEFT JOIN pms_project_list_tbl AS pplt ON pplt.projectListID = pptb.projectID",
 			"pptb.*, CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname, pptb.createdAt AS dateCreated, projectListCode, projectListName",
 			`pptb.employeeID = ${sessionID}`,
-			`FIELD(timelineBuilderStatus, 0, 1, 3, 2, 4, 5), COALESCE(pptb.submittedAt, pptb.createdAt)`
+			`FIELD(timelineBuilderStatus, 0, 1, 3, 2, 4, 5, 6, 7), COALESCE(pptb.submittedAt, pptb.createdAt)`
 		);
 		let html = `
         <table class="table table-bordered table-striped table-hover" id="tableMyForms">
@@ -442,6 +446,7 @@ $(document).ready(function() {
 				timelineBuilderID,
                 projectID,
                 projectListCode,
+				projectCode,
                 projectListName,
 				timelineProposedBudget,
 				timelineAllocatedBudget,
@@ -463,7 +468,7 @@ $(document).ready(function() {
 				dateApproved = moment(dateApproved[dateApproved.length - 1]).format("MMMM DD, YYYY hh:mm:ss A");
 			}
 
-			let btnClass = timelineBuilderStatus != 0 ? "btnView" : "btnEdit";
+			let btnClass = timelineBuilderStatus != 0 ? (timelineBudgetStatus ? "btnEdit" : "btnView") : "btnEdit";
 			
 			let button = timelineBuilderStatus != 0 ? `
             <button class="btn btn-view w-100 btnView" id="${encryptString(timelineBuilderID )}"><i class="fas fa-eye"></i> View</button>` : `
@@ -484,7 +489,7 @@ $(document).ready(function() {
 					<div>
 					${projectListName || '-'}
 					</div>
-					<small style="color:#848482;">${projectListCode || '-'}</small>
+					<small style="color:#848482;">${projectCode || '-'}</small>
 				</td>
 				<td>${projectCategory}</td>
 				<td class="text-right">${timelineProposedBudget ? formatAmount(timelineProposedBudget, true) : "-"}</td>
@@ -593,7 +598,7 @@ $(document).ready(function() {
 						status="${timelineBuilderStatus}"><i class="fas fa-ban"></i> 
 						Drop
 					</button>`;
-				}else if (timelineBuilderStatus == 3) {
+				} else if (timelineBuilderStatus == 3) {
 					// DENIED - FOR REVISE
 					if(!isDocumentRevised(timelineBuilderID)){
 						button = `
@@ -887,12 +892,15 @@ $(document).ready(function() {
 	});
 
 	$(document).on("change","[name=taskEndDate]", function(){
-		var startDate = [], endDate = [];
-		$("[name=taskStartDate]").each(function(){startDate.push(this.value); });	
-		$("[name=taskEndDate]").each(function(){endDate.push(this.value); });	
-		var startDateStr = startDate[0]
-		var endDateStr 	 = endDate.pop();
-		$("[name=timelineDate]").val(startDateStr+" - "+endDateStr);
+		var dates = [];
+		$(".task-list-sub-row").each(function(){
+			var startDateValue 	= $(this).find("[name=taskStartDate]").val();
+			var endDateValue 	= $(this).find("[name=taskEndDate]").val();
+			dates.push(startDateValue); 
+			dates.push(endDateValue); 
+		});	
+		var dateSortOf = dates.sort(function(a,b){ return new Date(a) - new Date(b) });
+		$("[name=timelineDate]").val(dateSortOf[0]+" - "+dateSortOf.pop());
 	});
 
 	$(document).on("change","[name=clientID]", function(){
@@ -910,6 +918,7 @@ $(document).ready(function() {
 			reviseTimelineBuilderID = "",
 			employeeID              = "",
 			projectID               = "",
+			projectCode 			= "",
 			clientID 				= "",
 			timelinePriorityLevel	= "",
 			timelineProjectManager  = "",
@@ -958,8 +967,8 @@ $(document).ready(function() {
 		let button = formButtons(data, isRevise, isFromCancelledDocument);
 
 		let reviseDocumentNo    = isRevise ? timelineBuilderID : reviseTimelineBuilderID;
-		let documentHeaderClass = isRevise || reviseTimelineBuilderID ? "col-lg-3 col-md-3 col-sm-12 px-1" : "col-lg-2 col-md-6 col-sm-12 px-1";
-		let documentDateClass   = isRevise || reviseTimelineBuilderID ? "col-md-12 col-sm-12 px-0" : "col-lg-6 col-md-12 col-sm-12 px-1";
+		let documentHeaderClass = isRevise || reviseTimelineBuilderID ? "col-lg-4 col-md-4 col-sm-12 px-1" : "col-lg-2 col-md-6 col-sm-12 px-1";
+		let documentDateClass   = isRevise || reviseTimelineBuilderID ? "col-md-12 col-sm-12 px-0" : "col-lg-8 col-md-12 col-sm-12 px-1";
 		let documentReviseNo    = isRevise || reviseTimelineBuilderID ? `
 		<div class="col-lg-4 col-md-4 col-sm-12 px-1">
 			<div class="card">
@@ -979,7 +988,16 @@ $(document).ready(function() {
 		});	
 
 		let projectCategory = projectID && projectList.filter(items=> items.projectListID == projectID).map(items=>{return items.projectCategory});
-
+		let proposedBudgetText = ``, proposedBudgetNote = ``;
+		if(timelineAllocatedBudget){
+			if(timelineProposedBudget > timelineAllocatedBudget ){
+				proposedBudgetText = `Over the budget`;
+			}else{
+				proposedBudgetText = `Within the budget`;
+			}
+			proposedBudgetNote = `<strong>Status: </strong>  ${proposedBudgetText}`;
+		}
+		
 		let html = `
         <div class="row px-2">
 			${documentReviseNo}
@@ -989,18 +1007,6 @@ $(document).ready(function() {
                         <small class="text-small text-muted font-weight-bold">Document No.</small>
                         <h6 class="mt-0 text-danger font-weight-bold">
 							${timelineBuilderID && !isRevise ? getFormCode("PBT", createdAt, timelineBuilderID) : "---"}
-						</h6>      
-                    </div>
-                </div>
-            </div>
-			<div class="${documentHeaderClass}">
-                <div class="card">
-                    <div class="body">
-                        <small class="text-small text-muted font-weight-bold">Status</small>
-                        <h6 class="mt-0 font-weight-bold">
-							${timelineBudgetStatus && !isRevise ? (timelineBudgetStatus == 0 ? 
-											`<span class="badge badge-outline-info w-100">For Proposal</span>` :
-											`<span class="badge badge-outline-success w-100" style="width: 100% !important">Allocated</span>`) : "---"}
 						</h6>      
                     </div>
                 </div>
@@ -1092,7 +1098,7 @@ $(document).ready(function() {
 			<div class="col-md-4 col-sm-12">
 				<div class="form-group">
 					<label>Project Code ${!disabled ? "<code>*</code>" : ""}</label>
-					<input type="text" class="form-control" data-allowcharacters=" data-allowcharacters="[a-z][A-Z][0-9][.][,][?][!][/][;][:][-][_][()][%][&][*][ ][']['']" disabled minlength="2" maxlength="150"  value="">
+					<input type="text" class="form-control" data-allowcharacters=" data-allowcharacters="[a-z][A-Z][0-9][.][,][?][!][/][;][:][-][_][()][%][&][*][ ][']['']" disabled minlength="2" maxlength="150"  value="${projectCode || "-"}">
 				</div>
 			</div>
 			<div class="col-md-4 col-sm-12">
@@ -1261,10 +1267,14 @@ $(document).ready(function() {
 								name="timelineProposedBudget"
 								id="timelineProposedBudget"
                                 min="1" 
-                                max="999999" 
+                                max="999999" timelineBudgetStatus="${timelineBudgetStatus}"
                                 value="${timelineProposedBudget|| 0.00}" ${disabled}>
                         </div>
-                        <div class="invalid-feedback d-block" id="invalid-proposedBudget"></div> 
+                        <div class="invalid-feedback d-block" id="invalid-proposedBudget"></div>
+						<div class="note-feedback text-warning">
+							${proposedBudgetNote}
+						</div>
+
                     </div>
                 </div>
                 <div class="col-md-6 col-sm-12">
@@ -1316,6 +1326,8 @@ $(document).ready(function() {
 				$(`#btnSubmit, #btnRevise, #btnCancel, #btnCancelForm, .btnAddRow, .btnDeleteRow`).hide();
 			}
 			// ----- END NOT ALLOWED FOR UPDATE -----
+			updateTableRows();
+			updateTableTaskList();
 			return html;
 		}, 200);
 	}
@@ -1331,8 +1343,8 @@ $(document).ready(function() {
 		if(tableData.length > 0){
 			tableData.map((items,index)=>{
 				var milestoneListData = milestoneList.filter(milestoneList => milestoneList.milestoneBuilderID == items.milestoneBuilderID).map((items,index)=>{
-					return `<li>${items["projectMilestoneName"]}</li>`;
-				}).join("");
+					return items["projectMilestoneName"];
+				}).join();
 				html += `<tr class="task-list-row">
 					${!readOnly ? 
 						`<td class="text-center">
@@ -1353,7 +1365,7 @@ $(document).ready(function() {
 
 						</td>
 						<td class="milestone-list" projectmilestoneid="">
-							<ol>${milestoneListData}</ol>
+							${milestoneListData.replaceAll(",",`<br>`)}
 						</td>
 
 						<td class="task-list">
@@ -1706,7 +1718,7 @@ $(document).ready(function() {
 						tableRow.fadeOut(500, function (){
 							$(this).closest("tr").remove();
 							updateTableRows();
-							updateTableTaskList()
+							updateTableTaskList();
 							updateDeleteButton();
 						});
 					})
@@ -1800,7 +1812,7 @@ $(document).ready(function() {
 		if (currentStatus == "0" && method != "approve") {
 			var timelineDate 					= $("[name=timelineDate]").val().split(" - ");
 			var files 							= document.getElementById("timelineDesign").files[0];
-			
+			var timelineBudgetStatus 			= $("[name=timelineProposedBudget]").attr("timelineBudgetStatus");
 			data["employeeID"]            		= sessionID;
 			data["projectID"]             		= $("[name=projectID]").val() || null;
 			data["clientID"] 					= $("[name=clientID]").val() || null;
@@ -1815,6 +1827,7 @@ $(document).ready(function() {
 			data["timelineBuilderReason"] 	  	= $("[name=timelineBuilderReason]").val()?.trim() ?? null;
 			data["timelineProposedBudget"] 		= $("[name=timelineProposedBudget]").val().replaceAll(",","") ?? null;
 			data["file"] 						= files;
+			data["timelineBudgetStatus"] 		= timelineBudgetStatus;
 
 			formData.append("employeeID", sessionID);
 			formData.append("projectID", $("[name=projectID]").val() || null);
@@ -1830,7 +1843,7 @@ $(document).ready(function() {
 			formData.append("timelineBuilderReason", $("[name=timelineBuilderReason]").val()?.trim() ?? null );
 			formData.append("timelineProposedBudget", $("[name=timelineProposedBudget]").val().replaceAll(",","") ?? null);
 			formData.append("file", files);
-		
+			formData.append("timelineBudgetStatus", timelineBudgetStatus);
 
 			if (action == "insert") {
 				data["createdBy"]   = sessionID;
@@ -1846,23 +1859,24 @@ $(document).ready(function() {
 			if (method == "submit") {
 				data["submittedAt"] = dateToday();
 				formData.append("submittedAt", dateToday());
+				var timelineBuilderStatus = timelineBudgetStatus != 0 ? true : false;
 				if (approversID) {
+					data["approversID"]           = timelineBuilderStatus ? approversID : ``;
+					data["timelineBuilderStatus"] = timelineBuilderStatus;
 
-					data["approversID"]           = approversID;
-					data["timelineBuilderStatus"] = 1;
-
-					formData.append("approversID", approversID);
-					formData.append("timelineBuilderStatus", 1);
+					formData.append("approversID", timelineBuilderStatus ? approversID : ``);
+					formData.append("timelineBuilderStatus", timelineBuilderStatus ? 2 : 6);
 				} else {  // AUTO APPROVED - IF NO APPROVERS
-					data["approversID"]           = sessionID;
-					data["approversStatus"]       = 2;
-					data["approversDate"]         = dateToday();
-					data["timelineBuilderStatus"] 	  = 2;
+				
+					data["approversID"]           = timelineBuilderStatus ? sessionID : ``;
+					data["approversStatus"]       = timelineBuilderStatus ? 2 : ``;
+					data["approversDate"]         = timelineBuilderStatus ? dateToday() : ``;
+					data["timelineBuilderStatus"] = timelineBuilderStatus ? 2 : 6;
 
-					formData.append("approversID", sessionID);
-					formData.append("approversStatus", 2);
-					formData.append("approversDate", dateToday());
-					formData.append("timelineBuilderStatus", 2);
+					formData.append("approversID", timelineBuilderStatus ? sessionID : ``);
+					formData.append("approversStatus", timelineBuilderStatus ? 2 : ``);
+					formData.append("approversDate", timelineBuilderStatus ? dateToday() : ``);
+					formData.append("timelineBuilderStatus", timelineBuilderStatus ? 2 : 6);
 				}
 			}
 
@@ -2020,7 +2034,7 @@ $(document).ready(function() {
     // ----- SUBMIT DOCUMENT -----
 	$(document).on("click", "#btnSubmit", function () {
 		const id           				= decryptString($(this).attr("timelineBuilderID"));
-		const isFromCancelledDocument 	= $(this).attr("cancel") == "true";
+		const isFromCancelledDocument 	= $("[name=timelineProposedBudget]").attr("timelineBudgetStatus") ? $(this).attr("cancel") == "false" : $(this).attr("cancel") == "true";
 		const revise       				= $(this).attr("revise") == "true";
 		const validate     				= validateForm("form_timeline_builder");
 		const validateForms 			= validateNoneForm();
@@ -2038,9 +2052,6 @@ $(document).ready(function() {
 						data.delete("timelineBuilderID");
 					}
 				}
-	
-
-
 
 				let approversID = "", approversDate = "";
 				for (var i of data) {
@@ -2059,7 +2070,6 @@ $(document).ready(function() {
 						employeeID,
 					};
 				}
-				
 				savetimelineBuilder(data, "submit", notificationData, pageContent);
 			}else{
 				showNotification("warning2","Cannot submit form, kindly input valid items")
@@ -2305,9 +2315,17 @@ function getConfirmation(method = "submit") {
 			swalImg   = `${base_url}assets/modal/draft.svg`;
 			break;
 		case "submit":
-			swalTitle = `SUBMIT ${title.toUpperCase()}`;
-			swalText  = "Are you sure to submit this document?";
-			swalImg   = `${base_url}assets/modal/add.svg`;
+			var condition = $("[name=timelineProposedBudget]").attr("timelineBudgetStatus");
+			console.log(condition);
+			if(condition != 0){
+				swalTitle = `SUBMIT ${title.toUpperCase()}`;
+				swalText  = "Are you sure to submit this document?";
+				swalImg   = `${base_url}assets/modal/add.svg`;
+			}else{
+				swalTitle = `PROPOSE ${title.toUpperCase()}`;
+				swalText  = "Are you sure to submit the project timeline for proposal";
+				swalImg   = `${base_url}assets/modal/add.svg`;
+			}
 			break;
 		case "approve":
 			swalTitle = `APPROVE ${title.toUpperCase()}`;
@@ -2379,7 +2397,11 @@ function savetimelineBuilder(data = null, method = "submit", notificationData = 
 
 						let swalTitle;
 						if (method == "submit") {
-							swalTitle = `${getFormCode("PBT", dateCreated, insertedID)} submitted successfully!`;
+							if($("[name=timelineProposedBudget]").attr("timelineBudgetStatus") !=  0 ){
+								swalTitle = `${getFormCode("PBT", dateCreated, insertedID)} submitted successfully!`;
+							}else{
+								swalTitle = `Project Timeline submitted for proposal successfully!`;
+							}
 						} else if (method == "save") {
 							swalTitle = `Project Timeline saved successfully!`;
 						} else if (method == "cancelform") {
