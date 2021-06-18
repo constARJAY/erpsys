@@ -234,16 +234,19 @@ $(document).ready(function() {
 				scrollCollapse: true,
 				columnDefs: [
 					{ targets: 0,  width: 200 },
-					{ targets: 1,  width: 180 },
-					{ targets: 2,  width: 180  },
+					{ targets: 1,  width: 100 },
+					{ targets: 2,  width: 100  },
                     { targets: 3,  width: 180  },
-					{ targets: 4,  width: 280  },
-					{ targets: 5,  width: 150  },
+					{ targets: 4,  width: 150  },
+					{ targets: 5,  width: 280  },
 					{ targets: 6,  width: 280  },
-					{ targets: 7,  width: 150  },
-					{ targets: 8,  width: 150  },
+					{ targets: 7,  width: 280  },
+					{ targets: 8,  width: 250  },
+					{ targets: 9,  width: 150  },
 				],
 			});
+
+		
 
 		var table = $("#tableProjectRequestItems0")
 			.css({ "min-width": "100%" })
@@ -257,14 +260,15 @@ $(document).ready(function() {
 				scrollCollapse: true,
 				columnDefs: [
 					{ targets: 0,  width: 200 },
-					{ targets: 1,  width: 180 },
-					{ targets: 2,  width: 180  },
+					{ targets: 1,  width: 100 },
+					{ targets: 2,  width: 100  },
                     { targets: 3,  width: 180  },
-					{ targets: 4,  width: 280  },
-					{ targets: 5,  width: 150  },
-					{ targets: 6,  width: 180  },
-					{ targets: 7,  width: 150  },
-					{ targets: 8,  width: 150  },
+					{ targets: 4,  width: 150  },
+					{ targets: 5,  width: 280  },
+					{ targets: 6,  width: 280  },
+					{ targets: 7,  width: 280  },
+					{ targets: 8,  width: 250  },
+					{ targets: 9,  width: 150  },
 				],
 			});
 	}
@@ -797,6 +801,7 @@ $(document).ready(function() {
 		let {
 			liquidationID                    							= "",
 			description                               					= "",
+			quantity													="",
 			amount                               						= "",
 			vatSales                               						= "",
 			vat                               							= "",
@@ -817,6 +822,11 @@ $(document).ready(function() {
 			<td>
 				<div class="description">
 				${description || "-"}
+				</div>
+			</td>
+			<td>
+				<div class="quantity">
+				${quantity || "-"}
 				</div>
 			</td>
 			<td>
@@ -887,21 +897,27 @@ $(document).ready(function() {
 					let {
 						amount,
 						financeRequestID,
-						description
+						description,
+						quantity,
 					} = item;
 				//$("#totalAmount").val(pettyCashRequestAmount);
 			html += `
 			<tr class="itemTableRow">
                     <td>
-					<div class="description" name="description" descriptionValue="${description}" financeRequestID="${financeRequestID}">
+					<div class="description" name="description" descriptionValue="${description}" financeRequestID="${financeRequestID}" pettyCashID="${pettyCashID}">
 							${description || "-"}
 					</div>
                    </td> 
-                    <td>
-					<div class="amount" name="amount" amountValue="${amount}">
-							${amount || "-"}
+					<td>
+						<div class="quantity text-center" name="quantity">
+								${quantity || "-"}
+						</div>
+					</td>
+					<td>
+					<div class="text-right" name="amount" amountValue="${amount}">
+							${formatAmount(amount, true) || "-"}
 					</div>
-				</td>
+					</td>
 				<td>
 				<div class="quantity">
 				<div class="input-group">
@@ -963,7 +979,7 @@ $(document).ready(function() {
 				<div class="quantity">
 					<input 
 						type="text" 
-						class="form-control text-right"
+						class="form-control"
 						min="0.00" 
 						data-allowcharacters="[0-9]" 
 						max="999999999" 
@@ -1034,31 +1050,7 @@ $(document).ready(function() {
 	//alert(totalbudget1);
 
 	})	
-	// 	$(document).on("keyup change", "[name=vatSales]", function() {
-	// 	//const index     		= $(this).closest("tr").first().attr("index");
-	// 	var rowCount = $('.itemProjectTableBody tr').length;
-		
-	// 	var totalcost = 0;
-	// 	for(var i=0; i<rowCount; i++) {
-	// 	 totalcost += parseFloat($(`#vatSales${i}`).val().replace(/,/g, ''));
-	// 	  if(isNaN(totalcost)){
-	// 		 totalcost=0;
-	// 	  }
- 	// 	}       
 	
-	// 	//$("#totalAmount").css('background-color', '#FFFFFF');
-	// 	$(`#totalAmount`).text(formatAmount(totalcost, true));
-	// 	// document.getElementById("invalid-message").style.visibility = "hidden";
-	// 	// document.getElementById('invalid-message').innerHTML = '';
-	// 	// $("#totalAmount").attr("totalValue","1");
-	// 	$("#totalAmount").attr("ClientFundRequestAmount",totalcost);
-	// 	//totalCashAmount("1");
-	// 	//return true;
-
-
-	// });	
-
-
 	// ----- UPDATE DELETE BUTTON -----
 	function updateDeleteButton() {
 		let projectCount = 0, companyCount = 0;
@@ -1179,6 +1171,7 @@ $(document).ready(function() {
 			LEFT JOIN pms_client_tbl					AS pct ON  frd.clientID = pct.clientID`,
 			`frd.liquidationID,
 			frd.description,
+			frd.quantity,
 			frd.amount,
 			frd.vatSales,
 			frd.vat,
@@ -1367,6 +1360,7 @@ $(document).ready(function() {
                     <thead>
                         <tr style="white-space: nowrap">
                             <th>Description ${!disabled ? "<code>*</code>" : ""}</th>
+							<th>Quantity</th>
                             <th>Amount</th>
 							<th>VAT Sales</th>
 							<th>VAT</th>
@@ -1451,15 +1445,15 @@ $(document).ready(function() {
 			// }
 
 			// ----- NOT ALLOWED FOR UPDATE -----
-			if (!allowedUpdate) {
-				$("#page_content").find(`input, select, textarea`).each(function() {
-					if (this.type != "search") {
-						$(this).attr("disabled", true);
-					}
-				})
-				$('#btnBack').attr("status", "2");
-				$(`#btnSubmit, #btnRevise, #btnCancel, #btnCancelForm`).hide();
-			}
+			// if (!allowedUpdate) {
+			// 	$("#page_content").find(`input, select, textarea`).each(function() {
+			// 		if (this.type != "search") {
+			// 			$(this).attr("disabled", true);
+			// 		}
+			// 	})
+			// 	$('#btnBack').attr("status", "2");
+			// 	$(`#btnSubmit, #btnRevise, #btnCancel, #btnCancelForm`).hide();
+			// }
 			// ----- END NOT ALLOWED FOR UPDATE -----
 
 			return html;
@@ -1560,7 +1554,7 @@ $(document).ready(function() {
 			data['liquidationBudget']											= $("#liquidationBudget").val();
 			data['liquidationExcessOrShortage'] 								= getNonFormattedAmount($("#liquidationExcessOrShortage").text());
 			data['liquidationDispositionofExcessOrShortage'] 					= $("#liquidationDispositionofExcessOrShortage").val();
-			data["pettyCashRequestID"] 											= $(".description").attr("pettyCashRequestID");
+			data["pettyCashRequestID"] 											= $(".description").attr("pettyCashID");
 			formData.append("employeeID", sessionID);
             formData.append("projectID", $("[name=projectID]").val() || null);
 			//alert(getNonFormattedAmount($("#liquidationAmount").text()));
@@ -1572,7 +1566,7 @@ $(document).ready(function() {
 			formData.append("liquidationExcessOrShortage", getNonFormattedAmount($("#liquidationExcessOrShortage").text()));
 			formData.append("liquidationDispositionofExcessOrShortage", $("#liquidationDispositionofExcessOrShortage").val());
 			formData.append("liquidationPurpose", $("[name=liquidationPurpose]").val()?.trim());
-			formData.append("pettyCashRequestID", $(".description").attr("pettyCashRequestid"));
+			formData.append("pettyCashRequestID", $(".description").attr("pettyCashID"));
 			if (action == "insert") {
 				data["createdBy"]   = sessionID;
 				data["createdAt"]   = dateToday();
@@ -1611,8 +1605,9 @@ $(document).ready(function() {
 				const liquidationID = $(this).attr('liquidationID');
 				const categoryType = 
 				$(this).closest("tbody").attr("project") == "true" ? "project" : "company";
-				const description    						= $("td [name=description]", this).attr("descriptionValue");	
-				const amount   		 						= $("td [name=amount]", this).attr("amountValue");
+				const description    						= $("td [name=description]", this).text();
+				const quantity    							= $("td [name=quantity]", this).text();
+				const amount   		 						= getNonFormattedAmount($("td [name=amount]", this).text());
 				const vatSales 								= $("td [name=vatSales]", this).val();
 				const vat 									= $("td [name=vat]", this).val();	
 				const clientID 								= $("td [name=clientID]", this).val();
@@ -1620,6 +1615,7 @@ $(document).ready(function() {
 				const chartOfAccountID 						= $("td [name=chartOfAccountID]", this).val();
 				const remark 								= $("td [name=remark]", this).val();
 				const receiptNumber 						= $("td [name=receiptNumber]", this).val();
+				//const totalAmount = 		getNonFormattedAmount($("td [name=basequantityandamount ]", this).text()); 
 				
 				
 
@@ -1630,6 +1626,7 @@ $(document).ready(function() {
 
 				//formData.append(`items[${i}][chartOfAccountID]`, chartOfAccountID);
 				formData.append(`items[${i}][description]`, description);
+				formData.append(`items[${i}][quantity]`, quantity);
 				formData.append(`items[${i}][amount]`, amount);
 				formData.append(`items[${i}][vatSales]`, vatSales);
 				formData.append(`items[${i}][vat]`, vat);

@@ -103,15 +103,14 @@ class Client_fund_request extends CI_Controller {
                     $pettyCashRequestItems = [];
                     foreach($items as $index => $item) {
                         $temp = [
-                            // "requestItemID"     => $item["requestItemID"] != "null" ? $item["requestItemID"] : null,
-                            "clientFundRequestID" => $clientFundRequestID,
-                           // "chartOfAccountID"  => $item["chartOfAccountID"] != "null" ? $item["chartOfAccountID"] : null,
-                            "description"   => $item["description"] != "null" ? $item["description"] : null,
-                            "quantity"          => $item["quantity"] != "null" ? $item["quantity"] : null,
-                            "amount"           => $item["amount"] != "null" ? $item["amount"] : null,
-                            "files"             => array_key_exists("existingFile", $item) ? $item["existingFile"] : null, 
-                            "createdBy"         => $item["createdBy"],
-                            "updatedBy"         => $item["updatedBy"],
+                            "clientFundRequestID"   => $clientFundRequestID,
+                            "description"           => $item["description"] != "null" ? $item["description"] : null,
+                            "quantity"              => $item["quantity"] != "null" ? $item["quantity"] : null,
+                            "amount"                => $item["amount"] != "null" ? $item["amount"] : null,
+                            "totalAmount"           => $item["totalAmount"] != "null" ? $item["totalAmount"] : null,
+                            "files"                 => array_key_exists("existingFile", $item) ? $item["existingFile"] : null, 
+                            "createdBy"             => $item["createdBy"],
+                            "updatedBy"             => $item["updatedBy"],
                         ];
                         array_push($pettyCashRequestItems, $temp);
                     }

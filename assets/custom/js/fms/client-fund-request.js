@@ -226,6 +226,7 @@ $(document).ready(function() {
 					{ targets: 2,  width: 150 },
 					{ targets: 3,  width: 180 },
 					{ targets: 4,  width: 100  },
+					{ targets: 5,  width: 100  },
 				],
 			});
 
@@ -243,7 +244,8 @@ $(document).ready(function() {
 					{ targets: 0,  width: 150 },
 					{ targets: 1,  width: 150 },
 					{ targets: 2,  width: 150 },
-					{ targets: 3,  width: 50  },
+					{ targets: 3,  width: 100  },
+					{ targets: 4,  width: 100  },
 				],
 			});
 	}
@@ -757,6 +759,7 @@ $(document).ready(function() {
 			description  						= "",
 			quantity							="",
 			amount                              = 0,
+			totalAmount							=0,
 			files                               = ""
 		} = item;
 
@@ -780,6 +783,11 @@ $(document).ready(function() {
 				${formatAmount(amount, true) || "-"}
 				</td>
 				<td>
+				<div class="basequantityandamount text-right">
+					${formatAmount(totalAmount, true) || "-"}
+			   </div>
+			   </td>
+				<td>
 					<div class="file">
 						${itemFIle}
 					</div>
@@ -790,7 +798,7 @@ $(document).ready(function() {
 			const inputFile = ceID && ceID != "0" ? "" : `
 			<input 
 				type="file" 
-				class="form-control" 
+				class="form-control validate" 
 				name="files" 
 				id="files"
 				accept="image/*, .pdf, .doc, .docx">
@@ -801,7 +809,7 @@ $(document).ready(function() {
 				if (files) {
 					itemFile = `
 					<a href="${base_url+"assets/upload-files/petty-cash-request/"+files}"
-					class="filename"
+					class="filename validate"
 					title="${files}" 
 					style="display: block;
 						width: 150px;
@@ -816,7 +824,7 @@ $(document).ready(function() {
 				if (files) {
 					itemFile = `
 					<div class="d-flex justify-content-between align-items-center py-2">
-						<a class="filename"
+						<a class="filename validate"
 						title="${files}"
 						style="display: block;
 							width: 150px;
@@ -841,13 +849,10 @@ $(document).ready(function() {
 				</td>
                     <td>
 					<div>
-						<textarea 
+						<input type="text" 
 							class="form-control validate description"
 							minlength="0"
 							maxlength="250"
-							rows="2" 
-							style="resize: none" 
-							class="form-control" 
 							data-allowcharacters="[0-9][a-z][A-Z][ ][.][,][_]['][()][?][-][/]"
 							name="description"
                             required 
@@ -855,7 +860,6 @@ $(document).ready(function() {
 							id="description"
 							ceID="${ceID ? true : false}"
 							${disabled}>
-							</textarea>
                             <div class="invalid-feedback d-block" id="invalid-description"></div>
                         </div>
                    </td> 
@@ -863,7 +867,7 @@ $(document).ready(function() {
 						<div class="quantity">
 							<input 
 							type="text" 
-							class="form-control input-quantity text-right "
+							class="form-control input-quantity text-center"
 							min="0.01" 
 							max="999999999" 
 							data-allowcharacters="[0-9]"
@@ -884,24 +888,26 @@ $(document).ready(function() {
 					<div class="input-group-prepend">
 						<span class="input-group-text">₱</span>
 					</div>
-					
 						<input 
 							type="text" 
-							class="form-control input-quantity text-right"
-							min="0.00" 
-							data-allowcharacters="[0-9]" 
-							max="999999999" 
+							class="form-control amount text-right"
+							min="0.01" 
+							max="999999" 
+							minlength="1" 
+							maxlength="20" 
 							id="amount" 
 							name="amount" 
 							value="${amount}" 
-							minlength="1" 
-							maxlength="20" 
 							autocomplete="off"
 							ceID="${ceID ? true : false}"
 							${disabled}>
 						<div class="invalid-feedback d-block" id="invalid-amount"></div>
 					</div>
-					</div>
+				</td>
+				<td>
+				<div class="basequantityandamount text-right">
+					<span class="basequantityandamount" id="basequantityandamount" name="basequantityandamount"> </span>
+				</div>
 				</td>
 				<td>
 					<div class="file">
@@ -917,7 +923,6 @@ $(document).ready(function() {
         return html;
     }
     // ----- END GET ITEM ROW -----
-
 
 	// ----- UPDATE TABLE ITEMS -----
 	function updateTableItems() {
@@ -957,11 +962,13 @@ $(document).ready(function() {
 			
 			// TOTAL COST
 			$("td .description", this).attr("id", `description${i}`);
+			$("td .basequantityandamount [name=basequantityandamount]", this).attr("id", `basequantityandamount${i}`);
             $("td .description .invalid-feedback", this).attr("id", `invalid-description${i}`);
 			$("td .description [name=description]", this).attr("company", `true`);
 
 			// FILE
 			$("td .file [name=files]", this).attr("id", `filesProject${i}`);
+			
 
 		})
 	}
@@ -1013,6 +1020,8 @@ $(document).ready(function() {
 							updateDeleteButton();
 							updateTotalAmount(isProject);
 							updateInventoryItemOptions();
+							totalAmount();
+							
 						});
 					})
 				}
@@ -1023,9 +1032,47 @@ $(document).ready(function() {
 		}
 	}
 	// ----- END DELETE TABLE ROW -----
-	
+	function totalAmount(id){
+		var TotalValue = 0;
+		$(".itemProjectTableBody tr").each(function(){
+			TotalValue += parseFloat(getNonFormattedAmount($(this).find('[name=basequantityandamount]').text()) || 0);	
+	  });
+		if(TotalValue <= 2000){
+			$("#totalAmount").css('background-color', '#FFFFFF');
+			$(`#totalAmount`).text(formatAmount(TotalValue, true));
+			document.getElementById("invalid-message").style.visibility = "hidden";
+			document.getElementById('invalid-message').innerHTML = '';
+			$("#totalAmount").attr("totalValue","1");
+			$("#totalAmount").attr("clientFundRequestAmount",TotalValue);
+		}else{
+			$("#totalAmount").css('background-color', '#FF0000');
+			$(`#totalAmount`).text(formatAmount(TotalValue, true));
+			document.getElementById('invalid-message').innerHTML = 'Invalid request! Can only request ₱ 2,000 and below.';
+			document.getElementById("invalid-message").style.visibility = "visible";
+			$("#totalAmount").attr("totalValue","");
+			$("#totalAmount").attr("clientFundRequestAmount",TotalValue);
+		}
+	 
+	  
+	}
+	function baseQuantityAndAmount(id){
+		let amountvalue = parseFloat($(`#amount${id}`).val().replace(/,/g, ''));
+		let amount = amountvalue || 0;	
+		let quantityvalue = parseFloat($(`#quantity${id}`).val().replace(/,/g, ''));
+		let quantity = quantityvalue || 0;	
+		let baseQuantityandAmount = amount * quantity;
+		$(`#basequantityandamount${id}`).text(formatAmount(baseQuantityandAmount, true));
+		totalAmount(id);
+	}
+
+	$(document).on("keyup", "[name=quantity]", function() {
+		const id     		= $(this).closest("tr").first().attr("index");
+		baseQuantityAndAmount(id);
+
+	})
 	$(document).on("keyup change", "[name=amount]", function() {
-		//const index     		= $(this).closest("tr").first().attr("index");
+		const id     		= $(this).closest("tr").first().attr("index");
+		baseQuantityAndAmount(id);
 		var rowCount = $('.itemProjectTableBody tr').length;
 		var totalcost = 0;
 		for(var i=0; i<rowCount; i++) {
@@ -1034,30 +1081,10 @@ $(document).ready(function() {
 			 totalcost=0;
 		  }
  		}       
-	 if(totalcost <= 2000){
-		$("#totalAmount").css('background-color', '#FFFFFF');
-		$(`#totalAmount`).text(formatAmount(totalcost, true));
-		document.getElementById("invalid-message").style.visibility = "hidden";
-		document.getElementById('invalid-message').innerHTML = '';
-		$("#totalAmount").attr("totalValue","1");
-		$("#totalAmount").attr("clientFundRequestAmount",totalcost);
-		//totalCashAmount("1");
-		//return true;
-	 }else{
-		 $("#totalAmount").css('background-color', '#FF0000');
-		$(`#totalAmount`).text(formatAmount(totalcost, true));
-		document.getElementById('invalid-message').innerHTML = 'Invalid request! Can only request ₱ 2,000 and below.';
-		document.getElementById("invalid-message").style.visibility = "visible";
-		$("#totalAmount").attr("totalValue","");
-		$("#totalAmount").attr("clientFundRequestAmount",totalcost);
-		//totalCashAmount("0");
-		//return false;
-	 }
-
 
 	});	
 
-	// ----- UPDATE TOTAL AMOUNT -----
+	// // ----- UPDATE TOTAL AMOUNT -----
 	function updateTotalAmount(isProject = true) {
 		const attr        = isProject ? "[project=true]" : "[company=true]";
 		const quantityArr = $.find(`[name=amount]${attr}`).map(element => getNonFormattedAmount(element.value) || "0");
@@ -1135,8 +1162,9 @@ $(document).ready(function() {
 						${checkboxProjectHeader}
 						<th>Chart of Account ${!disabled ? "<code>*</code>" : ""}</th>
 						<th>Description ${!disabled ? "<code>*</code>" : ""}</th>
-						<th>Quantity</th>
-						<th>Amount</th>
+						<th>Quantity ${!disabled ? "<code>*</code>" : ""}</th>
+						<th>Amount ${!disabled ? "<code>*</code>" : ""}</th>
+						<th>Total Amount </th>
 						<th>File</th>
 					</tr>
 				</thead>
@@ -1173,22 +1201,6 @@ $(document).ready(function() {
         $("[name=clientAddress]").val(address);
     })
     // ----- END SELECT PROJECT LIST -----
-
-	// ----- KEYUP QUANTITY OR UNITCOST -----
-	$(document).on("keyup", "[name=quantity]", function() {
-		const index     = $(this).closest("tr").first().attr("index");
-		const isProject = $(this).closest("tbody").attr("project") == "true";
-		const attr      = isProject ? "[project=true]" : "[company=true]";
-		const table     = isProject ? "project" : "company";
-		const quantity  = +getNonFormattedAmount($(`#quantity${index}${table}${attr}`).val());
-		const unitcost  = +getNonFormattedAmount($(`#unitcost${index}${attr}`).text());
-		const totalcost = quantity * unitcost;
-		$(`#totalcost${index}${attr}`).text(formatAmount(totalcost, true));
-		updateTotalAmount(isProject);
-	})
-	// ----- END KEYUP QUANTITY OR UNITCOST -----
-
-
 	// ----- SELECT FILE -----
 	$(document).on("change", "[name=files]", function(e) {
 		const filename = this.files[0].name;
@@ -1199,13 +1211,14 @@ $(document).ready(function() {
 			showNotification("danger", "File size must be less than or equal to 10mb");
 		} else {
 			let html = `
-			<div class="d-flex justify-content-between align-items-center py-2">
+			<div class="d-flex justify-content-between validate align-items-center py-2">
 				<span class="filename"
 					style="display: block;
 						width: 180px;
 						overflow: hidden;
 						white-space: nowrap;
 						text-overflow: ellipsis;">${filename}</span>
+				<div class="invalid-feedback d-block" id="invalid-files"></div>
 				<span class="btnRemoveFile" style="cursor: pointer"><i class="fas fa-close"></i></span>
 			</div>`;
 			$(this).parent().find(".displayfile").first().html(html);
@@ -1308,6 +1321,7 @@ $(document).ready(function() {
                 cfrd.description,
 				cfrd.quantity,
                 cfrd.amount,
+				cfrd.totalAmount,
                 cfrd.files`,
                 `cfrd.clientFundRequestID = ${clientFundRequestID}`,``,`cfrd.financeRequestID`);
                 clientFundRequestData.map(item => {
@@ -1434,7 +1448,13 @@ $(document).ready(function() {
             </div>
         </div>
             <div class="row" id="form_petty_cash_request">
-                <div class="col-md-6 col-sm-12">
+				<div class="col-md-4 col-sm-12">
+					<div class="form-group">
+					<label>Project Code</label>
+					<input type="text" class="form-control" name="projectCode" disabled value="">
+					</div>
+				</div>
+                <div class="col-md-4 col-sm-12">
                     <div class="form-group">
                         <label>Project Name ${!disabled ? "<code>*</code>" : ""}</label>
                         <select class="form-control validate select2"
@@ -1448,7 +1468,7 @@ $(document).ready(function() {
                     </select>
                     </div>
                 </div>
-                <div class="col-md-6 col-sm-12">
+                <div class="col-md-4 col-sm-12">
                     <div class="form-group">
                         <label>Client Code</label>
                         <input type="text" class="form-control" name="clientCode" disabled value="">
@@ -1520,8 +1540,9 @@ $(document).ready(function() {
                         <tr style="white-space: nowrap">
                             ${checkboxProjectHeader}
                             <th>Description ${!disabled ? "<code>*</code>" : ""}</th>
-							<th>Quantity</th>
-                            <th>Amount</th>
+							<th>Quantity ${!disabled ? "<code>*</code>" : ""}</th>
+                            <th>Amount ${!disabled ? "<code>*</code>" : ""}</th>
+							<th>Total Amount </th>
                             <th>File</th>
                         </tr>
                     </thead>
@@ -1664,14 +1685,14 @@ $(document).ready(function() {
 			
 			data["employeeID"]            = sessionID;
             data["projectID"]    = $("[name=projectID]").val() || null;
-			data["clientFundRequestAmount"]    =$("[name=totalAmount]").attr('clientFundRequestAmount');
+			data["clientFundRequestAmount"]    =getNonFormattedAmount($("[name=totalAmount]").text());
 			data["clientFundRequestDate"] = moment($("[name=clientFundRequestDate]").val()?.trim()).format("YYYY-MM-DD");
 			data["chartOfAccountID"] = $("[name=chartOfAccountID]").val()?.trim();
 
 
 			formData.append("employeeID", sessionID);
             formData.append("projectID", $("[name=projectID]").val() || null);
-			formData.append("clientFundRequestAmount", $("[name=totalAmount]").attr('clientFundRequestAmount'));
+			formData.append("clientFundRequestAmount", getNonFormattedAmount($("[name=totalAmount]").text()));
 			formData.append("clientFundRequestDate", moment($("[name=clientFundRequestDate]").val()?.trim()).format("YYYY-MM-DD"));
 			formData.append("chartOfAccountID", $("[name=chartOfAccountID]").val()?.trim());
 			if (action == "insert") {
@@ -1713,25 +1734,17 @@ $(document).ready(function() {
 
 				const categoryType = 
 					$(this).closest("tbody").attr("project") == "true" ? "project" : "company";
-
-				//const chartOfAccountID                              = $("td [name=chartOfAccountID]", this).val();
                 const description          = $("td [name=description]", this).val();
-				const quantity 				= $("td [name=quantity]", this).val().replaceAll(",","");	
-				//const itemDescription = $("td [name=itemID] option:selected", this).attr("itemDescription");	
-
-				//const amount  = +getNonFormattedAmount($("td [name=amount]", this).val());	
+				const quantity 				= $("td [name=quantity]", this).val().replaceAll(",","");		
                 const amount 				= $("td [name=amount]", this).val().replaceAll(",","");
-				//const amount 				= $("td [name=amount]", this).val().replaceAll(",","");
-				//const unitcost  = +getNonFormattedAmount($("td .unitcost", this).text());	
-				//const totalcost = quantity * unitcost;
-
+				const totalAmount = 		getNonFormattedAmount($("td [name=basequantityandamount ]", this).text()); 
 				let fileID   = $("td [name=files]", this).attr("id") || "";
 				let file     = fileID ? $(`#${fileID}`)?.[0]?.files?.[0] : "";
 				let fileArr  = file?.name?.split(".");
 				let filename = file ? file?.name : "";
 
 				let temp = {
-						description, quantity, amount,
+						description, quantity, amount,totalAmount,
 					filename
 				};
 
@@ -1739,6 +1752,7 @@ $(document).ready(function() {
 				formData.append(`items[${i}][description]`, description);
 				formData.append(`items[${i}][quantity]`, quantity);
 				formData.append(`items[${i}][amount]`, amount);
+				formData.append(`items[${i}][totalAmount]`, totalAmount);
 				formData.append(`items[${i}][filename]`, filename);
 				formData.append(`items[${i}][createdBy]`, sessionID);
 				formData.append(`items[${i}][updatedBy]`, sessionID);

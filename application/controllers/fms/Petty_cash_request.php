@@ -107,6 +107,7 @@ class Petty_cash_request extends CI_Controller {
                            // "chartOfAccountID"  => $item["chartOfAccountID"] != "null" ? $item["chartOfAccountID"] : null,
                             "description"       => $item["description"] != "null" ? $item["description"] : null,
                             "quantity"          => $item["quantity"] != "null" ? $item["quantity"] : null,
+                            "totalAmount"       => $item["totalAmount"] != "null" ? $item["totalAmount"] : null,
                             "amount"            => $item["amount"] != "null" ? $item["amount"] : null,
                             "files"             => array_key_exists("existingFile", $item) ? $item["existingFile"] : null, 
                             "createdBy"         => $item["createdBy"],

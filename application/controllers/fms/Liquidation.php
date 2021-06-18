@@ -119,6 +119,7 @@ class Liquidation extends CI_Controller {
                             "liquidationID" => $liquidationID,
                            // "chartOfAccountID"  => $item["chartOfAccountID"] != "null" ? $item["chartOfAccountID"] : null,
                             "description"         => $item["description"] != "null" ? $item["description"] : null,
+                            "quantity"         => $item["quantity"] != "null" ? $item["quantity"] : null,
                             "amount"              => $item["amount"] != "null" ? $item["amount"] : null,
                             "vatSales"            => $item["vatSales"] != "null" ? $item["vatSales"] : null,
                             "vat"                 => $item["vat"] != "null" ? $item["vat"] : null,
