@@ -560,7 +560,7 @@ $(document).on("change", "[name=clientCity]", function() {
                         <div class="form-group">
                             <label>Contract</label>
                             <div class="displayfile" id="displayContract">
-                                ${clientContract && getFileDisplay(clientContract)}
+                                ${clientContract ? getFileDisplay(clientContract) : ""}
                             </div>
                             <input 
                                 type="file" 
@@ -575,7 +575,7 @@ $(document).on("change", "[name=clientCity]", function() {
                         <div class="form-group">
                             <label>Job Order</label>
                             <div class="displayfile" id="displayJobOrder">
-                                ${clientJobOrder && getFileDisplay(clientJobOrder)}
+                                ${clientJobOrder ? getFileDisplay(clientJobOrder) : ""}
                             </div>
                             <input 
                                 type="file" 
@@ -590,7 +590,7 @@ $(document).on("change", "[name=clientCity]", function() {
                         <div class="form-group">
                             <label>Engagement Letter</label>
                             <div class="displayfile" id="displayEngagementLetter">
-                                ${clientEngagementLetter && getFileDisplay(clientEngagementLetter)}
+                                ${clientEngagementLetter ? getFileDisplay(clientEngagementLetter) : ""}
                             </div>
                             <input 
                                 type="file" 
