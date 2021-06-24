@@ -111,10 +111,11 @@ $(document).ready(function() {
 				var pettycashCode = ids[2];
 				var pettyCashDate = ids[3];
 				var pettyCashAmount = ids[4];
+				var pettycashChartOfAccountID =ids[5];
 				//alert(pettyCashDate);
 				//alert(liquidationDataID);
 				//alert(liquidationDataID);
-				let itemProjectTableBody = formContent('','','','', liquidationDataID, pettycashCode, pettyCashDate, pettyCashAmount);
+				let itemProjectTableBody = formContent('','','','', liquidationDataID, pettycashCode, pettyCashDate, pettyCashAmount, pettycashChartOfAccountID);
 				// var idtwo = ids[2];
 				
 				// alert(liquidationID);
@@ -191,10 +192,12 @@ $(document).ready(function() {
 					{ targets: 1,  width: 150 },
 					{ targets: 2,  width: 100 },
 					{ targets: 3,  width: 350 },
-					{ targets: 4,  width: 200 },
-					{ targets: 5,  width: 200 },
+					{ targets: 4,  width: 100 },
+					{ targets: 5,  width: 350 },
 					{ targets: 6,  width: 200 },
 					{ targets: 7,  width: 200 },
+					{ targets: 8,  width: 200 },
+					{ targets: 9,  width: 200 },
 				],
 			});
 
@@ -212,10 +215,12 @@ $(document).ready(function() {
 					{ targets: 1,  width: 150 },
 					{ targets: 2,  width: 100 },
 					{ targets: 3,  width: 350 },
-					{ targets: 4,  width: 200 },
-					{ targets: 5,  width: 200 },
+					{ targets: 4,  width: 100 },
+					{ targets: 5,  width: 350 },
 					{ targets: 6,  width: 200 },
 					{ targets: 7,  width: 200 },
+					{ targets: 8,  width: 200 },
+					{ targets: 9,  width: 200 },
 				],
 			});
 
@@ -223,26 +228,23 @@ $(document).ready(function() {
 			.css({ "min-width": "100%" })
 			.removeAttr("width")
 			.DataTable({
-				proccessing: false,
-				serverSide: false,
-				scrollX: true,
-				sorting: false,
-                searching: false,
-                paging: false,
-                ordering: false,
-                info: false,
-				scrollCollapse: true,
+				proccessing:    false,
+                serverSide:     false,
+                scrollX:        true,
+                sorting:        false,
+                searching:      false,
+                paging:         false,
+                ordering:       false,
+                info:           false,
+                scrollCollapse: true,
 				columnDefs: [
 					{ targets: 0,  width: 200 },
 					{ targets: 1,  width: 100 },
 					{ targets: 2,  width: 100  },
-                    { targets: 3,  width: 180  },
-					{ targets: 4,  width: 150  },
-					{ targets: 5,  width: 280  },
-					{ targets: 6,  width: 280  },
-					{ targets: 7,  width: 280  },
-					{ targets: 8,  width: 250  },
-					{ targets: 9,  width: 150  },
+					{ targets: 3,  width: 280  },
+					{ targets: 4,  width: 280  },
+					{ targets: 5,  width: 250  },
+					{ targets: 6,  width: 150  },
 				],
 			});
 
@@ -252,23 +254,23 @@ $(document).ready(function() {
 			.css({ "min-width": "100%" })
 			.removeAttr("width")
 			.DataTable({
-				proccessing: false,
-				serverSide: false,
-                paging: false,
-                info: false,
-				scrollX: true,
-				scrollCollapse: true,
+				proccessing:    false,
+                serverSide:     false,
+                scrollX:        true,
+                sorting:        false,
+                searching:      false,
+                paging:         false,
+                ordering:       false,
+                info:           false,
+                scrollCollapse: true,
 				columnDefs: [
 					{ targets: 0,  width: 200 },
 					{ targets: 1,  width: 100 },
 					{ targets: 2,  width: 100  },
-                    { targets: 3,  width: 180  },
-					{ targets: 4,  width: 150  },
-					{ targets: 5,  width: 280  },
-					{ targets: 6,  width: 280  },
-					{ targets: 7,  width: 280  },
-					{ targets: 8,  width: 250  },
-					{ targets: 9,  width: 150  },
+					{ targets: 3,  width: 280  },
+					{ targets: 4,  width: 280  },
+					{ targets: 5,  width: 250  },
+					{ targets: 6,  width: 150  },
 				],
 			});
 	}
@@ -337,6 +339,8 @@ $(document).ready(function() {
                 <tr style="white-space: nowrap">
                     <th>Document No.</th>
                     <th>Prepared By</th>
+					<th>Reference No.</th>
+					<th>Purpose</th>
                     <th>Current Approver</th>
                     <th>Date Created</th>
                     <th>Date Submitted</th>
@@ -357,6 +361,8 @@ $(document).ready(function() {
 				liquidationRemarks,
 				submittedAt,
 				createdAt,
+				liquidationPurpose,
+				liquidationReferenceNumber,
 				ceCreatedAt
 			} = item;
 
@@ -375,13 +381,15 @@ $(document).ready(function() {
 			<button type="button" 
 				class="btn btn-edit w-100 btnEdit" 
 				id="${encryptString(liquidationID )}" 
-				code="${getFormCode("PCR", createdAt, liquidationID)}"><i class="fas fa-edit"></i> Edit</button>`;
+				code="${getFormCode("LF", createdAt, liquidationID)}"><i class="fas fa-edit"></i> Edit</button>`;
 
 			if (isImCurrentApprover(approversID, approversDate, liquidationStatus) || isAlreadyApproved(approversID, approversDate)) {
 				html += `
 				<tr class="${btnClass}" id="${encryptString(liquidationID)}">
-					<td>${getFormCode("PCR", createdAt, liquidationID)}</td>
+					<td>${getFormCode("LF", createdAt, liquidationID)}</td>
 					<td>${fullname}</td>
+					<td>${liquidationReferenceNumber}</td>
+					<td>${liquidationPurpose}</td>
 					<td>
 						${employeeFullname(getCurrentApprover(approversID, approversDate, liquidationStatus, true))}
 					</td>
@@ -428,6 +436,8 @@ $(document).ready(function() {
                 <tr style="white-space: nowrap">
                     <th>Document No.</th>
                     <th>Prepared By</th>
+					<th>Reference No.</th>
+					<th>Purpose</th>
                     <th>Current Approver</th>
                     <th>Date Created</th>
                     <th>Date Submitted</th>
@@ -448,6 +458,8 @@ $(document).ready(function() {
 				liquidationRemarks,
 				submittedAt,
 				createdAt,
+				liquidationPurpose,
+				liquidationReferenceNumber,
 				ceCreatedAt
 			} = item;
 
@@ -466,12 +478,14 @@ $(document).ready(function() {
             <button type="button" 
                 class="btn btn-edit w-100 btnEdit" 
                 id="${encryptString(liquidationID )}" 
-                code="${getFormCode("PCR", createdAt, liquidationID )}"><i class="fas fa-edit"></i> Edit</button>`;
+                code="${getFormCode("LF", createdAt, liquidationID )}"><i class="fas fa-edit"></i> Edit</button>`;
 
 			html += `
             <tr class="${btnClass}" id="${encryptString(liquidationID )}">
-                <td>${getFormCode("PCR", createdAt, liquidationID )}</td>
+                <td>${getFormCode("LF", createdAt, liquidationID )}</td>
                 <td>${fullname}</td>
+				<td>${liquidationReferenceNumber}</td>
+				<td>${liquidationPurpose}</td>
                 <td>
                     ${employeeFullname(getCurrentApprover(approversID, approversDate, liquidationStatus, true))}
                 </td>
@@ -520,7 +534,7 @@ $(document).ready(function() {
 						class="btn btn-submit px-5 p-2"  
 						id="btnSubmit" 
 						liquidationID="${encryptString(liquidationID)}"
-						code="${getFormCode("PCR", createdAt, liquidationID)}"
+						code="${getFormCode("LF", createdAt, liquidationID)}"
 						revise="${isRevise}"
 						cancel="${isFromCancelledDocument}"><i class="fas fa-paper-plane"></i>
 						Submit
@@ -532,7 +546,7 @@ $(document).ready(function() {
 							class="btn btn-cancel btnCancel px-5 p-2" 
 							id="btnCancel"
 							liquidationID="${encryptString(liquidationID)}"
-							code="${getFormCode("PCR", createdAt, liquidationID)}"
+							code="${getFormCode("LF", createdAt, liquidationID)}"
 							revise="${isRevise}"
 							cancel="${isFromCancelledDocument}"><i class="fas fa-ban"></i> 
 							Cancel
@@ -543,7 +557,7 @@ $(document).ready(function() {
 							class="btn btn-cancel px-5 p-2"
 							id="btnCancelForm" 
 							liquidationID="${encryptString(liquidationID)}"
-							code="${getFormCode("PCR", createdAt, liquidationID)}"
+							code="${getFormCode("LF", createdAt, liquidationID)}"
 							revise=${isRevise}><i class="fas fa-ban"></i> 
 							Cancel
 						</button>`;
@@ -558,7 +572,7 @@ $(document).ready(function() {
 							class="btn btn-cancel  px-5 p-2"
 							id="btnCancelForm" 
 							liquidationID="${encryptString(liquidationID)}"
-							code="${getFormCode("PCR", createdAt, liquidationID)}"
+							code="${getFormCode("LF", createdAt, liquidationID)}"
 							status="${liquidationStatus}"><i class="fas fa-ban"></i> 
 							Cancel
 						</button>`;
@@ -570,7 +584,7 @@ $(document).ready(function() {
 						class="btn btn-cancel px-5 p-2"
 						id="btnDrop" 
 						liquidationID="${encryptString(liquidationID)}"
-						code="${getFormCode("PCR", createdAt, liquidationID)}"
+						code="${getFormCode("LF", createdAt, liquidationID)}"
 						status="${liquidationStatus}"><i class="fas fa-ban"></i> 
 						Drop
 					</button>`;
@@ -582,7 +596,7 @@ $(document).ready(function() {
 							class="btn btn-cancel px-5 p-2"
 							id="btnRevise" 
 							liquidationID="${encryptString(liquidationID)}"
-							code="${getFormCode("PCR", createdAt, liquidationID)}"
+							code="${getFormCode("LF", createdAt, liquidationID)}"
 							status="${liquidationStatus}"><i class="fas fa-clone"></i>
 							Revise
 						</button>`;
@@ -595,7 +609,7 @@ $(document).ready(function() {
 							class="btn btn-cancel px-5 p-2"
 							id="btnRevise" 
 							liquidationID="${encryptString(liquidationID)}"
-							code="${getFormCode("PCR", createdAt, liquidationID)}"
+							code="${getFormCode("LF", createdAt, liquidationID)}"
 							status="${liquidationStatus}"
 							cancel="true"><i class="fas fa-clone"></i>
 							Revise
@@ -610,14 +624,14 @@ $(document).ready(function() {
 							class="btn btn-submit px-5 p-2"  
 							id="btnApprove" 
 							liquidationID="${encryptString(liquidationID)}"
-							code="${getFormCode("PCR", createdAt, liquidationID)}"><i class="fas fa-paper-plane"></i>
+							code="${getFormCode("LF", createdAt, liquidationID)}"><i class="fas fa-paper-plane"></i>
 							Approve
 						</button>
 						<button type="button" 
 							class="btn btn-cancel  px-5 p-2"
 							id="btnReject" 
 							liquidationID="${encryptString(liquidationID)}"
-							code="${getFormCode("PCR", createdAt, liquidationID)}"><i class="fas fa-ban"></i> 
+							code="${getFormCode("LF", createdAt, liquidationID)}"><i class="fas fa-ban"></i> 
 							Deny
 						</button>`;
 					}
@@ -803,11 +817,8 @@ $(document).ready(function() {
 			description                               					= "",
 			quantity													="",
 			amount                               						= "",
-			vatSales                               						= "",
-			vat                               							= "",
 			clientID													="",
 			srfNumber                               					= "",
-			chartOfAccountID                          					= "",
 			remark                               						= "",
 			receiptNumber                              					= "",
 			accountName													="",
@@ -825,23 +836,13 @@ $(document).ready(function() {
 				</div>
 			</td>
 			<td>
-				<div class="quantity">
+				<div class="quantity text-center">
 				${quantity || "-"}
 				</div>
 			</td>
 			<td>
 				<div class="text-right">
 				${formatAmount(amount, true) || "-"}
-				</div>
-			</td>
-			<td>
-				<div class="vatSales text-right" >
-				${formatAmount(vatSales, true) || "-"}
-				</div>	
-			</td>
-			<td>
-				<div class="vat text-right">
-				${formatAmount(vat, true) || "-"}
 				</div>
 			</td>
 			<td>
@@ -854,11 +855,6 @@ $(document).ready(function() {
 				${srfNumber || "-"}
 				</div>
 			</td>
-			<td>
-				<div class="chartofaccount ">
-				${accountName || "-"}
-				</div>
-			</td>	
 			<td>	
 				<div class="">
 				${remark || "-"}
@@ -885,10 +881,7 @@ $(document).ready(function() {
 					quantity,
 					amount,
 					liquidationID,
-					vatSales,
-					vat,
 					srfNumber,
-					chartOfAccountID,
 					remark,
 					receiptNumber`,
 				 	`pettyCashRequestID = ${pettyCashID}`);
@@ -904,12 +897,12 @@ $(document).ready(function() {
 			html += `
 			<tr class="itemTableRow">
                     <td>
-					<div class="description" name="description" descriptionValue="${description}" financeRequestID="${financeRequestID}" pettyCashID="${pettyCashID}">
+					<div class="description" name="description" id="description" descriptionValue="${description}" financeRequestID="${financeRequestID}" pettyCashID="${pettyCashID}">
 							${description || "-"}
 					</div>
                    </td> 
 					<td>
-						<div class="quantity text-center" name="quantity">
+						<div class="quantity text-center" name="quantity" id="quantity">
 								${quantity || "-"}
 						</div>
 					</td>
@@ -918,51 +911,6 @@ $(document).ready(function() {
 							${formatAmount(amount, true) || "-"}
 					</div>
 					</td>
-				<td>
-				<div class="quantity">
-				<div class="input-group">
-				<div class="input-group-prepend">
-					<span class="input-group-text">₱</span>
-				</div>
-					<input 
-						type="text" 
-						class="form-control input-quantity text-right vatSales"
-						min="0.00" 
-						data-allowcharacters="[0-9]" 
-						max="999999999" 
-						id="vatSales${index}" 
-						name="vatSales" 
-						minlength="1" 
-						maxlength="20"
-						value="${vatSales}" 
-						autocomplete="off">
-					<div class="invalid-feedback d-block" id="invalid-vatSales"></div>
-				</div>
-				</div>
-			</td>
-			<td>
-				<div class="quantity">
-				<div class="input-group">
-				<div class="input-group-prepend">
-					<span class="input-group-text">₱</span>
-				</div>
-					<input 
-						type="text" 
-						class="form-control input-quantity text-right"
-						min="0.00" 
-						data-allowcharacters="[0-9]" 
-						max="999999999" 
-						id="vat${index}" 
-						name="vat" 
-						value="${vat}"
-						minlength="1" 
-						maxlength="20" 
-						autocomplete="off"
-						
-					<div class="invalid-feedback d-block" id="invalid-vat"></div>
-				</div>
-				</div>
-			</td>
 			<td>
 				<div class="clientID">
 				<select
@@ -976,39 +924,22 @@ $(document).ready(function() {
 				</div>
 			</td>
 			<td>
-				<div class="quantity">
+				<div class="srfNumber ">
 					<input 
-						type="text" 
-						class="form-control"
-						min="0.00" 
-						data-allowcharacters="[0-9]" 
-						max="999999999" 
+						type="text"
+						class="form-control validate"
 						id="srfNumber${index}" 
 						name="srfNumber" 
-						value="${srfNumber}"
-						minlength="1" 
-						maxlength="20" 
-						autocomplete="off"
-						>
+						data-allowcharacters="[a-z][A-Z][0-9][-]"
+						value="${srfNumber}">
 					<div class="invalid-feedback d-block" id="invalid-srfNumber"></div>
 				</div>
 			</td>
 			<td>
-				<div class="chartOfAccountID">
-				<select
-				class="form-control select2"
-				name="chartOfAccountID"
-				id="chartOfAccountID${index}">
-				${getChartofAccount(chartOfAccountID)}
-			</select>
-			<div class="invalid-feedback d-block" id="invalid-chartOfAccountID"></div>		
-			</div>
-			</td>
-			<td>
 				<div class="remark">
 					<textarea 
-						class="form-control"
-						data-allowcharacters="[0-9][a-z][A-Z][.][,][?][!][/][;][:][']["][-][_][(][)][%][&][*][ ]"
+						class="form-control validate"
+						data-allowcharacters="[0-9][a-z][A-Z][.][,][?][!][/][;][:]['']['][-][_][(][)][%][&][*][ ]"
 						minlength="0"
 						maxlength="250"
 						rows="2" 
@@ -1023,7 +954,7 @@ $(document).ready(function() {
 			<div class="receiptNumber">
 				<input type="text"
 				data-allowcharacters="[0-9][a-z][A-Z][-]"
-				class="form-control"
+				class="form-control validate"
 				id="receiptNumber" 
 				name="receiptNumber"
 				value="${receiptNumber}">
@@ -1042,8 +973,8 @@ $(document).ready(function() {
 	
 	$(document).on("keyup", ".liquidationBudget", function() {
 		//console.log("44");
-		var totalbudget = parseFloat($("#liquidationBudget").val().replace(/,/g, ''));
-		var pettyCashAmountValue = parseFloat($("#liquidationBudget").attr("pettyCashAmountValue").replace(/,/g, ''));
+		var totalbudget = getNonFormattedAmount($("#liquidationBudget").val());
+		var pettyCashAmountValue = getNonFormattedAmount($("#liquidationExpenses").text());
 		var munustotal =  pettyCashAmountValue - totalbudget;
 		var totalamount = formatAmount(munustotal, true);
 		$("#liquidationExcessOrShortage").text((totalamount));
@@ -1123,22 +1054,23 @@ $(document).ready(function() {
     // ----- END SELECT PROJECT LIST -----
 
     // ----- FORM CONTENT -----
-	function formContent(data = false, readOnly = false, isRevise = false, isFromCancelledDocument = false,liquidationDataID, pettycashCode, pettyCashDate, pettyCashAmount) {
+	function formContent(data = false, readOnly = false, isRevise = false, isFromCancelledDocument = false,liquidationDataID, pettycashCode, pettyCashDate, pettyCashAmount, pettycashChartOfAccountID) {
 		//alert(pettycashID);
 		$("#page_content").html(preloader);
 		let datewithrecord = moment(pettyCashDate).format("MMMM DD, YYYY");
 		readOnly = isRevise ? false : readOnly;
 		let pettyCashID = '';
+		let pettyCashChartOfAccountID = '';
+		//alert(pettycashChartOfAccountID);
 		let {
-			liquidationID      		= "",
-			reviseLiquidationID 	= "",
-			pettyCashRequestID		="",
-			liquidationPurpose		="",
-			employeeID              = "",
-			projectTotalAmount      = "0",
-			clientFundRequestDate	="",
-			chartOfAccountID		="",
-			companyTotalAmount      = "0",
+			liquidationID      			= "",
+			reviseLiquidationID 		= "",
+			pettyCashRequestID			="",
+			liquidationPurpose			="",
+			employeeID              	= "",
+			projectTotalAmount      	= "0",
+			clientFundRequestDate		="",
+			companyTotalAmount      	= "0",
 			liquidationRemarks  	= "",
 			approversID             = "",
             projectID               ="",
@@ -1151,15 +1083,20 @@ $(document).ready(function() {
 			liquidationDate			="",
 			approversStatus         = "",
 			approversDate           = "",
+			liquidationVatAmount	="0",
+			chartOfAccountID		="",
 			liquidationStatus   	= false,
 			submittedAt             = false,
 			createdAt               = false,
 		} = data && data[0];
 
+
 			if(liquidationID){
 				pettyCashID = liquidationID;
+				pettyCashChartOfAccountID = chartOfAccountID;
 			}else{
 				pettyCashID = liquidationDataID;
+				pettyCashChartOfAccountID = pettycashChartOfAccountID;
 			}
 			//alert(pettyCashID);
         let clientFundRequestItems = "";
@@ -1173,11 +1110,8 @@ $(document).ready(function() {
 			frd.description,
 			frd.quantity,
 			frd.amount,
-			frd.vatSales,
-			frd.vat,
 			frd.clientID,
 			frd.srfNumber,
-			frd.chartOfAccountID,
 			frd.remark,
 			frd.receiptNumber,
 			fcoa.accountName,
@@ -1207,6 +1141,10 @@ $(document).ready(function() {
 		$("#btnBack").attr("cancel", isFromCancelledDocument);
 
 		let disabled          = readOnly ? "disabled" : "";
+		let billingVat = !readOnly ? `
+        <input type="checkbox" 
+            id="billingVat" 
+            ${liquidationVatAmount > 0 ? "checked" : ""}>` : "";
         
         let tableProjectRequestItemsName = !disabled ? "tableProjectRequestItems" : "tableProjectRequestItems0";
         
@@ -1224,7 +1162,7 @@ $(document).ready(function() {
 				<div class="body">
 					<small class="text-small text-muted font-weight-bold">Revised Document No.</small>
 					<h6 class="mt-0 text-danger font-weight-bold">
-						${getFormCode("PCR", createdAt, reviseDocumentNo)}
+						${getFormCode("LF", createdAt, reviseDocumentNo)}
 					</h6>      
 				</div>
 			</div>
@@ -1238,7 +1176,7 @@ $(document).ready(function() {
                     <div class="body">
                         <small class="text-small text-muted font-weight-bold">Document No.</small>
                         <h6 class="mt-0 text-danger font-weight-bold">
-							${liquidationID && !isRevise ? getFormCode("PCR", createdAt, liquidationID) : "---"}
+							${liquidationID && !isRevise ? getFormCode("LF", createdAt, liquidationID) : "---"}
 						</h6>      
                     </div>
                 </div>
@@ -1337,36 +1275,62 @@ $(document).ready(function() {
 			   </div>	
 			</div>
 				<div class="col-md-4 col-sm-12">
-					<div class="form-group">
+				<div class="form-group">
 					<label>Purpose ${!disabled ? "<code>*</code>" : ""}</label>
-					<textarea class="form-control validate liquidationPurpose"
-						minlength="0"
-						maxlength="250"
-						rows="2" 
-						style="resize: none" 
-						class="form-control" 
-						data-allowcharacters="[0-9][a-z][A-Z][.][,][?][!][/][;][:]['][-][_][(][)][%][&][*][ ]"
-						name="liquidationPurpose"
+					<textarea class="form-control validate" 
+						data-allowcharacters="[a-z][A-Z][0-9][.][,][?][!][/][;][:]['][''][-][_][(][)][%][&][*][ ]" 
+						minlength="2" 
+						maxlength="325" 
+						id="liquidationPurpose" 
+						name="liquidationPurpose" 
 						required 
-						id="liquidationPurpose"${disabled}>${liquidationPurpose ?? ""}
-					</textarea>
-					<div class="invalid-feedback d-block" id="invalid-liquidationPurpose"></div>
+						rows="2" 
+						style="resize:none;"
+						${disabled}>${liquidationPurpose}</textarea>
+					<div class="d-block invalid-feedback" id="invalid-liquidationPurpose"></div>
+				</div>
+				</div>
+
+				<div class="col-md-6 col-sm-12">
+					<div class="form-group">
+					<label>Chart of Account</label>
+						<select
+							class="form-control select2 "
+							name="chartOfAccountID"
+							id="chartOfAccountID"
+							style="width: 100%"
+							${disabled}>
+							${getChartofAccount(pettyCashChartOfAccountID)}
+						</select>
+						<div class="invalid-feedback d-block" id="invalid-chartOfAccountID"></div>
 					</div>
+				</div>
+				<div class="col-md-6 col-sm-12">
+				<div class="form-group">
+					<label>Disposition of Excess/(Shortage)</label>
+					<textarea class="form-control validate" 
+						data-allowcharacters="[a-z][A-Z][0-9][.][,][?][!][/][;][:]['][''][-][_][(][)][%][&][*][ ]" 
+						minlength="0" 
+						maxlength="325" 
+						id="liquidationDispositionofExcessOrShortage" 
+						name="liquidationDispositionofExcessOrShortage" 
+						rows="2" 
+						style="resize:none;"
+						${disabled}>${liquidationDispositionofExcessOrShortage}</textarea>
+					<div class="d-block invalid-feedback" id="invalid-liquidationDispositionofExcessOrShortage"></div>
+				</div>
 				</div>
                 <div class="w-100">
                 <hr class="pb-1">
-                <div class="text-primary font-weight-bold" style="font-size: 1.5rem;">Liquidation</div>
+				<div class="text-primary font-weight-bold" style="font-size: 1.5rem;">Liquidation</div>
                 <table class="table table-striped" id="${tableProjectRequestItemsName}">
                     <thead>
                         <tr style="white-space: nowrap">
                             <th>Description ${!disabled ? "<code>*</code>" : ""}</th>
 							<th>Quantity</th>
                             <th>Amount</th>
-							<th>VAT Sales</th>
-							<th>VAT</th>
 							<th>Client</th>
 							<th>SRF Number</th>
-							<th>Chart of Account</th>
 							<th>Remarks</th>
 							<th>Receipt Number</th>
                         </tr>
@@ -1375,7 +1339,6 @@ $(document).ready(function() {
                         ${clientFundRequestItems}
                     </tbody>
                 </table>
-                
                 <div class="w-100 d-flex justify-content-between align-items-center py-2">
                     <div>
                        
@@ -1388,6 +1351,12 @@ $(document).ready(function() {
 							<span class="col-7 col-lg-5 text-right text-dark" id="liquidationExpenses" name="liquidationExpenses" style="font-size: 1.05em">${formatAmount(liquidationExpenses || `${pettyCashAmount}`, true)} 
 							</span>
 						</div>
+						<div class="row pb-1" style="font-size: 1.1rem">
+                        <div class="col-7 col-lg-5 text-left">${billingVat} 12% VAT: </div>
+                        <div class="col-7 col-lg-5 text-right text-dark">
+                            <span id="liquidationVatAmount">${formatAmount(liquidationVatAmount, true)}</span>
+                        </div>
+                    </div>
 						<div class="row pb-1" style="font-size: 1.1rem;">
 							<div class="col-7 col-lg-5 text-left">Budget:</div>
 							<div class="col-7 col-lg-5 text-right text-dark">
@@ -1399,26 +1368,16 @@ $(document).ready(function() {
 							id="liquidationBudget" 
 							name="liquidationBudget" 
 							value="${formatAmount(liquidationBudget, true)}"
-							style="font-size: 1.02em;">
+							style="font-size: 1.02em;"
+							${disabled}>
 							</div>
 						</div>
 						<div class="row pb-1" style="font-size: 1.1rem;">
 							<div class="col-7 col-lg-5 text-left">Excess(Shortage):</div>
 							<spn class="col-7 col-lg-5 text-right text-dark" id="liquidationExcessOrShortage" name="liquidationExcessOrShortage" style="font-size: 1.05em">
-							${formatAmount(liquidationExcessOrShortage, true) ?? ""}
+							${formatAmount(liquidationExcessOrShortage, true)}
 							</span>
-						</div>
-						<div class="row pb-1" style="font-size: 1.1rem;">
-							<div class="col-7 col-lg-5 text-left ">Disposition of Excess/(Shortage):</div>
-							<div class="col-7 col-lg-5 text-right text-danger" id="purchaseRequestGrandTotal">
-								<input type="text"class="form-control-plaintext py-0 text-dark border-bottom" 
-								id="liquidationDispositionofExcessOrShortage" 
-								name="liquidationDispositionofExcessOrShortage"
-								value="${liquidationDispositionofExcessOrShortage ?? ""}" 
-								style="font-size: 1.02em;">
-							</div>
-						</div
-							
+						</div>	
 							</div>
 						</div>
 					</div>
@@ -1460,6 +1419,37 @@ $(document).ready(function() {
 		}, 300);
 	}
 	// ----- END FORM CONTENT -----
+
+	    // ----- CLICK VATABLE -----
+		$(document).on("change", `#billingVat`, function() {
+			updateTotalAmount();
+		})
+		// ----- END CLICK VATABLE -----
+	  // ----- UPDATE TOTAL AMOUNT -----
+	  function updateTotalAmount() {
+		  var quantity = 0;
+		  var amount = 0;
+		$(".itemProjectTableBody tr").each(function(){
+			 quantity  += parseFloat(getNonFormattedAmount($(this).find('[name=quantity]').text()) || 0);
+			 amount  += parseFloat(getNonFormattedAmount($(this).find('[name=amount]').text()) || 0);
+		});	
+			var totalbasequantityandamount = quantity * amount;
+			//alert(totalbasequantityandamount);
+		// const quantityArr = $.find(`[name="quantity"]`).map(element => getNonFormattedAmount(element.value) || 0);
+		// const unitCostArr = $.find(`[name="amount"]`).map(element => getNonFormattedAmount(element.value) || 0);
+        // const grandTotal = quantityArr.map((qty, index) => +qty * +unitCostArr[index]).reduce((a,b) => a + b, 0);
+       // $("#billingGrandTotal").text(formatAmount(grandTotal, true));
+
+        const isChecked = $(`#billingVat`).prop("checked");
+        const vatAmount = isChecked ? (totalbasequantityandamount / 1.12 * 0.12) : 0;
+		alert(vatAmount);
+        $("#liquidationVatAmount").text(formatAmount(vatAmount, true));
+
+		//const totalAmount = grandTotal - vatAmount;
+		// /$(`#billingSubtotal`).text(formatAmount(totalAmount, true));
+        
+		///return grandTotal;
+	}
 
     // ----- PAGE CONTENT -----
 	function pageContent(isForm = false, data = false, readOnly = false, isRevise = false, isFromCancelledDocument = false) {
@@ -1548,8 +1538,10 @@ $(document).ready(function() {
             data["projectID"]    	   											= $("[name=projectID]").val() || null;
 			data['liquidationReferenceNumber']									= $("#liquidationReferenceNumber").val();
 			data['liquidationDate']												= $("#liquidationDate").val();
+			data['chartOfAccountID']											= $("#chartOfAccountID").val();
 			data["liquidationPurpose"] 											= $("[name=liquidationPurpose]").val()?.trim();
 			data['liquidationAmount']											= getNonFormattedAmount($("#liquidationAmount").text());
+			data['liquidationVatAmount']										= getNonFormattedAmount($("#liquidationVatAmount").text());
 			data['liquidationExpenses'] 										= getNonFormattedAmount($("#liquidationExpenses").text());
 			data['liquidationBudget']											= $("#liquidationBudget").val();
 			data['liquidationExcessOrShortage'] 								= getNonFormattedAmount($("#liquidationExcessOrShortage").text());
@@ -1559,8 +1551,10 @@ $(document).ready(function() {
             formData.append("projectID", $("[name=projectID]").val() || null);
 			//alert(getNonFormattedAmount($("#liquidationAmount").text()));
 			formData.append("liquidationAmount", getNonFormattedAmount($("#liquidationAmount").text()));
+			formData.append("liquidationVatAmount", getNonFormattedAmount($("#liquidationVatAmount").text()));
 			formData.append("liquidationExpenses", getNonFormattedAmount($("#liquidationExpenses").text()));
 			formData.append("liquidationDate", $("#liquidationDate").val());
+			formData.append("chartOfAccountID", $("#chartOfAccountID").val());
 			formData.append("liquidationReferenceNumber", $("#liquidationReferenceNumber").val());
 			formData.append("liquidationBudget", $("#liquidationBudget").val());
 			formData.append("liquidationExcessOrShortage", getNonFormattedAmount($("#liquidationExcessOrShortage").text()));
@@ -1608,11 +1602,11 @@ $(document).ready(function() {
 				const description    						= $("td [name=description]", this).text();
 				const quantity    							= $("td [name=quantity]", this).text();
 				const amount   		 						= getNonFormattedAmount($("td [name=amount]", this).text());
-				const vatSales 								= $("td [name=vatSales]", this).val();
-				const vat 									= $("td [name=vat]", this).val();	
+				// const vatSales 								= $("td [name=vatSales]", this).val();
+				// const vat 									= $("td [name=vat]", this).val();	
 				const clientID 								= $("td [name=clientID]", this).val();
 				const srfNumber 							= $("td [name=srfNumber]", this).val();
-				const chartOfAccountID 						= $("td [name=chartOfAccountID]", this).val();
+				// const chartOfAccountID 						= $("td [name=chartOfAccountID]", this).val();
 				const remark 								= $("td [name=remark]", this).val();
 				const receiptNumber 						= $("td [name=receiptNumber]", this).val();
 				//const totalAmount = 		getNonFormattedAmount($("td [name=basequantityandamount ]", this).text()); 
@@ -1620,19 +1614,18 @@ $(document).ready(function() {
 				
 
 				let temp = {
-					description, amount,vatSales,vat,
-					clientID, srfNumber, chartOfAccountID, remark
+					description, amount, clientID, srfNumber, remark
 				};
 
 				//formData.append(`items[${i}][chartOfAccountID]`, chartOfAccountID);
 				formData.append(`items[${i}][description]`, description);
 				formData.append(`items[${i}][quantity]`, quantity);
 				formData.append(`items[${i}][amount]`, amount);
-				formData.append(`items[${i}][vatSales]`, vatSales);
-				formData.append(`items[${i}][vat]`, vat);
+				// formData.append(`items[${i}][vatSales]`, vatSales);
+				// formData.append(`items[${i}][vat]`, vat);
 				formData.append(`items[${i}][clientID]`, clientID);
 				formData.append(`items[${i}][srfNumber]`, srfNumber);
-				formData.append(`items[${i}][chartOfAccountID]`, chartOfAccountID);
+				// formData.append(`items[${i}][chartOfAccountID]`, chartOfAccountID);
 				formData.append(`items[${i}][remark]`, remark);
 				formData.append(`items[${i}][receiptNumber]`, receiptNumber);
 				formData.append(`items[${i}][createdBy]`, sessionID);
@@ -1691,8 +1684,10 @@ $(document).ready(function() {
     // ----- REVISE DOCUMENT -----
 	$(document).on("click", "#btnRevise", function () {
 		const id                    = decryptString($(this).attr("liquidationID"));
+		const fromCancelledDocument = $(this).attr("cancel") == "true";
+		viewDocument(id, false, true, fromCancelledDocument);
 		//const fromCancelledDocument = $(this).attr("cancel") == "true";
-		viewDocument(id, false, true);
+		//viewDocument(id, false, true);
 	});
 	// ----- END REVISE DOCUMENT -----
 
@@ -1703,7 +1698,7 @@ $(document).ready(function() {
 		const isFromCancelledDocument = $(this).attr("cancel") == "true";
 		const revise     = $(this).attr("revise") == "true";
 		const employeeID = $(this).attr("employeeID");
-		const feedback   = $(this).attr("code") || getFormCode("PCR", dateToday(), id);
+		const feedback   = $(this).attr("code") || getFormCode("LF", dateToday(), id);
 		const status     = $(this).attr("status");
 
 		if (status != "false" && status != 0) {
@@ -1749,7 +1744,7 @@ $(document).ready(function() {
 		const id       = decryptString($(this).attr("liquidationID"));
 		const isFromCancelledDocument = $(this).attr("cancel") == "true";
 		const revise   = $(this).attr("revise") == "true";
-		const feedback = $(this).attr("code") || getFormCode("PCR", dateToday(), id);
+		const feedback = $(this).attr("code") || getFormCode("LF", dateToday(), id);
 		const action   = revise && !isFromCancelledDocument && "insert" || (id ? "update" : "insert");
 		const data     = getLiquidationData(action, "save", "0", id);
 		data.append("liquidationStatus", 0);
@@ -1841,7 +1836,7 @@ $(document).ready(function() {
     // ----- APPROVE DOCUMENT -----
 	$(document).on("click", "#btnApprove", function () {
 		const id       = decryptString($(this).attr("liquidationID"));
-		const feedback = $(this).attr("code") || getFormCode("PCR", dateToday(), id);
+		const feedback = $(this).attr("code") || getFormCode("LF", dateToday(), id);
 		let tableData  = getTableData("fms_liquidation_tbl", "", "liquidationID = " + id);
 
 		if (tableData) {
@@ -1890,10 +1885,10 @@ $(document).ready(function() {
     // ----- REJECT DOCUMENT -----
 	$(document).on("click", "#btnReject", function () {
 		const id       = decryptString($(this).attr("liquidationID"));
-		const feedback = $(this).attr("code") || getFormCode("PCR", dateToday(), id);
+		const feedback = $(this).attr("code") || getFormCode("LF", dateToday(), id);
 
 		$("#modal_liquidation_content").html(preloader);
-		$("#modal_liquidation .page-title").text("DENY CLIENT FUND REQUEST");
+		$("#modal_liquidation .page-title").text("DENY LIQUIDATION");
 		$("#modal_liquidation").modal("show");
 		let html = `
 		<div class="modal-body">
@@ -1922,7 +1917,7 @@ $(document).ready(function() {
 
 	$(document).on("click", "#btnRejectConfirmation", function () {
 		const id       = decryptString($(this).attr("liquidationID"));
-		const feedback = $(this).attr("code") || getFormCode("PCR", dateToday(), id);
+		const feedback = $(this).attr("code") || getFormCode("LF", dateToday(), id);
 
 		const validate = validateForm("modal_liquidation_content");
 		if (validate) {
@@ -2111,17 +2106,17 @@ function saveLiquidation(data = null, method = "submit", notificationData = null
 
 						let swalTitle;
 						if (method == "submit") {
-							swalTitle = `${getFormCode("PCR", dateCreated, insertedID)} submitted successfully!`;
+							swalTitle = `${getFormCode("LF", dateCreated, insertedID)} submitted successfully!`;
 						} else if (method == "save") {
-							swalTitle = `${getFormCode("PCR", dateCreated, insertedID)} saved successfully!`;
+							swalTitle = `${getFormCode("LF", dateCreated, insertedID)} saved successfully!`;
 						} else if (method == "cancelform") {
-							swalTitle = `${getFormCode("PCR", dateCreated, insertedID)} cancelled successfully!`;
+							swalTitle = `${getFormCode("LF", dateCreated, insertedID)} cancelled successfully!`;
 						} else if (method == "approve") {
-							swalTitle = `${getFormCode("PCR", dateCreated, insertedID)} approved successfully!`;
+							swalTitle = `${getFormCode("LF", dateCreated, insertedID)} approved successfully!`;
 						} else if (method == "deny") {
-							swalTitle = `${getFormCode("PCR", dateCreated, insertedID)} denied successfully!`;
+							swalTitle = `${getFormCode("LF", dateCreated, insertedID)} denied successfully!`;
 						} else if (method == "drop") {
-							swalTitle = `${getFormCode("PCR", dateCreated, insertedID)} dropped successfully!`;
+							swalTitle = `${getFormCode("LF", dateCreated, insertedID)} dropped successfully!`;
 						}	
 		
 						if (isSuccess == "true") {

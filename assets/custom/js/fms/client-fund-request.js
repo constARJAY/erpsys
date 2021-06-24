@@ -178,11 +178,12 @@ $(document).ready(function() {
 					{ targets: 0,  width: 100 },
 					{ targets: 1,  width: 150 },
 					{ targets: 2,  width: 100 },
-					{ targets: 3,  width: 350 },
-					{ targets: 4,  width: 200 },
+					{ targets: 3,  width: 100 },
+					{ targets: 4,  width: 350 },
 					{ targets: 5,  width: 200 },
 					{ targets: 6,  width: 200 },
 					{ targets: 7,  width: 200 },
+					{ targets: 8,  width: 200 },
 				],
 			});
 
@@ -196,14 +197,15 @@ $(document).ready(function() {
 				sorting: [],
 				scrollCollapse: true,
 				columnDefs: [
-                    { targets: 0,  width: 100 },
+					{ targets: 0,  width: 100 },
 					{ targets: 1,  width: 150 },
 					{ targets: 2,  width: 100 },
-					{ targets: 3,  width: 350 },
-					{ targets: 4,  width: 200 },
+					{ targets: 3,  width: 100 },
+					{ targets: 4,  width: 350 },
 					{ targets: 5,  width: 200 },
 					{ targets: 6,  width: 200 },
 					{ targets: 7,  width: 200 },
+					{ targets: 8,  width: 200 },
 				],
 			});
 
@@ -315,6 +317,7 @@ $(document).ready(function() {
                 <tr style="white-space: nowrap">
                     <th>Document No.</th>
                     <th>Prepared By</th>
+					<th>Amount</th>
                     <th>Current Approver</th>
                     <th>Date Created</th>
                     <th>Date Submitted</th>
@@ -333,6 +336,7 @@ $(document).ready(function() {
 				approversDate,
 				clientFundRequestStatus,
 				clientFundRequestRemarks,
+				clientFundRequestAmount,
 				submittedAt,
 				createdAt,
 				ceCreatedAt
@@ -360,6 +364,7 @@ $(document).ready(function() {
 				<tr class="${btnClass}" id="${encryptString(clientFundRequestID )}">
 					<td>${getFormCode("CFR", createdAt, clientFundRequestID )}</td>
 					<td>${fullname}</td>
+					<td class="text-right">${formatAmount(clientFundRequestAmount, true)}</td>
 					<td>
 						${employeeFullname(getCurrentApprover(approversID, approversDate, clientFundRequestStatus, true))}
 					</td>
@@ -406,6 +411,7 @@ $(document).ready(function() {
                 <tr style="white-space: nowrap">
                     <th>Document No.</th>
                     <th>Prepared By</th>
+					<th>Amount</th>
                     <th>Current Approver</th>
                     <th>Date Created</th>
                     <th>Date Submitted</th>
@@ -425,6 +431,7 @@ $(document).ready(function() {
 				clientFundRequestStatus,
 				clientFundRequestRemarks,
 				submittedAt,
+				clientFundRequestAmount,
 				createdAt,
 				ceCreatedAt
 			} = item;
@@ -450,6 +457,7 @@ $(document).ready(function() {
             <tr class="${btnClass}" id="${encryptString(clientFundRequestID )}">
                 <td>${getFormCode("CFR", createdAt, clientFundRequestID )}</td>
                 <td>${fullname}</td>
+				<td class="text-right">${formatAmount(clientFundRequestAmount, true)}</td>
                 <td>
                     ${employeeFullname(getCurrentApprover(approversID, approversDate, clientFundRequestStatus, true))}
                 </td>
@@ -801,9 +809,9 @@ $(document).ready(function() {
 				class="form-control validate" 
 				name="files" 
 				id="files"
-				accept="image/*, .pdf, .doc, .docx">
-			<div class="invalid-feedback d-block" id="invalid-files"></div>`;
-
+				accept="image/*, .pdf, .doc, .docx"
+				required>
+				<div class="invalid-feedback d-block" id="invalid-files"></div>`;
 			let itemFile  = "";
 			if (ceID && ceID != "0") {
 				if (files) {
@@ -817,7 +825,7 @@ $(document).ready(function() {
 						white-space: nowrap;
 						text-overflow: ellipsis;"
 					target="_blank">${files}</a>`;
-				} else {
+				} else { 
 					itemFile = "-";
 				}
 			} else {
@@ -830,6 +838,7 @@ $(document).ready(function() {
 							width: 150px;
 							overflow: hidden;
 							white-space: nowrap;
+						
 							text-overflow: ellipsis;"
 						href="${base_url+"assets/upload-files/petty-cash-request/"+files}" 
 						target="_blank">
@@ -1038,17 +1047,19 @@ $(document).ready(function() {
 			TotalValue += parseFloat(getNonFormattedAmount($(this).find('[name=basequantityandamount]').text()) || 0);	
 	  });
 		if(TotalValue <= 2000){
-			$("#totalAmount").css('background-color', '#FFFFFF');
+			//$("#totalAmount").css('background-color', '#FFFFFF');
 			$(`#totalAmount`).text(formatAmount(TotalValue, true));
-			document.getElementById("invalid-message").style.visibility = "hidden";
-			document.getElementById('invalid-message').innerHTML = '';
+			// document.getElementById("invalid-message").style.visibility = "hidden";
+			// document.getElementById('invalid-message').innerHTML = '';
 			$("#totalAmount").attr("totalValue","1");
 			$("#totalAmount").attr("clientFundRequestAmount",TotalValue);
 		}else{
-			$("#totalAmount").css('background-color', '#FF0000');
+			//$("#totalAmount").css('background-color', '#FF0000');
 			$(`#totalAmount`).text(formatAmount(TotalValue, true));
-			document.getElementById('invalid-message').innerHTML = 'Invalid request! Can only request ₱ 2,000 and below.';
-			document.getElementById("invalid-message").style.visibility = "visible";
+			showNotification("warning2", 	
+				`Invalid request! Can only request ₱ 2,000 and below.`);
+			// document.getElementById('invalid-message').innerHTML = 'Invalid request! Can only request ₱ 2,000 and below.';
+			// document.getElementById("invalid-message").style.visibility = "visible";
 			$("#totalAmount").attr("totalValue","");
 			$("#totalAmount").attr("clientFundRequestAmount",TotalValue);
 		}
@@ -1165,7 +1176,7 @@ $(document).ready(function() {
 						<th>Quantity ${!disabled ? "<code>*</code>" : ""}</th>
 						<th>Amount ${!disabled ? "<code>*</code>" : ""}</th>
 						<th>Total Amount </th>
-						<th>File</th>
+						<th>File ${!disabled ? "<code>*</code>" : ""}</th>
 					</tr>
 				</thead>
 				<tbody class="itemProjectTableBody" project="true">
@@ -1211,14 +1222,13 @@ $(document).ready(function() {
 			showNotification("danger", "File size must be less than or equal to 10mb");
 		} else {
 			let html = `
-			<div class="d-flex justify-content-between validate align-items-center py-2">
+			<div class="d-flex justify-content-between align-items-center py-2">
 				<span class="filename"
 					style="display: block;
 						width: 180px;
 						overflow: hidden;
 						white-space: nowrap;
 						text-overflow: ellipsis;">${filename}</span>
-				<div class="invalid-feedback d-block" id="invalid-files"></div>
 				<span class="btnRemoveFile" style="cursor: pointer"><i class="fas fa-close"></i></span>
 			</div>`;
 			$(this).parent().find(".displayfile").first().html(html);
@@ -1543,7 +1553,7 @@ $(document).ready(function() {
 							<th>Quantity ${!disabled ? "<code>*</code>" : ""}</th>
                             <th>Amount ${!disabled ? "<code>*</code>" : ""}</th>
 							<th>Total Amount </th>
-                            <th>File</th>
+                            <th>File ${!disabled ? "<code>*</code>" : ""}</th>
                         </tr>
                     </thead>
                     <tbody class="itemProjectTableBody" project="true">
@@ -1822,8 +1832,10 @@ $(document).ready(function() {
     // ----- REVISE DOCUMENT -----
 	$(document).on("click", "#btnRevise", function () {
 		const id                    = decryptString($(this).attr("clientFundRequestID"));
+		const fromCancelledDocument = $(this).attr("cancel") == "true";
+		viewDocument(id, false, true, fromCancelledDocument);
 		//const fromCancelledDocument = $(this).attr("cancel") == "true";
-		viewDocument(id, false, true);
+		//viewDocument(id, false, true);
 	});
 	// ----- END REVISE DOCUMENT -----
 

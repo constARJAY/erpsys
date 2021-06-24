@@ -27,8 +27,10 @@ class Liquidation extends CI_Controller {
         $pettyCashRequestID                                 = $this->input->post("pettyCashRequestID") ?? null;
         $reviseLiquidationID                                = $this->input->post("reviseLiquidationID") ?? null;
         $liquidationDate                                    = $this->input->post("liquidationDate") ?? null;
+        $chartOfAccountID                                   = $this->input->post("chartOfAccountID") ?? null;
         $liquidationReferenceNumber                         = $this->input->post("liquidationReferenceNumber") ?? null;
         $liquidationAmount                                  = $this->input->post("liquidationAmount") ?? null;
+        $liquidationVatAmount                               = $this->input->post("liquidationVatAmount") ?? null;
         $liquidationExpenses                                = $this->input->post("liquidationExpenses") ?? null;
         $liquidationBudget                                  = $this->input->post("liquidationBudget") ?? null;
         $liquidationExcessOrShortage                        = $this->input->post("liquidationExcessOrShortage") ?? null;
@@ -55,7 +57,9 @@ class Liquidation extends CI_Controller {
             "approversID"                                       => $approversID,
             "approversStatus"                                   => $approversStatus,
             "approversDate"                                     => $approversDate,
+            "chartOfAccountID"                                  => $chartOfAccountID,
             "liquidationAmount"                                 => $liquidationAmount,
+            "liquidationVatAmount"                              => $liquidationVatAmount,
             "liquidationExpenses"                               => $liquidationExpenses,
             "liquidationBudget"                                 => $liquidationBudget,
             "liquidationExcessOrShortage"                       => $liquidationExcessOrShortage,
@@ -121,11 +125,8 @@ class Liquidation extends CI_Controller {
                             "description"         => $item["description"] != "null" ? $item["description"] : null,
                             "quantity"         => $item["quantity"] != "null" ? $item["quantity"] : null,
                             "amount"              => $item["amount"] != "null" ? $item["amount"] : null,
-                            "vatSales"            => $item["vatSales"] != "null" ? $item["vatSales"] : null,
-                            "vat"                 => $item["vat"] != "null" ? $item["vat"] : null,
                             "clientID"              => $item["clientID"] != "null" ? $item["clientID"] : null,
                             "srfNumber"           => $item["srfNumber"] != "null" ? $item["srfNumber"] : null,
-                            "chartOfAccountID"    => $item["chartOfAccountID"] != "null" ? $item["chartOfAccountID"] : null,
                             "remark"              => $item["remark"] != "null" ? $item["remark"] : null,
                             "receiptNumber"       => $item["receiptNumber"] != "null" ? $item["receiptNumber"] : null,
                             "createdBy"         => $item["createdBy"],

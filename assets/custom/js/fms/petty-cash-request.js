@@ -90,6 +90,7 @@ $(document).ready(function() {
 		if (view_id) {
 			let id = view_id;
 				id && isFinite(id) && loadData(id, isRevise, isFromCancelledDocument);
+				//totalAmountArray();
 		} else {
 			let url   = window.document.URL;
 			let arr   = url.split("?view_id=");
@@ -178,11 +179,12 @@ $(document).ready(function() {
 					{ targets: 0,  width: 100 },
 					{ targets: 1,  width: 150 },
 					{ targets: 2,  width: 150 },
-					{ targets: 3,  width: 350 },
-					{ targets: 4,  width: 200 },
+					{ targets: 3,  width: 150 },
+					{ targets: 4,  width: 350 },
 					{ targets: 5,  width: 200 },
 					{ targets: 6,  width: 200 },
 					{ targets: 7,  width: 200 },
+					{ targets: 8,  width: 200 },
 				],
 			});
 
@@ -199,12 +201,13 @@ $(document).ready(function() {
                     { targets: 0,  width: 100 },
 					{ targets: 1,  width: 150 },
 					{ targets: 2,  width: 150 },
-					{ targets: 3,  width: 200 },
+					{ targets: 3,  width: 150 },
 					{ targets: 4,  width: 200 },
 					{ targets: 5,  width: 200 },
 					{ targets: 6,  width: 200 },
 					{ targets: 7,  width: 200 },
-					{ targets: 8,  width: 150 },
+					{ targets: 8,  width: 200 },
+					{ targets: 9,  width: 150 },
 				],
 			});
 
@@ -317,6 +320,7 @@ $(document).ready(function() {
                 <tr style="white-space: nowrap">
                     <th>Document No.</th>
                     <th>Prepared By</th>
+					<th>Amount</th>
                     <th>Current Approver</th>
                     <th>Date Created</th>
                     <th>Date Submitted</th>
@@ -334,7 +338,8 @@ $(document).ready(function() {
 				approversID,
 				approversDate,
 				pettyCashRequestStatus,
-					pettyCashRequestRemarks,
+				pettyCashRequestRemarks,
+				pettyCashRequestAmount,
 				submittedAt,
 				createdAt,
 				ceCreatedAt
@@ -362,6 +367,7 @@ $(document).ready(function() {
 				<tr class="${btnClass}" id="${encryptString(pettyCashRequestID )}">
 					<td>${getFormCode("PCR", createdAt, pettyCashRequestID )}</td>
 					<td>${fullname}</td>
+					<td class="text-right">${formatAmount(pettyCashRequestAmount, true)}</td>
 					<td>
 						${employeeFullname(getCurrentApprover(approversID, approversDate, pettyCashRequestStatus, true))}
 					</td>
@@ -410,6 +416,7 @@ $(document).ready(function() {
                 <tr style="white-space: nowrap">
                     <th>Document No.</th>
                     <th>Prepared By</th>
+					<th>Amount</th>
                     <th>Current Approver</th>
                     <th>Date Created</th>
                     <th>Date Submitted</th>
@@ -435,6 +442,7 @@ $(document).ready(function() {
 				pettyCashLiquidationStatus,
 				pettyCashCode,
 				pettyCashRequestDate,
+				chartOfAccountID,
 				dateformat,
 				pettyCashRequestAmount
 			} = item;
@@ -460,6 +468,7 @@ $(document).ready(function() {
             <tr class="" id="${encryptString(pettyCashRequestID )}">
                 <td>${getFormCode("PCR", createdAt, pettyCashRequestID )}</td>
                 <td>${fullname}</td>
+				<td class="text-right">${formatAmount(pettyCashRequestAmount, true)}</td>
                 <td>
                     ${employeeFullname(getCurrentApprover(approversID, approversDate, pettyCashRequestStatus, true))}
                 </td>
@@ -473,7 +482,7 @@ $(document).ready(function() {
 				<td> 
 				${button}`;
 				if(pettyCashRequestStatus ==2 && createdBy == `${sessionID}` && pettyCashLiquidationStatus ==0){
-					html += ` <a href="${base_url}fms/liquidation?add=${pettyCashRequestID}=${pettyCashCode}=${pettyCashRequestDate}=${pettyCashRequestAmount}"><button type="button" class="btn btn-default w-100 btn-add"<i class="icon-plus"></i> Create Liquidation</button></a>`;
+					html += ` <a href="${base_url}fms/liquidation?add=${pettyCashRequestID}=${pettyCashCode}=${pettyCashRequestDate}=${pettyCashRequestAmount}=${chartOfAccountID}"><button type="button" class="btn btn-default w-100 btn-add"<i class="icon-plus"></i> Create Liquidation</button></a>`;
 				
 				}
 				html +=`</td>
@@ -809,8 +818,9 @@ $(document).ready(function() {
 				class="form-control validate" 
 				name="files" 
 				id="files"
-				accept="image/*, .pdf, .doc, .docx">
-			<div class="invalid-feedback d-block" id="invalid-files"></div>`;
+				accept="image/*, .pdf, .doc, .docx"
+				required>
+				<div class="invalid-feedback d-block" id="invalid-files"></div>`;
 
 			let itemFile  = "";
 			if (ceID && ceID != "0") {
@@ -875,10 +885,9 @@ $(document).ready(function() {
                         </div>
                    </td> 
 				   <td>
-				   		<div class="quantity">
-						<input 
-						type="text" 
-						class="form-control input-quantity validate text-center "
+				   	<div class="quantity">
+						<input type="text" 
+						class="form-control input-quantity text-center mb-0"
 						min="0.01" 
 						max="999999999" 
 						data-allowcharacters="[0-9]"
@@ -887,8 +896,6 @@ $(document).ready(function() {
 						value="${quantity}" 
 						minlength="1" 
 						maxlength="20" 
-						autocomplete="off"
-						ceID="${ceID ? true : false}"
 						${disabled}>
 					<div class="invalid-feedback d-block" id="invalid-quantity"></div>
 					</div>
@@ -927,6 +934,7 @@ $(document).ready(function() {
 						</div>
 						${inputFile}
 					</div>
+					
 				</td>
 			</tr>`;
 		}
@@ -934,6 +942,7 @@ $(document).ready(function() {
         return html;
     }
     // ----- END GET ITEM ROW -----
+
 	
 	// ----- UPDATE TABLE ITEMS -----
 	function updateTableItems() {
@@ -981,11 +990,12 @@ $(document).ready(function() {
 
 			// FILE
 			$("td .file [name=files]", this).attr("id", `filesProject${i}`);
+			$("td .file .invalid-feedback", this).attr("id", `invalid-files${i}`);
 
 		})
 	}
 	// ----- END UPDATE TABLE ITEMS -----
-
+	
 
 	// ----- UPDATE DELETE BUTTON -----
 	function updateDeleteButton() {
@@ -1032,7 +1042,7 @@ $(document).ready(function() {
 							updateDeleteButton();
 							updateTotalAmount(isProject);
 							updateInventoryItemOptions();
-							totalAmount();
+							totalAmountArray();
 						});
 					})
 				}
@@ -1044,23 +1054,25 @@ $(document).ready(function() {
 	}
 	// ----- END DELETE TABLE ROW -----
 
-	function totalAmount(id){
+	function totalAmountArray(){
 		var TotalValue = 0;
 		$(".itemProjectTableBody tr").each(function(){
 			TotalValue += parseFloat(getNonFormattedAmount($(this).find('[name=basequantityandamount]').text()) || 0);	
 	  });
 		if(TotalValue <= 2000){
-			$("#totalAmount").css('background-color', '#FFFFFF');
+			//$("#totalAmount").css('background-color', '#FFFFFF');
 			$(`#totalAmount`).text(formatAmount(TotalValue, true));
-			document.getElementById("invalid-message").style.visibility = "hidden";
-			document.getElementById('invalid-message').innerHTML = '';
 			$("#totalAmount").attr("totalValue","1");
 			$("#totalAmount").attr("clientFundRequestAmount",TotalValue);
+			// document.getElementById("invalid-message").style.visibility = "hidden";
+			// document.getElementById('invalid-message').innerHTML = '';
 		}else{
-			$("#totalAmount").css('background-color', '#FF0000');
+			//$("#totalAmount").css('background-color', '#FF0000');
+			showNotification("warning2", 	
+				`Invalid request! Can only request ₱ 2,000 and below.`);
 			$(`#totalAmount`).text(formatAmount(TotalValue, true));
-			document.getElementById('invalid-message').innerHTML = 'Invalid request! Can only request ₱ 2,000 and below.';
-			document.getElementById("invalid-message").style.visibility = "visible";
+			// document.getElementById('invalid-message').innerHTML = 'Invalid request! Can only request ₱ 2,000 and below.';
+			// document.getElementById("invalid-message").style.visibility = "visible";
 			$("#totalAmount").attr("totalValue","");
 			$("#totalAmount").attr("clientFundRequestAmount",TotalValue);
 		}
@@ -1075,7 +1087,7 @@ $(document).ready(function() {
 		let quantity = quantityvalue || 0;	
 		let baseQuantityandAmount = amount * quantity;
 		$(`#basequantityandamount${id}`).text(formatAmount(baseQuantityandAmount, true));
-		totalAmount(id);
+		totalAmountArray();
 	}
 	
 	$(document).on("keyup", "[name=quantity]", function() {
@@ -1231,7 +1243,7 @@ $(document).ready(function() {
 		} else {
 			let html = `
 			<div class="d-flex justify-content-between align-items-center py-2">
-				<span class="filename"
+				<span class="filename validate"
 					style="display: block;
 						width: 180px;
 						overflow: hidden;
@@ -1504,6 +1516,7 @@ $(document).ready(function() {
 							class="form-control validate select2"
 							name="chartOfAccountID"
 							id="chartOfAccountID"
+							style="width: 100%"
 							required
 							${disabled}>
 							${getInventoryItem(chartOfAccountID)}
@@ -1522,7 +1535,7 @@ $(document).ready(function() {
 							<th>Quantity ${!disabled ? "<code>*</code>" : ""}</th>
                             <th>Amount ${!disabled ? "<code>*</code>" : ""}</th>
 							<th>Total Amount </th>
-                            <th>File</th>
+                            <th>File ${!disabled ? "<code>*</code>" : ""}</th>
                         </tr>
                     </thead>
                     <tbody class="itemProjectTableBody" project="true">
@@ -1536,7 +1549,7 @@ $(document).ready(function() {
                     </div>
                     <div class="font-weight-bolder align-self-start" style="font-size: 1rem;">
                         <span>Total Amount Requested: &nbsp;</span>
-                        <span class="text-dark" style="font-size: 1.2em" id="totalAmount" name="totalAmount" project="true">${formatAmount(pettyCashRequestAmount, true)}</span>
+                        <span class="text-dark" style="font-size: 1.2em" id="totalAmount" name="totalAmount" totalvalue="1" project="true">${formatAmount(pettyCashRequestAmount, true)}</span>
 						<p class="text-danger" id="invalid-message" style="font-size:9px;color:red;"></p>
 						</div>
                 </div>
@@ -1568,7 +1581,7 @@ $(document).ready(function() {
 					}
 				})
 				$('#btnBack').attr("status", "2");
-				$(`#btnSubmit, #btnRevise, #btnCancel, .btnAddRow, .btnDeleteRow`).hide();
+				$(`#btnSubmit, #btnRevise, #btnCancel, #btnCancelForm, .btnAddRow, .btnDeleteRow`).hide();
 			}
 			// ----- END NOT ALLOWED FOR UPDATE -----
 
@@ -1808,8 +1821,13 @@ $(document).ready(function() {
     // ----- REVISE DOCUMENT -----
 	$(document).on("click", "#btnRevise", function () {
 		const id              = decryptString($(this).attr("pettyCashRequestID"));
+		const fromCancelledDocument = $(this).attr("cancel") == "true";
+		viewDocument(id, false, true, fromCancelledDocument);
+		//totalAmount(id);
+		//baseQuantityAndAmount(id);
 		//const fromCancelledDocument = $(this).attr("cancel") == "true";
-		viewDocument(id, false, true);
+		// viewDocument(id, false, true);
+		//$("name=[totalAmount]").attr("totalValue","1");
 	});
 	// ----- END REVISE DOCUMENT -----
 

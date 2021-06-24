@@ -88,6 +88,7 @@ class Petty_cash_request extends CI_Controller {
                     "pettyCashRequestStatus"   => 5,
                     "updatedBy"               => $updatedBy,
                 ]; 
+            
             }
         }
 
