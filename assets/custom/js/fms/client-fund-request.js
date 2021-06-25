@@ -179,11 +179,13 @@ $(document).ready(function() {
 					{ targets: 1,  width: 150 },
 					{ targets: 2,  width: 100 },
 					{ targets: 3,  width: 100 },
-					{ targets: 4,  width: 350 },
-					{ targets: 5,  width: 200 },
-					{ targets: 6,  width: 200 },
+					{ targets: 4,  width: 300 },
+					{ targets: 5,  width: 100 },
+					{ targets: 6,  width: 350 },
 					{ targets: 7,  width: 200 },
 					{ targets: 8,  width: 200 },
+					{ targets: 9,  width: 200 },
+					{ targets: 10,  width: 200 },
 				],
 			});
 
@@ -201,11 +203,13 @@ $(document).ready(function() {
 					{ targets: 1,  width: 150 },
 					{ targets: 2,  width: 100 },
 					{ targets: 3,  width: 100 },
-					{ targets: 4,  width: 350 },
-					{ targets: 5,  width: 200 },
-					{ targets: 6,  width: 200 },
+					{ targets: 4,  width: 300 },
+					{ targets: 5,  width: 100 },
+					{ targets: 6,  width: 350 },
 					{ targets: 7,  width: 200 },
 					{ targets: 8,  width: 200 },
+					{ targets: 9,  width: 200 },
+					{ targets: 10,  width: 200 },
 				],
 			});
 
@@ -303,10 +307,12 @@ $(document).ready(function() {
 		$("#tableForApprovalParent").html(preloader);
 		let pettyCashRequest = getTableData(
 			`fms_client_fund_request_tbl AS cfr 
-			LEFT JOIN hris_employee_list_tbl AS helt USING(employeeID) `,
+			LEFT JOIN hris_employee_list_tbl AS helt USING(employeeID) 
+			LEFT JOIN pms_project_list_tbl AS pplt  ON cfr.projectID = pplt.projectListID
+			LEFT JOIN pms_client_tbl AS pct ON pct.clientID = pplt.projectListClientID`,
 			`cfr.*, 
             CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname, 
-            cfr.createdAt AS dateCreated`,
+            cfr.createdAt AS dateCreated,pct.clientCode,pct.clientName`,
 			`cfr.employeeID != ${sessionID} AND clientFundRequestStatus != 0 AND clientFundRequestStatus != 4`,
 			`FIELD(clientFundRequestStatus, 0, 1, 3, 2, 4, 5), COALESCE(cfr.submittedAt, cfr.createdAt)`
 		);
@@ -318,6 +324,8 @@ $(document).ready(function() {
                     <th>Document No.</th>
                     <th>Prepared By</th>
 					<th>Amount</th>
+					<th>Client Code</th>
+					<th>Client Name</th>
                     <th>Current Approver</th>
                     <th>Date Created</th>
                     <th>Date Submitted</th>
@@ -339,7 +347,9 @@ $(document).ready(function() {
 				clientFundRequestAmount,
 				submittedAt,
 				createdAt,
-				ceCreatedAt
+				ceCreatedAt,
+				clientCode,
+				clientName,
 			} = item;
 
 			let remarks       = 	clientFundRequestRemarks ? 	clientFundRequestRemarks : "-";
@@ -365,6 +375,8 @@ $(document).ready(function() {
 					<td>${getFormCode("CFR", createdAt, clientFundRequestID )}</td>
 					<td>${fullname}</td>
 					<td class="text-right">${formatAmount(clientFundRequestAmount, true)}</td>
+					<td>${clientCode}</td>
+					<td>${clientName}</td>
 					<td>
 						${employeeFullname(getCurrentApprover(approversID, approversDate, clientFundRequestStatus, true))}
 					</td>
@@ -397,10 +409,12 @@ $(document).ready(function() {
 		$("#tableMyFormsParent").html(preloader);
 		let pettyCashRequest = getTableData(
 			`fms_client_fund_request_tbl AS cfr 
-			LEFT JOIN hris_employee_list_tbl AS helt USING(employeeID) `,
+			LEFT JOIN hris_employee_list_tbl AS helt USING(employeeID) 
+			LEFT JOIN pms_project_list_tbl AS pplt  ON cfr.projectID = pplt.projectListID
+			LEFT JOIN pms_client_tbl AS pct ON pct.clientID = pplt.projectListClientID`,
 			`cfr.*, 
             CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname, 
-            cfr.createdAt AS dateCreated`,
+            cfr.createdAt AS dateCreated, pct.clientCode, pct.clientName`,
 			`cfr.employeeID = ${sessionID}`,
 			`FIELD(clientFundRequestStatus, 0, 1, 3, 2, 4, 5), COALESCE(cfr.submittedAt, cfr.createdAt)`
 		);
@@ -412,6 +426,8 @@ $(document).ready(function() {
                     <th>Document No.</th>
                     <th>Prepared By</th>
 					<th>Amount</th>
+					<th>Client Code</th>
+					<th>Client Name</th>
                     <th>Current Approver</th>
                     <th>Date Created</th>
                     <th>Date Submitted</th>
@@ -433,7 +449,10 @@ $(document).ready(function() {
 				submittedAt,
 				clientFundRequestAmount,
 				createdAt,
-				ceCreatedAt
+				ceCreatedAt,
+				clientCode,
+				clientName,
+				
 			} = item;
 
 			let remarks       = clientFundRequestRemarks ? clientFundRequestRemarks : "-";
@@ -458,6 +477,8 @@ $(document).ready(function() {
                 <td>${getFormCode("CFR", createdAt, clientFundRequestID )}</td>
                 <td>${fullname}</td>
 				<td class="text-right">${formatAmount(clientFundRequestAmount, true)}</td>
+				<td>${clientCode}</td>
+				<td>${clientName}</td>
                 <td>
                     ${employeeFullname(getCurrentApprover(approversID, approversDate, clientFundRequestStatus, true))}
                 </td>
@@ -627,14 +648,7 @@ $(document).ready(function() {
 
         // ----- GET PROJECT LIST -----
         function getProjectList(id = null, display = true) {
-            let html = `
-            <option 
-                value       = "0"
-                projectCode = "-"
-                clientCode  = "-"
-                clientName  = "-"
-                address     = "-"
-                ${id == "0" && "selected"}>N/A</option>`;
+            let html = ``;
             html += projectList.map(project => {
                 let address = `${project.clientUnitNumber && titleCase(project.clientUnitNumber)+", "}${project.clientHouseNumber && project.clientHouseNumber +", "}${project.clientBarangay && titleCase(project.clientBarangay)+", "}${project.clientCity && titleCase(project.clientCity)+", "}${project.clientProvince && titleCase(project.clientProvince)+", "}${project.clientCountry && titleCase(project.clientCountry)+", "}${project.clientPostalCode && titleCase(project.clientPostalCode)}`;
     
@@ -729,12 +743,12 @@ $(document).ready(function() {
 			itemIDArr.push($(this).val());
 		}) 
 
-		let optionNone = {
-			chartOfAccountID:       "0",
-			accountName:            "N/A"
-		};
+		// let optionNone = {
+		// 	chartOfAccountID:       "0",
+		// 	accountName:            "N/A"
+		// };
 		// let itemList = [optionNone, ...inventoryItemList];
-		let itemList = !itemIDArr.includes("0") && table ? [...inventoryItemList] : [optionNone, ...inventoryItemList];
+		let itemList = !itemIDArr.includes("0") && table ? [...inventoryItemList] : [...inventoryItemList];
 
 		html += itemList.filter(item => !itemIDArr.includes(item.chartOfAccountID) || item.chartOfAccountID == id).map(item => {
             return `
@@ -770,7 +784,7 @@ $(document).ready(function() {
 			totalAmount							=0,
 			files                               = ""
 		} = item;
-
+		// /$('[name=files]').val(files);
 		let html = "";
 		if (readOnly) {
 			const itemFIle = files ? `<a href="${base_url+"assets/upload-files/petty-cash-request/"+files}" target="_blank">${files}</a>` : `-`;
@@ -806,10 +820,12 @@ $(document).ready(function() {
 			const inputFile = ceID && ceID != "0" ? "" : `
 			<input 
 				type="file" 
-				class="form-control validate" 
+				class="form-control validate"
 				name="files" 
 				id="files"
 				accept="image/*, .pdf, .doc, .docx"
+				filename="${files != null ? files : ""}"
+				value="${files}"
 				required>
 				<div class="invalid-feedback d-block" id="invalid-files"></div>`;
 			let itemFile  = "";
@@ -817,8 +833,9 @@ $(document).ready(function() {
 				if (files) {
 					itemFile = `
 					<a href="${base_url+"assets/upload-files/petty-cash-request/"+files}"
-					class="filename validate"
-					title="${files}" 
+					class="filename"
+					title="${files}"
+					accept=".png, .jpeg, .jpg, .pdf, .doc, .docx" 
 					style="display: block;
 						width: 150px;
 						overflow: hidden;
@@ -832,13 +849,12 @@ $(document).ready(function() {
 				if (files) {
 					itemFile = `
 					<div class="d-flex justify-content-between align-items-center py-2">
-						<a class="filename validate"
+						<a class="filename"
 						title="${files}"
 						style="display: block;
 							width: 150px;
 							overflow: hidden;
 							white-space: nowrap;
-						
 							text-overflow: ellipsis;"
 						href="${base_url+"assets/upload-files/petty-cash-request/"+files}" 
 						target="_blank">
@@ -915,12 +931,12 @@ $(document).ready(function() {
 				</td>
 				<td>
 				<div class="basequantityandamount text-right">
-					<span class="basequantityandamount" id="basequantityandamount" name="basequantityandamount"> </span>
+					<span class="basequantityandamount" id="basequantityandamount" name="basequantityandamount">${formatAmount(totalAmount, true) || "-"} </span>
 				</div>
 				</td>
 				<td>
 					<div class="file">
-						<div class="displayfile">
+						<div class="displayfile ">
 							${itemFile}
 						</div>
 						${inputFile}
@@ -944,25 +960,6 @@ $(document).ready(function() {
 			$("td .action .checkboxrow", this).attr("id", `checkboxrow${i}`);
 			$("td .action .checkboxrow", this).attr("project", `true`);
 
-
-			// ITEMNAME
-			// $(this).find("select").each(function(x) {
-			// 	if ($(this).hasClass("select2-hidden-accessible")) {
-			// 		$(this).select2("destroy");
-			// 	}
-			// })
-
-			// $(this).find("select").each(function(j) {
-			// 	const chartOfAccountID = $(this).val();
-			// 	$(this).attr("index", `${i}`);
-			// 	$(this).attr("project", `true`);
-			// 	$(this).attr("id", `chartOfAccountID${i}`);
-			// 	$(this).attr("data-select2-id", `chartOfAccountID${i}`);
-			// 	if (!$(this).hasClass("select2-hidden-accessible")) {
-			// 		$(this).select2({ theme: "bootstrap" });
-			// 	}
-			// });
-
 			// QUANTITY
 			$("td .amountvalue [name=amount]", this).attr("id", `amount${i}`);		
 			// QUANTITY
@@ -978,7 +975,6 @@ $(document).ready(function() {
 			// FILE
 			$("td .file [name=files]", this).attr("id", `filesProject${i}`);
 			
-
 		})
 	}
 	// ----- END UPDATE TABLE ITEMS -----
@@ -1046,6 +1042,7 @@ $(document).ready(function() {
 		$(".itemProjectTableBody tr").each(function(){
 			TotalValue += parseFloat(getNonFormattedAmount($(this).find('[name=basequantityandamount]').text()) || 0);	
 	  });
+	  //alert(TotalValue);
 		if(TotalValue <= 2000){
 			//$("#totalAmount").css('background-color', '#FFFFFF');
 			$(`#totalAmount`).text(formatAmount(TotalValue, true));
@@ -1189,7 +1186,7 @@ $(document).ready(function() {
 					${buttonProjectAddDeleteRow}
 				</div>
 				<div class="font-weight-bolder " style="font-size: 1rem;">
-					<span>Total Amount: &nbsp;</span>
+					<span>Total Amount Requested: &nbsp;</span>
 					<span class="text-dark TotalAmount"color="" style="font-size: 1.2em" id="totalAmount" name="totalAmount" project="true">${formatAmount(projectTotalAmount, true)}</span>
 				</div>
 				
@@ -1212,8 +1209,48 @@ $(document).ready(function() {
         $("[name=clientAddress]").val(address);
     })
     // ----- END SELECT PROJECT LIST -----
+	// ----- VALIDATE SERVICE FILE ----- 
+	// function validateClientFile() {
+	
+	// 	let flag = 0;
+	// 	$(`[name="files"]`).each(function(i) {
+	// 		const filename = $(this).attr("filename");
+	// 		var filevalue = $(this).val();
+	// 		//alert(filevalue);
+	// 		if (!filename || filename == "null") {
+			
+	// 			$(this).addClass("is-invalid");
+	// 			$(this).parent().find(".invalid-feedback").first().text("File is required.");
+	// 			flag++;
+	// 		} else {
+	// 			$(this).removeClass("is-invalid");
+	// 			$(this).parent().find(".invalid-feedback").first().text("");
+	// 		}
+	// 	})
+	// 	$("#form_client_fund_request").find(".is-invalid").first().focus();
+	// 	return flag > 0 ? false : true;
+	// }
+	// ----- END VALIDATE SERVICE FILE ----- 
+	function fileValidation(){
+		let check = 0
+		$(`[name="files"]`).each(function(i) {
+			var allowedExtensions = /(\.jpg|\.jpeg|\.png|\.pdf|\.docx)$/i;
+			var filextension = $(this).val();
+			if(!allowedExtensions.exec(filextension)){
+				$(this).addClass("is-invalid");
+				$(this).parent().find(".invalid-feedback").first().text("Invalid file extension.");
+				check++;
+			}else{
+				$(this).removeClass("is-invalid");
+				$(this).parent().find(".invalid-feedback").first().text("");
+			}	
+		})
+		$("#form_client_fund_request").find(".is-invalid").first().focus();
+	return check > 0 ? false : true;	
+	}	
 	// ----- SELECT FILE -----
 	$(document).on("change", "[name=files]", function(e) {
+		
 		const filename = this.files[0].name;
 		const filesize = this.files[0].size/1024/1024; // Size in MB
 		if (filesize > 10) {
@@ -1231,11 +1268,12 @@ $(document).ready(function() {
 						text-overflow: ellipsis;">${filename}</span>
 				<span class="btnRemoveFile" style="cursor: pointer"><i class="fas fa-close"></i></span>
 			</div>`;
+			$(this).removeClass("is-invalid");
+			$(this).parent().find(".invalid-feedback").first().text("");
 			$(this).parent().find(".displayfile").first().html(html);
 		}
 	})
 	// ----- END SELECT FILE -----
-
 
 	// ----- REMOVE FILE -----
 	$(document).on("click", ".btnRemoveFile", function() {
@@ -1283,6 +1321,7 @@ $(document).ready(function() {
 		let isProject = $(this).attr("project") == "true";
         let row = getItemRow(isProject);
 		updateTableItems();
+		totalAmount();
 		if (isProject) {
 			$(".itemProjectTableBody").append(row);
 		} else {
@@ -1457,7 +1496,7 @@ $(document).ready(function() {
                 </div>
             </div>
         </div>
-            <div class="row" id="form_petty_cash_request">
+            <div class="row" id="form_client_fund_request">
 				<div class="col-md-4 col-sm-12">
 					<div class="form-group">
 					<label>Project Code</label>
@@ -1567,7 +1606,7 @@ $(document).ready(function() {
                     </div>
                     <div class="font-weight-bolder align-self-start" style="font-size: 1rem;">
                         <span>Total Amount: &nbsp;</span>
-                        <span class="text-dark" style="font-size: 1.2em" id="totalAmount" name="totalAmount" project="true">${formatAmount(clientFundRequestAmount, true)}</span>
+                        <span class="text-dark" style="font-size: 1.2em" id="totalAmount" name="totalAmount" totalvalue="1" project="true">${formatAmount(clientFundRequestAmount, true)}</span>
 						<p class="text-danger" id="invalid-message" style="font-size:9px;color:red;"></p>
 						</div>
                 </div>
@@ -1603,6 +1642,7 @@ $(document).ready(function() {
 				$(`#btnSubmit, #btnRevise, #btnCancel, #btnCancelForm, .btnAddRow, .btnDeleteRow`).hide();
 			}
 			// ----- END NOT ALLOWED FOR UPDATE -----
+			$("#clientFundRequestDate").data("daterangepicker").maxDate = moment();
 
 			return html;
 		}, 300);
@@ -1628,7 +1668,7 @@ $(document).ready(function() {
             </div>`;
 			$("#page_content").html(html);
 
-			headerButton(true, "Add Petty Cash Request");
+			headerButton(true, "Add Client Fund Request");
 			headerTabContent();
 			myFormsContent();
 			updateURL();
@@ -1945,13 +1985,14 @@ $(document).ready(function() {
 		const id            = decryptString($(this).attr("clientFundRequestID"));
 		const isFromCancelledDocument = $(this).attr("cancel") == "true";
 		const revise        = $(this).attr("revise") == "true";
-		const validate      = validateForm("form_petty_cash_request");
+		const validate      = validateForm("form_client_fund_request");
 		let validateamount = $("[name=totalAmount]").attr("totalvalue");
 		const validatePrice = validateItemPrice();
+		const validateFile = fileValidation();
 		const validateItems = validateTableItems();
 		removeIsValid("#tableProjectRequestItems");
 		//removeIsValid("#tableCompanyRequestItems");
-			if (validate && validateamount && validateItems) {
+			if (validate && validateamount && validateItems && validateFile) {
 				const action = revise && !isFromCancelledDocument && "insert" || (id ? "update" : "insert");
 				const data   = getClientFundRequestData(action, "submit", "1", id);
 	

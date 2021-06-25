@@ -5,29 +5,18 @@
                 <div class="col-lg-6 col-md-6">
                     <ul class="breadcrumb pl-0 pb-0 ">
                         <li class="breadcrumb-item"><a href="#"><i class="zmdi zmdi-home"></i> Dashboard</a></li>
-						<li class="breadcrumb-item"><i class="fas fa-users"></i> &nbsp;Project Modules</li>
-                        <li class="breadcrumb-item active">Sign Off</li>
+						<li class="breadcrumb-item"><i class="fas fa-folder-open"></i>&nbsp;Project Modules</li>
+                        <li class="breadcrumb-item active">Sign-Off</li>
                     </ul>
-                    <h1 class="mt-3">List of Sign Off Forms</h1>
-                    <span>This module is used to manage sign off forms details.</span>
+                    <h1 class="mt-3">List of Sign-Off Forms</h1>
+                    <span>This module is used to manage the submission and approval of sign-off forms for project phases that are already done.</span>
                 </div>
-                <div class="col-lg-6 col-md-6 text-right" id="headerButton">
-				<button type="button" class="btn btn-default btn-add" id="btnAdd" data-toggle="tab" href="#addPR"><i class="icon-plus"></i> &nbsp;Add Sign Off</button></div>
+                <div class="col-lg-6 col-md-6 text-right" id="headerButton"></div>
             </div>
-            <div class="bh_divider appendHeader"></div>
-            <div class="row clearfix appendHeader">
-                <div class="col-12">
-                    <ul class="nav nav-tabs">
-                        <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#forApprovalTab" redirect="forApprovalTab">For Approval</a></li>
-                        <li class="nav-item"><a class="nav-link active" data-toggle="tab" href="#myFormsTab" redirect="myFormsTab">My Forms</a></li>
-                    </ul>
-                </div>
-            </div>
-           
         </div>
     </div>
 
-    <div class="container">
+    <!-- <div class="container">
 		<div class="row clearfix row-deck mx-1">
             <div class="card col-md-12">
                 <div class="tab-content mt-3">
@@ -38,7 +27,12 @@
                                     <thead>
                                         <tr>
                                             <th>Document No.</th>
-                                            <th>Phase</th>
+                                            <th>Prepared By</th>
+                                            <th>Project Name</th>
+                                            <th>Project Category</th>
+                                            <th>Client</th>
+                                            <th>Project Phase</th>
+                                            <th>Current Approver</th>
                                             <th>Date Created</th>
                                             <th>Date Submitted</th>
                                             <th>Date Approved</th>
@@ -57,7 +51,12 @@
                                     <thead>
                                         <tr>
                                             <th>Document No.</th>
-                                            <th>Phase</th>
+                                            <th>Prepared By</th>
+                                            <th>Project Name</th>
+                                            <th>Project Category</th>
+                                            <th>Client</th>
+                                            <th>Project Phase</th>
+                                            <th>Current Approver</th>
                                             <th>Date Created</th>
                                             <th>Date Submitted</th>
                                             <th>Date Approved</th>
@@ -218,21 +217,6 @@
                                         <input type="text" class="form-control" disabled value="">
                                     </div>
                                 </div>
-                                <!-- <div class="col-md-6 col-sm-12">
-                                    <div class="form-group">
-                                        <label>Description <code>*</code></label>
-                                        <textarea class="form-control validate"
-                                            data-allowcharacters="[a-z][A-Z][0-9][ ][.][,][-][()]['][/][&]"
-                                            minlength="1"
-                                            maxlength="200"
-                                            id="collectionDescription"
-                                            name="collectionDescription"
-                                            required
-                                            rows="4"
-                                            style="resize:none;"></textarea>
-                                        <div class="d-block invalid-feedback" id="invalid-collectionDescription"></div>
-                                    </div>
-                                </div> -->
                             </div>  
                             <table class="table table-striped table-hover" id="tableForApprroval" role="grid">
                                 <thead>
@@ -257,7 +241,6 @@
                                 </tbody>
                             </table>
                             <div class="w-100 d-flex justify-content-between align-items-center py-2 addReq">
-                            <!-- <div>${buttonProjectAddDeleteRow}</div> -->
                                 <div class="w-100 text-left my-2 addReq">
                                         <button class="btn btn-primary btnAddRow" id="btnAddRow" project="true"><i class="fas fa-plus-circle"></i> Add Row</button>
                                         <button class="btn btn-danger btnDeleteRow" id="btnDeleteRow" project="true" disabled><i class="fas fa-minus-circle"></i> Delete Row/s</button>
@@ -284,10 +267,15 @@
 
             
         </div>
-	</div>
-</div>
+	</div> -->
     
-
+    <div class="container">
+		<div class="row clearfix row-deck mx-1">
+            <div class="card col-md-12">
+                <div class="card-body" id="page_content"></div>
+            </div>
+        </div>
+	</div>
     
 </div>
 
@@ -311,20 +299,4 @@
 
 
 <script src="<?= base_url('assets/custom/js/gen/approver-function.js') ?>"></script>
-<!-- <script src="<?= base_url('assets/custom/js/fms/petty-cash-request.js') ?>"></script> -->
-<script>
-    $(document).ready(function () {
-        $("#addRequest").show();
-        $("#pcrDetails").show();
-        $(".addReq").show();
-
-        $(document).on("click", "#btnAdd", function () {
-            $("#addRequest").show();
-            $("#pcrDetails").show();
-            $(".addReq").show();
-            $("#pcrDatatable").hide();
-        });
-
-
-	});
-</script>
+<script src="<?= base_url('assets/custom/js/pms/sign-off.js') ?>"></script>

@@ -46,7 +46,7 @@ $(document).ready(function() {
         
                         if (timelineManagementBy != sessionID) {
                             isReadOnly = true;
-                            isAllowed = timelineManagementBy ? true : false
+                            isAllowed = timelineManagementBy || timelineManagementBy == null ? true : false
                             if (timelineManagementStatus == 0 || timelineManagementStatus == 1) {
                                 isReadOnly = false;
                             }
@@ -145,7 +145,8 @@ $(document).ready(function() {
             ptbt.timelineManagementStatus,
             ptbt.timelineBuilderStatus`,
             `(ptbt.timelineManagementStatus = 2 AND ptbt.timelineBuilderStatus = 2) OR
-            (ptbt.timelineBuilderStatus = 2 AND ptbt.timelineManagementBy = ${sessionID} OR ptbt.timelineManagementBy IS NULL OR ptbt.timelineManagementBy = '')`);
+            (ptbt.timelineBuilderStatus = 2 AND ptbt.timelineManagementBy = ${sessionID}) OR 
+            (ptbt.timelineBuilderStatus = 2 AND (ptbt.timelineManagementBy IS NULL OR ptbt.timelineManagementBy = ''))`);
         return data;
     }
     // ----- END TIMELINE DATA -----

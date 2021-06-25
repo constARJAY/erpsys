@@ -44,8 +44,6 @@ $(document).ready(function() {
     // ----- VIEW DOCUMENT -----
 	function viewDocument(view_id = false, readOnly = false, isRevise = false, isFromCancelledDocument = false) {
 		const loadData = (id, isRevise = false, isFromCancelledDocument = false) => {
-			//alert(pettycashID);
-			//alert(pettycashID);
 			const tableData = getTableData("fms_liquidation_tbl", "", "liquidationID=" + id);
 
 			if (tableData.length > 0) {
@@ -112,17 +110,7 @@ $(document).ready(function() {
 				var pettyCashDate = ids[3];
 				var pettyCashAmount = ids[4];
 				var pettycashChartOfAccountID =ids[5];
-				//alert(pettyCashDate);
-				//alert(liquidationDataID);
-				//alert(liquidationDataID);
 				let itemProjectTableBody = formContent('','','','', liquidationDataID, pettycashCode, pettyCashDate, pettyCashAmount, pettycashChartOfAccountID);
-				// var idtwo = ids[2];
-				
-				// alert(liquidationID);
-				// let liquidationID = decryptString(descrypliquidationID);
-
-				//pettycashID = formContent('','','','',pettycashID);
-				//iquidationID = getPettyCashRow(liquidationID,readOnly,'');
 			
 				if (arr.length > 1) {
 					let id = decryptString(arr[1]);
@@ -978,7 +966,6 @@ $(document).ready(function() {
 		var munustotal =  pettyCashAmountValue - totalbudget;
 		var totalamount = formatAmount(munustotal, true);
 		$("#liquidationExcessOrShortage").text((totalamount));
-	//alert(totalbudget1);
 
 	})	
 	
@@ -1055,13 +1042,21 @@ $(document).ready(function() {
 
     // ----- FORM CONTENT -----
 	function formContent(data = false, readOnly = false, isRevise = false, isFromCancelledDocument = false,liquidationDataID, pettycashCode, pettyCashDate, pettyCashAmount, pettycashChartOfAccountID) {
-		//alert(pettycashID);
 		$("#page_content").html(preloader);
 		let datewithrecord = moment(pettyCashDate).format("MMMM DD, YYYY");
 		readOnly = isRevise ? false : readOnly;
 		let pettyCashID = '';
+		//var pcrreadOnly = false;
+		if(pettycashChartOfAccountID =="0"){
+			//var pcChartOfAccountID = 
+		}else{
+			//document.getElementById("chartOfAccountID").disabled = true;
+			$('#chartOfAccountID').attr('disabled', false);
+			
+			//$("#chartOfAccountID").attr('disabled', 'disabled');
+		}
+		let readPettyCashChartofAccount = false;
 		let pettyCashChartOfAccountID = '';
-		//alert(pettycashChartOfAccountID);
 		let {
 			liquidationID      			= "",
 			reviseLiquidationID 		= "",
@@ -1098,7 +1093,7 @@ $(document).ready(function() {
 				pettyCashID = liquidationDataID;
 				pettyCashChartOfAccountID = pettycashChartOfAccountID;
 			}
-			//alert(pettyCashID);
+			
         let clientFundRequestItems = "";
 		if (liquidationID) {
 		let pettyCashRequestData = getTableData(
@@ -1119,7 +1114,6 @@ $(document).ready(function() {
 			`frd.liquidationID  = ${liquidationID}`);
 			pettyCashRequestData.map(item => {
 				clientFundRequestItems += getItemRow(pettyCashID, true, item, readOnly)
-				//console.log(clientFundRequestItems);
 		})    
 		}else{
 			
@@ -1332,7 +1326,7 @@ $(document).ready(function() {
 							<th>Client</th>
 							<th>SRF Number</th>
 							<th>Remarks</th>
-							<th>Receipt Number</th>
+							<th>Reference</th>
                         </tr>
                     </thead>
                     <tbody class="itemProjectTableBody" project="true">
@@ -1360,6 +1354,8 @@ $(document).ready(function() {
 						<div class="row pb-1" style="font-size: 1.1rem;">
 							<div class="col-7 col-lg-5 text-left">Budget:</div>
 							<div class="col-7 col-lg-5 text-right text-dark">
+							<div class="input-group-prepend">
+							<span class="input-group-text text-dark">₱</span>
 							<input type="text" class="form-control-plaintext amount py-0 text-dark border-bottom liquidationBudget"  pettyCashAmountValue="${pettyCashAmount}"
 							min="0" 
 							max="9999999999"
@@ -1368,8 +1364,8 @@ $(document).ready(function() {
 							id="liquidationBudget" 
 							name="liquidationBudget" 
 							value="${formatAmount(liquidationBudget, true)}"
-							style="font-size: 1.02em;"
 							${disabled}>
+							</div>
 							</div>
 						</div>
 						<div class="row pb-1" style="font-size: 1.1rem;">
@@ -1433,22 +1429,10 @@ $(document).ready(function() {
 			 quantity  += parseFloat(getNonFormattedAmount($(this).find('[name=quantity]').text()) || 0);
 			 amount  += parseFloat(getNonFormattedAmount($(this).find('[name=amount]').text()) || 0);
 		});	
-			var totalbasequantityandamount = quantity * amount;
-			//alert(totalbasequantityandamount);
-		// const quantityArr = $.find(`[name="quantity"]`).map(element => getNonFormattedAmount(element.value) || 0);
-		// const unitCostArr = $.find(`[name="amount"]`).map(element => getNonFormattedAmount(element.value) || 0);
-        // const grandTotal = quantityArr.map((qty, index) => +qty * +unitCostArr[index]).reduce((a,b) => a + b, 0);
-       // $("#billingGrandTotal").text(formatAmount(grandTotal, true));
-
+		var totalbasequantityandamount = quantity * amount;
         const isChecked = $(`#billingVat`).prop("checked");
         const vatAmount = isChecked ? (totalbasequantityandamount / 1.12 * 0.12) : 0;
-		alert(vatAmount);
         $("#liquidationVatAmount").text(formatAmount(vatAmount, true));
-
-		//const totalAmount = grandTotal - vatAmount;
-		// /$(`#billingSubtotal`).text(formatAmount(totalAmount, true));
-        
-		///return grandTotal;
 	}
 
     // ----- PAGE CONTENT -----
@@ -1534,7 +1518,7 @@ $(document).ready(function() {
 
 		if (currentStatus == "0" && method != "approve") {
 			
-			data["employeeID"]            = sessionID;
+			data["employeeID"]            										= sessionID;
             data["projectID"]    	   											= $("[name=projectID]").val() || null;
 			data['liquidationReferenceNumber']									= $("#liquidationReferenceNumber").val();
 			data['liquidationDate']												= $("#liquidationDate").val();
@@ -1543,13 +1527,12 @@ $(document).ready(function() {
 			data['liquidationAmount']											= getNonFormattedAmount($("#liquidationAmount").text());
 			data['liquidationVatAmount']										= getNonFormattedAmount($("#liquidationVatAmount").text());
 			data['liquidationExpenses'] 										= getNonFormattedAmount($("#liquidationExpenses").text());
-			data['liquidationBudget']											= $("#liquidationBudget").val();
+			data['liquidationBudget']											= getNonFormattedAmount($("#liquidationBudget").val());
 			data['liquidationExcessOrShortage'] 								= getNonFormattedAmount($("#liquidationExcessOrShortage").text());
 			data['liquidationDispositionofExcessOrShortage'] 					= $("#liquidationDispositionofExcessOrShortage").val();
 			data["pettyCashRequestID"] 											= $(".description").attr("pettyCashID");
 			formData.append("employeeID", sessionID);
             formData.append("projectID", $("[name=projectID]").val() || null);
-			//alert(getNonFormattedAmount($("#liquidationAmount").text()));
 			formData.append("liquidationAmount", getNonFormattedAmount($("#liquidationAmount").text()));
 			formData.append("liquidationVatAmount", getNonFormattedAmount($("#liquidationVatAmount").text()));
 			formData.append("liquidationExpenses", getNonFormattedAmount($("#liquidationExpenses").text()));

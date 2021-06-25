@@ -2046,7 +2046,7 @@ $(document).ready(function() {
                     <div class="body">
                         <small class="text-small text-muted font-weight-bold">Document No.</small>
                         <h6 class="mt-0 text-danger font-weight-bold">
-							${serviceCompletionID && !isRevise ? getFormCode("SO", createdAt, serviceCompletionID) : "---"}
+							${serviceCompletionID && !isRevise ? getFormCode("SC", createdAt, serviceCompletionID) : "---"}
 						</h6>      
                     </div>
                 </div>

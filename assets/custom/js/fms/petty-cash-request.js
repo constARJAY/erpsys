@@ -482,7 +482,7 @@ $(document).ready(function() {
 				<td> 
 				${button}`;
 				if(pettyCashRequestStatus ==2 && createdBy == `${sessionID}` && pettyCashLiquidationStatus ==0){
-					html += ` <a href="${base_url}fms/liquidation?add=${pettyCashRequestID}=${pettyCashCode}=${pettyCashRequestDate}=${pettyCashRequestAmount}=${chartOfAccountID}"><button type="button" class="btn btn-default w-100 btn-add"<i class="icon-plus"></i> Create Liquidation</button></a>`;
+					html += ` <a href="${base_url}fms/liquidation?add=${pettyCashRequestID}=${pettyCashCode}=${pettyCashRequestDate}=${pettyCashRequestAmount}=${chartOfAccountID	}"><button type="button" class="btn btn-default w-100 btn-add"<i class="icon-plus"></i> Create Liquidation</button></a>`;
 				
 				}
 				html +=`</td>
@@ -1230,7 +1230,24 @@ $(document).ready(function() {
 	// 	//updateTotalAmount(isProject);
 	// })
 	// ----- END KEYUP QUANTITY OR UNITCOST -----
-
+	
+	function fileValidation(){
+		let check = 0
+		$(`[name="files"]`).each(function(i) {
+			var allowedExtensions = /(\.jpg|\.jpeg|\.png|\.pdf|\.docx)$/i;
+			var filextension = $(this).val();
+			if(!allowedExtensions.exec(filextension)){
+				$(this).addClass("is-invalid");
+				$(this).parent().find(".invalid-feedback").first().text("Invalid file extension.");
+				check++;
+			}else{
+				$(this).removeClass("is-invalid");
+				$(this).parent().find(".invalid-feedback").first().text("");
+			}	
+		})
+		$("#form_client_fund_request").find(".is-invalid").first().focus();
+	return check > 0 ? false : true;	
+	}	
 
 	// ----- SELECT FILE -----
 	$(document).on("change", "[name=files]", function(e) {
@@ -1251,6 +1268,8 @@ $(document).ready(function() {
 						text-overflow: ellipsis;">${filename}</span>
 				<span class="btnRemoveFile" style="cursor: pointer"><i class="fas fa-close"></i></span>
 			</div>`;
+			$(this).removeClass("is-invalid");
+			$(this).parent().find(".invalid-feedback").first().text("");
 			$(this).parent().find(".displayfile").first().html(html);
 		}
 	})
@@ -1584,7 +1603,7 @@ $(document).ready(function() {
 				$(`#btnSubmit, #btnRevise, #btnCancel, #btnCancelForm, .btnAddRow, .btnDeleteRow`).hide();
 			}
 			// ----- END NOT ALLOWED FOR UPDATE -----
-
+			$("#pettyCashRequestDate").data("daterangepicker").maxDate = moment();
 			return html;
 		}, 300);
 	}
@@ -1595,7 +1614,6 @@ $(document).ready(function() {
 	function pageContent(isForm = false, data = false, readOnly = false, isRevise = false, isFromCancelledDocument = false) {
 		$("#page_content").html(preloader);
 		if (!isForm) {
-			//alert("1");
 			preventRefresh(false);
 			let html = `
             <div class="tab-content">
@@ -1940,10 +1958,11 @@ $(document).ready(function() {
 		const validate      = validateForm("form_petty_cash_request");
 		let validateamount = $("[name=totalAmount]").attr("totalvalue");
 		const validatePrice = validateItemPrice();
+		const validateFile = fileValidation();
 		const validateItems = validateTableItems();
 		removeIsValid("#tableProjectRequestItems");
 		//removeIsValid("#tableCompanyRequestItems");
-			if (validate && validateamount && validateItems) {
+			if (validate && validateamount && validateItems && validateFile) {
 				const action = revise && !isFromCancelledDocument && "insert" || (id ? "update" : "insert");
 				const data   = getPettyCashRequestData(action, "submit", "1", id);
 	

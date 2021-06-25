@@ -730,7 +730,7 @@ $(document).ready(function() {
 
     // ----- CONFIRMATION -----
     const getConfirmation = method => {
-        const title = "Project Board";
+        const title = "Project Budget";
         let swalText, swalImg;
 
         switch (method) {

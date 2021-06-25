@@ -1,23 +1,12 @@
 $(document).ready(function() {
+    
+    // ----- GLOBAL VARIABLE -----
+    const allowedUpdate = isUpdateAllowed(52);
 
-	//------ MODULE FUNCTION IS ALLOWED UPDATE-----
-	
-	const allowedUpdate = isUpdateAllowed(52);
-	if(!allowedUpdate){
-		$("#page_content").find("input, select, textarea").each(function(){
-			$(this).attr("disabled",true);
-		});
-		$("#btnSubmit").hide();
+	const getNonFormattedAmount = (amount = "₱0.00") => {
+		return +amount.replaceAll(",", "").replaceAll("₱", "")?.trim();
 	}
 
-	//------ END MODULE FUNCTION IS ALLOWED UPDATE-----
-
-    // ----- MODULE APPROVER -----
-	const moduleApprover = getModuleApprover("Sign Off");
-	// ----- END MODULE APPROVER -----
-
-
-	// ---- GET EMPLOYEE DATA -----
 	const allEmployeeData = getAllEmployeeData();
 	const employeeData = (id) => {
 		if (id) {
@@ -34,154 +23,257 @@ $(document).ready(function() {
 		}
 		return "-";
 	}
-	// ---- END GET EMPLOYEE DATA -----
-
-	// ----- IS DOCUMENT REVISED -----
-	function isDocumentRevised(id = null) {
-		if (id) {
-			const revisedDocumentsID = getTableData(
-				"ims_inventory_incident_tbl", 
-				"reviseIncidentID", 
-				"reviseIncidentID IS NOT NULL AND incidentStatus != 4");
-			return revisedDocumentsID.map(item => item.reviseIncidentID).includes(id);
-		}
-		return false;
-	}
-	// ----- END IS DOCUMENT REVISED -----
+    // ----- END GLOBAL VARIABLE -----
 
 
     // ----- VIEW DOCUMENT -----
-	function viewDocument(view_id = false, readOnly = false, isRevise = false, isFromCancelledDocument = false) {
-		const loadData = (id, isRevise = false) => {
-			const tableData = getTableData("ims_inventory_incident_tbl", "", "incidentID=" + id);
-
-			if (tableData.length > 0) {
-				let {
-					employeeID,
-					incidentStatus
-				} = tableData[0];
-
-				let isReadOnly = true, isAllowed = true;
-
-				if (employeeID != sessionID) {
-					isReadOnly = true;
-					if (incidentStatus == 0 || incidentStatus == 4) {
-						isAllowed = false;
-					}
-				} else if (employeeID == sessionID) {
-					if (incidentStatus == 0) {
-						isReadOnly = false;
-					} else {
-						isReadOnly = true;
-					}
-				} else {
-					isReadOnly = readOnly;
-				}
-
-				if (isAllowed) {
-					if (isRevise && employeeID == sessionID) {
-						pageContent(true, tableData, isReadOnly, true, isFromCancelledDocument);
-						updateURL(encryptString(id), true, true);
-					} else {
-						pageContent(true, tableData, isReadOnly);
-						updateURL(encryptString(id));
-					}
-				} else {
-					pageContent();
-					updateURL();
-				}
-				
-			} else {
-				pageContent();
-				updateURL();
+    const getSignOffContent = async (signOffID) => {
+        let result = [
+			{
+				signOffID:       "1",
+				employeeID:      "1",
+				createdAt:       moment(new Date).format("MMMM DD, YYYY hh:mm:ss A"),
+				submittedAt:     moment(new Date).format("MMMM DD, YYYY hh:mm:ss A"),
+				approversID:     "1|2|3",
+				approversDate:   "",
+				approversStatus: "",
+				preparedBy:      "Arjay Diangzon",
+				clientCode:      "CLT-21-00001",
+				clientName:      "BlackCoders",
+				projectCode:     "PRJ-21-00001",
+				projectName:     "ERP System",
+				projectCategory: "Infrustructure",
+				projectPhase:    "Phase 1",
+				projectAddress:  "Pasig City",
+				signOffStatus:   "0",
+				signOffRemarks:  "",
+				signOffReason:   "",
+				signOffComment:  "",
+				deliverables: [
+					{
+						description: "test 1",
+					},
+					{
+						description: "test 2",
+					},
+					{
+						description: "test 3",
+					},
+				]
 			}
-		}
+		];
+        // $.ajax({
+        //     method:   "POST",
+        //     url:      "sign_off/getSignOffContent",
+        //     data:     { signOffID },
+        //     async:    false,
+        //     dataType: "json",
+        //     success: function(data) {
+        //         result = [data];
+        //     }
+        // })
+        return await result;
+    }
 
-		if (view_id) {
-			let id = decryptString(view_id);
-				id && isFinite(id) && loadData(id, isRevise, isFromCancelledDocument);
-		} else {
-			let url   = window.document.URL;
-			let arr   = url.split("?view_id=");
-			let isAdd = url.indexOf("?add");
-			if (arr.length > 1) {
-				let id = decryptString(arr[1]);
-					id && isFinite(id) && loadData(id);
-			} else if (isAdd != -1) {
-				arr = url.split("?add=");
-				if (arr.length > 1) {
-					let id = decryptString(arr[1]);
-						id && isFinite(id) && loadData(id, true);
-				} else {
-					pageContent(true);
-				}
-			}
-		}
-		
-	}
+    function viewDocument(view_id = false, readOnly = false) {
+        const loadData = (id) => {
+            const data = getSignOffContent(id);
+            data.then(res => {
+                if (res) {
+                    const tableData = res;
+        
+                    if (tableData.length > 0) {
+                        let {
+                            employeeID,
+                            signOffStatus
+                        } = tableData[0];
+        
+                        let isReadOnly = true, isAllowed = true;
+        
+                        if (employeeID != sessionID) {
+                            isReadOnly = true;
+                            if (signOffStatus == 0 || signOffStatus == 4) {
+                                isAllowed = false;
+                            }
+                        } else if (employeeID == sessionID) {
+                            if (signOffStatus == 0) {
+                                isReadOnly = false;
+                            } else {
+                                isReadOnly = true;
+                            }
+                        } else {
+                            isReadOnly = readOnly;
+                        }
+        
+                        if (isAllowed) {
+                            if (employeeID == sessionID) {
+                                pageContent(true, tableData, isReadOnly);
+                                updateURL(encryptString(id), true, true);
+                            } else {
+                                pageContent(true, tableData, isReadOnly);
+                                updateURL(encryptString(id));
+                            }
+                        } else {
+                            pageContent();
+                            updateURL();
+                        }
+                        
+                    } else {
+                        pageContent();
+                        updateURL();
+                    }
+                } else {
+                    showNotification("danger", "There was an error fetching the data.");
+                    pageContent();
+                    updateURL();
+                }
+            });
+        }
 
-	function updateURL(view_id = 0, isAdd = false, isRevise = false) {
-		if (view_id && !isAdd) {
-			window.history.pushState("", "", `${base_url}pms/sign_off?view_id=${view_id}`);
-		} else if (isAdd) {
-			if (view_id && isRevise) {
-				window.history.pushState("", "", `${base_url}pms/sign_off?add=${view_id}`);
-			} else {
-				window.history.pushState("", "", `${base_url}pms/sign_off?add`);
-			}
-		} else {
-			window.history.pushState("", "", `${base_url}pms/sign_off`);
-		}
-	}
-	// ----- END VIEW DOCUMENT -----
+        if (view_id) {
+            let id = view_id;
+                id && isFinite(id) && loadData(id);
+        } else {
+            let url   = window.document.URL;
+            let arr   = url.split("?view_id=");
+            let isAdd = url.indexOf("?add");
+            if (arr.length > 1) {
+                let id = decryptString(arr[1]);
+                    id && isFinite(id) && loadData(id);
+            } else if (isAdd != -1) {
+                arr = url.split("?add=");
+                if (arr.length > 1) {
+                    let id = decryptString(arr[1]);
+                        id && isFinite(id) && loadData(id);
+                } else {
+                    const isAllowed = isCreateAllowed(52);
+                    pageContent(isAllowed);
+                }
+            }
+        }
+        
+    }
+
+    function updateURL(view_id = 0, isAdd = false) { 
+        if (view_id && !isAdd) {
+            window.history.pushState("", "", `${base_url}pms/sign_off?view_id=${view_id}`);
+        } else if (isAdd) {
+            if (view_id) {
+                window.history.pushState("", "", `${base_url}pms/sign_off?view_id=${view_id}`);
+            } else {
+                window.history.pushState("", "", `${base_url}pms/sign_off?add`);
+            }
+        } else {
+            window.history.pushState("", "", `${base_url}pms/sign_off`);
+        }
+    }
+    // ----- END VIEW DOCUMENT -----
 
 
-    // GLOBAL VARIABLE - REUSABLE 
-	const dateToday = () => {
-		return moment(new Date).format("YYYY-MM-DD HH:mm:ss");
-	};
+    // ----- SIGN-OFF DATA -----
+    const getSignOffData = () => {
+        const data = [
+			{
+				signOffID: "1",
+				preparedBy: "Arjay Diangzon",
+				projectName: "ERP System",
+				projectCode: "PRJ-21-00001",
+				projectCategory: "Infrustructure",
+				clientName: "BlackCoders",
+				projectPhase: "Phase 1",
+				approversID: "1|2|3",
+				approversDate: "",
+				approversStatus: "",
+				createdAt: new Date,
+				submittedAt: new Date,
+				signOffStatus: "0",
+				signOffRemarks: ""
+			},
+			{
+				signOffID: "2",
+				preparedBy: "Mark Diangzon",
+				projectName: "ERP System 2",
+				projectCode: "PRJ-21-00002",
+				projectCategory: "Infrustructure",
+				clientName: "BlackCoders",
+				projectPhase: "Phase 2",
+				approversID: "1|2|3",
+				approversDate: "",
+				approversStatus: "",
+				createdAt: new Date,
+				submittedAt: new Date,
+				signOffStatus: "1",
+				signOffRemarks: ""
+			},
+			{
+				signOffID: "3",
+				preparedBy: "Charles Diangzon",
+				projectName: "ERP System 3",
+				projectCode: "PRJ-21-00003",
+				projectCategory: "Infrustructure",
+				clientName: "BlackCoders",
+				projectPhase: "Phase 3",
+				approversID: "1|2|3",
+				approversDate: "",
+				approversStatus: "",
+				createdAt: new Date,
+				submittedAt: new Date,
+				signOffStatus: "2",
+				signOffRemarks: ""
+			},
+			{
+				signOffID: "4",
+				preparedBy: "Wilson Diangzon",
+				projectName: "ERP System 4",
+				projectCode: "PRJ-21-00004",
+				projectCategory: "Infrustructure",
+				clientName: "BlackCoders",
+				projectPhase: "Phase 4",
+				approversID: "1|2|3",
+				approversDate: "",
+				approversStatus: "",
+				createdAt: new Date,
+				submittedAt: new Date,
+				signOffStatus: "3",
+				signOffRemarks: ""
+			},
+			{
+				signOffID: "5",
+				preparedBy: "Joseph Diangzon",
+				projectName: "ERP System 5",
+				projectCode: "PRJ-21-00005",
+				projectCategory: "Infrustructure",
+				clientName: "BlackCoders",
+				projectPhase: "Phase 5",
+				approversID: "1|2|3",
+				approversDate: "",
+				approversStatus: "",
+				createdAt: new Date,
+				submittedAt: new Date,
+				signOffStatus: "4",
+				signOffRemarks: ""
+			},
+		];
+        return data;
+    }
+    // ----- END SIGN-OFF DATA -----
 
-        // const inventoryStorageList = getTableData(
-        //     "ims_inventory_storage_tbl LEFT JOIN  ims_list_stocks_tbl USING(inventoryStorageID) LEFT JOIN ims_list_stocks_details_tbl USING(listStocksID) LEFT JOIN ims_inventory_item_tbl USING(itemID)", 
-		// 	"inventoryStorageID,inventoryStorageCode,inventoryStorageOfficeName,itemID, receivingQuantity",
-        //     "itemStatus = 1 AND inventoryStorageStatus =1");
-
-		const inventoryStorageList = getTableData(`ims_stock_in_total_tbl AS isit
-			LEFT JOIN ims_inventory_item_tbl 				AS iii 	ON isit.itemID = iii.itemID
-			LEFT JOIN ims_inventory_storage_tbl 			AS iis 	ON isit.inventoryStorageID = iis.inventoryStorageID
-			LEFT JOIN ims_stock_in_tbl 					AS isi 	ON isit.itemID = isi.itemID`, 
-			`
-			isi.barcode,
-			iis.inventoryStorageID,
-			iis.inventoryStorageCode,
-			iis.inventoryStorageOfficeName`,
-			``, // to be continued by adding the item ID
-			"");
-
-        const inventoryItemList = getTableData(
-            "ims_inventory_item_tbl LEFT JOIN ims_inventory_classification_tbl USING(classificationID)", 
-			"itemID, itemCode, itemName, unitOfMeasurementID,classificationName",
-            "itemStatus = 1");
-			
-		 const employeeList = getTableData(
-            "hris_employee_list_tbl", 
-			"CONCAT(employeeFirstname,' ',employeeMiddlename,' ',employeeLastname) as fullname,employeeID",
-            "employeeStatus = 1 OR employeeStatus = 2 OR employeeStatus = 5");
-
-	// END GLOBAL VARIABLE - REUSABLE 
-
-
-    // ----- DATATABLES -----
-	function initDataTables() {
-		if ($.fn.DataTable.isDataTable("#tableForApprroval")) {
-			$("#tableForApprroval").DataTable().destroy();
-		}
-
-		if ($.fn.DataTable.isDataTable("#tableMyForms")) {
+	
+	// ----- DATATABLES -----
+    function initDatatables() {
+        if ($.fn.DataTable.isDataTable("#tableMyForms")) {
 			$("#tableMyForms").DataTable().destroy();
 		}
 
-		var table = $("#tableForApprroval")
+        if ($.fn.DataTable.isDataTable("#tableForApprroval")) {
+			$("#tableForApprroval").DataTable().destroy();
+		}
+
+        if ($.fn.DataTable.isDataTable("#tableDeliverables")) {
+			$("#tableDeliverables").DataTable().destroy();
+		}
+
+        var table = $("#tableMyForms")
 			.css({ "min-width": "100%" })
 			.removeAttr("width")
 			.DataTable({
@@ -193,17 +285,19 @@ $(document).ready(function() {
 				columnDefs: [
 					{ targets: 0,  width: 100 },
 					{ targets: 1,  width: 150 },
-					{ targets: 2,  width: 250 },
+					{ targets: 2,  width: 150 },
 					{ targets: 3,  width: 150 },
-					{ targets: 4,  width: 180 },
-					{ targets: 5,  width: 180 },
-					{ targets: 6,  width: 180 },
-					{ targets: 7,  width: 80  },
-					{ targets: 8, width: 250 },
+					{ targets: 4,  width: 150 },
+					{ targets: 5,  width: 150 },
+					{ targets: 6,  width: 150 },
+					{ targets: 7,  width: 200 },
+					{ targets: 8,  width: 200 },
+					{ targets: 9,  width: 80  },
+					{ targets: 10, width: 200 },
 				],
 			});
 
-		var table = $("#tableMyForms")
+        var table = $("#tableForApprroval")
 			.css({ "min-width": "100%" })
 			.removeAttr("width")
 			.DataTable({
@@ -215,70 +309,63 @@ $(document).ready(function() {
 				columnDefs: [
 					{ targets: 0,  width: 100 },
 					{ targets: 1,  width: 150 },
-					{ targets: 2,  width: 250 },
+					{ targets: 2,  width: 150 },
 					{ targets: 3,  width: 150 },
-					{ targets: 4,  width: 180 },
-					{ targets: 5,  width: 180 },
-					{ targets: 6,  width: 180 },
-					{ targets: 7,  width: 80  },
-					{ targets: 8, width: 250 },
+					{ targets: 4,  width: 150 },
+					{ targets: 5,  width: 150 },
+					{ targets: 6,  width: 150 },
+					{ targets: 7,  width: 200 },
+					{ targets: 8,  width: 200 },
+					{ targets: 9,  width: 80  },
+					{ targets: 10, width: 200 },
 				],
 			});
 
-        var table = $("#tableProjectRequestItems")
+        var table = $("#tableDeliverables")
 			.css({ "min-width": "100%" })
 			.removeAttr("width")
 			.DataTable({
-				proccessing: false,
-				serverSide: false,
-				scrollX: true,
-				sorting: false,
-                searching: false,
-                paging: false,
-                ordering: false,
-                info: false,
+				proccessing:    false,
+				serverSide:     false,
+				scrollX:        true,
+                sorting:        false,
+                searching:      false,
+                paging:         false,
+                ordering:       false,
+                info:           false,
 				scrollCollapse: true,
 				columnDefs: [
-					{ targets: 0,  width: "4%"  },
-					{ targets: 1,  width: "48%" },
-					{ targets: 2,  width: "48%" },
-				
-					// { targets: 0,  width: 150 },
-					// { targets: 1,  width: 150 },
-					// { targets: 2,  width: 150  },
-					// { targets: 3,  width: 150 },
-					// { targets: 4,  width: 150 },
-					// { targets: 5,  width: 40 },
-					// { targets: 6,  width: 40 },
-					// { targets: 7,  width: 200 },
-					// { targets: 8,  width: 200 }, 
+					{ targets: 0,  width: 50     },
+					{ targets: 1,  width: "100%" }
 				],
 			});
+    }
+    // ----- END DATATABLES -----
 
-			var table = $("#tableProjectRequestItems0")
-			.css({ "min-width": "100%" })
-			.removeAttr("width")
-			.DataTable({
-				proccessing: false,
-				serverSide: false,
-                paging: false,
-                info: false,
-				scrollX: true,
-				scrollCollapse: true,
-				columnDefs: [
-					{ targets: 0,  width: "50%" },
-					{ targets: 0,  width: "50%" },
-					
-				],
-			});
+
+    // ----- HEADER BUTTON -----
+	function headerButton(isAdd = true, text = "Add") {
+		let html;
+		if (isAdd) {
+			if (isCreateAllowed(52)) {
+				html = `
+				<button type="button" class="btn btn-default btn-add" id="btnAdd"><i class="icon-plus"></i> &nbsp;${text}</button>`;
+			}
+		} else {
+			html = `
+            <button type="button" 
+				class="btn btn-default btn-light" 
+				id="btnBack"><i class="fas fa-arrow-left"></i>&nbsp;Back</button>`;
+		}
+		$("#headerButton").html(html);
 	}
-	// ----- END DATATABLES -----
-   
+	// ----- END HEADER BUTTON -----
 
-    // ----- HEADER CONTENT -----
+
+	// ----- HEADER TAB CONTENT -----
 	function headerTabContent(display = true) {
 		if (display) {
-			if (isImModuleApprover("ims_inventory_incident_tbl", "approversID")) {
+			if (isImModuleApprover("pms_sign_off_tbl", "approversID")) {
 				let html = `
                 <div class="bh_divider appendHeader"></div>
                 <div class="row clearfix appendHeader">
@@ -295,622 +382,668 @@ $(document).ready(function() {
 			$("#headerContainer").find(".appendHeader").remove();
 		}
 	}
-	// ----- END HEADER CONTENT -----
+	// ----- END HEADER TAB CONTENT -----
 
 
-    // ----- HEADER BUTTON -----
-	function headerButton(isAdd = true, text = "Add", isRevise = false, isFromCancelledDocument = false) {
-		let html;
-		if (isAdd) {
-			if(isCreateAllowed(52)){
-				html = `
-				<button type="button" class="btn btn-default btn-add" id="btnAdd"><i class="icon-plus"></i> &nbsp;${text}</button>`;
-				}
-		} else {
-			html = `
-            <button type="button" class="btn btn-default btn-light" id="btnBack" revise="${isRevise}" cancel="${isFromCancelledDocument}"><i class="fas fa-arrow-left"></i> &nbsp;Back</button>`;
-		}
-		$("#headerButton").html(html);
-	}
-	// ----- END HEADER BUTTON -----
+    // ----- FOR APPROVAL CONTENT ------
+    function forApprovalContent() {
+        const signOffData = getSignOffData();
 
+        let html = `
+        <div class="table-responsive">
+            <table class="table table-bordered table-striped table-hover js-basic-example dataTable" id="tableForApprroval">
+                <thead>
+                    <tr>
+						<th>Document No.</th>
+						<th>Prepared By</th>
+						<th>Project Name</th>
+						<th>Project Category</th>
+						<th>Client</th>
+						<th>Project Phase</th>
+						<th>Current Approver</th>
+						<th>Date Created</th>
+						<th>Date Submitted</th>
+						<th>Status</th>
+						<th>Remarks</th>
+                    </tr>
+                </thead>
+                <tbody>`;
 
-    // ----- FOR APPROVAL CONTENT -----
-	function forApprovalContent() {
-		$("#tableForApprovalParent").html(preloader);
-		let transferRequestData = getTableData(
-			"ims_inventory_incident_tbl AS mwt LEFT JOIN hris_employee_list_tbl AS helt USING(employeeID)",
-			"mwt.*, CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname, mwt.createdAt AS dateCreated",
-			`mwt.employeeID != ${sessionID} AND incidentStatus != 0 AND incidentStatus != 4`,
-			`FIELD(incidentStatus, 0, 1, 3, 2, 4, 5), COALESCE(mwt.submittedAt, mwt.createdAt)`
-		);
+        signOffData.map(signOff => {
 
-		let html = `
-        <table class="table table-bordered table-striped table-hover" id="tableForApprroval">
-            <thead>
-                <tr style="white-space: nowrap">
-					<th>Document No.</th>
-					<th>Prepared By</th>
-					<th>Description</th>
-					<th>Current Approver</th>
-					<th>Date Created</th>
-					<th>Date Submitted</th>
-					<th>Date Approved</th>
-					<th>Status</th>
-					<th>Remarks</th>
-                </tr>
-            </thead>
-            <tbody>`;
+            const { 
+				signOffID       = "1",
+				preparedBy      = "Arjay Diangzon",
+				projectName     = "ERP System",
+				projectCode     = "PRJ-21-00001",
+				projectCategory = "projectCategory",
+				clientName      = "BlackCoders",
+				projectPhase    = "Phase 1",
+				approversID     = "1|2|3",
+				approversDate   = "",
+				approversStatus = "",
+				createdAt       = new Date,
+				submittedAt     = new Date,
+				signOffStatus,
+				signOffRemarks  = ""
+            } = signOff;
 
-		transferRequestData.map((item) => {
-			let {
-				fullname,
-				incidentID,
-				projectID,
-				incidentReason,
-				approversID,
-				approversDate,
-				incidentStatus,
-				incidentRemarks,
-				submittedAt,
-				createdAt,
-			} = item;
-
-			let remarks       = incidentRemarks ? incidentRemarks : "-";
+			let remarks       = signOffRemarks ? signOffRemarks : "-";
 			let dateCreated   = moment(createdAt).format("MMMM DD, YYYY hh:mm:ss A");
 			let dateSubmitted = submittedAt ? moment(submittedAt).format("MMMM DD, YYYY hh:mm:ss A") : "-";
-			let dateApproved  = incidentStatus == 2 || incidentStatus == 5 ? approversDate.split("|") : "-";
+			let dateApproved  = signOffStatus == 2 || signOffStatus == 5 ? approversDate.split("|") : "-";
 			if (dateApproved !== "-") {
 				dateApproved = moment(dateApproved[dateApproved.length - 1]).format("MMMM DD, YYYY hh:mm:ss A");
 			}
 
-			let btnClass = incidentStatus != 0 ? "btnView" : "btnEdit";
-
-			let button = incidentStatus != 0 ? `
-			<button class="btn btn-view w-100 btnView" id="${encryptString(incidentID)}"><i class="fas fa-eye"></i> View</button>` : `
-			<button 
-				class="btn btn-edit w-100 btnEdit" 
-				id="${encryptString(incidentID)}" 
-				code="${getFormCode("SOF", createdAt, incidentID)}"><i class="fas fa-edit"></i> Edit</button>`;
-
-			if (isImCurrentApprover(approversID, approversDate, incidentStatus) || isAlreadyApproved(approversID, approversDate)) {
+			if (isImCurrentApprover(approversID, approversDate, signOffStatus) || isAlreadyApproved(approversID, approversDate)) {
 				html += `
-				<tr class="${btnClass}" id="${encryptString(incidentID)}">
-					<td>${getFormCode("SOF", createdAt, incidentID)}</td>
-					<td>${fullname}</td>
-					<td>${incidentReason}</td>
+				<tr class="btnView" id="${encryptString(signOffID)}">
+					<td>${getFormCode("SOF", createdAt, signOffID)}</td>
+					<td>${preparedBy}</td>
 					<td>
-						${employeeFullname(getCurrentApprover(approversID, approversDate, incidentStatus, true))}
+						<div>${projectName}</div>
+						<small style="color:#848482;">${projectCode}</small>
+					</td>
+					<td>${projectCategory}</td>
+					<td>${clientName}</td>
+					<td>${projectPhase}</td>
+					<td>
+						${employeeFullname(getCurrentApprover(approversID, approversDate, signOffStatus, true))}
 					</td>
 					<td>${dateCreated}</td>
 					<td>${dateSubmitted}</td>
-					<td>${dateApproved}</td>
 					<td class="text-center">
-						${getStatusStyle(incidentStatus)}
+						${getStatusStyle(signOffStatus)}
 					</td>
 					<td>${remarks}</td>
 				</tr>`;
 			}
-		});
-
-		html += `
-			</tbody>
-		</table>`;
-
-		setTimeout(() => {
-			$("#tableForApprovalParent").html(html);
-			initDataTables();
-			return html;
-		}, 300);
-	}
-	// ----- END FOR APPROVAL CONTENT -----
+        });
 
 
-    // ----- MY FORMS CONTENT -----
-	function myFormsContent() {
-		$("#tableMyFormsParent").html(preloader);
-		let materialWithdrawalData = getTableData(
-			"ims_inventory_incident_tbl AS mwt LEFT JOIN hris_employee_list_tbl AS helt USING(employeeID)",
-			"mwt.*, CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname, mwt.createdAt AS dateCreated",
-			`mwt.employeeID = ${sessionID}`,
-			`FIELD(incidentStatus, 0, 1, 3, 2, 4, 5), COALESCE(mwt.submittedAt, mwt.createdAt)`
-		);
+        html += `
+                </tbody>
+            </table>
+        </div>`;
 
-		let html = `
-        <table class="table table-bordered table-striped table-hover" id="tableMyForms">
-            <thead>
-                <tr style="white-space: nowrap">
-					<th>Document No.</th>
-					<th>Prepared By</th>
-					<th>Description</th>
-					<th>Current Approver</th>
-					<th>Date Created</th>
-					<th>Date Submitted</th>
-					<th>Date Approved</th>
-					<th>Status</th>
-					<th>Remarks</th>
-                </tr>
-            </thead>
-            <tbody>`;
+        setTimeout(() => {
+            $("#page_content").html(html);
+            initDatatables();
+        }, 500);
 
-		materialWithdrawalData.map((item) => {
-			let {
-				fullname,
-				incidentID,
-                projectID,
-				incidentReason,
-				approversID,
-				approversDate,
-				incidentStatus,
-				incidentRemarks,
-				submittedAt,
-				createdAt,
-			} = item;
+        return html;
+    }
+    // ----- END FOR APPROVAL CONTENT ------
 
-			let remarks       = incidentRemarks ? incidentRemarks : "-";
+
+    // ----- MY FORMS CONTENT ------
+    function myFormsContent() {
+        const signOffData = getSignOffData();
+
+        let html = `
+        <div class="table-responsive">
+            <table class="table table-bordered table-striped table-hover js-basic-example dataTable" id="tableMyForms">
+                <thead>
+                    <tr>
+						<th>Document No.</th>
+						<th>Prepared By</th>
+						<th>Project Name</th>
+						<th>Project Category</th>
+						<th>Client</th>
+						<th>Project Phase</th>
+						<th>Current Approver</th>
+						<th>Date Created</th>
+						<th>Date Submitted</th>
+						<th>Status</th>
+						<th>Remarks</th>
+                    </tr>
+                </thead>
+                <tbody>`;
+
+        signOffData.map(signOff => {
+
+            const { 
+				signOffID       = "1",
+				preparedBy      = "Arjay Diangzon",
+				projectName     = "ERP System",
+				projectCode     = "PRJ-21-00001",
+				projectCategory = "projectCategory",
+				clientName      = "BlackCoders",
+				projectPhase    = "Phase 1",
+				approversID     = "1|2|3",
+				approversDate   = "",
+				approversStatus = "",
+				createdAt       = new Date,
+				submittedAt     = new Date,
+				signOffStatus,
+				signOffRemarks  = ""
+            } = signOff;
+
+			let remarks       = signOffRemarks ? signOffRemarks : "-";
 			let dateCreated   = moment(createdAt).format("MMMM DD, YYYY hh:mm:ss A");
 			let dateSubmitted = submittedAt ? moment(submittedAt).format("MMMM DD, YYYY hh:mm:ss A") : "-";
-			let dateApproved  = incidentStatus == 2 || incidentStatus == 5 ? approversDate.split("|") : "-";
+			let dateApproved  = signOffStatus == 2 || signOffStatus == 5 ? approversDate.split("|") : "-";
 			if (dateApproved !== "-") {
 				dateApproved = moment(dateApproved[dateApproved.length - 1]).format("MMMM DD, YYYY hh:mm:ss A");
 			}
 
-			let btnClass = incidentStatus != 0 ? "btnView" : "btnEdit";
-
-			let button = incidentStatus != 0 ? `
-            <button class="btn btn-view w-100 btnView" id="${encryptString(incidentID)}"><i class="fas fa-eye"></i> View</button>` : `
-            <button 
-                class="btn btn-edit w-100 btnEdit" 
-                id="${encryptString(incidentID)}" 
-                code="${getFormCode("SOF", createdAt, incidentID)}"><i class="fas fa-edit"></i> Edit</button>`;
-
-			html += `
-            <tr class="${btnClass}" id="${encryptString(incidentID)}">
-                <td>${getFormCode("SOF", createdAt, incidentID)}</td>
-                <td>${fullname}</td>
-				<td>${incidentReason}</td>
+            html += `
+            <tr class="btnView" id="${encryptString(signOffID)}">
+                <td>${getFormCode("SOF", createdAt, signOffID)}</td>
+                <td>${preparedBy}</td>
                 <td>
-                    ${employeeFullname(getCurrentApprover(approversID, approversDate, incidentStatus, true))}
+                    <div>${projectName}</div>
+                    <small style="color:#848482;">${projectCode}</small>
                 </td>
-				<td>${dateCreated}</td>
-				<td>${dateSubmitted}</td>
-				<td>${dateApproved}</td>
-                <td class="text-center">
-                    ${getStatusStyle(incidentStatus)}
-                </td>
-				<td>${remarks}</td>
-            </tr>`;
-		});
-
-		html += `
-            </tbody>
-        </table>`;
-
-		setTimeout(() => {
-			$("#tableMyFormsParent").html(html);
-			initDataTables();
-			return html;
-		}, 300);
-	}
-	// ----- END MY FORMS CONTENT -----
-
-
-    // ----- FORM BUTTONS -----
-	function formButtons(data = false, isRevise = false, isFromCancelledDocument = false) {
-		let button = "";
-		if (data) {
-			let {
-				incidentID     = "",
-				incidentStatus = "",
-				employeeID            = "",
-				approversID           = "",
-				approversDate         = "",
-				createdAt             = new Date
-			} = data && data[0];
-
-			let isOngoing = approversDate ? approversDate.split("|").length > 0 ? true : false : false;
-			if (employeeID === sessionID) {
-				if (incidentStatus == 0 || isRevise) {
-					// DRAFT
-					button = `
-					<button 
-						class="btn btn-submit px-5 p-2" 
-						id="btnSubmit" 
-						incidentID="${incidentID}"
-						code="${getFormCode("SOF", createdAt, incidentID)}"
-						revise="${isRevise}" cancel="${isFromCancelledDocument}"><i class="fas fa-paper-plane"></i>
-						Submit
-					</button>`;
-
-					if (isRevise) {
-						button += `
-						<button 
-							class="btn btn-cancel px-5 p-2" 
-							id="btnCancel"
-							revise="${isRevise}" cancel="${isFromCancelledDocument}"><i class="fas fa-ban"></i> 
-							Cancel
-						</button>`;
-					} else {
-						button += `
-						<button 
-							class="btn btn-cancel px-5 p-2"
-							id="btnCancelForm" 
-							incidentID="${incidentID}"
-							code="${getFormCode("SOF", createdAt, incidentID)}"
-							revise=${isRevise}><i class="fas fa-ban"></i> 
-							Cancel
-						</button>`;
-					}
-
-					
-				} else if (incidentStatus == 1) {
-					// FOR APPROVAL
-					if (!isOngoing) {
-						button = `
-						<button 
-							class="btn btn-cancel px-5 p-2"
-							id="btnCancelForm" 
-							incidentID="${incidentID}"
-							code="${getFormCode("SOF", createdAt, incidentID)}"
-							status="${incidentStatus}"><i class="fas fa-ban"></i> 
-							Cancel
-						</button>`;
-					}
-				} else if (incidentStatus == 2) {
-					// DROP
-					button = `
-					<button type="button" 
-						class="btn btn-cancel px-5 p-2"
-						id="btnDrop" 
-						incidentID="${encryptString(incidentID)}"
-						code="${getFormCode("SOF", createdAt, incidentID)}"
-						status="${incidentStatus}"><i class="fas fa-ban"></i> 
-						Drop
-					</button>`;
-					
-				} else if (incidentStatus == 3) {
-					
-					// DENIED - FOR REVISE
-					if (!isDocumentRevised(incidentID)) {
-						button = `
-						<button
-							class="btn btn-cancel px-5 p-2"
-							id="btnRevise" 
-							incidentID="${encryptString(incidentID)}"
-							code="${getFormCode("SOF", createdAt, incidentID)}"
-							status="${incidentStatus}"><i class="fas fa-clone"></i>
-							Revise
-						</button>`;
-					}
-				} else if (incidentStatus == 4) {
-					// CANCELLED - FOR REVISE
-					if (!isDocumentRevised(incidentID)) {
-						button = `
-						<button
-							class="btn btn-cancel px-5 p-2"
-							id="btnRevise" 
-							incidentID="${encryptString(incidentID)}"
-							code="${getFormCode("SOF", createdAt, incidentID)}"
-							status="${incidentStatus}"
-							cancel="true"><i class="fas fa-clone"></i>
-							Revise
-						</button>`;
-					}
-				}
-			} else {
-				if (incidentStatus == 1) {
-					if (isImCurrentApprover(approversID, approversDate)) {
-						button = `
-						<button 
-							class="btn btn-submit px-5 p-2" 
-							id="btnApprove" 
-							incidentID="${encryptString(incidentID)}"
-							code="${getFormCode("SOF", createdAt, incidentID)}"><i class="fas fa-paper-plane"></i>
-							Approve
-						</button>
-						<button 
-							class="btn btn-cancel px-5 p-2"
-							id="btnReject" 
-							incidentID="${encryptString(incidentID)}"
-							code="${getFormCode("SOF", createdAt, incidentID)}"><i class="fas fa-ban"></i> 
-							Deny
-						</button>`;
-					}
-				}
-			}
-		} else {
-			button = `
-			<button 
-				class="btn btn-submit px-5 p-2" 
-				id="btnSubmit"><i class="fas fa-paper-plane"></i> Submit
-			</button>
-			<button 
-				class="btn btn-cancel px-5 p-2" 
-				id="btnCancel"><i class="fas fa-ban"></i> 
-				Cancel
-			</button>`;
-		}
-		return button;
-	}
-	// ----- END FORM BUTTONS -----
-
-
-    // ----- GET PROJECT LIST -----
-    function getEmployeeList(id = null, display = true) {
-		let html ='';
-        html += employeeList.map(employee => {
-			let fullname = `${employee.fullname}`;
-			let employeeid = `${employee.employeeID}`;
-
-            return `
-            <option 
-                value       = "${employee.employeeID}" 
-                ${employee.employeeID == id && "selected"}>
-                ${employee.fullname}
-            </option>`;
-        })
-        return display ? html : employeeList;
-    }
-    // ----- END GET PROJECT LIST -----
-
-
-    // ----- GET INVENTORY ITEM -----
-    function getInventoryItem(id = null, isProject = true, display = true) {
-        let html   = `<option selected disabled>Select Item Name</option>`;
-		const attr = isProject ? "[project=true]" : "";
-
-		let itemIDArr = []; // 0 IS THE DEFAULT VALUE
-		$(`[name=itemID]${attr}`).each(function(i, obj) {
-			itemIDArr.push($(this).val());
-		}) 
-
-		let itemList = [...inventoryItemList];
-
-		html += itemList.filter(item => !itemIDArr.includes(item.itemID) || item.itemID == id).map(item => {
-            return `
-            <option 
-                value        = "${item.itemID}" 
-                itemCode     = "${item.itemCode}"
-          
-                uom          = "${item.unitOfMeasurementID}"
-                classificationName          = "${item.classificationName}"
-                ${item.itemID == id && "selected"}>
-                ${item.itemName}
-            </option>`;
-        })
-		
-        return display ? html : inventoryItemList;
-    }
-    // ----- END GET INVENTORY ITEM -----
-
-    // ----- UPDATE STORAGE NAME -----
-	function updateInventoryStorageOptions() {
-		let projectItemIDArr = []; // 0 IS THE DEFAULT VALUE
-		let projectElementID = [];
-     
-		$("[name=inventoryStorageID][project=true]").each(function(i, obj) {
-			projectItemIDArr.push($(this).val());
-			projectElementID.push(`#${this.id}[project=true]`);
-			$(this).val() && $(this).trigger("change");
-		}) 
-
-		projectElementID.map((element, index) => {
-			let html = `<option selected disabled>Select Storage Name</option>`;
-			let itemList = [...inventoryStorageList];
-			html += itemList.map(item => {
-				return `
-                <option 
-                value        = "${item.inventoryStorageID}" 
-                storageCode     = "${item.inventoryStorageCode}"
-                liststocks = "${item.receivingQuantity}"
-                ${item.inventoryStorageID == projectItemIDArr[index] && "selected"}>
-                ${item.inventoryStorageOfficeName}
-            </option>`;
-                
-			})
-			$(element).html(html);
-		});
-	}
-	// ----- END UPDATE STORAGE NAME -----
-
-
-    // ----- GET STORAGE -----
-    function getStorage(id = null, isProject = true, display = true, barcodeval = null) {
-       
-       
-		const attr = isProject ? "[project=true]" : "";
-
-        let itemIDArr = []; // 0 IS THE DEFAULT VALUE
-		$(`[name=inventoryStorageID]${attr}`).each(function(i, obj) {
-            itemIDArr.push($(this).val());
-		}) 
-
-
-		let storageList = [ ...inventoryStorageList];
-		let html   = `<option selected disabled>Select Storage Name</option>`;
-		html += storageList.map(item => {
-                
-            if( barcodeval == null || barcodeval == "" ){
-                return `
-                <option 
-                    value        = "${item.inventoryStorageID}" 
-                    storageCode     = "${item.inventoryStorageCode}">
-                    ${item.inventoryStorageOfficeName}
-                </option>`;
-            }else{
-                if(item.barcode === barcodeval ){
-                    return `
-                    <option 
-                        value        = "${item.inventoryStorageID}" 
-                        storageCode     = "${item.inventoryStorageCode}"
-                        ${item.inventoryStorageID == id && "selected"}>
-                        ${item.inventoryStorageOfficeName}
-                    </option>`;
-                }
-            }
-               
-            
-        })
-		
-        return display ? html : inventoryStorageList;
-    }
-    // ----- END GET STORAGE -----
-
-
-	// ----- GET ITEM ROW -----
-    function getItemRow(isProject = true, item = {}, readOnly = false) {
-		const attr = isProject ? `project="true"` : ``;
-		let {
-			
-            inventoryStorageID          = null,
-			itemCode                    = "",
-			itemName                    = "",
-			barcode      				= "",
-			classificationName          = "",
-            inventoryStorageOfficeCode  = "",
-			inventoryStorageOfficeName  = "",
-			itemID                      = null,
-			quantity                    = 1,
-			unitOfMeasurement: uom      = "",
-			incidentInformation         = "",
-			incidentRecommendation      = ""
-
-		} = item;
-
-      
-		let html = "";
-		if (readOnly) {
-		
-			html += `
-			<tr class="itemTableRow">
-				<td>
-					<div class="barcode">
-						${barcode || "-"}
-					</div>
+                <td>${projectCategory}</td>
+                <td>${clientName}</td>
+                <td>${projectPhase}</td>
+                <td>
+					${employeeFullname(getCurrentApprover(approversID, approversDate, signOffStatus, true))}
 				</td>
-				<td>
-					<div class="barcode">
-						${barcode || "-"}
-					</div>
-				</td>
-			</tr>`;
-		} else {
-		
-			html += `
-			<tr class="itemTableRow">
+                <td>${dateCreated}</td>
+                <td>${dateSubmitted}</td>
 				<td class="text-center">
-					<div class="action">
-						<input type="checkbox" class="checkboxrow">
-					</div>
+					${getStatusStyle(signOffStatus)}
 				</td>
-				
-				<td>
-					<div class="incidentrecommendation">
-						<textarea 
-							data-allowcharacters="[0-9][a-z][A-Z][.][,][?][!][/][;][:][']["][-][_][(][)][%][&][*][]"
-							minlength="2"
-							maxlength="250"
-							rows="2" 
-							style="resize: none" 
-							class="form-control validate" 
-							name="incidentRecommendation" 
-							id="incidentRecommendation"
-							required>${incidentRecommendation || ""}</textarea>
-							<div class="invalid-feedback d-block" id="invalid-incidentRecommendation"></div>
-					</div>
-				</td>
+				<td>${remarks}</td>
+            </tr>`
+        });
 
-				<td>
-					<div class="incidentrecommendation">
-						<textarea 
-							data-allowcharacters="[0-9][a-z][A-Z][.][,][?][!][/][;][:][']["][-][_][(][)][%][&][*][]"
-							minlength="2"
-							maxlength="250"
-							rows="2" 
-							style="resize: none" 
-							class="form-control validate" 
-							name="incidentRecommendation" 
-							id="incidentRecommendation"
-							>${incidentRecommendation || ""}</textarea>
-							<div class="invalid-feedback d-block" id="invalid-incidentRecommendation"></div>
-					</div>
-				</td>
-			</tr>`;
-		}
+
+        html += `
+                </tbody>
+            </table>
+        </div>`;
+
+        setTimeout(() => {
+            $("#page_content").html(html);
+            initDatatables();
+        }, 500);
 
         return html;
     }
-    // ----- END GET ITEM ROW -----
+    // ----- END MY FORMS CONTENT ------
 
 
-	// ----- UPDATE TABLE ITEMS -----
-	function updateTableItems() {
-		$(".itemProjectTableBody tr").each(function(i) {
-			// ROW ID
-			$(this).attr("id", `tableRow${i}`);
-			$(this).attr("index", `${i}`);
+	// ----- GET CLIENT -----
+	function getClientOptions(rClientID = 0, clientName = "", status = 0) {
+		let html = '';
+		if (status == "2") {
+			html = `<option selected>${clientName}</option>`;
+		} else {
+			html = `<option selected disabled>Select Client Name</option>`;
 
-			// CHECKBOX
-			$("td .action .checkboxrow", this).attr("id", `checkboxrow${i}`);
-			$("td .action .checkboxrow", this).attr("project", `true`);
+			let clientList = getTableData(`pms_client_tbl`, `*`, `clientStatus = 1`);
+			clientList.map(client => {
+				let address = `${client.clientUnitNumber && titleCase(client.clientUnitNumber)+", "}${client.clientHouseNumber && client.clientHouseNumber +", "}${client.clientBarangay && titleCase(client.clientBarangay)+", "}${client.clientCity && titleCase(client.clientCity)+", "}${client.clientProvince && titleCase(client.clientProvince)+", "}${client.clientCountry && titleCase(client.clientCountry)+", "}${client.clientPostalCode && titleCase(client.clientPostalCode)}`;
 
-			// BARCODE
-			$("td .barcode [name=barcode]", this).attr("id", `barcode${i}`);
-			$("td .barcode [name=barcode]", this).attr("project", `true`);
+				const {
+					clientID,
+					clientCode,
+					clientName
+				} = client;
 
-			// ITEMCODE
-			$("td .itemcode", this).attr("id", `itemcode${i}`);
-
-			// ITEMNAME
-			$("td .itemname", this).attr("id", `itemname${i}`);
-
-            // CLASSIFICATION
-			$("td .classificationname", this).attr("id", `classificationname${i}`);
-
-            // STORAGECODE
-			$("td .storagecode", this).attr("id", `storagecode${i}`);
-
-			// STORAGENAME
-			$("td .storagename", this).attr("id", `storagename${i}`);
-
-			// QUANTITY
-			$("td .quantity [name=quantity]", this).attr("id", `quantity${i}`);
-			$("td .quantity [name=quantity]", this).attr("project", `true`);
-
-			// UOM
-			$("td .uom", this).attr("id", `uom${i}`);
-
-            // INCIDENT INFORMATION
-			$("td .incidentinformation [name=incidentinformation]", this).attr("id", `incidentinformation${i}`);
-			// $("td .incidentinformation", this).attr("id", `incidentinformation${i}`);
-
-			  // INCIDENT RECOMMENDATION
-			  $("td .incidentrecommendation [name=incidentrecommendation]", this).attr("id", `incidentrecommendation${i}`);
-			//   $("td .incidentrecommendation", this).attr("id", `incidentrecommendation${i}`);
-		})
+				html += `
+				<option value="${clientID}"
+					clientCode="${clientCode}"
+					clientName="${clientName}"
+					clientAddress="${address}"
+					${clientID == rClientID ? "selected" : ""}>${clientName}</option>`;
+			})
+		}
+		return html;
 	}
-	// ----- END UPDATE TABLE ITEMS -----
+	// ----- END GET CLIENT -----
 
 
-	// ----- UPDATE DELETE BUTTON -----
-	function updateDeleteButton() {
-		let projectCount = 0, companyCount = 0;
-		$(".checkboxrow[project=true]").each(function() {
-			this.checked && projectCount++;
-		})
-		$(".btnDeleteRow[project=true]").attr("disabled", projectCount == 0);
-		$(".checkboxrow[company=true]").each(function() {
-			this.checked && companyCount++;
-		})
-		$(".btnDeleteRow[company=true]").attr("disabled", companyCount == 0);
+	// ----- GET PROJECT OPTIONS -----
+	function getProjectOptions(rClientID = 0, rTimelineBuilderID = 0, projectName = "", status = "0") {
+		let html = '';
+		if (status == "2") {
+			html = `<option selected>${projectName}</option>`;
+		} else {
+			html = `<option selected disabled>Select Project Name</option>`;
+			
+			let projectList = getTableData(
+				`pms_timeline_builder_tbl AS ptbt
+					LEFT JOIN pms_project_list_tbl AS pplt ON ptbt.projectID = pplt.projectListID
+					LEFT JOIN pms_category_tbl AS pct ON pplt.categoryID = pct.categoryID`, 
+				`ptbt.timelineBuilderID,
+				ptbt.clientID,
+				ptbt.projectID, 
+				ptbt.projectCode,
+				pplt.projectListName AS projectName,
+				pct.categoryName AS projectCategory`, 
+				`ptbt.clientID = ${rClientID} AND ptbt.timelineBuilderStatus = 2`);
+			projectList.map(project => {
+			
+				const {
+					timelineBuilderID,
+					clientID,
+					projectID,
+					projectCode,
+					projectName,
+					projectCategory,
+				} = project;
+
+				html += `
+				<option value="${timelineBuilderID}"
+					projectID="${projectID}"
+					projectCode="${projectCode}"
+					projectName="${projectName}"
+					projectCategory="${projectCategory}"
+					${timelineBuilderID == rTimelineBuilderID ? "selected" : ""}>${projectName}</option>`;
+			})
+		}
+		return html;
 	}
-	// ----- END UPDATE DELETE BUTTON -----
+	// ----- END GET PROJECT OPTIONS -----
+
+
+	// ----- GET PROJECT PHASE -----
+	function getProjectPhase(rTimelineBuilderID = 0, rMilestoneBuilderID = 0, projectPhase = "", status = "0") {
+		let html = '';
+		if (status == "2") {
+			html = `<option selected>${projectPhase}</option>`;
+		} else {
+			html = `<option selected disabled>Select Project Phase</option>`;
+			
+			let phaseList = getTableData(
+				`pms_timeline_task_list_tbl AS pttlt
+					LEFT JOIN pms_milestone_builder_tbl AS pmbt USING (milestoneBuilderID)`,
+				`pttlt.milestoneBuilderID,
+				pmbt.phaseCode,
+				pmbt.phaseDescription`,
+				`pttlt.timelineBuilderID = ${rTimelineBuilderID}
+				GROUP BY pttlt.milestoneBuilderID`
+			)
+			phaseList.map(phase => {
+			
+				const {
+					milestoneBuilderID,
+					phaseCode,
+					phaseDescription
+				} = phase;
+
+				html += `
+				<option value="${milestoneBuilderID}"
+					phaseCode="${phaseCode}"
+					phaseDescription="${phaseDescription}"
+					${milestoneBuilderID == rMilestoneBuilderID ? "selected" : ""}>${phaseDescription}</option>`;
+			})
+		}
+		return html;
+	}
+	// ----- END GET PROJECT PHASE -----
+
+
+    // ----- FORM CONTENT -----
+    function formContent(data = false, readOnly = false) {
+        $("#page_content").html(preloader);
+        readOnly ? preventRefresh(false) : preventRefresh(true);
+
+        const {
+            signOffID,
+			employeeID = sessionID,
+			createdAt,
+			submittedAt,
+			approversID,
+			approversDate,
+			approversStatus,
+			preparedBy,
+			clientID,
+			clientCode,
+			clientName,
+			clientAddress = "",
+			timelineBuilderID,
+			milestoneBuilderID,
+			projectID = "",
+			projectCode,
+			projectName,
+			projectCategory,
+			projectPhase,
+			projectAddress,
+			signOffStatus,
+			signOffRemarks,
+			signOffReason,
+			signOffComment,
+			deliverables = false
+        } = data && data[0];
+
+		// ----- GET EMPLOYEE DATA -----
+		let {
+			fullname:    employeeFullname    = "",
+			department:  employeeDepartment  = "",
+			designation: employeeDesignation = "",
+		} = employeeData(employeeID);
+		// ----- END GET EMPLOYEE DATA -----
+
+        $("#btnBack").attr("status", signOffStatus);
+
+        const disabled = readOnly ? "disabled" : "";
+        const buttonDisplay = !disabled ? `
+        <button class="btn btn-submit px-5 p-2" 
+            id="btnSubmit"
+            signOffID="${signOffID}">
+            <i class="fas fa-paper-plane"></i> Submit
+        </button>
+        <button class="btn btn-cancel px-5 p-2" 
+            id="btnCancel"
+            status="${signOffStatus}">
+            <i class="fas fa-ban"></i> Cancel
+        </button>` : "";
+
+        let html = `
+        <div class="">
+            <div class="row px-2">
+                <div class="col-lg-2 col-md-6 col-sm-12 px-1">
+                    <div class="card">
+                        <div class="body">
+                            <small class="text-small text-muted font-weight-bold">Document No.</small>
+                            <h6 class="mt-0 text-danger font-weight-bold">
+                                ${signOffID ? getFormCode("SOF", createdAt, signOffID) : "---"}
+                            </h6>      
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-2 col-md-6 col-sm-12 px-1">
+                    <div class="card">
+                        <div class="body">
+                            <small class="text-small text-muted font-weight-bold">Budget Status</small>
+                            <h6 class="mt-0 font-weight-bold">
+                                ${signOffStatus ? getStatusStyle(signOffStatus) : "---"}
+                            </h6>      
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-8 col-md-12 col-sm-12 px-1">
+                    <div class="row m-0">
+                        <div class="col-lg-4 col-md-4 col-sm-12 px-1">
+                            <div class="card">
+                                <div class="body">
+                                    <small class="text-small text-muted font-weight-bold">Date Created</small>
+                                    <h6 class="mt-0 font-weight-bold">
+                                        ${createdAt || "---"}
+                                    </h6>      
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 col-md-4 col-sm-12 px-1">
+                            <div class="card">
+                                <div class="body">
+                                    <small class="text-small text-muted font-weight-bold">Date Submitted</small>
+                                    <h6 class="mt-0 font-weight-bold">
+                                        ${submittedAt || "---"}
+                                    </h6>      
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 col-md-4 col-sm-12 px-1">
+                            <div class="card">
+                                <div class="body">
+                                    <small class="text-small text-muted font-weight-bold">Date Approved</small>
+                                    <h6 class="mt-0 font-weight-bold">
+                                        ${getDateApproved(signOffStatus, approversID, approversDate)}
+                                    </h6>      
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-12 px-1">
+                    <div class="card">
+                        <div class="body">
+                            <small class="text-small text-muted font-weight-bold">Remarks</small>
+                            <h6 class="mt-0 font-weight-bold">
+                                ${signOffRemarks || "---"}
+                            </h6>      
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-4 col-sm-12">
+                    <div class="form-group">
+                        <label>Prepared By</label>
+                        <input type="text" class="form-control" disabled value="${employeeFullname}">
+                    </div>
+                </div>
+                <div class="col-md-4 col-sm-12">
+                    <div class="form-group">
+                        <label>Department</label>
+                        <input type="text" class="form-control" disabled value="${employeeDepartment}">
+                    </div>
+                </div>
+                <div class="col-md-4 col-sm-12">
+                    <div class="form-group">
+                        <label>Position</label>
+                        <input type="text" class="form-control" disabled value="${employeeDesignation}">
+                    </div>
+                </div>
+                <div class="col-md-12 col-sm-12">
+                    <div class="form-group">
+                        <label>Description ${!disabled ? "<code>*</code>" : ""}</label>
+                        <textarea rows="4" 
+                            class="form-control validate"
+                            data-allowcharacters="[0-9][a-z][A-Z][.][,][?][!][/][;][:]['][''][-][_][(][)][%][&][*][ ]"
+                            minlength="2"
+                            maxlength="325"
+                            style="resize: none" 
+                            name="signOffReason" 
+                            id="signOffReason"
+							required
+                            ${disabled}>${signOffReason || ""}</textarea>
+                        <div class="invalid-feedback d-block"></div>
+                    </div>
+                </div>
+				<div class="col-md-4 col-sm-12">
+                    <div class="form-group">
+                        <label>Client Name ${!disabled ? "<code>*</code>" : ""}</label>
+                        <select class="form-control validate select2"
+							name="clientName"
+							id="clientName"
+							required
+							${disabled}>
+							${getClientOptions(clientID, clientName, signOffStatus)}	
+						</select>
+						<div class="invalid-feedback d-block"></div>
+                    </div>
+                </div>
+                <div class="col-md-8 col-sm-12">
+                    <div class="form-group">
+                        <label>Address</label>
+                        <input type="text" 
+							class="form-control"  
+							name="clientAddress"
+							value="${clientAddress}"
+							disabled>
+                    </div>
+                </div>
+                <div class="col-md-4 col-sm-12">
+                    <div class="form-group">
+                        <label>Project Code</label>
+                        <input type="text" 
+							class="form-control" 
+							name="projectCode" 
+							value="${projectCode}"
+							disabled>  
+                    </div>
+                </div>
+                <div class="col-md-4 col-sm-12">
+                    <div class="form-group">
+                        <label>Project Name ${!disabled ? "<code>*</code>" : ""}</label>
+                        <select class="form-control validate select2"
+							name="projectName"
+							id="projectName"
+							required
+							${disabled}>
+							${getProjectOptions(clientID, timelineBuilderID, projectName, signOffStatus)}	
+						</select>
+						<div class="invalid-feedback d-block"></div>
+                    </div>
+                </div>
+                <div class="col-md-4 col-sm-12">
+                    <div class="form-group">
+                        <label>Project Category</label>
+                        <input type="text" 
+							class="form-control" 
+							name="projectCategory"
+							value="${projectCategory}"
+							disabled>
+                    </div>
+                </div>
+                <div class="col-md-12 col-sm-12">
+                    <div class="form-group">
+                        <label>Project Phase ${!disabled ? "<code>*</code>" : ""}</label>
+                        <select class="form-control validate select2"
+							name="projectPhase"
+							id="projectPhase"
+							required
+							${disabled}>
+							${getProjectPhase(timelineBuilderID, milestoneBuilderID, projectPhase, signOffStatus)}
+						</select>
+						<div class="invalid-feedback d-block"></div>
+                    </div>
+                </div>
+                
+				<div class="col-sm-12">
+					<div class="w-100">
+						<table class="table table-striped" id="tableDeliverables">
+							<thead>
+								<tr style="white-space: nowrap">
+									<th class="text-center">
+										<div class="action">
+											<input type="checkbox" class="checkboxall">
+										</div>
+									</th>
+									<th>Deliverables <code>*</code></th>
+								</tr>
+							</thead>
+							<tbody class="deliverablesTableBody">
+								${getDeliverableRow(deliverables, readOnly)}
+							</tbody>
+						</table>
+
+
+						<div class="w-100 d-flex justify-content-between align-items-center py-2">
+							<div>
+								<div class="w-100 text-left my-2">
+									<button class="btn btn-primary btnAddRow" id="btnAddRow"><i class="fas fa-plus-circle"></i> Add Row</button>
+									<button class="btn btn-danger btnDeleteRow" id="btnDeleteRow" disabled><i class="fas fa-minus-circle"></i> Delete Row/s</button>
+								</div>
+							</div>
+							<div class="font-weight-bolder" style="font-size: 1rem;"></div>
+						</div>
+					</div>
+				</div>
+                
+            </div>
+
+            <div class="col-md-12 text-right mt-3 mb-3">
+                ${buttonDisplay}
+            </div>
+        </div>`;
+
+        setTimeout(() => {
+            $("#page_content").html(html);
+            initDatatables();
+            initAll();
+
+            // ----- NOT ALLOWED FOR UPDATE -----
+			if (!allowedUpdate) {
+				$("#page_content").find(`input, select, textarea`).each(function() {
+					if (this.type != "search") {
+						$(this).attr("disabled", true);
+					}
+				})
+				$('#btnBack').attr("status", "2");
+				$(`#btnSubmit, #btnRevise, #btnCancel, #btnCancelForm, .btnAddRow, .btnDeleteRow`).hide();
+			}
+			// ----- END NOT ALLOWED FOR UPDATE -----
+
+        }, 500);
+    }
+    // ----- END FORM CONTENT -----
+
+
+	// ----- SELECT CLIENT NAME -----
+	$(document).on("change", `[name="clientName"]`, function() {
+		const clientID      = $(this).val();
+		const clientCode    = $(`option:selected`, this).attr("clientCode");
+		const clientName    = $(`option:selected`, this).attr("clientName");
+		const clientAddress = $(`option:selected`, this).attr("clientAddress");
+
+		$(`[name="clientAddress"]`).val(clientAddress);
+		$(`[name="projectName"]`).html(getProjectOptions(clientID));
+		supplyProjectDetails();
+		$(`[name="projectPhase"]`).html(getProjectPhase());
+	})
+	// ----- END SELECT CLIENT NAME -----
+
+
+	// ----- SELECT PROJECT NAME -----
+	function supplyProjectDetails(projectCode = "-", projectCategory = "-") {
+		$(`[name="projectCode"]`).val(projectCode);
+		$(`[name="projectCategory"]`).val(projectCategory);
+	}
+
+	$(document).on("change", `[name="projectName"]`, function() {
+		const timelineBuilderID = $(this).val();
+		const projectCode       = $(`option:selected`, this).attr("projectCode");
+		const projectName       = $(`option:selected`, this).attr("projectName");
+		const projectCategory   = $(`option:selected`, this).attr("projectCategory");
+
+		supplyProjectDetails(projectCode, projectCategory);
+		$(`[name="projectPhase"]`).html(getProjectPhase(timelineBuilderID));
+	})
+	// ----- END SELECT PROJECT NAME -----
+    
+
+    // ----- PAGE CONTENT -----
+    function pageContent(isForm = false, data = false, readOnly = false) {
+        if ($(`#page_content .loader`).text().length == 0) {
+            $("#page_content").html(preloader);
+        }
+        if (!isForm) {
+            preventRefresh(false);
+            headerButton(true, "Add Sign-Off");
+			headerTabContent();
+            myFormsContent();
+            updateURL();
+        } else {
+            headerButton(false, "");
+			headerTabContent(false);
+            formContent(data, readOnly);
+        }
+    }
+    viewDocument();
+	$("#page_content").text().trim().length == 0 && pageContent(); // CHECK IF THERE IS ALREADY LOADED ONE
+    // ----- END PAGE CONTENT -----
+
+
+    // ----- CLICK TIMELINE ROW -----
+    $(document).on("click", ".btnView", function() {
+        $("#page_content").html(preloader);
+        const signOffID = decryptString($(this).attr("id"));
+        viewDocument(signOffID);
+    })
+    // ----- END CLICK TIMELINE ROW -----
+
+
+	// ----- CLICK ADD BUTTON -----
+	$(document).on("click", "#btnAdd", function () {
+		pageContent(true);
+		updateURL(null, true);
+	});
+	// ----- END CLICK ADD BUTTON -----
 
 
 	// ----- DELETE TABLE ROW -----
-	function deleteTableRow(isProject = true) {
-		const attr = isProject ? "[project=true]" : "[company=true]";
-		if ($(`.checkboxrow${attr}:checked`).length != $(`.checkboxrow${attr}`).length) {
+	function deleteTableRow() {
+		if ($(`.checkboxrow:checked`).length != $(`.checkboxrow`).length) {
 			Swal.fire({
 				title:              "DELETE ROWS",
 				text:               "Are you sure to delete these rows?",
@@ -925,19 +1058,10 @@ $(document).ready(function() {
 				confirmButtonText:  "Yes"
 			}).then((result) => {
 				if (result.isConfirmed) {
-					$(`.checkboxrow${attr}:checked`).each(function(i, obj) {
+					$(`.checkboxrow:checked`).each(function(i, obj) {
 						var tableRow = $(this).closest('tr');
 						tableRow.fadeOut(500, function (){
 							$(this).closest("tr").remove();
-							updateTableItems();
-							$(`[name=barcode]${attr}`).each(function(i, obj) {
-								let barcode = $(this).val();
-								$(this).html(getInventoryItem(barcode, isProject));
-							}) 
-                            // $(this).find(`[name=inventoryStorageID]${attr}`).each(function(i, obj) {
-							// 	let inventoryStorageID = $(this).val();
-							// 	$(this).html(getStorage(inventoryStorageID,isProject,true,""));
-							// }) 
 							updateDeleteButton();
 						});
 					})
@@ -951,293 +1075,9 @@ $(document).ready(function() {
 	// ----- END DELETE TABLE ROW -----
 
 
-	// ----- SELECT PROJECT LIST -----
-    $(document).on("change", "[name=projectID]", function() {
-        const projectCode = $('option:selected', this).attr("projectCode");
-        const clientCode  = $('option:selected', this).attr("clientCode");
-        const clientName  = $('option:selected', this).attr("clientName");
-        const address     = $('option:selected', this).attr("address");
-
-        $("[name=projectCode]").val(projectCode);
-        $("[name=clientCode]").val(clientCode);
-        $("[name=clientName]").val(clientName);
-        $("[name=clientAddress]").val(address);
-    })
-    // ----- END SELECT PROJECT LIST -----
-
-
-    // // ----- SELECT ITEM NAME -----
-    // $(document).on("change", "[name=itemID]", function() {
-    //     const itemID     = $('option:selected', this).val();
-    //     const itemCode     = $('option:selected', this).attr("itemCode");
-    //     const categoryName = $('option:selected', this).attr("categoryName");
-    //     const uom          = $('option:selected', this).attr("uom");
-    //     const classificationName          = $('option:selected', this).attr("classificationname");
-	// 	const isProject    = $(this).closest("tbody").attr("project") == "true";
-	// 	const attr         = isProject ? "[project=true]" : "[company=true]";
-
-    //     $(this).closest("tr").find(`.itemcode`).first().text(itemCode);
-    //     $(this).closest("tr").find(`.category`).first().text(categoryName);
-    //     $(this).closest("tr").find(`.uom`).first().text(uom);
-    //     $(this).closest("tr").find(`.classificationname`).first().text(classificationName);
-
-    //     // Storage Field
-    //     $(this).closest("tr").find(`[name=quantity]`).first().val(1);
-    //     $(this).closest("tr").find(`.storagecode`).first().text('-');
-    //     $(this).closest("tr").find(`.liststocks`).first().text('-');
-
-	// 	$(`[name=itemID]${attr}`).each(function(i, obj) {
-	// 		let itemID = $(this).val();
-	// 		$(this).html(getInventoryItem(itemID, isProject));
-	// 	}) 
-
-    //     $(this).closest("tr").find(`[name=inventoryStorageID]${attr}`).each(function(i, obj) {
-	// 		let inventoryStorageID = $(this).val();
-	// 		$(this).html(getStorage(inventoryStorageID,isProject,true,itemID));
-	// 		$(this).prop("disabled",false);
-	// 	}) 
-	
-    // })
-    // // ----- END SELECT ITEM NAME -----
-
-     // ----- SELECT STORAGE NAME -----
-     $(document).on("change", "[name=inventoryStorageID]", function() {
-        const itemID     = $('option:selected', this).val();
-        const storagecode     = $('option:selected', this).attr("storagecode");
-        const liststocks = $('option:selected', this).attr("liststocks");
-		const isProject    = $(this).closest("tbody").attr("project") == "true";
-		const attr         = isProject ? "[project=true]" : "[company=true]";
-
-        $(this).closest("tr").find(`.storagecode`).first().text(storagecode);
-        // $(this).closest("tr").find(`.liststocks`).first().text(liststocks);
-
-        // $(`[name=inventoryStorageID]${attr}`).each(function(i, obj) {
-		// 	let inventoryStorageID = $(this).val();
-		// 	$(this).html(getStorage(inventoryStorageID, isProject));
-		// }) 
-	
-    })
-    // ----- END SELECT STORAGE NAME -----
-
-	// ----- BARCODE -----
-	var barcodeArray =[];
-	var barcodeLocationArray =[];
-    $(document).on("keyup change", "[name=barcode]", function() {
-		
-		const barcodeval   = $(this).val(); 
-		const barcodeID   = $(this).attr("id"); 
-		const StorageIDSender  = $("[name=inventoryStorageIDSender]").val();
-		const isProject    = $(this).closest("tbody").attr("project") == "true";
-		const attr         = isProject ? "[project=true]" : "[company=true]";
-
-		const data = getTableData
-			(`ims_stock_in_total_tbl AS isit
-			LEFT JOIN ims_inventory_item_tbl 					AS iii 	ON isit.itemID = iii.itemID
-			LEFT JOIN ims_inventory_classification_tbl AS iict ON iict.classificationID = iii.classificationID
-			LEFT JOIN ims_inventory_storage_tbl 				AS iis 	ON isit.inventoryStorageID = iis.inventoryStorageID
-			LEFT JOIN ims_stock_in_tbl 							AS isi  ON isit.itemID = isi.itemID AND isit.inventoryStorageID = isi.stockInLocationID
-			LEFT JOIN ims_inventory_receiving_details_tbl 		AS iird ON iird.inventoryReceivingID = isi.inventoryReceivingID AND iird.itemID = isi.itemID
-			LEFT JOIN ims_inventory_receiving_tbl 				AS iir 	ON iir.inventoryReceivingID = iird.inventoryReceivingID AND iir.inventoryReceivingStatus = 2 
-			LEFT JOIN ims_request_items_tbl 					AS iri 	ON iri.requestItemID  = iird.requestItemID`, 
-			`isit.itemID,
-			iii.createdAt as itemdate,
-			iis.createdAt as storagedate,
-			isit.itemName,
-			iri.itemUom,
-			iii.itemDescription,
-			isit.inventoryStorageID,
-			iis.inventoryStorageCode,
-			iis.inventoryStorageOfficeName,
-			isi.barcode,
-			isi.stockInSerialNumber,
-			iict.classificationName`,
-			 `isi.barcode = '${barcodeval}'`, ``,`isit.itemID`); 
-
-			if(data.length !=0){
-				data.map((item) => {
-					let {
-						itemID ,
-						itemName,
-						itemUom,
-						itemdate,
-						storagedate,
-						classificationName,
-						inventoryStorageOfficeName,
-						inventoryStorageID
-					} = item;
-
-					let item_ID       					= itemID ? itemID : "";
-					let item_Name       				= itemName ? itemName : "";
-					let item_Uom       					= itemUom ? itemUom : "";
-					let classification_Name 			= classificationName? classificationName :"";
-					let item_date       				= itemdate ? itemdate : "";
-					let storage_date       				= storagedate ? storagedate : "";
-					let inventory_Storage_Office_Name   = inventoryStorageOfficeName ? inventoryStorageOfficeName : "";
-					let inventory_Storage_ID       		= inventoryStorageID ? inventoryStorageID : "";
-
-			
-					let	barcodeArrayLength = barcodeArray.length || 0;
-					if(barcodeval.length  ==17){
-
-						
-						if(itemName != null){
-
-							
-							let counter =1;
-							if(barcodeArrayLength !=0){
-								for(var loop1 =0;loop1<barcodeArrayLength; loop1++ ){
-									
-
-									if(barcodeArray[loop1] == barcodeval && barcodeLocationArray[loop1] != barcodeID){
-									
-										$(this).closest("tr").find("[name=barcode]").removeClass("is-valid").addClass("is-invalid");
-										$(this).closest("tr").find("#invalid-barcode").removeClass("is-valid").addClass("is-invalid");
-										$(this).closest("tr").find("#invalid-barcode").text('Barcode '+barcodeval+' already declared!');
-										return false;
-									}else{
-
-										// if(counter == barcodeArrayLength){
-											barcodeArray[barcodeArrayLength] = barcodeval;
-											barcodeLocationArray[barcodeArrayLength] = barcodeID;
-										// }
-										
-									}
-									// counter++;
-								}
-							}else{
-								barcodeArray[0] = barcodeval;
-								barcodeLocationArray[0] = barcodeID;
-							}
-
-							$(this).closest("tr").find(`.itemcode`).first().text(getFormCode("ITM",item_date,item_ID));
-							$(this).closest("tr").find(`[name=barcode]`).first().attr('itemid',item_ID);
-							$(this).closest("tr").find(`[name=barcode]`).first().attr('storageid',inventory_Storage_ID);
-							$(this).closest("tr").find(`.itemname`).first().text(item_Name);
-							$(this).closest("tr").find(`.uom`).first().text(item_Uom);
-							$(this).closest("tr").find(`.classificationname`).first().text(classification_Name);
-							$(this).closest("tr").find(`.storagecode`).first().text(getFormCode("ISM",storage_date,inventory_Storage_ID));
-							$(this).closest("tr").find(`.storagename`).first().text(inventory_Storage_Office_Name);
-						
-
-							// Storage Field
-							
-							// let url   = window.document.URL;
-							// let arr   = url.split("?view_id=");
-							// let isAdd = url.indexOf("?add");
-
-							// if(isAdd != -1){
-							// 	arr = url.split("?add=");
-							// 	if (arr.length > 1) {
-							// 		$(this).closest("tr").find(`[name=quantity]`).first().val(0);
-							// 		$(this).closest("tr").find(`.storagecode`).first().text('-');
-							// 	} 
-							// }
-							
-
-
-							// $(this).closest("tr").find(`[name=inventoryStorageID]${attr}`).each(function(i, obj) {
-							// 	let inventoryStorageID = $(this).val();
-							// 	$(this).html(getStorage(inventoryStorageID,isProject,true,barcodeval));
-							// 	$(this).prop("disabled",false);
-							// }) 
-			
-							$(this).closest("tr").find("[name=barcode]").removeClass("is-invalid");
-							$(this).closest("tr").find("#invalid-barcode").removeClass("is-invalid");
-							$(this).closest("tr").find("#invalid-barcode").text('');
-			
-						}else{
-							$(this).closest("tr").find("[name=barcode]").removeClass("is-valid").addClass("is-invalid");
-							$(this).closest("tr").find("#invalid-barcode").removeClass("is-valid").addClass("is-invalid");
-							$(this).closest("tr").find("#invalid-barcode").text('No Item Available!');
-						}
-
-					}else{
-						$(this).closest("tr").find("[name=barcode]").removeClass("is-valid").addClass("is-invalid");
-						$(this).closest("tr").find("#invalid-barcode").removeClass("is-valid").addClass("is-invalid");
-						$(this).closest("tr").find("#invalid-barcode").text('Please Input exact 17 Characters!');
-					}
-				})
-			}
-			else if(data.length == 0){
-				$(this).closest("tr").find(`.itemcode`).first().text("-");
-					$(this).closest("tr").find(`[name=barcode]`).first().attr('itemid',"-");
-					$(this).closest("tr").find(`.itemname`).first().text("-");
-					$(this).closest("tr").find(`.uom`).first().text("-");
-					$(this).closest("tr").find(`.classificationname`).first().text("-");
-					$(this).closest("tr").find(`[name=quantity]`).first().val(0);
-					$(this).closest("tr").find(`.storagecode`).first().text('-');
-					$(this).closest("tr").find(`[name=inventoryStorageID]`)
-
-					$(this).closest("tr").find("[name=barcode]").removeClass("is-valid").addClass("is-invalid");
-					$(this).closest("tr").find("#invalid-barcode").removeClass("is-valid").addClass("is-invalid");
-					$(this).closest("tr").find("#invalid-barcode").text('No Item Available!');
-			}else{
-					$(this).closest("tr").find("[name=barcode]").removeClass("is-invalid");
-					$(this).closest("tr").find("#invalid-barcode").removeClass("is-invalid");
-					$(this).closest("tr").find("#invalid-barcode").text('');
-			}
-
-    })
-    // ----- END BARCODE -----
-	
-
-	// ----- KEYUP QUANTITY OR UNITCOST -----
-	$(document).on("change", "[name=quantity]", function() {
-        const index     		= $(this).closest("tr").first().attr("index");
-		const isProject 		= $(this).closest("tbody").attr("project") == "true";
-		const attr      		= isProject ? "[project=true]" : "";
-		const quantity  		= parseInt($(`#quantity${index}${attr}`).val().replaceAll(",","")) || 0;
-        const barcodeval  	= $(this).closest("tr").find('[name=barcode]').val();
-		
-		const data = getTableData
-				 (`ims_stock_in_total_tbl AS isit
-				 LEFT JOIN ims_inventory_item_tbl 		AS iii 	ON isit.itemID = iii.itemID
-				 LEFT JOIN ims_inventory_storage_tbl 	AS iis 	ON isit.inventoryStorageID = iis.inventoryStorageID
-				 LEFT JOIN ims_stock_in_tbl AS isi 				ON isit.itemID = isi.itemID AND isit.inventoryStorageID = isi.stockInLocationID`, 
-				 `isit.quantity as stocks`, `isi.barcode = '${barcodeval}'`, ``,`isi.itemID`);
-
-			if(data.length >0){
-
-				data.map((item) => {
-					let {
-					stocks
-					} = item;
-		
-					
-					let receiving_Quantity  = parseInt(stocks) || 0 ? stocks : "0";
-		
-				
-						if(barcodeval !="" ){
-							if(receiving_Quantity >= quantity){
-								$(`#quantity${index}${attr}`).removeClass("is-invalid").addClass("is-valid");
-								$(this).closest("tr").find("#invalid-quantity").removeClass("is-invalid").addClass("is-valid");
-								$(this).closest("tr").find("#invalid-quantity").text('');
-								removeIsValid("#tableProjectRequestItems");
-							}else{
-								$(`#quantity${index}${attr}`).removeClass("is-valid").addClass("is-invalid");
-								$(this).closest("tr").find("#invalid-quantity").removeClass("is-valid").addClass("is-invalid");
-								$(this).closest("tr").find("#invalid-quantity").text('Too much quantity!');
-							}
-						}else{
-								$(`#quantity${index}${attr}`).removeClass("is-valid").addClass("is-invalid");
-								$(this).closest("tr").find("#invalid-quantity").removeClass("is-valid").addClass("is-invalid");
-								$(this).closest("tr").find("#invalid-quantity").text('Too much quantity or no stocks available!');
-						}
-		
-					})
-			}else{
-				$(`#quantity${index}${attr}`).removeClass("is-valid").addClass("is-invalid");
-				$(this).closest("tr").find("#invalid-quantity").removeClass("is-valid").addClass("is-invalid");
-				$(this).closest("tr").find("#invalid-quantity").text('no item selected');
-			}
-	})
-	// ----- END KEYUP QUANTITY OR UNITCOST -----
-
-
 	// ----- CLICK DELETE ROW -----
 	$(document).on("click", ".btnDeleteRow", function(){
-		const isProject = $(this).attr("project") == "true";
-		deleteTableRow(isProject);
+		deleteTableRow();
 	})
 	// ----- END CLICK DELETE ROW -----
 
@@ -1252,1074 +1092,269 @@ $(document).ready(function() {
 	// ----- CHECK ALL -----
 	$(document).on("change", ".checkboxall", function() {
 		const isChecked = $(this).prop("checked");
-		const isProject = $(this).attr("project") == "true";
-		if (isProject) {
-			$(".checkboxrow[project=true]").each(function(i, obj) {
-				$(this).prop("checked", isChecked);
-			});
-		} 
+		$(".checkboxrow").each(function(i, obj) {
+			$(this).prop("checked", isChecked);
+		});
 		updateDeleteButton();
 	})
 	// ----- END CHECK ALL -----
 
 
-    // ----- INSERT ROW ITEM -----
-    $(document).on("click", ".btnAddRow", function() {
-		let isProject = $(this).attr("project") == "true";
-        let row = getItemRow(isProject);
-		if (isProject) {
-			$(".itemProjectTableBody").append(row);
+	// ----- UPDATE DELETE BUTTON -----
+	function updateDeleteButton() {
+		let count = 0;
+		$(".checkboxrow").each(function() {
+			this.checked && count++;
+		})
+		$(".btnDeleteRow").attr("disabled", count == 0);
+	}
+	// ----- END UPDATE DELETE BUTTON -----
+
+
+	// ----- UPDATE TABLE ITEMS -----
+	function updateTableItems() {
+		$(`[name="deliverableDescription"]`).each(function(i) {
+			$parent = $(this).closest(".form-group");
+			$(this).attr("id", `deliverableDescription${i}`);
+			$parent.find(".invalid-feedback").attr("id", `invalid-deliverableDescription${i}`);
+		})
+	}
+	// ----- END UPDATE TABLE ITEMS -----
+
+
+	// ----- INSERT ROW ITEM -----
+	function getDeliverableRow(deliverables = false, readOnly = false) {
+		let html = "";
+		let disabled = readOnly ? "disabled" : "";
+		if (deliverables) {
+
 		} else {
-			$(".itemCompanyTableBody").append(row);
+			html = `
+			<tr>
+				<td class="text-center">
+					<div class="action">
+						<input type="checkbox" class="checkboxrow">
+					</div>
+				</td>
+				<td>
+					<div class="form-group mb-0">
+						<input type="text"
+							class="form-control validate"
+							name="deliverableDescription"
+							data-allowcharacters="[a-z][A-Z][0-9][.][,][?][!][/][;][:]['][''][-][_][(][)][%][&][*][ ]"
+							minlength="2"
+							maxlength="325"
+							required
+							${disabled}>
+						<div class="d-block invalid-feedback"></div>
+					</div>
+				</td>
+			</tr>`;
 		}
+		return html;
+	}
+
+    $(document).on("click", ".btnAddRow", function() {
+        let row = getDeliverableRow();
+		$(".deliverablesTableBody").append(row);
 		updateTableItems();
-		initInputmask();
-		initAmount();
-		initQuantity();
     })
     // ----- END INSERT ROW ITEM -----
 
 
-	// ----- UPDATE TOTAL AMOUNT -----
-	function updateTotalAmount(isProject = true) {
-		const attr        = isProject ? "[project=true]" : "[company=true]";
-		const quantityArr = $.find(`[name=quantity]${attr}`).map(element => element.value || "0");
-		const unitCostArr = $.find(`#unitcost ${attr}`).map(element => element.value.replaceAll(",", "") || "0");
-		const totalAmount = quantityArr.map((qty, index) => +qty * +unitCostArr[index]).reduce((a,b) => a + b, 0);
-		$(`#totalAmount${attr}`).text(formatAmount(totalAmount, true));
-		return totalAmount;
-	}
-	// ----- END UPDATE TOTAL AMOUNT -----
-
-
-    // ----- FORM CONTENT -----
-	function formContent(data = false, readOnly = false, isRevise = false, isFromCancelledDocument = false) {
-		
-		$("#page_content").html(preloader);
-		readOnly = isRevise ? false : readOnly;
-
-		let {
-			incidentID       = "",
-			reviseIncidentID = "",
-			employeeID              = "",
-			projectID 		= "",
-			approversID             = "",
-			approversStatus         = "",
-			approversDate           = "",
-			incidentActionPlan           = "",
-			incidentEmployeeID    = "",
-			incidentTargetCompletion    = "",
-			incidentReason	="",
-			incidentStatus   = false,
-			incidentRemarks   = false,
-			submittedAt             = false,
-			createdAt               = false,
-		} = data && data[0];
-
-		let requestProjectItems = "";
-		if (incidentID) {
-			let requestItemsData = getTableData(
-				`ims_inventory_incident_details_tbl as imwd 
-				LEFT JOIN ims_inventory_item_tbl as iiit USING(itemID) 
-				LEFT JOIN ims_inventory_storage_tbl as iist ON imwd.inventoryStorageID =iist.inventoryStorageID
-                LEFT JOIN ims_inventory_classification_tbl USING(classificationID)`, 
-				`imwd.barcode,
-				 imwd.quantity,
-				 imwd.itemID,
-				 imwd.itemCode,
-				 imwd.itemName,
-				 imwd.unitOfMeasurement,
-				 imwd.inventoryStorageID,
-				 imwd.inventoryStorageOfficeCode,
-				 imwd.inventoryStorageOfficeName,
-				 imwd.quantity,
-				 imwd.incidentInformation,
-				 imwd.incidentRecommendation,
-				 imwd.classificationName`, 
-				`incidentID= ${incidentID} GROUP BY incidentDetailsID  ASC`);
-			requestItemsData.map(item => {
-				requestProjectItems += getItemRow(true, item, readOnly);
-			})
-			// requestProjectItems += getItemRow(true);
-		} else {
-			requestProjectItems += getItemRow(true);
-		}
-
-		// ----- GET EMPLOYEE DATA -----
-		let {
-			fullname:    employeeFullname    = "",
-			department:  employeeDepartment  = "",
-			designation: employeeDesignation = "",
-		} = employeeData(data ? employeeID : sessionID);
-		// ----- END GET EMPLOYEE DATA -----
-
-		readOnly ? preventRefresh(false) : preventRefresh(true);
-
-		$("#btnBack").attr("incidentID", incidentID);
-		$("#btnBack").attr("status", incidentStatus);
-		$("#btnBack").attr("employeeID", employeeID);
-		$("#btnBack").attr("cancel", isFromCancelledDocument);
-
-		let disabled = readOnly ? "disabled" : "";
-		let checkboxProjectHeader = !disabled ? `
-		<th class="text-center">
-			<div class="action">
-				<input type="checkbox" class="checkboxall" project="true">
-			</div>
-		</th>` : ``;
-	
-		let tableProjectRequestItemsName = !disabled ? "tableProjectRequestItems" : "tableProjectRequestItems0";
-	
-		let buttonProjectAddDeleteRow = !disabled ? `
-		<div class="w-100 text-left my-2">
-			<button class="btn btn-primary btnAddRow" id="btnAddRow" project="true"><i class="fas fa-plus-circle"></i> Add Row</button>
-			<button class="btn btn-danger btnDeleteRow" id="btnDeleteRow" project="true" disabled><i class="fas fa-minus-circle"></i> Delete Row/s</button>
-		</div>` : "";
-	
-		let button = formButtons(data, isRevise, isFromCancelledDocument);
-
-		let reviseDocumentNo    = isRevise ? incidentID: reviseIncidentID;
-		let documentHeaderClass = isRevise || reviseIncidentID ? "col-lg-4 col-md-4 col-sm-12 px-1" : "col-lg-2 col-md-6 col-sm-12 px-1";
-		let documentDateClass   = isRevise || reviseIncidentID ? "col-md-12 col-sm-12 px-0" : "col-lg-8 col-md-12 col-sm-12 px-1";
-		let documentReviseNo    = isRevise || reviseIncidentID ?
-		 `
-		<div class="col-lg-4 col-md-4 col-sm-12 px-1">
-			<div class="card">
-				<div class="body">
-					<small class="text-small text-muted font-weight-bold">Revised Document No.</small>
-					<h6 class="mt-0 text-danger font-weight-bold">
-						${getFormCode("SOF", createdAt, reviseDocumentNo)}
-					</h6>      
-				</div>
-			</div>
-		</div>` : "";
-
-		let html = `
-        <div class="row px-2">
-			${documentReviseNo}
-            <div class="${documentHeaderClass}">
-                <div class="card">
-                    <div class="body">
-                        <small class="text-small text-muted font-weight-bold">Document No.</small>
-                        <h6 class="mt-0 text-danger font-weight-bold">
-							${incidentID && !isRevise ? getFormCode("SOF", createdAt, incidentID) : "---"}
-						</h6>      
-                    </div>
-                </div>
-            </div>
-            <div class="${documentHeaderClass}">
-                <div class="card">
-                    <div class="body">
-                        <small class="text-small text-muted font-weight-bold">Status</small>
-                        <h6 class="mt-0 font-weight-bold">
-							${incidentStatus && !isRevise ? getStatusStyle(incidentStatus) : "---"}
-						</h6>      
-                    </div>
-                </div>
-            </div>
-            <div class="${documentDateClass}">
-                <div class="row m-0">
-                <div class="col-lg-4 col-md-4 col-sm-12 px-1">
-                    <div class="card">
-                        <div class="body">
-                            <small class="text-small text-muted font-weight-bold">Date Created</small>
-                            <h6 class="mt-0 font-weight-bold">
-								${createdAt && !isRevise ? moment(createdAt).format("MMMM DD, YYYY hh:mm:ss A") : "---"}
-                            </h6>      
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-4 col-md-4 col-sm-12 px-1">
-                    <div class="card">
-                        <div class="body">
-                            <small class="text-small text-muted font-weight-bold">Date Submitted</small>
-                            <h6 class="mt-0 font-weight-bold">
-								${submittedAt && !isRevise ? moment(submittedAt).format("MMMM DD, YYYY hh:mm:ss A") : "---"}
-							</h6>      
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-4 col-md-4 col-sm-12 px-1">
-                    <div class="card">
-                        <div class="body">
-                            <small class="text-small text-muted font-weight-bold">Date Approved</small>
-                            <h6 class="mt-0 font-weight-bold">
-								${getDateApproved(incidentStatus, approversID, approversDate)}
-							</h6>      
-                        </div>
-                    </div>
-                </div>
-                </div>
-            </div>
-            <div class="col-sm-12 px-1">
-                <div class="card">
-                    <div class="body">
-                        <small class="text-small text-muted font-weight-bold">Remarks</small>
-                        <h6 class="mt-0 font-weight-bold">
-							${incidentRemarks && !isRevise ? incidentRemarks : "---"}
-						</h6>      
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="row" id="form_purchase_request">
-
-            <div class="col-md-4 col-sm-12">
-                <div class="form-group">
-                    <label>Prepared By</label>
-                    <input type="text" class="form-control" disabled value="${employeeFullname}">
-                </div>
-            </div>
-            <div class="col-md-4 col-sm-12">
-                <div class="form-group">
-                    <label>Department</label>
-                    <input type="text" class="form-control" disabled value="${employeeDepartment}">
-                </div>
-            </div>
-            <div class="col-md-4 col-sm-12">
-                <div class="form-group">
-                    <label>Position</label>
-                    <input type="text" class="form-control" disabled value="${employeeDesignation}">
-                </div>
-            </div>
-			<div class="col-md-12 col-sm-12">
-			<div class="form-group">
-				<label>Description ${!disabled ? "<code>*</code>" : ""}</label>
-				<textarea class="form-control validate"
-					data-allowcharacters="[a-z][A-Z][0-9][ ][.][,][-][()]['][/][&]"
-					minlength="1"
-					maxlength="200"
-					id="incidentReason"
-					name="incidentReason"
-					required
-					rows="4"
-					style="resize:none;"
-					${disabled}>${incidentReason ?? ""}</textarea>
-				<div class="d-block invalid-feedback" id="invalid-incidentReason"></div>
-			</div>
-		</div>
-		<div class="col-md-12 col-sm-12"><hr class="pb-1"></div>
-		<div class="col-md-4 col-sm-12">
-			<div class="form-group">
-				<label>Client Name <code>*</code></label>
-				<select class="form-control select2 validate"
-					name="clientName"
-					id="clientName"
-					required>
-					<option selected disabled>Select Client Name</option>
-				</select>
-				<div class="invalid-feedback d-block" id="invalid-clientName"></div>
-			</div>
-		</div>
-		<div class="col-md-4 col-sm-12">
-			<div class="form-group">
-				<label>Project Code <code>*</code></label>
-					<input type="text" class="form-control" disabled value="">
-			</div>
-		</div>
-		<div class="col-md-4 col-sm-12">
-			<div class="form-group">
-				<label>Project Name</label>
-				<select class="form-control select2 validate"
-					name="projectName"
-					id="input_projectName"
-					required>
-					<option selected disabled>Select Project Name</option>
-				</select>
-				<div class="invalid-feedback d-block" id="invalid-projectName"></div>
-			</div>
-		</div>
-		<div class="col-md-6 col-sm-12">
-			<div class="form-group">
-				<label>Project Phase</label>
-				<input type="text" class="form-control" disabled value="">  
-			</div>
-		</div>
-		<div class="col-md-6 col-sm-12">
-			<div class="form-group">
-				<label>Address</label>
-				<input type="text" class="form-control" disabled value="">
-			</div>
-		</div>
-
-            <div class="col-sm-12">
-                <div class="w-100">
-					<hr class="pb-1">
-					<div class="text-primary font-weight-bold" style="font-size: 1.5rem;">Sign Off Materials and Equipment</div>
-                    <table class="table table-striped" id="${tableProjectRequestItemsName}">
-                        <thead>
-                            <tr>
-								${checkboxProjectHeader}
-								<th>Deliverables ${!disabled ? "<code>*</code>" : ""}</th>
-								<th>Notes/Comments from the user ${!disabled ? "<code>*</code>" : ""}</th>
-                            </tr>
-                        </thead>
-                        <tbody class="itemProjectTableBody" project="true">
-                            ${requestProjectItems}
-                        </tbody>
-                    </table>
-					<div class="w-100 d-flex justify-content-between align-items-center py-2">
-						<div>${buttonProjectAddDeleteRow}</div>
-						<div>
-						${button}
-						</div>
-					</div>
-                </div>
-            </div>
-        </div>
-		<div class="approvers">
-			${!isRevise  ? getApproversStatus(approversID, approversStatus, approversDate) : ""}
-		</div>`;
-	
-		setTimeout(() => {
-			$("#page_content").html(html);
-			initDataTables();
-			updateTableItems();
-			initAll();
-			initQuantity(".input-quantity");
-			// updateInventoryItemOptions();
-			updateInventoryStorageOptions();
-			// projectID && projectID != 0 && $("[name=projectID]").trigger("change");
-			// incidentID && incidentID != 0 &&  $("[name=itemID]").trigger("change");
-			// incidentID && incidentID != 0 &&  $("[name=barcode]").trigger("change");
-			// !incidentID && incidentID == 0 && $("#incidentTargetCompletion").val(moment(new Date).format("MMMM DD, YYYY"));
-			// $("#incidentTargetCompletion").data("daterangepicker").minDate = moment();
-			return html;
-		}, 300);
-	}
-	// ----- END FORM CONTENT -----
-
-
-    // ----- PAGE CONTENT -----
-	function pageContent(isForm = false, data = false, readOnly = false, isRevise = false, isFromCancelledDocument = false) {
-		$("#page_content").html(preloader);
-		if (!isForm) {
-			preventRefresh(false);
-			let html = `
-            <div class="tab-content">
-                <div role="tabpanel" class="tab-pane" id="forApprovalTab" aria-expanded="false">
-                    <div class="table-responsive" id="tableForApprovalParent">
-                    </div>
-                </div>
-                <div role="tabpanel" class="tab-pane active" id="myFormsTab" aria-expanded="false">
-                    <div class="table-responsive" id="tableMyFormsParent">
-                    </div>
-                </div>
-            </div>`;
-			$("#page_content").html(html);
-
-			headerButton(true, "Add Sign Off");
-			headerTabContent();
-			myFormsContent();
-			updateURL();
-		} else {
-			headerButton(false, "", isRevise, isFromCancelledDocument);
-			headerTabContent(false);
-			formContent(data, readOnly, isRevise, isFromCancelledDocument);
-		}
-	}
-	viewDocument();
-	$("#page_content").text().trim().length == 0 && pageContent(); // CHECK IF THERE IS ALREADY LOADED ONE
-	// ----- END PAGE CONTENT -----
-
-
-	// ----- GET PURCHASE REQUEST DATA -----
-	function getPurchaseRequestData(action = "insert", method = "submit", status = "1", id = null, currentStatus = "0", isObject = false) {
-
-		/**
-		 * ----- ACTION ---------
-		 *    > insert
-		 *    > update
-		 * ----- END ACTION -----
-		 * 
-		 * ----- STATUS ---------
-		 *    0. Draft
-		 *    1. For Approval
-		 *    2. Approved
-		 *    3. Denied
-		 *    4. Cancelled
-		 * ----- END STATUS -----
-		 * 
-		 * ----- METHOD ---------
-		 *    > submit
-		 *    > save
-		 *    > deny
-		 *    > approve
-		 * ----- END METHOD -----
-		 */
-
-		let data = { items: [] }, formData = new FormData;
-		const approversID = method != "approve" && moduleApprover;
-
-		if (id) {
-			data["incidentID"] = id;
-			formData.append("incidentID", id);
-
-			if (status != "2") {
-				data["incidentStatus"] = status;
-				formData.append("incidentStatus", status);
-			}
-		}
-
-		data["action"]                = action;
-		data["method"]                = method;
-		data["updatedBy"]             = sessionID;
-
-		formData.append("action", action);
-		formData.append("method", method);
-		formData.append("updatedBy", sessionID);
-
-		if (currentStatus == "0" && method != "approve") {
-			
-			data["employeeID"]            = sessionID;
-			data["projectID"]    = $("[name=projectID]").val() || null;
-			data["incidentReason"] = $("[name=incidentReason]").val()?.trim();
-			data["incidentRemarks"] = $("[name=incidentRemarks]").val()?.trim();
-			data["incidentActionPlan"] = $("[name=incidentActionPlan]").val()?.trim();
-			data["incidentEmployeeID"] = $("[name=incidentEmployeeID]").val()?.trim();
-			data["incidentTargetCompletion"] = moment($("[name=incidentTargetCompletion]").val()?.trim()).format("YYYY-MM-DD");
-			// data["projectTotalAmount"]    = updateTotalAmount(true);
-			// data["companyTotalAmount"]    = updateTotalAmount(false);
-			
-			formData.append("employeeID", sessionID);
-			// formData.append("projectID", $("[name=projectID]").val() || null);
-			formData.append("incidentReason", $("[name=incidentReason]").val()?.trim());
-			formData.append("incidentRemarks", $("[name=incidentRemarks]").val()?.trim());
-			formData.append("incidentActionPlan", $("[name=incidentActionPlan]").val()?.trim());
-			formData.append("incidentEmployeeID", $("[name=incidentEmployeeID]").val()?.trim());
-			formData.append("incidentTargetCompletion", moment($("[name=incidentTargetCompletion]").val()?.trim()).format("YYYY-MM-DD"));
-
-			if (action == "insert") {
-				data["createdBy"]   = sessionID;
-				data["createdAt"]   = dateToday();
-
-				formData.append("createdBy", sessionID);
-				formData.append("createdAt", dateToday());
-			} else if (action == "update") {
-				data["incidentID"] = id;
-
-				formData.append("incidentID", id);
-			}
-
-			if (method == "submit") {
-				data["submittedAt"] = dateToday();
-				formData.append("submittedAt", dateToday());
-				if (approversID) {
-					data["approversID"]           = approversID;
-					data["incidentStatus"] = 1;
-
-					formData.append("approversID", approversID);
-					formData.append("incidentStatus", 1);
-				} else {  // AUTO APPROVED - IF NO APPROVERS
-					data["approversID"]           = sessionID;
-					data["approversStatus"]       = 2;
-					data["approversDate"]         = dateToday();
-					data["incidentStatus"] = 2;
-
-					formData.append("approversID", sessionID);
-					formData.append("approversStatus", 2);
-					formData.append("approversDate", dateToday());
-					formData.append("incidentStatus", 2);
-				}
-			}
-
-			$(".itemTableRow").each(function(i, obj) {
-				const categoryType = $(this).closest("tbody").attr("project") == "true" ? "project" : "";
-
-				const barcode  = $("td [name=barcode]", this).val();
-				const itemCode    = $("td .itemcode", this).text().trim();	
-				const itemID    = $("td [name=barcode]", this).attr("itemid");	
-				const itemName    = $("td [name=itemname]", this).text().trim();		
-				const classificationname    = $("td [name=classificationname]", this).text().trim();		
-				const quantity  = +$("td [name=quantity]", this).val().replaceAll(",","");	
-				const uom  = $("td [name=uom]", this).text().trim();
-				const inventoryStorageID  = $("td [name=barcode]", this).attr("storageid");
-				const storagecode  = $("td .storagecode", this).text().trim();	
-				const storageName  = $("td .storagename", this).text().trim();		
-				const incidentInformation  = $("td [name=incidentInformation]", this).val()?.trim();	 
-				const incidentRecommendation  = $("td [name=incidentRecommendation]", this).val()?.trim();	
-
-				let temp = {
-					barcode,itemCode,itemID,itemName,classificationname,quantity,uom, inventoryStorageID,storagecode,storageName,incidentInformation,incidentRecommendation
-					
-				};
-
-				formData.append(`items[${i}][barcode]`, barcode);
-				formData.append(`items[${i}][itemCode]`, itemCode);
-				formData.append(`items[${i}][itemID]`, itemID);
-				formData.append(`items[${i}][itemName]`, itemName);
-				formData.append(`items[${i}][classificationname]`, classificationname);
-				formData.append(`items[${i}][quantity]`, quantity);
-				formData.append(`items[${i}][uom]`, uom);
-				formData.append(`items[${i}][inventoryStorageID]`, inventoryStorageID);
-				formData.append(`items[${i}][storagecode]`, storagecode);
-				formData.append(`items[${i}][storageName]`, storageName);
-				formData.append(`items[${i}][incidentInformation]`, incidentInformation);
-				formData.append(`items[${i}][incidentRecommendation]`, incidentRecommendation);
-				formData.append(`items[${i}][createdBy]`, sessionID);
-				formData.append(`items[${i}][updatedBy]`, sessionID);
-			
-
-				data["items"].push(temp);
-			});
-		} 
-
-		
-
-		return isObject ? data : formData;
-	}
-	// ----- END GET PURCHASE REQUEST DATA -----
-
-
-    // ----- OPEN ADD FORM -----
-	$(document).on("click", "#btnAdd", function () {
-		pageContent(true);
-		updateURL(null, true);
-		$(".title_content").text("This module is used to manage incident form details.");
-	});
-	// ----- END OPEN ADD FORM -----
-
-
-    // ----- OPEN EDIT FORM -----
-	$(document).on("click", ".btnEdit", function () {
-		const id = $(this).attr("id");
-		viewDocument(id);
-	});
-	// ----- END OPEN EDIT FORM -----
-
-
-    // ----- VIEW DOCUMENT -----
-	$(document).on("click", ".btnView", function () {
-		const id = $(this).attr("id");
-		viewDocument(id, true);
-	});
-	// ----- END VIEW DOCUMENT -----
-
-
-    // ----- VIEW DOCUMENT -----
-	$(document).on("click", "#btnRevise", function () {
-		const id = $(this).attr("incidentID");
-		viewDocument(id, false, true);
-	});
-	// ----- END VIEW DOCUMENT -----
-
-
-	// ----- SAVE CLOSE FORM -----
-	$(document).on("click", "#btnBack", function () {
-		const id         = $(this).attr("incidentID");
-		const isFromCancelledDocument = $(this).attr("cancel") == "true";
-		const revise     = $(this).attr("revise") == "true";
-		const employeeID = $(this).attr("employeeID");
-		const feedback   = $(this).attr("code") || getFormCode("SOF", dateToday(), id);
-		const status     = $(this).attr("status");
-
-		if (status != "false" && status != 0) {
-			
-			if (revise) {
-				// const action = revise && "insert" || (id && feedback ? "update" : "insert");
-				const action = revise && !isFromCancelledDocument && "insert" || (id ? "update" : "insert");
-				const data   = getPurchaseRequestData(action, "save", "0", id);
-				data.append("incidentStatus", 0);
-				// data.append("reviseIncidentID", id);
-				// data.delete("incidentID");
-
-				if (!isFromCancelledDocument) {
-					data.append("reviseIncidentID", id);
-					data.delete("incidentID");
-				} else {
-					data.append("incidentID", id);
-					data.delete("action");
-					data.append("action", "update");
-				}
-	
-				savePurchaseRequest(data, "save", null, pageContent);
-			} else {
-				$("#page_content").html(preloader);
-				pageContent();
-	
-				if (employeeID != sessionID) {
-					$("[redirect=forApprovalTab]").length > 0 && $("[redirect=forApprovalTab]").trigger("click");
-				}
-			}
-
-		} else {
-			const action = id && feedback ? "update" : "insert";
-			const data   = getPurchaseRequestData(action, "save", "0", id);
-			data.append("incidentStatus", 0);
-
-			savePurchaseRequest(data, "save", null, pageContent);
-		}
-	});
-	// ----- END SAVE CLOSE FORM -----
-
-
-    // ----- SAVE DOCUMENT -----
-	$(document).on("click", "#btnSave, #btnCancel", function () {
-
-        let condition = $("[name=quantity]").hasClass("is-invalid");
-
-		if(!condition){
-        
-            const id       = $(this).attr("incidentID");
-			const isFromCancelledDocument = $(this).attr("cancel") == "true"
-            const revise   = $(this).attr("revise") == "true";
-            const feedback = $(this).attr("code") || getFormCode("SOF", dateToday(), id);
-            const action   = revise && "insert" || (id && feedback ? "update" : "insert");
-            const data     = getPurchaseRequestData(action, "save", "0", id);
-            data.append("incidentStatus", 0);
-
-            if (revise) {
-                // data.append("reviseIncidentID", id);
-                // data.delete("incidentID");
-
-				if (!isFromCancelledDocument) {
-					data.append("reviseIncidentID", id);
-					data.delete("incidentID");
-				} else {
-					data.append("incidentID", id);
-					data.delete("action");
-					data.append("action", "update");
-				}
-            }
-
-            savePurchaseRequest(data, "save", null, pageContent);
-
-        }else{
-			$("[name=quantity]").focus();
-		}
-	});
-	// ----- END SAVE DOCUMENT -----
-
-
-	// ----- REMOVE IS-VALID IN TABLE -----
-	function removeIsValid(element = "table") {
-		$(element).find(".validated, .is-valid, .no-error").removeClass("validated")
-		.removeClass("is-valid").removeClass("no-error");
-	}
-	// ----- END REMOVE IS-VALID IN TABLE -----
-
-
-    // ----- SUBMIT DOCUMENT -----
+    // ----- CLICK BUTTON SUBMIT -----
 	$(document).on("click", "#btnSubmit", function () {
+        const signOffID = $(this).attr("signOffID");
+        const validateInputs    = validateForm("page_content");
+        if (validateInputs) {
+            saveProjectBudget("submit", signOffID, pageContent);
+        }
+    });
 
-        let condition = $("[name=quantity]").hasClass("is-invalid");
 
-		if(!condition){
+    // ----- CLICK BUTTON CANCEL OR BACK -----
+    $(document).on("click", "#btnCancel, #btnBack", function() {
+        const status = $(this).attr("status");
+        if (status == 0) {
+            saveProjectBudget("cancel", null, pageContent);
+        } else {
+            pageContent();
+        }
+    })
+    // ----- END CLICK BUTTON CANCEL OR BACK -----
 
-            const id           = $(this).attr("incidentID");
-            const revise       = $(this).attr("revise") == "true";
-            const validate     = validateForm("form_purchase_request");
-			removeIsValid("#tableProjectRequestItems");
 
-            if (validate) {
-                const action = revise && "insert" || (id ? "update" : "insert");
-                const data   = getPurchaseRequestData(action, "submit", "1", id);
+    // ----- CONFIRMATION -----
+    const getConfirmation = method => {
+        const title = "Project Budget";
+        let swalText, swalImg;
 
-                if (revise) {
-                    data.append("reviseIncidentID", id);
-                    data.delete("incidentID");
-                }
+        switch (method) {
+            case "save":
+                swalTitle = `SAVE ${title.toUpperCase()}`;
+                swalText  = "Are you sure to save this document?";
+                swalImg   = `${base_url}assets/modal/draft.svg`;
+                break;
+            case "submit":
+                swalTitle = `SUBMIT ${title.toUpperCase()}`;
+                swalText  = "Are you sure to submit this document?";
+                swalImg   = `${base_url}assets/modal/add.svg`;
+                break;
+            case "approve":
+                swalTitle = `APPROVE ${title.toUpperCase()}`;
+                swalText  = "Are you sure to approve this document?";
+                swalImg   = `${base_url}assets/modal/approve.svg`;
+                break;
+            case "deny":
+                swalTitle = `DENY ${title.toUpperCase()}`;
+                swalText  = "Are you sure to deny this document?";
+                swalImg   = `${base_url}assets/modal/reject.svg`;
+                break;
+            case "cancelform":
+                swalTitle = `CANCEL ${title.toUpperCase()}`;
+                swalText  = "Are you sure to cancel this document?";
+                swalImg   = `${base_url}assets/modal/cancel.svg`;
+                break;
+            case "drop":
+                swalTitle = `DROP ${title.toUpperCase()}`;
+                swalText  = "Are you sure to drop this document?";
+                swalImg   = `${base_url}assets/modal/drop.svg`;
+                break;
+            case "uploadcontract":
+                swalTitle = `UPLOAD CONTRACT`;
+                swalText  = "Are you sure to upload this contract?";
+                swalImg   = `${base_url}assets/modal/add.svg`;
+                break;
+            default:
+                swalTitle = `DISCARD ${title.toUpperCase()}`;
+                swalText  = "Are you sure to discard this process?";
+                swalImg   = `${base_url}assets/modal/cancel.svg`;
+                break;
+        }
+        return Swal.fire({
+            title:              swalTitle,
+            text:               swalText,
+            imageUrl:           swalImg,
+            imageWidth:         200,
+            imageHeight:        200,
+            imageAlt:           "Custom image",
+            showCancelButton:   true,
+            confirmButtonColor: "#dc3545",
+            cancelButtonColor:  "#1a1a1a",
+            cancelButtonText:   "No",
+            confirmButtonText:  "Yes"
+        })
+    }
+    // ----- END CONFIRMATION -----
 
-                let approversID = "", approversDate = "";
-                for (var i of data) {
-                    if (i[0] == "approversID")   approversID   = i[1];
-                    if (i[0] == "approversDate") approversDate = i[1];
-                }
 
-                const employeeID = getNotificationEmployeeID(approversID, approversDate, true);
-                let notificationData = false;
-                if (employeeID != sessionID) {
-                    notificationData = {
-                        moduleID:                52,
-                        notificationTitle:       "Sign Off",
-                        notificationDescription: `${employeeFullname(sessionID)} asked for your approval.`,
-                        notificationType:        2,
-                        employeeID,
+    // ----- SAVE PROJECT BUDGET -----
+    function saveProjectBudget(method = "submit", id = null, callback = null) {
+        const confirmation = getConfirmation(method);
+        confirmation.then(res => {
+            if (res.isConfirmed) {
+
+                if (method == "cancel") {
+                    callback && callback();
+                    Swal.fire({
+                        icon:              'success',
+                        title:             "Process successfully discarded!",
+                        showConfirmButton: false,
+                        timer:             2000
+                    });
+                } else {
+
+                    const data = {
+                        signOffID: id,
+                        allocatedBudget:   getNonFormattedAmount($(`[name="allocatedBudget"]`).val())
                     };
+
+                    $.ajax({
+                        method:      "POST",
+                        url:         `sign_off/saveProjectBudget`,
+                        data,
+                        cache:       false,
+                        async:       false,
+                        dataType:    "json",
+                        beforeSend: function() {
+                            $("#loader").show();
+                        },
+                        success: function(data) {
+                            let result = data.split("|");
+            
+                            let isSuccess   = result[0];
+                            let message     = result[1];
+                            let insertedID  = result[2];
+                            let dateCreated = result[3];
+    
+                            let swalTitle;
+                            if (method == "submit") {
+                                swalTitle = `Project Budget submitted successfully!`;
+                            } else if (method == "save") {
+                                swalTitle = `${getFormCode("SOF", dateCreated, insertedID)} saved successfully!`;
+                            } else if (method == "cancelform") {
+                                swalTitle = `${getFormCode("SOF", dateCreated, insertedID)} cancelled successfully!`;
+                            } else if (method == "approve") {
+                                swalTitle = `${getFormCode("SOF", dateCreated, insertedID)} approved successfully!`;
+                            } else if (method == "deny") {
+                                swalTitle = `${getFormCode("SOF", dateCreated, insertedID)} denied successfully!`;
+                            } else if (method == "drop") {
+                                swalTitle = `${getFormCode("SOF", dateCreated, insertedID)} dropped successfully!`;
+                            }
+            
+                            if (isSuccess == "true") {
+                                setTimeout(() => {
+                                    $("#loader").hide();
+                                    closeModals();
+                                    callback && callback();
+                                    Swal.fire({
+                                        icon:              "success",
+                                        title:             swalTitle,
+                                        showConfirmButton: false,
+                                        timer:             2000,
+                                    });
+                                }, 500);
+                            } else {
+                                setTimeout(() => {
+                                    $("#loader").hide();
+                                    Swal.fire({
+                                        icon:              "danger",
+                                        title:             message,
+                                        showConfirmButton: false,
+                                        timer:             2000,
+                                    });
+                                }, 500);
+                            }
+                        },
+                        error: function() {
+                            setTimeout(() => {
+                                $("#loader").hide();
+                                showNotification("danger", "System error: Please contact the system administrator for assistance!");
+                            }, 500);
+                        }
+                    }).done(function() {
+                        setTimeout(() => {
+                            $("#loader").hide();
+                        }, 500);
+                    })
                 }
-
-                savePurchaseRequest(data, "submit", notificationData, pageContent);
-                
+            } else {
+                if (res.dismiss == "cancel" && method != "submit") {
+                    if (method != "deny") {
+                        if (method != "cancelform") {
+                            // callback && callback();
+                        }
+                    } else {
+                        
+                    }
+                } else if (res.isDismissed) {
+                    if (method == "deny") {
+                        
+                    }
+                }
             }
-        }else{
-			$("[name=quantity]").focus();
-		}
-	});
-	// ----- END SUBMIT DOCUMENT -----
+        });
+    }
+    // ----- END SAVE PROJECT BUDGET -----
 
-
-    // ----- CANCEL DOCUMENT -----
-	$(document).on("click", "#btnCancelForm", function () {
-		const id     = $(this).attr("incidentID");
-		const status = $(this).attr("status");
-		const action = "update";
-		const data   = getPurchaseRequestData(action, "cancelform", "4", id, status);
-
-		savePurchaseRequest(data, "cancelform", null, pageContent);
-	});
-	// ----- END CANCEL DOCUMENT -----
-
-
-    // ----- APPROVE DOCUMENT -----
-	$(document).on("click", "#btnApprove", function () {
-		const id       = decryptString($(this).attr("incidentID"));
-		const feedback = $(this).attr("code") || getFormCode("SOF", dateToday(), id);
-		let tableData  = getTableData("ims_inventory_incident_tbl", "", "incidentID = " + id);
-
-		if (tableData) {
-			let approversID     = tableData[0].approversID;
-			let approversStatus = tableData[0].approversStatus;
-			let approversDate   = tableData[0].approversDate;
-			let employeeID      = tableData[0].employeeID;
-			let createdAt       = tableData[0].createdAt;
-
-			let data = getPurchaseRequestData("update", "approve", "2", id);
-			data.append("approversStatus", updateApproveStatus(approversStatus, 2));
-			let dateApproved = updateApproveDate(approversDate)
-			data.append("approversDate", dateApproved);
-
-			let status, notificationData;
-			if (isImLastApprover(approversID, approversDate)) {
-				status = 2;
-				notificationData = {
-					moduleID:                52,
-					tableID:                 id,
-					notificationTitle:       "Sign Off",
-					notificationDescription: `${feedback}: Your request has been approved.`,
-					notificationType:        7,
-					employeeID,
-				};
-			} else {
-				status = 1;
-				notificationData = {
-					moduleID:                52,
-					tableID:                 id,
-					notificationTitle:       "Sign Off",
-					notificationDescription: `${employeeFullname(employeeID)} asked for your approval.`,
-					notificationType:         2,
-					employeeID:               getNotificationEmployeeID(approversID, dateApproved),
-				};
-			}
-
-			data.append("incidentStatus", status);
-
-			savePurchaseRequest(data, "approve", notificationData, pageContent);
-		}
-	});
-	// ----- END APPROVE DOCUMENT -----
-
-
-    // ----- REJECT DOCUMENT -----
-	$(document).on("click", "#btnReject", function () {
-		const id       = $(this).attr("incidentID");
-		const feedback = $(this).attr("code") || getFormCode("SOF", dateToday(), id);
-
-		$("#modal_purchase_request_content").html(preloader);
-		$("#modal_purchase_request .page-title").text("DENY INVENTORY INCIDENT");
-		$("#modal_purchase_request").modal("show");
-		let html = `
-		<div class="modal-body">
-			<div class="form-group">
-				<label>Remarks <code>*</code></label>
-				<textarea class="form-control validate"
-					data-allowcharacters="[0-9][a-z][A-Z][ ][.][,][_]['][()][?][-][/]"
-					minlength="2"
-					maxlength="250"
-					id="incidentRemarks"
-					name="incidentRemarks"
-					rows="4"
-					style="resize: none"
-					required></textarea>
-				<div class="d-block invalid-feedback" id="invalid-incidentRemarks"></div>
-			</div>
-		</div>
-		<div class="modal-footer text-right">
-			<button class="btn btn-danger px-5 p-2" id="btnRejectConfirmation"
-			incidentID="${id}"
-			code="${feedback}"><i class="far fa-times-circle"></i> Deny</button>
-			<button class="btn btn-cancel px-5 p-2" data-dismiss="modal"><i class="fas fa-ban"></i> Cancel</button>
-		</div>`;
-		$("#modal_purchase_request_content").html(html);
-	});
-
-	$(document).on("click", "#btnRejectConfirmation", function () {
-		const id       = decryptString($(this).attr("incidentID"));
-		const feedback = $(this).attr("code") || getFormCode(" SOF", dateToday(), id);
-
-		const validate = validateForm("modal_purchase_request");
-		if (validate) {
-			let tableData = getTableData("ims_inventory_incident_tbl", "", "incidentID = " + id);
-			if (tableData) {
-				let approversStatus = tableData[0].approversStatus;
-				let approversDate   = tableData[0].approversDate;
-				let employeeID      = tableData[0].employeeID;
-
-				let data = new FormData;
-				data.append("action", "update");
-				data.append("method", "deny");
-				data.append("incidentID", id);
-				data.append("approversStatus", updateApproveStatus(approversStatus, 3));
-				data.append("approversDate", updateApproveDate(approversDate));
-				data.append("incidentRemarks", $("[name=incidentRemarks]").val()?.trim());
-				data.append("updatedBy", sessionID);
-
-				let notificationData = {
-					moduleID:                52,
-					tableID: 				 id,
-					notificationTitle:       "Sign Off",
-					notificationDescription: `${feedback}: Your request has been denied.`,
-					notificationType:        1,
-					employeeID,
-				};
-
-				savePurchaseRequest(data, "deny", notificationData, pageContent);
-				$("[redirect=forApprovalTab]").length > 0 && $("[redirect=forApprovalTab]").trigger("click");
-			} 
-		} 
-	});
-	// ----- END REJECT DOCUMENT -----
-
-	// ----- DROP DOCUMENT -----
-	$(document).on("click", "#btnDrop", function() {
-		const incidentID = decryptString($(this).attr("incidentID"));
-		const feedback          = $(this).attr("code") || getFormCode("TR", dateToday(), id);
-
-		const id = decryptString($(this).attr("incidentID"));
-		let data = new FormData;
-		data.append("incidentID", incidentID);
-		data.append("action", "update");
-		data.append("method", "drop");
-		data.append("updatedBy", sessionID);
-
-		savePurchaseRequest(data, "drop", null, pageContent);
-	})
-	// ----- END DROP DOCUMENT -----
-
-
-    // ----- NAV LINK -----
-	$(document).on("click", ".nav-link", function () {
-		const tab = $(this).attr("href");
-		if (tab == "#forApprovalTab") {
-			forApprovalContent();
-			$(".title_content").text("This module is used to manage the submission and approval of incident.");
-		}
-		if (tab == "#myFormsTab") {
-			myFormsContent();
-			$(".title_content").text("This module is used to manage incident form details.");
-		}
-	});
-	// ----- END NAV LINK -----
-
-
-    // ----- APPROVER STATUS -----
-	function getApproversStatus(approversID, approversStatus, approversDate) {
-		let html = "";
-		if (approversID) {
-			let idArr = approversID.split("|");
-			let statusArr = approversStatus ? approversStatus.split("|") : [];
-			let dateArr = approversDate ? approversDate.split("|") : [];
-			html += `<div class="row mt-4">`;
-	
-			idArr && idArr.map((item, index) => {
-				let date   = dateArr[index] ? moment(dateArr[index]).format("MMMM DD, YYYY hh:mm:ss A") : "";
-				let status = statusArr[index] ? statusArr[index] : "";
-				let statusBadge = "";
-				if (date && status) {
-					if (status == 2) {
-						statusBadge = `<span class="badge badge-info">Approved - ${date}</span>`;
-					} else if (status == 3) {
-						statusBadge = `<span class="badge badge-danger">Denied - ${date}</span>`;
-					}
-				}
-	
-				html += `
-				<div class="col-xl-3 col-lg-3 col-md-4 col-sm-12">
-					<div class="d-flex justify-content-start align-items-center">
-						<span class="font-weight-bold">
-							${employeeFullname(item)}
-						</span>
-						<small>&nbsp;- Level ${index + 1} Approver</small>
-					</div>
-					${statusBadge}
-				</div>`;
-			});
-			html += `</div>`;
-		}
-		return html;
-	}
-	// ----- END APPROVER STATUS --
 })
-
-
-// --------------- DATABASE RELATION ---------------
-function getConfirmation(method = "submit") {
-	const title = "Sign Off";
-	let swalText, swalImg;
-
-	$("#modal_purchase_request").text().length > 0 && $("#modal_purchase_request").modal("hide");
-
-	switch (method) {
-		case "save":
-			swalTitle = `SAVE ${title.toUpperCase()}`;
-			swalText  = "Are you sure to save this document?";
-			swalImg   = `${base_url}assets/modal/draft.svg`;
-			break;
-		case "submit":
-			swalTitle = `SUBMIT ${title.toUpperCase()}`;
-			swalText  = "Are you sure to submit this document?";
-			swalImg   = `${base_url}assets/modal/add.svg`;
-			break;
-		case "approve":
-			swalTitle = `APPROVE ${title.toUpperCase()}`;
-			swalText  = "Are you sure to approve this document?";
-			swalImg   = `${base_url}assets/modal/approve.svg`;
-			break;
-		case "deny":
-			swalTitle = `DENY ${title.toUpperCase()}`;
-			swalText  = "Are you sure to deny this document?";
-			swalImg   = `${base_url}assets/modal/reject.svg`;
-			break;
-		case "cancelform":
-			swalTitle = `CANCEL ${title.toUpperCase()}`;
-			swalText  = "Are you sure to cancel this document?";
-			swalImg   = `${base_url}assets/modal/cancel.svg`;
-			break;
-		case "drop":
-			swalTitle = `DROP ${title.toUpperCase()}`;
-			swalText  = "Are you sure to drop this document?";
-			swalImg   = `${base_url}assets/modal/drop.svg`;
-			break;
-		default:
-			swalTitle = `CANCEL ${title.toUpperCase()}`;
-			swalText  = "Are you sure that you want to cancel this process?";
-			swalImg   = `${base_url}assets/modal/cancel.svg`;
-			break;
-	}
-	return Swal.fire({
-		title:              swalTitle,
-		text:               swalText,
-		imageUrl:           swalImg,
-		imageWidth:         200,
-		imageHeight:        200,
-		imageAlt:           "Custom image",
-		showCancelButton:   true,
-		confirmButtonColor: "#dc3545",
-		cancelButtonColor:  "#1a1a1a",
-		cancelButtonText:   "No",
-		confirmButtonText:  "Yes"
-	})
-}
-
-function savePurchaseRequest(data = null, method = "submit", notificationData = null, callback = null) {
-	if (data) {
-		const confirmation = getConfirmation(method);
-		confirmation.then(res => {
-			if (res.isConfirmed) {
-				$.ajax({
-					method:      "POST",
-					url:         `inventory_incident/saveInventoryIncident`,
-					data,
-					processData: false,
-					contentType: false,
-					global:      false,
-					cache:       false,
-					async:       false,
-					dataType:    "json",
-					beforeSend: function() {
-						$("#loader").show();
-					},
-					success: function(data) {
-						let result = data.split("|");
-		
-						let isSuccess   = result[0];
-						let message     = result[1];
-						let insertedID  = result[2];
-						let dateCreated = result[3];
-
-						let swalTitle;
-						if (method == "submit") {
-							swalTitle = `${getFormCode("SOF", dateCreated, insertedID)} submitted successfully!`;
-						} else if (method == "save") {
-							swalTitle = `${getFormCode("SOF", dateCreated, insertedID)} saved successfully!`;
-						} else if (method == "cancelform") {
-							swalTitle = `${getFormCode("SOF", dateCreated, insertedID)} cancelled successfully!`;
-						} else if (method == "approve") {
-							swalTitle = `${getFormCode("SOF", dateCreated, insertedID)} approved successfully!`;
-						} else if (method == "deny") {
-							swalTitle = `${getFormCode("SOF", dateCreated, insertedID)} denied successfully!`;
-						} else if (method == "drop") {
-							swalTitle = `${getFormCode("SOF", dateCreated, insertedID)} dropped successfully!`;
-						}
-		
-						if (isSuccess == "true") {
-							setTimeout(() => {
-								$("#loader").hide();
-								closeModals();
-								Swal.fire({
-									icon:              "success",
-									title:             swalTitle,
-									showConfirmButton: false,
-									timer:             2000,
-								});
-								callback && callback();
-
-								if (method == "approve" || method == "deny") {
-									$("[redirect=forApprovalTab]").length > 0 && $("[redirect=forApprovalTab]").trigger("click")
-								}
-
-								// ----- SAVE NOTIFICATION -----
-								if (notificationData) {
-									if (Object.keys(notificationData).includes("tableID")) {
-										insertNotificationData(notificationData);
-									} else {
-										notificationData["tableID"] = insertedID;
-										insertNotificationData(notificationData);
-									}
-								}
-								// ----- END SAVE NOTIFICATION -----
-							}, 500);
-						} else {
-							setTimeout(() => {
-								$("#loader").hide();
-								Swal.fire({
-									icon:              "danger",
-									title:             message,
-									showConfirmButton: false,
-									timer:             2000,
-								});
-							}, 500);
-						}
-					},
-					error: function() {
-						setTimeout(() => {
-							$("#loader").hide();
-							showNotification("danger", "System error: Please contact the system administrator for assistance!");
-						}, 500);
-					}
-				}).done(function() {
-					setTimeout(() => {
-						$("#loader").hide();
-					}, 500);
-				})
-			} else {
-				if (res.dismiss === "cancel") {
-					if (method != "deny") {
-						callback && callback();
-					} else {
-						$("#modal_purchase_request").text().length > 0 && $("#modal_purchase_request").modal("show");
-					}
-				} else if (res.isDismissed) {
-					if (method == "deny") {
-						$("#modal_purchase_request").text().length > 0 && $("#modal_purchase_request").modal("show");
-					}
-				}
-			}
-		});
-
-		
-	}
-	return false;
-}
-
-// --------------- END DATABASE RELATION ---------------
