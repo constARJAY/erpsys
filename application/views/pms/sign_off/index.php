@@ -281,7 +281,7 @@
 
 
 <!-- ----- MODAL ----- -->
-<div id="modal_petty_cash_request" class="modal custom-modal fade" data-backdrop="static" data-keyboard="false" role="dialog">
+<div id="modal_sign_off" class="modal custom-modal fade" data-backdrop="static" data-keyboard="false" role="dialog">
     <div class="modal-dialog modal-dialog-centered modal-md" role="document">
 		<div class="modal-content">
 			<div class="modal-header bg-primary text-light">
@@ -291,7 +291,7 @@
 				</button>
 			</div>
 
-            <div id="modal_petty_cash_request_content"></div>
+            <div id="modal_sign_off_content"></div>
         </div>
 	</div>
 </div>

@@ -1,7 +1,12 @@
 $(document).ready(function() {
     
     // ----- GLOBAL VARIABLE -----
-    const allowedUpdate = isUpdateAllowed(52);
+    const allowedUpdate  = isUpdateAllowed(52);
+	const moduleApprover = getModuleApprover(52);
+
+	const dateToday = () => {
+		return moment(new Date).format("YYYY-MM-DD HH:mm:ss");
+	};
 
 	const getNonFormattedAmount = (amount = "₱0.00") => {
 		return +amount.replaceAll(",", "").replaceAll("₱", "")?.trim();
@@ -26,56 +31,37 @@ $(document).ready(function() {
     // ----- END GLOBAL VARIABLE -----
 
 
+	// ----- IS DOCUMENT REVISED -----
+	function isDocumentRevised(id = null) {
+		if (id) {
+			const revisedDocumentsID = getTableData(
+				"pms_sign_off_tbl", 
+				"reviseSignOffID", 
+				"reviseSignOffID IS NOT NULL AND signOffStatus != 4");
+			return revisedDocumentsID.map(item => item.reviseSignOffID).includes(id);
+		}
+		return false;
+	}
+	// ----- END IS DOCUMENT REVISED -----
+
+
     // ----- VIEW DOCUMENT -----
     const getSignOffContent = async (signOffID) => {
-        let result = [
-			{
-				signOffID:       "1",
-				employeeID:      "1",
-				createdAt:       moment(new Date).format("MMMM DD, YYYY hh:mm:ss A"),
-				submittedAt:     moment(new Date).format("MMMM DD, YYYY hh:mm:ss A"),
-				approversID:     "1|2|3",
-				approversDate:   "",
-				approversStatus: "",
-				preparedBy:      "Arjay Diangzon",
-				clientCode:      "CLT-21-00001",
-				clientName:      "BlackCoders",
-				projectCode:     "PRJ-21-00001",
-				projectName:     "ERP System",
-				projectCategory: "Infrustructure",
-				projectPhase:    "Phase 1",
-				projectAddress:  "Pasig City",
-				signOffStatus:   "0",
-				signOffRemarks:  "",
-				signOffReason:   "",
-				signOffComment:  "",
-				deliverables: [
-					{
-						description: "test 1",
-					},
-					{
-						description: "test 2",
-					},
-					{
-						description: "test 3",
-					},
-				]
-			}
-		];
-        // $.ajax({
-        //     method:   "POST",
-        //     url:      "sign_off/getSignOffContent",
-        //     data:     { signOffID },
-        //     async:    false,
-        //     dataType: "json",
-        //     success: function(data) {
-        //         result = [data];
-        //     }
-        // })
+		let result = [];
+        $.ajax({
+            method:   "POST",
+            url:      "sign_off/getSignOffContent",
+            data:     { signOffID },
+            async:    false,
+            dataType: "json",
+            success: function(data) {
+                result = data;
+            }
+        })
         return await result;
     }
 
-    function viewDocument(view_id = false, readOnly = false) {
+    function viewDocument(view_id = false, readOnly = false, isRevise = false, isFromCancelledDocument = false) {
         const loadData = (id) => {
             const data = getSignOffContent(id);
             data.then(res => {
@@ -106,8 +92,8 @@ $(document).ready(function() {
                         }
         
                         if (isAllowed) {
-                            if (employeeID == sessionID) {
-                                pageContent(true, tableData, isReadOnly);
+                            if (isRevise && employeeID == sessionID) {
+                                pageContent(true, tableData, isReadOnly, true, isFromCancelledDocument);
                                 updateURL(encryptString(id), true, true);
                             } else {
                                 pageContent(true, tableData, isReadOnly);
@@ -144,7 +130,7 @@ $(document).ready(function() {
                 arr = url.split("?add=");
                 if (arr.length > 1) {
                     let id = decryptString(arr[1]);
-                        id && isFinite(id) && loadData(id);
+                        id && isFinite(id) && loadData(id, true);
                 } else {
                     const isAllowed = isCreateAllowed(52);
                     pageContent(isAllowed);
@@ -154,12 +140,12 @@ $(document).ready(function() {
         
     }
 
-    function updateURL(view_id = 0, isAdd = false) { 
+    function updateURL(view_id = 0, isAdd = false, isRevise = false) { 
         if (view_id && !isAdd) {
             window.history.pushState("", "", `${base_url}pms/sign_off?view_id=${view_id}`);
         } else if (isAdd) {
-            if (view_id) {
-                window.history.pushState("", "", `${base_url}pms/sign_off?view_id=${view_id}`);
+            if (view_id && isRevise) {
+                window.history.pushState("", "", `${base_url}pms/sign_off?add=${view_id}`);
             } else {
                 window.history.pushState("", "", `${base_url}pms/sign_off?add`);
             }
@@ -168,95 +154,6 @@ $(document).ready(function() {
         }
     }
     // ----- END VIEW DOCUMENT -----
-
-
-    // ----- SIGN-OFF DATA -----
-    const getSignOffData = () => {
-        const data = [
-			{
-				signOffID: "1",
-				preparedBy: "Arjay Diangzon",
-				projectName: "ERP System",
-				projectCode: "PRJ-21-00001",
-				projectCategory: "Infrustructure",
-				clientName: "BlackCoders",
-				projectPhase: "Phase 1",
-				approversID: "1|2|3",
-				approversDate: "",
-				approversStatus: "",
-				createdAt: new Date,
-				submittedAt: new Date,
-				signOffStatus: "0",
-				signOffRemarks: ""
-			},
-			{
-				signOffID: "2",
-				preparedBy: "Mark Diangzon",
-				projectName: "ERP System 2",
-				projectCode: "PRJ-21-00002",
-				projectCategory: "Infrustructure",
-				clientName: "BlackCoders",
-				projectPhase: "Phase 2",
-				approversID: "1|2|3",
-				approversDate: "",
-				approversStatus: "",
-				createdAt: new Date,
-				submittedAt: new Date,
-				signOffStatus: "1",
-				signOffRemarks: ""
-			},
-			{
-				signOffID: "3",
-				preparedBy: "Charles Diangzon",
-				projectName: "ERP System 3",
-				projectCode: "PRJ-21-00003",
-				projectCategory: "Infrustructure",
-				clientName: "BlackCoders",
-				projectPhase: "Phase 3",
-				approversID: "1|2|3",
-				approversDate: "",
-				approversStatus: "",
-				createdAt: new Date,
-				submittedAt: new Date,
-				signOffStatus: "2",
-				signOffRemarks: ""
-			},
-			{
-				signOffID: "4",
-				preparedBy: "Wilson Diangzon",
-				projectName: "ERP System 4",
-				projectCode: "PRJ-21-00004",
-				projectCategory: "Infrustructure",
-				clientName: "BlackCoders",
-				projectPhase: "Phase 4",
-				approversID: "1|2|3",
-				approversDate: "",
-				approversStatus: "",
-				createdAt: new Date,
-				submittedAt: new Date,
-				signOffStatus: "3",
-				signOffRemarks: ""
-			},
-			{
-				signOffID: "5",
-				preparedBy: "Joseph Diangzon",
-				projectName: "ERP System 5",
-				projectCode: "PRJ-21-00005",
-				projectCategory: "Infrustructure",
-				clientName: "BlackCoders",
-				projectPhase: "Phase 5",
-				approversID: "1|2|3",
-				approversDate: "",
-				approversStatus: "",
-				createdAt: new Date,
-				submittedAt: new Date,
-				signOffStatus: "4",
-				signOffRemarks: ""
-			},
-		];
-        return data;
-    }
-    // ----- END SIGN-OFF DATA -----
 
 	
 	// ----- DATATABLES -----
@@ -271,6 +168,10 @@ $(document).ready(function() {
 
         if ($.fn.DataTable.isDataTable("#tableDeliverables")) {
 			$("#tableDeliverables").DataTable().destroy();
+		}
+
+        if ($.fn.DataTable.isDataTable("#tableDeliverables1")) {
+			$("#tableDeliverables1").DataTable().destroy();
 		}
 
         var table = $("#tableMyForms")
@@ -292,8 +193,9 @@ $(document).ready(function() {
 					{ targets: 6,  width: 150 },
 					{ targets: 7,  width: 200 },
 					{ targets: 8,  width: 200 },
-					{ targets: 9,  width: 80  },
-					{ targets: 10, width: 200 },
+					{ targets: 9,  width: 200 },
+					{ targets: 10, width: 80  },
+					{ targets: 11, width: 200 },
 				],
 			});
 
@@ -316,8 +218,9 @@ $(document).ready(function() {
 					{ targets: 6,  width: 150 },
 					{ targets: 7,  width: 200 },
 					{ targets: 8,  width: 200 },
-					{ targets: 9,  width: 80  },
-					{ targets: 10, width: 200 },
+					{ targets: 9,  width: 200 },
+					{ targets: 10, width: 80  },
+					{ targets: 11, width: 200 },
 				],
 			});
 
@@ -339,12 +242,30 @@ $(document).ready(function() {
 					{ targets: 1,  width: "100%" }
 				],
 			});
+
+        var table = $("#tableDeliverables1")
+			.css({ "min-width": "100%" })
+			.removeAttr("width")
+			.DataTable({
+				proccessing:    false,
+				serverSide:     false,
+				scrollX:        true,
+                sorting:        false,
+                searching:      false,
+                paging:         false,
+                ordering:       false,
+                info:           false,
+				scrollCollapse: true,
+				columnDefs: [
+					{ targets: 0,  width: "100%" }
+				],
+			});
     }
     // ----- END DATATABLES -----
 
 
     // ----- HEADER BUTTON -----
-	function headerButton(isAdd = true, text = "Add") {
+	function headerButton(isAdd = true, text = "Add", isRevise = false, isFromCancelledDocument = false) {
 		let html;
 		if (isAdd) {
 			if (isCreateAllowed(52)) {
@@ -355,7 +276,9 @@ $(document).ready(function() {
 			html = `
             <button type="button" 
 				class="btn btn-default btn-light" 
-				id="btnBack"><i class="fas fa-arrow-left"></i>&nbsp;Back</button>`;
+				id="btnBack"
+				revise="${isRevise}"
+				cancel="${isFromCancelledDocument}"><i class="fas fa-arrow-left"></i>&nbsp;Back</button>`;
 		}
 		$("#headerButton").html(html);
 	}
@@ -387,7 +310,14 @@ $(document).ready(function() {
 
     // ----- FOR APPROVAL CONTENT ------
     function forApprovalContent() {
-        const signOffData = getSignOffData();
+		$("#tableForApprovalParent").html(preloader);
+        let signOffData = getTableData(
+			`pms_sign_off_tbl AS psot 
+				LEFT JOIN hris_employee_list_tbl AS helt USING(employeeID)`,
+			"psot.*, CONCAT(employeeFirstname, ' ', employeeLastname) AS preparedBy",
+			`psot.employeeID != ${sessionID} AND signOffStatus != 0 AND signOffStatus != 4`,
+			`FIELD(signOffStatus, 0, 1, 3, 2, 4, 5), COALESCE(psot.submittedAt, psot.createdAt)`
+		);
 
         let html = `
         <div class="table-responsive">
@@ -403,6 +333,7 @@ $(document).ready(function() {
 						<th>Current Approver</th>
 						<th>Date Created</th>
 						<th>Date Submitted</th>
+						<th>Date Approved</th>
 						<th>Status</th>
 						<th>Remarks</th>
                     </tr>
@@ -412,20 +343,20 @@ $(document).ready(function() {
         signOffData.map(signOff => {
 
             const { 
-				signOffID       = "1",
-				preparedBy      = "Arjay Diangzon",
-				projectName     = "ERP System",
-				projectCode     = "PRJ-21-00001",
-				projectCategory = "projectCategory",
-				clientName      = "BlackCoders",
-				projectPhase    = "Phase 1",
-				approversID     = "1|2|3",
-				approversDate   = "",
-				approversStatus = "",
-				createdAt       = new Date,
-				submittedAt     = new Date,
+				signOffID,
+				preparedBy,
+				projectName,
+				projectCode,
+				projectCategory,
+				clientName,
+				phaseName,
+				approversID,
+				approversDate,
+				approversStatus,
+				createdAt,
+				submittedAt,
 				signOffStatus,
-				signOffRemarks  = ""
+				signOffRemarks
             } = signOff;
 
 			let remarks       = signOffRemarks ? signOffRemarks : "-";
@@ -442,17 +373,18 @@ $(document).ready(function() {
 					<td>${getFormCode("SOF", createdAt, signOffID)}</td>
 					<td>${preparedBy}</td>
 					<td>
-						<div>${projectName}</div>
-						<small style="color:#848482;">${projectCode}</small>
+						<div>${projectName || "-"}</div>
+						<small style="color:#848482;">${projectCode || "-"}</small>
 					</td>
-					<td>${projectCategory}</td>
-					<td>${clientName}</td>
-					<td>${projectPhase}</td>
+					<td>${projectCategory || "-"}</td>
+					<td>${clientName || "-"}</td>
+					<td>${phaseName && phaseName != "Select Project Phase" ? phaseName : "-"}</td>
 					<td>
 						${employeeFullname(getCurrentApprover(approversID, approversDate, signOffStatus, true))}
 					</td>
 					<td>${dateCreated}</td>
 					<td>${dateSubmitted}</td>
+					<td>${dateApproved}</td>
 					<td class="text-center">
 						${getStatusStyle(signOffStatus)}
 					</td>
@@ -468,7 +400,7 @@ $(document).ready(function() {
         </div>`;
 
         setTimeout(() => {
-            $("#page_content").html(html);
+            $("#forApprovalTab").html(html);
             initDatatables();
         }, 500);
 
@@ -479,7 +411,14 @@ $(document).ready(function() {
 
     // ----- MY FORMS CONTENT ------
     function myFormsContent() {
-        const signOffData = getSignOffData();
+		$("#tableMyFormsParent").html(preloader);
+		let signOffData = getTableData(
+			`pms_sign_off_tbl AS psot 
+				LEFT JOIN hris_employee_list_tbl AS helt USING(employeeID)`,
+			"psot.*, CONCAT(employeeFirstname, ' ', employeeLastname) AS preparedBy",
+			`psot.employeeID = ${sessionID}`,
+			`FIELD(signOffStatus, 0, 1, 3, 2, 4, 5), COALESCE(psot.submittedAt, psot.createdAt)`
+		);
 
         let html = `
         <div class="table-responsive">
@@ -495,6 +434,7 @@ $(document).ready(function() {
 						<th>Current Approver</th>
 						<th>Date Created</th>
 						<th>Date Submitted</th>
+						<th>Date Approved</th>
 						<th>Status</th>
 						<th>Remarks</th>
                     </tr>
@@ -504,20 +444,20 @@ $(document).ready(function() {
         signOffData.map(signOff => {
 
             const { 
-				signOffID       = "1",
-				preparedBy      = "Arjay Diangzon",
-				projectName     = "ERP System",
-				projectCode     = "PRJ-21-00001",
-				projectCategory = "projectCategory",
-				clientName      = "BlackCoders",
-				projectPhase    = "Phase 1",
-				approversID     = "1|2|3",
-				approversDate   = "",
-				approversStatus = "",
-				createdAt       = new Date,
-				submittedAt     = new Date,
+				signOffID,
+				preparedBy,
+				projectName,
+				projectCode,
+				projectCategory,
+				clientName,
+				phaseName,
+				approversID,
+				approversDate,
+				approversStatus,
+				createdAt,
+				submittedAt,
 				signOffStatus,
-				signOffRemarks  = ""
+				signOffRemarks
             } = signOff;
 
 			let remarks       = signOffRemarks ? signOffRemarks : "-";
@@ -533,22 +473,23 @@ $(document).ready(function() {
                 <td>${getFormCode("SOF", createdAt, signOffID)}</td>
                 <td>${preparedBy}</td>
                 <td>
-                    <div>${projectName}</div>
-                    <small style="color:#848482;">${projectCode}</small>
+                    <div>${projectName || "-"}</div>
+                    <small style="color:#848482;">${projectCode || "-"}</small>
                 </td>
-                <td>${projectCategory}</td>
-                <td>${clientName}</td>
-                <td>${projectPhase}</td>
+                <td>${projectCategory || "-"}</td>
+                <td>${clientName || "-"}</td>
+                <td>${phaseName && phaseName != "Select Project Phase" ? phaseName : "-"}</td>
                 <td>
 					${employeeFullname(getCurrentApprover(approversID, approversDate, signOffStatus, true))}
 				</td>
                 <td>${dateCreated}</td>
                 <td>${dateSubmitted}</td>
+                <td>${dateApproved}</td>
 				<td class="text-center">
 					${getStatusStyle(signOffStatus)}
 				</td>
 				<td>${remarks}</td>
-            </tr>`
+            </tr>`;
         });
 
 
@@ -558,7 +499,7 @@ $(document).ready(function() {
         </div>`;
 
         setTimeout(() => {
-            $("#page_content").html(html);
+            $("#myFormsTab").html(html);
             initDatatables();
         }, 500);
 
@@ -570,7 +511,8 @@ $(document).ready(function() {
 	// ----- GET CLIENT -----
 	function getClientOptions(rClientID = 0, clientName = "", status = 0) {
 		let html = '';
-		if (status == "2") {
+		if (status == "1" || status == "2") {
+			clientName = clientName ||  "-";
 			html = `<option selected>${clientName}</option>`;
 		} else {
 			html = `<option selected disabled>Select Client Name</option>`;
@@ -601,7 +543,8 @@ $(document).ready(function() {
 	// ----- GET PROJECT OPTIONS -----
 	function getProjectOptions(rClientID = 0, rTimelineBuilderID = 0, projectName = "", status = "0") {
 		let html = '';
-		if (status == "2") {
+		if (status == "1" || status == "2") {
+			projectName = projectName || "-";
 			html = `<option selected>${projectName}</option>`;
 		} else {
 			html = `<option selected disabled>Select Project Name</option>`;
@@ -643,10 +586,11 @@ $(document).ready(function() {
 
 
 	// ----- GET PROJECT PHASE -----
-	function getProjectPhase(rTimelineBuilderID = 0, rMilestoneBuilderID = 0, projectPhase = "", status = "0") {
+	function getProjectPhase(rTimelineBuilderID = 0, rMilestoneBuilderID = 0, phaseName = "", status = "0") {
 		let html = '';
-		if (status == "2") {
-			html = `<option selected>${projectPhase}</option>`;
+		if (status == "1" || status == "2") {
+			phaseName = phaseName && phaseName != "Select Project Phase" ? phaseName : "-";
+			html = `<option selected>${phaseName}</option>`;
 		} else {
 			html = `<option selected disabled>Select Project Phase</option>`;
 			
@@ -679,13 +623,157 @@ $(document).ready(function() {
 	// ----- END GET PROJECT PHASE -----
 
 
+	// ---- FORM BUTTONS -----
+	function formButtons(data = false, isRevise = false, isFromCancelledDocument = false) {
+		let button = "";
+		if (data) {
+			let {
+				signOffID     = "",
+				signOffStatus = "",
+				employeeID    = "",
+				approversID   = "",
+				approversDate = "",
+				createdAt     = new Date
+			} = data && data[0];
+
+			let isOngoing = approversDate ? approversDate.split("|").length > 0 ? true : false : false;
+			if (employeeID === sessionID) {
+				if (signOffStatus == 0 || isRevise) {
+					// DRAFT
+					button = `
+					<button 
+						class="btn btn-submit px-5 p-2"  
+						id="btnSubmit" 
+						signOffID="${encryptString(signOffID)}"
+						code="${getFormCode("SOF", createdAt, signOffID)}"
+						revise="${isRevise}"
+						cancel="${isFromCancelledDocument}"><i class="fas fa-paper-plane"></i>
+						Submit
+					</button>`;
+
+					if (isRevise) {
+						button += `
+						<button 
+							class="btn btn-cancel btnCancel px-5 p-2" 
+							id="btnCancel"
+							signOffID="${encryptString(signOffID)}"
+							code="${getFormCode("SOF", createdAt, signOffID)}"
+							revise="${isRevise}"
+							cancel="${isFromCancelledDocument}"><i class="fas fa-ban"></i> 
+							Cancel
+						</button>`;
+					} else {
+						button += `
+						<button 
+							class="btn btn-cancel px-5 p-2"
+							id="btnCancelForm" 
+							signOffID="${encryptString(signOffID)}"
+							code="${getFormCode("SOF", createdAt, signOffID)}"
+							revise=${isRevise}><i class="fas fa-ban"></i> 
+							Cancel
+						</button>`;
+					}
+
+					
+				} else if (signOffStatus == 1) {
+					// FOR APPROVAL
+					if (!isOngoing) {
+						button = `
+						<button 
+							class="btn btn-cancel px-5 p-2"
+							id="btnCancelForm" 
+							signOffID="${encryptString(signOffID)}"
+							code="${getFormCode("SOF", createdAt, signOffID)}"
+							status="${signOffStatus}"><i class="fas fa-ban"></i> 
+							Cancel
+						</button>`;
+					}
+				} else if (signOffStatus == 2) {
+					// DROP
+					// button = `
+					// <button type="button" 
+					// 	class="btn btn-cancel px-5 p-2"
+					// 	id="btnDrop" 
+					// 	signOffID="${encryptString(signOffID)}"
+					// 	code="${getFormCode("SOF", createdAt, signOffID)}"
+					// 	status="${signOffStatus}"><i class="fas fa-ban"></i> 
+					// 	Drop
+					// </button>`;
+				} else if (signOffStatus == 3) {
+					// DENIED - FOR REVISE
+					if (!isDocumentRevised(signOffID)) {
+						button = `
+						<button
+							class="btn btn-cancel px-5 p-2"
+							id="btnRevise" 
+							signOffID="${encryptString(signOffID)}"
+							code="${getFormCode("SOF", createdAt, signOffID)}"
+							status="${signOffStatus}"><i class="fas fa-clone"></i>
+							Revise
+						</button>`;
+					}
+				} else if (signOffStatus == 4) {
+					// CANCELLED - FOR REVISE
+					if (!isDocumentRevised(signOffID)) {
+						button = `
+						<button
+							class="btn btn-cancel px-5 p-2"
+							id="btnRevise" 
+							signOffID="${encryptString(signOffID)}"
+							code="${getFormCode("SOF", createdAt, signOffID)}"
+							status="${signOffStatus}"
+							cancel="true"><i class="fas fa-clone"></i>
+							Revise
+						</button>`;
+					}
+				}
+			} else {
+				if (signOffStatus == 1) {
+					if (isImCurrentApprover(approversID, approversDate)) {
+						button = `
+						<button 
+							class="btn btn-submit px-5 p-2"  
+							id="btnApprove" 
+							signOffID="${encryptString(signOffID)}"
+							code="${getFormCode("SOF", createdAt, signOffID)}"><i class="fas fa-paper-plane"></i>
+							Approve
+						</button>
+						<button 
+							class="btn btn-cancel px-5 p-2"
+							id="btnReject" 
+							signOffID="${encryptString(signOffID)}"
+							code="${getFormCode("SOF", createdAt, signOffID)}"><i class="fas fa-ban"></i> 
+							Deny
+						</button>`;
+					}
+				}
+			}
+		} else {
+			button = `
+			<button 
+				class="btn btn-submit px-5 p-2"  
+				id="btnSubmit"><i class="fas fa-paper-plane"></i> Submit
+			</button>
+			<button 
+				class="btn btn-cancel btnCancel px-5 p-2" 
+				id="btnCancel"><i class="fas fa-ban"></i> 
+				Cancel
+			</button>`;
+		}
+		return button;
+	}
+	// ---- END FORM BUTTONS -----
+
+
     // ----- FORM CONTENT -----
-    function formContent(data = false, readOnly = false) {
+    function formContent(data = false, readOnly = false, isRevise = false, isFromCancelledDocument = false) {
         $("#page_content").html(preloader);
+		readOnly = isRevise ? false : readOnly;
         readOnly ? preventRefresh(false) : preventRefresh(true);
 
         const {
             signOffID,
+			reviseSignOffID,
 			employeeID = sessionID,
 			createdAt,
 			submittedAt,
@@ -703,9 +791,9 @@ $(document).ready(function() {
 			projectCode,
 			projectName,
 			projectCategory,
-			projectPhase,
+			phaseName,
 			projectAddress,
-			signOffStatus,
+			signOffStatus = false,
 			signOffRemarks,
 			signOffReason,
 			signOffComment,
@@ -720,52 +808,65 @@ $(document).ready(function() {
 		} = employeeData(employeeID);
 		// ----- END GET EMPLOYEE DATA -----
 
-        $("#btnBack").attr("status", signOffStatus);
+		const disabled = readOnly ? "disabled" : "";
 
-        const disabled = readOnly ? "disabled" : "";
-        const buttonDisplay = !disabled ? `
-        <button class="btn btn-submit px-5 p-2" 
-            id="btnSubmit"
-            signOffID="${signOffID}">
-            <i class="fas fa-paper-plane"></i> Submit
-        </button>
-        <button class="btn btn-cancel px-5 p-2" 
-            id="btnCancel"
-            status="${signOffStatus}">
-            <i class="fas fa-ban"></i> Cancel
-        </button>` : "";
+		$("#btnBack").attr("signOffID", encryptString(signOffID));
+        $("#btnBack").attr("status", signOffStatus);
+        $("#btnBack").attr("employeeID", employeeID);
+		$("#btnBack").attr("cancel", isFromCancelledDocument);
+
+		let buttonDisplay = formButtons(data, isRevise, isFromCancelledDocument);
+
+		let reviseDocumentNo    = isRevise ? signOffID : reviseSignOffID;
+		let documentHeaderClass = isRevise || reviseSignOffID ? "col-lg-4 col-md-4 col-sm-12 px-1" : "col-lg-2 col-md-6 col-sm-12 px-1";
+		let documentDateClass   = isRevise || reviseSignOffID ? "col-md-12 col-sm-12 px-0" : "col-lg-8 col-md-12 col-sm-12 px-1";
+		let documentReviseNo    = isRevise || reviseSignOffID ? `
+		<div class="col-lg-4 col-md-4 col-sm-12 px-1">
+			<div class="card">
+				<div class="body">
+					<small class="text-small text-muted font-weight-bold">Revised Document No.</small>
+					<h6 class="mt-0 text-danger font-weight-bold">
+						${getFormCode("SOF", createdAt, reviseDocumentNo)}
+					</h6>      
+				</div>
+			</div>
+		</div>` : "";
+		let buttonAddDeleteRow = !readOnly ? `
+		<button class="btn btn-primary btnAddRow" id="btnAddRow"><i class="fas fa-plus-circle"></i> Add Row</button>
+		<button class="btn btn-danger btnDeleteRow" id="btnDeleteRow" disabled><i class="fas fa-minus-circle"></i> Delete Row/s</button>` : "";
 
         let html = `
         <div class="">
             <div class="row px-2">
-                <div class="col-lg-2 col-md-6 col-sm-12 px-1">
+				${documentReviseNo}
+                <div class="${documentHeaderClass}">
                     <div class="card">
                         <div class="body">
                             <small class="text-small text-muted font-weight-bold">Document No.</small>
                             <h6 class="mt-0 text-danger font-weight-bold">
-                                ${signOffID ? getFormCode("SOF", createdAt, signOffID) : "---"}
+                                ${signOffID && !isRevise ? getFormCode("SOF", createdAt, signOffID) : "---"}
                             </h6>      
                         </div>
                     </div>
                 </div>
-                <div class="col-lg-2 col-md-6 col-sm-12 px-1">
+                <div class="${documentHeaderClass}">
                     <div class="card">
                         <div class="body">
-                            <small class="text-small text-muted font-weight-bold">Budget Status</small>
+                            <small class="text-small text-muted font-weight-bold">Status</small>
                             <h6 class="mt-0 font-weight-bold">
-                                ${signOffStatus ? getStatusStyle(signOffStatus) : "---"}
+                                ${signOffStatus && !isRevise ? getStatusStyle(signOffStatus) : "---"}
                             </h6>      
                         </div>
                     </div>
                 </div>
-                <div class="col-lg-8 col-md-12 col-sm-12 px-1">
+                <div class="${documentDateClass}">
                     <div class="row m-0">
                         <div class="col-lg-4 col-md-4 col-sm-12 px-1">
                             <div class="card">
                                 <div class="body">
                                     <small class="text-small text-muted font-weight-bold">Date Created</small>
                                     <h6 class="mt-0 font-weight-bold">
-                                        ${createdAt || "---"}
+										${createdAt && !isRevise ? moment(createdAt).format("MMMM DD, YYYY hh:mm:ss A") : "---"}
                                     </h6>      
                                 </div>
                             </div>
@@ -775,7 +876,7 @@ $(document).ready(function() {
                                 <div class="body">
                                     <small class="text-small text-muted font-weight-bold">Date Submitted</small>
                                     <h6 class="mt-0 font-weight-bold">
-                                        ${submittedAt || "---"}
+										${submittedAt && !isRevise ? moment(submittedAt).format("MMMM DD, YYYY hh:mm:ss A") : "---"}
                                     </h6>      
                                 </div>
                             </div>
@@ -797,7 +898,7 @@ $(document).ready(function() {
                         <div class="body">
                             <small class="text-small text-muted font-weight-bold">Remarks</small>
                             <h6 class="mt-0 font-weight-bold">
-                                ${signOffRemarks || "---"}
+                                ${signOffRemarks && !isRevise ? signOffRemarks : "---"}
                             </h6>      
                         </div>
                     </div>
@@ -843,8 +944,8 @@ $(document).ready(function() {
                     <div class="form-group">
                         <label>Client Name ${!disabled ? "<code>*</code>" : ""}</label>
                         <select class="form-control validate select2"
-							name="clientName"
-							id="clientName"
+							name="clientID"
+							id="clientID"
 							required
 							${disabled}>
 							${getClientOptions(clientID, clientName, signOffStatus)}	
@@ -858,7 +959,7 @@ $(document).ready(function() {
                         <input type="text" 
 							class="form-control"  
 							name="clientAddress"
-							value="${clientAddress}"
+							value="${clientAddress || "-"}"
 							disabled>
                     </div>
                 </div>
@@ -868,7 +969,7 @@ $(document).ready(function() {
                         <input type="text" 
 							class="form-control" 
 							name="projectCode" 
-							value="${projectCode}"
+							value="${projectCode || "-"}"
 							disabled>  
                     </div>
                 </div>
@@ -876,8 +977,8 @@ $(document).ready(function() {
                     <div class="form-group">
                         <label>Project Name ${!disabled ? "<code>*</code>" : ""}</label>
                         <select class="form-control validate select2"
-							name="projectName"
-							id="projectName"
+							name="timelineBuilderID"
+							id="timelineBuilderID"
 							required
 							${disabled}>
 							${getProjectOptions(clientID, timelineBuilderID, projectName, signOffStatus)}	
@@ -891,7 +992,7 @@ $(document).ready(function() {
                         <input type="text" 
 							class="form-control" 
 							name="projectCategory"
-							value="${projectCategory}"
+							value="${projectCategory || "-"}"
 							disabled>
                     </div>
                 </div>
@@ -899,11 +1000,11 @@ $(document).ready(function() {
                     <div class="form-group">
                         <label>Project Phase ${!disabled ? "<code>*</code>" : ""}</label>
                         <select class="form-control validate select2"
-							name="projectPhase"
-							id="projectPhase"
+							name="milestoneBuilderID"
+							id="milestoneBuilderID"
 							required
 							${disabled}>
-							${getProjectPhase(timelineBuilderID, milestoneBuilderID, projectPhase, signOffStatus)}
+							${getProjectPhase(timelineBuilderID, milestoneBuilderID, phaseName, signOffStatus)}
 						</select>
 						<div class="invalid-feedback d-block"></div>
                     </div>
@@ -911,15 +1012,16 @@ $(document).ready(function() {
                 
 				<div class="col-sm-12">
 					<div class="w-100">
-						<table class="table table-striped" id="tableDeliverables">
+						<table class="table table-striped" id="${!readOnly ? "tableDeliverables" : "tableDeliverables1"}">
 							<thead>
 								<tr style="white-space: nowrap">
+									${!readOnly ? `
 									<th class="text-center">
 										<div class="action">
 											<input type="checkbox" class="checkboxall">
 										</div>
-									</th>
-									<th>Deliverables <code>*</code></th>
+									</th>` : ""}
+									<th>Deliverables ${!disabled ? "<code>*</code>" : ""}</th>
 								</tr>
 							</thead>
 							<tbody class="deliverablesTableBody">
@@ -931,26 +1033,46 @@ $(document).ready(function() {
 						<div class="w-100 d-flex justify-content-between align-items-center py-2">
 							<div>
 								<div class="w-100 text-left my-2">
-									<button class="btn btn-primary btnAddRow" id="btnAddRow"><i class="fas fa-plus-circle"></i> Add Row</button>
-									<button class="btn btn-danger btnDeleteRow" id="btnDeleteRow" disabled><i class="fas fa-minus-circle"></i> Delete Row/s</button>
+									${buttonAddDeleteRow}
 								</div>
 							</div>
 							<div class="font-weight-bolder" style="font-size: 1rem;"></div>
 						</div>
 					</div>
 				</div>
+
+				<div class="col-sm-12">
+                    <div class="form-group">
+                        <label><h5>Notes/Comments from the user: </h5></label>
+                        <textarea rows="5" 
+                            data-allowcharacters="[a-z][A-Z][0-9][.][,][?][!][/][;][:]['][''][-][_][(][)][%][&][*][ ]"
+                            minlength="0"
+                            maxlength="999999"
+                            class="form-control validate" 
+                            name="signOffComment" 
+                            id="signOffComment" 
+                            style="resize: none"
+                            ${disabled}>${signOffComment || ""}</textarea>
+                        <div class="d-block invalid-feedback" id="invalid-signOffComment"></div>
+                    </div>
+                </div>
                 
             </div>
 
             <div class="col-md-12 text-right mt-3 mb-3">
                 ${buttonDisplay}
             </div>
-        </div>`;
+        </div>
+		
+		<div class="approvers">
+			${!isRevise  ? getApproversStatus(approversID, approversStatus, approversDate) : ""}
+		</div>`;
 
         setTimeout(() => {
             $("#page_content").html(html);
             initDatatables();
             initAll();
+			updateTableItems();
 
             // ----- NOT ALLOWED FOR UPDATE -----
 			if (!allowedUpdate) {
@@ -970,16 +1092,16 @@ $(document).ready(function() {
 
 
 	// ----- SELECT CLIENT NAME -----
-	$(document).on("change", `[name="clientName"]`, function() {
+	$(document).on("change", `[name="clientID"]`, function() {
 		const clientID      = $(this).val();
 		const clientCode    = $(`option:selected`, this).attr("clientCode");
 		const clientName    = $(`option:selected`, this).attr("clientName");
 		const clientAddress = $(`option:selected`, this).attr("clientAddress");
 
 		$(`[name="clientAddress"]`).val(clientAddress);
-		$(`[name="projectName"]`).html(getProjectOptions(clientID));
+		$(`[name="timelineBuilderID"]`).html(getProjectOptions(clientID));
 		supplyProjectDetails();
-		$(`[name="projectPhase"]`).html(getProjectPhase());
+		$(`[name="milestoneBuilderID"]`).html(getProjectPhase());
 	})
 	// ----- END SELECT CLIENT NAME -----
 
@@ -990,33 +1112,45 @@ $(document).ready(function() {
 		$(`[name="projectCategory"]`).val(projectCategory);
 	}
 
-	$(document).on("change", `[name="projectName"]`, function() {
+	$(document).on("change", `[name="timelineBuilderID"]`, function() {
 		const timelineBuilderID = $(this).val();
 		const projectCode       = $(`option:selected`, this).attr("projectCode");
 		const projectName       = $(`option:selected`, this).attr("projectName");
 		const projectCategory   = $(`option:selected`, this).attr("projectCategory");
 
 		supplyProjectDetails(projectCode, projectCategory);
-		$(`[name="projectPhase"]`).html(getProjectPhase(timelineBuilderID));
+		$(`[name="milestoneBuilderID"]`).html(getProjectPhase(timelineBuilderID));
 	})
 	// ----- END SELECT PROJECT NAME -----
     
 
     // ----- PAGE CONTENT -----
-    function pageContent(isForm = false, data = false, readOnly = false) {
+    function pageContent(isForm = false, data = false, readOnly = false, isRevise = false, isFromCancelledDocument = false) {
         if ($(`#page_content .loader`).text().length == 0) {
             $("#page_content").html(preloader);
         }
         if (!isForm) {
             preventRefresh(false);
+			let html = `
+            <div class="tab-content">
+                <div role="tabpanel" class="tab-pane" id="forApprovalTab" aria-expanded="false">
+                    <div class="table-responsive" id="tableForApprovalParent">
+                    </div>
+                </div>
+                <div role="tabpanel" class="tab-pane active" id="myFormsTab" aria-expanded="false">
+                    <div class="table-responsive" id="tableMyFormsParent">
+                    </div>
+                </div>
+            </div>`;
+			$("#page_content").html(html);
             headerButton(true, "Add Sign-Off");
 			headerTabContent();
             myFormsContent();
             updateURL();
         } else {
-            headerButton(false, "");
+            headerButton(false, "", isRevise, isFromCancelledDocument);
 			headerTabContent(false);
-            formContent(data, readOnly);
+            formContent(data, readOnly, isRevise, isFromCancelledDocument);
         }
     }
     viewDocument();
@@ -1069,7 +1203,7 @@ $(document).ready(function() {
 			});
 			
 		} else {
-			showNotification("danger", "You must have atleast one or more items.");
+			showNotification("danger", "You must have atleast one or more deliverables.");
 		}
 	}
 	// ----- END DELETE TABLE ROW -----
@@ -1126,28 +1260,46 @@ $(document).ready(function() {
 	function getDeliverableRow(deliverables = false, readOnly = false) {
 		let html = "";
 		let disabled = readOnly ? "disabled" : "";
-		if (deliverables) {
+		let checkbox = !disabled ? `
+		<td class="text-center">
+			<div class="action">
+				<input type="checkbox" class="checkboxrow">
+			</div>
+		</td>` : "";
+		
+		const getDescription = (description = "") => {
+			return readOnly ? (description || "-") : `
+			<div class="form-group mb-0">
+				<input type="text"
+					class="form-control validate"
+					name="deliverableDescription"
+					data-allowcharacters="[a-z][A-Z][0-9][.][,][?][!][/][;][:]['][''][-][_][(][)][%][&][*][ ]"
+					minlength="2"
+					maxlength="325"
+					required
+					value="${description}"
+					${disabled}>
+				<div class="d-block invalid-feedback"></div>
+			</div>`;
+		}
 
+		if (deliverables && deliverables.length > 0) {
+			deliverables.map(deliverable => {
+				const { description } = deliverable;
+				html += `
+				<tr>
+					${checkbox}
+					<td>
+						${getDescription(description)}
+					</td>
+				</tr>`;
+			})
 		} else {
 			html = `
 			<tr>
-				<td class="text-center">
-					<div class="action">
-						<input type="checkbox" class="checkboxrow">
-					</div>
-				</td>
+				${checkbox}
 				<td>
-					<div class="form-group mb-0">
-						<input type="text"
-							class="form-control validate"
-							name="deliverableDescription"
-							data-allowcharacters="[a-z][A-Z][0-9][.][,][?][!][/][;][:]['][''][-][_][(][)][%][&][*][ ]"
-							minlength="2"
-							maxlength="325"
-							required
-							${disabled}>
-						<div class="d-block invalid-feedback"></div>
-					</div>
+					${getDescription()}
 				</td>
 			</tr>`;
 		}
@@ -1157,76 +1309,450 @@ $(document).ready(function() {
     $(document).on("click", ".btnAddRow", function() {
         let row = getDeliverableRow();
 		$(".deliverablesTableBody").append(row);
+		$(`[name="deliverableDescription"]`).last().focus();
 		updateTableItems();
     })
     // ----- END INSERT ROW ITEM -----
 
 
-    // ----- CLICK BUTTON SUBMIT -----
+	// ----- REMOVE IS-VALID IN TABLE -----
+	function removeIsValid(element = "table") {
+		$(element).find(".validated, .is-valid, .no-error").removeClass("validated")
+		.removeClass("is-valid").removeClass("no-error");
+	}
+	// ----- END REMOVE IS-VALID IN TABLE -----
+
+
+	// ----- GET SIGN OFF DATA -----
+	function getSignOffData(action = "insert", method = "submit", status = "1", id = null, currentStatus = "0") {
+
+		/**
+		 * ----- ACTION ---------
+		 *    > insert
+		 *    > update
+		 * ----- END ACTION -----
+		 * 
+		 * ----- STATUS ---------
+		 *    0. Draft
+		 *    1. For Approval
+		 *    2. Approved
+		 *    3. Denied
+		 *    4. Cancelled
+		 * ----- END STATUS -----
+		 * 
+		 * ----- METHOD ---------
+		 *    > submit
+		 *    > save
+		 *    > deny
+		 *    > approve
+		 * ----- END METHOD -----
+		 */
+
+		let data = { deliverables: [] };
+		const approversID = method != "approve" && moduleApprover;
+
+		if (id) {
+			data["signOffID"] = id;
+
+			if (status != "2") {
+				data["signOffStatus"] = status;
+			}
+		}
+
+		data["action"]    = action;
+		data["method"]    = method;
+		data["updatedBy"] = sessionID;
+
+		if ((currentStatus == "false" || currentStatus == "0" || currentStatus == "3") && method != "approve") {
+			
+			data["employeeID"]    = sessionID;
+			data["clientID"]      = $(`[name="clientID"]`).val();
+			data["clientName"]    = $(`[name="clientID"] option:selected`).attr("clientName");
+			data["clientAddress"] = $(`[name="clientID"] option:selected`).attr("clientAddress");
+
+			data["timelineBuilderID"] = $(`[name="timelineBuilderID"]`).val();
+			data["projectCode"]       = $(`[name="timelineBuilderID"] option:selected`).attr("projectCode");
+			data["projectName"]       = $(`[name="timelineBuilderID"] option:selected`).attr("projectName");
+			data["projectCategory"]   = $(`[name="timelineBuilderID"] option:selected`).attr("projectCategory");
+
+			data["milestoneBuilderID"] = $(`[name="milestoneBuilderID"]`).val();
+			data["phaseName"]          = $(`[name="milestoneBuilderID"] option:selected`).text();
+			
+			data["signOffReason"]  = $(`[name="signOffReason"]`).val()?.trim();
+			data["signOffComment"] = $(`[name="signOffComment"]`).val()?.trim();
+
+			if (action == "insert") {
+				data["createdBy"] = sessionID;
+				data["createdAt"] = dateToday();
+			} else if (action == "update") {
+				data["signOffID"] = id;
+			}
+
+			if (method == "submit") {
+				data["submittedAt"] = dateToday();
+				if (approversID) {
+					data["approversID"] = approversID;
+					data["signOffStatus"] = 1;
+				} else {  // AUTO APPROVED - IF NO APPROVERS
+					data["approversID"]     = sessionID;
+					data["approversStatus"] = 2;
+					data["approversDate"]   = dateToday();
+					data["signOffStatus"] = 2;
+				}
+			}
+
+			$(`.deliverablesTableBody tr`).each(function() {
+				const description = $(`[name="deliverableDescription"]`, this).val()?.trim();
+				data.deliverables.push({description});
+			})
+		} 
+
+		return data;
+	}
+	// ----- END GET SIGN OFF DATA -----
+
+
+	// ----- VIEW DOCUMENT -----
+	$(document).on("click", "#btnRevise", function () {
+		const id                    = decryptString($(this).attr("signOffID"));
+		const fromCancelledDocument = $(this).attr("cancel") == "true";
+		viewDocument(id, false, true, fromCancelledDocument);
+	});
+	// ----- END VIEW DOCUMENT -----
+
+
+	// ----- REJECT DOCUMENT -----
+	$(document).on("click", "#btnReject", function () {
+		const id       = decryptString($(this).attr("signOffID"));
+		const feedback = $(this).attr("code") || getFormCode("SOF", dateToday(), id);
+
+		$("#modal_sign_off_content").html(preloader);
+		$("#modal_sign_off .page-title").text("DENY SIGN-OFF FORM");
+		$("#modal_sign_off").modal("show");
+		let html = `
+		<div class="modal-body">
+			<div class="form-group">
+				<label>Remarks <code>*</code></label>
+				<textarea class="form-control validate"
+					data-allowcharacters="[0-9][a-z][A-Z][ ][.][,][_]['][()][?][-][/]"
+					minlength="2"
+					maxlength="250"
+					id="signOffRemarks"
+					name="signOffRemarks"
+					rows="4"
+					style="resize: none"
+					required></textarea>
+				<div class="d-block invalid-feedback"></div>
+			</div>
+		</div>
+		<div class="modal-footer text-right">
+			<button class="btn btn-danger px-5 p-2" id="btnRejectConfirmation"
+			signOffID="${encryptString(id)}"
+			code="${feedback}"><i class="far fa-times-circle"></i> Deny</button>
+			<button class="btn btn-cancel btnCancel px-5 p-2" data-dismiss="modal"><i class="fas fa-ban"></i> Cancel</button>
+		</div>`;
+		$("#modal_sign_off_content").html(html);
+	});
+
+	$(document).on("click", "#btnRejectConfirmation", function () {
+		const id       = decryptString($(this).attr("signOffID"));
+		const feedback = $(this).attr("code") || getFormCode("SOF", dateToday(), id);
+
+		const validate = validateForm("modal_sign_off");
+		if (validate) {
+			let tableData = getTableData("pms_sign_off_tbl", "", "signOffID = " + id);
+			if (tableData) {
+				let approversStatus = tableData[0].approversStatus;
+				let approversDate   = tableData[0].approversDate;
+				let employeeID      = tableData[0].employeeID;
+
+				let data = {};
+				data["action"]          = "update";
+				data["method"]          = "deny";
+				data["signOffID"]       = id;
+				data["approversStatus"] = updateApproveStatus(approversStatus, 3);
+				data["approversDate"]   = updateApproveDate(approversDate);
+				data["signOffRemarks"]  = $("[name=signOffRemarks]").val()?.trim();
+				data["updatedBy"]       = sessionID;
+
+				let notificationData = {
+					moduleID:                52,
+					tableID: 				 id,
+					notificationTitle:       "Sign-Off Form",
+					notificationDescription: `${feedback}: Your request has been denied.`,
+					notificationType:        1,
+					employeeID,
+				};
+
+				saveSignOff(data, "deny", notificationData, pageContent);
+				$("[redirect=forApprovalTab]").length > 0 && $("[redirect=forApprovalTab]").trigger("click");
+			} 
+		} 
+	});
+	// ----- END REJECT DOCUMENT -----
+
+
+	// ----- APPROVE DOCUMENT -----
+	$(document).on("click", "#btnApprove", function () {
+		const id       = decryptString($(this).attr("signOffID"));
+		const feedback = $(this).attr("code") || getFormCode("SOF", dateToday(), id);
+		let tableData  = getTableData("pms_sign_off_tbl", "", "signOffID = " + id);
+
+		if (tableData) {
+			let approversID     = tableData[0].approversID;
+			let approversStatus = tableData[0].approversStatus;
+			let approversDate   = tableData[0].approversDate;
+			let employeeID      = tableData[0].employeeID;
+			let createdAt       = tableData[0].createdAt;
+
+			let data = getSignOffData("update", "approve", "2", id);
+			data["approversStatus"] = updateApproveStatus(approversStatus, 2);
+			let dateApproved = updateApproveDate(approversDate)
+			data["approversDate"] = dateApproved;
+
+			let status, notificationData;
+			if (isImLastApprover(approversID, approversDate)) {
+				status = 2;
+				notificationData = {
+					moduleID:                52,
+					tableID:                 id,
+					notificationTitle:       "Sign-Off Form",
+					notificationDescription: `${feedback}: Your request has been approved.`,
+					notificationType:        7,
+					employeeID,
+				};
+			} else {
+				status = 1;
+				notificationData = {
+					moduleID:                52,
+					tableID:                 id,
+					notificationTitle:       "Sign-Off Form",
+					notificationDescription: `${employeeFullname(employeeID)} asked for your approval.`,
+					notificationType:         2,
+					employeeID:               getNotificationEmployeeID(approversID, dateApproved),
+				};
+			}
+
+			data["signOffStatus"] = status;
+
+			saveSignOff(data, "approve", notificationData, pageContent);
+		}
+	});
+	// ----- END APPROVE DOCUMENT -----
+
+
+	// ----- CLICK BUTTON SUBMIT -----
 	$(document).on("click", "#btnSubmit", function () {
-        const signOffID = $(this).attr("signOffID");
-        const validateInputs    = validateForm("page_content");
-        if (validateInputs) {
-            saveProjectBudget("submit", signOffID, pageContent);
-        }
-    });
+		const id = decryptString($(this).attr("signOffID"));
+		const isFromCancelledDocument = $(this).attr("cancel") == "true";
+		const revise   = $(this).attr("revise") == "true";
+		const validate = validateForm("page_content");
+		removeIsValid("#tableDeliverables");
+
+		if (validate) {
+			
+			const action = revise && !isFromCancelledDocument && "insert" || (id ? "update" : "insert");
+			const data   = getSignOffData(action, "submit", "1", id);
+
+			if (revise) {
+				if (!isFromCancelledDocument) {
+					data["reviseServiceRequisitionID"] = id;
+					delete data["signOffID"];
+				}
+			}
+
+			let approversID   = data["approversID"], 
+				approversDate = data["approversDate"];
+
+			const employeeID = getNotificationEmployeeID(approversID, approversDate, true);
+			let notificationData = false;
+			if (employeeID != sessionID) {
+				notificationData = {
+					moduleID:                52,
+					notificationTitle:       "Sign-Off Form",
+					notificationDescription: `${employeeFullname(sessionID)} asked for your approval.`,
+					notificationType:        2,
+					employeeID,
+				};
+			}
+
+			saveSignOff(data, "submit", notificationData, pageContent);
+		}
+	});
+	// ----- END CLICK BUTTON SUBMIT -----
 
 
-    // ----- CLICK BUTTON CANCEL OR BACK -----
-    $(document).on("click", "#btnCancel, #btnBack", function() {
-        const status = $(this).attr("status");
-        if (status == 0) {
-            saveProjectBudget("cancel", null, pageContent);
-        } else {
-            pageContent();
-        }
+	// ----- CLICK CANCEL DOCUMENT -----
+	$(document).on("click", "#btnCancelForm", function () {
+		const id     = decryptString($(this).attr("signOffID"));
+		const status = $(this).attr("status");
+		const action = "update";
+		const data   = getSignOffData(action, "cancelform", "4", id, status);
+
+		saveSignOff(data, "cancelform", null, pageContent);
+	});
+	// ----- END CLICK CANCEL DOCUMENT -----
+
+
+	// ----- CLICK BUTTON CANCEL -----
+    $(document).on("click", "#btnCancel", function() {
+        const id       = decryptString($(this).attr("signOffID"));
+		const isFromCancelledDocument = $(this).attr("cancel") == "true";
+		const revise   = $(this).attr("revise") == "true";
+		const action   = revise && !isFromCancelledDocument && "insert" || (id ? "update" : "insert");
+		const data     = getSignOffData(action, "save", "0", id);
+		data["signOffStatus"] = 0;
+
+		if (revise) {
+			if (!isFromCancelledDocument) {
+				data["reviseSignOffID"] = id;
+				delete data["signOffID"];
+			} else {
+				data["signOffID"] = id;
+				delete data["action"];
+				data["action"] = "update";
+			}
+		}
+
+		saveSignOff(data, "save", null, pageContent);
     })
-    // ----- END CLICK BUTTON CANCEL OR BACK -----
+    // ----- END CLICK BUTTON CANCEL -----
+
+
+	// ----- CLICK BUTTON BACK -----
+	$(document).on("click", "#btnBack", function () {
+		const id         = decryptString($(this).attr("signOffID"));
+		const isFromCancelledDocument = $(this).attr("cancel") == "true";
+		const revise     = $(this).attr("revise") == "true";
+		const employeeID = $(this).attr("employeeID");
+		const status     = $(this).attr("status");
+
+		if (status != "false" && status != 0) {
+			
+			if (revise) {
+				const action = revise && !isFromCancelledDocument && "insert" || (id ? "update" : "insert");
+				const data = getSignOffData(action, "save", "0", id);
+				data["signOffStatus"] = 0;
+				if (!isFromCancelledDocument) {
+					data["reviseSignOffID"] = id;
+					delete data["signOffID"];
+				} else {
+					data["signOffID"] = id;
+					delete data["action"];
+					data["action"] = "update";
+				}
+	
+				saveSignOff(data, "save", null, pageContent);
+			} else {
+				$("#page_content").html(preloader);
+				pageContent();
+	
+				if (employeeID != sessionID) {
+					$("[redirect=forApprovalTab]").length > 0 && $("[redirect=forApprovalTab]").trigger("click");
+				}
+			}
+
+		} else {
+			const action = id ? "update" : "insert";
+			const data   = getSignOffData(action, "save", "0", id);
+			data["signOffStatus"] = 0;
+
+			saveSignOff(data, "save", null, pageContent);
+		}
+	});
+	// ----- END CLICK BUTTON BACK -----
+
+
+	// ----- NAV LINK -----
+	$(document).on("click", ".nav-link", function () {
+		const tab = $(this).attr("href");
+		if (tab == "#forApprovalTab") {
+			forApprovalContent();
+		}
+		if (tab == "#myFormsTab") {
+			myFormsContent();
+		}
+	});
+	// ----- END NAV LINK -----
+
+
+    // ----- APPROVER STATUS -----
+	function getApproversStatus(approversID, approversStatus, approversDate) {
+		let html = "";
+		if (approversID) {
+			let idArr = approversID.split("|");
+			let statusArr = approversStatus ? approversStatus.split("|") : [];
+			let dateArr = approversDate ? approversDate.split("|") : [];
+			html += `<div class="row mt-4">`;
+	
+			idArr && idArr.map((item, index) => {
+				let date   = dateArr[index] ? moment(dateArr[index]).format("MMMM DD, YYYY hh:mm:ss A") : "";
+				let status = statusArr[index] ? statusArr[index] : "";
+				let statusBadge = "";
+				if (date && status) {
+					if (status == 2) {
+						statusBadge = `<span class="badge badge-info">Approved - ${date}</span>`;
+					} else if (status == 3) {
+						statusBadge = `<span class="badge badge-danger">Denied - ${date}</span>`;
+					}
+				}
+	
+				html += `
+				<div class="col-xl-3 col-lg-3 col-md-4 col-sm-12">
+					<div class="d-flex justify-content-start align-items-center">
+						<span class="font-weight-bold">
+							${employeeFullname(item)}
+						</span>
+						<small>&nbsp;- Level ${index + 1} Approver</small>
+					</div>
+					${statusBadge}
+				</div>`;
+			});
+			html += `</div>`;
+		}
+		return html;
+	}
+	// ----- END APPROVER STATUS -----
 
 
     // ----- CONFIRMATION -----
     const getConfirmation = method => {
-        const title = "Project Budget";
+        const title = "Sign-Off";
         let swalText, swalImg;
 
         switch (method) {
             case "save":
-                swalTitle = `SAVE ${title.toUpperCase()}`;
-                swalText  = "Are you sure to save this document?";
+                swalTitle = `SAVE DRAFT`;
+                swalText  = "Do you want to save your changes for this sign-off form?";
                 swalImg   = `${base_url}assets/modal/draft.svg`;
                 break;
             case "submit":
-                swalTitle = `SUBMIT ${title.toUpperCase()}`;
+                swalTitle = `SUBMIT ${title.toUpperCase()} FORM`;
                 swalText  = "Are you sure to submit this document?";
                 swalImg   = `${base_url}assets/modal/add.svg`;
                 break;
             case "approve":
-                swalTitle = `APPROVE ${title.toUpperCase()}`;
+                swalTitle = `APPROVE ${title.toUpperCase()} FORM`;
                 swalText  = "Are you sure to approve this document?";
                 swalImg   = `${base_url}assets/modal/approve.svg`;
                 break;
             case "deny":
-                swalTitle = `DENY ${title.toUpperCase()}`;
+                swalTitle = `DENY ${title.toUpperCase()} FORM`;
                 swalText  = "Are you sure to deny this document?";
                 swalImg   = `${base_url}assets/modal/reject.svg`;
                 break;
             case "cancelform":
-                swalTitle = `CANCEL ${title.toUpperCase()}`;
+                swalTitle = `CANCEL ${title.toUpperCase()} FORM`;
                 swalText  = "Are you sure to cancel this document?";
                 swalImg   = `${base_url}assets/modal/cancel.svg`;
                 break;
             case "drop":
-                swalTitle = `DROP ${title.toUpperCase()}`;
+                swalTitle = `DROP ${title.toUpperCase()} FORM`;
                 swalText  = "Are you sure to drop this document?";
                 swalImg   = `${base_url}assets/modal/drop.svg`;
                 break;
-            case "uploadcontract":
-                swalTitle = `UPLOAD CONTRACT`;
-                swalText  = "Are you sure to upload this contract?";
-                swalImg   = `${base_url}assets/modal/add.svg`;
-                break;
             default:
-                swalTitle = `DISCARD ${title.toUpperCase()}`;
+                swalTitle = `DISCARD ${title.toUpperCase()} FORM`;
                 swalText  = "Are you sure to discard this process?";
                 swalImg   = `${base_url}assets/modal/cancel.svg`;
                 break;
@@ -1249,110 +1775,111 @@ $(document).ready(function() {
 
 
     // ----- SAVE PROJECT BUDGET -----
-    function saveProjectBudget(method = "submit", id = null, callback = null) {
+    function saveSignOff(data = null, method = "submit", notificationData = null, callback = null) {
+		$("#modal_sign_off").modal("hide");
         const confirmation = getConfirmation(method);
         confirmation.then(res => {
             if (res.isConfirmed) {
+				$.ajax({
+					method:      "POST",
+					url:         `sign_off/saveSignOff`,
+					data,
+					async:       false,
+					dataType:    "json",
+					beforeSend: function() {
+						$("#loader").show();
+					},
+					success: function(data) {
+						let result = data.split("|");
+		
+						let isSuccess   = result[0];
+						let message     = result[1];
+						let insertedID  = result[2];
+						let dateCreated = result[3];
 
-                if (method == "cancel") {
-                    callback && callback();
-                    Swal.fire({
-                        icon:              'success',
-                        title:             "Process successfully discarded!",
-                        showConfirmButton: false,
-                        timer:             2000
-                    });
-                } else {
+						let swalTitle;
+						if (method == "submit") {
+							swalTitle = `${getFormCode("SOF", dateCreated, insertedID)} submitted successfully!`;
+						} else if (method == "save") {
+							swalTitle = `${getFormCode("SOF", dateCreated, insertedID)} saved successfully!`;
+						} else if (method == "cancelform") {
+							swalTitle = `${getFormCode("SOF", dateCreated, insertedID)} cancelled successfully!`;
+						} else if (method == "approve") {
+							swalTitle = `${getFormCode("SOF", dateCreated, insertedID)} approved successfully!`;
+						} else if (method == "deny") {
+							swalTitle = `${getFormCode("SOF", dateCreated, insertedID)} denied successfully!`;
+						} else if (method == "drop") {
+							swalTitle = `${getFormCode("SOF", dateCreated, insertedID)} dropped successfully!`;
+						}	
+		
+						if (isSuccess == "true") {
+							setTimeout(() => {
+								// ----- SAVE NOTIFICATION -----
+								if (notificationData) {
+									if (Object.keys(notificationData).includes("tableID")) {
+										insertNotificationData(notificationData);
+									} else {
+										notificationData["tableID"] = insertedID;
+										insertNotificationData(notificationData);
+									}
+								}
+								// ----- END SAVE NOTIFICATION -----
 
-                    const data = {
-                        signOffID: id,
-                        allocatedBudget:   getNonFormattedAmount($(`[name="allocatedBudget"]`).val())
-                    };
+								$("#loader").hide();
+								closeModals();
+								Swal.fire({
+									icon:              "success",
+									title:             swalTitle,
+									showConfirmButton: false,
+									timer:             2000,
+								});
+								callback && callback();
 
-                    $.ajax({
-                        method:      "POST",
-                        url:         `sign_off/saveProjectBudget`,
-                        data,
-                        cache:       false,
-                        async:       false,
-                        dataType:    "json",
-                        beforeSend: function() {
-                            $("#loader").show();
-                        },
-                        success: function(data) {
-                            let result = data.split("|");
-            
-                            let isSuccess   = result[0];
-                            let message     = result[1];
-                            let insertedID  = result[2];
-                            let dateCreated = result[3];
-    
-                            let swalTitle;
-                            if (method == "submit") {
-                                swalTitle = `Project Budget submitted successfully!`;
-                            } else if (method == "save") {
-                                swalTitle = `${getFormCode("SOF", dateCreated, insertedID)} saved successfully!`;
-                            } else if (method == "cancelform") {
-                                swalTitle = `${getFormCode("SOF", dateCreated, insertedID)} cancelled successfully!`;
-                            } else if (method == "approve") {
-                                swalTitle = `${getFormCode("SOF", dateCreated, insertedID)} approved successfully!`;
-                            } else if (method == "deny") {
-                                swalTitle = `${getFormCode("SOF", dateCreated, insertedID)} denied successfully!`;
-                            } else if (method == "drop") {
-                                swalTitle = `${getFormCode("SOF", dateCreated, insertedID)} dropped successfully!`;
-                            }
-            
-                            if (isSuccess == "true") {
-                                setTimeout(() => {
-                                    $("#loader").hide();
-                                    closeModals();
-                                    callback && callback();
-                                    Swal.fire({
-                                        icon:              "success",
-                                        title:             swalTitle,
-                                        showConfirmButton: false,
-                                        timer:             2000,
-                                    });
-                                }, 500);
-                            } else {
-                                setTimeout(() => {
-                                    $("#loader").hide();
-                                    Swal.fire({
-                                        icon:              "danger",
-                                        title:             message,
-                                        showConfirmButton: false,
-                                        timer:             2000,
-                                    });
-                                }, 500);
-                            }
-                        },
-                        error: function() {
-                            setTimeout(() => {
-                                $("#loader").hide();
-                                showNotification("danger", "System error: Please contact the system administrator for assistance!");
-                            }, 500);
-                        }
-                    }).done(function() {
-                        setTimeout(() => {
-                            $("#loader").hide();
-                        }, 500);
-                    })
-                }
-            } else {
-                if (res.dismiss == "cancel" && method != "submit") {
-                    if (method != "deny") {
-                        if (method != "cancelform") {
-                            // callback && callback();
-                        }
-                    } else {
-                        
-                    }
-                } else if (res.isDismissed) {
-                    if (method == "deny") {
-                        
-                    }
-                }
-            }
+								if (method == "approve" || method == "deny") {
+									$("[redirect=forApprovalTab]").length > 0 && $("[redirect=forApprovalTab]").trigger("click")
+								}
+							}, 500);
+						} else {
+							setTimeout(() => {
+								$("#loader").hide();
+								Swal.fire({
+									icon:              "danger",
+									title:             message,
+									showConfirmButton: false,
+									timer:             2000,
+								});
+							}, 500);
+						}
+					},
+					error: function() {
+						setTimeout(() => {
+							$("#loader").hide();
+							showNotification("danger", "System error: Please contact the system administrator for assistance!");
+						}, 500);
+					}
+				}).done(function() {
+					setTimeout(() => {
+						$("#loader").hide();
+					}, 500);
+				})
+			} else {
+				if (res.dismiss === "cancel" && method != "submit") {
+					if (method != "deny") {
+						if (method != "cancelform") {
+							callback && callback();
+							if (method == "approve" || method == "deny") {
+								$("[redirect=forApprovalTab]").length > 0 && $("[redirect=forApprovalTab]").trigger("click")
+							}
+						}
+					} else {
+						$("#modal_sign_off").text().length > 0 && $("#modal_sign_off").modal("show");
+					}
+				} else if (res.isDismissed) {
+					if (method == "deny") {
+						$("#modal_sign_off").text().length > 0 && $("#modal_sign_off").modal("show");
+					}
+				}
+			}
         });
     }
     // ----- END SAVE PROJECT BUDGET -----
