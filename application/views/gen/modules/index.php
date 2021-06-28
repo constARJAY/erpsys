@@ -1,5 +1,5 @@
-<div class="body_area">
-    <div class="block-header">
+<div class="body_area after_bg">
+    <div class="block-header pb-0">
 		<div class="container">
 			<div class="row clearfix">
 				<div class="col-lg-6 col-md-12">
@@ -16,19 +16,10 @@
 	</div>
 
     <div class="container">
-		<div class="row clearfix row-deck" style='text-align:right;'>
-            <div class="col-12">
-                <!-- <div class="col-12 header p-0">
-                    <ul class="header-dropdown">
-                        <button type="button" class="btn btn-primary p-2 px-3" id="btnAdd"> <i class="icon-plus"></i> &nbsp;Add Module</button>
-                    </ul>
-                </div> -->
-            </div>
-        </div>
-
 		<div class="row clearfix row-deck">
-            <div class="col-12" id="page_content">
-                <div class="table-responsive" id="table_content"></div>
+            <div class="card col-12">
+				<div class="card-body" id="page_content">
+				</div>
             </div>
         </div>
 	</div>
