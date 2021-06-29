@@ -40,6 +40,8 @@ class Inventory_receiving extends CI_Controller {
         $updatedBy                  = $this->input->post("updatedBy");
         $createdAt                  = $this->input->post("createdAt");
         $items                      = $this->input->post("items") ?? null;
+        $scopes                      = $this->input->post("scopes") ?? null;
+  
 
         $lastApproveCondition       = $this->input->post("lastApproveCondition");
 
@@ -103,7 +105,6 @@ class Inventory_receiving extends CI_Controller {
 
             if ($result[0] == "true") {
                 $inventoryReceivingID = $result[2];
-
                 if ($items) {
                     foreach($items as $index => $item) {
                         $service = [
@@ -115,7 +116,6 @@ class Inventory_receiving extends CI_Controller {
                             "createdBy"            => $updatedBy,
                             "updatedBy"            => $updatedBy,
                         ];
-                        $scopes = $item["scopes"];
                         
                         $saveServices = $this->inventoryreceiving->saveServices($service, $scopes, $inventoryReceivingID);
                     }

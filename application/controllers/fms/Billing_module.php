@@ -117,15 +117,15 @@ class Billing_module extends CI_Controller {
             ->getPageSetup()
             ->setPaperSize(\PhpOffice\PhpSpreadsheet\Worksheet\PageSetup::PAPERSIZE_A4);
 
-        $spreadsheet->getActiveSheet()->getPageMargins()->setTop(1.60416666666667);
+        $spreadsheet->getActiveSheet()->getPageMargins()->setTop(1.9541666666667);
         $spreadsheet->getActiveSheet()->getPageMargins()->setRight(0.0104166666666667);
         $spreadsheet->getActiveSheet()->getPageMargins()->setLeft(0.0104166666666667);
-        $spreadsheet->getActiveSheet()->getPageMargins()->setBottom(0.760416666666667);
+        $spreadsheet->getActiveSheet()->getPageMargins()->setBottom(0.860416666666667);
         $spreadsheet->getActiveSheet()->getPageMargins()->setHeader(0.0104166666666667);
         $spreadsheet->getActiveSheet()->getPageMargins()->setFooter(0.0104166666666667);
 
-        $spreadsheet->getActiveSheet()->getPageSetup()->setFitToWidth(0);
-        $spreadsheet->getActiveSheet()->getPageSetup()->setFitToHeight(1);
+        $spreadsheet->getActiveSheet()->getPageSetup()->setFitToWidth(1);
+        $spreadsheet->getActiveSheet()->getPageSetup()->setFitToHeight(0);
 
         $spreadsheet->getActiveSheet()->getPageSetup()->setHorizontalCentered(true);
 
@@ -134,7 +134,7 @@ class Billing_module extends CI_Controller {
 
         $headerLogo->setName('Header logo');
         $headerLogo->setPath("assets/images/company-logo/excel-header.png");
-        $headerLogo->setHeight(180);
+        $headerLogo->setHeight(165);
         $spreadsheet->getActiveSheet()->getHeaderFooter()->addImage($headerLogo, \PhpOffice\PhpSpreadsheet\Worksheet\HeaderFooter::IMAGE_HEADER_CENTER);
         $spreadsheet->getActiveSheet()->getHeaderFooter()->setOddHeader('&C&G');
         
@@ -291,86 +291,6 @@ class Billing_module extends CI_Controller {
         ];
 
         $borderBottomStyle = [
-            'borders' => [
-                'bottom' => [
-                    'borderStyle' => Border::BORDER_THIN,
-                    'color' => ['argb' => 'FF000000'],
-                ],
-            ],
-        ];
-
-        // ------ STYLE ABOVE IS CURRENTLY IN USED
-
-    
-        
-
-        $commentInstructionStyle = [
-            "font" => [
-                "size" => 7
-            ],
-            "alignment" => [
-                "vertical"   => Alignment::VERTICAL_TOP,
-                "horizontal" => Alignment::HORIZONTAL_LEFT,
-                "wrapText"   => true
-            ],
-            'borders' => [
-                'allBorders' => [
-                    'borderStyle' => Border::BORDER_THIN,
-                    'color' => ['argb' => 'FF000000'],
-                ],
-            ],
-        ];
-
-        $approversStyle = [
-            "alignment" => [
-                "vertical"   => Alignment::VERTICAL_CENTER,
-                "horizontal" => Alignment::HORIZONTAL_LEFT,
-                "wrapText"   => true
-            ],
-            'borders' => [
-                'allBorders' => [
-                    'borderStyle' => Border::BORDER_THIN,
-                    'color' => ['argb' => 'FF000000'],
-                ],
-            ],
-        ];
-
-        $amountWordStyle = [
-            "alignment" => [
-                "vertical"   => Alignment::VERTICAL_CENTER,
-                "horizontal" => Alignment::HORIZONTAL_CENTER,
-                "wrapText"   => true
-            ],
-            'borders' => [
-                'allBorders' => [
-                    'borderStyle' => Border::BORDER_THIN,
-                    'color' => ['argb' => 'FF000000'],
-                ],
-            ],
-        ];
-
-        $boldStyle = [
-            "font" => [
-                "bold" => true,
-            ],
-        ];
-
-        
-
-        $sideBorderStyle = [
-            'borders' => [
-                'left' => [
-                    'borderStyle' => Border::BORDER_THIN,
-                    'color' => ['argb' => 'FF000000'],
-                ],
-                'right' => [
-                    'borderStyle' => Border::BORDER_THIN,
-                    'color' => ['argb' => 'FF000000'],
-                ],
-            ],
-        ];
-
-        $bottomBorderStyle = [
             'borders' => [
                 'bottom' => [
                     'borderStyle' => Border::BORDER_THIN,

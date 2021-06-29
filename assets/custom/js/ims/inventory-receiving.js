@@ -1518,14 +1518,15 @@ $(document).ready(function() {
 			
 
 				$(`td .tableSerialBody tr`, this).each(function() {
+					const serialNumber = $('[name="serialNumber"]', this).val()?.trim();
 					let scope = {
-						serialNumber: $('[name="serialNumber"]', this).val()?.trim(),
-						itemID:       itemID,
-					}
+						serialNumber,
+						itemID:       itemID
+					};
+					temp["scopes"].push(scope);
 
 					formData.append(`scopes[${i}][serialNumber]`, serialNumber);
 					formData.append(`scopes[${i}][itemID]`, itemID);
-					temp["scopes"].push(scope);
 				})
 
 				data["items"].push(temp);

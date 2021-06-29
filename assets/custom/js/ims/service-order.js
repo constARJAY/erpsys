@@ -2844,250 +2844,247 @@ $(document).ready(function() {
 	// ----- END DOWNLOAD EXCEL -----
 
 
-})
+	// --------------- DATABASE RELATION ---------------
+	function getConfirmation(method = "submit") {
+		const title = "Service Order";
+		let swalText, swalImg;
 
+		$("#modal_service_order").text().length > 0 && $("#modal_service_order").modal("hide");
 
-
-// --------------- DATABASE RELATION ---------------
-function getConfirmation(method = "submit") {
-	const title = "Service Order";
-	let swalText, swalImg;
-
-	$("#modal_service_order").text().length > 0 && $("#modal_service_order").modal("hide");
-
-	switch (method) {
-		case "save":
-			swalTitle = `SAVE ${title.toUpperCase()}`;
-			swalText  = "Are you sure to save this document?";
-			swalImg   = `${base_url}assets/modal/draft.svg`;
-			break;
-		case "submit":
-			swalTitle = `SUBMIT ${title.toUpperCase()}`;
-			swalText  = "Are you sure to submit this document?";
-			swalImg   = `${base_url}assets/modal/add.svg`;
-			break;
-		case "approve":
-			swalTitle = `APPROVE ${title.toUpperCase()}`;
-			swalText  = "Are you sure to approve this document?";
-			swalImg   = `${base_url}assets/modal/approve.svg`;
-			break;
-		case "deny":
-			swalTitle = `DENY ${title.toUpperCase()}`;
-			swalText  = "Are you sure to deny this document?";
-			swalImg   = `${base_url}assets/modal/reject.svg`;
-			break;
-		case "cancelform":
-			swalTitle = `CANCEL ${title.toUpperCase()}`;
-			swalText  = "Are you sure to cancel this document?";
-			swalImg   = `${base_url}assets/modal/cancel.svg`;
-			break;
-		case "drop":
-			swalTitle = `DROP ${title.toUpperCase()}`;
-			swalText  = "Are you sure to drop this document?";
-			swalImg   = `${base_url}assets/modal/drop.svg`;
-			break;
-		case "uploadcontract":
-			swalTitle = `UPLOAD CONTRACT`;
-			swalText  = "Are you sure to upload this contract?";
-			swalImg   = `${base_url}assets/modal/add.svg`;
-			break;
-		default:
-			swalTitle = `CANCEL ${title.toUpperCase()}`;
-			swalText  = "Are you sure that you want to cancel this process?";
-			swalImg   = `${base_url}assets/modal/cancel.svg`;
-			break;
+		switch (method) {
+			case "save":
+				swalTitle = `SAVE ${title.toUpperCase()}`;
+				swalText  = "Are you sure to save this document?";
+				swalImg   = `${base_url}assets/modal/draft.svg`;
+				break;
+			case "submit":
+				swalTitle = `SUBMIT ${title.toUpperCase()}`;
+				swalText  = "Are you sure to submit this document?";
+				swalImg   = `${base_url}assets/modal/add.svg`;
+				break;
+			case "approve":
+				swalTitle = `APPROVE ${title.toUpperCase()}`;
+				swalText  = "Are you sure to approve this document?";
+				swalImg   = `${base_url}assets/modal/approve.svg`;
+				break;
+			case "deny":
+				swalTitle = `DENY ${title.toUpperCase()}`;
+				swalText  = "Are you sure to deny this document?";
+				swalImg   = `${base_url}assets/modal/reject.svg`;
+				break;
+			case "cancelform":
+				swalTitle = `CANCEL ${title.toUpperCase()}`;
+				swalText  = "Are you sure to cancel this document?";
+				swalImg   = `${base_url}assets/modal/cancel.svg`;
+				break;
+			case "drop":
+				swalTitle = `DROP ${title.toUpperCase()}`;
+				swalText  = "Are you sure to drop this document?";
+				swalImg   = `${base_url}assets/modal/drop.svg`;
+				break;
+			case "uploadcontract":
+				swalTitle = `UPLOAD CONTRACT`;
+				swalText  = "Are you sure to upload this contract?";
+				swalImg   = `${base_url}assets/modal/add.svg`;
+				break;
+			default:
+				swalTitle = `CANCEL ${title.toUpperCase()}`;
+				swalText  = "Are you sure that you want to cancel this process?";
+				swalImg   = `${base_url}assets/modal/cancel.svg`;
+				break;
+		}
+		return Swal.fire({
+			title:              swalTitle,
+			text:               swalText,
+			imageUrl:           swalImg,
+			imageWidth:         200,
+			imageHeight:        200,
+			imageAlt:           "Custom image",
+			showCancelButton:   true,
+			confirmButtonColor: "#dc3545",
+			cancelButtonColor:  "#1a1a1a",
+			cancelButtonText:   "No",
+			confirmButtonText:  "Yes"
+		})
 	}
-	return Swal.fire({
-		title:              swalTitle,
-		text:               swalText,
-		imageUrl:           swalImg,
-		imageWidth:         200,
-		imageHeight:        200,
-		imageAlt:           "Custom image",
-		showCancelButton:   true,
-		confirmButtonColor: "#dc3545",
-		cancelButtonColor:  "#1a1a1a",
-		cancelButtonText:   "No",
-		confirmButtonText:  "Yes"
-	})
-}
 
-function saveServiceOrder(data = null, method = "submit", notificationData = null, callback = null) {
-	if (data) {
-		const confirmation = getConfirmation(method);
-		confirmation.then(res => {
-			if (res.isConfirmed) {
-				$.ajax({
-					method:      "POST",
-					url:         `service_order/saveServiceOrder`,
-					data,
-					cache:       false,
-					async:       false,
-					dataType:    "json",
-					beforeSend: function() {
-						$("#loader").show();
-					},
-					success: function(data) {
-						let result = data.split("|");
-		
-						let isSuccess   = result[0];
-						let message     = result[1];
-						let insertedID  = result[2];
-						let dateCreated = result[3];
+	function saveServiceOrder(data = null, method = "submit", notificationData = null, callback = null) {
+		if (data) {
+			const confirmation = getConfirmation(method);
+			confirmation.then(res => {
+				if (res.isConfirmed) {
+					$.ajax({
+						method:      "POST",
+						url:         `service_order/saveServiceOrder`,
+						data,
+						cache:       false,
+						async:       false,
+						dataType:    "json",
+						beforeSend: function() {
+							$("#loader").show();
+						},
+						success: function(data) {
+							let result = data.split("|");
+			
+							let isSuccess   = result[0];
+							let message     = result[1];
+							let insertedID  = result[2];
+							let dateCreated = result[3];
 
-						let swalTitle;
-						if (method == "submit") {
-							swalTitle = `${getFormCode("SO", dateCreated, insertedID)} submitted successfully!`;
-						} else if (method == "save") {
-							swalTitle = `${getFormCode("SO", dateCreated, insertedID)} saved successfully!`;
-						} else if (method == "cancelform") {
-							swalTitle = `${getFormCode("SO", dateCreated, insertedID)} cancelled successfully!`;
-						} else if (method == "approve") {
-							swalTitle = `${getFormCode("SO", dateCreated, insertedID)} approved successfully!`;
-						} else if (method == "deny") {
-							swalTitle = `${getFormCode("SO", dateCreated, insertedID)} denied successfully!`;
-						} else if (method == "drop") {
-							swalTitle = `${getFormCode("SO", dateCreated, insertedID)} dropped successfully!`;
-						}	
-		
-						if (isSuccess == "true") {
-							setTimeout(() => {
-								// ----- SAVE NOTIFICATION -----
-								if (notificationData) {
-									if (Object.keys(notificationData).includes("tableID")) {
-										insertNotificationData(notificationData);
-									} else {
-										notificationData["tableID"] = insertedID;
-										insertNotificationData(notificationData);
+							let swalTitle;
+							if (method == "submit") {
+								swalTitle = `${getFormCode("SO", dateCreated, insertedID)} submitted successfully!`;
+							} else if (method == "save") {
+								swalTitle = `${getFormCode("SO", dateCreated, insertedID)} saved successfully!`;
+							} else if (method == "cancelform") {
+								swalTitle = `${getFormCode("SO", dateCreated, insertedID)} cancelled successfully!`;
+							} else if (method == "approve") {
+								swalTitle = `${getFormCode("SO", dateCreated, insertedID)} approved successfully!`;
+							} else if (method == "deny") {
+								swalTitle = `${getFormCode("SO", dateCreated, insertedID)} denied successfully!`;
+							} else if (method == "drop") {
+								swalTitle = `${getFormCode("SO", dateCreated, insertedID)} dropped successfully!`;
+							}	
+			
+							if (isSuccess == "true") {
+								setTimeout(() => {
+									// ----- SAVE NOTIFICATION -----
+									if (notificationData) {
+										if (Object.keys(notificationData).includes("tableID")) {
+											insertNotificationData(notificationData);
+										} else {
+											notificationData["tableID"] = insertedID;
+											insertNotificationData(notificationData);
+										}
 									}
-								}
-								// ----- END SAVE NOTIFICATION -----
+									// ----- END SAVE NOTIFICATION -----
 
-								$("#loader").hide();
-								closeModals();
-								Swal.fire({
-									icon:              "success",
-									title:             swalTitle,
-									showConfirmButton: false,
-									timer:             2000,
-								});
-								callback && callback();
+									$("#loader").hide();
+									closeModals();
+									Swal.fire({
+										icon:              "success",
+										title:             swalTitle,
+										showConfirmButton: false,
+										timer:             2000,
+									});
+									callback && callback();
 
-								if (method == "approve" || method == "deny") {
-									$("[redirect=forApprovalTab]").length > 0 && $("[redirect=forApprovalTab]").trigger("click")
-								}
-							}, 500);
-						} else {
+									if (method == "approve" || method == "deny") {
+										$("[redirect=forApprovalTab]").length > 0 && $("[redirect=forApprovalTab]").trigger("click")
+									}
+								}, 500);
+							} else {
+								setTimeout(() => {
+									$("#loader").hide();
+									Swal.fire({
+										icon:              "danger",
+										title:             message,
+										showConfirmButton: false,
+										timer:             2000,
+									});
+								}, 500);
+							}
+						},
+						error: function() {
 							setTimeout(() => {
 								$("#loader").hide();
-								Swal.fire({
-									icon:              "danger",
-									title:             message,
-									showConfirmButton: false,
-									timer:             2000,
-								});
+								showNotification("danger", "System error: Please contact the system administrator for assistance!");
 							}, 500);
 						}
-					},
-					error: function() {
+					}).done(function() {
 						setTimeout(() => {
 							$("#loader").hide();
-							showNotification("danger", "System error: Please contact the system administrator for assistance!");
 						}, 500);
-					}
-				}).done(function() {
-					setTimeout(() => {
-						$("#loader").hide();
-					}, 500);
-				})
-			} else {
-				if (res.dismiss === "cancel" && method != "submit") {
-					if (method != "deny") {
-						if (method != "cancelform") {
-							callback && callback();
+					})
+				} else {
+					if (res.dismiss === "cancel" && method != "submit") {
+						if (method != "deny") {
+							if (method != "cancelform") {
+								callback && callback();
+							}
+						} else {
+							$("#modal_service_order").text().length > 0 && $("#modal_service_order").modal("show");
 						}
-					} else {
-						$("#modal_service_order").text().length > 0 && $("#modal_service_order").modal("show");
-					}
-				} else if (res.isDismissed) {
-					if (method == "deny") {
-						$("#modal_service_order").text().length > 0 && $("#modal_service_order").modal("show");
+					} else if (res.isDismissed) {
+						if (method == "deny") {
+							$("#modal_service_order").text().length > 0 && $("#modal_service_order").modal("show");
+						}
 					}
 				}
-			}
-		});
+			});
+		}
+		return false;
 	}
-	return false;
-}
 
-function saveServiceOrderContract(data = null, filename = null) {
-	if (data) {
-		const confirmation = getConfirmation("uploadcontract");
-		confirmation.then(res => {
-			if (res.isConfirmed) {
-				$.ajax({
-					method:      "POST",
-					url:         `service_order/saveServiceOrderContract`,
-					data,
-					processData: false,
-					contentType: false,
-					global:      false,
-					cache:       false,
-					async:       false,
-					dataType:    "json",
-					beforeSend: function() {
-						$("#loader").show();
-					},
-					success: function(data) {
-						let result = data.split("|");
-		
-						let isSuccess   = result[0];
-						let message     = result[1];
-						let insertedID  = result[2];
-						let dateCreated = result[3];
-		
-						if (isSuccess == "true") {
+	function saveServiceOrderContract(data = null, filename = null) {
+		if (data) {
+			const confirmation = getConfirmation("uploadcontract");
+			confirmation.then(res => {
+				if (res.isConfirmed) {
+					$.ajax({
+						method:      "POST",
+						url:         `service_order/saveServiceOrderContract`,
+						data,
+						processData: false,
+						contentType: false,
+						global:      false,
+						cache:       false,
+						async:       false,
+						dataType:    "json",
+						beforeSend: function() {
+							$("#loader").show();
+						},
+						success: function(data) {
+							let result = data.split("|");
+			
+							let isSuccess   = result[0];
+							let message     = result[1];
+							let insertedID  = result[2];
+							let dateCreated = result[3];
+			
+							if (isSuccess == "true") {
+								setTimeout(() => {
+									$("#loader").hide();
+									closeModals();
+									Swal.fire({
+										icon:              "success",
+										title:             "CONTRACT UPLOADED SUCCESSFULLY!",
+										showConfirmButton: false,
+										timer:             2000,
+									});
+									$("#displayContractParent").html(displayContract(message, true));
+								}, 500);
+							} else {
+								setTimeout(() => {
+									$("#loader").hide();
+									Swal.fire({
+										icon:              "danger",
+										title:             "CONTRACT FAILED TO UPLOAD",
+										showConfirmButton: false,
+										timer:             2000,
+									});
+								}, 500);
+							}
+						},
+						error: function() {
 							setTimeout(() => {
 								$("#loader").hide();
-								closeModals();
-								Swal.fire({
-									icon:              "success",
-									title:             "CONTRACT UPLOADED SUCCESSFULLY!",
-									showConfirmButton: false,
-									timer:             2000,
-								});
-								$("#displayContract").text(message, true);
-							}, 500);
-						} else {
-							setTimeout(() => {
-								$("#loader").hide();
-								Swal.fire({
-									icon:              "danger",
-									title:             "CONTRACT FAILED TO UPLOAD",
-									showConfirmButton: false,
-									timer:             2000,
-								});
+								showNotification("danger", "System error: Please contact the system administrator for assistance!");
 							}, 500);
 						}
-					},
-					error: function() {
+					}).done(function() {
 						setTimeout(() => {
 							$("#loader").hide();
-							showNotification("danger", "System error: Please contact the system administrator for assistance!");
+							$("[type=file][name=contractFile]").val("");
 						}, 500);
-					}
-				}).done(function() {
-					setTimeout(() => {
-						$("#loader").hide();
-						$("[type=file][name=contractFile]").val("");
-					}, 500);
-				})
-			} else {
-				$("[type=file][name=contractFile]").val("");
-			}
-		});
+					})
+				} else {
+					$("[type=file][name=contractFile]").val("");
+				}
+			});
+		}
+		return false;
 	}
-	return false;
-}
 
-// --------------- END DATABASE RELATION ---------------
+	// --------------- END DATABASE RELATION ---------------
+})

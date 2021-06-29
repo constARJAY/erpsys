@@ -86,6 +86,7 @@ class ServiceOrder_model extends CI_Model {
                 $data["scheduleDate"]     = date("F d, Y", strtotime($soData->scheduleDate)) ?? "-";
                 $data["total"]            = $soData->total ?? "0";
                 $data["discount"]         = $soData->discount ?? "0";
+                $data["discountType"]     = $soData->discountType;
                 $data["totalAmount"]      = $soData->totalAmount ?? "0";
                 $data["vatSales"]         = $soData->vatSales ?? "0";
                 $data["vat"]              = $soData->vat ?? "0";

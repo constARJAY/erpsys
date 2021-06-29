@@ -217,7 +217,7 @@ class Service_order extends CI_Controller {
         $protection->setFormatCells(true);
         
         $spreadsheet->getDefaultStyle()->getFont()->setName('Segoe UI');
-        $spreadsheet->getDefaultStyle()->getFont()->setSize(9);
+        $spreadsheet->getDefaultStyle()->getFont()->setSize(10);
         $spreadsheet->getDefaultStyle()->getAlignment()->setVertical(Alignment::VERTICAL_BOTTOM);
         $spreadsheet->getDefaultStyle()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
         $spreadsheet->getActiveSheet()->getDefaultRowDimension()->setRowHeight(17);
@@ -231,15 +231,15 @@ class Service_order extends CI_Controller {
             ->getPageSetup()
             ->setPaperSize(\PhpOffice\PhpSpreadsheet\Worksheet\PageSetup::PAPERSIZE_A4);
 
-        $spreadsheet->getActiveSheet()->getPageMargins()->setTop(1.60416666666667);
+        $spreadsheet->getActiveSheet()->getPageMargins()->setTop(1.9541666666667);
         $spreadsheet->getActiveSheet()->getPageMargins()->setRight(0.0104166666666667);
         $spreadsheet->getActiveSheet()->getPageMargins()->setLeft(0.0104166666666667);
-        $spreadsheet->getActiveSheet()->getPageMargins()->setBottom(0.760416666666667);
+        $spreadsheet->getActiveSheet()->getPageMargins()->setBottom(0.860416666666667);
         $spreadsheet->getActiveSheet()->getPageMargins()->setHeader(0.0104166666666667);
         $spreadsheet->getActiveSheet()->getPageMargins()->setFooter(0.0104166666666667);
 
-        $spreadsheet->getActiveSheet()->getPageSetup()->setFitToWidth(0);
-        $spreadsheet->getActiveSheet()->getPageSetup()->setFitToHeight(1);
+        $spreadsheet->getActiveSheet()->getPageSetup()->setFitToWidth(1);
+        $spreadsheet->getActiveSheet()->getPageSetup()->setFitToHeight(0);
 
         $spreadsheet->getActiveSheet()->getPageSetup()->setHorizontalCentered(true);
 
@@ -248,13 +248,13 @@ class Service_order extends CI_Controller {
 
         $headerLogo->setName('Header logo');
         $headerLogo->setPath("assets/images/company-logo/excel-header.png");
-        $headerLogo->setHeight(150);
+        $headerLogo->setHeight(160);
         $spreadsheet->getActiveSheet()->getHeaderFooter()->addImage($headerLogo, \PhpOffice\PhpSpreadsheet\Worksheet\HeaderFooter::IMAGE_HEADER_CENTER);
         $spreadsheet->getActiveSheet()->getHeaderFooter()->setOddHeader('&C&G');
         
         $footerLogo->setName('Footer logo');
         $footerLogo->setPath("assets/images/company-logo/excel-footer.png");
-        $footerLogo->setHeight(60);
+        $footerLogo->setHeight(70);
         $spreadsheet->getActiveSheet()->getHeaderFooter()->addImage($footerLogo, \PhpOffice\PhpSpreadsheet\Worksheet\HeaderFooter::IMAGE_FOOTER_CENTER);
         $spreadsheet->getActiveSheet()->getHeaderFooter()->setOddFooter('&C&G');
         // ----- END PAGE SETUP -----
@@ -569,7 +569,8 @@ class Service_order extends CI_Controller {
         $sheet->getStyle("B$rowNumber:I".($rowNumber+3))->applyFromArray($commentInstructionStyle);
         $sheet->setCellValue("J$rowNumber", "Discount");
         $sheet->getStyle("J$rowNumber")->applyFromArray($sideBorderStyle);
-        $sheet->setCellValue("K$rowNumber", formatAmount($data["discount"] ?? 0.00, true));
+        $discountValue = $data["discountType"] == "percent" ? formatAmount($data["discount"] ?? 0.00)."%" : formatAmount($data["discount"] ?? 0.00, true);
+        $sheet->setCellValue("K$rowNumber", $discountValue);
         $sheet->getStyle("K$rowNumber")->applyFromArray($sideBorderStyle);
         $sheet->getStyle("K$rowNumber")->applyFromArray($amountFigureStyle);
         $sheet->getRowDimension("$rowNumber")->setRowHeight(15);

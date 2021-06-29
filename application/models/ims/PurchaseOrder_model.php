@@ -161,6 +161,7 @@ class PurchaseOrder_model extends CI_Model {
                 $data["deliveryDate"]     = date("F d, Y", strtotime($purchaseOrderData->deliveryDate)) ?? "-";
                 $data["total"]            = $purchaseOrderData->total ?? "0";
                 $data["discount"]         = $purchaseOrderData->discount ?? "0";
+                $data["discountType"]     = $purchaseOrderData->discountType;
                 $data["totalAmount"]      = $purchaseOrderData->totalAmount ?? "0";
                 $data["vatSales"]         = $purchaseOrderData->vatSales ?? "0";
                 $data["vat"]              = $purchaseOrderData->vat ?? "0";

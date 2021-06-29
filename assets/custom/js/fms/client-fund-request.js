@@ -178,14 +178,13 @@ $(document).ready(function() {
 					{ targets: 0,  width: 100 },
 					{ targets: 1,  width: 150 },
 					{ targets: 2,  width: 100 },
-					{ targets: 3,  width: 100 },
-					{ targets: 4,  width: 300 },
-					{ targets: 5,  width: 100 },
-					{ targets: 6,  width: 350 },
+					{ targets: 3,  width: 300 },
+					{ targets: 4,  width: 100 },
+					{ targets: 5,  width: 350 },
+					{ targets: 6,  width: 200 },
 					{ targets: 7,  width: 200 },
 					{ targets: 8,  width: 200 },
 					{ targets: 9,  width: 200 },
-					{ targets: 10,  width: 200 },
 				],
 			});
 
@@ -202,14 +201,13 @@ $(document).ready(function() {
 					{ targets: 0,  width: 100 },
 					{ targets: 1,  width: 150 },
 					{ targets: 2,  width: 100 },
-					{ targets: 3,  width: 100 },
-					{ targets: 4,  width: 300 },
-					{ targets: 5,  width: 100 },
-					{ targets: 6,  width: 350 },
+					{ targets: 3,  width: 300 },
+					{ targets: 4,  width: 100 },
+					{ targets: 5,  width: 350 },
+					{ targets: 6,  width: 200 },
 					{ targets: 7,  width: 200 },
 					{ targets: 8,  width: 200 },
 					{ targets: 9,  width: 200 },
-					{ targets: 10,  width: 200 },
 				],
 			});
 
@@ -324,7 +322,6 @@ $(document).ready(function() {
                     <th>Document No.</th>
                     <th>Prepared By</th>
 					<th>Amount</th>
-					<th>Client Code</th>
 					<th>Client Name</th>
                     <th>Current Approver</th>
                     <th>Date Created</th>
@@ -375,8 +372,11 @@ $(document).ready(function() {
 					<td>${getFormCode("CFR", createdAt, clientFundRequestID )}</td>
 					<td>${fullname}</td>
 					<td class="text-right">${formatAmount(clientFundRequestAmount, true)}</td>
-					<td>${clientCode}</td>
-					<td>${clientName}</td>
+					<td>
+					<div>${clientName || '-'}
+					</div>
+					<small style="color:#848482;">${clientCode || '-'}</small>
+					</td>
 					<td>
 						${employeeFullname(getCurrentApprover(approversID, approversDate, clientFundRequestStatus, true))}
 					</td>
@@ -426,7 +426,6 @@ $(document).ready(function() {
                     <th>Document No.</th>
                     <th>Prepared By</th>
 					<th>Amount</th>
-					<th>Client Code</th>
 					<th>Client Name</th>
                     <th>Current Approver</th>
                     <th>Date Created</th>
@@ -477,8 +476,11 @@ $(document).ready(function() {
                 <td>${getFormCode("CFR", createdAt, clientFundRequestID )}</td>
                 <td>${fullname}</td>
 				<td class="text-right">${formatAmount(clientFundRequestAmount, true)}</td>
-				<td>${clientCode}</td>
-				<td>${clientName}</td>
+				<td>
+					<div>${clientName || '-'}
+					</div>
+					<small style="color:#848482;">${clientCode || '-'}</small>
+					</td>
                 <td>
                     ${employeeFullname(getCurrentApprover(approversID, approversDate, clientFundRequestStatus, true))}
                 </td>
@@ -1605,7 +1607,7 @@ $(document).ready(function() {
                         ${buttonProjectAddDeleteRow}
                     </div>
                     <div class="font-weight-bolder align-self-start" style="font-size: 1rem;">
-                        <span>Total Amount: &nbsp;</span>
+                        <span>Total Amount Requested: &nbsp;</span>
                         <span class="text-dark" style="font-size: 1.2em" id="totalAmount" name="totalAmount" totalvalue="1" project="true">${formatAmount(clientFundRequestAmount, true)}</span>
 						<p class="text-danger" id="invalid-message" style="font-size:9px;color:red;"></p>
 						</div>
