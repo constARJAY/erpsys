@@ -51,23 +51,26 @@
                             
                             <div class="col-md-4">
                                 <div class="form-group">
-                                    <label>Classification Name <span class="text-danger font-weight-bold">*</span></label>
+                                    <label>Classification Name </label>
                                     <select
                                         class="form-control select2 validate"
                                         id="input_classificationID"
                                         name="classificationID"
+                                        style="width: 100%"
                                         required>
+                                        <option selected disabled>Select Item Classification</option>
                                     </select>
                                     <div class="invalid-feedback d-block" id="invalid-input_classificationID"></div>
                                 </div>
                             </div>    
                             <div class="col-md-4">
                                 <div class="form-group">
-                                    <label>Category Name <span class="text-danger font-weight-bold">*</span></label>
+                                    <label>Category Name </label>
                                     <select
                                         class="form-control select2 validate"
                                         id="input_categoryID"
                                         name="CategoryID"
+                                        style="width: 100%"
                                         required>
                                         <option value=""selected disabled>Select Category Name</option>
                                     </select>
@@ -154,7 +157,8 @@
     const data = getTableData("ims_inventory_classification_tbl", 
         "classificationID ,classificationName", "classificationStatus = 1", "");
       
-            let html = ` <option value="" disabled selected ${!param && "selected"}>Select Item Classification</option>`;
+            let html = ` <option value="0" ${!param && "selected"}>All</option>`;
+          
             data.map((item, index, array) => {
                 html += `<option value="${item.classificationID}" ${param && item.classificationID == param[0].classificationID && "selected"}>${item.classificationName}</option>`;
             })

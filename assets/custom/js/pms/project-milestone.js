@@ -109,7 +109,7 @@ $(document).ready(function () {
 		let button = projectMilestoneID
 			? `
         <button 
-            class="btn btn-update " 
+            class="btn btn-update px-5 p-2" 
             id="btnUpdate" 
             projectMilestoneID="${projectMilestoneID}">
             <i class="fas fa-save"></i>

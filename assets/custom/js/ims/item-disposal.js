@@ -1633,13 +1633,15 @@ $(document).ready(function() {
 			if (revise) {
 				const action = revise && "insert" || (id && feedback ? "update" : "insert");
 				const data   = getDisposalData(action, "save", "0", id);
-				data["disposalStatus"]   = 0;
-				data["reviseDisposalID"] = id;
-				delete data["disposalID"];
-				// data.append("disposalStatus", 0);
-				// data.append("revisedisposalID", id);
-				// data.delete("disposalID");
-	
+				data.append("disposalStatus", 0);
+				if (!isFromCancelledDocument) {
+					data.append("reviseDisposalID", id);
+					data.delete("disposalID");
+				} else {
+					data.append("disposalID", id);
+					data.delete("action");
+					data.append("action", "update");
+				}
 				saveDisposalItem(data, "save", null, pageContent);
 			} else {
 				$("#page_content").html(preloader);
@@ -1653,7 +1655,8 @@ $(document).ready(function() {
 		} else {
 			const action = id && feedback ? "update" : "insert";
 			const data   = getDisposalData(action, "save", "0", id);
-			data["disposalStatus"] = 0;
+			data.append("disposalStatus", 0);
+			//data["disposalStatus"] = 0;
 			//data.append("disposalStatus", 0);
 
 			saveDisposalItem(data, "save", null, pageContent);

@@ -1556,7 +1556,7 @@ $(document).ready(function() {
 
 			if (revise) {
 				if (!isFromCancelledDocument) {
-					data["reviseServiceRequisitionID"] = id;
+					data["reviseSignOffID"] = id;
 					delete data["signOffID"];
 				}
 			}

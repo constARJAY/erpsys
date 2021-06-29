@@ -64,6 +64,7 @@ class InventoryStockIn_model extends CI_Model {
             }
         return "true|Inventory Stock In Successfully";   
          }else{
+             
             //print_r("wilson");
             //exit;
         //kung may serial serial
@@ -88,8 +89,10 @@ class InventoryStockIn_model extends CI_Model {
             $this->db->insert_batch('ims_stock_in_tbl', $record);
             $id = $this->db->insert_id();
 
-            $query = $this->db->query("SELECT IFNULL(isi.itemID,'0') as itemID, isi.itemName,isit.itemName as totalitemname, (sum(stockInQuantity) + SUM(IFNULL(quantity,0))) AS quantity, stockInLocationID FROM ims_stock_in_tbl AS isi
-            LEFT JOIN ims_stock_in_total_tbl AS isit ON isi.itemID = isit.itemID AND  isi.stockInLocationID = isit.inventoryStorageID WHERE isi.inventoryReceivingID =$receivedID GROUP BY itemID, stockInLocationID");
+            $query = $this->db->query("SELECT IFNULL(isi.itemID,'0') as itemID, isi.itemName,isit.itemName as totalitemname, (sum(stockInQuantity) + IFNULL(quantity,0)) AS quantity, stockInLocationID 
+            FROM ims_stock_in_tbl AS isi
+            LEFT JOIN ims_stock_in_total_tbl AS isit ON isi.itemID = isit.itemID AND  isi.stockInLocationID = isit.inventoryStorageID
+            WHERE isi.inventoryReceivingID =$receivedID GROUP BY itemID, stockInLocationID");
     
                 foreach ($query->result() as $row)
                 {
@@ -105,7 +108,7 @@ class InventoryStockIn_model extends CI_Model {
                             'itemName'          => $itemName,
                             'quantity'          => $quantity,
                             'inventoryStorageID'  =>$stockInLocationID);
-                            if($row->totalitemname =="" || $row->totalitemname ==NULL){
+                            if($row->totalitemname =="" || $row->totalitemname ==null){
                                 $this->db->insert('ims_stock_in_total_tbl',$data);   
                             }else{
                                 $this->db->where($array);  

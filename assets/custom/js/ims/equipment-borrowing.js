@@ -342,6 +342,7 @@ $(document).ready(function() {
 				borrowingStatus,
 				borrowingRemarks,
 				submittedAt,
+				projectListCode,
 				createdAt,
 			} = item;
 
@@ -365,7 +366,10 @@ $(document).ready(function() {
 				<tr class="${btnClass}" id="${encryptString(borrowingID )}">
 					<td>${getFormCode("EBF", createdAt, borrowingID)}</td>
 					<td>${fullname}</td>
-					<td>${projectListName || "-"}</td>
+					<td>
+					<div>${projectListName || "-"}</div>
+					<small style="color:#848482;">${projectListCode || '-'}</small>
+					</td>
 					<td>${borrowingReason}</td>
 					<td>
 						${employeeFullname(getCurrentApprover(approversID, approversDate, borrowingStatus, true))}
@@ -438,6 +442,7 @@ $(document).ready(function() {
 				submittedAt,
 				createdAt,
 				projectListName,
+				projectListCode
 			} = item;
 
 			let remarks       = borrowingRemarks ? borrowingRemarks : "-";
@@ -459,7 +464,10 @@ $(document).ready(function() {
             <tr class="${btnClass}" id="${encryptString(borrowingID )}">
                 <td>${getFormCode("EBF", createdAt, borrowingID)}</td>
                 <td>${fullname}</td>
-				<td>${projectListName || "-"}</td>
+				<td>
+				<div>${projectListName || "-"}</div>
+				<small style="color:#848482;">${projectListCode || '-'}</small>
+				</td>
 				<td>${borrowingReason}</td>
                 <td>
                     ${employeeFullname(getCurrentApprover(approversID, approversDate, borrowingStatus, true))}
@@ -1757,6 +1765,7 @@ $(document).ready(function() {
 	// ----- SAVE CLOSE FORM -----
 	$(document).on("click", "#btnBack", function () {
 		const id         = decryptString($(this).attr("borrowingID"));
+		const isFromCancelledDocument = $(this).attr("cancel") == "true";
 		const revise     = $(this).attr("revise") == "true";
 		const employeeID = $(this).attr("employeeID");
 		const feedback   = $(this).attr("code") || getFormCode("EBF", dateToday(), id);
@@ -1765,11 +1774,22 @@ $(document).ready(function() {
 		if (status != "false" && status != 0) {
 			
 			if (revise) {
-				const action = revise && "insert" || (id && feedback ? "update" : "insert");
+				const action = revise && !isFromCancelledDocument && "insert" || (id ? "update" : "insert");
+				//const action = revise && "insert" || (id && feedback ? "update" : "insert");
 				const data   = getBorrowingData(action, "save", "0", id);
-				data["borrowingStatus"]   = 0;
-				data["reviseBorrowingID"] = id;
-				delete data["borrowingID"];
+				data.append("borrowingStatus", 0);
+				if (!isFromCancelledDocument) {
+					data.append("reviseBorrowingID", id);
+					data.delete("borrowingID");
+				} else {
+					data.append("borrowingID", id);
+					data.delete("action");
+					data.append("action", "update");
+				}
+
+				// data["borrowingStatus"]   = 0;
+				// data["reviseBorrowingID"] = id;
+				// delete data["borrowingID"];
 				// data.append("borrowingStatus", 0);
 				// data.append("reviseborrowingID", id);
 				// data.delete("borrowingID");
@@ -1787,8 +1807,9 @@ $(document).ready(function() {
 		} else {
 			const action = id && feedback ? "update" : "insert";
 			const data   = getBorrowingData(action, "save", "0", id);
+			data.append("borrowingStatus", 0);
 			//data.append("borrowingStatus", 0);
-			data["borrowingStatus"] = 0;
+			//data["borrowingStatus"] = 0;
 
 			saveReturnItem(data, "save", null, pageContent);
 		}
@@ -1826,16 +1847,15 @@ $(document).ready(function() {
 
 		//let condition = $("[name=borrowedPurpose]").hasClass("is-invalid");
 		let condition2 = $("[name=barcode]").hasClass("is-invalid");
+		//alert(condition2);
 
 		if(!condition2){
-
 			const id           = decryptString($(this).attr("borrowingID"));
 			const revise       = $(this).attr("revise") == "true";
 			const isFromCancelledDocument = $(this).attr("cancel") == "true";
 			const validate     = validateForm("form_purchase_request");
 			
 			removeIsValid("#tableProjectRequestItems");
-
 			if (validate) {
 				const action = revise && !isFromCancelledDocument && "insert" || (id ? "update" : "insert");
 				const data   = getBorrowingData(action, "submit", "1", id);
@@ -1846,15 +1866,14 @@ $(document).ready(function() {
 					data.delete("borrowingID");
 					}
 				}
-	
 				let approversID = "", approversDate = "";
 				for (var i of data) {
 					if (i[0] == "approversID")   approversID   = i[1];
 					if (i[0] == "approversDate") approversDate = i[1];
 				}
 	
-				const employeeID = getNotificationEmployeeID(data["approversID"], data["approversDate"], true);
-				console.log(employeeID);
+				const employeeID = getNotificationEmployeeID(approversID, approversDate, true);
+				//console.log(employeeID);
 				let notificationData = false;
 				if (employeeID != sessionID) {
 					notificationData = {
