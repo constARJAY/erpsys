@@ -45,7 +45,7 @@ class ListStock_model extends CI_Model {
             LEFT JOIN ims_material_withdrawal_details_tbl AS imwd ON imwd.materialUsageID = imu.materialUsageID
             LEFT JOIN ims_inventory_item_tbl AS iii ON imwd.itemID =iii.itemID 
             $where imu.materialUsageStatus = 2 
-            GROUP BY imwd.itemID AND imwd.inventoryStorageID
+            GROUP BY imwd.itemID, imwd.inventoryStorageID
             /* End material_usage */
             UNION ALL
             /*  Start material withdrawal*/
@@ -57,7 +57,7 @@ class ListStock_model extends CI_Model {
             LEFT JOIN ims_material_withdrawal_details_tbl AS imwd ON imwd.materialWithdrawalID = imu.materialWithdrawalID
             LEFT JOIN ims_inventory_item_tbl AS iii ON imwd.itemID =iii.itemID 
             $where imu.materialWithdrawalStatus = 2  AND materialUsageID is null
-            GROUP BY imwd.itemID AND imwd.inventoryStorageID
+            GROUP BY imwd.itemID, imwd.inventoryStorageID
             /* End material Withdrawal */
             UNION ALL
             /*Start borrowing query */
@@ -69,7 +69,7 @@ class ListStock_model extends CI_Model {
             LEFT JOIN ims_borrowing_details_tbl AS ibd ON ibd.borrowingID = ib.borrowingID
             LEFT JOIN ims_inventory_item_tbl AS iii ON ibd.itemID =iii.itemID 
             $where borrowingStatus = 2 
-            GROUP BY ibd.itemID AND ibd.inventoryStorageID
+            GROUP BY ibd.itemID, ibd.inventoryStorageID
             /*End borrowing query */
             UNION ALL
             /* Start return query */
@@ -81,7 +81,7 @@ class ListStock_model extends CI_Model {
             LEFT JOIN ims_return_item_details_tbl AS irid ON iri.returnItemID = irid.returnItemID
             LEFT JOIN ims_inventory_item_tbl AS iii ON irid.itemID =iii.itemID 
             $where iri.returnItemStatus = 2 
-            GROUP BY irid.itemID AND irid.inventoryStorageID
+            GROUP BY irid.itemID, irid.inventoryStorageID
             /* End return query*/
             UNION ALL
             /* start of disposal query*/
@@ -90,10 +90,10 @@ class ListStock_model extends CI_Model {
             '' AS borrowedQuantity, '' AS returnQuantity, '' AS transferredQuantity, SUM(quantity) AS disposalQuantity, '0' As endQuantity,
             '' AS reorderpoint, '' as stockInQuantity
             FROM ims_inventory_disposal_tbl AS iid
-            LEFT JOIN ims_inventory_disposal_details_tbl AS iidd ON iid.disposalID = iid.disposalID
+            LEFT JOIN ims_inventory_disposal_details_tbl AS iidd ON iid.disposalID = iidd.disposalID
             LEFT JOIN ims_inventory_item_tbl AS iii ON iidd.itemID =iii.itemID 
             $where iid.disposalStatus = 2 
-            GROUP BY iidd.itemID AND iidd.inventoryStorageID
+            GROUP BY iidd.itemID,iidd.inventoryStorageID
         )a GROUP BY itemID,inventoryStorageID";
         return $this->db->query($sql)->result_array();
 

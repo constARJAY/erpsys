@@ -803,8 +803,8 @@ $(document).ready(function() {
 					<div class="">
 					<input 
 						type="text" 
-						class="form-control  number quantity input-quantity text-center"
-						min="1" 
+						class="form-control  quantity input-quantity text-center"
+						min="0.01" 
 						data-allowcharacters="[0-9]" 
 						max="999999999" 
 						id="quantity" 
@@ -831,7 +831,7 @@ $(document).ready(function() {
 				<div class="">
 					<input 
 						type="text" 
-						class="form-control validate disposalDetailRemarks text-center"
+						class="form-control validate disposalDetailRemarks"
 						data-allowcharacters="[a-z][A-Z][0-9][ ][.][,][-][()]['][/]" 
 						min="2"
 						max="250" 
@@ -867,6 +867,8 @@ $(document).ready(function() {
 			$("td .itemName", this).attr("id", `itemName${i}`);
 			$("td .serialnumber", this).attr("id", `serialnumber${i}`);
 			$("td .quantity", this).attr("id", `quantity${i}`);
+			$("td .quantity [name=quantity]", this).attr("project", `true`);
+
 			$("td .unitofmeasurement", this).attr("id", `unitofmeasurement${i}`);
 			$("td .StorageCode", this).attr("id", `StorageCode${i}`);
 			$("td .StorageName", this).attr("id", `StorageName${i}`);
@@ -968,14 +970,11 @@ $(document).ready(function() {
 				if(barcode.length  ==17){
 	
 					
-					if(itemName != null){
-	
-						
+					if(itemName != null){					
 						let counter =1;
 						if(barcodeArrayLength !=0){
 							for(var loop1 =0;loop1<barcodeArrayLength; loop1++ ){
 								
-	
 								if(barcodeArray[loop1] == barcode && barcodeLocationArray[loop1] != barcodeID){
 									// barcodeArray[loop1] = barcodeval;
 									$(this).closest("tr").find("[name=barcode]").removeClass("is-valid").addClass("is-invalid");
@@ -1050,8 +1049,6 @@ $(document).ready(function() {
 					
 			}
 		})
-
-
 	// ----- KEYUP QUANTITY OR UNITCOST -----
 	$(document).on("change", "[name=quantity]", function() {
 		const index     		= $(this).closest("tr").first().attr("index");
@@ -1318,7 +1315,7 @@ $(document).ready(function() {
                 </div>
             </div>
         </div>
-        <div class="row" id="form_purchase_request">
+        <div class="row" id="form_disposal">
             <div class="col-md-4 col-sm-12">
                 <div class="form-group">
                     <label>Prepared By</label>
@@ -1703,12 +1700,12 @@ $(document).ready(function() {
 	$(document).on("click", "#btnSubmit", function () {
 
 		//let condition = $("[name=quantity]").hasClass("is-invalid");
-		let condition2 = $("[name=barcode]").hasClass("is-invalid");
+		let condition2 = $("[name=quantity]").hasClass("is-invalid");
 		if(!condition2){
 		const id           = decryptString($(this).attr("disposalID"));
 		const revise       = $(this).attr("revise") == "true";
 		const isFromCancelledDocument = $(this).attr("cancel") == "true";
-		const validate     = validateForm("form_purchase_request");
+		const validate     = validateForm("form_disposal");
 		removeIsValid("#tableProjectRequestItems");
 		if (validate) {
 			const action = revise && !isFromCancelledDocument && "insert" || (id ? "update" : "insert");
