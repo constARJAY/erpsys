@@ -40,10 +40,16 @@ class Inventory_receiving extends CI_Controller {
         $updatedBy                  = $this->input->post("updatedBy");
         $createdAt                  = $this->input->post("createdAt");
         $items                      = $this->input->post("items") ?? null;
-        $scopes                      = $this->input->post("scopes") ?? null;
-  
+       
+        // echo "<pre>";
+        // print_r($items);
+        // echo json_encode($items);
+        // exit;
 
         $lastApproveCondition       = $this->input->post("lastApproveCondition");
+
+           
+      
 
         $inventoryReceivingData = [
             "reviseInventoryReceivingID" => $reviseInventoryReceivingID,
@@ -97,6 +103,7 @@ class Inventory_receiving extends CI_Controller {
                 $this->inventoryreceiving->deleteItemAndSerial($inventoryReceivingID);
             }
         }
+    
 
         $saveInventoryReceivingData = $this->inventoryreceiving->saveInventoryReceivingData($action, $inventoryReceivingData, $inventoryReceivingID);
 
@@ -116,8 +123,12 @@ class Inventory_receiving extends CI_Controller {
                             "createdBy"            => $updatedBy,
                             "updatedBy"            => $updatedBy,
                         ];
+
+                        $scopes = $item["scopes"];
+
+                      
                         
-                        $saveServices = $this->inventoryreceiving->saveServices($service, $scopes, $inventoryReceivingID);
+                        $saveServices = $this->inventoryreceiving->saveServices($service, $scopes, $inventoryReceivingID,$item["itemID"]);
                     }
                     
                     if ($inventoryReceivingData["inventoryReceivingStatus"] == "2") {

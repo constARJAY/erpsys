@@ -2462,7 +2462,7 @@ $(document).ready(function() {
 				data.append("reviseServiceCompletionID", id);
 				data.delete("serviceCompletionID");
 			} else {
-				data.append("serviceOrderID", id);
+				// data.append("serviceOrderID", id);
 				data.delete("action");
 				data.append("action", "update");
 			}

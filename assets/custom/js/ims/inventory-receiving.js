@@ -594,6 +594,7 @@ $(document).ready(function() {
 			} else {
 				if (inventoryReceivingStatus == 1) {
 					if (isImCurrentApprover(approversID, approversDate)) {
+					
 						button = `
 						<button 
 							class="btn btn-submit px-5 p-2" 
@@ -805,7 +806,7 @@ $(document).ready(function() {
 			$(`[name="serialNumber"]`).each(function(i) {
 				var tmp_Checkserial = $(this).val();
 				var tmp_addressID = $(this).attr("id");
-				console.log(addressID +" != "+  tmp_addressID)
+				// console.log(addressID +" != "+  tmp_addressID)
 					if(addressID !=  tmp_addressID){
 						if(tmp_Checkserial == serialval){
 							$parent.removeClass("is-valid").addClass("is-invalid");
@@ -888,7 +889,7 @@ $(document).ready(function() {
 				const scopeData = getTableData(
 					`ims_receiving_serial_number_tbl`,
 					``,
-					`inventoryReceivingDetailsID = ${inventoryReceivingDetailsID}`
+					`inventoryReceivingDetailsID = ${inventoryReceivingDetailsID} AND  itemID = ${itemID}`
 				);
 	
 			
@@ -1402,7 +1403,7 @@ $(document).ready(function() {
 
 
 	// ----- GET INVENTORY RECEIVING DATA -----
-	function getInventoryReceivingData(action = "insert", method = "submit", status = "1", id = null, currentStatus = "0", isObject = false) {
+	function getInventoryReceivingData(action = "insert", method = "submit", status = "1", id = null, currentStatus = "0", isObject = true) {
 
 		/**
 		 * ----- ACTION ---------
@@ -1425,19 +1426,21 @@ $(document).ready(function() {
 		 *    > approve
 		 * ----- END METHOD -----
 		 */
-		 console.log("id "+ id)
-		 console.log("status "+ status)
-		 let data = { items: [] }, formData = new FormData;
-		const approversID = method != "approve" && moduleApprover;
+		//  console.log("id "+ id)
+		//  console.log("action "+ action)
+		//  console.log("status "+ status)
+		 let data = { items: [] };
+		 //, formData = new FormData;
+		 const approversID = method != "approve" && moduleApprover;
 
 		if (id) {
 			data["inventoryReceivingID"] = id;
-			formData.append("inventoryReceivingID", id);
+			// formData.append("inventoryReceivingID", id);
 
 
 			if (status != "2") {
 				data["inventoryReceivingStatus"] = status;
-				formData.append("inventoryReceivingStatus", status);
+				// formData.append("inventoryReceivingStatus", status);
 
 			}
 		}
@@ -1446,9 +1449,9 @@ $(document).ready(function() {
 		data["method"]    = method;
 		data["updatedBy"] = sessionID;
 
-		formData.append("action", action);
-		formData.append("method", method);
-		formData.append("updatedBy", sessionID);
+		// formData.append("action", action);
+		// formData.append("method", method);
+		// formData.append("updatedBy", sessionID);
 
 		if (currentStatus == "0" && method != "approve") {
 			
@@ -1458,41 +1461,43 @@ $(document).ready(function() {
 			data["dateReceived"]     =  moment($("[name=dateReceived]").val()?.trim()).format("YYYY-MM-DD");
 			data["inventoryReceivingReason"] = $("[name=inventoryReceivingReason]").val()?.trim();
 
-			formData.append("employeeID", sessionID);
-			formData.append("purchaseOrderID", $("[name=purchaseOrderID]").val() || null);
-			formData.append("receiptNo", $("[name=receiptNo]").val() || null);
-			formData.append("inventoryReceivingReason", $("[name=inventoryReceivingReason]").val()?.trim());
-			formData.append("dateReceived", moment($("[name=dateReceived]").val() ?.trim()).format("YYYY-MM-DD"));
+			// formData.append("employeeID", sessionID);
+			// formData.append("purchaseOrderID", $("[name=purchaseOrderID]").val() || null);
+			// formData.append("receiptNo", $("[name=receiptNo]").val() || null);
+			// formData.append("inventoryReceivingReason", $("[name=inventoryReceivingReason]").val()?.trim());
+			// formData.append("dateReceived", moment($("[name=dateReceived]").val() ?.trim()).format("YYYY-MM-DD"));
 
 			if (action == "insert") {
 				data["createdBy"] = sessionID;
 				data["createdAt"] = dateToday();
 
-				formData.append("createdBy", sessionID);
-				formData.append("createdAt", dateToday());
+				// formData.append("createdBy", sessionID);
+				// formData.append("createdAt", dateToday());
 			} else if (action == "update") {
 				data["inventoryReceivingID"] = id;
-				formData.append("inventoryReceivingID", id);
+				// formData.append("inventoryReceivingID", id);
 			}
+
 
 			if (method == "submit") {
 				data["submittedAt"] = dateToday();
-				formData.append("submittedAt", dateToday());
+				// formData.append("submittedAt", dateToday());
 				if (approversID) {
-					data["approversID"] = approversID;
+					data["approversID"]           = approversID;
 					data["inventoryReceivingStatus"] = 1;
-					formData.append("approversID", approversID);
-					formData.append("inventoryReceivingStatus", 1);
+
+					// formData.append("approversID", approversID);
+					// formData.append("inventoryReceivingStatus", 1);
 				} else {  // AUTO APPROVED - IF NO APPROVERS
-					data["approversID"]     = sessionID;
-					data["approversStatus"] = 2;
-					data["approversDate"]   = dateToday();
+					data["approversID"]           = sessionID;
+					data["approversStatus"]       = 2;
+					data["approversDate"]         = dateToday();
 					data["inventoryReceivingStatus"] = 2;
 
-					formData.append("approversID", sessionID);
-					formData.append("approversStatus", 2);
-					formData.append("approversDate", dateToday());
-					formData.append("inventoryReceivingStatus", 2);
+					// formData.append("approversID", sessionID);
+					// formData.append("approversStatus", 2);
+					// formData.append("approversDate", dateToday());
+					// formData.append("inventoryReceivingStatus", 2);
 				}
 			}
 
@@ -1510,14 +1515,14 @@ $(document).ready(function() {
 					scopes: []
 				};
 
-				formData.append(`items[${i}][requestItemID]`, requestItemID);
-				formData.append(`items[${i}][itemID]`, itemID);
-				formData.append(`items[${i}][received]`, received);
-				formData.append(`items[${i}][remarks]`, remarks);
+				// formData.append(`items[${i}][requestItemID]`, requestItemID);
+				// formData.append(`items[${i}][itemID]`, itemID);
+				// formData.append(`items[${i}][received]`, received);
+				// formData.append(`items[${i}][remarks]`, remarks);
 			
 			
 
-				$(`td .tableSerialBody tr`, this).each(function() {
+				$(`td .tableSerialBody tr`, this).each(function(index,obj) {
 					const serialNumber = $('[name="serialNumber"]', this).val()?.trim();
 					let scope = {
 						serialNumber,
@@ -1525,11 +1530,12 @@ $(document).ready(function() {
 					};
 					temp["scopes"].push(scope);
 
-					formData.append(`scopes[${i}][serialNumber]`, serialNumber);
-					formData.append(`scopes[${i}][itemID]`, itemID);
+					// formData.append(`items[${i}]scopes[${index}][serialNumber]`, serialNumber);
+					// formData.append(`items[${i}]scopes[${index}][itemID]`, itemID);
 				})
 
 				data["items"].push(temp);
+				console.log(data) /////////////////////////// ENDDDDDDDDDDDDDDDDDDD MODIFYYYYYYYYYYYYYYYYY
 			});
 		} 
 
@@ -1588,16 +1594,29 @@ $(document).ready(function() {
 				const action = revise && !isFromCancelledDocument && "insert" || (id ? "update" : "insert");
 				const data   = getInventoryReceivingData(action, "save", "0", id);
 				data["inventoryReceivingStatus"]   = 0;
+
+				// data.append("inventoryReceivingStatus", 0);
+				
 				// data["reviseInventoryReceivingID"] = id;
+
 				// delete data["inventoryReceivingID"];
 
 				if (!isFromCancelledDocument) {
 					data["reviseInventoryReceivingID"] = id;
 					delete data["inventoryReceivingID"];
+
+					// data.append("reviseInventoryReceivingID", id);
+					// data.delete("inventoryReceivingID");
 				} else {
-					delete data["inventoryReceivingID"];
+					// delete data["inventoryReceivingID"];
+
+					data["inventoryReceivingID"] = id;
 					delete data["action"];
 					data["action"] = update;
+
+					// data.append("inventoryReceivingID", id);
+					// data.delete("action");
+					// data.append("action", "update");
 				}
 	
 				saveInventoryReceiving(data, "save", null, pageContent);
@@ -1614,6 +1633,7 @@ $(document).ready(function() {
 			const action = id && feedback ? "update" : "insert";
 			const data   = getInventoryReceivingData(action, "save", "0", id);
 			data["inventoryReceivingStatus"] = 0;
+			// data.append("inventoryReceivingStatus", 0);
 
 			saveInventoryReceiving(data, "save", null, pageContent);
 		}
@@ -1634,7 +1654,7 @@ $(document).ready(function() {
 			const action   = revise && "insert" || (id && feedback ? "update" : "insert");
 			const data     = getInventoryReceivingData(action, "save", "0", id);
 			data["inventoryReceivingStatus"] = 0;
-			data.append("inventoryReceivingStatus", 0);
+			// data.append("inventoryReceivingStatus", 0);
 			
 			if (revise) {
 				// data["reviseInventoryReceivingID"] = id;
@@ -1643,10 +1663,19 @@ $(document).ready(function() {
 				if (!isFromCancelledDocument) {
 					data["reviseInventoryReceivingID"] = id;
 					delete data["inventoryReceivingID"];
+
+					// data.append("reviseInventoryReceivingID", id);
+					// data.delete("inventoryReceivingID");
 				} else {
-					delete data["inventoryReceivingID"];
+					// delete data["inventoryReceivingID"];
+
+					data["inventoryReceivingID"] = id;
 					delete data["action"];
 					data["action"] = update;
+
+					// data.append("inventoryReceivingID", id);
+					// data.delete("action");
+					// data.append("action", "update");
 				}
 			}
 	
@@ -1747,33 +1776,41 @@ $(document).ready(function() {
 
 		const validateDuplicateSerial  = $("[name=serialNumber]").hasClass("is-invalid") ;
 		const validateSerialMessage  = $(".invalid-feedback").text() ;
-		console.log("validateDuplicateSerial: "+ validateDuplicateSerial)
+		// console.log("validateDuplicateSerial: "+ validateDuplicateSerial)
 		// if(!validateDuplicateSerial || validateSerialMessage != "Data already exist!"){
 			if(!validateDuplicateSerial){
 			const validateSerial = checkSerialReceivedQuantity();
-			console.log("validateSerial: "+ validateSerial)
+			
 			if (validateSerial != "false") {
 				const validate       = validateForm("form_inventory_receiving");
-				console.log("validate: "+ validate)
+				// console.log("validate: "+ validate)
 				removeIsValid("#tableInventoryReceivingItems");
 				if(validate){
-					
-					
-	
 					const id             = $(this).attr("inventoryReceivingID");
 					const revise         = $(this).attr("revise") == "true";
 					const action = revise && "insert" || (id ? "update" : "insert");
 					const data   = getInventoryReceivingData(action, "submit", "1", id);
-		
+					// console.log(data["approversID"])
 					if (revise) {
 						data["reviseInventoryReceivingID"] = id;
 						delete data["inventoryReceivingID"];
+
+						// data.append("reviseInventoryReceivingID", id);
+						// data.delete("inventoryReceivingID");
 					}
 		
+					// let approversID = "", approversDate = "";
+					// for (var i of data) {
+					// 	if (i[0] == "approversID")   approversID   = i[1];
+					// 	if (i[0] == "approversDate") approversDate = i[1];
+					// }
+
 					let approversID   = data["approversID"], 
 						approversDate = data["approversDate"];
+	
 		
 					const employeeID = getNotificationEmployeeID(approversID, approversDate, true);
+				
 					let notificationData = false;
 					if (employeeID != sessionID) {
 						notificationData = {
@@ -1783,6 +1820,7 @@ $(document).ready(function() {
 							notificationType:        2,
 							employeeID,
 						};
+						// console.log(notificationData)
 					}
 		
 					saveInventoryReceiving(data, "submit", notificationData, pageContent);
@@ -1820,10 +1858,11 @@ $(document).ready(function() {
 
     // ----- APPROVE DOCUMENT -----
 	$(document).on("click", "#btnApprove", function () {
+		
 		const id       = decryptString($(this).attr("inventoryReceivingID"));
 		const feedback = $(this).attr("code") || getFormCode("SCH", dateToday(), id);
 		let tableData  = getTableData("ims_inventory_receiving_tbl", "", "inventoryReceivingID = " + id);
-
+	
 		if (tableData) {
 			let approversID     = tableData[0].approversID;
 			let approversStatus = tableData[0].approversStatus;
@@ -1833,9 +1872,11 @@ $(document).ready(function() {
 
 			let data = getInventoryReceivingData("update", "approve", "2", id);
 			data["approversStatus"] = updateApproveStatus(approversStatus, 2);
+			// data.append("approversStatus", updateApproveStatus(approversStatus, 2));
 			let dateApproved = updateApproveDate(approversDate)
 			data["approversDate"] = dateApproved;
-
+			// data.append("approversDate", dateApproved);
+		
 			let status, notificationData,lastApproveCondition = false;
 			if (isImLastApprover(approversID, approversDate)) {
 				status = 2;
@@ -1862,6 +1903,8 @@ $(document).ready(function() {
 			}
 
 			data["inventoryReceivingStatus"] = status;
+			// data.append("inventoryReceivingStatus", status);
+
 
 			saveInventoryReceiving(data, "approve", notificationData, pageContent,lastApproveCondition);
 		}
@@ -1871,7 +1914,7 @@ $(document).ready(function() {
 
     // ----- REJECT DOCUMENT -----
 	$(document).on("click", "#btnReject", function () {
-	
+		
 		const id       = $(this).attr("inventoryReceivingID");
 		const feedback = $(this).attr("code") || getFormCode("INRR", dateToday(), id);
 
@@ -1916,13 +1959,23 @@ $(document).ready(function() {
 				let employeeID      = tableData[0].employeeID;
 
 				let data = {};
-				data["action"] = "update";
-				data["method"] = "deny";
-				data["inventoryReceivingID"] = id;
-				data["approversStatus"] = updateApproveStatus(approversStatus, 3);
-				data["approversDate"]   = updateApproveDate(approversDate);
+				data["action"]               = "update";
+				data["method"]               = "deny";
+				data["serviceRequisitionID"] = id;
+				data["approversStatus"]      = updateApproveStatus(approversStatus, 3);
+				data["approversDate"]        = updateApproveDate(approversDate);
 				data["inventoryReceivingRemarks"] = $("[name=inventoryReceivingRemarks]").val()?.trim();
 				data["updatedBy"] = sessionID;
+
+			
+				// let data = new FormData;
+				// data.append("action", "update");
+				// data.append("method", "deny");
+				// data.append("inventoryReceivingID", id);
+				// data.append("approversStatus", updateApproveStatus(approversStatus, 3));
+				// data.append("approversDate", updateApproveDate(approversDate));
+				// data.append("inventoryReceivingRemarks", $("[name=inventoryReceivingRemarks]").val()?.trim());
+				// data.append("updatedBy", sessionID);
 
 				let notificationData = {
 					moduleID:                33,
@@ -1946,11 +1999,17 @@ $(document).ready(function() {
 		const feedback          = $(this).attr("code") || getFormCode("TR", dateToday(), id);
 
 		const id = decryptString($(this).attr("inventoryReceivingID"));
-		let data = new FormData;
-		data.append("inventoryReceivingID", inventoryReceivingID);
-		data.append("action", "update");
-		data.append("method", "drop");
-		data.append("updatedBy", sessionID);
+		// let data = new FormData;
+		// data.append("inventoryReceivingID", inventoryReceivingID);
+		// data.append("action", "update");
+		// data.append("method", "drop");
+		// data.append("updatedBy", sessionID);
+
+		let data = {};
+		data["inventoryReceivingID"] = id;
+		data["action"]               = "update";
+		data["method"]               = "drop";
+		data["updatedBy"]            = sessionID;
 
 		saveInventoryReceiving(data, "drop", null, pageContent);
 	})
@@ -2070,7 +2129,7 @@ function getConfirmation(method = "submit") {
 }
 
 function saveInventoryReceiving(data = null, method = "submit", notificationData = null, callback = null,lastApproveCondition =false) {
-
+	
 	data.lastApproveCondition = lastApproveCondition; // inserting object in data object parameter
 
 	if (data) {
@@ -2081,10 +2140,10 @@ function saveInventoryReceiving(data = null, method = "submit", notificationData
 					method:      "POST",
 					url:         `inventory_receiving/saveInventoryReceiving`,
 					data,
-					processData: false,
-					contentType: false,
-					global:      false,
-					cache:       false,
+					// processData: false,
+					// contentType: false,
+					// global:      false,
+					// cache:       false,
 					async:       false,
 					dataType:    "json",
 					beforeSend: function() {

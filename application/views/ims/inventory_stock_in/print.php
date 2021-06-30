@@ -16,6 +16,9 @@ span { font-size: 13px;}
         margin: 0mm;  /* this affects the margin in the printer settings */
 
     }
+    td {
+        text-align: center !important;
+    }
 </style>
 </head>
 <body onload="window.print();">

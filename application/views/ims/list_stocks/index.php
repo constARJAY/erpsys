@@ -1,4 +1,4 @@
-<div class="body_area after_bg sm">
+<div class="body_area after_bg">
 	<div class="block-header">
 		<div class="container">
 			<div class="row clearfix">
@@ -7,18 +7,11 @@
 						<li class="breadcrumb-item"><a href="#"><i class="zmdi zmdi-home"></i> Dashboard</a></li>
 						<li class="breadcrumb-item"><i class="fad fa-boxes-alt"></i> &nbsp;Inventory Modules</li>
 						<li class="breadcrumb-item active"  id="invMainVendorBreadcrumbs">  List of Stocks</li>
-                        <!-- <li class="breadcrumb-item" id="invVendorBreadcrumbs" style="visibility:hidden;"><i class="fa fas-users" ></i> &nbsp;Add Vendor</li> -->
 					</ul>
 					<h1 class="mt-3" id="invVendoHeaderID">List of Stocks</h1>
 					<span>This module is used to monitor list of stocks.</span>
 				</div>
 				<div class="col-lg-6 col-md-12 text-md-right">
-					<!-- <button class="btn btn-default hidden-xs ml-2">Download Report</button>
-                        <button class="btn btn-secondary hidden-xs ml-2">New Report</button> -->
-                        <!-- <button type="button" class="btn btn-danger pr-2" id="btnAdd"> <i class="icon-plus" id="btnIcon"></i> &nbsp;Add Item</button> -->
-                        <!-- <button class="btn btn-add" id="btnAdd"><i class="fas fa-plus-square"></i> Add Vendor</button> -->
-                        <!-- <button type="button" class="btn btn-light pr-2" id="btnCancel"> <i class="icon-ban"></i> &nbsp;Cancel</button> -->
-                    </ul>
 				</div>
 			</div>
 		</div>
@@ -30,26 +23,10 @@
 		<div class="row clearfix">
 			<div class="col-lg-12">
 				<div class="card">
-					<div class="header text-right p-0">
-						<div class="closeBtn"></div>
-					</div>
 					<div class="body" id="main_body">
-						<div class="row" id="loading-screen" style="visibility:hidden;"></div>
 						<div class="row">
-							<!-- <div class="col-xl-2 col-lg-4 col-md-4 col-sm-12">
-                                <div class="form-group">
-                                    <label>Storage Code <span class="text-danger font-weight-bold">*</span></label>
-                                    <select class=" form-control show-tick select2 validate" name="storageCode" id="input_storageCode" autocomplete="off" required>
-                                        <option value="" selected disabled>Select Storage Code</option>
-                                        <option value="">STO-21-00001</option>   
-                                    </select>
-                                    <div class="invalid-feedback d-block" id="invalidInputStorageCode"></div>
-                                </div>
-							</div> -->
-                            <!-- <div id="filterdata">
-                            </div> -->
                             
-                            <div class="col-md-4">
+                            <div class="col-sm-12 col-md-4">
                                 <div class="form-group">
                                     <label>Classification Name </label>
                                     <select
@@ -63,7 +40,7 @@
                                     <div class="invalid-feedback d-block" id="invalid-input_classificationID"></div>
                                 </div>
                             </div>    
-                            <div class="col-md-4">
+                            <div class="col-sm-12 col-md-4">
                                 <div class="form-group">
                                     <label>Category Name </label>
                                     <select
@@ -77,20 +54,19 @@
                                     <div class="invalid-feedback d-block" id="invalid-input_input_categoryID"></div>
                                 </div>
                             </div> 
-                            <div class="col-md-3 p-1">
+                            <div class="col-sm-12 col-md-4">
                                 <div class="form-group">
                                 <button type="button" class="btn btn-primary w-100 p-2 mt-4 ml-2"  id="btnSearch"><i class="icon-magnifier"></i> &nbsp;Search</button>
                                 </div>
                             </div>         
-                            <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12">
-                                <div class="card">
-                                <div class="card-header">
-                                    <h3>List of Items:</h3>
-                                </div>
-                                <div class="card-body">
-                                <div class="table-responsive" id="table_content"></div>
-                                </div>
-								
+                            <div class="col-12">
+                                <div class="border">
+                                    <div class="card-header">
+                                        <h3>List of Items:</h3>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="table-responsive" id="table_content"></div>
+                                    </div>
                                 </div>
 							</div>
 						</div>
@@ -99,23 +75,6 @@
 			</div>
 		</div>
 	</div>
-
-    <!-- <div class="container" id="container_2"> 
-		<div class="row clearfix">
-			<div class="col-lg-12">
-				<div class="card">
-                    <div class="body" id="main_body">
-						<div class="row" id="loading-screen" style="visibility:hidden;"></div>
-						<div class="row clearfix row-deck">
-							<div class="col-12">
-								<div class="table-responsive" id="table_content"></div>
-							</div>
-						</div>
-					</div>
-                </div>
-			</div>
-		</div>
-	</div> -->
 </div>
 
 <!-- ----- ADD MODAL ----- -->

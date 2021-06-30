@@ -33,13 +33,16 @@ class Material_withdrawal extends CI_Controller {
         $materialWithdrawalStatus   = $this->input->post("materialWithdrawalStatus");
         $materialWithdrawalReason   = $this->input->post("materialWithdrawalReason") ?? null;
         $materialWithdrawalRemarks  = $this->input->post("materialWithdrawalRemarks") ?? null;
-        $materialWithdrawalPurpose  = $this->input->post("materialWithdrawalPurpose") ?? null;
+        // $materialWithdrawalPurpose  = $this->input->post("materialWithdrawalPurpose") ?? null;
         $submittedAt             = $this->input->post("submittedAt") ?? null;
         $createdBy               = $this->input->post("createdBy");
         $updatedBy               = $this->input->post("updatedBy");
         $createdAt               = $this->input->post("createdAt");
         $items                   = $this->input->post("items") ?? null;
 
+        // echo "<pre>";
+        // print_r($_POST);
+        // exit;
 
         $purchaseRequestData = [
             "reviseMaterialWithdrawalID" => $reviseMaterialWithdrawalID,
@@ -50,7 +53,7 @@ class Material_withdrawal extends CI_Controller {
             "approversDate"           => $approversDate,
             "materialWithdrawalStatus"   => $materialWithdrawalStatus,
             "materialWithdrawalReason"   => $materialWithdrawalReason,
-            "materialWithdrawalPurpose"   => $materialWithdrawalPurpose,
+            // "materialWithdrawalPurpose"   => $materialWithdrawalPurpose,
             // "projectTotalAmount"      => $projectTotalAmount,
             // "companyTotalAmount"      => $companyTotalAmount,
             "submittedAt"             => $submittedAt,
@@ -116,8 +119,8 @@ class Material_withdrawal extends CI_Controller {
                             "inventoryStorageOfficeCode"          => $item["storagecode"],
                             "inventoryStorageOfficeName"          => $item["storageName"],
                             "quantity"          => $item["quantity"],
-                            "createdBy"         => $item["createdBy"],
-                            "updatedBy"         => $item["updatedBy"],
+                            "createdBy"         => $createdBy,
+                            "updatedBy"         => $updatedBy,
                         ];
                         array_push($purchaseRequestItems, $temp);
 

@@ -12,6 +12,8 @@ class InventoryReceiving_model extends CI_Model {
 
     public function saveInventoryReceivingData($action, $data, $id = null) 
     {
+        //    echo "<pre>";
+    //     print_r($data);
         if ($action == "insert") {
             $query = $this->db->insert("ims_inventory_receiving_tbl", $data);
         } else {
@@ -46,7 +48,7 @@ class InventoryReceiving_model extends CI_Model {
         return $query ? true : false;
     }
 
-    public function saveServices($service = null, $scopes = null, $id = null)
+    public function saveServices($service = null, $scopes = null, $id = null,$itemID=null)
     {
         $sessionID = $this->session->has_userdata("adminSessionID") ? $this->session->userdata("adminSessionID") : 0;
         if ($service && $scopes) {
@@ -55,15 +57,21 @@ class InventoryReceiving_model extends CI_Model {
                 $insertID  = $this->db->insert_id();
                 $scopeData = [];
                 foreach ($scopes as $scope) {
-                    $temp = [
-                        "inventoryReceivingID" => $id,
-                        "inventoryReceivingDetailsID"=> $insertID,
-                        "serialNumber"          => $scope["serialNumber"],
-                        "itemID"             => $scope["itemID"],
-                        "createdBy"            => $sessionID,
-                        "updatedBy"            => $sessionID,
-                    ];
-                    array_push($scopeData, $temp);
+
+                    // if($itemID == $scope["itemID"]){
+                        $temp = [
+                            "inventoryReceivingID" => $id,
+                            "inventoryReceivingDetailsID"=> $insertID,
+                            "serialNumber"          => $scope["serialNumber"],
+                            "itemID"             => $scope["itemID"],
+                            "createdBy"            => $sessionID,
+                            "updatedBy"            => $sessionID,
+                        ];
+                        array_push($scopeData, $temp);
+                    // }
+
+                        //  echo "<pre>";
+                        //     print_r($$scopes);
                 }
                 $saveScopes = $this->saveScopes($scopeData);
                 if ($saveScopes) {

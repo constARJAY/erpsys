@@ -402,71 +402,52 @@ $(document).ready(function() {
 	const borrowingItemList = getTableData(
 		`ims_borrowing_tbl AS ib
 		LEFT JOIN ims_borrowing_details_tbl AS ibd ON ibd.borrowingID = ib.borrowingID`, `ib.borrowingID,ib.createdAt`,
-		"borrowingStatus = 2 GROUP BY borrowingID");
+		"borrowingStatus = 2  GROUP BY ib.borrowingID");
 
-
-
-	function getBorroiwngList(id = null, clientID = 0, display = false) {
+	function getBorroiwngList(id = null, clientID = 0, display = true) {
 		let html ='';
-		var exist =[];
-
-		const borrowingItemAllList = getTableData(
-			`ims_borrowing_tbl AS ib
-			LEFT JOIN ims_borrowing_details_tbl AS ibd ON ibd.borrowingID = ib.borrowingID`, `ib.borrowingID,ibd.quantity`,
-			"borrowingStatus = 2");
-
-		const returnItemList = getTableData(
-			`ims_return_item_tbl AS iri
-			LEFT JOIN ims_return_item_details_tbl AS irid ON irid.returnItemID = iri.returnItemID`, `irid.returnItemID,irid.borrowingDetailID,SUM(irid.quantityBorrowed) AS quantity ,iri.createdAt, iri.returnItemStatus`,
-			"returnItemStatus = 1 OR returnItemStatus = 0 GROUP BY irid.barcode" );
-
-		const defaultReturnItemList = getTableData(
-			`ims_return_item_tbl AS iri
-			LEFT JOIN ims_return_item_details_tbl AS irid ON irid.returnItemID = iri.returnItemID`, `irid.returnItemID,irid.borrowingDetailID`,
-			"" );
-
-		var returnItemLength =returnItemList.length;
-
-		defaultReturnItemList.map(items=>{
-			exist.push(items.borrowingDetailID);
-		})
-
-		console.log(borrowingItemList)
-
-		html += borrowingItemList.map((borrowing,index) => {
-          
-			for(var loop =0; loop<returnItemLength;loop++){
-				
-					if(borrowing.borrowingID == returnItemList[loop]["borrowingDetailID"] && parseFloat(borrowing.quantity) !=parseFloat(returnItemList[loop]["quantity"]) ){
-				
-						if(returnItemList[loop]["returnItemStatus"] != 0 || returnItemList[loop]["returnItemStatus"] != 1){
-				
-							return `
-				<option 
-					value       = "${borrowing.borrowingID}" 
-					${borrowing.borrowingID == id && "selected"}>
-					${getFormCode("EBF",moment(borrowing.createdAt),borrowing.borrowingID)}
-				</option>`;
-						}
-					
-					}
-			}
-		})
-		console.log(html);
-
-	
-        // html += borrowingItemList.map(borrowing => {
+        html += borrowingItemList.map(borrowing => {
             
-        //     return `
-        //     <option 
-        //         value       = "${borrowing.borrowingID}" 
-        //         ${borrowing.borrowingID == id && "selected"}>
-        //         ${getFormCode("EBF",moment(borrowing.createdAt),borrowing.borrowingID)}
-        //     </option>`;
+            return `
+            <option 
+                value       = "${borrowing.borrowingID}" 
+                ${borrowing.borrowingID == id && "selected"}>
+                ${getFormCode("EBF",moment(borrowing.createdAt),borrowing.borrowingID)}
+            </option>`;
 			
-        // })
+        })
         return display ? html : borrowingItemList;
     }
+	// function getBorroiwngList(id = null, clientID = 0, display = true) {
+	// 		let html ='';
+	// 		const borrowingItemList = getTableData(
+	// 			`ims_borrowing_tbl AS ib
+	// 			LEFT JOIN ims_borrowing_details_tbl AS ibd ON ibd.borrowingID = ib.borrowingID
+	// 			LEFT JOIN ims_return_item_tbl AS ri ON ib.borrowingID = ri.borrowingID 
+	// 			LEFT JOIN ims_return_item_details_tbl AS rid ON ri.returnItemID = rid.returnItemID`, `ib.borrowingID,ib.createdAt,sum(ibd.quantity) AS bborrowingQuantity,
+	// 			rid.quantityBorrowed, sum(returnItemQuantity) as returnItemQuantity`,
+	// 			"borrowingStatus = 2  GROUP BY ib.borrowingID, ri.returnItemID");
+				
+	// 		html += borrowingItemList.map(borrowing => {
+	// 			if(borrowing.bborrowingQuantity <= borrowing.returnItemQuantity || borrowing.returnItemQuantity ==null){
+	// 			return `
+	// 			<option 
+	// 				value       = "${borrowing.borrowingID}" 
+	// 				${borrowing.borrowingID == id && "selected"}>
+	// 				${getFormCode("EBF",moment(borrowing.createdAt),borrowing.borrowingID)}
+	// 			</option>`;
+	// 			}else{		
+	// 			return `	
+	// 			<option 	
+	// 				value       = "${borrowing.borrowingID}" 
+	// 				${borrowing.borrowingID == id && "selected"}>
+	// 				${getFormCode("EBF",moment(borrowing.createdAt),borrowing.borrowingID)}
+	// 			</option>`;
+	// 			}
+	// 		})
+	// 	//}
+	// 		return display ? html : borrowingItemList;
+	// 	}
 
 	// ----- SELECT PROJECT LIST -----
     $(document).on("change", "[name=borrowingID]", function() {

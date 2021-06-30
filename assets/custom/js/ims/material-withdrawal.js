@@ -1452,7 +1452,7 @@ $(document).ready(function() {
 			approversDate           = "",
 			materialWithdrawalStatus   = false,
 			materialWithdrawalRemarks   = false,
-			materialWithdrawalPurpose   = "",
+			materialWithdrawalReason   = "",
 			submittedAt             = false,
 			createdAt               = false,
 		} = data && data[0];
@@ -1667,13 +1667,13 @@ $(document).ready(function() {
                         data-allowcharacters="[a-z][A-Z][0-9][ ][.][,][-][()]['][/][&]"
                         minlength="1"
                         maxlength="200"
-                        id="materialWithdrawalPurpose"
-                        name="materialWithdrawalPurpose"
+                        id="materialWithdrawalReason"
+                        name="materialWithdrawalReason"
                         required
                         rows="4"
                         style="resize:none;"
-						${disabled}>${materialWithdrawalPurpose ?? ""}</textarea>
-                    <div class="d-block invalid-feedback" id="invalid-materialWithdrawalPurpose"></div>
+						${disabled}>${materialWithdrawalReason ?? ""}</textarea>
+                    <div class="d-block invalid-feedback" id="invalid-materialWithdrawalReason"></div>
                 </div>
             </div>
 
@@ -1762,7 +1762,7 @@ $(document).ready(function() {
 
 
 	// ----- GET PURCHASE REQUEST DATA -----
-	function getPurchaseRequestData(action = "insert", method = "submit", status = "1", id = null, currentStatus = "0", isObject = false) {
+	function getPurchaseRequestData(action = "insert", method = "submit", status = "1", id = null, currentStatus = "0", isObject = true) {
 
 		/**
 		 * ----- ACTION ---------
@@ -1786,16 +1786,17 @@ $(document).ready(function() {
 		 * ----- END METHOD -----
 		 */
 
-		let data = { items: [] }, formData = new FormData;
+		let data = { items: [] };
+		//, formData = new FormData;
 		const approversID = method != "approve" && moduleApprover;
 
 		if (id) {
 			data["materialWithdrawalID"] = id;
-			formData.append("materialWithdrawalID", id);
+			// formData.append("materialWithdrawalID", id);
 
 			if (status != "2") {
 				data["materialWithdrawalStatus"] = status;
-				formData.append("materialWithdrawalStatus", status);
+				// formData.append("materialWithdrawalStatus", status);
 			}
 		}
 
@@ -1803,55 +1804,54 @@ $(document).ready(function() {
 		data["method"]                = method;
 		data["updatedBy"]             = sessionID;
 
-		formData.append("action", action);
-		formData.append("method", method);
-		formData.append("updatedBy", sessionID);
+		// formData.append("action", action);
+		// formData.append("method", method);
+		// formData.append("updatedBy", sessionID);
 
 		if (currentStatus == "0" && method != "approve") {
 			
 			data["employeeID"]            = sessionID;
 			data["projectID"]    = $("[name=projectID]").val() || null;
 			data["materialWithdrawalReason"] = $("[name=materialWithdrawalReason]").val()?.trim();
-			data["materialWithdrawalPurpose"] = $("[name=materialWithdrawalPurpose]").val()?.trim();
 			data["projectTotalAmount"]    = updateTotalAmount(true);
 			data["companyTotalAmount"]    = updateTotalAmount(false);
 			
-			formData.append("employeeID", sessionID);
-			formData.append("projectID", $("[name=projectID]").val() || null);
-			formData.append("materialWithdrawalReason", $("[name=materialWithdrawalReason]").val()?.trim());
-			formData.append("materialWithdrawalPurpose", $("[name=materialWithdrawalPurpose]").val()?.trim());
+			// formData.append("employeeID", sessionID);
+			// formData.append("projectID", $("[name=projectID]").val() || null);
+			// formData.append("materialWithdrawalReason", $("[name=materialWithdrawalReason]").val()?.trim());
+			// formData.append("materialWithdrawalReason", $("[name=materialWithdrawalReason]").val()?.trim());
 
 			if (action == "insert") {
 				data["createdBy"]   = sessionID;
 				data["createdAt"]   = dateToday();
 
-				formData.append("createdBy", sessionID);
-				formData.append("createdAt", dateToday());
+				// formData.append("createdBy", sessionID);
+				// formData.append("createdAt", dateToday());
 			} else if (action == "update") {
 				data["materialWithdrawalID"] = id;
 
-				formData.append("materialWithdrawalID", id);
+				// formData.append("materialWithdrawalID", id);
 			}
 
 			if (method == "submit") {
 				data["submittedAt"] = dateToday();
-				formData.append("submittedAt", dateToday());
+				// formData.append("submittedAt", dateToday());
 				if (approversID) {
 					data["approversID"]           = approversID;
 					data["materialWithdrawalStatus"] = 1;
 
-					formData.append("approversID", approversID);
-					formData.append("materialWithdrawalStatus", 1);
+					// formData.append("approversID", approversID);
+					// formData.append("materialWithdrawalStatus", 1);
 				} else {  // AUTO APPROVED - IF NO APPROVERS
 					data["approversID"]           = sessionID;
 					data["approversStatus"]       = 2;
 					data["approversDate"]         = dateToday();
 					data["materialWithdrawalStatus"] = 2;
 
-					formData.append("approversID", sessionID);
-					formData.append("approversStatus", 2);
-					formData.append("approversDate", dateToday());
-					formData.append("materialWithdrawalStatus", 2);
+					// formData.append("approversID", sessionID);
+					// formData.append("approversStatus", 2);
+					// formData.append("approversDate", dateToday());
+					// formData.append("materialWithdrawalStatus", 2);
 				}
 			}
 
@@ -1872,23 +1872,31 @@ $(document).ready(function() {
 
 
 				let temp = {
-					barcode,itemCode,itemID,itemName,quantity,itemDescription,itemUom,inventoryStorageID,storagecode,storageName //,liststocks
+					barcode,
+					itemCode,
+					itemID,
+					itemName,
+					quantity,
+					itemDescription,
+					itemUom,
+					inventoryStorageID,
+					storagecode,
+					storageName //,liststocks
 					
 				};
 
-				formData.append(`items[${i}][barcode]`, barcode);
-				formData.append(`items[${i}][itemCode]`, itemCode);
-				formData.append(`items[${i}][itemID]`, itemID);
-				formData.append(`items[${i}][itemName]`, itemName);
-				formData.append(`items[${i}][itemDescription]`, itemDescription);
-				formData.append(`items[${i}][itemUom]`, itemUom);
-				formData.append(`items[${i}][quantity]`, quantity);
-				formData.append(`items[${i}][inventoryStorageID]`, inventoryStorageID);
-				formData.append(`items[${i}][storagecode]`, storagecode);
-				formData.append(`items[${i}][storageName]`, storageName);
-				// formData.append(`items[${i}][liststocks]`, liststocks);
-				formData.append(`items[${i}][createdBy]`, sessionID);
-				formData.append(`items[${i}][updatedBy]`, sessionID);
+				// formData.append(`items[${i}][barcode]`, barcode);
+				// formData.append(`items[${i}][itemCode]`, itemCode);
+				// formData.append(`items[${i}][itemID]`, itemID);
+				// formData.append(`items[${i}][itemName]`, itemName);
+				// formData.append(`items[${i}][itemDescription]`, itemDescription);
+				// formData.append(`items[${i}][itemUom]`, itemUom);
+				// formData.append(`items[${i}][quantity]`, quantity);
+				// formData.append(`items[${i}][inventoryStorageID]`, inventoryStorageID);
+				// formData.append(`items[${i}][storagecode]`, storagecode);
+				// formData.append(`items[${i}][storageName]`, storageName);
+				// formData.append(`items[${i}][createdBy]`, sessionID);
+				// formData.append(`items[${i}][updatedBy]`, sessionID);
 			
 
 				data["items"].push(temp);
@@ -1949,17 +1957,24 @@ $(document).ready(function() {
 				// const action = revise && "insert" || (id && feedback ? "update" : "insert");
 				const action = revise && !isFromCancelledDocument && "insert" || (id ? "update" : "insert");
 				const data   = getPurchaseRequestData(action, "save", "0", id);
-				data.append("materialWithdrawalStatus", 0);
+				data["materialWithdrawalStatus"] = 0;
+				// data.append("materialWithdrawalStatus", 0);
 				// data.append("reviseMaterialWithdrawalID", id);
 				// data.delete("materialWithdrawalID");
 
 				if (!isFromCancelledDocument) {
-					data.append("reviseMaterialWithdrawalID", id);
-					data.delete("materialWithdrawalID");
+					data["reviseMaterialWithdrawalID"] = id;
+					delete data["materialWithdrawalID"];
+					// data.append("reviseMaterialWithdrawalID", id);
+					// data.delete("materialWithdrawalID");
 				} else {
-					data.append("materialWithdrawalID", id);
-					data.delete("action");
-					data.append("action", "update");
+					data["materialWithdrawalID"] = id;
+					delete data["action"];
+					data["action"] = "update";
+
+					// data.append("materialWithdrawalID", id);
+					// data.delete("action");
+					// data.append("action", "update");
 				}
 	
 				savePurchaseRequest(data, "save", null, pageContent);
@@ -1975,8 +1990,8 @@ $(document).ready(function() {
 		} else {
 			const action = id && feedback ? "update" : "insert";
 			const data   = getPurchaseRequestData(action, "save", "0", id);
-			data.append("materialWithdrawalStatus", 0);
-
+			// data.append("materialWithdrawalStatus", 0);
+			data["materialWithdrawalStatus"] = 0;
 			savePurchaseRequest(data, "save", null, pageContent);
 		}
 	});
@@ -1996,19 +2011,27 @@ $(document).ready(function() {
             const feedback = $(this).attr("code") || getFormCode("MWF", dateToday(), id);
             const action   = revise && "insert" || (id && feedback ? "update" : "insert");
             const data     = getPurchaseRequestData(action, "save", "0", id);
-            data.append("materialWithdrawalStatus", 0);
+			data["materialWithdrawalStatus"] = 0;
+            // data.append("materialWithdrawalStatus", 0);
 
             if (revise) {
                 // data.append("reviseMaterialWithdrawalID", id);
                 // data.delete("materialWithdrawalID");
 
 				if (!isFromCancelledDocument) {
-					data.append("reviseMaterialWithdrawalID", id);
-					data.delete("materialWithdrawalID");
+					data["reviseMaterialWithdrawalID"] = id;
+					delete data["materialWithdrawalID"];
+
+					// data.append("reviseMaterialWithdrawalID", id);
+					// data.delete("materialWithdrawalID");
 				} else {
-					data.append("materialWithdrawalID", id);
-					data.delete("action");
-					data.append("action", "update");
+					data["materialWithdrawalID"] = id;
+					delete data["action"];
+					data["action"] = "update";
+
+					// data.append("materialWithdrawalID", id);
+					// data.delete("action");
+					// data.append("action", "update");
 				}
             }
 
@@ -2046,15 +2069,21 @@ $(document).ready(function() {
                 const data   = getPurchaseRequestData(action, "submit", "1", id);
 
                 if (revise) {
-                    data.append("reviseMaterialWithdrawalID", id);
-                    data.delete("materialWithdrawalID");
+					data["reviseMaterialWithdrawalID"] = id;
+					delete data["materialWithdrawalID"];
+
+                    // data.append("reviseMaterialWithdrawalID", id);
+                    // data.delete("materialWithdrawalID");
                 }
 
-                let approversID = "", approversDate = "";
-                for (var i of data) {
-                    if (i[0] == "approversID")   approversID   = i[1];
-                    if (i[0] == "approversDate") approversDate = i[1];
-                }
+                // let approversID = "", approversDate = "";
+                // for (var i of data) {
+                //     if (i[0] == "approversID")   approversID   = i[1];
+                //     if (i[0] == "approversDate") approversDate = i[1];
+                // }
+
+				let approversID   = data["approversID"], 
+				approversDate = data["approversDate"];
 
                 const employeeID = getNotificationEmployeeID(approversID, approversDate, true);
                 let notificationData = false;
@@ -2103,9 +2132,12 @@ $(document).ready(function() {
 			let employeeID      = tableData[0].employeeID;
 			let createdAt       = tableData[0].createdAt;
 			let data = getPurchaseRequestData("update", "approve", "2", id);
-			data.append("approversStatus", updateApproveStatus(approversStatus, 2));
+			data["approversStatus"] = updateApproveStatus(approversStatus, 2);
+
+			// data.append("approversStatus", updateApproveStatus(approversStatus, 2));
 			let dateApproved = updateApproveDate(approversDate)
-			data.append("approversDate", dateApproved);
+			data["approversDate"] = dateApproved;
+			// data.append("approversDate", dateApproved);
 
 			let status, notificationData, lastApproveCondition = false;
 			if (isImLastApprover(approversID, approversDate)) {
@@ -2133,7 +2165,8 @@ $(document).ready(function() {
 				};
 			}
 
-			data.append("materialWithdrawalStatus", status);
+			// data.append("materialWithdrawalStatus", status);
+			data["materialWithdrawalStatus"] = status;
 
 			savePurchaseRequest(data, "approve", notificationData, pageContent,lastApproveCondition,id);
 			
@@ -2188,14 +2221,23 @@ $(document).ready(function() {
 				let approversDate   = tableData[0].approversDate;
 				let employeeID      = tableData[0].employeeID;
 
-				let data = new FormData;
-				data.append("action", "update");
-				data.append("method", "deny");
-				data.append("materialWithdrawalID", id);
-				data.append("approversStatus", updateApproveStatus(approversStatus, 3));
-				data.append("approversDate", updateApproveDate(approversDate));
-				data.append("materialWithdrawalRemarks", $("[name=materialWithdrawalRemarks]").val()?.trim());
-				data.append("updatedBy", sessionID);
+				let data = {};
+				data["action"]               = "update";
+				data["method"]               = "deny";
+				data["materialWithdrawalID"] = id;
+				data["approversStatus"]      = updateApproveStatus(approversStatus, 3);
+				data["approversDate"]        = updateApproveDate(approversDate);
+				data["materialWithdrawalRemarks"] = $("[name=materialWithdrawalRemarks]").val()?.trim();
+				data["updatedBy"] = sessionID;
+
+				// let data = new FormData;
+				// data.append("action", "update");
+				// data.append("method", "deny");
+				// data.append("materialWithdrawalID", id);
+				// data.append("approversStatus", updateApproveStatus(approversStatus, 3));
+				// data.append("approversDate", updateApproveDate(approversDate));
+				// data.append("materialWithdrawalRemarks", $("[name=materialWithdrawalRemarks]").val()?.trim());
+				// data.append("updatedBy", sessionID);
 
 				let notificationData = {
 					moduleID:                42,
@@ -2219,11 +2261,18 @@ $(document).ready(function() {
 		const feedback          = $(this).attr("code") || getFormCode("TR", dateToday(), id);
 
 		const id = decryptString($(this).attr("materialWithdrawalID"));
-		let data = new FormData;
-		data.append("materialWithdrawalID", materialWithdrawalID);
-		data.append("action", "update");
-		data.append("method", "drop");
-		data.append("updatedBy", sessionID);
+
+		let data = {};
+		data["materialWithdrawalID"] = id;
+		data["action"]               = "update";
+		data["method"]               = "drop";
+		data["updatedBy"]            = sessionID;
+
+		// let data = new FormData;
+		// data.append("materialWithdrawalID", materialWithdrawalID);
+		// data.append("action", "update");
+		// data.append("method", "drop");
+		// data.append("updatedBy", sessionID);
 
 		savePurchaseRequest(data, "drop", null, pageContent);
 	})
@@ -2353,10 +2402,10 @@ function savePurchaseRequest(data = null, method = "submit", notificationData = 
 						method:      "POST",
 						url:         `material_withdrawal/saveMaterialWithdrawal`,
 						data,
-						processData: false,
-						contentType: false,
-						global:      false,
-						cache:       false,
+						// processData: false,
+						// contentType: false,
+						// global:      false,
+						// cache:       false,
 						async:       false,
 						dataType:    "json",
 						beforeSend: function() {
