@@ -37,7 +37,7 @@ class ManageProjectBudget_model extends CI_Model {
             ptbt.timelineBudgetStatus AS budgetStatus,
             ptbt.submittedAt,
             ptbt.timelineBuilderReason,
-            pplt.projectListCode AS projectCode,
+            ptbt.projectCode AS projectCode,
             pplt.projectListName AS projectName,
             pct.categoryName AS projectCategory,
             pct2.clientName,

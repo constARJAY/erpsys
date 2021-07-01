@@ -11,7 +11,7 @@ $(document).on("click",".addClassification", function(){
     let modal_classification_content    =   ` 
                                             <div class="modal-body">  
                                                 <form id="modal_classification_form"> 
-                                                    <div class="col-md-12 col-sm-12">
+                                                    <div class="col-md-12 col-sm-12 px-0">
                                                         <div class="form-group">
                                                             <label for="">Classification Name <strong class="text-danger">*</strong></label>
                                                             <input type="text" class="form-control validate" name="classificationName" unique id="input_classificationName" 
@@ -19,7 +19,7 @@ $(document).on("click",".addClassification", function(){
                                                             <div class="invalid-feedback d-block" id="invalid-input_classificationName"></div>
                                                         </div>
                                                     </div>
-                                                    <div class="col-md-12 col-sm-12">
+                                                    <div class="col-md-12 col-sm-12 px-0">
                                                         <div class="form-group">
                                                             <label for="">Status <strong class="text-danger">*</strong></label>
                                                             <select class="form-control select2 validate" name="classificationStatus" id="input_classificationStatus">
@@ -32,8 +32,8 @@ $(document).on("click",".addClassification", function(){
                                                 </form>
                                             </div>
                                             <div class="modal-footer">
-                                                <button class="btn btn-save" id="btnSave"><i class="fas fa-save"></i>&nbsp;Save</button>
-                                                <button class="btn btn-cancel btnCancel"><i class="fas fa-ban"></i>&nbsp;Cancel</button>
+                                                <button class="btn btn-save px-5 py-2" id="btnSave"><i class="fas fa-save"></i>&nbsp;Save</button>
+                                                <button class="btn btn-cancel px-5 py-2 btnCancel"><i class="fas fa-ban"></i>&nbsp;Cancel</button>
                                             </div>
                                             `;
     setTimeout(function(){
@@ -53,7 +53,7 @@ $(document).on("click",".editClassification", function(){
     let modal_classification_content    =   `   
                                             <div class="modal-body">  
                                                 <form id="modal_classification_form"> 
-                                                    <div class="col-md-12 col-sm-12">
+                                                    <div class="col-md-12 col-sm-12 px-0">
                                                         <div class="form-group">
                                                             <label for="">Classification Name <strong class="text-danger">*</strong></label>
                                                             <input 
@@ -68,7 +68,7 @@ $(document).on("click",".editClassification", function(){
                                                             <div class="invalid-feedback d-block" id="invalid-input_classificationName"></div>
                                                         </div>
                                                     </div>
-                                                    <div class="col-md-12 col-sm-12">
+                                                    <div class="col-md-12 col-sm-12 px-0">
                                                         <div class="form-group">
                                                             <label for="">Status <strong class="text-danger">*</strong></label>
                                                             <select class="form-control select2 validate" name="classificationStatus" id="input_classificationStatus" data-classificationid="${classificationID}">
@@ -80,8 +80,8 @@ $(document).on("click",".editClassification", function(){
                                                 </form>
                                             </div>
                                             <div class="modal-footer">
-                                                <button class="btn btn-update" id="btnUpdate" data-classificationid="${classificationID}"><i class="fas fa-save"></i>&nbsp;Update</button>
-                                                <button class="btn btn-cancel btnCancel"><i class="fas fa-ban"></i>&nbsp;Cancel</button>
+                                                <button class="btn btn-update px-5 py-2" id="btnUpdate" data-classificationid="${classificationID}"><i class="fas fa-save"></i>&nbsp;Update</button>
+                                                <button class="btn btn-cancel px-5 py-2 btnCancel"><i class="fas fa-ban"></i>&nbsp;Cancel</button>
                                             </div>  
                                             `;
     setTimeout(function(){

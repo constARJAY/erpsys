@@ -12,13 +12,13 @@
                     <ul class="breadcrumb pl-0 pb-0 ">
                         <li class="breadcrumb-item"><a href="#"><i class="zmdi zmdi-home"></i> Dashboard</a></li>
 						<li class="breadcrumb-item"><i class="fas fa-file-invoice-dollar"></i> &nbsp;Finance Modules</li>
-                        <li class="breadcrumb-item active">Petty Cash Voucher</li>
+                        <li class="breadcrumb-item active">Client Fund Voucher</li>
                     </ul>
-                    <h1 class="mt-3">Petty Cash Voucher</h1>
-                    <span>This module is used to manage petty cash voucher form details.</span>
+                    <h1 class="mt-3">Client Fund Voucher</h1>
+                    <span>This module is used to manage client fund voucher form details.</span>
                 </div>
                 <div class="col-lg-6 col-md-6 text-right" id="headerButton">
-                    <?php if(isCreateAllowed(93)):?>
+                    <?php if(isCreateAllowed(94)):?>
                         <button type="button" class="btn btn-default btn-add" id="replenishBtn" data-toggle="tab"><i class="fas fa-sync-alt"></i> &nbsp;Replenish</button>
                     <?php endif;?>
                 </div>
@@ -39,16 +39,16 @@
 
 
 <!-- ----- MODAL ----- -->
-<div id="modal_petty_cash_request" class="modal custom-modal fade" data-backdrop="static" data-keyboard="false" role="dialog">
+<div id="modal_client_fund_request" class="modal custom-modal fade" data-backdrop="static" data-keyboard="false" role="dialog">
     <div class="modal-dialog modal-dialog-centered modal-xl" role="document">
 		<div class="modal-content">
 			<div class="modal-header bg-primary text-light">
-				<h6 class="page-title font-weight-bold">VIEW PETTY CASH REQUEST</h6>
+				<h6 class="page-title font-weight-bold">VIEW CLIENT FUND REQUEST</h6>
 				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
 					<span class="text-light" aria-hidden="true">&times;</span>
 				</button>
 			</div>
-            <div id="modal_petty_cash_request_content"></div>
+            <div id="modal_client_fund_request_content"></div>
         </div>
 	</div>
 </div>
@@ -56,4 +56,4 @@
 
 
 <script src="<?= base_url('assets/custom/js/gen/approver-function.js') ?>"></script>
-<script src="<?= base_url('assets/custom/js/fms/petty-cash-voucher.js') ?>"></script>
+<script src="<?= base_url('assets/custom/js/fms/client-fund-voucher.js') ?>"></script>

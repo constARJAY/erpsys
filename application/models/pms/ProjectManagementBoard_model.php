@@ -38,7 +38,7 @@ class ProjectManagementBoard_model extends CI_Model {
             ptbt.timelineTeamMember AS teamMember,
             ptbt.timelineBuilderStatus,
             ptbt.timelineManagementStatus,
-            pplt.projectListCode AS projectCode,
+            ptbt.projectCode AS projectCode,
             pplt.projectListName AS projectName
         FROM 
             pms_timeline_builder_tbl AS ptbt

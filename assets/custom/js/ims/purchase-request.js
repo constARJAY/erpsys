@@ -1593,7 +1593,7 @@ $(document).ready(function() {
 			if (itemID == "0") {
 				$(this).closest("tr").find("[name=quantity]").removeAttr("required");
 				$(this).closest("tr").find("[name=quantity]").val("0").removeClass("is-valid is-invalid has-error no-error");
-				$(this).closest("tr").find(".unitCost").text(formatAmount("0.00", true));
+				$(this).closest("tr").find(".unitcost").text(formatAmount("0.00", true));
 				$(this).closest("tr").find(".totalcost").text(formatAmount("0.00", true));
 				$(this).closest("tr").find("[name=files]").val("").removeClass("is-valid is-invalid has-error no-error");
 				$(this).closest("tr").find(".displayfile").empty();

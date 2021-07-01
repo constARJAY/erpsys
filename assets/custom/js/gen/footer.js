@@ -108,7 +108,7 @@ const sweetAlertConfirmation = (
                     saveData.then(res => {  
                         if (res) {
                             
-                            if (moduleName.toLowerCase() === "role") {
+                            if (condition.toLowerCase() == "add" && (moduleName.toLowerCase() === "role" || moduleName.toLowerCase() === "designation")) {
                                 generateNewRolesPermission();
                             }   
 
@@ -163,8 +163,8 @@ window.addEventListener('beforeunload', function (e) {
 
 // ----- GENERATE NEW ROLE -----
 const generateNewRolesPermission =() => {
-    let roleID = getTableData("gen_user_role_tbl", "", "", "createdAt DESC", "", "LIMIT 1");    
-        roleID = roleID[0]["roleID"];
+    let roleID = getTableData("hris_designation_tbl", "", "", "createdAt DESC", "", "LIMIT 1");    
+        roleID = roleID[0]["designationID"];
 
     $.ajax({
         method: "POST",

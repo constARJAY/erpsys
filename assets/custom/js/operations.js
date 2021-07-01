@@ -147,20 +147,12 @@ const getTableLastCode = (
 			tableName,
 			columnName,
 			whereFilter,
-			"createdAt DESC",
+			`${columnName} DESC`,
 			"",
 			"LIMIT 1"
 		);
 
 		if (lastID.length > 0) {
-			// let lastID = getTableData(
-			// 	tableName,
-			// 	"",
-			// 	whereFilter,
-			// 	"createdAt DESC",
-			// 	"",
-			// 	"LIMIT 1"
-			// );
 			if (lastID && lastID.length > 0) {
 				const columnValue = lastID[0][columnName];
 				const arrValue = columnValue.split("-");

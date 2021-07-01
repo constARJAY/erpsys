@@ -123,13 +123,13 @@ $(document).ready(function () {
 		let button = conditionID
 			? `
         <button 
-            class="btn btn-update" 
+            class="btn btn-update px-5 py-2" 
             id="btnUpdate" 
             conditionid="${conditionID}"><i class="fas fa-save"></i>
             Update
         </button>`
 			: `
-        <button class="btn btn-save" id="btnSave"><i class="fas fa-save"></i> Save</button>`;
+        <button class="btn btn-save px-5 py-2" id="btnSave"><i class="fas fa-save"></i> Save</button>`;
 
 		let html = `
             <div class="modal-body">
@@ -184,7 +184,7 @@ $(document).ready(function () {
             </div>
             <div class="modal-footer">
                 ${button}
-                <button class="btn btn-cancel btnCancel"><i class="fas fa-ban"></i> Cancel</button>
+                <button class="btn btn-cancel btnCancel px-5 py-2"><i class="fas fa-ban"></i> Cancel</button>
             </div>`;
 		return html;
 	}

@@ -24,9 +24,9 @@ class Petty_cash_voucher extends CI_Controller {
     public function __construct()
     {
         parent::__construct();
-        $this->load->model("fms/PettyCashVoucher_model", "purchaseorder");
+        // $this->load->model("fms/PettyCashVoucher_model", "purchaseorder");
         $this->load->model("Operations_model", "operations");
-        isAllowed(14);
+        isAllowed(93);
     }
 
     public function index()
@@ -236,17 +236,17 @@ class Petty_cash_voucher extends CI_Controller {
             $rowNumber  = 5;
 
 
-            $pettyCashRequestDetails = $this->operations->getTableData('fms_petty_cash_request_details_tbl', '',
-                                                                        "pettyCashRequestID = '$pettyCashRequestID' ", '', '', '');                                                  
+            $pettyCashRequestDetails = $this->operations->getTableData('fms_finance_request_details_tbl LEFT JOIN fms_liquidation_tbl USING(liquidationID)', '',
+                                                                        "fms_liquidation_tbl.pettyCashRequestID = '$pettyCashRequestID' ", '', '', '');                                                  
             $limit      = count($pettyCashRequestDetails);
             $totalAmountRequested = 0;
             for ($i = 0; $i < $limit; $i++) { 
                 $sheet->mergeCells("A$rowNumber:H$rowNumber");
-                $sheet->setCellValue("A$rowNumber",$pettyCashRequestDetails[$i]["pettyCashRequestDetailsDescription"]);
+                $sheet->setCellValue("A$rowNumber",$pettyCashRequestDetails[$i]["description"]." ( ".$pettyCashRequestDetails[$i]["quantity"]."x )");
                 $sheet->getStyle("A$rowNumber:H$rowNumber")->applyFromArray($normalTextStyle);
-    
+                $totalAmount = floatval($pettyCashRequestDetails[$i]["quantity"]) * floatval($pettyCashRequestDetails[$i]["amount"] ?? 0.00);
                 $sheet->mergeCells("I$rowNumber:K$rowNumber");
-                $sheet->setCellValue("I$rowNumber", formatAmount($pettyCashRequestDetails[$i]["amount"] ?? 0.00, true));
+                $sheet->setCellValue("I$rowNumber", formatAmount($totalAmount, true));
                 $sheet->getStyle("I$rowNumber:K$rowNumber")->applyFromArray($rightTextStyle);
                 $totalAmountRequested += floatval($pettyCashRequestDetails[$i]["amount"]);
                 $rowNumber++;

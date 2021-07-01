@@ -8,7 +8,7 @@ class Service_completion extends CI_Controller {
         parent::__construct();
         $this->load->model("ims/ServiceOrder_model", "serviceorder");
         $this->load->model("ims/ServiceCompletion_model", "servicecompletion");
-        isAllowed(46);
+        isAllowed(128);
     }
 
     public function index()

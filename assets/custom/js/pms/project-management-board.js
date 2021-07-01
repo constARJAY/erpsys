@@ -136,7 +136,7 @@ $(document).ready(function() {
             LEFT JOIN hris_designation_tbl AS hdt2 ON helt.designationID = hdt2.designationID`,
             `ptbt.timelineBuilderID,
             pplt.projectListName AS projectName,
-            pplt.projectListCode AS projectCode,
+            ptbt.projectCode AS projectCode,
             pct.categoryName AS projectCategory,
             CONCAT(helt.employeeFirstname, ' ', helt.employeeLastname) AS projectManager,
             hdt.departmentName,

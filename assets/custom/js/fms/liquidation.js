@@ -799,7 +799,7 @@ $(document).ready(function() {
 	// ----- GET ITEM ROW -----
     function getItemRow(pettyCashID, isProject = true, item = {}, readOnly) {
 		const attr = isProject ? `project="true"` : ``;
-	
+
 		let {
 			liquidationID                    							= "",
 			description                               					= "",
@@ -811,6 +811,8 @@ $(document).ready(function() {
 			receiptNumber                              					= "",
 			accountName													="",
 			clientName													="",
+			financeRequestID											="",
+			files														="",
 		} = item;
 		
 
@@ -849,43 +851,19 @@ $(document).ready(function() {
 				</div>
 			</td>
 			<td>
-				<div class="receiptNumber">
+				<div>
 				${receiptNumber || "-"}
 				</div>
 			</td>
-			
-			
 			</tr>`;
 		}else{
-			//let disabled = readOnly ? "disabled " : "";
 			
-			let disposalItemsData = getTableData(
-				`fms_finance_request_details_tbl`,
-					`financeRequestID,
-					clientFundRequestID,
-					pettyCashRequestID,	
-					voucherID,
-					description,
-					quantity,
-					amount,
-					liquidationID,
-					srfNumber,
-					remark,
-					receiptNumber`,
-				 	`pettyCashRequestID = ${pettyCashID}`);
-				disposalItemsData.map((item, index) => {
-
-					let {
-						amount,
-						financeRequestID,
-						description,
-						quantity,
-					} = item;
+			
 				//$("#totalAmount").val(pettyCashRequestAmount);
 			html += `
 			<tr class="itemTableRow">
                     <td>
-					<div class="description" name="description" id="description" descriptionValue="${description}" financeRequestID="${financeRequestID}" pettyCashID="${pettyCashID}">
+					<div class="description" name="description" id="description" descriptionValue="${description}" financeRequestID="${financeRequestID || ""}" pettyCashID="${pettyCashID || ""}">
 							${description || "-"}
 					</div>
                    </td> 
@@ -905,7 +883,7 @@ $(document).ready(function() {
 					class="form-control select2"
 					data-allowcharacters="[0-9][a-z][A-Z][.][,][?][!][/][;][:][''][-][_][(][)][%][&][*][ ]"
 					name="clientID"
-					id="clientID${index}">
+					id="clientID">
 					${getClient(clientID)}
 				</select>
 					<div class="invalid-feedback d-block" id="invalid-clientID"></div>
@@ -916,10 +894,10 @@ $(document).ready(function() {
 					<input 
 						type="text"
 						class="form-control validate"
-						id="srfNumber${index}" 
+						id="srfNumber" 
 						name="srfNumber" 
 						data-allowcharacters="[a-z][A-Z][0-9][-]"
-						value="${srfNumber}">
+						value="${srfNumber || ""}">
 					<div class="invalid-feedback d-block" id="invalid-srfNumber"></div>
 				</div>
 			</td>
@@ -934,24 +912,19 @@ $(document).ready(function() {
 						style="resize: none" 
 						class="form-control" 
 						data-allowcharacters="[0-9][a-z][A-Z][ ][.][,][_]['][()][?][-][/]"
-						id="remark${index}"
-						name="remark">${remark}</textarea>
+						id="remark"
+						name="remark">${remark || ""}</textarea>
 				</div>
 				</td>
 			<td>
-			<div class="receiptNumber">
-				<input type="text"
-				data-allowcharacters="[0-9][a-z][A-Z][-]"
-				class="form-control validate"
-				id="receiptNumber" 
-				name="receiptNumber"
-				value="${receiptNumber}">
-			</div>	
+				<div class="receiptNumber text-center" name="receiptNumber" id="receiptNumber">
+								${receiptNumber || files}
+				</div>	
 			</td>
 			</tr>`;
 			//$("#totalAmount").text("seds");
 			//$(`#totalAmount`).text(formatAmount(pettyCashRequestAmount, true));
-		})
+		
 		
 		}
 
@@ -1095,10 +1068,11 @@ $(document).ready(function() {
 			}
 			
         let clientFundRequestItems = "";
+		let pettycashid = "0";
 		if (liquidationID) {
 		let pettyCashRequestData = getTableData(
-			`fms_finance_request_details_tbl 			AS frd
-			LEFT JOIN fms_liquidation_tbl         	 	AS lt ON frd.liquidationID = lt.liquidationID
+			`fms_liquidation_tbl         	 			AS lt 
+			LEFT JOIN  fms_finance_request_details_tbl 	AS frd ON frd.liquidationID = lt.liquidationID
 			LEFT JOIN fms_chart_of_accounts_tbl			AS fcoa ON frd.chartOfAccountID = fcoa.chartOfAccountID
 			LEFT JOIN pms_client_tbl					AS pct ON  frd.clientID = pct.clientID`,
 			`frd.liquidationID,
@@ -1110,16 +1084,39 @@ $(document).ready(function() {
 			frd.remark,
 			frd.receiptNumber,
 			fcoa.accountName,
-			pct.clientName`,
-			`frd.liquidationID  = ${liquidationID}`);
+			pct.clientName,
+			frd.amount,
+			frd.financeRequestID,
+			frd.description,
+			frd.quantity,
+			frd.files`,
+			`frd.liquidationID  = ${liquidationID} `,``,`financeRequestID`);
 			pettyCashRequestData.map(item => {
-				clientFundRequestItems += getItemRow(pettyCashID, true, item, readOnly)
-		})    
+				clientFundRequestItems += getItemRow(pettyCashID, true, item, readOnly)  
+		})  
+	
 		}else{
-			
-			clientFundRequestItems += getItemRow(pettyCashID, true, "", false);
-	} 
-		
+			let disposalItemsData = getTableData(
+				`fms_finance_request_details_tbl`,
+					`financeRequestID,
+					clientFundRequestID,
+					pettyCashRequestID,	
+					voucherID,
+					description,
+					quantity,
+					amount,
+					liquidationID,
+					srfNumber,
+					remark,
+					receiptNumber,
+					
+					files`,
+				 	`pettyCashRequestID = ${pettyCashID}`);
+					 disposalItemsData.map(item => {
+				clientFundRequestItems += getItemRow(pettyCashID, true, item, false);
+
+				})
+		} 
 		let {
 			fullname:    employeeFullname    = "",
 			department:  employeeDepartment  = "",
@@ -1591,7 +1588,7 @@ $(document).ready(function() {
 				const srfNumber 							= $("td [name=srfNumber]", this).val();
 				// const chartOfAccountID 						= $("td [name=chartOfAccountID]", this).val();
 				const remark 								= $("td [name=remark]", this).val();
-				const receiptNumber 						= $("td [name=receiptNumber]", this).val();
+				const receiptNumber 						= $("td [name=receiptNumber]", this).text();
 				//const totalAmount = 		getNonFormattedAmount($("td [name=basequantityandamount ]", this).text()); 
 				
 				

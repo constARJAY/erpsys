@@ -777,6 +777,7 @@ $(document).ready(function() {
 	// ----- GET ITEM ROW -----
     function getItemRow(isProject = true, item = {}, readOnly = false, ceID = null) {
 		const attr = isProject ? `project="true"` : `company="true"`;
+		var inputFile = "";
 		let {
 			requestItemID                       = "",
 			chartOfAccountID                    = "",
@@ -789,7 +790,8 @@ $(document).ready(function() {
 		// /$('[name=files]').val(files);
 		let html = "";
 		if (readOnly) {
-			const itemFIle = files ? `<a href="${base_url+"assets/upload-files/petty-cash-request/"+files}" target="_blank">${files}</a>` : `-`;
+			///filenameretrieve(files);
+			const itemFIle = files ? `<a href="${base_url+"assets/upload-files/client-fund-request/"+files}" target="_blank">${files}</a>` : `-`;
 			html += `
 			<tr class="itemTableRow">
 				
@@ -818,18 +820,32 @@ $(document).ready(function() {
 				</td>
 			</tr>`;
 		} else {
+			//const inputFile 
 			const disabled  = ceID && ceID != "0" ? "disabled" : "";
-			const inputFile = ceID && ceID != "0" ? "" : `
+			if(files ==""){
+				inputFile = ceID && ceID != "0" ? "" : `
+				<input 
+					type="file" 
+					class="form-control validate files"
+					name="files" 
+					id="files"
+					accept="image/*, .pdf, .doc, .docx"
+					filename="${files != null ? files : ""}"
+					value="${files}"
+					required>
+					<div class="invalid-feedback d-block" id="invalid-files"></div>`;
+			}else{
+				 inputFile = ceID && ceID != "0" ? "" : `
 			<input 
 				type="file" 
-				class="form-control validate"
+				class="form-control validate file"
 				name="files" 
 				id="files"
 				accept="image/*, .pdf, .doc, .docx"
 				filename="${files != null ? files : ""}"
-				value="${files}"
-				required>
+				value="${files}">
 				<div class="invalid-feedback d-block" id="invalid-files"></div>`;
+			}	
 			let itemFile  = "";
 			if (ceID && ceID != "0") {
 				if (files) {
@@ -843,7 +859,7 @@ $(document).ready(function() {
 						overflow: hidden;
 						white-space: nowrap;
 						text-overflow: ellipsis;"
-					target="_blank">${files}</a>`;
+					target="_blank"></a>`;
 				} else { 
 					itemFile = "-";
 				}
@@ -866,7 +882,6 @@ $(document).ready(function() {
 					</div>`;
 				}
 			}
-
 			html += `
 			<tr class="itemTableRow">
 				<td class="text-center">
@@ -975,7 +990,7 @@ $(document).ready(function() {
 			$("td .description [name=description]", this).attr("company", `true`);
 
 			// FILE
-			$("td .file [name=files]", this).attr("id", `filesProject${i}`);
+			$("td .file [name=files]", this).attr("id", `files${i}`);
 			
 		})
 	}
@@ -1044,7 +1059,7 @@ $(document).ready(function() {
 		$(".itemProjectTableBody tr").each(function(){
 			TotalValue += parseFloat(getNonFormattedAmount($(this).find('[name=basequantityandamount]').text()) || 0);	
 	  });
-	  //alert(TotalValue);
+
 		if(TotalValue <= 2000){
 			//$("#totalAmount").css('background-color', '#FFFFFF');
 			$(`#totalAmount`).text(formatAmount(TotalValue, true));
@@ -1232,12 +1247,12 @@ $(document).ready(function() {
 	// 	$("#form_client_fund_request").find(".is-invalid").first().focus();
 	// 	return flag > 0 ? false : true;
 	// }
-	// ----- END VALIDATE SERVICE FILE ----- 
+	//----- END VALIDATE SERVICE FILE ----- 
 	function fileValidation(){
-		let check = 0
-		$(`[name="files"]`).each(function(i) {
+		let check = 0;
+		$(`.files`).each(function(i) {
 			var allowedExtensions = /(\.jpg|\.jpeg|\.png|\.pdf|\.docx)$/i;
-			var filextension = $(this).val();
+		var filextension = $(this).val();
 			if(!allowedExtensions.exec(filextension)){
 				$(this).addClass("is-invalid");
 				$(this).parent().find(".invalid-feedback").first().text("Invalid file extension.");
@@ -1250,9 +1265,35 @@ $(document).ready(function() {
 		$("#form_client_fund_request").find(".is-invalid").first().focus();
 	return check > 0 ? false : true;	
 	}	
+	// function filenameretrieve(){
+		
+	// 	const filename = this.files[0].name;
+	// 	const filesize = this.files[0].size/1024/1024; // Size in MB
+	// 	if (filesize > 10) {
+	// 		$(this).val("");
+	// 		$(this).parent().parent().find(".displayfile").empty();
+	// 		showNotification("danger", "File size must be less than or equal to 10mb");
+	// 	} else {
+	// 		let html = `
+	// 		<div class="d-flex justify-content-between align-items-center py-2">
+	// 			<span class="filename"
+	// 				style="display: block;
+	// 					width: 180px;
+	// 					overflow: hidden;
+	// 					white-space: nowrap;
+	// 					text-overflow: ellipsis;">${filename}</span>
+	// 			<span class="btnRemoveFile" style="cursor: pointer"><i class="fas fa-close"></i></span>
+	// 		</div>`;
+	// 		$(this).removeClass("is-invalid");
+	// 		$(this).attr("filename",filename);
+	// 		$(this).parent().find(".invalid-feedback").first().text("");
+	// 		$(this).parent().find(".displayfile").first().html(html);
+	// 	}
+
+	// }
 	// ----- SELECT FILE -----
 	$(document).on("change", "[name=files]", function(e) {
-		
+		//filenameretrieve();
 		const filename = this.files[0].name;
 		const filesize = this.files[0].size/1024/1024; // Size in MB
 		if (filesize > 10) {
@@ -1271,6 +1312,7 @@ $(document).ready(function() {
 				<span class="btnRemoveFile" style="cursor: pointer"><i class="fas fa-close"></i></span>
 			</div>`;
 			$(this).removeClass("is-invalid");
+			$(this).attr("filename",filename);
 			$(this).parent().find(".invalid-feedback").first().text("");
 			$(this).parent().find(".displayfile").first().html(html);
 		}
@@ -1630,8 +1672,9 @@ $(document).ready(function() {
 			!clientFundRequestID && clientFundRequestID == 0 && $("#clientFundRequestDate").val(moment(new Date).format("MMMM DD, YYYY"));
             projectID && projectID != 0 && $("[name=projectID]").trigger("change");
 			// if (billMaterialID || projectID) {
-			// 	$("[name=projectID]").val(projectID).trigger("change");
+			//$("[name=files]").val(files).trigger("change");
 			// }
+			//$("[name=files]").trigger("change");
 
 			// ----- NOT ALLOWED FOR UPDATE -----
 			if (!allowedUpdate) {
@@ -1780,7 +1823,6 @@ $(document).ready(function() {
 					formData.append("clientFundRequestStatus", 2);
 				}
 			}
-
 			$(".itemTableRow").each(function(i, obj) {
 				const requestItemID = $(this).attr('requestItemID');
 
@@ -1791,9 +1833,11 @@ $(document).ready(function() {
                 const amount 				= $("td [name=amount]", this).val().replaceAll(",","");
 				const totalAmount = 		getNonFormattedAmount($("td [name=basequantityandamount ]", this).text()); 
 				let fileID   = $("td [name=files]", this).attr("id") || "";
+				//console.log(fileID);
 				let file     = fileID ? $(`#${fileID}`)?.[0]?.files?.[0] : "";
 				let fileArr  = file?.name?.split(".");
 				let filename = file ? file?.name : "";
+				//console.log("checkrecord".filename);
 
 				let temp = {
 						description, quantity, amount,totalAmount,

@@ -133,7 +133,7 @@ $(document).ready(function() {
             ptbt.createdAt,
             CONCAT(helt.employeeFirstname, ' ', helt.employeeLastname) AS preparedBy,
             pplt.projectListName AS projectName,
-            pplt.projectListCode AS projectCode,
+            ptbt.projectCode AS projectCode,
             pct.categoryName AS projectCategory,
             ptbt.timelineProposedBudget AS proposedBudget,
             ptbt.timelineAllocatedBudget AS allocatedBudget,

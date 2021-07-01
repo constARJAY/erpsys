@@ -770,6 +770,7 @@ $(document).ready(function() {
 	// ----- GET ITEM ROW -----
     function getItemRow(isProject = true, item = {}, readOnly = false, ceID = null) {
 		const attr = isProject ? `project="true"` : `company="true"`;
+		var inputFile = "";
 		let {
 			requestItemID                       = "",
 			chartOfAccountID                    = "",
@@ -812,16 +813,30 @@ $(document).ready(function() {
 			</tr>`;
 		} else {
 			const disabled  = ceID && ceID != "0" ? "disabled" : "";
-			const inputFile = ceID && ceID != "0" ? "" : `
+			if(files ==""){
+				inputFile = ceID && ceID != "0" ? "" : `
+				<input 
+					type="file" 
+					class="form-control validate files"
+					name="files" 
+					id="files"
+					accept="image/*, .pdf, .doc, .docx"
+					filename="${files != null ? files : ""}"
+					value="${files}"
+					required>
+					<div class="invalid-feedback d-block" id="invalid-files"></div>`;
+			}else{
+				 inputFile = ceID && ceID != "0" ? "" : `
 			<input 
 				type="file" 
-				class="form-control validate" 
+				class="form-control validate file"
 				name="files" 
 				id="files"
 				accept="image/*, .pdf, .doc, .docx"
-				required>
+				filename="${files != null ? files : ""}"
+				value="${files}">
 				<div class="invalid-feedback d-block" id="invalid-files"></div>`;
-
+			}	
 			let itemFile  = "";
 			if (ceID && ceID != "0") {
 				if (files) {
@@ -1233,7 +1248,7 @@ $(document).ready(function() {
 	
 	function fileValidation(){
 		let check = 0
-		$(`[name="files"]`).each(function(i) {
+		$(`.files`).each(function(i) {
 			var allowedExtensions = /(\.jpg|\.jpeg|\.png|\.pdf|\.docx)$/i;
 			var filextension = $(this).val();
 			if(!allowedExtensions.exec(filextension)){
@@ -1589,7 +1604,7 @@ $(document).ready(function() {
 			updateInventoryItemOptions();
 			!pettyCashRequestID && pettyCashRequestID == 0 && $("#pettyCashRequestDate").val(moment(new Date).format("MMMM DD, YYYY"));
 			// if (billMaterialID || projectID) {
-			// 	$("[name=projectID]").val(projectID).trigger("change");
+			 	//$("[name=files]").val(files).trigger("change");
 			// }
 
 			// ----- NOT ALLOWED FOR UPDATE -----
@@ -1759,7 +1774,7 @@ $(document).ready(function() {
 				let file     = fileID ? $(`#${fileID}`)?.[0]?.files?.[0] : "";
 				let fileArr  = file?.name?.split(".");
 				let filename = file ? file?.name : "";
-
+				console.log(filename);
 				let temp = {
 						description, quantity, amount,totalAmount,
 					filename

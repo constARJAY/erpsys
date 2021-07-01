@@ -10,10 +10,10 @@ $(document).ready(function() {
 		}
 		return {};
 	}
-    const pettyCashRequestData = getTableData(`fms_petty_cash_request_tbl AS fpcrt JOIN fms_liquidation_tbl USING(pettyCashRequestID)`,
-                                                `fpcrt.*, fms_liquidation_tbl.liquidationID`,
-                                                `pettyCashRequestStatus = 2 `);
-    const pettyCashFinanceRequest = getTableData(`fms_finance_request_details_tbl`, ``,`pettyRepID IS NOT NULL`);
+    const clientFundRequestData = getTableData(`fms_client_fund_request_tbl AS fcfrt JOIN fms_liquidation_tbl USING(clientFundRequestID)`,
+                                                `fcfrt.*, fms_liquidation_tbl.liquidationID`,
+                                                `clientFundRequestStatus = 2 `);
+    const clientFundFinanceRequest = getTableData(`fms_finance_request_details_tbl`, ``,`clientRepID IS NOT NULL`);
 
     // ----- DATATABLES -----
 	function initDataTables() {
@@ -47,7 +47,7 @@ $(document).ready(function() {
     // ----- MY FORMS CONTENT -----
 	function myFormsContent() {
 		$("#tableMyFormsParent").html(preloader);
-        // (SELECT SUM(amount) FROM fms_petty_cash_request_details_tbl WHERE pettyCashRequestID = 'fpcrt.pettyCashRequestID') AS `
+        // (SELECT SUM(amount) FROM fms_client_fund_request_details_tbl WHERE clientFundRequestID = 'fcfrt.clientFundRequestID') AS `
 		
 		let html = `
         <table class="table table-bordered table-striped table-hover" id="tableMyForms">
@@ -65,13 +65,13 @@ $(document).ready(function() {
             </thead>
             <tbody>`;
         let overAllTotal = 0, overAllBalance = 0;
-        pettyCashRequestData.map((item) => {
+        clientFundRequestData.map((item) => {
 			let {
-				pettyCashRequestID,
+				clientFundRequestID,
                 createdBy,
                 createdAt,
                 updatedAt,
-                pettyCashRequestAmount,
+                clientFundRequestAmount,
                 liquidationID,
 			} = item;
              // ----- GET EMPLOYEE DATA -----
@@ -81,21 +81,21 @@ $(document).ready(function() {
                     designation: employeeDesignation = "",
                 } = employeeData(createdBy);
             // ----- END GET EMPLOYEE DATA -----
-            var condition = pettyCashFinanceRequest.filter(items => items.liquidationID == liquidationID);
+            var condition = clientFundFinanceRequest.filter(items => items.liquidationID == liquidationID);
             if(condition.length < 1){
-                var tempBalance = parseFloat(totalBudget) - parseFloat(pettyCashRequestAmount);
+                var tempBalance = parseFloat(totalBudget) - parseFloat(clientFundRequestAmount);
                 var tempTotal   = parseFloat(totalBudget) - parseFloat(tempBalance);
                 overAllTotal    += tempTotal, 
                 overAllBalance  = parseFloat(totalBudget) - parseFloat(overAllTotal); 
             }
 			html += `
-			<tr class="btn-view" id="${encryptString(pettyCashRequestID)}">
-				<td>${getFormCode("PCV", createdAt, pettyCashRequestID )}</td>
+			<tr class="btn-view" id="${encryptString(clientFundRequestID)}">
+				<td>${getFormCode("PCV", createdAt, clientFundRequestID )}</td>
 				<td>${employeeFullname}</td>
                 <td>${employeeDesignation}</td>
                 <td>${employeeDepartment}</td>
                 <td>${moment(updatedAt).format("MMMM DD,YYYY")}</td>
-                <td class="text-right">${formatAmount(pettyCashRequestAmount, true)}</td>
+                <td class="text-right">${formatAmount(clientFundRequestAmount, true)}</td>
                 <td class="text-right">${condition.length > 0 ? "-" : formatAmount(overAllTotal, true)}</td>
                 <td class="text-right">${condition.length > 0 ? "-" : formatAmount(overAllBalance, true)}</td>
 			</tr>`;
@@ -123,8 +123,8 @@ $(document).ready(function() {
                 </div>
             </div>`;
 
-        var pettyCashFinanceRequest = getTableData(`fms_finance_request_details_tbl`, ``,`liquidationID IS NOT NULL AND pettyRepID IS NULL`);       
-        pettyCashFinanceRequest.length > 0 ? $("#replenishBtn").show() : $("#replenishBtn").hide();
+        var clientFundFinanceRequest = getTableData(`fms_finance_request_details_tbl`, ``,`liquidationID IS NOT NULL AND clientRepID IS NULL`);       
+        clientFundFinanceRequest.length > 0 ? $("#replenishBtn").show() : $("#replenishBtn").hide();
         setTimeout(() => {
             $("#page_content").html(html);
             initDataTables();
@@ -136,10 +136,10 @@ $(document).ready(function() {
     pageContent();
 
     $(document).on("click",".btn-view", function(){
-        $("#modal_petty_cash_request_content").html(preloader);
-        $("#modal_petty_cash_request").modal("show");
-        let pettyCashRequestID = decryptString($(this).attr("id"));
-        let data = pettyCashRequestData.filter(items => items.pettyCashRequestID == pettyCashRequestID).map(items => {return items});
+        $("#modal_client_fund_request_content").html(preloader);
+        $("#modal_client_fund_request").modal("show");
+        let clientFundRequestID = decryptString($(this).attr("id"));
+        let data = clientFundRequestData.filter(items => items.clientFundRequestID == clientFundRequestID).map(items => {return items});
         let {
             createdBy ,
             createdAt
@@ -152,7 +152,7 @@ $(document).ready(function() {
         } = employeeData(createdBy);
         // ----- END GET EMPLOYEE DATA -----
         
-        let voucherData        = getTableData(`fms_finance_request_details_tbl LEFT JOIN fms_liquidation_tbl USING(liquidationID)`, ``, `fms_liquidation_tbl.pettyCashRequestID = '${pettyCashRequestID}'`);
+        let voucherData        = getTableData(`fms_finance_request_details_tbl LEFT JOIN fms_liquidation_tbl USING(liquidationID)`, ``, `fms_liquidation_tbl.clientFundRequestID = '${clientFundRequestID}'`);
         let voucherDescription = ``, voucherAmount =``, voucherTotalAmount = 0, voucherDataLength = voucherData.length; 
         voucherData.map((items, index) => {
             var breakLine = voucherDataLength != index ? `<br>`:``;
@@ -172,7 +172,7 @@ $(document).ready(function() {
                                         </div>
                                     </th>
                                     <th class="text-center"><h3 class="font-weight-bold">PETTY CASH VOUCHER</h3></th>
-                                    <th class="text-center"><h3 class="font-weight-bold text-danger">${getFormCode("PCV", createdAt, pettyCashRequestID )}</h3></th>
+                                    <th class="text-center"><h3 class="font-weight-bold text-danger">${getFormCode("PCV", createdAt, clientFundRequestID )}</h3></th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -223,7 +223,7 @@ $(document).ready(function() {
                         </table>
                         <div class="modal-footer">
                                 <button 
-                                    class="btn btn-info px-5 p-2" id="download_excel" pettyCashRequestID="${encryptString(pettyCashRequestID)}">
+                                    class="btn btn-info px-5 p-2" id="download_excel" clientFundRequestID="${encryptString(clientFundRequestID)}">
                                     <i class="fas fa-file-excel"></i>
                                     Excel
                                 </button>
@@ -231,18 +231,18 @@ $(document).ready(function() {
                         </div>
                     `;
 
-        $("#modal_petty_cash_request_content").html(html);
+        $("#modal_client_fund_request_content").html(html);
     });
 
     $(document).on("click", "#download_excel", function(){
-        const pettyCashRequestID = decryptString($(this).attr("pettyCashRequestID"));
-		const url = `${base_url}fms/petty_cash_voucher/downloadExcel?id=${pettyCashRequestID}`;
+        const clientFundRequestID = decryptString($(this).attr("clientFundRequestID"));
+		const url = `${base_url}fms/client_fund_voucher/downloadExcel?id=${clientFundRequestID}`;
 		window.location.replace(url); 
     });
 
     $(document).on("click", "#replenishBtn", function(){
-        // const pettyCashRequestID = decryptString($(this).attr("pettyCashRequestID"));
-		const url = `${base_url}fms/petty_cash_replenishment?add`;
+        // const clientFundRequestID = decryptString($(this).attr("clientFundRequestID"));
+		const url = `${base_url}fms/client_fund_replenishment?add`;
 		window.location.replace(url); 
     });
 })

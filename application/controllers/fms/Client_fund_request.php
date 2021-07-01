@@ -125,7 +125,7 @@ class Client_fund_request extends CI_Controller {
                             $extension = $uploadedFile[1];
                             $filename  = $i.time().'.'.$extension;
 
-                            $folderDir = "assets/upload-files/petty-cash-request/";
+                            $folderDir = "assets/upload-files/client-fund-request/";
                             if (!is_dir($folderDir)) {
                                 mkdir($folderDir);
                             }

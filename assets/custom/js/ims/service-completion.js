@@ -449,7 +449,7 @@ $(document).ready(function() {
 						</div>
 						<small style="color:#848482;">${projectListCode || '-'}</small>
 					</td>
-					<td>${serviceOrderReason}</td>
+					<td>${serviceOrderReason || "-"}</td>
 					<td>
 						${employeeFullname(getCurrentApprover(approversID, approversDate, serviceCompletionStatus, true))}
 					</td>
@@ -555,7 +555,7 @@ $(document).ready(function() {
 					</div>
 					<small style="color:#848482;">${projectListCode || '-'}</small>
 				</td>
-				<td>${serviceOrderReason}</td>
+				<td>${serviceOrderReason || "-"}</td>
                 <td>
                     ${employeeFullname(getCurrentApprover(approversID, approversDate, serviceCompletionStatus, true))}
                 </td>
@@ -728,7 +728,7 @@ $(document).ready(function() {
 	function getServiceOrderList(id = null, status = 0, display = true) {
 		const createdORList = getTableData("ims_service_completion_tbl", "serviceOrderID", "serviceCompletionStatus <> 3 AND serviceCompletionStatus <> 4").map(so => so.serviceOrderID);
 		let html = ``;
-		if (!status || status == 0) {
+		if (!status || status == "0") {
 			html += serviceOrderList.filter(so => createdORList.indexOf(so.serviceOrderID) == -1 || so.serviceOrderID == id).map(so => {
 				return `
 				<option 
@@ -753,7 +753,7 @@ $(document).ready(function() {
 			html += serviceOrderList.map(so => {
 				return `
 				<option 
-					value        = "${so.servisoOrderID}" 
+					value        = "${so.serviceOrderID}" 
 					serviceRequisitionID = "${so.serviceRequisitionID}"
 					soCode       = "${getFormCode("SO", so.createdAt, so.serviceOrderID)}"
 					paymentTerms = "${so.paymentTerms}"
@@ -1511,6 +1511,7 @@ $(document).ready(function() {
 		companyContactPerson && $(`[name="companyContactPerson"]`).val(companyContactPerson);
 		companyAddress && $(`[name="companyAddress"]`).val(companyAddress);
 
+		const where = serviceOrderID ? `serviceOrderID=${serviceOrderID}` : "";
 		const data = getTableData(
 			`ims_service_order_tbl`,
 			`serviceRequisitionID, 
@@ -1524,7 +1525,7 @@ $(document).ready(function() {
 			totalVat,
 			lessEwt, 
 			grandTotalAmount`,
-			`serviceOrderID=${serviceOrderID}`
+			where
 		)
 
 		const services = getServicesDisplay(data);
@@ -1926,28 +1927,30 @@ $(document).ready(function() {
 
 			$(".itemTableRow").each(function(i, obj) {
 				const requestServiceID = $(this).attr("requestServiceID");
-				const serviceID        = $(this).attr("serviceID");
-				const serviceName      = $(this).attr("serviceName");
-				const remarks          = $(this).attr("remarks");
-				const serviceDate      = $("td [name=serviceDate]", this).val();	
-				const serviceDateArr   = serviceDate.split(" - ");
-				const serviceDateFrom  = moment(serviceDateArr[0]).format("YYYY-MM-DD");
-				const serviceDateTo    = moment(serviceDateArr[1]).format("YYYY-MM-DD");
-
-				formData.append(`services[${i}][requestServiceID]`, requestServiceID);
-				formData.append(`services[${i}][serviceID]`, serviceID);
-				formData.append(`services[${i}][serviceName]`, serviceName);
-				formData.append(`services[${i}][remarks]`, remarks);
-				formData.append(`services[${i}][serviceDateFrom]`, serviceDateFrom);
-				formData.append(`services[${i}][serviceDateTo]`, serviceDateTo);
-
-				let temp = {
-					requestServiceID,
-					serviceDateFrom, 
-					serviceDateTo
-				};
-
-				data["items"].push(temp);
+				if (requestServiceID && requestServiceID != "0") {
+					const serviceID        = $(this).attr("serviceID");
+					const serviceName      = $(this).attr("serviceName");
+					const remarks          = $(this).attr("remarks");
+					const serviceDate      = $("td [name=serviceDate]", this).val();	
+					const serviceDateArr   = serviceDate.split(" - ");
+					const serviceDateFrom  = moment(serviceDateArr[0]).format("YYYY-MM-DD");
+					const serviceDateTo    = moment(serviceDateArr[1]).format("YYYY-MM-DD");
+	
+					formData.append(`services[${i}][requestServiceID]`, requestServiceID);
+					formData.append(`services[${i}][serviceID]`, serviceID);
+					formData.append(`services[${i}][serviceName]`, serviceName);
+					formData.append(`services[${i}][remarks]`, remarks);
+					formData.append(`services[${i}][serviceDateFrom]`, serviceDateFrom);
+					formData.append(`services[${i}][serviceDateTo]`, serviceDateTo);
+	
+					let temp = {
+						requestServiceID,
+						serviceDateFrom, 
+						serviceDateTo
+					};
+	
+					data["items"].push(temp);
+				}
 			});
 
 		} 

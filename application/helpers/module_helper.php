@@ -1,35 +1,43 @@
 <?php
 
-    function isAllowed($moduleID, $displayModule = false)
+    function isGranted($moduleID = 0)
     {
         $CI =& get_instance();
-        $CI->load->helper('url', 'string', 'integer'); 
-
         $sessionUserAccount = getAdminSessionAccount();
         $designationID      = $sessionUserAccount->designationID;
         $sessionID          = $CI->session->has_userdata("adminSessionID") ? $CI->session->userdata("adminSessionID") : false;
+
+        $sql    = "SELECT permissionStatus FROM gen_roles_permission_tbl WHERE moduleID = $moduleID AND designationID = $designationID AND permissionStatus = 1";
+        $sql2   = "SELECT readStatus FROM hris_employee_permission_tbl WHERE moduleID = $moduleID AND employeeID = $sessionID AND readStatus = 1";
+        $query  = $CI->db->query($sql);
+        $query2 = $CI->db->query($sql2);
+
+        return [$query->num_rows(), $query2->num_rows()];
+    }
+
+    function isAllowed($moduleID = 0, $displayModule = false)
+    {
+        $CI =& get_instance();
+        $CI->load->helper('url', 'string', 'integer'); 
+        $sessionID = $CI->session->has_userdata("adminSessionID") ? $CI->session->userdata("adminSessionID") : false;
         
         if ($sessionID) {
             if ($moduleID) {
-                $sql = "SELECT permissionStatus FROM gen_roles_permission_tbl WHERE moduleID = $moduleID AND designationID = $designationID AND permissionStatus = 1";
-                $sql2 = "SELECT readStatus FROM hris_employee_permission_tbl WHERE moduleID = $moduleID AND employeeID = $sessionID AND readStatus = 1";
+                $accessibility = isGranted($moduleID);
+                if ($displayModule) {
+                    return $accessibility[0] > 0 && $accessibility[1] > 0;
+                } else {
+                    if ($accessibility[0] == 0 || $accessibility[1] == 0) {
+                        redirect(base_url('denied'));
+                    }
+                }
             } else {
                 redirect(base_url('denied'));
             }
-    
-            
-            $query  = $CI->db->query($sql);
-            $query2 = $CI->db->query($sql2); // ----- WITH ACCESSBILITY -----
-            if ($displayModule) {
-                // return $query->num_rows() > 0 ? true : false;
-                return $query->num_rows() > 0 && $query2->num_rows() > 0 ? true : false; // ----- WITH ACCESSBILITY -----
-            } else {
-                // if ($query->num_rows() == 0) {
-                if ($query->num_rows() == 0 || $query2->num_rows() == 0) { // ----- WITH ACCESSBILITY -----
-                    redirect(base_url('denied'));
-                }
-            }
         } else {
+            if ($moduleID) {
+                $CI->session->set_userdata('request_url', current_url());
+            }
             redirect(base_url("login"));
         }
 

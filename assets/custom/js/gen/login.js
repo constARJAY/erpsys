@@ -49,7 +49,9 @@ $(document).on("click", "#login-btn", function(e){
                 data,
                 dataType:"json",
                 success:function(data){
-                    if(data == true) window.location.replace('approval_setup');
+                    // ! NOTE: Assume that the base name of the system is erpsys_backup
+                    let url = data.replaceAll("index.php/", "");
+                    window.location.replace(url);
                 }
             });
                 
