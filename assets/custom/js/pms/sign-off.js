@@ -586,23 +586,35 @@ $(document).ready(function() {
 
 
 	// ----- GET PROJECT PHASE -----
+	const getTimelinePhases = (timelineBuilderID = 0) => {
+		let result = [];
+		$.ajax({
+			method: "POST",
+			url: "sign_off/getTimelinePhases",
+			data: {timelineBuilderID},
+			dataType: "json",
+			async: false,
+			success: function(data) {
+				result = data;
+			}
+		})
+		return result;
+	}
+
 	function getProjectPhase(rTimelineBuilderID = 0, rMilestoneBuilderID = 0, phaseName = "", status = "0") {
 		let html = '';
-		if (status == "1" || status == "2") {
+		if (status != "0") {
 			phaseName = phaseName && phaseName != "Select Project Phase" ? phaseName : "-";
 			html = `<option selected>${phaseName}</option>`;
 		} else {
 			html = `<option selected disabled>Select Project Phase</option>`;
 			
-			let phaseList = getTableData(
-				`pms_timeline_task_list_tbl AS pttlt
-					LEFT JOIN pms_milestone_builder_tbl AS pmbt USING (milestoneBuilderID)`,
-				`pttlt.milestoneBuilderID,
-				pmbt.phaseCode,
-				pmbt.phaseDescription`,
-				`pttlt.timelineBuilderID = ${rTimelineBuilderID}
-				GROUP BY pttlt.milestoneBuilderID`
-			)
+			let signOffPhases = getTableData(
+				`pms_sign_off_tbl`,
+				`milestoneBuilderID`,
+				`signOffStatus = 1 OR signOffStatus = 2 OR signOffStatus = 5`
+			)?.map(signOff => signOff.milestoneBuilderID);
+			let phaseList = getTimelinePhases(rTimelineBuilderID);
 			phaseList.map(phase => {
 			
 				const {
@@ -611,11 +623,13 @@ $(document).ready(function() {
 					phaseDescription
 				} = phase;
 
-				html += `
-				<option value="${milestoneBuilderID}"
-					phaseCode="${phaseCode}"
-					phaseDescription="${phaseDescription}"
-					${milestoneBuilderID == rMilestoneBuilderID ? "selected" : ""}>${phaseDescription}</option>`;
+				if (!signOffPhases.includes(milestoneBuilderID)) {
+					html += `
+					<option value="${milestoneBuilderID}"
+						phaseCode="${phaseCode}"
+						phaseDescription="${phaseDescription}"
+						${milestoneBuilderID == rMilestoneBuilderID ? "selected" : ""}>${phaseDescription}</option>`;
+				}
 			})
 		}
 		return html;
@@ -946,6 +960,7 @@ $(document).ready(function() {
                         <select class="form-control validate select2"
 							name="clientID"
 							id="clientID"
+							style="width: 100%"
 							required
 							${disabled}>
 							${getClientOptions(clientID, clientName, signOffStatus)}	
@@ -979,6 +994,7 @@ $(document).ready(function() {
                         <select class="form-control validate select2"
 							name="timelineBuilderID"
 							id="timelineBuilderID"
+							style="width: 100%"
 							required
 							${disabled}>
 							${getProjectOptions(clientID, timelineBuilderID, projectName, signOffStatus)}	
@@ -1002,6 +1018,7 @@ $(document).ready(function() {
                         <select class="form-control validate select2"
 							name="milestoneBuilderID"
 							id="milestoneBuilderID"
+							style="width: 100%"
 							required
 							${disabled}>
 							${getProjectPhase(timelineBuilderID, milestoneBuilderID, phaseName, signOffStatus)}

@@ -369,12 +369,18 @@ $(document).ready(function() {
 	function headerTabContent(display = true) {
 		if (display) {
 			if (isImModuleApprover("pms_cost_estimate_tbl", "approversID")) {
+				let count = getCountForApproval("pms_cost_estimate_tbl");
+				let displayCount = count ? `<span class="ml-1 badge badge-danger rounded-circle">${count}</span>` : "";
 				let html = `
                 <div class="bh_divider appendHeader"></div>
                 <div class="row clearfix appendHeader">
                     <div class="col-12">
                         <ul class="nav nav-tabs">
-                            <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#forApprovalTab" redirect="forApprovalTab">For Approval</a></li>
+                            <li class="nav-item">
+								<a class="nav-link" data-toggle="tab" href="#forApprovalTab" redirect="forApprovalTab">
+									For Approval ${displayCount}
+								</a>
+							</li>
                             <li class="nav-item"><a class="nav-link active" data-toggle="tab" href="#myFormsTab" redirect="myFormsTab">My Forms</a></li>
                         </ul>
                     </div>

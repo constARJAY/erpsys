@@ -143,4 +143,10 @@ class Sign_off extends CI_Controller {
         echo json_encode($saveSignOffData);
     }
 
+    public function getTimelinePhases()
+    {
+        $timelineBuilderID = $this->input->post("timelineBuilderID") ?? 2;
+        echo json_encode($this->signoff->getTimelinePhases($timelineBuilderID));
+    }
+
 }

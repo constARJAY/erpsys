@@ -521,3 +521,20 @@ function getFormCode(str = null, date = null, id = 0) {
 }
 // ----- END GET FORM CODE -----
 
+
+// ----- GET COUNT FOR APPROVAL -----
+function getCountForApproval(tableName = "pms_cost_estimate_tbl") {
+	let result = 0;
+	$.ajax({
+		method: "POST",
+		url: `${base_url}system_notification/getCountForApproval`,
+		data: { tableName, employeeID: sessionID },
+		async: false,
+		success: function(data) {
+			result = data;
+		}
+	})
+	return result > 0 ? result : false;
+}
+// ----- END GET COUNT FOR APPROVAL -----
+

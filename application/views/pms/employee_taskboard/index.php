@@ -1,30 +1,192 @@
 <style>
-    .panel-body{
-        background-color: #dee2e6;
-    }
+.list-group.panel > .list-group-item {
+  border-bottom-right-radius: 4px;
+  border-bottom-left-radius: 4px
+}
+.list-group-submenu {
+  margin-left:20px;
+}
+
+.avatar img {
+  border-radius: 50%;
+  border: 2px solid #ffff;
+  position: relative;
+  left: -5px;
+  margin-left: -25px;
+  z-index: 1;
+}
+
+.avatars {
+  direction: rtl;  /* This is to get the stack with left on top */
+  text-align: left;  /* Now need to explitly align left */
+  padding-left: 25px;  /* Same value as the negative margin */
+}
+
+#proxy_label{
+  color: black;
+  cursor: pointer;
+}
+
+#proxy_label:hover{
+  text-decoration: underline;
+ 
+}
+
+#file_input_id{
+  display:none;
+}
+
+div.modalContentLeft {
+  /* background-color: lightblue;
+  width: 110px; */
+  height: 500px;
+  overflow: auto;
+}
+
+#modalContentLeft::-webkit-scrollbar-track
+{
+	-webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
+	border-radius: 10px;
+	background-color: #F5F5F5;
+}
+
+#modalContentLeft::-webkit-scrollbar
+{
+	width: 10px;
+	background-color: #F5F5F5;
+}
+
+#modalContentLeft::-webkit-scrollbar-thumb
+{
+	border-radius: 10px;
+	-webkit-box-shadow: inset 0 0 6px rgba(0,0,0,.3);
+	background-color: #D62929;
+}
+
+/* .container {
+  position: relative;
+  width: 100%;
+  max-width: 400px;
+} */
+
+.image {
+  display: block;
+}
+
+.overlay {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 100%;
+  width: 100%;
+  opacity: 0;
+  transition: .3s ease;
+  background-color: red;
+}
+
+.container:hover .overlay {
+  opacity: 1;
+}
+
+.icon {
+  color: white;
+  font-size: 100px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  -ms-transform: translate(-50%, -50%);
+  text-align: center;
+}
+
+.fa-eye:hover {
+  color: #eee;
+}
+
+.dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.dropdown-content {
+  /* display: none; */
+  position: relative;
+  background-color: #f1f1f1;
+  min-width: 160px;
+  overflow: auto;
+  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+  z-index: 1;
+  margin-top: auto;
+}
+
+.dropdown-content a {
+  color: black;
+  padding: 12px 16px;
+  text-decoration: none;
+  display: block;
+}
+
+.dropdown a:hover {background-color: #ddd;}
+
+.show {display: block;}
+
+
+.log-content::-webkit-scrollbar {
+  display: none;
+}
+
+/* Hide scrollbar for IE, Edge and Firefox */
+.log-content {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
 </style>
-
-
 <div class="body_area after_bg ">
 	<div class="block-header pb-0">
 		<div class="container" id="headerContainer">
 			<div class="row clearfix">
 				<div class="col-lg-6 col-md-12">
-                <ul class="breadcrumb pl-0 pb-0 ">
-                <li class="breadcrumb-item"><a href="#"><i class="zmdi zmdi-home"></i> Dashboard</a></li>
-						<li class="breadcrumb-item"><i class="zmdi zmdi-folder"></i> &nbsp;Project Modules</li>
-                        <li class="breadcrumb-item active">Employee Taskboard</li>
+                    <ul class="breadcrumb pl-0 pb-0 ">
+                        <li class="breadcrumb-item"><a href="#"><i class="zmdi zmdi-home"></i> Dashboard</a></li>
+                        <li class="breadcrumb-item"><i class="fas fa-folder-open"></i>&nbsp;Project Modules</li>
+                        <li class="breadcrumb-item active">Project Management Board</li>
                     </ul>
-                    <h1 class="mt-3">Employee Taskboard</h1>
-                    <span>This module is used to manage employee taskboard details.</span>
+                    <h1 class="mt-3">Project Management Board</h1>
+                    <span>This module is used to manage the submission of project timelines and milestones with man hours.</span>
 				</div>
-				<div class="col-lg-6 col-md-12 text-md-right">
-                <!-- <div class="text-right" id="headerButton"></div> -->
-                    </ul>
+				<div class="col-lg-6 col-md-12 text-md-right" id="headerButton">
 				</div>
+                <div class="bh_divider appendHeader"></div>
 			</div>
 		</div>
 	</div>
+
+    <div class="container">
+    	<div class="row clearfix row-deck mx-1">
+    		<div class="card col-2 ">
+
+    			<div class="text-primary font-weight-bold mb-2 mt-4 ml-2" style="font-size: 1.5rem;">
+    				<span>List of projects</span>
+    				<hr>
+    			</div>
+
+    			<div class="card-body" id="page_sidebar">
+    				
+    			</div>
+
+    		</div>
+
+
+    		<div class="card col-10 ">
+    			<div class="card-body" id="page_content"></div>
+    		</div>
+			
+    	</div>
+    </div>
+
 
     <!-- <div class="container">
 		<div class="row clearfix row-deck mx-1">
@@ -34,23 +196,22 @@
                         <table class="table table-bordered table-striped table-hover js-basic-example dataTable">
                             <thead>
                                 <tr>
-                                    <th>Project Code</th>
                                     <th>Project Name</th>
                                     <th>Project Category</th>
                                     <th>Status</th>
-                                    <th>Action</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr>
-                                    <td>PRJ-2021-00001</td>
-                                    <td>Finance Management System</td>
+                                    <td>
+                                        <div>
+                                            Finance Management System
+                                        </div>
+                                        <small style="color:#848482;">PRJ-21-00001</small>
+                                    </td>
                                     <td>Software</td>
                                     <td class="text-center">
                                         <span class="badge badge-info w-100">Approved</span>
-                                    </td>
-                                    <td>
-                                        <button class="btn btn-view w-100 btnView" id=""><i class="fas fa-eye"></i> View</button>
                                     </td>
                                 </tr>
                             </tbody>
@@ -59,7 +220,7 @@
                 </div>        
             </div>            
         </div>
-	</div> -->
+	</div>
 
     <div class="container" id="containerBoard">
 		<div class="row clearfix row-deck mx-1">
@@ -68,18 +229,16 @@
                 <div class="text-primary font-weight-bold mb-2" style="font-size: 1.5rem;">Finance Management System
                     <span class="text-danger font-weight-bold mb-1 float-right" style="font-size: 1.5rem;">PRJ-2021-00001</span>
                 </div>
-                    <!-- <div class="card">
+                    <div class="card">
                         <div class="card-body">
                             <small><b>PHASE 1</b></small>
                             
                             <div class="text-primary font-weight-bold mb-1" style="font-size: 1.2rem;">FMS Masterfiles </div>
 
                                 <div class="row" style="border-top:1px #eee;">
-                                    <div class="col-4"><small><b>TASKS</b></small></div>
-                                    <div class="col-2"><small><b>MAN HOURS</b></small></div>
-                                    <div class="col-2"><small><b>ASSIGNEE</b></small></div>
-                                    <div class="col-2"><small><b>DUE DATE</b></small></div>
-                                    <div class="col-2"><small><b>ACTUAL END DATE</b></small></div>
+                                    <div class="col-6"><small><b>TASKS</b></small></div>
+                                    <div class="col-3"><small><b>MAN HOURS</b></small></div>
+                                    <div class="col-3"><small><b>ASSIGNEE</b></small></div>
                                 </div>
                                 <hr class="mt-0 mb-0">
                             <div class="panel-group" id="accordion_1" role="tablist" aria-multiselectable="true">
@@ -87,46 +246,27 @@
                                     <div class="panel-heading" role="tab" id="headingOne_1">         
                                         <div class="panel-title"> 
                                             <div class="row">
-                                                <div class="col-md-4 col-sm-12">
-                                                    <div class="row">
-                                                        <div class="col-md-6 col-sm-12">
-                                                        <a data-toggle="collapse" href="#collapseOne_1" role="button" aria-expanded="false" aria-controls="collapseExample">  <i  class="fa fa-angle-down"></i><span>Link with href</span></a>
-                                                        </div>
-                                                        <div class="col-md-6 col-sm-12">
-                                                        <button class="btn btn-light float-right mt-1">Create Subtask</button>
-                                                        </div>
-                                                    </div>
-                                                 </div>   
-                                                <div class="col-md-2 col-sm-12">
-                                                    <input type="text" class="form-control mt-2" value="26" disabled>
+                                                <div class="col-6">
+                                                    <a role="button" data-toggle="collapse" data-parent="#accordion_1" href="#collapseOne_1" aria-expanded="true" aria-controls="collapseOne_1"> Bank Masterfile </a> 
                                                 </div>
-                                                <div class="col-md-2 col-sm-12">
-                                                    <input type="text" class="form-control mt-2" value="Joseph, Errol, Charles" disabled>
+                                                <div class="col-3 mt-2">
+                                                    <input type="text" class="form-control" value="26" disabled>
                                                 </div>
-                                                <div class="col-md-2 col-sm-12">
-                                                    <input type="text" class="form-control mt-2" value="26" disabled>
-                                                </div>
-                                                <div class="col-md-2 col-sm-12">
-                                                    <input type="text" class="form-control mt-2" value="Joseph, Errol, Charles" disabled>
+                                                <div class="col-3 mt-2">
+                                                    <input type="text" class="form-control" value="Joseph, Errol, Charles" disabled>
                                                 </div>
                                             </div>
                                         </div>              
                                     </div>
                                     <div id="collapseOne_1" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingOne_1">
                                         <div class="row mt-1">
-                                            <div class="col-md-4 col-sm-12">                                                
+                                            <div class="col-6">                                                
                                                 <input type="text" class="form-control" value="&emsp;&emsp;User Stories" disabled>
                                             </div>
-                                            <div class="col-md-2 col-sm-12">
+                                            <div class="col-3">
                                             <input type="text" class="form-control" value="4">
                                             </div>
-                                            <div class="col-md-2 col-sm-12">
-                                            <input type="text" class="form-control" value="Joseph">
-                                            </div>
-                                            <div class="col-md-2 col-sm-12">
-                                            <input type="text" class="form-control" value="4">
-                                            </div>
-                                            <div class="col-md-2 col-sm-12">
+                                            <div class="col-3">
                                             <input type="text" class="form-control" value="Joseph">
                                             </div>
                                         </div>
@@ -178,286 +318,12 @@
                                 </div>
                             </div>    
                         </div>
-                    </div> -->
-                    <div class="card">
-                        <div class="card-body">
-                            <small><b>PHASE 1</b></small>
-                            
-                            <div class="text-primary font-weight-bold mb-1" style="font-size: 1.2rem;">PLANNING </div>
-                            <!-- <table class="table table-striped" id="pcrDetails">
-                                <thead>
-                                    <tr style="white-space: nowrap">
-                                        <th class="text-center">
-                                            <div class="action">
-                                                <input type="checkbox" class="checkboxall" project="true">
-                                            </div>
-                                        </th>
-                                        <th>Milestone</th>
-                                        <th>Tasks</th>
-                                        <th>Subtask</th>
-                                        <th>Assignee</th>
-                                        <th>Assignee</th>
-                                        <th>Man Hours</th>
-                                        <th>Used Hours</th>
-                                        <th>Actual End Date</th>
-                                        <th>Due Date</th>
-                                        <th>Priority</th>
-                                        <th>Severity</th>
-                                        <th>Time Left</th>
-                                        <th>Status</th>
-                                        <th>Notes</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="itemProjectTableBody" project="true">
-                                    <tr>
-                                        <td class="text-center">
-                                            <div class="action">
-                                                <input type="checkbox" class="checkboxrow" id="checkboxrow0" company="true">
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <div class="form-group mt-2">
-                                                <input type="text" class="form-control" min="" max="" minlength="1" maxlength="250" name="empMilestone" id="empMilestone" value="Data Gathering" disabled>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <div class="form-group mt-2">
-                                                <input type="text" class="form-control" min="" max="" minlength="1" maxlength="250" name="tasksName" id="tasksName" value="Project Management System">
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <div class="form-group mt-2">
-                                                <button class="btn btn-light fad fa-plus-square" data-toggle="tooltip" data-placement="top" title="Create subtask"></button>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <div class="form-group mt-2">
-                                                <input type="date" class="form-control" min="" max="" minlength="1" maxlength="250" name="endDate" id="endDate" value="">
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <div class="notes">
-                                                <textarea rows="2" style="resize: none" class="form-control" name="notes" id="notes0"></textarea>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table> -->
-                           
-    <table class="table table-condensed"  id="myTable">
-        <thead>
-            <tr style="white-space: nowrap">
-                <th class="text-center">
-                    <div class="action">
-                        <input type="checkbox" class="checkboxall" project="true">
-                    </div>
-                </th>
-                <th>Milestone</th>
-                <th>Tasks</th>
-                <th>Subtask</th>
-                <th>Assignee</th>
-                <th>Man Hours</th>
-                <th>Used Hours</th>
-                <th>Actual End Date</th>
-                <th>Due Date</th>
-                <th>Priority</th>
-                <th>Severity</th>
-                <th>Time Left</th>
-                <th>Status</th>
-                <th>Notes</th>
-            </tr>
-        </thead>
-    <tbody class="panel">
-        <tr data-toggle="collapse" data-target="#demo1" data-parent="#myTable">
-            <td class="text-center">
-                <div class="action">
-                    <input type="checkbox" class="checkboxrow" id="checkboxrow0" company="true">
-                </div>
-            </td>
-            <td>
-                <div class="form-group mt-2">
-                    <input type="text" class="form-control" min="" max="" minlength="1" maxlength="250" name="empMilestone" id="empMilestone" value="Data Gathering" disabled>
-                </div>
-            </td>
-            <td>
-                <div class="form-group mt-2">
-                    <input type="text" class="form-control" min="" max="" minlength="1" maxlength="250" name="tasksName" id="tasksName" value="Project Management System">
-                </div>
-            </td>
-            <td>
-                <div class="form-group mt-2">
-                    <button class="btn btn-light fad fa-plus-square" data-toggle="tooltip" data-placement="top" title="Create subtask"></button>
-                </div>
-            </td>
-            <td>
-                <div class="form-group mt-2">
-                    <input type="date" class="form-control" min="" max="" minlength="1" maxlength="250" name="endDate" id="endDate" value="">
-                </div>
-            </td>
-            <td>
-                <div class="form-group mt-2">
-                    <input type="text" class="form-control" min="" max="" minlength="1" maxlength="250" name="tasksName" id="tasksName" value="Project Management System">
-                </div>
-            </td>
-            <td>
-                <div class="form-group mt-2">
-                    <input type="text" class="form-control" min="" max="" minlength="1" maxlength="250" name="tasksName" id="tasksName" value="Project Management System">
-                </div>
-            </td>
-            <td>
-                <div class="form-group mt-2">
-                    <input type="text" class="form-control" min="" max="" minlength="1" maxlength="250" name="tasksName" id="tasksName" value="Project Management System">
-                </div>
-            </td>
-            <td>
-                <div class="form-group mt-2">
-                    <input type="text" class="form-control" min="" max="" minlength="1" maxlength="250" name="tasksName" id="tasksName" value="Project Management System">
-                </div>
-            </td>
-            <td>
-                <div class="form-group mt-2">
-                    <input type="text" class="form-control" min="" max="" minlength="1" maxlength="250" name="tasksName" id="tasksName" value="Project Management System">
-                </div>
-            </td>
-            <td>
-                <div class="form-group mt-2">
-                    <input type="text" class="form-control" min="" max="" minlength="1" maxlength="250" name="tasksName" id="tasksName" value="Project Management System">
-                </div>
-            </td>
-            <td>
-                <div class="form-group mt-2">
-                    <input type="text" class="form-control" min="" max="" minlength="1" maxlength="250" name="tasksName" id="tasksName" value="Project Management System">
-                </div>
-            </td>
-            <td>
-                <div class="form-group mt-2">
-                    <input type="text" class="form-control" min="" max="" minlength="1" maxlength="250" name="tasksName" id="tasksName" value="Project Management System">
-                </div>
-            </td>
-            <td>
-                <div class="notes">
-                    <textarea rows="2" style="resize: none" class="form-control" name="notes" id="notes0"></textarea>
-                </div>
-            </td>
-        </tr>
-        <tr id="demo1" class="collapse">
-        <td class="text-center">
-                <div class="action">
-                    <input type="checkbox" class="checkboxrow" id="checkboxrow0" company="true">
-                </div>
-            </td>
-            <td>
-                <div class="form-group mt-2">
-                    <input type="text" class="form-control" min="" max="" minlength="1" maxlength="250" name="empMilestone" id="empMilestone" value="Data Gathering" disabled>
-                </div>
-            </td>
-            <td>
-                <div class="form-group mt-2">
-                    <input type="text" class="form-control" min="" max="" minlength="1" maxlength="250" name="tasksName" id="tasksName" value="Project Management System">
-                </div>
-            </td>
-            <td>
-                <div class="form-group mt-2">
-                    <button class="btn btn-light fad fa-plus-square" data-toggle="tooltip" data-placement="top" title="Create subtask"></button>
-                </div>
-            </td>
-            <td>
-                <div class="form-group mt-2">
-                    <input type="date" class="form-control" min="" max="" minlength="1" maxlength="250" name="endDate" id="endDate" value="">
-                </div>
-            </td>
-            <td>
-                <div class="form-group mt-2">
-                    <input type="text" class="form-control" min="" max="" minlength="1" maxlength="250" name="tasksName" id="tasksName" value="Project Management System">
-                </div>
-            </td>
-            <td>
-                <div class="form-group mt-2">
-                    <input type="text" class="form-control" min="" max="" minlength="1" maxlength="250" name="tasksName" id="tasksName" value="Project Management System">
-                </div>
-            </td>
-            <td>
-                <div class="form-group mt-2">
-                    <input type="text" class="form-control" min="" max="" minlength="1" maxlength="250" name="tasksName" id="tasksName" value="Project Management System">
-                </div>
-            </td>
-            <td>
-                <div class="form-group mt-2">
-                    <input type="text" class="form-control" min="" max="" minlength="1" maxlength="250" name="tasksName" id="tasksName" value="Project Management System">
-                </div>
-            </td>
-            <td>
-                <div class="form-group mt-2">
-                    <input type="text" class="form-control" min="" max="" minlength="1" maxlength="250" name="tasksName" id="tasksName" value="Project Management System">
-                </div>
-            </td>
-            <td>
-                <div class="form-group mt-2">
-                    <input type="text" class="form-control" min="" max="" minlength="1" maxlength="250" name="tasksName" id="tasksName" value="Project Management System">
-                </div>
-            </td>
-            <td>
-                <div class="form-group mt-2">
-                    <input type="text" class="form-control" min="" max="" minlength="1" maxlength="250" name="tasksName" id="tasksName" value="Project Management System">
-                </div>
-            </td>
-            <td>
-                <div class="form-group mt-2">
-                    <input type="text" class="form-control" min="" max="" minlength="1" maxlength="250" name="tasksName" id="tasksName" value="Project Management System">
-                </div>
-            </td>
-            <td>
-                <div class="notes">
-                    <textarea rows="2" style="resize: none" class="form-control" name="notes" id="notes0"></textarea>
-                </div>
-            </td>
-        </tr>
-        <tr data-toggle="collapse" data-target="#demo2" data-parent="#myTable">
-            <td>2</td>
-            <td>05 May 2013</td>
-            <td>Credit Account</td>
-            <td class="text-success">$11.00</td>
-            <td class="text-error"></td>
-            <td class="text-success">$161.00</td>
-        </tr>
-        <tr id="demo2" class="collapse">
-            <td colspan="1" class="hiddenRow"></td>
-            <td  class="hiddenRow"><div>Demo2</div></td>
-                    <td  class="hiddenRow"><div>Demo2</div></td>
-                                <td  class="hiddenRow"><div>Demo2</div></td>
-                                            <td  class="hiddenRow"><div>Demo2</div></td>
-                                                        <td  class="hiddenRow"><div>Demo2</div></td>
-        </tr>
-        <tr data-toggle="collapse" data-target="#demo3" data-parent="#myTable">
-            <td>3</td>
-            <td>05 May 2013</td>
-            <td>Credit Account</td>
-            <td class="text-success">$500.00</td>
-            <td class="text-error"></td>
-            <td class="text-success">$661.00</td>
-        </tr>
-        <tr id="demo3" class="collapse">
-            <td colspan="6" class="hiddenRow"><div>Demo3</div></td>
-        </tr>
-    </tbody>
-</table>
-
-                            <div class="w-100 d-flex justify-content-between align-items-center py-2 addReq">
-                            <!-- <div>${buttonProjectAddDeleteRow}</div> -->
-                            <div>
-                                <div class="w-100 text-left my-2 addReq">
-                                        <button class="btn btn-primary btnAddRow" id="btnAddRow" project="true"><i class="fas fa-plus-circle"></i> Add Row</button>
-                                        <button class="btn btn-danger btnDeleteRow" id="btnDeleteRow" project="true" disabled><i class="fas fa-minus-circle"></i> Delete Row/s</button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
                     </div>
 
                 </div>        
             </div>            
         </div>
-	</div>
+	</div> -->
 </div>
     
 
@@ -466,39 +332,74 @@
 
 
 <!-- ----- MODAL ----- -->
-<div id="modal_petty_cash_request" class="modal custom-modal fade" data-backdrop="static" data-keyboard="false" role="dialog">
-    <div class="modal-dialog modal-dialog-centered modal-md" role="document">
+<div id="modal_employee_taskboard_board" class="modal custom-modal fade" data-backdrop="static" data-keyboard="false" role="dialog">
+    <div class="modal-dialog modal-dialog-centered modal-xl" style="max-width: 1500px !important;" role="document">
 		<div class="modal-content">
-			<div class="modal-header bg-primary text-light">
-				<h6 class="page-title font-weight-bold">ADD PETTY CASH REQUEST</h6>
+			<div class="modal-header bg-primary text-balck">
+				<h6 class="page-title font-weight-bold " id="modal_title"></h6>
 				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
-					<span class="text-light" aria-hidden="true">&times;</span>
+					<span class="text-black" aria-hidden="true">&times;</span>
 				</button>
 			</div>
 
-            <div id="modal_petty_cash_request_content"></div>
+            <div id="modal_employee_taskboard_board_content"></div>
         </div>
 	</div>
 </div>
 <!-- ----- END MODAL ----- -->
 
+<!-- ----- MODAL IMAGE ----- -->
+
+<div class="modal fade" id="imagemodal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-xl">
+    <div class="modal-content">              
+      <div class="modal-body">
+      	<button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+
+        <img src="" class="imagepreview" style="width: 100%;height:100%; " >
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ----- END MODAL ----- -->
+
+<!-- ----- MODAL ASSIGNEE ----- -->
+<div id="modal_employee_assignee" class="modal custom-modal fade" data-backdrop="static" data-keyboard="false" role="dialog">
+    <div class="modal-dialog modal-dialog-centered modal-xl" role="document">
+		<div class="modal-content">
+			<div class="modal-header bg-primary text-balck">
+				<h6 class="page-title font-weight-bold " id="modal_title"></h6>
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span class="text-black" aria-hidden="true">&times;</span>
+				</button>
+			</div>
+
+            <div id="modal_employee_assignee_content"></div>
+        </div>
+	</div>
+</div>
+<!-- ----- END MODAL ASSIGNEE ----- -->
+
+
+
 
 <script src="<?= base_url('assets/custom/js/gen/approver-function.js') ?>"></script>
-<!-- <script src="<?= base_url('assets/custom/js/fms/petty-cash-request.js') ?>"></script> -->
+<script src="<?= base_url('assets/custom/js/pms/employee-taskboard.js') ?>"></script>
 
 <script>
-    $(document).ready(function () {
-        $("#addRequest").show();
-        $("#pcrDetails").show();
-        $(".addReq").show();
+    // $(document).ready(function () {
+    //     $("#addRequest").show();
+    //     $("#pcrDetails").show();
+    //     $(".addReq").show();
 
-        $(document).on("click", "#btnAdd", function () {
-            $("#addRequest").show();
-            $("#pcrDetails").show();
-            $(".addReq").show();
-            $("#pcrDatatable").hide();
-        });
+    //     $(document).on("click", "#btnAdd", function () {
+    //         $("#addRequest").show();
+    //         $("#pcrDetails").show();
+    //         $(".addReq").show();
+    //         $("#pcrDatatable").hide();
+    //     });
 
 
-	});
+	// });
 </script>

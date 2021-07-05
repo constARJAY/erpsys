@@ -140,4 +140,39 @@
         }
         return $output;
     }
+
+    // ----- GET COUNT FOR APPROVAL -----
+    function getTableForApproval($tableName = "pms_cost_estimate_tbl", $employeeID = 1)
+    {
+        $CI =& get_instance();
+        $sql   = "SELECT approversID, approversDate FROM $tableName WHERE FIND_IN_SET($employeeID, REPLACE(approversID, '|', ','))";
+        $query = $CI->db->query($sql);
+        return $query ? $query->result_array() : [];
+    }
+
+    function isImCurrentApprover($approversID, $approversDate, $employeeID)
+    {
+        $approversID   = $approversID ? explode("|", $approversID) : [];
+        $approversDate = $approversDate ? explode("|", $approversDate) : [];
+        foreach ($approversID as $index => $id) {
+            if ($id == $employeeID) {
+                return count($approversDate) == $index;
+            }
+        }
+        return false;
+    }
+
+    function getCountForApproval($tableName = "pms_cost_estimate_tbl", $employeeID = 1)
+    {
+        $CI =& get_instance();
+        $count = 0;
+        $documents = getTableForApproval($tableName, $employeeID);
+        foreach ($documents as $document) {
+            $approversID   = $document["approversID"];
+            $approversDate = $document["approversDate"];
+            $count = isImCurrentApprover($approversID, $approversDate, $employeeID) ? ($count + 1) : $count;
+        }
+        return $count;
+    }
+    // ----- END GET COUNT FOR APPROVAL -----
     

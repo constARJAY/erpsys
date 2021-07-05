@@ -53,6 +53,58 @@ class SignOff_model extends CI_Model {
         return $query ? true : false;
     }
 
+    public function getCountPhases($timelineBuilderID = 0, $milestoneBuilderID = 0)
+    {
+        $sql   = "SELECT COUNT(*) AS count FROM pms_employeetaskoard_tbl WHERE timelineBuilderID = $timelineBuilderID AND milestoneBuilderID = $milestoneBuilderID AND taskStatus = 7";
+        $query = $this->db->query($sql);
+        return $query ? $query->row() ? $query->row()->count : 0 : 0;
+    }
+
+    public function getCountMilestones($milestoneBuilderID = 0)
+    {
+        $sql   = "SELECT COUNT(*) AS count FROM pms_milestone_list_tbl WHERE milestoneBuilderID = $milestoneBuilderID";
+        $query = $this->db->query($sql);
+        return $query ? $query->row() ? $query->row()->count : 0 : 0;
+    }
+
+    public function getTimelinePhases($timelineBuilderID = 0)
+    {
+        $sql = "
+        SELECT
+            pttlt.milestoneBuilderID,
+            pmbt.phaseDescription,
+            pmbt.phaseCode,
+            COUNT(pttlt.taskID) AS count
+        FROM
+            pms_timeline_task_list_tbl AS pttlt
+            LEFT JOIN pms_milestone_builder_tbl AS pmbt USING(milestoneBuilderID)
+        WHERE timelineBuilderID = $timelineBuilderID
+        GROUP BY pttlt.milestoneBuilderID";
+        $query  = $this->db->query($sql);
+        $phases = $query ? $query->result_array() : [];
+
+        $output = [];
+        foreach ($phases as $phase) {
+            $milestoneBuilderID = $phase["milestoneBuilderID"];
+            $phaseDescription   = $phase["phaseDescription"];
+            $phaseCode          = $phase["phaseCode"];
+            $count              = $phase["count"] ?? 0;
+
+            $countMilestones = $this->getCountMilestones($milestoneBuilderID) * $count;
+            $countPhases     = $this->getCountPhases($timelineBuilderID, $milestoneBuilderID);
+
+            if ($countMilestones > 0 && $countPhases >  0 && $countMilestones == $countPhases) {
+                $temp = [
+                    "milestoneBuilderID" => $milestoneBuilderID,
+                    "phaseCode"          => $phaseCode,
+                    "phaseDescription"   => $phaseDescription,
+                ];
+                array_push($output, $temp);
+            }
+        }
+        return $output;
+    }
+
 }
 
 

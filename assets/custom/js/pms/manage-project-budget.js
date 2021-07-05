@@ -262,8 +262,8 @@ $(document).ready(function() {
                     <small style="color:#848482;">${projectCode}</small>
                 </td>
                 <td>${projectCategory}</td>
-                <td>${proposedBudget && formatAmount(proposedBudget, true) || "-"}</td>
-                <td>${allocatedBudget && formatAmount(allocatedBudget, true) || "-"}</td>
+                <td class="text-right">${proposedBudget && formatAmount(proposedBudget, true) || "-"}</td>
+                <td class="text-right">${allocatedBudget && formatAmount(allocatedBudget, true) || "-"}</td>
                 <td>${statusStyle}</td>
             </tr>`
         });
