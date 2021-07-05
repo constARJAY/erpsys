@@ -159,9 +159,9 @@ tr.btnView, tr.btnEdit {
 	border-color: #28a745 !important;
 	border-radius: 0.25rem !important;
 }
-.table td {
+/* .table td {
 	padding: 0.3rem 0.75rem !important;
-}
+} */
 
 body {
 	padding-right: 0px !important;

@@ -214,15 +214,13 @@ $(document).ready(function() {
 				scrollCollapse: true,
 				columnDefs: [
 					{ targets: 0,  width: 100 },
-					{ targets: 1,  width: 150 },
-					{ targets: 2,  width: 150 },
-					{ targets: 3,  width: 150 },
-					{ targets: 4,  width: 150 },
-					{ targets: 5,  width: 180 },
-					{ targets: 6,  width: 180 },
-					{ targets: 7,  width: 180 },
-					{ targets: 8,  width: 80 },
-					{ targets: 9,  width: 300  },
+					{ targets: 1,  width: 200 },
+					{ targets: 2,  width: 350 },
+					{ targets: 3,  width: 270 },
+					{ targets: 4,  width: 200 },
+					{ targets: 5,  width: 250 },
+					{ targets: 6,  width: 80 },
+					{ targets: 7, width: 250 },
 				],
 			});
 
@@ -439,9 +437,7 @@ $(document).ready(function() {
 					<th>Project Name</th>
 					<th>Description</th>
 					<th>Current Approver</th>
-					<th>Date Created</th>
-					<th>Date Submitted</th>
-					<th>Date Approved</th>
+					<th>Date</th>
 					<th>Status</th>
 					<th>Remarks</th>
                 </tr>
@@ -481,6 +477,43 @@ $(document).ready(function() {
                 id="${encryptString(materialWithdrawalID)}" 
                 code="${getFormCode("MWF", createdAt, materialWithdrawalID)}"><i class="fas fa-edit"></i> Edit</button>`;
 
+			var date =`<span style="color:#dc3450; display: block; font-size: 14px; padding: 2px"><b>Created: </b>
+								<span style="color:#000;">
+								${dateCreated}
+								</span>
+							</span>
+							<span style="color:#dc3450;display: block; font-size: 14px; padding: 2px"><b>Submitted: </b>
+								<span style="color:#000;">
+								${dateSubmitted}
+								</span>
+							</span>
+							<span style="color:#dc3450;display: block; font-size: 14px; padding: 2px"><b>Approved: </b>
+								<span style="color:#000;">
+								${dateApproved}
+								</span>
+							</span>`;
+
+			if(dateSubmitted == '-'){
+				var date =`<span style="color:#dc3450;display: block; font-size: 14px; padding: 2px"><b>Created: </b>
+								<span style="color:#000;">
+								${dateCreated}
+								</span>
+							</span>`;
+			} 
+
+			if(dateApproved == '-' && dateSubmitted != '-'){
+				var date =`<span style="color:#dc3450;display: block; font-size: 14px; padding: 2px"><b>Created: </b>
+								<span style="color:#000;">
+								${dateCreated}
+								</span>
+							</span>
+							<span style="color:#dc3450;display: block; font-size: 14px; padding: 2px"><b>Submitted: </b>
+								<span style="color:#000;">
+								${dateSubmitted}
+								</span>
+							</span>`;
+			}
+
 			html += `
             <tr class="${btnClass}" id="${encryptString(materialWithdrawalID)}">
                 <td>${getFormCode("MWF", createdAt, materialWithdrawalID)}</td>
@@ -495,9 +528,7 @@ $(document).ready(function() {
                 <td>
                     ${employeeFullname(getCurrentApprover(approversID, approversDate, materialWithdrawalStatus, true))}
                 </td>
-				<td>${dateCreated}</td>
-				<td>${dateSubmitted}</td>
-				<td>${dateApproved}</td>
+				<td>${date}</td>
                 <td class="text-center">
                     ${getStatusStyle(materialWithdrawalStatus)}
                 </td>

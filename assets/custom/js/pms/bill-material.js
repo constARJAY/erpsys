@@ -194,15 +194,13 @@ $(document).ready(function() {
 				columnDefs: [
 					{ targets: 0,  width: 100 },
 					{ targets: 1,  width: 150 },
-					{ targets: 2,  width: 150 },
-					{ targets: 3,  width: 350 },
-					{ targets: 4,  width: 350 },
+					{ targets: 2,  width: 100 },
+					{ targets: 3,  width: 290 },
+					{ targets: 4,  width: 290 },
 					{ targets: 5,  width: 150 },
-					{ targets: 6,  width: 200 },
-					{ targets: 7,  width: 200 },
-					{ targets: 8,  width: 200 },
-					{ targets: 9,  width: 80  },
-					{ targets: 10, width: 250 },
+					{ targets: 6,  width: 250 },
+					{ targets: 7,  width: 80 },
+					{ targets: 8,  width: 285 },
 				],
 			});
 
@@ -552,9 +550,7 @@ $(document).ready(function() {
                     <th>Project Name</th>
 					<th>Description</th>
                     <th>Current Approver</th>
-                    <th>Date Created</th>
-                    <th>Date Submitted</th>
-                    <th>Date Approved</th>
+                    <th>Date</th>
                     <th>Status</th>
                     <th>Remarks</th>
                 </tr>
@@ -580,8 +576,8 @@ $(document).ready(function() {
 
 			let remarks       = billMaterialRemarks ? billMaterialRemarks : "-";
 			let dateCreated   = moment(createdAt).format("MMMM DD, YYYY hh:mm:ss A");
-			let dateSubmitted = submittedAt ? moment(submittedAt).format("MMMM DD, YYYY hh:mm:ss A") : "-";
-			let dateApproved  = billMaterialStatus == 2 || billMaterialStatus == 5 ? approversDate.split("|") : "-";
+			let dateSubmitted = submittedAt ? moment(submittedAt).format("MMMM DD, YYYY hh:mm:ss A") : "";
+			let dateApproved  = billMaterialStatus == 2 || billMaterialStatus == 5 ? approversDate.split("|") : "";
 			if (dateApproved !== "-") {
 				dateApproved = moment(dateApproved[dateApproved.length - 1]).format("MMMM DD, YYYY hh:mm:ss A");
 			}
@@ -594,6 +590,43 @@ $(document).ready(function() {
                 class="btn btn-edit w-100 btnEdit" 
                 id="${encryptString(billMaterialID )}" 
                 code="${getFormCode("PBR", createdAt, billMaterialID )}"><i class="fas fa-edit"></i> Edit</button>`;
+
+			var date =`<span style="color:#dc3450; display: block; font-size: 14px; padding: 2px"><b>Created: </b>
+								<span style="color:#000;">
+								${dateCreated}
+								</span>
+							</span>
+							<span style="color:#dc3450;display: block; font-size: 14px; padding: 2px"><b>Submitted: </b>
+								<span style="color:#000;">
+								${dateSubmitted}
+								</span>
+							</span>
+							<span style="color:#dc3450;display: block; font-size: 14px; padding: 2px"><b>Approved: </b>
+								<span style="color:#000;">
+								${dateApproved}
+								</span>
+							</span>`;
+
+			if(dateSubmitted == ''){
+				var date =`<span style="color:#dc3450;display: block; font-size: 14px; padding: 2px"><b>Created: </b>
+								<span style="color:#000;">
+								${dateCreated}
+								</span>
+							</span>`;
+			} 
+
+			if(dateApproved == '' && dateSubmitted != ''){
+				var date =`<span style="color:#dc3450;display: block; font-size: 14px; padding: 2px"><b>Created: </b>
+								<span style="color:#000;">
+								${dateCreated}
+								</span>
+							</span>
+							<span style="color:#dc3450;display: block; font-size: 14px; padding: 2px"><b>Submitted: </b>
+								<span style="color:#000;">
+								${dateSubmitted}
+								</span>
+							</span>`;
+			}  
 
 			html += `
             <tr class="${btnClass}" id="${encryptString(billMaterialID )}">
@@ -610,9 +643,7 @@ $(document).ready(function() {
                 <td>
                     ${employeeFullname(getCurrentApprover(approversID, approversDate, billMaterialStatus, true))}
                 </td>
-				<td>${dateCreated}</td>
-				<td>${dateSubmitted}</td>
-				<td>${dateApproved}</td>
+				<td>${date}</td>
                 <td class="text-center">
                     ${getStatusStyle(billMaterialStatus)}
                 </td>
@@ -1724,25 +1755,25 @@ $(document).ready(function() {
                 </div>
 				<div class="row py-2">
 					<div class="offset-lg-6 col-lg-6 offset-md-3 col-md-9 col-sm-12 pt-3 pb-2">
-						<div class="row" style="font-size: 1.1rem; font-weight:bold">
+						<div class="row" style="font-size: 1.1rem">
 							<div class="col-6 col-lg-7 text-left">Personnel Total Cost:</div>
 							<div class="col-6 col-lg-5 text-right tableTotal personnelTotal" style="font-size: 1.05em">
 								₱ 0.00
 							</div>
 						</div>
-						<div class="row" style="font-size: 1.1rem; font-weight:bold">
+						<div class="row" style="font-size: 1.1rem">
 							<div class="col-6 col-lg-7 text-left">Project Total Cost:</div>
 							<div class="col-6 col-lg-5 text-right tableTotal projectTotal" style="font-size: 1.05em">
 								₱ 0.00
 							</div>
 						</div>
-						<div class="row" style="font-size: 1.1rem; font-weight:bold">
+						<div class="row" style="font-size: 1.1rem">
 							<div class="col-6 col-lg-7 text-left">Company Total Cost:</div>
 							<div class="col-6 col-lg-5 text-right tableTotal companyTotal" style="font-size: 1.05em">
 								₱ 0.00
 							</div>
 						</div>
-						<div class="row pb-2" style="font-size: 1.1rem; font-weight:bold">
+						<div class="row pb-2" style="font-size: 1.1rem">
 							<div class="col-6 col-lg-7 text-left">Travel Total Cost:</div>
 							<div class="col-6 col-lg-5 text-right tableTotal travel grandTotal " style="font-size: 1.05em">
 								₱ 0.00

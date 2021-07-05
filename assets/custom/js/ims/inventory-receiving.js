@@ -199,10 +199,8 @@ $(document).ready(function() {
 					{ targets: 3,  width: 250 },
 					{ targets: 4,  width: 150 },
 					{ targets: 5,  width: 200 },
-					{ targets: 6,  width: 200 },
-					{ targets: 7,  width: 200 },
-					{ targets: 8,  width: 80  },
-					{ targets: 9, width: 250  },
+					{ targets: 6,  width: 80 },
+					{ targets: 7,  width: 250 },
 				],
 			});
 
@@ -417,9 +415,7 @@ $(document).ready(function() {
                     <th>Reference No.</th>
                     <th>Description</th>
                     <th>Current Approver</th>
-                    <th>Date Created</th>
-                    <th>Date Submitted</th>
-                    <th>Date Approved</th>
+                    <th>Date</th>
                     <th>Status</th>
                     <th>Remarks</th>
                 </tr>
@@ -458,6 +454,43 @@ $(document).ready(function() {
 
 			let btnClass =  inventoryReceivingStatus != 0 ? `btnView` : `btnEdit`;
 
+			var date =`<span style="color:#dc3450; display: block; font-size: 14px; padding: 2px"><b>Created: </b>
+								<span style="color:#000;">
+								${dateCreated}
+								</span>
+							</span>
+							<span style="color:#dc3450;display: block; font-size: 14px; padding: 2px"><b>Submitted: </b>
+								<span style="color:#000;">
+								${dateSubmitted}
+								</span>
+							</span>
+							<span style="color:#dc3450;display: block; font-size: 14px; padding: 2px"><b>Approved: </b>
+								<span style="color:#000;">
+								${dateApproved}
+								</span>
+							</span>`;
+
+			if(dateSubmitted == '-'){
+				var date =`<span style="color:#dc3450;display: block; font-size: 14px; padding: 2px"><b>Created: </b>
+								<span style="color:#000;">
+								${dateCreated}
+								</span>
+							</span>`;
+			} 
+
+			if(dateApproved == '-' && dateSubmitted != '-'){
+				var date =`<span style="color:#dc3450;display: block; font-size: 14px; padding: 2px"><b>Created: </b>
+								<span style="color:#000;">
+								${dateCreated}
+								</span>
+							</span>
+							<span style="color:#dc3450;display: block; font-size: 14px; padding: 2px"><b>Submitted: </b>
+								<span style="color:#000;">
+								${dateSubmitted}
+								</span>
+							</span>`;
+			}
+
 			html += `
             <tr class="${btnClass}" id="${encryptString(inventoryReceivingID)}">
                 <td>${getFormCode("INRR", dateCreatedIR, inventoryReceivingID)}</td>
@@ -467,9 +500,7 @@ $(document).ready(function() {
                 <td>
                     ${employeeFullname(getCurrentApprover(approversID, approversDate, inventoryReceivingStatus, true))}
                 </td>
-				<td>${dateCreated}</td>
-				<td>${dateSubmitted}</td>
-				<td>${dateApproved}</td>
+				<td>${date}</td>
                 <td class="text-center">
                     ${getStatusStyle(inventoryReceivingStatus)}
                 </td>

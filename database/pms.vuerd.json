@@ -3,8 +3,8 @@
     "version": "2.1.0",
     "width": 2000,
     "height": 2000,
-    "scrollTop": -818,
-    "scrollLeft": -13,
+    "scrollTop": -449,
+    "scrollLeft": 0,
     "zoomLevel": 1,
     "show": {
       "tableComment": true,
@@ -1293,10 +1293,10 @@
           }
         ],
         "ui": {
-          "active": true,
+          "active": false,
           "left": 33,
           "top": 953,
-          "zIndex": 23,
+          "zIndex": 11,
           "widthName": 100,
           "widthComment": 60
         },
@@ -1472,7 +1472,7 @@
           "active": false,
           "left": 940,
           "top": 953,
-          "zIndex": 11,
+          "zIndex": 10,
           "widthName": 145,
           "widthComment": 60
         },

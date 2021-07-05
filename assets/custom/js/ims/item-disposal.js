@@ -181,14 +181,12 @@ $(document).ready(function() {
 				scrollCollapse: true,
 				columnDefs: [
 					{ targets: 0,  width: 100 },
-					{ targets: 1,  width: 150 },
-					{ targets: 2,  width: 200 },
+					{ targets: 1,  width: 200 },
+					{ targets: 2,  width: 350 },
 					{ targets: 3,  width: 200 },
-					{ targets: 4,  width: 190 },
-					{ targets: 5,  width: 190 },
-					{ targets: 6,  width: 200 },
-					{ targets: 7,  width: 200 },
-					{ targets: 8,  width: 250 },
+					{ targets: 4,  width: 250 },
+					{ targets: 5,  width: 80 },
+					{ targets: 6,  width: 350 },
 				],
 			});
 
@@ -403,9 +401,7 @@ $(document).ready(function() {
                     <th>Prepared By</th>
 					<th>Description</th>
                     <th>Current Approver</th>
-                    <th>Date Created</th>
-                    <th>Date Submitted</th>
-                    <th>Date Approved</th>
+                    <th>Date</th>
                     <th>Status</th>
                     <th>Remarks</th>
                 </tr>
@@ -442,6 +438,43 @@ $(document).ready(function() {
                 id="${encryptString(disposalID )}" 
                 code="${getFormCode("ADF", createdAt, disposalID )}"><i class="fas fa-edit"></i> Edit</button>`;
 
+			var date =`<span style="color:#dc3450; display: block; font-size: 14px; padding: 2px"><b>Created: </b>
+								<span style="color:#000;">
+								${dateCreated}
+								</span>
+							</span>
+							<span style="color:#dc3450;display: block; font-size: 14px; padding: 2px"><b>Submitted: </b>
+								<span style="color:#000;">
+								${dateSubmitted}
+								</span>
+							</span>
+							<span style="color:#dc3450;display: block; font-size: 14px; padding: 2px"><b>Approved: </b>
+								<span style="color:#000;">
+								${dateApproved}
+								</span>
+							</span>`;
+
+			if(dateSubmitted == '-'){
+				var date =`<span style="color:#dc3450;display: block; font-size: 14px; padding: 2px"><b>Created: </b>
+								<span style="color:#000;">
+								${dateCreated}
+								</span>
+							</span>`;
+			} 
+
+			if(dateApproved == '-' && dateSubmitted != '-'){
+				var date =`<span style="color:#dc3450;display: block; font-size: 14px; padding: 2px"><b>Created: </b>
+								<span style="color:#000;">
+								${dateCreated}
+								</span>
+							</span>
+							<span style="color:#dc3450;display: block; font-size: 14px; padding: 2px"><b>Submitted: </b>
+								<span style="color:#000;">
+								${dateSubmitted}
+								</span>
+							</span>`;
+			}
+
 			html += `
             <tr class="${btnClass}" id="${encryptString(disposalID)}">
                 <td>${getFormCode("ADF", createdAt, disposalID )}</td>
@@ -450,9 +483,7 @@ $(document).ready(function() {
                 <td>
                     ${employeeFullname(getCurrentApprover(approversID, approversDate, disposalStatus, true))}
                 </td>
-				<td>${dateCreated}</td>
-				<td>${dateSubmitted}</td>
-				<td>${dateApproved}</td>
+				<td>${date}</td>
                 <td class="text-center">
                     ${getStatusStyle(disposalStatus)}
                 </td>

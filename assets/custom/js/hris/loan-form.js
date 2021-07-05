@@ -773,7 +773,7 @@ function formContent(data = false, readOnly = false, isRevise = false, isFromCan
 		<div class="col-md-3 col-sm-12">
 			<div class="form-group">
 				<label>Interest (%) ${!disabled ? "<code>*</code>" : ""}</label>
-				<input type="text" class="form-control validate " name="loanFormInterest" 
+				<input type="text" class="form-control validate text-right" name="loanFormInterest" 
 				id="loanFormInterest" data-allowcharacters="[0-9][.]" minlength="1" 
 				maxlength="50" required  value="${loanFormInterest}" autocomplete="off"  ${disabled}>
 				<div class="invalid-feedback d-block" id="invalid-loanFormInterest"></div>

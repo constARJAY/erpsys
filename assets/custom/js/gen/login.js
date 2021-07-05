@@ -49,8 +49,8 @@ $(document).on("click", "#login-btn", function(e){
                 data,
                 dataType:"json",
                 success:function(data){
-                    // ! NOTE: Assume that the base name of the system is erpsys_backup
-                    let url = data.replaceAll("index.php/", "");
+                    // ! NOTE: Assume that the base name of the system is erpsys
+                    let url = data.replaceAll("index.php/", "").replaceAll("\\", "");
                     window.location.replace(url);
                 }
             });

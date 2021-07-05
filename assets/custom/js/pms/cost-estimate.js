@@ -192,11 +192,9 @@ $(document).ready(function() {
 					{ targets: 2,  width: 350 },
 					{ targets: 3,  width: 350 },	
 					{ targets: 4,  width: 100 },
-					{ targets: 5,  width: 200 },
-					{ targets: 6,  width: 200 },
-					{ targets: 7,  width: 200 },
-					{ targets: 8,  width: 100  },
-					{ targets: 9,  width: 350  },
+					{ targets: 5,  width: 250 },
+					{ targets: 6,  width: 100 },
+					{ targets: 7,  width: 300 },
 				],
 			});
 
@@ -528,9 +526,7 @@ $(document).ready(function() {
 					<th>Project Name</th>
 					<th>Description</th>
 					<th>Current Approver</th>
-					<th>Date Created</th>
-					<th>Date Submitted</th>
-					<th>Date Approved</th>
+					<th>Date</th>
 					<th>Status</th>
 					<th>Remarks</th>
                 </tr>
@@ -555,9 +551,9 @@ $(document).ready(function() {
 
 			let remarks       = costEstimateRemarks ? costEstimateRemarks : "-";
 			let dateCreated   = moment(createdAt).format("MMMM DD, YYYY hh:mm:ss A");
-			let dateSubmitted = submittedAt ? moment(submittedAt).format("MMMM DD, YYYY hh:mm:ss A") : "-";
-			let dateApproved  = costEstimateStatus == 2 || costEstimateStatus == 5 ? approversDate.split("|") : "-";
-			if (dateApproved !== "-") {
+			let dateSubmitted = submittedAt ? moment(submittedAt).format("MMMM DD, YYYY hh:mm:ss A") : "";
+			let dateApproved  = costEstimateStatus == 2 || costEstimateStatus == 5 ? approversDate.split("|") : "";
+			if (dateApproved !== "") {
 				dateApproved = moment(dateApproved[dateApproved.length - 1]).format("MMMM DD, YYYY hh:mm:ss A");
 			}
 
@@ -569,6 +565,43 @@ $(document).ready(function() {
                 class="btn btn-edit w-100 btnEdit" 
                 id="${encryptString(costEstimateID )}" 
                 code="${getFormCode("CEF", createdAt, costEstimateID )}"><i class="fas fa-edit"></i> Edit</button>`;
+				
+			var date =`<span style="color:#dc3450; display: block; font-size: 14px; padding: 2px"><b>Created: </b>
+								<span style="color:#000;">
+								${dateCreated}
+								</span>
+							</span>
+							<span style="color:#dc3450;display: block; font-size: 14px; padding: 2px"><b>Submitted: </b>
+								<span style="color:#000;">
+								${dateSubmitted}
+								</span>
+							</span>
+							<span style="color:#dc3450;display: block; font-size: 14px; padding: 2px"><b>Approved: </b>
+								<span style="color:#000;">
+								${dateApproved}
+								</span>
+							</span>`;
+
+			if(dateSubmitted == ''){
+				var date =`<span style="color:#dc3450;display: block; font-size: 14px; padding: 2px"><b>Created: </b>
+								<span style="color:#000;">
+								${dateCreated}
+								</span>
+							</span>`;
+			} 
+
+			if(dateApproved == '' && dateSubmitted != ''){
+				var date =`<span style="color:#dc3450;display: block; font-size: 14px; padding: 2px"><b>Created: </b>
+								<span style="color:#000;">
+								${dateCreated}
+								</span>
+							</span>
+							<span style="color:#dc3450;display: block; font-size: 14px; padding: 2px"><b>Submitted: </b>
+								<span style="color:#000;">
+								${dateSubmitted}
+								</span>
+							</span>`;
+			}  
 
 			html += `
 			<tr class="${btnClass}" id="${encryptString(costEstimateID )}">
@@ -584,9 +617,9 @@ $(document).ready(function() {
 				<td>
 					${employeeFullname(getCurrentApprover(approversID, approversDate, costEstimateStatus, true))}
 				</td>
-				<td>${dateCreated}</td>
-				<td>${dateSubmitted}</td>
-				<td>${dateApproved}</td>
+				<td>
+					${date}
+				</td>
 				<td class="text-center">
 					${getStatusStyle(costEstimateStatus)}
 				</td>
