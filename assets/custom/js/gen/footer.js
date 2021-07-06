@@ -204,7 +204,16 @@ $(document).ready(function() {
         })
         $("#moduleList").html(html);
     }
-    const moduleTableData = getTableData("gen_roles_permission_tbl AS grpt LEFT JOIN gen_module_list_tbl AS gmlt USING(moduleID)", "gmlt.moduleName AS moduleName", `grpt.designationID = ${sessionDesignationID} AND gmlt.moduleStatus = 1`, "gmlt.moduleName ASC");
+    const moduleTableData = getTableData(
+        `gen_roles_permission_tbl AS grpt 
+        LEFT JOIN gen_module_list_tbl AS gmlt USING(moduleID)
+        LEFT JOIN hris_employee_permission_tbl AS hept ON (hept.employeeID = ${sessionID} AND hept.moduleID = grpt.moduleID)`, 
+        "gmlt.moduleName AS moduleName", 
+        `grpt.designationID = ${sessionDesignationID} AND 
+        gmlt.moduleStatus = 1 AND
+        grpt.permissionStatus = 1 AND
+        hept.readStatus = 1`, 
+        "gmlt.moduleName ASC");
     const moduleData = moduleTableData.map(item => item.moduleName.toLowerCase());
     getAllModules(moduleTableData);
 
@@ -250,10 +259,6 @@ $(document).ready(function() {
 
 // ----- LIST UNIT OF MEASURE -----
 function unitOfMeasurementOptions(value, isWithNone = false){
-    // let data = ["none","gallon","piece","gram","cup",
-    //     "inch","pound","ounces","litre","bag",
-    //     "bucket","bundle","box","case","pack",
-    //     "rack","roll","sheet","yard","kilometer"];
     let data = getTableData("ims_uom_tbl","uomName", "uomStatus = '1'")
     let returnData =  `<option value="" disabled selected>Select Unit of Measure</option>`;
     if(isWithNone){
