@@ -4066,78 +4066,6 @@ UNLOCK TABLES;
 --
 -- Dumping routines for database 'erpdb'
 --
-/*!50003 DROP FUNCTION IF EXISTS `fn_explode` */;
-/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
-/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
-/*!50003 SET @saved_col_connection = @@collation_connection */ ;
-/*!50003 SET character_set_client  = utf8 */ ;
-/*!50003 SET character_set_results = utf8 */ ;
-/*!50003 SET collation_connection  = utf8_general_ci */ ;
-/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = 'NO_ZERO_IN_DATE,NO_ZERO_DATE,NO_ENGINE_SUBSTITUTION' */ ;
-DELIMITER ;;
-CREATE DEFINER=`root`@`localhost` FUNCTION `fn_explode`(`str` TEXT, `delim` VARCHAR(255), `pos` INT) RETURNS text CHARSET utf8mb4
-BEGIN
-	RETURN REPLACE(SUBSTRING(SUBSTRING_INDEX(str, delim, pos),
-       CHAR_LENGTH(SUBSTRING_INDEX(str, delim, pos-1)) + 1),
-       delim, '');
-END ;;
-DELIMITER ;
-/*!50003 SET sql_mode              = @saved_sql_mode */ ;
-/*!50003 SET character_set_client  = @saved_cs_client */ ;
-/*!50003 SET character_set_results = @saved_cs_results */ ;
-/*!50003 SET collation_connection  = @saved_col_connection */ ;
-/*!50003 DROP FUNCTION IF EXISTS `fn_get_count_for_approval` */;
-/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
-/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
-/*!50003 SET @saved_col_connection = @@collation_connection */ ;
-/*!50003 SET character_set_client  = utf8 */ ;
-/*!50003 SET character_set_results = utf8 */ ;
-/*!50003 SET collation_connection  = utf8_general_ci */ ;
-/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = 'NO_ZERO_IN_DATE,NO_ZERO_DATE,NO_ENGINE_SUBSTITUTION' */ ;
-DELIMITER ;;
-CREATE DEFINER=`root`@`localhost` FUNCTION `fn_get_count_for_approval`(tableName VARCHAR(100), employeeID BIGINT(21)) RETURNS text CHARSET utf8mb4
-BEGIN
-	DECLARE output TEXT DEFAULT NULL;
-    CALL proc_count_for_approval(tableName, employeeID, @count);
-    SET output = (SELECT @count); 
-RETURN output;
-END ;;
-DELIMITER ;
-/*!50003 SET sql_mode              = @saved_sql_mode */ ;
-/*!50003 SET character_set_client  = @saved_cs_client */ ;
-/*!50003 SET character_set_results = @saved_cs_results */ ;
-/*!50003 SET collation_connection  = @saved_col_connection */ ;
-/*!50003 DROP PROCEDURE IF EXISTS `proc_count_for_approval` */;
-/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
-/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
-/*!50003 SET @saved_col_connection = @@collation_connection */ ;
-/*!50003 SET character_set_client  = utf8 */ ;
-/*!50003 SET character_set_results = utf8 */ ;
-/*!50003 SET collation_connection  = utf8_general_ci */ ;
-/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = 'NO_ZERO_IN_DATE,NO_ZERO_DATE,NO_ENGINE_SUBSTITUTION' */ ;
-DELIMITER ;;
-CREATE DEFINER=`root`@`localhost` PROCEDURE `proc_count_for_approval`(IN tableName VARCHAR(100), IN employeeID BIGINT(21), OUT count TEXT)
-BEGIN
-	DECLARE aprvID, aprvDate TEXT DEFAULT NULL;
-    SET @tableName = tableName;
-
-	IF (tableName <> '' AND employeeID <> 0) THEN
-		SELECT GROUP_CONCAT(approversID SEPARATOR '=') INTO aprvID FROM pms_cost_estimate_tbl WHERE FIND_IN_SET(employeeID, REPLACE(approversID, '|', ','));
-		SELECT GROUP_CONCAT(approversDate SEPARATOR '=') INTO aprvDate FROM pms_cost_estimate_tbl WHERE FIND_IN_SET(employeeID, REPLACE(approversID, '|', ','));
-        SET count = aprvID;
-    ELSE
-		SET count = '0';
-    END IF;
-    
-END ;;
-DELIMITER ;
-/*!50003 SET sql_mode              = @saved_sql_mode */ ;
-/*!50003 SET character_set_client  = @saved_cs_client */ ;
-/*!50003 SET character_set_results = @saved_cs_results */ ;
-/*!50003 SET collation_connection  = @saved_col_connection */ ;
 /*!50003 DROP PROCEDURE IF EXISTS `proc_update_bid_po_items` */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
@@ -4179,4 +4107,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2021-07-06  7:39:30
+-- Dump completed on 2021-07-06  8:02:06
