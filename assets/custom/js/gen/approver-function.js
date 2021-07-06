@@ -523,12 +523,12 @@ function getFormCode(str = null, date = null, id = 0) {
 
 
 // ----- GET COUNT FOR APPROVAL -----
-function getCountForApproval(tableName = "pms_cost_estimate_tbl") {
+function getCountForApproval(tableName = "pms_cost_estimate_tbl", columnStatus = "costEstimateStatus") {
 	let result = 0;
 	$.ajax({
 		method: "POST",
 		url: `${base_url}system_notification/getCountForApproval`,
-		data: { tableName, employeeID: sessionID },
+		data: { tableName, employeeID: sessionID, columnStatus },
 		async: false,
 		success: function(data) {
 			result = data;
@@ -537,4 +537,42 @@ function getCountForApproval(tableName = "pms_cost_estimate_tbl") {
 	return result > 0 ? result : false;
 }
 // ----- END GET COUNT FOR APPROVAL -----
+
+
+// ----- GET DOCUMENT DATES -----
+function getDocumentDates(createdAt = null, submittedAt = null, approvedAt = null) {
+	submittedAt = submittedAt != "-" ? submittedAt : null;
+	approvedAt  = approvedAt  != "-" ? approvedAt  : null;
+
+	let dateDisplay = "";
+	if (createdAt) {
+		dateDisplay = `
+		<div style="color:#dc3450; display: block; font-size: 14px; padding: 2px">
+			<b>Created: </b><span style="color:#000;">${createdAt}</span>
+		</div>`;
+		if (!submittedAt && !approvedAt) {
+			// DISREGARD
+		} else if (!submittedAt && approvedAt) {
+			dateDisplay += `
+			<div style="color:#dc3450; display: block; font-size: 14px; padding: 2px">
+				<b>Approved: </b><span style="color:#000;">${approvedAt}</span>
+			</div>`;
+		} else if (submittedAt && !approvedAt) {
+			dateDisplay += `
+			<div style="color:#dc3450; display: block; font-size: 14px; padding: 2px">
+				<b>Submitted: </b><span style="color:#000;">${submittedAt}</span>
+			</div>`;
+		} else if (submittedAt && approvedAt) {
+			dateDisplay += `
+			<div style="color:#dc3450; display: block; font-size: 14px; padding: 2px">
+				<b>Submitted: </b><span style="color:#000;">${submittedAt}</span>
+			</div>
+			<div style="color:#dc3450; display: block; font-size: 14px; padding: 2px">
+				<b>Approved: </b><span style="color:#000;">${approvedAt}</span>
+			</div>`;
+		}
+	}
+	return dateDisplay;
+}
+// ----- END GET DOCUMENT DATES -----
 

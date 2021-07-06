@@ -934,8 +934,9 @@ $(document).ready(function() {
 	
 	$(document).on("keyup", ".liquidationBudget", function() {
 		//console.log("44");
-		var totalbudget = getNonFormattedAmount($("#liquidationBudget").val());
-		var pettyCashAmountValue = getNonFormattedAmount($("#liquidationExpenses").text());
+		var totalbudget = parseFloat($("#liquidationBudget").val() || 0);
+		//var totalbudget = $("#liquidationBudget").val();
+		var pettyCashAmountValue = parseFloat(getNonFormattedAmount($("#liquidationExpenses").text()) || 0);
 		var munustotal =  pettyCashAmountValue - totalbudget;
 		var totalamount = formatAmount(munustotal, true);
 		$("#liquidationExcessOrShortage").text((totalamount));
@@ -1360,7 +1361,7 @@ $(document).ready(function() {
 							maxlength="20" 
 							id="liquidationBudget" 
 							name="liquidationBudget" 
-							value="${formatAmount(liquidationBudget, true)}"
+							value="${liquidationBudget}"
 							${disabled}>
 							</div>
 							</div>
@@ -1422,13 +1423,15 @@ $(document).ready(function() {
 	  function updateTotalAmount() {
 		  var quantity = 0;
 		  var amount = 0;
-		$(".itemProjectTableBody tr").each(function(){
-			 quantity  += parseFloat(getNonFormattedAmount($(this).find('[name=quantity]').text()) || 0);
-			 amount  += parseFloat(getNonFormattedAmount($(this).find('[name=amount]').text()) || 0);
-		});	
-		var totalbasequantityandamount = quantity * amount;
+		  var totalamount = parseFloat(getNonFormattedAmount($("#liquidationExpenses").text()) || 0);
+		// $(".itemProjectTableBody tr").each(function(){
+		// 	 quantity  += parseFloat($(this).find('[name=quantity]').text() || 0);
+		// 	 amount  += parseFloat(getNonFormattedAmount($(this).find('[name=amount]').text()) || 0);
+		// });	
+		//alert(totalamount);
+		//var totalbasequantityandamount = quantity * amount;
         const isChecked = $(`#billingVat`).prop("checked");
-        const vatAmount = isChecked ? (totalbasequantityandamount / 1.12 * 0.12) : 0;
+        const vatAmount = isChecked ? (totalamount / 1.12 * 0.12) : 0;
         $("#liquidationVatAmount").text(formatAmount(vatAmount, true));
 	}
 
@@ -1528,6 +1531,7 @@ $(document).ready(function() {
 			data['liquidationExcessOrShortage'] 								= getNonFormattedAmount($("#liquidationExcessOrShortage").text());
 			data['liquidationDispositionofExcessOrShortage'] 					= $("#liquidationDispositionofExcessOrShortage").val();
 			data["pettyCashRequestID"] 											= $(".description").attr("pettyCashID");
+			//alert(getNonFormattedAmount($("#liquidationBudget").val()));
 			formData.append("employeeID", sessionID);
             formData.append("projectID", $("[name=projectID]").val() || null);
 			formData.append("liquidationAmount", getNonFormattedAmount($("#liquidationAmount").text()));
@@ -1536,7 +1540,7 @@ $(document).ready(function() {
 			formData.append("liquidationDate", $("#liquidationDate").val());
 			formData.append("chartOfAccountID", $("#chartOfAccountID").val());
 			formData.append("liquidationReferenceNumber", $("#liquidationReferenceNumber").val());
-			formData.append("liquidationBudget", $("#liquidationBudget").val());
+			formData.append("liquidationBudget", getNonFormattedAmount($("#liquidationBudget").val()));
 			formData.append("liquidationExcessOrShortage", getNonFormattedAmount($("#liquidationExcessOrShortage").text()));
 			formData.append("liquidationDispositionofExcessOrShortage", $("#liquidationDispositionofExcessOrShortage").val());
 			formData.append("liquidationPurpose", $("[name=liquidationPurpose]").val()?.trim());

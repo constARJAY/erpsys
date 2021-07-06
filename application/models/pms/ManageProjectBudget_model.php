@@ -168,7 +168,7 @@ class ManageProjectBudget_model extends CI_Model {
             $clientProvince    = $timelineHeader->clientProvince ?? "";
             $clientCountry     = $timelineHeader->clientCountry ?? "";
             $clientPostalCode  = $timelineHeader->clientPostalCode ?? "";
-            $address = $this->titleCase($clientUnitNumber).", ".$this->titleCase($clientHouseNumber).", ".$this->titleCase($clientCity).", ".$this->titleCase($clientBarangay).", ".$this->titleCase($clientProvince).", ".$this->titleCase($clientCountry)." ".$clientPostalCode;
+            $address = $this->titleCase($clientUnitNumber)." ".$this->titleCase($clientHouseNumber).", ".$this->titleCase($clientCity).", ".$this->titleCase($clientBarangay).", ".$this->titleCase($clientProvince).", ".$this->titleCase($clientCountry)." ".$clientPostalCode;
 
             $pmData = $this->getEmployeeInformation($timelineHeader->projectManager);
             $projectManager = $pmData ? $pmData->employeeFirstname." ".$pmData->employeeLastname : "";

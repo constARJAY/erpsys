@@ -55,9 +55,10 @@ class System_notification extends CI_Controller {
 
     public function getCountForApproval()
     {
-        $tableName  = $this->input->post("tableName") ?? "pms_cost_estimate_tbl";
-        $employeeID = $this->input->post("employeeID") ?? 2;
-        echo getCountForApproval($tableName, $employeeID);
+        $tableName    = $this->input->post("tableName") ?? "pms_cost_estimate_tbl";
+        $columnStatus = $this->input->post("columnStatus") ?? "costEstimateStatus";
+        $employeeID   = $this->input->post("employeeID") ?? 2;
+        echo getCountForApproval($tableName, $columnStatus, $employeeID);
     }
 
 }

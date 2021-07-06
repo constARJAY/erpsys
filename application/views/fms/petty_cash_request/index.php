@@ -9,7 +9,7 @@
                         <li class="breadcrumb-item active">Petty Cash Request</li>
                     </ul>
                     <h1 class="mt-3">Petty Cash Request</h1>
-                    <span>This module is used to manage petty cash request form details.</span>
+                    <span>This module is used to manage the submission and approval of petty cash request.</span>
                 </div>
                 <div class="col-lg-6 col-md-6 text-right" id="headerButton"></div>
             </div>

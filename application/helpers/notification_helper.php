@@ -142,10 +142,10 @@
     }
 
     // ----- GET COUNT FOR APPROVAL -----
-    function getTableForApproval($tableName = "pms_cost_estimate_tbl", $employeeID = 1)
+    function getTableForApproval($tableName = "pms_cost_estimate_tbl", $columnStatus = "costEstimateStatus", $employeeID = 1)
     {
         $CI =& get_instance();
-        $sql   = "SELECT approversID, approversDate FROM $tableName WHERE FIND_IN_SET($employeeID, REPLACE(approversID, '|', ','))";
+        $sql   = "SELECT approversID, approversDate FROM $tableName WHERE FIND_IN_SET($employeeID, REPLACE(approversID, '|', ',')) AND $columnStatus = 1"; // FOR APPROVAL
         $query = $CI->db->query($sql);
         return $query ? $query->result_array() : [];
     }
@@ -162,11 +162,11 @@
         return false;
     }
 
-    function getCountForApproval($tableName = "pms_cost_estimate_tbl", $employeeID = 1)
+    function getCountForApproval($tableName = "pms_cost_estimate_tbl", $columnStatus = "costEstimateStatus", $employeeID = 1)
     {
         $CI =& get_instance();
         $count = 0;
-        $documents = getTableForApproval($tableName, $employeeID);
+        $documents = getTableForApproval($tableName, $columnStatus, $employeeID);
         foreach ($documents as $document) {
             $approversID   = $document["approversID"];
             $approversDate = $document["approversDate"];

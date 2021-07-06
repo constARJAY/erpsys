@@ -570,7 +570,7 @@ $(document).ready(function() {
                         </div>
                         <div class="col-md-6 col-sm-12">
                             <div class="form-group">
-                                <label>Team Member</label>
+                                <label>Team Members</label>
                                 <textarea type="text" class="form-control" rows="5" style="resize: none" disabled>${teamMember}</textarea>
                             </div>
                         </div>

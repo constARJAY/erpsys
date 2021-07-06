@@ -214,16 +214,14 @@ $(document).ready(function() {
 				columnDefs: [
 					{ targets: 0,  width: 100 },
 					{ targets: 1,  width: 150 },
-					{ targets: 2,  width: 150 },
+					{ targets: 2,  width: 100 },
 					{ targets: 3,  width: 150 },
-					{ targets: 4,  width: 350 },
-					{ targets: 5,  width: 350 },
+					{ targets: 4,  width: 280 },
+					{ targets: 5,  width: 250 },
 					{ targets: 6,  width: 100 },
-					{ targets: 7,  width: 200 },
-					{ targets: 8,  width: 200 },
+					{ targets: 7,  width: 300 },
+					{ targets: 8,  width: 80  },
 					{ targets: 9,  width: 200 },
-					{ targets: 10, width: 80  },
-					{ targets: 11, width: 200 },
 				],
 			});
 
@@ -244,9 +242,9 @@ $(document).ready(function() {
 					{ targets: 4,  width: 280 },
 					{ targets: 5,  width: 250 },
 					{ targets: 6,  width: 100 },
-					{ targets: 7,  width: 250 },
-					{ targets: 8,  width: 80 },
-					{ targets: 9,  width: 150 },
+					{ targets: 7,  width: 300 },
+					{ targets: 8,  width: 80  },
+					{ targets: 9,  width: 200 },
 				],
 			});
 
@@ -351,16 +349,18 @@ $(document).ready(function() {
 	function headerTabContent(display = true) {
 		if (display) {
 			if (isImModuleApprover("ims_service_order_tbl", "approversID")) {
+				let count = getCountForApproval("ims_service_order_tbl", "serviceOrderStatus");
+				let displayCount = count ? `<span class="ml-1 badge badge-danger rounded-circle">${count}</span>` : "";
 				let html = `
-                <div class="bh_divider appendHeader"></div>
-                <div class="row clearfix appendHeader">
-                    <div class="col-12">
-                        <ul class="nav nav-tabs">
-                            <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#forApprovalTab" redirect="forApprovalTab">For Approval</a></li>
-                            <li class="nav-item"><a class="nav-link active" data-toggle="tab" href="#myFormsTab" redirect="myFormsTab">My Forms</a></li>
-                        </ul>
-                    </div>
-                </div>`;
+				<div class="bh_divider appendHeader"></div>
+				<div class="row clearfix appendHeader">
+					<div class="col-12">
+						<ul class="nav nav-tabs">
+							<li class="nav-item"><a class="nav-link" data-toggle="tab" href="#forApprovalTab" redirect="forApprovalTab">For Approval ${displayCount}</a></li>
+							<li class="nav-item"><a class="nav-link active" data-toggle="tab" href="#myFormsTab" redirect="myFormsTab">My Forms</a></li>
+						</ul>
+					</div>
+				</div>`;
 				$("#headerContainer").append(html);
 			}
 		} else {
@@ -416,9 +416,7 @@ $(document).ready(function() {
 					<th>Project Name</th>
 					<th>Description</th>
 					<th>Current Approver</th>
-					<th>Date Created</th>
-					<th>Date Submitted</th>
-					<th>Date Approved</th>
+					<th>Date</th>
 					<th>Status</th>
 					<th>Remarks</th>
 				</tr>
@@ -470,9 +468,7 @@ $(document).ready(function() {
 					<td>
 						${employeeFullname(getCurrentApprover(approversID, approversDate, serviceOrderStatus, true))}
 					</td>
-					<td>${dateCreated}</td>
-					<td>${dateSubmitted}</td>
-					<td>${dateApproved}</td>
+					<td>${getDocumentDates(dateCreated, dateSubmitted, dateApproved)}</td>
 					<td class="text-center">
 						${getStatusStyle(serviceOrderStatus)}
 					</td>
@@ -555,43 +551,6 @@ $(document).ready(function() {
 
 			let btnClass = serviceOrderStatus != 0 ? "btnView" : "btnEdit";
 
-			var date =`<span style="color:#dc3450; display: block; font-size: 14px; padding: 2px"><b>Created: </b>
-								<span style="color:#000;">
-								${dateCreated}
-								</span>
-							</span>
-							<span style="color:#dc3450;display: block; font-size: 14px; padding: 2px"><b>Submitted: </b>
-								<span style="color:#000;">
-								${dateSubmitted}
-								</span>
-							</span>
-							<span style="color:#dc3450;display: block; font-size: 14px; padding: 2px"><b>Approved: </b>
-								<span style="color:#000;">
-								${dateApproved}
-								</span>
-							</span>`;
-
-			if(dateSubmitted == '-'){
-				var date =`<span style="color:#dc3450;display: block; font-size: 14px; padding: 2px"><b>Created: </b>
-								<span style="color:#000;">
-								${dateCreated}
-								</span>
-							</span>`;
-			} 
-
-			if(dateApproved == '-' && dateSubmitted != '-'){
-				var date =`<span style="color:#dc3450;display: block; font-size: 14px; padding: 2px"><b>Created: </b>
-								<span style="color:#000;">
-								${dateCreated}
-								</span>
-							</span>
-							<span style="color:#dc3450;display: block; font-size: 14px; padding: 2px"><b>Submitted: </b>
-								<span style="color:#000;">
-								${dateSubmitted}
-								</span>
-							</span>`;
-			}
-
 			html += `
             <tr class="${btnClass}" id="${encryptString(serviceOrderID )}">
                 <td>${getFormCode("SO", createdAt, serviceOrderID )}</td>
@@ -608,7 +567,7 @@ $(document).ready(function() {
                 <td>
                     ${employeeFullname(getCurrentApprover(approversID, approversDate, serviceOrderStatus, true))}
                 </td>
-				<td>${date}</td>
+				<td>${getDocumentDates(dateCreated, dateSubmitted, dateApproved)}</td>
                 <td class="text-center">
                     ${getStatusStyle(serviceOrderStatus)}
                 </td>

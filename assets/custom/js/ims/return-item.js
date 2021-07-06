@@ -165,11 +165,9 @@ $(document).ready(function() {
 					{ targets: 3,  width: 350 },
 					{ targets: 4,  width: 200 },
 					{ targets: 5,  width: 200 },
-					{ targets: 6,  width: 200 },
-					{ targets: 7, width: 200 },
-					{ targets: 8, width: 250 },
-					{ targets: 9, width: 80 },
-					{ targets: 10, width: 250 },
+					{ targets: 6,  width: 300 },
+					{ targets: 7,  width: 80  },
+					{ targets: 8,  width: 250 },
 				],
 			});
 
@@ -189,11 +187,9 @@ $(document).ready(function() {
 					{ targets: 3,  width: 350 },
 					{ targets: 4,  width: 200 },
 					{ targets: 5,  width: 200 },
-					{ targets: 6,  width: 200 },
-					{ targets: 7, width: 200 },
-					{ targets: 8, width: 250 },
-					{ targets: 9, width: 80 },
-					{ targets: 10, width: 250 },
+					{ targets: 6,  width: 300 },
+					{ targets: 7,  width: 80  },
+					{ targets: 8,  width: 250 },
 				],
 			});
 
@@ -258,16 +254,18 @@ $(document).ready(function() {
 	function headerTabContent(display = true) {
 		if (display) {
 			if (isImModuleApprover("ims_return_item_tbl", "approversID")) {
+				let count = getCountForApproval("ims_return_item_tbl", "returnItemStatus");
+				let displayCount = count ? `<span class="ml-1 badge badge-danger rounded-circle">${count}</span>` : "";
 				let html = `
-                <div class="bh_divider appendHeader"></div>
-                <div class="row clearfix appendHeader">
-                    <div class="col-12">
-                        <ul class="nav nav-tabs">
-                            <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#forApprovalTab" redirect="forApprovalTab">For Approval</a></li>
-                            <li class="nav-item"><a class="nav-link active" data-toggle="tab" href="#myFormsTab" redirect="myFormsTab">My Forms</a></li>
-                        </ul>
-                    </div>
-                </div>`;
+				<div class="bh_divider appendHeader"></div>
+				<div class="row clearfix appendHeader">
+					<div class="col-12">
+						<ul class="nav nav-tabs">
+							<li class="nav-item"><a class="nav-link" data-toggle="tab" href="#forApprovalTab" redirect="forApprovalTab">For Approval ${displayCount}</a></li>
+							<li class="nav-item"><a class="nav-link active" data-toggle="tab" href="#myFormsTab" redirect="myFormsTab">My Forms</a></li>
+						</ul>
+					</div>
+				</div>`;
 				$("#headerContainer").append(html);
 			}
 		} else {
@@ -322,9 +320,7 @@ $(document).ready(function() {
 					<th>Project Name</th>
 					<th>Description</th>
                     <th>Current Approver</th>
-                    <th>Date Created</th>
-                    <th>Date Submitted</th>
-                    <th>Date Approved</th>
+                    <th>Date</th>
                     <th>Status</th>
                     <th>Remarks</th>
                 </tr>
@@ -376,9 +372,7 @@ $(document).ready(function() {
 					<td>
 						${employeeFullname(getCurrentApprover(approversID, approversDate, returnItemStatus, true))}
 					</td>
-					<td>${dateCreated}</td>
-					<td>${dateSubmitted}</td>
-					<td>${dateApproved}</td>
+					<td>${getDocumentDates(dateCreated, dateSubmitted, dateApproved)}</td>
 					<td class="text-center">
 						${getStatusStyle(returnItemStatus)}
 					</td>
@@ -510,9 +504,7 @@ $(document).ready(function() {
 					<th>Project Name</th>
 					<th>Description</th>
                     <th>Current Approver</th>
-                    <th>Date Created</th>
-                    <th>Date Submitted</th>
-                    <th>Date Approved</th>
+                    <th>Date</th>
                     <th>Status</th>
                     <th>Remarks</th>
                 </tr>
@@ -563,9 +555,7 @@ $(document).ready(function() {
                 <td>
                     ${employeeFullname(getCurrentApprover(approversID, approversDate, returnItemStatus, true))}
                 </td>
-				<td>${dateCreated}</td>
-				<td>${dateSubmitted}</td>
-				<td>${dateApproved}</td>
+				<td>${getDocumentDates(dateCreated, dateSubmitted, dateApproved)}</td>
                 <td class="text-center">
                     ${getStatusStyle(returnItemStatus)}
                 </td>
