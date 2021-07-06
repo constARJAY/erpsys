@@ -126,12 +126,9 @@ $(document).ready(function () {
 					{ targets: 0, width: 100 },
 					{ targets: 1, width: 150 },
 					{ targets: 2, width: 150 },
-					{ targets: 3, width: 200 },
-					{ targets: 4, width: 200 },
+					{ targets: 3, width: 300 },
+					{ targets: 4, width: 80  },
 					{ targets: 5, width: 200 },
-					{ targets: 6, width: 80 },
-					{ targets: 7, width: 250 },
-					{ targets: 8, width: 80 },
 				],
 			});
 
@@ -148,12 +145,9 @@ $(document).ready(function () {
 					{ targets: 0, width: 100 },
 					{ targets: 1, width: 150 },
 					{ targets: 2, width: 150 },
-					{ targets: 3, width: 200 },
-					{ targets: 4, width: 200 },
+					{ targets: 3, width: 300 },
+					{ targets: 4, width: 80  },
 					{ targets: 5, width: 200 },
-					{ targets: 6, width: 80 },
-					{ targets: 7, width: 250 },
-					{ targets: 8, width: 80 },
 				],
 			});
 	}
@@ -164,16 +158,18 @@ $(document).ready(function () {
 	function headerTabContent(display = true) {
 		if (display) {
 			if (isImModuleApprover("hris_no_timein_timeout_tbl", "approversID")) {
+				let count = getCountForApproval("hris_no_timein_timeout_tbl", "noTimeinTimeoutStatus");
+				let displayCount = count ? `<span class="ml-1 badge badge-danger rounded-circle">${count}</span>` : "";
 				let html = `
-                <div class="bh_divider appendHeader"></div>
-                <div class="row clearfix appendHeader">
-                    <div class="col-12">
-                        <ul class="nav nav-tabs">
-                            <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#forApprovalTab" redirect="forApprovalTab">For Approval</a></li>
-                            <li class="nav-item"><a class="nav-link active" data-toggle="tab" href="#myFormsTab" redirect="myFormsTab">My Forms</a></li>
-                        </ul>
-                    </div>
-                </div>`;
+				<div class="bh_divider appendHeader"></div>
+				<div class="row clearfix appendHeader">
+					<div class="col-12">
+						<ul class="nav nav-tabs">
+							<li class="nav-item"><a class="nav-link" data-toggle="tab" href="#forApprovalTab" redirect="forApprovalTab">For Approval ${displayCount}</a></li>
+							<li class="nav-item"><a class="nav-link active" data-toggle="tab" href="#myFormsTab" redirect="myFormsTab">My Forms</a></li>
+						</ul>
+					</div>
+				</div>`;
 				$("#headerContainer").append(html);
 			}
 		} else {
@@ -236,12 +232,9 @@ $(document).ready(function () {
 					<th>Document No.</th>
 					<th>Employee Name</th>
 					<th>Current Approver</th>
-					<th>Date Created</th>
-					<th>Date Submitted</th>
-					<th>Date Approved</th>
+					<th>Date</th>
 					<th>Status</th>
 					<th>Remarks</th>
-					<th>Action</th>
 				</tr>
             </thead>
             <tbody>`;
@@ -273,20 +266,15 @@ $(document).ready(function () {
 
 			if (isImCurrentApprover(approversID, approversDate, noTimeinTimeoutStatus) || isAlreadyApproved(approversID, approversDate)) {
 				html += `
-				<tr>
+				<tr class="btnEdit btnView" id="${encryptString(noTimeinTimeoutID)}">
 					<td>${getFormCode("NTI", createdAt, noTimeinTimeoutID)}</td>
 					<td>${employeeFirstname + ' ' +employeeLastname}</td>
 					<td>
 						${employeeFullname(getCurrentApprover(approversID, approversDate, noTimeinTimeoutStatus, true))}
 					</td>
-					<td>${dateCreated}</td>
-					<td>${dateSubmitted}</td>
-					<td>${dateApproved}</td>
+					<td>${getDocumentDates(dateCreated, dateSubmitted, dateApproved)}</td>
 					<td class="text-center">${getStatusStyle(noTimeinTimeoutStatus)}</td>
 					<td>${remarks}</td>
-					<td class="text-center">
-						${button}
-					</td>
 				</tr>`;
 			}
 			
@@ -340,12 +328,9 @@ $(document).ready(function () {
                     <th>Document No.</th>
                     <th>Employee Name</th>
 					<th>Current Approver</th>
-					<th>Date Created</th>
-					<th>Date Submitted</th>
-					<th>Date Approved</th>
+					<th>Date</th>
                     <th>Status</th>
 					<th>Remarks</th>
-                    <th>Action</th>
                 </tr>
             </thead>
             <tbody>`;
@@ -389,20 +374,15 @@ $(document).ready(function () {
                 id="${encryptString(noTimeinTimeoutID)}" 
                 code="${getFormCode("NTI", createdAt, noTimeinTimeoutID)}"><i class="fas fa-edit"></i> Edit</button>`;
 			html += `
-            <tr>
+            <tr class="btnEdit btnView" id="${encryptString(noTimeinTimeoutID)}">
                 <td>${getFormCode("NTI", createdAt, noTimeinTimeoutID)}</td>
                 <td>${employeeFirstname + ' ' +employeeLastname}</td>
 				<td>
                     ${employeeFullname(getCurrentApprover(approversID, approversDate, noTimeinTimeoutStatus, true))}
                 </td>
-				<td>${dateCreated}</td>
-				<td>${dateSubmitted}</td>
-				<td>${dateApproved}</td>
+				<td>${getDocumentDates(dateCreated, dateSubmitted, dateApproved)}</td>
                 <td class="text-center">${getStatusStyle(noTimeinTimeoutStatus)}</td>
 				<td>${remarks}</td>
-                <td class="text-center">
-                    ${button}
-                </td>
             </tr>`;
 		});
 
@@ -439,16 +419,16 @@ $(document).ready(function () {
 					// DRAFT
 					button = `
 					<button 
-						class="btn btn-submit" 
+						class="btn btn-submit px-5 py-2" 
 						id="btnSubmit" 
-						noTimeinTimeoutID="${noTimeinTimeoutID}"
+						noTimeinTimeoutID="${encryptString(noTimeinTimeoutID)}"
 						code="${getFormCode("NTI", createdAt, noTimeinTimeoutID)}"><i class="fas fa-paper-plane"></i>
 						Submit
 					</button>
 					<button 
-						class="btn btn-cancel"
+						class="btn btn-cancel px-5 py-2"
 						id="btnCancelForm" 
-						noTimeinTimeoutID="${noTimeinTimeoutID}"
+						noTimeinTimeoutID="${encryptString(noTimeinTimeoutID)}"
 						code="${getFormCode("NTI", createdAt, noTimeinTimeoutID)}"><i class="fas fa-ban"></i> 
 						Cancel
 					</button>`;
@@ -456,9 +436,9 @@ $(document).ready(function () {
 					if (!isOngoing) {
 						button = `
 						<button 
-							class="btn btn-cancel"
+							class="btn btn-cancel px-5 py-2"
 							id="btnCancelForm" 
-							noTimeinTimeoutID="${noTimeinTimeoutID}"
+							noTimeinTimeoutID="${encryptString(noTimeinTimeoutID)}"
 							code="${getFormCode("NTI", createdAt, noTimeinTimeoutID)}"><i class="fas fa-ban"></i> 
 							Cancel
 						</button>`;
@@ -469,16 +449,16 @@ $(document).ready(function () {
 					if (isImCurrentApprover(approversID, approversDate)) {
 						button = `
 						<button 
-							class="btn btn-submit" 
+							class="btn btn-submit px-5 py-2" 
 							id="btnApprove" 
-							noTimeinTimeoutID="${noTimeinTimeoutID}"
+							noTimeinTimeoutID="${encryptString(noTimeinTimeoutID)}"
 							code="${getFormCode("NTI", createdAt, noTimeinTimeoutID)}"><i class="fas fa-paper-plane"></i>
 							Approve
 						</button>
 						<button 
-							class="btn btn-cancel"
+							class="btn btn-cancel px-5 py-2"
 							id="btnReject" 
-							noTimeinTimeoutID="${noTimeinTimeoutID}"
+							noTimeinTimeoutID="${encryptString(noTimeinTimeoutID)}"
 							code="${getFormCode("NTI", createdAt, noTimeinTimeoutID)}"><i class="fas fa-ban"></i> 
 							Deny
 						</button>`;
@@ -489,11 +469,11 @@ $(document).ready(function () {
 		} else {
 			button = `
 			<button 
-				class="btn btn-submit" 
+				class="btn btn-submit px-5 py-2" 
 				id="btnSubmit"><i class="fas fa-paper-plane"></i> Submit
 			</button>
 			<button 
-				class="btn btn-cancel" 
+				class="btn btn-cancel px-5 py-2" 
 				id="btnCancel"><i class="fas fa-ban"></i> 
 				Cancel
 			</button>`;
@@ -1254,17 +1234,17 @@ $(document).ready(function () {
 			</div>
 		</div>
 		<div class="modal-footer text-right">
-			<button class="btn btn-danger" id="btnRejectConfirmation"
-			noTimeinTimeoutID="${id}"
+			<button class="btn btn-danger px-5 py-2" id="btnRejectConfirmation"
+			noTimeinTimeoutID="${(id)}"
 			code="${feedback}"><i class="far fa-times-circle"></i> Deny</button>
-			<button class="btn btn-cancel" data-dismiss="modal"><i class="fas fa-ban"></i> Cancel</button>
+			<button class="btn btn-cancel px-5 py-2" data-dismiss="modal"><i class="fas fa-ban"></i> Cancel</button>
 		</div>`;
 		$("#modal_change_schedule_content").html(html);
 	})
 
 
 	$(document).on("click", "#btnRejectConfirmation", function() {
-		const id       = $(this).attr("noTimeinTimeoutID");
+		const id       = decryptString($(this).attr("noTimeinTimeoutID"));
 		const feedback = $(this).attr("code") || getFormCode("NTI", dateToday(), id);
 
 		const validate = validateForm("modal_change_schedule");

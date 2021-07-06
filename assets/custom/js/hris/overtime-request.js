@@ -125,12 +125,9 @@ $(document).ready(function () {
 					{ targets: 0, width: 100 },
 					{ targets: 1, width: 150 },
 					{ targets: 2, width: 150 },
-					{ targets: 3, width: 200 },
-					{ targets: 4, width: 200 },
+					{ targets: 3, width: 300 },
+					{ targets: 4, width: 80  },
 					{ targets: 5, width: 200 },
-					{ targets: 6, width: 80  },
-					{ targets: 7, width: 250 },
-					{ targets: 8, width: 80  },
 				],
 			});
 
@@ -147,12 +144,9 @@ $(document).ready(function () {
 					{ targets: 0, width: 100 },
 					{ targets: 1, width: 150 },
 					{ targets: 2, width: 150 },
-					{ targets: 3, width: 200 },
-					{ targets: 4, width: 200 },
+					{ targets: 3, width: 300 },
+					{ targets: 4, width: 80  },
 					{ targets: 5, width: 200 },
-					{ targets: 6, width: 80  },
-					{ targets: 7, width: 250 },
-					{ targets: 8, width: 80  },
 				],
 			});
 	}
@@ -163,16 +157,18 @@ $(document).ready(function () {
 	function headerTabContent(display = true) {
 		if (display) {
 			if (isImModuleApprover("hris_overtime_request_tbl", "approversID")) {
+				let count = getCountForApproval("hris_overtime_request_tbl", "overtimeRequestStatus");
+				let displayCount = count ? `<span class="ml-1 badge badge-danger rounded-circle">${count}</span>` : "";
 				let html = `
-                <div class="bh_divider appendHeader"></div>
-                <div class="row clearfix appendHeader">
-                    <div class="col-12">
-                        <ul class="nav nav-tabs">
-                            <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#forApprovalTab" redirect="forApprovalTab">For Approval</a></li>
-                            <li class="nav-item"><a class="nav-link active" data-toggle="tab" href="#myFormsTab" redirect="myFormsTab">My Forms</a></li>
-                        </ul>
-                    </div>
-                </div>`;
+				<div class="bh_divider appendHeader"></div>
+				<div class="row clearfix appendHeader">
+					<div class="col-12">
+						<ul class="nav nav-tabs">
+							<li class="nav-item"><a class="nav-link" data-toggle="tab" href="#forApprovalTab" redirect="forApprovalTab">For Approval ${displayCount}</a></li>
+							<li class="nav-item"><a class="nav-link active" data-toggle="tab" href="#myFormsTab" redirect="myFormsTab">My Forms</a></li>
+						</ul>
+					</div>
+				</div>`;
 				$("#headerContainer").append(html);
 			}
 		} else {
@@ -217,12 +213,9 @@ $(document).ready(function () {
                     <th>Document No.</th>
                     <th>Employee Name</th>
 					<th>Current Approver</th>
-					<th>Date Created</th>
-					<th>Date Submitted</th>
-					<th>Date Approved</th>
+					<th>Date</th>
                     <th>Status</th>
 					<th>Remarks</th>
-                    <th>Action</th>
                 </tr>
             </thead>
             <tbody>`;
@@ -252,22 +245,17 @@ $(document).ready(function () {
 
 			if (isImCurrentApprover(approversID, approversDate, overtimeRequestStatus) || isAlreadyApproved(approversID, approversDate)) {
 				html += `
-				<tr>
+				<tr class="btnView btnEdit" id="${encryptString(overtimeRequestID)}">
 					<td>${getFormCode("OTR", dateCreated, overtimeRequestID)}</td>
 					<td>${fullname}</td>
 					<td>
 						${employeeFullname(getCurrentApprover(approversID, approversDate, overtimeRequestStatus, true))}
 					</td>
-					<td>${dateCreated}</td>
-					<td>${dateSubmitted}</td>
-					<td>${dateApproved}</td>
+					<td>${getDocumentDates(dateCreated, dateSubmitted, dateApproved)}</td>
 					<td class="text-center">
 						${getStatusStyle(overtimeRequestStatus)}
 					</td>
 					<td>${remarks}</td>
-					<td class="text-center">
-						${button}
-					</td>
 				</tr>`;
 			}
 		});
@@ -302,12 +290,9 @@ $(document).ready(function () {
                     <th>Document No.</th>
                     <th>Employee Name</th>
                     <th>Current Approver</th>
-					<th>Date Created</th>
-					<th>Date Submitted</th>
-					<th>Date Approved</th>
+					<th>Date</th>
                     <th>Status</th>
 					<th>Remarks</th>
-                    <th>Action</th>
                 </tr>
             </thead>
             <tbody>`;
@@ -349,22 +334,17 @@ $(document).ready(function () {
                 id="${encryptString(overtimeRequestID)}" 
                 code="${getFormCode("OTR", dateCreated, overtimeRequestID)}"><i class="fas fa-edit"></i> Edit</button>`;
 			html += `
-            <tr>
+            <tr class="btnEdit btnView" id="${encryptString(overtimeRequestID)}">
                 <td>${getFormCode("OTR", dateCreated, overtimeRequestID)}</td>
                 <td>${fullname}</td>
                 <td>
                     ${employeeFullname(getCurrentApprover(approversID, approversDate, overtimeRequestStatus, true))}
                 </td>
-				<td>${dateCreated}</td>
-				<td>${dateSubmitted}</td>
-				<td>${dateApproved}</td>
+				<td>${getDocumentDates(dateCreated, dateSubmitted, dateApproved)}</td>
                 <td class="text-center">
                     ${getStatusStyle(overtimeRequestStatus)}
                 </td>
 				<td>${remarks}</td>
-                <td class="text-center">
-                    ${button}
-                </td>
             </tr>`;
 		});
 
@@ -404,14 +384,14 @@ $(document).ready(function () {
 					// DRAFT
 					button = `
 					<button 
-						class="btn btn-submit" 
+						class="btn btn-submit px-5 py-2" 
 						id="btnSubmit" 
 						overtimeRequestID="${overtimeRequestID}"
 						code="${getFormCode("OTR", createdAt, overtimeRequestID)}"><i class="fas fa-paper-plane"></i>
 						Submit
 					</button>
 					<button 
-						class="btn btn-cancel"
+						class="btn btn-cancel px-5 py-2"
 						id="btnCancelForm" 
 						overtimeRequestID="${overtimeRequestID}"
 						code="${getFormCode("OTR", createdAt, overtimeRequestID)}"><i class="fas fa-ban"></i> 
@@ -421,7 +401,7 @@ $(document).ready(function () {
 					if (!isOngoing) {
 						button = `
 						<button 
-							class="btn btn-cancel"
+							class="btn btn-cancel px-5 py-2"
 							id="btnCancelForm" 
 							overtimeRequestID="${overtimeRequestID}"
 							code="${getFormCode("OTR", createdAt, overtimeRequestID)}"><i class="fas fa-ban"></i> 
@@ -434,14 +414,14 @@ $(document).ready(function () {
 					if (isImCurrentApprover(approversID, approversDate)) {
 						button = `
 						<button 
-							class="btn btn-submit" 
+							class="btn btn-submit px-5 py-2" 
 							id="btnApprove" 
 							overtimeRequestID="${encryptString(overtimeRequestID)}"
 							code="${getFormCode("OTR", createdAt, overtimeRequestID)}"><i class="fas fa-paper-plane"></i>
 							Approve
 						</button>
 						<button 
-							class="btn btn-cancel"
+							class="btn btn-cancel px-5 py-2"
 							id="btnReject" 
 							overtimeRequestID="${encryptString(overtimeRequestID)}"
 							code="${getFormCode("OTR", createdAt, overtimeRequestID)}"><i class="fas fa-ban"></i> 
@@ -453,11 +433,11 @@ $(document).ready(function () {
 		} else {
 			button = `
 			<button 
-				class="btn btn-submit" 
+				class="btn btn-submit px-5 py-2" 
 				id="btnSubmit"><i class="fas fa-paper-plane"></i> Submit
 			</button>
 			<button 
-				class="btn btn-cancel" 
+				class="btn btn-cancel px-5 py-2" 
 				id="btnCancel"><i class="fas fa-ban"></i> 
 				Cancel
 			</button>`;
@@ -1123,10 +1103,10 @@ $(document).ready(function () {
 			</div>
 		</div>
 		<div class="modal-footer text-right">
-			<button class="btn btn-danger" id="btnRejectConfirmation"
+			<button class="btn btn-danger px-5 py-2" id="btnRejectConfirmation"
 			overtimeRequestID="${id}"
 			code="${feedback}"><i class="far fa-times-circle"></i> Deny</button>
-			<button class="btn btn-cancel" data-dismiss="modal"><i class="fas fa-ban"></i> Cancel</button>
+			<button class="btn btn-cancel px-5 py-2" data-dismiss="modal"><i class="fas fa-ban"></i> Cancel</button>
 		</div>`;
 		$("#modal_overtime_request_content").html(html);
 	});

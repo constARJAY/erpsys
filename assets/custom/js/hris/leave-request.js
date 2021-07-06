@@ -127,12 +127,9 @@ $(document).ready(function () {
 					{ targets: 2, width: 180 },
 					{ targets: 3, width: 200 },
 					{ targets: 4, width: 150 },
-					{ targets: 5, width: 200 },
-					{ targets: 6, width: 200 },
+					{ targets: 5, width: 300 },
+					{ targets: 6, width: 80  },
 					{ targets: 7, width: 200 },
-					{ targets: 8, width: 80  },
-					{ targets: 9, width: 250 },
-					{ targets: 10, width: 80  },
 				],
 			});
 
@@ -151,12 +148,9 @@ $(document).ready(function () {
 					{ targets: 2, width: 180 },
 					{ targets: 3, width: 200 },
 					{ targets: 4, width: 150 },
-					{ targets: 5, width: 200 },
-					{ targets: 6, width: 200 },
+					{ targets: 5, width: 300 },
+					{ targets: 6, width: 80  },
 					{ targets: 7, width: 200 },
-					{ targets: 8, width: 80  },
-					{ targets: 9, width: 250 },
-					{ targets: 10, width: 80  },
 				],
 			});
 	}
@@ -167,16 +161,18 @@ $(document).ready(function () {
 	function headerTabContent(display = true) {
 		if (display) {
 			if (isImModuleApprover("hris_leave_request_tbl", "approversID")) {
+				let count = getCountForApproval("hris_leave_request_tbl", "leaveRequestStatus");
+				let displayCount = count ? `<span class="ml-1 badge badge-danger rounded-circle">${count}</span>` : "";
 				let html = `
-                <div class="bh_divider appendHeader"></div>
-                <div class="row clearfix appendHeader">
-                    <div class="col-12">
-                        <ul class="nav nav-tabs">
-                            <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#forApprovalTab" redirect="forApprovalTab">For Approval</a></li>
-                            <li class="nav-item"><a class="nav-link active" data-toggle="tab" href="#myFormsTab" redirect="myFormsTab">My Forms</a></li>
-                        </ul>
-                    </div>
-                </div>`;
+				<div class="bh_divider appendHeader"></div>
+				<div class="row clearfix appendHeader">
+					<div class="col-12">
+						<ul class="nav nav-tabs">
+							<li class="nav-item"><a class="nav-link" data-toggle="tab" href="#forApprovalTab" redirect="forApprovalTab">For Approval ${displayCount}</a></li>
+							<li class="nav-item"><a class="nav-link active" data-toggle="tab" href="#myFormsTab" redirect="myFormsTab">My Forms</a></li>
+						</ul>
+					</div>
+				</div>`;
 				$("#headerContainer").append(html);
 			}
 		} else {
@@ -223,12 +219,9 @@ $(document).ready(function () {
 					<th>Leave Type</th>
 					<th>Leave Date/s</th>
 					<th>Current Approver</th>
-					<th>Date Created</th>
-					<th>Date Submitted</th>
-					<th>Date Approved</th>
+					<th>Date</th>
                     <th>Status</th>
 					<th>Remarks</th>
-                    <th>Action</th>
                 </tr>
             </thead>
             <tbody>`;
@@ -262,7 +255,7 @@ $(document).ready(function () {
 
 			if (isImCurrentApprover(approversID, approversDate, leaveRequestStatus) || isAlreadyApproved(approversID, approversDate)) {
 				html += `
-				<tr>
+				<tr class="btnView btnEdit" id="${encryptString(leaveRequestID)}">
 					<td>${getFormCode("LRF", dateCreated, leaveRequestID)}</td>
 					<td>${fullname}</td>
 					<td>${leaveID != 0 ? leaveType[0].leaveName : "-" }</td>
@@ -270,16 +263,11 @@ $(document).ready(function () {
 					<td>
 						${employeeFullname(getCurrentApprover(approversID, approversDate, leaveRequestStatus, true))}
 					</td>
-					<td>${dateCreated}</td>
-					<td>${dateSubmitted}</td>
-					<td>${dateApproved}</td>
+					<td>${getDocumentDates(dateCreated, dateSubmitted, dateApproved)}</td>
 					<td class="text-center">
 						${getStatusStyle(leaveRequestStatus)}
 					</td>
 					<td>${remarks}</td>
-					<td class="text-center">
-						${button}
-					</td>
 				</tr>`;
 			}
 		});
@@ -316,12 +304,9 @@ $(document).ready(function () {
 					<th>Leave Type</th>
 					<th>Leave Date/s</th>
                     <th>Current Approver</th>
-					<th>Date Created</th>
-					<th>Date Submitted</th>
-					<th>Date Approved</th>
+					<th>Date</th>
                     <th>Status</th>
 					<th>Remarks</th>
-                    <th>Action</th>
                 </tr>
             </thead>
             <tbody>`;
@@ -367,7 +352,7 @@ $(document).ready(function () {
                 id="${encryptString(leaveRequestID)}" 
                 code="${getFormCode("LRF", dateCreated, leaveRequestID)}"><i class="fas fa-edit"></i> Edit</button>`;
 			html += `
-            <tr>
+            <tr class="btnView btnEdit" id="${encryptString(leaveRequestID)}" >
                 <td>${getFormCode("LRF", dateCreated, leaveRequestID)}</td>
                 <td>${fullname}</td>
 				<td>${leaveID != 0 ? leaveType[0].leaveName : "-" }</td>
@@ -375,16 +360,11 @@ $(document).ready(function () {
                 <td>
                     ${employeeFullname(getCurrentApprover(approversID, approversDate, leaveRequestStatus, true))}
                 </td>
-				<td>${dateCreated}</td>
-				<td>${dateSubmitted}</td>
-				<td>${dateApproved}</td>
+				<td>${getDocumentDates(dateCreated, dateSubmitted, dateApproved)}</td>
                 <td class="text-center">
                     ${getStatusStyle(leaveRequestStatus)}
                 </td>
 				<td>${remarks}</td>
-                <td class="text-center">
-                    ${button}
-                </td>
             </tr>`;
 		});
 
@@ -424,14 +404,14 @@ $(document).ready(function () {
 					// DRAFT
 					button = `
 					<button 
-						class="btn btn-submit" 
+						class="btn btn-submit px-5 py-2" 
 						id="btnSubmit" 
 						leaveRequestID="${leaveRequestID}"
 						code="${getFormCode("LRF", createdAt, leaveRequestID)}"><i class="fas fa-paper-plane"></i>
 						Submit
 					</button>
 					<button 
-						class="btn btn-cancel"
+						class="btn btn-cancel px-5 py-2"
 						id="btnCancelForm" 
 						leaveRequestID="${leaveRequestID}"
 						code="${getFormCode("LRF", createdAt, leaveRequestID)}"><i class="fas fa-ban"></i> 
@@ -441,7 +421,7 @@ $(document).ready(function () {
 					if (!isOngoing) {
 						button = `
 						<button 
-							class="btn btn-cancel"
+							class="btn btn-cancel px-5 py-2"
 							id="btnCancelForm" 
 							leaveRequestID="${leaveRequestID}"
 							code="${getFormCode("LRF", createdAt, leaveRequestID)}"><i class="fas fa-ban"></i> 
@@ -454,14 +434,14 @@ $(document).ready(function () {
 					if (isImCurrentApprover(approversID, approversDate)) {
 						button = `
 						<button 
-							class="btn btn-submit" 
+							class="btn btn-submit px-5 py-2" 
 							id="btnApprove" 
 							leaveRequestID="${encryptString(leaveRequestID)}"
 							code="${getFormCode("LRF", createdAt, leaveRequestID)}"><i class="fas fa-paper-plane"></i>
 							Approve
 						</button>
 						<button 
-							class="btn btn-cancel"
+							class="btn btn-cancel px-5 py-2"
 							id="btnReject" 
 							leaveRequestID="${encryptString(leaveRequestID)}"
 							code="${getFormCode("LRF", createdAt, leaveRequestID)}"><i class="fas fa-ban"></i> 
@@ -473,11 +453,11 @@ $(document).ready(function () {
 		} else {
 			button = `
 			<button 
-				class="btn btn-submit" 
+				class="btn btn-submit px-5 py-2" 
 				id="btnSubmit"><i class="fas fa-paper-plane"></i> Submit
 			</button>
 			<button 
-				class="btn btn-cancel" 
+				class="btn btn-cancel px-5 py-2" 
 				id="btnCancel"><i class="fas fa-ban"></i> 
 				Cancel
 			</button>`;
@@ -1161,10 +1141,10 @@ $(document).ready(function () {
 			</div>
 		</div>
 		<div class="modal-footer text-right">
-			<button class="btn btn-danger" id="btnRejectConfirmation"
+			<button class="btn btn-danger px-5 py-2" id="btnRejectConfirmation"
 			leaveRequestID="${id}"
 			code="${feedback}"><i class="far fa-times-circle"></i> Deny</button>
-			<button class="btn btn-cancel" data-dismiss="modal"><i class="fas fa-ban"></i> Cancel</button>
+			<button class="btn btn-cancel px-5 py-2" data-dismiss="modal"><i class="fas fa-ban"></i> Cancel</button>
 		</div>`;
 		$("#modal_leave_request_content").html(html);
 	});

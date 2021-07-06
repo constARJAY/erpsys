@@ -125,16 +125,9 @@ $(document).ready(function () {
 					{ targets: 0,  width: 110 },
 					{ targets: 1,  width: 150 },
 					{ targets: 2,  width: 150 },
-					// { targets: 3,  width: 180 },
-					// { targets: 4,  width: 200 },
-					// { targets: 5,  width: 200 },
-					// { targets: 6,  width: 100 },
-					// { targets: 7,  width: 150 },
-					{ targets: 3,  width: 200 },
-					{ targets: 4,  width: 200 },
-					{ targets: 5, width: 200 },
-					{ targets: 6, width: 80  },
-					{ targets: 7, width: 250 },
+					{ targets: 3,  width: 300 },
+					{ targets: 4,  width: 80  },
+					{ targets: 5,  width: 200 },
 				],
 			});
 
@@ -153,16 +146,9 @@ $(document).ready(function () {
 					{ targets: 0,  width: 110 },
 					{ targets: 1,  width: 150 },
 					{ targets: 2,  width: 150 },
-					// { targets: 3,  width: 180 },
-					// { targets: 4,  width: 200 },
-					// { targets: 5,  width: 200 },
-					// { targets: 6,  width: 100 },
-					// { targets: 7,  width: 150 },
-					{ targets: 3,  width: 200 },
-					{ targets: 4,  width: 200 },
-					{ targets: 5, width: 200 },
-					{ targets: 6, width: 80  },
-					{ targets: 7, width: 250 },
+					{ targets: 3,  width: 300 },
+					{ targets: 4,  width: 80  },
+					{ targets: 5,  width: 200 },
 				],
 			});
 	}
@@ -171,16 +157,18 @@ $(document).ready(function () {
 	function headerTabContent(display = true) {
 		if (display) {
 			if (isImModuleApprover("hris_official_business_tbl", "approversID")) {
+				let count = getCountForApproval("hris_official_business_tbl", "officialBusinessStatus");
+				let displayCount = count ? `<span class="ml-1 badge badge-danger rounded-circle">${count}</span>` : "";
 				let html = `
-                <div class="bh_divider appendHeader"></div>
-                <div class="row clearfix appendHeader">
-                    <div class="col-12">
-                        <ul class="nav nav-tabs">
-                            <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#forApprovalTab" redirect="forApprovalTab">For Approval</a></li>
-                            <li class="nav-item"><a class="nav-link active" data-toggle="tab" href="#myFormsTab" redirect="myFormsTab">My Forms</a></li>
-                        </ul>
-                    </div>
-                </div>`;
+				<div class="bh_divider appendHeader"></div>
+				<div class="row clearfix appendHeader">
+					<div class="col-12">
+						<ul class="nav nav-tabs">
+							<li class="nav-item"><a class="nav-link" data-toggle="tab" href="#forApprovalTab" redirect="forApprovalTab">For Approval ${displayCount}</a></li>
+							<li class="nav-item"><a class="nav-link active" data-toggle="tab" href="#myFormsTab" redirect="myFormsTab">My Forms</a></li>
+						</ul>
+					</div>
+				</div>`;
 				$("#headerContainer").append(html);
 			}
 		} else {
@@ -234,9 +222,7 @@ $(document).ready(function () {
 					<th>Employee Name</th>
 					<th>Current Approver</th>
 					
-					<th>Date Created</th>
-					<th>Date Submitted</th>
-					<th>Date Approved</th>
+					<th>Date</th>
 
 					<th>Status</th>
 					<th>Remarks</th>
@@ -275,16 +261,14 @@ $(document).ready(function () {
 
 			if (isImCurrentApprover(approversID, approversDate, officialBusinessStatus) || isAlreadyApproved(approversID, approversDate)) {
 				html += `
-				<tr class="${button}" id="${encryptString(item.officialBusinessID)}">
+				<tr class="btnView btnEdit" id="${encryptString(item.officialBusinessID)}">
 					<td>${getFormCode("OBF", dateCreated, officialBusinessID)}</td>
 					<td>${fullname}</td>
 					<td>
 						${employeeFullname(getCurrentApprover(approversID, approversDate, officialBusinessStatus, true))}
 					</td>
 
-					<td>${dateCreated}</td>
-					<td>${dateSubmitted}</td>
-					<td>${dateApproved}</td>
+					<td>${getDocumentDates(dateCreated, dateSubmitted, dateApproved)}</td>
 
 					<td class="text-center">${getStatusStyle(officialBusinessStatus)}</td>
 					<td>${remarks}</td>
@@ -336,9 +320,7 @@ $(document).ready(function () {
                     <th>Employee Name</th>
 					<th>Current Approver</th>
 					
-					<th>Date Created</th>
-					<th>Date Submitted</th>
-					<th>Date Approved</th>
+					<th>Date</th>
 
                     <th>Status</th>
                     <th>Remarks</th>
@@ -394,16 +376,14 @@ $(document).ready(function () {
                 id="${encryptString(officialBusinessID)}" 
                 code="${getFormCode("OBF", dateCreated, officialBusinessID)}"><i class="fas fa-edit"></i> Edit</button>`;
 			html += `
-            <tr class="${btnClass}" id="${encryptString(officialBusinessID)}">
+            <tr class="btnEdit btnView" id="${encryptString(officialBusinessID)}">
                 <td>${getFormCode("OBF", dateCreated, officialBusinessID)}</td>
                 <td>${fullname}</td>
 				<td>
 					${employeeFullname(getCurrentApprover(approversID, approversDate, officialBusinessStatus, true))}
 				</td>
 
-				<td>${dateCreated}</td>
-				<td>${dateSubmitted}</td>
-				<td>${dateApproved}</td>
+				<td>${getDocumentDates(dateCreated, dateSubmitted, dateApproved)}</td>
 
                 <td class="text-center">${getStatusStyle(officialBusinessStatus)}</td>
                 <td>${remarks}</td>

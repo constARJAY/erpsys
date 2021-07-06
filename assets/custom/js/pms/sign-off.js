@@ -191,11 +191,9 @@ $(document).ready(function() {
 					{ targets: 4,  width: 150 },
 					{ targets: 5,  width: 150 },
 					{ targets: 6,  width: 150 },
-					{ targets: 7,  width: 200 },
-					{ targets: 8,  width: 200 },
+					{ targets: 7,  width: 300 },
+					{ targets: 8,  width: 80  },
 					{ targets: 9,  width: 200 },
-					{ targets: 10, width: 80  },
-					{ targets: 11, width: 200 },
 				],
 			});
 
@@ -216,11 +214,9 @@ $(document).ready(function() {
 					{ targets: 4,  width: 150 },
 					{ targets: 5,  width: 150 },
 					{ targets: 6,  width: 150 },
-					{ targets: 7,  width: 200 },
-					{ targets: 8,  width: 200 },
+					{ targets: 7,  width: 300 },
+					{ targets: 8,  width: 80  },
 					{ targets: 9,  width: 200 },
-					{ targets: 10, width: 80  },
-					{ targets: 11, width: 200 },
 				],
 			});
 
@@ -289,16 +285,18 @@ $(document).ready(function() {
 	function headerTabContent(display = true) {
 		if (display) {
 			if (isImModuleApprover("pms_sign_off_tbl", "approversID")) {
+				let count = getCountForApproval("pms_sign_off_tbl", "signOffStatus");
+				let displayCount = count ? `<span class="ml-1 badge badge-danger rounded-circle">${count}</span>` : "";
 				let html = `
-                <div class="bh_divider appendHeader"></div>
-                <div class="row clearfix appendHeader">
-                    <div class="col-12">
-                        <ul class="nav nav-tabs">
-                            <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#forApprovalTab" redirect="forApprovalTab">For Approval</a></li>
-                            <li class="nav-item"><a class="nav-link active" data-toggle="tab" href="#myFormsTab" redirect="myFormsTab">My Forms</a></li>
-                        </ul>
-                    </div>
-                </div>`;
+				<div class="bh_divider appendHeader"></div>
+				<div class="row clearfix appendHeader">
+					<div class="col-12">
+						<ul class="nav nav-tabs">
+							<li class="nav-item"><a class="nav-link" data-toggle="tab" href="#forApprovalTab" redirect="forApprovalTab">For Approval ${displayCount}</a></li>
+							<li class="nav-item"><a class="nav-link active" data-toggle="tab" href="#myFormsTab" redirect="myFormsTab">My Forms</a></li>
+						</ul>
+					</div>
+				</div>`;
 				$("#headerContainer").append(html);
 			}
 		} else {
@@ -331,9 +329,7 @@ $(document).ready(function() {
 						<th>Client</th>
 						<th>Project Phase</th>
 						<th>Current Approver</th>
-						<th>Date Created</th>
-						<th>Date Submitted</th>
-						<th>Date Approved</th>
+						<th>Date</th>
 						<th>Status</th>
 						<th>Remarks</th>
                     </tr>
@@ -382,9 +378,7 @@ $(document).ready(function() {
 					<td>
 						${employeeFullname(getCurrentApprover(approversID, approversDate, signOffStatus, true))}
 					</td>
-					<td>${dateCreated}</td>
-					<td>${dateSubmitted}</td>
-					<td>${dateApproved}</td>
+					<td>${getDocumentDates(dateCreated, dateSubmitted, dateApproved)}</td>
 					<td class="text-center">
 						${getStatusStyle(signOffStatus)}
 					</td>
@@ -432,9 +426,7 @@ $(document).ready(function() {
 						<th>Client</th>
 						<th>Project Phase</th>
 						<th>Current Approver</th>
-						<th>Date Created</th>
-						<th>Date Submitted</th>
-						<th>Date Approved</th>
+						<th>Date</th>
 						<th>Status</th>
 						<th>Remarks</th>
                     </tr>
@@ -482,9 +474,7 @@ $(document).ready(function() {
                 <td>
 					${employeeFullname(getCurrentApprover(approversID, approversDate, signOffStatus, true))}
 				</td>
-                <td>${dateCreated}</td>
-                <td>${dateSubmitted}</td>
-                <td>${dateApproved}</td>
+                <td>${getDocumentDates(dateCreated, dateSubmitted, dateApproved)}</td>
 				<td class="text-center">
 					${getStatusStyle(signOffStatus)}
 				</td>
