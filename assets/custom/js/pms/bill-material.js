@@ -444,8 +444,8 @@ $(document).ready(function() {
                     <th>Document No.</th>
                     <th>Prepared By</th>
 					<th>Reference No.</th>
-                    <th>Project Name</th>
-					<th>Description</th>
+                    <th>Project Code</th>
+					<th>Project Name</th>
                     <th>Current Approver</th>
                     <th>Date</th>
                     <th>Status</th>
@@ -496,11 +496,11 @@ $(document).ready(function() {
 					<td>${referenceCode ? getFormCode("CEF",createdAt,referenceCode) : "-"}</td>
 					<td>
 						<div>
-							${projectListName || '-'}
+							${projectListCode || '-'}
 						</div>
-						<small style="color:#848482;">${projectListCode || '-'}</small>
+						<small style="color:#848482;">${billMaterialReason}</small>
 					</td>
-					<td>${billMaterialReason}</td>
+					<td>${projectListName || '-'}</td>
 					<td>
 						${employeeFullname(getCurrentApprover(approversID, approversDate, billMaterialStatus, true))}
 					</td>
@@ -543,8 +543,8 @@ $(document).ready(function() {
                     <th>Document No.</th>
                     <th>Prepared By</th>
 					<th>Reference No.</th>
-                    <th>Project Name</th>
-					<th>Description</th>
+                    <th>Project Code</th>
+					<th>Project Name</th>
                     <th>Current Approver</th>
                     <th>Date</th>
                     <th>Status</th>
@@ -592,13 +592,13 @@ $(document).ready(function() {
                 <td>${getFormCode("PBR", createdAt, billMaterialID )}</td>
                 <td>${fullname}</td>
 				<td>${referenceCode ? getFormCode("CEF",createdAt,referenceCode) : "-"}</td>
-                <td>
+				<td>
 					<div>
-						${projectListName || '-'}
+						${projectListCode || '-'}
 					</div>
-					<small style="color:#848482;">${projectListCode || '-'}</small>
+					<small style="color:#848482;">${billMaterialReason}</small>
 				</td>
-				<td>${billMaterialReason}</td>
+				<td>${projectListName || '-'}</td>
                 <td>
                     ${employeeFullname(getCurrentApprover(approversID, approversDate, billMaterialStatus, true))}
                 </td>

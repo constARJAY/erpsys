@@ -168,12 +168,12 @@ $(document).ready(function() {
 				columnDefs: [
 					{ targets: 0,  width: 100 },
 					{ targets: 1,  width: 150 },
-					{ targets: 2,  width: 350 },
-					{ targets: 3,  width: 100 },	
+					{ targets: 2,  width: 350 }, // Project Code & Description Combo
+					{ targets: 3,  width: 350 }, 
 					{ targets: 4,  width: 150 },
 					{ targets: 5,  width: 150 },
 					{ targets: 6,  width: 100 },
-					{ targets: 7,  width: 350 }, // Description
+					{ targets: 7,  width: 100 }, 
 					{ targets: 8,  width: 100  },
 					{ targets: 9,  width: 150  },
 					{ targets: 10,  width: 150  },
@@ -195,12 +195,12 @@ $(document).ready(function() {
 				columnDefs: [
 					{ targets: 0,  width: 100 },
 					{ targets: 1,  width: 150 },
-					{ targets: 2,  width: 350 },
-					{ targets: 3,  width: 100 },	
+					{ targets: 2,  width: 350 }, // Project Code & Description Combo
+					{ targets: 3,  width: 350 }, 	
 					{ targets: 4,  width: 150 },
 					{ targets: 5,  width: 150 },
 					{ targets: 6,  width: 100 },
-					{ targets: 7,  width: 350 }, // Description
+					{ targets: 7,  width: 100 }, 
 					{ targets: 8,  width: 100  },
 					{ targets: 9,  width: 150  },
 					{ targets: 10,  width: 150  },
@@ -310,12 +310,12 @@ $(document).ready(function() {
                 <tr style="white-space: nowrap">
 					<th>Document No.</th>
 					<th>Prepared By</th>
+					<th>Project Code</th>
 					<th>Project Name</th>
 					<th>Project Category</th>
 					<th>Proposed Budget</th>
 					<th>Allocated Budget</th>
 					<th>Budget Status</th>
-					<th>Description</th>
 					<th>Current Approver</th>
 					<th>Date Created</th>
 					<th>Date Submitted</th>
@@ -373,15 +373,15 @@ $(document).ready(function() {
 					<td>${fullname}</td>
 					<td>
 						<div>
-						${projectListName || '-'}
+							${projectCode || '-'}
 						</div>
-						<small style="color:#848482;">${projectCode || '-'}</small>
+						<small style="color:#848482;">${timelineBuilderReason == "null" ? "-" :  timelineBuilderReason}</small>
 					</td>
+					<td>${projectListName || '-'}</td>
 					<td>${projectCategory}</td>
 					<td class="text-right">${timelineProposedBudget ? formatAmount(timelineProposedBudget, true) : "-"}</td>
 					<td class="text-right">${timelineAllocatedBudget ? formatAmount(timelineAllocatedBudget, true) : "-"}</td>
 					<td>${budgetStatus}</td>
-					<td>${timelineBuilderReason == "null" ? "-" :  timelineBuilderReason}</td>
 					<td>
 						${employeeFullname(getCurrentApprover(approversID, approversDate, timelineBuilderStatus, true))}
 					</td>
@@ -424,12 +424,12 @@ $(document).ready(function() {
                 <tr style="white-space: nowrap">
 					<th>Document No.</th>
 					<th>Prepared By</th>
+					<th>Project Code</th>
 					<th>Project Name</th>
 					<th>Project Category</th>
 					<th>Proposed Budget</th>
 					<th>Allocated Budget</th>
 					<th>Budget Status</th>
-					<th>Description</th>
 					<th>Current Approver</th>
 					<th>Date Created</th>
 					<th>Date Submitted</th>
@@ -487,15 +487,15 @@ $(document).ready(function() {
 				<td>${fullname}</td>
 				<td>
 					<div>
-					${projectListName || '-'}
+						${projectCode || '-'}
 					</div>
-					<small style="color:#848482;">${projectCode || '-'}</small>
+					<small style="color:#848482;">${timelineBuilderReason == "null" ? "-" :  timelineBuilderReason}</small>
 				</td>
+				<td>${projectListName || '-'}</td>
 				<td>${projectCategory}</td>
 				<td class="text-right">${timelineProposedBudget ? formatAmount(timelineProposedBudget, true) : "-"}</td>
 				<td class="text-right">${timelineAllocatedBudget ? formatAmount(timelineAllocatedBudget, true) : "-"}</td>
 				<td>${budgetStatus}</td>
-				<td>${timelineBuilderReason == "null" ? "-" :  timelineBuilderReason}</td>
 				<td>
 					${employeeFullname(getCurrentApprover(approversID, approversDate, timelineBuilderStatus, true))}
 				</td>

@@ -424,8 +424,8 @@ $(document).ready(function() {
                 <tr style="white-space: nowrap">
 					<th>Document No.</th>
 					<th>Prepared By</th>
+					<th>Project Code</th>
 					<th>Project Name</th>
-					<th>Description</th>
 					<th>Current Approver</th>
 					<th>Date</th>
 					<th>Status</th>
@@ -474,11 +474,11 @@ $(document).ready(function() {
 					<td>${fullname}</td>
 					<td>
 						<div>
-						${projectListName || '-'}
+							${projectListCode || '-'}
 						</div>
-						<small style="color:#848482;">${projectListCode || '-'}</small>
+						<small style="color:#848482;">${costEstimateReason}</small>
 					</td>
-					<td>${costEstimateReason}</td>
+					<td>${projectListName || '-'}</td>
 					<td>
 						${employeeFullname(getCurrentApprover(approversID, approversDate, costEstimateStatus, true))}
 					</td>
@@ -519,8 +519,8 @@ $(document).ready(function() {
                 <tr style="white-space: nowrap">
 					<th>Document No.</th>
 					<th>Prepared By</th>
+					<th>Project Code</th>
 					<th>Project Name</th>
-					<th>Description</th>
 					<th>Current Approver</th>
 					<th>Date</th>
 					<th>Status</th>
@@ -568,11 +568,11 @@ $(document).ready(function() {
 				<td>${fullname}</td>
 				<td>
 					<div>
-					${projectListName || '-'}
+					${projectListCode || '-'}
 					</div>
-					<small style="color:#848482;">${projectListCode || '-'}</small>
+					<small style="color:#848482;">${costEstimateReason}</small>
 				</td>
-				<td>${costEstimateReason}</td>
+				<td>${projectListName || '-'}</td>
 				<td>
 					${employeeFullname(getCurrentApprover(approversID, approversDate, costEstimateStatus, true))}
 				</td>

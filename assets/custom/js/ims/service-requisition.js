@@ -324,8 +324,8 @@ $(document).ready(function() {
                     <th>Document No.</th>
                     <th>Prepared By</th>
                     <th>Client Name</th>
+                    <th>Project Code</th>
                     <th>Project Name</th>
-                    <th>Description</th>
                     <th>Current Approver</th>
                     <th>Date</th>
                     <th>Status</th>
@@ -369,11 +369,11 @@ $(document).ready(function() {
 					<td>${clientName || '-'}</td>
 					<td>
 						<div>
-							${projectListName || '-'}
+							${projectListCode || '-'}
 						</div>
-						<small style="color:#848482;">${projectListCode || '-'}</small>
+						<small style="color:#848482;">${serviceRequisitionReason}</small>
 					</td>
-					<td>${serviceRequisitionReason}</td>
+					<td>${projectListName || '-'}</td>
 					<td>
 						${employeeFullname(getCurrentApprover(approversID, approversDate, serviceRequisitionStatus, true))}
 					</td>
@@ -419,8 +419,8 @@ $(document).ready(function() {
                     <th>Document No.</th>
                     <th>Prepared By</th>
                     <th>Client Name</th>
+                    <th>Project Code</th>
                     <th>Project Name</th>
-                    <th>Description</th>
                     <th>Current Approver</th>
                     <th>Date</th>
                     <th>Status</th>
@@ -469,11 +469,11 @@ $(document).ready(function() {
 			<td>${clientName || '-'}</td>
 			<td>
 				<div>
-					${projectListName || '-'}
+					${projectListCode || '-'}
 				</div>
-				<small style="color:#848482;">${projectListCode || '-'}</small>
+				<small style="color:#848482;">${serviceRequisitionReason}</small>
 			</td>
-			<td>${serviceRequisitionReason}</td>
+			<td>${projectListName || '-'}</td>
 			<td>
 				${employeeFullname(getCurrentApprover(approversID, approversDate, serviceRequisitionStatus, true))}
 			</td>
@@ -754,7 +754,7 @@ $(document).ready(function() {
 			uomList.map(uom => {
 				html += `
 				<option value="${uom.uomName}"
-					${uomName == uom.uomName ? "selected" : ""}>${uom.uomName}</option>`;
+					${uomName == uom.uomName ? "selected" : ""}>${titleCase(uom.uomName)}</option>`;
 			})
 		// }
 		return html;

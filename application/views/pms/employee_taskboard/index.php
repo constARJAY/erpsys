@@ -142,6 +142,9 @@ div.modalContentLeft {
   -ms-overflow-style: none;  /* IE and Edge */
   scrollbar-width: none;  /* Firefox */
 }
+select{
+  text-align-last: center;
+}
 
 </style>
 <div class="body_area after_bg ">
@@ -152,10 +155,10 @@ div.modalContentLeft {
                     <ul class="breadcrumb pl-0 pb-0 ">
                         <li class="breadcrumb-item"><a href="#"><i class="zmdi zmdi-home"></i> Dashboard</a></li>
                         <li class="breadcrumb-item"><i class="fas fa-folder-open"></i>&nbsp;Project Modules</li>
-                        <li class="breadcrumb-item active">Project Management Board</li>
+                        <li class="breadcrumb-item active">Employee Taskboard</li>
                     </ul>
-                    <h1 class="mt-3">Project Management Board</h1>
-                    <span>This module is used to manage the submission of project timelines and milestones with man hours.</span>
+                    <h1 class="mt-3">Employee Taskboard</h1>
+                    <span>This module is used to manage the project timelines and milestones with man hours.</span>
 				</div>
 				<div class="col-lg-6 col-md-12 text-md-right" id="headerButton">
 				</div>

@@ -402,8 +402,8 @@ $(document).ready(function() {
                     <th>Prepared By</th>
                     <th>Reference No.</th>
                     <th>Purchase Request Code</th>
+                    <th>Project Code</th>
                     <th>Project Name</th>
-                    <th>Description</th>
                     <th>Current Approver</th>
                     <th>Date</th>
                     <th>Status</th>
@@ -459,11 +459,11 @@ $(document).ready(function() {
 					<td>${purchaseRequestID ? getFormCode("PR", iprtCreatedAt, purchaseRequestID) : "-"}</td>
 					<td>
 						<div>
-							${projectListName || '-'}
+							${projectListCode || '-'}
 						</div>
-						<small style="color:#848482;">${projectListCode || '-'}</small>
+						<small style="color:#848482;">${purchaseOrderReason || '-'}</small>
 					</td>
-					<td>${purchaseOrderReason || '-'}</td>
+					<td>${projectListName || '-'}</td>
 					<td>
 						${employeeFullname(getCurrentApprover(approversID, approversDate, purchaseOrderStatus, true))}
 					</td>
@@ -511,8 +511,8 @@ $(document).ready(function() {
                     <th>Prepared By</th>
                     <th>Reference No.</th>
                     <th>Purchase Request Code</th>
+                    <th>Project Code</th>
                     <th>Project Name</th>
-                    <th>Description</th>
                     <th>Current Approver</th>
                     <th>Date</th>
                     <th>Status</th>
@@ -567,11 +567,11 @@ $(document).ready(function() {
 				<td>${purchaseRequestID ? getFormCode("PR", iprtCreatedAt, purchaseRequestID) : "-"}</td>
 				<td>
 					<div>
-						${projectListName || '-'}
+						${projectListCode || '-'}
 					</div>
-					<small style="color:#848482;">${projectListCode || '-'}</small>
+					<small style="color:#848482;">${purchaseOrderReason || '-'}</small>
 				</td>
-				<td>${purchaseOrderReason || '-'}</td>
+				<td>${projectListName || '-'}</td>
                 <td>
                     ${employeeFullname(getCurrentApprover(approversID, approversDate, purchaseOrderStatus, true))}
                 </td>

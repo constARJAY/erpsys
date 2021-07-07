@@ -413,8 +413,8 @@ $(document).ready(function() {
 					<th>Prepared By</th>
 					<th>Reference No.</th>
 					<th>Client Name</th>
+					<th>Project Code</th>
 					<th>Project Name</th>
-					<th>Description</th>
 					<th>Current Approver</th>
 					<th>Date</th>
 					<th>Status</th>
@@ -460,11 +460,11 @@ $(document).ready(function() {
 					<td>${clientName   || '-'}</td>
 					<td>
 						<div>
-							${projectListName || '-'}
+						${projectListCode || '-'}
 						</div>
-						<small style="color:#848482;">${projectListCode || '-'}</small>
+						<small style="color:#848482;">${serviceOrderReason}</small>
 					</td>
-					<td>${serviceOrderReason}</td>
+					<td>${projectListName || '-'}</td>
 					<td>
 						${employeeFullname(getCurrentApprover(approversID, approversDate, serviceOrderStatus, true))}
 					</td>
@@ -512,8 +512,8 @@ $(document).ready(function() {
                     <th>Prepared By</th>
                     <th>Reference No.</th>
                     <th>Client Name</th>
+                    <th>Project Code</th>
                     <th>Project Name</th>
-                    <th>Description</th>
                     <th>Current Approver</th>
                     <th>Date</th>
                     <th>Status</th>
@@ -557,13 +557,13 @@ $(document).ready(function() {
                 <td>${fullname}</td>
 				<td>${serviceRequisitionID != "0" ? getFormCode("SR", isrtCreatedAt, serviceRequisitionID) : "-"}</td>
                 <td>${clientName   || '-'}</td>
-                <td>
+				<td>
 					<div>
-						${projectListName || '-'}
+					${projectListCode || '-'}
 					</div>
-					<small style="color:#848482;">${projectListCode || '-'}</small>
+					<small style="color:#848482;">${serviceOrderReason}</small>
 				</td>
-				<td>${serviceOrderReason}</td>
+				<td>${projectListName || '-'}</td>
                 <td>
                     ${employeeFullname(getCurrentApprover(approversID, approversDate, serviceOrderStatus, true))}
                 </td>

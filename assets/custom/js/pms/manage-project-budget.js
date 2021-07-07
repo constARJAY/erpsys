@@ -166,11 +166,12 @@ $(document).ready(function() {
 				columnDefs: [
 					{ targets: 0, width: 100 },
 					{ targets: 1, width: 150 },
-					{ targets: 2, width: 250 },
-					{ targets: 3, width: 150 },
+					{ targets: 2, width: 350 }, // Project Code & Description Combo
+                    { targets: 3, width: 350 }, // Project Name
 					{ targets: 4, width: 150 },
 					{ targets: 5, width: 150 },
 					{ targets: 6, width: 150 },
+					{ targets: 7, width: 150 },
 				],
 			});
 
@@ -226,6 +227,7 @@ $(document).ready(function() {
                     <tr>
                         <th>Document No.</th>
                         <th>Prepared By</th>
+                        <th>Project Code</th>
                         <th>Project Name</th>
                         <th>Project Category</th>
                         <th>Proposed Budget</th>
@@ -258,9 +260,10 @@ $(document).ready(function() {
                 <td>${getFormCode("PTB", createdAt, timelineBuilderID)}</td>
                 <td>${preparedBy}</td>
                 <td>
-                    <div>${projectName}</div>
-                    <small style="color:#848482;">${projectCode}</small>
+                    <div>${projectCode}</div>
+                    <small style="color:#848482;"></small>
                 </td>
+                <td>${projectName}</td>
                 <td>${projectCategory}</td>
                 <td class="text-right">${proposedBudget && formatAmount(proposedBudget, true) || "-"}</td>
                 <td class="text-right">${allocatedBudget && formatAmount(allocatedBudget, true) || "-"}</td>

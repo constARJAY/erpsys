@@ -7,7 +7,7 @@ class Employee_taskboard extends CI_Controller {
     {
         parent::__construct();
         $this->load->model("pms/EmployeeTaskboard_model", "employee_taskboard");
-        isAllowed(10);
+        isAllowed(51);
     }
 
     public function index()
@@ -105,6 +105,7 @@ class Employee_taskboard extends CI_Controller {
 
     public function autoSavedSubtask(){
         $array_task = $this->input->post("subtask");
+        $label = $this->input->post("label");
         $data = [];
         $subtaskboardID ="";
         foreach($array_task as $value){
@@ -152,10 +153,19 @@ class Employee_taskboard extends CI_Controller {
          
       
          
-        $data = $this->employee_taskboard->autoSavedSubtask($data,$subtaskboardID);
+        $data = $this->employee_taskboard->autoSavedSubtask($data,$subtaskboardID,$label);
  
           echo json_encode($data);
      }
+
+     public function deleteSubtaskContent(){
+      $subtaskboardID           = $this->input->post('subtaskboardID');
+      // unlink("assets/upload-files/taskboard-images/".$imageSrc);
+
+      $data = $this->employee_taskboard->deleteSubtaskContent($subtaskboardID);
+
+        echo json_encode($data);
+   }
 
      public function updateExtension(){
 
@@ -169,6 +179,8 @@ class Employee_taskboard extends CI_Controller {
    }
 
      public function saveImageContent(){
+
+        $label= "attachment";
 
         $taskBoardID           = $this->input->post('taskBoardID');
         $subtaskboardID           = $this->input->post('subtaskboardID');
@@ -226,7 +238,7 @@ class Employee_taskboard extends CI_Controller {
 
       
          
-        $data = $this->employee_taskboard->saveImageContent($img,$subtaskboardID,$taskBoardID );
+        $data = $this->employee_taskboard->saveImageContent($img,$subtaskboardID,$taskBoardID,$label);
  
           echo json_encode(array(
             'data'=>$data,
@@ -234,21 +246,21 @@ class Employee_taskboard extends CI_Controller {
      }
 
      public function deleteImageContent(){
-
+      $label ="delete attachment";
       $imageSrc           = $this->input->post('imageSrc');
       unlink("assets/upload-files/taskboard-images/".$imageSrc);
 
-      $data = $this->employee_taskboard->deleteImageContent($imageSrc);
+      $data = $this->employee_taskboard->deleteImageContent($imageSrc,$label);
 
         echo json_encode($data);
    }
 
    public function updateImgComment(){
-
+      $label ="comment";
       $imageID           = $this->input->post('imageID');
       $imageComment           = $this->input->post('imageComment');
 
-      $data = $this->employee_taskboard->updateImgComment($imageID,$imageComment);
+      $data = $this->employee_taskboard->updateImgComment($imageID,$imageComment,$label);
 
         echo json_encode($data);
   }
@@ -256,7 +268,8 @@ class Employee_taskboard extends CI_Controller {
   public function updateAssignee(){
 
    
-   $subtaskboardID          =  $this->input->post('subtaskboardID');
+    $subtaskboardID          =  $this->input->post('subtaskboardID');
+    $label           = $this->input->post('label');
     $listAssignee           = $this->input->post('listAssignee');
     $explode                = explode(",",$listAssignee);
 
@@ -272,7 +285,7 @@ class Employee_taskboard extends CI_Controller {
         "subTaskAssignee"        => $passListAssignee
     );
 
-    $data = $this->employee_taskboard->updateAssignee($subtaskboardID,$sendData);
+    $data = $this->employee_taskboard->updateAssignee($subtaskboardID,$sendData,$label);
 
       echo json_encode($data);
 }

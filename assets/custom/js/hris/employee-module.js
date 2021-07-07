@@ -1859,12 +1859,13 @@ $(document).ready(function() {
         }
 
         let html = moduleList.map(module => {
-            let createStatus = "", 
-                readStatus   = "checked", 
-                updateStatus = "", 
-                deleteStatus = "", 
-                printStatus  = "",
-                disabled     = "";
+            let checked = employeeID == 1 ? "checked" : "";
+            let createStatus = checked, 
+                readStatus   = checked, 
+                updateStatus = checked, 
+                deleteStatus = checked, 
+                printStatus  = checked,
+                disabled     = checked;
 
             if (employeeID) {
                 getEmployeeAccessibility

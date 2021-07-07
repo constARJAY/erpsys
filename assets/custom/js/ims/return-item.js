@@ -317,8 +317,8 @@ $(document).ready(function() {
                     <th>Document No.</th>
                     <th>Prepared By</th>
 					<th>Reference No.</th>
+					<th>Project Code</th>
 					<th>Project Name</th>
-					<th>Description</th>
                     <th>Current Approver</th>
                     <th>Date</th>
                     <th>Status</th>
@@ -367,8 +367,13 @@ $(document).ready(function() {
 					<td>${getFormCode("RI", createdAt, returnItemID )}</td>
 					<td>${fullname}</td>
 					<td>${borrowingID ? getFormCode("EBF", createdAtborrowing, borrowingID ) : "-"}</td>
+					<td>
+						<div>
+							${projectListCode || '-'}
+						</div>
+						<small style="color:#848482;">${returnItemReason}</small>
+					</td>
 					<td>${projectListName || "-"}</td>
-					<td>${returnItemReason}</td>
 					<td>
 						${employeeFullname(getCurrentApprover(approversID, approversDate, returnItemStatus, true))}
 					</td>
@@ -501,8 +506,8 @@ $(document).ready(function() {
                     <th>Document No.</th>
                     <th>Prepared By</th>
 					<th>Reference No.</th>
+					<th>Project Code</th>
 					<th>Project Name</th>
-					<th>Description</th>
                     <th>Current Approver</th>
                     <th>Date</th>
                     <th>Status</th>
@@ -527,7 +532,7 @@ $(document).ready(function() {
 				borrowingID,
 				createdAtborrowing,
 				projectListName,
-
+				projectListCode
 			} = item;
 
 			let remarks       = returnItemRemarks ? returnItemRemarks : "-";
@@ -550,8 +555,13 @@ $(document).ready(function() {
                 <td>${getFormCode("RI", createdAt, returnItemID )}</td>
                 <td>${fullname}</td>
 				<td>${borrowingID ? getFormCode("EBF", createdAtborrowing, borrowingID ) : "-"}</td>
+				<td>
+					<div>
+						${projectListCode || '-'}
+					</div>
+					<small style="color:#848482;">${returnItemReason}</small>
+				</td>
 				<td>${projectListName || "-"}</td>
-               <td>${returnItemReason}</td>
                 <td>
                     ${employeeFullname(getCurrentApprover(approversID, approversDate, returnItemStatus, true))}
                 </td>

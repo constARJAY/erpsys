@@ -242,6 +242,7 @@ $(document).ready(function() {
             <table class="table table-bordered table-striped table-hover js-basic-example dataTable" id="tableTimeline">
                 <thead>
                     <tr>
+                        <th>Project Code</th>
                         <th>Project Name</th>
                         <th>Project Category</th>
                         <th>Project Manager</th>
@@ -273,9 +274,10 @@ $(document).ready(function() {
             html += `
             <tr class="btnView" id="${encryptString(timelineBuilderID)}">
                 <td>
-                    <div>${projectName}</div>
-                    <small style="color:#848482;">${projectCode}</small>
+                    <div>${projectCode}</div>
+                    <small style="color:#848482;">put description here</small>
                 </td>
+                <td>${projectName}</td>
                 <td>${projectCategory}</td>
                 <td>${projectManager}</td>
                 <td>${managementStatusDisplay}</td>
@@ -1007,7 +1009,7 @@ $(document).ready(function() {
                 break;
             case "submit":
                 swalTitle = `SUBMIT ${title.toUpperCase()}`;
-                swalText  = "Are you sure to submit these tasks with man hours to employee taskboard?";
+                swalText  = "Are you sure to submit these tasks with man hours to the next phase?";
                 swalImg   = `${base_url}assets/modal/add.svg`;
                 break;
             case "approve":

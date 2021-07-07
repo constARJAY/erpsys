@@ -354,8 +354,8 @@ $(document).ready(function() {
 					<th>Document No.</th>
                     <th>Prepared By</th>
 					<th>Reference No.</th>
+                    <th>Project Code</th>
                     <th>Project Name</th>
-                    <th>Description</th>
                     <th>Current Approver</th>
                     <th>Date</th>
                     <th>Status</th>
@@ -406,11 +406,11 @@ $(document).ready(function() {
 					<td>${referenceNumber}</td>
 					<td>
 						<div>
-							${projectListName || '-'}
+							${projectListCode || '-'} 
 						</div>
-						<small style="color:#848482;">${projectListCode || '-'}</small>
+						<small style="color:#848482;">${inventoryValidationReason || "-"}</small>
 					</td>
-					<td>${inventoryValidationReason || "-"}</td>
+					<td>${projectListName || '-'}</td>
 					<td>
 						${employeeFullname(getCurrentApprover(approversID, approversDate, inventoryValidationStatus, true))}
 					</td>
@@ -453,8 +453,8 @@ $(document).ready(function() {
 					<th>Document No.</th>
                     <th>Prepared By</th>
 					<th>Reference No.</th>
+                    <th>Project Code</th>
                     <th>Project Name</th>
-                    <th>Description</th>
                     <th>Current Approver</th>
                     <th>Date</th>
                     <th>Status</th>
@@ -503,11 +503,11 @@ $(document).ready(function() {
 				<td>${referenceNumber}</td>
 				<td>
 					<div>
-						${projectListName || '-'}
+						${projectListCode || '-'} 
 					</div>
-					<small style="color:#848482;">${projectListCode || '-'}</small>
+					<small style="color:#848482;">${inventoryValidationReason || "-"}</small>
 				</td>
-				<td>${inventoryValidationReason || "-"}</td>
+				<td>${projectListName || '-'}</td>
                 <td>
                     ${employeeFullname(getCurrentApprover(approversID, approversDate, inventoryValidationStatus, true))}
                 </td>

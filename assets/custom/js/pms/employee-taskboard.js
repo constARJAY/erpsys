@@ -391,7 +391,7 @@ $(document).ready(function() {
         const subtaskboardID  = $(this).attr("subtaskboardID");
         const subTaskAssignee  = $(this).attr("subTaskAssignee");
         const employees = getSubAssignedEmployee(taskBoardID, subtaskboardID);
-        console.log(employees)
+        // console.log(employees)
         displayAssignedEmployee(employees, taskBoardID,subtaskboardID);
         
         $parent = $(this).closest(".form-group");
@@ -722,6 +722,8 @@ function displayPhase(teamMembers = {}, phase = {}, index = 0,  ) {
         subTaskContent += `<tr>
             <td class="text-nowrap">
                 <div class="form-group my-1">
+                <button type="button" class="btn btn-danger btn-sm delete_subtask" title="Delete"><i class="fas fa-trash-alt" ></i></button>
+                &nbsp;
                     <span
                     class="btnModal"
                     taskID="${taskID}"
@@ -842,7 +844,7 @@ function displayPhase(teamMembers = {}, phase = {}, index = 0,  ) {
             <td style="width:13%;">
                 <div class="row clearfix">
                     <div class="form-group my-1 ml-1" style="width:100%;">
-                        <select class="badge  criticalBadge form-control show-tick text-center" name="subTaskSeverity" label="status">
+                        <select class="badge  criticalBadge form-control show-tick text-center" name="subTaskSeverity" label="severity">
                             <option value="">---</option>
                             <option class="badge badge-danger" value="1" ${subTaskSeverity == 1 ? "selected" : ""}><span class="text-center">CRITICAL</span></option>
                             <option class="badge badge-warning" value="2" ${subTaskSeverity == 2 ? "selected" : ""}><span class="text-center">MAJOR</span></option>
@@ -939,7 +941,7 @@ function displayPhase(teamMembers = {}, phase = {}, index = 0,  ) {
           
             const employees = getAssignedEmployee(phaseCode, taskName,assignedEmployee,teamMembers);
 
-            console.log(task)
+            // console.log(task)
 
             attachedUniqueID = milestoneBuilderID+''+milestoneName.replaceAll(' ','')+''+index;
             const subTaskList = getSubTaskList(subTask,attachedUniqueID,taskBoardID,teamMembers);
@@ -1572,7 +1574,6 @@ function displayPhase(teamMembers = {}, phase = {}, index = 0,  ) {
           
         } = data && data[0];
 
-        console.log(data)
 
         var condition = "";
         if(taskHeaderID != 0 ){
@@ -1832,10 +1833,59 @@ function displayPhase(teamMembers = {}, phase = {}, index = 0,  ) {
                             createdAt 
                         } = logs;
 
+                            var priority = ['URGENT','HIGH','NORMAL','LOW'];
+                            var severity = ['CRITICAL','MAJOR','MINOR','TRIVIAL','SUGGESTION','WITHDRAWN'];
+                            var status = ['ON HOLD DEVELOPMENT','ON DEVELOPMENT','FOR TESTING','ON HOLD TESTING','ON TESTING','FAILED','PASSED'];
+                            var value= '';
+                            if(object_label === 'priority'){
+                              value =  priority[object_value-1];
+                            }
+                            if(object_label === 'severity'){
+                                value =  severity[object_value-1];
+                            }
+                            if(object_label === 'status'){
+                                value =  status[object_value-1];
+                            }if(object_label ==='actual end date'){
+                                value = moment(object_value).format('MMMM DD, YYYY');
+                            }   
+                            if(object_label ==='assigned'){
+                                var extract = object_value.split("|");
+
+                                for(var loop =0;loop<extract.length;loop++){
+                                    if(loop == extract.length-1){
+                                        if(extract.length == 1){
+                                            value += employeeFullname(extract[loop]);
+                                        }else{
+                                            value += "and "+employeeFullname(extract[loop]);
+                                        }
+                                    }else{
+                                        value += employeeFullname(extract[loop])+", ";
+                                    }
+                                }
+                            }   
+
+                            if(object_label === 'description' || 
+                                object_label === 'man hours' ||  
+                                object_label === 'used hours' ||
+                                object_label === 'notes'||
+                                object_label === 'comment'){
+                                value= object_value;
+                            }
+                            var attchedLog = "";
+
+                            if(object_label ==="attachment"){
+                                    attchedLog = action +" new "+object_label;
+                            }if(object_label ==="attachment row"){
+                                attchedLog = action +" "+object_label;
+                            }
+                            else{
+                                attchedLog = action +" the "+object_label +" to "+ value;
+                            }
+
                             html+=`
                             <div class="row mt-3">
                                 <div class="col-8">
-                                    <small><span><b>${employeeFullname(createdBy)+":</b> "+ action +" this "+object_label +" to "+ object_value}</span></small>
+                                    <small><span><b>${employeeFullname(createdBy)+":</b> "+ attchedLog}</span></small>
                                 </div>
                                 <div class="col-4 text-right">
                                     <small><span>${moment(createdAt).format('MMMM DD, YYYY')} at ${moment(createdAt).format('h:mm:ss a')}</span></small>
@@ -1906,10 +1956,10 @@ function displayPhase(teamMembers = {}, phase = {}, index = 0,  ) {
 				`
                 pms_timeline_builder_tbl AS ptbt
 				LEFT JOIN pms_project_list_tbl AS pplt ON ptbt.projectID = pplt.projectListID`,
-				`DISTINCT pplt.projectListName AS projectName,ptbt.timelineBuilderID`,
-				`ptbt.timelineBuilderStatus =2`);
+				`DISTINCT pplt.projectListName AS projectName,ptbt.timelineBuilderID,ptbt.timelineTeamMember`,
+				`ptbt.timelineBuilderStatus =2 AND FIND_IN_SET(${sessionID},replace(ptbt.timelineTeamMember,'|',','))`);
 	
-			
+                console.log(sessionID)
 	
 				getProjectData.map((project,index1) => {
 	
@@ -2008,7 +2058,7 @@ function displayPhase(teamMembers = {}, phase = {}, index = 0,  ) {
         var employees=$(this).attr("employees");
         var subTask = JSON.parse($(this).attr("subtask"));
         var teamMembers = JSON.parse($(this).attr("teamMembers"));
-        console.log(teamMembers)
+        // console.log(teamMembers)
         
         var subTableLength = $("#"+subTableID).find("tbody tr").length +1;
 
@@ -2305,6 +2355,7 @@ function displayPhase(teamMembers = {}, phase = {}, index = 0,  ) {
      $(document).on("click", ".btnAssignee", function() {
         $parent  = $(this).closest("tr");
         const listAssignee = $parent.find("[name=assignEmployee]").val();
+        const label = $parent.find("[name=assignEmployee]").attr("label");
         // console.log($parent.find("[name=assignEmployee]").val())
         const taskBoardID = $(this).attr("taskBoardID");
         const subtaskboardID    = $(this).attr("subtaskboardID");
@@ -2320,6 +2371,7 @@ function displayPhase(teamMembers = {}, phase = {}, index = 0,  ) {
 
                  
                     data.append('listAssignee', listAssignee);
+                    data.append('label', label);
                     data.append('subtaskboardID', subtaskboardID);
 
                     $.ajax({
@@ -2378,6 +2430,69 @@ function displayPhase(teamMembers = {}, phase = {}, index = 0,  ) {
     })
     // ------------------COMPUTE DIFFERENCE OF HOURS-------------//
 
+    // ------------------ DELETE SUBTASK IN A ROW-----------------------------------// 
+    $(document).on('click','.delete_subtask',function() {
+
+        var subtaskboardID = $(this).closest("tr").find("td span").attr("subtaskboardID");
+  
+
+        Swal.fire({
+            title: 'Delete',
+        text: "Are you sure want to delete this row?",
+            imageUrl: `${base_url}assets/modal/delete.svg`,
+            imageWidth: 200,
+            imageHeight: 200,
+            imageAlt: 'Custom image',
+            showCancelButton: true,
+            confirmButtonColor: '#dc3545',
+            cancelButtonColor: '#1A1A1A',
+            confirmButtonText: 'Delete',
+            allowOutsideClick: false
+          }).then((result) => {
+            if (result.isConfirmed) {
+
+                $(this).closest("tr").remove();
+
+                var data = new FormData();
+
+                data.append('subtaskboardID', subtaskboardID);
+
+                $.ajax({
+                    url           :"Employee_Taskboard/deleteSubtaskContent",
+                    method        : "POST",
+                    dataType      : 'text', // what to expect back from the server
+                    cache         : false,
+                    contentType   : false,
+                    processData   : false,
+                    data          : data,
+                    async         : true,
+                    dataType      : 'json',
+                    success       : function(data){
+ 
+                    },
+                    error: function() {
+                        setTimeout(() => {
+                            // $("#loader").hide();
+                            showNotification("danger", "System error: Please contact the system administrator for assistance!");
+                        }, 500);
+                    }
+                      
+                  });
+
+            Swal.fire({
+                icon: 'success',
+                title: 'Subtask successfully delete!',
+                showConfirmButton: false,
+                timer: 800
+              })
+            }
+        });
+
+        
+    }
+    )
+    // ------------------ DELETE SUBTASK IN A ROW-----------------------------------// 
+
 
     // ----- CLICK TIMELINE ROW -----
     $(document).on("click", ".btnView", function() {
@@ -2406,8 +2521,8 @@ function displayPhase(teamMembers = {}, phase = {}, index = 0,  ) {
         var modalActualEndDate = $(this).closest("tr").find("td .actualEndDate").val();
         var modalNotes = $(this).closest("tr").find("td .notes").val();
        
-           console.log("taskHeaderID "+taskHeaderID)
-           console.log("subtaskboardID "+subtaskboardID)
+        //    console.log("taskHeaderID "+taskHeaderID)
+        //    console.log("subtaskboardID "+subtaskboardID)
        
 
         if(taskHeaderID != 0){
@@ -2416,7 +2531,7 @@ function displayPhase(teamMembers = {}, phase = {}, index = 0,  ) {
         if(subtaskboardID !=0){
             var subtaskAssignee = $(this).closest("tr").find("[name=assignEmployee]").val();
             modalTeamMembers = JSON.parse($(this).closest("tr").find("[name=subtaskName]").attr("employees"));
-            console.log(JSON.parse($(this).closest("tr").find("[name=subtaskName]").attr("employees")))
+            // console.log(JSON.parse($(this).closest("tr").find("[name=subtaskName]").attr("employees")))
         }else{
             taskAssignee = JSON.parse($(this).closest("tr").find("[name=taskName]").attr("employees"));
         }
@@ -2548,9 +2663,9 @@ function displayPhase(teamMembers = {}, phase = {}, index = 0,  ) {
             imageHeight: 200,
             imageAlt: 'Custom image',
             showCancelButton: true,
-            confirmButtonColor: '#28a745',
+            confirmButtonColor: '#dc3545',
             cancelButtonColor: '#1A1A1A',
-            confirmButtonText: 'Add',
+            confirmButtonText: 'Delete',
             allowOutsideClick: false
           }).then((result) => {
             if (result.isConfirmed) {
@@ -2652,6 +2767,7 @@ function displayPhase(teamMembers = {}, phase = {}, index = 0,  ) {
                 <td>
                     <textarea rows="3"  class="form-control mt-3 updateImgComment" placeholder="Comment for this picture..."
                         name="imgDescription"
+                        label="comment"
                         id="imgDescripiton${loop+''+unique}"
                         style="width: 100%;">Comment for this picture...</textarea>
                 </td>
@@ -2913,6 +3029,9 @@ function displayPhase(teamMembers = {}, phase = {}, index = 0,  ) {
         
        
         let data = { subtask: [] }, formData = new FormData;
+
+        var label = $(this).attr("label");
+        formData.append(`label`,label);
         
         $(this).closest("tr").each(function(i, obj) {
             const taskID  = $("td [name=subtaskName]", this).attr("taskID");

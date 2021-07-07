@@ -42,7 +42,9 @@ function formConfirmation(
 	isObject         = true,
 	callback         = false,
 	notificationData = false,
-	buttonElement    = null
+	buttonElement    = null,
+	aFunctions       = false,
+	aArguments       = []
 ) {
 	buttonElement && formButtonHTML(buttonElement, false);
 
@@ -121,6 +123,9 @@ function formConfirmation(
 					saveData.then((res) => {
 						if (res) {
 							callback && callback();
+							if (aFunctions) {
+								aFunctions(...aArguments);
+							}
 
 							if (method == "approve" || method == "reject") {
 								$("[redirect=forApprovalTab]").length > 0 && $("[redirect=forApprovalTab]").trigger("click");

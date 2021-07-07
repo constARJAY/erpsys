@@ -374,8 +374,8 @@ $(document).ready(function() {
                     <th>Document No.</th>
                     <th>Prepared By</th>
 					<th>Reference No.</th>
+                    <th>Project Code</th>
                     <th>Project Name</th>
-                    <th>Description</th>
                     <th>Current Approver</th>
                     <th>Date</th>
                     <th>Status</th>
@@ -419,19 +419,6 @@ $(document).ready(function() {
 				id="${encryptString(purchaseRequestID )}" 
 				code="${getFormCode("PR", createdAt, purchaseRequestID )}"><i class="fas fa-edit"></i> Edit</button>`;
 
-			if(dateApproved == '' && dateSubmitted != ''){
-			var date =`<span style="color:#dc3450;display: block; font-size: 14px; padding: 2px"><b>Created: </b>
-							<span style="color:#000;">
-							${dateCreated}
-							</span>
-						</span>
-						<span style="color:#dc3450;display: block; font-size: 14px; padding: 2px"><b>Submitted: </b>
-							<span style="color:#000;">
-							${dateSubmitted}
-							</span>
-						</span>`;
-			}  
-
 			if (isImCurrentApprover(approversID, approversDate, purchaseRequestStatus) || isAlreadyApproved(approversID, approversDate)) {
 				html += `
 				<tr class="${btnClass}" id="${encryptString(purchaseRequestID )}">
@@ -440,11 +427,11 @@ $(document).ready(function() {
 					<td>${billMaterialID && billMaterialID != 0 ? getFormCode("PBR", ceCreatedAt, billMaterialID) : '-'}</td>
 					<td>
 						<div>
-							${projectListName || '-'}
+							${projectListCode || '-'}
 						</div>
-						<small style="color:#848482;">${projectListCode || '-'}</small>
+						<small style="color:#848482;">${purchaseRequestReason || '-'}</small>
 					</td>
-					<td>${purchaseRequestReason || '-'}</td>
+					<td>${projectListName || '-'}</td>
 					<td>
 						${employeeFullname(getCurrentApprover(approversID, approversDate, purchaseRequestStatus, true))}
 					</td>
@@ -490,8 +477,8 @@ $(document).ready(function() {
                     <th>Document No.</th>
                     <th>Prepared By</th>
 					<th>Reference No.</th>
+                    <th>Project Code</th>
                     <th>Project Name</th>
-                    <th>Description</th>
                     <th>Current Approver</th>
                     <th>Date</th>
                     <th>Status</th>
@@ -542,11 +529,11 @@ $(document).ready(function() {
 				<td>${billMaterialID && billMaterialID != 0 ? getFormCode("PBR", ceCreatedAt, billMaterialID) : '-'}</td>
 				<td>
 					<div>
-						${projectListName || '-'}
+						${projectListCode || '-'}
 					</div>
-					<small style="color:#848482;">${projectListCode || '-'}</small>
+					<small style="color:#848482;">${purchaseRequestReason || '-'}</small>
 				</td>
-				<td>${purchaseRequestReason || '-'}</td>
+				<td>${projectListName || '-'}</td>
                 <td>
                     ${employeeFullname(getCurrentApprover(approversID, approversDate, purchaseRequestStatus, true))}
                 </td>

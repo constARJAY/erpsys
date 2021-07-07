@@ -314,8 +314,8 @@ $(document).ready(function() {
                 <tr style="white-space: nowrap">
                     <th>Document No.</th>
                     <th>Prepared By</th>
-					<th>Project Name</th>
-					<th>Description</th>
+                    <th>Project Code</th>
+                    <th>Project Name</th>
                     <th>Current Approver</th>
                     <th>Date</th>
                     <th>Status</th>
@@ -360,10 +360,10 @@ $(document).ready(function() {
 					<td>${getFormCode("EBF", createdAt, borrowingID)}</td>
 					<td>${fullname}</td>
 					<td>
-					<div>${projectListName || "-"}</div>
-					<small style="color:#848482;">${projectListCode || '-'}</small>
+					<div>${projectListCode || '-'}</div>
+					<small style="color:#848482;">${borrowingReason}</small>
 					</td>
-					<td>${borrowingReason}</td>
+					<td>${projectListName || "-"}</td>
 					<td>
 						${employeeFullname(getCurrentApprover(approversID, approversDate, borrowingStatus, true))}
 					</td>
@@ -408,8 +408,8 @@ $(document).ready(function() {
                 <tr style="white-space: nowrap">
                     <th>Document No.</th>
                     <th>Prepared By</th>
-					<th>Project Name</th>
-					<th>Description</th>
+                    <th>Project Code</th>
+                    <th>Project Name</th>
                     <th>Current Approver</th>
                     <th>Date</th>
                     <th>Status</th>
@@ -454,10 +454,10 @@ $(document).ready(function() {
                 <td>${getFormCode("EBF", createdAt, borrowingID)}</td>
                 <td>${fullname}</td>
 				<td>
-				<div>${projectListName || "-"}</div>
-				<small style="color:#848482;">${projectListCode || '-'}</small>
+				<div>${projectListCode || '-'}</div>
+				<small style="color:#848482;">${borrowingReason}</small>
 				</td>
-				<td>${borrowingReason}</td>
+				<td>${projectListName || "-"}</td>
                 <td>
                     ${employeeFullname(getCurrentApprover(approversID, approversDate, borrowingStatus, true))}
                 </td>

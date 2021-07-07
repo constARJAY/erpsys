@@ -6,6 +6,7 @@ class Leave_request extends CI_Controller {
     public function __construct()
     {
         parent::__construct();
+        $this->load->model("hris/LeaveRequest_model", "leaverequest");
         isAllowed(55);
     }
 
@@ -16,4 +17,13 @@ class Leave_request extends CI_Controller {
         $this->load->view("hris/leave_request/index");
         $this->load->view("template/footer");
     }
+
+    public function updateEmployeeLeave()
+    {
+        $employeeID  = $this->input->post("employeeID");
+        $leaveID     = $this->input->post("leaveID");
+        $leaveCredit = $this->input->post("leaveCredit");
+        echo $this->leaverequest->updateEmployeeLeave($employeeID, $leaveID, $leaveCredit);
+    }
+
 }    
