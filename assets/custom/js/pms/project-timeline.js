@@ -168,12 +168,12 @@ $(document).ready(function() {
 				columnDefs: [
 					{ targets: 0,  width: 100 },
 					{ targets: 1,  width: 150 },
-					{ targets: 2,  width: 350 }, // Project Code & Description Combo
-					{ targets: 3,  width: 350 }, 
+					{ targets: 2,  width: 350 },
+					{ targets: 3,  width: 100 },	
 					{ targets: 4,  width: 150 },
 					{ targets: 5,  width: 150 },
 					{ targets: 6,  width: 100 },
-					{ targets: 7,  width: 100 }, 
+					{ targets: 7,  width: 350 }, // Description
 					{ targets: 8,  width: 100  },
 					{ targets: 9,  width: 150  },
 					{ targets: 10,  width: 150  },
@@ -195,12 +195,12 @@ $(document).ready(function() {
 				columnDefs: [
 					{ targets: 0,  width: 100 },
 					{ targets: 1,  width: 150 },
-					{ targets: 2,  width: 350 }, // Project Code & Description Combo
-					{ targets: 3,  width: 350 }, 	
+					{ targets: 2,  width: 350 },
+					{ targets: 3,  width: 100 },	
 					{ targets: 4,  width: 150 },
 					{ targets: 5,  width: 150 },
 					{ targets: 6,  width: 100 },
-					{ targets: 7,  width: 100 }, 
+					{ targets: 7,  width: 350 }, // Description
 					{ targets: 8,  width: 100  },
 					{ targets: 9,  width: 150  },
 					{ targets: 10,  width: 150  },
@@ -310,12 +310,12 @@ $(document).ready(function() {
                 <tr style="white-space: nowrap">
 					<th>Document No.</th>
 					<th>Prepared By</th>
-					<th>Project Code</th>
 					<th>Project Name</th>
 					<th>Project Category</th>
 					<th>Proposed Budget</th>
 					<th>Allocated Budget</th>
 					<th>Budget Status</th>
+					<th>Description</th>
 					<th>Current Approver</th>
 					<th>Date Created</th>
 					<th>Date Submitted</th>
@@ -373,15 +373,15 @@ $(document).ready(function() {
 					<td>${fullname}</td>
 					<td>
 						<div>
-							${projectCode || '-'}
+						${projectListName || '-'}
 						</div>
-						<small style="color:#848482;">${timelineBuilderReason == "null" ? "-" :  timelineBuilderReason}</small>
+						<small style="color:#848482;">${projectCode || '-'}</small>
 					</td>
-					<td>${projectListName || '-'}</td>
 					<td>${projectCategory}</td>
 					<td class="text-right">${timelineProposedBudget ? formatAmount(timelineProposedBudget, true) : "-"}</td>
 					<td class="text-right">${timelineAllocatedBudget ? formatAmount(timelineAllocatedBudget, true) : "-"}</td>
 					<td>${budgetStatus}</td>
+					<td>${timelineBuilderReason == "null" ? "-" :  timelineBuilderReason}</td>
 					<td>
 						${employeeFullname(getCurrentApprover(approversID, approversDate, timelineBuilderStatus, true))}
 					</td>
@@ -424,12 +424,12 @@ $(document).ready(function() {
                 <tr style="white-space: nowrap">
 					<th>Document No.</th>
 					<th>Prepared By</th>
-					<th>Project Code</th>
 					<th>Project Name</th>
 					<th>Project Category</th>
 					<th>Proposed Budget</th>
 					<th>Allocated Budget</th>
 					<th>Budget Status</th>
+					<th>Description</th>
 					<th>Current Approver</th>
 					<th>Date Created</th>
 					<th>Date Submitted</th>
@@ -487,15 +487,15 @@ $(document).ready(function() {
 				<td>${fullname}</td>
 				<td>
 					<div>
-						${projectCode || '-'}
+					${projectListName || '-'}
 					</div>
-					<small style="color:#848482;">${timelineBuilderReason == "null" ? "-" :  timelineBuilderReason}</small>
+					<small style="color:#848482;">${projectCode || '-'}</small>
 				</td>
-				<td>${projectListName || '-'}</td>
 				<td>${projectCategory}</td>
 				<td class="text-right">${timelineProposedBudget ? formatAmount(timelineProposedBudget, true) : "-"}</td>
 				<td class="text-right">${timelineAllocatedBudget ? formatAmount(timelineAllocatedBudget, true) : "-"}</td>
 				<td>${budgetStatus}</td>
+				<td>${timelineBuilderReason == "null" ? "-" :  timelineBuilderReason}</td>
 				<td>
 					${employeeFullname(getCurrentApprover(approversID, approversDate, timelineBuilderStatus, true))}
 				</td>
@@ -1112,6 +1112,7 @@ $(document).ready(function() {
 						${disabled}>
                         ${getProjectList(projectID)}
                     </select>
+					<div class="invalid-feedback d-block" id="invalid-projectID"></div>
 				</div>
 			</div>
 			<div class="col-md-4 col-sm-12">
@@ -1131,12 +1132,14 @@ $(document).ready(function() {
 						${disabled}>
                         ${getClientList(clientID)}
                     </select>
+					<div class="invalid-feedback d-block" id="invalid-clientID"></div>
 				</div>
 			</div>
 			<div class="col-md-8 col-sm-12">
 				<div class="form-group">
 					<label>Client Address ${!disabled ? "<code>*</code>" : ""}</label>
 					<input type="text" class="form-control" disabled  name="clientAddress" value="${clientAddress}">
+					
 				</div>
 			</div>
 			<div class="col-md-3 col-sm-12">
@@ -1160,6 +1163,7 @@ $(document).ready(function() {
 						<option value="1" ${timelinePriorityLevel == "1" ? "selected": ``} >Medium</option>
 						<option value="0" ${timelinePriorityLevel == "0" ? "selected": ``} >Low</option>
                     </select>
+					<div class="invalid-feedback d-block" id="invalid-timelinePriorityLevel"></div>
 				</div>
 			</div>
 			<div class="col-md-3 col-sm-12">
@@ -1174,6 +1178,7 @@ $(document).ready(function() {
 						<option value="0" ${timelineIssued == "0" ? "selected": ``} >For Development</option>
 						<option value="1" ${timelineIssued == "1" ? "selected": ``} >For Purchasing</option>
                     </select>
+					<div class="invalid-feedback d-block" id="invalid-timelineIssued"></div>
 				</div>
 			</div>
 			<div class="col-md-3 col-sm-12">
@@ -1189,8 +1194,7 @@ $(document).ready(function() {
 								class="form-control" 
 								name="timelineDesign" 
 								id="timelineDesign"
-								accept="image/*, .pdf, .doc, .docx" ${disabled}>
-						<div class="invalid-feedback d-block" id="invalid-timelineDesign"></div>`}
+								accept="image/*, .pdf, .doc, .docx" ${disabled}>`}
 					
 				</div>
 			</div>
@@ -1206,6 +1210,7 @@ $(document).ready(function() {
 								required ${disabled}>
 								${getEmployeeList(timelineProjectManager, "PM")}
 							</select>
+							<div class="invalid-feedback d-block" id="invalid-timelineProjectManager"></div>
 						</div>
 						<div class="form-group">
 							<label>Team Leader ${!disabled ? "<code>*</code>" : ""}</label>
@@ -1216,6 +1221,7 @@ $(document).ready(function() {
 								required ${disabled}>
 								${getEmployeeList(timelineTeamLeader, "TL")}
 							</select>
+							<div class="invalid-feedback d-block" id="invalid-timelineTeamLeader"></div>
 						</div>
 					</div>
 					<div class="col-md-6 col-sm-12">
@@ -1228,6 +1234,7 @@ $(document).ready(function() {
 								required ${disabled}>
 								${getEmployeeList(timelineTeamMember)}
 							</select>
+							<div class="invalid-feedback d-block" id="invalid-timelineTeamMember"></div>
 						</div>
 					</div>
 				</div>

@@ -169,9 +169,11 @@ $(document).ready(function() {
 					{ targets: 2,  width: 350 },
 					{ targets: 3,  width: 350 },	
 					{ targets: 4,  width: 100 },
-					{ targets: 5,  width: 250 },
-					{ targets: 6,  width: 100 },
-					{ targets: 7,  width: 300 },
+					{ targets: 5,  width: 200 },
+					{ targets: 6,  width: 200 },
+					{ targets: 7,  width: 200 },
+					{ targets: 8,  width: 100  },
+					{ targets: 9,  width: 350  },
 				],
 			});
 
@@ -190,9 +192,11 @@ $(document).ready(function() {
 					{ targets: 2,  width: 350 },
 					{ targets: 3,  width: 350 },	
 					{ targets: 4,  width: 100 },
-					{ targets: 5,  width: 250 },
-					{ targets: 6,  width: 100 },
-					{ targets: 7,  width: 300 },
+					{ targets: 5,  width: 200 },
+					{ targets: 6,  width: 200 },
+					{ targets: 7,  width: 200 },
+					{ targets: 8,  width: 100  },
+					{ targets: 9,  width: 350  },
 				],
 			});
 
@@ -367,14 +371,12 @@ $(document).ready(function() {
 	function headerTabContent(display = true) {
 		if (display) {
 			if (isImModuleApprover("pms_cost_estimate_tbl", "approversID")) {
-				let count = getCountForApproval("pms_cost_estimate_tbl", "costEstimateStatus");
-				let displayCount = count ? `<span class="ml-1 badge badge-danger rounded-circle">${count}</span>` : "";
 				let html = `
                 <div class="bh_divider appendHeader"></div>
                 <div class="row clearfix appendHeader">
                     <div class="col-12">
                         <ul class="nav nav-tabs">
-                            <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#forApprovalTab" redirect="forApprovalTab">For Approval ${displayCount}</a></li>
+                            <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#forApprovalTab" redirect="forApprovalTab">For Approval</a></li>
                             <li class="nav-item"><a class="nav-link active" data-toggle="tab" href="#myFormsTab" redirect="myFormsTab">My Forms</a></li>
                         </ul>
                     </div>
@@ -424,10 +426,12 @@ $(document).ready(function() {
                 <tr style="white-space: nowrap">
 					<th>Document No.</th>
 					<th>Prepared By</th>
-					<th>Project Code</th>
 					<th>Project Name</th>
+					<th>Description</th>
 					<th>Current Approver</th>
-					<th>Date</th>
+					<th>Date Created</th>
+					<th>Date Submitted</th>
+					<th>Date Approved</th>
 					<th>Status</th>
 					<th>Remarks</th>
                 </tr>
@@ -474,15 +478,17 @@ $(document).ready(function() {
 					<td>${fullname}</td>
 					<td>
 						<div>
-							${projectListCode || '-'}
+						${projectListName || '-'}
 						</div>
-						<small style="color:#848482;">${costEstimateReason}</small>
+						<small style="color:#848482;">${projectListCode || '-'}</small>
 					</td>
-					<td>${projectListName || '-'}</td>
+					<td>${costEstimateReason}</td>
 					<td>
 						${employeeFullname(getCurrentApprover(approversID, approversDate, costEstimateStatus, true))}
 					</td>
-					<td>${getDocumentDates(dateCreated, dateSubmitted, dateApproved)}</td>
+					<td>${dateCreated}</td>
+					<td>${dateSubmitted}</td>
+					<td>${dateApproved}</td>
 					<td class="text-center">
 						${getStatusStyle(costEstimateStatus)}
 					</td>
@@ -519,10 +525,12 @@ $(document).ready(function() {
                 <tr style="white-space: nowrap">
 					<th>Document No.</th>
 					<th>Prepared By</th>
-					<th>Project Code</th>
 					<th>Project Name</th>
+					<th>Description</th>
 					<th>Current Approver</th>
-					<th>Date</th>
+					<th>Date Created</th>
+					<th>Date Submitted</th>
+					<th>Date Approved</th>
 					<th>Status</th>
 					<th>Remarks</th>
                 </tr>
@@ -547,9 +555,9 @@ $(document).ready(function() {
 
 			let remarks       = costEstimateRemarks ? costEstimateRemarks : "-";
 			let dateCreated   = moment(createdAt).format("MMMM DD, YYYY hh:mm:ss A");
-			let dateSubmitted = submittedAt ? moment(submittedAt).format("MMMM DD, YYYY hh:mm:ss A") : "";
-			let dateApproved  = costEstimateStatus == 2 || costEstimateStatus == 5 ? approversDate.split("|") : "";
-			if (dateApproved !== "") {
+			let dateSubmitted = submittedAt ? moment(submittedAt).format("MMMM DD, YYYY hh:mm:ss A") : "-";
+			let dateApproved  = costEstimateStatus == 2 || costEstimateStatus == 5 ? approversDate.split("|") : "-";
+			if (dateApproved !== "-") {
 				dateApproved = moment(dateApproved[dateApproved.length - 1]).format("MMMM DD, YYYY hh:mm:ss A");
 			}
 
@@ -568,15 +576,17 @@ $(document).ready(function() {
 				<td>${fullname}</td>
 				<td>
 					<div>
-					${projectListCode || '-'}
+					${projectListName || '-'}
 					</div>
-					<small style="color:#848482;">${costEstimateReason}</small>
+					<small style="color:#848482;">${projectListCode || '-'}</small>
 				</td>
-				<td>${projectListName || '-'}</td>
+				<td>${costEstimateReason}</td>
 				<td>
 					${employeeFullname(getCurrentApprover(approversID, approversDate, costEstimateStatus, true))}
 				</td>
-				<td>${getDocumentDates(dateCreated, dateSubmitted, dateApproved)}</td>
+				<td>${dateCreated}</td>
+				<td>${dateSubmitted}</td>
+				<td>${dateApproved}</td>
 				<td class="text-center">
 					${getStatusStyle(costEstimateStatus)}
 				</td>
@@ -2843,12 +2853,11 @@ $(document).ready(function() {
 							max="999999999" 
 							id="travelQuantity" 
 							name="quantity" 
-							travel="true"
 							value="${quantity}"
 							min="0.00" 
 							minlength="1" 
 							maxlength="20" 
-							required ${optionDisabled || "disabled"}>
+							required ${optionDisabled}>
 						<div class="invalid-feedback d-block" id="invalid-quantity"></div>
 					</div>
 				</td>
@@ -2870,21 +2879,6 @@ $(document).ready(function() {
 		}
 		return html;
 	}
-
-
-	// ----- KEYUP DESCRIPTION -----
-	$(document).on("keyup", `[name="description"]`, function() {
-		const description = $(this).val()?.trim();
-		$parent = $(this).closest("tr");
-		if (description) {
-			$parent.find(`[name="quantity"]`).removeAttr("disabled");
-		} else {
-			$parent.find(`[name="quantity"]`).val("0");
-			$parent.find(`[name="quantity"]`).attr("disabled", true);
-		}
-	})
-	// ----- END KEYUP DESCRIPTION -----
-
 
 	// CHECK IF THE DOCUMENT IS ALREADY REVISED
 	function isRevised(id = null){

@@ -236,7 +236,7 @@ $(document).ready(function () {
 	function forApprovalContent() {
 		$("#tableForApprovalParent").html(preloader);
 
-		let scheduleData = getTableData(
+		let leaveRequestData = getTableData(
 			"hris_leave_request_tbl LEFT JOIN hris_employee_list_tbl USING(employeeID)",
 			"hris_leave_request_tbl.*, CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname",
 			`employeeID != ${sessionID} AND leaveRequestStatus != 0 AND leaveRequestStatus != 4`,
@@ -259,7 +259,7 @@ $(document).ready(function () {
             </thead>
             <tbody>`;
 
-		scheduleData.map((schedule) => {
+		leaveRequestData.map((schedule) => {
 			let {
 				fullname,
 				leaveID,
@@ -319,14 +319,32 @@ $(document).ready(function () {
 
 
 	// ----- MY FORMS CONTENT -----
-	function myFormsContent() {
-		$("#tableMyFormsParent").html(preloader);
-		let scheduleData = getTableData(
+	function myFormsData() {
+		uniqueData = [];
+		let leaveRequestData = getTableData(
 			"hris_leave_request_tbl LEFT JOIN hris_employee_list_tbl USING(employeeID)",
 			"hris_leave_request_tbl.*, CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname, hris_leave_request_tbl.createdAt AS dateCreated",
 			`hris_leave_request_tbl.employeeID = ${sessionID}`,
 			`FIELD(leaveRequestStatus, 0, 1, 3, 2, 4), COALESCE(hris_leave_request_tbl.submittedAt, hris_leave_request_tbl.createdAt)`
 		);
+		leaveRequestData.map(leave => {
+			let {
+				leaveRequestID,
+				leaveRequestDate,
+				leaveRequestStatus
+			} = leave;
+			let unique = {
+				id: leaveRequestID,
+				leaveRequestDate,
+			};
+			(leaveRequestStatus == 1 || leaveRequestStatus == 2) && uniqueData.push(unique);
+		})
+		return leaveRequestData;
+	}
+
+	function myFormsContent() {
+		$("#tableMyFormsParent").html(preloader);
+		let leaveRequestData = myFormsData();
 
 		let html = `
         <table class="table table-bordered table-striped table-hover" id="tableMyForms">
@@ -344,7 +362,7 @@ $(document).ready(function () {
             </thead>
             <tbody>`;
 
-		scheduleData.map((item) => {
+		leaveRequestData.map((item) => {
 			let {
 				fullname,
 				leaveID,
@@ -370,8 +388,8 @@ $(document).ready(function () {
 			}
 
 			let unique = {
-				id:                 leaveRequestID,
-				leaveRequestDate: moment(leaveRequestDate).format("MMMM DD, YYYY"),
+				id:               leaveRequestID,
+				leaveRequestDate: leaveRequestDate,
 			};
 			(leaveRequestStatus == 1 || leaveRequestStatus == 2) && uniqueData.push(unique);
 
@@ -800,17 +818,28 @@ $(document).ready(function () {
 		</div>`;
 
 		setTimeout(() => {
+			let leaveRequestData = getTableData(
+				"hris_leave_request_tbl LEFT JOIN hris_employee_list_tbl USING(employeeID)",
+				"hris_leave_request_tbl.*, CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname, hris_leave_request_tbl.createdAt AS dateCreated",
+				`hris_leave_request_tbl.employeeID = ${sessionID}`,
+				`FIELD(leaveRequestStatus, 0, 1, 3, 2, 4), COALESCE(hris_leave_request_tbl.submittedAt, hris_leave_request_tbl.createdAt)`
+			);
+			leaveRequestData.map(leave => {
+				let {
+					leaveRequestID,
+					leaveRequestDate,
+					leaveRequestStatus
+				} = leave;
+				let unique = {
+					id: leaveRequestID,
+					leaveRequestDate,
+				};
+				(leaveRequestStatus == 1 || leaveRequestStatus == 2) && uniqueData.push(unique);
+			})
 			$("#page_content").html(html);
 			initAll();
 			initDataTables();
             leaveRequestDateRange(leaveRequestDateFrom, leaveRequestDateTo);
-
-			if (data) {
-				initInputmaskTime(false);
-			} else {
-				initInputmaskTime();
-				
-			}
 			return html;
 		}, 300);
 	}
@@ -848,75 +877,6 @@ $(document).ready(function () {
 	viewDocument();
 	$("#page_content").text().trim().length == 0 && pageContent(); // CHECK IF THERE IS ALREADY LOADED ONE
 	// ----- END PAGE CONTENT -----
-
-
-	// ----- CUSTOM INPUTMASK -----
-	function initInputmaskTime(isMethodAdd = true) {
-		if (isMethodAdd) {
-			$(".timeIn").val("08:00");
-			$(".timeOut").val("17:00");
-		}
-
-		$(".timeIn").inputmask({
-			mask: "h:s",
-			placeholder: "08:00",
-			insertMode: false,
-			hourFormat: "24",
-			clearMaskOnLostFocus: false,
-			floatLabelType: "Always",
-			focus: function (args) {
-				args.selectionEnd = args.selectionStart;
-			},
-		});
-		$(".timeOut").inputmask({
-			mask: "h:s",
-			placeholder: "17:00",
-			insertMode: false,
-			hourFormat: "24",
-			clearMaskOnLostFocus: false,
-			floatLabelType: "Always",
-			focus: function (args) {
-				args.selectionEnd = args.selectionStart;
-			},
-		});
-	}
-	// ----- END CUSTOM INPUTMASK ------
-
-
-	// ----- CHECK TIME RANGE -----
-	function checkTimeRange(elementID = false, isReturnable = false) {
-		let element = elementID ? `#${elementID}` : ".timeOut";
-		let flag = 0;
-		$(element).each(function () {
-			const fromValue = $("#leaveRequestTimeIn").val() + ":00";
-			const validated = $(this).hasClass("validated");
-			const toValue   = $(this).val() + ":00";
-
-			const timeIn  = moment(`2021-01-01 ${fromValue}`);
-			const timeOut = moment(`2021-01-01 ${toValue}`);
-
-			let diff = moment.duration(timeOut.diff(timeIn));
-				diff = diff.asSeconds();
-
-			const invalidFeedback = $(this).parent().find(".invalid-feedback");
-
-			if (diff <= 0) {
-				$(this).removeClass("is-valid").addClass("is-invalid");
-				invalidFeedback.text("Invalid time range");
-				flag++;
-			} else {
-				isReturnable || validated
-					? $(this).removeClass("is-invalid").addClass("is-valid")
-					: $(this).removeClass("is-invalid").removeClass("is-valid");
-				invalidFeedback.text("");
-			}
-		});
-		if (isReturnable) {
-			$(".modal").find(".is-invalid").first().focus();
-			return flag > 0 ? false : true;
-		}
-	}
-	// ----- END CHECK TIME RANGE -----
 
 
 	// ----- GET DATA -----
@@ -971,13 +931,6 @@ $(document).ready(function () {
 		return data;
 	}
 	// ----- END GET DATA -----
-
-
-	// ----- CHANGE TIME TO -----
-	$(document).on("keyup", ".timeOut", function () {
-		checkTimeRange($(this).attr("id"));
-	});
-	// ----- END CHANGE TIME TO -----
 
 	
 	// ----- OPEN ADD FORM -----
@@ -1133,7 +1086,6 @@ $(document).ready(function () {
 		formButtonHTML(this);
 		const id           = decryptString($(this).attr("leaveRequestID"));
 		const validate     = validateForm("form_leave_request");
-		const validateTime = checkTimeRange(false, true);
 
 		if (validate && validateTime) {
 			const feedback = $(this).attr("code") || getFormCode("LRF", dateToday(), id);

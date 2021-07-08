@@ -8,7 +8,7 @@
 						<li class="breadcrumb-item"><i class="fas fa-file-invoice-dollar"></i>&nbsp;Finance Modules</li>
                         <li class="breadcrumb-item active">Collection Module</li>
                     </ul>
-                    <h1 class="mt-3">List of Collection</h1>
+                    <h1 class="mt-3">Collection Module</h1>
                     <span>This module is used to manage the creation and monitoring of collection of billing for every clients.</span>
 				</div>
 				<div class="col-lg-6 col-md-12 text-md-right" id="headerButton"></div>

@@ -8,12 +8,10 @@
 						<li class="breadcrumb-item"><i class="fas fa-file-invoice-dollar"></i>&nbsp;Finance Modules</li>
                         <li class="breadcrumb-item active">Billing Module</li>
                     </ul>
-                    <h1 class="mt-3">List of Billing</h1>
+                    <h1 class="mt-3">Billing Module</h1>
                     <span>This module is used to manage the creation and monitoring of billing for every clients.</span>
 				</div>
-				<div class="col-lg-6 col-md-12 text-md-right" id="headerButton">
-                    <!-- <button type="button" class="btn btn-default btn-add" id="btnAdd" data-toggle="tab" href="#addPhaseForm"><i class="icon-plus"></i> &nbsp;Show Budget</button> -->
-                </div>
+				<div class="col-lg-6 col-md-12 text-md-right" id="headerButton"></div>
             </div>
             <div class="bh_divider appendHeader"></div>
            

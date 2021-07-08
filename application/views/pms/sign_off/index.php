@@ -8,7 +8,7 @@
 						<li class="breadcrumb-item"><i class="fas fa-folder-open"></i>&nbsp;Project Modules</li>
                         <li class="breadcrumb-item active">Sign-Off</li>
                     </ul>
-                    <h1 class="mt-3">List of Sign-Off Forms</h1>
+                    <h1 class="mt-3">Sign-Off</h1>
                     <span>This module is used to manage the submission and approval of sign-off forms for project phases that are already done.</span>
                 </div>
                 <div class="col-lg-6 col-md-6 text-right" id="headerButton"></div>
