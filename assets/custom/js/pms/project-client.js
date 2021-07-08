@@ -770,7 +770,7 @@ $(document).on("change", "[name=clientCity]", function() {
 
 			sweetAlertConfirmation(
 				"update",
-				"Client Masterfile",
+				"Client",
 				"modalProjectClient",
 				"",
 				data,
@@ -787,7 +787,7 @@ $(document).on("change", "[name=clientCity]", function() {
 		if (!formEmpty) {
 			sweetAlertConfirmation(
 				"cancel",
-				"Client Masterfile",
+				"Client",
 				"modalProjectClient"
 			);
 		} else {

@@ -319,12 +319,12 @@ $(document).ready(function () {
 
 
 	// ----- MY FORMS CONTENT -----
-	function myFormsData() {
+	function myFormsData(leaveRequestID = 0) {
 		uniqueData = [];
 		let leaveRequestData = getTableData(
 			"hris_leave_request_tbl LEFT JOIN hris_employee_list_tbl USING(employeeID)",
 			"hris_leave_request_tbl.*, CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname, hris_leave_request_tbl.createdAt AS dateCreated",
-			`hris_leave_request_tbl.employeeID = ${sessionID}`,
+			`hris_leave_request_tbl.employeeID = ${sessionID} AND leaveRequestID <> ${leaveRequestID}`,
 			`FIELD(leaveRequestStatus, 0, 1, 3, 2, 4), COALESCE(hris_leave_request_tbl.submittedAt, hris_leave_request_tbl.createdAt)`
 		);
 		leaveRequestData.map(leave => {
@@ -636,6 +636,7 @@ $(document).ready(function () {
 		readOnly ? preventRefresh(false) : preventRefresh(true);
 
 		$("#btnBack").attr("leaveRequestID", leaveRequestID ? encryptString(leaveRequestID) : "");
+		$("#btnBack").attr("code", getFormCode("LRF", moment(createdAt), leaveRequestID));
 		$("#btnBack").attr("status", leaveRequestStatus);
 		$("#btnBack").attr("employeeID", employeeID);
 		$("#btnBack").attr("cancel", isFromCancelledDocument);
@@ -840,6 +841,19 @@ $(document).ready(function () {
 			initAll();
 			initDataTables();
             leaveRequestDateRange(leaveRequestDateFrom, leaveRequestDateTo);
+
+			// ----- NOT ALLOWED FOR UPDATE -----
+			if (!allowedUpdate) {
+				$("#page_content").find(`input, select, textarea`).each(function() {
+					if (this.type != "search") {
+						$(this).attr("disabled", true);
+					}
+				})
+				$('#btnBack').attr("status", "2");
+				$(`#btnSubmit, #btnRevise, #btnCancel, #btnCancelForm, .btnAddRow, .btnDeleteRow`).hide();
+			}
+			// ----- END NOT ALLOWED FOR UPDATE -----
+
 			return html;
 		}, 300);
 	}
@@ -974,10 +988,11 @@ $(document).ready(function () {
 				data["leaveRequestStatus"] = 0;
 				if (!isFromCancelledDocument) {
 					data["reviseLeaveRequestID"] = id;
+					data[`feedback`] = getFormCode("LRF", new Date);
 					delete data["leaveRequestID"];
 				} else {
-					data["leaveRequestID"] = id;
 					delete data["action"];
+					data["leaveRequestID"] = id;
 					data["action"] = "update";
 				}
 
@@ -990,8 +1005,7 @@ $(document).ready(function () {
 						"form_leave_request",
 						data,
 						true,
-						pageContent,
-						this
+						pageContent
 					);
 				}, 0);
 			} else {
@@ -1003,7 +1017,6 @@ $(document).ready(function () {
 				}
 			}
 		} else {
-			formButtonHTML(this);
 			const action   = id && feedback ? "update" : "insert";
 			const data     = getData(action, 0, "save", feedback, id);
 			data["leaveRequestStatus"] = 0;
@@ -1017,8 +1030,7 @@ $(document).ready(function () {
 					"form_leave_request",
 					data,
 					true,
-					pageContent,
-					this
+					pageContent
 				);
 			}, 0);
 		}
@@ -1035,62 +1047,28 @@ $(document).ready(function () {
 	// ----- END REVISE DOCUMENT -----
 
 
-	// ----- SAVE DOCUMENT -----
-	$(document).on("click", "#btnSave", function () {
-		/**
-		 * 
-		 * 	I THINK IF IT'S A DRAFT DOCUMENT, NO NEED TO VALIDATE...
-		 * 
-		 */
-		// const validate     = validateForm("form_leave_request");
-		// const validateTime = checkTimeRange(false, true);
-
-		// if (validate && validateTime) {
-		// 	const action   = "insert"; 
-		// 	const feedback = getFormCode("LRF", dateToday()); // SCH-20-00000
-
-		// 	const data = getData(action, 0, "save", feedback);
-
-		// 	formConfirmation(
-		// 		"save",
-		// 		"insert",
-		// 		"LEAVE REQUEST",
-		// 		"",
-		// 		"form_leave_request",
-		// 		data,
-		// 		true,
-		// 		myFormsContent
-		// 	);
-		// }
-
-		const action   = "insert"; 
-		const feedback = getFormCode("LRF", dateToday()); 
-		const data     = getData(action, 0, "save", feedback);
-
-		formConfirmation(
-			"save",
-			"insert",
-			"LEAVE REQUEST",
-			"",
-			"form_leave_request",
-			data,
-			true,
-			myFormsContent
-		);
-	});
-	// ----- END SAVE DOCUMENT -----
-
-
 	// ----- SUBMIT DOCUMENT -----
 	$(document).on("click", "#btnSubmit", function () {
 		formButtonHTML(this);
 		const id           = decryptString($(this).attr("leaveRequestID"));
+		const isFromCancelledDocument = $(this).attr("cancel") == "true";
+		const revise       = $(this).attr("revise") == "true";
 		const validate     = validateForm("form_leave_request");
 
-		if (validate && validateTime) {
+		if (validate) {
 			const feedback = $(this).attr("code") || getFormCode("LRF", dateToday(), id);
-			const action   = id && feedback ? "update" : "insert";
+			const action   = revise && !isFromCancelledDocument && "insert" || (id ? "update" : "insert");
 			const data     = getData(action, 1, "submit", feedback, id);
+
+			if (revise) {
+				if (!isFromCancelledDocument) {
+					data[`tableData[reviseLeaveRequestID]`] = id;
+					delete data[`tableData[leaveRequestID]`];
+					data["feedback"] = getFormCode("SCH", new Date);
+				} else {
+					data[`whereFilter`] = `leaveRequestID = ${id}`;
+				}
+			}
 
 			const employeeID = getNotificationEmployeeID(
 				data["tableData[approversID]"],
@@ -1102,7 +1080,6 @@ $(document).ready(function () {
 			if (employeeID != sessionID) {
 				notificationData = {
 					moduleID:                55,
-					// tableID:                 1, // AUTO FILL
 					notificationTitle:       "Leave Request Form",
 					notificationDescription: `${employeeFullname(sessionID)} asked for your approval.`,
 					notificationType:        2,
@@ -1153,14 +1130,30 @@ $(document).ready(function () {
 
 
 	// ----- CANCEL DOCUMENT -----
-	$(document).on("click", "#btnCancel", function () {
-		formButtonHTML(this);
+	$(document).on("click", "#btnSave, #btnCancel", function () {
 		const id       = decryptString($(this).attr("leaveRequestID"));
+		const isFromCancelledDocument = $(this).attr("cancel") == "true";
+		const revise   = $(this).attr("revise") == "true";
 		const feedback = $(this).attr("code") || getFormCode("LRF", dateToday(), id);
-		const action   = id && feedback ? "update" : "insert";
-		const data     = getData(action, 0, "save", feedback, id);
+		const action   = revise && !isFromCancelledDocument && "insert" || (id && feedback ? "update" : "insert");
+		const data     = getData(action, 0, "save", feedback);
+		data[`tableData[leaveRequestStatus]`] = 0;
 
-		cancelForm(
+		if (revise) {
+			if (!isFromCancelledDocument) {
+				data[`feedback`] = getFormCode("LRF", new Date);
+				data[`tableData[reviseLeaveRequestID]`] = id;
+				data[`whereFilter`] = `leaveRequestID = ${id}`;
+				delete data[`tableData[leaveRequestID]`];
+			} else {
+				data[`tableData[leaveRequestID]`] = id;
+				data[`whereFilter`] = `leaveRequestID = ${id}`;
+				delete data[`action`];
+				data[`action`] = "update";
+			}
+		}
+
+		formConfirmation(
 			"save",
 			action,
 			"LEAVE REQUEST",
@@ -1168,8 +1161,7 @@ $(document).ready(function () {
 			"form_leave_request",
 			data,
 			true,
-			pageContent,
-			this
+			pageContent
 		);
 	});
 	// ----- END CANCEL DOCUMENT -----
@@ -1285,7 +1277,7 @@ $(document).ready(function () {
 		</div>
 		<div class="modal-footer text-right">
 			<button class="btn btn-danger px-5 py-2" id="btnRejectConfirmation"
-			leaveRequestID="${id}"
+			leaveRequestID="${encryptString(id)}"
 			code="${feedback}"><i class="far fa-times-circle"></i> Deny</button>
 			<button class="btn btn-cancel px-5 py-2" data-dismiss="modal"><i class="fas fa-ban"></i> Cancel</button>
 		</div>`;

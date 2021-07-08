@@ -8,7 +8,7 @@ class PettyCashReplenishment_model extends CI_Model {
         parent::__construct();
     }
 
-    public function saveClientRepData($action, $data, $id = null){
+    public function savePettyRepData($action, $data, $id = null){
         if ($action == "insert") {
             $query = $this->db->insert("fms_petty_cash_replenishment_tbl", $data);
         } else {
@@ -23,14 +23,14 @@ class PettyCashReplenishment_model extends CI_Model {
         return "false|System error: Please contact the system administrator for assistance!";
     }
 
-    public function deleteClientRepItems($id) {
+    public function deletePettyRepItems($id) {
         $query = $this->db->delete("fms_finance_request_details_tbl", ["pettyRepID" => $id]) ? true : "";
         return $query;
     }
 
-    public function saveClientRepIRequest($data, $id = null) {
+    public function savePettyRepIRequest($data, $id = null) {
         // if ($id) {
-        //     $deleteClientRepItems = $this->deleteClientRepItems($id);
+        //     $deletePettyRepItems = $this->deletePettyRepItems($id);
         // }
         $query  = $this->db->update_batch("fms_finance_request_details_tbl", $data, "financeRequestID");
         if ($query) {
@@ -39,7 +39,7 @@ class PettyCashReplenishment_model extends CI_Model {
         return "false|System error: Please contact the system administrator for assistance 2nd part!";
     }
     
-    // public function updateClientRep($tableName,$data, $reference) {
+    // public function updatePettyRep($tableName,$data, $reference) {
     //     $query =  $this->db->update($tableName, $data, $reference);  //"id = 4"
     //     return $query;
     // }

@@ -1003,6 +1003,7 @@ $(document).ready(function () {
 				data[`tableData[changeScheduleStatus]`] = 0;
 				if (!isFromCancelledDocument) {
 					delete data[`changeScheduleID`];
+					data[`feedback`] = getFormCode("SCH", new Date);
 					data[`tableData[reviseChangeScheduleID]`] = id;
 				} else {
 					delete data[`action`];
@@ -1057,8 +1058,6 @@ $(document).ready(function () {
 		const id       = decryptString($(this).attr("changeScheduleID"));
 		const isFromCancelledDocument = $(this).attr("cancel") == "true";
 		const revise   = $(this).attr("revise") == "true";
-		// const action   = "insert"; 
-		// const feedback = getFormCode("SCH", dateToday()); 
 		const feedback = $(this).attr("code") || getFormCode("SCH", dateToday(), id);
 		const action   = revise && !isFromCancelledDocument && "insert" || (id && feedback ? "update" : "insert");
 		const data     = getData(action, 0, "save", feedback);
@@ -1066,6 +1065,7 @@ $(document).ready(function () {
 
 		if (revise) {
 			if (!isFromCancelledDocument) {
+				data[`feedback`] = getFormCode("SCH", new Date);
 				data[`tableData[reviseChangeScheduleID]`] = id;
 				data[`whereFilter`] = `changeScheduleID = ${id}`;
 				delete data[`tableData[changeScheduleID]`];
@@ -1097,7 +1097,6 @@ $(document).ready(function () {
 		const isFromCancelledDocument = $(this).attr("cancel") == "true";
 		const revise       = $(this).attr("revise") == "true";
 		const validate     = validateForm("form_change_schedule");
-		// const validateTime = checkTimeRange(false, true);
 
 		if (validate) {
 			const feedback = $(this).attr("code") || getFormCode("SCH", dateToday(), id);
@@ -1108,7 +1107,7 @@ $(document).ready(function () {
 				if (!isFromCancelledDocument) {
 					data[`tableData[reviseChangeScheduleID]`] = id;
 					delete data[`tableData[changeScheduleID]`];
-					data["feedback"] = `SCH-${moment("YY")}-00000`;
+					data["feedback"] = getFormCode("SCH", new Date);
 				} else {
 					data[`whereFilter`] = `changeScheduleID = ${id}`;
 				}

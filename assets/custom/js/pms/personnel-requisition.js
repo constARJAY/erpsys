@@ -13,7 +13,7 @@ $(document).ready(function() {
 	//------ END MODULE FUNCTION IS ALLOWED UPDATE-----
 
     // ----- MODULE APPROVER -----
-	const moduleApprover = getModuleApprover("Personel Requisition");
+	const moduleApprover = getModuleApprover(50);
 	// ----- END MODULE APPROVER -----
 
 
@@ -122,15 +122,15 @@ $(document).ready(function() {
 
 	function updateURL(view_id = 0, isAdd = false, isRevise = false) {
 		if (view_id && !isAdd) {
-			window.history.pushState("", "", `${base_url}pms/personel_requisition?view_id=${view_id}`);
+			window.history.pushState("", "", `${base_url}pms/personnel_requisition?view_id=${view_id}`);
 		} else if (isAdd) {
 			if (view_id && isRevise) {
-				window.history.pushState("", "", `${base_url}pms/personel_requisition?add=${view_id}`);
+				window.history.pushState("", "", `${base_url}pms/personnel_requisition?add=${view_id}`);
 			} else {
-				window.history.pushState("", "", `${base_url}pms/personel_requisition?add`);
+				window.history.pushState("", "", `${base_url}pms/personnel_requisition?add`);
 			}
 		} else {
-			window.history.pushState("", "", `${base_url}pms/personel_requisition`);
+			window.history.pushState("", "", `${base_url}pms/personnel_requisition`);
 		}
 	}
 	// ----- END VIEW DOCUMENT -----
@@ -172,13 +172,14 @@ $(document).ready(function() {
 					{ targets: 0,  width: 100 },
 					{ targets: 1,  width: 150 },
 					{ targets: 2,  width: 150 },
-					{ targets: 3,  width: 250 },
-					{ targets: 4,  width: 150 },
-					{ targets: 5,  width: 180 },
+					{ targets: 3,  width: 150 },
+					{ targets: 4,  width: 250 },
+					{ targets: 5,  width: 150 },
 					{ targets: 6,  width: 180 },
 					{ targets: 7,  width: 180 },
-					{ targets: 8,  width: 80  },
-					{ targets: 9, width: 220 },
+					{ targets: 8,  width: 180 },
+					{ targets: 9,  width: 80  },
+					{ targets: 10, width: 220 },
 				],
 			});
 
@@ -195,13 +196,14 @@ $(document).ready(function() {
 					{ targets: 0,  width: 100 },
 					{ targets: 1,  width: 150 },
 					{ targets: 2,  width: 150 },
-					{ targets: 3,  width: 250 },
-					{ targets: 4,  width: 150 },
-					{ targets: 5,  width: 180 },
+					{ targets: 3,  width: 150 },
+					{ targets: 4,  width: 250 },
+					{ targets: 5,  width: 150 },
 					{ targets: 6,  width: 180 },
 					{ targets: 7,  width: 180 },
-					{ targets: 8,  width: 80  },
-					{ targets: 9, width: 220 },
+					{ targets: 8,  width: 180 },
+					{ targets: 9,  width: 80  },
+					{ targets: 10, width: 220 },
 				],
 			});
 	}
@@ -259,7 +261,12 @@ $(document).ready(function() {
 			`requisitionID,
 			requisitionRemarks,
 			designationName,
-			departmentName, 
+			departmentName,
+			CASE 
+				WHEN personnelOption = 1 THEN 'Permanent'
+				WHEN personnelOption = 2 THEN 'Non-Permanent'
+				WHEN personnelOption = 3 THEN 'Other Justifications'
+				END as natureRequest, 
 			personnelDescription,
 			requisitionStatus,
 			approversID,
@@ -278,7 +285,8 @@ $(document).ready(function() {
                 <tr style="white-space: nowrap">
 					<th>Document No.</th>
 					<th>Prepared By</th>
-					<th>Requested Designation</th>
+					<th>Open Designation</th>
+					<th>Nature of Request</th>
 					<th>Description</th>
 					<th>Current Approver</th>
 					<th>Date Created</th>
@@ -298,6 +306,7 @@ $(document).ready(function() {
 				designationName,
 				requisitionRemarks,
 				personnelDescription,
+				natureRequest,
 				requisitionStatus,
 				approversID,
 				approversDate,
@@ -333,6 +342,7 @@ $(document).ready(function() {
 						</div>
 						<small style="color:#848482;">${departmentName || '-'}</small>
 					</td>
+					<td>${natureRequest}</td>
 					<td>${personnelDescription}</td>
 					<td>
 						${employeeFullname(getCurrentApprover(approversID, approversDate, requisitionStatus, true))}
@@ -374,6 +384,11 @@ $(document).ready(function() {
 			designationName,
 			departmentName, 
 			personnelDescription,
+			CASE 
+				WHEN personnelOption = 1 THEN 'Permanent'
+				WHEN personnelOption = 2 THEN 'Non-Permanent'
+				WHEN personnelOption = 3 THEN 'Other Justifications'
+				END as natureRequest,
 			requisitionStatus,
 			approversID,
 			approversDate,
@@ -391,7 +406,8 @@ $(document).ready(function() {
                 <tr style="white-space: nowrap">
 					<th>Document No.</th>
 					<th>Prepared By</th>
-					<th>Requested Designation</th>
+					<th>Open Designation</th>
+					<th>Nature of Request</th>
 					<th>Description</th>
 					<th>Current Approver</th>
 					<th>Date Created</th>
@@ -411,6 +427,7 @@ $(document).ready(function() {
 				designationName,
 				requisitionRemarks,
 				personnelDescription,
+				natureRequest,
 				requisitionStatus,
 				approversID,
 				approversDate,
@@ -445,6 +462,7 @@ $(document).ready(function() {
 						</div>
 						<small style="color:#848482;">${departmentName || '-'}</small>
 					</td>
+				<td>${natureRequest}</td>
 				<td>${personnelDescription}</td>
                 <td>
                     ${employeeFullname(getCurrentApprover(approversID, approversDate, requisitionStatus, true))}
@@ -688,7 +706,7 @@ $(document).ready(function() {
             let thisValue   =   $(this).val();
             designationList (thisValue,"");
             reportEmployeeList(thisValue,"");
-            initAll();
+            // initAll();
         });
 
         $(document).on("change","#designationID",function(){
@@ -696,7 +714,7 @@ $(document).ready(function() {
             let departmentID = $(this).find(":selected").attr("departmentid");
             // reportEmployeeList(thisValue,departmentID,"");
             reportEmployeeList2(thisValue,departmentID,"");
-            initAll();
+            // initAll();
         });
     
 
@@ -868,7 +886,7 @@ $(document).ready(function() {
                 <div class="form-group">
                     <label>Description ${!disabled ? "<code>*</code>" : ""}</label>
                     <textarea class="form-control validate"
-                        data-allowcharacters="[a-z][A-Z][0-9][.][,][?][!][/][;][:][']["][-][_][(][)][%][&][*][ ]"
+                        data-allowcharacters="[a-z][A-Z][0-9][.][,][?][!][/][;][:]['][''][-][_][(][)][%][&][*][ ]"
                         minlength="2"
                         maxlength="325"
                         id="personnelDescription"
@@ -1011,11 +1029,11 @@ $(document).ready(function() {
 						type="radio"  
 						name="personnelOption" 
 						value="2"
-						requisitionID = ${requisitionID} 
-						status =${requisitionStatus}
-						radioGroup2=${radioGroup2}
-						isRevise = ${isRevise}
-						personnelDuration =${personnelDuration}
+						requisitionID = "${requisitionID}"
+						status ="${requisitionStatus}"
+						radioGroup2="${radioGroup2}"
+						isRevise = "${isRevise}"
+						personnelDuration ="${personnelDuration}"
 						${personnelOption == 2  ? "checked":""}
 						${disabled}>
                         <span class="checkmark"></span>
@@ -1033,10 +1051,10 @@ $(document).ready(function() {
 						type="radio"  
 						name="personnelOption" 
 						value="3"
-						requisitionID = ${requisitionID} 
-						status =${requisitionStatus}
-						isRevise = ${isRevise}
-						personnelOthers =${personnelOthers}
+						requisitionID ="${requisitionID}"
+						status ="${requisitionStatus}"
+						isRevise = "${isRevise}"
+						personnelOthers ="${personnelOthers}"
 						${personnelOption == 3  ? "checked":""}
 						${disabled}>
                         <span class="checkmark"></span>
@@ -1052,7 +1070,7 @@ $(document).ready(function() {
                 <div class="form-group">
                     <div class="text-primary font-weight-bold mb-2" style="font-size: 1.5rem;">Qualifications Required ${!disabled ? "<code>*</code>" : ""}</div>
                     <textarea 
-                    data-allowcharacters="[a-z][A-Z][0-9][.][,][?][!][/][;][:][']["][-][_][(][)][%][&][*][ ]"
+                    data-allowcharacters="[a-z][A-Z][0-9][.][,][?][!][/][;][:]['][''][-][_][(][)][%][&][*][ ]"
                     minlength="2"
                     rows="5" 
                     style="resize: none" 
@@ -1069,7 +1087,7 @@ $(document).ready(function() {
                     <div class="text-primary font-weight-bold mt-2 mb-2" style="font-size: 1.5rem;">Brief Statement of
                     Duties ${!disabled ? "<code>*</code>" : ""}</div>
                     <textarea 
-                    data-allowcharacters="[a-z][A-Z][0-9][.][,][?][!][/][;][:][']["][-][_][(][)][%][&][*][ ]"
+                    data-allowcharacters="[a-z][A-Z][0-9][.][,][?][!][/][;][:]['][''][-][_][(][)][%][&][*][ ]"
                     minlength="2"
                     rows="5" 
                     style="resize: none" 
@@ -1191,6 +1209,12 @@ $(document).ready(function() {
                 }
                 $("#option2 li").fadeOut(1000).remove();
                 $("#option3 li").fadeOut(1000).remove();
+
+				$("[name=salaryPackage]").addClass("required");
+				$("#invalid-salaryPackage").text("");
+				$("[name=salaryPackage]").prop("disabled",false);
+				$("[name=salaryPackage]").attr("min",".01");
+				
                 
         }else if(val ==2 ){
             html=`  <li>
@@ -1209,16 +1233,23 @@ $(document).ready(function() {
                     <ul style="list-style-type:none!important">
                         <li class="form-group">
                             <label for="">Duration:</label>
-                            <input 
-                            type="text" 
-                            data-allowcharacters="[0-9][.][,][?][!][/][;][:][']["][-][_][(][)][%][&][*][ ]"
-                            minlength="2"
-                            maxlength="325"
-                            class="form-control" 
-                            value="${personnelDuration}"
-                            id="personnelDuration"
-                            name="personnelDuration"
-							${radioGroup2 == 2 && (status =="0" || isRevise) ? "" :"readonly"}>
+
+							<div>
+								<input 
+								type="text" 
+								data-allowcharacters="[0-9]"
+								minlength="1"
+								maxlength="3"
+								class="form-control text-right w-50" 
+								style="display: inline"; 
+								value="${personnelDuration}"
+
+								id="personnelDuration"
+								name="personnelDuration"
+								${radioGroup2 == 2 && (status =="0" || isRevise) ? "" :"readonly"}>
+								<label for="personnelDuration">hours</label>
+							</div>
+                           
                             <div class="invalid-feedback d-block" id="invalid-personnelDuration"></div>
                         </li>
                     </ul>
@@ -1227,6 +1258,14 @@ $(document).ready(function() {
                 if($("#option2").children().length == 0){
                     $(html).hide().appendTo("#option2").fadeIn(1000);
                 }
+
+				if(radioGroup2 ==2){
+					$("[name=salaryPackage]").removeClass("required").removeClass("validated").removeClass("is-invalid");
+					$("#invalid-salaryPackage").text("");
+					$("[name=salaryPackage]").prop("disabled",true);
+					$("[name=salaryPackage]").attr("min","0");
+					$("[name=salaryPackage]").val(0);
+				}
                 $("#option1 li").fadeOut(1000).remove();
                 $("#option3 li").fadeOut(1000).remove();
         }else if(val==3){
@@ -1234,7 +1273,7 @@ $(document).ready(function() {
                     <input 
                     type="text" 
                     class="form-control mt-2 mb-2 validate" 
-                    data-allowcharacters="[a-z][A-Z][0-9][.][,][?][!][/][;][:][']["][-][_][(][)][%][&][*][ ]"
+                    data-allowcharacters="[a-z][A-Z][0-9][.][,][?][!][/][;][:]['][''][-][_][(][)][%][&][*][ ]"
                     minlength="2"
                     maxlength="325"
                     value="${personnelOthers}" 
@@ -1249,8 +1288,14 @@ $(document).ready(function() {
                 }
                 $("#option1 li").fadeOut(1000).remove();
                 $("#option2 li").fadeOut(1000).remove();
+
+				$("[name=salaryPackage]").addClass("required");
+				$("#invalid-salaryPackage").text("");
+				$("[name=salaryPackage]").prop("disabled",false);
+				$("[name=salaryPackage]").attr("min",".01");
+			
         }
-        initAll();
+        initSelect2();
 
        
 
@@ -1265,11 +1310,15 @@ $(document).ready(function() {
             $("#personnelReplacement").addClass("validate").removeClass("is-valid");
             $("#personnelReplacement").attr("required","");
             $("#personnelReplacement").prop("disabled",false);
+
+		
         }else{
             $("#personnelReplacement").removeClass("validate").removeClass("is-invalid").removeClass("is-valid");
 
             $("#personnelReplacement").removeAttr("required");
             $("#personnelReplacement").prop("disabled",true);
+
+			
 
             // $("#personnelReplacement").val(0).trigger('change.select2');
             // $('#personnelReplacement option:eq(0)').prop('selected',true);
@@ -1282,19 +1331,34 @@ $(document).ready(function() {
 
     // -------- RADIO BUTTON #2 ----------------
     $(document).on("click","[name='radioGroup2']",function(){
+	
         var radioVal = $(this).val() || 0;
         if(radioVal == 2){
             $("#personnelDuration").addClass("validate").removeClass("is-valid");
             $("#personnelDuration").attr("required","");
             $("#personnelDuration").prop("readonly",false);
+
+			$("[name=salaryPackage]").removeClass("required").removeClass("validated").removeClass("is-invalid");
+            $("#invalid-salaryPackage").text("");
+            $("[name=salaryPackage]").prop("disabled",true);
+            $("[name=salaryPackage]").attr("min","0");
+            $("[name=salaryPackage]").val(0);
         }else{
             $("#personnelDuration").removeClass("validate").removeClass("is-invalid").removeClass("is-valid");
 
             $("#personnelDuration").removeAttr("required");
             $("#personnelDuration").prop("readonly",true);
+            $("#personnelDuration").val("");
 
             $("#personnelReplacement").val("");
             $("#invalid-personnelDuration").text("");
+
+			
+			$("[name=salaryPackage]").addClass("required");
+			$("#invalid-salaryPackage").text("");
+            $("[name=salaryPackage]").prop("disabled",false);
+            $("[name=salaryPackage]").attr("min",".01");
+            
         }
     
     });
@@ -1649,7 +1713,7 @@ $(document).ready(function() {
                 let notificationData = false;
                 if (employeeID != sessionID) {
                     notificationData = {
-                        moduleID:                44,
+                        moduleID:                50,
                         notificationTitle:       "Personnel Requisition",
                         notificationDescription: `${employeeFullname(sessionID)} asked for your approval.`,
                         notificationType:        2,
@@ -1702,7 +1766,7 @@ $(document).ready(function() {
 			if (isImLastApprover(approversID, approversDate)) {
 				status = 2;
 				notificationData = {
-					moduleID:                44,
+					moduleID:                50,
 					tableID:                 id,
 					notificationTitle:       "Personnel Requisition",
 					notificationDescription: `${feedback}: Your request has been approved.`,
@@ -1712,7 +1776,7 @@ $(document).ready(function() {
 			} else {
 				status = 1;
 				notificationData = {
-					moduleID:                44,
+					moduleID:                50,
 					tableID:                 id,
 					notificationTitle:       "Personnel Requisition",
 					notificationDescription: `${employeeFullname(employeeID)} asked for your approval.`,
@@ -1784,7 +1848,7 @@ $(document).ready(function() {
 				data.append("updatedBy", sessionID);
 
 				let notificationData = {
-					moduleID:                44,
+					moduleID:                50,
 					tableID: 				 id,
 					notificationTitle:       "Personnel Requisition",
 					notificationDescription: `${feedback}: Your request has been denied.`,
