@@ -1171,7 +1171,7 @@ $(document).ready(function() {
 			 iii.itemCode,
 			 iii.createdAt,
 			 isit.itemName,
-			 iri.brandName as itemBrandName,
+			 iri.brandName,
 			 iri.itemUom,
 			 iis.inventoryStorageCode,
 			 iis.inventoryStorageOfficeName,

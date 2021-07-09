@@ -176,10 +176,8 @@ $(document).ready(function() {
 					{ targets: 4,  width: 250 },
 					{ targets: 5,  width: 150 },
 					{ targets: 6,  width: 180 },
-					{ targets: 7,  width: 180 },
-					{ targets: 8,  width: 180 },
-					{ targets: 9,  width: 80  },
-					{ targets: 10, width: 220 },
+					{ targets: 7,  width: 80  },
+					{ targets: 8, width: 220 },
 				],
 			});
 
@@ -200,10 +198,8 @@ $(document).ready(function() {
 					{ targets: 4,  width: 250 },
 					{ targets: 5,  width: 150 },
 					{ targets: 6,  width: 180 },
-					{ targets: 7,  width: 180 },
-					{ targets: 8,  width: 180 },
-					{ targets: 9,  width: 80  },
-					{ targets: 10, width: 220 },
+					{ targets: 7,  width: 80  },
+					{ targets: 8, width: 220 },
 				],
 			});
 	}
@@ -289,9 +285,7 @@ $(document).ready(function() {
 					<th>Nature of Request</th>
 					<th>Description</th>
 					<th>Current Approver</th>
-					<th>Date Created</th>
-					<th>Date Submitted</th>
-					<th>Date Approved</th>
+					<th>Date</th>
 					<th>Status</th>
 					<th>Remarks</th>
                 </tr>
@@ -342,18 +336,16 @@ $(document).ready(function() {
 						</div>
 						<small style="color:#848482;">${departmentName || '-'}</small>
 					</td>
-					<td>${natureRequest}</td>
-					<td>${personnelDescription}</td>
+					<td>${natureRequest || '-'}</td>
+					<td>${personnelDescription || '-'}</td>
 					<td>
 						${employeeFullname(getCurrentApprover(approversID, approversDate, requisitionStatus, true))}
 					</td>
-					<td>${dateCreated}</td>
-					<td>${dateSubmitted}</td>
-					<td>${dateApproved}</td>
+					<td>${getDocumentDates(dateCreated, dateSubmitted, dateApproved)}</td>
 					<td class="text-center">
 						${getStatusStyle(requisitionStatus)}
 					</td>
-					<td>${remarks}</td>
+					<td>${remarks || '-'}</td>
 				</tr>`;
 			}
 		});
@@ -410,9 +402,7 @@ $(document).ready(function() {
 					<th>Nature of Request</th>
 					<th>Description</th>
 					<th>Current Approver</th>
-					<th>Date Created</th>
-					<th>Date Submitted</th>
-					<th>Date Approved</th>
+					<th>Date</th>
 					<th>Status</th>
 					<th>Remarks</th>
                 </tr>
@@ -462,18 +452,16 @@ $(document).ready(function() {
 						</div>
 						<small style="color:#848482;">${departmentName || '-'}</small>
 					</td>
-				<td>${natureRequest}</td>
-				<td>${personnelDescription}</td>
+				<td>${natureRequest || '-'}</td>
+				<td>${personnelDescription || '-'}</td>
                 <td>
                     ${employeeFullname(getCurrentApprover(approversID, approversDate, requisitionStatus, true))}
                 </td>
-				<td>${dateCreated}</td>
-				<td>${dateSubmitted}</td>
-				<td>${dateApproved}</td>
+				<td>${getDocumentDates(dateCreated, dateSubmitted, dateApproved)}</td>
                 <td class="text-center">
                     ${getStatusStyle(requisitionStatus)}
                 </td>
-				<td>${remarks}</td>
+				<td>${remarks || '-'}</td>
             </tr>`;
 		});
 
@@ -1007,9 +995,9 @@ $(document).ready(function() {
                         value="1" 
                         class=""
                         id="personnelOption"
-						requisitionID = ${requisitionID} 
+						requisitionID =${requisitionID} 
 						status =${requisitionStatus}
-						radioGroup1 = ${radioGroup1}
+						radioGroup1 =${radioGroup1}
 						isRevise = ${isRevise}
 						personnelReplacement = ${personnelReplacement}
 						${personnelOption == 1  ? "checked":""}
@@ -1029,11 +1017,11 @@ $(document).ready(function() {
 						type="radio"  
 						name="personnelOption" 
 						value="2"
-						requisitionID = "${requisitionID}"
-						status ="${requisitionStatus}"
-						radioGroup2="${radioGroup2}"
-						isRevise = "${isRevise}"
-						personnelDuration ="${personnelDuration}"
+						requisitionID =${requisitionID}
+						status =${requisitionStatus}
+						radioGroup2=${radioGroup2}
+						isRevise = ${isRevise}
+						personnelDuration =${personnelDuration}
 						${personnelOption == 2  ? "checked":""}
 						${disabled}>
                         <span class="checkmark"></span>
@@ -1051,10 +1039,10 @@ $(document).ready(function() {
 						type="radio"  
 						name="personnelOption" 
 						value="3"
-						requisitionID ="${requisitionID}"
-						status ="${requisitionStatus}"
-						isRevise = "${isRevise}"
-						personnelOthers ="${personnelOthers}"
+						requisitionID =${requisitionID}
+						status =${requisitionStatus}
+						isRevise = ${isRevise}
+						personnelOthers =${personnelOthers}
 						${personnelOption == 3  ? "checked":""}
 						${disabled}>
                         <span class="checkmark"></span>
@@ -1132,6 +1120,12 @@ $(document).ready(function() {
 		}, 300);
 	}
 	// ----- END FORM CONTENT -----
+
+	$(document).on("keypress keyup",".setHours",function(){
+		if($(this).val()== 0){
+			$(this).val("");
+		}
+	})
 
     // -------- CHECKBOX REPLICATE RADIO BUTTON----------------
     $(document).on("change","[name='personnelOption']",function(){
@@ -1212,7 +1206,7 @@ $(document).ready(function() {
 
 				$("[name=salaryPackage]").addClass("required");
 				$("#invalid-salaryPackage").text("");
-				$("[name=salaryPackage]").prop("disabled",false);
+				// $("[name=salaryPackage]").prop("disabled",false);
 				$("[name=salaryPackage]").attr("min",".01");
 				
                 
@@ -1240,7 +1234,8 @@ $(document).ready(function() {
 								data-allowcharacters="[0-9]"
 								minlength="1"
 								maxlength="3"
-								class="form-control text-right w-50" 
+								min="1"
+								class="form-control text-right w-50 setHours" 
 								style="display: inline"; 
 								value="${personnelDuration}"
 
@@ -1262,7 +1257,7 @@ $(document).ready(function() {
 				if(radioGroup2 ==2){
 					$("[name=salaryPackage]").removeClass("required").removeClass("validated").removeClass("is-invalid");
 					$("#invalid-salaryPackage").text("");
-					$("[name=salaryPackage]").prop("disabled",true);
+					// $("[name=salaryPackage]").prop("disabled",true);
 					$("[name=salaryPackage]").attr("min","0");
 					$("[name=salaryPackage]").val(0);
 				}
@@ -1291,7 +1286,7 @@ $(document).ready(function() {
 
 				$("[name=salaryPackage]").addClass("required");
 				$("#invalid-salaryPackage").text("");
-				$("[name=salaryPackage]").prop("disabled",false);
+				// $("[name=salaryPackage]").prop("disabled",false);
 				$("[name=salaryPackage]").attr("min",".01");
 			
         }
@@ -1340,7 +1335,7 @@ $(document).ready(function() {
 
 			$("[name=salaryPackage]").removeClass("required").removeClass("validated").removeClass("is-invalid");
             $("#invalid-salaryPackage").text("");
-            $("[name=salaryPackage]").prop("disabled",true);
+
             $("[name=salaryPackage]").attr("min","0");
             $("[name=salaryPackage]").val(0);
         }else{
@@ -1356,7 +1351,7 @@ $(document).ready(function() {
 			
 			$("[name=salaryPackage]").addClass("required");
 			$("#invalid-salaryPackage").text("");
-            $("[name=salaryPackage]").prop("disabled",false);
+          
             $("[name=salaryPackage]").attr("min",".01");
             
         }

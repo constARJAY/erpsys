@@ -50,6 +50,17 @@ $(document).ready(function(){
             async:    false,
             dataType: 'json',
             data:     {tableName: "ims_inventory_item_tbl as item INNER JOIN ims_inventory_classification_tbl as classification USING(classificationID) INNER JOIN ims_inventory_category_tbl as category USING(categoryID)",
+                        columnName: `CONCAT('ITM','-',classification.classificationShortcut,'-',SUBSTR(item.createdAt,3,2),'-',LPAD(item.itemID, 5, '0')) as itemCode,
+                                    item.itemID,
+                                    item.itemName,
+                                    item.unitOfMeasurementID,
+                                    item.brandName,
+                                    category.categoryName,
+                                    classification.classificationName,
+                                    item.itemSize,
+                                    item.itemDescription,
+                                    item.reOrderLevel,
+                                    item.itemStatus`,
                         tableWhere: "categoryStatus=1"},
             beforeSend: function() {
                 $("#table_content").html(preloader);

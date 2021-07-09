@@ -166,14 +166,12 @@ function initDataTables() {
             columnDefs: [
                 { targets: 0,  width: 100 },
                 { targets: 1,  width: 150 },
-                { targets: 2,  width: 100 },
+                { targets: 2,  width: 120 },
                 { targets: 3,  width: 250 },
                 { targets: 4,  width: 150 },
-                { targets: 5,  width: 200 },
-                { targets: 6,  width: 200 },
-                { targets: 7,  width: 200 },
-                { targets: 8,  width: 80  },
-                { targets: 9, width: 250  },
+                { targets: 5,  width: 180 },
+                { targets: 6,  width: 80  },
+                { targets: 7,  width: 220 },
             ],
         });
 
@@ -189,14 +187,12 @@ function initDataTables() {
             columnDefs: [
                 { targets: 0,  width: 100 },
                 { targets: 1,  width: 150 },
-                { targets: 2,  width: 100 },
+                { targets: 2,  width: 120 },
                 { targets: 3,  width: 250 },
                 { targets: 4,  width: 150 },
-                { targets: 5,  width: 200 },
-                { targets: 6,  width: 200 },
-                { targets: 7,  width: 200 },
-                { targets: 8,  width: 80  },
-                { targets: 9, width: 250  },
+                { targets: 5,  width: 180 },
+                { targets: 6,  width: 80  },
+                { targets: 7,  width: 220 },
             ],
         });
 
@@ -309,9 +305,7 @@ function forApprovalContent() {
                 <th>Reference No.</th>
                 <th>Description</th>
                 <th>Current Approver</th>
-                <th>Date Created</th>
-                <th>Date Submitted</th>
-                <th>Date Approved</th>
+                <th>Date</th>
                 <th>Status</th>
                 <th>Remarks</th>
             </tr>
@@ -361,9 +355,7 @@ function forApprovalContent() {
                 <td>
                     ${employeeFullname(getCurrentApprover(approversID, approversDate, voucherStatus, true))}
                 </td>
-                <td>${dateCreated}</td>
-                <td>${dateSubmitted}</td>
-                <td>${dateApproved}</td>
+                <td>${getDocumentDates(dateCreated, dateSubmitted, dateApproved)}</td>
                 <td class="text-center">
                     ${getStatusStyle(voucherStatus)}
                 </td>
@@ -406,9 +398,7 @@ function myFormsContent() {
                 <th>Reference No.</th>
                 <th>Description</th>
                 <th>Current Approver</th>
-                <th>Date Created</th>
-                <th>Date Submitted</th>
-                <th>Date Approved</th>
+                <th>Date</th>
                 <th>Status</th>
                 <th>Remarks</th>
             </tr>
@@ -456,9 +446,7 @@ function myFormsContent() {
             <td>
                 ${employeeFullname(getCurrentApprover(approversID, approversDate, voucherStatus, true))}
             </td>
-            <td>${dateCreated}</td>
-            <td>${dateSubmitted}</td>
-            <td>${dateApproved}</td>
+            <td>${getDocumentDates(dateCreated, dateSubmitted, dateApproved)}</td>
             <td class="text-center">
                 ${getStatusStyle(voucherStatus)}
             </td>

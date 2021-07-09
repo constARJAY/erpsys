@@ -10,7 +10,7 @@ $(document).on("click",".addClassification", function(){
     let modal_classification_content    =   ` 
                                             <div class="modal-body">  
                                                 <form id="modal_classification_form"> 
-                                                    <div class="col-md-12 col-sm-12">
+                                                    <div class="col-md-8 col-sm-8">
                                                         <div class="form-group">
                                                             <label for="">Classification Name</label>
                                                             <input type="text" class="form-control validate" name="classificationName" unique id="input_classificationName" 
@@ -18,6 +18,16 @@ $(document).on("click",".addClassification", function(){
                                                             <div class="invalid-feedback d-block" id="invalid-input_classificationName"></div>
                                                         </div>
                                                     </div>
+
+                                                    <div class="col-md-4 col-sm-4">
+                                                        <div class="form-group">
+                                                            <label for="">Classification Shortcut</label>
+                                                            <input type="text" class="form-control validate" name="classificationShortcut" unique id="input_classificationShortcut" 
+                                                                    data-allowcharacters="[A-Z][a-z]" minlength="2" maxlength="3" required>
+                                                            <div class="invalid-feedback d-block" id="invalid-input_classificationShortcut"></div>
+                                                        </div>
+                                                    </div>  
+
                                                     <div class="col-md-12 col-sm-12">
                                                         <div class="form-group">
                                                             <label for="">Classification Status</label>
@@ -52,7 +62,7 @@ $(document).on("click",".editClassification", function(){
     let modal_classification_content    =   `   
                                             <div class="modal-body">  
                                                 <form id="modal_classification_form"> 
-                                                    <div class="col-md-12 col-sm-12">
+                                                    <div class="col-md-8 col-sm-8">
                                                         <div class="form-group" style="padding-left:0!important;padding-right:0!important">
                                                             <label for="">Classification Name</label>
                                                             <input 
@@ -67,6 +77,14 @@ $(document).on("click",".editClassification", function(){
                                                             <div class="invalid-feedback d-block" id="invalid-input_classificationName"></div>
                                                         </div>
                                                     </div>
+                                                    <div class="col-md-4 col-sm-4">
+                                                        <div class="form-group">
+                                                            <label for="">Classification Shortcut</label>
+                                                            <input type="text" class="form-control validate" name="classificationShortcut" unique id="input_classificationShortcut" 
+                                                                    data-allowcharacters="[A-Z][a-z]" minlength="2" maxlength="3" required>
+                                                            <div class="invalid-feedback d-block" id="invalid-input_classificationShortcut"></div>
+                                                        </div>
+                                                    </div>  
                                                     <div class="col-md-12 col-sm-12">
                                                         <div class="form-group" style="padding-left:0!important;padding-right:0!important">
                                                             <label for="">Classification Status</label>

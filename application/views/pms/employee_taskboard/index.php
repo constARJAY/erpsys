@@ -158,7 +158,7 @@ select{
                         <li class="breadcrumb-item active">Employee Taskboard</li>
                     </ul>
                     <h1 class="mt-3">Employee Taskboard</h1>
-                    <span>This module is used to manage the project timelines and milestones with man hours.</span>
+                    <span>This module is used to manage and monitor the project progress and status.</span>
 				</div>
 				<div class="col-lg-6 col-md-12 text-md-right" id="headerButton">
 				</div>
