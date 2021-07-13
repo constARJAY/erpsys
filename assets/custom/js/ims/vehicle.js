@@ -2,7 +2,7 @@ $(document).ready(function(){
 
     //------ MODULE FUNCTION IS ALLOWED UPDATE-----
 
-const allowedUpdate = isUpdateAllowed(4);
+const allowedUpdate = isUpdateAllowed(135);
 if(!allowedUpdate){
     $("#modal_vehicle_content").find("input, select, textarea").each(function(){
         $(this).attr("disabled",true);
@@ -68,7 +68,7 @@ function tableContent() {
                     <tr>
                         <th>Vehicle Code</th>
                         <th>Vehicle Name</th>
-                        <th>Plate Number</th>
+                        <th>Plate Number/Conduction Number</th>
                         <th>Gas Type</th>
                         <th>Status</th>
                     </tr>
@@ -106,7 +106,7 @@ function tableContent() {
                 feedback="${item.vehicleName}">
                     <td>${item.vehicleCode}</td>
                     <td>${item.vehicleName}</td>
-                    <td>${item.vehiclePlateNumber}</td>
+                    <td class="text-center">${item.vehiclePlateNumber}</td>
                     <td>${gasType}</td>
                     <td class="text-center">${status}</td>
                 </tr>`;
@@ -169,9 +169,9 @@ tableContent();
                             class="form-control validate" 
                             name="vehicleName" 
                             id="input_vehicleName" 
-                            data-allowcharacters="[A-Z][a-z][0-9][ ]['][-]" 
-                            minlength="2" 
-                            maxlength="100" 
+                            data-allowcharacters="[A-Z][a-z][0-9][.][,][:]['][-][(][)][ ]" 
+                            minlength="3" 
+                            maxlength="75" 
                             required 
                           
                             value="${vehicleName}"
@@ -181,13 +181,13 @@ tableContent();
                 </div>
                 <div class="col-md-6 col-sm-12">
                     <div class="form-group">
-                        <label>Plate Number <span class="text-danger font-weight-bold">*</span></label>
+                        <label>Plate Number/Conduction Number <span class="text-danger font-weight-bold">*</span></label>
                         <input 
                             type="text" 
                             class="form-control validate" 
                             name="vehiclePlateNumber" 
                             id="input_vehiclePlateNumber" 
-                            data-allowcharacters="[A-Z][0-9][-]" 
+                            data-allowcharacters="[A-Z][0-9][-][ ]" 
                             minlength="1" 
                             maxlength="8" 
                             required 
@@ -206,17 +206,18 @@ tableContent();
                             <div>
                                 <input 
                                 type="text" 
-                                class="form-control amount" 
+                                class="form-control amount text-right" 
                                 name="vehicleFuelConsumption" 
                                 id="input_vehicleFuelConsumption" 
                                 data-allowcharacters="[0-9][.]" 
-                                minlength="2" 
-                                maxlength="100" 
+                                minlength="1" 
+                                maxlength="9"
+                                min="1" 
                                 required 
-                                style="display: inline;width:80%;" 
+                                style="display: inline;width:90%;" 
                                 value="${vehicleFuelConsumption}"
                                 autocomplete="off">
-								<label for="input_vehicleFuelConsumption">km/l</label>
+								<label for="input_vehicleFuelConsumption">km/L</label>
 							</div>
                         <div class="invalid-feedback d-block" id="invalid-input_vehicleFuelConsumption"></div>
                     </div>
@@ -270,6 +271,31 @@ tableContent();
     
 } 
 // ----- END MODAL CONTENT -----
+
+$(document).on("change", "#input_classificationStatus", function(){
+    if($(this).data("classificationid")){
+        let thisID              =   $(this).data("classificationid");
+        let thisValue           =   $(this).val();
+        let attrID              =   $(this).attr("id");
+        let categoryCondition   =   getTableData("ims_inventory_category_tbl",`COUNT(categoryID) AS categoryLength`,`classificationID='${thisID}' AND categoryStatus = '1' `);
+        let itemCondition       =   getTableData("ims_inventory_item_tbl", `COUNT(itemID) AS itemLength`, `classificationID='${thisID}' AND itemStatus = '1' `)
+        console.log(categoryCondition[0].categoryLength+" | "+ itemCondition[0].itemLength);
+        if((categoryCondition[0].categoryLength > 0 || itemCondition[0].itemLength > 0) && thisValue == 0 ){
+            setTimeout(function(){
+                $("#"+attrID).removeClass("is-valid").removeClass("validated").addClass("is-invalid");
+                $(".select2-selection").removeClass("no-error").addClass("has-error");
+                $("#invalid-input_classificationStatus").text(`This record is currently in use!`);
+            },180);
+            $("#btnUpdate").prop("disabled", true);
+        }else{
+            $("#"+attrID).removeClass("is-invalid");
+            $("#invalid-input_classificationStatus").text(``);
+            $("#btnUpdate").prop("disabled", false);
+            $(".select2-selection").addClass("no-error").removeClass("has-error");
+        }
+    }
+
+});
 
 // ----- OPEN ADD MODAL -----
 $(document).on("click", "#btnAdd", function() {

@@ -9,14 +9,14 @@
 						<li class="breadcrumb-item active"  id="inv_mainItem_breadcrumbs">Vehicle Masterfiles</li>
                         <!-- <li class="breadcrumb-item" id="inv_item_breadcrumbs" style="visibility:hidden;"><i class="icon-social-dropbox" ></i> &nbsp;Add Item</li> -->
 					</ul>
-					<h1 class="mt-3" id="inv_headerID">List of Vehicle</h1>
-					<span>This module is used to manage vehicle details.</span>
+					<h1 class="mt-3" id="inv_headerID">List of Vehicles</h1>
+					<span>This module is used to manage the vehicle details.</span>
 				</div>
 				<div class="col-lg-6 col-md-12 text-md-right">
 					<!-- <button class="btn btn-default hidden-xs ml-2">Download Report</button>
                         <button class="btn btn-secondary hidden-xs ml-2">New Report</button> -->
                         <!-- <button type="button" class="btn btn-danger pr-2" id="btnAdd"> <i class="icon-plus" id="btnIcon"></i> &nbsp;Add Item</button> -->
-						<?php if(isCreateAllowed(4)){ ?>
+						<?php if(isCreateAllowed(135)){ ?>
 							<button type="button" class="btn btn-default btn-add" id="btnAdd"> <i class="icon-plus"></i> Add Vehicle</button>
 						<?php  } ?>
                      
