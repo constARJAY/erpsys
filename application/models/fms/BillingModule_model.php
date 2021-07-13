@@ -94,17 +94,16 @@ class BillingModule_model extends CI_Model {
         $billingVatAmount = $data["billingVatAmount"];
         $activityData = [];
         foreach ($activities as $activity) {
-            $totalAmount   = $activity["totalAmount"];
-            $vatAmount     = $billingVatAmount > 0 ? ($totalAmount * 0.12) : 0;
-            $pendingAmount =  $totalAmount - $vatAmount;
             $temp = [
                 "billingID"     => $billingID,
                 "activity"      => $activity["activity"],
+                "vatType"       => $activity["vatType"],
                 "quantity"      => $activity["quantity"],
                 "amount"        => $activity["amount"],
-                "totalAmount"   => $totalAmount,
-                "vatAmount"     => $vatAmount,
-                "pendingAmount" => $totalAmount,
+                "vatAmount"     => $activity["vatAmount"],
+                "totalAmount"   => $activity["totalAmount"],
+                "grandTotalAmount" => $activity["grandTotalAmount"],
+                "pendingAmount" => $activity["grandTotalAmount"],
                 "createdBy"     => $sessionID,
                 "updatedBy"     => $sessionID,
             ];

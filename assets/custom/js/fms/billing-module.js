@@ -49,7 +49,7 @@ $(document).ready(function() {
                 clientPostalCode
             } = client;
 
-            const clientAddress = (clientUnitNumber ? titleCase(clientUnitNumber)+", " : "")+(clientHouseNumber ? titleCase(clientHouseNumber)+", " : "")+(clientStreetName ? titleCase(clientStreetName)+", " : "")+(clientSubdivisionName ? titleCase(clientSubdivisionName)+", " : "")+(clientBarangay ? titleCase(clientBarangay)+", " : "")+(clientCity ? titleCase(clientCity)+", " : "")+(clientProvince ? titleCase(clientProvince)+", " : "")+(clientCountry ? titleCase(clientCountry)+", " : "")+(clientPostalCode ? titleCase(clientPostalCode) : "");
+            const clientAddress = (clientUnitNumber ? titleCase(clientUnitNumber)+" " : "")+(clientHouseNumber ? titleCase(clientHouseNumber)+", " : "")+(clientStreetName ? titleCase(clientStreetName)+", " : "")+(clientSubdivisionName ? titleCase(clientSubdivisionName)+", " : "")+(clientBarangay ? titleCase(clientBarangay)+", " : "")+(clientCity ? titleCase(clientCity)+", " : "")+(clientProvince ? titleCase(clientProvince)+", " : "")+(clientCountry ? titleCase(clientCountry)+", " : "")+(clientPostalCode ? titleCase(clientPostalCode) : "");
             return { clientID, clientName, clientAddress };
         })
     // ----- END GLOBAL VARIABLE -----
@@ -247,6 +247,8 @@ $(document).ready(function() {
                     { targets: 2, width: 100 },
                     { targets: 3, width: 100 },
                     { targets: 4, width: 100 },
+                    { targets: 5, width: 100 },
+                    { targets: 6, width: 100 },
                 ],
             });
 
@@ -268,6 +270,8 @@ $(document).ready(function() {
                     { targets: 1, width: 100 },
                     { targets: 2, width: 100 },
                     { targets: 3, width: 100 },
+                    { targets: 4, width: 100 },
+                    { targets: 5, width: 100 },
                 ],
             });
     }
@@ -299,7 +303,7 @@ $(document).ready(function() {
         if (status == 0) {
             html = `<span class="badge badge-warning w-100">Draft</span>`;
         } else if (status == 1) {
-            html = `<span class="badge badge-outline-success w-100" style="width: 100% !important">Saved</span>`;
+            html = `<span class="badge badge-outline-success w-100" style="width: 100% !important">Submitted</span>`;
         } else if (status == 2) {
             html = `<span class="badge badge-primary w-100">Cancelled</span>`;
         }
@@ -504,10 +508,6 @@ $(document).ready(function() {
             <button type="button" class="btn btn-primary btnAddRow" id="btnAddRow"><i class="fas fa-plus-circle"></i> Add Row</button>
             <button type="button" class="btn btn-danger btnDeleteRow" id="btnDeleteRow" disabled><i class="fas fa-minus-circle"></i> Delete Row/s</button>
         </div>` : "";
-        let billingVat = !readOnly ? `
-        <input type="checkbox" 
-            id="billingVat" 
-            ${billingVatAmount > 0 ? "checked" : ""}>` : "";
         let buttonExcel = billingStatus == 1 ? `
         <div class="w-100 text-right pb-4">
             <button 
@@ -609,7 +609,7 @@ $(document).ready(function() {
                             style="width: 100%"
                             required
                             ${disabled}>
-                            <option selected disabled>Select Bill To</option>    
+                            <option selected disabled>Please select a client</option>    
                             ${getClientList(clientID, clientName, billingStatus)}
                         </select>
                         <div class="d-block invalid-feedback" id="invalid-clientID"></div>
@@ -633,9 +633,11 @@ $(document).ready(function() {
                         <thead>
                             <tr style="white-space: nowrap">
                                 ${tableCheckbox}
-                                <th>Activity ${!disabled ? "<code>*</code>" : ""}</th>
+                                <th>Service ${!disabled ? "<code>*</code>" : ""}</th>
+                                <th>VAT ${!disabled ? "<code>*</code>" : ""}</th>
                                 <th>Quantity ${!disabled ? "<code>*</code>" : ""}</th>
                                 <th>Amount ${!disabled ? "<code>*</code>" : ""}</th>
+                                <th>12% VAT</th>
                                 <th>Total Amount</th>
                             </tr>
                         </thead>
@@ -676,7 +678,7 @@ $(document).ready(function() {
                         </div>
                     </div>
                     <div class="row" style="font-size: 1.1rem">
-                        <div class="col-6 col-lg-7 text-left">${billingVat} 12% VAT: </div>
+                        <div class="col-6 col-lg-7 text-left">12% VAT: </div>
                         <div class="col-6 col-lg-5 text-right text-dark">
                             <span id="billingVatAmount">${formatAmount(billingVatAmount, true)}</span>
                         </div>
@@ -739,6 +741,10 @@ $(document).ready(function() {
             $(`td .billingActivityParent [name="billingActivity"]`, this).attr("id", `billingActivity${i}`);
             $(`td .billingActivityParent .invalid-feedback`, this).attr("id", `invalid-billingActivity${i}`);
 
+            // VAT TYPE
+            $(`td .billingVatTypeParent [name="billingVatType"]`, this).attr("id", `billingVatType${i}`);
+            $(`td .billingVatTypeParent .invalid-feedback`, this).attr("id", `invalid-billingVatType${i}`);
+
             // QUANTITY
             $(`td .billingQuantityParent [name="billingQuantity"]`, this).attr("id", `billingQuantity${i}`);
             $(`td .billingQuantityParent .invalid-feedback`, this).attr("id", `invalid-billingQuantity${i}`);
@@ -746,6 +752,9 @@ $(document).ready(function() {
             // AMOUNT
             $(`td .billingAmountParent [name="billingAmount"]`, this).attr("id", `billingAmount${i}`);
             $(`td .billingAmountParent .invalid-feedback`, this).attr("id", `invalid-billingAmount${i}`);
+
+            // VAT AMOUNT
+            $(`td .billingVatAmount`, this).attr("id", `billingVatAmount${i}`);
 
             // TOTAL AMOUNT
             $(`td .billingTotalAmount`, this).attr("id", `billingTotalAmount${i}`);
@@ -758,8 +767,10 @@ $(document).ready(function() {
     function getItemRow(data = false, readOnly = false) {
         const {
             activity    = "",
+            vatType     = "Non-Vatable",
             quantity    = 0.00,
             amount      = 0.00,
+            vatAmount   = 0.00,
             totalAmount = 0.00
         } = data;
 
@@ -771,10 +782,16 @@ $(document).ready(function() {
                     ${activity}
                 </td>
                 <td class="text-center">
+                    ${vatType}
+                </td>
+                <td class="text-center">
                     ${formatAmount(quantity)} 
                 </td>
                 <td class="text-right">
                     ${formatAmount(amount, true)}
+                </td>
+                <td class="text-right">
+                    ${formatAmount(vatAmount, true)}
                 </td>
                 <td class="text-right">
                     ${formatAmount(totalAmount, true)}
@@ -799,6 +816,24 @@ $(document).ready(function() {
                             maxlength="325"
                             style="resize: none" 
                             required>${activity}</textarea>
+                        <div class="d-block invalid-feedback"></div>
+                    </div>
+                </td>
+                <td>
+                    <div class="form-group billingVatTypeParent mb-0">
+                        <select class="form-control validate select2"
+                            name="billingVatType"
+                            required>
+                            <option disabled>Select VAT</option>
+                            <option value="Non-Vatable" 
+                                ${vatType == "Non-Vatable" ? "selected" : ""}>
+                                Non-Vatable
+                            </option>    
+                            <option value="Vatable" 
+                                ${vatType == "Vatable" ? "selected" : ""}>
+                                Vatable
+                            </option>    
+                        </select>
                         <div class="d-block invalid-feedback"></div>
                     </div>
                 </td>
@@ -838,6 +873,9 @@ $(document).ready(function() {
                     </div>
                 </td>
                 <td class="text-right">
+                    <div class="billingVatAmount">${formatAmount(vatAmount, true)}</div>
+                </td>
+                <td class="text-right">
                     <div class="billingTotalAmount">${formatAmount(totalAmount, true)}</div>
                 </td>
             </tr>`;
@@ -851,11 +889,12 @@ $(document).ready(function() {
 	function updateTotalAmount() {
 		const quantityArr = $.find(`[name="billingQuantity"]`).map(element => getNonFormattedAmount(element.value) || 0);
 		const unitCostArr = $.find(`[name="billingAmount"]`).map(element => getNonFormattedAmount(element.value) || 0);
-        const grandTotal = quantityArr.map((qty, index) => +qty * +unitCostArr[index]).reduce((a,b) => a + b, 0);
+        const grandTotal = quantityArr
+            .map((qty, index) => +qty * +unitCostArr[index])
+            .reduce((a,b) => a + b, 0);
         $("#billingGrandTotal").text(formatAmount(grandTotal, true));
 
-        const isChecked = $(`#billingVat`).prop("checked");
-        const vatAmount = isChecked ? (grandTotal * 0.12) : 0;
+        const vatAmount = $.find(`.billingVatAmount`).map(element => getNonFormattedAmount(element.innerText) || 0).reduce((a,b) => a + b, 0);
         $("#billingVatAmount").text(formatAmount(vatAmount, true));
 
 		const totalAmount = grandTotal - vatAmount;
@@ -922,7 +961,23 @@ $(document).ready(function() {
 
 
     // ----- CLICK VATABLE -----
-    $(document).on("change", `#billingVat`, function() {
+    $(document).on("change", `[name="billingVatType"]`, function() {
+        // updateTotalAmount();
+        const vatType = $(this).val();
+        $parent = $(this).closest("tr");
+        let totalAmount = getNonFormattedAmount($parent.find(".billingTotalAmount").text());
+        let quantity = getNonFormattedAmount($parent.find(`[name="billingQuantity"]`).val());
+        let amount   = getNonFormattedAmount($parent.find(`[name="billingAmount"]`).val());
+        let vatAmount = 0;
+        if (vatType == "Vatable") {
+            vatAmount   = totalAmount * 0.12; 
+            totalAmount = totalAmount - vatAmount;
+        } else {
+            vatAmount   = 0;
+            totalAmount = quantity * amount;
+        }
+        $parent.find(".billingTotalAmount").text(formatAmount(totalAmount, true));
+        $parent.find(".billingVatAmount").text(formatAmount(vatAmount, true));
         updateTotalAmount();
     })
     // ----- END CLICK VATABLE -----
@@ -933,8 +988,12 @@ $(document).ready(function() {
 		const index     = $(this).closest("tr").first().attr("index");
 		const quantity  = +getNonFormattedAmount($(`#billingQuantity${index}`).val());
 		const unitcost  = +getNonFormattedAmount($(`#billingAmount${index}`).val());
-		const totalcost = quantity * unitcost;
-		$(`#billingTotalAmount${index}`).text(formatAmount(totalcost, true));
+        const vatType = $(`#billingVatType${index}`).val();
+		let totalCost = quantity * unitcost;
+        let vatAmount = vatType == "Vatable" ? totalCost * 0.12 : 0;
+		$(`#billingVatAmount${index}`).text(formatAmount(vatAmount, true));
+        totalCost = totalCost - vatAmount;
+		$(`#billingTotalAmount${index}`).text(formatAmount(totalCost, true));
 
 		updateTotalAmount();
 	})
@@ -974,6 +1033,7 @@ $(document).ready(function() {
 		updateTableItems();
 		initAmount();
         initQuantity();
+        initSelect2();
     })
     // ----- END INSERT ROW ITEM -----
 
@@ -1062,12 +1122,15 @@ $(document).ready(function() {
 
         let activities = [];
         $(`.activityTableBody tr`).each(function() {
-            const activity = $(`[name="billingActivity"]`, this).val()?.trim();
-            const quantity = getNonFormattedAmount($(`[name="billingQuantity"]`, this).val());
-            const amount   = getNonFormattedAmount($(`[name="billingAmount"]`, this).val());
-            const totalAmount = quantity * amount;
+            const activity  = $(`[name="billingActivity"]`, this).val()?.trim();
+            const vatType   = $(`[name="billingVatType"]`, this).val();
+            const quantity  = getNonFormattedAmount($(`[name="billingQuantity"]`, this).val());
+            const amount    = getNonFormattedAmount($(`[name="billingAmount"]`, this).val());
+            const vatAmount = getNonFormattedAmount($(`td .billingVatAmount`, this).text());
+            const totalAmount = getNonFormattedAmount($(`td .billingTotalAmount`, this).text());
+            const grandTotalAmount = quantity * amount;
             activities.push({
-                activity, quantity, amount, totalAmount
+                activity, vatType, quantity, amount, vatAmount, totalAmount, grandTotalAmount
             });
         })
 
@@ -1105,7 +1168,7 @@ $(document).ready(function() {
                 break;
             case "submit":
                 swalTitle = `SUBMIT ${title.toUpperCase()}`;
-                swalText  = "Are you sure to save this document?";
+                swalText  = "Are you sure to submit this document?";
                 swalImg   = `${base_url}assets/modal/add.svg`;
                 break;
             case "approve":

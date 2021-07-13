@@ -1,9 +1,3 @@
-<style>
-	.select2-container--bootstrap .select2-selection--multiple .select2-selection__choice {
-		display: grid;
-	}
-</style>
-
 <div class="body_area after_bg">
 	<div class="block-header pb-0">
 		<div class="container">
@@ -32,9 +26,7 @@
 				<div class="card">
 					<div class="card-body">
 						<div class="table-responsive" id="table_content"></div>
-					
 					</div>
-
 				</div>
 			</div>
 		</div>
@@ -43,7 +35,7 @@
 
 <!-- ----- ADD MODAL ----- -->
 <div id="modal_project_list" class="modal custom-modal fade" data-backdrop="static" data-keyboard="false" role="dialog">
-    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+    <div class="modal-dialog modal-dialog-centered modal-md" role="document">
 		<div class="modal-content">
 			<div class="modal-header bg-primary text-light">
 				<h5 class="page-title font-weight-bold">ADD PROJECT</h5>
