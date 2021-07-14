@@ -30,24 +30,99 @@ $(document).ready(function() {
 
 
     // ----- VIEW DOCUMENT -----
-    const getTimelineContent = async (timelineBuilderID) => {
+    const getTimelineContent = async (timelineBuilderID,phaseCode,projectMilestoneName) => {
         let result = false;
         $.ajax({
             method:   "POST",
             url:      "Employee_Taskboard/getTimelineContent",
-            data:     { timelineBuilderID },
+            data:     { timelineBuilderID,phaseCode,projectMilestoneName },
             async:    false,
             dataType: "json",
             success: function(data) {
                 result = [data];
+                // console.log(data)
             }
         })
         return await result;
     }
 
-    function viewDocument(view_id = false, readOnly = false) {
+    //------------ PENDING NOTIFICATION-----------------//
+    function pendingNotification(){
+        const task = getTableData(`pms_employeetaskoard_tbl as pet
+		LEFT JOIN pms_timeline_task_list_tbl as ptt ON ptt.taskID = pet.taskID AND ptt.timelineBuilderID = pet.timelineBuilderID
+		LEFT JOIN pms_timeline_management_tbl as ptm  ON ptm.taskID = ptt.taskID
+		LEFT JOIN pms_milestone_list_tbl as pml ON pml.projectMilestoneID = pet.projectMilestoneID 
+		LEFT JOIN pms_milestone_builder_tbl as pmb ON pmb.milestoneBuilderID = pet.milestoneBuilderID OR pmb.milestoneBuilderID = ptt.milestoneBuilderID `, 
+		`DISTINCT taskboardID,ptt.taskID,assignedEmployee,ptt.taskName,pet.taskStatus,pml.projectMilestoneName,CASE 
+		WHEN pet.taskStartDates = "" THEN ptt.taskEndDate
+		WHEN pet.taskStartDates !="" THEN pet.taskStartDates
+		END taskStartDate,
+		phaseCode `, 
+		"assignedEmployee = "+sessionID);
+		// "assignedEmployee = "+sessionID+" AND (taskStatus !=7 AND taskStatus != 1 )");
+
+		const subTask = getTableData(`pms_employeetaskoard_details_tbl as ped
+		LEFT JOIN pms_timeline_management_tbl as ptm  ON ptm.taskID = ped.taskID
+		LEFT JOIN pms_milestone_list_tbl as pml ON pml.projectMilestoneID = ped.projectMilestoneID
+		LEFT JOIN pms_milestone_builder_tbl as pmb ON pmb.milestoneBuilderID = ped.milestoneBuilderID`, 
+		`DISTINCT subtaskboardID,ped.taskID,subTaskAssignee,ped.subTaskName,ped.subTaskStatus,pml.projectMilestoneName,ped.subTaskStartDates,phaseCode`, 
+		` FIND_IN_SET(${sessionID},replace(ped.subTaskAssignee,'|',','))`);
+		// ` FIND_IN_SET(${sessionID},replace(ped.subTaskAssignee,'|',',')) AND (subTaskStatus !=7 AND subTaskStatus != 1 )`);
+	
+			for(var loop =0; loop<task.length;loop++){
+				
+				(function(index) {
+				
+						var dueDate = task[index].taskStartDate;
+						var phaseCode = task[index].phaseCode;
+						var taskName = task[index].taskName;
+						var status = task[index].taskStatus;
+						var milestoneName = task[index].projectMilestoneName;
+				
+						var now = moment();
+						var then = moment(dueDate);
+						var beforeDueDate = moment().diff(dueDate, 'days');
+
+					setTimeout(function() {
+                            if (now > then && (status == 0 || status == 8 || status == 9)) {
+                                showTaskBoardNotification("info",phaseCode,milestoneName,taskName);
+                            }
+						}, loop * 600);
+				})(loop);
+			}	
+			
+			for(var loop2 =0; loop2<subTask.length;loop2++){
+				
+				(function(index2) {
+				
+						var dueDate = subTask[index2].subTaskStartDates;
+						var phaseCode = subTask[index2].phaseCode;
+						var subTaskName = subTask[index2].subTaskName;
+						var status = subTask[index2].subTaskStatus;
+						var milestoneName = subTask[index2].projectMilestoneName;
+				
+						var now = moment();
+						var then = moment(dueDate);
+						var beforeDueDate = moment().diff(dueDate, 'days');
+
+					setTimeout(function() {
+                            if (now > then && (status == 0 || status == 8 || status == 9)) {
+                                showTaskBoardNotification("info",phaseCode,milestoneName,subTaskName);
+                            }
+						}, loop2 * 600);
+				})(loop2);
+				
+			}	
+    }
+    pendingNotification();
+    //------------ PENDING NOTIFICATION-----------------//
+
+    function viewDocument(view_id = false, readOnly = false,phaseCode = false,projectMilestoneName = false) {
+
+      
         const loadData = (id) => {
-            const data = getTimelineContent(id);
+            // console.log("view_id "+ view_id)
+            const data = getTimelineContent(id,phaseCode,projectMilestoneName);
             data.then(res => {
                 if (res) {
                     const tableData = res;
@@ -296,6 +371,40 @@ $(document).ready(function() {
             $parent.find(`.taskMainList[taskName="${taskName}"][phase="${phase}"]`).hide().removeClass("d-none").slideDown(500);
         }
         $parent.find(`i[caret="true"]`).removeClass(myCaret(!display)).addClass(myCaret(display));
+
+         
+    
+
+        $parent.find("tr").each(function(){
+            var dueDate = $(this).closest("tr").find("td [name=TaskStartDates]").val();
+            var status = $(this).closest("tr").find("td [name=taskStatus]").val();
+     
+            var now = moment();
+            var then = moment(dueDate);
+
+            var beforeDueDate = moment().diff(dueDate, 'days');
+
+            if (now > then && (status != 7 && status != 1)) {
+
+               $(this).closest("tr").find("td [name=TaskStartDates]").css('background-color',"#dc3545");
+               $(this).closest("tr").find("td [name=TaskStartDates]").css('color',"#fff");
+              
+              } else {
+                if( beforeDueDate == 5 || (beforeDueDate <5 && beforeDueDate !=1) ){
+                   $(this).closest("tr").find("td [name=TaskStartDates]").css('background-color',"#ffc107");
+                   $(this).closest("tr").find("td [name=TaskStartDates]").css('color',"#fff");
+                }else{
+                    if(status != 7 ){
+                        $(this).closest("tr").find("td [name=TaskStartDates]").css('background-color',"#dc3545");
+                        $(this).closest("tr").find("td [name=TaskStartDates]").css('color',"#fff");
+                    }
+                }
+              }
+        })
+
+      
+      
+     
     })
     // ----- END THIS IS FOR THE MILESTONE CONTENT -----
 
@@ -319,6 +428,34 @@ $(document).ready(function() {
             $parent.find(`.taskContent`).hide().removeClass("d-none").slideDown(500);
         }
         $parent.find(`i[taskCaret="true"]`).removeClass(myCaret(!display)).addClass(myCaret(display));
+     
+        $parent.find("tr").each(function(){
+            var dueDate = $(this).closest("tr").find("td [name=subTaskStartDates]").val();
+            var status = $(this).closest("tr").find("td [name=taskStatus]").val();
+     
+            var now = moment();
+            var then = moment(dueDate);
+
+            var beforeDueDate = moment().diff(dueDate, 'days');
+
+            if (now > then && (status != 7 && status != 1)) {
+
+               $(this).closest("tr").find("td [name=subTaskStartDates]").css('background-color',"#dc3545");
+               $(this).closest("tr").find("td [name=subTaskStartDates]").css('color',"#fff");
+              
+              } else {
+                if( beforeDueDate == 5 || (beforeDueDate <5 && beforeDueDate !=1) ){
+                   $(this).closest("tr").find("td [name=subTaskStartDates]").css('background-color',"#ffc107");
+                   $(this).closest("tr").find("td [name=subTaskStartDates]").css('color',"#fff");
+                }else{
+                    if(status != 7 ){
+                        $(this).closest("tr").find("td [name=subTaskStartDates]").css('background-color',"#dc3545");
+                        $(this).closest("tr").find("td [name=subTaskStartDates]").css('color',"#fff");
+                    }
+                }
+              }
+        })
+       
     })
     // ----- END CLICK TASK NAME OR CARET -----
 
@@ -532,7 +669,7 @@ $(document).ready(function() {
 
     $(document).on("change", `.statusBadge,.modalStatusBadge`, function() {
         var value = $(this).val();
-      
+        
         if(value ==""){
             $(this).removeClass("badge-primary");
             $(this).removeClass("badge-info");
@@ -541,6 +678,8 @@ $(document).ready(function() {
             $(this).removeClass("badge-outline-warning");
             $(this).removeClass("badge-danger");
             $(this).removeClass("badge-success");
+            $(this).removeClass("badge-outline-primary");
+            $(this).removeClass("badge-outline-info");
 
         }
         if(value ==1){
@@ -551,6 +690,8 @@ $(document).ready(function() {
             $(this).removeClass("badge-outline-warning");
             $(this).removeClass("badge-danger");
             $(this).removeClass("badge-success");
+            $(this).removeClass("badge-outline-primary");
+            $(this).removeClass("badge-outline-info");
         }
         if(value ==2){
             $(this).removeClass("badge-primary");
@@ -560,6 +701,8 @@ $(document).ready(function() {
             $(this).removeClass("badge-outline-warning");
             $(this).removeClass("badge-danger");
             $(this).removeClass("badge-success");
+            $(this).removeClass("badge-outline-primary");
+            $(this).removeClass("badge-outline-info");
         }
         if(value ==3){
             $(this).removeClass("badge-primary");
@@ -569,6 +712,8 @@ $(document).ready(function() {
             $(this).removeClass("badge-outline-warning");
             $(this).removeClass("badge-danger");
             $(this).removeClass("badge-success");
+            $(this).removeClass("badge-outline-primary");
+            $(this).removeClass("badge-outline-info");
 
         }
         if(value ==4){
@@ -579,6 +724,8 @@ $(document).ready(function() {
             $(this).removeClass("badge-outline-warning");
             $(this).removeClass("badge-danger");
             $(this).removeClass("badge-success");
+            $(this).removeClass("badge-outline-primary");
+            $(this).removeClass("badge-outline-info");
         }
         if(value ==5){
             $(this).removeClass("badge-primary");
@@ -588,6 +735,8 @@ $(document).ready(function() {
             $(this).addClass("badge-outline-warning");
             $(this).removeClass("badge-danger");
             $(this).removeClass("badge-success");
+            $(this).removeClass("badge-outline-primary");
+            $(this).removeClass("badge-outline-info");
         }
         if(value ==6){
             $(this).removeClass("badge-primary");
@@ -597,6 +746,8 @@ $(document).ready(function() {
             $(this).removeClass("badge-outline-warning");
             $(this).addClass("badge-danger");
             $(this).removeClass("badge-success");
+            $(this).removeClass("badge-outline-primary");
+            $(this).removeClass("badge-outline-info");
         }
         if(value ==7){
             $(this).removeClass("badge-primary");
@@ -606,6 +757,31 @@ $(document).ready(function() {
             $(this).removeClass("badge-outline-warning");
             $(this).removeClass("badge-danger");
             $(this).addClass("badge-success");
+            $(this).removeClass("badge-outline-primary");
+            $(this).removeClass("badge-outline-info");
+        }
+
+        if(value ==8){
+            $(this).removeClass("badge-primary");
+            $(this).removeClass("badge-info");
+            $(this).removeClass("badge-warning");
+            $(this).removeClass("badge-outline-secondary");
+            $(this).removeClass("badge-outline-warning");
+            $(this).removeClass("badge-danger");
+            $(this).removeClass("badge-success");
+            $(this).addClass("badge-outline-primary");
+            $(this).removeClass("badge-outline-info");
+        }
+        if(value ==9){
+            $(this).removeClass("badge-primary");
+            $(this).removeClass("badge-info");
+            $(this).removeClass("badge-warning");
+            $(this).removeClass("badge-outline-secondary");
+            $(this).removeClass("badge-outline-warning");
+            $(this).removeClass("badge-danger");
+            $(this).removeClass("badge-success");
+            $(this).removeClass("badge-outline-primary");
+            $(this).addClass("badge-outline-info");
         }
     })
     // ----- END SELECT ASSIGNED EMPLOYEE -----
@@ -632,6 +808,8 @@ function displayPhase(teamMembers = {}, phase = {}, index = 0,  ) {
         phaseCode,
         milestones = []
     } = phase;
+
+    
 
 //   console.log(phase)
         const getAssigneeList = (subtaskboardID = null, subTask=[],teamMembers = {} ) => { 
@@ -879,6 +1057,8 @@ function displayPhase(teamMembers = {}, phase = {}, index = 0,  ) {
                             <option class="badge badge-outline-warning" value="5" ${subTaskStatus == 5 ? "selected" : ""}><span class="text-center">ON TESTING</span></option>
                             <option class="badge badge badge-danger" value="6" ${subTaskStatus == 6 ? "selected" : ""}><span class="text-center">FAILED</span></option>
                             <option class="badge badge-success" value="7" ${subTaskStatus == 7 ? "selected" : ""}><span class="text-center">PASSED</span></option>
+                            <option class="badge badge-outline-primary" value="8" ${subTaskStatus == 8 ? "selected" : ""}>TODO</option>
+                            <option class="badge badge-outline-info" value="9" ${subTaskStatus == 9 ? "selected" : ""}>PENDING</option>
                         </select>
                     </div>
                 </div>
@@ -941,7 +1121,7 @@ function displayPhase(teamMembers = {}, phase = {}, index = 0,  ) {
           
             const employees = getAssignedEmployee(phaseCode, taskName,assignedEmployee,teamMembers);
 
-            // console.log(task)
+            // console.log(employees)
 
             attachedUniqueID = milestoneBuilderID+''+milestoneName.replaceAll(' ','')+''+index;
             const subTaskList = getSubTaskList(subTask,attachedUniqueID,taskBoardID,teamMembers);
@@ -1160,6 +1340,8 @@ function displayPhase(teamMembers = {}, phase = {}, index = 0,  ) {
                     <option class="badge badge-outline-warning" value="5" ${taskStatus == 5 ? "selected" : ""}>ON TESTING</option>
                     <option class="badge badge badge-danger" value="6" ${taskStatus == 6 ? "selected" : ""}>FAILED</option>
                     <option class="badge badge-success" value="7" ${taskStatus == 7 ? "selected" : ""}>PASSED</option>
+                    <option class="badge badge-outline-primary" value="8" ${taskStatus == 8 ? "selected" : ""}>TODO</option>
+                    <option class="badge badge-outline-info" value="9" ${taskStatus == 9 ? "selected" : ""}>PENDING</option>
                 </select>
                 </div>
             </div>
@@ -1959,7 +2141,7 @@ function displayPhase(teamMembers = {}, phase = {}, index = 0,  ) {
 				`DISTINCT pplt.projectListName AS projectName,ptbt.timelineBuilderID,ptbt.timelineTeamMember`,
 				`ptbt.timelineBuilderStatus =2 AND FIND_IN_SET(${sessionID},replace(ptbt.timelineTeamMember,'|',','))`);
 	
-                console.log(sessionID)
+                // console.log(sessionID)
 	
 				getProjectData.map((project,index1) => {
 	
@@ -1973,6 +2155,7 @@ function displayPhase(teamMembers = {}, phase = {}, index = 0,  ) {
 					LEFT JOIN pms_milestone_builder_tbl AS pmb ON pmb.milestoneBuilderID  = pttl.milestoneBuilderID `,
 					`
 					DISTINCT pmb.phaseDescription AS phaseName,
+                    pmb.phaseCode,
 					pttl.timelineBuilderID,
 					pmb.milestoneBuilderID
 					`,`pttl.timelineBuilderID = ${timelineBuilderID}`,
@@ -1982,9 +2165,9 @@ function displayPhase(teamMembers = {}, phase = {}, index = 0,  ) {
 									<div class="col-md-12">
 										<div id="MainMenu">
 											<div class="list-group panel mb-2">
-												<a class="list-group-item list-group-item-danger btnSelectedProject" style="cursor:pointer;" timelineBuilderID="${encryptString(timelineBuilderID)}" 
+												<a class="list-group-item list-group-item-danger " style="cursor:pointer;"  
 													><i type="button" href="#project${counter1}" data-toggle="collapse" data-parent="#MainMenu" class="fa fa-caret-down"></i>
-													&nbsp; <small>${projectName}</small></a>`;
+													&nbsp; <small class="btnSelectedProject" timelineBuilderID="${encryptString(timelineBuilderID)}">${projectName}</small></a>`;
 	
 													getProjectPhaseData.map((phase,index2) => {
 	
@@ -1992,15 +2175,15 @@ function displayPhase(teamMembers = {}, phase = {}, index = 0,  ) {
 															timelineBuilderID     = 0,
 															milestoneBuilderID = 0,
 															phaseName           = "",
+                                                            phaseCode=""
 														} = phase;
 	
-														
 	
 												sidebarhtml +=`<div class="collapse" id="project${counter1}">
 															
 																			<a class="list-group-item" style="cursor:pointer;" >
 																				<i type="button" href="#phaseProject${counter2}" data-toggle="collapse"
-																				data-parent="#phaseProject${counter2}" class="fa fa-caret-down"></i> &nbsp; <small>${phaseName}</small> 
+																				data-parent="#phaseProject${counter2}" class="fa fa-caret-down"></i> &nbsp; <small class="btnSelectedProject" timelineBuilderID="${encryptString(timelineBuilderID)}" phaseCode="${phaseCode}">${phaseName}</small> 
 																				</a> 
 																	
 																		<div class="collapse list-group-submenu" id="phaseProject${counter2}">`;
@@ -2019,9 +2202,11 @@ function displayPhase(teamMembers = {}, phase = {}, index = 0,  ) {
 																				milestoneBuilderID = 0,
 																				projectMilestoneName           = "",
 																			} = milestone;
+
+                                                                            console.log(getProjectMilestoneData)
 	
 														sidebarhtml +=`<a href="#" class="list-group-item" data-parent="#phaseProject${counter2}" style="cursor:pointer;"><i
-																					class="fa fa-circle"></i> &nbsp; <small>${projectMilestoneName}</small></a>`;
+																					class="fa fa-circle"></i> &nbsp; <small class="btnSelectedProject" timelineBuilderID="${encryptString(timelineBuilderID)}" phaseCode="${phaseCode}" projectMilestoneName="${projectMilestoneName}">${projectMilestoneName} </small></a>`;
 																		})
 														sidebarhtml +=`</div>
 																</div>`;
@@ -2065,7 +2250,14 @@ function displayPhase(teamMembers = {}, phase = {}, index = 0,  ) {
         // ----------------------------GET ASSIGNEE---------------------//
         const getLastSubtask = getTableData("pms_employeetaskoard_details_tbl","subtaskboardID","","subtaskboardID  DESC LIMIT 1");
         var subtaskboardID ="";
-        subtaskboardID = parseFloat(getLastSubtask[0].subtaskboardID) +1;
+
+        if(getLastSubtask.length != 0){
+        	subtaskboardID = parseFloat(getLastSubtask[0].subtaskboardID) +1;
+        }else{
+        	subtaskboardID = 1;
+        	
+        }
+        // subtaskboardID = parseFloat(getLastSubtask[0].subtaskboardID) +1;
 
         const getAssigneeList = (subtaskboardID = null, subTask=[],teamMembers = {} ) => { 
             let taskAssigneeContent = "";
@@ -2278,6 +2470,8 @@ function displayPhase(teamMembers = {}, phase = {}, index = 0,  ) {
                             <option class="badge badge-outline-warning" value="5"><span class="text-center">ON TESTING</span></option>
                             <option class="badge badge badge-danger" value="6"><span class="text-center">FAILED</span></option>
                             <option class="badge badge-success" value="7"><span class="text-center">PASSED</span></option>
+                            <option class="badge badge-outline-primary" value="8">TODO</option>
+                            <option class="badge badge-outline-info" value="9">PENDING</option>
                         </select>
                     </div>
                 </div>
@@ -3330,10 +3524,13 @@ function displayPhase(teamMembers = {}, phase = {}, index = 0,  ) {
 
 	$(document).on("click",".btnSelectedProject",function(){
 		$("#page_content").html(preloader);
-		var timelineBuilderID = decryptString($(this).attr("timelineBuilderID"));
+		var timelineBuilderID = decryptString($(this).attr("timelineBuilderID") || 0);
+		var phaseCode = $(this).attr("phaseCode") || 0;
+		var projectMilestoneName = $(this).attr("projectMilestoneName") || 0;
+     
 
         setTimeout(() => {
-            viewDocument(timelineBuilderID);
+            viewDocument(timelineBuilderID,false,phaseCode,projectMilestoneName);
         }, 50);
 	});
 })

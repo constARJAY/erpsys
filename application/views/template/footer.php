@@ -45,5 +45,142 @@
 	<script src="<?=base_url('assets/custom/js/custom-validation.js')?>"></script>
 	<script src="<?=base_url('assets/custom/js/operations.js')?>"></script>
 	<script src="<?= base_url('assets/custom/js/gen/footer.js') ?>"></script>
+	<script>
+
+	function dataNotification(){
+		const task = getTableData(`pms_employeetaskoard_tbl as pet
+		LEFT JOIN pms_timeline_task_list_tbl as ptt ON ptt.taskID = pet.taskID AND ptt.timelineBuilderID = pet.timelineBuilderID
+		LEFT JOIN pms_timeline_management_tbl as ptm  ON ptm.taskID = ptt.taskID
+		LEFT JOIN pms_milestone_list_tbl as pml ON pml.projectMilestoneID = pet.projectMilestoneID 
+		LEFT JOIN pms_milestone_builder_tbl as pmb ON pmb.milestoneBuilderID = pet.milestoneBuilderID OR pmb.milestoneBuilderID = ptt.milestoneBuilderID `, 
+		`DISTINCT taskboardID,ptt.taskID,assignedEmployee,ptt.taskName,pet.taskStatus,pml.projectMilestoneName,CASE 
+		WHEN pet.taskStartDates = "" THEN ptt.taskEndDate
+		WHEN pet.taskStartDates !="" THEN pet.taskStartDates
+		END taskStartDate,
+		phaseCode `, 
+		"assignedEmployee = "+sessionID);
+		// "assignedEmployee = "+sessionID+" AND (taskStatus !=7 AND taskStatus != 1 )");
+
+		const subTask = getTableData(`pms_employeetaskoard_details_tbl as ped
+		LEFT JOIN pms_timeline_management_tbl as ptm  ON ptm.taskID = ped.taskID
+		LEFT JOIN pms_milestone_list_tbl as pml ON pml.projectMilestoneID = ped.projectMilestoneID
+		LEFT JOIN pms_milestone_builder_tbl as pmb ON pmb.milestoneBuilderID = ped.milestoneBuilderID`, 
+		`DISTINCT subtaskboardID,ped.taskID,subTaskAssignee,ped.subTaskName,ped.subTaskStatus,pml.projectMilestoneName,ped.subTaskStartDates,phaseCode`, 
+		` FIND_IN_SET(${sessionID},replace(ped.subTaskAssignee,'|',','))`);
+		// ` FIND_IN_SET(${sessionID},replace(ped.subTaskAssignee,'|',',')) AND (subTaskStatus !=7 AND subTaskStatus != 1 )`);
+	
+			for(var loop =0; loop<task.length;loop++){
+				
+				(function(index) {
+				
+						var dueDate = task[index].taskStartDate;
+						var phaseCode = task[index].phaseCode;
+						var taskName = task[index].taskName;
+						var status = task[index].taskStatus;
+						var milestoneName = task[index].projectMilestoneName;
+				
+						var now = moment();
+						var then = moment(dueDate);
+						var beforeDueDate = moment().diff(dueDate, 'days');
+
+					setTimeout(function() {
+
+						if (now > then && (status == 0 || status == 8 || status == 9)) {
+					
+							showTaskBoardNotification("info",phaseCode,milestoneName,taskName);
+				
+						}
+						
+						if (now > then && (status != 7 && status != 1)) {
+					
+							showTaskBoardNotification("danger",phaseCode,milestoneName,taskName);
+				
+						} else {
+							if( beforeDueDate == 5 || (beforeDueDate <5 && beforeDueDate !=1) ){
+								showTaskBoardNotification("warning",phaseCode,milestoneName,taskName);
+							}else{
+								if(status != 7 ){
+									showTaskBoardNotification("danger",phaseCode,milestoneName,taskName);
+								}
+							}
+						}
+
+						}, loop * 600);
+				})(loop);
+				
+			}	
+			
+			for(var loop2 =0; loop2<subTask.length;loop2++){
+				
+				(function(index2) {
+				
+						var dueDate = subTask[index2].subTaskStartDates;
+						var phaseCode = subTask[index2].phaseCode;
+						var subTaskName = subTask[index2].subTaskName;
+						var status = subTask[index2].subTaskStatus;
+						var milestoneName = subTask[index2].projectMilestoneName;
+				
+						var now = moment();
+						var then = moment(dueDate);
+						var beforeDueDate = moment().diff(dueDate, 'days');
+
+					setTimeout(function() {
+
+						if (now > then && (status == 0 || status == 8 || status == 9)) {
+					
+							showTaskBoardNotification("info",phaseCode,milestoneName,subTaskName);
+				
+						}
+						
+						if (now > then && (status != 7 && status != 1)) {
+					
+							showTaskBoardNotification("danger",phaseCode,milestoneName,subTaskName);
+				
+						} else {
+							if( beforeDueDate == 5 || (beforeDueDate <5 && beforeDueDate !=1) ){
+								showTaskBoardNotification("warning",phaseCode,milestoneName,subTaskName);
+							}else{
+								if(status != 7 ){
+									showTaskBoardNotification("danger",phaseCode,milestoneName,subTaskName);
+								}
+							}
+						}
+
+						}, loop2 * 600);
+				})(loop2);
+				
+			}	
+	}
+
+	var flag = false;
+	function doSomething() {
+		var d = new Date(),
+			h = new Date(d.getFullYear(), d.getMonth(), d.getDate(), d.getHours(), (d.getMinutes() - (d.getMinutes() % 60)) + 60, 0, 0),
+			e = h - d;
+		window.setTimeout(doSomething, e);
+		
+		var sessionChecker = <?= $this->session->has_userdata('checkerFlag')?  $this->session->has_userdata('checkerFlag') : 0 ?> ;
+	
+
+		if(!sessionChecker){
+			<?php $this->session->set_userdata('checkerFlag', 100); ?>
+			dataNotification();
+
+		}else{
+			if(flag){
+			dataNotification();
+			}else{
+				flag = true;
+			}
+		}
+
+	}
+	doSomething();
+
+		
+
+	
+
+	</script>
 </body>
 </html>

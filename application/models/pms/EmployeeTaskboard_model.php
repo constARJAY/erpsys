@@ -48,10 +48,17 @@ class EmployeeTaskboard_model extends CI_Model {
         return $query ? $query->row() : false;
     }
 
-    public function getMilestoneList($milestoneBuilderID = 0,$timelineBuilderID = 0)
+    public function getMilestoneList($milestoneBuilderID = 0,$timelineBuilderID = 0,$projectMilestoneName =false)
     {
+       
+
         $output = [];
-        $sql    = "SELECT * FROM pms_milestone_list_tbl WHERE milestoneBuilderID = $milestoneBuilderID";
+        $condition ="";
+
+        if($projectMilestoneName){
+            $condition =" AND projectMilestoneName = '$projectMilestoneName' ";
+        }
+        $sql    = "SELECT * FROM pms_milestone_list_tbl WHERE milestoneBuilderID = $milestoneBuilderID  $condition";
         $query  = $this->db->query($sql);
         $milestones = $query ? $query->result_array() : [];
         foreach ($milestones as $milestone) {
@@ -66,6 +73,12 @@ class EmployeeTaskboard_model extends CI_Model {
             ];
             array_push($output, $temp);
         }
+
+        // var_dump($sql);
+        // // echo "<pre>";
+        // // print_r($output);
+        // exit;
+
         return $output;
     }
 
@@ -132,7 +145,7 @@ class EmployeeTaskboard_model extends CI_Model {
                 "taskName"      => $task["taskName"],
                 "manHours"      => $task["manHours"],
                 "usedHours"      => $task["taskUsedHours"] ? $task["taskUsedHours"] : 0 ,
-                "taskStartDate" => $task["newTaskStartDate"] ? date("M d, Y", strtotime($task["newTaskStartDate"])) : date("M d, Y", strtotime($task["defaultTaskStartDate"])),
+                "taskStartDate" => $task["newTaskStartDate"] ? date("M d, Y", strtotime($task["newTaskStartDate"])) : date("M d, Y", strtotime($task["defaultTaskEndDate"])),
                 "taskEndDate"   => $task["newTaskEndDate"] ? date("M d, Y", strtotime($task["newTaskEndDate"])) : date("M d, Y", strtotime($task["defaultTaskEndDate"])),
                 "extension"   => $task["extension"] ? date("M d, Y", strtotime($task["extension"])) : date("M d, Y"),
                 "taskPriority"  => $task["taskPriority"] ? $task["taskPriority"] : "",
@@ -235,9 +248,15 @@ class EmployeeTaskboard_model extends CI_Model {
         return $output;
     }
 
-    public function getTimelinePhases($timelineBuilderID = 0)
+    public function getTimelinePhases($timelineBuilderID = 0, $phaseCode = false, $projectMilestoneName =false)
     {
+        
         $output = [];
+        $condition = "";
+        if($phaseCode){
+            $condition = " AND phaseCode = '$phaseCode' ";
+        }
+
         $sql    = "
         SELECT 
             pttlt.milestoneBuilderID,
@@ -247,7 +266,7 @@ class EmployeeTaskboard_model extends CI_Model {
             pms_timeline_task_list_tbl AS pttlt
             LEFT JOIN pms_milestone_builder_tbl AS pmbt USING(milestoneBuilderID) 
         WHERE 
-            timelineBuilderID = $timelineBuilderID 
+            timelineBuilderID = $timelineBuilderID  $condition
             GROUP BY milestoneBuilderID";
         $query = $this->db->query($sql);
 
@@ -258,7 +277,7 @@ class EmployeeTaskboard_model extends CI_Model {
                 "milestoneBuilderID" => $milestoneBuilderID,
                 "phaseCode"          => $phase["phaseCode"],
                 "phaseDescription"   => $phase["phaseDescription"],
-                "milestones"         => $this->getMilestoneList($milestoneBuilderID,$timelineBuilderID),
+                "milestones"         => $this->getMilestoneList($milestoneBuilderID,$timelineBuilderID,$projectMilestoneName),
                 // "tasks"              => $this->getTaskList($timelineBuilderID, $milestoneBuilderID),
             ];
             array_push($output, $temp);
@@ -266,8 +285,10 @@ class EmployeeTaskboard_model extends CI_Model {
         return $output;
     }
 
-    public function getTimelineContent($timelineBuilderID = 1)
-    {
+    public function getTimelineContent($timelineBuilderID = 1,$phaseCode = false,$projectMilestoneName =false)
+    {   
+        
+
         $output = [];
         $projectDetails = $this->getProjectDetails($timelineBuilderID);
         if ($projectDetails) {
@@ -278,7 +299,7 @@ class EmployeeTaskboard_model extends CI_Model {
             $output["projectCode"]       = $projectDetails->projectCode;
             $output["timelineManagementStatus"] = $projectDetails->timelineManagementStatus;
 
-            $output["phases"] = $this->getTimelinePhases($timelineBuilderID);
+            $output["phases"] = $this->getTimelinePhases($timelineBuilderID,$phaseCode,$projectMilestoneName);
         }
         return $output;
     }

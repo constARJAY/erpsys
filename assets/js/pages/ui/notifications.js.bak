@@ -8,7 +8,6 @@ $(function () {
 
         // showNotification(colorName, null, placementFrom, placementAlign, animateEnter, animateExit);
         showNotification(colorName, null);
-        showTaskBoardNotification(colorName,null,null,null);
     });
 });
 
@@ -83,47 +82,5 @@ function showNotification(msgtype, msg) {
         icon: icon_type
     },{
         type: msgtype
-    });
-}
-
-
-function showTaskBoardNotification(msgtype,phase,milestone,msg) {
-    var title_type = '';
-    var icon_type  = '';
-    var attachmsg ='';
-    if(msgtype=='danger'){
-        title_type = 'OVERDUE!';
-        icon_type  = 'fa fa-exclamation-circle';
-        attachmsg =' is already on due date.';
-    } else if (msgtype=='info') {
-        title_type = 'PENDING!';
-        icon_type  = 'fa fa-exclamation-circle';
-        attachmsg =' is currently pending.';
-       
-    }else if(msgtype == 'warning'){
-      
-        title_type = 'REMINDER!';
-        icon_type  = 'fa fa-exclamation-circle';
-        attachmsg =' is already near on its due date.';
-
-    } else{
-        title_type = 'SUCCESS!';
-        icon_type  = 'fa fa-check-circle';
-    }
- 
-    $.notify({
-        
-        title: '<strong>'+title_type+'</strong><br>',
-        message: '<strong>'+phase+'</strong><br><small>'+milestone+': </small><br><small><b><i>'+msg+'</i></b>'+attachmsg+'<small>',
-        icon: icon_type
-
-    },{
-        allow_dismiss:true,
-        delay:99999999,
-        onClose: null,
-        type: msgtype,
-        placement: {
-            align: "right"
-        }
     });
 }
