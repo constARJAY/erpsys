@@ -162,7 +162,7 @@ $(document).ready(function() {
 		// materialWithdrawalID        = executeonce ? materialWithdrawalID : null;
 
 		$.ajax({
-			url       : `Check_writer/convertnumberintowords`,
+			url       : `payment_request/convertnumberintowords`,
 			method    : "POST",
 			data      : {checkAmountConvert:  amount},
 			async     : true,

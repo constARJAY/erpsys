@@ -111,6 +111,13 @@ class Payment_request extends CI_Controller {
         echo json_encode($savePaymentRequestData);
     }
 
+    public function convertnumberintowords(){
+
+        $num = $this->input->post("checkAmountConvert");
+        error_reporting(0);
+        $data =  convertNumberToWords($num)." Only";
+        echo json_encode($data); 
+      }
 
 }
 ?>
