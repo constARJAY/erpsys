@@ -439,6 +439,48 @@ INSERT INTO `fms_liquidation_tbl` VALUES (1,NULL,5,45,'PCR-20-00005',0.00,321.43
 UNLOCK TABLES;
 
 --
+-- Table structure for table `fms_payment_request_tbl`
+--
+
+DROP TABLE IF EXISTS `fms_payment_request_tbl`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `fms_payment_request_tbl` (
+  `paymentRequestID` bigint(20) NOT NULL AUTO_INCREMENT,
+  `revisePaymentRequestID` bigint(20) DEFAULT NULL,
+  `paymentRequestStatus` int(50) NOT NULL,
+  `paymentRequestRemarks` longtext COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `paymentRequestReason` longtext COLLATE utf8mb4_unicode_ci NOT NULL,
+  `requestorID` bigint(20) DEFAULT NULL,
+  `referenceCode` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `referencePurpose` longtext COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `amountWords` longtext COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `amount` decimal(10,2) DEFAULT NULL,
+  `pettyRepID` bigint(20) DEFAULT NULL,
+  `purchaseOrderID` bigint(20) DEFAULT NULL,
+  `employeeID` bigint(20) NOT NULL,
+  `ApproversID` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `approversStatus` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `approversDate` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `submittedAt` timestamp NULL DEFAULT NULL,
+  `createdBy` bigint(20) DEFAULT NULL,
+  `updatedBy` bigint(20) DEFAULT NULL,
+  `createdAt` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updatedAt` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`paymentRequestID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `fms_payment_request_tbl`
+--
+
+LOCK TABLES `fms_payment_request_tbl` WRITE;
+/*!40000 ALTER TABLE `fms_payment_request_tbl` DISABLE KEYS */;
+/*!40000 ALTER TABLE `fms_payment_request_tbl` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `fms_petty_cash_replenishment_tbl`
 --
 
@@ -4140,4 +4182,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2021-07-14  9:57:55
+-- Dump completed on 2021-07-15 14:29:29
