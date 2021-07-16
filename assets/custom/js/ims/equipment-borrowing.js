@@ -1083,12 +1083,12 @@ $(document).ready(function() {
 								}else{
 									$(`#quantity${index}`).removeClass("is-valid").addClass("is-invalid");
 									$(this).closest("tr").find("#invalid-quantity").removeClass("is-valid").addClass("is-invalid");
-									$(this).closest("tr").find("#invalid-quantity").text('Not enough quantity!');
+									$(this).closest("tr").find("#invalid-quantity").text('Excessive amount of quantity!');
 								}
 							}else{
 								$(`#quantity${index}`).removeClass("is-valid").addClass("is-invalid");
 								$(this).closest("tr").find("#invalid-quantity").removeClass("is-valid").addClass("is-invalid");
-								$(this).closest("tr").find("#invalid-quantity").text('Not enough quantity or no stocks available!');
+								$(this).closest("tr").find("#invalid-quantity").text('Excessive amount of quantity or no stocks available!');
 						}
 					
 

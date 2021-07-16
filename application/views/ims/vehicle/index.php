@@ -6,7 +6,7 @@
 					<ul class="breadcrumb pl-0 pb-0 ">
 						<li class="breadcrumb-item"><a href="#"><i class="zmdi zmdi-home"></i> Dashboard</a></li>
 						<li class="breadcrumb-item"><i class="zmdi zmdi-folder"></i> &nbsp;Masterfiles</li>
-						<li class="breadcrumb-item active"  id="inv_mainItem_breadcrumbs">Vehicle Masterfiles</li>
+						<li class="breadcrumb-item active"  id="inv_mainItem_breadcrumbs">Vehicle Masterfile</li>
                         <!-- <li class="breadcrumb-item" id="inv_item_breadcrumbs" style="visibility:hidden;"><i class="icon-social-dropbox" ></i> &nbsp;Add Item</li> -->
 					</ul>
 					<h1 class="mt-3" id="inv_headerID">List of Vehicles</h1>

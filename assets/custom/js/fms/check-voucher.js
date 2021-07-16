@@ -290,8 +290,8 @@ function forApprovalContent() {
     let inventoryReceivingData = getTableData(
         `fms_check_voucher_tbl AS isrt 
             LEFT JOIN hris_employee_list_tbl AS helt USING(employeeID) 
-            LEFT JOIN fms_payment_request_tbl AS pct ON isrt.paymentID  = pct.paymentID `,
-        "isrt.*, CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname,isrt.voucherID ,isrt.createdAt AS dateCreatedVoucher, pct.paymentID , pct.createdAt AS dateCreatedPayment",
+            LEFT JOIN fms_payment_request_tbl AS pct ON isrt.paymentRequestID  = pct.paymentRequestID `,
+        "isrt.*, CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname,isrt.voucherID ,isrt.createdAt AS dateCreatedVoucher, pct.paymentRequestID , pct.createdAt AS dateCreatedPayment",
         `isrt.employeeID != ${sessionID} AND voucherStatus != 0 AND voucherStatus != 4`,
         `FIELD(voucherStatus, 0, 1, 3, 2, 4, 5), COALESCE(isrt.submittedAt, isrt.createdAt)`
     );
@@ -317,7 +317,7 @@ function forApprovalContent() {
             fullname,
             voucherID,
             dateCreatedVoucher,
-            paymentID,
+            paymentRequestID,
             dateCreatedPayment,
             approversID,
             approversDate,
@@ -350,7 +350,7 @@ function forApprovalContent() {
             <tr class="${btnClass}" id="${encryptString(voucherID)}">
                 <td>${getFormCode("CV", createdAt, voucherID)}</td>
                 <td>${fullname}</td>
-                <td>${getFormCode("PYRF", dateCreatedPayment, paymentID)}</td>
+                <td>${getFormCode("PYRF", dateCreatedPayment, paymentRequestID)}</td>
                 <td>${voucherDescription}</td>
                 <td>
                     ${employeeFullname(getCurrentApprover(approversID, approversDate, voucherStatus, true))}
@@ -383,8 +383,8 @@ function myFormsContent() {
     let inventoryReceivingData = getTableData(
         `fms_check_voucher_tbl AS isrt 
         LEFT JOIN hris_employee_list_tbl AS helt USING(employeeID) 
-        LEFT JOIN fms_payment_request_tbl AS pct ON isrt.paymentID = pct.paymentID`,
-        "isrt.*, CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname,isrt.voucherID ,isrt.createdAt AS dateCreatedVoucher, pct.paymentID, pct.createdAt AS dateCreatedPayment",
+        LEFT JOIN fms_payment_request_tbl AS pct ON isrt.paymentRequestID = pct.paymentRequestID`,
+        "isrt.*, CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname,isrt.voucherID ,isrt.createdAt AS dateCreatedVoucher, pct.paymentRequestID, pct.createdAt AS dateCreatedPayment",
         `isrt.employeeID = ${sessionID}`,
         `FIELD(voucherStatus, 0, 1, 3, 2, 4, 5), COALESCE(isrt.submittedAt, isrt.createdAt)`
     );
@@ -410,7 +410,7 @@ function myFormsContent() {
             fullname,
             voucherID,
             dateCreatedVoucher,
-            paymentID,
+            paymentRequestID,
             dateCreatedPayment,
             approversID,
             approversDate,
@@ -441,7 +441,7 @@ function myFormsContent() {
         <tr class="${btnClass}" id="${encryptString(voucherID)}">
             <td>${getFormCode("CV", dateCreatedVoucher, voucherID)}</td>
             <td>${fullname}</td>
-            <td>${getFormCode("PYRF", dateCreatedPayment, paymentID)}</td>
+            <td>${getFormCode("PYRF", dateCreatedPayment, paymentRequestID)}</td>
             <td>${voucherDescription}</td>
             <td>
                 ${employeeFullname(getCurrentApprover(approversID, approversDate, voucherStatus, true))}
@@ -613,46 +613,36 @@ function getPaymentRequestList(id = null, status = 0, display = true , voucherid
     var exist = [];
     var condition  ="";
     
-    const paymentList = getTableData(
-        `fms_payment_request_tbl`,
-        "paymentID ",`paymentStatus = 1`
-    );
-    paymentList.map(items=>{
-        exist.push(items.paymentID);
-    })
+    // const paymentList = getTableData(
+    //     `fms_payment_request_tbl`,
+    //     "paymentRequestID ",`paymentStatus = 2`
+    // );
+    // paymentList.map(items=>{
+    //     exist.push(items.paymentRequestID);
+    // })
 
     if(status === false){
         
-         condition  =`(ipot.paymentStatus = 2 AND 
+         condition  =`(ipot.paymentRequestStatus = 2 AND 
             ((iir.voucherStatus != 1 AND 
                 iir.voucherStatus != 0 AND 
                 iir.voucherStatus != 3 AND 
                 iir.voucherStatus != 4 AND 
-                iir.voucherStatus != 5) OR 
-                (iir.voucherStatus IS NULL))) AND 
-                (irit.maintainBalance IS NULL OR irit.maintainBalance > 0) `;
-
-        // condition  =`(ipot.purchaseOrderStatus = 2 AND 
-        // 		((iir.voucherStatus IS NULL))) AND 
-        // 		(irit.orderedPending IS NULL OR (CASE WHEN iir.voucherStatus != 1 AND 
-        // 		iir.voucherStatus != 0 AND 
-        // 		iir.voucherStatus != 3 AND 
-        // 		iir.voucherStatus != 4 AND 
-        // 		iir.voucherStatus != 5 THEN irit.orderedPending > 0 Else '' END) ) `;
+                iir.voucherStatus != 5 AND 
+                iir.voucherStatus != 2) OR 
+                (iir.voucherStatus IS NULL)))`;
     }
     else{
         
-        condition  =`(ipot.paymentStatus = 2 AND iir.paymentID =${id} )`;
+        condition  =`(ipot.paymentRequestStatus = 2 AND iir.paymentRequestID =${id} ) GROUP BY  ipot.paymentRequestID`;
     }
 
     const paymentRequestList = getTableData(
         `fms_payment_request_tbl AS ipot
-            LEFT JOIN fms_payment_request_details_tbl AS irit USING(paymentID)
-            LEFT JOIN fms_petty_cash_replenishment_tbl AS pettyrep ON pettyrep.pettyRepID = ipot.pettyRepID
-            LEFT JOIN hris_employee_list_tbl AS helt  ON helt.employeeID = pettyrep.requestorID
+            LEFT JOIN hris_employee_list_tbl AS helt  ON helt.employeeID = ipot.requestorID
             LEFT JOIN hris_department_tbl AS dept ON dept.departmentID = helt.departmentID
             LEFT JOIN hris_designation_tbl AS dsg ON dsg.designationID = helt.designationID
-            LEFT JOIN fms_check_voucher_tbl AS iir ON iir.paymentID = ipot.paymentID`,
+            LEFT JOIN fms_check_voucher_tbl AS iir ON iir.paymentRequestID = ipot.paymentRequestID`,
         `ipot.*, CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname, dept.departmentName, dsg.designationName, 
         helt.employeeUnit,
         helt.employeeBuilding,
@@ -661,8 +651,8 @@ function getPaymentRequestList(id = null, status = 0, display = true , voucherid
         helt.employeeProvince,
         helt.employeeCountry,
         helt.employeeZipCode,
-        DATE_FORMAT(pettyrep.createdAt, '%M% %d, %Y') as requestorDate`,
-        `${condition} GROUP BY irit.paymentID`
+        DATE_FORMAT(ipot.createdAt, '%M% %d, %Y') as requestorDate`,
+        `${condition}`
     )
 
   
@@ -670,20 +660,20 @@ function getPaymentRequestList(id = null, status = 0, display = true , voucherid
     if (!status || status == 0) {
         // html += paymentRequestList.filter(po => createdIRList.indexOf(po.purchaseOrderID) == -1 || po.purchaseOrderID == id).map(po => {
         
-        html += paymentRequestList.filter(payment => !exist.includes(payment.paymentID) || payment.paymentID == id).map(payment => {
+        html += paymentRequestList.filter(payment => !exist.includes(payment.paymentRequestID) || payment.paymentRequestID == id).map(payment => {
 			let address = `${payment.employeeUnit && titleCase(payment.employeeUnit)+" "}${payment.employeeBuilding && payment.employeeBuilding +" "}${payment.employeeBarangay && titleCase(payment.employeeBarangay)+", "}${payment.employeeCity && titleCase(payment.employeeCity)+", "}${payment.employeeProvince && titleCase(payment.employeeProvince)+", "}${payment.employeeCountry && titleCase(payment.employeeCountry)+", "}${payment.employeeZipCode && titleCase(payment.employeeZipCode)}`;
 
             return `
             <option 
-                value      = "${payment.paymentID}" 
+                value      = "${payment.paymentRequestID}" 
                 requestorname = "${payment.fullname}"
                 department = "${payment.departmentName}"
                 designation = "${payment.designationName}"
                 address     = "${address}"
                 checkvoucherid     = "${voucherid}"
                 requestordate     = "${payment.requestorDate}"
-            ${payment.paymentID == id && "selected"}>
-            ${getFormCode("PYRF", payment.createdAt, payment.paymentID)}
+            ${payment.paymentRequestID == id && "selected"}>
+            ${getFormCode("PYRF", payment.createdAt, payment.paymentRequestID)}
             </option>`;
         })
     } else {
@@ -692,15 +682,15 @@ function getPaymentRequestList(id = null, status = 0, display = true , voucherid
 
             return `
             <option 
-            value      = "${payment.paymentID}" 
+            value      = "${payment.paymentRequestID}" 
             requestorname = "${payment.fullname}"
             department = "${payment.departmentName}"
             designation = "${payment.designationName}"
             address     = "${address}"
             checkvoucherid     = "${voucherid}"
             requestordate     = "${payment.requestorDate}"
-            ${payment.paymentID == id && "selected"}>
-            ${getFormCode("PYRF", payment.createdAt, payment.paymentID)}
+            ${payment.paymentRequestID == id && "selected"}>
+            ${getFormCode("PYRF", payment.createdAt, payment.paymentRequestID)}
             </option>`;
         })
     }
@@ -767,11 +757,13 @@ function getBudgetSourceList(id = null, status = 0, display = true , voucherid= 
 function getItemsRow(id, readOnly = false, voucherID = "") {
     let html = "";
     let requestItemsData;	
+    let purchaseOrder;	
+    let replenishmentList;	
     if (voucherID) {
         requestItemsData = getTableData(
             `fms_check_voucher_details_tbl AS voucherdet
             LEFT JOIN fms_check_voucher_tbl AS voucher USING(voucherID)`,
-            `voucher.paymentID,
+            `voucher.paymentRequestID,
             voucherdet.accountCode,
             voucherdet.accountName,
             voucherdet.debit,
@@ -781,19 +773,36 @@ function getItemsRow(id, readOnly = false, voucherID = "") {
             `voucherdet.voucherID = ${voucherID}`
         )
     } else {
-        requestItemsData = getTableData(
+        replenishmentList = getTableData(
             `fms_payment_request_tbl as  payment
-                LEFT JOIN fms_petty_cash_replenishment_details_tbl AS  pettyrep ON pettyrep.pettyRepID = payment.pettyRepID
-                LEFT JOIN fms_chart_of_accounts_tbl as chart ON chart.chartOfAccountID  = pettyrep.chartOfAccountID   `, 
-            "payment.paymentID,chart.accountCode, chart.accountName,chart.chartOfAccountID,pettyrep.amount", 
-            `paymentID = ${id} AND paymentStatus=2 `
+                LEFT JOIN fms_finance_request_details_tbl AS  ffr ON ffr.pettyRepID = payment.pettyRepID
+                LEFT JOIN fms_liquidation_tbl AS  flt ON flt.liquidationID  = ffr.liquidationID 
+                LEFT JOIN fms_chart_of_accounts_tbl as chart ON chart.chartOfAccountID  = flt.chartOfAccountID `, 
+            "payment.paymentRequestID,chart.accountCode, chart.accountName,chart.chartOfAccountID,ffr.totalAmount as amount", 
+            `payment.paymentRequestID = ${id} AND payment.paymentRequestStatus=2 AND payment.pettyRepID !=0 `
         )
+
+        purchaseOrderList = getTableData(
+            `fms_payment_request_tbl as  payment
+            LEFT JOIN ims_purchase_order_tbl AS  ipo ON ipo.purchaseOrderID  = payment.purchaseOrderID 
+            LEFT JOIN fms_chart_of_accounts_tbl as chart ON chart.chartOfAccountID  = ipo.chartOfAccountID`, 
+            "payment.paymentRequestID,chart.accountCode, chart.accountName,chart.chartOfAccountID,ipo.grandTotalAmount as amount", 
+            `payment.paymentRequestID = ${id} AND payment.paymentRequestStatus=2 AND payment.purchaseOrderID !=0 `
+        )
+
+        if(purchaseOrderList.length){
+            requestItemsData = purchaseOrderList;
+        }else{
+            requestItemsData = replenishmentList;
+        }
+
+            
     }
     if (requestItemsData.length > 0) {
         requestItemsData.map((item, index) => {
        
             let {
-                paymentID               = "",
+                paymentRequestID               = "",
                 chartOfAccountID = "",
                 accountCode                      = "",
                 accountName                    = "",
@@ -807,7 +816,7 @@ function getItemsRow(id, readOnly = false, voucherID = "") {
 
             if (readOnly) {
                 html += `
-                <tr class="itemTableRow" paymentID="${paymentID}">
+                <tr class="itemTableRow" paymentRequestID="${paymentRequestID}">
                     <td>
                         <div class="accountcode" accountid="${chartOfAccountID}"> ${accountCode || "-"}</div>
                     </td>
@@ -834,7 +843,7 @@ function getItemsRow(id, readOnly = false, voucherID = "") {
                 </tr>`;
             } else {
                 html += `
-                <tr class="itemTableRow" paymentID="${paymentID}" >
+                <tr class="itemTableRow" paymentRequestID="${paymentRequestID}" >
 			
                 <td>
                     <div class="accountcode" name="accountcode" accountid="${chartOfAccountID}" ${voucherID ? prevbudgetsource="${chartOfAccountID}" : ""} >${ accountCode || "-"}</div>
@@ -919,7 +928,7 @@ function getItemsRowCredit(id, readOnly = false, voucherID = "") {
         // chartOfAcccts = getTableData(
         //     `fms_check_voucher_details_tbl AS voucherdet
         //     LEFT JOIN fms_check_voucher_tbl AS voucher USING(voucherID)`,
-        //     `voucher.paymentID,
+        //     `voucher.paymentRequestID,
         //     voucherdet.accountCode,
         //     voucherdet.accountName,
         //     voucherdet.debit,
@@ -1100,7 +1109,7 @@ $(document).on("change", "[name=voucherBudgetSource]", function() {
 
 
 // ----- SELECT PURCHASE ORDER -----
-$(document).on("change", "[name=paymentID]", function() {
+$(document).on("change", "[name=paymentRequestID]", function() {
     const department = $('option:selected', this).attr("department");
     const designation = $('option:selected', this).attr("designation");
     const address = $('option:selected', this).attr("address");
@@ -1269,7 +1278,7 @@ function formContent(data = false, readOnly = false, isRevise = false, isFromCan
         voucherID        = "",
         reviseVoucherID  = "",
         employeeID              = "",
-        paymentID               = "",
+        paymentRequestID               = "",
         voucherBudgetSource	 ="",
         voucherRemarks  = "",
         checkNo  = "",
@@ -1286,7 +1295,7 @@ function formContent(data = false, readOnly = false, isRevise = false, isFromCan
 
     let purchaseOrderItems = "";
     if (voucherID) {
-        purchaseOrderItems = getItemsRow(paymentID, readOnly, voucherID);
+        purchaseOrderItems = getItemsRow(paymentRequestID, readOnly, voucherID);
     } 
 
     // ----- GET EMPLOYEE DATA -----
@@ -1423,8 +1432,8 @@ function formContent(data = false, readOnly = false, isRevise = false, isFromCan
             <div class="form-group">
                 <label>Payment Request No. ${!disabled ? "<code>*</code>" : ""}</label>
                 <select class="form-control validate select2"
-                    name="paymentID"
-                    id="paymentID"
+                    name="paymentRequestID"
+                    id="paymentRequestID"
                     style="width: 100%"
                     required
                     ${disabled}
@@ -1434,9 +1443,9 @@ function formContent(data = false, readOnly = false, isRevise = false, isFromCan
                     executeonce="${voucherStatus ? true : false}"
                    >
                     <option selected disabled>Select Payment Request</option>
-                    ${getPaymentRequestList(paymentID, voucherStatus,true,voucherID)}           
+                    ${getPaymentRequestList(paymentRequestID, voucherStatus,true,voucherID)}           
                 </select>
-                <div class="d-block invalid-feedback" id="invalid-paymentID"></div>
+                <div class="d-block invalid-feedback" id="invalid-paymentRequestID"></div>
             </div>
         </div>
 
@@ -1606,7 +1615,7 @@ function formContent(data = false, readOnly = false, isRevise = false, isFromCan
         initDataTables();
         initAll();
         // updateSerialNumber();
-        paymentID && paymentID != 0 && $("[name=paymentID]").trigger("change");
+        paymentRequestID && paymentRequestID != 0 && $("[name=paymentRequestID]").trigger("change");
         
         // !purchaseOrderID && purchaseOrderID == 0 && $("#dateReceived").val(moment(new Date).format("MMMM DD, YYYY"));
         // $("#dateReceived").data("daterangepicker").maxDate = moment();
@@ -1699,7 +1708,7 @@ console.log("status "+ status)
     if (currentStatus == "0" && method != "approve") {
         
         data["employeeID"] = sessionID;
-        data["paymentID"]  = $("[name=paymentID]").val() || null;
+        data["paymentRequestID"]  = $("[name=paymentRequestID]").val() || null;
         data["voucherTinPayee"]  = $("[name=voucherTinPayee]").val() || null;
         data["voucherDescription"]  = $("[name=voucherDescription]").val()?.trim() || null;
         data["voucherBudgetSource"]  = $("[name=voucherBudgetSource]").val() || null;
@@ -1707,7 +1716,7 @@ console.log("status "+ status)
         data["voucherAmount"]  = $(".computecredit").text().replaceAll(",","").replaceAll("₱","")?.trim() || null;
 
         formData.append("employeeID", sessionID);
-        formData.append("paymentID", $("[name=paymentID]").val() || null);
+        formData.append("paymentRequestID", $("[name=paymentRequestID]").val() || null);
         formData.append("voucherTinPayee", $("[name=voucherTinPayee]").val() || null);
         formData.append("voucherDescription", $("[name=voucherDescription]").val()?.trim());
         formData.append("voucherBudgetSource", $("[name=voucherBudgetSource]").val()?.trim());
@@ -1749,7 +1758,7 @@ console.log("status "+ status)
         }
 
         $(".itemTableRow").each(function(i, obj) {
-            const paymentID = $(this).attr("paymentID");
+            const paymentRequestID = $(this).attr("paymentRequestID");
             const chartOfAccountID     = $("td [name=accountcode]", this).attr("accountid");	
             const accountCode  = $("td [name=accountcode]", this).text().trim();	
             const accountName  = $("td [name=accountname]", this).text().trim();	
@@ -1758,7 +1767,7 @@ console.log("status "+ status)
             const balance  = $("td [name=balance]", this).val().replaceAll(",","");	
            
             let temp = {
-                paymentID,
+                paymentRequestID,
                 chartOfAccountID,
                 accountCode,
                 accountName,
@@ -1767,7 +1776,7 @@ console.log("status "+ status)
                 balance
             };
 
-            formData.append(`items[${i}][paymentID]`, paymentID);
+            formData.append(`items[${i}][paymentRequestID]`, paymentRequestID);
             formData.append(`items[${i}][chartOfAccountID]`, chartOfAccountID);
             formData.append(`items[${i}][accountCode]`, accountCode);
             formData.append(`items[${i}][accountName]`, accountName);

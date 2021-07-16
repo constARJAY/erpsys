@@ -27,7 +27,7 @@
 //         $reviseVoucherID            = $this->input->post("reviseVoucherID") ?? null;
 //         $employeeID                 = $this->input->post("employeeID");
      
-//         $paymentID                  = $this->input->post("paymentID") ?? null;
+//         $paymentRequestID                  = $this->input->post("paymentRequestID") ?? null;
 //         $voucherTinPayee               = $this->input->post("voucherTinPayee");
 //         $voucherDescription               = $this->input->post("voucherDescription");
 //         $voucherBudgetSource               = $this->input->post("voucherBudgetSource");
@@ -49,7 +49,7 @@
 //         $financeCheckVoucherData = [
 //             "reviseVoucherID"           => $reviseVoucherID,
 //             "employeeID"                 => $employeeID,
-//             "paymentID"                 => $paymentID,
+//             "paymentRequestID"                 => $paymentRequestID,
 //             "voucherTinPayee"            => $voucherTinPayee,
 //             "voucherDescription"               => $voucherDescription,
 //             "voucherBudgetSource"               => $voucherBudgetSource,
@@ -113,7 +113,7 @@
 //                     foreach($items as $index => $item) {
 //                         $service = [
 //                             "voucherID" => $voucherID,
-//                             "paymentID"        => $item["paymentID"] != "null" ? $item["paymentID"] : null,
+//                             "paymentRequestID"        => $item["paymentRequestID"] != "null" ? $item["paymentRequestID"] : null,
 //                             "chartOfAccountID"               => $item["chartOfAccountID"] != "null" ? $item["chartOfAccountID"] : null,
 //                             "accountCode"             => $item["accountCode"],
 //                             "accountName"              => $item["accountName"],
@@ -168,7 +168,7 @@ class Check_voucher extends CI_Controller {
         $reviseVoucherID            = $this->input->post("reviseVoucherID") ?? null;
         $employeeID                 = $this->input->post("employeeID");
      
-        $paymentID                  = $this->input->post("paymentID") ?? null;
+        $paymentRequestID                  = $this->input->post("paymentRequestID") ?? null;
         $voucherTinPayee               = $this->input->post("voucherTinPayee");
         $voucherDescription               = $this->input->post("voucherDescription");
         $voucherBudgetSource               = $this->input->post("voucherBudgetSource");
@@ -191,7 +191,7 @@ class Check_voucher extends CI_Controller {
         $financeCheckVoucherData = [
             "reviseVoucherID"           => $reviseVoucherID,
             "employeeID"                 => $employeeID,
-            "paymentID"                 => $paymentID,
+            "paymentRequestID"                 => $paymentRequestID,
             "voucherTinPayee"            => $voucherTinPayee,
             "voucherDescription"               => $voucherDescription,
             "voucherBudgetSource"               => $voucherBudgetSource,
@@ -256,7 +256,7 @@ class Check_voucher extends CI_Controller {
                     foreach($items as $index => $item) {
                         $temp = [
                             "voucherID" => $voucherID,
-                            "paymentID"        => $item["paymentID"] != "null" ? $item["paymentID"] : null,
+                            "paymentRequestID"        => $item["paymentRequestID"] != "null" ? $item["paymentRequestID"] : null,
                             "chartOfAccountID"               => $item["chartOfAccountID"] != "null" ? $item["chartOfAccountID"] : null,
                             "accountCode"             => $item["accountCode"],
                             "accountName"              => $item["accountName"],

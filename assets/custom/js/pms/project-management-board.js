@@ -172,6 +172,7 @@ $(document).ready(function() {
 					{ targets: 1, width: 250 },
 					{ targets: 2, width: 250 },
 					{ targets: 3, width: 150 },
+					{ targets: 4, width: 80  },
 				],
 			});
 
@@ -275,7 +276,7 @@ $(document).ready(function() {
             <tr class="btnView" id="${encryptString(timelineBuilderID)}">
                 <td>
                     <div>${projectCode}</div>
-                    <small style="color:#848482;">put description here</small>
+                    <!-- <small style="color:#848482;">put description here</small> -->
                 </td>
                 <td>${projectName}</td>
                 <td>${projectCategory}</td>
@@ -461,13 +462,14 @@ $(document).ready(function() {
                 </div>`;
     
                 const teamMemberOptions = teamMembers.map(member => {
-                    const { id, fullname, image } = member;
+                    const { id, fullname, image, designation } = member;
                     
                     return `
                     <option 
                         value    = "${id}"
                         fullname = "${fullname}"
-                        image    = "${image}">${fullname}</option>`;
+                        image    = "${image}"
+                        designation = "${designation}">${fullname}</option>`;
                 }).join("");
 
                 taskAssigneeContent += `
@@ -713,19 +715,21 @@ $(document).ready(function() {
         let membersID = teamMember ? teamMember.replaceAll("|", ",") : "0";
         const teamMembers = getTableData(
             `hris_employee_list_tbl`,
-            `employeeID, employeeFirstname, employeeLastname, employeeProfile`,
+            `employeeID, designationID, employeeFirstname, employeeLastname, employeeProfile`,
             `FIND_IN_SET(employeeID, "${membersID}")`
         ).map(member => {
             const { 
                 employeeID, 
+                designationID,
                 employeeFirstname, 
                 employeeLastname, 
                 employeeProfile = "default.jpg"
             } = member;
             return {
-                id:       employeeID,
-                fullname: `${employeeFirstname} ${employeeLastname}`,
-                image:    `${base_url}/assets/upload-files/profile-images/${employeeProfile}`
+                id:          employeeID,
+                fullname:    `${employeeFirstname} ${employeeLastname}`,
+                designation: designationID,
+                image:       `${base_url}/assets/upload-files/profile-images/${employeeProfile}`
             }
         });
 
@@ -985,9 +989,16 @@ $(document).ready(function() {
             const taskID = $(`[name="milestoneName"][index="${index}"]`).attr("taskID");
             const projectMilestoneID = $(`[name="milestoneName"][index="${index}"]`).attr("projectMilestoneID");
             const manHours       = getNonFormattedAmount($(`[name="manHours"][index="${index}"]`).val());
-            const assignEmployee = $(`[name="assignEmployee"][index="${index}"]`).val()?.join("|");
+            let assignEmployee = $(`[name="assignEmployee"][index="${index}"]`).val();
+            let assignDesignation = [];
+            assignEmployee.map((_, i) => {
+                const designationID = $(`[name="assignEmployee"][index="${index}"] option:selected`).eq(i).attr("designation") || "";
+                assignDesignation.push(designationID);
+            })
+            assignEmployee    = assignEmployee.join("|");
+            assignDesignation = assignDesignation.join("|");
             const temp = {
-                taskID, projectMilestoneID, manHours, assignEmployee
+                taskID, projectMilestoneID, manHours, assignEmployee, assignDesignation
             };
             data.tasks.push(temp);
         })

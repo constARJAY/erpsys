@@ -48,6 +48,7 @@ const initAll = () => {
 	initDateRangePicker();
 	initInputmask();
 	initAmount();
+	initAmountFuel();
 	initQuantity();
 	initHours();
 };
@@ -131,6 +132,18 @@ const initAmount = (element = null, displayPrefix = false) => {
 	});
 };
 initAmount();
+
+
+const initAmountFuel = (element = null, displayPrefix = false) => {
+	let elem = getElement(element, ".input-fuel");
+	$(elem).inputmask({
+		alias: "currency",
+		prefix: displayPrefix ? "₱ " : "",
+		allowMinus: false,
+		allowPlus:  false,
+	});
+};
+initAmountFuel();
 // ----- END INITIALIZE AMOUNT FORMAT -----
 
 
@@ -486,6 +499,60 @@ const checkAmount = (elementID, invalidFeedback, value) => {
 };
 // ----- END VALIDATE CURRENCY -----
 
+// ----- VALIDATE FUEL CONSUMPTION -----
+const checkFuel = (elementID, invalidFeedback, value) => {
+	const validated = $(elementID).hasClass("validated");
+	const min = $(elementID).attr("min") ? +$(elementID).attr("min") : false;
+	const max = $(elementID).attr("max") ? +$(elementID).attr("max") : false;
+	let currencyValue = +value.split(",").join("");
+
+	if (typeof min != "number" && typeof max != "number") {
+		validated
+			? $(elementID).removeClass("is-invalid").addClass("is-valid")
+			: $(elementID).removeClass("is-invalid").removeClass("is-valid");
+		invalidFeedback.text("");
+	} else if (typeof min != "number" && typeof max == "number") {
+		if (currencyValue > max) {
+			$(elementID).removeClass("is-valid").addClass("is-invalid");
+			invalidFeedback.text(`Please input  value less than ${formatAmount(max)}`);
+		} else {
+			validated
+				? $(elementID).removeClass("is-invalid").addClass("is-valid")
+				: $(elementID).removeClass("is-invalid").removeClass("is-valid");
+			invalidFeedback.text("");
+		}
+	} else if (typeof min == "number" && typeof max != "number") {
+		if (currencyValue < min) {
+			$(elementID).removeClass("is-valid").addClass("is-invalid");
+			invalidFeedback.text(`Please input value greater than ${formatAmount(min)}`);
+		} else {
+			validated
+				? $(elementID).removeClass("is-invalid").addClass("is-valid")
+				: $(elementID).removeClass("is-invalid").removeClass("is-valid");
+			invalidFeedback.text("");
+		}
+	} else if (typeof min == "number" && typeof max == "number") {
+		if (currencyValue >= min && currencyValue > max) {
+			$(elementID).removeClass("is-valid").addClass("is-invalid");
+			invalidFeedback.text(`Please input value less than ${formatAmount(max)}`);
+		} else if (currencyValue >= min && currencyValue <= max) {
+			validated
+				? $(elementID).removeClass("is-invalid").addClass("is-valid")
+				: $(elementID).removeClass("is-invalid").removeClass("is-valid");
+			invalidFeedback.text("");
+		} else if (currencyValue < min && currencyValue <= max) {
+			$(elementID).removeClass("is-valid").addClass("is-invalid");
+			invalidFeedback.text(`Please input value greater than ${formatAmount(min - 0.01)}`);
+		}
+	} else {
+		validated
+			? $(elementID).removeClass("is-invalid").addClass("is-valid")
+			: $(elementID).removeClass("is-invalid").removeClass("is-valid");
+		invalidFeedback.text("");
+	}
+};
+// ----- END VALIDATE FUEL CONSUMPTION -----
+
 
 // ----- VALIDATE QUANTITY -----
 const checkQuantity = (elementID, invalidFeedback, value) => {
@@ -774,6 +841,7 @@ const characterCasing = (elementID) => {
 // ----- VALIDATE INPUTS -----
 const validateInput = (elementID) => {
 	$(elementID).addClass("validated");
+	let fuelConsumption = $(elementID).hasClass("input-fuel");
 	let currency = $(elementID).hasClass("amount");
 	let number   = $(elementID).hasClass("number");
 	let quantity = $(elementID).hasClass("input-quantity");
@@ -911,6 +979,7 @@ const validateInput = (elementID) => {
 					checkLength(elementID, invalidFeedback);
 					number && checkNumber(elementID, invalidFeedback, value);
 					currency && checkAmount(elementID, invalidFeedback, value);
+					fuelConsumption && checkFuel(elementID, invalidFeedback, value);
 					quantity && checkQuantity(elementID, invalidFeedback, value);
 					hours && checkHours(elementID, invalidFeedback, value);
 					checkEmail(elementID, invalidFeedback, value);
@@ -922,6 +991,7 @@ const validateInput = (elementID) => {
 				valLength > 0 && checkLength(elementID, invalidFeedback);
 				number && checkNumber(elementID, invalidFeedback, value);
 				currency && checkAmount(elementID, invalidFeedback, value);
+				fuelConsumption && checkFuel(elementID, invalidFeedback, value);
 				quantity && checkQuantity(elementID, invalidFeedback, value);
 				hours && checkHours(elementID, invalidFeedback, value);
 				checkEmail(elementID, invalidFeedback, value);
@@ -1303,6 +1373,20 @@ $(function () {
 		checkAmount(elementID, invalidFeedback, value);
 	})
 	// ----- END CHECK AMOUNT KEYUP -----
+
+	// ----- CHECK INPUT FUEL KEYUP -----
+	$(document).on("keyup", ".input-fuel", function() {
+		let value     = $(this).val();
+		let elementID = `#${$(this).attr("id")}`;
+		let invalidFeedback =
+		$(elementID).parent().find(".invalid-feedback").length > 0
+			? $(elementID).parent().find(".invalid-feedback")
+			: $(elementID).parent().parent().find(".invalid-feedback").length > 0
+			? $(elementID).parent().parent().find(".invalid-feedback")
+			: $(elementID).parent().parent().parent().find(".invalid-feedback");
+		checkFuel(elementID, invalidFeedback, value);
+	})
+	// ----- END CHECK INPUT FUEL KEYUP -----
 
 
 	// ----- CHECK AMOUNT KEYUP -----

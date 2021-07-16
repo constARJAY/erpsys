@@ -12,7 +12,7 @@ class Transfer_request extends CI_Controller {
 
     public function index()
     {
-        $data["title"] = "Inventory Request";
+        $data["title"] = "Inventory Transfer";
 
         $this->load->view("template/header",$data);
         $this->load->view("ims/transfer_request/index");

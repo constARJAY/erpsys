@@ -153,7 +153,7 @@ $(document).ready(function() {
 		const address = $('option:selected', this).attr("address");
 		const department = $('option:selected', this).attr("department");
 		const designation = $('option:selected', this).attr("designation");
-		const amount = $('option:selected', this).attr("amount");
+		const amount = $('option:selected', this).attr("amount").replaceAll(",","");
 		const id 					= $(this).val();
 		// let materialWithdrawalID 	= $(this).attr("materialWithdrawalID");
 		// let executeonce 	        = $(this).attr("executeonce") == "true";
@@ -622,6 +622,7 @@ $(document).ready(function() {
     // ----- FORM BUTTONS -----
 	function formButtons(data = false, isRevise = false, isFromCancelledDocument = false) {
 		let button = "";
+	
 		if (data) {
 			let {
 				paymentRequestID     = "",
@@ -918,6 +919,7 @@ $(document).ready(function() {
         let tableProjectRequestItemsName = !disabled ? "tableProjectRequestItems" : "tableProjectRequestItems0";
 		
 		let button = formButtons(data, isRevise, isFromCancelledDocument);
+		console.log(button)
 
 		let reviseDocumentNo    = isRevise ? paymentRequestID : revisePaymentRequestID;
 		let documentHeaderClass = isRevise || revisePaymentRequestID ? "col-lg-4 col-md-4 col-sm-12 px-1" : "col-lg-2 col-md-6 col-sm-12 px-1";
@@ -1113,7 +1115,7 @@ $(document).ready(function() {
 		<div class="approvers">
 			${!isRevise  ? getApproversStatus(approversID, approversStatus, approversDate) : ""}
 		</div>`;
-
+		
 		setTimeout(() => {
 			$("#page_content").html(html);
 			initDataTables();

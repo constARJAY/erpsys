@@ -381,11 +381,11 @@ class Billing_module extends CI_Controller {
         
         $sheet->mergeCells("A$rowNumber:F$rowNumber");
         $sheet->setCellValue("A$rowNumber", "COMMENTS: ");
-        $sheet->getStyle("A$rowNumber")->applyFromArray($labelFillTableStyle);
+        $sheet->getStyle("A$rowNumber:F$rowNumber")->applyFromArray($labelFillTableStyle);
         $rowNumber++;
         $sheet->getRowDimension($rowNumber)->setRowHeight($space * 9);
         $sheet->mergeCells("A$rowNumber:F$rowNumber");
-        $sheet->setCellValue("A$rowNumber", $data["billingReason"]);
+        $sheet->setCellValue("A$rowNumber", $data["billingComment"]);
         $sheet->getStyle("A$rowNumber:F$rowNumber")->applyFromArray($wrapTextLeft);
         $sheet->getStyle("A$rowNumber:F$rowNumber")->applyFromArray($allBorderStyle);
         $rowNumber+=2;

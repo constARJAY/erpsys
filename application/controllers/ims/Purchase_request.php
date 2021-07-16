@@ -28,13 +28,16 @@ class Purchase_request extends CI_Controller {
         $employeeID              = $this->input->post("employeeID");
         $billMaterialID          = $this->input->post("billMaterialID") ?? null;
         $projectID               = $this->input->post("projectID") ?? null;
+        $projectCode             = $this->input->post("projectCode") ?? null;
+        $projectName             = $this->input->post("projectName") ?? null;
+        $clientName              = $this->input->post("clientName") ?? null;
+        $clientAddress           = $this->input->post("clientAddress") ?? null;
         $approversID             = $this->input->post("approversID") ?? null;
         $approversStatus         = $this->input->post("approversStatus") ?? null;
         $approversDate           = $this->input->post("approversDate") ?? null;
         $purchaseRequestStatus   = $this->input->post("purchaseRequestStatus");
         $purchaseRequestReason   = $this->input->post("purchaseRequestReason") ?? null;
-        $projectTotalAmount      = $this->input->post("projectTotalAmount") ?? null;
-        $companyTotalAmount      = $this->input->post("companyTotalAmount") ?? null;
+        $purchaseRequestGrandTotal = $this->input->post("purchaseRequestGrandTotal") ?? 0;
         $purchaseRequestRemarks  = $this->input->post("purchaseRequestRemarks") ?? null;
         $submittedAt             = $this->input->post("submittedAt") ?? null;
         $createdBy               = $this->input->post("createdBy");
@@ -47,13 +50,16 @@ class Purchase_request extends CI_Controller {
             "employeeID"              => $employeeID,
             "billMaterialID"          => $billMaterialID,
             "projectID"               => $projectID,
+            "projectCode"             => $projectCode,
+            "projectName"             => $projectName,
+            "clientName"              => $clientName,
+            "clientAddress"           => $clientAddress,
             "approversID"             => $approversID,
             "approversStatus"         => $approversStatus,
             "approversDate"           => $approversDate,
             "purchaseRequestStatus"   => $purchaseRequestStatus,
             "purchaseRequestReason"   => $purchaseRequestReason,
-            "projectTotalAmount"      => $projectTotalAmount,
-            "companyTotalAmount"      => $companyTotalAmount,
+            "purchaseRequestGrandTotal" => $purchaseRequestGrandTotal,
             "submittedAt"             => $submittedAt,
             "createdBy"               => $createdBy,
             "updatedBy"               => $updatedBy,
@@ -109,23 +115,80 @@ class Purchase_request extends CI_Controller {
                 if ($items) {
                     $purchaseRequestItems = [];
                     foreach($items as $index => $item) {
+                        $requestItemID        = $item["requestItemID"] ?? null;
+                        $billMaterialID       = $billMaterialID;
+                        $purchaseRequestID    = $purchaseRequestID;
+                        $milestoneBuilderID   = null;
+                        $phaseDescription     = null;
+                        $milestoneListID      = null;
+                        $projectMilestoneID   = null;
+                        $projectMilestoneName = null;
+                        $inventoryVendorID    = $item["inventoryVendorID"] ?? null;
+                        $itemID               = $item["itemID"] ?? null;
+                        $itemCode             = $item["itemCode"] ?? null;
+                        $itemName             = $item["itemName"] ?? null;
+                        $itemDescription      = $item["itemDescription"] ?? null;
+                        $itemClassification   = $item["itemClassification"] ?? null;
+                        $brandName            = $item["brandName"] ?? null;
+                        $itemUom              = $item["itemUom"] ?? null;
+                        $categoryType         = $item["categoryType"] ?? null;
+                        $quantity             = $item["quantity"] ?? null;
+                        $unitCost             = $item["unitcost"] ?? null;
+                        $totalCost            = $item["totalcost"] ?? null;
+                        $files                = array_key_exists("existingFile", $item) ? $item["existingFile"] : null;
+                        $remarks              = $item["remarks"] ?? null;
+                        $createdBy            = $item["createdBy"] ?? null;
+                        $updatedBy            = $item["updatedBy"] ?? null;
+
+                        if ($requestItemID) {
+                            $requestItem = $this->purchaserequest->getRequestItem($requestItemID);
+                            if ($requestItem) {
+                                $milestoneBuilderID   = $requestItem->milestoneBuilderID;
+                                $phaseDescription     = $requestItem->phaseDescription;
+                                $milestoneListID      = $requestItem->milestoneListID;
+                                $projectMilestoneID   = $requestItem->projectMilestoneID;
+                                $projectMilestoneName = $requestItem->projectMilestoneName;
+                                $inventoryVendorID    = $requestItem->inventoryVendorID;
+                                $itemID               = $requestItem->itemID;
+                                $itemCode             = $requestItem->itemCode;
+                                $itemName             = $requestItem->itemName;
+                                $itemDescription      = $requestItem->itemDescription;
+                                $itemClassification   = $requestItem->itemClassification;
+                                $brandName            = $requestItem->brandName;
+                                $itemUom              = $requestItem->itemUom;
+                                $categoryType         = $requestItem->categoryType;
+                                $quantity             = $requestItem->quantity;
+                                $unitCost             = $requestItem->unitCost;
+                                $totalCost            = $requestItem->totalCost;
+                                $files                = $requestItem->files;
+                                $remarks              = $requestItem->remarks;
+                            }
+                        }
+
                         $temp = [
-                            // "requestItemID"     => $item["requestItemID"] != "null" ? $item["requestItemID"] : null,
-                            "billMaterialID"    => $billMaterialID,
-                            "purchaseRequestID" => $purchaseRequestID,
-                            "itemID"            => $item["itemID"] != "null" ? $item["itemID"] : null,
-                            "itemName"          => $item["itemName"] != "null" ? $item["itemName"] : null,
-                            "itemDescription"   => $item["itemDescription"] != "null" ? $item["itemDescription"] : null,
-                            "itemUom"           => $item["itemUom"] != "null" ? $item["itemUom"] : null,
-                            "inventoryVendorID" => $item["inventoryVendorID"] != "null" ? $item["inventoryVendorID"] : null,
-                            "categoryType"      => $item["categoryType"],
-                            "quantity"          => $item["quantity"],
-                            "unitCost"          => $item["unitcost"],
-                            "totalCost"         => $item["totalcost"],
-                            "files"             => array_key_exists("existingFile", $item) ? $item["existingFile"] : null, 
-                            "remarks"           => $item["remarks"] ? $item["remarks"] : null, 
-                            "createdBy"         => $item["createdBy"],
-                            "updatedBy"         => $item["updatedBy"],
+                            "billMaterialID"       => $billMaterialID,
+                            "purchaseRequestID"    => $purchaseRequestID,
+                            "milestoneBuilderID"   => $milestoneBuilderID,
+                            "phaseDescription"     => $phaseDescription,
+                            "milestoneListID"      => $milestoneListID,
+                            "projectMilestoneID"   => $projectMilestoneID,
+                            "projectMilestoneName" => $projectMilestoneName,
+                            "inventoryVendorID"    => $inventoryVendorID,
+                            "itemID"               => $itemID,
+                            "itemCode"             => $itemCode,
+                            "itemName"             => $itemName,
+                            "itemDescription"      => $itemDescription,
+                            "itemClassification"   => $itemClassification,
+                            "brandName"            => $brandName,
+                            "itemUom"              => $itemUom,
+                            "categoryType"         => $categoryType,
+                            "quantity"             => $quantity,
+                            "unitCost"             => $unitCost,
+                            "totalCost"            => $totalCost,
+                            "files"                => $files,
+                            "remarks"              => $remarks,
+                            "createdBy"            => $createdBy,
+                            "updatedBy"            => $updatedBy,
                         ];
                         array_push($purchaseRequestItems, $temp);
                     }
@@ -168,6 +231,19 @@ class Purchase_request extends CI_Controller {
             
         }
         echo json_encode($savePurchaseRequestData);
+    }
+
+    public function getMaterialEquipmentRequestItems()
+    {
+        $purchaseRequestID = $this->input->post("purchaseRequestID");
+        echo json_encode($this->purchaserequest->getMaterialEquipmentRequestItems($purchaseRequestID));
+    }
+
+    public function getCostEstimateRequest()
+    {
+        $purchaseRequestID = $this->input->post("purchaseRequestID");
+        $billMaterialID    = $this->input->post("billMaterialID");
+        echo json_encode($this->purchaserequest->getCostEstimateRequest($purchaseRequestID, $billMaterialID));
     }
 
 }

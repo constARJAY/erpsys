@@ -42,6 +42,7 @@ class Project_management_board extends CI_Controller {
                 "projectMilestoneID"       => $task["projectMilestoneID"],
                 "manHours"                 => $task["manHours"],
                 "assignedEmployee"         => $task["assignEmployee"],
+                "assignedDesignation"      => $task["assignDesignation"],
                 "createdBy"                => $sessionID,
                 "updatedBy"                => $sessionID
             ];

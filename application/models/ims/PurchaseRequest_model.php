@@ -85,4 +85,182 @@ class PurchaseRequest_model extends CI_Model {
         return "false|System error: Please contact the system administrator for assistance!";
     }
 
+    public function getRequestItem($requestItemID = 0)
+    {
+        $sql   = "SELECT * FROM ims_request_items_tbl WHERE requestItemID = $requestItemID";
+        $query = $this->db->query($sql);
+        return $query ? $query->row() : false;
+    }
+
+    public function getPurchaseRequestClassification($purchaseRequestID = 0, $billMaterialID = 0)
+    {
+        $result = [];
+        if ($purchaseRequestID && $purchaseRequestID > 0 || $billMaterialID && $billMaterialID > 0) {
+            $wherePR  = $purchaseRequestID && $purchaseRequestID > 0 ? "AND purchaseRequestID = $purchaseRequestID" : "AND purchaseRequestID IS NULL";
+            $whereBOM = $billMaterialID && $billMaterialID > 0 ? "AND billMaterialID = $billMaterialID" : "";
+            $sql = "
+            SELECT 
+                itemClassification
+            FROM 
+                ims_request_items_tbl 
+            WHERE 
+                (inventoryValidationID IS NULL OR inventoryValidationID = 0)
+                $wherePR
+                $whereBOM
+            GROUP BY itemClassification";
+            $query = $this->db->query($sql);
+            $result = $query ? $query->result_array() : [];
+        }
+        return $result;
+    }
+
+    public function getPurchaseRequestItems($purchaseRequestID = 0, $billMaterialID = 0, $itemClassification = "")
+    {
+        $result = [];
+        if ($purchaseRequestID && $purchaseRequestID > 0 || $billMaterialID && $billMaterialID > 0) {
+            $wherePR  = $purchaseRequestID && $purchaseRequestID > 0 ? "AND purchaseRequestID = $purchaseRequestID" : "AND purchaseRequestID IS NULL";
+            $whereBOM = $billMaterialID && $billMaterialID > 0 ? "AND billMaterialID = $billMaterialID" : "";
+            $sql = "
+            SELECT 
+                *
+            FROM 
+                ims_request_items_tbl 
+            WHERE 
+                milestoneBuilderID IS NULL AND
+                phaseDescription IS NULL AND
+                milestoneListID IS NULL AND
+                projectMilestoneID IS NULL AND
+                projectMilestoneName IS NULL AND
+                (inventoryValidationID IS NULL OR inventoryValidationID = 0) AND
+                itemClassification = BINARY('$itemClassification')
+                $wherePR 
+                $whereBOM";
+            $query = $this->db->query($sql);
+            $result = $query ? $query->result_array() : [];
+        }
+        return $result;
+    }
+
+    public function getMaterialEquipmentRequestItems($purchaseRequestID = 0, $billMaterialID = 0)
+    {
+        $classifications = $this->getPurchaseRequestClassification($purchaseRequestID, $billMaterialID);
+        $result = [];
+        foreach($classifications as $classification) {
+            $itemClassification = $classification["itemClassification"];
+            $temp = [
+                "name"  => $itemClassification,
+                "items" => $this->getPurchaseRequestItems($purchaseRequestID, $billMaterialID, $itemClassification)
+            ];
+            array_push($result, $temp);
+        }
+        return $result;
+    }
+
+    public function getPhases($purchaseRequestID = 0, $billMaterialID = 0)
+    {
+        $wherePR = $purchaseRequestID && $purchaseRequestID > 0 ? "AND purchaseRequestID = $purchaseRequestID" : "AND purchaseRequestID IS NULL";
+        $sql = "
+        SELECT 
+            milestoneBuilderID, phaseDescription
+        FROM 
+            ims_request_items_tbl 
+        WHERE 
+            milestoneBuilderID IS NOT NULL AND
+            phaseDescription IS NOT NULL AND
+            milestoneListID IS NOT NULL AND
+            projectMilestoneID IS NOT NULL AND
+            projectMilestoneName IS NOT NULL AND
+            billMaterialID = $billMaterialID AND 
+            (inventoryValidationID IS NULL OR inventoryValidationID = 0) 
+            $wherePR 
+        GROUP BY milestoneBuilderID";
+        $query = $this->db->query($sql);
+        return $query ? $query->result_array() : [];
+    }
+
+    public function getMilestones($purchaseRequestID = 0, $billMaterialID = 0, $milestoneBuilderID = 0) {
+        $wherePR = $purchaseRequestID && $purchaseRequestID > 0 ? "AND purchaseRequestID = $purchaseRequestID" : "AND purchaseRequestID IS NULL";
+        $sql = "
+        SELECT 
+            projectMilestoneID, projectMilestoneName
+        FROM 
+            ims_request_items_tbl 
+        WHERE 
+            milestoneBuilderID IS NOT NULL AND
+            phaseDescription IS NOT NULL AND
+            milestoneListID IS NOT NULL AND
+            projectMilestoneID IS NOT NULL AND
+            projectMilestoneName IS NOT NULL AND
+            billMaterialID = $billMaterialID AND 
+            (inventoryValidationID IS NULL OR inventoryValidationID = 0) AND
+            milestoneBuilderID = $milestoneBuilderID 
+            $wherePR
+        GROUP BY projectMilestoneID";
+        $query = $this->db->query($sql);
+        return $query ? $query->result_array() : [];
+    }
+
+    public function getMilestoneItems($purchaseRequestID = 0, $billMaterialID = 0, $milestoneBuilderID = 0, $projectMilestoneID = 0)
+    {
+        $wherePR = $purchaseRequestID && $purchaseRequestID > 0 ? "AND purchaseRequestID = $purchaseRequestID" : "AND purchaseRequestID IS NULL";
+        $sql = "
+        SELECT 
+            *
+        FROM 
+            ims_request_items_tbl 
+        WHERE 
+            milestoneBuilderID IS NOT NULL AND
+            phaseDescription IS NOT NULL AND
+            milestoneListID IS NOT NULL AND
+            projectMilestoneID IS NOT NULL AND
+            projectMilestoneName IS NOT NULL AND
+            billMaterialID = $billMaterialID AND 
+            (inventoryValidationID IS NULL OR inventoryValidationID = 0) AND
+            milestoneBuilderID = $milestoneBuilderID AND
+            projectMilestoneID = $projectMilestoneID
+            $wherePR";
+        $query = $this->db->query($sql);
+        return $query ? $query->result_array() : [];
+    }
+
+    public function getProjectPhases($purchaseRequestID = 0, $billMaterialID = 0)
+    {
+        $result = [];
+        $phases = $this->getPhases($purchaseRequestID, $billMaterialID);
+        foreach($phases as $phase) {
+            $milestoneBuilderID = $phase["milestoneBuilderID"];
+            $phaseDescription   = $phase["phaseDescription"];
+
+            $milestones = $this->getMilestones($purchaseRequestID, $billMaterialID, $milestoneBuilderID);
+            $milestoneItems = [];
+            foreach($milestones as $milestone) {
+                $projectMilestoneID   = $milestone["projectMilestoneID"];
+                $projectMilestoneName = $milestone["projectMilestoneName"];
+
+                $temp2 = [
+                    "projectMilestoneID" => $projectMilestoneID,
+                    "name"  => $projectMilestoneName,
+                    "items" => $this->getMilestoneItems($purchaseRequestID, $billMaterialID, $milestoneBuilderID, $projectMilestoneID)
+                ];
+                array_push($milestoneItems, $temp2);
+            }
+            $temp = [
+                "milestoneBuilderID" => $milestoneBuilderID,
+                "phaseDescription"   => $phaseDescription,
+                "milestones"         => $milestoneItems,
+            ];
+            array_push($result, $temp);
+        }
+        return $result;
+    }
+
+    public function getCostEstimateRequest($purchaseRequestID = 0, $billMaterialID = 0) 
+    {
+        $result = [
+            "phases" => $this->getProjectPhases($purchaseRequestID, $billMaterialID),
+            "materialsEquipment" => $this->getMaterialEquipmentRequestItems($purchaseRequestID, $billMaterialID)
+        ];
+        return $result;
+    }
+
 }

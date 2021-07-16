@@ -47,7 +47,7 @@ $(document).ready(function() {
                 createdAt
             } = client;
 
-            const clientAddress = (clientUnitNumber ? titleCase(clientUnitNumber)+" " : "")+(clientHouseNumber ? titleCase(clientHouseNumber)+", " : "")+(clientStreetName ? titleCase(clientStreetName)+", " : "")+(clientSubdivisionName ? titleCase(clientSubdivisionName)+", " : "")+(clientBarangay ? titleCase(clientBarangay)+", " : "")+(clientCity ? titleCase(clientCity)+", " : "")+(clientProvince ? titleCase(clientProvince)+", " : "")+(clientCountry ? titleCase(clientCountry)+", " : "")+(clientPostalCode ? titleCase(clientPostalCode) : "");
+            const clientAddress = (clientUnitNumber ? titleCase(clientUnitNumber)+" " : "")+(clientHouseNumber ? titleCase(clientHouseNumber)+" " : "")+(clientStreetName ? titleCase(clientStreetName)+", " : "")+(clientSubdivisionName ? titleCase(clientSubdivisionName)+", " : "")+(clientBarangay ? titleCase(clientBarangay)+", " : "")+(clientCity ? titleCase(clientCity)+", " : "")+(clientProvince ? titleCase(clientProvince)+", " : "")+(clientCountry ? titleCase(clientCountry)+", " : "")+(clientPostalCode ? titleCase(clientPostalCode) : "");
             const clientCode = getFormCode("CLT", createdAt, clientID);
             const clientContactNumber = client_MobileNo;
 

@@ -67,7 +67,7 @@ function tableContent() {
                 <thead style="white-space:nowrap">
                     <tr>
                         <th>Vehicle Code</th>
-                        <th>Vehicle Name</th>
+                        <th>Vehicle</th>
                         <th>Plate Number/Conduction Number</th>
                         <th>Gas Type</th>
                         <th>Status</th>
@@ -163,7 +163,7 @@ tableContent();
             <div class="row">
                 <div class="col-md-6 col-sm-12">
                     <div class="form-group">
-                        <label>Vehicle Name <span class="text-danger font-weight-bold">*</span></label>
+                        <label>Vehicle <span class="text-danger font-weight-bold">*</span></label>
                         <input 
                             type="text" 
                             class="form-control validate" 
@@ -188,6 +188,7 @@ tableContent();
                             name="vehiclePlateNumber" 
                             id="input_vehiclePlateNumber" 
                             data-allowcharacters="[A-Z][0-9][-][ ]" 
+                            placeholder="AAA 0000"
                             minlength="1" 
                             maxlength="8" 
                             required 
@@ -206,7 +207,7 @@ tableContent();
                             <div>
                                 <input 
                                 type="text" 
-                                class="form-control amount text-right" 
+                                class="form-control input-fuel text-right" 
                                 name="vehicleFuelConsumption" 
                                 id="input_vehicleFuelConsumption" 
                                 data-allowcharacters="[0-9][.]" 
@@ -214,7 +215,7 @@ tableContent();
                                 maxlength="9"
                                 min="1" 
                                 required 
-                                style="display: inline;width:90%;" 
+                                style="display: inline;width:75%;" 
                                 value="${vehicleFuelConsumption}"
                                 autocomplete="off">
 								<label for="input_vehicleFuelConsumption">km/L</label>

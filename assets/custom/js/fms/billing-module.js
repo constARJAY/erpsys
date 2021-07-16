@@ -49,7 +49,7 @@ $(document).ready(function() {
                 clientPostalCode
             } = client;
 
-            const clientAddress = (clientUnitNumber ? titleCase(clientUnitNumber)+" " : "")+(clientHouseNumber ? titleCase(clientHouseNumber)+", " : "")+(clientStreetName ? titleCase(clientStreetName)+", " : "")+(clientSubdivisionName ? titleCase(clientSubdivisionName)+", " : "")+(clientBarangay ? titleCase(clientBarangay)+", " : "")+(clientCity ? titleCase(clientCity)+", " : "")+(clientProvince ? titleCase(clientProvince)+", " : "")+(clientCountry ? titleCase(clientCountry)+", " : "")+(clientPostalCode ? titleCase(clientPostalCode) : "");
+            const clientAddress = (clientUnitNumber ? titleCase(clientUnitNumber)+" " : "")+(clientHouseNumber ? titleCase(clientHouseNumber)+" " : "")+(clientStreetName ? titleCase(clientStreetName)+", " : "")+(clientSubdivisionName ? titleCase(clientSubdivisionName)+", " : "")+(clientBarangay ? titleCase(clientBarangay)+", " : "")+(clientCity ? titleCase(clientCity)+", " : "")+(clientProvince ? titleCase(clientProvince)+", " : "")+(clientCountry ? titleCase(clientCountry)+", " : "")+(clientPostalCode ? titleCase(clientPostalCode) : "");
             return { clientID, clientName, clientAddress };
         })
     // ----- END GLOBAL VARIABLE -----

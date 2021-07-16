@@ -47,7 +47,7 @@ class BillingModule_model extends CI_Model {
                 "designationName"   => $result->designationName,
                 "billingStatus"     => $result->billingStatus,
                 "submittedAt"       => $result->submittedAt,
-                "billingReason"     => $result->billingReason,
+                "billingComment"    => $result->billingComment,
                 "clientID"          => $result->clientID,
                 "clientName"        => $result->clientName,
                 "clientAddress"     => $result->clientAddress,

@@ -189,6 +189,12 @@ $(document).ready(function() {
 		``,
 		`uomStatus = 1`
 	)
+
+	const chartAccountList = getTableData(
+		`fms_chart_of_accounts_tbl`,
+		`chartOfAccountID, accountName`,
+		`accountStatus = 1`
+	);
 	// END GLOBAL VARIABLE - REUSABLE 
 
 
@@ -900,15 +906,13 @@ $(document).ready(function() {
 
 
 	// ----- GET UOM LIST -----
-	function getUomList(uomName = null) {
-		let html = `<option disabled selected>Select UOM</option>`;
-		if (uomName) {
-			uomList.map(uom => {
-				html += `
-				<option value="${uom.uomName}"
-					${uomName == uom.uomName ? "selected" : ""}>${uom.uomName}</option>`;
-			})
-		}
+	function getUomList(inUomName = null) {
+		let html = ``;
+		uomList.map(uom => {
+			html += `
+			<option value="${uom.uomName}"
+				${inUomName == uom.uomName ? "selected" : ""}>${titleCase(uom.uomName)}</option>`;
+		})
 		return html;
 	}
 	// ----- END GET UOM LIST -----
@@ -970,6 +974,7 @@ $(document).ready(function() {
 							name="serviceUom"
 							id="serviceUom"
 							required>
+							<option disabled selected>Select UOM</option>
 							${getUomList(uom)}
 						</select>
 						<!-- <input 
@@ -1644,6 +1649,9 @@ $(document).ready(function() {
 			data["companyContactPerson"]  = $(`[name="companyContactPerson"]`).val()?.trim() || null;
 			data["companyAddress"]        = $(`[name="companyAddress"]`).val()?.trim() || null;
 
+			data["chartOfAccountID"] = $(`[name="chartOfAccountID"]`).val();
+			data["accountName"]      = $(`[name="chartOfAccountID"] option:selected`).attr("accountName");
+
 			data["paymentTerms"]     = $("[name=paymentTerms]").val()?.trim();
 			data["discountType"]     = $("[name=discountType]").val();
 			data["scheduleDate"]     = moment($("[name=scheduleDate]").val()).format("YYYY-MM-DD");
@@ -1695,7 +1703,7 @@ $(document).ready(function() {
 						const unitCost = +getNonFormattedAmount($(`[name="unitCost"]`, this).val()) || +getNonFormattedAmount($(`.unitcost`, this).text());
 						let scope = {
 							description: $('[name="serviceDescription"]', this).val()?.trim() || $(`.servicescope`, this).text().trim(),
-							uom: $(`[name="serviceUom"]`, this).val()?.trim() || $(`.uom`, this).text().trim(),
+							uom: $(`[name="serviceUom"]`, this).val(),
 							quantity,
 							unitCost,
 							totalCost: (quantity * unitCost)
@@ -1839,7 +1847,7 @@ $(document).ready(function() {
 						</div>
 					</div>
 					<div class="row" style="font-size: 1.1rem">
-						<div class="col-6 col-lg-7 text-left">Discount :</div>
+						<div class="col-6 col-lg-7 text-left align-self-center">Discount :</div>
 						<div class="col-6 col-lg-5 text-right text-dark">
 							${discountDisplay}
 						</div>
@@ -1970,6 +1978,27 @@ $(document).ready(function() {
 	// ----- END DISPLAY CONTRACT -----
 
 
+	// ----- GET CHART ACCOUNT LIST -----
+	function getChartAccountList(argAhartOfAccountID = 0, argAccountName = "", status = 0) {
+		let html = "";
+		if (status != "2" && status != "5") {
+			chartAccountList.map(account => {
+				const { chartOfAccountID, accountName } = account;
+				html += `
+				<option value="${chartOfAccountID}"
+					accountName="${accountName}"
+					${chartOfAccountID == argAhartOfAccountID ? "selected" : ""}>
+					${accountName}
+				</option>`;
+			})
+		} else {
+			html = `<option selected>${argAccountName}</option>`;
+		}
+		return html;
+	}
+	// ----- END GET CHART ACCOUNT LIST -----
+
+
     // ----- FORM CONTENT -----
 	function formContent(data = false, readOnly = false, isRevise = false, isFromCancelledDocument = false) {
 		$("#page_content").html(preloader);
@@ -1996,6 +2025,8 @@ $(document).ready(function() {
 			companyAddress           = "-",
 			companyContactDetails    = "",
 			companyContactPerson     = "",
+			chartOfAccountID         = "",
+			accountName              = "",
 			paymentTerms             = "",
 			scheduleDate             = "",
 			serviceRequisitionReason = "",
@@ -2091,7 +2122,7 @@ $(document).ready(function() {
 			if (isPrintAllowed(41)) {
 				approvedButton += `
 					<button 
-						class="btn btn-info py-2" 
+						class="btn btn-info px-5 py-2" 
 						serviceOrderID="${encryptString(serviceOrderID)}"
 						id="btnExcel">
 						<i class="fas fa-file-excel"></i> Excel
@@ -2290,8 +2321,21 @@ $(document).ready(function() {
                     <input type="text" class="form-control" name="companyAddress" disabled value="${companyAddress || "-"}">
                 </div>
             </div>
-
-            <div class="col-md-6 col-sm-12">
+			<div class="col-md-4 col-sm-12">
+                <div class="form-group">
+                    <label>Account Name ${!disabled ? "<code>*</code>" : ""}</label>
+					<select class="form-control validate select2"
+						name="chartOfAccountID"
+						id="chartOfAccountID"
+						required
+						${disabled}>
+						<option selected disabled>Select Account Name</option>
+						${getChartAccountList(chartOfAccountID, accountName, serviceOrderStatus)}
+					</select>
+					<div class="d-block invalid-feedback" id="invalid-chartOfAccountID"></div>
+                </div>
+            </div>
+            <div class="col-md-4 col-sm-12">
                 <div class="form-group">
                     <label>Payment Terms ${!disabled ? "<code>*</code>" : ""}</label>
                     <input type="text" 
@@ -2308,7 +2352,7 @@ $(document).ready(function() {
 					<div class="d-block invalid-feedback" id="invalid-paymentTerms"></div>
                 </div>
             </div>
-            <div class="col-md-6 col-sm-12">
+            <div class="col-md-4 col-sm-12">
                 <div class="form-group">
                     <label>Schedule ${!disabled ? "<code>*</code>" : ""}</label>
                     <input type="button" 

@@ -1327,12 +1327,12 @@ $(document).ready(function() {
 							}else{
 								$(`#quantity${index}${attr}`).removeClass("is-valid").addClass("is-invalid");
 								$(this).closest("tr").find("#invalid-quantity").removeClass("is-valid").addClass("is-invalid");
-								$(this).closest("tr").find("#invalid-quantity").text('Too much quantity!');
+								$(this).closest("tr").find("#invalid-quantity").text('Excessive amount of quantity!');
 							}
 						}else{
 								$(`#quantity${index}${attr}`).removeClass("is-valid").addClass("is-invalid");
 								$(this).closest("tr").find("#invalid-quantity").removeClass("is-valid").addClass("is-invalid");
-								$(this).closest("tr").find("#invalid-quantity").text('Too much quantity or no stocks available!');
+								$(this).closest("tr").find("#invalid-quantity").text('Excessive amount of quantity or no stocks available!');
 						}
 		
 					})

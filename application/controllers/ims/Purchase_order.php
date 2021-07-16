@@ -111,12 +111,18 @@ class Purchase_order extends CI_Controller {
         $employeeID            = $this->input->post("employeeID") ?? null;
         $purchaseRequestID     = $this->input->post("purchaseRequestID") ?? null;
         $bidRecapID            = $this->input->post("bidRecapID") ?? null;
+        $projectID             = $this->input->post("projectID") ?? null;
+        $projectCode           = $this->input->post("projectCode") ?? null;
+        $projectName           = $this->input->post("projectName") ?? null;
+        $clientName            = $this->input->post("clientName") ?? null;
+        $clientAddress         = $this->input->post("clientAddress") ?? null;
         $inventoryVendorID     = $this->input->post("inventoryVendorID") ?? null;
         $vendorName            = $this->input->post("vendorName") ?? null;
         $vendorContactDetails  = $this->input->post("vendorContactDetails") ?? null;
         $vendorContactPerson   = $this->input->post("vendorContactPerson") ?? null;
         $vendorAddress         = $this->input->post("vendorAddress") ?? null;
-        $categoryType          = $this->input->post("categoryType") ?? null;
+        $chartOfAccountID      = $this->input->post("chartOfAccountID") ?? null;
+        $accountName           = $this->input->post("accountName") ?? null;
         $paymentTerms          = $this->input->post("paymentTerms") ?? null;
         $deliveryTerm          = $this->input->post("deliveryTerm") ?? null;
         $discountType          = $this->input->post("discountType") ?? null;
@@ -144,12 +150,18 @@ class Purchase_order extends CI_Controller {
             "employeeID"            => $employeeID,
             "purchaseRequestID"     => $purchaseRequestID,
             "bidRecapID"            => $bidRecapID,
+            "projectID"             => $projectID,
+            "projectCode"           => $projectCode,
+            "projectName"           => $projectName,
+            "clientName"            => $clientName,
+            "clientAddress"         => $clientAddress,
             "inventoryVendorID"     => $inventoryVendorID,
             "vendorName"            => $vendorName,
             "vendorContactDetails"  => $vendorContactDetails,
             "vendorContactPerson"   => $vendorContactPerson,
             "vendorAddress"         => $vendorAddress,
-            "categoryType"          => $categoryType,
+            "chartOfAccountID"      => $chartOfAccountID,
+            "accountName"           => $accountName,
             "paymentTerms"          => $paymentTerms,
             "deliveryTerm"          => $deliveryTerm,
             "discountType"          => $discountType,
@@ -225,22 +237,29 @@ class Purchase_order extends CI_Controller {
                             "billMaterialID"           => $riData->billMaterialID,
                             "purchaseRequestID"        => $riData->purchaseRequestID,
                             "referencePurchaseOrderID" => $riData->referencePurchaseOrderID,
-                            "purchaseOrderID"          => $purchaseOrderID,
-                            "purchaseRequestID"        => $purchaseRequestID,
                             "bidRecapID"               => $bidRecapID,
-                            "categoryType"             => $categoryType,
+                            "purchaseOrderID"          => $purchaseOrderID,
+                            "inventoryReceivingID"     => $riData->inventoryReceivingID,
+                            "categoryType"             => $riData->categoryType,
                             "inventoryVendorID"        => $inventoryVendorID,
                             "inventoryVendorName"      => $riData->inventoryVendorName,
+                            "milestoneBuilderID"       => $riData->milestoneBuilderID,
+                            "phaseDescription"         => $riData->phaseDescription,
+                            "milestoneListID"          => $riData->milestoneListID,
+                            "projectMilestoneID"       => $riData->projectMilestoneID,
+                            "projectMilestoneName"     => $riData->projectMilestoneName,
                             "itemID"                   => $riData->itemID,
+                            "itemCode"                 => $riData->itemCode,
                             "itemName"                 => $riData->itemName,
                             "itemDescription"          => $riData->itemDescription,
+                            "itemClassification"       => $riData->itemClassification,
                             "itemUom"                  => $riData->itemUom,
+                            "brandName"                => $riData->brandName,
                             "quantity"                 => $riData->quantity,
                             "unitCost"                 => $item["unitCost"],
                             "totalCost"                => $item["totalCost"],
                             "remarks"                  => $item["remarks"],
                             "files"                    => $riData->files,
-                            "brandName"                => $riData->brandName,
                             "orderedPending"           => $riData->orderedPending,
                             "stocks"                   => $riData->stocks,
                             "forPurchase"              => $item["forPurchase"],
@@ -787,6 +806,14 @@ class Purchase_order extends CI_Controller {
                 echo json_encode($savePurchaseOrderContract);
             }
         }
+    }
+
+    public function getRequestItems()
+    {
+        $purchaseOrderID   = $this->input->post("purchaseOrderID");
+        $bidRecapID        = $this->input->post("bidRecapID");
+        $inventoryVendorID = $this->input->post("inventoryVendorID");
+        echo json_encode($this->purchaseorder->getRequestItems($purchaseOrderID, $bidRecapID, $inventoryVendorID));
     }
 
 }
