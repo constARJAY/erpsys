@@ -1007,7 +1007,7 @@ $(document).ready(function() {
                     </label>
                     <div class="invalid-feedback d-block invalid-personnelOption" id="invalid-personnelOption1"></div>
                 </div>
-                    <ul style="list-style-type:none!important" id="option1">
+                    <ul style="list-style-type:none!important;white-space: nowrap;" id="option1" class="">
                     </ul>
             </div>
             <div class="col-md-4 col-sm-12 mb-3">
@@ -1029,7 +1029,7 @@ $(document).ready(function() {
                     </label>
                     <div class="invalid-feedback d-block invalid-personnelOption" id="invalid-personnelOption2"></div>
                 </div>
-                    <ul style="list-style-type:none!important" id="option2"> 
+                    <ul style="list-style-type:none!important;white-space: nowrap;" id="option2"> 
                     </ul>
             </div>
             <div class="col-md-4 col-sm-12 mb-3">
@@ -1050,7 +1050,7 @@ $(document).ready(function() {
                     </label>
                     <div class="invalid-feedback d-block invalid-personnelOption" id="invalid-personnelOption"></div>
                 </div>
-                    <ul style="list-style-type:none!important" id="option3">
+                    <ul style="list-style-type:none!important;white-space: nowrap;" id="option3">
                     </ul>
             </div>
 

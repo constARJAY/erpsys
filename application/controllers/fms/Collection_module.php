@@ -31,7 +31,7 @@ class Collection_module extends CI_Controller {
 
         $collectionID            = $this->input->post("collectionID") ?? null;
         $collectionStatus        = $this->input->post("collectionStatus");
-        $submittedAt             = $this->input->post("submittedAt") == "true" ? date("Y-m-d h:i:s") : null;
+        $submittedAt             = $this->input->post("submittedAt") == "true" ? date("Y-m-d H:i:s") : null;
         $employeeID              = $this->input->post("employeeID");
         $collectionReason        = $this->input->post("collectionReason");
         $clientID                = $this->input->post("clientID");

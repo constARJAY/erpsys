@@ -140,7 +140,7 @@ class Purchase_request extends CI_Controller {
                         $createdBy            = $item["createdBy"] ?? null;
                         $updatedBy            = $item["updatedBy"] ?? null;
 
-                        if ($requestItemID) {
+                        if ($requestItemID && $purchaseRequestStatus != "0") {
                             $requestItem = $this->purchaserequest->getRequestItem($requestItemID);
                             if ($requestItem) {
                                 $milestoneBuilderID   = $requestItem->milestoneBuilderID;

@@ -51,7 +51,7 @@ class Billing_module extends CI_Controller {
 
         $billingID         = $this->input->post("billingID") ?? null;
         $billingStatus     = $this->input->post("billingStatus");
-        $submittedAt       = $this->input->post("submittedAt") == "true" ? date("Y-m-d h:i:s") : null;
+        $submittedAt       = $this->input->post("submittedAt") == "true" ? date("Y-m-d H:i:s") : null;
         $employeeID        = $this->input->post("employeeID");
         $billingReason     = $this->input->post("billingReason");
         $clientID          = $this->input->post("clientID");

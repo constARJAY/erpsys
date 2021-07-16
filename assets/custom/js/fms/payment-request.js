@@ -1034,7 +1034,7 @@ $(document).ready(function() {
 						required
 						${disabled}
 					   >
-						<option selected disabled>Select Payment Request</option>
+						<option selected disabled>Select Reference No.</option>
 						${getReferenceList(referenceCode,paymentRequestStatus)} 
 					</select>
 					<div class="d-block invalid-feedback" id="invalid-referenceCode"></div>

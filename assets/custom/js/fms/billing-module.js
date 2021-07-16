@@ -511,7 +511,7 @@ $(document).ready(function() {
         let buttonExcel = billingStatus == 1 ? `
         <div class="w-100 text-right pb-4">
             <button 
-                class="btn btn-info py-2" 
+                class="btn btn-info px-5 py-2" 
                 billingID="${encryptString(billingID)}"
                 id="btnExcel">
                 <i class="fas fa-file-excel"></i> Excel
