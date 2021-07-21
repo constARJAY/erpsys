@@ -808,9 +808,10 @@ $(document).ready(function() {
 				inputFile = ceID && ceID != "0" ? "" : `
 				<input 
 					type="file" 
-					class="form-control validate files"
+					class="form-control validate files one"
 					name="files" 
 					id="files"
+					checkfile="0"
 					accept="image/*, .pdf, .doc, .docx"
 					filename="${files != null ? files : ""}"
 					value="${files}"
@@ -820,9 +821,10 @@ $(document).ready(function() {
 				 inputFile = ceID && ceID != "0" ? "" : `
 			<input 
 				type="file" 
-				class="form-control validate file"
+				class="form-control validate files one two"
 				name="files" 
 				id="files"
+				checkfile="1"
 				accept="image/*, .pdf, .doc, .docx"
 				filename="${files != null ? files : ""}"
 				value="${files}">
@@ -834,7 +836,7 @@ $(document).ready(function() {
 					itemFile = `
 					<a href="${base_url+"assets/upload-files/petty-cash-request/"+files}"
 					class="filename validate"
-					title="${files}" 
+					title="${files}"
 					style="display: block;
 						width: 150px;
 						overflow: hidden;
@@ -1237,29 +1239,63 @@ $(document).ready(function() {
 	// })
 	// ----- END KEYUP QUANTITY OR UNITCOST -----
 	
-	function fileValidation(){
+	function fileValidation() {
 		let check = 0
-		$(`.files`).each(function(i) {
-			var allowedExtensions = /(\.jpg|\.jpeg|\.png|\.pdf|\.docx)$/i;
-			var filextension = $(this).val();
-			console.log(filextension)
-			if(!allowedExtensions.exec(filextension) && filextension !="" ){
+		$(`.files`).each(function (i) {
+			var filextensionattr = $(this).attr("checkfile");
+			//alert(filextensionattr);
+			if (filextensionattr == "0") {
+				//alert(filextensionattr);
 				$(this).addClass("is-invalid");
 				$(this).parent().find(".invalid-feedback").first().text("Invalid file extension.");
 				check++;
-			}else{
+			} else {
+				//alert(filextensionattr);
+				// var allowedExtensions = /(\.jpg|\.jpeg|\.png|\.pdf|\.docx)$/i;
+				// var filextension = $(this).val();
+				// 	if(!allowedExtensions.exec(filextension)){
+				// 		$(this).addClass("is-invalid");
+				// 		$(this).parent().find(".invalid-feedback").first().text("Invalid file extension.");
+				// 		check++;
+				// 	}else{
 				$(this).removeClass("is-invalid");
 				$(this).parent().find(".invalid-feedback").first().text("");
-			}	
-			if(filextension ==""){
-				$(this).addClass("is-invalid");
-				$(this).parent().find(".invalid-feedback").first().text("This field is required.");
-				check++;
+				// }
 			}
 		})
 		$("#form_client_fund_request").find(".is-invalid").first().focus();
-	return check > 0 ? false : true;	
-	}	
+		return check > 0 ? false : true;
+	}
+			// var filextensionattr = $(this).attr("checkfile");
+			
+	// 		if(filextensionattr ==null){
+	// 			$(this).addClass("is-invalid");
+	// 			$(this).parent().find(".invalid-feedback").first().text("Invalid file extension.");
+	// 			check++;
+	// 		}else{
+	// 			var allowedExtensions = /(\.jpg|\.jpeg|\.png|\.pdf|\.docx)$/i;
+	// 			var filextension = $(this).val();
+	// 			//alert(filextensionattr);
+	// 			if(allowedExtensions.exec(filextension)){
+	// 				//alert(filextensionattr);
+	// 				$(this).addClass("is-invalid");
+	// 				$(this).parent().find(".invalid-feedback").first().text("Invalid file extension.");
+	// 				check++;
+	// 			}else{
+	// 				//alert(filextensionattr);
+	// 				$(this).removeClass("is-invalid");
+	// 				$(this).parent().find(".invalid-feedback").first().text("");
+	// 			}	
+	// 		}
+	// 		if(filextension ==""){
+	// 			$(this).addClass("is-invalid");
+	// 			$(this).parent().find(".invalid-feedback").first().text("This field is required.");
+	// 			check++;
+	// 		}
+	// 	})
+	// 	$("#form_client_fund_request").find(".is-invalid").first().focus();
+	// return check > 0 ? false : true;	
+	//}	
 
 	// ----- SELECT FILE -----
 	$(document).on("change", "[name=files]", function(e) {
@@ -1281,6 +1317,7 @@ $(document).ready(function() {
 				<span class="btnRemoveFile" style="cursor: pointer"><i class="fas fa-close"></i></span>
 			</div>`;
 			$(this).removeClass("is-invalid");
+			$(".one").attr("checkfile","1");
 			$(this).parent().find(".invalid-feedback").first().text("");
 			$(this).parent().find(".displayfile").first().html(html);
 		}
@@ -1291,6 +1328,7 @@ $(document).ready(function() {
 	// ----- REMOVE FILE -----
 	$(document).on("click", ".btnRemoveFile", function() {
 		$(this).parent().parent().parent().find("[name=files]").first().val("");
+		$(this).parent().parent().parent().find("[name=files]").first().attr("checkfile","0");
 		$(this).closest(".displayfile").empty();
 	})
 	// ----- END REMOVE FILE -----

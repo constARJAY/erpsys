@@ -110,6 +110,7 @@ $(document).ready(function() {
 				var pettyCashDate = ids[3];
 				var pettyCashAmount = ids[4];
 				var pettycashChartOfAccountID =ids[5];
+			
 				let itemProjectTableBody = formContent('','','','', liquidationDataID, pettycashCode, pettyCashDate, pettyCashAmount, pettycashChartOfAccountID);
 			
 				if (arr.length > 1) {
@@ -747,7 +748,8 @@ $(document).ready(function() {
 
 	    // ----- GET INVENTORY ITEM -----
 		function getClient(id = null, isProject = true, display = true) {
-			console.log(id);
+			//console.log(id);
+			//$("[name=clientID]").select2({ theme: "bootstrap"});
 			let html    = `<option selected disabled>Select Client</option>`;
 			const attr  = isProject ? "[project=true]" : "[company=true]";
 			const table = isProject ? $(`.itemProjectTableBody tr`).length > 1 : $(`.itemCompanyTableBody tr`).length > 1;
@@ -756,14 +758,17 @@ $(document).ready(function() {
 			$(`[name=clientID]${attr}`).each(function(i, obj) {
 				itemIDArr.push($(this).val());
 			}) 
-	
+			//$(`[name=clientID]`).select2({ theme: "bootstrap"});
+			//$(this).select2({ theme: "bootstrap"});
+			
 			let optionNone = {
 				clientID:       "0",
 				clientName:     "N/A"
 			};
+			
 			// let itemList = [optionNone, ...inventoryItemList];
 			let itemList = !itemIDArr.includes("0") && table ? [...clientList] : [optionNone, ...clientList];
-	
+			
 			html += itemList.filter(item => !itemIDArr.includes(item.clientList) || item.clientList == id).map(item => {
 				return `
 				<option 
@@ -773,9 +778,16 @@ $(document).ready(function() {
 					${item.clientName}
 				</option>`;
 			})
+			// if ($(`[name=clientID]`).hasClass("select2-hidden-accessible")) {
+			// 	$(this).select2("destroy");
+				
+			// }
 			
 			return display ? html : clientList;
+			
+		
 		}
+		
 		// ----- END GET INVENTORY ITEM -----
 
 
@@ -788,8 +800,29 @@ $(document).ready(function() {
 
 	// ----- GET ITEM ROW -----
     function getItemRow(pettyCashID, isProject = true, item = {}, readOnly) {
-		const attr = isProject ? `project="true"` : ``;
+		// var count  = 0;
+		// const attr[] = isProject ? `` : ``;
+		// const attr1 = isProject ? `${count}` : ``;
+		// for (var i = 0; i <= attr1.length; i++) {
+		// 	alert(attr1[i]);
+		//  }
+		//console.log( _.keys(item).length );
+		// for(var i = 0; i < attr.length; ++i){
+		// 	if(attr[i] == 0)
+		// 		count++;
+				
+		// }
+		// alert(count);
 
+		// $(this).find("select").each(function(x) {
+		// 	if ($(this).hasClass("select2-hidden-accessible")) {
+		// 		$(this).select2({ theme: "bootstrap" });
+		// 	}
+		// })
+		// $(this).find("select").each(function(j) {
+		// 		$(this).select2({ theme: "bootstrap" });
+		// });
+		//var count =0;
 		let {
 			liquidationID                    							= "",
 			description                               					= "",
@@ -808,7 +841,7 @@ $(document).ready(function() {
 
 		let html = "";
 		if (readOnly) {
-		
+			
 			html += `
 			<td>
 				<div class="description">
@@ -848,9 +881,15 @@ $(document).ready(function() {
 			</tr>`;
 		}else{
 			
-			
+			//$("[name=clientID]").select2({ theme: "bootstrap"});
+			//$(`[name=clientID]`).select2({ theme: "bootstrap"});
+			//$(`[name=clientID]`).find("select").each(function(i) {
+		
+			//});
 				//$("#totalAmount").val(pettyCashRequestAmount);
-			html += `
+				//$(".itemProjectTableBody tr").each(function(i) {
+				html += `
+				
 			<tr class="itemTableRow">
                     <td>
 					<div class="description" name="description" id="description" descriptionValue="${description}" financeRequestID="${financeRequestID || ""}" pettyCashID="${pettyCashID || ""}">
@@ -868,9 +907,9 @@ $(document).ready(function() {
 					</div>
 					</td>
 			<td>
-				<div class="clientID">
+				<div>
 				<select
-					class="form-control select2"
+					class="form-control select2 clientID"
 					data-allowcharacters="[0-9][a-z][A-Z][.][,][?][!][/][;][:][''][-][_][(][)][%][&][*][ ]"
 					name="clientID"
 					id="clientID">
@@ -914,9 +953,11 @@ $(document).ready(function() {
 			</tr>`;
 			//$("#totalAmount").text("seds");
 			//$(`#totalAmount`).text(formatAmount(pettyCashRequestAmount, true));
+			//count++;
 		
-		
+		//})
 		}
+		
 
         return html;
     }
@@ -924,7 +965,8 @@ $(document).ready(function() {
 	
 	$(document).on("keyup", ".liquidationBudget", function() {
 		//console.log("44");
-		var totalbudget = parseFloat($("#liquidationBudget").val() || 0);
+		var totalbudget = parseFloat(getNonFormattedAmount($("#liquidationBudget").val()) || 0);
+		console.log(totalbudget);
 		//var totalbudget = $("#liquidationBudget").val();
 		var pettyCashAmountValue = parseFloat(getNonFormattedAmount($("#liquidationExpenses").text()) || 0);
 		var munustotal =  pettyCashAmountValue - totalbudget;
@@ -1006,10 +1048,18 @@ $(document).ready(function() {
 
     // ----- FORM CONTENT -----
 	function formContent(data = false, readOnly = false, isRevise = false, isFromCancelledDocument = false,liquidationDataID, pettycashCode, pettyCashDate, pettyCashAmount, pettycashChartOfAccountID) {
+		
 		$("#page_content").html(preloader);
+		
+		// if (!$(this).hasClass("select2-hidden-accessible")) {
+		// 	$(this).select2({ theme: "bootstrap" });
+		// }
 		let datewithrecord = moment(pettyCashDate).format("MMMM DD, YYYY");
 		readOnly = isRevise ? false : readOnly;
 		let pettyCashID = '';
+		// 
+
+		
 		//var pcrreadOnly = false;
 		if(pettycashChartOfAccountID =="0"){
 			//var pcChartOfAccountID = 
@@ -1059,6 +1109,7 @@ $(document).ready(function() {
 			}
 			
         let clientFundRequestItems = "";
+		
 		let pettycashid = "0";
 		if (liquidationID) {
 		let pettyCashRequestData = getTableData(
@@ -1085,8 +1136,9 @@ $(document).ready(function() {
 			pettyCashRequestData.map(item => {
 				clientFundRequestItems += getItemRow(pettyCashID, true, item, readOnly)  
 		})  
-	
+		
 		}else{
+			
 			let disposalItemsData = getTableData(
 				`fms_finance_request_details_tbl`,
 					`financeRequestID,
@@ -1100,14 +1152,14 @@ $(document).ready(function() {
 					srfNumber,
 					remark,
 					receiptNumber,
-					
 					files`,
 				 	`pettyCashRequestID = ${pettyCashID}`);
 					 disposalItemsData.map(item => {
 				clientFundRequestItems += getItemRow(pettyCashID, true, item, false);
-
 				})
+				
 		} 
+		
 		let {
 			fullname:    employeeFullname    = "",
 			department:  employeeDepartment  = "",
@@ -1378,11 +1430,29 @@ $(document).ready(function() {
 
 		setTimeout(() => {
 			$("#page_content").html(html);
+			
 			initDataTables();
+			
+			// $(".clientID").find("select").each(function(i) {
+			// 	if ($(this).hasClass("select2-hidden-accessible")) {
+			// 		$(this).select2("destroy");
+			// 	}
+			//$(".clientID").select2({ theme: "bootstrap"});
 			initAll();
 			updateInventoryItemOptions();
 			//!liquidationID && liquidationID == 0 && $("#liquidationDate").val(moment(new Date).format("MMMM DD, YYYY"));
             projectID && projectID != 0 && $("[name=projectID]").trigger("change");
+			$("td [name=clientID]").select2({ theme: "bootstrap"});
+			// $(".clientID").find("select").each(function(i) {
+			// 	if ($(this).hasClass("select2-hidden-accessible")) {
+			// 		$(this).select2({ theme: "bootstrap" });
+			// 	}
+			// });
+			// if ($(this).hasClass("select2-hidden-accessible")) {
+			// 	// 		$(this).select2({ theme: "bootstrap" });
+			// 	// 	}
+			
+			// })
 			// if (billMaterialID || projectID) {
 			// 	$("[name=projectID]").val(projectID).trigger("change");
 			// }
@@ -1398,7 +1468,6 @@ $(document).ready(function() {
 			// 	$(`#btnSubmit, #btnRevise, #btnCancel, #btnCancelForm`).hide();
 			// }
 			// ----- END NOT ALLOWED FOR UPDATE -----
-
 			return html;
 		}, 300);
 	}
@@ -1447,10 +1516,13 @@ $(document).ready(function() {
 			headerTabContent();
 			myFormsContent();
 			updateURL();
+			
 		} else {
 			headerButton(false, "", isRevise, isFromCancelledDocument);
 			headerTabContent(false);
 			formContent(data, readOnly, isRevise, isFromCancelledDocument);
+			//$("name=clientID").select2({ theme: "bootstrap"});
+			
 		}
 	}
 	viewDocument();
