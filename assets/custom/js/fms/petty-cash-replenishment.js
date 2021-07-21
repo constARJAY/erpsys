@@ -170,11 +170,9 @@ $(document).ready(function() {
 					{ targets: 1,  width: 150 },
 					{ targets: 2,  width: 150 },
 					{ targets: 3,  width: 150 },
-					{ targets: 4,  width: 150  },
-					{ targets: 5,  width: 150  },
-					{ targets: 6,  width: 150  },
-					{ targets: 7,  width: 100  },
-					{ targets: 8,  width: 350  }
+					{ targets: 4,  width: 250  },
+					{ targets: 5,  width: 80  },
+					{ targets: 6,  width: 350  }
 				],
 			});
 
@@ -192,11 +190,9 @@ $(document).ready(function() {
 					{ targets: 1,  width: 150 },
 					{ targets: 2,  width: 150 },
 					{ targets: 3,  width: 180 },
-					{ targets: 4,  width: 180  },
-					{ targets: 5,  width: 180  },
-					{ targets: 6,  width: 180  },
-					{ targets: 7,  width: 100  },
-					{ targets: 8,  width: 350  }
+					{ targets: 4,  width: 250  },
+					{ targets: 5,  width: 80  },
+					{ targets: 6,  width: 350  }
 				],
 			});
 
@@ -252,12 +248,14 @@ $(document).ready(function() {
 	function headerTabContent(display = true) {
 		if (display) {
 			if (isImModuleApprover("fms_petty_cash_replenishment_tbl", "approversID")) {
+				let count = getCountForApproval("fms_petty_cash_replenishment_tbl", "pettyRepStatus");
+				let displayCount = count ? `<span class="ml-1 badge badge-danger rounded-circle">${count}</span>` : "";
 				let html = `
                 <div class="bh_divider appendHeader"></div>
                 <div class="row clearfix appendHeader">
                     <div class="col-12">
                         <ul class="nav nav-tabs">
-                            <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#forApprovalTab" redirect="forApprovalTab">For Approval</a></li>
+                            <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#forApprovalTab" redirect="forApprovalTab">For Approval ${displayCount}</a></li>
                             <li class="nav-item"><a class="nav-link active" data-toggle="tab" href="#myFormsTab" redirect="myFormsTab">My Forms</a></li>
                         </ul>
                     </div>
@@ -310,9 +308,7 @@ $(document).ready(function() {
 					<th>Prepared By</th>
 					<th>Total Balance</th>
 					<th>Current Approver</th>
-					<th>Date Created</th>
-					<th>Date Submitted</th>
-					<th>Date Approved</th>
+					<th>Date</th>
 					<th>Status</th>
 					<th>Remarks</th>
                 </tr>
@@ -358,9 +354,7 @@ $(document).ready(function() {
 						<td>
 							${employeeFullname(getCurrentApprover(approversID, approversDate, pettyRepStatus, true))}
 						</td>
-						<td>${dateCreated}</td>
-						<td>${dateSubmitted}</td>
-						<td>${dateApproved}</td>
+						<td>${getDocumentDates(dateCreated, dateSubmitted, dateApproved)}</td>
 						<td class="text-center">
 							${getStatusStyle(pettyRepStatus)}
 						</td>
@@ -399,9 +393,7 @@ $(document).ready(function() {
 					<th>Prepared By</th>
 					<th>Total Balance</th>
 					<th>Current Approver</th>
-					<th>Date Created</th>
-					<th>Date Submitted</th>
-					<th>Date Approved</th>
+					<th>Date</th>
 					<th>Status</th>
 					<th>Remarks</th>
                 </tr>
@@ -438,9 +430,7 @@ $(document).ready(function() {
 					<td>
 						${employeeFullname(getCurrentApprover(approversID, approversDate, pettyRepStatus, true))}
 					</td>
-					<td>${dateCreated}</td>
-					<td>${dateSubmitted}</td>
-					<td>${dateApproved}</td>
+					<td>${getDocumentDates(dateCreated, dateSubmitted, dateApproved)}</td>
 					<td class="text-center">
 						${getStatusStyle(pettyRepStatus)}
 					</td>
@@ -1034,7 +1024,7 @@ $(document).ready(function() {
 			updateTableRows();
 			updateTableTaskList();
 			return html;
-		}, 200);
+		}, 500);
 	}
 	// ----- END FORM CONTENT -----
 
@@ -1074,17 +1064,17 @@ $(document).ready(function() {
 		let html = ``, totalAmount = 0, totalVat = 0, grandTotal = 0;
 		let condition = id ? `pettyRepID = '${id}'` : `pettyRepID IS NULL`;
 		let tableData = getTableData(`fms_finance_request_details_tbl LEFT JOIN fms_liquidation_tbl USING(liquidationID) JOIN fms_chart_of_accounts_tbl ON fms_liquidation_tbl.chartOfAccountID = fms_chart_of_accounts_tbl.chartOfAccountID`, 
-									`fms_finance_request_details_tbl.*,fms_liquidation_tbl.*,fms_chart_of_accounts_tbl.accountName as accountName `, 
+									`fms_finance_request_details_tbl.*,fms_liquidation_tbl.*,fms_chart_of_accounts_tbl.accountName as accountName, SUM(fms_finance_request_details_tbl.amount * fms_finance_request_details_tbl.quantity) as summaryTotal `, 
 									condition,``,`accountName`);
-		
+		console.log(tableData);
 			tableData.map((items, index)=>{
-				var finalAmount = parseFloat(items.liquidationExpenses) - parseFloat(items.liquidationVatAmount);
-				totalAmount += parseFloat(items.liquidationExpenses);
+				var finalAmount = parseFloat(items.summaryTotal) - parseFloat(items.liquidationVatAmount);
+				totalAmount += parseFloat(items.summaryTotal);
 				totalVat += parseFloat(items.liquidationVatAmount);
 				grandTotal += parseFloat(finalAmount);
 				html += `<tr style="white-space: nowrap">
 						<td>${items.accountName}</td>
-						<td class="text-right">${formatAmount(items.liquidationExpenses, true)}</td>
+						<td class="text-right">${formatAmount(items.summaryTotal, true)}</td>
 						<td class="text-right">${formatAmount(items.liquidationVatAmount, true)}</td>
 						<td class="text-right">${formatAmount(finalAmount, true)}</td>
 					</tr>`;

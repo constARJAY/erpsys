@@ -325,7 +325,7 @@ $(document).ready(function() {
 					{ targets: 2,  width: 150 },
 					{ targets: 3,  width: 150 },
 					{ targets: 4,  width: 200 },
-					{ targets: 5,  width: 200 },
+					{ targets: 5,  width: 250 },
 					{ targets: 6,  width: 80 },
 					{ targets: 7,  width: 250 },
 				],
@@ -346,7 +346,7 @@ $(document).ready(function() {
 					{ targets: 2,  width: 150 },
 					{ targets: 3,  width: 150 },
 					{ targets: 4,  width: 200 },
-					{ targets: 5,  width: 200 },
+					{ targets: 5,  width: 250 },
 					{ targets: 6,  width: 80 },
 					{ targets: 7,  width: 250 },
 				],
@@ -399,12 +399,14 @@ $(document).ready(function() {
 	function headerTabContent(display = true) {
 		if (display) {
 			if (isImModuleApprover("fms_payment_request_tbl", "approversID")) {
+				let count = getCountForApproval("fms_payment_request_tbl", "paymentRequestStatus");
+				let displayCount = count ? `<span class="ml-1 badge badge-danger rounded-circle">${count}</span>` : "";
 				let html = `
                 <div class="bh_divider appendHeader"></div>
                 <div class="row clearfix appendHeader">
                     <div class="col-12">
                         <ul class="nav nav-tabs">
-                            <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#forApprovalTab" redirect="forApprovalTab">For Approval</a></li>
+                            <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#forApprovalTab" redirect="forApprovalTab">For Approval ${displayCount}</a></li>
                             <li class="nav-item"><a class="nav-link active" data-toggle="tab" href="#myFormsTab" redirect="myFormsTab">My Forms</a></li>
                         </ul>
                     </div>
@@ -816,7 +818,7 @@ $(document).ready(function() {
 					</div>
 				</td>
 				<td>
-					<div class="quantity text-center">
+					<div class="quantity text-left">
 						${amountWords || "-"}
 					</div>
 				</td>
@@ -832,24 +834,22 @@ $(document).ready(function() {
 			<tr class="itemTableRow" paymentRequestID="${paymentRequestID}">
                     <td>
 					<div>
-						<textarea 
-							rows="4" 
-							style="resize: none" 
-							class="form-control validate" 
-							data-allowcharacters="[A-Z][a-z][0-9][.][,][?][!][/][;][:]['][''][-][_][(][)][%][&][*][ ]"
-							minlength="2"
-							
-							id="referencePurpose"
-							name="referencePurpose"
-							ceID="${ceID ? true : false}"
-							${disabled}
-							required>${referencePurpose || ""}
-						</textarea>
+					 <textarea class="form-control validate"
+						data-allowcharacters="[A-Z][a-z][0-9][.][,][?][!][/][;][:]['][''][-][_][(][)][%][&][*][ ]"
+						minlength="2"
+						id="referencePurpose"
+						name="referencePurpose"
+						ceID="${ceID ? true : false}"
+                        required
+                        rows="4"
+                        style="resize:none;"
+						${disabled}>${referencePurpose ?? ""}</textarea>
+
                             <div class="invalid-feedback d-block" id="invalid-referencePurpose"></div>
                         </div>
                    </td> 
 				   <td>
-						<div>
+						<div calss="text-left">
 							<span name="amountWords">-</span>
 						</div>
                    </td>
@@ -1074,18 +1074,17 @@ $(document).ready(function() {
 			<div class="col-md-12 col-sm-12">
 				<div class="form-group">
 					<label>Description ${!disabled ? "<code>*</code>" : ""}</label>
-					<textarea 
-					rows="2" 
-					style="resize: none" 
-					class="form-control validate" 
-					name="paymentRequestReason" 
-					id="paymentRequestReason" 
+
+					<textarea class="form-control validate"
 					data-allowcharacters="[A-Z][a-z][0-9][.][,][?][!][/][;][:]['][''][-][_][(][)][%][&][*][ ]"
 					minlength="2"
 					maxlength="150"
-					${disabled}
-					required>${paymentRequestReason || ""}
-					</textarea>
+					name="paymentRequestReason" 
+					id="paymentRequestReason" 
+					required
+					rows="4"
+					style="resize:none;"
+					${disabled}>${paymentRequestReason ?? ""}</textarea>
 					<div class="d-block invalid-feedback" id="invalid-paymentRequestReason"></div>
 				</div>
 			</div>
@@ -1533,7 +1532,7 @@ $(document).ready(function() {
 		const feedback = $(this).attr("code") || getFormCode("PYRF", dateToday(), id);
 
 		$("#modal_petty_cash_request_content").html(preloader);
-		$("#modal_petty_cash_request .page-title").text("DENY PETTY CASH REQUEST");
+		$("#modal_petty_cash_request .page-title").text("DENY PAYMENT REQUEST");
 		$("#modal_petty_cash_request").modal("show");
 		let html = `
 		<div class="modal-body">
@@ -1566,7 +1565,7 @@ $(document).ready(function() {
 
 		const validate = validateForm("modal_petty_cash_request_content");
 		if (validate) {
-			let tableData = getTableData("fms_petty_cash_request_tbl", "", "paymentRequestID = " + id);
+			let tableData = getTableData("fms_payment_request_tbl", "", "paymentRequestID = " + id);
 			if (tableData) {
 				let approversStatus = tableData[0].approversStatus;
 				let approversDate   = tableData[0].approversDate;

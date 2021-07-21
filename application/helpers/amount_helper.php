@@ -209,8 +209,10 @@
                 if ($ones[substr($decnum,1,1)] != "ZERO") {
                     $rettxt .= $tens[substr($decnum,0,1)];
                     $rettxt .= " ".$ones[substr($decnum,1,1)]." CENTAVOS ";
+                    return $rettxt;
                 } else {
-                    $rettxt .= " ".$ones[substr($decnum,0,1)]." CENTAVOS ";
+                    $rettxt .= " ".$tens[substr($decnum,0,1)]." CENTAVOS ";
+                    return $rettxt;
                 }
 
             }

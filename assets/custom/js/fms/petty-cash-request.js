@@ -180,11 +180,10 @@ $(document).ready(function() {
 					{ targets: 1,  width: 150 },
 					{ targets: 2,  width: 150 },
 					{ targets: 3,  width: 150 },
-					{ targets: 4,  width: 350 },
-					{ targets: 5,  width: 200 },
-					{ targets: 6,  width: 200 },
-					{ targets: 7,  width: 200 },
-					{ targets: 8,  width: 200 },
+					{ targets: 4,  width: 250 },
+					{ targets: 5,  width: 80 },
+					{ targets: 6,  width: 300 },
+					{ targets: 7,  width: 80 },
 				],
 			});
 
@@ -202,12 +201,10 @@ $(document).ready(function() {
 					{ targets: 1,  width: 150 },
 					{ targets: 2,  width: 150 },
 					{ targets: 3,  width: 150 },
-					{ targets: 4,  width: 200 },
-					{ targets: 5,  width: 200 },
-					{ targets: 6,  width: 200 },
-					{ targets: 7,  width: 200 },
-					{ targets: 8,  width: 200 },
-					{ targets: 9,  width: 150 },
+					{ targets: 4,  width: 250 },
+					{ targets: 5,  width: 80 },
+					{ targets: 6,  width: 300 },
+					{ targets: 7,  width: 80 },
 				],
 			});
 
@@ -261,12 +258,14 @@ $(document).ready(function() {
 	function headerTabContent(display = true) {
 		if (display) {
 			if (isImModuleApprover("fms_petty_cash_request_tbl", "approversID")) {
+				let count = getCountForApproval("fms_petty_cash_request_tbl", "pettyCashRequestStatus");
+				let displayCount = count ? `<span class="ml-1 badge badge-danger rounded-circle">${count}</span>` : "";
 				let html = `
                 <div class="bh_divider appendHeader"></div>
                 <div class="row clearfix appendHeader">
                     <div class="col-12">
                         <ul class="nav nav-tabs">
-                            <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#forApprovalTab" redirect="forApprovalTab">For Approval</a></li>
+                            <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#forApprovalTab" redirect="forApprovalTab">For Approval ${displayCount}</a></li>
                             <li class="nav-item"><a class="nav-link active" data-toggle="tab" href="#myFormsTab" redirect="myFormsTab">My Forms</a></li>
                         </ul>
                     </div>
@@ -322,9 +321,7 @@ $(document).ready(function() {
                     <th>Prepared By</th>
 					<th>Amount</th>
                     <th>Current Approver</th>
-                    <th>Date Created</th>
-                    <th>Date Submitted</th>
-                    <th>Date Approved</th>
+                    <th>Date</th>
                     <th>Status</th>
                     <th>Remarks</th>
                 </tr>
@@ -371,9 +368,7 @@ $(document).ready(function() {
 					<td>
 						${employeeFullname(getCurrentApprover(approversID, approversDate, pettyCashRequestStatus, true))}
 					</td>
-					<td>${dateCreated}</td>
-					<td>${dateSubmitted}</td>
-					<td>${dateApproved}</td>
+					<td>${getDocumentDates(dateCreated, dateSubmitted, dateApproved)}</td>
 					<td class="text-center">
 						${getStatusStyle(pettyCashRequestStatus)}
 					</td>
@@ -418,9 +413,7 @@ $(document).ready(function() {
                     <th>Prepared By</th>
 					<th>Amount</th>
                     <th>Current Approver</th>
-                    <th>Date Created</th>
-                    <th>Date Submitted</th>
-                    <th>Date Approved</th>
+                    <th>Date</th>
                     <th>Status</th>
                     <th>Remarks</th>
 					<th>Action</th>
@@ -472,9 +465,7 @@ $(document).ready(function() {
                 <td>
                     ${employeeFullname(getCurrentApprover(approversID, approversDate, pettyCashRequestStatus, true))}
                 </td>
-				<td>${dateCreated}</td>
-				<td>${dateSubmitted}</td>
-				<td>${dateApproved}</td>
+				<td>${getDocumentDates(dateCreated, dateSubmitted, dateApproved)}</td>
                 <td class="text-center">
                     ${getStatusStyle(pettyCashRequestStatus)}
                 </td>
@@ -1251,7 +1242,8 @@ $(document).ready(function() {
 		$(`.files`).each(function(i) {
 			var allowedExtensions = /(\.jpg|\.jpeg|\.png|\.pdf|\.docx)$/i;
 			var filextension = $(this).val();
-			if(!allowedExtensions.exec(filextension)){
+			console.log(filextension)
+			if(!allowedExtensions.exec(filextension) && filextension !="" ){
 				$(this).addClass("is-invalid");
 				$(this).parent().find(".invalid-feedback").first().text("Invalid file extension.");
 				check++;
@@ -1259,6 +1251,11 @@ $(document).ready(function() {
 				$(this).removeClass("is-invalid");
 				$(this).parent().find(".invalid-feedback").first().text("");
 			}	
+			if(filextension ==""){
+				$(this).addClass("is-invalid");
+				$(this).parent().find(".invalid-feedback").first().text("This field is required.");
+				check++;
+			}
 		})
 		$("#form_client_fund_request").find(".is-invalid").first().focus();
 	return check > 0 ? false : true;	

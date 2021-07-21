@@ -169,7 +169,7 @@ function initDataTables() {
                 { targets: 2,  width: 120 },
                 { targets: 3,  width: 250 },
                 { targets: 4,  width: 150 },
-                { targets: 5,  width: 180 },
+                { targets: 5,  width: 250 },
                 { targets: 6,  width: 80  },
                 { targets: 7,  width: 220 },
             ],
@@ -190,7 +190,7 @@ function initDataTables() {
                 { targets: 2,  width: 120 },
                 { targets: 3,  width: 250 },
                 { targets: 4,  width: 150 },
-                { targets: 5,  width: 180 },
+                { targets: 5,  width: 250 },
                 { targets: 6,  width: 80  },
                 { targets: 7,  width: 220 },
             ],
@@ -248,12 +248,14 @@ function initDataTables() {
 function headerTabContent(display = true) {
     if (display) {
         if (isImModuleApprover("fms_check_voucher_tbl", "approversID")) {
+            let count = getCountForApproval("fms_check_voucher_tbl", "voucherStatus");
+            let displayCount = count ? `<span class="ml-1 badge badge-danger rounded-circle">${count}</span>` : "";
             let html = `
             <div class="bh_divider appendHeader"></div>
             <div class="row clearfix appendHeader">
                 <div class="col-12">
                     <ul class="nav nav-tabs">
-                        <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#forApprovalTab" redirect="forApprovalTab">For Approval</a></li>
+                        <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#forApprovalTab" redirect="forApprovalTab">For Approval ${displayCount}</a></li>
                         <li class="nav-item"><a class="nav-link active" data-toggle="tab" href="#myFormsTab" redirect="myFormsTab">My Forms</a></li>
                     </ul>
                 </div>
@@ -530,15 +532,15 @@ function formButtons(data = false, isRevise = false, isFromCancelledDocument = f
                 }
             } else if (voucherStatus == 2) {
                 // DROP
-                button = `
-                <button type="button" 
-                    class="btn btn-cancel px-5 p-2"
-                    id="btnDrop" 
-                    voucherID="${encryptString(voucherID)}"
-                    code="${getFormCode("CV", createdAt, voucherID)}"
-                    status="${voucherStatus}"><i class="fas fa-ban"></i> 
-                    Drop
-                </button>`;
+                // button = `
+                // <button type="button" 
+                //     class="btn btn-cancel px-5 p-2"
+                //     id="btnDrop" 
+                //     voucherID="${encryptString(voucherID)}"
+                //     code="${getFormCode("CV", createdAt, voucherID)}"
+                //     status="${voucherStatus}"><i class="fas fa-ban"></i> 
+                //     Drop
+                // </button>`;
                 
             } else if (voucherStatus == 3) {
                 // DENIED - FOR REVISE
@@ -778,7 +780,7 @@ function getItemsRow(id, readOnly = false, voucherID = "") {
                 LEFT JOIN fms_finance_request_details_tbl AS  ffr ON ffr.pettyRepID = payment.pettyRepID
                 LEFT JOIN fms_liquidation_tbl AS  flt ON flt.liquidationID  = ffr.liquidationID 
                 LEFT JOIN fms_chart_of_accounts_tbl as chart ON chart.chartOfAccountID  = flt.chartOfAccountID `, 
-            "payment.paymentRequestID,chart.accountCode, chart.accountName,chart.chartOfAccountID,ffr.totalAmount as amount", 
+            "payment.paymentRequestID,chart.accountCode, chart.accountName,chart.chartOfAccountID,ffr.quantity * ffr.amount as amount", 
             `payment.paymentRequestID = ${id} AND payment.paymentRequestStatus=2 AND payment.pettyRepID !=0 `
         )
 
@@ -812,8 +814,7 @@ function getItemsRow(id, readOnly = false, voucherID = "") {
                 amount = 0
             } = item;
 
-            console.log(item)
-
+         
             if (readOnly) {
                 html += `
                 <tr class="itemTableRow" paymentRequestID="${paymentRequestID}">
@@ -826,17 +827,17 @@ function getItemsRow(id, readOnly = false, voucherID = "") {
                     </td>
 
                     <td>
-                        <div class="debit  text-right">${debit || "-"}</div>
+                        <div class="debit  text-right">₱ ${debit || "-"}</div>
                         <input type="hidden" name="debit" value="${debit || 0}">
                     </td>
 
                     <td>
-                        <div class="credit text-right" name="credit">${credit || "-"}</div>
+                        <div class="credit text-right" name="credit">₱ ${credit || "-"}</div>
                         <input type="hidden" name="credit" value="${credit || 0}">
                     </td>
 
                     <td>
-                    <div class="balance text-right">${balance || "-"}</div>
+                    <div class="balance text-right">₱ ${balance || "-"}</div>
                     </td>
                    
 
@@ -854,50 +855,58 @@ function getItemsRow(id, readOnly = false, voucherID = "") {
                 </td>
                
 				<td>
-                <div class="form-group">
-                    <input 
-                        type="text" 
-                        class="form-control amount text-right"
-                        data-allowcharacters="[0-9]" 
-                       min="0" max="${voucherID ? debit : amount}"
-                        id="debit${index}" 
-                        name="debit" 
-                        value="${voucherID ? debit : amount}" 
-                        ${credit !=0 ? "" : "disabled"} 
-                        >
+                 <div class="input-group">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text">₱</span>
+                    </div>
+                    <input type="text" 
+                    class="form-control amount"  
+                    data-allowcharacters="[0-9]" 
+                    min="0" max="${voucherID ? debit : amount}"
+                    minlength="1" 
+                    maxlength="13" 
+                    id="debit${index}" 
+                    name="debit" 
+                    value="${voucherID ? debit : amount}" 
+                    ${credit !=0 ? "" : "disabled"} 
+                    style="text-align: right;">
                     <div class="invalid-feedback d-block" id="invalid-debit${index}"></div>
                 </div>
                 </td>
 
                 <td>
-                <div class="form-group">
-                    <input 
-                        type="text" 
-                        class="form-control amount text-right"
-                        data-allowcharacters="[0-9]" 
-                       min="0" max="${voucherID ? credit :"" }"
-                        id="credit${index}" 
-                        name="credit" 
-                        value="${voucherID ? credit : ""}" 
-                        >
-        
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text">₱</span>
+                    </div>
+                    <input type="text" 
+                    class="form-control amount"  
+                    min="0" max="${voucherID ? credit :"" }"
+                    minlength="1" 
+                    maxlength="13" 
+                    name="credit" 
+                    id="credit${index}" 
+                    value="${voucherID ? credit : ""}" 
+                    style="text-align: right;">
                 </div>
                 </td>
 
                 <td>
-                <div class="form-group">
-                    <input 
-                        type="text" 
-                        class="form-control amount text-right"
-                        data-allowcharacters="[0-9]" 
-                       min="0" max="${voucherID ? balance : ""}"
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text">₱</span>
+                        </div>
+                        <input type="text" 
+                        class="form-control amount"  
+                        min="0" max="${voucherID ? credit :"" }"
+                        minlength="1" 
+                        maxlength="13" 
                         id="balance${index}" 
-                        name="balance" 
+                        name="balance"
                         value="${voucherID ? balance : ""}" 
-                       
-                        >
-                    <div class="invalid-feedback d-block" id="invalid-balance${index}"></div>
-                </div>
+                        style="text-align: right;">
+                        <div class="invalid-feedback d-block" id="invalid-balance${index}"></div>
+                    </div>
                 </td>
 
 			</tr>`;
@@ -1430,7 +1439,7 @@ function formContent(data = false, readOnly = false, isRevise = false, isFromCan
 
         <div class="col-md-3 col-sm-12">
             <div class="form-group">
-                <label>Payment Request No. ${!disabled ? "<code>*</code>" : ""}</label>
+                <label>Reference No. ${!disabled ? "<code>*</code>" : ""}</label>
                 <select class="form-control validate select2"
                     name="paymentRequestID"
                     id="paymentRequestID"
@@ -1442,7 +1451,7 @@ function formContent(data = false, readOnly = false, isRevise = false, isFromCan
                     status="${voucherStatus}"
                     executeonce="${voucherStatus ? true : false}"
                    >
-                    <option selected disabled>Select Payment Request</option>
+                    <option selected disabled>Select Reference No.</option>
                     ${getPaymentRequestList(paymentRequestID, voucherStatus,true,voucherID)}           
                 </select>
                 <div class="d-block invalid-feedback" id="invalid-paymentRequestID"></div>
@@ -1844,16 +1853,17 @@ $(document).on("click", "#btnBack", function () {
             const action = revise && !isFromCancelledDocument && "insert" || (id ? "update" : "insert");
             const data   = getInventoryReceivingData(action, "save", "0", id);
             data["voucherStatus"]   = 0;
+            data.append("voucherStatus", 0);
             // data["revisevoucherID"] = id;
             // delete data["voucherID"];
 
             if (!isFromCancelledDocument) {
-                data["revisevoucherID"] = id;
-                delete data["voucherID"];
+                data.append("revisevoucherID", id);
+                data.delete("voucherID");
             } else {
-                delete data["voucherID"];
-                delete data["action"];
-                data["action"] = update;
+                data.append("voucherID", id);
+                data.delete("action");
+                data.append("action", "update");
             }
 
             saveInventoryReceiving(data, "save", null, pageContent);
@@ -1870,6 +1880,7 @@ $(document).on("click", "#btnBack", function () {
         const action = id && feedback ? "update" : "insert";
         const data   = getInventoryReceivingData(action, "save", "0", id);
         data["voucherStatus"] = 0;
+        data.append("voucherStatus", 0);
 
         saveInventoryReceiving(data, "save", null, pageContent);
     }
@@ -1889,20 +1900,29 @@ $(document).on("click", "#btnSave, #btnCancel", function () {
         const feedback = $(this).attr("code") || getFormCode("CV", dateToday(), id);
         const action   = revise && "insert" || (id && feedback ? "update" : "insert");
         const data     = getInventoryReceivingData(action, "save", "0", id);
-        data["voucherStatus"] = 0;
+        // data["voucherStatus"] = 0;
         data.append("voucherStatus", 0);
         
         if (revise) {
             // data["revisevoucherID"] = id;
             // delete data["voucherID"];
 
+            // if (!isFromCancelledDocument) {
+            //     data["revisevoucherID"] = id;
+            //     delete data["voucherID"];
+            // } else {
+            //     delete data["voucherID"];
+            //     delete data["action"];
+            //     data["action"] = update;
+            // }
+
             if (!isFromCancelledDocument) {
-                data["revisevoucherID"] = id;
-                delete data["voucherID"];
+                data.append("revisevoucherID", id);
+                data.delete("voucherID");
             } else {
-                delete data["voucherID"];
-                delete data["action"];
-                data["action"] = update;
+                data.append("voucherID", id);
+                data.delete("action");
+                data.append("action", "update");
             }
         }
 
@@ -1945,13 +1965,26 @@ $(document).on("click", "#btnSubmit", function () {
                    const action = revise && "insert" || (id ? "update" : "insert");
                    const data   = getInventoryReceivingData(action, "submit", "1", id);
        
+
                    if (revise) {
-                       data["revisevoucherID"] = id;
-                       delete data["voucherID"];
-                   }
+                    data.append("revisevoucherID", id);
+                    data.delete("voucherID");
+                    }
+
+                    let approversID = "", approversDate = "";
+                    for (var i of data) {
+                        if (i[0] == "approversID")   approversID   = i[1];
+                        if (i[0] == "approversDate") approversDate = i[1];
+                    }
+
+                //    if (revise) {
+                //        data["revisevoucherID"] = id;
+                //        delete data["voucherID"];
+                //    }
+                   
        
-                   let approversID   = data["approversID"], 
-                       approversDate = data["approversDate"];
+                //    let approversID   = data["approversID"], 
+                //        approversDate = data["approversDate"];
        
                    const employeeID = getNotificationEmployeeID(approversID, approversDate, true);
                    let notificationData = false;
@@ -2002,9 +2035,10 @@ $(document).on("click", "#btnApprove", function () {
 
         let data = getInventoryReceivingData("update", "approve", "2", id);
         data["approversStatus"] = updateApproveStatus(approversStatus, 2);
+        data.append("approversStatus", updateApproveStatus(approversStatus, 2));
         let dateApproved = updateApproveDate(approversDate)
         data["approversDate"] = dateApproved;
-
+        data.append("approversDate", dateApproved);
         let status, notificationData,lastApproveCondition = false;
         if (isImLastApprover(approversID, approversDate)) {
             status = 2;
@@ -2031,7 +2065,7 @@ $(document).on("click", "#btnApprove", function () {
         }
 
         data["voucherStatus"] = status;
-
+        data.append("voucherStatus", status);
         saveInventoryReceiving(data, "approve", notificationData, pageContent,lastApproveCondition);
     }
 });
@@ -2084,14 +2118,23 @@ $(document).on("click", "#btnRejectConfirmation", function () {
             let approversDate   = tableData[0].approversDate;
             let employeeID      = tableData[0].employeeID;
 
-            let data = {};
-            data["action"] = "update";
-            data["method"] = "deny";
-            data["voucherID"] = id;
-            data["approversStatus"] = updateApproveStatus(approversStatus, 3);
-            data["approversDate"]   = updateApproveDate(approversDate);
-            data["voucherRemarks"] = $("[name=voucherRemarks]").val()?.trim();
-            data["updatedBy"] = sessionID;
+            // let data = {};
+            // data["action"] = "update";
+            // data["method"] = "deny";
+            // data["voucherID"] = id;
+            // data["approversStatus"] = updateApproveStatus(approversStatus, 3);
+            // data["approversDate"]   = updateApproveDate(approversDate);
+            // data["voucherRemarks"] = $("[name=voucherRemarks]").val()?.trim();
+            // data["updatedBy"] = sessionID;
+
+            let data = new FormData;
+            data.append("action", "update");
+            data.append("method", "deny");
+            data.append("voucherID", id);
+            data.append("approversStatus", updateApproveStatus(approversStatus, 3));
+            data.append("approversDate", updateApproveDate(approversDate));
+            data.append("voucherRemarks", $("[name=voucherRemarks]").val()?.trim());
+            data.append("updatedBy", sessionID);
 
             let notificationData = {
                 moduleID:                96,

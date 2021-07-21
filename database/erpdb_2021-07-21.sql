@@ -490,7 +490,7 @@ CREATE TABLE `fms_payment_request_tbl` (
   `pettyRepID` bigint(20) DEFAULT NULL,
   `purchaseOrderID` bigint(20) DEFAULT NULL,
   `employeeID` bigint(20) NOT NULL,
-  `ApproversID` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `approversID` text CHARACTER SET utf8mb4 DEFAULT NULL,
   `approversStatus` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `approversDate` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `submittedAt` timestamp NULL DEFAULT NULL,
@@ -4233,4 +4233,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2021-07-16 14:16:03
+-- Dump completed on 2021-07-21  7:58:38

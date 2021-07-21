@@ -2,7 +2,7 @@ $(document).ready(function(){
 
     //------ MODULE FUNCTION IS ALLOWED UPDATE-----
 	
-	const allowedUpdate = isUpdateAllowed(5);
+	const allowedUpdate = isUpdateAllowed(97);
 	if(!allowedUpdate){
 		$("#modal_inventory_category_content").find("input, select, textarea").each(function(){
 			$(this).attr("disabled",true);
@@ -50,14 +50,13 @@ $(document).ready(function(){
             async:    false,
             dataType: 'json',
             data:     {tableName: `fms_check_voucher_tbl AS fcv 
-                                    INNER JOIN fms_payment_request_tbl AS fpr ON fpr.paymentID = fcv.paymentID
-                                    INNER JOIN fms_petty_cash_replenishment_tbl AS fpc ON fpc.pettyRepID  = fpr.pettyRepID
+                                    INNER JOIN fms_payment_request_tbl AS fpr ON fpr.paymentRequestID = fcv.paymentRequestID
                                     INNER JOIN fms_chart_of_accounts_tbl AS fco ON fco.chartOfAccountID  = fcv.voucherBudgetSource
-                                    INNER JOIN hris_employee_list_tbl AS emp ON emp.employeeID = fpc.requestorID `,
+                                    INNER JOIN hris_employee_list_tbl AS emp ON emp.employeeID = fcv.employeeID `,
                        columnName:`CONCAT('CV-',SUBSTR(fcv.createdAt,3,2),'-',LPAD(fcv.voucherID, 5, '0')) as checkvoucherCode,
                                    CONCAT(emp.employeeFirstname, ' ', emp.employeeLastname) AS fullname,
                                     fco.accountName,
-                                    CONCAT('PYRF-',SUBSTR(fpr.createdAt,3,2),'-',LPAD(fpr.paymentID, 5, '0')) as paymentCode,
+                                    CONCAT('PYRF-',SUBSTR(fpr.createdAt,3,2),'-',LPAD(fpr.paymentRequestID, 5, '0')) as paymentCode,
                                     fcv.checkNo,
                                     fcv.voucherAmount`,
                         searchFilter: "voucherStatus='2'"},
