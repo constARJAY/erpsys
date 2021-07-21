@@ -7,12 +7,12 @@ class Vehicle extends CI_Controller {
     {
         parent::__construct();
         // $this->load->model("Companysetup_model", "company_setup");
-        isAllowed(135);
+        // isAllowed(135);
     }
 
     public function index()
     {
-        $data["title"] = "Vehicle Mastefile";
+        $data["title"] = "Vehicle Masterfile";
 
         $this->load->view("template/header",$data);
         $this->load->view("ims/vehicle/index");

@@ -7,7 +7,7 @@ class Check_writer extends CI_Controller {
     {
         parent::__construct();
         // $this->load->model("Companysetup_model", "company_setup");
-        isAllowed(15);
+        isAllowed(97);
     }
 
     public function index()

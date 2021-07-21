@@ -219,7 +219,7 @@
         } 
 
         if ($ones[substr($decnum,1,1)] != "ZERO" && $tens[substr($decnum,0,1)] != "ZERO"){
-            return $rettxt;
+            return $rettxt." CENTAVOS ";
         }
         if($ones[substr($decnum,1,1)] == "ZERO" && $tens[substr($decnum,0,1)] == "ZERO"){
             return $rettxt." PESOS ";
