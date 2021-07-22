@@ -924,7 +924,6 @@ $(document).ready(function() {
 							<tr style="white-space: nowrap">
 								<th>Date</th>
 								<th>Liquidation No.</th>
-								<th>Quantity</th>
 								<th>Account Name</th>
 								<th>Description</th>
 								<th>Amount</th>
@@ -1031,23 +1030,28 @@ $(document).ready(function() {
 	function listOfLiquidation(id = null, readOnly = false){
 		let html = ``, projectTaskButtons = false, totalExpense = 0, totalBalance = 0;
 		let condition = id ? `pettyRepID = '${id}'` : `pettyRepID IS NULL`;
-		let tableData = getTableData(`fms_finance_request_details_tbl LEFT JOIN fms_liquidation_tbl USING(liquidationID) JOIN fms_chart_of_accounts_tbl ON fms_liquidation_tbl.chartOfAccountID = fms_chart_of_accounts_tbl.chartOfAccountID`, 
-									`fms_finance_request_details_tbl.*,fms_liquidation_tbl.*,fms_chart_of_accounts_tbl.accountName as accountName `, 
-									condition);
-		
+		let tableData = getTableData(`fms_finance_request_details_tbl as ffrd LEFT JOIN fms_liquidation_tbl USING(liquidationID) JOIN fms_chart_of_accounts_tbl ON fms_liquidation_tbl.chartOfAccountID = fms_chart_of_accounts_tbl.chartOfAccountID`, 
+									` SUM(ffrd.amount * ffrd.quantity) as amount,fms_liquidation_tbl.*,fms_chart_of_accounts_tbl.accountName as accountName `, 
+									condition,``,` ffrd.liquidationID`);
+		console.log(tableData)
 			tableData.map((items, index)=>{
-				var totalAmount = parseFloat(items.quantity) * parseFloat(items.amount);
+				var totalAmount =  parseFloat(items.amount);
+				var vatSales=0,vatAmount=0;
 				totalExpense += parseFloat(totalAmount);
+
+				if(items.liquidationVatAmount != 0){
+					vatSales =  parseFloat(totalAmount) / 1.12;
+					vatAmount = parseFloat(totalAmount) - parseFloat(vatSales) 
+				}
 				html += `
 						<tr class="list-finance-request" financerequest="${items.financeRequestID}">
 						 	<td>${moment(items.createdAt).format("MMMM DD, YYYY")}</td>
 							<td>${getFormCode("LF", items.createdAt, items.liquidationID)}</td>
-							<td>${items.quantity}</td>
 							<td>${items.accountName}</td>
-							<td>${items.description}</td>
+							<td>${items.liquidationPurpose}</td>
 							<td class="text-right">${formatAmount(totalAmount, true)}</td>
-							<td class="text-right">-</td>
-							<td class="text-right">-</td>
+							<td class="text-right">${formatAmount(vatSales, true)}</td>
+							<td class="text-right">${formatAmount(vatAmount, true)}</td>
 						</tr>
 					`;
 			});
@@ -1063,7 +1067,8 @@ $(document).ready(function() {
 	function listOfLiquidationSummary(id = null){
 		let html = ``, totalAmount = 0, totalVat = 0, grandTotal = 0;
 		let condition = id ? `pettyRepID = '${id}'` : `pettyRepID IS NULL`;
-		let tableData = getTableData(`fms_finance_request_details_tbl LEFT JOIN fms_liquidation_tbl USING(liquidationID) JOIN fms_chart_of_accounts_tbl ON fms_liquidation_tbl.chartOfAccountID = fms_chart_of_accounts_tbl.chartOfAccountID`, 
+		let tableData = getTableData(`fms_finance_request_details_tbl LEFT JOIN fms_liquidation_tbl USING(liquidationID) 
+									LEFT JOIN fms_chart_of_accounts_tbl ON fms_liquidation_tbl.chartOfAccountID = fms_chart_of_accounts_tbl.chartOfAccountID`, 
 									`fms_finance_request_details_tbl.*,fms_liquidation_tbl.*,fms_chart_of_accounts_tbl.accountName as accountName, SUM(fms_finance_request_details_tbl.amount * fms_finance_request_details_tbl.quantity) as summaryTotal `, 
 									condition,``,`accountName`);
 		console.log(tableData);
@@ -1611,7 +1616,7 @@ $(document).ready(function() {
 		const feedback = $(this).attr("code") || getFormCode("PCRF", dateToday(), id);
 
 		$("#modal_cost_estimate_content").html(preloader);
-		$("#modal_cost_estimate .page-title").text("DENY Project Timeline");
+		$("#modal_cost_estimate .page-title").text("DENY PETTY CASH REPLENISHMENT");
 		$("#modal_cost_estimate").modal("show");
 		let html = `
 		<div class="modal-body">

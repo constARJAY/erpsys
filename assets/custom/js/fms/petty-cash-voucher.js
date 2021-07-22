@@ -10,9 +10,14 @@ $(document).ready(function() {
 		}
 		return {};
 	}
-    const pettyCashRequestData = getTableData(`fms_petty_cash_request_tbl AS fpcrt JOIN fms_liquidation_tbl USING(pettyCashRequestID)`,
+    const pettyCashRequestDataLastRow = getTableData(`fms_petty_cash_request_tbl AS fpcrt JOIN fms_liquidation_tbl USING(pettyCashRequestID)`,
                                                 `fpcrt.*, fms_liquidation_tbl.liquidationID`,
-                                                `pettyCashRequestStatus = 2 `);
+                                                `pettyCashRequestStatus = 2 `,`fpcrt.pettyCashRequestID DESC LIMIT 1`);
+
+     const pettyCashRequestData = getTableData(`fms_petty_cash_request_tbl AS fpcrt JOIN fms_liquidation_tbl USING(pettyCashRequestID)`,
+                                                `fpcrt.*, fms_liquidation_tbl.liquidationID`,
+                                                `pettyCashRequestStatus = 2 `,`fpcrt.createdAt DESC`);
+
     const pettyCashFinanceRequest = getTableData(`fms_finance_request_details_tbl`, ``,`pettyRepID IS NOT NULL`);
 
     // ----- DATATABLES -----
@@ -44,12 +49,39 @@ $(document).ready(function() {
 	}
 	// ----- END DATATABLES -----
 
+      // ----- MY FORMS CONTENT HEADER BALANCE -----
+	function myFormsContentBalance() {
+        let html =``;
+	
+        let overAllTotal = 0, overAllBalance = 0;
+        pettyCashRequestDataLastRow.map((item) => {
+			let {
+                pettyCashRequestAmount
+			} = item;
+             // ----- GET EMPLOYEE DATA -----
+          
+            // ----- END GET EMPLOYEE DATA -----
+       
+         
+                var tempBalance = parseFloat(totalBudget) - parseFloat(pettyCashRequestAmount);
+                var tempTotal   = parseFloat(totalBudget) - parseFloat(tempBalance);
+                overAllTotal    += tempTotal, 
+                overAllBalance  = parseFloat(totalBudget) - parseFloat(overAllTotal); 
+            
+			html += ` <span><h4 class="font-weight-bolder" >Remaining Balance: <label  class="font-weight-bolder" style="color:#dc3450;" >${formatAmount(overAllBalance,true)}</label></h4></span>`;
+            
+		});
+		
+		return html;
+	}
+	// ----- END MY FORMS CONTENT HEADER BALANCE -----
+
     // ----- MY FORMS CONTENT -----
 	function myFormsContent() {
 		$("#tableMyFormsParent").html(preloader);
         // (SELECT SUM(amount) FROM fms_petty_cash_request_details_tbl WHERE pettyCashRequestID = 'fpcrt.pettyCashRequestID') AS `
-		
 		let html = `
+        <div class="text-right mt-1 mb-1 ">${myFormsContentBalance()}</div>
         <table class="table table-bordered table-striped table-hover" id="tableMyForms">
             <thead>
                 <tr style="white-space: nowrap">
@@ -108,6 +140,8 @@ $(document).ready(function() {
 		return html;
 	}
 	// ----- END MY FORMS CONTENT -----
+
+    
 
     // ----- PAGE CONTENT -----
     

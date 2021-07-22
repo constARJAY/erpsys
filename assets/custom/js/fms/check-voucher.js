@@ -977,17 +977,17 @@ function getItemsRowCredit(id, readOnly = false, voucherID = "") {
                     </td>
 
                     <td>
-                        <div class="debit  text-right">${debit || "-"}</div>
+                        <div class="debit  text-right">₱ ${debit || "-"}</div>
                         <input type="hidden" name="debit" value="${debit || 0}">
                     </td>
 
                     <td>
-                        <div class="credit text-right" name="credit">${credit || "-"}</div>
+                        <div class="credit text-right" name="credit">₱ ${credit || "-"}</div>
                         <input type="hidden" name="credit" value="${credit || 0}">
                     </td>
 
                     <td>
-                    <div class="balance text-right">${balance || "-"}</div>
+                    <div class="balance text-right">₱ ${balance || "-"}</div>
                     </td>
                    
 
@@ -1005,49 +1005,55 @@ function getItemsRowCredit(id, readOnly = false, voucherID = "") {
                 </td>
                
 				<td>
-                <div class="form-group">
-                    <input 
-                        type="text" 
-                        class="form-control amount text-right"
-                        data-allowcharacters="[0-9]" 
-                       min="0" max="${voucherID ? debit : ""}"
-                        id="debits${index}" 
-                        name="debit" 
-                        value="${voucherID ? debit : ""}" 
-                       
-                        >
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text">₱</span>
+                    </div>
+                    <input type="text" 
+                    class="form-control amount text-right"  
+                    data-allowcharacters="[0-9]" 
+                    min="0" max="${voucherID ? debit : ""}"
+                    minlength="1" 
+                    maxlength="13" 
+                    id="debits${index}" 
+                    name="debit" 
+                    value="${voucherID ? debit : ""}" >
                     <div class="invalid-feedback d-block" id="invalid-debits${index}"></div>
                 </div>
                 </td>
 
                 <td>
-                <div class="form-group">
-                    <input 
-                        type="text" 
-                        class="form-control amount text-right"
-                        data-allowcharacters="[0-9]" 
-                       min="0" max="${voucherID ? credit : ""}"
-                        id="credits${index}" 
-                        name="credit" 
-                        value="${voucherID ? credit : ""}" 
-                    
-                        >
+                 <div class="input-group">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text">₱</span>
+                    </div>
+                    <input type="text" 
+                    class="form-control amount text-right"  
+                    data-allowcharacters="[0-9]" 
+                    min="0" max="${voucherID ? credit : ""}"
+                    minlength="1" 
+                    maxlength="13" 
+                    id="credits${index}" 
+                    name="credit" 
+                    value="${voucherID ? credit : ""}"  >
                     <div class="invalid-feedback d-block" id="invalid-credits${index}"></div>
                 </div>
                 </td>
 
                 <td>
-                <div class="form-group">
-                    <input 
-                        type="text" 
-                        class="form-control amount text-right"
-                        data-allowcharacters="[0-9]" 
-                       min="0" max="${voucherID ? balance : ""}"
-                        id="balances${index}" 
-                        name="balance" 
-                        value="${voucherID ? balance : ""}" 
-                      
-                        >
+                  <div class="input-group">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text">₱</span>
+                    </div>
+                    <input type="text" 
+                    class="form-control amount text-right"  
+                    data-allowcharacters="[0-9]" 
+                    min="0" max="${voucherID ? balance : ""}"
+                    minlength="1" 
+                    maxlength="13" 
+                    id="balances${index}" 
+                    name="balance" 
+                    value="${voucherID ? balance : ""}"   >
                     <div class="invalid-feedback d-block" id="invalid-balances${index}"></div>
                 </div>
                 </td>

@@ -89,8 +89,8 @@ $(document).ready(function(){
                         <td>${counter++}</td>
                         <td>${check.checkNo}</td>
                         <td class="text-right">${formatAmount(check.voucherAmount,true)}</td>
-                        <td class="text-center">${check.fullname}</td>
-                        <td class="text-center">${check.accountName}</td>
+                        <td class="text-left">${check.fullname}</td>
+                        <td class="text-left">${check.accountName}</td>
                         <td class="text-center">${check.paymentCode}</td>
                         <td class="text-center">${check.checkvoucherCode}</td>
                         <td class="text-center"><button class="btn btn-secondary btnPrint px-5 p-2" 
