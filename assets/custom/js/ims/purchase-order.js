@@ -48,7 +48,7 @@ $(document).ready(function() {
 			const tableData = getTableData(
 				`ims_purchase_order_tbl AS ipot
 					LEFT JOIN ims_purchase_request_tbl AS iprt USING(purchaseRequestID)`, 
-				`ipot.*, iprt.projectID, iprt.referenceCode, iprt.purchaseRequestReason, iprt.createdAt AS iprtCreatedAt`, 
+				`ipot.*, iprt.timelineBuilderID, iprt.referenceCode, iprt.purchaseRequestReason, iprt.createdAt AS iprtCreatedAt`, 
 				"purchaseOrderID=" + id);
 
 			if (tableData.length > 0) {
@@ -320,7 +320,7 @@ $(document).ready(function() {
 				LEFT JOIN ims_purchase_request_tbl AS iprt USING(purchaseRequestID)
 				LEFT JOIN ims_bid_recap_tbl AS ibrt USING(bidRecapID)
 				LEFT JOIN hris_employee_list_tbl AS helt ON ipot.employeeID = helt.employeeID`,
-			`ipot.*, CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname, ipot.createdAt AS dateCreated, ipot.projectID, ipot.projectCode, ipot.projectName, ibrt.bidRecapID, ibrt.createdAt AS ibrtCreatedAt, iprt.createdAt AS iprtCreatedAt`,
+			`ipot.*, CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname, ipot.createdAt AS dateCreated, ibrt.bidRecapID, ibrt.createdAt AS ibrtCreatedAt, iprt.createdAt AS iprtCreatedAt`,
 			`ipot.employeeID != ${sessionID} AND ipot.purchaseOrderStatus != 0 AND ipot.purchaseOrderStatus != 4`,
 			`FIELD(purchaseOrderStatus, 0, 1, 3, 2, 4, 5), COALESCE(ipot.submittedAt, ipot.createdAt)`
 		);
@@ -351,7 +351,7 @@ $(document).ready(function() {
 				ibrtCreatedAt,
 				purchaseRequestID,
 				iprtCreatedAt,
-                projectID,
+                timelineBuilderID,
 				projectCode,
 				projectName,
                 referenceCode,
@@ -420,7 +420,7 @@ $(document).ready(function() {
 				LEFT JOIN ims_purchase_request_tbl AS iprt USING(purchaseRequestID)
 				LEFT JOIN ims_bid_recap_tbl AS ibrt USING(bidRecapID)
 				LEFT JOIN hris_employee_list_tbl AS helt ON ipot.employeeID = helt.employeeID`,
-			`ipot.*, CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname, ipot.createdAt AS dateCreated, ipot.projectID, ipot.projectCode, ipot.projectName, ibrt.bidRecapID, ibrt.createdAt AS ibrtCreatedAt, iprt.createdAt AS iprtCreatedAt`,
+			`ipot.*, CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname, ipot.createdAt AS dateCreated, ibrt.bidRecapID, ibrt.createdAt AS ibrtCreatedAt, iprt.createdAt AS iprtCreatedAt`,
 			`ipot.employeeID = ${sessionID}`,
 			`FIELD(purchaseOrderStatus, 0, 1, 3, 2, 4, 5), COALESCE(ipot.submittedAt, ipot.createdAt)`
 		);
@@ -451,7 +451,7 @@ $(document).ready(function() {
 				ibrtCreatedAt,
 				purchaseRequestID,
 				iprtCreatedAt,
-                projectID,
+                timelineBuilderID,
                 projectCode,
                 projectName,
                 referenceCode,
@@ -691,7 +691,7 @@ $(document).ready(function() {
 				</option>`;
 			})
 		} else {
-			html = `<option selected>${argAccountName}</option>`;
+			html = `<option selected>${argAccountName ?? "-"}</option>`;
 		}
 		return html;
 	}
@@ -704,16 +704,19 @@ $(document).ready(function() {
 
 		const pendingBidRecap = getTableData(
 			`ims_bid_po_tbl AS ibpt 
-				LEFT JOIN ims_bid_recap_tbl AS ibrt USING(bidRecapID)
-				LEFT JOIN pms_project_list_tbl AS pplt ON ibrt.projectID = pplt.projectListID`,
+				LEFT JOIN ims_bid_recap_tbl AS ibrt USING(bidRecapID)`,
 			`ibpt.bidRecapID, 
 			ibpt.inventoryVendorID, 
 			ibpt.categoryType, 
 			ibrt.createdAt, 
-			pplt.projectListClientID AS clientID, 
-			ibrt.projectID, 
+			ibrt.timelineBuilderID, 
 			ibrt.purchaseRequestID, 
-			ibrt.bidRecapReason`,
+			ibrt.bidRecapReason,
+			ibrt.projectCode,
+			ibrt.projectName,
+			ibrt.projectCategory,
+			ibrt.clientName,
+			ibrt.clientAddress`,
 			`ibrt.bidRecapStatus = 2 AND 
 			(ibpt.bidPoStatus = 0 ${status == 0 || status == "false" || !status ? "" : "AND ibpt.bidPoStatus = 1"}) OR
 			ibpt.bidRecapID = ${id}
@@ -725,17 +728,15 @@ $(document).ready(function() {
 			html += pendingBidRecap.filter(br => createdBRList.indexOf(br.bidRecapID) == -1 || br.bidRecapID == id).map(br => {
 				return `
 				<option 
-				value     = "${br.bidRecapID}" 
-				brCode    = "${getFormCode("BRF", br.createdAt, br.bidRecapID)}"
-				clientID  = "${br.clientID}"
-				projectID = "${br.projectID}"
-				purchaseRequestID = "${br.purchaseRequestID}"
-				reason    = "${br.bidRecapReason}"
-				projectCode = "PRJ-21-00001"
-				projectName = "BlackBox Account"
-				clientName  = "BlackCoders"
-				clientAddress = "Pasig City"
-				${br.bidRecapID == id && "selected"}>
+					value     = "${br.bidRecapID}" 
+					timelineBuilderID = "${br.timelineBuilderID}"
+					purchaseRequestID = "${br.purchaseRequestID}"
+					projectCode       = "${br.projectCode}"
+					projectName       = "${br.projectName}"
+					projectCategory   = "${br.projectCategory}"
+					clientName        = "${br.clientName}"
+					clientAddress     = "${br.clientAddress}"
+					${br.bidRecapID == id && "selected"}>
 				${getFormCode("BRF", br.createdAt, br.bidRecapID)}
 				</option>`;
 			})
@@ -744,15 +745,13 @@ $(document).ready(function() {
 				return `
 				<option 
 					value     = "${br.bidRecapID}" 
-					brCode    = "${getFormCode("BRF", br.createdAt, br.bidRecapID)}"
-					clientID  = "${br.clientID}"
-					projectID = "${br.projectID}"
+					timelineBuilderID = "${br.timelineBuilderID}"
 					purchaseRequestID = "${br.purchaseRequestID}"
-					reason    = "${br.bidRecapReason}"
-					projectCode = "PRJ-21-00001"
-					projectName = "BlackBox Account"
-					clientName  = "BlackCoders"
-					clientAddress = "Pasig City"
+					projectCode       = "${br.projectCode}"
+					projectName       = "${br.projectName}"
+					projectCategory   = "${br.projectCategory}"
+					clientName        = "${br.clientName}"
+					clientAddress     = "${br.clientAddress}"
 					${br.bidRecapID == id && "selected"}>
 					${getFormCode("BRF", br.createdAt, br.bidRecapID)}
 				</option>`;
@@ -799,15 +798,16 @@ $(document).ready(function() {
 					} = vendor;
 
 					if (inventoryVendorID && inventoryVendorID != "null") {
-						let address = `${inventoryVendorUnit && titleCase(inventoryVendorUnit)+" "}${inventoryVendorBuilding && inventoryVendorBuilding +", "}${inventoryVendorBarangay && titleCase(inventoryVendorBarangay)+", "}${inventoryVendorCity && titleCase(inventoryVendorCity)+", "}${inventoryVendorProvince && titleCase(inventoryVendorProvince)+", "}${inventoryVendorCountry && titleCase(inventoryVendorCountry)+", "}${inventoryVendorZipCode && titleCase(inventoryVendorZipCode)}`;
+						let address = `${inventoryVendorUnit && titleCase(inventoryVendorUnit)+" "}${inventoryVendorBuilding && inventoryVendorBuilding +" "}${inventoryVendorBarangay && titleCase(inventoryVendorBarangay)+", "}${inventoryVendorCity && titleCase(inventoryVendorCity)+", "}${inventoryVendorProvince && titleCase(inventoryVendorProvince)+", "}${inventoryVendorCountry && titleCase(inventoryVendorCountry)+", "}${inventoryVendorZipCode && titleCase(inventoryVendorZipCode)}`;
 						let vendorContactDetails = `${inventoryVendorMobile} / ${inventoryVendorTelephone}`;
 
-						html += `<option 
-							value="${inventoryVendorID}"
-							vendorName="${inventoryVendorName || "-"}"
-							vendorAddress="${address || "-"}"
-							vendorContactPerson="${inventoryVendorPerson || "-"}"
-							vendorContactDetails="${vendorContactDetails}"
+						html += `
+						<option 
+							value                = "${inventoryVendorID}"
+							vendorName           = "${inventoryVendorName || "-"}"
+							vendorAddress        = "${address || "-"}"
+							vendorContactPerson  = "${inventoryVendorPerson || "-"}"
+							vendorContactDetails = "${vendorContactDetails}"
 							vatable="${inventoryVendorVAT == 1 ? true : false}"
 							${inventoryVendorID == invVendorID ? "selected" : ""}>
 							${getFormCode("VEN", createdAt, inventoryVendorID)}
@@ -1103,16 +1103,23 @@ $(document).ready(function() {
 
 	// ----- SELECT REFERENCE NO. -----
 	$(document).on("change", `[name="bidRecapID"]`, function() {
-		const bidRecapID    = $(this).val();
-		const projectID     = $("option:selected", this).attr("projectID");
-		const projectCode   = $("option:selected", this).attr("projectCode");
-		const projectName   = $("option:selected", this).attr("projectName");
-		const clientName    = $("option:selected", this).attr("clientName");
-		const clientAddress = $("option:selected", this).attr("clientAddress");
-		const status        = $(this).attr("status");
+		const bidRecapID = $(this).val();
+		const timelineBuilderID = $("option:selected", this).attr("timelineBuilderID");
+		let projectCode = $("option:selected", this).attr("projectCode");
+			projectCode = projectCode && projectCode != "null" ? projectCode : "-";
+		let projectName = $("option:selected", this).attr("projectName");
+			projectName = projectName && projectName != "null" ? projectName : "-";
+		let projectCategory = $("option:selected", this).attr("projectCategory");
+			projectCategory = projectCategory && projectCategory != "null" ? projectCategory : "-";
+		let clientName  = $("option:selected", this).attr("clientName");
+			clientName  = clientName && clientName != "null" ? clientName : "-";
+		let clientAddress = $("option:selected", this).attr("clientAddress");
+			clientAddress = clientAddress && clientAddress != "null" ? clientAddress : "-";
+		const status = $(this).attr("status");
 
 		$(`[name="projectCode"]`).val(projectCode);
 		$(`[name="projectName"]`).val(projectName);
+		$(`[name="projectCategory"]`).val(projectCategory);
 		$(`[name="clientName"]`).val(clientName);
 		$(`[name="clientAddress"]`).val(clientAddress);
 		
@@ -1366,11 +1373,12 @@ $(document).ready(function() {
 			data["employeeID"]        = sessionID;
 			data["bidRecapID"]        = $("[name=bidRecapID]").val();
 			data["purchaseRequestID"] = $(`[name="bidRecapID"] option:selected`).attr("purchaseRequestID");
-			data["projectID"]         = $(`[name="bidRecapID"] option:selected`).attr("projectID");
+			data["timelineBuilderID"] = $(`[name="bidRecapID"] option:selected`).attr("timelineBuilderID");
 			data["inventoryVendorID"] = $("[name=inventoryVendorID]").val();
 			
 			data["projectCode"]          = $("[name=projectCode]").val();
 			data["projectName"]          = $("[name=projectName]").val();
+			data["projectCategory"]      = $("[name=projectCategory]").val();
 			data["clientName"]           = $("[name=clientName]").val();
 			data["clientAddress"]        = $("[name=clientAddress]").val();
 			data["vendorName"]           = $("[name=vendorName]").val();
@@ -1625,9 +1633,10 @@ $(document).ready(function() {
 			employeeID            = "",
 			purchaseRequestID     = "",
 			iprtCreatedAt         = "",
-			projectID             = "",
+			timelineBuilderID     = "",
 			projectCode           = "",
 			projectName           = "",
+			projectCategory       = "",
 			clientName            = "",
 			clientAddress         = "",
 			bidRecapID            = 0,
@@ -1822,7 +1831,7 @@ $(document).ready(function() {
 
         <div class="row" id="form_purchase_order">
 
-			<div class="col-md-4 col-sm-12">
+			<div class="col-md-3 col-sm-12">
 				<div class="form-group">
 					<label>Reference No. ${!disabledReference ? "<code>*</code>" : ""}</label>
 					<select class="form-control validate select2"
@@ -1840,7 +1849,7 @@ $(document).ready(function() {
 				</div>
 			</div>
 
-			<div class="col-md-4 col-sm-12">
+			<div class="col-md-3 col-sm-12">
                 <div class="form-group">
                     <label>Project Code</label>
                     <input type="text" 
@@ -1850,7 +1859,7 @@ $(document).ready(function() {
 						value="${projectCode || "-"}">
                 </div>
             </div>
-            <div class="col-md-4 col-sm-12">
+            <div class="col-md-3 col-sm-12">
                 <div class="form-group">
                     <label>Project Name</label>
 					<input type="text"
@@ -1858,6 +1867,16 @@ $(document).ready(function() {
 						name="projectName"
 						disabled
 						value="${projectName || "-"}">
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-12">
+                <div class="form-group">
+                    <label>Project Category</label>
+					<input type="text"
+						class="form-control"
+						name="projectCategory"
+						disabled
+						value="${projectCategory || "-"}">
                 </div>
             </div>
             <div class="col-md-4 col-sm-12">

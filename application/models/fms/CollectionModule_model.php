@@ -218,6 +218,8 @@ class CollectionModule_model extends CI_Model {
                     "checkDate"         => $activity["checkDate"],
                     "depositoryAccount" => $activity["depositoryAccount"],
                     "termPayment"       => $activity["termPayment"],
+                    "vatType"           => $activity["vatType"],
+                    "vatAmount"         => $activity["vatAmount"],
                     "amount"            => $amount,
                     "remarks"           => $activity["remarks"],
                     "createdBy"         => $sessionID,

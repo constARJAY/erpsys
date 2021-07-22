@@ -189,7 +189,8 @@ $(document).ready(function() {
             fct.collectionPaymentMethod AS paymentMethod,
             fct.submittedAt AS dateCollected,
             fct.collectionStatus AS status`,
-            `fct.collectionStatus = 1 OR fct.employeeID = ${sessionID}`
+            `fct.collectionStatus = 1 OR fct.employeeID = ${sessionID}`,
+            `FIELD(collectionStatus, 0, 1, 3, 2, 4, 5), COALESCE(fct.submittedAt, fct.createdAt)`
         );
         return data;
     }
@@ -579,6 +580,8 @@ $(document).ready(function() {
                 billingActivity.map((act) => {
                     const {
                         billingItemID,
+                        vatType     = "Non-Vatable",
+                        vatAmount   = 0,
                         activity    = "",
                         type        = "",
                         checkNumber = "",
@@ -737,6 +740,7 @@ $(document).ready(function() {
                                             billingID="${billingID}"
                                             billingItemID="${billingItemID}"
                                             value="${inputAmount || 0}"
+                                            vatType="${vatType}"
                                             ${disabled}>
                                     </div>
                                     <div class="d-block invalid-feedback"
@@ -1016,7 +1020,7 @@ $(document).ready(function() {
                         <thead>
                             <tr style="white-space: nowrap">
                                 ${tableCheckbox}
-                                <th>Activity</th>
+                                <th>Service</th>
                                 <th>Type ${!disabled ? "<code>*</code>" : ""}</th>
                                 <th>Check No. ${!disabled ? "<code>*</code>" : ""}</th>
                                 <th>Check Date ${!disabled ? "<code>*</code>" : ""}</th>
@@ -1057,7 +1061,7 @@ $(document).ready(function() {
                         </div>
                     </div>
                     <div class="row" style="font-size: 1.1rem">
-                        <div class="col-6 col-lg-7 text-left">${collectionVat} 12% VAT: </div>
+                        <div class="col-6 col-lg-7 text-left">12% VAT: </div>
                         <div class="col-6 col-lg-5 text-right text-dark">
                             <span id="collectionVatAmount">${formatAmount(collectionVatAmount, true)}</span>
                         </div>
@@ -1243,26 +1247,28 @@ $(document).ready(function() {
 
     // ----- UPDATE TOTAL AMOUNT -----
 	function updateTotalAmount() {
-		// const amount = $.find(`[name="amount"]`).map(element => getNonFormattedAmount(element.value) || 0);
-
-        let amount = [];
+        let grandTotalArr = [], amountArr = [], vatAmountArr = [];
         $(`.checkboxrow:checked`).each(function() {
             const billingID = $(this).attr("billingID");
             $(`[name="amount"][billingID="${billingID}"]`).each(function() {
-                const val = getNonFormattedAmount($(this).val()) || 0;
-                amount.push(val);
-            })
+                const vatType = $(this).attr("vatType");
+                let tAmount = getNonFormattedAmount($(this).val()) || 0;
+                grandTotalArr.push(tAmount);
+                const tVatAmount = vatType == "Non-Vatable" ? 0 : (tAmount * 0.12);
+                    tAmount = tAmount - tVatAmount;
+                amountArr.push(tAmount);
+                vatAmountArr.push(tVatAmount);
+            });
         })
 
-        const grandTotal = amount.reduce((a,b) => a + b, 0);
+        const grandTotal = grandTotalArr.reduce((a,b) => a + b, 0);
         $("#collectionGrandTotal").text(formatAmount(grandTotal, true));
 
-        const isChecked = $(`#collectionVat`).prop("checked");
-        const vatAmount = isChecked ? (grandTotal * 0.12) : 0;
-        $("#collectionVatAmount").text(formatAmount(vatAmount, true));
+        const totalAmount = amountArr.reduce((a,b) => a + b, 0);
+        $("#collectionSubtotal").text(formatAmount(totalAmount, true));
 
-		const totalAmount = grandTotal - vatAmount;
-		$(`#collectionSubtotal`).text(formatAmount(totalAmount, true));
+        const totalVAT = vatAmountArr.reduce((a,b) => a + b, 0);
+        $("#collectionVatAmount").text(formatAmount(totalVAT, true));
 
 		return grandTotal;
 	}
@@ -1422,6 +1428,7 @@ $(document).ready(function() {
             $(this).prop("checked", isChecked);
         });
 		updateDeleteButton();
+        updateTotalAmount();
 	})
 	// ----- END CHECK ALL -----
 
@@ -1560,6 +1567,8 @@ $(document).ready(function() {
                 const depositoryAccount = $(`#depositoryAccount${billingID}${billingItemID}`).val()?.trim();
                 const termPayment       = $(`#termPayment${billingID}${billingItemID}`).val();
                 const amount            = getNonFormattedAmount($(`#amount${billingID}${billingItemID}`).val());
+                const vatType           = $(`#amount${billingID}${billingItemID}`).attr("vatType");
+                const vatAmount         = vatType == "Non-Vatable" ? 0 : (amount * 0.12);
                 const remarks           = $(`#remarks${billingID}${billingItemID}`).val()?.trim();
 
                 activities.push({
@@ -1570,6 +1579,8 @@ $(document).ready(function() {
                     checkDate, 
                     depositoryAccount, 
                     termPayment, 
+                    vatType,
+                    vatAmount,
                     amount, 
                     remarks
                 })

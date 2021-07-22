@@ -27,9 +27,10 @@ class Purchase_request extends CI_Controller {
         $revisePurchaseRequestID = $this->input->post("revisePurchaseRequestID") ?? null;
         $employeeID              = $this->input->post("employeeID");
         $billMaterialID          = $this->input->post("billMaterialID") ?? null;
-        $projectID               = $this->input->post("projectID") ?? null;
+        $timelineBuilderID       = $this->input->post("timelineBuilderID") ?? null;
         $projectCode             = $this->input->post("projectCode") ?? null;
         $projectName             = $this->input->post("projectName") ?? null;
+        $projectCategory         = $this->input->post("projectCategory") ?? null;
         $clientName              = $this->input->post("clientName") ?? null;
         $clientAddress           = $this->input->post("clientAddress") ?? null;
         $approversID             = $this->input->post("approversID") ?? null;
@@ -49,9 +50,10 @@ class Purchase_request extends CI_Controller {
             "revisePurchaseRequestID" => $revisePurchaseRequestID,
             "employeeID"              => $employeeID,
             "billMaterialID"          => $billMaterialID,
-            "projectID"               => $projectID,
+            "timelineBuilderID"       => $timelineBuilderID,
             "projectCode"             => $projectCode,
             "projectName"             => $projectName,
+            "projectCategory"         => $projectCategory,
             "clientName"              => $clientName,
             "clientAddress"           => $clientAddress,
             "approversID"             => $approversID,

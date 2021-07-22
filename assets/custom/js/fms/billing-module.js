@@ -187,7 +187,8 @@ $(document).ready(function() {
             fbt.billingGrandTotal AS grandTotal,
             fbt.submittedAt AS dateBilled,
             fbt.billingStatus AS status`,
-            `fbt.billingStatus = 1 OR fbt.employeeID = ${sessionID}`
+            `fbt.billingStatus = 1 OR fbt.employeeID = ${sessionID}`,
+            `FIELD(billingStatus, 0, 1, 3, 2, 4, 5), COALESCE(fbt.submittedAt, fbt.createdAt)`
         );
         return data;
     }

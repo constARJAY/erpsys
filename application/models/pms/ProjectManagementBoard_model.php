@@ -78,7 +78,9 @@ class ProjectManagementBoard_model extends CI_Model {
                 "timelineManagementID" => $milestone["timelineManagementID"],
                 "milestoneID"          => $milestone["projectMilestoneID"],
                 "manHours"             => $milestone["manHours"],
-                "assignedEmployee"     => $milestone["assignedEmployee"]
+                "assignedDesignation"  => $milestone["assignedDesignation"],
+                "assignedManHours"     => $milestone["assignedManHours"],
+                "assignedEmployee"     => $milestone["assignedEmployee"],
             ];
             array_push($output, $temp);
         }

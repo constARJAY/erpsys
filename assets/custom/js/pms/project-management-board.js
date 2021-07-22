@@ -322,27 +322,32 @@ $(document).ready(function() {
 
 
     // ----- DISPLAY ASSIGNED EMPLOYEE -----
-    const displayAssignedEmployee = (employees = [], phase = null, taskID = null) => {
+    const displayAssignedEmployee = (employees = [], phase = null, taskID = null, isDisabled = false) => {
+        const isReadOnly = isDisabled ? "true" : "false";
         let html = "";
         if (employees.length > 0 && phase && taskID) {
             employees.map((employee, index) => {
                 const { id, fullname, image } = employee;
-                if (index <= 5) {
+                // if (index <= 5) {
                     html += `
                     <img src="${image}" 
-                        class="rounded rounded-circle" 
-                        style="width: 50px; height: 50px"
-                        title="${fullname}">`;
-                }
-                if (index == 6) {
-                    html += `
-                    <span class="font-weight-bolder"
-                        style="position: absolute;
-                            top: 0;
-                            margin-left: 7px;
-                            margin-top: 25px;
-                            font-size: 1.5rem;">+${members.length - 6}<span>`;
-                }
+                        class="rounded rounded-circle employeeProfile" 
+                        style="width: 50px; height: 50px; cursor: pointer;"
+                        title="${fullname}"
+                        phase="${phase}"
+                        taskID="${taskID}"
+                        employeeID="${id}"
+                        isReadOnly="${isReadOnly}">`;
+                // }
+                // if (index == 6) {
+                //     html += `
+                //     <span class="font-weight-bolder"
+                //         style="position: absolute;
+                //             top: 0;
+                //             margin-left: 7px;
+                //             margin-top: 25px;
+                //             font-size: 1.5rem;">+${members.length - 6}<span>`;
+                // }
             })
         } else {
             html += `<span>No data available yet.</span>`;
@@ -350,6 +355,149 @@ $(document).ready(function() {
         $(`.assignedMembers[phase="${phase}"][taskID="${taskID}"]`).html(html);
     }
     // ----- END DISPLAY ASSIGNED EMPLOYEE -----
+
+
+    // ----- CLICK EMPLOYEE PROFILE -----
+    function getTaskMilestone(phase = null, taskID = null, employeeData = {}, isReadOnly = false) {
+        const {
+            employeeID = "",
+            fullname   = "",
+            image      = ""
+        } = employeeData;
+
+        let milestones = [];
+        $(`[name="milestoneName"][taskID="${taskID}"]`).each(function() {
+            const index = $(this).attr("index");
+            const projectMilestoneID = $(this).attr("projectMilestoneID");
+            const milestoneName = $(this).val()?.trim();
+            let assignedEmployee = $(`#manHours${index}`).attr("employees");
+                assignedEmployee = assignedEmployee ? assignedEmployee.split("|") : [];
+            let assignedManHours = $(`#manHours${index}`).attr("manHours");
+                assignedManHours = assignedManHours ? assignedManHours.split("|") : [];
+            const employeeIndex = assignedEmployee.indexOf(employeeID);
+            const manHours = assignedManHours[employeeIndex];
+
+            assignedEmployee.includes(employeeID) && milestones.push({index, milestoneName, manHours, projectMilestoneID});
+        });
+
+        let tbodyHTML = "";
+        milestones.map(milestone => {
+            const { index, milestoneName, manHours = 0, projectMilestoneID } = milestone;
+
+            tbodyHTML += `
+            <tr>
+                <td>${milestoneName}</td>
+                <td>
+                    <div class="form-group my-1">
+                        <input class="form-control input-hours text-center"
+                            value="${manHours}"
+                            name="employeeManHours"
+                            min="0.00"
+                            max="9999999999"
+                            minlength="1"
+                            maxlength="10"
+                            phase="${phase}"
+                            taskID="${taskID}"
+                            projectMilestoneID="${projectMilestoneID}"
+                            employeeID="${employeeID}"
+                            index="${index}"
+                            ${isReadOnly ? "disabled" : ""}
+                            required>
+                        <div class="invalid-feedback d-block"></div>
+                    </div>
+                </td>
+            </tr>`;
+        })
+
+        let footerHTML = !isReadOnly ? `
+        <div class="modal-footer">
+            <div class="w-100 text-right">
+                <button class="btn btn-save px-5 py-2" 
+                    id="btnSaveManHours"
+                    employeeID="${employeeID}"
+                    phase="${phase}"
+                    taskID="${taskID}">Save</button>
+                <button class="btn btn-cancel px-5 py-2" data-dismiss="modal">Cancel</button>
+            </div>
+        </div>` : "";
+
+        let html = `
+        <div class="row p-3">
+            <div class="col-12">
+                <div class="d-flex justify-content-start align-items-center mb-3 px-2">
+                    <img src="${image}"
+                        class="rounded-circle"
+                        style="width: 50px; height: 50px;"
+                        alt="${fullname}">
+                    <span class="font-weight-bold ml-2 h5">${fullname}</span>
+                </div>
+            </div>
+            <div class="col-12">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Milestones</th>
+                            <th>Man Hours</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${tbodyHTML}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        ${footerHTML}`;
+
+        return html;
+    }
+
+    $(document).on("click", "#btnSaveManHours", function() {
+        const employeeID = $(this).attr("employeeID");
+        const phase      = $(this).attr("phase");
+        const taskID     = $(this).attr("taskID");
+
+        let milestones = [];
+        $(`[name="employeeManHours"]`).each(function() {
+            const manHours = getNonFormattedAmount($(this).val()) || 0;
+            const index = $(this).attr("index");
+            const projectMilestoneID = $(this).attr("projectMilestoneID");
+            let temp = {
+                index, projectMilestoneID, manHours
+            };
+            milestones.push(temp);
+        })
+        
+        milestones.map(milestone => {
+            const { index, projectMilestoneID, manHours } = milestone;
+            const selector = `[name="manHours"][phase="${phase}"][taskID="${taskID}"][index="${index}"]`;
+            const assignedEmployee = $(selector).attr("employees").split("|");
+            const employeeIndex    = assignedEmployee.indexOf(employeeID);
+            let manHoursArr = $(selector).attr("manHours")?.split("|");
+            manHoursArr[employeeIndex] = manHours;
+            let totalManHours = manHoursArr.reduce((a,b) => (+a)+(+b),0);
+
+            $(selector).attr("manHours", manHoursArr.join("|"));
+            $(selector).val(totalManHours.toString()).trigger("keyup");
+        })
+
+        $(`#modal_project_management_board`).modal("hide");
+    })
+
+    $(document).on("click", `.employeeProfile`, function() {
+        const isReadOnly = $(this).attr("isReadOnly") == "true";
+        const phase  = $(this).attr("phase");
+        const taskID = $(this).attr("taskID");
+        const employeeID = $(this).attr("employeeID");
+        const fullname   = $(this).attr("title");
+        const image      = $(this).attr("src");
+        let content = getTaskMilestone(phase, taskID, {employeeID, fullname, image}, isReadOnly);
+        let title = isReadOnly ? "ASSIGNED MAN HOURS" : "ASSIGN MAN HOURS";
+        $(`#modal_project_management_board .page-title`).text(title);
+        $(`#modal_project_management_board_content`).html(content);
+        $(`#modal_project_management_board`).modal("show");
+        initHours();
+    })
+    // ----- END CLICK EMPLOYEE PROFILE -----
 
 
     // ----- SELECT ASSIGNED EMPLOYEE -----
@@ -374,21 +522,80 @@ $(document).ready(function() {
         return employees;
     }
 
+    function getDifferentEmployeeID(oldEmployeeArr = [], newEmployeeArr = []) {
+        let oldArrCount = oldEmployeeArr.length;
+        let newArrCount = newEmployeeArr.length;
+        let first  = oldArrCount > newArrCount ? oldEmployeeArr : newEmployeeArr;
+        let second = oldArrCount > newArrCount ? newEmployeeArr : oldEmployeeArr;
+
+        let index = first.filter(x => second.indexOf(x) === -1);
+        return index ? index[0] : 0;
+    }
+
+    function updateManHoursValue(index = 0) {
+        let manHours = $(`#manHours${index}`).attr("manHours");
+            manHours = manHours ? manHours.split("|") : [];
+        let totalManHours = manHours.reduce((a,b) => (+a)+(+b), 0);
+        $(`#manHours${index}`).val(totalManHours).trigger("keyup");
+    }
+
     $(document).on("change", `[name="assignEmployee"]`, function() {
+        const index   = $(this).attr("index");
         const phase   = $(this).attr("phase");
         const taskID  = $(this).attr("taskID");
-        const employees = getAssignedEmployee(phase, taskID);
-        displayAssignedEmployee(employees, phase, taskID);
-        
-        $parent = $(this).closest(".form-group");
-        $(this).parent()
-            .find(".selection")
-            .children()
-            .removeClass("is-invalid")
-            .removeClass("is-valid")
-            .removeClass("no-error")
-            .removeClass("has-error");
-            $parent.find(".invalid-feedback").text("");
+        const employees  = getAssignedEmployee(phase, taskID);
+        const employeeID = $(this).val() || [];
+        const isDisabled = $(this).attr("disabled");
+        displayAssignedEmployee(employees, phase, taskID, isDisabled);
+
+        const selector = `[phase="${phase}"][taskID="${taskID}"][name="manHours"][index="${index}"]`;
+
+        const executeonce = $(this).attr("executeonce") == "true";
+        if (!executeonce) {
+            const oldEmployees    = $(selector).attr("employees") || false;
+            const oldEmployeesArr = oldEmployees ? oldEmployees.split("|") : [];
+            const isOnAdd = employeeID.length > oldEmployeesArr.length;
+            const diffEmployeeID = getDifferentEmployeeID(oldEmployeesArr, employeeID);
+            const oldManHours = $(selector).attr("manHours") || "";
+
+            // ----- SET NEW MAN HOURS -----
+            let newManHoursArr = oldManHours ? oldManHours.split("|") : [];
+            let tempArr        = isOnAdd ? employeeID : oldEmployeesArr;
+            let employeeIndex  = tempArr.indexOf(diffEmployeeID);
+                employeeIndex  = employeeIndex != -1 ? employeeIndex : 0;
+
+            if (employeeIndex >= 0 && !isOnAdd) {
+                newManHoursArr.splice(employeeIndex, 1);
+            } else {
+                if (isOnAdd) {
+                    newManHoursArr.splice(employeeIndex, 0, "0");
+                }
+                else {
+                    newManHoursArr.splice(employeeIndex, 1, "0");
+                }
+            }
+            newManHoursArr = newManHoursArr.join("|");
+
+            $(selector).attr("manHours", newManHoursArr);
+            // ----- END SET NEW MAN HOURS -----
+
+            $(selector).attr("employees", employeeID.join("|"));
+
+            $(this).attr("assignedemployee", employeeID.join("|"));
+            $(this).attr("assignedManHours", newManHoursArr);
+
+            updateManHoursValue(index);
+            
+            $parent = $(this).closest(".form-group");
+            $(this).parent()
+                .find(".selection")
+                .children()
+                .removeClass("is-invalid")
+                .removeClass("is-valid")
+                .removeClass("no-error")
+                .removeClass("has-error");
+            $parent.find(".invalid-feedback").text("");    
+        }   
     })
     // ----- END SELECT ASSIGNED EMPLOYEE -----
 
@@ -423,18 +630,23 @@ $(document).ready(function() {
 
             const taskData = (milestoneID = null) => {
                 let data = milestoneTask.filter(mt => mt.milestoneID == milestoneID);
-                let manHours = "0", assignedEmployee = "";
+                let manHours            = "0", 
+                    assignedEmployee    = "", 
+                    assignedDesignation = "", 
+                    assignedManHours    = "";
                 if (data && data.length > 0) {
-                    manHours         = data[0]?.manHours;
-                    assignedEmployee = data[0]?.assignedEmployee;
+                    manHours            = data[0]?.manHours;
+                    assignedEmployee    = data[0]?.assignedEmployee;
+                    assignedDesignation = data[0]?.assignedDesignation;
+                    assignedManHours    = data[0]?.assignedManHours;
                 }
-                return {manHours, assignedEmployee};
+                return {manHours, assignedEmployee, assignedDesignation, assignedManHours};
             };
 
             milestones.map(milestone => {
                 const { milestoneID, milestoneName } = milestone;
-                const { manHours, assignedEmployee } = taskData(milestoneID);
-    
+                const { manHours, assignedEmployee, assignedManHours } = taskData(milestoneID);
+
                 taskNameContent += `
                 <div class="form-group my-1">
                     <input class="form-control"
@@ -456,7 +668,9 @@ $(document).ready(function() {
                         maxlength="10"
                         taskID="${taskID}"
                         phase="${phaseCode}"
-                        ${disabled}
+                        readonly
+                        employees="${assignedEmployee}"
+                        manHours="${assignedManHours}"
                         required>
                     <div class="invalid-feedback d-block"></div>
                 </div>`;
@@ -480,6 +694,7 @@ $(document).ready(function() {
                         phase="${phaseCode}"
                         taskID="${taskID}"
                         assignedEmployee="${assignedEmployee}"
+                        executeonce="true"
                         ${disabled}>
                         <option disabled>${!disabled ? "Select Employee" : "-"}</option>
                         ${teamMemberOptions}
@@ -772,6 +987,7 @@ $(document).ready(function() {
                 const assignedEmployeeArr = $assignedEmployee?.split("|");
                 $assignedEmployee && $(this).val(assignedEmployeeArr).trigger("change");
             })
+            $(`[name="assignEmployee"]`).attr("executeonce", "false");  
 
             // ----- NOT ALLOWED FOR UPDATE -----
 			if (!allowedUpdate) {
@@ -997,8 +1213,9 @@ $(document).ready(function() {
             })
             assignEmployee    = assignEmployee.join("|");
             assignDesignation = assignDesignation.join("|");
+            let assignManHours = $(`#manHours${index}`).attr("manHours") || "";
             const temp = {
-                taskID, projectMilestoneID, manHours, assignEmployee, assignDesignation
+                taskID, projectMilestoneID, manHours, assignEmployee, assignDesignation, assignManHours
             };
             data.tasks.push(temp);
         })

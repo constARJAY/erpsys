@@ -224,8 +224,8 @@ class Reservation_report extends CI_Controller {
                 $projectName = $data[$i]["projectName"] ?? "";
                 $itemName    = $data[$i]["itemName"] ?? "";
                 $itemUom     = $data[$i]["itemUom"] ?? "";
-                $reservedQuantity = $data[$i]["reservedQuantity"] ?? "";
-                $dateReserved = $data[$i]["dateReserved"] ? date("M d, Y", strtotime($data[$i]["dateReserved"])) : "";
+                $reservedQuantity  = $data[$i]["reservedQuantity"] ?? "";
+                $dateReserved      = $data[$i]["dateReserved"] ? date("M d, Y", strtotime($data[$i]["dateReserved"])) : "";
                 $materialUsageCode = $data[$i]["materialUsageCode"] ?? "";
             }
             $sheet->setCellValue("A$rowNumber", $projectCode);

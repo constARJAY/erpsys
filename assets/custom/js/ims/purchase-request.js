@@ -333,10 +333,9 @@ $(document).ready(function() {
 		$("#tableForApprovalParent").html(preloader);
 		let purchaseRequestData = getTableData(
 			`ims_purchase_request_tbl AS imrt 
-				LEFT JOIN hris_employee_list_tbl AS helt USING(employeeID) 
-				LEFT JOIN pms_project_list_tbl AS pplt ON pplt.projectListID = imrt.projectID
+				LEFT JOIN hris_employee_list_tbl AS helt USING(employeeID)
 				LEFT JOIN pms_bill_material_tbl AS pcet USING(billMaterialID)`,
-			"imrt.*, CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname, imrt.createdAt AS dateCreated, projectListCode, projectListName, pcet.createdAt AS ceCreatedAt",
+			"imrt.*, CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname, imrt.createdAt AS dateCreated, pcet.createdAt AS ceCreatedAt",
 			`imrt.employeeID != ${sessionID} AND purchaseRequestStatus != 0 AND purchaseRequestStatus != 4`,
 			`FIELD(purchaseRequestStatus, 0, 1, 3, 2, 4, 5), COALESCE(imrt.submittedAt, imrt.createdAt)`
 		);
@@ -362,9 +361,9 @@ $(document).ready(function() {
 			let {
 				fullname,
 				purchaseRequestID,
-				projectID,
-				projectListCode,
-				projectListName,
+				timelineBuilderID,
+				projectCode,
+				projectName,
 				billMaterialID,
 				approversID,
 				approversDate,
@@ -393,11 +392,11 @@ $(document).ready(function() {
 					<td>${billMaterialID && billMaterialID != 0 ? getFormCode("PBR", ceCreatedAt, billMaterialID) : '-'}</td>
 					<td>
 						<div>
-							${projectListCode || '-'}
+							${projectCode || '-'}
 						</div>
 						<small style="color:#848482;">${purchaseRequestReason || '-'}</small>
 					</td>
-					<td>${projectListName || '-'}</td>
+					<td>${projectName || '-'}</td>
 					<td>
 						${employeeFullname(getCurrentApprover(approversID, approversDate, purchaseRequestStatus, true))}
 					</td>
@@ -429,9 +428,8 @@ $(document).ready(function() {
 		let purchaseRequestData = getTableData(
 			`ims_purchase_request_tbl AS imrt 
 				LEFT JOIN hris_employee_list_tbl AS helt USING(employeeID) 
-				LEFT JOIN pms_project_list_tbl AS pplt ON pplt.projectListID = imrt.projectID
 				LEFT JOIN pms_bill_material_tbl AS pcet USING(billMaterialID)`,
-			"imrt.*, CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname, imrt.createdAt AS dateCreated, projectListCode, projectListName, pcet.createdAt AS ceCreatedAt",
+			"imrt.*, CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname, imrt.createdAt AS dateCreated, pcet.createdAt AS ceCreatedAt",
 			`imrt.employeeID = ${sessionID}`,
 			`FIELD(purchaseRequestStatus, 0, 1, 3, 2, 4, 5), COALESCE(imrt.submittedAt, imrt.createdAt)`
 		);
@@ -457,9 +455,9 @@ $(document).ready(function() {
 			let {
 				fullname,
 				purchaseRequestID,
-                projectID,
-                projectListCode,
-                projectListName,
+                timelineBuilderID,
+                projectCode,
+                projectName,
                 billMaterialID,
 				approversID,
 				approversDate,
@@ -480,14 +478,6 @@ $(document).ready(function() {
 			}
 
 			let btnClass = purchaseRequestStatus != 0 ? "btnView" : "btnEdit";
-
-			let button = purchaseRequestStatus != 0 ? `
-            <button type="button" class="btn btn-view w-100 btnView" id="${encryptString(purchaseRequestID)}"><i class="fas fa-eye"></i> View</button>` : `
-            <button type="button" 
-                class="btn btn-edit w-100 btnEdit" 
-                id="${encryptString(purchaseRequestID )}" 
-                code="${getFormCode("PR", createdAt, purchaseRequestID )}"><i class="fas fa-edit"></i> Edit</button>`;
-
 			html += `
             <tr class="${btnClass}" id="${encryptString(purchaseRequestID )}">
                 <td>${getFormCode("PR", createdAt, purchaseRequestID )}</td>
@@ -495,11 +485,11 @@ $(document).ready(function() {
 				<td>${billMaterialID && billMaterialID != 0 ? getFormCode("PBR", ceCreatedAt, billMaterialID) : '-'}</td>
 				<td>
 					<div>
-						${projectListCode || '-'}
+						${projectCode || '-'}
 					</div>
 					<small style="color:#848482;">${purchaseRequestReason || '-'}</small>
 				</td>
-				<td>${projectListName || '-'}</td>
+				<td>${projectName || '-'}</td>
                 <td>
                     ${employeeFullname(getCurrentApprover(approversID, approversDate, purchaseRequestStatus, true))}
                 </td>
@@ -684,20 +674,24 @@ $(document).ready(function() {
 		let html = `
 		<option 
 			value     = "0"
-			bomCode   = "-"
-			projectID = "0"
+			timelineBuilderID = "0"
+			projectCode     = "-"
+			projectName     = "-"
+			projectCategory = "-"
+			clientName      = "-"
+			clientAddress   = "-"
 			${id == "0" && "selected"}>Internal</option>`;
 		if (!status || status == 0) {
 			html += billMaterialList.filter(bom => createdBOMList.indexOf(bom.billMaterialID) == -1 || bom.billMaterialID == id).map(bom => {
 				return `
 				<option 
-				value     = "${bom.billMaterialID}" 
-				bomCode    = "${getFormCode("PBR", bom.createdAt, bom.billMaterialID)}"
-				projectID = "${bom.projectID}"
-				projectCode = "PRJ-21-00001"
-				projectName = "Sample Project"
-				clientName  = "BlackCoders"
-				clientAddress = "Pasig City"
+					value     = "${bom.billMaterialID}" 
+					timelineBuilderID = "${bom.timelineBuilderID}"
+					projectCode     = "${bom.projectCode}"
+					projectName     = "${bom.projectName}"
+					projectCategory = "${bom.projectCategory}"
+					clientName      = "${bom.clientName}"
+					clientAddress   = "${bom.clientAddress}"
 				${bom.billMaterialID == id && "selected"}>
 				${getFormCode("PBR", bom.createdAt, bom.billMaterialID)}
 				</option>`;
@@ -707,12 +701,12 @@ $(document).ready(function() {
 				return `
 				<option 
 					value     = "${bom.billMaterialID}" 
-					bomCode    = "${getFormCode("PBR", bom.createdAt, bom.billMaterialID)}"
-					projectID = "${bom.projectID}"
-					projectCode   = "PRJ-21-00001"
-					projectName   = "Sample Project"
-					clientName    = "BlackCoders"
-					clientAddress = "Pasig City"
+					timelineBuilderID = "${bom.timelineBuilderID}"
+					projectCode     = "${bom.projectCode}"
+					projectName     = "${bom.projectName}"
+					projectCategory = "${bom.projectCategory}"
+					clientName      = "${bom.clientName}"
+					clientAddress   = "${bom.clientAddress}"
 					${bom.billMaterialID == id && "selected"}>
 					${getFormCode("PBR", bom.createdAt, bom.billMaterialID)}
 				</option>`;
@@ -1294,20 +1288,7 @@ $(document).ready(function() {
 
 			const {
 				purchaseRequestID       = "",
-				revisePurchaseRequestID = "",
-				employeeID              = "",
 				billMaterialID          = "",
-				projectID               = "",
-				purchaseRequestReason   = "",
-				projectTotalAmount      = 0,
-				companyTotalAmount      = 0,
-				purchaseRequestRemarks  = "",
-				approversID             = "",
-				approversStatus         = "",
-				approversDate           = "",
-				purchaseRequestStatus   = false,
-				submittedAt             = false,
-				createdAt               = false,
 			} = data && data[0];
 
 			let disabled = readOnly ? "disabled" : "";
@@ -1418,14 +1399,16 @@ $(document).ready(function() {
 	$(document).on("change", `[name="billMaterialID"]`, function() {
 		const billMaterialID = $(this).val();
 		
-		const projectID     = $(`option:selected`, this).attr("projectID") || "-";
-		const projectCode   = $(`option:selected`, this).attr("projectCode") || "-";
-		const projectName   = $(`option:selected`, this).attr("projectName") || "-";
-		const clientName    = $(`option:selected`, this).attr("clientName") || "-";
-		const clientAddress = $(`option:selected`, this).attr("clientAddress") || "-";
+		const timelineBuilderID = $(`option:selected`, this).attr("timelineBuilderID") || "-";
+		const projectCode     = $(`option:selected`, this).attr("projectCode") || "-";
+		const projectName     = $(`option:selected`, this).attr("projectName") || "-";
+		const projectCategory = $(`option:selected`, this).attr("projectCategory") || "-";
+		const clientName      = $(`option:selected`, this).attr("clientName") || "-";
+		const clientAddress   = $(`option:selected`, this).attr("clientAddress") || "-";
 
 		$(`[name="projectCode"]`).val(projectCode);
 		$(`[name="projectName"]`).val(projectName);
+		$(`[name="projectCategory"]`).val(projectCategory);
 		$(`[name="clientName"]`).val(clientName);
 		$(`[name="clientAddress"]`).val(clientAddress);
 
@@ -1708,6 +1691,7 @@ $(document).ready(function() {
 			billMaterialID          = "",
 			projectCode             = "",
 			projectName             = "",
+			projectCategory         = "",
 			clientName              = "",
 			clientAddress           = "",
 			purchaseRequestReason   = "",
@@ -1736,8 +1720,6 @@ $(document).ready(function() {
 		$("#btnBack").attr("cancel", isFromCancelledDocument);
 
 		let disabled          = readOnly ? "disabled" : "";
-		let disabledReference = billMaterialID && billMaterialID != "0" ? "disabled" : disabled;
-		
 		let button = formButtons(data, isRevise, isFromCancelledDocument);
 
 		let reviseDocumentNo    = isRevise ? purchaseRequestID : revisePurchaseRequestID;
@@ -1826,7 +1808,7 @@ $(document).ready(function() {
 
         <div class="row" id="form_purchase_request">
 
-            <div class="col-md-4 col-sm-12">
+            <div class="col-md-3 col-sm-12">
                 <div class="form-group">
                     <label>Reference No. ${!disabled ? "<code>*</code>" : ""}</label>
 					<select class="form-control validate select2"
@@ -1841,7 +1823,7 @@ $(document).ready(function() {
                     <div class="d-block invalid-feedback" id="invalid-billMaterialID"></div>
                 </div>
             </div>
-            <div class="col-md-4 col-sm-12">
+            <div class="col-md-3 col-sm-12">
                 <div class="form-group">
                     <label>Project Code</label>
                     <input type="text" 
@@ -1851,7 +1833,7 @@ $(document).ready(function() {
 						value="${projectCode || "-"}">
                 </div>
             </div>
-            <div class="col-md-4 col-sm-12">
+            <div class="col-md-3 col-sm-12">
                 <div class="form-group">
                     <label>Project Name</label>
                     <input type="text" 
@@ -1860,6 +1842,17 @@ $(document).ready(function() {
 						disabled 
 						value="${projectName || "-"}">
                     <div class="d-block invalid-feedback" id="invalid-projectName"></div>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-12">
+                <div class="form-group">
+                    <label>Project Category</label>
+                    <input type="text" 
+						class="form-control" 
+						name="projectCategory" 
+						disabled 
+						value="${projectCategory || "-"}">
+                    <div class="d-block invalid-feedback" id="invalid-projectCategory"></div>
                 </div>
             </div>
             <div class="col-md-4 col-sm-12">
@@ -2041,18 +2034,20 @@ $(document).ready(function() {
 		formData.append("updatedBy", sessionID);
 
 		if (currentStatus == "0" && method != "approve") {
-			const billMaterialID = $("[name=billMaterialID]").val() || null;
-			const projectID     = $("[name=billMaterialID] option:selected").attr("projectID") || null;
-			const projectCode   = $(`[name="projectCode"]`).val() || null;
-			const projectName   = $(`[name="projectName"]`).val() || null;
-			const clientName    = $(`[name="clientName"]`).val() || null;
-			const clientAddress = $(`[name="clientAddress"]`).val() || null;
+			const billMaterialID = $("[name=billMaterialID]").val();
+			const timelineBuilderID = $("[name=billMaterialID] option:selected").attr("timelineBuilderID");
+			const projectCode   = $(`[name="projectCode"]`).val();
+			const projectName   = $(`[name="projectName"]`).val();
+			const projectCategory = $(`[name="projectCategory"]`).val();
+			const clientName    = $(`[name="clientName"]`).val();
+			const clientAddress = $(`[name="clientAddress"]`).val();
 
 			formData.append("employeeID", sessionID);
 			formData.append("billMaterialID", billMaterialID);
-			formData.append("projectID", projectID);
+			formData.append("timelineBuilderID", timelineBuilderID);
 			formData.append("projectCode", projectCode);
 			formData.append("projectName", projectName);
+			formData.append("projectCategory", projectCategory);
 			formData.append("clientName", clientName);
 			formData.append("clientAddress", clientAddress);
 			formData.append("purchaseRequestReason", $("[name=purchaseRequestReason]").val()?.trim());

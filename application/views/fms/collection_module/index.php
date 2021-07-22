@@ -1,3 +1,13 @@
+<style>
+
+    #btnSubmit[disabled]:hover {
+        color: rgb(26 26 26) !important;
+        border: 1px solid rgb(26 26 26) !important;
+        background: white !important;
+    }
+
+</style>
+
 <div class="body_area after_bg">
     <div class="block-header pb-0">
         <div class="container" id="headerContainer">

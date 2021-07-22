@@ -111,9 +111,10 @@ class Purchase_order extends CI_Controller {
         $employeeID            = $this->input->post("employeeID") ?? null;
         $purchaseRequestID     = $this->input->post("purchaseRequestID") ?? null;
         $bidRecapID            = $this->input->post("bidRecapID") ?? null;
-        $projectID             = $this->input->post("projectID") ?? null;
+        $timelineBuilderID     = $this->input->post("timelineBuilderID") ?? null;
         $projectCode           = $this->input->post("projectCode") ?? null;
         $projectName           = $this->input->post("projectName") ?? null;
+        $projectCategory       = $this->input->post("projectCategory") ?? null;
         $clientName            = $this->input->post("clientName") ?? null;
         $clientAddress         = $this->input->post("clientAddress") ?? null;
         $inventoryVendorID     = $this->input->post("inventoryVendorID") ?? null;
@@ -150,9 +151,10 @@ class Purchase_order extends CI_Controller {
             "employeeID"            => $employeeID,
             "purchaseRequestID"     => $purchaseRequestID,
             "bidRecapID"            => $bidRecapID,
-            "projectID"             => $projectID,
+            "timelineBuilderID"     => $timelineBuilderID,
             "projectCode"           => $projectCode,
             "projectName"           => $projectName,
+            "projectCategory"       => $projectCategory,
             "clientName"            => $clientName,
             "clientAddress"         => $clientAddress,
             "inventoryVendorID"     => $inventoryVendorID,
