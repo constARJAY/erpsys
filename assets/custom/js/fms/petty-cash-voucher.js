@@ -16,7 +16,7 @@ $(document).ready(function() {
 
      const pettyCashRequestData = getTableData(`fms_petty_cash_request_tbl AS fpcrt JOIN fms_liquidation_tbl USING(pettyCashRequestID)`,
                                                 `fpcrt.*, fms_liquidation_tbl.liquidationID`,
-                                                `pettyCashRequestStatus = 2 `,`fpcrt.createdAt DESC`);
+                                                `pettyCashRequestStatus = 2 `,``,`fpcrt.pettyCashRequestID`);
 
     const pettyCashFinanceRequest = getTableData(`fms_finance_request_details_tbl`, ``,`pettyRepID IS NOT NULL`);
 
@@ -45,6 +45,7 @@ $(document).ready(function() {
 					{ targets: 6,  width: 150 },
 					{ targets: 7,  width: 150 }
 				],
+                order: [[ 0, "desc" ]]
 			});
 	}
 	// ----- END DATATABLES -----
@@ -185,13 +186,13 @@ $(document).ready(function() {
             designation: employeeDesignation = "",
         } = employeeData(createdBy);
         // ----- END GET EMPLOYEE DATA -----
-        
-        let voucherData        = getTableData(`fms_finance_request_details_tbl LEFT JOIN fms_liquidation_tbl USING(liquidationID)`, ``, `fms_liquidation_tbl.pettyCashRequestID = '${pettyCashRequestID}'`);
+            console.log(pettyCashRequestID)
+        let voucherData        = getTableData(`fms_finance_request_details_tbl as fpcrt LEFT JOIN fms_liquidation_tbl USING(liquidationID)`, ``, `fms_liquidation_tbl.pettyCashRequestID = '${pettyCashRequestID}'`,``,``);
         let voucherDescription = ``, voucherAmount =``, voucherTotalAmount = 0, voucherDataLength = voucherData.length; 
         voucherData.map((items, index) => {
             var breakLine = voucherDataLength != index ? `<br>`:``;
             var totalAmount = parseFloat(items.quantity) * parseFloat(items.amount);
-            voucherDescription += `<span>${items.description} (${items.quantity}x)</span>${breakLine}`;
+            voucherDescription += `<span>${items.description} (${items.quantity}x)</span><span class="float-right">${formatAmount(items.amount, true)}</span>${breakLine}`;
             voucherAmount      += `<span>${formatAmount(totalAmount, true)}</span>${breakLine}`;
             voucherTotalAmount += parseFloat(totalAmount)
         });
