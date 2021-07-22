@@ -2,19 +2,17 @@ $(document).ready(function () {
     const thisURL       = window.document.URL;
     const isEdit        = thisURL.split("?edit_id=");
     const isAdd         = thisURL.split("?");
-    const milestoneBuilderData = getTableData("pms_milestone_builder_tbl JOIN pms_category_tbl USING(categoryID)","pms_milestone_builder_tbl.*, pms_category_tbl.categoryName AS categoryName");
+    const projectCatergotyData = getTableData(`pms_category_tbl`,``,`categoryStatus = '1'`);
+    const milestoneBuilderData = getTableData("pms_milestone_builder_tbl JOIN pms_category_tbl USING(categoryID)","pms_milestone_builder_tbl.*, pms_category_tbl.categoryName AS categoryName, pms_category_tbl.categoryShortcut AS categoryShortcut");
     const projectMilestoneData = getTableData("pms_project_milestone_tbl", "projectMilestoneID,projectMilestoneName", "projectMilestoneStatus = 1" );
                 
 
     if(isEdit.length >= 2){
         var thisID = decryptString(isEdit[1]);
-        console.log(isEdit);
         pageContent(true, thisID);
     }else if(isAdd[1] == "add"){
-        console.log(isAdd);
         pageContent(true);
     }else{
-        console.log("TANGINA");
         pageContent();
     }
 
@@ -475,12 +473,16 @@ $(document).ready(function () {
 		if (id) {
 			data["milestoneBuilderID"] = id;
 		}
-
-        data["categoryID"]        = $("#projectCategory").val();
+        var categoryID            = $("#projectCategory").val();
+        var phaseTableData        = projectCatergotyData.filter(items => items.categoryID == categoryID)
+        var categoryShortcut      = phaseTableData[0].categoryShortcut;
+        var categoryLength        = phaseTableData.length > 0 ? parseFloat(phaseTableData.length) + 1 : 1;
+        var phaseCode             = getPhaseCode(categoryShortcut,categoryLength);
+        data["categoryID"]        = categoryID;
         data["phaseDescription"]  = $("#phaseDescription").val();
         data["createdBy"]         = sessionID;
 		data["updatedBy"]         = sessionID;
-
+        data["phaseCode"]         = phaseCode;
 			$(".milestone-list-row").each(function(i, obj) {
                 var thisTaskName = $(this).find("[name=tasksName]");
 				var temp = {
@@ -632,8 +634,8 @@ $(document).ready(function () {
             var str = '';
             
             for (var i of Object.keys(roman)) {
-                var q = Math.floor(num / roman[i]);
-                num -= q * roman[i];
+                var q = Math.floor(number / roman[i]);
+                number -= q * roman[i];
                 str += i.repeat(q);
             }
             

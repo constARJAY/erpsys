@@ -21,19 +21,30 @@ class Milestone_builder extends CI_Controller {
 
     public function saveMilestoneBuilder()
     {
-        $milestoneBuilderID  = $this->input->post("milestoneBuilderID");
+        $milestoneBuilderID  = $this->input->post("milestoneBuilderID") ?? null;
         $categoryID          = $this->input->post("categoryID");
+        $phaseCode           = $this->input->post("phaseCode");
         $phaseDescription    = $this->input->post("phaseDescription");
         $createdBy           = $this->input->post("createdBy");
         $updatedBy           = $this->input->post("updatedBy");
         $list                = $this->input->post("list");
-
-        $milestoneBuilderData = [
-            "categoryID"       => $categoryID,
-            "phaseDescription" => $phaseDescription,
-            "createdBy"        => $createdBy,
-            "updatedBy"        => $updatedBy,
-        ];
+        if($milestoneBuilderID ){
+            $milestoneBuilderData = [
+                "categoryID"       => $categoryID,
+                "phaseDescription" => $phaseDescription,
+                "createdBy"        => $createdBy,
+                "updatedBy"        => $updatedBy,
+            ];
+        }else{
+            $milestoneBuilderData = [
+                "categoryID"       => $categoryID,
+                "phaseCode"        => $phaseCode,
+                "phaseDescription" => $phaseDescription,
+                "createdBy"        => $createdBy,
+                "updatedBy"        => $updatedBy,
+            ];
+        }
+        
         $saveMilestoneBuilderData = $this->milestone_builder->saveMilestoneBuilderData($milestoneBuilderData, $milestoneBuilderID);
         if ($saveMilestoneBuilderData) {
             $result = explode("|", $saveMilestoneBuilderData);

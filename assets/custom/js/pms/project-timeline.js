@@ -812,7 +812,7 @@ $(document).ready(function() {
         $("[name=projectCode]").val(projectCode);
         $("[name=projectCategory]").val(projectCategory);
 		// if(!thisValue){
-			var row = listOfProjectPhase("","",projectCategoryID);
+			var row = listOfProjectPhase("","",thisValue);
 			$(".timelineBuilderTableBody").html(row);
 		// }
 		updateTableRows();
@@ -843,8 +843,10 @@ $(document).ready(function() {
 	});
 
 	$(document).on("click", "#btnAddRow", function(){
-		var projectCategoryID = $('option:selected', $("#projectID")).attr("projectCategoryID");
-		let row = listOfProjectPhase("","",projectCategoryID);
+		// var projectCategoryID = $('option:selected', $("#projectID")).attr("projectCategoryID");
+	 	var projectID = $("#projectID").val();
+		
+		let row = listOfProjectPhase("","", projectID);
 		$(".timelineBuilderTableBody").append(row);  
 		updateTableRows();
 		updateTableTaskList()
@@ -1095,6 +1097,7 @@ $(document).ready(function() {
 					</div>
 				</div>
 			</div>
+			
 			<div class="col-md-4 col-sm-12">
 				<div class="form-group">
 					<label>Project Code ${!disabled ? "<code>*</code>" : ""}</label>
@@ -1340,7 +1343,7 @@ $(document).ready(function() {
 	}
 	// ----- END FORM CONTENT -----
 
-	function listOfProjectPhase(id = null, readOnly = false, projectCategoryID = null){
+	function listOfProjectPhase(id = null, readOnly = false, projectID = null){
 		let html = ``, tableData = [], projectTaskButtons = false;
 		if(id){
 			 tableData = getTableData(`pms_timeline_task_list_tbl JOIN pms_timeline_builder_tbl USING(timelineBuilderID) `,
@@ -1405,7 +1408,7 @@ $(document).ready(function() {
 			});
 			projectTaskButtons = readOnly ? false : true;
 		}else{
-			if(projectCategoryID){
+			if(projectID){
 				html += `<tr class="task-list-row">
 					${!readOnly ? 
 						`<td class="text-center">
@@ -1420,7 +1423,7 @@ $(document).ready(function() {
 									style="width: 100%"
 									required
 									${readOnly ? "disabled" : ``} required>
-									${milestoneSelect(projectCategoryID)}
+									${milestoneSelect(projectID)}
 							</select>
 							<div class="invalid-feedback d-block" id="invalid-phaseDescription0"></div>
 
