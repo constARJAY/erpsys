@@ -932,7 +932,7 @@ $(document).ready(function() {
 				</td>
 				<td>
 				<div class="basequantityandamount text-right">
-					<span class="basequantityandamount" id="basequantityandamount" name="basequantityandamount"> </span>
+					<span class="basequantityandamount" id="basequantityandamount" name="basequantityandamount">${formatAmount(totalAmount, true)}</span>
 				</div>
 				</td>
 				<td>

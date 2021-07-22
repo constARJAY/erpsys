@@ -1,3 +1,12 @@
+<style>
+.has-error {
+    border-color: #db3c36 !important;
+}
+.no-error {
+    border-color: #09a561 !important;
+}
+</style>
+
 <div class="body_area after_bg">
 	<div class="block-header">
 		<div class="container">
@@ -28,21 +37,20 @@
                             
                             <div class="col-sm-12 col-md-4">
                                 <div class="form-group">
-                                    <label>Classification Name </label>
+                                    <label>Classification Name <code>*</code></label>
                                     <select
-                                        class="form-control select2 validate"
+                                        class="form-control select2 validate input_classificationID"
                                         id="input_classificationID"
                                         name="classificationID"
                                         style="width: 100%"
                                         required>
-                                        <option selected disabled>Select Item Classification</option>
                                     </select>
                                     <div class="invalid-feedback d-block" id="invalid-input_classificationID"></div>
                                 </div>
                             </div>    
                             <div class="col-sm-12 col-md-4">
                                 <div class="form-group">
-                                    <label>Category Name </label>
+                                    <label>Category Name <code>*</code></label>
                                     <select
                                         class="form-control select2 validate"
                                         id="input_categoryID"
@@ -116,8 +124,8 @@
     const data = getTableData("ims_inventory_classification_tbl", 
         "classificationID ,classificationName", "classificationStatus = 1", "");
       
-            let html = ` <option value="0" ${!param && "selected"}>All</option>`;
-          
+            let html =`<option selected disabled>Select Item Classification</option>
+                       <option value="0">All</option>`;
             data.map((item, index, array) => {
                 html += `<option value="${item.classificationID}" ${param && item.classificationID == param[0].classificationID && "selected"}>${item.classificationName}</option>`;
             })
@@ -133,8 +141,10 @@
     let paramCondition = param == false ? "":" AND classificationID="+param;
 
     const data = getTableData("ims_inventory_category_tbl", "categoryID ,categoryName", "categoryStatus = '1'"+paramCondition, "");
-        
-            let html = ` <option value="" disabled ${condition == "add" ? "selected": ""}>Select Item Category</option>`;
+
+            let html =`<option selected disabled>Select Category Name</option>
+                     <option value="0">All</option>`;
+            //let html = ` <option value="" disabled ${condition == "add" ? "selected": ""}>Select Item Category</option>`;
             if(param != false){
                     data.map((item, index, array) => {
                     html += `<option value="${item.categoryID}" ${item.classificationID == param && condition != "add" ? "selected":""}>${item.categoryName}</option>`;

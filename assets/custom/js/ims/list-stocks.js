@@ -86,28 +86,34 @@ $(document).ready(function(){
   
     // ----- END DATATABLES -----
 
-
-    
     $(document).on("click", "#btnSearch", function() {
         var classificationID    =$("#input_classificationID").val();
         var categoryID          = $("#input_categoryID").val();
-       // var inventoryStorageID  = $("#input_inventoryStorageID").val();
-       // initDataTables();
-        tableContent(classificationID,categoryID);          
-    });
-    $(document).on("click",".priceListRow-show-more",function(){
-        let target = $(this).attr("target");
-        if($(target).hasClass("hide")){
-            $(this).find("i").addClass("zmdi-caret-up").removeClass("zmdi-caret-down");
-            $(this).find("span").text("Hide");
-            $(target).show(550);
-            $(target).addClass("show").removeClass("hide");
-        }else{
-            $(this).find("i").addClass("zmdi-caret-down").removeClass("zmdi-caret-up");;
-            $(this).find("span").text("Show More");
-            $(target).hide(550);
-            $(target).addClass("hide").removeClass("show");
-        }
+        var countErrors   = 0;
+       if(classificationID ===null){
+        $("[aria-labelledby='select2-input_classificationID-container']").removeClass("no-error").addClass('has-error');
+        $("#invalid-input_classificationID").html("Please select data");
+        countErrors++;
+       }else{
+        $("[aria-labelledby='select2-input_classificationID-container']").removeClass("has-error").addClass("no-error");
+        $("#invalid-input_classificationID").html("");
+        //tableContent(classificationID,categoryID);  
+       }
+       if(categoryID ===null){
+        $("[aria-labelledby='select2-input_categoryID-container']").removeClass("no-error").addClass('has-error');
+        $("#invalid-input_input_categoryID").html("Please select data");
+        countErrors++;
+       }else{
+        $("[aria-labelledby='select2-input_categoryID-container']").removeClass("has-error").addClass("no-error");
+        $("#invalid-input_input_categoryID").html("");
+       }
+       if (countErrors > 0) {
+        //showErrorToast("Please fill in required fields");
+        return false;
+       }else{
+        tableContent(classificationID,categoryID);
+       } 
+
     });
     function tableContent(classificationID,categoryID){
     //    / var data =[];
@@ -124,11 +130,7 @@ $(document).ready(function(){
             beforeSend: function() {
             $("#table_content").html(preloader);
             },
-         
             success: function(data) {
-
-            
-                
                           let html = `
                              <table class="table table-bordered table-striped table-hover" id="tableListStocks">
                              <thead>

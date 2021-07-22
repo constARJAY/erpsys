@@ -11,9 +11,14 @@ class ListStock_model extends CI_Model {
         
        
         if($classificationID =="0"){
-            $where ="WHERE";
+            $where ='WHERE';
         }else{
-            $where = "WHERE iii.classificationID = '$classificationID' AND iii.categoryID = '$categoryID' AND";
+            $where = "WHERE iii.classificationID = '$classificationID' AND";
+        }
+        if($categoryID =="0"){
+            $AND = "";
+        }else{
+            $AND  = "iii.categoryID ='$categoryID' AND";
         }
         $sql = "
         SELECT itemID, inventoryStorageID, itemCode,itemName,itemClassification,UOM,barcode,storageCode,StorageName,
@@ -32,7 +37,7 @@ class ListStock_model extends CI_Model {
             LEFT JOIN ims_inventory_item_tbl AS iii ON isit.itemID =iii.itemID 
             LEFT JOIN ims_inventory_classification_tbl AS iic ON iii.classificationID =iic.classificationID 
             LEFT JOIN ims_inventory_storage_tbl AS iis ON isit.inventoryStorageID = iis.inventoryStorageID 
-           $where  isi.stockInStatus = 0
+            $where  $AND isi.stockInStatus = 0
             GROUP BY stockInTotalID,isit.itemID 
             /* stock_in end */
             UNION  ALL 
@@ -44,7 +49,7 @@ class ListStock_model extends CI_Model {
             FROM ims_material_usage_tbl AS  imu
             LEFT JOIN ims_material_withdrawal_details_tbl AS imwd ON imwd.materialUsageID = imu.materialUsageID
             LEFT JOIN ims_inventory_item_tbl AS iii ON imwd.itemID =iii.itemID 
-            $where imu.materialUsageStatus = 2 
+            $where  $AND imu.materialUsageStatus = 2 
             GROUP BY imwd.itemID, imwd.inventoryStorageID
             /* End material_usage */
             UNION ALL
@@ -56,7 +61,7 @@ class ListStock_model extends CI_Model {
             FROM ims_material_withdrawal_tbl AS  imu
             LEFT JOIN ims_material_withdrawal_details_tbl AS imwd ON imwd.materialWithdrawalID = imu.materialWithdrawalID
             LEFT JOIN ims_inventory_item_tbl AS iii ON imwd.itemID =iii.itemID 
-            $where imu.materialWithdrawalStatus = 2  AND materialUsageID is null
+            $where  $AND imu.materialWithdrawalStatus = 2  AND materialUsageID is null
             GROUP BY imwd.itemID, imwd.inventoryStorageID
             /* End material Withdrawal */
             UNION ALL
@@ -68,7 +73,7 @@ class ListStock_model extends CI_Model {
             from ims_borrowing_tbl AS ib
             LEFT JOIN ims_borrowing_details_tbl AS ibd ON ibd.borrowingID = ib.borrowingID
             LEFT JOIN ims_inventory_item_tbl AS iii ON ibd.itemID =iii.itemID 
-            $where borrowingStatus = 2 
+            $where  $AND borrowingStatus = 2 
             GROUP BY ibd.itemID, ibd.inventoryStorageID
             /*End borrowing query */
             UNION ALL
@@ -80,7 +85,7 @@ class ListStock_model extends CI_Model {
             from ims_return_item_tbl AS iri
             LEFT JOIN ims_return_item_details_tbl AS irid ON iri.returnItemID = irid.returnItemID
             LEFT JOIN ims_inventory_item_tbl AS iii ON irid.itemID =iii.itemID 
-            $where iri.returnItemStatus = 2 
+            $where  $AND iri.returnItemStatus = 2 
             GROUP BY irid.itemID, irid.inventoryStorageID
             /* End return query*/
             UNION ALL
@@ -92,7 +97,7 @@ class ListStock_model extends CI_Model {
             FROM ims_inventory_disposal_tbl AS iid
             LEFT JOIN ims_inventory_disposal_details_tbl AS iidd ON iid.disposalID = iidd.disposalID
             LEFT JOIN ims_inventory_item_tbl AS iii ON iidd.itemID =iii.itemID 
-            $where iid.disposalStatus = 2 
+            $where  $AND iid.disposalStatus = 2 
             GROUP BY iidd.itemID,iidd.inventoryStorageID
         )a GROUP BY itemID,inventoryStorageID";
         return $this->db->query($sql)->result_array();

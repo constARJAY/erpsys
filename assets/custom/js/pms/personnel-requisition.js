@@ -175,9 +175,9 @@ $(document).ready(function() {
 					{ targets: 3,  width: 150 },
 					{ targets: 4,  width: 250 },
 					{ targets: 5,  width: 150 },
-					{ targets: 6,  width: 180 },
+					{ targets: 6,  width: 250 },
 					{ targets: 7,  width: 80  },
-					{ targets: 8, width: 220 },
+					{ targets: 8, width: 250 },
 				],
 			});
 
@@ -197,9 +197,9 @@ $(document).ready(function() {
 					{ targets: 3,  width: 150 },
 					{ targets: 4,  width: 250 },
 					{ targets: 5,  width: 150 },
-					{ targets: 6,  width: 180 },
+					{ targets: 6,  width: 250 },
 					{ targets: 7,  width: 80  },
-					{ targets: 8, width: 220 },
+					{ targets: 8, width: 250 },
 				],
 			});
 	}
@@ -277,8 +277,8 @@ $(document).ready(function() {
 
 		let html = `
         <table class="table table-bordered table-striped table-hover" id="tableForApprroval">
-            <thead>
-                <tr style="white-space: nowrap">
+            <thead >
+                <tr>
 					<th>Document No.</th>
 					<th>Prepared By</th>
 					<th>Open Designation</th>
@@ -395,7 +395,7 @@ $(document).ready(function() {
 		let html = `
         <table class="table table-bordered table-striped table-hover" id="tableMyForms">
             <thead>
-                <tr style="white-space: nowrap">
+                <tr>
 					<th>Document No.</th>
 					<th>Prepared By</th>
 					<th>Open Designation</th>
@@ -434,7 +434,6 @@ $(document).ready(function() {
 			}
 
 			let btnClass = requisitionStatus != 0 ? "btnView" : "btnEdit";
-
 			let button = requisitionStatus != 0 ? `
             <button class="btn btn-view w-100 btnView" id="${encryptString(requisitionID)}"><i class="fas fa-eye"></i> View</button>` : `
             <button 
@@ -451,7 +450,7 @@ $(document).ready(function() {
 							${designationName || '-'}
 						</div>
 						<small style="color:#848482;">${departmentName || '-'}</small>
-					</td>
+				</td>
 				<td>${natureRequest || '-'}</td>
 				<td>${personnelDescription || '-'}</td>
                 <td>
@@ -1793,9 +1792,9 @@ $(document).ready(function() {
 		const id       = $(this).attr("requisitionID");
 		const feedback = $(this).attr("code") || getFormCode("PRF", dateToday(), id);
 
-		$("#modal_purchase_request_content").html(preloader);
-		$("#modal_purchase_request .page-title").text("DENY PERSONNEL REQUISITION");
-		$("#modal_purchase_request").modal("show");
+		$("#modal_personnel_requisition_content").html(preloader);
+		$("#modal_personnel_requisition .page-title").text("DENY PERSONNEL REQUISITION");
+		$("#modal_personnel_requisition").modal("show");
 		let html = `
 		<div class="modal-body">
 			<div class="form-group">
@@ -1818,14 +1817,14 @@ $(document).ready(function() {
 			code="${feedback}"><i class="far fa-times-circle"></i> Deny</button>
 			<button class="btn btn-cancel px-5 p-2" data-dismiss="modal"><i class="fas fa-ban"></i> Cancel</button>
 		</div>`;
-		$("#modal_purchase_request_content").html(html);
+		$("#modal_personnel_requisition_content").html(html);
 	});
 
 	$(document).on("click", "#btnRejectConfirmation", function () {
 		const id       = decryptString($(this).attr("requisitionID"));
 		const feedback = $(this).attr("code") || getFormCode(" PRF", dateToday(), id);
 
-		const validate = validateForm("modal_purchase_request");
+		const validate = validateForm("modal_personnel_requisition");
 		if (validate) {
 			let tableData = getTableData("pms_personnel_requisition_tbl", "", "requisitionID = " + id);
 			if (tableData) {
@@ -1935,7 +1934,7 @@ function getConfirmation(method = "submit") {
 	const title = "Personnel Requisition";
 	let swalText, swalImg;
 
-	$("#modal_purchase_request").text().length > 0 && $("#modal_purchase_request").modal("hide");
+	$("#modal_personnel_requisition").text().length > 0 && $("#modal_personnel_requisition").modal("hide");
 
 	switch (method) {
 		case "save":
@@ -2085,11 +2084,11 @@ function savePurchaseRequest(data = null, method = "submit", notificationData = 
 					if (method != "deny") {
 						callback && callback();
 					} else {
-						$("#modal_purchase_request").text().length > 0 && $("#modal_purchase_request").modal("show");
+						$("#modal_personnel_requisition").text().length > 0 && $("#modal_personnel_requisition").modal("show");
 					}
 				} else if (res.isDismissed) {
 					if (method == "deny") {
-						$("#modal_purchase_request").text().length > 0 && $("#modal_purchase_request").modal("show");
+						$("#modal_personnel_requisition").text().length > 0 && $("#modal_personnel_requisition").modal("show");
 					}
 				}
 			}

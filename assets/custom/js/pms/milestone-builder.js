@@ -240,7 +240,7 @@ $(document).ready(function () {
                         <div class="text-primary font-weight-bold mb-2" >
                             <div class="row">
                                 <div class="col-md-6 col-sm-12">
-                                    <label>Phase Category <code>*</code></label>
+                                    <label>Project Category <code>*</code></label>
                                     <select class="form-control form-control-sm select2 validate" unique="${milestoneBuilderID}"
                                         name="categoryID"
                                         id="projectCategory"
@@ -463,7 +463,7 @@ $(document).ready(function () {
 			});
 			
 		} else {
-			showNotification("danger", "You must have atleast one or more items.");
+			showNotification("danger", "You must have at least one or more row.");
 		}
     }
 

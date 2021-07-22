@@ -608,7 +608,7 @@ $(document).ready(function() {
                                 min="0.1" 
                                 max="999999" 
                                 minlength="1" 
-                                maxlength="20" 
+                                maxlength="7" 
                                 name="proposedBudget" 
                                 id="proposedBudget" 
                                 value="${proposedBudget}"

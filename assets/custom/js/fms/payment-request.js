@@ -93,7 +93,7 @@ $(document).ready(function() {
 	employeeBarangay,employeeCity,employeeProvince,employeeCountry,employeeZipCode,departmentName,designationName`,
 	queryCondition2);
 
-	var condition = purchaseOrderList.length < replenishmentList.length ? purchaseOrderList : replenishmentList;
+	var condition = purchaseOrderList.length < replenishmentList.length ? replenishmentList  : purchaseOrderList ;
 		condition.map(items=>{
 			purchaseOrderList.push(items);
 		})

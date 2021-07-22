@@ -14,7 +14,7 @@
                     <ul class="breadcrumb pl-0 pb-0 ">
                         <li class="breadcrumb-item"><a href="#"><i class="zmdi zmdi-home"></i> Dashboard</a></li>
 						<li class="breadcrumb-item"><i class="fas fa-folder-open"></i>&nbsp;Project Modules</li>
-                        <li class="breadcrumb-item active">Cost Estimate</li>
+                        <li class="breadcrumb-item active">Project Timeline Builder</li>
                     </ul>
                     <h1 class="mt-3">Project Timeline Builder</h1>
                     <span>This module is used to manage the submission and approval of project timelines.</span>

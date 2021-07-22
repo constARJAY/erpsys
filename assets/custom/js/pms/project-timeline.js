@@ -135,7 +135,8 @@ $(document).ready(function() {
 		return moment(new Date).format("YYYY-MM-DD HH:mm:ss");
 	};
 
-	const employeeList = getTableData("hris_employee_list_tbl", "CONCAT(employeeLastname,', ',employeeFirstname,' ',employeeMiddlename) AS employeeFullname, employeeID");
+	const employeeList = getTableData("hris_employee_list_tbl", "CONCAT(employeeLastname,', ',employeeFirstname,' ',employeeMiddlename) AS employeeFullname, employeeID",
+	`employeeStatus != 0 AND employeeStatus != 3 AND employeeStatus != 4 AND employeeStatus != 5 AND employeeStatus != 6`);
 	
 	const projectList = getTableData("pms_project_list_tbl JOIN pms_category_tbl USING(categoryID) JOIN pms_milestone_builder_tbl USING(categoryID)", 
 							"pms_project_list_tbl.*, pms_category_tbl.categoryName AS projectCategory ",
@@ -363,9 +364,15 @@ $(document).ready(function() {
 				id="${encryptString(timelineBuilderID)}" 
 				code="${getFormCode("PBT", createdAt, timelineBuilderID )}"><i class="fas fa-edit"></i> Edit</button>`;
 			let projectCategory = projectID && projectList.filter(items=> items.projectListID == projectID).map(items=>{return items.projectCategory});
-			let budgetStatus = timelineBudgetStatus == 0 ? 
+			let budgetStatus = ``;
+
+			if(timelineBuilderStatus != 6 && timelineBuilderStatus != 1 && timelineBuilderStatus != 2){
+				 budgetStatus = `-`;
+			}else{
+				 budgetStatus = timelineBudgetStatus == 0 ? 
                 `<span class="badge badge-outline-info w-100">For Proposal</span>` :
                 `<span class="badge badge-outline-success w-100" style="width: 100% !important">Allocated</span>`;
+			}
 			if (isImCurrentApprover(approversID, approversDate, timelineBuilderStatus) || isAlreadyApproved(approversID, approversDate)) {
 				html += `
 				<tr class="${btnClass}" id="${encryptString(timelineBuilderID )}">
@@ -478,9 +485,16 @@ $(document).ready(function() {
                 code="${getFormCode("PBT", createdAt, timelineBuilderID )}"><i class="fas fa-edit"></i> Edit</button>`;
 				
 			let projectCategory = projectID && projectList.filter(items=> items.projectListID == projectID).map(items=>{return items.projectCategory});
-			let budgetStatus = timelineBudgetStatus == 0 ? 
+			let budgetStatus = ``;
+
+			if(timelineBuilderStatus != 6 && timelineBuilderStatus != 1 && timelineBuilderStatus != 2){
+				 budgetStatus = `-`;
+			}else{
+				 budgetStatus = timelineBudgetStatus == 0 ? 
                 `<span class="badge badge-outline-info w-100">For Proposal</span>` :
                 `<span class="badge badge-outline-success w-100" style="width: 100% !important">Allocated</span>`;
+			}
+			
 			html += `
 			<tr class="${btnClass}" id="${encryptString(timelineBuilderID )}">
 				<td>${getFormCode("PBT", createdAt, timelineBuilderID )}</td>
@@ -1229,7 +1243,7 @@ $(document).ready(function() {
 					</div>
 					<div class="col-md-6 col-sm-12">
 						<div class="form-group">
-							<label>Team Member ${!disabled ? "<code>*</code>" : ""}</label>
+							<label>Team Members ${!disabled ? "<code>*</code>" : ""}</label>
 							<select class="form-control validate select2"  multiple="multiple"
 								name="timelineTeamMember"
 								id="timelineTeamMember"
@@ -1455,7 +1469,7 @@ $(document).ready(function() {
 								</tbody>
 							</table>
 							<div class="w-100 text-left my-2" id="taskListButtons">
-								<button class="btn btn-primary btnSubAddRow" type="button" id="btnSubAddRow"><i class="fas fa-plus"></i></button>
+								<button class="btn btn-primary btnSubAddRow" type="button" id="btnSubAddRow" style="margin-left: 30px;"><i class="fas fa-plus"></i></button>
 							</div>
 						</td>
 					</tr>`;
@@ -1530,7 +1544,7 @@ $(document).ready(function() {
 								id="taskRemarks${index}"  
 								value = "${items.taskRemarks}"
 								data-allowcharacters="[a-z][A-Z][0-9][.][,][?][!][/][;][:][-][_][()][%][&][*][ ][']['']"
-								${readOnly ? "disabled" : ``} required>
+								${readOnly ? "disabled" : ``}>
 							<div class="invalid-feedback d-block" id="invalid-taskRemarks${index}"></div>
 						</td>
 				</tr>`;
@@ -1587,7 +1601,7 @@ $(document).ready(function() {
 								id="taskRemarks0"  
 								value = ""
 								data-allowcharacters="[a-z][A-Z][0-9][.][,][?][!][/][;][:][-][_][()][%][&][*][ ][']['']"
-								${readOnly ? "disabled" : ``} required>
+								${readOnly ? "disabled" : ``}>
 							<div class="invalid-feedback d-block" id="invalid-taskRemarks0"></div>
 						</td>
 				</tr>`;

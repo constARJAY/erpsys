@@ -110,7 +110,6 @@ $(document).ready(function() {
 				var pettyCashDate = ids[3];
 				var pettyCashAmount = ids[4];
 				var pettycashChartOfAccountID =ids[5];
-			
 				let itemProjectTableBody = formContent('','','','', liquidationDataID, pettycashCode, pettyCashDate, pettyCashAmount, pettycashChartOfAccountID);
 			
 				if (arr.length > 1) {
@@ -154,6 +153,7 @@ $(document).ready(function() {
 		"pms_client_tbl", 
 		"clientID , clientCode, clientName",
 		"	clientStatus = 1");
+		
 	// END GLOBAL VARIABLE - REUSABLE 
 
 
@@ -797,7 +797,7 @@ $(document).ready(function() {
 	}
 	// ----- END GET NON FORMAT AMOUNT -----
 
-
+	var count = 0;
 	// ----- GET ITEM ROW -----
     function getItemRow(pettyCashID, isProject = true, item = {}, readOnly) {
 		// var count  = 0;
@@ -823,6 +823,7 @@ $(document).ready(function() {
 		// 		$(this).select2({ theme: "bootstrap" });
 		// });
 		//var count =0;
+		
 		let {
 			liquidationID                    							= "",
 			description                               					= "",
@@ -837,8 +838,8 @@ $(document).ready(function() {
 			financeRequestID											="",
 			files														="",
 		} = item;
+		++count;
 		
-
 		let html = "";
 		if (readOnly) {
 			
@@ -910,9 +911,9 @@ $(document).ready(function() {
 				<div>
 				<select
 					class="form-control select2 clientID"
-					data-allowcharacters="[0-9][a-z][A-Z][.][,][?][!][/][;][:][''][-][_][(][)][%][&][*][ ]"
 					name="clientID"
-					id="clientID">
+					id="clientID${count}"
+					style="width:100%">
 					${getClient(clientID)}
 				</select>
 					<div class="invalid-feedback d-block" id="invalid-clientID"></div>
@@ -1050,7 +1051,7 @@ $(document).ready(function() {
 	function formContent(data = false, readOnly = false, isRevise = false, isFromCancelledDocument = false,liquidationDataID, pettycashCode, pettyCashDate, pettyCashAmount, pettycashChartOfAccountID) {
 		
 		$("#page_content").html(preloader);
-		
+		let pettyCashChartOfAccountID = '0';
 		// if (!$(this).hasClass("select2-hidden-accessible")) {
 		// 	$(this).select2({ theme: "bootstrap" });
 		// }
@@ -1061,42 +1062,36 @@ $(document).ready(function() {
 
 		
 		//var pcrreadOnly = false;
-		if(pettycashChartOfAccountID =="0"){
-			//var pcChartOfAccountID = 
-		}else{
-			//document.getElementById("chartOfAccountID").disabled = true;
-			$('#chartOfAccountID').attr('disabled', false);
-			
-			//$("#chartOfAccountID").attr('disabled', 'disabled');
-		}
+	
 		let readPettyCashChartofAccount = false;
-		let pettyCashChartOfAccountID = '';
+		
 		let {
-			liquidationID      			= "",
-			reviseLiquidationID 		= "",
-			pettyCashRequestID			="",
-			liquidationPurpose			="",
-			employeeID              	= "",
-			projectTotalAmount      	= "0",
-			clientFundRequestDate		="",
-			companyTotalAmount      	= "0",
-			liquidationRemarks  	= "",
-			approversID             = "",
-            projectID               ="",
-			ClientFundRequestAmount	= "0",
-			liquidationReferenceNumber ="",
-			liquidationExpenses			="",
-			liquidationBudget			="",
-			liquidationExcessOrShortage	="",
-			liquidationDispositionofExcessOrShortage="",
-			liquidationDate			="",
-			approversStatus         = "",
-			approversDate           = "",
-			liquidationVatAmount	="0",
-			chartOfAccountID		="",
-			liquidationStatus   	= false,
-			submittedAt             = false,
-			createdAt               = false,
+			liquidationID 									= "",
+				reviseLiquidationID 						= "",
+				pettyCashRequestID 							= "",
+				liquidationPurpose 							= "",
+				employeeID 									= "",
+				projectTotalAmount 							= "0",
+				clientFundRequestDate 						= "",
+				companyTotalAmount 							= "0",
+				liquidationRemarks 							= "",
+				approversID 								= "",
+				projectID 									= "",
+				ClientFundRequestAmount 					= "0",
+				liquidationReferenceNumber 					= "",
+				liquidationExpenses 						= "",
+				liquidationBudget 							= "",
+				liquidationExcessOrShortage 				= "",
+				liquidationDispositionofExcessOrShortage 	= "",
+				liquidationDate 							= "",
+				approversStatus 							= "",
+				approversDate 								= "",
+				liquidationVatAmount 						= "0",
+				chartOfAccountID 							= "",
+				clientID 									= "",
+				liquidationStatus 							= false,
+				submittedAt 								= false,
+				createdAt 									= false,
 		} = data && data[0];
 
 
@@ -1106,6 +1101,7 @@ $(document).ready(function() {
 			}else{
 				pettyCashID = liquidationDataID;
 				pettyCashChartOfAccountID = pettycashChartOfAccountID;
+				//$('.chartOfAccountID').prop("disabled", true);
 			}
 			
         let clientFundRequestItems = "";
@@ -1158,8 +1154,9 @@ $(document).ready(function() {
 				clientFundRequestItems += getItemRow(pettyCashID, true, item, false);
 				})
 				
+				
 		} 
-		
+		// $(".clientID").select2({ theme: "bootstrap"});
 		let {
 			fullname:    employeeFullname    = "",
 			department:  employeeDepartment  = "",
@@ -1324,13 +1321,14 @@ $(document).ready(function() {
 					<div class="d-block invalid-feedback" id="invalid-liquidationPurpose"></div>
 				</div>
 				</div>
-
+			
 				<div class="col-md-6 col-sm-12">
 					<div class="form-group">
 					<label>Chart of Account</label>
 						<select
-							class="form-control select2 "
+							class="form-control select2 chartOfAccountID"
 							name="chartOfAccountID"
+							disabled
 							id="chartOfAccountID"
 							style="width: 100%"
 							${disabled}>
@@ -1437,12 +1435,15 @@ $(document).ready(function() {
 			// 	if ($(this).hasClass("select2-hidden-accessible")) {
 			// 		$(this).select2("destroy");
 			// 	}
-			//$(".clientID").select2({ theme: "bootstrap"});
+			//$(".clientID").val(clientID).trigger("change");
+			
 			initAll();
 			updateInventoryItemOptions();
 			//!liquidationID && liquidationID == 0 && $("#liquidationDate").val(moment(new Date).format("MMMM DD, YYYY"));
             projectID && projectID != 0 && $("[name=projectID]").trigger("change");
-			$("td [name=clientID]").select2({ theme: "bootstrap"});
+			// clientID && clientID != 0 && $("[name=clientID]").trigger("change");
+			// $(".clientID").select2({ theme: "bootstrap"});
+			
 			// $(".clientID").find("select").each(function(i) {
 			// 	if ($(this).hasClass("select2-hidden-accessible")) {
 			// 		$(this).select2({ theme: "bootstrap" });
@@ -1476,6 +1477,7 @@ $(document).ready(function() {
 	    // ----- CLICK VATABLE -----
 		$(document).on("change", `#billingVat`, function() {
 			updateTotalAmount();
+			
 		})
 		// ----- END CLICK VATABLE -----
 	  // ----- UPDATE TOTAL AMOUNT -----
@@ -1492,6 +1494,7 @@ $(document).ready(function() {
         const isChecked = $(`#billingVat`).prop("checked");
         const vatAmount = isChecked ? (totalamount / 1.12 * 0.12) : 0;
         $("#liquidationVatAmount").text(formatAmount(vatAmount, true));
+		
 	}
 
     // ----- PAGE CONTENT -----

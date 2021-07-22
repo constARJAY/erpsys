@@ -1073,15 +1073,21 @@ $(document).ready(function() {
 									condition,``,`accountName`);
 		console.log(tableData);
 			tableData.map((items, index)=>{
-				var finalAmount = parseFloat(items.summaryTotal) - parseFloat(items.liquidationVatAmount);
-				totalAmount += parseFloat(items.summaryTotal);
-				totalVat += parseFloat(items.liquidationVatAmount);
-				grandTotal += parseFloat(finalAmount);
+				var liquidationVatAmount =0;
+				
+				if(items.liquidationVatAmount != null){
+					liquidationVatAmount  =items.liquidationVatAmount;
+				}
+
+				var finalAmount = parseFloat(items.summaryTotal  || 0) - parseFloat(liquidationVatAmount);
+				totalAmount += parseFloat(items.summaryTotal  || 0);
+				totalVat += parseFloat(liquidationVatAmount || 0) ;
+				grandTotal += parseFloat(finalAmount || 0) ;
 				html += `<tr style="white-space: nowrap">
 						<td>${items.accountName}</td>
-						<td class="text-right">${formatAmount(items.summaryTotal, true)}</td>
-						<td class="text-right">${formatAmount(items.liquidationVatAmount, true)}</td>
-						<td class="text-right">${formatAmount(finalAmount, true)}</td>
+						<td class="text-right">${formatAmount(items.summaryTotal || 0, true)}</td>
+						<td class="text-right">${formatAmount(liquidationVatAmount || 0, true)}</td>
+						<td class="text-right">${formatAmount(finalAmount || 0, true)}</td>
 					</tr>`;
 			});
 		setTimeout(() => {
