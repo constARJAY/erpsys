@@ -41,17 +41,18 @@ class Reservation_report extends CI_Controller {
 
     public function getReservationData()
     {
-        $timelineBuilderID = $this->input->post("timelineBuilderID");
+        $projectID = $this->input->post("projectID");
         $dateFrom = $this->input->post("dateFrom");
         $dateTo   = $this->input->post("dateTo");
-        echo json_encode($this->reservationreport->getReservationData($timelineBuilderID, $dateFrom, $dateTo));
+        echo json_encode($this->reservationreport->getReservationData($projectID, $dateFrom, $dateTo));
     }
 
     public function reservationReportExcel($data, $dateFrom, $dateTo) {
         $dateFromFn  = str_replace("-", "", $dateFrom);
         $dateToFn    = str_replace("-", "", $dateTo);
         $dateFn      = $dateFromFn."-".$dateToFn;
-        $dateDisplay = date("M d, Y", strtotime($dateFrom))." - ".date("M d, Y", strtotime($dateTo));
+        $dateDisplay = date("F d, Y", strtotime($dateFrom))." - ".date("F d, Y", strtotime($dateTo));
+        $projectName = count($data) > 0 ? $data[0]["projectName"] : "-";
         $fileName    = "ReservationReport_$dateFn.xlsx";
         $spreadsheet = new Spreadsheet();
         $sheet       = $spreadsheet->getActiveSheet();
@@ -178,6 +179,12 @@ class Reservation_report extends CI_Controller {
                 "wrapText"   => true
             ],
         ];
+
+        $wrapTextStyle = [
+            "alignment" => [
+                "wrapText"   => true
+            ],
+        ];
         // ----- END STYLES -----
 
 
@@ -191,7 +198,7 @@ class Reservation_report extends CI_Controller {
         $sheet->setCellValue('A1', "Reservation Report");
         $sheet->setCellValue('A2', "BlackCoders Group Inc."); // CHANGE BASED ON COMPANY SETUP
         $sheet->setCellValue('A3', "Project Name");
-        $sheet->setCellValue('D3', "BlackCoders Group Inc.");
+        $sheet->setCellValue('D3', $projectName);
         $sheet->setCellValue('A4', "Date");
         $sheet->setCellValue('D4', $dateDisplay);
         $sheet->getStyle('A1:G1')->applyFromArray($titleStyle);
@@ -225,7 +232,7 @@ class Reservation_report extends CI_Controller {
                 $itemName    = $data[$i]["itemName"] ?? "";
                 $itemUom     = $data[$i]["itemUom"] ?? "";
                 $reservedQuantity  = $data[$i]["reservedQuantity"] ?? "";
-                $dateReserved      = $data[$i]["dateReserved"] ? date("M d, Y", strtotime($data[$i]["dateReserved"])) : "";
+                $dateReserved      = $data[$i]["dateReserved"] ? date("F d, Y", strtotime($data[$i]["dateReserved"])) : "";
                 $materialUsageCode = $data[$i]["materialUsageCode"] ?? "";
             }
             $sheet->setCellValue("A$rowNumber", $projectCode);
@@ -239,12 +246,14 @@ class Reservation_report extends CI_Controller {
             $sheet->getStyle("A$rowNumber")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
             $sheet->getStyle("D$rowNumber")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
             $sheet->getStyle("E$rowNumber")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+            $sheet->getStyle("F$rowNumber")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
             $sheet->getStyle("G$rowNumber")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
-            $sheet->getRowDimension("$rowNumber")->setRowHeight(17);
+            $sheet->getRowDimension("$rowNumber")->setRowHeight(30);
             $rowNumber++;
         }
         $sheet->getStyle("A6:G$rowNumber")->applyFromArray($allBorderStyle);
+        $sheet->getStyle("A6:G$rowNumber")->applyFromArray($wrapTextStyle);
         // ----- END BODY -----
 
 
@@ -261,13 +270,13 @@ class Reservation_report extends CI_Controller {
 
     public function downloadExcel() 
     {
-        $timelineBuilderID = $this->input->get("timelineBuilderID");
-        $dateFrom = $this->input->get("dateFrom");
-        $dateTo   = $this->input->get("dateTo");
-        $reservationData = $this->reservationreport->getReservationData($timelineBuilderID, $dateFrom, $dateTo);
-        if ($reservationData) {
+        $projectID = $this->input->get("projectID");
+        $dateFrom  = $this->input->get("dateFrom");
+        $dateTo    = $this->input->get("dateTo");
+        $reservationData = $this->reservationreport->getReservationData($projectID, $dateFrom, $dateTo);
+        // if ($reservationData) {
             $this->reservationReportExcel($reservationData, $dateFrom, $dateTo);
-        }
+        // }
 
     }
 

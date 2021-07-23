@@ -1242,22 +1242,24 @@ $(document).ready(function() {
 	function fileValidation() {
 		let check = 0
 		$(`.files`).each(function (i) {
+			var allowedExtensions = /(\.jpg|\.jpeg|\.png|\.pdf|\.docx)$/i;
 			var filextensionattr = $(this).attr("checkfile");
+			var filextension = $(this).attr("filename");
 			//alert(filextensionattr);
-			if (filextensionattr == "0") {
-				//alert(filextensionattr);
-				$(this).addClass("is-invalid");
-				$(this).parent().find(".invalid-feedback").first().text("Invalid file extension.");
-				check++;
-			} else {
+			// if (filextensionattr == "0") {
+			// 	//alert(filextensionattr);
+			// 	$(this).addClass("is-invalid");
+			// 	$(this).parent().find(".invalid-feedback").first().text("Invalid file extension.");
+			// 	check++;
+			// } else {
 				//alert(filextensionattr);
 				// var allowedExtensions = /(\.jpg|\.jpeg|\.png|\.pdf|\.docx)$/i;
 				// var filextension = $(this).val();
-				// 	if(!allowedExtensions.exec(filextension)){
-				// 		$(this).addClass("is-invalid");
-				// 		$(this).parent().find(".invalid-feedback").first().text("Invalid file extension.");
-				// 		check++;
-				// 	}else{
+					if(!allowedExtensions.exec(filextension)){
+						$(this).addClass("is-invalid");
+						$(this).parent().find(".invalid-feedback").first().text("Invalid file extension.");
+						check++;
+					}else{
 				$(this).removeClass("is-invalid");
 				$(this).parent().find(".invalid-feedback").first().text("");
 				// }
@@ -1318,6 +1320,7 @@ $(document).ready(function() {
 			</div>`;
 			$(this).removeClass("is-invalid");
 			$(".one").attr("checkfile","1");
+			$(".one").attr("filename",`${filename}`);
 			$(this).parent().find(".invalid-feedback").first().text("");
 			$(this).parent().find(".displayfile").first().html(html);
 		}
@@ -1329,6 +1332,7 @@ $(document).ready(function() {
 	$(document).on("click", ".btnRemoveFile", function() {
 		$(this).parent().parent().parent().find("[name=files]").first().val("");
 		$(this).parent().parent().parent().find("[name=files]").first().attr("checkfile","0");
+		$(this).parent().parent().parent().find("[name=files]").first().attr("filename","");
 		$(this).closest(".displayfile").empty();
 	})
 	// ----- END REMOVE FILE -----

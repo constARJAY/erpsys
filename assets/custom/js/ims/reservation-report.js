@@ -30,12 +30,12 @@ $(document).ready(function() {
 
 
     // ----- GET RESERVATION DATA -----
-    function getReservationData(timelineBuilderID = 0, dateFrom = moment(new Date).format("YYYY-MM-DD"), dateTo = moment(new Date).format("YYYY-MM-DD")) {
-        const data = { timelineBuilderID, dateFrom, dateTo };
+    function getReservationData(projectID = 0, dateFrom = moment(new Date).format("YYYY-MM-DD"), dateTo = moment(new Date).format("YYYY-MM-DD")) {
+        const data = { projectID, dateFrom, dateTo };
         let result = [];
         $.ajax({
             method: "POST",
-            url: "reservation_report/getReservationData",
+            url: `${base_url}ims/reservation_report/getReservationData`,
             data,
             async: false,
             dataType: "json",
@@ -108,11 +108,11 @@ $(document).ready(function() {
 
     // ----- REFRESH TABLE -----
     function refreshTableContent() {
-        const timelineBuilderID = $(`[name="timelineBuilderID"]`).val();
+        const projectID = $(`[name="projectID"]`).val();
         const startDate = $(`[name="filterDate"]`).attr("start");
         const endDate   = $(`[name="filterDate"]`).attr("end");
 
-        const data = getReservationData(timelineBuilderID, startDate, endDate);
+        const data = getReservationData(projectID, startDate, endDate);
         tableContent(data);
     }
     // ----- END REFRESH TABLE -----
@@ -141,10 +141,27 @@ $(document).ready(function() {
 
 
     // ----- SELECT PROJECT NAME -----
-    $(document).on("change", `[name="timelineBuilderID"]`, function() {
+    $(document).on("change", `[name="projectID"]`, function() {
         refreshTableContent();
     })
     // ----- END SELECT PROJECT NAME -----
+
+
+    // ----- GET PROJECT LIST -----
+    function getProjectList() {
+        const projectList = getTableData(
+            `pms_project_list_tbl`, 
+            `projectListID AS projectID, projectListName AS projectName`, 
+            `projectListStatus = 1`);
+        
+        let html = "";
+        projectList.map(project => {
+            const { projectID, projectName } = project;
+            html += `<option value="${projectID}">${projectName}</option>`
+        });
+        return html;
+    }
+    // ----- END GET PROJECT LIST -----
 
 
     // ----- FILTERING OPTIONS -----
@@ -155,11 +172,11 @@ $(document).ready(function() {
                 <div class="form-group">
                     <label>Project Name</label>
                     <select class="form-control select2"
-                        name="timelineBuilderID"
+                        name="projectID"
                         style="width: 100%">
                         <option disabled>Select Project Name</option>
                         <option value="0" selected>All</option>
-                        <option value="1">BlackBox Accounting</option>
+                        ${getProjectList()}
                     </select>
                 </div>
             </div>
@@ -213,12 +230,12 @@ $(document).ready(function() {
 
     // ----- CLICK BUTTON EXCEL -----
     $(document).on("click", "#btnExcel", function() {
-        const timelineBuilderID = $(`[name="timelineBuilderID"]`).val();
+        const projectID = $(`[name="projectID"]`).val();
         const startDate = $(`[name="filterDate"]`).attr("start");
         const endDate   = $(`[name="filterDate"]`).attr("end");
 
-        const url = `${base_url}ims/reservation_report/downloadExcel?timelineBuilderID=${timelineBuilderID}&dateFrom=${startDate}&dateTo=${endDate}`;
-		window.location.replace(url); 
+        const url = `${base_url}ims/reservation_report/downloadExcel?projectID=${projectID}&dateFrom=${startDate}&dateTo=${endDate}`;
+		window.open(url, "_blank"); 
     })
     // ----- END CLICK BUTTON EXCEL -----
 

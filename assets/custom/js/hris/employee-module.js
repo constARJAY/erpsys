@@ -67,6 +67,7 @@ $(document).ready(function() {
 				serverSide: false,
 				scrollX: true,
 				scrollCollapse: true,
+                bStateSave: true,
 				columnDefs: [
 					{ targets: 0, width: 50  },
 					{ targets: 1, width: 200 },
