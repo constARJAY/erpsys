@@ -221,7 +221,7 @@ $(document).ready(function(){
                       </div>
                       <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12">
                           <div class="form-group">
-                              <label>Job Responsibilities</label>
+                              <label>Brief Statement of Duties</label>
                               <textarea 
                                   type="text" 
                                   class="form-control" 
@@ -231,30 +231,9 @@ $(document).ready(function(){
                                   autocomplete="off">${personnelStatement}</textarea>
                           </div>
                       </div>
-                      <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12">
+                       <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12">
                           <div class="form-group">
-                              <label>Job Type</label>
-                              <input 
-                              type="text" 
-                              class="form-control" 
-                              disabled
-                              value="${personnelOption}">
-                          </div>
-                      </div>
-
-                      <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12">
-                          <div class="form-group">
-                              <label>Job Category</label>
-                              <input 
-                              type="text" 
-                              class="form-control" 
-                              disabled
-                              value="${departmentName}">
-                          </div>
-                      </div>
-                      <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12">
-                          <div class="form-group">
-                              <label>Technical Skills & Qualifications</label>
+                              <label>Qualifications Required</label>
                               <textarea 
                               type="text" 
                               class="form-control" 
@@ -282,7 +261,29 @@ $(document).ready(function(){
                             autocomplete="off">${jobBenefits}</textarea>
                             <div class="invalid-feedback d-block" id="invalid-input_jobBenefits"></div>
                         </div>
-                    </div>
+                    </div>  
+                      <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12">
+                          <div class="form-group">
+                              <label>Job Type</label>
+                              <input 
+                              type="text" 
+                              class="form-control" 
+                              disabled
+                              value="${personnelOption}">
+                          </div>
+                      </div>
+
+                      <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12">
+                          <div class="form-group">
+                              <label>Job Category</label>
+                              <input 
+                              type="text" 
+                              class="form-control" 
+                              disabled
+                              value="${departmentName}">
+                          </div>
+                      </div>
+                     
                       <div class=" col-md-4  col-sm-12">
                           <div class="form-group">
                               <label>No. of Vacancies</label>
@@ -295,7 +296,7 @@ $(document).ready(function(){
                       </div>     
                       <div class="col-md-4 col-sm-12">
                           <div class="form-group">
-                              <label>Salary Range</label>
+                              <label>Salary Package</label>
                               <div class="input-group w-100">
                                 <div class="input-group-prepend">
                                 <span class="input-group-text" id="basic-addon1">₱</span>
