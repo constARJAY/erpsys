@@ -49,18 +49,42 @@ $(document).ready(function(){
           method:   'POST',
           async:    false,
           dataType: 'json',
-          data:     {tableName: "hris_job_posting_tbl"},
+          data:     {tableName: `hris_job_posting_tbl as jpt 
+                    LEFT JOIN  pms_personnel_requisition_tbl AS ppr USING(requisitionID)
+                    LEFT JOIN  hris_designation_tbl AS dsg ON dsg.designationID  = ppr.designationID 
+                    LEFT JOIN  hris_department_tbl AS dept ON dept.departmentID  = ppr.departmentID`,
+                    columnName:`jobID,
+                    CONCAT('JPG-',SUBSTR(jpt.createdAt,3,2),"-",LPAD(jpt.jobID,5,0)) as jobCode,
+                    requisitionCode,
+                    designationName,
+                    jobDescription,
+                    personnelStatement,
+              
+                    CASE
+                    WHEN personnelOption = '1' THEN 'Permanent'
+                    WHEN personnelOption = '2' THEN 'Non-Permanent'
+                    WHEN personnelOption = '3' THEN 'Other Justifications'
+                    END as personnelOption,
+              
+                    departmentName,
+                    personnelQualification,
+                    jobBenefits,
+                    jobSlot,
+                    salaryPackage,
+                    jobStatus,
+                    jpt.createdAt` },
           beforeSend: function() {
               $("#table_content").html(preloader);
               // $("#inv_headerID").text("List of Inventory Item");
           },
           success: function(data) {
+          
               let html = `
               <table class="table table-bordered table-striped table-hover" id="tableJobPosting">
                   <thead>
                   <tr>
                       <th>Job Code</th>
-                      <th>Company</th>
+                      <th>Refrence No.</th>
                       <th>Job Title</th>
                       <th>Job Description</th>
                       <th>Job Type</th>
@@ -80,24 +104,27 @@ $(document).ready(function(){
                   }
                   uniqueData.push(unique);
                   // ----- END INSERT UNIQUE DATA TO uniqueData VARIABLE ----
-                  if(item.jobStatus == 1){
-                    var status=`<span class="badge badge-outline-success w-100">Active</span>`;
-                }   
-                if(item.jobStatus == 0){
-                    var status=`<span class="badge badge-outline-danger w-100">Inactive</span>`;
-                }
-                
+                    if(item.jobStatus == 0){
+                    var status=`<span class="badge badge-outline-success w-100">Open</span>`;
+                    }   
+                    if(item.jobStatus == 1){
+                        var status=`<span class="badge badge-outline-danger w-100">Closed</span>`;
+                    }
+                    if(item.jobStatus == 2){
+                        var status=`<span class="badge badge-outline-primary w-100">Drop</span>`;
+                    }
+                    
                   html += `
                   <tr
                     class="btnEdit" 
                     id="${item.jobID}"
                     feedback="${item.jobTitle}">
                       <td>${item.jobCode}</td>
-                      <td>${item.jobCompany}</td>
-                      <td>${item.jobTitle}</td>
+                      <td>${item.requisitionCode}</td>
+                      <td>${item.designationName}</td>
                       <td style="white-space: normal;">${item.jobDescription}</td>
-                      <td>${item.jobType}</td>
-                      <td>${item.jobCategory}</td>
+                      <td>${item.personnelOption}</td>
+                      <td>${item.departmentName}</td>
                       <td class="text-center">${item.jobSlot}</td>
                       <td class="text-center">${status}</td>
                   </tr>`;
@@ -125,33 +152,28 @@ $(document).ready(function(){
    // ----- MODAL CONTENT -----
    function modalContent(data = false) {
     let jobID               = data ? (data[0].jobID                     ? data[0].jobID                     : "") : "",
-    jobCompany              = data ? (data[0].jobCompany                ? data[0].jobCompany                : "") : "",
-    jobTitle                = data ? (data[0].jobTitle                  ? data[0].jobTitle                  : "") : "",
+    requisitionCode              = data ? (data[0].requisitionCode                ? data[0].requisitionCode                : "") : "",
+    designationName                = data ? (data[0].designationName                  ? data[0].designationName                  : "") : "",
     jobDescription          = data ? (data[0].jobDescription            ? data[0].jobDescription            : "") : "",
-    jobResponsibilities     = data ? (data[0].jobResponsibilities       ? data[0].jobResponsibilities       : "") : "",
-    jobType                 = data ? (data[0].jobType                   ? data[0].jobType                   : "") : "",
-    jobCategory             = data ? (data[0].jobCategory               ? data[0].jobCategory               : "") : "",
-    techSkillsQualification = data ? (data[0].techSkillsQualification   ? data[0].techSkillsQualification   : "") : "",
+    personnelStatement     = data ? (data[0].personnelStatement       ? data[0].personnelStatement       : "") : "",
+    personnelOption                 = data ? (data[0].personnelOption                   ? data[0].personnelOption                   : "") : "",
+    departmentName             = data ? (data[0].departmentName               ? data[0].departmentName               : "") : "",
+    personnelQualification = data ? (data[0].personnelQualification   ? data[0].personnelQualification   : "") : "",
     jobBenefits             = data ? (data[0].jobBenefits               ? data[0].jobBenefits               : "") : "",
     jobStatus               = data ? (data[0].jobStatus                 ? data[0].jobStatus                 : "") : "",
-    jobLanguage             = data ? (data[0].jobLanguage               ? data[0]["jobLanguage"].split("|") : []) : [],
     jobSlot                 = data ? (data[0].jobSlot                   ? data[0].jobSlot                   : "") : "",
-    salaryRangeSelect       = data ? (data[0].salaryRangeSelect         ? data[0].salaryRangeSelect         : "") : "",
-    salaryRange             = data ? (data[0].salaryRange               ? data[0].salaryRange               : "") : "";
+    salaryPackage             = data ? (data[0].salaryPackage               ? data[0].salaryPackage               : "") : "";
         
-      let button = jobID ? `
+      let button = jobID &&  jobStatus!=2  ? `
       <button 
           class="btn btn-update " 
           id="btnUpdate" 
           rowID="${jobID}">
           <i class="fas fa-save"></i>
           Update
-      </button>` : `
-      <button 
-          class="btn btn-save" 
-          id="btnSave"><i class="fas fa-save"></i>
-          Save
-      </button>`;
+      </button>` : ``;
+
+      let disabled = jobID &&  jobStatus!=2  ? `` : `disabled`;
 
       let html = `
       <div class="modal-body">
@@ -159,46 +181,29 @@ $(document).ready(function(){
                   <div class="row">
                       <div class="col-xl-4 col-lg-4 col-md-6 col-sm-12">
                           <div class="form-group">
-                              <label>Company <span class="text-danger font-weight-bold">*</span></label>
-                              <select 
-                                  class="form-control select2 validate" 
-                                  id="input_jobCompany" 
-                                  name="jobCompany"
-                                  autocomplete="off"
-                                  style="width: 100%"
-                                  required>
-                                  <option disabled ${!data && "selected"} selected>Select Company</option>
-                                  <option ${data && jobCompany == "BlackCoders Group Inc." && "selected"} value="BlackCoders Group Inc.">BlackCoders Group Inc.</option>
-                                  <option ${data && jobCompany == "CMTLand Development Inc." && "selected"} value="CMTLand Development Inc.">CMTLand Development Inc.</option>
-                                  <option ${data && jobCompany == "Gatchallan Tangalin Co.&CPA's" && "selected"} value="Gatchallan Tangalin Co.&CPA's">Gatchallan Tangalin Co.&CPA's</option>
-                                  <option ${data && jobCompany == "CMTBuilders Inc." && "selected"} value="CMTBuilders Inc.">CMTBuilders Inc.</option>
-                              </select>
-                              <div class="invalid-feedback d-block" id="invalid-input_jobCompany"></div>
+                              <label>Reference No.</label>
+                              <input 
+                                  type="text" 
+                                  class="form-control" 
+                                  disabled
+                                  value="${requisitionCode}">
                           </div>
                       </div>
 
                       <div class="col-xl-8 col-lg-8 col-md-6 col-sm-12">
                           <div class="form-group">
-                              <label>Job Title <span class="text-danger font-weight-bold">*</span></label>
+                              <label>Job Title</label>
                               <input 
-                                  type="text" 
-                                  class="form-control validate" 
-                                  name="jobTitle" 
-                                  id="input_jobTitle" 
-                                  data-allowcharacters="[A-Z][a-z][0-9][-][(][)][,]['][&][ ]" 
-                                  minlength="2" 
-                                  maxlength="50" 
-                                  required 
-                                  unique="${jobID}" 
-                                  value="${jobTitle}"
-                                  autocomplete="off">
-                              <div class="invalid-feedback d-block" id="invalid-input_jobTitle"></div>
+                                type="text" 
+                                class="form-control jobTitle" 
+                                disabled
+                                value="${designationName}">
                           </div>
                       </div>
 
                       <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12">
                           <div class="form-group">
-                              <label>Job Description <span class="text-danger font-weight-bold">*</span></label>
+                              <label>Job Description</label>
                               <textarea 
                                   type="text" 
                                   class="form-control validate" 
@@ -207,94 +212,61 @@ $(document).ready(function(){
                                   data-allowcharacters="[A-Z][a-z][0-9][ ][-][.][,][(][)]['][&]" 
                                   minlength="2" 
                                   maxlength="325" 
-                                  rows="3"
-                                  required 
+                                  rows="8" 
                                   style="resize: none"
+                                  ${disabled}
                                   autocomplete="off">${jobDescription}</textarea>
                               <div class="invalid-feedback d-block" id="invalid-input_jobDescription"></div>
                           </div>
                       </div>
                       <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12">
                           <div class="form-group">
-                              <label>Job Responsibilities <span class="text-danger font-weight-bold">*</span></label>
+                              <label>Job Responsibilities</label>
                               <textarea 
                                   type="text" 
-                                  class="form-control validate" 
-                                  name="jobResponsibilities" 
-                                  id="input_jobResponsibilities" 
-                                  data-allowcharacters="[A-Z][a-z][0-9][ ][-][.][,][(][)]['][&]" 
-                                  minlength="2" 
-                                  maxlength="500" 
-                                  rows="3"
-                                  required 
+                                  class="form-control" 
+                                  rows="8"
+                                  disabled
                                   style="resize: none"
-                                  autocomplete="off">${jobResponsibilities}</textarea>
-                              <div class="invalid-feedback d-block" id="invalid-input_jobResponsibilities"></div>
+                                  autocomplete="off">${personnelStatement}</textarea>
                           </div>
                       </div>
                       <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12">
                           <div class="form-group">
-                              <label>Job Type <span class="text-danger font-weight-bold">*</span></label>
-                              <select 
-                                  class="form-control select2 validate" 
-                                  id="input_jobType" 
-                                  name="jobType"
-                                  autocomplete="off"
-                                  style="width: 100%"
-                                  required>
-                                  <option disabled ${!data && "selected"} selected>Select Type</option>
-                                  <option ${data && jobType == "Full-Time" && "selected"} value="Full-Time">Full-Time</option>
-                                  <option ${data && jobType == "Part-Time" && "selected"} value="Part-Time">Part-Time</option>
-                                  <option ${data && jobType == "Contractual" && "selected"} value="Contractual">Contractual</option>
-                                  <option ${data && jobType == "Temporary" && "selected"} value="Temporary">Temporary</option>
-                                  <option ${data && jobType == "Internship" && "selected"} value="Internship">Internship</option>
-                              </select>
-                              <div class="invalid-feedback d-block" id="invalid-input_jobType"></div>
+                              <label>Job Type</label>
+                              <input 
+                              type="text" 
+                              class="form-control" 
+                              disabled
+                              value="${personnelOption}">
                           </div>
                       </div>
 
                       <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12">
                           <div class="form-group">
-                              <label>Job Category <span class="text-danger font-weight-bold">*</span></label>
-                              <select 
-                                  class="form-control select2 validate" 
-                                  id="input_jobCategory" 
-                                  name="jobCategory"
-                                  autocomplete="off"
-                                  style="width: 100%"
-                                  required>
-                                  <option disabled ${!data && "selected"} selected>Select Category</option>
-                                  <option ${data && jobCategory == "Accounting/Finance" && "selected"} value="Accounting/Finance">Accounting/Finance</option>
-                                  <option ${data && jobCategory == "Admin/Human Resource" && "selected"} value="Admin/Human Resource">Admin/Human Resource</option>
-                                  <option ${data && jobCategory == "Sales/Marketing" && "selected"} value="Sales/Marketing">Sales/Marketing</option>
-                                  <option ${data && jobCategory == "Computer/Information Technology" && "selected"} value="Computer/Information Technology">Computer/Information Technology</option>
-                                  <option ${data && jobCategory == "Engineering" && "selected"} value="Engineering">Engineering</option>
-                                  <option ${data && jobCategory == "Building Construction" && "selected"} value="Building Construction">Building Construction</option>
-                              </select>
-                              <div class="invalid-feedback d-block" id="invalid-input_jobCategory"></div>
+                              <label>Job Category</label>
+                              <input 
+                              type="text" 
+                              class="form-control" 
+                              disabled
+                              value="${departmentName}">
                           </div>
                       </div>
                       <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12">
                           <div class="form-group">
-                              <label>Technical Skills & Qualifications <span class="text-danger font-weight-bold">*</span></label>
+                              <label>Technical Skills & Qualifications</label>
                               <textarea 
                               type="text" 
-                              class="form-control validate" 
-                              name="techSkillsQualification" 
-                              id="input_techSkillsQualification" 
-                              data-allowcharacters="[A-Z][a-z][0-9][ ][-][.][,][(][)]['][&][*]" 
-                              minlength="2" 
-                              maxlength="500" 
-                              rows="4"
-                              required 
+                              class="form-control" 
+                              rows="8"
+                              disabled 
                               style="resize: none"
-                              autocomplete="off">${techSkillsQualification}</textarea>
-                              <div class="invalid-feedback d-block" id="invalid-input_techSkillsQualification"></div>
+                              autocomplete="off">${personnelQualification}</textarea>
                           </div>
                       </div>
                       <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12">
                         <div class="form-group">
-                            <label>Benefits <span class="text-danger font-weight-bold">*</span></label>
+                            <label>Benefits</label>
                             <textarea 
                             type="text" 
                             class="form-control validate" 
@@ -303,107 +275,62 @@ $(document).ready(function(){
                             data-allowcharacters="[A-Z][a-z][0-9][ ][-][.][,][(][)][*][&]" 
                             minlength="2" 
                             maxlength="500" 
-                            rows="4"
-                            required 
+                            rows="8"
+                             
                             style="resize: none"
+                            ${disabled}
                             autocomplete="off">${jobBenefits}</textarea>
                             <div class="invalid-feedback d-block" id="invalid-input_jobBenefits"></div>
                         </div>
                     </div>
-                      <div class=" col-md-6 col-sm-12">
+                      <div class=" col-md-4  col-sm-12">
                           <div class="form-group">
-                              <label>Language <span class="text-danger font-weight-bold">*</span></label>
-                              <select 
-                                  class="form-control select2 validate" 
-                                  id="input_jobLanguage" 
-                                  name="jobLanguage"
-                                  autocomplete="off"
-                                  style="width: 100%"
-                                  title="Select Language"
-                                  required multiple>
-                                  <option ${data && jobLanguage && jobLanguage.some(x => x == "Tagalog") ? "selected" : ""} value="Tagalog">Tagalog</option>
-                                  <option ${data && jobLanguage && jobLanguage.some(x => x == "English") ? "selected" : ""} value="English">English</option>
-                                  <option ${data && jobLanguage && jobLanguage.some(x => x == "Others") ? "selected" : ""} value="Others">Others</option>
-                              </select>
-                              <div class="invalid-feedback d-block" id="invalid-input_jobLanguage"></div>
-                          </div>
-                      </div>
-                      <div class=" col-md-6 col-sm-12">
-                          <div class="form-group">
-                              <label>No. of Vacancies <span class="text-danger font-weight-bold">*</span></label>
+                              <label>No. of Vacancies</label>
                               <input 
                                   type="number" 
-                                  class="form-control validate" 
-                                  name="jobSlot" 
-                                  id="input_jobSlot" 
-                                  data-allowcharacters="[0-9]" 
-                                  minlength="1" 
-                                  maxlength="50" 
-                                  required 
+                                  class="form-control" 
                                   value="${jobSlot}"
-                                  autocomplete="off">
-                              <div class="invalid-feedback d-block" id="invalid-input_jobSlot"></div>
+                                  disabled>
                           </div>
                       </div>     
-                      <div class="col-md-6 col-sm-12">
+                      <div class="col-md-4 col-sm-12">
                           <div class="form-group">
-                              <label>Salary Range <span class="text-danger font-weight-bold">*</span></label>
+                              <label>Salary Range</label>
                               <div class="input-group w-100">
                                 <div class="input-group-prepend">
-
-                                <select 
-                                    class="form-control select2 validate" 
-                                    id="input_salaryRangeSelect" 
-                                    style="width: 100%"
-                                    name="salaryRangeSelect"
-                                    autocomplete="off"
-                                    title="Select Range"
-                                    >
-                                    <option ${data && salaryRangeSelect == "1" && "selected"} value="1">Above</option>
-                                    <option ${data && salaryRangeSelect == "2" && "selected"} value="2">Below</option>
-                                    <option ${data && salaryRangeSelect == "3" && "selected"} value="3">Average</option>
-                                </select>
                                 <span class="input-group-text" id="basic-addon1">₱</span>
-                            
                                 </div>
 
                                 <input 
                                     type="text" 
                                     class="form-control amount text-right" 
-                                    name="salaryRange" 
-                                    id="input_salaryRange" 
-                                    min="1000"
-                                    max="99999999"
-                                    data-allowcharacters="[0-9]" 
                                     placeholder="0.00"
-                                    required 
-                                    value="${salaryRange}"
-                                    autocomplete="off">
+                                    disabled 
+                                    value="${salaryPackage}">
 
                               </div>
-
-                              <div class="invalid-feedback d-block" id="invalid-input_salaryRange"></div>
                           </div>
                       </div>
 
-                      <div class="col-md-6 col-sm-12">
+                      <div class="col-md-4 col-sm-12">
                             <div class="form-group">
-                                <label>Status <span class="text-danger font-weight-bold">*</span></label>
+                                <label>Status</label>
                                 <select 
                                     class="form-control select2 validate" 
-                                    id="input_jobStatus" 
-                                    name="jobStatus"
                                     autocomplete="off"
                                     style="width: 100%"
+                                    disabled
                                     >
                                     <option 
-                                        value="1" 
-                                        ${data && jobStatus == "1" && "selected"} >Active</option>
-                                    <option 
                                         value="0" 
-                                        ${data && jobStatus == "0" && "selected"}>Inactive</option>
+                                        ${data && jobStatus == "0" && "selected"} >Open</option>
+                                    <option 
+                                        value="1" 
+                                        ${data && jobStatus == "1" && "selected"}>Closed</option>
+                                    <option 
+                                        value="2" 
+                                        ${data && jobStatus == "2" && "selected"}>Drop</option>
                                 </select>
-                                <div class="invalid-feedback d-block" id="invalid-input_jobStatus"></div>
                             </div>
                         </div>
 
@@ -419,32 +346,32 @@ $(document).ready(function(){
   // ----- END MODAL CONTENT -----
 
   // ----- OPEN ADD MODAL -----
-  $(document).on("click", "#btnAdd", function() {
-      $("#modalJobPostingHeader").text("ADD JOB VACANT");
-      $("#modalJobPosting").modal("show");
-      $("#modalJobPostingContent").html(preloader);
-      const content = modalContent();
-      $("#modalJobPostingContent").html(content);
-      initAll();
-  });
+//   $(document).on("click", "#btnAdd", function() {
+//       $("#modalJobPostingHeader").text("ADD JOB VACANT");
+//       $("#modalJobPosting").modal("show");
+//       $("#modalJobPostingContent").html(preloader);
+//       const content = modalContent();
+//       $("#modalJobPostingContent").html(content);
+//       initAll();
+//   });
   // ----- END OPEN ADD MODAL -----
 
 
   // ----- SAVE MODAL -----
-  $(document).on("click", "#btnSave", function() {
-  const validate = validateForm("modalJobPosting");
-  if (validate) {
+//   $(document).on("click", "#btnSave", function() {
+//   const validate = validateForm("modalJobPosting");
+//   if (validate) {
 
-    let data = getFormData("modalJobPosting", true);
-    data["tableData[jobCode]"] = generateCode("JPG", false, "hris_job_posting_tbl", "jobCode");
-    data["tableData[createdBy]"] = sessionID;
-    data["tableData[updatedBy]"] = sessionID;
-    data["tableName"]            = "hris_job_posting_tbl";
-    data["feedback"]             = $("[name=jobTitle]").val();
+//     let data = getFormData("modalJobPosting", true);
+//     data["tableData[jobCode]"] = generateCode("JPG", false, "hris_job_posting_tbl", "jobCode");
+//     data["tableData[createdBy]"] = sessionID;
+//     data["tableData[updatedBy]"] = sessionID;
+//     data["tableName"]            = "hris_job_posting_tbl";
+//     data["feedback"]             = $(".jobTitle").val();
 
-    sweetAlertConfirmation("add", "Vacant Position", "modalJobPosting", null, data, true, tableContent);
-      }
-  });
+//     sweetAlertConfirmation("add", "Vacant Position", "modalJobPosting", null, data, true, tableContent);
+//       }
+//   });
   // ----- END SAVE MODAL -----
 
   // ----- OPEN EDIT MODAL -----
@@ -457,7 +384,32 @@ $(document).ready(function(){
       // Display preloader while waiting for the completion of getting the data
       $("#modalJobPostingContent").html(preloader); 
 
-      const tableData = getTableData("hris_job_posting_tbl", "*", "jobID="+id, "");
+      const tableData = getTableData(`hris_job_posting_tbl 
+      LEFT JOIN  pms_personnel_requisition_tbl AS ppr USING(requisitionID)
+      LEFT JOIN  hris_designation_tbl AS dsg ON dsg.designationID  = ppr.designationID 
+      LEFT JOIN  hris_department_tbl AS dept ON dept.departmentID  = ppr.departmentID `, `
+      jobID,
+      requisitionCode,
+      designationName,
+      jobDescription,
+      personnelStatement,
+
+      CASE
+      WHEN personnelOption = 1 THEN "Permanent"
+      WHEN personnelOption = 2 THEN "Non-Permanent"
+      WHEN personnelOption = 3 THEN "Other Justifications"
+      END as personnelOption,
+
+      departmentName,
+      personnelQualification,
+      jobBenefits,
+      jobSlot,
+      salaryPackage,
+      jobStatus
+
+
+
+      `, "jobID="+id, "");
       if (tableData) {
           const content = modalContent(tableData);
           setTimeout(() => {
@@ -475,14 +427,14 @@ $(document).ready(function(){
 
     const validate = validateForm("modalJobPosting");
     let rowID           = $(this).attr("rowID");
-    let genCode         = getTableData("hris_job_posting_tbl","jobCode","jobID="+rowID,"jobCode DESC");
+    let genCode         = getTableData("hris_job_posting_tbl","","jobID="+rowID);
     if (validate) {
 
         let data = getFormData("modalJobPosting", true);
 			data["tableData[updatedBy]"] = sessionID;
 			data["tableName"]            = "hris_job_posting_tbl";
 			data["whereFilter"]          ="jobID="+rowID;
-			data["feedback"]             = $("[name=jobTitle]").val();
+			data["feedback"]             = $(".jobTitle").val();
 
 			sweetAlertConfirmation(
 				"update",

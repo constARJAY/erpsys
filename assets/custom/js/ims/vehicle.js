@@ -52,6 +52,7 @@ function tableContent() {
                     vehicleName,
                     vehiclePlateNumber,
                     vehicleGasType,
+                    vehicleFuelConsumption,
                     vehicleStatus,
                     createdAt
                     `,
@@ -107,7 +108,12 @@ function tableContent() {
                     <td>${item.vehicleCode}</td>
                     <td>${item.vehicleName}</td>
                     <td class="text-center">${item.vehiclePlateNumber}</td>
-                    <td>${gasType}</td>
+                    <td>
+					<div>
+						${vehicleFuelConsumption}
+					</div>
+					<small style="color:#848482;">${gasType}</small>
+				</td>
                     <td class="text-center">${status}</td>
                 </tr>`;
             })

@@ -40,6 +40,7 @@ class Personnel_requisition extends CI_Controller {
         $requisitionRemarks  = $this->input->post("requisitionRemarks") ?? null;
 
 
+        $vacancy  = $this->input->post("vacancy") ?? null;
         $departmentID  = $this->input->post("departmentID") ?? null;
         $designationID  = $this->input->post("designationID") ?? null;
         $salaryPackage  = $this->input->post("salaryPackage") ?? null;
@@ -71,6 +72,7 @@ class Personnel_requisition extends CI_Controller {
             "approversDate"           => $approversDate,
             "requisitionStatus"   => $requisitionStatus,
            
+            "vacancy"   => $vacancy,
             "departmentID"   => $departmentID,
             "designationID"   => $designationID,
             "salaryPackage"   => $salaryPackage,
@@ -125,10 +127,11 @@ class Personnel_requisition extends CI_Controller {
                     "requisitionStatus"   => 5,
                     "updatedBy"               => $updatedBy,
                 ]; 
+                $requisitionStatus = 5;
             }
         }
 
-        $saveTransferData = $this->purchaserequest->savePurchaseRequestData($action, $purchaseRequestData, $requisitionID);
+        $saveTransferData = $this->purchaserequest->savePurchaseRequestData($action, $purchaseRequestData, $requisitionID,$requisitionStatus,$createdBy,$updatedBy,$createdAt);
         // if ($saveTransferData) {
         //     $result = explode("|", $saveTransferData);
 

@@ -14,7 +14,7 @@
 				</div>
 				<div class="col-lg-6 col-md-12 text-md-right">
 						<?php if(isCreateAllowed(103)){ ?>
-							<button class="btn btn-default btn-add" id="btnAdd"><i class="icon-plus"></i> Add Job</button>
+							<!-- <button class="btn btn-default btn-add" id="btnAdd"><i class="icon-plus"></i> Add Job</button> -->
 						<?php  } ?>
 				</div>
 			</div>

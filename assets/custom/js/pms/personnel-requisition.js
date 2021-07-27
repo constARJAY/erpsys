@@ -738,7 +738,8 @@ $(document).ready(function() {
 			personnelQualification	= "",
 			personnelStatement		= "",
 			personnelDescription	= "",
-			personnelDateNeeded		= ""
+			personnelDateNeeded		= "",
+			vacancy		= ""
 
 
 		} = data && data[0];
@@ -886,7 +887,25 @@ $(document).ready(function() {
                 </div>
 		    </div>
 
-            <div class="col-md-4 col-sm-12">
+			<div class="col-md-3 col-sm-12">
+                <div class="form-group">
+                    <label>No. of Vacancies ${!disabled ? "<code>*</code>" : ""}</label>
+                    <input type="number" 
+					class="form-control validate" 
+					name="vacancy"
+					id="vacancy"
+					required 
+					display=${readOnly} 
+					value="${vacancy}" 
+					autocomplete="off"
+					data-allowcharacters="[0-9]" minlength="1" maxlength="50"
+					min="0"
+					${disabled}> 
+                    <div class="d-block invalid-feedback" id="invalid-vacancy"></div>
+                </div>
+            </div>
+
+            <div class="col-md-3 col-sm-12">
                 <div class="form-group">
                     <label>Department ${!disabled ? "<code>*</code>" : ""}</label>
                     <!-- <input type="text" class="form-control" disabled value=""> -->
@@ -904,7 +923,7 @@ $(document).ready(function() {
                 </div>
             </div>
 
-            <div class="col-md-4 col-sm-12">
+            <div class="col-md-3 col-sm-12">
                 <div class="form-group">
                     <label>Designation ${!disabled ? "<code>*</code>" : ""}</label>
                     <select class="form-control validate select2"
@@ -920,7 +939,7 @@ $(document).ready(function() {
                 </div>
             </div>
 
-            <div class="col-md-4 col-sm-12">
+            <div class="col-md-3 col-sm-12">
                 <div class="form-group">
                     <label>Requesting Department</label>
                     <input type="text" class="form-control" disabled value="${employeeDepartment}">
@@ -1186,7 +1205,8 @@ $(document).ready(function() {
                             name="personnelReplacement"
                             id="personnelReplacement"
                             style="width: 100%"
-                           ${radioGroup1 == 4 && (status =="0" || isRevise)  ? "" :"disabled"}
+							${disabled}
+							${radioGroup1 == 4 && (status =="0" || isRevise)  ? "" :"disabled"}
                             >
                             <option selected disabled>Select Employee</option>                          
                             </select>
@@ -1237,10 +1257,10 @@ $(document).ready(function() {
 								class="form-control text-right w-50 setHours" 
 								style="display: inline"; 
 								value="${personnelDuration}"
-
+								${disabled}
 								id="personnelDuration"
 								name="personnelDuration"
-								${radioGroup2 == 2 && (status =="0" || isRevise) ? "" :"readonly"}>
+								${radioGroup2 == 2 && (status =="0" || isRevise) ? "" :"disabled"}>
 								<label for="personnelDuration">hours</label>
 							</div>
                            
@@ -1443,6 +1463,7 @@ $(document).ready(function() {
 		if (currentStatus == "0" && method != "approve") {
 			
 			data["employeeID"]            = sessionID;
+			data["vacancy"] = $("[name=vacancy]").val();
 			data["departmentID"] = $("[name=departmentID]").val();
 			data["designationID"] = $("[name=designationID]").val();
 			data["salaryPackage"] = $("[name=salaryPackage]").val();
@@ -1464,6 +1485,7 @@ $(document).ready(function() {
 			
 	
 			formData.append("employeeID", sessionID);
+			formData.append("vacancy", $("[name=vacancy]").val() || null);
 			formData.append("departmentID", $("[name=departmentID]").val() || null);
 			formData.append("designationID", $("[name=designationID]").val() || null);
 			formData.append("salaryPackage", $("[name=salaryPackage]").val().replaceAll(",","") || null);
