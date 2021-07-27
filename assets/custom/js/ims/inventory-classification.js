@@ -21,6 +21,14 @@ $(document).on("click",".addClassification", function(){
                                                     </div>
                                                     <div class="col-md-12 col-sm-12 px-0">
                                                         <div class="form-group">
+                                                            <label for="">Classification Shortcut <strong class="text-danger">*</strong></label>
+                                                            <input type="text" class="form-control validate" name="classificationShortcut" unique id="input_classificationShortcut" 
+                                                                    data-allowcharacters="[A-Z][a-z]" minlength="2" maxlength="3" required>
+                                                            <div class="invalid-feedback d-block" id="invalid-input_classificationShortcut"></div>
+                                                        </div>
+                                                    </div>  
+                                                    <div class="col-md-12 col-sm-12 px-0">
+                                                        <div class="form-group">
                                                             <label for="">Status <strong class="text-danger">*</strong></label>
                                                             <select class="form-control select2 validate" name="classificationStatus" id="input_classificationStatus">
                                                                 <option value="1">Active</option>
@@ -68,6 +76,25 @@ $(document).on("click",".editClassification", function(){
                                                             <div class="invalid-feedback d-block" id="invalid-input_classificationName"></div>
                                                         </div>
                                                     </div>
+
+                                                    <div class="col-md-12 col-sm-12 px-0">
+                                                        <div class="form-group">
+                                                            <label for="">Classification Shortcut <strong class="text-danger">*</strong></label>
+                                                            <input 
+                                                                type="text" 
+                                                                class="form-control validate" 
+                                                                name="classificationShortcut" id="input_classificationShortcut" 
+                                                                data-allowcharacters="[a-z][A-Z]" 
+                                                                minlength="2" 
+                                                                maxlength="3" 
+                                                                required  unique="${tableData[0]["classificationID"]}"
+                                                                value="${tableData[0]["classificationShortcut"]}">
+                                                            <div class="invalid-feedback d-block" id="invalid-input_classificationShortcut"></div>
+                                                        </div>
+                                                    </div>
+
+                                                    
+
                                                     <div class="col-md-12 col-sm-12 px-0">
                                                         <div class="form-group">
                                                             <label for="">Status <strong class="text-danger">*</strong></label>
@@ -211,7 +238,8 @@ function tableContent(){
                         // ----- INSERT UNIQUE DATA TO uniqueData VARIABLE ----
                         let unique = {
                             id:                       item.classificationID, // Required
-                            classificationName:       item.classificationName // Required
+                            classificationName:       item.classificationName, // Required
+                            classificationShortcut:       item.classificationShortcut // Required
                         }
                         uniqueData.push(unique);
                         // ----- END INSERT UNIQUE DATA TO uniqueData VARIABLE ----
