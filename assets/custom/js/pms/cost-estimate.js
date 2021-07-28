@@ -1573,6 +1573,7 @@ $(document).ready(function(){
 									!existMilestone.includes(items.milestoneListID) ? existMilestone.push(items.milestoneListID) : ``;
 								}
 							});
+							
 							existMilestone.map(milestoneList=>{
 								var temp = {
 									phaseID: phaseList,
@@ -1869,7 +1870,7 @@ $(document).ready(function(){
 										</td>
 										<td><div class="milestoneUom">${items.itemUom}</div></td>
 									</tr>`;
-					}).join(); 
+					}); 
 					tableDataItem += `	<table class="table table-striped table-bordered table-responsive-xl" >
 											<thead>
 												<tr style="white-space: nowrap">
@@ -1882,7 +1883,7 @@ $(document).ready(function(){
 												</tr>
 											</thead>
 											<tbody class="table-body-request-items">
-												${tableDataItemList}
+												${tableDataItemList.join()}
 											</tbody>
 											${!readOnly ? 
 												`	<tfoot>
@@ -2183,7 +2184,7 @@ $(document).ready(function(){
 							${!readOnly ? `<td>
 												<button class="btn btn-danger deleteRow" travel="true" type="button"><i class="fas fa-minus"></i></button>
 											</td>`: ``}
-							<td><div class="travel-vehicle-code">${vehicleCode || "-"}</div></td>
+							<td><div class="travel-vehicle-code">-</div></td>
 							<td>
 								<div class="travel-vehicle">
 									<select class="form-control validate select2" name="travelVehicle" id="" style="width: 100%">
@@ -2191,9 +2192,9 @@ $(document).ready(function(){
 									</select>
 								</div>
 							</td>
-							<td><div class="travel-vehicle-plate-number">${vehiclePlateNumber || "-"}</div></td>
-							<td><div class="travel-vehicle-consumption">${vehicleCode || "-"}</div></td>
-							<td><div class="travel-vehicle-gas">${vehicleGasType || "-"}</div></td>
+							<td><div class="travel-vehicle-plate-number">-</div></td>
+							<td><div class="travel-vehicle-consumption">-</div></td>
+							<td><div class="travel-vehicle-gas">-</div></td>
 							<td>
 								<div class="travel-vehicle-distance">
 									<input 
@@ -2203,7 +2204,7 @@ $(document).ready(function(){
 									max="999999999" 
 									id="vehicleDistance" 
 									name="vehicleDistance"
-									value="${vehicleDistance || ""}"
+									value=""
 									min="0.01" 
 									minlength="1" 
 									maxlength="20" required>

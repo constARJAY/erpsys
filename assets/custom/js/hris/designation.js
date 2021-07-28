@@ -25,7 +25,8 @@ $(document).ready(function(){
             scrollCollapse: true,
             columnDefs: [
                 { targets: 0, width: "10%" },
-                { targets: 3, width: 80 },
+                { targets: 3, width: 180},
+                { targets: 4, width: 80 },
             ],
         });
     }
@@ -74,6 +75,7 @@ $(document).ready(function(){
                         <th>Designation Code</th>
                         <th>Designation Name</th>
                         <th>Department Name</th>
+                        <th>Hourly Rate</th>
                         <th>Status</th>
                     </tr>
                     </thead>
@@ -105,6 +107,7 @@ $(document).ready(function(){
                         <td>${item.designationCode}</td>
                         <td>${item.designationName}</td>
                         <td>${item.departmentName}</td>
+                        <td class="text-right">${formatAmount(item.designationHourlyRate, true)}</td>
                         <td class="text-center">${status}</td>
                     </tr>`;
                 })
@@ -130,11 +133,12 @@ $(document).ready(function(){
 
      // ----- MODAL CONTENT -----
      function modalContent(data = false) {
-        let asterisk                   =   !allowedUpdate ? `` : `<strong class="text-danger">*</strong>`;
-        let designationID              = data ? (data[0].designationID            ? data[0].designationID        : "") : "",
-        departmentID             = data ? (data[0].departmentID       ? data[0].departmentID   : "") : "",
-        designationName                = data ? (data[0].designationName          ? data[0].designationName      : "") : "",
-        designationStatus      = data ? (data[0].designationStatus? data[0].designationStatus         : "") : "";
+        let asterisk                = !allowedUpdate ? `` : `<strong class="text-danger">*</strong>`;
+        let designationID           = data ? (data[0].designationID         ? data[0].designationID         : "") : "",
+        departmentID                = data ? (data[0].departmentID          ? data[0].departmentID          : "") : "",
+        designationName             = data ? (data[0].designationName       ? data[0].designationName       : "") : "",
+        designationHourlyRate       = data ? (data[0].designationHourlyRate ? data[0].designationHourlyRate : "") : "",
+        designationStatus           = data ? (data[0].designationStatus     ? data[0].designationStatus     : "") : "";
         let button = designationID ? `
         <button 
             class="btn btn-update px-5 p-2" 
@@ -183,6 +187,28 @@ $(document).ready(function(){
                             value="${designationName}"
                             autocomplete="off">
                         <div class="invalid-feedback d-block" id="invalid-input_designationName"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12 col-sm-12">
+                    <div class="form-group">
+                        <label>Hourly Rate ${asterisk}</label>
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text">₱</span>
+                            </div>
+                            <input 
+                            type="text" 
+                            class="form-control amount" 
+                            name="designationHourlyRate" 
+                            id="input_designationHourlyRate" 
+                            data-allowcharacters="[A-Z][a-z][0-9][ ][.][,][-][(][)]['][/]" 
+                            min="1"  max="999999" required
+                            value="${designationHourlyRate}"
+                            autocomplete="off">
+                        </div>
+                        <div class="invalid-feedback d-block" id="invalid-input_designationHourlyRate"></div>
                     </div>
                 </div>
             </div>
