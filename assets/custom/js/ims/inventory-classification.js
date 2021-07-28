@@ -23,7 +23,7 @@ $(document).on("click",".addClassification", function(){
                                                         <div class="form-group">
                                                             <label for="">Classification Shortcut <strong class="text-danger">*</strong></label>
                                                             <input type="text" class="form-control validate" name="classificationShortcut" unique id="input_classificationShortcut" 
-                                                                    data-allowcharacters="[A-Z][a-z]" minlength="2" maxlength="3" required>
+                                                                    data-allowcharacters="[A-Z]" minlength="2" maxlength="3" required>
                                                             <div class="invalid-feedback d-block" id="invalid-input_classificationShortcut"></div>
                                                         </div>
                                                     </div>  

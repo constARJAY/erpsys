@@ -113,6 +113,9 @@ $(document).ready(function(){
                     if(item.jobStatus == 2){
                         var status=`<span class="badge badge-outline-primary w-100">Drop</span>`;
                     }
+                    if(item.jobStatus == 3){
+                        var status=`<span class="badge badge-outline-warning w-100">Ongoing</span>`;
+                    }
                     
                   html += `
                   <tr
@@ -214,6 +217,7 @@ $(document).ready(function(){
                                   maxlength="325" 
                                   rows="8" 
                                   style="resize: none"
+                                  required
                                   ${disabled}
                                   autocomplete="off">${jobDescription}</textarea>
                               <div class="invalid-feedback d-block" id="invalid-input_jobDescription"></div>
@@ -255,7 +259,7 @@ $(document).ready(function(){
                             minlength="2" 
                             maxlength="500" 
                             rows="8"
-                             
+                             required
                             style="resize: none"
                             ${disabled}
                             autocomplete="off">${jobBenefits}</textarea>
@@ -331,6 +335,9 @@ $(document).ready(function(){
                                     <option 
                                         value="2" 
                                         ${data && jobStatus == "2" && "selected"}>Drop</option>
+                                     <option 
+                                        value="2" 
+                                        ${data && jobStatus == "3" && "selected"}>Ongoing</option>
                                 </select>
                             </div>
                         </div>
@@ -433,6 +440,7 @@ $(document).ready(function(){
 
         let data = getFormData("modalJobPosting", true);
 			data["tableData[updatedBy]"] = sessionID;
+			data["tableData[jobStatus]"] = 0;
 			data["tableName"]            = "hris_job_posting_tbl";
 			data["whereFilter"]          ="jobID="+rowID;
 			data["feedback"]             = $(".jobTitle").val();
