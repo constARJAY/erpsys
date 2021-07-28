@@ -26,7 +26,13 @@ class Cost_estimate extends CI_Controller {
         $costEstimateID             = $this->input->post("costEstimateID") ?? null;
         $reviseCostEstimateID       = $this->input->post("reviseCostEstimateID") ?? null;
         $employeeID                 = $this->input->post("employeeID");
-        $projectID                  = $this->input->post("projectID") ?? null;
+        $timelineBuilderID          = $this->input->post("timelineBuilderID") ?? null;
+        $projectCode                = $this->input->post("projectCode") ?? null;
+        $projectName                = $this->input->post("projectName") ?? null;
+        $projectCategory            = $this->input->post("projectCategory") ?? null;
+        $clientName                 = $this->input->post("clientName") ?? null;
+        $clientAddress              = $this->input->post("clientAddress") ?? null;
+
         $approversID                = $this->input->post("approversID") ?? null;
         $approversStatus            = $this->input->post("approversStatus") ?? null;
         $approversDate              = $this->input->post("approversDate") ?? null;
@@ -37,12 +43,21 @@ class Cost_estimate extends CI_Controller {
         $createdBy                  = $this->input->post("createdBy");
         $updatedBy                  = $this->input->post("updatedBy");
         $createdAt                  = $this->input->post("createdAt");
-        $items                      = $this->input->post("items") ?? null;
+
+        $projectPhase               = $this->input->post("projectPhaseData") ?? null;
+        $material                   = $this->input->post("materialData") ?? null;
+        $manpower                   = $this->input->post("manpowerData") ?? null;
+        $travel                     = $this->input->post("travelData") ?? null;
 
         $costEstimateData = [
             "reviseCostEstimateID" => $reviseCostEstimateID,
             "employeeID"              => $employeeID,
-            "projectID"               => $projectID,
+            "timelineBuilderID"       => $timelineBuilderID,
+            "projectCode"             => $projectCode,
+            "projectName"             => $projectName,
+            "projectCategory"         => $projectCategory,
+            "clientName"              => $clientName,
+            "clientAddress"           => $clientAddress,
             "approversID"             => $approversID,
             "approversStatus"         => $approversStatus,
             "approversDate"           => $approversDate,
@@ -95,69 +110,104 @@ class Cost_estimate extends CI_Controller {
             if ($result[0] == "true") {
                 $costEstimateID = $result[2];
 
-                if ($items) {
-                    $costEstimateItems = [];
-                    foreach($items as $index => $item) {
+                if ($projectPhase) {
+                    $projectPhaseData = [];
+                    foreach($projectPhase as $index => $item) {
                         $temp = [
-                            "costEstimateID"        => $costEstimateID,
-                            "itemID"                => $item["itemID"],
-                            "itemName"	 	        => $item["itemName"],
-                            "itemDescription"       => $item["itemDescription"],
-                            "itemUom"	            => $item["itemUom"],
-                            "designationID"         => $item["designationID"],
-                            "designationName"       => $item["designationName"],
-                            "designationTotalHours" => $item["designationTotalHours"],
-                            "travelDescription"     => $item["travelDescription"],
-                            "travelUnitOfMeasure"   => $item["travelUnitOfMeasure"],
-                            "categoryType"          => $item["categoryType"],
-                            "quantity"              => $item["quantity"],
-                            "brandName"             => $item["brandName"],
-                            "files"                 => array_key_exists("existingFile", $item) ? $item["existingFile"] : null,
-                            "createdBy"             => $item["createdBy"],
-                            "updatedBy"             => $item["updatedBy"],
+                            "costEstimateID"                => $costEstimateID,
+                            "categoryType"                  => "Project Phase",
+                            "milestoneBuilderID"            => $item["projectPhaseID"],
+                            "phaseDescription"	            => $item["projectPhaseDescription"],
+                            "milestoneListID"               => $item["milestoneID"],
+                            "projectMilestoneID"            => $item["milestoneID"],
+                            "projectMilestoneName"	        => $item["milestoneName"],
+                            "itemID"                        => $item["milestoneItemID"],
+                            "itemCode"                      => $item["milestoneItemCode"],
+                            "itemName"                      => $item["milestoneItemName"],
+                            "itemClassification"            => $item["milestoneItemClassification"],
+                            "quantity"                      => $item["milestoneItemQuantity"],
+                            "itemUom"                       => $item["milestoneItemUom"],
+                            "updatedBy"                     => $updatedBy,
+                            "createdBy"                     => $createdBy
                         ];
-                        array_push($costEstimateItems, $temp);
+                        array_push($projectPhaseData, $temp);
                     }
-                    
-                    if (isset($_FILES["items"])) {
-                        $length = count($_FILES["items"]["name"]);
-                        $keys   = array_keys($_FILES["items"]["name"]);
-                        for ($i=0; $i<$length; $i++) {
-                            $uploadedFile = explode(".", $_FILES["items"]["name"][$keys[$i]]["file"]);
-
-                            $index     = (int)$uploadedFile[0]; 
-                            $extension = $uploadedFile[1];
-                            $filename  = $i.time().'.'.$extension;
-
-                            $folderDir = "assets/upload-files/request-items/";
-                            if (!is_dir($folderDir)) {
-                                mkdir($folderDir);
-                            }
-                            $targetDir = $folderDir.$filename;
-
-                            if (move_uploaded_file($_FILES["items"]["tmp_name"][$index]["file"], $targetDir)) {
-                                $costEstimateItems[$index]["files"] = $filename;
-                            }
-                            
-                        } 
-
-                        // ----- UPDATE ITEMS FILE -----
-                        foreach ($costEstimateItems as $key => $prItem) {
-                            if (!array_key_exists("files", $prItem)) {
-                                $costEstimateItems[$key]["files"] = null;
-                            }
-                        }
-                        // ----- END UPDATE ITEMS FILE -----
-                    }
-                    $saveCostEstimateItems = $this->costestimate->saveCostEstimateItems($costEstimateItems, $costEstimateID);
+                    $this->costestimate->saveCostEstimateProjectPhase($projectPhaseData, $costEstimateID);
                 }
 
+                if ($material) {
+                    $materialData = [];
+                    foreach($material as $index => $item) {
+                        $temp = [
+                            "costEstimateID"        => $costEstimateID,
+                            "categoryType"          => "Materials and Equipment",
+                            "itemCode"              => $item["materialItemCode"],
+                            "itemID"	 	        => $item["materialItemID"],
+                            "itemName"              => $item["materialItemName"],
+                            "itemClassification"    => $item["materialItemClassification"],
+                            "quantity"              => $item["materialItemQuantity"],
+                            "itemUom"               => $item["materialItemUom"],
+                            "updatedBy"             => $updatedBy,
+                            "createdBy"             => $createdBy
+                        ];
+                        array_push($materialData, $temp);
+                    }
+                    $this->costestimate->saveCostEstimateMaterial($materialData, $costEstimateID);
+                }
+
+                if ($manpower) {
+                    $manpowerData = [];
+                    foreach($manpower as $index => $item) {
+                        $temp = [
+                            "costEstimateID"            => $costEstimateID,
+                            "designationID"             => $item["designationID"],
+                            "designationCode"	 	    => $item["designationCode"],
+                            "designation"               => $item["designation"],
+                            "designationQuantity"       => $item["designationQuantity"],
+                            "designationTotalManHours"  => $item["designationTotalManHours"],
+                            "updatedBy"                 => $updatedBy,
+                            "createdBy"                 => $createdBy
+                        ];
+                        array_push($manpowerData, $temp);
+                    }
+                    $this->costestimate->saveCostEstimateManpower($manpowerData, $costEstimateID);
+                }
+
+                if ($travel) {
+                    $travelData = [];
+                    foreach($travel as $index => $item) {
+                        $temp = [
+                            "costEstimateID"            => $costEstimateID,
+                            "travelType"                => $item["travelType"],
+                            "vehicleID"                 => $item["vehicleID"] ?? null,
+                            "vehicleCode"	 	        => $item["vehicleCode"] ?? null,
+                            "vehicleName"               => $item["vehicleName"] ?? null,
+                            "vehiclePlateNumber"        => $item["vehiclePlateNumber"] ?? null,
+                            "vehicleFuelConsumption"    => $item["vehicleFuelConsumption"] ?? null,
+                            "vehicleGasType"            => $item["vehicleGasType"] ?? null,
+                            "vehicleDistance"           => $item["vehicleDistance"] ?? null,
+                            "travelTypeDescription"     => $item["travelTypeDescription"] ?? null,
+                            "updatedBy"                 => $updatedBy,
+                            "createdBy"                 => $createdBy
+                        ];
+                        array_push($travelData, $temp);
+                    }
+                    $this->costestimate->saveCostEstimateTravel($travelData, $costEstimateID);
+                }
+                
+                
             }
             
         }
         echo json_encode($saveCostEstimateData);
     }
 
+    public function getDataDivision(){
+        $timelineBuilderID       = $this->input->post("timelineBuilderID") ?? null;
+        $costEstimateID          = $this->input->post("costEstimateID") ?? null;
+        $result                  = $this->costestimate->getDataDivision($timelineBuilderID, $costEstimateID);
+        echo json_encode($result);
+    }
 
 
 }

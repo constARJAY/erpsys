@@ -597,7 +597,7 @@ const getAllEmployeeData = (employeeID = null) => {
 		`employeeID,
 		CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname,
 		departmentName AS department,
-		designationName AS designation`,
+		designationName AS designation, designationID AS designationID`,
 		`employeeStatus = 1 OR employeeStatus = 2 OR ${whereEmployee}`
 	);
 	return data || [];
