@@ -1403,27 +1403,19 @@ DROP TABLE IF EXISTS `hris_job_posting_tbl`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `hris_job_posting_tbl` (
   `jobID` bigint(20) NOT NULL AUTO_INCREMENT,
-  `jobCode` varchar(255) NOT NULL,
-  `jobCompany` varchar(255) NOT NULL,
-  `jobTitle` varchar(255) NOT NULL,
-  `jobDescription` longtext NOT NULL,
-  `jobResponsibilities` longtext NOT NULL,
-  `jobType` varchar(255) NOT NULL,
-  `jobCategory` varchar(255) NOT NULL,
-  `techSkillsQualification` longtext NOT NULL,
-  `jobBenefits` longtext NOT NULL,
-  `jobLanguage` varchar(255) NOT NULL,
+  `requisitionID` bigint(20) NOT NULL,
+  `requisitionCode` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `jobDescription` longtext COLLATE utf8mb4_unicode_ci NOT NULL,
+  `jobBenefits` longtext COLLATE utf8mb4_unicode_ci NOT NULL,
   `jobSlot` int(50) NOT NULL,
-  `salaryRangeSelect` int(50) NOT NULL,
-  `salaryRange` decimal(10,2) NOT NULL,
   `jobStatus` int(50) NOT NULL,
-  `datecreated` date NOT NULL DEFAULT current_timestamp(),
+  `datecreated` timestamp NOT NULL DEFAULT current_timestamp(),
   `createdAt` timestamp NOT NULL DEFAULT current_timestamp(),
   `updatedAt` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   `createdBy` bigint(20) NOT NULL,
   `updatedBy` bigint(20) NOT NULL,
   PRIMARY KEY (`jobID`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1432,7 +1424,6 @@ CREATE TABLE `hris_job_posting_tbl` (
 
 LOCK TABLES `hris_job_posting_tbl` WRITE;
 /*!40000 ALTER TABLE `hris_job_posting_tbl` DISABLE KEYS */;
-INSERT INTO `hris_job_posting_tbl` VALUES (1,'JPG-21-00001','BlackCoders Group Inc.','Programmer','Code and test programming for software and mobile apps. Develop and deploy computer applications. Execute code builds to test and production environments. Fix bugs in existing code.','Coding and debugging.\nDesigning and testing computer structures.\nTroubleshooting system errors.\nWriting computer instructions.\nManaging database systems.','Full-Time','Computer/Information Technology','Degree in Computer Science or Computer Programming.\nEnd user-oriented.\nExpert IT skills.\nStrong aptitude for math.\nAdvanced knowledge of operating systems.\nAnalytical and problem-solving skills.\nJava, C++, SQL, C#, and HTML experience.','Overtime pay, Night Shift Differential','Tagalog|English',2,1,20000.00,1,'2021-05-14','2021-05-14 06:27:33','0000-00-00 00:00:00',1,1),(2,'JPG-21-00002','BlackCoders Group Inc.','Software Quality Analyst ','Software quality assurance (SQA) analysts are in charge of ensuring that software packages contain no errors by analyzing development data. They implement test plans using diverse troubleshooting computer applications.','Write, implement, and document test cases to identify bugs and rewrite requirements.\nConduct exploratory testing to evaluate robustness and functionality of products.\nDesign, develop, and implement automated testing systems, and evaluate output.','Full-Time','Computer/Information Technology','A software quality assurance analyst will need to have a problem-solving and analytical mind to excel at this job, as they are in charge of creating test plans, automation tests and maintenance procedures. They also ensure that software is coded to industry regulations. Communication skills are very important because analysts are responsible for communicating changes that need to be made to the programming team.','HMO, 13th Month Pay','English',2,1,20000.00,1,'2021-05-14','2021-05-14 06:53:42','0000-00-00 00:00:00',1,1);
 /*!40000 ALTER TABLE `hris_job_posting_tbl` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -1755,9 +1746,10 @@ CREATE TABLE `hris_personnel_request_tbl` (
   `costEstimateID` bigint(20) DEFAULT NULL,
   `billMaterialID` bigint(20) DEFAULT NULL,
   `designationID` bigint(20) NOT NULL,
-  `designationName` text NOT NULL,
-  `designationTotalHours` decimal(10,1) NOT NULL,
-  `quantity` bigint(20) NOT NULL,
+  `designationCode` text NOT NULL,
+  `designation` text NOT NULL,
+  `designationQuantity` decimal(10,0) NOT NULL,
+  `designationTotalManHours` decimal(10,1) NOT NULL,
   `unitCost` decimal(10,2) NOT NULL,
   `totalCost` decimal(10,2) NOT NULL,
   `createdBy` bigint(20) NOT NULL,
@@ -1765,7 +1757,7 @@ CREATE TABLE `hris_personnel_request_tbl` (
   `createdAt` timestamp NOT NULL DEFAULT current_timestamp(),
   `updatedAt` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   PRIMARY KEY (`personnelRequestID`)
-) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1774,7 +1766,6 @@ CREATE TABLE `hris_personnel_request_tbl` (
 
 LOCK TABLES `hris_personnel_request_tbl` WRITE;
 /*!40000 ALTER TABLE `hris_personnel_request_tbl` DISABLE KEYS */;
-INSERT INTO `hris_personnel_request_tbl` VALUES (1,1,NULL,7,'Installer',16.0,2,0.00,0.00,1,1,'2021-06-29 04:51:44','2021-06-29 04:51:44'),(2,1,NULL,7,'Installer',16.0,2,0.00,0.00,1,1,'2021-06-29 04:51:44','2021-06-29 04:51:44'),(3,2,NULL,7,'Installer',16.0,2,0.00,0.00,1,1,'2021-06-29 05:00:35','2021-06-29 05:00:35'),(4,2,NULL,7,'Installer',16.0,2,0.00,0.00,1,1,'2021-06-29 05:00:35','2021-06-29 05:00:35'),(5,1,1,7,'Installer',16.0,0,95.00,1520.00,1,1,'2021-06-29 05:38:18','2021-06-29 05:38:18'),(6,1,1,7,'Installer',16.0,0,95.00,1520.00,1,1,'2021-06-29 05:38:18','2021-06-29 05:38:18'),(7,5,NULL,7,'Installer',8.0,1,0.00,0.00,1,1,'2021-06-29 06:01:44','2021-06-29 06:01:44'),(8,6,NULL,7,'Installer',8.0,2,0.00,0.00,1,1,'2021-06-29 23:04:37','2021-06-29 23:04:37'),(9,6,NULL,7,'Installer',8.0,2,0.00,0.00,1,1,'2021-06-29 23:04:37','2021-06-29 23:04:37'),(10,8,NULL,7,'Installer',8.0,2,0.00,0.00,1,1,'2021-06-29 23:09:17','2021-06-29 23:09:17'),(11,8,NULL,7,'Installer',8.0,2,0.00,0.00,1,1,'2021-06-29 23:09:17','2021-06-29 23:09:17'),(12,5,4,7,'Installer',8.0,0,80.00,640.00,1,1,'2021-06-29 23:25:50','2021-06-29 23:25:50');
 /*!40000 ALTER TABLE `hris_personnel_request_tbl` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -3461,10 +3452,15 @@ CREATE TABLE `ims_travel_request_tbl` (
   `travelRequestID` bigint(20) NOT NULL AUTO_INCREMENT,
   `costEstimateID` bigint(20) DEFAULT NULL,
   `billMaterialID` bigint(20) DEFAULT NULL,
-  `travelDescription` text NOT NULL,
-  `categoryType` text NOT NULL,
-  `quantity` decimal(10,2) DEFAULT NULL,
-  `unitOfMeasure` text NOT NULL,
+  `travelType` text NOT NULL,
+  `vehicleID` bigint(20) DEFAULT NULL,
+  `vehicleCode` text DEFAULT NULL,
+  `vehicleName` text DEFAULT NULL,
+  `vehiclePlateNumber` text DEFAULT NULL,
+  `vehicleGasType` text DEFAULT NULL,
+  `vehicleDistance` decimal(20,2) DEFAULT NULL,
+  `vehicleFuelConsumption` decimal(20,2) DEFAULT NULL,
+  `travelTypeDescription` text DEFAULT NULL,
   `unitCost` decimal(10,2) NOT NULL,
   `totalCost` decimal(10,2) NOT NULL,
   `createdBy` bigint(20) NOT NULL,
@@ -3472,7 +3468,7 @@ CREATE TABLE `ims_travel_request_tbl` (
   `createdAt` timestamp NOT NULL DEFAULT current_timestamp(),
   `updatedAt` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   PRIMARY KEY (`travelRequestID`)
-) ENGINE=InnoDB AUTO_INCREMENT=21 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -3481,7 +3477,6 @@ CREATE TABLE `ims_travel_request_tbl` (
 
 LOCK TABLES `ims_travel_request_tbl` WRITE;
 /*!40000 ALTER TABLE `ims_travel_request_tbl` DISABLE KEYS */;
-INSERT INTO `ims_travel_request_tbl` VALUES (1,1,NULL,'Toll Gate to NLEX','',2.00,'pieces',0.00,0.00,1,1,'2021-06-29 04:51:44','2021-06-29 04:51:44'),(2,2,NULL,'None','',0.00,'none',0.00,0.00,1,1,'2021-06-29 05:00:35','2021-06-29 05:00:35'),(3,3,NULL,'None','',0.00,'none',0.00,0.00,1,1,'2021-06-29 05:22:41','2021-06-29 05:22:41'),(4,4,NULL,'None','',0.00,'none',0.00,0.00,1,1,'2021-06-29 05:23:56','2021-06-29 05:23:56'),(5,1,1,'Toll Gate to NLEX','',2.00,'pieces',0.00,0.00,1,1,'2021-06-29 05:38:18','2021-06-29 05:38:18'),(6,1,1,'BCGI to La Union','',1.00,'Pieces',200.00,200.00,1,1,'2021-06-29 05:38:18','2021-06-29 05:38:18'),(7,1,1,'La Union to BCGI','',1.00,'Pieces',200.00,200.00,1,1,'2021-06-29 05:38:18','2021-06-29 05:38:18'),(8,3,2,'None','',0.00,'none',0.00,0.00,1,1,'2021-06-29 05:58:18','2021-06-29 05:58:18'),(9,4,3,'None','',0.00,'none',0.00,0.00,1,1,'2021-06-29 05:59:21','2021-06-29 05:59:21'),(10,5,NULL,'NLEX Toll Gate','',2.00,'pieces',0.00,0.00,1,1,'2021-06-29 06:01:44','2021-06-29 06:01:44'),(11,6,NULL,'None','',0.00,'none',0.00,0.00,1,1,'2021-06-29 23:04:37','2021-06-29 23:04:37'),(12,7,NULL,'None','',0.00,'none',0.00,0.00,1,1,'2021-06-29 23:06:04','2021-06-29 23:06:04'),(13,8,NULL,'None','',0.00,'none',0.00,0.00,1,1,'2021-06-29 23:09:17','2021-06-29 23:09:17'),(14,5,4,'NLEX Toll Gate','',2.00,'pieces',0.00,0.00,1,1,'2021-06-29 23:25:50','2021-06-29 23:25:50'),(15,5,4,'Ortigas Pasig to NLEX','',1.00,'Pieces',200.00,200.00,1,1,'2021-06-29 23:25:50','2021-06-29 23:25:50'),(16,5,4,'NLEX to Ortigas Pasig','',1.00,'Pieces',200.00,200.00,1,1,'2021-06-29 23:25:50','2021-06-29 23:25:50'),(17,7,5,'None','',0.00,'none',0.00,0.00,1,1,'2021-06-29 23:26:20','2021-06-29 23:26:20'),(18,9,NULL,'test','',100.00,'kilo',0.00,0.00,1,1,'2021-07-05 01:52:34','2021-07-05 01:52:34'),(19,10,NULL,'test','',100.00,'pounds',0.00,0.00,1,1,'2021-07-05 01:53:02','2021-07-05 01:53:02'),(20,11,NULL,'Test','',10.00,'pounds',0.00,0.00,1,1,'2021-07-05 23:10:32','2021-07-05 23:10:32');
 /*!40000 ALTER TABLE `ims_travel_request_tbl` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -3648,8 +3643,13 @@ CREATE TABLE `pms_cost_estimate_tbl` (
   `costEstimateID` bigint(20) NOT NULL AUTO_INCREMENT,
   `reviseCostEstimateID` bigint(20) DEFAULT NULL,
   `employeeID` bigint(20) NOT NULL,
-  `projectID` bigint(20) DEFAULT NULL,
   `referenceCode` text DEFAULT NULL,
+  `timelineBuilderID` bigint(20) DEFAULT NULL,
+  `projectCode` varchar(200) DEFAULT NULL,
+  `projectName` text DEFAULT NULL,
+  `projectCategory` varchar(200) DEFAULT NULL,
+  `clientName` text DEFAULT NULL,
+  `clientAddress` text DEFAULT NULL,
   `approversID` text DEFAULT NULL,
   `approversStatus` text DEFAULT NULL,
   `approversDate` text DEFAULT NULL,
@@ -3662,7 +3662,7 @@ CREATE TABLE `pms_cost_estimate_tbl` (
   `createdAt` timestamp NOT NULL DEFAULT current_timestamp(),
   `updatedAt` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   PRIMARY KEY (`costEstimateID`)
-) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -3671,7 +3671,6 @@ CREATE TABLE `pms_cost_estimate_tbl` (
 
 LOCK TABLES `pms_cost_estimate_tbl` WRITE;
 /*!40000 ALTER TABLE `pms_cost_estimate_tbl` DISABLE KEYS */;
-INSERT INTO `pms_cost_estimate_tbl` VALUES (1,NULL,1,5,NULL,'4|20|2','2|2|2','2021-06-29 13:26:28|2021-06-29 13:28:05|2021-06-29 13:30:52',2,'For CCTV Installation',NULL,'2021-06-29 12:51:39',1,2,'2021-06-29 12:51:39','2021-06-29 05:30:54'),(2,NULL,1,5,NULL,'4|20|2','2|2|3','2021-06-29 13:26:11|2021-06-29 13:28:34|2021-06-29 13:30:10',3,'CCTV Installation in La Union','please revise','2021-06-29 13:00:32',1,2,'2021-06-29 13:00:32','2021-06-29 05:30:11'),(3,NULL,1,2,NULL,'4|20|2','2|2|2','2021-06-29 13:26:41|2021-06-29 13:27:49|2021-06-29 13:30:36',2,'For BlackBox POS and Inventory System Project',NULL,'2021-06-29 13:22:38',1,2,'2021-06-29 13:22:38','2021-06-29 05:30:38'),(4,NULL,1,4,NULL,'4|20|2','2|2|2','2021-06-29 13:25:49|2021-06-29 13:28:57|2021-06-29 13:29:37',2,'For Hotel Mercante HMS Project',NULL,'2021-06-29 13:23:52',1,2,'2021-06-29 13:23:52','2021-06-29 05:29:40'),(5,NULL,1,5,NULL,'4|20|2','2|2|2','2021-06-29 14:03:44|2021-06-30 07:21:41|2021-06-30 07:22:46',2,'CCTV installation',NULL,'2021-06-29 14:01:40',1,2,'2021-06-29 14:01:40','2021-06-29 23:22:48'),(6,NULL,1,5,NULL,'4|20|2','2|2|2','2021-06-30 07:10:52|2021-06-30 07:21:18|2021-06-30 07:22:59',2,'CCTV Installation to Fairview Q.C',NULL,'2021-06-30 07:04:35',1,2,'2021-06-30 07:04:35','2021-06-29 23:23:01'),(7,NULL,1,2,NULL,'4|20|2','2|2|2','2021-06-30 07:11:02|2021-06-30 07:18:00|2021-06-30 07:20:25',2,'For Kyusi Market POS System Project',NULL,'2021-06-30 07:06:01',1,2,'2021-06-30 07:06:01','2021-06-29 23:20:27'),(8,NULL,1,4,NULL,'4|20|2','2|2|2','2021-06-30 07:10:20|2021-06-30 07:21:51|2021-06-30 07:22:34',2,'For SMD Hotel Management System Project',NULL,'2021-06-30 07:09:14',1,2,'2021-06-30 07:09:14','2021-06-29 23:22:36'),(9,NULL,1,1,NULL,'4|20|2','2|2','2021-07-05 16:05:06|2021-07-06 07:11:50',1,'test',NULL,'2021-07-05 01:52:33',1,20,'2021-07-05 01:52:33','2021-07-05 23:11:52'),(10,NULL,1,1,NULL,'4|20|2','2','2021-07-05 16:05:41',1,'test',NULL,'2021-07-05 01:52:59',1,4,'2021-07-05 01:52:59','2021-07-05 08:05:44'),(11,NULL,1,1,NULL,'4|20|2',NULL,NULL,1,'desc',NULL,'2021-07-05 23:10:28',1,1,'2021-07-05 23:10:28','2021-07-05 23:10:32');
 /*!40000 ALTER TABLE `pms_cost_estimate_tbl` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -3888,6 +3887,7 @@ CREATE TABLE `pms_personnel_requisition_tbl` (
   `employeeID` bigint(20) NOT NULL,
   `requisitionStatus` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
   `requisitionRemarks` longtext COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `vacancy` int(50) DEFAULT NULL,
   `departmentID` bigint(20) DEFAULT NULL,
   `designationID` bigint(20) DEFAULT NULL,
   `salaryPackage` decimal(10,2) DEFAULT NULL,
@@ -4238,4 +4238,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2021-07-22  8:02:29
+-- Dump completed on 2021-07-28  9:08:21
