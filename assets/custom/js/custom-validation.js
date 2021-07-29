@@ -51,6 +51,7 @@ const initAll = () => {
 	initAmountFuel();
 	initQuantity();
 	initHours();
+	initPoints();
 };
 // ----- END REINITIALIZE ALL FUNCTION -----
 
@@ -159,6 +160,20 @@ const initQuantity = (element = null) => {
 };
 initQuantity();
 // ----- END INITIALIZE QUANTITY FORMAT -----
+
+
+// ----- INITIALIZE POINTS -----
+const initPoints = (element = null) => {
+	let elem = getElement(element, ".input-points");
+	$(elem).inputmask({
+		alias: "currency",
+		prefix: "",
+		allowMinus: false,
+		allowPlus:  false,
+	});
+};
+initPoints();
+// ----- END INITIALIZE POINTS -----
 
 
 // ----- INITIALIZE HOURSE FORMAT -----
@@ -664,6 +679,61 @@ const checkHours = (elementID, invalidFeedback, value) => {
 // ----- END VALIDATE HOURS -----
 
 
+// ----- VALIDATE POINTS -----
+const checkPoints = (elementID, invalidFeedback, value) => {
+	const validated = $(elementID).hasClass("validated");
+	const min = $(elementID).attr("min") ? +$(elementID).attr("min") : false;
+	const max = $(elementID).attr("max") ? +$(elementID).attr("max") : false;
+	let points = +value.split(",").join("");
+
+	if (typeof min != "number" && typeof max != "number") {
+		validated
+			? $(elementID).removeClass("is-invalid").addClass("is-valid")
+			: $(elementID).removeClass("is-invalid").removeClass("is-valid");
+		invalidFeedback.text("");
+	} else if (typeof min != "number" && typeof max == "number") {
+		if (points > max) {
+			$(elementID).removeClass("is-valid").addClass("is-invalid");
+			invalidFeedback.text(`Please input points less than ${formatAmount(max)}`);
+		} else {
+			validated
+				? $(elementID).removeClass("is-invalid").addClass("is-valid")
+				: $(elementID).removeClass("is-invalid").removeClass("is-valid");
+			invalidFeedback.text("");
+		}
+	} else if (typeof min == "number" && typeof max != "number") {
+		if (points < min) {
+			$(elementID).removeClass("is-valid").addClass("is-invalid");
+			invalidFeedback.text(`Please input points greater than ${formatAmount(min)}`);
+		} else {
+			validated
+				? $(elementID).removeClass("is-invalid").addClass("is-valid")
+				: $(elementID).removeClass("is-invalid").removeClass("is-valid");
+			invalidFeedback.text("");
+		}
+	} else if (typeof min == "number" && typeof max == "number") {
+		if (points >= min && points > max) {
+			$(elementID).removeClass("is-valid").addClass("is-invalid");
+			invalidFeedback.text(`Please input points less than ${formatAmount(max)}`);
+		} else if (points >= min && points <= max) {
+			validated
+				? $(elementID).removeClass("is-invalid").addClass("is-valid")
+				: $(elementID).removeClass("is-invalid").removeClass("is-valid");
+			invalidFeedback.text("");
+		} else if (points < min && points <= max) {
+			$(elementID).removeClass("is-valid").addClass("is-invalid");
+			invalidFeedback.text(`Please input points greater than ${formatAmount(min - 0.01)}`);
+		}
+	} else {
+		validated
+			? $(elementID).removeClass("is-invalid").addClass("is-valid")
+			: $(elementID).removeClass("is-invalid").removeClass("is-valid");
+		invalidFeedback.text("");
+	}
+};
+// ----- END VALIDATE POINTS -----
+
+
 // ----- VALIDATE IF EXISTS -----
 const checkExists = (elementID, invalidFeedback) => {
 	let inputs = {};
@@ -1127,8 +1197,8 @@ $(function () {
 		let quantity  = $(this).hasClass("input-quantity");
 		let hours     = $(this).hasClass("input-hours");
 		let number    = $(this).hasClass("number");
-		let value     = $(this).val().trim();
-		let valLength = value.length;
+		let value     = $(this).val()?.trim();
+		let valLength = value?.length;
 		let invalidFeedback =
 			$(elementID).parent().find(".invalid-feedback").length > 0
 				? $(elementID).parent().find(".invalid-feedback")
@@ -1417,6 +1487,21 @@ $(function () {
 		checkHours(elementID, invalidFeedback, value);
 	})
 	// ----- END CHECK AMOUNT KEYUP -----
+
+
+	// ----- CHECK POINTS KEYUP -----
+	$(document).on("keyup", ".input-points", function() {
+		let value     = $(this).val();
+		let elementID = `#${$(this).attr("id")}`;
+		let invalidFeedback =
+		$(elementID).parent().find(".invalid-feedback").length > 0
+			? $(elementID).parent().find(".invalid-feedback")
+			: $(elementID).parent().parent().find(".invalid-feedback").length > 0
+			? $(elementID).parent().parent().find(".invalid-feedback")
+			: $(elementID).parent().parent().parent().find(".invalid-feedback");
+		checkPoints(elementID, invalidFeedback, value);
+	})
+	// ----- END CHECK POINTS KEYUP -----
 
 
 	// ----- CHECK INPUTMASK KEYUP -----

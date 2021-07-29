@@ -62,15 +62,16 @@ $(document).ready(function() {
 				scrollX: true,
 				scrollCollapse: true,
 				columnDefs: [
-					{ targets: 0, width: "80px" },
-					{ targets: 1, width: "150px" },
+					{ targets: 0, width: "80px"  },
+					{ targets: 1, width: "80px"  },
 					{ targets: 2, width: "150px" },
 					{ targets: 3, width: "150px" },
-					{ targets: 4, width: "200px" },
-					{ targets: 5, width: "150px" },
+					{ targets: 4, width: "150px" },
+					{ targets: 5, width: "200px" },
 					{ targets: 6, width: "150px" },
-					{ targets: 7, width: "80px" },
-					{ targets: 8, width: "80px" },
+					{ targets: 7, width: "150px" },
+					{ targets: 8, width: "80px"  },
+					{ targets: 9, width: "80px"  },
 				],
 			});
     }
@@ -200,6 +201,7 @@ $(document).ready(function() {
             <table class="table table-striped" id="tableModuleListTable">
                 <thead class="text-center">
                     <tr>
+                        <th>Module ID</th>
                         <th>Order</th>
                         <th>Module Header</th>
                         <th>Module Category</th>
@@ -232,6 +234,7 @@ $(document).ready(function() {
 
                 html += `
                 <tr class="text-center">
+                    <td>${item.moduleID}</td>
                     <td>${item.moduleOrder}</td>
                     <td>${item.moduleHeaderName}</td>
                     <td>${item.moduleCategoryName ? item.moduleCategoryName : "-"}</td>

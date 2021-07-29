@@ -1886,7 +1886,7 @@ $(document).ready(function() {
 				var timelineBuilderStatus = timelineBudgetStatus != 0 ? true : false;
 				if (approversID) {
 					data["approversID"]           = timelineBuilderStatus ? approversID : ``;
-					data["timelineBuilderStatus"] = timelineBuilderStatus;
+					data["timelineBuilderStatus"] = timelineBuilderStatus ? 0 : 6;
 
 					formData.append("approversID", timelineBuilderStatus ? approversID : ``);
 					formData.append("timelineBuilderStatus", timelineBuilderStatus ? 2 : 6);
@@ -1934,7 +1934,6 @@ $(document).ready(function() {
 				formData.append(`tasks[${i}][taskRemarks]`, taskRemarks);
 				data["tasks"].push(temp);
 			});
-
 		} 
 
 		

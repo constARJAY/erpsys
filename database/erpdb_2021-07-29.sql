@@ -1363,6 +1363,98 @@ INSERT INTO `hris_event_calendar_tbl` VALUES (1,'Departmental Meeting','bg-green
 UNLOCK TABLES;
 
 --
+-- Table structure for table `hris_examination_choices_tbl`
+--
+
+DROP TABLE IF EXISTS `hris_examination_choices_tbl`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `hris_examination_choices_tbl` (
+  `examinationChoicesID` bigint(21) NOT NULL AUTO_INCREMENT,
+  `examinationID` bigint(21) NOT NULL,
+  `examinationQaID` bigint(21) NOT NULL,
+  `keyID` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `description` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `createdBy` bigint(21) DEFAULT NULL,
+  `updatedBy` bigint(21) DEFAULT NULL,
+  `createdAt` timestamp NULL DEFAULT current_timestamp(),
+  `updatedAt` timestamp NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`examinationChoicesID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `hris_examination_choices_tbl`
+--
+
+LOCK TABLES `hris_examination_choices_tbl` WRITE;
+/*!40000 ALTER TABLE `hris_examination_choices_tbl` DISABLE KEYS */;
+/*!40000 ALTER TABLE `hris_examination_choices_tbl` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `hris_examination_qa_tbl`
+--
+
+DROP TABLE IF EXISTS `hris_examination_qa_tbl`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `hris_examination_qa_tbl` (
+  `examinationQaID` bigint(21) NOT NULL AUTO_INCREMENT,
+  `examinationID` bigint(21) NOT NULL,
+  `examinationType` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `question` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `answer` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `points` decimal(10,2) DEFAULT NULL,
+  `createdBy` bigint(21) DEFAULT NULL,
+  `updatedBy` bigint(21) DEFAULT NULL,
+  `createdAt` timestamp NULL DEFAULT current_timestamp(),
+  `updatedAt` timestamp NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`examinationQaID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `hris_examination_qa_tbl`
+--
+
+LOCK TABLES `hris_examination_qa_tbl` WRITE;
+/*!40000 ALTER TABLE `hris_examination_qa_tbl` DISABLE KEYS */;
+/*!40000 ALTER TABLE `hris_examination_qa_tbl` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `hris_examination_tbl`
+--
+
+DROP TABLE IF EXISTS `hris_examination_tbl`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `hris_examination_tbl` (
+  `examinationID` bigint(21) NOT NULL AUTO_INCREMENT,
+  `examinationName` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `examinationDescription` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `examinationType` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `examinationStatus` int(11) DEFAULT NULL,
+  `examinationPoints` decimal(15,2) DEFAULT NULL,
+  `createdBy` bigint(21) DEFAULT NULL,
+  `updatedBy` bigint(21) DEFAULT NULL,
+  `createdAt` timestamp NULL DEFAULT current_timestamp(),
+  `updatedAt` timestamp NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`examinationID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `hris_examination_tbl`
+--
+
+LOCK TABLES `hris_examination_tbl` WRITE;
+/*!40000 ALTER TABLE `hris_examination_tbl` DISABLE KEYS */;
+/*!40000 ALTER TABLE `hris_examination_tbl` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `hris_holiday_tbl`
 --
 
@@ -3461,6 +3553,7 @@ CREATE TABLE `ims_travel_request_tbl` (
   `vehicleDistance` decimal(20,2) DEFAULT NULL,
   `vehicleFuelConsumption` decimal(20,2) DEFAULT NULL,
   `travelTypeDescription` text DEFAULT NULL,
+  `vehicleLiters` decimal(20,2) DEFAULT NULL,
   `unitCost` decimal(10,2) NOT NULL,
   `totalCost` decimal(10,2) NOT NULL,
   `createdBy` bigint(20) NOT NULL,
@@ -3691,7 +3784,7 @@ CREATE TABLE `pms_employeetaskboard_log_tbl` (
   `createdBy` bigint(20) NOT NULL,
   `createdAt` timestamp NOT NULL DEFAULT current_timestamp(),
   PRIMARY KEY (`logID`)
-) ENGINE=InnoDB AUTO_INCREMENT=58 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -3700,7 +3793,6 @@ CREATE TABLE `pms_employeetaskboard_log_tbl` (
 
 LOCK TABLES `pms_employeetaskboard_log_tbl` WRITE;
 /*!40000 ALTER TABLE `pms_employeetaskboard_log_tbl` DISABLE KEYS */;
-INSERT INTO `pms_employeetaskboard_log_tbl` VALUES (1,1,NULL,'changed','used hours','10.00',1,'2021-07-05 02:55:39'),(2,2,NULL,'changed','used hours','10.00',1,'2021-07-05 02:55:40'),(3,3,NULL,'changed','used hours','10.00',1,'2021-07-05 02:55:42'),(4,1,NULL,'changed','description','Test',1,'2021-07-05 02:55:44'),(5,2,NULL,'changed','description','test 2',1,'2021-07-05 02:55:46'),(6,3,NULL,'changed','description','test3',1,'2021-07-05 02:55:51'),(7,1,NULL,'changed','priority','3',1,'2021-07-05 02:55:53'),(8,1,NULL,'changed','severity','1',1,'2021-07-05 02:57:35'),(9,1,NULL,'changed','status','7',1,'2021-07-05 02:57:38'),(10,2,NULL,'changed','status','7',1,'2021-07-05 02:57:50'),(11,3,NULL,'changed','status','7',1,'2021-07-05 02:57:53'),(12,2,NULL,'changed','priority','3',1,'2021-07-05 02:57:58'),(13,3,NULL,'changed','priority','3',1,'2021-07-05 02:57:59'),(14,2,NULL,'changed','severity','3',1,'2021-07-05 02:58:02'),(15,3,NULL,'changed','severity','3',1,'2021-07-05 02:58:04'),(16,3,NULL,'changed','used hours','8.00',1,'2021-07-05 02:58:18'),(17,4,NULL,'changed','used hours','5.00',1,'2021-07-05 02:58:39'),(18,5,NULL,'changed','used hours','5.00',1,'2021-07-05 02:58:40'),(19,6,NULL,'changed','used hours','5.00',1,'2021-07-05 02:58:41'),(20,5,NULL,'changed','actual end date','2021-07-05',1,'2021-07-05 02:58:42'),(21,4,NULL,'changed','status','7',1,'2021-07-05 02:58:48'),(22,5,NULL,'changed','status','7',1,'2021-07-05 03:00:59'),(23,6,NULL,'changed','status','7',1,'2021-07-05 03:01:03'),(24,1,NULL,'changed','status','7',1,'2021-07-05 04:55:26'),(25,2,NULL,'changed','status','3',1,'2021-07-05 04:55:38'),(26,3,NULL,'changed','status','1',1,'2021-07-05 04:55:40'),(27,2,NULL,'changed','status','7',1,'2021-07-05 04:55:45'),(28,3,NULL,'changed','status','7',1,'2021-07-05 04:55:48'),(29,3,NULL,'changed','status','4',1,'2021-07-05 04:55:52'),(30,3,NULL,'changed','status','3',1,'2021-07-05 04:55:54'),(31,3,NULL,'changed','status','7',1,'2021-07-05 04:56:02'),(32,1,NULL,'changed','description','Test',1,'2021-07-05 04:59:47'),(33,1,NULL,'changed','status','7',1,'2021-07-05 05:12:29'),(34,2,NULL,'changed','status','4',1,'2021-07-05 05:12:30'),(35,2,NULL,'changed','status','2',1,'2021-07-05 05:12:32'),(36,2,NULL,'changed','status','5',1,'2021-07-05 05:13:05'),(37,1,NULL,'changed','description','test',1,'2021-07-05 05:13:31'),(38,1,NULL,'changed','description','tests',1,'2021-07-05 05:14:22'),(39,2,NULL,'changed','description','te',1,'2021-07-05 05:14:32'),(40,3,NULL,'changed','status','7',1,'2021-07-05 05:28:24'),(41,4,NULL,'changed','status','7',1,'2021-07-05 05:33:31'),(42,2,NULL,'changed','status','7',1,'2021-07-05 05:37:37'),(43,5,NULL,'changed','status','7',1,'2021-07-05 05:37:43'),(44,6,NULL,'changed','status','7',1,'2021-07-05 05:37:46'),(45,1,NULL,'changed','status','2',1,'2021-07-05 05:47:46'),(46,1,NULL,'changed','status','7',1,'2021-07-05 05:47:51'),(47,7,NULL,'changed','status','7',1,'2021-07-05 05:48:07'),(48,8,NULL,'changed','status','7',1,'2021-07-05 05:48:09'),(49,9,NULL,'changed','status','7',1,'2021-07-05 05:48:11'),(50,10,NULL,'changed','status','7',1,'2021-07-05 05:48:13'),(51,11,NULL,'changed','status','7',1,'2021-07-05 05:48:15'),(52,12,NULL,'changed','status','7',1,'2021-07-05 05:48:17'),(53,13,NULL,'changed','status','7',1,'2021-07-05 05:48:19'),(54,14,NULL,'changed','status','5',1,'2021-07-05 05:48:20'),(55,14,NULL,'changed','status','7',1,'2021-07-05 05:48:26'),(56,3,NULL,'changed','status','2',1,'2021-07-05 05:54:56'),(57,3,NULL,'changed','status','7',1,'2021-07-05 05:55:17');
 /*!40000 ALTER TABLE `pms_employeetaskboard_log_tbl` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -3771,7 +3863,7 @@ CREATE TABLE `pms_employeetaskoard_tbl` (
   `extension` date DEFAULT NULL,
   `createdAt` timestamp NOT NULL DEFAULT current_timestamp(),
   PRIMARY KEY (`taskboardID`)
-) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -3780,7 +3872,6 @@ CREATE TABLE `pms_employeetaskoard_tbl` (
 
 LOCK TABLES `pms_employeetaskoard_tbl` WRITE;
 /*!40000 ALTER TABLE `pms_employeetaskoard_tbl` DISABLE KEYS */;
-INSERT INTO `pms_employeetaskoard_tbl` VALUES (1,2,5,5,14,'User Account MasterFile',0.00,'tests','2021-07-04','2021-07-06',0,0,0.00,7,'',NULL,'2021-07-05 05:12:29'),(2,2,5,5,15,'Department Masterfile',0.00,'te','2021-07-06','2021-07-08',0,0,0.00,7,'',NULL,'2021-07-05 05:12:30'),(3,2,5,5,16,'Designation Masterfile',0.00,'','2021-07-14','2021-07-16',0,0,0.00,7,'',NULL,'2021-07-05 05:28:24'),(4,2,1,5,14,'User Account MasterFile',0.00,'','2021-07-04','2021-07-06',0,0,0.00,7,'',NULL,'2021-07-05 05:33:30'),(5,2,1,5,15,'Department Masterfile',0.00,'','2021-07-06','2021-07-08',0,0,0.00,7,'',NULL,'2021-07-05 05:37:43'),(6,2,1,5,16,'Designation Masterfile',0.00,'','2021-07-14','2021-07-16',0,0,0.00,7,'',NULL,'2021-07-05 05:37:46'),(7,2,4,6,18,'SCRUM Meeting',0.00,'','2021-06-30','2021-07-02',0,0,0.00,7,'',NULL,'2021-07-05 05:48:07'),(8,2,4,6,17,'Presentation',0.00,'','2021-07-22','2021-07-23',0,0,0.00,7,'',NULL,'2021-07-05 05:48:09'),(9,2,3,6,18,'SCRUM Meeting',0.00,'','2021-06-30','2021-07-02',0,0,0.00,7,'',NULL,'2021-07-05 05:48:11'),(10,2,3,6,17,'Presentation',0.00,'','2021-07-22','2021-07-23',0,0,0.00,7,'',NULL,'2021-07-05 05:48:13'),(11,2,2,6,18,'SCRUM Meeting',0.00,'','2021-06-30','2021-07-02',0,0,0.00,7,'',NULL,'2021-07-05 05:48:15'),(12,2,2,6,17,'Presentation',0.00,'','2021-07-22','2021-07-23',0,0,0.00,7,'',NULL,'2021-07-05 05:48:17'),(13,2,1,6,18,'SCRUM Meeting',0.00,'','2021-06-30','2021-07-02',0,0,0.00,7,'',NULL,'2021-07-05 05:48:19'),(14,2,1,6,17,'Presentation',0.00,'','2021-07-22','2021-07-23',0,0,0.00,7,'',NULL,'2021-07-05 05:48:20');
 /*!40000 ALTER TABLE `pms_employeetaskoard_tbl` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -3799,7 +3890,7 @@ CREATE TABLE `pms_image_taskboard_tbl` (
   `subtaskboardID` bigint(20) DEFAULT NULL,
   `createdAt` timestamp NOT NULL DEFAULT current_timestamp(),
   PRIMARY KEY (`imageID`)
-) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -3808,7 +3899,6 @@ CREATE TABLE `pms_image_taskboard_tbl` (
 
 LOCK TABLES `pms_image_taskboard_tbl` WRITE;
 /*!40000 ALTER TABLE `pms_image_taskboard_tbl` DISABLE KEYS */;
-INSERT INTO `pms_image_taskboard_tbl` VALUES (4,'ST-21-1-16254650760.jpeg',NULL,1,0,'2021-07-05 06:04:36'),(5,'ST-21-1-16254651790.png',NULL,1,0,'2021-07-05 06:06:19'),(6,'ST-21-1-16254651791.png',NULL,1,0,'2021-07-05 06:06:19'),(7,'ST-21-1-16254651792.png',NULL,1,0,'2021-07-05 06:06:19'),(8,'ST-21-1-16254651793.jpeg',NULL,1,0,'2021-07-05 06:06:20'),(9,'ST-21-1-16254651794.png',NULL,1,0,'2021-07-05 06:06:20'),(10,'ST-21-1-16254651795.png',NULL,1,0,'2021-07-05 06:06:20'),(11,'ST-21-1-16254651796.jpeg',NULL,1,0,'2021-07-05 06:06:20');
 /*!40000 ALTER TABLE `pms_image_taskboard_tbl` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -3829,7 +3919,7 @@ CREATE TABLE `pms_milestone_builder_tbl` (
   `createdAt` timestamp NOT NULL DEFAULT current_timestamp(),
   `updatedAt` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   PRIMARY KEY (`milestoneBuilderID`)
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -3838,7 +3928,6 @@ CREATE TABLE `pms_milestone_builder_tbl` (
 
 LOCK TABLES `pms_milestone_builder_tbl` WRITE;
 /*!40000 ALTER TABLE `pms_milestone_builder_tbl` DISABLE KEYS */;
-INSERT INTO `pms_milestone_builder_tbl` VALUES (4,'0','System Analysis and Design',1,1,1,'2021-06-29 06:14:04','2021-06-29 06:19:32'),(5,'0','Development and Integration',3,1,1,'2021-06-29 06:34:31','2021-06-29 06:34:31'),(6,'0','System Maintenance',3,1,1,'2021-06-29 06:44:35','2021-06-29 06:44:35');
 /*!40000 ALTER TABLE `pms_milestone_builder_tbl` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -3861,7 +3950,7 @@ CREATE TABLE `pms_milestone_list_tbl` (
   `createdAt` timestamp NOT NULL DEFAULT current_timestamp(),
   `updatedAt` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   PRIMARY KEY (`milestoneListID`)
-) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -3870,7 +3959,6 @@ CREATE TABLE `pms_milestone_list_tbl` (
 
 LOCK TABLES `pms_milestone_list_tbl` WRITE;
 /*!40000 ALTER TABLE `pms_milestone_list_tbl` DISABLE KEYS */;
-INSERT INTO `pms_milestone_list_tbl` VALUES (4,4,'5','Software Development','','a step where the developers will now be able to start the development of the software for the project.',1,1,'2021-06-29 06:26:56','2021-06-29 06:26:56'),(5,4,'2','Phase Sign-off and Project Status','','a step wherein the outcome of the phase that is already done will now be presented for approval.',1,1,'2021-06-29 06:26:56','2021-06-29 06:26:56'),(6,5,'5','Software Development','','',1,1,'2021-06-29 06:34:31','2021-06-29 06:34:31'),(7,5,'1','User Acceptance Testing','','',1,1,'2021-06-29 06:34:31','2021-06-29 06:34:31'),(8,6,'1','User Acceptance Testing','','',1,1,'2021-06-29 06:44:35','2021-06-29 06:44:35'),(9,6,'2','Phase Sign-off and Project Status','','',1,1,'2021-06-29 06:44:35','2021-06-29 06:44:35'),(10,6,'3','Training','','',1,1,'2021-06-29 06:44:35','2021-06-29 06:44:35'),(11,6,'4','Go-Live','','',1,1,'2021-06-29 06:44:35','2021-06-29 06:44:35');
 /*!40000 ALTER TABLE `pms_milestone_list_tbl` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -4009,7 +4097,7 @@ CREATE TABLE `pms_sign_off_details_tbl` (
   `createdAt` timestamp NOT NULL DEFAULT current_timestamp(),
   `updatedAt` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   PRIMARY KEY (`signOffDetailID`)
-) ENGINE=InnoDB AUTO_INCREMENT=17 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -4018,7 +4106,6 @@ CREATE TABLE `pms_sign_off_details_tbl` (
 
 LOCK TABLES `pms_sign_off_details_tbl` WRITE;
 /*!40000 ALTER TABLE `pms_sign_off_details_tbl` DISABLE KEYS */;
-INSERT INTO `pms_sign_off_details_tbl` VALUES (7,2,'Del',1,1,'2021-07-05 06:59:14','2021-07-05 06:59:14'),(8,2,'Del 2',1,1,'2021-07-05 06:59:14','2021-07-05 06:59:14'),(9,2,'Del 3',1,1,'2021-07-05 06:59:14','2021-07-05 06:59:14'),(10,1,'Del',1,1,'2021-07-05 07:02:25','2021-07-05 07:02:25'),(11,1,'Del2',1,1,'2021-07-05 07:02:25','2021-07-05 07:02:25'),(13,4,'Del',1,1,'2021-07-05 07:04:10','2021-07-05 07:04:10'),(14,4,'Del2',1,1,'2021-07-05 07:04:10','2021-07-05 07:04:10'),(15,3,'Test 1',1,1,'2021-07-06 05:41:56','2021-07-06 05:41:56'),(16,3,'test 1.2',1,1,'2021-07-06 05:41:56','2021-07-06 05:41:56');
 /*!40000 ALTER TABLE `pms_sign_off_details_tbl` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -4055,7 +4142,7 @@ CREATE TABLE `pms_sign_off_tbl` (
   `createdAt` timestamp NOT NULL DEFAULT current_timestamp(),
   `updatedAt` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   PRIMARY KEY (`signOffID`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -4064,7 +4151,6 @@ CREATE TABLE `pms_sign_off_tbl` (
 
 LOCK TABLES `pms_sign_off_tbl` WRITE;
 /*!40000 ALTER TABLE `pms_sign_off_tbl` DISABLE KEYS */;
-INSERT INTO `pms_sign_off_tbl` VALUES (1,NULL,1,4,'Gatchallan Tangalin and Co CPAs','1709, Antel Global Corporate Center, San Antonio, City Of Pasig, National Capital Region - Second District, Philippines, 1605',2,'2021-TST-00002','TACs (Tax and Accounting System)','Software',5,'Development and Integration','3|2','2021-07-05 15:02:38','3','Desc','Note','Test',3,'2021-07-05 07:02:24',1,3,'2021-07-05 06:57:43','2021-07-05 07:02:38'),(2,NULL,1,4,'Gatchallan Tangalin and Co CPAs','1709, Antel Global Corporate Center, San Antonio, City Of Pasig, National Capital Region - Second District, Philippines, 1605',2,'2021-TST-00002','TACs (Tax and Accounting System)','Software',6,'System Maintenance','3|2','2021-07-05 15:02:28|2021-07-05 15:05:01','2|2','Desc','C',NULL,2,'2021-07-05 06:59:13',1,2,'2021-07-05 06:57:53','2021-07-05 07:05:04'),(3,NULL,1,4,'Gatchallan Tangalin and Co CPAs','1709, Antel Global Corporate Center, San Antonio, City Of Pasig, National Capital Region - Second District, Philippines, 1605',2,'2021-TST-00002','TACs (Tax and Accounting System)','Software',0,'Development and Integration','3|2',NULL,NULL,'desc','comment',NULL,1,'2021-07-06 05:41:54',1,0,'2021-07-05 07:03:20','2021-07-06 05:41:56'),(4,1,1,4,'Gatchallan Tangalin and Co CPAs','1709, Antel Global Corporate Center, San Antonio, City Of Pasig, National Capital Region - Second District, Philippines, 1605',2,'2021-TST-00002','TACs (Tax and Accounting System)','Software',5,'Development and Integration','3|2','2021-07-05 15:04:33|2021-07-05 15:04:55','2|2','Desc','REVISED',NULL,2,'2021-07-05 07:04:09',1,2,'2021-07-05 07:04:09','2021-07-05 07:04:56');
 /*!40000 ALTER TABLE `pms_sign_off_tbl` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -4108,7 +4194,7 @@ CREATE TABLE `pms_timeline_builder_tbl` (
   `createdAt` timestamp NOT NULL DEFAULT current_timestamp(),
   `updatedAt` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   PRIMARY KEY (`timelineBuilderID`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -4117,7 +4203,6 @@ CREATE TABLE `pms_timeline_builder_tbl` (
 
 LOCK TABLES `pms_timeline_builder_tbl` WRITE;
 /*!40000 ALTER TABLE `pms_timeline_builder_tbl` DISABLE KEYS */;
-INSERT INTO `pms_timeline_builder_tbl` VALUES (1,NULL,1,1,'2021-TST-00002',2,'1','2','2021-06-30 14:26:19',2,'Test Description',NULL,'2021-06-07','2021-07-09',3,0,1,'2|4|5',2,55000.00,60000.00,1,1,1,2,'PTB-21-00001.jpeg','2021-06-30 06:26:19',1,1,'2021-06-30 06:24:45','2021-06-30 06:28:16'),(2,NULL,1,3,'2021-TST-00002',4,'1','2','2021-07-05 10:53:04',2,'',NULL,'2021-06-30','2021-07-23',0,0,5,'2|4|5',2,100000.00,90000.00,1,1,1,2,'PTB-21-00002.jpeg','2021-07-05 02:53:04',1,1,'2021-07-05 02:52:19','2021-07-05 02:54:08');
 /*!40000 ALTER TABLE `pms_timeline_builder_tbl` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -4142,7 +4227,7 @@ CREATE TABLE `pms_timeline_management_tbl` (
   `createdAt` timestamp NOT NULL DEFAULT current_timestamp(),
   `updatedAt` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   PRIMARY KEY (`timelineManagementID`)
-) ENGINE=InnoDB AUTO_INCREMENT=25 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -4151,7 +4236,6 @@ CREATE TABLE `pms_timeline_management_tbl` (
 
 LOCK TABLES `pms_timeline_management_tbl` WRITE;
 /*!40000 ALTER TABLE `pms_timeline_management_tbl` DISABLE KEYS */;
-INSERT INTO `pms_timeline_management_tbl` VALUES (1,1,4,5,12.00,'2',NULL,NULL,1,1,'2021-06-30 06:28:16','2021-06-30 06:28:16'),(2,1,4,2,8.00,'2|4',NULL,NULL,1,1,'2021-06-30 06:28:16','2021-06-30 06:28:16'),(3,1,5,5,10.00,'2',NULL,NULL,1,1,'2021-06-30 06:28:16','2021-06-30 06:28:16'),(4,1,5,2,10.00,'5',NULL,NULL,1,1,'2021-06-30 06:28:16','2021-06-30 06:28:16'),(5,1,6,5,15.00,'2|4',NULL,NULL,1,1,'2021-06-30 06:28:16','2021-06-30 06:28:16'),(6,1,6,2,5.00,'4',NULL,NULL,1,1,'2021-06-30 06:28:16','2021-06-30 06:28:16'),(7,1,7,5,50.00,'2|4|5',NULL,NULL,1,1,'2021-06-30 06:28:16','2021-06-30 06:28:16'),(8,1,7,2,0.00,'',NULL,NULL,1,1,'2021-06-30 06:28:16','2021-06-30 06:28:16'),(9,1,8,5,15.00,'5',NULL,NULL,1,1,'2021-06-30 06:28:16','2021-06-30 06:28:16'),(10,1,8,2,0.00,'',NULL,NULL,1,1,'2021-06-30 06:28:16','2021-06-30 06:28:16'),(11,2,14,5,5.00,'2',NULL,NULL,1,1,'2021-07-05 02:54:08','2021-07-05 02:54:08'),(12,2,14,1,5.00,'4',NULL,NULL,1,1,'2021-07-05 02:54:08','2021-07-05 02:54:08'),(13,2,15,5,5.00,'2',NULL,NULL,1,1,'2021-07-05 02:54:08','2021-07-05 02:54:08'),(14,2,15,1,5.00,'5',NULL,NULL,1,1,'2021-07-05 02:54:08','2021-07-05 02:54:08'),(15,2,16,5,10.00,'4',NULL,NULL,1,1,'2021-07-05 02:54:08','2021-07-05 02:54:08'),(16,2,16,1,0.00,'',NULL,NULL,1,1,'2021-07-05 02:54:08','2021-07-05 02:54:08'),(17,2,17,1,1.00,'2|4',NULL,NULL,1,1,'2021-07-05 02:54:08','2021-07-05 02:54:08'),(18,2,17,2,2.00,'5',NULL,NULL,1,1,'2021-07-05 02:54:08','2021-07-05 02:54:08'),(19,2,17,3,1.00,'4',NULL,NULL,1,1,'2021-07-05 02:54:08','2021-07-05 02:54:08'),(20,2,17,4,1.00,'4',NULL,NULL,1,1,'2021-07-05 02:54:08','2021-07-05 02:54:08'),(21,2,18,1,0.00,'',NULL,NULL,1,1,'2021-07-05 02:54:08','2021-07-05 02:54:08'),(22,2,18,2,0.00,'',NULL,NULL,1,1,'2021-07-05 02:54:08','2021-07-05 02:54:08'),(23,2,18,3,0.00,'',NULL,NULL,1,1,'2021-07-05 02:54:08','2021-07-05 02:54:08'),(24,2,18,4,10.00,'2',NULL,NULL,1,1,'2021-07-05 02:54:08','2021-07-05 02:54:08');
 /*!40000 ALTER TABLE `pms_timeline_management_tbl` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -4177,7 +4261,7 @@ CREATE TABLE `pms_timeline_task_list_tbl` (
   `createdAt` timestamp NOT NULL DEFAULT current_timestamp(),
   `updatedAt` timestamp NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   PRIMARY KEY (`taskID`)
-) ENGINE=InnoDB AUTO_INCREMENT=19 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -4186,7 +4270,6 @@ CREATE TABLE `pms_timeline_task_list_tbl` (
 
 LOCK TABLES `pms_timeline_task_list_tbl` WRITE;
 /*!40000 ALTER TABLE `pms_timeline_task_list_tbl` DISABLE KEYS */;
-INSERT INTO `pms_timeline_task_list_tbl` VALUES (4,1,4,0,'User Account',20.00,'2021-06-08','2021-06-18','asap',1,1,'2021-06-30 06:26:20','2021-06-30 06:26:20'),(5,1,4,0,'User Department',20.00,'2021-06-07','2021-06-23','asap',1,1,'2021-06-30 06:26:20','2021-06-30 06:26:20'),(6,1,4,0,'User Designation',20.00,'2021-06-14','2021-07-09','asap',1,1,'2021-06-30 06:26:20','2021-06-30 06:26:20'),(7,1,4,0,'Inventory Item',50.00,'2021-06-30','2021-06-30','asap',1,1,'2021-06-30 06:26:20','2021-06-30 06:26:20'),(8,1,4,0,'Menu Group',15.00,'2021-06-30','2021-06-30','asap',1,1,'2021-06-30 06:26:20','2021-06-30 06:26:20'),(14,2,5,0,'User Account MasterFile',10.00,'2021-07-04','2021-07-06','re1',1,1,'2021-07-05 02:53:05','2021-07-05 02:53:05'),(15,2,5,0,'Department Masterfile',10.00,'2021-07-06','2021-07-08','re2',1,1,'2021-07-05 02:53:05','2021-07-05 02:53:05'),(16,2,5,0,'Designation Masterfile',10.00,'2021-07-14','2021-07-16','re3',1,1,'2021-07-05 02:53:05','2021-07-05 02:53:05'),(17,2,6,0,'Presentation',5.00,'2021-07-22','2021-07-23','re4',1,1,'2021-07-05 02:53:05','2021-07-05 02:53:05'),(18,2,6,0,'SCRUM Meeting',10.00,'2021-06-30','2021-07-02','re5',1,1,'2021-07-05 02:53:05','2021-07-05 02:53:05');
 /*!40000 ALTER TABLE `pms_timeline_task_list_tbl` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -4238,4 +4321,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2021-07-28  9:08:21
+-- Dump completed on 2021-07-29  8:12:00
