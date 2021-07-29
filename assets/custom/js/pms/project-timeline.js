@@ -1886,10 +1886,10 @@ $(document).ready(function() {
 				var timelineBuilderStatus = timelineBudgetStatus != 0 ? true : false;
 				if (approversID) {
 					data["approversID"]           = timelineBuilderStatus ? approversID : ``;
-					data["timelineBuilderStatus"] = timelineBuilderStatus ? 1 : 6;
+					data["timelineBuilderStatus"] = timelineBuilderStatus ? data["timelineBuilderStatus"] : 6;
 
 					formData.append("approversID", timelineBuilderStatus ? approversID : ``);
-					formData.append("timelineBuilderStatus", timelineBuilderStatus ? 1 : 6);
+					formData.append("timelineBuilderStatus", timelineBuilderStatus ? data["timelineBuilderStatus"] : 6);
 				} else {  // AUTO APPROVED - IF NO APPROVERS
 				
 					data["approversID"]           = timelineBuilderStatus ? sessionID : ``;

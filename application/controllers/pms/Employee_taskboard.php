@@ -22,7 +22,10 @@ class Employee_taskboard extends CI_Controller {
     public function getTimelineContent()
     {
         $timelineBuilderID = $this->input->post("timelineBuilderID");
-        echo json_encode($this->employee_taskboard->getTimelineContent($timelineBuilderID));
+        $phaseCode = $this->input->post("phaseCode");
+        $projectMilestoneName = $this->input->post("projectMilestoneName");
+        
+        echo json_encode($this->employee_taskboard->getTimelineContent($timelineBuilderID, $phaseCode,$projectMilestoneName));
         // echo json_encode($this->employee_taskboard->getTimelineContent(1));
     }
 
