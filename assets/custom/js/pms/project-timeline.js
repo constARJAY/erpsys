@@ -1290,8 +1290,7 @@ $(document).ready(function() {
                                 class="form-control text-right proposedBudget amount" 
 								name="timelineProposedBudget"
 								id="timelineProposedBudget"
-                                min="1" 
-                                max="999999" timelineBudgetStatus="${timelineBudgetStatus}"
+                                min="1" timelineBudgetStatus="${timelineBudgetStatus}"
                                 value="${timelineProposedBudget|| 0.00}" ${disabled}>
                         </div>
                         <div class="invalid-feedback d-block" id="invalid-proposedBudget"></div>
@@ -1877,6 +1876,7 @@ $(document).ready(function() {
 				formData.append("createdAt", dateToday());
 			} else if (action == "update") {
 				data["timelineBuilderID"] = id;
+
 				formData.append("timelineBuilderID", id);
 			}
 
@@ -1886,10 +1886,10 @@ $(document).ready(function() {
 				var timelineBuilderStatus = timelineBudgetStatus != 0 ? true : false;
 				if (approversID) {
 					data["approversID"]           = timelineBuilderStatus ? approversID : ``;
-					data["timelineBuilderStatus"] = timelineBuilderStatus ? 0 : 6;
+					data["timelineBuilderStatus"] = timelineBuilderStatus ? 1 : 6;
 
 					formData.append("approversID", timelineBuilderStatus ? approversID : ``);
-					formData.append("timelineBuilderStatus", timelineBuilderStatus ? 2 : 6);
+					formData.append("timelineBuilderStatus", timelineBuilderStatus ? 1 : 6);
 				} else {  // AUTO APPROVED - IF NO APPROVERS
 				
 					data["approversID"]           = timelineBuilderStatus ? sessionID : ``;
