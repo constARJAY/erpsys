@@ -1424,6 +1424,36 @@ LOCK TABLES `hris_examination_qa_tbl` WRITE;
 UNLOCK TABLES;
 
 --
+-- Table structure for table `hris_examination_setup_tbl`
+--
+
+DROP TABLE IF EXISTS `hris_examination_setup_tbl`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `hris_examination_setup_tbl` (
+  `examSetupID` bigint(20) NOT NULL AUTO_INCREMENT,
+  `examinationID` bigint(20) NOT NULL,
+  `designationID` bigint(20) NOT NULL,
+  `timeLimit` time NOT NULL,
+  `percentage` decimal(10,2) NOT NULL,
+  `createdBy` bigint(20) DEFAULT NULL,
+  `updatedBy` bigint(20) DEFAULT NULL,
+  `createdAt` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updatedAt` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`examSetupID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `hris_examination_setup_tbl`
+--
+
+LOCK TABLES `hris_examination_setup_tbl` WRITE;
+/*!40000 ALTER TABLE `hris_examination_setup_tbl` DISABLE KEYS */;
+/*!40000 ALTER TABLE `hris_examination_setup_tbl` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `hris_examination_tbl`
 --
 
@@ -3615,21 +3645,27 @@ CREATE TABLE `pms_bill_material_tbl` (
   `billMaterialID` bigint(20) NOT NULL AUTO_INCREMENT,
   `reviseBillMaterialID` bigint(20) DEFAULT NULL,
   `employeeID` bigint(20) NOT NULL,
-  `projectID` bigint(20) DEFAULT NULL,
-  `referenceCode` text DEFAULT NULL,
-  `approversID` text DEFAULT NULL,
-  `approversStatus` text DEFAULT NULL,
-  `approversDate` text DEFAULT NULL,
+  `costEstimateID` bigint(20) DEFAULT NULL,
+  `costEstimateCode` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `timelineBuilderID` bigint(20) DEFAULT NULL,
+  `projectCode` varchar(200) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `projectName` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `projectCategory` varchar(200) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `clientName` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `clientAddress` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `approversID` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `approversStatus` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `approversDate` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `billMaterialStatus` int(11) NOT NULL,
-  `billMaterialReason` text DEFAULT NULL,
-  `billMaterialRemarks` text DEFAULT NULL,
+  `billMaterialReason` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `billMaterialRemarks` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `submittedAt` timestamp NULL DEFAULT current_timestamp(),
   `createdBy` bigint(20) NOT NULL,
   `updatedBy` bigint(20) NOT NULL,
   `createdAt` timestamp NOT NULL DEFAULT current_timestamp(),
   `updatedAt` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   PRIMARY KEY (`billMaterialID`)
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -3638,7 +3674,6 @@ CREATE TABLE `pms_bill_material_tbl` (
 
 LOCK TABLES `pms_bill_material_tbl` WRITE;
 /*!40000 ALTER TABLE `pms_bill_material_tbl` DISABLE KEYS */;
-INSERT INTO `pms_bill_material_tbl` VALUES (1,NULL,1,5,'1','4|20|2','2|2|2','2021-06-29 14:04:40|2021-06-29 14:06:15|2021-06-29 14:10:48',2,'For CCTV Installation',NULL,'2021-06-29 13:38:10',1,2,'2021-06-29 13:38:10','2021-06-29 06:10:50'),(2,NULL,1,2,'3','4|20|2','2|2|2','2021-06-29 14:05:00|2021-06-29 14:05:53|2021-06-29 14:11:12',2,'For BlackBox POS and Inventory System Project',NULL,'2021-06-29 13:58:08',1,2,'2021-06-29 13:58:08','2021-06-29 06:11:13'),(3,NULL,1,4,'4','4|20|2','2|2|2','2021-06-29 14:03:12|2021-06-29 14:06:32|2021-06-29 14:10:20',2,'For Hotel Mercante HMS Project',NULL,'2021-06-29 13:59:15',1,2,'2021-06-29 13:59:15','2021-06-29 06:10:21'),(4,NULL,1,5,'5','4|20|2','2|2|2','2021-06-30 07:27:24|2021-06-30 07:28:00|2021-06-30 07:28:57',2,'CCTV installation',NULL,'2021-06-30 07:25:47',1,2,'2021-06-30 07:25:47','2021-06-29 23:28:59'),(5,NULL,1,2,'7','4|20|2','2|2|2','2021-06-30 07:27:00|2021-06-30 07:28:13|2021-06-30 07:28:45',2,'For Kyusi Market POS System Project',NULL,'2021-06-30 07:26:16',1,2,'2021-06-30 07:26:16','2021-06-29 23:28:47');
 /*!40000 ALTER TABLE `pms_bill_material_tbl` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -4321,4 +4356,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2021-07-29  8:12:00
+-- Dump completed on 2021-07-30 16:23:53
