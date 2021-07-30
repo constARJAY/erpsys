@@ -110,7 +110,7 @@ function tableContent() {
                     <td class="text-center">${item.vehiclePlateNumber}</td>
                     <td>
 					<div>
-						${vehicleFuelConsumption}
+						${item.vehicleFuelConsumption} km/L
 					</div>
 					<small style="color:#848482;">${gasType}</small>
 				</td>

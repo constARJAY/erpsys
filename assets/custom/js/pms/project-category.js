@@ -70,6 +70,7 @@ $(document).ready(function(){
                     let unique = {
                         id:       item.categoryID, // Required
                         categoryName: item.categoryName,
+                        categoryShortcut: item.categoryShortcut
                         // email:    item.email,
                     }
                     uniqueData.push(unique);

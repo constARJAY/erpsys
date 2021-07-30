@@ -23,7 +23,7 @@ $(document).on("click",".addClassification", function(){
                                                         <div class="form-group">
                                                             <label for="">Classification Shortcut</label>
                                                             <input type="text" class="form-control validate" name="classificationShortcut" unique id="input_classificationShortcut" 
-                                                                    data-allowcharacters="[A-Z][a-z]" minlength="2" maxlength="3" required>
+                                                                    data-allowcharacters="[A-Z]" minlength="2" maxlength="3" required>
                                                             <div class="invalid-feedback d-block" id="invalid-input_classificationShortcut"></div>
                                                         </div>
                                                     </div>  
@@ -81,7 +81,7 @@ $(document).on("click",".editClassification", function(){
                                                         <div class="form-group">
                                                             <label for="">Classification Shortcut</label>
                                                             <input type="text" class="form-control validate" name="classificationShortcut" unique id="input_classificationShortcut" 
-                                                                    data-allowcharacters="[A-Z][a-z]" minlength="2" maxlength="3" required>
+                                                                    data-allowcharacters="[A-Z][a-z]" minlength="2" maxlength="3" required  unique="${tableData[0]["classificationID"]}">
                                                             <div class="invalid-feedback d-block" id="invalid-input_classificationShortcut"></div>
                                                         </div>
                                                     </div>  
@@ -213,7 +213,8 @@ function tableContent(){
                         // ----- INSERT UNIQUE DATA TO uniqueData VARIABLE ----
                         let unique = {
                             id:                       item.classificationID, // Required
-                            classificationName:       item.classificationName // Required
+                            classificationName:       item.classificationName, // Required
+                            classificationShortcut:       item.classificationShortcut // Required
                         }
                         uniqueData.push(unique);
                         // ----- END INSERT UNIQUE DATA TO uniqueData VARIABLE ----

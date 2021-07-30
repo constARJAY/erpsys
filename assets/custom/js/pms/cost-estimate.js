@@ -737,12 +737,14 @@ $(document).ready(function(){
 	// ----- PROJECT PHASE -----
 		function getProjectPhaseList(phaseID = null){
 			let html = `<option disabled ${!phaseID ? `selected` :``}>Please select a project phase</option>`;
-			html +=	listOfPhase.map( items => {
-					return `<option
+			listOfPhase.map( items => {
+					html +=	 `<option
 								value 	= "${items.phaseID}"
 								phaseid = "${items.phaseID}"
-								phasedescription = "${items.phaseDescription}">${items.phaseDescription}
+								phasedescription = "${items.phaseDescription}"
 								${phaseID == items.phaseID ? `selected`: ``}
+								>${items.phaseDescription}
+
 							</option>`;
 					});
 			return html;
@@ -2188,7 +2190,7 @@ $(document).ready(function(){
 							<td>
 								<div class="travel-vehicle">
 									<select class="form-control validate select2" name="travelVehicle" id="" style="width: 100%">
-										${getVehicleList(vehicleID)}
+										${getVehicleList()}
 									</select>
 								</div>
 							</td>
@@ -2552,6 +2554,9 @@ $(document).ready(function(){
 					while(listEmployeeList.length > 0) {
 						listEmployeeList.pop();
 					}
+					while(listEmployeeList.length > 0) {
+						listOfManpower.pop();
+					}
 					var designationData = [];
 					$.ajax({
 						method:      "POST",
@@ -2756,7 +2761,7 @@ $(document).ready(function(){
 							// MANPOWER  
 								let manpowerTableBody = ``;
 								var manpowerArrData = costEstimateID ? designationRequest[0] : listOfManpower;
-								console.log(designationRequest[0]);
+								// console.log(designationRequest[0]);
 								manpowerArrData.map(x=>{
 									manpowerTableBody +=  `<tr class="manpowerRowData">
 																<td>
