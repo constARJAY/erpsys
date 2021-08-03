@@ -45,6 +45,9 @@
 	<script src="<?=base_url('assets/custom/js/custom-validation.js')?>"></script>
 	<script src="<?=base_url('assets/custom/js/operations.js')?>"></script>
 	<script src="<?= base_url('assets/custom/js/gen/footer.js') ?>"></script>
+
+	<!-- <script type="text/javascript" src="lib/jquery-backward-timer.min.js"></script> -->
+	<script src="<?=base_url('assets/plugins/timer/jquery-backward-timer.min.js')?>"></script> 
 	<script>
 
 	function dataNotification(){

@@ -630,7 +630,19 @@ function formContent(data = false, readOnly = false, isRevise = false, isFromCan
 		optionLoanType += `<option value="${loanTypeItems["loanID"]}" ${isSelected}>${loanTypeItems["loanName"]}</option>`;
 	});
 	// Payday = 0, Monthly = 1;
-	let optionLoanFormTermPayment = data == false ? `<option value="" disabled selected>Select Term of Payment</option><option value="2">Payday</option><option value="1">Monthly</option>`: (loanFormTermPayment == "0" ? `<option value="" disabled>Select Term of Payment</option><option value="2" selected>Payday</option><option value="1">Monthly</option>` : `<option value="" disabled>Select Term of Payment</option><option value="2">Payday</option><option value="1" selected>Monthly</option>`);
+	let optionLoanFormTermPayment = data == false ? `<option value="" disabled selected>Select Term of Payment</option> 
+	<option value="1">Monthly (First cutoff)</option>
+	<option value="2">Monthly (Second cutoff)</option>
+	<option value="3">Payday</option>`: (loanFormTermPayment == "1" ? `<option value="" disabled>Select Term of Payment</option>
+	<option value="1" selected>Monthly (First cutoff)</option>
+	<option value="2">Monthly (Second cutoff)</option>
+	<option value="3">Payday</option>` : (loanFormTermPayment == "2" ?`<option value="" disabled>Select Term of Payment</option>
+	<option value="1">Monthly (First cutoff)</option> 
+	<option value="2" selected>Monthly (Second cutoff)</option> 
+	<option value="3">Payday</option>`:`<option value="" disabled>Select Term of Payment</option>
+	<option value="1">Monthly (First cutoff)</option> 
+	<option value="2">Monthly (Second cutoff)</option> 
+	<option value="3" selected>Payday</option>` ));
 
 	let reviseDocumentNo    = isRevise ? loanFormID : reviseLoanFormID;
 	let documentHeaderClass = isRevise || reviseLoanFormID ? "col-lg-4 col-md-4 col-sm-12 px-1" : "col-lg-2 col-md-6 col-sm-12 px-1";
