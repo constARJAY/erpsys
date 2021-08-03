@@ -92,7 +92,7 @@ $(document).ready(function () {
 	
 		
 		let html = `
-        <div class="col-12 col-lg-8 col-xl-12 py-2 text-left">
+        <div class="col-12 col-lg-8 col-xl-12 text-left">
         <h6 class="bg-primary text-light p-3"><strong>LIST OF EXAMS</strong></h6>
         <div class="card my-0 p-2 approval-list" style='box-shadow:none;'>`;
         count = 0;
@@ -119,17 +119,25 @@ $(document).ready(function () {
 
 			});
             html += ` <div class="py-2 border-top d-flex justify-content-end align-items-end">
-            <button class="btn btn-primary btn-approval-setup" designation="${roleID}" designationName="${data[0].designationName}" >Update Exams</button>
+            <button class="btn btn-primary btn-approval-setup" designation="${roleID}" designationName="${data[0].designationName}" >Update Examination Setup</button>
         </div>`;
 		} else {
 			
 			html += `
-            <div class="text-center" style="height: 50px;">
-                <td>No data available in table.</td>
+            <div class="text-center" style="height: 500px;">
+			<td>
+               <div class="row">
+					<div class="col-4"></div>
+					<div class="col-4"><img class="img-fluid" src="${base_url}assets/modal/please-select.gif" alt=""> <h6 class="text-primary text-center font-weight-bold">No data available</h6>
+					<p class="text-center">Select add examination setup to view list examination title.</p>
+					</div>
+					<div class="col-4"></div>
+				</div>
+				</td>
             </div>
-            <div class="py-2 border-top d-flex justify-content-end align-items-end">
-            <button class="btn btn-primary btn-approval-setup" designation="${roleID}" >Create Exams</button>
-        </div>`;
+				<div class="py-2 border-top d-flex justify-content-end align-items-end">
+					<button class="btn btn-primary btn-approval-setup" designation="${roleID}" >Add Examination Setup</button>
+				</div>`;
           
 		}
 
@@ -140,21 +148,18 @@ $(document).ready(function () {
 
 	function pageContent() {
 		$("#roles_permission_content").html(preloader);
-		const userRoleData = getTableData("hris_designation_tbl");
+		const userRoleData = getTableData("hris_designation_tbl","","designationStatus = 1");
 		let html = "";
 		if (userRoleData) {
 			html = `
             <div class="col-md-3 col-sm-12">
-                <div class="table-responsive" id="user_role_content">
+                <div class="table-responsive overflow-auto" id="user_role_content" style="
+				height: 620px;
+			">
                     ${getUserRoleContent(userRoleData)}
                 </div>
             </div>
             <div class="col-md-9 col-sm-12">
-
-                <div class="row">
-                    <div class="col-md-6 col-sm-12 mb-4">
-                    </div>
-                </div>
                 
                 <div class="table-responsive" id="module_access_content">
                     ${getModuleAccessContent()}
@@ -224,12 +229,16 @@ $(document).ready(function () {
 			</tbody>
 		</table>
 		<div class="w-100 d-flex justify-content-between align-items-center py-2">
-			<div>
+			
 			<div class="w-100 text-left my-2">
 				<button class="btn btn-primary btnAddRow" id="btnAddRow" project="true"><i class="fas fa-plus-circle"></i> Add Row</button>
 				<button class="btn btn-danger btnDeleteRow" id="btnDeleteRow" project="true" disabled><i class="fas fa-minus-circle"></i> Delete Row/s</button>
 			</div>
+
+			<div class="w-100 text-right my-2">
+				<h5 class="font-weight-bolder" id="percent">0.00%</h5>
 			</div>
+			
 		</div>
         </div>
         <div class="modal-footer">
@@ -307,7 +316,7 @@ function getItemRow(exam = {}) {
 				<div class="timeLimit">
 					<input 
 						type="text" 
-						class="form-control text-center"
+						class="form-control text-left"
 						id="timeLimit"
 						name="timeLimit"
 						mask="99:99:99"
@@ -322,14 +331,13 @@ function getItemRow(exam = {}) {
 		
 				<div class="input-group">
                         <input type="text" 
-                        class="form-control input-percentage"  
+                        class="form-control input-percentage text-left"  
                         minlength="1" 
                         maxlength="13" 
                         id="percentage" 
 						name="percentage" 
 						value="${percentage}"
-						required 
-                        style="text-align: right;">
+						required>
 						<div class="input-group-prepend">
                             <span class="input-group-text">%</span>
                         </div>
@@ -374,12 +382,56 @@ function updateTableItems() {
 		$("td .timeLimit [name=timeLimit]", this).addClass("inputmask");
 		
 		// PERCENTAGE
-		$("td .percentage [name=percentage]", this).attr("id", `percentage${i}`);
-		$("td .percentage [name=percentage]", this).attr("project", `true`);
+		$("td [name=percentage]", this).attr("id", `percentage${i}`);
+		$("td [name=percentage]", this).attr("project", `true`);
 		
 	})
 }
 // ----- END UPDATE TABLE ITEMS -----
+
+// ----- COMPUTE PERCENTAGE-----
+function computePercent() {
+	var getLength= 0;
+	var totalPercent= 0;
+
+	getLength =$("[name=percentage]").length-1;
+	
+	$("[name=percentage]").each(function(i) {
+	
+		totalPercent += parseFloat($(this).val().replaceAll(",","")) ||0;
+		if( getLength == i ){
+			if(totalPercent != 0){
+				if(totalPercent > 100 || totalPercent < 100){
+					$(this).addClass("is-invalid").removeClass("is-valid");
+					$(this).closest("td").find(".invalid-feedback").addClass("is-invalid").removeClass("is-valid");
+					$(this).closest("td").find(".invalid-feedback").text("Must equate the total percentage to 100%");
+	
+					return false;
+				}else{
+					$(this).removeClass("is-invalid");
+					$(this).closest("td").find(".invalid-feedback").removeClass("is-invalid");
+					$(this).closest("td").find(".invalid-feedback").text("");
+	
+					return true;
+				}
+			}			
+		}else{
+			$(this).removeClass("is-invalid");
+			$(this).closest("td").find(".invalid-feedback").removeClass("is-invalid");
+			$(this).closest("td").find(".invalid-feedback").text("");
+
+			return true;
+
+		}
+	})
+	$("#percent").text(formatAmount(totalPercent)+"%");
+}
+// ----- END COMPUTE PERCENTAGE-----
+
+// ----- CHECKBOX EVENT -----
+$(document).on("keyup", "[name=percentage]", function() {
+	computePercent();
+})
 
  // ----- INSERT ROW ITEM -----
  $(document).on("click", ".btnAddRow", function() {
@@ -494,116 +546,120 @@ function deleteTableRow(isProject = true) {
 
 	// ----- SAVE UPDATE -----
 	$(document).on("click", "#btnUpdate", function () {
-		const validate = validateForm("modal_examination_setup");
-		var designationID = $(this).attr("designationID");
-		var designationName = $(this).attr("designationName");
-		if (validate) {
-			// $("#modal_examination_setup").modal("hide");
-			// $("#confirmation-modal_edit_roles_permission").modal("show");
+		const percentValidate = computePercent();
 
-			// let data = getFormData("modal_examination_setup", true);
-			// data.tableName = "hris_examination_setup_tbl";
-			// data.whereFilter = "designationID = " + designationID;
-			// data.feedback = designationName+" Exams ";
-
-			// sweetAlertConfirmation(
-			// 	"update",
-			// 	"Examination Setup",
-			// 	"modal_examination_setup",
-			// 	null,
-			// 	"",
-			// 	true,
-			// 	pageContent
-			// );
-
-			let data = { exams: [] }, formData = new FormData;
-
-			$(".tableExaminationSetupTableBody tr").each(function(i, obj) {
-		
-
-				const examinationID    = $("td [name=examinationID]", this).val();	
-				const timeLimit    = $("td [name=timeLimit]", this).val();	
-				const percentage    = $("td [name=percentage]", this).val();	
-				
+		if(percentValidate){
+			const validate = validateForm("modal_examination_setup");
+			var designationID = $(this).attr("designationID");
+			var designationName = $(this).attr("designationName");
+			if (validate) {
+				// $("#modal_examination_setup").modal("hide");
+				// $("#confirmation-modal_edit_roles_permission").modal("show");
+	
+				// let data = getFormData("modal_examination_setup", true);
+				// data.tableName = "hris_examination_setup_tbl";
+				// data.whereFilter = "designationID = " + designationID;
+				// data.feedback = designationName+" Exams ";
+	
+				// sweetAlertConfirmation(
+				// 	"update",
+				// 	"Examination Setup",
+				// 	"modal_examination_setup",
+				// 	null,
+				// 	"",
+				// 	true,
+				// 	pageContent
+				// );
+	
+				let data = { exams: [] }, formData = new FormData;
+	
+				$(".tableExaminationSetupTableBody tr").each(function(i, obj) {
 			
-
-				let temp = {
-					examinationID,timeLimit,percentage,designationID
+	
+					const examinationID    = $("td [name=examinationID]", this).val();	
+					const timeLimit    = $("td [name=timeLimit]", this).val();	
+					const percentage    = $("td [name=percentage]", this).val();	
 					
-				};
-
-				formData.append(`exams[${i}][examinationID]`, examinationID);
-				formData.append(`exams[${i}][timeLimit]`, timeLimit);
-				formData.append(`exams[${i}][percentage]`, percentage);
-				formData.append(`exams[${i}][designationID]`, designationID);
-			
-				data["exams"].push(temp);
-			});
-			console.log(formData)
-
-			let condition           = validateForm("modal_examination_setup");
-			if(condition == true){
-			   var employeeID = [];
-			
-			   Swal.fire({
-				   title: 'UPDATE EXAMINATION SETUP',
-				   text: 'Are you sure that you want to update the examination setup for this designation?',
-				   imageUrl: `${base_url}assets/modal/update.svg`,
-				   imageWidth: 200,
-				   imageHeight: 200,
-				   imageAlt: 'Custom image',
-				   showCancelButton: true,
-				   confirmButtonColor: '#dc3545',
-				   cancelButtonColor: '#1a1a1a',
-				   cancelButtonText: 'No',
-				   confirmButtonText: 'Yes',
-				   allowOutsideClick: false
-			   }).then((result) => {
-				   if (result.isConfirmed) {
-					   preventRefresh(false);
-					   $.ajax({
-						   url: `${base_url}hris/Examination_setup/updaterecord`,
-						   method: "POST",
-						   data:formData,
-						   processData: false,
-						   contentType: false,
-						   global:      false,
-						   cache:       false,
-						   async:       false,
-						   dataType:    "json",
-						   beforeSend: function () {
-							   $("#loader").show();
-						   },
-						   success: function (data) {
-							   $("#loader").hide();
-							   $("#modal_examination_setup").hide();
-							//    setTimeout(() => {
-								   let swalTitle = "Examination setup for "+designationName+" updated successfully!";
-								   Swal.fire({
-									   icon: "success",
-									   title: swalTitle,
-									   showConfirmButton: false,
-									   timer: 200,
-								   }).then(() => {
-									   $("#loader").show();
-									   window.location.reload();
-								   })
-								   // 	setTimeout(() => {
-								   // }, 1000)
-   
-								   // window.location.replace(`${base_url}ims/inventory_recieving_report`);
-							//    }, 100);
-   
-						   },
-					   });	
-   
-				   } else {
-					   preventRefresh(false);
-				   }	
-			   })
+				
+	
+					let temp = {
+						examinationID,timeLimit,percentage,designationID
+						
+					};
+	
+					formData.append(`exams[${i}][examinationID]`, examinationID);
+					formData.append(`exams[${i}][timeLimit]`, timeLimit);
+					formData.append(`exams[${i}][percentage]`, percentage);
+					formData.append(`exams[${i}][designationID]`, designationID);
+				
+					data["exams"].push(temp);
+				});
+	
+				let condition           = validateForm("modal_examination_setup");
+				if(condition == true){
+				   var employeeID = [];
+				
+				   Swal.fire({
+					   title: 'UPDATE EXAMINATION SETUP',
+					   text: 'Are you sure that you want to update the examination setup for this designation?',
+					   imageUrl: `${base_url}assets/modal/update.svg`,
+					   imageWidth: 200,
+					   imageHeight: 200,
+					   imageAlt: 'Custom image',
+					   showCancelButton: true,
+					   confirmButtonColor: '#dc3545',
+					   cancelButtonColor: '#1a1a1a',
+					   cancelButtonText: 'No',
+					   confirmButtonText: 'Yes',
+					   allowOutsideClick: false
+				   }).then((result) => {
+					   if (result.isConfirmed) {
+						   preventRefresh(false);
+						   $.ajax({
+							   url: `${base_url}hris/Examination_setup/updaterecord`,
+							   method: "POST",
+							   data:formData,
+							   processData: false,
+							   contentType: false,
+							   global:      false,
+							   cache:       false,
+							   async:       false,
+							   dataType:    "json",
+							   beforeSend: function () {
+								   $("#loader").show();
+							   },
+							   success: function (data) {
+								   $("#loader").hide();
+								   $("#modal_examination_setup").hide();
+								//    setTimeout(() => {
+									   let swalTitle = "Examination setup for "+designationName+" updated successfully!";
+									   Swal.fire({
+										   icon: "success",
+										   title: swalTitle,
+										   showConfirmButton: false,
+										   timer: 200,
+									   }).then(() => {
+										   $("#loader").show();
+										   window.location.reload();
+									   })
+									   // 	setTimeout(() => {
+									   // }, 1000)
+	   
+									   // window.location.replace(`${base_url}ims/inventory_recieving_report`);
+								//    }, 100);
+	   
+							   },
+						   });	
+	   
+					   } else {
+						   preventRefresh(false);
+					   }	
+				   })
+				}
+				
 			}
-			
 		}
+	
 	});
 	// ----- END SAVE UPDATE -----
 
@@ -622,6 +678,7 @@ function deleteTableRow(isProject = true) {
 			$("#module_access_content").html(moduleData);
 			$(".btn-approval-setup").attr("designationName",$(this).text().trim());
 			initDataTables();
+			
 		}, 500);
 	});
 	// ----- END SELECT USER ROLE -----
@@ -644,9 +701,10 @@ function deleteTableRow(isProject = true) {
 
 	// ------- CANCEL MODAL--------
 	$(document).on("click", ".btnCancel", function () {
-		let formEmpty = isFormEmpty("modal_roles_permission");
+
+		let formEmpty = isFormEmpty("modal_examination_setup");
 		if (!formEmpty) {
-			sweetAlertConfirmation("cancel", "Role", "modal_roles_permission");
+			sweetAlertConfirmation("cancel", "Examination Setup", "modal_roles_permission");
 		} else {
 			$("#modal_roles_permission").modal("hide");
 		}
@@ -667,7 +725,7 @@ $(document).on("click", ".btn-approval-setup", function(){
 		updateTableItems();
 		initInputmask();
 		initPercentage();
-
+		computePercent();
 		$("#btnSave").attr("designationID",designationID);	
 		$("#btnUpdate").attr("designationID",designationID);
 		$("#btnSave").attr("designationName",designationName);	

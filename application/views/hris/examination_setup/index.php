@@ -31,7 +31,7 @@
 						<li class="breadcrumb-item active"> Examination Setup</li>
 					</ul>
 					<h1 class="mt-3">Examination Setup</h1>
-					<span>This module is to manage examination setup</span>
+					<span>This module is used to manage the setup for examinations.</span>
 				</div>
 			</div>
 		</div>

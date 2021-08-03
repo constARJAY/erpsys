@@ -34,7 +34,7 @@ $(document).ready(function() {
         let result = false;
         $.ajax({
             method:   "POST",
-            url:      "Employee_Taskboard/getTimelineContent",
+            url:      "Employee_taskboard/getTimelineContent",
             data:     { timelineBuilderID,phaseCode,projectMilestoneName },
             async:    false,
             dataType: "json",
