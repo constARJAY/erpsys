@@ -1818,6 +1818,33 @@ INSERT INTO `hris_on_timein_timeout_tbl` VALUES (1,'SCH-21-00001',1,'2021-04-05'
 UNLOCK TABLES;
 
 --
+-- Table structure for table `hris_orientation_setup_tbl`
+--
+
+DROP TABLE IF EXISTS `hris_orientation_setup_tbl`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `hris_orientation_setup_tbl` (
+  `orientationID` bigint(11) NOT NULL AUTO_INCREMENT,
+  `orientationCode` varchar(25) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `departmentID` bigint(11) NOT NULL,
+  `designationID` int(20) NOT NULL,
+  `employeeID` int(11) DEFAULT NULL,
+  `orientationStatus` int(11) NOT NULL,
+  PRIMARY KEY (`orientationID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `hris_orientation_setup_tbl`
+--
+
+LOCK TABLES `hris_orientation_setup_tbl` WRITE;
+/*!40000 ALTER TABLE `hris_orientation_setup_tbl` DISABLE KEYS */;
+/*!40000 ALTER TABLE `hris_orientation_setup_tbl` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `hris_overtime_request_tbl`
 --
 
@@ -2088,6 +2115,84 @@ LOCK TABLES `hris_tax_table_tbl` WRITE;
 /*!40000 ALTER TABLE `hris_tax_table_tbl` DISABLE KEYS */;
 INSERT INTO `hris_tax_table_tbl` VALUES (1,1.00,20832.00,0.00,0.00,'2021-04-15 23:01:28','2021-04-15 23:01:28'),(2,20833.00,33332.00,0.00,0.20,'2021-04-15 23:01:28','2021-04-15 23:01:28'),(3,33333.00,66666.00,2500.00,0.25,'2021-04-15 23:01:28','2021-04-15 23:01:28'),(4,66667.00,166666.00,10833.33,0.30,'2021-04-15 23:01:28','2021-04-15 23:01:28'),(5,166667.00,666666.00,40833.33,0.32,'2021-04-15 23:01:28','2021-04-15 23:01:28'),(6,666667.00,999999.00,200833.33,0.35,'2021-04-15 23:01:28','2021-04-15 23:01:28');
 /*!40000 ALTER TABLE `hris_tax_table_tbl` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `hris_training_development_module`
+--
+
+DROP TABLE IF EXISTS `hris_training_development_module`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `hris_training_development_module` (
+  `trainingDevelopmentModuleID` bigint(20) NOT NULL AUTO_INCREMENT,
+  `trainingDevelopmentSetupID` bigint(100) NOT NULL,
+  `revisetrainingDevelopmentModuleID` bigint(20) DEFAULT NULL,
+  `trainingDevelopmentModuleTrainee` text COLLATE utf8mb4_unicode_ci NOT NULL,
+  `trainingDevelopmentModuleTopic` text COLLATE utf8mb4_unicode_ci NOT NULL,
+  `trainingDevelopmentModuleTrainor` varchar(250) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `trainingDevelopmentModuleType` text COLLATE utf8mb4_unicode_ci NOT NULL,
+  `trainingDevelopmentModuleBudget` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `trainingDevelopmentModuleFile` varchar(250) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `trainingDevelopmentModuleDifficulty` varchar(250) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `trainingDevelopmentModuleDate` date NOT NULL,
+  `employeeID` int(250) NOT NULL,
+  `approversID` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `approversStatus` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `approversDate` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `trainingDevelopmentModuleStatus` int(11) NOT NULL,
+  `trainingDevelopmentModuleDescription` text COLLATE utf8mb4_unicode_ci NOT NULL,
+  `trainingDevelopmentModuleRemarks` longtext COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `submittedAt` timestamp NULL DEFAULT NULL,
+  `createdBy` bigint(20) NOT NULL,
+  `updatedBy` bigint(20) NOT NULL,
+  `createdAt` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updatedAt` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`trainingDevelopmentModuleID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `hris_training_development_module`
+--
+
+LOCK TABLES `hris_training_development_module` WRITE;
+/*!40000 ALTER TABLE `hris_training_development_module` DISABLE KEYS */;
+/*!40000 ALTER TABLE `hris_training_development_module` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `hris_training_development_setup_tbl`
+--
+
+DROP TABLE IF EXISTS `hris_training_development_setup_tbl`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `hris_training_development_setup_tbl` (
+  `trainingDevelopmentSetupID` bigint(20) NOT NULL AUTO_INCREMENT,
+  `trainingDevelopmentSetupCode` varchar(250) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `trainingDevelopmentSetupName` text COLLATE utf8mb4_unicode_ci NOT NULL,
+  `trainingDevelopmentSetupTopic` text COLLATE utf8mb4_unicode_ci NOT NULL,
+  `trainingDevelopmentSetupType` varchar(250) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `trainingDevelopmentSetupModuleFile` text COLLATE utf8mb4_unicode_ci NOT NULL,
+  `employeeID` bigint(20) NOT NULL,
+  `trainingDevelopmentSetupDifficulty` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `trainingDevelopmentSetupStatus` int(50) NOT NULL,
+  `createdBy` int(20) NOT NULL,
+  `updatedBy` int(20) NOT NULL,
+  `createdAt` timestamp(6) NOT NULL DEFAULT current_timestamp(6),
+  `updatedAt` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`trainingDevelopmentSetupID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `hris_training_development_setup_tbl`
+--
+
+LOCK TABLES `hris_training_development_setup_tbl` WRITE;
+/*!40000 ALTER TABLE `hris_training_development_setup_tbl` DISABLE KEYS */;
+/*!40000 ALTER TABLE `hris_training_development_setup_tbl` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -4309,6 +4414,114 @@ LOCK TABLES `pms_timeline_task_list_tbl` WRITE;
 UNLOCK TABLES;
 
 --
+-- Table structure for table `web_applicant_list_tbl`
+--
+
+DROP TABLE IF EXISTS `web_applicant_list_tbl`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `web_applicant_list_tbl` (
+  `applicantID` bigint(20) NOT NULL AUTO_INCREMENT,
+  `applicantFirstname` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `applicantMiddlename` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `applicantLastname` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `applicantMobile` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `applicantEmail` text COLLATE utf8mb4_unicode_ci NOT NULL,
+  `applicantUsername` text COLLATE utf8mb4_unicode_ci NOT NULL,
+  `applicantPassword` text COLLATE utf8mb4_unicode_ci NOT NULL,
+  `applicantEncryptedPassword` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `applicantProfile` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `applicantGender` varchar(20) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `applicantBirthday` date DEFAULT NULL,
+  `applicantResume` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `applicantCitizenship` varchar(20) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `applicantCivilStatus` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `applicantTIN` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `applicantSSS` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `applicantPhilHealth` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `applicantPagibig` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `applicantRegion` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `applicantProvince` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `applicantCity` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `applicantBarangay` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `applicantUnit` varchar(20) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `applicantBuilding` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `applicantStreet` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `applicantSubdivision` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `applicantCountry` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `applicantZipCode` varchar(20) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `applicantStatus` int(11) NOT NULL,
+  `reset_link` int(11) NOT NULL,
+  `applicantDesignationID` bigint(20) NOT NULL,
+  `examStatus` int(11) NOT NULL,
+  `createdAt` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updatedAt` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`applicantID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `web_applicant_list_tbl`
+--
+
+LOCK TABLES `web_applicant_list_tbl` WRITE;
+/*!40000 ALTER TABLE `web_applicant_list_tbl` DISABLE KEYS */;
+/*!40000 ALTER TABLE `web_applicant_list_tbl` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `web_examination_form_details_tbl`
+--
+
+DROP TABLE IF EXISTS `web_examination_form_details_tbl`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `web_examination_form_details_tbl` (
+  `examFormDetailID` bigint(20) NOT NULL AUTO_INCREMENT,
+  `examFormID` bigint(20) NOT NULL,
+  `applicantAnswer` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `applicantPoint` decimal(10,2) NOT NULL,
+  `createdAt` timestamp NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`examFormDetailID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `web_examination_form_details_tbl`
+--
+
+LOCK TABLES `web_examination_form_details_tbl` WRITE;
+/*!40000 ALTER TABLE `web_examination_form_details_tbl` DISABLE KEYS */;
+/*!40000 ALTER TABLE `web_examination_form_details_tbl` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `web_examination_form_tbl`
+--
+
+DROP TABLE IF EXISTS `web_examination_form_tbl`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `web_examination_form_tbl` (
+  `examFormID` bigint(20) NOT NULL AUTO_INCREMENT,
+  `applicantID` bigint(20) NOT NULL,
+  `totalPoints` decimal(10,2) NOT NULL,
+  `percent` decimal(10,2) NOT NULL,
+  `createdAt` timestamp NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`examFormID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `web_examination_form_tbl`
+--
+
+LOCK TABLES `web_examination_form_tbl` WRITE;
+/*!40000 ALTER TABLE `web_examination_form_tbl` DISABLE KEYS */;
+/*!40000 ALTER TABLE `web_examination_form_tbl` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Dumping events for database 'erpdb'
 --
 
@@ -4356,4 +4569,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2021-07-30 16:23:53
+-- Dump completed on 2021-08-03 16:16:34
