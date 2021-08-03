@@ -656,14 +656,15 @@ function pageContent(level = "0",onGoing = false) {
 		// var designationID="4";
 		// var examStatus="0";
 		var dateToday=moment().format('YYYY-MM-DD');
-		var schedule=  "2021-08-02";
+		var schedule=  "2021-08-03";
+		var applicantDesignationID;
 		// var schedule=  decryptString($(".body_area").attr("applicantSchedule"));
 
 		// console.log(dateToday)
 		const applicantData = getTableData(`web_applicant_list_tbl`,"","applicantID= "+applicantID);
-
+		applicantDesignationID = applicantData[0].applicantDesignationID;
 		const getExamData = getTableData(`hris_examination_setup_tbl hest
-							LEFT JOIN hris_examination_tbl as het ON het.examinationID  = hest.examinationID  `,"","designationID= "+applicantData[0].applicantDesignationID);
+							LEFT JOIN hris_examination_tbl as het ON het.examinationID  = hest.examinationID  `,"","designationID= "+ applicantDesignationID);
 		
 		let html = "";
 		if(schedule == dateToday ){
@@ -685,7 +686,7 @@ function pageContent(level = "0",onGoing = false) {
 						</div>
 					</div>
 					<div class="footer">
-					<button type="button" class="btn btn-success btn-lg float-right startExam" style="width: 15%;line-height: 49px;font-size: 32px;font-weight: 1000;border-radius: 50px;" examTitle="${getExamData[level].examinationName}" examinationID="${encryptString(getExamData[level].examinationID)}" examinationType="${encryptString(getExamData[level].examinationType)}" level="${encryptString(level)}">Start <i class="fas fa-arrow-right"></i></button>
+					<button type="button" class="btn btn-success btn-lg float-right startExam" style="width: 15%;line-height: 49px;font-size: 32px;font-weight: 1000;border-radius: 50px;" examTitle="${getExamData[level].examinationName}" examinationID="${encryptString(getExamData[level].examinationID)}" examinationType="${encryptString(getExamData[level].examinationType)}" level="${encryptString(level)}" applicantDesignationID="${encryptString(applicantDesignationID)}">Start <i class="fas fa-arrow-right"></i></button>
 					</div> 
 				</div>`;
 				preventRefresh(false);
@@ -728,7 +729,7 @@ function pageContent(level = "0",onGoing = false) {
 							</div>
 						</div>
 						<div class="footer">
-						<button type="button" class="btn btn-success btn-lg float-right startExam" style="width: 15%;line-height: 49px;font-size: 32px;font-weight: 1000;border-radius: 50px;" examTitle="${getExamData[level].examinationName}" examinationID="${encryptString(getExamData[level].examinationID)}" examinationType="${encryptString(getExamData[level].examinationType)}" level="${encryptString(level)}">Start <i class="fas fa-arrow-right"></i></button>
+						<button type="button" class="btn btn-success btn-lg float-right startExam" style="width: 15%;line-height: 49px;font-size: 32px;font-weight: 1000;border-radius: 50px;" examTitle="${getExamData[level].examinationName}" examinationID="${encryptString(getExamData[level].examinationID)}" examinationType="${encryptString(getExamData[level].examinationType)}" level="${encryptString(level)}" applicantDesignationID="${encryptString(applicantDesignationID)}">Start <i class="fas fa-arrow-right"></i></button>
 						</div> 
 					</div>`;
 					preventRefresh(false);
@@ -812,6 +813,7 @@ function examContent(data = false,examinationType="",level="",examTitle=""){
 		let examinationID = data[0].examinationID
 		let nextLevel = parseFloat(level) + 1;
 		let html='';
+		console.log(data)
 		if (data) {
 			html = `
             <div class="col-md-9 col-sm-12 mb-4">
@@ -887,14 +889,15 @@ function examContent(data = false,examinationType="",level="",examTitle=""){
 $(document).on("click",".startExam",function(){
 	var examinationID = decryptString($(this).attr("examinationID"));
 	var examinationType = decryptString($(this).attr("examinationType"));
+	var applicantDesignationID = decryptString($(this).attr("applicantDesignationID"));
 	var examTitle = $(this).attr("examTitle");
 	var level = decryptString($(this).attr("level"));
 	var applicantID= decryptString($(".body_area").attr("applicantID"));
 	
 	$("#roles_permission_content").html(preloader);
-		const data  = getTableData(`hris_examination_qa_tbl LEFT JOIN hris_examination_setup_tbl USING(examinationID) `,
+		const data  = getTableData(`hris_examination_qa_tbl LEFT  JOIN hris_examination_setup_tbl USING(examinationID)`,
 		`designationID,examinationID,examinationQaID,examinationType,question,timeLimit
-		`,`examinationID='${examinationID}' AND  examinationType='${examinationType}'`);
+		`,`examinationID='${examinationID}' AND  examinationType='${examinationType}' AND designationID='${applicantDesignationID}'`);
 
 		if(level == "0"){
 			updateApplicantExamStatus(applicantID);
@@ -1021,7 +1024,7 @@ $(document).on("click", ".finishQuestion", function (){
 	Swal.fire({
 		title: 'Finish this part',
 		text: "Are you sure that you want to finish this part of your exam?",
-		imageUrl: ` ../assets/custom/isometric_image/save.png`,
+		imageUrl: `${baseurl}assets/modal/add.svg`,
 		imageWidth: 200,
 		imageHeight: 200,
 		imageAlt: 'Custom image',

@@ -581,3 +581,14 @@ function getDocumentDates(createdAt = null, submittedAt = null, approvedAt = nul
 }
 // ----- END GET DOCUMENT DATES -----
 
+
+function generateSubtaskCode (str = null, id = 0) {
+	if (str) {
+		let codeID = id ? id.toString() : "0";
+		codeID =
+			codeID.length < 5 ? "0".repeat(5 - codeID.length) + codeID : codeID;
+		
+		return `${str}-${codeID}`;
+	}
+	return null;
+}

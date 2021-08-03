@@ -90,4 +90,14 @@
         return null;
     }
 
+    function generateSubtaskCode($str = null,  $id = 0) {
+        if ($str && $date) {
+            $codeID = $id ? strval($id) : "0";
+            $codeID = strlen($codeID) < 5 ? str_repeat("0", 5 - strlen($codeID)).$codeID : $codeID;
+            $code = $str."-".$codeID;
+            return $code;
+        }
+        return null;
+    }
+
 ?>

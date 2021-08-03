@@ -278,13 +278,16 @@ $(document).ready(function () {
 
 
 // ----- GET ITEM ROW -----
+
 function getItemRow(exam = {}) {
+
 	let {
 			
 		examinationID     = "",
 		timeLimit ="",
 		percentage =""
 	} = exam;
+
   
 	let html = "";
 
@@ -331,7 +334,7 @@ function getItemRow(exam = {}) {
 		
 				<div class="input-group">
                         <input type="text" 
-                        class="form-control input-percentage text-left"  
+                        class="form-control input-percentage text-left percentage"  
                         minlength="1" 
                         maxlength="13" 
                         id="percentage" 
@@ -341,7 +344,7 @@ function getItemRow(exam = {}) {
 						<div class="input-group-prepend">
                             <span class="input-group-text">%</span>
                         </div>
-						<div class="invalid-feedback d-block" id="invalid-percentage"></div>
+						<div class="invalid-feedback d-block invalid-percentage" id="invalid_percentage"></div>
                     </div>
 			</td>
 			
@@ -384,6 +387,10 @@ function updateTableItems() {
 		// PERCENTAGE
 		$("td [name=percentage]", this).attr("id", `percentage${i}`);
 		$("td [name=percentage]", this).attr("project", `true`);
+
+		$("td [name=percentage]", this).closest("tr").find("td .invalid-percentage").attr("id",`invalid_percentage${i}`);
+
+		// $("td .disposalDetailRemarks", this).attr("id", `disposalDetailRemarks${i}`);
 		
 	})
 }
@@ -393,38 +400,49 @@ function updateTableItems() {
 function computePercent() {
 	var getLength= 0;
 	var totalPercent= 0;
-
+	var rate= parseFloat(100);
+	
 	getLength =$("[name=percentage]").length-1;
 	
+
+	$("[name=percentage]").each(function(i) {
+		totalPercent += parseFloat($(this).val().replaceAll(",","")) ||0;
+	})
+
 	$("[name=percentage]").each(function(i) {
 	
-		totalPercent += parseFloat($(this).val().replaceAll(",","")) ||0;
-		if( getLength == i ){
-			if(totalPercent != 0){
-				if(totalPercent > 100 || totalPercent < 100){
-					$(this).addClass("is-invalid").removeClass("is-valid");
-					$(this).closest("td").find(".invalid-feedback").addClass("is-invalid").removeClass("is-valid");
-					$(this).closest("td").find(".invalid-feedback").text("Must equate the total percentage to 100%");
+		console.log(getLength);
 	
-					return false;
-				}else{
-					$(this).removeClass("is-invalid");
-					$(this).closest("td").find(".invalid-feedback").removeClass("is-invalid");
-					$(this).closest("td").find(".invalid-feedback").text("");
-	
-					return true;
-				}
-			}			
-		}else{
-			$(this).removeClass("is-invalid");
-			$(this).closest("td").find(".invalid-feedback").removeClass("is-invalid");
-			$(this).closest("td").find(".invalid-feedback").text("");
+	if( getLength == i ){
+		// if(totalPercent != 0){
+		
+			if(totalPercent > rate || totalPercent < rate){
+				//console.log("pasok "+i )
+					$("#invalid_percentage"+i).html("Must equate the total percentage to 100%");
+					$('#percentage'+i).addClass("has-error").removeClass("no-error");
+					
+				
+				// return false;
+			}else{
+				$("#invalid_percentage"+i).html("");
+				$('#percentage'+i).addClass("no-error").removeClass("has-error");
+				
+				// return true;
+			}
+		// }			
+	}else{
+		$("#invalid_percentage"+i).html("");
+		$('#percentage'+i).addClass("no-error").removeClass("has-error");
 
-			return true;
+		// return true;
 
-		}
+	}
 	})
+
+	
+
 	$("#percent").text(formatAmount(totalPercent)+"%");
+	// return true;
 }
 // ----- END COMPUTE PERCENTAGE-----
 
@@ -440,12 +458,14 @@ $(document).on("keyup", "[name=percentage]", function() {
 		updateTableItems();
 		initInputmask();
 		initPercentage();
+		computePercent();
 })
 // ----- END INSERT ROW ITEM -----
 
 // ----- CLICK DELETE ROW -----
 $(document).on("click", ".btnDeleteRow", function(){
 	deleteTableRow();
+	computePercent();
 })
 // ----- END CLICK DELETE ROW -----
 
