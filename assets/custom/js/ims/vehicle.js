@@ -70,7 +70,7 @@ function tableContent() {
                         <th>Vehicle Code</th>
                         <th>Vehicle</th>
                         <th>Plate Number/Conduction Number</th>
-                        <th>Gas Type</th>
+                        <th>Fule Type</th>
                         <th>Status</th>
                     </tr>
                 </thead>
@@ -231,7 +231,7 @@ tableContent();
                 </div>
                 <div class="col-md-6 col-sm-12">
                 <div class="form-group">
-                    <label>Gas Type <span class="text-danger font-weight-bold">*</span></label>
+                    <label>Fuel Type <span class="text-danger font-weight-bold">*</span></label>
                     <select 
                         class="form-control select2 validate" 
                         id="input_vehicleGasType" 

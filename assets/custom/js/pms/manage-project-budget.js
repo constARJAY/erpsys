@@ -319,7 +319,7 @@ $(document).ready(function() {
                     tasksList += `
                     <tr>
                         <td>${taskName}</td>
-                        <td class="text-center">${formatAmount(allottedHours)}</td>
+                        <td class="text-left">${formatAmount(allottedHours)}</td>
                         <td>${moment(taskStartDate).format("MMMM DD, YYYY")}</td>
                         <td>${moment(taskEndDate).format("MMMM DD, YYYY")}</td>
                         <td>${taskRemarks || "-"}</td>
@@ -813,7 +813,8 @@ $(document).ready(function() {
 
                     const data = {
                         timelineBuilderID: id,
-                        allocatedBudget:   getNonFormattedAmount($(`[name="allocatedBudget"]`).val())
+                        allocatedBudget:   getNonFormattedAmount($(`[name="allocatedBudget"]`).val()),
+                        proposedBudget:   getNonFormattedAmount($(`[name="proposedBudget"]`).val())
                     };
 
                     $.ajax({

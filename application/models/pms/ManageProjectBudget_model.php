@@ -9,14 +9,14 @@ class ManageProjectBudget_model extends CI_Model {
         parent::__construct();
     }
 
-    public function saveProjectBudget($timelineBuilderID = null, $allocatedBudget = null)
+    public function saveProjectBudget($timelineBuilderID = null, $allocatedBudget = null,$budgetStatus ="")
     {
         $sessionID = $this->session->has_userdata("adminSessionID") ? $this->session->userdata("adminSessionID") : 1;
 
         if ($timelineBuilderID && $allocatedBudget) {
             $data = [
                 "timelineAllocatedBudget" => $allocatedBudget,
-                "timelineBudgetStatus"    => 1, // ALLOCATED
+                "timelineBudgetStatus"    => $budgetStatus, // ALLOCATED
                 "timelineBuilderStatus"   => 7, // REASSESSMENT
                 "allocatedBudgetBy"       => $sessionID,
                 "updatedBy"               => $sessionID

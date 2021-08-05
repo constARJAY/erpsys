@@ -19,8 +19,7 @@ class Cost_estimate extends CI_Controller {
         $this->load->view("template/footer");
     }
 
-    public function saveCostEstimate()
-    {
+    public function saveCostEstimate(){
         $action                     = $this->input->post("action");
         $method                     = $this->input->post("method");
         $costEstimateID             = $this->input->post("costEstimateID") ?? null;
@@ -192,6 +191,7 @@ class Cost_estimate extends CI_Controller {
                         ];
                         array_push($travelData, $temp);
                     }
+                    
                     $this->costestimate->saveCostEstimateTravel($travelData, $costEstimateID);
                 }
                 

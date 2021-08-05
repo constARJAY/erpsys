@@ -952,16 +952,17 @@ function displayPhase(teamMembers = {}, phase = {}, index = 0,  ) {
             </td>
             <td style="width:25%;">
                 <div class="form-group my-1">
-                    <textarea rows="2" 
-                        style="width: 100%;" 
+                    <textarea 
                         class="form-control description validate btnSubTaskSubmit" 
-                        data-allowcharacters="[a-z][A-Z][0-9][ ][.][,][?][!][/][;][:][-][_][()][%][&][*]" 
+                        data-allowcharacters="[a-z][A-Z][0-9][ ][.][,][?][!][/][;][:][-][_][()][%][&][*]"
                         minlength="2" 
                         maxlength="325" 
                         name="subTaskDescription" 
-                        label="description"
-                        id="subTaskDescription">${subTaskDescription}
-                    </textarea>
+                        label="description" 
+                        id="subTaskDescription" 
+                        required="" 
+                        rows="2" 
+                        style="width: 100%;">${subTaskDescription || ""}</textarea>
                 </div>
             </td>
             <td class="text-center"
@@ -1065,16 +1066,17 @@ function displayPhase(teamMembers = {}, phase = {}, index = 0,  ) {
             </td>
             <td style="width:25%;">
                 <div class="form-group my-1">
-                    <textarea rows="2" 
-                        style="width: 100%;" 
+                    <textarea 
                         class="form-control notes validate btnSubTaskSubmit" 
-                        data-allowcharacters="[a-z][A-Z][0-9][ ][.][,][?][!][/][;][:][-][_][()][%][&][*]" 
+                        data-allowcharacters="[a-z][A-Z][0-9][ ][.][,][?][!][/][;][:][-][_][()][%][&][*]"
                         minlength="2" 
                         maxlength="325" 
                         name="subTaskNotes" 
-                        label="notes"
-                        id="subTaskNotes">${subTaskNotes}
-                    </textarea>
+                        label="notes" 
+                        id="subTaskNotes" 
+                        required="" 
+                        rows="2" 
+                        style="width: 100%;">${subTaskNotes || ""}</textarea>
                 </div>
             </td>`;
           
@@ -1219,16 +1221,17 @@ function displayPhase(teamMembers = {}, phase = {}, index = 0,  ) {
 
             <td style="width:15%;">
             <div class="form-group my-1">
-                    <textarea rows="2" 
-                        style="width: 80%;" 
-                        class="form-control description validate btnSubmit" 
-                        data-allowcharacters="[a-z][A-Z][0-9][ ][.][,][?][!][/][;][:][-][_][()][%][&][*]" 
-                        minlength="2" 
-                        maxlength="325" 
-                        name="TaskDescription" 
-                        label="description"
-                        id="TaskDescription">${taskDescription || ""}
-                    </textarea>
+                    <textarea 
+                    class="form-control description validate btnSubmit" 
+                    data-allowcharacters="[a-z][A-Z][0-9][ ][.][,][?][!][/][;][:][-][_][()][%][&][*]"
+                    minlength="2" 
+                    maxlength="325" 
+                    name="TaskDescription" 
+                    label="description" 
+                    id="TaskDescription" 
+                    required="" 
+                    rows="2" 
+                    style="width: 80%;">${taskDescription || ""}</textarea>
                 </div>
             </td>
 
@@ -1349,16 +1352,17 @@ function displayPhase(teamMembers = {}, phase = {}, index = 0,  ) {
             
             <td style="width:15%;">
                 <div class="form-group my-1">
-                    <textarea rows="2" 
-                        style="width: 100%;" 
-                        class="form-control validate notes btnSubmit" 
-                        data-allowcharacters="[a-z][A-Z][0-9][ ][.][,][?][!][/][;][:][-][_][()][%][&][*]" 
+                    <textarea 
+                        class="form-control notes validate btnSubmit" 
+                        data-allowcharacters="[a-z][A-Z][0-9][ ][.][,][?][!][/][;][:][-][_][()][%][&][*]"
                         minlength="2" 
                         maxlength="325" 
-                        name="taskNotes"
+                        name="taskNotes" 
                         label="notes" 
-                        id="taskNotes">${taskNotes || ""}
-                    </textarea>
+                        id="taskNotes" 
+                        required="" 
+                        rows="2" 
+                        style="width: 100%;">${taskNotes || ""}</textarea>
                 </div>
             </td>
             
@@ -1985,12 +1989,16 @@ function displayPhase(teamMembers = {}, phase = {}, index = 0,  ) {
                                         </div>               
                                     </td>
                                     <td>
-                                        <textarea rows="3"  class="form-control mt-3 updateImgComment" placeholder="Comment for this picture..."
-                                            name="imgDescription"
-                                            id="imgDescripiton${index}"
-                                            imageID ="${imageID}"
-                                            style="width: 100%;" >${imageComment || "Comment for this picture..."}
-                                        </textarea>
+                                     <textarea 
+                                        class="form-control mt-3 validate updateImgComment" 
+                                        data-allowcharacters="[a-z][A-Z][0-9][ ][.][,][?][!][/][;][:][-][_][()][%][&][*]"
+                                        minlength="2" 
+                                        maxlength="325" 
+                                        name="imgDescription"
+                                        id="imgDescripiton${index}"
+                                        imageID ="${imageID}"
+                                        rows="3" 
+                                        style="width: 100%;">${imageComment || "Comment for this picture..."}</textarea>
                                     </td>
                                     <td class="text-center">
                                         <button type="button" class="btn btn-danger delete_image" title="Delete"><i class="fas fa-trash-alt" ></i></button>
@@ -2366,15 +2374,17 @@ function displayPhase(teamMembers = {}, phase = {}, index = 0,  ) {
 
             <td style="width:25%;">
                 <div class="form-group my-1">
-                    <textarea rows="2" 
-                        style="width: 100%;" 
+                    <textarea 
                         class="form-control description validate btnSubTaskSubmit" 
-                        data-allowcharacters="[a-z][A-Z][0-9][ ][.][,][?][!][/][;][:][-][_][()][%][&][*]" 
+                        data-allowcharacters="[a-z][A-Z][0-9][ ][.][,][?][!][/][;][:][-][_][()][%][&][*]"
                         minlength="2" 
                         maxlength="325" 
                         name="subTaskDescription" 
-                        id="subTaskDescription">
-                    </textarea>
+                        label="description" 
+                        id="subTaskDescription" 
+                        required="" 
+                        rows="2" 
+                        style="width: 100%;"></textarea>
                 </div>
             </td>
             <td class="text-center"
@@ -2478,15 +2488,17 @@ function displayPhase(teamMembers = {}, phase = {}, index = 0,  ) {
             </td>
             <td style="width:25%;">
                 <div class="form-group my-1">
-                    <textarea rows="2" 
-                        style="width: 100%;" 
-                        class="form-control btnSubTaskSubmit validate" 
-                        data-allowcharacters="[a-z][A-Z][0-9][ ][.][,][?][!][/][;][:][-][_][()][%][&][*]" 
+                    <textarea 
+                        class="form-control notes validate btnSubTaskSubmit" 
+                        data-allowcharacters="[a-z][A-Z][0-9][ ][.][,][?][!][/][;][:][-][_][()][%][&][*]"
                         minlength="2" 
                         maxlength="325" 
                         name="subTaskNotes" 
-                        id="subTaskNotes">
-                    </textarea>
+                        label="notes" 
+                        id="subTaskNotes" 
+                        required="" 
+                        rows="2" 
+                        style="width: 100%;"></textarea>
                 </div>
             </td>`;
 
@@ -2569,7 +2581,7 @@ function displayPhase(teamMembers = {}, phase = {}, index = 0,  ) {
                     data.append('subtaskboardID', subtaskboardID);
 
                     $.ajax({
-                        url           :"Employee_Taskboard/updateAssignee",
+                        url           :"Employee_taskboard/updateAssignee",
                         method        : "POST",
                         dataType      : 'text', // what to expect back from the server
                         cache         : false,
@@ -2652,7 +2664,7 @@ function displayPhase(teamMembers = {}, phase = {}, index = 0,  ) {
                 data.append('subtaskboardID', subtaskboardID);
 
                 $.ajax({
-                    url           :"Employee_Taskboard/deleteSubtaskContent",
+                    url           :"Employee_taskboard/deleteSubtaskContent",
                     method        : "POST",
                     dataType      : 'text', // what to expect back from the server
                     cache         : false,
@@ -2773,7 +2785,7 @@ function displayPhase(teamMembers = {}, phase = {}, index = 0,  ) {
                 data.append('subtaskboardID', subtaskboardID);
 
                 $.ajax({
-                    url           :"Employee_Taskboard/updateExtension",
+                    url           :"Employee_taskboard/updateExtension",
                     method        : "POST",
                     dataType      : 'text', // what to expect back from the server
                     cache         : false,
@@ -2812,7 +2824,7 @@ function displayPhase(teamMembers = {}, phase = {}, index = 0,  ) {
                 data.append('imageComment', imageComment);
 
                 $.ajax({
-                    url           :"Employee_Taskboard/updateImgComment",
+                    url           :"Employee_taskboard/updateImgComment",
                     method        : "POST",
                     dataType      : 'text', // what to expect back from the server
                     cache         : false,
@@ -2871,7 +2883,7 @@ function displayPhase(teamMembers = {}, phase = {}, index = 0,  ) {
                 data.append('imageSrc', imageSrc);
 
                 $.ajax({
-                    url           :"Employee_Taskboard/deleteImageContent",
+                    url           :"Employee_taskboard/deleteImageContent",
                     method        : "POST",
                     dataType      : 'text', // what to expect back from the server
                     cache         : false,
@@ -2959,11 +2971,17 @@ function displayPhase(teamMembers = {}, phase = {}, index = 0,  ) {
                                 
                 </td>
                 <td>
-                    <textarea rows="3"  class="form-control mt-3 updateImgComment" placeholder="Comment for this picture..."
+                    <textarea 
+                        class="form-control mt-3  validate updateImgComment" 
+                        data-allowcharacters="[a-z][A-Z][0-9][ ][.][,][?][!][/][;][:][-][_][()][%][&][*]"
+                        minlength="2" 
+                        maxlength="325" 
                         name="imgDescription"
                         label="comment"
                         id="imgDescripiton${loop+''+unique}"
-                        style="width: 100%;">Comment for this picture...</textarea>
+                        rows="3" 
+                        style="width: 100%;"
+                        placeholder="Comment for this picture...">Comment for this picture...</textarea>
                 </td>
                 <td class="text-center">
                     <button type="button" class="btn btn-danger delete_image" title="Delete"><i class="fas fa-trash-alt"></i></button>
@@ -2991,7 +3009,7 @@ function displayPhase(teamMembers = {}, phase = {}, index = 0,  ) {
          }
          
          $.ajax({
-            url           :"Employee_Taskboard/saveImageContent",
+            url           :"Employee_taskboard/saveImageContent",
             method        : "POST",
             dataType      : 'text', // what to expect back from the server
             cache         : false,

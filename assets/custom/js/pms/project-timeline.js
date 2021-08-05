@@ -362,7 +362,7 @@ $(document).ready(function() {
 			<button 
 				class="btn btn-edit w-100 btnEdit" 
 				id="${encryptString(timelineBuilderID)}" 
-				code="${getFormCode("PBT", createdAt, timelineBuilderID )}"><i class="fas fa-edit"></i> Edit</button>`;
+				code="${getFormCode("PTB", createdAt, timelineBuilderID )}"><i class="fas fa-edit"></i> Edit</button>`;
 			let projectCategory = projectID && projectList.filter(items=> items.projectListID == projectID).map(items=>{return items.projectCategory});
 			let budgetStatus = ``;
 
@@ -371,12 +371,13 @@ $(document).ready(function() {
 			}else{
 				 budgetStatus = timelineBudgetStatus == 0 ? 
                 `<span class="badge badge-outline-info w-100">For Proposal</span>` :
-                `<span class="badge badge-outline-success w-100" style="width: 100% !important">Allocated</span>`;
+				timelineBudgetStatus == 1 ? `<span class="badge badge-outline-success w-100" style="width: 100% !important">Within the Budget</span>` :
+                `<span class="badge badge-outline-danger w-100" style="width: 100% !important">Over the Budget</span>`;
 			}
 			if (isImCurrentApprover(approversID, approversDate, timelineBuilderStatus) || isAlreadyApproved(approversID, approversDate)) {
 				html += `
 				<tr class="${btnClass}" id="${encryptString(timelineBuilderID )}">
-					<td>${getFormCode("PBT", createdAt, timelineBuilderID )}</td>
+					<td>${getFormCode("PTB", createdAt, timelineBuilderID )}</td>
 					<td>${fullname}</td>
 					<td>
 						<div>
@@ -482,22 +483,30 @@ $(document).ready(function() {
             <button 
                 class="btn btn-edit w-100 btnEdit" 
                 id="${encryptString(timelineBuilderID )}" 
-                code="${getFormCode("PBT", createdAt, timelineBuilderID )}"><i class="fas fa-edit"></i> Edit</button>`;
+                code="${getFormCode("PTB", createdAt, timelineBuilderID )}"><i class="fas fa-edit"></i> Edit</button>`;
 				
 			let projectCategory = projectID && projectList.filter(items=> items.projectListID == projectID).map(items=>{return items.projectCategory});
 			let budgetStatus = ``;
 
 			if(timelineBuilderStatus != 6 && timelineBuilderStatus != 1 && timelineBuilderStatus != 2){
-				 budgetStatus = `-`;
+				if(timelineAllocatedBudget){
+					budgetStatus = timelineBudgetStatus == 0 ? 
+					`<span class="badge badge-outline-info w-100">For Proposal</span>` :
+					timelineBudgetStatus == 1 ? `<span class="badge badge-outline-success w-100" style="width: 100% !important">Within the Budget</span>` :
+					`<span class="badge badge-outline-danger w-100" style="width: 100% !important">Over the Budget</span>`;
+				 }else{	
+					budgetStatus = `-`;
+				 }
 			}else{
-				 budgetStatus = timelineBudgetStatus == 0 ? 
+				budgetStatus = timelineBudgetStatus == 0 ? 
                 `<span class="badge badge-outline-info w-100">For Proposal</span>` :
-                `<span class="badge badge-outline-success w-100" style="width: 100% !important">Allocated</span>`;
+				timelineBudgetStatus == 1 ? `<span class="badge badge-outline-success w-100" style="width: 100% !important">Within the Budget</span>` :
+                `<span class="badge badge-outline-danger w-100" style="width: 100% !important">Over the Budget</span>`;
 			}
 			
 			html += `
 			<tr class="${btnClass}" id="${encryptString(timelineBuilderID )}">
-				<td>${getFormCode("PBT", createdAt, timelineBuilderID )}</td>
+				<td>${getFormCode("PTB", createdAt, timelineBuilderID )}</td>
 				<td>${fullname}</td>
 				<td>
 					<div>
@@ -542,6 +551,7 @@ $(document).ready(function() {
 		if (data) {
 			let {
 				timelineBuilderID     = "",
+				timelineAllocatedBudget ="",
 				timelineBuilderStatus = "",
 				employeeID            = "",
 				approversID           = "",
@@ -558,30 +568,43 @@ $(document).ready(function() {
 						class="btn btn-submit px-5 p-2" 
 						id="btnSubmit" 
 						timelineBuilderID="${encryptString(timelineBuilderID)}"
-						code="${getFormCode("PBT", createdAt, timelineBuilderID)}"
+						code="${getFormCode("PTB", createdAt, timelineBuilderID)}"
 						revise="${isRevise}"
 						cancel="${isFromCancelledDocument}"><i class="fas fa-paper-plane"></i>
 						Submit
 					</button>`;
 
 					if (isRevise) {
-						button += `
-						<button 
-							class="btn btn-cancel px-5 p-2" 
-							id="btnCancel"
-							timelineBuilderID="${encryptString(timelineBuilderID)}"
-							code="${getFormCode("PBT",createdAt, timelineBuilderID)}"
-							revise="${isRevise}"
-							cancel="${isFromCancelledDocument}"><i class="fas fa-ban"></i> 
-							Cancel
-						</button>`;
+						if(timelineAllocatedBudget){
+							button += `
+							<button 
+								class="btn btn-cancel px-5 p-2"
+								id="btnCancelForm" 
+								timelineBuilderID="${encryptString(timelineBuilderID)}"
+								code="${getFormCode("PTB", createdAt, timelineBuilderID)}"
+								revise=${isRevise}><i class="fas fa-ban"></i> 
+								Cancel
+							</button>`;
+						}else{
+							button += `
+							<button 
+								class="btn btn-cancel px-5 p-2" 
+								id="btnCancel"
+								timelineBuilderID="${encryptString(timelineBuilderID)}"
+								code="${getFormCode("PTB",createdAt, timelineBuilderID)}"
+								revise="${isRevise}"
+								cancel="${isFromCancelledDocument}"><i class="fas fa-ban"></i> 
+								Cancel
+							</button>`;
+						}
+						
 					} else {
 						button += `
 						<button 
 							class="btn btn-cancel px-5 p-2"
 							id="btnCancelForm" 
 							timelineBuilderID="${encryptString(timelineBuilderID)}"
-							code="${getFormCode("PBT", createdAt, timelineBuilderID)}"
+							code="${getFormCode("PTB", createdAt, timelineBuilderID)}"
 							revise=${isRevise}><i class="fas fa-ban"></i> 
 							Cancel
 						</button>`;
@@ -596,7 +619,7 @@ $(document).ready(function() {
 							class="btn btn-cancel px-5 p-2"
 							id="btnCancelForm" 
 							timelineBuilderID="${encryptString(timelineBuilderID)}"
-							code="${getFormCode("PBT", createdAt, timelineBuilderID)}"
+							code="${getFormCode("PTB", createdAt, timelineBuilderID)}"
 							status="${timelineBuilderStatus}"><i class="fas fa-ban"></i> 
 							Cancel
 						</button>`;
@@ -608,7 +631,7 @@ $(document).ready(function() {
 						class="btn btn-cancel px-5 p-2"
 						id="btnDrop" 
 						timelineBuilderID="${encryptString(timelineBuilderID)}"
-						code="${getFormCode("PBT", createdAt, timelineBuilderID)}"
+						code="${getFormCode("PTB", createdAt, timelineBuilderID)}"
 						status="${timelineBuilderStatus}"><i class="fas fa-ban"></i> 
 						Drop
 					</button>`;
@@ -620,7 +643,7 @@ $(document).ready(function() {
 							class="btn btn-cancel px-5 p-2"
 							id="btnRevise" 
 							timelineBuilderID="${encryptString(timelineBuilderID)}"
-							code="${getFormCode("PBT", createdAt, timelineBuilderID)}"
+							code="${getFormCode("PTB", createdAt, timelineBuilderID)}"
 							status="${timelineBuilderStatus}"><i class="fas fa-clone"></i>
 							Revise
 						</button>`;
@@ -634,7 +657,7 @@ $(document).ready(function() {
 							class="btn btn-cancel px-5 p-2"
 							id="btnRevise" 
 							timelineBuilderID="${encryptString(timelineBuilderID)}"
-							code="${getFormCode("PBT", createdAt, timelineBuilderID)}"
+							code="${getFormCode("PTB", createdAt, timelineBuilderID)}"
 							status="${timelineBuilderStatus}"
 							cancel="true"><i class="fas fa-clone"></i>
 							Revise
@@ -649,14 +672,14 @@ $(document).ready(function() {
 							class="btn btn-submit px-5 p-2" 
 							id="btnApprove" 
 							timelineBuilderID="${encryptString(timelineBuilderID)}"
-							code="${getFormCode("PBT", createdAt, timelineBuilderID)}"><i class="fas fa-paper-plane"></i>
+							code="${getFormCode("PTB", createdAt, timelineBuilderID)}"><i class="fas fa-paper-plane"></i>
 							Approve
 						</button>
 						<button 
 							class="btn btn-cancel px-5 p-2"
 							id="btnReject" 
 							timelineBuilderID="${encryptString(timelineBuilderID)}"
-							code="${getFormCode("PBT", createdAt, timelineBuilderID)}"><i class="fas fa-ban"></i> 
+							code="${getFormCode("PTB", createdAt, timelineBuilderID)}"><i class="fas fa-ban"></i> 
 							Deny
 						</button>`;
 					}
@@ -789,26 +812,53 @@ $(document).ready(function() {
 	}
 	// ----- END UPDATE MILESTONE SELECT -----
 
+	// ------ GET ALL TOTAL ALLOTED HOURS -------
+	 function getTotalAlottedHours(){
+		
+		var getValue = 0;
+		$("[name=allottedHours]").each(function(){
+			 getValue += parseFloat($(this).val().replaceAll(",","") || 0 )
+			 console.log(getValue)
+		})
+		$("#totalhours").text("Total Alloted Hours: "+ formatAmount(getValue));
+	 }
+	// ------ GET ALL TOTAL ALLOTED HOURS -------
+
+
 
 
 	// ----- SELECT FILE -----
-	$(document).on("change", "[name=files]", function(e) {
-		const filename = this.files[0].name;
-		const filesize = this.files[0].size/1024/1024; // Size in MB
-		if (filesize > 10) {
-			$(this).val("");
-			$(this).parent().parent().find(".displayfile").empty();
-			showNotification("danger", "File size must be less than or equal to 10mb");
-		} else {
-			let html = `
-			<div class="d-flex justify-content-between align-items-center py-2">
-				<span class="filename">${filename}</span>
-				<span class="btnRemoveFile" style="cursor: pointer"><i class="fas fa-close"></i></span>
-			</div>`;
-			$(this).parent().find(".displayfile").first().html(html);
+	$(document).on("change", "[name=timelineDesign]", function(e) {
+		fileLength = this.files.length;
+	
+
+		for(var loop =0;loop<fileLength;loop++){
+
+			const filename = this.files[loop].name;
+			const filesize = this.files[loop].size/1024/1024; // Size in MB
+			console.log(filesize)
+			if (filesize > 10) {
+				$(this).val("");
+				$(this).parent().parent().find(".displayfile").empty();
+				showNotification("danger", "File size must be less than or equal to 10mb");
+			} else {
+				let html = `
+				<div class="d-flex justify-content-between align-items-center py-2">
+					<span class="filename">${filename}</span>
+					<span class="btnRemoveFile" style="cursor: pointer"><i class="fas fa-close"></i></span>
+				</div>`;
+				$(this).parent().find(".displayfile").first().html(html);
+			}
+
 		}
+		
+	
 	})
 	// ----- END SELECT FILE -----
+
+	$(document).on("keyup","[name=allottedHours]", function(){
+		getTotalAlottedHours();
+	});
 
 	// ----- REMOVE FILE -----
 	$(document).on("click", ".btnRemoveFile", function() {
@@ -866,6 +916,7 @@ $(document).ready(function() {
 		updateTableTaskList()
 		initHours();
 		updateDeleteButton();
+		getTotalAlottedHours();
 	});
 
 	$(document).on("click", "#btnSubAddRow", function(){
@@ -876,6 +927,8 @@ $(document).ready(function() {
 		updateTableTaskList()
 		initHours();
 		updateDeleteButton();
+		getTotalAlottedHours();
+
 	});
 
 	/** CHECKBOX */
@@ -901,6 +954,8 @@ $(document).ready(function() {
 		if( thisCondition.length > 1 ){
 			setTimeout(() => {
 				$(this).closest("tr").remove();
+				getTotalAlottedHours();
+
 			}, 120);
 		}else{
 			showNotification("danger", "You must have atleast one or more items.");
@@ -991,7 +1046,7 @@ $(document).ready(function() {
 				<div class="body">
 					<small class="text-small text-muted font-weight-bold">Revised Document No.</small>
 					<h6 class="mt-0 text-danger font-weight-bold">
-						${getFormCode("PBT", createdAt, reviseDocumentNo)}
+						${getFormCode("PTB", createdAt, reviseDocumentNo)}
 					</h6>      
 				</div>
 			</div>
@@ -1022,7 +1077,7 @@ $(document).ready(function() {
                     <div class="body">
                         <small class="text-small text-muted font-weight-bold">Document No.</small>
                         <h6 class="mt-0 text-danger font-weight-bold">
-							${timelineBuilderID && !isRevise ? getFormCode("PBT", createdAt, timelineBuilderID) : "---"}
+							${timelineBuilderID && !isRevise ? getFormCode("PTB", createdAt, timelineBuilderID) : "---"}
 						</h6>      
                     </div>
                 </div>
@@ -1211,6 +1266,7 @@ $(document).ready(function() {
 								class="form-control" 
 								name="timelineDesign" 
 								id="timelineDesign"
+								multiple
 								accept="image/*, .pdf, .doc, .docx" ${disabled}>`}
 					
 				</div>
@@ -1274,6 +1330,7 @@ $(document).ready(function() {
 					</tbody>
 				</table>
 				<div class="w-100 text-left my-2" id="projectTaskButtons">
+				<div class="text-right"><h5 class=" font-weight-bold " id="totalhours" >Total Alloted Hours: 0.00</h5></div>
 					
 				</div>
 			</div>
@@ -1290,7 +1347,9 @@ $(document).ready(function() {
                                 class="form-control text-right proposedBudget amount" 
 								name="timelineProposedBudget"
 								id="timelineProposedBudget"
-                                min="1" timelineBudgetStatus="${timelineBudgetStatus}"
+								minlength="1" 
+                                maxlength="14" 
+								 timelineBudgetStatus="${timelineBudgetStatus}"
                                 value="${timelineProposedBudget|| 0.00}" ${disabled}>
                         </div>
                         <div class="invalid-feedback d-block" id="invalid-proposedBudget"></div>
@@ -1349,8 +1408,10 @@ $(document).ready(function() {
 				$(`#btnSubmit, #btnRevise, #btnCancel, #btnCancelForm, .btnAddRow, .btnDeleteRow`).hide();
 			}
 			// ----- END NOT ALLOWED FOR UPDATE -----
+			console.log("pasok")
 			updateTableRows();
 			updateTableTaskList();
+			getTotalAlottedHours();
 			return html;
 		}, 200);
 	}
@@ -1372,7 +1433,7 @@ $(document).ready(function() {
 					${!readOnly ? 
 						`<td class="text-center">
 							<div class="action">
-								<input type="checkbox" id="checkboxrow0" class="main_checkboxrow">
+								<input type="checkbox" id="checkboxrow0" class="main_checkboxrow" >
 							</div>
 						</td>` : ``}
 						<td>
@@ -1478,7 +1539,8 @@ $(document).ready(function() {
 		if(projectTaskButtons){
 			setTimeout(() => {
 				$("#projectTaskButtons").html(`	<button class="btn btn-primary btnAddRow" type="button" id="btnAddRow"><i class="fas fa-plus-circle"></i> Add Row</button>
-				<button class="btn btn-danger btnDeleteRow" type="button" id="btnDeleteRow" disabled><i class="fas fa-minus-circle"></i> Delete Row/s</button>`);
+				<button class="btn btn-danger btnDeleteRow" type="button" id="btnDeleteRow" disabled><i class="fas fa-minus-circle"></i> Delete Row/s</button>
+				<h5  class="text-right font-weight-bold float-right" id="totalhours" >Total Alloted Hours: 0.00</h5>`);
 			}, 500);
 		}
 
@@ -1509,7 +1571,7 @@ $(document).ready(function() {
 						</td>
 						<td>
 							<input type="text" 
-								class = "form-control input-hours" 
+								class = "form-control input-hours text-left" 
 								name="allottedHours"
 								id="allottedHours${index}"
 								value = "${items.allottedHours}"
@@ -1566,7 +1628,7 @@ $(document).ready(function() {
 						</td>
 						<td>
 							<input type="text" 
-								class = "form-control input-hours" 
+								class = "form-control input-hours text-left" 
 								name="allottedHours"
 								id="allottedHours0"
 								value = ""
@@ -1652,7 +1714,9 @@ $(document).ready(function() {
 	function updateTableTaskList(){
 		$(".task-list-row").each(function(i){
             // CHECKBOX
-			var rowID 	=	$("td .action .main_checkboxrow", this).attr("id").replaceAll("main_checkboxrow","");
+			var condition 	= $("td .action .main_checkboxrow", this).attr("id");
+			if(condition){
+				var rowID 		=	$("td .action .main_checkboxrow", this).attr("id").replaceAll("main_checkboxrow","");
 				$(".task-list-sub-row").each(function(x){
 					var newID 	= rowID+"_"+x;
 					// CHECKBOX
@@ -1676,6 +1740,7 @@ $(document).ready(function() {
 					var startDateValue 	=	$(`#taskStartDate${newID}`).val();
 					var endDateValue 	=	$(`#taskEndDate${newID}`).val();
 
+					var dateToday 	= new Date();
 					var dateRangePickerStartDate 	= startDateValue != moment() ? startDateValue : moment();
 					var dateRangePickerEndDate		= endDateValue 	!= moment() ? endDateValue : moment();
 
@@ -1686,6 +1751,7 @@ $(document).ready(function() {
 									autoApply: true,
 									startDate: dateRangePickerStartDate,
 									endDate: dateRangePickerEndDate,
+									minDate: dateToday,
 									locale: {
 										format: 'MMMM DD, YYYY'
 									},
@@ -1703,6 +1769,7 @@ $(document).ready(function() {
 										})
 								});
 				});
+			}
         });
 	}
 
@@ -1982,7 +2049,7 @@ $(document).ready(function() {
 		const isFromCancelledDocument 	= $(this).attr("cancel") == "true";
 		const revise     				= $(this).attr("revise") == "true";
 		const employeeID 				= $(this).attr("employeeID");
-		const feedback   				= $(this).attr("code") || getFormCode("PBT", dateToday(), id);
+		const feedback   				= $(this).attr("code") || getFormCode("PTB", dateToday(), id);
 		const status     				= $(this).attr("status");
 
 		if (status != "false" && status != 0) {
@@ -2026,12 +2093,13 @@ $(document).ready(function() {
 		const id       					= decryptString($(this).attr("timelineBuilderID"));
 		const isFromCancelledDocument 	= $(this).attr("cancel") == "true";
 		const revise   					= $(this).attr("revise") == "true";
-		const feedback 					= $(this).attr("code") || getFormCode("PBT", dateToday(), id);
+		const feedback 					= $(this).attr("code") || getFormCode("PTB", dateToday(), id);
 		const action   					= revise && !isFromCancelledDocument && "insert" || (id && feedback ? "update" : "insert");
 		const data     					= gettimelineBuilderData(action, "save", "0", id);
 		data.append("timelineBuilderStatus", 0);
 
 		if (revise) {
+			
 			if(!isFromCancelledDocument){
 				data.append("reviseTimelineBuilderID", id);
 				data.delete("timelineBuilderID");
@@ -2172,7 +2240,7 @@ $(document).ready(function() {
     // ----- REJECT DOCUMENT -----
 	$(document).on("click", "#btnReject", function () {
 		const id       = decryptString($(this).attr("timelineBuilderID"));
-		const feedback = $(this).attr("code") || getFormCode("PBT", dateToday(), id);
+		const feedback = $(this).attr("code") || getFormCode("PTB", dateToday(), id);
 
 		$("#modal_cost_estimate_content").html(preloader);
 		$("#modal_cost_estimate .page-title").text("DENY Project Timeline");
@@ -2204,7 +2272,7 @@ $(document).ready(function() {
 
 	$(document).on("click", "#btnRejectConfirmation", function () {
 		const id       = decryptString($(this).attr("timelineBuilderID"));
-		const feedback = $(this).attr("code") || getFormCode("PBT", dateToday(), id);
+		const feedback = $(this).attr("code") || getFormCode("PTB", dateToday(), id);
 
 		const validate = validateForm("modal_cost_estimate");
 		if (validate) {
@@ -2242,7 +2310,7 @@ $(document).ready(function() {
 	// ----- DROP DOCUMENT -----
 	$(document).on("click", "#btnDrop", function() {
 		const timelineBuilderID = decryptString($(this).attr("timelineBuilderID"));
-		const feedback       = $(this).attr("code") || getFormCode("PBT", dateToday(), id);
+		const feedback       = $(this).attr("code") || getFormCode("PTB", dateToday(), id);
 
 		const id = decryptString($(this).attr("timelineBuilderID"));
 		let data = new FormData;
@@ -2421,20 +2489,20 @@ function savetimelineBuilder(data = null, method = "submit", notificationData = 
 						let swalTitle;
 						if (method == "submit") {
 							if($("[name=timelineProposedBudget]").attr("timelineBudgetStatus") !=  0 ){
-								swalTitle = `${getFormCode("PBT", dateCreated, insertedID)} submitted successfully!`;
+								swalTitle = `${getFormCode("PTB", dateCreated, insertedID)} submitted successfully!`;
 							}else{
 								swalTitle = `Project Timeline submitted for proposal successfully!`;
 							}
 						} else if (method == "save") {
 							swalTitle = `Project Timeline saved successfully!`;
 						} else if (method == "cancelform") {
-							swalTitle = `${getFormCode("PBT", dateCreated, insertedID)} cancelled successfully!`;
+							swalTitle = `${getFormCode("PTB", dateCreated, insertedID)} cancelled successfully!`;
 						} else if (method == "approve") {
-							swalTitle = `${getFormCode("PBT", dateCreated, insertedID)} approved successfully!`;
+							swalTitle = `${getFormCode("PTB", dateCreated, insertedID)} approved successfully!`;
 						} else if (method == "deny") {
-							swalTitle = `${getFormCode("PBT", dateCreated, insertedID)} denied successfully!`;
+							swalTitle = `${getFormCode("PTB", dateCreated, insertedID)} denied successfully!`;
 						} else if (method == "drop") {
-							swalTitle = `${getFormCode("PBT", dateCreated, insertedID)} dropped successfully!`;
+							swalTitle = `${getFormCode("PTB", dateCreated, insertedID)} dropped successfully!`;
 						}
 		
 						if (isSuccess == "true") {

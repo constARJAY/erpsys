@@ -430,7 +430,7 @@ $(document).ready(function(){
 			let {
 				fullname,
 				billMaterialID,
-				referenceCode,
+				costEstimateCode,
 				projectCode,
 				projectName,
 				clientName,
@@ -459,14 +459,14 @@ $(document).ready(function(){
 			<button 
 				class="btn btn-edit w-100 btnEdit" 
 				id="${encryptString(billMaterialID )}" 
-				code="${getFormCode("CEF", createdAt, billMaterialID )}"><i class="fas fa-edit"></i> Edit</button>`;
+				code="${getFormCode("PBR", createdAt, billMaterialID )}"><i class="fas fa-edit"></i> Edit</button>`;
 
 			if (isImCurrentApprover(approversID, approversDate, billMaterialStatus) || isAlreadyApproved(approversID, approversDate)) {
 				html += `
 				<tr class="${btnClass}" id="${encryptString(billMaterialID )}">
-					<td>${getFormCode("CEF", createdAt, billMaterialID )}</td>
+					<td>${getFormCode("PBR", createdAt, billMaterialID )}</td>
 					<td>${fullname}</td>
-					<td>${referenceCode || "-"}</td>
+					<td>${costEstimateCode || "-"}</td>
 					<td>
 						<div>
 						${projectCode || '-'}
@@ -529,7 +529,7 @@ $(document).ready(function(){
 				fullname,
 				billMaterialID,
 				costEstimateID,
-				referenceCode,
+				costEstimateCode,
 				projectCode,
 				projectName,
 				projectCategory,
@@ -561,13 +561,13 @@ $(document).ready(function(){
 			<button 
 				class="btn btn-edit w-100 btnEdit" 
 				id="${encryptString(billMaterialID )}" 
-				code="${getFormCode("CEF", createdAt, billMaterialID )}"><i class="fas fa-edit"></i> Edit</button>`;
+				code="${getFormCode("PBR", createdAt, billMaterialID )}"><i class="fas fa-edit"></i> Edit</button>`;
 
 			html += `
 			<tr class="${btnClass}" id="${encryptString(billMaterialID )}">
-				<td>${getFormCode("CEF", createdAt, billMaterialID )}</td>
+				<td>${getFormCode("PBR", createdAt, billMaterialID )}</td>
 				<td>${fullname}</td>
-				<td>${referenceCode || "-"}</td>
+				<td>${costEstimateCode || "-"}</td>
 				<td>
 					<div>
 					${projectCode || '-'}
@@ -622,7 +622,7 @@ $(document).ready(function(){
 						class="btn btn-submit px-5 p-2" 
 						id="btnSubmit" 
 						billMaterialID="${encryptString(billMaterialID)}"
-						code="${getFormCode("CEF", createdAt, billMaterialID)}"
+						code="${getFormCode("PBR", createdAt, billMaterialID)}"
 						revise="${isRevise}"
 						cancel="${isFromCancelledDocument}"><i class="fas fa-paper-plane"></i>
 						Submit
@@ -634,7 +634,7 @@ $(document).ready(function(){
 							class="btn btn-cancel px-5 p-2" 
 							id="btnCancel"
 							billMaterialID="${encryptString(billMaterialID)}"
-							code="${getFormCode("CEF",createdAt, billMaterialID)}"
+							code="${getFormCode("PBR",createdAt, billMaterialID)}"
 							revise="${isRevise}"
 							cancel="${isFromCancelledDocument}"><i class="fas fa-ban"></i> 
 							Cancel
@@ -645,7 +645,7 @@ $(document).ready(function(){
 							class="btn btn-cancel px-5 p-2"
 							id="btnCancelForm" 
 							billMaterialID="${encryptString(billMaterialID)}"
-							code="${getFormCode("CEF", createdAt, billMaterialID)}"
+							code="${getFormCode("PBR", createdAt, billMaterialID)}"
 							revise=${isRevise}><i class="fas fa-ban"></i> 
 							Cancel
 						</button>`;
@@ -660,7 +660,7 @@ $(document).ready(function(){
 							class="btn btn-cancel px-5 p-2"
 							id="btnCancelForm" 
 							billMaterialID="${encryptString(billMaterialID)}"
-							code="${getFormCode("CEF", createdAt, billMaterialID)}"
+							code="${getFormCode("PBR", createdAt, billMaterialID)}"
 							status="${billMaterialStatus}"><i class="fas fa-ban"></i> 
 							Cancel
 						</button>`;
@@ -672,7 +672,7 @@ $(document).ready(function(){
 						class="btn btn-cancel px-5 p-2"
 						id="btnDrop" 
 						billMaterialID="${encryptString(billMaterialID)}"
-						code="${getFormCode("CEF", createdAt, billMaterialID)}"
+						code="${getFormCode("PBR", createdAt, billMaterialID)}"
 						status="${billMaterialStatus}"><i class="fas fa-ban"></i> 
 						Drop
 					</button>`;
@@ -684,7 +684,7 @@ $(document).ready(function(){
 							class="btn btn-cancel px-5 p-2"
 							id="btnRevise" 
 							billMaterialID="${encryptString(billMaterialID)}"
-							code="${getFormCode("CEF", createdAt, billMaterialID)}"
+							code="${getFormCode("PBR", createdAt, billMaterialID)}"
 							status="${billMaterialStatus}"><i class="fas fa-clone"></i>
 							Revise
 						</button>`;
@@ -698,7 +698,7 @@ $(document).ready(function(){
 							class="btn btn-cancel px-5 p-2"
 							id="btnRevise" 
 							billMaterialID="${encryptString(billMaterialID)}"
-							code="${getFormCode("CEF", createdAt, billMaterialID)}"
+							code="${getFormCode("PBR", createdAt, billMaterialID)}"
 							status="${billMaterialStatus}"
 							cancel="true"><i class="fas fa-clone"></i>
 							Revise
@@ -713,14 +713,14 @@ $(document).ready(function(){
 							class="btn btn-submit px-5 p-2" 
 							id="btnApprove" 
 							billMaterialID="${encryptString(billMaterialID)}"
-							code="${getFormCode("CEF", createdAt, billMaterialID)}"><i class="fas fa-paper-plane"></i>
+							code="${getFormCode("PBR", createdAt, billMaterialID)}"><i class="fas fa-paper-plane"></i>
 							Approve
 						</button>
 						<button 
 							class="btn btn-cancel px-5 p-2"
 							id="btnReject" 
 							billMaterialID="${encryptString(billMaterialID)}"
-							code="${getFormCode("CEF", createdAt, billMaterialID)}"><i class="fas fa-ban"></i> 
+							code="${getFormCode("PBR", createdAt, billMaterialID)}"><i class="fas fa-ban"></i> 
 							Deny
 						</button>`;
 					}
@@ -951,11 +951,11 @@ $(document).ready(function(){
 
 
 
-$(document).on("keypress",  "[name=vehicle-unit-cost]", function(){
+$(document).on("keyup",  "[name=vehicle-unit-cost]", function(){
 	updateTravelUnitCost("vehicle-unit-cost");
 });
 
-$(document).on("keypress",  "[name=row-unit-cost]", function(){
+$(document).on("keyup",  "[name=row-unit-cost]", function(){
 	updateTravelUnitCost("row-unit-cost");
 });
 
@@ -1237,7 +1237,7 @@ $(document).on("keypress",  "[name=row-unit-cost]", function(){
 			const isFromCancelledDocument 	= $(this).attr("cancel") == "true";
 			const revise     				= $(this).attr("revise") == "true";
 			const employeeID 				= $(this).attr("employeeID");
-			const feedback   				= $(this).attr("code") || getFormCode("CEF", dateToday(), id);
+			const feedback   				= $(this).attr("code") || getFormCode("PBR", dateToday(), id);
 			const status     				= $(this).attr("status");
 
 			if (status != "false" && status != 0) {
@@ -1281,7 +1281,7 @@ $(document).on("keypress",  "[name=row-unit-cost]", function(){
 			const id       					= decryptString($(this).attr("billMaterialID"));
 			const isFromCancelledDocument 	= $(this).attr("cancel") == "true";
 			const revise   					= $(this).attr("revise") == "true";
-			const feedback 					= $(this).attr("code") || getFormCode("CEF", dateToday(), id);
+			const feedback 					= $(this).attr("code") || getFormCode("PBR", dateToday(), id);
 			const action   					= revise && !isFromCancelledDocument && "insert" || (id && feedback ? "update" : "insert");
 			const data     					= getbillMaterialData(action, "save", "0", id);
 			data.append("billMaterialStatus", 0);
@@ -1416,7 +1416,7 @@ $(document).on("keypress",  "[name=row-unit-cost]", function(){
 	// ----- REJECT DOCUMENT -----
 		$(document).on("click", "#btnReject", function () {
 			const id       = decryptString($(this).attr("billMaterialID"));
-			const feedback = $(this).attr("code") || getFormCode("CEF", dateToday(), id);
+			const feedback = $(this).attr("code") || getFormCode("PBR", dateToday(), id);
 
 			$("#modal_project_budget_rationale_content").html(preloader);
 			$("#modal_project_budget_rationale .page-title").text("DENY COST ESTIMATE");
@@ -1448,7 +1448,7 @@ $(document).on("keypress",  "[name=row-unit-cost]", function(){
 
 		$(document).on("click", "#btnRejectConfirmation", function () {
 			const id       = decryptString($(this).attr("billMaterialID"));
-			const feedback = $(this).attr("code") || getFormCode("CEF", dateToday(), id);
+			const feedback = $(this).attr("code") || getFormCode("PBR", dateToday(), id);
 
 			const validate = validateForm("modal_project_budget_rationale");
 			if (validate) {
@@ -1486,7 +1486,7 @@ $(document).on("keypress",  "[name=row-unit-cost]", function(){
 	// ----- DROP DOCUMENT -----
 		$(document).on("click", "#btnDrop", function() {
 			const billMaterialID = decryptString($(this).attr("billMaterialID"));
-			const feedback       = $(this).attr("code") || getFormCode("CEF", dateToday(), id);
+			const feedback       = $(this).attr("code") || getFormCode("PBR", dateToday(), id);
 
 			const id = decryptString($(this).attr("billMaterialID"));
 			let data = new FormData;
@@ -1511,6 +1511,12 @@ $(document).on("keypress",  "[name=row-unit-cost]", function(){
 		});
 	// ----- END NAV LINK -----
 
+	$(document).on("click","#btnExcel", function(){
+		let billMaterialID = decryptString($(this).attr("pbrid"));
+		const url = `${base_url}pms/project_budget_rationale/downloadExcel?id=${billMaterialID}`;
+		window.location.replace(url); 
+
+	});
 // ------------------------------ END ONCLICK EVENTS ------------------------------
 
 // ------------------------------ FUNCTIONS ------------------------------
@@ -1579,7 +1585,7 @@ $(document).on("keypress",  "[name=row-unit-cost]", function(){
 																clientaddress="${items.clientAddress}"
 																costestimatereason="${items.costEstimateReason}"
 																createdBy="${items.createdBy}"  ${items.costEstimateID == costEstimateID ? `selected` : ``}> 
-																${getFormCode("CEF",items.createdAt,items.costEstimateID)}
+																${getFormCode("PBR",items.createdAt,items.costEstimateID)}
 															</option>`;
 		});
 
@@ -1594,14 +1600,21 @@ $(document).on("keypress",  "[name=row-unit-cost]", function(){
 				<div class="body">
 					<small class="text-small text-muted font-weight-bold">Revised Document No.</small>
 					<h6 class="mt-0 text-danger font-weight-bold">
-						${getFormCode("CEF", createdAt, reviseDocumentNo)}
+						${getFormCode("PBR", createdAt, reviseDocumentNo)}
 					</h6>      
 				</div>
 			</div>
 		</div>` : "";
 
-	
+		
+		let generateCostSheet = billMaterialStatus == "2" ? `<div class="w-100 text-right pb-4">
+																<button class="btn btn-info px-5 py-2" pbrid="${encryptString(billMaterialID)}" id="btnExcel">
+																	<i class="fas fa-file-excel"></i> Generate Cost Sheet
+																</button>
+															</div>` :``;
+
 		let html = `
+					${generateCostSheet}
 					<div class="row px-2">
 						${documentReviseNo}
 						<div class="${documentHeaderClass}">
@@ -1609,7 +1622,7 @@ $(document).on("keypress",  "[name=row-unit-cost]", function(){
 								<div class="body">
 									<small class="text-small text-muted font-weight-bold">Document No.</small>
 									<h6 class="mt-0 text-danger font-weight-bold">
-										${billMaterialID && !isRevise ? getFormCode("CEF", createdAt, billMaterialID) : "---"}
+										${billMaterialID && !isRevise ? getFormCode("PBR", createdAt, billMaterialID) : "---"}
 									</h6>      
 								</div>
 							</div>
@@ -1764,9 +1777,10 @@ $(document).on("keypress",  "[name=row-unit-cost]", function(){
 						</div>
 						<div class="col-sm-12" id="formContentDivision">
 							${billMaterialID ? formContentDivision(costEstimateID, billMaterialID, readOnly) : `<div class="alert alert-warning py-1 text-center" role="alert">
-							<small class="font-weight-bold"><i class="fa fa-exclamation-circle text-warning font-weight-bold"></i> Please select reference no.</small>
-					</div>`}
-							
+											<small class="font-weight-bold"><i class="fa fa-exclamation-circle text-warning font-weight-bold"></i> Please select reference no.</small>
+									</div>`}
+						</div>
+						<div id="totalCostSummary" class="col-12 row">
 							
 						</div>
 
@@ -1802,7 +1816,6 @@ $(document).on("keypress",  "[name=row-unit-cost]", function(){
 		}, 600);
 	}
 
-
 	// ----- FORM CONTENT DIVISION -----
 		function formContentDivision(costEstimateID = null, billMaterialID = null, readOnly = false){
 			// let projectPhaseItemsRequest = [], materialItemsRequest = [], designationRequest = [], travelRequest = [];
@@ -1817,10 +1830,11 @@ $(document).on("keypress",  "[name=row-unit-cost]", function(){
 					},
 					success: function(data) {
 						// 1st DATA IS FOR PROJECT PHASE
-						var tableBodyProjectPhase =  ``, tableMilestone  = ``;
+						var tableBodyProjectPhase =  ``, projectPhaseTotalCost = 0;
 							data[0].map(items=>{
-							 var itemData = ``;
+							 	var tableMilestone  = ``, projectPhaseRowTotalCost = 0;
 									items.milestone.map(milestoneList=>{
+										
 										 tableMilestone += `<tr class="table-row-milestone">
 																<td>
 																	${getMilestoneList(items.phaseID, milestoneList.milestoneID)}
@@ -1866,6 +1880,8 @@ $(document).on("keypress",  "[name=row-unit-cost]", function(){
 																									</td>
 																								</tr>`;
 																			});
+													projectPhaseRowTotalCost  += parseFloat(itemTotalCost);
+													projectPhaseTotalCost += parseFloat(itemTotalCost);
 													 tableMilestone +=	 	`</tbody>
 																			<tfoot>
 																				<tr style="background-color: var(--secondary-color);">
@@ -1895,6 +1911,7 @@ $(document).on("keypress",  "[name=row-unit-cost]", function(){
 																				</tbody>
 																			</table>
 																		</td>
+																		<td><div class="text-right project-phase-total-cost">${formatAmount(projectPhaseRowTotalCost,true)}</div></td>
 																	</tr>`;
 								
 							});
@@ -1907,11 +1924,18 @@ $(document).on("keypress",  "[name=row-unit-cost]", function(){
 															<tr style="white-space: nowrap">
 																<th style="width: 300px">Project Phase</th>
 																<th style="width: 300px">Milestone</th>
+																<th style="width: 200px">Total Cost</th>
 															</tr>
 														</thead>
 														<tbody class="projectPhaseTables">
 															${tableBodyProjectPhase}
 														</tbody>
+														<tfoot>
+															<tr style="background-color: var(--secondary-color);">
+																<td class="font-weight-bold text-light" colspan="2">Total Cost</td>
+																<td class="text-right font-weight-bold milestone-total-cost text-light">${formatAmount(projectPhaseTotalCost, true)}</td>
+															</tr>
+														</tfoot>
 													</table>
 											</div>`;
 
@@ -2025,8 +2049,8 @@ $(document).on("keypress",  "[name=row-unit-cost]", function(){
 											</tbody>
 											<tfoot>
 												<tr style="background-color: var(--secondary-color); color: var(--font-white);">
-													<td text-light font-weight-bold" colspan="5">Total Cost</td>
-													<td text-light text-right font-weight-bold manpower-total-cost">${formatAmount(manpowerTotalCost, true)}</td>
+													<td class="text-light font-weight-bold" colspan="5">Total Cost</td>
+													<td class="text-light text-right font-weight-bold manpower-total-cost">${formatAmount(manpowerTotalCost, true)}</td>
 												</tr>
 											</tfoot>
 										</table>
@@ -2172,6 +2196,7 @@ $(document).on("keypress",  "[name=row-unit-cost]", function(){
 						initAll();
 						updateTableAttribute();
 						initDataTables();
+						updateTotalCostSummary();
 					}, 800);
 				});
 		}
@@ -2569,7 +2594,8 @@ $(document).on("keypress",  "[name=row-unit-cost]", function(){
 				
 				// VEHICLE UNIT COST
 				$(`[name=vehicle-unit-cost]`).each(function(){
-					var thisValue = $(this).val() || 0;
+					var thisValueText 	  = $(this).val();
+					var thisValue 		  = (thisValueText.indexOf(",") ? thisValueText.replaceAll(",","") : thisValueText) || 0 ;
 					var tableRowLiters    = $(this).closest(".table-row-vehicle").find(".travel-vehicle-liters").text();
 					var litersValue  	  = tableRowLiters.replaceAll(",","").replaceAll("/L", "") || tableRowLiters.replaceAll("/L", "");
 					var totalCost  		  = parseFloat(thisValue) * parseFloat(litersValue);
@@ -2600,8 +2626,111 @@ $(document).on("keypress",  "[name=row-unit-cost]", function(){
 				$(".travel-total-cost").text(travelTotalCost ? formatAmount(travelTotalCost, true) : "-");
 				
 			}
+			updateTotalCostSummary(false);
 		}
 	// ----- END UPDATE UNIT COST FOR TRAVEL -----
+	
+	// ----- UPDATE ALL TABLE TOTAL -----
+		function updateTotalCostSummary(keypress = true){
+			keypress ? $("#totalCostSummary").html(preloader) : null;
+			let projectPhaseTotalCost = 0, manpowerTotalCost = 0, travelTotalCost = 0, grandTotal = 0;
+			$(".table-row-project-phase").each(function(){
+				var totalCostText = $(this).find(".project-phase-total-cost").text().replaceAll("₱ ","");
+				var totalCost  	  = totalCostText.indexOf(",") ? totalCostText.replaceAll(",","") : totalCostText;
+				projectPhaseTotalCost += parseFloat(totalCost);
+			});
+
+			let materialEquipmentData =``, classifiationArray = [];
+			$(".table-row-material-equipment").each(function(){
+				var itemClassification = $(this).find(".material-item-classification").text().trim();
+				if(classifiationArray.length < 1){
+					classifiationArray.push(itemClassification);
+				}else{
+					if(!classifiationArray.includes(itemClassification)){
+						classifiationArray.push(itemClassification);
+					}
+				}
+			});
+
+			classifiationArray.map(classifications=>{
+				var classificationTotalCost = 0;
+				$(".table-row-material-equipment").each(function(){
+					var itemClassification =  $(this).find(".material-item-classification").text();
+					var itemTotalCostText  =  $(this).find(".material-total-cost").text().replaceAll("₱ ","");
+					var itemTotalCost	   =  itemTotalCostText.indexOf(",") ? itemTotalCostText.replaceAll(",","") : itemTotalCostText; 
+					if(classifications == itemClassification){
+						classificationTotalCost += parseFloat(itemTotalCost || 0);
+					}
+				});
+
+
+				materialEquipmentData += `<div class="row" style="font-size: 1.1rem">
+												<div class="col-6 col-lg-7 text-left">${classifications}:</div>
+												<div class="col-6 col-lg-5 text-right" style="font-size: 1.05em">
+													${formatAmount(classificationTotalCost || 0, true)}
+												</div>
+											</div>`;
+				grandTotal += parseFloat(classificationTotalCost || 0);
+			});
+
+
+			
+			$(".manpowerRowData").each(function(){
+				var manpowerText = $(this).find(".manpowerTotalCost").text().replaceAll("₱ ","");
+				var manpower  	  = manpowerText.indexOf(",") ? manpowerText.replaceAll(",","") : manpowerText;
+				manpowerTotalCost += parseFloat(manpower);
+			});
+
+			// let travelText = $(".travelTableReadOnly").find(".travel-total-cost").replaceAll("₱ ","");
+			let travelText 	= $(".travel-total-cost").text().replaceAll("₱ ","");
+			let travel 	 	= travelText.indexOf(",") ? travelText.replaceAll(",","") : travelText;
+			travelTotalCost += parseFloat(travel || 0);
+
+			grandTotal += parseFloat(projectPhaseTotalCost || 0);
+			grandTotal += parseFloat(manpowerTotalCost || 0);
+			grandTotal += parseFloat(travelTotalCost || 0);
+
+
+
+
+
+			let html = `	<div class="offset-lg-6 col-lg-6 offset-md-3 col-md-9 col-sm-12 pt-3 pb-2">
+								<div class="row" style="font-size: 1.1rem">
+									<div class="col-6 col-lg-7 text-left">Project Phase:</div>
+									<div class="col-6 col-lg-5 text-right" style="font-size: 1.05em">
+										${formatAmount(projectPhaseTotalCost,true)}
+									</div>
+								</div>
+
+								${materialEquipmentData}
+
+								<div class="row" style="font-size: 1.1rem">
+									<div class="col-6 col-lg-7 text-left">Manpower Summary:</div>
+									<div class="col-6 col-lg-5 text-right" style="font-size: 1.05em">
+										${formatAmount(manpowerTotalCost || 0,true)}
+									</div>
+								</div>
+								<div class="row pb-2" style="font-size: 1.1rem">
+									<div class="col-6 col-lg-7 text-left">Travel:</div>
+									<div class="col-6 col-lg-5 text-right" style="font-size: 1.05em">
+										${formatAmount(travelTotalCost || 0,true)}
+									</div>
+								</div>
+
+								<div class="row pt-1" style="font-size: 1.3rem; font-weight:bold; border-bottom: 3px double black; border-top: 1px solid black">
+									<div class="col-6 col-lg-7 text-left">Grand Total:</div>
+									<div class="col-6 col-lg-5 text-right text-danger" id="grandTotal" style="font-size: 1.05em">
+										${formatAmount(grandTotal || 0, true)}
+									</div>
+								</div>
+							</div>`;
+
+			setTimeout(() => {
+				$("#totalCostSummary").html(html);
+			}, 500);				
+			
+		}
+	// ----- END UPDATE ALL TABLE TOTAL -----
 
 	// ----- REMOVE IS-VALID IN TABLE -----
 		function removeIsValid(element = "table") {
@@ -2745,17 +2874,17 @@ $(document).on("keypress",  "[name=row-unit-cost]", function(){
 
 								let swalTitle;
 								if (method == "submit") {
-									swalTitle = `${getFormCode("CEF", dateCreated, insertedID)} submitted successfully!`;
+									swalTitle = `${getFormCode("PBR", dateCreated, insertedID)} submitted successfully!`;
 								} else if (method == "save") {
-									swalTitle = `${getFormCode("CEF", dateCreated, insertedID)} saved successfully!`;
+									swalTitle = `${getFormCode("PBR", dateCreated, insertedID)} saved successfully!`;
 								} else if (method == "cancelform") {
-									swalTitle = `${getFormCode("CEF", dateCreated, insertedID)} cancelled successfully!`;
+									swalTitle = `${getFormCode("PBR", dateCreated, insertedID)} cancelled successfully!`;
 								} else if (method == "approve") {
-									swalTitle = `${getFormCode("CEF", dateCreated, insertedID)} approved successfully!`;
+									swalTitle = `${getFormCode("PBR", dateCreated, insertedID)} approved successfully!`;
 								} else if (method == "deny") {
-									swalTitle = `${getFormCode("CEF", dateCreated, insertedID)} denied successfully!`;
+									swalTitle = `${getFormCode("PBR", dateCreated, insertedID)} denied successfully!`;
 								} else if (method == "drop") {
-									swalTitle = `${getFormCode("CEF", dateCreated, insertedID)} dropped successfully!`;
+									swalTitle = `${getFormCode("PBR", dateCreated, insertedID)} dropped successfully!`;
 								}
 				
 								if (isSuccess == "true") {

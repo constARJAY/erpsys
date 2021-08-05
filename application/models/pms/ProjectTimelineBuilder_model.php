@@ -50,7 +50,7 @@ class ProjectTimelineBuilder_model extends CI_Model {
         $sql            = "SELECT COUNT(clientID) AS clientCount , clientShortcut FROM pms_timeline_builder_tbl JOIN pms_client_tbl USING(clientID) WHERE  clientID = '$clientID'";
         $query          = $this->db->query($sql);
         $result         = $query->result_array();
-        $countClient    = ($result[0]["clientCount"] ? $result[0]["clientCount"] : 0) + 1 ;
+        $countClient    = ($result[0]["clientCount"] ? $result[0]["clientCount"] + 1  : 1) ;
         $clientShortcut = $result[0]["clientShortcut"] ? $result[0]["clientShortcut"] : "TST";
         $projetCode     = strlen($countClient) < 5  ? $clientShortcut."-".str_repeat("0", 5 - strlen($countClient)).$countClient : $clientShortcut."-".$countClient;
         return date("Y")."-".$projetCode;
