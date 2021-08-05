@@ -20,7 +20,8 @@ class Orientation_setup extends CI_Controller {
     public function updaterecord(){
         $employeeID = $this->input->post("employeeID");
         $designationID = $this->input->post("designationID");
-        $orientationsetupdata = $this->orientationsetup->updateorientationsetup($designationID, $employeeID);
+        $orientationName = $this->input->post("OrientationName");
+        $orientationsetupdata = $this->orientationsetup->updateorientationsetup($designationID, $employeeID,$orientationName);
         $result = explode("|", $orientationsetupdata);
         if ($result[0] == "true") {
             $this->session->set_flashdata('success', $result[1]);

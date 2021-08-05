@@ -217,6 +217,7 @@ $(document).ready(function () {
 					</div>
 				</th>
 				<th>Approval <code>*</code></th>
+				<th>Orientation Name <code>*</code></th>
 				</tr>
 			</thead>
 			<tbody class="tableExaminationSetupTableBody">
@@ -272,8 +273,9 @@ $(document).ready(function () {
 function getItemRow(item = {}) {
 	let {
 			
-		orientationID     = "",
-		employeeID 			=""
+		orientationID     	= "",
+		employeeID 			="",
+		OrientationName		=""
 	} = item;
   
 	let html = "";
@@ -301,6 +303,21 @@ function getItemRow(item = {}) {
 					<div class="invalid-feedback d-block" id="invalid-itemID"></div>
 				</div>
 			</td>
+			<td>
+				<div class="">
+					<input 
+						type="text" 
+						class="form-control validate OrientationName"
+						data-allowcharacters="[a-z][A-Z][0-9][ ][.][,][-][()]['][/]" 
+						min="2"
+						max="250" 
+						id="OrientationName" 
+						name="OrientationName" 
+						value="${OrientationName}"
+						required>
+					<div class="invalid-feedback d-block" id="invalid-OrientationName"></div>
+				</div>
+				</td>
 		</tr>`;
 	return html;
 }
@@ -327,6 +344,7 @@ function updateTableItems() {
 				$(this).select2({ theme: "bootstrap" });
 			}
 		});
+		$("td .OrientationName", this).attr("id", `OrientationName${i}`);
 		
 	})
 }
@@ -436,8 +454,12 @@ function deleteTableRow(isProject = true) {
 		let condition           = validateForm("modal_orientation_setup");
 		 if(condition == true){
 			var employeeID = [];
+			var OrientationName = [];
 			$(".employeeID").each(function () {
 				employeeID.push($(this).val());
+			});
+			$(".OrientationName").each(function () {
+				OrientationName.push($(this).val());
 			});
 			let designationID     =  $(this).attr("designationID");
 			let designationName     =  $(this).attr("designationName");
@@ -461,8 +483,9 @@ function deleteTableRow(isProject = true) {
 						url: `${base_url}hris/Orientation_setup/updaterecord`,
 						method: "POST",
 						data: {
-							employeeID: 	employeeID,
-							designationID: 	designationID,
+							employeeID: 		employeeID,
+							designationID: 		designationID,
+							OrientationName:	OrientationName,
 						},
 						async: true,
 						dataType: "json",

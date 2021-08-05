@@ -130,7 +130,7 @@
 <!-- ----- ADD MODAL ----- -->
 <div id="modal_orientation_setup" class="modal custom-modal fade" data-backdrop="static" data-keyboard="false"
 	role="dialog">
-	<div class="modal-dialog modal-md modal-dialog-centered" role="document">
+	<div class="modal-dialog modal-lg modal-dialog-centered" role="document">
 		<div class="modal-content">
 			<div class="modal-header bg-primary text-light">
 				<h5 class="page-title font-weight-bold">SETUP APPROVAL</h5>

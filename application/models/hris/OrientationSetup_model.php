@@ -7,7 +7,7 @@ class OrientationSetup_model extends CI_Model {
     {
         parent::__construct();
     }
-    public function updateorientationsetup($designationID, $employeeID){
+    public function updateorientationsetup($designationID, $employeeID,$orientationName){
         $querydelete = $this->db->delete("hris_orientation_setup_tbl", ["designationID" => $designationID]);
         $record  = array();
         if(is_array($employeeID)){ 
@@ -16,7 +16,8 @@ class OrientationSetup_model extends CI_Model {
             {
              $record[$count] = array(
                         'designationID'		        =>$designationID,
-                        'employeeID'		        =>$employeeID[$count]);
+                        'employeeID'		        =>$employeeID[$count],
+                        'orientationName'           =>$orientationName[$count]);
             } 
             $this->db->insert_batch('hris_orientation_setup_tbl', $record);
             //$insert_id = $this->db->insert_id();

@@ -1818,6 +1818,33 @@ INSERT INTO `hris_on_timein_timeout_tbl` VALUES (1,'SCH-21-00001',1,'2021-04-05'
 UNLOCK TABLES;
 
 --
+-- Table structure for table `hris_onboarding_tbl`
+--
+
+DROP TABLE IF EXISTS `hris_onboarding_tbl`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `hris_onboarding_tbl` (
+  `onboardingID` bigint(25) NOT NULL AUTO_INCREMENT,
+  `orientationID` int(11) NOT NULL,
+  `employeeID` int(25) NOT NULL,
+  `onboardingDate` date NOT NULL,
+  `onboardingStatus` int(20) NOT NULL,
+  `createdBy` int(11) NOT NULL,
+  PRIMARY KEY (`onboardingID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `hris_onboarding_tbl`
+--
+
+LOCK TABLES `hris_onboarding_tbl` WRITE;
+/*!40000 ALTER TABLE `hris_onboarding_tbl` DISABLE KEYS */;
+/*!40000 ALTER TABLE `hris_onboarding_tbl` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `hris_orientation_setup_tbl`
 --
 
@@ -1830,6 +1857,7 @@ CREATE TABLE `hris_orientation_setup_tbl` (
   `departmentID` bigint(11) NOT NULL,
   `designationID` int(20) NOT NULL,
   `employeeID` int(11) DEFAULT NULL,
+  `OrientationName` text COLLATE utf8mb4_unicode_ci NOT NULL,
   `orientationStatus` int(11) NOT NULL,
   PRIMARY KEY (`orientationID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -4569,4 +4597,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2021-08-05 16:15:42
+-- Dump completed on 2021-08-05 16:36:18
