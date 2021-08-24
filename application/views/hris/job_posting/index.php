@@ -9,7 +9,7 @@
 						<li class="breadcrumb-item active"  id="inv_mainItem_breadcrumbs">Job Posting</li>
                         <!-- <li class="breadcrumb-item" id="inv_item_breadcrumbs" style="visibility:hidden;"><i class="icon-social-dropbox" ></i> &nbsp;Add Category</li> -->
 					</ul>
-					<h1 class="mt-3" id="inv_headerID">List of Jobs Vacancies</h1>
+					<h1 class="mt-3" id="inv_headerID">List of Job Vacancies</h1>
 					<span>This module is used to manage job posting details.</span>
 				</div>
 				<div class="col-lg-6 col-md-12 text-md-right">

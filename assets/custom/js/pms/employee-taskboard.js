@@ -492,6 +492,7 @@ $(document).ready(function() {
         }
          
         // $(`.assignedMembers[taskBoardID="${taskBoardID}"][subtaskboardID="${subtaskboardID}"]`).html(html);
+        // console.log(subtaskboardID);
         $(`.assignedMembers[subtaskboardID="${subtaskboardID}"]`).html(html);
     }
     // ----- END DISPLAY ASSIGNED EMPLOYEE -----
@@ -528,9 +529,8 @@ $(document).ready(function() {
         const subtaskboardID  = $(this).attr("subtaskboardID");
         const subTaskAssignee  = $(this).attr("subTaskAssignee");
         const employees = getSubAssignedEmployee(taskBoardID, subtaskboardID);
-        // console.log(employees)
+   
         displayAssignedEmployee(employees, taskBoardID,subtaskboardID);
-        
         $parent = $(this).closest(".form-group");
         $(this).parent()
             .find(".selection")
@@ -1410,6 +1410,7 @@ function displayPhase(teamMembers = {}, phase = {}, index = 0,  ) {
                             employees='${JSON.stringify(employees)}'
                             subtask='${JSON.stringify(subTask)}'
                             teamMembers='${JSON.stringify(teamMembers)}'
+                            manHours='${manHours}'
                             subTableID = "projectSubTask${attachedUniqueID}" ><i class="fas fa-plus-circle"></i> Add Subtask</button>
                     </div>
                     </div>
@@ -2094,7 +2095,7 @@ function displayPhase(teamMembers = {}, phase = {}, index = 0,  ) {
             <i class="fas fa-cloud-upload-alt fa-2x "></i>&nbsp;<span class="mt-1">Drop files here to attach or </span> 
             &nbsp;
             <label id="proxy_label" for="file_input_id" class="mt-1 font-italic">browse</label>
-            <input type="file" id="file_input_id" subtaskboardID="${subtaskboardID}" taskBoardID="${taskHeaderID}" multiple>
+            <input type="file" id="file_input_id" subtaskboardID="${subtaskboardID}" taskBoardID="${taskHeaderID}"  accept="image/png, image/jpg, image/jpeg" multiple >
             </div>
            
         </div>`;
@@ -2211,7 +2212,7 @@ function displayPhase(teamMembers = {}, phase = {}, index = 0,  ) {
 																				projectMilestoneName           = "",
 																			} = milestone;
 
-                                                                            console.log(getProjectMilestoneData)
+                                                                            // console.log(getProjectMilestoneData)
 	
 														sidebarhtml +=`<a href="#" class="list-group-item" data-parent="#phaseProject${counter2}" style="cursor:pointer;"><i
 																					class="fa fa-circle"></i> &nbsp; <small class="btnSelectedProject" timelineBuilderID="${encryptString(timelineBuilderID)}" phaseCode="${phaseCode}" projectMilestoneName="${projectMilestoneName}">${projectMilestoneName} </small></a>`;
@@ -2247,6 +2248,7 @@ function displayPhase(teamMembers = {}, phase = {}, index = 0,  ) {
         var taskBoardID = $(this).attr("taskBoardID");
         var taskStartDate = $(this).attr("startDate");
         var taskEndDate = $(this).attr("endDate");
+        var manHours = $(this).attr("manHours");
         var subTableID = $(this).attr("subTableID");
         var employees=$(this).attr("employees");
         var subTask = JSON.parse($(this).attr("subtask"));
@@ -2256,17 +2258,17 @@ function displayPhase(teamMembers = {}, phase = {}, index = 0,  ) {
         var subTableLength = $("#"+subTableID).find("tbody tr").length +1;
 
         // ----------------------------GET ASSIGNEE---------------------//
-        const getLastSubtask = getTableData("pms_employeetaskoard_details_tbl","subtaskboardID","","subtaskboardID  DESC LIMIT 1");
+        const getLastSubtask = getTableData("information_schema.TABLES"," AUTO_INCREMENT","TABLE_SCHEMA = 'erpdb' AND TABLE_NAME = 'pms_employeetaskoard_details_tbl'");
         var subtaskboardID ="";
-
+        //  NOTE : THERE IS A PROBLEM IN THE LAST WHEN IT IS NOT ARRANGED BY NUMBER//
         if(getLastSubtask.length != 0){
-        	subtaskboardID = parseFloat(getLastSubtask[0].subtaskboardID) +1;
+        	subtaskboardID = parseFloat(getLastSubtask[0].AUTO_INCREMENT);
         }else{
         	subtaskboardID = 1;
         	
         }
         // subtaskboardID = parseFloat(getLastSubtask[0].subtaskboardID) +1;
-
+        console.log(subtaskboardID)
         const getAssigneeList = (subtaskboardID = null, subTask=[],teamMembers = {} ) => { 
             let taskAssigneeContent = "";
           
@@ -2325,6 +2327,8 @@ function displayPhase(teamMembers = {}, phase = {}, index = 0,  ) {
         let html = `<tr>
             <td class="text-nowrap">
                 <div class="form-group my-1">
+                <button type="button" class="btn btn-danger btn-sm delete_subtask" title="Delete"><i class="fas fa-trash-alt" ></i></button>
+                &nbsp;
                     <span
                     class="btnModal"
                     taskID="${taskID}"
@@ -2333,6 +2337,7 @@ function displayPhase(teamMembers = {}, phase = {}, index = 0,  ) {
                     milestoneBuilderID="${milestoneBuilderID}"
                     taskBoardID="${taskBoardID}"
                     subtaskboardID=""
+                    label="assigned"
                     employees='${JSON.stringify(teamMembers)}'
                      name="subtaskName"><small>TSK-${generateSubtaskCode(taskName.toUpperCase().replaceAll(" ",""),subTableLength ) }</small></span>
                 </div>
@@ -2392,7 +2397,7 @@ function displayPhase(teamMembers = {}, phase = {}, index = 0,  ) {
                     <input class="form-control manHours input-hours text-center subTaskManHours btnSubTaskSubmit"
                         name="subTaskManHours"
                         id="subTaskManHours"
-                        value="1"
+                        value="${manHours}"
                         >
                 </div>
             </td>
@@ -2401,7 +2406,6 @@ function displayPhase(teamMembers = {}, phase = {}, index = 0,  ) {
                     <input class="form-control input-hours text-center subTaskUsedHours btnSubTaskSubmit"
                         name="subTaskUsedHours"
                         id="subTaskUsedHours"
-                        value="2"
                         >
                 </div>
             </td>
@@ -2525,6 +2529,36 @@ function displayPhase(teamMembers = {}, phase = {}, index = 0,  ) {
                     $("#"+subTableID+" > tbody").find("tr:last-child").addClass("btnSubTaskSubmit").trigger("change");
                     // $("#subTaskStartDates"+attachedUniqueID+""+subTableLength).addClass("btnSubTaskSubmit");
                     $("#subTaskEndDates"+attachedUniqueID+""+subTableLength).addClass("btnSubTaskSubmit");
+
+                    $parent =   $("#"+subTableID+" > tbody tr:last-child");
+
+                        var dueDate = $parent.find("td [name=subTaskStartDates]").val();
+                        var status = $parent.find("td [name=taskStatus]").val();
+                 
+                        var now = moment();
+                        var then = moment(dueDate);
+            
+                        var beforeDueDate = moment().diff(dueDate, 'days');
+            
+                        if (now > then && (status != 7 && status != 1)) {
+            
+                           $parent.find("td [name=subTaskStartDates]").css('background-color',"#dc3545");
+                           $parent.find("td [name=subTaskStartDates]").css('color',"#fff");
+                          
+                          } else {
+                            if( beforeDueDate == 5 || (beforeDueDate <5 && beforeDueDate !=1) ){
+                               $parent.find("td [name=subTaskStartDates]").css('background-color',"#ffc107");
+                               $parent.find("td [name=subTaskStartDates]").css('color',"#fff");
+                            }else{
+                                if(status != 7 ){
+                                    $parent.find("td [name=subTaskStartDates]").css('background-color',"#dc3545");
+                                    $parent.find("td [name=subTaskStartDates]").css('color',"#fff");
+                                }
+                            }
+                          }
+                   
+
+
 
                 Swal.fire({
                     icon: 'success',
@@ -3133,8 +3167,6 @@ function displayPhase(teamMembers = {}, phase = {}, index = 0,  ) {
         })
     }
     // ----- VALIDATE ASSIGNEE -----
-
-
 
 
     // ----- CLICK BUTTON SUBMIT -----

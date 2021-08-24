@@ -408,7 +408,7 @@ $(document).ready(function() {
                                 id="input_moduleName"
                                 data-allowcharacters="[a-z][A-Z][ ][-]"
                                 minlength="2"
-                                maxlength="50"
+                                maxlength="100"
                                 unique="${moduleID}"
                                 value="${moduleName}"
                                 autocomplete="off"
@@ -445,7 +445,7 @@ $(document).ready(function() {
                                 id="input_moduleController"
                                 data-allowcharacters="[a-z][A-Z][_][-][/]"
                                 minlength="2"
-                                maxlength="30"
+                                maxlength="100"
                                 required
                                 value="${moduleController}">
                             <div class="invalid-feedback d-block" id="invalid-input_moduleController"></div>
@@ -473,7 +473,7 @@ $(document).ready(function() {
                                 id="input_moduleOrder"
                                 data-allowcharacters="[0-9]"
                                 minlength="1"
-                                maxlength="2"
+                                maxlength="3"
                                 required
                                 value="${moduleOrder}">
                             <div class="invalid-feedback d-block" id="invalid-input_moduleOrder"></div>
@@ -552,7 +552,7 @@ $(document).ready(function() {
                                 id="input_moduleCategory"
                                 data-allowcharacters="[a-z][A-Z][ ][-]"
                                 minlength="2"
-                                maxlength="50"
+                                maxlength="100"
                                 required
                                 unique="${moduleCategoryID}"
                                 autocomplete="off"
@@ -583,7 +583,7 @@ $(document).ready(function() {
                                 value="${moduleCategoryOrder}"
                                 data-allowcharacters="[0-9]"
                                 minlength="0"
-                                maxlength="2"
+                                maxlength="3"
                                 required>
                             <div class="invalid-feedback d-block" id="invalid-input_moduleCategoryOrder"></div>
                         </div>
@@ -646,7 +646,7 @@ $(document).ready(function() {
                                 id="input_moduleHeaderName"
                                 data-allowcharacters="[a-z][A-Z][ ][-]"
                                 minlength="2"
-                                maxlength="20"
+                                maxlength="100"
                                 required
                                 unique="${moduleHeaderID}"
                                 title="Module Header"
@@ -666,7 +666,7 @@ $(document).ready(function() {
                                 value="${moduleHeaderOrder}"
                                 data-allowcharacters="[0-9]"
                                 minlength="0"
-                                maxlength="2"
+                                maxlength="3"
                                 required>
                             <div class="invalid-feedback d-block" id="invalid-input_moduleHeaderOrder"></div>
                         </div>

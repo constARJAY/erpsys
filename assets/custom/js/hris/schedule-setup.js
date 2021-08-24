@@ -4,11 +4,15 @@ $(document).ready(function () {
 
 	// ----- DATATABLES -----
 	function initDataTables() {
-		if ($.fn.DataTable.isDataTable("#tableSssTable")) {
-			$("#tableSssTable").DataTable().destroy();
+		if ($.fn.DataTable.isDataTable("#scheduleTable")) {
+			$("#scheduleTable").DataTable().destroy();
 		}
 
-		var table = $("#tableSssTable")
+		if ($.fn.DataTable.isDataTable("#scheduleFormTable")) {
+			$("#scheduleFormTable").DataTable().destroy();
+		}
+
+		var table = $("#scheduleTable")
 			.css({ "min-width": "100%" })
 			.removeAttr("width")
 			.DataTable({
@@ -27,6 +31,28 @@ $(document).ready(function () {
 					{ targets: 7, width: 130 },
 					{ targets: 8, width: 130 },
 					{ targets: 9, width: 80 },
+				],
+			});
+
+		var table = $("#scheduleFormTable")
+			.css({ "min-width": "100%" })
+			.removeAttr("width")
+			.DataTable({
+				proccessing:    false,
+				serverSide:     false,
+				scrollX:        true,
+				sorting:        false,
+				searching:      false,
+				paging:         false,
+				ordering:       false,
+				info:           false,
+				scrollCollapse: true,
+				columnDefs: [
+					{ targets: 0, width: 50  },
+					{ targets: 1, width: 100 },
+					{ targets: 2, width: 120 },
+					{ targets: 3, width: 120 },
+					{ targets: 4, width: 150 },
 				],
 			});
 	}
@@ -51,7 +77,7 @@ $(document).ready(function () {
 			},
 			success: function (data) {
 				let html = `
-                <table class="table table-bordered table-striped table-hover" id="tableSssTable">
+                <table class="table table-bordered table-striped table-hover" id="scheduleTable">
                     <thead>
                         <tr>
                             <th>No.</th>
@@ -172,24 +198,31 @@ $(document).ready(function () {
 			scheduleStatus  = "1",
 			mondayFrom      = "",
 			mondayTo        = "",
+			mondayBreakDuration = "0",
 			mondayStatus    = "",
 			tuesdayFrom     = "",
 			tuesdayTo       = "",
+			tuesdayBreakDuration = "0",
 			tuesdayStatus   = "",
 			wednesdayFrom   = "",
 			wednesdayTo     = "",
+			wednesdayBreakDuration = "0",
 			wednesdayStatus = "",
 			thursdayFrom    = "",
 			thursdayTo      = "",
+			thursdayBreakDuration = "0",
 			thursdayStatus  = "",
 			fridayFrom      = "",
 			fridayTo        = "",
+			fridayBreakDuration = "0",
 			fridayStatus    = "",
 			saturdayFrom    = "",
 			saturdayTo      = "",
+			saturdayBreakDuration = "0",
 			saturdayStatus  = "",
 			sundayFrom      = "",
 			sundayTo        = "",
+			sundayBreakDuration = "0",
 			sundayStatus    = "",
 		} = data && data[0];
 
@@ -219,121 +252,316 @@ $(document).ready(function () {
                     </div>
                 </div>
                 <div class="col-12">
-                    <table class="table text-center">
+					<div class="table-responsive">
+                    <table class="table text-center" id="scheduleFormTable">
                         <thead>
                             <tr>
                                 <th>Enabled</th>
                                 <th>Day</th>
-                                <th>From</th>
-                                <th>To</th>
+                                <th>Check In</th>
+                                <th>Check Out</th>
+                                <th>Break Duration</th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr>
-                                <td><input type="checkbox" id="mondayStatus" name="mondayStatus" ${
-																	mondayStatus == 1 && "checked"
-																}></td>
+                                <td>
+									<input type="checkbox" 
+										id="mondayStatus" 
+										name="mondayStatus" 
+										${mondayStatus == 1 && "checked"}>
+								</td>
                                 <td class="text-left">Monday</td>
                                 <td>
-                                    <input type="text" class="form-control timeFrom text-center" id="input_mondayFrom" name="mondayFrom" required value="${mondayFrom}">
+                                    <input type="text" 
+										class="form-control timeFrom text-center" 
+										id="input_mondayFrom" 
+										name="mondayFrom" 
+										required 
+										value="${mondayFrom}">
                                     <div class="d-block invalid-feedback" id="invalid-input_mondayFrom"></div>
                                 </td>
                                 <td>
-                                    <input type="text" class="form-control timeTo text-center" id="input_mondayTo" name="mondayTo" required value="${mondayTo}" from="mondayFrom">
+                                    <input type="text" 
+										class="form-control timeTo text-center" 
+										id="input_mondayTo" 
+										name="mondayTo" 
+										required 
+										value="${mondayTo}" 
+										from="mondayFrom">
                                     <div class="d-block invalid-feedback" id="invalid-input_mondayTo"></div>
                                 </td>
+								<td>
+									<input type="text"
+										class="form-control input-hours text-center"
+										id="mondayBreakDuration"
+										name="mondayBreakDuration"
+										minlength="0"
+										maxlength="5"
+										min="0"
+										max="2"
+										value="${mondayBreakDuration}"
+										required>
+									<div class="d-block invalid-feedback"></div>
+								</td>
                             </tr>
                             <tr>
-                                <td><input type="checkbox" id="tuesdayStatus" name="tuesdayStatus" ${
-																	tuesdayStatus == 1 && "checked"
-																}></td>
+                                <td>
+									<input type="checkbox" 
+										id="tuesdayStatus" 
+										name="tuesdayStatus" 
+										${tuesdayStatus == 1 && "checked"}>
+								</td>
                                 <td class="text-left">Tuesday</td>
                                 <td>
-                                    <input type="text" class="form-control timeFrom text-center" id="input_tuesdayFrom" name="tuesdayFrom" required value="${tuesdayFrom}">
+                                    <input type="text" 
+										class="form-control timeFrom text-center" 
+										id="input_tuesdayFrom" 
+										name="tuesdayFrom" 
+										required 
+										value="${tuesdayFrom}">
                                     <div class="d-block invalid-feedback" id="invalid-input_tuesdayFrom"></div>
                                 </td>
                                 <td>
-                                    <input type="text" class="form-control timeTo text-center" id="input_tuesdayTo" name="tuesdayTo" required value="${tuesdayTo}" from="tuesdayFrom">
+                                    <input type="text" 
+										class="form-control timeTo text-center" 
+										id="input_tuesdayTo" 
+										name="tuesdayTo" 
+										required 
+										value="${tuesdayTo}" 
+										from="tuesdayFrom">
                                     <div class="d-block invalid-feedback" id="invalid-input_tuesdayTo"></div>
                                 </td>
+								<td>
+									<input type="text"
+										class="form-control input-hours text-center"
+										id="tuesdayBreakDuration"
+										name="tuesdayBreakDuration"
+										minlength="0"
+										maxlength="5"
+										min="0"
+										max="2"
+										value="${tuesdayBreakDuration}"
+										required>
+									<div class="d-block invalid-feedback"></div>
+								</td>
                             </tr>
                             <tr>
-                                <td><input type="checkbox" id="wednesdayStatus" name="wednesdayStatus" ${
-																	wednesdayStatus == 1 && "checked"
-																}></td>
+                                <td>
+									<input type="checkbox" 
+										id="wednesdayStatus" 
+										name="wednesdayStatus" 
+										${wednesdayStatus == 1 && "checked"}>
+								</td>
                                 <td class="text-left">Wednesday</td>
                                 <td>
-                                    <input type="text" class="form-control timeFrom text-center" id="input_wednesdayFrom" name="wednesdayFrom" required value="${wednesdayFrom}">
+                                    <input type="text" 
+										class="form-control timeFrom text-center" 
+										id="input_wednesdayFrom" 
+										name="wednesdayFrom" 
+										required 
+										value="${wednesdayFrom}">
                                     <div class="d-block invalid-feedback" id="invalid-input_wednesdayFrom"></div>
                                 </td>
                                 <td>
-                                    <input type="text" class="form-control timeTo text-center" id="input_wednesdayTo" name="wednesdayTo" required value="${wednesdayTo}" from="wednesdayFrom">
+                                    <input type="text" 
+										class="form-control timeTo text-center" 
+										id="input_wednesdayTo" 
+										name="wednesdayTo" 
+										required 
+										value="${wednesdayTo}" 
+										from="wednesdayFrom">
                                     <div class="d-block invalid-feedback" id="invalid-input_wednesdayTo"></div>
                                 </td>
+								<td>
+									<input type="text"
+										class="form-control input-hours text-center"
+										id="wednesdayBreakDuration"
+										name="wednesdayBreakDuration"
+										minlength="0"
+										maxlength="5"
+										min="0"
+										max="2"
+										value="${wednesdayBreakDuration}"
+										required>
+									<div class="d-block invalid-feedback"></div>
+								</td>
                             </tr>
                             <tr>
-                                <td><input type="checkbox" id="thursdayStatus"  name="thursdayStatus" ${
-																	thursdayStatus == 1 && "checked"
-																}></td>
+                                <td>
+									<input type="checkbox" 
+										id="thursdayStatus"  
+										name="thursdayStatus" 
+										${thursdayStatus == 1 && "checked"}>
+								</td>
                                 <td class="text-left">Thursday</td>
                                 <td>
-                                    <input type="text" class="form-control timeFrom text-center" id="input_thursdayFrom" name="thursdayFrom" required value="${thursdayFrom}">
+                                    <input type="text" 
+										class="form-control timeFrom text-center" 
+										id="input_thursdayFrom" 
+										name="thursdayFrom" 
+										required 
+										value="${thursdayFrom}">
                                     <div class="d-block invalid-feedback" id="invalid-input_thursdayFrom"></div>
                                 </td>
                                 <td>
-                                    <input type="text" class="form-control timeTo text-center" id="input_thursdayTo" name="thursdayTo" required value="${thursdayTo}" from="thursdayFrom">
+                                    <input type="text" 
+										class="form-control timeTo text-center" 
+										id="input_thursdayTo" 
+										name="thursdayTo" 
+										required 
+										value="${thursdayTo}" 
+										from="thursdayFrom">
                                     <div class="d-block invalid-feedback" id="invalid-input_thursdayTo"></div>
                                 </td>
+								<td>
+									<input type="text"
+										class="form-control input-hours text-center"
+										id="thursdayBreakDuration"
+										name="thursdayBreakDuration"
+										minlength="0"
+										maxlength="5"
+										min="0"
+										max="2"
+										value="${thursdayBreakDuration}"
+										required>
+									<div class="d-block invalid-feedback"></div>
+								</td>
                             </tr>
                             <tr>
-                                <td><input type="checkbox" id="fridayStatus" name="fridayStatus" ${
-																	fridayStatus == 1 && "checked"
-																}></td>
+                                <td>
+									<input type="checkbox" 
+										id="fridayStatus"
+										name="fridayStatus" 
+										${fridayStatus == 1 && "checked"}>
+								</td>
                                 <td class="text-left">Friday</td>
                                 <td>
-                                    <input type="text" class="form-control timeFrom text-center" id="input_fridayFrom" name="fridayFrom" required value="${fridayFrom}">
+                                    <input type="text" 
+										class="form-control timeFrom text-center" 
+										id="input_fridayFrom" 
+										name="fridayFrom" 
+										required 
+										value="${fridayFrom}">
                                     <div class="d-block invalid-feedback" id="invalid-input_fridayFrom"></div>
                                 </td>
                                 <td>
-                                    <input type="text" class="form-control timeTo text-center" id="input_fridayTo" name="fridayTo" required value="${fridayTo}" from="fridayFrom">
+                                    <input type="text" 	
+										class="form-control timeTo text-center" 
+										id="input_fridayTo" 
+										name="fridayTo" 
+										required 
+										value="${fridayTo}" 
+										from="fridayFrom">
                                     <div class="d-block invalid-feedback" id="invalid-input_fridayTo"></div>
                                 </td>
+								<td>
+									<input type="text"
+										class="form-control input-hours text-center"
+										id="fridayBreakDuration"
+										name="fridayBreakDuration"
+										minlength="0"
+										maxlength="5"
+										min="0"
+										max="2"
+										value="${fridayBreakDuration}"
+										required>
+									<div class="d-block invalid-feedback"></div>
+								</td>
                             </tr>
                             <tr>
-                                <td><input type="checkbox" id="saturdayStatus" name="saturdayStatus" ${
-																	saturdayStatus == 1 && "selected"
-																}></td>
+                                <td>
+									<input type="checkbox" 
+										id="saturdayStatus" 
+										name="saturdayStatus" 
+										${saturdayStatus == 1 && "selected"}>
+								</td>
                                 <td class="text-left">Saturday</td>
                                 <td>
-                                    <input type="text" class="form-control timeFrom text-center" id="input_saturdayFrom" name="saturdayFrom" required value="${saturdayFrom}">
+                                    <input type="text" 
+										class="form-control timeFrom text-center" 
+										id="input_saturdayFrom" 
+										name="saturdayFrom" 
+										required 
+										value="${saturdayFrom}">
                                     <div class="d-block invalid-feedback" id="invalid-input_saturdayFrom"></div>
                                 </td>
                                 <td>
-                                    <input type="text" class="form-control timeTo text-center" id="input_saturdayTo" name="saturdayTo" required value="${saturdayTo}" from="saturdayFrom">
+                                    <input type="text" 
+										class="form-control timeTo text-center" 
+										id="input_saturdayTo" 
+										name="saturdayTo" 
+										required 
+										value="${saturdayTo}" 
+										from="saturdayFrom">
                                     <div class="d-block invalid-feedback" id="invalid-input_saturdayTo"></div>
                                 </td>
+								<td>
+									<input type="text"
+										class="form-control input-hours text-center"
+										id="saturdayBreakDuration"
+										name="saturdayBreakDuration"
+										minlength="0"
+										maxlength="5"
+										min="0"
+										max="2"
+										value="${saturdayBreakDuration}"
+										required>
+									<div class="d-block invalid-feedback"></div>
+								</td>
                             </tr>
                             <tr>
-                                <td><input type="checkbox" id="sundayStatus" name="sundayStatus" ${
-																	sundayStatus == 1 && "checked"
-																}></td>
+                                <td>
+									<input type="checkbox" 
+										id="sundayStatus" 
+										name="sundayStatus" 
+										${sundayStatus == 1 && "checked"}>
+								</td>
                                 <td class="text-left">Sunday</td>
                                 <td>
-                                    <input type="text" class="form-control timeFrom text-center" id="input_sundayFrom" name="sundayFrom" required value="${sundayFrom}">
+                                    <input type="text" 
+										class="form-control timeFrom text-center" 
+										id="input_sundayFrom" 
+										name="sundayFrom" 
+										required 
+										value="${sundayFrom}">
                                     <div class="d-block invalid-feedback" id="invalid-input_sundayFrom"></div>
                                 </td>
                                 <td>
-                                    <input type="text" class="form-control timeTo text-center" id="input_sundayTo" name="sundayTo" required value="${sundayTo}" from="sundayFrom">
+                                    <input type="text" 
+										class="form-control timeTo text-center" 
+										id="input_sundayTo" 
+										name="sundayTo" 
+										required 
+										value="${sundayTo}" 
+										from="sundayFrom">
                                     <div class="d-block invalid-feedback" id="invalid-input_sundayTo"></div>
                                 </td>
+								<td>
+									<input type="text"
+										class="form-control input-hours text-center"
+										id="sundayBreakDuration"
+										name="sundayBreakDuration"
+										minlength="0"
+										maxlength="5"
+										min="0"
+										max="2"
+										value="${sundayBreakDuration}"
+										required>
+									<div class="d-block invalid-feedback"></div>
+								</td>
                             </tr>
                         </tbody>
                     </table>
+					</div>
                 </div>
-                <div class="col-12">
+                <div class="col-12 mt-3">
                     <div class="form-group">
                         <label>Status <code>*</code></label>
-                        <select class="form-control select2" id="scheduleStatus" name="scheduleStatus" scheduleID="${scheduleID}">
+                        <select class="form-control select2" 
+							id="scheduleStatus" 
+							name="scheduleStatus" 
+							scheduleID="${scheduleID}">
                             <option value="1" ${scheduleStatus == 1 && "selected"}>Active</option>
                             <option value="0" ${scheduleStatus == 0 && "selected"}>Inactive</option>
                         </select>
@@ -432,9 +660,12 @@ $(document).ready(function () {
 		$("#modal_schedule_setup .page-title").text("ADD SCHEDULE");
 		$("#modal_schedule_setup_content").html(preloader);
 		const content = modalContent();
-		$("#modal_schedule_setup_content").html(content);
-		initAll();
-		initInputmaskTime();
+		setTimeout(() => {
+			$("#modal_schedule_setup_content").html(content);
+			initAll();
+			initDataTables();
+			initInputmaskTime();
+		}, 200);
 	});
 	// ----- END OPEN ADD MODAL -----
 
@@ -480,6 +711,7 @@ $(document).ready(function () {
 			setTimeout(() => {
 				$("#modal_schedule_setup_content").html(content);
 				initAll();
+				initDataTables();
 				initInputmaskTime(false);
 
 				if (!allowedUpdate) {

@@ -56,4 +56,5 @@
 
 
 <script src="<?= base_url('assets/custom/js/gen/approver-function.js') ?>"></script>
+<script src="<?= base_url('assets/custom/js/hris/employee-biotime.js') ?>"></script>
 <script src="<?= base_url('assets/custom/js/hris/employee-module.js') ?>"></script>

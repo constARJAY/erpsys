@@ -154,6 +154,51 @@ $(document).ready(function() {
 	// ----- END DATATABLES -----
 
 
+    // ----- GET EMPLOYEE NOT IN BIOMETRICS -----
+    function getEmployeeNotInBiometrics() {
+        let result = [];
+        $.ajax({
+            method: "POST",
+            url: `${base_url}/hris/employee_attendance/getEmployeeNotInDevice`,
+            dataType: "json",
+            async: false,
+            success: function(data) {
+                result = data;
+            }
+        })
+        return result;
+    }
+    // ----- END GET EMPLOYEE NOT IN BIOMETRICS -----
+
+
+    // ----- ALERT NOTICE CONTENT -----
+    function alertNoticeContent() {
+        let html = "";
+        const noticeEmployees = getEmployeeNotInBiometrics();
+        noticeEmployees.map(emp => {
+            const { employeeFirstname = "", employeeLastname = "" } = emp;
+            const fullname = `${employeeFirstname} ${employeeLastname}`;
+            html += `
+            <div class="alert alert-warning alert-dismissible fade show w-100 mb-1" role="alert">
+                <div class="d-flex justify-content-start align-items-center">
+                    <div class="font-weight-bold text-danger pr-2"><i class="fas fa-exclamation"></i> NOTICE:</div>
+                    <div>
+                        <span class="font-weight-bold">${fullname}</span> is not sync in yet on biometrics.
+                    </div>
+                </div>
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>`;
+        });
+
+        setTimeout(() => {
+            $("#alert_notice_content").html(html);
+        }, 500);
+    }
+    // ----- END ALERT NOTICE CONTENT -----
+
+
 	// ----- TABLE CONTENT -----
 	function tableContent() {
 		preventRefresh(false);
@@ -206,7 +251,6 @@ $(document).ready(function() {
                 <tr style="white-space:nowrap">
                     <th>Employee Code</th>
                     <th>Full Name</th>
-                    <!-- <th>Department</th> -->
                     <th>Designation</th>
                     <th>Hourly Rate</th>
                     <th>Address</th>
@@ -264,8 +308,6 @@ $(document).ready(function() {
             <tr class="btnEdit" id="${encryptString(employeeID)}">
                 <td>${getFormCode("EMP", "2021-04-12", employeeID)}</td>
                 <td>${profileImg} <span class="ml-2">${fullname}<span></td>
-                <!-- <td>${departmentName}</td>
-                <td>${designationName}</td> -->
                 <td>
                     <div>
                         ${designationName || '-'}
@@ -290,8 +332,20 @@ $(document).ready(function() {
             initDataTables();
         }, 500);
 	}
-	tableContent();
 	// ----- END TABLE CONTENT -----
+
+
+    // ----- PAGE CONTENT -----
+    function pageContent() {
+        let html = `
+        <div id="alert_notice_content"></div>
+        <div class="table-responsive mt-4" id="table_content"></div>`;
+        $("#page_content").html(html);
+        tableContent();
+        alertNoticeContent();
+    }
+    pageContent();
+    // ----- END PAGE CONTENT -----
 
 
     // ----- CIVIL STATUS OPTIONS -----
@@ -2730,6 +2784,10 @@ $(document).ready(function() {
                                 let message     = result[1];
                                 let insertedID  = result[2];
                                 let dateCreated = result[3];
+
+                                const employeeFirstname = $("[name=employeeFirstname]").val()?.trim();
+                                const employeeLastname  = $("[name=employeeLastname]").val()?.trim();
+                                const employeeID        = insertedID;
         
                                 let swalTitle;
                                 if (method == "add") {

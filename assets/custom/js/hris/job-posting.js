@@ -206,7 +206,7 @@ $(document).ready(function(){
 
                       <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12">
                           <div class="form-group">
-                              <label>Job Description</label>
+                              <label>Job Description <code>*</code></label>
                               <textarea 
                                   type="text" 
                                   class="form-control validate" 
@@ -214,7 +214,7 @@ $(document).ready(function(){
                                   id="input_jobDescription" 
                                   data-allowcharacters="[A-Z][a-z][0-9][ ][-][.][,][(][)]['][&]" 
                                   minlength="2" 
-                                  maxlength="325" 
+                                  maxlength="1735" 
                                   rows="8" 
                                   style="resize: none"
                                   required
@@ -249,7 +249,7 @@ $(document).ready(function(){
                       </div>
                       <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12">
                         <div class="form-group">
-                            <label>Benefits</label>
+                            <label>Benefits <code>*</code></label>
                             <textarea 
                             type="text" 
                             class="form-control validate" 
@@ -257,7 +257,7 @@ $(document).ready(function(){
                             id="input_jobBenefits" 
                             data-allowcharacters="[A-Z][a-z][0-9][ ][-][.][,][(][)][*][&]" 
                             minlength="2" 
-                            maxlength="500" 
+                            maxlength="1735" 
                             rows="8"
                              required
                             style="resize: none"
@@ -447,7 +447,7 @@ $(document).ready(function(){
 
 			sweetAlertConfirmation(
 				"update",
-				"Vacant Position",
+				"Job Posting",
 				"modalJobPosting",
 				"",
 				data,

@@ -248,8 +248,17 @@ $(document).ready(function() {
             examinationName        = "",
             examinationDescription = "",
             examinationType        = "",
+            examinationPicture     = "",
             examinationStatus      = 1
         } = data && data[0];
+
+        let isometrics = examinationPicture ? `
+        <div class="d-flex justify-content-between align-items-center py-2">
+            <a href="${base_url}assets/upload-files/examination/${examinationPicture}"
+                target="_blank"
+                alt="Isometrics">${examinationPicture}</a>
+            <span class="btnRemoveFile" style="cursor: pointer"><i class="fas fa-close"></i></span>
+        </div>` : "";
 
         let button = examinationID ? `
         <button 
@@ -316,6 +325,20 @@ $(document).ready(function() {
                             <option selected disabled>Please select an examination type</option>
                             ${getExaminationTypeOptions(examinationType)}
                         </select>
+                        <div class="d-block invalid-feedback"></div>
+                    </div>
+                </div>
+                <div class="col-12">
+                    <div class="form-group">
+                        <label>Isometrics <code>*</code></label>
+                        <div id="displayIsometrics">${isometrics}</div>
+                        <input type="file"
+                            class="form-control validate"
+                            accept="image/*"
+                            name="examinationPicture|examination"
+                            id="examinationPicture"
+                            data="${examinationPicture}"
+                            ${!examinationPicture ? "required" : ""}>
                         <div class="d-block invalid-feedback"></div>
                     </div>
                 </div>
@@ -984,6 +1007,49 @@ $(document).ready(function() {
     // ----- END UPDATE SAVE BUTTON -----
 
 
+    // ----- SELECT ISOMETRICS -----
+    $(document).on("change", "#examinationPicture", function() {
+        const data = $(this).attr("data");
+
+        $(this).removeClass("is-valid").removeClass("is-invalid");
+        $parent = $(this).closest(".form-group");
+        $parent.find(".invalid-feedback").text("");
+
+        const filename = this.files[0].name;
+		const filesize = this.files[0].size/1024/1024; // Size in MB
+        const filetype = this.files[0].type;
+		if (filesize > 10) {
+			$(this).val("");
+            !data && $("#displayIsometrics").empty();
+			showNotification("danger", "File size must be less than or equal to 10mb");
+		} else if (filetype.indexOf("image") == -1) {
+            $(this).val("");
+            !data && $("#displayIsometrics").empty();
+            showNotification("danger", "Invalid file type");
+        } else {
+            $(this).attr("data", filename);
+            $(this).removeAttr("required");
+			let html = `
+			<div class="d-flex justify-content-between align-items-center py-2">
+				<span class="filename">${filename}</span>
+				<span class="btnRemoveFile" style="cursor: pointer"><i class="fas fa-close"></i></span>
+			</div>`;
+			$("#displayIsometrics").html(html);
+		}
+    })
+    // ----- END SELECT ISOMETRICS -----
+
+
+    // ----- REMOVE ISOMETRICS -----
+    $(document).on("click", ".btnRemoveFile", function() {
+        $("#displayIsometrics").empty();
+        $("#examinationPicture").val("");
+        $("#examinationPicture").attr("required", true);
+        $("#examinationPicture").removeAttr("data");
+    })
+    // ----- END REMOVE ISOMETRICS -----
+
+
     // ----- ADD EXAM -----
     $(document).on("click", `#btnAddExam`, function() {
         let content = getExaminationFormContent();
@@ -1035,11 +1101,11 @@ $(document).ready(function() {
     $(document).on("click", "#btnSaveExam", function() {
         const validate = validateForm("modal_examination");
         if (validate) {
-            let data = getFormData("modal_examination", true);
-            data["tableData[createdBy]"] = sessionID;
-            data["tableData[updatedBy]"] = sessionID;
-            data["tableName"] = "hris_examination_tbl";
-            data["feedback"]  = $(`[name="examinationName"]`).val()?.trim();
+            let data = getFormData("modal_examination");
+            data.append(`tableData[createdBy]`, sessionID);
+            data.append(`tableData[updatedBy]`, sessionID);
+            data.append("tableName", "hris_examination_tbl");
+            data.append("feedback", $(`[name="examinationName"]`).val()?.trim());
 
             sweetAlertConfirmation(
                 "add", 
@@ -1047,7 +1113,7 @@ $(document).ready(function() {
                 "modal_examination", 
                 null, 
                 data, 
-                true, 
+                false, 
                 pageContent);
         }
     })
@@ -1059,11 +1125,11 @@ $(document).ready(function() {
         const examinationID = $(this).attr("examinationID");
         const validate = validateForm("modal_examination");
         if (validate) {
-            let data = getFormData("modal_examination", true);
-            data["tableData[updatedBy]"] = sessionID;
-            data["tableName"]   = "hris_examination_tbl";
-            data["whereFilter"] = `examinationID=${examinationID}`;
-            data["feedback"]    = $(`[name="examinationName"]`).val()?.trim();
+            let data = getFormData("modal_examination");
+            data.append(`tableData[updatedBy]`, sessionID);
+            data.append("tableName", "hris_examination_tbl");
+            data.append("whereFilter", `examinationID=${examinationID}`);
+            data.append("feedback", $(`[name="examinationName"]`).val()?.trim());
 
             sweetAlertConfirmation(
                 "update", 
@@ -1071,7 +1137,7 @@ $(document).ready(function() {
                 "modal_examination", 
                 null, 
                 data, 
-                true, 
+                false, 
                 pageContent);
         }
     })
