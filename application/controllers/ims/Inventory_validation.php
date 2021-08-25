@@ -19,19 +19,26 @@ class Inventory_validation extends CI_Controller {
         $this->load->view("template/footer");
     }
 
-    public function save_inventory_validation(){
+    public function saveInventoryValidation()
+    {
         $action                         = $this->input->post("action");
         $method                         = $this->input->post("method");
-        $inventoryValidationID          = $this->input->post("inventoryValidationID") ?? null;
+        $inventoryValidationID          = $this->input->post("inventoryValidationID") ?? null; 
         $reviseInventoryValidationID    = $this->input->post("reviseInventoryValidationID") ?? null;
         $employeeID                     = $this->input->post("employeeID");
-        $projectID                      = $this->input->post("projectID") ?? null;
-        $purchaseRequestID              = $this->input->post("documentID") ?? null;
+        $purchaseRequestID              = $this->input->post("purchaseRequestID") ?? null;
+        $timelineBuilderID              = $this->input->post("timelineBuilderID") ?? null;
+        $projectCode                    = $this->input->post("projectCode") ?? null;
+        $projectName                    = $this->input->post("projectName") ?? null;
+        $projectCategory                = $this->input->post("projectCategory") ?? null;
+        $clientName                     = $this->input->post("clientName") ?? null;
+        $clientAddress                  = $this->input->post("clientAddress") ?? null;
         $approversID                    = $this->input->post("approversID") ?? null;
         $approversStatus                = $this->input->post("approversStatus") ?? null;
         $approversDate                  = $this->input->post("approversDate") ?? null;
         $inventoryValidationStatus      = $this->input->post("inventoryValidationStatus");
         $inventoryValidationReason      = $this->input->post("inventoryValidationReason") ?? null;
+        $inventoryValidationGrandTotal  = $this->input->post("inventoryValidationGrandTotal") ?? 0;
         $inventoryValidationRemarks     = $this->input->post("inventoryValidationRemarks") ?? null;
         $submittedAt                    = $this->input->post("submittedAt") ?? null;
         $createdBy                      = $this->input->post("createdBy");
@@ -41,9 +48,14 @@ class Inventory_validation extends CI_Controller {
 
         $inventoryValidationData = [
             "reviseInventoryValidationID"   => $reviseInventoryValidationID,
-            "purchaseRequestID"             => $purchaseRequestID,
             "employeeID"                    => $employeeID,
-            "projectID"                     => $projectID,
+            "purchaseRequestID"             => $purchaseRequestID,
+            "timelineBuilderID"             => $timelineBuilderID,
+            "projectCode"                   => $projectCode,
+            "projectName"                   => $projectName,
+            "projectCategory"               => $projectCategory,
+            "clientName"                    => $clientName,
+            "clientAddress"                 => $clientAddress,
             "approversID"                   => $approversID,
             "approversStatus"               => $approversStatus,
             "approversDate"                 => $approversDate,
@@ -72,6 +84,11 @@ class Inventory_validation extends CI_Controller {
                     "inventoryValidationStatus" => $inventoryValidationStatus,
                     "updatedBy"             => $updatedBy,
                 ];
+                // ----- UPDATE BRAND NAME IN REQUEST ITEMS -----
+                if ($inventoryValidationStatus == 2) {
+                    $this->inventoryvalidation->updateRequestItemsBrandName($inventoryValidationID, $purchaseRequestID);
+                }
+                // ----- END UPDATE BRAND NAME IN REQUEST ITEMS -----
             } else if ($method == "deny") {
                 $inventoryValidationData = [
                     "approversStatus"        => $approversStatus,
@@ -84,55 +101,87 @@ class Inventory_validation extends CI_Controller {
                 $inventoryValidationData = [
                     "reviseInventoryValidationID" => $reviseInventoryValidationID,
                     "inventoryValidationStatus"   => 5,
-                    "updatedBy"                   => $updatedBy,
+                    "updatedBy"               => $updatedBy,
                 ]; 
             }
         }
+        // ----- ADD REQUEST ITEMS -----
+        if ($inventoryValidationStatus == 2) {
+            if ($items) {
+                $inventoryValidationItems = [];
+                foreach($items as $index => $item) {
+                    $billMaterialID 			= $item["billMaterialID"] ?? null;
+				    $purchaseRequestID		    = $item["purchaseRequestID"] ?? null;
+                    $inventoryValidationID      = $inventoryValidationID;
+                    $categoryType 			    = $item["categoryType"] ?? null;
+                    $milestoneBuilderID 		= $item["milestoneBuilderID"] ?? NULL;
+                    $phaseDescription 		    = $item["phaseDescription"] ?? NULL;
+                    $milestoneListID 		    = $item["milestoneListID"] ?? NULL;
+                    $projectMilestoneName	    = $item["projectMilestoneName"] ?? NULL;
+                    $itemID 					= $item["itemID"] ?? null;
+                    $itemCode				    = $item["itemCode"] ?? null;
+                    $itemName 				    = $item["itemName"] ?? null;
+                    $itemDescription 		    = $item["itemDescription"] ?? null;
+                    $itemClassification 		= $item["itemClassification"] ?? null;
+                    $brandName 				    = $item["brandName"] ?? null;
+                    $itemUom 				    = $item["itemUom"] ?? null;
+                    $quantity 				    = $item["quantity"] ?? null;
+                    $stocks					    = $item["stocks"] ?? null;
+                    $forPurchase 			    = $item["forPurchase"] ?? null;
+                    $reservedItem 			    = $item["reservedItem"] ?? null;
+
+                    $temp = [
+                        "billMaterialID" 			=> $billMaterialID,
+                        "purchaseRequestID"		    => $purchaseRequestID,
+                        "inventoryValidationID"     => $inventoryValidationID,
+                        "categoryType" 			    => $categoryType,
+                        "milestoneBuilderID" 		=> $milestoneBuilderID,
+                        "phaseDescription" 		    => $phaseDescription,
+                        "milestoneListID" 		    => $milestoneListID,
+                        "projectMilestoneID" 		=> $milestoneListID,
+                        "projectMilestoneName"	    => $projectMilestoneName,
+                        "itemID" 					=> $itemID,
+                        "itemCode"				    => $itemCode,
+                        "itemName" 				    => $itemName,
+                        "itemDescription" 		    => $itemDescription,
+                        "itemClassification" 		=> $itemClassification,
+                        "brandName" 			    => $brandName,
+                        "itemUom" 				    => $itemUom,
+                        "quantity" 				    => $quantity,
+                        "stocks"					=> $stocks,
+                        "forPurchase" 			    => $forPurchase,
+                        "reserveItem" 			    => $reservedItem,
+                        "createdBy"                 => $createdBy,
+                        "updatedBy"                 => $createdBy,
+                    ];
+                    array_push($inventoryValidationItems, $temp);
+                }
+                
+                $saveInventoryValidationItems = $this->inventoryvalidation->saveInventoryValidationItems($inventoryValidationItems, $inventoryValidationID, $purchaseRequestID);
+            }
+        }
+        // ----- END ADD REQUEST ITEMS -----
 
         $saveInventoryValidationData = $this->inventoryvalidation->saveInventoryValidationData($action, $inventoryValidationData, $inventoryValidationID);
-        if ($saveInventoryValidationData) {
-            $result = explode("|", $saveInventoryValidationData);
 
-            if ($result[0] == "true") {
-                $inventoryValidationID = $result[2];
-                if ($items) {
-                    $inventoryValidationtems = [];
-                    foreach($items as $index => $item) {
-                        $temp = [
-                            "inventoryValidationID" => $inventoryValidationID,
-                            "costEstimateID"        => $item["costEstimateID"],
-                            "purchaseRequestID"     => $purchaseRequestID,
-                            "categoryType"          => $item["category"],
-                            "itemID"                => $item["itemID"],
-                            "itemname"              => $item["itemname"],
-                            "itemUom"               => $item["itemUom"],
-                            "itemDescription"       => $item["itemDescription"],
-                            "quantity"              => $item["quantity"],
-                            "stocks"                => $item["stocks"],
-                            "files"                 => $item["files"],
-                            "brandName"             => $item["brandName"],
-                            "forPurchase"           => $item["forPurchase"],
-                            "createdBy"             => $createdBy,
-                            "updatedBy"             => $item["updatedBy"],
-                        ];
-                        array_push($inventoryValidationtems, $temp);
-                    }
-                    
-                    $saveInventoryValidationItems = $this->inventoryvalidation->saveInventoryValidationItems($inventoryValidationtems, $inventoryValidationID);
-                }
 
-            }
-            
-        }
         echo json_encode($saveInventoryValidationData);
     }
 
-    public function saveCanvassingData(){
-        $id     = $this->input->post("inventoryValidationID");
-        $result = $this->inventoryvalidation->saveCanvassingData($id);
-        echo json_encode($result);
+    public function getMaterialEquipmentRequestItems()
+    {
+        $inventoryValidationID = $this->input->post("inventoryValidationID");
+        echo json_encode($this->inventoryvalidation->getMaterialEquipmentRequestItems($inventoryValidationID));
+    }
+
+    public function getPurchaseRequest(){
+        $inventoryValidationID = $this->input->post("inventoryValidationID");
+        $purchaseRequestID    = $this->input->post("purchaseRequestID");
+        echo json_encode($this->inventoryvalidation->getPurchaseRequest($inventoryValidationID, $purchaseRequestID));
     }
 
 
+
+    
 }
 ?>     

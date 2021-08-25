@@ -941,6 +941,34 @@ INSERT INTO `gen_user_role_tbl` VALUES (1,'Administrator',1,'2021-03-08 00:29:00
 UNLOCK TABLES;
 
 --
+-- Table structure for table `hris_attendance_break_tbl`
+--
+
+DROP TABLE IF EXISTS `hris_attendance_break_tbl`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `hris_attendance_break_tbl` (
+  `breakID` bigint(21) NOT NULL AUTO_INCREMENT,
+  `employeeID` bigint(21) DEFAULT NULL,
+  `breakIn` datetime DEFAULT NULL,
+  `breakOut` datetime DEFAULT NULL,
+  `breakDuration` decimal(10,2) DEFAULT NULL,
+  `createdAt` timestamp NULL DEFAULT current_timestamp(),
+  `updatedAt` timestamp NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`breakID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `hris_attendance_break_tbl`
+--
+
+LOCK TABLES `hris_attendance_break_tbl` WRITE;
+/*!40000 ALTER TABLE `hris_attendance_break_tbl` DISABLE KEYS */;
+/*!40000 ALTER TABLE `hris_attendance_break_tbl` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `hris_award_tbl`
 --
 
@@ -1162,6 +1190,44 @@ LOCK TABLES `hris_designation_tbl` WRITE;
 /*!40000 ALTER TABLE `hris_designation_tbl` DISABLE KEYS */;
 INSERT INTO `hris_designation_tbl` VALUES (1,'DSN-21-00001',4,'Administrator',0.00,1,'2021-03-24',1,1,'2021-03-24 05:07:13','2021-05-05 02:45:17'),(2,'DSN-21-00002',4,'Network Engineer',0.00,1,'2021-03-26',1,1,'2021-03-26 05:43:25','2021-04-14 23:35:13'),(3,'DSN-21-00003',1,'Human Resources',0.00,1,'2021-03-24',1,1,'2021-03-24 05:07:13','2021-04-07 01:17:08'),(4,'DSN-21-00004',3,'Junior Developer',0.00,1,'2021-03-26',1,1,'2021-03-26 05:43:25','2021-04-14 23:33:57'),(5,'DSN-21-00005',3,'Senior Developer',0.00,1,'2021-03-24',1,1,'2021-03-24 05:07:13','2021-04-14 23:34:07'),(6,'DSN-21-00006',2,'Finance',0.00,1,'2021-03-26',1,1,'2021-03-26 05:43:25','2021-04-14 23:34:19'),(7,'DSN-21-00007',1,'Installer',0.00,1,'2021-03-24',1,1,'2021-03-24 05:07:13','2021-04-07 01:17:08'),(8,'DSN-21-00008',4,'IT Admin',0.00,1,'2021-03-26',1,1,'2021-03-26 05:43:25','2021-05-05 02:46:16'),(9,'DSN-21-00009',3,'Quality Analyst',0.00,1,'2021-03-24',1,1,'2021-03-24 05:07:13','2021-04-14 23:33:32'),(10,'DSN-21-00010',5,'Marketing',0.00,0,'2021-03-26',1,1,'2021-03-26 05:43:25','2021-04-14 23:36:11'),(11,'DSN-21-00003',5,'Digital Marketing Specialist',0.00,1,'2021-04-22',1,1,'2021-04-22 02:24:08','2021-04-22 02:24:08'),(12,'DSN-21-00004',3,'UI/UX Designer',0.00,1,'2021-05-14',1,1,'2021-05-14 06:49:52','2021-05-14 06:49:52'),(13,'DSN-21-00005',2,'Finance Officer',0.00,1,'2021-05-24',1,1,'2021-05-24 00:24:35','2021-05-24 00:24:35'),(14,'DSN-21-00006',3,'Front-end Developer',0.00,1,'2021-06-14',1,1,'2021-06-14 07:45:16','2021-06-14 07:45:16'),(15,'DSN-21-00007',3,'Project Manager',0.00,1,'2021-06-30',1,1,'2021-06-30 04:57:14','2021-06-30 04:57:14'),(17,'DSN-21-00011',5,'Marketing Support',0.00,1,'2021-06-30',1,1,'2021-06-30 05:19:33','2021-06-30 05:19:33');
 /*!40000 ALTER TABLE `hris_designation_tbl` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `hris_employee_attendance_tbl`
+--
+
+DROP TABLE IF EXISTS `hris_employee_attendance_tbl`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `hris_employee_attendance_tbl` (
+  `attendanceID` bigint(21) NOT NULL AUTO_INCREMENT,
+  `employeeID` bigint(21) NOT NULL,
+  `scheduleDate` date DEFAULT NULL,
+  `scheduleIn` datetime DEFAULT NULL,
+  `scheduleOut` datetime DEFAULT NULL,
+  `scheduleBreakDuration` decimal(10,2) DEFAULT NULL,
+  `scheduleDuration` decimal(10,2) DEFAULT NULL,
+  `checkIn` datetime DEFAULT NULL,
+  `checkOut` datetime DEFAULT NULL,
+  `checkDuration` decimal(10,2) DEFAULT NULL,
+  `overtimeIn` datetime DEFAULT NULL,
+  `overtimeOut` datetime DEFAULT NULL,
+  `overtimeDuration` decimal(10,2) DEFAULT NULL,
+  `createdBy` bigint(21) DEFAULT NULL,
+  `updatedBy` bigint(21) DEFAULT NULL,
+  `createdAt` timestamp NULL DEFAULT current_timestamp(),
+  `updatedAt` timestamp NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`attendanceID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `hris_employee_attendance_tbl`
+--
+
+LOCK TABLES `hris_employee_attendance_tbl` WRITE;
+/*!40000 ALTER TABLE `hris_employee_attendance_tbl` DISABLE KEYS */;
+/*!40000 ALTER TABLE `hris_employee_attendance_tbl` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -1465,6 +1531,7 @@ CREATE TABLE `hris_examination_tbl` (
   `examinationName` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `examinationDescription` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `examinationType` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `examinationPicture` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `examinationStatus` int(11) DEFAULT NULL,
   `examinationPoints` decimal(15,2) DEFAULT NULL,
   `createdBy` bigint(21) DEFAULT NULL,
@@ -2044,27 +2111,34 @@ DROP TABLE IF EXISTS `hris_schedule_setup_tbl`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `hris_schedule_setup_tbl` (
   `scheduleID` bigint(20) NOT NULL AUTO_INCREMENT,
-  `scheduleName` varchar(100) NOT NULL,
+  `scheduleName` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
   `mondayFrom` time NOT NULL,
   `mondayTo` time NOT NULL,
+  `mondayBreakDuration` decimal(10,2) DEFAULT NULL,
   `mondayStatus` int(11) NOT NULL,
   `tuesdayFrom` time NOT NULL,
   `tuesdayTo` time NOT NULL,
+  `tuesdayBreakDuration` decimal(10,2) DEFAULT NULL,
   `tuesdayStatus` int(11) NOT NULL,
   `wednesdayFrom` time NOT NULL,
   `wednesdayTo` time NOT NULL,
+  `wednesdayBreakDuration` decimal(10,2) DEFAULT NULL,
   `wednesdayStatus` int(11) NOT NULL,
   `thursdayFrom` time NOT NULL,
   `thursdayTo` time NOT NULL,
+  `thursdayBreakDuration` decimal(10,2) DEFAULT NULL,
   `thursdayStatus` int(11) NOT NULL,
   `fridayFrom` time NOT NULL,
   `fridayTo` time NOT NULL,
+  `fridayBreakDuration` decimal(10,2) DEFAULT NULL,
   `fridayStatus` int(11) NOT NULL,
   `saturdayFrom` time NOT NULL,
   `saturdayTo` time NOT NULL,
+  `saturdayBreakDuration` decimal(10,2) DEFAULT NULL,
   `saturdayStatus` int(11) NOT NULL,
   `sundayFrom` time NOT NULL,
   `sundayTo` time NOT NULL,
+  `sundayBreakDuration` decimal(10,2) DEFAULT NULL,
   `sundayStatus` int(11) NOT NULL,
   `scheduleStatus` int(11) NOT NULL,
   `createdBy` int(11) NOT NULL,
@@ -2072,7 +2146,7 @@ CREATE TABLE `hris_schedule_setup_tbl` (
   `createdAt` timestamp NOT NULL DEFAULT current_timestamp(),
   `updatedAt` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   PRIMARY KEY (`scheduleID`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2081,7 +2155,7 @@ CREATE TABLE `hris_schedule_setup_tbl` (
 
 LOCK TABLES `hris_schedule_setup_tbl` WRITE;
 /*!40000 ALTER TABLE `hris_schedule_setup_tbl` DISABLE KEYS */;
-INSERT INTO `hris_schedule_setup_tbl` VALUES (1,'Regular Schedule','07:00:00','16:00:00',1,'07:00:00','16:00:00',1,'07:00:00','16:00:00',1,'07:00:00','16:00:00',1,'07:00:00','16:00:00',1,'07:00:00','16:00:00',0,'07:00:00','16:00:00',0,1,0,0,'2021-04-15 03:25:39','2021-04-21 01:27:40'),(2,'ECQ Schedule','06:00:00','17:00:00',1,'06:00:00','17:00:00',1,'06:00:00','17:00:00',0,'06:00:00','17:00:00',1,'06:00:00','17:00:00',1,'08:00:00','17:00:00',0,'08:00:00','17:00:00',0,1,0,0,'2021-04-21 01:28:53','2021-04-21 01:29:32');
+INSERT INTO `hris_schedule_setup_tbl` VALUES (1,'Regular Schedule','07:00:00','16:00:00',1.00,1,'07:00:00','16:00:00',1.00,1,'08:00:00','16:00:00',1.00,1,'07:00:00','16:00:00',1.00,1,'07:00:00','16:00:00',1.00,1,'07:00:00','16:00:00',1.00,0,'07:00:00','16:00:00',0.50,0,1,0,0,'2021-04-14 19:25:39','2021-08-07 21:26:41'),(2,'ECQ Schedule','06:00:00','17:00:00',1.00,1,'06:00:00','17:00:00',1.00,1,'06:00:00','17:00:00',1.00,0,'06:00:00','17:00:00',1.00,0,'06:00:00','17:00:00',1.00,1,'08:00:00','17:00:00',1.00,0,'08:00:00','17:00:00',1.00,0,1,0,0,'2021-04-20 17:28:53','2021-08-07 21:23:50');
 /*!40000 ALTER TABLE `hris_schedule_setup_tbl` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -2143,6 +2217,43 @@ LOCK TABLES `hris_tax_table_tbl` WRITE;
 /*!40000 ALTER TABLE `hris_tax_table_tbl` DISABLE KEYS */;
 INSERT INTO `hris_tax_table_tbl` VALUES (1,1.00,20832.00,0.00,0.00,'2021-04-15 23:01:28','2021-04-15 23:01:28'),(2,20833.00,33332.00,0.00,0.20,'2021-04-15 23:01:28','2021-04-15 23:01:28'),(3,33333.00,66666.00,2500.00,0.25,'2021-04-15 23:01:28','2021-04-15 23:01:28'),(4,66667.00,166666.00,10833.33,0.30,'2021-04-15 23:01:28','2021-04-15 23:01:28'),(5,166667.00,666666.00,40833.33,0.32,'2021-04-15 23:01:28','2021-04-15 23:01:28'),(6,666667.00,999999.00,200833.33,0.35,'2021-04-15 23:01:28','2021-04-15 23:01:28');
 /*!40000 ALTER TABLE `hris_tax_table_tbl` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `hris_timekeeping_tbl`
+--
+
+DROP TABLE IF EXISTS `hris_timekeeping_tbl`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `hris_timekeeping_tbl` (
+  `timekeepingID` bigint(21) NOT NULL AUTO_INCREMENT,
+  `reviseTimekeepingID` bigint(21) DEFAULT NULL,
+  `employeeID` bigint(21) DEFAULT NULL,
+  `timekeepingStartDate` date DEFAULT NULL,
+  `timekeepingEndDate` date DEFAULT NULL,
+  `timekeepingReason` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `approversID` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `approversStatus` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `approversDate` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `timekeepingStatus` int(10) DEFAULT NULL,
+  `timekeepingRemarks` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `submittedAt` timestamp NULL DEFAULT NULL,
+  `createdBy` bigint(21) DEFAULT NULL,
+  `updatedBy` bigint(21) DEFAULT NULL,
+  `createdAt` timestamp NULL DEFAULT current_timestamp(),
+  `updatedAt` timestamp NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`timekeepingID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `hris_timekeeping_tbl`
+--
+
+LOCK TABLES `hris_timekeeping_tbl` WRITE;
+/*!40000 ALTER TABLE `hris_timekeeping_tbl` DISABLE KEYS */;
+/*!40000 ALTER TABLE `hris_timekeeping_tbl` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -2808,24 +2919,29 @@ DROP TABLE IF EXISTS `ims_inventory_validation_tbl`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `ims_inventory_validation_tbl` (
-  `inventoryValidationID` bigint(20) NOT NULL AUTO_INCREMENT,
+  `inventoryValidationID` bigint(20) NOT NULL,
   `reviseInventoryValidationID` bigint(20) DEFAULT NULL,
   `purchaseRequestID` bigint(20) DEFAULT NULL,
   `employeeID` bigint(20) NOT NULL,
-  `projectID` bigint(20) DEFAULT NULL,
-  `approversID` text DEFAULT NULL,
-  `approversStatus` text DEFAULT NULL,
-  `approversDate` text DEFAULT NULL,
+  `timelineBuilderID` bigint(20) DEFAULT NULL,
+  `approversID` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `projectCode` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `projectName` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `projectCategory` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `clientName` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `clientAddress` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `approversStatus` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `approversDate` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `inventoryValidationStatus` int(11) NOT NULL,
-  `inventoryValidationReason` text DEFAULT NULL,
-  `inventoryValidationRemarks` text DEFAULT NULL,
+  `inventoryValidationReason` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `inventoryValidationRemarks` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `submittedAt` timestamp NULL DEFAULT current_timestamp(),
   `createdBy` bigint(20) NOT NULL,
   `updatedBy` bigint(20) NOT NULL,
   `createdAt` timestamp NOT NULL DEFAULT current_timestamp(),
   `updatedAt` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   PRIMARY KEY (`inventoryValidationID`)
-) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2834,7 +2950,6 @@ CREATE TABLE `ims_inventory_validation_tbl` (
 
 LOCK TABLES `ims_inventory_validation_tbl` WRITE;
 /*!40000 ALTER TABLE `ims_inventory_validation_tbl` DISABLE KEYS */;
-INSERT INTO `ims_inventory_validation_tbl` VALUES (1,NULL,1,1,5,'2|4|5','2|2|2','2021-06-29 15:19:29|2021-06-29 15:21:47|2021-06-29 15:24:07',2,'for inventory validation',NULL,'2021-06-29 15:14:02',1,5,'2021-06-29 15:14:02','2021-06-29 07:24:08'),(2,NULL,2,1,2,'2|4|5','2|2|2','2021-06-29 15:19:51|2021-06-29 15:22:14|2021-06-29 15:25:32',2,'for inventory validation',NULL,'2021-06-29 15:16:04',1,5,'2021-06-29 15:16:04','2021-06-29 07:25:37'),(3,NULL,3,1,4,'2|4|5','2|2|2','2021-06-29 15:20:18|2021-06-29 15:21:21|2021-06-29 15:24:29',2,'for inventory validation',NULL,'2021-06-29 15:16:57',1,5,'2021-06-29 15:16:57','2021-06-29 07:24:36'),(4,NULL,5,1,0,'2|4|5','2|2|2','2021-06-29 15:19:11|2021-06-29 15:22:37|2021-06-29 15:23:44',2,'for validation',NULL,'2021-06-29 15:17:48',1,5,'2021-06-29 15:17:48','2021-06-29 07:23:45'),(5,NULL,6,1,0,'2|4|5','2|2|2','2021-06-30 07:45:41|2021-06-30 07:46:21|2021-06-30 07:47:48',2,'for inventory validation',NULL,'2021-06-30 07:42:19',1,5,'2021-06-30 07:42:19','2021-06-29 23:47:50'),(6,NULL,8,1,0,'2|4|5','2|2|2','2021-06-30 07:45:24|2021-06-30 07:46:42|2021-06-30 07:48:01',2,'for inventory validation',NULL,'2021-06-30 07:42:53',1,5,'2021-06-30 07:42:53','2021-06-29 23:48:03'),(7,NULL,9,1,0,'2|4|5','2|2|2','2021-06-30 07:45:10|2021-06-30 07:46:55|2021-06-30 07:47:33',2,'for inventory validation',NULL,'2021-06-30 07:43:56',1,5,'2021-06-30 07:43:56','2021-06-29 23:47:36'),(8,NULL,7,1,5,'2|4|5',NULL,NULL,1,'Test',NULL,'2021-07-05 23:19:09',1,1,'2021-07-05 23:19:09','2021-07-05 23:19:13');
 /*!40000 ALTER TABLE `ims_inventory_validation_tbl` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -4597,4 +4712,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2021-08-05 16:36:18
+-- Dump completed on 2021-08-25  8:03:27
