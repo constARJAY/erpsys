@@ -660,7 +660,7 @@ $(document).ready(function() {
     // getTableData(tableName = null, columnName = “”, WHERE = “”, orderBy = “”) 
     let paramCondition = deptID == false ? "":"AND departmentID ="+deptID;
 
-    const data = getTableData("hris_employee_list_tbl", "CONCAT(employeeFirstname ,', ', employeeLastname) as fullname,employeeID ", "employeeStatus = '1' AND employeeRanking = 'Officer' "+paramCondition, "");
+    const data = getTableData("hris_employee_list_tbl", "CONCAT(employeeFirstname ,' ', employeeLastname) as fullname,employeeID ", "employeeStatus = '1' AND employeeRanking = 'Officer' "+paramCondition, "");
             let html = ` <option value="" disabled ${empID1 == false ? "selected": ""} >Select Employee</option>`;
             if(deptID != false){
                     data.map((emp1, index, array) => {
@@ -677,7 +677,7 @@ $(document).ready(function() {
         // getTableData(tableName = null, columnName = “”, WHERE = “”, orderBy = “”) 
         let paramCondition1 = deptID == false ? "":"AND departmentID ="+deptID;
         let paramCondition2 =designID == false ? "":" AND designationID="+designID; 
-        const data = getTableData("hris_employee_list_tbl", "CONCAT(employeeFirstname ,', ', employeeLastname) as fullname,employeeID ", "employeeStatus = '1' "+paramCondition1+" "+paramCondition2, "");
+        const data = getTableData("hris_employee_list_tbl", "CONCAT(employeeFirstname ,' ', employeeLastname) as fullname,employeeID ", "employeeStatus = '1' "+paramCondition1+" "+paramCondition2, "");
                 let html = ` <option value="" disabled ${empID2 == false ? "selected": ""} >Select Employee</option>`;
                 if(designID != false){
                  
@@ -890,16 +890,17 @@ $(document).ready(function() {
 			<div class="col-md-3 col-sm-12">
                 <div class="form-group">
                     <label>No. of Vacancies ${!disabled ? "<code>*</code>" : ""}</label>
-                    <input type="number" 
-					class="form-control validate" 
+                    <input type="text" 
+					class="form-control  input-numberLength" 
 					name="vacancy"
 					id="vacancy"
 					required 
 					display=${readOnly} 
 					value="${vacancy}" 
 					autocomplete="off"
-					data-allowcharacters="[0-9]" minlength="1" maxlength="50"
-					min="0"
+					data-allowcharacters="[0-9]" minlength="1" maxlength="3"
+					min="1"
+					max="100"
 					${disabled}> 
                     <div class="d-block invalid-feedback" id="invalid-vacancy"></div>
                 </div>

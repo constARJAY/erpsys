@@ -193,12 +193,11 @@ class Employee_taskboard extends CI_Controller {
         $img =[];
       
             for ($i = 0; $i < count($_FILES['uploadImgArray']['name']); $i++){
-               $file_extension_extract         = explode("/",$_FILES['uploadImgArray']['type'][$i]);
-              $extension = $file_extension_extract[1];
+               $file_extension_extract         = explode(".",$_FILES['uploadImgArray']['name'][$i]);
+              $extension = end($file_extension_extract);
                $img[$i]                  = "ST-".date('y')."-".$selectedID."-".strtotime("now").$i.'.'.$extension;
             }
-             
-        
+       
             //start of upload multiple image
            
             $number_of_files_uploaded = count($_FILES['uploadImgArray']['name']);

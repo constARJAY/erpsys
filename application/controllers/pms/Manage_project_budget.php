@@ -40,7 +40,7 @@ class Manage_project_budget extends CI_Controller {
         $proposedBudget   = $this->input->post("proposedBudget");
         $allocatedBudget   = $this->input->post("allocatedBudget");
 
-        if($proposedBudget < $allocatedBudget){
+        if($proposedBudget <= $allocatedBudget){
             $budgetStatus = 1;
         }else{
             $budgetStatus =2;

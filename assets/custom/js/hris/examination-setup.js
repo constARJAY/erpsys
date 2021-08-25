@@ -93,7 +93,7 @@ $(document).ready(function () {
 		
 		let html = `
         <div class="col-12 col-lg-8 col-xl-12 text-left">
-        <h6 class="bg-primary text-light p-3"><strong>LIST OF EXAMS</strong></h6>
+        <h6 class="bg-primary text-light p-3"><strong>LIST OF EXAMINATIONS</strong></h6>
         <div class="card my-0 p-2 approval-list" style='box-shadow:none;'>`;
         count = 0;
 		
@@ -129,7 +129,7 @@ $(document).ready(function () {
                <div class="row">
 					<div class="col-4"></div>
 					<div class="col-4"><img class="img-fluid" src="${base_url}assets/modal/please-select.gif" alt=""> <h6 class="text-primary text-center font-weight-bold">No data available</h6>
-					<p class="text-center">Select add examination setup to view list examination title.</p>
+					<p class="text-center">Click "Add Examination Setup" to view the lists of examinations that can be assigned</p>
 					</div>
 					<div class="col-4"></div>
 				</div>
@@ -207,7 +207,7 @@ $(document).ready(function () {
             Update
         </button>`
 			: `
-        <button class="btn btn-save" id="btnSave"><i class="fas fa-save"></i> Save</button>`;
+        <button class="btn btn-save" id="btnSave" disabled><i class="fas fa-save"></i> Save</button>`;
 
 		let html = `
         <div class="modal-body">
@@ -237,6 +237,9 @@ $(document).ready(function () {
 
 			<div class="w-100 text-right my-2">
 				<h5 class="font-weight-bolder" id="percent">0.00%</h5>
+				<div class="note-feedback text-warning">
+							<strong>Note: </strong> Must equate the total percentage to 100%
+						</div>
 			</div>
 			
 		</div>
@@ -319,13 +322,15 @@ function getItemRow(exam = {}) {
 				<div class="timeLimit">
 					<input 
 						type="text" 
-						class="form-control text-left"
+						class="form-control text-right input-hoursLimit"
 						id="timeLimit"
+						min="00:10:00"
+						max="05:00:00"
 						name="timeLimit"
 						mask="99:99:99"
 						value="${timeLimit}" 
 						required>
-					<div class="invalid-feedback d-block" id="invalid-timeLimit"></div>
+					<div class="invalid-feedback d-block text-left" id="invalid-timeLimit"></div>
 				</div>
 			</td>
 			
@@ -335,8 +340,9 @@ function getItemRow(exam = {}) {
 				<div class="input-group">
                         <input type="text" 
                         class="form-control input-percentage text-left percentage"  
+						data-allowcharacters="[0-9][.]"
                         minlength="1" 
-                        maxlength="13" 
+                        maxlength="5" 
                         id="percentage" 
 						name="percentage" 
 						value="${percentage}"
@@ -411,23 +417,27 @@ function computePercent() {
 
 	$("[name=percentage]").each(function(i) {
 	
-		console.log(getLength);
+		// console.log(getLength);
 	
 	if( getLength == i ){
 		// if(totalPercent != 0){
-		
+			// console.log( totalPercent+ " > "+ rate)
 			if(totalPercent > rate || totalPercent < rate){
-				//console.log("pasok "+i )
-					$("#invalid_percentage"+i).html("Must equate the total percentage to 100%");
+				// console.log("pasok "+i )
+					// $("#invalid_percentage"+i).html("Must equate the total percentage to 100%");
 					$('#percentage'+i).addClass("has-error").removeClass("no-error");
-					
+					$("#btnSave").prop('disabled','true');
+					$("#btnUpdate").prop('disabled','true');
 				
 				// return false;
 			}else{
+			
 				$("#invalid_percentage"+i).html("");
 				$('#percentage'+i).addClass("no-error").removeClass("has-error");
+				$("#btnSave").removeAttr('disabled');
+				$("#btnUpdate").removeAttr('disabled');
 				
-				// return true;
+				return true;
 			}
 		// }			
 	}else{
@@ -457,7 +467,6 @@ $(document).on("keyup", "[name=percentage]", function() {
 		$(".tableExaminationSetupTableBody").append(row);
 		updateTableItems();
 		initInputmask();
-		initPercentage();
 		computePercent();
 })
 // ----- END INSERT ROW ITEM -----
@@ -566,9 +575,11 @@ function deleteTableRow(isProject = true) {
 
 	// ----- SAVE UPDATE -----
 	$(document).on("click", "#btnUpdate", function () {
-		const percentValidate = computePercent();
+		// const percentValidate = computePercent();
+		// console.log(percentValidate)
 
-		if(percentValidate){
+		// if(percentValidate){
+		
 			const validate = validateForm("modal_examination_setup");
 			var designationID = $(this).attr("designationID");
 			var designationName = $(this).attr("designationName");
@@ -678,7 +689,7 @@ function deleteTableRow(isProject = true) {
 				}
 				
 			}
-		}
+		// }
 	
 	});
 	// ----- END SAVE UPDATE -----
@@ -744,7 +755,7 @@ $(document).on("click", ".btn-approval-setup", function(){
 		
 		updateTableItems();
 		initInputmask();
-		initPercentage();
+		// initPercentage();
 		computePercent();
 		$("#btnSave").attr("designationID",designationID);	
 		$("#btnUpdate").attr("designationID",designationID);

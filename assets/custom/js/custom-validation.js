@@ -624,6 +624,61 @@ const checkQuantity = (elementID, invalidFeedback, value) => {
 // ----- END VALIDATE QUANTITY -----
 
 
+// ----- VALIDATE QUANTITY -----
+const checkNumberLength = (elementID, invalidFeedback, value) => {
+	const validated = $(elementID).hasClass("validated");
+	const min = $(elementID).attr("min") ? +$(elementID).attr("min") : false;
+	const max = $(elementID).attr("max") ? +$(elementID).attr("max") : false;
+	let quantityValue = +value.split(",").join("");
+
+	if (typeof min != "number" && typeof max != "number") {
+		validated
+			? $(elementID).removeClass("is-invalid").addClass("is-valid")
+			: $(elementID).removeClass("is-invalid").removeClass("is-valid");
+		invalidFeedback.text("");
+	} else if (typeof min != "number" && typeof max == "number") {
+		if (quantityValue > max) {
+			$(elementID).removeClass("is-valid").addClass("is-invalid");
+			invalidFeedback.text(`Please input less than ${max}`);
+		} else {
+			validated
+				? $(elementID).removeClass("is-invalid").addClass("is-valid")
+				: $(elementID).removeClass("is-invalid").removeClass("is-valid");
+			invalidFeedback.text("");
+		}
+	} else if (typeof min == "number" && typeof max != "number") {
+		if (quantityValue < min) {
+			$(elementID).removeClass("is-valid").addClass("is-invalid");
+			invalidFeedback.text(`Please input greater than ${min}`);
+		} else {
+			validated
+				? $(elementID).removeClass("is-invalid").addClass("is-valid")
+				: $(elementID).removeClass("is-invalid").removeClass("is-valid");
+			invalidFeedback.text("");
+		}
+	} else if (typeof min == "number" && typeof max == "number") {
+		if (quantityValue >= min && quantityValue > max) {
+			$(elementID).removeClass("is-valid").addClass("is-invalid");
+			invalidFeedback.text(`Please input less than ${max}`);
+		} else if (quantityValue >= min && quantityValue <= max) {
+			validated
+				? $(elementID).removeClass("is-invalid").addClass("is-valid")
+				: $(elementID).removeClass("is-invalid").removeClass("is-valid");
+			invalidFeedback.text("");
+		} else if (quantityValue < min && quantityValue <= max) {
+			$(elementID).removeClass("is-valid").addClass("is-invalid");
+			invalidFeedback.text(`Please input greater than ${min}`);
+		}
+	} else {
+		validated
+			? $(elementID).removeClass("is-invalid").addClass("is-valid")
+			: $(elementID).removeClass("is-invalid").removeClass("is-valid");
+		invalidFeedback.text("");
+	}
+};
+// ----- END VALIDATE QUANTITY -----
+
+
 // ----- VALIDATE HOURS -----
 const checkHours = (elementID, invalidFeedback, value) => {
 	const validated = $(elementID).hasClass("validated");
@@ -677,6 +732,86 @@ const checkHours = (elementID, invalidFeedback, value) => {
 	}
 };
 // ----- END VALIDATE HOURS -----
+
+// ----- VALIDATE HOURS LIMIT -----
+const checkHoursLimit = (elementID, invalidFeedback, value) => {
+	const validated = $(elementID).hasClass("validated");
+	const min = $(elementID).attr("min") ? $(elementID).attr("min") : false;
+	const max = $(elementID).attr("max") ? $(elementID).attr("max") : false;
+	let hourValue = value.split(":");
+	let hourMin = min.split(":");
+	let hourMax = max.split(":");
+
+	// compute hours value//
+
+		let getValHour   = parseFloat(hourValue[0]) * 3600;
+		let getValMinute = parseFloat(hourValue[1]) * 60;
+		let totalTime = parseFloat(getValHour) + parseFloat(getValMinute) + parseFloat(hourValue[2]); 
+
+	// end compute hours value//
+
+	// compute hours of min hour set//
+
+		let getMinHour   = parseFloat(hourMin[0]) * 3600;
+		let getMinMinute = parseFloat(hourMin[1]) * 60;
+		let totalTimeMinLimit = parseFloat(getMinHour) + parseFloat(getMinMinute) + parseFloat(hourMin[2]); 
+
+	// end compute hours of min hour set//
+
+	// compute hours of max hour set//
+
+		let getMaxHour   = parseFloat(hourMax[0]) * 3600;
+		let getMaxMinute = parseFloat(hourMax[1]) * 60;
+		let totalTimeMaxLimit = parseFloat(getMaxHour) + parseFloat(getMaxMinute) + parseFloat(hourMax[2]); 
+
+	// end compute hours of max hour set//
+
+	if (typeof totalTimeMinLimit != "number" && typeof totalTimeMaxLimit != "number") {
+		validated
+			? $(elementID).removeClass("is-invalid").addClass("is-valid")
+			: $(elementID).removeClass("is-invalid").removeClass("is-valid");
+		invalidFeedback.text("");
+	} else if (typeof totalTimeMinLimit != "number" && typeof totalTimeMaxLimit == "number") {
+		if (totalTime > totalTimeMaxLimit) {
+			$(elementID).removeClass("is-valid").addClass("is-invalid");
+			invalidFeedback.text(`Please input hour less than ${max}`);
+		} else {
+			validated
+				? $(elementID).removeClass("is-invalid").addClass("is-valid")
+				: $(elementID).removeClass("is-invalid").removeClass("is-valid");
+			invalidFeedback.text("");
+		}
+	} else if (typeof totalTimeMinLimit == "number" && typeof totalTimeMaxLimit != "number") {
+		if (totalTime < totalTimeMinLimit) {
+			$(elementID).removeClass("is-valid").addClass("is-invalid");
+			invalidFeedback.text(`Please input hour greater than ${min}`);
+		} else {
+			validated
+				? $(elementID).removeClass("is-invalid").addClass("is-valid")
+				: $(elementID).removeClass("is-invalid").removeClass("is-valid");
+			invalidFeedback.text("");
+		}
+	} else if (typeof totalTimeMinLimit == "number" && typeof totalTimeMaxLimit == "number") {
+		if (totalTime >= totalTimeMinLimit && totalTime > totalTimeMaxLimit) {
+			$(elementID).removeClass("is-valid").addClass("is-invalid");
+			invalidFeedback.text(`Please input hour less than ${max}`);
+		} else if (totalTime >= totalTimeMinLimit && totalTime <= totalTimeMaxLimit) {
+			validated
+				? $(elementID).removeClass("is-invalid").addClass("is-valid")
+				: $(elementID).removeClass("is-invalid").removeClass("is-valid");
+			invalidFeedback.text("");
+		} else if (totalTime < totalTimeMinLimit && totalTime <= totalTimeMaxLimit) {
+			$(elementID).removeClass("is-valid").addClass("is-invalid");
+			invalidFeedback.text(`Please input hour greater than ${min}`);
+		}
+	} else {
+		validated
+			? $(elementID).removeClass("is-invalid").addClass("is-valid")
+			: $(elementID).removeClass("is-invalid").removeClass("is-valid");
+		invalidFeedback.text("");
+	}
+};
+// ----- END VALIDATE HOURS LIMIT -----
 
 
 // ----- VALIDATE POINTS -----
@@ -915,7 +1050,9 @@ const validateInput = (elementID) => {
 	let currency = $(elementID).hasClass("amount");
 	let number   = $(elementID).hasClass("number");
 	let quantity = $(elementID).hasClass("input-quantity");
+	let numberLength = $(elementID).hasClass("input-numberLength");
 	let hours    = $(elementID).hasClass("input-hours");
+	let hoursLimit    = $(elementID).hasClass("input-hoursLimit");
 	let required = $(elementID).attr("required");
 	let disabled = $(elementID).attr("disabled");
 	let value =
@@ -1051,7 +1188,9 @@ const validateInput = (elementID) => {
 					currency && checkAmount(elementID, invalidFeedback, value);
 					fuelConsumption && checkFuel(elementID, invalidFeedback, value);
 					quantity && checkQuantity(elementID, invalidFeedback, value);
+					numberLength && checkNumberLength(elementID, invalidFeedback, value);
 					hours && checkHours(elementID, invalidFeedback, value);
+					hoursLimit && checkHoursLimit(elementID, invalidFeedback, value);
 					checkEmail(elementID, invalidFeedback, value);
 					checkURL(elementID, invalidFeedback, value);
 					checkExists(elementID, invalidFeedback);
@@ -1063,7 +1202,9 @@ const validateInput = (elementID) => {
 				currency && checkAmount(elementID, invalidFeedback, value);
 				fuelConsumption && checkFuel(elementID, invalidFeedback, value);
 				quantity && checkQuantity(elementID, invalidFeedback, value);
+				numberLength && checkNumberLength(elementID, invalidFeedback, value);
 				hours && checkHours(elementID, invalidFeedback, value);
+				hoursLimit && checkHoursLimit(elementID, invalidFeedback, value);
 				checkEmail(elementID, invalidFeedback, value);
 				checkURL(elementID, invalidFeedback, value);
 				checkExists(elementID, invalidFeedback);
@@ -1195,7 +1336,9 @@ $(function () {
 		let validated = $(this).hasClass("validated");
 		let currency  = $(this).hasClass("amount");
 		let quantity  = $(this).hasClass("input-quantity");
+		let numberLength  = $(this).hasClass("input-numberLength");
 		let hours     = $(this).hasClass("input-hours");
+		let hoursLimit     = $(this).hasClass("input-hoursLimit");
 		let number    = $(this).hasClass("number");
 		let value     = $(this).val()?.trim();
 		let valLength = value?.length;
@@ -1221,7 +1364,9 @@ $(function () {
 			number && checkNumber(elementID, invalidFeedback, value);
 			currency && checkAmount(elementID, invalidFeedback, value);
 			quantity && checkQuantity(elementID, invalidFeedback, value);
+			numberLength && checkNumberLength(elementID, invalidFeedback, value);
 			hours && checkHours(elementID, invalidFeedback, value);
+			hoursLimit && checkHoursLimit(elementID, invalidFeedback, value);
 			checkEmail(elementID, invalidFeedback, value);
 			checkURL(elementID, invalidFeedback, value);
 			checkExists(elementID, invalidFeedback);
@@ -1242,7 +1387,9 @@ $(function () {
 				number && checkNumber(elementID, invalidFeedback, value);
 				currency && checkAmount(elementID, invalidFeedback, value);
 				quantity && checkQuantity(elementID, invalidFeedback, value);
+				numberLength && checkNumberLength(elementID, invalidFeedback, value);
 				hours && checkHours(elementID, invalidFeedback, value);
+				hoursLimit && checkHoursLimit(elementID, invalidFeedback, value);
 				checkEmail(elementID, invalidFeedback, value);
 				checkURL(elementID, invalidFeedback, value);
 				checkExists(elementID, invalidFeedback);
@@ -1473,8 +1620,22 @@ $(function () {
 	})
 	// ----- END CHECK AMOUNT KEYUP -----
 
-
 	// ----- CHECK AMOUNT KEYUP -----
+	$(document).on("keyup", ".input-numberLength", function() {
+		let value     = $(this).val();
+		let elementID = `#${$(this).attr("id")}`;
+		let invalidFeedback =
+		$(elementID).parent().find(".invalid-feedback").length > 0
+			? $(elementID).parent().find(".invalid-feedback")
+			: $(elementID).parent().parent().find(".invalid-feedback").length > 0
+			? $(elementID).parent().parent().find(".invalid-feedback")
+			: $(elementID).parent().parent().parent().find(".invalid-feedback");
+			checkNumberLength(elementID, invalidFeedback, value);
+	})
+	// ----- END CHECK AMOUNT KEYUP -----
+
+
+	// ----- CHECK INPUT HOURS KEYUP -----
 	$(document).on("keyup", ".input-hours", function() {
 		let value     = $(this).val();
 		let elementID = `#${$(this).attr("id")}`;
@@ -1486,7 +1647,21 @@ $(function () {
 			: $(elementID).parent().parent().parent().find(".invalid-feedback");
 		checkHours(elementID, invalidFeedback, value);
 	})
-	// ----- END CHECK AMOUNT KEYUP -----
+	// ----- END CHECK INPUT HOURS KEYUP -----
+
+	// ----- CHECK INPUT HOURS LIMIT KEYUP -----
+	$(document).on("keyup", ".input-hoursLimit", function() {
+		let value     = $(this).val();
+		let elementID = `#${$(this).attr("id")}`;
+		let invalidFeedback =
+		$(elementID).parent().find(".invalid-feedback").length > 0
+			? $(elementID).parent().find(".invalid-feedback")
+			: $(elementID).parent().parent().find(".invalid-feedback").length > 0
+			? $(elementID).parent().parent().find(".invalid-feedback")
+			: $(elementID).parent().parent().parent().find(".invalid-feedback");
+		checkHoursLimit(elementID, invalidFeedback, value);
+	})
+	// ----- END CHECK INPUT HOURS LIMIT KEYUP -----
 
 
 	// ----- CHECK POINTS KEYUP -----

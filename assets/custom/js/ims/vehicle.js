@@ -70,7 +70,7 @@ function tableContent() {
                         <th>Vehicle Code</th>
                         <th>Vehicle</th>
                         <th>Plate Number/Conduction Number</th>
-                        <th>Fule Type</th>
+                        <th>Fuel Type</th>
                         <th>Status</th>
                     </tr>
                 </thead>
