@@ -1,84 +1,132 @@
-$(document).ready(function() {
-    const allowedUpdate = isUpdateAllowed(114);
+$(document).ready(function () {
+	const allowedUpdate = isUpdateAllowed(114);
 
-function initDataTables() {
+	function initDataTables() {
 
-    if ($.fn.DataTable.isDataTable("#tableForApprroval")) {
-        $("#tableForApprroval").DataTable().destroy();
-    }   
+		if ($.fn.DataTable.isDataTable("#tableForApprroval")) {
+			$("#tableForApprroval").DataTable().destroy();
+		}
 
-    if ($.fn.DataTable.isDataTable("#tableMyForms")) {
-        $("#tableMyForms").DataTable().destroy();
-    }
-    if ($.fn.DataTable.isDataTable("#onboardingTable")) {
-        $("#onboardingTable").DataTable().destroy();
-    }
-
-    
-
-    var table = $("#tableForApprroval")
-    .css({ "min-width": "100%" })
-    .removeAttr("width")
-    .DataTable({
-        proccessing: false,
-        serverSide: false,
-        scrollX: true,
-        scrollCollapse: true,
-        columnDefs: [
-            { targets: 0, width: 50  },
-            { targets: 1, width: 200 },
-            { targets: 2, width: 250 },
-            { targets: 3, width: 300 },
-            { targets: 4, width: 120 },
-            { targets: 5, width: 150 },
-            { targets: 6, width: 120 },
-            { targets: 7, width: 200 },
-            { targets: 8, width: 120 },
-        ],
-    });    
-
-var table = $("#tableMyForms")
-        .css({ "min-width": "100%" })
-        .removeAttr("width")
-        .DataTable({
-            proccessing: false,
-            serverSide: false,
-            scrollX: true,
-            scrollCollapse: true,
-            columnDefs: [
-                { targets: 0, width: 50  },
-                { targets: 1, width: 200 },
-                { targets: 2, width: 200 },
-            ],
-        });
-
-        var table = $("#onboardingTable")
-        .css({ "min-width": "100%" })
-        .removeAttr("width")
-        .DataTable({
-            proccessing: false,
-            serverSide: false,
-            scrollX: true,
-            scrollCollapse: true,
-            columnDefs: [
-                { targets: 0, width: 50  },
-                { targets: 1, width: 200 },
-                { targets: 2, width: 200 },
-                { targets: 3, width: 200 },
-                { targets: 4, width: 200 },
-            ],
-        });  
-        $("#onboardingTable").DataTable().columns.adjust().draw();
+		if ($.fn.DataTable.isDataTable("#tableMyForms")) {
+			$("#tableMyForms").DataTable().destroy();
+		}
+		if ($.fn.DataTable.isDataTable("#onboardingTable")) {
+			$("#onboardingTable").DataTable().destroy();
+		}
 
 
-} 
-initDataTables();
-function headerTabContent(display = true) {
-    if (display) {
-    //     if (isImModuleApprover("hris_official_business_tbl", "approversID")) {
-            // let count = getCountForApproval("hris_official_business_tbl", "officialBusinessStatus");
-            // let displayCount = count ? `<span class="ml-1 badge badge-danger rounded-circle">${count}</span>` : "";
-            let html = `
+
+		var table = $("#tableForApprroval")
+			.css({
+				"min-width": "100%"
+			})
+			.removeAttr("width")
+			.DataTable({
+				proccessing: false,
+				serverSide: false,
+				scrollX: true,
+				scrollCollapse: true,
+				columnDefs: [{
+						targets: 0,
+						width: 50
+					},
+					{
+						targets: 1,
+						width: 200
+					},
+					{
+						targets: 2,
+						width: 250
+					},
+					{
+						targets: 3,
+						width: 300
+					},
+					{
+						targets: 4,
+						width: 120
+					},
+					{
+						targets: 5,
+						width: 150
+					},
+					{
+						targets: 6,
+						width: 120
+					},
+					{
+						targets: 7,
+						width: 200
+					},
+					{
+						targets: 8,
+						width: 120
+					},
+				],
+			});
+
+		var table = $("#tableMyForms")
+			.css({
+				"min-width": "100%"
+			})
+			.removeAttr("width")
+			.DataTable({
+				proccessing: false,
+				serverSide: false,
+				scrollX: true,
+				scrollCollapse: true,
+				columnDefs: [{
+						targets: 0,
+						width: 50
+					},
+					{
+						targets: 1,
+						width: 200
+					},
+					{
+						targets: 2,
+						width: 200
+					},
+				],
+			});
+
+		var table = $("#onboardingTable")
+			.css({
+				"min-width": "100%"
+			})
+			.removeAttr("width")
+			.DataTable({
+				proccessing: false,
+				serverSide: false,
+				scrollX: true,
+				scrollCollapse: true,
+				columnDefs: [{
+						targets: 0,
+						width: 50
+					},
+					{
+						targets: 1,
+						width: 200
+					},
+					{
+						targets: 2,
+						width: 200
+					},
+					{
+						targets: 3,
+						width: 200
+					},
+				],
+			});
+		$("#onboardingTable").DataTable().columns.adjust().draw();
+
+
+	}
+	initDataTables();
+
+	function headerTabContent(display = true) {
+		if (display) {
+			let html = `
             <div class="bh_divider appendHeader"></div>
             <div class="row clearfix appendHeader">
                 <div class="col-12">
@@ -88,20 +136,16 @@ function headerTabContent(display = true) {
                     </ul>
                 </div>
             </div>`;
-            $("#headerContainer").append(html);
-        //}
-    } else {
-        $("#headerContainer").find(".appendHeader").remove();
-    }
-}
+			$("#headerContainer").append(html);
+		} else {
+			$("#headerContainer").find(".appendHeader").remove();
+		}
+	}
 
-// ----- PAGE CONTENT -----
-function pageContent(isForm = false) {
-    //alert("2");
-    $("#page_content").html(preloader);
-    // if (!isForm) {
-    //     preventRefresh(false);
-        let html = `
+	// ----- PAGE CONTENT -----
+	function pageContent(isForm = false) {
+		$("#page_content").html(preloader);
+		let html = `
         <div class="tab-content">
             <div role="tabpanel" class="tab-pane" id="forApprovalTab" aria-expanded="false">
                 <div class="table-responsive" id="tableForApprovalParent">
@@ -112,90 +156,100 @@ function pageContent(isForm = false) {
                 </div>
             </div>
         </div>`;
-        $("#page_content").html(html);
-        headerTabContent();
-        myChecklist();
-        //headerButton(false);
-}
-//$("#page_content").text().trim().length == 0 && pageContent(); // CHECK IF THERE IS ALREADY LOADED ONE
-    pageContent();
+		$("#page_content").html(html);
+		headerTabContent();
+		myChecklist();
+		//headerButton(false);
+	}
+	//$("#page_content").text().trim().length == 0 && pageContent(); // CHECK IF THERE IS ALREADY LOADED ONE
+	pageContent();
 
-    // ----- HEADER BUTTON -----
+	// ----- HEADER BUTTON -----
 	function headerButton(isAdd = true, text = "Add") {
 		let html;
 		if (isAdd) {
 			html = `
 				<button type="button" class="btn btn-default btn-add" id="btnAdd"><i class="icon-plus"></i> &nbsp;Add Onboarding</button>`;
-           
+
 		} else {
 			html = `
             <button type="button" class="btn btn-default btn-light" id="btnBack"><i class="fas fa-arrow-left"></i> &nbsp;Back</button>`;
 		}
 		$("#headerButton").html(html);
-       
+
 	}
-    // ----- HEADER CONTENT -----
-    	// ----- TABLE CONTENT -----
-        $(document).on("click", ".nav-link", function () {
-            const tab = $(this).attr("href");
-           
-            if (tab == "#forApprovalTab") {
-                OrientationContent();
-                //alert("1")
-                //headerButton(isAdd = false);
-                $(".btn-add").hide();
-               $(".hiddenadd").hide();
-            }
-            if (tab == "#myFormsTab") {
-                myChecklist();
-                $(".hiddenadd").show();
-                headerButton(isAdd = true);
-            }
-        });    
+	// ----- HEADER CONTENT -----
+	// ----- TABLE CONTENT -----
+	$(document).on("click", ".nav-link", function () {
+		const tab = $(this).attr("href");
+
+		if (tab == "#forApprovalTab") {
+			OrientationContent();
+			//headerButton(isAdd = false);
+			$(".btn-add").hide();
+			$(".hiddenadd").hide();
+		}
+		if (tab == "#myFormsTab") {
+			myChecklist();
+			$(".hiddenadd").show();
+			headerButton(isAdd = true);
+		}
+	});
+
 	function OrientationContent() {
 		//preventRefresh(false);
-        $("#tableForApprovalParent").html(preloader);
+		$("#tableForApprovalParent").html(preloader);
 		// Reset the unique datas
 		uniqueData = [];
 
-        $("#table_content").html(preloader);
+		$("#table_content").html(preloader);
 
-        const employeeListData = getTableData(
-            `hris_employee_list_tbl
-                LEFT JOIN hris_department_tbl USING(departmentID)
-                LEFT JOIN hris_designation_tbl USING(designationID)`,
-            `employeeID, 
-            employeeProfile,
-            employeeUsername,
-            employeeEmail,
-            CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname,
-            employeeUnit, employeeBuilding, employeeStreet, employeeSubdivision, employeeBarangay, employeeProvince, employeeCity, employeeRegion, employeeCountry, employeeZipCode,
-            employeeMobile,
-            employeeEmail,
-            employeeHiredDate,
-            departmentName,
-            designationName,
-            employeeHourlyRate,
-            employeeStatus`
-        );
+		const employeeListData = getTableData(
+			`hris_employee_list_tbl AS empl
+            LEFT JOIN hris_department_tbl  AS dp ON empl.departmentID = dp.departmentID
+            LEFT JOIN hris_designation_tbl AS dg ON empl.designationID = dg.designationID
+            LEFT JOIN hris_orientation_setup_tbl AS ost ON empl.designationID = ost.designationID
+            LEFT JOIN  hris_employee_list_tbl AS emplprogress ON ost.employeeID = emplprogress.employeeID
+            LEFT JOIN hris_onboarding_progress_tbl AS ob ON empl.employeeID = ob.employeeID
+            LEFT JOIN  hris_employee_list_tbl AS emplob ON ob.employeeID = emplob.employeeID`,
+			`empl.employeeID, 
+            empl.employeeProfile,
+            empl.employeeUsername,
+            empl.employeeEmail,
+            CONCAT(empl.employeeFirstname, ' ', empl.employeeLastname) AS fullname,
+            empl.employeeUnit, empl.employeeBuilding, empl.employeeStreet, empl.employeeSubdivision, empl.employeeBarangay, empl.employeeProvince, empl.employeeCity, 
+            empl.employeeRegion, empl.employeeCountry, empl.employeeZipCode,empl.employeeMobile,empl.employeeEmail,
+            empl.employeeHiredDate,
+            dp.departmentName,
+            dg.designationName,
+            empl.employeeHourlyRate,
+            empl.employeeStatus,
+            CASE 
+                WHEN ob.employeeID IS NULL THEN IFNULL(CONCAT(emplprogress.employeeFirstname,' ',emplprogress.employeeLastname),'')
+	            WHEN ob.approvalCount = ob.onboardingProgressCount THEN ''
+            ELSE IFNULL(CONCAT(emplob.employeeFirstname,' ',emplob.employeeLastname),'') end approval,
+            CASE 
+                WHEN ob.employeeID IS NOT NULL THEN ROUND((onboardingProgressCount/approvalCount)*100,0)
+            else '0' END progressbar`,``,``,`ost.designationID,empl.employeeID ORDER BY ost.orientationID `
+		);
 
-        const statusStyle = (status) => {
-            if (status == "0") {
-                return `<span class="badge badge-outline-danger w-100">Resigned</span>`;
-            } else if (status == "1") {
-                return `<span class="badge badge-outline-success w-100">Active</span>`;
-            } else if (status == "2") {
-                return `<span class="badge badge-outline-primary w-100">Probationary</span>`;
-            } else if (status == "3") {
-                return `<span class="badge badge-outline-danger w-100">AWOL</span>`;
-            } else if (status == "4") {
-                return `<span class="badge badge-outline-info w-100">Retired</span>`;
-            } else if (status == "5") {
-                return `<span class="badge badge-outline-warning w-100">Suspended</span>`;
-            } else {
-                return `<span class="badge badge-outline-danger w-100">Terminated</span>`;
-            }
-        }
+		const statusStyle = (status) => {
+			if (status == "0") {
+				return `<span class="badge badge-outline-danger w-100">Resigned</span>`;
+			} else if (status == "1") {
+				return `<span class="badge badge-outline-success w-100">Active</span>`;
+			} else if (status == "2") {
+				return `<span class="badge badge-outline-primary w-100">Probationary</span>`;
+			} else if (status == "3") {
+				return `<span class="badge badge-outline-danger w-100">AWOL</span>`;
+			} else if (status == "4") {
+				return `<span class="badge badge-outline-info w-100">Retired</span>`;
+			} else if (status == "5") {
+				return `<span class="badge badge-outline-warning w-100">Suspended</span>`;
+			} else {
+				return `<span class="badge badge-outline-danger w-100">Terminated</span>`;
+			}
+		}
 
 		let html = `
         <table class="table table-bordered table-striped table-hover" id="tableForApprroval">
@@ -214,49 +268,51 @@ function pageContent(isForm = false) {
             </thead>
             <tbody>`;
 
-        employeeListData.map((employee, index) => {
+		employeeListData.map((employee, index) => {
 
-            let {
-                employeeID,
-                fullname,
-                employeeUnit,
-                employeeBuilding,
-                employeeStreet,
-                employeeSubdivision,
-                employeeBarangay,
-                employeeProvince,
-                employeeCity,
-                employeeRegion,
-                employeeCountry,
-                employeeZipCode,
-                employeeMobile,
-                employeeUsername,
-                employeeEmail,
-               // employeeHiredDate,
-                employeeProfile    = "default.jpg",
-                departmentName     = "-",
-                designationName    = "-",
-                employeeHourlyRate = 0,
-                employeeStatus     = 0,
-            } = employee;
+			let {
+				employeeID,
+				fullname,
+				employeeUnit,
+				employeeBuilding,
+				employeeStreet,
+				employeeSubdivision,
+				employeeBarangay,
+				employeeProvince,
+				employeeCity,
+				employeeRegion,
+				employeeCountry,
+				employeeZipCode,
+				employeeMobile,
+				employeeUsername,
+				employeeEmail,
+				// employeeHiredDate,
+				employeeProfile = "default.jpg",
+				departmentName = "-",
+				designationName = "-",
+				employeeHourlyRate = 0,
+				employeeStatus = 0,
+                progressbar,
+                approval,
+			} = employee;
 
-            let unique = {
-                id: employeeID,
-                employeeUsername,
-                employeeEmail
-            }
-            uniqueData.push(unique);
+			let unique = {
+				id: employeeID,
+				employeeUsername,
+				employeeEmail
+			}
+			uniqueData.push(unique);
 
-            let profile     = employeeProfile != null ? employeeProfile : "default.jpg";
-            let profilePath = `${base_url}assets/upload-files/profile-images/${profile}`;
-            let profileImg  = `<img 
+			let profile = employeeProfile != null ? employeeProfile : "default.jpg";
+			let profilePath = `${base_url}assets/upload-files/profile-images/${profile}`;
+			let profileImg = `<img 
                 src="${profilePath}"
                 class="rounded rounded-circle"
                 style="width: 50px;
                     height: 50px">`;
-            let address = `${employeeUnit ? titleCase(employeeUnit)+", " : ""}${titleCase(employeeBuilding) +" "}${titleCase(employeeStreet)+", "}${titleCase(employeeSubdivision)+", "}${titleCase(employeeBarangay)+", "}${titleCase(employeeCity)+", "}${titleCase(employeeProvince)+", "}${titleCase(employeeCountry)+", "}${titleCase(employeeZipCode)}`;
+			let address = `${employeeUnit ? titleCase(employeeUnit)+", " : ""}${titleCase(employeeBuilding) +" "}${titleCase(employeeStreet)+", "}${titleCase(employeeSubdivision)+", "}${titleCase(employeeBarangay)+", "}${titleCase(employeeCity)+", "}${titleCase(employeeProvince)+", "}${titleCase(employeeCountry)+", "}${titleCase(employeeZipCode)}`;
 
-            html += `
+			html += `
             <tr class="btnEdit" id="${encryptString(employeeID)}">
                 <td>${getFormCode("EMP", "2021-04-12", employeeID)}</td>
                 <td>${profileImg} <span class="ml-2">${fullname}<span></td>
@@ -269,48 +325,51 @@ function pageContent(isForm = false) {
                 <td>${address}</td>
                 <td>${employeeMobile}</td>
                 <td>${employeeEmail}</td>
-                <td></td>
-                <td></td>
-               <td>${statusStyle(employeeStatus)}</td>
-            </tr>`
-        })
-
-        html += `
+                <td>
+                <div class="progress w-100" style="width:100px;height:20px;">
+                <div class="progress-bar" role="progressbar" style="width: ${progressbar}%;" aria-valuenow="${progressbar}" aria-valuemin="0" aria-valuemax="100">${progressbar}%</div>
+                </div>
+                </td>
+                <td>${approval}</td>
+                <td>${statusStyle(employeeStatus)}</td>
+           </tr>`;
+		})
+		html += `
             </tbody>
         </table>`;
 
-        setTimeout(() => {
-            $("#tableForApprovalParent").html(html);
-            initDataTables();
-            return html;
-        }, 500);
-       
+		setTimeout(() => {
+			$("#tableForApprovalParent").html(html);
+			initDataTables();
+			return html;
+		}, 500);
+
 	}
 
-    function myChecklist() {
-        $("#tableMyFormsParent").html(preloader);
-        const checklistdata = getTableData("hris_checklist", 
-        "", "", "");
-        let html ='';
-        // let html = `
-        // <table class="table table-bordered table-striped table-hover" id="tableMyForms">
-        //     <thead>
-        //         <tr>
-        //             <th>Checklist Number</th>
-        //             <th>Checklist Title</th>
+	function myChecklist() {
+		$("#tableMyFormsParent").html(preloader);
+		const checklistdata = getTableData("hris_checklist_tbl",
+			"", "", "");
+		let html = '';
+		// let html = `
+		// <table class="table table-bordered table-striped table-hover" id="tableMyForms">
+		//     <thead>
+		//         <tr>
+		//             <th>Checklist Number</th>
+		//             <th>Checklist Title</th>
 		// 			<th>Checklist Description</th>
-        //         </tr>
-        //     </thead>
-        //     <tbody>`;
-            checklistdata.map((checklist, index) => {
-                console.log(checklist);
-                let {
-                    checklistID,
-                    checklistTitle,
-                    checklistDescription,
-                } = checklist;
+		//         </tr>
+		//     </thead>
+		//     <tbody>`;
+		checklistdata.map((checklist, index) => {
+			console.log(checklist);
+			let {
+				checklistID,
+				checklistTitle,
+				checklistDescription,
+			} = checklist;
 
-                html += `
+			html += `
  
                     <div class="card text-white mb-3 btnEditChecklist pointer"id="${checklistID}" style="max-width: 43rem; background-color: #5D6161;">
                         <div class="card-body pointer"style="min-height: 20rem;max-height: 20rem;">
@@ -322,79 +381,81 @@ function pageContent(isForm = false) {
                     </div>
                 `;
 
-                // html += `<tr class="btnEdit1" id="${encryptString(checklistID)}">
-                //             <td>${checklistID}</td>
-                //             <td>${checklistTitle}</td>
-                //             <td>${checklistDescription}</td>
-                //         </tr>`;
+			// html += `<tr class="btnEdit1" id="${encryptString(checklistID)}">
+			//             <td>${checklistID}</td>
+			//             <td>${checklistTitle}</td>
+			//             <td>${checklistDescription}</td>
+			//         </tr>`;
 
-            })    
-            html += `
+		})
+		html += `
             </tbody>
         </table>`;
-        setTimeout(() => {
+		setTimeout(() => {
 			$("#tableMyFormsParent").html(html);
 			initDataTables();
 			return html;
-		}, 500); 
-    }    
+		}, 500);
+	}
 	//OrientationContent();
 	// ----- END TABLE CONTENT -----
-    // edit function 
-    $(document).on("click", ".btnEdit", function () {
-        const id = decryptString($(this).attr("id"));
-        headerTabContent(display = false);
-        headerButton(isAdd = false);
-        $("#btnBack").attr("checklistID", id);
-        $("#btnBack").attr("status", 2);
-        //headerButton();
-        $("#page_content").html(preloader);
-        setTimeout(() => {
-                const employeeData = getTableData(
-                    `hris_employee_list_tbl`,
-                    `*`,
-                    `employeeID = ${id}`
-                );
-                if (employeeData) {
-                    try {
-                        const content = formContent(employeeData[0]);
-                       console.log(content);
+	// edit function 
+	$(document).on("click", ".btnEdit", function () {
+		const id = decryptString($(this).attr("id"));;
+		headerTabContent(display = false);
+		headerButton(isAdd = false);
+		$("#btnBack").attr("checklistID", id);
+		$("#btnBack").attr("status", 2);
+		//headerButton();
+		$("#page_content").html(preloader);
+		setTimeout(() => {
+			const employeeData = getTableData(
+				`hris_employee_list_tbl`,
+				`*`,
+				`employeeID = ${id}`
+			);
+			// console.log(employeeData[0].designationID);
+			if (employeeData) {
+				try {
+					const content = formContent(employeeData[0]);
 
-                    } catch (error) {
-                        showNotification("danger", `${error}`);
-                        let html = `
+
+				} catch (error) {
+					showNotification("danger", `${error}`);
+					let html = `
                         <div class="w-100 text-center text-danger py-5">
                             <h5 style="font-weight: bold; font-size: 1.2rem;">${error}</h5>
                         </div>`;
-                        //$("#modal_employee_module_content").html(html);
-                    }
-                } else {
-                    showNotification("danger", "There was an error fetching employee data.");
-                }  
-        
+					//$("#modal_employee_module_content").html(html);
+				}
+			} else {
+				showNotification("danger", "There was an error fetching employee data.");
+			}
 
-            }, 500);     
-        //alert(id);
 
-    })    
+		}, 500);
+		//alert(id);
 
-    function formContent(data = false) {
-        
+	})
+
+	function formContent(data = false) {
+
 		$("#page_content").html(preloader);
-        var designationID = data.designationID;
+		var designationID = data.designationID;
+		var employeeID = data.employeeID;
 
-        let button = data
-        ? `
+		let button = data ?
+			`
     <button 
         class="btn btn-update px-5 p-2" 
         id="btnUpdate" 
         employeeID="${encryptString(data.employeeID)}"><i class="fas fa-save"></i>
         Update
-    </button>`
-        : `
+    </button>` :
+			`
     <button class="btn btn-save px-5 p-2" id="btnSave"><i class="fas fa-save"></i> Save</button>`;
 
-        let html = `
+		let html = `
         <div class="modal-body">
             <ul class="nav nav-tabs nav-tabs-bottom nav-justified border" id="addtabs">
                 <li class="nav-item">
@@ -472,11 +533,10 @@ function pageContent(isForm = false) {
                          <th>Accountable Person</th>
                          <th>Date</th>
                          <th>Status</th>
-                         <th>Scheduling Date</th>
                      </tr>
                  </thead>
                  <tbody>
-                    ${onboardingTab(designationID)}
+                    ${onboardingTab(designationID,employeeID)}
                     </tbody>
                 </table>  
                 </div> 
@@ -489,54 +549,54 @@ function pageContent(isForm = false) {
         </div>
         <div class="modal-footer">
             ${button}
-            <button class="btn btn-cancel btnCancel px-5 p-2" ><i class="fas fa-ban"></i> Cancel</button>
+            <button class="btn btn-cancel btnCancel px-5 p-2" id="btnOnboardingCancel" ><i class="fas fa-ban"></i> Cancel</button>
         </div>`;
-        setTimeout(() => {
-            $("#page_content").html(html);
-            initAll();
+		setTimeout(() => {
+			$("#page_content").html(html);
+			initAll();
 			initDataTables();
-            datevalidated();
-            return html;
-        }, 300); 
-        
-            // ----- END REMOVE PROFILE IMAGE -----
+			datevalidated();
+			return html;
+		}, 300);
 
-    // ----- EMPLOYEE INFORMATION TAB  first tab-----
-    function employeeInformationTab(data = false) {
+		// ----- END REMOVE PROFILE IMAGE -----
 
-        let {
-            employeeID          = "",
-            employeeProfile     = "default.jpg",
-            employeeFirstname   = "",
-            employeeMiddlename  = "",
-            employeeLastname    = "",
-            employeeBirthday    = "",
-            employeeGender      = "",
-            employeeCitizenship = "",
-            employeeCivilStatus = "",
-            employeeHiredDate   = "",
-            employeeRegion      = "",
-            employeeProvince    = "",   
-            employeeCity        = "",
-            employeeBarangay    = "",
-            employeeUnit        = "",
-            employeeBuilding    = "",
-            employeeStreet      = "",
-            employeeSubdivision = "",
-            employeeCountry     = "",
-            employeeZipCode     = "",
-            departmentID        = "",
-            designationID       = "",
-            employeeEmail       = "",
-            employeeMobile      = "",
-            employeeStatus      = "",
-        } = data;
+		// ----- EMPLOYEE INFORMATION TAB  first tab-----
+		function employeeInformationTab(data = false) {
 
-        let profile = employeeProfile != null ? employeeProfile : "default.jpg";
-        //const disabledHiredDate = employeeHiredDate ? "disabled" : "";
-        // const disabledHiredDate = "";
+			let {
+				employeeID = "",
+					employeeProfile = "default.jpg",
+					employeeFirstname = "",
+					employeeMiddlename = "",
+					employeeLastname = "",
+					employeeBirthday = "",
+					employeeGender = "",
+					employeeCitizenship = "",
+					employeeCivilStatus = "",
+					employeeHiredDate = "",
+					employeeRegion = "",
+					employeeProvince = "",
+					employeeCity = "",
+					employeeBarangay = "",
+					employeeUnit = "",
+					employeeBuilding = "",
+					employeeStreet = "",
+					employeeSubdivision = "",
+					employeeCountry = "",
+					employeeZipCode = "",
+					departmentID = "",
+					designationID = "",
+					employeeEmail = "",
+					employeeMobile = "",
+					employeeStatus = "",
+			} = data;
 
-        let html = `
+			let profile = employeeProfile != null ? employeeProfile : "default.jpg";
+			//const disabledHiredDate = employeeHiredDate ? "disabled" : "";
+			// const disabledHiredDate = "";
+
+			let html = `
         <div class="forms-group">
             <div class="row">
                 <div class="col-12">
@@ -950,22 +1010,22 @@ function pageContent(isForm = false) {
                 </div>
             </div>
         </div>`;
-        return html;
-    }
-    // End of first tab
+			return html;
+		}
+		// End of first tab
 
-    // 2nd Tab
+		// 2nd Tab
 
-        // ----- EMPLOYEE ACCOUNT TAB -----
-        function employeeAccountTab(data = false) {
+		// ----- EMPLOYEE ACCOUNT TAB -----
+		function employeeAccountTab(data = false) {
 
-            let {
-                employeeID       = "",
-                employeeUsername = "",
-                employeePassword = "",
-            } = data;
-    
-            let html = `
+			let {
+				employeeID = "",
+					employeeUsername = "",
+					employeePassword = "",
+			} = data;
+
+			let html = `
             <div class="forms-group">
                 <div class="row">
                     <div class="col-lg-6 col-md-6 col-sm-12">
@@ -1048,19 +1108,19 @@ function pageContent(isForm = false) {
                     </div>
                 </div>
             </div>`;
-            return html;
-        }
-        // ----- END EMPLOYEE ACCOUNT TAB  End 2nd Tab-----
-        // -----Start of dependent Information ----
-        function dependentInformation(data = false){
-    
-            let {
-                dependentName           ="",
-                dependentRelationship   ="",
-                dependentBirthday       ="",
-                employeeBirthday        ="",
-            } =data;
-            let html = `
+			return html;
+		}
+		// ----- END EMPLOYEE ACCOUNT TAB  End 2nd Tab-----
+		// -----Start of dependent Information ----
+		function dependentInformation(data = false) {
+
+			let {
+				dependentName = "",
+					dependentRelationship = "",
+					dependentBirthday = "",
+					employeeBirthday = "",
+			} = data;
+			let html = `
             <div class="forms-group">
                 <div class="row">
                 <div class="col-lg-12 col-md-4 col-sm-12">
@@ -1102,28 +1162,28 @@ function pageContent(isForm = false) {
                 </div>
                 </div>
             </div>`;
-            return html;
-        }
+			return html;
+		}
 
-        
-    // ----- EMPLOYEE PAYROLL TAB -----
-    function govTab(data = false) {
 
-        let {
-            employeeBasicSalary     = "",
-            employeeDailyRate       = "",
-            employeeHourlyRate      = "",
-            employeeAllowance       = "",
-            bankID                  = "",
-            employeeBankAccountName = "",
-            employeeBankAccountNo   = "",
-            employeeTIN             = "",
-            employeeSSS             = "",
-            employeePhilHealth      = "",
-            employeePagibig         = "",
-        } = data;
+		// ----- EMPLOYEE PAYROLL TAB -----
+		function govTab(data = false) {
 
-        let html = `
+			let {
+				employeeBasicSalary = "",
+					employeeDailyRate = "",
+					employeeHourlyRate = "",
+					employeeAllowance = "",
+					bankID = "",
+					employeeBankAccountName = "",
+					employeeBankAccountNo = "",
+					employeeTIN = "",
+					employeeSSS = "",
+					employeePhilHealth = "",
+					employeePagibig = "",
+			} = data;
+
+			let html = `
         <div class="forms-group">
             <div class="row">
                 <div class="col-lg-6 col-md-3 col-sm-12">
@@ -1208,17 +1268,18 @@ function pageContent(isForm = false) {
                 </div>
             </div>
         </div>`;
-        return html;
-    }
-    function employeeHistoryTab(data = false){
+			return html;
+		}
 
-        let {
-            employeeID          = "",
-            employeeBirthday    ="",
+		function employeeHistoryTab(data = false) {
 
-        } = data;
+			let {
+				employeeID = "",
+					employeeBirthday = "",
 
-        let html = `
+			} = data;
+
+			let html = `
         <div class="forms-group">
         <div class="row">
             <div class="col-lg-4 col-md-6 col-sm-12">
@@ -1461,15 +1522,16 @@ function pageContent(isForm = false) {
         </div> 
         </div>  
         </div>`;
-        return html;
-    }
-    function educationalAttainment(data = false){
+			return html;
+		}
 
-        let {
-            employeeID = "",
-        } = data;
+		function educationalAttainment(data = false) {
 
-        let html =`
+			let {
+				employeeID = "",
+			} = data;
+
+			let html = `
         <div class="forms-group">
             <div class="row">
                 <div class="col-lg-12 col-md-4 col-sm-12">
@@ -1523,15 +1585,16 @@ function pageContent(isForm = false) {
             </div>
         </div>
         `;
-        return html;
-    }
-    function organizationJoined(data = false){
+			return html;
+		}
 
-        let {
-            employeeID = "",
-        } = data;
+		function organizationJoined(data = false) {
 
-        let html =`
+			let {
+				employeeID = "",
+			} = data;
+
+			let html = `
         <div class="forms-group">
             <div class="row">
             <div class="col-lg-12 col-md-4 col-sm-12">
@@ -1585,16 +1648,17 @@ function pageContent(isForm = false) {
             </div>
         </div>
         `;
-        return html;
-    }
-    function examTaken(data = false){
+			return html;
+		}
 
-        let {
-            employeeID = "",
+		function examTaken(data = false) {
 
-        }= data;
-        
-        let html =`
+			let {
+				employeeID = "",
+
+			} = data;
+
+			let html = `
                     <div class="forms-group">
                     <div class="row">
                         <div class="col-lg-12 col-md-4 col-sm-12">
@@ -1636,13 +1700,14 @@ function pageContent(isForm = false) {
                     </div>
                 </div>
         `;
-        return html;
-    }
-    function seminar(data = false){
-        let {
-            employeeID = "",
-        }= data;
-        let html = `
+			return html;
+		}
+
+		function seminar(data = false) {
+			let {
+				employeeID = "",
+			} = data;
+			let html = `
                 <div class="forms-group">
                 <div class="row">
                     <div class="col-lg-12 col-md-4 col-sm-12">
@@ -1684,13 +1749,14 @@ function pageContent(isForm = false) {
                 </div>
             </div>
         `;
-        return html;
-    }
-    function characterReference(data = false){
-        let {
-            employee ="",
-        } =data;
-        let html = `
+			return html;
+		}
+
+		function characterReference(data = false) {
+			let {
+				employee = "",
+			} = data;
+			let html = `
             <div class="forms-group">
             <div class="row">
                 <div class="col-lg-12 col-md-4 col-sm-12">
@@ -1744,143 +1810,286 @@ function pageContent(isForm = false) {
             </div>
         </div>
         `;
-        return html;
-    }
-    function onboardingTab(designationID){
-        let html ="";
-        let checkOrientation = getTableData(
-            `hris_orientation_setup_tbl AS ost
-             LEFT JOIN hris_employee_list_tbl AS empl ON ost.employeeID = empl.employeeID`,`ost.designationID,concat(employeeFirstName,' ',employeeLastname) AS fullname
-             ,ost.orientationName,'' AS onboardingDate,ost.employeeID`,`ost.designationID = ${designationID}`,``);
-             checkOrientation.map((item, index) => {
+			return html;
+		}
 
-                let {
-                    orientationName     ="",
-                    fullname            ="",
-                    onboardingDate      ="",
-                    employeeID          =""
-                }   =item;
-        
-                datevalidated();
-             //checkOrientation.map(item => {
-            html += `
-            <tr class="white-space: nowrap">
-            <td>
-               <div class="">
-                ${orientationName}
-               </div>
-            </td>
-            <td>
-            <div class="">
-                ${fullname}
-                </div>
-            </td>`;
-            if(employeeID == sessionID){
-                html +=`<td>
-                <div class="col-md-12 col-sm-12">
-                <div class="form-group">  
-                    <input type="button" 
-                    class="form-control daterange returnItemDate  text-left"
-                    required
-                    id="returnItemDate${index}"
-                    name="returnItemDate"
-                    value="${onboardingDate && moment(onboardingDate).format("MMMM DD, YYYY") || moment().format("MMMM DD, YYYY")} "
-                    dateBorrowed="${onboardingDate}"
-                    title="Date" required>
-                    <div class="d-block invalid-feedback" id="invalid-returnItemDate"></div>
-                </div>
-                </div>
-                </td>`;
-            }else{
-                html +=`<td>
-                <div class="col-md-12 col-sm-12">
-                    <div class="form-group">  
-                        <input type="button" 
-                        class="form-control daterange returnItemDate  text-left"
-                        required
-                        id="returnItemDate${index}"
-                        name="returnItemDate"
-                        value="${onboardingDate && moment(onboardingDate).format("MMMM DD, YYYY") || moment().format("MMMM DD, YYYY")} "
-                        dateBorrowed="${onboardingDate}"
-                        disabled
-                        title="Date" required>
-                        <div class="d-block invalid-feedback" id="invalid-returnItemDate"></div>
-                    </div>
-                    </div>
-                </td>`;
-            }   
-            if(employeeID == sessionID){
-            html +=`<td>
-            <div class="col-md-12 col-sm-12">
-                <div class="form-group">
-                    <select 
-                        class="form-control select2 validate" 
-                        id="input_departmentStatus${index}" 
-                        name="departmentStatus"
-                        autocomplete="off"
-                        getdepartmentid= "">
-                        <option 
-                            value="0">Pending</option>
-                        <option 
-                            value="1">Ongoing</option>
-                        <option 
-                        value="2">Accomplished</option>
-                    </select>
-               </div> 
-            </div>   
-            </td>`;
-            }else{
-                html +=`<td>
-                <div class="col-md-12 col-sm-12">
-                <div class="form-group">
-                    <select 
-                        class="form-control select2 validate" 
-                        id="input_departmentStatus${index}" 
-                        name="departmentStatus"
-                        autocomplete="off"
-                        getdepartmentid= ""
-                        disabled>
-                        <option 
-                            value="0">Pending</option>
-                        <option 
-                            value="1">Ongoing</option>
-                        <option 
-                        value="2">Accomplished</option>
-                    </select>
-               </div> 
-            </div>   
-            </td>`;
-            }
-            html +=`<td>
-            </td>
-        </tr>`;
-        });
-        //initDataTables();
-       
-        return html;
-    }
+		function onboardingTab(designationID, employeeID) {
+			let html = "";
+			let onBoarding = getTableData(`hris_onboarding_tbl`, `employeeID AS employeeIDDATA`, `employeeID=${employeeID}`, ``, `designationID`);
+			if (onBoarding.length != 0) {
+              
+				//alert("with conditon of employee");
+				let checkOrientation = getTableData(
+					`hris_orientation_setup_tbl AS ost
+                     LEFT JOIN hris_employee_list_tbl AS empl ON ost.employeeID = empl.employeeID
+                     LEFT JOIN hris_onboarding_tbl AS ob ON ost.employeeID = ob.approvalEmployeeID`,
+					`ost.designationID,concat(employeeFirstName,' ',employeeLastname) AS fullname
+                     ,ost.orientationName,onboardingDate AS onboardingDate,onboardingStatus, ost.employeeID,ost.designationID`, `ost.designationID = ${designationID} AND  ob.employeeID=${employeeID}`, ``);
+                     var countnumber = checkOrientation.map(a=> a.designationID).length
+                     checkOrientation.map((item, index) => {
+					let {
+						orientationName = "",
+							fullname = "",
+							employeeID = "",
+							designationID = "",
+							onboardingDate = "",
+							onboardingStatus = ""
+					} = item;
+					datevalidated();
 
-     // ----- OPEN ADD MODAL -----
-     
-    // ----- END OPEN ADD MODAL -----
-    }    
-    $(document).on("click", "#btnAdd", function() {
-       $("#checklist_modalheader").text("ADD CHECKLIST");
-       $("#modal_checklist_module").modal("show");
-       $("#modal_checklist_module_content").html(preloader);
-       const content = modalContent();
-       $("#modal_checklist_module_content").html(content);
-       initAll();
-   });
+					let disableInput = "";
+					if (onboardingStatus == "3") {
+						disableInput = "disabled";
+					} else {
 
-  
+					}
+                    //console.log(index);
+					//checkOrientation.map(item => {
+					html += `
+                    <tr class="white-space: nowrap itemtablecount">
+                    <td>
+                       <div class="">
+                        ${orientationName}
+                       </div>
+                    </td>
+                    <td>
+                    <div class="">
+                        ${fullname}
+                        </div>
+                    </td>`;
+					if (employeeID == sessionID) {
+						html += `<td>
+                        <div class="col-md-12 col-sm-12">
+                        <div class="form-group">  
+                            <input type="button" 
+                            class="form-control daterange returnItemDate validate text-left"
+                            countnumber="${countnumber}"
+                            id="returnItemDate${index}"
+                            employeeID="${employeeID}"
+                            designationID="${designationID}"
+                            name="returnItemDate"
+                            value="${onboardingDate && moment(onboardingDate).format("MMMM DD, YYYY") || moment().format("MMMM DD, YYYY")} "
+                            title="Date"
+                            ${disableInput}>
+                            <div class="d-block invalid-feedback" id="invalid-returnItemDate"></div>
+                        </div>
+                        </div>
+                        </td>`;
+					} else {
+						html += `<td>
+                        <div class="col-md-12 col-sm-12">
+                            <div class="form-group">  
+                                <input type="button" 
+                                class="form-control daterange returnItemDate validate text-left"
+                                id="returnItemDate${index}"
+                                countnumber="${countnumber}"
+                                required
+                                employeeID="${employeeID}"
+                                designationID="${designationID}"
+                                name="returnItemDate"
+                                value="${onboardingDate && moment(onboardingDate).format("MMMM DD, YYYY") || moment().format("MMMM DD, YYYY")} "
+                                disabled
+                                title="Date">
+                                <div class="d-block invalid-feedback" id="invalid-returnItemDate"></div>
+                            </div>
+                            </div>
+                        </td>`;
+					}
+					if (employeeID == sessionID) {
+						html += `<td>
+                    <div class="col-md-12 col-sm-12">
+                        <div class="form-group">
+                            <select 
+                                class="form-control select2 validate OrientationStatus" 
+                                id="OrientationStatus${index}" 
+                                name="OrientationStatus"
+                                autocomplete="off"
+                                getdepartmentid= ""${disableInput}>
+                              
+                                <option 
+                                value="1" 
+                                ${onboardingStatus && onboardingStatus == "1" && "selected"}>Pending</option>
+                                <option 
+                                value="2" 
+                                ${onboardingStatus && onboardingStatus == "2" && "selected"}>Ongoing</option>
+                                <option 
+                                value="3" 
+                                ${onboardingStatus && onboardingStatus == "3" && "selected"}>Accomplished</option>
+                            </select>
+                       </div> 
+                    </div>   
+                    </td>`;
+					} else {
+						html += `<td>
+                        <div class="col-md-12 col-sm-12">
+                        <div class="form-group">
+                            <select 
+                                class="form-control select2 validate OrientationStatus" 
+                                id="OrientationStatus${index}" 
+                                name="departmentStatus"
+                                autocomplete="off"
+                                getdepartmentid= ""
+                                disabled>
+                                <option 
+                                value="1" 
+                                ${onboardingStatus && onboardingStatus == "1" && "selected"}>Pending</option>
+                                <option 
+                                value="2" 
+                                ${onboardingStatus && onboardingStatus == "2" && "selected"}>Ongoing</option>
+                                <option 
+                                value="3" 
+                                ${onboardingStatus && onboardingStatus == "3" && "selected"}>Accomplished</option>
+                            </select>
+                       </div> 
+                    </div>   
+                    </td>`;
+					}
+					html += `
+                </tr>`;
+				});
+                //console.log(count);
+			} else {
+				//alert("with out conditon of employee");
+				let checkOrientation = getTableData(
+					`hris_orientation_setup_tbl AS ost
+                     LEFT JOIN hris_employee_list_tbl AS empl ON ost.employeeID = empl.employeeID`,
+					`ost.designationID,concat(employeeFirstName,' ',employeeLastname) AS fullname
+                     ,ost.orientationName,'' AS onboardingDate,ost.employeeID,ost.designationID`, `ost.designationID = ${designationID}`, ``);
+                     var countnumber = checkOrientation.map(a=> a.designationID).length
+                     checkOrientation.map((item, index) => {
 
-  function  modalContent(data = false){
-      console.log(data);
-    let checklistID                 = data ? (data[0].checklistID            ? data[0].checklistID        : "") : "",
-    checklistTitle                  = data ? (data[0].checklistTitle          ? data[0].checklistTitle      : "") : "",
-    checklistDescription            =data ? (data[0]                         ? data[0].checklistDescription : "") : "";
-    let button = checklistID ? `
+					let {
+						orientationName = "",
+							fullname = "",
+							employeeID = "",
+							designationID = "",
+							onboardingDate = ""
+					} = item;
+					datevalidated();
+					//checkOrientation.map(item => {
+                       
+					html += `
+                    <tr class="white-space: nowrap itemtablecount">
+                    <td>
+                       <div class="">
+                        ${orientationName}
+                       </div>
+                    </td>
+                    <td>
+                    <div class="">
+                        ${fullname}
+                        </div>
+                    </td>`;
+					if (employeeID == sessionID) {
+						html += `<td>
+                        <div class="col-md-12 col-sm-12">
+                        <div class="form-group">  
+                            <input type="button" 
+                            class="form-control daterange returnItemDate validate text-left"
+                            
+                            id="returnItemDate${index}"
+                            employeeID="${employeeID}"
+                            designationID="${designationID}"
+                            name="returnItemDate"
+                            countnumber="${countnumber}"
+                            value="${onboardingDate && moment(onboardingDate).format("MMMM DD, YYYY") || moment().format("MMMM DD, YYYY")} "
+                            title="Date">
+                            <div class="d-block invalid-feedback" id="invalid-returnItemDate"></div>
+                        </div>
+                        </div>
+                        </td>`;
+					} else {
+						html += `<td>
+                        <div class="col-md-12 col-sm-12">
+                            <div class="form-group">  
+                                <input type="button" 
+                                class="form-control daterange returnItemDate validate text-left"
+                                id="returnItemDate${index}"
+                                required
+                                countnumber="${countnumber}"
+                                employeeID="${employeeID}"
+                                designationID="${designationID}"
+                                name="returnItemDate"
+                                value="${onboardingDate && moment(onboardingDate).format("MMMM DD, YYYY") || moment().format("MMMM DD, YYYY")}"
+                                disabled
+                                title="Date">
+                                <div class="d-block invalid-feedback" id="invalid-returnItemDate"></div>
+                            </div>
+                            </div>
+                        </td>`;
+					}
+					if (employeeID == sessionID) {
+						html += `<td>
+                    <div class="col-md-12 col-sm-12">
+                        <div class="form-group">
+                            <select 
+                                class="form-control select2 validate OrientationStatus" 
+                                id="OrientationStatus${index}" 
+                                name="OrientationStatus"
+                                autocomplete="off"
+                                getdepartmentid= "">
+                                <option 
+                                    value="1">Pending</option>
+                                <option 
+                                    value="2">Ongoing</option>
+                                <option 
+                                value="3">Accomplished</option>
+                            </select>
+                       </div> 
+                    </div>   
+                    </td>`;
+					} else {
+						html += `<td>
+                        <div class="col-md-12 col-sm-12">
+                        <div class="form-group">
+                            <select 
+                                class="form-control select2 validate OrientationStatus" 
+                                id="OrientationStatus${index}" 
+                                name="departmentStatus"
+                                autocomplete="off"
+                                getdepartmentid= ""
+                                disabled>
+                                <option 
+                                    value="1">Pending</option>
+                                <option 
+                                    value="2">Ongoing</option>
+                                <option 
+                                value="3">Accomplished</option>
+                            </select>
+                       </div> 
+                    </div>   
+                    </td>`;
+					}
+					html += `
+                </tr>`;
+				});
+
+			}
+           
+			return html;
+		}
+
+		// ----- OPEN ADD MODAL -----
+
+		// ----- END OPEN ADD MODAL -----
+	}
+	$(document).on("click", "#btnAdd", function () {
+		$("#checklist_modalheader").text("ADD CHECKLIST");
+		$("#modal_checklist_module").modal("show");
+		$("#modal_checklist_module_content").html(preloader);
+		const content = modalContent();
+		$("#modal_checklist_module_content").html(content);
+		initAll();
+	});
+
+
+
+	function modalContent(data = false) {
+		console.log(data);
+		let checklistID = data ? (data[0].checklistID ? data[0].checklistID : "") : "",
+			checklistTitle = data ? (data[0].checklistTitle ? data[0].checklistTitle : "") : "",
+			checklistDescription = data ? (data[0] ? data[0].checklistDescription : "") : "";
+		let button = checklistID ? `
     <button 
         class="btn btn-update px-5 p-2" 
         id="btnChecklistUpdate" 
@@ -1893,7 +2102,7 @@ function pageContent(isForm = false) {
         id="btnSave"><i class="fas fa-save"></i>
         Save
     </button>`;
-    let html = `
+		let html = `
     <div class="modal-body">
         <div class="row">
             <div class="col-md-12 col-sm-12">
@@ -1939,49 +2148,49 @@ function pageContent(isForm = false) {
     ${button}
     <button class="btn btn-cancel px-5 p-2 btnCancel"><i class="fas fa-ban"></i> Cancel</button>
     </div>`;
-    return html;    
-   }
+		return html;
+	}
 
-   $(document).on("click", "#btnSave", function() {
-    
- const validate = validateForm("modal_checklist_module");
- if (validate) {
-    let data = getFormData("modal_checklist_module", true);
-     //data["tableData[departmentCode]"] = generateCode("DPT", false, "hris_department_tbl", "departmentCode");
-     data["tableData[createdBy]"] = sessionID;
-     data["tableData[updatedBy]"] = sessionID;
-     data["tableName"]            = "hris_checklist";
-     data["feedback"]             = $("[name=checklistTitle]").val();
+	$(document).on("click", "#btnSave", function () {
 
-     sweetAlertConfirmation("add", "Checklist", "modal_checklist_module", null, data, true,myChecklist);
-     }
- });
- // ----- END SAVE MODAL -----
+		const validate = validateForm("modal_checklist_module");
+		if (validate) {
+			let data = getFormData("modal_checklist_module", true);
+			//data["tableData[departmentCode]"] = generateCode("DPT", false, "hris_department_tbl", "departmentCode");
+			data["tableData[createdBy]"] = sessionID;
+			data["tableData[updatedBy]"] = sessionID;
+			data["tableName"] = "hris_checklist_tbl";
+			data["feedback"] = $("[name=checklistTitle]").val();
 
-    // ----- OPEN EDIT MODAL -----
-    $(document).on("click", ".btnEditChecklist", function() {
-        const id       = $(this).attr("id");
-        const feedback = $(this).attr("feedback");
-        $("#checklist_modalheader").text("EDIT CHECKLIST");
-        $("#modal_checklist_module").modal("show");
+			sweetAlertConfirmation("add", "Checklist", "modal_checklist_module", null, data, true, myChecklist);
+		}
+	});
+	// ----- END SAVE MODAL -----
 
-        // Display preloader while waiting for the completion of getting the data
-        $("#modal_checklist_module_content").html(preloader); 
+	// ----- OPEN EDIT MODAL -----
+	$(document).on("click", ".btnEditChecklist", function () {
+		const id = $(this).attr("id");
+		const feedback = $(this).attr("feedback");
+		$("#checklist_modalheader").text("EDIT CHECKLIST");
+		$("#modal_checklist_module").modal("show");
 
-        const tableData = getTableData("hris_checklist", "*", "checklistID ="+id, "");
-        if (tableData) {
-            const content = modalContent(tableData);
-            setTimeout(() => {
-                $("#modal_checklist_module_content").html(content);
-               // departmentContent(tableData);
-                $("#btnSaveConfirmationEdit").attr("rowID", id);
-                $("#btnSaveConfirmationEdit").attr("feedback", feedback);
-                initAll();
-            }, 500);
-        }
-    });
-    // ----- END OPEN EDIT MODAL -----
-    $(document).on("click", ".btnCancel", function () {
+		// Display preloader while waiting for the completion of getting the data
+		$("#modal_checklist_module_content").html(preloader);
+
+		const tableData = getTableData("hris_checklist_tbl", "*", "checklistID =" + id, "");
+		if (tableData) {
+			const content = modalContent(tableData);
+			setTimeout(() => {
+				$("#modal_checklist_module_content").html(content);
+				// departmentContent(tableData);
+				$("#btnSaveConfirmationEdit").attr("rowID", id);
+				$("#btnSaveConfirmationEdit").attr("feedback", feedback);
+				initAll();
+			}, 500);
+		}
+	});
+	// ----- END OPEN EDIT MODAL -----
+	$(document).on("click", ".btnCancel", function () {
 		let formEmpty = isFormEmpty("modal_checklist_module");
 		if (!formEmpty) {
 			sweetAlertConfirmation(
@@ -1992,63 +2201,63 @@ function pageContent(isForm = false) {
 		} else {
 			$("#modal_checklist_module").modal("hide");
 		}
-    });
+	});
 
-    // ----- UPDATE MODAL -----
-    $(document).on("click", "#btnChecklistUpdate", function() {
-                const validate = validateForm("modal_checklist_module");
-                const id = $(this).attr("rowID");
-                if (validate) {
+	// ----- UPDATE MODAL -----
+	$(document).on("click", "#btnChecklistUpdate", function () {
+		const validate = validateForm("modal_checklist_module");
+		const id = $(this).attr("rowID");
+		if (validate) {
 
-                    let data = getFormData("modal_checklist_module", true);
-                    data["tableData[updatedBy]"] = sessionID;
-                    data["tableName"]            = "hris_checklist";
-                    data["whereFilter"]          ="checklistID ="+id;
-                    data["feedback"]             = $("[name=checklistTitle]").val();
-        
-                    sweetAlertConfirmation(
-                        "update",
-                        "Checklist",
-                        "modal_checklist_module",
-                        "",
-                        data,
-                        true,
-                        myChecklist
-                       
-                    );
-                    }
-                
-        });
-        // ----- END UPDATE MODAL --
+			let data = getFormData("modal_checklist_module", true);
+			data["tableData[updatedBy]"] = sessionID;
+			data["tableName"] = "hris_checklist_tbl";
+			data["whereFilter"] = "checklistID =" + id;
+			data["feedback"] = $("[name=checklistTitle]").val();
 
-        // ----- CLOSE FORM -----
+			sweetAlertConfirmation(
+				"update",
+				"Checklist",
+				"modal_checklist_module",
+				"",
+				data,
+				true,
+				myChecklist
+
+			);
+		}
+
+	});
+	// ----- END UPDATE MODAL --
+
+	// ----- CLOSE FORM -----
 	$(document).on("click", "#btnBack", function () {
 		const id = $(this).attr("checklistID");
 		// /const feedback = $(this).attr("code") || getFormCode("INRR", dateToday(), id);
 		const status = $(this).attr("status");
-        
+
 		if (status != "false" && status != 0) {
-            //alert("1");
+			//alert("1");
 			$("#page_content").html(preloader);
-            $("#btnBack").hide();
-          
+			$("#btnBack").hide();
+
 			pageContent();
-            $("[redirect=forApprovalTab]").length > 0 && $("[redirect=forApprovalTab]").trigger("click");
+			$("[redirect=forApprovalTab]").length > 0 && $("[redirect=forApprovalTab]").trigger("click");
 
 		}
 
 	});
 	// ----- END CLOSE FORM -----
 
-    function datevalidated() {
-		$(".returnItemDate").each(function() {
-			const elementID    = $(this).attr("id");
+	function datevalidated() {
+		$(".returnItemDate").each(function () {
+			const elementID = $(this).attr("id");
 			const dateBorrowed = `#${$(this).attr("dateBorrowed")}`;
 			const minDateOptions = {
-				autoUpdateInput:  false,
+				autoUpdateInput: false,
 				singleDatePicker: true,
-				showDropdowns:    true,
-				autoApply:        true,
+				showDropdowns: true,
+				autoApply: true,
 				locale: {
 					format: "MMMM DD, YYYY",
 				},
@@ -2056,11 +2265,113 @@ function pageContent(isForm = false) {
 			}
 			initDateRangePicker(elementID, minDateOptions);
 		})
-	}	
+	}
+
+
+	$(document).on("click", "#btnUpdate", function () {
+		let validate = validateForm("modal_checklist_module");
+		const id = decryptString($(this).attr("employeeid"));
+        var countapprovar = $(".returnItemDate").attr("countnumber");
+		var onboardingDate = [];
+		var OnboardingStatus = [];
+		var OnboardingEmployeeID = [];
+		var designationID = [];
+
+		$(".returnItemDate").each(function () {
+			onboardingDate.push(moment($(this).val()).format("YYYY-MM-DD HH:mm:ss"));
+		});
+		//onboardingDate = moment(onboardingDate).format("YYYY-MM-DD HH:mm:ss");
+		$(".OrientationStatus").each(function () {
+			OnboardingStatus.push($(this).val());
+		});
+		$(".returnItemDate").each(function () {
+			OnboardingEmployeeID.push($(this).attr("employeeID"));
+		});
+		$(".returnItemDate").each(function () {
+			designationID.push($(this).attr("designationID"));
+		});
+		// const dateBorrowed = moment(formatdate).format("YYYY-MM-DD HH:mm:ss");
+		Swal.fire({
+			title: 'ORIENTATION',
+			text: 'Are you sure that you want to update the status of the orientation for this employee?',
+			imageUrl: `${base_url}assets/modal/update.svg`,
+			imageWidth: 200,
+			imageHeight: 200,
+			imageAlt: 'Custom image',
+			showCancelButton: true,
+			confirmButtonColor: '#dc3545',
+			cancelButtonColor: '#1a1a1a',
+			cancelButtonText: 'No',
+			confirmButtonText: 'Yes',
+			allowOutsideClick: false
+		}).then((result) => {
+			if (result.isConfirmed) {
+				preventRefresh(false);
+				$.ajax({
+					url: `${base_url}hris/On_boarding/updaterecord`,
+					method: "POST",
+					data: {
+						id: id,
+						designationID:          designationID,
+						onboardingDate:         onboardingDate,
+						OnboardingStatus:       OnboardingStatus,
+						OnboardingEmployeeID:   OnboardingEmployeeID,
+                        countapprovar:          countapprovar,
+					},
+					async: true,
+					dataType: "json",
+					beforeSend: function () {
+						$("#loader").show();
+					},
+					success: function (data) {
+						$("#loader").hide();
+
+						setTimeout(() => {
+							let swalTitle = `Orientation status updated successfully!`;
+							Swal.fire({
+								icon: "success",
+								title: swalTitle,
+								showConfirmButton: false,
+								timer: 2000,
+							}).then(() => {
+								$("#loader").show();
+								setTimeout(function () {
+									pageContent();
+									$("[redirect=forApprovalTab]").length > 0 && $("[redirect=forApprovalTab]").trigger("click");
+									$("#loader").hide();
+									//window.location.reload(1);
+									//window.location.href = window.location.href + 'redirect=forApprovalTab]';
+								}, 1);
+							})
+
+
+						}, 1);
+					}
+				})
+			} else {
+				preventRefresh(false);
+			}
+
+		});
+		//console.log(OnboardingEmployeeID);
+
+	});
+	$(document).on("click", "#btnOnboardingCancel", function () {
+		$("#page_content").html(preloader);
+		$("#btnBack").hide();
+
+		pageContent();
+		$("[redirect=forApprovalTab]").length > 0 && $("[redirect=forApprovalTab]").trigger("click");
+
+		// }
+
+	});
+	// ----- END CLOSE FORM -----
 
 
 
 
 
 
-});    
+
+});

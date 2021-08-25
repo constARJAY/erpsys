@@ -14,7 +14,7 @@
                         <li class="breadcrumb-item active">Onboarding</li>
                     </ul>
                     <h1 class="mt-3">Onboarding</h1>
-                    <span>This module is used to manage onboarding and documents.</span>
+                    <span>This module is used to manage applicants for onboarding and orientation.</span>
                 </div>
                 <?php if(isCreateAllowed(107)) { ?>
                     <div class="col-lg-6 col-md-6 text-right" id="headerButton">
