@@ -291,7 +291,6 @@ function getMultipleChoiceQuestion(data = false,pageQuestionsNumber=1,examData=f
 	if(index >= 0 && index < questionsID.length - 1){
 	nextQuestionID = questionsID[index + 1];
 	}
-	
 
 	let html = "";
 	
@@ -656,9 +655,9 @@ function pageContent(level = "0",onGoing = false) {
 		// var designationID="4";
 		// var examStatus="0";
 		var dateToday=moment().format('YYYY-MM-DD');
-		var schedule=  "2021-08-03";
+		// var schedule=  "2021-08-26";
 		var applicantDesignationID;
-		// var schedule=  decryptString($(".body_area").attr("applicantSchedule"));
+		var schedule=  decryptString($(".body_area").attr("applicantSchedule"));
 
 		// console.log(dateToday)
 		const applicantData = getTableData(`web_applicant_list_tbl`,"","applicantID= "+applicantID);
@@ -676,7 +675,7 @@ function pageContent(level = "0",onGoing = false) {
 					<div class="section">
 						<div class="row">
 							<div class="col-4">
-								<img src="../assets/modal/exam.svg" alt="">
+								<img src="../assets/upload-files/examination/${getExamData[level].examinationPicture}" alt="">
 							</div>
 							<div class="col-8">
 							
@@ -695,7 +694,7 @@ function pageContent(level = "0",onGoing = false) {
 					<div class="section">
 						<div class="row">
 							<div class="col-4">
-								<img src="../assets/modal/exam.svg" alt="">
+								<img src="../assets/modal/done.svg" alt="">
 							</div>
 							<div class="col-8">
 							
@@ -719,7 +718,7 @@ function pageContent(level = "0",onGoing = false) {
 						<div class="section">
 							<div class="row">
 								<div class="col-4">
-									<img src="../assets/modal/exam.svg" alt="">
+									<img src="../assets/upload-files/examination/${getExamData[level].examinationPicture}" alt="">
 								</div>
 								<div class="col-8">
 								
@@ -738,7 +737,7 @@ function pageContent(level = "0",onGoing = false) {
 						<div class="section">
 							<div class="row">
 								<div class="col-4">
-									<img src="../assets/modal/exam.svg" alt="">
+									<img src="../assets/modal/done.svg" alt="">
 								</div>
 								<div class="col-8">
 								
@@ -1022,16 +1021,16 @@ $(document).on("click", ".finishQuestion", function (){
 
 
 	Swal.fire({
-		title: 'Finish this part',
+		title: 'Finish this part?',
 		text: "Are you sure that you want to finish this part of your exam?",
-		imageUrl: `${baseurl}assets/modal/add.svg`,
+		imageUrl: `../assets/modal/add.svg`,
 		imageWidth: 200,
 		imageHeight: 200,
 		imageAlt: 'Custom image',
 		showCancelButton: true,
-		confirmButtonColor: '#28a745',
+		confirmButtonColor: '#dc3545',
 		cancelButtonColor: '#1A1A1A',
-		confirmButtonText: 'Next',
+		confirmButtonText: 'Finish',
 		allowOutsideClick: false
 	}).then((result) => {
 		if (result.isConfirmed) {

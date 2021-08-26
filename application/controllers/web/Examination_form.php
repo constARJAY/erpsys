@@ -23,11 +23,23 @@ class Examination_form extends CI_Controller {
 
         $this->encryption->initialize(array('driver' => 'mcrypt'));
         
-        // $code = $this->input->get('id');
+        $code = $this->input->get('id');
 
-        $code ="bf2fc628644267ec4a51a3956514f384227636a9c100db345f7979bb4ea0f86668cc025a32b52af3d565dde7e4f3f59600936dd80aef234d4c066630d4784616fqahFKXJVsTHmgNNnSYS+3lH8XmCGOyNGJurhg==";
+        //  generate encrypted url parameter
+        // $code = '1|2021-08-26';
+
+        // $url = $this->encryption->encrypt(str_replace("slash","/","$code"));
+
+        // echo $url;
+        // exit;
+
+        // end  generate encrypted url parameter
+
+        //  decode encrypted url parameter
+        // $code ="c90fc36ab1ff5e4db0e9bce71bc4bf44e74a254864b5dc455f0e935b9f3d4778c73da9e9145cf0285d71d9553295cf5039d1c8da7fd13658e7d30c4e9add8b5dlKo9o4rgijZDSgbEvMmGjne2PXpEQa7VpuSeuA==";
 
         $url = $this->encryption->decrypt(str_replace("slash","/","$code"));
+        // end  decode encrypted url parameter
 
        
 
@@ -36,8 +48,8 @@ class Examination_form extends CI_Controller {
         $applicantID = $split[0];
         $applicantSchedule = $split[1];
         $data['applicantID']= $applicantID;
-        // $data['applicantSchedule'] = $applicantSchedule;
-        $data['applicantSchedule'] = "2021-08-03";
+        $data['applicantSchedule'] = $applicantSchedule;
+        // $data['applicantSchedule'] = "2021-08-03";
       
 
         $this->load->view('template/header', $data);
