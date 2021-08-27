@@ -11,15 +11,15 @@
                     <ul class="breadcrumb pl-0 pb-0 ">
                         <li class="breadcrumb-item"><a href="#"><i class="zmdi zmdi-home"></i> Dashboard</a></li>
 						<li class="breadcrumb-item"><i class="fas fa-users-cog"></i> &nbsp;HR Modules</li>
-                        <li class="breadcrumb-item active">Onboarding</li>
+                        <li class="breadcrumb-item active">Onboarding Module</li>
                     </ul>
-                    <h1 class="mt-3">Onboarding</h1>
+                    <h1 class="mt-3">Onboarding Module</h1>
                     <span>This module is used to manage applicants for onboarding and orientation.</span>
                 </div>
                 <?php if(isCreateAllowed(107)) { ?>
                     <div class="col-lg-6 col-md-6 text-right" id="headerButton">
                        <div class="hiddenadd"> 
-                        <button class="btn btn-default btn-add" id="btnAdd"><i class="icon-plus"></i> Add Onboarding</button>
+                        <button class="btn btn-default btn-add" id="btnAdd"><i class="icon-plus"></i> Add Checklist</button>
                     </div> 
                     </div>
                 <?php } ?>

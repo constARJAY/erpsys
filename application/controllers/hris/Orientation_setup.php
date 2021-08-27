@@ -16,12 +16,27 @@ class Orientation_setup extends CI_Controller {
         $this->load->view("hris/orientation_setup/index");
         $this->load->view("template/footer");
     }
+    public function insertrecord()
+    {
+        $employeeID = $this->input->post("employeeID");
+        $designationID = $this->input->post("designationID");
+        $orientationName = $this->input->post("OrientationName");
+        $employeeDesignationID = $this->input->post("employeeDesignationID");
+        $addorientationsetupdata = $this->orientationsetup->addorientationsetup($designationID, $employeeID,$orientationName, $employeeDesignationID);
+        $result = explode("|", $addorientationsetupdata);
+        if ($result[0] == "true") {
+            $this->session->set_flashdata('success', $result[1]);
+        }
+        echo json_encode($addorientationsetupdata);
+
+    }
 
     public function updaterecord(){
         $employeeID = $this->input->post("employeeID");
         $designationID = $this->input->post("designationID");
         $orientationName = $this->input->post("OrientationName");
-        $orientationsetupdata = $this->orientationsetup->updateorientationsetup($designationID, $employeeID,$orientationName);
+        $employeeDesignationID = $this->input->post("employeeDesignationID");
+        $orientationsetupdata = $this->orientationsetup->updateorientationsetup($designationID, $employeeID,$orientationName, $employeeDesignationID);
         $result = explode("|", $orientationsetupdata);
         if ($result[0] == "true") {
             $this->session->set_flashdata('success', $result[1]);

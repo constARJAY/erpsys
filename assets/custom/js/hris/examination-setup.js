@@ -339,7 +339,7 @@ function getItemRow(exam = {}) {
 		
 				<div class="input-group">
                         <input type="text" 
-                        class="form-control input-percentage text-left percentage"  
+                        class="form-control validate input-percentage text-right percentage"  
 						data-allowcharacters="[0-9][.]"
                         minlength="1" 
                         maxlength="5" 
@@ -350,7 +350,7 @@ function getItemRow(exam = {}) {
 						<div class="input-group-prepend">
                             <span class="input-group-text">%</span>
                         </div>
-						<div class="invalid-feedback d-block invalid-percentage" id="invalid_percentage"></div>
+						<div class="invalid-feedback d-block invalid-percentage text-left" id="invalid_percentage"></div>
                     </div>
 			</td>
 			

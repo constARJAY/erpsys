@@ -8,7 +8,7 @@
 						<li class="breadcrumb-item"><i class="zmdi zmdi-folder"></i> &nbsp;Masterfiles</li>
 						<li class="breadcrumb-item active"  id="inv_mainItem_breadcrumbs">Training and Development Setup</li>
 					</ul>
-					<h1 class="mt-3" id="inv_headerID">Training and Development Setup</h1>
+					<h1 class="mt-3" id="inv_headerID">List of Training and Development</h1>
 					<span>This module is used to manage training and development setup details.</span>
 				</div>
 				<?php if (isCreateAllowed(31)) { ?>

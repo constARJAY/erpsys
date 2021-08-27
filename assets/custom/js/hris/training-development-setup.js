@@ -237,7 +237,7 @@ $(document).ready(function () {
 								name="employeeID"
 								id="employeeID"
 								required>
-								<option selected disabled>Select Project Category</option>
+								<option selected disabled>Select Speaker Name</option>
 								${employeeList(employeeID)}
 							</select>
                             <div class="invalid-feedback d-block" id="invalid-employeeID"></div>

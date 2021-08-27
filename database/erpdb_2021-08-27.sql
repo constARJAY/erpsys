@@ -2390,7 +2390,8 @@ DROP TABLE IF EXISTS `ims_bid_recap_tbl`;
 CREATE TABLE `ims_bid_recap_tbl` (
   `bidRecapID` bigint(20) NOT NULL,
   `reviseBidRecapID` bigint(20) DEFAULT NULL,
-  `inventoryValidationtID` bigint(20) DEFAULT NULL,
+  `purchaseRequestID` bigint(20) DEFAULT NULL,
+  `inventoryValidationID` bigint(20) DEFAULT NULL,
   `employeeID` bigint(20) NOT NULL,
   `timelineBuilderID` bigint(20) DEFAULT NULL,
   `approversID` text DEFAULT NULL,
@@ -2404,6 +2405,7 @@ CREATE TABLE `ims_bid_recap_tbl` (
   `bidRecapStatus` int(11) NOT NULL,
   `bidRecapReason` text DEFAULT NULL,
   `bidRecapRemarks` text DEFAULT NULL,
+  `bidRecapGrandTotal` decimal(20,2) DEFAULT NULL,
   `submittedAt` timestamp NULL DEFAULT current_timestamp(),
   `createdBy` bigint(20) NOT NULL,
   `updatedBy` bigint(20) NOT NULL,
@@ -4727,4 +4729,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2021-08-26  7:48:20
+-- Dump completed on 2021-08-27  7:58:47

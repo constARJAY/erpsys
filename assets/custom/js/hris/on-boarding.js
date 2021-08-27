@@ -152,7 +152,7 @@ $(document).ready(function () {
                 </div>
             </div>
             <div role="tabpanel" class="tab-pane active" id="myFormsTab" aria-expanded="false">
-                <div class="table-responsive" id="tableMyFormsParent">
+                <div class="" id="tableMyFormsParent">
                 </div>
             </div>
         </div>`;
@@ -179,6 +179,8 @@ $(document).ready(function () {
 
 	}
 	// ----- HEADER CONTENT -----
+
+
 	// ----- TABLE CONTENT -----
 	$(document).on("click", ".nav-link", function () {
 		const tab = $(this).attr("href");
@@ -348,19 +350,11 @@ $(document).ready(function () {
 
 	function myChecklist() {
 		$("#tableMyFormsParent").html(preloader);
+        uniqueData = [];
 		const checklistdata = getTableData("hris_checklist_tbl",
 			"", "", "");
 		let html = '';
-		// let html = `
-		// <table class="table table-bordered table-striped table-hover" id="tableMyForms">
-		//     <thead>
-		//         <tr>
-		//             <th>Checklist Number</th>
-		//             <th>Checklist Title</th>
-		// 			<th>Checklist Description</th>
-		//         </tr>
-		//     </thead>
-		//     <tbody>`;
+		if (checklistdata.length > 0) {
 		checklistdata.map((checklist, index) => {
 			console.log(checklist);
 			let {
@@ -369,9 +363,14 @@ $(document).ready(function () {
 				checklistDescription,
 			} = checklist;
 
+            let unique = {
+                id:             checklist.checklistID, // Required
+                checklistTitle: checklist.checklistTitle,
+            }
+            uniqueData.push(unique);
+
 			html += `
- 
-                    <div class="card text-white mb-3 btnEditChecklist pointer"id="${checklistID}" style="max-width: 43rem; background-color: #5D6161;">
+                    <div class="card text-white mb-3 btnEditChecklist pointer"id="${checklistID}" style="max-width: 36.5rem; background-color: #5D6161;">
                         <div class="card-body pointer"style="min-height: 20rem;max-height: 20rem;">
                             <h3 class="card-title">#${checklistID}: ${checklistTitle}</h3>
                             <div class="overflow-auto mb-3"style="min-height: 15rem;max-height: 15rem;text-align:justify">
@@ -380,14 +379,19 @@ $(document).ready(function () {
                         </div>
                     </div>
                 `;
-
-			// html += `<tr class="btnEdit1" id="${encryptString(checklistID)}">
-			//             <td>${checklistID}</td>
-			//             <td>${checklistTitle}</td>
-			//             <td>${checklistDescription}</td>
-			//         </tr>`;
-
-		})
+            })
+        }else{
+            html += `
+            <div class="text-center">
+				<div class="row">
+				<div class="col-4"></div>
+				<div class="col-4"><img class="img-fluid" src="${base_url}assets/modal/please-select.gif" alt=""> <h6 class="text-primary text-center font-weight-bold">No data available</h6>
+                <p class="text-center">Click "Add Checklist" to add a new checklist.</p>
+				</div>
+				<div class="col-4"></div>
+			</div>
+            </div>`;
+        }       
 		html += `
             </tbody>
         </table>`;
@@ -489,7 +493,7 @@ $(document).ready(function () {
                     <a class="nav-link border" href="#characterReference-tab" data-toggle="tab" style="border-bottom: none;min-width: 220px;">Character Reference </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link border" href="#onboarding-tab" data-toggle="tab" style="border-bottom: none;min-width: 220px;">Onboarding </a>
+                    <a class="nav-link border" href="#onboarding-tab" data-toggle="tab" style="border-bottom: none;min-width: 220px;">Onboarding Module</a>
                 </li>
             </ul>
             <div class="tab-content pt-4" style="min-height: 28vh;">
@@ -1012,6 +1016,7 @@ $(document).ready(function () {
         </div>`;
 			return html;
 		}
+        
 		// End of first tab
 
 		// 2nd Tab
@@ -2085,7 +2090,7 @@ $(document).ready(function () {
 
 
 	function modalContent(data = false) {
-		console.log(data);
+		//console.log(data);
 		let checklistID = data ? (data[0].checklistID ? data[0].checklistID : "") : "",
 			checklistTitle = data ? (data[0].checklistTitle ? data[0].checklistTitle : "") : "",
 			checklistDescription = data ? (data[0] ? data[0].checklistDescription : "") : "";
@@ -2113,11 +2118,11 @@ $(document).ready(function () {
                     class="form-control validate" 
                     name="checklistTitle" 
                     id="checklistTitle" 
-                    data-allowcharacters="[A-Z][a-z][0-9][.][,][?][!][/][;][:][']["][-][_][(][)][%][&][*][ ]" 
+                    data-allowcharacters="[a-z][A-Z][0-9][ ][.][,][?][!][/][;][:][']["][-][_][(][)][%][&][*]" 
                     minlength="2" 
                     maxlength="100" 
                     required 
-                    unique=""  
+                    unique="${checklistID}"  
                     value="${checklistTitle}"
                     autocomplete="off">
                 <div class="invalid-feedback d-block" id="invalid-input_checklistTitle"></div>
@@ -2130,7 +2135,7 @@ $(document).ready(function () {
                     <label>Checklist Description <code>*</code></label>
                     <textarea class="form-control validate"
 					minlength="1"
-                    data-allowcharacters="[A-Z][a-z][0-9][.][,][?][!][/][;][:][']["][-][_][(][)][%][&][*][ ]"
+                    data-allowcharacters="[a-z][A-Z][0-9][ ][.][,][?][!][/][;][:][']["][-][_][(][)][%][&][*]"
 					id="checklistDescription"
 					name="checklistDescription"
 					required
@@ -2211,7 +2216,7 @@ $(document).ready(function () {
 
 			let data = getFormData("modal_checklist_module", true);
 			data["tableData[updatedBy]"] = sessionID;
-			data["tableName"] = "hris_checklist_tbl";
+			data["tableName"] = "hris_checklist_tbl";   
 			data["whereFilter"] = "checklistID =" + id;
 			data["feedback"] = $("[name=checklistTitle]").val();
 
