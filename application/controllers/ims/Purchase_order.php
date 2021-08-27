@@ -41,9 +41,8 @@ class Purchase_order extends CI_Controller {
 
     public function insertPurchaseOrder()
     {
-        $sessionID = 
-            $CI->session->has_userdata("otherSessionID") ? 
-            $CI->session->userdata("otherSessionID") : 1;
+        $sessionID = $CI->session->has_userdata("otherSessionID") ? 
+                        $CI->session->userdata("otherSessionID") : 1;
 
         $purchaseOrderID   = $this->input->get("purchaseOrderID");
         $bidRecapID        = $this->input->get("bidRecapID");
@@ -777,8 +776,7 @@ class Purchase_order extends CI_Controller {
         $writer->save('php://output');
     }
 
-    public function downloadExcel()
-    {
+    public function downloadExcel(){
         $purchaseOrderID = $this->input->get("id");
         if ($purchaseOrderID) {
             $purchaseOrderData = $this->purchaseorder->getPurchaseOrderData($purchaseOrderID);

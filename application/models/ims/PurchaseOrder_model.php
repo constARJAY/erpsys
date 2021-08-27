@@ -130,8 +130,7 @@ class PurchaseOrder_model extends CI_Model {
         return null;
     }
 
-    public function getPurchaseOrderData($id = null)
-    {
+    public function getPurchaseOrderData($id = null){
         $data = ["items" => [], "employees" => []];
         if ($id) {
             $purchaseOrderData = $this->getPurchaseOrder($id);

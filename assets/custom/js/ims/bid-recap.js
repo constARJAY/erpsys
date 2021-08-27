@@ -1,7 +1,9 @@
 $(document).ready(function() {
 	const allowedUpdate = isUpdateAllowed(40);
+
+
     // ----- MODULE APPROVER -----
-	const moduleApprover = getModuleApprover(40);
+	const moduleApprover = getModuleApprover("bid recap");
 	// ----- END MODULE APPROVER -----
 
 
@@ -23,6 +25,7 @@ $(document).ready(function() {
 		return "-";
 	}
 	// ---- END GET EMPLOYEE DATA -----
+
 
 	// ----- IS DOCUMENT REVISED -----
 	function isDocumentRevised(id = null) {
@@ -84,9 +87,7 @@ $(document).ready(function() {
 				updateURL();
 			}
 		}
-
 		if (view_id) {
-			// let id = decryptString(view_id);
 			let id = view_id;
 				id && isFinite(id) && loadData(id, isRevise, isFromCancelledDocument);
 		} else {
@@ -102,7 +103,8 @@ $(document).ready(function() {
 					let id = decryptString(arr[1]);
 						id && isFinite(id) && loadData(id, true);
 				} else {
-					pageContent(true);
+					const isAllowed = isCreateAllowed(40);
+					pageContent(isAllowed);
 				}
 			}
 		}
@@ -125,74 +127,162 @@ $(document).ready(function() {
 	// ----- END VIEW DOCUMENT -----
 
 
-    // GLOBAL VARIABLE - REUSABLE 
-	const priceListValidation = [];
-
+    // ----- GLOBAL VARIABLE - REUSABLE ----- 
 	const dateToday = () => {
 		return moment(new Date).format("YYYY-MM-DD HH:mm:ss");
 	};
+
+	const getNonFormattedAmount = (amount = "₱0.00") => {
+		return +amount.replaceAll(",", "").replaceAll("₱", "")?.trim();
+	}
+
 	const inventoryItemList = getTableData(
-		"ims_inventory_item_tbl LEFT JOIN ims_inventory_category_tbl USING(categoryID)", "ims_inventory_item_tbl.itemID AS itemID, itemCode, itemName, itemDescription ,categoryName, unitOfMeasurementID",
+		`ims_inventory_item_tbl 
+			LEFT JOIN ims_inventory_category_tbl USING(categoryID)
+			LEFT JOIN ims_inventory_classification_tbl ON (ims_inventory_item_tbl.classificationID = ims_inventory_classification_tbl.classificationID)`, 
+		`itemID, itemCode, itemName, itemDescription, brandName, categoryName, classificationName, unitOfMeasurementID, ims_inventory_item_tbl.createdAt`,
 		"itemStatus = 1");
-	const designationList = getTableData("hris_designation_tbl JOIN hris_employee_list_tbl USING(designationID)","designationID, designationName, MAX(employeeHourlyRate) AS designationRate", "designationStatus=1","","designationName");
-	
-	const itemPriceListData = getTableData("ims_inventory_price_list_tbl");
-	// END GLOBAL VARIABLE - REUSABLE 
+
+	const inventoryPriceList = getTableData(
+		`ims_inventory_price_list_tbl`,
+		``,
+		`preferred = 1`
+	);
+
+	const inventoryValidationList = getTableData(
+		`ims_inventory_validation_tbl`,
+		"",
+		`inventoryValidationStatus = 2`
+	);
+	// ----- END GLOBAL VARIABLE - REUSABLE ----- 
 
 
     // ----- DATATABLES -----
 	function initDataTables() {
-		if ($.fn.DataTable.isDataTable("#tableForApprroval")) {
-			$("#tableForApprroval").DataTable().destroy();
+		const activateDatatable = (elementID = null, options = {}) => {
+			if ($.fn.DataTable.isDataTable(`#${elementID}`)) {
+				$(`#${elementID}`).DataTable().destroy();
+			}
+
+			var table = $(`#${elementID}`)
+				.css({ "min-width": "100%" })
+				.removeAttr("width")
+				.DataTable(options);
 		}
+		
+		
 
-		if ($.fn.DataTable.isDataTable("#tableMyForms")) {
-			$("#tableMyForms").DataTable().destroy();
+		const bodyOptions = {
+			proccessing:    false,
+			serverSide:     false,
+			scrollX:        true,
+			sorting:        false,
+			searching:      false,
+			paging:         false,
+			ordering:       false,
+			info:           false,
+			scrollCollapse: true,
+			columnDefs: [
+				{ targets: 0,  width: 50  },
+				{ targets: 1,  width: 150 },
+				{ targets: 2,  width: 180 },
+				{ targets: 3,  width: 150 },
+				{ targets: 4,  width: 50  },
+				{ targets: 5,  width: 100 },
+				{ targets: 6,  width: 150 },
+				{ targets: 7,  width: 150 },
+				{ targets: 8,  width: 180 },
+				{ targets: 9,  width: 200 },
+			],
+		};
+
+		const bodyOptionsWithoutCheckbox = {
+			proccessing:    false,
+			serverSide:     false,
+			scrollX:        true,
+			sorting:        false,
+			searching:      false,
+			paging:         false,
+			ordering:       false,
+			info:           false,
+			scrollCollapse: true,
+			columnDefs: [
+				{ targets: 0,  width: 150 },
+				{ targets: 1,  width: 180 },
+				{ targets: 2,  width: 150 },
+				{ targets: 3,  width: 50  },
+				{ targets: 4,  width: 100 },
+				{ targets: 5,  width: 150 },
+				{ targets: 6,  width: 150 },
+				{ targets: 7,  width: 180 },
+				{ targets: 8,  width: 200 },
+			],
+		};
+
+		const bodyOptionsWithoutClassificationAndCheckbox = {
+			proccessing:    false,
+			serverSide:     false,
+			scrollX:        true,
+			sorting:        false,
+			searching:      false,
+			paging:         false,
+			ordering:       false,
+			info:           false,
+			scrollCollapse: true,
+			columnDefs: [
+				{ targets: 0,  width: 150 },
+				{ targets: 1,  width: 180 },
+				{ targets: 2,  width: 50  },
+				{ targets: 3,  width: 100 },
+				{ targets: 4,  width: 150 },
+				{ targets: 5,  width: 150 },
+				{ targets: 6,  width: 180 },
+				{ targets: 7,  width: 200 },
+			],
+		};
+		
+		if ($.fn.DataTable.isDataTable(".project-phase-tables")) {
+			$(".project-phase-tables").DataTable().destroy();
 		}
+		
+		var table = $(".project-phase-tables")
+		.css({ "min-width": "100%" })
+		.removeAttr("width")
+		.DataTable(bodyOptionsWithoutCheckbox);
 
-		var table = $("#tableForApprroval")
-			.css({ "min-width": "100%" })
-			.removeAttr("width")
-			.DataTable({
-				proccessing: false,
-				serverSide: false,
-				scrollX: true,
-				sorting: [],
-				scrollCollapse: true,
-				columnDefs: [
-					{ targets: 0,  width: 100 },
-					{ targets: 1,  width: 150 },
-					{ targets: 2,  width: 100 },
-					{ targets: 3,  width: 350 },
-					{ targets: 4,  width: 260 },
-					{ targets: 5,  width: 150 },
-					{ targets: 6,  width: 250 },
-					{ targets: 7,  width: 80  },
-					{ targets: 8,  width: 250 },
-				],
-			});
+		const headerOptions = {
+			proccessing:    false,
+			serverSide:     false,
+			scrollX:        true,
+			sorting:        [],
+			scrollCollapse: true,
+			columnDefs: [
+				{ targets: 0,  width: 100 },
+				{ targets: 1,  width: 150 },
+				{ targets: 2,  width: 100 },
+				{ targets: 3,  width: 350 },
+				{ targets: 4,  width: 260 },
+				{ targets: 5,  width: 150 },
+				{ targets: 6,  width: 250 },
+				{ targets: 7,  width: 80  },
+				{ targets: 8,  width: 250 },
+			],
+		};
 
-		var table = $("#tableMyForms")
-			.css({ "min-width": "100%" })
-			.removeAttr("width")
-			.DataTable({
-				proccessing: false,
-				serverSide: false,
-				scrollX: true,
-				sorting: [],
-				scrollCollapse: true,
-				columnDefs: [
-					{ targets: 0,  width: 100 },
-					{ targets: 1,  width: 150 },
-					{ targets: 2,  width: 100 },
-					{ targets: 3,  width: 350 },
-					{ targets: 4,  width: 260 },
-					{ targets: 5,  width: 150 },
-					{ targets: 6,  width: 250 },
-					{ targets: 7,  width: 80  },
-					{ targets: 8,  width: 250 },
-				],
-			});
+		["tableForApproval", "tableMyForms"].map(id => activateDatatable(id, headerOptions));
+		$(`.requestItemTable`).each(function() {
+			const elementID = $(this).attr("id");
+			const readOnly  = $(this).attr("isReadOnly") == "true";
+			const materialEquipment = $(this).attr("isMaterialEquipment") == "true";
+			let options = bodyOptions;
+			if (materialEquipment) {
+				options = bodyOptionsWithoutClassificationAndCheckbox;
+			} else {
+				options =  bodyOptionsWithoutCheckbox;
+			}
+
+			activateDatatable(elementID, options);
+		})
 	}
 	// ----- END DATATABLES -----
    
@@ -204,15 +294,15 @@ $(document).ready(function() {
 				let count = getCountForApproval("ims_bid_recap_tbl", "bidRecapStatus");
 				let displayCount = count ? `<span class="ml-1 badge badge-danger rounded-circle">${count}</span>` : "";
 				let html = `
-				<div class="bh_divider appendHeader"></div>
-				<div class="row clearfix appendHeader">
-					<div class="col-12">
-						<ul class="nav nav-tabs">
-							<li class="nav-item"><a class="nav-link" data-toggle="tab" href="#forApprovalTab" redirect="forApprovalTab">For Approval ${displayCount}</a></li>
-							<li class="nav-item"><a class="nav-link active" data-toggle="tab" href="#myFormsTab" redirect="myFormsTab">My Forms</a></li>
-						</ul>
-					</div>
-				</div>`;
+                <div class="bh_divider appendHeader"></div>
+                <div class="row clearfix appendHeader">
+                    <div class="col-12">
+                        <ul class="nav nav-tabs">
+                            <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#forApprovalTab" redirect="forApprovalTab">For Approval ${displayCount}</a></li>
+                            <li class="nav-item"><a class="nav-link active" data-toggle="tab" href="#myFormsTab" redirect="myFormsTab">My Forms</a></li>
+                        </ul>
+                    </div>
+                </div>`;
 				$("#headerContainer").append(html);
 			}
 		} else {
@@ -226,13 +316,23 @@ $(document).ready(function() {
 	function headerButton(isAdd = true, text = "Add", isRevise = false, isFromCancelledDocument = false) {
 		let html;
 		if (isAdd) {
-			if(isCreateAllowed(40)){
+			if (isCreateAllowed(40)) {
 				html = `
-            		<button type="button" class="btn btn-default btn-add" id="btnAdd"><i class="icon-plus"></i> &nbsp;${text}</button>`;
+				<button type="button" 
+					class="btn btn-default btn-add" 
+					id="btnAdd">
+					<i class="icon-plus"></i> ${text}
+				</button>`;
 			}
 		} else {
 			html = `
-            <button type="button" class="btn btn-default btn-light" id="btnBack" revise="${isRevise}" cancel="${isFromCancelledDocument}"><i class="fas fa-arrow-left"></i> &nbsp;Back</button>`;
+            <button type="button" 
+				class="btn btn-default btn-light" 
+				id="btnBack" 
+				revise="${isRevise}" 
+				cancel="${isFromCancelledDocument}">
+				<i class="fas fa-arrow-left"></i> Back
+			</button>`;
 		}
 		$("#headerButton").html(html);
 	}
@@ -243,25 +343,27 @@ $(document).ready(function() {
 	function forApprovalContent() {
 		$("#tableForApprovalParent").html(preloader);
 		let bidRecapData = getTableData(
-			"ims_bid_recap_tbl AS ibrt LEFT JOIN hris_employee_list_tbl AS helt USING(employeeID) LEFT JOIN pms_project_list_tbl AS pplt ON pplt.projectListID = ibrt.projectID",
-			"ibrt.*, CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname, ibrt.createdAt AS dateCreated, projectListCode, projectListName",
+			`ims_bid_recap_tbl AS ibrt 
+				LEFT JOIN hris_employee_list_tbl AS helt USING(employeeID)
+				LEFT JOIN ims_inventory_validation_tbl AS ivrt USING(inventoryValidationID)`,
+			"ibrt.*, CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname, ibrt.createdAt AS dateCreated, ivrt.createdAt AS ivrCreatedAt",
 			`ibrt.employeeID != ${sessionID} AND bidRecapStatus != 0 AND bidRecapStatus != 4`,
 			`FIELD(bidRecapStatus, 0, 1, 3, 2, 4, 5), COALESCE(ibrt.submittedAt, ibrt.createdAt)`
 		);
 
 		let html = `
-        <table class="table table-bordered table-striped table-hover" id="tableForApprroval">
+        <table class="table table-bordered table-striped table-hover" id="tableForApproval">
             <thead>
                 <tr style="white-space: nowrap">
-                     	<th>Document No.</th>
-						<th>Prepared By</th>
-						<th>Reference No.</th>
-						<th>Project Code</th>
-						<th>Project Name</th>
-						<th>Current Approver</th>
-						<th>Date</th>
-						<th>Status</th>
-						<th>Remarks</th>
+                    <th>Document No.</th>
+                    <th>Prepared By</th>
+					<th>Reference No.</th>
+                    <th>Project Code</th>
+                    <th>Project Name</th>
+                    <th>Current Approver</th>
+                    <th>Date</th>
+                    <th>Status</th>
+                    <th>Remarks</th>
                 </tr>
             </thead>
             <tbody>`;
@@ -270,23 +372,20 @@ $(document).ready(function() {
 			let {
 				fullname,
 				bidRecapID,
-				projectListCode,
-				projectListName,
-				bidRecapReason,
-				documentType,
-				documentID,
-				purchaseRequestID,
+				timelineBuilderID,
+				projectCode,
+				projectName,
 				inventoryValidationID,
 				approversID,
 				approversDate,
 				bidRecapStatus,
 				bidRecapRemarks,
+				bidRecapReason,
 				submittedAt,
 				createdAt,
+				ivrCreatedAt
 			} = item;
 
-			let referenceNumber = getFormCode("IVR",moment(createdAt),inventoryValidationID);
-			
 			let remarks       = bidRecapRemarks ? bidRecapRemarks : "-";
 			let dateCreated   = moment(createdAt).format("MMMM DD, YYYY hh:mm:ss A");
 			let dateSubmitted = submittedAt ? moment(submittedAt).format("MMMM DD, YYYY hh:mm:ss A") : "-";
@@ -296,27 +395,19 @@ $(document).ready(function() {
 			}
 
 			let btnClass = bidRecapStatus != 0 ? "btnView" : "btnEdit";
-
-			let button = bidRecapStatus != 0 ? `
-			<button class="btn btn-view w-100 btnView" id="${encryptString(bidRecapID )}"><i class="fas fa-eye"></i> View</button>` : `
-			<button 
-				class="btn btn-edit w-100 btnEdit" 
-				id="${encryptString(bidRecapID )}" 
-				code="${getFormCode("BRF", createdAt, bidRecapID )}"><i class="fas fa-edit"></i> Edit</button>`;
-
 			if (isImCurrentApprover(approversID, approversDate, bidRecapStatus) || isAlreadyApproved(approversID, approversDate)) {
 				html += `
-				<tr class="${btnClass}" id="${encryptString(bidRecapID )}">
+				<tr class="${btnClass}" id="${encryptString(bidRecapID)}">
 					<td>${getFormCode("BRF", createdAt, bidRecapID )}</td>
 					<td>${fullname}</td>
-					<td>${referenceNumber}</td>
+					<td>${inventoryValidationID && inventoryValidationID != 0 ? getFormCode("IVR", ivrCreatedAt, inventoryValidationID) : '-'}</td>
 					<td>
 						<div>
-							${projectListCode || '-'}
+							${projectCode || '-'}
 						</div>
-						<small style="color:#848482;">${bidRecapReason || "-"}</small>
+						<small style="color:#848482;">${bidRecapReason || '-'}</small>
 					</td>
-					<td>${projectListName || '-'}</td>
+					<td>${projectName || '-'}</td>
 					<td>
 						${employeeFullname(getCurrentApprover(approversID, approversDate, bidRecapStatus, true))}
 					</td>
@@ -325,7 +416,6 @@ $(document).ready(function() {
 						${getStatusStyle(bidRecapStatus)}
 					</td>
 					<td>${remarks}</td>
-					
 				</tr>`;
 			}
 		});
@@ -347,8 +437,10 @@ $(document).ready(function() {
 	function myFormsContent() {
 		$("#tableMyFormsParent").html(preloader);
 		let bidRecapData = getTableData(
-			"ims_bid_recap_tbl AS ibrt LEFT JOIN hris_employee_list_tbl AS helt USING(employeeID) LEFT JOIN pms_project_list_tbl AS pplt ON pplt.projectListID = ibrt.projectID",
-			"ibrt.*, CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname, ibrt.createdAt AS dateCreated, projectListCode, projectListName",
+			`ims_bid_recap_tbl AS ibrt 
+				LEFT JOIN hris_employee_list_tbl AS helt USING(employeeID) 
+				LEFT JOIN ims_inventory_validation_tbl AS ivrt USING(inventoryValidationID)`,
+			"ibrt.*, CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname, ibrt.createdAt AS dateCreated, ivrt.createdAt AS ivrCreatedAt",
 			`ibrt.employeeID = ${sessionID}`,
 			`FIELD(bidRecapStatus, 0, 1, 3, 2, 4, 5), COALESCE(ibrt.submittedAt, ibrt.createdAt)`
 		);
@@ -374,12 +466,10 @@ $(document).ready(function() {
 			let {
 				fullname,
 				bidRecapID,
-                projectListCode,
-                projectListName,
-				documentType,
-				documentID,
-				purchaseRequestID,
-				inventoryValidationID,
+                timelineBuilderID,
+                projectCode,
+                projectName,
+                inventoryValidationID,
 				approversID,
 				approversDate,
 				bidRecapStatus,
@@ -387,8 +477,9 @@ $(document).ready(function() {
 				bidRecapReason,
 				submittedAt,
 				createdAt,
+				ivrCreatedAt
 			} = item;
-			let referenceNumber = getFormCode("IVR",moment(createdAt),inventoryValidationID);
+
 			let remarks       = bidRecapRemarks ? bidRecapRemarks : "-";
 			let dateCreated   = moment(createdAt).format("MMMM DD, YYYY hh:mm:ss A");
 			let dateSubmitted = submittedAt ? moment(submittedAt).format("MMMM DD, YYYY hh:mm:ss A") : "-";
@@ -398,26 +489,18 @@ $(document).ready(function() {
 			}
 
 			let btnClass = bidRecapStatus != 0 ? "btnView" : "btnEdit";
-
-			let button = bidRecapStatus != 0 ? `
-            <button class="btn btn-view w-100 btnView" id="${encryptString(bidRecapID )}"><i class="fas fa-eye"></i> View</button>` : `
-            <button 
-                class="btn btn-edit w-100 btnEdit" 
-                id="${encryptString(bidRecapID )}" 
-                code="${getFormCode("BRF", createdAt, bidRecapID )}"><i class="fas fa-edit"></i> Edit</button>`;
-
 			html += `
-            <tr  class="${btnClass}" id="${encryptString(bidRecapID )}">
+            <tr class="${btnClass}" id="${encryptString(bidRecapID )}">
                 <td>${getFormCode("BRF", createdAt, bidRecapID )}</td>
-				<td>${fullname}</td>
-				<td>${referenceNumber}</td>
+                <td>${fullname}</td>
+				<td>${inventoryValidationID && inventoryValidationID != 0 ? getFormCode("IVR", ivrCreatedAt, inventoryValidationID) : '-'}</td>
 				<td>
 					<div>
-						 ${projectListCode || '-'}
+						${projectCode || '-'}
 					</div>
-					<small style="color:#848482;">${bidRecapReason ||  "-"}</small>
+					<small style="color:#848482;">${bidRecapReason || '-'}</small>
 				</td>
-				<td>${projectListName || '-'}</td>
+				<td>${projectName || '-'}</td>
                 <td>
                     ${employeeFullname(getCurrentApprover(approversID, approversDate, bidRecapStatus, true))}
                 </td>
@@ -449,7 +532,6 @@ $(document).ready(function() {
 			let {
 				bidRecapID     = "",
 				bidRecapStatus = "",
-				inventoryValidationID ="",
 				employeeID            = "",
 				approversID           = "",
 				approversDate         = "",
@@ -461,29 +543,30 @@ $(document).ready(function() {
 				if (bidRecapStatus == 0 || isRevise) {
 					// DRAFT
 					button = `
-					<button 
-						class="btn btn-submit px-5 p-2" 
+					<button type="button" 
+						class="btn btn-submit px-5 p-2"  
 						id="btnSubmit" 
 						bidRecapID="${encryptString(bidRecapID)}"
 						code="${getFormCode("BRF", createdAt, bidRecapID)}"
-						revise=${isRevise} 
+						revise="${isRevise}"
 						cancel="${isFromCancelledDocument}"><i class="fas fa-paper-plane"></i>
 						Submit
 					</button>`;
 
 					if (isRevise) {
 						button += `
-						<button 
+						<button type="button" 
 							class="btn btn-cancel btnCancel px-5 p-2" 
 							id="btnCancel"
 							bidRecapID="${encryptString(bidRecapID)}"
 							code="${getFormCode("BRF", createdAt, bidRecapID)}"
-							revise="${isRevise}" cancel="${isFromCancelledDocument}><i class="fas fa-ban"></i> 
+							revise="${isRevise}"
+							cancel="${isFromCancelledDocument}"><i class="fas fa-ban"></i> 
 							Cancel
 						</button>`;
 					} else {
 						button += `
-						<button 
+						<button type="button" 
 							class="btn btn-cancel px-5 p-2"
 							id="btnCancelForm" 
 							bidRecapID="${encryptString(bidRecapID)}"
@@ -498,8 +581,8 @@ $(document).ready(function() {
 					// FOR APPROVAL
 					if (!isOngoing) {
 						button = `
-						<button 
-							class="btn btn-cancel px-5 p-2"
+						<button type="button" 
+							class="btn btn-cancel  px-5 p-2"
 							id="btnCancelForm" 
 							bidRecapID="${encryptString(bidRecapID)}"
 							code="${getFormCode("BRF", createdAt, bidRecapID)}"
@@ -507,7 +590,7 @@ $(document).ready(function() {
 							Cancel
 						</button>`;
 					}
-				} else if(bidRecapStatus == 2){
+				} else if (bidRecapStatus == 2) {
 					// DROP
 					button = `
 					<button type="button" 
@@ -520,47 +603,57 @@ $(document).ready(function() {
 					</button>`;
 				} else if (bidRecapStatus == 3) {
 					// DENIED - FOR REVISE
-						if(!isDocumentRevised(bidRecapID)){
-							button = `
-							<button
-								class="btn btn-cancel px-5 p-2"
-								id="btnRevise" 
-								bidRecapID="${encryptString(bidRecapID)}"
-								code="${getFormCode("BRF", createdAt, bidRecapID)}"
-								status="${bidRecapStatus}" ><i class="fas fa-clone"></i>
-								Revise
-							</button>`;
-						}
+					if (!isDocumentRevised(bidRecapID)) {
+						button = `
+						<button
+							class="btn btn-cancel px-5 p-2"
+							id="btnRevise" 
+							bidRecapID="${encryptString(bidRecapID)}"
+							code="${getFormCode("BRF", createdAt, bidRecapID)}"
+							status="${bidRecapStatus}"><i class="fas fa-clone"></i>
+							Revise
+						</button>`;
+					}
 				} else if (bidRecapStatus == 4) {
 					// CANCELLED - FOR REVISE
-					if (!isDocumentRevised(bidRecapID)) {
-						if(!isRevised(inventoryValidationID)){
-							button = `
-								<button
-									class="btn btn-cancel px-5 p-2"
-									id="btnRevise" 
-									bidRecapID="${encryptString(bidRecapID)}"
-									code="${getFormCode("BRF", createdAt, bidRecapID)}"
-									status="${bidRecapStatus}"
-									cancel="true"><i class="fas fa-clone"></i>
-									Revise
-								</button>`;
-						}
+					const data = getTableData(
+						`ims_bid_recap_tbl`,
+						`inventoryValidationID`,
+						`bidRecapID = ${bidRecapID}`,
+					);
+					const { inventoryValidationID } = data && data[0];
+					const isAllowedForRevise = getTableDataLength(
+						`ims_bid_recap_tbl`,
+						`bidRecapID`,
+						`bidRecapStatus <> 3 AND bidRecapStatus <> 4 AND inventoryValidationID = ${inventoryValidationID}`
+					);
+
+					if (!isDocumentRevised(bidRecapID) && isAllowedForRevise == 0) {
+						button = `
+						<button
+							class="btn btn-cancel px-5 p-2"
+							id="btnRevise" 
+							bidRecapID="${encryptString(bidRecapID)}"
+							code="${getFormCode("BRF", createdAt, bidRecapID)}"
+							status="${bidRecapStatus}"
+							cancel="true"><i class="fas fa-clone"></i>
+							Revise
+						</button>`;
 					}
 				}
 			} else {
 				if (bidRecapStatus == 1) {
 					if (isImCurrentApprover(approversID, approversDate)) {
 						button = `
-						<button 
-							class="btn btn-submit px-5 p-2" 
+						<button type="button" 
+							class="btn btn-submit px-5 p-2"  
 							id="btnApprove" 
 							bidRecapID="${encryptString(bidRecapID)}"
 							code="${getFormCode("BRF", createdAt, bidRecapID)}"><i class="fas fa-paper-plane"></i>
 							Approve
 						</button>
-						<button 
-							class="btn btn-cancel px-5 p-2"
+						<button type="button" 
+							class="btn btn-cancel  px-5 p-2"
 							id="btnReject" 
 							bidRecapID="${encryptString(bidRecapID)}"
 							code="${getFormCode("BRF", createdAt, bidRecapID)}"><i class="fas fa-ban"></i> 
@@ -571,11 +664,11 @@ $(document).ready(function() {
 			}
 		} else {
 			button = `
-			<button 
-				class="btn btn-submit px-5 p-2" 
+			<button type="button" 
+				class="btn btn-submit px-5 p-2"  
 				id="btnSubmit"><i class="fas fa-paper-plane"></i> Submit
 			</button>
-			<button 
+			<button type="button" 
 				class="btn btn-cancel btnCancel px-5 p-2" 
 				id="btnCancel"><i class="fas fa-ban"></i> 
 				Cancel
@@ -586,583 +679,674 @@ $(document).ready(function() {
 	// ----- END FORM BUTTONS -----
 
 
-    // ----- GET PROJECT LIST -----
-    function getReferenceList(id = null, display = false) {
-		let existIVR = [], html = ``;
-		let data = [];
-		let invValidationData = getTableData("ims_inventory_validation_tbl","","inventoryValidationStatus = '2'");
-		let bidRecapData = getTableData("ims_bid_recap_tbl","","bidRecapStatus != '4'");
-		bidRecapData.map(items=>{
-			id ? "" : existIVR.push(items.inventoryValidationID);
-		});
-		html += invValidationData.filter(items => !existIVR.includes(items.inventoryValidationID)).map(items=>{
-			var projectList   = getTableData(
-				"pms_project_list_tbl AS pplt LEFT JOIN pms_client_tbl AS pct ON pct.clientID = pplt.projectListClientID", 
-				"projectListID, projectListCode, projectListName, clientCode, clientName, clientRegion, clientProvince, clientCity, clientBarangay, clientUnitNumber, clientHouseNumber, clientCountry, clientPostalCode",
-				"projectListStatus = 1 && projectListID ="+items.projectID);
-				if(projectList.length > 0){
-					data["projectid"]			= projectList[0].projectListID;
-					data["projectcode"]			= getFormCode("PRO",moment(projectList[0].createdAt),projectList[0].projectListID);
-					data["projectname"]			= projectList[0].projectListName;
-					data["clientcode"]			= projectList[0].clientCode;
-					data["clientname"]			= projectList[0].clientName;
-					data["address"] 			= `${projectList[0].clientUnitNumber && titleCase(projectList[0].clientUnitNumber)+", "}${projectList[0].clientHouseNumber && projectList[0].clientHouseNumber +", "}${projectList[0].clientBarangay && titleCase(projectList[0].clientBarangay)+", "}${projectList[0].clientCity && titleCase(projectList[0].clientCity)+", "}${projectList[0].clientProvince && titleCase(projectList[0].clientProvince)+", "}${projectList[0].clientCountry && titleCase(projectList[0].clientCountry)+", "}${projectList[0].clientPostalCode && titleCase(projectList[0].clientPostalCode)}`;
-				}
-				
-				let {
-					projectid				=	"0",
-					projectcode				=	"-",
-					projectname				=	"-",
-					clientcode				=	"-",
-					clientname				=	"-",
-					address					=	"-",
-				} = projectList.length > 0 && data;
-			return `<option value            = "${items.inventoryValidationID}"
-						purchaserequest 	 = "${items.purchaseRequestID}"
-						projectid 			 = "${projectid}"
-						projectcode          = "${projectcode}"
-						projectname          = "${projectname}"
-						clientcode           = "${clientcode}"
-						clientname           = "${clientname}"
-						address              = "${address}"
-						${items.inventoryValidationID == id?"selected":""}>
-						${getFormCode("IVR",moment(items.createdAt), items.inventoryValidationID)}
-				   	</option>`;
-		});
-        return html;
-        
-    }
-    // ----- END GET PROJECT LIST -----
-
-	// ----- UPDATE INVENTORYT NAME -----
-	function updateInventoryItemOptions() {
-		let projectItemIDArr = [], companyItemIDArr = []; // 0 IS THE DEFAULT VALUE
-		let projectElementID = [], companyElementID = [];
-		$("[name=itemID][project=true]").each(function(i, obj) {
-			projectItemIDArr.push($(this).val());
-			projectElementID.push(`#${this.id}[project=true]`);
-			$(this).val() && $(this).trigger("change");
-		}) 
-		$("[name=itemID][company=true]").each(function(i, obj) {
-			companyItemIDArr.push($(this).val());
-			companyElementID.push(`#${this.id}[company=true]`);
-			$(this).val() && $(this).trigger("change");
-		}) 
-
-		projectElementID.map((element, index) => {
-			let html = `<option selected disabled>Select Item Name</option>`;
-			html += `<option value="-">None</option>`;
-			html += inventoryItemList.filter(item => !projectItemIDArr.includes(item.itemID) || item.itemID == projectItemIDArr[index]).map(item => {
-				
+	// ----- GET INVENTORY VALIDATION LIST -----
+	function getInventoryValidationList(id = null, status = 0, display = true) {
+		const createdBidRecap = getTableData("ims_bid_recap_tbl", "inventoryValidationID", "bidRecapStatus <> 3 AND bidRecapStatus <> 4").map(bidRecap => bidRecap.inventoryValidationID);
+		let html = ``;
+		if (!status || status == 0) {
+			html += inventoryValidationList.filter(ivr => createdBidRecap.indexOf(ivr.inventoryValidationID) == -1 || ivr.inventoryValidationID == id).map(ivr => {
 				return `
 				<option 
-					value        = "${item.itemID}" 
-					itemCode     = "${item.itemCode}"
-					categoryName = "${item.categoryName}"
-					uom          = "${item.unitOfMeasurementID}"
-					${item.itemID == projectItemIDArr[index] && "selected"}>
-					${item.itemName}
+					value     			= "${ivr.inventoryValidationID}" 
+					timelineBuilderID 	= "${ivr.timelineBuilderID}"
+					purchaseRequestID 	= "${ivr.purchaseRequestID}"
+					projectCode     	= "${ivr.projectCode}"
+					projectName     	= "${ivr.projectName}"
+					projectCategory 	= "${ivr.projectCategory}"
+					clientName      	= "${ivr.clientName}"
+					clientAddress   	= "${ivr.clientAddress}"
+				${ivr.inventoryValidationID == id && "selected"}>
+				${getFormCode("IVR", ivr.createdAt, ivr.inventoryValidationID)}
 				</option>`;
 			})
-			$(element).html(html);
-		});
-
-		companyElementID.map((element, index) => {
-			let html = `<option selected disabled>Select Item Name</option>`;
-			html += `<option value="-">None</option>`;
-			html += inventoryItemList.filter(item => !companyItemIDArr.includes(item.itemID) || item.itemID == companyItemIDArr[index]).map(item => {
+		} else {
+			html += inventoryValidationList.map(ivr => {
 				return `
 				<option 
-					value        = "${item.itemID}" 
-					itemCode     = "${item.itemCode}"
-					categoryName = "${item.categoryName}"
-					uom          = "${item.unitOfMeasurementID}"
-					${item.itemID == companyItemIDArr[index] && "selected"}>
-					${item.itemName}
+					value     = "${ivr.inventoryValidationID}" 
+					timelineBuilderID = "${ivr.timelineBuilderID}"
+					purchaseRequestID =	"${ivr.purchaseRequestID}"
+					projectCode     = "${ivr.projectCode}"
+					projectName     = "${ivr.projectName}"
+					projectCategory = "${ivr.projectCategory}"
+					clientName      = "${ivr.clientName}"
+					clientAddress   = "${ivr.clientAddress}"
+					${ivr.inventoryValidationID == id && "selected"}>
+					${getFormCode("IVR", ivr.createdAt, ivr.inventoryValidationID)}
 				</option>`;
 			})
-			$(element).html(html);
-		});
-	}
-	// ----- END UPDATE INVENTORYT NAME -----
-
-
-    // ----- GET INVENTORY ITEM -----
-    function getInventoryItem(id = null, param, display = true) {
-        let html		= "";
-		let itemIDArr 	= []; // 0 IS THE DEFAULT VALUE
-		// const attr = isProject ? "[project=true]" : "[company=true]";
-		let attr;
-		switch(param){	
-			case "project":
-					attr = "[project=true]";
-					html += `<option selected disabled>Select Item Name</option>`;
-					html += `<option value="-" ${id == "-" ? "selected":""}>None</option>`;
-					 // 0 IS THE DEFAULT VALUE
-					$(`[name=itemID]${attr}`).each(function(i, obj) {
-						itemIDArr.push($(this).val());
-					}) 
-
-					html += inventoryItemList.filter(item => !itemIDArr.includes(item.itemID) || item.itemID == id).map(item => {
-						return `
-						<option 
-							value        = "${item.itemID}" 
-							itemCode     = "${item.itemCode}"
-							categoryName = "${item.categoryName}"
-							uom          = "${item.unitOfMeasurementID}"
-							${item.itemID == id && "selected"}>
-							${item.itemName}
-						</option>`;
-					});
-				break;
-			case "company":
-					attr = "[company=true]"
-					html += `<option selected disabled>Select Item Name</option>`;
-					html += `<option value="-" ${id == "-" && "selected"}>None</option>`;
-					$(`[name=itemID]${attr}`).each(function(i, obj) {
-						itemIDArr.push($(this).val());
-					}) 
-					html += inventoryItemList.filter(item => !itemIDArr.includes(item.itemID) || item.itemID == id).map(item => {
-						return `
-						<option 
-							value        = "${item.itemID}" 
-							itemCode     = "${item.itemCode}"
-							categoryName = "${item.categoryName}"
-							uom          = "${item.unitOfMeasurementID}"
-							${item.itemID == id && "selected"}>
-							${item.itemName}
-						</option>`;
-					});
-				break;
-			case "personnel":
-					attr = "[personnel=true]";
-					html += `<option selected disabled>Select Designation</option>`;
-					html += `<option value="-" ${id == 0 && "selected"}>None</option>`;
-					$(`[name=designationID]${attr}`).each(function(i, obj) {
-						itemIDArr.push($(this).val());
-					}) 
-					html += designationList.filter(item => !itemIDArr.includes(item.designationID) || item.designationID == id).map(item => {
-						return `
-						<option 
-							value        	= "${item.designationID}" 
-							designationCode	= "${getFormCode("DSN",moment(),item.designationID)}"
-							hourlyRate 		= "${item.designationRate}"
-							${item.designationID == id && "selected"}>
-							${item.designationName}
-						</option>`;
-					});
-
-				break;
-			default:
-					attr = "[travel=true]";
 		}
-
-		
-		
-        return display ? html : inventoryItemList;
-    }
-    // ----- END GET INVENTORY ITEM -----
-
-
-	// ----- GET ITEM ROW -----
-    function getItemRow(param, item = {}, readOnly = false) {
-		let html = param == "project" ? getProjectRow(item, readOnly) : getCompanyRow(item, readOnly);
-        return html;
-    }
-    // ----- END GET ITEM ROW -----
+        return display ? html : inventoryValidationList;
+	}
+	// ----- END GET INVENTORY VALIDATION LIST -----
 
 
 	// ----- UPDATE TABLE ITEMS -----
 	function updateTableItems() {
-		$(".itemProjectTableBody tr").each(function(i) {
+		$(".itemTableBody tr").each(function(i) {
 			// ROW ID
 			$(this).attr("id", `tableRow${i}`);
 			$(this).attr("index", `${i}`);
 
 			// CHECKBOX
 			$("td .action .checkboxrow", this).attr("id", `checkboxrow${i}`);
-			$("td .action .checkboxrow", this).attr("project", `true`);
 
 			// ITEMCODE
 			$("td .itemcode", this).attr("id", `itemcode${i}`);
 
 			// ITEMNAME
+			$(this).find("select").each(function(x) {
+				if ($(this).hasClass("select2-hidden-accessible")) {
+					$(this).select2("destroy");
+				}
+			})
+
 			$(this).find("select").each(function(j) {
 				const itemID = $(this).val();
 				$(this).attr("index", `${i}`);
-				$(this).attr("project", `true`);
-				$(this).attr("id", `projectitemid${i}`)
-				if (!$(this).attr("data-select2-id")) {
+				$(this).attr("id", `requestitem${i}`);
+				$(this).attr("data-select2-id", `requestitem${i}`);
+				if (!$(this).hasClass("select2-hidden-accessible")) {
 					$(this).select2({ theme: "bootstrap" });
 				}
 			});
 
 			// QUANTITY
-			$("td .quantity [name=quantity]", this).attr("id", `projectQuantity${i}`);
-			$("td .quantity [name=quantity]", this).attr("project", `true`);
+			$("td .quantity [name=quantity]", this).attr("id", `quantity${i}`);
+			$("td .quantity .invalid-feedback", this).attr("id", `invalid-quantity${i}`);
 			
+			// CLASSIFICATION
+			$("td .classification", this).attr("id", `classification${i}`);
+
 			// UOM
 			$("td .uom", this).attr("id", `uom${i}`);
 
+			// UNIT COST
+			$("td .unitcost", this).attr("id", `unitcost${i}`);
+
+			// TOTAL COST
+			$("td .totalcost", this).attr("id", `totalcost${i}`);
+
 			// FILE
-			$("td .file [name=files]", this).attr("id", `projectFiles${i}`);
-		})
+			$("td .file [name=files]", this).attr("id", `filesCompany${i}`);
 
-		$(".itemCompanyTableBody tr").each(function(i) {
-			// ROW ID
-			$(this).attr("id", `tableRow${i}`);
-			$(this).attr("index", `${i}`);
-
-			// CHECKBOX
-			$("td .action .checkboxrow", this).attr("id", `checkboxrow${i}`);
-			$("td .action .checkboxrow", this).attr("company", `true`);
-
-			// ITEMCODE
-			$("td .itemcode", this).attr("id", `itemcode${i}`);
-
-			// ITEMNAME
-			$(this).find("select").each(function(j) {
-				const itemID = $(this).val();
-				$(this).attr("index", `${i}`);
-				$(this).attr("company", `true`);
-				$(this).attr("id", `companycompanyitemid${i}`)
-				if (!$(this).attr("data-select2-id")) {
-					$(this).select2({ theme: "bootstrap" });
-				}
-			});
-
-			// QUANTITY
-			$("td .quantity [name=quantity]", this).attr("id", `companyQuantity${i}`);
-			$("td .quantity [name=quantity]", this).attr("company", `true`);
-			
-			// UOM
-			$("td .uom", this).attr("id", `uom${i}`);
-			
-			// FILE
-			$("td .file [name=files]", this).attr("id", `companyFiles${i}`);
-		})
-
-		$(".personnelTableBody tr").each(function(i) {
-			// ROW ID
-			$(this).attr("id", `tableRow${i}`);
-			$(this).attr("index", `${i}`);
-
-			// CHECKBOX
-			$("td .action .checkboxrow", this).attr("id", `checkboxrow${i}`);
-			$("td .action .checkboxrow", this).attr("personnel", `true`);
-
-			// ITEMCODE
-			$("td .itemcode", this).attr("id", `itemcode${i}`);
-
-			// ITEMNAME
-			$(this).find("select").each(function(j) {
-				const itemID = $(this).val();
-				$(this).attr("index", `${i}`);
-				$(this).attr("personnel", `true`);
-				$(this).attr("id", `personnelid${i}`)
-				if (!$(this).attr("data-select2-id")) {
-					$(this).select2({ theme: "bootstrap" });
-				}
-			});
-
-			// QUANTITY
-			$("td .quantity [name=quantity]", this).attr("id", `personnelQuantity${i}`);
-			$("td .quantity [name=quantity]", this).attr("personnel", `true`);
-			$("td .quantity [name=quantity]", this).next().attr("id", `personnelQuantity${i}`);
-			
-			// TOTAL HOURS
-			$("td .totalhours [name=employeeTotalHours]", this).attr("id", `employeeTotalHours${i}`);
-			$("td .totalhours [name=employeeTotalHours]", this).attr("personnel", `true`);
-			$("td .totalhours [name=employeeTotalHours]", this).next().attr("id", `employeeTotalHours${i}`);
-		})
-
-		$(".travelTableBody tr").each(function(i) {
-			// ROW ID
-			$(this).attr("id", `tableRow${i}`);
-			$(this).attr("index", `${i}`);
-
-			// CHECKBOX
-			$("td .action .checkboxrow", this).attr("id", `checkboxrow${i}`);
-			$("td .action .checkboxrow", this).attr("travel", `true`);
-
-			// DESCRIPTION
-			$("td .description [name=description]", this).attr("id", `description${i}`);
-			$("td .description [name=description]", this).attr("travel", `true`);
-			$("td .description [name=description]", this).next().attr("id", `invalid-description${i}`);
-			
-			// QUANTITY
-			$("td .quantity [name=quantity]", this).attr("id", `travelQuantity${i}`);
-			$("td .quantity [name=quantity]", this).attr("travel", `true`);
-			$("td .quantity [name=quantity]", this).next().attr("id", `invalid-travelQuantity${i}`);
-			
-			// UOM
-			// ITEMNAME
-			$(this).find("select").each(function(j) {
-				// const itemID = $(this).val();
-				$(this).attr("index", `${i}`);
-				$(this).attr("travel", `true`);
-				$(this).attr("id", `travelUom${i}`)
-				if (!$(this).attr("data-select2-id")) {
-					$(this).select2({ theme: "bootstrap" });
-				}
-			});
-			// $("td .uom [name=travelUom]", this).attr("id", `travelUom${i}`);
-			$("td .uom [name=travelUom]", this).next().attr("id", `invalid-travelUom${i}`);
+			// REMARKS
+			$("td .remarks [name=remarks]", this).attr("id", `remarks${i}`);
+			$("td .remarks .invalid-feedback", this).attr("id", `invalid-remarks${i}`);
 		})
 	}
 	// ----- END UPDATE TABLE ITEMS -----
 
 
-	// ----- UPDATE DELETE BUTTON -----
-	function updateDeleteButton() {
-		let thisArray = ["[project=true]|projectCount","[company=true]|companyCount",
-						 "[personnel=true]|personnelCount","[travel=true]|travelCount"	
-						];
-		thisArray.map(items=>{
-			var splitItems = items.split("|");
-			 splitItems[1] = 0;
-			$(".checkboxrow"+splitItems[0]).each(function() {
-				this.checked && splitItems[1]++;
-			})
-			$(".btnDeleteRow"+splitItems[0]).attr("disabled", splitItems[1] == 0);
-		});
-	}
-	// ----- END UPDATE DELETE BUTTON -----
-
-	// ----- SELECT PROJECT LIST -----
-    $(document).on("change", "[name=documentID]", function() {
-		const id 			= $(this).val();
-		const purchaserequest = $('option:selected', this).attr("purchaserequest");
-		const projectid 	= $('option:selected',this).attr("projectid");
-        const projectcode   = $('option:selected', this).attr("projectcode");
-        const projectname   = $('option:selected', this).attr("projectname");
-        const clientcode    = $('option:selected', this).attr("clientcode");
-        const clientname    = $('option:selected', this).attr("clientname");
-        const address       = $('option:selected', this).attr("address");
-		$("[name=projectCode]").attr("purchaserequest",purchaserequest);
-		$("[name=projectCode]").attr("projectid",projectid);
-        $("[name=projectCode]").val(projectcode);
-        $("[name=projectName]").val(projectname);
-        $("[name=clientCode]").val(clientcode);
-        $("[name=clientName]").val(clientname);
-        $("[name=clientAddress]").val(address);
-        $(".itemProjectTableBody").html('<tr><td colspan="7">'+preloader+'</td></tr>');
-        $(".itemCompanyTableBody").html('<tr><td colspan="7">'+preloader+'</td></tr>');
-
-        let itemProjectTableBody = requestItemData(id, "project");
-		let itemCompanyTableBody = requestItemData(id, "company");
-		let alertConfirmation 	 = ``;
-		if(priceListValidation.length > 0){
-			alertConfirmation 	 = `<div class="alert alert-warning py-1 text-center" role="alert">
-											<small class="font-weight-bold"><i class="fa fa-exclamation-circle text-warning font-weight-bold"></i> Cannot process. Set a price for each item on the item price list first.</small>
-										</div>`;
-			let newSetPriceListValidation = [...new Set(priceListValidation)];
-			newSetPriceListValidation.map(items=>{
-				var itemsSplit = items.split("|");
-				showNotification("warning2", 
-				`Please set item code <strong>${getFormCode("ITM",moment(itemsSplit[0]), itemsSplit[1])}</strong> into Item price list module to proceed in this proccess`);
-			});
-		}
-						
-
-
-										
-		$("#alert-confirmation").hide();
-        setTimeout(() => {
-			$("#alert-confirmation").html(alertConfirmation);
-			$("#alert-confirmation").show(500);
-			$(".itemProjectTableBody").html(itemProjectTableBody);
-            $(".itemCompanyTableBody").html(itemCompanyTableBody);
-			getGrandTotal();
-			// initDataTables();
-			// initAll();
-		}, 300);
-    })
-    // ----- END SELECT PROJECT LIST -----
-
-
-    // ----- SELECT ITEM NAME -----
-    $(document).on("keyup", "[name=stocks]", function() {
-		let thisValue 			= $(this).val();
-		let quantityRequested 	= $(this).closest("tr").find(".qtyrequested").first().text();
-		let difference 			= parseInt(quantityRequested) - parseInt(thisValue);
-		let forPurchase 		= difference < 1 ? "0" : (difference||"-");
-		$(this).closest("tr").find(".forpurchase").first().text(forPurchase);
-    })
-    // ----- END SELECT ITEM NAME -----
-
-	// ----- SELECT FILE -----
-	$(document).on("change", "[name=files]", function(e) {
-		const filename = this.files[0].name;
-		const filesize = this.files[0].size/1024/1024; // Size in MB
-		if (filesize > 10) {
-			$(this).val("");
-			$(this).parent().parent().find(".displayfile").empty();
-			showNotification("danger", "File size must be less than or equal to 10mb");
-		} else {
-			let html = `
-			<div class="d-flex justify-content-between align-items-center py-2">
-				<span class="filename">${filename}</span>
-				<span class="btnRemoveFile" style="cursor: pointer"><i class="fas fa-close"></i></span>
-			</div>`;
-			$(this).parent().find(".displayfile").first().html(html);
-		}
-	})
-	// ----- END SELECT FILE -----
-
-
-	// ----- REMOVE FILE -----
-	$(document).on("click", ".btnRemoveFile", function() {
-		$(this).parent().parent().parent().find("[name=files]").first().val("");
-		$(this).closest(".displayfile").empty();
-	})
-	// ----- END REMOVE FILE -----
-
-
-	// ----- CLICK DELETE ROW -----
-	$(document).on("click", ".btnDeleteRow", function(){
-		let attr;
-		if($(this).attr("project") == "true"){
-			attr = "project";
-		}else if($(this).attr("company") == "true"){
-			attr = "company";
-		}else if($(this).attr("personnel") == "true"){
-			attr = "personnel";
-		}else{
-			attr = "travel";
-		}
-		deleteTableRow(attr);
-	})
-	// ----- END CLICK DELETE ROW -----
-
-
-	// ----- CHECKBOX EVENT -----
-	$(document).on("click", "[type=checkbox]", function() {
-		updateDeleteButton();
-	})
-	// ----- END CHECKBOX EVENT -----
-
-
-	// ----- CHECK ALL -----
-	$(document).on("change", ".checkboxall", function() {
-		const isChecked = $(this).prop("checked");
-		// const isProject = $(this).attr("project") == "true";
-		let attr;
-
-		if($(this).attr("project") == "true"){
-			attr = "[project=true]";
-		}else if($(this).attr("company") == "true"){
-			attr = "[company=true]";
-		}else if($(this).attr("personnel") == "true"){
-			attr = "[personnel=true]";
-		}else{
-			attr = "[travel=true]";
-		}
-		$(".checkboxrow"+attr).each(function(i, obj) {
-			$(this).prop("checked", isChecked);
-		});
-		updateDeleteButton();
-	})
-	// ----- END CHECK ALL -----
-
 	// ----- UPDATE TOTAL AMOUNT -----
-	function updateTotalAmount(isProject = true) {
-		const attr        = isProject ? "[project=true]" : "[company=true]";
-		const quantityArr = $.find(`[name=quantity]${attr}`).map(element => element.value || "0");
-		const unitCostArr = $.find(`[name=unitCost]${attr}`).map(element => element.value.replaceAll(",", "") || "0");
+	function updateTotalAmount() {
+		const quantityArr = $.find(`[name=quantity]`).map(element => getNonFormattedAmount(element.value) || "0");
+		const unitCostArr = $.find(`.unitcost`).map(element => getNonFormattedAmount(element.innerText) || "0");
 		const totalAmount = quantityArr.map((qty, index) => +qty * +unitCostArr[index]).reduce((a,b) => a + b, 0);
-		$(`#totalAmount${attr}`).text(formatAmount(totalAmount, true));
+		$(`#totalAmount`).text(formatAmount(totalAmount, true));
+		$("#bidRecapProjectTotal").text(formatAmount(totalAmount, true));
+
+		const projectTotal = +getNonFormattedAmount($(`#bidRecapProjectTotal`).text()); 
+		const companyTotal = +getNonFormattedAmount($(`#bidRecapCompanyTotal`).text()); 
+		const grandTotal   = projectTotal + companyTotal;
+		$("#bidRecapGrandTotal").text(formatAmount(grandTotal, true));
+
 		return totalAmount;
 	}
 	// ----- END UPDATE TOTAL AMOUNT -----
-	
-	// GETTING THE GRAND TOTAL OF TWO CATEGORIES
-		function getGrandTotal(){
-			// itemTableRowTotal
-			let grandTotal = 0, projectTotal=0, companyTotal=0;
-			$(".itemTableRowTotal").each(function(i, obj) {
-				let totalCost = $(this).find(".totalCost").text().replaceAll("₱","").replaceAll(",","");
-				if($(this).find(".totalCost").attr("category") === "project"){
-					projectTotal += parseFloat(totalCost);
-				}else{
-					companyTotal += parseFloat(totalCost);
-				}
-				grandTotal += parseFloat(totalCost);
+
+
+	// ----- GET COST ESTIMATE REQUEST ITEMS -----
+	function getCostEstimateRequestItems(isMaterialEquipment = false, data = false) {
+		let html = "";
+		let vendorID		= data.vendorID;
+		let rowspan 		= data.rowspan;
+		let vendorName 		= data.vendorName;
+		let vendorTotalCost = 0;
+			
+
+		if (data) {
+			let tableRowCondition 	= data["items"].length;
+
+			for (let index = 0; index < tableRowCondition; index++) {
+				var {
+					forPurchase        			  = 0,
+					preferredInventoryVendorPrice = 0
+				} = data["items"][index];
+				var preferredTotalCost 	= parseFloat(forPurchase) * parseFloat(preferredInventoryVendorPrice);
+				vendorTotalCost 		+= parseFloat(preferredTotalCost);
+			}
+
+
+			for (let index = 0; index < tableRowCondition; index++) {
+
+				var {
+					bidRecapID 					  = "",
+					requestItemID      			  = "",
+					itemCode           			  = "-",
+					itemName           			  = "-",
+					itemClassification 			  = "-",
+					forPurchase        			  = 0,
+					itemUom            			  = "",
+					unitCost           			  = 0,
+					totalCost          			  = 0,
+					preferredInventoryVendorPrice = 0
+				} = data["items"][index];
+
+				var tdVendorName 		= index == 0 ? `<td rowspan="${rowspan}" >${vendorName}</td>` : ``;
+				var tdVendorTotalCost 	= index == 0 ? `<td rowspan="${rowspan}" class="text-right">${formatAmount(vendorTotalCost, true)}</td>` : ``;
+				var tdClassification 	= !isMaterialEquipment ? `<td class="table-row-classification">${itemClassification || "-"}</td>` : "";
+				var preferredTotalCost 	= parseFloat(forPurchase) * parseFloat(preferredInventoryVendorPrice);
+
+				html += `
+				<tr class="itemTableRow" requestItemID="${requestItemID}" vendorid="${vendorID}" vendorname="${vendorName}">
+					${tdVendorName}
+					<td class="table-row-item-code">${itemCode || "-"}</td>
+					<td class="table-row-item-name">${itemName && itemName != "Select Item Name" ? itemName : "-"}</td>
+					${tdClassification}
+					<td class="text-center table-row-item-for-purchase">${formatAmount(forPurchase)}</td>
+					<td class="table-row-item-uom">${itemUom || "-"}</td>
+					<td class="text-right item-unit-cost">${formatAmount(bidRecapID ? unitCost : preferredInventoryVendorPrice , true)}</td>
+					<td class="text-right totalcost">${formatAmount(bidRecapID ? totalCost : preferredTotalCost , true) }</td>
+					${tdVendorTotalCost}
+				</tr>`;	
+			}
+		}
+
+		return html;
+	}
+	// ----- END GET COST ESTIMATE REQUEST ITEMS -----
+
+
+
+
+
+	// ----- GET COST ESTIMATE REQUEST TABLE -----
+	function getCostEstimateRequestTable(item = false, index = 0) {
+		let html = "";
+		if (item) {
+			const {
+				phaseDescription = "",
+				milestones       = []
+			} = item;
+
+			let milestoneHTML = "";
+			milestones.map((milestone, index2) => {
+				const { name = "", items = [] } = milestone;
+				const tempVendor = [], vendorItemsArray = [];
+				let requestItemsHTML = "";
+				
+				items.map((x, i)=>{
+					let vendorName = x.preferredInventoryVendorName;
+					tempVendor.includes(vendorName) ? "" : tempVendor.push(vendorName);
+				});
+				tempVendor.map(vendorName=>{
+					let vendor		= vendorName;
+					let vendorID 	= "";
+					let vendorItems = items.filter(y => y.preferredInventoryVendorName == vendorName).map(y => { vendorID = y.preferredInventoryVendorID; return y; });
+					let vendorItemsCount = vendorItems.length;
+					let vendorItemsArrayTemp = {
+						"vendorID" 	:   vendorID,
+						"vendorName":	vendor, 
+						"rowspan" 	:	vendorItemsCount, 
+						"items" 	: 	vendorItems
+					};
+					vendorItemsArray.push(vendorItemsArrayTemp);
+				});
+
+				vendorItemsArray.map((item, index) => {
+					requestItemsHTML += getCostEstimateRequestItems(false, vendorItemsArray[index]);
+				});
+
+				milestoneHTML += requestItemsHTML ? `
+				<div class="milestoneContent pt-1 pb-2">
+					<div class="titleName"
+						style="color: rgb(104 158 46);
+							font-size: 1.05rem;
+							font-weight: 700;">${name}</div>
+					<table class="table table-striped requestItemTable project-phase-tables" title="${name}" isMaterialEquipment="false" isReadOnly="true" id="${(phaseDescription+index+name+index2)?.replaceAll(/[&\/\\#,+()$~%.'":*?<>{}]/g, "")?.replaceAll(" ", "")?.toLowerCase()}">
+						<thead>
+							<tr style="white-space: nowrap">
+								<th>Vendor Name</th>
+								<th>Item Code</th>
+								<th>Item Name</th>
+								<th>Item Classification</th>
+								<th>Quantity</th>
+								<th>UOM</th>
+								<th>Unit Cost</th>
+								<th>Total Cost</th>
+								<th>Total</th>
+							</tr>
+						</thead>
+						<tbody class="itemTableBody">
+							${requestItemsHTML}
+						</tbody>
+					</table>
+				</div>` : "";
+			})
+			html = `
+			<div class="phaseContent pt-1 pb-2">
+				<div class="phaseName"
+					style="font-weight: bold;
+						font-size: 1.4rem;
+						color: rgb(0 176 80);">${phaseDescription}</div>
+				${milestoneHTML}
+			</div>`;
+		}
+		return html;
+	}
+	// ----- END GET COST ESTIMATE REQUEST TABLE -----
+
+
+	// ----- GET MATERIAL EQUIPMENT REQUEST TABLE -----
+	function getMaterialEquipmentRequestTable(item = false, index = 0) {
+		let html = "";
+		if (item) {
+			const {
+				name  = "",
+				items = []
+			} = item;
+			let requestItemsHTML = "";
+			const tempVendor = [], vendorItemsArray = [];
+			items.map((x, i)=>{
+				let vendorName = x.preferredInventoryVendorName;
+				tempVendor.includes(vendorName) ? "" : tempVendor.push(vendorName);
 			});
 
-			$("#bidRecapProjectTotal").text(formatAmount(projectTotal,true));
-			$("#bidRecapCompanyTotal").text(formatAmount(companyTotal,true));
-			$("#bidRecapGrandTotal").text(formatAmount(grandTotal,true));
+			tempVendor.map(vendorName=>{
+				let vendor		= vendorName;
+				let vendorID 	= "";
+				let vendorItems = items.filter(y => y.preferredInventoryVendorName == vendorName).map(y=>{ vendorID = y.preferredInventoryVendorID; return y});
+				let vendorItemsCount = vendorItems.length;
+				let vendorItemsArrayTemp = {
+					"vendorID" 	:   vendorID,
+					"vendorName":	vendor, 
+					"rowspan" 	:	vendorItemsCount, 
+					"items" 	: 	vendorItems
+				};
+				vendorItemsArray.push(vendorItemsArrayTemp);
+			});
+
+			vendorItemsArray.map((item,index) => {	
+				requestItemsHTML += getCostEstimateRequestItems(true, vendorItemsArray[index]);
+			});
+
+			// let requestItemsHTML = items.map(item => {
+			// 	return getCostEstimateRequestItems(true, item);
+			// }).join("");
+
+			let classificationHTML = `
+			<table class="table table-striped requestItemTable" isMaterialEquipment="true" isReadOnly="true" id="${(name+index)?.replaceAll(/[&\/\\#,+()$~%.'":*?<>{}]/g, "")?.replaceAll(" ", "")?.toLowerCase()}" title="${name}">
+				<thead>
+					<tr style="white-space: nowrap">
+						<th>Vendor Name</th>
+						<th>Item Code</th>
+						<th>Item Name</th>
+						<th>Quantity</th>
+						<th>UOM</th>
+						<th>Unit Cost</th>
+						<th>Total Cost</th>
+						<th>Total</th>
+					</tr>
+				</thead>
+				<tbody class="itemTableBody">
+					${requestItemsHTML}
+				</tbody>
+			</table>`;
+
+			html = requestItemsHTML ? `
+			<div class="classificationContent pt-1 pb-2">
+				<div class="titleName"
+					style="color: rgb(104 158 46);
+						font-size: 1.05rem;
+						font-weight: 700;">${name}</div>
+				${classificationHTML}
+			</div>` : "";
 		}
-	// END GETTING THE GRAND TOTAL OF TWO CATEGORIES
+		return html;
+	}
+	// ----- END GET MATERIAL EQUIPMENT REQUEST TABLE -----
+
+
+	// ----- GET ITEM REQUEST -----
+	function getRequestItems(bidRecapID = 0, inventoryValidationID = 0) {
+		let result = {};
+		$.ajax({
+			method: "POST",
+			url: "bid_recap/getCostEstimateRequest",
+			data: { bidRecapID, inventoryValidationID },
+			async: false,
+			dataType: "json",
+			success: function(data) {
+				result = data;
+			}
+		})
+		return result;
+	}
+	// ----- END GET ITEM REQUEST -----
+
+
+	// ----- GET COST ESTIMATE REQUEST ITEMS -----
+	function getCostEstimateRequest(inventoryValidationID = 0, bidRecapID = 0) {
+		let requestItems = getRequestItems(bidRecapID, inventoryValidationID);
+
+		let costEstimateRequestItemHTML = "", materialsEquipmentRequestItemHTML = "";
+		requestItems.phases.map((item, index) => {
+			costEstimateRequestItemHTML += getCostEstimateRequestTable(item, index);
+		})
+		requestItems.materialsEquipment.map((item, index) => {
+			materialsEquipmentRequestItemHTML += getMaterialEquipmentRequestTable(item, index);
+		})
+
+		let projectPhaseHTML = costEstimateRequestItemHTML ? `
+		<div class="w-100">
+			<hr class="pb-1">
+			<div class="text-primary font-weight-bold" style="font-size: 1.5rem;">Project Phase</div>
+			${costEstimateRequestItemHTML}
+		</div>` : "";
+		
+		let materialsEquipmentHTML = materialsEquipmentRequestItemHTML ? `
+		<div class="w-100">
+			<hr class="pb-1">
+			<div class="text-primary font-weight-bold" style="font-size: 1.5rem;">Materials and Equipment</div>
+			${materialsEquipmentRequestItemHTML}
+		</div>` : "";
+
+		return projectPhaseHTML+materialsEquipmentHTML;
+	}
+	// ----- END GET COST ESTIMATE REQUEST ITEMS -----
+
+
+	// ----- GET MATERIALS EQUIPMENT REQUEST ITEMS -----
+	function getMaterialEquipmentRequestItems(bidRecapID = 0) {
+		let result = [];
+		$.ajax({
+			method: "POST",
+			url: "bid_recap/getMaterialEquipmentRequestItems",
+			data: { bidRecapID },
+			async: false,
+			dataType: "json",
+			success: function(data) {
+				result = data;
+			}
+		})
+		return result;
+	}
+	// ----- END GET MATERIALS EQUIPMENT REQUEST ITEMS -----
+
+
+	// ----- GET TABLE MATERIALS AND EQUIPMENT -----
+	function getMaterialsEquipment(data = false, readOnly = true) {
+		let html = "";
+		if (data) {
+
+			const {
+				bidRecapID       = "",
+				inventoryValidationID          = "",
+			} = data && data[0];
+
+			let disabled = readOnly ? "disabled" : "";
+
+			let checkboxHeader = !disabled ? `
+			<th class="text-center">
+				<div class="action">
+					<input type="checkbox" class="checkboxall">
+				</div>
+			</th>` : ``;
+
+			let buttonAddDeleteRow = !disabled ? `
+			<div class="d-flex flex-column justify-content-start text-left my-2">
+				<div>
+					<button type="button" class="btn btn-primary btnAddRow" id="btnAddRow"><i class="fas fa-plus-circle"></i> Add Row</button>
+					<button type="button" class="btn btn-danger btnDeleteRow" id="btnDeleteRow"  disabled><i class="fas fa-minus-circle"></i> Delete Row/s</button>
+				</div>
+			</div>` : "";
+
+			let requestItemsData = [], requestItemHTML = "";
+			if (readOnly) {
+				if (inventoryValidationID) {
+					html = getCostEstimateRequest(inventoryValidationID, bidRecapID);
+				} else {
+					requestItemsData = getMaterialEquipmentRequestItems(bidRecapID);
+					html = `
+					<div class="w-100">
+						<hr class="pb-1">
+						<div class="text-primary font-weight-bold" style="font-size: 1.5rem;">Materials and Equipment</div>`;
+
+					if (requestItemsData.length > 0) {
+						requestItemsData.map((item, index) => {
+							html += getMaterialEquipmentRequestTable(item, index);
+						})
+					}
+
+					html += `
+					</div>`
+				}
+			} else {
+				if (bidRecapID) {
+					requestItemsData = getTableData(
+						`ims_request_items_tbl`, 
+						``, 
+						`bidRecapID = ${bidRecapID} AND (inventoryValidationID IS NULL OR inventoryValidationID = 0) AND inventoryValidationID IS NULL`);
+				}
+				if (requestItemsData.length > 0) {
+					requestItemsData.map(item => {
+						requestItemHTML += getItemRow(item, readOnly);
+					})
+				} else {
+					requestItemHTML = getItemRow(false, readOnly);
+				}
+
+
+				if (inventoryValidationID && inventoryValidationID != "0" && bidRecapID) {
+					html = getCostEstimateRequest(inventoryValidationID, bidRecapID);
+				} else {
+					html = `
+					<div class="w-100">
+						<hr class="pb-1">
+						<div class="text-primary font-weight-bold" style="font-size: 1.5rem;">Materials and Equipment Request</div>
+						<table class="table table-striped requestItemTable" isReadOnly="${readOnly}" id="tableRequestItems">
+							<thead>
+								<tr style="white-space: nowrap">
+									${checkboxHeader}
+									<th>Item Code</th>
+									<th>Item Name ${!disabled ? "<code>*</code>" : ""}</th>
+									<th>Item Classification</th>
+									<th>Quantity ${!disabled ? "<code>*</code>" : ""}</th>
+									<th>UOM</th>
+									<th>Unit Cost</th>
+									<th>Total Cost</th>
+									<th>File</th>
+									<th>Remarks</th>
+								</tr>
+							</thead>
+							<tbody class="itemTableBody">
+								${requestItemHTML}
+							</tbody>
+						</table>
+						
+						<div class="w-100 d-flex justify-content-between align-items-center py-2">
+							<div>${buttonAddDeleteRow}</div>
+						</div>
+					</div>`;
+				}
+			}
+			
+		} else {
+			html = `
+			<div class="w-100 text-center mb-5">
+				<img src="${base_url}assets/modal/please-select.gif"
+					style="max-width: 300px;
+					width: auto;
+					min-width: 100px;
+					height: auto;"
+					alt="Please Select Reference No.">
+				<div class="h4">Please Select Reference No.</div>
+			</div>`
+		}
+		return html;
+	}
+	// ----- END GET TABLE MATERIALS AND EQUIPMENT -----
+
+
+	// ----- SELECT INVENTORY VALIDATION -----
+	$(document).on("change", `[name="inventoryValidationID"]`, function() {
+		const inventoryValidationID = $(this).val();
+		
+		const timelineBuilderID = $(`option:selected`, this).attr("timelineBuilderID") || "-";
+		const projectCode     	= $(`option:selected`, this).attr("projectCode") || "-";
+		const projectName     	= $(`option:selected`, this).attr("projectName") || "-";
+		const projectCategory 	= $(`option:selected`, this).attr("projectCategory") || "-";
+		const clientName      	= $(`option:selected`, this).attr("clientName") || "-";
+		const clientAddress   	= $(`option:selected`, this).attr("clientAddress") || "-";
+
+		$(`[name="projectCode"]`).val(projectCode);
+		$(`[name="projectName"]`).val(projectName);
+		$(`[name="projectCategory"]`).val(projectCategory);
+		$(`[name="clientName"]`).val(clientName);
+		$(`[name="clientAddress"]`).val(clientAddress);
+
+		$("#tableRequestItemContent").html(preloader);
+		// if (inventoryValidationID == "0") {
+		// 	setTimeout(() => {
+		// 		let materialsEquipment = getMaterialsEquipment([{inventoryValidationID}]);
+		// 		$(`#tableRequestItemContent`).html(materialsEquipment);
+		// 		initDataTables();
+		// 		initAll();
+		// 		updateTableItems();
+		// 		$(`#costSummary`).html(getCostSummary(true));
+		// 	}, 200);
+		// } else {
+			setTimeout(() => {
+				initDataTables();
+				initAll();
+				updateTableItems();
+					setTimeout(()=>{
+						let requestItems = getCostEstimateRequest(inventoryValidationID, 0);
+						$(`#tableRequestItemContent`).html(requestItems);
+						$(`#costSummary`).html(getCostSummary());
+					}, 500);
+			}, 200);
+		// }
+
+	})
+	// ----- END SELECT INVENTORY VALIDATION -----
+
+
+	// ----- GET COST SUMMARY -----
+	function getCostSummary(isOnCreation = false, display = true) {
+		let costSummary = [], items = [];
+		if (isOnCreation) {
+			$(`.itemTableRow .classification`).each(function() {
+				$parent    = $(this).closest("tr");
+				const name = $(this).attr("name");
+				let totalCost = $parent.find(".totalcost").text() || "0";
+					totalCost = getNonFormattedAmount(totalCost);
+				let temp = { name, totalCost };
+				name && name != "-" && items.push(temp);
+			})
+	
+			const isExisting = (inName = "") => {
+				let flag = false;
+				costSummary.map(summary => {
+					const { name } = summary;
+					if (inName === name) {
+						flag = true;
+					}
+				})
+				return flag;
+			}
+	
+			const getTotalCost = (inName = "") => {
+				return items
+					.filter(cls => cls.name == inName)
+					.map(cls => cls.totalCost)
+					.reduce((a, b) => a + b, 0);
+			}
+	
+			items.map(cls => {
+				const { name } = cls;
+				if (!isExisting(name)) {
+					let temp = {
+						name,
+						totalCost: getTotalCost(name)
+					};
+					costSummary.push(temp);
+				}
+			})
+		} else {
+			$(`table.requestItemTable .itemTableBody`).each(function() {
+				$parent = $(this).closest(".requestItemTable");
+				const name = $parent.attr("title");
+				let totalCost = 0;
+				$(`td.totalcost`, this).each(function() {
+					const temp = getNonFormattedAmount($(this).text());
+					totalCost += temp;
+				})
+				let temp = { name, totalCost };
+				costSummary.push(temp);
+			})
+		}
+		
+
+		let html = `
+		<div class="row py-2">
+			<div class="offset-lg-6 col-lg-6 offset-md-3 col-md-9 col-sm-12 pb-2 pt-3">`;
+		let	grandTotal = 0;
+		costSummary.map((summary, i) => {
+			const bottom = costSummary.length == i ? "pb-2" : "";
+			const { name = "-", totalCost = 0 } = summary;
+			html += `
+			<div class="row ${bottom}" style="font-size: 1.1rem;">
+				<div class="col-6 col-lg-7 text-left">${name || "-"}</div>
+				<div class="col-6 col-lg-5 text-right text-dark" style="font-size: 1.05em" class="costSummary" name="${name}">
+					${formatAmount(totalCost, true)}
+				</div>
+			</div>`;
+			grandTotal += totalCost;
+		})
+
+		let grandTotalHTML = costSummary.length > 0 ? `
+		<div class="row pt-1" style="font-size: 1.3rem;; border-bottom: 3px double black; border-top: 1px solid black">
+			<div class="col-6 col-lg-7 text-left font-weight-bolder">Grand Total:</div>
+			<div class="col-6 col-lg-5 text-right text-danger font-weight-bolder" id="bidRecapGrandTotal" style="font-size: 1.05em">
+				${formatAmount(grandTotal, true)}
+			</div>
+		</div>` : "";
+
+		html += `
+				${grandTotalHTML}
+			</div>
+		</div>`;
+
+		return display ? html : grandTotal;
+	}
+	// ----- END GET COST SUMMARY -----
+
 
     // ----- FORM CONTENT -----
 	function formContent(data = false, readOnly = false, isRevise = false, isFromCancelledDocument = false) {
 		$("#page_content").html(preloader);
 		readOnly = isRevise ? false : readOnly;
 		let {
-			bidRecapID       	= "",
-			reviseBidRecapID 	= "",
-			employeeID          = "",
-			projectID           = "",
-			purchaseRequestID 	= "",
-			inventoryValidationID = "",
-            documentType        = "",
-			bidRecapReason   	= "",
-			bidRecapRemarks  	= "",
-			approversID         = "",
-			approversStatus     = "",
-			approversDate       = "",
-			bidRecapGrandTotal	= null,
-			bidRecapStatus   	= false,
-			submittedAt         = false,
-			createdAt           = false,
+			bidRecapID       		= "",
+			reviseBidRecapID 		= "",
+			employeeID              = "",
+			inventoryValidationID   = "",
+			projectCode             = "",
+			projectName             = "",
+			projectCategory         = "",
+			clientName              = "",
+			clientAddress           = "",
+			bidRecapReason   		= "",
+			bidRecapRemarks  		= "",
+			approversID             = "",
+			approversStatus         = "",
+			approversDate           = "",
+			bidRecapStatus   		= false,
+			submittedAt             = false,
+			createdAt               = false,
 		} = data && data[0];
-
-		let requestProjectItems = "", requestCompanyItems = "";
-		
-		if (bidRecapID) {
-            requestProjectItems = requestItemData(inventoryValidationID, "project", readOnly, `bidRecapID = '${bidRecapID}'`);
-            requestCompanyItems = requestItemData(inventoryValidationID, "company", readOnly, `bidRecapID = '${bidRecapID}'`);
-		}
-		
-		let projectCode = "", projectName="", clientCode="",clientName="", clientAddress="";
-		if(documentType){
-			var bidRecapItems = [];
-			let bidRecapData   = getTableData("ims_bid_recap_tbl","","bidRecapID="+bidRecapID);
-			bidRecapData.map(bidRecapItems=>{
-					let projectList   = getTableData(
-						"pms_project_list_tbl AS pplt LEFT JOIN pms_client_tbl AS pct ON pct.clientID = pplt.projectListClientID", 
-						"projectListID, projectListCode, projectListName, clientCode, clientName, clientRegion, clientProvince, clientCity, clientBarangay, clientUnitNumber, clientHouseNumber, clientCountry, clientPostalCode",
-						"projectListStatus = 1 && projectListID ="+bidRecapItems.projectID);
-						if(projectList.length > 0){
-							bidRecapItems["projectid"]			= projectList[0].projectListID;
-							bidRecapItems["projectcode"]		= getFormCode("PRO",moment(projectList[0].createdAt),projectList[0].projectListID);
-							bidRecapItems["projectname"]		= projectList[0].projectListName;
-							bidRecapItems["clientcode"]			= projectList[0].clientCode;
-							bidRecapItems["clientname"]			= projectList[0].clientName;
-							bidRecapItems["address"] 			= `${projectList[0].clientUnitNumber && titleCase(projectList[0].clientUnitNumber)+" "}${projectList[0].clientHouseNumber && projectList[0].clientHouseNumber +" "}${projectList[0].clientBarangay && titleCase(projectList[0].clientBarangay)+", "}${projectList[0].clientCity && titleCase(projectList[0].clientCity)+", "}${projectList[0].clientProvince && titleCase(projectList[0].clientProvince)+", "}${projectList[0].clientCountry && titleCase(projectList[0].clientCountry)+", "}${projectList[0].clientPostalCode && titleCase(projectList[0].clientPostalCode)}`;
-						}
-	
-						var {	
-							projectid			="0",
-							projectcode			="-",
-							projectname			="-",
-							clientcode			="-",
-							clientname			="-",
-							address 			="-"
-						}	= projectList.length > 0 && bidRecapItems;
-
-						if(bidRecapItems.bidRecapID	== bidRecapID){
-							projectID 			= projectid;
-							projectCode			= projectcode;
-							projectName			= projectname;
-							clientCode			= clientcode;
-							clientName			= clientname;
-							clientAddress		= address;
-						}
-				});
-		}
 
 		// ----- GET EMPLOYEE DATA -----
 		let {
@@ -1179,12 +1363,7 @@ $(document).ready(function() {
 		$("#btnBack").attr("employeeID", employeeID);
 		$("#btnBack").attr("cancel", isFromCancelledDocument);
 
-		let disabled = readOnly ? "disabled" : "";
-		
-
-		let tableProjectRequestItemsName = !disabled ? "tableProjectRequestItems" : "tableProjectRequestItems0";
-		let tableCompanyRequestItemsName = !disabled ? "tableCompanyRequestItems" : "tableCompanyRequestItems0";
-
+		let disabled          = readOnly ? "disabled" : "";
 		let button = formButtons(data, isRevise, isFromCancelledDocument);
 
 		let reviseDocumentNo    = isRevise ? bidRecapID : reviseBidRecapID;
@@ -1272,71 +1451,102 @@ $(document).ready(function() {
         </div>
 
         <div class="row" id="form_bid_recap">
-            
-            <div class="col-md-4 col-sm-12">
+
+            <div class="col-md-3 col-sm-12">
                 <div class="form-group">
                     <label>Reference No. ${!disabled ? "<code>*</code>" : ""}</label>
-                    <select class="form-control validate select2"
-                        name="documentID"
-                        id="documentID"
+					<select class="form-control validate select2"
+                        name="inventoryValidationID"
+                        id="inventoryValidationID"
                         style="width: 100%"
-                        required
-						${bidRecapID == "" ? `` : `disabled`}>
+                        required ${inventoryValidationID ? "disabled" : ""}
+						>
                         <option selected disabled>Select Reference No.</option>
-                        ${getReferenceList(inventoryValidationID,readOnly)}
+                        ${getInventoryValidationList(inventoryValidationID, bidRecapStatus)}
                     </select>
-                    <div class="d-block invalid-feedback" id="invalid-documentID"></div>
+                    <div class="d-block invalid-feedback" id="invalid-inventoryValidationID"></div>
                 </div>
             </div>
-            <div class="col-md-4 col-sm-12">
+            <div class="col-md-3 col-sm-12">
                 <div class="form-group">
                     <label>Project Code</label>
-                    <input type="text" class="form-control" name="projectCode" purchaserequest="${purchaseRequestID || ""}" projectid="${projectID||""}" disabled value="${projectCode||"-"}">
+                    <input type="text" 
+						class="form-control" 
+						name="projectCode" 
+						disabled 
+						value="${projectCode || "-"}">
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-12">
+                <div class="form-group">
+                    <label>Project Name</label>
+                    <input type="text" 
+						class="form-control" 
+						name="projectName" 
+						disabled 
+						value="${projectName || "-"}">
+                    <div class="d-block invalid-feedback" id="invalid-projectName"></div>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-12">
+                <div class="form-group">
+                    <label>Project Category</label>
+                    <input type="text" 
+						class="form-control" 
+						name="projectCategory" 
+						disabled 
+						value="${projectCategory || "-"}">
+                    <div class="d-block invalid-feedback" id="invalid-projectCategory"></div>
                 </div>
             </div>
             <div class="col-md-4 col-sm-12">
                 <div class="form-group">
-                    <label>Project Name </label>
-                    <input type="text" class="form-control" name="projectName" disabled value="${projectName||"-"}">
-                </div>
-            </div>
-            <div class="col-md-3 col-sm-12">
-                <div class="form-group">
-                    <label>Client Code</label>
-                    <input type="text" class="form-control" name="clientCode" disabled value="${clientCode||"-"}">
-                </div>
-            </div>
-            <div class="col-md-3 col-sm-12">
-                <div class="form-group">
                     <label>Client Name</label>
-                    <input type="text" class="form-control" name="clientName" disabled value="${clientName||"-"}">
+                    <input type="text" 
+						class="form-control" 
+						name="clientName" 
+						disabled 
+						value="${clientName || "-"}">
                 </div>
             </div>
-            <div class="col-md-6 col-sm-12">
+            <div class="col-md-8 col-sm-12">
                 <div class="form-group">
                     <label>Client Address</label>
-                    <input type="text" class="form-control" name="clientAddress" disabled value="${clientAddress||"-"}">
+                    <input type="text" 
+						class="form-control" 
+						name="clientAddress" 
+						disabled 
+						value="${clientAddress || "-"}">
                 </div>
             </div>
-			<div class="col-md-4 col-sm-12">
+            <div class="col-md-4 col-sm-12">
                 <div class="form-group">
-                    <label>Employee Name</label>
-                    <input type="text" class="form-control" disabled value="${employeeFullname||"-"}">
+                    <label>Prepared By</label>
+                    <input type="text" 
+						class="form-control" 
+						disabled 
+						value="${employeeFullname}">
                 </div>
             </div>
             <div class="col-md-4 col-sm-12">
                 <div class="form-group">
                     <label>Department</label>
-                    <input type="text" class="form-control" disabled value="${employeeDepartment||"-"}">
+                    <input type="text" 
+						class="form-control" 
+						disabled 
+						value="${employeeDepartment}">
                 </div>
             </div>
             <div class="col-md-4 col-sm-12">
                 <div class="form-group">
                     <label>Position</label>
-                    <input type="text" class="form-control" disabled value="${employeeDesignation||"-"}">
+                    <input type="text" 
+						class="form-control" 
+						disabled 
+						value="${employeeDesignation}">
                 </div>
             </div>
-			<div class="col-md-12 col-sm-12">
+            <div class="col-md-12 col-sm-12">
                 <div class="form-group">
                     <label>Description ${!disabled ? "<code>*</code>" : ""}</label>
                     <textarea class="form-control validate"
@@ -1348,96 +1558,34 @@ $(document).ready(function() {
                         required
                         rows="4"
                         style="resize:none;"
-                        ${disabled}>${bidRecapReason ?? ""}</textarea>
+						${disabled}>${bidRecapReason ?? ""}</textarea>
                     <div class="d-block invalid-feedback" id="invalid-bidRecapReason"></div>
                 </div>
             </div>
-            <div class="col-sm-12">
-				<div id="alert-confirmation"></div>
-				<div class="w-100">
-					<hr class="pb-1">
-					<div class="text-primary font-weight-bold" style="font-size: 1.5rem;">Project Materials and Equipment</div>
-                    <table class="table table-striped table-bordered table-responsive-xl">
-                        <thead>
-							<tr style="white-space: nowrap">
-								<th class="th-lg" >Vendor Name</th>
-								<th style="width: 150px" class="pr-xl-4 pr-lg-4 pr-5">Item Code</th>
-                                <th style="width: 150px" class="pr-xl-4 pr-lg-4 pr-5">Item Name</th>
-                                <th class="th-sm" >UOM</th>
-                                <th style="width: 80px"  class="pr-xl-4 pr-lg-4 pr-5">Requested</th>
-                                <th style="width: 80px"  class="pr-xl-4 pr-lg-4 pr-5">No. of Issuance</th>
-                                <th style="width: 150px" class="pr-xl-4 pr-lg-4 pr-5">For Purchase</th>
-                                <th style="width: 80px"  class="pr-xl-4 pr-lg-4 pr-5">File</th>
-								<th style="width: 150px padding-right: 5px" class="pr-md-5" >Unit Cost</th>
-								<th style="width: 150px padding-right: 5px" class="pr-md-5" >Total Cost</th>
-                            </tr>
-                        </thead>
-                        <tbody class="itemProjectTableBody" project="true"></tbody>
-                    </table>
-                </div>
-				<div class="w-100">
-					<hr class="pb-1">
-					<div class="text-primary font-weight-bold" style="font-size: 1.5rem;">Company Materials and Equipment</div>
-                    <table class="table table-striped table-bordered table-responsive-xl">
-                        <thead>
-							<tr style="white-space: nowrap">
-								<th class="th-lg" >Vendor Name</th>
-								<th style="width: 150px" class="pr-xl-4 pr-lg-4 pr-5">Item Code</th>
-                                <th style="width: 150px" class="pr-xl-4 pr-lg-4 pr-5">Item Name</th>
-                                <th class="th-sm" >UOM</th>
-                                <th style="width: 80px"  class="pr-xl-4 pr-lg-4 pr-5">Requested</th>
-                                <th style="width: 80px"  class="pr-xl-4 pr-lg-4 pr-5">No. of Issuance</th>
-                                <th style="width: 150px" class="pr-xl-4 pr-lg-4 pr-5">For Purchase</th>
-                                <th style="width: 80px"  class="pr-xl-4 pr-lg-4 pr-5">File</th>
-								<th style="width: 150px padding-right: 5px" class="pr-md-5" >Unit Cost</th>
-								<th style="width: 150px padding-right: 5px" class="pr-md-5" >Total Cost</th>
-                            </tr>
-                        </thead>
-                        <tbody class="itemCompanyTableBody" company="true"></tbody>
-                    </table>
-                </div>
-				<div class="row py-2">
-					<div class="offset-lg-6 col-lg-6 offset-md-3 col-md-9 col-sm-12 pt-3 pb-2">
-						<div class="row" style="font-size: 1.1rem; font-weight:bold">
-							<div class="col-6 col-lg-7 text-left">Project Total Cost:</div>
-							<div class="col-6 col-lg-5 text-right text-dark" id="bidRecapProjectTotal" style="font-size: 1.05em">
-								₱ 0.00
-							</div>
-						</div>
-						<div class="row pb-2" style="font-size: 1.1rem; font-weight:bold">
-							<div class="col-6 col-lg-7 text-left">Company Total Cost:</div>
-							<div class="col-6 col-lg-5 text-right text-dark" id="bidRecapCompanyTotal" style="font-size: 1.05em">
-								₱ 0.00
-							</div>
-						</div>
-						<div class="row pt-1" style="font-size: 1.3rem; font-weight:bold; border-bottom: 3px double black; border-top: 1px solid black">
-							<div class="col-6 col-lg-7 text-left">Grand Total:</div>
-							<div class="col-6 col-lg-5 text-right text-danger" id="bidRecapGrandTotal" style="font-size: 1.05em">
-								₱ 0.00
-							</div>
-						</div>
-					</div>
-				</div>
-				
+
+            <div class="col-sm-12" id="tableRequestItemContent">
+                ${inventoryValidationID ? getCostEstimateRequest(inventoryValidationID, bidRecapStatus < 3 ? bidRecapID : 0  ) : getMaterialsEquipment(data, readOnly)}
             </div>
+
+			<div class="col-12" id="costSummary"></div>
+
             <div class="col-md-12 text-right mt-3">
                 ${button}
             </div>
         </div>
 		<div class="approvers">
-			${!isRevise  ? getApproversStatus(approversID, approversStatus, approversDate) : ""}
+			${!isRevise ? getApproversStatus(approversID, approversStatus, approversDate) : ""}
 		</div>`;
-		
+
 		setTimeout(() => {
 			$("#page_content").html(html);
-			$(".itemProjectTableBody").append(requestProjectItems);
-			$(".itemCompanyTableBody").append(requestCompanyItems);
-			getGrandTotal();
 			initDataTables();
 			updateTableItems();
 			initAll();
-			updateInventoryItemOptions();
-			projectID && projectID != 0 && $("[name=projectID]").trigger("change");
+			
+			
+			$("#costSummary").html(getCostSummary(!readOnly));
+
 			// ----- NOT ALLOWED FOR UPDATE -----
 			if (!allowedUpdate) {
 				$("#page_content").find(`input, select, textarea`).each(function() {
@@ -1449,6 +1597,7 @@ $(document).ready(function() {
 				$(`#btnSubmit, #btnRevise, #btnCancel, #btnCancelForm, .btnAddRow, .btnDeleteRow`).hide();
 			}
 			// ----- END NOT ALLOWED FOR UPDATE -----
+
 			return html;
 		}, 300);
 	}
@@ -1488,8 +1637,8 @@ $(document).ready(function() {
 	// ----- END PAGE CONTENT -----
 
 
-	// ----- GET Inventory Validation DATA -----
-	function getbidRecapData(action = "insert", method = "submit", status = "1", id = null, currentStatus = "0", isObject = false) {
+	// ----- GET PURCHASE REQUEST DATA -----
+	function getBidRecapData(action = "insert", method = "submit", status = "1", id = null, currentStatus = "0", isObject = false) {
 
 		/**
 		 * ----- ACTION ---------
@@ -1513,86 +1662,85 @@ $(document).ready(function() {
 		 * ----- END METHOD -----
 		 */
 
-		let data = { items: [] };
+		let formData = new FormData;
 		const approversID = method != "approve" && moduleApprover;
 
 		if (id) {
-			data["bidRecapID"] = id;
+			formData.append("bidRecapID", id);
 
 			if (status != "2") {
-				data["bidRecapStatus"] = status;
+				formData.append("bidRecapStatus", status);
 			}
 		}
 
-		data["action"]                = action;
-		data["method"]                = method;
-		data["updatedBy"]             = sessionID;
+		formData.append("action", action);
+		formData.append("method", method);
+		formData.append("updatedBy", sessionID);
 
 		if (currentStatus == "0" && method != "approve") {
-			var inventoryValidationID 	  = $("[name=documentID]").val() || null;	
-		    var purchaseRequestID 		  = $("[name=projectCode]").attr("purchaserequest") || null;	 
-			data["employeeID"]            = sessionID;
-			data["projectID"]             = $("[name=projectCode]").attr("projectid") || null;
-			data["inventoryValidationID"] = inventoryValidationID;
-			data["purchaseRequestID"] 	  = purchaseRequestID;
-			data["bidRecapReason"] 	  	  = $("[name=bidRecapReason]").val()?.trim();
-			data["bidRecapProjectTotal"]  = $("#bidRecapProjectTotal").text().replaceAll("₱","").replaceAll(",","");;
-			data["bidRecapCompanyTotal"]  = $("#bidRecapCompanyTotal").text().replaceAll("₱","").replaceAll(",","");;
-			data["bidRecapGrandTotal"] 	  = $("#bidRecapGrandTotal").text().replaceAll("₱","").replaceAll(",","");
-			
-		
+			const inventoryValidationID = $("[name=inventoryValidationID]").val();
+			const timelineBuilderID 	= $("[name=inventoryValidationID] option:selected").attr("timelineBuilderID");
+			const purchaseRequestID 	= $("[name=inventoryValidationID] option:selected").attr("purchaseRequestID");
+			const projectCode   		= $(`[name="projectCode"]`).val();
+			const projectName   		= $(`[name="projectName"]`).val();
+			const projectCategory 		= $(`[name="projectCategory"]`).val();
+			const clientName    		= $(`[name="clientName"]`).val();
+			const clientAddress 		= $(`[name="clientAddress"]`).val();
+			const bidRecapGrandTotal 	= $("#bidRecapGrandTotal").text().replace("₱ ","").replaceAll(",","") || $("#bidRecapGrandTotal").text().replace("₱ ","");
+			formData.append("employeeID", sessionID);
+			formData.append("inventoryValidationID", inventoryValidationID);
+			formData.append("timelineBuilderID", timelineBuilderID);
+			formData.append("purchaseRequestID", purchaseRequestID);
+			formData.append("projectCode", projectCode);
+			formData.append("projectName", projectName);
+			formData.append("projectCategory", projectCategory);
+			formData.append("clientName", clientName);
+			formData.append("clientAddress", clientAddress);
+			formData.append("bidRecapReason", $("[name=bidRecapReason]").val()?.trim());
+			formData.append("bidRecapGrandTotal", bidRecapGrandTotal );
 
 			if (action == "insert") {
-				data["createdBy"]   = sessionID;
-				data["createdAt"]   = dateToday();
+				formData.append("createdBy", sessionID);
+				formData.append("createdAt", dateToday());
 			} else if (action == "update") {
-				data["bidRecapID"] = id;
+				formData.append("bidRecapID", id);
 			}
 
 			if (method == "submit") {
-				data["submittedAt"] = dateToday();
+				formData.append("submittedAt", dateToday());
 				if (approversID) {
-					data["approversID"]    = approversID;
-					data["bidRecapStatus"] = 1;
+					formData.append("approversID", approversID);
+					formData.append("bidRecapStatus", 1);
 				} else {  // AUTO APPROVED - IF NO APPROVERS
-					data["approversID"]      = sessionID;
-					data["approversStatus"]  = 2;
-					data["approversDate"]    = dateToday();
-					data["bidRecapStatus"] 	 = 2;
+					formData.append("approversID", sessionID);
+					formData.append("approversStatus", 2);
+					formData.append("approversDate", dateToday());
+					formData.append("bidRecapStatus", 2);
 				}
 			}
 
 			$(".itemTableRow").each(function(i, obj) {
-				var requestItemID 			= $(this).find(".itemcode").attr("requestitem");
-				var requestItemsData 		= getTableData("ims_request_items_tbl",
-															`costEstimateID,inventoryValidationID,itemID,itemName,itemDescription,itemUom,quantity,files,brandName`,
-															"requestItemID="+requestItemID); 
-				var temp = {
-					costEstimateID: 		requestItemsData[0].costEstimateID,
-					inventoryValidationID:	requestItemsData[0].inventoryValidationID,
-					category:				$(this).attr("category"),
-					inventoryVendorID:		$(this).find(".itemcode").attr("vendorID"),
-					inventoryVendorName:	$(this).find(".itemcode").attr("vendorName"),
-					itemID:					requestItemsData[0].itemID,
-					itemname:				requestItemsData[0].itemName,
-					itemDescription:		requestItemsData[0].itemDescription,
-					itemUom:				requestItemsData[0].itemUom,
-					quantity:				requestItemsData[0].quantity,
-					brandName:				requestItemsData[0].brandName,
-					stocks:					$(this).find(".stocks").text(),
-					forPurchase:			$(this).find(".forpurchase").text(),
-					file:					requestItemsData[0].files,
-					unitCost:				$(this).find(".unitCost").text().replaceAll("₱","").replaceAll(",",""),
-					totalCost:				$(this).find(".totalCost").text().replaceAll("₱","").replaceAll(",",""),
-					createdBy: 				sessionID,
-					updatedBy:				sessionID
-				};
-				data[`items`].push(temp);
+				const requestItemID = $(this).attr("requestitemid");
+				const categoryType 	= $(this).find(".table-row-classification") ? "Project Phase" : "Materials and Equipment";
+				const vendorID 		= $(this).attr("vendorid");
+				const vendorName 	= $(this).attr("vendorname");
+				const unitCost		= $(this).find(".item-unit-cost").text().replace("₱ ","").replaceAll(",","") || $(this).find(".item-unit-cost").text().replace("₱ ","");
+				const totalCost		= $(this).find(".totalcost").text().replace("₱ ","").replaceAll(",","") || $(this).find(".totalcost").text().replace("₱ ","");
+
+				formData.append(`items[${i}][requestItemID]`, requestItemID);
+				formData.append(`items[${i}][categoryType]`, categoryType);
+				formData.append(`items[${i}][vendorID]`, vendorID);
+				formData.append(`items[${i}][vendorName]`, vendorName);
+				formData.append(`items[${i}][unitCost]`, unitCost);
+				formData.append(`items[${i}][totalCost]`, totalCost);
 			});
 		} 
-		return data;
+
+		
+
+		return isObject ? data : formData;
 	}
-	// ----- END GET Inventory Validation DATA -----
+	// ----- END GET PURCHASE REQUEST DATA -----
 
 
     // ----- OPEN ADD FORM -----
@@ -1619,40 +1767,40 @@ $(document).ready(function() {
 	// ----- END VIEW DOCUMENT -----
 
 
-    // ----- VIEW DOCUMENT -----
+    // ----- REVISE DOCUMENT -----
 	$(document).on("click", "#btnRevise", function () {
-		const id = decryptString($(this).attr("bidRecapID")); 
+		const id                    = decryptString($(this).attr("bidRecapID"));
 		const fromCancelledDocument = $(this).attr("cancel") == "true";
 		viewDocument(id, false, true, fromCancelledDocument);
 	});
-	// ----- END VIEW DOCUMENT -----
+	// ----- END REVISE DOCUMENT -----
 
 
 	// ----- SAVE CLOSE FORM -----
 	$(document).on("click", "#btnBack", function () {
-		const id         				= decryptString($(this).attr("bidRecapID"));
-		const isFromCancelledDocument 	= $(this).attr("cancel") == "true";
-		const revise     				= $(this).attr("revise") == "true";
-		const employeeID 				= $(this).attr("employeeID");
-		const feedback   				= $(this).attr("code") || getFormCode("BRF", dateToday(), id);
-		const status     				= $(this).attr("status");
+		const id         = decryptString($(this).attr("bidRecapID"));
+		const isFromCancelledDocument = $(this).attr("cancel") == "true";
+		const revise     = $(this).attr("revise") == "true";
+		const employeeID = $(this).attr("employeeID");
+		const feedback   = $(this).attr("code") || getFormCode("BRF", dateToday(), id);
+		const status     = $(this).attr("status");
 
 		if (status != "false" && status != 0) {
 			
 			if (revise) {
-				const action = revise && !isFromCancelledDocument &&  "insert" || (id && feedback ? "update" : "insert");
-				const data   = getbidRecapData(action, "save", "0", id);
-				data["bidRecapStatus"] 	=	0;
-				if(!isFromCancelledDocument){
-					data["reviseBidRecapID"] = id;
-					delete data["bidRecapID"]; 
-				}else{
-					data["bidRecapID"] 	= id;
-					delete data["action"];
-					data["action"] 	= "update"; 
+				const action = revise && !isFromCancelledDocument && "insert" || (id ? "update" : "insert");
+				const data   = getBidRecapData(action, "save", "0", id);
+				data.append("bidRecapStatus", 0);
+				if (!isFromCancelledDocument) {
+					data.append("reviseBidRecapID", id);
+					data.delete("bidRecapID");
+				} else {
+					data.append("bidRecapID", id);
+					data.delete("action");
+					data.append("action", "update");
 				}
-	
-				savebidRecapID(data, "save", null, pageContent);
+
+				saveBidRecap(data, "save", null, pageContent);
 			} else {
 				$("#page_content").html(preloader);
 				pageContent();
@@ -1664,10 +1812,10 @@ $(document).ready(function() {
 
 		} else {
 			const action = id && feedback ? "update" : "insert";
-			const data   = getbidRecapData(action, "save", "0", id);
-			data["bidRecapStatus"] 	=	0;
-			
-			savebidRecapID(data, "save", null, pageContent);
+			const data   = getBidRecapData(action, "save", "0", id);
+			data.append("bidRecapStatus", 0);
+
+			saveBidRecap(data, "save", null, pageContent);
 		}
 	});
 	// ----- END SAVE CLOSE FORM -----
@@ -1675,50 +1823,80 @@ $(document).ready(function() {
 
     // ----- SAVE DOCUMENT -----
 	$(document).on("click", "#btnSave, #btnCancel", function () {
-		const id       					= decryptString($(this).attr("bidRecapID"));
-		const isFromCancelledDocument 	= $(this).attr("cancel") == "true";
-		const revise   					= $(this).attr("revise") == "true";
-		const feedback 					= $(this).attr("code") || getFormCode("BRF", dateToday(), id);
-		const action   					= revise && !isFromCancelledDocument && "insert" || (id && feedback ? "update" : "insert");
-		const data     					= getbidRecapData(action, "save", "0", id);
-		data["bidRecapStatus"] 	=	0;
+		const id       = decryptString($(this).attr("bidRecapID"));
+		const isFromCancelledDocument = $(this).attr("cancel") == "true";
+		const revise   = $(this).attr("revise") == "true";
+		const feedback = $(this).attr("code") || getFormCode("BRF", dateToday(), id);
+		const action   = revise && !isFromCancelledDocument && "insert" || (id ? "update" : "insert");
+		const data     = getBidRecapData(action, "save", "0", id);
+		data.append("bidRecapStatus", 0);
+
 		if (revise) {
-			if(!isFromCancelledDocument){
-				data["reviseBidRecapID"] = id;
-				delete data["bidRecapID"]; 
-			}else{
-				data["bidRecapID"] 	= id;
-				delete data["action"];
-				data["action"] 	= "update"; 
+			if (!isFromCancelledDocument) {
+				data.append("reviseBidRecapID", id);
+				data.delete("bidRecapID");
+			} else {
+				data.append("bidRecapID", id);
+				data.delete("action");
+				data.append("action", "update");
 			}
-		}	
-		savebidRecapID(data, "save", null, pageContent);
+		}
+
+		saveBidRecap(data, "save", null, pageContent);
 	});
 	// ----- END SAVE DOCUMENT -----
+
+	
+	// ----- REMOVE IS-VALID IN TABLE -----
+	function removeIsValid(element = "table") {
+		$(element).find(".validated, .is-valid, .no-error").removeClass("validated")
+		.removeClass("is-valid").removeClass("no-error");
+	}
+	// ----- END REMOVE IS-VALID IN TABLE -----
+
+
+	// ----- VALIDATE TABLE -----
+	function validateTableItems() {
+		let flag = 0;
+		$(".itemTableRow").each(function(){
+			let unitcost = $(this).find(".item-unit-cost").text().replaceAll("₱ ");
+			if(parseFloat(unitcost) < 1){
+				flag += 1;
+			}
+		});
+
+		if (flag > 0) {
+			showNotification("warning2", `Please review the item price on <strong>Inventory Price List</strong>.`);
+		}
+		return flag > 0 ? false : true;
+	}
+	// ----- END VALIDATE TABLE -----
 
 
     // ----- SUBMIT DOCUMENT -----
 	$(document).on("click", "#btnSubmit", function () {
-		const id           				= decryptString($(this).attr("bidRecapID"));
-		const isFromCancelledDocument 	= $(this).attr("cancel") == "true";
-		const revise       				= $(this).attr("revise") == "true";
-		const validate     				= validateForm("form_bid_recap");
+		const id            = decryptString($(this).attr("bidRecapID"));
+		const isFromCancelledDocument = $(this).attr("cancel") == "true";
+		const revise        = $(this).attr("revise") == "true";
+		const validate      = validateForm("form_bid_recap");
+		const validateItems = validateTableItems();
+		removeIsValid("#tableRequestItems");
 
-		if (validate) {
+		if (validate && validateItems) {
 			const action = revise && !isFromCancelledDocument && "insert" || (id ? "update" : "insert");
-			const data   = getbidRecapData(action, "submit", "1", id);
+			const data   = getBidRecapData(action, "submit", "1", id);
 
 			if (revise) {
-				if(!isFromCancelledDocument){
-					data["reviseBidRecapID"] = id;
-					delete data["bidRecapID"];  
+				if (!isFromCancelledDocument) {
+					data.append("reviseBidRecapID", id);
+					data.delete("bidRecapID");
 				}
 			}
 
 			let approversID = "", approversDate = "";
-			for (var i of Object.keys(data)) {
-				if (i == "approversID")   approversID   = data[i];
-				if (i == "approversDate") approversDate = data[i];
+			for (var i of data) {
+				if (i[0] == "approversID")   approversID   = i[1];
+				if (i[0] == "approversDate") approversDate = i[1];
 			}
 
 			const employeeID = getNotificationEmployeeID(approversID, approversDate, true);
@@ -1732,16 +1910,8 @@ $(document).ready(function() {
 					employeeID,
 				};
 			}
-		
-			if(priceListValidation.length > 0){
-				priceListValidation.map(items=>{
-					var splitItems = items.split("|");
-					showNotification("warning2",
-					`Please set item code <strong>${getFormCode("ITM",moment(splitItems[0]), splitItems[1])}</strong> into Item price list module to proceed in this proccess`)
-				});
-			}else{
-				savebidRecapID(data, "submit", notificationData, pageContent);
-			}
+
+			saveBidRecap(data, "submit", notificationData, pageContent);
 		}
 	});
 	// ----- END SUBMIT DOCUMENT -----
@@ -1752,35 +1922,30 @@ $(document).ready(function() {
 		const id     = decryptString($(this).attr("bidRecapID"));
 		const status = $(this).attr("status");
 		const action = "update";
-		const data   = getbidRecapData(action, "cancelform", "4", id, status);
+		const data   = getBidRecapData(action, "cancelform", "4", id, status);
 
-		savebidRecapID(data, "cancelform", null, pageContent);
+		saveBidRecap(data, "cancelform", null, pageContent);
 	});
 	// ----- END CANCEL DOCUMENT -----
 
 
     // ----- APPROVE DOCUMENT -----
 	$(document).on("click", "#btnApprove", function () {
-		const id       		= decryptString($(this).attr("bidRecapID"));
-		const feedback 		= $(this).attr("code") || getFormCode("SCH", dateToday(), id);
-		let tableData  		= getTableData("ims_bid_recap_tbl", "", "bidRecapID = " + id);
-		let thisCondition 	= false;
-		
-			
-
+		const id       = decryptString($(this).attr("bidRecapID"));
+		const feedback = $(this).attr("code") || getFormCode("BRF", dateToday(), id);
+		let tableData  = getTableData("ims_bid_recap_tbl", "", "bidRecapID = " + id);
 
 		if (tableData) {
-			let bidRecapID  = tableData[0].bidRecapID;
 			let approversID     = tableData[0].approversID;
 			let approversStatus = tableData[0].approversStatus;
 			let approversDate   = tableData[0].approversDate;
 			let employeeID      = tableData[0].employeeID;
 			let createdAt       = tableData[0].createdAt;
 
-			let data = getbidRecapData("update", "approve", "2", id);
-			data["approversStatus"]	= updateApproveStatus(approversStatus, 2);
+			let data = getBidRecapData("update", "approve", "2", id);
+			data.append("approversStatus", updateApproveStatus(approversStatus, 2));
 			let dateApproved = updateApproveDate(approversDate)
-			data["approversDate"]	= dateApproved;
+			data.append("approversDate", dateApproved);
 
 			let status, notificationData;
 			if (isImLastApprover(approversID, approversDate)) {
@@ -1793,7 +1958,6 @@ $(document).ready(function() {
 					notificationType:        7,
 					employeeID,
 				};
-				thisCondition = true;
 			} else {
 				status = 1;
 				notificationData = {
@@ -1806,9 +1970,9 @@ $(document).ready(function() {
 				};
 			}
 
-			data["bidRecapStatus"]	= status;
-			savebidRecapID(data, "approve", notificationData, pageContent, bidRecapID);
-		
+			data.append("bidRecapStatus", status);
+
+			saveBidRecap(data, "approve", notificationData, pageContent);
 		}
 	});
 	// ----- END APPROVE DOCUMENT -----
@@ -1820,7 +1984,7 @@ $(document).ready(function() {
 		const feedback = $(this).attr("code") || getFormCode("BRF", dateToday(), id);
 
 		$("#modal_bid_recap_content").html(preloader);
-		$("#modal_bid_recap .page-title").text("DENY BID RECAP");
+		$("#modal_bid_recap .page-title").text("DENY PURCHASE REQUEST");
 		$("#modal_bid_recap").modal("show");
 		let html = `
 		<div class="modal-body">
@@ -1839,10 +2003,10 @@ $(document).ready(function() {
 			</div>
 		</div>
 		<div class="modal-footer text-right">
-			<button class="btn btn-danger" id="btnRejectConfirmation"
-			bidRecapID="${id}"
+			<button type="button" class="btn btn-danger px-5 p-2" id="btnRejectConfirmation"
+			bidRecapID="${encryptString(id)}"
 			code="${feedback}"><i class="far fa-times-circle"></i> Deny</button>
-			<button class="btn btn-cancel" data-dismiss="modal"><i class="fas fa-ban"></i> Cancel</button>
+			<button type="button" class="btn btn-cancel btnCancel px-5 p-2" data-dismiss="modal"><i class="fas fa-ban"></i> Cancel</button>
 		</div>`;
 		$("#modal_bid_recap_content").html(html);
 	});
@@ -1859,14 +2023,14 @@ $(document).ready(function() {
 				let approversDate   = tableData[0].approversDate;
 				let employeeID      = tableData[0].employeeID;
 
-				let data = {};
-				data["action"]			= "update";
-				data["method"]			= "deny";
-				data["bidRecapID"]		= id;
-				data["approversStatus"]	= updateApproveStatus(approversStatus, 3);
-				data["approversDate"]	= updateApproveDate(approversDate);
-				data["bidRecapRemarks"]	= $("[name=bidRecapRemarks]").val()?.trim();
-				data["updatedBy"]		= sessionID;
+				let data = new FormData;
+				data.append("action", "update");
+				data.append("method", "deny");
+				data.append("bidRecapID", id);
+				data.append("approversStatus", updateApproveStatus(approversStatus, 3));
+				data.append("approversDate", updateApproveDate(approversDate));
+				data.append("bidRecapRemarks", $("[name=bidRecapRemarks]").val()?.trim());
+				data.append("updatedBy", sessionID);
 
 				let notificationData = {
 					moduleID:                40,
@@ -1877,24 +2041,24 @@ $(document).ready(function() {
 					employeeID,
 				};
 
-				savebidRecapID(data, "deny", notificationData, pageContent);
+				saveBidRecap(data, "deny", notificationData, pageContent);
 				$("[redirect=forApprovalTab]").length > 0 && $("[redirect=forApprovalTab]").trigger("click");
 			} 
 		} 
 	});
 	// ----- END REJECT DOCUMENT -----
 
+
 	// ----- DROP DOCUMENT -----
 	$(document).on("click", "#btnDrop", function() {
-		const bidRecapID = decryptString($(this).attr("bidRecapID"));
-		const feedback       = $(this).attr("code") || getFormCode("BRF", dateToday(), id);
-
 		const id = decryptString($(this).attr("bidRecapID"));
-		let data = {
-			bidRecapID : id, action:"update", method: "drop", updatedBy: sessionID
-		};
+		let data = new FormData;
+		data.append("bidRecapID", id);
+		data.append("action", "update");
+		data.append("method", "drop");
+		data.append("updatedBy", sessionID);
 
-		savebidRecapID(data, "drop", null, pageContent);
+		saveBidRecap(data, "drop", null, pageContent);
 	})
 	// ----- END DROP DOCUMENT -----
 
@@ -1949,161 +2113,6 @@ $(document).ready(function() {
 		return html;
 	}
 	// ----- END APPROVER STATUS --
-
-
-    // GETTING REQUEST ITEMS 
-        function requestItemData(id, type, readOnly = false, requestID = null){
-			let html = "", totalRequestedQty=0, totalStocksQty=0, totalForPurchaseQty=0, totalUnitCost=0, grandTotalCost=0;
-			let joinedTableData = [], vendorArr = [];
-			let condition = requestID ? requestID : `inventoryValidationID='${id}' AND bidRecapID IS NULL`;
-            let tableData = getTableData("ims_request_items_tbl JOIN ims_inventory_item_tbl USING(itemID)",
-										`requestItemID, inventoryValidationID , bidRecapID, 
-										ims_inventory_item_tbl.itemID AS itemID, categoryType ,ims_inventory_item_tbl.createdAt AS createdAt ,
-										ims_request_items_tbl.itemName AS itemName, ims_request_items_tbl.itemDescription AS itemDescription,
-										ims_request_items_tbl.inventoryVendorID AS inventoryVendorID, ims_request_items_tbl.inventoryVendorName AS inventoryVendorName,
-										itemUom,quantity,stocks,forPurchase,files,unitCost,totalCost`,
-										`${condition} AND categoryType='${type}'`);
-			if(tableData.length > 0){
-						tableData.map(items=>{
-							var tempData = items;
-							var priceListArray;
-								if(readOnly){
-									priceListArray = tableData.filter(thisItems => thisItems.itemID == items.itemID);
-								}else{
-									priceListArray = itemPriceListData.filter(priceListItems => priceListItems.itemID == items.itemID  && priceListItems.preferred == 1);	
-								}
-							var priceListCondition          = priceListArray.length < 1;
-							priceListCondition ? priceListValidation.push(tempData.createdAt+"|"+tempData.itemID) : ``;
-							tempData["inventoryVendorID"] 	=  !priceListCondition ? priceListArray[0].inventoryVendorID 	: `-`;
-							tempData["inventoryVendorName"] =  !priceListCondition ? priceListArray[0].inventoryVendorName 	: `-`;
-							tempData["vendorCurrentPrice"] 	=  !priceListCondition ? (priceListArray[0].vendorCurrentPrice || priceListArray[0].unitCost) 	: `0`;
-							!priceListCondition ? vendorArr.push(priceListArray[0].inventoryVendorID) : ``;
-							joinedTableData.push(tempData);
-						});
-						let newSetVendorArr = [...new Set(vendorArr)];
-						newSetVendorArr.map((items,index)=>{
-							var vendorRequested=0, vendorStocks=0, vendorForPurchase=0, vendorUnitCost=0, vendorTotalCost=0;
-							let vendorItemsArr 		= joinedTableData.filter(joinedItems => joinedItems.inventoryVendorID == items && joinedItems.forPurchase > 0.00);
-							let vendorItemsLength 	= vendorItemsArr.length;
-							let vendorRowspanArr	= [];
-							let tfooter 			= false;
-							
-								// MAPPING FOR THE ROWSPAN;
-								
-									vendorItemsArr.map((items,index)=>{
-										var tempData = index == 0 && items.forPurchase > 0.01 ? `<td class="font-weight-bold" rowspan="${vendorItemsLength}">
-																		${items.inventoryVendorName} <br> <small>${getFormCode("VEN", items.createdAt, items.inventoryVendorID)}</small>
-																		</td>` : ``;
-										vendorRowspanArr.push(tempData);
-									});
-								// END MAPPING FOR THE ROWSPAN;
-								
-
-								// MAPPING THE ITEMS OF TABLE DATA
-									html += vendorItemsArr.map((joinedItems,joinedIndex)=>{
-										if(joinedItems.forPurchase > 0.01){		
-											var returnData 	= "";
-												var unitCost 	= parseFloat(joinedItems.vendorCurrentPrice);
-												var totalCost 	= parseFloat(joinedItems.forPurchase) * parseFloat(unitCost);
-												var files = joinedItems.files ? `<a class="filename" href="${base_url+"assets/upload-files/request-items/"+joinedItems.files}" 
-																					target="_blank">${joinedItems.files}
-																			</a>`:"-";
-												
-														returnData += `
-																<tr class="itemTableRow" category="${type}">
-																	${vendorRowspanArr[joinedIndex]}
-																	<td>
-																		<div class="itemcode" 
-																		requestitem="${joinedItems.requestItemID}"
-																		vendorID="${joinedItems.inventoryVendorID}"
-																		vendorName="${joinedItems.inventoryVendorName}"
-																		itemid="${joinedItems.itemID}" 
-																		inventoryValidationID="${joinedItems.inventoryValidationID}">${getFormCode("ITM",moment(joinedItems.createdAt), joinedItems.itemID)}</div>
-																	</td>
-																	<td>
-																		<div class="itemname">${joinedItems.itemName}</div>
-																	</td>
-																	<td>
-																		<div class="uom">${joinedItems.itemUom}</div>
-																	</td>
-																	<td class="text-center">
-																		<div class="qtyrequested">${joinedItems.quantity}</div>
-																	</td>
-																	<td class="text-center">
-																		<div class="stocks">${joinedItems.stocks || "0"}</div>
-																	</td>
-																	<td class="text-center">
-																		<div class="forpurchase">${joinedItems.forPurchase || "0"}</div>
-																	</td>
-																	<td>
-																		<div class="file">
-																			${files}
-																		</div>
-																	</td>
-																	<td>
-																		<div class="unitCost text-right">${formatAmount(unitCost,true)}</div>
-																	</td>
-																	<td>
-																		<div class="totalCost text-right">${formatAmount(totalCost,true)}</div>
-																	</td>
-																</tr>`;
-
-												// ADD THE FOLLOWING;
-													vendorRequested		+= parseFloat(joinedItems.quantity), 
-													vendorStocks		+= parseFloat(joinedItems.stocks), 
-													vendorForPurchase	+= parseFloat(joinedItems.forPurchase), 
-													vendorUnitCost		+= parseFloat(unitCost), 
-													vendorTotalCost		+= parseFloat(totalCost);
-													tfooter				= true;
-												return returnData;
-												
-											}
-									});
-								// END  MAPPING THE ITEMS OF TABLE DATA
-
-								// TABLE ROW FOR TOTALS
-								if(tfooter){
-									// html += `
-									// 		<tr class="itemTableRowTotal" category="${type}" style="background-color: #dc3450;">
-									// 			<td class="font-weight-bold text-light" colspan="4">SUBTOTAL</td>
-									// 			<td class="font-weight-bold text-light text-center">${parseFloat(vendorRequested).toFixed(2)}</td>
-									// 			<td class="font-weight-bold text-light text-center">${parseFloat(vendorStocks).toFixed(2)}</td>
-									// 			<td class="font-weight-bold text-light text-center">${parseFloat(vendorForPurchase).toFixed(2)}</td>
-									// 			<td class="font-weight-bold text-light">-</td>
-									// 			<td class="font-weight-bold text-light text-right">${formatAmount(vendorUnitCost,true)}</td>
-									// 			<td class="font-weight-bold text-light text-right"><span class="totalCost" category="${type}">${formatAmount(vendorTotalCost,true)}</span></td>
-									// 		</tr>`;
-									html += `	<tr class="itemTableRowTotal" category="${type}" style="background-color: #dc3450;">
-													<td class="font-weight-bold text-light" colspan="9">SUBTOTAL</td>
-													<td class="font-weight-bold text-light text-right"><span class="totalCost" category="${type}">${formatAmount(vendorTotalCost,true)}</span></td>
-												</tr>`;
-								}
-								// END TABLE ROW FOR TOTALS
-
-						}) // END MAPPING OF "newSetVendorArr"
-			}else{
-				html += `	<tr>
-								<td class="text-dark text-center" colspan="10">No data available in table</td>
-							</tr>`;
-			}
-
-			var noData = `	<tr>
-								<td class="text-dark text-center" colspan="10">No data available in table</td>
-							</tr>`;
-            return html || noData;
-        }
-    // END GETTING REQUEST ITEMS
-
-
-	// CHECK IF THE DOCUMENT IS ALREADY REVISED
-	function isRevised(id = null){
-		let revised = false;
-		var tableData = getTableData("ims_bid_recap_tbl","inventoryValidationID",`inventoryValidationID='${id}' AND  bidRecapStatus != '4'`);
-		revised = tableData.length > 0 ? true : false;
-		// console.log(tableData);
-		return revised; 
-	}
-	// END CHECK IF THE DOCUMENT IS ALREADY REVISED
 })
 
 
@@ -2166,18 +2175,21 @@ function getConfirmation(method = "submit") {
 	})
 }
 
-function savebidRecapID(data = null, method = "submit", notificationData = null, callback = null, lastApproverID = 0) {
-	let thisReturnData = false;
+function saveBidRecap(data = null, method = "submit", notificationData = null, callback = null) {
 	if (data) {
 		const confirmation = getConfirmation(method);
 		confirmation.then(res => {
 			if (res.isConfirmed) {
 				$.ajax({
-					url:	base_url+`ims/bid_recap/save_bid_recap`,
-					method: "POST",
-					async:  false,
-					dataType:    "json",
+					method:      "POST",
+					url:         `bid_recap/saveBidRecap`,
 					data,
+					processData: false,
+					contentType: false,
+					global:      false,
+					cache:       false,
+					async:       false,
+					dataType:    "json",
 					beforeSend: function() {
 						$("#loader").show();
 					},
@@ -2202,24 +2214,10 @@ function savebidRecapID(data = null, method = "submit", notificationData = null,
 							swalTitle = `${getFormCode("BRF", dateCreated, insertedID)} denied successfully!`;
 						} else if (method == "drop") {
 							swalTitle = `${getFormCode("BRF", dateCreated, insertedID)} dropped successfully!`;
-						}
+						}	
 		
 						if (isSuccess == "true") {
 							setTimeout(() => {
-								$("#loader").hide();
-								closeModals();
-								Swal.fire({
-									icon:              "success",
-									title:             swalTitle,
-									showConfirmButton: false,
-									timer:             2000,
-								});
-								callback && callback();
-								
-								if (method == "approve" || method == "deny") {
-									$("[redirect=forApprovalTab]").length > 0 && $("[redirect=forApprovalTab]").trigger("click")
-								}
-
 								// ----- SAVE NOTIFICATION -----
 								if (notificationData) {
 									if (Object.keys(notificationData).includes("tableID")) {
@@ -2231,6 +2229,19 @@ function savebidRecapID(data = null, method = "submit", notificationData = null,
 								}
 								// ----- END SAVE NOTIFICATION -----
 
+								$("#loader").hide();
+								closeModals();
+								Swal.fire({
+									icon:              "success",
+									title:             swalTitle,
+									showConfirmButton: false,
+									timer:             2000,
+								});
+								callback && callback();
+
+								if (method == "approve" || method == "deny") {
+									$("[redirect=forApprovalTab]").length > 0 && $("[redirect=forApprovalTab]").trigger("click")
+								}
 							}, 500);
 						} else {
 							setTimeout(() => {
@@ -2244,10 +2255,9 @@ function savebidRecapID(data = null, method = "submit", notificationData = null,
 							}, 500);
 						}
 					},
-					error: function(xhr) {
+					error: function() {
 						setTimeout(() => {
 							$("#loader").hide();
-							console.log(xhr.responseText);
 							showNotification("danger", "System error: Please contact the system administrator for assistance!");
 						}, 500);
 					}
@@ -2259,13 +2269,12 @@ function savebidRecapID(data = null, method = "submit", notificationData = null,
 			} else {
 				if (res.dismiss == "cancel" && method != "submit") {
 					if (method != "deny") {
-							if (method != "cancelform") {
-								callback && callback();
-							}
-						} else {
-							$("#modal_bid_recap").text().length > 0 && $("#modal_bid_recap").modal("show");
+						if (method != "cancelform") {
+							callback && callback();
 						}
-					
+					} else {
+						$("#modal_bid_recap").text().length > 0 && $("#modal_bid_recap").modal("show");
+					}
 				} else if (res.isDismissed) {
 					if (method == "deny") {
 						$("#modal_bid_recap").text().length > 0 && $("#modal_bid_recap").modal("show");
@@ -2273,8 +2282,10 @@ function savebidRecapID(data = null, method = "submit", notificationData = null,
 				}
 			}
 		});
+
+		
 	}
-	return thisReturnData;
+	return false;
 }
 
 // --------------- END DATABASE RELATION ---------------
