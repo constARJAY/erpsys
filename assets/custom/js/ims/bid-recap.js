@@ -830,14 +830,17 @@ $(document).ready(function() {
 					itemUom            			  = "",
 					unitCost           			  = 0,
 					totalCost          			  = 0,
-					preferredInventoryVendorPrice = 0
+					preferredInventoryVendorPrice = 0,
+					inventoryValidationID 		  = "",
+					inventoryVendorName			  = ""
 				} = data["items"][index];
-
+				vendorName 	= vendorName == "undefined" ? inventoryVendorName : vendorName
+				vendorID 	= vendorID == "undefined" ? inventoryVendorName : vendorID
 				var tdVendorName 		= index == 0 ? `<td rowspan="${rowspan}" >${vendorName}</td>` : ``;
 				var tdVendorTotalCost 	= index == 0 ? `<td rowspan="${rowspan}" class="text-right">${formatAmount(vendorTotalCost, true)}</td>` : ``;
 				var tdClassification 	= !isMaterialEquipment ? `<td class="table-row-classification">${itemClassification || "-"}</td>` : "";
 				var preferredTotalCost 	= parseFloat(forPurchase) * parseFloat(preferredInventoryVendorPrice);
-
+				
 				html += `
 				<tr class="itemTableRow" requestItemID="${requestItemID}" vendorid="${vendorID}" vendorname="${vendorName}">
 					${tdVendorName}
