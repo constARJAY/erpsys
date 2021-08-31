@@ -154,6 +154,7 @@ $(document).ready(function() {
 		"",
 		`inventoryValidationStatus = 2`
 	);
+	let validateVendors = 0;
 	// ----- END GLOBAL VARIABLE - REUSABLE ----- 
 
 
@@ -803,17 +804,23 @@ $(document).ready(function() {
 		let rowspan 		= data.rowspan;
 		let vendorName 		= data.vendorName;
 		let vendorTotalCost = 0;
-			
-
+		
+		
+		
 		if (data) {
 			let tableRowCondition 	= data["items"].length;
 
 			for (let index = 0; index < tableRowCondition; index++) {
+				
 				var {
+					itemName           			  = "-",
 					forPurchase        			  = 0,
 					preferredInventoryVendorPrice = 0
 				} = data["items"][index];
-				var preferredTotalCost 	= parseFloat(forPurchase) * parseFloat(preferredInventoryVendorPrice);
+
+				
+
+				var preferredTotalCost 	= parseFloat(forPurchase) * parseFloat(preferredInventoryVendorPrice || 0);
 				vendorTotalCost 		+= parseFloat(preferredTotalCost);
 			}
 
@@ -834,12 +841,19 @@ $(document).ready(function() {
 					inventoryValidationID 		  = "",
 					inventoryVendorName			  = ""
 				} = data["items"][index];
-				vendorName 	= vendorName == "undefined" ? inventoryVendorName : vendorName
+				vendorName 	= inventoryValidationID ? inventoryVendorName : (vendorName || "-");
+
+				if(!vendorName){
+					showNotification("warning2",`Please select a preferred vendor for this item (<strong>${itemName}</strong>) on item price list first`);
+					$("#btnSubmit").prop("disabled",true);
+					validateVendors ++;
+				}
+
 				vendorID 	= vendorID == "undefined" ? inventoryVendorName : vendorID
 				var tdVendorName 		= index == 0 ? `<td rowspan="${rowspan}" >${vendorName}</td>` : ``;
 				var tdVendorTotalCost 	= index == 0 ? `<td rowspan="${rowspan}" class="text-right">${formatAmount(vendorTotalCost, true)}</td>` : ``;
 				var tdClassification 	= !isMaterialEquipment ? `<td class="table-row-classification">${itemClassification || "-"}</td>` : "";
-				var preferredTotalCost 	= parseFloat(forPurchase) * parseFloat(preferredInventoryVendorPrice);
+				var preferredTotalCost 	= parseFloat(forPurchase) * parseFloat(preferredInventoryVendorPrice || 0);
 				
 				html += `
 				<tr class="itemTableRow" requestItemID="${requestItemID}" vendorid="${vendorID}" vendorname="${vendorName}">
@@ -1229,6 +1243,11 @@ $(document).ready(function() {
 						$(`#tableRequestItemContent`).html(requestItems);
 						$(`#costSummary`).html(getCostSummary());
 					}, 500);
+					if(validateVendors > 0){
+						$("#btnSubmit").prop("disabled", true);
+					}else{
+						$("#btnSubmit").prop("disabled", false);
+					}
 			}, 200);
 		// }
 
@@ -1601,6 +1620,13 @@ $(document).ready(function() {
 			}
 			// ----- END NOT ALLOWED FOR UPDATE -----
 
+
+			// ------- VALIDATE VENDORS;
+				if(validateVendors > 0){
+					$("#btnSubmit").prop("disabled", true);
+				}else{
+					$("#btnSubmit").prop("disabled", false);
+				}
 			return html;
 		}, 300);
 	}

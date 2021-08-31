@@ -190,8 +190,8 @@ $(document).ready(function () {
 		if (userRoleData) {
 			html = `
             <div class="col-md-3 col-sm-12">
-                <div class="table-responsive overflow-auto" style="
-				height: 640px; id="user_role_content">
+                <div class="table-responsive overflow-auto" id="user_role_content" style="
+				height: 640px;">
                     ${getUserRoleContent(userRoleData)}
                 </div>
             </div>
@@ -291,6 +291,7 @@ $(document).ready(function () {
 
 // ----- GET INVENTORY ITEM -----
     function getExaminationList(id = null, isProject = true, display = true ,storageID = null) {
+		//alert(id);
         let html   = `<option selected disabled>Select Employee Name</option>`;
 		const attr = isProject ? "[project=true]" : "";
 
@@ -324,6 +325,10 @@ $(document).ready(function () {
 		$(`#designationName${index}`).text(designationName);
 		$(`#designationName${index}`).attr("designationID",designationID);
 	});
+	$("[name=employeeID]").each(function(i, obj) {
+		$(this).val() && $(this).trigger("change");
+	}) 
+
 // ----- GET ITEM ROW -----
 function getItemRow(item = {}) {
 	let {
@@ -331,10 +336,11 @@ function getItemRow(item = {}) {
 		orientationID     	= "",
 		employeeID 			="",
 		orientationName		="",
-		designationName		=""
+		designationName		="",
+		designationID		=""
 	} = item;
 
-  
+	
 	let html = "";
 
 	
@@ -362,7 +368,7 @@ function getItemRow(item = {}) {
 			</td>
 			<td>
 			 <div>
-			 <span class="designationName" id="designationName" name="designationName">${designationName}</span>
+			 <span class="designationName" id="designationName" designationID="${designationID}" name="designationName">${designationName}</span>
 			 </div>
 			</td>
 			<td>

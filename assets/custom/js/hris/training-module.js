@@ -1,5 +1,5 @@
 $(document).ready(function () {
-
+	const allowedUpdate = isUpdateAllowed(123);
 	// ----- MODULE APPROVER -----
 	const moduleApprover = getModuleApprover("Training and Development");
 	// ----- END MODULE APPROVER -----
@@ -23,10 +23,23 @@ $(document).ready(function () {
 	}
 	// ---- END GET EMPLOYEE DATA -----
 
+	// ----- IS DOCUMENT REVISED -----
+	function isDocumentRevised(id = null) {
+		if (id) {
+			const revisedDocumentsID = getTableData(
+				"hris_training_development_module", 
+				"reviseTrainingDevelopmentModuleID", 
+				"reviseTrainingDevelopmentModuleID IS NOT NULL AND trainingDevelopmentModuleID  != 4");
+			return revisedDocumentsID.map(item => item.reviseTrainingDevelopmentModuleID).includes(id);
+		}
+		return false;
+	}
+	// ----- END IS DOCUMENT REVISED -----
+
 	
 	// ----- VIEW DOCUMENT -----
-	function viewDocument(view_id = false, readOnly = false) {
-		const loadData = (id) => {
+	function viewDocument(view_id = false, readOnly = false, isRevise = false, isFromCancelledDocument = false) {
+		const loadData = (id, isRevise = false, isFromCancelledDocument = false) => {
 			const tableData = getTableData("hris_training_development_module", "", "trainingDevelopmentModuleID=" + id);
 
 			if (tableData.length > 0) {
@@ -53,8 +66,13 @@ $(document).ready(function () {
 				}
 
 				if (isAllowed) {
-					pageContent(true, tableData, isReadOnly);
-					updateURL(encryptString(id));
+					if (isRevise && employeeID == sessionID) {
+						pageContent(true, tableData, isReadOnly, true, isFromCancelledDocument);
+						updateURL(encryptString(id), true, true);
+					} else {
+						pageContent(true, tableData, isReadOnly);
+						updateURL(encryptString(id));
+					}
 				} else {
 					pageContent();
 					updateURL();
@@ -67,8 +85,8 @@ $(document).ready(function () {
 		}
 
 		if (view_id) {
-			let id = decryptString(view_id);
-				id && isFinite(id) && loadData(id);
+			let id = view_id;
+				id && isFinite(id) && loadData(id, isRevise, isFromCancelledDocument);
 		} else {
 			let url   = window.document.URL;
 			let arr   = url.split("?view_id=");
@@ -77,17 +95,28 @@ $(document).ready(function () {
 				let id = decryptString(arr[1]);
 					id && isFinite(id) && loadData(id);
 			} else if (isAdd != -1) {
-				pageContent(true);
+				arr = url.split("?add=");
+				if (arr.length > 1) {
+					let id = decryptString(arr[1]);
+						id && isFinite(id) && loadData(id, true);
+				} else {
+					const isAllowed = isCreateAllowed(46);
+					pageContent(isAllowed);
+				}
 			}
 		}
 		
 	}
 
-	function updateURL(view_id = 0, isAdd = false) {
+	function updateURL(view_id = 0, isAdd = false, isRevise = false) {
 		if (view_id && !isAdd) {
 			window.history.pushState("", "", `${base_url}hris/training_development?view_id=${view_id}`);
-		} else if (!view_id && isAdd) {
-			window.history.pushState("", "", `${base_url}hris/training_development?add`);
+		} else if (isAdd) {
+			if (view_id && isRevise) {
+				window.history.pushState("", "", `${base_url}hris/training_development?add=${view_id}`);
+			} else {
+				window.history.pushState("", "", `${base_url}hris/training_development?add`);
+			}
 		} else {
 			window.history.pushState("", "", `${base_url}hris/training_development`);
 		}
@@ -186,14 +215,20 @@ $(document).ready(function () {
 	// ----- END HEADER CONTENT -----
 
 	// ----- HEADER BUTTON -----
-	function headerButton(isAdd = true, text = "Add") {
+	function headerButton(isAdd = true, text = "Add", isRevise = false, isFromCancelledDocument = false) {
 		let html;
 		if (isAdd) {
-			html = `
-            <button type="button" class="btn btn-default btn-add" id="btnAdd"><i class="icon-plus"></i> &nbsp;${text}</button>`;
+			if (isCreateAllowed(123)) {
+				html = `
+				<button type="button" class="btn btn-default btn-add" id="btnAdd"><i class="icon-plus"></i> &nbsp;${text}</button>`;
+			}
 		} else {
 			html = `
-            <button type="button" class="btn btn-default btn-light" id="btnBack"><i class="fas fa-arrow-left"></i> &nbsp;Back</button>`;
+            <button type="button" 
+				class="btn btn-default btn-light" 
+				id="btnBack"
+				revise="${isRevise}" 
+				cancel="${isFromCancelledDocument}"><i class="fas fa-arrow-left"></i> &nbsp;Back</button>`;
 		}
 		$("#headerButton").html(html);
 	}
@@ -409,7 +444,7 @@ $(document).ready(function () {
 	}
 
 	// ----- FORM BUTTONS -----
-	function formButtons(data = false) {
+	function formButtons(data = false, isRevise = false, isFromCancelledDocument = false) {
 		let button = "";
 		if (data) {
 
@@ -424,32 +459,91 @@ $(document).ready(function () {
 
 			let isOngoing = approversDate ? (approversDate.split("|").length > 0 ? true : false) : false;
 			if (employeeID === sessionID) {
-				if (trainingDevelopmentModuleStatus == 0) {
+				if (trainingDevelopmentModuleStatus == 0 || isRevise) {
 					// DRAFT
 					button = `
 					<button 
 						class="btn btn-submit px-5 p-2"  
 						id="btnSubmit" 
-						trainingDevelopmentModuleID="${trainingDevelopmentModuleID}"
-						code="${getFormCode("TRN", createdAt, trainingDevelopmentModuleID)}"><i class="fas fa-paper-plane"></i>
+						trainingDevelopmentModuleID="${encryptString(trainingDevelopmentModuleID)}"
+						code="${getFormCode("TRN", createdAt, trainingDevelopmentModuleID)}"
+						revise="${isRevise}"
+						cancel="${isFromCancelledDocument}"><i class="fas fa-paper-plane"></i>
 						Submit
-					</button>
-					<button 
-						class="btn btn-cancel px-5 p-2"
-						id="btncancelForm2" 
-						trainingDevelopmentModuleID="${trainingDevelopmentModuleID}"
-						code="${getFormCode("TRN", createdAt, trainingDevelopmentModuleID)}"><i class="fas fa-ban"></i> 
-						Cancel
 					</button>`;
+
+					if (isRevise) {
+						button += `
+						<button 
+							class="btn btn-cancel px-5 p-2"
+							id="btnCancel" 
+							trainingDevelopmentModuleID="${encryptString(trainingDevelopmentModuleID)}"
+							code="${getFormCode("TRN", createdAt, trainingDevelopmentModuleID)}"
+							revise="${isRevise}"
+							cancel="${isFromCancelledDocument}"><i class="fas fa-ban"></i> 
+							Cancel
+						</button>`;
+					} else {
+						button += `
+						<button type="button" 
+							class="btn btn-cancel px-5 p-2"
+							id="btnCancelForm" 
+							trainingDevelopmentModuleID="${encryptString(trainingDevelopmentModuleID)}"
+							code="${getFormCode("TRN", createdAt, trainingDevelopmentModuleID)}"
+							revise="${isRevise}"><i class="fas fa-ban"></i> 
+							Cancel
+						</button>`;
+					}
+
 				} else if (trainingDevelopmentModuleStatus == 1) {
+					// FOR APPROVAL
 					if (!isOngoing) {
 						button = `
 						<button 
 							class="btn btn-cancel px-5 p-2"
-							id="btncancelForm2" 
-							trainingDevelopmentModuleID="${trainingDevelopmentModuleID}"
-							code="${getFormCode("TRN", createdAt, trainingDevelopmentModuleID)}"><i class="fas fa-ban"></i> 
+							id="btnCancelForm" 
+							trainingDevelopmentModuleID="${encryptString(trainingDevelopmentModuleID)}"
+							code="${getFormCode("TRN", createdAt, trainingDevelopmentModuleID)}"
+							status="${trainingDevelopmentModuleStatus}"><i class="fas fa-ban"></i> 
 							Cancel
+						</button>`;
+					}
+				} else if (trainingDevelopmentModuleStatus == 2) {
+					// DROP
+					button = `
+					<button type="button" 
+						class="btn btn-cancel px-5 p-2"
+						id="btnDrop" 
+						trainingDevelopmentModuleID="${encryptString(trainingDevelopmentModuleID)}"
+						code="${getFormCode("TRN", createdAt, trainingDevelopmentModuleID)}"
+						status="${trainingDevelopmentModuleStatus}"><i class="fas fa-ban"></i> 
+						Drop
+					</button>`;
+				} else if (trainingDevelopmentModuleStatus == 3) {
+					// DENIED - FOR REVISE
+					if (!isDocumentRevised(trainingDevelopmentModuleID)) {
+						button = `
+						<button
+							class="btn btn-cancel px-5 p-2"
+							id="btnRevise" 
+							trainingDevelopmentModuleID="${encryptString(trainingDevelopmentModuleID)}"
+							code="${getFormCode("TRN", createdAt, trainingDevelopmentModuleID)}"
+							status="${trainingDevelopmentModuleStatus}"><i class="fas fa-clone"></i>
+							Revise
+						</button>`;
+					}
+				} else if (trainingDevelopmentModuleStatus == 4) {
+					// CANCELLED - FOR REVISE
+					if (!isDocumentRevised(trainingDevelopmentModuleID)) {
+						button = `
+						<button
+							class="btn btn-cancel px-5 p-2"
+							id="btnRevise" 
+							trainingDevelopmentModuleID="${encryptString(trainingDevelopmentModuleID)}"
+							code="${getFormCode("TRN", createdAt, trainingDevelopmentModuleID)}"
+							status="${trainingDevelopmentModuleStatus}"
+							cancel="true"><i class="fas fa-clone"></i>
+							Revise
 						</button>`;
 					}
 				}
@@ -474,7 +568,6 @@ $(document).ready(function () {
 					}
 				}
 			}
-
 		} else {
 			button = `
 			<button 
@@ -491,13 +584,14 @@ $(document).ready(function () {
 	}
 	// ----- END FORM BUTTONS -----
 	// ----- FORM CONTENT -----
-	function formContent(data = false, readOnly = false) {
+	function formContent(data = false, readOnly = false, isRevise = false, isFromCancelledDocument = false) {
 		$("#page_content").html(preloader);
+		readOnly = isRevise ? false : readOnly;
 
 		let {
 				trainingDevelopmentModuleID 				= "",
 				trainingDevelopmentSetupID 					= "",
-				revisetrainingDevelopmentModuleID 			= "",
+				reviseTrainingDevelopmentModuleID 			= "",
 				trainingDevelopmentModuleTrainee			="",
 				trainingDevelopmentModuleTopic 				= "",
 				trainingDevelopmentModuleTrainor			="",
@@ -512,6 +606,8 @@ $(document).ready(function () {
 				approversID 								= "",
 				approversStatus 							= "",
 				approversDate 								= "",
+				dateFrom                					= new Date,
+				dateTo                  					= new Date,
 				trainingDevelopmentModuleStatus 			= false,
 				submittedAt 								= false,
 				createdAt 									= false,
@@ -531,41 +627,64 @@ $(document).ready(function () {
 
 
 		$("#btnBack").attr("trainingDevelopmentModuleID", trainingDevelopmentModuleID);
+		$("#btnBack").attr("code", getFormCode("TRN", moment(createdAt), trainingDevelopmentModuleID));
 		$("#btnBack").attr("status", trainingDevelopmentModuleStatus);
 		$("#btnBack").attr("employeeID", employeeID);
+		$("#btnBack").attr("cancel", isFromCancelledDocument);
 
 		let disabled = readOnly ? "disabled" : "";
+		let button   = formButtons(data, isRevise, isFromCancelledDocument);
+
+		let reviseDocumentNo    = isRevise ? trainingDevelopmentModuleID  : reviseTrainingDevelopmentModuleID;
+		let documentHeaderClass = isRevise || reviseTrainingDevelopmentModuleID ? "col-lg-4 col-md-4 col-sm-12 px-1" : "col-lg-2 col-md-6 col-sm-12 px-1";
+		let documentDateClass   = isRevise || reviseTrainingDevelopmentModuleID ? "col-md-12 col-sm-12 px-0" : "col-lg-8 col-md-12 col-sm-12 px-1";
+		let documentReviseNo    = isRevise || reviseTrainingDevelopmentModuleID ? `
+		<div class="col-lg-4 col-md-4 col-sm-12 px-1">
+			<div class="card">
+				<div class="body">
+					<small class="text-small text-muted font-weight-bold">Revised Document No.</small>
+					<h6 class="mt-0 text-danger font-weight-bold">
+						${getFormCode("TRN", createdAt, reviseDocumentNo)}
+					</h6>      
+				</div>
+			</div>
+		</div>` : "";
 		//let disabledmulti = trainingDevelopmentModuleTrainee ? "disabled" :"";
 		// /let disabled
-		let button = formButtons(data);
+		//let button = formButtons(data);
 
 		let html = `
         <div class="row px-2">
-            <div class="col-lg-2 col-md-6 col-sm-12 px-1">
+			${documentReviseNo}
+            <div class="${documentHeaderClass}">
                 <div class="card">
                     <div class="body">
                         <small class="text-small text-muted font-weight-bold">Document No.</small>
                         <h6 class="mt-0 text-danger font-weight-bold">
-						${trainingDevelopmentModuleID ? getFormCode("TRN", createdAt, trainingDevelopmentModuleID) : "---"}
+							${trainingDevelopmentModuleID && !isRevise ? getFormCode("TRN", createdAt, trainingDevelopmentModuleID) : "---"}
 						</h6>      
                     </div>
                 </div>
             </div>
-            <div class="col-lg-2 col-md-6 col-sm-12 px-1">
+            <div class="${documentHeaderClass}">
                 <div class="card">
                     <div class="body">
                         <small class="text-small text-muted font-weight-bold">Status</small>
-                        <h6 class="mt-0 font-weight-bold">${trainingDevelopmentModuleStatus ? getStatusStyle(trainingDevelopmentModuleStatus) : "---"}</h6>      
+                        <h6 class="mt-0 font-weight-bold">
+							${trainingDevelopmentModuleStatus && !isRevise ? getStatusStyle(trainingDevelopmentModuleStatus) : "---"}
+						</h6>      
                     </div>
                 </div>
             </div>
-            <div class="col-lg-8 col-md-12 col-sm-12 px-1">
+            <div class="${documentDateClass}">
                 <div class="row m-0">
                 <div class="col-lg-4 col-md-4 col-sm-12 px-1">
                     <div class="card">
                         <div class="body">
                             <small class="text-small text-muted font-weight-bold">Date Created</small>
-                            <h6 class="mt-0 font-weight-bold">${createdAt ? moment(createdAt).format("MMMM DD, YYYY hh:mm:ss A") : "---"}</h6>      
+                            <h6 class="mt-0 font-weight-bold">
+								${createdAt && !isRevise ? moment(createdAt).format("MMMM DD, YYYY hh:mm:ss A") : "---"}
+                            </h6>      
                         </div>
                     </div>
                 </div>
@@ -573,7 +692,9 @@ $(document).ready(function () {
                     <div class="card">
                         <div class="body">
                             <small class="text-small text-muted font-weight-bold">Date Submitted</small>
-                            <h6 class="mt-0 font-weight-bold">${submittedAt ? moment(submittedAt).format("MMMM DD, YYYY hh:mm:ss A") : "---"}</h6>      
+                            <h6 class="mt-0 font-weight-bold">
+								${submittedAt && !isRevise && !isRevise ? moment(submittedAt).format("MMMM DD, YYYY hh:mm:ss A") : "---"}
+							</h6>      
                         </div>
                     </div>
                 </div>
@@ -581,7 +702,9 @@ $(document).ready(function () {
                     <div class="card">
                         <div class="body">
                             <small class="text-small text-muted font-weight-bold">Date Approved</small>
-                            <h6 class="mt-0 font-weight-bold">${getDateApproved(trainingDevelopmentModuleStatus, approversID, approversDate)}</h6>      
+                            <h6 class="mt-0 font-weight-bold">
+								${getDateApproved(trainingDevelopmentModuleStatus, approversID, approversDate)}
+							</h6>      
                         </div>
                     </div>
                 </div>
@@ -591,7 +714,9 @@ $(document).ready(function () {
                 <div class="card">
                     <div class="body">
                         <small class="text-small text-muted font-weight-bold">Remarks</small>
-                        <h6 class="mt-0 font-weight-bold">${trainingDevelopmentModuleRemarks ? trainingDevelopmentModuleRemarks : "---"}</h6>      
+                        <h6 class="mt-0 font-weight-bold">
+							${trainingDevelopmentModuleRemarks && !isRevise ? trainingDevelopmentModuleRemarks : "---"}
+						</h6>      
                     </div>
                 </div>
             </div>
@@ -718,14 +843,8 @@ $(document).ready(function () {
 				<div class="col-md-4 col-sm-12">
 				<div class="form-group">
 					<label>Training module</label>
-					<input type="text"
-					   class="form-control"
-					   data-allowcharacters="[0-9][a-z][A-Z][ ][.][,][-][<]"
-					   id="trainingDevelopmentModuleFile"
-					   name="trainingDevelopmentModuleFile"
-					   value="${trainingDevelopmentModuleFile}"
-					   disabled>
-				   <div class="d-block invalid-feedback" id="invalid-trainingDevelopmentModuleFile"></div>
+					<input class="form-group" type="hidden" id="trainingDevelopmentModuleFile1">
+					<a class="form-control record" style="background : #e9ecef;" id="trainingDevelopmentModuleFile" name="trainingDevelopmentModuleFile" target="_blank">${trainingDevelopmentModuleFile}</a>
 				</div>
 			   </div>
 			   <div class="col-md-4 col-sm-12">
@@ -740,44 +859,83 @@ $(document).ready(function () {
 					  disabled>
 				  <div class="d-block invalid-feedback" id="invalid-trainingDevelopmentModuleDifficulty"></div>
 			   </div>
-			  </div>		
-            <div class="col-md-4 col-sm-12">
-                <div class="form-group">
-                    <label>Date ${!disabled ? "<code>*</code>" : ""}</label>
-                    <input type="button" 
-                        class="form-control validate daterange text-left"
-                        required
-                        id="trainingDevelopmentModuleDate"
-                        name="trainingDevelopmentModuleDate"
-                        value="${trainingDevelopmentModuleDate && moment(trainingDevelopmentModuleDate).format("MMMM DD, YYYY")}"
-						${disabled}
-						unique="${trainingDevelopmentModuleDate}"
-						title="Date">
-                    <div class="d-block invalid-feedback" id="invalid-trainingDevelopmentModuleDate"></div>
-                </div>
-            </div>
+			  </div>
+			  <div class="col-md-4 col-sm-12">
+			  <div class="form-group">
+				  <label>Date ${!disabled ? "<code>*</code>" : ""}</label>
+				  <input type="button" 
+					  class="form-control text-left" 
+					  name="dateFilter"
+					  id="dateFilter"
+					  value="${moment(dateFrom).format("MMMM DD, YYYY")} - ${moment(dateTo).format("MMMM DD, YYYY")}"
+					  dateFrom="${moment(dateFrom).format("YYYY-MM-DD")}"
+					  dateTo="${moment(dateTo).format("YYYY-MM-DD")}"
+					  style="width: 100% !important"
+					  ${disabled}>
+				  <div class="d-block invalid-feedback" id="invalid-dateFilter"></div>
+			  </div>
+		  </div>		
+           
             <div class="col-md-12 text-right">
                 ${button}
             </div>
         </div>
 		<div class="approvers">
-			${getApproversStatus(approversID, approversStatus, approversDate)}
+			${!isRevise ? getApproversStatus(approversID, approversStatus, approversDate) : ""}
 		</div>`;
 
 		setTimeout(() => {
 			$("#page_content").html(html);
 			initAll();
 			initDataTables();
+			let start = dateFrom || new Date;
+            let end   = dateTo   || new Date;
+            dateRangePicker(start, end); 
 			
-			$("#trainingDevelopmentModuleDate").data("daterangepicker").minDate = moment();
+			//$("#trainingDevelopmentModuleDate").data("daterangepicker").minDate = moment();
 			//data ? initInputmaskTime(false) : initInputmaskTime();
+			// ----- NOT ALLOWED FOR UPDATE -----
+			if (!allowedUpdate) {
+				$("#page_content").find(`input, select, textarea`).each(function() {
+					if (this.type != "search") {
+						$(this).attr("disabled", true);
+					}
+				})
+				$('#btnBack').attr("status", "2");
+				$(`#btnSubmit, #btnRevise, #btnCancel, #btnCancelForm, .btnAddRow, .btnDeleteRow`).hide();
+			}
+			// ----- END NOT ALLOWED FOR UPDATE -----
+
 			return html;
 		}, 300);
 	}
 	// ----- END FORM CONTENT -----
 
+	
+
+    // ----- DATERANGEPICKER -----
+    function dateRangePicker(dateFrom = new Date, dateTo = new Date) {
+        $("#dateFilter").daterangepicker({
+            autoUpdateInput: false,
+            showDropdowns: true,
+            autoApply: true,
+            locale: {
+                format: "MMMM DD, YYYY",
+            },
+            minDate:   moment(),
+            startDate: moment(dateFrom),
+            endDate:   moment(dateTo)
+        }, function(start, end) {
+            let dateFilter = `${start.format("MMMM DD, YYYY")} - ${end.format("MMMM DD, YYYY")}`;
+            $("#dateFilter").val(dateFilter);
+            $("#dateFilter").attr("dateFrom", start.format("YYYY-MM-DD"));
+            $("#dateFilter").attr("dateTo", end.format("YYYY-MM-DD"));
+        })
+    }
+    // ----- END DATERANGEPICKER -----
+
 	// ----- PAGE CONTENT -----
-	function pageContent(isForm = false, data = false, readOnly = false) {
+	function pageContent(isForm = false, data = false, readOnly = false, isRevise = false, isFromCancelledDocument = false) {
 		$("#page_content").html(preloader);
 		if (!isForm) {
 			preventRefresh(false);
@@ -800,9 +958,9 @@ $(document).ready(function () {
 			myFormsContent();
 			updateURL();
 		} else {
-			headerButton(false);
+			headerButton(false, "", isRevise, isFromCancelledDocument);
 			headerTabContent(false);
-			formContent(data, readOnly);
+			formContent(data, readOnly, isRevise, isFromCancelledDocument);
 		}
 	}
 	viewDocument();
@@ -840,12 +998,11 @@ $(document).ready(function () {
 				$("#trainingDevelopmentModuleTopic").val(TrainingTopic);
 				$("#trainingDevelopmentModuleTrainor").val(TrainingSpeaker);
 				$("#trainingDevelopmentModuleType").val(TrainingType);
-				$("#trainingDevelopmentModuleFile").val(TrainingModule);
+				$("#trainingDevelopmentModuleFile").text(TrainingModule);
 				$("#trainingDevelopmentModuleDifficulty").val(TrainingDiffulty);
 			}
 
 		})
-
 		return moduleHeaderOptions;
 
 	}
@@ -861,10 +1018,14 @@ $(document).ready(function () {
         $("#trainingDevelopmentModuleTopic").val(TrainingTopic);
 		$("#trainingDevelopmentModuleTrainor").val(TrainingSpeaker);
 		$("#trainingDevelopmentModuleType").val(TrainingType);
-		$("#trainingDevelopmentModuleFile").val(TrainingModule);
+		//$("#trainingDevelopmentModuleFile").text(TrainingModule);
 		$("#trainingDevelopmentModuleDifficulty").val(TrainingDifficulty);
+		var scrt_var = `${base_url}assets/upload-files/training-development-setup/`+TrainingModule;
+		$("#trainingDevelopmentModuleFile").attr("href",scrt_var);
+		$("#trainingDevelopmentModuleFile").text(TrainingModule);
     });
-    // ----- END CHANGE CLIENT ADDRESS -----
+    // ----- END CHANGE CLIENT ADDRESS -----//
+
 
 	//get multiple employee
 	function userAccountOption(selected = ""){
@@ -896,6 +1057,8 @@ $(document).ready(function () {
 
 		if (action && method != "" && feedback != "") {
 			data["tableData[trainingDevelopmentModuleStatus]"] 	= status;
+			data["tableData[dateFrom]"] = $("#dateFilter").attr("dateFrom");
+			data["tableData[dateTo]"] = $("#dateFilter").attr("dateTo");
 			data["tableData[updatedBy]"] 				= sessionID;
 			data["feedback"] 							= feedback;
 			data["method"] 								= method;
@@ -932,7 +1095,7 @@ $(document).ready(function () {
 						data["tableData[approversID]"]          = sessionID;
 						data["tableData[approversStatus]"]      = 2;
 						data["tableData[approversDate]"]        = dateToday();
-						data["tableData[changeScheduleStatus]"] = 2;
+						data["tableData[trainingDevelopmentModuleStatus]"] = 2;
 					}
 				}
 				data["whereFilter"] = "trainingDevelopmentModuleID =" + id;
@@ -989,7 +1152,7 @@ $(document).ready(function () {
 
 	// ----- OPEN EDIT MODAL -----
 	$(document).on("click", ".btnEdit", function () {
-		const id = $(this).attr("id");
+		const id = decryptString($(this).attr("id"));
 		viewDocument(id);
 		// const code = $(this).attr("code");
 
@@ -1008,7 +1171,7 @@ $(document).ready(function () {
 
 	// ----- VIEW DOCUMENT -----
 	$(document).on("click", ".btnView", function () {
-		const id = $(this).attr("id");
+		const id = decryptString($(this).attr("id"));
 		viewDocument(id, true);
 		// const tableData = getTableData(
 		// 	"hris_training_development_module",
@@ -1019,6 +1182,14 @@ $(document).ready(function () {
 		// pageContent(true, tableData, true);
 	});
 	// ----- END VIEW DOCUMENT -----
+
+	// ----- REVISE DOCUMENT -----
+	$(document).on("click", "#btnRevise", function () {
+		const id                    = decryptString($(this).attr("trainingDevelopmentModuleID"));
+		const fromCancelledDocument = $(this).attr("cancel") == "true";
+		viewDocument(id, false, true, fromCancelledDocument);
+	});
+	// ----- END REVISE DOCUMENT -----
 
 	// ----- SAVE DOCUMENT -----
 	$(document).on("click", "#btnSave", function () {
@@ -1042,52 +1213,43 @@ $(document).ready(function () {
 	});
 	// ----- END SAVE DOCUMENT -----
 
-
-	// ----- SUBMIT DOCUMENT -----
+	//form_training_module
+	// ----- SUBMIT DOCUMENT -----form_training_module
 	$(document).on("click", "#btnSubmit", function () {
-		const id = $(this).attr("trainingDevelopmentModuleID");
-		const amountvalue = $("#employeeBasicSalary").val();
-		const validate = validateForm("form_training_module");
-		// const validateTime = checkTimeRange(false, true);
+		const id           = decryptString($(this).attr("trainingDevelopmentModuleID"));
+
+		const isFromCancelledDocument = $(this).attr("cancel") == "true";
+		const revise       = $(this).attr("revise") == "true";
+		const validate     = validateForm("form_training_module");
 
 		if (validate) {
 			const feedback = $(this).attr("code") || getFormCode("TRN", dateToday(), id);
-			const action   = id && feedback ? "update" : "insert";
+			const action   = revise && !isFromCancelledDocument && "insert" || (id ? "update" : "insert");
 			const data     = getData(action, 1, "submit", feedback, id);
-
-			
+			if (revise) {
+				if (!isFromCancelledDocument) {
+					data[`tableData[reviseTrainingDevelopmentModuleID]`] = id;
+					delete data[`tableData[trainingDevelopmentModuleID]`];
+					data["feedback"] = getFormCode("TRN", new Date);
+				} else {
+					data[`whereFilter`] = `trainingDevelopmentModuleID = ${id}`;
+				}
+			}
 			const employeeID = getNotificationEmployeeID(
 				data["tableData[approversID]"],
 				data["tableData[approversDate]"],
 				true
 			);
-			
-			//let notificationData = false;
-			// const employeeID = getNotificationEmployeeID(
-			// 	data["tableData[approversID]"],
-			// 	data["tableData[approversDate]"],
-			// 	true
-			// );
-
 			let notificationData = false;
 			if (employeeID != sessionID) {
 				notificationData = {
 					moduleID:                123,
-					// tableID:                 1, // AUTO FILL
 					notificationTitle:       "Training and Development",
 					notificationDescription: `${employeeFullname(sessionID)} asked for your approval.`,
 					notificationType:        2,
 					employeeID,
 				};
 			}
-
-			// let notificationData = {
-			// 	moduleID: 123,
-			// 	notificationTitle: "Official Business Form",
-			// 	notificationDescription: `${sessionID} asked for your approval.`,
-			// 	notificationType: 2,
-			// 	employeeID: getNotificationEmployeeID(data["tableData[approversID]"], data["tableData[approversDate]"]),
-			// };
 			setTimeout(() => {
 				formConfirmation(
 					"submit",
@@ -1106,25 +1268,14 @@ $(document).ready(function () {
 	// ----- END SUBMIT DOCUMENT -----
 
 	// ----- CANCEL DOCUMENT -----
-	$(document).on("click", "#btncancelForm2", function () {
-		const id = $(this).attr("trainingDevelopmentModuleID");
+	$(document).on("click", "#btnCancelForm", function () {
+		const id       = decryptString($(this).attr("trainingDevelopmentModuleID"));
 		const feedback = $(this).attr("code") || getFormCode("TRN", dateToday(), id);
 		const action   = "update";
 		const data     = getData(action, 4, "cancelForm2", feedback, id);
 
-
-		//const feedback = $(this).attr("officialBusinessCode");
-
-		// const validate = validateForm("form_change_schedule");
-		// const validateTime = checkTimeRange(false, true);
-
-		// if (validate && validateTime) {
-
-		// const action = "update";
-		// const data = getData(action, 4, "cancelForm2", feedback, id);
-
 		formConfirmation(
-			"cancelForm2",
+			"cancelform",
 			action,
 			"TRAINING AND DEVELOPMENT",
 			"",
@@ -1133,22 +1284,53 @@ $(document).ready(function () {
 			true,
 			pageContent
 		);
-		// const action = "update";
-
-		// const data = getData(action, 4, "cancelForm2", feedback, id);
-
-		// formConfirmation(
-		// 	"cancelForm2",
-		// 	action,
-		// 	"OFFICIAL BUSINESS",
-		// 	"",
-		// 	"form_training_module",
-		// 	data,
-		// 	true,
-		// 	pageContent
-		// );
-		// }
 	});
+	// ----- END CANCEL DOCUMENT -----
+
+	// // ----- CANCEL DOCUMENT -----
+	// $(document).on("click", "#btncancelForm2", function () {
+	// 	const id = $(this).attr("trainingDevelopmentModuleID");
+	// 	const feedback = $(this).attr("code") || getFormCode("TRN", dateToday(), id);
+	// 	const action   = "update";
+	// 	const data     = getData(action, 4, "cancelForm2", feedback, id);
+
+
+	// 	//const feedback = $(this).attr("officialBusinessCode");
+
+	// 	// const validate = validateForm("form_change_schedule");
+	// 	// const validateTime = checkTimeRange(false, true);
+
+	// 	// if (validate && validateTime) {
+
+	// 	// const action = "update";
+	// 	// const data = getData(action, 4, "cancelForm2", feedback, id);
+
+	// 	formConfirmation(
+	// 		"cancelForm2",
+	// 		action,
+	// 		"TRAINING AND DEVELOPMENT",
+	// 		"",
+	// 		"form_training_module",
+	// 		data,
+	// 		true,
+	// 		pageContent
+	// 	);
+	// 	// const action = "update";
+
+	// 	// const data = getData(action, 4, "cancelForm2", feedback, id);
+
+	// 	// formConfirmation(
+	// 	// 	"cancelForm2",
+	// 	// 	action,
+	// 	// 	"OFFICIAL BUSINESS",
+	// 	// 	"",
+	// 	// 	"form_training_module",
+	// 	// 	data,
+	// 	// 	true,
+	// 	// 	pageContent
+	// 	// );
+	// 	// }
+	// });
 	// ----- END CANCEL DOCUMENT -----
 
 	// ----- CANCEL DOCUMENT -----

@@ -59,7 +59,7 @@ class BidRecap_model extends CI_Model {
     {
         $result = [];
         if ($bidRecapID && $bidRecapID > 0 || $inventoryValidationID && $inventoryValidationID > 0) {
-            $whereBRF  = $bidRecapID && $bidRecapID > 0 ? " bidRecapID = $bidRecapID" : "bidRecapID IS NULL";
+            $whereBRF  = $bidRecapID && $bidRecapID > 0 ? "bidRecapID = $bidRecapID" : "bidRecapID IS NULL";
             $whereIVR = $inventoryValidationID && $inventoryValidationID > 0 ? "AND inventoryValidationID = $inventoryValidationID" : "";
             $sql = "
             SELECT 
@@ -92,7 +92,11 @@ class BidRecap_model extends CI_Model {
             FROM 
                 ims_request_items_tbl AS irit 
             WHERE 
-                milestoneBuilderID = '0' AND
+                milestoneBuilderID IS NULL AND 
+                phaseDescription IS NULL AND
+                milestoneListID IS NULL AND
+                projectMilestoneID IS NULL AND
+                projectMilestoneName IS NULL AND
                 itemClassification = BINARY('$itemClassification')
                 $whereBRF 
                 $whereIVR";

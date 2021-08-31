@@ -18,31 +18,6 @@ class InventoryValidation_model extends CI_Model {
         }
         return null;
     }
-
-    public function updateRequestItemsBrandName($inventoryValidationID = null)
-    {
-        $sql = "
-        SELECT 
-            * 
-        FROM 
-            ims_request_items_tbl 
-        WHERE 
-            inventoryValidationID = $inventoryValidationID AND
-            inventoryValidationID IS NULL AND
-            purchaseOrderID IS NULL AND 
-            bidRecapID IS NULL AND
-            itemID IS NOT NULL";
-        $queryGetRequestItems = $this->db->query($sql);
-        if ($queryGetRequestItems) {
-            $items = $queryGetRequestItems->result_array();
-            foreach ($items as $item) {
-                $requestItemID = $item["requestItemID"];
-                $itemID        = $item["itemID"];
-                $brandName     = $this->brandName($itemID);
-                $queryQuery    = $this->db->update("ims_request_items_tbl", ["brandName" => $brandName], ["requestItemID" => $requestItemID]);
-            }
-        }
-    }
     
     public function saveInventoryValidationData($action, $data, $id = null) 
     {
@@ -95,7 +70,7 @@ class InventoryValidation_model extends CI_Model {
     {
         $result = [];
         if ($inventoryValidationID > 0 || $purchaseRequestID && $purchaseRequestID > 0) {
-            $wherePR  = $inventoryValidationID > 0 ? "inventoryValidationID = '$inventoryValidationID' AND milestoneBuilderID = '0' " : "inventoryValidationID IS NULL";
+            $wherePR  = $inventoryValidationID > 0 ? "inventoryValidationID = '$inventoryValidationID'" : "inventoryValidationID IS NULL";
             $whereBOM = $purchaseRequestID && $purchaseRequestID > 0 ? "AND purchaseRequestID = $purchaseRequestID" : "";
             $sql = "
             SELECT 
@@ -103,6 +78,11 @@ class InventoryValidation_model extends CI_Model {
             FROM 
                 ims_request_items_tbl 
             WHERE 
+                milestoneBuilderID IS NULL  AND
+                phaseDescription IS NULL    AND
+                milestoneListID IS NULL AND
+                projectMilestoneID IS NULL  AND
+                projectMilestoneName IS NULL    AND
                 $wherePR
                 $whereBOM
             GROUP BY itemClassification";

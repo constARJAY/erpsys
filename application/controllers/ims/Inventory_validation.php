@@ -114,10 +114,10 @@ class Inventory_validation extends CI_Controller {
 				    $purchaseRequestID		    = $item["purchaseRequestID"] ?? NULL;
                     $inventoryValidationID      = $inventoryValidationID;
                     $categoryType 			    = $item["categoryType"] ?? NULL;
-                    $milestoneBuilderID 		= $item["milestoneBuilderID"] ?? NULL;
-                    $phaseDescription 		    = $item["phaseDescription"] ?? NULL;
-                    $milestoneListID 		    = $item["milestoneListID"] ?? NULL;
-                    $projectMilestoneName	    = $item["projectMilestoneName"] ?? NULL;
+                    $milestoneBuilderID 		= $item["milestoneBuilderID"] == "null"     ? NULL : $item["milestoneBuilderID"];
+                    $phaseDescription 		    = $item["phaseDescription"] == "null"       ? NULL : $item["phaseDescription"];
+                    $milestoneListID 		    = $item["milestoneListID"] == "null"        ? NULL : $item["milestoneListID"];
+                    $projectMilestoneName	    = $item["projectMilestoneName"] == "null"   ? NULL : $item["projectMilestoneName"];
                     $itemID 					= $item["itemID"] ?? NULL;
                     $itemCode				    = $item["itemCode"] ?? NULL;
                     $itemName 				    = $item["itemName"] ?? NULL;

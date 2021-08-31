@@ -224,7 +224,7 @@ $(document).ready(function () {
 						  <input 
 							  type="file" 
 							  class="form-control file" 
-							  name="trainingDevelopmentSetupModuleFile|orientation-development-setup" 
+							  name="trainingDevelopmentSetupModuleFile|training-development-setup" 
 							  id="trainingDevelopmentSetupModuleFile"
 							  file="${trainingDevelopmentSetupModuleFile}"
 							  autocomplete="off">
@@ -287,7 +287,7 @@ $(document).ready(function () {
             width: 90%;
             overflow: hidden;
             white-space: nowrap;
-            text-overflow: ellipsis;" href="${base_url}assets/upload-files/orientation-development-setup/${filename}" target="_blank">
+            text-overflow: ellipsis;" href="${base_url}assets/upload-files/training-development-setup/${filename}" target="_blank">
             ${filename}
         </a>` : `
         <span class="filename" title="${filename}" style="display: block;
@@ -309,7 +309,7 @@ $(document).ready(function () {
 
 	$(document).on("change", `[type="file"]`, function() {
         $parent = $(this).closest(".form-group");
-
+		
         if (this.files && this.files[0]) {
             const filesize = this.files[0].size/1024/1024; // Size in MB
             const filetype = this.files[0].type;
@@ -318,6 +318,7 @@ $(document).ready(function () {
                 $(this).val("");
                 showNotification("danger", "File size must be less than or equal to 10mb");
             } else {
+				
                 $parent.find(`[type="file"]`).attr("file", filename);
                 $parent.find(".displayfile").html(getFileDisplay(filename, false));
             }
