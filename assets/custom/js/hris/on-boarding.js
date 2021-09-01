@@ -213,7 +213,7 @@ $(document).ready(function () {
             LEFT JOIN hris_orientation_setup_tbl AS ost ON empl.designationID = ost.designationID
             LEFT JOIN  hris_employee_list_tbl AS emplprogress ON ost.employeeID = emplprogress.employeeID
             LEFT JOIN hris_onboarding_progress_tbl AS ob ON empl.employeeID = ob.employeeID
-            LEFT JOIN  hris_employee_list_tbl AS emplob ON ob.employeeID = emplob.employeeID`,
+            LEFT JOIN  hris_employee_list_tbl AS emplob ON ob.approvalEmployee = emplob.employeeID`,
 			`empl.employeeID, 
             empl.employeeProfile,
             empl.employeeUsername,
@@ -232,7 +232,7 @@ $(document).ready(function () {
             ELSE IFNULL(CONCAT(emplob.employeeFirstname,' ',emplob.employeeLastname),'') end approval,
             CASE 
                 WHEN ob.employeeID IS NOT NULL THEN ROUND((onboardingProgressCount/approvalCount)*100,0)
-            else '0' END progressbar`,``,``,`ost.designationID,empl.employeeID ORDER BY ost.orientationID `
+            else '0' END progressbar`,``,``,`ost.designationID,empl.employeeID ORDER BY ost.orientationID`
 		);
 
 		const statusStyle = (status) => {
@@ -370,7 +370,7 @@ $(document).ready(function () {
             uniqueData.push(unique);
 
 			html += `
-                    <div class="card text-white mb-3 btnEditChecklist pointer"id="${checklistID}" style="max-width: 36.5rem; background-color: #5D6161;">
+                    <div class="card text-white mb-3 btnEditChecklist pointer"id="${checklistID}" style="max-width: 36.5rem; background-color: #697179;">
                         <div class="card-body pointer"style="min-height: 20rem;max-height: 20rem;">
                             <h3 class="card-title">#${checklistID}: ${checklistTitle}</h3>
                             <div class="overflow-auto mb-3"style="min-height: 15rem;max-height: 15rem;text-align:justify">
@@ -528,23 +528,7 @@ $(document).ready(function () {
                     ${characterReference(data)}
                 </div>
                 <div class="tab-pane" id="onboarding-tab">
-                <div class="col-sm-12">
-                <div class="w-100">
-                <table class="table table-bordered table-striped table-hover" id="onboardingTable">
-                 <thead>
-                     <tr style="white-space:nowrap">
-                         <th>Orientation Name</th>
-                         <th>Accountable Person</th>
-                         <th>Date</th>
-                         <th>Status</th>
-                     </tr>
-                 </thead>
-                 <tbody>
                     ${onboardingTab(designationID,employeeID)}
-                    </tbody>
-                </table>  
-                </div> 
-                </div>
                 </div>
                 </div>    
                 </div>
@@ -1820,6 +1804,18 @@ $(document).ready(function () {
 
 		function onboardingTab(designationID, employeeID) {
 			let html = "";
+            html =`
+                <div class="w-auto">
+            <table class="table table-bordered table-striped table-hover" id="onboardingTable" style=" border-collapse: collapse; width:100%;">
+            <thead>
+                <tr style="white-space:nowrap">
+                    <th>Orientation Name</th>
+                    <th>Accountable Person</th>
+                    <th>Date</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>`;
 			let onBoarding = getTableData(`hris_onboarding_tbl`, `employeeID AS employeeIDDATA`, `employeeID=${employeeID}`, ``, `designationID`);
 			if (onBoarding.length != 0) {
               
@@ -2070,6 +2066,14 @@ $(document).ready(function () {
 				});
 
 			}
+            html += `</tbody>
+            </table>
+        </div>`;
+        setTimeout(() => {
+           // $("#page_content").html(html);
+           $("#onboardingTable").DataTable().destroy();
+            initDatatables();
+        }, 500);
            
 			return html;
 		}
@@ -2118,7 +2122,7 @@ $(document).ready(function () {
                     class="form-control validate" 
                     name="checklistTitle" 
                     id="checklistTitle" 
-                    data-allowcharacters="[a-z][A-Z][0-9][ ][.][,][?][!][/][;][:][']["][-][_][(][)][%][&][*]" 
+                    data-allowcharacters="[a-z][A-Z][0-9][ ][.][,][?][!][/][;][:]['']['][-][_][(][)][%][&][*]" 
                     minlength="2" 
                     maxlength="100" 
                     required 
@@ -2135,7 +2139,7 @@ $(document).ready(function () {
                     <label>Checklist Description <code>*</code></label>
                     <textarea class="form-control validate"
 					minlength="1"
-                    data-allowcharacters="[a-z][A-Z][0-9][ ][.][,][?][!][/][;][:][']["][-][_][(][)][%][&][*]"
+                    data-allowcharacters="[a-z][A-Z][0-9][ ][.][,][?][!][/][;][:]['']['][-][_][(][)][%][&][*]"
 					id="checklistDescription"
 					name="checklistDescription"
 					required

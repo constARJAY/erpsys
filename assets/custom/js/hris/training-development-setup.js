@@ -226,8 +226,10 @@ $(document).ready(function () {
 							  class="form-control file" 
 							  name="trainingDevelopmentSetupModuleFile|training-development-setup" 
 							  id="trainingDevelopmentSetupModuleFile"
+							  accept=".xlsx,.xls,.doc, .docx,.ppt, .pptx,.txt,.pdf"
 							  file="${trainingDevelopmentSetupModuleFile}"
 							  autocomplete="off">
+							  <div class="invalid-feedback d-block" id="invalid-files"></div>
 					  </div>
 				  </div>
                     <div class="col-sm-6">
@@ -307,22 +309,40 @@ $(document).ready(function () {
         return html;
     }
 
+	function fileValidation(){
+		var fileName = document.getElementById('trainingDevelopmentSetupModuleFile').value.toLowerCase();
+		if(!fileName=="" && !fileName.endsWith('.xlsx') && !fileName.endsWith('.xls') && !fileName.endsWith('.pptx') && !fileName.endsWith('.pdf') && !fileName.endsWith('.docs')){
+			//showNotification("danger", "Pleased upload excel, powerpoint, docs and pdf");
+			$("#trainingDevelopmentSetupModuleFile").addClass("is-invalid");
+			$("#invalid-files").text("Invalid file extension.");
+			return false;
+		}else{
+			$("#trainingDevelopmentSetupModuleFile").removeClass("is-invalid");
+			$("#invalid-files").text("");
+			return true;
+		}		
+	}
 	$(document).on("change", `[type="file"]`, function() {
         $parent = $(this).closest(".form-group");
 		
-        if (this.files && this.files[0]) {
-            const filesize = this.files[0].size/1024/1024; // Size in MB
-            const filetype = this.files[0].type;
-            const filename = this.files[0].name;
-            if (filesize > 10) {
-                $(this).val("");
-                showNotification("danger", "File size must be less than or equal to 10mb");
-            } else {
-				
-                $parent.find(`[type="file"]`).attr("file", filename);
-                $parent.find(".displayfile").html(getFileDisplay(filename, false));
-            }
-        }
+		//alert(fileName);
+
+			//alert('Please upload excel file only.');
+		
+			if (this.files && this.files[0]) {
+				const filesize = this.files[0].size/1024/1024; // Size in MB
+				const filetype = this.files[0].type;
+				const filename = this.files[0].name;
+				if (filesize > 10) {
+					$(this).val("");
+					showNotification("danger", "File size must be less than or equal to 10mb");
+				} else {
+					
+					$parent.find(`[type="file"]`).attr("file", filename);
+					$parent.find(".displayfile").html(getFileDisplay(filename, false));
+				}
+			}
+		
     })
     // ----- END CHOOSE FILE -----
 	// ----- REMOVE FILE -----
@@ -349,8 +369,9 @@ $(document).ready(function () {
 
 	// ----- SAVE MODAL -----
 	$(document).on("click", "#btnSave", function () {
+		const filevalidate  = fileValidation();
 		const validate = validateForm("modal_training_development_setup");
-		if (validate) {
+		if (validate && filevalidate) {
 			//alert(sessionID);
 			let data = getFormData("modal_training_development_setup");
             data.append(`tableData[trainingDevelopmentSetupCode]`, generateCode("TRC", false, "hris_training_development_setup_tbl", "trainingDevelopmentSetupCode"));

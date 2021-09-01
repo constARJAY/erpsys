@@ -88,7 +88,7 @@ $(document).ready(function () {
                 LEFT JOIN hris_employee_list_tbl AS empl ON or1.employeeID = empl.employeeID
 				LEFT JOIN hris_department_tbl AS dt ON empl.departmentID = dt.departmentID
 				LEFT JOIN hris_designation_tbl AS ds ON or1.employeedesignationID = ds.designationID`,
-				"or1.OrientationName,or1.designationID,or1.employeeID,or1.orientationStatus,concat(empl.employeeFirstname,'' ,empl.employeeLastname) AS fullname,designationName,empl.employeeProfile,dt.departmentName",
+				"or1.OrientationName,or1.designationID,or1.employeeID,or1.orientationStatus,concat(empl.employeeFirstname,' ' ,empl.employeeLastname) AS fullname,designationName,empl.employeeProfile,dt.departmentName",
 				"or1.designationID=" + roleID
 			);
 			

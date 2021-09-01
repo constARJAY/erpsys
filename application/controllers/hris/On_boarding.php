@@ -13,7 +13,7 @@ class On_boarding extends CI_Controller {
 
     public function index()
     {
-        $data["title"] = "Onboarding";
+        $data["title"] = "Onboarding Module";
        // $this->employeemodule->updateLeaveCredit();
         $this->load->view("template/header", $data);
         $this->load->view("hris/on_boarding/index");

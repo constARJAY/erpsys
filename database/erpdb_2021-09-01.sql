@@ -1938,6 +1938,7 @@ CREATE TABLE `hris_orientation_setup_tbl` (
   `departmentID` bigint(11) NOT NULL,
   `designationID` int(20) NOT NULL,
   `employeeID` int(11) DEFAULT NULL,
+  `employeeDesignationID` int(50) NOT NULL,
   `OrientationName` text COLLATE utf8mb4_unicode_ci NOT NULL,
   `orientationStatus` int(11) NOT NULL,
   PRIMARY KEY (`orientationID`)
@@ -2279,16 +2280,19 @@ DROP TABLE IF EXISTS `hris_training_development_module`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `hris_training_development_module` (
   `trainingDevelopmentModuleID` bigint(20) NOT NULL AUTO_INCREMENT,
-  `trainingDevelopmentSetupID` bigint(100) NOT NULL,
-  `revisetrainingDevelopmentModuleID` bigint(20) DEFAULT NULL,
+  `trainingDevelopmentSetupID` bigint(20) NOT NULL,
+  `reviseTrainingDevelopmentModuleID` bigint(20) DEFAULT NULL,
   `trainingDevelopmentModuleTrainee` text COLLATE utf8mb4_unicode_ci NOT NULL,
   `trainingDevelopmentModuleTopic` text COLLATE utf8mb4_unicode_ci NOT NULL,
   `trainingDevelopmentModuleTrainor` varchar(250) COLLATE utf8mb4_unicode_ci NOT NULL,
   `trainingDevelopmentModuleType` text COLLATE utf8mb4_unicode_ci NOT NULL,
   `trainingDevelopmentModuleBudget` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `trainingDevelopmentModuleFile` varchar(250) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `trainingDevelopmentModuleFile` text COLLATE utf8mb4_unicode_ci NOT NULL,
   `trainingDevelopmentModuleDifficulty` varchar(250) COLLATE utf8mb4_unicode_ci NOT NULL,
   `trainingDevelopmentModuleDate` date NOT NULL,
+  `dateFilter` varchar(200) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `dateFrom` date NOT NULL,
+  `dateTo` date NOT NULL,
   `employeeID` int(250) NOT NULL,
   `approversID` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `approversStatus` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
@@ -2388,23 +2392,23 @@ DROP TABLE IF EXISTS `ims_bid_recap_tbl`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `ims_bid_recap_tbl` (
-  `bidRecapID` bigint(20) NOT NULL,
+  `bidRecapID` bigint(20) NOT NULL AUTO_INCREMENT,
   `reviseBidRecapID` bigint(20) DEFAULT NULL,
   `purchaseRequestID` bigint(20) DEFAULT NULL,
   `inventoryValidationID` bigint(20) DEFAULT NULL,
   `employeeID` bigint(20) NOT NULL,
   `timelineBuilderID` bigint(20) DEFAULT NULL,
-  `approversID` text DEFAULT NULL,
-  `projectCode` varchar(100) DEFAULT NULL,
-  `projectName` text DEFAULT NULL,
-  `projectCategory` varchar(100) DEFAULT NULL,
-  `clientName` text DEFAULT NULL,
-  `clientAddress` text DEFAULT NULL,
-  `approversStatus` text DEFAULT NULL,
-  `approversDate` text DEFAULT NULL,
+  `approversID` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `projectCode` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `projectName` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `projectCategory` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `clientName` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `clientAddress` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `approversStatus` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `approversDate` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `bidRecapStatus` int(11) NOT NULL,
-  `bidRecapReason` text DEFAULT NULL,
-  `bidRecapRemarks` text DEFAULT NULL,
+  `bidRecapReason` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `bidRecapRemarks` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `bidRecapGrandTotal` decimal(20,2) DEFAULT NULL,
   `submittedAt` timestamp NULL DEFAULT current_timestamp(),
   `createdBy` bigint(20) NOT NULL,
@@ -2412,7 +2416,7 @@ CREATE TABLE `ims_bid_recap_tbl` (
   `createdAt` timestamp NOT NULL DEFAULT current_timestamp(),
   `updatedAt` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   PRIMARY KEY (`bidRecapID`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -4729,4 +4733,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2021-08-27  7:58:47
+-- Dump completed on 2021-09-01 13:26:09
