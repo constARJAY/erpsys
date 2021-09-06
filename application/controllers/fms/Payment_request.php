@@ -29,6 +29,7 @@ class Payment_request extends CI_Controller {
         $method                             = $this->input->post("method");
         $paymentRequestID                 = $this->input->post("paymentRequestID") ?? null;
         $revisePaymentRequestID           = $this->input->post("revisePaymentRequestID") ?? null;
+        $chartOfAccountID             = $this->input->post("chartOfAccountID") ?? null;
         $purchaseOrderID             = $this->input->post("purchaseOrderID") ?? null;
         $pettyRepID               = $this->input->post("pettyRepID") ?? null;
         $paymentRequestReason                   = $this->input->post("paymentRequestReason") ?? null;
@@ -61,6 +62,7 @@ class Payment_request extends CI_Controller {
             "referencePurpose"          => $referencePurpose,
             "amount"          => $amount,
             "amountWords"          => $amountWords,
+            "chartOfAccountID"          => $chartOfAccountID,
             "purchaseOrderID"          => $purchaseOrderID,
             "pettyRepID"          => $pettyRepID,
             "paymentRequestStatus"        => $paymentRequestStatus,

@@ -169,6 +169,9 @@ class Check_voucher extends CI_Controller {
         $employeeID                 = $this->input->post("employeeID");
      
         $paymentRequestID                  = $this->input->post("paymentRequestID") ?? null;
+        $pettyRepID                  = $this->input->post("pettyRepID") ?? null;
+        $purchaseOrderID                  = $this->input->post("purchaseOrderID") ?? null;
+        $chartOfAccountID                  = $this->input->post("chartOfAccountID") ?? null;
         $voucherTinPayee               = $this->input->post("voucherTinPayee");
         $voucherDescription               = $this->input->post("voucherDescription");
         $voucherBudgetSource               = $this->input->post("voucherBudgetSource");
@@ -185,13 +188,14 @@ class Check_voucher extends CI_Controller {
         $createdAt                  = $this->input->post("createdAt");
         $items                      = $this->input->post("items") ?? null;
 
-        
-
 
         $financeCheckVoucherData = [
             "reviseVoucherID"           => $reviseVoucherID,
             "employeeID"                 => $employeeID,
             "paymentRequestID"                 => $paymentRequestID,
+            "pettyRepID"                 => $pettyRepID,
+            "purchaseOrderID"                 => $purchaseOrderID,
+            "chartOfAccountID"                 => $chartOfAccountID,
             "voucherTinPayee"            => $voucherTinPayee,
             "voucherDescription"               => $voucherDescription,
             "voucherBudgetSource"               => $voucherBudgetSource,

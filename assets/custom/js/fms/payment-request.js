@@ -77,20 +77,22 @@ $(document).ready(function() {
 	LEFT JOIN hris_employee_list_tbl as emp ON emp.employeeID = ipo.employeeID
 	LEFT JOIN hris_designation_tbl as dsg ON dsg.designationID  = emp.designationID
 	LEFT JOIN hris_department_tbl as dept ON dept.departmentID  = emp.departmentID
-	LEFT JOIN fms_payment_request_tbl as fpr ON fpr.purchaseOrderID = ipo.purchaseOrderID`,
+	LEFT JOIN fms_payment_request_tbl as fpr ON fpr.purchaseOrderID = ipo.purchaseOrderID
+	LEFT JOIN fms_chart_of_accounts_tbl as acct ON acct.chartOfAccountID  = ipo.chartOfAccountID`,
 	`ipo.purchaseOrderID,ipo.purchaseOrderID as refID,ipo.employeeID,CONCAT('PO-',SUBSTR(ipo.createdAt,3,2),"-",LPAD(ipo.purchaseOrderID,5,0)) as documentCode,
 	grandTotalAmount as Amount,CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname,employeeUnit,employeeBuilding,
-	employeeBarangay,employeeCity,employeeProvince,employeeCountry,employeeZipCode,departmentName,designationName`,
+	employeeBarangay,employeeCity,employeeProvince,employeeCountry,employeeZipCode,departmentName,designationName,acct.chartOfAccountID,acct.accountName`,
 	queryCondition1);
 
 	var replenishmentList = getTableData(`fms_petty_cash_replenishment_tbl as fpc
 	LEFT JOIN hris_employee_list_tbl as emp ON emp.employeeID = fpc.employeeID
 	LEFT JOIN hris_designation_tbl as dsg ON dsg.designationID  = emp.designationID
 	LEFT JOIN hris_department_tbl as dept ON dept.departmentID  = emp.departmentID
-	LEFT JOIN fms_payment_request_tbl as fpr ON fpr.pettyRepID = fpc.pettyRepID`,
+	LEFT JOIN fms_payment_request_tbl as fpr ON fpr.pettyRepID = fpc.pettyRepID
+	LEFT JOIN fms_chart_of_accounts_tbl as acct ON acct.chartOfAccountID  = 2`,
 	`fpc.pettyRepID,fpc.pettyRepID as refID,fpc.employeeID,CONCAT("PCR-",SUBSTR(fpc.createdAt,3,2),"-",LPAD(fpc.pettyRepID,5,0)) as documentCode,
 	pettyRepTotalBalance as Amount,CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname,employeeUnit,employeeBuilding,
-	employeeBarangay,employeeCity,employeeProvince,employeeCountry,employeeZipCode,departmentName,designationName`,
+	employeeBarangay,employeeCity,employeeProvince,employeeCountry,employeeZipCode,departmentName,designationName,acct.chartOfAccountID,acct.accountName`,
 	queryCondition2);
 
 	var condition = purchaseOrderList.length < replenishmentList.length ? replenishmentList  : purchaseOrderList ;
@@ -118,6 +120,8 @@ $(document).ready(function() {
 				amount=${po.Amount}
 				purchaseOrderID=${po.purchaseOrderID || 0}
 				pettyRepID=${po.pettyRepID || 0}
+				chartOfAccountID="${po.chartOfAccountID || 0}"
+				accountName="${po.accountName }"
 			${po.documentCode == id && "selected"}>
 			${po.documentCode}
 			</option>`;
@@ -137,6 +141,8 @@ $(document).ready(function() {
 				amount=${po.Amount}
 				purchaseOrderID=${po.purchaseOrderID || 0}
 				pettyRepID=${po.pettyRepID || 0}
+				chartOfAccountID="${po.chartOfAccountID || 0}"
+				accountName="${po.accountName }"
 				${po.documentCode == id && "selected"}>
 				${po.documentCode}
 			</option>`;
@@ -153,6 +159,7 @@ $(document).ready(function() {
 		const address = $('option:selected', this).attr("address");
 		const department = $('option:selected', this).attr("department");
 		const designation = $('option:selected', this).attr("designation");
+		const accountName = $('option:selected', this).attr("accountName");
 		const amount = $('option:selected', this).attr("amount").replaceAll(",","");
 		const id 					= $(this).val();
 		// let materialWithdrawalID 	= $(this).attr("materialWithdrawalID");
@@ -173,6 +180,7 @@ $(document).ready(function() {
 			
 			$("[name=amountWords]").text(titleCase(data));
 			$("[name=amountFigures]").text(formatAmount(amount,true));
+			$("[name=accountName]").val(accountName);
 			$("[name=requestorName]").val(requestorName);
 			$("[name=requestorPosition]").val(designation);
 			$("[name=requestorDepartment]").val(department);
@@ -1024,7 +1032,7 @@ $(document).ready(function() {
 				</div>
 				</div>
 				
-				<div class="col-md-4 col-sm-12">
+				<div class="col-md-3 col-sm-12">
 				<div class="form-group">
 					<label>Reference No. ${!disabled ? "<code>*</code>" : ""}</label>
 					<select class="form-control validate select2"
@@ -1040,15 +1048,22 @@ $(document).ready(function() {
 					<div class="d-block invalid-feedback" id="invalid-referenceCode"></div>
 				</div>
 			</div>
+
+			<div class="col-md-3 col-sm-12">
+				<div class="form-group">
+					<label>Account Name</label>
+					<input type="text" class="form-control" name="accountName" disabled value="">
+				</div>
+			</div>
 	
-			<div class="col-md-4 col-sm-12">
+			<div class="col-md-3 col-sm-12">
 				<div class="form-group">
 					<label>Requestor</label>
 					<input type="text" class="form-control" name="requestorName" disabled value="">
 				</div>
 			</div>
 	
-			<div class="col-md-4 col-sm-12">
+			<div class="col-md-3 col-sm-12">
 				<div class="form-group">
 					<label>Position</label>
 					<input type="text" class="form-control" name="requestorPosition" disabled value="">
@@ -1236,6 +1251,7 @@ $(document).ready(function() {
 			formData.append("employeeID", sessionID);
 			formData.append("referenceCode", $("[name=referenceCode]").val());
 			formData.append("requestorID", $("[name=referenceCode]").find(":selected").attr("requestorID"));
+			formData.append("chartOfAccountID", $("[name=referenceCode]").find(":selected").attr("chartOfAccountID"));
 			formData.append("purchaseOrderID", $("[name=referenceCode]").find(":selected").attr("purchaseOrderID"));
 			formData.append("pettyRepID", $("[name=referenceCode]").find(":selected").attr("pettyRepID"));
 			formData.append("paymentRequestReason", $("[name=paymentRequestReason]").val()?.trim());

@@ -660,8 +660,9 @@ function getPaymentRequestList(id = null, status = 0, display = true , voucherid
             LEFT JOIN hris_employee_list_tbl AS helt  ON helt.employeeID = ipot.requestorID
             LEFT JOIN hris_department_tbl AS dept ON dept.departmentID = helt.departmentID
             LEFT JOIN hris_designation_tbl AS dsg ON dsg.designationID = helt.designationID
-            LEFT JOIN fms_check_voucher_tbl AS iir ON iir.paymentRequestID = ipot.paymentRequestID`,
-        `ipot.*, CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname, dept.departmentName, dsg.designationName, 
+            LEFT JOIN fms_check_voucher_tbl AS iir ON iir.paymentRequestID = ipot.paymentRequestID
+            LEFT JOIN fms_chart_of_accounts_tbl AS acct ON acct.chartOfAccountID  = ipot.chartOfAccountID `,
+        `ipot.*,acct.accountName, CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname, dept.departmentName, dsg.designationName, 
         helt.employeeUnit,
         helt.employeeBuilding,
         helt.employeeBarangay,
@@ -690,6 +691,10 @@ function getPaymentRequestList(id = null, status = 0, display = true , voucherid
                 address     = "${address}"
                 checkvoucherid     = "${voucherid}"
                 requestordate     = "${payment.requestorDate}"
+                pettyRepID      = "${payment.pettyRepID || 0 }"
+                purchaseOrderID      = "${payment.purchaseOrderID || 0 }"
+                chartOfAccountID      = "${payment.chartOfAccountID || 0 }"
+                accountName     = "${payment.accountName}"
             ${payment.paymentRequestID == id && "selected"}>
             ${getFormCode("PYRF", payment.createdAt, payment.paymentRequestID)}
             </option>`;
@@ -707,6 +712,10 @@ function getPaymentRequestList(id = null, status = 0, display = true , voucherid
             address     = "${address}"
             checkvoucherid     = "${voucherid}"
             requestordate     = "${payment.requestorDate}"
+            pettyRepID      = "${payment.pettyRepID || 0 }"
+            purchaseOrderID      = "${payment.purchaseOrderID || 0 }"
+            chartOfAccountID      = "${payment.chartOfAccountID || 0 }"
+                accountName     = "${payment.accountName}"
             ${payment.paymentRequestID == id && "selected"}>
             ${getFormCode("PYRF", payment.createdAt, payment.paymentRequestID)}
             </option>`;
@@ -1144,6 +1153,7 @@ $(document).on("change", "[name=paymentRequestID]", function() {
     const department = $('option:selected', this).attr("department");
     const designation = $('option:selected', this).attr("designation");
     const address = $('option:selected', this).attr("address");
+    const accountName = $('option:selected', this).attr("accountName");
     const requestorname = $('option:selected', this).attr("requestorname");
     const requestordate = $('option:selected', this).attr("requestordate");
     const id 					= $(this).val();
@@ -1160,6 +1170,7 @@ $(document).on("change", "[name=paymentRequestID]", function() {
     $(this).attr("prevPaymentID",id);
 
     $("#invalid-voucherBudgetSource").text("");
+    $("[name=accountName]").val(accountName);
     $("[name=requestorName]").val(requestorname);
     $("[name=requestorPosition]").val(designation);
     $("[name=requestorDepartment]").val(department);
@@ -1482,6 +1493,13 @@ function formContent(data = false, readOnly = false, isRevise = false, isFromCan
 
         <div class="col-md-3 col-sm-12">
             <div class="form-group">
+                <label>Account Name</label>
+                <input type="text" class="form-control" name="accountName" disabled value="">
+            </div>
+        </div>
+
+        <div class="col-md-3 col-sm-12">
+            <div class="form-group">
                 <label>Requestor</label>
                 <input type="text" class="form-control" name="requestorName" disabled value="">
             </div>
@@ -1508,7 +1526,7 @@ function formContent(data = false, readOnly = false, isRevise = false, isFromCan
             </div>
         </div>
 
-        <div class="col-md-4 col-sm-12">
+        <div class="col-md-2 col-sm-12">
             <div class="form-group">
                 <label>TIN of Payee</label>
                 <input 
@@ -1526,7 +1544,7 @@ function formContent(data = false, readOnly = false, isRevise = false, isFromCan
             </div>
         </div>
 
-        <div class="col-md-4 col-sm-12">
+        <div class="col-md-3 col-sm-12">
                 <div class="form-group">
                 <label>Date</label>
                 <input type="text" class="form-control" name="requestorDate" disabled value="">
@@ -1539,7 +1557,7 @@ function formContent(data = false, readOnly = false, isRevise = false, isFromCan
             <div class="form-group">
                 <label>Description ${!disabled ? "<code>*</code>" : ""}</label>
                 <textarea 
-                rows="2" 
+                rows="3" 
                 style="resize: none" 
                 class="form-control validate" 
                 name="voucherDescription" 
@@ -1740,6 +1758,9 @@ console.log("status "+ status)
         
         data["employeeID"] = sessionID;
         data["paymentRequestID"]  = $("[name=paymentRequestID]").val() || null;
+        data["chartOfAccountID"]  = $("[name=paymentRequestID]").find(":selected").attr("chartOfAccountID") || null;
+        data["pettyRepID"]  = $("[name=paymentRequestID]").find(":selected").attr("pettyRepID")|| null;
+        data["purchaseOrderID"]  = $("[name=paymentRequestID]").find(":selected").attr("purchaseOrderID") || null;
         data["voucherTinPayee"]  = $("[name=voucherTinPayee]").val() || null;
         data["voucherDescription"]  = $("[name=voucherDescription]").val()?.trim() || null;
         data["voucherBudgetSource"]  = $("[name=voucherBudgetSource]").val() || null;
@@ -1748,6 +1769,9 @@ console.log("status "+ status)
 
         formData.append("employeeID", sessionID);
         formData.append("paymentRequestID", $("[name=paymentRequestID]").val() || null);
+        formData.append("chartOfAccountID", $("[name=paymentRequestID]").find(":selected").attr("chartOfAccountID") || null);
+        formData.append("pettyRepID", $("[name=paymentRequestID]").find(":selected").attr("pettyRepID") || null);
+        formData.append("purchaseOrderID", $("[name=paymentRequestID]").find(":selected").attr("purchaseOrderID") || null);
         formData.append("voucherTinPayee", $("[name=voucherTinPayee]").val() || null);
         formData.append("voucherDescription", $("[name=voucherDescription]").val()?.trim());
         formData.append("voucherBudgetSource", $("[name=voucherBudgetSource]").val()?.trim());
