@@ -193,6 +193,7 @@ function initDataTables() {
                 { targets: 5,  width: 250 },
                 { targets: 6,  width: 80  },
                 { targets: 7,  width: 220 },
+                { targets: 8,  width: 100 },
             ],
         });
 
@@ -386,7 +387,9 @@ function myFormsContent() {
         `fms_check_voucher_tbl AS isrt 
         LEFT JOIN hris_employee_list_tbl AS helt USING(employeeID) 
         LEFT JOIN fms_payment_request_tbl AS pct ON isrt.paymentRequestID = pct.paymentRequestID`,
-        "isrt.*, CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname,isrt.voucherID ,isrt.createdAt AS dateCreatedVoucher, pct.paymentRequestID, pct.createdAt AS dateCreatedPayment",
+        `isrt.*, CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname,isrt.voucherID ,isrt.createdAt AS dateCreatedVoucher, pct.paymentRequestID, pct.createdAt AS dateCreatedPayment,
+        concat('CV-',LEFT(isrt.createdAt,2),'-',LPAD(isrt.voucherID,5,'0')) AS checkVoucherCode,
+        isrt.createdAt requestorDate`,
         `isrt.employeeID = ${sessionID}`,
         `FIELD(voucherStatus, 0, 1, 3, 2, 4, 5), COALESCE(isrt.submittedAt, isrt.createdAt)`
     );
@@ -403,6 +406,7 @@ function myFormsContent() {
                 <th>Date</th>
                 <th>Status</th>
                 <th>Remarks</th>
+                <th>Action</th>
             </tr>
         </thead>
         <tbody>`;
@@ -414,12 +418,17 @@ function myFormsContent() {
             dateCreatedVoucher,
             paymentRequestID,
             dateCreatedPayment,
+            voucherAmount,
             approversID,
             approversDate,
             voucherStatus,
             voucherRemarks,
+            checkVoucherLiquidationStatus,
+            checkVoucherCode,
             voucherDescription,
+            requestorDate,
             submittedAt,
+            createdBy,
         } = item;
 
         let remarks       = voucherRemarks ? voucherRemarks : "-";
@@ -437,10 +446,10 @@ function myFormsContent() {
             id="${encryptString(voucherID)}" 
             code="${getFormCode("CV", dateCreatedVoucher, voucherID)}"><i class="fas fa-edit"></i> Edit</button>`;
 
-        let btnClass =  voucherStatus != 0 ? `btnView` : `btnEdit`;
+       // let btnClass =  voucherStatus != 0 ? `btnView` : `btnEdit`;
 
         html += `
-        <tr class="${btnClass}" id="${encryptString(voucherID)}">
+        <tr class="" id="${encryptString(voucherID)}">
             <td>${getFormCode("CV", dateCreatedVoucher, voucherID)}</td>
             <td>${fullname}</td>
             <td>${getFormCode("PYRF", dateCreatedPayment, paymentRequestID)}</td>
@@ -453,6 +462,13 @@ function myFormsContent() {
                 ${getStatusStyle(voucherStatus)}
             </td>
             <td>${remarks}</td>
+            <td>
+            ${button}`;
+				if(voucherStatus ==2 && createdBy == `${sessionID}` && checkVoucherLiquidationStatus ==0){
+					html += ` <a href="${base_url}fms/liquidation?add=0=${checkVoucherCode}=${requestorDate}=${voucherAmount}=0=${voucherID}=${voucherDescription}"><button type="button" class="btn btn-default w-100 btn-add"<i class="icon-plus"></i> Create Liquidation</button></a>`;
+				
+				}
+            html +=`</td>
         </tr>`;
     });
 
