@@ -805,8 +805,6 @@ $(document).ready(function() {
 		let vendorName 		= data.vendorName;
 		let vendorTotalCost = 0;
 		
-		
-		
 		if (data) {
 			let tableRowCondition 	= data["items"].length;
 
@@ -824,7 +822,6 @@ $(document).ready(function() {
 				vendorTotalCost 		+= parseFloat(preferredTotalCost);
 			}
 
-
 			for (let index = 0; index < tableRowCondition; index++) {
 
 				var {
@@ -841,8 +838,9 @@ $(document).ready(function() {
 					inventoryValidationID 		  = "",
 					inventoryVendorName			  = ""
 				} = data["items"][index];
-				vendorName 	= inventoryValidationID ? inventoryVendorName : (vendorName || "-");
 
+				vendorName 	= inventoryValidationID ? (inventoryVendorName || vendorName ) : (vendorName || "-");
+				
 				if(!vendorName){
 					showNotification("warning2",`Please select a preferred vendor for this item (<strong>${itemName}</strong>) on item price list first`);
 					$("#btnSubmit").prop("disabled",true);
@@ -1243,6 +1241,7 @@ $(document).ready(function() {
 						$(`#tableRequestItemContent`).html(requestItems);
 						$(`#costSummary`).html(getCostSummary());
 					}, 500);
+					
 					if(validateVendors > 0){
 						$("#btnSubmit").prop("disabled", true);
 					}else{

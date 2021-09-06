@@ -121,7 +121,7 @@ class Bid_recap extends CI_Controller {
 
                     foreach($items as $index => $item) {
                         $requestItemID  = $item["requestItemID"] ?? null;
-                        $categoryType   = $item["categoryType"] ?? null;
+                        
                         $vendorID       = $item["vendorID"] ?? null;
                         $vendorName     = $item["vendorName"] ?? null;
                         $unitCost       = $item["unitCost"] ?? null;
@@ -135,6 +135,8 @@ class Bid_recap extends CI_Controller {
                                 $purchaseRequestID          = $requestItem->purchaseRequestID;
                                 $inventoryVendorID          = $vendorID;
                                 $inventoryVendorName        = $vendorName;
+
+                                $categoryType               = $requestItem->milestoneBuilderID ? "Project Phase" : "Materials and Equipment";
                                 $milestoneBuilderID         = $requestItem->milestoneBuilderID;
                                 $phaseDescription           = $requestItem->phaseDescription;
                                 $milestoneListID            = $requestItem->milestoneListID;

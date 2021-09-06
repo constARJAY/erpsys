@@ -52,7 +52,7 @@ $(document).on("click","#btn-approval_designation", function(){
     if(approvalDesignation.length > 0){
         position_list = listOfAttachDesignation(thisModuleID);
     }else{
-        let tableDataDesignation    =  getTableData("hris_designation_tbl", "","designationStatus != 0", "designationID ASC");
+        let tableDataDesignation    =  getTableData("hris_designation_tbl", "","designationStatus != 0 AND designationName NOT LIKE '%non organic%'", "designationID ASC");
         tableDataDesignation.map((itemDesignation, index)=>{
             position_list   +=   `<div class="card my-0 p-2" style="box-shadow: none !important;">
                                     <div class="d-flex justify-content-start align-items-center" >
@@ -248,7 +248,7 @@ function viewAttachDesignation(moduleID = null){
             approvalUsers.push(item_designationID["userAccountID"])
         });
 
-        let tableDataDesignation   =  getTableData("hris_designation_tbl", "","designationStatus != 0","designationID ASC");
+        let tableDataDesignation   =  getTableData("hris_designation_tbl", "","designationStatus != 0 AND designationName NOT LIKE '%non organic%'","designationID ASC");
         tableDataDesignation.map((item_designation, index)=>{
             let checkedCondition    = approvalDesignationID.indexOf(item_designation["designationID"]);
             if(checkedCondition >= 0){
@@ -279,7 +279,7 @@ function listOfAttachDesignation(moduleID = null){
             approvalDesignationID.push(item_designationID["designationID"]);
             approvalUsers.push(item_designationID["userAccountID"])
         });
-        let tableDataDesignation   =  getTableData("hris_designation_tbl", "","designationStatus != 0","designationID ASC");
+        let tableDataDesignation   =  getTableData("hris_designation_tbl", "","designationStatus != 0 AND designationName NOT LIKE '%non organic%'","designationID ASC");
         tableDataDesignation.map((item_designation, index)=>{
             let checkedCondition    = approvalDesignationID.indexOf(item_designation["designationID"]);
             let checked             = checkedCondition >= 0 ? "checked": "";
@@ -397,8 +397,8 @@ function approvalModalContent(approvalID){
 
 
 
-    modalFooterContent = `  <button class="btn btn-update" approval="${approvalTableData[0]["approvalID"]}" module="${approvalTableData[0]["moduleID"]}" designation="${approvalTableData[0]["designationID"]}" id="approvalUpdateBtn"><i class="fas fa-save"></i>&nbsp;Update</button>
-                            <button class="btn btn-cancel" data-dismiss="modal" id="approvalCancelBtn"><i class="fas fa-ban"></i>&nbsp;Cancel</button>`;
+    modalFooterContent = `  <button class="btn btn-update px-5 p-2" approval="${approvalTableData[0]["approvalID"]}" module="${approvalTableData[0]["moduleID"]}" designation="${approvalTableData[0]["designationID"]}" id="approvalUpdateBtn"><i class="fas fa-save"></i>&nbsp;Update</button>
+                            <button class="btn btn-cancel px-5 p-2" data-dismiss="modal" id="approvalCancelBtn"><i class="fas fa-ban"></i>&nbsp;Cancel</button>`;
 
 
     $(modalBody).html(modalBodyContent);

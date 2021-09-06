@@ -764,7 +764,7 @@ $(document).ready(function(){
 		function getItemList(itemID = null){
 			let html = `<option disabled ${!itemID ? `selected` : ``}>Select Item Name</option>`;
 			inventoryItemList.map(items=>{
-				html += `<option value="${items.itemID}" itemcode="${items.itemCode}" classificationname="${items.classificationName}" classificationid="${items.classificationID}" uom="${items.unitOfMeasurementID}" itemname="${items.itemName}" ${items.itemID == itemID ? `selected` : ``}>${items.itemName}</option>`;
+				html += `<option value="${items.itemID}" itemcode="${items.itemCode}" brandname="${items.brandName}" classificationname="${items.classificationName}" classificationid="${items.classificationID}" uom="${items.unitOfMeasurementID}" itemname="${items.itemName}" ${items.itemID == itemID ? `selected` : ``}>${items.itemName}</option>`;
 			});
 			return html;
 		}
@@ -979,6 +979,7 @@ $(document).ready(function(){
 			let thisParent 			= $(this).closest("tr");
 			let thisValue 			= $(this).val();
 			let itemCode 			= $('option:selected', this).attr("itemcode");
+			let brandName 			= $("option:selected", this).attr("brandname");
 			let classificationID 	= $('option:selected', this).attr("classificationid");
 			let classificationName  = $('option:selected', this).attr("classificationname");
 			let unitOfMeasurement   = $('option:selected', this).attr("uom");
@@ -987,6 +988,7 @@ $(document).ready(function(){
 			thisParent.find(".milestone-item-code").text(itemCode);
 			thisParent.find(".milestone-item-classification").text(classificationName);
 			thisParent.find(".milestoneUom").text(unitOfMeasurement);
+			thisParent.find(".item-brand-name").text(brandName);
 			
 			// $(`[name=projectCategory]`).val(`${projectCategory}`);
 		});
@@ -995,6 +997,7 @@ $(document).ready(function(){
 			let thisParent 			= $(this).closest("tr");
 			let thisValue 			= $(this).val();
 			let itemCode 			= $('option:selected', this).attr("itemcode");
+			let brandName 			= $("option:selected", this).attr("brandname");
 			let classificationID 	= $('option:selected', this).attr("classificationid");
 			let classificationName  = $('option:selected', this).attr("classificationname");
 			let unitOfMeasurement   = $('option:selected', this).attr("uom");
@@ -1003,6 +1006,7 @@ $(document).ready(function(){
 			thisParent.find(".material-item-code").text(itemCode);
 			thisParent.find(".material-item-classification").text(classificationName);
 			thisParent.find(".materialUom").text(unitOfMeasurement);
+			thisParent.find(".item-brand-name").text(brandName);
 			
 			// $(`[name=projectCategory]`).val(`${projectCategory}`);
 		});
@@ -1587,6 +1591,7 @@ $(document).ready(function(){
 
 						projectPhaseData.map(items=>{
 							var itemList = [];
+							console.log(data[0]);
 							data[0].filter(list=> list.milestoneBuilderID == items.phaseID && list.milestoneListID == items.milestoneID).map(list=>{
 								var temp = {
 									itemID: list.itemID,
@@ -1594,6 +1599,7 @@ $(document).ready(function(){
 									itemName: list.itemName,
 									itemClassification: list.itemClassification,
 									itemUom: list.itemUom,
+									brandName: list.brandName,
 									quantity: list.quantity,
 								}
 								itemList.push(temp);
@@ -1709,6 +1715,7 @@ $(document).ready(function(){
 												style="width: 100%" required>
 												${getItemList(items.itemID)}
 											</select>
+											<div style="font-size: 85%;" class="font-weight-bold py-2 item-brand-name">${items.brandName}</div>
 										</div>
 									</td>
 									<td>
@@ -1745,6 +1752,7 @@ $(document).ready(function(){
 												style="width: 100%" required>
 												${getItemList()}
 											</select>
+											<div style="font-size: 85%;" class="font-weight-bold py-2 item-brand-name"></div>
 										</div>
 									</td>
 									<td>
@@ -1799,7 +1807,7 @@ $(document).ready(function(){
 												<option disabled ${travelTypeList ? ``: `selected`}>Select travel type</option>
 												<option value="vehicle" ${travelTypeList=="vehicle" ? `selected`:``}>Vehicle</option>
 												<option value="toll" ${travelTypeList=="toll" ? `selected`:``}>Toll</option>
-												<option value="commute"  ${travelTypeList=="commute" ? `selected`:``}>Commute</option>
+												<option value="commute"  ${travelTypeList=="commute" ? `selected`:``}>Others</option>
 											</select>
 										</td>
 										<td class="travelTypeRequest"> 
@@ -1817,7 +1825,7 @@ $(document).ready(function(){
 												<option disabled selected>Select travel type</option>
 												<option value="vehicle">Vehicle</option>
 												<option value="toll">Toll</option>
-												<option value="commute">Commute</option>
+												<option value="commute">Others</option>
 											</select>
 										</td>
 										<td class="travelTypeRequest"> 
@@ -1837,6 +1845,7 @@ $(document).ready(function(){
 				var option = ``, tableDataItem = ``;
 				if(phaseData){
 					option += getMilestoneList(phaseData.phaseID, phaseData.milestoneID);
+					// console.log(phaseData["items"]);
 					tableDataItemList = phaseData["items"].map(items=>{
 						return `	<tr style="white-space: nowrap">
 										${!readOnly ? `<td>
@@ -1849,6 +1858,7 @@ $(document).ready(function(){
 													style="width: 100%" required>
 													${getItemList(items.itemID)}
 												</select>
+												<div style="font-size: 85%;" class="font-weight-bold py-2 item-brand-name">${items.brandName}</div>
 											</div>
 										</td>
 										<td>
@@ -1975,6 +1985,7 @@ $(document).ready(function(){
 											style="width: 100%" required>
 											${getItemList()}
 										</select>
+										<div style="font-size: 85%;" class="font-weight-bold py-2 item-brand-name"></div>
 									</div>
 								</td>
 								<td>
@@ -2027,6 +2038,7 @@ $(document).ready(function(){
 												style="width: 100%" required>
 												${getItemList()}
 											</select>
+											<div style="font-size: 85%;" class="font-weight-bold py-2 item-brand-name"></div>
 										</div>
 									</td>
 									<td>
@@ -2630,11 +2642,11 @@ $(document).ready(function(){
 							if(costEstimateID){
 								let conditionSqlItemRequest = `inventoryValidationID IS NULL AND billMaterialID IS NULL AND purchaseRequestID IS NULL AND bidRecapID IS NULL AND referencePurchaseOrderID IS NULL AND purchaseOrderID IS NULL AND inventoryReceivingID IS NULL`;
 								let projectPhaseItemsRequestData = getTableData(`pms_cost_estimate_tbl LEFT JOIN ims_request_items_tbl USING(costEstimateID)`,
-																		`requestItemID, milestoneBuilderID, phaseDescription, milestoneListID, projectMilestoneID, projectMilestoneName, itemID, itemCode, itemName, itemDescription,itemClassification, itemUom, quantity`,
+																		`requestItemID, milestoneBuilderID, phaseDescription, milestoneListID, projectMilestoneID, projectMilestoneName, itemID, itemCode, itemName, itemDescription,itemClassification, brandName, itemUom, quantity`,
 																		 `${conditionSqlItemRequest} AND costEstimateID = '${costEstimateID}' AND categoryType = 'Project Phase'`
 																		);
 								let materialItemsRequestData = getTableData(`pms_cost_estimate_tbl LEFT JOIN ims_request_items_tbl USING(costEstimateID)`,
-																		`milestoneBuilderID, phaseDescription, milestoneListID, projectMilestoneID, projectMilestoneName, itemID, itemCode, itemName, itemDescription,itemClassification, itemUom, quantity`,
+																		`milestoneBuilderID, phaseDescription, milestoneListID, projectMilestoneID, projectMilestoneName, itemID, itemCode, itemName, itemDescription,itemClassification, itemUom, brandName, quantity`,
 																		 `${conditionSqlItemRequest} AND costEstimateID = '${costEstimateID}' AND categoryType = 'Materials and Equipment'`
 																		);
 								let designationRequestData = getTableData(`pms_cost_estimate_tbl LEFT JOIN hris_personnel_request_tbl USING(costEstimateID)`,
@@ -3042,6 +3054,7 @@ $(document).ready(function(){
 								var milestoneItemCode 			= $(this).find(".milestone-item-code").text();
 								var milestoneItemName 			= $(this).find("[name=milestoneItems] option:selected").attr("itemname");
 								var milestoneItemClassification = $(this).find(".milestone-item-classification").text().trim();
+								var milestoneBranName 			= $(this).find("[name=milestoneItems] option:selected").attr("brandname");
 								var milestoneItemQuantity 		= $(this).find(".milestone-quantity").find("[name=quantity]").val();
 								var milestoneItemUom 			= $(this).find(".milestoneUom").text();
 								var temp = {
@@ -3058,6 +3071,7 @@ $(document).ready(function(){
 								formData.append(`projectPhaseData[${projectPhaseCount}][milestoneItemCode]`, milestoneItemCode);
 								formData.append(`projectPhaseData[${projectPhaseCount}][milestoneItemName]`, milestoneItemName);
 								formData.append(`projectPhaseData[${projectPhaseCount}][milestoneItemClassification]`, milestoneItemClassification);
+								formData.append(`projectPhaseData[${projectPhaseCount}][milestoneBranName]`, milestoneBranName);
 								formData.append(`projectPhaseData[${projectPhaseCount}][milestoneItemQuantity]`, milestoneItemQuantity);
 								formData.append(`projectPhaseData[${projectPhaseCount}][milestoneItemUom]`, milestoneItemUom);
 								projectPhaseCount += 1;
@@ -3069,6 +3083,7 @@ $(document).ready(function(){
 						var materialItemCode 			= $(this).find(".material-item-code").text().replaceAll(" ", "");
 						var materialItemID 				= $(this).find(`[name=materialItems]`).val();
 						var materialItemName 			= $(this).find(`[name=materialItems] option:selected`).attr("itemname");
+						var materialBrandName 			= $(this).find(`[name=materialItems] option:selected`).attr("brandname");
 						var materialItemClassification	= $(this).find(".material-item-classification").text().replaceAll(" ", "");
 						var materialItemQuantity 		= $(this).find(".material-quantity [name=quantity]").val();
 						var materialItemUom 			= $(this).find(".materialUom").text().replaceAll(" ", "");
@@ -3080,6 +3095,7 @@ $(document).ready(function(){
 						formData.append(`materialData[${i}][materialItemID]`, materialItemID);
 						formData.append(`materialData[${i}][materialItemName]`, materialItemName);
 						formData.append(`materialData[${i}][materialItemClassification]`, materialItemClassification);
+						formData.append(`materialData[${i}][materialBrandName]`, materialBrandName);
 						formData.append(`materialData[${i}][materialItemQuantity]`, materialItemQuantity);
 						formData.append(`materialData[${i}][materialItemUom]`, materialItemUom);
 					});

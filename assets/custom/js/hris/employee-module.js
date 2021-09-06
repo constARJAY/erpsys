@@ -47,6 +47,10 @@ $(document).ready(function() {
 			$("#tableEmployeeModule").DataTable().destroy();
 		}
 
+		if ($.fn.DataTable.isDataTable("#tableEmployeeModule2")) {
+			$("#tableEmployeeModule2").DataTable().destroy();
+		}
+
 		if ($.fn.DataTable.isDataTable("#tableLeaveBalance")) {
 			$("#tableLeaveBalance").DataTable().destroy();
 		}
@@ -78,6 +82,23 @@ $(document).ready(function() {
 					{ targets: 6, width: 150 },
 					{ targets: 7, width: 110 },
 					{ targets: 8, width: 80  },
+				],
+			});
+
+		var table = $("#tableEmployeeModule2")
+			.css({ "min-width": "100%" })
+			.removeAttr("width")
+			.DataTable({
+				proccessing: false,
+				serverSide: false,
+				scrollX: true,
+				scrollCollapse: true,
+                bStateSave: true,
+				columnDefs: [
+					{ targets: 0, width: 50  },
+					{ targets: 1, width: 200 },
+					{ targets: 2, width: 150 },
+					{ targets: 3, width: 150 },
 				],
 			});
 
@@ -183,7 +204,7 @@ $(document).ready(function() {
                 <div class="d-flex justify-content-start align-items-center">
                     <div class="font-weight-bold text-danger pr-2"><i class="fas fa-exclamation"></i> NOTICE:</div>
                     <div>
-                        <span class="font-weight-bold">${fullname}</span> is not sync in yet on biometrics.
+                        <span class="font-weight-bold">${fullname}</span> is not yet synced on the biometrics.
                     </div>
                 </div>
                 <button type="button" class="close" data-dismiss="alert" aria-label="Close">
@@ -200,7 +221,7 @@ $(document).ready(function() {
 
 
 	// ----- TABLE CONTENT -----
-	function tableContent() {
+	function organicTableContent() {
 		preventRefresh(false);
 
 		// Reset the unique datas
@@ -224,7 +245,9 @@ $(document).ready(function() {
             departmentName,
             designationName,
             employeeHourlyRate,
-            employeeStatus`
+            employeeStatus,
+            hris_employee_list_tbl.createdAt AS createdAt`,
+            `employeeStatus <> 7`
         );
 
         const statusStyle = (status) => {
@@ -286,6 +309,7 @@ $(document).ready(function() {
                 designationName    = "-",
                 employeeHourlyRate = 0,
                 employeeStatus     = 0,
+                createdAt
             } = employee;
 
             let unique = {
@@ -306,7 +330,7 @@ $(document).ready(function() {
 
             html += `
             <tr class="btnEdit" id="${encryptString(employeeID)}">
-                <td>${getFormCode("EMP", "2021-04-12", employeeID)}</td>
+                <td>${getFormCode("EMP", createdAt, employeeID)}</td>
                 <td>${profileImg} <span class="ml-2">${fullname}<span></td>
                 <td>
                     <div>
@@ -335,13 +359,92 @@ $(document).ready(function() {
 	// ----- END TABLE CONTENT -----
 
 
+    // ----- NON-ORGANIC TABLE CONTENT -----
+    function nonOrganicTableContent() {
+        preventRefresh(false);
+
+		// Reset the unique datas
+		uniqueData = [];
+
+        $("#table_content").html(preloader);
+
+        const employeeListData = getTableData(
+            `hris_employee_list_tbl
+                LEFT JOIN hris_department_tbl USING(departmentID)
+                LEFT JOIN hris_designation_tbl USING(designationID)`,
+            `employeeID, 
+            employeeProfile,
+            employeeFirstname AS fullname,
+            departmentName,
+            designationName,
+            employeeStatus,
+            hris_employee_list_tbl.createdAt AS createdAt`,
+            `employeeStatus = 7`
+        );
+
+		let html = `
+        <table class="table table-bordered table-striped table-hover" id="tableEmployeeModule2">
+            <thead>
+                <tr style="white-space:nowrap">
+                    <th>Employee Code</th>
+                    <th>Full Name</th>
+                    <th>Department</th>
+                    <th>Designation</th>
+                </tr>
+            </thead>
+            <tbody>`;
+
+        employeeListData.map((employee, index) => {
+
+            let {
+                employeeID,
+                fullname,
+                departmentName     = "-",
+                designationName    = "-",
+                createdAt
+            } = employee;
+
+            let unique = {
+                id: employeeID,
+                employeeFirstname: fullname
+            }
+            uniqueData.push(unique);
+
+            let profilePath = `${base_url}assets/upload-files/profile-images/default.jpg`;
+            let profileImg  = `<img 
+                src="${profilePath}"
+                class="rounded rounded-circle"
+                style="width: 50px;
+                    height: 50px">`;
+
+            html += `
+            <tr class="btnEdit" id="${encryptString(employeeID)}">
+                <td>${getFormCode("EMP", createdAt, employeeID)}</td>
+                <td>${profileImg} <span class="ml-2">${fullname}<span></td>
+                <td>${departmentName}</td>
+                <td>${designationName}</td>
+            </tr>`
+        })
+
+        html += `
+            </tbody>
+        </table>`;
+
+        setTimeout(() => {
+            $("#table_content").html(html);
+            initDataTables();
+        }, 500);
+    }
+    // ----- END NON-ORGANIC TABLE CONTENT -----
+
+
     // ----- PAGE CONTENT -----
     function pageContent() {
         let html = `
         <div id="alert_notice_content"></div>
         <div class="table-responsive mt-4" id="table_content"></div>`;
         $("#page_content").html(html);
-        tableContent();
+        organicTableContent();
         alertNoticeContent();
     }
     pageContent();
@@ -622,6 +725,7 @@ $(document).ready(function() {
             { id: 4, value: "Retired"      },
             { id: 5, value: "Suspended"    },
             { id: 6, value: "Terminated"   },
+            // 7 - NON-ORGANIC
         ]
         return statuses.map(status => {
             return `
@@ -2285,7 +2389,7 @@ $(document).ready(function() {
 
 
     // ----- MODAL CONTENT -----
-    function modalContent(data = false) {
+    function modalContent(data = false, type = "organicTab") {
         contractAppraisalFilename   = [], contractAppraisalFiles   = [];
         employeeMemorandaFilename   = [], employeeMemorandaFiles   = [];
         trainingDevelopmentFilename = [], trainingDevelopmentFiles = [];
@@ -2296,65 +2400,129 @@ $(document).ready(function() {
         <button 
             class="btn btn-update px-5 p-2" 
             id="btnUpdate" 
+            redirect="${type}"
             employeeID="${encryptString(data.employeeID)}"><i class="fas fa-save"></i>
             Update
         </button>`
 			: `
-        <button class="btn btn-save px-5 p-2" id="btnSave"><i class="fas fa-save"></i> Save</button>`;
+        <button class="btn btn-save px-5 p-2" id="btnSave" redirect="${type}"><i class="fas fa-save"></i> Save</button>`;
 
-        let html = `
-        <div class="modal-body">
-            <ul class="nav nav-tabs nav-tabs-bottom nav-justified border" id="addtabs">
-                <li class="nav-item">
-                    <a class="nav-link border active" href="#information-tab" data-toggle="tab" style="border-bottom: none;">Information</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link border" href="#account-tab" data-toggle="tab" style="border-bottom: none;">Account</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link border" href="#payroll-tab" data-toggle="tab" style="border-bottom: none;">Payroll</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link border" href="#leave-balance-tab" data-toggle="tab" style="border-bottom: none;">Leave Balance</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link border" href="#schedule-tab" data-toggle="tab" style="border-bottom: none;">Schedule</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link border" href="#accessibility-tab" data-toggle="tab" style="border-bottom: none;">Accessibility</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link border" href="#documents-tab" data-toggle="tab" style="border-bottom: none;">Documents</a>
-                </li>
-            </ul>
-            <div class="tab-content pt-4" style="min-height: 28vh;">
-                <div class="tab-pane show active" id="information-tab">
-                    ${employeeInformationTab(data)}
-                </div>
-                <div class="tab-pane" id="account-tab">
-                    ${employeeAccountTab(data)}
-                </div>
-                <div class="tab-pane" id="payroll-tab">
-                    ${employeePayrollTab(data)}
-                </div>
-                <div class="tab-pane" id="leave-balance-tab">
-                    ${employeeLeaveBalance(data)}
-                </div>
-                <div class="tab-pane" id="schedule-tab">
-                    ${employeeSchedule(data)}
-                </div>
-                <div class="tab-pane" id="accessibility-tab">
-                    ${employeeAccessibility(data)}
-                </div>
-                <div class="tab-pane" id="documents-tab">
-                    ${employeeDocuments(data)}
+        let html = "";
+        
+        if (type == "organicTab") {
+            html = `
+            <div class="modal-body">
+                <ul class="nav nav-tabs nav-tabs-bottom nav-justified border" id="addtabs">
+                    <li class="nav-item">
+                        <a class="nav-link border active" href="#information-tab" data-toggle="tab" style="border-bottom: none;">Information</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link border" href="#account-tab" data-toggle="tab" style="border-bottom: none;">Account</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link border" href="#payroll-tab" data-toggle="tab" style="border-bottom: none;">Payroll</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link border" href="#leave-balance-tab" data-toggle="tab" style="border-bottom: none;">Leave Balance</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link border" href="#schedule-tab" data-toggle="tab" style="border-bottom: none;">Schedule</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link border" href="#accessibility-tab" data-toggle="tab" style="border-bottom: none;">Accessibility</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link border" href="#documents-tab" data-toggle="tab" style="border-bottom: none;">Documents</a>
+                    </li>
+                </ul>
+                <div class="tab-content pt-4" style="min-height: 28vh;">
+                    <div class="tab-pane show active" id="information-tab">
+                        ${employeeInformationTab(data)}
+                    </div>
+                    <div class="tab-pane" id="account-tab">
+                        ${employeeAccountTab(data)}
+                    </div>
+                    <div class="tab-pane" id="payroll-tab">
+                        ${employeePayrollTab(data)}
+                    </div>
+                    <div class="tab-pane" id="leave-balance-tab">
+                        ${employeeLeaveBalance(data)}
+                    </div>
+                    <div class="tab-pane" id="schedule-tab">
+                        ${employeeSchedule(data)}
+                    </div>
+                    <div class="tab-pane" id="accessibility-tab">
+                        ${employeeAccessibility(data)}
+                    </div>
+                    <div class="tab-pane" id="documents-tab">
+                        ${employeeDocuments(data)}
+                    </div>
                 </div>
             </div>
-        </div>
-        <div class="modal-footer">
-            ${button}
-            <button class="btn btn-cancel btnCancel px-5 p-2" ><i class="fas fa-ban"></i> Cancel</button>
-        </div>`;
+            <div class="modal-footer">
+                ${button}
+                <button class="btn btn-cancel btnCancel px-5 p-2" ><i class="fas fa-ban"></i> Cancel</button>
+            </div>`;
+        } else {
+
+            const {
+                employeeID,
+                employeeFirstname = "", 
+                departmentID,
+                designationID
+            } = data;
+
+            html = `
+            <div class="modal-body">
+                <div class="row">
+                    <div></div>
+                </div>
+                <div class="form-group">
+                    <label>Full Name <code>*</code></label>
+                    <input type="text"
+                        class="form-control validate"
+                        name="employeeFirstname"
+                        id="employeeFirstname"
+                        data-allowcharacters="[a-z][A-Z][.][,][-]['][ ]"
+                        minlength="2"
+                        maxlength="150"
+                        autocomplete="off"
+                        required
+                        title="Employee"
+                        unique="${employeeID}"
+                        value="${employeeFirstname || ""}">
+                    <div class="invalid-feedback d-block" id="invalid-employeeFirstname"></div>
+                </div>
+                <div class="form-group">
+                    <label>Department <code>*</code></label>
+                    <select class="form-control validate select2"
+                        style="width: 100%"
+                        name="departmentID"
+                        id="departmentID"
+                        required>
+                        <option value="" selected disabled>Select Department</option>
+                        ${departmentOptions(departmentID)}
+                    </select>
+                    <div class="invalid-feedback d-block" id="invalid-departmentID"></div>
+                </div>
+                <div class="form-group">
+                    <label>Designation <code>*</code></label>
+                    <select class="form-control validate select2"
+                        style="width: 100%"
+                        name="designationID"
+                        id="designationID"
+                        required>
+                        ${designationOptions(designationID, departmentID, true)}
+                    </select>
+                    <div class="invalid-feedback d-block" id="invalid-designationID"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                ${button}
+                <button class="btn btn-cancel btnCancel px-5 p-2" ><i class="fas fa-ban"></i> Cancel</button>
+            </div>`;
+        }
+
         return html;
 
     }
@@ -2533,12 +2701,22 @@ $(document).ready(function() {
 	$(document).on("click", "#btnAdd", function () {
 		preventRefresh(true);
 
-		$("#modal_employee_module .page-title").text("ADD EMPLOYEE");
-		$("#modal_employee_module").modal("show");
-		$("#modal_employee_module_content").html(preloader);
-		const content = modalContent();
-		$("#modal_employee_module_content").html(content);
-		initAll();
+        let modalTitle = "";
+        const tab = $(`.nav-link.active`).attr("redirect");
+        if (tab == "organicTab") {
+            modalTitle = "ADD EMPLOYEE (ORGANIC)";
+            $("#modal_employee_module .modal-dialog").removeClass("modal-md").addClass("modal-xl");
+        } else {
+            modalTitle = "ADD EMPLOYEE (NON-ORGANIC)";
+            $("#modal_employee_module .modal-dialog").removeClass("modal-xl").addClass("modal-md");
+        }
+
+        $("#modal_employee_module .page-title").text(modalTitle);
+        $("#modal_employee_module").modal("show");
+        $("#modal_employee_module_content").html(preloader);
+        const content = modalContent(false, tab);
+        $("#modal_employee_module_content").html(content);
+        initAll();
         const disabledFutureDates = {
             autoUpdateInput:  false,
             singleDatePicker: true,
@@ -2552,8 +2730,21 @@ $(document).ready(function() {
         initDateRangePicker("#employeeBirthday", disabledFutureDates);
         initDateRangePicker("#employeeHiredDate", disabledFutureDates);
         initDataTables();
+		
 	});
 	// ----- END OPEN ADD MODAL -----
+
+
+    // ----- NAV LINK -----
+	$(document).on("click", ".nav-link", function () {
+		const tab = $(this).attr("redirect");
+		if (tab == "organicTab") {
+			organicTableContent();
+		} else  {
+			nonOrganicTableContent();
+		}
+	});
+	// ----- END NAV LINK -----
 
 
     // ----- FOCUS ERROR FORM -----
@@ -2571,30 +2762,45 @@ $(document).ready(function() {
 
 
     // ----- SAVE MODAL -----
-	$(document).on("click", "#btnSave", function () {
-        formButtonHTML(this, true);
+	$(document).on("click", "#btnSave", function () { 
 		const validate = validateForm("modal_employee_module");
-        comparePassword();
-		if (validate) {
-            // ----- RESET SEARCH IN DATATABLE -----
-            $(`[aria-controls="tableAccessibility"]`).val("");
-            $('#tableAccessibility').DataTable().search("").draw();
-            // ----- RESET SEARCH IN DATATABLE -----
-            setTimeout(() => {
-                getEmployeeData()
-                .then(data => {
-                    formButtonHTML(this, false);
-                    if (data) {
-                        data.append("action", "insert");
-                        saveEmployeeData(data, "add", tableContent);
-                    } else {
-                        showNotification("danger", "There was an error getting employee data");
-                    }
-                })
-            }, 100);
-		} else {
-            displayErrorTab();
-            formButtonHTML(this, false);
+        
+        const tab = $(this).attr("redirect");
+        if (tab == "organicTab") {
+            formButtonHTML(this, true);
+            comparePassword();
+            if (validate) {
+                // ----- RESET SEARCH IN DATATABLE -----
+                $(`[aria-controls="tableAccessibility"]`).val("");
+                $('#tableAccessibility').DataTable().search("").draw();
+                // ----- RESET SEARCH IN DATATABLE -----
+                setTimeout(() => {
+                    getEmployeeData()
+                    .then(data => {
+                        formButtonHTML(this, false);
+                        if (data) {
+                            data.append("action", "insert");
+                            saveEmployeeData(data, "add", organicTableContent);
+                        } else {
+                            showNotification("danger", "There was an error getting employee data");
+                        }
+                    })
+                }, 100);
+            } else {
+                displayErrorTab();
+                formButtonHTML(this, false);
+            }
+        } else {
+            if (validate) {
+                let data = getFormData("modal_employee_module", true);
+                data[`tableData[employeeStatus]`] = 7;
+                data[`tableData[createdAt]`] = sessionID;
+                data[`tableData[updatedAt]`] = sessionID;
+                data[`tableName`] = "hris_employee_list_tbl";
+                data[`feedback`]  = $(`[name="employeeFirstname"]`).val()?.trim();
+
+                sweetAlertConfirmation("add", "Employee", "modal_employee_module", null, data, true, nonOrganicTableContent);
+            } 
         }
 	});
 	// ----- END SAVE MODAL -----
@@ -2603,31 +2809,49 @@ $(document).ready(function() {
     // ----- SAVE MODAL -----
 	$(document).on("click", "#btnUpdate", function () {
         const id = decryptString($(this).attr("employeeID"));
-        formButtonHTML(this, true);
 		const validate = validateForm("modal_employee_module");
-        comparePassword();
-		if (validate) {
-            // ----- RESET SEARCH IN DATATABLE -----
-            $(`[aria-controls="tableAccessibility"]`).val("");
-            $('#tableAccessibility').DataTable().search("").draw();
-            // ----- RESET SEARCH IN DATATABLE -----
-            setTimeout(() => {
-                getEmployeeData()
-                .then(data => {
-                    formButtonHTML(this, false);
-                    if (data) {
-                        data.append("employeeID", id);
-                        data.append("action", "update");
-                        saveEmployeeData(data, "edit", tableContent);
-                    } else {
-                        showNotification("danger", "There was an error getting employee data");
-                    }
-                })
-            }, 100);
-		} else {
-            displayErrorTab();
-            formButtonHTML(this, false);
+
+        const tab = $(this).attr("redirect");
+        if (tab == "organicTab") {
+            formButtonHTML(this, true);
+            comparePassword();
+            if (validate) {
+                // ----- RESET SEARCH IN DATATABLE -----
+                $(`[aria-controls="tableAccessibility"]`).val("");
+                $('#tableAccessibility').DataTable().search("").draw();
+                // ----- RESET SEARCH IN DATATABLE -----
+                setTimeout(() => {
+                    getEmployeeData()
+                    .then(data => {
+                        formButtonHTML(this, false);
+                        if (data) {
+                            data.append("employeeID", id);
+                            data.append("action", "update");
+                            saveEmployeeData(data, "edit", organicTableContent);
+                        } else {
+                            showNotification("danger", "There was an error getting employee data");
+                        }
+                    })
+                }, 100);
+            } else {
+                displayErrorTab();
+                formButtonHTML(this, false);
+            }
+        } else {
+            if (validate) {
+                let data = getFormData("modal_employee_module", true);
+                data[`tableData[employeeStatus]`] = 7;
+                data[`tableData[createdAt]`] = sessionID;
+                data[`tableData[updatedAt]`] = sessionID;
+                data[`tableName`]   = "hris_employee_list_tbl";
+                data[`whereFilter`] = `employeeID = ${id}`;
+                data[`feedback`]    = $(`[name="employeeFirstname"]`).val()?.trim();
+
+                sweetAlertConfirmation("update", "Employee", "modal_employee_module", null, data, true, nonOrganicTableContent);
+            } 
         }
+
+        
 	});
 	// ----- END SAVE MODAL -----
     
@@ -2636,8 +2860,18 @@ $(document).ready(function() {
 	$(document).on("click", ".btnEdit", function () {
 		preventRefresh(true);
 
+        let modalTitle = "";
+        const tab = $(`.nav-link.active`).attr("redirect");
+        if (tab == "organicTab") {
+            modalTitle = "ADD EMPLOYEE (ORGANIC)";
+            $("#modal_employee_module .modal-dialog").removeClass("modal-md").addClass("modal-xl");
+        } else {
+            modalTitle = "ADD EMPLOYEE (NON-ORGANIC)";
+            $("#modal_employee_module .modal-dialog").removeClass("modal-xl").addClass("modal-md");
+        }
+
 		const id = decryptString($(this).attr("id"));
-		$("#modal_employee_module .page-title").text("EDIT EMPLOYEE");
+		$("#modal_employee_module .page-title").text(modalTitle);
         $("#modal_employee_module").modal("show");
 		$("#modal_employee_module_content").html(preloader);
 
@@ -2650,29 +2884,31 @@ $(document).ready(function() {
                 );
                 
                 if (employeeData) {
-                    
                     try {
-                        const content = modalContent(employeeData[0]);
+                        const content = modalContent(employeeData[0], tab);
                         setTimeout(() => {
                             $("#modal_employee_module_content").html(content);
                             initAll();
-                            employeeData[0].bankID && employeeData[0].bankID != 0 && $("[name=bankID]").trigger("change");
-                            $("[name=employeeBankAccountNo]").val(employeeData[0].employeeBankAccountNo);
-                            employeeData[0].scheduleID && employeeData[0].scheduleID != 0 && $("[name=scheduleID]").trigger("change");
-                            const disabledFutureDates = {
-                                autoUpdateInput:  false,
-                                singleDatePicker: true,
-                                showDropdowns:    true,
-                                autoApply:        true,
-                                locale: {
-                                    format: "MMMM DD, YYYY",
-                                },
-                                maxDate: moment(new Date).format("MMMM DD, YYYY"),
-                            }
-                            const daterangepickerBirthday  = { ...disabledFutureDates, startDate: moment(employeeData[0]?.employeeBirthday)  };
-                            const daterangepickerHireddate = { ...disabledFutureDates, startDate: moment(employeeData[0]?.employeeHiredDate) };
-                            initDateRangePicker("#employeeBirthday", daterangepickerBirthday);
-                            initDateRangePicker("#employeeHiredDate", daterangepickerHireddate);
+
+                            if (tab == "organicTab") {
+                                employeeData[0].bankID && employeeData[0].bankID != 0 && $("[name=bankID]").trigger("change");
+                                $("[name=employeeBankAccountNo]").val(employeeData[0].employeeBankAccountNo);
+                                employeeData[0].scheduleID && employeeData[0].scheduleID != 0 && $("[name=scheduleID]").trigger("change");
+                                const disabledFutureDates = {
+                                    autoUpdateInput:  false,
+                                    singleDatePicker: true,
+                                    showDropdowns:    true,
+                                    autoApply:        true,
+                                    locale: {
+                                        format: "MMMM DD, YYYY",
+                                    },
+                                    maxDate: moment(new Date).format("MMMM DD, YYYY"),
+                                }
+                                const daterangepickerBirthday  = { ...disabledFutureDates, startDate: moment(employeeData[0]?.employeeBirthday)  };
+                                const daterangepickerHireddate = { ...disabledFutureDates, startDate: moment(employeeData[0]?.employeeHiredDate) };
+                                initDateRangePicker("#employeeBirthday", daterangepickerBirthday);
+                                initDateRangePicker("#employeeHiredDate", daterangepickerHireddate);
+                            } 
                             initDataTables();
         
                             if (!allowedUpdate) {

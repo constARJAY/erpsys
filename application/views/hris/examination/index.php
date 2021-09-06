@@ -30,8 +30,8 @@
 						<li class="breadcrumb-item"><i class="zmdi zmdi-folder"></i> &nbsp;Masterfiles</li>
 						<li class="breadcrumb-item active">Examination</li>
 					</ul>
-					<h1 class="mt-3" id="inv_headerID">List of Examination</h1>
-					<span>This module is used to manage examination details.</span>
+					<h1 class="mt-3" id="inv_headerID">List of Examinations</h1>
+					<span>This module is used to manage the examination details.</span>
 				</div>
 				<div class="col-lg-6 col-md-12 text-md-right">
 						<?php if(isCreateAllowed(32)){ ?>

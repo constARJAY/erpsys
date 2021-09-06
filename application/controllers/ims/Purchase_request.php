@@ -241,8 +241,7 @@ class Purchase_request extends CI_Controller {
         echo json_encode($this->purchaserequest->getMaterialEquipmentRequestItems($purchaseRequestID));
     }
 
-    public function getCostEstimateRequest()
-    {
+    public function getCostEstimateRequest(){
         $purchaseRequestID = $this->input->post("purchaseRequestID");
         $billMaterialID    = $this->input->post("billMaterialID");
         echo json_encode($this->purchaserequest->getCostEstimateRequest($purchaseRequestID, $billMaterialID));

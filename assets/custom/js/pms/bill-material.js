@@ -1862,6 +1862,7 @@ $(document).on("keyup",  "[name=row-unit-cost]", function(){
 																									</td>
 																									<td> 
 																										<div class="milestone-item-name">${itemList.itemName}</div>
+																										<div style="font-size: 85%;" class="font-weight-bold py-2 item-brand-name">${itemList.itemBrandName}</div>
 																									</td>
 																									<td>
 																										<div class="milestone-item-classification">${itemList.itemClassification}</div>
@@ -1947,6 +1948,7 @@ $(document).on("keyup",  "[name=row-unit-cost]", function(){
 														<td><div class="material-item-code" itemid="${items.itemID}" brandname="${items.itemBrandName}">${items.itemCode}</div></td>
 														<td> 
 															<div class="material-item-name">${items.itemName}</div>
+															<div style="font-size: 85%;" class="font-weight-bold py-2 item-brand-name">${items.itemBrandName}</div>
 														</td>
 														<td>
 															<div class="material-item-classification">${items.itemClassification}</div>

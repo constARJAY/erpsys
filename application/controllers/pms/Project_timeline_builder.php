@@ -20,8 +20,7 @@ class Project_timeline_builder extends CI_Controller {
     }
 
 
-    public function savetimelineBuilder()
-    {
+    public function savetimelineBuilder(){
         $action                     = $this->input->post("action");
         $method                     = $this->input->post("method");
         $timelineBuilderID          = $this->input->post("timelineBuilderID") ?? null;

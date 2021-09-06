@@ -909,10 +909,10 @@ class Project_budget_rationale extends CI_Controller {
         $rowNumber++;
 
             $sheet->mergeCells("B$rowNumber:E$rowNumber");
-            $sheet->setCellValue("B$rowNumber", "Acknowledge by: ");
+            $sheet->setCellValue("B$rowNumber", "Acknowledged by: ");
             $sheet->getStyle("B$rowNumber:E$rowNumber")->applyFromArray($allBorderStyle);
             $sheet->mergeCells("F$rowNumber:H$rowNumber");
-            $sheet->setCellValue("F$rowNumber", "Supplier's Signature: ");
+            $sheet->setCellValue("F$rowNumber", "Signature: ");
             $sheet->getStyle("F$rowNumber:H$rowNumber")->applyFromArray($allBorderStyle);
             $sheet->mergeCells("I$rowNumber:K$rowNumber");
             $sheet->setCellValue("I$rowNumber", "Date: ");

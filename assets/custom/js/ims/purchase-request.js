@@ -208,8 +208,6 @@ $(document).ready(function() {
 				{ targets: 5,  width: 100 },
 				{ targets: 6,  width: 150 },
 				{ targets: 7,  width: 150 },
-				{ targets: 8,  width: 180 },
-				{ targets: 9,  width: 200 },
 			],
 		};
 
@@ -231,8 +229,8 @@ $(document).ready(function() {
 				{ targets: 4,  width: 100 },
 				{ targets: 5,  width: 150 },
 				{ targets: 6,  width: 150 },
-				{ targets: 7,  width: 180 },
-				{ targets: 8,  width: 200 },
+				{ targets: 7,  width: 150 },
+				{ targets: 8,  width: 150 },
 			],
 		};
 
@@ -253,8 +251,6 @@ $(document).ready(function() {
 				{ targets: 3,  width: 100 },
 				{ targets: 4,  width: 150 },
 				{ targets: 5,  width: 150 },
-				{ targets: 6,  width: 180 },
-				{ targets: 7,  width: 200 },
 			],
 		};
 
@@ -862,7 +858,6 @@ $(document).ready(function() {
                 ${item.itemName}
             </option>`;
         })
-		
         return display ? html : inventoryItemList;
     }
     // ----- END GET INVENTORY ITEM -----
@@ -975,9 +970,8 @@ $(document).ready(function() {
 					<div class="itemname">
 						<div class="form-group mb-0">
 							<select
-								class="form-control validate select2"
-								name="itemID"
-								style="width: 200px !important"
+								class="form-control validate select2 w-100"
+								name="itemID"            
 								required
 								${disabled}>
 								${getInventoryItem(itemID)}
@@ -985,6 +979,7 @@ $(document).ready(function() {
 							<div class="invalid-feedback d-block" id="invalid-itemID"></div>
 						</div>
 					</div>
+					<div style="font-size: 85%;" class="font-weight-bold py-2 item-brand-name">${brandName || "-"} </div>
 				</td>
 				<td>
 					<div class="classification">${itemClassification || "-"}</div>
@@ -1017,29 +1012,6 @@ $(document).ready(function() {
 				</td>
 				<td class="text-right">
 					<div class="totalcost">${formatAmount(totalCost, true)}</div>
-				</td>
-				<td>
-					<div class="file">
-						<div class="displayfile">${itemFile}</div>
-						<input type="file" 
-							class="form-control" 
-							name="files" 
-							accept="image/*, .pdf, .doc, .docx">
-					</div>
-				</td>
-				<td>
-					<div class="remarks">
-						<textarea 
-							class="form-control validate"
-							minlength="0"
-							maxlength="250"
-							rows="2" 
-							style="resize: none" 
-							class="form-control" 
-							data-allowcharacters="[0-9][a-z][A-Z][ ][.][,][_]['][()][?][-][/]"
-							name="remarks" 
-							id="remarks">${remarks || ""}</textarea>
-					</div>
 				</td>
 			</tr>`;
 		}
@@ -1077,6 +1049,7 @@ $(document).ready(function() {
 				itemName           = "-",
 				itemClassification = "-",
 				quantity           = 0,
+				brandName 		   = "",
 				itemUom            = "",
 				unitCost           = 0,
 				totalCost          = 0,
@@ -1096,7 +1069,10 @@ $(document).ready(function() {
 			<tr class="itemTableRow"
 				requestItemID="${requestItemID}">
 				<td>${itemCode || "-"}</td>
-				<td>${itemName && itemName != "Select Item Name" ? itemName : "-"}</td>
+				<td>
+					${itemName && itemName != "Select Item Name" ? itemName : "-"}
+					<div style="font-size: 85%;" class="font-weight-bold py-2 item-brand-name">${brandName || "-"} </div>
+				</td>
 				${tdClassification}
 				<td class="text-center">${formatAmount(quantity)}</td>
 				<td>${itemUom || "-"}</td>
@@ -1251,6 +1227,7 @@ $(document).ready(function() {
 			<div class="text-primary font-weight-bold" style="font-size: 1.5rem;">Project Phase</div>
 			${costEstimateRequestItemHTML}
 		</div>` : "";
+		
 		let materialsEquipmentHTML = materialsEquipmentRequestItemHTML ? `
 		<div class="w-100">
 			<hr class="pb-1">
@@ -1362,8 +1339,6 @@ $(document).ready(function() {
 									<th>UOM</th>
 									<th>Unit Cost</th>
 									<th>Total Cost</th>
-									<th>File</th>
-									<th>Remarks</th>
 								</tr>
 							</thead>
 							<tbody class="itemTableBody">
@@ -1461,6 +1436,7 @@ $(document).ready(function() {
 		$(this).closest("tr").find(`.classification`).first().text(classificationName);
 		$(this).closest("tr").find(`.classification`).first().attr("name", classificationName);
 		$(this).closest("tr").find(`.uom`).first().text(titleCase(uom));
+		$(this).closest("tr").find(`.item-brand-name`).text(brandName);
 
 		$(`[name=itemID]`).each(function(i, obj) {
 			let itemID = $(this).val();

@@ -210,12 +210,36 @@ class PurchaseOrder_model extends CI_Model {
             $inventoryVendorID = $poData->inventoryVendorID ?? $data["inventoryVendorID"];
             $status            = $data["purchaseOrderStatus"];
             if ($bidRecapID && $bidRecapID != "" && $inventoryVendorID && $inventoryVendorID != "") {
-                $this->db->query("CALL proc_update_bid_po_items($bidRecapID, $inventoryVendorID, $status)");
+                if($status != 3 && $status != 4){
+                    $itemStatus = 1;
+                }else{
+                    $itemStatus = 0;
+                }
+                if ($bidRecapID != 0 && $inventoryVendorID != 0){
+                    $primaryKey    = $this->getPOPrimaryID($bidRecapID, $inventoryVendorID);
+                    $updateSql     = "UPDATE ims_bid_po_tbl SET bidPoStatus = $itemStatus WHERE bidPoID IN ($primaryKey)";
+                    $updateQuery   = $this->db->query($updateSql);
+                    if(!$updateQuery){
+                        return "false|System error: Please contact the system administrator for assistance!!";
+                    }
+                }
             }
             // ----- END UPDATE BID ITEMS -----
             return "true|Successfully submitted|$insertID|".date("Y-m-d");
         }
         return "false|System error: Please contact the system administrator for assistance!";
+    }
+
+    public function getPOPrimaryID($bidRecapID, $inventoryVendorID){
+        $sql    = "SELECT GROUP_CONCAT(bidPoID SEPARATOR ',') AS primaryKey FROM ims_bid_po_tbl WHERE bidRecapID = '$bidRecapID' AND inventoryVendorID = '$inventoryVendorID' ";
+        $query  = $this->db->query($sql);
+        $result = $query->result_array();
+        $status = count($result) > 0 ? true : false;
+        foreach ($query->result() as $row)
+        {
+                $primaryKey =  $row->primaryKey;
+        }
+        return  $status ? $primaryKey : false;
     }
 
     public function savePurchaseOrderItems($data, $id)

@@ -18,6 +18,17 @@
                         <button class="btn btn-default btn-add" id="btnAdd"><i class="icon-plus"></i> Add Employee</button>
                     </div>
                 <?php } ?>
+                <div class="col-lg-6 col-md-6">
+                    <div class="bh_divider appendHeader"></div>
+                    <div class="row clearfix appendHeader">
+                        <div class="col-12">
+                            <ul class="nav nav-tabs">
+                                <li class="nav-item"><a class="nav-link active" data-toggle="tab" href="#organicTab" redirect="organicTab">Organic</a></li>
+                                <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#nonOrganicTab" redirect="nonOrganicTab">Non-Organic</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -56,5 +67,4 @@
 
 
 <script src="<?= base_url('assets/custom/js/gen/approver-function.js') ?>"></script>
-<script src="<?= base_url('assets/custom/js/hris/employee-biotime.js') ?>"></script>
 <script src="<?= base_url('assets/custom/js/hris/employee-module.js') ?>"></script>

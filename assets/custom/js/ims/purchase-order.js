@@ -463,7 +463,7 @@ $(document).ready(function() {
 				submittedAt,
 				createdAt,
 			} = item;
-
+			
 			let remarks       = purchaseOrderRemarks ? purchaseOrderRemarks : "-";
 			let dateCreated   = moment(createdAt).format("MMMM DD, YYYY hh:mm:ss A");
 			let dateSubmitted = submittedAt ? moment(submittedAt).format("MMMM DD, YYYY hh:mm:ss A") : "-";

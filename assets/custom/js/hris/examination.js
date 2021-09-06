@@ -599,7 +599,7 @@ $(document).ready(function() {
                                     class="form-control validate"
                                     data-allowcharacters="[a-z][A-Z][0-9][.][,][?][!][/][;][:]['][''][-][_][(][)][%][&][*][ ]"
                                     minlength="2"
-                                    maxlength="1735"
+                                    maxlength="150"
                                     value="${answer}"
                                     ${noSavedAnswer ? "disabled" : ""}
                                     autocomplete="off"

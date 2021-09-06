@@ -715,11 +715,6 @@ $(document).ready(function() {
 				<td>
 					<div class="servicescope">
 						<div class="input-group mb-0">
-							<div class="input-group-prepend">
-								<button class="btn btn-sm btn-danger btnDeleteSerial">
-									<i class="fas fa-minus"></i>
-								</button>
-							</div>
 							<input type="text"
 								class="form-control validate"
 								name="serialNumber"
@@ -871,37 +866,79 @@ $(document).ready(function() {
 
 				let pending = orderedPending ? orderedPending : forPurchase;
 	
+				// const buttonAddRow = !readOnly ? `
+				// <button class="btn btn-md btn-primary float-left ml-2 my-1 btnAddSerial">
+				// 	<i class="fas fa-plus"></i> Add Serial
+				// </button>
+				// ` : ""
+
 				const buttonAddRow = !readOnly ? `
-				<button class="btn btn-md btn-primary float-left ml-2 my-1 btnAddSerial">
-					<i class="fas fa-plus"></i>
-				</button>` : ""
+					<div class="w-100 text-center">
+						<input type="checkbox" class="form-check-label btnAddSerial" > Add Serial Number</input>
+					</div>
+				` : "";
 					
 				const scopeData = getTableData(
 					`ims_receiving_serial_number_tbl`,
 					``,
 					`inventoryReceivingDetailsID = ${inventoryReceivingDetailsID} AND  itemID = ${itemID}`
 				);
-	
-			
+				
+				
+				let serialNumberData  		= 	scopeData.filter(x => x.serialNumber == "" || !x.serialNumber);
+				let serialNumberDataLength 	= 	serialNumberData.length;
+
 				let itemSerialNumbers = `
 				<div class="table-responsive">
 					<table class="table table-bordered">
 					
 						<tbody class="tableSerialBody">
 						`;
-				if (scopeData.length > 0 && inventoryReceivingID != "") {
-					itemSerialNumbers += scopeData.map(scope => {
-						return getSerialNumber(scope, readOnly);
-					}).join("");
-				} else {
-					itemSerialNumbers += getSerialNumber();
-				}
+					
+						if (scopeData.length > 0 && inventoryReceivingID != "" && serialNumberDataLength > 0) {
+							itemSerialNumbers += scopeData.map(scope => {
+								return getSerialNumber(scope, readOnly);
+							}).join("");
+						} else {
+							itemSerialNumbers += getSerialNumber({}, readOnly);
+						}
+					
 				itemSerialNumbers += `
 						</tbody>
 					</table>
-					${buttonAddRow}
+					
 				</div>`;
-	
+				
+				if(inventoryReceivingID){
+					itemSerialNumbers = `
+						<div class="table-responsive">
+							<table class="table table-bordered serial-number-table">
+							
+								<tbody class="tableSerialBody">
+								`;
+							
+								if (scopeData.length > 0 && inventoryReceivingID != "" && serialNumberDataLength > 0) {
+									itemSerialNumbers += scopeData.map(scope => {
+										return getSerialNumber(scope, readOnly);
+									}).join("");
+								} else {
+									itemSerialNumbers += getSerialNumber({}, readOnly);
+								}
+							
+							itemSerialNumbers += `
+								</tbody>
+							</table>
+							
+						</div>`;
+				}else{
+					itemSerialNumbers = `
+				<div class="table-responsive">
+					<table class="table table-bordered serial-number-table">
+
+					</table>
+				</div>`;
+				}	
+
 				if (readOnly) {
 					html += `
 					<tr class="itemTableRow" requestItemID="${requestItemID}">
@@ -914,7 +951,7 @@ $(document).ready(function() {
 						<td>
 							<div class="brandname">${brandName || "-"}</div>
 						</td>
-						<td>
+						<td class="table-data-serial-number">
 							${itemSerialNumbers}
 						</td>
 						<td class="text-center">
@@ -950,8 +987,9 @@ $(document).ready(function() {
 						<td>
 							<div class="brandname">${brandName || "-"}</div>
 						</td>
-						<td>
+						<td class="table-data-serial-number">
 							${itemSerialNumbers}
+							${buttonAddRow}
 						</td>
 						<td class="text-center">
 							<div class="ordered" name="ordered">
@@ -1060,13 +1098,38 @@ $(document).ready(function() {
 
 	// ----- ADD SERIAL -----
 	$(document).on("click", ".btnAddSerial", function() {
-		let newSerial = getSerialNumber();
-		$(this).parent().find("table tbody").append(newSerial);
-		$(this).parent().find("[name=serialNumber]").last().focus();
-		updateSerialNumber();
+		let thisEvent 		= $(this);
+		let thisCheck 		= thisEvent[0].checked;
+		let thisTR 	  		= thisEvent.closest(".itemTableRow");
+		let thisTableData	= thisEvent.closest(".table-data-serial-number");
+		
+		thisTableData.find("table").html(`<tbody><tr><td>${preloader}</td></tr></tbody>`);
 
-		const parentTable = $(this).closest("tr.itemTableRow");
-		checkSerialRowReceived(parentTable);
+					if(thisCheck){
+						let thisReceived	= thisTR.find(".input-quantity").val();
+						let arrayCount		= thisReceived ? parseInt(thisReceived) : 0;
+						let subTable  		= thisTableData.find("table");
+						if(arrayCount == 0){
+							thisTableData.find("table").html(``);
+						}else{
+							thisTableData.find("table").html(`<tbody></tbody>`);
+							for (let index = 0; index < arrayCount; index++) {
+								let newSerial = getSerialNumber();
+								subTable.find("tbody").append(newSerial);
+								updateSerialNumber();
+								// checkSerialRowReceived(thisTR);
+							}
+						}
+					}else{
+						thisTableData.find("table").html(``);
+					}
+		// let newSerial = getSerialNumber();
+		// $(this).parent().find("table tbody").append(newSerial);
+		// $(this).parent().find("[name=serialNumber]").last().focus();
+		// updateSerialNumber();
+
+		// const parentTable = $(this).closest("tr.itemTableRow");
+		// checkSerialRowReceived(parentTable);
 	})
 	// ----- END ADD SERIAL -----
 
@@ -1097,18 +1160,22 @@ $(document).ready(function() {
 		let {
 			inventoryReceivingID        = "",
 			reviseInventoryReceivingID  = "",
-			employeeID              = "",
-			purchaseOrderID               = "",
-			receiptNo               = "",
-			dateReceived               = "",
-			inventoryReceivingReason ="",
-			inventoryReceivingRemarks  = "",
-			approversID             = "",
-			approversStatus         = "",
-			approversDate           = "",
-			inventoryReceivingStatus   = false,
-			submittedAt             = false,
-			createdAt               = false,
+			timelineBuilderID 			= "",
+			projectCode					= "",
+			projectName					= "",
+			clientName					= "",
+			employeeID              	= "",
+			purchaseOrderID             = "",
+			receiptNo               	= "",
+			dateReceived               	= "",
+			inventoryReceivingReason 	= "",
+			inventoryReceivingRemarks   = "",
+			approversID             	= "",
+			approversStatus         	= "",
+			approversDate           	= "",
+			inventoryReceivingStatus    = false,
+			submittedAt             	= false,
+			createdAt               	= false,
 		} = data && data[0];
 
 
@@ -1242,20 +1309,21 @@ $(document).ready(function() {
                 </div>
             </div>
 			<div class="col-md-3 col-sm-12">
-                <div class="form-group">
-                    <label>Receipt No. ${!disabled ? "<code>*</code>" : ""}</label>
-                    <input type="text" class="form-control validate" 
-					name="receiptNo" 
-					id="receiptNo" 
-					data-allowcharacters="[0-9][-]"
-					minlength="5"
-					maxlength="20"
-					required 
-					value="${receiptNo}" 
-					${disabled}
-					>
-					<div class="d-block invalid-feedback" id="invalid-receiptNo"></div>
-                </div>
+					<div class="form-group">
+						<div class="d-flex justify-content-between align-items-center">
+								<label>Receipt No. ${!disabled ? "<code>*</code>" : ""}</label>
+								<label>${!disabled ? (receiptNo ? `<a href="${base_url+"assets/upload-files/receiving-receipts/"+receiptNo}" target="_blank">${receiptNo}</a>` : ``) : ``}</label>
+						</div>
+						
+						
+						${ disabled ? (receiptNo ? `<a href="${base_url+"assets/upload-files/receiving-receipts/"+receiptNo}" target="_blank">${receiptNo}</a>` : `-` )
+						: `<input  type="file" 
+									class="form-control" 
+									name="receiptNo" 
+									id="receiptNo"
+									accept="image/*, .pdf, .doc, .docx" ${disabled}>`}
+						<div class="d-block invalid-feedback" id="invalid-receiptNo"></div>	
+					</div>
             </div>
             <div class="col-md-3 col-sm-12">
                 <div class="form-group">
@@ -1277,6 +1345,26 @@ $(document).ready(function() {
                     <div class="d-block invalid-feedback" id="invalid-dateReceived"></div>
                 </div>
             </div>
+
+			<div class="col-md-4 col-sm-12">
+                <div class="form-group">
+                    <label>Project Code</label>
+                    <input type="text" name="projectCode" id="projectCode" class="form-control" disabled timelinebuilderid="${timelineBuilderID || "-" }" value="${projectCode || "-"}">
+                </div>
+            </div>
+            <div class="col-md-4 col-sm-12">
+                <div class="form-group">
+                    <label>Project Name</label>
+                    <input type="text" name="projectName" id="projectName" class="form-control" disabled value="${projectName || "-"}">
+                </div>
+            </div>
+            <div class="col-md-4 col-sm-12">
+                <div class="form-group">
+                    <label>Client Name</label>
+                    <input type="text" name="clientName" id="clientName" class="form-control" disabled value="${clientName || "-"}">
+                </div>
+            </div>
+			
             <div class="col-md-4 col-sm-12">
                 <div class="form-group">
                     <label>Employee Name</label>
@@ -1419,8 +1507,8 @@ $(document).ready(function() {
 		//  console.log("id "+ id)
 		//  console.log("action "+ action)
 		//  console.log("status "+ status)
-		 let data = { items: [] };
-		 //, formData = new FormData;
+		 let data 		= { items: [] };
+		 let formData 	= new FormData;
 		 const approversID = method != "approve" && moduleApprover;
 
 		if (id) {
@@ -1431,7 +1519,6 @@ $(document).ready(function() {
 			if (status != "2") {
 				data["inventoryReceivingStatus"] = status;
 				// formData.append("inventoryReceivingStatus", status);
-
 			}
 		}
 
@@ -1439,55 +1526,55 @@ $(document).ready(function() {
 		data["method"]    = method;
 		data["updatedBy"] = sessionID;
 
-		// formData.append("action", action);
-		// formData.append("method", method);
-		// formData.append("updatedBy", sessionID);
+		formData.append("action", action);
+		formData.append("method", method);
+		formData.append("updatedBy", sessionID);
 
 		if (currentStatus == "0" && method != "approve") {
 			
-			data["employeeID"] = sessionID;
-			data["purchaseOrderID"]  = $("[name=purchaseOrderID]").val() || null;
-			data["receiptNo"]  = $("[name=receiptNo]").val() || null;
-			data["dateReceived"]     =  moment($("[name=dateReceived]").val()?.trim()).format("YYYY-MM-DD");
+			data["employeeID"] 				 = sessionID;
+			data["purchaseOrderID"]  		 = $("[name=purchaseOrderID]").val() || null;
+			data["receiptNo"]  				 = $("[name=receiptNo]").val() || null;
+			data["dateReceived"]     		 =  moment($("[name=dateReceived]").val()?.trim()).format("YYYY-MM-DD");
 			data["inventoryReceivingReason"] = $("[name=inventoryReceivingReason]").val()?.trim();
 
-			// formData.append("employeeID", sessionID);
-			// formData.append("purchaseOrderID", $("[name=purchaseOrderID]").val() || null);
-			// formData.append("receiptNo", $("[name=receiptNo]").val() || null);
-			// formData.append("inventoryReceivingReason", $("[name=inventoryReceivingReason]").val()?.trim());
-			// formData.append("dateReceived", moment($("[name=dateReceived]").val() ?.trim()).format("YYYY-MM-DD"));
-
+			formData.append("employeeID", sessionID);
+			formData.append("purchaseOrderID", $("[name=purchaseOrderID]").val() || null);
+			formData.append("receiptNo", $("[name=receiptNo]").val() || null);
+			formData.append("dateReceived", moment($("[name=dateReceived]").val() ?.trim()).format("YYYY-MM-DD"));
+			formData.append("inventoryReceivingReason", $("[name=inventoryReceivingReason]").val()?.trim());
+			
 			if (action == "insert") {
 				data["createdBy"] = sessionID;
 				data["createdAt"] = dateToday();
 
-				// formData.append("createdBy", sessionID);
-				// formData.append("createdAt", dateToday());
+				formData.append("createdBy", sessionID);
+				formData.append("createdAt", dateToday());
 			} else if (action == "update") {
 				data["inventoryReceivingID"] = id;
-				// formData.append("inventoryReceivingID", id);
+				formData.append("inventoryReceivingID", id);
 			}
 
 
 			if (method == "submit") {
 				data["submittedAt"] = dateToday();
-				// formData.append("submittedAt", dateToday());
+				formData.append("submittedAt", dateToday());
 				if (approversID) {
-					data["approversID"]           = approversID;
-					data["inventoryReceivingStatus"] = 1;
+					data["approversID"]           		= approversID;
+					data["inventoryReceivingStatus"] 	= 1;
 
-					// formData.append("approversID", approversID);
-					// formData.append("inventoryReceivingStatus", 1);
+					formData.append("approversID", approversID);
+					formData.append("inventoryReceivingStatus", 1);
 				} else {  // AUTO APPROVED - IF NO APPROVERS
-					data["approversID"]           = sessionID;
-					data["approversStatus"]       = 2;
-					data["approversDate"]         = dateToday();
-					data["inventoryReceivingStatus"] = 2;
+					data["approversID"]           		= sessionID;
+					data["approversStatus"]       		= 2;
+					data["approversDate"]         		= dateToday();
+					data["inventoryReceivingStatus"] 	= 2;
 
-					// formData.append("approversID", sessionID);
-					// formData.append("approversStatus", 2);
-					// formData.append("approversDate", dateToday());
-					// formData.append("inventoryReceivingStatus", 2);
+					formData.append("approversID", sessionID);
+					formData.append("approversStatus", 2);
+					formData.append("approversDate", dateToday());
+					formData.append("inventoryReceivingStatus", 2);
 				}
 			}
 
@@ -1505,13 +1592,11 @@ $(document).ready(function() {
 					scopes: []
 				};
 
-				// formData.append(`items[${i}][requestItemID]`, requestItemID);
-				// formData.append(`items[${i}][itemID]`, itemID);
-				// formData.append(`items[${i}][received]`, received);
-				// formData.append(`items[${i}][remarks]`, remarks);
+				formData.append(`items[${i}][requestItemID]`, requestItemID);
+				formData.append(`items[${i}][itemID]`, itemID);
+				formData.append(`items[${i}][received]`, received);
+				formData.append(`items[${i}][remarks]`, remarks);
 			
-			
-
 				$(`td .tableSerialBody tr`, this).each(function(index,obj) {
 					const serialNumber = $('[name="serialNumber"]', this).val()?.trim();
 					let scope = {
