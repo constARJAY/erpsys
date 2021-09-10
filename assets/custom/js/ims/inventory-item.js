@@ -67,7 +67,6 @@ $(document).ready(function(){
                 // $("#inv_headerID").text("List of Inventory Item");
             },
             success: function(data) {
-                console.log(data);
                 let html = `
                 <table class="table table-bordered table-striped table-hover nowrap" id="tableInventoryItem">
                     <thead style="white-space:nowrap">
@@ -215,6 +214,7 @@ $(document).ready(function(){
             class="btn btn-update px-5 p-2" 
             id="btnUpdate" 
             rowID="${itemID}"
+            classificationID="${classificationID}"
             feedback="${itemName}">
             <i class="fas fa-save"></i>
             Update
@@ -420,13 +420,20 @@ $(document).ready(function(){
     if (validate) {
 
         let data = getFormData("modal_inventory_item", true);
-        data["tableData[itemCode]"] = generateCode("ITM", false, "ims_inventory_item_tbl", "itemCode");
+        data["tableData[itemCode]"]  = generateItemCode(data["tableData"]["classificationID"]);
         data["tableData[createdBy]"] = sessionID;
         data["tableData[updatedBy]"] = sessionID;
         data["tableName"]            = "ims_inventory_item_tbl";
         data["feedback"]             = $("[name=itemName]").val();
 
-        sweetAlertConfirmation("add", "Inventory Item", "modal_inventory_item", null, data, true, tableContent); 
+            if(!data["tableData[itemCode]"]){
+                let classificationName = $("#input_classificationID option:selected").text();
+                $("#modal_inventory_item").find(".is-valid").removeClass("is-valid");
+                $("#modal_inventory_item").find(".no-error").removeClass("no-error");
+                showNotification("warning2",`Set the classification (<strong>${classificationName}</strong>) of this item first`);
+            }else{
+                sweetAlertConfirmation("add", "Inventory Item", "modal_inventory_item", null, data, true, tableContent); 
+            }
         }
     });
     // ----- END SAVE MODAL -----
@@ -459,25 +466,40 @@ $(document).ready(function(){
 
     // ----- UPDATE MODAL -----
     $(document).on("click", "#btnUpdate", function() {
-        const rowID = $(this).attr("rowID");
+        const rowID             = $(this).attr("rowID");
+        const classificationID  = $(this).attr("classificationID");
         const validate = validateForm("modal_inventory_item");
         if (validate) {
-
             let data = getFormData("modal_inventory_item", true);
+
+                if(data["tableData[classificationID]"] != classificationID){
+                    data["tableData[itemCode]"]  = generateItemCode(data["tableData[classificationID]"]);
+                }
+
 			data["tableData[updatedBy]"] = sessionID;
 			data["tableName"]            = "ims_inventory_item_tbl";
 			data["whereFilter"]          = "itemID=" + rowID;
 			data["feedback"]             = $("[name=itemName]").val();
 
-			sweetAlertConfirmation(
-				"update",
-				"Inventory Item",
-				"modal_inventory_item",
-				"",
-				data,
-				true,
-				tableContent
-            );
+
+            if(!data["tableData[itemCode]"]){
+                let classificationName = $("#input_classificationID option:selected").text();
+                $("#modal_inventory_item").find(".is-valid").removeClass("is-valid");
+                $("#modal_inventory_item").find(".no-error").removeClass("no-error");
+                showNotification("warning2",`Set the classification (<strong>${classificationName}</strong>) of this item first`);
+                
+            }else{
+                sweetAlertConfirmation(
+                    "update",
+                    "Inventory Item",
+                    "modal_inventory_item",
+                    "",
+                    data,
+                    true,
+                    tableContent
+                ); 
+            }
+			
         
             }
         });

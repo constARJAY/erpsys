@@ -196,6 +196,21 @@ const generateCode = (
 };
 // ----- END GENERATE CODE -----
 
+// ----- GENERATE ITEM CODE -----
+const generateItemCode = (
+	classificationID = null
+) => {
+	let id;
+	let tableData = getTableData(`ims_inventory_classification_tbl AS iict LEFT JOIN ims_inventory_item_tbl AS iiit USING(classificationID)`,
+								`COUNT(itemID) AS lastID, classificationShortcut`, `iiit.classificationID ='${classificationID}' `);
+	let shortcutCode = tableData[0].classificationShortcut;
+	let lastID 		 = tableData[0].lastID < 1 ? 1 : parseInt(tableData[0].lastID) + 1;
+	let stringID 	 = lastID.toString();
+	let lastStr = "0".repeat(5 - stringID.length) + lastID;
+	return shortcutCode ? `ITM-${shortcutCode}-${moment().format("YY")}-${lastStr}` : false;
+};
+// ----- END GENERATE ITEM CODE -----
+
 // ----- SAVE/UPDATE/DELETE TABLE DATA -----
 const saveUpdateDeleteDatabaseFormData = async (
 	data,

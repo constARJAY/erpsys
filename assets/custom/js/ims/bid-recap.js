@@ -813,12 +813,16 @@ $(document).ready(function() {
 				var {
 					itemName           			  = "-",
 					forPurchase        			  = 0,
+					totalCost 					  = 0,
 					preferredInventoryVendorPrice = 0
 				} = data["items"][index];
 
-				
-
-				var preferredTotalCost 	= parseFloat(forPurchase) * parseFloat(preferredInventoryVendorPrice || 0);
+				var preferredTotalCost 	= "";
+					if(totalCost < 1){	
+						preferredTotalCost =  parseFloat(forPurchase) * parseFloat(preferredInventoryVendorPrice || 0);
+					}else{
+						preferredTotalCost =  totalCost;
+					}
 				vendorTotalCost 		+= parseFloat(preferredTotalCost);
 			}
 
@@ -830,13 +834,15 @@ $(document).ready(function() {
 					itemCode           			  = "-",
 					itemName           			  = "-",
 					itemClassification 			  = "-",
+					brandName 					  = "",
 					forPurchase        			  = 0,
 					itemUom            			  = "",
 					unitCost           			  = 0,
 					totalCost          			  = 0,
 					preferredInventoryVendorPrice = 0,
 					inventoryValidationID 		  = "",
-					inventoryVendorName			  = ""
+					inventoryVendorName			  = "",
+					vendorCode 					  = ""
 				} = data["items"][index];
 
 				vendorName 	= inventoryValidationID ? (inventoryVendorName || vendorName ) : (vendorName || "-");
@@ -848,7 +854,10 @@ $(document).ready(function() {
 				}
 
 				vendorID 	= vendorID == "undefined" ? inventoryVendorName : vendorID
-				var tdVendorName 		= index == 0 ? `<td rowspan="${rowspan}" >${vendorName}</td>` : ``;
+				var tdVendorName 		= index == 0 ? 
+														`<td rowspan="${rowspan}" >${vendorName} 
+																<div style="font-size: 85%;" class="font-weight-bold py-2 item-vendor-code">${vendorCode}</div>      
+														</td>` : ``;
 				var tdVendorTotalCost 	= index == 0 ? `<td rowspan="${rowspan}" class="text-right">${formatAmount(vendorTotalCost, true)}</td>` : ``;
 				var tdClassification 	= !isMaterialEquipment ? `<td class="table-row-classification">${itemClassification || "-"}</td>` : "";
 				var preferredTotalCost 	= parseFloat(forPurchase) * parseFloat(preferredInventoryVendorPrice || 0);
@@ -857,7 +866,10 @@ $(document).ready(function() {
 				<tr class="itemTableRow" requestItemID="${requestItemID}" vendorid="${vendorID}" vendorname="${vendorName}">
 					${tdVendorName}
 					<td class="table-row-item-code">${itemCode || "-"}</td>
-					<td class="table-row-item-name">${itemName && itemName != "Select Item Name" ? itemName : "-"}</td>
+					<td class="table-row-item-name">
+						${itemName && itemName != "Select Item Name" ? itemName : "-"}
+						${brandName ? `<div style="font-size: 85%;" class="font-weight-bold py-2 item-brand-name">${brandName}</div>` : "-"}
+					</td>
 					${tdClassification}
 					<td class="text-center table-row-item-for-purchase">${formatAmount(forPurchase)}</td>
 					<td class="table-row-item-uom">${itemUom || "-"}</td>
@@ -964,14 +976,14 @@ $(document).ready(function() {
 			let requestItemsHTML = "";
 			const tempVendor = [], vendorItemsArray = [];
 			items.map((x, i)=>{
-				let vendorName = x.preferredInventoryVendorName;
+				let vendorName = x.preferredInventoryVendorName || x.inventoryVendorName;
 				tempVendor.includes(vendorName) ? "" : tempVendor.push(vendorName);
 			});
 
 			tempVendor.map(vendorName=>{
 				let vendor		= vendorName;
 				let vendorID 	= "";
-				let vendorItems = items.filter(y => y.preferredInventoryVendorName == vendorName).map(y=>{ vendorID = y.preferredInventoryVendorID; return y});
+				let vendorItems = items.filter(y => y.preferredInventoryVendorName || y.inventoryVendorName == vendorName).map(y=>{ vendorID = y.preferredInventoryVendorID || y.inventoryVendorID; return y});
 				let vendorItemsCount = vendorItems.length;
 				let vendorItemsArrayTemp = {
 					"vendorID" 	:   vendorID,

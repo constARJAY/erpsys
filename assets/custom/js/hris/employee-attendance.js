@@ -144,7 +144,15 @@ $(document).ready(function() {
     // ----- DECIMAL TO HOURS -----
     function decimalToHours(decimal = 0.00) {
         if (decimal) {
-            return moment().startOf('day').add(decimal, 'hours').format('HH:mm');
+            const num     = decimal * 60;
+            const hours   = Math.floor(num / 60);  
+            const minutes = Math.floor(num % 60);
+            if (isFinite(hours) && isFinite(minutes)) {
+                let hoursDisplay   = hours.toString().length > 1 ? hours : `0${hours}`;
+                let minutesDisplay = minutes.toString().length > 1 ? minutes : `0${minutes}`;
+                let display = `${hoursDisplay}:${minutesDisplay}`;
+                return display;  
+            }
         }
         return "00:00";
     }
@@ -341,7 +349,7 @@ $(document).ready(function() {
 
 
     // ----- GET TODAY ACTIVITY DISPLAY -----
-    function getTodayActivityDisplay(data = false) {
+    function getActivityDisplay(data = false) {
         let activities = data && data["activity"] || [];
 
         let activityHTML = "";
@@ -378,7 +386,7 @@ $(document).ready(function() {
                 max-height: 475px;
                 overflow-y: auto;">
             <div class="card-header">
-                <h5 style="font-weight: 600">Today Activity</h5>
+                <h5 style="font-weight: 600">Activities</h5>
             </div>
             <div class="card-body"
                 style="height: 400px;
@@ -394,8 +402,8 @@ $(document).ready(function() {
     // ----- GET EMPLOYEE ATTENDANCE DATA -----
     function getEmployeeAttendanceData(startDate = "", endDate = "") {
         let employeeID = sessionID;
-        let url   = window.document.URL;
-        let arr   = url.split("?view_id=");
+        let url = window.document.URL;
+        let arr = url.split("?view_id=");
         if (arr.length > 1) {
             let id = decryptString(arr[1]);
             if (id && isFinite(id)) {
@@ -421,6 +429,36 @@ $(document).ready(function() {
     // ----- END GET EMPLOYEE ATTENDANCE DATA -----
 
 
+    // ----- GET EMPLOYEE ACTIVITY DATA -----
+    function getEmployeeActivityData(startDate = "", endDate = "") {
+        let employeeID = sessionID;
+        let url = window.document.URL;
+        let arr = url.split("?view_id=");
+        if (arr.length > 1) {
+            let id = decryptString(arr[1]);
+            if (id && isFinite(id)) {
+                employeeID = id;
+            }
+        }
+
+        let result = null;
+        $.ajax({
+            method: "POST",
+            url: "employee_attendance/getEmployeeActivityData",
+            data: { employeeID, startDate, endDate },
+            dataType: "json",
+            async: false,
+            success: function(data) {
+                if (data) {
+                    result = { activity: data };
+                }
+            }
+        })
+        return result;
+    }
+    // ----- END GET EMPLOYEE ACTIVITY DATA -----
+
+
     // ----- GET EMPLOYEE ATTENDANCE DISPLAY -----
     function getEmployeeAttendanceDisplay(data = false) {
         let attendances = data && data["attendance"] || [];
@@ -429,18 +467,38 @@ $(document).ready(function() {
         attendances.map((att, index) => {
             let number = index + 1;
             let {
-                scheduleDate  = "",
-                scheduleDay   = "",
-                scheduleTime  = "",
-                checkIn       = "",
-                checkOut      = "",
-                checkDuration = "",
-                breakDuration = "",
-                overtimeDuration = ""
+                scheduleDate     = "",
+                scheduleDay      = "",
+                scheduleTime     = "",
+                checkIn          = "",
+                checkOut         = "",
+                checkReference   = "",
+                checkReferenceID = "",
+                checkDuration    = "",
+                breakDuration    = "",
+                overtimeDuration = "",
+                overtimeReference   = "",
+                overtimeReferenceID = ""
             } = att;
             scheduleDate  = scheduleDate ? moment(scheduleDate).format("MMMM DD, YYYY") : "-";
-            checkIn       = checkIn ? moment(checkIn).format("MMMM DD, YYYY hh:mm:ss A") : "-";
-            checkOut      = checkOut ? moment(checkOut).format("MMMM DD, YYYY hh:mm:ss A") : "-";
+            checkIn       = checkIn ? moment(checkIn).format("MMMM DD, YYYY hh:mm A") : "-";
+            checkOut      = checkOut ? moment(checkOut).format("MMMM DD, YYYY hh:mm A") : "-";
+
+            let inReferenceHTML = checkReference && checkReferenceID && checkIn == "-" ? `
+            <a href="${base_url}hris/no_timein_timeout?view_id=${encryptString(checkReferenceID)}"
+                target="_blank">
+                <small>${checkReference}</small>
+            </a>` : "";
+            let outReferenceHTML = checkReference && checkReferenceID && checkOut == "-" ? `
+            <a href="${base_url}hris/no_timein_timeout?view_id=${encryptString(checkReferenceID)}"
+                target="_blank">
+                <small>${checkReference}</small>
+            </a>` : "";
+            let otReferenceHTML = overtimeReference && overtimeReferenceID ? `
+            <a href="${base_url}hris/overtime_request?view_id=${encryptString(overtimeReferenceID)}"
+                target="_blank">
+                <small>${overtimeReference}</small>
+            </a>` : "";
 
             attendanceHTML += `
             <tr>
@@ -451,11 +509,20 @@ $(document).ready(function() {
                     </div>
                     <small style="color:#848482;">${scheduleDay} | ${scheduleTime}</small>
                 </td>
-                <td>${checkIn}</td>
-                <td>${checkOut}</td>
+                <td>
+                    <div>${checkIn}</div>
+                    ${inReferenceHTML}
+                </td>
+                <td>
+                    <div>${checkOut}</div>
+                    ${outReferenceHTML}    
+                </td>
                 <td class="text-center">${decimalToHours(checkDuration)} hours</td>
                 <td class="text-center">${decimalToHours(breakDuration)} hours</td>
-                <td class="text-center">${decimalToHours(overtimeDuration)} hours</td>
+                <td class="text-center">
+                    <div>${decimalToHours(overtimeDuration)} hours</div>
+                    ${otReferenceHTML}
+                </td>
             </tr>`;
         })
 
@@ -547,8 +614,8 @@ $(document).ready(function() {
                     <div class="col-md-4 col-sm-12">
                         ${getStatisticsDisplay(employeeAttendance)}
                     </div>
-                    <div class="col-md-4 col-sm-12">
-                        ${getTodayActivityDisplay(employeeAttendance)}
+                    <div class="col-md-4 col-sm-12" id="employeeAcitivityDisplay">
+                        ${getActivityDisplay(employeeAttendance)}
                     </div>
                 </div>
             </div>
@@ -613,10 +680,17 @@ $(document).ready(function() {
         let startDate = $(this).attr("start");
         let endDate   = $(this).attr("end");
         $("#employeeAttendanceDisplay").html(preloader);
-        let data = getEmployeeAttendanceData(startDate, endDate);
+        $("#employeeAcitivityDisplay").html(preloader);
+        let attendanceData = getEmployeeAttendanceData(startDate, endDate);
+        let activityData   = getEmployeeActivityData(startDate, endDate);
+
         setTimeout(() => {
-            let display = getEmployeeAttendanceDisplay(data);
-            $("#employeeAttendanceDisplay").html(display);
+            let attendanceDisplay = getEmployeeAttendanceDisplay(attendanceData);
+            $("#employeeAttendanceDisplay").html(attendanceDisplay);
+
+            let activityDisplay = getActivityDisplay(activityData);
+            $("#employeeAcitivityDisplay").html(activityDisplay);
+
             initDataTables();
         }, 300);
     })

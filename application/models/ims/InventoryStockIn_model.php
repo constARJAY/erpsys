@@ -13,6 +13,7 @@ class InventoryStockIn_model extends CI_Model {
         $serialnumber1       = implode(",", $serialnumber);
        
         $inventoryStorageID1 = implode(",", $inventoryStorageID);
+        $barcode1 = implode("','", $barcode);
         $insert_id = "";
         if($serialnumber1 ==""){
             $record  = array();
@@ -37,23 +38,25 @@ class InventoryStockIn_model extends CI_Model {
             }
         }
       
-        $query = $this->db->query("SELECT IFNULL(isi.itemID,'0') as itemID, isi.itemName,isit.itemName as totalitemname, (sum(stockInQuantity) + SUM(IFNULL(quantity,0))) AS quantity, stockInLocationID FROM ims_stock_in_tbl AS isi
+        $query = $this->db->query("SELECT IFNULL(isi.itemID,'0') as itemID, isi.itemName,isit.itemName as totalitemname, (sum(stockInQuantity) + SUM(IFNULL(quantity,0))) AS quantity, stockInLocationID, isi.barcode FROM ims_stock_in_tbl AS isi
         LEFT JOIN ims_stock_in_total_tbl AS isit ON isi.itemID = isit.itemID AND  isi.stockInLocationID = isit.inventoryStorageID WHERE isi.stockinID =$insert_id GROUP BY itemID, stockInLocationID");
 
             foreach ($query->result() as $row)
             {
                 $totalitemname                  =$row->totalitemname;
-                $itemID                        = $row->itemID;
+                $itemID                         = $row->itemID;
+                $barcode                        =$row->barcode;
                 $itemName                       = $row->itemName;
                 $quantity                       =$row->quantity;
                 $stockInLocationID              =$row->stockInLocationID;
 
                 $array = array('itemID' => $row->itemID, 'inventoryStorageID' => $row->stockInLocationID);
                 $data = array(
-                        'itemID'            => $itemID,
-                        'itemName'          => $itemName,
-                        'quantity'          => $quantity,
-                        'inventoryStorageID'  =>$stockInLocationID);
+                        'itemID'                => $itemID,
+                        'barcode'               => $barcode,
+                        'itemName'              => $itemName,
+                        'quantity'              => $quantity,
+                        'inventoryStorageID'    =>$stockInLocationID);
                         if($row->totalitemname =="" || $row->totalitemname ==NULL){
                             $this->db->insert('ims_stock_in_total_tbl',$data);   
                         }else{
@@ -89,25 +92,27 @@ class InventoryStockIn_model extends CI_Model {
             $this->db->insert_batch('ims_stock_in_tbl', $record);
             $id = $this->db->insert_id();
 
-            $query = $this->db->query("SELECT IFNULL(isi.itemID,'0') as itemID, isi.itemName,isit.itemName as totalitemname, (sum(stockInQuantity) + IFNULL(quantity,0)) AS quantity, stockInLocationID 
+            $query = $this->db->query("SELECT IFNULL(isi.itemID,'0') as itemID, isi.itemName,isit.itemName as totalitemname, (sum(stockInQuantity) + IFNULL(quantity,0)) AS quantity, stockInLocationID, isi.barcode 
             FROM ims_stock_in_tbl AS isi
             LEFT JOIN ims_stock_in_total_tbl AS isit ON isi.itemID = isit.itemID AND  isi.stockInLocationID = isit.inventoryStorageID
-            WHERE isi.inventoryReceivingID =$receivedID GROUP BY itemID, stockInLocationID");
+            WHERE isi.inventoryReceivingID =$receivedID  AND isi.barcode IN('$barcode1') GROUP BY isi.barcode");
     
                 foreach ($query->result() as $row)
                 {
                     $totalitemname                  =$row->totalitemname;
                     $itemID                        = $row->itemID;
+                    $barcode                        =$row->barcode;
                     $itemName                       = $row->itemName;
                     $quantity                       =$row->quantity;
                     $stockInLocationID              =$row->stockInLocationID;
     
-                    $array = array('itemID' => $row->itemID, 'inventoryStorageID' => $row->stockInLocationID);
+                    $array = array('barcode' => $row->barcode);
                     $data = array(
-                            'itemID'            => $itemID,
-                            'itemName'          => $itemName,
-                            'quantity'          => $quantity,
-                            'inventoryStorageID'  =>$stockInLocationID);
+                            'itemID'                => $itemID,
+                            'barcode'               => $barcode,
+                            'itemName'              => $itemName,
+                            'quantity'              => $quantity,
+                            'inventoryStorageID'    =>$stockInLocationID);
                             if($row->totalitemname =="" || $row->totalitemname ==null){
                                 $this->db->insert('ims_stock_in_total_tbl',$data);   
                             }else{

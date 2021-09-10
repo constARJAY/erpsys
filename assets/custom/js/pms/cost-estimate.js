@@ -1236,7 +1236,6 @@ $(document).ready(function(){
 			tableBody.append(row);
 			updateTableAttribute();
 			initAll();
-			// console.log(row);
 			// parentTableBody.append(row);
 		});
 		// ----- OPEN ADD FORM -----
@@ -1350,7 +1349,7 @@ $(document).ready(function(){
 				const validate     				= validateForm("form_cost_estimate");
 				// const action = revise && !isFromCancelledDocument && "insert" || (id ? "update" : "insert");
 				// const data   = getcostEstimateData(action, "submit", "1", id,0,true);
-				// console.log(data);
+				
 				removeIsValid("#tablePersonnelRequest");
 				removeIsValid("#tableProjectRequestItems");
 				removeIsValid("#tableCompanyRequestItems");
@@ -1560,7 +1559,7 @@ $(document).ready(function(){
 			switch(param){
 				case `projectphase`:
 					if(data){
-						// console.log(data[0].length);
+						
 						let projectPhaseData = [], phaseIDArr = [], projectPhaseDataItems = [];
 						data[0].map(items=>{
 							if(phaseIDArr.length < 1){
@@ -1591,16 +1590,17 @@ $(document).ready(function(){
 
 						projectPhaseData.map(items=>{
 							var itemList = [];
+							console.log("___|___")
 							console.log(data[0]);
-							data[0].filter(list=> list.milestoneBuilderID == items.phaseID && list.milestoneListID == items.milestoneID).map(list=>{
+							data[0].filter(list => list.milestoneBuilderID == items.phaseID && list.milestoneListID == items.milestoneID).map(list=>{
 								var temp = {
-									itemID: list.itemID,
-									itemCode: list.itemCode,
-									itemName: list.itemName,
+									itemID: 			list.itemID,
+									itemCode: 			list.itemCode,
+									itemName: 			list.itemName,
 									itemClassification: list.itemClassification,
-									itemUom: list.itemUom,
-									brandName: list.brandName,
-									quantity: list.quantity,
+									itemUom: 			list.itemUom,
+									brandName: 			list.brandName,
+									quantity: 			list.quantity,
 								}
 								itemList.push(temp);
 							});
@@ -1845,7 +1845,7 @@ $(document).ready(function(){
 				var option = ``, tableDataItem = ``;
 				if(phaseData){
 					option += getMilestoneList(phaseData.phaseID, phaseData.milestoneID);
-					// console.log(phaseData["items"]);
+					
 					tableDataItemList = phaseData["items"].map(items=>{
 						return `	<tr style="white-space: nowrap">
 										${!readOnly ? `<td>
@@ -2601,7 +2601,7 @@ $(document).ready(function(){
 								var employeeTempData = items["phaseManpower"][0];
 								employeeTempData.map(dataItems => {
 									var temp;
-									// console.log(dataItems["assignedEmployee"]);
+									
 									// var condition = dataItems["assignedEmployee"].split("|") ? true : false;
 									var splitAssignedEmployee = dataItems["assignedEmployee"].split("|");
 										splitAssignedEmployee.map(splitItems =>{
@@ -2773,7 +2773,7 @@ $(document).ready(function(){
 							// MANPOWER  
 								let manpowerTableBody = ``;
 								var manpowerArrData = costEstimateID ? designationRequest[0] : listOfManpower;
-								// console.log(designationRequest[0]);
+								
 								manpowerArrData.map(x=>{
 									manpowerTableBody +=  `<tr class="manpowerRowData">
 																<td>
@@ -2819,7 +2819,7 @@ $(document).ready(function(){
 
 							// TRAVEL AND TRANSPORTAION
 								var tableBodyTravel = ``;
-								if(costEstimateID){
+								if(costEstimateID){getRowData
 									tableBodyTravel = getRowData("travel",travelRequest,readOnly);
 								}else{
 									tableBodyTravel = getRowData("travel","",readOnly);
@@ -2850,8 +2850,8 @@ $(document).ready(function(){
 						}, 500);					
 						
 						// END PROJECT PHASE DIVISION;
-						// console.log(listOfPhase);
-						// console.log(listEmployeeList);
+						
+						
 						
 					});
 			}
@@ -3244,7 +3244,7 @@ $(document).ready(function(){
 			function isRevised(id = null){
 				let revised = false;
 				var tableData = getTableData("pms_cost_estimate_tbl","reviseCostEstimateID",`reviseCostEstimateID=`+id);
-				// console.log(tableData);
+				
 				revised = tableData.length > 0 ? true : false;
 				return revised; 
 			}
@@ -3384,7 +3384,7 @@ $(document).ready(function(){
 												// 		dataType: "json",
 												// 		async: false,
 												// 		success: function (data) {
-												// 			console.log("tangina mo ka");
+												// 			
 												// 		},
 												// 	});
 												// }

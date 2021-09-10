@@ -905,6 +905,7 @@ $(document).ready(function() {
 				itemCode           = "-",
 				itemName           = "-",
 				itemClassification = "-",
+				brandName 		   = "",
 				quantity           = 0,
 				forPurchase        = 0,
 				itemUom            = "",
@@ -928,7 +929,10 @@ $(document).ready(function() {
 			<tr class="itemTableRow"
 				requestItemID="${requestItemID}">
 				<td>${itemCode}</td>
-				<td>${itemName}</td>
+				<td>
+					${itemName}
+					${brandName ? `<div style="font-size: 85%;" class="font-weight-bold py-2 item-brand-name">${brandName}</div>` : "-"}
+				</td>
 				${tdClassification}
 				<td class="text-center">
 					<div class="forPurchase">${forPurchase}</div>

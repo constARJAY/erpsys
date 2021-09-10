@@ -163,7 +163,10 @@ $(document).ready(function(){
                                         html += `
                                         <tr> 
                                          <td>${item["itemCode"]}</td> 
-                                         <td>${item["itemName"]}</td> 
+                                         <td>
+                                            ${item["itemName"]}
+                                            <div style="font-size: 85%;" class="font-weight-bold py-2 item-brand-name">${item.brandName}</div>
+                                        </td> 
                                          <td class='buildname'>${item["itemClassification"]}</td>
                                          <td>${item["UOM"]}</td>
                                          <td>${item["barcode"]}</td>

@@ -21,6 +21,7 @@
 		background-color: var(--bg-primary);
 		color: white !important;
 	}
+	
 	table thead tr.theadlabel th:hover {
 		color: black !important;
 	}
@@ -29,7 +30,7 @@
 
 <div class="body_area after_bg">
 	<div class="block-header pb-0">
-		<div class="container">
+		<div class="container" id="headerContainer">
 			<div class="row clearfix">
 				<div class="col-lg-6 col-md-12">
 					<ul class="breadcrumb pl-0 pb-0 ">

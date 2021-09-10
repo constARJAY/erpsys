@@ -77,12 +77,7 @@ class InventoryValidation_model extends CI_Model {
                 itemClassification
             FROM 
                 ims_request_items_tbl 
-            WHERE 
-                milestoneBuilderID IS NULL  AND
-                phaseDescription IS NULL    AND
-                milestoneListID IS NULL AND
-                projectMilestoneID IS NULL  AND
-                projectMilestoneName IS NULL    AND
+            WHERE
                 $wherePR
                 $whereBOM
             GROUP BY itemClassification";
@@ -95,19 +90,25 @@ class InventoryValidation_model extends CI_Model {
     public function getInventoryValidationItems($inventoryValidationID = 0, $purchaseRequestID = 0, $itemClassification = "")
     {
         $result = [];
-        if ($inventoryValidationID > 0 || $purchaseRequestID && $purchaseRequestID > 0) {
-            $wherePR  = $inventoryValidationID > 0 ? "AND irit.inventoryValidationID = '$inventoryValidationID'" : "AND irit.inventoryValidationID IS NULL";
-            $whereBOM = $purchaseRequestID && $purchaseRequestID > 0 ? "AND irit.purchaseRequestID = $purchaseRequestID" : "";
+        if ($inventoryValidationID > 0 || $purchaseRequestID && $purchaseRequestID > 0) {   
+            $wherePR        = $inventoryValidationID > 0 ? "AND irit.inventoryValidationID = '$inventoryValidationID'" : "AND irit.inventoryValidationID IS NULL";
+            $whereBOM       = $purchaseRequestID && $purchaseRequestID > 0 ? "AND irit.purchaseRequestID = $purchaseRequestID" : "";
+            $selectQuantity = $inventoryValidationID > 0 ? "" : ", SUM(irit.quantity) AS quantity";     
             $sql = "
             SELECT 
-                *, (SELECT SUM(isitt.quantity) as availableStocks FROM ims_stock_in_total_tbl as isitt WHERE isitt.itemID = irit.itemID) as availableItems,
+                * $selectQuantity, (SELECT SUM(isitt.quantity) as availableStocks FROM ims_stock_in_total_tbl as isitt WHERE isitt.itemID = irit.itemID) as availableItems,
                     (SELECT SUM(sub_irit.reserveItem) AS reservedStock FROM ims_request_items_tbl AS sub_irit WHERE sub_irit.billMaterialID IS NOT NULL AND sub_irit.itemID = irit.itemID) AS reservedItems
             FROM 
                 ims_request_items_tbl AS irit
             WHERE 
+                irit.bidRecapID IS NULL AND
+                irit.purchaseOrderID IS NULL AND
+                irit.materialWithdrawalID IS NULL AND
                 irit.itemClassification = BINARY('$itemClassification')
                 $wherePR 
-                $whereBOM";
+                $whereBOM
+            GROUP BY itemID    
+                ";
             $query = $this->db->query($sql);
             $result = $query ? $query->result_array() : [];
         }
@@ -227,7 +228,8 @@ class InventoryValidation_model extends CI_Model {
     public function getPurchaseRequest($inventoryValidationID = 0, $purchaseRequestID = 0) 
     {
         $result = [
-            "phases" => $this->getProjectPhases($inventoryValidationID, $purchaseRequestID),
+            // "phases" => $this->getProjectPhases($inventoryValidationID, $purchaseRequestID),/
+            "phases" => [],
             "materialsEquipment" => $this->getMaterialEquipmentRequestItems($inventoryValidationID, $purchaseRequestID)
         ];
         return $result;

@@ -18,35 +18,59 @@
         </div>
     </div>
 
-    <div class="container">
+    <div class="container" id="container_1"> <!-- table front page -->
 		<div class="row clearfix">
-            <div class="col-lg-12">
-                <div class="card">
-                    <div class="header text-right p-0">
-						<div class="closeBtn"></div>
-					</div>
+			<div class="col-lg-12">
+				<div class="card">
 					<div class="body" id="main_body">
-						<div class="row" id="loading-screen" style="visibility:hidden;"></div>
-						<div class="row clearfix row-deck">
-							<div class="col-12">
-                                <div class="table-responsive" id="table_content">
-                                    <div class="container row">
-                                        <div class="col-2"></div>
-                                        <div class="col-8 text-center" style='margin:100px 0px;'>
-                                            <img class="img-fluid" src="<?=base_url()?>assets/modal/please-select2.gif" alt="" style='max-width:25%; padding:0px;'>
-                                            <h6 class="module-header text-primary text-center font-weight-bold">ITEM PRICE LIST</h6>
-                                            <p>Select classification to show price list.</p>
-                                        </div>
-                                        <div class="col-2"></div>
+						<div class="row">
+                            
+                            <div class="col-sm-12 col-md-4">
+                                <div class="form-group">
+                                    <label>Classification Name <code>*</code></label>
+                                    <select
+                                        class="form-control select2 validate input_classificationID"
+                                        id="input_classificationID"
+                                        name="classificationID"
+                                        style="width: 100%"
+                                        required>
+                                    </select>
+                                    <div class="invalid-feedback d-block" id="invalid-input_classificationID"></div>
+                                </div>
+                            </div>    
+                            <div class="col-sm-12 col-md-4">
+                                <div class="form-group">
+                                    <label>Category Name</label>
+                                    <select
+                                        class="form-control select2 validate"
+                                        id="input_categoryID"
+                                        name="CategoryID"
+                                        style="width: 100%"
+                                        required>
+                                    </select>
+                                    <div class="invalid-feedback d-block" id="invalid-input_input_categoryID"></div>
+                                </div>
+                            </div> 
+                            <div class="col-sm-12 col-md-4">
+                                <div class="form-group">
+                                <button type="button" class="btn btn-primary w-100 p-2 mt-4 ml-2"  id="btnSearch"><i class="icon-magnifier"></i> &nbsp;Search</button>
+                                </div>
+                            </div>         
+                            <div class="col-12">
+                                <div class="border">
+                                    <div class="card-header">
+                                        <h3>Inventory Report:</h3>
                                     </div>
-
+                                    <div class="card-body">
+                                        <div class="table-responsive" id="table_content"></div>
+                                    </div>
                                 </div>
 							</div>
 						</div>
 					</div>
-                </div>
-            </div>
-        </div>
+				</div>
+			</div>
+		</div>
 	</div>
 
 

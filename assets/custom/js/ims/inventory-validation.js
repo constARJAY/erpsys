@@ -1069,6 +1069,7 @@ $(document).ready(function() {
 				requestItemID      = "",
 				itemCode           = "-",
 				itemName           = "-",
+				brandName 		   = "",
 				itemClassification = "-",
 				quantity           = 0,
 				itemUom            = "",
@@ -1092,10 +1093,13 @@ $(document).ready(function() {
 			<tr class="itemTableRow"
 				requestItemID="${requestItemID}">
 				<td>${itemCode || "-"}</td>
-				<td>${itemName && itemName != "Select Item Name" ? itemName : "-"}</td>
+				<td>
+					${itemName && itemName != "Select Item Name" ? itemName : "-"}
+					${brandName ? `<div style="font-size: 85%;" class="font-weight-bold py-2 item-brand-name">${brandName}</div>` : "-"}
+				</td>
 				${tdClassification}
 				<td>${itemUom || "-"}</td>
-				<td class="text-center">${formatAmount(quantity)}</td>
+				<td class="text-center quantity-requested">${formatAmount(quantity)}</td>
 				<td class="text-center available-stocks">${formatAmount(availableItems || "0.00")}</td>
 				${reservedTableRow}
 				<td class="text-center for-purchase">${formatAmount(forPurchaseItem < 1 ? "0" : forPurchaseItem)}</td>
@@ -2320,10 +2324,10 @@ $(document).ready(function() {
 					let itemClassification 		= tableData.itemClassification;
 					let brandName 				= tableData.brandName;
 					let itemUom 				= tableData.itemUom;
-					let quantity 				= tableData.quantity;
-					let stocks					= $(this).find(".available-stocks").text();
-					let forPurchase 			= $(this).find(".for-purchase").text();
-					let reservedItem 			= $(this).find(".reserved-quantity").text() || null;
+					let quantity 				= $(this).find(".quantity-requested").text().replaceAll(",","") || $(this).find(".quantity-requested").text();
+					let stocks					= $(this).find(".available-stocks").text().replaceAll(",","") || $(this).find(".available-stocks").text();
+					let forPurchase 			= $(this).find(".for-purchase").text().replaceAll(",","") || $(this).find(".for-purchase").text();
+					let reservedItem 			= $(this).find(".reserved-quantity").text().replaceAll(",","") || $(this).find(".reserved-quantity").text();
 					
 					data.append(`items[${i}][billMaterialID]`, billMaterialID);
 					data.append(`items[${i}][purchaseRequestID]`, purchaseRequestID);

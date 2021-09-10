@@ -21,28 +21,32 @@ class Inventory_receiving extends CI_Controller {
 
     public function saveInventoryReceiving()
     {
-        $action                     = $this->input->post("action");
-        $method                     = $this->input->post("method");
-        $inventoryReceivingID       = $this->input->post("inventoryReceivingID") ?? null;
-        $reviseInventoryReceivingID = $this->input->post("reviseInventoryReceivingID") ?? null;
-        $employeeID                 = $this->input->post("employeeID");
-        $receiptNo                 = $this->input->post("receiptNo");
-        $purchaseOrderID            = $this->input->post("purchaseOrderID") ?? null;
-        $dateReceived               = $this->input->post("dateReceived");
-        $approversID                = $this->input->post("approversID") ?? null;
-        $approversStatus            = $this->input->post("approversStatus") ?? null;
-        $approversDate              = $this->input->post("approversDate") ?? null;
-        $inventoryReceivingStatus   = $this->input->post("inventoryReceivingStatus");
-        $inventoryReceivingReason   = $this->input->post("inventoryReceivingReason") ?? null;
-        $inventoryReceivingRemarks  = $this->input->post("inventoryReceivingRemarks") ?? null;
-        $submittedAt                = $this->input->post("submittedAt") ?? null;
-        $createdBy                  = $this->input->post("createdBy");
-        $updatedBy                  = $this->input->post("updatedBy");
-        $createdAt                  = $this->input->post("createdAt");
-        $items                      = $this->input->post("items") ?? null;
+        $action                         = $this->input->post("action");
+        $method                         = $this->input->post("method");
+        $inventoryReceivingID           = $this->input->post("inventoryReceivingID") ?? null;
+        $reviseInventoryReceivingID     = $this->input->post("reviseInventoryReceivingID") ?? null;
+        $employeeID                     = $this->input->post("employeeID");
+        // $receiptNo                 = $this->input->post("receiptNo");
+        $timelineBuilderID              = $this->input->post("timelineBuilderID") ?? null;
+        $projectCode                    = $this->input->post("projectCode") ?? null;
+        $projectName                    = $this->input->post("projectName") ?? null;
+        $clientName                     = $this->input->post("clientName") ?? null;
+        $purchaseOrderID                = $this->input->post("purchaseOrderID") ?? null;
+        $dateReceived                   = $this->input->post("dateReceived");
+        $approversID                    = $this->input->post("approversID") ?? null;
+        $approversStatus                = $this->input->post("approversStatus") ?? null;
+        $approversDate                  = $this->input->post("approversDate") ?? null;
+        $inventoryReceivingStatus       = $this->input->post("inventoryReceivingStatus");
+        $inventoryReceivingReason       = $this->input->post("inventoryReceivingReason") ?? null;
+        $inventoryReceivingRemarks      = $this->input->post("inventoryReceivingRemarks") ?? null;
+        $submittedAt                    = $this->input->post("submittedAt") ?? null;
+        $createdBy                      = $this->input->post("createdBy");
+        $updatedBy                      = $this->input->post("updatedBy");
+        $createdAt                      = $this->input->post("createdAt");
+        $items                          = $this->input->post("items") ?? null;
        
         // echo "<pre>";
-        // print_r($items);
+        // print_r($_POST);
         // echo json_encode($items);
         // exit;
 
@@ -54,7 +58,11 @@ class Inventory_receiving extends CI_Controller {
         $inventoryReceivingData = [
             "reviseInventoryReceivingID" => $reviseInventoryReceivingID,
             "employeeID"                 => $employeeID,
-            "receiptNo"                 => $receiptNo,
+            // "receiptNo"                 => $receiptNo,
+            "timelineBuilderID"          => $timelineBuilderID,
+            "projectCode"                => $projectCode,
+            "projectName"                => $projectName,
+            "clientName"                 => $clientName,
             "purchaseOrderID"            => $purchaseOrderID,
             "dateReceived"               => $dateReceived,
             "approversID"                => $approversID,
@@ -111,8 +119,23 @@ class Inventory_receiving extends CI_Controller {
             $result = explode("|", $saveInventoryReceivingData);
 
             if ($result[0] == "true") {
+
+                $inventoryReceivingID  = $result[2];
+                if($_FILES){
+                    $fileType                   = substr($_FILES["file"]["type"], strpos($_FILES["file"]["type"], "/") + 1);
+                    $receiptNo             = "INRR-".date("y")."-".str_pad($inventoryReceivingID , 5, '0', STR_PAD_LEFT).".".$fileType;
+                    $updateReceiptNo  = ["receiptNo" => $receiptNo];
+                    if(file_exists("assets/upload-files/receiving-receipts/".$receiptNo)){
+                        unlink("assets/upload-files/receiving-receipts/".$receiptNo);
+                    }
+                    if(move_uploaded_file($_FILES["file"]["tmp_name"], "assets/upload-files/receiving-receipts/".$receiptNo)){
+                        $this->inventoryreceiving->updateInventoryReceiving("ims_inventory_receiving_tbl", $updateReceiptNo, "inventoryReceivingID  = ".$inventoryReceivingID );
+                    }
+                }
+
                 $inventoryReceivingID = $result[2];
                 if ($items) {
+                    $scopes =[];
                     foreach($items as $index => $item) {
                         $service = [
                             "inventoryReceivingID" => $inventoryReceivingID,
@@ -124,11 +147,12 @@ class Inventory_receiving extends CI_Controller {
                             "updatedBy"            => $updatedBy,
                         ];
 
-                        $scopes = $item["scopes"];
+                        if(!empty($item["scopes"])){
+                            $scopes = $item["scopes"];
+                        }
 
-                      
+                        $saveServices = $this->inventoryreceiving->saveServices($service, $scopes, $inventoryReceivingID, $item["itemID"]);
                         
-                        $saveServices = $this->inventoryreceiving->saveServices($service, $scopes, $inventoryReceivingID,$item["itemID"]);
                     }
                     
                     if ($inventoryReceivingData["inventoryReceivingStatus"] == "2") {

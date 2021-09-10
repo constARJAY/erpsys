@@ -789,7 +789,11 @@ $(document).ready(function () {
 	// ----- MODAL CONTENT -----
 	function modalContent(data = false, readOnly = false) {
 		//initQuantity();
-
+		var today = new Date();
+		var dd = String(today.getDate()).padStart(2, '0');
+		var mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
+		var yyyy = today.getFullYear();
+		today = mm + '/' + dd + '/' + yyyy;
 		let {
 			inventoryReceivingID = "",
 				itemID = "",
@@ -934,7 +938,7 @@ $(document).ready(function () {
 											<th>Serial Number</th>
 											<th>Storage <code>*</code></th>
 											<th>Manufactured Date</th>
-											<th>Expiration Date</th>
+											<th>Expiration Date <code>*</code></th>
 										</tr>
 									</thead>
 									
@@ -1010,7 +1014,7 @@ $(document).ready(function () {
 									</td>
 									<td> 
 										<input 
-										type="button" 
+										type="date" 
 										class="form-control manufactureDate" 
 										number="${count}"
 										name="manufactureDate" 
@@ -1018,12 +1022,14 @@ $(document).ready(function () {
 									</td>
 									<td>
 										<input 
-										type="button" 
-										class="form-control expirationdate expirationdateoncheck" 
+										type="date" 
+										class="form-control expirationdate  validate expirationdateoncheck" 
 										number="${count}"
-										name="expirationdate" 
+										max="2040-04-30"
+										name="expirationdate"
+										required 
+										value="${today}"
 										id="expirationdate${count}">
-										
 									</td>
 									</tr>`;
 		});
@@ -1045,6 +1051,38 @@ $(document).ready(function () {
 
 	}
 
+		$(document).on("change", ".expirationdate", function() {
+			const val = $(this).val();
+			const number = $(this).attr("number");
+			const dateSplit = val.split("-");
+			const myYear = dateSplit[0].substring(2);
+			const myMonth = dateSplit[1].length < 2 ? "0"+dateSplit[1] : dateSplit[1];
+			const myDate = dateSplit[2].length < 2 ? "0"+dateSplit[2] : dateSplit[2];
+			const myExpDate = `${myMonth}${myDate}${myYear}`;
+			const itemcodeSplit = $("#itemCode").val().split("-");
+			const myItemcode = itemcodeSplit[2];
+			var getlastthreedigititemcode = myItemcode.slice(-3);
+			const inventoryStorageID = $(`#inventoryStorageID${number}`).val();
+			const data = getTableData("ims_inventory_storage_tbl",
+			"inventoryStorageID  ,inventoryStorageOfficeName,inventoryStorageCode", `inventoryStorageStatus=1 AND inventoryStorageID =${inventoryStorageID}`, "");
+		data.map((item) => {
+			inventoryStorageCode = item.inventoryStorageCode;
+		}); 
+		const inventoryStorageCodeSplit = inventoryStorageCode.split("-");
+		const myInventorycode = inventoryStorageCodeSplit[2];
+		var getlastthreedigitinventorycode = myInventorycode.slice(-3);
+		var serialnumberretrive = $(`#serialnumber${number}`).val();
+		var serialnumber = "000000000000";
+		if (serialnumberretrive == "") {
+			serialnumber = "000000000000";
+		} else {
+			serialnumber = serialnumberretrive;
+		}
+		var serialnumberlastFive = serialnumber.substr(serialnumber.length - 5); // => "Tabs1 lastfive"
+		const barcode = `${myExpDate}-${getlastthreedigititemcode}${getlastthreedigitinventorycode}-${serialnumberlastFive}`;
+		$("#barcode" + number).val(barcode);
+	  });
+	
 	$(document).on("change", ".recievedQuantity1", function () {
 		const val = $(this).val();
 		var totalval = parseInt(val);
@@ -1068,19 +1106,28 @@ $(document).ready(function () {
 			}
 		} else {}
 	});
+	
 	$(document).on("change", ".inventoryStorageID", function () {
 		var storageID = $(this).val();
 		const number = $(this).attr("number");
+		const expirationdate = $(`#expirationdate${number}`).val();
+		const dateSplit = expirationdate.split("-");
+		const myYear = dateSplit[0].substring(2);
+		const myMonth = dateSplit[1].length < 2 ? "0"+dateSplit[1] : dateSplit[1];
+		const myDate = dateSplit[2].length < 2 ? "0"+dateSplit[2] : dateSplit[2];
+		const myExpDate = `${myMonth}${myDate}${myYear}`;
 		var inventoryStorageID = "";
 		const data = getTableData("ims_inventory_storage_tbl",
 			"inventoryStorageID  ,inventoryStorageOfficeName,inventoryStorageCode", `inventoryStorageStatus=1 AND inventoryStorageID =${storageID}`, "");
 		data.map((item) => {
 			inventoryStorageCode = item.inventoryStorageCode;
-		});
+		}); 
 		const itemcodeSplit = $("#itemCode").val().split("-");
 		const myItemcode = itemcodeSplit[2];
+		var getlastthreedigititemcode = myItemcode.slice(-3);
 		const inventoryStorageCodeSplit = inventoryStorageCode.split("-");
 		const myInventorycode = inventoryStorageCodeSplit[2];
+		var getlastthreedigitinventorycode = myInventorycode.slice(-3);
 		var serialnumberretrive = $(`#serialnumber${number}`).val();
 		var serialnumber = "000000000000";
 		if (serialnumberretrive == "") {
@@ -1089,12 +1136,12 @@ $(document).ready(function () {
 			serialnumber = serialnumberretrive;
 		}
 		var serialnumberlastFive = serialnumber.substr(serialnumber.length - 5); // => "Tabs1 lastfive"
-		const barcode = `${myItemcode}-${myInventorycode}-${serialnumberlastFive}`;
+		//const barcode = `${myItemcode}-${myInventorycode}-${serialnumberlastFive}`;
+		const barcode = `${myExpDate}-${getlastthreedigititemcode}${getlastthreedigitinventorycode}-${serialnumberlastFive}`;
 		$("#barcode" + number).val(barcode);
 		//$(".inventorystorageIDquantity"+storageID);
 
 	});
-
 	$(document).on("click", "#btnSave", function () {
 		const validate = validateForm("modal_product_record");
 		if (validate) {
@@ -1116,7 +1163,6 @@ $(document).ready(function () {
 				serialnumber.push($(this).val());
 			});
 
-
 			$(".inventoryStorageID").each(function () {
 				inventoryStorageID.push($(this).val());
 			});
@@ -1128,23 +1174,19 @@ $(document).ready(function () {
 				manufactureDate.push($(this).val());
 				//manufactureDate = moment(manufactureDate1).format("YYYY-MM-DD HH:mm:ss");
 			});
-			// $(".manufactureDate").each(function () {
-			// 	manufactureDate.push($(this).val());
-			// 	const returnItemDate = moment(manufactureDate).format("YYYY-MM-DD HH:mm:ss");
-
-			// });
+			$(".manufactureDate").each(function () {
+				manufactureDate.push($(this).val());
+				//manufactureDate = moment(manufactureDate1).format("YYYY-MM-DD HH:mm:ss");
+			});
 			$(".expirationdate").each(function () {
 				expirationdate.push($(this).val());
-				//expirationdate.moment(expirationdate).format("YYYY-MM-DD");
-				//	expirationdate.moment(push($(this).val().format("YYYY-MM-DD")));
-				//expirationdate = moment(expirationdate1).format("YYYY-MM-DD");
-
-				//alert(expirationdate);
+				//manufactureDate = moment(manufactureDate1).format("YYYY-MM-DD HH:mm:ss");
 			});
-
+		
+			// $(".expirationdate").each(function () {
+			// 	expirationdate.push(moment($(this).val()).format("YYYY-MM-DD"));
+			// });
 			//alert(expirationdate);
-
-
 			Swal.fire({
 				title: 'ADD INVENTORY STOCK IN',
 				text: 'Are you sure that you want to add a new inventory stock in to the system?',
@@ -1210,9 +1252,6 @@ $(document).ready(function () {
 					// $("#" + modalID).modal("show");
 				}
 			});
-
-
-
 			//alert(recievedQuantity);
 
 		}
@@ -1249,7 +1288,6 @@ $(document).ready(function () {
 
 	});
 
-
 	function datevalidated() {
 		var dtToday = new Date();
 		// var number  = $(this).attr(number);
@@ -1268,39 +1306,23 @@ $(document).ready(function () {
 			expirationDay = '0' + expirationDay.toString();
 
 		var today = year + '-' + month + '-' + day;
-		var expirationDate = year + '-' + month + '-' + expirationDay;
+		//var expirationDate = year + '-' + month + '-' + expirationDay;
 
 		$(".manufactureDate").each(function () {
 			const id = $(this).attr("id");
 			$(`#${id}`).attr('max', today);
-			initDateRangePicker(`#${id}`, {
-				autoUpdateInput: false,
-				singleDatePicker: true,
-				showDropdowns: true,
-				autoApply: true,
-				locale: {
-					format: "MMMM DD, YYYY",
-				},
-				maxDate: moment()
-			})
-		})
+			$(`#${id}`).val(today);
+		
+		});
+
 		$(".expirationdate").each(function () {
 			const id = $(this).attr("id");
 			$(`#${id}`).attr('min', today);
-			initDateRangePicker(`#${id}`, {
-				autoUpdateInput: false,
-				singleDatePicker: true,
-				showDropdowns: true,
-				autoApply: true,
-				locale: {
-					format: "MMMM DD, YYYY",
-				},
-				minDate: moment()
-			})
-		})
-		//$('.expirationdateoncheck').attr('min', expirationDate);
-
-	}
+			$(`#${id}`).val(today);
+			
+		});
+	}	
+		
 
 	// ----- CLOSE FORM -----
 	$(document).on("click", "#btnBack", function () {
@@ -1320,10 +1342,6 @@ $(document).ready(function () {
 
 	});
 	// ----- END CLOSE FORM -----
-
-
-
-
 
 
 });

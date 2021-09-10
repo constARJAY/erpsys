@@ -388,7 +388,6 @@ class PurchaseOrder_model extends CI_Model {
             FROM 
                 ims_request_items_tbl 
             WHERE 
-                (inventoryValidationID IS NULL OR inventoryValidationID = 0) AND
                 inventoryVendorID = $inventoryVendorID
                 $wherePO
                 $whereBR
@@ -411,12 +410,6 @@ class PurchaseOrder_model extends CI_Model {
             FROM 
                 ims_request_items_tbl 
             WHERE 
-                milestoneBuilderID IS NULL AND
-                phaseDescription IS NULL AND
-                milestoneListID IS NULL AND
-                projectMilestoneID IS NULL AND
-                projectMilestoneName IS NULL AND
-                (inventoryValidationID IS NULL OR inventoryValidationID = 0) AND
                 inventoryVendorID = $inventoryVendorID AND
                 itemClassification = BINARY('$itemClassification')
                 $wherePO 
@@ -430,7 +423,8 @@ class PurchaseOrder_model extends CI_Model {
     public function getRequestItems($purchaseOrderID = 0, $bidRecapID = 0, $inventoryVendorID = 0)
     {
         $result = [
-            "phases" => $this->getProjectPhases($purchaseOrderID, $bidRecapID, $inventoryVendorID),
+            // "phases" => $this->getProjectPhases($purchaseOrderID, $bidRecapID, $inventoryVendorID),
+            "phases" => [],
             "materialsEquipment" => $this->getMaterialEquipmentRequestItems($purchaseOrderID, $bidRecapID, $inventoryVendorID)
         ];
         return $result;

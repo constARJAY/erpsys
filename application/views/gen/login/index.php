@@ -6,7 +6,7 @@
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 <!--===============================================================================================-->	
-	<link rel="icon" type="image/png" href="<?=base_url('assets/login-assets/')?>images/icons/logo.ico"/>
+	<link rel="icon" type="image/png" href="<?=base_url('assets/login-assets/')?>images/icons/logo_bcgi.png"/>
 <!--===============================================================================================-->
 	<link rel="stylesheet" type="text/css" href="<?=base_url('assets/login-assets/')?>vendor/bootstrap/css/bootstrap.min.css">
 <!--===============================================================================================-->

@@ -84,19 +84,18 @@ class BidRecap_model extends CI_Model {
             $whereIVR = $inventoryValidationID && $inventoryValidationID > 0 ? "AND inventoryValidationID = $inventoryValidationID" : "";
             $selectPriceList    = $bidRecapID < 1 ? 
                                 ", ( SELECT iiplt.inventoryVendorID FROM ims_inventory_price_list_tbl AS iiplt WHERE preferred = '1' AND iiplt.itemID = irit.itemID) AS preferredInventoryVendorID, 
-                                ( SELECT iiplt.inventoryVendorName FROM ims_inventory_price_list_tbl AS iiplt WHERE preferred = '1' AND iiplt.itemID = irit.itemID) AS preferredInventoryVendorName,
-                                ( SELECT iiplt.vendorCurrentPrice FROM ims_inventory_price_list_tbl AS iiplt WHERE preferred = '1' AND iiplt.itemID = irit.itemID) AS preferredInventoryVendorPrice" : "";
+                                   ( SELECT iiplt.inventoryVendorName FROM ims_inventory_price_list_tbl AS iiplt WHERE preferred = '1' AND iiplt.itemID = irit.itemID) AS preferredInventoryVendorName,
+                                   ( SELECT iiplt.vendorCurrentPrice FROM ims_inventory_price_list_tbl AS iiplt WHERE preferred = '1' AND iiplt.itemID = irit.itemID) AS preferredInventoryVendorPrice,
+                                   ( SELECT iivt.inventoryVendorCode FROM ims_inventory_vendor_tbl AS iivt WHERE inventoryVendorID = preferredInventoryVendorPrice ) AS vendorCode" 
+                                : ", ( SELECT iivt.inventoryVendorCode FROM ims_inventory_vendor_tbl AS iivt WHERE inventoryVendorID = irit.inventoryVendorID ) AS vendorCode";
             $sql = "
             SELECT 
                 irit.* $selectPriceList
             FROM 
                 ims_request_items_tbl AS irit 
             WHERE 
-                milestoneBuilderID IS NULL AND 
-                phaseDescription IS NULL AND
-                milestoneListID IS NULL AND
-                projectMilestoneID IS NULL AND
-                projectMilestoneName IS NULL AND
+                irit.purchaseOrderID IS NULL AND
+                irit.materialWithdrawalID IS NULL AND
                 itemClassification = BINARY('$itemClassification')
                 $whereBRF 
                 $whereIVR";
@@ -225,7 +224,8 @@ class BidRecap_model extends CI_Model {
     public function getCostEstimateRequest($bidRecapID = 0, $inventoryValidationID = 0) 
     {
         $result = [
-            "phases" => $this->getProjectPhases($bidRecapID, $inventoryValidationID),
+            // "phases" => $this->getProjectPhases($bidRecapID, $inventoryValidationID),
+            "phases" => [],
             "materialsEquipment" => $this->getMaterialEquipmentRequestItems($bidRecapID, $inventoryValidationID)
         ];
         return $result;

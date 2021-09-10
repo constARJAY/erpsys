@@ -664,15 +664,15 @@ $(document).ready(function() {
 			`${condition} GROUP BY irit.purchaseOrderID`
 		)
 
-		const createdIRList = getTableData(
-			`ims_inventory_receiving_tbl AS iirt
-				LEFT JOIN ims_inventory_receiving_details_tbl AS iirdt USING(inventoryReceivingID)
-				LEFT JOIN ims_request_items_tbl AS irit USING(requestItemID)`, 
-			"iirt.purchaseOrderID", 
-			`iirt.inventoryReceivingStatus <> 3 AND 
-			iirt.inventoryReceivingStatus <> 4 AND 
-			(irit.orderedPending IS NOT NULL AND irit.orderedPending >= irit.forPurchase)`
-		).map(po => po.purchaseOrderID);
+		// const createdIRList = getTableData(
+		// 	`ims_inventory_receiving_tbl AS iirt
+		// 		LEFT JOIN ims_inventory_receiving_details_tbl AS iirdt USING(inventoryReceivingID)
+		// 		LEFT JOIN ims_request_items_tbl AS irit USING(requestItemID)`, 
+		// 	"iirt.purchaseOrderID", 
+		// 	`iirt.inventoryReceivingStatus <> 3 AND 
+		// 	iirt.inventoryReceivingStatus <> 4 AND 
+		// 	(irit.orderedPending IS NOT NULL AND irit.orderedPending >= irit.forPurchase)`
+		// ).map(po => po.purchaseOrderID);
 		let html = '';
 		if (!status || status == 0) {
 			// html += purchaseOrderList.filter(po => createdIRList.indexOf(po.purchaseOrderID) == -1 || po.purchaseOrderID == id).map(po => {
@@ -682,6 +682,10 @@ $(document).ready(function() {
 				<option 
 					value      = "${po.purchaseOrderID}" 
 					vendorname = "${po.vendorName}"
+					timelineBuilderID = "${po.timelineBuilderID}"
+					projectCode = "${po.projectCode}"
+					projectName = "${po.projectName}"
+					clientName = "${po.clientName}"
 				${po.purchaseOrderID == id && "selected"}>
 				${getFormCode("PO", po.createdAt, po.purchaseOrderID)}
 				</option>`;
@@ -692,6 +696,10 @@ $(document).ready(function() {
 				<option 
 					value      = "${po.purchaseOrderID}" 
 					vendorname = "${po.vendorName}"
+					timelineBuilderID = "${po.timelineBuilderID}"
+					projectCode = "${po.projectCode}"
+					projectName = "${po.projectName}"
+					clientName = "${po.clientName}"
 					${po.purchaseOrderID == id && "selected"}>
 					${getFormCode("PO", po.createdAt, po.purchaseOrderID)}
 				</option>`;
@@ -723,7 +731,8 @@ $(document).ready(function() {
 								minlength="17"
 								maxlength="17"
 								value="${serialNumber}"
-								autocomplete="off">
+								autocomplete="off"
+								required>
 							<div class="d-block invalid-feedback mt-0 mb-1" id="invalid-serialNumber"></div>
 						</div>
 					</div>
@@ -917,7 +926,7 @@ $(document).ready(function() {
 								<tbody class="tableSerialBody">
 								`;
 							
-								if (scopeData.length > 0 && inventoryReceivingID != "" && serialNumberDataLength > 0) {
+								if (scopeData.length > 0 && inventoryReceivingID != "") {
 									itemSerialNumbers += scopeData.map(scope => {
 										return getSerialNumber(scope, readOnly);
 									}).join("");
@@ -965,7 +974,7 @@ $(document).ready(function() {
 						</td>
 
 						<td class="text-center">
-							<div class="pending">${pending || "-"}</div>
+							<div class="pending">${(pending < 1 ? "0.00" : pending ) || "-"}</div>
 						</td>
 
 						<td>
@@ -1002,8 +1011,8 @@ $(document).ready(function() {
 									type="text" 
 									class="form-control input-quantity text-center"
 									data-allowcharacters="[0-9]" 
-									min="1"
-									max="${pending}" 
+									min="0"
+									 
 									id="received" 
 									name="received" 
 									value="${inventoryReceivingID ? received : ""}" 
@@ -1015,7 +1024,7 @@ $(document).ready(function() {
 						</td>
 
 						<td class="text-center">
-							<div class="pending">${pending || "-"}</div>
+							<div class="pending">${(pending < 1 ? "0.00" : pending ) || "-"}</div>
 						</td>
 						
 						<td>
@@ -1052,15 +1061,22 @@ $(document).ready(function() {
 
 	// ----- SELECT PURCHASE ORDER -----
     $(document).on("change", "[name=purchaseOrderID]", function() {
-        const vendorname = $('option:selected', this).attr("vendorname");
+        const vendorname 			= $('option:selected', this).attr("vendorname");
         const id 					= $(this).val();
         let inventoryreceivingid 	= $(this).attr("inventoryreceivingid");
+		let timelineBuilderID 		= $('option:selected', this).attr("timelinebuilderid")
+        let projectCode 			= $('option:selected', this).attr("projectcode");
+        let projectName 			= $('option:selected', this).attr("projectname");
+        let clientName 				= $('option:selected', this).attr("clientname");
         let executeonce 	        = $(this).attr("executeonce") == "true";
 		var readOnly			    = $(this).attr("disabled") == "disabled";
 		const status                = $(this).attr("status");
 		inventoryreceivingid        = executeonce ? inventoryreceivingid : null;
 
         $("[name=vendorName]").val(vendorname);
+        $("[name=projectCode]").val(projectCode);
+        $("[name=projectName]").val(projectName);
+        $("[name=clientName]").val(clientName);
         $(".purchaseOrderItemsBody").html('<tr><td colspan="8">'+preloader+'</td></tr>');
 
         let purchaseOrderItemsBody = getItemsRow(id, readOnly, inventoryreceivingid);
@@ -1075,24 +1091,24 @@ $(document).ready(function() {
 
 
 	// ----- CHECK SERIAL ROW AND RECEIVED -----
-	function checkSerialRowReceived(parentTable = null) {
-		if (parentTable) {
-			const serialRow        = $(`.tableSerialBody tr`, parentTable).length;
-			const receivedQuantity = +$(`.received [name="received"]`, parentTable).val() || 0;
+	// function checkSerialRowReceived(parentTable = null) {
+	// 	if (parentTable) {
+	// 		const serialRow        = $(`.tableSerialBody tr`, parentTable).length;
+	// 		const receivedQuantity = +$(`.received [name="received"]`, parentTable).val() || 0;
 		
-			if (serialRow == receivedQuantity) {
-				$(`.received [name="received"]`, parentTable).removeClass("is-valid, no-error").removeClass("is-invalid");
-				$(`.received .invalid-feedback`, parentTable).text("");
+	// 		if (serialRow == receivedQuantity) {
+	// 			$(`.received [name="received"]`, parentTable).removeClass("is-valid, no-error").removeClass("is-invalid");
+	// 			$(`.received .invalid-feedback`, parentTable).text("");
 
-				$(`.tableSerialBody tr`, parentTable).each(function() {
-					if($(`.servicescope .invalid-feedback`, this).text() != "Data already exist!"){
-					$(`.servicescope [name="serialNumber"]`, this).removeClass("is-valid").removeClass("no-error").removeClass("is-invalid");
-					$(`.servicescope .invalid-feedback`, this).text("");
-					}
-				})
-			}
-		}
-	}
+	// 			$(`.tableSerialBody tr`, parentTable).each(function() {
+	// 				if($(`.servicescope .invalid-feedback`, this).text() != "Data already exist!"){
+	// 				$(`.servicescope [name="serialNumber"]`, this).removeClass("is-valid").removeClass("no-error").removeClass("is-invalid");
+	// 				$(`.servicescope .invalid-feedback`, this).text("");
+	// 				}
+	// 			})
+	// 		}
+	// 	}
+	// }
 	// ----- END CHECK SERIAL ROW AND RECEIVED -----
 
 
@@ -1135,20 +1151,20 @@ $(document).ready(function() {
 
 
 	// ----- DELETE SERIAL -----
-	$(document).on("click", ".btnDeleteSerial", function() {
-		const isCanDelete = $(this).closest(".tableSerialBody").find("tr").length > 1;
+	// $(document).on("click", ".btnDeleteSerial", function() {
+	// 	const isCanDelete = $(this).closest(".tableSerialBody").find("tr").length > 1;
 		
-		if (isCanDelete) {
-			const scopeElement = $(this).closest("tr");
-			scopeElement.fadeOut(500, function() {
-				const parentTable = $(this).closest("tr.itemTableRow");
-				$(this).closest("tr").remove();
-				checkSerialRowReceived(parentTable);
-			})
-		} else {
-			showNotification("danger", "You must have atleast one serial number.");
-		}
-	})
+	// 	if (isCanDelete) {
+	// 		const scopeElement = $(this).closest("tr");
+	// 		scopeElement.fadeOut(500, function() {
+	// 			const parentTable = $(this).closest("tr.itemTableRow");
+	// 			$(this).closest("tr").remove();
+	// 			checkSerialRowReceived(parentTable);
+	// 		})
+	// 	} else {
+	// 		showNotification("danger", "You must have atleast one serial number.");
+	// 	}
+	// })
 	// ----- END DELETE SERIAL -----
 
 
@@ -1314,13 +1330,12 @@ $(document).ready(function() {
 								<label>Receipt No. ${!disabled ? "<code>*</code>" : ""}</label>
 								<label>${!disabled ? (receiptNo ? `<a href="${base_url+"assets/upload-files/receiving-receipts/"+receiptNo}" target="_blank">${receiptNo}</a>` : ``) : ``}</label>
 						</div>
-						
-						
 						${ disabled ? (receiptNo ? `<a href="${base_url+"assets/upload-files/receiving-receipts/"+receiptNo}" target="_blank">${receiptNo}</a>` : `-` )
 						: `<input  type="file" 
 									class="form-control" 
 									name="receiptNo" 
 									id="receiptNo"
+									required
 									accept="image/*, .pdf, .doc, .docx" ${disabled}>`}
 						<div class="d-block invalid-feedback" id="invalid-receiptNo"></div>	
 					</div>
@@ -1481,7 +1496,7 @@ $(document).ready(function() {
 
 
 	// ----- GET INVENTORY RECEIVING DATA -----
-	function getInventoryReceivingData(action = "insert", method = "submit", status = "1", id = null, currentStatus = "0", isObject = true) {
+	function getInventoryReceivingData(action = "insert", method = "submit", status = "1", id = null, currentStatus = "0", isObject = false) {
 
 		/**
 		 * ----- ACTION ---------
@@ -1513,12 +1528,12 @@ $(document).ready(function() {
 
 		if (id) {
 			data["inventoryReceivingID"] = id;
-			// formData.append("inventoryReceivingID", id);
+			formData.append("inventoryReceivingID", id);
 
 
 			if (status != "2") {
 				data["inventoryReceivingStatus"] = status;
-				// formData.append("inventoryReceivingStatus", status);
+				formData.append("inventoryReceivingStatus", status);
 			}
 		}
 
@@ -1529,18 +1544,27 @@ $(document).ready(function() {
 		formData.append("action", action);
 		formData.append("method", method);
 		formData.append("updatedBy", sessionID);
-
+	
 		if (currentStatus == "0" && method != "approve") {
-			
+			var file = document.getElementById("receiptNo").files[0];
 			data["employeeID"] 				 = sessionID;
 			data["purchaseOrderID"]  		 = $("[name=purchaseOrderID]").val() || null;
-			data["receiptNo"]  				 = $("[name=receiptNo]").val() || null;
+			data["timelineBuilderID"]  		 = $("[name=purchaseOrderID]").find(":selected").attr("timelineBuilderID") || null;
+			data["projectCode"]  		 	 = $("[name=purchaseOrderID]").find(":selected").attr("projectCode") || null;
+			data["projectName"]  		 	 = $("[name=purchaseOrderID]").find(":selected").attr("projectName") || null;
+			data["clientName"]  		 	 = $("[name=purchaseOrderID]").find(":selected").attr("clientName") || null;
+			// data["receiptNo"]  				 = $("[name=receiptNo]").val() || null;
+			data["file"]  				 	 = file;
 			data["dateReceived"]     		 =  moment($("[name=dateReceived]").val()?.trim()).format("YYYY-MM-DD");
 			data["inventoryReceivingReason"] = $("[name=inventoryReceivingReason]").val()?.trim();
 
 			formData.append("employeeID", sessionID);
 			formData.append("purchaseOrderID", $("[name=purchaseOrderID]").val() || null);
-			formData.append("receiptNo", $("[name=receiptNo]").val() || null);
+			formData.append("timelineBuilderID", $("[name=purchaseOrderID] option:selected").attr("timelineBuilderID") || null);
+			formData.append("projectCode", $("[name=purchaseOrderID] option:selected").attr("projectCode") || null);
+			formData.append("projectName", $("[name=purchaseOrderID] option:selected").attr("projectName") || null);
+			formData.append("clientName", $("[name=purchaseOrderID] option:selected").attr("clientName") || null);
+			formData.append("file", file);
 			formData.append("dateReceived", moment($("[name=dateReceived]").val() ?.trim()).format("YYYY-MM-DD"));
 			formData.append("inventoryReceivingReason", $("[name=inventoryReceivingReason]").val()?.trim());
 			
@@ -1596,8 +1620,8 @@ $(document).ready(function() {
 				formData.append(`items[${i}][itemID]`, itemID);
 				formData.append(`items[${i}][received]`, received);
 				formData.append(`items[${i}][remarks]`, remarks);
-			
-				$(`td .tableSerialBody tr`, this).each(function(index,obj) {
+				
+				$(`td .serial-number-table tbody > tr`, this).each(function(index,obj) {
 					const serialNumber = $('[name="serialNumber"]', this).val()?.trim();
 					let scope = {
 						serialNumber,
@@ -1605,12 +1629,14 @@ $(document).ready(function() {
 					};
 					temp["scopes"].push(scope);
 
-					// formData.append(`items[${i}]scopes[${index}][serialNumber]`, serialNumber);
-					// formData.append(`items[${i}]scopes[${index}][itemID]`, itemID);
+					formData.append(`items[${i}][scopes][${index}][serialNumber]`, serialNumber);
+					formData.append(`items[${i}][scopes][${index}][itemID]`, itemID);
 				})
+				
+			
 
 				data["items"].push(temp);
-				console.log(data) /////////////////////////// ENDDDDDDDDDDDDDDDDDDD MODIFYYYYYYYYYYYYYYYYY
+				// console.log(data) /////////////////////////// ENDDDDDDDDDDDDDDDDDDD MODIFYYYYYYYYYYYYYYYYY
 			});
 		} 
 
@@ -1668,9 +1694,9 @@ $(document).ready(function() {
 				// const action = revise && "insert" || (id && feedback ? "update" : "insert");
 				const action = revise && !isFromCancelledDocument && "insert" || (id ? "update" : "insert");
 				const data   = getInventoryReceivingData(action, "save", "0", id);
+				
 				data["inventoryReceivingStatus"]   = 0;
-
-				// data.append("inventoryReceivingStatus", 0);
+				data.append("inventoryReceivingStatus", 0);
 				
 				// data["reviseInventoryReceivingID"] = id;
 
@@ -1678,6 +1704,8 @@ $(document).ready(function() {
 
 				if (!isFromCancelledDocument) {
 					data["reviseInventoryReceivingID"] = id;
+					data.append("reviseInventoryReceivingID", id);
+
 					delete data["inventoryReceivingID"];
 
 					// data.append("reviseInventoryReceivingID", id);
@@ -1729,7 +1757,7 @@ $(document).ready(function() {
 			const action   = revise && "insert" || (id && feedback ? "update" : "insert");
 			const data     = getInventoryReceivingData(action, "save", "0", id);
 			data["inventoryReceivingStatus"] = 0;
-			// data.append("inventoryReceivingStatus", 0);
+			data.append("inventoryReceivingStatus", 0);
 			
 			if (revise) {
 				// data["reviseInventoryReceivingID"] = id;
@@ -1739,8 +1767,8 @@ $(document).ready(function() {
 					data["reviseInventoryReceivingID"] = id;
 					delete data["inventoryReceivingID"];
 
-					// data.append("reviseInventoryReceivingID", id);
-					// data.delete("inventoryReceivingID");
+					data.append("reviseInventoryReceivingID", id);
+					data.delete("inventoryReceivingID");
 				} else {
 					// delete data["inventoryReceivingID"];
 
@@ -1748,9 +1776,9 @@ $(document).ready(function() {
 					delete data["action"];
 					data["action"] = update;
 
-					// data.append("inventoryReceivingID", id);
-					// data.delete("action");
-					// data.append("action", "update");
+					data.append("inventoryReceivingID", id);
+					data.delete("action");
+					data.append("action", "update");
 				}
 			}
 	
@@ -1777,13 +1805,14 @@ $(document).ready(function() {
 		var flag = ['false'];
 		if ($(`.purchaseOrderItemsBody tr.itemTableRow`).length > 0) {
 			$(`.itemTableRow`).each(function() {
+
 				const receivedQuantity = parseFloat($(`[name="received"]`, this).val()) || 0;
 			
-				if ($(`.tableSerialBody tr`, this).length >= 1) {
-					let countSerial = $(`.tableSerialBody tr`, this).length;
+				if ($(`td .serial-number-table tbody > tr`, this).length >= 1) {
+					let countSerial = $(`td .serial-number-table tbody > tr`, this).length;
 					var tmpSerialStorage =[];
 					var counter =0;
-						$(`.tableSerialBody tr`, this).each(function() {
+						$(`td .serial-number-table tbody > tr`, this).each(function() {
 							var conSerail = $(this).find("[name=serialNumber]").val() || "";
 							if(conSerail !=""){
 								tmpSerialStorage[counter++] = $(this).find("[name=serialNumber]").val();
@@ -1791,7 +1820,7 @@ $(document).ready(function() {
 						})
 
 							if(tmpSerialStorage.length == 0 && receivedQuantity !=0 ){
-								$(`.tableSerialBody tr`, this).each(function() {
+								$(`td .serial-number-table tbody > tr`, this).each(function() {
 									if($(`.servicescope .invalid-feedback`, this).text() !="Data already exist!"){
 										$(`.servicescope [name="serialNumber"]`, this).removeClass("is-invalid");
 										$(`.servicescope .invalid-feedback`, this).text("");
@@ -1802,7 +1831,7 @@ $(document).ready(function() {
 								flag[0] = true;
 							}
 							if(tmpSerialStorage.length >= 1 && receivedQuantity !=0 && countSerial == receivedQuantity ){
-								$(`.tableSerialBody tr`, this).each(function() {
+								$(`td .serial-number-table tbody > tr`, this).each(function() {
 									if($(`.servicescope .invalid-feedback`, this).text() !="Data already exist!"){
 									$(`.servicescope [name="serialNumber"]`, this).removeClass("is-invalid");
 									$(`.servicescope .invalid-feedback`, this).text("");
@@ -1815,7 +1844,7 @@ $(document).ready(function() {
 								$(`.received [name="received"]`, this).removeClass("is-valid, no-error").addClass("is-invalid");
 								$(`.received .invalid-feedback`, this).text("Serial number is not equal on received items!");
 
-								$(`.tableSerialBody tr`, this).each(function() {
+								$(`td .serial-number-table tbody > tr`, this).each(function() {
 
 										$(`.servicescope [name="serialNumber"]`, this).removeClass("is-valid").addClass("is-invalid");
 										$(`.servicescope .invalid-feedback`, this).text("Serial number is not equal on received items!");
@@ -1827,7 +1856,7 @@ $(document).ready(function() {
 								$(`.received [name="received"]`, this).removeClass("is-invalid");
 								$(`.received .invalid-feedback`, this).text("");
 
-								$(`.tableSerialBody tr`, this).each(function() {
+								$(`td .serial-number-table tbody > tr`, this).each(function() {
 									if($(`.servicescope .invalid-feedback`, this).text() !="Data already exist!"){
 										$(`.servicescope [name="serialNumber"]`, this).removeClass("is-invalid");
 										$(`.servicescope .invalid-feedback`, this).text("");
@@ -1836,6 +1865,9 @@ $(document).ready(function() {
 								})
 								flag[0] = true;
 							}
+				}
+				else{
+					flag[0] = true;
 				}
 			})
 			return flag;
@@ -1847,7 +1879,6 @@ $(document).ready(function() {
 
     // ----- SUBMIT DOCUMENT -----
 	$(document).on("click", "#btnSubmit", function () {
-	
 
 		const validateDuplicateSerial  = $("[name=serialNumber]").hasClass("is-invalid") ;
 		const validateSerialMessage  = $(".invalid-feedback").text() ;
@@ -1870,17 +1901,17 @@ $(document).ready(function() {
 						data["reviseInventoryReceivingID"] = id;
 						delete data["inventoryReceivingID"];
 
-						// data.append("reviseInventoryReceivingID", id);
-						// data.delete("inventoryReceivingID");
+						data.append("reviseInventoryReceivingID", id);
+						data.delete("inventoryReceivingID");
 					}
 		
-					// let approversID = "", approversDate = "";
-					// for (var i of data) {
-					// 	if (i[0] == "approversID")   approversID   = i[1];
-					// 	if (i[0] == "approversDate") approversDate = i[1];
-					// }
+					let approversID = "", approversDate = "";
+					for (var i of data) {
+						if (i[0] == "approversID")   approversID   = i[1];
+						if (i[0] == "approversDate") approversDate = i[1];
+					}
 
-					let approversID   = data["approversID"], 
+						approversID   = data["approversID"]; 
 						approversDate = data["approversDate"];
 	
 		
@@ -1947,10 +1978,10 @@ $(document).ready(function() {
 
 			let data = getInventoryReceivingData("update", "approve", "2", id);
 			data["approversStatus"] = updateApproveStatus(approversStatus, 2);
-			// data.append("approversStatus", updateApproveStatus(approversStatus, 2));
+			data.append("approversStatus", updateApproveStatus(approversStatus, 2));
 			let dateApproved = updateApproveDate(approversDate)
 			data["approversDate"] = dateApproved;
-			// data.append("approversDate", dateApproved);
+			data.append("approversDate", dateApproved);
 		
 			let status, notificationData,lastApproveCondition = false;
 			if (isImLastApprover(approversID, approversDate)) {
@@ -1978,7 +2009,7 @@ $(document).ready(function() {
 			}
 
 			data["inventoryReceivingStatus"] = status;
-			// data.append("inventoryReceivingStatus", status);
+			data.append("inventoryReceivingStatus", status);
 
 
 			saveInventoryReceiving(data, "approve", notificationData, pageContent,lastApproveCondition);
@@ -2033,24 +2064,24 @@ $(document).ready(function() {
 				let approversDate   = tableData[0].approversDate;
 				let employeeID      = tableData[0].employeeID;
 
-				let data = {};
-				data["action"]               = "update";
-				data["method"]               = "deny";
-				data["serviceRequisitionID"] = id;
-				data["approversStatus"]      = updateApproveStatus(approversStatus, 3);
-				data["approversDate"]        = updateApproveDate(approversDate);
-				data["inventoryReceivingRemarks"] = $("[name=inventoryReceivingRemarks]").val()?.trim();
-				data["updatedBy"] = sessionID;
+				// let data = {};
+				// data["action"]               		= "update";
+				// data["method"]               		= "deny";
+				// data["serviceRequisitionID"] 		= id;
+				// data["approversStatus"]      		= updateApproveStatus(approversStatus, 3);
+				// data["approversDate"]        		= updateApproveDate(approversDate);
+				// data["inventoryReceivingRemarks"] 	= $("[name=inventoryReceivingRemarks]").val()?.trim();
+				// data["updatedBy"] 					= sessionID;
 
 			
-				// let data = new FormData;
-				// data.append("action", "update");
-				// data.append("method", "deny");
-				// data.append("inventoryReceivingID", id);
-				// data.append("approversStatus", updateApproveStatus(approversStatus, 3));
-				// data.append("approversDate", updateApproveDate(approversDate));
-				// data.append("inventoryReceivingRemarks", $("[name=inventoryReceivingRemarks]").val()?.trim());
-				// data.append("updatedBy", sessionID);
+				let data = new FormData;
+				data.append("action", "update");
+				data.append("method", "deny");
+				data.append("inventoryReceivingID", id);
+				data.append("approversStatus", updateApproveStatus(approversStatus, 3));
+				data.append("approversDate", updateApproveDate(approversDate));
+				data.append("inventoryReceivingRemarks", $("[name=inventoryReceivingRemarks]").val()?.trim());
+				data.append("updatedBy", sessionID);
 
 				let notificationData = {
 					moduleID:                33,
@@ -2074,17 +2105,17 @@ $(document).ready(function() {
 		const feedback          = $(this).attr("code") || getFormCode("TR", dateToday(), id);
 
 		const id = decryptString($(this).attr("inventoryReceivingID"));
-		// let data = new FormData;
-		// data.append("inventoryReceivingID", inventoryReceivingID);
-		// data.append("action", "update");
-		// data.append("method", "drop");
-		// data.append("updatedBy", sessionID);
+		let data = new FormData;
+		data.append("inventoryReceivingID", inventoryReceivingID);
+		data.append("action", "update");
+		data.append("method", "drop");
+		data.append("updatedBy", sessionID);
 
-		let data = {};
-		data["inventoryReceivingID"] = id;
-		data["action"]               = "update";
-		data["method"]               = "drop";
-		data["updatedBy"]            = sessionID;
+		// let data = {};
+		// data["inventoryReceivingID"] = id;
+		// data["action"]               = "update";
+		// data["method"]               = "drop";
+		// data["updatedBy"]            = sessionID;
 
 		saveInventoryReceiving(data, "drop", null, pageContent);
 	})
@@ -2215,10 +2246,10 @@ function saveInventoryReceiving(data = null, method = "submit", notificationData
 					method:      "POST",
 					url:         `inventory_receiving/saveInventoryReceiving`,
 					data,
-					// processData: false,
-					// contentType: false,
-					// global:      false,
-					// cache:       false,
+					processData: false,
+					contentType: false,
+					global:      false,
+					cache:       false,
 					async:       false,
 					dataType:    "json",
 					beforeSend: function() {

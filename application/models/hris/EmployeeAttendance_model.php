@@ -3,12 +3,6 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class EmployeeAttendance_model extends CI_Model {
 
-    public function getBiotimeDatabase()
-    {
-        $DB_NAME = "biotime";
-        return $DB_NAME;
-    }
-
     public function getAllEmployees()
     {
         /**
@@ -20,9 +14,10 @@ class EmployeeAttendance_model extends CI_Model {
          * 4. Retired
          * 5. Suspended
          * 6. Terminated
+         * 7. Non-Organic
          */
 
-        $sql = "SELECT * FROM hris_employee_list_tbl";
+        $sql = "SELECT * FROM hris_employee_list_tbl WHERE employeeStatus <> 7";
         $query = $this->db->query($sql);
         return $query ? $query->result_array() : [];
     }
@@ -144,10 +139,8 @@ class EmployeeAttendance_model extends CI_Model {
      *    ----- PUNCH STATE STATUS -----
      *    0 - Check In
      *    1 - Check Out
-     *    2 - Break In
-     *    3 - Break Out
-     *    4 - Overtime In
-     *    5 - Overtime Out
+     *    4 - Break In
+     *    5 - Break Out
      */
 
     public function getCheckDuration($scheduleIn = "", $scheduleOut = "", $scheduleBreakDuration = "", $checkIn = "", $checkOut = "")
@@ -168,7 +161,7 @@ class EmployeeAttendance_model extends CI_Model {
 
             $scheduleDuration = ($scheduleOut - $scheduleIn) / 3600;
             $duration = ($diff / 3600); // COMPUTE IN HOURS 
-            if ($duration == $scheduleDuration) {
+            if ($duration >= $scheduleDuration || $duration >= ($scheduleDuration - $scheduleBreakDuration)) {
                 $duration = $duration - $scheduleBreakDuration; 
             } else if ($duration <= 0) {
                 $duration = 0;
@@ -178,9 +171,9 @@ class EmployeeAttendance_model extends CI_Model {
         return 0;
     }
 
-    public function getBreakDuration($employeeID = 0, $scheduleIn = "", $scheduleOut = "")
+    public function getBreakDuration($employeeID = 0, $scheduleIn = "", $checkOut = "")
     {
-        if ($employeeID && $scheduleIn && $scheduleOut) {
+        if ($employeeID && $scheduleIn && $checkOut) {
             $sql = "
             SELECT 
                 SUM(breakDuration) AS duration 
@@ -188,7 +181,7 @@ class EmployeeAttendance_model extends CI_Model {
                 hris_attendance_break_tbl 
             WHERE 
                 employeeID = $employeeID
-                AND (breakIn >= '$scheduleIn' AND breakOut <= '$scheduleOut')";
+                AND (breakIn >= '$scheduleIn' AND breakOut <= '$checkOut')";
             $query = $this->db->query($sql);
             $result = $query ? $query->row() : false;
             return $result ? ($result->duration ?? 0.00) : 0;
@@ -240,46 +233,6 @@ class EmployeeAttendance_model extends CI_Model {
             iclock_transaction 
         WHERE 
             punch_state = 1 AND 
-            emp_code = '$emp_code' AND 
-            punch_time BETWEEN '$punch_time 00:00:00' AND '$punch_time 23:59:59' AND 
-            mobile IS NULL 
-        ORDER BY punch_time DESC LIMIT 1";
-        $query  = $db2->query($sql);
-        $result = $query ? $query->row() : false;
-        return $result ? $result->punch_time : null;
-    }
-
-    public function getEmployeeOvertimeIn($emp_code = 1, $punch_time = "")
-    {
-        $db2 = $this->load->database("biotime", TRUE);
-
-        $sql = "
-        SELECT 
-            punch_time 
-        FROM 
-            iclock_transaction 
-        WHERE 
-            punch_state = 4 AND 
-            emp_code = '$emp_code' AND 
-            punch_time BETWEEN '$punch_time 00:00:00' AND '$punch_time 23:59:59' AND 
-            mobile IS NULL 
-        ORDER BY punch_time ASC LIMIT 1";
-        $query  = $db2->query($sql);
-        $result = $query ? $query->row() : false;
-        return $result ? $result->punch_time : null;
-    }
-
-    public function getEmployeeOvertimeOut($emp_code = 1, $punch_time = "")
-    {
-        $db2 = $this->load->database("biotime", TRUE);
-
-        $sql = "
-        SELECT 
-            punch_time 
-        FROM 
-            iclock_transaction 
-        WHERE 
-            punch_state = 5 AND 
             emp_code = '$emp_code' AND 
             punch_time BETWEEN '$punch_time 00:00:00' AND '$punch_time 23:59:59' AND 
             mobile IS NULL 
@@ -397,67 +350,75 @@ class EmployeeAttendance_model extends CI_Model {
 
                 $inCheckIn  = $savedCheckIn ?? null;
                 $inCheckOut = $savedCheckOut ?? null;
+                
+                $isInGreaterOutCheck = $this->isInGreaterThanOut(false, $inCheckIn, $inCheckOut);
+                $inCheckOut = $isInGreaterOutCheck ? null : $inCheckOut;
+                $duration   = $this->getCheckDuration($scheduleIn, $scheduleOut, $scheduleBreakDuration, $inCheckIn, $inCheckOut);
+    
+                $data = [
+                    "checkIn"       => $inCheckIn,
+                    "checkOut"      => $inCheckOut,
+                    "checkDuration" => $duration
+                ];
+                $query = $this->db->update("hris_employee_attendance_tbl", 
+                    $data, 
+                    [
+                        "employeeID"   => $employeeID, 
+                        "scheduleDate" => $scheduleDate
+                    ]);
+                return $query ? true : false;
             }
-            $isInGreaterOutCheck = $this->isInGreaterThanOut(false, $inCheckIn, $inCheckOut);
-            $inCheckOut = $isInGreaterOutCheck ? null : $inCheckOut;
-            $duration   = $this->getCheckDuration($scheduleIn, $scheduleOut, $scheduleBreakDuration, $inCheckIn, $inCheckOut);
-
-            $data = [
-                "checkIn"       => $inCheckIn,
-                "checkOut"      => $inCheckOut,
-                "checkDuration" => $duration
-            ];
-            $query = $this->db->update("hris_employee_attendance_tbl", 
-                $data, 
-                [
-                    "employeeID"   => $employeeID, 
-                    "scheduleDate" => $scheduleDate
-                ]);
-            return $query ? true : false;
         }
         return false;
     }
 
-    public function updateEmployeeOvertimeInOut($employeeID = 0, $scheduleDate = "", $overtimeIn = "", $overtimeOut = "")
+    public function getDuration($timeIn = "", $timeOut = "")
     {
-        if ($employeeID && $scheduleDate) {
-            $inOvertimeIn = $inOvertimeOut = NULL;
+        if ($timeIn && $timeOut) {
+            $timeIn  = strtotime($timeIn);
+            $timeOut = strtotime($timeOut);
+
+            $diff = $timeOut - $timeIn;
+            $duration = ($diff / 3600); // COMPUTE IN HOURS 
+            return $duration;
+        }
+        return 0;
+    }
+
+    public function updateEmployeeOvertimeInOut($employeeID = 0, $scheduleDate = "", $checkIn = "", $checkOut = "")
+    {
+        if ($employeeID && $scheduleDate && $checkOut) {
+            $overtimeIn = $overtimeOut = null;
+            $overtimeDuration = 0;
+
             $employeeAttendance = $this->getEmployeeAttendance($employeeID, $scheduleDate);
             if ($employeeAttendance) {
-                $savedOvertimeIn  = $employeeAttendance->overtimeIn ?? null;
-                $savedOvertimeOut = $employeeAttendance->overtimeOut ?? null;
-                if (!$overtimeIn && !$overtimeOut) {
-                    $inOvertimeIn  = $savedOvertimeIn;
-                    $inOvertimeOut = $savedOvertimeOut;
-                } else if (!$overtimeIn && $overtimeOut) {
-                    $inOvertimeIn  = $savedOvertimeIn;
-                    // $inOvertimeOut = $overtimeOut;
-                } else if ($overtimeIn && !$overtimeOut) {
-                    $inOvertimeIn  = $overtimeIn;
-                    $inOvertimeOut = $savedOvertimeOut;
-                } else if ($overtimeIn && $overtimeOut) {
-                    $inOvertimeIn  = $overtimeIn ?? $savedOvertimeIn;
-                    $inOvertimeOut = $overtimeOut ?? $savedOvertimeOut;
+                $scheduleIn  = $employeeAttendance->scheduleIn;
+                $scheduleOut = $employeeAttendance->scheduleOut;
+
+                $duration = $this->getDuration($scheduleOut, $checkOut);
+                if ($duration > 0) {
+                    $overtimeIn  = $scheduleOut;
+                    $overtimeOut = $checkOut;
+                    $overtimeDuration = $this->getDuration($overtimeIn, $overtimeOut);
+
+                    $data = [
+                        "overtimeIn"       => $overtimeIn,
+                        "overtimeOut"      => $overtimeOut,
+                        "overtimeDuration" => $overtimeDuration,
+                    ];
+                    $query = $this->db->update(
+                        "hris_employee_attendance_tbl",
+                        $data,
+                        ["employeeID" => $employeeID, "scheduleDate" => $scheduleDate]);
+                    return $query ? true : false;
                 }
             }
-            $isInGreaterOutOvertime = $this->isInGreaterThanOut(false, $inOvertimeIn, $inOvertimeOut);
-            $inOvertimeOut = $isInGreaterOutOvertime ? null : $inOvertimeOut;
-            $duration   = $this->getOvertimeDuration($inOvertimeIn, $inOvertimeOut);
-            $data = [
-                "overtimeIn"       => $inOvertimeIn,
-                "overtimeOut"      => $inOvertimeOut,
-                "overtimeDuration" => $duration
-            ];
-            $query = $this->db->update("hris_employee_attendance_tbl", 
-                $data, 
-                [
-                    "employeeID"   => $employeeID, 
-                    "scheduleDate" => $scheduleDate
-                ]);
-            return $query ? true : false;
+            
         }
         return false;
     }
+
 
     public function updateBiotimeAttendance()
     {
@@ -484,16 +445,16 @@ class EmployeeAttendance_model extends CI_Model {
         $newDates = [];
         foreach($dates as $dt) array_push($newDates, $dt["punch_time"]); // INSERT DATE ONLY 
         $newDates = array_unique($newDates);
+
         foreach($employeeTransactions as $empTrans) {
             $emp_code = $empTrans["emp_code"];
             foreach($newDates as $date) {
-                $checkIn     = $this->getEmployeeCheckIn($emp_code, $date);
-                $checkOut    = $this->getEmployeeCheckOut($emp_code, $date);
-                $overtimeIn  = $this->getEmployeeOvertimeIn($emp_code, $date);
-                $overtimeOut = $this->getEmployeeOvertimeOut($emp_code, $date);
+                $checkIn  = $this->getEmployeeCheckIn($emp_code, $date);
+                $checkOut = $this->getEmployeeCheckOut($emp_code, $date);
                 
-                $updateEmployeeCheckInOut    = $this->updateEmployeeCheckInOut($emp_code, $date, $checkIn, $checkOut);
-                $updateEmployeeOvertimeInOut = $this->updateEmployeeOvertimeInOut($emp_code, $date, $overtimeIn, $overtimeOut);
+                $updateEmployeeCheckInOut= $this->updateEmployeeCheckInOut($emp_code, $date, $checkIn, $checkOut);
+                
+                $updateEmployeeOvertimeInOut = $this->updateEmployeeOvertimeInOut($emp_code, $date, $checkIn, $checkOut);
             }
         }      
         $updateBiotimeAttendance = $this->updateBiotimeAttendance();
@@ -677,7 +638,11 @@ class EmployeeAttendance_model extends CI_Model {
             $checkInDate  = $checkIn ? date("l, F d, Y h:i:s A", strtotime($checkIn)) : null;
             $checkOutDate = $checkOut ? date("l, F d, Y h:i:s A", strtotime($checkOut)) : null;
 
-            $breakDuration = $this->getBreakDuration($employeeID, $scheduleIn, $scheduleOut);
+            $timeOut = $checkOut ?? $scheduleOut;
+
+            $breakDuration = $this->getBreakDuration($employeeID, $scheduleIn, $timeOut);
+
+            $totalDuration = $checkDuration + $overtimeDuration;
             
             $data = [
                 "dateToday"        => date("F d, Y"),
@@ -862,14 +827,20 @@ class EmployeeAttendance_model extends CI_Model {
 
 
     // ----- ***** GET TODAY ACTIVITY DATA ***** -----
-    public function getTodayActivityData($employeeID = 0)
+    public function getActivityData($employeeID = 0, $startDate = "", $endDate = "")
     {
         $db2 = $this->load->database("biotime", TRUE);
         
         if ($employeeID) {
             $scheduleDate = date("Y-m-d");
-            $startDate = $scheduleDate." 00:00:00";
-            $endDate   = $scheduleDate." 23:59:59";
+
+            if ($startDate && $endDate) {
+                $startDate = $startDate." 00:00:00";
+                $endDate   = $endDate." 23:59:59";
+            } else {
+                $startDate = $scheduleDate." 00:00:00";
+                $endDate   = $scheduleDate." 23:59:59";
+            }
 
             $sql = "
             SELECT
@@ -878,10 +849,8 @@ class EmployeeAttendance_model extends CI_Model {
                 (CASE
                     WHEN punch_state = 0 THEN 'Check In at'
                     WHEN punch_state = 1 THEN 'Check Out at'
-                    WHEN punch_state = 2 THEN 'Break In at'
-                    WHEN punch_state = 3 THEN 'Break Out at'
-                    WHEN punch_state = 4 THEN 'Overtime In at'
-                    WHEN punch_state = 5 THEN 'Overtime Out at'
+                    WHEN punch_state = 4 THEN 'Break In at'
+                    WHEN punch_state = 5 THEN 'Break Out at'
                     ELSE 'Invalid Punch Status'
                 END) AS punchStatus
             FROM
@@ -902,6 +871,38 @@ class EmployeeAttendance_model extends CI_Model {
 
 
     // ----- ***** GET EMPLOYEE ATTENDANCE DATA **** -----
+    public function getNoTimeInOutRequest($employeeID = 0, $scheduleDate = "")
+    {
+        $id = ""; $reference = "";
+        if ($employeeID && $scheduleDate) {
+            $sql = "SELECT noTimeinTimeoutID AS ID, createdAt FROM hris_no_timein_timeout_tbl WHERE employeeID = $employeeID AND noTimeinTimeoutDate = '$scheduleDate' AND noTimeinTimeoutStatus = 2";
+            $query = $this->db->query($sql);
+            $result = $query ? $query->row() : false;
+            if ($result) {
+                $id = $result->ID;
+                $createdAt = $result->createdAt;
+                $reference = getFormCode("NTI", $createdAt, $id);
+            }
+        }
+        return ["id" => $id, "reference" => $reference];
+    }
+
+    public function getOvertimeRequest($employeeID = 0, $scheduleDate = "")
+    {
+        $id = ""; $reference = "";
+        if ($employeeID && $scheduleDate) {
+            $sql = "SELECT overtimeRequestID AS ID, createdAt FROM hris_overtime_request_tbl WHERE employeeID = $employeeID AND overtimeRequestDate = '$scheduleDate' AND overtimeRequestStatus = 2";
+            $query = $this->db->query($sql);
+            $result = $query ? $query->row() : false;
+            if ($result) {
+                $id = $result->ID;
+                $createdAt = $result->createdAt;
+                $reference = getFormCode("OTR", $createdAt, $id);
+            }
+        }
+        return ["id" => $id, "reference" => $reference];
+    }
+
     public function getEmployeeAttendanceData($employeeID = 0, $startDate = "", $endDate = "")
     {
         $data = [];
@@ -922,13 +923,27 @@ class EmployeeAttendance_model extends CI_Model {
             $query = $this->db->query($sql);
             $result = $query ? $query->result_array() : [];
             foreach($result as $res) {
+                $scheduleDate  = $res["scheduleDate"];
                 $scheduleIn    = $res["scheduleIn"];
                 $scheduleOut   = $res["scheduleOut"];
-                $breakDuration = $this->getBreakDuration($employeeID, $scheduleIn, $scheduleOut);
+                $checkOut      = $res["checkOut"];
+                $timeOut       = $checkOut ?? $scheduleOut;
+
+                $breakDuration = $this->getBreakDuration($employeeID, $scheduleIn, $timeOut);
+                $noTimeInOutRequest = $this->getNoTimeInOutRequest($employeeID, $scheduleDate);
+                $checkReference   = $noTimeInOutRequest["reference"];
+                $checkReferenceID = $noTimeInOutRequest["id"];
+                $overtimeRequest  = $this->getOvertimeRequest($employeeID, $scheduleDate);
+                $overtimeReference   = $overtimeRequest["reference"];
+                $overtimeReferenceID = $overtimeRequest["id"];
+
+                $checkDuration    = $res["checkDuration"];
+                $overtimeDuration = $res["overtimeDuration"];
+                $totalDuration    = $checkDuration + $overtimeDuration;
 
                 $temp = [
                     "attendanceID"     => $res["attendanceID"],
-                    "scheduleDate"     => $res["scheduleDate"],
+                    "scheduleDate"     => $scheduleDate,
                     "scheduleIn"       => $scheduleIn,
                     "scheduleOut"      => $scheduleOut,
                     "scheduleBreakDuration" => $res["scheduleBreakDuration"],
@@ -937,11 +952,15 @@ class EmployeeAttendance_model extends CI_Model {
                     "scheduleDuration" => $res["scheduleDuration"],
                     "checkIn"          => $res["checkIn"],
                     "checkOut"         => $res["checkOut"],
-                    "checkDuration"    => $res["checkDuration"],
+                    "checkReference"   => $checkReference,
+                    "checkReferenceID" => $checkReferenceID,
+                    "checkDuration"    => $totalDuration,
                     "breakDuration"    => $breakDuration,
                     "overtimeIn"       => $res["overtimeIn"],
                     "overtimeOut"      => $res["overtimeOut"],
                     "overtimeDuration" => $res["overtimeDuration"],
+                    "overtimeReference"   => $overtimeReference,
+                    "overtimeReferenceID" => $overtimeReferenceID,
                 ];
                 array_push($data, $temp);
             }
@@ -960,7 +979,7 @@ class EmployeeAttendance_model extends CI_Model {
         $data = [
             "timesheet"  => $this->getTimesheetData($employeeID),
             "statistics" => $this->getStatisticsData($employeeID),
-            "activity"   => $this->getTodayActivityData($employeeID),
+            "activity"   => $this->getActivityData($employeeID),
             "attendance" => $this->getEmployeeAttendanceData($employeeID)
         ];
         return $data;
@@ -981,7 +1000,7 @@ class EmployeeAttendance_model extends CI_Model {
         $result = $query ? $query->row() : false;
         $id     = $result ? $result->id : "";
 
-        $sql2   = "SELECT * FROM hris_employee_list_tbl WHERE FIND_IN_SET(employeeID, '$id')";
+        $sql2   = "SELECT * FROM hris_employee_list_tbl WHERE FIND_IN_SET(employeeID, '$id') AND employeeStatus <> 7";
         $query2 = $this->db->query($sql2);
         return $query2 ? $query2->result_array() : [];
     }

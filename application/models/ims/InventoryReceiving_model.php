@@ -48,38 +48,48 @@ class InventoryReceiving_model extends CI_Model {
         return $query ? true : false;
     }
 
-    public function saveServices($service = null, $scopes = null, $id = null,$itemID=null)
+    public function saveServices($service = null, $scopes = null, $id = null, $itemID = null)
     {
         $sessionID = $this->session->has_userdata("adminSessionID") ? $this->session->userdata("adminSessionID") : 0;
-        if ($service && $scopes) {
+        if ($service) {
             $query = $this->db->insert("ims_inventory_receiving_details_tbl", $service);
             if ($query) {
                 $insertID  = $this->db->insert_id();
-                $scopeData = [];
-                foreach ($scopes as $scope) {
+                if($scopes){
+                    $scopeData = [];
+                    foreach ($scopes as $scope) {
+                            $temp = [
+                                "inventoryReceivingID"          => $id,
+                                "inventoryReceivingDetailsID"   => $insertID,
+                                "serialNumber"                  => $scope["serialNumber"],
+                                "itemID"                        => $scope["itemID"],
+                                "createdBy"                     => $sessionID,
+                                "updatedBy"                     => $sessionID,
+                            ];
+                            array_push($scopeData, $temp);
+                    }
 
-                    // if($itemID == $scope["itemID"]){
-                        $temp = [
-                            "inventoryReceivingID" => $id,
-                            "inventoryReceivingDetailsID"=> $insertID,
-                            "serialNumber"          => $scope["serialNumber"],
-                            "itemID"             => $scope["itemID"],
-                            "createdBy"            => $sessionID,
-                            "updatedBy"            => $sessionID,
-                        ];
-                        array_push($scopeData, $temp);
-                    // }
-
-                        //  echo "<pre>";
-                        //     print_r($$scopes);
-                }
-                $saveScopes = $this->saveScopes($scopeData);
-                if ($saveScopes) {
-                    return true;
+                    $saveScopes = $this->saveScopes($scopeData);
+                    if ($saveScopes) {
+                        return true;
+                    }
+                }else{
+                    $temp = [
+                        "inventoryReceivingID"          => $id,
+                        "inventoryReceivingDetailsID"   => $insertID,
+                        "itemID"                        => $itemID,
+                        "createdBy"                     => $sessionID,
+                        "updatedBy"                     => $sessionID,
+                    ];
+                    $this->db->insert("ims_receiving_serial_number_tbl", $temp);
                 }
             }
         }
         return false;
+    }
+
+    public function saveNonSerial($data = []){
+        
     }
 
     public function updateOrderedPending($inventoryReceivingID = null)
@@ -104,6 +114,14 @@ class InventoryReceiving_model extends CI_Model {
             return true;
         }
         return false;
+    }
+
+
+
+
+    public function updateInventoryReceiving($tableName,$data, $reference){
+        $query =  $this->db->update($tableName, $data, $reference);  //"id = 4"
+        return $query;
     }
     
 }

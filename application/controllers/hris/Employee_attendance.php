@@ -33,6 +33,14 @@ class Employee_attendance extends CI_Controller {
         echo json_encode($this->employeeattendance->getTimesheetData($employeeID));
     }
 
+    public function getEmployeeActivityData()
+    {
+        $employeeID = $this->input->post("employeeID");
+        $startDate  = $this->input->post("startDate");
+        $endDate    = $this->input->post("endDate");
+        echo json_encode($this->employeeattendance->getActivityData($employeeID, $startDate, $endDate));
+    }
+
     public function getEmployeeAttendanceData()
     {
         $employeeID = $this->input->post("employeeID");
@@ -42,7 +50,10 @@ class Employee_attendance extends CI_Controller {
     }
 
     
-
+    public function syncEmployeeAttendance()
+    {
+        echo json_encode($this->employeeattendance->syncEmployeeAttendance());
+    }
     
 
     public function getEmployeeNotInDevice()

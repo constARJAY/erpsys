@@ -9,7 +9,7 @@
 						<li class="breadcrumb-item active"><i class="zmdi zmdi-hotel"></i> &nbsp;Modules</li>
 					</ul>
 					<h1 class="mt-3">Modules</h1>
-					<span>This module is used to manage Lorem ipsum dolor sit amet..</span>
+					<span>This module is used to manage system modules.</span>
 				</div>
 			</div>
 		</div>

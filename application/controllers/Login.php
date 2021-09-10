@@ -6,11 +6,14 @@ class Login extends CI_Controller {
     public function __construct(){
         parent::__construct();
         $this->load->model("Operations_model", "operations");
-        // $this->load->model("Login_model", "Login_model");
+        $this->load->model("hris/EmployeeAttendance_model", "employeeattendance");
     }
 
     public function index(){
         
+        $syncEmployee   = $this->employeeattendance->syncEmployeeToBiotime();
+        $syncAttendance = $this->employeeattendance->syncEmployeeAttendance();
+
         $data["title"] = "Login";
         $this->load->view("gen/login/index", $data);
     }
