@@ -110,7 +110,12 @@ $(document).ready(function() {
 				var pettyCashDate = ids[3];
 				var pettyCashAmount = ids[4];
 				var pettycashChartOfAccountID =ids[5];
-				let itemProjectTableBody = formContent('','','','', liquidationDataID, pettycashCode, pettyCashDate, pettyCashAmount, pettycashChartOfAccountID);
+				var voucherDataID =ids[6];
+				var voucherDescription =ids[7];
+				const regex = /%20/i;
+				var convertvaluedescription = voucherDescription.replace(regex," ");
+				//alert(convertvaluedescription);
+				let itemProjectTableBody = formContent('','','','', liquidationDataID, pettycashCode, pettyCashDate, pettyCashAmount, pettycashChartOfAccountID, voucherDataID, convertvaluedescription);
 			
 				if (arr.length > 1) {
 					let id = decryptString(arr[1]);
@@ -799,7 +804,9 @@ $(document).ready(function() {
 
 	var count = 0;
 	// ----- GET ITEM ROW -----
-    function getItemRow(pettyCashID, isProject = true, item = {}, readOnly) {
+    function getItemRow(pettyCashID, isProject = true, item = {}, readOnly, pettyCashAmount, voucherDataID, convertvaluedescription) {
+		//alert(pettyCashAmount);
+		
 		// var count  = 0;
 		// const attr[] = isProject ? `` : ``;
 		// const attr1 = isProject ? `${count}` : ``;
@@ -827,6 +834,7 @@ $(document).ready(function() {
 		let {
 			liquidationID                    							= "",
 			description                               					= "",
+			voucherID													="",
 			quantity													="",
 			amount                               						= "",
 			clientID													="",
@@ -836,6 +844,7 @@ $(document).ready(function() {
 			accountName													="",
 			clientName													="",
 			financeRequestID											="",
+			pettyCashRequestID											="",
 			files														="",
 		} = item;
 		++count;
@@ -851,12 +860,12 @@ $(document).ready(function() {
 			</td>
 			<td>
 				<div class="quantity text-center">
-				${quantity || "-"}
+				${quantity || "1"}
 				</div>
 			</td>
 			<td>
 				<div class="text-right">
-				${formatAmount(amount, true) || "-"}
+				${formatAmount(amount, true) || ""}
 				</div>
 			</td>
 			<td>
@@ -881,11 +890,24 @@ $(document).ready(function() {
 			</td>
 			</tr>`;
 		}else{
-			
+			var totalamount = '';
+			var voucherdescriptionvalue = '';
+			var checkVoucherValue = '';
+			if(description ==""){				
+				totalamount = pettyCashAmount;
+				voucherdescriptionvalue = convertvaluedescription;
+				checkVoucherValue = voucherDataID;
+				//alert(checkVoucherValue);
+			}else{
+				totalamount = amount;
+				voucherdescriptionvalue = description;
+				checkVoucherValue = voucherID
+			}
+			var checkVoucherCashAmount = pettyCashAmount || "";
+			//alert(checkVoucherCashAmount);
 			//$("[name=clientID]").select2({ theme: "bootstrap"});
 			//$(`[name=clientID]`).select2({ theme: "bootstrap"});
 			//$(`[name=clientID]`).find("select").each(function(i) {
-		
 			//});
 				//$("#totalAmount").val(pettyCashRequestAmount);
 				//$(".itemProjectTableBody tr").each(function(i) {
@@ -893,18 +915,18 @@ $(document).ready(function() {
 				
 			<tr class="itemTableRow">
                     <td>
-					<div class="description" name="description" id="description" descriptionValue="${description}" financeRequestID="${financeRequestID || ""}" pettyCashID="${pettyCashID || ""}">
-							${description || "-"}
+					<div class="description" name="description" id="description" descriptionValue="${voucherdescriptionvalue}" financeRequestID="${financeRequestID || ""}" pettyCashID="${pettyCashRequestID || ""}" voucherID="${checkVoucherValue}">
+							${voucherdescriptionvalue || "-"}
 					</div>
                    </td> 
 					<td>
 						<div class="quantity text-center" name="quantity" id="quantity">
-								${quantity || "-"}
+								${quantity || "1"}
 						</div>
 					</td>
 					<td>
 					<div class="text-right" name="amount" amountValue="${amount}">
-							${formatAmount(amount, true) || "-"}
+							${formatAmount(totalamount, true) || ""}
 					</div>
 					</td>
 			<td>
@@ -1048,7 +1070,7 @@ $(document).ready(function() {
     // ----- END SELECT PROJECT LIST -----
 
     // ----- FORM CONTENT -----
-	function formContent(data = false, readOnly = false, isRevise = false, isFromCancelledDocument = false,liquidationDataID, pettycashCode, pettyCashDate, pettyCashAmount, pettycashChartOfAccountID) {
+	function formContent(data = false, readOnly = false, isRevise = false, isFromCancelledDocument = false,liquidationDataID, pettycashCode, pettyCashDate, pettyCashAmount, pettycashChartOfAccountID, voucherDataID, convertvaluedescription) {
 		
 		$("#page_content").html(preloader);
 		let pettyCashChartOfAccountID = '0';
@@ -1089,6 +1111,7 @@ $(document).ready(function() {
 				liquidationVatAmount 						= "0",
 				chartOfAccountID 							= "",
 				clientID 									= "",
+				voucherID									="",
 				liquidationStatus 							= false,
 				submittedAt 								= false,
 				createdAt 									= false,
@@ -1120,11 +1143,13 @@ $(document).ready(function() {
 			frd.clientID,
 			frd.srfNumber,
 			frd.remark,
+			lt.voucherID,
 			frd.receiptNumber,
 			fcoa.accountName,
 			pct.clientName,
 			frd.amount,
 			frd.financeRequestID,
+			lt.pettyCashRequestID,
 			frd.description,
 			frd.quantity,
 			frd.files`,
@@ -1134,27 +1159,31 @@ $(document).ready(function() {
 		})  
 		
 		}else{
-			
-			let disposalItemsData = getTableData(
-				`fms_finance_request_details_tbl`,
-					`financeRequestID,
-					clientFundRequestID,
-					pettyCashRequestID,	
-					voucherID,
-					description,
-					quantity,
-					amount,
-					liquidationID,
-					srfNumber,
-					remark,
-					receiptNumber,
-					files`,
-				 	`pettyCashRequestID = ${pettyCashID}`);
-					 disposalItemsData.map(item => {
-				clientFundRequestItems += getItemRow(pettyCashID, true, item, false);
-				})
-				
-				
+			if(voucherDataID !=='0'){
+				clientFundRequestItems += getItemRow(pettyCashID, true, 0, false, pettyCashAmount, voucherDataID, convertvaluedescription);
+			}else{
+				let disposalItemsData = getTableData(
+					`fms_finance_request_details_tbl`,
+						`financeRequestID,
+						clientFundRequestID,
+						pettyCashRequestID,	
+						voucherID,
+						description,
+						quantity,
+						amount,
+						liquidationID,
+						pettyCashRequestID,
+						srfNumber,
+						remark,
+						voucherID,
+						receiptNumber,
+						files`,
+						 `pettyCashRequestID = ${pettyCashID}`);
+						 disposalItemsData.map(item => {
+					clientFundRequestItems += getItemRow(pettyCashID, true, item, false, 0, 0, 0);
+					})
+
+			}		
 		} 
 		// $(".clientID").select2({ theme: "bootstrap"});
 		let {
@@ -1596,6 +1625,8 @@ $(document).ready(function() {
 			data['liquidationExcessOrShortage'] 								= getNonFormattedAmount($("#liquidationExcessOrShortage").text());
 			data['liquidationDispositionofExcessOrShortage'] 					= $("#liquidationDispositionofExcessOrShortage").val();
 			data["pettyCashRequestID"] 											= $(".description").attr("pettyCashID");
+			data["voucherID"] 													= $(".description").attr("voucherID");
+			//alert($(".description").attr("voucherID"));
 			//alert(getNonFormattedAmount($("#liquidationBudget").val()));
 			formData.append("employeeID", sessionID);
             formData.append("projectID", $("[name=projectID]").val() || null);
@@ -1610,6 +1641,7 @@ $(document).ready(function() {
 			formData.append("liquidationDispositionofExcessOrShortage", $("#liquidationDispositionofExcessOrShortage").val());
 			formData.append("liquidationPurpose", $("[name=liquidationPurpose]").val()?.trim());
 			formData.append("pettyCashRequestID", $(".description").attr("pettyCashID"));
+			//formData.append("voucherID", $(".description").attr("voucherID"));
 			if (action == "insert") {
 				data["createdBy"]   = sessionID;
 				data["createdAt"]   = dateToday();

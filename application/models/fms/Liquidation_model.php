@@ -8,7 +8,7 @@ class Liquidation_model extends CI_Model {
         parent::__construct();
     }
 
-    public function saveliquidationData($action, $data, $id = null, $pettyCashRequestID) 
+    public function saveliquidationData($action, $data, $id = null, $pettyCashRequestID, $voucherID) 
     {
         if ($action == "insert") {
             $query = $this->db->insert("fms_liquidation_tbl", $data);
@@ -19,12 +19,21 @@ class Liquidation_model extends CI_Model {
 
         if ($query) {
             $insertID = $action == "insert" ? $this->db->insert_id() : $id;
-            $updateDate = array(
-                'pettyCashLiquidationStatus'  =>'1');
-                $where1 = ["pettyCashRequestID " => $pettyCashRequestID];
-                $query = $this->db->update("fms_petty_cash_request_tbl", $updateDate, $where1);
-
-            return "true|Successfully submitted|$insertID|".date("Y-m-d");
+            if($pettyCashRequestID!=="0" || $pettyCashRequestID!==null){
+                $updateDate = array(
+                    'pettyCashLiquidationStatus'  =>'1');
+                    $where1 = ["pettyCashRequestID " => $pettyCashRequestID];
+                    $query = $this->db->update("fms_petty_cash_request_tbl", $updateDate, $where1);
+                    return "true|Successfully submitted|$insertID|".date("Y-m-d");   
+            }else{
+                $updateDate = array(
+                    'checkVoucherLiquidationStatus'  =>'1');
+                    $where1 = ["voucherID " => $voucherID];
+                    $query = $this->db->update("fms_check_voucher_tbl", $updateDate, $where1);
+                    return "true|Successfully submitted|$insertID|".date("Y-m-d");   
+ 
+            }
+            
         }
         return "false|System error: Please contact the system administrator for assistance!";
     }
