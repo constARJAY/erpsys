@@ -137,6 +137,95 @@ function tableContent() {
 tableContent();
 // ----- END TABLE CONTENT -----
 
+  // ----- DISPLAY IMAGE -----
+      function displayImage(image = null, link = true) {
+        let html = ``;
+        if (image && image != null && image != "null" && image != "undefined") {
+            let otherAttr = link ? `
+            href="${base_url+"assets/upload-files/inventory-vehicle/"+image}" 
+            target="_blank"` : `href="javascript:void(0)"`;
+            html = `
+            <div class="d-flex justify-content-start align-items-center p-0">
+                <span class="btnRemoveImage pr-2" style="cursor: pointer"><i class="fas fa-close"></i></span>
+                <a class="filename"
+                    title="${image}"
+                    style="display: block;
+                    color: black;
+                    width: 90%;
+                    overflow: hidden;
+                    white-space: nowrap;
+                    text-overflow: ellipsis;"
+                    ${otherAttr}>
+                    ${image}
+                </a>
+			</div>`;
+        }
+        return html;
+    }
+    // ----- END DISPLAY IMAGE -----
+
+
+    // ----- REMOVE IMAGE -----
+    $(document).on("click", `.btnRemoveImage`, function() {
+        $(`#displayImage`).empty();
+        $(`[id="vehicleImage"]`).val("");
+        $(`[id="vehicleImage"]`).removeAttr("file");
+        $(`#displayImage`).css('display','none');
+    })
+    // ----- END REMOVE IMAGE -----
+
+
+    // ----- SELECT IMAGE -----
+    $(document).on("change", "[id=vehicleImage]", function(e) {
+        e.preventDefault();
+        if (this.files && this.files[0]) {
+            const filesize = this.files[0].size/1024/1024; // Size in MB
+            const filetype = this.files[0].type;
+            const filename = this.files[0].name;
+
+            console.log(filetype);
+
+            if (filesize > 10) {
+                $(`#displayImage`).empty();
+                $(`[name="vehicleImage"]`).val("");
+                $(`[name="vehicleImage"]`).removeAttr("file");
+                $(`#displayImage`).css('display','none');
+                showNotification("danger", "File size must be less than or equal to 10mb");
+            } else if (filetype.indexOf("image") == -1 && filetype.indexOf("jpeg") == -1 && filetype.indexOf("jpg") == -1 && filetype.indexOf("png") == -1) {
+                $(`#displayImage`).empty();
+                $(`[name="vehicleImage"]`).val("");
+                $(`[name="vehicleImage"]`).removeAttr("file");
+                $(`#displayImage`).css('display','none');
+                showNotification("danger", "Invalid file type");
+            } else {
+                $("#vehicleImage").removeClass("is-invalid").addClass("is-valid");
+                $("#invalid-vehicleImage").text("");
+                $(`#displayImage`).css('display','block');
+                $(`#displayImage`).html(displayImage(filename, false));
+                $(this).attr("file", filename);
+            }
+        }
+    })
+    // ----- END SELECT IMAGE -----
+
+    // -- START COMPUTE MONTHLY DEPRECIATION AND HOURLY RATE --//
+    $(document).on('keyup','#input_vehicleCost,#input_vehicleSalvageValue,#input_vehicleUsefulLife',function(){
+        var getAssetCost = +parseFloat($("#input_vehicleCost").val().replaceAll(",",""));
+        var getSalvageValue = +parseFloat($("#input_vehicleSalvageValue").val().replaceAll(",",""));
+        var getEstimatedLife = +parseFloat($("#input_vehicleUsefulLife").val().replaceAll(",",""));
+        var getMonthlyDepreciation = 0;
+        var getHourlyRate = 0;
+
+        getMonthlyDepreciation = ((getAssetCost - getSalvageValue)/getEstimatedLife)/12;
+
+        getHourlyRate = getMonthlyDepreciation / 720;
+
+        $("#input_vehicleDepreciation").val(getMonthlyDepreciation);
+        $("#input_vehicleHourRate").val(getHourlyRate);
+
+    })    
+    // -- END COMPUTE MONTHLY DEPRECIATION AND HOURLY RATE --//
+
 
  // ----- MODAL CONTENT -----
  function modalContent(data = false) {
@@ -146,7 +235,14 @@ tableContent();
     vehiclePlateNumber    = "",
     vehicleFuelConsumption          = "",
     vehicleStatus            = "",
-    vehicleGasType             = ""
+    vehicleGasType             = "",
+    acquisitionDate = new Date(),
+    vehicleCost   = "",
+    vehicleSalvageValue   = "",
+    vehicleUsefulLife   = "",
+    vehicleImage   = "",
+    vehicleDepreciation   = "",
+    vehicleHourRate   = ""
     }= data && data[0];     
     // classificationContent(data);
     let button = vehicleID ? `
@@ -246,6 +342,131 @@ tableContent();
                     <div class="invalid-feedback d-block" id="invalid-input_vehicleGasType"></div>
                 </div>
             </div>
+
+            <div class="col-md-6 col-sm-12">
+                <div class="form-group">
+                    <label for="">Acquisition Date <strong class="text-danger">*</strong></label>
+                    <input 
+                        type="button" 
+                        class="form-control daterange validate text-left" 
+                        name="acquisitionDate" 
+                        id="inputacquisitionDate" 
+                        data-allowcharacters="[A-Z][ ][,][a-z][0-9]" 
+                        minlength="5" 
+                        maxlength="20"
+                        value="${moment(acquisitionDate).format("MMMM DD, YYYY")}"
+                        unique
+                        required>
+                    <div class="invalid-feedback d-block" id="invalid-inputacquisitionDate"></div>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-sm-12">
+                <label>Cost <span class="text-danger font-weight-bold">*</span></label>
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text">₱</span>
+                    </div>
+                    <input type="text" 
+                    class="form-control amount text-right"  
+                    min="0.01" max="9999999"
+                    minlength="1" 
+                    maxlength="20" 
+                    name="vehicleCost" 
+                    id="input_vehicleCost" 
+                    value="${vehicleCost}" 
+                    required>
+                    <div class="invalid-feedback d-block" id="invalid-input_vehicleCost"></div>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-sm-12">
+                <label>Salvage Value <span class="text-danger font-weight-bold">*</span></label>
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text">₱</span>
+                    </div>
+                    <input type="text" 
+                    class="form-control amount text-right"  
+                    min="0.01" max="9999999"
+                    minlength="1" 
+                    maxlength="20" 
+                    name="vehicleSalvageValue" 
+                    id="input_vehicleSalvageValue" 
+                    value="${vehicleSalvageValue}" 
+                    required>
+                    <div class="invalid-feedback d-block" id="invalid-input_vehicleSalvageValue"></div>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-sm-12">
+                <div class="form-group">
+                    <label>Estimated Useful Life (No. of Month) <span class="text-danger font-weight-bold">*</span></label>
+                    <input 
+                        type="text" 
+                        class="form-control validate" 
+                        name="vehicleUsefulLife" 
+                        id="input_vehicleUsefulLife" 
+                        data-allowcharacters="[0-9]" 
+                        minlength="1" 
+                        maxlength="20" 
+                        required 
+                        value="${vehicleUsefulLife}"
+                        autocomplete="off">
+                    <div class="invalid-feedback d-block" id="invalid-input_vehicleUsefulLife"></div>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-sm-12">
+                <label>Monthly Depreciation <span class="text-danger font-weight-bold">*</span></label>
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text">₱</span>
+                    </div>
+                    <input type="text" 
+                    class="form-control amount text-right"  
+                    min="0.01" max="9999999"
+                    minlength="1" 
+                    maxlength="20" 
+                    name="vehicleDepreciation" 
+                    id="input_vehicleDepreciation" 
+                    value="${vehicleDepreciation}" 
+                    disabled>
+                    <div class="invalid-feedback d-block" id="invalid-input_vehicleDepreciation"></div>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-sm-12">
+                <label>Hourly Rate <span class="text-danger font-weight-bold">*</span></label>
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text">₱</span>
+                    </div>
+                    <input type="text" 
+                    class="form-control amount text-right"  
+                    min="0.01" max="9999999"
+                    minlength="1" 
+                    maxlength="20" 
+                    name="vehicleHourRate" 
+                    id="input_vehicleHourRate" 
+                    value="${vehicleHourRate}" 
+                    disabled>
+                    <div class="invalid-feedback d-block" id="invalid-input_vehicleHourRate"></div>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-sm-12">
+                <div class="form-group">
+                    <label>Reference Image</label>
+                    <input type="file"
+                        class="form-control validate"
+                        name="vehicleImage|inventory-vehicle"
+                        id="vehicleImage"
+                        file="${vehicleImage}">
+                    <div class="invalid-feedback d-block" id="invalid-vehicleImage"></div>
+                    <div id="displayImage" style="${vehicleImage?'display:block;':'display:none;'} font-size: 12px; border: 1px solid black; border-radius: 5px; background: #d1ffe0; padding: 2px 10px;">${displayImage(vehicleImage)}</div>
+                </div>
+            </div>
             
             <div class="col-md-6 col-sm-12">
                 <div class="form-group">
@@ -322,14 +543,23 @@ $(document).on("click", "#btnSave", function() {
 const validate = validateForm("modal_vehicle");
 if (validate) {
 
-    let data = getFormData("modal_vehicle", true);
-    // data["tableData[vehicleCode]"] = generateCode("ITM", false, "ims_inventory_vehicle_tbl", "vehicleCode");
-    data["tableData[createdBy]"] = sessionID;
-    data["tableData[updatedBy]"] = sessionID;
-    data["tableName"]            = "ims_inventory_vehicle_tbl";
-    data["feedback"]             = $("[name=vehicleName]").val();
+    let data = getFormData("modal_vehicle");
+    // data["tableData[createdBy]"] = sessionID;
+    // data["tableData[updatedBy]"] = sessionID;
+    // data["tableName"]            = "ims_inventory_vehicle_tbl";
+    // data["feedback"]             = $("[name=vehicleName]").val();
 
-    sweetAlertConfirmation("add", "Vehicle", "modal_vehicle", null, data, true, tableContent); 
+    data.append("tableData[vehicleCost]", +$("#input_vehicleCost").val().replaceAll(",",""));
+    data.append("tableData[vehicleSalvageValue]", +$("#input_vehicleSalvageValue").val().replaceAll(",",""));
+    data.append("tableData[vehicleHourRate]", +$("#input_vehicleHourRate").val().replaceAll(",",""));
+    data.append("tableData[vehicleDepreciation]", +$("#input_vehicleDepreciation").val().replaceAll(",",""));
+
+    data.append("tableData[createdBy]", sessionID);
+    data.append("tableData[updatedBy]", sessionID);
+    data.append("tableName", "ims_inventory_vehicle_tbl");
+    data.append("feedback", $("[name=vehicleName]").val()?.trim());
+
+    sweetAlertConfirmation("add", "Vehicle", "modal_vehicle", null, data, false, tableContent); 
     }
 });
 // ----- END SAVE MODAL -----
@@ -363,11 +593,21 @@ $(document).on("click", "#btnUpdate", function() {
     const validate = validateForm("modal_vehicle");
     if (validate) {
 
-        let data = getFormData("modal_vehicle", true);
-        data["tableData[updatedBy]"] = sessionID;
-        data["tableName"]            = "ims_inventory_vehicle_tbl";
-        data["whereFilter"]          = "vehicleID=" + rowID;
-        data["feedback"]             = $("[name=vehicleName]").val();
+        let data = getFormData("modal_vehicle");
+        // data["tableData[updatedBy]"] = sessionID;
+        // data["tableName"]            = "ims_inventory_vehicle_tbl";
+        // data["whereFilter"]          = "vehicleID=" + rowID;
+        // data["feedback"]             = $("[name=vehicleName]").val();
+
+        data.append("tableData[vehicleCost]", +$("#input_vehicleCost").val().replaceAll(",",""));
+        data.append("tableData[vehicleSalvageValue]", +$("#input_vehicleSalvageValue").val().replaceAll(",",""));
+        data.append("tableData[vehicleHourRate]", +$("#input_vehicleHourRate").val().replaceAll(",",""));
+        data.append("tableData[vehicleDepreciation]", +$("#input_vehicleDepreciation").val().replaceAll(",",""));
+
+        data.append("tableData[updatedBy]", sessionID);
+        data.append("tableName", "ims_inventory_vehicle_tbl");
+        data.append("whereFilter", `vehicleID = ${rowID}`);
+        data.append("feedback", $("[name=vehicleName]").val()?.trim());
 
         sweetAlertConfirmation(
             "update",
@@ -375,7 +615,7 @@ $(document).on("click", "#btnUpdate", function() {
             "modal_vehicle",
             "",
             data,
-            true,
+            false,
             tableContent
         );
     

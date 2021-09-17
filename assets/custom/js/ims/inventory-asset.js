@@ -495,7 +495,7 @@ $(document).ready(function(){
                     </div>
 
                     <div class="col-md-6 col-sm-12">
-                        <label>Cost <span class="text-danger font-weight-bold">*</span></label>
+                        <label>3rd Provider Fee <span class="text-danger font-weight-bold">*</span></label>
                         <div class="input-group">
                             <div class="input-group-prepend">
                                 <span class="input-group-text">₱</span>
@@ -693,6 +693,13 @@ $(document).ready(function(){
         data.append("tableData[assetCode]", generateCode);
         data.append("tableData[createdBy]", sessionID);
         data.append("tableData[updatedBy]", sessionID);
+
+        data.append("tableData[assetProviderFee]", +$("#input_assetProviderFee").val().replaceAll(",",""));
+        data.append("tableData[assetCost]", +$("#input_assetCost").val().replaceAll(",",""));
+        data.append("tableData[assetSalvageValue]", +$("#input_assetSalvageValue").val().replaceAll(",",""));
+        data.append("tableData[assetHourRate]", +$("#input_assetHourRate").val().replaceAll(",",""));
+        data.append("tableData[assetDepreciation]", +$("#input_assetDepreciation").val().replaceAll(",",""));
+
         data.append("tableName", "ims_inventory_asset_tbl");
         data.append("feedback", $("[name=assetName]").val()?.trim());
 
@@ -712,7 +719,7 @@ $(document).ready(function(){
     $(document).on("click", ".btnEdit", function() {
         const id       = $(this).attr("id");
         const feedback = $(this).attr("feedback");
-        $("#inventory_asset_modalheader").text("EDIT INVENTORY ITEM");
+        $("#inventory_asset_modalheader").text("EDIT INVENTORY ASSET");
         $("#modal_inventory_asset").modal("show");
 
         // Display preloader while waiting for the completion of getting the data
@@ -751,6 +758,12 @@ $(document).ready(function(){
 			// data["tableName"]            = "ims_inventory_asset_tbl";
 			// data["whereFilter"]          = "assetID=" + rowID;
 			// data["feedback"]             = $("[name=assetName]").val();
+
+            data.append("tableData[assetProviderFee]", +$("#input_assetProviderFee").val().replaceAll(",",""));
+            data.append("tableData[assetCost]", +$("#input_assetCost").val().replaceAll(",",""));
+            data.append("tableData[assetSalvageValue]", +$("#input_assetSalvageValue").val().replaceAll(",",""));
+            data.append("tableData[assetHourRate]", +$("#input_assetHourRate").val().replaceAll(",",""));
+            data.append("tableData[assetDepreciation]", +$("#input_assetDepreciation").val().replaceAll(",",""));
 
             data.append("tableData[updatedBy]", sessionID);
 			data.append("tableName", "ims_inventory_asset_tbl");
