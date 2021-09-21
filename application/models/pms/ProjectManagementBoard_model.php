@@ -75,12 +75,17 @@ class ProjectManagementBoard_model extends CI_Model {
         $milestones = $query ? $query->result_array() : [];
         foreach ($milestones as $milestone) {
             $temp = [
-                "timelineManagementID" => $milestone["timelineManagementID"],
-                "milestoneID"          => $milestone["projectMilestoneID"],
-                "manHours"             => $milestone["manHours"],
-                "assignedDesignation"  => $milestone["assignedDesignation"],
-                "assignedManHours"     => $milestone["assignedManHours"],
-                "assignedEmployee"     => $milestone["assignedEmployee"],
+                "timelineManagementID"  => $milestone["timelineManagementID"],
+                "milestoneID"           => $milestone["projectMilestoneID"],
+                "manHours"              => $milestone["manHours"],
+                "assignedDesignation"   => $milestone["assignedDesignation"],
+                "assignedManHours"      => $milestone["assignedManHours"],
+                "assignedEmployee"      => $milestone["assignedEmployee"],
+                "assignedStartDate"     => $milestone["assignedStartDate"],
+                "assignedEndDate"       => $milestone["assignedEndDate"],
+                "assignedDays"          => $milestone["assignedDays"],
+                "assignedRegularHours"  => $milestone["assignedRegularHours"],
+                "assignedOvertimeHours" => $milestone["assignedOvertimeHours"],
             ];
             array_push($output, $temp);
         }

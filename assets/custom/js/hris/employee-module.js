@@ -374,7 +374,9 @@ $(document).ready(function() {
                 LEFT JOIN hris_designation_tbl USING(designationID)`,
             `employeeID, 
             employeeProfile,
-            employeeFirstname AS fullname,
+            employeeFirstname,
+            employeeMiddlename,
+            employeeLastname,
             departmentName,
             designationName,
             employeeStatus,
@@ -398,15 +400,21 @@ $(document).ready(function() {
 
             let {
                 employeeID,
-                fullname,
+                employeeFirstname,
+                employeeMiddlename,
+                employeeLastname,
                 departmentName     = "-",
                 designationName    = "-",
                 createdAt
             } = employee;
 
             let unique = {
-                id: employeeID,
-                employeeFirstname: fullname
+                multiple: {
+                    id: employeeID,
+                    employeeFirstname,
+                    employeeMiddlename,
+                    employeeLastname,
+                },
             }
             uniqueData.push(unique);
 
@@ -416,6 +424,7 @@ $(document).ready(function() {
                 class="rounded rounded-circle"
                 style="width: 50px;
                     height: 50px">`;
+            let fullname = `${employeeFirstname ? employeeFirstname+" " : ""}${employeeMiddlename ? employeeMiddlename+" " : ""}${employeeLastname ? employeeLastname+" " : ""}`
 
             html += `
             <tr class="btnEdit" id="${encryptString(employeeID)}">
@@ -1387,7 +1396,7 @@ $(document).ready(function() {
                                 value="${employeePassword}">
                             <div class="input-group-prepend bg-transparent">
                                 <span class="input-group-text bg-transparent border-left-0">
-                                    <a href="javascript: void(0)" class="btnTogglePassword" show="false"><i class="text-primary fas fa-eye"></i></a>
+                                    <a href="javascript: void(0)" class="btnTogglePassword" show="false" tabindex="-1"><i class="text-primary fas fa-eye"></i></a>
                                 </span>
                             </div>
                         </div>
@@ -1413,7 +1422,7 @@ $(document).ready(function() {
                                 value="${employeePassword}">
                             <div class="input-group-prepend bg-transparent">
                                 <span class="input-group-text bg-transparent border-left-0">
-                                    <a href="javascript: void(0)" class="btnTogglePassword" show="false"><i class="text-primary fas fa-eye"></i></a>
+                                    <a href="javascript: void(0)" class="btnTogglePassword" show="false" tabindex="-1"><i class="text-primary fas fa-eye"></i></a>
                                 </span>
                             </div>
                         </div>
@@ -2414,25 +2423,25 @@ $(document).ready(function() {
             <div class="modal-body">
                 <ul class="nav nav-tabs nav-tabs-bottom nav-justified border" id="addtabs">
                     <li class="nav-item">
-                        <a class="nav-link border active" href="#information-tab" data-toggle="tab" style="border-bottom: none;">Information</a>
+                        <a class="nav-link modal-tab border active" href="#information-tab" data-toggle="tab" style="border-bottom: none;">Information</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link border" href="#account-tab" data-toggle="tab" style="border-bottom: none;">Account</a>
+                        <a class="nav-link modal-tab border" href="#account-tab" data-toggle="tab" style="border-bottom: none;">Account</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link border" href="#payroll-tab" data-toggle="tab" style="border-bottom: none;">Payroll</a>
+                        <a class="nav-link modal-tab border" href="#payroll-tab" data-toggle="tab" style="border-bottom: none;">Payroll</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link border" href="#leave-balance-tab" data-toggle="tab" style="border-bottom: none;">Leave Balance</a>
+                        <a class="nav-link modal-tab border" href="#leave-balance-tab" data-toggle="tab" style="border-bottom: none;">Leave Balance</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link border" href="#schedule-tab" data-toggle="tab" style="border-bottom: none;">Schedule</a>
+                        <a class="nav-link modal-tab border" href="#schedule-tab" data-toggle="tab" style="border-bottom: none;">Schedule</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link border" href="#accessibility-tab" data-toggle="tab" style="border-bottom: none;">Accessibility</a>
+                        <a class="nav-link modal-tab border" href="#accessibility-tab" data-toggle="tab" style="border-bottom: none;">Accessibility</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link border" href="#documents-tab" data-toggle="tab" style="border-bottom: none;">Documents</a>
+                        <a class="nav-link modal-tab border" href="#documents-tab" data-toggle="tab" style="border-bottom: none;">Documents</a>
                     </li>
                 </ul>
                 <div class="tab-content pt-4" style="min-height: 28vh;">
@@ -2467,31 +2476,61 @@ $(document).ready(function() {
 
             const {
                 employeeID,
-                employeeFirstname = "", 
+                employeeFirstname  = "", 
+                employeeMiddlename = "", 
+                employeeLastname   = "", 
                 departmentID,
                 designationID
             } = data;
 
             html = `
             <div class="modal-body">
-                <div class="row">
-                    <div></div>
-                </div>
                 <div class="form-group">
-                    <label>Full Name <code>*</code></label>
+                    <label>First Name <code>*</code></label>
                     <input type="text"
                         class="form-control validate"
                         name="employeeFirstname"
                         id="employeeFirstname"
                         data-allowcharacters="[a-z][A-Z][.][,][-]['][ ]"
                         minlength="2"
-                        maxlength="150"
+                        maxlength="50"
                         autocomplete="off"
                         required
                         title="Employee"
                         unique="${employeeID}"
                         value="${employeeFirstname || ""}">
                     <div class="invalid-feedback d-block" id="invalid-employeeFirstname"></div>
+                </div>
+                <div class="form-group">
+                    <label>Middle Name</label>
+                    <input type="text"
+                        class="form-control validate"
+                        name="employeeMiddlename"
+                        id="employeeMiddlename"
+                        data-allowcharacters="[a-z][A-Z][.][,][-]['][ ]"
+                        minlength="2"
+                        maxlength="50"
+                        autocomplete="off"
+                        title="Employee"
+                        unique="${employeeID}"
+                        value="${employeeMiddlename || ""}">
+                    <div class="invalid-feedback d-block" id="invalid-employeeMiddlename"></div>
+                </div>
+                <div class="form-group">
+                    <label>Last Name <code>*</code></label>
+                    <input type="text"
+                        class="form-control validate"
+                        name="employeeLastname"
+                        id="employeeLastname"
+                        data-allowcharacters="[a-z][A-Z][.][,][-]['][ ]"
+                        minlength="2"
+                        maxlength="50"
+                        autocomplete="off"
+                        required
+                        title="Employee"
+                        unique="${employeeID}"
+                        value="${employeeLastname || ""}">
+                    <div class="invalid-feedback d-block" id="invalid-employeeLastname"></div>
                 </div>
                 <div class="form-group">
                     <label>Department <code>*</code></label>
@@ -2702,7 +2741,7 @@ $(document).ready(function() {
 		preventRefresh(true);
 
         let modalTitle = "";
-        const tab = $(`.nav-link.active`).attr("redirect");
+        const tab = $(`.nav-link.page-tab.active`).attr("redirect");
         if (tab == "organicTab") {
             modalTitle = "ADD EMPLOYEE (ORGANIC)";
             $("#modal_employee_module .modal-dialog").removeClass("modal-md").addClass("modal-xl");
@@ -2736,7 +2775,7 @@ $(document).ready(function() {
 
 
     // ----- NAV LINK -----
-	$(document).on("click", ".nav-link", function () {
+	$(document).on("click", ".nav-link.page-tab", function () {
 		const tab = $(this).attr("redirect");
 		if (tab == "organicTab") {
 			organicTableContent();
@@ -2794,10 +2833,13 @@ $(document).ready(function() {
             if (validate) {
                 let data = getFormData("modal_employee_module", true);
                 data[`tableData[employeeStatus]`] = 7;
-                data[`tableData[createdAt]`] = sessionID;
-                data[`tableData[updatedAt]`] = sessionID;
+                data[`tableData[createdBy]`] = sessionID;
+                data[`tableData[updatedBy]`] = sessionID;
+                data[`tableData[createdAt]`] = moment().format("YYYY-MM-DD");
+                data[`tableData[updatedAt]`] = moment().format("YYYY-MM-DD");
                 data[`tableName`] = "hris_employee_list_tbl";
-                data[`feedback`]  = $(`[name="employeeFirstname"]`).val()?.trim();
+                let fullname = $(`[name="employeeFirstname"]`).val()?.trim() +" "+ $(`[name="employeeLastname"]`).val()?.trim();
+                data[`feedback`]  = fullname;
 
                 sweetAlertConfirmation("add", "Employee", "modal_employee_module", null, data, true, nonOrganicTableContent);
             } 
@@ -2841,11 +2883,11 @@ $(document).ready(function() {
             if (validate) {
                 let data = getFormData("modal_employee_module", true);
                 data[`tableData[employeeStatus]`] = 7;
-                data[`tableData[createdAt]`] = sessionID;
-                data[`tableData[updatedAt]`] = sessionID;
+                data[`tableData[updatedBy]`] = sessionID;
                 data[`tableName`]   = "hris_employee_list_tbl";
                 data[`whereFilter`] = `employeeID = ${id}`;
-                data[`feedback`]    = $(`[name="employeeFirstname"]`).val()?.trim();
+                let fullname = $(`[name="employeeFirstname"]`).val()?.trim() +" "+ $(`[name="employeeLastname"]`).val()?.trim();
+                data[`feedback`] = fullname;
 
                 sweetAlertConfirmation("update", "Employee", "modal_employee_module", null, data, true, nonOrganicTableContent);
             } 
@@ -2861,7 +2903,7 @@ $(document).ready(function() {
 		preventRefresh(true);
 
         let modalTitle = "";
-        const tab = $(`.nav-link.active`).attr("redirect");
+        const tab = $(`.nav-link.page-tab.active`).attr("redirect");
         if (tab == "organicTab") {
             modalTitle = "ADD EMPLOYEE (ORGANIC)";
             $("#modal_employee_module .modal-dialog").removeClass("modal-md").addClass("modal-xl");

@@ -907,7 +907,7 @@ const checkExists = (elementID, invalidFeedback) => {
 			inputs["multiple"] = multiple;
 			uniqueData.map((data) => {
 				if (keys.length > 0) {
-					if (data.id !== uniqueID && elementID && invalidFeedback) {
+					if (data["multiple"].id !== uniqueID && elementID && invalidFeedback) {
 						let countKeys = keys.length;
 						let countTemp = 0;
 						keys.map((item, index) => {
@@ -1235,13 +1235,15 @@ const validateForm = (formID = null) => {
 
 
 // ----- FORMAT AMOUNT -----
-const formatAmount = (amount = 0, pesoSign = false) => {
+const formatAmount = (amount = 0, pesoSign = false, parentheses = false) => {
 	var currency = new Intl.NumberFormat("tl-PH", {
 		style: "currency",
 		currency: "PHP",
 	}).format(amount);
 	currency = currency.replace("₱", "");
-	return !pesoSign ? currency : `₱ ${currency}`;
+	let result = !pesoSign ? currency : `₱ ${currency}`;
+		result = parentheses ? `(${result})` : result;
+	return result;
 };
 // ----- END FORMAT AMOUNT -----
 

@@ -5,6 +5,30 @@
     h3{
         font-size: 1.2rem;
     }
+
+    .login-input{
+        border-radius: 10px;
+        height: 50px;
+        font-weight: 700;
+        padding: 25px;
+    }
+
+    .inner-addon { position: relative; }
+
+    .login-icon, .view-icon{ color: #949494; }
+
+    .inner-addon .login-icon, .inner-addon .view-icon {
+        position: absolute;
+        padding: 18px;
+    }
+
+    .left-addon .login-icon  { left:  0px;}
+    .right-addon .login-icon { right: 0px;}
+
+    .view-icon { right: 10px;}
+
+    .left-addon input  { padding-left:  40px; }
+    .right-addon input { padding-right: 40px; }
 </style>
 
 <div class="body_area after_bg">

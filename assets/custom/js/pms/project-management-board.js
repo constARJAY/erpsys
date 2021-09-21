@@ -158,6 +158,10 @@ $(document).ready(function() {
 			$("#tableTimeline").DataTable().destroy();
 		}
 
+        if ($.fn.DataTable.isDataTable("#tableManHours")) {
+			$("#tableManHours").DataTable().destroy();
+		}
+
         var table = $("#tableTimeline")
 			.css({ "min-width": "100%" })
 			.removeAttr("width")
@@ -173,6 +177,28 @@ $(document).ready(function() {
 					{ targets: 2, width: 250 },
 					{ targets: 3, width: 150 },
 					{ targets: 4, width: 80  },
+				],
+			});
+
+        var tableManHours = $("#tableManHours")
+			.css({ "min-width": "100%" })
+			.removeAttr("width")
+			.DataTable({
+                proccessing:    false,
+                serverSide:     false,
+                scrollX:        true,
+                sorting:        false,
+                searching:      false,
+                paging:         false,
+                ordering:       false,
+                info:           false,
+                scrollCollapse: true,
+				columnDefs: [
+					{ targets: 0, width: 250 },
+					{ targets: 1, width: 250 },
+					{ targets: 2, width: 100 },
+					{ targets: 3, width: 100 },
+					{ targets: 4, width: 100 },
 				],
 			});
 
@@ -203,6 +229,8 @@ $(document).ready(function() {
                     ],
                 });
         }
+
+        $("#tableManHours").DataTable().columns.adjust().draw();
     }
     // ----- END DATATABLES -----
 
@@ -338,16 +366,6 @@ $(document).ready(function() {
                         taskID="${taskID}"
                         employeeID="${id}"
                         isReadOnly="${isReadOnly}">`;
-                // }
-                // if (index == 6) {
-                //     html += `
-                //     <span class="font-weight-bolder"
-                //         style="position: absolute;
-                //             top: 0;
-                //             margin-left: 7px;
-                //             margin-top: 25px;
-                //             font-size: 1.5rem;">+${members.length - 6}<span>`;
-                // }
             })
         } else {
             html += `<span>No data available yet.</span>`;
@@ -374,37 +392,92 @@ $(document).ready(function() {
                 assignedEmployee = assignedEmployee ? assignedEmployee.split("|") : [];
             let assignedManHours = $(`#manHours${index}`).attr("manHours");
                 assignedManHours = assignedManHours ? assignedManHours.split("|") : [];
+            let assignedStart    = $(`#manHours${index}`).attr("startDate");
+                assignedStart    = assignedStart ? assignedStart.split("|") : [];
+            let assignedEnd      = $(`#manHours${index}`).attr("endDate");
+                assignedEnd      = assignedEnd ? assignedEnd.split("|") : [];
+            let assignedDuration = $(`#manHours${index}`).attr("days");
+                assignedDuration = assignedDuration ? assignedDuration.split("|") : [];
+            let assignedRegularHours  = $(`#manHours${index}`).attr("days");
+                assignedRegularHours  = assignedRegularHours ? assignedRegularHours.split("|") : [];
+            let assignedOvertimeHours = $(`#manHours${index}`).attr("days");
+                assignedOvertimeHours = assignedOvertimeHours ? assignedOvertimeHours.split("|") : [];
             const employeeIndex = assignedEmployee.indexOf(employeeID);
-            const manHours = assignedManHours[employeeIndex];
+            const manHours  = assignedManHours[employeeIndex];
+            const startDate = assignedStart[employeeIndex];
+            const endDate   = assignedEnd[employeeIndex];
+            const duration  = assignedDuration[employeeIndex];
+            const regularHours  = assignedRegularHours[employeeIndex];
+            const overtimeHours = assignedOvertimeHours[employeeIndex];
 
-            assignedEmployee.includes(employeeID) && milestones.push({index, milestoneName, manHours, projectMilestoneID});
+            assignedEmployee.includes(employeeID) && milestones.push({index, milestoneName, manHours, projectMilestoneID, startDate, endDate, duration, regularHours, overtimeHours});
         });
 
         let tbodyHTML = "";
         milestones.map(milestone => {
-            const { index, milestoneName, manHours = 0, projectMilestoneID } = milestone;
+            const { 
+                index, 
+                milestoneName, 
+                manHours = 0, 
+                projectMilestoneID, 
+                startDate = moment(new Date).format("YYYY-MM-DD"), 
+                endDate   = moment(new Date).format("YYYY-MM-DD"),
+                duration  = 1,
+                regularHours  = "0",
+                overtimeHours = "0"
+            } = milestone;
 
             tbodyHTML += `
-            <tr>
+            <tr manhoursid="${index}">
                 <td>${milestoneName}</td>
                 <td>
                     <div class="form-group my-1">
-                        <input class="form-control input-hours text-center"
+                        <input type="button"
+                            class="form-control validate employeeDateRange"
+                            name="employeeDateRange"
+                            startDate="${startDate}"
+                            endDate="${endDate}"
+                            days="${duration}"
+                            required
+                            ${isReadOnly ? "disabled" : ""}>
+                        <div class="invalid-feedback d-block"></div>
+                    </div>
+                </td>
+                <td>
+                    <div class="form-group my-1">
+                        <input class="form-control input-hours text-center employeeManHours"
                             value="${manHours}"
                             name="employeeManHours"
                             min="0.00"
-                            max="9999999999"
+                            max="${(duration * 24)}"
                             minlength="1"
                             maxlength="10"
                             phase="${phase}"
                             taskID="${taskID}"
                             projectMilestoneID="${projectMilestoneID}"
                             employeeID="${employeeID}"
+                            startDate="${startDate}"
+                            endDate="${endDate}"
+                            days="${duration}"
                             index="${index}"
+                            regularHours="${regularHours}"
+                            overtimeHours="${overtimeHours}"
                             ${isReadOnly ? "disabled" : ""}
                             required>
                         <div class="invalid-feedback d-block"></div>
                     </div>
+                </td>
+                <td>
+                    <input type="text"
+                        class="form-control text-center"
+                        name="regularHours"
+                        disabled>
+                </td>
+                <td>
+                    <input type="text"
+                        class="form-control text-center"
+                        name="overtimeHours"
+                        disabled>
                 </td>
             </tr>`;
         })
@@ -416,8 +489,13 @@ $(document).ready(function() {
                     id="btnSaveManHours"
                     employeeID="${employeeID}"
                     phase="${phase}"
-                    taskID="${taskID}">Save</button>
-                <button class="btn btn-cancel px-5 py-2" data-dismiss="modal">Cancel</button>
+                    taskID="${taskID}">
+                    <i class="fas fa-save"></i> Save
+                </button>
+                <button class="btn btn-cancel px-5 py-2" 
+                    data-dismiss="modal">
+                    <i class="fas fa-ban"></i> Cancel
+                </button>
             </div>
         </div>` : "";
 
@@ -433,11 +511,14 @@ $(document).ready(function() {
                 </div>
             </div>
             <div class="col-12">
-                <table class="table table-striped">
+                <table class="table table-striped" id="tableManHours">
                     <thead>
                         <tr>
                             <th>Milestones</th>
-                            <th>Man Hours</th>
+                            <th>Date Range ${!isReadOnly ? "<code>*</code>" : ""}</th>
+                            <th>Man Hours ${!isReadOnly ? "<code>*</code>" : ""}</th>
+                            <th>Regular Hours</th>
+                            <th>Overtime Hours</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -451,6 +532,27 @@ $(document).ready(function() {
         return html;
     }
 
+
+    // ----- KEYUP MANHOURS -----
+    $(document).on("keyup", `[name="employeeManHours"]`, function() {
+        $parent = $(this).closest("tr");
+        const days = $(this).attr("days");
+        const regularHours = days * 8;
+        const manHours = getNonFormattedAmount($(this).val());
+
+        let inRegularHours  = manHours; 
+        let inOvertimeHours = 0;
+        if (manHours > regularHours) {
+            inOvertimeHours = manHours - regularHours;
+            inRegularHours  = manHours - inOvertimeHours;
+        }
+
+        $parent.find(`[name="regularHours"]`).val(formatAmount(inRegularHours));
+        $parent.find(`[name="overtimeHours"]`).val(formatAmount(inOvertimeHours));
+    })
+    // ----- END KEYUP MANHOURS -----
+
+
     $(document).on("click", "#btnSaveManHours", function() {
         const employeeID = $(this).attr("employeeID");
         const phase      = $(this).attr("phase");
@@ -458,35 +560,142 @@ $(document).ready(function() {
 
         let milestones = [];
         $(`[name="employeeManHours"]`).each(function() {
+            $parent = $(this).closest("tr");
             const manHours = getNonFormattedAmount($(this).val()) || 0;
-            const index = $(this).attr("index");
+            const index = $parent.attr("manhoursid");
             const projectMilestoneID = $(this).attr("projectMilestoneID");
+
+            const startDate = $(this).attr("startDate");
+            const endDate   = $(this).attr("endDate");
+            const duration  = $(this).attr("days");
+            const regularHours = (+duration) * 8;
+            let inRegularHours  = manHours; 
+            let inOvertimeHours = 0;
+            if (manHours > regularHours) {
+                inOvertimeHours = manHours - regularHours;
+                inRegularHours  = manHours - inOvertimeHours;
+            }
+
             let temp = {
-                index, projectMilestoneID, manHours
+                index, 
+                projectMilestoneID, 
+                manHours, 
+                startDate, 
+                endDate, 
+                duration, 
+                regularHours: inRegularHours, 
+                overtimeHours: inOvertimeHours
             };
             milestones.push(temp);
         })
         
         milestones.map(milestone => {
-            const { index, projectMilestoneID, manHours } = milestone;
+            const { index, projectMilestoneID, manHours, startDate, endDate, duration, regularHours, overtimeHours } = milestone;
             const selector = `[name="manHours"][phase="${phase}"][taskID="${taskID}"][index="${index}"]`;
             const assignedEmployee = $(selector).attr("employees").split("|");
             const employeeIndex    = assignedEmployee.indexOf(employeeID);
             let manHoursArr = $(selector).attr("manHours")?.split("|");
             manHoursArr[employeeIndex] = manHours;
             let totalManHours = manHoursArr.reduce((a,b) => (+a)+(+b),0);
-
             $(selector).attr("manHours", manHoursArr.join("|"));
+
+            let startDateArr = $(selector).attr("startDate")?.split("|");
+            startDateArr[employeeIndex] = startDate;
+            $(selector).attr("startDate", startDateArr.join("|"));
+
+            let endDateArr = $(selector).attr("endDate")?.split("|");
+            endDateArr[employeeIndex] = endDate;
+            $(selector).attr("endDate", endDateArr.join("|"));
+
+            let durationArr = $(selector).attr("days")?.split("|");
+            durationArr[employeeIndex] = duration;
+            $(selector).attr("days", durationArr.join("|"));
+
+            let regularArr = $(selector).attr("regularHours")?.split("|");
+            regularArr[employeeIndex] = regularHours;
+            $(selector).attr("regularHours", regularArr.join("|"));
+
+            let overtimeArr = $(selector).attr("overtimeHours")?.split("|");
+            overtimeArr[employeeIndex] = overtimeHours;
+            $(selector).attr("overtimeHours", overtimeArr.join("|"));
+            
             $(selector).val(totalManHours.toString()).trigger("keyup");
         })
 
         $(`#modal_project_management_board`).modal("hide");
     })
 
+    function dateRange(input) {
+        const elementID = input ? `#${input.id}` : "[name=employeeDateRange]";
+        
+        const employeeDateRangeFrom = $(elementID).attr("startDate") || moment(new Date).format("YYYY-MM-DD");
+        const employeeDateRangeTo   = $(elementID).attr("endDate") || moment(new Date).format("YYYY-MM-DD");
+        let duration = moment.duration(moment(employeeDateRangeTo, "YYYY-MM-DD").diff(moment(employeeDateRangeFrom, "YYYY-MM-DD"))).asDays() + 1;
+
+        const options = {
+            autoUpdateInput: false,
+            showDropdowns: true,
+            autoApply: true,
+            locale: {
+                format: "MMMM DD, YYYY",
+            },
+            startDate: moment(employeeDateRangeFrom),
+            endDate:   moment(employeeDateRangeTo),
+        }
+        const displayDate = `${moment(employeeDateRangeFrom).format("MMMM DD, YYYY")} - ${moment(employeeDateRangeTo).format("MMMM DD, YYYY")}`;
+        $(elementID).attr("startDate", employeeDateRangeFrom);
+        $(elementID).attr("endDate", employeeDateRangeTo);
+        $(elementID).attr("max", (duration * 24));
+        $(elementID).attr("days", duration);
+        $(elementID).val(displayDate);
+
+        $parent = $(elementID).closest("tr");
+        const index = $parent.attr("index");
+        $(`#employeeManHours${index}`).attr("startDate", employeeDateRangeFrom);
+        $(`#employeeManHours${index}`).attr("endDate", employeeDateRangeTo);
+        $(`#employeeManHours${index}`).attr("max", (duration * 24));
+        $(`#employeeManHours${index}`).attr("days", duration);
+        $(`#employeeManHours${index}`).trigger("keyup");
+        
+        $(elementID).daterangepicker(options, function (start, end) {
+            if (start && end) {
+                const validated = $(elementID).hasClass("validated");
+                let invalidFeedback =
+                    $(elementID).parent().find(".invalid-feedback").length > 0
+                        ? $(elementID).parent().find(".invalid-feedback")
+                        : $(elementID).parent().parent().find(".invalid-feedback").length > 0
+                        ? $(elementID).parent().parent().find(".invalid-feedback")
+                        : $(elementID).parent().parent().parent().find(".invalid-feedback");
+                validated
+                    ? $(elementID).removeClass("is-invalid").addClass("is-valid")
+                    : $(elementID).removeClass("is-invalid").removeClass("is-valid");
+                invalidFeedback.text("");
+                const displayDate = `${moment(start).format("MMMM DD, YYYY")} - ${moment(end).format("MMMM DD, YYYY")}`;
+
+                let formatStart = moment(start).format("YYYY-MM-DD");
+                let formatEnd   = moment(end).format("YYYY-MM-DD");
+                let duration = moment.duration(moment(formatEnd, "YYYY-MM-DD").diff(moment(formatStart, "YYYY-MM-DD"))).asDays() + 1;
+
+                console.log(`#employeeManHours${index}`);
+                $(elementID).attr("startDate", formatStart);
+                $(elementID).attr("endDate", formatEnd);
+                $(elementID).attr("max", (duration * 24));
+                $(elementID).attr("days", duration);
+                $(elementID).val(displayDate);
+
+                $(`#employeeManHours${index}`).attr("startDate", formatStart);
+                $(`#employeeManHours${index}`).attr("endDate", formatEnd);
+                $(`#employeeManHours${index}`).attr("max", (duration * 24));
+                $(`#employeeManHours${index}`).attr("days", duration);
+                $(`#employeeManHours${index}`).trigger("keyup");
+            }
+        });
+    }
+
     $(document).on("click", `.employeeProfile`, function() {
         const isReadOnly = $(this).attr("isReadOnly") == "true";
-        const phase  = $(this).attr("phase");
-        const taskID = $(this).attr("taskID");
+        const phase   = $(this).attr("phase");
+        const taskID  = $(this).attr("taskID");
         const employeeID = $(this).attr("employeeID");
         const fullname   = $(this).attr("title");
         const image      = $(this).attr("src");
@@ -496,7 +705,25 @@ $(document).ready(function() {
         $(`#modal_project_management_board_content`).html(content);
         $(`#modal_project_management_board`).modal("show");
         initHours();
+        initDatatables();
+        
+        updateTables();
+        $(`.employeeDateRange`).each(function(i) {
+            $parent = $(this).closest("tr");
+            $(this).attr("id", `employeeDateRange${i}`);
+            $parent.attr("index", i);
+
+            $parent.find(`[name="employeeManHours"]`, this).attr("id", `employeeManHours${i}`);
+            $parent.find(`[name="employeeManHours"]`, this).attr("index", `${i}`);
+
+            dateRange(this);
+            !isReadOnly && $parent.find(`[name="employeeManHours"]`, this).trigger("keyup");
+        })
     })
+
+    $(document).on('shown.bs.modal', '#modal_project_management_board', function () {
+        $("#tableManHours").DataTable().columns.adjust().draw();
+    });
     // ----- END CLICK EMPLOYEE PROFILE -----
 
 
@@ -630,22 +857,32 @@ $(document).ready(function() {
 
             const taskData = (milestoneID = null) => {
                 let data = milestoneTask.filter(mt => mt.milestoneID == milestoneID);
-                let manHours            = "0", 
-                    assignedEmployee    = "", 
-                    assignedDesignation = "", 
-                    assignedManHours    = "";
+                let manHours              = "0", 
+                    assignedEmployee      = "", 
+                    assignedDesignation   = "", 
+                    assignedManHours      = "",
+                    assignedStartDate     = "", 
+                    assignedEndDate       = "", 
+                    assignedDays          = "1";
+                    assignedRegularHours  = "0";
+                    assignedOvertimeHours = "0";
                 if (data && data.length > 0) {
-                    manHours            = data[0]?.manHours;
-                    assignedEmployee    = data[0]?.assignedEmployee;
-                    assignedDesignation = data[0]?.assignedDesignation;
-                    assignedManHours    = data[0]?.assignedManHours;
+                    manHours              = data[0]?.manHours;
+                    assignedEmployee      = data[0]?.assignedEmployee;
+                    assignedDesignation   = data[0]?.assignedDesignation;
+                    assignedManHours      = data[0]?.assignedManHours;
+                    assignedStartDate     = data[0]?.assignedStartDate;
+                    assignedEndDate       = data[0]?.assignedEndDate;
+                    assignedDays          = data[0]?.assignedDays;
+                    assignedRegularHours  = data[0]?.assignedRegularHours;
+                    assignedOvertimeHours = data[0]?.assignedOvertimeHours;
                 }
-                return {manHours, assignedEmployee, assignedDesignation, assignedManHours};
+                return {manHours, assignedEmployee, assignedDesignation, assignedManHours, assignedStartDate, assignedEndDate, assignedDays, assignedRegularHours, assignedOvertimeHours};
             };
 
             milestones.map(milestone => {
                 const { milestoneID, milestoneName } = milestone;
-                const { manHours, assignedEmployee, assignedManHours } = taskData(milestoneID);
+                const { manHours, assignedEmployee, assignedManHours, assignedStartDate, assignedEndDate, assignedDays = "1", assignedRegularHours = "0", assignedOvertimeHours = "0" } = taskData(milestoneID);
 
                 taskNameContent += `
                 <div class="form-group my-1">
@@ -671,6 +908,11 @@ $(document).ready(function() {
                         readonly
                         employees="${assignedEmployee}"
                         manHours="${assignedManHours}"
+                        startDate="${assignedStartDate || moment(new Date).format("YYYY-MM-DD")}"
+                        endDate="${assignedEndDate || moment(new Date).format("YYYY-MM-DD")}"
+                        days="${assignedDays}"
+                        regularHours="${assignedRegularHours}"
+                        overtimeHours="${assignedOvertimeHours}"
                         required>
                     <div class="invalid-feedback d-block"></div>
                 </div>`;
@@ -1211,11 +1453,18 @@ $(document).ready(function() {
                 const designationID = $(`[name="assignEmployee"][index="${index}"] option:selected`).eq(i).attr("designation") || "";
                 assignDesignation.push(designationID);
             })
-            assignEmployee    = assignEmployee.join("|");
-            assignDesignation = assignDesignation.join("|");
-            let assignManHours = $(`#manHours${index}`).attr("manHours") || "";
+            assignEmployee          = assignEmployee.join("|");
+            assignDesignation       = assignDesignation.join("|");
+            let assignManHours      = $(`#manHours${index}`).attr("manHours") || "";
+            let assignStartDate     = $(`#manHours${index}`).attr("startDate") || "";
+            let assignEndDate       = $(`#manHours${index}`).attr("endDate") || "";
+            let assignDays          = $(`#manHours${index}`).attr("days") || "";
+            let assingRegularHours  = $(`#manHours${index}`).attr("regularHours") || "";
+            let assingOvertimeHours = $(`#manHours${index}`).attr("overtimeHours") || "";
+
+
             const temp = {
-                taskID, projectMilestoneID, manHours, assignEmployee, assignDesignation, assignManHours
+                taskID, projectMilestoneID, manHours, assignEmployee, assignDesignation, assignManHours, assignStartDate, assignEndDate, assignDays, assingRegularHours, assingOvertimeHours
             };
             data.tasks.push(temp);
         })

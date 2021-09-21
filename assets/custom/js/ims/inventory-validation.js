@@ -60,7 +60,7 @@ $(document).ready(function() {
 					}
 				} else if (employeeID == sessionID) {
 					if (inventoryValidationStatus == 0) {
-						isReadOnly = false;
+						isReadOnly = false; 
 					} else {
 						isReadOnly = true;
 					}
@@ -135,24 +135,6 @@ $(document).ready(function() {
 		return +amount.replaceAll(",", "").replaceAll("₱", "")?.trim();
 	}
 
-	const inventoryItemList = getTableData(
-		`ims_inventory_item_tbl 
-			LEFT JOIN ims_inventory_category_tbl USING(categoryID)
-			LEFT JOIN ims_inventory_classification_tbl ON (ims_inventory_item_tbl.classificationID = ims_inventory_classification_tbl.classificationID)`, 
-		`itemID, itemCode, itemName, itemDescription, brandName, categoryName, classificationName, unitOfMeasurementID, ims_inventory_item_tbl.createdAt`,
-		"itemStatus = 1");
-
-	const inventoryPriceList = getTableData(
-		`ims_inventory_price_list_tbl`,
-		``,
-		`preferred = 1`
-	);
-
-	const purchaseRequestList = getTableData(
-		`ims_purchase_request_tbl`,
-		"",
-		`purchaseRequestStatus = 2`
-	);
 	// ----- END GLOBAL VARIABLE - REUSABLE ----- 
 
 
@@ -183,8 +165,7 @@ $(document).ready(function() {
 				{ targets: 4,  width: 260 },
 				{ targets: 5,  width: 150 },
 				{ targets: 6,  width: 250 },
-				{ targets: 7,  width: 80  },
-				{ targets: 8,  width: 250 },
+
 			],
 		};
 
@@ -206,9 +187,7 @@ $(document).ready(function() {
 				{ targets: 4,  width: 50  },
 				{ targets: 5,  width: 100 },
 				{ targets: 6,  width: 150 },
-				{ targets: 7,  width: 150 },
-				{ targets: 8,  width: 180 },
-				{ targets: 9,  width: 200 },
+
 			],
 		};
 
@@ -230,8 +209,7 @@ $(document).ready(function() {
 				{ targets: 4,  width: 100 },
 				{ targets: 5,  width: 150 },
 				{ targets: 6,  width: 150 },
-				{ targets: 7,  width: 180 },
-				{ targets: 8,  width: 200 },
+
 			],
 		};
 
@@ -336,9 +314,8 @@ $(document).ready(function() {
 		$("#tableForApprovalParent").html(preloader);
 		let inventoryValidationData = getTableData(
 			`ims_inventory_validation_tbl AS imrt 
-				LEFT JOIN hris_employee_list_tbl AS helt USING(employeeID)
-				LEFT JOIN ims_purchase_request_tbl AS iprt USING(purchaseRequestID)`,
-			"imrt.*, CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname, imrt.createdAt AS dateCreated, iprt.createdAt AS prCreatedAt",
+				LEFT JOIN hris_employee_list_tbl AS helt USING(employeeID)`,
+			"imrt.*, CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname, imrt.createdAt AS dateCreated,  imrt.materialRequestCode",
 			`imrt.employeeID != ${sessionID} AND inventoryValidationStatus != 0 AND inventoryValidationStatus != 4`,
 			`FIELD(inventoryValidationStatus, 0, 1, 3, 2, 4, 5), COALESCE(imrt.submittedAt, imrt.createdAt)`
 		);
@@ -367,37 +344,37 @@ $(document).ready(function() {
 				timelineBuilderID,
 				projectCode,
 				projectName,
-				purchaseRequestID,
+				materialRequestCode,
 				approversID,
 				approversDate,
 				inventoryValidationStatus,
 				inventoryValidationRemarks,
 				inventoryValidationReason,
 				submittedAt,
-				createdAt,
-				prCreatedAt
+				createdAt
 			} = item;
 
 			let remarks       = inventoryValidationRemarks ? inventoryValidationRemarks : "-";
-			let dateCreated   = moment(createdAt).format("MMMM DD, YYYY hh:mm:ss A");
+			let dateCreated   = moment(createdAt).format("MMMM DD, YYYY hh:mm:ss A") ;
 			let dateSubmitted = submittedAt ? moment(submittedAt).format("MMMM DD, YYYY hh:mm:ss A") : "-";
 			let dateApproved  = inventoryValidationStatus == 2 || inventoryValidationStatus == 5 ? approversDate.split("|") : "-";
 			if (dateApproved !== "-") {
-				dateApproved = moment(dateApproved[dateApproved.length - 1]).format("MMMM DD, YYYY hh:mm:ss A");
+				dateApproved = dateApproved[dateApproved.length - 1] ? moment(dateApproved[dateApproved.length - 1]).format("MMMM DD, YYYY hh:mm:ss A") : "-";
 			}
+
 
 			let btnClass = inventoryValidationStatus != 0 ? "btnView" : "btnEdit";
 			if (isImCurrentApprover(approversID, approversDate, inventoryValidationStatus) || isAlreadyApproved(approversID, approversDate)) {
 				html += `
 				<tr class="${btnClass}" id="${encryptString(inventoryValidationID)}">
-					<td>${getFormCode("IVR", createdAt, inventoryValidationID )}</td>
+					<td>${getFormCode("IVR", createdAt, inventoryValidationID)}</td>
 					<td>${fullname}</td>
-					<td>${purchaseRequestID && purchaseRequestID != 0 ? getFormCode("PR", prCreatedAt, purchaseRequestID) : '-'}</td>
+					<td>${materialRequestCode ? materialRequestCode : '-'}</td>
 					<td>
 						<div>
 							${projectCode || '-'}
 						</div>
-						<small style="color:#848482;">${inventoryValidationReason || '-'}</small>
+						<small style="color:#848482;">${projectName || '-'}</small>
 					</td>
 					<td>${projectName || '-'}</td>
 					<td>
@@ -430,9 +407,8 @@ $(document).ready(function() {
 		$("#tableMyFormsParent").html(preloader);
 		let inventoryValidationData = getTableData(
 			`ims_inventory_validation_tbl AS imrt 
-				LEFT JOIN hris_employee_list_tbl AS helt USING(employeeID) 
-				LEFT JOIN ims_purchase_request_tbl AS iprt USING(purchaseRequestID)`,
-			"imrt.*, CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname, imrt.createdAt AS dateCreated, iprt.createdAt AS prCreatedAt",
+				LEFT JOIN hris_employee_list_tbl AS helt USING(employeeID) `,
+			"imrt.*, CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname, imrt.createdAt AS dateCreated, imrt.materialRequestCode",
 			`imrt.employeeID = ${sessionID}`,
 			`FIELD(inventoryValidationStatus, 0, 1, 3, 2, 4, 5), COALESCE(imrt.submittedAt, imrt.createdAt)`
 		);
@@ -459,38 +435,39 @@ $(document).ready(function() {
 				fullname,
 				inventoryValidationID,
                 timelineBuilderID,
+				materialRequestCode,
                 projectCode,
                 projectName,
-                purchaseRequestID,
 				approversID,
 				approversDate,
 				inventoryValidationStatus,
 				inventoryValidationRemarks,
 				inventoryValidationReason,
 				submittedAt,
-				createdAt,
-				prCreatedAt
+				createdAt
 			} = item;
+
+			console.log(createdAt)
 
 			let remarks       = inventoryValidationRemarks ? inventoryValidationRemarks : "-";
 			let dateCreated   = moment(createdAt).format("MMMM DD, YYYY hh:mm:ss A");
 			let dateSubmitted = submittedAt ? moment(submittedAt).format("MMMM DD, YYYY hh:mm:ss A") : "-";
 			let dateApproved  = inventoryValidationStatus == 2 || inventoryValidationStatus == 5 ? approversDate.split("|") : "-";
 			if (dateApproved !== "-") {
-				dateApproved = moment(dateApproved[dateApproved.length - 1]).format("MMMM DD, YYYY hh:mm:ss A");
+				dateApproved = dateApproved[dateApproved.length - 1] ? moment(dateApproved[dateApproved.length - 1]).format("MMMM DD, YYYY hh:mm:ss A") : "-";
 			}
 
 			let btnClass = inventoryValidationStatus != 0 ? "btnView" : "btnEdit";
 			html += `
-            <tr class="${btnClass}" id="${encryptString(inventoryValidationID )}">
-                <td>${getFormCode("IVR", createdAt, inventoryValidationID )}</td>
+            <tr class="${btnClass}" id="${encryptString(inventoryValidationID)}">
+                <td>${getFormCode("IVR", createdAt, inventoryValidationID)}</td>
                 <td>${fullname}</td>
-				<td>${purchaseRequestID && purchaseRequestID != 0 ? getFormCode("PR", prCreatedAt, purchaseRequestID) : '-'}</td>
+				<td>${ materialRequestCode ? materialRequestCode : '-'}</td>
 				<td>
 					<div>
 						${projectCode || '-'}
 					</div>
-					<small style="color:#848482;">${inventoryValidationReason || '-'}</small>
+					<small style="color:#848482;">${projectName || '-'}</small>
 				</td>
 				<td>${projectName || '-'}</td>
                 <td>
@@ -582,18 +559,20 @@ $(document).ready(function() {
 							Cancel
 						</button>`;
 					}
-				} else if (inventoryValidationStatus == 2) {
-					// DROP
-					button = `
-					<button type="button" 
-						class="btn btn-cancel px-5 p-2"
-						id="btnDrop" 
-						inventoryValidationID="${encryptString(inventoryValidationID)}"
-						code="${getFormCode("IVR", createdAt, inventoryValidationID)}"
-						status="${inventoryValidationStatus}"><i class="fas fa-ban"></i> 
-						Drop
-					</button>`;
-				} else if (inventoryValidationStatus == 3) {
+				}
+				//  else if (inventoryValidationStatus == 2) {
+				// 	// DROP
+				// 	button = `
+				// 	<button type="button" 
+				// 		class="btn btn-cancel px-5 p-2"
+				// 		id="btnDrop" 
+				// 		inventoryValidationID="${encryptString(inventoryValidationID)}"
+				// 		code="${getFormCode("IVR", createdAt, inventoryValidationID)}"
+				// 		status="${inventoryValidationStatus}"><i class="fas fa-ban"></i> 
+				// 		Drop
+				// 	</button>`;
+				// } 
+				else if (inventoryValidationStatus == 3) {
 					// DENIED - FOR REVISE
 					if (!isDocumentRevised(inventoryValidationID)) {
 						button = `
@@ -671,370 +650,116 @@ $(document).ready(function() {
 	// ----- END FORM BUTTONS -----
 
 
-	// ----- GET BILL MATERIAL LIST -----
-	function getBillMaterialList(id = null, status = 0, display = true) {
-		const createdIVRList = getTableData("ims_inventory_validation_tbl","purchaseRequestID").map(ivr => ivr.purchaseRequestID);
-		let html = ``;
-		if (!status || status == 0) {
-			html += purchaseRequestList.filter(pr => pr.inventoryValidationID == id || !createdIVRList.includes(pr.purchaseRequestID) ).map(pr => {
-				return `
-				<option 
-					value     = "${pr.purchaseRequestID}" 
-					timelineBuilderID = "${pr.timelineBuilderID}"
-					projectCode     = "${pr.projectCode}"
-					projectName     = "${pr.projectName}"
-					projectCategory = "${pr.projectCategory}"
-					clientName      = "${pr.clientName}"
-					clientAddress   = "${pr.clientAddress}"
-				${pr.purchaseRequestID == id && "selected"}>
-				${getFormCode("PR", pr.createdAt, pr.purchaseRequestID)}
-				</option>`;
-			});
-		} else {
-			html += purchaseRequestList.map(pr => {
-				return `
-				<option 
-					value     = "${pr.purchaseRequestID}" 
-					timelineBuilderID = "${pr.timelineBuilderID}"
-					projectCode     = "${pr.projectCode}"
-					projectName     = "${pr.projectName}"
-					projectCategory = "${pr.projectCategory}"
-					clientName      = "${pr.clientName}"
-					clientAddress   = "${pr.clientAddress}"
-					${pr.purchaseRequestID == id && "selected"}>
-					${getFormCode("PR", pr.createdAt, pr.purchaseRequestID)}
-				</option>`;
-			});
-		}
-        return display ? html : purchaseRequestList;
-	}
-	// ----- END GET BILL MATERIAL LIST -----
-
-
-	// ----- UPDATE TABLE ITEMS -----
-	function updateTableItems() {
-		$(".itemTableBody tr").each(function(i) {
-			// ROW ID
-			$(this).attr("id", `tableRow${i}`);
-			$(this).attr("index", `${i}`);
-
-			// CHECKBOX
-			$("td .action .checkboxrow", this).attr("id", `checkboxrow${i}`);
-
-			// ITEMCODE
-			$("td .itemcode", this).attr("id", `itemcode${i}`);
-
-			// ITEMNAME
-			$(this).find("select").each(function(x) {
-				if ($(this).hasClass("select2-hidden-accessible")) {
-					$(this).select2("destroy");
-				}
-			})
-
-			$(this).find("select").each(function(j) {
-				const itemID = $(this).val();
-				$(this).attr("index", `${i}`);
-				$(this).attr("id", `requestitem${i}`);
-				$(this).attr("data-select2-id", `requestitem${i}`);
-				if (!$(this).hasClass("select2-hidden-accessible")) {
-					$(this).select2({ theme: "bootstrap" });
-				}
-			});
-
-			// QUANTITY
-			$("td .quantity [name=quantity]", this).attr("id", `quantity${i}`);
-			$("td .quantity .invalid-feedback", this).attr("id", `invalid-quantity${i}`);
-			
-			// CLASSIFICATION
-			$("td .classification", this).attr("id", `classification${i}`);
-
-			// UOM
-			$("td .uom", this).attr("id", `uom${i}`);
-
-			// UNIT COST
-			$("td .unitcost", this).attr("id", `unitcost${i}`);
-
-			// TOTAL COST
-			$("td .totalcost", this).attr("id", `totalcost${i}`);
-
-			// FILE
-			$("td .file [name=files]", this).attr("id", `filesCompany${i}`);
-
-			// REMARKS
-			$("td .remarks [name=remarks]", this).attr("id", `remarks${i}`);
-			$("td .remarks .invalid-feedback", this).attr("id", `invalid-remarks${i}`);
-		})
-	}
-	// ----- END UPDATE TABLE ITEMS -----
-
-
-	// ----- UPDATE INVENTORYT NAME -----
-	function updateInventoryItemOptions() {
-		let itemIDArr = []; // 0 IS THE DEFAULT VALUE
-		let elementID = [];
-
-		$("[name=itemID]").each(function() {
-			const itemID = $(this).val();
-			$parent = $(this).closest("tr");
-			itemIDArr.push(itemID);
-			elementID.push(`#${this.id}`);
-			if (itemID && itemID != null) {
-				$(this).trigger("change");
-				// $parent.find(`[name="quantity"]`).trigger("keyup");
-			}
-		}) 
-
-		elementID.map((element, index) => {
-			let html = `<option selected disabled>Select Item Name</option>`;
-			let itemList = [...inventoryItemList];
-
-			html += itemList.filter(item => !itemIDArr.includes(item.itemID) || item.itemID == itemIDArr[index]).map(item => {
-				return `
-				<option 
-					value              = "${item.itemID}" 
-					itemCode           = "${item.itemCode}"
-					itemDescription    = "${item.itemDescription}"
-					categoryName       = "${item.categoryName}"
-					brandName          = "${item.brandName}"
-					classificationName = "${item.classificationName}"
-					uom                = "${item.unitOfMeasurementID}"
-					createdAt          = "${item.createdAt}"
-					${item.itemID == itemIDArr[index] && "selected"}>
-					${item.itemName}
-				</option>`;
-			})
-			$(element).html(html);
-		});
-	}
-	// ----- END UPDATE INVENTORYT NAME -----
-
-
-	// ----- GET INVENTORY PREFERRED PRICE -----
-	function getInventoryPreferredPrice(id = null, input, executeOnce = false) {
-		const errorMsg = `Please set item code <b>${getFormCode("ITM", dateToday(), id)}</b> into item price list module to proceed in this proccess`;
-		if (id && id != "0") {
-			const price = inventoryPriceList.filter(item => item.itemID == id).map(item => {
-				input && $(input).attr("inventoryVendorID", item.inventoryVendorID);
-				return item.vendorCurrentPrice;
-			});
-			if (price.length > 0) {
-				return price?.[0];
-			}
-			input && $(input).removeAttr("inventoryVendorID");
-			!executeOnce && showNotification("warning2", errorMsg);
-			return false;
-		}
-		input && $(input).removeAttr("inventoryVendorID");
-		id && id != "0" && !executeOnce && showNotification("warning2", errorMsg);
-		return id == "0";
-	}
-	// ----- END GET INVENTORY PREFERRED PRICE -----
-
-
-    // ----- GET INVENTORY ITEM -----
-    function getInventoryItem(id = null, display = true) {
-        let html  = `<option selected disabled>Select Item Name</option>`;
-
-		let itemIDArr = []; // 0 IS THE DEFAULT VALUE
-		$(`[name=itemID]`).each(function(i, obj) {
-			itemIDArr.push($(this).val());
-		}) 
-
-		let itemList = [...inventoryItemList];
-		html += itemList.filter(item => !itemIDArr.includes(item.itemID) || item.itemID == id).map(item => {
-            return `
-            <option 
-                value              = "${item.itemID}" 
-                itemCode           = "${item.itemCode}"
-                itemDescription    = "${item.itemDescription}"
-                categoryName       = "${item.categoryName}"
-				brandName          = "${item.brandName}"
-				classificationName = "${item.classificationName}"
-                uom                = "${item.unitOfMeasurementID}"
-				createdAt          = "${item.createdAt}"
-                ${item.itemID == id && "selected"}>
-                ${item.itemName}
-            </option>`;
-        })
-		
-        return display ? html : inventoryItemList;
-    }
-    // ----- END GET INVENTORY ITEM -----
-
-
-	// ----- UPDATE DELETE BUTTON -----
-	function updateDeleteButton() {
-		let flag = 0;
-		$(".checkboxrow").each(function() {
-			this.checked && flag++;
-		})
-		$(".btnDeleteRow").attr("disabled", flag == 0);
-	}
-	// ----- END UPDATE DELETE BUTTON -----
-
-
-	// ----- DELETE TABLE ROW -----
-	function deleteTableRow() {
-		if ($(`.checkboxrow:checked`).length != $(`.checkboxrow`).length) {
-			Swal.fire({
-				title:              "DELETE ROWS",
-				text:               "Are you sure to delete these rows?",
-				imageUrl:           `${base_url}assets/modal/delete.svg`,
-				imageWidth:         200,
-				imageHeight:        200,
-				imageAlt:           "Custom image",
-				showCancelButton:   true,
-				confirmButtonColor: "#dc3545",
-				cancelButtonColor:  "#1a1a1a",
-				cancelButtonText:   "No",
-				confirmButtonText:  "Yes"
-			}).then((result) => {
-				if (result.isConfirmed) {
-					$(`.checkboxrow:checked`).each(function(i, obj) {
-						var tableRow = $(this).closest('tr');
-						tableRow.fadeOut(500, function (){
-							$(this).closest("tr").remove();
-							updateTableItems();
-							$(`[name="itemID"]`).each(function(i, obj) {
-								let itemID = $(this).val();
-								$(this).html(getInventoryItem(itemID));
-							}) 
-							updateDeleteButton();
-							updateTotalAmount();
-							updateInventoryItemOptions();
-						});
-					})
-				}
-			});
-			
-		} else {
-			showNotification("danger", "You must have atleast one or more items.");
-		}
-	}
-	// ----- END DELETE TABLE ROW -----
-
-
 	// ----- GET ITEM ROW -----
-    function getItemRow(item = {}, readOnly = false) {
-		let disabled = readOnly ? "disabled" : "";
+    function getItemRow(inventoryValidationID = false ,item = {}, readOnly = false) {
 		let html = "";
-
+	
 		const {
-			requestItemID      = "",
-			itemID             = 0,
-			itemCode           = "-",
-			itemName           = "-",
-			itemDescription    = "-",
-			itemClassification = "-",
-			itemUom            = "-",
-			brandName          = "-",
-			quantity           = 0,
-			unitCost           = 0,
-			totalCost          = 0,
-			files              = "",
-			remarks            = "",
+			requestItemID       = "",
+			// materialRequestID 	="",
+			itemID             	= 0,
+			itemCode           	= "-",
+			itemName           	= "-",
+			itemBrandName    	= "-",
+			itemClassification 	= "-",
+			itemCategory 		= "-",
+			itemUom            	= "-",
+			requestQuantity     = 0,
+			availableStocks 	= 0,
+			forPurchase          = 0,
 		} = item;
-
-		let itemFile = files ? `
-		<div class="d-flex justify-content-between align-items-center py-2">
-			<a class="filename"
-				title="${files}"
-				style="display: block;
-					width: 150px;
-					overflow: hidden;
-					white-space: nowrap;
-					text-overflow: ellipsis;"
-				href="${base_url+"assets/upload-files/request-items/"+files}" 
-				target="_blank">
-				${files || ""}
-			</a>
-			<span class="btnRemoveFile" style="cursor: pointer"><i class="fas fa-close"></i></span>
-		</div>` : "";
 
 		if (readOnly) {
 
-		} else {
 			html += `
-			<tr class="itemTableRow"
-				requestItemID="${requestItemID}">
-				<td class="text-center">
-					<div class="action">
-						<input type="checkbox" class="checkboxrow" ${disabled}>
-					</div>
-				</td>
+			<tr class="table-row-request-item itemTableRow"
+				requestItemID="${requestItemID}" inventoryValidationID="${inventoryValidationID}">
 				<td>
 					<div class="itemcode">${itemCode || "-"}</div>
 				</td>
+
 				<td>
 					<div class="itemname">
-						<div class="form-group mb-0">
-							<select
-								class="form-control validate select2"
-								name="itemID"
-								style="width: 200px !important"
-								required
-								${disabled}>
-								${getInventoryItem(itemID)}
-							</select>
-							<div class="invalid-feedback d-block" id="invalid-itemID"></div>
-						</div>
+						${itemName || '-'}
 					</div>
+					<small style="color:#848482;" class="itembrandname">${itemBrandName || '-'}</small>
 				</td>
+
 				<td>
-					<div class="classification">${itemClassification || "-"}</div>
-				</td>
-				<td class="text-center">
-					<div class="quantity">
-						<input 
-							type="text" 
-							class="form-control input-quantity text-center"
-							min="0.01" 
-							data-allowcharacters="[0-9]" 
-							max="999999999"
-							name="quantity" 
-							value="${quantity}" 
-							minlength="1" 
-							maxlength="20" 
-							autocomplete="off"
-							required
-							${disabled}>
-						<div class="invalid-feedback d-block" id="invalid-quantity"></div>
+					<div class="itemclassification">
+						${itemClassification || '-'}
 					</div>
+					<small style="color:#848482;" class="itemcategory">${itemCategory || '-'}</small>
 				</td>
+			
 				<td>
-					<div class="uom">${itemUom}</div>
+					<div class="itemuom">${itemUom || "-"}</div>
 				</td>
+				
 				<td class="text-right">
-					<div class="unitcost">
-						${formatAmount(unitCost, true)}
+					<div class="requestquantity">
+						${formatAmount(requestQuantity)}
 					</div>
 				</td>
+
 				<td class="text-right">
-					<div class="totalcost">${formatAmount(totalCost, true)}</div>
-				</td>
-				<td>
-					<div class="file">
-						<div class="displayfile">${itemFile}</div>
-						<input type="file" 
-							class="form-control" 
-							name="files" 
-							accept="image/*, .pdf, .doc, .docx">
+					<div class="availablestocks">
+						${formatAmount(availableStocks)}
 					</div>
 				</td>
-				<td>
-					<div class="remarks">
-						<textarea 
-							class="form-control validate"
-							minlength="0"
-							maxlength="250"
-							rows="2" 
-							style="resize: none" 
-							class="form-control" 
-							data-allowcharacters="[0-9][a-z][A-Z][ ][.][,][_]['][()][?][-][/]"
-							name="remarks" 
-							id="remarks">${remarks || ""}</textarea>
+
+				<td class="text-right">
+					<div class="forpurchase">
+						${formatAmount(forPurchase)}
 					</div>
 				</td>
+			
+			</tr>`;
+
+		} else {
+			html += `
+			<tr class="table-row-request-item itemTableRow"
+				requestItemID="${requestItemID}" inventoryValidationID="${inventoryValidationID}">
+				<td>
+					<div class="itemcode">${itemCode || "-"}</div>
+				</td>
+
+				<td>
+					<div class="itemname">
+						${itemName || '-'}
+					</div>
+					<small style="color:#848482;" class="itembrandname">${itemBrandName || '-'}</small>
+				</td>
+
+				<td>
+					<div class="itemclassification">
+						${itemClassification || '-'}
+					</div>
+					<small style="color:#848482;" class="itemcategory">${itemCategory || '-'}</small>
+				</td>
+			
+				<td>
+					<div class="itemuom">${itemUom || "-"}</div>
+				</td>
+				
+				<td class="text-right">
+					<div class="requestquantity">
+						${formatAmount(requestQuantity)}
+					</div>
+				</td>
+
+				<td class="text-right">
+					<div class="availablestocks">
+						${formatAmount(availableStocks)}
+					</div>
+				</td>
+
+				<td class="text-right">
+					<div class="forpurchase">
+						${formatAmount(forPurchase)}
+					</div>
+				</td>
+			
 			</tr>`;
 		}
 
@@ -1042,341 +767,319 @@ $(document).ready(function() {
     }
     // ----- END GET ITEM ROW -----
 
-
-	// ----- UPDATE TOTAL AMOUNT -----
-	function updateTotalAmount() {
-		const quantityArr = $.find(`[name=quantity]`).map(element => getNonFormattedAmount(element.value) || "0");
-		const unitCostArr = $.find(`.unitcost`).map(element => getNonFormattedAmount(element.innerText) || "0");
-		const totalAmount = quantityArr.map((qty, index) => +qty * +unitCostArr[index]).reduce((a,b) => a + b, 0);
-		$(`#totalAmount`).text(formatAmount(totalAmount, true));
-		$("#inventoryValidationProjectTotal").text(formatAmount(totalAmount, true));
-
-		const projectTotal = +getNonFormattedAmount($(`#inventoryValidationProjectTotal`).text()); 
-		const companyTotal = +getNonFormattedAmount($(`#inventoryValidationCompanyTotal`).text()); 
-		const grandTotal   = projectTotal + companyTotal;
-		$("#inventoryValidationGrandTotal").text(formatAmount(grandTotal, true));
-
-		return totalAmount;
-	}
-	// ----- END UPDATE TOTAL AMOUNT -----
-
-
-	// ----- GET COST ESTIMATE REQUEST ITEMS -----
-	function getPurchaseRequestItems(isMaterialEquipment = false, item = false) {
+	// ----- GET ASSET ROW -----
+    function getAssetRow(inventoryValidationID = false ,asset = {}, readOnly = false) {
 		let html = "";
-		if (item) {
-			const {
-				requestItemID      = "",
-				itemCode           = "-",
-				itemName           = "-",
-				brandName 		   = "",
-				itemClassification = "-",
-				quantity           = 0,
-				itemUom            = "",
-				files              = "",
-				remarks            = "-",
-				availableItems 	   = "",
-				reserveItem 	   = "",
-			} = item;
+	
+		const {
+			requestAssetID       = "",
+			// materialRequestID 	="",
+			assetID             	= 0,
+			assetCode           	= "-",
+			assetName           	= "-",
+			assetBrandName    	= "-",
+			assetClassification 	= "-",
+			assetCategory 		= "-",
+			assetUom            	= "-",
+			requestQuantity     = 0,
+			availableStocks 	= 0,
+			forPurchase          = 0,
+		} = asset;
 
-			let tdClassification = !isMaterialEquipment ? `
-			<td>${itemClassification || "-"}</td>` : "";
-			let fileHTML = files ? `
-			<a href="${base_url}assets/upload-files/request-items/${files}"
-				target="_blank"
-				title="${files}"
-				alt="${files}">${files}</a>` : "-";
+		if (readOnly) {
 
-			let reservedTableRow	 =  !isMaterialEquipment ? `<td class="text-center reserved-quantity">${formatAmount(availableItems || "0.00")}</td>` : ``;
-			let forPurchaseItem 	 =	parseFloat(formatAmount(quantity || "0.00")) - parseFloat(formatAmount(availableItems || "0.00"));
 			html += `
-			<tr class="itemTableRow"
-				requestItemID="${requestItemID}">
-				<td>${itemCode || "-"}</td>
+			<tr class="table-row-request-item assetTableRow"
+				requestAssetID="${requestAssetID}" inventoryValidationID="${inventoryValidationID}">
 				<td>
-					${itemName && itemName != "Select Item Name" ? itemName : "-"}
-					${brandName ? `<div style="font-size: 85%;" class="font-weight-bold py-2 item-brand-name">${brandName}</div>` : "-"}
+					<div class="assetcode">${assetCode || "-"}</div>
 				</td>
-				${tdClassification}
-				<td>${itemUom || "-"}</td>
-				<td class="text-center quantity-requested">${formatAmount(quantity)}</td>
-				<td class="text-center available-stocks">${formatAmount(availableItems || "0.00")}</td>
-				${reservedTableRow}
-				<td class="text-center for-purchase">${formatAmount(forPurchaseItem < 1 ? "0" : forPurchaseItem)}</td>
-				<td>${fileHTML}</td>
+
+				<td>
+					<div class="assetame">
+						${assetName || '-'}
+					</div>
+					<small style="color:#848482;" class="assetbrandname">${assetBrandName || '-'}</small>
+				</td>
+
+				<td>
+					<div class="assetclassification">
+						${assetClassification || '-'}
+					</div>
+					<small style="color:#848482;" class="assetcategory">${assetCategory || '-'}</small>
+				</td>
+			
+				<td>
+					<div class="assetuom">${assetUom || "-"}</div>
+				</td>
+				
+				<td class="text-right">
+					<div class="requestquantity">
+						${formatAmount(requestQuantity)}
+					</div>
+				</td>
+
+				<td class="text-right">
+					<div class="availablestocks">
+						${formatAmount(availableStocks)}
+					</div>
+				</td>
+
+				<td class="text-right">
+					<div class="forpurchase">
+						${formatAmount(forPurchase)}
+					</div>
+				</td>
+			
+			</tr>`;
+
+		} else {
+			html += `
+			<tr class="table-row-request-item assetTableRow"
+				requestAssetID="${requestAssetID}" inventoryValidationID="${inventoryValidationID}">
+				<td>
+					<div class="assetcode">${assetCode || "-"}</div>
+				</td>
+
+				<td>
+					<div class="assetame">
+						${assetName || '-'}
+					</div>
+					<small style="color:#848482;" class="assetbrandname">${assetBrandName || '-'}</small>
+				</td>
+
+				<td>
+					<div class="assetclassification">
+						${assetClassification || '-'}
+					</div>
+					<small style="color:#848482;" class="assetcategory">${assetCategory || '-'}</small>
+				</td>
+			
+				<td>
+					<div class="assetuom">${assetUom || "-"}</div>
+				</td>
+				
+				<td class="text-right">
+					<div class="requestquantity">
+						${formatAmount(requestQuantity)}
+					</div>
+				</td>
+
+				<td class="text-right">
+					<div class="availablestocks">
+						${formatAmount(availableStocks)}
+					</div>
+				</td>
+
+				<td class="text-right">
+					<div class="forpurchase">
+						${formatAmount(forPurchase)}
+					</div>
+				</td>
+			
 			</tr>`;
 		}
-		return html;
-	}
-	// ----- END GET COST ESTIMATE REQUEST ITEMS -----
+
+        return html;
+    }
+    // ----- END GET ASSET ROW -----
 
 
-	// ----- GET COST ESTIMATE REQUEST TABLE -----
-	function getPurchaseRequestTable(item = false, index = 0, readOnly = false) {
-		let html = "";
-		if (item) {
-			const {
-				phaseDescription = "",
-				milestones       = []
-			} = item;
+	// ----- GET REQUEST ITEMS CONTENT -----
+	function requestItemsContent(data = false, readOnly = false){
 
-			let milestoneHTML = "";
-			milestones.map((milestone, index2) => {
-				const { name = "", items = [] } = milestone;
-
-				let requestItemsHTML = "";
-				items.map((item) => {
-					requestItemsHTML += getPurchaseRequestItems(false, item);
-				})
-
-				milestoneHTML += requestItemsHTML ? `
-				<div class="milestoneContent pt-1 pb-2">
-					<div class="titleName"
-						style="color: rgb(104 158 46);
-							font-size: 1.05rem;
-							font-weight: 700;">${name}</div>
-					<table class="table table-striped requestItemTable phasing-table" title="${name}" isMaterialEquipment="false" isReadOnly="true" id="${(phaseDescription+index+name+index2)?.replaceAll(/[&\/\\#,+()$~%.'":*?<>{}]/g, "")?.replaceAll(" ", "")?.toLowerCase()}">
-						<thead>
-							<tr style="white-space: nowrap">
-								<th>Item Code</th>
-								<th>Item Name</th>
-								<th>Item Classification</th>
-								<th>UOM</th>
-								<th>Requested Quantity</th>
-								<th>Available Stocks</th>
-								<th>Reserved Quantity</th>
-								<th>For Purchase</th>
-								<th>File</th>
-							</tr>
-						</thead>
-						<tbody class="itemTableBody">
-							${requestItemsHTML}
-						</tbody>
-					</table>
-				</div>` : "";
-			})
-			html = `
-			<div class="phaseContent pt-1 pb-2">
-				<div class="phaseName"
-					style="font-weight: bold;
-						font-size: 1.4rem;
-						color: rgb(0 176 80);">${phaseDescription}</div>
-				${milestoneHTML}
-			</div>`;
-		}
-		return html;
-	}
-	// ----- END GET COST ESTIMATE REQUEST TABLE -----
-
-
-	// ----- GET MATERIAL EQUIPMENT REQUEST TABLE -----
-	function getMaterialEquipmentRequestTable(item = false, index = 0) {
-		let html = "";
-		if (item) {
-			const {
-				name  = "",
-				items = []
-			} = item;
-
-			let requestItemsHTML = items.map(item => {
-				return getPurchaseRequestItems(true, item);
-			}).join("");
-
-			let classificationHTML = `
-			<table class="table table-striped requestItemTable" isMaterialEquipment="true" isReadOnly="true" id="${(name+index)?.replaceAll(/[&\/\\#,+()$~%.'":*?<>{}]/g, "")?.replaceAll(" ", "")?.toLowerCase()}" title="${name}">
-				<thead>
-					<tr style="white-space: nowrap">
-						<th>Item Code</th>
-						<th>Item Name</th>
-						<th>UOM</th>
-						<th>Requested Quantity</th>
-						<th>Available Stocks</th>
-						<th>For Purchase</th>
-						<th>File</th>
-					</tr>
-				</thead>
-				<tbody class="itemTableBody">
-					${requestItemsHTML}
-				</tbody>
-			</table>`;
-
-			html = requestItemsHTML ? `
-			<div class="classificationContent pt-1 pb-2">
-				<div class="titleName"
-					style="color: rgb(104 158 46);
-						font-size: 1.05rem;
-						font-weight: 700;">${name}</div>
-				${classificationHTML}
-			</div>` : "";
-		}
-		return html;
-	}
-	// ----- END GET MATERIAL EQUIPMENT REQUEST TABLE -----
-
-
-	// ----- GET ITEM REQUEST -----
-	function getRequestItems(inventoryValidationID = 0, purchaseRequestID = 0) {
-		let result = {};
-		$.ajax({
-			method: "POST",
-			url: "inventory_validation/getPurchaseRequest",
-			data: { inventoryValidationID, purchaseRequestID },
-			async: false,
-			dataType: "json",
-			success: function(data) {
-				result = data;
-			}
-		})
-		return result;
-	}
-	// ----- END GET ITEM REQUEST -----
-
-
-	// ----- GET COST ESTIMATE REQUEST ITEMS -----
-	function getPurchaseRequest(purchaseRequestID = 0, inventoryValidationID = 0, readOnly = false) {
-		let requestItems = getRequestItems(inventoryValidationID, purchaseRequestID);
-
-		let purchaseRequestItemHTML = "", materialsEquipmentRequestItemHTML = "";
-		requestItems.phases.map((item, index) => {
-			purchaseRequestItemHTML += getPurchaseRequestTable(item, index);
-		})
-		requestItems.materialsEquipment.map((item, index) => {
-			materialsEquipmentRequestItemHTML += getMaterialEquipmentRequestTable(item, index);
-		})
-
-		let projectPhaseHTML = purchaseRequestItemHTML ? `
-		<div class="w-100">
-			<hr class="pb-1">
-			<div class="text-primary font-weight-bold" style="font-size: 1.5rem;">Project Phase</div>
-			${purchaseRequestItemHTML}
-		</div>` : "";
-		
-		let materialsEquipmentHTML = materialsEquipmentRequestItemHTML ? `
-		<div class="w-100">
-			<hr class="pb-1">
-			<div class="text-primary font-weight-bold" style="font-size: 1.5rem;">Materials and Equipment</div>
-			${materialsEquipmentRequestItemHTML}
-		</div>` : "";
-
-		return projectPhaseHTML+materialsEquipmentHTML;
-	}
-	// ----- END GET COST ESTIMATE REQUEST ITEMS -----
-
-
-	// ----- GET MATERIALS EQUIPMENT REQUEST ITEMS -----
-	function getMaterialEquipmentRequestItems(inventoryValidationID = 0) {
-		let result = [];
-		$.ajax({
-			method: "POST",
-			url: "inventory_validation/getMaterialEquipmentRequestItems",
-			data: { inventoryValidationID },
-			async: false,
-			dataType: "json",
-			success: function(data) {
-				result = data;
-			}
-		})
-		return result;
-	}
-	// ----- END GET MATERIALS EQUIPMENT REQUEST ITEMS -----
-
-
-	// ----- GET TABLE MATERIALS AND EQUIPMENT -----
-	function getMaterialsEquipment(data = false, readOnly = false) {
 		let html = "";
 		if (data) {
 
 			const {
 				inventoryValidationID       = "",
-				purchaseRequestID          = "",
+				materialRequestID          = "",
+				inventoryValidationStatus = 0,
 			} = data && data[0];
 
-			let disabled = readOnly ? "disabled" : "";
-
-			let checkboxHeader = !disabled ? `
-			<th class="text-center">
-				<div class="action">
-					<input type="checkbox" class="checkboxall">
-				</div>
-			</th>` : ``;
-
-			let buttonAddDeleteRow = !disabled ? `
-			<div class="d-flex flex-column justify-content-start text-left my-2">
-				<div>
-					<button type="button" class="btn btn-primary btnAddRow" id="btnAddRow"><i class="fas fa-plus-circle"></i> Add Row</button>
-					<button type="button" class="btn btn-danger btnDeleteRow" id="btnDeleteRow"  disabled><i class="fas fa-minus-circle"></i> Delete Row/s</button>
-				</div>
-			</div>` : "";
-
 			let requestItemsData = [], requestItemHTML = "";
-			if (readOnly) {
-				if (purchaseRequestID) {
-					html = getPurchaseRequest(purchaseRequestID, inventoryValidationID);
-				} else {
-					requestItemsData = getMaterialEquipmentRequestItems(inventoryValidationID);
-					html = `
-					<div class="w-100">
-						<hr class="pb-1">
-						<div class="text-primary font-weight-bold" style="font-size: 1.5rem;">Materials and Equipment</div>`;
-
-					if (requestItemsData.length > 0) {
-						requestItemsData.map((item, index) => {
-							html += getMaterialEquipmentRequestTable(item, index);
-						})
-					}
-
-					html += `
-					</div>`
-				}
-			} else {
+		
 				if (inventoryValidationID) {
-					requestItemsData = getTableData(
-						`ims_request_items_tbl`, 
-						``, 
-						`inventoryValidationID = ${inventoryValidationID} AND (inventoryValidationID IS NULL OR inventoryValidationID = 0) AND (bidRecapID IS NULL AND materialWithdrawalID IS NULL)`);
+
+					if(inventoryValidationStatus == 0 || inventoryValidationStatus == 1 ){
+						
+						requestItemsData = getTableData(
+							`ims_request_items_tbl as reqItems`, 
+							`	reqItems.requestItemID,
+								reqItems.materialRequestID,
+								reqItems.itemID,
+								reqItems.itemCode,
+								reqItems.itemName,
+								reqItems.itemBrandName,
+								reqItems.itemClassification,
+								reqItems.itemCategory,
+								reqItems.itemUom,
+								reqItems.requestQuantity,
+									(SELECT 
+										CASE 
+										WHEN ((SUM(itmStock.quantity)-reOrderLevel) - (SELECT SUM(reservedItem) FROM ims_request_items_tbl WHERE itemID = reqItems.itemID)) < 0 
+											THEN  0
+										WHEN  ((SUM(itmStock.quantity)-reOrderLevel) - (SELECT SUM(reservedItem) FROM ims_request_items_tbl WHERE itemID = reqItems.itemID)) > 0 
+											THEN (SUM(itmStock.quantity)-reOrderLevel - (SELECT SUM(reservedItem) FROM ims_request_items_tbl WHERE itemID = reqItems.itemID))
+										END as availableStocks
+									FROM ims_stock_in_item_tbl AS itmStock 
+									LEFT JOIN ims_inventory_item_tbl AS itm ON itm.itemID = itmStock.itemID
+									WHERE itmStock.stockOutDate IS NUll 
+									AND itmStock.stockInDate IS NOT NULL 
+									AND itmStock.itemID = reqItems.itemID) as availableStocks,
+	
+									(SELECT 
+										CASE 
+										WHEN ((SUM(itmStock.quantity)-reOrderLevel) - (SELECT SUM(reservedItem) FROM ims_request_items_tbl WHERE itemID = reqItems.itemID)) < reqItems.requestQuantity 
+										THEN IF( ( (SUM(itmStock.quantity)-reOrderLevel) - (SELECT SUM(reservedItem) FROM ims_request_items_tbl WHERE itemID = reqItems.itemID) ) <0, 
+												reqItems.requestQuantity ,
+												reqItems.requestQuantity  - ((SUM(itmStock.quantity)-reOrderLevel) - (SELECT SUM(reservedItem) FROM ims_request_items_tbl WHERE itemID = reqItems.itemID)))
+											
+										WHEN  ((SUM(itmStock.quantity)-reOrderLevel) - (SELECT SUM(reservedItem) FROM ims_request_items_tbl WHERE itemID = reqItems.itemID) ) >  reqItems.requestQuantity
+											THEN 0
+										END as forPurchase
+																	
+									FROM ims_stock_in_item_tbl  AS itmStock 
+									LEFT JOIN ims_inventory_item_tbl AS itm ON itm.itemID = itmStock.itemID
+									WHERE itmStock.stockOutDate IS NUll 
+									AND itmStock.stockInDate IS NOT NULL 
+									AND itmStock.itemID = reqItems.itemID) as forPurchase
+																	
+							`, 
+							`materialRequestID = ${materialRequestID}`);
+					}else{
+						
+						requestItemsData = getTableData(
+							`ims_request_items_tbl as reqItems`, 
+							`	reqItems.requestItemID,
+								reqItems.materialRequestID,
+								reqItems.itemID,
+								reqItems.itemCode,
+								reqItems.itemName,
+								reqItems.itemBrandName,
+								reqItems.itemClassification,
+								reqItems.itemCategory,
+								reqItems.itemUom,
+								reqItems.requestQuantity,
+								reqItems.availableStocks,
+								reqItems.forPurchase
+							`, 
+							`inventoryValidationID = ${inventoryValidationID}`);
+					}
 				}
+				// else{
+
+				// 	requestItemsData = getTableData(
+				// 		`ims_request_items_tbl as reqItems`, 
+				// 		`	reqItems.requestItemID,
+				// 			reqItems.materialRequestID,
+				// 			reqItems.itemID,
+				// 			reqItems.itemCode,
+				// 			reqItems.itemName,
+				// 			reqItems.itemBrandName,
+				// 			reqItems.itemClassification,
+				// 			reqItems.itemCategory,
+				// 			reqItems.itemUom,
+				// 			reqItems.requestQuantity,
+				// 				(SELECT SUM(quantity) 
+				// 				FROM ims_stock_in_item_tbl 
+				// 				WHERE stockOutDate IS NUll 
+				// 				AND stockInDate IS NOT NULL 
+				// 				AND itemID = reqItems.itemID) as availableStocks,
+
+				// 				reqItems.requestQuantity,
+				// 				(SELECT 
+				// 				CASE 
+				// 					WHEN SUM(quantity)> reqItems.requestQuantity
+				// 					THEN 0
+				// 					WHEN SUM(quantity)< reqItems.requestQuantity
+				// 					THEN
+				// 					reqItems.requestQuantity - SUM(quantity)
+				// 					END AS forPurchase
+				// 				FROM ims_stock_in_item_tbl 
+				// 				WHERE stockOutDate IS NUll 
+				// 				AND stockInDate IS NOT NULL 
+				// 				AND itemID = reqItems.itemID) as forPurchase
+				// 		`, 
+				// 		`materialRequestID = ${materialRequestID}`);
+
+				// }
+
+				console.log(requestItemsData)
+
 				if (requestItemsData.length > 0) {
 					requestItemsData.map(item => {
-						requestItemHTML += getItemRow(item, readOnly);
+						requestItemHTML += getItemRow(inventoryValidationID,item, readOnly);
 					})
 				} else {
-					requestItemHTML = getItemRow(false, readOnly);
+					requestItemHTML = getItemRow(false,false, readOnly);
 				}
-
-
-				if (purchaseRequestID && purchaseRequestID != "0" && inventoryValidationID) {
-					html = getPurchaseRequest(purchaseRequestID, inventoryValidationID);
-				} else {
 					html = `
-					<div class="w-100">
-						<hr class="pb-1">
-						<div class="text-primary font-weight-bold" style="font-size: 1.5rem;">Materials and Equipment Request</div>
-						<table class="table table-striped requestItemTable" isReadOnly="${readOnly}" id="tableRequestItems">
-							<thead>
-								<tr style="white-space: nowrap">
-									${checkboxHeader}
-									<th>Item Code</th>
-									<th>Item Name ${!disabled ? "<code>*</code>" : ""}</th>
-									<th>Item Classification</th>
-									<th>Quantity ${!disabled ? "<code>*</code>" : ""}</th>
-									<th>UOM</th>
-									<th>Unit Cost</th>
-									<th>Total Cost</th>
-									<th>File</th>
-									<th>Remarks</th>
-								</tr>
-							</thead>
-							<tbody class="itemTableBody">
-								${requestItemHTML}
-							</tbody>
-						</table>
-						
-						<div class="w-100 d-flex justify-content-between align-items-center py-2">
-							<div>${buttonAddDeleteRow}</div>
+					<div class="card">
+						<div class="card-header bg-primary text-white">
+							<div class="row">
+								<div class="col-md-6 col-sm-12 text-left">
+									<h5 style="font-weight: bold;
+										letter-spacing: 0.05rem;">Item/s Request</h5>
+								</div>
+								<div class="col-md-6 col-sm-12 text-right"></div>
+							</div>
 						</div>
-					</div>`;
-				}
-			}
+						<div class="card-body">
+							<div class="w-100 request-items-content">
+								<table class="table table-hover inventory-request" id="tableRequestItems"  isReadOnly="${readOnly}">
+									<thead>
+										<tr>
+										<th>Item Code</th>
+										<th>Item Name/Brand</th>
+										<th>Item Classification/Category</th>
+										<th>UOM</th>
+										<th>Request Quantity</th>
+										<th>Available Stocks</th>
+										<th>For Purchase</th>
+										</tr>
+									</thead>
+									<tbody class="itemTableBody">
+									${requestItemHTML}
+									</tbody>
+								</table>
+							</div>
+						</div>
+						<div class="card-footer">
+							<div class="row">
+								<div class="col-md-6 col-sm-12 text-left">
+									
+								</div>
+								<div class="col-md-6 col-sm-12 text-right"></div>
+							</div>
+						</div>
+
+					</div>
+					`;
+
+					// html = `
+					// <div class="w-100">
+					// 	<hr class="pb-1">
+					// 	<div class="text-primary font-weight-bold" style="font-size: 1.5rem;">Item/s Request</div>
+					// 	<table class="table table-striped requestItemTable" isReadOnly="${readOnly}" id="tableRequestItems">
+					// 		<thead>
+					// 			<tr style="white-space: nowrap">
+					// 				<th>Item Code</th>
+					// 				<th>Item Name/Brand</th>
+					// 				<th>Item Classification/Category</th>
+					// 				<th>UOM</th>
+					// 				<th>Request Quantity</th>
+					// 				<th>Available Stocks</th>
+					// 				<th>For Purchase</th>
+					// 			</tr>
+					// 		</thead>
+					// 		<tbody class="itemTableBody">
+					// 			${requestItemHTML}
+					// 		</tbody>
+					// 	</table>
+						
+					// </div>`;
+
 			
 		} else {
 			html = `
@@ -1392,282 +1095,218 @@ $(document).ready(function() {
 		}
 		return html;
 	}
-	// ----- END GET TABLE MATERIALS AND EQUIPMENT -----
+	// ----- END GET REQUEST ITEMS CONTENT -----
 
+	// ----- GET REQUEST ASSETS CONTENT -----
+	function requestAssetsContent(data = false, readOnly = false){
 
-	// ----- SELECT PURCHASE REQUEST-----
-	$(document).on("change", `[name=purchaseRequestID]`, function() {
-		const purchaseRequestID = $(this).val();
+		let html = "";
+		if (data) {
+
+			const {
+				inventoryValidationID       = "",
+				materialRequestID          = "",
+				inventoryValidationStatus = 0,
+			} = data && data[0];
+
+			let requestAssetData = [], requestAssetHTML = "";
 		
-		const timelineBuilderID = $(`option:selected`, this).attr("timelineBuilderID") || "-";
-		const projectCode     = $(`option:selected`, this).attr("projectCode") || "-";
-		const projectName     = $(`option:selected`, this).attr("projectName") || "-";
-		const projectCategory = $(`option:selected`, this).attr("projectCategory") || "-";
-		const clientName      = $(`option:selected`, this).attr("clientName") || "-";
-		const clientAddress   = $(`option:selected`, this).attr("clientAddress") || "-";
+				if (inventoryValidationID) {
 
-		$(`[name="projectCode"]`).val(projectCode);
-		$(`[name="projectName"]`).val(projectName);
-		$(`[name="projectCategory"]`).val(projectCategory);
-		$(`[name="clientName"]`).val(clientName);
-		$(`[name="clientAddress"]`).val(clientAddress);
-
-		$("#tableRequestItemContent").html(preloader);
-		setTimeout(() => {
-			let requestItems = getPurchaseRequest(purchaseRequestID, 0);
-			$(`#tableRequestItemContent`).html(requestItems);
-			initDataTables();
-			initAll();
-			updateTableItems();
-			$(`#costSummary`).html(getCostSummary());
-		}, 200);
-		
-
-	})
-	// ----- END SELECT PURCHASE REQUEST-----
-
-
-    // ----- SELECT ITEM NAME -----
-    $(document).on("change", "[name=itemID]", function() {
-		const selectedItemID = $(this).val();
-        const itemCode       = $('option:selected', this).attr("itemCode");
-        const itemName       = $('option:selected', this).text();
-        const uom            = $('option:selected', this).attr("uom");
-        const categoryName   = $('option:selected', this).attr("categoryName");
-        const brandName      = $('option:selected', this).attr("brandName");
-        const classificationName = $('option:selected', this).attr("classificationName");
-		const inventoryValidationID = $(`[name="inventoryValidationID"]`).val();
-
-		if (selectedItemID != "0" && (!inventoryValidationID || inventoryValidationID == "0")) {
-			$(`.btnAddRow`).removeAttr("disabled");
-		} else {
-			$(`.btnAddRow`).attr("disabled", true);
-		}
-
-		getInventoryPreferredPrice(selectedItemID, this);
-
-		$(this).closest("tr").find(`.itemcode`).first().text(itemCode);
-		$(this).closest("tr").find(`.category`).first().text(categoryName);
-		$(this).closest("tr").find(`.classification`).first().text(classificationName);
-		$(this).closest("tr").find(`.classification`).first().attr("name", classificationName);
-		$(this).closest("tr").find(`.uom`).first().text(titleCase(uom));
-
-		$(`[name=itemID]`).each(function(i, obj) {
-			let itemID = $(this).val();
-			if (itemID == "0") {
-				$(this).closest("tr").find("[name=quantity]").removeAttr("required");
-				$(this).closest("tr").find("[name=quantity]").val("0").removeClass("is-valid is-invalid has-error no-error");
-				$(this).closest("tr").find(".unitcost").text(formatAmount("0.00", true));
-				$(this).closest("tr").find(".totalcost").text(formatAmount("0.00", true));
-				$(this).closest("tr").find("[name=files]").val("").removeClass("is-valid is-invalid has-error no-error");
-				$(this).closest("tr").find(".displayfile").empty();
-				$(this).closest("tr").find("[name=remarks]").val("").removeClass("is-valid is-invalid has-error no-error");
-				$(this).closest("tr").find("[name=quantity], [name=files], [name=remarks]").attr("disabled", "true");
-				$(this).closest("tr").find(".invalid-feedback").empty("");
-			} else {
-				let oldQty = $(this).closest("tr").find("[name=quantity]").val();
-				oldQty = oldQty != 0 ? oldQty : 0;
-				$(this).closest("tr").find("[name=quantity]").attr("required", true);
-				$(this).closest("tr").find("[name=quantity]").val(oldQty);
-				
-				if ($(this).closest("tr").find("[name=quantity]").attr("ceID") == "true") {
-					if (inventoryValidationID && inventoryValidationID != "0" && inventoryValidationID != "Select Reference No.") {
-						$(this).closest("tr").find("[name=files], [name=remarks]").removeAttr("disabled");
-					} else {
-						$(this).closest("tr").find("[name=quantity], [name=files], [name=remarks]").removeAttr("disabled");
+					if(inventoryValidationStatus == 0 || inventoryValidationStatus == 1 ){
+						
+						requestAssetData = getTableData(
+							`ims_request_assets_tbl as reqAsset`, 
+							`	reqAsset.requestAssetID,
+								reqAsset.materialRequestID,
+								reqAsset.assetID,
+								reqAsset.assetCode,
+								reqAsset.assetName,
+								reqAsset.assetBrandName,
+								reqAsset.assetClassification,
+								reqAsset.assetCategory,
+								reqAsset.assetUom,
+								reqAsset.requestQuantity,
+										(SELECT 
+										CASE 
+										WHEN ((SUM(astStock.quantity)-reOrderLevel) - (SELECT SUM(reservedAsset) FROM ims_request_assets_tbl WHERE assetID = reqAsset.assetID)) < 0 
+											THEN  0
+										WHEN  ((SUM(astStock.quantity)-reOrderLevel) - (SELECT SUM(reservedAsset) FROM ims_request_assets_tbl WHERE assetID = reqAsset.assetID)) > 0 
+											THEN (SUM(astStock.quantity)-reOrderLevel - (SELECT SUM(reservedAsset) FROM ims_request_assets_tbl WHERE assetID = reqAsset.assetID))
+										END as availableStocks
+									FROM ims_stock_in_assets_tbl AS astStock 
+									LEFT JOIN ims_inventory_asset_tbl AS ast ON ast.assetID = astStock.stockInAssetID
+									WHERE astStock.stockOutDate IS NUll 
+									AND astStock.stockInDate IS NOT NULL 
+									AND astStock.stockInAssetID = reqAsset.assetID) as availableStocks,
+	
+									(SELECT 
+										CASE 
+										WHEN ((SUM(astStock.quantity)-reOrderLevel) - (SELECT SUM(reservedAsset) FROM ims_request_assets_tbl WHERE assetID = reqAsset.assetID)) < reqAsset.requestQuantity 
+										THEN IF( ( (SUM(astStock.quantity)-reOrderLevel) - (SELECT SUM(reservedAsset) FROM ims_request_assets_tbl WHERE assetID = reqAsset.assetID) ) <0, 
+												reqAsset.requestQuantity ,
+												reqAsset.requestQuantity  - ((SUM(astStock.quantity)-reOrderLevel) - (SELECT SUM(reservedAsset) FROM ims_request_assets_tbl WHERE assetID = reqAsset.assetID)))
+											
+										WHEN  ((SUM(astStock.quantity)-reOrderLevel) - (SELECT SUM(reservedAsset) FROM ims_request_assets_tbl WHERE assetID = reqAsset.assetID) ) >  reqAsset.requestQuantity
+											THEN 0
+										END as forPurchase
+																	
+									FROM ims_stock_in_assets_tbl  AS astStock 
+									LEFT JOIN ims_inventory_asset_tbl AS ast ON ast.assetID = astStock.stockInAssetID
+									WHERE astStock.stockOutDate IS NUll 
+									AND astStock.stockInDate IS NOT NULL 
+									AND astStock.stockInAssetID = reqAsset.assetID) as forPurchase
+							`, 
+							`materialRequestID = ${materialRequestID}`);
+					}else{
+						
+						requestAssetData = getTableData(
+							`ims_request_assets_tbl as reqAsset`, 
+							`	reqAsset.requestAssetID,
+								reqAsset.materialRequestID,
+								reqAsset.assetID,
+								reqAsset.assetCode,
+								reqAsset.assetName,
+								reqAsset.assetBrandName,
+								reqAsset.assetClassification,
+								reqAsset.assetCategory,
+								reqAsset.assetUom,
+								reqAsset.requestQuantity,
+								reqAsset.availableStocks,
+								reqAsset.forPurchase
+							`, 
+							`inventoryValidationID = ${inventoryValidationID}`);
 					}
+				}
+				// else{
+
+				// 	requestAssetData = getTableData(
+				// 		`ims_request_assets_tbl as reqAsset`, 
+				// 		`	reqAsset.requestAssetID,
+				// 			reqAsset.materialRequestID,
+				// 			reqAsset.assetID,
+				// 			reqAsset.assetCode,
+				// 			reqAsset.assetName,
+				// 			reqAsset.assetBrandName,
+				// 			reqAsset.assetClassification,
+				// 			reqAsset.assetCategory,
+				// 			reqAsset.assetUom,
+				// 			reqAsset.requestQuantity,
+				// 				(SELECT SUM(quantity) 
+				// 				FROM ims_stock_in_assets_tbl 
+				// 				WHERE stockOutDate IS NUll 
+				// 				AND stockInDate IS NOT NULL 
+				// 				AND assetID = reqAsset.assetID) as availableStocks,
+
+				// 				reqAsset.requestQuantity,
+				// 				(SELECT 
+				// 				CASE 
+				// 					WHEN SUM(quantity)> reqAsset.requestQuantity
+				// 					THEN 0
+				// 					WHEN SUM(quantity)< reqAsset.requestQuantity
+				// 					THEN
+				// 					reqAsset.requestQuantity - SUM(quantity)
+				// 					END AS forPurchase
+				// 				FROM ims_stock_in_assets_tbl 
+				// 				WHERE stockOutDate IS NUll 
+				// 				AND stockInDate IS NOT NULL 
+				// 				AND assetID = reqAsset.assetID) as forPurchase
+				// 		`, 
+				// 		`materialRequestID = ${materialRequestID}`);
+				// }
+
+		
+				if (requestAssetData.length > 0) {
+					requestAssetData.map(item => {
+						requestAssetHTML += getAssetRow(inventoryValidationID,item, readOnly);
+					})
 				} else {
-					$(this).closest("tr").find("[name=quantity], [name=files], [name=remarks]").removeAttr("disabled");
+					requestAssetHTML = getAssetRow(false,false, readOnly);
 				}
+					html = `
+					<div class="card">
+						<div class="card-header bg-primary text-white">
+							<div class="row">
+								<div class="col-md-6 col-sm-12 text-left">
+									<h5 style="font-weight: bold;
+										letter-spacing: 0.05rem;">Asset Request</h5>
+								</div>
+								<div class="col-md-6 col-sm-12 text-right"></div>
+							</div>
+						</div>
+						<div class="card-body">
+							<div class="w-100 request-items-content">
+								<table class="table table-hover inventory-request" id="tableRequestAsset"  isReadOnly="${readOnly}">
+									<thead>
+										<tr>
+										<th>Asset Code</th>
+										<th>Asset Name/Brand</th>
+										<th>Asset Classification/Category</th>
+										<th>UOM</th>
+										<th>Requested Quantity</th>
+										<th>Available Stocks</th>
+										<th>For Purchase</th>
+										</tr>
+									</thead>
+									<tbody class="assetTableBody">
+									${requestAssetHTML}
+									</tbody>
+								</table>
+							</div>
+						</div>
+						<div class="card-footer">
+							<div class="row">
+								<div class="col-md-6 col-sm-12 text-left">
+									
+								</div>
+								<div class="col-md-6 col-sm-12 text-right"></div>
+							</div>
+						</div>
 
-				const unitCost  = getInventoryPreferredPrice(itemID, this, true) || 0;
-				const quantity  = $(this).closest("tr").find("[name=quantity]").val();
-				const totalCost = quantity * unitCost;
-				$(this).closest("tr").find(`.unitcost`).text(formatAmount(unitCost, true));
-				$(this).closest("tr").find(".totalcost").text(formatAmount(totalCost, true));
+					</div>
+					`;
 
-			}
-			$(this).html(getInventoryItem(itemID));
-		}) 
-		updateTotalAmount();		
-		$(`#costSummary`).html(getCostSummary(true));
-    })
-    // ----- END SELECT ITEM NAME -----
+					// html = `
+					// <div class="w-100">
+					// 	<hr class="pb-1">
+					// 	<div class="text-primary font-weight-bold" style="font-size: 1.5rem;">Item/s Request</div>
+					// 	<table class="table table-striped requestItemTable" isReadOnly="${readOnly}" id="tableRequestItems">
+					// 		<thead>
+					// 			<tr style="white-space: nowrap">
+					// 				<th>Item Code</th>
+					// 				<th>Item Name/Brand</th>
+					// 				<th>Item Classification/Category</th>
+					// 				<th>UOM</th>
+					// 				<th>Request Quantity</th>
+					// 				<th>Available Stocks</th>
+					// 				<th>For Purchase</th>
+					// 			</tr>
+					// 		</thead>
+					// 		<tbody class="itemTableBody">
+					// 			${requestItemHTML}
+					// 		</tbody>
+					// 	</table>
+						
+					// </div>`;
 
-
-	// ----- KEYUP QUANTITY OR UNITCOST -----
-	$(document).on("keyup", "[name=quantity]", function() {
-		const index     = $(this).closest("tr").first().attr("index");
-		const quantity  = +getNonFormattedAmount($(`#quantity${index}`).val());
-		const unitcost  = +getNonFormattedAmount($(`#unitcost${index}`).text());
-		const totalcost = quantity * unitcost;
-		$(`#totalcost${index}`).text(formatAmount(totalcost, true));
-		updateTotalAmount();
-		$(`#costSummary`).html(getCostSummary(true));
-	})
-	// ----- END KEYUP QUANTITY OR UNITCOST -----
-
-
-	// ----- SELECT FILE -----
-	$(document).on("change", "[name=files]", function(e) {
-		const filename = this.files[0].name;
-		const filesize = this.files[0].size/1024/1024; // Size in MB
-		if (filesize > 10) {
-			$(this).val("");
-			$(this).parent().parent().find(".displayfile").empty();
-			showNotification("danger", "File size must be less than or equal to 10mb");
+			
 		} else {
-			let html = `
-			<div class="d-flex justify-content-between align-items-center py-2">
-				<span class="filename"
-					style="display: block;
-						width: 180px;
-						overflow: hidden;
-						white-space: nowrap;
-						text-overflow: ellipsis;">${filename}</span>
-				<span class="btnRemoveFile" style="cursor: pointer"><i class="fas fa-close"></i></span>
-			</div>`;
-			$(this).parent().find(".displayfile").first().html(html);
+			html = `
+			<div class="w-100 text-center mb-5">
+				<img src="${base_url}assets/modal/please-select.gif"
+					style="max-width: 300px;
+					width: auto;
+					min-width: 100px;
+					height: auto;"
+					alt="Please Select Reference No.">
+				<div class="h4">Please Select Reference No.</div>
+			</div>`
 		}
-	})
-	// ----- END SELECT FILE -----
-
-
-	// ----- REMOVE FILE -----
-	$(document).on("click", ".btnRemoveFile", function() {
-		$(this).parent().parent().parent().find("[name=files]").first().val("");
-		$(this).closest(".displayfile").empty();
-	})
-	// ----- END REMOVE FILE -----
-
-
-	// ----- CLICK DELETE ROW -----
-	$(document).on("click", ".btnDeleteRow", function(){
-		deleteTableRow();
-	})
-	// ----- END CLICK DELETE ROW -----
-
-
-	// ----- CHECKBOX EVENT -----
-	$(document).on("click", "[type=checkbox]", function() {
-		updateDeleteButton();
-	})
-	// ----- END CHECKBOX EVENT -----
-
-
-	// ----- CHECK ALL -----
-	$(document).on("change", ".checkboxall", function() {
-		const isChecked = $(this).prop("checked");
-		$(".checkboxrow").each(function(i, obj) {
-			$(this).prop("checked", isChecked);
-		});
-		updateDeleteButton();
-	})
-	// ----- END CHECK ALL -----
-
-
-    // ----- INSERT ROW ITEM -----
-    $(document).on("click", ".btnAddRow", function() {
-		let row = getItemRow();
-		$(".itemTableBody").append(row);
-		updateTableItems();
-		updateInventoryItemOptions();
-		initInputmask();
-		initAmount();
-		initQuantity();
-    })
-    // ----- END INSERT ROW ITEM -----
-
-
-	// ----- GET COST SUMMARY -----
-	function getCostSummary(isOnCreation = false, display = true) {
-		let costSummary = [], items = [];
-		if (isOnCreation) {
-			$(`.itemTableRow .classification`).each(function() {
-				$parent    = $(this).closest("tr");
-				const name = $(this).attr("name");
-				let totalCost = $parent.find(".totalcost").text() || "0";
-					totalCost = getNonFormattedAmount(totalCost);
-				let temp = { name, totalCost };
-				name && name != "-" && items.push(temp);
-			})
-	
-			const isExisting = (inName = "") => {
-				let flag = false;
-				costSummary.map(summary => {
-					const { name } = summary;
-					if (inName === name) {
-						flag = true;
-					}
-				})
-				return flag;
-			}
-	
-			const getTotalCost = (inName = "") => {
-				return items
-					.filter(cls => cls.name == inName)
-					.map(cls => cls.totalCost)
-					.reduce((a, b) => a + b, 0);
-			}
-	
-			items.map(cls => {
-				const { name } = cls;
-				if (!isExisting(name)) {
-					let temp = {
-						name,
-						totalCost: getTotalCost(name)
-					};
-					costSummary.push(temp);
-				}
-			})
-		} else {
-			$(`table.requestItemTable .itemTableBody`).each(function() {
-				$parent = $(this).closest(".requestItemTable");
-				const name = $parent.attr("title");
-				let totalCost = 0;
-				$(`td.totalcost`, this).each(function() {
-					const temp = getNonFormattedAmount($(this).text());
-					totalCost += temp;
-				})
-				let temp = { name, totalCost };
-				costSummary.push(temp);
-			})
-		}
-		
-
-		let html = `
-		<div class="row py-2">
-			<div class="offset-lg-6 col-lg-6 offset-md-3 col-md-9 col-sm-12 pb-2 pt-3">`;
-		let	grandTotal = 0;
-		costSummary.map((summary, i) => {
-			const bottom = costSummary.length == i ? "pb-2" : "";
-			const { name = "-", totalCost = 0 } = summary;
-			html += `
-			<div class="row ${bottom}" style="font-size: 1.1rem;">
-				<div class="col-6 col-lg-7 text-left">${name || "-"}</div>
-				<div class="col-6 col-lg-5 text-right text-dark" style="font-size: 1.05em" class="costSummary" name="${name}">
-					${formatAmount(totalCost, true)}
-				</div>
-			</div>`;
-			grandTotal += totalCost;
-		})
-
-		let grandTotalHTML = costSummary.length > 0 ? `
-		<div class="row pt-1" style="font-size: 1.3rem;; border-bottom: 3px double black; border-top: 1px solid black">
-			<div class="col-6 col-lg-7 text-left font-weight-bolder">Grand Total:</div>
-			<div class="col-6 col-lg-5 text-right text-danger font-weight-bolder" id="inventoryValidationGrandTotal" style="font-size: 1.05em">
-				${formatAmount(grandTotal, true)}
-			</div>
-		</div>` : "";
-
-		html += `
-				${grandTotalHTML}
-			</div>
-		</div>`;
-
-		return display ? html : grandTotal;
+		return html;
 	}
-	// ----- END GET COST SUMMARY -----
+	// ----- END GET REQUEST ASSETS CONTENT -----
+
+	
 
 
     // ----- FORM CONTENT -----
@@ -1678,7 +1317,7 @@ $(document).ready(function() {
 			inventoryValidationID       = "",
 			reviseInventoryValidationID = "",
 			employeeID              = "",
-			purchaseRequestID          = "",
+			materialRequestID          = "",
 			projectCode             = "",
 			projectName             = "",
 			projectCategory         = "",
@@ -1694,6 +1333,7 @@ $(document).ready(function() {
 			createdAt               = false,
 		} = data && data[0];
 
+	
 		// ----- GET EMPLOYEE DATA -----
 		let {
 			fullname:    employeeFullname    = "",
@@ -1702,7 +1342,7 @@ $(document).ready(function() {
 		} = employeeData(data ? employeeID : sessionID);
 		// ----- END GET EMPLOYEE DATA -----
 
-		readOnly ? preventRefresh(false) : preventRefresh(true);
+		// readOnly ? preventRefresh(false) : preventRefresh(true);
 
 		$("#btnBack").attr("inventoryValidationID", encryptString(inventoryValidationID));
 		$("#btnBack").attr("status", inventoryValidationStatus);
@@ -1798,21 +1438,7 @@ $(document).ready(function() {
 
         <div class="row" id="form_inventory_validation">
 
-            <div class="col-md-3 col-sm-12">
-                <div class="form-group">
-                    <label>Reference No. ${!disabled ? "<code>*</code>" : ""}</label>
-					<select class="form-control validate select2"
-                        name="purchaseRequestID"
-                        id="purchaseRequestID"
-                        style="width: 100%"
-                        required ${purchaseRequestID ? "disabled" : "" }>
-                        <option selected disabled>Select Reference No.</option>
-                        ${getBillMaterialList(purchaseRequestID, inventoryValidationStatus)}
-                    </select>
-                    <div class="d-block invalid-feedback" id="invalid-inventoryValidationID"></div>
-                </div>
-            </div>
-            <div class="col-md-3 col-sm-12">
+            <div class="col-md-4 col-sm-12">
                 <div class="form-group">
                     <label>Project Code</label>
                     <input type="text" 
@@ -1822,7 +1448,7 @@ $(document).ready(function() {
 						value="${projectCode || "-"}">
                 </div>
             </div>
-            <div class="col-md-3 col-sm-12">
+            <div class="col-md-4 col-sm-12">
                 <div class="form-group">
                     <label>Project Name</label>
                     <input type="text" 
@@ -1833,7 +1459,7 @@ $(document).ready(function() {
                     <div class="d-block invalid-feedback" id="invalid-projectName"></div>
                 </div>
             </div>
-            <div class="col-md-3 col-sm-12">
+            <div class="col-md-4 col-sm-12">
                 <div class="form-group">
                     <label>Project Category</label>
                     <input type="text" 
@@ -1903,14 +1529,20 @@ $(document).ready(function() {
                         required
                         rows="4"
                         style="resize:none;"
-						${disabled}>${inventoryValidationReason ?? ""}</textarea>
+						disabled>${inventoryValidationReason ?? ""}</textarea>
                     <div class="d-block invalid-feedback" id="invalid-inventoryValidationReason"></div>
                 </div>
             </div>
 
-            <div class="col-sm-12" id="tableRequestItemContent">
-                ${purchaseRequestID ? getPurchaseRequest(purchaseRequestID, inventoryValidationStatus == 2 ? inventoryValidationID : 0) : getMaterialsEquipment(data, readOnly)}
+
+			<div class="col-sm-12" id="request-items-table-content">
+					${requestItemsContent(data, readOnly)}
             </div>
+
+			<div class="col-sm-12" id="request-assets-table-content">
+					${requestAssetsContent(data, readOnly)}
+            </div>
+			
 
             <div class="col-md-12 text-right mt-3">
                 ${button}
@@ -1923,11 +1555,8 @@ $(document).ready(function() {
 		setTimeout(() => {
 			$("#page_content").html(html);
 			initDataTables();
-			updateTableItems();
 			initAll();
-			
-			updateInventoryItemOptions();
-			$("#costSummary").html(getCostSummary(!readOnly));
+		
 
 			// ----- NOT ALLOWED FOR UPDATE -----
 			if (!allowedUpdate) {
@@ -2021,24 +1650,9 @@ $(document).ready(function() {
 		formData.append("updatedBy", sessionID);
 
 		if (currentStatus == "0" && method != "approve") {
-			const purchaseRequestID 	= $("[name=purchaseRequestID]").val();
-			const timelineBuilderID 	= $("[name=purchaseRequestID] option:selected").attr("timelineBuilderID");
-			const projectCode   		= $(`[name="projectCode"]`).val();
-			const projectName   		= $(`[name="projectName"]`).val();
-			const projectCategory 		= $(`[name="projectCategory"]`).val();
-			const clientName    		= $(`[name="clientName"]`).val();
-			const clientAddress 		= $(`[name="clientAddress"]`).val();
+		
 
 			formData.append("employeeID", sessionID);
-			formData.append("purchaseRequestID", purchaseRequestID);
-			formData.append("timelineBuilderID", timelineBuilderID);
-			formData.append("projectCode", projectCode);
-			formData.append("projectName", projectName);
-			formData.append("projectCategory", projectCategory);
-			formData.append("clientName", clientName);
-			formData.append("clientAddress", clientAddress);
-			formData.append("inventoryValidationReason", $("[name=inventoryValidationReason]").val()?.trim());
-			formData.append("inventoryValidationGrandTotal", getCostSummary(true, false));
 
 			if (action == "insert") {
 				formData.append("createdBy", sessionID);
@@ -2060,9 +1674,9 @@ $(document).ready(function() {
 				}
 			}
 
-			if(status == "2"){
+			// if(status == "2"){
 				
-			}
+			// }
 		}
 		
 		
@@ -2071,19 +1685,6 @@ $(document).ready(function() {
 	// ----- END GET PURCHASE REQUEST DATA -----
 
 
-	// ----- VALIDATE INVENTORY ITEM PRICE LIST -----
-	function validateItemPrice() {
-		let flag = 0;
-		$(`[name="itemID"]`).each(function(i) {
-			const itemID = $(this).val();
-			const price = getInventoryPreferredPrice(itemID, this);
-			if (!price) {
-				flag++;
-			}
-		})
-		return flag > 0 ? false : true;
-	}
-	// ----- END VALIDATE INVENTORY ITEM PRICE LIST -----
 
 
     // ----- OPEN ADD FORM -----
@@ -2125,10 +1726,10 @@ $(document).ready(function() {
 		const isFromCancelledDocument = $(this).attr("cancel") == "true";
 		const revise     = $(this).attr("revise") == "true";
 		const employeeID = $(this).attr("employeeID");
-		const feedback   = $(this).attr("code") || getFormCode("PR", dateToday(), id);
+		const feedback   = $(this).attr("code") || getFormCode("IVR", dateToday(), id);
 		const status     = $(this).attr("status");
 
-		if (status != "false" && status != 0) {
+		// if (status != "false" && status != 0) {
 			
 			if (revise) {
 				const action = revise && !isFromCancelledDocument && "insert" || (id ? "update" : "insert");
@@ -2143,7 +1744,7 @@ $(document).ready(function() {
 					data.append("action", "update");
 				}
 
-				validateItemPrice();
+				
 				saveInventoryValidation(data, "save", null, pageContent);
 			} else {
 				$("#page_content").html(preloader);
@@ -2154,14 +1755,14 @@ $(document).ready(function() {
 				}
 			}
 
-		} else {
-			const action = id && feedback ? "update" : "insert";
-			const data   = getInventoryValidationData(action, "save", "0", id);
-			data.append("inventoryValidationStatus", 0);
+		// } else {
+		// 	const action = id && feedback ? "update" : "insert";
+		// 	const data   = getInventoryValidationData(action, "save", "0", id);
+		// 	data.append("inventoryValidationStatus", 0);
 
-			validateItemPrice()
-			saveInventoryValidation(data, "save", null, pageContent);
-		}
+	
+		// 	saveInventoryValidation(data, "save", null, pageContent);
+		// }
 	});
 	// ----- END SAVE CLOSE FORM -----
 
@@ -2171,7 +1772,7 @@ $(document).ready(function() {
 		const id       = decryptString($(this).attr("inventoryValidationID"));
 		const isFromCancelledDocument = $(this).attr("cancel") == "true";
 		const revise   = $(this).attr("revise") == "true";
-		const feedback = $(this).attr("code") || getFormCode("PR", dateToday(), id);
+		const feedback = $(this).attr("code") || getFormCode("IVR", dateToday(), id);
 		const action   = revise && !isFromCancelledDocument && "insert" || (id ? "update" : "insert");
 		const data     = getInventoryValidationData(action, "save", "0", id);
 		data.append("inventoryValidationStatus", 0);
@@ -2187,36 +1788,11 @@ $(document).ready(function() {
 			}
 		}
 
-		validateItemPrice();
+
 		saveInventoryValidation(data, "save", null, pageContent);
 	});
 	// ----- END SAVE DOCUMENT -----
 
-	
-	// ----- REMOVE IS-VALID IN TABLE -----
-	function removeIsValid(element = "table") {
-		$(element).find(".validated, .is-valid, .no-error").removeClass("validated")
-		.removeClass("is-valid").removeClass("no-error");
-	}
-	// ----- END REMOVE IS-VALID IN TABLE -----
-
-
-	// ----- VALIDATE TABLE -----
-	function validateTableItems() {
-		let flag = true;
-		if ($(`.itemProjectTableBody tr`).length == 1 && $(`.itemTableBody tr`).length == 1) {
-			const projectItemID = $(`[name="itemID"][project="true"]`).val();
-			const companyItemID = $(`[name="itemID"][]`).val();
-			flag = !(projectItemID == "0" && companyItemID == "0");
-			// flag = !(projectItemID == companyItemID);
-		}
-
-		if (!flag) {
-			showNotification("warning2", "Cannot submit form, kindly input valid items.");
-		}
-		return flag;
-	}
-	// ----- END VALIDATE TABLE -----
 
 
     // ----- SUBMIT DOCUMENT -----
@@ -2224,12 +1800,8 @@ $(document).ready(function() {
 		const id            = decryptString($(this).attr("inventoryValidationID"));
 		const isFromCancelledDocument = $(this).attr("cancel") == "true";
 		const revise        = $(this).attr("revise") == "true";
-		const validate      = validateForm("form_inventory_validation");
-		const validatePrice = validateItemPrice();
-		const validateItems = validateTableItems();
-		removeIsValid("#tableRequestItems");
 
-		if (validate && validatePrice && validateItems) {
+		
 			const action = revise && !isFromCancelledDocument && "insert" || (id ? "update" : "insert");
 			const data   = getInventoryValidationData(action, "submit", "1", id);
 
@@ -2259,7 +1831,7 @@ $(document).ready(function() {
 			}
 
 			saveInventoryValidation(data, "submit", notificationData, pageContent);
-		}
+		
 	});
 	// ----- END SUBMIT DOCUMENT -----
 
@@ -2279,7 +1851,7 @@ $(document).ready(function() {
     // ----- APPROVE DOCUMENT -----
 	$(document).on("click", "#btnApprove", function () {
 		const id       = decryptString($(this).attr("inventoryValidationID"));
-		const feedback = $(this).attr("code") || getFormCode("PR", dateToday(), id);
+		const feedback = $(this).attr("code") || getFormCode("IVR", dateToday(), id);
 		let tableData  = getTableData("ims_inventory_validation_tbl", "", "inventoryValidationID = " + id);
 
 		if (tableData) {
@@ -2308,45 +1880,228 @@ $(document).ready(function() {
 
 				$(".itemTableRow").each(function(i, obj){
 					let requestItemID 			= $(this).attr("requestitemid");
+					let inventoryValidationID 	= $(this).attr("inventoryValidationID");
+
+					let forPurchase 			= $(this).find(".forpurchase").text().replaceAll(",","") || $(this).find(".forpurchase").text();
+					let availableStocks 		= $(this).find(".availablestocks").text().replaceAll(",","") || $(this).find(".availablestocks").text();
+
+					data.append(`items[${i}][requestItemID]`, requestItemID);
+					data.append(`items[${i}][inventoryValidationID]`, inventoryValidationID);
+					data.append(`items[${i}][forPurchase]`, forPurchase);
+					data.append(`items[${i}][availableStocks]`, availableStocks);
+					
+					
+				});
+
+				$(".itemTableRow").each(function(i, obj){
+					let requestItemID 			= $(this).attr("requestitemid");
+					let inventoryValidationID 	= $(this).attr("inventoryValidationID");
 					let requestItemData			= getTableData("ims_request_items_tbl", "", `requestItemID = '${requestItemID}'`);
 					let tableData 				= requestItemData[0];
-					let billMaterialID 			= tableData.billMaterialID;
-					let purchaseRequestID		= tableData.purchaseRequestID;
-					let categoryType 			= tableData.categoryType;
-					let milestoneBuilderID 		= tableData.milestoneBuilderID;
-					let phaseDescription 		= tableData.phaseDescription;
-					let milestoneListID 		= tableData.projectMilestoneID;
-					let projectMilestoneName	= tableData.projectMilestoneName;
-					let itemID 					= tableData.itemID;
-					let itemCode				= tableData.itemCode;
-					let itemName 				= tableData.itemName;
-					let itemDescription 		= tableData.itemDescription;
-					let itemClassification 		= tableData.itemClassification;
-					let brandName 				= tableData.brandName;
-					let itemUom 				= tableData.itemUom;
-					let quantity 				= $(this).find(".quantity-requested").text().replaceAll(",","") || $(this).find(".quantity-requested").text();
-					let stocks					= $(this).find(".available-stocks").text().replaceAll(",","") || $(this).find(".available-stocks").text();
-					let forPurchase 			= $(this).find(".for-purchase").text().replaceAll(",","") || $(this).find(".for-purchase").text();
-					let reservedItem 			= $(this).find(".reserved-quantity").text().replaceAll(",","") || $(this).find(".reserved-quantity").text();
+					let getForPurchase = +$(this).find(".forpurchase").text().replaceAll(",","") || $(this).find(".forpurchase").text();
+					let getAvailableStocks = +$(this).find(".availablestocks").text().replaceAll(",","") || $(this).find(".availablestocks").text();
+
+					let costEstimateID = tableData.costEstimateID;
+					let billMaterialID = tableData.billMaterialID;
+					let materialRequestID = tableData.materialRequestID;
+					let bidRecapID = tableData.bidRecapID;
+					let purchaseRequestID = tableData.purchaseRequestID;
+					let purchaseOrderID = tableData.purchaseOrderID;
+					let changeRequestID = tableData.changeRequestID;
+					let inventoryReceivingID = tableData.inventoryReceivingID;
+					let inventoryVendorID = tableData.inventoryVendorID;
+					let inventoryVendorCode = tableData.inventoryVendorCode;
+					let inventoryVendorName = tableData.inventoryVendorName;
+					let finalQuoteRemarks = tableData.finalQuoteRemarks;
+					let milestoneBuilderID = tableData.milestoneBuilderID;
+					let phaseDescription = tableData.phaseDescription;
+					let milestoneListID = tableData.milestoneListID;
+					let projectMilestoneID = tableData.projectMilestoneID;
+					let projectMilestoneName = tableData.projectMilestoneName;
+					let itemID = tableData.itemID;
+					let itemCode = tableData.itemCode;
+					let itemBrandName = tableData.itemBrandName;
+					let itemName = tableData.itemName;
+					let itemClassification = tableData.itemClassification;
+					let itemCategory = tableData.itemCategory;
+					let itemUom = tableData.itemUom;
+					let itemDescription = tableData.itemDescription;
+					let files = tableData.files;
+					let remarks = tableData.remarks;
+					let requestQuantity = tableData.requestQuantity;
+
+					let computeReservedItem  = "";
 					
-					data.append(`items[${i}][billMaterialID]`, billMaterialID);
-					data.append(`items[${i}][purchaseRequestID]`, purchaseRequestID);
-					data.append(`items[${i}][categoryType]`, categoryType);
-					data.append(`items[${i}][milestoneBuilderID]`, milestoneBuilderID);
-					data.append(`items[${i}][phaseDescription]`, phaseDescription);
-					data.append(`items[${i}][milestoneListID]`, milestoneListID);
-					data.append(`items[${i}][projectMilestoneName]`, projectMilestoneName);
-					data.append(`items[${i}][itemID]`, itemID);
-					data.append(`items[${i}][itemCode]`, itemCode);
-					data.append(`items[${i}][itemName]`, itemName);
-					data.append(`items[${i}][itemDescription]`, itemDescription);
-					data.append(`items[${i}][itemClassification]`, itemClassification);
-					data.append(`items[${i}][brandName]`, brandName);
-					data.append(`items[${i}][itemUom]`, itemUom);
-					data.append(`items[${i}][quantity]`, quantity);
-					data.append(`items[${i}][stocks]`, stocks);
-					data.append(`items[${i}][forPurchase]`, forPurchase);
-					data.append(`items[${i}][reserveItem]`, reservedItem);
+					if(getForPurchase == 0 ){
+						if( getAvailableStocks ==0){
+							computeReservedItem = 0;
+
+						}else{
+							computeReservedItem =  requestQuantity;
+
+						}
+					}else{
+						 computeReservedItem = Math.abs(getForPurchase - requestQuantity);
+
+					}
+					let reservedItem =  computeReservedItem || tableData.reservedItem;
+					let forPurchase 	= getForPurchase;				
+					let availableStocks = getAvailableStocks;				
+					let unitCost = tableData.unitCost;
+					let totalCost = tableData.totalCost;
+
+
+					data.append(`items[${i}][costEstimateID]` , costEstimateID);
+					data.append(`items[${i}][billMaterialID]` , billMaterialID);
+					data.append(`items[${i}][materialRequestID]` , materialRequestID);
+					data.append(`items[${i}][inventoryValidationID]` , inventoryValidationID);
+					data.append(`items[${i}][bidRecapID]` , bidRecapID);
+					data.append(`items[${i}][purchaseRequestID]` , purchaseRequestID);
+					data.append(`items[${i}][purchaseOrderID]` , purchaseOrderID);
+					data.append(`items[${i}][changeRequestID]` , changeRequestID);
+					data.append(`items[${i}][inventoryReceivingID]` , inventoryReceivingID);
+					data.append(`items[${i}][inventoryVendorID]` , inventoryVendorID);
+					data.append(`items[${i}][inventoryVendorCode]` , inventoryVendorCode);
+					data.append(`items[${i}][inventoryVendorName]` , inventoryVendorName);
+					data.append(`items[${i}][finalQuoteRemarks]` , finalQuoteRemarks);
+					data.append(`items[${i}][milestoneBuilderID]` , milestoneBuilderID);
+					data.append(`items[${i}][phaseDescription]` , phaseDescription);
+					data.append(`items[${i}][milestoneListID]` , milestoneListID);
+					data.append(`items[${i}][projectMilestoneID]` , projectMilestoneID);
+					data.append(`items[${i}][projectMilestoneName]` , projectMilestoneName);
+					data.append(`items[${i}][itemID]` , itemID);
+					data.append(`items[${i}][itemCode]` , itemCode);
+					data.append(`items[${i}][itemBrandName]` , itemBrandName);
+					data.append(`items[${i}][itemName]` , itemName);
+					data.append(`items[${i}][itemClassification]` , itemClassification);
+					data.append(`items[${i}][itemCategory]` , itemCategory);
+					data.append(`items[${i}][itemUom]` , itemUom);
+					data.append(`items[${i}][itemDescription]` , itemDescription);
+					data.append(`items[${i}][files]` , files);
+					data.append(`items[${i}][remarks]`  , remarks);
+					data.append(`items[${i}][requestQuantity]` , requestQuantity);
+					data.append(`items[${i}][reservedItem]` , reservedItem);
+					data.append(`items[${i}][forPurchase]` , forPurchase);
+					data.append(`items[${i}][availableStocks]` , availableStocks );
+					data.append(`items[${i}][unitCost]` , unitCost);
+					data.append(`items[${i}][totalCost]` , totalCost);
+				});
+
+
+				$(".assetTableRow").each(function(i, obj){
+					let requestAssetID 			= $(this).attr("requestassetid");
+					let inventoryValidationID 	= $(this).attr("inventoryValidationID");
+
+					let forPurchase 			= $(this).find(".forpurchase").text().replaceAll(",","") || $(this).find(".forpurchase").text();
+					let availableStocks 		= $(this).find(".availablestocks").text().replaceAll(",","") || $(this).find(".availablestocks").text();
+
+					data.append(`assets[${i}][requestAssetID]`, requestAssetID);
+					data.append(`assets[${i}][inventoryValidationID]`, inventoryValidationID);
+					data.append(`assets[${i}][forPurchase]`, forPurchase);
+					data.append(`assets[${i}][availableStocks]`, availableStocks);
+					
+					
+				});
+
+				$(".assetTableRow").each(function(i, obj){
+					let requestAseetID 			= $(this).attr("requestassetid");
+					let inventoryValidationID 	= $(this).attr("inventoryValidationID");
+					let requestAssetData			= getTableData("ims_request_assets_tbl", "", `requestAssetID = '${requestAseetID}'`);
+					let tableData 				= requestAssetData[0];
+					let getForPurchase = +$(this).find(".forpurchase").text().replaceAll(",","") || $(this).find(".forpurchase").text();
+					let getAvailableStocks = +$(this).find(".availablestocks").text().replaceAll(",","") || $(this).find(".availablestocks").text();
+
+					let costEstimateID = tableData.costEstimateID;
+					let billMaterialID = tableData.billMaterialID;
+					let materialRequestID = tableData.materialRequestID;
+					let bidRecapID = tableData.bidRecapID;
+					let purchaseRequestID = tableData.purchaseRequestID;
+					let purchaseOrderID = tableData.purchaseOrderID;
+					let changeRequestID = tableData.changeRequestID;
+					let inventoryReceivingID = tableData.inventoryReceivingID;
+					let inventoryVendorID = tableData.inventoryVendorID;
+					let inventoryVendorCode = tableData.inventoryVendorCode;
+					let inventoryVendorName = tableData.inventoryVendorName;
+					let finalQuoteRemarks = tableData.finalQuoteRemarks;
+					let milestoneBuilderID = tableData.milestoneBuilderID;
+					let phaseDescription = tableData.phaseDescription;
+					let milestoneListID = tableData.milestoneListID;
+					let projectMilestoneID = tableData.projectMilestoneID;
+					let projectMilestoneName = tableData.projectMilestoneName;
+					let assetID = tableData.assetID;
+					let assetCode = tableData.assetCode;
+					let assetBrandName = tableData.assetBrandName;
+					let assetName = tableData.assetName;
+					let assetClassification = tableData.assetClassification;
+					let assetCategory = tableData.assetCategory;
+					let assetUom = tableData.assetUom;
+					let assetDescription = tableData.assetDescription;
+					let files = tableData.files;
+					let remarks = tableData.remarks;
+					let requestQuantity = tableData.requestQuantity;
+
+					let computeReservedAsset  = "";
+
+					if(getForPurchase == 0 ){
+						if( getAvailableStocks ==0){
+							computeReservedAsset = 0;
+
+						}else{
+							computeReservedAsset =  requestQuantity;
+
+						}
+					}else{
+						 computeReservedAsset = Math.abs(getForPurchase - requestQuantity);
+
+					}
+					
+					let reservedAsset = computeReservedAsset || tableData.reservedAsset;
+					let	requestManHours = tableData.requestManHours;
+					let	dateNeeded = tableData.dateNeeded;
+					let	dateReturn = tableData.dateReturn;
+					let	actualDateReturn = tableData.actualDateReturn;
+					let forPurchase 			= getForPurchase;
+					let availableStocks 		= getAvailableStocks;
+					let totalCost = tableData.totalCost;
+
+
+					data.append(`assets[${i}][costEstimateID]` , costEstimateID);
+					data.append(`assets[${i}][billMaterialID]` , billMaterialID);
+					data.append(`assets[${i}][materialRequestID]` , materialRequestID);
+					data.append(`assets[${i}][inventoryValidationID]` , inventoryValidationID);
+					data.append(`assets[${i}][bidRecapID]` , bidRecapID);
+					data.append(`assets[${i}][purchaseRequestID]` , purchaseRequestID);
+					data.append(`assets[${i}][purchaseOrderID]` , purchaseOrderID);
+					data.append(`assets[${i}][changeRequestID]` , changeRequestID);
+					data.append(`assets[${i}][inventoryReceivingID]` , inventoryReceivingID);
+					data.append(`assets[${i}][inventoryVendorID]` , inventoryVendorID);
+					data.append(`assets[${i}][inventoryVendorCode]` , inventoryVendorCode);
+					data.append(`assets[${i}][inventoryVendorName]` , inventoryVendorName);
+					data.append(`assets[${i}][finalQuoteRemarks]` , finalQuoteRemarks);
+					data.append(`assets[${i}][milestoneBuilderID]` , milestoneBuilderID);
+					data.append(`assets[${i}][phaseDescription]` , phaseDescription);
+					data.append(`assets[${i}][milestoneListID]` , milestoneListID);
+					data.append(`assets[${i}][projectMilestoneID]` , projectMilestoneID);
+					data.append(`assets[${i}][projectMilestoneName]` , projectMilestoneName);
+					data.append(`assets[${i}][assetID]` , assetID);
+					data.append(`assets[${i}][assetode]` ,assetCode);
+					data.append(`assets[${i}][assetBrandName]` , assetBrandName);
+					data.append(`assets[${i}][assetName]` , assetName);
+					data.append(`assets[${i}][assetClassification]` , assetClassification);
+					data.append(`assets[${i}][assetCategory]` , assetCategory);
+					data.append(`assets[${i}][assetUom]` , assetUom);
+					data.append(`assets[${i}][assetDescription]` , assetDescription);
+					data.append(`assets[${i}][files]` , files);
+					data.append(`assets[${i}][remarks]`  , remarks);
+					data.append(`assets[${i}][requestQuantity]` , requestQuantity);
+					data.append(`assets[${i}][reservedAsset]` , reservedAsset);
+					data.append(`assets[${i}][forPurchase]` , forPurchase);
+					data.append(`assets[${i}][availableStocks]` , availableStocks );
+					data.append(`assets[${i}][requestManHours]` , requestManHours );
+					data.append(`assets[${i}][dateNeeded]` , dateNeeded );
+					data.append(`assets[${i}][dateReturn]` , dateReturn );
+					data.append(`assets[${i}][actualDateReturn]` , actualDateReturn );
+					data.append(`assets[${i}][totalCost]` , totalCost);
 				});
 
 			} else {
@@ -2372,7 +2127,7 @@ $(document).ready(function() {
     // ----- REJECT DOCUMENT -----
 	$(document).on("click", "#btnReject", function () {
 		const id       = decryptString($(this).attr("inventoryValidationID"));
-		const feedback = $(this).attr("code") || getFormCode("PR", dateToday(), id);
+		const feedback = $(this).attr("code") || getFormCode("IVR", dateToday(), id);
 
 		$("#modal_inventory_validation_content").html(preloader);
 		$("#modal_inventory_validation .page-title").text("DENY PURCHASE REQUEST");
@@ -2404,7 +2159,7 @@ $(document).ready(function() {
 
 	$(document).on("click", "#btnRejectConfirmation", function () {
 		const id       = decryptString($(this).attr("inventoryValidationID"));
-		const feedback = $(this).attr("code") || getFormCode("PR", dateToday(), id);
+		const feedback = $(this).attr("code") || getFormCode("IVR", dateToday(), id);
 
 		const validate = validateForm("modal_inventory_validation");
 		if (validate) {
@@ -2440,18 +2195,18 @@ $(document).ready(function() {
 	// ----- END REJECT DOCUMENT -----
 
 
-	// ----- DROP DOCUMENT -----
-	$(document).on("click", "#btnDrop", function() {
-		const id = decryptString($(this).attr("inventoryValidationID"));
-		let data = new FormData;
-		data.append("inventoryValidationID", id);
-		data.append("action", "update");
-		data.append("method", "drop");
-		data.append("updatedBy", sessionID);
+	// // ----- DROP DOCUMENT -----
+	// $(document).on("click", "#btnDrop", function() {
+	// 	const id = decryptString($(this).attr("inventoryValidationID"));
+	// 	let data = new FormData;
+	// 	data.append("inventoryValidationID", id);
+	// 	data.append("action", "update");
+	// 	data.append("method", "drop");
+	// 	data.append("updatedBy", sessionID);
 
-		saveInventoryValidation(data, "drop", null, pageContent);
-	})
-	// ----- END DROP DOCUMENT -----
+	// 	saveInventoryValidation(data, "drop", null, pageContent);
+	// })
+	// // ----- END DROP DOCUMENT -----
 
 
     // ----- NAV LINK -----
@@ -2540,11 +2295,11 @@ function getConfirmation(method = "submit") {
 			swalText  = "Are you sure to cancel this document?";
 			swalImg   = `${base_url}assets/modal/cancel.svg`;
 			break;
-		case "drop":
-			swalTitle = `DROP ${title.toUpperCase()}`;
-			swalText  = "Are you sure to drop this document?";
-			swalImg   = `${base_url}assets/modal/drop.svg`;
-			break;
+		// case "drop":
+		// 	swalTitle = `DROP ${title.toUpperCase()}`;
+		// 	swalText  = "Are you sure to drop this document?";
+		// 	swalImg   = `${base_url}assets/modal/drop.svg`;
+		// 	break;
 		default:
 			swalTitle = `CANCEL ${title.toUpperCase()}`;
 			swalText  = "Are you sure that you want to cancel this process?";
@@ -2594,18 +2349,18 @@ function saveInventoryValidation(data = null, method = "submit", notificationDat
 
 						let swalTitle;
 						if (method == "submit") {
-							swalTitle = `${getFormCode("PR", dateCreated, insertedID)} submitted successfully!`;
+							swalTitle = `${getFormCode("", dateCreated, insertedID)} submitted successfully!`;
 						} else if (method == "save") {
-							swalTitle = `${getFormCode("PR", dateCreated, insertedID)} saved successfully!`;
+							swalTitle = `${getFormCode("IVR", dateCreated, insertedID)} saved successfully!`;
 						} else if (method == "cancelform") {
-							swalTitle = `${getFormCode("PR", dateCreated, insertedID)} cancelled successfully!`;
+							swalTitle = `${getFormCode("IVR", dateCreated, insertedID)} cancelled successfully!`;
 						} else if (method == "approve") {
-							swalTitle = `${getFormCode("PR", dateCreated, insertedID)} approved successfully!`;
+							swalTitle = `${getFormCode("IVR", dateCreated, insertedID)} approved successfully!`;
 						} else if (method == "deny") {
-							swalTitle = `${getFormCode("PR", dateCreated, insertedID)} denied successfully!`;
-						} else if (method == "drop") {
-							swalTitle = `${getFormCode("PR", dateCreated, insertedID)} dropped successfully!`;
-						}	
+							swalTitle = `${getFormCode("IVR", dateCreated, insertedID)} denied successfully!`;
+						} //else if (method == "drop") {
+							//swalTitle = `${getFormCode("IVR", dateCreated, insertedID)} dropped successfully!`;
+						// }	
 		
 						if (isSuccess == "true") {
 							setTimeout(() => {

@@ -26,41 +26,25 @@ class Inventory_validation extends CI_Controller {
         $inventoryValidationID          = $this->input->post("inventoryValidationID") ?? null; 
         $reviseInventoryValidationID    = $this->input->post("reviseInventoryValidationID") ?? null;
         $employeeID                     = $this->input->post("employeeID");
-        $purchaseRequestID              = $this->input->post("purchaseRequestID") ?? null;
-        $timelineBuilderID              = $this->input->post("timelineBuilderID") ?? null;
-        $projectCode                    = $this->input->post("projectCode") ?? null;
-        $projectName                    = $this->input->post("projectName") ?? null;
-        $projectCategory                = $this->input->post("projectCategory") ?? null;
-        $clientName                     = $this->input->post("clientName") ?? null;
-        $clientAddress                  = $this->input->post("clientAddress") ?? null;
         $approversID                    = $this->input->post("approversID") ?? null;
         $approversStatus                = $this->input->post("approversStatus") ?? null;
         $approversDate                  = $this->input->post("approversDate") ?? null;
         $inventoryValidationStatus      = $this->input->post("inventoryValidationStatus");
-        $inventoryValidationReason      = $this->input->post("inventoryValidationReason") ?? null;
-        $inventoryValidationGrandTotal  = $this->input->post("inventoryValidationGrandTotal") ?? 0;
         $inventoryValidationRemarks     = $this->input->post("inventoryValidationRemarks") ?? null;
         $submittedAt                    = $this->input->post("submittedAt") ?? null;
         $createdBy                      = $this->input->post("createdBy");
         $updatedBy                      = $this->input->post("updatedBy");
         $createdAt                      = $this->input->post("createdAt");
         $items                          = $this->input->post("items") ?? null;
+        $assets                          = $this->input->post("assets") ?? null;
 
         $inventoryValidationData = [
             "reviseInventoryValidationID"   => $reviseInventoryValidationID,
             "employeeID"                    => $employeeID,
-            "purchaseRequestID"             => $purchaseRequestID,
-            "timelineBuilderID"             => $timelineBuilderID,
-            "projectCode"                   => $projectCode,
-            "projectName"                   => $projectName,
-            "projectCategory"               => $projectCategory,
-            "clientName"                    => $clientName,
-            "clientAddress"                 => $clientAddress,
             "approversID"                   => $approversID,
             "approversStatus"               => $approversStatus,
             "approversDate"                 => $approversDate,
             "inventoryValidationStatus"     => $inventoryValidationStatus,
-            "inventoryValidationReason"     => $inventoryValidationReason,
             "submittedAt"                   => $submittedAt,
             "createdBy"                     => $createdBy,
             "updatedBy"                     => $updatedBy,
@@ -89,76 +73,216 @@ class Inventory_validation extends CI_Controller {
                 //     $this->inventoryvalidation->updateRequestItemsBrandName($inventoryValidationID, $purchaseRequestID);
                 // }
                 // ----- END UPDATE BRAND NAME IN REQUEST ITEMS -----
-            } else if ($method == "deny") {
-                $inventoryValidationData = [
-                    "approversStatus"        => $approversStatus,
-                    "approversDate"          => $approversDate,
-                    "inventoryValidationStatus"  => 3,
-                    "inventoryValidationRemarks" => $inventoryValidationRemarks,
-                    "updatedBy"              => $updatedBy,
-                ];
-            } else if ($method == "drop") {
-                $inventoryValidationData = [
-                    "reviseInventoryValidationID" => $reviseInventoryValidationID,
-                    "inventoryValidationStatus"   => 5,
-                    "updatedBy"               => $updatedBy,
-                ]; 
-            }
+            } 
+            // else if ($method == "deny") {
+            //     $inventoryValidationData = [
+            //         "approversStatus"        => $approversStatus,
+            //         "approversDate"          => $approversDate,
+            //         "inventoryValidationStatus"  => 3,
+            //         "inventoryValidationRemarks" => $inventoryValidationRemarks,
+            //         "updatedBy"              => $updatedBy,
+            //     ];
+            // } else if ($method == "drop") {
+            //     $inventoryValidationData = [
+            //         "reviseInventoryValidationID" => $reviseInventoryValidationID,
+            //         "inventoryValidationStatus"   => 5,
+            //         "updatedBy"               => $updatedBy,
+            //     ]; 
+            // }
         }
         // ----- ADD REQUEST ITEMS -----
         if ($inventoryValidationStatus == 2) {
+    
             if ($items) {
-                $inventoryValidationItems = [];
+                $inventoryValidationItems =[];
                 foreach($items as $index => $item) {
-                    $billMaterialID 			= $item["billMaterialID"] ?? NULL;
-				    $purchaseRequestID		    = $item["purchaseRequestID"] ?? NULL;
-                    $inventoryValidationID      = $inventoryValidationID;
-                    $categoryType 			    = $item["categoryType"] ?? NULL;
-                    $milestoneBuilderID 		= $item["milestoneBuilderID"] == "null"     ? NULL : $item["milestoneBuilderID"];
-                    $phaseDescription 		    = $item["phaseDescription"] == "null"       ? NULL : $item["phaseDescription"];
-                    $milestoneListID 		    = $item["milestoneListID"] == "null"        ? NULL : $item["milestoneListID"];
-                    $projectMilestoneName	    = $item["projectMilestoneName"] == "null"   ? NULL : $item["projectMilestoneName"];
-                    $itemID 					= $item["itemID"] ?? NULL;
-                    $itemCode				    = $item["itemCode"] ?? NULL;
-                    $itemName 				    = $item["itemName"] ?? NULL;
-                    $itemDescription 		    = $item["itemDescription"] ?? NULL;
-                    $itemClassification 		= $item["itemClassification"] ?? NULL;
-                    $brandName 				    = $item["brandName"] ?? NULL;
-                    $itemUom 				    = $item["itemUom"] ?? NULL;
-                    $quantity 				    = $item["quantity"] ?? NULL;
-                    $stocks					    = $item["stocks"] ?? NULL;
-                    $forPurchase 			    = $item["forPurchase"] ?? NULL;
-                    $reservedItem 			    = $item["reservedItem"] ?? NULL;
+
+                    $costEstimateID  = $item["costEstimateID"]  == "null" ? NULL : $item["costEstimateID"];
+                    $billMaterialID  = $item["billMaterialID"]  == "null" ? NULL : $item["billMaterialID"];  
+                    $materialRequestID  = $item["materialRequestID"]  == "null" ? NULL : $item["materialRequestID"]; 
+                    $inventoryValidationID  = $item["inventoryValidationID"]  == "null" ? NULL : $item["inventoryValidationID"]; 
+                    $bidRecapID  = $item["bidRecapID"]  == "null" ? NULL : $item["bidRecapID"];
+                    $purchaseRequestID  = $item["purchaseRequestID"]  == "null" ? NULL : $item["purchaseRequestID"];
+                    $purchaseOrderID  = $item["purchaseOrderID"]  == "null" ? NULL : $item["purchaseOrderID"]; 
+                    $changeRequestID  = $item["changeRequestID"]  == "null" ? NULL : $item["changeRequestID"]; 
+                    $inventoryReceivingID  = $item["inventoryReceivingID"]  == "null" ? NULL : $item["inventoryReceivingID"]; 
+                    $inventoryVendorID  = $item["inventoryVendorID"]  == "null" ? NULL : $item["inventoryVendorID"];  
+                    $inventoryVendorCode  = $item["inventoryVendorCode"] ?? NULL;
+                    $inventoryVendorName  = $item["inventoryVendorName"] ?? NULL;  
+                    $finalQuoteRemarks  = $item["finalQuoteRemarks"] ?? NULL;
+                    $milestoneBuilderID  = $item["milestoneBuilderID"]  == "null" ? NULL : $item["milestoneBuilderID"];  
+                    $phaseDescription  = $item["phaseDescription"]  ?? NULL;
+                    $milestoneListID  = $item["milestoneListID"]  == "null" ? NULL : $item["milestoneListID"];
+                    $projectMilestoneID  = $item["projectMilestoneID"]  == "null" ? NULL : $item["projectMilestoneID"];
+                    $projectMilestoneName  = $item["projectMilestoneName"] ?? NULL;
+                    $itemID  = $item["itemID"]  == "null" ? NULL : $item["itemID"];
+                    $itemCode  = $item["itemCode"]  ?? NULL;
+                    $itemBrandName  = $item["itemBrandName"]  ?? NULL;
+                    $itemName  = $item["itemName"]  ?? NULL; 
+                    $itemClassification  = $item["itemClassification"]  ?? NULL; 
+                    $itemCategory  = $item["itemCategory"] ?? NULL;
+                    $itemUom  = $item["itemUom"] ?? NULL;
+                    $itemDescription  = $item["itemDescription"] ?? NULL;
+                    $files  = $item["files"]  ?? NULL;
+                    $remarks  = $item["remarks"]  ?? NULL;
+                    $availableStocks  = $item["availableStocks"]  ?? NULL;
+                    $requestQuantity  = $item["requestQuantity"]  ?? NULL; 
+                    $reservedItem  = $item["reservedItem"]  ?? NULL;
+                    $forPurchase  = $item["forPurchase"]  ?? NULL;
+                    $availableStocks  = $item["availableStocks"]  ?? NULL; 
+                    $unitCost  = $item["unitCost"]  ?? NULL;
+                    $totalCost  = $item["totalCost"]  ?? NULL;
+
+                  
 
                     $temp = [
-                        "billMaterialID" 			=> $billMaterialID,
-                        "purchaseRequestID"		    => $purchaseRequestID,
-                        "inventoryValidationID"     => $inventoryValidationID,
-                        "categoryType" 			    => $categoryType,
-                        "milestoneBuilderID" 		=> $milestoneBuilderID,
-                        "phaseDescription" 		    => $phaseDescription,
-                        "milestoneListID" 		    => $milestoneListID,
-                        "projectMilestoneID" 		=> $milestoneListID,
-                        "projectMilestoneName"	    => $projectMilestoneName,
-                        "itemID" 					=> $itemID,
-                        "itemCode"				    => $itemCode,
-                        "itemName" 				    => $itemName,
-                        "itemDescription" 		    => $itemDescription,
-                        "itemClassification" 		=> $itemClassification,
-                        "brandName" 			    => $brandName,
-                        "itemUom" 				    => $itemUom,
-                        "quantity" 				    => $quantity,
-                        "stocks"					=> $stocks,
-                        "forPurchase" 			    => $forPurchase,
-                        "reserveItem" 			    => $reservedItem,
-                        "createdBy"                 => $createdBy,
-                        "updatedBy"                 => $createdBy,
+                        'costEstimateID'  => $costEstimateID,
+                        'billMaterialID'  => $billMaterialID,  
+                        'materialRequestID'  => $materialRequestID, 
+                        'inventoryValidationID'  => $inventoryValidationID, 
+                        'bidRecapID'  => $bidRecapID,
+                        'purchaseRequestID'  => $purchaseRequestID,
+                        'purchaseOrderID'  => $purchaseOrderID, 
+                        'changeRequestID'  => $changeRequestID, 
+                        'inventoryReceivingID'  => $inventoryReceivingID, 
+                        'inventoryVendorID'  => $inventoryVendorID,  
+                        'inventoryVendorCode'  => $inventoryVendorCode,  
+                        'inventoryVendorName'  => $inventoryVendorName,  
+                        'finalQuoteRemarks'  => $finalQuoteRemarks,  
+                        'milestoneBuilderID'  => $milestoneBuilderID,  
+                        'phaseDescription'  => $phaseDescription, 
+                        'milestoneListID'  => $milestoneListID,
+                        'projectMilestoneID'  => $projectMilestoneID,
+                        'projectMilestoneName'  => $projectMilestoneName,
+                        'itemID'  => $itemID,
+                        'itemCode'  => $itemCode,
+                        'itemBrandName'  => $itemBrandName,
+                        'itemName'  => $itemName, 
+                        'itemClassification'  => $itemClassification, 
+                        'itemCategory'  => $itemCategory, 
+                        'itemUom'  => $itemUom, 
+                        'itemDescription'  => $itemDescription, 
+                        'files'  => $files,
+                        'remarks'  => $remarks, 
+                        'availableStocks'  => $availableStocks,
+                        'requestQuantity'  => $requestQuantity, 
+                        'reservedItem'  => $reservedItem,
+                        'forPurchase'  => $forPurchase,
+                        'availableStocks'  => $availableStocks, 
+                        'unitCost'  => $unitCost,
+                        'totalCost'  => $totalCost, 
+                        'updatedBy' => $updatedBy, 
+                       
                     ];
+
+                
+
+                   
                     array_push($inventoryValidationItems, $temp);
                 }
+               
                 
-                $saveInventoryValidationItems = $this->inventoryvalidation->saveInventoryValidationItems($inventoryValidationItems, $inventoryValidationID, $purchaseRequestID);
+                $saveInventoryValidationItems = $this->inventoryvalidation->saveInventoryValidationItems($inventoryValidationItems,$materialRequestID);
             }
+
+            if ($assets) {
+                $inventoryValidationAssets =[];
+                foreach($assets as $index => $asset) {
+
+                    $costEstimateID  = $asset["costEstimateID"]  == "null" ? NULL : $asset["costEstimateID"];
+                    $billMaterialID  = $asset["billMaterialID"]  == "null" ? NULL : $asset["billMaterialID"];  
+                    $materialRequestID  = $asset["materialRequestID"]  == "null" ? NULL : $asset["materialRequestID"]; 
+                    $inventoryValidationID  = $asset["inventoryValidationID"]  == "null" ? NULL : $asset["inventoryValidationID"]; 
+                    $bidRecapID  = $asset["bidRecapID"]  == "null" ? NULL : $asset["bidRecapID"];
+                    $purchaseRequestID  = $asset["purchaseRequestID"]  == "null" ? NULL : $asset["purchaseRequestID"];
+                    $purchaseOrderID  = $asset["purchaseOrderID"]  == "null" ? NULL : $asset["purchaseOrderID"]; 
+                    $changeRequestID  = $asset["changeRequestID"]  == "null" ? NULL : $asset["changeRequestID"]; 
+                    $inventoryReceivingID  = $asset["inventoryReceivingID"]  == "null" ? NULL : $asset["inventoryReceivingID"]; 
+                    $inventoryVendorID  = $asset["inventoryVendorID"]  == "null" ? NULL : $asset["inventoryVendorID"];  
+                    $inventoryVendorCode  = $asset["inventoryVendorCode"] ?? NULL;
+                    $inventoryVendorName  = $asset["inventoryVendorName"] ?? NULL;  
+                    $finalQuoteRemarks  = $asset["finalQuoteRemarks"] ?? NULL;
+                    $milestoneBuilderID  = $asset["milestoneBuilderID"]  == "null" ? NULL : $asset["milestoneBuilderID"];  
+                    $phaseDescription  = $asset["phaseDescription"]  ?? NULL;
+                    $milestoneListID  = $asset["milestoneListID"]  == "null" ? NULL : $asset["milestoneListID"];
+                    $projectMilestoneID  = $asset["projectMilestoneID"]  == "null" ? NULL : $asset["projectMilestoneID"];
+                    $projectMilestoneName  = $asset["projectMilestoneName"] ?? NULL;
+                    $assetID  = $asset["assetID"]  == "null" ? NULL : $asset["assetID"];
+                    $assetCode  = $asset["assetCode"]  ?? NULL;
+                    $assetBrandName  = $asset["assetBrandName"]  ?? NULL;
+                    $assetName  = $asset["assetName"]  ?? NULL; 
+                    $assetClassification  = $asset["assetClassification"]  ?? NULL; 
+                    $assetCategory  = $asset["assetCategory"] ?? NULL;
+                    $assetUom  = $asset["assetUom"] ?? NULL;
+                    $assetDescription  = $asset["assetDescription"] ?? NULL;
+                    $files  = $asset["files"]  ?? NULL;
+                    $remarks  = $asset["remarks"]  ?? NULL;
+                    $availableStocks  = $asset["availableStocks"]  ?? NULL;
+                    $requestQuantity  = $asset["requestQuantity"]  ?? NULL; 
+                    $reservedAsset  = $asset["reservedAsset"]  ?? NULL;
+					$requestManHours = $asset["requestManHours"] ?? NULL;
+					$dateNeeded = $asset["dateNeeded"] ?? NULL;
+					$dateReturn = $asset["dateReturn"] ?? NULL;
+					$actualDateReturn = $asset["actualDateReturn"] ?? NULL;
+                    $forPurchase  = $asset["forPurchase"]  ?? NULL;
+                    $availableStocks  = $asset["availableStocks"]  ?? NULL; 
+                    $totalCost  = $asset["totalCost"]  ?? NULL;
+
+                  
+
+                    $temp = [
+                        'costEstimateID'  => $costEstimateID,
+                        'billMaterialID'  => $billMaterialID,  
+                        'materialRequestID'  => $materialRequestID, 
+                        'inventoryValidationID'  => $inventoryValidationID, 
+                        'bidRecapID'  => $bidRecapID,
+                        'purchaseRequestID'  => $purchaseRequestID,
+                        'purchaseOrderID'  => $purchaseOrderID, 
+                        'changeRequestID'  => $changeRequestID, 
+                        'inventoryReceivingID'  => $inventoryReceivingID, 
+                        'inventoryVendorID'  => $inventoryVendorID,  
+                        'inventoryVendorCode'  => $inventoryVendorCode,  
+                        'inventoryVendorName'  => $inventoryVendorName,  
+                        'finalQuoteRemarks'  => $finalQuoteRemarks,  
+                        'milestoneBuilderID'  => $milestoneBuilderID,  
+                        'phaseDescription'  => $phaseDescription, 
+                        'milestoneListID'  => $milestoneListID,
+                        'projectMilestoneID'  => $projectMilestoneID,
+                        'projectMilestoneName'  => $projectMilestoneName,
+                        'assetID'  => $assetID,
+                        'assetCode'  => $assetCode,
+                        'assetBrandName'  => $assetBrandName,
+                        'assetName'  => $assetName, 
+                        'assetClassification'  => $assetClassification, 
+                        'assetCategory'  => $assetCategory, 
+                        'assetUom'  => $assetUom, 
+                        'assetDescription'  => $assetDescription, 
+                        'files'  => $files,
+                        'remarks'  => $remarks, 
+                        'availableStocks'  => $availableStocks,
+                        'requestQuantity'  => $requestQuantity, 
+                        'reservedAsset'  => $reservedAsset,
+                        'requestManHours' => $requestManHours,
+                        'dateNeeded' => $dateNeeded,
+                        'dateReturn' => $dateReturn,
+                        'actualDateReturn' => $actualDateReturn,
+                        'forPurchase'  => $forPurchase,
+                        'availableStocks'  => $availableStocks, 
+                        'totalCost'  => $totalCost, 
+                        'updatedBy' => $updatedBy, 
+                       
+                    ];
+
+                
+
+                   
+                    array_push($inventoryValidationAssets, $temp);
+                }
+               
+                
+                $saveInventoryValidationAssets = $this->inventoryvalidation->saveInventoryValidationAssets($inventoryValidationAssets,$materialRequestID);
+            }
+          
         }
         // ----- END ADD REQUEST ITEMS -----
 

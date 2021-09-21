@@ -448,7 +448,7 @@ function getApproversStatus(approversID, approversStatus, approversDate) {
 }
 
 // ----- BADGE STATUS -----
-function getStatusStyle(status = 1) {
+function getStatusStyle(status = 1, isInventory = false) {
 	switch (status) {
 		case "1":
 			return `<span class="badge badge-outline-info w-100">For Approval</span>`;
@@ -464,11 +464,12 @@ function getStatusStyle(status = 1) {
 			return `<span class="badge badge-outline-info w-100">For Proposal</span>`;
 		case "7":
 			return `<span class="badge badge-outline-info w-100">Reassessment</span>`;
-		case "7":
+		case "8":
 			return `<span class="badge badge-outline-success w-100" style="width: 100% !important">Assessed</span>`;
 		case "0":
 		default:
-			return `<span class="badge badge-warning w-100">Draft</span>`;
+			let text = isInventory ? "Pending" : "Draft";
+			return `<span class="badge badge-warning w-100">${text}</span>`;
 	}
 }
 // ----- END BADGE STATUS -----

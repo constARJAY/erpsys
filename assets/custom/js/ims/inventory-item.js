@@ -165,48 +165,137 @@ $(document).ready(function(){
         "classificationID ,classificationName", "classificationStatus = 1", "");
       
             let html = ` <option value="" disabled selected ${!param && "selected"}>Select Item Classification</option>`;
+            let disabled = false;
             data.map((item, index, array) => {
-                html += `<option value="${item.classificationID}" ${param && item.classificationID == param[0].classificationID && "selected"}>${item.classificationName}</option>`;
+                let isEqual = param && item.classificationID == param[0].classificationID;
+                if (isEqual) disabled = true;
+                html += `<option value="${item.classificationID}" ${isEqual && "selected"}>${item.classificationName}</option>`;
             })
+            if (disabled) {
+                $("#input_classificationID").attr("disabled", true);
+                $("#input_classificationID").parent().find(`span.text-danger`).remove();
+            }
             $("#input_classificationID").html(html);
     }
     classificationContent();
     // ----- END CLASSIFICATION CONTENT -----
 
+
     // -----CATEGORY CONTENT -----
-    function categoryContent(condition = "add", param = false) {
+    function categoryContent(condition = "add", inClassificationID = false, inCategoryID = false) {
     // getTableData(tableName = null, columnName = “”, WHERE = “”, orderBy = “”) 
-    let paramCondition = param == false ? "":" AND classificationID="+param;
-    const data = getTableData("ims_inventory_category_tbl", "categoryID ,categoryName", "categoryStatus = '1'"+paramCondition, "");
+    let classificationCondition = inClassificationID == false ? "":" AND classificationID="+inClassificationID;
+    let categoryCondition = inCategoryID == false ? "":" AND categoryID="+inCategoryID;
+    const data = getTableData("ims_inventory_category_tbl", "categoryID ,categoryName", "categoryStatus = '1'"+classificationCondition+categoryCondition);
         
             let html = ` <option value="" disabled ${condition == "add" ? "selected": ""}>Select Item Category</option>`;
-            if(param != false){
+            let disabled = false;
+            if(inClassificationID != false){
                     data.map((item, index, array) => {
-                    html += `<option value="${item.categoryID}" ${item.classificationID == param && condition != "add" ? "selected":""}>${item.categoryName}</option>`;
+                    let isEqual = item.categoryID == inCategoryID && condition != "add";
+                    if (isEqual) disabled = true;
+                    html += `<option value="${item.categoryID}" ${isEqual ? "selected":""}>${item.categoryName}</option>`;
                 })
+            }
+            if (disabled) {
+                $("#input_categoryID").attr("disabled", true);
+                $("#input_categoryID").parent().find(`span.text-danger`).remove();
             }
             $("#input_categoryID").html(html);
     }
     // categoryContent();
     // ----- END CATEGORY CONTENT -----
 
+
+    // ----- DISPLAY IMAGE -----
+    function displayImage(image = null, link = true) {
+        let html = ``;
+        if (image && image != null && image != "null" && image != "undefined") {
+            let otherAttr = link ? `
+            href="${base_url+"assets/upload-files/inventory-items/"+image}" 
+            target="_blank"` : `href="javascript:void(0)"`;
+            html = `
+            <div class="d-flex justify-content-start align-items-center p-0">
+                <span class="btnRemoveImage pr-2" style="cursor: pointer"><i class="fas fa-close"></i></span>
+                <a class="filename"
+                    title="${image}"
+                    style="display: block;
+                    color: black;
+                    width: 90%;
+                    overflow: hidden;
+                    white-space: nowrap;
+                    text-overflow: ellipsis;"
+                    ${otherAttr}>
+                    ${image}
+                </a>
+			</div>`;
+        }
+        return html;
+    }
+    // ----- END DISPLAY IMAGE -----
+
+
+    // ----- REMOVE IMAGE -----
+    $(document).on("click", `.btnRemoveImage`, function() {
+        $(`#displayImage`).empty();
+        $(`[id="itemImage"]`).val("");
+        $(`[id="itemImage"]`).removeAttr("file");
+        $(`#displayImage`).css('display','none');
+    })
+    // ----- END REMOVE IMAGE -----
+
+
+    // ----- SELECT IMAGE -----
+    $(document).on("change", "[id=itemImage]", function(e) {
+        e.preventDefault();
+        if (this.files && this.files[0]) {
+            const filesize = this.files[0].size/1024/1024; // Size in MB
+            const filetype = this.files[0].type;
+            const filename = this.files[0].name;
+
+            console.log(filetype);
+
+            if (filesize > 10) {
+                $(`#displayImage`).empty();
+                $(`[name="itemImage"]`).val("");
+                $(`[name="itemImage"]`).removeAttr("file");
+                $(`#displayImage`).css('display','none');
+                showNotification("danger", "File size must be less than or equal to 10mb");
+            } else if (filetype.indexOf("image") == -1 && filetype.indexOf("jpeg") == -1 && filetype.indexOf("jpg") == -1 && filetype.indexOf("png") == -1) {
+                $(`#displayImage`).empty();
+                $(`[name="itemImage"]`).val("");
+                $(`[name="itemImage"]`).removeAttr("file");
+                $(`#displayImage`).css('display','none');
+                showNotification("danger", "Invalid file type");
+            } else {
+                $("#itemImage").removeClass("is-invalid").addClass("is-valid");
+                $("#invalid-itemImage").text("");
+                $(`#displayImage`).css('display','block');
+                $(`#displayImage`).html(displayImage(filename, false));
+                $(this).attr("file", filename);
+            }
+        }
+    })
+    // ----- END SELECT IMAGE -----
+
+
      // ----- MODAL CONTENT -----
      function modalContent(data = false) {
         let {
-        itemID              = "",
-        inventoryStorageID  = "",
-        itemName            = "",
-        classificationID    = "",
-        categoryID          = "",
-        itemSize            = "",
-        vatType             = "",
-        reOrderLevel        = "",
-        basePrice           = "",
-        brandName           = "",
-        itemDescription      = "",
-
-        unitOfMeasurementID = "",
-        itemStatus          = ""
+            itemID              = "",
+            inventoryStorageID  = "",
+            itemName            = "",
+            classificationID    = "",
+            categoryID          = "",
+            itemSize            = "",
+            vatType             = "",
+            reOrderLevel        = "",
+            basePrice           = "",
+            brandName           = "",
+            itemDescription     = "",
+            itemImage           = "",
+            unitOfMeasurementID = "",
+            itemStatus          = ""
         }= data && data[0];     
         // classificationContent(data);
         let button = itemID ? `
@@ -265,93 +354,85 @@ $(document).ready(function(){
                         </div>
                     </div>
                     <div class="col-md-6 col-sm-12">
-                    <div class="form-group">
-                        <label>Item Classification <span class="text-danger font-weight-bold">*</span></label>
-                        <select 
+                        <div class="form-group">
+                            <label>Item Classification <span class="text-danger font-weight-bold">*</span></label>
+                            <select 
+                                class="form-control select2 validate" 
+                                id="input_classificationID" 
+                                name="classificationID"
+                                autocomplete="off"
+                                required>
+                            </select>
+                            <div class="invalid-feedback d-block" id="invalid-input_classificationID"></div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 col-sm-12">
+                        <div class="form-group">
+                            <label>Item Category <span class="text-danger font-weight-bold">*</span></label>
+                            <select 
                             class="form-control select2 validate" 
-                            id="input_classificationID" 
-                            name="classificationID"
+                            id="input_categoryID" 
+                            name="categoryID"
                             autocomplete="off"
                             required>
-                        </select>
-                        <div class="invalid-feedback d-block" id="invalid-input_classificationID"></div>
-                    </div>
-                </div>
-                <div class="col-md-6 col-sm-12">
-                <div class="form-group">
-                    <label>Item Category <span class="text-danger font-weight-bold">*</span></label>
-                    <select 
-                    class="form-control select2 validate" 
-                    id="input_categoryID" 
-                    name="categoryID"
-                    autocomplete="off"
-                    required>
-                </select>
-                    <div class="invalid-feedback d-block" id="invalid-input_categoryID"></div>
-                </div>
-            </div>
-            <div class="col-md-6 col-sm-12">
-            <div class="form-group">
-                <label>Item Size <span class="text-danger font-weight-bold">*</span></label>
-                <select 
-                    class="form-control select2 validate" 
-                    id="input_itemSize" 
-                    name="itemSize"
-                    autocomplete="off"
-                    required>
-                    <option 
-                        value="" 
-                        disabled 
-                        selected
-                        ${!data && "selected"} >Select Item Size</option>
-                    <option 
-                        value="" 
-                        ${data && itemSize == "N/A" && "selected"} > N/A</option>
-                    <option 
-                        value="Extra Small" 
-                        ${data && itemSize == "Extra Small" && "selected"} > Extra Small</option>
-                    <option 
-                        value="Small" 
-                        ${data && itemSize == "Small" && "selected"} >Small</option>
-                    <option 
-                        value="Medium" 
-                        ${data && itemSize == "Medium" && "selected"}  >Medium</option>
-                    <option 
-                        value="Large" 
-                        ${data && itemSize == "Large" && "selected"} >Large</option>
-                    <option 
-                        value="Extra Large" 
-                        ${data && itemSize == "Extra Large" && "selected"}  >Extra Large</option>
-                </select>
-                <div class="invalid-feedback d-block" id="invalid-input_itemSize"></div>
-            </div>
-        </div>
-
-        <div class="col-md-6 col-sm-12">
-            <div class="form-group">
-                <label>Unit of Measurement <span class="text-danger font-weight-bold">*</span></label>
-                <select 
-                    class="form-control select2 validate" 
-                    id="input_unitOfMeasurementID" 
-                    name="unitOfMeasurementID"
-                    autocomplete="off"
-                    required>
-                    ${unitOfMeasurementOptions(unitOfMeasurementID)}
-                </select>
-                <div class="invalid-feedback d-block" id="invalid-unitOfMeasurementID"></div>
-            </div>
-        </div>
-                
-                <div class="col-md-12 col-sm-12">
-                        <div class="form-group">
-                            <label>Item Description <span class="text-danger font-weight-bold">*</span></label>
-                            <textarea style="resize:none; white-space:wrap;" row="3" class="form-control validate" name="itemDescription" id="inputItemDescription" 
-                                    data-allowcharacters="[a-z][A-Z][0-9][.][,][-][()]['][/][?][*][!][#][%][&][ ]" minlength="2" maxlength="250" required >${itemDescription}</textarea>
-                            <div class="invalid-feedback d-block" id="invalid-inputItemDescription"></div>
+                            </select>
+                            <div class="invalid-feedback d-block" id="invalid-input_categoryID"></div>
                         </div>
-                </div>
-                <div class="col-md-6 col-sm-12">
-                    <div class="form-group">
+                    </div>
+                    <div class="col-md-4 col-sm-12">
+                        <div class="form-group">
+                            <label>Item Size <span class="text-danger font-weight-bold">*</span></label>
+                            <select 
+                                class="form-control select2 validate" 
+                                id="input_itemSize" 
+                                name="itemSize"
+                                autocomplete="off"
+                                required>
+                                <option 
+                                    value="" 
+                                    disabled 
+                                    selected
+                                    ${!data && "selected"} >Select Item Size</option>
+                                <option 
+                                    value="" 
+                                    ${data && itemSize == "N/A" && "selected"} > N/A</option>
+                                <option 
+                                    value="Extra Small" 
+                                    ${data && itemSize == "Extra Small" && "selected"} > Extra Small</option>
+                                <option 
+                                    value="Small" 
+                                    ${data && itemSize == "Small" && "selected"} >Small</option>
+                                <option 
+                                    value="Medium" 
+                                    ${data && itemSize == "Medium" && "selected"}  >Medium</option>
+                                <option 
+                                    value="Large" 
+                                    ${data && itemSize == "Large" && "selected"} >Large</option>
+                                <option 
+                                    value="Extra Large" 
+                                    ${data && itemSize == "Extra Large" && "selected"}  >Extra Large</option>
+                            </select>
+                            <div class="invalid-feedback d-block" id="invalid-input_itemSize"></div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4 col-sm-12">
+                        <div class="form-group">
+                            <label>Unit of Measurement <span class="text-danger font-weight-bold">*</span></label>
+                            <select 
+                                class="form-control select2 validate" 
+                                id="input_unitOfMeasurementID" 
+                                name="unitOfMeasurementID"
+                                autocomplete="off"
+                                required>
+                                ${unitOfMeasurementOptions(unitOfMeasurementID)}
+                            </select>
+                            <div class="invalid-feedback d-block" id="invalid-unitOfMeasurementID"></div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4 col-sm-12">
+                        <div class="form-group">
                             <label>Re-order Level <span class="text-danger font-weight-bold">*</span></label>
                             <input 
                                 type="text" 
@@ -366,26 +447,49 @@ $(document).ready(function(){
                                 autocomplete="off">
                             <div class="invalid-feedback d-block" id="invalid-input_reOrderLevel"></div>
                         </div>
-                </div>
-                <div class="col-md-6 col-sm-12">
-                    <div class="form-group">
-                        <label>Status <span class="text-danger font-weight-bold">*</span></label>
-                        <select 
-                            class="form-control select2 validate" 
-                            id="input_itemStatus" 
-                            name="itemStatus"
-                            autocomplete="off"
-                            >
-                            <option 
-                                value="1" 
-                                ${data && itemStatus == "1" && "selected"} >Active</option>
-                            <option 
-                                value="0" 
-                                ${data && itemStatus == "0" && "selected"}>Inactive</option>
-                        </select>
-                        <div class="invalid-feedback d-block" id="invalid-itemStatus"></div>
                     </div>
-                </div>
+                    
+                    <div class="col-md-12 col-sm-12">
+                        <div class="form-group">
+                            <label>Item Description <span class="text-danger font-weight-bold">*</span></label>
+                            <textarea style="resize:none; white-space:wrap;" row="3" class="form-control validate" name="itemDescription" id="inputItemDescription" 
+                                    data-allowcharacters="[a-z][A-Z][0-9][.][,][-][()]['][/][?][*][!][#][%][&][ ]" minlength="2" maxlength="250" required >${itemDescription}</textarea>
+                            <div class="invalid-feedback d-block" id="invalid-inputItemDescription"></div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6 col-sm-12">
+                        <div class="form-group">
+                            <label>Reference Image</label>
+                            <input type="file"
+                                class="form-control validate"
+                                name="itemImage|inventory-items"
+                                id="itemImage"
+                                file="${itemImage}">
+                            <div class="invalid-feedback d-block" id="invalid-itemImage"></div>
+                            <div id="displayImage" style="${itemImage?'display:block;':'display:none;'} font-size: 12px; border: 1px solid black; border-radius: 5px; background: #d1ffe0; padding: 2px 10px;">${displayImage(itemImage)}</div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6 col-sm-12">
+                        <div class="form-group">
+                            <label>Status <span class="text-danger font-weight-bold">*</span></label>
+                            <select 
+                                class="form-control select2 validate" 
+                                id="input_itemStatus" 
+                                name="itemStatus"
+                                autocomplete="off"
+                                >
+                                <option 
+                                    value="1" 
+                                    ${data && itemStatus == "1" && "selected"} >Active</option>
+                                <option 
+                                    value="0" 
+                                    ${data && itemStatus == "0" && "selected"}>Inactive</option>
+                            </select>
+                            <div class="invalid-feedback d-block" id="invalid-itemStatus"></div>
+                        </div>
+                    </div>
 
                 </div>
             </div>
@@ -416,23 +520,32 @@ $(document).ready(function(){
 
     // ----- SAVE MODAL -----
     $(document).on("click", "#btnSave", function() {
-    const validate = validateForm("modal_inventory_item");
-    if (validate) {
+        const validate = validateForm("modal_inventory_item");
+        if (validate) {
+        
+            const classificationID = $(`[name="classificationID"]`).val();
+            const itemCode = generateItemCode(classificationID);
 
-        let data = getFormData("modal_inventory_item", true);
-        data["tableData[itemCode]"]  = generateItemCode(data["tableData"]["classificationID"]);
-        data["tableData[createdBy]"] = sessionID;
-        data["tableData[updatedBy]"] = sessionID;
-        data["tableName"]            = "ims_inventory_item_tbl";
-        data["feedback"]             = $("[name=itemName]").val();
+            let data = getFormData("modal_inventory_item");
+            data.append(`tableData[createdBy]`, sessionID);
+            data.append(`tableData[updatedBy]`, sessionID);
+            data.append(`tableData[itemCode]`, itemCode);
+            data.append(`tableName`, `ims_inventory_item_tbl`);
+            data.append(`feedback`, $("[name=itemName]").val()?.trim());
+            
+            const itemImage = $(`[id="itemImage"]`).val();
+            if (!itemImage) {
+                let file = $(`[id="itemImage"]`).attr("file") ?? "";
+                data.append(`tableData[itemImage]`, file);
+            }
 
-            if(!data["tableData[itemCode]"]){
+            if(!itemCode) {
                 let classificationName = $("#input_classificationID option:selected").text();
                 $("#modal_inventory_item").find(".is-valid").removeClass("is-valid");
                 $("#modal_inventory_item").find(".no-error").removeClass("no-error");
                 showNotification("warning2",`Set the classification (<strong>${classificationName}</strong>) of this item first`);
-            }else{
-                sweetAlertConfirmation("add", "Inventory Item", "modal_inventory_item", null, data, true, tableContent); 
+            } else {
+                sweetAlertConfirmation("add", "Inventory Item", "modal_inventory_item", null, data, false, tableContent); 
             }
         }
     });
@@ -455,7 +568,7 @@ $(document).ready(function(){
                 $("#modal_inventory_item_content").html(content);
                 storageContent(tableData);
                 classificationContent(tableData);
-                categoryContent("edit",tableData[0].classificationID);
+                categoryContent("edit",tableData[0].classificationID, tableData[0].categoryID);
                 $("#btnSaveConfirmationEdit").attr("accountid", id);
                 $("#btnSaveConfirmationEdit").attr("feedback", feedback);
                 initAll();
@@ -470,19 +583,30 @@ $(document).ready(function(){
         const classificationID  = $(this).attr("classificationID");
         const validate = validateForm("modal_inventory_item");
         if (validate) {
-            let data = getFormData("modal_inventory_item", true);
 
-                if(data["tableData[classificationID]"] != classificationID){
-                    data["tableData[itemCode]"]  = generateItemCode(data["tableData[classificationID]"]);
-                }
+            // if(data["tableData[classificationID]"] != classificationID){
+            //     data["tableData[itemCode]"]  = generateItemCode(data["tableData[classificationID]"]);
+            // }
 
-			data["tableData[updatedBy]"] = sessionID;
-			data["tableName"]            = "ims_inventory_item_tbl";
-			data["whereFilter"]          = "itemID=" + rowID;
-			data["feedback"]             = $("[name=itemName]").val();
+            const classification = $(`[name="classificationID"]`).val();
+            const category       = $(`[name="categoryID"]`).val();
 
+            let data = getFormData("modal_inventory_item");
+            data.append(`tableData[updatedBy]`, sessionID);
+            data.append(`tableName`, `ims_inventory_item_tbl`);
+            data.append(`whereFilter`, `itemID = ${rowID}`);
+            data.append(`feedback`, $("[name=itemName]").val()?.trim());
 
-            if(!data["tableData[itemCode]"]){
+            // let file = $(`[id="itemImage"]`).attr("file") ?? "";
+            // data.append(`tableData[itemImage]`, file);
+
+            const itemImage = $(`[id="itemImage"]`).val();
+            if (!itemImage) {
+                let file = $(`[id="itemImage"]`).attr("file") ?? "";
+                data.append(`tableData[itemImage]`, file);
+            }
+
+            if(!classification && !category){
                 let classificationName = $("#input_classificationID option:selected").text();
                 $("#modal_inventory_item").find(".is-valid").removeClass("is-valid");
                 $("#modal_inventory_item").find(".no-error").removeClass("no-error");
@@ -495,7 +619,7 @@ $(document).ready(function(){
                     "modal_inventory_item",
                     "",
                     data,
-                    true,
+                    false,
                     tableContent
                 ); 
             }

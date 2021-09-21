@@ -14,7 +14,7 @@ $(document).ready(function() {
                 setTimeout(() => {
                     var result = getTableData("web_applicant_list_tbl",
                                               "applicantID",
-                                              "applicantUsername = BINARY '"+applicantUsername+"' AND applicantPassword = BINARY '"+applicantPassword+"'");
+                                              "applicantUsername = BINARY '"+applicantUsername+"' AND applicantPassword = BINARY '"+applicantPassword+"' AND applicantStatus <> 0");
 
                     if(result.length != 0){
                         let data = {"applicantID"  : result[0]["applicantID"]};
@@ -40,6 +40,13 @@ $(document).ready(function() {
             formButtonHTML(this, false);
         }
     });
+
+    $(document).on("keyup", `[type="password"]`, function(e) {
+        e.preventDefault();
+        if (e.which == 13) {
+            $("#btnLogin").trigger("click");
+        }
+    })
 
     // ----- TOGGLE PASSWORD -----
     $(document).on("click", ".btnTogglePassword", function() {

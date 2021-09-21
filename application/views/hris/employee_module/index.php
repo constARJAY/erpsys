@@ -23,8 +23,8 @@
                     <div class="row clearfix appendHeader">
                         <div class="col-12">
                             <ul class="nav nav-tabs">
-                                <li class="nav-item"><a class="nav-link active" data-toggle="tab" href="#organicTab" redirect="organicTab">Organic</a></li>
-                                <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#nonOrganicTab" redirect="nonOrganicTab">Non-Organic</a></li>
+                                <li class="nav-item"><a class="nav-link page-tab active" data-toggle="tab" href="#organicTab" redirect="organicTab">Organic</a></li>
+                                <li class="nav-item"><a class="nav-link page-tab" data-toggle="tab" href="#nonOrganicTab" redirect="nonOrganicTab">Non-Organic</a></li>
                             </ul>
                         </div>
                     </div>

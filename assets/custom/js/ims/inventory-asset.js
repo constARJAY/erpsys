@@ -54,7 +54,7 @@ $(document).ready(function(){
             async:    false,
             dataType: 'json',
             data:     {tableName: "ims_inventory_asset_tbl as asset INNER JOIN ims_inventory_classification_tbl as classification USING(classificationID) INNER JOIN ims_inventory_category_tbl as category USING(categoryID)",
-                        columnName: `CONCAT('ITM','-',classification.classificationShortcut,'-',SUBSTR(asset.createdAt,3,2),'-',LPAD(asset.assetID, 5, '0')) as assetCode,
+                        columnName: `CONCAT('AST','-',classification.classificationShortcut,'-',SUBSTR(asset.createdAt,3,2),'-',LPAD(asset.assetID, 5, '0')) as assetCode,
                                     asset.assetID,
                                     asset.assetName,
                                     asset.unitOfMeasurementID,
@@ -376,7 +376,7 @@ $(document).ready(function(){
                                 id="input_brandName" 
                                 data-allowcharacters="[A-Z][a-z][0-9][ ]['][-]" 
                                 minlength="2" 
-                                maxlength="100" 
+                                maxlength="325" 
                                 required 
                                 unique="${assetID}" 
                                 value="${brandName}"
@@ -395,7 +395,7 @@ $(document).ready(function(){
                                 id="input_assetName" 
                                 data-allowcharacters="[A-Z][a-z][0-9][ ]['][-]" 
                                 minlength="2" 
-                                maxlength="100" 
+                                maxlength="325" 
                                 required 
                                 unique="${assetID}" 
                                 value="${assetName}"
@@ -459,7 +459,7 @@ $(document).ready(function(){
                                 id="input_reOrderLevel" 
                                 data-allowcharacters="[0-9]" 
                                 minlength="1" 
-                                maxlength="20" 
+                                maxlength="4" 
                                 required 
                                 value="${reOrderLevel}"
                                 autocomplete="off">
@@ -502,7 +502,7 @@ $(document).ready(function(){
                             </div>
                             <input type="text" 
                             class="form-control amount text-right"  
-                            min="0.01" max="9999999"
+                            min="1" max="9999999"
                             minlength="1" 
                             maxlength="20" 
                             name="assetProviderFee" 
@@ -576,7 +576,8 @@ $(document).ready(function(){
                                 class="form-control validate"
                                 name="assetImage|inventory-asset"
                                 id="assetImage"
-                                file="${assetImage}">
+                                file="${assetImage}"
+                                accept=".png,.jpg, .jpeg,">
                             <div class="invalid-feedback d-block" id="invalid-assetImage"></div>
                             <div id="displayImage" style="${assetImage?'display:block;':'display:none;'} font-size: 12px; border: 1px solid black; border-radius: 5px; background: #d1ffe0; padding: 2px 10px;">${displayImage(assetImage)}</div>
                         </div>
@@ -652,6 +653,29 @@ $(document).ready(function(){
     } 
     // ----- END MODAL CONTENT -----
 
+
+    //  FUNCTION FOR CHECK SALVAGE VALUE//
+    function validateSalvageValue(){
+        var getCost = +$("#input_assetCost").val().replaceAll(",","");
+        var getSalvageValue = +$("#input_assetSalvageValue").val().replaceAll(",","");
+        
+        if(getCost < getSalvageValue ){
+            $("#input_assetSalvageValue").removeClass("validated").removeClass("is-valid").addClass("is-invalid");
+            $("#invalid-input_assetSalvageValue").text("greater value on salvage value than cost");
+            $("#input_assetSalvageValue").focus();
+            return false;
+        }else{
+            $("#input_assetSalvageValue").removeClass("validated").removeClass("is-invalid").addClass("is-valid");
+            $("#invalid-input_assetSalvageValue").text("greater value on salvage value than cost");
+            return true;
+        }
+    }
+
+    //  VALIDATE THE SALVAGE VALUE AND COST
+    $(document).on("change","#input_assetSalvageValue", function(){
+        validateSalvageValue();
+    });
+
     // ----- OPEN ADD MODAL -----
     $(document).on("click", "#btnAdd", function() {
         $("#inventory_asset_modalheader").text("ADD INVENTORY ASSET");
@@ -662,56 +686,66 @@ $(document).ready(function(){
         storageContent();
         classificationContent();
         categoryContent();
-        initAll();
+        // initAll();
         initAmount();
+        initSelect2();
+        initDateRangePicker();
     });
     // ----- END OPEN ADD MODAL -----
 
 
     // ----- SAVE MODAL -----
     $(document).on("click", "#btnSave", function() {
-    const validate = validateForm("modal_inventory_asset");
-    const getClassificationID = $("#input_classificationID option:selected").val();
-    if (validate) {
+       
+         var getValidateSalvageValue = validateSalvageValue();
+ 
 
-        let data = getFormData("modal_inventory_asset");
+        if(getValidateSalvageValue){
+            const validate = validateForm("modal_inventory_asset");
+            const getClassificationID = $("#input_classificationID option:selected").val();
+            if (validate) {
 
-        const assetImage = $(`[id="assetImage"]`).val();
-        if (!assetImage) {
-            let file = $(`[id="assetImage"]`).attr("file") ?? "";
-            data.append(`tableData[assetImage]`, file);
+                let data = getFormData("modal_inventory_asset");
+        
+                const assetImage = $(`[id="assetImage"]`).val();
+                if (!assetImage) {
+                    let file = $(`[id="assetImage"]`).attr("file") ?? "";
+                    data.append(`tableData[assetImage]`, file);
+                }
+        
+        
+                // data["tableData[itemCode]"]  = generateItemCode(data["tableData"]["classificationID"]);
+                // data["tableData[createdBy]"] = sessionID;
+                // data["tableData[updatedBy]"] = sessionID;
+                // data["tableName"]            = "ims_inventory_asset_tbl";
+                // data["feedback"]             = $("[name=assetName]").val();
+        
+                const generateCode = generateItemCode(getClassificationID,"asset");
+                data.append("tableData[assetCode]", generateCode);
+                data.append("tableData[createdBy]", sessionID);
+                data.append("tableData[updatedBy]", sessionID);
+        
+                data.append("tableData[assetProviderFee]", +$("#input_assetProviderFee").val().replaceAll(",",""));
+                data.append("tableData[assetCost]", +$("#input_assetCost").val().replaceAll(",",""));
+                data.append("tableData[assetSalvageValue]", +$("#input_assetSalvageValue").val().replaceAll(",",""));
+                data.append("tableData[assetHourRate]", +$("#input_assetHourRate").val().replaceAll(",",""));
+                data.append("tableData[assetDepreciation]", +$("#input_assetDepreciation").val().replaceAll(",",""));
+        
+                data.append("tableName", "ims_inventory_asset_tbl");
+                data.append("feedback", $("[name=assetName]").val()?.trim());
+        
+                    if(!generateCode){
+                        let classificationName = $("#input_classificationID option:selected").text();
+                        $("#modal_inventory_asset").find(".is-valid").removeClass("is-valid");
+                        $("#modal_inventory_asset").find(".no-error").removeClass("no-error");
+                        showNotification("warning2",`Set the classification (<strong>${classificationName}</strong>) of this asset first`);
+                    }else{
+                        sweetAlertConfirmation("add", "Company Asset", "modal_inventory_asset", null, data, false, tableContent); 
+                    }
+                }
+
         }
-
-
-        // data["tableData[itemCode]"]  = generateItemCode(data["tableData"]["classificationID"]);
-        // data["tableData[createdBy]"] = sessionID;
-        // data["tableData[updatedBy]"] = sessionID;
-        // data["tableName"]            = "ims_inventory_asset_tbl";
-        // data["feedback"]             = $("[name=assetName]").val();
-
-        const generateCode = generateItemCode(getClassificationID,"asset");
-        data.append("tableData[assetCode]", generateCode);
-        data.append("tableData[createdBy]", sessionID);
-        data.append("tableData[updatedBy]", sessionID);
-
-        data.append("tableData[assetProviderFee]", +$("#input_assetProviderFee").val().replaceAll(",",""));
-        data.append("tableData[assetCost]", +$("#input_assetCost").val().replaceAll(",",""));
-        data.append("tableData[assetSalvageValue]", +$("#input_assetSalvageValue").val().replaceAll(",",""));
-        data.append("tableData[assetHourRate]", +$("#input_assetHourRate").val().replaceAll(",",""));
-        data.append("tableData[assetDepreciation]", +$("#input_assetDepreciation").val().replaceAll(",",""));
-
-        data.append("tableName", "ims_inventory_asset_tbl");
-        data.append("feedback", $("[name=assetName]").val()?.trim());
-
-            if(!generateCode){
-                let classificationName = $("#input_classificationID option:selected").text();
-                $("#modal_inventory_asset").find(".is-valid").removeClass("is-valid");
-                $("#modal_inventory_asset").find(".no-error").removeClass("no-error");
-                showNotification("warning2",`Set the classification (<strong>${classificationName}</strong>) of this asset first`);
-            }else{
-                sweetAlertConfirmation("add", "Inventory Asset", "modal_inventory_asset", null, data, false, tableContent); 
-            }
-        }
+    
     });
     // ----- END SAVE MODAL -----
 
@@ -744,61 +778,67 @@ $(document).ready(function(){
 
     // ----- UPDATE MODAL -----
     $(document).on("click", "#btnUpdate", function() {
-        const rowID             = $(this).attr("rowID");
-        const classificationID  = $(this).attr("classificationID");
-        const validate = validateForm("modal_inventory_asset");
-        if (validate) {
 
-            const classification = $(`[name="classificationID"]`).val();
-            const category       = $(`[name="categoryID"]`).val();
-
-
-            let data = getFormData("modal_inventory_asset");
-			// data["tableData[updatedBy]"] = sessionID;
-			// data["tableName"]            = "ims_inventory_asset_tbl";
-			// data["whereFilter"]          = "assetID=" + rowID;
-			// data["feedback"]             = $("[name=assetName]").val();
-
-            data.append("tableData[assetProviderFee]", +$("#input_assetProviderFee").val().replaceAll(",",""));
-            data.append("tableData[assetCost]", +$("#input_assetCost").val().replaceAll(",",""));
-            data.append("tableData[assetSalvageValue]", +$("#input_assetSalvageValue").val().replaceAll(",",""));
-            data.append("tableData[assetHourRate]", +$("#input_assetHourRate").val().replaceAll(",",""));
-            data.append("tableData[assetDepreciation]", +$("#input_assetDepreciation").val().replaceAll(",",""));
-
-            data.append("tableData[updatedBy]", sessionID);
-			data.append("tableName", "ims_inventory_asset_tbl");
-			data.append("whereFilter", `assetID = ${rowID}`);
-			data.append("feedback", $("[name=assetName]").val()?.trim());
-
-
-            const assetImage = $(`[id="assetImage"]`).val();
-            if (!assetImage) {
-                let file = $(`[id="assetImage"]`).attr("file") ?? "";
-                data.append(`tableData[assetImage]`, file);
-            }
-
-
-
-            // if(!classification && !category){
-            //     let classificationName = $("#input_classificationID option:selected").text();
-            //     $("#modal_inventory_item").find(".is-valid").removeClass("is-valid");
-            //     $("#modal_inventory_item").find(".no-error").removeClass("no-error");
-            //     showNotification("warning2",`Set the classification (<strong>${classificationName}</strong>) of this asset first`);
-                
-            // }else{
-                sweetAlertConfirmation(
-                    "update",
-                    "Inventory Asset",
-                    "modal_inventory_asset",
-                    "",
-                    data,
-                    false,
-                    tableContent
-                ); 
-            // }
-			
+        var getValidateSalvageValue = validateSalvageValue();
+            
+        if(getValidateSalvageValue){
         
-            }
+                const rowID             = $(this).attr("rowID");
+                const classificationID  = $(this).attr("classificationID");
+                const validate = validateForm("modal_inventory_asset");
+                if (validate) {
+
+                    const classification = $(`[name="classificationID"]`).val();
+                    const category       = $(`[name="categoryID"]`).val();
+
+
+                let data = getFormData("modal_inventory_asset");
+                // data["tableData[updatedBy]"] = sessionID;
+                // data["tableName"]            = "ims_inventory_asset_tbl";
+                // data["whereFilter"]          = "assetID=" + rowID;
+                // data["feedback"]             = $("[name=assetName]").val();
+
+                data.append("tableData[assetProviderFee]", +$("#input_assetProviderFee").val().replaceAll(",",""));
+                data.append("tableData[assetCost]", +$("#input_assetCost").val().replaceAll(",",""));
+                data.append("tableData[assetSalvageValue]", +$("#input_assetSalvageValue").val().replaceAll(",",""));
+                data.append("tableData[assetHourRate]", +$("#input_assetHourRate").val().replaceAll(",",""));
+                data.append("tableData[assetDepreciation]", +$("#input_assetDepreciation").val().replaceAll(",",""));
+
+                data.append("tableData[updatedBy]", sessionID);
+                data.append("tableName", "ims_inventory_asset_tbl");
+                data.append("whereFilter", `assetID = ${rowID}`);
+                data.append("feedback", $("[name=assetName]").val()?.trim());
+
+
+                const assetImage = $(`[id="assetImage"]`).val();
+                if (!assetImage) {
+                    let file = $(`[id="assetImage"]`).attr("file") ?? "";
+                    data.append(`tableData[assetImage]`, file);
+                }
+
+
+
+                // if(!classification && !category){
+                //     let classificationName = $("#input_classificationID option:selected").text();
+                //     $("#modal_inventory_item").find(".is-valid").removeClass("is-valid");
+                //     $("#modal_inventory_item").find(".no-error").removeClass("no-error");
+                //     showNotification("warning2",`Set the classification (<strong>${classificationName}</strong>) of this asset first`);
+                    
+                // }else{
+                    sweetAlertConfirmation(
+                        "update",
+                        "Company Asset",
+                        "modal_inventory_asset",
+                        "",
+                        data,
+                        false,
+                        tableContent
+                    ); 
+                // }
+                
+            
+                }
+        }
         });
         // ----- END UPDATE MODAL -----
 
@@ -809,7 +849,7 @@ $(document).ready(function(){
 		if (!formEmpty) {
 			sweetAlertConfirmation(
 				"cancel",
-				"Inventory Asset",
+				"Company Asset",
 				"modal_inventory_asset"
 			);
 		} else {

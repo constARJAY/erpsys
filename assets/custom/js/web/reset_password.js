@@ -81,7 +81,7 @@ $(document).ready(function() {
                                     if (res.isConfirmed) {
                                         $("#loader").show();
                                         $(".loader p").text('Loading...');
-                                        window.location.replace("http://localhost/erpsys/web/login");
+                                        window.location.replace(`${base_url}web/login`);
                                     }
                                 });
                             }else{

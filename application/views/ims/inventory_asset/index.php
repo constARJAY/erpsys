@@ -6,11 +6,11 @@
 					<ul class="breadcrumb pl-0 pb-0 ">
 						<li class="breadcrumb-item"><a href="#"><i class="zmdi zmdi-home"></i> Dashboard</a></li>
 						<li class="breadcrumb-item"><i class="zmdi zmdi-folder"></i> &nbsp;Masterfiles</li>
-						<li class="breadcrumb-item active"  id="inv_mainItem_breadcrumbs">Inventory Asset</li>
+						<li class="breadcrumb-item active"  id="inv_mainItem_breadcrumbs">Asset Masterfile</li>
                         <!-- <li class="breadcrumb-item" id="inv_item_breadcrumbs" style="visibility:hidden;"><i class="icon-social-dropbox" ></i> &nbsp;Add Item</li> -->
 					</ul>
-					<h1 class="mt-3" id="inv_headerID">List of Inventory Asset</h1>
-					<span>This module is used to manage inventory asset details.</span>
+					<h1 class="mt-3" id="inv_headerID">List of Asset</h1>
+					<span>This module is used to manage company asset details.</span>
 				</div>
 				<div class="col-lg-6 col-md-12 text-md-right">
 					<!-- <button class="btn btn-default hidden-xs ml-2">Download Report</button>

@@ -37,15 +37,20 @@ class Project_management_board extends CI_Controller {
         $data = [];
         foreach ($tasks as $task) {
             $temp = [
-                "timelineBuilderID"   => $timelineBuilderID,
-                "taskID"              => $task["taskID"],
-                "projectMilestoneID"  => $task["projectMilestoneID"],
-                "manHours"            => $task["manHours"],
-                "assignedEmployee"    => $task["assignEmployee"],
-                "assignedDesignation" => $task["assignDesignation"],
-                "assignedManHours"    => $task["assignManHours"],
-                "createdBy"           => $sessionID,
-                "updatedBy"           => $sessionID
+                "timelineBuilderID"     => $timelineBuilderID,
+                "taskID"                => $task["taskID"],
+                "projectMilestoneID"    => $task["projectMilestoneID"],
+                "manHours"              => $task["manHours"],
+                "assignedEmployee"      => $task["assignEmployee"],
+                "assignedDesignation"   => $task["assignDesignation"],
+                "assignedManHours"      => $task["assignManHours"],
+                "assignedStartDate"     => $task["assignStartDate"],
+                "assignedEndDate"       => $task["assignEndDate"],
+                "assignedDays"          => $task["assignDays"],
+                "assignedRegularHours"  => $task["assingRegularHours"],
+                "assignedOvertimeHours" => $task["assingOvertimeHours"],
+                "createdBy"             => $sessionID,
+                "updatedBy"             => $sessionID
             ];
             array_push($data, $temp);
         }

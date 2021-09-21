@@ -172,8 +172,8 @@ class Applicant extends CI_Controller {
     }
 
     public function send_activation($email_to, $applicantID){
-        $from_user = 'robinjamin.gelilio.gtc@gmail.com';
-        $from_pass = 'blackcoders';
+        $from_user = 'bcgierpsys@gmail.com';
+        $from_pass = 'Erpsys2o2!';
 
         $this->encryption->initialize(
             array(
@@ -205,7 +205,7 @@ class Applicant extends CI_Controller {
                     <br>
                     Thank you for registering. To activate your account, please click the link below to confirm your account.
                     <br>
-                    http://localhost/erpsys/web/applicant/activation/'.$code.'
+                    '.base_url().'/web/applicant/activation/'.$code.'
                     <br>
                     <br>
                     <br>

@@ -367,19 +367,26 @@ class Employee_module extends CI_Controller {
             $saveDocument = $this->employeemodule->saveDocument($documentData, $oldDocumentData, $action, $employeeID);
 
 
-            $leaveData = [];
-            foreach ($leaveCredit as $index => $leave) {
-                $temp = [
-                    "employeeID"       => $employeeID,
-                    "leaveID"          => $leave["leaveTypeID"],
-                    "leaveCredit"      => $leave["leaveBalance"] ?? 0,
-                    "leaveAccumulated" => $leave["leaveAccumulated"] ?? 0,
-                    "createdBy"        => $createdBy,
-                    "updatedBy"        => $updatedBy,
-                ];
-                array_push($leaveData, $temp);
+            if ($leaveCredit && count($leaveCredit) > 0) {
+                $leaveData = [];
+                foreach ($leaveCredit as $index => $leave) {
+                    $temp = [
+                        "employeeID"       => $employeeID,
+                        "leaveID"          => $leave["leaveTypeID"],
+                        "leaveCredit"      => $leave["leaveBalance"] ?? 0,
+                        "leaveAccumulated" => $leave["leaveAccumulated"] ?? 0,
+                        "createdBy"        => $createdBy,
+                        "updatedBy"        => $updatedBy,
+                    ];
+                    array_push($leaveData, $temp);
+                }
+                if (count($leaveData) > 0) {
+                    if ($action == "update") {
+                        unset($leaveData["createdBy"]);
+                    }
+                    $saveLeaveCredit = $this->employeemodule->saveLeaveCredit($leaveData, $action, $employeeID);
+                }
             }
-            $saveLeaveCredit = $this->employeemodule->saveLeaveCredit($leaveData, $action, $employeeID);
 
             $accessData = [];
             foreach ($accessibility as $index => $module) {
@@ -396,14 +403,16 @@ class Employee_module extends CI_Controller {
                 ];
                 array_push($accessData, $temp);
             }
-
-            if ($action == "update") {
-                unset($leaveData["createdBy"]);
-                unset($accessData["createdBy"]);
+            if (count($accessData) > 0) {
+                if ($action == "update") {
+                    unset($accessData["createdBy"]);
+                }
+                $saveAccessibility = $this->employeemodule->saveAccessibility($accessData, $action, $employeeID);
             }
-            $saveAccessibility = $this->employeemodule->saveAccessibility($accessData, $action, $employeeID);
 
-            if ($saveDocument && $saveLeaveCredit && $saveAccessibility) {
+            
+
+            if ($saveEmployeeData) {
                 echo json_encode($saveEmployeeData);
             } else {
                 echo json_encode("false|System error: Please contact the system administrator for assistance!");

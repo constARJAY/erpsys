@@ -18,7 +18,7 @@ class Forgot_password extends CI_Controller {
     }
 
     public function validate_email($email_to){
-        $query = $this->db->query("SELECT applicantID, applicantFirstname FROM web_applicant_list_tbl WHERE applicantEmail='".$email_to."'");
+        $query = $this->db->query("SELECT applicantID, applicantFirstname FROM web_applicant_list_tbl WHERE applicantEmail='".$email_to."' AND applicantStatus <> 0");
 
         if($query->num_rows() > 0){
             return "true|".$query->row()->applicantID."|".$query->row()->applicantFirstname;
@@ -47,8 +47,8 @@ class Forgot_password extends CI_Controller {
 
         $string_to_encrypt = $applicantID."|".$email_to."|".$expire_stamp;
 
-        $from_user = 'robinjamin.gelilio.gtc@gmail.com';
-        $from_pass = 'blackcoders';
+        $from_user = 'bcgierpsys@gmail.com';
+        $from_pass = 'Erpsys2o2!';
 
         $this->encryption->initialize(
             array(
@@ -83,7 +83,7 @@ class Forgot_password extends CI_Controller {
                     <br>
                     To reset your password, click on the link below:
                     <br>
-                    <a href="http://localhost/erpsys/web/reset_password/index/'.$code.'">http://localhost/erpsys/web/reset_password/index/'.$code.'</a>
+                    <a href="'.base_url().'/web/reset_password/index/'.$code.'">'.base_url().'/web/reset_password/index/'.$code.'</a>
                     <br>
                     <br>
                     <b>This link will expire 5 minutes after this email was sent.</b>
@@ -101,13 +101,13 @@ class Forgot_password extends CI_Controller {
         $this->email->subject('Web Portal - Reset Password');
         $this->email->message($message);
         
-        if(!$this->email->send())
+        if($this->email->send())
         {
-            echo json_encode('error');
-            print_r($this->email->print_debugger());
-        }else{
             $this->update_reset_link($applicantID);
             echo json_encode('success');
+        }else{
+            echo json_encode('error');
+            print_r($this->email->print_debugger());
         }
     }
 }

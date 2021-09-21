@@ -231,8 +231,12 @@ $(document).ready(function() {
 				proccessing: false,
 				serverSide: false,
 				scrollX: true,
+				scrollY: 500,
 				sorting: [],
 				scrollCollapse: true,
+				paging: false,
+                sorting: false,
+                info: false,
 				// autoWidth: false,
 				bSort: false, 
 				lengthMenu: [
@@ -1365,6 +1369,13 @@ $(document).ready(function() {
 		 * ----- END METHOD -----
 		 */
 
+
+		// ----- RESET SEARCH IN DATATABLE -----
+		$(`[aria-controls="tableTimekeeping"]`).val("");
+		$('#tableTimekeeping').DataTable().search("").draw();
+		// ----- RESET SEARCH IN DATATABLE -----
+
+		
 		let data = { items: [] };
 		const approversID = method != "approve" && moduleApprover;
 
@@ -1841,6 +1852,7 @@ $(document).ready(function() {
 					success: function(data) {
 						const display = timekeepingTable(data);
 						$("#tableTimekeepingParent").html(display);
+						initDataTables();
 
 						$("#timesheetFile").val("");
 						$(`.custom-file-label`).text("Choose csv file...");

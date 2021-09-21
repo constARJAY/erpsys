@@ -258,12 +258,9 @@ $(document).ready(function () {
 					},
 					{
 						targets: 4,
-						width: "15%",
-					},
-					{
-						targets: 5,
 						width: "10%",
 					},
+					
 				],
 			});
 	}
@@ -282,6 +279,21 @@ $(document).ready(function () {
 			dataType: "json",
 			data: {
 				tableName: "ims_inventory_storage_tbl",
+				columnName: `*, CASE 
+								WHEN inventoryStorageRoom IS  NULL THEN 'R0'
+							ELSE CONCAT('R',inventoryStorageRoom) END inventoryStorageRoomFormat,
+							CASE 
+								WHEN inventoryStorageFloor IS  NULL THEN 'F0'
+							ELSE CONCAT('F',inventoryStorageFloor) END inventoryStorageFloorFormat,
+							CASE 
+								WHEN inventoryStorageBay IS  NULL THEN 'B0'
+							ELSE CONCAT('B',inventoryStorageBay) END inventoryStorageBayFormat,
+							CASE 
+								WHEN inventoryStorageLevel IS  NULL THEN 'L0'
+							ELSE CONCAT('L',inventoryStorageLevel) END inventoryStorageLevelFormat,
+							CASE 
+								WHEN inventoryStorageShelves IS  NULL THEN 'S0'
+							ELSE CONCAT('S',inventoryStorageShelves) END inventoryStorageShelvesFormat`,
 			},
 			beforeSend: function () {
 				$("#table_content").html(preloader);
@@ -294,8 +306,7 @@ $(document).ready(function () {
                                 <th>Storage Code</th>
                                 <th>Office Name</th>
                                 <th>Storage Address</th>
-                                <th>Room Type</th>
-                                <th>Department</th>
+                                <th>Room</th>
                                 <th>Status</th>
                             </tr>
                         </thead>
@@ -312,12 +323,11 @@ $(document).ready(function () {
 						multiple: {
 							id: item.inventoryStorageID, // Required
 							inventoryStorageOfficeName: item.inventoryStorageOfficeName, // Required
-							inventoryStorageRoomType: item.inventoryStorageRoomType,
-							inventoryStorageDepartment: item.inventoryStorageDepartment
+							inventoryStorageRoom: item.inventoryStorageRoom
 						},
 					};
 					uniqueData.push(unique);
-					var storageDepartmentName = getTableData("hris_department_tbl","departmentName", "departmentID="+item.inventoryStorageDepartment)
+					//var storageDepartmentName = getTableData("hris_department_tbl","departmentName", "departmentID="+item.inventoryStorageDepartment)
 					html += `
 						<tr
 						class="btnEdit" 
@@ -339,8 +349,7 @@ $(document).ready(function () {
 						
 
                            </td>
-                           <td>${item.inventoryStorageRoomType}</td>
-                           <td>${storageDepartmentName[0].departmentName}</td>
+                           <td>${item.inventoryStorageRoomFormat}-${item.inventoryStorageFloorFormat}-${item.inventoryStorageBayFormat}-${item.inventoryStorageLevelFormat}-${item.inventoryStorageShelvesFormat}</td>
                            <td class="text-center">${activestatus}</td>
                         </tr>`;
 				});
@@ -366,21 +375,31 @@ $(document).ready(function () {
 	// ----- MODAL CONTENT -----
 	function modalContent(data = false) {
 		let {
-			inventoryStorageID = "",
-			inventoryStorageOfficeName = "",
-			inventoryStorageUnitNumber = "",
-			inventoryStorageHouseNumber = "",
-			inventoryStorageStreetName = "",
+			inventoryStorageID 				= "",
+			inventoryStorageOfficeName 		= "",
+			inventoryStorageUnitNumber 		= "",
+			inventoryStorageHouseNumber 	= "",
+			inventoryStorageStreetName 		= "",
 			inventoryStorageSubdivisionName = "",
-			inventoryStorageBarangay = false,
-			inventoryStorageMunicipality = false,
-			inventoryStorageProvince = false,
-			inventoryStorageRegion = false,
-			inventoryStorageCountry = "",
-			inventoryStorageZipCode = "",
-			inventoryStorageRoomType = "",
-			inventoryStorageDepartment = "",
-			inventoryStorageStatus = "",
+			inventoryStorageBarangay 		= false,
+			inventoryStorageMunicipality 	= false,
+			inventoryStorageProvince 		= false,
+			inventoryStorageRegion 			= false,
+			inventoryStorageCountry 		= "",
+			inventoryStorageZipCode 		= "",
+			inventoryStorageNumber			= "",
+			inventoryStorageFloor			="",
+			inventoryStorageBay				="",
+			inventoryStorageLevel 			="",
+			inventoryStorageShelves			="",
+			inventoryStorageRoom 			= "",
+			inventoryStorageStatus 			= "",
+			Floor							=	"",
+			Bay								= "",
+			Level							= "",
+			Shelves							= "",
+			Room							= "",
+			Number							= "",
 		} = data && data[0];
 
 		let button = inventoryStorageID
@@ -537,36 +556,96 @@ $(document).ready(function () {
                         </div>
                         <div class="invalid-feedback d-block" id="invalid-input_zipcode"></div>
                     </div>
-
-                        <div class="col-md-6 col-lg-6">
-                            <div class="form-group">
-                                <label for="">Room Type </label>
-                                <input 
-                                    type="text" 
-                                    class="form-control validate" 
-                                    name="inventoryStorageRoomType" 
-                                    id="input_roomType"
-                                    minlength="2" 
-                                    minlength="75"
-                                    data-allowcharacters="[a-z][A-Z][0-9][.][,][-][(][)]['][/][ ]" unique="${inventoryStorageID}"
-                                    value="${inventoryStorageRoomType}">  
-								<div class="invalid-feedback d-block" id="invalid-input_roomType"></div>
-                            </div>
-                        </div>
-                        <div class="col-md-6 col-lg-6">
-                            <div class="form-group">
-                                <label for="">Department <span class="text-danger">*</span></label>
-								<select 
-									class="form-control validate select2" 
-									id="input_departmentStorage" 
-									name="inventoryStorageDepartment"
-									required
-									unique="${inventoryStorageID}">
-									${departmentOptions(inventoryStorageDepartment)}
-								</select>
-								<div class="invalid-feedback d-block" id="invalid-input_departmentStorage"></div>
-                            </div>
-                        </div>
+					<div class="col-md-4 col-lg-4">
+						<div class="form-group">
+							<label for="">Storage Number</label>
+							<input 
+								type="text" 
+								class="form-control validate" 
+								name="inventoryStorageNumber" 
+								id="input_number"
+								minlength="1" 
+								minlength="3"
+								data-allowcharacters="[0-9]"
+								value="${Number}">  
+							<div class="invalid-feedback d-block" id="invalid-input_number"></div>
+						</div>
+					</div>
+					<div class="col-md-4 col-lg-4">
+						<div class="form-group">
+							<label for="">Room Number</label>
+							<input 
+								type="text" 
+								class="form-control validate" 
+								name="inventoryStorageRoom" 
+								id="input_room"
+								minlength="1" 
+								minlength="3"
+								data-allowcharacters="[0-9]" unique="${inventoryStorageID}"
+								value="${inventoryStorageRoom}">  
+							<div class="invalid-feedback d-block" id="invalid-input_room"></div>
+						</div>
+                    </div>
+					<div class="col-md-4 col-lg-4">
+						<div class="form-group">
+							<label for="">Floor Number</label>
+							<input 
+								type="text" 
+								class="form-control validate" 
+								name="inventoryStorageFloor" 
+								id="input_floor"
+								minlength="1" 
+								minlength="3"
+								data-allowcharacters="[0-9]"
+								value="${Floor}">  
+							<div class="invalid-feedback d-block" id="invalid-input_floor"></div>
+						</div>
+					</div>
+					<div class="col-md-6 col-lg-6">
+						<div class="form-group">
+							<label for="">Bay Number</label>
+							<input 
+								type="text" 
+								class="form-control validate" 
+								name="inventoryStorageBay" 
+								id="input_bay"
+								minlength="1" 
+								minlength="3"
+								data-allowcharacters="[0-9]"
+								value="${Bay}">  
+							<div class="invalid-feedback d-block" id="invalid-input_bay"></div>
+						</div>
+					</div>
+					<div class="col-md-6 col-lg-6">
+						<div class="form-group">
+							<label for="">Level Number</label>
+							<input 
+								type="text" 
+								class="form-control validate" 
+								name="inventoryStorageLevel" 
+								id="input_level"
+								minlength="1" 
+								minlength="3"
+								data-allowcharacters="[0-9]"
+								value="${Level}">  
+							<div class="invalid-feedback d-block" id="invalid-input_level"></div>
+						</div>
+					</div>
+					<div class="col-md-6 col-lg-6">
+						<div class="form-group">
+							<label for="">Shelves Number</label>
+							<input 
+								type="text" 
+								class="form-control validate" 
+								name="inventoryStorageShelves" 
+								id="input_level"
+								minlength="1" 
+								minlength="6"
+								data-allowcharacters="[0-9]"
+								value="${Shelves}">  
+							<div class="invalid-feedback d-block" id="invalid-input_shelves"></div>
+						</div>
+					</div>
                         <div class="col-md-6 col-lg-6">
                         <div class="form-group">
                          <label for="">Status <span class="text-danger">*</span></label>
@@ -661,7 +740,7 @@ $(document).ready(function () {
 
 		const tableData = getTableData(
 			"ims_inventory_storage_tbl",
-			"*",
+			`*,IFNULL(inventoryStorageNumber,'') AS Number,IFNULL(inventoryStorageRoom,'') AS Room, IFNULL(inventoryStorageFloor,'') AS Floor, IFNULL(inventoryStorageBay,'') AS Bay, IFNULL(inventoryStorageLevel,'')AS Level, IFNULL(inventoryStorageShelves,'') AS Shelves`,
 			"inventoryStorageID=" + id,
 			""
 		);
@@ -722,14 +801,14 @@ $(document).ready(function () {
 
 
 
-function departmentOptions(departmentID = 0) {
-	let getDepartment = getTableData("hris_department_tbl", "*", "departmentStatus = 1");
-        let departmentOptions = `<option ${departmentID == 0 && "selected"} disabled>Select Department</option>`;
-		departmentOptions += `<option value="">N/A</option>`;
+// function departmentOptions(departmentID = 0) {
+// 	let getDepartment = getTableData("hris_department_tbl", "*", "departmentStatus = 1");
+//         let departmentOptions = `<option ${departmentID == 0 && "selected"} disabled>Select Department</option>`;
+// 		departmentOptions += `<option value="">N/A</option>`;
         
-		getDepartment.map(item => {
-            departmentOptions += `<option value="${item.departmentID}" ${item.departmentID == departmentID && "selected"}>${item.departmentName}</option>`;
-        })
+// 		getDepartment.map(item => {
+//             departmentOptions += `<option value="${item.departmentID}" ${item.departmentID == departmentID && "selected"}>${item.departmentName}</option>`;
+//         })
 	
-	return departmentOptions;
-}
+// 	return departmentOptions;
+// }

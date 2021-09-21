@@ -35,13 +35,12 @@ class InventoryValidation_model extends CI_Model {
         return "false|System error: Please contact the system administrator for assistance!";
     }
 
-    public function deleteInventoryValidationItems($inventoryValidationID, $purchaseRequestID) {
-        $whereBOM = $purchaseRequestID ?? NULL;
+    public function deleteInventoryValidationItems($inventoryValidationID, $materialRequestID) {
+    
         $query = $this->db->delete(
             "ims_request_items_tbl", 
             [
-                "purchaseRequestID"         => $whereBOM,
-                "inventoryValidationID"      => $inventoryValidationID,
+                "inventoryValidationID"      => $materialRequestID,
                 "purchaseOrderID "       => NULL,
                 "inventoryValidationID " => NULL,
                 "bidRecapID "            => NULL
@@ -50,14 +49,25 @@ class InventoryValidation_model extends CI_Model {
     }
 
     public function saveInventoryValidationItems($data, $inventoryValidationID = null, $purchaseRequestID = null){
-        $deleteInventoryValidationItems = $this->deleteInventoryValidationItems($inventoryValidationID, $purchaseRequestID);
-
+        // $deleteInventoryValidationItems = $this->deleteInventoryValidationItems($inventoryValidationID, $purchaseRequestID);
+      
         $query = $this->db->insert_batch("ims_request_items_tbl", $data);
         if ($query) {
             return "true|Successfully submitted";
         }
         return "false|System error: Please contact the system administrator for assistance!";
     }
+
+    public function saveInventoryValidationAssets($data, $inventoryValidationID = null, $purchaseRequestID = null){
+        // $deleteInventoryValidationItems = $this->deleteInventoryValidationItems($inventoryValidationID, $purchaseRequestID);
+      
+        $query = $this->db->insert_batch("ims_request_assets_tbl", $data);
+        if ($query) {
+            return "true|Successfully submitted";
+        }
+        return "false|System error: Please contact the system administrator for assistance!";
+    }
+
 
     public function getRequestItem($requestItemID = 0)
     {
