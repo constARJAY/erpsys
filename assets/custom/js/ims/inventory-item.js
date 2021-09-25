@@ -358,6 +358,7 @@ $(document).ready(function(){
                             <label>Item Classification <span class="text-danger font-weight-bold">*</span></label>
                             <select 
                                 class="form-control select2 validate" 
+                                style="width: 100%"
                                 id="input_classificationID" 
                                 name="classificationID"
                                 autocomplete="off"
@@ -371,6 +372,7 @@ $(document).ready(function(){
                             <label>Item Category <span class="text-danger font-weight-bold">*</span></label>
                             <select 
                             class="form-control select2 validate" 
+                            style="width: 100%"
                             id="input_categoryID" 
                             name="categoryID"
                             autocomplete="off"
@@ -379,11 +381,13 @@ $(document).ready(function(){
                             <div class="invalid-feedback d-block" id="invalid-input_categoryID"></div>
                         </div>
                     </div>
+                    <!--
                     <div class="col-md-4 col-sm-12">
                         <div class="form-group">
                             <label>Item Size <span class="text-danger font-weight-bold">*</span></label>
                             <select 
                                 class="form-control select2 validate" 
+                                style="width: 100%"
                                 id="input_itemSize" 
                                 name="itemSize"
                                 autocomplete="off"
@@ -415,12 +419,13 @@ $(document).ready(function(){
                             <div class="invalid-feedback d-block" id="invalid-input_itemSize"></div>
                         </div>
                     </div>
-
-                    <div class="col-md-4 col-sm-12">
+                    -->
+                    <div class="col-md-6 col-sm-12">
                         <div class="form-group">
                             <label>Unit of Measurement <span class="text-danger font-weight-bold">*</span></label>
                             <select 
                                 class="form-control select2 validate" 
+                                style="width: 100%"
                                 id="input_unitOfMeasurementID" 
                                 name="unitOfMeasurementID"
                                 autocomplete="off"
@@ -431,7 +436,7 @@ $(document).ready(function(){
                         </div>
                     </div>
 
-                    <div class="col-md-4 col-sm-12">
+                    <div class="col-md-6 col-sm-12">
                         <div class="form-group">
                             <label>Re-order Level <span class="text-danger font-weight-bold">*</span></label>
                             <input 
@@ -479,6 +484,7 @@ $(document).ready(function(){
                                 id="input_itemStatus" 
                                 name="itemStatus"
                                 autocomplete="off"
+                                style="width: 100%"
                                 >
                                 <option 
                                     value="1" 

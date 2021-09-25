@@ -21,6 +21,10 @@ class Inventory_validation extends CI_Controller {
 
     public function saveInventoryValidation()
     {
+
+        // echo"<pre>";
+        // print_r($_POST);
+        // exit;
         $action                         = $this->input->post("action");
         $method                         = $this->input->post("method");
         $inventoryValidationID          = $this->input->post("inventoryValidationID") ?? null; 
@@ -32,11 +36,12 @@ class Inventory_validation extends CI_Controller {
         $inventoryValidationStatus      = $this->input->post("inventoryValidationStatus");
         $inventoryValidationRemarks     = $this->input->post("inventoryValidationRemarks") ?? null;
         $submittedAt                    = $this->input->post("submittedAt") ?? null;
-        $createdBy                      = $this->input->post("createdBy");
+        // $createdBy                      = $this->input->post("createdBy");
         $updatedBy                      = $this->input->post("updatedBy");
         $createdAt                      = $this->input->post("createdAt");
         $items                          = $this->input->post("items") ?? null;
         $assets                          = $this->input->post("assets") ?? null;
+
 
         $inventoryValidationData = [
             "reviseInventoryValidationID"   => $reviseInventoryValidationID,
@@ -46,7 +51,7 @@ class Inventory_validation extends CI_Controller {
             "approversDate"                 => $approversDate,
             "inventoryValidationStatus"     => $inventoryValidationStatus,
             "submittedAt"                   => $submittedAt,
-            "createdBy"                     => $createdBy,
+            // "createdBy"                     => $createdBy,
             "updatedBy"                     => $updatedBy,
             "createdAt"                     => $createdAt
         ];
@@ -281,9 +286,65 @@ class Inventory_validation extends CI_Controller {
                
                 
                 $saveInventoryValidationAssets = $this->inventoryvalidation->saveInventoryValidationAssets($inventoryValidationAssets,$materialRequestID);
+    
+
+         
+
+                $materialWithdrawalCode  = $this->input->post("materialWithdrawalCode") ?? null; 
+                $inventoryValidationID  = $this->input->post("inventoryValidationID") ?? null; 
+                $inventoryValidationCode  = $this->input->post("inventoryValidationCode") ?? null; 
+                $materialRequestID  = $this->input->post("materialRequestID") ?? null; 
+                $materialRequestCode  = $this->input->post("materialRequestCode") ?? null; 
+                $costEstimateID  = $this->input->post("costEstimateID") ?? null; 
+                $costEstimateCode  = $this->input->post("costEstimateCode") ?? null; 
+                $billMaterialID  = $this->input->post("billMaterialID") ?? null; 
+                $billMaterialCode  = $this->input->post("billMaterialCode") ?? null; 
+                $timelineBuilderID  = $this->input->post("timelineBuilderID") ?? null; 
+                $projectCode  = $this->input->post("projectCode") ?? null; 
+                $projectName  = $this->input->post("projectName") ?? null; 
+                $projectCategory  = $this->input->post("projectCategory") ?? null; 
+                $clientCode  = $this->input->post("clientCode") ?? null; 
+                $clientName  = $this->input->post("clientName") ?? null; 
+                $clientAddress  = $this->input->post("clientAddress") ?? null; 
+                $dateNeeded  = $this->input->post("dateNeeded") ?? null; 
+                $inventoryItemStatus  = $this->input->post("inventoryItemStatus") ?? null; 
+                $inventoryAssetStatus  = $this->input->post("inventoryAssetStatus") ?? null; 
+                $materialWithdrawalStatus  = $this->input->post("materialWithdrawalStatus") ?? null; 
+                $createdBy  = $this->input->post("createdBy") ?? null; 
+
+                $dataMaterialWithdrawalDocument =array(
+                    'materialWithdrawalCode' => $materialWithdrawalCode,
+                    'inventoryValidationID' => $inventoryValidationID,
+                    'inventoryValidationCode' => $inventoryValidationCode,
+                    'materialRequestID' => $materialRequestID,
+                    'materialRequestCode' => $materialRequestCode,
+                    'costEstimateID' => $costEstimateID,
+                    'costEstimateCode' => $costEstimateCode,
+                    'billMaterialID' => $billMaterialID,
+                    'billMaterialCode' => $billMaterialCode,
+                    'employeeID' => $employeeID,
+                    'timelineBuilderID' => $timelineBuilderID,
+                    'projectCode' => $projectCode,
+                    'projectName' => $projectName,
+                    'projectCategory' => $projectCategory,
+                    'clientCode' => $clientCode,
+                    'clientName' => $clientName,
+                    'clientAddress' => $clientAddress,
+                    'dateNeeded' => $dateNeeded,
+                    'inventoryItemStatus' => $inventoryItemStatus,
+                    'inventoryAssetStatus' => $inventoryAssetStatus,
+                    'materialWithdrawalStatus' => $materialWithdrawalStatus,
+                    'createdBy' => $createdBy, 
+                );
+
+               
+                $saveMaterialWithdrawalDocument = $this->inventoryvalidation->saveMaterialWithdrawalDocument($dataMaterialWithdrawalDocument);
             }
           
         }
+        // echo "<pre>";
+        // print_r($dataMaterialWithdrawalDocument);
+        // exit;
         // ----- END ADD REQUEST ITEMS -----
 
         $saveInventoryValidationData = $this->inventoryvalidation->saveInventoryValidationData($action, $inventoryValidationData, $inventoryValidationID);

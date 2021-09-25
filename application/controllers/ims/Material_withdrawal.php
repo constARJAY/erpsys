@@ -2,12 +2,12 @@
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Material_withdrawal extends CI_Controller {
-
+   
     public function __construct()
     {
         parent::__construct();
-        $this->load->model("ims/MaterialWithdrawal_model", "purchaserequest");
-        isAllowed(42);
+        $this->load->model("ims/MaterialWithdrawal_model", "materialWithdrawal");
+        isAllowed(92);
     }
 
     public function index()
@@ -19,128 +19,76 @@ class Material_withdrawal extends CI_Controller {
         $this->load->view("template/footer");
     }
 
-    public function saveMaterialWithdrawal()
+    public function getTimelineContent()
     {
-        $action                  = $this->input->post("action");
-        $method                  = $this->input->post("method");
-        $materialWithdrawalID        = $this->input->post("materialWithdrawalID") ?? null;
-        $reviseMaterialWithdrawalID = $this->input->post("reviseMaterialWithdrawalID") ?? null;
-        $employeeID              = $this->input->post("employeeID");
-        $projectID      = $this->input->post("projectID") ?? null;
-        $approversID             = $this->input->post("approversID") ?? null;
-        $approversStatus         = $this->input->post("approversStatus") ?? null;
-        $approversDate           = $this->input->post("approversDate") ?? null;
-        $materialWithdrawalStatus   = $this->input->post("materialWithdrawalStatus");
-        $materialWithdrawalReason   = $this->input->post("materialWithdrawalReason") ?? null;
-        $materialWithdrawalRemarks  = $this->input->post("materialWithdrawalRemarks") ?? null;
-        // $materialWithdrawalPurpose  = $this->input->post("materialWithdrawalPurpose") ?? null;
-        $submittedAt             = $this->input->post("submittedAt") ?? null;
-        $createdBy               = $this->input->post("createdBy");
-        $updatedBy               = $this->input->post("updatedBy");
-        $createdAt               = $this->input->post("createdAt");
-        $items                   = $this->input->post("items") ?? null;
-
-        // echo "<pre>";
-        // print_r($_POST);
-        // exit;
-
-        $purchaseRequestData = [
-            "reviseMaterialWithdrawalID" => $reviseMaterialWithdrawalID,
-            "employeeID"              => $employeeID,
-            "projectID"               => $projectID ,
-            "approversID"             => $approversID,
-            "approversStatus"         => $approversStatus,
-            "approversDate"           => $approversDate,
-            "materialWithdrawalStatus"   => $materialWithdrawalStatus,
-            "materialWithdrawalReason"   => $materialWithdrawalReason,
-            // "materialWithdrawalPurpose"   => $materialWithdrawalPurpose,
-            // "projectTotalAmount"      => $projectTotalAmount,
-            // "companyTotalAmount"      => $companyTotalAmount,
-            "submittedAt"             => $submittedAt,
-            "createdBy"               => $createdBy,
-            "updatedBy"               => $updatedBy,
-            "createdAt"               => $createdAt
-        ];
-
-        if ($action == "update") {
-            // unset($purchaseRequestData["revisePurchaseRequestID"]);
-            unset($purchaseRequestData["createdBy"]);
-            unset($purchaseRequestData["createdAt"]);
-
-            if ($method == "cancelform") {
-                $purchaseRequestData = [
-                    "materialWithdrawalStatus" => 4,
-                    "updatedBy"             => $updatedBy,
-                ];
-            } else if ($method == "approve") {
-                $purchaseRequestData = [
-                    "approversStatus"       => $approversStatus,
-                    "approversDate"         => $approversDate,
-                    "materialWithdrawalStatus" => $materialWithdrawalStatus,
-                    "updatedBy"             => $updatedBy,
-                ];
-            } else if ($method == "deny") {
-                $purchaseRequestData = [
-                    "approversStatus"        => $approversStatus,
-                    "approversDate"          => $approversDate,
-                    "materialWithdrawalStatus"  => 3,
-                    "materialWithdrawalRemarks" => $materialWithdrawalRemarks,
-                    "updatedBy"              => $updatedBy,
-                ];
-            } else if ($method == "drop") {
-                $purchaseRequestData = [
-                    "reviseMaterialWithdrawalID" => $reviseMaterialWithdrawalID,
-                    "materialWithdrawalStatus"   => 5,
-                    "updatedBy"               => $updatedBy,
-                ]; 
-            }
-        }
-
-        $saveTransferData = $this->purchaserequest->savePurchaseRequestData($action, $purchaseRequestData, $materialWithdrawalID);
-        if ($saveTransferData) {
-            $result = explode("|", $saveTransferData);
-
-            if ($result[0] == "true") {
-                $materialWithdrawalID  = $result[2];
-
-                if ($items) {
-                    $purchaseRequestItems = [];
-                    foreach($items as $index => $item) {
-                        $temp = [
-                            "materialWithdrawalID " => $materialWithdrawalID ,
-                            "barcode"            => $item["barcode"],
-                            "itemCode"            => $item["itemCode"],
-                            "itemID"            => $item["itemID"] != "null" ? $item["itemID"] : null,
-                            "itemName"            => $item["itemName"],
-                            "itemDescription"            => $item["itemDescription"],
-                            "unitOfMeasurement"            => $item["itemUom"],
-                            // "listStocks"            => $item["liststocks"],
-                            "inventoryStorageID"            => $item["inventoryStorageID"] != "null" ? $item["inventoryStorageID"] : null,
-                            "inventoryStorageOfficeCode"          => $item["storagecode"],
-                            "inventoryStorageOfficeName"          => $item["storageName"],
-                            "quantity"          => $item["quantity"],
-                            "createdBy"         => $createdBy,
-                            "updatedBy"         => $updatedBy,
-                        ];
-                        array_push($purchaseRequestItems, $temp);
-
-                       
-                    }
-                    $savePurchTransferstItems = $this->purchaserequest->savePurchaseRequestItems($purchaseRequestItems, $materialWithdrawalID );
-                }
-
-            }
-            
-        }
-        echo json_encode($saveTransferData);
+        $timelineBuilderID = $this->input->post("timelineBuilderID");
+        echo json_encode($this->materialWithdrawal->getTimelineContent($timelineBuilderID));
+        // echo json_encode($this->materialWithdrawal->getTimelineContent(1));
     }
 
-    function updateStorage(){
+    public function saveProjectBoard()
+    {
+        $sessionID = $this->session->has_userdata("adminSessionID") ? $this->session->userdata("adminSessionID") : 1;
 
-        $saveupdateStorage = $this->purchaserequest->updateStorage();
-        echo json_encode($saveupdateStorage);
-        
+        $materialWithdrawalID        = $this->input->post("materialWithdrawalID");
+        // $timelineManagementStatus = $this->input->post("timelineManagementStatus");
+        $items = $this->input->post("items");
+        $assets = $this->input->post("assets");
+
+        $dataAsset = [];
+        $dataItem = [];
+
+        if($items){
+            foreach ($items as $item) {
+                $status = "0";
+                $getReceived = $item["received"];
+                $getRemaining = $item["remainingItem"];
+                if($getRemaining == 0 && $getReceived !=0   ){
+                    $status = "1";
+                }
+                $temp = [
+                    "materialWithdrawalID"              => $item["materialWithdrawalID"],
+                    "withdrawalItemID"  => $item["withdrawalItemID"],
+                    "received"            => $item["received"],
+                    "remaining"    => $item["remainingItem"],
+                    "dateReceived" => $item["receivedDateItem"],
+                    "remarks"    => $item["itemRemarks"],
+                    "withdrawalItemStatus"    =>$status,
+                    "createdBy"           => $sessionID,
+                    "updatedBy"           => $sessionID
+                ];
+                array_push($dataItem, $temp);
+            }
+        }
+
+        if($assets){
+            foreach ($assets as $asset) {
+                $status = "0";
+                $getReceived = $asset["received"];
+                $getRemaining = $asset["remainingAsset"];
+                if($getRemaining == 0 && $getReceived !=0   ){
+                    $status = "1";
+                }
+                $temp = [
+                    "materialWithdrawalID"              => $asset["materialWithdrawalID"],
+                    "withdrawalAssetID"  => $asset["withdrawalAssetID"],
+                    "received"            => $asset["received"],
+                    "remaining"    => $asset["remainingAsset"],
+                    "dateReceived" => $asset["receivedDateAsset"],
+                    "remarks"    => $asset["assetRemarks"],
+                    "withdrawalAssetStatus"    =>$status,
+                    "createdBy"           => $sessionID,
+                    "updatedBy"           => $sessionID
+                ];
+                array_push($dataAsset, $temp);
+            }
+        }
+      
+        // echo "<pre>";
+        // print_r($dataItem);
+        // print_r($dataAsset);
+        // exit;
+        echo json_encode( $this->materialWithdrawal->saveProjectBoard($materialWithdrawalID, $dataItem,$dataAsset,$sessionID));
     }
 
 }
-?>

@@ -136,7 +136,7 @@ $(document).ready(function() {
 	};
 
 	const employeeList = getTableData("hris_employee_list_tbl LEFT JOIN hris_designation_tbl USING (designationID)", 
-										`employeeLastname, employeeFirstname, employeeMiddlename, employeeID, employeeRanking, hris_designation_tbl.designationName AS designationName,
+										`employeeLastname, employeeFirstname, employeeMiddlename, employeeID, employeeRanking, hris_designation_tbl.designationName AS designationName, employeeRankingCredit,
 											CASE employeeLastname WHEN "" THEN employeeFirstname
 											ELSE CONCAT(employeeLastname,', ',employeeFirstname,' ',employeeMiddlename) 
 											END  "employeeFullname" `,
@@ -229,10 +229,10 @@ $(document).ready(function() {
                 info: false,
 				scrollCollapse: true,
 				columnDefs: [
-					{ targets: 0,  width: "5%"  },
-					{ targets: 1,  width: 100 },
-					{ targets: 2,  width: 100 },
-					{ targets: 3,  width: 350  },
+					{ targets: 0,  width: "5%"  	},
+					{ targets: 1,  width: 250	 	},
+					{ targets: 2,  width: 200 		},
+					{ targets: 3,  width: 1000 		},
 				],
 			});
 
@@ -247,9 +247,9 @@ $(document).ready(function() {
 				scrollX: true,
 				scrollCollapse: true,
 				columnDefs: [
-					{ targets: 0,  width: 150 },
-					{ targets: 1,  width: 150 },
-					{ targets: 2,  width: 350  }
+					{ targets: 0,  width: 250 },
+					{ targets: 1,  width: 200 },
+					{ targets: 2,  width: 1000  }
 				],
 			});
 	}
@@ -723,11 +723,12 @@ $(document).ready(function() {
     // ----- END GET CLIENT LIST -----
 
 	// ----- GET EMPLOYEE LIST -----
-	function getEmployeeList(id = null , typeEmployee = "default"){
+	function getEmployeeList(id = null , typeEmployee = "NonOrganic"){
 		// TYPE EMPLOYEE ;
-			// PROJECT MANAGER 	= PM; 
-			// TEAM LEADER 		= TL
-			// TEAM MEMBERS 	= default
+			// PROJECT MANAGER 			= PM; 
+			// TEAM LEADER 				= TL
+			// TEAM MEMBERS Oranic 		= ORG
+			// TEAM MEMBERS Non Organic	= NORG
 		let html = ``, members = [];
 		let projectManager 	= $("[name=timelineProjectManager]").val(); 
 		let teamLeader 		= $("[name=timelineTeamLeader]").val();
@@ -755,10 +756,24 @@ $(document).ready(function() {
 						`;
 				});
 				break;
+			case "ORG": 
+			// html += `<option disabled ${!id?"selected":''}>Please select a team </option>`;
+				var employeeIDs = id.split("|");
+				
+				employeeList.filter(emp => emp.employeeRanking).map((emp,index) =>{
+					html += `			
+							<option 
+								value  = "${emp.employeeID}" 
+								${employeeIDs.includes(emp.employeeID) && "selected"}>
+								${emp.employeeFullname} - ${emp.designationName}
+							</option>
+							`;
+				});
+			break;
 			default: 
 				var employeeIDs = id.split("|");
 
-				employeeList.map((emp,index) =>{
+				employeeList.filter(emp => !emp.employeeRanking).map((emp,index) =>{
 					html += `			
 							<option 
 								value  = "${emp.employeeID}" 
@@ -775,20 +790,32 @@ $(document).ready(function() {
 
 	// ----- UPDATE MILESTONE SELECT -----
 	function milestoneSelect(projectID  = null, milestoneBuilderID = null){
+		
 		let html = `<option disabled ${!milestoneBuilderID ? "selected":''}>Please select a phase</option>`;
+		
+		
+
 		if(projectID){
-			let categoryID 	= projectList.filter(items=> items.projectListID == projectID ).map(items=>{ return items.categoryID });
+			let categoryID 	= projectList.filter(project =>  project.projectListID == projectID ).map(project=>{ return project.categoryID });
 			let tableData 	= getTableData("pms_milestone_builder_tbl",`*`,`categoryID = '${categoryID}'`);
 			
-			tableData.map((items,index) =>{
+			let phaseIDArr = [];
+			$(`[name=phaseDescription]`).each(function(i,obj){
+				if($(this).val()){
+					phaseIDArr.push($(this).val());
+				}
+			});
+
+			tableData.filter(phase => !phaseIDArr.includes(phase.milestoneBuilderID) || phase.milestoneBuilderID == milestoneBuilderID).map((phase,index) =>{
 				html += `			
-					<option value = "${items.milestoneBuilderID}"
-					${items.milestoneBuilderID == milestoneBuilderID && "selected"}>
-						${items.phaseDescription}
+					<option value = "${phase.milestoneBuilderID}"
+					${phase.milestoneBuilderID == milestoneBuilderID && "selected"}>
+						${phase.phaseDescription}
 					</option>
 					`;
 			});
 		}
+
 		return html;
 	}
 	// ----- END UPDATE MILESTONE SELECT -----
@@ -857,7 +884,6 @@ $(document).ready(function() {
 		setTimeout(() => {
 			thisParent.find(".milestone-list").html(html);
 		}, 120);
-
 	});
 
 	$(document).on("click", "#btnAddRow", function(){
@@ -911,18 +937,34 @@ $(document).ready(function() {
 		}
 	});
 
-	$(document).on("change","[name=taskEndDate]", function(){
-		var dates = [];
-		$(".task-list-sub-row").each(function(){
-			var startDateValue 	= $(this).find("[name=taskStartDate]").val();
-			var endDateValue 	= $(this).find("[name=taskEndDate]").val();
-			dates.push(startDateValue); 
-			dates.push(endDateValue); 
-		});	
-		var dateSortOf = dates.sort(function(a,b){ return new Date(a) - new Date(b) });
-		$("[name=timelineDate]").val(dateSortOf[0]+" - "+dateSortOf.pop());
+	$(document).on("change", "[name=taskStartDate]", function(){
+		let date = $(this).val().split(" - ");
+		let startDate 	= new Date(moment(date[0]).format("YYYY-MM-DD"));
+		let endDate		= new Date(moment(date[1]).format("YYYY-MM-DD"));
+		let plusOne 	= date[0] == date[1] ? 0 : 1;
+		let oneDay 		= 24 * 60 * 60 * 1000; // hours*minutes*seconds*milliseconds
+		let diffDays 	= (Math.round(Math.abs((startDate - endDate) / oneDay)) || 1) + plusOne;
+		let maxValue 	= diffDays * 24;
+		$(this).closest(`tr`).find("[name=allottedHours]").removeClass("is-invalid");
+		$(this).closest(`tr`).find("[name=allottedHours]").next().text("");
+		$(this).closest(`tr`).find("[name=allottedHours]").prop("max", maxValue);
 	});
 
+	$(document).on("change","[name=taskStartDate]", function(){
+		var dates = [];
+		$(".task-list-sub-row").each(function(){
+			var dateSplit 		= $(this).find("[name=taskStartDate]").val().split(" - ");
+			var startDateValue 	= dateSplit[0];
+			var endDateValue 	= dateSplit[1];
+			startDateValue ? dates.push(startDateValue) : ``; 
+			endDateValue ? dates.push(endDateValue) : ``; 
+		});	
+		var dateSortOf = dates.sort(function(a,b){ return new Date(a) - new Date(b) });
+		console.log("123")
+		console.log(dateSortOf);
+		$("[name=timelineDate]").val(dateSortOf[0]+" - "+dateSortOf.pop());
+	});
+	
 	$(document).on("change","[name=clientID]", function(){
 		var clientAddress 		= $('option:selected', this).attr("address");
 		$("[name=clientAddress]").val(clientAddress);
@@ -1165,41 +1207,35 @@ $(document).ready(function() {
 			</div>
 			<div class="col-md-3 col-sm-12">
 				<div class="form-group">
+					<label>Project Manager ${!disabled ? "<code>*</code>" : ""}</label>
+					<select class="form-control validate select2"
+						name="timelineProjectManager"
+						id="timelineProjectManager"
+						style="width: 100%"
+						required ${disabled}>
+						${getEmployeeList(timelineProjectManager, "PM")}
+					</select>
+					<div class="invalid-feedback d-block" id="invalid-timelineProjectManager"></div>
+				</div>
+			</div>
+			<div class="col-md-3 col-sm-12">
+				<div class="form-group">
+					<label>Team Leader ${!disabled ? "<code>*</code>" : ""}</label>
+					<select class="form-control validate select2"
+						name="timelineTeamLeader"
+						id="timelineTeamLeader"
+						style="width: 100%"
+						required ${disabled}>
+						${getEmployeeList(timelineTeamLeader, "TL")}
+					</select>
+					<div class="invalid-feedback d-block" id="invalid-timelineTeamLeader"></div>
+				</div>
+			</div>
+
+			<div class="col-md-3 col-sm-12">
+				<div class="form-group">
 					<label>Start Date & End Date ${!disabled ? "<code>*</code>" : ""}</label>
 					<input type="text" class="form-control" disabled name="timelineDate" value="${timelineDate}">
-				</div>
-			</div>
-			<div class="col-md-3 col-sm-12">
-				<div class="form-group">
-					<label>Priority Level ${!disabled ? "<code>*</code>" : ""}</label>
-					<select class="form-control validate select2"
-                        name="timelinePriorityLevel"
-                        id="timelinePriorityLevel"
-                        style="width: 100%"
-                        required
-						 ${disabled}>
-                        <option ${timelinePriorityLevel == "" ? "selected": ``} disabled>Please select a priority level</option>
-						<option value="3" ${timelinePriorityLevel == "3" ? "selected": ``} >Urgent</option>
-						<option value="2" ${timelinePriorityLevel == "2" ? "selected": ``} >High</option>
-						<option value="1" ${timelinePriorityLevel == "1" ? "selected": ``} >Medium</option>
-						<option value="0" ${timelinePriorityLevel == "0" ? "selected": ``} >Low</option>
-                    </select>
-					<div class="invalid-feedback d-block" id="invalid-timelinePriorityLevel"></div>
-				</div>
-			</div>
-			<div class="col-md-3 col-sm-12">
-				<div class="form-group">
-					<label>Issued ${!disabled ? "<code>*</code>" : ""}</label>
-					<select class="form-control validate select2"
-                        name="timelineIssued"
-                        id="timelineIssued"
-                        style="width: 100%"
-                        required ${disabled}>
-                        <option ${timelineIssued == "" ? "selected": ``} disabled>Please select a way to issue</option>
-						<option value="0" ${timelineIssued == "0" ? "selected": ``} >For Development</option>
-						<option value="1" ${timelineIssued == "1" ? "selected": ``} >For Purchasing</option>
-                    </select>
-					<div class="invalid-feedback d-block" id="invalid-timelineIssued"></div>
 				</div>
 			</div>
 			<div class="col-md-3 col-sm-12">
@@ -1223,66 +1259,77 @@ $(document).ready(function() {
 				<div class="row">
 					<div class="col-md-6 col-sm-12">
 						<div class="form-group">
-							<label>Project Manager ${!disabled ? "<code>*</code>" : ""}</label>
-							<select class="form-control validate select2"
-								name="timelineProjectManager"
-								id="timelineProjectManager"
-								style="width: 100%"
-								required ${disabled}>
-								${getEmployeeList(timelineProjectManager, "PM")}
-							</select>
-							<div class="invalid-feedback d-block" id="invalid-timelineProjectManager"></div>
-						</div>
-						<div class="form-group">
-							<label>Team Leader ${!disabled ? "<code>*</code>" : ""}</label>
-							<select class="form-control validate select2"
-								name="timelineTeamLeader"
-								id="timelineTeamLeader"
-								style="width: 100%"
-								required ${disabled}>
-								${getEmployeeList(timelineTeamLeader, "TL")}
-							</select>
-							<div class="invalid-feedback d-block" id="invalid-timelineTeamLeader"></div>
-						</div>
-					</div>
-					<div class="col-md-6 col-sm-12">
-						<div class="form-group">
-							<label>Team Members ${!disabled ? `<code>*</code> <small class="text-info"> ( Kindly include the project manager and team leader on the team member. )</small>` : ""}</label>
+							<label>Team Members (Organic) ${!disabled ? `<code>*</code> <small class="text-info"> ( Kindly include the project manager and team leader on the team member. )</small>` : ""}</label>
 							<select class="form-control validate select2"  multiple="multiple"
 								name="timelineTeamMember"
-								id="timelineTeamMember"
+								id="timelineTeamMemberOrganic"
 								style="width: 100%"
 								required ${disabled}>
-								${getEmployeeList(timelineTeamMember)}
+								${getEmployeeList(timelineTeamMember, "ORG")}
 							</select>
-							<div class="invalid-feedback d-block" id="invalid-timelineTeamMember"></div>
+							<div class="invalid-feedback d-block" id="invalid-timelineTeamMemberOrganic"></div>
 						</div>
 					</div>
-				</div>
-			</div>
-			
-			<hr class="pb-1">
-            <div class="text-primary font-weight-bold mb-2" style="font-size: 1.5rem;">Project Tasks</div>
-			<div class="w-100">
-				<table class="table table-striped" id="${tableProjectTaskID}">
-					<thead>
-						<tr style="white-space: nowrap">
-							${checkboxProjectTaskHeader}
-							<th>Phase</th>
-							<th>Milestone</th>
-							<th>Task/s</th>
-						</tr>
-					</thead>
-					<tbody class="timelineBuilderTableBody">
-						${listOfProjectPhase(timelineBuilderID, readOnly)}
-					</tbody>
-				</table>
-				<div class="w-100 text-left my-2" id="projectTaskButtons">
-					
+
+					<div class="col-md-6 col-sm-12">
+						<div class="form-group">
+							<label>Team Members (Non-Organic) </label>
+							<select class="form-control validate select2"  multiple="multiple"
+								name="timelineTeamMember"
+								id="timelineTeamMemberNonOrganic"
+								style="width: 100%" ${disabled}>
+								${getEmployeeList(timelineTeamMember)}
+							</select>
+							<div class="invalid-feedback d-block" id="invalid-timelineTeamMemberNonOrganic"></div>
+						</div>
+					</div>
 				</div>
 			</div>
 
-			<div class="w-100 row mt-4">
+
+			<div class="card mt-2">
+				<div class="card-header bg-primary text-white">
+					<div class="row">
+						<div class="col-md-6 col-sm-12 text-left">
+							<h5 style="font-weight: bold;
+								letter-spacing: 0.05rem;">Project Tasks</h5>
+						</div>
+						<div class="col-md-6 col-sm-12 text-right"></div>
+					</div>
+				</div>
+				<div class="card-body">
+					<div class="w-100 request-items-content">
+						<table class="table table-striped" id="${tableProjectTaskID}">
+							<thead>
+								<tr style="white-space: nowrap">
+									${checkboxProjectTaskHeader}
+									<th>Phase</th>
+									<th>Milestone</th>
+									<th>Task/s</th>
+								</tr>
+							</thead>
+							<tbody class="timelineBuilderTableBody">
+								${listOfProjectPhase(timelineBuilderID, readOnly)}
+							</tbody>
+						</table>
+						<div class="w-100 text-left my-2" id="projectTaskButtons">
+							
+						</div>
+					</div>
+				</div>
+				<div class="card-footer">
+					<div class="row">
+						<div class="col-md-6 col-sm-12 text-left">
+							
+						</div>
+						<div class="col-md-6 col-sm-12 text-right"></div>
+					</div>
+				</div>
+
+			</div>
+			
+
+			<div class="w-100 row">
                 <div class="col-md-6 col-sm-12">
                     <div class="form-group">
                         <label>Proposed Budget ${!disabled ? "<code>*</code>" : ""}</label>
@@ -1407,8 +1454,7 @@ $(document).ready(function() {
 										 </th>` : ``}
 										<th style="width:150px;">Task Name</th>
 										<th style="width:100px;">Alotted Hours</th>
-										<th style="width:100px;">Start Date</th>
-										<th style="width:100px;">End Date</th>
+										<th style="width:100px;">Date</th>
 										<th style="width:150px;">Remarks</th>
 									</tr>
 								</thead>
@@ -1460,11 +1506,10 @@ $(document).ready(function() {
 												
 											</div>
 										 </th>` : ``}
-										<th style="width:150px;">Task Name</th>
-										<th style="width:100px;">Alotted Hours</th>
-										<th style="width:100px;">Start Date</th>
-										<th style="width:100px;">End Date</th>
-										<th style="width:150px;">Remarks</th>
+										<th style="width:350px;">Task Name</th>
+										<th style="width:200px;">Alotted Hours</th>
+										<th style="width:320px;">Date</th>
+										<th style="width:250px;">Remarks</th>
 									</tr>
 								</thead>
 								<tbody class="">
@@ -1513,7 +1558,7 @@ $(document).ready(function() {
 						</td>
 						<td>
 							<input type="text" 
-								class = "form-control input-hours" 
+								class = "form-control input-hours text-center" 
 								name="allottedHours"
 								id="allottedHours${index}"
 								value = "${items.allottedHours}"
@@ -1523,22 +1568,12 @@ $(document).ready(function() {
 						<td>
 							<input
 								type="button"
-								class = "form-control daterange text-left"
+								class = "form-control daterange text-center"
 								name = "taskStartDate"
 								id="taskStartDate${index}" 
-								value = "${moment(items.taskStartDate).format("MMMM DD, YYYY")}"
+								value = "${ items.taskStartDate ? moment(items.taskStartDate).format("MMMM DD, YYYY") : moment().format("MMMM DD, YYYY")} - ${moment(items.taskEndtDate).format("MMMM DD, YYYY")}"
 								${readOnly ? "disabled" : ``} required>
 							<div class="invalid-feedback d-block" id="invalid-taskStartDate${index}"></div>
-						</td>
-						<td>
-							<input
-								type="button"
-								class = "form-control daterange text-left"
-								name = "taskEndDate"
-								id="taskEndDate${index}"  
-								value = "${moment(items.taskEndDate).format("MMMM DD, YYYY")}"
-								${readOnly ? "disabled" : ``} required>
-							<div class="invalid-feedback d-block" id="invalid-taskEndDate${index}"></div>
 						</td>
 						<td>
 							<input type="text" 
@@ -1569,8 +1604,8 @@ $(document).ready(function() {
 							<div class="invalid-feedback d-block" id="invalid-taskName0"></div>
 						</td>
 						<td>
-							<input type="text" 
-								class = "form-control input-hours" 
+							<input type="text " 
+								class = "form-control input-hours text-center" 
 								name="allottedHours"
 								id="allottedHours0"
 								value = ""
@@ -1580,22 +1615,12 @@ $(document).ready(function() {
 						<td>
 							<input
 								type="button"
-								class = "form-control daterange text-left"
+								class = "form-control daterange text-center"
 								name = "taskStartDate"
 								id="taskStartDate0" 
-								value = "${moment(new Date()).format("MMMM DD, YYYY")}"
+								value = "${moment().format("MMMM DD, YYYY") - moment().format("MMMM DD, YYYY")}"
 								${readOnly ? "disabled" : ``} required>
 							<div class="invalid-feedback d-block" id="invalid-taskStartDate0"></div>
-						</td>
-						<td>
-							<input
-								type="button"
-								class = "form-control daterange text-left"
-								name = "taskEndDate"
-								id="taskEndDate0"  
-								value = "${moment(new Date()).format("MMMM DD, YYYY")}"
-								${readOnly ? "disabled" : ``} required>
-							<div class="invalid-feedback d-block" id="invalid-taskEndDate0"></div>
 						</td>
 						<td>
 							<input type="text" 
@@ -1611,8 +1636,7 @@ $(document).ready(function() {
 		}
 		return html;
 	}
-
-
+	
 	function updateTableRows(){
         $(".task-list-row").each(function(i){
             // CHECKBOX
@@ -1676,35 +1700,24 @@ $(document).ready(function() {
 					$("td [name=taskRemarks]", this).next().attr("id", `invalid-taskRemarks${newID}`);
 					$("td [name=taskStartDate]", this).next().attr("id", `invalid-taskStartDate${newID}`);
 					$("td [name=taskStartDate]", this).next().attr("id", `invalid-taskStartDate${newID}`);
-
-					var startDateValue 	=	$(`#taskStartDate${newID}`).val();
-					var endDateValue 	=	$(`#taskEndDate${newID}`).val();
-
-					var dateRangePickerStartDate 	= startDateValue != moment() ? startDateValue : moment();
-					var dateRangePickerEndDate		= endDateValue 	!= moment() ? endDateValue : moment();
+					var date 			=	$(`#taskStartDate${newID}`).val();
+					var conditionDate 	=	date != "NaN" ? date : moment().format("MMMM DD, YYYY")+" - "+moment().format("MMMM DD, YYYY");
+					var dateSplit 		= 	conditionDate.split(" - ");
+					var startDateValue 	=	dateSplit[0];
+					var endDateValue	=	dateSplit[1];
+					// var displayDate		=	startDataValue+" - "+endDateValue;
+					// var dateRangePickerStartDate 	= startDateValue != moment() ? startDateValue : moment();
+					// var dateRangePickerEndDate		= endDateValue 	!= moment() ? endDateValue : moment();
 
 					// INIALIZE DATERANGE 
 								$(`#taskStartDate${newID}`).daterangepicker({
-									singleDatePicker: true,
 									showDropdowns: true,
 									autoApply: true,
-									startDate: dateRangePickerStartDate,
-									endDate: dateRangePickerEndDate,
+									startDate: startDateValue,
+									endDate: endDateValue,
 									locale: {
 										format: 'MMMM DD, YYYY'
 									},
-								}, function(start, end, label) {
-										$(`#taskEndDate${newID}`).daterangepicker({
-											singleDatePicker: true,
-											showDropdowns: true,
-											autoApply: true,
-											minDate: start,
-											startDate: start,
-											endDate: end,
-											locale: {
-												format: 'MMMM DD, YYYY'
-											},
-										})
 								});
 				});
         });
@@ -1840,6 +1853,18 @@ $(document).ready(function() {
 			var timelineDate 					= $("[name=timelineDate]").val().split(" - ");
 			var files 							= document.getElementById("timelineDesign").files[0];
 			var timelineBudgetStatus 			= $("[name=timelineProposedBudget]").attr("timelineBudgetStatus");
+			var timelineTeamMember 				= [];
+			var timelineTeamMemberOrganic 		= $("#timelineTeamMemberOrganic").val() ?? null;
+			var timelineTeamMemberNonOrganic 	= $("#timelineTeamMemberNonOrganic").val() ?? null;
+
+			for (let index = 0; index < timelineTeamMemberOrganic.length; index++) {
+				timelineTeamMember.push(timelineTeamMemberOrganic[index]);
+			}
+			for (let index = 0; index < timelineTeamMemberNonOrganic.length; index++) {
+				timelineTeamMember.push(timelineTeamMemberNonOrganic[index]);
+			}
+			
+
 			data["employeeID"]            		= sessionID;
 			data["projectID"]             		= $("[name=projectID]").val() || null;
 			data["clientID"] 					= $("[name=clientID]").val() || null;
@@ -1850,11 +1875,14 @@ $(document).ready(function() {
 			data["timelineIssued"] 				= $("[name=timelineIssued]").val() ?? null;
 			data["timelineProjectManager"]		= $("[name=timelineProjectManager]").val() ?? null;
 			data["timelineTeamLeader"] 			= $("[name=timelineTeamLeader]").val() ?? null;
-			data["timelineTeamMember"] 			= $("[name=timelineTeamMember]").val().join("|") ?? null;
+			data["timelineTeamMember"] 			= timelineTeamMember.join("|") ?? null;
 			data["timelineBuilderReason"] 	  	= $("[name=timelineBuilderReason]").val()?.trim() ?? null;
 			data["timelineProposedBudget"] 		= $("[name=timelineProposedBudget]").val().replaceAll(",","") ?? null;
 			data["file"] 						= files;
 			data["timelineBudgetStatus"] 		= timelineBudgetStatus;
+
+
+
 
 			formData.append("employeeID", sessionID);
 			formData.append("projectID", $("[name=projectID]").val() || null);
@@ -1862,11 +1890,11 @@ $(document).ready(function() {
 			formData.append("timelineBuilderReason", $("[name=timelineBuilderReason]").val() || null);
 			formData.append("timelineStartDate",moment(timelineDate[0]).format("YYYY-MM-DD"));
 			formData.append("timelineEndDate", moment(timelineDate[1]).format("YYYY-MM-DD"));
-			formData.append("timelinePriorityLevel",$("[name=timelinePriorityLevel]").val());
-			formData.append("timelineIssued",$("[name=timelineIssued]").val());
+			formData.append("timelinePriorityLevel",$("[name=timelinePriorityLevel]").val() ?? null);
+			formData.append("timelineIssued",$("[name=timelineIssued]").val() ?? null);
 			formData.append("timelineProjectManager",$("[name=timelineProjectManager]").val());
 			formData.append("timelineTeamLeader",$("[name=timelineTeamLeader]").val() ??  null);
-			formData.append("timelineTeamMember",$("[name=timelineTeamMember]").val().join("|") ?? null);
+			formData.append("timelineTeamMember",timelineTeamMember.join("|") ?? null);
 			formData.append("timelineBuilderReason", $("[name=timelineBuilderReason]").val()?.trim() ?? null );
 			formData.append("timelineProposedBudget", $("[name=timelineProposedBudget]").val().replaceAll(",","") ?? null);
 			formData.append("file", files);
@@ -1917,8 +1945,9 @@ $(document).ready(function() {
 				var milestoneListID;
 				var taskName  			= $(this).val(); 	
 				var allottedHours 		= thisParent.find("[name=allottedHours]").val().replaceAll(",","");
-				var taskStartDate		= moment(thisParent.find("[name=taskStartDate]").val()).format("YYYY-MM-DD");
-				var taskEndDate			= moment(thisParent.find("[name=taskEndDate]").val()).format("YYYY-MM-DD");
+				var taskDateSplit 		= thisParent.find("[name=taskStartDate]").val().split(" - ");
+				var taskStartDate		= moment(taskDateSplit[0]).format("YYYY-MM-DD");
+				var taskEndDate			= moment(taskDateSplit[1]).format("YYYY-MM-DD");
 				var taskRemarks			= thisParent.find("[name=taskRemarks]").val();
 
 				let temp = {
@@ -2062,46 +2091,54 @@ $(document).ready(function() {
 	$(document).on("click", "#btnSubmit", function () {
 		const id           				= decryptString($(this).attr("timelineBuilderID"));
 		const isFromCancelledDocument 	= $("[name=timelineProposedBudget]").attr("timelineBudgetStatus") ? $(this).attr("cancel") == "false" : $(this).attr("cancel") == "true";
+		const timelineBudgetStatus 		= $("[name=timelineProposedBudget]").attr("timelinebudgetstatus") != 0 ? true : false; 
 		const revise       				= $(this).attr("revise") == "true";
 		const validate     				= validateForm("form_timeline_builder");
 		const validateForms 			= validateNoneForm();
-		
+		const timelineAllocatedBudget 	= $("#timelineAllocatedBudget").val().replaceAll(",","") ||$("#timelineAllocatedBudget").val();
+		const timelineProposedBudget 	= $("#timelineProposedBudget").val().replaceAll(",","") ||$("#timelineProposedBudget").val();
+		const budgetStatus 				= timelineBudgetStatus ? (parseFloat(timelineAllocatedBudget) < parseFloat(timelineProposedBudget) ? false : true) : true;
 		removeIsValid("#tableProjectTask");
-
-		if (validate) {
-			if(validateForms){
-				const action = revise && !isFromCancelledDocument && "insert" || (id ? "update" : "insert");
-				const data   = gettimelineBuilderData(action, "submit", "1", id);
-	
-				if (revise) {
-					if(!isFromCancelledDocument){
-						data.append("reviseTimelineBuilderID", id);
-						data.delete("timelineBuilderID");
+		if(budgetStatus){
+			if (validate) {
+				if(validateForms){
+					const action = revise && !isFromCancelledDocument && "insert" || (id ? "update" : "insert");
+					const data   = gettimelineBuilderData(action, "submit", "1", id);
+		
+					if (revise) {
+						if(!isFromCancelledDocument){
+							data.append("reviseTimelineBuilderID", id);
+							data.delete("timelineBuilderID");
+						}
 					}
-				}
-
-				let approversID = "", approversDate = "";
-				for (var i of data) {
-					if (i[0] == "approversID")   approversID   = i[1];
-					if (i[0] == "approversDate") approversDate = i[1];
-				}
 	
-				const employeeID = getNotificationEmployeeID(approversID, approversDate, true);
-				let notificationData = false;
-				if (employeeID != sessionID) {
-					notificationData = {
-						moduleID:                90,
-						notificationTitle:       "Project Timeline",
-						notificationDescription: `${employeeFullname(sessionID)} asked for your approval.`,
-						notificationType:        2,
-						employeeID,
-					};
+					let approversID = "", approversDate = "";
+					for (var i of data) {
+						if (i[0] == "approversID")   approversID   = i[1];
+						if (i[0] == "approversDate") approversDate = i[1];
+					}
+		
+					const employeeID = getNotificationEmployeeID(approversID, approversDate, true);
+					let notificationData = false;
+					if (employeeID != sessionID) {
+						notificationData = {
+							moduleID:                90,
+							notificationTitle:       "Project Timeline",
+							notificationDescription: `${employeeFullname(sessionID)} asked for your approval.`,
+							notificationType:        2,
+							employeeID,
+						};
+					}
+					savetimelineBuilder(data, "submit", notificationData, pageContent);
+				}else{
+					showNotification("warning2","Cannot submit form, kindly input valid items")
 				}
-				savetimelineBuilder(data, "submit", notificationData, pageContent);
-			}else{
-				showNotification("warning2","Cannot submit form, kindly input valid items")
 			}
+		}else{
+			$("#timelineProposedBudget").removeClass("is-valid").addClass("is-invalid");
+			$("#timelineProposedBudget").prop("max", timelineAllocatedBudget.replaceAll(",","") || timelineAllocatedBudget);
 		}
+		
 	});
 	// ----- END SUBMIT DOCUMENT -----
 

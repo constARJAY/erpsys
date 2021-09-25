@@ -954,7 +954,7 @@ $(document).ready(function() {
 
 		let total = getTotalAmount();
 
-		$(`#total`).text(formatAmount(total));
+		$(`#total`).text(formatAmount(total, true));
 
 		const discount = getNonFormattedAmount($("#discount").val());
 		let totalAmount = total - discount;
@@ -2071,7 +2071,7 @@ $(document).ready(function() {
 						style="width: 100%"
 						required
 						${disabled}>
-						<option selected disabled>${!disabled ? "Select Delivery Term" : "-"}</option>
+						<option selected disabled>${!disabled ? "Select Shipping Term" : "-"}</option>
 						<option value="Meet-up" ${shippingTerm == "Meet-up" ? "selected" : ""}>Meet-up</option>
 						<option value="Delivery" ${shippingTerm == "Delivery" ? "selected" : ""}>Delivery</option>
 					</select>
@@ -2951,8 +2951,9 @@ function savePurchaseRequest(data = null, method = "submit", notificationData = 
 									title:             swalTitle,
 									showConfirmButton: false,
 									timer:             2000,
+								}).then(function() {
+									callback && callback();
 								});
-								callback && callback();
 
 								if (method == "approve" || method == "deny") {
 									$("[redirect=forApprovalTab]").length > 0 && $("[redirect=forApprovalTab]").trigger("click")

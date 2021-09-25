@@ -70,6 +70,7 @@ class ManageProjectBudget_model extends CI_Model {
             ptbt.approversStatus,
             ptbt.timelineBuilderStatus,
             ptbt.timelineBuilderRemarks,
+            ptbt.*,
             CONCAT(helt.employeeFirstname, ' ', helt.employeeLastname) AS preparedBy,
             departmentName,
             designationName

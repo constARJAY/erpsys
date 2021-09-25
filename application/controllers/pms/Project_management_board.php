@@ -7,6 +7,7 @@ class Project_management_board extends CI_Controller {
     {
         parent::__construct();
         $this->load->model("pms/ProjectManagementBoard_model", "projectmanagementboard");
+        $this->load->model("pms/CostEstimate_model", "costestimate");
         isAllowed(92);
     }
 
@@ -30,9 +31,9 @@ class Project_management_board extends CI_Controller {
     {
         $sessionID = $this->session->has_userdata("adminSessionID") ? $this->session->userdata("adminSessionID") : 1;
 
-        $timelineBuilderID        = $this->input->post("timelineBuilderID");
-        $timelineManagementStatus = $this->input->post("timelineManagementStatus");
-        $tasks = $this->input->post("tasks");
+        $timelineBuilderID          = $this->input->post("timelineBuilderID");
+        $timelineManagementStatus   = $this->input->post("timelineManagementStatus");
+        $tasks                      = $this->input->post("tasks");
 
         $data = [];
         foreach ($tasks as $task) {
@@ -54,7 +55,18 @@ class Project_management_board extends CI_Controller {
             ];
             array_push($data, $temp);
         }
-        echo json_encode($this->projectmanagementboard->saveProjectBoard($timelineBuilderID, $timelineManagementStatus, $data));
+
+
+        $result         =   $this->projectmanagementboard->saveProjectBoard($timelineBuilderID, $timelineManagementStatus, $data);
+        $explodeResult  =   explode("|",$result);
+            if($explodeResult[0] == "true"){
+                $saveCEResult = $this->costestimate->saveCE($timelineBuilderID);
+                $CEResult = explode("|", $saveCEResult);
+                if($CEResult[0] == "false"){
+                    $result = $CEResult;
+                }
+            }
+        echo json_encode($result);
     }
 
 }

@@ -1322,7 +1322,7 @@ $(document).ready(function() {
 
             <div class="col-md-3 col-sm-12">
                 <div class="form-group">
-                    <label>Reference No. ${!disabled ? "<code>*</code>" : ""}</label>
+                    <label>Reference No.</label>
 					<input type="text" 
 						class="form-control" 
 						name="referenceInput"
@@ -1490,7 +1490,7 @@ $(document).ready(function() {
 	// ----- GET REQUEST ITEMS CONTENT -----
 	function requestItemsContent(data = false, materialRequestID = null, billMaterialID = null, readOnly = false){
 
-		let tableBodyData = requestItemsRow();
+		let tableBodyData = readOnly ? `` :  requestItemsRow(data, readOnly);
 
 		if(readOnly){	
 			if(data){
@@ -1562,7 +1562,7 @@ $(document).ready(function() {
 	// ----- GET REQUEST ASSETS CONTENT -----
 	function requestAssetsContent(data = false, materialRequestID = null, billMaterialID = null, readOnly = false){
 
-		let tableBodyData = requestAssetsRow();
+		let tableBodyData = readOnly ? `` :  requestAssetsRow(data, readOnly);
 
 		if(readOnly){	
 			if(data){
@@ -1574,6 +1574,7 @@ $(document).ready(function() {
 				}
 			}
 		}
+
 		let checkboxHeader 	= !readOnly ? `	<th class="text-center">
 												<input type="checkbox" class="checkboxall" invcategory="asset">
 											</th>` : ``;
@@ -2214,7 +2215,7 @@ $(document).ready(function() {
 
 				if (employeeID != sessionID) {
 					notificationData = {
-						moduleID:                46,
+						moduleID:                137,
 						notificationTitle:       "Material Request",
 						notificationDescription: `${employeeFullname(sessionID)} asked for your approval.`,
 						notificationType:        2,
@@ -2243,6 +2244,29 @@ $(document).ready(function() {
 	});
 	// ----- END CANCEL DOCUMENT -----
 
+	// function insertToIVR(materialRequestID = null){
+	// 	if(materialRequestID){
+	// 		$.ajax({
+	// 			method:  "POST",
+	// 			url:     `material_request/insertToIVR`,
+	// 			data:	{materialRequestID},
+	// 			async:   false,
+	// 			dataType:    "json",
+	// 			beforeSend: function() {
+	// 				$("#loader").show();
+	// 			},
+	// 			success: function(data) {
+	// 				result = data;
+	// 			},
+	// 			error: function() {
+	// 				setTimeout(() => {
+	// 					$("#loader").hide();
+	// 					showNotification("danger", "System error: Please contact the system administrator for assistance!");
+	// 				}, 500);
+	// 			}
+	// 		});
+	// 	}
+	// }
 
     // ----- APPROVE DOCUMENT -----
 	$(document).on("click", "#btnApprove", function () {
@@ -2266,7 +2290,7 @@ $(document).ready(function() {
 			if (isImLastApprover(approversID, approversDate)) {
 				status = 2;
 				notificationData = {
-					moduleID:                46,
+					moduleID:                137,
 					tableID:                 id,
 					notificationTitle:       "Material Request",
 					notificationDescription: `${feedback}: Your request has been approved.`,
@@ -2276,7 +2300,7 @@ $(document).ready(function() {
 			} else {
 				status = 1;
 				notificationData = {
-					moduleID:                46,
+					moduleID:                137,
 					tableID:                 id,
 					notificationTitle:       "Material Request",
 					notificationDescription: `${employeeFullname(employeeID)} asked for your approval.`,
@@ -2348,7 +2372,7 @@ $(document).ready(function() {
 				data.append("updatedBy", sessionID);
 
 				let notificationData = {
-					moduleID:                46,
+					moduleID:                137,
 					tableID: 				 id,
 					notificationTitle:       "Material Request",
 					notificationDescription: `${feedback}: Your request has been denied.`,

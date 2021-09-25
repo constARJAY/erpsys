@@ -71,6 +71,35 @@ class MaterialRequest_model extends CI_Model {
         return $result;
     }
     
+    public function insertToIVR($materialRequestID){
+        $sql        = "SELECT * FROM ims_material_request_tbl WHERE materialRequestID = '$materialRequestID'";
+        $query      = $this->db->query($sql);
+        $result     = $query->row();
+        $data       = [
+
+                "materialRequestID"             => $result->materialRequestID,
+                "materialRequestCode"           => $result->materialRequestCode,
+                "costEstimateID"                => $result->costEstimateID,
+                "costEstimateCode"              => $result->costEstimateCode,
+                "billMaterialID"                => $result->billMaterialID,
+                "billMaterialCode"              => $result->billMaterialCode,
+                "timelineBuilderID"             => $result->materialRequestCode,
+                "projectCode"                   => $result->projectCode,
+                "projectName"                   => $result->projectName,
+                "projectCategory"               => $result->projectCategory,
+                "clientCode"                    => $result->clientCode,
+                "clientName"                    => $result->clientName,
+                "clientAddress"                 => $result->clientAddress,
+                "inventoryValidationStatus"     => "0",
+                "dateNeeded"                    => $result->dateNeeded,
+                "inventoryValidationReason"     => $result->materialRequestReason,
+                "createdBy"                     => $result->createdBy
+        ];
+        $queryIVR = $this->db->insert("ims_inventory_validation_tbl", $data);
+    }
+
+
+
 
     public function deleteMaterialRequestItems($materialRequestID, $billMaterialID) {
         // $whereBOM = $billMaterialID ?? NULL;
@@ -85,6 +114,8 @@ class MaterialRequest_model extends CI_Model {
         //     ]);
         // return $query ? true : false;
     }
+
+
 
     // public function saveMaterialRequestItems($data, $materialRequestID = null, $billMaterialID = null)
     // {

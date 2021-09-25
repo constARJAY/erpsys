@@ -126,6 +126,10 @@ class Material_request extends CI_Controller {
             if($result[0]== "true"){
                 $materialRequestID = $result[2];
 
+                if($materialRequestStatus == "2"){
+                    $this->materialrequest->insertToIVR($materialRequestID);
+                }
+                
                 if($items){
                     $materialRequestItems = [];
                     foreach ($items as $index => $item) {
@@ -202,6 +206,11 @@ class Material_request extends CI_Controller {
         $billMaterialID     = $this->input->post("billMaterialID");
 
         echo json_encode($this->materialrequest->getInventoryRequestdata($materialRequestID, $billMaterialID));
+    }
+
+    public function insertToIVR(){
+       $materialRequestID = $this->input->post("materialRequestID");
+        $this->materialrequest->insertToIVR($materialRequestID);
     }
     // public function getEquipmentRequestItems()
     // {

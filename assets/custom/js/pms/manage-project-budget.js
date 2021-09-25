@@ -139,11 +139,22 @@ $(document).ready(function() {
             ptbt.timelineAllocatedBudget AS allocatedBudget,
             hdt.departmentName,
             hdt2.designationName,
+            ptbt.timelineProjectManager AS timelineProjectManager,
+            ptbt.timelineTeamMember AS timelineTeamMember,
+            ptbt.timelineTeamLeader AS timelineTeamLeader,
+            ptbt.timelineDesign AS timelineDesign,
             ptbt.timelineBudgetStatus AS budgetStatus`,
             `ptbt.timelineBuilderStatus <> 0 AND ptbt.timelineBuilderStatus <> 4`);
         return data;
     }
     // ----- END TIMELINE DATA -----
+
+    const employeeList = getTableData("hris_employee_list_tbl LEFT JOIN hris_designation_tbl USING (designationID)", 
+										`employeeLastname, employeeFirstname, employeeMiddlename, employeeID, employeeRanking, hris_designation_tbl.designationName AS designationName, employeeRankingCredit,
+											CASE employeeLastname WHEN "" THEN employeeFirstname
+											ELSE CONCAT(employeeLastname,', ',employeeFirstname,' ',employeeMiddlename) 
+											END  "employeeFullname" `,
+										`employeeStatus != 0 AND employeeStatus != 3 AND employeeStatus != 4 AND employeeStatus != 5 AND employeeStatus != 6`);
 
     function initDatatables() {
         if ($.fn.DataTable.isDataTable("#tableTimeline")) {
@@ -319,9 +330,8 @@ $(document).ready(function() {
                     tasksList += `
                     <tr>
                         <td>${taskName}</td>
-                        <td class="text-left">${formatAmount(allottedHours)}</td>
-                        <td>${moment(taskStartDate).format("MMMM DD, YYYY")}</td>
-                        <td>${moment(taskEndDate).format("MMMM DD, YYYY")}</td>
+                        <td class="text-center">${formatAmount(allottedHours)}</td>
+                        <td class="text-center">${moment(taskStartDate).format("MMMM DD, YYYY")} - ${moment(taskEndDate).format("MMMM DD, YYYY")}</td>
                         <td>${taskRemarks || "-"}</td>
                     </tr>`;
                 })
@@ -334,11 +344,10 @@ $(document).ready(function() {
                         <table class="table">
                             <thead>
                                 <tr>
-                                    <th style="width:25%;">Task Name</th>
-                                    <th style="width:20%;">Allotted Hours</th>
-                                    <th style="width:15%;">Start Date</th>
-                                    <th style="width:15%;">End Date</th>
-                                    <th style="width:25%;">Remarks</th>
+                                    <th style="width:150px;">Task Name</th>
+                                    <th style="width:100px;">Alotted Hours</th>
+                                    <th style="width:300px;">Date</th>
+                                    <th style="width:150px;">Remarks</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -353,6 +362,72 @@ $(document).ready(function() {
     }
     // ----- END GET PROJECT TASK DISPLAY -----
 
+
+        // ----- GET EMPLOYEE LIST -----
+	function getEmployeeList(id = null , typeEmployee = "NonOrganic"){
+		// TYPE EMPLOYEE ;
+			// PROJECT MANAGER 			= PM; 
+			// TEAM LEADER 				= TL
+			// TEAM MEMBERS Oranic 		= ORG
+			// TEAM MEMBERS Non Organic	= NORG
+		let html = ``, members = [];
+		// let projectManager 	= $("[name=timelineProjectManager]").val(); 
+		// let teamLeader 		= $("[name=timelineTeamLeader]").val();
+
+		switch(typeEmployee) {
+			case "PM":	html += `<option disabled ${!id?"selected":''}>Please select a project manager</option>`;
+				employeeList.filter(emp => emp.employeeRanking == "Managerial").map((emp,index) =>{
+					html += `			
+						<option 
+							value        = "${emp.employeeID}" 
+							${emp.employeeID == id && "selected"}>
+							${emp.employeeFullname}
+						</option>
+						`;
+				});
+				break;
+			case "TL": html += `<option disabled ${!id?"selected":''}>Please select a team leader</option>`;
+				employeeList.filter(emp => emp.employeeRanking == "Officer" || emp.employeeRanking == "Managerial").map((emp,index) =>{
+					html += `			
+						<option 
+							value        = "${emp.employeeID}" 
+							${emp.employeeID == id && "selected"}>
+							${emp.employeeFullname}
+						</option>
+						`;
+				});
+				break;
+			case "ORG": 
+			// html += `<option disabled ${!id?"selected":''}>Please select a team </option>`;
+				var employeeIDs = id.split("|");
+				
+				employeeList.filter(emp => emp.employeeRanking).map((emp,index) =>{
+					html += `			
+							<option 
+								value  = "${emp.employeeID}" 
+								${employeeIDs.includes(emp.employeeID) && "selected"}>
+								${emp.employeeFullname} - ${emp.designationName}
+							</option>
+							`;
+				});
+			break;
+			default: 
+				var employeeIDs = id.split("|");
+
+				employeeList.filter(emp => !emp.employeeRanking).map((emp,index) =>{
+					html += `			
+							<option 
+								value  = "${emp.employeeID}" 
+								${employeeIDs.includes(emp.employeeID) && "selected"}>
+								${emp.employeeFullname} - ${emp.designationName}
+							</option>
+							`;
+				});
+		}
+		return html;	
+
+	}	
+	// ----- END GET EMPLOYEE LIST -----
 
     // ----- FORM CONTENT -----
     function formContent(data = false, readOnly = false) {
@@ -406,7 +481,14 @@ $(document).ready(function() {
             status="${budgetStatus}">
             <i class="fas fa-ban"></i> Cancel
         </button>` : "";
+        let tableData = getTimelineData().filter(timeline=> timeline.timelineBuilderID == timelineBuilderID);
+        let {
+            timelineProjectManager  =   "",
+            timelineTeamLeader      =   "",
+            timelineTeamMember      =   "",
+            timelineDesign          =   ""
 
+        } = tableData[0];
         let html = `
         <div class="">
             <div class="row px-2">
@@ -540,62 +622,117 @@ $(document).ready(function() {
                         <input type="text" class="form-control" disabled value="${clientAddress}">
                     </div>
                 </div>
-                <div class="col-md-4 col-sm-12">
+                <div class="col-md-3 col-sm-12">
                     <div class="form-group">
-                        <label>Start Date & End Date</label>
-                        <input type="text" class="form-control" disabled value="${timelineDate}">
+                        <label>Project Manager ${!disabled ? "<code>*</code>" : ""}</label>
+                        <select class="form-control validate select2"
+                            name="timelineProjectManager"
+                            id="timelineProjectManager"
+                            style="width: 100%"
+                            required disabled>
+                            ${getEmployeeList(timelineProjectManager, "PM")}
+                        </select>
+                        <div class="invalid-feedback d-block" id="invalid-timelineProjectManager"></div>
                     </div>
                 </div>
-                <div class="col-md-4 col-sm-12">
+                <div class="col-md-3 col-sm-12">
                     <div class="form-group">
-                        <label>Priority Level</label>
-                        <input type="text" class="form-control" disabled value="${timelinePriority}">
-                    </div>
-                </div>
-                <div class="col-md-4 col-sm-12">
-                    <div class="form-group">
-                        <label>Issued</label>
-                        <input type="text" class="form-control" disabled value="${timelineIssued}">
+                        <label>Team Leader ${!disabled ? "<code>*</code>" : ""}</label>
+                        <select class="form-control validate select2"
+                            name="timelineTeamLeader"
+                            id="timelineTeamLeader"
+                            style="width: 100%"
+                            required disabled}
+                            ${getEmployeeList(timelineTeamLeader, "TL")}
+                        </select>
+                        <div class="invalid-feedback d-block" id="invalid-timelineTeamLeader"></div>
                     </div>
                 </div>
 
+                <div class="col-md-3 col-sm-12">
+                    <div class="form-group">
+                        <label>Start Date & End Date ${!disabled ? "<code>*</code>" : ""}</label>
+                        <input type="text" class="form-control" disabled name="timelineDate" value="${timelineDate}">
+                    </div>
+                </div>
+                <div class="col-md-3 col-sm-12">
+                    <div class="form-group">
+                        <label>Design </label>
+                        ${ timelineDesign ? `<div class="w-100 ripple"> <a href="${base_url+"assets/upload-files/project-designs/"+timelineDesign}" class="ripple" target="_blank">${timelineDesign}</a></div>` 
+                            : `<input type="text" class="form-control" disabled name="timelineDate" value="-">` }
+                    </div>
+                </div>
                 <div class="col-12">
                     <div class="row">
                         <div class="col-md-6 col-sm-12">
                             <div class="form-group">
-                                <label>Project Manager</label>
-                                <input type="text" class="form-control" disabled value="${projectManager}">
-                            </div>
-                            <div class="form-group">
-                                <label>Team Leader</label>
-                                <input type="text" class="form-control" disabled value="${teamLeader}">
+                                <label>Team Members (Organic)</label>
+                                <select class="form-control validate select2"  multiple="multiple"
+                                    name="timelineTeamMember"
+                                    id="timelineTeamMemberOrganic"
+                                    style="width: 100%"
+                                    required disabled>
+                                    ${getEmployeeList(timelineTeamMember, "ORG")}
+                                </select>
+                                <div class="invalid-feedback d-block" id="invalid-timelineTeamMemberOrganic"></div>
                             </div>
                         </div>
+
                         <div class="col-md-6 col-sm-12">
                             <div class="form-group">
-                                <label>Team Members</label>
-                                <textarea type="text" class="form-control" rows="5" style="resize: none" disabled>${teamMember}</textarea>
+                                <label>Team Members (Non-Organic) </label>
+                                <select class="form-control validate select2"  multiple="multiple"
+                                    name="timelineTeamMember"
+                                    id="timelineTeamMemberNonOrganic"
+                                    style="width: 100%" disabled>
+                                    ${getEmployeeList(timelineTeamMember)}
+                                </select>
+                                <div class="invalid-feedback d-block" id="invalid-timelineTeamMemberNonOrganic"></div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>    
-            <hr class="pb-1">
-            <div class="text-primary font-weight-bold mb-2" style="font-size: 1.5rem;">Project Tasks</div>
-            <table class="table table-striped" id="projectTimeline">
-                <thead>
-                    <tr style="white-space: nowrap">
-                        <th>Phase</th>
-                        <th>Milestone</th>
-                        <th>Task/s</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    ${getProjectTaskDisplay(phases)}
-                </tbody>
-            </table>
+            
+            <div class="card mt-2">
+                <div class="card-header bg-primary text-white">
+                    <div class="row">
+                        <div class="col-md-6 col-sm-12 text-left">
+                            <h5 style="font-weight: bold;
+                                letter-spacing: 0.05rem;">Project Tasks</h5>
+                        </div>
+                        <div class="col-md-6 col-sm-12 text-right"></div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="w-100">
+                        <table class="table table-striped" id="projectTimeline" style="font-size: 90%;">
+                            <thead>
+                                <tr style="white-space: nowrap">
+                                    <th>Phase</th>
+                                    <th>Milestone</th>
+                                    <th>Task/s</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${getProjectTaskDisplay(phases)}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <div class="row">
+                        <div class="col-md-6 col-sm-12 text-left">
+                            
+                        </div>
+                        <div class="col-md-6 col-sm-12 text-right"></div>
+                    </div>
+                </div>
 
-            <div class="row mt-4">
+            </div>
+
+
+            <div class="row">
                 <div class="col-md-6 col-sm-12">
                     <div class="form-group">
                         <label>Proposed Budget</label>

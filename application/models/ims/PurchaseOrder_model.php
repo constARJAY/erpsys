@@ -8,6 +8,25 @@ class PurchaseOrder_model extends CI_Model {
         parent::__construct();
     }
 
+    public function saveSignedPurchaseOrder($purchaseOrderID = null, $filename = null)
+    {
+        $query = $this->db->update(
+                "ims_purchase_order_tbl", 
+                [
+                    "purchaseOrderSignedPO" => $filename,
+                    "purchaseOrderStatus"   => 2,
+                    "submittedAt"           => date("Y-m-d H:i:s")
+                ],
+                ["purchaseOrderID" => $purchaseOrderID]
+            );
+        if ($query) {
+            return "true|$filename|$purchaseOrderID|".date("Y-m-d");
+        }
+        return "false|System error: Please contact the system administrator for assistance!";
+    }
+
+
+
     public function getInventoryVendor($inventoryVendorID)
     {
         $sql = "
@@ -247,18 +266,6 @@ class PurchaseOrder_model extends CI_Model {
         $query = $this->db->insert_batch("ims_request_items_tbl", $data);
         if ($query) {
             return "true|Successfully submitted";
-        }
-        return "false|System error: Please contact the system administrator for assistance!";
-    }
-
-    public function savePurchaseOrderContract($purchaseOrderID = null, $filename = null)
-    {
-        $query = $this->db->update(
-            "ims_purchase_order_tbl", 
-            ["contractFile" => $filename],
-            ["purchaseOrderID" => $purchaseOrderID]);
-        if ($query) {
-            return "true|$filename|$purchaseOrderID|".date("Y-m-d");
         }
         return "false|System error: Please contact the system administrator for assistance!";
     }

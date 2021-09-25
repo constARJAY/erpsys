@@ -39,6 +39,31 @@ class Purchase_order extends CI_Controller {
         $this->load->view("template/footer");
     }
 
+    public function saveSignedPurchaseOrder()
+    {
+        $purchaseOrderID = $this->input->post("purchaseOrderID");
+        if (isset($_FILES["files"])) {
+            $uploadedFile = explode(".", $_FILES["files"]["name"]);
+            $uploadName   = $uploadedFile[0];
+            $extension    = $uploadedFile[1];
+            $filename     = $uploadName.time().'.'.$extension;
+
+            $folderDir = "assets/upload-files/purchase-order/";
+            if (!is_dir($folderDir)) {
+                mkdir($folderDir);
+            }
+
+            $targetDir = $folderDir.$filename;
+            if (move_uploaded_file($_FILES["files"]["tmp_name"], $targetDir)) {
+                
+                $saveSignedPurchaseOrder = $this->purchaseorder->saveSignedPurchaseOrder($purchaseOrderID, $filename);
+                echo json_encode($saveSignedPurchaseOrder);
+            }
+        }
+    }
+
+
+
     public function insertPurchaseOrder()
     {
         $sessionID = $CI->session->has_userdata("otherSessionID") ? 
@@ -782,28 +807,6 @@ class Purchase_order extends CI_Controller {
             $purchaseOrderData = $this->purchaseorder->getPurchaseOrderData($purchaseOrderID);
             if ($purchaseOrderData) {
                 $this->purchaseOrderExcel($purchaseOrderData);
-            }
-        }
-    }
-
-    public function savePurchaseOrderContract()
-    {
-        $purchaseOrderID = $this->input->post("purchaseOrderID");
-        if (isset($_FILES["files"])) {
-            $uploadedFile = explode(".", $_FILES["files"]["name"]);
-            $extension    = $uploadedFile[1];
-            $filename     = implode(".", $uploadedFile).time().'.'.$extension;
-
-            $folderDir = "assets/upload-files/contracts/";
-            if (!is_dir($folderDir)) {
-                mkdir($folderDir);
-            }
-
-            $targetDir = $folderDir.$filename;
-            if (move_uploaded_file($_FILES["files"]["tmp_name"], $targetDir)) {
-                
-                $savePurchaseOrderContract = $this->purchaseorder->savePurchaseOrderContract($purchaseOrderID, $filename);
-                echo json_encode($savePurchaseOrderContract);
             }
         }
     }

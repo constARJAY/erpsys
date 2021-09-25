@@ -48,9 +48,11 @@ $(document).ready(function() {
 			if (tableData.length > 0) {
 				let {
 					employeeID,
-					inventoryValidationStatus
+					inventoryValidationStatus,
+					createdBy
 				} = tableData[0];
 
+				employeeID = employeeID == "0" ? createdBy : employeeID;
 				let isReadOnly = true, isAllowed = true;
 
 				if (employeeID != sessionID) {
@@ -286,14 +288,15 @@ $(document).ready(function() {
 	function headerButton(isAdd = true, text = "Add", isRevise = false, isFromCancelledDocument = false) {
 		let html;
 		if (isAdd) {
-			if (isCreateAllowed(126)) {
-				html = `
-				<button type="button" 
-					class="btn btn-default btn-add" 
-					id="btnAdd">
-					<i class="icon-plus"></i> ${text}
-				</button>`;
-			}
+			html =``;
+			// if (isCreateAllowed(126)) {
+			// 	html = `
+			// 	<button type="button" 
+			// 		class="btn btn-default btn-add" 
+			// 		id="btnAdd">
+			// 		<i class="icon-plus"></i> ${text}
+			// 	</button>`;
+			// }
 		} else {
 			html = `
             <button type="button" 
@@ -409,7 +412,7 @@ $(document).ready(function() {
 			`ims_inventory_validation_tbl AS imrt 
 				LEFT JOIN hris_employee_list_tbl AS helt USING(employeeID) `,
 			"imrt.*, CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname, imrt.createdAt AS dateCreated, imrt.materialRequestCode",
-			`imrt.employeeID = ${sessionID}`,
+			`IF(imrt.employeeID = 0 ,imrt.createdBy = ${sessionID},imrt.employeeID = ${sessionID})`,
 			`FIELD(inventoryValidationStatus, 0, 1, 3, 2, 4, 5), COALESCE(imrt.submittedAt, imrt.createdAt)`
 		);
 
@@ -504,8 +507,11 @@ $(document).ready(function() {
 				employeeID            = "",
 				approversID           = "",
 				approversDate         = "",
-				createdAt             = new Date
+				createdAt             = new Date,
+				createdBy=""
 			} = data && data[0];
+
+			employeeID = employeeID == "0" ? createdBy : employeeID;
 
 			let isOngoing = approversDate ? approversDate.split("|").length > 0 ? true : false : false;
 			if (employeeID === sessionID) {
@@ -615,6 +621,22 @@ $(document).ready(function() {
 			} else {
 				if (inventoryValidationStatus == 1) {
 					if (isImCurrentApprover(approversID, approversDate)) {
+						// button = `
+						// <button type="button" 
+						// 	class="btn btn-submit px-5 p-2"  
+						// 	id="btnApprove" 
+						// 	inventoryValidationID="${encryptString(inventoryValidationID)}"
+						// 	code="${getFormCode("IVR", createdAt, inventoryValidationID)}"><i class="fas fa-paper-plane"></i>
+						// 	Approve
+						// </button>
+						// <button type="button" 
+						// 	class="btn btn-cancel  px-5 p-2"
+						// 	id="btnReject" 
+						// 	inventoryValidationID="${encryptString(inventoryValidationID)}"
+						// 	code="${getFormCode("IVR", createdAt, inventoryValidationID)}"><i class="fas fa-ban"></i> 
+						// 	Deny
+						// </button>`;
+
 						button = `
 						<button type="button" 
 							class="btn btn-submit px-5 p-2"  
@@ -622,13 +644,6 @@ $(document).ready(function() {
 							inventoryValidationID="${encryptString(inventoryValidationID)}"
 							code="${getFormCode("IVR", createdAt, inventoryValidationID)}"><i class="fas fa-paper-plane"></i>
 							Approve
-						</button>
-						<button type="button" 
-							class="btn btn-cancel  px-5 p-2"
-							id="btnReject" 
-							inventoryValidationID="${encryptString(inventoryValidationID)}"
-							code="${getFormCode("IVR", createdAt, inventoryValidationID)}"><i class="fas fa-ban"></i> 
-							Deny
 						</button>`;
 					}
 				}
@@ -1089,8 +1104,8 @@ $(document).ready(function() {
 					width: auto;
 					min-width: 100px;
 					height: auto;"
-					alt="Please Select Reference No.">
-				<div class="h4">Please Select Reference No.</div>
+					alt="No Item Records Found.">
+				<div class="h4">No Item Records Found.</div>
 			</div>`
 		}
 		return html;
@@ -1298,8 +1313,8 @@ $(document).ready(function() {
 					width: auto;
 					min-width: 100px;
 					height: auto;"
-					alt="Please Select Reference No.">
-				<div class="h4">Please Select Reference No.</div>
+					alt="No Asset Records Found.">
+				<div class="h4">No Asset Records Found.</div>
 			</div>`
 		}
 		return html;
@@ -1328,9 +1343,11 @@ $(document).ready(function() {
 			approversID             = "",
 			approversStatus         = "",
 			approversDate           = "",
+			dateNeeded				=  "",
 			inventoryValidationStatus   = false,
 			submittedAt             = false,
 			createdAt               = false,
+			createdBy 				= ""
 		} = data && data[0];
 
 	
@@ -1339,7 +1356,7 @@ $(document).ready(function() {
 			fullname:    employeeFullname    = "",
 			department:  employeeDepartment  = "",
 			designation: employeeDesignation = "",
-		} = employeeData(data ? employeeID : sessionID);
+		} = employeeData(data ? (employeeID == "0" ? createdBy : employeeID) : sessionID);
 		// ----- END GET EMPLOYEE DATA -----
 
 		// readOnly ? preventRefresh(false) : preventRefresh(true);
@@ -1480,7 +1497,7 @@ $(document).ready(function() {
 						value="${clientName || "-"}">
                 </div>
             </div>
-            <div class="col-md-8 col-sm-12">
+            <div class="col-md-4 col-sm-12">
                 <div class="form-group">
                     <label>Client Address</label>
                     <input type="text" 
@@ -1488,6 +1505,16 @@ $(document).ready(function() {
 						name="clientAddress" 
 						disabled 
 						value="${clientAddress || "-"}">
+                </div>
+            </div>
+			 <div class="col-md-4 col-sm-12">
+                <div class="form-group">
+                    <label>Date Needed</label>
+                    <input type="text" 
+						class="form-control" 
+						name="dateNeeded" 
+						disabled 
+						value="${moment(dateNeeded).format("MMMM DD, YYYY") || "-"}">
                 </div>
             </div>
             <div class="col-md-4 col-sm-12">
@@ -1594,7 +1621,7 @@ $(document).ready(function() {
             </div>`;
 			$("#page_content").html(html);
 
-			headerButton(true, "Add Inventory Validation");
+			headerButton(true, "");
 			headerTabContent();
 			myFormsContent();
 			updateURL();
@@ -1860,6 +1887,29 @@ $(document).ready(function() {
 			let approversDate   = tableData[0].approversDate;
 			let employeeID      = tableData[0].employeeID;
 			let createdAt       = tableData[0].createdAt;
+			let createdBy       = tableData[0].createdBy;
+
+			let materialWithdrawalCode = generateCode("MWF", false, "ims_material_withdrawal_tbl", "materialWithdrawalCode");
+			let inventoryValidationID = tableData[0].inventoryValidationID;
+			let inventoryValidationCode = tableData[0].inventoryValidationCode;
+			let materialRequestID = tableData[0].materialRequestID;
+			let materialRequestCode = tableData[0].materialRequestCode;
+			let costEstimateID = tableData[0].costEstimateID;
+			let costEstimateCode = tableData[0].costEstimateCode;
+			let billMaterialID = tableData[0].billMaterialID;
+			let billMaterialCode = tableData[0].billMaterialCode;
+			let timelineBuilderID = tableData[0].timelineBuilderID;
+			let projectCode = tableData[0].projectCode;
+			let projectName = tableData[0].projectName;
+			let projectCategory = tableData[0].projectCategory;
+			let clientCode = tableData[0].clientCode;
+			let clientName = tableData[0].clientName;
+			let clientAddress = tableData[0].clientAddress;
+			let dateNeeded = tableData[0].dateNeeded;
+			
+			let inventoryItemStatus = 0;
+			let inventoryAssetStatus = 0;
+			let materialWithdrawalStatus = 0;
 
 			let data = getInventoryValidationData("update", "approve", "2", id);
 			data.append("approversStatus", updateApproveStatus(approversStatus, 2));
@@ -1877,6 +1927,31 @@ $(document).ready(function() {
 					notificationType:        7,
 					employeeID,
 				};
+				
+				data.append(`materialWithdrawalCode`, materialWithdrawalCode);
+				data.append(`inventoryValidationID`, inventoryValidationID);
+				data.append(`inventoryValidationCode`, inventoryValidationCode);
+				data.append(`materialRequestID`, materialRequestID);
+				data.append(`materialRequestCode`, materialRequestCode);
+				data.append(`costEstimateID`, costEstimateID);
+				data.append(`costEstimateCode`, costEstimateCode);
+				data.append(`billMaterialID`, billMaterialID);
+				data.append(`billMaterialCode`, billMaterialCode);
+				data.append(`timelineBuilderID`, timelineBuilderID);
+				data.append(`projectCode`, projectCode);
+				data.append(`projectName`, projectName);
+				data.append(`projectCategory`, projectCategory);
+				data.append(`clientCode`, clientCode);
+				data.append(`clientName`, clientName);
+				data.append(`clientAddress`, clientAddress);
+				data.append(`dateNeeded`, dateNeeded);
+				data.append(`employeeID`, employeeID);
+				data.append(`createdBy`, createdBy);
+				
+				data.append(`inventoryItemStatus`, inventoryItemStatus);
+				data.append(`inventoryAssetStatus`, inventoryAssetStatus);
+				data.append(`materialWithdrawalStatus`, materialWithdrawalStatus);
+
 
 				$(".itemTableRow").each(function(i, obj){
 					let requestItemID 			= $(this).attr("requestitemid");
