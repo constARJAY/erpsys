@@ -736,52 +736,55 @@ $(document).ready(function() {
 			
 
 		} 
-		// else {
-		// 	html += `
-		// 	<tr class="table-row-request-item itemTableRow"
-		// 		requestItemID="${requestItemID}" inventoryValidationID="${inventoryValidationID}">
-		// 		<td>
-		// 			<div class="itemcode">${itemCode || "-"}</div>
-		// 		</td>
+		else {
 
-		// 		<td>
-		// 			<div class="itemname">
-		// 				${itemName || '-'}
-		// 			</div>
-		// 			<small style="color:#848482;" class="itembrandname">${itemBrandName || '-'}</small>
-		// 		</td>
+			if(itemID !=0){
+				html += `
+				<tr class="table-row-request-item itemTableRow"
+					requestItemID="${requestItemID}" inventoryValidationID="${inventoryValidationID}">
+					<td>
+						<div class="itemcode">${itemCode || "-"}</div>
+					</td>
 
-		// 		<td>
-		// 			<div class="itemclassification">
-		// 				${itemClassification || '-'}
-		// 			</div>
-		// 			<small style="color:#848482;" class="itemcategory">${itemCategory || '-'}</small>
-		// 		</td>
-			
-		// 		<td>
-		// 			<div class="itemuom">${itemUom || "-"}</div>
-		// 		</td>
+					<td>
+						<div class="itemname">
+							${itemName || '-'}
+						</div>
+						<small style="color:#848482;" class="itembrandname">${itemBrandName || '-'}</small>
+					</td>
+
+					<td>
+						<div class="itemclassification">
+							${itemClassification || '-'}
+						</div>
+						<small style="color:#848482;" class="itemcategory">${itemCategory || '-'}</small>
+					</td>
 				
-		// 		<td class="text-right">
-		// 			<div class="requestquantity">
-		// 				${formatAmount(requestQuantity)}
-		// 			</div>
-		// 		</td>
+					<td>
+						<div class="itemuom">${itemUom || "-"}</div>
+					</td>
+					
+					<td class="text-right">
+						<div class="requestquantity">
+							${formatAmount(requestQuantity)}
+						</div>
+					</td>
 
-		// 		<td class="text-right">
-		// 			<div class="availablestocks">
-		// 				${formatAmount(availableStocks)}
-		// 			</div>
-		// 		</td>
+					<td class="text-right">
+						<div class="availablestocks">
+							${formatAmount(availableStocks)}
+						</div>
+					</td>
 
-		// 		<td class="text-right">
-		// 			<div class="forpurchase">
-		// 				${formatAmount(forPurchase)}
-		// 			</div>
-		// 		</td>
-			
-		// 	</tr>`;
-		// }
+					<td class="text-right">
+						<div class="forpurchase">
+							${formatAmount(forPurchase)}
+						</div>
+					</td>
+				
+				</tr>`;
+			}
+		}
 
         return html;
     }
@@ -857,52 +860,56 @@ $(document).ready(function() {
 			
 
 		}
-		//  else {
-		// 	html += `
-		// 	<tr class="table-row-request-item assetTableRow"
-		// 		requestAssetID="${requestAssetID}" inventoryValidationID="${inventoryValidationID}">
-		// 		<td>
-		// 			<div class="assetcode">${assetCode || "-"}</div>
-		// 		</td>
+		 else {
 
-		// 		<td>
-		// 			<div class="assetame">
-		// 				${assetName || '-'}
-		// 			</div>
-		// 			<small style="color:#848482;" class="assetbrandname">${assetBrandName || '-'}</small>
-		// 		</td>
-
-		// 		<td>
-		// 			<div class="assetclassification">
-		// 				${assetClassification || '-'}
-		// 			</div>
-		// 			<small style="color:#848482;" class="assetcategory">${assetCategory || '-'}</small>
-		// 		</td>
-			
-		// 		<td>
-		// 			<div class="assetuom">${assetUom || "-"}</div>
-		// 		</td>
+			if(asset !=0){
+				html += `
+				<tr class="table-row-request-item assetTableRow"
+					requestAssetID="${requestAssetID}" inventoryValidationID="${inventoryValidationID}">
+					<td>
+						<div class="assetcode">${assetCode || "-"}</div>
+					</td>
+	
+					<td>
+						<div class="assetame">
+							${assetName || '-'}
+						</div>
+						<small style="color:#848482;" class="assetbrandname">${assetBrandName || '-'}</small>
+					</td>
+	
+					<td>
+						<div class="assetclassification">
+							${assetClassification || '-'}
+						</div>
+						<small style="color:#848482;" class="assetcategory">${assetCategory || '-'}</small>
+					</td>
 				
-		// 		<td class="text-right">
-		// 			<div class="requestquantity">
-		// 				${formatAmount(requestQuantity)}
-		// 			</div>
-		// 		</td>
-
-		// 		<td class="text-right">
-		// 			<div class="availablestocks">
-		// 				${formatAmount(availableStocks)}
-		// 			</div>
-		// 		</td>
-
-		// 		<td class="text-right">
-		// 			<div class="forpurchase">
-		// 				${formatAmount(forPurchase)}
-		// 			</div>
-		// 		</td>
-			
-		// 	</tr>`;
-		// }
+					<td>
+						<div class="assetuom">${assetUom || "-"}</div>
+					</td>
+					
+					<td class="text-right">
+						<div class="requestquantity">
+							${formatAmount(requestQuantity)}
+						</div>
+					</td>
+	
+					<td class="text-right">
+						<div class="availablestocks">
+							${formatAmount(availableStocks)}
+						</div>
+					</td>
+	
+					<td class="text-right">
+						<div class="forpurchase">
+							${formatAmount(forPurchase)}
+						</div>
+					</td>
+				
+				</tr>`;
+			}
+		
+		}
 
         return html;
     }

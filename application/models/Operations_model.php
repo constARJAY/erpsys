@@ -116,5 +116,15 @@ class Operations_model extends CI_Model {
         return "false|System error: Please contact the system administrator for assistance!";
     }
 
+    public function unionData($unionData = null)
+    {
+        if ($unionData) {
+            $sql         = "$unionData";
+            $query       = $this->db->query($sql);
+            return $query ? $query->result_array() : [];
+        } 
+        return 0;   
+    }
+
 }
 

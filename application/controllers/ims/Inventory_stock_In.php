@@ -11,27 +11,46 @@ class Inventory_stock_in extends CI_Controller {
         isAllowed(129);
     }
 
+    // public function getStockIn($data)
+    // {
+    //     echo json_encode($data); 
+    // }
     public function index()
     {
         $data["title"] = "Inventory Stock In";
-
+        $data['data']=$this->inventorystockin->getStockIn();
+        
         $this->load->view("template/header",$data);
-        $this->load->view("ims/inventory_stock_in/index");
+        $this->load->view("ims/inventory_stock_in/index",$data);
         $this->load->view("template/footer");
+        //$this->getStockIn($data); 
+       
     }
+   
+
     public function insertbarcode()
     {
+
         $itemID = $this->input->post("itemID");
-        $receivedID = $this->input->post("receivedID");
         $itemName = $this->input->post("itemName");
+        $brand = $this->input->post("brand");
+        $classificationName = $this->input->post("classificationName");
+        $categoryName = $this->input->post("categoryName");
         $barcode = $this->input->post("barcode");
         $recievedQuantity = $this->input->post("recievedQuantity");
         $serialnumber = $this->input->post("serialnumber");
         $inventoryStorageID = $this->input->post("inventoryStorageID");
+        $inventoryStorageCode = $this->input->post("inventoryStorageCode");
+        $inventoryStorageOfficeName = $this->input->post("inventoryStorageOfficeName");
         $manufactureDate = $this->input->post("manufactureDate");
         $expirationdate = $this->input->post("expirationdate");
-
-        $savereceivingreport = $this->inventorystockin->savestockin($itemID, $receivedID,$itemName, $barcode, $recievedQuantity,$serialnumber,$inventoryStorageID,$manufactureDate,$expirationdate);
+        $ReturnItemID = $this->input->post("ReturnItemID");
+        $MaterialUsageID = $this->input->post("MaterialUsageID");
+        $InventoryReceivingID = $this->input->post("InventoryReceivingID");
+        $recordID = $this->input->post("recordID");
+        $quantity = $this->input->post("quantity");
+        $inventoryCode = $this->input->post("inventoryCode");
+        $savereceivingreport = $this->inventorystockin->savestockin($itemID, $itemName,$brand, $classificationName, $categoryName,$barcode,$recievedQuantity,$serialnumber,$inventoryStorageID, $inventoryStorageCode, $inventoryStorageOfficeName, $manufactureDate, $expirationdate, $ReturnItemID, $MaterialUsageID,  $InventoryReceivingID, $recordID, $quantity, $inventoryCode);
         $result = explode("|", $savereceivingreport);
         if ($result[0] == "true") {
             $this->session->set_flashdata('success', $result[1]);
@@ -47,9 +66,9 @@ class Inventory_stock_in extends CI_Controller {
     public function printStockInBarcode()
 		{
             
-            $receivedID = $this->input->post("receivedID");
+            $referenceCode = $this->input->post("referenceCode");
             $itemID = $this->input->post("itemID");
-            $data["barcodes"] = $this->inventorystockin->getBarcodes($receivedID,$itemID);
+            $data["barcodes"] = $this->inventorystockin->getBarcodes($referenceCode,$itemID);
 			//$data["barcodes"] = $this->input->post("data");
 			$data["title"] = "PRINT BARCODES";
 			return $this->load->view("ims/inventory_stock_in/print",$data);

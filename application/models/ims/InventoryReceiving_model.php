@@ -30,7 +30,7 @@ class InventoryReceiving_model extends CI_Model {
                 $createdAt      = $res["createdAt"];
               //$data   = ["materialUsageCode" => getFormCode("MUF", $createdAt, $id)];
               $data = array(
-                'inventoryReceivingCode' => getFormCode("INRR", $createdAt, $id));
+                'inventoryReceivingCode' => getFormCode("INR", $createdAt, $id));
               $this->db->where('inventoryReceivingID', $id);
               $this->db->update('ims_inventory_receiving_tbl', $data);
             } 

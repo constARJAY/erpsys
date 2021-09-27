@@ -161,4 +161,10 @@ class Operations extends CI_Controller {
         echo json_encode($this->operations->database($sql));
     }
 
+    public function getUnionTableData()
+    {
+        $unionData = $this->input->post("unionData");
+        echo json_encode($this->operations->unionData($unionData));
+    }
+
 }

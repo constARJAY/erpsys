@@ -198,22 +198,16 @@ const generateCode = (
 
 // ----- GENERATE ITEM CODE -----
 const generateItemCode = (
-	classificationID = null,
-	type = "item"
+	classificationID = null
 ) => {
 	let id;
-	let table = type == `item` ? 'ims_inventory_item_tbl'  : 'ims_inventory_asset_tbl' ;
-	let tableID = type == `item` ? 'itemID'  : 'assetID' ;
-	let code = type == `item` ? 'ITM'  : 'AST' ;
-	
-	
-	let tableData = getTableData(`ims_inventory_classification_tbl AS iict LEFT JOIN ${table} AS iiit USING(classificationID)`,
-								`COUNT(${tableID}) AS lastID, classificationShortcut`, `iiit.classificationID ='${classificationID}' `);
+	let tableData = getTableData(`ims_inventory_classification_tbl AS iict LEFT JOIN ims_inventory_item_tbl AS iiit USING(classificationID)`,
+								`COUNT(itemID) AS lastID, classificationShortcut`, `iiit.classificationID ='${classificationID}' `);
 	let shortcutCode = tableData[0].classificationShortcut;
 	let lastID 		 = tableData[0].lastID < 1 ? 1 : parseInt(tableData[0].lastID) + 1;
 	let stringID 	 = lastID.toString();
 	let lastStr = "0".repeat(5 - stringID.length) + lastID;
-	return shortcutCode ? `${code}-${shortcutCode}-${moment().format("YY")}-${lastStr}` : false;
+	return shortcutCode ? `ITM-${shortcutCode}-${moment().format("YY")}-${lastStr}` : false;
 };
 // ----- END GENERATE ITEM CODE -----
 
@@ -692,7 +686,38 @@ const isDeleteAllowed = (moduleID = 60) => {
 const isPrintAllowed = (moduleID = 60) => {
 	return getEmployeePermission(moduleID, "print");
 };
+
+const getUnionTableData = (
+	unionData = "",
+) => {
+	let path = `${base_url}operations/getUnionTableData`;
+	let data = {
+		unionData,
+	};
+	let result = [];
+	if (unionData) {
+		$.ajax({
+			method: "POST",
+			url: path,
+			data,
+			async: false,
+			dataType: "json",
+			success: function (data) {
+				if (data) {
+					data.map((item) => {
+						result.push(item);
+					});
+				}
+			},
+			error: function (err) {
+				showNotification(
+					"danger",
+					"System error: Please contact the system administrator for assistance!"
+				);
+			},
+		});
+	}
+	return result;
+};
+
 // ----- END EMPLOYEE PERMISSIONS -----
-
-
-

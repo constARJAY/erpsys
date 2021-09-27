@@ -23,6 +23,15 @@ class Inventory_receiving extends CI_Controller {
     {
         $action                     = $this->input->post("action");
         $method                     = $this->input->post("method");
+        $purchaseOrderID            = $this->input->post("purchaseOrderID") ?? null;
+        $purchaseOrderCode          = $this->input->post("purchaseOrderCode") ?? null;
+        $projectCode                = $this->input->post("projectCode") ?? null;
+        $projectName                = $this->input->post("projectName") ?? null;
+        $projectCategory            = $this->input->post("projectCategory") ?? null;
+        $clientCode                 = $this->input->post("clientCode") ?? null;
+        $timelineBuilderID          = $this->input->post("timelineBuilderID") ?? null;
+        $clientAddress              = $this->input->post("clientAddress") ?? null;
+        $recordID                   = $this->input->post("recordID") ?? null;
         $inventoryReceivingID       = $this->input->post("inventoryReceivingID") ?? null;
         $reviseInventoryReceivingID = $this->input->post("reviseInventoryReceivingID") ?? null;
         $employeeID                 = $this->input->post("employeeID");
@@ -46,18 +55,27 @@ class Inventory_receiving extends CI_Controller {
 
         $lastApproveCondition       = $this->input->post("lastApproveCondition");
         $inventoryReceivingData = [
-            "reviseInventoryReceivingID" => $reviseInventoryReceivingID,
-            "employeeID"                 => $employeeID,
-            "receiptNo"                 => $receiptNo,
-            "approversID"                => $approversID,
-            "approversStatus"            => $approversStatus,
-            "approversDate"              => $approversDate,
-            "inventoryReceivingStatus"   => $inventoryReceivingStatus,
-            "inventoryReceivingReason"   => $inventoryReceivingReason,
-            "submittedAt"                => $submittedAt,
-            "createdBy"                  => $createdBy,
-            "updatedBy"                  => $updatedBy,
-            "createdAt"                  => $createdAt
+            "reviseInventoryReceivingID"    => $reviseInventoryReceivingID,
+            "purchaseOrderID"               => $purchaseOrderID,
+            "purchaseOrderCode"             => $purchaseOrderCode,
+            "projectCode"                   => $projectCode,
+            "projectName"                   => $projectName,
+            "projectCategory"               => $projectCategory,
+            "clientCode"                    => $clientCode,
+            "timelineBuilderID"             => $timelineBuilderID,
+            "clientAddress"                 => $clientAddress,
+            "recordID"                      => $recordID,
+            "employeeID"                    => $employeeID,
+            "receiptNo"                     => $receiptNo,
+            "approversID"                   => $approversID,
+            "approversStatus"               => $approversStatus,
+            "approversDate"                 => $approversDate,
+            "inventoryReceivingStatus"      => $inventoryReceivingStatus,
+            "inventoryReceivingReason"      => $inventoryReceivingReason,
+            "submittedAt"                   => $submittedAt,
+            "createdBy"                     => $createdBy,
+            "updatedBy"                     => $updatedBy,
+            "createdAt"                     => $createdAt
         ];
         if ($action == "update") {
             unset($inventoryReceivingData["reviseInventoryReceivingID"]);
@@ -107,7 +125,7 @@ class Inventory_receiving extends CI_Controller {
                             "inventoryReceivingID" => $inventoryReceivingID,
                             "itemCode"             => $item["itemCode"],
                             "recordID"             => $item["recordID"],
-                            "inventoryCode"        => getFormCode("INNR", $item["created"], $inventoryReceivingID),
+                            "inventoryCode"        => getFormCode("INR", $item["created"], $inventoryReceivingID),
                             "itemID"               => $item["itemID"] != "null" ? $item["itemID"] : null,
                             "itemName"             => $item["itemName"],
                             "Brand"                 => $item["Brand"],

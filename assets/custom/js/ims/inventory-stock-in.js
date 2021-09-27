@@ -41,25 +41,73 @@ $(document).ready(function () {
 
 	// ----- VIEW DOCUMENT -----
 	function viewDocument(view_id = false, readOnly = false) {
-		var quantity1 ='0.00';
-		const loadData = (id) => {
-
-			const tableData1 = getTableData(`ims_stock_in_tbl
-			`,` FORMAT(sum(stockInQuantity),2) AS quantity , '' as received, '' AS employeeID, '' inventoryReceivingID`,`inventoryReceivingID =${id}`);
-			tableData1.map((item) => {
-				quantity1 = item.quantity;
-			});	
-
-			const tableData = getTableData(`
-			ims_inventory_receiving_details_tbl  as  iird
- 			LEFT JOIN ims_inventory_receiving_tbl AS iir ON iird.inventoryReceivingID  = iir.inventoryReceivingID`,
-				`${quantity1} as quantity ,SUM(received) as received,iir.employeeID,iir.inventoryReceivingID, iir.createdAt`, "iird.inventoryReceivingID=" + id);
-			//const tableData = getTableData("ims_received_tbl","","receivedID=" + id);
-			console.log(tableData);
-			if (tableData.length > 0) {
+		const loadData = (id) => { 
+			const tableData	= getUnionTableData(`
+					SELECT id,consolidateCode, employeeID,SUM(quantity) AS quantity, SUM(received) AS received,  createAt, '2' as dataStatus
+					FROM
+					( 
+						SELECT '1' AS module,
+							iri.returnItemID AS id,
+							returnItemCode AS consolidateCode,
+							employeeID,
+							SUM(quantity) AS quantity,
+							0 AS received,
+							createAt
+						FROM ims_return_item_tbl AS iri
+						LEFT JOIN ims_inventory_request_details_tbl AS ird ON iri.returnItemID = ird.returnItemID
+						WHERE iri.returnItemCode ='${id}'
+						UNION ALL
+						SELECT 
+							'2' AS module,
+							muf.materialUsageID AS id,
+							materialUsageCode AS consolidateCode,
+							employeeID,
+							SUM(unused) AS quantity,
+							0 AS received,
+							createAt
+						FROM ims_material_usage_tbl AS muf
+						LEFT JOIN ims_inventory_request_details_tbl AS ird ON muf.materialUsageID = ird.materialUsageID
+						WHERE muf.materialUsageCode ='${id}'
+						UNION ALL
+						SELECT 
+							'3' AS module,
+							innr.inventoryReceivingID AS id,
+							inventoryReceivingCode AS consolidateCode,
+							employeeID,
+							SUM(receivedQuantity) AS quantity,
+							0 AS received,
+							createAt
+						FROM ims_inventory_receiving_tbl AS innr
+						LEFT JOIN ims_inventory_request_details_tbl AS ird ON innr.inventoryReceivingID = ird.inventoryReceivingID
+						WHERE innr.inventoryReceivingCode ='${id}'
+						UNION ALL
+						SELECT 
+							'4' AS module,
+							'' AS id,
+							'' AS consolidateCode,
+							'' AS employeeID,
+							0 AS quantity,
+							SUM(quantity) AS received,
+							'' AS createAt
+						FROM ims_stock_in_item_tbl 
+						WHERE inventoryCode ='${id}'
+						UNION ALL
+						SELECT 
+							'5' AS module,
+							'' AS id,
+							'' AS consolidateCode,
+							'' AS employeeID,
+							0 AS quantity,
+							SUM(quantity) AS received,
+							'' AS createAt
+						FROM ims_stock_in_assets_tbl 
+						WHERE inventoryCode ='${id}'
+					)a WHERE consolidateCode IS NOT NULL `);
+			if (tableData.length > 0) {	
+				
 				let {
 					employeeID,
-					receivedStatus
+					dataStatus
 				} = tableData[0]; 
 
 				let isReadOnly = true,
@@ -67,11 +115,11 @@ $(document).ready(function () {
 
 				if (employeeID != sessionID) {
 					isReadOnly = true;
-					if (receivedStatus == 0 || receivedStatus == 4) {
+					if (dataStatus == 0 || dataStatus == 4) {
 						isAllowed = false;
 					}
 				} else if (employeeID == sessionID) {
-					if (receivedStatus == 0) {
+					if (dataStatus == 0) {
 						isReadOnly = false;
 					} else {
 						isReadOnly = true;
@@ -96,14 +144,14 @@ $(document).ready(function () {
 
 		if (view_id) {
 			let id = decryptString(view_id);
-			id && isFinite(id) && loadData(id);
+			id  && loadData(id);
 		} else {
 			let url = window.document.URL;
 			let arr = url.split("?view_id=");
 			let isAdd = url.indexOf("?add");
 			if (arr.length > 1) {
 				let id = decryptString(arr[1]);
-				id && isFinite(id) && loadData(id);
+				id && loadData(id);
 			} else if (isAdd != -1) {
 				pageContent(true);
 			}
@@ -165,10 +213,6 @@ $(document).ready(function () {
 						targets: 4,
 						width: 150
 					},
-					{
-						targets: 5,
-						width: 100
-					},
 				],
 			});
 
@@ -209,19 +253,10 @@ $(document).ready(function () {
 					},
 					{
 						targets: 6,
-						width: 200
+						width: 120
 					},
-					{
-						targets: 7,
-						width: 110
-					},
-
 				],
 			});
-
-
-
-
 	}
 
 	function initDataTables1() {
@@ -247,15 +282,15 @@ $(document).ready(function () {
 				scrollCollapse: true,
 				columnDefs: [{
 						targets: 0,
-						width: 190
+						width: 100
 					},
 					{
 						targets: 1,
-						width: 150
+						width: 420
 					},
 					{
 						targets: 2,
-						width: 150
+						width: 200
 					},
 					{
 						targets: 3,
@@ -263,12 +298,17 @@ $(document).ready(function () {
 					},
 					{
 						targets: 4,
-						width: 100
+						width: 150
 					},
 					{
 						targets: 5,
 						width: 150
 					},
+					{
+						targets: 6,
+						width: 150
+					},
+					
 
 				],
 			});
@@ -290,85 +330,101 @@ $(document).ready(function () {
 	// ----- MY FORMS CONTENT -----
 	function myFormsContent() { // first load check first load kung sino ang mag view
 		$("#tableMyFormsParent").html(preloader);
-		let receivingReportData = getTableData(
-			`ims_inventory_receiving_tbl AS r 
-			LEFT JOIN hris_employee_list_tbl 				AS emp USING(employeeID)
-			LEFT JOIN hris_designation_tbl 					AS dtn USING(designationID)
-			LEFT JOIN ims_inventory_receiving_details_tbl	AS iird ON r.inventoryReceivingID =iird.inventoryReceivingID
-			LEFT JOIN ims_stock_in_tbl						AS isi ON r.inventoryReceivingID = isi.inventoryReceivingID
-			LEFT JOIN ims_purchase_order_tbl				AS ipo ON r.purchaseOrderID = ipo.purchaseOrderID`,
-			`r.inventoryReceivingID,	r.inventoryReceivingStatus,	r.inventoryReceivingRemarks, 
-			CONCAT(emp.employeeFirstname, ' ', emp.employeeLastname) AS fullname, 
-            r.purchaseOrderID,r.createdAt,ipo.createdAt AS pocreatedAt,dtn.designationName,r.approversDate,	r.submittedAt,ROUND(sum(IFNULL(isi.stockInQuantity,'0.00')),2) AS receivingQuantity,
-			iird.received AS quantity`,
-			`inventoryReceivingStatus = 2`,
-			``, `r.inventoryReceivingID`
-		);
+		let receivingReportData = getUnionTableData(`
+											SELECT module,ID,referenceCode,purchaseID, fullname, (SUM(quantity) -IFNULL(SUM(RECORD),0)) AS quantity, daterequest, inventoryStatus,IFNULL(SUM(RECORD),0) AS stockQuantity
+											FROM (
+											SELECT 
+												'1' AS module, 
+												iri.returnItemID as ID,
+												'' AS purchaseID, 
+												returnItemCode as referenceCode, 
+												CONCAT(empl.employeeFirstname,' ',empl.employeeLastname) AS fullname,
+												ird.quantity AS quantity,
+												DATE_FORMAT(iri.createdAt,'%M% %d%, %Y') AS daterequest,
+												returnItemStatus AS inventoryStatus,
+												CASE WHEN sii.quantity IS NOT NULL  THEN sii.quantity
+												ELSE sia.quantity END RECORD
+											FROM ims_return_item_tbl AS iri
+											LEFT JOIN ims_inventory_request_details_tbl AS ird ON iri.returnItemID = ird.returnItemID
+											LEFT JOIN hris_employee_list_tbl AS empl ON iri.employeeID = empl.employeeID
+											LEFT JOIN ims_stock_in_item_tbl AS sii ON iri.returnItemID = sii.returnItemID
+											LEFT JOIN ims_stock_in_assets_tbl AS sia ON iri.returnItemID = sia.returnItemID
+											WHERE returnItemStatus = 2
+											UNION ALL
+											SELECT '2' AS module,
+												muf.materialUsageID AS ID,
+												'' AS purchaseID,
+												materialUsageCode as referenceCode,
+												CONCAT(empl.employeeFirstname,' ',empl.employeeLastname) AS fullname,
+												unused AS quantity,
+												DATE_FORMAT(muf.createdAt,'%M% %d%, %Y') AS daterequest,
+												materialUsageStatus as inventoryStatus,
+												CASE WHEN sii.quantity IS NOT NULL  THEN sii.quantity
+												ELSE sia.quantity END RECORD  
+											FROM ims_material_usage_tbl AS muf
+											LEFT JOIN ims_inventory_request_details_tbl AS ird ON ird.materialUsageID = muf.materialUsageID
+											LEFT JOIN hris_employee_list_tbl AS empl ON muf.employeeID = empl.employeeID
+											LEFT JOIN ims_stock_in_item_tbl AS sii ON muf.materialUsageID = sii.materialUsageID
+											LEFT JOIN ims_stock_in_assets_tbl AS sia ON muf.materialUsageID = sia.materialUsageID
+											WHERE materialUsageStatus = 2
+											UNION ALL
+											SELECT '3' AS module,
+												iir.inventoryReceivingID AS ID,
+												purchaseOrderCode AS purchaseID,
+												inventoryReceivingCode as referenceCode, 
+												CONCAT(empl.employeeFirstname,' ',empl.employeeLastname) AS fullname,
+												receivedQuantity AS quantity,
+												DATE_FORMAT(iir.createdAt,'%M% %d%, %Y') AS daterequest,
+												inventoryReceivingStatus as inventoryStatus,
+												CASE WHEN sii.quantity IS NOT NULL  THEN sii.quantity
+												ELSE sia.quantity END RECORD    
+											FROM ims_inventory_receiving_tbl AS iir
+											LEFT JOIN ims_inventory_request_details_tbl AS ird ON iir.inventoryReceivingID = ird.inventoryReceivingID
+											LEFT JOIN hris_employee_list_tbl AS empl ON iir.employeeID = empl.employeeID
+											LEFT JOIN ims_stock_in_item_tbl AS sii ON iir.inventoryReceivingID = sii.inventoryReceivingID
+											LEFT JOIN ims_stock_in_assets_tbl AS sia ON iir.inventoryReceivingID = sia.inventoryReceivingID
+											WHERE inventoryReceivingStatus = 2
+											)a GROUP BY referenceCode`);
 		let html = `
         <table class="table table-bordered table-striped table-hover" id="tableMyForms">
             <thead>
                 <tr style="white-space: nowrap">
                     <th>Document No.</th>
-					<th>Purchase No.</th>
+					<th>Purchase Order No.</th>
                     <th>Preparer Name</th>
-                    <th>Position</th>
                     <th>Date Submitted</th>
                     <th>Status</th>
                 </tr>
             </thead>
             <tbody>`;
-
-		receivingReportData.map((item) => {
-			let {
-				inventoryReceivingID,
-				fullname,
-				approversID,
-				approversDate,
-				designationName,
-				inventoryReceivingStatus,
-				submittedAt,
-				createdAt,
-				quantity,
-				receivingQuantity,
-				purchaseOrderID,
-				pocreatedAt,
-
-			} = item;
-			//var quantity = item.quantity;
-			var formatquantity = parseFloat(quantity);
-			//	var receivingQuantity = item.receivingQuantity;
-			var formatreceivingQuantity = parseFloat(receivingQuantity);
-			let btnClass = inventoryReceivingStatus != 0 ? "btnView" : "btnEdit";
-			// let remarks       = purchaseRequestRemarks ? purchaseRequestRemarks : "-";
-			let dateCreated = moment(createdAt).format("MMMM DD, YYYY hh:mm:ss A");
-			let dateSubmitted = submittedAt ? moment(submittedAt).format("MMMM DD, YYYY hh:mm:ss A") : "-";
-			let dateApproved = inventoryReceivingStatus == 2 ? approversDate.split("|") : "-";
-			if (dateApproved !== "-") {
-				dateApproved = moment(dateApproved[dateApproved.length - 1]).format("MMMM DD, YYYY hh:mm:ss A");
-			}
-
-			// let button = receivedStatus != 0 ? `
-			let button =
-				//officialBusinessStatus != 0 ?
-				`
-            <button class="btn btn-view w-100 btnView" id="${encryptString(inventoryReceivingID)}"><i class="fas fa-eye"></i> View</button>`;
-
-			html += `
-            <tr class="${btnClass}" id="${encryptString(inventoryReceivingID )}">
-               
-                <td>${getFormCode("INRR", dateCreated, inventoryReceivingID)}</td>
-				<td>${getFormCode("PO", pocreatedAt, purchaseOrderID)}</td>
-                <td>${fullname}</td>
-                <td>${designationName}</td>
-				<td>${dateSubmitted}</td>
-                <td class="text-center">`;
-			if (formatquantity < formatreceivingQuantity || formatquantity == formatreceivingQuantity) {
-				html += `<span class="badge badge-success w-100">Completed</span>`;
-			} else {
-				html += `<span class="badge badge-outline-warning w-100">Pending</span>`;
-			}
-			html += ` </td>
-            </tr>`;
+			receivingReportData.map((item) => {
+				let {
+					ID,
+					purchaseID,
+					referenceCode,
+					fullname,
+					quantity,
+					daterequest,
+					inventoryStatus,
+					stockQuantity,
+				} = item;
+				let btnClass = inventoryStatus != 0 ? "btnView" : "btnEdit";
+				let button =`
+				<button class="btn btn-view w-100 btnView" id="${encryptString(referenceCode)}"><i class="fas fa-eye"></i> View</button>`;
+				html += `
+				<tr class="${btnClass}" id="${encryptString(referenceCode)}">
+				<td>${referenceCode}</td>
+				<td>${purchaseID}</td>
+				<td>${fullname}</td>
+				<td>${daterequest}</td>
+				<td>`;
+				if(quantity == stockQuantity) {
+					html += `<span class="badge badge-success w-100">Completed</span>`;
+				}else{
+					html += `<span class="badge badge-outline-warning w-100">Pending</span>`;
+				}
+				html += `</td>
+				</tr>`;
 		});
 
 		html += `
@@ -389,8 +445,8 @@ $(document).ready(function () {
 		let button = "";
 		if (data) {
 			let {
-				inventoryReceivingID = "",
-					inventoryReceivingStatus = "",
+					consolidateCode = "",
+					dataStatus = "",
 					employeeID = "",
 					approversID = "",
 					approversDate = "",
@@ -398,51 +454,51 @@ $(document).ready(function () {
 			} = data && data[0];
 			let isOngoing = approversDate ? approversDate.split("|").length > 0 ? true : false : false;
 			if (employeeID === sessionID) {
-				if (inventoryReceivingStatus == 0) {
+				if (dataStatus == 0) {
 					// DRAFT
 					button = `
 					<button 
 						class="btn btn-submit px-5 p-2" 
 						id="btnSubmit" 
-						inventoryReceivingID="${inventoryReceivingID}"
-						code="${getFormCode("INRR", createdAt, inventoryReceivingID)}"><i class="fas fa-paper-plane"></i>
+						inventoryCode="${consolidateCode}"
+						code="${consolidateCode}"><i class="fas fa-paper-plane"></i>
 						Submit
 					</button>
 					<button 
 						class="btn btn-cancel px-5 p-2"
 						id="btnCancelForm" 
-						inventoryReceivingID="${inventoryReceivingID}"
-						code="${getFormCode("INRR", createdAt, inventoryReceivingID)}"><i class="fas fa-ban"></i> 
+						inventoryCode="${consolidateCode}"
+						code="${consolidateCode}"><i class="fas fa-ban"></i> 
 						Cancel
 					</button>`;
-				} else if (inventoryReceivingStatus == 1) {
+				} else if (dataStatus == 1) {
 					if (!isOngoing) {
 						button = `
 						<button 
 							class="btn btn-cancel px-5 p-2"
 							id="btnCancelForm" 
-							inventoryReceivingID="${inventoryReceivingID}"
-							code="${getFormCode("INRR", createdAt, inventoryReceivingID)}"><i class="fas fa-ban"></i> 
+							inventoryCode="${consolidateCode}"
+							code="${consolidateCode}"><i class="fas fa-ban"></i> 
 							Cancel
 						</button>`;
 					}
 				}
 			} else {
-				if (inventoryReceivingStatus == 1) {
+				if (dataStatus == 1) {
 					if (isImCurrentApprover(approversID, approversDate)) {
 						button = `
 						<button 
 							class="btn btn-submit px-5 p-2" 
 							id="btnApprove" 
-							inventoryReceivingID="${encryptString(inventoryReceivingID)}"
-							code="${getFormCode("INRR", createdAt, inventoryReceivingID)}"><i class="fas fa-paper-plane"></i>
+							inventoryCode="${encryptString(consolidateCode)}"
+							code="${consolidateCode}"><i class="fas fa-paper-plane"></i>
 							Approve
 						</button>
 						<button 
 							class="btn btn-cancel px-5 p-2"
 							id="btnReject" 
-							inventoryReceivingID="${encryptString(inventoryReceivingID)}"
-							code="${getFormCode("INRR", createdAt, inventoryReceivingID)}"><i class="fas fa-ban"></i> 
+							inventoryCode="${encryptString(consolidateCode)}"
+							code="${consolidateCode}"><i class="fas fa-ban"></i> 
 							Deny
 						</button>`;
 					}
@@ -482,12 +538,11 @@ $(document).ready(function () {
             </div>`;
 			$("#page_content").html(html);
 			headerButton(true);
-			myFormsContent();
-			updateURL();
+			myFormsContent();		
+			updateURL();			
 		} else {
-			headerButton(false, "");
+			headerButton(false, "");	
 			formContent(data, readOnly);
-
 		}
 	}
 	viewDocument();
@@ -497,13 +552,6 @@ $(document).ready(function () {
 	$(document).on("click", ".btnView", function () {
 		const id = $(this).attr("id");
 		viewDocument(id, true);
-		// const tableData = getTableData(
-		// 	"hris_official_business_tbl",
-		// 	"*",
-		// 	"receivedID=" + id,
-		// 	""
-		// );
-		// pageContent(true, tableData, true);
 	});
 	// ----- END VIEW DOCUMENT -----
 
@@ -511,25 +559,18 @@ $(document).ready(function () {
 	function formContent(data = false, readOnly = false) {
 		$("#page_content").html(preloader);
 		storageContent();
-		let {
-				inventoryReceivingID = "",
-				employeeID = "",
-				approversID = "",
-				approversDate = "",
-				designationName = "",
-				inventoryReceivingStatus = false,
-				quantity,
-				received,
-				submittedAt = false,
-				createdAt = false,
-		} = data && data[0];
+		let {	
 
-		// let requestItems ="";
-		// if(receivedID){
-		// 	let requestItemsData = getTableData(
-		// 		``,``,``);
-		// }
-		
+
+			consolidateCode,
+			employeeID,
+			quantity,
+			received,
+			createAt,
+			approversID = "",
+			approversDate = "",
+			dataStatus	= "",
+		} = data && data[0];
 		formatquantity = parseFloat(quantity) || 0;
 		//alert(formatquantity);
 		//var formatquantity = parseFloat(quantity);
@@ -557,7 +598,7 @@ $(document).ready(function () {
 		readOnly ? preventRefresh(false) : preventRefresh(true);
 		//alert(fullname);
 
-		$("#btnBack").attr("inventoryReceivingID", inventoryReceivingID);
+		$("#btnBack").attr("inventoryCode", consolidateCode);
 		$("#btnBack").attr("status", 2);
 		$("#btnBack").attr("employeeID", employeeID);
 
@@ -570,9 +611,19 @@ $(document).ready(function () {
 			<div class="col-lg-2 col-md-6 col-sm-12 px-1">
 				<div class="card">
 					<div class="body">
-						<small class="text-small text-muted font-weight-bold">Document No.</small>
+						<small class="text-small text-muted font-weight-bold">Reference No.</small>
 						<h6 class="mt-0 text-danger font-weight-bold">
-						${inventoryReceivingID ? getFormCode("INRR", createdAt, inventoryReceivingID) : "---"}
+						${consolidateCode ? consolidateCode : "---"}
+						</h6>      
+					</div>
+				</div>
+			</div>
+			<div class="col-lg-2 col-md-6 col-sm-12 px-1">
+				<div class="card">
+					<div class="body">
+						<small class="text-small text-muted font-weight-bold">Inventory Classification</small>
+						<h6 class="mt-0 text-danger font-weight-bold">
+						${consolidateCode ? consolidateCode : "---"}
 						</h6>      
 					</div>
 				</div>
@@ -585,13 +636,13 @@ $(document).ready(function () {
 					</div>
 				</div>
 			</div>
-			<div class="col-lg-8 col-md-12 col-sm-12 px-1">
+			<div class="col-lg-6 col-md-12 col-sm-12 px-1">
 				<div class="row m-0">
-					<div class="col-lg-4 col-md-4 col-sm-12 px-1">
+					<div class="col-lg-5 col-md-4 col-sm-12 px-1">
 						<div class="card">
 							<div class="body">
 								<small class="text-small text-muted font-weight-bold">Date Created</small>
-								<h6 class="mt-0 font-weight-bold">${createdAt ? moment(createdAt).format("MMMM DD, YYYY hh:mm:ss A") : "---"}</h6>      
+								<h6 class="mt-0 font-weight-bold">${createAt ? moment(createAt).format("MMMM DD, YYYY hh:mm:ss A") : "---"}</h6>      
 							</div>
 						</div>
 					</div>
@@ -603,7 +654,7 @@ $(document).ready(function () {
 							</div>
 						</div>
 					</div>
-					<div class="col-lg-4 col-md-4 col-sm-12 px-1">
+					<div class="col-lg-3 col-md-4 col-sm-12 px-1">
 						<div class="card">
 							<div class="body">
 								<small class="text-small text-muted font-weight-bold">Position</small>
@@ -623,92 +674,151 @@ $(document).ready(function () {
                                 <th>Item Code</th>
                                 <th>Item Name</th>
                                 <th>Item Classification</th>
-                                <th>Item Category</th>
-								<th>Brand</th>
-                                <th>Ordered</th>
-                                <th>Received</th>
+                                <th>Request</th>
+								<th>Received</th>
+                                <th>Remaining</th>
                                 <th>Action</th>
                             </tr>
                         </thead>
                         <tbody class="">`;
 
+		let ItemData	= getUnionTableData(`
+											SELECT id, itemCode,recordCode AS referenceCode, recordID, employeeID, requestName, itemID, itemCode, name_Brand, IFNULL(classification_category,'') AS classification_category, quantity, SUM(remaining) AS remaining
+											FROM
+											(
+											SELECT
+												ri.returnItemID as id, 
+												ri.returnItemCode AS recordCode,
+												ird.recordID,
+												ri.employeeID,
+												CONCAT(empl.employeeFirstname,' ',empl.employeeLastname) AS requestName,
+												itemID,
+												itemCode, 
+												CONCAT(itemName,' / ',brand) AS name_Brand,
+												CONCAT(classificationName,' / ',categoryName) AS classification_category,
+												sum(quantity) AS quantity,
+												0 AS remaining
+											FROM ims_return_item_tbl AS ri
+											LEFT JOIN ims_inventory_request_details_tbl AS ird ON ri.returnItemID = ird.returnItemID
+											LEFT JOIN hris_employee_list_tbl AS empl ON ri.employeeID = empl.employeeID
+											WHERE returnItemCode = '${consolidateCode}'
+											GROUP BY itemID
+											UNION ALL
+											SELECT
+												muf.materialUsageID AS id, 
+												muf.materialUsageCode AS recordCode,
+												ird.recordID,
+												muf.employeeID,
+												CONCAT(empl.employeeFirstname,' ',empl.employeeLastname) AS requestName,
+												itemID,
+												itemCode, 
+												CONCAT(itemName,' / ',brand) AS name_Brand,
+												CONCAT(classificationName,' / ',categoryName) AS classification_category,
+												sum(unused) AS quantity,
+												0 AS remaining
+											FROM ims_material_usage_tbl AS muf
+											LEFT JOIN ims_inventory_request_details_tbl AS ird ON muf.materialUsageID = ird.materialUsageID
+											LEFT JOIN hris_employee_list_tbl AS empl ON muf.employeeID = empl.employeeID
+											WHERE materialUsageCode = '${consolidateCode}'
+											GROUP BY itemID
+											UNION ALL
+											SELECT
+												inr.inventoryReceivingID AS id, 
+												inr.inventoryReceivingCode AS recordCode,
+												ird.recordID,
+												inr.employeeID,
+												CONCAT(empl.employeeFirstname,' ',empl.employeeLastname) AS requestName,
+												itemID,
+												itemCode, 
+												CONCAT(itemName,' / ',brand) AS name_Brand,
+												CONCAT(classificationName,' / ',categoryName) AS classification_category,
+												sum(receivedQuantity) AS quantity,
+												0 AS remaining
+												FROM ims_inventory_receiving_tbl AS inr
+												LEFT JOIN ims_inventory_request_details_tbl AS ird ON inr.inventoryReceivingID = ird.inventoryReceivingID
+												LEFT JOIN hris_employee_list_tbl AS empl ON inr.employeeID = empl.employeeID
+												WHERE inventoryReceivingCode = '${consolidateCode}'
+											UNION ALL
+												SELECT
+												NULL AS id, 
+												inventoryCode AS recordCode,
+												NULL AS recordID,
+												NULL AS employeeID,
+												NULL AS requestName,
+												NULL AS itemID,
+												NULL AS itemCode, 
+												NULL AS name_Brand,
+												NULL AS classification_category,
+												0 AS quantity,
+												sum(quantity) AS remaining
+											FROM ims_stock_in_item_tbl 
+											WHERE inventoryCode = '${consolidateCode}'
+											GROUP BY itemID
+											UNION ALL
+											SELECT
+												NULL AS id, 
+												inventoryCode AS recordCode,
+												NULL AS recordID,
+												NULL AS employeeID,
+												NULL AS requestName,
+												NULL AS itemID,
+												NULL AS itemCode, 
+												NULL AS name_Brand,
+												NULL AS classification_category,
+												0 AS quantity,
+												sum(quantity) AS remaining
+											FROM ims_stock_in_assets_tbl 
+											WHERE inventoryCode = '${consolidateCode}'
+											GROUP BY itemID
+											) a GROUP BY referenceCode`);	
 
-		let ItemData = getTableData(
-			`ims_inventory_receiving_details_tbl 		AS iird
-			LEFT JOIN ims_inventory_receiving_tbl 		AS iir 	ON iird.inventoryReceivingID  = iir.inventoryReceivingID
-			LEFT JOIN ims_purchase_order_tbl 			AS ipo 	ON iir.purchaseOrderID = ipo.purchaseOrderID
-			LEFT JOIN ims_request_items_tbl 			AS iri 	ON ipo.purchaseOrderID = iri.purchaseOrderID AND iird.itemID = iri.itemID
-			LEFT JOIN ims_inventory_item_tbl 			AS iii 	ON iird.itemID = iii.itemID
-			LEFT JOIN ims_inventory_category_tbl 		AS iic 	ON iii.categoryID = iic.categoryID
-			LEFT JOIN ims_inventory_classification_tbl  AS iict ON iii.classificationID = iict.classificationID 
-			LEFT JOIN ims_stock_in_tbl 					AS isi	ON iird.inventoryReceivingID = isi.inventoryReceivingID AND iird.itemID = isi.itemID`,
-			`iird.inventoryReceivingID, iird.itemID,
-			iri.itemName,iii.brandName,iic.categoryName,iict.classificationName,
-			iird.received AS quantity,ROUND(sum(IFNULL(isi.stockInQuantity,'0.00')),2) AS receivingQuantity, iir.createdAt`,
-			`iird.inventoryReceivingID = ${inventoryReceivingID}`,
-			``,
-			"iird.inventoryReceivingID,iird.itemID"
-		);
-		var count = 0;
-		//var received_quantity = "received_quantity";
-		ItemData.map((item) => {
-			var quantity = item.quantity;
-			var formatquantity = parseFloat(quantity);
-			var receivingQuantity = item.receivingQuantity;
-			var formatreceivingQuantity = parseFloat(receivingQuantity);
-			var totalreceiving1 = (quantity) - (receivingQuantity);
-			var totalreceiving = parseFloat(totalreceiving1).toFixed(2);
-			//alert(totalreceiving);
+		ItemData.map((item) => {	
+					var totalremaining = parseFloat(item.quanity) - parseFloat(item.remaining);
+					var totalQuantity = parseFloat(item.quanity);
+					var totalremaining = parseFloat(item.remaining);
+					
+			html += `<tr>
+						<td>${item.itemCode}</td>
+						<td>${item.name_Brand}</td>
+						<td>${item.classification_category}</td>
+						<td>${item.requestName}</td>
+						<td>${item.quantity}</td>
+						<td>${item.remaining}</td>
+						<td>`;
+						if(totalQuantity = totalremaining){
+							html += `<a class="btn btn-primary btn-barcode btn-sm btn-block" 
+									href="javascript:void(0);" 
+									number="" 
+									referenceCode="${item.referenceCode}" 
+									itemID="${item.itemID}">
+									<i class="fas fa-barcode"></i> Barcode
+									</a>`;
+							//html += `<span class="badge badge-success w-100">Completed</span>`;
+						}else{
+							html += `<a class="btn btn-secondary btnRecord btn-sm btn-block mt-1" 
+										href="javascript:void(0);" 
+										inventoryid="${item.id}"
+										referenceCode="${item.referenceCode}"
+										itemID="${item.itemID}"
+										itemCode="${item.itemCode}"
+										itemNameBrand="${item.name_Brand}"
+										classificationCategory="${item.classification_category}"
+										quantityRequest="${item.quantity}"
+										remaining="${totalremaining}"
+										UOM="pack">
+										<i class="fas fa-pencil-alt"></i>Record
+									</a>`; 
+						}
+						html += `</td>
+					</tr>`;	
 
-			++count;
-			html += `        
-			<tr>
-            <td>${getFormCode("ITM", item.createdAt, item.inventoryReceivingID)}</td>
-            <td>${item.itemName}</td>
-            <td>${item.classificationName}</td>
-            <td>${item.categoryName}</td>
-			<td>${item.brandName}</td>
-            <td class="text-center">${item.quantity}</td>
-            <td  class="text-center">${item.receivingQuantity}</td>
-            <td class="text-center">
-            <input type="hidden" id="totalquantity1${count}">
-            <div id="actionbutton"></div>
-			<div class="span2">
-			<a class="btn btn-primary btn-barcode btn-sm btn-block" 
-			href="javascript:void(0);" 
-			number="${count}" 
-			data-inventoryReceivingID="${item.inventoryReceivingID}" 
-			data-itemID="${item.itemID}">
-            <i class="fas fa-barcode"></i> Barcode
-            </a>`;
-			if (formatquantity < formatreceivingQuantity || formatquantity == formatreceivingQuantity) {
-			} else {
-				html += `<a class="btn btn-secondary btnRecord btn-sm btn-block" 
-				href="javascript:void(0);" 
-				inventoryreceivingid="${item.inventoryReceivingID}" 
-				itemID="${item.itemID}"
-				itemName="${item.itemName}"
-				classificationName ="${item.classificationName}"
-				categoryName="${item.categoryName}"
-				totalreceiving="${totalreceiving}"
-				brandName="${item.brandName}"
-				orderQuantity="${item.quantity}"
-				receivingQuantity="${item.receivingQuantity}">
-					<i class="fas fa-pencil-alt"></i>Record
-				</a>
-				<div class="span2">`;
-			}
-			html += ` </td>
-        </tr>`;
-
-		});
+		})
 		html += `
                         </tbody>
                     </table>
                 </div>
             </div>
         </div>`;
-
 		setTimeout(() => {
 			$("#page_content").html(html);
 			initDataTables();
@@ -725,49 +835,127 @@ $(document).ready(function () {
 
 	}
 	$(document).on("click", ".btnRecord", function () {
-
-		//var inventoryReceivingID = $(attr)("inventoryReceivingid");
-		const inventoryReceivingID = $(this).attr("inventoryReceivingid");
-		const itemID = $(this).attr("itemid"); 
-		const orderquantity = $(this).attr("orderQuantity");
-		//var receivingquantity = $(this).data("receivingquantity");
-		const receivingquantity = $(this).attr("receivingQuantity");
-		const brandName = $(this).attr("brandName");
-		const totalreceiving = $(this).attr("totalreceiving");
+		var id = $(this).attr("inventoryid");
+		var referenceCode = $(this).attr("referenceCode");
+		var itemID = $(this).attr("itemID");
+		var itemCode = $(this).attr("itemCode");
+		var itemNameBrand = $(this).attr("itemNameBrand");
+		var classificationCategory = $(this).attr("classificationCategory");
+		var quantity = $(this).attr("quantityRequest");
+		var remaining = $(this).attr("remaining");
+		var uom =$(this).attr("UOM");
 
 		$("#modal_product_record").modal("show");
 		// Display preloader while waiting for the completion of getting the data
 		$("#modal_product_record_content").html(preloader);
-
-		const tableData = getTableData(
-			`ims_receiving_serial_number_tbl 				AS irsn
-			LEFT JOIN ims_inventory_receiving_details_tbl 	AS iird ON irsn.inventoryReceivingID =iird.inventoryReceivingID
-			LEFT JOIN ims_request_items_tbl 				AS iri ON iird.requestItemID=iri.requestItemID 
-			LEFT JOIN ims_inventory_item_tbl 				AS iii ON irsn.itemID = iii.itemID`,
-			`irsn.inventoryReceivingID,IFNULL(irsn.serialNumber,'') AS serialNumber,irsn.itemID,iri.itemName,iird.received AS quantity
-			,concat('ITM-',LEFT(iii.createdAt,2),'-',LPAD(iii.itemID,5,'0')) AS itemCode,iri.itemDescription,IFNULL(iri.brandNAme,'') AS brandName`, `irsn.inventoryReceivingID=${inventoryReceivingID} AND irsn.itemID =${itemID}`,
-			``, `irsn.serialnumberID,irsn.inventoryReceivingID`);
-		if (tableData) {
-			const content = modalContent(tableData);
-			setTimeout(() => {
-				$("#modal_product_record_content").html(content);
-				$("#received").val(orderquantity);
-				$("#receivedQuantitytotal").val(receivingquantity);
-				$("#brandName").val(brandName);
-				$("#remainingQuantity").val(totalreceiving);
-				initAll();
-				initQuantity();
-				storageContent();
-				datevalidated();
+		
+		const tableData = getUnionTableData(`
+											SELECT moduleReturnItemID, moduleMaterialUsageID,moduleInventoryReceivingID,recordID, itemID, serialNumber, itemName, Brand, classificationName, categoryName   FROM
+											(
+												SELECT 
+													iri.returnItemID AS moduleReturnItemID,
+													'' AS moduleMaterialUsageID,
+													'' AS moduleInventoryReceivingID,
+													recordID,
+													ird.itemID,
+													serialNumber,
+													itemName,
+													Brand,
+													classificationName,
+													categoryName
+												FROM ims_return_item_tbl AS iri
+												LEFT JOIN ims_inventory_request_details_tbl	AS ird ON iri.returnItemID = ird.returnItemID AND ird.itemID =${itemID}
+												LEFT JOIN  ims_inventory_request_serial_tbl AS irs ON iri.returnItemID = irs.returnItemID AND irs.itemID =${itemID}
+												WHERE returnItemCode ='${referenceCode}' AND ird.itemID =${itemID}
+												GROUP BY inventoryRequestSerialID
+												UNION ALL
+												SELECT 
+													'' AS moduleReturnItemID,
+													muf.materialUsageID AS moduleMaterialUsageID,
+													'' AS moduleInventoryReceivingID,
+													recordID,
+													ird.itemID,
+													serialNumber,
+													itemName,
+													Brand,
+													classificationName,
+													categoryName
+												FROM ims_material_usage_tbl AS muf
+												LEFT JOIN ims_inventory_request_details_tbl	AS ird ON muf.materialUsageID = ird.materialUsageID AND ird.itemID =${itemID}
+												LEFT JOIN  ims_inventory_request_serial_tbl AS irs ON muf.materialUsageID = irs.materialUsageID AND irs.itemID =${itemID}
+												WHERE materialUsageCode ='${referenceCode}' AND ird.itemID =${itemID}
+												GROUP BY inventoryRequestSerialID
+												UNION ALL
+												SELECT 
+												'' AS moduleReturnItemID,
+												'' AS moduleMaterialUsageID,
+												inr.inventoryReceivingID AS moduleInventoryReceivingID,
+												ird.recordID,
+												ird.itemID,
+												serialNumber,
+												itemName,
+												Brand,
+												classificationName,
+												categoryName
+												FROM ims_inventory_receiving_tbl AS inr
+												LEFT JOIN ims_inventory_request_details_tbl	AS ird ON inr.inventoryReceivingID = ird.inventoryReceivingID AND ird.itemID =${itemID}
+												LEFT JOIN  ims_inventory_request_serial_tbl AS irs ON inr.inventoryReceivingID = irs.inventoryReceivingID AND irs.itemID =${itemID}
+												WHERE inventoryReceivingCode ='${referenceCode}' AND ird.itemID =${itemID}
+												GROUP BY inventoryRequestSerialID
+											)a WHERE itemID IS NOT NULL`);
+			if (tableData) {
+				
+				const content = modalContent(tableData);
+				setTimeout(() => {
+					$("#modal_product_record_content").html(content);
+					$("#itemCode").val(itemCode);
+					$("#itemCode").attr("inventoryCode", referenceCode);
+					$("#itemName").val(itemNameBrand);
+					$("#itemClassification").val(classificationCategory);
+					$("#quantity").val(quantity);
+					$("#remaining").val(remaining);
+					$("#uom").val(uom);
+					initAll();
+					initQuantity();
+					storageContent();
+					datevalidated();
 
 				//initDataTables();
-				initDataTables1();
+					initDataTables1();
+					
+				}, 500);	
+				
+			}	
 
-				//getItemRow();
+		// const tableData = getTableData(
+		// 	`ims_receiving_serial_number_tbl 				AS irsn
+		// 	LEFT JOIN ims_inventory_receiving_details_tbl 	AS iird ON irsn.inventoryReceivingID =iird.inventoryReceivingID
+		// 	LEFT JOIN ims_request_items_tbl 				AS iri ON iird.requestItemID=iri.requestItemID 
+		// 	LEFT JOIN ims_inventory_item_tbl 				AS iii ON irsn.itemID = iii.itemID`,
+		// 	`irsn.inventoryReceivingID,IFNULL(irsn.serialNumber,'') AS serialNumber,irsn.itemID,iri.itemName,iird.received AS quantity
+		// 	,concat('ITM-',LEFT(iii.createdAt,2),'-',LPAD(iii.itemID,5,'0')) AS itemCode,iri.itemDescription,IFNULL(iri.brandNAme,'') AS brandName`, `irsn.inventoryReceivingID=${inventoryReceivingID} AND irsn.itemID =${itemID}`,
+		// 	``, `irsn.serialnumberID,irsn.inventoryReceivingID`);
+		// if (tableData) {
+		// 	const content = modalContent(tableData);
+		// 	setTimeout(() => {
+		// 		$("#modal_product_record_content").html(content);
+		// 		$("#received").val(orderquantity);
+		// 		$("#receivedQuantitytotal").val(receivingquantity);
+		// 		$("#brandName").val(brandName);
+		// 		$("#remainingQuantity").val(totalreceiving);
+		// 		initAll();
+		// 		initQuantity();
+		// 		storageContent();
+		// 		datevalidated();
 
-			}, 500);
+		// 		//initDataTables();
+		// 		initDataTables1();
 
-		}
+		// 		//getItemRow();
+
+		// 	}, 500);
+
+		// }
 	});
 
 	// ----- STORAGE CONTENT -----
@@ -776,53 +964,68 @@ $(document).ready(function () {
 		// getTableData(tableName = null, columnName = “”, WHERE = “”, orderBy = “”) 
 
 		const data = getTableData("ims_inventory_storage_tbl",
-			"inventoryStorageID  ,inventoryStorageOfficeName", "inventoryStorageStatus=1", "");
+			`inventoryStorageID, inventoryStorageOfficeName, inventoryStorageCode,
+			CASE 
+			WHEN inventoryStorageRoom IS  NULL THEN 'R0'
+			ELSE CONCAT('R',inventoryStorageRoom) END inventoryStorageRoomFormat,
+			CASE 
+			WHEN inventoryStorageFloor IS  NULL THEN 'F0'
+			ELSE CONCAT('F',inventoryStorageFloor) END inventoryStorageFloorFormat,
+			CASE 
+			WHEN inventoryStorageBay IS  NULL THEN 'B0'
+			ELSE CONCAT('B',inventoryStorageBay) END inventoryStorageBayFormat,
+			CASE 
+			WHEN inventoryStorageLevel IS  NULL THEN 'L0'
+			ELSE CONCAT('L',inventoryStorageLevel) END inventoryStorageLevelFormat,
+			CASE 
+			WHEN inventoryStorageShelves IS  NULL THEN 'S0'
+			ELSE CONCAT('S',inventoryStorageShelves) END inventoryStorageShelvesFormat`, "inventoryStorageStatus=1", "");
 
 		let html = ` <option value="" disabled selected ${!param && "selected"}>Select Storage Name</option>`;
 		data.map((item, index, array) => {
-			html += `<option value="${item.inventoryStorageID}" ${param && item.inventoryStorageID == param[0].inventoryStorageID && "selected"}>${item.inventoryStorageOfficeName}</option>`;
+			html += `<option 
+			inventoryStorageCode="${item.inventoryStorageCode}"
+			inventoryStorageOfficeName="${item.inventoryStorageOfficeName}"
+			inventoryStorageRoom="${item.inventoryStorageRoomFormat}"
+			inventoryStorageFloor="${item.inventoryStorageFloorFormat}"
+			inventoryStorageBay="${item.inventoryStorageBayFormat}"
+			inventoryStorageLevel="${item.inventoryStorageLevelFormat}"
+			inventoryStorageShelves="${item.inventoryStorageShelvesFormat}"
+			value="${item.inventoryStorageID}" ${param && item.inventoryStorageID == param[0].inventoryStorageID && "selected"}>${item.inventoryStorageOfficeName}</option>`;
 		})
+		//$("#inventorydetail").val(inventoryStorageRoom+inventoryStorageFloor);
 		$(".inventoryStorageID").html(html);
 
 	}
 
 	// ----- MODAL CONTENT -----
 	function modalContent(data = false, readOnly = false) {
-		//initQuantity();
+		console.log(data);
+		initQuantity();
 		var today = new Date();
 		var dd = String(today.getDate()).padStart(2, '0');
 		var mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
 		var yyyy = today.getFullYear();
 		today = mm + '/' + dd + '/' + yyyy;
 		let {
-			inventoryReceivingID = "",
-				itemID = "",
-				itemCode = "",
-				itemDescription = "",
-				brandName = "",
-				quantity = "",
-				serialNumber = "",
-				itemName = "",
-				receivingQuantity = ""
-
-
+			moduleReturnItemID 			= "",
+			moduleMaterialUsageID		="",
+			moduleInventoryReceivingID	="",
+			recordID					= "",
+			itemID						= "",
+			serialNumber				= null,
+			itemName					= "",
+			Brand						= "",
+			classificationName			= "",
+			categoryName				= ""
 		} = data && data[0];
-		// classificationContent(data);
-		let button = itemID ? `
-			<button 
-				class="btn btn-update px-5 p-2" 
-				id="btnSave" 
-				rowID="${itemID}"
-				itemID="${encryptString(itemID)}"
-				feedback="">
-				<i class="fas fa-save"></i>
-				Save
-			</button>` : `
-			<button 
-				class="btn btn-save px-5 p-2" 
-				id="btnSave"><i class="fas fa-save"></i>
-				Save
-			</button>`;
+
+		let button = `<button 
+		 				class="btn btn-save px-5 p-2" 
+		 				id="btnSave"><i class="fas fa-save"></i>
+		 				Save
+		 				</button>`;
+		
 		readOnly ? preventRefresh(false) : preventRefresh(true);
 		let disabled = readOnly ? "disabled" : "";
 		let checkboxProjectHeader = !disabled ? `
@@ -842,21 +1045,21 @@ $(document).ready(function () {
 									class="form-control" 
 									name="itemCode" 
 									id="itemCode"
-									value="${itemCode}"
+									value=""
 									disabled>
 									<input 
 									type="hidden" 
 									class="form-control" 
 									name="itemID" 
 									id="itemID"
-									value="${itemID}"
+									value=""
 									disabled>
 									<input 
 									type="hidden" 
 									class="form-control" 
 									name="inventoryReceivingID" 
 									id="inventoryReceivingID"
-									value="${inventoryReceivingID}"
+									value=""
 									disabled>
 								<div class="invalid-feedback d-block" id="invalid-input_itemCode"></div>
 							</div>
@@ -869,62 +1072,62 @@ $(document).ready(function () {
 									class="form-control" 
 									name="invalid-input_itemName" 
 									id="itemName"
-									value="${itemName}"
+									value=""
 									disabled>
 								<div class="invalid-feedback d-block" id="invalid-input_itemName"></div>
 							</div>
 						</div>
 						<div class="col-md-4 col-sm-12">
 							<div class="form-group">
-								<label>Brand</label>
+								<label>Item Classification</label>
 								<input 
 									type="text" 
 									class="form-control " 
-									name="brandName" 
-									id="brandName"
-									value="${brandName}"
+									name="itemClassification" 
+									id="itemClassification"
+									value=""
 									disabled>
-								<div class="invalid-feedback d-block" id="invalid-input_brandName"></div>
+								<div class="invalid-feedback d-block" id="invalid-input_itemClassification"></div>
 							</div>
 						</div>
 						<div class="col-md-4 col-sm-12">
 							<div class="form-group">
-								<label>Order</label>
+								<label>Quantity</label>
 								<input 
 									type="text" 
 									class="form-control" 
-									name="received" 
-									id="received"
-									value="${quantity}"
+									name="quantity" 
+									id="quantity"
+									value=""
 									disabled>
-								<div class="invalid-feedback d-block" id="invalid-input_orderQuantity"></div>
+								<div class="invalid-feedback d-block" id="invalid-input_quantity"></div>
 							</div>
 						</div>
 						<div class="col-md-4 col-sm-12">
 							<div class="form-group">
-								<label>Received</label>
+								<label>Remaining</label>
 								<input 
 									type="text" 
 									class="form-control" 
-									name="receivedQuantitytotal" 
-									id="receivedQuantitytotal"
-									value="${receivingQuantity}"
+									name="remaining" 
+									id="remaining"
+									value=""
 									autocomplete="off"
 									disabled>
-								<div class="invalid-feedback d-block" id="invalid-input_receivedQuantitytotal"></div>
+								<div class="invalid-feedback d-block" id="invalid-input_remaining"></div>
 							</div>
 						</div>
 						<div class="col-md-4 col-sm-12">
 							<div class="form-group">
-								<label>Remaining Quantity</label>
+								<label>UOM</label>
 								<input 
 									type="text" 
 									class="form-control validate" 
-									name="remainingQuantity" 
-									id="remainingQuantity"
+									name="uom" 
+									id="uom"
 									value=""
 									disabled>
-								<div class="invalid-feedback d-block" id="invalid-remainingQuantity"></div>
+								<div class="invalid-feedback d-block" id="invalid-uom"></div>
 							</div>
 						</div>
 					   
@@ -932,107 +1135,117 @@ $(document).ready(function () {
 							<div class="container-fluid">
 								<table class="table table-bordered table-striped table-hover" id="tableItems">
 									<thead>
-										<tr style="white-space: nowrap">    
+										<tr style="white-space: nowrap"> 
+											<th>Received Quantity</th>   
 											<th>Barcode</th>
-											<th>Received Quantity <code>*</code></th>
-											<th>Serial Number</th>
-											<th>Storage <code>*</code></th>
+											<th>Serial No.</th>
+											<th>Storage Name <code>*</code></th>
+											<th>Storage Details</th>
 											<th>Manufactured Date</th>
 											<th>Expiration Date <code>*</code></th>
 										</tr>
 									</thead>
 									
 									<tbody class="tableRowItems">`;
-					var count = 0;
-					var totalquantity = 0;
-					data.map((item) => {
-
-						++count;
-						html += `<tr>`;
-						html += `<td>
-									<input 
-										type="text" 
-										class="form-control barcode" 
-										number="${count}"
-										name="barcode" 
-										id="barcode${count}"
-										disabled>
-									</td>`;
-					if (!item.serialNumber) {
-						// REMOVING CLASS OF (validate number) ;
-						html += `
-									<td class="text-center"><input type="text"
-										class="form-control recievedQuantity text-center recievedQuantity1 input-quantity" 
-										id="recievedQuantity${count}"
-										min="0.01"
-										data-allowcharacters="[0-9]" 
-										max="999999999" 
-										minlength="1" 
-										maxlength="20" 
-										autocomplete="off"
-										name="recievedQuantity"required>
-										<div class="invalid-feedback d-block" id="invalid-input_recievedQuantity"></div>
-									</td>`;
-						} else {
-							var quantity = 1;
-							html += `
-									<td class="text-center"><input type="text"
-										class="form-control validate recievedQuantity  inventorystorageIDquantity text-center input-quantity" 
-										id="recievedQuantity${count}"
-										min="0.01"
-										data-allowcharacters="[0-9]" 
-										max="999999999" 
-										name="recievedQuantity"
-										minlength="1" 
-										maxlength="20" 
-										autocomplete="off"
-										required
-										value="${quantity}" 
-										disabled>
-										<div class="invalid-feedback d-block" id="invalid-input_recievedQuantity"></div>
-									</td>`;
-						}
-						html += `
-									<td>
-									<input 
-										type="text" 
-										class="form-control serialnumber" 
-										number="${count}"
-										name="serialnumber" 
-										id="serialnumber${count}"
-										value="${item.serialNumber}"
-										disabled>
-									</td>
-									<td>
-										<select style="width:100%;"
-										class="form-control select2 validate inventoryStorageID"
-										number="${count}"
-										name="inventoryStorageID"
-										id="inventoryStorageID${count}" required>
-										</select>
-										<div class="invalid-feedback d-block" id="invalid-input_inventoryStorageID"></div>
-									</td>
-									<td> 
+					data.map((item, index) => {
+									html +=`<tr>`;
+								if(serialNumber==""){
+									html +=`
+										<td>
+											<input type="text"
+													class="form-control quantity text-center input-quantity"
+													id="quantity${index}
+													name="quantity"
+													min="0.01"
+													data-allowcharacters="[0-9]" 
+													max="999999999" 
+													minlength="1" 
+													maxlength="20" 
+													autocomplete="off">
+										</td>`;
+								}else{
+								var quantityReceived = 1;
+									html +=`
+										<td>
+											<input type="text"
+													class="form-control quantity text-center input-quantity"
+													id="quantity${index}"
+													name="quantity"
+													value="${quantityReceived}"
+													min="0.01"
+													data-allowcharacters="[0-9]" 
+													max="999999999" 
+													minlength="1" 
+													maxlength="20" 
+													autocomplete="off"
+													disabled>
+										</td>`;
+								}
+									html +=`
+										<td>
+											<input 
+												type="text"
+												class="form-control barcode" recordID="${recordID}"
+												ReturnItemID="${moduleReturnItemID}"
+												MaterialUsageID="${moduleMaterialUsageID}"
+												InventoryReceivingID="${moduleInventoryReceivingID}"
+												number="${index}"
+												name="barcode"
+												itemid="${itemID}"
+												itemName="${itemName}"
+												brand="${Brand}"
+												classificationName="${classificationName}"
+												categoryName="${categoryName}"
+												recordID="${recordID}"
+												id="barcode${index}"
+												disabled>
+										</td>
+										<td>
+											<input type="text"
+													class="form-control serialnumber"
+													id="serialnumber${index}"
+													name="serialnumber"
+													value="${serialNumber}"
+													disabled>	
+										</td>
+										<td>
+											<select style="width:100%;"
+													class="form-control select2 validate inventoryStorageID"
+													number="${index}"
+													name="inventoryStorageID"
+													id="inventoryStorageID${index}" required>
+													</select>
+													<div class="invalid-feedback d-block" id="invalid-input_inventoryStorageID"></div>
+										</td>	
+										<td>
+											<input type="text"
+												  class="form-control inventorydetail"
+												  id="inventorydetail${index}"
+												  name="inventorydetail"
+												  disabled>
+										</td>
+										<td>
+											<input 
+												type="date" 
+												class="form-control manufactureDate" 
+												number="${index}"
+												name="manufactureDate" 
+												id="manufactureDate${index}">
+										</td>
+										<td>
 										<input 
-										type="date" 
-										class="form-control manufactureDate" 
-										number="${count}"
-										name="manufactureDate" 
-										id="manufactureDate${count}">
-									</td>
-									<td>
-										<input 
-										type="date" 
-										class="form-control expirationdate  validate expirationdateoncheck" 
-										number="${count}"
-										max="2040-04-30"
-										name="expirationdate"
-										required 
-										value="${today}"
-										id="expirationdate${count}">
-									</td>
-									</tr>`;
-		});
+												type="date" 
+												class="form-control expirationdate  validate expirationdateoncheck" 
+												number="${index}"
+												max="2040-04-30"
+												name="expirationdate"
+												required 
+												value="${today}"
+												id="expirationdate${index}">
+										</td>
+									
+								</tr>`;
+					})
 		html += `
 									</tbody>
 								</table>
@@ -1050,36 +1263,111 @@ $(document).ready(function () {
 		return html;
 
 	}
+		$(document).on("change", ".manufactureDate", function() {
+			const val = $(this).val();
+			const number = $(this).attr("number");
+			const todaydate = new Date().toLocaleString('en-US', { timeZone: 'Asia/Manila' });
+			var dateString = moment(todaydate).format('YYYY-MM-DD');
+			const inventoryStorageID = $(`#inventoryStorageID${number}`).val();
+			var inventoryStorageRoom 		= $('option:selected', `#inventoryStorageID${number}`).attr("inventoryStorageRoom");
+			var inventoryStorageFloor 		= $('option:selected', `#inventoryStorageID${number}`).attr("inventoryStorageFloor");
+			var inventoryStorageBay 		= $('option:selected', `#inventoryStorageID${number}`).attr("inventoryStorageBay");
+			var inventoryStorageLevel 		= $('option:selected', `#inventoryStorageID${number}`).attr("inventoryStorageLevel");
+			var inventoryStorageShelves 	= $('option:selected', `#inventoryStorageID${number}`).attr("inventoryStorageShelves");
+			var inventoryStorageCode 		= $('option:selected', `#inventoryStorageID${number}`).attr("inventoryStorageCode");
+			var consolidatevalue = 'W'+val+inventoryStorageRoom+inventoryStorageFloor+inventoryStorageBay+inventoryStorageLevel+inventoryStorageShelves;
+			var warehouse = '';
+			var storageCode = '';
+			if(!consolidatevalue){
+				warehouse ='0000000000';
+			}else{
+				warehouse = consolidatevalue;	
+			}
+			// start date today split //
+			const todaydateSplit = dateString.split("-");
+			const todaymyYear = todaydateSplit[0].substring(2);
+			const todaymyMonth = todaydateSplit[1].length < 2 ? "0"+todaydateSplit[1] : todaydateSplit[1];
+			const todaymyDate = todaydateSplit[2].length < 2 ? "0"+todaydateSplit[2] : todaydateSplit[2];
+			const mytodayDate = `${todaymyMonth}${todaymyDate}${todaymyYear}`;
+			// END DATE TODAY SPLIT //
 
+			// START EXPIRATION DATE //	
+			const expirationdate = $(`#expirationdate${number}`).val();
+			const dateSplit = expirationdate.split("-");
+			const myxYear = dateSplit[0].substring(2);
+			const myxMonth = dateSplit[1].length < 2 ? "0"+dateSplit[1] : dateSplit[1];
+			const myxDate = dateSplit[2].length < 2 ? "0"+dateSplit[2] : dateSplit[2];
+			const myExpDate = `${myxMonth}${myxDate}${myxYear}`;
+			// END EXPIRATION DATE//
+			// START FOR MANUFACTURE DATE //
+			const mdateSplit = val.split("-");
+			const mmyYear = mdateSplit[0].substring(2);
+			const mmyMonth = mdateSplit[1].length < 2 ? "0"+mdateSplit[1] : mdateSplit[1];
+			const mmyDate = mdateSplit[2].length < 2 ? "0"+mdateSplit[2] : mdateSplit[2];
+			const myManufactureDate = `${mmyMonth}${mmyDate}${mmyYear}`;
+			// END OF MANUFACTURE DATE //
+
+			const itemcodeSplit = $("#itemCode").val().split("-");
+			const myItemcode = itemcodeSplit[2];
+			var getlastthreedigititemcode = myItemcode.slice(-5);
+			const barcode = `${warehouse}-${myManufactureDate}-${myExpDate}-${mytodayDate}-${getlastthreedigititemcode}`;
+			$("#barcode" + number).val(barcode);
+		});	
+		
 		$(document).on("change", ".expirationdate", function() {
 			const val = $(this).val();
 			const number = $(this).attr("number");
+			const todaydate = new Date().toLocaleString('en-US', { timeZone: 'Asia/Manila' });
+			var dateString = moment(todaydate).format('YYYY-MM-DD');
+			const inventoryStorageID = $(`#inventoryStorageID${number}`).val();
+			var inventoryStorageRoom 		= $('option:selected', `#inventoryStorageID${number}`).attr("inventoryStorageRoom");
+			var inventoryStorageFloor 		= $('option:selected', `#inventoryStorageID${number}`).attr("inventoryStorageFloor");
+			var inventoryStorageBay 		= $('option:selected', `#inventoryStorageID${number}`).attr("inventoryStorageBay");
+			var inventoryStorageLevel 		= $('option:selected', `#inventoryStorageID${number}`).attr("inventoryStorageLevel");
+			var inventoryStorageShelves 	= $('option:selected', `#inventoryStorageID${number}`).attr("inventoryStorageShelves");
+			var inventoryStorageCode 		= $('option:selected', `#inventoryStorageID${number}`).attr("inventoryStorageCode");
+			var consolidatevalue = 'W'+inventoryStorageID+inventoryStorageRoom+inventoryStorageFloor+inventoryStorageBay+inventoryStorageLevel+inventoryStorageShelves;
+			var warehouse = '';
+			var storageCode = '';
+			if(!consolidatevalue){
+				warehouse = consolidatevalue;	
+			
+			}else{
+				
+				warehouse ='0000000000';
+				
+			}
+			// start date today split //
+			const todaydateSplit = dateString.split("-");
+			const todaymyYear = todaydateSplit[0].substring(2);
+			const todaymyMonth = todaydateSplit[1].length < 2 ? "0"+todaydateSplit[1] : todaydateSplit[1];
+			const todaymyDate = todaydateSplit[2].length < 2 ? "0"+todaydateSplit[2] : todaydateSplit[2];
+			const mytodayDate = `${todaymyMonth}${todaymyDate}${todaymyYear}`;
+			// END DATE TODAY SPLIT //
+
+			// START MANUFACTURE DATE SPLIT //
+			const manufactureDate = $(`#manufactureDate${number}`).val();
+			const mdatedateSplit = manufactureDate.split("-");
+			const mmyYear = mdatedateSplit[0].substring(2);
+			const mmyMonth = mdatedateSplit[1].length < 2 ? "0"+mdatedateSplit[1] : mdatedateSplit[1];
+			const mmyDate = mdatedateSplit[2].length < 2 ? "0"+mdatedateSplit[2] : mdatedateSplit[2];
+			const mmyMDate = `${mmyMonth}${mmyDate}${mmyYear}`;
+		// END OF MANUFACTURE DATE SPLIT //
+
+			// start date expiration date split //
 			const dateSplit = val.split("-");
 			const myYear = dateSplit[0].substring(2);
 			const myMonth = dateSplit[1].length < 2 ? "0"+dateSplit[1] : dateSplit[1];
 			const myDate = dateSplit[2].length < 2 ? "0"+dateSplit[2] : dateSplit[2];
 			const myExpDate = `${myMonth}${myDate}${myYear}`;
+			// END DATE TODAY SPLIT //
+
 			const itemcodeSplit = $("#itemCode").val().split("-");
 			const myItemcode = itemcodeSplit[2];
-			var getlastthreedigititemcode = myItemcode.slice(-3);
-			const inventoryStorageID = $(`#inventoryStorageID${number}`).val();
-			const data = getTableData("ims_inventory_storage_tbl",
-			"inventoryStorageID  ,inventoryStorageOfficeName,inventoryStorageCode", `inventoryStorageStatus=1 AND inventoryStorageID =${inventoryStorageID}`, "");
-		data.map((item) => {
-			inventoryStorageCode = item.inventoryStorageCode;
-		}); 
-		const inventoryStorageCodeSplit = inventoryStorageCode.split("-");
-		const myInventorycode = inventoryStorageCodeSplit[2];
-		var getlastthreedigitinventorycode = myInventorycode.slice(-3);
-		var serialnumberretrive = $(`#serialnumber${number}`).val();
-		var serialnumber = "000000000000";
-		if (serialnumberretrive == "") {
-			serialnumber = "000000000000";
-		} else {
-			serialnumber = serialnumberretrive;
-		}
-		var serialnumberlastFive = serialnumber.substr(serialnumber.length - 5); // => "Tabs1 lastfive"
-		const barcode = `${myExpDate}-${getlastthreedigititemcode}${getlastthreedigitinventorycode}-${serialnumberlastFive}`;
+			var getlastthreedigititemcode = myItemcode.slice(-5);
+			
+		//const barcode = `${warehouse}-${myExpDate}-${getlastthreedigititemcode}`;
+		const barcode = `${warehouse}-${mmyMDate}-${myExpDate}-${mytodayDate}-${getlastthreedigititemcode}`;
 		$("#barcode" + number).val(barcode);
 	  });
 	
@@ -1108,36 +1396,59 @@ $(document).ready(function () {
 	});
 	
 	$(document).on("change", ".inventoryStorageID", function () {
-		var storageID = $(this).val();
 		const number = $(this).attr("number");
+		const val = $(this).val();
+		const todaydate = new Date().toLocaleString('en-US', { timeZone: 'Asia/Manila' });
+		var dateString = moment(todaydate).format('YYYY-MM-DD');
+		//let formatted_date = todaydate.getFullYear() + "-" + (todaydate.getMonth() + 1) + "-" + todaydate.getDate();
+		var inventoryStorageRoom 		= $('option:selected', this).attr("inventoryStorageRoom");
+		var inventoryStorageFloor 		= $('option:selected', this).attr("inventoryStorageFloor");
+		var inventoryStorageBay 		= $('option:selected', this).attr("inventoryStorageBay");
+		var inventoryStorageLevel 		= $('option:selected', this).attr("inventoryStorageLevel");
+		var inventoryStorageShelves 	= $('option:selected', this).attr("inventoryStorageShelves");
+		var inventoryStorageCode 		= $('option:selected', this).attr("inventoryStorageCode");
+		var consolidatevalue = 'W'+val+inventoryStorageRoom+inventoryStorageFloor+inventoryStorageBay+inventoryStorageLevel+inventoryStorageShelves;
+		$(`#inventorydetail${number}`).val(consolidatevalue);
+		var storageID = $(this).val();
+		// START TODAY DATE SPLIT //
+		const todaySplit = dateString.split("-");
+		const todaymyYear = todaySplit[0].substring(2);
+		const todaymyMonth = todaySplit[1].length < 2 ? "0"+todaySplit[1] : todaySplit[1];
+		const todaymyDate = todaySplit[2].length < 2 ? "0"+todaySplit[2] : todaySplit[2];
+		const todaymyMDate = `${todaymyMonth}${todaymyDate}${todaymyYear}`;
+		// END TODAY DATE SPLIT //
+
+		// START MANUFACTURE DATE SPLIT //
+		const manufactureDate = $(`#manufactureDate${number}`).val();
+		const mdatedateSplit = manufactureDate.split("-");
+		const mmyYear = mdatedateSplit[0].substring(2);
+		const mmyMonth = mdatedateSplit[1].length < 2 ? "0"+mdatedateSplit[1] : mdatedateSplit[1];
+		const mmyDate = mdatedateSplit[2].length < 2 ? "0"+mdatedateSplit[2] : mdatedateSplit[2];
+		const mmyMDate = `${mmyMonth}${mmyDate}${mmyYear}`;
+		// END OF MANUFACTURE DATE SPLIT //
+		// START EXPIRATION DATE SPLIT //
 		const expirationdate = $(`#expirationdate${number}`).val();
 		const dateSplit = expirationdate.split("-");
 		const myYear = dateSplit[0].substring(2);
 		const myMonth = dateSplit[1].length < 2 ? "0"+dateSplit[1] : dateSplit[1];
 		const myDate = dateSplit[2].length < 2 ? "0"+dateSplit[2] : dateSplit[2];
 		const myExpDate = `${myMonth}${myDate}${myYear}`;
+		// END EXPIRATION DATE SPLIT //
 		var inventoryStorageID = "";
-		const data = getTableData("ims_inventory_storage_tbl",
-			"inventoryStorageID  ,inventoryStorageOfficeName,inventoryStorageCode", `inventoryStorageStatus=1 AND inventoryStorageID =${storageID}`, "");
-		data.map((item) => {
-			inventoryStorageCode = item.inventoryStorageCode;
-		}); 
+		// const data = getTableData("ims_inventory_storage_tbl",
+		// 	"inventoryStorageID  ,inventoryStorageOfficeName,inventoryStorageCode", `inventoryStorageStatus=1 AND inventoryStorageID =${storageID}`, "");
+		// data.map((item) => {
+		// 	inventoryStorageCode = item.inventoryStorageCode;
+		// }); 
 		const itemcodeSplit = $("#itemCode").val().split("-");
 		const myItemcode = itemcodeSplit[2];
-		var getlastthreedigititemcode = myItemcode.slice(-3);
-		const inventoryStorageCodeSplit = inventoryStorageCode.split("-");
-		const myInventorycode = inventoryStorageCodeSplit[2];
-		var getlastthreedigitinventorycode = myInventorycode.slice(-3);
-		var serialnumberretrive = $(`#serialnumber${number}`).val();
-		var serialnumber = "000000000000";
-		if (serialnumberretrive == "") {
-			serialnumber = "000000000000";
-		} else {
-			serialnumber = serialnumberretrive;
-		}
-		var serialnumberlastFive = serialnumber.substr(serialnumber.length - 5); // => "Tabs1 lastfive"
+		var getlastthreedigititemcode = myItemcode.slice(-5);
+		// const inventoryStorageCodeSplit = inventoryStorageCode.split("-");
+		// const myInventorycode = inventoryStorageCodeSplit[2];
+		// var getlastthreedigitinventorycode = myInventorycode.slice(-3);
+		
 		//const barcode = `${myItemcode}-${myInventorycode}-${serialnumberlastFive}`;
-		const barcode = `${myExpDate}-${getlastthreedigititemcode}${getlastthreedigitinventorycode}-${serialnumberlastFive}`;
+		const barcode = `${consolidatevalue}-${mmyMDate}-${myExpDate}-${todaymyMDate}-${getlastthreedigititemcode}`;
 		$("#barcode" + number).val(barcode);
 		//$(".inventorystorageIDquantity"+storageID);
 
@@ -1145,30 +1456,75 @@ $(document).ready(function () {
 	$(document).on("click", "#btnSave", function () {
 		const validate = validateForm("modal_product_record");
 		if (validate) {
-			var itemID = $("#itemID").val();
-			var itemName = $("#itemName").val();
-			var receivedID = $("#inventoryReceivingID").val();
+			var itemCode = $("#itemCode").val();
+			var inventoryCode = $("#itemCode").attr("inventoryCode");
+			var itemID = [];
+			var itemName = [];
+			var brand = [];
+			var classificationName = [];
+			var categoryName = [];
 			var barcode = [];
 			var recievedQuantity = [];
 			var serialnumber = [];
 			var inventoryStorageID = [];
-			var manufactureDate1 = [];
+			var inventoryStorageCode =[];
+			var inventoryStorageOfficeName = [];
 			const manufactureDate = [];
-			var expirationdate1 = [];
 			var expirationdate = [];
-			$(".recievedQuantity").each(function () {
-				recievedQuantity.push($(this).val());
+			var ReturnItemID = [];
+			var MaterialUsageID = [];
+			var InventoryReceivingID = [];
+			var quantity = [];
+			var recordID = $("[name=barcode]").attr("recordID");
+			// $("[name=barcode]").each(function () {
+			// 	recordID.push($(this).attr("recordID"));
+			// });
+			$("[name=barcode]").each(function () {	
+				barcode.push($(this).val());
+			});
+			$("[name=barcode]").each(function () {
+				itemID.push($(this).attr("itemid"));
+			});
+			$("[name=barcode]").each(function () {
+				itemName.push($(this).attr("itemName"));
+			});
+			$("[name=barcode]").each(function () {
+				brand.push($(this).attr("brand"));
+			});
+			$("[name=barcode]").each(function () {
+				classificationName.push($(this).attr("classificationName"));
+			});
+			$("[name=barcode]").each(function () {
+				categoryName.push($(this).attr("categoryName"));
+			});
+			$("[name=barcode]").each(function () {
+				ReturnItemID.push($(this).attr("ReturnItemID"));
+			});
+			$("[name=barcode]").each(function () {
+				MaterialUsageID.push($(this).attr("MaterialUsageID"));
+			});
+			$("[name=barcode]").each(function () {
+				InventoryReceivingID.push($(this).attr("InventoryReceivingID"));
+			});
+			$("[name=serialnumber]").each(function () {
+				serialnumber.push($(this).val());
 			});
 			$("[name=serialnumber]").each(function () {
 				serialnumber.push($(this).val());
 			});
 
+			$(".quantity").each(function () {
+				quantity.push($(this).val());
+			});
 			$(".inventoryStorageID").each(function () {
 				inventoryStorageID.push($(this).val());
 			});
-
-			$(".barcode").each(function () {
-				barcode.push($(this).val());
+			
+			$(".inventoryStorageID").each(function () {
+				inventoryStorageOfficeName.push($('option:selected', this).attr("inventoryStorageOfficeName"));
+			});
+			$(".inventoryStorageID").each(function () {
+				inventoryStorageCode.push($('option:selected', this).attr("inventoryStorageCode"));
 			});
 			$(".manufactureDate").each(function () {
 				manufactureDate.push($(this).val());
@@ -1209,15 +1565,13 @@ $(document).ready(function () {
 						url: `${base_url}ims/inventory_stock_in/insertbarcode`,
 						method: "POST",
 						data: {
-							itemID: itemID,
-							receivedID: receivedID,
-							barcode: barcode,
-							recievedQuantity: recievedQuantity,
-							serialnumber: serialnumber,
-							inventoryStorageID: inventoryStorageID,
-							manufactureDate: manufactureDate,
-							expirationdate: expirationdate,
-							itemName: itemName,
+							itemID: 				itemID, 				itemName: 					itemName, 					brand: 					brand,
+							classificationName: 	classificationName,		categoryName: 				categoryName, 				barcode: 				barcode,
+							recievedQuantity:		recievedQuantity, 		serialnumber:				serialnumber, 				inventoryStorageID: 	inventoryStorageID,
+							inventoryStorageCode: 	inventoryStorageCode,	inventoryStorageOfficeName: inventoryStorageOfficeName, manufactureDate:		manufactureDate,
+							expirationdate:			expirationdate, 		MaterialUsageID:			MaterialUsageID,			InventoryReceivingID: 	InventoryReceivingID,
+							ReturnItemID:			ReturnItemID,			recordID:				recordID,						quantity: 				quantity,
+							inventoryCode:			inventoryCode,
 						},
 						async: true,
 						dataType: "json",
@@ -1258,20 +1612,15 @@ $(document).ready(function () {
 	});
 
 	$(document).on("click", ".btn-barcode", function () {
-		var receivedID = $(this).data("inventoryreceivingid");
-		// /alert(receivedID);
-		var itemID = $(this).data("itemid");
-		const data = {
-			receivedID,
-			itemID
-		};
+		var referenceCode = $(this).attr("referenceCode");
+		var itemID = $(this).attr("itemID");
 		// console.log(data);
 		$.ajax({
 			url: `${base_url}ims/inventory_stock_in/printStockInBarcode`,
 			method: "POST",
 			data: {
-				receivedID: receivedID,
-				itemID: itemID
+				referenceCode: referenceCode,
+				itemID: 	  itemID,
 
 			},
 			success: function (data) {

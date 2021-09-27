@@ -3115,7 +3115,7 @@ CREATE TABLE `ims_inventory_request_details_tbl` (
   `itemCode` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `itemName` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `Brand` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `borrowedQuantity` decimal(15,2) NOT NULL,
+  `borrowedQuantity` decimal(15,2) DEFAULT NULL,
   `quantity` decimal(15,2) NOT NULL,
   `used` decimal(15,2) NOT NULL,
   `unused` decimal(15,2) NOT NULL,
@@ -3425,23 +3425,40 @@ DROP TABLE IF EXISTS `ims_material_usage_tbl`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `ims_material_usage_tbl` (
   `materialUsageID` bigint(20) NOT NULL AUTO_INCREMENT,
+  `materialUsageCode` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `reviseMaterialUsageID` bigint(20) DEFAULT NULL,
+  `materialWithdrawalID` int(255) DEFAULT NULL,
+  `materialWithdrawalCode` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `inventoryValidationID` int(255) DEFAULT NULL,
+  `inventoryValidationCode` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `materialRequestID` int(255) DEFAULT NULL,
+  `materialRequestCode` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `StockOutID` bigint(20) NOT NULL,
+  `referenceNo` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
   `employeeID` bigint(20) NOT NULL,
   `projectID` bigint(20) DEFAULT NULL,
-  `referenceCode` text DEFAULT NULL,
-  `approversID` text DEFAULT NULL,
-  `approversStatus` text DEFAULT NULL,
-  `approversDate` text DEFAULT NULL,
+  `projectCode` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `projectName` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `projectCategory` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `clientID` bigint(255) NOT NULL,
+  `clientCode` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `clientName` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `clientAddress` text COLLATE utf8mb4_unicode_ci NOT NULL,
+  `approversID` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `approversStatus` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `approversDate` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `materialUsageStatus` int(11) NOT NULL,
-  `materialUsageReason` text DEFAULT NULL,
-  `materialUsageRemarks` text DEFAULT NULL,
-  `submittedAt` timestamp NULL DEFAULT current_timestamp(),
+  `materialUsageReason` longtext COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `materialUsageRemarks` longtext COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `materialUsageDate` date DEFAULT NULL,
+  `submittedAt` timestamp NULL DEFAULT NULL,
   `createdBy` bigint(20) NOT NULL,
   `updatedBy` bigint(20) NOT NULL,
   `createdAt` timestamp NOT NULL DEFAULT current_timestamp(),
   `updatedAt` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `materialUsageCreateAt` date NOT NULL,
   PRIMARY KEY (`materialUsageID`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -4070,21 +4087,31 @@ DROP TABLE IF EXISTS `ims_return_item_tbl`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `ims_return_item_tbl` (
   `returnItemID` bigint(20) NOT NULL AUTO_INCREMENT,
+  `returnItemCode` varchar(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
   `reviseReturnItemID` bigint(20) DEFAULT NULL,
   `borrowingID` bigint(20) NOT NULL,
+  `borrowingCode` varchar(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
   `employeeID` bigint(20) NOT NULL,
   `projectID` bigint(20) DEFAULT NULL,
-  `approversID` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `approversStatus` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `approversDate` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `projectCode` varchar(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
+  `projectName` varchar(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
+  `clientID` bigint(255) NOT NULL,
+  `clientCode` varchar(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT NULL,
+  `clientName` varchar(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT NULL,
+  `clientAddress` text CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
+  `approversID` text CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT NULL,
+  `approversStatus` text CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT NULL,
+  `approversDate` text CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT NULL,
   `returnItemStatus` int(11) NOT NULL,
-  `returnItemReason` longtext COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `returnItemRemarks` longtext COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `returnItemReason` longtext CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT NULL,
+  `returnItemRemarks` longtext CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT NULL,
+  `returnItemDate` date DEFAULT NULL,
   `submittedAt` timestamp NULL DEFAULT NULL,
   `createdBy` bigint(20) NOT NULL,
   `updatedBy` bigint(20) NOT NULL,
   `createdAt` timestamp NOT NULL DEFAULT current_timestamp(),
   `updatedAt` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `borrowingCreateAt` date NOT NULL,
   PRIMARY KEY (`returnItemID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -5415,6 +5442,61 @@ UNLOCK TABLES;
 --
 -- Dumping routines for database 'erpdb'
 --
+/*!50003 DROP PROCEDURE IF EXISTS `proc_get_material_withdrawal_approve` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'NO_ZERO_IN_DATE,NO_ZERO_DATE,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `proc_get_material_withdrawal_approve`(IN id BIGINT(255))
+BEGIN
+DECLARE materialUsageID  INT DEFAULT NULL;
+-- execute data into inventory receiving --
+INSERT INTO  ims_material_usage_tbl(employeeID, materialWithdrawalID,	materialWithdrawalCode, inventoryValidationID, inventoryValidationCode, materialRequestID, materialRequestCode, projectCode, projectName, projectCategory,clientCode, clientName, clientAddress, materialUsageStatus) 
+SELECT 
+		employeeID, 				materialWithdrawalID, 		materialWithdrawalCode, inventoryValidationID,
+        inventoryValidationCode,	materialRequestID, 			materialRequestCode, 	projectCode, 			
+        projectName,				projectCategory, 			clientCode, 			clientName, 			
+        clientAddress,				materialUsageStatus
+FROM	
+(
+SELECT 
+		employeeID, 				materialWithdrawalID, 	materialWithdrawalCode,		inventoryValidationID, 
+		inventoryValidationCode,	materialRequestID, 	 	materialRequestCode,		projectCode,
+		projectName, 				projectCategory,		clientCode,					clientName,
+        clientAddress,	 'O' AS materialUsageStatus
+FROM ims_material_withdrawal_tbl 
+WHERE materialWithdrawalID =id AND inventoryItemStatus = 1
+)w;
+-- get inventory receiving ID--
+ SET materialUsageID  = LAST_INSERT_ID();
+ -- end of inventory receiving ID - 
+-- end of execute --
+-- execute data into request details --
+INSERT INTO ims_inventory_request_details_tbl(materialUsageID, recordID, itemID, itemCode, Brand, itemName, classificationName, quantity)	
+SELECT materialUsageID , recordID, itemID, itemCode, Brand, itemName, classificationName, quantity
+FROM 
+(
+	SELECT '0' AS recordID, 				itemID,
+			itemCode, 						itemBrandName AS Brand, 
+			itemName, 						itemClassification AS classificationName,
+			itemCategory AS categoryName, 	itemUom AS uom, 
+            remaining AS quantity
+	FROM ims_material_withdrawal_item_tbl AS ri
+	LEFT JOIN ims_material_withdrawal_tbl AS po ON ri.materialWithdrawalID = po.materialWithdrawalID
+	WHERE po.materialWithdrawalID = id AND po.inventoryItemStatus = 1
+)a; 
+
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 /*!50003 DROP PROCEDURE IF EXISTS `proc_get_purchase_order_approve` */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
@@ -5518,4 +5600,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2021-09-27 13:04:04
+-- Dump completed on 2021-09-27 13:54:32
