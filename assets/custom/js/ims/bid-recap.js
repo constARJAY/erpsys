@@ -1,5 +1,6 @@
 $(document).ready(function() {
-	const allowedUpdate = isUpdateAllowed(40);
+
+    const allowedUpdate = isUpdateAllowed(40);
 
 
     // ----- MODULE APPROVER -----
@@ -7,11 +8,12 @@ $(document).ready(function() {
 	// ----- END MODULE APPROVER -----
 
 
-	// ---- GET EMPLOYEE DATA -----
-	const allEmployeeData = getAllEmployeeData();
+    // ----- GLOBAL VARIABLES/FUNCTIONS -----
+    const allEmployeeData = getAllEmployeeData();
 	const employeeData = (id) => {
 		if (id) {
-			let data = allEmployeeData.filter(employee => employee.employeeID == id);
+			let empID = id == "0" ? sessionID : id;
+			let data = allEmployeeData.filter(employee => employee.employeeID == empID);
 			let { employeeID, fullname, designation, department } = data && data[0];
 			return { employeeID, fullname, designation, department };
 		}
@@ -24,10 +26,132 @@ $(document).ready(function() {
 		}
 		return "-";
 	}
-	// ---- END GET EMPLOYEE DATA -----
+
+    const getNonFormattedAmount = (amount = "₱0.00") => {
+		return +amount.replaceAll(",", "").replaceAll("₱", "")?.trim();
+	}
+
+    const dateToday = () => {
+		return moment(new Date).format("YYYY-MM-DD HH:mm:ss");
+	};
+
+    function getItemPriceList(classification = "", itemAssetID = 0) {
+        let result = [];
+        if (classification == "Items") {
+            result = getTableData(
+                `ims_inventory_price_list_tbl
+                LEFT JOIN ims_inventory_vendor_tbl USING(inventoryVendorID)`,
+                `ims_inventory_vendor_tbl.inventoryVendorID,
+                inventoryVendorCode,
+                ims_inventory_vendor_tbl.inventoryVendorName,
+                vendorCurrentPrice AS vendorPrice`,
+                `itemID = ${itemAssetID}
+                AND assetID IS NULL
+                AND inventoryVendorStatus = 1`
+            )
+        } else if (classification == "Assets") {
+            result = getTableData(
+                `ims_inventory_price_list_tbl
+                LEFT JOIN ims_inventory_vendor_tbl USING(inventoryVendorID)`,
+                `ims_inventory_vendor_tbl.inventoryVendorID,
+                inventoryVendorCode,
+                ims_inventory_vendor_tbl.inventoryVendorName,
+                vendorCurrentPrice AS vendorPrice`,
+                `itemID IS NULL
+                AND assetID = ${itemAssetID}
+                AND inventoryVendorStatus = 1`
+            )
+        }
+        return result;
+    }
+    // ----- END GLOBAL VARIABLES/FUNCTIONS -----
 
 
-	// ----- IS DOCUMENT REVISED -----
+    // ----- DATATABLES -----
+	function activateDatatable(elementID = null, options = {}) {
+		if ($.fn.DataTable.isDataTable(`#${elementID || "table"}`)) {
+			$(`#${elementID || "table"}`).DataTable().destroy();
+		}
+
+		var table = $(`#${elementID || "table"}`)
+			.css({ "min-width": "100%" })
+			.removeAttr("width")
+			.DataTable(options);
+	}
+
+	function initDataTables() {
+		const headerOptions = {
+			proccessing:    false,
+			serverSide:     false,
+			scrollX:        true,
+			sorting:        [],
+			scrollCollapse: true,
+			columnDefs: [
+				{ targets: 0,  width: 150 },
+				{ targets: 1,  width: 150 },
+				{ targets: 2,  width: 180 },
+				{ targets: 3,  width: 150 },
+				{ targets: 4,  width: 150 },
+				{ targets: 5,  width: 150 },
+				{ targets: 6,  width: 300 },
+				{ targets: 7,  width: 150 },
+				{ targets: 8,  width: 250 },
+			],
+		};
+        
+		const bodyOptions = {
+			proccessing:    false,
+			serverSide:     false,
+			scrollX:        true,
+			sorting:        false,
+			searching:      false,
+			paging:         false,
+			ordering:       false,
+			info:           false,
+			scrollCollapse: true,
+			columnDefs:     [
+				{ targets: 0,  width: 150 },
+				{ targets: 1,  width: 180 },
+				{ targets: 2,  width: 180 },
+				{ targets: 3,  width: 100 },
+				{ targets: 4,  width: 100 },
+				{ targets: 5,  width: 450 },
+				{ targets: 6,  width: 250 },
+			],
+		};
+        
+		const tableBodyOptions = {
+			proccessing:    false,
+			serverSide:     false,
+			scrollX:        true,
+			sorting:        false,
+			searching:      false,
+			paging:         false,
+			ordering:       false,
+			info:           false,
+			scrollCollapse: true,
+			columnDefs:     [
+				{ targets: 0,  width: 150 },
+				{ targets: 1,  width: 180 },
+				{ targets: 2,  width: 180 },
+				{ targets: 3,  width: 100 },
+				{ targets: 4,  width: 100 },
+				{ targets: 5,  width: 150 },
+				{ targets: 6,  width: 150 },
+				{ targets: 7,  width: 250 },
+			],
+		};
+
+		["tableForApproval", "tableMyForms"].map(id => activateDatatable(id, headerOptions));
+		["tableRequestItems", "tableRequestAssets"].map(id => activateDatatable(id, bodyOptions));
+		$(".tableFinalQuote").each(function() {
+			activateDatatable(this.id, tableBodyOptions)
+		})
+	}
+	// ----- END DATATABLES -----
+
+
+    // ----- IS DOCUMENT REVISED -----
 	function isDocumentRevised(id = null) {
 		if (id) {
 			const revisedDocumentsID = getTableData(
@@ -56,8 +180,16 @@ $(document).ready(function() {
 
 				if (employeeID != sessionID) {
 					isReadOnly = true;
-					if (bidRecapStatus == 0 || bidRecapStatus == 4) {
-						isAllowed = false;
+					if (employeeID == null || employeeID == 0) {
+						if (bidRecapStatus == 0) {
+							isReadOnly = false;
+						} else {
+							isReadOnly = true;
+						}
+					} else {
+						if (bidRecapStatus == 0 || bidRecapStatus == 4) {
+							isAllowed = false;
+						}
 					}
 				} else if (employeeID == sessionID) {
 					if (bidRecapStatus == 0) {
@@ -103,7 +235,7 @@ $(document).ready(function() {
 					let id = decryptString(arr[1]);
 						id && isFinite(id) && loadData(id, true);
 				} else {
-					const isAllowed = isCreateAllowed(40);
+					const isAllowed = isCreateAllowed(46);
 					pageContent(isAllowed);
 				}
 			}
@@ -127,166 +259,25 @@ $(document).ready(function() {
 	// ----- END VIEW DOCUMENT -----
 
 
-    // ----- GLOBAL VARIABLE - REUSABLE ----- 
-	const dateToday = () => {
-		return moment(new Date).format("YYYY-MM-DD HH:mm:ss");
-	};
-
-	const getNonFormattedAmount = (amount = "₱0.00") => {
-		return +amount.replaceAll(",", "").replaceAll("₱", "")?.trim();
-	}
-
-	const inventoryItemList = getTableData(
-		`ims_inventory_item_tbl 
-			LEFT JOIN ims_inventory_category_tbl USING(categoryID)
-			LEFT JOIN ims_inventory_classification_tbl ON (ims_inventory_item_tbl.classificationID = ims_inventory_classification_tbl.classificationID)`, 
-		`itemID, itemCode, itemName, itemDescription, brandName, categoryName, classificationName, unitOfMeasurementID, ims_inventory_item_tbl.createdAt`,
-		"itemStatus = 1");
-
-	const inventoryPriceList = getTableData(
-		`ims_inventory_price_list_tbl`,
-		``,
-		`preferred = 1`
-	);
-
-	const inventoryValidationList = getTableData(
-		`ims_inventory_validation_tbl`,
-		"",
-		`inventoryValidationStatus = 2`
-	);
-	let validateVendors = 0;
-	// ----- END GLOBAL VARIABLE - REUSABLE ----- 
-
-
-    // ----- DATATABLES -----
-	function initDataTables() {
-		const activateDatatable = (elementID = null, options = {}) => {
-			if ($.fn.DataTable.isDataTable(`#${elementID}`)) {
-				$(`#${elementID}`).DataTable().destroy();
-			}
-
-			var table = $(`#${elementID}`)
-				.css({ "min-width": "100%" })
-				.removeAttr("width")
-				.DataTable(options);
+    // ----- HEADER BUTTON -----
+	function headerButton(isAdd = true, text = "Add", isRevise = false, isFromCancelledDocument = false) {
+		let html;
+		if (isAdd) {
+			html = "";
+		} else {
+			html = `
+            <button type="button" 
+				class="btn btn-default btn-light btnBack" 
+				id="btnBack" 
+				revise="${isRevise}" 
+				cancel="${isFromCancelledDocument}">
+				<i class="fas fa-arrow-left"></i> Back
+			</button>`;
 		}
-		
-		
-
-		const bodyOptions = {
-			proccessing:    false,
-			serverSide:     false,
-			scrollX:        true,
-			sorting:        false,
-			searching:      false,
-			paging:         false,
-			ordering:       false,
-			info:           false,
-			scrollCollapse: true,
-			columnDefs: [
-				{ targets: 0,  width: 50  },
-				{ targets: 1,  width: 150 },
-				{ targets: 2,  width: 180 },
-				{ targets: 3,  width: 150 },
-				{ targets: 4,  width: 50  },
-				{ targets: 5,  width: 100 },
-				{ targets: 6,  width: 150 },
-				{ targets: 7,  width: 150 },
-				{ targets: 8,  width: 180 },
-				{ targets: 9,  width: 200 },
-			],
-		};
-
-		const bodyOptionsWithoutCheckbox = {
-			proccessing:    false,
-			serverSide:     false,
-			scrollX:        true,
-			sorting:        false,
-			searching:      false,
-			paging:         false,
-			ordering:       false,
-			info:           false,
-			scrollCollapse: true,
-			columnDefs: [
-				{ targets: 0,  width: 150 },
-				{ targets: 1,  width: 180 },
-				{ targets: 2,  width: 150 },
-				{ targets: 3,  width: 50  },
-				{ targets: 4,  width: 100 },
-				{ targets: 5,  width: 150 },
-				{ targets: 6,  width: 150 },
-				{ targets: 7,  width: 180 },
-				{ targets: 8,  width: 200 },
-			],
-		};
-
-		const bodyOptionsWithoutClassificationAndCheckbox = {
-			proccessing:    false,
-			serverSide:     false,
-			scrollX:        true,
-			sorting:        false,
-			searching:      false,
-			paging:         false,
-			ordering:       false,
-			info:           false,
-			scrollCollapse: true,
-			columnDefs: [
-				{ targets: 0,  width: 150 },
-				{ targets: 1,  width: 180 },
-				{ targets: 2,  width: 50  },
-				{ targets: 3,  width: 100 },
-				{ targets: 4,  width: 150 },
-				{ targets: 5,  width: 150 },
-				{ targets: 6,  width: 180 },
-				{ targets: 7,  width: 200 },
-			],
-		};
-		
-		if ($.fn.DataTable.isDataTable(".project-phase-tables")) {
-			$(".project-phase-tables").DataTable().destroy();
-		}
-		
-		var table = $(".project-phase-tables")
-		.css({ "min-width": "100%" })
-		.removeAttr("width")
-		.DataTable(bodyOptionsWithoutCheckbox);
-
-		const headerOptions = {
-			proccessing:    false,
-			serverSide:     false,
-			scrollX:        true,
-			sorting:        [],
-			scrollCollapse: true,
-			columnDefs: [
-				{ targets: 0,  width: 100 },
-				{ targets: 1,  width: 150 },
-				{ targets: 2,  width: 100 },
-				{ targets: 3,  width: 350 },
-				{ targets: 4,  width: 260 },
-				{ targets: 5,  width: 150 },
-				{ targets: 6,  width: 250 },
-				{ targets: 7,  width: 80  },
-				{ targets: 8,  width: 250 },
-			],
-		};
-
-		["tableForApproval", "tableMyForms"].map(id => activateDatatable(id, headerOptions));
-		$(`.requestItemTable`).each(function() {
-			const elementID = $(this).attr("id");
-			const readOnly  = $(this).attr("isReadOnly") == "true";
-			const materialEquipment = $(this).attr("isMaterialEquipment") == "true";
-			let options = bodyOptions;
-			if (materialEquipment) {
-				options = bodyOptionsWithoutClassificationAndCheckbox;
-			} else {
-				options =  bodyOptionsWithoutCheckbox;
-			}
-
-			activateDatatable(elementID, options);
-		})
+		$("#headerButton").html(html);
 	}
-	// ----- END DATATABLES -----
-   
+	// ----- END HEADER BUTTON -----
+
 
     // ----- HEADER CONTENT -----
 	function headerTabContent(display = true) {
@@ -313,44 +304,27 @@ $(document).ready(function() {
 	// ----- END HEADER CONTENT -----
 
 
-    // ----- HEADER BUTTON -----
-	function headerButton(isAdd = true, text = "Add", isRevise = false, isFromCancelledDocument = false) {
-		let html;
-		if (isAdd) {
-			if (isCreateAllowed(40)) {
-				html = `
-				<button type="button" 
-					class="btn btn-default btn-add" 
-					id="btnAdd">
-					<i class="icon-plus"></i> ${text}
-				</button>`;
-			}
-		} else {
-			html = `
-            <button type="button" 
-				class="btn btn-default btn-light" 
-				id="btnBack" 
-				revise="${isRevise}" 
-				cancel="${isFromCancelledDocument}">
-				<i class="fas fa-arrow-left"></i> Back
-			</button>`;
-		}
-		$("#headerButton").html(html);
-	}
-	// ----- END HEADER BUTTON -----
-
-
-    // ----- FOR APPROVAL CONTENT -----
+	// ----- FOR APPROVAL CONTENT -----
 	function forApprovalContent() {
 		$("#tableForApprovalParent").html(preloader);
 		let bidRecapData = getTableData(
 			`ims_bid_recap_tbl AS ibrt 
-				LEFT JOIN hris_employee_list_tbl AS helt USING(employeeID)
-				LEFT JOIN ims_inventory_validation_tbl AS ivrt USING(inventoryValidationID)`,
-			"ibrt.*, CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname, ibrt.createdAt AS dateCreated, ivrt.createdAt AS ivrCreatedAt",
+				LEFT JOIN hris_employee_list_tbl AS helt USING(employeeID)`,
+			"ibrt.*, CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname, ibrt.createdAt AS dateCreated",
 			`ibrt.employeeID != ${sessionID} AND bidRecapStatus != 0 AND bidRecapStatus != 4`,
 			`FIELD(bidRecapStatus, 0, 1, 3, 2, 4, 5), COALESCE(ibrt.submittedAt, ibrt.createdAt)`
 		);
+
+		/*
+		 ----- ***** STATUS ***** -----
+			0 - PENDING
+			1 - FOR APPROVAL
+			2 - APPROVED
+			3 - REJECTED
+			4 - CANCELLED
+			5 - DROPPED [IF NEEDED]
+		 ----- ***** END STATUS ***** -----
+		*/
 
 		let html = `
         <table class="table table-bordered table-striped table-hover" id="tableForApproval">
@@ -359,8 +333,8 @@ $(document).ready(function() {
                     <th>Document No.</th>
                     <th>Prepared By</th>
 					<th>Reference No.</th>
-                    <th>Project Code</th>
-                    <th>Project Name</th>
+					<th>Project</th>
+					<th>Client</th>
                     <th>Current Approver</th>
                     <th>Date</th>
                     <th>Status</th>
@@ -371,23 +345,29 @@ $(document).ready(function() {
 
 		bidRecapData.map((item) => {
 			let {
-				fullname,
 				bidRecapID,
+				bidRecapCode,
+                inventoryValidationID,
+                inventoryValidationCode,
 				timelineBuilderID,
+				employeeID,
+				fullname,
 				projectCode,
 				projectName,
-				inventoryValidationID,
+				clientCode,
+				clientName,
+				vendorCode,
+				vendorName,
 				approversID,
 				approversDate,
+				approversStatus,
+				bidRecapReason,
 				bidRecapStatus,
 				bidRecapRemarks,
-				bidRecapReason,
 				submittedAt,
-				createdAt,
-				ivrCreatedAt
+				createdAt
 			} = item;
 
-			let remarks       = bidRecapRemarks ? bidRecapRemarks : "-";
 			let dateCreated   = moment(createdAt).format("MMMM DD, YYYY hh:mm:ss A");
 			let dateSubmitted = submittedAt ? moment(submittedAt).format("MMMM DD, YYYY hh:mm:ss A") : "-";
 			let dateApproved  = bidRecapStatus == 2 || bidRecapStatus == 5 ? approversDate.split("|") : "-";
@@ -399,37 +379,46 @@ $(document).ready(function() {
 			if (isImCurrentApprover(approversID, approversDate, bidRecapStatus) || isAlreadyApproved(approversID, approversDate)) {
 				html += `
 				<tr class="${btnClass}" id="${encryptString(bidRecapID)}">
-					<td>${getFormCode("BRF", createdAt, bidRecapID )}</td>
-					<td>${fullname}</td>
-					<td>${inventoryValidationID && inventoryValidationID != 0 ? getFormCode("IVR", ivrCreatedAt, inventoryValidationID) : '-'}</td>
+					<td>${bidRecapCode}</td>
+					<td>${fullname || "-"}</td>
+					<td>
+						<div>
+							${inventoryValidationCode || '-'}
+						</div>
+						<small style="color:#848482;">${bidRecapReason || ''}</small>
+					</td>
 					<td>
 						<div>
 							${projectCode || '-'}
 						</div>
-						<small style="color:#848482;">${bidRecapReason || '-'}</small>
+						<small style="color:#848482;">${projectName || ''}</small>
 					</td>
-					<td>${projectName || '-'}</td>
+					<td>
+						<div>
+							${clientCode || '-'}
+						</div>
+						<small style="color:#848482;">${clientName || ''}</small>
+					</td>
 					<td>
 						${employeeFullname(getCurrentApprover(approversID, approversDate, bidRecapStatus, true))}
 					</td>
 					<td>${getDocumentDates(dateCreated, dateSubmitted, dateApproved)}</td>
 					<td class="text-center">
-						${getStatusStyle(bidRecapStatus)}
+						${getStatusStyle(bidRecapStatus, true)}
 					</td>
-					<td>${remarks}</td>
+					<td>${bidRecapRemarks || "-"}</td>
 				</tr>`;
 			}
 		});
 
 		html += `
-			</tbody>
-		</table>`;
+            </tbody>
+        </table>`;
 
 		setTimeout(() => {
 			$("#tableForApprovalParent").html(html);
 			initDataTables();
-			return html;
-		}, 300);
+		}, 100);
 	}
 	// ----- END FOR APPROVAL CONTENT -----
 
@@ -439,12 +428,22 @@ $(document).ready(function() {
 		$("#tableMyFormsParent").html(preloader);
 		let bidRecapData = getTableData(
 			`ims_bid_recap_tbl AS ibrt 
-				LEFT JOIN hris_employee_list_tbl AS helt USING(employeeID) 
-				LEFT JOIN ims_inventory_validation_tbl AS ivrt USING(inventoryValidationID)`,
-			"ibrt.*, CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname, ibrt.createdAt AS dateCreated, ivrt.createdAt AS ivrCreatedAt",
-			`ibrt.employeeID = ${sessionID}`,
+				LEFT JOIN hris_employee_list_tbl AS helt USING(employeeID)`,
+			"ibrt.*, CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname, ibrt.createdAt AS dateCreated",
+			`ibrt.employeeID = 0 OR ibrt.employeeID IS NULL OR ibrt.employeeID = ${sessionID}`,
 			`FIELD(bidRecapStatus, 0, 1, 3, 2, 4, 5), COALESCE(ibrt.submittedAt, ibrt.createdAt)`
 		);
+
+		/*
+		 ----- ***** STATUS ***** -----
+			0 - PENDING
+			1 - FOR APPROVAL
+			2 - APPROVED
+			3 - REJECTED
+			4 - CANCELLED
+			5 - DROPPED [IF NEEDED]
+		 ----- ***** END STATUS ***** -----
+		*/
 
 		let html = `
         <table class="table table-bordered table-striped table-hover" id="tableMyForms">
@@ -453,8 +452,8 @@ $(document).ready(function() {
                     <th>Document No.</th>
                     <th>Prepared By</th>
 					<th>Reference No.</th>
-                    <th>Project Code</th>
-                    <th>Project Name</th>
+					<th>Project</th>
+					<th>Client</th>
                     <th>Current Approver</th>
                     <th>Date</th>
                     <th>Status</th>
@@ -465,23 +464,29 @@ $(document).ready(function() {
 
 		bidRecapData.map((item) => {
 			let {
-				fullname,
 				bidRecapID,
-                timelineBuilderID,
-                projectCode,
-                projectName,
+				bidRecapCode,
                 inventoryValidationID,
+                inventoryValidationCode,
+				timelineBuilderID,
+				employeeID,
+				fullname,
+				projectCode,
+				projectName,
+				clientCode,
+				clientName,
+				vendorCode,
+				vendorName,
 				approversID,
 				approversDate,
+				approversStatus,
+				bidRecapReason,
 				bidRecapStatus,
 				bidRecapRemarks,
-				bidRecapReason,
 				submittedAt,
-				createdAt,
-				ivrCreatedAt
+				createdAt
 			} = item;
 
-			let remarks       = bidRecapRemarks ? bidRecapRemarks : "-";
 			let dateCreated   = moment(createdAt).format("MMMM DD, YYYY hh:mm:ss A");
 			let dateSubmitted = submittedAt ? moment(submittedAt).format("MMMM DD, YYYY hh:mm:ss A") : "-";
 			let dateApproved  = bidRecapStatus == 2 || bidRecapStatus == 5 ? approversDate.split("|") : "-";
@@ -491,25 +496,35 @@ $(document).ready(function() {
 
 			let btnClass = bidRecapStatus != 0 ? "btnView" : "btnEdit";
 			html += `
-            <tr class="${btnClass}" id="${encryptString(bidRecapID )}">
-                <td>${getFormCode("BRF", createdAt, bidRecapID )}</td>
-                <td>${fullname}</td>
-				<td>${inventoryValidationID && inventoryValidationID != 0 ? getFormCode("IVR", ivrCreatedAt, inventoryValidationID) : '-'}</td>
+            <tr class="${btnClass}" id="${encryptString(bidRecapID)}">
+                <td>${bidRecapCode}</td>
+                <td>${fullname || "-"}</td>
+				<td>
+					<div>
+						${inventoryValidationCode || '-'}
+					</div>
+					<small style="color:#848482;">${bidRecapReason || ''}</small>
+				</td>
 				<td>
 					<div>
 						${projectCode || '-'}
 					</div>
-					<small style="color:#848482;">${bidRecapReason || '-'}</small>
+					<small style="color:#848482;">${projectName || ''}</small>
 				</td>
-				<td>${projectName || '-'}</td>
+				<td>
+					<div>
+						${clientCode || '-'}
+					</div>
+					<small style="color:#848482;">${clientName || ''}</small>
+				</td>
                 <td>
                     ${employeeFullname(getCurrentApprover(approversID, approversDate, bidRecapStatus, true))}
                 </td>
 				<td>${getDocumentDates(dateCreated, dateSubmitted, dateApproved)}</td>
                 <td class="text-center">
-                    ${getStatusStyle(bidRecapStatus)}
+                    ${getStatusStyle(bidRecapStatus, true)}
                 </td>
-				<td>${remarks}</td>
+				<td>${bidRecapRemarks || "-"}</td>
             </tr>`;
 		});
 
@@ -520,8 +535,7 @@ $(document).ready(function() {
 		setTimeout(() => {
 			$("#tableMyFormsParent").html(html);
 			initDataTables();
-			return html;
-		}, 300);
+		}, 100);
 	}
 	// ----- END MY FORMS CONTENT -----
 
@@ -532,15 +546,15 @@ $(document).ready(function() {
 		if (data) {
 			let {
 				bidRecapID     = "",
+				bidRecapCode   = "",
 				bidRecapStatus = "",
-				employeeID            = "",
-				approversID           = "",
-				approversDate         = "",
-				createdAt             = new Date
+				employeeID     = "",
+				approversID    = "",
+				approversDate  = "",
 			} = data && data[0];
 
 			let isOngoing = approversDate ? approversDate.split("|").length > 0 ? true : false : false;
-			if (employeeID === sessionID) {
+			if (employeeID == 0 || employeeID == null || employeeID == sessionID) {
 				if (bidRecapStatus == 0 || isRevise) {
 					// DRAFT
 					button = `
@@ -548,7 +562,7 @@ $(document).ready(function() {
 						class="btn btn-submit px-5 p-2"  
 						id="btnSubmit" 
 						bidRecapID="${encryptString(bidRecapID)}"
-						code="${getFormCode("BRF", createdAt, bidRecapID)}"
+						bidRecapCode="${bidRecapCode}"
 						revise="${isRevise}"
 						cancel="${isFromCancelledDocument}"><i class="fas fa-paper-plane"></i>
 						Submit
@@ -557,21 +571,25 @@ $(document).ready(function() {
 					if (isRevise) {
 						button += `
 						<button type="button" 
-							class="btn btn-cancel btnCancel px-5 p-2" 
-							id="btnCancel"
+							class="btn btn-cancel btnBack px-5 p-2" 
+							id="btnBack"
 							bidRecapID="${encryptString(bidRecapID)}"
-							code="${getFormCode("BRF", createdAt, bidRecapID)}"
+							bidRecapCode="${bidRecapCode}"
 							revise="${isRevise}"
-							cancel="${isFromCancelledDocument}"><i class="fas fa-ban"></i> 
+							cancel="${isFromCancelledDocument}"
+							employeeID="${employeeID}"><i class="fas fa-ban"></i> 
 							Cancel
 						</button>`;
 					} else {
 						button += `
 						<button type="button" 
-							class="btn btn-cancel px-5 p-2"
-							id="btnCancelForm" 
+							class="btn btn-cancel px-5 p-2 btnBack"
+							id="btnBack" 
 							bidRecapID="${encryptString(bidRecapID)}"
-							code="${getFormCode("BRF", createdAt, bidRecapID)}"
+							bidRecapCode="${bidRecapCode}"
+							status="${bidRecapStatus}"
+							cancel="${isFromCancelledDocument}"
+							employeeID="${employeeID}"
 							revise=${isRevise}><i class="fas fa-ban"></i> 
 							Cancel
 						</button>`;
@@ -586,7 +604,7 @@ $(document).ready(function() {
 							class="btn btn-cancel  px-5 p-2"
 							id="btnCancelForm" 
 							bidRecapID="${encryptString(bidRecapID)}"
-							code="${getFormCode("BRF", createdAt, bidRecapID)}"
+							bidRecapCode="${bidRecapCode}"
 							status="${bidRecapStatus}"><i class="fas fa-ban"></i> 
 							Cancel
 						</button>`;
@@ -598,7 +616,7 @@ $(document).ready(function() {
 						class="btn btn-cancel px-5 p-2"
 						id="btnDrop" 
 						bidRecapID="${encryptString(bidRecapID)}"
-						code="${getFormCode("BRF", createdAt, bidRecapID)}"
+						bidRecapCode="${bidRecapCode}"
 						status="${bidRecapStatus}"><i class="fas fa-ban"></i> 
 						Drop
 					</button>`;
@@ -610,35 +628,35 @@ $(document).ready(function() {
 							class="btn btn-cancel px-5 p-2"
 							id="btnRevise" 
 							bidRecapID="${encryptString(bidRecapID)}"
-							code="${getFormCode("BRF", createdAt, bidRecapID)}"
+							bidRecapCode="${bidRecapCode}"
 							status="${bidRecapStatus}"><i class="fas fa-clone"></i>
 							Revise
 						</button>`;
 					}
 				} else if (bidRecapStatus == 4) {
 					// CANCELLED - FOR REVISE
-					const data = getTableData(
-						`ims_bid_recap_tbl`,
-						`inventoryValidationID`,
-						`bidRecapID = ${bidRecapID}`,
-					);
-					const { inventoryValidationID } = data && data[0];
-					const isAllowedForRevise = getTableDataLength(
-						`ims_bid_recap_tbl`,
-						`bidRecapID`,
-						`bidRecapStatus <> 3 AND bidRecapStatus <> 4 AND inventoryValidationID = ${inventoryValidationID}`
-					);
+					// const data = getTableData(
+					// 	`ims_bid_recap_tbl`,
+					// 	`bidRecapID`,
+					// 	`bidRecapID = ${bidRecapID}`,
+					// );
+					// const { bidRecapID } = data && data[0];
+					// const isAllowedForRevise = getTableDataLength(
+					// 	`ims_bid_recap_tbl`,
+					// 	`bidRecapID`,
+					// 	`bidRecapStatus <> 3 AND bidRecapStatus <> 4 AND bidRecapID = ${bidRecapID}`
+					// );
 
-					if (!isDocumentRevised(bidRecapID) && isAllowedForRevise == 0) {
+					if (!isDocumentRevised(bidRecapID)) {
 						button = `
 						<button
 							class="btn btn-cancel px-5 p-2"
 							id="btnRevise" 
 							bidRecapID="${encryptString(bidRecapID)}"
-							code="${getFormCode("BRF", createdAt, bidRecapID)}"
+							bidRecapCode="${bidRecapCode}"
 							status="${bidRecapStatus}"
-							cancel="true"><i class="fas fa-clone"></i>
-							Revise
+							cancel="true">
+							<i class="fas fa-clone"></i> Revise
 						</button>`;
 					}
 				}
@@ -650,15 +668,15 @@ $(document).ready(function() {
 							class="btn btn-submit px-5 p-2"  
 							id="btnApprove" 
 							bidRecapID="${encryptString(bidRecapID)}"
-							code="${getFormCode("BRF", createdAt, bidRecapID)}"><i class="fas fa-paper-plane"></i>
-							Approve
+							bidRecapCode="${bidRecapCode}">
+							<i class="fas fa-paper-plane"></i> Approve
 						</button>
 						<button type="button" 
-							class="btn btn-cancel  px-5 p-2"
+							class="btn btn-cancel px-5 p-2"
 							id="btnReject" 
 							bidRecapID="${encryptString(bidRecapID)}"
-							code="${getFormCode("BRF", createdAt, bidRecapID)}"><i class="fas fa-ban"></i> 
-							Deny
+							bidRecapCode="${bidRecapCode}">
+							<i class="fas fa-ban"></i> Deny
 						</button>`;
 					}
 				}
@@ -680,418 +698,470 @@ $(document).ready(function() {
 	// ----- END FORM BUTTONS -----
 
 
-	// ----- GET INVENTORY VALIDATION LIST -----
-	function getInventoryValidationList(id = null, status = 0, display = true) {
-		const createdBidRecap = getTableData("ims_bid_recap_tbl", "inventoryValidationID", "bidRecapStatus <> 3 AND bidRecapStatus <> 4").map(bidRecap => bidRecap.inventoryValidationID);
-		let html = ``;
-		if (!status || status == 0) {
-			html += inventoryValidationList.filter(ivr => createdBidRecap.indexOf(ivr.inventoryValidationID) == -1 || ivr.inventoryValidationID == id).map(ivr => {
-				return `
-				<option 
-					value     			= "${ivr.inventoryValidationID}" 
-					timelineBuilderID 	= "${ivr.timelineBuilderID}"
-					purchaseRequestID 	= "${ivr.purchaseRequestID}"
-					projectCode     	= "${ivr.projectCode}"
-					projectName     	= "${ivr.projectName}"
-					projectCategory 	= "${ivr.projectCategory}"
-					clientName      	= "${ivr.clientName}"
-					clientAddress   	= "${ivr.clientAddress}"
-				${ivr.inventoryValidationID == id && "selected"}>
-				${getFormCode("IVR", ivr.createdAt, ivr.inventoryValidationID)}
-				</option>`;
-			})
-		} else {
-			html += inventoryValidationList.map(ivr => {
-				return `
-				<option 
-					value     = "${ivr.inventoryValidationID}" 
-					timelineBuilderID = "${ivr.timelineBuilderID}"
-					purchaseRequestID =	"${ivr.purchaseRequestID}"
-					projectCode     = "${ivr.projectCode}"
-					projectName     = "${ivr.projectName}"
-					projectCategory = "${ivr.projectCategory}"
-					clientName      = "${ivr.clientName}"
-					clientAddress   = "${ivr.clientAddress}"
-					${ivr.inventoryValidationID == id && "selected"}>
-					${getFormCode("IVR", ivr.createdAt, ivr.inventoryValidationID)}
-				</option>`;
-			})
-		}
-        return display ? html : inventoryValidationList;
-	}
-	// ----- END GET INVENTORY VALIDATION LIST -----
-
-
-	// ----- UPDATE TABLE ITEMS -----
+    // ----- UPDATE TABLE ITEMS -----
 	function updateTableItems() {
-		$(".itemTableBody tr").each(function(i) {
+
+		$(`.tableVendor tbody tr`).each(function(i) {
 			// ROW ID
 			$(this).attr("id", `tableRow${i}`);
-			$(this).attr("index", `${i}`);
+			$(this).attr("index", i);
 
-			// CHECKBOX
-			$("td .action .checkboxrow", this).attr("id", `checkboxrow${i}`);
+			$(`input, textarea, select`, this).each(function(j) {
+				const name = $(this).attr("name") || "";
+				$(this).attr("id", `${name}${i}`);
 
-			// ITEMCODE
-			$("td .itemcode", this).attr("id", `itemcode${i}`);
-
-			// ITEMNAME
-			$(this).find("select").each(function(x) {
-				if ($(this).hasClass("select2-hidden-accessible")) {
-					$(this).select2("destroy");
-				}
-			})
-
-			$(this).find("select").each(function(j) {
-				const itemID = $(this).val();
-				$(this).attr("index", `${i}`);
-				$(this).attr("id", `requestitem${i}`);
-				$(this).attr("data-select2-id", `requestitem${i}`);
-				if (!$(this).hasClass("select2-hidden-accessible")) {
+				if ($(this).is("select")) {
+					if ($(this).hasClass("select2-hidden-accessible")) {
+						$(this).select2("destroy");
+					}
 					$(this).select2({ theme: "bootstrap" });
 				}
-			});
 
-			// QUANTITY
-			$("td .quantity [name=quantity]", this).attr("id", `quantity${i}`);
-			$("td .quantity .invalid-feedback", this).attr("id", `invalid-quantity${i}`);
-			
-			// CLASSIFICATION
-			$("td .classification", this).attr("id", `classification${i}`);
-
-			// UOM
-			$("td .uom", this).attr("id", `uom${i}`);
-
-			// UNIT COST
-			$("td .unitcost", this).attr("id", `unitcost${i}`);
-
-			// TOTAL COST
-			$("td .totalcost", this).attr("id", `totalcost${i}`);
-
-			// FILE
-			$("td .file [name=files]", this).attr("id", `filesCompany${i}`);
-
-			// REMARKS
-			$("td .remarks [name=remarks]", this).attr("id", `remarks${i}`);
-			$("td .remarks .invalid-feedback", this).attr("id", `invalid-remarks${i}`);
+				$parent = $(this).parent();
+				$parent.find(".invalid-feedback").attr("id", `invalid-${name}${i}`);
+				$parent.find(".invalid-feedback").text("");
+			})
 		})
+
+		$(`[name="reason"]`).each(function(i) {
+			const name = $(this).attr("name") || "";
+			$(this).attr("id", `${name}${i}`);
+			$parent = $(this).parent();
+			$parent.find(".invalid-feedback").attr("id", `invalid-${name}${i}`);
+		})
+
 	}
 	// ----- END UPDATE TABLE ITEMS -----
 
 
-	// ----- UPDATE TOTAL AMOUNT -----
-	function updateTotalAmount() {
-		const quantityArr = $.find(`[name=quantity]`).map(element => getNonFormattedAmount(element.value) || "0");
-		const unitCostArr = $.find(`.unitcost`).map(element => getNonFormattedAmount(element.innerText) || "0");
-		const totalAmount = quantityArr.map((qty, index) => +qty * +unitCostArr[index]).reduce((a,b) => a + b, 0);
-		$(`#totalAmount`).text(formatAmount(totalAmount, true));
-		$("#bidRecapProjectTotal").text(formatAmount(totalAmount, true));
-
-		const projectTotal = +getNonFormattedAmount($(`#bidRecapProjectTotal`).text()); 
-		const companyTotal = +getNonFormattedAmount($(`#bidRecapCompanyTotal`).text()); 
-		const grandTotal   = projectTotal + companyTotal;
-		$("#bidRecapGrandTotal").text(formatAmount(grandTotal, true));
-
-		return totalAmount;
-	}
-	// ----- END UPDATE TOTAL AMOUNT -----
-
-
-	// ----- GET COST ESTIMATE REQUEST ITEMS -----
-	function getCostEstimateRequestItems(isMaterialEquipment = false, data = false) {
-		let html = "";
-		let vendorID		= data.vendorID;
-		let rowspan 		= data.rowspan;
-		let vendorName 		= data.vendorName;
-		let vendorTotalCost = 0;
-		
-		if (data) {
-			let tableRowCondition 	= data["items"].length;
-
-			for (let index = 0; index < tableRowCondition; index++) {
-				
-				var {
-					itemName           			  = "-",
-					forPurchase        			  = 0,
-					totalCost 					  = 0,
-					preferredInventoryVendorPrice = 0
-				} = data["items"][index];
-
-				var preferredTotalCost 	= "";
-					if(totalCost < 1){	
-						preferredTotalCost =  parseFloat(forPurchase) * parseFloat(preferredInventoryVendorPrice || 0);
-					}else{
-						preferredTotalCost =  totalCost;
-					}
-				vendorTotalCost 		+= parseFloat(preferredTotalCost);
-			}
-
-			for (let index = 0; index < tableRowCondition; index++) {
-
-				var {
-					bidRecapID 					  = "",
-					requestItemID      			  = "",
-					itemCode           			  = "-",
-					itemName           			  = "-",
-					itemClassification 			  = "-",
-					brandName 					  = "",
-					forPurchase        			  = 0,
-					itemUom            			  = "",
-					unitCost           			  = 0,
-					totalCost          			  = 0,
-					preferredInventoryVendorPrice = 0,
-					inventoryValidationID 		  = "",
-					inventoryVendorName			  = "",
-					vendorCode 					  = ""
-				} = data["items"][index];
-
-				vendorName 	= inventoryValidationID ? (inventoryVendorName || vendorName ) : (vendorName || "-");
-				
-				if(!vendorName){
-					showNotification("warning2",`Please select a preferred vendor for this item (<strong>${itemName}</strong>) on item price list first`);
-					$("#btnSubmit").prop("disabled",true);
-					validateVendors ++;
-				}
-
-				vendorID 	= vendorID == "undefined" ? inventoryVendorName : vendorID
-				var tdVendorName 		= index == 0 ? 
-														`<td rowspan="${rowspan}" >${vendorName} 
-																<div style="font-size: 85%;" class="font-weight-bold py-2 item-vendor-code">${vendorCode}</div>      
-														</td>` : ``;
-				var tdVendorTotalCost 	= index == 0 ? `<td rowspan="${rowspan}" class="text-right">${formatAmount(vendorTotalCost, true)}</td>` : ``;
-				var tdClassification 	= !isMaterialEquipment ? `<td class="table-row-classification">${itemClassification || "-"}</td>` : "";
-				var preferredTotalCost 	= parseFloat(forPurchase) * parseFloat(preferredInventoryVendorPrice || 0);
-				
+    // ----- GET INVENTORY VENDOR OPTIONS -----
+    function getInventoryVendorOptions(classification = "", itemAssetID = 0, vendorID = 0, readOnly = false) {
+        let html = "";
+		if (!readOnly) {
+			let itemPriceList = [...getItemPriceList(classification, itemAssetID)];
+			itemPriceList.map(vendor => {
+				let {
+					inventoryVendorID,
+					inventoryVendorCode,
+					inventoryVendorName,
+					vendorPrice
+				} = vendor;
 				html += `
-				<tr class="itemTableRow" requestItemID="${requestItemID}" vendorid="${vendorID}" vendorname="${vendorName}">
-					${tdVendorName}
-					<td class="table-row-item-code">${itemCode || "-"}</td>
-					<td class="table-row-item-name">
-						${itemName && itemName != "Select Item Name" ? itemName : "-"}
-						${brandName ? `<div style="font-size: 85%;" class="font-weight-bold py-2 item-brand-name">${brandName}</div>` : "-"}
-					</td>
-					${tdClassification}
-					<td class="text-center table-row-item-for-purchase">${formatAmount(forPurchase)}</td>
-					<td class="table-row-item-uom">${itemUom || "-"}</td>
-					<td class="text-right item-unit-cost">${formatAmount(bidRecapID ? unitCost : preferredInventoryVendorPrice , true)}</td>
-					<td class="text-right totalcost">${formatAmount(bidRecapID ? totalCost : preferredTotalCost , true) }</td>
-					${tdVendorTotalCost}
-				</tr>`;	
-			}
-		}
-
-		return html;
-	}
-	// ----- END GET COST ESTIMATE REQUEST ITEMS -----
-
-
-
-
-
-	// ----- GET COST ESTIMATE REQUEST TABLE -----
-	function getCostEstimateRequestTable(item = false, index = 0) {
-		let html = "";
-		if (item) {
-			const {
-				phaseDescription = "",
-				milestones       = []
-			} = item;
-
-			let milestoneHTML = "";
-			milestones.map((milestone, index2) => {
-				const { name = "", items = [] } = milestone;
-				const tempVendor = [], vendorItemsArray = [];
-				let requestItemsHTML = "";
-				
-				items.map((x, i)=>{
-					let vendorName = x.preferredInventoryVendorName;
-					tempVendor.includes(vendorName) ? "" : tempVendor.push(vendorName);
-				});
-				tempVendor.map(vendorName=>{
-					let vendor		= vendorName;
-					let vendorID 	= "";
-					let vendorItems = items.filter(y => y.preferredInventoryVendorName == vendorName).map(y => { vendorID = y.preferredInventoryVendorID; return y; });
-					let vendorItemsCount = vendorItems.length;
-					let vendorItemsArrayTemp = {
-						"vendorID" 	:   vendorID,
-						"vendorName":	vendor, 
-						"rowspan" 	:	vendorItemsCount, 
-						"items" 	: 	vendorItems
-					};
-					vendorItemsArray.push(vendorItemsArrayTemp);
-				});
-
-				vendorItemsArray.map((item, index) => {
-					requestItemsHTML += getCostEstimateRequestItems(false, vendorItemsArray[index]);
-				});
-
-				milestoneHTML += requestItemsHTML ? `
-				<div class="milestoneContent pt-1 pb-2">
-					<div class="titleName"
-						style="color: rgb(104 158 46);
-							font-size: 1.05rem;
-							font-weight: 700;">${name}</div>
-					<table class="table table-striped requestItemTable project-phase-tables" title="${name}" isMaterialEquipment="false" isReadOnly="true" id="${(phaseDescription+index+name+index2)?.replaceAll(/[&\/\\#,+()$~%.'":*?<>{}]/g, "")?.replaceAll(" ", "")?.toLowerCase()}">
-						<thead>
-							<tr style="white-space: nowrap">
-								<th>Vendor Name</th>
-								<th>Item Code</th>
-								<th>Item Name</th>
-								<th>Item Classification</th>
-								<th>Quantity</th>
-								<th>UOM</th>
-								<th>Unit Cost</th>
-								<th>Total Cost</th>
-								<th>Total</th>
-							</tr>
-						</thead>
-						<tbody class="itemTableBody">
-							${requestItemsHTML}
-						</tbody>
-					</table>
-				</div>` : "";
+				<option value="${inventoryVendorID}"
+					vendorCode="${inventoryVendorCode}"
+					vendorName="${inventoryVendorName}"
+					vendorPrice="${vendorPrice}"
+					${inventoryVendorID == vendorID ? "selected" : ""}>
+					${inventoryVendorName}
+				</option>`;
 			})
-			html = `
-			<div class="phaseContent pt-1 pb-2">
-				<div class="phaseName"
-					style="font-weight: bold;
-						font-size: 1.4rem;
-						color: rgb(0 176 80);">${phaseDescription}</div>
-				${milestoneHTML}
-			</div>`;
 		}
-		return html;
-	}
-	// ----- END GET COST ESTIMATE REQUEST TABLE -----
+        return html;
+    }
+    // ----- END GET INVENTORY VENDOR OPTIONS -----
 
 
-	// ----- GET MATERIAL EQUIPMENT REQUEST TABLE -----
-	function getMaterialEquipmentRequestTable(item = false, index = 0) {
-		let html = "";
-		if (item) {
-			const {
-				name  = "",
-				items = []
-			} = item;
-			let requestItemsHTML = "";
-			const tempVendor = [], vendorItemsArray = [];
-			items.map((x, i)=>{
-				let vendorName = x.preferredInventoryVendorName || x.inventoryVendorName;
-				tempVendor.includes(vendorName) ? "" : tempVendor.push(vendorName);
-			});
+    // ---- GET TABLE ROW -----
+    function getTableRow(classification = "", item = false, readOnly = false) {
+        let html = "";
 
-			tempVendor.map(vendorName=>{
-				let vendor		= vendorName;
-				let vendorID 	= "";
-				let vendorItems = items.filter(y => y.preferredInventoryVendorName || y.inventoryVendorName == vendorName).map(y=>{ vendorID = y.preferredInventoryVendorID || y.inventoryVendorID; return y});
-				let vendorItemsCount = vendorItems.length;
-				let vendorItemsArrayTemp = {
-					"vendorID" 	:   vendorID,
-					"vendorName":	vendor, 
-					"rowspan" 	:	vendorItemsCount, 
-					"items" 	: 	vendorItems
-				};
-				vendorItemsArray.push(vendorItemsArrayTemp);
-			});
+		const candidateDisplay = (classification = "", itemAssetID = 0, inventoryVendorID = 0, candidateVendorID = "", candidateSelectedVendor = "", candidateVendorName = "", candidateVendorPrice = "", readOnly = false) => {
+			let vendorID1 = "0", vendorID2 = "0", vendorID3 = "0";
+			if (candidateVendorID) {
+				let vendorArr = candidateVendorID.split("|");
+				vendorID1 = vendorArr[0] || "0";
+				vendorID2 = vendorArr[1] || "0";
+				vendorID3 = vendorArr[2] || "0";
+			}
 
-			vendorItemsArray.map((item,index) => {	
-				requestItemsHTML += getCostEstimateRequestItems(true, vendorItemsArray[index]);
-			});
+			let selectedVendor1 = "0", selectedVendor2 = "0", selectedVendor3 = "0";
+			if (candidateSelectedVendor) {
+				let selectedVendorArr = candidateSelectedVendor.split("|");
+				selectedVendor1 = selectedVendorArr[0] || "0";
+				selectedVendor2 = selectedVendorArr[1] || "0";
+				selectedVendor3 = selectedVendorArr[2] || "0";
+			}
 
-			// let requestItemsHTML = items.map(item => {
-			// 	return getCostEstimateRequestItems(true, item);
-			// }).join("");
+			let vendorName1 = "-", vendorName2 = "-", vendorName3 = "-";
+			if (candidateVendorName) {
+				let vendorNameArr = candidateVendorName.split("|");
+				vendorName1 = vendorNameArr[0] || "-";
+				vendorName2 = vendorNameArr[1] || "-";
+				vendorName3 = vendorNameArr[2] || "-";
+			}
 
-			let classificationHTML = `
-			<table class="table table-striped requestItemTable" isMaterialEquipment="true" isReadOnly="true" id="${(name+index)?.replaceAll(/[&\/\\#,+()$~%.'":*?<>{}]/g, "")?.replaceAll(" ", "")?.toLowerCase()}" title="${name}">
-				<thead>
-					<tr style="white-space: nowrap">
-						<th>Vendor Name</th>
-						<th>Item Code</th>
-						<th>Item Name</th>
-						<th>Quantity</th>
-						<th>UOM</th>
-						<th>Unit Cost</th>
-						<th>Total Cost</th>
-						<th>Total</th>
+			let vendorPrice1 = "-", vendorPrice2 = "-", vendorPrice3 = "-";
+			if (candidateVendorPrice) {
+				let vendorPriceArr = candidateVendorPrice.split("|");
+				vendorPrice1 = formatAmount(vendorPriceArr[0], true) || "-";
+				vendorPrice2 = formatAmount(vendorPriceArr[1], true) || "-";
+				vendorPrice3 = formatAmount(vendorPriceArr[2], true) || "-";
+			}
+
+			let checkedVendor1 = selectedVendor1 == "1" ? "checked" : "";
+			let checkedVendor2 = selectedVendor2 == "1" ? "checked" : "";
+			let checkedVendor3 = selectedVendor3 == "1" ? "checked" : "";
+
+			let checkboxDisplay1 = `
+				<input type="checkbox"
+					name="selectedVendor"
+					classification="${classification}"
+					${checkedVendor1}>`;
+			let checkboxDisplay2 = `
+				<input type="checkbox"
+					name="selectedVendor"
+					classification="${classification}"
+					${checkedVendor2}>`;
+			let checkboxDisplay3 = `
+				<input type="checkbox"
+					name="selectedVendor"
+					classification="${classification}"
+					${checkedVendor3}>`;
+			let vendorDisplay1 = `
+				<div class="form-group mb-0" style="width: 300px;">
+					<select class="form-control validate select2"
+						name="inventoryVendorID"
+						style="width: 300px;"
+						itemAssetID="${itemAssetID}"
+						classification="${classification}"
+						required>
+						<option selected disabled>Select Vendor Name</option>
+						${getInventoryVendorOptions(classification, itemAssetID, vendorID1, readOnly)}    
+					</select>
+					<div class="d-block invalid-feedback"></div>
+				</div>`;
+			let vendorDisplay2 = `
+				<div class="form-group mb-0" style="width: 300px;">
+					<select class="form-control validate select2"
+						name="inventoryVendorID"
+						style="width: 300px;"
+						itemAssetID="${itemAssetID}"
+						classification="${classification}"
+						required>
+						<option selected disabled>Select Vendor Name</option>
+						${getInventoryVendorOptions(classification, itemAssetID, vendorID2, readOnly)}    
+					</select>
+					<div class="d-block invalid-feedback"></div>
+				</div>`;
+			let vendorDisplay3 = `
+				<div class="form-group mb-0" style="width: 300px;">
+					<select class="form-control validate select2"
+						name="inventoryVendorID"
+						style="width: 300px;"
+						itemAssetID="${itemAssetID}"
+						classification="${classification}"
+						required>
+						<option selected disabled>Select Vendor Name</option>
+						${getInventoryVendorOptions(classification, itemAssetID, vendorID3, readOnly)}    
+					</select>
+					<div class="d-block invalid-feedback"></div>
+				</div>`;
+
+			if (readOnly) {
+				checkboxDisplay1 = (checkedVendor1 && vendorID1 ==inventoryVendorID) ? `
+					<i class="fas fa-check text-success"></i>` : `
+					<i class="fas fa-times text-danger"></i>`;
+				checkboxDisplay2 = (checkedVendor2 && vendorID2 ==inventoryVendorID) ? `
+					<i class="fas fa-check text-success"></i>` : `
+					<i class="fas fa-times text-danger"></i>`;
+				checkboxDisplay3 = (checkedVendor3 && vendorID3 ==inventoryVendorID) ? `
+					<i class="fas fa-check text-success"></i>` : `
+					<i class="fas fa-times text-danger"></i>`;
+				vendorDisplay1 = `<div>${vendorName1}</div>`;
+				vendorDisplay2 = `<div>${vendorName2}</div>`;
+				vendorDisplay3 = `<div>${vendorName3}</div>`;
+			}
+
+			let html = `
+			<table class="table tableVendor">
+				<tbody>
+					<tr class="border-bottom">
+						<td class="text-center">
+							${checkboxDisplay1}
+						</td>
+						<td class="text-center">1</td>
+						<td>
+							${vendorDisplay1}
+						</td>
+						<td class="text-right vendorPrice">
+							${vendorPrice1}
+						</td>
 					</tr>
-				</thead>
-				<tbody class="itemTableBody">
-					${requestItemsHTML}
+					<tr class="border-bottom border-top">
+						<td class="text-center">
+							${checkboxDisplay2}
+						</td>
+						<td class="text-center">2</td>
+						<td>
+							${vendorDisplay2}
+						</td>
+						<td class="text-right vendorPrice">
+							${vendorPrice2}
+						</td>
+					</tr>
+					<tr class="border-top">
+						<td class="text-center">
+							${checkboxDisplay3}
+						</td>
+						<td class="text-center">3</td>
+						<td>
+							${vendorDisplay3}
+						</td>
+						<td class="text-right vendorPrice">
+							${vendorPrice3}
+						</td>
+					</tr>
 				</tbody>
 			</table>`;
-
-			html = requestItemsHTML ? `
-			<div class="classificationContent pt-1 pb-2">
-				<div class="titleName"
-					style="color: rgb(104 158 46);
-						font-size: 1.05rem;
-						font-weight: 700;">${name}</div>
-				${classificationHTML}
-			</div>` : "";
+			return html;
 		}
-		return html;
-	}
-	// ----- END GET MATERIAL EQUIPMENT REQUEST TABLE -----
+
+        if (classification == "Items") {
+            let {
+               requestItemID,
+               itemID,
+               itemCode,
+               itemBrandName,
+               itemName,
+               itemClassification,
+               itemCategory,
+               itemUom,
+               remarks,
+               forPurchase = 0,
+			   candidateVendorID       = "0|0|0",
+			   candidateSelectedVendor = "0|0|0",
+			   candidateVendorName     = "-|-|-",
+			   candidateVendorPrice    = "-|-|-",
+               inventoryVendorID,
+            } = item;
+
+            if (forPurchase && forPurchase > 0) {
+                html = `
+                <tr requestItemAssetID="${requestItemID}"
+					itemAssetID="${itemID}"
+                    class="request">
+                    <td>${itemCode || "-"}</td>
+                    <td>
+                        <div>${itemName || "-"}</div>
+                        <small>${itemBrandName}</small>
+                    </td>
+                    <td>
+                        <div>${itemClassification || "-"}</div>
+                        <small>${itemCategory}</small>
+                    </td>
+                    <td class="text-center">${itemUom || "-"}</td>
+                    <td class="text-center forPurchase">${formatAmount((forPurchase || "0"))}</td>
+                    <td>
+                        ${candidateDisplay(classification, itemID, inventoryVendorID, candidateVendorID, candidateSelectedVendor, candidateVendorName, candidateVendorPrice, readOnly)}
+                    </td>
+                    <td>${remarks || "-"}</td>
+                </tr>`;
+            }
+        } else if (classification == "Assets") {
+            let {
+				requestAssetID,
+				assetID,
+				assetCode,
+				assetBrandName,
+				assetName,
+				assetClassification,
+				assetCategory,
+				assetUom,
+				remarks,
+				forPurchase = 0,
+				candidateVendorID       = "0|0|0",
+				candidateSelectedVendor = "0|0|0",
+				candidateVendorName     = "-|-|-",
+				candidateVendorPrice    = "-|-|-",
+				inventoryVendorID,
+			 } = item;
+ 
+			 if (forPurchase && forPurchase > 0) {
+				 html = `
+				 <tr requestItemAssetID="${requestAssetID}"
+					 itemAssetID="${assetID}"
+					 class="request">
+					 <td>${assetCode || "-"}</td>
+					 <td>
+						 <div>${assetName || "-"}</div>
+						 <small>${assetBrandName}</small>
+					 </td>
+					 <td>
+						 <div>${assetClassification || "-"}</div>
+						 <small>${assetCategory}</small>
+					 </td>
+					 <td class="text-center">${assetUom || "-"}</td>
+					 <td class="text-center forPurchase">${formatAmount((forPurchase || "0"))}</td>
+					 <td>
+						${candidateDisplay(classification, assetID, inventoryVendorID, candidateVendorID, candidateSelectedVendor, candidateVendorName, candidateVendorPrice, readOnly)}
+					 </td>
+					 <td>${remarks || "-"}</td>
+				 </tr>`;
+			 }
+        }
+        return html;
+    }
+    // ---- END GET TABLE ROW -----
 
 
-	// ----- GET ITEM REQUEST -----
-	function getRequestItems(bidRecapID = 0, inventoryValidationID = 0) {
-		let result = {};
-		$.ajax({
-			method: "POST",
-			url: "bid_recap/getCostEstimateRequest",
-			data: { bidRecapID, inventoryValidationID },
-			async: false,
-			dataType: "json",
-			success: function(data) {
-				result = data;
-			}
-		})
-		return result;
-	}
-	// ----- END GET ITEM REQUEST -----
+    // ----- GET REQUEST ASSETS DISPLAY -----
+    function getRequestAssetsDisplay(data = false, readOnly = false, isRevise = false, isFromCancelledDocument = false) {
+        let {
+            bidRecapID,
+            inventoryValidationID,
+            bidRecapStatus
+        } = data && data[0];
+
+        let requestAssets = [];
+        if (bidRecapID) {
+            requestAssets = getTableData(
+                `ims_request_assets_tbl`,
+                `*`,
+                `bidRecapID = ${bidRecapID}
+                AND inventoryValidationID = ${inventoryValidationID}
+                AND purchaseRequestID IS NULL`
+            );
+        }
+
+        let tableRowHTML = "";
+        requestAssets.map(item => {
+            tableRowHTML += getTableRow("Assets", item, readOnly);
+        })
+
+		let buttonGenerateFinalQuoteDisplay = !readOnly ? `
+			<button class="btn btn-info btnGenerateFinalQuote"
+				bidRecapID="${bidRecapID}"
+				classification="Assets"
+				id="btnAssetFinalQuote"
+				revise="${isRevise}"
+				cancel="${isFromCancelledDocument}"
+				disabled>
+				<i class="fas fa-cloud-upload-alt"></i> Generate Final Quote
+			</button>` : "";
+
+        let html = `
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <div class="row align-items-center">
+                    <div class="col-md-6 col-sm-12 text-left">
+                        <h5 style="font-weight: bold;
+                            letter-spacing: 0.05rem;">ASSETS</h5>
+                    </div>
+                    <div class="col-md-6 col-sm-12 text-right">
+						${buttonGenerateFinalQuoteDisplay}
+					</div>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="w-100">
+                    <table class="table table-hover" 
+                        id="tableRequestAssets">
+                        <thead>
+                            <tr>
+                                <th>Asset Code</th>
+                                <th>Asset Name</th>
+                                <th>Asset Classification</th>
+                                <th>UOM</th>
+                                <th>Quantity</th>
+                                <th>Candidate Vendors ${!readOnly ? "<code>*</code>" : ""}</th>
+                                <th>Remarks</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${tableRowHTML}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>`;
+        return html;
+    }
+    // ----- END GET REQUEST ASSETS DISPLAY -----
 
 
-	// ----- GET COST ESTIMATE REQUEST ITEMS -----
-	function getCostEstimateRequest(inventoryValidationID = 0, bidRecapID = 0) {
-		let requestItems = getRequestItems(bidRecapID, inventoryValidationID);
+    // ----- GET REQUEST ITEMS DISPLAY -----
+    function getRequestItemsDisplay(data = false, readOnly = false, isRevise = false, isFromCancelledDocument = false) {
+        let {
+            bidRecapID,
+            inventoryValidationID,
+            bidRecapStatus
+        } = data && data[0];
 
-		let costEstimateRequestItemHTML = "", materialsEquipmentRequestItemHTML = "";
-		requestItems.phases.map((item, index) => {
-			costEstimateRequestItemHTML += getCostEstimateRequestTable(item, index);
-		})
-		requestItems.materialsEquipment.map((item, index) => {
-			materialsEquipmentRequestItemHTML += getMaterialEquipmentRequestTable(item, index);
-		})
+        let requestItems = [];
+        if (bidRecapID) {
+            requestItems = getTableData(
+                `ims_request_items_tbl`,
+                `*`,
+                `bidRecapID = ${bidRecapID}
+                AND inventoryValidationID = ${inventoryValidationID}
+                AND purchaseRequestID IS NULL`
+            );
+        }
 
-		let projectPhaseHTML = costEstimateRequestItemHTML ? `
-		<div class="w-100">
-			<hr class="pb-1">
-			<div class="text-primary font-weight-bold" style="font-size: 1.5rem;">Project Phase</div>
-			${costEstimateRequestItemHTML}
-		</div>` : "";
-		
-		let materialsEquipmentHTML = materialsEquipmentRequestItemHTML ? `
-		<div class="w-100">
-			<hr class="pb-1">
-			<div class="text-primary font-weight-bold" style="font-size: 1.5rem;">Materials and Equipment</div>
-			${materialsEquipmentRequestItemHTML}
-		</div>` : "";
+        let tableRowHTML = "";
+        requestItems.map(item => {
+            tableRowHTML += getTableRow("Items", item, readOnly);
+        })
 
-		return projectPhaseHTML+materialsEquipmentHTML;
-	}
-	// ----- END GET COST ESTIMATE REQUEST ITEMS -----
+		let buttonGenerateFinalQuoteDisplay = !readOnly ? `
+			<button class="btn btn-info btnGenerateFinalQuote"
+				bidRecapID="${bidRecapID}"
+				classification="Items"
+				id="btnItemFinalQuote"
+				revise="${isRevise}"
+				cancel="${isFromCancelledDocument}"
+				disabled>
+				<i class="fas fa-cloud-upload-alt"></i> Generate Final Quote
+			</button>` : "";
+
+        let html = `
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <div class="row align-items-center">
+                    <div class="col-md-6 col-sm-12 text-left">
+                        <h5 style="font-weight: bold;
+                            letter-spacing: 0.05rem;">ITEMS</h5>
+                    </div>
+                    <div class="col-md-6 col-sm-12 text-right">
+						${buttonGenerateFinalQuoteDisplay}
+					</div>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="w-100">
+                    <table class="table table-hover" 
+                        id="tableRequestItems">
+                        <thead>
+                            <tr>
+                                <th>Item Code</th>
+                                <th>Item Name</th>
+                                <th>Item Classification</th>
+                                <th>UOM</th>
+                                <th>Quantity</th>
+                                <th>Candidate Vendors ${!readOnly ? "<code>*</code>" : ""}</th>
+                                <th>Remarks</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${tableRowHTML}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>`;
+        return html;
+    }
+    // ----- END GET REQUEST ITEMS DISPLAY -----
 
 
-	// ----- GET MATERIALS EQUIPMENT REQUEST ITEMS -----
-	function getMaterialEquipmentRequestItems(bidRecapID = 0) {
+	// ----- GET FINAL QUOTE DATA -----
+	function getFinalQuoteData(classification = "", bidRecapID = 0) {
 		let result = [];
 		$.ajax({
-			method: "POST",
-			url: "bid_recap/getMaterialEquipmentRequestItems",
-			data: { bidRecapID },
+			method: "post",
+			url: `bid_recap/getFinalQuote`,
 			async: false,
+			data: { classification, bidRecapID },
 			dataType: "json",
 			success: function(data) {
 				result = data;
@@ -1099,262 +1169,278 @@ $(document).ready(function() {
 		})
 		return result;
 	}
-	// ----- END GET MATERIALS EQUIPMENT REQUEST ITEMS -----
+	// ----- END GET FINAL QUOTE DATA -----
 
 
-	// ----- GET TABLE MATERIALS AND EQUIPMENT -----
-	function getMaterialsEquipment(data = false, readOnly = true) {
+	// ----- GET FINAL QUOTE TABLE ROW -----
+	function getFinalQuoteTableRow(classification = "", data = false) {
 		let html = "";
-		if (data) {
+        if (classification == "Items") {
+            let {
+               requestItemID,
+               itemID,
+               itemCode,
+               itemBrandName,
+               itemName,
+               itemClassification,
+               itemCategory,
+               itemUom,
+               remarks,
+               forPurchase = 0,
+               unitCost,
+               totalCost,
+            } = data;
+
+            if (forPurchase && forPurchase > 0) {
+                html = `
+                <tr requestItemAssetID="${requestItemID}"
+					itemAssetID="${itemID}"
+                    class="request-finalquote">
+                    <td>${itemCode || "-"}</td>
+                    <td>
+                        <div>${itemName || "-"}</div>
+                        <small>${itemBrandName}</small>
+                    </td>
+                    <td>
+                        <div>${itemClassification || "-"}</div>
+                        <small>${itemCategory}</small>
+                    </td>
+                    <td class="text-center">${itemUom || "-"}</td>
+                    <td class="text-center">${formatAmount((forPurchase || "0"))}</td>
+                    <td class="text-right">${formatAmount((unitCost || "0"), true)}</td>
+                    <td class="text-right">${formatAmount((totalCost || "0"), true)}</td>
+                    <td>${remarks || "-"}</td>
+                </tr>`;
+            }
+        } else if (classification == "Assets") {
+            let {
+				requestAssetID,
+				assetID,
+				assetCode,
+				assetBrandName,
+				assetName,
+				assetClassification,
+				assetCategory,
+				assetUom,
+				remarks,
+				forPurchase = 0,
+				unitCost,
+				totalCost
+			} = data;
+ 
+			 if (forPurchase && forPurchase > 0) {
+				html = `
+				<tr requestItemAssetID="${requestAssetID}"
+					itemAssetID="${assetID}"
+					class="request-finalquote">
+					<td>${assetCode || "-"}</td>
+					<td>
+						<div>${assetName || "-"}</div>
+						<small>${assetBrandName}</small>
+					</td>
+					<td>
+						<div>${assetClassification || "-"}</div>
+						<small>${assetCategory}</small>
+					</td>
+					<td class="text-center">${assetUom || "-"}</td>
+					<td class="text-center forPurchase">${formatAmount((forPurchase || "0"))}</td>
+					<td class="text-right">${formatAmount((unitCost || "0"), true)}</td>
+					<td class="text-right">${formatAmount((totalCost || "0"), true)}</td>
+					<td>${remarks || "-"}</td>
+				</tr>`;
+			 }
+        }
+        return html;
+	}
+	// ----- END GET FINAL QUOTE TABLE ROW -----
+
+
+	// ----- GET FINAL QUOTE DISPLAY -----
+	function getFinalQuoteDisplay(classification = "", bidRecapID = 0, readOnly = false) {
+		const finalQuoteData = getFinalQuoteData(classification, bidRecapID);
+
+		let html = ``;
+		finalQuoteData.map((finalQuote, i) => {
 
 			const {
-				bidRecapID       = "",
-				inventoryValidationID          = "",
-			} = data && data[0];
+				bidRecapID,
+				inventoryVendorID,   
+				vendorName,          
+				vendorCode,          
+				vendorAddress,        
+				vendorContactDetails,
+				vendorContactPerson, 
+				finalQuoteRemarks,
+				finalQuoteTotal,
+				data = [],
+			} = finalQuote;
 
-			let disabled = readOnly ? "disabled" : "";
+			let grandTotalCost = 0;
+			let requestItemsHTML = "";
+			data.map(item => {
+				const { totalCost = 0 } = item;
+				grandTotalCost += (+totalCost);
+				requestItemsHTML += getFinalQuoteTableRow(classification, item);
+			})
 
-			let checkboxHeader = !disabled ? `
-			<th class="text-center">
-				<div class="action">
-					<input type="checkbox" class="checkboxall">
-				</div>
-			</th>` : ``;
-
-			let buttonAddDeleteRow = !disabled ? `
-			<div class="d-flex flex-column justify-content-start text-left my-2">
-				<div>
-					<button type="button" class="btn btn-primary btnAddRow" id="btnAddRow"><i class="fas fa-plus-circle"></i> Add Row</button>
-					<button type="button" class="btn btn-danger btnDeleteRow" id="btnDeleteRow"  disabled><i class="fas fa-minus-circle"></i> Delete Row/s</button>
-				</div>
-			</div>` : "";
-
-			let requestItemsData = [], requestItemHTML = "";
-			if (readOnly) {
-				if (inventoryValidationID) {
-					html = getCostEstimateRequest(inventoryValidationID, bidRecapID);
-				} else {
-					requestItemsData = getMaterialEquipmentRequestItems(bidRecapID);
-					html = `
-					<div class="w-100">
-						<hr class="pb-1">
-						<div class="text-primary font-weight-bold" style="font-size: 1.5rem;">Materials and Equipment</div>`;
-
-					if (requestItemsData.length > 0) {
-						requestItemsData.map((item, index) => {
-							html += getMaterialEquipmentRequestTable(item, index);
-						})
-					}
-
+			if (data && data.length > 0) {
+				if (classification == "Items") {
 					html += `
-					</div>`
-				}
-			} else {
-				if (bidRecapID) {
-					requestItemsData = getTableData(
-						`ims_request_items_tbl`, 
-						``, 
-						`bidRecapID = ${bidRecapID} AND (inventoryValidationID IS NULL OR inventoryValidationID = 0) AND inventoryValidationID IS NULL`);
-				}
-				if (requestItemsData.length > 0) {
-					requestItemsData.map(item => {
-						requestItemHTML += getItemRow(item, readOnly);
-					})
-				} else {
-					requestItemHTML = getItemRow(false, readOnly);
-				}
-
-
-				if (inventoryValidationID && inventoryValidationID != "0" && bidRecapID) {
-					html = getCostEstimateRequest(inventoryValidationID, bidRecapID);
-				} else {
-					html = `
-					<div class="w-100">
-						<hr class="pb-1">
-						<div class="text-primary font-weight-bold" style="font-size: 1.5rem;">Materials and Equipment Request</div>
-						<table class="table table-striped requestItemTable" isReadOnly="${readOnly}" id="tableRequestItems">
-							<thead>
-								<tr style="white-space: nowrap">
-									${checkboxHeader}
-									<th>Item Code</th>
-									<th>Item Name ${!disabled ? "<code>*</code>" : ""}</th>
-									<th>Item Classification</th>
-									<th>Quantity ${!disabled ? "<code>*</code>" : ""}</th>
-									<th>UOM</th>
-									<th>Unit Cost</th>
-									<th>Total Cost</th>
-									<th>File</th>
-									<th>Remarks</th>
-								</tr>
-							</thead>
-							<tbody class="itemTableBody">
-								${requestItemHTML}
-							</tbody>
-						</table>
-						
-						<div class="w-100 d-flex justify-content-between align-items-center py-2">
-							<div>${buttonAddDeleteRow}</div>
+					<div class="card">
+						<div class="card-header bg-primary text-white">
+							<div class="row align-items-center">
+								<div class="col-md-6 col-sm-12 text-left">
+									<h5 style="font-weight: bold;
+										letter-spacing: 0.05rem;">${vendorName} (${classification})</h5>
+								</div>
+								<div class="col-md-6 col-sm-12 text-right">
+								</div>
+							</div>
+						</div>
+						<div class="card-body">
+							<div class="w-100">
+	
+								<div class="form-group">
+									<label>Description ${!readOnly ? "<code>*</code>" : ""}</label>
+									<textarea class="form-control validate"
+										data-allowcharacters="[a-z][A-Z][0-9][ ][.][,][-][()]['][/][&]"
+										minlength="1"
+										maxlength="200"
+										name="reason"
+										required
+										rows="4"
+										classification="${classification}"
+										bidRecapID="${bidRecapID}"
+										inventoryVendorID="${inventoryVendorID}"
+										vendorName="${vendorName}"    
+										vendorCode="${vendorCode}"    
+										vendorAddress="${vendorAddress}"    
+										vendorContactDetails="${vendorContactDetails}"    
+										vendorContactPerson="${vendorContactPerson}" 
+										style="resize:none;"
+										${!readOnly ? "" : "disabled"}>${finalQuoteRemarks || ""}</textarea>
+									<div class="d-block invalid-feedback"></div>
+								</div>
+	
+								<table class="table table-hover tableFinalQuote" 
+									id="tableFinalQuoteRequestItems${Math.random().toString().replaceAll(".", "")}">
+									<thead>
+										<tr>
+											<th>Item Code</th>
+											<th>Item Name</th>
+											<th>Item Classification</th>
+											<th>UOM</th>
+											<th>Quantity</th>
+											<th>Unit Cost</th>
+											<th>Total Cost</th>
+											<th>Remarks</th>
+										</tr>
+									</thead>
+									<tbody>
+										${requestItemsHTML}
+									</tbody>
+								</table>
+							</div>
+						</div>
+						<div class="card-footer text-right">
+							<h5 class="font-weight-bold">GRAND TOTAL: <span class="text-danger grandTotalCost" style="font-size: 1.1em">${formatAmount((finalQuoteTotal || grandTotalCost), true)}</span></h5>
+						</div>
+					</div>`;
+				} else if (classification == "Assets") {
+					html += `
+					<div class="card">
+						<div class="card-header bg-primary text-white">
+							<div class="row align-items-center">
+								<div class="col-md-6 col-sm-12 text-left">
+									<h5 style="font-weight: bold;
+										letter-spacing: 0.05rem;">${vendorName} (${classification})</h5>
+								</div>
+								<div class="col-md-6 col-sm-12 text-right">
+								</div>
+							</div>
+						</div>
+						<div class="card-body">
+							<div class="w-100">
+	
+								<div class="form-group">
+									<label>Description ${!readOnly ? "<code>*</code>" : ""}</label>
+									<textarea class="form-control validate"
+										data-allowcharacters="[a-z][A-Z][0-9][ ][.][,][-][()]['][/][&]"
+										minlength="1"
+										maxlength="200"
+										name="reason"
+										required
+										rows="4"
+										classification="${classification}"
+										bidRecapID="${bidRecapID}"
+										inventoryVendorID="${inventoryVendorID}"
+										vendorName="${vendorName}"    
+										vendorCode="${vendorCode}"    
+										vendorAddress="${vendorAddress}"    
+										vendorContactDetails="${vendorContactDetails}"    
+										vendorContactPerson="${vendorContactPerson}" 
+										style="resize:none;"
+										${!readOnly ? "" : "disabled"}>${finalQuoteRemarks || ""}</textarea>
+									<div class="d-block invalid-feedback"></div>
+								</div>
+	
+								<table class="table table-hover tableFinalQuote" 
+									id="tableFinalQuoteRequestAssets${Math.random().toString().replaceAll(".", "")}">
+									<thead>
+										<tr>
+											<th>Asset Code</th>
+											<th>Asset Name</th>
+											<th>Asset Classification</th>
+											<th>UOM</th>
+											<th>Quantity</th>
+											<th>Unit Cost</th>
+											<th>Total Cost</th>
+											<th>Remarks</th>
+										</tr>
+									</thead>
+									<tbody>
+										${requestItemsHTML}
+									</tbody>
+								</table>
+							</div>
+						</div>
+						<div class="card-footer text-right">
+							<h5 class="font-weight-bold">GRAND TOTAL: <span class="text-danger grandTotalCost" style="font-size: 1.1em">${formatAmount((finalQuoteTotal || grandTotalCost), true)}</span></h5>
 						</div>
 					</div>`;
 				}
 			}
 			
-		} else {
-			html = `
-			<div class="w-100 text-center mb-5">
-				<img src="${base_url}assets/modal/please-select.gif"
+		})
+		return html;
+	}
+	// ----- END GET FINAL QUOTE DISPLAY -----
+
+
+	// ----- NO DATA AVAILABLE DISPLAY -----
+	function noDataAvailableDisplay() {
+		const hasDisplay = (elementID) => {
+			return $(`#${elementID}`).text().replaceAll("\n", "").trim().length > 0;
+		}
+		const itemFinalQuote  = hasDisplay("itemFinalQuoteDisplay");
+		const assetFinalQuote = hasDisplay("assetFinalQuoteDisplay");
+		if (!itemFinalQuote && !assetFinalQuote) {
+			let html = `
+			<div class="w-100 h-100 d-flex justify-content-center align-items-center flex-column">
+                <img src="${base_url}assets/modal/no-data.gif"
 					style="max-width: 300px;
 					width: auto;
 					min-width: 100px;
 					height: auto;"
-					alt="Please Select Reference No.">
-				<div class="h4">Please Select Reference No.</div>
-			</div>`
-		}
-		return html;
-	}
-	// ----- END GET TABLE MATERIALS AND EQUIPMENT -----
-
-
-	// ----- SELECT INVENTORY VALIDATION -----
-	$(document).on("change", `[name="inventoryValidationID"]`, function() {
-		const inventoryValidationID = $(this).val();
-		
-		const timelineBuilderID = $(`option:selected`, this).attr("timelineBuilderID") || "-";
-		const projectCode     	= $(`option:selected`, this).attr("projectCode") || "-";
-		const projectName     	= $(`option:selected`, this).attr("projectName") || "-";
-		const projectCategory 	= $(`option:selected`, this).attr("projectCategory") || "-";
-		const clientName      	= $(`option:selected`, this).attr("clientName") || "-";
-		const clientAddress   	= $(`option:selected`, this).attr("clientAddress") || "-";
-
-		$(`[name="projectCode"]`).val(projectCode);
-		$(`[name="projectName"]`).val(projectName);
-		$(`[name="projectCategory"]`).val(projectCategory);
-		$(`[name="clientName"]`).val(clientName);
-		$(`[name="clientAddress"]`).val(clientAddress);
-
-		$("#tableRequestItemContent").html(preloader);
-		// if (inventoryValidationID == "0") {
-		// 	setTimeout(() => {
-		// 		let materialsEquipment = getMaterialsEquipment([{inventoryValidationID}]);
-		// 		$(`#tableRequestItemContent`).html(materialsEquipment);
-		// 		initDataTables();
-		// 		initAll();
-		// 		updateTableItems();
-		// 		$(`#costSummary`).html(getCostSummary(true));
-		// 	}, 200);
-		// } else {
-			setTimeout(() => {
-				initDataTables();
-				initAll();
-				updateTableItems();
-					setTimeout(()=>{
-						let requestItems = getCostEstimateRequest(inventoryValidationID, 0);
-						$(`#tableRequestItemContent`).html(requestItems);
-						$(`#costSummary`).html(getCostSummary());
-					}, 500);
-					
-					if(validateVendors > 0){
-						$("#btnSubmit").prop("disabled", true);
-					}else{
-						$("#btnSubmit").prop("disabled", false);
-					}
-			}, 200);
-		// }
-
-	})
-	// ----- END SELECT INVENTORY VALIDATION -----
-
-
-	// ----- GET COST SUMMARY -----
-	function getCostSummary(isOnCreation = false, display = true) {
-		let costSummary = [], items = [];
-		if (isOnCreation) {
-			$(`.itemTableRow .classification`).each(function() {
-				$parent    = $(this).closest("tr");
-				const name = $(this).attr("name");
-				let totalCost = $parent.find(".totalcost").text() || "0";
-					totalCost = getNonFormattedAmount(totalCost);
-				let temp = { name, totalCost };
-				name && name != "-" && items.push(temp);
-			})
-	
-			const isExisting = (inName = "") => {
-				let flag = false;
-				costSummary.map(summary => {
-					const { name } = summary;
-					if (inName === name) {
-						flag = true;
-					}
-				})
-				return flag;
-			}
-	
-			const getTotalCost = (inName = "") => {
-				return items
-					.filter(cls => cls.name == inName)
-					.map(cls => cls.totalCost)
-					.reduce((a, b) => a + b, 0);
-			}
-	
-			items.map(cls => {
-				const { name } = cls;
-				if (!isExisting(name)) {
-					let temp = {
-						name,
-						totalCost: getTotalCost(name)
-					};
-					costSummary.push(temp);
-				}
-			})
+					alt="No data available.">
+                <span class="font-weight-bold">No data available.</span>
+            </div>`;
+			$("#noDataAvailableDisplay").html(html);
 		} else {
-			$(`table.requestItemTable .itemTableBody`).each(function() {
-				$parent = $(this).closest(".requestItemTable");
-				const name = $parent.attr("title");
-				let totalCost = 0;
-				$(`td.totalcost`, this).each(function() {
-					const temp = getNonFormattedAmount($(this).text());
-					totalCost += temp;
-				})
-				let temp = { name, totalCost };
-				costSummary.push(temp);
-			})
+			$("#noDataAvailableDisplay").empty();
 		}
-		
-
-		let html = `
-		<div class="row py-2">
-			<div class="offset-lg-6 col-lg-6 offset-md-3 col-md-9 col-sm-12 pb-2 pt-3">`;
-		let	grandTotal = 0;
-		costSummary.map((summary, i) => {
-			const bottom = costSummary.length == i ? "pb-2" : "";
-			const { name = "-", totalCost = 0 } = summary;
-			html += `
-			<div class="row ${bottom}" style="font-size: 1.1rem;">
-				<div class="col-6 col-lg-7 text-left">${name || "-"}</div>
-				<div class="col-6 col-lg-5 text-right text-dark" style="font-size: 1.05em" class="costSummary" name="${name}">
-					${formatAmount(totalCost, true)}
-				</div>
-			</div>`;
-			grandTotal += totalCost;
-		})
-
-		let grandTotalHTML = costSummary.length > 0 ? `
-		<div class="row pt-1" style="font-size: 1.3rem;; border-bottom: 3px double black; border-top: 1px solid black">
-			<div class="col-6 col-lg-7 text-left font-weight-bolder">Grand Total:</div>
-			<div class="col-6 col-lg-5 text-right text-danger font-weight-bolder" id="bidRecapGrandTotal" style="font-size: 1.05em">
-				${formatAmount(grandTotal, true)}
-			</div>
-		</div>` : "";
-
-		html += `
-				${grandTotalHTML}
-			</div>
-		</div>`;
-
-		return display ? html : grandTotal;
 	}
-	// ----- END GET COST SUMMARY -----
+	// ----- END NO DATA AVAILABLE DISPLAY -----
 
 
     // ----- FORM CONTENT -----
@@ -1362,23 +1448,33 @@ $(document).ready(function() {
 		$("#page_content").html(preloader);
 		readOnly = isRevise ? false : readOnly;
 		let {
-			bidRecapID       		= "",
-			reviseBidRecapID 		= "",
-			employeeID              = "",
-			inventoryValidationID   = "",
-			projectCode             = "",
-			projectName             = "",
-			projectCategory         = "",
-			clientName              = "",
-			clientAddress           = "",
-			bidRecapReason   		= "",
-			bidRecapRemarks  		= "",
-			approversID             = "",
-			approversStatus         = "",
-			approversDate           = "",
-			bidRecapStatus   		= false,
-			submittedAt             = false,
-			createdAt               = false,
+            bidRecapID,
+            bidRecapCode,
+            reviseBidRecapID,
+            reviseBidRecapCode,
+            inventoryValidationID,
+            inventoryValidationCode,
+            timelineBuilderID,
+            projectCode,
+            projectName,
+            projectCategory,
+            clientCode,
+            clientName,
+            clientAddress,
+            employeeID,
+            bidRecapReason,
+            approversID,
+            approversDate,
+            approversStatus,
+            bidRecapStatus,
+            bidRecapRemarks,
+			itemFinalQuoteStatus  = "0",
+			assetFinalQuoteStatus = "0",
+            submittedAt,
+            createdBy,
+            updatedBy,
+            createdAt,
+            updatedAt,
 		} = data && data[0];
 
 		// ----- GET EMPLOYEE DATA -----
@@ -1391,13 +1487,20 @@ $(document).ready(function() {
 
 		readOnly ? preventRefresh(false) : preventRefresh(true);
 
-		$("#btnBack").attr("bidRecapID", encryptString(bidRecapID));
-		$("#btnBack").attr("status", bidRecapStatus);
-		$("#btnBack").attr("employeeID", employeeID);
-		$("#btnBack").attr("cancel", isFromCancelledDocument);
+		$(".btnBack").attr("bidRecapID", encryptString(bidRecapID));
+		$(".btnBack").attr("status", bidRecapStatus);
+		$(".btnBack").attr("employeeID", employeeID);
+		$(".btnBack").attr("cancel", isFromCancelledDocument);
+		$(".btnBack").attr("bidRecapCode", bidRecapCode);
 
-		let disabled          = readOnly ? "disabled" : "";
-		let button = formButtons(data, isRevise, isFromCancelledDocument);
+		let disabled = readOnly ? "disabled" : "";
+		let button   = formButtons(data, isRevise, isFromCancelledDocument);
+
+		let finalQuoteTitle = itemFinalQuoteStatus == "0" || assetFinalQuoteStatus == "1" ? `
+			<div class="pb-4">
+				<h3 class="font-weight-bold">FINAL QUOTE: </h3>
+				<h5><b class="font-weight-bold text-warning">NOTE: </b><span>All final quote are based on the selected vendors in each and every items.</span></h5>
+			</div>` : "";
 
 		let reviseDocumentNo    = isRevise ? bidRecapID : reviseBidRecapID;
 		let documentHeaderClass = isRevise || reviseBidRecapID ? "col-lg-4 col-md-4 col-sm-12 px-1" : "col-lg-2 col-md-6 col-sm-12 px-1";
@@ -1408,7 +1511,7 @@ $(document).ready(function() {
 				<div class="body">
 					<small class="text-small text-muted font-weight-bold">Revised Document No.</small>
 					<h6 class="mt-0 text-danger font-weight-bold">
-						${getFormCode("BRF", createdAt, reviseDocumentNo)}
+						${(reviseBidRecapCode || (isRevise && bidRecapCode)) || "---"}
 					</h6>      
 				</div>
 			</div>
@@ -1422,7 +1525,7 @@ $(document).ready(function() {
                     <div class="body">
                         <small class="text-small text-muted font-weight-bold">Document No.</small>
                         <h6 class="mt-0 text-danger font-weight-bold">
-							${bidRecapID && !isRevise ? getFormCode("BRF", createdAt, bidRecapID) : "---"}
+							${bidRecapID && !isRevise ? bidRecapCode : "---"}
 						</h6>      
                     </div>
                 </div>
@@ -1432,7 +1535,7 @@ $(document).ready(function() {
                     <div class="body">
                         <small class="text-small text-muted font-weight-bold">Status</small>
                         <h6 class="mt-0 font-weight-bold">
-							${bidRecapStatus && !isRevise ? getStatusStyle(bidRecapStatus) : "---"}
+							${bidRecapStatus && !isRevise ? getStatusStyle(bidRecapStatus, true) : "---"}
 						</h6>      
                     </div>
                 </div>
@@ -1487,19 +1590,15 @@ $(document).ready(function() {
 
             <div class="col-md-3 col-sm-12">
                 <div class="form-group">
-                    <label>Reference No. ${!disabled ? "<code>*</code>" : ""}</label>
-					<select class="form-control validate select2"
-                        name="inventoryValidationID"
-                        id="inventoryValidationID"
-                        style="width: 100%"
-                        required ${inventoryValidationID ? "disabled" : ""}
-						>
-                        <option selected disabled>Select Reference No.</option>
-                        ${getInventoryValidationList(inventoryValidationID, bidRecapStatus)}
-                    </select>
-                    <div class="d-block invalid-feedback" id="invalid-inventoryValidationID"></div>
+                    <label>Reference No.</label>
+					<input type="text"
+						name="bidRecapID"
+						class="form-control validate"
+						disabled
+						value="${inventoryValidationCode || "-"}">
                 </div>
             </div>
+
             <div class="col-md-3 col-sm-12">
                 <div class="form-group">
                     <label>Project Code</label>
@@ -1510,6 +1609,7 @@ $(document).ready(function() {
 						value="${projectCode || "-"}">
                 </div>
             </div>
+
             <div class="col-md-3 col-sm-12">
                 <div class="form-group">
                     <label>Project Name</label>
@@ -1518,9 +1618,9 @@ $(document).ready(function() {
 						name="projectName" 
 						disabled 
 						value="${projectName || "-"}">
-                    <div class="d-block invalid-feedback" id="invalid-projectName"></div>
                 </div>
             </div>
+
             <div class="col-md-3 col-sm-12">
                 <div class="form-group">
                     <label>Project Category</label>
@@ -1529,10 +1629,21 @@ $(document).ready(function() {
 						name="projectCategory" 
 						disabled 
 						value="${projectCategory || "-"}">
-                    <div class="d-block invalid-feedback" id="invalid-projectCategory"></div>
                 </div>
             </div>
-            <div class="col-md-4 col-sm-12">
+
+            <div class="col-md-3 col-sm-12">
+                <div class="form-group">
+                    <label>Client Code</label>
+                    <input type="text" 
+						class="form-control" 
+						name="clientCode" 
+						disabled 
+						value="${clientCode || "-"}">
+                </div>
+            </div>
+
+            <div class="col-md-3 col-sm-12">
                 <div class="form-group">
                     <label>Client Name</label>
                     <input type="text" 
@@ -1542,7 +1653,8 @@ $(document).ready(function() {
 						value="${clientName || "-"}">
                 </div>
             </div>
-            <div class="col-md-8 col-sm-12">
+
+            <div class="col-md-6 col-sm-12">
                 <div class="form-group">
                     <label>Client Address</label>
                     <input type="text" 
@@ -1552,6 +1664,7 @@ $(document).ready(function() {
 						value="${clientAddress || "-"}">
                 </div>
             </div>
+
             <div class="col-md-4 col-sm-12">
                 <div class="form-group">
                     <label>Prepared By</label>
@@ -1561,6 +1674,7 @@ $(document).ready(function() {
 						value="${employeeFullname}">
                 </div>
             </div>
+
             <div class="col-md-4 col-sm-12">
                 <div class="form-group">
                     <label>Department</label>
@@ -1581,7 +1695,7 @@ $(document).ready(function() {
             </div>
             <div class="col-md-12 col-sm-12">
                 <div class="form-group">
-                    <label>Description ${!disabled ? "<code>*</code>" : ""}</label>
+                    <label>Description </label>
                     <textarea class="form-control validate"
                         data-allowcharacters="[a-z][A-Z][0-9][ ][.][,][-][()]['][/][&]"
                         minlength="1"
@@ -1591,33 +1705,64 @@ $(document).ready(function() {
                         required
                         rows="4"
                         style="resize:none;"
-						${disabled}>${bidRecapReason ?? ""}</textarea>
+						disabled>${bidRecapReason || ""}</textarea>
                     <div class="d-block invalid-feedback" id="invalid-bidRecapReason"></div>
                 </div>
             </div>
 
-            <div class="col-sm-12" id="tableRequestItemContent">
-                ${inventoryValidationID ? getCostEstimateRequest(inventoryValidationID, bidRecapStatus < 3 ? bidRecapID : 0  ) : getMaterialsEquipment(data, readOnly)}
+            <div class="col-12 mt-4">
+                ${getRequestItemsDisplay(data, readOnly, isRevise, isFromCancelledDocument)}
+                ${getRequestAssetsDisplay(data, readOnly, isRevise, isFromCancelledDocument)}
             </div>
 
-			<div class="col-12" id="costSummary"></div>
+			<div class="col-12 border-top pt-4" id="tableFinalQuoteParent">
+				<div id="finalQuoteTitle">
+					${finalQuoteTitle}
+				</div>
+				<div id="noDataAvailableDisplay"></div>
+				<div id="itemFinalQuoteDisplay">
+					${getFinalQuoteDisplay("Items", bidRecapID, readOnly)}
+				</div>
+				<div id="assetFinalQuoteDisplay">
+					${getFinalQuoteDisplay("Assets", bidRecapID, readOnly)}
+				</div>
+			</div>
 
             <div class="col-md-12 text-right mt-3">
                 ${button}
             </div>
         </div>
 		<div class="approvers">
-			${!isRevise ? getApproversStatus(approversID, approversStatus, approversDate) : ""}
+			${!isRevise  ? getApproversStatus(approversID, approversStatus, approversDate) : ""}
 		</div>`;
 
 		setTimeout(() => {
 			$("#page_content").html(html);
 			initDataTables();
-			updateTableItems();
 			initAll();
 			
-			
-			$("#costSummary").html(getCostSummary(!readOnly));
+			updateTableItems();
+			updateInvetoryVendorDisplay(readOnly);
+			updateButtonGenerateFinalQuote();
+			noDataAvailableDisplay();
+			// updateInventoryItemOptions();
+
+			// initAmount("#discount");
+			// initAmount("#lessEwt");
+			// initAmount("#vat");
+
+			// const disablePreviousDateOptions = {
+			// 	autoUpdateInput: false,
+			// 	singleDatePicker: true,
+			// 	showDropdowns: true,
+			// 	autoApply: true,
+			// 	locale: {
+			// 		format: "MMMM DD, YYYY",
+			// 	},
+			// 	minDate: moment(new Date).format("MMMM DD, YYYY"),
+			// 	startDate: moment(shippingDate || new Date),
+			// }
+			// initDateRangePicker("#shippingDate", disablePreviousDateOptions);
 
 			// ----- NOT ALLOWED FOR UPDATE -----
 			if (!allowedUpdate) {
@@ -1626,19 +1771,10 @@ $(document).ready(function() {
 						$(this).attr("disabled", true);
 					}
 				})
-				$('#btnBack').attr("status", "2");
+				$('.btnBack').attr("status", "2");
 				$(`#btnSubmit, #btnRevise, #btnCancel, #btnCancelForm, .btnAddRow, .btnDeleteRow`).hide();
 			}
 			// ----- END NOT ALLOWED FOR UPDATE -----
-
-
-			// ------- VALIDATE VENDORS;
-				if(validateVendors > 0){
-					$("#btnSubmit").prop("disabled", true);
-				}else{
-					$("#btnSubmit").prop("disabled", false);
-				}
-			return html;
 		}, 300);
 	}
 	// ----- END FORM CONTENT -----
@@ -1662,7 +1798,7 @@ $(document).ready(function() {
             </div>`;
 			$("#page_content").html(html);
 
-			headerButton(true, "Add Bid Recap");
+			headerButton(true, "");
 			headerTabContent();
 			myFormsContent();
 			updateURL();
@@ -1677,217 +1813,306 @@ $(document).ready(function() {
 	// ----- END PAGE CONTENT -----
 
 
-	// ----- GET PURCHASE REQUEST DATA -----
-	function getBidRecapData(action = "insert", method = "submit", status = "1", id = null, currentStatus = "0", isObject = false) {
+    // ----- UPDATE INVENTORY VENDOR OPTIONS -----
+    function updateInventoryVendorOptions(classification = "", itemAssetID = 0, executeOnce = false) {
+        let vendorIDArr = [];
+		let elementID   = [];
 
-		/**
-		 * ----- ACTION ---------
-		 *    > insert
-		 *    > update
-		 * ----- END ACTION -----
-		 * 
-		 * ----- STATUS ---------
-		 *    0. Draft
-		 *    1. For Approval
-		 *    2. Approved
-		 *    3. Denied
-		 *    4. Cancelled
-		 * ----- END STATUS -----
-		 * 
-		 * ----- METHOD ---------
-		 *    > submit
-		 *    > save
-		 *    > deny
-		 *    > approve
-		 * ----- END METHOD -----
-		 */
-
-		let formData = new FormData;
-		const approversID = method != "approve" && moduleApprover;
-
-		if (id) {
-			formData.append("bidRecapID", id);
-
-			if (status != "2") {
-				formData.append("bidRecapStatus", status);
+		$(`[classification="${classification}"][itemAssetID="${itemAssetID}"][name="inventoryVendorID"]`).each(function() {
+			const vendorID = $(this).val();
+			vendorIDArr.push(vendorID);
+			elementID.push(`#${this.id}`);
+			if (vendorID && vendorID != null && !executeOnce) {
+				$(this).trigger("change");
 			}
-		}
+		}) 
 
-		formData.append("action", action);
-		formData.append("method", method);
-		formData.append("updatedBy", sessionID);
+		let vendorList = [...getItemPriceList(classification, itemAssetID)];
+		elementID.map((element, index) => {
+			let html = `<option selected disabled>Select Vendor Name</option>`;
+
+            vendorList
+                .filter(item => !vendorIDArr.includes(item.inventoryVendorID) || item.inventoryVendorID == vendorIDArr[index])
+                .map(vendor => {
+
+                let {
+                    inventoryVendorID,
+                    inventoryVendorCode,
+                    inventoryVendorName,
+                    vendorPrice
+                } = vendor;
+                html += `
+                <option value="${inventoryVendorID}"
+                    vendorCode="${inventoryVendorCode}"
+                    vendorName="${inventoryVendorName}"
+                    vendorPrice="${vendorPrice}"
+                    ${inventoryVendorID == vendorIDArr[index] ? "selected" : ""}>
+                    ${inventoryVendorName}
+                </option>`;
+            });
+
+            $(element).html(html);
+        })
+    }
+    // ----- END UPDATE INVENTORY VENDOR OPTIONS -----
+
+
+	// ----- UPDATE INVENTORY VENDOR DISPLAY -----
+	function updateInvetoryVendorDisplay(readOnly = false) {
+		$(`#tableRequestItems tbody tr.request`).each(function() {
+			const itemAssetID = $(this).attr("itemAssetID");
+			!readOnly && updateInventoryVendorOptions("Items", itemAssetID);
+		})
+		$(`#tableRequestAssets tbody tr.request`).each(function() {
+			const itemAssetID = $(this).attr("itemAssetID");
+			!readOnly && updateInventoryVendorOptions("Assets", itemAssetID);
+		})
+	}
+	// ----- END UPDATE INVENTORY VENDOR DISPLAY -----
+
+
+	// ----- GET REQUEST ITEM ASSET DATA -----
+	function getRequestItemAssetData(classification = "") {
+		let data = [];
+		if (classification == "Items") {
+			$(`#tableRequestItems tbody tr.request`).each(function(i) {
+				const requestItemAssetID = $(this).attr("requestItemAssetID");
+	
+				let vendorArr = []; 
+				let selectedVendorArr = [];
+				let vendorNameArr = [];
+				let vendorPriceArr = [];
+				$(`[name="selectedVendor"]`, this).each(function() {
+					const selectedVendorID = $(this).prop("checked") ? 1 : 0;
+					selectedVendorArr.push(selectedVendorID);
+				})
+				selectedVendorArr = selectedVendorArr.join("|");
+				$(`[name="inventoryVendorID"]`, this).each(function() {
+					const inventoryVendorID = $(this).val() || 0;
+					vendorArr.push(inventoryVendorID);
+				})
+				vendorArr = vendorArr.join("|");
+				$(`[name="inventoryVendorID"]`, this).each(function() {
+					const vendorName = $(`option:selected`, this).attr("vendorName") || "";
+					vendorNameArr.push(vendorName);
+				})
+				vendorNameArr = vendorNameArr.join("|");
+				$(`[name="inventoryVendorID"]`, this).each(function() {
+					const vendorPrice = $(`option:selected`, this).attr("vendorPrice") || "";
+					vendorPriceArr.push(vendorPrice);
+				})
+				vendorPriceArr = vendorPriceArr.join("|");
+	
+				$vendorParent = $(`[name="selectedVendor"]:checked`, this).closest("tr");
+				const vendorID    = $vendorParent.find(`[name="inventoryVendorID"]`).val() || 0;
+				const vendorCode  = $vendorParent.find(`[name="inventoryVendorID"] option:selected`).attr("vendorCode") || "";
+				const vendorName  = $vendorParent.find(`[name="inventoryVendorID"] option:selected`).attr("vendorName") || "";
+				const vendorPrice = +$vendorParent.find(`[name="inventoryVendorID"] option:selected`).attr("vendorPrice") || 0;
+				const forPurchase = getNonFormattedAmount($(this).closest("tr").find(`td.forPurchase`).text()) || 0;
+				const totalCost   = vendorPrice * forPurchase;                
+	
+	
+				let temp = { 
+					requestItemAssetID,
+					candidateVendorID:       vendorArr,
+					candidateSelectedVendor: selectedVendorArr,
+					candidateVendorName:     vendorNameArr,
+					candidateVendorPrice:    vendorPriceArr,
+					inventoryVendorID:       vendorID,
+					inventoryVendorCode:     vendorCode,
+					inventoryVendorName:     vendorName,
+					unitCost:                vendorPrice,
+					totalCost,
+					forPurchase
+				};
+				data.push(temp);
+			})
+		} else if (classification == "Assets") {
+			$(`#tableRequestAssets tbody tr.request`).each(function(i) {
+                const requestItemAssetID = $(this).attr("requestItemAssetID");
+
+				let vendorArr         = []; 
+				let selectedVendorArr = [];
+				let vendorNameArr     = [];
+				let vendorPriceArr    = [];
+				$(`[name="selectedVendor"]`, this).each(function() {
+					const selectedVendorID = $(this).prop("checked") ? 1 : 0;
+					selectedVendorArr.push(selectedVendorID);
+				})
+				selectedVendorArr = selectedVendorArr.join("|");
+				$(`[name="inventoryVendorID"]`, this).each(function() {
+					const inventoryVendorID = $(this).val() || 0;
+					vendorArr.push(inventoryVendorID);
+				})
+				vendorArr = vendorArr.join("|");
+				$(`[name="inventoryVendorID"]`, this).each(function() {
+					const vendorName = $(`option:selected`, this).attr("vendorName") || "";
+					vendorNameArr.push(vendorName);
+				})
+				vendorNameArr = vendorNameArr.join("|");
+				$(`[name="inventoryVendorID"]`, this).each(function() {
+					const vendorPrice = $(`option:selected`, this).attr("vendorPrice") || "";
+					vendorPriceArr.push(vendorPrice);
+				})
+				vendorPriceArr = vendorPriceArr.join("|");
+	
+				$vendorParent = $(`[name="selectedVendor"]:checked`, this).closest("tr");
+				const vendorID    = $vendorParent.find(`[name="inventoryVendorID"]`).val() || 0;
+				const vendorCode  = $vendorParent.find(`[name="inventoryVendorID"] option:selected`).attr("vendorCode") || "";
+				const vendorName  = $vendorParent.find(`[name="inventoryVendorID"] option:selected`).attr("vendorName") || "";
+				const vendorPrice = +$vendorParent.find(`[name="inventoryVendorID"] option:selected`).attr("vendorPrice") || 0;
+				const forPurchase = getNonFormattedAmount($(this).closest("tr").find(`td.forPurchase`).text()) || 0;
+				const totalCost   = vendorPrice * forPurchase;                 
+
+
+                let temp = { 
+                    requestItemAssetID,
+					candidateVendorID:       vendorArr,
+					candidateSelectedVendor: selectedVendorArr,
+					candidateVendorName:     vendorNameArr,
+					candidateVendorPrice:    vendorPriceArr,
+                    inventoryVendorID:       vendorID,
+                    inventoryVendorCode:     vendorCode,
+                    inventoryVendorName:     vendorName,
+                    unitCost:                vendorPrice,
+                    totalCost,
+                    forPurchase
+                };
+                data.push(temp);
+			})
+		}
+		return data;
+	}
+	// ----- END GET REQUEST ITEM ASSET DATA -----
+
+
+	// ----- GET REQUEST FINAL QUOTE DATA -----
+	function getRequestFinalQuoteData() {
+		let data = [];
+		$(`[name="reason"]`).each(function() {
+			const reason               = $(this).val()?.trim();
+			const classification       = $(this).attr("classification");
+			const bidRecapID           = $(this).attr("bidRecapID");
+			const inventoryVendorID    = $(this).attr("inventoryVendorID");
+			const vendorCode           = $(this).attr("vendorCode");
+			const vendorName           = $(this).attr("vendorName");
+			const vendorAddress        = $(this).attr("vendorAddress");
+			const vendorContactDetails = $(this).attr("vendorContactDetails");
+			const vendorContactPerson  = $(this).attr("vendorContactPerson");
+
+			$parent = $(this).closest(".card");
+			const grandTotalCost = getNonFormattedAmount($parent.find(`.grandTotalCost`).text() || "0");
+
+			let temp = {
+				bidRecapID,
+				classification,
+				inventoryVendorID,
+				vendorCode,
+				vendorName,
+				vendorAddress,
+				vendorContactDetails,
+				vendorContactPerson,
+				finalQuoteRemarks: reason,
+				finalQuoteTotal:   grandTotalCost
+			}
+			data.push(temp);
+		})
+		return data;
+	}
+	// ----- END GET REQUEST FINAL QUOTE DATA -----
+
+
+    // ----- GET BID RECAP DATA -----
+	function getBidRecapData(action = "insert", method = "submit", status = "1", id = null, currentStatus = "0") {
+
+        let data = { 
+			items:      getRequestItemAssetData("Items"), 
+			assets:     getRequestItemAssetData("Assets"),
+			finalquote: getRequestFinalQuoteData(),
+			employeeID: sessionID
+		};
+        const approversID = method != "approve" && moduleApprover;
+
+        if (id) {
+            data.bidRecapID = id;
+
+            if (status != "2") {
+                data.bidRecapStatus = status;
+            }
+        }
+
+		data.action    = action;
+		data.method    = method;
+		data.updatedBy = sessionID;
 
 		if (currentStatus == "0" && method != "approve") {
-			const inventoryValidationID = $("[name=inventoryValidationID]").val();
-			const timelineBuilderID 	= $("[name=inventoryValidationID] option:selected").attr("timelineBuilderID");
-			const purchaseRequestID 	= $("[name=inventoryValidationID] option:selected").attr("purchaseRequestID");
-			const projectCode   		= $(`[name="projectCode"]`).val();
-			const projectName   		= $(`[name="projectName"]`).val();
-			const projectCategory 		= $(`[name="projectCategory"]`).val();
-			const clientName    		= $(`[name="clientName"]`).val();
-			const clientAddress 		= $(`[name="clientAddress"]`).val();
-			const bidRecapGrandTotal 	= $("#bidRecapGrandTotal").text().replace("₱ ","").replaceAll(",","") || $("#bidRecapGrandTotal").text().replace("₱ ","");
-			formData.append("employeeID", sessionID);
-			formData.append("inventoryValidationID", inventoryValidationID);
-			formData.append("timelineBuilderID", timelineBuilderID);
-			formData.append("purchaseRequestID", purchaseRequestID);
-			formData.append("projectCode", projectCode);
-			formData.append("projectName", projectName);
-			formData.append("projectCategory", projectCategory);
-			formData.append("clientName", clientName);
-			formData.append("clientAddress", clientAddress);
-			formData.append("bidRecapReason", $("[name=bidRecapReason]").val()?.trim());
-			formData.append("bidRecapGrandTotal", bidRecapGrandTotal );
 
 			if (action == "insert") {
-				formData.append("createdBy", sessionID);
-				formData.append("createdAt", dateToday());
+				data.createdBy = sessionID;
+				data.createdAt = dateToday();
 			} else if (action == "update") {
-				formData.append("bidRecapID", id);
+				data.bidRecapID = id;
 			}
 
 			if (method == "submit") {
-				formData.append("submittedAt", dateToday());
+				data.submittedAt = dateToday();
 				if (approversID) {
-					formData.append("approversID", approversID);
-					formData.append("bidRecapStatus", 1);
+					data.approversID = approversID;
+					data.bidRecapStatus = 1;
 				} else {  // AUTO APPROVED - IF NO APPROVERS
-					formData.append("approversID", sessionID);
-					formData.append("approversStatus", 2);
-					formData.append("approversDate", dateToday());
-					formData.append("bidRecapStatus", 2);
+					data.approversID = sessionID;
+					data.approversStatus = 2;
+					data.approversDate = dateToday();
+					data.bidRecapStatus = 2;
 				}
 			}
-
-			$(".itemTableRow").each(function(i, obj) {
-				const requestItemID = $(this).attr("requestitemid");
-				const categoryType 	= $(this).find(".table-row-classification") ? "Project Phase" : "Materials and Equipment";
-				const vendorID 		= $(this).attr("vendorid");
-				const vendorName 	= $(this).attr("vendorname");
-				const unitCost		= $(this).find(".item-unit-cost").text().replace("₱ ","").replaceAll(",","") || $(this).find(".item-unit-cost").text().replace("₱ ","");
-				const totalCost		= $(this).find(".totalcost").text().replace("₱ ","").replaceAll(",","") || $(this).find(".totalcost").text().replace("₱ ","");
-
-				formData.append(`items[${i}][requestItemID]`, requestItemID);
-				formData.append(`items[${i}][categoryType]`, categoryType);
-				formData.append(`items[${i}][vendorID]`, vendorID);
-				formData.append(`items[${i}][vendorName]`, vendorName);
-				formData.append(`items[${i}][unitCost]`, unitCost);
-				formData.append(`items[${i}][totalCost]`, totalCost);
-			});
 		} 
 
-		
-
-		return isObject ? data : formData;
+		return data;
 	}
-	// ----- END GET PURCHASE REQUEST DATA -----
+	// ----- END GET BID RECAP DATA -----
 
 
-    // ----- OPEN ADD FORM -----
-	$(document).on("click", "#btnAdd", function () {
-		pageContent(true);
-		updateURL(null, true);
-	});
-	// ----- END OPEN ADD FORM -----
-
-
-    // ----- OPEN EDIT FORM -----
-	$(document).on("click", ".btnEdit", function () {
-		const id = decryptString($(this).attr("id"));
-		viewDocument(id);
-	});
-	// ----- END OPEN EDIT FORM -----
-
-
-    // ----- VIEW DOCUMENT -----
-	$(document).on("click", ".btnView", function () {
-		const id = decryptString($(this).attr("id"));
-		viewDocument(id, true);
-	});
-	// ----- END VIEW DOCUMENT -----
-
-
-    // ----- REVISE DOCUMENT -----
-	$(document).on("click", "#btnRevise", function () {
-		const id                    = decryptString($(this).attr("bidRecapID"));
-		const fromCancelledDocument = $(this).attr("cancel") == "true";
-		viewDocument(id, false, true, fromCancelledDocument);
-	});
-	// ----- END REVISE DOCUMENT -----
-
-
-	// ----- SAVE CLOSE FORM -----
-	$(document).on("click", "#btnBack", function () {
-		const id         = decryptString($(this).attr("bidRecapID"));
-		const isFromCancelledDocument = $(this).attr("cancel") == "true";
-		const revise     = $(this).attr("revise") == "true";
-		const employeeID = $(this).attr("employeeID");
-		const feedback   = $(this).attr("code") || getFormCode("BRF", dateToday(), id);
-		const status     = $(this).attr("status");
-
-		if (status != "false" && status != 0) {
-			
-			if (revise) {
-				const action = revise && !isFromCancelledDocument && "insert" || (id ? "update" : "insert");
-				const data   = getBidRecapData(action, "save", "0", id);
-				data.append("bidRecapStatus", 0);
-				if (!isFromCancelledDocument) {
-					data.append("reviseBidRecapID", id);
-					data.delete("bidRecapID");
-				} else {
-					data.append("bidRecapID", id);
-					data.delete("action");
-					data.append("action", "update");
-				}
-
-				saveBidRecap(data, "save", null, pageContent);
-			} else {
-				$("#page_content").html(preloader);
-				pageContent();
-	
-				if (employeeID != sessionID) {
-					$("[redirect=forApprovalTab]").length > 0 && $("[redirect=forApprovalTab]").trigger("click");
-				}
+    // ----- VALIDATE TABLE -----
+    function validateTableRequest(classification = "") {
+        let flag = 0;
+		if (classification) {
+			if (classification == "Items") {
+				$(`#tableRequestItems tbody tr.request`).each(function() {
+					let hasCheck = $(`[type="checkbox"]:checked`, this).length > 0;
+					if (!hasCheck) flag++;
+				})
+			} else if (classification == "Assets") {
+				$(`#tableRequestAssets tbody tr.request`).each(function() {
+					let hasCheck = $(`[type="checkbox"]:checked`, this).length > 0;
+					if (!hasCheck) flag++;
+				})
 			}
-
 		} else {
-			const action = id && feedback ? "update" : "insert";
-			const data   = getBidRecapData(action, "save", "0", id);
-			data.append("bidRecapStatus", 0);
-
-			saveBidRecap(data, "save", null, pageContent);
+			$(`#tableRequestItems tbody tr.request`).each(function() {
+				let hasCheck = $(`[type="checkbox"]:checked`, this).length > 0;
+				if (!hasCheck) flag++;
+			})
+			$(`#tableRequestAssets tbody tr.request`).each(function() {
+				let hasCheck = $(`[type="checkbox"]:checked`, this).length > 0;
+				if (!hasCheck) flag++;
+			})
 		}
-	});
-	// ----- END SAVE CLOSE FORM -----
+        return flag == 0;
+    }
+    // ----- END VALIDATE TABLE -----
 
 
-    // ----- SAVE DOCUMENT -----
-	$(document).on("click", "#btnSave, #btnCancel", function () {
-		const id       = decryptString($(this).attr("bidRecapID"));
-		const isFromCancelledDocument = $(this).attr("cancel") == "true";
-		const revise   = $(this).attr("revise") == "true";
-		const feedback = $(this).attr("code") || getFormCode("BRF", dateToday(), id);
-		const action   = revise && !isFromCancelledDocument && "insert" || (id ? "update" : "insert");
-		const data     = getBidRecapData(action, "save", "0", id);
-		data.append("bidRecapStatus", 0);
+	// ----- VALIDATE FINAL QUOTE -----
+	function validateFinalQuote() {
+		const requestLength = $(`tr.request`).length;
+		const finalQuoteRequestLength = $(`tr.request-finalquote`).length;
+		return requestLength == finalQuoteRequestLength;
+	}
+	// ----- END VALIDATE FINAL QUOTE -----
 
-		if (revise) {
-			if (!isFromCancelledDocument) {
-				data.append("reviseBidRecapID", id);
-				data.delete("bidRecapID");
-			} else {
-				data.append("bidRecapID", id);
-				data.delete("action");
-				data.append("action", "update");
-			}
-		}
 
-		saveBidRecap(data, "save", null, pageContent);
-	});
-	// ----- END SAVE DOCUMENT -----
-
-	
-	// ----- REMOVE IS-VALID IN TABLE -----
+    // ----- REMOVE IS-VALID IN TABLE -----
 	function removeIsValid(element = "table") {
 		$(element).find(".validated, .is-valid, .no-error").removeClass("validated")
 		.removeClass("is-valid").removeClass("no-error");
@@ -1895,84 +2120,286 @@ $(document).ready(function() {
 	// ----- END REMOVE IS-VALID IN TABLE -----
 
 
-	// ----- VALIDATE TABLE -----
-	function validateTableItems() {
-		let flag = 0;
-		$(".itemTableRow").each(function(){
-			let unitcost = $(this).find(".item-unit-cost").text().replaceAll("₱ ");
-			if(parseFloat(unitcost) < 1){
-				flag += 1;
+	// ----- UPDATE BUTTON GENERATE FINAL QUOTE -----
+	function updateButtonGenerateFinalQuote(classification = "") {
+		const manipulate = (clss = "") => {
+			const table = clss == "Items" ? "tableRequestItems" : "tableRequestAssets";
+			const count = $(`#${table} tbody tr.request`).length;
+	
+			let temp = 0;
+			$(`#${table} tbody tr.request`).each(function() {
+				let hasVendor = $(`[type="checkbox"]:checked`, this).length > 0;
+				hasVendor && temp++;
+			})
+		
+			if (temp == count) {
+				$(`.btnGenerateFinalQuote[classification="${clss}"]`).removeAttr("disabled");
+			} else {
+				$(`.btnGenerateFinalQuote[classification="${clss}"]`).attr("disabled", true);
 			}
-		});
-
-		if (flag > 0) {
-			showNotification("warning2", `Please review the item price on <strong>Inventory Price List</strong>.`);
 		}
-		return flag > 0 ? false : true;
+
+		if (classification) {
+			manipulate(classification);
+		} else {
+			["Items", "Assets"].map(clss => manipulate(clss));
+		}
 	}
-	// ----- END VALIDATE TABLE -----
+	// ----- END UPDATE BUTTON GENERATE FINAL QUOTE -----
+
+
+    // ----- SELECT PREFERRED VENDOR -----
+    $(document).on("change", `[name="selectedVendor"]`, function(e) {
+		const classification    = $(this).attr("classification");
+        const inventoryVendorID = $(this).closest("tr").find(`[name="inventoryVendorID"]`).val();
+        if (inventoryVendorID && inventoryVendorID != "Select Vendor Name") {
+            $parent = $(this).closest("tbody");
+            $parent.find(`[name="selectedVendor"]`).not(this).prop('checked', false); 
+        } else {
+            $(this).prop("checked", false);
+        }
+		updateButtonGenerateFinalQuote(classification);
+    })
+    // ----- SELECT PREFERRED VENDOR -----
+
+
+    // ----- SELECT VENDOR NAME -----
+    $(document).on("change", `[name="inventoryVendorID"]`, function() {
+        const classification = $(this).attr("classification");
+        const itemAssetID    = $(this).attr("itemAssetID");
+        updateInventoryVendorOptions(classification, itemAssetID, true);
+
+        const vendorPrice = $(`option:selected`, this).attr("vendorPrice");
+        $parent = $(this).closest("tr");
+        $parent.find(".vendorPrice").text(formatAmount(vendorPrice, true));
+    })
+    // ----- EMD SELECT VENDOR NAME -----
+
+
+    // ----- OPEN EDIT FORM -----
+	$(document).on("click", ".btnEdit", function () {
+		const id = decryptString($(this).attr("id"));
+		$("#page_content").html(preloader);
+		setTimeout(() => {
+			viewDocument(id);
+		}, 10);
+	});
+	// ----- END OPEN EDIT FORM -----
+
+
+    // ----- VIEW DOCUMENT -----
+	$(document).on("click", ".btnView", function () {
+		const id = decryptString($(this).attr("id"));
+		$("#page_content").html(preloader);
+		setTimeout(() => {
+			viewDocument(id, true);
+		}, 10);
+	});
+	// ----- END VIEW DOCUMENT -----
+
+
+	// ----- GENERATE FINAL QUOTE -----
+	$(document).on("click", ".btnGenerateFinalQuote", function() {
+		const bidRecapID     = $(this).attr("bidRecapID");
+		const classification = $(this).attr("classification");
+		const isFromCancelledDocument = $(this).attr("cancel") == "true";
+		const revise         = $(this).attr("revise") == "true";
+		if (classification) {
+			const checkTableRequestItems = validateTableRequest(classification);
+			if (checkTableRequestItems) {
+				const tableID   = classification == "Items" ? "tableRequestItems" : "tableRequestAssets";
+				const checkForm = validateForm(tableID);
+				removeIsValid();
+				if (checkForm) {
+					const action = revise && !isFromCancelledDocument && "insert" || (bidRecapID ? "update" : "insert");
+					generateFinalQuote(action, classification, bidRecapID);
+				}
+			} else {
+				showNotification("danger", "Please select preferred vendor in each items.");
+			}
+		}
+	})
+	// ----- END GENERATE FINAL QUOTE -----
 
 
     // ----- SUBMIT DOCUMENT -----
 	$(document).on("click", "#btnSubmit", function () {
 		const id            = decryptString($(this).attr("bidRecapID"));
+		const code          = $(this).attr("bidRecapCode");
 		const isFromCancelledDocument = $(this).attr("cancel") == "true";
 		const revise        = $(this).attr("revise") == "true";
-		const validate      = validateForm("form_bid_recap");
-		const validateItems = validateTableItems();
-		removeIsValid("#tableRequestItems");
+		const checkForm     = validateForm("form_bid_recap");
+		const checkTable    = validateTableRequest();
+		const checkFinalQuote = validateFinalQuote();
+        removeIsValid();
 
-		if (validate && validateItems) {
-			const action = revise && !isFromCancelledDocument && "insert" || (id ? "update" : "insert");
-			const data   = getBidRecapData(action, "submit", "1", id);
-
-			if (revise) {
-				if (!isFromCancelledDocument) {
-					data.append("reviseBidRecapID", id);
-					data.delete("bidRecapID");
+		if (checkForm) {
+            if (checkTable) {
+				if (checkFinalQuote) {
+					const action = revise && !isFromCancelledDocument && "insert" || (id ? "update" : "insert");
+					const data = getBidRecapData(action, "submit", "1", id);
+		
+					if (revise) {
+						if (!isFromCancelledDocument) {
+							data.revisePurchaseRequestID   = id;
+							data.reviseBidRecapCode = code;
+							delete data["bidRecapID"];
+						}
+					}
+		
+					const employeeID = getNotificationEmployeeID(data["approversID"], data["approversDate"], true);
+					let notificationData = false;
+					if (employeeID != sessionID) {
+						notificationData = {
+							moduleID:                40,
+							notificationTitle:       "Bid Recap",
+							notificationDescription: `${employeeFullname(sessionID)} asked for your approval.`,
+							notificationType:        2,
+							employeeID,
+						};
+					}
+		
+					saveBidRecap(data, "submit", notificationData, pageContent, code);
+				} else {
+					showNotification("danger", "Invalid final quote!");
 				}
-			}
-
-			let approversID = "", approversDate = "";
-			for (var i of data) {
-				if (i[0] == "approversID")   approversID   = i[1];
-				if (i[0] == "approversDate") approversDate = i[1];
-			}
-
-			const employeeID = getNotificationEmployeeID(approversID, approversDate, true);
-			let notificationData = false;
-			if (employeeID != sessionID) {
-				notificationData = {
-					moduleID:                40,
-					notificationTitle:       "Bid Recap",
-					notificationDescription: `${employeeFullname(sessionID)} asked for your approval.`,
-					notificationType:        2,
-					employeeID,
-				};
-			}
-
-			saveBidRecap(data, "submit", notificationData, pageContent);
+            } else {
+                showNotification("danger", "Please select preferred vendor in each items.");
+            }
 		}
 	});
 	// ----- END SUBMIT DOCUMENT -----
 
 
-    // ----- CANCEL DOCUMENT -----
+	// ----- CANCEL DOCUMENT -----
 	$(document).on("click", "#btnCancelForm", function () {
 		const id     = decryptString($(this).attr("bidRecapID"));
 		const status = $(this).attr("status");
+		const code   = $(this).attr("bidRecapCode");
 		const action = "update";
 		const data   = getBidRecapData(action, "cancelform", "4", id, status);
 
-		saveBidRecap(data, "cancelform", null, pageContent);
+		saveBidRecap(data, "cancelform", null, pageContent, code);
 	});
 	// ----- END CANCEL DOCUMENT -----
 
 
-    // ----- APPROVE DOCUMENT -----
+	// ----- SAVE CLOSE FORM -----
+	$(document).on("click", ".btnBack", function () {
+		const id         = decryptString($(this).attr("bidRecapID"));
+		const fromCancelledDocument = $(this).attr("cancel") == "true";
+		const revise     = $(this).attr("revise") == "true";
+		const employeeID = $(this).attr("employeeID");
+		const status     = $(this).attr("status");
+		const code       = $(this).attr("bidRecapCode");
+
+		if (status != "false" && status != 0) {
+			
+			if (revise) {
+				const action = revise && !fromCancelledDocument && "insert" || (id ? "update" : "insert");
+				const data = getBidRecapData(action, "save", "0", id, status);
+				data["employeeID"] = employeeID;
+				if (!fromCancelledDocument) {
+					delete data["bidRecapID"];
+					data["reviseBidRecapID"] = id;
+				} else {
+					delete data["action"];
+					data["bidRecapStatus"] = 0;
+					data["action"]         = "update";
+				}
+	
+				saveBidRecap(data, "save", null, pageContent, code);
+			} else {
+				$("#page_content").html(preloader);
+				setTimeout(() => {
+					pageContent();
+		
+					if (employeeID != sessionID) {
+						$("[redirect=forApprovalTab]").length > 0 && $("[redirect=forApprovalTab]").trigger("click");
+					}
+				}, 10);
+			}
+
+		} else {
+			const action = "update";
+			const data   = getBidRecapData(action, "save", "0", id, status);
+			data["bidRecapStatus"] = 0;
+
+			saveBidRecap(data, "save", null, pageContent, code);
+		}
+	});
+	// ----- END SAVE CLOSE FORM -----
+
+
+	// ----- REVISE DOCUMENT -----
+	$(document).on("click", "#btnRevise", function () {
+		const id     = decryptString($(this).attr("bidRecapID"));
+		const status = $(this).attr("status");
+		const code    = $(this).attr("bidRecapCode");
+		const fromCancelledDocument = $(this).attr("cancel") == "true";
+		if (status == "4") {
+			$("#page_content").html(preloader);
+			setTimeout(() => {
+				viewDocument(id, false, true, fromCancelledDocument);
+			}, 10);
+		} else {
+			const confirmation = getConfirmation("revise");
+			confirmation.then(res => {
+				if (res.isConfirmed) {
+					$.ajax({
+						method:      "POST",
+						url:         `bid_recap/reviseBidRecap`,
+						data:        { bidRecapID: id },
+						cache:       false,
+						async:       false,
+						dataType:    "json",
+						beforeSend: function() {
+							$("#loader").show();
+						},
+						success: function(data) {
+							let result = data.split("|");
+							setTimeout(() => {
+								$("#loader").hide();
+								let isSuccess   = result[0];
+								let feedback   = code || (result[1] || "Bid Recap");
+								let insertedID  = result[2];
+								let dateCreated = result[3];
+				
+								if (isSuccess == "true") {
+									showNotification("success", `${feedback} revised successfully!`);
+									viewDocument(insertedID);
+								} else {
+									Swal.fire({
+										icon:              "danger",
+										title:             "There's an error revising bid recap",
+										showConfirmButton: false,
+										timer:             2000,
+									});
+								}
+							}, 500);
+						},
+						error: function() {
+							setTimeout(() => {
+								$("#loader").hide();
+								showNotification("danger", "System error: Please contact the system administrator for assistance!");
+							}, 500);
+						}
+					}).done(function() {
+						setTimeout(() => {
+							$("#loader").hide();
+						}, 500);
+					})
+				}
+			});
+		}
+	});
+	// ----- END REVISE DOCUMENT -----
+
+
+	// ----- APPROVE DOCUMENT -----
 	$(document).on("click", "#btnApprove", function () {
-		const id       = decryptString($(this).attr("bidRecapID"));
-		const feedback = $(this).attr("code") || getFormCode("BRF", dateToday(), id);
+		const id   = decryptString($(this).attr("bidRecapID"));
+		const code = $(this).attr("bidRecapCode");
 		let tableData  = getTableData("ims_bid_recap_tbl", "", "bidRecapID = " + id);
 
 		if (tableData) {
@@ -1983,9 +2410,12 @@ $(document).ready(function() {
 			let createdAt       = tableData[0].createdAt;
 
 			let data = getBidRecapData("update", "approve", "2", id);
-			data.append("approversStatus", updateApproveStatus(approversStatus, 2));
+			delete data["items"];
+			delete data["assets"];
+			delete data["finalquote"];
 			let dateApproved = updateApproveDate(approversDate)
-			data.append("approversDate", dateApproved);
+			data.approversStatus = updateApproveStatus(approversStatus, 2);
+			data.approversDate   = dateApproved;
 
 			let status, notificationData;
 			if (isImLastApprover(approversID, approversDate)) {
@@ -1994,7 +2424,7 @@ $(document).ready(function() {
 					moduleID:                40,
 					tableID:                 id,
 					notificationTitle:       "Bid Recap",
-					notificationDescription: `${feedback}: Your request has been approved.`,
+					notificationDescription: `${code}: Your request has been approved.`,
 					notificationType:        7,
 					employeeID,
 				};
@@ -2010,21 +2440,21 @@ $(document).ready(function() {
 				};
 			}
 
-			data.append("bidRecapStatus", status);
+			data.bidRecapStatus = status;
 
-			saveBidRecap(data, "approve", notificationData, pageContent);
+			saveBidRecap(data, "approve", notificationData, pageContent, code);
 		}
 	});
 	// ----- END APPROVE DOCUMENT -----
 
 
-    // ----- REJECT DOCUMENT -----
+	// ----- REJECT DOCUMENT -----
 	$(document).on("click", "#btnReject", function () {
-		const id       = decryptString($(this).attr("bidRecapID"));
-		const feedback = $(this).attr("code") || getFormCode("BRF", dateToday(), id);
+		const id   = decryptString($(this).attr("bidRecapID"));
+		const code = $(this).attr("bidRecapCode");
 
 		$("#modal_bid_recap_content").html(preloader);
-		$("#modal_bid_recap .page-title").text("DENY PURCHASE REQUEST");
+		$("#modal_bid_recap .page-title").text("DENY BID RECAP");
 		$("#modal_bid_recap").modal("show");
 		let html = `
 		<div class="modal-body">
@@ -2043,17 +2473,26 @@ $(document).ready(function() {
 			</div>
 		</div>
 		<div class="modal-footer text-right">
-			<button type="button" class="btn btn-danger px-5 p-2" id="btnRejectConfirmation"
-			bidRecapID="${encryptString(id)}"
-			code="${feedback}"><i class="far fa-times-circle"></i> Deny</button>
-			<button type="button" class="btn btn-cancel btnCancel px-5 p-2" data-dismiss="modal"><i class="fas fa-ban"></i> Cancel</button>
+			<button type="button" 
+				class="btn btn-danger px-5 p-2" 
+				id="btnRejectConfirmation"
+				bidRecapID="${encryptString(id)}"
+				bidRecapCode="${code}">
+				<i class="far fa-times-circle"></i> Deny
+			</button>
+			<button type="button" 
+				class="btn btn-cancel btnCancel px-5 p-2"
+				data-dismiss="modal">
+				<i class="fas fa-ban"></i> Cancel
+			</button>
 		</div>`;
 		$("#modal_bid_recap_content").html(html);
+		$(`[name="bidRecapRemarks"]`).focus();
 	});
 
 	$(document).on("click", "#btnRejectConfirmation", function () {
-		const id       = decryptString($(this).attr("bidRecapID"));
-		const feedback = $(this).attr("code") || getFormCode("BRF", dateToday(), id);
+		const id   = decryptString($(this).attr("bidRecapID"));
+		const code = $(this).attr("bidRecapCode");
 
 		const validate = validateForm("modal_bid_recap");
 		if (validate) {
@@ -2063,25 +2502,26 @@ $(document).ready(function() {
 				let approversDate   = tableData[0].approversDate;
 				let employeeID      = tableData[0].employeeID;
 
-				let data = new FormData;
-				data.append("action", "update");
-				data.append("method", "deny");
-				data.append("bidRecapID", id);
-				data.append("approversStatus", updateApproveStatus(approversStatus, 3));
-				data.append("approversDate", updateApproveDate(approversDate));
-				data.append("bidRecapRemarks", $("[name=bidRecapRemarks]").val()?.trim());
-				data.append("updatedBy", sessionID);
+				let data = {
+					action:          "update",
+					method:          "deny",
+					bidRecapID:      id,
+					approversStatus: updateApproveStatus(approversStatus, 3),
+					approversDate:   updateApproveDate(approversDate),
+					bidRecapRemarks: $(`[name="bidRecapRemarks"]`).val()?.trim(),
+					updatedBy:       sessionID,
+				}
 
 				let notificationData = {
 					moduleID:                40,
 					tableID: 				 id,
 					notificationTitle:       "Bid Recap",
-					notificationDescription: `${feedback}: Your request has been denied.`,
+					notificationDescription: `${code}: Your request has been denied.`,
 					notificationType:        1,
 					employeeID,
 				};
 
-				saveBidRecap(data, "deny", notificationData, pageContent);
+				saveBidRecap(data, "deny", notificationData, pageContent, code);
 				$("[redirect=forApprovalTab]").length > 0 && $("[redirect=forApprovalTab]").trigger("click");
 			} 
 		} 
@@ -2089,21 +2529,7 @@ $(document).ready(function() {
 	// ----- END REJECT DOCUMENT -----
 
 
-	// ----- DROP DOCUMENT -----
-	$(document).on("click", "#btnDrop", function() {
-		const id = decryptString($(this).attr("bidRecapID"));
-		let data = new FormData;
-		data.append("bidRecapID", id);
-		data.append("action", "update");
-		data.append("method", "drop");
-		data.append("updatedBy", sessionID);
-
-		saveBidRecap(data, "drop", null, pageContent);
-	})
-	// ----- END DROP DOCUMENT -----
-
-
-    // ----- NAV LINK -----
+	// ----- NAV LINK -----
 	$(document).on("click", ".nav-link", function () {
 		const tab = $(this).attr("href");
 		if (tab == "#forApprovalTab") {
@@ -2116,216 +2542,284 @@ $(document).ready(function() {
 	// ----- END NAV LINK -----
 
 
-    // ----- APPROVER STATUS -----
-	function getApproversStatus(approversID, approversStatus, approversDate) {
-		let html = "";
-		if (approversID) {
-			let idArr = approversID.split("|");
-			let statusArr = approversStatus ? approversStatus.split("|") : [];
-			let dateArr = approversDate ? approversDate.split("|") : [];
-			html += `<div class="row mt-4">`;
-	
-			idArr && idArr.map((item, index) => {
-				let date   = dateArr[index] ? moment(dateArr[index]).format("MMMM DD, YYYY hh:mm:ss A") : "";
-				let status = statusArr[index] ? statusArr[index] : "";
-				let statusBadge = "";
-				if (date && status) {
-					if (status == 2) {
-						statusBadge = `<span class="badge badge-info">Approved - ${date}</span>`;
-					} else if (status == 3) {
-						statusBadge = `<span class="badge badge-danger">Denied - ${date}</span>`;
-					}
-				}
-	
-				html += `
-				<div class="col-xl-3 col-lg-3 col-md-4 col-sm-12">
-					<div class="d-flex justify-content-start align-items-center">
-						<span class="font-weight-bold">
-							${employeeFullname(item)}
-						</span>
-						<small>&nbsp;- Level ${index + 1} Approver</small>
-					</div>
-					${statusBadge}
-				</div>`;
-			});
-			html += `</div>`;
+    // ----- GET CONFIRMATION -----
+    function getConfirmation(method = "submit") {
+		const title = "Bid Recap";
+		let swalText, swalImg;
+
+		$("#modal_bid_recap").text().length > 0 && $("#modal_bid_recap").modal("hide");
+
+		switch (method) {
+			case "save":
+				swalTitle = `SAVE ${title.toUpperCase()}`;
+				swalText  = "Are you sure to save this document?";
+				swalImg   = `${base_url}assets/modal/draft.svg`;
+				break;
+			case "submit":
+				swalTitle = `SUBMIT ${title.toUpperCase()}`;
+				swalText  = "Are you sure to submit this document?";
+				swalImg   = `${base_url}assets/modal/add.svg`;
+				break;
+			case "approve":
+				swalTitle = `APPROVE ${title.toUpperCase()}`;
+				swalText  = "Are you sure to approve this document?";
+				swalImg   = `${base_url}assets/modal/approve.svg`;
+				break;
+			case "deny":
+				swalTitle = `DENY ${title.toUpperCase()}`;
+				swalText  = "Are you sure to deny this document?";
+				swalImg   = `${base_url}assets/modal/reject.svg`;
+				break;
+			case "cancelform":
+				swalTitle = `CANCEL ${title.toUpperCase()}`;
+				swalText  = "Are you sure to cancel this document?";
+				swalImg   = `${base_url}assets/modal/cancel.svg`;
+				break;
+			case "drop":
+				swalTitle = `DROP ${title.toUpperCase()}`;
+				swalText  = "Are you sure to drop this document?";
+				swalImg   = `${base_url}assets/modal/drop.svg`;
+				break;
+			case "finalquote":
+				swalTitle = `GENERATE FINAL QUOTE`;
+				swalText  = "Are you sure to generate final quote?";
+				swalImg   = `${base_url}assets/modal/generate.svg`;
+				break;
+			case "revise":
+				swalTitle = `REVISE ${title.toUpperCase()}`;
+				swalText  = "Are you sure to revise this document?";
+				swalImg   = `${base_url}assets/modal/revise.svg`;
+				break;
+			default:
+				swalTitle = `CANCEL ${title.toUpperCase()}`;
+				swalText  = "Are you sure that you want to cancel this process?";
+				swalImg   = `${base_url}assets/modal/cancel.svg`;
+				break;
 		}
-		return html;
+		return Swal.fire({
+			title:              swalTitle,
+			text:               swalText,
+			imageUrl:           swalImg,
+			imageWidth:         200,
+			imageHeight:        200,
+			imageAlt:           "Custom image",
+			showCancelButton:   true,
+			confirmButtonColor: "#dc3545",
+			cancelButtonColor:  "#1a1a1a",
+			cancelButtonText:   "No",
+			confirmButtonText:  "Yes"
+		})
 	}
-	// ----- END APPROVER STATUS --
-})
+    // ----- END GET CONFIRMATION -----
 
 
-// --------------- DATABASE RELATION ---------------
-function getConfirmation(method = "submit") {
-	const title = "Bid Recap";
-	let swalText, swalImg;
+    // ----- SAVE BID RECAP -----
+    function saveBidRecap(data = null, method = "submit", notificationData = null, callback = null, feedback = "") {
+		if (data) {
+			const confirmation = getConfirmation(method);
+			confirmation.then(res => {
+				if (res.isConfirmed) {
+					$.ajax({
+						method:      "POST",
+						url:         `bid_recap/saveBidRecap`,
+						data,
+						cache:       false,
+						async:       false,
+						dataType:    "json",
+						beforeSend: function() {
+							$("#loader").show();
+						},
+						success: function(data) {
+							let result = data.split("|");
+			
+							let isSuccess   = result[0];
+							let code        = result[1] || (feedback || "Bid Recap");
+							let insertedID  = result[2];
+							let dateCreated = result[3];
 
-	$("#modal_bid_recap").text().length > 0 && $("#modal_bid_recap").modal("hide");
-
-	switch (method) {
-		case "save":
-			swalTitle = `SAVE ${title.toUpperCase()}`;
-			swalText  = "Are you sure to save this document?";
-			swalImg   = `${base_url}assets/modal/draft.svg`;
-			break;
-		case "submit":
-			swalTitle = `SUBMIT ${title.toUpperCase()}`;
-			swalText  = "Are you sure to submit this document?";
-			swalImg   = `${base_url}assets/modal/add.svg`;
-			break;
-		case "approve":
-			swalTitle = `APPROVE ${title.toUpperCase()}`;
-			swalText  = "Are you sure to approve this document?";
-			swalImg   = `${base_url}assets/modal/approve.svg`;
-			break;
-		case "deny":
-			swalTitle = `DENY ${title.toUpperCase()}`;
-			swalText  = "Are you sure to deny this document?";
-			swalImg   = `${base_url}assets/modal/reject.svg`;
-			break;
-		case "cancelform":
-			swalTitle = `CANCEL ${title.toUpperCase()}`;
-			swalText  = "Are you sure to cancel this document?";
-			swalImg   = `${base_url}assets/modal/cancel.svg`;
-			break;
-		case "drop":
-			swalTitle = `DROP ${title.toUpperCase()}`;
-			swalText  = "Are you sure to drop this document?";
-			swalImg   = `${base_url}assets/modal/drop.svg`;
-			break;
-		default:
-			swalTitle = `CANCEL ${title.toUpperCase()}`;
-			swalText  = "Are you sure that you want to cancel this process?";
-			swalImg   = `${base_url}assets/modal/cancel.svg`;
-			break;
-	}
-	return Swal.fire({
-		title:              swalTitle,
-		text:               swalText,
-		imageUrl:           swalImg,
-		imageWidth:         200,
-		imageHeight:        200,
-		imageAlt:           "Custom image",
-		showCancelButton:   true,
-		confirmButtonColor: "#dc3545",
-		cancelButtonColor:  "#1a1a1a",
-		cancelButtonText:   "No",
-		confirmButtonText:  "Yes"
-	})
-}
-
-function saveBidRecap(data = null, method = "submit", notificationData = null, callback = null) {
-	if (data) {
-		const confirmation = getConfirmation(method);
-		confirmation.then(res => {
-			if (res.isConfirmed) {
-				$.ajax({
-					method:      "POST",
-					url:         `bid_recap/saveBidRecap`,
-					data,
-					processData: false,
-					contentType: false,
-					global:      false,
-					cache:       false,
-					async:       false,
-					dataType:    "json",
-					beforeSend: function() {
-						$("#loader").show();
-					},
-					success: function(data) {
-						let result = data.split("|");
-		
-						let isSuccess   = result[0];
-						let message     = result[1];
-						let insertedID  = result[2];
-						let dateCreated = result[3];
-
-						let swalTitle;
-						if (method == "submit") {
-							swalTitle = `${getFormCode("BRF", dateCreated, insertedID)} submitted successfully!`;
-						} else if (method == "save") {
-							swalTitle = `${getFormCode("BRF", dateCreated, insertedID)} saved successfully!`;
-						} else if (method == "cancelform") {
-							swalTitle = `${getFormCode("BRF", dateCreated, insertedID)} cancelled successfully!`;
-						} else if (method == "approve") {
-							swalTitle = `${getFormCode("BRF", dateCreated, insertedID)} approved successfully!`;
-						} else if (method == "deny") {
-							swalTitle = `${getFormCode("BRF", dateCreated, insertedID)} denied successfully!`;
-						} else if (method == "drop") {
-							swalTitle = `${getFormCode("BRF", dateCreated, insertedID)} dropped successfully!`;
-						}	
-		
-						if (isSuccess == "true") {
-							setTimeout(() => {
-								// ----- SAVE NOTIFICATION -----
-								if (notificationData) {
-									if (Object.keys(notificationData).includes("tableID")) {
-										insertNotificationData(notificationData);
-									} else {
-										notificationData["tableID"] = insertedID;
-										insertNotificationData(notificationData);
+							let swalTitle;
+							if (method == "submit") {
+								swalTitle = `${code} submitted successfully!`;
+							} else if (method == "save") {
+								swalTitle = `${code} saved successfully!`;
+							} else if (method == "cancelform") {
+								swalTitle = `${code} cancelled successfully!`;
+							} else if (method == "approve") {
+								swalTitle = `${code} approved successfully!`;
+							} else if (method == "deny") {
+								swalTitle = `${code} denied successfully!`;
+							} else if (method == "drop") {
+								swalTitle = `${code} dropped successfully!`;
+							}
+			
+							if (isSuccess == "true") {
+								setTimeout(() => {
+									// ----- SAVE NOTIFICATION -----
+									if (notificationData) {
+										if (Object.keys(notificationData).includes("tableID")) {
+											insertNotificationData(notificationData);
+										} else {
+											notificationData["tableID"] = insertedID;
+											insertNotificationData(notificationData);
+										}
 									}
-								}
-								// ----- END SAVE NOTIFICATION -----
+									// ----- END SAVE NOTIFICATION -----
 
-								$("#loader").hide();
-								closeModals();
-								Swal.fire({
-									icon:              "success",
-									title:             swalTitle,
-									showConfirmButton: false,
-									timer:             2000,
-								});
-								callback && callback();
+									$("#loader").hide();
+									closeModals();
+									Swal.fire({
+										icon:              "success",
+										title:             swalTitle,
+										showConfirmButton: false,
+										timer:             2000,
+									}).then(function() {
+                                        callback && callback();
 
-								if (method == "approve" || method == "deny") {
-									$("[redirect=forApprovalTab]").length > 0 && $("[redirect=forApprovalTab]").trigger("click")
-								}
-							}, 500);
-						} else {
+										if (method == "approve" || method == "deny") {
+											$("[redirect=forApprovalTab]").length > 0 && $("[redirect=forApprovalTab]").trigger("click")
+										}
+                                    });
+								}, 500);
+							} else {
+								setTimeout(() => {
+									$("#loader").hide();
+									Swal.fire({
+										icon:              "danger",
+										title:             message,
+										showConfirmButton: false,
+										timer:             2000,
+									});
+								}, 500);
+							}
+						},
+						error: function() {
 							setTimeout(() => {
 								$("#loader").hide();
-								Swal.fire({
-									icon:              "danger",
-									title:             message,
-									showConfirmButton: false,
-									timer:             2000,
-								});
+								showNotification("danger", "System error: Please contact the system administrator for assistance!");
 							}, 500);
 						}
-					},
-					error: function() {
+					}).done(function() {
 						setTimeout(() => {
 							$("#loader").hide();
-							showNotification("danger", "System error: Please contact the system administrator for assistance!");
 						}, 500);
-					}
-				}).done(function() {
-					setTimeout(() => {
-						$("#loader").hide();
-					}, 500);
-				})
-			} else {
-				if (res.dismiss == "cancel" && method != "submit") {
-					if (method != "deny") {
-						if (method != "cancelform") {
-							callback && callback();
+					})
+				} else {
+					if (res.dismiss == "cancel" && method != "submit") {
+						if (method != "deny") {
+							if (method != "cancelform") {
+								callback && callback();
+							}
+						} else {
+							$("#modal_bid_recap").text().length > 0 && $("#modal_bid_recap").modal("show");
 						}
-					} else {
-						$("#modal_bid_recap").text().length > 0 && $("#modal_bid_recap").modal("show");
-					}
-				} else if (res.isDismissed) {
-					if (method == "deny") {
-						$("#modal_bid_recap").text().length > 0 && $("#modal_bid_recap").modal("show");
+					} else if (res.isDismissed) {
+						if (method == "deny") {
+							$("#modal_bid_recap").text().length > 0 && $("#modal_bid_recap").modal("show");
+						}
 					}
 				}
-			}
-		});
-
-		
+			});
+		}
+		return false;
 	}
-	return false;
-}
+    // ----- END SAVE BID RECAP -----
 
-// --------------- END DATABASE RELATION ---------------
+
+	// ----- GENERATE FINAL QUOTE -----
+	function generateFinalQuote(action = "", classification = "", bidRecapID = 0) {
+		if (classification && bidRecapID) {
+			const confirmation = getConfirmation("finalquote");
+			confirmation.then(res => {
+				if (res.isConfirmed) {
+					const data = {
+						items: getRequestItemAssetData(classification),
+						classification,
+						bidRecapID,
+						action
+					}
+
+					$.ajax({
+						method:      "POST",
+						url:         `bid_recap/generateFinalQuote`,
+						data,
+						cache:       false,
+						async:       false,
+						dataType:    "json",
+						beforeSend: function() {
+							$("#loader p").text("Generating final quote...");
+							$("#loader").show();
+						},
+						success: function(data) {
+							if (data == true) {
+								let elementID = classification == "Items" ? "itemFinalQuoteDisplay" : "assetFinalQuoteDisplay";
+								$(`#${elementID}`).html(preloader);
+								setTimeout(() => {
+									$("#loader").hide();
+									$("#loader p").text("Saving...");
+
+									showNotification("success", "Final quote generated successfully!");
+
+									let finalQuoteTitle = `
+									<div class="pb-4">
+										<h3 class="font-weight-bold">FINAL QUOTE: </h3>
+										<h5><b class="font-weight-bold text-warning">NOTE: </b><span>All final quote are based on the selected vendors in each and every items.</span></small>
+									</div>`;
+
+									let html = getFinalQuoteDisplay(classification, bidRecapID)
+									$(`#${elementID}`).html(html);
+									updateTableItems();
+									$(".tableFinalQuote").each(function() {
+										const tableBodyOptions = {
+											proccessing:    false,
+											serverSide:     false,
+											scrollX:        true,
+											sorting:        false,
+											searching:      false,
+											paging:         false,
+											ordering:       false,
+											info:           false,
+											scrollCollapse: true,
+											columnDefs:     [
+												{ targets: 0,  width: 150 },
+												{ targets: 1,  width: 180 },
+												{ targets: 2,  width: 180 },
+												{ targets: 3,  width: 100 },
+												{ targets: 4,  width: 100 },
+												{ targets: 5,  width: 150 },
+												{ targets: 6,  width: 150 },
+												{ targets: 7,  width: 250 },
+											],
+										};
+										activateDatatable(this.id, tableBodyOptions);
+									})
+
+									if ($("#finalQuoteTitle").text()?.replaceAll("\n", "")?.trim().length == 0) {
+										$("#finalQuoteTitle").html(finalQuoteTitle);
+									}
+									noDataAvailableDisplay();
+								}, 10);
+							} else {
+								showNotification("danger", "There's an error generating final quote. Please try again.");
+							}
+						},
+						error: function() {
+							setTimeout(() => {
+								$("#loader").hide();
+								$("#loader p").text("Saving...");
+								showNotification("danger", "System error: Please contact the system administrator for assistance!");
+							}, 500);
+						}
+					}).done(function() {
+						setTimeout(() => {
+							$("#loader").hide();
+							$("#loader p").text("Saving...");
+							noDataAvailableDisplay();
+						}, 500);
+					})
+				}
+			})
+		}
+	}
+	// ----- END GENERATE FINAL QUOTE -----
+
+})

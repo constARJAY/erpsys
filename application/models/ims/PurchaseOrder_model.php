@@ -8,11 +8,12 @@ class PurchaseOrder_model extends CI_Model {
         parent::__construct();
     }
 
-    public function saveSignedPurchaseOrder($purchaseOrderID = null, $filename = null)
+    public function saveSignedPurchaseOrder($purchaseOrderID = 0, $employeeID = 0, $filename = "")
     {
         $query = $this->db->update(
                 "ims_purchase_order_tbl", 
                 [
+                    "employeeID"            => $employeeID,
                     "purchaseOrderSignedPO" => $filename,
                     "purchaseOrderStatus"   => 2,
                     "submittedAt"           => date("Y-m-d H:i:s")
@@ -20,6 +21,7 @@ class PurchaseOrder_model extends CI_Model {
                 ["purchaseOrderID" => $purchaseOrderID]
             );
         if ($query) {
+            $this->db->query("CALL proc_get_purchase_order_approve($purchaseOrderID)");
             return "true|$filename|$purchaseOrderID|".date("Y-m-d");
         }
         return "false|System error: Please contact the system administrator for assistance!";

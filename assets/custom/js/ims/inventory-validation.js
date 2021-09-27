@@ -385,7 +385,7 @@ $(document).ready(function() {
 					</td>
 					<td>${getDocumentDates(dateCreated, dateSubmitted, dateApproved)}</td>
 					<td class="text-center">
-						${getStatusStyle(inventoryValidationStatus)}
+						${getStatusStyle(inventoryValidationStatus,true)}
 					</td>
 					<td>${remarks}</td>
 				</tr>`;
@@ -464,7 +464,7 @@ $(document).ready(function() {
 			html += `
             <tr class="${btnClass}" id="${encryptString(inventoryValidationID)}">
                 <td>${getFormCode("IVR", createdAt, inventoryValidationID)}</td>
-                <td>${fullname}</td>
+                <td>${fullname != null ? fullname : "-"}</td>
 				<td>${ materialRequestCode ? materialRequestCode : '-'}</td>
 				<td>
 					<div>
@@ -478,7 +478,7 @@ $(document).ready(function() {
                 </td>
 				<td>${getDocumentDates(dateCreated, dateSubmitted, dateApproved)}</td>
                 <td class="text-center">
-                    ${getStatusStyle(inventoryValidationStatus)}
+                    ${getStatusStyle(inventoryValidationStatus,true)}
                 </td>
 				<td>${remarks}</td>
             </tr>`;
@@ -686,97 +686,102 @@ $(document).ready(function() {
 
 		if (readOnly) {
 
-			html += `
-			<tr class="table-row-request-item itemTableRow"
-				requestItemID="${requestItemID}" inventoryValidationID="${inventoryValidationID}">
-				<td>
-					<div class="itemcode">${itemCode || "-"}</div>
-				</td>
+				if(itemID !=0){
+					html += `
+					<tr class="table-row-request-item itemTableRow"
+						requestItemID="${requestItemID}" inventoryValidationID="${inventoryValidationID}">
+						<td>
+							<div class="itemcode">${itemCode || "-"}</div>
+						</td>
 
-				<td>
-					<div class="itemname">
-						${itemName || '-'}
-					</div>
-					<small style="color:#848482;" class="itembrandname">${itemBrandName || '-'}</small>
-				</td>
+						<td>
+							<div class="itemname">
+								${itemName || '-'}
+							</div>
+							<small style="color:#848482;" class="itembrandname">${itemBrandName || '-'}</small>
+						</td>
 
-				<td>
-					<div class="itemclassification">
-						${itemClassification || '-'}
-					</div>
-					<small style="color:#848482;" class="itemcategory">${itemCategory || '-'}</small>
-				</td>
+						<td>
+							<div class="itemclassification">
+								${itemClassification || '-'}
+							</div>
+							<small style="color:#848482;" class="itemcategory">${itemCategory || '-'}</small>
+						</td>
+					
+						<td>
+							<div class="itemuom">${itemUom || "-"}</div>
+						</td>
+						
+						<td class="text-right">
+							<div class="requestquantity">
+								${formatAmount(requestQuantity)}
+							</div>
+						</td>
+
+						<td class="text-right">
+							<div class="availablestocks">
+								${formatAmount(availableStocks)}
+							</div>
+						</td>
+
+						<td class="text-right">
+							<div class="forpurchase">
+								${formatAmount(forPurchase)}
+							</div>
+						</td>
+					
+					</tr>`;
+				}
+
 			
-				<td>
-					<div class="itemuom">${itemUom || "-"}</div>
-				</td>
+
+		} 
+		// else {
+		// 	html += `
+		// 	<tr class="table-row-request-item itemTableRow"
+		// 		requestItemID="${requestItemID}" inventoryValidationID="${inventoryValidationID}">
+		// 		<td>
+		// 			<div class="itemcode">${itemCode || "-"}</div>
+		// 		</td>
+
+		// 		<td>
+		// 			<div class="itemname">
+		// 				${itemName || '-'}
+		// 			</div>
+		// 			<small style="color:#848482;" class="itembrandname">${itemBrandName || '-'}</small>
+		// 		</td>
+
+		// 		<td>
+		// 			<div class="itemclassification">
+		// 				${itemClassification || '-'}
+		// 			</div>
+		// 			<small style="color:#848482;" class="itemcategory">${itemCategory || '-'}</small>
+		// 		</td>
+			
+		// 		<td>
+		// 			<div class="itemuom">${itemUom || "-"}</div>
+		// 		</td>
 				
-				<td class="text-right">
-					<div class="requestquantity">
-						${formatAmount(requestQuantity)}
-					</div>
-				</td>
+		// 		<td class="text-right">
+		// 			<div class="requestquantity">
+		// 				${formatAmount(requestQuantity)}
+		// 			</div>
+		// 		</td>
 
-				<td class="text-right">
-					<div class="availablestocks">
-						${formatAmount(availableStocks)}
-					</div>
-				</td>
+		// 		<td class="text-right">
+		// 			<div class="availablestocks">
+		// 				${formatAmount(availableStocks)}
+		// 			</div>
+		// 		</td>
 
-				<td class="text-right">
-					<div class="forpurchase">
-						${formatAmount(forPurchase)}
-					</div>
-				</td>
+		// 		<td class="text-right">
+		// 			<div class="forpurchase">
+		// 				${formatAmount(forPurchase)}
+		// 			</div>
+		// 		</td>
 			
-			</tr>`;
-
-		} else {
-			html += `
-			<tr class="table-row-request-item itemTableRow"
-				requestItemID="${requestItemID}" inventoryValidationID="${inventoryValidationID}">
-				<td>
-					<div class="itemcode">${itemCode || "-"}</div>
-				</td>
-
-				<td>
-					<div class="itemname">
-						${itemName || '-'}
-					</div>
-					<small style="color:#848482;" class="itembrandname">${itemBrandName || '-'}</small>
-				</td>
-
-				<td>
-					<div class="itemclassification">
-						${itemClassification || '-'}
-					</div>
-					<small style="color:#848482;" class="itemcategory">${itemCategory || '-'}</small>
-				</td>
-			
-				<td>
-					<div class="itemuom">${itemUom || "-"}</div>
-				</td>
-				
-				<td class="text-right">
-					<div class="requestquantity">
-						${formatAmount(requestQuantity)}
-					</div>
-				</td>
-
-				<td class="text-right">
-					<div class="availablestocks">
-						${formatAmount(availableStocks)}
-					</div>
-				</td>
-
-				<td class="text-right">
-					<div class="forpurchase">
-						${formatAmount(forPurchase)}
-					</div>
-				</td>
-			
-			</tr>`;
-		}
+		// 	</tr>`;
+		// }
 
         return html;
     }
@@ -802,8 +807,8 @@ $(document).ready(function() {
 		} = asset;
 
 		if (readOnly) {
-
-			html += `
+			if(assetID !=0){
+				html += `
 			<tr class="table-row-request-item assetTableRow"
 				requestAssetID="${requestAssetID}" inventoryValidationID="${inventoryValidationID}">
 				<td>
@@ -847,53 +852,57 @@ $(document).ready(function() {
 				</td>
 			
 			</tr>`;
+			}
 
-		} else {
-			html += `
-			<tr class="table-row-request-item assetTableRow"
-				requestAssetID="${requestAssetID}" inventoryValidationID="${inventoryValidationID}">
-				<td>
-					<div class="assetcode">${assetCode || "-"}</div>
-				</td>
-
-				<td>
-					<div class="assetame">
-						${assetName || '-'}
-					</div>
-					<small style="color:#848482;" class="assetbrandname">${assetBrandName || '-'}</small>
-				</td>
-
-				<td>
-					<div class="assetclassification">
-						${assetClassification || '-'}
-					</div>
-					<small style="color:#848482;" class="assetcategory">${assetCategory || '-'}</small>
-				</td>
 			
-				<td>
-					<div class="assetuom">${assetUom || "-"}</div>
-				</td>
-				
-				<td class="text-right">
-					<div class="requestquantity">
-						${formatAmount(requestQuantity)}
-					</div>
-				</td>
 
-				<td class="text-right">
-					<div class="availablestocks">
-						${formatAmount(availableStocks)}
-					</div>
-				</td>
-
-				<td class="text-right">
-					<div class="forpurchase">
-						${formatAmount(forPurchase)}
-					</div>
-				</td>
-			
-			</tr>`;
 		}
+		//  else {
+		// 	html += `
+		// 	<tr class="table-row-request-item assetTableRow"
+		// 		requestAssetID="${requestAssetID}" inventoryValidationID="${inventoryValidationID}">
+		// 		<td>
+		// 			<div class="assetcode">${assetCode || "-"}</div>
+		// 		</td>
+
+		// 		<td>
+		// 			<div class="assetame">
+		// 				${assetName || '-'}
+		// 			</div>
+		// 			<small style="color:#848482;" class="assetbrandname">${assetBrandName || '-'}</small>
+		// 		</td>
+
+		// 		<td>
+		// 			<div class="assetclassification">
+		// 				${assetClassification || '-'}
+		// 			</div>
+		// 			<small style="color:#848482;" class="assetcategory">${assetCategory || '-'}</small>
+		// 		</td>
+			
+		// 		<td>
+		// 			<div class="assetuom">${assetUom || "-"}</div>
+		// 		</td>
+				
+		// 		<td class="text-right">
+		// 			<div class="requestquantity">
+		// 				${formatAmount(requestQuantity)}
+		// 			</div>
+		// 		</td>
+
+		// 		<td class="text-right">
+		// 			<div class="availablestocks">
+		// 				${formatAmount(availableStocks)}
+		// 			</div>
+		// 		</td>
+
+		// 		<td class="text-right">
+		// 			<div class="forpurchase">
+		// 				${formatAmount(forPurchase)}
+		// 			</div>
+		// 		</td>
+			
+		// 	</tr>`;
+		// }
 
         return html;
     }
@@ -930,12 +939,12 @@ $(document).ready(function() {
 								reqItems.itemCategory,
 								reqItems.itemUom,
 								reqItems.requestQuantity,
-									(SELECT 
+									( SELECT 
 										CASE 
-										WHEN ((SUM(itmStock.quantity)-reOrderLevel) - (SELECT SUM(reservedItem) FROM ims_request_items_tbl WHERE itemID = reqItems.itemID)) < 0 
+										WHEN ((IFNULL(SUM(itmStock.quantity),0)-IFNULL(reOrderLevel,0)) - (SELECT IFNULL(SUM(reservedItem),0) FROM ims_request_items_tbl WHERE itemID = reqItems.itemID)) < 0 
 											THEN  0
-										WHEN  ((SUM(itmStock.quantity)-reOrderLevel) - (SELECT SUM(reservedItem) FROM ims_request_items_tbl WHERE itemID = reqItems.itemID)) > 0 
-											THEN (SUM(itmStock.quantity)-reOrderLevel - (SELECT SUM(reservedItem) FROM ims_request_items_tbl WHERE itemID = reqItems.itemID))
+										WHEN  ((IFNULL(SUM(itmStock.quantity),0)-IFNULL(reOrderLevel,0)) - (SELECT IFNULL(SUM(reservedItem),0) FROM ims_request_items_tbl WHERE itemID = reqItems.itemID)) > 0 
+											THEN (IFNULL(SUM(itmStock.quantity),0)-IFNULL(reOrderLevel,0) - (SELECT IFNULL(SUM(reservedItem),0) FROM ims_request_items_tbl WHERE itemID = reqItems.itemID))
 										END as availableStocks
 									FROM ims_stock_in_item_tbl AS itmStock 
 									LEFT JOIN ims_inventory_item_tbl AS itm ON itm.itemID = itmStock.itemID
@@ -945,12 +954,12 @@ $(document).ready(function() {
 	
 									(SELECT 
 										CASE 
-										WHEN ((SUM(itmStock.quantity)-reOrderLevel) - (SELECT SUM(reservedItem) FROM ims_request_items_tbl WHERE itemID = reqItems.itemID)) < reqItems.requestQuantity 
-										THEN IF( ( (SUM(itmStock.quantity)-reOrderLevel) - (SELECT SUM(reservedItem) FROM ims_request_items_tbl WHERE itemID = reqItems.itemID) ) <0, 
+										WHEN ((IFNULL(SUM(itmStock.quantity),0)-IFNULL(reOrderLevel,0)) - (SELECT IFNULL(SUM(reservedItem),0) FROM ims_request_items_tbl WHERE itemID = reqItems.itemID)) < reqItems.requestQuantity
+										THEN IF( ( (IFNULL(SUM(itmStock.quantity),0)-IFNULL(reOrderLevel,0)) - (SELECT IFNULL(SUM(reservedItem),0) FROM ims_request_items_tbl WHERE itemID = reqItems.itemID) ) <0, 
 												reqItems.requestQuantity ,
-												reqItems.requestQuantity  - ((SUM(itmStock.quantity)-reOrderLevel) - (SELECT SUM(reservedItem) FROM ims_request_items_tbl WHERE itemID = reqItems.itemID)))
+												reqItems.requestQuantity  - ((IFNULL(SUM(itmStock.quantity),0)-IFNULL(reOrderLevel,0)) - (SELECT IFNULL(SUM(reservedItem),0) FROM ims_request_items_tbl WHERE itemID = reqItems.itemID)))
 											
-										WHEN  ((SUM(itmStock.quantity)-reOrderLevel) - (SELECT SUM(reservedItem) FROM ims_request_items_tbl WHERE itemID = reqItems.itemID) ) >  reqItems.requestQuantity
+										WHEN  ((IFNULL(SUM(itmStock.quantity),0)-IFNULL(reOrderLevel,0)) - (SELECT IFNULL(SUM(reservedItem),0) FROM ims_request_items_tbl WHERE itemID = reqItems.itemID) ) >  reqItems.requestQuantity
 											THEN 0
 										END as forPurchase
 																	
@@ -979,7 +988,8 @@ $(document).ready(function() {
 								reqItems.availableStocks,
 								reqItems.forPurchase
 							`, 
-							`inventoryValidationID = ${inventoryValidationID}`);
+							`inventoryValidationID = ${inventoryValidationID}
+							AND bidRecapID IS NULL`);
 					}
 				}
 				// else{
@@ -1142,30 +1152,32 @@ $(document).ready(function() {
 								reqAsset.assetCategory,
 								reqAsset.assetUom,
 								reqAsset.requestQuantity,
-										(SELECT 
+									
+	
+									( SELECT 
 										CASE 
-										WHEN ((SUM(astStock.quantity)-reOrderLevel) - (SELECT SUM(reservedAsset) FROM ims_request_assets_tbl WHERE assetID = reqAsset.assetID)) < 0 
+										WHEN ((IFNULL(SUM(astStock.quantity),0)-IFNULL(reOrderLevel,0)) - (SELECT IFNULL(SUM(reservedAsset),0) FROM ims_request_assets_tbl WHERE assetID = reqAsset.assetID)) < 0 
 											THEN  0
-										WHEN  ((SUM(astStock.quantity)-reOrderLevel) - (SELECT SUM(reservedAsset) FROM ims_request_assets_tbl WHERE assetID = reqAsset.assetID)) > 0 
-											THEN (SUM(astStock.quantity)-reOrderLevel - (SELECT SUM(reservedAsset) FROM ims_request_assets_tbl WHERE assetID = reqAsset.assetID))
+										WHEN  ((IFNULL(SUM(astStock.quantity),0)-IFNULL(reOrderLevel,0)) - (SELECT IFNULL(SUM(reservedAsset),0) FROM ims_request_assets_tbl WHERE assetID = reqAsset.assetID)) > 0 
+											THEN (IFNULL(SUM(astStock.quantity),0)-IFNULL(reOrderLevel,0) - (SELECT IFNULL(SUM(reservedAsset),0) FROM ims_request_assets_tbl WHERE assetID = reqAsset.assetID))
 										END as availableStocks
 									FROM ims_stock_in_assets_tbl AS astStock 
 									LEFT JOIN ims_inventory_asset_tbl AS ast ON ast.assetID = astStock.stockInAssetID
 									WHERE astStock.stockOutDate IS NUll 
 									AND astStock.stockInDate IS NOT NULL 
 									AND astStock.stockInAssetID = reqAsset.assetID) as availableStocks,
-	
+
 									(SELECT 
 										CASE 
-										WHEN ((SUM(astStock.quantity)-reOrderLevel) - (SELECT SUM(reservedAsset) FROM ims_request_assets_tbl WHERE assetID = reqAsset.assetID)) < reqAsset.requestQuantity 
-										THEN IF( ( (SUM(astStock.quantity)-reOrderLevel) - (SELECT SUM(reservedAsset) FROM ims_request_assets_tbl WHERE assetID = reqAsset.assetID) ) <0, 
+										WHEN ((IFNULL(SUM(astStock.quantity),0)-IFNULL(reOrderLevel,0)) - (SELECT IFNULL(SUM(reservedAsset),0) FROM ims_request_assets_tbl WHERE assetID = reqAsset.assetID)) < reqAsset.requestQuantity
+										THEN IF( ( (IFNULL(SUM(astStock.quantity),0)-IFNULL(reOrderLevel,0)) - (SELECT IFNULL(SUM(reservedAsset),0) FROM ims_request_assets_tbl WHERE assetID = reqAsset.assetID) ) <0, 
 												reqAsset.requestQuantity ,
-												reqAsset.requestQuantity  - ((SUM(astStock.quantity)-reOrderLevel) - (SELECT SUM(reservedAsset) FROM ims_request_assets_tbl WHERE assetID = reqAsset.assetID)))
+												reqAsset.requestQuantity  - ((IFNULL(SUM(astStock.quantity),0)-IFNULL(reOrderLevel,0)) - (SELECT IFNULL(SUM(reservedAsset),0) FROM ims_request_assets_tbl WHERE assetID = reqAsset.assetID)))
 											
-										WHEN  ((SUM(astStock.quantity)-reOrderLevel) - (SELECT SUM(reservedAsset) FROM ims_request_assets_tbl WHERE assetID = reqAsset.assetID) ) >  reqAsset.requestQuantity
+										WHEN  ((IFNULL(SUM(astStock.quantity),0)-IFNULL(reOrderLevel,0)) - (SELECT IFNULL(SUM(reservedAsset),0) FROM ims_request_assets_tbl WHERE assetID = reqAsset.assetID) ) >  reqAsset.requestQuantity
 											THEN 0
 										END as forPurchase
-																	
+																
 									FROM ims_stock_in_assets_tbl  AS astStock 
 									LEFT JOIN ims_inventory_asset_tbl AS ast ON ast.assetID = astStock.stockInAssetID
 									WHERE astStock.stockOutDate IS NUll 
@@ -1190,7 +1202,8 @@ $(document).ready(function() {
 								reqAsset.availableStocks,
 								reqAsset.forPurchase
 							`, 
-							`inventoryValidationID = ${inventoryValidationID}`);
+							`inventoryValidationID = ${inventoryValidationID}
+							 AND bidRecapID IS NULL`);
 					}
 				}
 				// else{
@@ -1402,7 +1415,7 @@ $(document).ready(function() {
                     <div class="body">
                         <small class="text-small text-muted font-weight-bold">Status</small>
                         <h6 class="mt-0 font-weight-bold">
-							${inventoryValidationStatus && !isRevise ? getStatusStyle(inventoryValidationStatus) : "---"}
+							${inventoryValidationStatus && !isRevise ? getStatusStyle(inventoryValidationStatus,true) : "---"}
 						</h6>      
                     </div>
                 </div>
@@ -1976,7 +1989,8 @@ $(document).ready(function() {
 					let getForPurchase = +$(this).find(".forpurchase").text().replaceAll(",","") || $(this).find(".forpurchase").text();
 					let getAvailableStocks = +$(this).find(".availablestocks").text().replaceAll(",","") || $(this).find(".availablestocks").text();
 
-					let costEstimateID = tableData.costEstimateID;
+					if(requestItemData.length !=0){
+						let costEstimateID = tableData.costEstimateID;
 					let billMaterialID = tableData.billMaterialID;
 					let materialRequestID = tableData.materialRequestID;
 					let bidRecapID = tableData.bidRecapID;
@@ -2060,6 +2074,9 @@ $(document).ready(function() {
 					data.append(`items[${i}][availableStocks]` , availableStocks );
 					data.append(`items[${i}][unitCost]` , unitCost);
 					data.append(`items[${i}][totalCost]` , totalCost);
+					}
+
+					
 				});
 
 
@@ -2086,97 +2103,101 @@ $(document).ready(function() {
 					let getForPurchase = +$(this).find(".forpurchase").text().replaceAll(",","") || $(this).find(".forpurchase").text();
 					let getAvailableStocks = +$(this).find(".availablestocks").text().replaceAll(",","") || $(this).find(".availablestocks").text();
 
-					let costEstimateID = tableData.costEstimateID;
-					let billMaterialID = tableData.billMaterialID;
-					let materialRequestID = tableData.materialRequestID;
-					let bidRecapID = tableData.bidRecapID;
-					let purchaseRequestID = tableData.purchaseRequestID;
-					let purchaseOrderID = tableData.purchaseOrderID;
-					let changeRequestID = tableData.changeRequestID;
-					let inventoryReceivingID = tableData.inventoryReceivingID;
-					let inventoryVendorID = tableData.inventoryVendorID;
-					let inventoryVendorCode = tableData.inventoryVendorCode;
-					let inventoryVendorName = tableData.inventoryVendorName;
-					let finalQuoteRemarks = tableData.finalQuoteRemarks;
-					let milestoneBuilderID = tableData.milestoneBuilderID;
-					let phaseDescription = tableData.phaseDescription;
-					let milestoneListID = tableData.milestoneListID;
-					let projectMilestoneID = tableData.projectMilestoneID;
-					let projectMilestoneName = tableData.projectMilestoneName;
-					let assetID = tableData.assetID;
-					let assetCode = tableData.assetCode;
-					let assetBrandName = tableData.assetBrandName;
-					let assetName = tableData.assetName;
-					let assetClassification = tableData.assetClassification;
-					let assetCategory = tableData.assetCategory;
-					let assetUom = tableData.assetUom;
-					let assetDescription = tableData.assetDescription;
-					let files = tableData.files;
-					let remarks = tableData.remarks;
-					let requestQuantity = tableData.requestQuantity;
-
-					let computeReservedAsset  = "";
-
-					if(getForPurchase == 0 ){
-						if( getAvailableStocks ==0){
-							computeReservedAsset = 0;
-
+					if(requestAssetData.length !=0){
+						let costEstimateID = tableData.costEstimateID;
+						let billMaterialID = tableData.billMaterialID;
+						let materialRequestID = tableData.materialRequestID;
+						let bidRecapID = tableData.bidRecapID;
+						let purchaseRequestID = tableData.purchaseRequestID;
+						let purchaseOrderID = tableData.purchaseOrderID;
+						let changeRequestID = tableData.changeRequestID;
+						let inventoryReceivingID = tableData.inventoryReceivingID;
+						let inventoryVendorID = tableData.inventoryVendorID;
+						let inventoryVendorCode = tableData.inventoryVendorCode;
+						let inventoryVendorName = tableData.inventoryVendorName;
+						let finalQuoteRemarks = tableData.finalQuoteRemarks;
+						let milestoneBuilderID = tableData.milestoneBuilderID;
+						let phaseDescription = tableData.phaseDescription;
+						let milestoneListID = tableData.milestoneListID;
+						let projectMilestoneID = tableData.projectMilestoneID;
+						let projectMilestoneName = tableData.projectMilestoneName;
+						let assetID = tableData.assetID;
+						let assetCode = tableData.assetCode;
+						let assetBrandName = tableData.assetBrandName;
+						let assetName = tableData.assetName;
+						let assetClassification = tableData.assetClassification;
+						let assetCategory = tableData.assetCategory;
+						let assetUom = tableData.assetUom;
+						let assetDescription = tableData.assetDescription;
+						let files = tableData.files;
+						let remarks = tableData.remarks;
+						let requestQuantity = tableData.requestQuantity;
+	
+						let computeReservedAsset  = "";
+	
+						if(getForPurchase == 0 ){
+							if( getAvailableStocks ==0){
+								computeReservedAsset = 0;
+	
+							}else{
+								computeReservedAsset =  requestQuantity;
+	
+							}
 						}else{
-							computeReservedAsset =  requestQuantity;
-
+							 computeReservedAsset = Math.abs(getForPurchase - requestQuantity);
+	
 						}
-					}else{
-						 computeReservedAsset = Math.abs(getForPurchase - requestQuantity);
-
+						
+						let reservedAsset = computeReservedAsset || tableData.reservedAsset;
+						let	requestManHours = tableData.requestManHours;
+						let	dateNeeded = tableData.dateNeeded;
+						let	dateReturn = tableData.dateReturn;
+						let	actualDateReturn = tableData.actualDateReturn;
+						let forPurchase 			= getForPurchase;
+						let availableStocks 		= getAvailableStocks;
+						let totalCost = tableData.totalCost;
+	
+	
+						data.append(`assets[${i}][costEstimateID]` , costEstimateID);
+						data.append(`assets[${i}][billMaterialID]` , billMaterialID);
+						data.append(`assets[${i}][materialRequestID]` , materialRequestID);
+						data.append(`assets[${i}][inventoryValidationID]` , inventoryValidationID);
+						data.append(`assets[${i}][bidRecapID]` , bidRecapID);
+						data.append(`assets[${i}][purchaseRequestID]` , purchaseRequestID);
+						data.append(`assets[${i}][purchaseOrderID]` , purchaseOrderID);
+						data.append(`assets[${i}][changeRequestID]` , changeRequestID);
+						data.append(`assets[${i}][inventoryReceivingID]` , inventoryReceivingID);
+						data.append(`assets[${i}][inventoryVendorID]` , inventoryVendorID);
+						data.append(`assets[${i}][inventoryVendorCode]` , inventoryVendorCode);
+						data.append(`assets[${i}][inventoryVendorName]` , inventoryVendorName);
+						data.append(`assets[${i}][finalQuoteRemarks]` , finalQuoteRemarks);
+						data.append(`assets[${i}][milestoneBuilderID]` , milestoneBuilderID);
+						data.append(`assets[${i}][phaseDescription]` , phaseDescription);
+						data.append(`assets[${i}][milestoneListID]` , milestoneListID);
+						data.append(`assets[${i}][projectMilestoneID]` , projectMilestoneID);
+						data.append(`assets[${i}][projectMilestoneName]` , projectMilestoneName);
+						data.append(`assets[${i}][assetID]` , assetID);
+						data.append(`assets[${i}][assetode]` ,assetCode);
+						data.append(`assets[${i}][assetBrandName]` , assetBrandName);
+						data.append(`assets[${i}][assetName]` , assetName);
+						data.append(`assets[${i}][assetClassification]` , assetClassification);
+						data.append(`assets[${i}][assetCategory]` , assetCategory);
+						data.append(`assets[${i}][assetUom]` , assetUom);
+						data.append(`assets[${i}][assetDescription]` , assetDescription);
+						data.append(`assets[${i}][files]` , files);
+						data.append(`assets[${i}][remarks]`  , remarks);
+						data.append(`assets[${i}][requestQuantity]` , requestQuantity);
+						data.append(`assets[${i}][reservedAsset]` , reservedAsset);
+						data.append(`assets[${i}][forPurchase]` , forPurchase);
+						data.append(`assets[${i}][availableStocks]` , availableStocks );
+						data.append(`assets[${i}][requestManHours]` , requestManHours );
+						data.append(`assets[${i}][dateNeeded]` , dateNeeded );
+						data.append(`assets[${i}][dateReturn]` , dateReturn );
+						data.append(`assets[${i}][actualDateReturn]` , actualDateReturn );
+						data.append(`assets[${i}][totalCost]` , totalCost);
 					}
-					
-					let reservedAsset = computeReservedAsset || tableData.reservedAsset;
-					let	requestManHours = tableData.requestManHours;
-					let	dateNeeded = tableData.dateNeeded;
-					let	dateReturn = tableData.dateReturn;
-					let	actualDateReturn = tableData.actualDateReturn;
-					let forPurchase 			= getForPurchase;
-					let availableStocks 		= getAvailableStocks;
-					let totalCost = tableData.totalCost;
 
-
-					data.append(`assets[${i}][costEstimateID]` , costEstimateID);
-					data.append(`assets[${i}][billMaterialID]` , billMaterialID);
-					data.append(`assets[${i}][materialRequestID]` , materialRequestID);
-					data.append(`assets[${i}][inventoryValidationID]` , inventoryValidationID);
-					data.append(`assets[${i}][bidRecapID]` , bidRecapID);
-					data.append(`assets[${i}][purchaseRequestID]` , purchaseRequestID);
-					data.append(`assets[${i}][purchaseOrderID]` , purchaseOrderID);
-					data.append(`assets[${i}][changeRequestID]` , changeRequestID);
-					data.append(`assets[${i}][inventoryReceivingID]` , inventoryReceivingID);
-					data.append(`assets[${i}][inventoryVendorID]` , inventoryVendorID);
-					data.append(`assets[${i}][inventoryVendorCode]` , inventoryVendorCode);
-					data.append(`assets[${i}][inventoryVendorName]` , inventoryVendorName);
-					data.append(`assets[${i}][finalQuoteRemarks]` , finalQuoteRemarks);
-					data.append(`assets[${i}][milestoneBuilderID]` , milestoneBuilderID);
-					data.append(`assets[${i}][phaseDescription]` , phaseDescription);
-					data.append(`assets[${i}][milestoneListID]` , milestoneListID);
-					data.append(`assets[${i}][projectMilestoneID]` , projectMilestoneID);
-					data.append(`assets[${i}][projectMilestoneName]` , projectMilestoneName);
-					data.append(`assets[${i}][assetID]` , assetID);
-					data.append(`assets[${i}][assetode]` ,assetCode);
-					data.append(`assets[${i}][assetBrandName]` , assetBrandName);
-					data.append(`assets[${i}][assetName]` , assetName);
-					data.append(`assets[${i}][assetClassification]` , assetClassification);
-					data.append(`assets[${i}][assetCategory]` , assetCategory);
-					data.append(`assets[${i}][assetUom]` , assetUom);
-					data.append(`assets[${i}][assetDescription]` , assetDescription);
-					data.append(`assets[${i}][files]` , files);
-					data.append(`assets[${i}][remarks]`  , remarks);
-					data.append(`assets[${i}][requestQuantity]` , requestQuantity);
-					data.append(`assets[${i}][reservedAsset]` , reservedAsset);
-					data.append(`assets[${i}][forPurchase]` , forPurchase);
-					data.append(`assets[${i}][availableStocks]` , availableStocks );
-					data.append(`assets[${i}][requestManHours]` , requestManHours );
-					data.append(`assets[${i}][dateNeeded]` , dateNeeded );
-					data.append(`assets[${i}][dateReturn]` , dateReturn );
-					data.append(`assets[${i}][actualDateReturn]` , actualDateReturn );
-					data.append(`assets[${i}][totalCost]` , totalCost);
+				
 				});
 
 			} else {

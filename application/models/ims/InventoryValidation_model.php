@@ -30,6 +30,19 @@ class InventoryValidation_model extends CI_Model {
 
         if ($query) {
             $insertID = $action == "insert" ? $this->db->insert_id() : $id;
+
+            $inventoryValidationCode = "IVR-".date("y")."-".str_pad($insertID, 5, "0", STR_PAD_LEFT);
+            $updateArr = ["inventoryValidationCode"=> $inventoryValidationCode ];
+            $this->db->update("ims_inventory_validation_tbl", $updateArr, ["inventoryValidationID" => $insertID]);
+
+            // ---- INSERT BID RECAP IF APPROVE -----
+            $inventoryValidationStatus = $data["inventoryValidationStatus"];
+            if ($inventoryValidationStatus == "2")
+            {
+                $insertBidRecapData = $this->insertBidRecapData($insertID);
+            }
+            // ---- END INSERT BID RECAP IF APPROVE -----
+
             return "true|Successfully submitted|$insertID|".date("Y-m-d");
         }
         return "false|System error: Please contact the system administrator for assistance!";
@@ -46,6 +59,15 @@ class InventoryValidation_model extends CI_Model {
                 "bidRecapID "            => NULL
             ]);
         return $query ? true : false;
+    }
+
+    public function saveMaterialWithdrawalDocument($data){
+      
+        $query = $this->db->insert("ims_material_withdrawal_tbl", $data);
+        if ($query) {
+            return "true|Successfully submitted";
+        }
+        return "false|System error: Please contact the system administrator for assistance!";
     }
 
     public function saveInventoryValidationItems($data, $inventoryValidationID = null, $purchaseRequestID = null){
@@ -244,5 +266,201 @@ class InventoryValidation_model extends CI_Model {
         ];
         return $result;
     }
+
+
+
+
+    // ----- ***** BID RECAP ***** -----
+    public function getInventoryValidationData($inventoryValidationID = 0)
+    {
+        $sql = "SELECT * FROM ims_inventory_validation_tbl WHERE inventoryValidationID = $inventoryValidationID";
+        $query = $this->db->query($sql);
+        return $query ? $query->row() : null;
+    }
+
+    public function getInventoryValidationRequestItems($inventoryValidationID = 0)
+    {
+        $sql = "SELECT * FROM ims_request_items_tbl WHERE inventoryValidationID = $inventoryValidationID AND bidRecapID IS NULL";
+        $query = $this->db->query($sql);
+        return $query ? $query->result_array() : [];
+    }
+
+    public function getInventoryValidationAssets($inventoryValidationID = 0)
+    {
+        $sql = "SELECT * FROM ims_request_assets_tbl WHERE inventoryValidationID = $inventoryValidationID AND bidRecapID IS NULL";
+        $query = $this->db->query($sql);
+        return $query ? $query->result_array() : [];
+    }
+
+    public function insertBidRecapItems($inventoryValidationID = 0, $bidRecapID = 0)
+    {
+        $requestItems = $this->getInventoryValidationRequestItems($inventoryValidationID);
+        if ($requestItems && count($requestItems) > 0)
+        {
+            $data = [];
+            foreach($requestItems as $item)
+            {
+                $data[] = [
+                    'costEstimateID'          => $item['costEstimateID'],
+                    'billMaterialID'          => $item['billMaterialID'],
+                    'materialRequestID'       => $item['materialRequestID'],
+                    'inventoryValidationID'   => $item['inventoryValidationID'],
+                    'bidRecapID'              => $bidRecapID,
+                    'finalQuoteID'            => $item['finalQuoteID'],
+                    'purchaseRequestID'       => $item['purchaseRequestID'],
+                    'purchaseOrderID'         => $item['purchaseOrderID'],
+                    'changeRequestID'         => $item['changeRequestID'],
+                    'inventoryReceivingID'    => $item['inventoryReceivingID'],
+                    'candidateVendorID'       => $item['candidateVendorID'],
+                    'candidateSelectedVendor' => $item['candidateSelectedVendor'],
+                    'candidateVendorName'     => $item['candidateVendorName'],
+                    'candidateVendorPrice'    => $item['candidateVendorPrice'],
+                    'inventoryVendorID'       => $item['inventoryVendorID'],
+                    'inventoryVendorCode'     => $item['inventoryVendorCode'],
+                    'inventoryVendorName'     => $item['inventoryVendorName'],
+                    'milestoneBuilderID'      => $item['milestoneBuilderID'],
+                    'phaseDescription'        => $item['phaseDescription'],
+                    'milestoneListID'         => $item['milestoneListID'],
+                    'projectMilestoneID'      => $item['projectMilestoneID'],
+                    'projectMilestoneName'    => $item['projectMilestoneName'],
+                    'itemID'                  => $item['itemID'],
+                    'itemCode'                => $item['itemCode'],
+                    'itemBrandName'           => $item['itemBrandName'],
+                    'itemName'                => $item['itemName'],
+                    'itemClassification'      => $item['itemClassification'],
+                    'itemCategory'            => $item['itemCategory'],
+                    'itemUom'                 => $item['itemUom'],
+                    'itemDescription'         => $item['itemDescription'],
+                    'files'                   => $item['files'],
+                    'remarks'                 => $item['remarks'],
+                    'availableStocks'         => $item['availableStocks'],
+                    'requestQuantity'         => $item['requestQuantity'],
+                    'reservedItem'            => $item['reservedItem'],
+                    'forPurchase'             => $item['forPurchase'],
+                    'unitCost'                => $item['unitCost'],
+                    'totalCost'               => $item['totalCost'],
+                    'createdBy'               => $item['createdBy'],
+                    'updatedBy'               => $item['updatedBy'],
+                ];
+            }
+            $query = $this->db->insert_batch("ims_request_items_tbl", $data);
+            return $query ? true : false;
+        }
+        return false;
+    }
+
+    public function insertBidRecapAssets($inventoryValidationID = 0, $bidRecapID = 0)
+    {
+        $requestAssets = $this->getInventoryValidationAssets($inventoryValidationID);
+        if ($requestAssets && count($requestAssets) > 0)
+        {
+            $data = [];
+            foreach($requestAssets as $asset)
+            {
+                $data[] = [
+                    'costEstimateID'          => $asset['costEstimateID'],
+                    'billMaterialID'          => $asset['billMaterialID'],
+                    'materialRequestID'       => $asset['materialRequestID'],
+                    'inventoryValidationID'   => $asset['inventoryValidationID'],
+                    'bidRecapID'              => $bidRecapID,
+                    'finalQuoteID'            => $asset['finalQuoteID'],
+                    'purchaseRequestID'       => $asset['purchaseRequestID'],
+                    'purchaseOrderID'         => $asset['purchaseOrderID'],
+                    'changeRequestID'         => $asset['changeRequestID'],
+                    'inventoryReceivingID'    => $asset['inventoryReceivingID'],
+                    'candidateVendorID'       => $asset['candidateVendorID'],
+                    'candidateSelectedVendor' => $asset['candidateSelectedVendor'],
+                    'candidateVendorName'     => $asset['candidateVendorName'],
+                    'candidateVendorPrice'    => $asset['candidateVendorPrice'],
+                    'inventoryVendorID'       => $asset['inventoryVendorID'],
+                    'inventoryVendorCode'     => $asset['inventoryVendorCode'],
+                    'inventoryVendorName'     => $asset['inventoryVendorName'],
+                    'milestoneBuilderID'      => $asset['milestoneBuilderID'],
+                    'phaseDescription'        => $asset['phaseDescription'],
+                    'milestoneListID'         => $asset['milestoneListID'],
+                    'projectMilestoneID'      => $asset['projectMilestoneID'],
+                    'projectMilestoneName'    => $asset['projectMilestoneName'],
+                    'assetID'                 => $asset['assetID'],
+                    'assetCode'               => $asset['assetCode'],
+                    'assetBrandName'          => $asset['assetBrandName'],
+                    'assetName'               => $asset['assetName'],
+                    'assetClassification'     => $asset['assetClassification'],
+                    'assetCategory'           => $asset['assetCategory'],
+                    'assetUom'                => $asset['assetUom'],
+                    'assetDescription'        => $asset['assetDescription'],
+                    'files'                   => $asset['files'],
+                    'remarks'                 => $asset['remarks'],
+                    'availableStocks'         => $asset['availableStocks'],
+                    'requestQuantity'         => $asset['requestQuantity'],
+                    'reservedAsset'           => $asset['reservedAsset'],
+                    'forPurchase'             => $asset['forPurchase'],
+                    'requestManHours'         => $asset['requestManHours'],
+                    'dateNeeded'              => $asset['dateNeeded'],
+                    'dateReturn'              => $asset['dateReturn'],
+                    'actualDateReturn'        => $asset['actualDateReturn'],
+                    'hourlyRate'              => $asset['hourlyRate'],
+                    'unitCost'                => $asset['unitCost'],
+                    'totalCost'               => $asset['totalCost'],
+                    'createdBy'               => $asset['createdBy'],
+                    'updatedBy'               => $asset['updatedBy'],
+                ];
+            }
+            $query = $this->db->insert_batch("ims_request_assets_tbl", $data);
+            return $query ? true : false;
+        }
+        return false;
+    }
+
+    public function insertBidRecapItemAssetData($inventoryValidationID = 0, $purchaseRequestID = 0)
+    {
+        $insertBidRecapItems  = $this->insertBidRecapItems($inventoryValidationID, $purchaseRequestID);
+        $insertBidRecapAssets = $this->insertBidRecapAssets($inventoryValidationID, $purchaseRequestID);
+    }
+
+    public function insertBidRecapData($inventoryValidationID = 0)
+    {
+        $sessionID = $this->session->has_userdata('adminSessionID') ? $this->session->userdata('adminSessionID') : 0;
+
+        $inventoryValidationData = $this->getInventoryValidationData($inventoryValidationID);
+        if ($inventoryValidationData)
+        {
+            $data = [
+                'inventoryValidationID'   => $inventoryValidationData->inventoryValidationID,
+                'inventoryValidationCode' => $inventoryValidationData->inventoryValidationCode,
+                'materialRequestID'       => $inventoryValidationData->materialRequestID,
+                'materialRequestCode'     => $inventoryValidationData->materialRequestCode,
+                'costEstimateID'          => $inventoryValidationData->costEstimateID,
+                'costEstimateCode'        => $inventoryValidationData->costEstimateCode,
+                'billMaterialID'          => $inventoryValidationData->billMaterialID,
+                'billMaterialCode'        => $inventoryValidationData->billMaterialCode,
+                'employeeID'              => 0,
+                'timelineBuilderID'       => $inventoryValidationData->timelineBuilderID,
+                'projectCode'             => $inventoryValidationData->projectCode,
+                'projectName'             => $inventoryValidationData->projectName,
+                'projectCategory'         => $inventoryValidationData->projectCategory,
+                'clientCode'              => $inventoryValidationData->clientCode,
+                'clientName'              => $inventoryValidationData->clientName,
+                'clientAddress'           => $inventoryValidationData->clientAddress,
+                'bidRecapReason'          => $inventoryValidationData->inventoryValidationReason,
+                'dateNeeded'              => $inventoryValidationData->dateNeeded,
+                'bidRecapStatus'          => 0,
+                'createdBy'               => $inventoryValidationData->employeeID,
+                'updatedBy'               => $sessionID,
+            ];
+            $saveBidRecap = $this->db->insert("ims_bid_recap_tbl", $data);
+            if ($saveBidRecap)
+            {
+                $bidRecapID = $this->db->insert_id();
+                $bidRecapCode = getFormCode("BR", date("Y-m-d"), $bidRecapID);
+                $this->db->update(
+                    "ims_bid_recap_tbl", 
+                    ["bidRecapCode" => $bidRecapCode], 
+                    ["bidRecapID" => $bidRecapID]);
+                $insertBidRecapItemAssetData = $this->insertBidRecapItemAssetData($inventoryValidationID, $bidRecapID);
+            }
+        }
+        return false;
+    }
+    // ----- ***** END BID RECAP ***** -----
 
 }

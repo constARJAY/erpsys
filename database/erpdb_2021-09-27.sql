@@ -2507,6 +2507,12 @@ CREATE TABLE `ims_bid_recap_tbl` (
   `bidRecapCode` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `reviseBidRecapID` bigint(21) DEFAULT NULL,
   `reviseBidRecapCode` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `costEstimateID` bigint(21) DEFAULT NULL,
+  `costEstimateCode` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `billMaterialID` bigint(21) DEFAULT NULL,
+  `billMaterialCode` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `materialRequestID` bigint(21) DEFAULT NULL,
+  `materialRequestCode` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `inventoryValidationID` bigint(21) DEFAULT NULL,
   `inventoryValidationCode` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `timelineBuilderID` bigint(21) DEFAULT NULL,
@@ -2521,8 +2527,11 @@ CREATE TABLE `ims_bid_recap_tbl` (
   `approversID` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `approversDate` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `approversStatus` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `dateNeeded` date DEFAULT NULL,
   `bidRecapStatus` int(11) DEFAULT NULL,
   `bidRecapRemarks` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `assetFinalQuoteStatus` int(11) DEFAULT 0,
+  `itemFinalQuoteStatus` int(11) DEFAULT 0,
   `submittedAt` timestamp NULL DEFAULT NULL,
   `createdBy` bigint(21) DEFAULT NULL,
   `updatedBy` bigint(21) DEFAULT NULL,
@@ -2611,6 +2620,42 @@ CREATE TABLE `ims_borrowing_tbl` (
 LOCK TABLES `ims_borrowing_tbl` WRITE;
 /*!40000 ALTER TABLE `ims_borrowing_tbl` DISABLE KEYS */;
 /*!40000 ALTER TABLE `ims_borrowing_tbl` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `ims_final_quote_tbl`
+--
+
+DROP TABLE IF EXISTS `ims_final_quote_tbl`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `ims_final_quote_tbl` (
+  `finalQuoteID` bigint(21) NOT NULL AUTO_INCREMENT,
+  `bidRecapID` bigint(21) DEFAULT NULL,
+  `classification` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `inventoryVendorID` bigint(21) DEFAULT NULL,
+  `vendorCode` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `vendorName` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `vendorAddress` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `vendorContactDetails` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `vendorContactPerson` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `finalQuoteRemarks` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `finalQuoteTotal` decimal(15,2) DEFAULT NULL,
+  `createdBy` bigint(21) DEFAULT NULL,
+  `updatedBy` bigint(21) DEFAULT NULL,
+  `createdAt` timestamp NULL DEFAULT current_timestamp(),
+  `updatedAt` timestamp NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`finalQuoteID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `ims_final_quote_tbl`
+--
+
+LOCK TABLES `ims_final_quote_tbl` WRITE;
+/*!40000 ALTER TABLE `ims_final_quote_tbl` DISABLE KEYS */;
+/*!40000 ALTER TABLE `ims_final_quote_tbl` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -3722,6 +3767,16 @@ CREATE TABLE `ims_purchase_request_tbl` (
   `purchaseRequestCode` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `revisePurchaseRequestID` bigint(21) DEFAULT NULL,
   `revisePurchaseRequestCode` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `costEstimateID` bigint(21) DEFAULT NULL,
+  `costEstimateCode` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `billMaterialID` bigint(21) DEFAULT NULL,
+  `billMaterialCode` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `materialRequestID` bigint(21) DEFAULT NULL,
+  `materialRequestCode` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `inventoryValidationID` bigint(21) DEFAULT NULL,
+  `inventoryValidationCode` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `bidRecapID` bigint(21) DEFAULT NULL,
+  `bidRecapCode` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `timelineBuilderID` bigint(21) DEFAULT NULL,
   `projectCode` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `projectName` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
@@ -3729,8 +3784,6 @@ CREATE TABLE `ims_purchase_request_tbl` (
   `clientCode` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `clientName` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `clientAddress` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `bidRecapID` bigint(21) DEFAULT NULL,
-  `bidRecapCode` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `employeeID` bigint(21) DEFAULT NULL,
   `inventoryVendorID` bigint(21) DEFAULT NULL,
   `vendorCode` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
@@ -3819,16 +3872,18 @@ CREATE TABLE `ims_request_assets_tbl` (
   `materialRequestID` bigint(20) DEFAULT NULL,
   `inventoryValidationID` bigint(20) DEFAULT NULL,
   `bidRecapID` bigint(20) DEFAULT NULL,
+  `finalQuoteID` bigint(21) DEFAULT NULL,
   `purchaseRequestID` bigint(20) DEFAULT NULL,
   `purchaseOrderID` bigint(20) DEFAULT NULL,
   `changeRequestID` bigint(20) DEFAULT NULL,
   `inventoryReceivingID` bigint(20) DEFAULT NULL,
-  `candidateVendor` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `candidateVendorID` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `candidateSelectedVendor` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `candidateVendorName` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `candidateVendorPrice` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `inventoryVendorID` bigint(20) DEFAULT NULL,
   `inventoryVendorCode` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `inventoryVendorName` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `finalQuoteRemarks` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `milestoneBuilderID` bigint(20) DEFAULT NULL,
   `phaseDescription` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `milestoneListID` bigint(20) DEFAULT NULL,
@@ -3855,6 +3910,7 @@ CREATE TABLE `ims_request_assets_tbl` (
   `hourlyRate` bigint(20) DEFAULT NULL,
   `unitCost` decimal(15,2) DEFAULT NULL,
   `totalCost` bigint(20) DEFAULT NULL,
+  `finalQuoteRemarks` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `createdBy` bigint(20) NOT NULL,
   `updatedBy` bigint(20) NOT NULL,
   `createdAt` timestamp NOT NULL DEFAULT current_timestamp(),
@@ -3886,16 +3942,18 @@ CREATE TABLE `ims_request_items_tbl` (
   `materialRequestID` bigint(20) DEFAULT NULL,
   `inventoryValidationID` bigint(20) DEFAULT NULL,
   `bidRecapID` bigint(20) DEFAULT NULL,
+  `finalQuoteID` bigint(21) DEFAULT NULL,
   `purchaseRequestID` bigint(20) DEFAULT NULL,
   `purchaseOrderID` bigint(20) DEFAULT NULL,
   `changeRequestID` bigint(20) DEFAULT NULL,
   `inventoryReceivingID` bigint(20) DEFAULT NULL,
-  `candidateVendor` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `candidateVendorID` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `candidateSelectedVendor` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `candidateVendorName` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `candidateVendorPrice` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `inventoryVendorID` bigint(20) DEFAULT NULL,
   `inventoryVendorCode` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `inventoryVendorName` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `finalQuoteRemarks` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `milestoneBuilderID` bigint(20) DEFAULT NULL,
   `phaseDescription` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `milestoneListID` bigint(20) DEFAULT NULL,
@@ -3917,6 +3975,7 @@ CREATE TABLE `ims_request_items_tbl` (
   `forPurchase` decimal(10,2) DEFAULT NULL,
   `unitCost` decimal(15,2) DEFAULT NULL,
   `totalCost` decimal(15,2) DEFAULT NULL,
+  `finalQuoteRemarks` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `createdBy` bigint(20) NOT NULL,
   `updatedBy` bigint(20) NOT NULL,
   `createdAt` timestamp NOT NULL DEFAULT current_timestamp(),
@@ -4239,6 +4298,95 @@ CREATE TABLE `ims_services_tbl` (
 LOCK TABLES `ims_services_tbl` WRITE;
 /*!40000 ALTER TABLE `ims_services_tbl` DISABLE KEYS */;
 /*!40000 ALTER TABLE `ims_services_tbl` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `ims_stock_in_assets_tbl`
+--
+
+DROP TABLE IF EXISTS `ims_stock_in_assets_tbl`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `ims_stock_in_assets_tbl` (
+  `stockInAssetID` bigint(255) NOT NULL AUTO_INCREMENT,
+  `returnItemID` bigint(255) NOT NULL,
+  `materialUsageID` bigint(255) DEFAULT NULL,
+  `inventoryReceivingID` bigint(255) DEFAULT NULL,
+  `stockOutID` bigint(255) NOT NULL,
+  `inventoryCode` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `inventoryStorageID` int(255) NOT NULL,
+  `inventoryStorageCode` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `inventoryStorageOfficeName` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `itemID` int(255) DEFAULT NULL,
+  `itemName` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `brand` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `classificationName` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `categoryName` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `serialNumber` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `ExpirationDate` date NOT NULL,
+  `ManufactureDate` date NOT NULL,
+  `barcode` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `quantity` decimal(15,2) NOT NULL,
+  `createAt` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `updateAt` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `stockInDate` date NOT NULL,
+  `stockOutDate` date NOT NULL,
+  PRIMARY KEY (`stockInAssetID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `ims_stock_in_assets_tbl`
+--
+
+LOCK TABLES `ims_stock_in_assets_tbl` WRITE;
+/*!40000 ALTER TABLE `ims_stock_in_assets_tbl` DISABLE KEYS */;
+/*!40000 ALTER TABLE `ims_stock_in_assets_tbl` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `ims_stock_in_item_tbl`
+--
+
+DROP TABLE IF EXISTS `ims_stock_in_item_tbl`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `ims_stock_in_item_tbl` (
+  `stockInItemID` bigint(255) NOT NULL AUTO_INCREMENT,
+  `returnItemID` bigint(255) NOT NULL,
+  `materialUsageID` bigint(255) DEFAULT NULL,
+  `inventoryReceivingID` bigint(255) DEFAULT NULL,
+  `stockOutID` bigint(255) NOT NULL,
+  `inventoryCode` varchar(255) NOT NULL,
+  `inventoryStorageID` int(255) NOT NULL,
+  `inventoryStorageCode` varchar(255) NOT NULL,
+  `inventoryStorageOfficeName` varchar(255) NOT NULL,
+  `itemID` int(255) DEFAULT NULL,
+  `itemCode` varchar(255) NOT NULL,
+  `itemName` varchar(255) DEFAULT NULL,
+  `brand` varchar(255) DEFAULT NULL,
+  `classificationName` varchar(255) NOT NULL,
+  `categoryName` varchar(255) NOT NULL,
+  `serialNumber` varchar(255) NOT NULL,
+  `ExpirationDate` date NOT NULL,
+  `ManufactureDate` date NOT NULL,
+  `barcode` varchar(255) NOT NULL,
+  `quantity` decimal(15,2) NOT NULL,
+  `createAt` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `updateAt` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `stockInDate` date NOT NULL,
+  `stockOutDate` date NOT NULL,
+  PRIMARY KEY (`stockInItemID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `ims_stock_in_item_tbl`
+--
+
+LOCK TABLES `ims_stock_in_item_tbl` WRITE;
+/*!40000 ALTER TABLE `ims_stock_in_item_tbl` DISABLE KEYS */;
+/*!40000 ALTER TABLE `ims_stock_in_item_tbl` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -5370,4 +5518,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2021-09-25 13:53:52
+-- Dump completed on 2021-09-27 13:04:04

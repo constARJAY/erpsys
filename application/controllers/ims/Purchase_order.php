@@ -42,6 +42,7 @@ class Purchase_order extends CI_Controller {
     public function saveSignedPurchaseOrder()
     {
         $purchaseOrderID = $this->input->post("purchaseOrderID");
+        $employeeID      = $this->input->post("employeeID");
         if (isset($_FILES["files"])) {
             $uploadedFile = explode(".", $_FILES["files"]["name"]);
             $uploadName   = $uploadedFile[0];
@@ -56,7 +57,7 @@ class Purchase_order extends CI_Controller {
             $targetDir = $folderDir.$filename;
             if (move_uploaded_file($_FILES["files"]["tmp_name"], $targetDir)) {
                 
-                $saveSignedPurchaseOrder = $this->purchaseorder->saveSignedPurchaseOrder($purchaseOrderID, $filename);
+                $saveSignedPurchaseOrder = $this->purchaseorder->saveSignedPurchaseOrder($purchaseOrderID, $employeeID, $filename);
                 echo json_encode($saveSignedPurchaseOrder);
             }
         }

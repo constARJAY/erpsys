@@ -11,7 +11,8 @@ $(document).ready(function() {
 	const allEmployeeData = getAllEmployeeData();
 	const employeeData = (id) => {
 		if (id) {
-			let data = allEmployeeData.filter(employee => employee.employeeID == id);
+			let empID = id == "0" ? sessionID : id;
+			let data = allEmployeeData.filter(employee => employee.employeeID == empID);
 			let { employeeID, fullname, designation, department } = data && data[0];
 			return { employeeID, fullname, designation, department };
 		}
@@ -309,7 +310,7 @@ $(document).ready(function() {
 			html += `
             <tr class="${btnClass}" id="${encryptString(purchaseOrderID)}">
                 <td>${purchaseOrderCode}</td>
-                <td>${fullname}</td>
+                <td>${fullname || "-"}</td>
 				<td>
 					<div>
 						${purchaseRequestCode || '-'}
@@ -564,15 +565,19 @@ $(document).ready(function() {
                             <h5 style="font-weight: bold;
                                 letter-spacing: 0.05rem;">ASSETS (FOR PURCHASE)</h5>
                         </div>
-                        <div class="col-md-6 col-sm-12 text-right"></div>
+                        <div class="col-md-6 col-sm-12 text-right">
+							<button class="btn btn-danger">
+								<i class="fas fa-file-pdf"></i> PDF
+							</button>
+							<button class="btn btn-info">
+								<i class="fas fa-file-excel"></i> EXCEL
+							</button>
+						</div>
                     </div>
                 </div>
                 <div class="card-body">
                     <div class="w-100">
-                        <div class="text-left">
-                            <b class="text-warning">NOTE: </b>
-                            <span>All available items are based on the item price list's preferred vendor.</span>
-                        </div>
+                        <div class="text-left"></div>
 
                         <table class="table table-hover" 
                             id="tableOrderItems" 
@@ -1139,11 +1144,10 @@ $(document).ready(function() {
 			const filesize    = files[0].size/1024/1024;
 			const filenameArr = files[0].name.split(".");
 			const filename    = filenameArr[0];
-			const extension   = filenameArr[1];
+			const extension   = filenameArr[filenameArr.length - 1];
 			const filetypeArr = files[0].type.split("/");
 			const filetype    = filetypeArr[0];
 			const acceptArr   = ["png", "jpg", "jpeg", "doc", "docx", "pdf"];
-			console.log(extension);
 			if (filesize > 10) {
 				showNotification("danger", `${filenameArr.join(".")} size must be less than or equal to 10mb`);
 				$(this).val("");
@@ -1154,6 +1158,7 @@ $(document).ready(function() {
 				let formData = new FormData();
 				formData.append("purchaseOrderID", purchaseOrderID);
 				formData.append("purchaseOrderStatus", "2");
+				formData.append("employeeID", sessionID);
 				formData.append("files", files[0]);
 				saveSignedPurchaseOrder(formData, purchaseOrderID);
 			}

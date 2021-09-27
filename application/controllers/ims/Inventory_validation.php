@@ -42,6 +42,9 @@ class Inventory_validation extends CI_Controller {
         $items                          = $this->input->post("items") ?? null;
         $assets                          = $this->input->post("assets") ?? null;
 
+        // print_r(!Empty($assets));
+        // exit;
+
 
         $inventoryValidationData = [
             "reviseInventoryValidationID"   => $reviseInventoryValidationID,
@@ -98,7 +101,7 @@ class Inventory_validation extends CI_Controller {
         // ----- ADD REQUEST ITEMS -----
         if ($inventoryValidationStatus == 2) {
     
-            if ($items) {
+            if (!empty($items)) {
                 $inventoryValidationItems =[];
                 foreach($items as $index => $item) {
 
@@ -190,7 +193,7 @@ class Inventory_validation extends CI_Controller {
                 $saveInventoryValidationItems = $this->inventoryvalidation->saveInventoryValidationItems($inventoryValidationItems,$materialRequestID);
             }
 
-            if ($assets) {
+            if (empty($assets)) {
                 $inventoryValidationAssets =[];
                 foreach($assets as $index => $asset) {
 

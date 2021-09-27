@@ -94,6 +94,29 @@ class Purchase_request extends CI_Controller {
             "createdAt"                     => $createdAt,
         ];
 
+        $bidRecapID = "";
+        if ($revisePurchaseRequestID) {
+            $purchaseRequest = $this->purchaserequest->getPurchaseRequestData($revisePurchaseRequestID);
+            if ($purchaseRequest) {
+                $bidRecapID = $purchaseRequest->bidRecapID;
+
+                $temp = [
+                    'costEstimateID'          => $purchaseRequest->costEstimateID,
+                    'costEstimateCode'        => $purchaseRequest->costEstimateCode,
+                    'billMaterialID'          => $purchaseRequest->billMaterialID,
+                    'billMaterialCode'        => $purchaseRequest->billMaterialCode,
+                    'materialRequestID'       => $purchaseRequest->materialRequestID,
+                    'materialRequestCode'     => $purchaseRequest->materialRequestCode,
+                    'inventoryValidationID'   => $purchaseRequest->inventoryValidationID,
+                    'inventoryValidationCode' => $purchaseRequest->inventoryValidationCode,
+                    'bidRecapID'              => $bidRecapID,
+                    'bidRecapCode'            => $purchaseRequest->bidRecapCode,
+
+                ];
+                $purchaseRequestData = array_merge($purchaseRequestData, $temp);
+            }
+        }
+
         if ($action == "update") {
             unset($purchaseRequestData["revisePurchaseRequestID"]);
             unset($purchaseRequestData["revisePurchaseRequestCode"]);
@@ -103,6 +126,7 @@ class Purchase_request extends CI_Controller {
             if ($method == "cancelform") {
                 if ($total) {
                     $purchaseRequestData = [
+                        "employeeID"            => $employeeID,
                         "total"                 => $total,
                         "discount"              => $discount,
                         "totalAmount"           => $totalAmount,
@@ -153,6 +177,7 @@ class Purchase_request extends CI_Controller {
             if ($items) {
                 $purchaseRequestItems = [];
                 foreach($items as $item) {
+                    $requestItemAssetID = $item["requestItemAssetID"] ?? 0;
                     $itemID             = $item["itemID"] ?? null;
                     $itemName           = $item["itemName"] ?? null;
                     $itemCode           = $item["itemCode"] ?? null;
@@ -168,51 +193,154 @@ class Purchase_request extends CI_Controller {
                     $totalCost          = $item["totalCost"] ?? null;
                     $createdBy          = $updatedBy;
 
+                    $requestData = false;
+                    if ($requestItemAssetID && $requestItemAssetID != "undefined") {
+                        $requestData = $this->purchaserequest->getPurchaseRequestItemAssetData($purchaseRequestClassification, $requestItemAssetID);
+                    }
+
                     if ($purchaseRequestClassification == "Items") {
-                        $temp = [
-                            "purchaseRequestID"   => $purchaseRequestID,
-                            "inventoryVendorID"   => $inventoryVendorID,
-                            "inventoryVendorCode" => $vendorCode,
-                            "inventoryVendorName" => $vendorName,
-                            "itemID"              => $itemID,
-                            "itemName"            => $itemName,
-                            "itemCode"            => $itemCode,
-                            "itemClassification"  => $itemClassification,
-                            "itemDescription"     => $itemDescription,
-                            "files"               => $files,
-                            "itemCategory"        => $itemCategory,
-                            "itemBrandName"       => $itemBrandName,
-                            "itemUom"             => $itemUom,
-                            "remarks"             => $remarks,
-                            "forPurchase"         => $forPurchase,
-                            "unitCost"            => $unitCost,
-                            "totalCost"           => $totalCost,
-                            "createdBy"           => $createdBy,
-                            "updatedBy"           => $updatedBy,
-                        ];
+                        if ($bidRecapID && $requestData) {
+                            $temp = [
+                                'costEstimateID'          => $requestData->costEstimateID,
+                                'billMaterialID'          => $requestData->billMaterialID,
+                                'materialRequestID'       => $requestData->materialRequestID,
+                                'inventoryValidationID'   => $requestData->inventoryValidationID,
+                                'bidRecapID'              => $requestData->bidRecapID,
+                                'finalQuoteID'            => $requestData->finalQuoteID,
+                                'purchaseRequestID'       => $purchaseRequestID,
+                                'purchaseOrderID'         => $requestData->purchaseOrderID,
+                                'changeRequestID'         => $requestData->changeRequestID,
+                                'inventoryReceivingID'    => $requestData->inventoryReceivingID,
+                                'candidateVendorID'       => $requestData->candidateVendorID,
+                                'candidateSelectedVendor' => $requestData->candidateSelectedVendor,
+                                'candidateVendorName'     => $requestData->candidateVendorName,
+                                'candidateVendorPrice'    => $requestData->candidateVendorPrice,
+                                'inventoryVendorID'       => $requestData->inventoryVendorID,
+                                'inventoryVendorCode'     => $requestData->inventoryVendorCode,
+                                'inventoryVendorName'     => $requestData->inventoryVendorName,
+                                'milestoneBuilderID'      => $requestData->milestoneBuilderID,
+                                'phaseDescription'        => $requestData->phaseDescription,
+                                'milestoneListID'         => $requestData->milestoneListID,
+                                'projectMilestoneID'      => $requestData->projectMilestoneID,
+                                'projectMilestoneName'    => $requestData->projectMilestoneName,
+                                'itemID'                  => $requestData->itemID,
+                                'itemCode'                => $requestData->itemCode,
+                                'itemBrandName'           => $requestData->itemBrandName,
+                                'itemName'                => $requestData->itemName,
+                                'itemClassification'      => $requestData->itemClassification,
+                                'itemCategory'            => $requestData->itemCategory,
+                                'itemUom'                 => $requestData->itemUom,
+                                'itemDescription'         => $requestData->itemDescription,
+                                'files'                   => $requestData->files,
+                                'remarks'                 => $requestData->remarks,
+                                'availableStocks'         => $requestData->availableStocks,
+                                'requestQuantity'         => $requestData->requestQuantity,
+                                'reservedItem'            => $requestData->reservedItem,
+                                'forPurchase'             => $requestData->forPurchase,
+                                'unitCost'                => $requestData->unitCost,
+                                'totalCost'               => $requestData->totalCost,
+                                'finalQuoteRemarks'       => $requestData->finalQuoteRemarks,
+                                'createdBy'               => $requestData->createdBy,
+                                'updatedBy'               => $requestData->updatedBy,
+                            ];
+                        } else {
+                            $temp = [
+                                "purchaseRequestID"   => $purchaseRequestID,
+                                "inventoryVendorID"   => $inventoryVendorID,
+                                "inventoryVendorCode" => $vendorCode,
+                                "inventoryVendorName" => $vendorName,
+                                "itemID"              => $itemID,
+                                "itemName"            => $itemName,
+                                "itemCode"            => $itemCode,
+                                "itemClassification"  => $itemClassification,
+                                "itemDescription"     => $itemDescription,
+                                "files"               => $files,
+                                "itemCategory"        => $itemCategory,
+                                "itemBrandName"       => $itemBrandName,
+                                "itemUom"             => $itemUom,
+                                "remarks"             => $remarks,
+                                "forPurchase"         => $forPurchase,
+                                "unitCost"            => $unitCost,
+                                "totalCost"           => $totalCost,
+                                "createdBy"           => $createdBy,
+                                "updatedBy"           => $updatedBy,
+                            ];
+                        }
+
                         $purchaseRequestItems[] = $temp;
                     } else if ($purchaseRequestClassification == "Assets") {
-                        $temp = [
-                            "purchaseRequestID"   => $purchaseRequestID,
-                            "inventoryVendorID"   => $inventoryVendorID,
-                            "inventoryVendorCode" => $vendorCode,
-                            "inventoryVendorName" => $vendorName,
-                            "assetID"              => $itemID,
-                            "assetName"            => $itemName,
-                            "assetCode"            => $itemCode,
-                            "assetClassification"  => $itemClassification,
-                            "assetDescription"     => $itemDescription,
-                            "files"               => $files,
-                            "assetCategory"        => $itemCategory,
-                            "assetBrandName"       => $itemBrandName,
-                            "assetUom"             => $itemUom,
-                            "remarks"             => $remarks,
-                            "forPurchase"         => $forPurchase,
-                            "unitCost"            => $unitCost,
-                            "totalCost"           => $totalCost,
-                            "createdBy"           => $createdBy,
-                            "updatedBy"           => $updatedBy,
-                        ];
+                        if ($bidRecapID && $requestData) {
+                            $temp = [
+                                'costEstimateID'          => $requestData->costEstimateID,
+                                'billMaterialID'          => $requestData->billMaterialID,
+                                'materialRequestID'       => $requestData->materialRequestID,
+                                'inventoryValidationID'   => $requestData->inventoryValidationID,
+                                'bidRecapID'              => $requestData->bidRecapID,
+                                'finalQuoteID'            => $requestData->finalQuoteID,
+                                'purchaseRequestID'       => $purchaseRequestID,
+                                'purchaseOrderID'         => $requestData->purchaseOrderID,
+                                'changeRequestID'         => $requestData->changeRequestID,
+                                'inventoryReceivingID'    => $requestData->inventoryReceivingID,
+                                'candidateVendorID'       => $requestData->candidateVendorID,
+                                'candidateSelectedVendor' => $requestData->candidateSelectedVendor,
+                                'candidateVendorName'     => $requestData->candidateVendorName,
+                                'candidateVendorPrice'    => $requestData->candidateVendorPrice,
+                                'inventoryVendorID'       => $requestData->inventoryVendorID,
+                                'inventoryVendorCode'     => $requestData->inventoryVendorCode,
+                                'inventoryVendorName'     => $requestData->inventoryVendorName,
+                                'milestoneBuilderID'      => $requestData->milestoneBuilderID,
+                                'phaseDescription'        => $requestData->phaseDescription,
+                                'milestoneListID'         => $requestData->milestoneListID,
+                                'projectMilestoneID'      => $requestData->projectMilestoneID,
+                                'projectMilestoneName'    => $requestData->projectMilestoneName,
+                                'assetID'                 => $requestData->assetID,
+                                'assetCode'               => $requestData->assetCode,
+                                'assetBrandName'          => $requestData->assetBrandName,
+                                'assetName'               => $requestData->assetName,
+                                'assetClassification'     => $requestData->assetClassification,
+                                'assetCategory'           => $requestData->assetCategory,
+                                'assetUom'                => $requestData->assetUom,
+                                'assetDescription'        => $requestData->assetDescription,
+                                'files'                   => $requestData->files,
+                                'remarks'                 => $requestData->remarks,
+                                'availableStocks'         => $requestData->availableStocks,
+                                'requestQuantity'         => $requestData->requestQuantity,
+                                'reservedAsset'           => $requestData->reservedAsset,
+                                'forPurchase'             => $requestData->forPurchase,
+                                'requestManHours'         => $requestData->requestManHours,
+                                'dateNeeded'              => $requestData->dateNeeded,
+                                'dateReturn'              => $requestData->dateReturn,
+                                'actualDateReturn'        => $requestData->actualDateReturn,
+                                'hourlyRate'              => $requestData->hourlyRate,
+                                'unitCost'                => $requestData->unitCost,
+                                'totalCost'               => $requestData->totalCost,
+                                'finalQuoteRemarks'       => $requestData->finalQuoteRemarks,
+                                'createdBy'               => $requestData->createdBy,
+                                'updatedBy'               => $requestData->updatedBy,
+                            ];
+                        } else {
+                            $temp = [
+                                "purchaseRequestID"   => $purchaseRequestID,
+                                "inventoryVendorID"   => $inventoryVendorID,
+                                "inventoryVendorCode" => $vendorCode,
+                                "inventoryVendorName" => $vendorName,
+                                "assetID"             => $itemID,
+                                "assetName"           => $itemName,
+                                "assetCode"           => $itemCode,
+                                "assetClassification" => $itemClassification,
+                                "assetDescription"    => $itemDescription,
+                                "files"               => $files,
+                                "assetCategory"       => $itemCategory,
+                                "assetBrandName"      => $itemBrandName,
+                                "assetUom"            => $itemUom,
+                                "remarks"             => $remarks,
+                                "forPurchase"         => $forPurchase,
+                                "unitCost"            => $unitCost,
+                                "totalCost"           => $totalCost,
+                                "createdBy"           => $createdBy,
+                                "updatedBy"           => $updatedBy,
+                            ];
+                        }
                         $purchaseRequestItems[] = $temp;
                     }
                 }

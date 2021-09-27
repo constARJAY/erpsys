@@ -19,9 +19,15 @@ class PurchaseRequest_model extends CI_Model {
 
         if ($query) {
             $insertID = $action == "insert" ? $this->db->insert_id() : $id;
-            $purchaseRequestStatus = $data["purchaseRequestStatus"];
-            $this->insertPurchaseOrderData($insertID, $purchaseRequestStatus);
 
+            // ----- INSERT PURCHASE ORDER IF APPROVE -----
+            $purchaseRequestStatus = $data["purchaseRequestStatus"];
+            if ($purchaseRequestStatus == "2")
+            {
+                $insertPurchaseOrderData = $this->insertPurchaseOrderData($insertID);
+            }
+            // ----- END INSERT PURCHASE ORDER IF APPROVE -----
+            
             $purchaseRequestCode = "";
             if ($action == "insert") {
                 $purchaseRequestCode = getFormCode("PR", date("Y-m-d"), $insertID);
@@ -52,20 +58,36 @@ class PurchaseRequest_model extends CI_Model {
     public function savePurchaseRequestItems($action, $data, $id = null, $classification = "")
     {
         $deletePurchaseRequestItems = $this->deletePurchaseRequestItems($id, $classification);
-        if ($classification) {
+        if ($classification) 
+        {
             $table = $classification == "Items" ? "ims_request_items_tbl" : "ims_request_assets_tbl";
             $query = $this->db->insert_batch($table, $data);
-            if ($query) {
+            if ($query) 
+            {
                 return "true|Successfully submitted";
             }
         }
-
         return "false|System error: Please contact the system administrator for assistance!";
     }
 
+    public function getPurchaseRequestItemAssetData($classification = "", $requestItemAssetID = 0)
+    {
+        if ($classification && $requestItemAssetID) 
+        {
+            $table  = $classification == "Items" ? "ims_request_items_tbl" : "ims_request_assets_tbl";
+            $column = $classification == "Items" ? "requestItemID" : "requestAssetID";
+            $sql = "SELECT * FROM $table WHERE $column = $requestItemAssetID";
+            $query = $this->db->query($sql);
+            return $query ? $query->row() : null;
+        }
+        return null;
+    }
+
+
+
+    
 
     // ----- ***** INSERT PURCHASE ORDER ***** -----
-
     public function getPurchaseRequestData($purchaseRequestID = 0)
     {
         $sql = "SELECT * FROM ims_purchase_request_tbl WHERE purchaseRequestID = $purchaseRequestID";
@@ -266,104 +288,119 @@ class PurchaseRequest_model extends CI_Model {
     }
 
 
-    public function insertPurchaseOrderData($purchaseRequestID = 0, $purchaseRequestStatus = "")
+    public function insertPurchaseOrderData($purchaseRequestID = 0)
     {
         $sessionID = $this->session->has_userdata('adminSessionID') ? $this->session->userdata('adminSessionID') : 0;
 
-        if ($purchaseRequestStatus == "2")
-        {
-            $purchaseRequestData = $this->getPurchaseRequestData($purchaseRequestID);
-            if ($purchaseRequestData) {
-                $purchaseRequestID    = $purchaseRequestData->purchaseRequestID;
-                $purchaseRequestCode  = $purchaseRequestData->purchaseRequestCode;
-                $timelineBuilderID    = $purchaseRequestData->timelineBuilderID;
-                $projectCode          = $purchaseRequestData->projectCode;
-                $projectName          = $purchaseRequestData->projectName;
-                $projectCategory      = $purchaseRequestData->projectCategory;
-                $clientCode           = $purchaseRequestData->clientCode;
-                $clientName           = $purchaseRequestData->clientName;
-                $clientAddress        = $purchaseRequestData->clientAddress;
-                $bidRecapID           = $purchaseRequestData->bidRecapID;
-                $bidRecapCode         = $purchaseRequestData->bidRecapCode;
-                $employeeID           = $purchaseRequestData->employeeID;
-                $inventoryVendorID    = $purchaseRequestData->inventoryVendorID;
-                $vendorCode           = $purchaseRequestData->vendorCode;
-                $vendorName           = $purchaseRequestData->vendorName;
-                $vendorContactPerson  = $purchaseRequestData->vendorContactPerson;
-                $vendorContactDetails = $purchaseRequestData->vendorContactDetails;
-                $vendorAddress        = $purchaseRequestData->vendorAddress;
-                $purchaseRequestClassification = $purchaseRequestData->purchaseRequestClassification;
-                $paymentTerms          = $purchaseRequestData->paymentTerms;
-                $shippingTerm          = $purchaseRequestData->shippingTerm;
-                $shippingDate          = $purchaseRequestData->shippingDate;
-                $purchaseRequestReason = $purchaseRequestData->purchaseRequestReason;
-                $total                 = $purchaseRequestData->total;
-                $discountType          = $purchaseRequestData->discountType;
-                $discount              = $purchaseRequestData->discount;
-                $totalAmount           = $purchaseRequestData->totalAmount;
-                $vatSales              = $purchaseRequestData->vatSales;
-                $vat                   = $purchaseRequestData->vat;
-                $totalVat              = $purchaseRequestData->totalVat;
-                $lessEwt               = $purchaseRequestData->lessEwt;
-                $grandTotalAmount      = $purchaseRequestData->grandTotalAmount;
-                $createdAt             = $purchaseRequestData->createdAt ?? date("Y-m-d");
+        $purchaseRequestData = $this->getPurchaseRequestData($purchaseRequestID);
+        if ($purchaseRequestData) {
 
-                /*
-                ----- ***** STATUS ***** ------
-                0 - Unsign
-                2 - Signed
-                4 - Cancelled
-                ----- ***** END STATUS ***** ------
-                */
+            $purchaseRequestID       = $purchaseRequestData->purchaseRequestID;
+            $purchaseRequestCode     = $purchaseRequestData->purchaseRequestCode;
+            $costEstimateID          = $purchaseRequestData->costEstimateID;
+            $costEstimateCode        = $purchaseRequestData->costEstimateCode;
+            $billMaterialID          = $purchaseRequestData->billMaterialID;
+            $billMaterialCode        = $purchaseRequestData->billMaterialCode;
+            $materialRequestID       = $purchaseRequestData->materialRequestID;
+            $materialRequestCode     = $purchaseRequestData->materialRequestCode;
+            $inventoryValidationID   = $purchaseRequestData->inventoryValidationID;
+            $inventoryValidationCode = $purchaseRequestData->inventoryValidationCode;
+            $bidRecapID              = $purchaseRequestData->bidRecapID;
+            $bidRecapCode            = $purchaseRequestData->bidRecapCode;
+            $timelineBuilderID       = $purchaseRequestData->timelineBuilderID;
+            $projectCode             = $purchaseRequestData->projectCode;
+            $projectName             = $purchaseRequestData->projectName;
+            $projectCategory         = $purchaseRequestData->projectCategory;
+            $clientCode              = $purchaseRequestData->clientCode;
+            $clientName              = $purchaseRequestData->clientName;
+            $clientAddress           = $purchaseRequestData->clientAddress;
+            $employeeID              = $purchaseRequestData->employeeID;
+            $inventoryVendorID       = $purchaseRequestData->inventoryVendorID;
+            $vendorCode              = $purchaseRequestData->vendorCode;
+            $vendorName              = $purchaseRequestData->vendorName;
+            $vendorContactPerson     = $purchaseRequestData->vendorContactPerson;
+            $vendorContactDetails    = $purchaseRequestData->vendorContactDetails;
+            $vendorAddress           = $purchaseRequestData->vendorAddress;
+            $purchaseRequestClassification = $purchaseRequestData->purchaseRequestClassification;
+            $paymentTerms            = $purchaseRequestData->paymentTerms;
+            $shippingTerm            = $purchaseRequestData->shippingTerm;
+            $shippingDate            = $purchaseRequestData->shippingDate;
+            $purchaseRequestReason   = $purchaseRequestData->purchaseRequestReason;
+            $total                   = $purchaseRequestData->total;
+            $discountType            = $purchaseRequestData->discountType;
+            $discount                = $purchaseRequestData->discount;
+            $totalAmount             = $purchaseRequestData->totalAmount;
+            $vatSales                = $purchaseRequestData->vatSales;
+            $vat                     = $purchaseRequestData->vat;
+            $totalVat                = $purchaseRequestData->totalVat;
+            $lessEwt                 = $purchaseRequestData->lessEwt;
+            $grandTotalAmount        = $purchaseRequestData->grandTotalAmount;
+            $createdAt               = $purchaseRequestData->createdAt;
 
-                $data = [
-                    "purchaseOrderCode"    => getFormCode("PO", $createdAt, $purchaseRequestID),
-                    "purchaseRequestID"    => $purchaseRequestID, 
-                    "purchaseRequestCode"  => $purchaseRequestCode, 
-                    "timelineBuilderID"    => $timelineBuilderID, 
-                    "projectCode"          => $projectCode, 
-                    "projectName"          => $projectName, 
-                    "projectCategory"      => $projectCategory, 
-                    "clientCode"           => $clientCode, 
-                    "clientName"           => $clientName, 
-                    "clientAddress"        => $clientAddress, 
-                    "bidRecapID"           => $bidRecapID, 
-                    "bidRecapCode"         => $bidRecapCode, 
-                    "employeeID"           => $employeeID, 
-                    "inventoryVendorID"    => $inventoryVendorID, 
-                    "vendorCode"           => $vendorCode, 
-                    "vendorName"           => $vendorName, 
-                    "vendorContactPerson"  => $vendorContactPerson, 
-                    "vendorContactDetails" => $vendorContactDetails, 
-                    "vendorAddress"        => $vendorAddress, 
-                    "purchaseOrderClassification" => $purchaseRequestClassification, 
-                    "paymentTerms"        => $paymentTerms, 
-                    "shippingTerm"        => $shippingTerm, 
-                    "shippingDate"        => $shippingDate, 
-                    "purchaseOrderReason" => $purchaseRequestReason, 
-                    "total"               => $total, 
-                    "discountType"        => $discountType, 
-                    "discount"            => $discount, 
-                    "totalAmount"         => $totalAmount, 
-                    "vatSales"            => $vatSales, 
-                    "vat"                 => $vat, 
-                    "totalVat"            => $totalVat, 
-                    "lessEwt"             => $lessEwt, 
-                    "grandTotalAmount"    => $grandTotalAmount, 
-                    "purchaseOrderStatus" => "0",
-                    "createdBy"           => $sessionID,
-                    "updatedBy"           => $sessionID,
-                ];
+            /*
+            ----- ***** STATUS ***** ------
+            0 - Unsign
+            2 - Signed
+            4 - Cancelled
+            ----- ***** END STATUS ***** ------
+            */
 
-                $query = $this->db->insert("ims_purchase_order_tbl", $data);
-                if ($query) {
-                    $insertID = $this->db->insert_id();
-                    $this->insertPurchaseOrderItems($purchaseRequestClassification, $purchaseRequestID, $insertID);
-                    return true;
-                }
-                return false;
+            $data = [
+                'purchaseOrderCode'       => getFormCode("PO", $createdAt, $purchaseRequestID),
+                'costEstimateID'          => $costEstimateID,
+                'costEstimateCode'        => $costEstimateCode,
+                'billMaterialID'          => $billMaterialID,
+                'billMaterialCode'        => $billMaterialCode,
+                'materialRequestID'       => $materialRequestID,
+                'materialRequestCode'     => $materialRequestCode,
+                'inventoryValidationID'   => $inventoryValidationID,
+                'inventoryValidationCode' => $inventoryValidationCode,
+                'bidRecapID'              => $bidRecapID,
+                'bidRecapCode'            => $bidRecapCode,
+                'purchaseRequestID'       => $purchaseRequestID,
+                'purchaseRequestCode'     => $purchaseRequestCode,
+                'timelineBuilderID'       => $timelineBuilderID,
+                'projectCode'             => $projectCode,
+                'projectName'             => $projectName,
+                'projectCategory'         => $projectCategory,
+                'clientCode'              => $clientCode,
+                'clientName'              => $clientName,
+                'clientAddress'           => $clientAddress,
+                'employeeID'              => 0,
+                'inventoryVendorID'       => $inventoryVendorID,
+                'vendorCode'              => $vendorCode,
+                'vendorName'              => $vendorName,
+                'vendorContactPerson'     => $vendorContactPerson,
+                'vendorContactDetails'    => $vendorContactDetails,
+                'vendorAddress'           => $vendorAddress,
+                'purchaseOrderClassification' => $purchaseRequestClassification,
+                'paymentTerms'            => $paymentTerms,
+                'shippingTerm'            => $shippingTerm,
+                'shippingDate'            => $shippingDate,
+                'purchaseOrderReason'     => $purchaseRequestReason,
+                'total'                   => $total,
+                'discountType'            => $discountType,
+                'discount'                => $discount,
+                'totalAmount'             => $totalAmount,
+                'vatSales'                => $vatSales,
+                'vat'                     => $vat,
+                'totalVat'                => $totalVat,
+                'lessEwt'                 => $lessEwt,
+                'grandTotalAmount'        => $grandTotalAmount,
+                'purchaseOrderStatus'     => 0,
+                'createdBy'               => $employeeID,
+                'updatedBy'               => $sessionID,
+            ];
+
+            $query = $this->db->insert("ims_purchase_order_tbl", $data);
+            if ($query) {
+                $insertID = $this->db->insert_id();
+                $this->insertPurchaseOrderItems($purchaseRequestClassification, $purchaseRequestID, $insertID);
+                return true;
             }
+            return false;
         }
+        
         return false;
     }
 }

@@ -1,3 +1,11 @@
+<style>
+
+    table.tableVendor tbody tr td {
+        padding: 0 5px !important; 
+    } 
+
+</style>
+
 <div class="body_area after_bg">
     <div class="block-header pb-0">
         <div class="container" id="headerContainer">
@@ -34,7 +42,7 @@
     <div class="modal-dialog modal-dialog-centered modal-md" role="document">
 		<div class="modal-content">
 			<div class="modal-header bg-primary text-light">
-				<h6 class="page-title font-weight-bold">ADD INVENTORY VALIDATION</h6>
+				<h5 class="page-title font-weight-bold">ADD INVENTORY VALIDATION</h5>
 				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
 					<span class="text-light" aria-hidden="true">&times;</span>
 				</button>

@@ -68,7 +68,8 @@ $(document).ready(function() {
 	const allEmployeeData = getAllEmployeeData();
 	const employeeData = (id) => {
 		if (id) {
-			let data = allEmployeeData.filter(employee => employee.employeeID == id);
+			let empID = id == "0" ? sessionID : id;
+			let data = allEmployeeData.filter(employee => employee.employeeID == empID);
 			let { employeeID, fullname, designation, department } = data && data[0];
 			return { employeeID, fullname, designation, department };
 		}
@@ -113,8 +114,16 @@ $(document).ready(function() {
 
 				if (employeeID != sessionID) {
 					isReadOnly = true;
-					if (purchaseRequestStatus == 0 || purchaseRequestStatus == 4) {
-						isAllowed = false;
+					if (employeeID == null || employeeID == 0) {
+						if (purchaseRequestStatus == 0) {
+							isReadOnly = false;
+						} else {
+							isReadOnly = true;
+						}
+					} else {
+						if (purchaseRequestStatus == 0 || purchaseRequestStatus == 4) {
+							isAllowed = false;
+						}
 					}
 				} else if (employeeID == sessionID) {
 					if (purchaseRequestStatus == 0) {
@@ -377,7 +386,7 @@ $(document).ready(function() {
 				html += `
 				<tr class="${btnClass}" id="${encryptString(purchaseRequestID)}">
 					<td>${purchaseRequestCode}</td>
-					<td>${fullname}</td>
+					<td>${fullname || "-"}</td>
 					<td>
 						<div>
 							${bidRecapCode || '-'}
@@ -433,7 +442,7 @@ $(document).ready(function() {
 			`ims_purchase_request_tbl AS imrt 
 				LEFT JOIN hris_employee_list_tbl AS helt USING(employeeID)`,
 			"imrt.*, CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname, imrt.createdAt AS dateCreated",
-			`imrt.employeeID = ${sessionID}`,
+			`imrt.employeeID = 0 OR imrt.employeeID IS NULL OR imrt.employeeID = ${sessionID}`,
 			`FIELD(purchaseRequestStatus, 0, 1, 3, 2, 4, 5), COALESCE(imrt.submittedAt, imrt.createdAt)`
 		);
 
@@ -502,7 +511,7 @@ $(document).ready(function() {
 			html += `
             <tr class="${btnClass}" id="${encryptString(purchaseRequestID )}">
                 <td>${purchaseRequestCode}</td>
-                <td>${fullname}</td>
+                <td>${fullname || "-"}</td>
 				<td>
 					<div>
 						${bidRecapCode || '-'}
@@ -555,6 +564,7 @@ $(document).ready(function() {
 		let button = "";
 		if (data) {
 			let {
+				revisePurchaseRequestID,
 				purchaseRequestID     = "",
 				purchaseRequestCode   = "",
 				purchaseRequestStatus = "",
@@ -564,7 +574,7 @@ $(document).ready(function() {
 			} = data && data[0];
 
 			let isOngoing = approversDate ? approversDate.split("|").length > 0 ? true : false : false;
-			if (employeeID === sessionID) {
+			if (employeeID == 0 || employeeID == null || employeeID === sessionID) {
 				if (purchaseRequestStatus == 0 || isRevise) {
 					// DRAFT
 					button = `
@@ -617,15 +627,15 @@ $(document).ready(function() {
 					}
 				} else if (purchaseRequestStatus == 2) {
 					// DROP
-					button = `
-					<button type="button" 
-						class="btn btn-cancel px-5 p-2"
-						id="btnDrop" 
-						purchaseRequestID="${encryptString(purchaseRequestID)}"
-						purchaseRequestCode="${purchaseRequestCode}"
-						status="${purchaseRequestStatus}"><i class="fas fa-ban"></i> 
-						Drop
-					</button>`;
+					// button = `
+					// <button type="button" 
+					// 	class="btn btn-cancel px-5 p-2"
+					// 	id="btnDrop" 
+					// 	purchaseRequestID="${encryptString(purchaseRequestID)}"
+					// 	purchaseRequestCode="${purchaseRequestCode}"
+					// 	status="${purchaseRequestStatus}"><i class="fas fa-ban"></i> 
+					// 	Drop
+					// </button>`;
 				} else if (purchaseRequestStatus == 3) {
 					// DENIED - FOR REVISE
 					if (!isDocumentRevised(purchaseRequestID)) {
@@ -643,15 +653,19 @@ $(document).ready(function() {
 					// CANCELLED - FOR REVISE
 					const data = getTableData(
 						`ims_purchase_request_tbl`,
-						`bidRecapID`,
-						`purchaseRequestID = ${purchaseRequestID}`,
+						`revisePurchaseRequestID`,
+						`revisePurchaseRequestID = ${revisePurchaseRequestID}`,
 					);
-					const { bidRecapID } = data && data[0];
-					const isAllowedForRevise = getTableDataLength(
-						`ims_purchase_request_tbl`,
-						`purchaseRequestID`,
-						`purchaseRequestStatus <> 3 AND purchaseRequestStatus <> 4 AND bidRecapID = ${bidRecapID}`
-					);
+					let isAllowedForRevise = 0;
+					if (data && data.length > 0) {
+						const { revisePurchaseRequestID:reviseID } = data && data[0];
+						console.log(reviseID);
+						isAllowedForRevise = getTableDataLength(
+							`ims_purchase_request_tbl`,
+							`revisePurchaseRequestID`,
+							`purchaseRequestStatus <> 3 AND purchaseRequestStatus <> 4 AND revisePurchaseRequestID = ${reviseID}`
+						);
+					}
 
 					if (!isDocumentRevised(purchaseRequestID) && isAllowedForRevise == 0) {
 						button = `
@@ -956,18 +970,27 @@ $(document).ready(function() {
 
 		$(`#total`).text(formatAmount(total, true));
 
+		$("#discount").attr("max", total);
 		const discount = getNonFormattedAmount($("#discount").val());
 		let totalAmount = total - discount;
 		const discountType = $(`[name="discountType"]`).val();
 		if (discountType == "percent") {
 			totalAmount = total - (total * (discount / 100));
+			$("#discount").attr("max", "100");
 		}
 
 		$("#totalAmount").html(formatAmount(totalAmount));
 
-		const vat      = getNonFormattedAmount($("[name=vat]").val())
-		const vatSales = totalAmount - vat;
+		const isVatable = $(`[name="inventoryVendorID"]`).length > 0 ? 
+			$(`[name="inventoryVendorID"] option:selected`).attr("vendorVatable") == "1" : false;
+		let vat = 0, vatSales = 0;
+		if (isVatable) {
+			vatSales = totalAmount / 1.12;
+			vat      = totalAmount - vatSales;
+		}
+
 		$("#vatSales").html(formatAmount(vatSales));
+		$(`[name="vat"]`).val(vat);
 
 		const totalVat = totalAmount;
 		$("#totalVat").html(formatAmount(totalVat));
@@ -1168,6 +1191,7 @@ $(document).ready(function() {
 		let disabled = readOnly ? "disabled" : "";
 
 		let {
+			bidRecapID            = "",
 			purchaseRequestID     = "",
 			discountType          = "amount",
 			total                 = 0,
@@ -1386,13 +1410,10 @@ $(document).ready(function() {
 	function getTableRow(classification = "", item = {}, readOnly = false) {
 		let html = "";
 
-		let checkBoxHeader = "";
-		if (!readOnly) {
-			checkBoxHeader = `
-				<td class="text-center">
-					<input type="checkbox" class="checkboxrow">
-				</td>`;
-		}
+		let checkBoxHeader = !readOnly ? `
+		<td class="text-center">
+			<input type="checkbox" class="checkboxrow">
+		</td>` : "";
 
 		if (classification == "Items") {
 
@@ -1413,7 +1434,7 @@ $(document).ready(function() {
 				remarks,
 			} = item;
 
-			let itemNameDisplay = readOnly ? (itemName || "-") : `
+			let itemNameDisplay = readOnly ? (itemName ? (itemName != 'Select Item Name' ? itemName : "-") : "-") : `
 				<select class="form-control validate select2 w-100"
 					name="inventoryItemID"         
 					required>
@@ -1446,7 +1467,7 @@ $(document).ready(function() {
 				<div class="d-block invalid-feedback"></div>`;
 
 			html = `
-			<tr requestItemID="${requestItemID}">
+			<tr requestItemAssetID="${requestItemID}">
 				${checkBoxHeader}
 				<td class="itemCode">${itemCode || "-"}</td>
 				<td class="itemName">
@@ -1477,7 +1498,7 @@ $(document).ready(function() {
 		} else if (classification == "Assets") {
 
 			let {
-				requestItemID,
+				requestAssetID,
 				assetID,
 				assetCode,
 				assetBrandName,
@@ -1493,7 +1514,7 @@ $(document).ready(function() {
 				remarks,
 			} = item;
 
-			let assetNameDisplay = readOnly ? (assetName || "-") : `
+			let assetNameDisplay = readOnly ? (assetName ? (assetName != 'Select Item Name' ? assetName : "-") : "-") : `
 				<select class="form-control validate select2 w-100"
 					name="inventoryItemID"         
 					required>
@@ -1526,7 +1547,7 @@ $(document).ready(function() {
 				<div class="d-block invalid-feedback"></div>`;
 
 			html = `
-			<tr requestItemID="${requestItemID}">
+			<tr requestItemAssetID="${requestAssetID}">
 				${checkBoxHeader}
 				<td class="itemCode">${assetCode || "-"}</td>
 				<td class="itemName">
@@ -1576,6 +1597,7 @@ $(document).ready(function() {
 			bidRecapID,
 			purchaseRequestClassification
 		} = data && data[0];
+		readOnly = bidRecapID ? true : readOnly;
 
 		let requestItems = [];
 		if (purchaseRequestID) {
@@ -1585,7 +1607,8 @@ $(document).ready(function() {
 					requestItems = getTableData(
 						`ims_request_items_tbl 
 						WHERE purchaseRequestID = ${purchaseRequestID}
-						AND bidRecapID = ${bidRecapID}`); 
+						AND bidRecapID = ${bidRecapID}
+						AND purchaseOrderID IS NULL`); 
 				} else {
 					requestItems = getTableData(
 						`ims_request_items_tbl 
@@ -1601,7 +1624,8 @@ $(document).ready(function() {
 					requestItems = getTableData(
 						`ims_request_assets_tbl 
 						WHERE purchaseRequestID = ${purchaseRequestID}
-						AND bidRecapID = ${bidRecapID}`); 
+						AND bidRecapID = ${bidRecapID}
+						AND purchaseOrderID IS NULL`); 
 				} else {
 					requestItems = getTableData(
 						`ims_request_assets_tbl 
@@ -1614,8 +1638,16 @@ $(document).ready(function() {
 			}
 		}
 
+		let noteItemDisplay = !bidRecapID ? `
+		<b class="text-warning">NOTE: </b>
+		<span>All available items are based on the item price list's preferred vendor.</span>` : "";
+		let noteAssetDisplay = !bidRecapID ? `
+		<b class="text-warning">NOTE: </b>
+		<span>All available assets are based on the asset price list's preferred vendor.</span>` : "";
+
 		let tableRequestItemsHTML = "";
 		if (requestItems.length > 0) {
+			console.log(readOnly);
 			requestItems.map(item => {
 				tableRequestItemsHTML += `${getTableRow(classification, item, readOnly)}`;
 			})
@@ -1664,8 +1696,7 @@ $(document).ready(function() {
 					<div class="card-body">
 						<div class="w-100">
 							<div class="text-left">
-								<b class="text-warning">NOTE: </b>
-								<span>All available items are based on the item price list's preferred vendor.</span>
+								${noteItemDisplay}
 							</div>
 
 							<table class="table table-hover" 
@@ -1708,8 +1739,7 @@ $(document).ready(function() {
 					<div class="card-body">
 						<div class="w-100">
 							<div class="text-left">
-								<b class="text-warning">NOTE: </b>
-								<span>All available items are based on the item price list's preferred vendor.</span>
+								${noteAssetDisplay}
 							</div>
 
 							<table class="table table-hover" 
@@ -1802,9 +1832,12 @@ $(document).ready(function() {
 		$("#btnBack").attr("status", purchaseRequestStatus);
 		$("#btnBack").attr("employeeID", employeeID);
 		$("#btnBack").attr("cancel", isFromCancelledDocument);
+		$("#btnBack").attr("purchaseRequestCode", purchaseRequestCode);
 
-		let disabled = readOnly ? "disabled" : "";
-		let button   = formButtons(data, isRevise, isFromCancelledDocument);
+		let disabled  = readOnly ? "disabled" : "";
+		let disabled2 = bidRecapID ? "disabled" : "";
+		let button    = formButtons(data, isRevise, isFromCancelledDocument);
+		let tableReadOnly = disabled || disabled2 ? true : false;
 
 		let reviseDocumentNo    = isRevise ? purchaseRequestID : revisePurchaseRequestID;
 		let documentHeaderClass = isRevise || revisePurchaseRequestID ? "col-lg-4 col-md-4 col-sm-12 px-1" : "col-lg-2 col-md-6 col-sm-12 px-1";
@@ -1982,13 +2015,13 @@ $(document).ready(function() {
 
             <div class="col-md-4 col-sm-12">
                 <div class="form-group">
-                    <label>Vendor Name ${!disabled ? "<code>*</code>" : ""}</label>
+                    <label>Vendor Name ${!disabled && !disabled2 ? "<code>*</code>" : ""}</label>
 					<select class="form-control validate select2"
 						name="inventoryVendorID"
 						id="inventoryVendorID"
 						style="width: 100%"
 						required
-						${disabled}>
+						${disabled || disabled2}>
 						${getInventoryVendorList(inventoryVendorID, readOnly, vendorName)}
 					</select>
                 </div>
@@ -2029,14 +2062,14 @@ $(document).ready(function() {
 
 			<div class="col-md-3 col-sm-12">
                 <div class="form-group">
-					<label>Classification Type ${!disabled ? "<code>*</code>" : ""}</label>
+					<label>Classification Type ${!disabled && !disabled2 ? "<code>*</code>" : ""}</label>
 					<select class="form-control select2 validate"
 						name="purchaseRequestClassification"
 						id="purchaseRequestClassification"
 						style="width: 100%"
 						required
-						${disabled}>
-						<option selected disabled>${!disabled ? "Select Classification Type" : "-"}</option>
+						${disabled || disabled2}>
+						<option selected disabled>${!disabled || !disabled2 ? "Select Classification Type" : "-"}</option>
 						<option value="Items" ${purchaseRequestClassification == "Items" ? "selected" : ""}>Items</option>
 						<option value="Assets" ${purchaseRequestClassification == "Assets" ? "selected" : ""}>Assets</option>
 					</select>
@@ -2123,7 +2156,7 @@ $(document).ready(function() {
             </div>
             <div class="col-md-12 col-sm-12">
                 <div class="form-group">
-                    <label>Description ${!disabled ? "<code>*</code>" : ""}</label>
+                    <label>Description ${!disabled && !disabled2 ? "<code>*</code>" : ""}</label>
                     <textarea class="form-control validate"
                         data-allowcharacters="[a-z][A-Z][0-9][ ][.][,][-][()]['][/][&]"
                         minlength="1"
@@ -2133,13 +2166,13 @@ $(document).ready(function() {
                         required
                         rows="4"
                         style="resize:none;"
-						${disabled}>${purchaseRequestReason || ""}</textarea>
+						${disabled || disabled2}>${purchaseRequestReason || ""}</textarea>
                     <div class="d-block invalid-feedback" id="invalid-purchaseRequestReason"></div>
                 </div>
             </div>
 
             <div class="col-sm-12 mt-4" id="tableRequestItemsParent">
-                ${getTableRequestItems(inventoryVendorID, purchaseRequestClassification, data, readOnly)}
+                ${getTableRequestItems(inventoryVendorID, purchaseRequestClassification, data, tableReadOnly)}
             </div>
 
 			<div class="col-12" id="costSummaryDisplay">
@@ -2165,6 +2198,8 @@ $(document).ready(function() {
 			initAmount("#discount");
 			initAmount("#lessEwt");
 			initAmount("#vat");
+
+			$(`[name="discount" ]`).trigger("keyup");
 
 			const disablePreviousDateOptions = {
 				autoUpdateInput: false,
@@ -2330,6 +2365,7 @@ $(document).ready(function() {
 
 		formData.append("action", action);
 		formData.append("method", method);
+		formData.append("employeeID", sessionID);
 		formData.append("updatedBy", sessionID);
 
 		if (currentStatus == "0" && method != "approve") {
@@ -2400,6 +2436,7 @@ $(document).ready(function() {
 
 			$(`#tableRequestItems tbody tr`).each(function(i) {
 
+				const requestItemAssetID = $(this).attr("requestItemAssetID");
 				const inventoryItemID = $(`[name="inventoryItemID"]`, this).val();
 				const itemName        = $(`[name="inventoryItemID"] option:selected`, this).text()?.trim().replaceAll("\n", "");
 				const itemCode        = $(`[name="inventoryItemID"] option:selected`, this).attr("itemCode");
@@ -2414,6 +2451,7 @@ $(document).ready(function() {
 				const itemTotalcost   = itemPrice * itemQuantity;
 				const itemRemarks     = $(`[name="itemRemarks"]`, this).val()?.trim();
 
+				formData.append(`items[${i}][requestItemAssetID]`, requestItemAssetID || "");
 				formData.append(`items[${i}][itemID]`, inventoryItemID || "");
 				formData.append(`items[${i}][itemName]`, itemName || "");
 				formData.append(`items[${i}][itemCode]`, itemCode || "");
@@ -2429,10 +2467,6 @@ $(document).ready(function() {
 				formData.append(`items[${i}][totalCost]`, itemTotalcost || "");
 			})
 		} 
-
-		// for (var x of formData.entries()) {
-		// 	console.log(`${x[0]}: ${x[1]}`);
-		// }
 
 		return formData;
 	}
@@ -2953,11 +2987,11 @@ function savePurchaseRequest(data = null, method = "submit", notificationData = 
 									timer:             2000,
 								}).then(function() {
 									callback && callback();
-								});
 
-								if (method == "approve" || method == "deny") {
-									$("[redirect=forApprovalTab]").length > 0 && $("[redirect=forApprovalTab]").trigger("click")
-								}
+									if (method == "approve" || method == "deny") {
+										$("[redirect=forApprovalTab]").length > 0 && $("[redirect=forApprovalTab]").trigger("click")
+									}
+								});
 							}, 500);
 						} else {
 							setTimeout(() => {
