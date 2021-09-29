@@ -24,7 +24,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 |
 */
 // $config['base_url'] = 'http://localhost/erpsys/';
-$config['base_url'] = 'http://192.168.50.250:8081/';
+$config['base_url'] = 'http://192.168.50.252:8081/';
 
 /*
 |--------------------------------------------------------------------------

@@ -304,7 +304,7 @@ $(document).ready(function () {
                         <thead>
                             <tr style="white-space:nowrap">
                                 <th>Storage Code</th>
-                                <th>Office Name</th>
+                                <th>Storage Name</th>
                                 <th>Storage Address</th>
                                 <th>Room</th>
                                 <th>Status</th>
@@ -322,8 +322,8 @@ $(document).ready(function () {
 						
 						multiple: {
 							id: item.inventoryStorageID, // Required
-							inventoryStorageOfficeName: item.inventoryStorageOfficeName, // Required
-							inventoryStorageRoom: item.inventoryStorageRoom
+							inventoryStorageOfficeName: item.inventoryStorageOfficeName // Required
+							
 						},
 					};
 					uniqueData.push(unique);
@@ -433,7 +433,8 @@ $(document).ready(function () {
                                     minlength="2" 
                                     minlength="50"
                                     data-allowcharacters="[a-z][A-Z][0-9][.][,][-][(][)]['][/][ ]"
-                                     value="${inventoryStorageOfficeName}" unique="${inventoryStorageID}" 
+									 unique="${inventoryStorageID}" 
+                                     value="${inventoryStorageOfficeName}"
                                     required>  
                                  <div class="invalid-feedback d-block" id="invalid-input_officename"></div>
                             </div>
@@ -565,7 +566,7 @@ $(document).ready(function () {
 								name="inventoryStorageNumber" 
 								id="input_number"
 								minlength="1" 
-								minlength="3"
+								maxlength="4"
 								data-allowcharacters="[0-9]"
 								value="${Number}">  
 							<div class="invalid-feedback d-block" id="invalid-input_number"></div>
@@ -580,8 +581,8 @@ $(document).ready(function () {
 								name="inventoryStorageRoom" 
 								id="input_room"
 								minlength="1" 
-								minlength="3"
-								data-allowcharacters="[0-9]" unique="${inventoryStorageID}"
+								maxlength="4"
+								data-allowcharacters="[0-9]"
 								value="${inventoryStorageRoom}">  
 							<div class="invalid-feedback d-block" id="invalid-input_room"></div>
 						</div>
@@ -595,7 +596,7 @@ $(document).ready(function () {
 								name="inventoryStorageFloor" 
 								id="input_floor"
 								minlength="1" 
-								minlength="3"
+								maxlength="4"
 								data-allowcharacters="[0-9]"
 								value="${Floor}">  
 							<div class="invalid-feedback d-block" id="invalid-input_floor"></div>
@@ -610,7 +611,7 @@ $(document).ready(function () {
 								name="inventoryStorageBay" 
 								id="input_bay"
 								minlength="1" 
-								minlength="3"
+								maxlength="4"
 								data-allowcharacters="[0-9]"
 								value="${Bay}">  
 							<div class="invalid-feedback d-block" id="invalid-input_bay"></div>
@@ -625,7 +626,7 @@ $(document).ready(function () {
 								name="inventoryStorageLevel" 
 								id="input_level"
 								minlength="1" 
-								minlength="3"
+								maxlength="4"
 								data-allowcharacters="[0-9]"
 								value="${Level}">  
 							<div class="invalid-feedback d-block" id="invalid-input_level"></div>
@@ -633,14 +634,14 @@ $(document).ready(function () {
 					</div>
 					<div class="col-md-6 col-lg-6">
 						<div class="form-group">
-							<label for="">Shelves Number</label>
+							<label for="">Shelf Number</label>
 							<input 
 								type="text" 
 								class="form-control validate" 
 								name="inventoryStorageShelves" 
 								id="input_level"
 								minlength="1" 
-								minlength="6"
+								maxlength="6"
 								data-allowcharacters="[0-9]"
 								value="${Shelves}">  
 							<div class="invalid-feedback d-block" id="invalid-input_shelves"></div>

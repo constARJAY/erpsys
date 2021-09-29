@@ -69,11 +69,12 @@
                             </div>         
                             <div class="col-12">
                                 <div class="border">
-                                    <div class="card-header">
-                                        <h3>List of Items:</h3>
-                                    </div>
+                                    
                                     <div class="card-body">
                                         <div class="table-responsive" id="table_content"></div>
+                                    </div>
+                                    <div class="card-body mt-1">
+                                        <div class="table-responsive" id="table_content1"></div>
                                     </div>
                                 </div>
 							</div>

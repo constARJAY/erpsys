@@ -22,16 +22,19 @@ class PurchaseRequest_model extends CI_Model {
 
             // ----- INSERT PURCHASE ORDER IF APPROVE -----
             $purchaseRequestStatus = $data["purchaseRequestStatus"];
-            if ($purchaseRequestStatus == "2")
-            {
-                $insertPurchaseOrderData = $this->insertPurchaseOrderData($insertID);
-            }
+            // if ($purchaseRequestStatus == "2")
+            // {
+            //     $insertPurchaseOrderData = $this->insertPurchaseOrderData($insertID);
+            // }
             // ----- END INSERT PURCHASE ORDER IF APPROVE -----
             
             $purchaseRequestCode = "";
             if ($action == "insert") {
                 $purchaseRequestCode = getFormCode("PR", date("Y-m-d"), $insertID);
-                $this->db->update("ims_purchase_request_tbl", ["purchaseRequestCode" => $purchaseRequestCode], ["purchaseRequestID" => $insertID]);
+                $this->db->update(
+                    "ims_purchase_request_tbl", 
+                    ["purchaseRequestCode" => $purchaseRequestCode], 
+                    ["purchaseRequestID" => $insertID]);
             }
             return "true|$purchaseRequestCode|$insertID|".date("Y-m-d");
         }
@@ -44,9 +47,6 @@ class PurchaseRequest_model extends CI_Model {
             $query = $this->db->delete(
                 $table, 
                 [
-                    "materialRequestID"     => NULL,
-                    "inventoryValidationID" => NULL,
-                    "bidRecapID"            => NULL,
                     "purchaseRequestID"     => $purchaseRequestID,
                     "purchaseOrderID"       => NULL,
                 ]);
@@ -102,7 +102,10 @@ class PurchaseRequest_model extends CI_Model {
         if ($classification) 
         {
             $table = $classification == "Items" ? "ims_request_items_tbl" : "ims_request_assets_tbl";
-            $sql = "SELECT * FROM $table WHERE purchaseRequestID = $purchaseRequestID AND purchaseOrderID IS NULL";
+            $sql = "
+            SELECT * FROM $table 
+            WHERE purchaseRequestID = $purchaseRequestID 
+            AND purchaseOrderID IS NULL";
             $query = $this->db->query($sql);
             $result = $query ? $query->result_array() : [];
 
@@ -187,9 +190,7 @@ class PurchaseRequest_model extends CI_Model {
                             "createdBy"             => $createdBy            ,
                             "updatedBy"             => $updatedBy            ,
                         ];
-                    }
-
-                    if ($classification == "Assets")
+                    } else if ($classification == "Assets")
                     {
                         $costEstimateID        = $dt["costEstimateID"];
                         $billMaterialID        = $dt["billMaterialID"];
@@ -326,6 +327,7 @@ class PurchaseRequest_model extends CI_Model {
             $shippingTerm            = $purchaseRequestData->shippingTerm;
             $shippingDate            = $purchaseRequestData->shippingDate;
             $purchaseRequestReason   = $purchaseRequestData->purchaseRequestReason;
+            $dateNeeded              = $purchaseRequestData->dateNeeded;
             $total                   = $purchaseRequestData->total;
             $discountType            = $purchaseRequestData->discountType;
             $discount                = $purchaseRequestData->discount;
@@ -387,6 +389,7 @@ class PurchaseRequest_model extends CI_Model {
                 'totalVat'                => $totalVat,
                 'lessEwt'                 => $lessEwt,
                 'grandTotalAmount'        => $grandTotalAmount,
+                'dateNeeded'              => $dateNeeded,
                 'purchaseOrderStatus'     => 0,
                 'createdBy'               => $employeeID,
                 'updatedBy'               => $sessionID,
@@ -394,8 +397,8 @@ class PurchaseRequest_model extends CI_Model {
 
             $query = $this->db->insert("ims_purchase_order_tbl", $data);
             if ($query) {
-                $insertID = $this->db->insert_id();
-                $this->insertPurchaseOrderItems($purchaseRequestClassification, $purchaseRequestID, $insertID);
+                $purchaseOrderID = $this->db->insert_id();
+                $insertPurchaseOrderItems = $this->insertPurchaseOrderItems($purchaseRequestClassification, $purchaseRequestID, $purchaseOrderID);
                 return true;
             }
             return false;

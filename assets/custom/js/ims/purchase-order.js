@@ -517,7 +517,7 @@ $(document).ready(function() {
             html = `
             <div class="card">
                 <div class="card-header bg-primary text-white">
-                    <div class="row">
+                    <div class="row align-items-center">
                         <div class="col-md-6 col-sm-12 text-left align-self-center">
                             <h5 style="font-weight: bold;
                                 letter-spacing: 0.05rem;">ITEMS (FOR PURCHASE)</h5>
@@ -526,7 +526,9 @@ $(document).ready(function() {
                             <button class="btn btn-danger">
                                 <i class="fas fa-file-pdf"></i> PDF
                             </button>
-                            <button class="btn btn-info">
+                            <button class="btn btn-info" 
+								id="btnExcel"
+								purchaseOrderID="${encryptString(purchaseOrderID)}">
                                 <i class="fas fa-file-excel"></i> EXCEL
                             </button>
                         </div>
@@ -560,7 +562,7 @@ $(document).ready(function() {
             html = `
             <div class="card">
                 <div class="card-header bg-primary text-white">
-                    <div class="row">
+                    <div class="row align-items-center">
                         <div class="col-md-6 col-sm-12 text-left">
                             <h5 style="font-weight: bold;
                                 letter-spacing: 0.05rem;">ASSETS (FOR PURCHASE)</h5>
@@ -569,7 +571,9 @@ $(document).ready(function() {
 							<button class="btn btn-danger">
 								<i class="fas fa-file-pdf"></i> PDF
 							</button>
-							<button class="btn btn-info">
+							<button class="btn btn-info"
+								id="btnExcel"
+								purchaseOrderID="${encryptString(purchaseOrderID)}">
 								<i class="fas fa-file-excel"></i> EXCEL
 							</button>
 						</div>
@@ -754,7 +758,9 @@ $(document).ready(function() {
 
         const buttonChangeRequest = purchaseOrderStatus == "0" ? `
             <button type="button" 
-                class="btn btn-cancel btnCancel px-5 p-2">
+                class="btn btn-cancel btnCancel px-5 p-2"
+				purchaseOrderID="${encryptString(purchaseOrderID)}"
+				id="btnChangeRequest">
                 <i class="fas fa-ban"></i> Change Request
             </button>` : "";
         const displaySignedPO = purchaseOrderStatus == "2" && purchaseOrderSignedPO ? `
@@ -1128,12 +1134,12 @@ $(document).ready(function() {
 	// ----- END PAGE CONTENT -----
 
 
-    // ----- GET PURCHASE ORDER DATA -----
-	function getPurchaseOrderData(action = "insert", method = "submit", status = "1", id = null, currentStatus = "0", isObject = false) {
-		let formData = new FormData;
-        return formData;
-	}
-	// ----- END GET PURCHASE ORDER DATA -----
+	// ----- BUTTON CHANGE REQUEST -----
+	$(document).on("click", `#btnChangeRequest`, function() {
+		const purchaseOrderID = decryptString($(this).attr("purchaseOrderID"));
+		saveChangeRequestForm(purchaseOrderID);
+	})
+	// ----- END BUTTON CHANGE REQUEST -----
 
 
     // ----- UPLOAD SIGNED PO -----
@@ -1173,16 +1179,22 @@ $(document).ready(function() {
 
     // ----- OPEN EDIT FORM -----
 	$(document).on("click", ".btnEdit", function () {
-		const id = decryptString($(this).attr("id"));
-		viewDocument(id);
+		$("#page_content").html(preloader);
+		setTimeout(() => {
+			const id = decryptString($(this).attr("id"));
+			viewDocument(id);
+		}, 10);
 	});
 	// ----- END OPEN EDIT FORM -----
 
 
     // ----- VIEW DOCUMENT -----
 	$(document).on("click", ".btnView", function () {
-		const id = decryptString($(this).attr("id"));
-		viewDocument(id, true);
+		$("#page_content").html(preloader);
+		setTimeout(() => {
+			const id = decryptString($(this).attr("id"));
+			viewDocument(id, true);
+		}, 10);
 	});
 	// ----- END VIEW DOCUMENT -----
 
@@ -1192,6 +1204,15 @@ $(document).ready(function() {
         pageContent();
 	});
 	// ----- END SAVE CLOSE FORM -----
+
+
+	// ----- DOWNLOAD EXCEL -----
+	$(document).on("click", "#btnExcel", function() {
+		const purchaseOrderID = decryptString($(this).attr("purchaseOrderID"));
+		const url = `${base_url}ims/purchase_order/downloadExcel?id=${purchaseOrderID}`;
+		window.open(url, "_blank"); 
+	})
+	// ----- END DOWNLOAD EXCEL -----
 
 
     // ----- GET CONFIRMATION -----
@@ -1237,6 +1258,12 @@ $(document).ready(function() {
                 swalText  = "Are you sure to upload signed purchase order in this document?";
                 swalImg   = `${base_url}assets/modal/add.svg`;
                 break;
+            case "changerequest":
+                swalTitle = `CREATE CHANGE REQUEST FORM?`;
+                swalText  = `<div>Are you sure to create a change request?</div><br>
+							<div><b class="text-danger">Note: </b>This purchase order will be cancelled if you continue.</div>`;
+                swalImg   = `${base_url}assets/modal/add.svg`;
+                break;
             default:
                 swalTitle = `CANCEL ${title.toUpperCase()}`;
                 swalText  = "Are you sure that you want to cancel this process?";
@@ -1245,7 +1272,7 @@ $(document).ready(function() {
         }
         return Swal.fire({
             title:              swalTitle,
-            text:               swalText,
+            html:               swalText,
             imageUrl:           swalImg,
             imageWidth:         200,
             imageHeight:        200,
@@ -1260,135 +1287,18 @@ $(document).ready(function() {
     // ----- END GET CONFIRMATION -----
 
 
-    // ----- SAVE PURCHASE ORDER -----
-    function savePurchaseOrder(data = null, method = "submit", notificationData = null, callback = null, feedback = "") {
-        if (data) {
-            const confirmation = getConfirmation(method);
-            confirmation.then(res => {
-                if (res.isConfirmed) {
-                    $.ajax({
-                        method:      "POST",
-                        url:         `purchase_order/savePurchaseOrder`,
-                        data,
-                        processData: false,
-                        contentType: false,
-                        global:      false,
-                        cache:       false,
-                        async:       false,
-                        dataType:    "json",
-                        beforeSend: function() {
-                            $("#loader").show();
-                        },
-                        success: function(data) {
-                            let result = data.split("|");
-            
-                            let isSuccess   = result[0];
-                            let code        = result[1] || (feedback || "Purchase order");
-                            let insertedID  = result[2];
-                            let dateCreated = result[3];
-    
-                            let swalTitle;
-                            if (method == "submit") {
-                                swalTitle = `${code} submitted successfully!`;
-                            } else if (method == "save") {
-                                swalTitle = `${code} saved successfully!`;
-                            } else if (method == "cancelform") {
-                                swalTitle = `${code} cancelled successfully!`;
-                            } else if (method == "approve") {
-                                swalTitle = `${code} approved successfully!`;
-                            } else if (method == "deny") {
-                                swalTitle = `${code} denied successfully!`;
-                            } else if (method == "drop") {
-                                swalTitle = `${code} dropped successfully!`;
-                            }	
-            
-                            if (isSuccess == "true") {
-                                setTimeout(() => {
-                                    // ----- SAVE NOTIFICATION -----
-                                    if (notificationData) {
-                                        if (Object.keys(notificationData).includes("tableID")) {
-                                            insertNotificationData(notificationData);
-                                        } else {
-                                            notificationData["tableID"] = insertedID;
-                                            insertNotificationData(notificationData);
-                                        }
-                                    }
-                                    // ----- END SAVE NOTIFICATION -----
-    
-                                    $("#loader").hide();
-                                    closeModals();
-                                    Swal.fire({
-                                        icon:              "success",
-                                        title:             swalTitle,
-                                        showConfirmButton: false,
-                                        timer:             2000,
-                                    });
-                                    callback && callback();
-    
-                                    if (method == "approve" || method == "deny") {
-                                        $("[redirect=forApprovalTab]").length > 0 && $("[redirect=forApprovalTab]").trigger("click")
-                                    }
-                                }, 500);
-                            } else {
-                                setTimeout(() => {
-                                    $("#loader").hide();
-                                    Swal.fire({
-                                        icon:              "danger",
-                                        title:             message,
-                                        showConfirmButton: false,
-                                        timer:             2000,
-                                    });
-                                }, 500);
-                            }
-                        },
-                        error: function() {
-                            setTimeout(() => {
-                                $("#loader").hide();
-                                showNotification("danger", "System error: Please contact the system administrator for assistance!");
-                            }, 500);
-                        }
-                    }).done(function() {
-                        setTimeout(() => {
-                            $("#loader").hide();
-                        }, 500);
-                    })
-                } else {
-                    if (res.dismiss == "cancel" && method != "submit") {
-                        if (method != "deny") {
-                            if (method != "cancelform") {
-                                callback && callback();
-                            }
-                        } else {
-                            $("#modal_purchase_order").text().length > 0 && $("#modal_purchase_order").modal("show");
-                        }
-                    } else if (res.isDismissed) {
-                        if (method == "deny") {
-                            $("#modal_purchase_order").text().length > 0 && $("#modal_purchase_order").modal("show");
-                        }
-                    }
-                }
-            });
-    
-            
-        }
-        return false;
-    }    
-    // ----- END SAVE PURCHASE ORDER -----
+	// ----- SAVE CHANGE REQUEST FORM -----
+	function saveChangeRequestForm(purchaseOrderID = 0) {
+		const confirmation = getConfirmation("changerequest");
+		confirmation.then(res => {
+			if (res.isConfirmed) {
+				$("#loader").show();
 
-
-    // ----- SAVE SIGNED PURCHASE ORDER -----
-    function saveSignedPurchaseOrder(data, purchaseOrderID = 0) {
-        if (data) {
-            const confirmation = getConfirmation("signedpo");
-            confirmation.then(res => {
-                if (res.isConfirmed) {
+				setTimeout(() => {
 					$.ajax({
 						method:      "POST",
-						url:         `purchase_order/saveSignedPurchaseOrder`,
-						data,
-						processData: false,
-						contentType: false,
-						global:      false,
+						url:         `purchase_order/saveChangeRequestForm`,
+						data:        { purchaseOrderID },
 						cache:       false,
 						async:       false,
 						dataType:    "json",
@@ -1399,7 +1309,7 @@ $(document).ready(function() {
 							let result = data.split("|");
 			
 							let isSuccess   = result[0];
-							let message     = result[1];
+							let feedback    = result[1];
 							let insertedID  = result[2];
 							let dateCreated = result[3];
 			
@@ -1408,19 +1318,19 @@ $(document).ready(function() {
 									$("#loader").hide();
 									Swal.fire({
 										icon:              "success",
-										title:             `SIGNED PURCHASE ORDER UPLOADED SUCCESSFULLY!`,
+										title:             `${feedback} created successfully!`,
 										showConfirmButton: false,
 										timer:             2000,
 									}).then(function() {
-                                        viewDocument(purchaseOrderID);
-                                    });
+										pageContent();
+									});
 								}, 500);
 							} else {
 								setTimeout(() => {
 									$("#loader").hide();
 									Swal.fire({
 										icon:              "danger",
-										title:             "FAILED TO UPLOAD SIGNED PURCHASE ORDER",
+										title:             "FAILED TO CREATE CHANGE REQUEST",
 										showConfirmButton: false,
 										timer:             2000,
 									});
@@ -1436,9 +1346,82 @@ $(document).ready(function() {
 					}).done(function() {
 						setTimeout(() => {
 							$("#loader").hide();
-							$(`[name="fileSignedPO"]`).val("");
 						}, 500);
 					})
+				}, 10);
+			}
+		});
+	}
+	// ----- SAVE CHANGE REQUEST FORM -----
+
+
+    // ----- SAVE SIGNED PURCHASE ORDER -----
+    function saveSignedPurchaseOrder(data, purchaseOrderID = 0) {
+        if (data) {
+            const confirmation = getConfirmation("signedpo");
+            confirmation.then(res => {
+                if (res.isConfirmed) {
+					$("#loader").show();
+
+					setTimeout(() => {
+						$.ajax({
+							method:      "POST",
+							url:         `purchase_order/saveSignedPurchaseOrder`,
+							data,
+							processData: false,
+							contentType: false,
+							global:      false,
+							cache:       false,
+							async:       false,
+							dataType:    "json",
+							beforeSend: function() {
+								$("#loader").show();
+							},
+							success: function(data) {
+								let result = data.split("|");
+				
+								let isSuccess   = result[0];
+								let message     = result[1];
+								let insertedID  = result[2];
+								let dateCreated = result[3];
+				
+								if (isSuccess == "true") {
+									setTimeout(() => {
+										$("#loader").hide();
+										Swal.fire({
+											icon:              "success",
+											title:             `SIGNED PURCHASE ORDER UPLOADED SUCCESSFULLY!`,
+											showConfirmButton: false,
+											timer:             2000,
+										}).then(function() {
+											viewDocument(purchaseOrderID);
+										});
+									}, 500);
+								} else {
+									setTimeout(() => {
+										$("#loader").hide();
+										Swal.fire({
+											icon:              "danger",
+											title:             "FAILED TO UPLOAD SIGNED PURCHASE ORDER",
+											showConfirmButton: false,
+											timer:             2000,
+										});
+									}, 500);
+								}
+							},
+							error: function() {
+								setTimeout(() => {
+									$("#loader").hide();
+									showNotification("danger", "System error: Please contact the system administrator for assistance!");
+								}, 500);
+							}
+						}).done(function() {
+							setTimeout(() => {
+								$("#loader").hide();
+								$(`[name="fileSignedPO"]`).val("");
+							}, 500);
+						})
+					}, 10);
 				} else {
 					$(`[name="fileSignedPO"]`).val("");
 				}

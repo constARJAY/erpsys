@@ -360,14 +360,14 @@ function forApprovalContent() {
 		<button 
 			class="btn btn-edit w-100 btnEdit" 
 			id="${encryptString(inventoryReceivingID)}" 
-			code="${getFormCode("INRR", dateCreatedRI, inventoryReceivingID)}"><i class="fas fa-edit"></i> Edit</button>`;
+			code="${getFormCode("INR", dateCreatedRI, inventoryReceivingID)}"><i class="fas fa-edit"></i> Edit</button>`;
 
 		let btnClass =  inventoryReceivingStatus != 0 ? `btnView` : `btnEdit`;
 		
 		if (isImCurrentApprover(approversID, approversDate, inventoryReceivingStatus) || isAlreadyApproved(approversID, approversDate)) {
 			html += `
 			<tr class="${btnClass}" id="${encryptString(inventoryReceivingID)}">
-				<td>${getFormCode("INRR", createdAt, inventoryReceivingID)}</td>
+				<td>${getFormCode("INR", createdAt, inventoryReceivingID)}</td>
 				<td>${fullname}</td>
 				<td>${purchaseOrderCode}</td>
 				<td>${projectName}</td>
@@ -455,13 +455,13 @@ function myFormsContent() {
 		<button 
 			class="btn btn-edit w-100 btnEdit" 
 			id="${encryptString(inventoryReceivingID)}" 
-			code="${getFormCode("INRR", dateCreated, inventoryReceivingID)}"><i class="fas fa-edit"></i> Edit</button>`;
+			code="${getFormCode("INR", dateCreated, inventoryReceivingID)}"><i class="fas fa-edit"></i> Edit</button>`;
 
 		let btnClass =  inventoryReceivingStatus != 0 ? `btnView` : `btnEdit`;
 
 		html += `
 		<tr class="${btnClass}" id="${encryptString(inventoryReceivingID)}">
-			<td>${getFormCode("INRR", dateCreated, inventoryReceivingID)}</td>
+			<td>${getFormCode("INR", dateCreated, inventoryReceivingID)}</td>
 			<td>${fullname}</td>
 			<td>${purchaseOrderCode}</td>
 			<td>${projectName}</td>
@@ -512,7 +512,7 @@ function formButtons(data = false, isRevise = false, isFromCancelledDocument = f
 					class="btn btn-submit px-5 p-2" 
 					id="btnSubmit" 
 					inventoryReceivingID="${encryptString(inventoryReceivingID)}"
-					code="${getFormCode("INRR", createdAt, inventoryReceivingID)}"
+					code="${getFormCode("INR", createdAt, inventoryReceivingID)}"
 					revise="${isRevise}" cancel="${isFromCancelledDocument}"><i class="fas fa-paper-plane"></i>
 					Submit
 				</button>`;
@@ -523,7 +523,7 @@ function formButtons(data = false, isRevise = false, isFromCancelledDocument = f
 						class="btn btn-cancel btnCancel px-5 p-2" 
 						id="btnCancel"
 						inventoryReceivingID="${encryptString(inventoryReceivingID)}"
-						code="${getFormCode("INRR", createdAt, inventoryReceivingID)}"
+						code="${getFormCode("INR", createdAt, inventoryReceivingID)}"
 						revise="${isRevise}" cancel="${isFromCancelledDocument}"><i class="fas fa-ban"></i> 
 						Cancel
 					</button>`;
@@ -533,7 +533,7 @@ function formButtons(data = false, isRevise = false, isFromCancelledDocument = f
 						class="btn btn-cancel px-5 p-2"
 						id="btnCancelForm" 
 						inventoryReceivingID="${encryptString(inventoryReceivingID)}"
-						code="${getFormCode("INRR", createdAt, inventoryReceivingID)}"
+						code="${getFormCode("INR", createdAt, inventoryReceivingID)}"
 						revise=${isRevise}><i class="fas fa-ban"></i> 
 						Cancel
 					</button>`;
@@ -548,7 +548,7 @@ function formButtons(data = false, isRevise = false, isFromCancelledDocument = f
 						class="btn btn-cancel px-5 p-2"
 						id="btnCancelForm" 
 						inventoryReceivingID="${encryptString(inventoryReceivingID)}"
-						code="${getFormCode("INRR", createdAt, inventoryReceivingID)}"
+						code="${getFormCode("INR", createdAt, inventoryReceivingID)}"
 						status="${inventoryReceivingStatus}"><i class="fas fa-ban"></i> 
 						Cancel
 					</button>`;
@@ -560,7 +560,7 @@ function formButtons(data = false, isRevise = false, isFromCancelledDocument = f
 					class="btn btn-cancel px-5 p-2"
 					id="btnDrop" 
 					inventoryReceivingID="${encryptString(inventoryReceivingID)}"
-					code="${getFormCode("INRR", createdAt, inventoryReceivingID)}"
+					code="${getFormCode("INR", createdAt, inventoryReceivingID)}"
 					status="${inventoryReceivingStatus}"><i class="fas fa-ban"></i> 
 					Drop
 				</button>`;
@@ -573,7 +573,7 @@ function formButtons(data = false, isRevise = false, isFromCancelledDocument = f
 						class="btn btn-cancel px-5 p-2"
 						id="btnRevise" 
 						inventoryReceivingID="${encryptString(inventoryReceivingID)}"
-						code="${getFormCode("INRR", createdAt, inventoryReceivingID)}"
+						code="${getFormCode("INR", createdAt, inventoryReceivingID)}"
 						status="${inventoryReceivingStatus}"><i class="fas fa-clone"></i>
 						Revise
 					</button>`;
@@ -586,7 +586,7 @@ function formButtons(data = false, isRevise = false, isFromCancelledDocument = f
 						class="btn btn-cancel px-5 p-2"
 						id="btnRevise" 
 						inventoryReceivingID="${encryptString(inventoryReceivingID)}"
-						code="${getFormCode("INRR", createdAt, inventoryReceivingID)}"
+						code="${getFormCode("INR", createdAt, inventoryReceivingID)}"
 						status="${inventoryReceivingStatus}"
 						cancel="true"><i class="fas fa-clone"></i>
 						Revise
@@ -602,14 +602,14 @@ function formButtons(data = false, isRevise = false, isFromCancelledDocument = f
 						class="btn btn-submit px-5 p-2" 
 						id="btnApprove" 
 						inventoryReceivingID="${encryptString(inventoryReceivingID)}"
-						code="${getFormCode("INRR", createdAt, inventoryReceivingID)}"><i class="fas fa-paper-plane"></i>
+						code="${getFormCode("INR", createdAt, inventoryReceivingID)}"><i class="fas fa-paper-plane"></i>
 						Approve
 					</button>
 					<button 
 						class="btn btn-cancel px-5 p-2"
 						id="btnReject" 
 						inventoryReceivingID="${encryptString(inventoryReceivingID)}"
-						code="${getFormCode("INRR", createdAt, inventoryReceivingID)}"><i class="fas fa-ban"></i> 
+						code="${getFormCode("INR", createdAt, inventoryReceivingID)}"><i class="fas fa-ban"></i> 
 						Deny
 					</button>`;
 				}
@@ -1170,7 +1170,7 @@ function formContent(data = false, readOnly = false, isRevise = false, isFromCan
 			<div class="body">
 				<small class="text-small text-muted font-weight-bold">Revised Document No.</small>
 				<h6 class="mt-0 text-danger font-weight-bold">
-					${getFormCode("INRR", createdAt, reviseDocumentNo)}
+					${getFormCode("INR", createdAt, reviseDocumentNo)}
 				</h6>      
 			</div>
 		</div>
@@ -1184,7 +1184,7 @@ function formContent(data = false, readOnly = false, isRevise = false, isFromCan
 				<div class="body">
 					<small class="text-small text-muted font-weight-bold">Document No.</small>
 					<h6 class="mt-0 text-danger font-weight-bold">
-						${inventoryReceivingID  && !isRevise ? getFormCode("INRR", createdAt, inventoryReceivingID) : "---"}
+						${inventoryReceivingID  && !isRevise ? getFormCode("INR", createdAt, inventoryReceivingID) : "---"}
 					</h6>      
 				</div>
 			</div>
@@ -1251,26 +1251,29 @@ function formContent(data = false, readOnly = false, isRevise = false, isFromCan
 				<input type="text" name="inventoryReceivingCode" id="inventoryReceivingCode" purchaseOrderID="${purchaseOrderID}"  value="${purchaseOrderCode}" class="form-control" disabled>
 			</div>
 		</div>
-        <div class="col-md-4 col-sm-12">
-                <div class="form-group">
-                    <label>Upload Invoice ${!disabled ? "<code>*</code>" : ""}</label>
-                    <input type="file" class="form-control validate" 
-					name="receiptNo" 
-					id="receiptNo" 
-					data-allowcharacters="[0-9][-]"
-					minlength="5"
-					maxlength="20"
-					required 
-					value="${receiptNo}" 
-					${disabled}
-					>
+
+		<div class="col-md-4 col-sm-12">
+				<div class="form-group">
+					<div class="d-flex justify-content-between align-items-center">
+							<label>Upload Invoice ${!disabled ? "<code>*</code>" : ""}</label>
+							<label>${!disabled ? (receiptNo ? `<a href="${base_url+"assets/upload-files/inventory-receiving/"+receiptNo}" target="_blank">${receiptNo}</a>` : ``) : ``}</label>
+					</div>
+					
+					
+					${ disabled ? (receiptNo ? `<a href="${base_url+"assets/upload-files/inventory-receiving/"+receiptNo}" target="_blank">${receiptNo}</a>` : `-` )
+					: `<input  type="file" 
+								class="form-control" 
+								name="receiptNo" 
+								id="receiptNo"
+								multiple
+								accept="image/*, .pdf, .doc, .docx" ${disabled}>`}
 					<div class="d-block invalid-feedback" id="invalid-receiptNo"></div>
-                </div>
-            </div>
+				</div>
+			</div>
 		<div class="col-md-4 col-sm-12">
 			<div class="form-group">
 				<label>Project Code</label>
-				<input type="text" name="projectCode" id="projectCode"  value="${projectCode}" timelineBuilderID="${timelineBuilderID}" class="form-control" disabled>
+				<input type="text" name="projectCode" id="projectCode"  value="${projectCode || "-"}" timelineBuilderID="${timelineBuilderID}" class="form-control" disabled>
 			</div>
 		</div>
 		<div class="col-md-4 col-sm-12">
@@ -1380,6 +1383,38 @@ function formContent(data = false, readOnly = false, isRevise = false, isFromCan
 	}, 300);
 }
 // ----- END FORM CONTENT -----
+// ----- SELECT FILE -----
+$(document).on("change", "[name=receiptNo]", function(e) {
+	fileLength = this.files.length;
+
+
+	for(var loop =0;loop<fileLength;loop++){
+
+		const filename = this.files[loop].name;
+		const filesize = this.files[loop].size/1024/1024; // Size in MB
+		console.log(filesize)
+		if (filesize > 10) {
+			$(this).val("");
+			$(this).parent().parent().find(".displayfile").empty();
+			showNotification("danger", "File size must be less than or equal to 10mb");
+		} else {
+			let html = `
+			<div class="d-flex justify-content-between align-items-center py-2">
+				<span class="filename">${filename}</span>
+				<span class="btnRemoveFile" style="cursor: pointer"><i class="fas fa-close"></i></span>
+			</div>`;
+			$(this).parent().find(".displayfile").first().html(html);
+		}
+
+	}
+});	
+// ----- REMOVE FILE -----
+$(document).on("click", ".btnRemoveFile", function() {
+	$(this).parent().parent().parent().find("[name=files]").first().val("");
+	$(this).closest(".displayfile").empty();
+})
+// ----- END REMOVE FILE -----
+
 
 
 // ----- PAGE CONTENT -----
@@ -1413,6 +1448,8 @@ function pageContent(isForm = false, data = false, readOnly = false, isRevise = 
 viewDocument();
 $("#page_content").text().trim().length == 0 && pageContent(); // CHECK IF THERE IS ALREADY LOADED ONE
 // ----- END PAGE CONTENT -----
+
+
 
 
 // ----- GET INVENTORY RECEIVING DATA -----
@@ -1467,18 +1504,21 @@ function getInventoryReceivingData(action = "insert", method = "submit", status 
 
 	if (currentStatus == "0" && method != "approve") {
 		//var file = document.getElementById("receiptNo").files[0];
-		data["employeeID"] 				 = sessionID;
-		data["inventoryReceivingReason"] = $("[name=inventoryReceivingReason]").val()?.trim();
-		data["receiptNo"]  = $("[name=receiptNo]").val() || null;
-		data["purchaseOrderCode"] = $("[name=inventoryReceivingCode]").val()?.trim();
-		data["purchaseOrderID"] = $("[name=inventoryReceivingCode]").attr("purchaseOrderID");
-		data["projectCode"] = $("[name=projectCode]").val();
-		data["timelineBuilderID"] = $("[name=projectCode]").attr("timelineBuilderID");
-		data["projectName"] = $("[name=projectName]").val();
-		data["projectCategory"] = $("[name=projectCategory]").val();
-		data["clientCode"] = $("[name=clientCode]").val();
-		data["clientAddress"] = $("[name=clientAddress]").val();
-		data["recordID"] = $("[name=recordID]").attr("assetoritem");
+		data["employeeID"] 				 	= sessionID;
+		var timelineDate 					= $("[name=receiptNo]").val().split(" - ");
+			var files 						= document.getElementById("receiptNo").files[0];
+		data["inventoryReceivingReason"] 	= $("[name=inventoryReceivingReason]").val()?.trim();
+		data["purchaseOrderCode"] 			= $("[name=inventoryReceivingCode]").val()?.trim();
+		data["purchaseOrderID"] 			= $("[name=inventoryReceivingCode]").attr("purchaseOrderID");
+		data["projectCode"] 				= $("[name=projectCode]").val();
+		data["timelineBuilderID"] 			= $("[name=projectCode]").attr("timelineBuilderID");
+		data["projectName"] 				= $("[name=projectName]").val();
+		data["projectCategory"] 			= $("[name=projectCategory]").val();
+		data["clientCode"] 					= $("[name=clientCode]").val();
+		data["clientAddress"] 				= $("[name=clientAddress]").val();
+		data["file"] 						= files;
+		data["recordID"] 					= $("[name=recordID]").attr("assetoritem");
+		
 
 		// let fileID   = $("td [name=receiptNo]", this).attr("id") || "";
 		// let file     = fileID ? $(`#${fileID}`)?.[0]?.files?.[0] : "";
@@ -1494,8 +1534,9 @@ function getInventoryReceivingData(action = "insert", method = "submit", status 
 		formData.append("clientCode", $("[name=clientCode]").val());
 		formData.append("timelineBuilderID", $("[name=clientCode]").attr("timelineBuilderID"));
 		formData.append("clientAddress", $("[name=clientAddress]").val());
-		formData.append("recordID", $("[name=recordID]").attr("assetoritem"));
-		formData.append("receiptNo", $("[name=receiptNo]").val());
+		//formData.append("recordID", $("[name=recordID]").attr("assetoritem"));
+		formData.append("file", files);
+		//formData.append("receiptNo", $("[name=receiptNo]").val());
 		formData.append("inventoryReceivingReason", $("[name=inventoryReceivingReason]").val()?.trim());
 		if (action == "insert") {
 			data["createdBy"] = sessionID;
@@ -1639,7 +1680,7 @@ $(document).on("click", "#btnBack", function () {
 	const isFromCancelledDocument = $(this).attr("cancel") == "true";
 	const revise     = $(this).attr("revise") == "true";
 	const employeeID = $(this).attr("employeeID");
-	const feedback   = $(this).attr("code") || getFormCode("INRR", dateToday(), id);
+	const feedback   = $(this).attr("code") || getFormCode("INR", dateToday(), id);
 	const status     = $(this).attr("status");
 
 	if (status != "false" && status != 0) {
@@ -1707,7 +1748,7 @@ $(document).on("click", "#btnSave, #btnCancel", function () {
 		const id       = decryptString($(this).attr("inventoryReceivingID"));
 		const isFromCancelledDocument = $(this).attr("cancel") == "true";
 		const revise   = $(this).attr("revise") == "true";
-		const feedback = $(this).attr("code") || getFormCode("INRR", dateToday(), id);
+		const feedback = $(this).attr("code") || getFormCode("INR", dateToday(), id);
 		const action   = revise && "insert" || (id && feedback ? "update" : "insert");
 		const data     = getInventoryReceivingData(action, "save", "0", id);
 		data["inventoryReceivingStatus"] = 0;
@@ -1921,7 +1962,7 @@ $(document).on("click", "#btnCancelForm", function () {
 $(document).on("click", "#btnApprove", function () {
 	
 	const id       = decryptString($(this).attr("inventoryReceivingID"));
-	const feedback = $(this).attr("code") || getFormCode("INRR", dateToday(), id);
+	const feedback = $(this).attr("code") || getFormCode("INR", dateToday(), id);
 	let tableData  = getTableData("ims_inventory_receiving_tbl", "", "inventoryReceivingID = " + id);
 
 	if (tableData) {
@@ -1978,7 +2019,7 @@ $(document).on("click", "#btnApprove", function () {
 $(document).on("click", "#btnReject", function () {
 	
 	const id       = $(this).attr("inventoryReceivingID");
-	const feedback = $(this).attr("code") || getFormCode("INRR", dateToday(), id);
+	const feedback = $(this).attr("code") || getFormCode("INR", dateToday(), id);
 
 	$("#modal_inventory_receiving_content").html(preloader);
 	$("#modal_inventory_receiving .page-title").text("DENY Inventory Receiving");
@@ -2010,7 +2051,7 @@ $(document).on("click", "#btnReject", function () {
 
 $(document).on("click", "#btnRejectConfirmation", function () {
 	const id       = decryptString($(this).attr("inventoryReceivingID"));
-	const feedback = $(this).attr("code") || getFormCode("INRR", dateToday(), id);
+	const feedback = $(this).attr("code") || getFormCode("INR", dateToday(), id);
 
 	const validate = validateForm("modal_inventory_receiving");
 	if (validate) {
@@ -2221,17 +2262,17 @@ if (data) {
 
 					let swalTitle;
 					if (method == "submit") {
-						swalTitle = `${getFormCode("INRR", dateCreated, insertedID)} submitted successfully!`;
+						swalTitle = `${getFormCode("INR", dateCreated, insertedID)} submitted successfully!`;
 					} else if (method == "save") {
-						swalTitle = `${getFormCode("INRR", dateCreated, insertedID)} saved successfully!`;
+						swalTitle = `${getFormCode("INR", dateCreated, insertedID)} saved successfully!`;
 					} else if (method == "cancelform") {
-						swalTitle = `${getFormCode("INRR", dateCreated, insertedID)} cancelled successfully!`;
+						swalTitle = `${getFormCode("INR", dateCreated, insertedID)} cancelled successfully!`;
 					} else if (method == "approve") {
-						swalTitle = `${getFormCode("INRR", dateCreated, insertedID)} approved successfully!`;
+						swalTitle = `${getFormCode("INR", dateCreated, insertedID)} approved successfully!`;
 					} else if (method == "deny") {
-						swalTitle = `${getFormCode("INRR", dateCreated, insertedID)} denied successfully!`;
+						swalTitle = `${getFormCode("INR", dateCreated, insertedID)} denied successfully!`;
 					} else if (method == "drop") {
-						swalTitle = `${getFormCode("INRR", dateCreated, insertedID)} dropped successfully!`;
+						swalTitle = `${getFormCode("INR", dateCreated, insertedID)} dropped successfully!`;
 					}	
 	
 					if (isSuccess == "true") {

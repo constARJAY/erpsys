@@ -27,416 +27,354 @@ class PurchaseOrder_model extends CI_Model {
         return "false|System error: Please contact the system administrator for assistance!";
     }
 
-
-
-    public function getInventoryVendor($inventoryVendorID)
+    public function getPurchaseOrderData($purchaseOrderID = 0)
     {
         $sql = "
         SELECT 
-            inventoryVendorName AS vendorName,
-            CONCAT(
-                (IF (inventoryVendorUnit <> NULL OR inventoryVendorUnit <> '', 
-                    CONCAT(UCASE(LEFT(inventoryVendorUnit, 1)), LCASE(SUBSTRING(inventoryVendorUnit, 2)),', '),
-                    '')),
-                (IF (inventoryVendorStreet <> NULL OR inventoryVendorStreet <> '', 
-                    CONCAT(UCASE(LEFT(inventoryVendorStreet, 1)), LCASE(SUBSTRING(inventoryVendorStreet, 2)),', '),
-                    '')),
-                (IF (inventoryVendorSubdivision <> NULL OR inventoryVendorSubdivision <> '', 
-                    CONCAT(UCASE(LEFT(inventoryVendorSubdivision, 1)), LCASE(SUBSTRING(inventoryVendorSubdivision, 2)),', '),
-                    '')),
-                (IF (inventoryVendorBarangay <> NULL OR inventoryVendorBarangay <> '', 
-                    CONCAT(UCASE(LEFT(inventoryVendorBarangay, 1)), LCASE(SUBSTRING(inventoryVendorBarangay, 2)),', '),
-                    '')),
-                (IF (inventoryVendorCity <> NULL OR inventoryVendorCity <> '', 
-                    CONCAT(UCASE(LEFT(inventoryVendorCity, 1)), LCASE(SUBSTRING(inventoryVendorCity, 2)),', '),
-                    '')),
-                (IF (inventoryVendorProvince <> NULL OR inventoryVendorProvince <> '', 
-                    CONCAT(UCASE(LEFT(inventoryVendorProvince, 1)), LCASE(SUBSTRING(inventoryVendorProvince, 2)),', '),
-                    '')),
-                (IF (inventoryVendorCountry <> NULL OR inventoryVendorCountry <> '', 
-                    CONCAT(UCASE(LEFT(inventoryVendorCountry, 1)), LCASE(SUBSTRING(inventoryVendorCountry, 2)),', '),
-                    '')),
-                (IF (inventoryVendorZipCode <> NULL OR inventoryVendorZipCode <> '', 
-                    CONCAT(UCASE(LEFT(inventoryVendorZipCode, 1)), LCASE(SUBSTRING(inventoryVendorZipCode, 2)),', '),
-                    ''))
-            ) AS vendorAddress,
-            CONCAT(IF(inventoryVendorMobile, inventoryVendorMobile, '-'), ' / ', IF(inventoryVendorTelephone, inventoryVendorTelephone, '-')) AS vendorContactDetails,
-            inventoryVendorPerson AS vendorContactPerson
+            ipot.*, iprt.approversID, iprt.employeeID as preparedBy
         FROM 
-            ims_inventory_vendor_tbl 
-        WHERE 
-            inventoryVendorID = $inventoryVendorID";
+            ims_purchase_order_tbl AS ipot 
+            LEFT JOIN ims_purchase_request_tbl AS iprt USING(purchaseRequestID)
+        WHERE ipot.purchaseOrderID = $purchaseOrderID";
         $query = $this->db->query($sql);
-        return $query ? $query->row() : false;
+        return $query ? $query->row() : null;
     }
 
-    public function getRequestItem($requestItemID = null) 
+    public function getRequestItemAssets($classification = "", $purchaseOrderID = 0)
     {
-        if ($requestItemID) {
-            $sql   = "SELECT * FROM ims_request_items_tbl WHERE requestItemID = $requestItemID";
-            $query = $this->db->query($sql);
-            return $query ? $query->row() : null;
-        }
-        return null;
-    }
-
-    public function deleteRequestItems($purchaseRequestID = null, $bidRecapID = null, $purchaseOrderID = null)
-    {
-        $query = $this->db->delete("ims_request_items_tbl", [
-            "purchaseRequestID" => $purchaseRequestID,
-            "bidRecapID"        => $bidRecapID,
-            "purchaseOrderID"   => $purchaseOrderID,
-        ]);
-        return $query ? true : false;
-    }
-
-    public function insertPurchaseOrder($data = [], $requestItemsID = []) {
-        if ($data) {
-            $query           = $this->db->insert("ims_purchase_order_tbl", $data);
-            $purchaseOrderID = $this->db->insert_id();
-            if ($requestItemsID) {
-                $updateSql = "
-                UPDATE 
-                    ims_request_items_tbl 
-                SET 
-                    purchaseOrderID = $purchaseOrderID
-                WHERE
-                    requestItemID IN ($requestItemsID)";
-                $updateQuery = $this->db->query($updateSql);
-            }
-            return $query ? $purchaseOrderID : false;
-        }
-        return false;
-    }
-
-    public function getPurchaseOrder($id = null)
-    {
-        if ($id) {
-            $sql = "
-            SELECT 
-                ipot.*, ibrt.createdAt AS ibrtCreatedAt 
-            FROM 
-                ims_purchase_order_tbl AS ipot 
-                LEFT JOIN ims_bid_recap_tbl AS ibrt USING(bidRecapID)
-            WHERE ipot.purchaseOrderID = $id";
-            $query = $this->db->query($sql);
-            return $query ? $query->row() : false;
-        }
-        return false;
-    }
-
-    public function getPurchaseOrderItems($id = null) 
-    {
-        if ($id) {
-            $sql   = "SELECT * FROM ims_request_items_tbl WHERE purchaseOrderID = $id";
+        if ($classification && $purchaseOrderID)
+        {
+            $table = $classification == "Items" ? "ims_request_items_tbl" : "ims_request_assets_tbl";
+            $sql = "SELECT * FROM $table WHERE purchaseOrderID = $purchaseOrderID AND changeRequestID IS NULL AND inventoryReceivingID IS NULL";
             $query = $this->db->query($sql);
             return $query ? $query->result_array() : [];
         }
         return [];
     }
 
-    public function getEmployeeInformation($id = null) {
-        if ($id) {
-            $sql = "
-            SELECT 
-                CONCAT(helt.employeeFirstname, ' ', helt.employeeLastname) AS fullname,
-                designationName
-            FROM 
-                hris_employee_list_tbl AS helt 
-                LEFT JOIN hris_designation_tbl USING(designationID)
-            WHERE employeeID = $id";
-            $query = $this->db->query($sql);
-            return $query ? $query->row() : null;
-        }
-        return null;
-    }
+    public function insertRequestItemAssets($classification = "", $purchaseOrderID = 0, $changeRequestID = 0)
+    {
+        if ($classification && $purchaseOrderID)
+        {
+            $table = $classification == "Items" ? "ims_request_items_tbl" : "ims_request_assets_tbl";
 
-    public function getPurchaseOrderData($id = null){
-        $data = ["items" => [], "employees" => []];
-        if ($id) {
-            $purchaseOrderData = $this->getPurchaseOrder($id);
-            if ($purchaseOrderData) {
-                $data["companyName"]      = $purchaseOrderData->vendorName ?? "-";
-                $data["address"]          = $purchaseOrderData->vendorAddress ?? "-";
-                $data["contactDetails"]   = $purchaseOrderData->vendorContactDetails ?? "-";
-                $data["contactPerson"]    = $purchaseOrderData->vendorContactPerson ?? "-";
-                $data["dateAproved"]      = date("F d, Y", strtotime($purchaseOrderData->submittedAt)) ?? "-";
-                $data["referenceNo"]      = $purchaseOrderData->bidRecapID ? getFormCode("BRF", $purchaseOrderData->ibrtCreatedAt, $purchaseOrderData->bidRecapID) : "-";
-                $data["paymentTerms"]     = $purchaseOrderData->paymentTerms ?? "-";
-                $data["deliveryDate"]     = date("F d, Y", strtotime($purchaseOrderData->deliveryDate)) ?? "-";
-                $data["total"]            = $purchaseOrderData->total ?? "0";
-                $data["discount"]         = $purchaseOrderData->discount ?? "0";
-                $data["discountType"]     = $purchaseOrderData->discountType;
-                $data["totalAmount"]      = $purchaseOrderData->totalAmount ?? "0";
-                $data["vatSales"]         = $purchaseOrderData->vatSales ?? "0";
-                $data["vat"]              = $purchaseOrderData->vat ?? "0";
-                $data["totalVat"]         = $purchaseOrderData->totalVat ?? "0";
-                $data["lessEwt"]          = $purchaseOrderData->lessEwt ?? "0";
-                $data["grandTotalAmount"] = $purchaseOrderData->grandTotalAmount ?? "0";
-                $data["createdAt"]        = $purchaseOrderData->createdAt ?? date("Y-m-d");
-                $data["purchaseOrderID"]  = $id;
-
-                $preparedID  = $purchaseOrderData->employeeID;
-                $approversID = $purchaseOrderData->approversID;
-                $approversID = explode("|", $approversID);
-                $employeesID = array_merge([$preparedID], $approversID);
-                foreach ($employeesID as $index => $employeeID) {
-                    $employeeData = $this->getEmployeeInformation($employeeID);
-                    if ($index == 0) {
-                        $title = "Prepared By";
-                    } else if (($index+1) == count($employeesID)) {
-                        $title = "Approved By";
-                    } else {
-                        $title = "Checked By";
-                    }
-                    $employee = [
-                        "title"    => $title,
-                        "name"     => $employeeData->fullname,
-                        "position" => $employeeData->designationName
+            $data = [];
+            $requestItemAssets = $this->getRequestItemAssets($classification, $purchaseOrderID);
+            if ($classification == "Items")
+            {
+                foreach($requestItemAssets as $item)
+                {
+                    $data[] = [
+                        'costEstimateID'          => $item['costEstimateID'],
+                        'billMaterialID'          => $item['billMaterialID'],
+                        'materialRequestID'       => $item['materialRequestID'],
+                        'inventoryValidationID'   => $item['inventoryValidationID'],
+                        'changeRequestID'         => $changeRequestID,
+                        'inventoryReceivingID'    => $item['inventoryReceivingID'],
+                        'candidateVendorID'       => $item['candidateVendorID'],
+                        'candidateSelectedVendor' => $item['candidateSelectedVendor'],
+                        'candidateVendorName'     => $item['candidateVendorName'],
+                        'candidateVendorPrice'    => $item['candidateVendorPrice'],
+                        'inventoryVendorID'       => $item['inventoryVendorID'],
+                        'inventoryVendorCode'     => $item['inventoryVendorCode'],
+                        'inventoryVendorName'     => $item['inventoryVendorName'],
+                        'milestoneBuilderID'      => $item['milestoneBuilderID'],
+                        'phaseDescription'        => $item['phaseDescription'],
+                        'milestoneListID'         => $item['milestoneListID'],
+                        'projectMilestoneID'      => $item['projectMilestoneID'],
+                        'projectMilestoneName'    => $item['projectMilestoneName'],
+                        'itemID'                  => $item['itemID'],
+                        'itemCode'                => $item['itemCode'],
+                        'itemBrandName'           => $item['itemBrandName'],
+                        'itemName'                => $item['itemName'],
+                        'itemClassification'      => $item['itemClassification'],
+                        'itemCategory'            => $item['itemCategory'],
+                        'itemUom'                 => $item['itemUom'],
+                        'itemDescription'         => $item['itemDescription'],
+                        'files'                   => $item['files'],
+                        'remarks'                 => $item['remarks'],
+                        'availableStocks'         => $item['availableStocks'],
+                        'requestQuantity'         => $item['requestQuantity'],
+                        'reservedItem'            => $item['reservedItem'],
+                        'forPurchase'             => $item['forPurchase'],
+                        'unitCost'                => $item['unitCost'],
+                        'totalCost'               => $item['totalCost'],
+                        'finalQuoteRemarks'       => $item['finalQuoteRemarks'],
+                        'createdBy'               => $item['createdBy'],
+                        'updatedBy'               => $item['updatedBy'],
                     ];
-                    array_push($data["employees"], $employee);
+                }
+            }
+            else if ($classification == "Assets")
+            {
+                foreach($requestItemAssets as $asset)
+                {
+                    $data[] = [
+                        'costEstimateID'          => $asset['costEstimateID'],
+                        'billMaterialID'          => $asset['billMaterialID'],
+                        'materialRequestID'       => $asset['materialRequestID'],
+                        'inventoryValidationID'   => $asset['inventoryValidationID'],
+                        'changeRequestID'         => $changeRequestID,
+                        'inventoryReceivingID'    => $asset['inventoryReceivingID'],
+                        'candidateVendorID'       => $asset['candidateVendorID'],
+                        'candidateSelectedVendor' => $asset['candidateSelectedVendor'],
+                        'candidateVendorName'     => $asset['candidateVendorName'],
+                        'candidateVendorPrice'    => $asset['candidateVendorPrice'],
+                        'inventoryVendorID'       => $asset['inventoryVendorID'],
+                        'inventoryVendorCode'     => $asset['inventoryVendorCode'],
+                        'inventoryVendorName'     => $asset['inventoryVendorName'],
+                        'milestoneBuilderID'      => $asset['milestoneBuilderID'],
+                        'phaseDescription'        => $asset['phaseDescription'],
+                        'milestoneListID'         => $asset['milestoneListID'],
+                        'projectMilestoneID'      => $asset['projectMilestoneID'],
+                        'projectMilestoneName'    => $asset['projectMilestoneName'],
+                        'assetID'                 => $asset['assetID'],
+                        'assetCode'               => $asset['assetCode'],
+                        'assetBrandName'          => $asset['assetBrandName'],
+                        'assetName'               => $asset['assetName'],
+                        'assetClassification'     => $asset['assetClassification'],
+                        'assetCategory'           => $asset['assetCategory'],
+                        'assetUom'                => $asset['assetUom'],
+                        'assetDescription'        => $asset['assetDescription'],
+                        'files'                   => $asset['files'],
+                        'remarks'                 => $asset['remarks'],
+                        'availableStocks'         => $asset['availableStocks'],
+                        'requestQuantity'         => $asset['requestQuantity'],
+                        'reservedAsset'           => $asset['reservedAsset'],
+                        'forPurchase'             => $asset['forPurchase'],
+                        'requestManHours'         => $asset['requestManHours'],
+                        'dateNeeded'              => $asset['dateNeeded'],
+                        'dateReturn'              => $asset['dateReturn'],
+                        'actualDateReturn'        => $asset['actualDateReturn'],
+                        'hourlyRate'              => $asset['hourlyRate'],
+                        'unitCost'                => $asset['unitCost'],
+                        'totalCost'               => $asset['totalCost'],
+                        'finalQuoteRemarks'       => $asset['finalQuoteRemarks'],
+                        'createdBy'               => $asset['createdBy'],
+                        'updatedBy'               => $asset['updatedBy'],
+                    ];
                 }
             }
 
-            $purchaseOrderItems = $this->getPurchaseOrderItems($id);
-            foreach ($purchaseOrderItems as $item) {
-                $temp = [
-                    "code"        => getFormCode("ITM", $item["createdAt"], $item["itemID"]),
-                    "desc"        => $item["itemName"]." - ".$item["itemDescription"],
-                    "qty"         => $item["quantity"],
-                    "unit"        => $item["itemUom"],
-                    "unitcost"    => $item["unitCost"],
-                    "totalamount" => $item["totalCost"]
+            if ($data && count($data) > 0)
+            {
+                $query = $this->db->insert_batch($table, $data);
+                return $query ? true : false;
+            }
+        }
+        return true;
+    }
+
+    public function saveChangeRequestForm($purchaseOrderID = 0)
+    {
+        $sessionID = $this->session->has_userdata('adminSessionID') ? $this->session->userdata('adminSessionID') : 0;
+
+        $updatePurchaseOrder = $this->db->update(
+            "ims_purchase_order_tbl",
+            [
+                "purchaseOrderStatus" => 4,
+                "employeeID"          => $sessionID
+            ],
+            ["purchaseOrderID" => $purchaseOrderID]
+        );
+
+        $purchaseOrderData = $this->getPurchaseOrderData($purchaseOrderID);
+        if ($purchaseOrderData)
+        {
+            $classification = $purchaseOrderData->purchaseOrderClassification;
+            $data = [
+                'costEstimateID'          => $purchaseOrderData->costEstimateID,
+                'costEstimateCode'        => $purchaseOrderData->costEstimateCode,
+                'billMaterialID'          => $purchaseOrderData->billMaterialID,
+                'billMaterialCode'        => $purchaseOrderData->billMaterialCode,
+                'materialRequestID'       => $purchaseOrderData->materialRequestID,
+                'materialRequestCode'     => $purchaseOrderData->materialRequestCode,
+                'inventoryValidationID'   => $purchaseOrderData->inventoryValidationID,
+                'inventoryValidationCode' => $purchaseOrderData->inventoryValidationCode,
+                'bidRecapID'              => $purchaseOrderData->bidRecapID,
+                'bidRecapCode'            => $purchaseOrderData->bidRecapCode,
+                'purchaseRequestID'       => $purchaseOrderData->purchaseRequestID,
+                'purchaseRequestCode'     => $purchaseOrderData->purchaseRequestCode,
+                'purchaseOrderID'         => $purchaseOrderData->purchaseOrderID,
+                'purchaseOrderCode'       => $purchaseOrderData->purchaseOrderCode,
+                'timelineBuilderID'       => $purchaseOrderData->timelineBuilderID,
+                'projectCode'             => $purchaseOrderData->projectCode,
+                'projectName'             => $purchaseOrderData->projectName,
+                'projectCategory'         => $purchaseOrderData->projectCategory,
+                'clientCode'              => $purchaseOrderData->clientCode,
+                'clientName'              => $purchaseOrderData->clientName,
+                'clientAddress'           => $purchaseOrderData->clientAddress,
+                'employeeID'              => $purchaseOrderData->employeeID,
+                'inventoryVendorID'       => $purchaseOrderData->inventoryVendorID,
+                'vendorCode'              => $purchaseOrderData->vendorCode,
+                'vendorName'              => $purchaseOrderData->vendorName,
+                'vendorContactPerson'     => $purchaseOrderData->vendorContactPerson,
+                'vendorContactDetails'    => $purchaseOrderData->vendorContactDetails,
+                'vendorAddress'           => $purchaseOrderData->vendorAddress,
+                'changeRequestClassification' => $classification,
+                'purchaseOrderReason'     => $purchaseOrderData->purchaseOrderReason,
+                'dateNeeded'              => $purchaseOrderData->dateNeeded,
+                'changeRequestStatus'     => 0,
+                'changeRequestRemarks'    => $purchaseOrderData->purchaseOrderRemarks,
+                'createdBy'               => $purchaseOrderData->employeeID,
+                'updatedBy'               => $purchaseOrderData->updatedBy,
+            ];
+            $query = $this->db->insert("ims_change_request_tbl", $data);
+            $changeRequestCode = "";
+            if ($query)
+            {
+                $changeRequestID = $this->db->insert_id();
+                $changeRequestCode = getFormCode("CRF", date("Y-m-d"), $changeRequestID);
+                $updateCode = $this->db->update(
+                    "ims_change_request_tbl", 
+                    ["changeRequestCode" => $changeRequestCode], 
+                    ["changeRequestID" => $changeRequestID]);
+
+                if ($updateCode)
+                {
+                    $insertRequestItemAsset = $this->insertRequestItemAssets($classification, $purchaseOrderID, $changeRequestID);
+                }
+            }
+            return "true|$changeRequestCode|$changeRequestID|".date("Y-m-d");
+        }
+        return "false|System error: Please contact the system administrator for assistance!";
+    }
+
+
+
+
+    // ----- ***** PURCHASE ORDER EXCEL DATA ***** -----
+    public function getEmployeeData($employeeID = 0)
+    {
+        $sql = "
+        SELECT 
+            CONCAT(hris_employee_list_tbl.employeeFirstname, ' ', hris_employee_list_tbl.employeeLastname) AS fullname,
+            hris_designation_tbl.designationName AS designation
+        FROM hris_employee_list_tbl LEFT JOIN hris_designation_tbl USING(designationID) 
+        WHERE employeeID = $employeeID";
+        $query = $this->db->query($sql);
+        return $query ? $query->row() : null;
+    }
+
+    public function getPurchaseOrderExcelData($purchaseOrderID = 0)
+    {
+        $data = [];
+        if ($purchaseOrderID)
+        {
+            $purchaseOrderData = $this->getPurchaseOrderData($purchaseOrderID);
+            if ($purchaseOrderData)
+            {
+                $approversID = $purchaseOrderData->approversID;
+                $preparedBy  = $purchaseOrderData->preparedBy;
+
+                $data["filename"] = $purchaseOrderData->purchaseOrderCode.".xlsx";
+                $data["code"]     = $purchaseOrderData->purchaseOrderCode;
+                $data["title"]    = "PURCHASE ORDER";
+                $data["header"]   = [
+                    "companyName"    => $purchaseOrderData->vendorName,
+                    "address"        => $purchaseOrderData->vendorAddress,
+                    "contactDetails" => $purchaseOrderData->vendorContactDetails,
+                    "contactPerson"  => $purchaseOrderData->vendorContactPerson,
+                    "date"           => date("F d, Y", strtotime($purchaseOrderData->createdAt)),
+                    "requestNo"      => $purchaseOrderData->purchaseRequestCode,
+                    "paymentTerms"   => $purchaseOrderData->paymentTerms,
+                    "deliveryDate"   => date("F d, Y", strtotime($purchaseOrderData->shippingDate))
                 ];
-                array_push($data["items"], $temp);
+                $classification    = $purchaseOrderData->purchaseOrderClassification;
+                $requestItemAssets = $this->getRequestItemAssets($classification, $purchaseOrderID);
+
+                if ($requestItemAssets && count($requestItemAssets) > 0)
+                {
+                    $body = [];
+                    foreach($requestItemAssets as $itemAsset)
+                    {
+                        if ($classification == "Items")
+                        {
+                            $body[] = [
+                                "code"        => $itemAsset["itemCode"],
+                                "description" => $itemAsset["itemName"]." - ".$itemAsset["itemBrandName"],
+                                "quantity"    => formatAmount($itemAsset["forPurchase"] ?? 0),
+                                "unit"        => $itemAsset["itemUom"],
+                                "unitCost"    => formatAmount(($itemAsset["unitCost"] ?? 0), true),
+                                "totalAmount" => formatAmount(($itemAsset["totalCost"] ?? 0), true)
+                            ];
+                        }
+                        else if ($classification == "Assets")
+                        {
+                            $body[] = [
+                                "code"        => $itemAsset["assetCode"],
+                                "description" => $itemAsset["assetName"]." - ".$itemAsset["assetBrandName"],
+                                "quantity"    => formatAmount($itemAsset["forPurchase"] ?? 0),
+                                "unit"        => $itemAsset["assetUom"],
+                                "unitCost"    => formatAmount(($itemAsset["unitCost"] ?? 0), true),
+                                "totalAmount" => formatAmount(($itemAsset["totalCost"] ?? 0), true)
+                            ];
+                        }
+                    }
+                    $data["body"] = $body;
+                }
+
+                $footer = [
+                    "comments"   => "1. Purchase Order must appear in all documents.\n2. The price of the Goods and/or Services stated in this purchase order shall be the price agreed upon in writing by the Company and the Supplier.\n3. Goods are subject to inspection upon arrival Goods must conform to description and specification set above, otherwise this will be return at the supplier's expenses.\n4. Original Invoice and/or Delivery receipt are left with Receiving Clerk to facilitate payment.",
+                    "wordAmount" => convertNumberToWords($purchaseOrderData->grandTotalAmount),
+                    "grandTotal" => $purchaseOrderData->grandTotalAmount ?? 0
+                ];
+                $discount = formatAmount(($purchaseOrderData->discount ?? 0), true);
+                if ($purchaseOrderData->discountType == "percent") {
+                    $discount = formatAmount(($purchaseOrderData->discount ?? 0))." %";
+                }
+                $footer["costSummary"] = [
+                    "total"       => formatAmount(($purchaseOrderData->total ?? 0), true),
+                    "discount"    => $discount,
+                    "totalAmount" => formatAmount($purchaseOrderData->totalAmount ?? 0),
+                    "vatSales"    => formatAmount($purchaseOrderData->vatSales ?? 0),
+                    "vat"         => formatAmount($purchaseOrderData->vat ?? 0),
+                    "totalVat"    => formatAmount($purchaseOrderData->totalVat ?? 0),
+                    "lessEwt"     => formatAmount($purchaseOrderData->lessEwt ?? 0),
+                    "grandTotalAmount" => formatAmount(($purchaseOrderData->grandTotalAmount ?? 0), true)
+                ];
+
+                $approvers = [];
+                if ($preparedBy)
+                {
+                    $employeeData = $this->getEmployeeData($preparedBy);
+                    if ($employeeData)
+                    {
+                        $approvers[] = [
+                            "designation" => $employeeData->designation,
+                            "title"       => "Prepared By: ".$employeeData->fullname
+                        ];
+                    }
+                }
+
+                if ($approversID)
+                {
+                    $approversArr = explode("|", $approversID) ?? [];
+                    $countApprover = count($approversArr);
+                    if ($approversArr && $countApprover > 0)
+                    {
+                        foreach($approversArr as $index => $approver)
+                        {
+                            $employeeData = $this->getEmployeeData($approver);
+
+                            if ($employeeData)
+                            {
+                                $title = ($index+1) == $countApprover ? "Approved By: " : "Checked By: ";
+                                $approvers[] = [
+                                    "title"       => $title.$employeeData->fullname,
+                                    "designation" => $employeeData->designation,
+                                ];
+                            }
+                        }
+                    }
+                }
+                $footer["approvers"] = $approvers;
+                $data["footer"]      = $footer;
             }
         }
         return $data;
     }
+    // ----- ***** END PURCHASE ORDER EXCEL DATA ***** -----
 
-    public function savePurchaseOrderData($action, $data, $id = null) 
-    {
-        if ($action == "insert") {
-            $query = $this->db->insert("ims_purchase_order_tbl", $data);
-        } else {
-            $where = ["purchaseOrderID" => $id];
-            $query = $this->db->update("ims_purchase_order_tbl", $data, $where);
-        }
-
-        if ($query) {
-            $insertID = $action == "insert" ? $this->db->insert_id() : $id;
-            // ----- UPDATE BID ITEMS -----
-            $poData            = $this->getPurchaseOrder($id);
-            $bidRecapID        = $poData->bidRecapID ?? $data["bidRecapID"];
-            $inventoryVendorID = $poData->inventoryVendorID ?? $data["inventoryVendorID"];
-            $status            = $data["purchaseOrderStatus"];
-            if ($bidRecapID && $bidRecapID != "" && $inventoryVendorID && $inventoryVendorID != "") {
-                if($status != 3 && $status != 4){
-                    $itemStatus = 1;
-                }else{
-                    $itemStatus = 0;
-                }
-                if ($bidRecapID != 0 && $inventoryVendorID != 0){
-                    $primaryKey    = $this->getPOPrimaryID($bidRecapID, $inventoryVendorID);
-                    $updateSql     = "UPDATE ims_bid_po_tbl SET bidPoStatus = $itemStatus WHERE bidPoID IN ($primaryKey)";
-                    $updateQuery   = $this->db->query($updateSql);
-                    if(!$updateQuery){
-                        return "false|System error: Please contact the system administrator for assistance!!";
-                    }
-                }
-            }
-            // ----- END UPDATE BID ITEMS -----
-            return "true|Successfully submitted|$insertID|".date("Y-m-d");
-        }
-        return "false|System error: Please contact the system administrator for assistance!";
-    }
-
-    public function getPOPrimaryID($bidRecapID, $inventoryVendorID){
-        $sql    = "SELECT GROUP_CONCAT(bidPoID SEPARATOR ',') AS primaryKey FROM ims_bid_po_tbl WHERE bidRecapID = '$bidRecapID' AND inventoryVendorID = '$inventoryVendorID' ";
-        $query  = $this->db->query($sql);
-        $result = $query->result_array();
-        $status = count($result) > 0 ? true : false;
-        foreach ($query->result() as $row)
-        {
-                $primaryKey =  $row->primaryKey;
-        }
-        return  $status ? $primaryKey : false;
-    }
-
-    public function savePurchaseOrderItems($data, $id)
-    {
-        $query = $this->db->insert_batch("ims_request_items_tbl", $data);
-        if ($query) {
-            return "true|Successfully submitted";
-        }
-        return "false|System error: Please contact the system administrator for assistance!";
-    }
-
-    public function getPhases($purchaseOrderID = 0, $bidRecapID = 0, $inventoryVendorID = 0)
-    {
-        $wherePO = $purchaseOrderID && $purchaseOrderID > 0 ? "AND purchaseOrderID = $purchaseOrderID" : "AND purchaseOrderID IS NULL";
-        $sql = "
-        SELECT 
-            milestoneBuilderID, phaseDescription
-        FROM 
-            ims_request_items_tbl 
-        WHERE 
-            milestoneBuilderID IS NOT NULL AND
-            phaseDescription IS NOT NULL AND
-            milestoneListID IS NOT NULL AND
-            projectMilestoneID IS NOT NULL AND
-            projectMilestoneName IS NOT NULL AND
-            bidRecapID = $bidRecapID AND
-            inventoryVendorID = $inventoryVendorID
-            $wherePO 
-        GROUP BY milestoneBuilderID";
-        $query = $this->db->query($sql);
-        return $query ? $query->result_array() : [];
-    }
-
-    public function getMilestones($purchaseOrderID = 0, $bidRecapID = 0, $inventoryVendorID = 0, $milestoneBuilderID = 0) {
-        $wherePO = $purchaseOrderID && $purchaseOrderID > 0 ? "AND purchaseOrderID = $purchaseOrderID" : "AND purchaseOrderID IS NULL";
-        $sql = "
-        SELECT 
-            projectMilestoneID, projectMilestoneName
-        FROM 
-            ims_request_items_tbl 
-        WHERE 
-            milestoneBuilderID IS NOT NULL AND
-            phaseDescription IS NOT NULL AND
-            milestoneListID IS NOT NULL AND
-            projectMilestoneID IS NOT NULL AND
-            projectMilestoneName IS NOT NULL AND
-            bidRecapID = $bidRecapID AND 
-            inventoryVendorID = $inventoryVendorID AND
-            milestoneBuilderID = $milestoneBuilderID 
-            $wherePO
-        GROUP BY projectMilestoneID";
-        $query = $this->db->query($sql);
-        return $query ? $query->result_array() : [];
-    }
-
-    public function getMilestoneItems($purchaseOrderID = 0, $bidRecapID = 0, $inventoryVendorID = 0, $milestoneBuilderID = 0, $projectMilestoneID = 0)
-    {
-        $wherePO = $purchaseOrderID && $purchaseOrderID > 0 ? "AND purchaseOrderID = $purchaseOrderID" : "AND purchaseOrderID IS NULL";
-        $sql = "
-        SELECT 
-            *
-        FROM 
-            ims_request_items_tbl 
-        WHERE 
-            milestoneBuilderID IS NOT NULL AND
-            phaseDescription IS NOT NULL AND
-            milestoneListID IS NOT NULL AND
-            projectMilestoneID IS NOT NULL AND
-            projectMilestoneName IS NOT NULL AND
-            bidRecapID = $bidRecapID AND 
-            inventoryVendorID = $inventoryVendorID AND
-            milestoneBuilderID = $milestoneBuilderID AND
-            projectMilestoneID = $projectMilestoneID
-            $wherePO";
-        $query = $this->db->query($sql);
-        return $query ? $query->result_array() : [];
-    }
-
-    public function getProjectPhases($purchaseOrderID = 0, $bidRecapID = 0, $inventoryVendorID = 0)
-    {
-        $result = [];
-        $phases = $this->getPhases($purchaseOrderID, $bidRecapID, $inventoryVendorID);
-        foreach($phases as $phase) {
-            $milestoneBuilderID = $phase["milestoneBuilderID"];
-            $phaseDescription   = $phase["phaseDescription"];
-
-            $milestones = $this->getMilestones($purchaseOrderID, $bidRecapID, $inventoryVendorID, $milestoneBuilderID);
-            $milestoneItems = [];
-            foreach($milestones as $milestone) {
-                $projectMilestoneID   = $milestone["projectMilestoneID"];
-                $projectMilestoneName = $milestone["projectMilestoneName"];
-
-                $temp2 = [
-                    "projectMilestoneID" => $projectMilestoneID,
-                    "name"  => $projectMilestoneName,
-                    "items" => $this->getMilestoneItems($purchaseOrderID, $bidRecapID, $inventoryVendorID, $milestoneBuilderID, $projectMilestoneID)
-                ];
-                array_push($milestoneItems, $temp2);
-            }
-            $temp = [
-                "milestoneBuilderID" => $milestoneBuilderID,
-                "phaseDescription"   => $phaseDescription,
-                "milestones"         => $milestoneItems,
-            ];
-            array_push($result, $temp);
-        }
-        return $result;
-    }
-
-    public function getMaterialEquipmentRequestItems($purchaseOrderID = 0, $bidRecapID = 0, $inventoryVendorID = 0)
-    {
-        $classifications = $this->getPurchaseRequestClassification($purchaseOrderID, $bidRecapID, $inventoryVendorID);
-        $result = [];
-        foreach($classifications as $classification) {
-            $itemClassification = $classification["itemClassification"];
-            $temp = [
-                "name"  => $itemClassification,
-                "items" => $this->getPurchaseRequestItems($purchaseOrderID, $bidRecapID, $inventoryVendorID, $itemClassification)
-            ];
-            array_push($result, $temp);
-        }
-        return $result;
-    }
-
-    public function getPurchaseRequestClassification($purchaseOrderID = 0, $bidRecapID = 0, $inventoryVendorID = 0)
-    {
-        $result = [];
-        if ($purchaseOrderID && $purchaseOrderID > 0 || $bidRecapID && $bidRecapID > 0) {
-            $wherePO  = $purchaseOrderID && $purchaseOrderID > 0 ? "AND purchaseOrderID = $purchaseOrderID" : "AND purchaseOrderID IS NULL";
-            $whereBR = $bidRecapID && $bidRecapID > 0 ? "AND bidRecapID = $bidRecapID" : "";
-            $sql = "
-            SELECT 
-                itemClassification
-            FROM 
-                ims_request_items_tbl 
-            WHERE 
-                inventoryVendorID = $inventoryVendorID
-                $wherePO
-                $whereBR
-            GROUP BY itemClassification";
-            $query = $this->db->query($sql);
-            $result = $query ? $query->result_array() : [];
-        }
-        return $result;
-    }
-
-    public function getPurchaseRequestItems($purchaseOrderID = 0, $bidRecapID = 0, $inventoryVendorID = 0, $itemClassification = "")
-    {
-        $result = [];
-        if ($purchaseOrderID && $purchaseOrderID > 0 || $bidRecapID && $bidRecapID > 0) {
-            $wherePO  = $purchaseOrderID && $purchaseOrderID > 0 ? "AND purchaseOrderID = $purchaseOrderID" : "AND purchaseOrderID IS NULL";
-            $whereBR = $bidRecapID && $bidRecapID > 0 ? "AND bidRecapID = $bidRecapID" : "";
-            $sql = "
-            SELECT 
-                *
-            FROM 
-                ims_request_items_tbl 
-            WHERE 
-                inventoryVendorID = $inventoryVendorID AND
-                itemClassification = BINARY('$itemClassification')
-                $wherePO 
-                $whereBR";
-            $query = $this->db->query($sql);
-            $result = $query ? $query->result_array() : [];
-        }
-        return $result;
-    }
-
-    public function getRequestItems($purchaseOrderID = 0, $bidRecapID = 0, $inventoryVendorID = 0)
-    {
-        $result = [
-            // "phases" => $this->getProjectPhases($purchaseOrderID, $bidRecapID, $inventoryVendorID),
-            "phases" => [],
-            "materialsEquipment" => $this->getMaterialEquipmentRequestItems($purchaseOrderID, $bidRecapID, $inventoryVendorID)
-        ];
-        return $result;
-    }
 
 }

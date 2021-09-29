@@ -95,11 +95,12 @@ class Purchase_request extends CI_Controller {
         ];
 
         $bidRecapID = "";
-        if ($revisePurchaseRequestID) {
-            $purchaseRequest = $this->purchaserequest->getPurchaseRequestData($revisePurchaseRequestID);
+        $prID = $revisePurchaseRequestID || $purchaseRequestID;
+        if ($prID) {
+            $purchaseRequest = $this->purchaserequest->getPurchaseRequestData($prID);
             if ($purchaseRequest) {
                 $bidRecapID = $purchaseRequest->bidRecapID;
-
+    
                 $temp = [
                     'costEstimateID'          => $purchaseRequest->costEstimateID,
                     'costEstimateCode'        => $purchaseRequest->costEstimateCode,
@@ -111,7 +112,6 @@ class Purchase_request extends CI_Controller {
                     'inventoryValidationCode' => $purchaseRequest->inventoryValidationCode,
                     'bidRecapID'              => $bidRecapID,
                     'bidRecapCode'            => $purchaseRequest->bidRecapCode,
-
                 ];
                 $purchaseRequestData = array_merge($purchaseRequestData, $temp);
             }
@@ -346,6 +346,12 @@ class Purchase_request extends CI_Controller {
                 }
                 $savePurchaseRequestItems = $this->purchaserequest->savePurchaseRequestItems($action, $purchaseRequestItems, $purchaseRequestID, $purchaseRequestClassification);
             }
+
+            // ----- INSERT PURCHASE ORDER -----
+            if ($purchaseRequestStatus == "2") {
+                $insertPurchaseOrderData = $this->purchaserequest->insertPurchaseOrderData($purchaseRequestID);
+            }
+            // ----- END INSERT PURCHASE ORDER -----
         }
         echo json_encode($savePurchaseRequestData);
     }

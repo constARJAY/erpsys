@@ -11,96 +11,45 @@ class ListStock_model extends CI_Model {
         
        
         if($classificationID =="0"){
-            $where ='WHERE';
+            $where ='';
         }else{
             $where = "WHERE iii.classificationID = '$classificationID' AND";
         }
         if($categoryID =="0"){
             $AND = "";
         }else{
-            $AND  = "iii.categoryID ='$categoryID' AND";
+            $AND  = "iii.categoryID ='$categoryID'";
         }
-        $sql = "
-        SELECT itemID, inventoryStorageID, itemCode,itemName,itemClassification,UOM,barcode,storageCode,StorageName, brandName ,
-        FORMAT(sum(stockIN) + SUM(unusedQuantity),2) AS stockIN,FORMAT(SUM(widhdrawn),2) AS widhdrawn,FORMAT(SUM(unusedQuantity),2) AS unusedQuantity,FORMAT(sum(borrowedQuantity),2) AS borrowedQuantity,FORMAT(SUM(returnQuantity),2) AS returnQuantity,FORMAT(SUM(transferredQuantity),2) AS transferredQuantity,
-        FORMAT(SUM(disposalQuantity),2) AS disposalQuantity,FORMAT(SUM(endQuantity),2) AS endQuantity,
-        FORMAT(reorderpoint,2) AS reorderpoint, format(stockInQuantity,2) AS stockInQuantity FROM
-        (
-            select isit.itemID,isit.inventoryStorageID,concat('ITM-',LEFT(iii.createdAt,2),'-',LPAD(isit.itemID,5,'0')) AS itemCode, iii.itemName, 
-            iic.classificationName AS itemClassification , iii.unitOfMeasurementID AS UOM, isi.barcode,
-            concat('ISM-',LEFT(iis.createdAt,2),'-',LPAD(iis.inventoryStorageID,5,'0')) AS storageCode, iis.inventoryStorageOfficeName AS StorageName,
-            ROUND(isit.quantity,2) AS stockIN, '' AS widhdrawn, '' AS unusedQuantity,
-            '' AS borrowedQuantity, '' AS returnQuantity, '' AS transferredQuantity, '' AS disposalQuantity, '0' As endQuantity,
-            iii.reOrderLevel AS reorderpoint, SUM(stockInQuantity) as stockInQuantity, brandName
-            FROM ims_stock_in_total_tbl AS isit
-            LEFT JOIN ims_stock_in_tbl	AS isi ON isit.itemID = isi.itemID AND isi.stockInLocationID = isit.inventoryStorageID
-            LEFT JOIN ims_inventory_item_tbl AS iii ON isit.itemID =iii.itemID 
-            LEFT JOIN ims_inventory_classification_tbl AS iic ON iii.classificationID =iic.classificationID 
-            LEFT JOIN ims_inventory_storage_tbl AS iis ON isit.inventoryStorageID = iis.inventoryStorageID 
-            $where  $AND isi.stockInStatus = 0
-            GROUP BY stockInTotalID,isit.itemID 
-            /* stock_in end */
-            UNION  ALL 
-            /*  Start material_usage*/
-            select imwd.itemID,imwd.inventoryStorageID,'' AS itemCode, '' AS itemName, '' AS itemClassification , '' AS UOM, '' AS barcode,
-            '' AS storageCode, '' AS StorageName, '' AS stockIN, '' AS widhdrawn, ROUND(sum(imwd.Unused),2)  AS unusedQuantity,
-            '' AS borrowedQuantity, '' AS returnQuantity, '' AS transferredQuantity, '' AS disposalQuantity, '0' As endQuantity,
-            '' AS reorderpoint, '' as stockInQuantity,'' AS brandName
-            FROM ims_material_usage_tbl AS  imu
-            LEFT JOIN ims_material_withdrawal_details_tbl AS imwd ON imwd.materialUsageID = imu.materialUsageID
-            LEFT JOIN ims_inventory_item_tbl AS iii ON imwd.itemID =iii.itemID 
-            $where  $AND imu.materialUsageStatus = 2 
-            GROUP BY imwd.itemID, imwd.inventoryStorageID
-            /* End material_usage */
-            UNION ALL
-            /*  Start material withdrawal*/
-            select imwd.itemID,imwd.inventoryStorageID,'' AS itemCode, '' AS itemName, '' AS itemClassification , '' AS UOM, '' AS barcode,
-            '' AS storageCode, '' AS StorageName, '' AS stockIN, ROUND(sum(imwd.quantity),2) AS widhdrawn, ROUND(sum(imwd.Unused),2)  AS unusedQuantity,
-            '' AS borrowedQuantity, '' AS returnQuantity, '' AS transferredQuantity, '' AS disposalQuantity, '' As endQuantity,
-            '' AS reorderpoint, '' as stockInQuantity,'' AS brandName
-            FROM ims_material_withdrawal_tbl AS  imu
-            LEFT JOIN ims_material_withdrawal_details_tbl AS imwd ON imwd.materialWithdrawalID = imu.materialWithdrawalID
-            LEFT JOIN ims_inventory_item_tbl AS iii ON imwd.itemID =iii.itemID 
-            $where  $AND imu.materialWithdrawalStatus = 2  AND materialUsageID is null
-            GROUP BY imwd.itemID, imwd.inventoryStorageID
-            /* End material Withdrawal */
-            UNION ALL
-            /*Start borrowing query */
-            select ibd.itemID,ibd.inventoryStorageID, '' AS itemCode, '' AS itemName, '' AS itemClassification , '' AS UOM, '' AS barcode,
-            '' AS storageCode, '' AS StorageName, '' AS stockIN, '' AS widhdrawn, '' AS unusedQuantity,
-            ROUND(sum(ibd.quantity),2) AS borrowedQuantity, '' AS returnQuantity, '' AS transferredQuantity, '' AS disposalQuantity, '0' As endQuantity,
-            '' AS reorderpoint, '' as stockInQuantity,'' AS brandName
-            from ims_borrowing_tbl AS ib
-            LEFT JOIN ims_borrowing_details_tbl AS ibd ON ibd.borrowingID = ib.borrowingID
-            LEFT JOIN ims_inventory_item_tbl AS iii ON ibd.itemID =iii.itemID 
-            $where  $AND borrowingStatus = 2 
-            GROUP BY ibd.itemID, ibd.inventoryStorageID
-            /*End borrowing query */
-            UNION ALL
-            /* Start return query */
-            select irid.itemID,irid.inventoryStorageID, '' AS itemCode, '' AS itemName, '' AS itemClassification , '' AS UOM, '' AS barcode,
-            '' AS storageCode, '' AS StorageName, '' AS stockIN, '' AS widhdrawn, '' AS unusedQuantity,
-            '' AS borrowedQuantity, ROUND(sum(irid.returnItemQuantity),2) AS returnQuantity, '' AS transferredQuantity, '0' AS disposalQuantity, '' As endQuantity,
-            '' AS reorderpoint, '' as stockInQuantity,'' AS brandName
-            from ims_return_item_tbl AS iri
-            LEFT JOIN ims_return_item_details_tbl AS irid ON iri.returnItemID = irid.returnItemID
-            LEFT JOIN ims_inventory_item_tbl AS iii ON irid.itemID =iii.itemID 
-            $where  $AND iri.returnItemStatus = 2 
-            GROUP BY irid.itemID, irid.inventoryStorageID
-            /* End return query*/
-            UNION ALL
-            /* start of disposal query*/
-            select iidd.itemID, iidd.inventoryStorageID,'' AS itemCode, '' AS itemName, '' AS itemClassification , '' AS UOM, '' AS barcode,
-            '' AS storageCode, '' AS StorageName, '' AS stockIN, '' AS widhdrawn, '' AS unusedQuantity,
-            '' AS borrowedQuantity, '' AS returnQuantity, '' AS transferredQuantity, SUM(quantity) AS disposalQuantity, '0' As endQuantity,
-            '' AS reorderpoint, '' as stockInQuantity,'' AS brandName
-            FROM ims_inventory_disposal_tbl AS iid
-            LEFT JOIN ims_inventory_disposal_details_tbl AS iidd ON iid.disposalID = iidd.disposalID
-            LEFT JOIN ims_inventory_item_tbl AS iii ON iidd.itemID =iii.itemID 
-            $where  $AND iid.disposalStatus = 2 
-            GROUP BY iidd.itemID,iidd.inventoryStorageID
-        )a GROUP BY itemID,inventoryStorageID";
-        return $this->db->query($sql)->result_array();
+        $sqlItem = $this->db->query("SELECT itemID, itemCode, itemName, brand, classificationName, categoryName, uom, SUM(stockIN) AS stockIN, stockOut, SUM(unused) AS unused, disposed, SUM(reservedItem) AS reservedItem
+                FROM 
+                (
+                    SELECT sii.itemID, sii.itemCode, sii.itemName, sii.brand, sii.classificationName, sii.categoryName,sii.uom, 
+                        CASE sii.inventoryReceivingID WHEN 0 THEN 0 ELSE quantity END stockIN,
+                        '0' AS stockOut,
+                        CASE materialUsageID WHEN 0 THEN 0 ELSE quantity END unused,
+                        '0'  AS disposed,
+                        ifnull(iri.reservedItem,'0') AS reservedItem 
+                    FROM  ims_stock_in_item_tbl AS sii
+                    LEFT JOIN ims_inventory_item_tbl AS iii ON sii.itemID = iii.itemID
+                    LEFT JOIN ims_request_items_tbl AS iri ON sii.itemID = iri.itemID AND iri.inventoryValidationID IS NOT NULL
+                    $where $AND
+                )a GROUP BY itemID");
+        $sqlAsset = $this->db->query("SELECT assetID, itemCode, itemName, brand, classificationName, categoryName, uom, SUM(stockIN) AS stockIN, stockOut, SUM(unused) AS unused, disposed, SUM(reservedItem) AS reservedItem
+                    FROM 
+                    (
+                        SELECT sii.assetID, sii.itemCode, sii.itemName, sii.brand, sii.classificationName, sii.categoryName,sii.uom, 
+                            CASE sii.inventoryReceivingID WHEN 0 THEN 0 ELSE sii.quantity END stockIN,
+                            '0' AS stockOut,
+                            CASE sii.materialUsageID WHEN 0 THEN 0 ELSE sii.quantity END unused,
+                            '0'  AS disposed,
+                            ifnull(iri.reservedAsset,'0') AS reservedItem 
+                        FROM  ims_stock_in_assets_tbl AS sii
+                        LEFT JOIN ims_stock_in_assets_tbl AS iii ON sii.assetID = iii.assetID
+                        LEFT JOIN ims_request_assets_tbl AS iri ON sii.assetID = iri.assetID AND iri.inventoryValidationID IS NOT NULL
+                        $where $AND
+                    )a GROUP BY assetID");        
+        return array('item' =>$sqlItem->result(),'assets' =>$sqlAsset->result());
+        //return array('item',$this->db->query($sqlItem)->result_array(),'assets',$this->db->query($sqlAsset)->result_array());
 
     }
 

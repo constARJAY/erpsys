@@ -94,110 +94,120 @@ class Bid_recap extends CI_Controller {
             $result = explode("|", $saveBidRecapData);
             $bidRecapID = $result[2];
 
-            if ($result[0] == "true" && ($bidRecapStatus == "0" || $bidRecapStatus == "1")) {
+            if ($result[0] == "true") {
                 
-                if ($items && count($items) > 0) {
-                    $itemsData = [];
-                    foreach($items as $item) {
-                        $requestItemAssetID      = $item["requestItemAssetID"];
-                        $candidateVendorID       = $item["candidateVendorID"];
-                        $candidateSelectedVendor = $item["candidateSelectedVendor"];
-                        $candidateVendorName     = $item["candidateVendorName"];
-                        $candidateVendorPrice    = $item["candidateVendorPrice"];
-                        $inventoryVendorID       = $item["inventoryVendorID"];
-                        $inventoryVendorCode     = $item["inventoryVendorCode"];
-                        $inventoryVendorName     = $item["inventoryVendorName"];
-                        $forPurchase             = $item["forPurchase"];
-                        $unitCost                = $item["unitCost"];
-                        $totalCost               = $item["totalCost"];
-
-                        $temp = [
-                            "requestItemID"           => $requestItemAssetID,
-                            "candidateVendorID"       => $candidateVendorID,
-                            "candidateSelectedVendor" => $candidateSelectedVendor,
-                            "candidateVendorName"     => $candidateVendorName,
-                            "candidateVendorPrice"    => $candidateVendorPrice,
-                            "inventoryVendorID"       => $inventoryVendorID,
-                            "inventoryVendorCode"     => $inventoryVendorCode,
-                            "inventoryVendorName"     => $inventoryVendorName,
-                            "forPurchase"             => $forPurchase,
-                            "unitCost"                => $unitCost,
-                            "totalCost"               => $totalCost,
-                        ];
-                        $itemsData[] = $temp;
+                if ($bidRecapStatus == "0" || $bidRecapStatus == "1") {
+                    if ($items && count($items) > 0) {
+                        $itemsData = [];
+                        foreach($items as $item) {
+                            $requestItemAssetID      = $item["requestItemAssetID"];
+                            $candidateVendorID       = $item["candidateVendorID"];
+                            $candidateSelectedVendor = $item["candidateSelectedVendor"];
+                            $candidateVendorName     = $item["candidateVendorName"];
+                            $candidateVendorPrice    = $item["candidateVendorPrice"];
+                            $inventoryVendorID       = $item["inventoryVendorID"];
+                            $inventoryVendorCode     = $item["inventoryVendorCode"];
+                            $inventoryVendorName     = $item["inventoryVendorName"];
+                            $forPurchase             = $item["forPurchase"];
+                            $unitCost                = $item["unitCost"];
+                            $totalCost               = $item["totalCost"];
+    
+                            $temp = [
+                                "requestItemID"           => $requestItemAssetID,
+                                "candidateVendorID"       => $candidateVendorID,
+                                "candidateSelectedVendor" => $candidateSelectedVendor,
+                                "candidateVendorName"     => $candidateVendorName,
+                                "candidateVendorPrice"    => $candidateVendorPrice,
+                                "inventoryVendorID"       => $inventoryVendorID,
+                                "inventoryVendorCode"     => $inventoryVendorCode,
+                                "inventoryVendorName"     => $inventoryVendorName,
+                                "forPurchase"             => $forPurchase,
+                                "unitCost"                => $unitCost,
+                                "totalCost"               => $totalCost,
+                            ];
+                            $itemsData[] = $temp;
+                        }
+                        if ($itemsData && count($itemsData) > 0) {
+                            $saveBidRecapItems = $this->bidrecap->saveBidRecapItems($itemsData);
+                        }
                     }
-                    if ($itemsData && count($itemsData) > 0) {
-                        $saveBidRecapItems = $this->bidrecap->saveBidRecapItems($itemsData);
+    
+                    if ($assets && count($assets) > 0) {
+                        $assetsData = [];
+                        foreach($assets as $item) {
+                            $requestItemAssetID      = $item["requestItemAssetID"];
+                            $candidateVendorID       = $item["candidateVendorID"];
+                            $candidateSelectedVendor = $item["candidateSelectedVendor"];
+                            $candidateVendorName     = $item["candidateVendorName"];
+                            $candidateVendorPrice    = $item["candidateVendorPrice"];
+                            $inventoryVendorID       = $item["inventoryVendorID"];
+                            $inventoryVendorCode     = $item["inventoryVendorCode"];
+                            $inventoryVendorName     = $item["inventoryVendorName"];
+                            $forPurchase             = $item["forPurchase"];
+                            $unitCost                = $item["unitCost"];
+                            $totalCost               = $item["totalCost"];
+    
+                            $temp = [
+                                "requestAssetID"          => $requestItemAssetID,
+                                "candidateVendorID"       => $candidateVendorID,
+                                "candidateSelectedVendor" => $candidateSelectedVendor,
+                                "candidateVendorName"     => $candidateVendorName,
+                                "candidateVendorPrice"    => $candidateVendorPrice,
+                                "inventoryVendorID"       => $inventoryVendorID,
+                                "inventoryVendorCode"     => $inventoryVendorCode,
+                                "inventoryVendorName"     => $inventoryVendorName,
+                                "forPurchase"             => $forPurchase,
+                                "unitCost"                => $unitCost,
+                                "totalCost"               => $totalCost,
+                            ];
+                            $assetsData[] = $temp;
+                        }
+                        if ($assetsData && count($assetsData) > 0) {
+                            $saveBidRecapAsset = $this->bidrecap->saveBidRecapAsset($assetsData, $action, $bidRecapID);
+                        }
+                    }
+    
+                    if ($finalquote && count($finalquote) > 0) {
+                        if ($action == "update") {
+                            $deleteFinalQuote = $this->bidrecap->deleteBidRecapFinalQuote($bidRecapID);
+                        }
+    
+                        foreach($finalquote as $item) {
+                            $classification       = $item["classification"];
+                            $inventoryVendorID    = $item["inventoryVendorID"];
+                            $vendorCode           = $item["vendorCode"];
+                            $vendorName           = $item["vendorName"];
+                            $vendorAddress        = $item["vendorAddress"];
+                            $vendorContactDetails = $item["vendorContactDetails"];
+                            $vendorContactPerson  = $item["vendorContactPerson"];
+                            $finalQuoteRemarks    = $item["finalQuoteRemarks"];
+                            $finalQuoteTotal      = $item["finalQuoteTotal"];
+    
+                            $finalQuoteData = [
+                                "bidRecapID"           => $bidRecapID,
+                                "classification"       => $classification,
+                                "inventoryVendorID"    => $inventoryVendorID,
+                                "vendorCode"           => $vendorCode,
+                                "vendorName"           => $vendorName,
+                                "vendorAddress"        => $vendorAddress,
+                                "vendorContactDetails" => $vendorContactDetails,
+                                "vendorContactPerson"  => $vendorContactPerson,
+                                "finalQuoteRemarks"    => $finalQuoteRemarks,
+                                "finalQuoteTotal"      => $finalQuoteTotal,
+                                "createdBy"            => $sessionID,
+                                "updatedBy"            => $sessionID,
+                            ];
+                            $saveBidRecapFinalQuote = $this->bidrecap->saveBidRecapFinalQuote($finalQuoteData, $bidRecapID, $inventoryVendorID, $classification);
+                        }
                     }
                 }
 
-                if ($assets && count($assets) > 0) {
-                    $assetsData = [];
-                    foreach($assets as $item) {
-                        $requestItemAssetID      = $item["requestItemAssetID"];
-                        $candidateVendorID       = $item["candidateVendorID"];
-                        $candidateSelectedVendor = $item["candidateSelectedVendor"];
-                        $candidateVendorName     = $item["candidateVendorName"];
-                        $candidateVendorPrice    = $item["candidateVendorPrice"];
-                        $inventoryVendorID       = $item["inventoryVendorID"];
-                        $inventoryVendorCode     = $item["inventoryVendorCode"];
-                        $inventoryVendorName     = $item["inventoryVendorName"];
-                        $forPurchase             = $item["forPurchase"];
-                        $unitCost                = $item["unitCost"];
-                        $totalCost               = $item["totalCost"];
-
-                        $temp = [
-                            "requestAssetID"          => $requestItemAssetID,
-                            "candidateVendorID"       => $candidateVendorID,
-                            "candidateSelectedVendor" => $candidateSelectedVendor,
-                            "candidateVendorName"     => $candidateVendorName,
-                            "candidateVendorPrice"    => $candidateVendorPrice,
-                            "inventoryVendorID"       => $inventoryVendorID,
-                            "inventoryVendorCode"     => $inventoryVendorCode,
-                            "inventoryVendorName"     => $inventoryVendorName,
-                            "forPurchase"             => $forPurchase,
-                            "unitCost"                => $unitCost,
-                            "totalCost"               => $totalCost,
-                        ];
-                        $assetsData[] = $temp;
-                    }
-                    if ($assetsData && count($assetsData) > 0) {
-                        $saveBidRecapAsset = $this->bidrecap->saveBidRecapAsset($assetsData, $action, $bidRecapID);
-                    }
+                // ----- INSERT PURCHASE REQUEST -----
+                if ($bidRecapStatus == "2")
+                {
+                    $insertPurchaseRequestData = $this->bidrecap->insertPurchaseRequestData($bidRecapID);
                 }
-                if ($finalquote && count($finalquote) > 0) {
-                    if ($action == "update") {
-                        $deleteFinalQuote = $this->bidrecap->deleteBidRecapFinalQuote($bidRecapID);
-                    }
-
-                    foreach($finalquote as $item) {
-                        $classification       = $item["classification"];
-                        $inventoryVendorID    = $item["inventoryVendorID"];
-                        $vendorCode           = $item["vendorCode"];
-                        $vendorName           = $item["vendorName"];
-                        $vendorAddress        = $item["vendorAddress"];
-                        $vendorContactDetails = $item["vendorContactDetails"];
-                        $vendorContactPerson  = $item["vendorContactPerson"];
-                        $finalQuoteRemarks    = $item["finalQuoteRemarks"];
-                        $finalQuoteTotal      = $item["finalQuoteTotal"];
-
-                        $finalQuoteData = [
-                            "bidRecapID"           => $bidRecapID,
-                            "classification"       => $classification,
-                            "inventoryVendorID"    => $inventoryVendorID,
-                            "vendorCode"           => $vendorCode,
-                            "vendorName"           => $vendorName,
-                            "vendorAddress"        => $vendorAddress,
-                            "vendorContactDetails" => $vendorContactDetails,
-                            "vendorContactPerson"  => $vendorContactPerson,
-                            "finalQuoteRemarks"    => $finalQuoteRemarks,
-                            "finalQuoteTotal"      => $finalQuoteTotal,
-                            "createdBy"            => $sessionID,
-                            "updatedBy"            => $sessionID,
-                        ];
-                        $saveBidRecapFinalQuote = $this->bidrecap->saveBidRecapFinalQuote($finalQuoteData, $bidRecapID, $inventoryVendorID, $classification);
-                    }
-                }
+                // ----- END INSERT PURCHASE REQUEST -----
 
             } 
         }

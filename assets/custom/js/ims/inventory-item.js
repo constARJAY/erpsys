@@ -28,11 +28,10 @@ $(document).ready(function(){
                 { targets: 1, width: 150 },
                 { targets: 2, width: 250 },
                 { targets: 3, width: 150 },
-                { targets: 4, width: 150 },
-                { targets: 5, width: 80 },
-                { targets: 6, width: 400 },
-                { targets: 7, width: 150 },
-                { targets: 8, width: 80 },
+                { targets: 4, width: 80  },
+                { targets: 5, width: 400 },
+                { targets: 6, width: 150 },
+                { targets: 7, width: 80  },
             ],
         });
     }
@@ -75,7 +74,6 @@ $(document).ready(function(){
                             <th>Item Name</th>
                             <th>Item Classification</th>
                             <th>Item Category</th>
-                            <th>Item Size</th>
                             <th>UOM</th>
                             <th>Item Description</th>
                             <th>Re-Order Level</th>
@@ -325,7 +323,7 @@ $(document).ready(function(){
                                 class="form-control validate" 
                                 name="brandName" 
                                 id="input_brandName" 
-                                data-allowcharacters="[A-Z][a-z][0-9][ ]['][-]" 
+                                data-allowcharacters="[.][,][?][!][/][;][:]['][''][-][_][(][)][%][&][*][ ]" 
                                 minlength="2" 
                                 maxlength="100" 
                                 required 
@@ -343,7 +341,7 @@ $(document).ready(function(){
                                 class="form-control validate" 
                                 name="itemName" 
                                 id="input_itemName" 
-                                data-allowcharacters="[A-Z][a-z][0-9][ ]['][-]" 
+                                data-allowcharacters="[.][,][?][!][/][;][:]['][''][-][_][(][)][%][&][*][ ]" 
                                 minlength="2" 
                                 maxlength="100" 
                                 required 

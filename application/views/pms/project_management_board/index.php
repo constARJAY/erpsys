@@ -1,3 +1,15 @@
+<style>
+	.select2-container--bootstrap .select2-selection--multiple .select2-selection__choice {
+		display: grid;
+	}
+	.select2-container--bootstrap.select2-container--disabled .select2-selection--multiple .select2-selection__choice {
+		padding: 0 2px 0 0px;
+	}
+	.select2-container--bootstrap.select2-container--disabled .select2-selection {
+		padding: 0 3.5px;
+	}
+</style>
+
 <div class="body_area after_bg ">
 	<div class="block-header pb-0">
 		<div class="container" id="headerContainer">

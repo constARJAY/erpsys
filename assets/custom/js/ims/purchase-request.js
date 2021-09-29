@@ -659,7 +659,6 @@ $(document).ready(function() {
 					let isAllowedForRevise = 0;
 					if (data && data.length > 0) {
 						const { revisePurchaseRequestID:reviseID } = data && data[0];
-						console.log(reviseID);
 						isAllowedForRevise = getTableDataLength(
 							`ims_purchase_request_tbl`,
 							`revisePurchaseRequestID`,
@@ -808,7 +807,8 @@ $(document).ready(function() {
 
     // ----- GET INVENTORY ITEM -----
     function getInventoryRequestItem(id = null, display = true) {
-        let html  = `<option selected disabled>Select Item Name</option>`;
+		let label = GLOBAL_CLASSIFICATION_TYPE == "Items" ? "Select Item Name" : "Select Asset Name";
+        let html  = `<option selected disabled>${label}</option>`;
 
 		let itemIDArr = [];
 		$(`[name=inventoryItemID]`).each(function(i, obj) {
@@ -1685,7 +1685,7 @@ $(document).ready(function() {
 				html = `
 				<div class="card">
 					<div class="card-header bg-primary text-white">
-						<div class="row">
+						<div class="row align-selft-center">
 							<div class="col-md-6 col-sm-12 text-left">
 								<h5 style="font-weight: bold;
 									letter-spacing: 0.05rem;">ITEMS (FOR PURCHASE)</h5>
@@ -1711,7 +1711,7 @@ $(document).ready(function() {
 										<th>UOM</th>
 										<th>Quantity ${!readOnly ? "<code>*</code>" : ""}</th>
 										<th>Unit Cost</th>
-										<th>Total Cost</th>
+										<th>Total Amount</th>
 										<th>Remarks</th>
 									</tr>
 								</thead>
@@ -1728,7 +1728,7 @@ $(document).ready(function() {
 				html = `
 				<div class="card">
 					<div class="card-header bg-primary text-white">
-						<div class="row">
+						<div class="row align-items-center">
 							<div class="col-md-6 col-sm-12 text-left">
 								<h5 style="font-weight: bold;
 									letter-spacing: 0.05rem;">ASSETS (FOR PURCHASE)</h5>
@@ -2430,6 +2430,7 @@ $(document).ready(function() {
 					formData.append("approversID", sessionID);
 					formData.append("approversStatus", 2);
 					formData.append("approversDate", dateToday());
+					formData.delete("purchaseRequestStatus");
 					formData.append("purchaseRequestStatus", 2);
 				}
 			}
@@ -2484,7 +2485,10 @@ $(document).ready(function() {
     // ----- OPEN EDIT FORM -----
 	$(document).on("click", ".btnEdit", function () {
 		const id = decryptString($(this).attr("id"));
-		viewDocument(id);
+		$("#page_content").html(preloader);
+		setTimeout(() => {
+			viewDocument(id);
+		}, 10);
 	});
 	// ----- END OPEN EDIT FORM -----
 
@@ -2492,7 +2496,10 @@ $(document).ready(function() {
     // ----- VIEW DOCUMENT -----
 	$(document).on("click", ".btnView", function () {
 		const id = decryptString($(this).attr("id"));
-		viewDocument(id, true);
+		$("#page_content").html(preloader);
+		setTimeout(() => {
+			viewDocument(id, true);
+		}, 10);
 	});
 	// ----- END VIEW DOCUMENT -----
 
@@ -2501,7 +2508,10 @@ $(document).ready(function() {
 	$(document).on("click", "#btnRevise", function () {
 		const id                    = decryptString($(this).attr("purchaseRequestID"));
 		const fromCancelledDocument = $(this).attr("cancel") == "true";
-		viewDocument(id, false, true, fromCancelledDocument);
+		$("#page_content").html(preloader);
+		setTimeout(() => {
+			viewDocument(id, false, true, fromCancelledDocument);
+		}, 10);
 	});
 	// ----- END REVISE DOCUMENT -----
 
@@ -2929,93 +2939,96 @@ function savePurchaseRequest(data = null, method = "submit", notificationData = 
 		const confirmation = getConfirmation(method);
 		confirmation.then(res => {
 			if (res.isConfirmed) {
-				$.ajax({
-					method:      "POST",
-					url:         `purchase_request/savePurchaseRequest`,
-					data,
-					processData: false,
-					contentType: false,
-					global:      false,
-					cache:       false,
-					async:       false,
-					dataType:    "json",
-					beforeSend: function() {
-						$("#loader").show();
-					},
-					success: function(data) {
-						let result = data.split("|");
-		
-						let isSuccess   = result[0];
-						let code        = result[1] || (feedback || "Purchase request");
-						let insertedID  = result[2];
-						let dateCreated = result[3];
-
-						let swalTitle;
-						if (method == "submit") {
-							swalTitle = `${code} submitted successfully!`;
-						} else if (method == "save") {
-							swalTitle = `${code} saved successfully!`;
-						} else if (method == "cancelform") {
-							swalTitle = `${code} cancelled successfully!`;
-						} else if (method == "approve") {
-							swalTitle = `${code} approved successfully!`;
-						} else if (method == "deny") {
-							swalTitle = `${code} denied successfully!`;
-						} else if (method == "drop") {
-							swalTitle = `${code} dropped successfully!`;
-						}	
-		
-						if (isSuccess == "true") {
-							setTimeout(() => {
-								// ----- SAVE NOTIFICATION -----
-								if (notificationData) {
-									if (Object.keys(notificationData).includes("tableID")) {
-										insertNotificationData(notificationData);
-									} else {
-										notificationData["tableID"] = insertedID;
-										insertNotificationData(notificationData);
+				$("#loader").show();
+				setTimeout(() => {
+					$.ajax({
+						method:      "POST",
+						url:         `purchase_request/savePurchaseRequest`,
+						data,
+						processData: false,
+						contentType: false,
+						global:      false,
+						cache:       false,
+						async:       false,
+						dataType:    "json",
+						beforeSend: function() {
+							$("#loader").show();
+						},
+						success: function(data) {
+							let result = data.split("|");
+			
+							let isSuccess   = result[0];
+							let code        = result[1] || (feedback || "Purchase request");
+							let insertedID  = result[2];
+							let dateCreated = result[3];
+	
+							let swalTitle;
+							if (method == "submit") {
+								swalTitle = `${code} submitted successfully!`;
+							} else if (method == "save") {
+								swalTitle = `${code} saved successfully!`;
+							} else if (method == "cancelform") {
+								swalTitle = `${code} cancelled successfully!`;
+							} else if (method == "approve") {
+								swalTitle = `${code} approved successfully!`;
+							} else if (method == "deny") {
+								swalTitle = `${code} denied successfully!`;
+							} else if (method == "drop") {
+								swalTitle = `${code} dropped successfully!`;
+							}	
+			
+							if (isSuccess == "true") {
+								setTimeout(() => {
+									// ----- SAVE NOTIFICATION -----
+									if (notificationData) {
+										if (Object.keys(notificationData).includes("tableID")) {
+											insertNotificationData(notificationData);
+										} else {
+											notificationData["tableID"] = insertedID;
+											insertNotificationData(notificationData);
+										}
 									}
-								}
-								// ----- END SAVE NOTIFICATION -----
-
-								$("#loader").hide();
-								closeModals();
-								Swal.fire({
-									icon:              "success",
-									title:             swalTitle,
-									showConfirmButton: false,
-									timer:             2000,
-								}).then(function() {
-									callback && callback();
-
-									if (method == "approve" || method == "deny") {
-										$("[redirect=forApprovalTab]").length > 0 && $("[redirect=forApprovalTab]").trigger("click")
-									}
-								});
-							}, 500);
-						} else {
+									// ----- END SAVE NOTIFICATION -----
+	
+									$("#loader").hide();
+									closeModals();
+									Swal.fire({
+										icon:              "success",
+										title:             swalTitle,
+										showConfirmButton: false,
+										timer:             2000,
+									}).then(function() {
+										callback && callback();
+	
+										if (method == "approve" || method == "deny") {
+											$("[redirect=forApprovalTab]").length > 0 && $("[redirect=forApprovalTab]").trigger("click")
+										}
+									});
+								}, 500);
+							} else {
+								setTimeout(() => {
+									$("#loader").hide();
+									Swal.fire({
+										icon:              "danger",
+										title:             message,
+										showConfirmButton: false,
+										timer:             2000,
+									});
+								}, 500);
+							}
+						},
+						error: function() {
 							setTimeout(() => {
 								$("#loader").hide();
-								Swal.fire({
-									icon:              "danger",
-									title:             message,
-									showConfirmButton: false,
-									timer:             2000,
-								});
+								showNotification("danger", "System error: Please contact the system administrator for assistance!");
 							}, 500);
 						}
-					},
-					error: function() {
+					}).done(function() {
 						setTimeout(() => {
 							$("#loader").hide();
-							showNotification("danger", "System error: Please contact the system administrator for assistance!");
 						}, 500);
-					}
-				}).done(function() {
-					setTimeout(() => {
-						$("#loader").hide();
-					}, 500);
-				})
+					})
+				}, 10);
 			} else {
 				if (res.dismiss == "cancel" && method != "submit") {
 					if (method != "deny") {

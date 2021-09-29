@@ -25,8 +25,18 @@ class Return_item extends CI_Controller {
         $action                     = $this->input->post("action");
         $method                     = $this->input->post("method");
         $returnItemID               = $this->input->post("returnItemID") ?? null;
-        $itemID                     = $this->input->post("itemID ") ?? null;
         $reviseReturnItemID         = $this->input->post("reviseReturnItemID") ?? null;
+        $itemID                     = $this->input->post("itemID") ?? null;
+        $borrowingID                = $this->input->post("borrowingID") ?? null;
+        $borrowingCode              = $this->input->post("borrowingCode") ?? null;
+        $projectID                  = $this->input->post("projectID") ?? null;
+        $projectCode                = $this->input->post("projectCode") ?? null;
+        $projectName                = $this->input->post("projectName") ?? null;
+        $clientID                   = $this->input->post("clientID") ?? null;
+        $clientCode                 = $this->input->post("clientCode") ?? null;
+        $clientName                 = $this->input->post("clientName") ?? null;
+        $clientAddress              = $this->input->post("clientAddress") ?? null;
+        $dateNeeded                 = $this->input->post("dateNeeded") ?? null;
         $employeeID                 = $this->input->post("employeeID");
         $approversID                = $this->input->post("approversID") ?? null;
         $approversStatus            = $this->input->post("approversStatus") ?? null;
@@ -56,16 +66,26 @@ class Return_item extends CI_Controller {
 
         $returnitemData = [
             "reviseReturnItemID"        => $reviseReturnItemID,
-            "employeeID"                 => $employeeID,
-            "approversID"                => $approversID,
-            "approversStatus"            => $approversStatus,
-            "approversDate"              => $approversDate,
+            "borrowingID"               => $borrowingID,
+            "borrowingCode"             => $borrowingCode,
+            "projectID"                 => $projectID,
+            "projectCode"               => $projectCode,
+            "projectName"               => $projectName,
+            "clientID"                  => $clientID,
+            "clientCode"                => $clientCode,
+            "clientName"                => $clientName,
+            "clientAddress"             => $clientAddress,
+            "dateNeeded"                => $dateNeeded,
+            "employeeID"                => $employeeID,
+            "approversID"               => $approversID,
+            "approversStatus"           => $approversStatus,
+            "approversDate"             => $approversDate,
             "returnItemStatus"          => $returnItemStatus,
             "returnItemReason"          => $returnItemReason,
-            "submittedAt"                => $submittedAt,
-            "createdBy"                  => $createdBy,
-            "updatedBy"                  => $updatedBy,
-            "createdAt"                  => $createdAt
+            "submittedAt"               => $submittedAt,
+            "createdBy"                 => $createdBy,
+            "updatedBy"                 => $updatedBy,
+            "createdAt"                 => $createdAt
         ];
 
         if ($action == "update") {

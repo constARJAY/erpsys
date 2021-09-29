@@ -305,7 +305,7 @@ $(document).ready(function() {
 
             const { 
                 materialWithdrawalCode     = 0,
-                materialRequestID     = 0,
+                materialWithdrawalID     = 0,
                 preparedBy     = "",
                 projectName           = "",
                 projectCode           = "",
@@ -321,7 +321,7 @@ $(document).ready(function() {
 
 
             html += `
-            <tr class="btnView" id="${encryptString(materialRequestID)}">
+            <tr class="btnView" id="${encryptString(materialWithdrawalID)}">
                 <td>
                     <div>${materialWithdrawalCode}</div>
                     <!-- <small style="color:#848482;">put description here</small> -->

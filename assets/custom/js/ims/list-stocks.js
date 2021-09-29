@@ -13,10 +13,10 @@ $(document).ready(function(){
             
         }
         
-        var table = $("#tableListStocks").css({"min-width": "100%"}).removeAttr('width').DataTable({
+        var table = $("#tableListStocksItem").css({"min-width": "100%"}).removeAttr('width').DataTable({
             
            data,
-            proccessing:    false,
+            proccessing:    true,
             serverSide:     false,
             scrollX:        true,
             scrollCollapse: true,
@@ -26,7 +26,7 @@ $(document).ready(function(){
             columnDefs: [
                 { targets: 0, width: 100},
                 { targets: 1, width: 200},
-                { targets: 2, width: 150},
+                { targets: 2, width: 250},
                 { targets: 3, width: 120},
                 { targets: 4, width: 200},
                 { targets: 5, width: 100},
@@ -35,53 +35,41 @@ $(document).ready(function(){
                 { targets: 8, width: 200},
                 { targets: 9, width: 200},
                 { targets: 10, width: 150},
-                { targets: 11, width: 200},
-                { targets: 12, width: 150},
-                { targets: 13, width: 150},
-                { targets: 14, width: 100},
-                { targets: 15, width: 40},
-                { targets: 16, width: 150},
-                
+                { targets: 11, width: 200},    
             ],
           
-           
-          
-            // rowsGroup: [
-            //   'qw:name',
-              
-            // ],
-          
-           
-          
         });
-       
-        
-      
 
-    // var tableRows = $("#tableListStocks tbody tr");
-    // var id = '';
-//    tableRows.each(function(n){
-//       id = this.id;
-
-//       alert(id.join('')); 
-//       var row = $(this).html();
-//      // alert(id);
-
-//          if(this.id != id){
-//             $this = $(this);
+        var table = $("#tableListStocksAsset").css({"min-width": "100%"}).removeAttr('width').DataTable({
             
-//            // alert($this);
-//            $this.css('backgroundColor', 'black');
-
-//             if ($this.html() == row){
-//                 alert("1");
-//                $this.css('backgroundColor', 'black');
-//             }
-//           }
-//     //    });
-//    });
+            data,
+             proccessing:    true,
+             serverSide:     false,
+             scrollX:        true,
+             scrollCollapse: true,
+             searching: true,
+           
+         paging: true,
+             columnDefs: [
+                 { targets: 0, width: 100},
+                 { targets: 1, width: 200},
+                 { targets: 2, width: 250},
+                 { targets: 3, width: 120},
+                 { targets: 4, width: 200},
+                 { targets: 5, width: 100},
+                 { targets: 6, width: 200},
+                 { targets: 7, width: 100},
+                 { targets: 8, width: 200},
+                 { targets: 9, width: 200},
+                 { targets: 10, width: 150},
+                 { targets: 11, width: 200},   
+                 { targets: 12, width: 200},    
+             ],
+           
+         });
         
-       // console.log(data);
+       
+    
     }
   
     // ----- END DATATABLES -----
@@ -111,12 +99,24 @@ $(document).ready(function(){
         //showErrorToast("Please fill in required fields");
         return false;
        }else{
+          // tab1();
+        //   let  html =` <div class="row clearfix appendHeader">
+        //             <div class="col-12">
+        //                 <ul class="nav nav-tabs">
+        //                     <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#listofStocks" redirect="listofStocks">List of Stocks (ITEM) </a></li>
+        //                     <li class="nav-item"><a class="nav-link active" data-toggle="tab" href="#listofAssets" id="listofAssets" redirect="listofAssets">List of Stocks (ASSET)</a></li>
+        //                 </ul>
+        //             </div>
+        //         </div>`;
         tableContent(classificationID,categoryID);
+       // tab1();
+        ///$("#table_content").html(html);
        } 
 
     });
-    function tableContent(classificationID,categoryID){
-    //    / var data =[];
+     function tableContent(classificationID,categoryID){
+        
+       
     var id = [];
         $.ajax({
             url: `${base_url}ims/list_stocks/getliststocks`,
@@ -128,70 +128,154 @@ $(document).ready(function(){
             async: true,
             dataType: "json",
             beforeSend: function() {
+            
             $("#table_content").html(preloader);
             },
             success: function(data) {
-                          let html = `
-                             <table class="table table-bordered table-striped table-hover" id="tableListStocks">
+               
+
+                let item =`
+                <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <div class="row">
+                        <div class="col-md-6 col-sm-12 text-left align-self-center">
+                            <h5 style="font-weight: bold;
+                                letter-spacing: 0.05rem;">List of Stocks (ITEM)</h5>
+                        </div>
+                    </div>
+                </div>
+                <table class="table table-bordered table-striped table-hover" id="tableListStocksItem">
+                <thead>
+                <tr>
+                    <th>Item Code</th>
+                    <th>Item Name/Brand</th>
+                    <th>Item Classification</th>
+                    <th>UOM</th>
+                    <th>Stock In</th>
+                    <th>Stock Out</th>
+                    <th>Unused</th>
+                    <th>Disposed</th>
+                    <th>Reserved</th>
+                    <th>Available</th>
+                    <th>Total Quantity</th>
+                    <th>Re-order</th>
+                </tr>
+               </thead>
+               <tbody>`;
+               
+              
+
+                           let assets =`
+                           <div class="card mt-2">
+                            <div class="card-header bg-primary text-white">
+                                <div class="row">
+                                    <div class="col-md-6 col-sm-12 text-left align-self-center">
+                                        <h5 style="font-weight: bold;
+                                            letter-spacing: 0.05rem;">List of Stocks (ASSET)</h5>
+                                    </div>
+                                </div>
+                            </div>
+                             <table class="table table-bordered table-striped table-hover" id="tableListStocksAsset">
                              <thead>
                              <tr>
-                                <th>Item Code</th>
-                                <th>Item Name</th>
+                                <th>Asset Code</th>
+                                <th>Asset Name</th>
                                 <th>Item Classification</th>
                                 <th>UOM</th>
-                                <th>Barcode</th>
-                                <th>Strorage Code</th>
-                                <th>Storage Name</th>
                                 <th>Stock In</th>
-                                <th>Withdrawn Quantity</th>
-                                <th>Unused Quantity</th>
-                                <th>Borrowed Quantity</th>
-                                <th>Returned Quantity</th>
-                                <th>Transferred Quantity</th>
-                                <th>Disposed Quantity</th>
-                                <th>End Quantity</th>
-                                <th>Total</th>
-                                <th>Reorder Point</th>
+                                <th>Borrowed</th>
+                                <th>Returned</th>
+                                <th>Transferred</th>
+                                <th>Disposed</th>
+                                <th>Reserved</th>
+                                <th>Available</th>
+                                <th>Total Quantity</th>
+                                <th>Re-order</th>
                              </tr>
-                        </thead>
-                                    <tbody>`;
-                                   
-                                 
-                                    data.map((item, index, array) => { 
-                                     
-                                        
-                                        html += `
-                                        <tr> 
-                                         <td>${item["itemCode"]}</td> 
-                                         <td>
-                                            ${item["itemName"]}
-                                            <div style="font-size: 85%;" class="font-weight-bold py-2 item-brand-name">${item.brandName}</div>
-                                        </td> 
-                                         <td class='buildname'>${item["itemClassification"]}</td>
-                                         <td>${item["UOM"]}</td>
-                                         <td>${item["barcode"]}</td>
-                                         <td>${item["storageCode"]}</td>
-                                         <td>${item["StorageName"]}</td>
-                                         <td class="text-center">${item["stockInQuantity"]}</td>
-                                         <td class="text-center">${item["widhdrawn"]}</td>
-                                         <td class="text-center">${item["unusedQuantity"]}</td>
-                                         <td class="text-center">${item["borrowedQuantity"]}</td>
-                                         <td class="text-center">${item["returnQuantity"]}</td>
-                                         <td class="text-center">${item["transferredQuantity"]}</td>
-                                         <td class="text-center">${item["disposalQuantity"]}</td>
-                                         <td class="text-center">${item["stockIN"]}</td>    
-                                         <td class="text-center">${item["stockIN"]}</td>
-                                         <td class="text-center">${item["reorderpoint"]}</td>
-                                         </tr>`;
-                                        // initDataTables(item);
-                                    })
-                                    html += `</tbody>
-                                    </table>`;
+                            </thead>
+                            <tbody>`;
+                            for(var i=0; i<data["assets"].length; i++){
+                                assets +=`  
+                                <tr> 
+                                    <td>${data["assets"][i].itemCode} </td> 
+                                    <td>
+                                        <div>
+                                        ${data["assets"][i].itemName}
+                                        </div>
+                                        <small style="color:#848482;">${data["assets"][i].brand}</small>
+                                    </td>
+                                    <td>
+                                        <div>
+                                        ${data["assets"][i].classificationName}
+                                        </div>
+                                        <small style="color:#848482;">${data["assets"][i].categoryName}</small>
+                                    </td>
+                                    <td>
+                                        ${data["assets"][i].uom}
+                                    </td>
+                                    <td>
+                                    ${data["assets"][i].stockIN}
+                                    </td> 
+                                    <td>
+                                    </td>
+                                    <td>0</td>
+                                    <td>0</td>
+                                    <td>0</td> 
+                                    <td>0</td>
+                                    <td>0</td>
+                                    <td>0</td>
+                                    <td>0</td>
+                                </tr>`;
+                            };    
+                           for(var i=0; i<data["item"].length; i++){
+                 
+                            item +=`
+                            <tr> 
+                                <td> 
+                                    ${data["item"][i].itemCode}
+                                </td> 
+                                <td>
+                                    <div>
+                                    ${data["item"][i].itemName}
+                                    </div>
+                                    <small style="color:#848482;">${data["item"][i].brand}</small>
+                                </td>
+                                <td>
+                                    <div>
+                                    ${data["item"][i].classificationName}
+                                    </div>
+                                <small style="color:#848482;">${data["item"][i].categoryName}</small>
+                                </td>
+                                <td>
+                                ${data["item"][i].uom}
+                                </td>
+                                <td>
+                                ${data["item"][i].stockIN}
+                                </td> 
+                                <td>
+                                ${data["item"][i].stockOut}
+                                </td>
+                                <td>
+                                ${data["item"][i].unused}
+                                </td>
+                                <td>
+                                ${data["item"][i].disposed}
+                                </td>
+                                <td>
+                                ${data["item"][i].reservedItem}
+                                </td> 
+                                <td>0</td>
+                                <td>0</td>
+                                <td>0</td>
+                           </tr>`;
+                            };
+                          
                                   initDataTables();
                                     setTimeout(() => {
-                                        $("#table_content").html(html);
-                                        initDataTables();
-                                        //$(".price-list-description-row").hide();
+                                        $("#table_content").html(item);
+                                       $("#table_content1").html(assets);
+                                     
+                                       initDataTables();
                                     }, 500);   
                     
                             },
@@ -200,7 +284,8 @@ $(document).ready(function(){
                                     <div class="w-100 h5 text-center text-danger>
                                         There was an error fetching data.
                                     </div>`;
-                                $("#table_content").html(html);
+                                $("#table_content1").html(assets);
+                                $("#table_content").html(item);
                                 
 
          } 

@@ -349,6 +349,8 @@ $(document).ready(function() {
 				bidRecapCode,
                 inventoryValidationID,
                 inventoryValidationCode,
+				changeRequestID,
+                changeRequestCode,
 				timelineBuilderID,
 				employeeID,
 				fullname,
@@ -383,7 +385,7 @@ $(document).ready(function() {
 					<td>${fullname || "-"}</td>
 					<td>
 						<div>
-							${inventoryValidationCode || '-'}
+							${(changeRequestCode || inventoryValidationCode) || '-'}
 						</div>
 						<small style="color:#848482;">${bidRecapReason || ''}</small>
 					</td>
@@ -468,6 +470,8 @@ $(document).ready(function() {
 				bidRecapCode,
                 inventoryValidationID,
                 inventoryValidationCode,
+                changeRequestID,
+                changeRequestCode,
 				timelineBuilderID,
 				employeeID,
 				fullname,
@@ -501,7 +505,7 @@ $(document).ready(function() {
                 <td>${fullname || "-"}</td>
 				<td>
 					<div>
-						${inventoryValidationCode || '-'}
+						${(changeRequestCode || inventoryValidationCode) || '-'}
 					</div>
 					<small style="color:#848482;">${bidRecapReason || ''}</small>
 				</td>
@@ -611,15 +615,15 @@ $(document).ready(function() {
 					}
 				} else if (bidRecapStatus == 2) {
 					// DROP
-					button = `
-					<button type="button" 
-						class="btn btn-cancel px-5 p-2"
-						id="btnDrop" 
-						bidRecapID="${encryptString(bidRecapID)}"
-						bidRecapCode="${bidRecapCode}"
-						status="${bidRecapStatus}"><i class="fas fa-ban"></i> 
-						Drop
-					</button>`;
+					// button = `
+					// <button type="button" 
+					// 	class="btn btn-cancel px-5 p-2"
+					// 	id="btnDrop" 
+					// 	bidRecapID="${encryptString(bidRecapID)}"
+					// 	bidRecapCode="${bidRecapCode}"
+					// 	status="${bidRecapStatus}"><i class="fas fa-ban"></i> 
+					// 	Drop
+					// </button>`;
 				} else if (bidRecapStatus == 3) {
 					// DENIED - FOR REVISE
 					if (!isDocumentRevised(bidRecapID)) {
@@ -975,7 +979,7 @@ $(document).ready(function() {
 				candidateVendorPrice    = "-|-|-",
 				inventoryVendorID,
 			 } = item;
- 
+			 
 			 if (forPurchase && forPurchase > 0) {
 				 html = `
 				 <tr requestItemAssetID="${requestAssetID}"
@@ -1008,19 +1012,30 @@ $(document).ready(function() {
     function getRequestAssetsDisplay(data = false, readOnly = false, isRevise = false, isFromCancelledDocument = false) {
         let {
             bidRecapID,
+			changeRequestID,
             inventoryValidationID,
             bidRecapStatus
         } = data && data[0];
 
         let requestAssets = [];
         if (bidRecapID) {
-            requestAssets = getTableData(
-                `ims_request_assets_tbl`,
-                `*`,
-                `bidRecapID = ${bidRecapID}
-                AND inventoryValidationID = ${inventoryValidationID}
-                AND purchaseRequestID IS NULL`
-            );
+			if (changeRequestID) {
+				requestAssets = getTableData(
+					`ims_request_assets_tbl`,
+					`*`,
+					`bidRecapID = ${bidRecapID}
+					AND changeRequestID = ${changeRequestID}
+					AND purchaseRequestID IS NULL`
+				);
+			} else {
+				requestAssets = getTableData(
+					`ims_request_assets_tbl`,
+					`*`,
+					`bidRecapID = ${bidRecapID}
+					AND inventoryValidationID = ${inventoryValidationID}
+					AND purchaseRequestID IS NULL`
+				);
+			}
         }
 
         let tableRowHTML = "";
@@ -1083,19 +1098,31 @@ $(document).ready(function() {
     function getRequestItemsDisplay(data = false, readOnly = false, isRevise = false, isFromCancelledDocument = false) {
         let {
             bidRecapID,
+			changeRequestID,
             inventoryValidationID,
             bidRecapStatus
         } = data && data[0];
 
         let requestItems = [];
         if (bidRecapID) {
-            requestItems = getTableData(
-                `ims_request_items_tbl`,
-                `*`,
-                `bidRecapID = ${bidRecapID}
-                AND inventoryValidationID = ${inventoryValidationID}
-                AND purchaseRequestID IS NULL`
-            );
+			if (changeRequestID) {
+				requestItems = getTableData(
+					`ims_request_items_tbl`,
+					`*`,
+					`bidRecapID = ${bidRecapID}
+					AND changeRequestID = ${changeRequestID}
+					AND inventoryValidationID = ${inventoryValidationID}
+					AND purchaseRequestID IS NULL`
+				);
+			} else {
+				requestItems = getTableData(
+					`ims_request_items_tbl`,
+					`*`,
+					`bidRecapID = ${bidRecapID}
+					AND inventoryValidationID = ${inventoryValidationID}
+					AND purchaseRequestID IS NULL`
+				);
+			}
         }
 
         let tableRowHTML = "";
@@ -1332,7 +1359,7 @@ $(document).ready(function() {
 											<th>UOM</th>
 											<th>Quantity</th>
 											<th>Unit Cost</th>
-											<th>Total Cost</th>
+											<th>Total Amount</th>
 											<th>Remarks</th>
 										</tr>
 									</thead>
@@ -1394,7 +1421,7 @@ $(document).ready(function() {
 											<th>UOM</th>
 											<th>Quantity</th>
 											<th>Unit Cost</th>
-											<th>Total Cost</th>
+											<th>Total Amount</th>
 											<th>Remarks</th>
 										</tr>
 									</thead>
@@ -1454,6 +1481,8 @@ $(document).ready(function() {
             reviseBidRecapCode,
             inventoryValidationID,
             inventoryValidationCode,
+            changeRequestID,
+            changeRequestCode,
             timelineBuilderID,
             projectCode,
             projectName,
@@ -1595,7 +1624,7 @@ $(document).ready(function() {
 						name="bidRecapID"
 						class="form-control validate"
 						disabled
-						value="${inventoryValidationCode || "-"}">
+						value="${(changeRequestCode || inventoryValidationCode) || "-"}">
                 </div>
             </div>
 
@@ -2063,6 +2092,7 @@ $(document).ready(function() {
 					data.approversID = sessionID;
 					data.approversStatus = 2;
 					data.approversDate = dateToday();
+					delete data["bidRecapStatus"];
 					data.bidRecapStatus = 2;
 				}
 			}

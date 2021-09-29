@@ -1076,6 +1076,9 @@ function formContent(data = false, readOnly = false, isRevise = false, isFromCan
 		returnItemID        		= "",
 		reviseReturnItemID  		= "",
 		timelineBuilderID 			= "",
+		borrowingID					= "",
+		borrowingCode				= "",
+		projectID					= "",
 		projectCode					= "",
 		projectName					= "",
 		clientName					= "",
@@ -1087,12 +1090,14 @@ function formContent(data = false, readOnly = false, isRevise = false, isFromCan
 		approversID             	= "",
 		approversStatus         	= "",
 		approversDate           	= "",
+		clientID					= "",
 		clientCode					= "",
+		dateNeeded					= "",
+		clientAddress				= "",
 		returnItemStatus    		= false,
 		submittedAt             	= false,
 		createdAt               	= false,
 	} = data && data[0];
-
 
 	let returnItems = "";
 	if (returnItemID) {
@@ -1206,28 +1211,15 @@ function formContent(data = false, readOnly = false, isRevise = false, isFromCan
 	<div class="row" id="form_return_item">
 	<div class="col-md-4 col-sm-12">
 			 <div class="form-group">
-				<label>Date ${!disabled ? "<code>*</code>" : ""}</label>
-				<input type="button" 
-					class="form-control validate daterange text-left"
-					required
-					id="returnItemDate"
-					name="returnItemDate"
-					value="${returnItemDate && moment(returnItemDate).format("MMMM DD, YYYY")}"
-					${disabled}
-					>
-				<div class="d-block invalid-feedback" id="invalid-returnItemDate"></div>
-			</div>
-		</div>
-		<div class="col-md-4 col-sm-12">
-			 <div class="form-group">
-				<label>Date Needed </label>
-				<input type="button" 
+				<label>Reference No. </label>
+				<input type="text" 
 					class="form-control validate text-left"
-					id="returnItemDateNeeded"
-					name="returnItemDateNeeded"
+					id="borrowingCode"
+					name="borrowingCode"
+					borrowingID="${borrowingID}"
 					disabled
-					value="">
-				<div class="d-block invalid-feedback" id="invalid-dateneeded"></div>
+					value="${borrowingCode || "-" }">
+				<div class="d-block invalid-feedback" id="invalid-borrowingCode"></div>
 			</div>
 		</div>
 		<div class="col-md-4 col-sm-12">
@@ -1239,7 +1231,11 @@ function formContent(data = false, readOnly = false, isRevise = false, isFromCan
 		<div class="col-md-4 col-sm-12">
 			<div class="form-group">
 				<label>Project Name</label>
-				<input type="text" name="projectName" id="projectName" class="form-control" disabled value="${projectName || "-"}">
+				<input type="text" 
+				name="projectName"
+				id="projectName"
+				projectID="${projectID}"
+				class="form-control" disabled value="${projectName || "-"}">
 			</div>
 		</div>
 		<div class="col-md-4 col-sm-12">
@@ -1251,22 +1247,50 @@ function formContent(data = false, readOnly = false, isRevise = false, isFromCan
 		<div class="col-md-4 col-sm-12">
 			<div class="form-group">
 				<label>Client Name</label>
-				<input type="text" name="clientName" id="clientName" class="form-control" disabled value="${clientName || "-"}">
+				<input type="text" 
+				name="clientName"
+			 	id="clientName" 
+				clientID="${clientID}"
+				 class="form-control" disabled value="${clientName || "-"}">
 			</div>
 		</div>
 		<div class="col-md-4 col-sm-12">
+			<div class="form-group">
+			<label>Client Address </label>
+			<input type="button" 
+				class="form-control validate text-left"
+				id="clientAddress"
+				name="clientAddress"
+				value="${clientAddress}"
+				disabled
+				value="">
+			<div class="d-block invalid-feedback" id="invalid-clientAddress"></div>
+		</div>
+   		</div>
+		   <div class="col-md-3 col-sm-12">
+			<div class="form-group">
+				<label>Date Needed</label>
+				<input type="text" 
+				class="form-control"
+				id="dateNeeded"
+				name="dateNeeded"
+				value="${dateNeeded && moment(dateNeeded).format("MMMM DD, YYYY")}"
+				disabled>
+			</div>
+		</div>
+		<div class="col-md-3 col-sm-12">
 			<div class="form-group">
 				<label>Prepared By</label>
 				<input type="text" class="form-control" disabled value="${employeeFullname}">
 			</div>
 		</div>
-		<div class="col-md-4 col-sm-12">
+		<div class="col-md-3 col-sm-12">
 			<div class="form-group">
 				<label>Department</label>
 				<input type="text" class="form-control" disabled value="${employeeDepartment}">
 			</div>
 		</div>
-		<div class="col-md-4 col-sm-12">
+		<div class="col-md-3 col-sm-12">
 			<div class="form-group">
 				<label>Position</label>
 				<input type="text" class="form-control" disabled value="${employeeDesignation}">
@@ -1324,13 +1348,13 @@ function formContent(data = false, readOnly = false, isRevise = false, isFromCan
 
 	setTimeout(() => {
 		$("#page_content").html(html);
-		$("#returnItemDate").val(moment(new Date).format("MMMM DD, YYYY"));
+		//$("#returnItemDate").val(moment(new Date).format("MMMM DD, YYYY"));
 		//initDataTables();
 		//$("#returnItemDate").val(moment(new Date).format("MMMM DD, YYYY"));
 		initAll();
 		updateSerialNumber();
 		
-		$("#returnItemDate").data("daterangepicker").maxDate = moment();
+		//$("#returnItemDate").data("daterangepicker").maxDate = moment();
 		return html;
 	}, 300);
 }
@@ -1422,10 +1446,33 @@ function getReturnItemData(action = "insert", method = "submit", status = "1", i
 
 	if (currentStatus == "0" && method != "approve") {
 		//var file = document.getElementById("receiptNo").files[0];
-		data["employeeID"] 				 = sessionID;
-		data["returnItemReason"] = $("[name=returnItemReason]").val()?.trim();
+		data["employeeID"] 				 	= sessionID;
+		data["borrowingID"]   				= $(`[name="borrowingCode"]`).attr("borrowingID");
+		data["borrowingCode"] 				= $(`[name="borrowingCode"]`).val();
+		data["projectCode"] 				= $(`[name="projectCode"]`).val();
+		data["timelinebuilderid"]   		= $(`[name="projectCode"]`).attr("timelinebuilderid");
+		data["projectID"]					= $(`[name="projectName"]`).attr("projectID");
+		data["projectName"]  				= $(`[name="projectName"]`).val();
+		data["clientCode"] 					= $(`[name="clientCode"]`).val();
+		data["clientID"]					= $(`[name="clientName"]`).attr("clientID");
+		data["clientName"]  				= $(`[name="clientName"]`).val();
+		data["clientAddress"]  				= $(`[name="clientAddress"]`).val();
+		data["dateNeeded"]  				= $(`[name="dateNeeded"]`).val();
+		data["returnItemReason"] 			= $("[name=returnItemReason]").val()?.trim();
+		// const clientName   					= $(`[name="clientName"]`).val();
 
 		formData.append("employeeID", sessionID);
+		formData.append("borrowingID", $("[name=borrowingCode]").attr("borrowingID"));
+		formData.append("borrowingCode", $("[name=borrowingCode]").val());
+		formData.append("projectCode", $("[name=projectCode]").val());
+		formData.append("timelinebuilderid", $("[name=projectCode]").attr("timelinebuilderid"));
+		formData.append("projectID", $("[name=projectName]").attr("projectID"));
+		formData.append("projectName", $("[name=projectName]").val());
+		formData.append("clientCode", $("[name=clientCode]").val());
+		formData.append("clientID", $("[name=clientName]").attr("clientID"));
+		formData.append("clientName", $("[name=clientName]").val());
+		formData.append("clientAddress", $("[name=clientAddress]").val());
+		formData.append("dateNeeded", $("[name=dateNeeded]").val());
 		formData.append("returnItemReason", $("[name=returnItemReason]").val()?.trim());
 		
 		if (action == "insert") {

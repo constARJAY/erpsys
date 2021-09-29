@@ -198,16 +198,22 @@ const generateCode = (
 
 // ----- GENERATE ITEM CODE -----
 const generateItemCode = (
-	classificationID = null
+	classificationID = null,
+	type = "item"
 ) => {
 	let id;
-	let tableData = getTableData(`ims_inventory_classification_tbl AS iict LEFT JOIN ims_inventory_item_tbl AS iiit USING(classificationID)`,
-								`COUNT(itemID) AS lastID, classificationShortcut`, `iiit.classificationID ='${classificationID}' `);
+	let table = type == `item` ? 'ims_inventory_item_tbl'  : 'ims_inventory_asset_tbl' ;
+	let tableID = type == `item` ? 'itemID'  : 'assetID' ;
+	let code = type == `item` ? 'ITM'  : 'AST' ;
+	
+	
+	let tableData = getTableData(`ims_inventory_classification_tbl AS iict LEFT JOIN ${table} AS iiit USING(classificationID)`,
+								`COUNT(${tableID}) AS lastID, classificationShortcut`, `iiit.classificationID ='${classificationID}' `);
 	let shortcutCode = tableData[0].classificationShortcut;
 	let lastID 		 = tableData[0].lastID < 1 ? 1 : parseInt(tableData[0].lastID) + 1;
 	let stringID 	 = lastID.toString();
 	let lastStr = "0".repeat(5 - stringID.length) + lastID;
-	return shortcutCode ? `ITM-${shortcutCode}-${moment().format("YY")}-${lastStr}` : false;
+	return shortcutCode ? `${code}-${shortcutCode}-${moment().format("YY")}-${lastStr}` : false;
 };
 // ----- END GENERATE ITEM CODE -----
 

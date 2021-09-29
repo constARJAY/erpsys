@@ -50,7 +50,8 @@ class Inventory_stock_in extends CI_Controller {
         $recordID = $this->input->post("recordID");
         $quantity = $this->input->post("quantity");
         $inventoryCode = $this->input->post("inventoryCode");
-        $savereceivingreport = $this->inventorystockin->savestockin($itemID, $itemName,$brand, $classificationName, $categoryName,$barcode,$recievedQuantity,$serialnumber,$inventoryStorageID, $inventoryStorageCode, $inventoryStorageOfficeName, $manufactureDate, $expirationdate, $ReturnItemID, $MaterialUsageID,  $InventoryReceivingID, $recordID, $quantity, $inventoryCode);
+        $itemCode = $this->input->post("itemCode");
+        $savereceivingreport = $this->inventorystockin->savestockin($itemID, $itemName,$brand, $classificationName, $categoryName,$barcode,$recievedQuantity,$serialnumber,$inventoryStorageID, $inventoryStorageCode, $inventoryStorageOfficeName, $manufactureDate, $expirationdate, $ReturnItemID, $MaterialUsageID,  $InventoryReceivingID, $recordID, $quantity, $inventoryCode, $itemCode);
         $result = explode("|", $savereceivingreport);
         if ($result[0] == "true") {
             $this->session->set_flashdata('success', $result[1]);

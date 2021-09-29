@@ -6,6 +6,24 @@ $(document).ready(function() {
     let employeeMemorandaFilename   = [], employeeMemorandaFiles   = [];
     let trainingDevelopmentFilename = [], trainingDevelopmentFiles = [];
     let othersFilename              = [], othersFiles              = [];
+
+    const statusStyle = (status) => {
+        if (status == "0") {
+            return `<span class="badge badge-outline-danger" style="width: 100% !important">Resigned</span>`;
+        } else if (status == "1") {
+            return `<span class="badge badge-outline-success" style="width: 100% !important">Active</span>`;
+        } else if (status == "2") {
+            return `<span class="badge badge-outline-primary" style="width: 100% !important">Probationary</span>`;
+        } else if (status == "3") {
+            return `<span class="badge badge-outline-danger" style="width: 100% !important">AWOL</span>`;
+        } else if (status == "4") {
+            return `<span class="badge badge-outline-info" style="width: 100% !important">Retired</span>`;
+        } else if (status == "5") {
+            return `<span class="badge badge-outline-warning" style="width: 100% !important">Suspended</span>`;
+        } else {
+            return `<span class="badge badge-outline-danger" style="width: 100% !important">Terminated</span>`;
+        }
+    }
     // ----- END GLOBAL VARIABLES -----
 
 
@@ -43,12 +61,12 @@ $(document).ready(function() {
     } );
 
 	function initDataTables() {
-		if ($.fn.DataTable.isDataTable("#tableEmployeeModule")) {
-			$("#tableEmployeeModule").DataTable().destroy();
+		if ($.fn.DataTable.isDataTable("#tablePersonnelModule")) {
+			$("#tablePersonnelModule").DataTable().destroy();
 		}
 
-		if ($.fn.DataTable.isDataTable("#tableEmployeeModule2")) {
-			$("#tableEmployeeModule2").DataTable().destroy();
+		if ($.fn.DataTable.isDataTable("#tablePersonnelModule2")) {
+			$("#tablePersonnelModule2").DataTable().destroy();
 		}
 
 		if ($.fn.DataTable.isDataTable("#tableLeaveBalance")) {
@@ -63,7 +81,7 @@ $(document).ready(function() {
 			$("#tableAccessibility").DataTable().destroy();
 		}
 
-		var table = $("#tableEmployeeModule")
+		var table = $("#tablePersonnelModule")
 			.css({ "min-width": "100%" })
 			.removeAttr("width")
 			.DataTable({
@@ -81,11 +99,11 @@ $(document).ready(function() {
 					{ targets: 5, width: 150 },
 					{ targets: 6, width: 150 },
 					{ targets: 7, width: 110 },
-					{ targets: 8, width: 80  },
+					{ targets: 8, width: 120 },
 				],
 			});
 
-		var table = $("#tableEmployeeModule2")
+		var table = $("#tablePersonnelModule2")
 			.css({ "min-width": "100%" })
 			.removeAttr("width")
 			.DataTable({
@@ -97,8 +115,8 @@ $(document).ready(function() {
 				columnDefs: [
 					{ targets: 0, width: 50  },
 					{ targets: 1, width: 200 },
-					{ targets: 2, width: 150 },
-					{ targets: 3, width: 150 },
+					{ targets: 2, width: 200 },
+					{ targets: 3, width: 120 },
 				],
 			});
 
@@ -175,8 +193,8 @@ $(document).ready(function() {
 	// ----- END DATATABLES -----
 
 
-    // ----- GET EMPLOYEE NOT IN BIOMETRICS -----
-    function getEmployeeNotInBiometrics() {
+    // ----- GET PERSONNEL NOT IN BIOMETRICS -----
+    function getPersonnelNotInBiometrics() {
         let result = [];
         $.ajax({
             method: "POST",
@@ -189,14 +207,14 @@ $(document).ready(function() {
         })
         return result;
     }
-    // ----- END GET EMPLOYEE NOT IN BIOMETRICS -----
+    // ----- END GET PERSONNEL NOT IN BIOMETRICS -----
 
 
     // ----- ALERT NOTICE CONTENT -----
     function alertNoticeContent() {
         let html = "";
-        const noticeEmployees = getEmployeeNotInBiometrics();
-        noticeEmployees.map(emp => {
+        const noticePersonnels = getPersonnelNotInBiometrics();
+        noticePersonnels.map(emp => {
             const { employeeFirstname = "", employeeLastname = "" } = emp;
             const fullname = `${employeeFirstname} ${employeeLastname}`;
             html += `
@@ -247,32 +265,14 @@ $(document).ready(function() {
             employeeHourlyRate,
             employeeStatus,
             hris_employee_list_tbl.createdAt AS createdAt`,
-            `employeeStatus <> 7`
+            `scheduleID <> 0`
         );
 
-        const statusStyle = (status) => {
-            if (status == "0") {
-                return `<span class="badge badge-outline-danger w-100">Resigned</span>`;
-            } else if (status == "1") {
-                return `<span class="badge badge-outline-success w-100">Active</span>`;
-            } else if (status == "2") {
-                return `<span class="badge badge-outline-primary w-100">Probationary</span>`;
-            } else if (status == "3") {
-                return `<span class="badge badge-outline-danger w-100">AWOL</span>`;
-            } else if (status == "4") {
-                return `<span class="badge badge-outline-info w-100">Retired</span>`;
-            } else if (status == "5") {
-                return `<span class="badge badge-outline-warning w-100">Suspended</span>`;
-            } else {
-                return `<span class="badge badge-outline-danger w-100">Terminated</span>`;
-            }
-        }
-
 		let html = `
-        <table class="table table-bordered table-striped table-hover" id="tableEmployeeModule">
+        <table class="table table-bordered table-striped table-hover" id="tablePersonnelModule">
             <thead>
                 <tr style="white-space:nowrap">
-                    <th>Employee Code</th>
+                    <th>Personnel Code</th>
                     <th>Full Name</th>
                     <th>Designation</th>
                     <th>Hourly Rate</th>
@@ -381,17 +381,17 @@ $(document).ready(function() {
             designationName,
             employeeStatus,
             hris_employee_list_tbl.createdAt AS createdAt`,
-            `employeeStatus = 7`
+            `scheduleID = 0`
         );
 
 		let html = `
-        <table class="table table-bordered table-striped table-hover" id="tableEmployeeModule2">
+        <table class="table table-bordered table-striped table-hover" id="tablePersonnelModule2">
             <thead>
                 <tr style="white-space:nowrap">
-                    <th>Employee Code</th>
+                    <th>Personnel Code</th>
                     <th>Full Name</th>
-                    <th>Department</th>
                     <th>Designation</th>
+                    <th>Status</th>
                 </tr>
             </thead>
             <tbody>`;
@@ -403,8 +403,9 @@ $(document).ready(function() {
                 employeeFirstname,
                 employeeMiddlename,
                 employeeLastname,
-                departmentName     = "-",
-                designationName    = "-",
+                departmentName  = "-",
+                designationName = "-",
+                employeeStatus  = 0,
                 createdAt
             } = employee;
 
@@ -430,8 +431,13 @@ $(document).ready(function() {
             <tr class="btnEdit" id="${encryptString(employeeID)}">
                 <td>${getFormCode("EMP", createdAt, employeeID)}</td>
                 <td>${profileImg} <span class="ml-2">${fullname}<span></td>
-                <td>${departmentName}</td>
-                <td>${designationName}</td>
+                <td>
+                    <div>
+                        ${designationName || '-'}
+                    </div>
+                    <small style="color:#848482;">${departmentName || '-'}</small>
+                </td>
+                <td>${statusStyle(employeeStatus)}</td>
             </tr>`
         })
 
@@ -724,7 +730,7 @@ $(document).ready(function() {
     // ----- END DESIGNATION OPTIONS -----
 
 
-    // ----- EMPLOYEE STATUS -----
+    // ----- PERSONNEL STATUS -----
     function employeeStatuses(statusID = null) {
         let statuses = [
             { id: 0, value: "Resigned"     },
@@ -746,7 +752,7 @@ $(document).ready(function() {
             </option>`
         })
     }
-    // ----- END EMPLOYEE STATUS -----
+    // ----- END PERSONNEL STATUS -----
 
 
     // ----- SELECT PROFILE IMAGE -----
@@ -807,7 +813,7 @@ $(document).ready(function() {
                 $(this).val("");
                 showNotification("danger", "Invalid file type");
             } else {
-                $(`#displaySignature`).html(displayEmployeeSignature(filename, false));
+                $(`#displaySignature`).html(displayPersonnelSignature(filename, false));
             }
         }
     })
@@ -829,8 +835,8 @@ $(document).ready(function() {
     // ----- END REMOVE PROFILE IMAGE -----
 
     
-    // ----- DISPLAY EMPLOYEE SIGNATURE -----
-    function displayEmployeeSignature(employeeSignature = null, link = true) {
+    // ----- DISPLAY PERSONNEL SIGNATURE -----
+    function displayPersonnelSignature(employeeSignature = null, link = true) {
         let html = ``;
         if (employeeSignature && employeeSignature != null && employeeSignature != "null" && employeeSignature != "undefined") {
             let otherAttr = link ? `
@@ -853,10 +859,10 @@ $(document).ready(function() {
         }
         return html;
     }
-    // ----- END DISPLAY EMPLOYEE SIGNATURE -----
+    // ----- END DISPLAY PERSONNEL SIGNATURE -----
 
 
-    // ----- EMPLOYEE INFORMATION TAB -----
+    // ----- PERSONNEL INFORMATION TAB -----
     function employeeInformationTab(data = false) {
 
         let {
@@ -927,7 +933,7 @@ $(document).ready(function() {
                                             id="employeeFirstname"
                                             data-allowcharacters="[a-z][A-Z][.][,][-]['][ ]"
                                             minlength="2"
-                                            maxlength="50"
+                                            maxlength="75"
                                             autocomplete="off"
                                             required
                                             value="${employeeFirstname}">
@@ -943,7 +949,7 @@ $(document).ready(function() {
                                             id="employeeMiddlename"
                                             data-allowcharacters="[a-z][A-Z][.][,][-]['][ ]"
                                             minlength="2"
-                                            maxlength="50"
+                                            maxlength="75"
                                             autocomplete="off"
                                             value="${employeeMiddlename ?? ""}">
                                         <div class="invalid-feedback d-block" id="invalid-employeeMiddlename"></div>
@@ -958,7 +964,7 @@ $(document).ready(function() {
                                             id="employeeLastname"
                                             data-allowcharacters="[a-z][A-Z][.][,][-]['][ ]"
                                             minlength="2"
-                                            maxlength="50"
+                                            maxlength="75"
                                             autocomplete="off"
                                             required
                                             value="${employeeLastname}">
@@ -1235,7 +1241,7 @@ $(document).ready(function() {
                     <div class="form-group">
                         <label>Signature</label>
                         <div class="signature" id="displaySignature">
-                            ${displayEmployeeSignature(employeeSignature)}
+                            ${displayPersonnelSignature(employeeSignature)}
                         </div>
                         <input type="file"
                             class="form-control validate"
@@ -1299,7 +1305,7 @@ $(document).ready(function() {
         </div>`;
         return html;
     }
-    // ----- END EMPLOYEE INFORMATION TAB -----
+    // ----- END PERSONNEL INFORMATION TAB -----
 
 
     // ----- CONFIRM PASSWORD -----
@@ -1342,7 +1348,7 @@ $(document).ready(function() {
     // ----- END TOGGLE PASSWORD -----
 
 
-    // ----- EMPLOYEE ACCOUNT TAB -----
+    // ----- PERSONNEL ACCOUNT TAB -----
     function employeeAccountTab(data = false) {
 
         let {
@@ -1433,7 +1439,7 @@ $(document).ready(function() {
         </div>`;
         return html;
     }
-    // ----- END EMPLOYEE ACCOUNT TAB -----
+    // ----- END PERSONNEL ACCOUNT TAB -----
 
 
     // ----- BANK NAME OPTIONS -----
@@ -1488,7 +1494,7 @@ $(document).ready(function() {
     // ----- END CHANGE BASIC SALARY -----
 
 
-    // ----- EMPLOYEE PAYROLL TAB -----
+    // ----- PERSONNEL PAYROLL TAB -----
     function employeePayrollTab(data = false) {
 
         let {
@@ -1694,7 +1700,7 @@ $(document).ready(function() {
         </div>`;
         return html;
     }
-    // ----- END EMPLOYEE PAYROLL TAB -----
+    // ----- END PERSONNEL PAYROLL TAB -----
 
 
     // ----- KEYUP LEAVE CREDIT -----
@@ -1709,7 +1715,7 @@ $(document).ready(function() {
     // ----- END KEYUP LEAVE CREDIT -----
 
 
-    // ----- EMPLOYEE LEAVE BALANCE -----
+    // ----- PERSONNEL LEAVE BALANCE -----
     const leaveTypeList = getTableData("hris_leave_tbl", "leaveID, leaveName", "leaveStatus = 1");
 
     function employeeLeaveBalance(data = false) {
@@ -1869,7 +1875,7 @@ $(document).ready(function() {
         </div>`;
         return html;
     }
-    // ----- END EMPLOYEE LEAVE BALANCE -----
+    // ----- END PERSONNEL LEAVE BALANCE -----
 
 
     // ----- SELECT SCHEDULE -----
@@ -1885,7 +1891,7 @@ $(document).ready(function() {
     // ----- END SELECT SCHEDULE -----
 
 
-    // ----- EMPLOYEE SCHEDULE -----
+    // ----- PERSONNEL SCHEDULE -----
     const scheduleList = getTableData("hris_schedule_setup_tbl", "*", "scheduleStatus = 1");
 
     function scheduleOptions(id = null) {
@@ -2010,16 +2016,16 @@ $(document).ready(function() {
         </div>`;
         return html;
     }
-    // ----- END EMPLOYEE SCHEDULE -----
+    // ----- END PERSONNEL SCHEDULE -----
 
 
-    // ----- EMPLOYEE ACCESSIBILITY -----
+    // ----- PERSONNEL ACCESSIBILITY -----
     const moduleList = getTableData("gen_module_list_tbl", "moduleID, moduleName", "moduleStatus = 1");
 
     function displayAccessibility(employeeID = null) {
-        let getEmployeeAccessibility = [];
+        let getPersonnelAccessibility = [];
         if (employeeID) {
-            getEmployeeAccessibility = getTableData(
+            getPersonnelAccessibility = getTableData(
                 `hris_employee_permission_tbl`,
                 "",
                 `employeeID = ${employeeID}`
@@ -2036,7 +2042,7 @@ $(document).ready(function() {
                 disabled     = checked;
 
             if (employeeID) {
-                getEmployeeAccessibility
+                getPersonnelAccessibility
                 .filter(mdl => mdl.moduleID == module.moduleID)
                 .map(mdl2 => {
                     createStatus = mdl2.createStatus == 1 || employeeID == 1 ? "checked" : "";
@@ -2103,7 +2109,7 @@ $(document).ready(function() {
         </div>`;
         return html;
     }
-    // ----- END EMPLOYEE ACCESSIBILITY -----
+    // ----- END PERSONNEL ACCESSIBILITY -----
 
 
     // ----- UPLOAD FILE -----
@@ -2151,7 +2157,7 @@ $(document).ready(function() {
                 input:     "contractAppraisal",
                 contentID: "contractAppraisalContent"
             },
-            "Employee Memoranda": {
+            "Personnel Memoranda": {
                 input:     "employeeMemoranda",
                 contentID: "employeeMemorandaContent"
             },
@@ -2208,7 +2214,7 @@ $(document).ready(function() {
                         // ----- STORING OLD FILES -----
                         if (documentType == "Contract and Appraisal") {
                             contractAppraisalFilename.push(filename);
-                        } else if (documentType == "Employee Memoranda") {
+                        } else if (documentType == "Personnel Memoranda") {
                             employeeMemorandaFilename.push(filename);
                         } else if (documentType == "Training and Development") {
                             trainingDevelopmentFilename.push(filename);
@@ -2241,7 +2247,7 @@ $(document).ready(function() {
             if (documentType == "Contract and Appraisal") {
                 contractAppraisalFilename = contractAppraisalFilename.filter(file => file != key);
                 contractAppraisalFiles    = contractAppraisalFiles.filter(file => file.name != key);
-            } else if (documentType == "Employee Memoranda") {
+            } else if (documentType == "Personnel Memoranda") {
                 employeeMemorandaFilename = employeeMemorandaFilename.filter(file => file != key);
                 employeeMemorandaFiles    = employeeMemorandaFiles.filter(file => file.name != key);
             } else if (documentType == "Training and Development") {
@@ -2287,7 +2293,7 @@ $(document).ready(function() {
                     if (documentType == "Contract and Appraisal") {
                         contractAppraisalFilename.push(filenameArr.join("."));
                         contractAppraisalFiles.push(files[i]);
-                    } else if (documentType == "Employee Memoranda") {
+                    } else if (documentType == "Personnel Memoranda") {
                         employeeMemorandaFilename.push(filenameArr.join("."));
                         employeeMemorandaFiles.push(files[i]);
                     } else if (documentType == "Training and Development") {
@@ -2319,7 +2325,7 @@ $(document).ready(function() {
     // ----- END CHANGE STATUS -----
 
 
-    // ----- EMPLOYEE DOCUMENTS -----
+    // ----- PERSONNEL DOCUMENTS -----
     function employeeDocuments(data = false) {
         let { employeeID = "" } = data;
         let documentTypes = [
@@ -2329,7 +2335,7 @@ $(document).ready(function() {
                 contentID: "contractAppraisalContent",
             },
             {
-                title:     "Employee Memoranda",    
+                title:     "Personnel Memoranda",    
                 input:     "employeeMemoranda",   
                 contentID: "employeeMemorandaContent",
             },
@@ -2394,7 +2400,7 @@ $(document).ready(function() {
         </div>`;
         return html;
     }
-    // ----- END EMPLOYEE DOCUMENTS -----
+    // ----- END PERSONNEL DOCUMENTS -----
 
 
     // ----- MODAL CONTENT -----
@@ -2479,6 +2485,7 @@ $(document).ready(function() {
                 employeeFirstname  = "", 
                 employeeMiddlename = "", 
                 employeeLastname   = "", 
+                employeeStatus     = 0,
                 departmentID,
                 designationID
             } = data;
@@ -2493,10 +2500,10 @@ $(document).ready(function() {
                         id="employeeFirstname"
                         data-allowcharacters="[a-z][A-Z][.][,][-]['][ ]"
                         minlength="2"
-                        maxlength="50"
+                        maxlength="75"
                         autocomplete="off"
                         required
-                        title="Employee"
+                        title="Personnel"
                         unique="${employeeID}"
                         value="${employeeFirstname || ""}">
                     <div class="invalid-feedback d-block" id="invalid-employeeFirstname"></div>
@@ -2509,9 +2516,9 @@ $(document).ready(function() {
                         id="employeeMiddlename"
                         data-allowcharacters="[a-z][A-Z][.][,][-]['][ ]"
                         minlength="2"
-                        maxlength="50"
+                        maxlength="75"
                         autocomplete="off"
-                        title="Employee"
+                        title="Personnel"
                         unique="${employeeID}"
                         value="${employeeMiddlename || ""}">
                     <div class="invalid-feedback d-block" id="invalid-employeeMiddlename"></div>
@@ -2524,10 +2531,10 @@ $(document).ready(function() {
                         id="employeeLastname"
                         data-allowcharacters="[a-z][A-Z][.][,][-]['][ ]"
                         minlength="2"
-                        maxlength="50"
+                        maxlength="75"
                         autocomplete="off"
                         required
-                        title="Employee"
+                        title="Personnel"
                         unique="${employeeID}"
                         value="${employeeLastname || ""}">
                     <div class="invalid-feedback d-block" id="invalid-employeeLastname"></div>
@@ -2555,6 +2562,17 @@ $(document).ready(function() {
                     </select>
                     <div class="invalid-feedback d-block" id="invalid-designationID"></div>
                 </div>
+                <div class="form-group">
+                    <label>Status <code>*</code></label>
+                    <select class="form-control validate select2"
+                        style="width: 100%"
+                        name="employeeStatus"
+                        id="employeeStatus"
+                        employeeID="${employeeID}">
+                        ${employeeStatuses(employeeStatus)}
+                    </select>
+                    <div class="invalid-feedback d-block" id="invalid-employeeStatus"></div>
+                </div>
             </div>
             <div class="modal-footer">
                 ${button}
@@ -2569,7 +2587,7 @@ $(document).ready(function() {
 
 
     // ----- GET MODAL DATA -----
-    function getEmployeeInformationData() {
+    function getPersonnelInformationData() {
         let employeeProfile       = $("[name=employeeProfile]").val();
         const employeeFirstname   = $("[name=employeeFirstname]").val()?.trim();
         const employeeMiddlename  = $("[name=employeeMiddlename]").val()?.trim();
@@ -2610,7 +2628,7 @@ $(document).ready(function() {
         };
     }
 
-    function getEmployeeAccountData() {
+    function getPersonnelAccountData() {
         const employeeUsername = $("[name=employeeUsername]").val()?.trim();
         const employeePassword = $("[name=employeePassword]").val()?.trim();
         const employeeEncryptedPassword = encryptString(employeePassword);
@@ -2620,7 +2638,7 @@ $(document).ready(function() {
         };
     }
 
-    function getEmployeePayrollData() {
+    function getPersonnelPayrollData() {
         const employeeBasicSalary     = +$("[name=employeeBasicSalary]").val().replaceAll(",", "");
         const employeeDailyRate       = +$("[name=employeeDailyRate]").val().replaceAll(",", "");
         const employeeHourlyRate      = employeeDailyRate / 8;
@@ -2638,7 +2656,7 @@ $(document).ready(function() {
         }
     }
 
-    function getEmployeeLeaveBalanceData() {
+    function getPersonnelLeaveBalanceData() {
         const employeeRanking       = $(`[name="employeeRanking"]`).val();
         const employeeRankingCredit = $(`[name="employeeRanking"] option:selected`).attr("balance");
         let result = [];
@@ -2656,11 +2674,11 @@ $(document).ready(function() {
         return { employeeRanking, employeeRankingCredit, balance: result};
     }
 
-    function getEmployeeScheduleData() {
+    function getPersonnelScheduleData() {
         return $("[name=scheduleID]").val();
     }
 
-    function getEmployeeAccessibilityData() {
+    function getPersonnelAccessibilityData() {
         let result = [];
         $(".module").each(function() {
             const moduleID = $(this).attr("moduleid");
@@ -2673,21 +2691,21 @@ $(document).ready(function() {
         })
         return result;
     }
-    async function getEmployeeData() {
+    async function getPersonnelData() {
         let formData = new FormData();
-        const informationData = getEmployeeInformationData();
+        const informationData = getPersonnelInformationData();
         Object.keys(informationData).map(informationKey => {
             formData.append(informationKey, informationData[informationKey]);
         })
-        const accountData = getEmployeeAccountData();
+        const accountData = getPersonnelAccountData();
         Object.keys(accountData).map(accountKey => {
             formData.append(accountKey, accountData[accountKey]);
         })
-        const payrollData = getEmployeePayrollData();
+        const payrollData = getPersonnelPayrollData();
         Object.keys(payrollData).map(payrollKey => {
             formData.append(payrollKey, payrollData[payrollKey]);
         })
-        const leaveBalanceData = getEmployeeLeaveBalanceData();
+        const leaveBalanceData = getPersonnelLeaveBalanceData();
         formData.append(`employeeRanking`, leaveBalanceData.employeeRanking);
         formData.append(`employeeRankingCredit`, leaveBalanceData.employeeRankingCredit);
         leaveBalanceData.balance.map((leave, index) => {
@@ -2696,8 +2714,8 @@ $(document).ready(function() {
             formData.append(`leaveCredit[${index}][leaveBalance]`, leaveBalance);
             formData.append(`leaveCredit[${index}][leaveAccumulated]`, leaveAccumulated);
         })
-        formData.append("scheduleID", getEmployeeScheduleData());
-        const accessiblityData = getEmployeeAccessibilityData();
+        formData.append("scheduleID", getPersonnelScheduleData());
+        const accessiblityData = getPersonnelAccessibilityData();
         accessiblityData.map((accessibility, index) => {
             const { moduleID, createStatus, readStatus, updateStatus, deleteStatus, printStatus } = accessibility;
             formData.append(`accessibility[${index}][moduleID]`, moduleID);
@@ -2743,10 +2761,10 @@ $(document).ready(function() {
         let modalTitle = "";
         const tab = $(`.nav-link.page-tab.active`).attr("redirect");
         if (tab == "organicTab") {
-            modalTitle = "ADD EMPLOYEE (ORGANIC)";
+            modalTitle = "ADD PERSONNEL (ORGANIC)";
             $("#modal_employee_module .modal-dialog").removeClass("modal-md").addClass("modal-xl");
         } else {
-            modalTitle = "ADD EMPLOYEE (NON-ORGANIC)";
+            modalTitle = "ADD PERSONNEL (NON-ORGANIC)";
             $("#modal_employee_module .modal-dialog").removeClass("modal-xl").addClass("modal-md");
         }
 
@@ -2814,12 +2832,12 @@ $(document).ready(function() {
                 $('#tableAccessibility').DataTable().search("").draw();
                 // ----- RESET SEARCH IN DATATABLE -----
                 setTimeout(() => {
-                    getEmployeeData()
+                    getPersonnelData()
                     .then(data => {
                         formButtonHTML(this, false);
                         if (data) {
                             data.append("action", "insert");
-                            saveEmployeeData(data, "add", organicTableContent);
+                            savePersonnelData(data, "add", organicTableContent);
                         } else {
                             showNotification("danger", "There was an error getting employee data");
                         }
@@ -2832,16 +2850,14 @@ $(document).ready(function() {
         } else {
             if (validate) {
                 let data = getFormData("modal_employee_module", true);
-                data[`tableData[employeeStatus]`] = 7;
+                data[`tableData[employeeProfile]`] = "default.jpg";
                 data[`tableData[createdBy]`] = sessionID;
                 data[`tableData[updatedBy]`] = sessionID;
-                data[`tableData[createdAt]`] = moment().format("YYYY-MM-DD");
-                data[`tableData[updatedAt]`] = moment().format("YYYY-MM-DD");
                 data[`tableName`] = "hris_employee_list_tbl";
                 let fullname = $(`[name="employeeFirstname"]`).val()?.trim() +" "+ $(`[name="employeeLastname"]`).val()?.trim();
                 data[`feedback`]  = fullname;
 
-                sweetAlertConfirmation("add", "Employee", "modal_employee_module", null, data, true, nonOrganicTableContent);
+                sweetAlertConfirmation("add", "Personnel", "modal_employee_module", null, data, true, nonOrganicTableContent);
             } 
         }
 	});
@@ -2863,13 +2879,13 @@ $(document).ready(function() {
                 $('#tableAccessibility').DataTable().search("").draw();
                 // ----- RESET SEARCH IN DATATABLE -----
                 setTimeout(() => {
-                    getEmployeeData()
+                    getPersonnelData()
                     .then(data => {
                         formButtonHTML(this, false);
                         if (data) {
                             data.append("employeeID", id);
                             data.append("action", "update");
-                            saveEmployeeData(data, "edit", organicTableContent);
+                            savePersonnelData(data, "edit", organicTableContent);
                         } else {
                             showNotification("danger", "There was an error getting employee data");
                         }
@@ -2882,14 +2898,13 @@ $(document).ready(function() {
         } else {
             if (validate) {
                 let data = getFormData("modal_employee_module", true);
-                data[`tableData[employeeStatus]`] = 7;
                 data[`tableData[updatedBy]`] = sessionID;
                 data[`tableName`]   = "hris_employee_list_tbl";
                 data[`whereFilter`] = `employeeID = ${id}`;
                 let fullname = $(`[name="employeeFirstname"]`).val()?.trim() +" "+ $(`[name="employeeLastname"]`).val()?.trim();
                 data[`feedback`] = fullname;
 
-                sweetAlertConfirmation("update", "Employee", "modal_employee_module", null, data, true, nonOrganicTableContent);
+                sweetAlertConfirmation("update", "Personnel", "modal_employee_module", null, data, true, nonOrganicTableContent);
             } 
         }
 
@@ -2905,10 +2920,10 @@ $(document).ready(function() {
         let modalTitle = "";
         const tab = $(`.nav-link.page-tab.active`).attr("redirect");
         if (tab == "organicTab") {
-            modalTitle = "ADD EMPLOYEE (ORGANIC)";
+            modalTitle = "EDIT PERSONNEL (ORGANIC)";
             $("#modal_employee_module .modal-dialog").removeClass("modal-md").addClass("modal-xl");
         } else {
-            modalTitle = "ADD EMPLOYEE (NON-ORGANIC)";
+            modalTitle = "EDIT PERSONNEL (NON-ORGANIC)";
             $("#modal_employee_module .modal-dialog").removeClass("modal-xl").addClass("modal-md");
         }
 
@@ -2985,7 +3000,7 @@ $(document).ready(function() {
 	$(document).on("click", ".btnCancel", function () {
 		let formEmpty = isFormEmpty("modal_employee_module");
 		if (!formEmpty) {
-			sweetAlertConfirmation("cancel", "Employee", "modal_employee_module");
+			sweetAlertConfirmation("cancel", "Personnel", "modal_employee_module");
 		} else {
 			preventRefresh(false);
 			$("#modal_employee_module").modal("hide");
@@ -2997,9 +3012,9 @@ $(document).ready(function() {
 /* ---------------------------------------------------------- */
 
 
-    // ----- SAVE EMPLOYEE -----
+    // ----- SAVE PERSONNEL -----
     function getConfirmation(action = "insert") {
-        const title = "Employee";
+        const title = "Personnel";
         let swalText, swalImg;
     
         switch (action) {
@@ -3034,7 +3049,7 @@ $(document).ready(function() {
         })
     }
     
-    function saveEmployeeData(data, method = "add", callback = false) {
+    function savePersonnelData(data, method = "add", callback = false) {
         $("#modal_employee_module").modal("hide");
         if (data) {
             const confirmation = getConfirmation(method);
@@ -3118,7 +3133,7 @@ $(document).ready(function() {
             });
         }
     } 
-    // ----- END SAVE EMPLOYEE -----
+    // ----- END SAVE PERSONNEL -----
 
 })
 

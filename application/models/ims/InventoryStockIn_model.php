@@ -30,7 +30,7 @@ class InventoryStockIn_model extends CI_Model {
 
     }
 
-    public function savestockin($itemID, $itemName,$brand, $classificationName, $categoryName,$barcode,$recievedQuantity,$serialnumber,$inventoryStorageID, $inventoryStorageCode, $inventoryStorageOfficeName, $manufactureDate, $expirationdate, $ReturnItemID, $MaterialUsageID,  $InventoryReceivingID, $recordID, $quantity, $inventoryCode)
+    public function savestockin($itemID, $itemName,$brand, $classificationName, $categoryName,$barcode,$recievedQuantity,$serialnumber,$inventoryStorageID, $inventoryStorageCode, $inventoryStorageOfficeName, $manufactureDate, $expirationdate, $ReturnItemID, $MaterialUsageID,  $InventoryReceivingID, $recordID, $quantity, $inventoryCode, $itemCode)
     {
 
        // $recordID       = implode(",", $recordID);
@@ -49,6 +49,7 @@ class InventoryStockIn_model extends CI_Model {
                             'InventoryReceivingID'		 =>$InventoryReceivingID[$count],
                             'barcode'		            =>$barcode[$count],
                             'itemID'		            =>$itemID[$count],
+                            'itemCode'		            =>$itemCode,
                             'itemName'		            =>$itemName[$count],
                             'brand'                     =>$brand[$count],
                             'inventoryStorageID'        =>$inventoryStorageID[$count],
@@ -84,7 +85,8 @@ class InventoryStockIn_model extends CI_Model {
                             'MaterialUsageID'		    =>$MaterialUsageID[$count],
                             'InventoryReceivingID'		 =>$InventoryReceivingID[$count],
                             'barcode'		            =>$barcode[$count],
-                            'itemID'		            =>$itemID[$count],
+                            'assetID'		            =>$itemID[$count],
+                            'itemCode'		            =>$itemCode,
                             'itemName'		            =>$itemName[$count],
                             'brand'                     =>$brand[$count],
                             'inventoryStorageID'        =>$inventoryStorageID[$count],

@@ -8,14 +8,14 @@
                     <ul class="breadcrumb pl-0 pb-0 ">
                         <li class="breadcrumb-item"><a href="#"><i class="zmdi zmdi-home"></i> Dashboard</a></li>
 						<li class="breadcrumb-item"><i class="fas fa-users-cog"></i> &nbsp;HR Modules</li>
-                        <li class="breadcrumb-item active">Employee Module</li>
+                        <li class="breadcrumb-item active">Personnel Module</li>
                     </ul>
-                    <h1 class="mt-3">Employee Module</h1>
-                    <span>This module is used to manage employee information and documents.</span>
+                    <h1 class="mt-3">Personnel Module</h1>
+                    <span>This module is used to manage personnel information and documents.</span>
                 </div>
                 <?php if(isCreateAllowed(114)) { ?>
                     <div class="col-lg-6 col-md-6 text-right" id="headerButton">
-                        <button class="btn btn-default btn-add" id="btnAdd"><i class="icon-plus"></i> Add Employee</button>
+                        <button class="btn btn-default btn-add" id="btnAdd"><i class="icon-plus"></i> Add Personnel</button>
                     </div>
                 <?php } ?>
                 <div class="col-lg-6 col-md-6">

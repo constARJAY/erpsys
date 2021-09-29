@@ -119,6 +119,18 @@ class Inventory_receiving extends CI_Controller {
 
             if ($result[0] == "true") {
                 $inventoryReceivingID = $result[2];
+                if($_FILES){
+                    $fileType                   = substr($_FILES["file"]["type"], strpos($_FILES["file"]["type"], "/") + 1);
+                    $receiptNo             = "INR-".date("y")."-".str_pad($inventoryReceivingID, 5, '0', STR_PAD_LEFT).".".$fileType;
+                    $updateReceiptData  = ["receiptNo" => $receiptNo];
+                    if(file_exists("assets/upload-files/inventory-receiving/".$receiptNo)){
+                        unlink("assets/upload-files/inventory-receiving/".$receiptNo);
+                    }
+                    if(move_uploaded_file($_FILES["file"]["tmp_name"], "assets/upload-files/inventory-receiving/".$receiptNo)){
+                        $this->inventoryreceiving->updateInventoryReceiving("ims_inventory_receiving_tbl", $updateReceiptData, "inventoryReceivingID = ".$inventoryReceivingID);
+                    }
+                }
+
                 if ($items) {
                     foreach($items as $index => $item) {
                         $service = [

@@ -977,7 +977,7 @@ $(document).ready(function() {
 									AND itmStock.itemID = reqItems.itemID) as forPurchase
 																	
 							`, 
-							`materialRequestID = ${materialRequestID}`);
+							`materialRequestID = ${materialRequestID} AND inventoryValidationID IS NULL AND bidRecapID IS NULL`);
 					}else{
 						
 						requestItemsData = getTableData(
@@ -1191,7 +1191,7 @@ $(document).ready(function() {
 									AND astStock.stockInDate IS NOT NULL 
 									AND astStock.stockInAssetID = reqAsset.assetID) as forPurchase
 							`, 
-							`materialRequestID = ${materialRequestID}`);
+							`materialRequestID = ${materialRequestID} AND inventoryValidationID IS NULL AND bidRecapID IS NULL`);
 					}else{
 						
 						requestAssetData = getTableData(
@@ -1910,6 +1910,8 @@ $(document).ready(function() {
 			let createdBy       = tableData[0].createdBy;
 
 			let materialWithdrawalCode = generateCode("MWF", false, "ims_material_withdrawal_tbl", "materialWithdrawalCode");
+			let stockOutCode = generateCode("STO", false, "ims_stock_out_tbl", "stockOutCode");
+			let equipmentBorrowingCode = generateCode("EBF", false, "ims_equipment_borrowing_tbl", "materialWithdrawalCode");
 			let inventoryValidationID = tableData[0].inventoryValidationID;
 			let inventoryValidationCode = tableData[0].inventoryValidationCode;
 			let materialRequestID = tableData[0].materialRequestID;
@@ -1949,6 +1951,8 @@ $(document).ready(function() {
 				};
 				
 				data.append(`materialWithdrawalCode`, materialWithdrawalCode);
+				data.append(`stockOutCode`, stockOutCode);
+				data.append(`equipmentBorrowingCode`, equipmentBorrowingCode);
 				data.append(`inventoryValidationID`, inventoryValidationID);
 				data.append(`inventoryValidationCode`, inventoryValidationCode);
 				data.append(`materialRequestID`, materialRequestID);
@@ -2184,7 +2188,7 @@ $(document).ready(function() {
 						data.append(`assets[${i}][projectMilestoneID]` , projectMilestoneID);
 						data.append(`assets[${i}][projectMilestoneName]` , projectMilestoneName);
 						data.append(`assets[${i}][assetID]` , assetID);
-						data.append(`assets[${i}][assetode]` ,assetCode);
+						data.append(`assets[${i}][assetCode]` ,assetCode);
 						data.append(`assets[${i}][assetBrandName]` , assetBrandName);
 						data.append(`assets[${i}][assetName]` , assetName);
 						data.append(`assets[${i}][assetClassification]` , assetClassification);

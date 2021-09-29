@@ -12,7 +12,7 @@ class Employee_module extends CI_Controller {
 
     public function index()
     {
-        $data["title"] = "Employee Module";
+        $data["title"] = "Personnel Module";
         $this->employeemodule->updateLeaveCredit();
 
         $this->load->view("template/header",$data);

@@ -96,7 +96,8 @@ class MaterialWithdrawal_model extends CI_Model {
         FROM 
         ims_request_items_tbl 
         WHERE 
-        inventoryValidationID = $inventoryValidationID 
+        inventoryValidationID = $inventoryValidationID AND
+        bidRecapID IS NULL
            ";
         $query  = $this->db->query($sql);
         $items  = $query ? $query->result_array() : [];
@@ -140,7 +141,8 @@ class MaterialWithdrawal_model extends CI_Model {
         FROM 
         ims_request_assets_tbl 
         WHERE 
-        inventoryValidationID = $inventoryValidationID 
+        inventoryValidationID = $inventoryValidationID AND
+        bidRecapID IS NULL
            ";
         $query  = $this->db->query($sql);
         $assets  = $query ? $query->result_array() : [];

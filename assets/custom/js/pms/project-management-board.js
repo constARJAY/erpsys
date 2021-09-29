@@ -13,6 +13,27 @@ $(document).ready(function() {
     // ----- END REUSABLE VARIABLE/FUNCTIONS -----
 
 
+    // ---- GET EMPLOYEE DATA -----
+	const allEmployeeData = getAllEmployeeData();
+	const employeeData = (id) => {
+		if (id) {
+			let empID = id == "0" ? sessionID : id;
+			let data = allEmployeeData.filter(employee => employee.employeeID == empID);
+			let { employeeID, fullname, designation, department } = data && data[0];
+			return { employeeID, fullname, designation, department };
+		}
+		return {};
+	}
+	const employeeFullname = (id) => {
+		if (id != "-") {
+			let data = employeeData(id);
+			return data.fullname || "-";
+		}
+		return "-";
+	}
+	// ---- END GET EMPLOYEE DATA -----
+
+
     // ----- VIEW DOCUMENT -----
     const getTimelineContent = async (timelineBuilderID) => {
         let result = false;
@@ -355,17 +376,20 @@ $(document).ready(function() {
         let html = "";
         if (employees.length > 0 && phase && taskID) {
             employees.map((employee, index) => {
-                const { id, fullname, image } = employee;
+                const { id, fullname, image, departmentName, designationName, employeeCode } = employee;
                 // if (index <= 5) {
                     html += `
-                    <img src="${image}" 
-                        class="rounded rounded-circle employeeProfile" 
-                        style="width: 50px; height: 50px; cursor: pointer;"
-                        title="${fullname}"
-                        phase="${phase}"
-                        taskID="${taskID}"
-                        employeeID="${id}"
-                        isReadOnly="${isReadOnly}">`;
+                    <img src            = "${image}" 
+                        class           = "rounded rounded-circle employeeProfile" 
+                        style           = "width: 50px; height: 50px; cursor: pointer;"
+                        title           = "${fullname}"
+                        phase           = "${phase}"
+                        taskID          = "${taskID}"
+                        employeeID      = "${id}"
+                        departmentName  = "${departmentName}"
+                        designationName = "${designationName}"
+                        employeeCode    = "${employeeCode}"
+                        isReadOnly      = "${isReadOnly}">`;
             })
         } else {
             html += `<span>No data available yet.</span>`;
@@ -380,37 +404,42 @@ $(document).ready(function() {
         const {
             employeeID = "",
             fullname   = "",
-            image      = ""
+            image      = "",
+            employeeCode    = "",
+            departmentName  = "",
+            designationName = ""
         } = employeeData;
 
         let milestones = [];
         $(`[name="milestoneName"][taskID="${taskID}"]`).each(function() {
-            const index = $(this).attr("index");
-            const projectMilestoneID = $(this).attr("projectMilestoneID");
-            const milestoneName = $(this).val()?.trim();
-            let assignedEmployee = $(`#manHours${index}`).attr("employees");
-                assignedEmployee = assignedEmployee ? assignedEmployee.split("|") : [];
-            let assignedManHours = $(`#manHours${index}`).attr("manHours");
-                assignedManHours = assignedManHours ? assignedManHours.split("|") : [];
-            let assignedStart    = $(`#manHours${index}`).attr("startDate");
-                assignedStart    = assignedStart ? assignedStart.split("|") : [];
-            let assignedEnd      = $(`#manHours${index}`).attr("endDate");
-                assignedEnd      = assignedEnd ? assignedEnd.split("|") : [];
-            let assignedDuration = $(`#manHours${index}`).attr("days");
-                assignedDuration = assignedDuration ? assignedDuration.split("|") : [];
+            const index               = $(this).attr("index");
+            const milestoneName       = $(this).val()?.trim();
+            const projectMilestoneID  = $(this).attr("projectMilestoneID");
+            const taskStartDate       = $(`#manHours${index}`).attr("taskStartDate");
+            const taskEndDate         = $(`#manHours${index}`).attr("taskEndDate");
+            let assignedEmployee      = $(`#manHours${index}`).attr("employees");
+                assignedEmployee      = assignedEmployee ? assignedEmployee.split("|") : [];
+            let assignedManHours      = $(`#manHours${index}`).attr("manHours");
+                assignedManHours      = assignedManHours ? assignedManHours.split("|") : [];
+            let assignedStart         = $(`#manHours${index}`).attr("startDate");
+                assignedStart         = assignedStart ? assignedStart.split("|") : [];
+            let assignedEnd           = $(`#manHours${index}`).attr("endDate");
+                assignedEnd           = assignedEnd ? assignedEnd.split("|") : [];
+            let assignedDuration      = $(`#manHours${index}`).attr("days");
+                assignedDuration      = assignedDuration ? assignedDuration.split("|") : [];
             let assignedRegularHours  = $(`#manHours${index}`).attr("days");
                 assignedRegularHours  = assignedRegularHours ? assignedRegularHours.split("|") : [];
             let assignedOvertimeHours = $(`#manHours${index}`).attr("days");
                 assignedOvertimeHours = assignedOvertimeHours ? assignedOvertimeHours.split("|") : [];
             const employeeIndex = assignedEmployee.indexOf(employeeID);
-            const manHours  = assignedManHours[employeeIndex];
-            const startDate = assignedStart[employeeIndex];
-            const endDate   = assignedEnd[employeeIndex];
-            const duration  = assignedDuration[employeeIndex];
+            const manHours      = assignedManHours[employeeIndex];
+            const startDate     = assignedStart[employeeIndex];
+            const endDate       = assignedEnd[employeeIndex];
+            const duration      = assignedDuration[employeeIndex];
             const regularHours  = assignedRegularHours[employeeIndex];
             const overtimeHours = assignedOvertimeHours[employeeIndex];
 
-            assignedEmployee.includes(employeeID) && milestones.push({index, milestoneName, manHours, projectMilestoneID, startDate, endDate, duration, regularHours, overtimeHours});
+            assignedEmployee.includes(employeeID) && milestones.push({index, milestoneName, manHours, projectMilestoneID, taskStartDate, taskEndDate, startDate, endDate, duration, regularHours, overtimeHours});
         });
 
         let tbodyHTML = "";
@@ -420,9 +449,11 @@ $(document).ready(function() {
                 milestoneName, 
                 manHours = 0, 
                 projectMilestoneID, 
-                startDate = moment(new Date).format("YYYY-MM-DD"), 
-                endDate   = moment(new Date).format("YYYY-MM-DD"),
-                duration  = 1,
+                taskStartDate = moment(new Date).format("YYYY-MM-DD"),
+                taskEndDate   = moment(new Date).format("YYYY-MM-DD"),
+                startDate     = moment(new Date).format("YYYY-MM-DD"), 
+                endDate       = moment(new Date).format("YYYY-MM-DD"),
+                duration      = 1,
                 regularHours  = "0",
                 overtimeHours = "0"
             } = milestone;
@@ -433,11 +464,13 @@ $(document).ready(function() {
                 <td>
                     <div class="form-group my-1">
                         <input type="button"
-                            class="form-control validate employeeDateRange"
-                            name="employeeDateRange"
-                            startDate="${startDate}"
-                            endDate="${endDate}"
-                            days="${duration}"
+                            class         = "form-control validate employeeDateRange"
+                            name          = "employeeDateRange"
+                            taskStartDate = "${taskStartDate}"
+                            taskEndDate   = "${taskEndDate}"
+                            startDate     = "${startDate}"
+                            endDate       = "${endDate}"
+                            days          = "${duration}"
                             required
                             ${isReadOnly ? "disabled" : ""}>
                         <div class="invalid-feedback d-block"></div>
@@ -502,12 +535,21 @@ $(document).ready(function() {
         let html = `
         <div class="row p-3">
             <div class="col-12">
-                <div class="d-flex justify-content-start align-items-center mb-3 px-2">
-                    <img src="${image}"
-                        class="rounded-circle"
-                        style="width: 50px; height: 50px;"
-                        alt="${fullname}">
-                    <span class="font-weight-bold ml-2 h5">${fullname}</span>
+                <div class="d-flex justify-content-between align-items-center mb-3 px-2">
+                    <div class="d-flex justify-content-start align-items-center">
+                        <img src="${image}"
+                            class="rounded-circle"
+                            style="width: 50px; height: 50px;"
+                            alt="${fullname}">
+                        <div class="font-weight-bold ml-2">
+                            <h5>${fullname}</h5>
+                            <small>${employeeCode}</small>
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-end align-items-end flex-column">
+                        <h5>${designationName}</h5>
+                        <small>${departmentName}</small>
+                    </div>
                 </div>
             </div>
             <div class="col-12">
@@ -627,6 +669,11 @@ $(document).ready(function() {
 
     function dateRange(input) {
         const elementID = input ? `#${input.id}` : "[name=employeeDateRange]";
+
+        let taskMinDate = $(elementID).attr("taskStartDate");
+        taskMinDate = moment(taskMinDate, "YYYY-MM-DD").add(-7, "days").format("YYYY-MM-DD");
+        let taskMaxDate = $(elementID).attr("taskEndDate");
+        taskMaxDate = moment(taskMaxDate, "YYYY-MM-DD").add(7, "days").format("YYYY-MM-DD");
         
         const employeeDateRangeFrom = $(elementID).attr("startDate") || moment(new Date).format("YYYY-MM-DD");
         const employeeDateRangeTo   = $(elementID).attr("endDate") || moment(new Date).format("YYYY-MM-DD");
@@ -639,6 +686,8 @@ $(document).ready(function() {
             locale: {
                 format: "MMMM DD, YYYY",
             },
+            minDate:   moment(taskMinDate),
+            maxDate:   moment(taskMaxDate),
             startDate: moment(employeeDateRangeFrom),
             endDate:   moment(employeeDateRangeTo),
         }
@@ -676,7 +725,6 @@ $(document).ready(function() {
                 let formatEnd   = moment(end).format("YYYY-MM-DD");
                 let duration = moment.duration(moment(formatEnd, "YYYY-MM-DD").diff(moment(formatStart, "YYYY-MM-DD"))).asDays() + 1;
 
-                console.log(`#employeeManHours${index}`);
                 $(elementID).attr("startDate", formatStart);
                 $(elementID).attr("endDate", formatEnd);
                 $(elementID).attr("max", (duration * 24));
@@ -694,12 +742,15 @@ $(document).ready(function() {
 
     $(document).on("click", `.employeeProfile`, function() {
         const isReadOnly = $(this).attr("isReadOnly") == "true";
-        const phase   = $(this).attr("phase");
-        const taskID  = $(this).attr("taskID");
+        const phase      = $(this).attr("phase");
+        const taskID     = $(this).attr("taskID");
         const employeeID = $(this).attr("employeeID");
         const fullname   = $(this).attr("title");
         const image      = $(this).attr("src");
-        let content = getTaskMilestone(phase, taskID, {employeeID, fullname, image}, isReadOnly);
+        const employeeCode    = $(this).attr("employeeCode");
+        const departmentName  = $(this).attr("departmentName");
+        const designationName = $(this).attr("designationName");
+        let content = getTaskMilestone(phase, taskID, {employeeID, fullname, image, employeeCode, departmentName, designationName}, isReadOnly);
         let title = isReadOnly ? "ASSIGNED MAN HOURS" : "ASSIGN MAN HOURS";
         $(`#modal_project_management_board .page-title`).text(title);
         $(`#modal_project_management_board_content`).html(content);
@@ -735,9 +786,12 @@ $(document).ready(function() {
                 const employeeID = $(this).val();
                 if (employeeID && employeeID.length > 0) {
                     employeeID.map(tempID => {
-                        const fullname = $(`option:selected[value="${tempID}"]`, this).attr("fullname");
-                        const image    = $(`option:selected[value="${tempID}"]`, this).attr("image");
-                        let temp = { id: tempID, fullname, image };
+                        const fullname        = $(`option:selected[value="${tempID}"]`, this).attr("fullname");
+                        const image           = $(`option:selected[value="${tempID}"]`, this).attr("image") || "default.jpg";
+                        const designationName = $(`option:selected[value="${tempID}"]`, this).attr("designationName");
+                        const departmentName  = $(`option:selected[value="${tempID}"]`, this).attr("departmentName");
+                        const employeeCode    = $(`option:selected[value="${tempID}"]`, this).attr("employeeCode");
+                        let temp = { id: tempID, fullname, image, designationName, departmentName, employeeCode };
                         const id = employees.map(emp => emp.id);
                         if (!id.includes(tempID)) {
                             employees.push(temp);
@@ -767,9 +821,9 @@ $(document).ready(function() {
     }
 
     $(document).on("change", `[name="assignEmployee"]`, function() {
-        const index   = $(this).attr("index");
-        const phase   = $(this).attr("phase");
-        const taskID  = $(this).attr("taskID");
+        const index      = $(this).attr("index");
+        const phase      = $(this).attr("phase");
+        const taskID     = $(this).attr("taskID");
         const employees  = getAssignedEmployee(phase, taskID);
         const employeeID = $(this).val() || [];
         const isDisabled = $(this).attr("disabled");
@@ -863,11 +917,15 @@ $(document).ready(function() {
                     assignedManHours      = "",
                     assignedStartDate     = "", 
                     assignedEndDate       = "", 
-                    assignedDays          = "1";
-                    assignedRegularHours  = "0";
-                    assignedOvertimeHours = "0";
+                    assignedDays          = "1",
+                    assignedRegularHours  = "0",
+                    assignedOvertimeHours = "0",
+                    taskStartDate         = "",
+                    taskEndDate           = "";
                 if (data && data.length > 0) {
                     manHours              = data[0]?.manHours;
+                    taskStartDate         = data[0]?.taskStartDate;
+                    taskEndDate           = data[0]?.taskEndDate;
                     assignedEmployee      = data[0]?.assignedEmployee;
                     assignedDesignation   = data[0]?.assignedDesignation;
                     assignedManHours      = data[0]?.assignedManHours;
@@ -877,12 +935,22 @@ $(document).ready(function() {
                     assignedRegularHours  = data[0]?.assignedRegularHours;
                     assignedOvertimeHours = data[0]?.assignedOvertimeHours;
                 }
-                return {manHours, assignedEmployee, assignedDesignation, assignedManHours, assignedStartDate, assignedEndDate, assignedDays, assignedRegularHours, assignedOvertimeHours};
+                return {manHours, taskStartDate, taskEndDate, assignedEmployee, assignedDesignation, assignedManHours, assignedStartDate, assignedEndDate, assignedDays, assignedRegularHours, assignedOvertimeHours};
             };
 
             milestones.map(milestone => {
                 const { milestoneID, milestoneName } = milestone;
-                const { manHours, assignedEmployee, assignedManHours, assignedStartDate, assignedEndDate, assignedDays = "1", assignedRegularHours = "0", assignedOvertimeHours = "0" } = taskData(milestoneID);
+                const { 
+                    manHours, 
+                    taskStartDate,
+                    taskEndDate,
+                    assignedEmployee, 
+                    assignedManHours, 
+                    assignedStartDate, 
+                    assignedEndDate, 
+                    assignedDays          = "1", 
+                    assignedRegularHours  = "0", 
+                    assignedOvertimeHours = "0" } = taskData(milestoneID);
 
                 taskNameContent += `
                 <div class="form-group my-1">
@@ -897,35 +965,41 @@ $(document).ready(function() {
                 taskManHoursContent += `
                 <div class="form-group my-1">
                     <input class="form-control custom-input-hours text-center"
-                        value="${manHours}"
-                        name="manHours"
-                        min="0.00"
-                        max="9999999999"
-                        minlength="1"
-                        maxlength="10"
-                        taskID="${taskID}"
-                        phase="${phaseCode}"
                         readonly
-                        employees="${assignedEmployee}"
-                        manHours="${assignedManHours}"
-                        startDate="${assignedStartDate || moment(new Date).format("YYYY-MM-DD")}"
-                        endDate="${assignedEndDate || moment(new Date).format("YYYY-MM-DD")}"
-                        days="${assignedDays}"
-                        regularHours="${assignedRegularHours}"
-                        overtimeHours="${assignedOvertimeHours}"
+                        value         = "${manHours}"
+                        name          = "manHours"
+                        min           = "0.00"
+                        max           = "9999999999"
+                        minlength     = "1"
+                        maxlength     = "10"
+                        taskID        = "${taskID}"
+                        phase         = "${phaseCode}"
+                        taskStartDate = "${taskStartDate}"
+                        taskEndDate   = "${taskEndDate}"
+                        employees     = "${assignedEmployee}"
+                        manHours      = "${assignedManHours}"
+                        startDate     = "${assignedStartDate || moment(new Date).format("YYYY-MM-DD")}"
+                        endDate       = "${assignedEndDate || moment(new Date).format("YYYY-MM-DD")}"
+                        days          = "${assignedDays}"
+                        regularHours  = "${assignedRegularHours}"
+                        overtimeHours = "${assignedOvertimeHours}"
                         required>
                     <div class="invalid-feedback d-block"></div>
                 </div>`;
     
                 const teamMemberOptions = teamMembers.map(member => {
-                    const { id, fullname, image, designation } = member;
+                    const { id, fullname, image, designation, designationName, departmentName, employeeCode } = member;
                     
                     return `
                     <option 
-                        value    = "${id}"
-                        fullname = "${fullname}"
-                        image    = "${image}"
-                        designation = "${designation}">${fullname}</option>`;
+                        value           = "${id}"
+                        fullname        = "${fullname}"
+                        image           = "${image}"
+                        designation     = "${designation}"
+                        designationName = "${designationName}"
+                        departmentName  = "${departmentName}"
+                        employeeCode    = "${employeeCode}"
+                        >${fullname}</option>`;
                 }).join("");
 
                 taskAssigneeContent += `
@@ -1172,7 +1246,7 @@ $(document).ready(function() {
         let membersID = teamMember ? teamMember.replaceAll("|", ",") : "0";
         const teamMembers = getTableData(
             `hris_employee_list_tbl`,
-            `employeeID, designationID, employeeFirstname, employeeLastname, employeeProfile`,
+            `employeeID, designationID, employeeFirstname, employeeLastname, employeeProfile, createdAt`,
             `FIND_IN_SET(employeeID, "${membersID}")`
         ).map(member => {
             const { 
@@ -1180,13 +1254,23 @@ $(document).ready(function() {
                 designationID,
                 employeeFirstname, 
                 employeeLastname, 
-                employeeProfile = "default.jpg"
+                employeeProfile = "default.jpg",
+                createdAt
             } = member;
+
+            const { designation:designationName, department:departmentName } = employeeData(employeeID);
+            const employeeCode = getFormCode("EMP", createdAt, employeeID);
+
+            let profile = employeeProfile && employeeProfile != "null" ? employeeProfile : "default.jpg";
+
             return {
                 id:          employeeID,
                 fullname:    `${employeeFirstname} ${employeeLastname}`,
                 designation: designationID,
-                image:       `${base_url}/assets/upload-files/profile-images/${employeeProfile}`
+                image:       `${base_url}/assets/upload-files/profile-images/${profile}`,
+                designationName,
+                departmentName,
+                employeeCode
             }
         });
 

@@ -90,6 +90,11 @@ class InventoryReceiving_model extends CI_Model {
         }
         return false;
     }
+    public function updateInventoryReceiving($tableName,$data, $reference){
+        $query =  $this->db->update($tableName, $data, $reference);  //"id = 4"
+        return $query;
+    }
+
 
     // public function updateOrderedPending($inventoryReceivingID = null)
     // {

@@ -193,32 +193,22 @@ class BidRecap_model extends CI_Model {
         }
 
         if ($query) {
-            $insertID = $action == "insert" ? $this->db->insert_id() : $id;
-
-            // ----- INSERT PURCHASE REQUEST IF APPROVE -----
-            $bidRecapStatus = $data["bidRecapStatus"];
-            if ($bidRecapStatus == "2")
-            {
-                $insertPurchaseRequestData = $this->insertPurchaseRequestData($insertID);
-            }
-            // ----- END INSERT PURCHASE REQUEST IF APPROVE -----
-            
-
+            $bidRecapID = $action == "insert" ? $this->db->insert_id() : $id;
             $bidRecapCode = "";
             if ($action == "insert") 
             {
-                $bidRecapCode = getFormCode("BR", date("Y-m-d"), $insertID);
-                $this->db->update("ims_bid_recap_tbl", ["bidRecapCode" => $bidRecapCode], ["bidRecapID" => $insertID]);
+                $bidRecapCode = getFormCode("BR", date("Y-m-d"), $bidRecapID);
+                $this->db->update("ims_bid_recap_tbl", ["bidRecapCode" => $bidRecapCode], ["bidRecapID" => $bidRecapID]);
 
                 if ($revise)
                 {
                     $bidRecapRequestItems  = $this->getBidRecapRequestItems($id);
                     $bidRecapRequestAssets = $this->getBidRecapRequestAssets($id);
                     $bidRecapFinalQuotes   = $this->getBidRecapFinalQuotes($id);
-                    $saveBidRecapDetails   = $this->saveBidRecapDetails($bidRecapRequestItems, $bidRecapRequestAssets, $bidRecapFinalQuotes, $insertID);
+                    $saveBidRecapDetails   = $this->saveBidRecapDetails($bidRecapRequestItems, $bidRecapRequestAssets, $bidRecapFinalQuotes, $bidRecapID);
                 }
             }
-            return "true|$bidRecapCode|$insertID|".date("Y-m-d");
+            return "true|$bidRecapCode|$bidRecapID|".date("Y-m-d");
         }
         return "false|System error: Please contact the system administrator for assistance!";
     }
@@ -372,6 +362,9 @@ class BidRecap_model extends CI_Model {
                     (IF (inventoryVendorBuilding <> NULL OR inventoryVendorBuilding <> '', 
                         CONCAT(UCASE(LEFT(inventoryVendorBuilding, 1)), LCASE(SUBSTRING(inventoryVendorBuilding, 2)),', '),
                         '')),
+                    (IF (inventoryVendorStreet <> NULL OR inventoryVendorStreet <> '', 
+                        CONCAT(UCASE(LEFT(inventoryVendorStreet, 1)), LCASE(SUBSTRING(inventoryVendorStreet, 2)),', '),
+                        '')),
                     (IF (inventoryVendorSubdivision <> NULL OR inventoryVendorSubdivision <> '', 
                         CONCAT(UCASE(LEFT(inventoryVendorSubdivision, 1)), LCASE(SUBSTRING(inventoryVendorSubdivision, 2)),', '),
                         '')),
@@ -448,7 +441,8 @@ class BidRecap_model extends CI_Model {
             clientCode,
             clientName,
             clientAddress,
-            employeeID
+            employeeID,
+            dateNeeded
         FROM 
             ims_final_quote_tbl
             LEFT JOIN ims_bid_recap_tbl USING(bidRecapID)
@@ -723,6 +717,7 @@ class BidRecap_model extends CI_Model {
                     'vendorContactDetails'    => $quote['vendorContactDetails'],
                     'vendorContactPerson'     => $quote['vendorContactPerson'],
                     'purchaseRequestClassification' => $classification,
+                    'dateNeeded'              => $quote['dateNeeded'],
                     'purchaseRequestReason'   => $quote['finalQuoteRemarks'],
                     'total'                   => $quote['finalQuoteTotal'],
                     'purchaseRequestStatus'   => 0,

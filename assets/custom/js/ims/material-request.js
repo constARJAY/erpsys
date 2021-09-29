@@ -1518,7 +1518,7 @@ $(document).ready(function() {
 							<div class="row">
 								<div class="col-md-6 col-sm-12 text-left">
 									<h5 style="font-weight: bold;
-										letter-spacing: 0.05rem;">ITEMS</h5>
+										letter-spacing: 0.05rem;">ITEM/S</h5>
 								</div>
 								<div class="col-md-6 col-sm-12 text-right"></div>
 							</div>
@@ -1590,7 +1590,7 @@ $(document).ready(function() {
 							<div class="row">
 								<div class="col-md-6 col-sm-12 text-left">
 									<h5 style="font-weight: bold;
-										letter-spacing: 0.05rem;">ASSETS</h5>
+										letter-spacing: 0.05rem;">ASSET/S</h5>
 								</div>
 								<div class="col-md-6 col-sm-12 text-right"></div>
 							</div>

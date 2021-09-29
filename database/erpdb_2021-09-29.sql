@@ -767,7 +767,7 @@ CREATE TABLE `gen_module_list_tbl` (
 
 LOCK TABLES `gen_module_list_tbl` WRITE;
 /*!40000 ALTER TABLE `gen_module_list_tbl` DISABLE KEYS */;
-INSERT INTO `gen_module_list_tbl` VALUES (1,5,1,1,'Project Management System|Inventory Management System|Finance Management System','01618295087.svg|11618295087.svg|21618295087.svg|31618295087.svg|41618295087.svg|51618295087.svg|6161','Approval Setup',0,'approval_setup',1,'2021-03-23 23:22:25','2021-04-13 06:24:47'),(2,5,1,2,'Inventory Management System|Project Management System|Finance Management System|Human Resource Information System',NULL,'Roles and Permission',0,'roles_permission',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(3,5,1,3,'Inventory Management System|Project Management System|Finance Management System|Human Resource Information System',NULL,'System Notification',0,'system_notification',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(4,2,2,1,'Inventory Management System',NULL,'Inventory Item',0,'ims/inventory_item',1,'2021-03-23 23:22:25','2021-03-23 23:22:25'),(5,2,2,2,'Inventory Management System',NULL,'Inventory Category',0,'ims/inventory_category',1,'2021-03-23 23:22:25','2021-03-23 23:22:25'),(6,2,2,3,'Inventory Management System',NULL,'Inventory Classification',0,'ims/inventory_classification',1,'2021-03-23 23:22:25','2021-03-23 23:22:25'),(7,2,2,4,'Inventory Management System',NULL,'Inventory Storage',0,'ims/inventory_storage',1,'2021-03-23 23:22:25','2021-03-23 23:22:25'),(8,2,2,5,'Inventory Management System',NULL,'Inventory Vendor',0,'ims/inventory_vendor',1,'2021-03-23 23:22:25','2021-03-23 23:22:25'),(9,2,2,6,'Inventory Management System',NULL,'Inventory Condition',0,'ims/inventory_condition',1,'2021-03-23 23:22:25','2021-03-23 23:22:25'),(10,2,2,7,'Project Management System',NULL,'Project Milestone',0,'pms/project_milestone',1,'2021-03-23 23:22:25','2021-03-23 23:22:25'),(11,2,2,8,'Project Management System',NULL,'Project List',0,'pms/project_list',1,'2021-03-23 23:22:25','2021-03-23 23:22:25'),(12,2,2,9,'Project Management System',NULL,'Project Client',0,'pms/project_client',1,'2021-03-23 23:22:25','2021-03-23 23:22:25'),(13,2,2,10,'Project Management System',NULL,'Project Category',0,'pms/project_category',1,'2021-03-23 23:22:25','2021-03-23 23:22:25'),(14,2,2,11,'Finance Management System',NULL,'Bank',0,'fms/bank',1,'2021-03-23 23:22:25','2021-03-23 23:22:25'),(15,2,2,12,'Finance Management System',NULL,'Chart of Accounts',0,'fms/chart_of_accounts',1,'2021-03-23 23:22:25','2021-05-05 06:09:55'),(16,2,2,13,'Finance Management System',NULL,'Ledger Classification',0,'fms/ledger_classification',1,'2021-03-23 23:22:25','2021-03-23 23:22:25'),(17,2,2,14,'Human Resource Information System',NULL,'Designation',0,'hris/designation',1,'2021-03-23 23:22:25','2021-03-23 23:22:25'),(18,2,2,15,'Human Resource Information System',NULL,'Department',0,'hris/department',1,'2021-03-23 23:22:25','2021-03-23 23:22:25'),(19,2,2,16,'Human Resources Information System',NULL,'Requirement',0,'hris/requirements',1,'2021-03-23 23:22:25','2021-05-14 03:20:21'),(20,2,2,17,'Human Resource Information System',NULL,'Holiday',0,'hris/holiday',1,'2021-03-23 23:22:25','2021-03-23 23:22:25'),(21,2,2,18,'Human Resource Information System',NULL,'Leave Type',0,'hris/leave_type',1,'2021-03-23 23:22:25','2021-03-23 23:22:25'),(22,2,2,19,'Human Resource Information System',NULL,'Loan Type',0,'hris/loan_type',1,'2021-03-23 23:22:25','2021-03-23 23:22:25'),(23,2,2,20,'Human Resource Information System',NULL,'Code of Conduct Category',0,'hris/code_conduct_category',1,'2021-03-23 23:22:25','2021-03-23 23:22:25'),(24,2,2,21,'Human Resource Information System',NULL,'Code of Conduct Section',0,'hris/code_conduct_section',1,'2021-03-23 23:22:25','2021-03-23 23:22:25'),(25,2,2,22,'Human Resource Information System',NULL,'Branch',0,'hris/branch',1,'2021-03-23 23:22:25','2021-03-23 23:22:25'),(26,2,2,23,'Human Resource Information System',NULL,'Qualification',0,'hris/qualification',1,'2021-03-23 23:22:25','2021-03-23 23:22:25'),(27,2,2,24,'Human Resource Information System',NULL,'Award',0,'hris/award',1,'2021-03-23 23:22:25','2021-03-23 23:22:25'),(28,2,2,25,'Human Resource Information System',NULL,'SSS Table',0,'hris/sss_table',1,'2021-03-23 23:22:25','2021-03-23 23:22:25'),(29,2,2,26,'Human Resource Information System',NULL,'PhilHealth Table',0,'hris/philhealth_table',1,'2021-03-23 23:22:25','2021-03-23 23:22:25'),(30,2,2,27,'Human Resource Information System',NULL,'Tax Table',0,'hris/tax_table',1,'2021-03-23 23:22:25','2021-03-23 23:22:25'),(31,2,2,28,'Human Resources Information System',NULL,'Training and Development Masterfile',0,'hris/training_development_setup',1,'2021-03-23 23:22:25','2021-08-23 02:47:38'),(32,2,2,29,'Human Resource Information System',NULL,'Examination',0,'hris/examination',1,'2021-03-23 23:22:25','2021-03-23 23:22:25'),(33,2,3,1,'Inventory Management System',NULL,'Inventory Receiving',3,'ims/inventory_receiving',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(34,2,3,2,'Inventory Management System',NULL,'List of Stocks',0,'ims/list_stocks',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(35,2,3,3,'Inventory Management System',NULL,'Return Item',3,'ims/return_item',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(36,2,3,4,'Inventory Management System',NULL,'Disposal',3,'ims/item_disposal',1,'2021-03-23 23:22:25','2021-05-05 05:53:05'),(37,2,3,5,'Inventory Management System',NULL,'Inventory Transfer',3,'ims/transfer_request',1,'2021-03-23 23:22:25','2021-06-10 02:43:19'),(38,2,5,6,'Project Management System',NULL,'Cost Estimate',3,'pms/cost_estimate',1,'2021-03-23 23:22:25','2021-05-02 05:09:04'),(39,2,5,7,'Project Management System',NULL,'Project Budget Rationale',3,'pms/project_budget_rationale',1,'2021-03-23 23:22:25','2021-05-25 06:04:50'),(40,2,3,8,'Inventory Management System',NULL,'Bid Recap',3,'ims/bid_recap',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(41,2,3,9,'Inventory Management System',NULL,'Service Order',3,'ims/service_order',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(42,2,3,1,'Inventory Management System',NULL,'Material Withdrawal',3,'ims/material_withdrawal',1,'2021-03-23 23:22:25','2021-05-25 04:57:02'),(43,2,3,2,'Inventory Management System',NULL,'Equipment Borrowing',3,'ims/equipment_borrowing',1,'2021-03-23 23:22:25','2021-05-31 06:13:52'),(44,2,3,3,'Inventory Management System',NULL,'Inventory Incident',3,'ims/inventory_incident',1,'2021-03-23 23:22:25','2021-05-26 23:38:34'),(45,2,3,4,'Inventory Management System',NULL,'Material Usage',3,'ims/material_usage',1,'2021-03-23 23:22:25','2021-05-11 05:37:06'),(46,2,3,5,'Inventory Management System',NULL,'Purchase Request',3,'ims/purchase_request',1,'2021-03-23 23:22:25','2021-05-09 10:50:44'),(47,2,3,6,'Inventory Management System',NULL,'Purchase Order',3,'ims/purchase_order',1,'2021-03-23 23:22:25','2021-05-09 10:50:28'),(48,2,4,7,'Inventory Management System',NULL,'Item Price List',0,'ims/item_price_list',0,'2021-03-23 23:22:25','2021-07-07 03:10:53'),(49,2,3,8,'Inventory Management System',NULL,'Service Requisition',3,'ims/service_requisition',1,'2021-03-23 23:22:25','2021-05-17 08:12:57'),(50,2,8,9,'Human Resources Information System',NULL,'Personnel Requisition',3,'pms/personel_requisition',1,'2021-03-23 23:22:25','2021-07-06 06:13:50'),(51,2,5,10,'Project Management System',NULL,'Employee Taskboard',3,'pms/employee_taskboard',1,'2021-03-23 23:22:25','2021-07-05 03:17:02'),(52,2,5,11,'Project Management System',NULL,'Sign-Off',3,'pms/sign_off',1,'2021-03-23 23:22:25','2021-06-29 04:52:21'),(53,2,7,12,'Finance Management System',NULL,'Petty Cash Request',3,'fms/petty_cash_request',1,'2021-03-23 23:22:25','2021-06-09 00:00:46'),(54,2,7,13,'Finance Management System',NULL,'Client Fund Request',3,'fms/client_fund_request',1,'2021-03-23 23:22:25','2021-06-21 23:25:31'),(55,2,4,14,'Human Resource Information System',NULL,'Leave Request',3,'hris/leave_request',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(56,2,4,15,'Human Resource Information System',NULL,'Overtime Request',3,'hris/overtime_request',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(57,2,4,16,'Human Resources Information System',NULL,'No Time In/Out',3,'hris/no_timein_timeout',1,'2021-03-23 23:22:25','2021-03-25 05:53:42'),(58,2,4,17,'Human Resource Information System',NULL,'Official Business',3,'hris/official_business',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(59,2,4,18,'Human Resources Information System',NULL,'Loan',3,'hris/loan_form',1,'2021-03-23 23:22:25','2021-04-13 03:47:55'),(60,2,4,19,'Human Resource Information System',NULL,'Change Schedule',3,'hris/change_schedule',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(61,2,4,20,'Human Resource Information System',NULL,'Employee Evaluation',3,'hris/employee_evaluation',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(62,2,4,21,'Human Resource Information System',NULL,'Clearance',3,'hris/clearance',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(63,1,12,1,'Inventory Management System',NULL,'Purhcase Order Report',0,'ims/purchase_order_report',1,'2021-03-23 23:22:25','2021-07-13 00:58:26'),(64,4,6,2,'Inventory Management System',NULL,'Receiving Report',0,'ims/receiving_report',1,'2021-03-23 23:22:25','2021-07-13 00:59:02'),(65,4,6,3,'Inventory Management System',NULL,'Inventory Incident Report',0,'ims/inventory_incident_report',1,'2021-03-23 23:22:25','2021-07-13 00:59:20'),(66,4,6,4,'Inventory Management System',NULL,'Inventory Report',0,'ims/inventory_report',1,'2021-03-23 23:22:25','2021-07-13 00:59:36'),(67,1,12,1,'Inventory Management System',NULL,'Inventory Dashboard',0,'ims/inventory_dashboard',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(68,1,12,2,'Project Management System',NULL,'Project Dashboard',0,'pms/project_dashboard',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(69,1,12,3,'Finance Management System',NULL,'Finance Dashboard',0,'fms/finance_dashboard',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(70,1,12,4,'Human Resource Information System',NULL,'HRIS Dashboard',0,'hris/hr_dashboard',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(71,4,6,5,'Project Management System',NULL,'Project Management',0,'fms/project_management',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(72,4,6,6,'Project Management System',NULL,'Project Task',0,'fms/project_task',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(73,4,6,7,'Project Management System',NULL,'Project Timeline',0,'fms/project_timeline',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(74,4,6,8,'Finance Management System',NULL,'Petty Cash Voucher',0,'fms/petty_cash_voucher',0,'2021-03-23 23:22:25','2021-06-28 06:50:48'),(75,4,6,9,'Finance Management System',NULL,'Client Fund Voucher Report',0,'fms/client_fund_voucher',1,'2021-03-23 23:22:25','2021-06-18 06:11:11'),(76,2,7,10,'Finance Management System',NULL,'Payment Request',0,'fms/payment_request',1,'2021-03-23 23:22:25','2021-07-15 07:04:47'),(77,4,6,11,'Finance Management System',NULL,'Check Voucher',0,'fms/check_voucher',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(78,4,6,12,'Human Resource Information System',NULL,'Examination Report',0,'hris/examination_report',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(79,4,6,13,'Human Resource Information System',NULL,'Timekeeping Report',0,'hris/timekeeping_report',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(80,4,6,14,'Human Resource Information System',NULL,'Payroll Report',0,'hris/payroll_report',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(81,4,6,15,'Human Resource Information System',NULL,'Payroll Adjustment Report',0,'hris/payroll_adjustment_report',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(82,4,6,16,'Human Resource Information System',NULL,'Payslip Generation',0,'hris/payslip_generation',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(83,4,6,17,'Human Resource Information System',NULL,'13th Month Report',0,'hris/13th_month_report',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(84,4,6,18,'Human Resource Information System',NULL,'PHIC Premium Payment',0,'hris/phic_premium_payment',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(85,4,6,19,'Human Resource Information System',NULL,'SSS Premium Payment',0,'hris/sss_premium_payment',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(86,4,6,20,'Human Resource Information System',NULL,'HDMF Premim Payment',0,'hris/hdmf_premium_payment',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(87,4,6,21,'Human Resource Information System',NULL,'Manpower Management Report',0,'hris/manpower_management_report',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(88,1,12,5,'Human Resource Information System',NULL,'Employee Dashboard',0,'hris/employee_dashboard',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(89,2,5,1,'Project Management System',NULL,'Milestone Builder',3,'pms/milestone_builder',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(90,2,5,2,'Project Management System',NULL,'Project Timeline Builder',3,'pms/project_timeline_builder',1,'2021-03-23 23:22:25','2021-07-05 04:53:07'),(91,2,5,3,'Project Management System',NULL,'Manage Project Budget',3,'pms/manage_project_budget',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(92,2,5,4,'Project Management System',NULL,'Project Management Board',3,'pms/project_management_board',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(93,2,7,1,'Finance Management System',NULL,'Petty Cash Voucher',3,'fms/petty_cash_voucher',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(94,2,7,2,'Finance Management System',NULL,'Client Fund Voucher',3,'fms/client_fund_voucher',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(95,4,6,3,'Finance Management System',NULL,'Payment Request',3,'fms/payment_request',0,'2021-03-23 23:22:25','2021-07-15 07:05:09'),(96,2,7,4,'Finance Management System',NULL,'Check Voucher',3,'fms/check_voucher',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(97,2,7,5,'Finance Management System',NULL,'Check Writer',3,'fms/check_writer',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(98,2,7,6,'Finance Management System',NULL,'Check Voucher Liquidation',3,'fms/check_voucher_liquidation',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(99,2,7,7,'Finance Management System',NULL,'Billing Module',0,'fms/billing_module',1,'2021-03-23 23:22:25','2021-06-20 04:57:13'),(100,2,7,8,'Finance Management System',NULL,'Collection Module',3,'fms/collection_module',1,'2021-03-23 23:22:25','2021-06-20 04:52:03'),(101,5,9,1,'Human Resource Information System',NULL,'Schedule Setup',0,'hris/schedule_setup',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(102,5,9,2,'Human Resource Information System',NULL,'Orientation Setup',0,'hris/orientation_setup',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(103,2,10,1,'Human Resources Information System',NULL,'Job Posting',0,'hris/job_posting',1,'2021-03-23 23:22:25','2021-03-25 05:25:43'),(104,2,10,2,'Human Resource Information System',NULL,'Applicant Registration',0,'hris/application_registration',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(105,5,9,3,'Human Resources Information System',NULL,'Examination Setup',0,'hris/examination_setup',1,'2021-03-23 23:22:25','2021-07-29 00:41:52'),(106,2,10,4,'Human Resource Information System',NULL,'Applicant List',0,'hris/applicant_list',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(107,2,10,5,'Human Resources Information System',NULL,'Onboarding Module',0,'hris/on_boarding',1,'2021-03-23 23:22:25','2021-08-26 07:19:10'),(108,2,11,1,'Human Resource Information System',NULL,'Employee Attendance',0,'hris/employee_attendance',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(109,2,11,2,'Human Resources Information System',NULL,'Timekeeping Module',0,'hris/timekeeping_module',1,'2021-03-23 23:22:25','2021-08-24 05:04:18'),(110,2,11,3,'Human Resource Information System',NULL,'Payroll',0,'hris/payroll',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(111,2,11,4,'Human Resource Information System',NULL,'Payroll Adjustment',0,'hris/payroll_adjustment',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(112,2,11,5,'Human Resource Information System',NULL,'13th Month',0,'hris/13th_month',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(113,2,2,1,'Human Resources Information System',NULL,'Personnel Requisition',3,'hris/personnel_requisition',0,'2021-03-23 23:22:25','2021-07-06 06:12:00'),(114,2,8,2,'Human Resources Information System',NULL,'Employee Module',0,'hris/employee_module',1,'2021-03-23 23:22:25','2021-04-19 05:22:53'),(115,2,8,3,'Human Resource Information System',NULL,'Personal Action Notice',0,'hris/personal_action_notice',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(116,2,8,4,'Human Resource Information System',NULL,'Manpower Management',0,'hris/manpower_management',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(117,2,8,5,'Human Resource Information System',NULL,'Employee Relation',0,'hris/employee_relation',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(118,2,8,6,'Human Resource Information System',NULL,'Employee Evaluation',0,'hris/employee_evaluation',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(119,2,8,7,'Human Resource Information System',NULL,'Employee Management',0,'hris/employee_management',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(120,2,8,8,'Human Resource Information System',NULL,'Memorandum',0,'hris/memorandum',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(121,2,8,9,'Human Resource Information System',NULL,'Employee Award',0,'hris/employee_award',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(122,2,8,10,'Human Resource Information System',NULL,'Leave Monitoring',0,'hris/leave_monitoring',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(123,2,8,11,'Human Resources Information System',NULL,'Training and Development',3,'hris/training_development',1,'2021-03-23 23:22:25','2021-08-25 05:47:53'),(124,2,8,12,'Human Resource Information System',NULL,'Event Calendar',0,'hris/event_calendar',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(125,2,3,1,'Inventory Management System',NULL,'Canvassing Form',1,'ims/inventory_canvassing',1,'2021-04-20 23:29:40','2021-04-20 23:29:40'),(126,2,3,1,'Inventory Management System',NULL,'Inventory Validation',3,'ims/inventory_validation',1,'2021-04-20 23:41:40','2021-06-02 05:46:41'),(127,2,3,1,'Inventory Management System',NULL,'Item Price List',0,'ims/item_price_list',1,'2021-04-22 16:09:10','2021-05-06 06:53:39'),(128,2,3,9,'Inventory Management System',NULL,'Service Completion',3,'ims/service_completion',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(129,2,3,99,'Inventory Management System',NULL,'Inventory Stock In',0,'ims/inventory_stock_in',1,'2021-05-07 01:50:57','2021-05-07 01:50:57'),(130,2,2,3,'Inventory Management System',NULL,'Unit of Measurement',0,'ims/unit_of_measurement',1,'2021-05-24 13:09:23','2021-05-24 13:09:23'),(131,2,2,31,'Inventory Management System',NULL,'Service',0,'ims/service',1,'2021-05-26 05:39:58','2021-05-26 05:44:44'),(132,2,7,1,'Finance Management System',NULL,'Liquidation',3,'fms/liquidation',1,'2021-06-18 00:32:53','2021-06-18 00:32:53'),(133,2,7,1,'Finance Management System',NULL,'Petty Cash Replenishment',3,'fms/petty_cash_replenishment',1,'2021-06-18 06:12:41','2021-06-18 06:12:41'),(134,2,7,1,'Finance Management System',NULL,'Client Fund Replenishment',3,'fms/client_fund_replenishment',1,'2021-06-18 06:13:14','2021-06-18 06:13:14'),(135,2,2,1,'Inventory Management System',NULL,'Vehicle',1,'ims/vehicle',1,'2021-07-13 00:59:45','2021-07-13 01:00:09'),(136,4,6,1,'Inventory Management System',NULL,'Reservation Report',0,'ims/reservation_report',1,'2021-07-16 00:45:44','2021-07-16 00:45:44'),(137,2,3,1,'Inventory Management System',NULL,'Material Request',3,'ims/material_request',1,'2021-09-16 11:47:46','2021-09-16 11:47:46'),(138,2,3,1,'Inventory Management System',NULL,'Change Request',3,'ims/change_request',1,'2021-09-16 11:48:36','2021-09-16 11:48:36'),(139,2,3,1,'Inventory Management System',NULL,'Stock Out',1,'ims/stock_out',1,'2021-09-16 23:17:19','2021-09-16 23:17:19'),(140,2,2,1,'Inventory Management System',NULL,'Inventory Asset',0,'ims/invventory_asset',1,'2021-09-19 23:25:53','2021-09-19 23:25:53'),(141,2,3,1,'Inventory Management System',NULL,'Asset Price List',0,'ims/asset_price_list',1,'2021-09-22 11:39:26','2021-09-22 11:39:26');
+INSERT INTO `gen_module_list_tbl` VALUES (1,5,1,1,'Project Management System|Inventory Management System|Finance Management System','01618295087.svg|11618295087.svg|21618295087.svg|31618295087.svg|41618295087.svg|51618295087.svg|6161','Approval Setup',0,'approval_setup',1,'2021-03-23 23:22:25','2021-04-13 06:24:47'),(2,5,1,2,'Inventory Management System|Project Management System|Finance Management System|Human Resource Information System',NULL,'Roles and Permission',0,'roles_permission',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(3,5,1,3,'Inventory Management System|Project Management System|Finance Management System|Human Resource Information System',NULL,'System Notification',0,'system_notification',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(4,2,2,1,'Inventory Management System',NULL,'Inventory Item',0,'ims/inventory_item',1,'2021-03-23 23:22:25','2021-03-23 23:22:25'),(5,2,2,2,'Inventory Management System',NULL,'Inventory Category',0,'ims/inventory_category',1,'2021-03-23 23:22:25','2021-03-23 23:22:25'),(6,2,2,3,'Inventory Management System',NULL,'Inventory Classification',0,'ims/inventory_classification',1,'2021-03-23 23:22:25','2021-03-23 23:22:25'),(7,2,2,4,'Inventory Management System',NULL,'Inventory Storage',0,'ims/inventory_storage',1,'2021-03-23 23:22:25','2021-03-23 23:22:25'),(8,2,2,5,'Inventory Management System',NULL,'Inventory Vendor',0,'ims/inventory_vendor',1,'2021-03-23 23:22:25','2021-03-23 23:22:25'),(9,2,2,6,'Inventory Management System',NULL,'Inventory Condition',0,'ims/inventory_condition',1,'2021-03-23 23:22:25','2021-03-23 23:22:25'),(10,2,2,7,'Project Management System',NULL,'Project Milestone',0,'pms/project_milestone',1,'2021-03-23 23:22:25','2021-03-23 23:22:25'),(11,2,2,8,'Project Management System',NULL,'Project List',0,'pms/project_list',1,'2021-03-23 23:22:25','2021-03-23 23:22:25'),(12,2,2,9,'Project Management System',NULL,'Project Client',0,'pms/project_client',1,'2021-03-23 23:22:25','2021-03-23 23:22:25'),(13,2,2,10,'Project Management System',NULL,'Project Category',0,'pms/project_category',1,'2021-03-23 23:22:25','2021-03-23 23:22:25'),(14,2,2,11,'Finance Management System',NULL,'Bank',0,'fms/bank',1,'2021-03-23 23:22:25','2021-03-23 23:22:25'),(15,2,2,12,'Finance Management System',NULL,'Chart of Accounts',0,'fms/chart_of_accounts',1,'2021-03-23 23:22:25','2021-05-05 06:09:55'),(16,2,2,13,'Finance Management System',NULL,'Ledger Classification',0,'fms/ledger_classification',1,'2021-03-23 23:22:25','2021-03-23 23:22:25'),(17,2,2,14,'Human Resource Information System',NULL,'Designation',0,'hris/designation',1,'2021-03-23 23:22:25','2021-03-23 23:22:25'),(18,2,2,15,'Human Resource Information System',NULL,'Department',0,'hris/department',1,'2021-03-23 23:22:25','2021-03-23 23:22:25'),(19,2,2,16,'Human Resources Information System',NULL,'Requirement',0,'hris/requirements',1,'2021-03-23 23:22:25','2021-05-14 03:20:21'),(20,2,2,17,'Human Resource Information System',NULL,'Holiday',0,'hris/holiday',1,'2021-03-23 23:22:25','2021-03-23 23:22:25'),(21,2,2,18,'Human Resource Information System',NULL,'Leave Type',0,'hris/leave_type',1,'2021-03-23 23:22:25','2021-03-23 23:22:25'),(22,2,2,19,'Human Resource Information System',NULL,'Loan Type',0,'hris/loan_type',1,'2021-03-23 23:22:25','2021-03-23 23:22:25'),(23,2,2,20,'Human Resource Information System',NULL,'Code of Conduct Category',0,'hris/code_conduct_category',1,'2021-03-23 23:22:25','2021-03-23 23:22:25'),(24,2,2,21,'Human Resource Information System',NULL,'Code of Conduct Section',0,'hris/code_conduct_section',1,'2021-03-23 23:22:25','2021-03-23 23:22:25'),(25,2,2,22,'Human Resource Information System',NULL,'Branch',0,'hris/branch',1,'2021-03-23 23:22:25','2021-03-23 23:22:25'),(26,2,2,23,'Human Resource Information System',NULL,'Qualification',0,'hris/qualification',1,'2021-03-23 23:22:25','2021-03-23 23:22:25'),(27,2,2,24,'Human Resource Information System',NULL,'Award',0,'hris/award',1,'2021-03-23 23:22:25','2021-03-23 23:22:25'),(28,2,2,25,'Human Resource Information System',NULL,'SSS Table',0,'hris/sss_table',1,'2021-03-23 23:22:25','2021-03-23 23:22:25'),(29,2,2,26,'Human Resource Information System',NULL,'PhilHealth Table',0,'hris/philhealth_table',1,'2021-03-23 23:22:25','2021-03-23 23:22:25'),(30,2,2,27,'Human Resource Information System',NULL,'Tax Table',0,'hris/tax_table',1,'2021-03-23 23:22:25','2021-03-23 23:22:25'),(31,2,2,28,'Human Resources Information System',NULL,'Training and Development Masterfile',0,'hris/training_development_setup',1,'2021-03-23 23:22:25','2021-08-23 02:47:38'),(32,2,2,29,'Human Resource Information System',NULL,'Examination',0,'hris/examination',1,'2021-03-23 23:22:25','2021-03-23 23:22:25'),(33,2,3,1,'Inventory Management System',NULL,'Inventory Receiving',3,'ims/inventory_receiving',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(34,2,3,2,'Inventory Management System',NULL,'List of Stocks',0,'ims/list_stocks',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(35,2,3,3,'Inventory Management System',NULL,'Return Item',3,'ims/return_item',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(36,2,3,4,'Inventory Management System',NULL,'Disposal',3,'ims/item_disposal',1,'2021-03-23 23:22:25','2021-05-05 05:53:05'),(37,2,3,5,'Inventory Management System',NULL,'Inventory Transfer',3,'ims/transfer_request',1,'2021-03-23 23:22:25','2021-06-10 02:43:19'),(38,2,5,6,'Project Management System',NULL,'Cost Estimate',3,'pms/cost_estimate',1,'2021-03-23 23:22:25','2021-05-02 05:09:04'),(39,2,5,7,'Project Management System',NULL,'Project Budget Rationale',3,'pms/project_budget_rationale',1,'2021-03-23 23:22:25','2021-05-25 06:04:50'),(40,2,3,8,'Inventory Management System',NULL,'Bid Recap',3,'ims/bid_recap',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(41,2,3,9,'Inventory Management System',NULL,'Service Order',3,'ims/service_order',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(42,2,3,1,'Inventory Management System',NULL,'Material Withdrawal',3,'ims/material_withdrawal',1,'2021-03-23 23:22:25','2021-05-25 04:57:02'),(43,2,3,2,'Inventory Management System',NULL,'Equipment Borrowing',3,'ims/equipment_borrowing',1,'2021-03-23 23:22:25','2021-05-31 06:13:52'),(44,2,3,3,'Inventory Management System',NULL,'Inventory Incident',3,'ims/inventory_incident',1,'2021-03-23 23:22:25','2021-05-26 23:38:34'),(45,2,3,4,'Inventory Management System',NULL,'Material Usage',3,'ims/material_usage',1,'2021-03-23 23:22:25','2021-05-11 05:37:06'),(46,2,3,5,'Inventory Management System',NULL,'Purchase Request',3,'ims/purchase_request',1,'2021-03-23 23:22:25','2021-05-09 10:50:44'),(47,2,3,6,'Inventory Management System',NULL,'Purchase Order',3,'ims/purchase_order',1,'2021-03-23 23:22:25','2021-05-09 10:50:28'),(48,2,4,7,'Inventory Management System',NULL,'Item Price List',0,'ims/item_price_list',0,'2021-03-23 23:22:25','2021-07-07 03:10:53'),(49,2,3,8,'Inventory Management System',NULL,'Service Requisition',3,'ims/service_requisition',1,'2021-03-23 23:22:25','2021-05-17 08:12:57'),(50,2,8,9,'Human Resources Information System',NULL,'Personnel Requisition',3,'pms/personel_requisition',1,'2021-03-23 23:22:25','2021-07-06 06:13:50'),(51,2,5,10,'Project Management System',NULL,'Employee Taskboard',3,'pms/employee_taskboard',1,'2021-03-23 23:22:25','2021-07-05 03:17:02'),(52,2,5,11,'Project Management System',NULL,'Sign-Off',3,'pms/sign_off',1,'2021-03-23 23:22:25','2021-06-29 04:52:21'),(53,2,7,12,'Finance Management System',NULL,'Petty Cash Request',3,'fms/petty_cash_request',1,'2021-03-23 23:22:25','2021-06-09 00:00:46'),(54,2,7,13,'Finance Management System',NULL,'Client Fund Request',3,'fms/client_fund_request',1,'2021-03-23 23:22:25','2021-06-21 23:25:31'),(55,2,4,14,'Human Resource Information System',NULL,'Leave Request',3,'hris/leave_request',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(56,2,4,15,'Human Resource Information System',NULL,'Overtime Request',3,'hris/overtime_request',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(57,2,4,16,'Human Resources Information System',NULL,'No Time In/Out',3,'hris/no_timein_timeout',1,'2021-03-23 23:22:25','2021-03-25 05:53:42'),(58,2,4,17,'Human Resource Information System',NULL,'Official Business',3,'hris/official_business',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(59,2,4,18,'Human Resources Information System',NULL,'Loan',3,'hris/loan_form',1,'2021-03-23 23:22:25','2021-04-13 03:47:55'),(60,2,4,19,'Human Resource Information System',NULL,'Change Schedule',3,'hris/change_schedule',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(61,2,4,20,'Human Resource Information System',NULL,'Employee Evaluation',3,'hris/employee_evaluation',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(62,2,4,21,'Human Resource Information System',NULL,'Clearance',3,'hris/clearance',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(63,1,12,1,'Inventory Management System',NULL,'Purhcase Order Report',0,'ims/purchase_order_report',1,'2021-03-23 23:22:25','2021-07-13 00:58:26'),(64,4,6,2,'Inventory Management System',NULL,'Receiving Report',0,'ims/receiving_report',1,'2021-03-23 23:22:25','2021-07-13 00:59:02'),(65,4,6,3,'Inventory Management System',NULL,'Inventory Incident Report',0,'ims/inventory_incident_report',1,'2021-03-23 23:22:25','2021-07-13 00:59:20'),(66,4,6,4,'Inventory Management System',NULL,'Inventory Report',0,'ims/inventory_report',1,'2021-03-23 23:22:25','2021-07-13 00:59:36'),(67,1,12,1,'Inventory Management System',NULL,'Inventory Dashboard',0,'ims/inventory_dashboard',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(68,1,12,2,'Project Management System',NULL,'Project Dashboard',0,'pms/project_dashboard',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(69,1,12,3,'Finance Management System',NULL,'Finance Dashboard',0,'fms/finance_dashboard',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(70,1,12,4,'Human Resource Information System',NULL,'HRIS Dashboard',0,'hris/hr_dashboard',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(71,4,6,5,'Project Management System',NULL,'Project Management',0,'fms/project_management',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(72,4,6,6,'Project Management System',NULL,'Project Task',0,'fms/project_task',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(73,4,6,7,'Project Management System',NULL,'Project Timeline',0,'fms/project_timeline',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(74,4,6,8,'Finance Management System',NULL,'Petty Cash Voucher',0,'fms/petty_cash_voucher',0,'2021-03-23 23:22:25','2021-06-28 06:50:48'),(75,4,6,9,'Finance Management System',NULL,'Client Fund Voucher Report',0,'fms/client_fund_voucher',1,'2021-03-23 23:22:25','2021-06-18 06:11:11'),(76,2,7,10,'Finance Management System',NULL,'Payment Request',0,'fms/payment_request',1,'2021-03-23 23:22:25','2021-07-15 07:04:47'),(77,4,6,11,'Finance Management System',NULL,'Check Voucher',0,'fms/check_voucher',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(78,4,6,12,'Human Resource Information System',NULL,'Examination Report',0,'hris/examination_report',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(79,4,6,13,'Human Resource Information System',NULL,'Timekeeping Report',0,'hris/timekeeping_report',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(80,4,6,14,'Human Resource Information System',NULL,'Payroll Report',0,'hris/payroll_report',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(81,4,6,15,'Human Resource Information System',NULL,'Payroll Adjustment Report',0,'hris/payroll_adjustment_report',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(82,4,6,16,'Human Resource Information System',NULL,'Payslip Generation',0,'hris/payslip_generation',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(83,4,6,17,'Human Resource Information System',NULL,'13th Month Report',0,'hris/13th_month_report',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(84,4,6,18,'Human Resource Information System',NULL,'PHIC Premium Payment',0,'hris/phic_premium_payment',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(85,4,6,19,'Human Resource Information System',NULL,'SSS Premium Payment',0,'hris/sss_premium_payment',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(86,4,6,20,'Human Resource Information System',NULL,'HDMF Premim Payment',0,'hris/hdmf_premium_payment',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(87,4,6,21,'Human Resource Information System',NULL,'Manpower Management Report',0,'hris/manpower_management_report',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(88,1,12,5,'Human Resource Information System',NULL,'Employee Dashboard',0,'hris/employee_dashboard',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(89,2,5,1,'Project Management System',NULL,'Milestone Builder',3,'pms/milestone_builder',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(90,2,5,2,'Project Management System',NULL,'Project Timeline Builder',3,'pms/project_timeline_builder',1,'2021-03-23 23:22:25','2021-07-05 04:53:07'),(91,2,5,3,'Project Management System',NULL,'Manage Project Budget',3,'pms/manage_project_budget',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(92,2,5,4,'Project Management System',NULL,'Project Management Board',3,'pms/project_management_board',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(93,2,7,1,'Finance Management System',NULL,'Petty Cash Voucher',3,'fms/petty_cash_voucher',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(94,2,7,2,'Finance Management System',NULL,'Client Fund Voucher',3,'fms/client_fund_voucher',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(95,4,6,3,'Finance Management System',NULL,'Payment Request',3,'fms/payment_request',0,'2021-03-23 23:22:25','2021-07-15 07:05:09'),(96,2,7,4,'Finance Management System',NULL,'Check Voucher',3,'fms/check_voucher',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(97,2,7,5,'Finance Management System',NULL,'Check Writer',3,'fms/check_writer',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(98,2,7,6,'Finance Management System',NULL,'Check Voucher Liquidation',3,'fms/check_voucher_liquidation',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(99,2,7,7,'Finance Management System',NULL,'Billing Module',0,'fms/billing_module',1,'2021-03-23 23:22:25','2021-06-20 04:57:13'),(100,2,7,8,'Finance Management System',NULL,'Collection Module',3,'fms/collection_module',1,'2021-03-23 23:22:25','2021-06-20 04:52:03'),(101,5,9,1,'Human Resource Information System',NULL,'Schedule Setup',0,'hris/schedule_setup',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(102,5,9,2,'Human Resource Information System',NULL,'Orientation Setup',0,'hris/orientation_setup',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(103,2,10,1,'Human Resources Information System',NULL,'Job Posting',0,'hris/job_posting',1,'2021-03-23 23:22:25','2021-03-25 05:25:43'),(104,2,10,2,'Human Resource Information System',NULL,'Applicant Registration',0,'hris/application_registration',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(105,5,9,3,'Human Resources Information System',NULL,'Examination Setup',0,'hris/examination_setup',1,'2021-03-23 23:22:25','2021-07-29 00:41:52'),(106,2,10,4,'Human Resource Information System',NULL,'Applicant List',0,'hris/applicant_list',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(107,2,10,5,'Human Resources Information System',NULL,'Onboarding Module',0,'hris/on_boarding',1,'2021-03-23 23:22:25','2021-08-26 07:19:10'),(108,2,11,1,'Human Resource Information System',NULL,'Employee Attendance',0,'hris/employee_attendance',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(109,2,11,2,'Human Resources Information System',NULL,'Timekeeping Module',0,'hris/timekeeping_module',1,'2021-03-23 23:22:25','2021-08-24 05:04:18'),(110,2,11,3,'Human Resource Information System',NULL,'Payroll',0,'hris/payroll',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(111,2,11,4,'Human Resource Information System',NULL,'Payroll Adjustment',0,'hris/payroll_adjustment',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(112,2,11,5,'Human Resource Information System',NULL,'13th Month',0,'hris/13th_month',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(113,2,2,1,'Human Resources Information System',NULL,'Personnel Requisition',3,'hris/personnel_requisition',0,'2021-03-23 23:22:25','2021-07-06 06:12:00'),(114,2,8,2,'Human Resources Information System',NULL,'Personnel Module',0,'hris/employee_module',1,'2021-03-23 23:22:25','2021-09-28 01:41:41'),(115,2,8,3,'Human Resource Information System',NULL,'Personal Action Notice',0,'hris/personal_action_notice',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(116,2,8,4,'Human Resource Information System',NULL,'Manpower Management',0,'hris/manpower_management',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(117,2,8,5,'Human Resource Information System',NULL,'Employee Relation',0,'hris/employee_relation',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(118,2,8,6,'Human Resource Information System',NULL,'Employee Evaluation',0,'hris/employee_evaluation',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(119,2,8,7,'Human Resource Information System',NULL,'Employee Management',0,'hris/employee_management',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(120,2,8,8,'Human Resource Information System',NULL,'Memorandum',0,'hris/memorandum',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(121,2,8,9,'Human Resource Information System',NULL,'Employee Award',0,'hris/employee_award',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(122,2,8,10,'Human Resource Information System',NULL,'Leave Monitoring',0,'hris/leave_monitoring',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(123,2,8,11,'Human Resources Information System',NULL,'Training and Development',3,'hris/training_development',1,'2021-03-23 23:22:25','2021-08-25 05:47:53'),(124,2,8,12,'Human Resource Information System',NULL,'Event Calendar',0,'hris/event_calendar',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(125,2,3,1,'Inventory Management System',NULL,'Canvassing Form',1,'ims/inventory_canvassing',1,'2021-04-20 23:29:40','2021-04-20 23:29:40'),(126,2,3,1,'Inventory Management System',NULL,'Inventory Validation',3,'ims/inventory_validation',1,'2021-04-20 23:41:40','2021-06-02 05:46:41'),(127,2,3,1,'Inventory Management System',NULL,'Item Price List',0,'ims/item_price_list',1,'2021-04-22 16:09:10','2021-05-06 06:53:39'),(128,2,3,9,'Inventory Management System',NULL,'Service Completion',3,'ims/service_completion',1,'2021-03-23 23:22:25','2021-03-23 23:58:14'),(129,2,3,99,'Inventory Management System',NULL,'Inventory Stock In',0,'ims/inventory_stock_in',1,'2021-05-07 01:50:57','2021-05-07 01:50:57'),(130,2,2,3,'Inventory Management System',NULL,'Unit of Measurement',0,'ims/unit_of_measurement',1,'2021-05-24 13:09:23','2021-05-24 13:09:23'),(131,2,2,31,'Inventory Management System',NULL,'Service',0,'ims/service',1,'2021-05-26 05:39:58','2021-05-26 05:44:44'),(132,2,7,1,'Finance Management System',NULL,'Liquidation',3,'fms/liquidation',1,'2021-06-18 00:32:53','2021-06-18 00:32:53'),(133,2,7,1,'Finance Management System',NULL,'Petty Cash Replenishment',3,'fms/petty_cash_replenishment',1,'2021-06-18 06:12:41','2021-06-18 06:12:41'),(134,2,7,1,'Finance Management System',NULL,'Client Fund Replenishment',3,'fms/client_fund_replenishment',1,'2021-06-18 06:13:14','2021-06-18 06:13:14'),(135,2,2,1,'Inventory Management System',NULL,'Vehicle',1,'ims/vehicle',1,'2021-07-13 00:59:45','2021-07-13 01:00:09'),(136,4,6,1,'Inventory Management System',NULL,'Reservation Report',0,'ims/reservation_report',1,'2021-07-16 00:45:44','2021-07-16 00:45:44'),(137,2,3,1,'Inventory Management System',NULL,'Material Request',3,'ims/material_request',1,'2021-09-16 11:47:46','2021-09-16 11:47:46'),(138,2,3,1,'Inventory Management System',NULL,'Change Request',3,'ims/change_request',1,'2021-09-16 11:48:36','2021-09-16 11:48:36'),(139,2,3,1,'Inventory Management System',NULL,'Stock Out',1,'ims/stock_out',1,'2021-09-16 23:17:19','2021-09-16 23:17:19'),(140,2,2,1,'Inventory Management System',NULL,'Inventory Asset',0,'ims/invventory_asset',1,'2021-09-19 23:25:53','2021-09-19 23:25:53'),(141,2,3,1,'Inventory Management System',NULL,'Asset Price List',0,'ims/asset_price_list',1,'2021-09-22 11:39:26','2021-09-22 11:39:26');
 /*!40000 ALTER TABLE `gen_module_list_tbl` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -1250,7 +1250,7 @@ CREATE TABLE `hris_employee_attendance_tbl` (
   `createdAt` timestamp NULL DEFAULT current_timestamp(),
   `updatedAt` timestamp NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   PRIMARY KEY (`attendanceID`)
-) ENGINE=InnoDB AUTO_INCREMENT=99 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=113 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1259,7 +1259,7 @@ CREATE TABLE `hris_employee_attendance_tbl` (
 
 LOCK TABLES `hris_employee_attendance_tbl` WRITE;
 /*!40000 ALTER TABLE `hris_employee_attendance_tbl` DISABLE KEYS */;
-INSERT INTO `hris_employee_attendance_tbl` VALUES (1,1,'2021-09-10','2021-09-10 07:00:00','2021-09-10 16:00:00',1.00,8.00,'2021-09-10 14:12:52',NULL,0.00,NULL,NULL,NULL,4,4,'2021-09-10 06:09:40','2021-09-10 06:12:57'),(2,2,'2021-09-10','2021-09-10 07:00:00','2021-09-10 16:00:00',1.00,8.00,'2021-09-10 14:12:50',NULL,0.00,NULL,NULL,NULL,4,4,'2021-09-10 06:09:40','2021-09-10 06:12:57'),(3,3,'2021-09-10','2021-09-10 07:00:00','2021-09-10 16:00:00',1.00,8.00,NULL,NULL,NULL,NULL,NULL,NULL,4,4,'2021-09-10 06:09:40','2021-09-10 06:09:40'),(4,4,'2021-09-10','2021-09-10 06:00:00','2021-09-10 17:00:00',1.00,10.00,NULL,NULL,NULL,NULL,NULL,NULL,4,4,'2021-09-10 06:09:40','2021-09-10 06:09:40'),(5,5,'2021-09-10','2021-09-10 07:00:00','2021-09-10 16:00:00',1.00,8.00,NULL,NULL,NULL,NULL,NULL,NULL,4,4,'2021-09-10 06:09:40','2021-09-10 06:09:40'),(6,6,'2021-09-10','2021-09-10 07:00:00','2021-09-10 16:00:00',1.00,8.00,NULL,NULL,NULL,NULL,NULL,NULL,4,4,'2021-09-10 06:09:40','2021-09-10 06:09:40'),(7,7,'2021-09-10','2021-09-10 07:00:00','2021-09-10 16:00:00',1.00,8.00,NULL,NULL,NULL,NULL,NULL,NULL,4,4,'2021-09-10 06:09:40','2021-09-10 06:09:40'),(8,8,'2021-09-10','2021-09-10 07:00:00','2021-09-10 16:00:00',1.00,8.00,NULL,NULL,NULL,NULL,NULL,NULL,4,4,'2021-09-10 06:09:40','2021-09-10 06:09:40'),(9,9,'2021-09-10','2021-09-10 07:00:00','2021-09-10 16:00:00',1.00,8.00,'2021-09-10 14:43:43',NULL,0.00,NULL,NULL,NULL,4,4,'2021-09-10 06:09:40','2021-09-10 06:43:58'),(10,19,'2021-09-10','2021-09-10 07:00:00','2021-09-10 16:00:00',1.00,8.00,NULL,NULL,NULL,NULL,NULL,NULL,4,4,'2021-09-10 06:09:40','2021-09-10 06:09:40'),(11,20,'2021-09-10','2021-09-10 06:00:00','2021-09-10 17:00:00',1.00,10.00,'2021-09-10 14:21:39','2021-09-10 16:34:16',2.21,NULL,NULL,NULL,4,4,'2021-09-10 06:09:40','2021-09-13 07:18:20'),(12,21,'2021-09-10','2021-09-10 07:00:00','2021-09-10 16:00:00',1.00,8.00,'2021-09-10 14:24:18',NULL,0.00,NULL,NULL,NULL,4,4,'2021-09-10 06:09:40','2021-09-10 06:43:58'),(13,22,'2021-09-10','2021-09-10 07:00:00','2021-09-10 16:00:00',1.00,8.00,NULL,NULL,NULL,NULL,NULL,NULL,4,4,'2021-09-10 06:09:40','2021-09-10 06:09:40'),(14,23,'2021-09-10','2021-09-10 07:00:00','2021-09-10 16:00:00',1.00,8.00,NULL,NULL,NULL,NULL,NULL,NULL,4,4,'2021-09-10 06:09:40','2021-09-10 06:09:40'),(15,1,'2021-09-13','2021-09-13 07:00:00','2021-09-13 16:00:00',1.00,8.00,NULL,NULL,NULL,NULL,NULL,NULL,0,0,'2021-09-13 00:42:28','2021-09-13 00:42:28'),(16,2,'2021-09-13','2021-09-13 07:00:00','2021-09-13 16:00:00',1.00,8.00,NULL,NULL,NULL,NULL,NULL,NULL,0,0,'2021-09-13 00:42:28','2021-09-13 00:42:28'),(17,3,'2021-09-13','2021-09-13 07:00:00','2021-09-13 16:00:00',1.00,8.00,NULL,NULL,NULL,NULL,NULL,NULL,0,0,'2021-09-13 00:42:28','2021-09-13 00:42:28'),(18,4,'2021-09-13','2021-09-13 06:00:00','2021-09-13 17:00:00',1.00,10.00,NULL,NULL,NULL,NULL,NULL,NULL,0,0,'2021-09-13 00:42:28','2021-09-13 00:42:28'),(19,5,'2021-09-13','2021-09-13 07:00:00','2021-09-13 16:00:00',1.00,8.00,NULL,NULL,NULL,NULL,NULL,NULL,0,0,'2021-09-13 00:42:28','2021-09-13 00:42:28'),(20,6,'2021-09-13','2021-09-13 07:00:00','2021-09-13 16:00:00',1.00,8.00,NULL,NULL,NULL,NULL,NULL,NULL,0,0,'2021-09-13 00:42:28','2021-09-13 00:42:28'),(21,7,'2021-09-13','2021-09-13 07:00:00','2021-09-13 16:00:00',1.00,8.00,NULL,NULL,NULL,NULL,NULL,NULL,0,0,'2021-09-13 00:42:28','2021-09-13 00:42:28'),(22,8,'2021-09-13','2021-09-13 07:00:00','2021-09-13 16:00:00',1.00,8.00,NULL,NULL,NULL,NULL,NULL,NULL,0,0,'2021-09-13 00:42:28','2021-09-13 00:42:28'),(23,9,'2021-09-13','2021-09-13 07:00:00','2021-09-13 16:00:00',1.00,8.00,NULL,NULL,NULL,NULL,NULL,NULL,0,0,'2021-09-13 00:42:28','2021-09-13 00:42:28'),(24,19,'2021-09-13','2021-09-13 07:00:00','2021-09-13 16:00:00',1.00,8.00,NULL,NULL,NULL,NULL,NULL,NULL,0,0,'2021-09-13 00:42:28','2021-09-13 00:42:28'),(25,20,'2021-09-13','2021-09-13 06:00:00','2021-09-13 17:00:00',1.00,10.00,'2021-09-13 15:18:46','2021-09-13 16:21:01',1.04,NULL,NULL,NULL,0,0,'2021-09-13 00:42:28','2021-09-13 23:58:59'),(26,21,'2021-09-13','2021-09-13 07:00:00','2021-09-13 16:00:00',1.00,8.00,NULL,NULL,NULL,NULL,NULL,NULL,0,0,'2021-09-13 00:42:28','2021-09-13 00:42:28'),(27,22,'2021-09-13','2021-09-13 07:00:00','2021-09-13 16:00:00',1.00,8.00,NULL,NULL,NULL,NULL,NULL,NULL,0,0,'2021-09-13 00:42:28','2021-09-13 00:42:28'),(28,23,'2021-09-13','2021-09-13 07:00:00','2021-09-13 16:00:00',1.00,8.00,NULL,NULL,NULL,NULL,NULL,NULL,0,0,'2021-09-13 00:42:28','2021-09-13 00:42:28'),(29,1,'2021-09-14','2021-09-14 07:00:00','2021-09-14 16:00:00',1.00,8.00,NULL,NULL,NULL,NULL,NULL,NULL,0,0,'2021-09-13 23:37:36','2021-09-13 23:37:36'),(30,2,'2021-09-14','2021-09-14 07:00:00','2021-09-14 16:00:00',1.00,8.00,NULL,NULL,NULL,NULL,NULL,NULL,0,0,'2021-09-13 23:37:36','2021-09-13 23:37:36'),(31,3,'2021-09-14','2021-09-14 07:00:00','2021-09-14 16:00:00',1.00,8.00,NULL,NULL,NULL,NULL,NULL,NULL,0,0,'2021-09-13 23:37:36','2021-09-13 23:37:36'),(32,4,'2021-09-14','2021-09-14 06:00:00','2021-09-14 17:00:00',1.00,10.00,NULL,NULL,NULL,NULL,NULL,NULL,0,0,'2021-09-13 23:37:36','2021-09-13 23:37:36'),(33,5,'2021-09-14','2021-09-14 07:00:00','2021-09-14 16:00:00',1.00,8.00,NULL,NULL,NULL,NULL,NULL,NULL,0,0,'2021-09-13 23:37:36','2021-09-13 23:37:36'),(34,6,'2021-09-14','2021-09-14 07:00:00','2021-09-14 16:00:00',1.00,8.00,NULL,NULL,NULL,NULL,NULL,NULL,0,0,'2021-09-13 23:37:36','2021-09-13 23:37:36'),(35,7,'2021-09-14','2021-09-14 07:00:00','2021-09-14 16:00:00',1.00,8.00,NULL,NULL,NULL,NULL,NULL,NULL,0,0,'2021-09-13 23:37:36','2021-09-13 23:37:36'),(36,8,'2021-09-14','2021-09-14 07:00:00','2021-09-14 16:00:00',1.00,8.00,NULL,NULL,NULL,NULL,NULL,NULL,0,0,'2021-09-13 23:37:36','2021-09-13 23:37:36'),(37,9,'2021-09-14','2021-09-14 07:00:00','2021-09-14 16:00:00',1.00,8.00,NULL,NULL,NULL,NULL,NULL,NULL,0,0,'2021-09-13 23:37:36','2021-09-13 23:37:36'),(38,19,'2021-09-14','2021-09-14 07:00:00','2021-09-14 16:00:00',1.00,8.00,NULL,NULL,NULL,NULL,NULL,NULL,0,0,'2021-09-13 23:37:36','2021-09-13 23:37:36'),(39,20,'2021-09-14','2021-09-14 06:00:00','2021-09-14 17:00:00',1.00,10.00,'2021-09-14 07:57:53','2021-09-14 12:07:00',4.15,NULL,NULL,NULL,0,0,'2021-09-13 23:37:36','2021-09-14 05:05:42'),(40,21,'2021-09-14','2021-09-14 07:00:00','2021-09-14 16:00:00',1.00,8.00,NULL,NULL,NULL,NULL,NULL,NULL,0,0,'2021-09-13 23:37:36','2021-09-13 23:37:36'),(41,22,'2021-09-14','2021-09-14 07:00:00','2021-09-14 16:00:00',1.00,8.00,NULL,NULL,NULL,NULL,NULL,NULL,0,0,'2021-09-13 23:37:36','2021-09-13 23:37:36'),(42,23,'2021-09-14','2021-09-14 07:00:00','2021-09-14 16:00:00',1.00,8.00,NULL,NULL,NULL,NULL,NULL,NULL,0,0,'2021-09-13 23:37:36','2021-09-13 23:37:36'),(43,1,'2021-09-16','2021-09-16 07:00:00','2021-09-16 16:00:00',1.00,8.00,NULL,NULL,NULL,NULL,NULL,NULL,1,1,'2021-09-16 06:01:43','2021-09-16 06:01:43'),(44,2,'2021-09-16','2021-09-16 07:00:00','2021-09-16 16:00:00',1.00,8.00,NULL,NULL,NULL,NULL,NULL,NULL,1,1,'2021-09-16 06:01:43','2021-09-16 06:01:43'),(45,3,'2021-09-16','2021-09-16 07:00:00','2021-09-16 16:00:00',1.00,8.00,NULL,NULL,NULL,NULL,NULL,NULL,1,1,'2021-09-16 06:01:43','2021-09-16 06:01:43'),(46,4,'2021-09-16','2021-09-16 00:00:00','2021-09-16 00:00:00',0.00,0.00,NULL,NULL,NULL,NULL,NULL,NULL,1,1,'2021-09-16 06:01:43','2021-09-16 06:01:43'),(47,5,'2021-09-16','2021-09-16 07:00:00','2021-09-16 16:00:00',1.00,8.00,NULL,NULL,NULL,NULL,NULL,NULL,1,1,'2021-09-16 06:01:43','2021-09-16 06:01:43'),(48,6,'2021-09-16','2021-09-16 07:00:00','2021-09-16 16:00:00',1.00,8.00,NULL,NULL,NULL,NULL,NULL,NULL,1,1,'2021-09-16 06:01:43','2021-09-16 06:01:43'),(49,7,'2021-09-16','2021-09-16 07:00:00','2021-09-16 16:00:00',1.00,8.00,NULL,NULL,NULL,NULL,NULL,NULL,1,1,'2021-09-16 06:01:43','2021-09-16 06:01:43'),(50,8,'2021-09-16','2021-09-16 07:00:00','2021-09-16 16:00:00',1.00,8.00,NULL,NULL,NULL,NULL,NULL,NULL,1,1,'2021-09-16 06:01:43','2021-09-16 06:01:43'),(51,9,'2021-09-16','2021-09-16 07:00:00','2021-09-16 16:00:00',1.00,8.00,NULL,NULL,NULL,NULL,NULL,NULL,1,1,'2021-09-16 06:01:43','2021-09-16 06:01:43'),(52,19,'2021-09-16','2021-09-16 07:00:00','2021-09-16 16:00:00',1.00,8.00,NULL,NULL,NULL,NULL,NULL,NULL,1,1,'2021-09-16 06:01:43','2021-09-16 06:01:43'),(53,20,'2021-09-16','2021-09-16 00:00:00','2021-09-16 00:00:00',0.00,0.00,NULL,NULL,NULL,NULL,NULL,NULL,1,1,'2021-09-16 06:01:43','2021-09-16 06:01:43'),(54,21,'2021-09-16','2021-09-16 07:00:00','2021-09-16 16:00:00',1.00,8.00,NULL,NULL,NULL,NULL,NULL,NULL,1,1,'2021-09-16 06:01:43','2021-09-16 06:01:43'),(55,22,'2021-09-16','2021-09-16 07:00:00','2021-09-16 16:00:00',1.00,8.00,NULL,NULL,NULL,NULL,NULL,NULL,1,1,'2021-09-16 06:01:43','2021-09-16 06:01:43'),(56,23,'2021-09-16','2021-09-16 07:00:00','2021-09-16 16:00:00',1.00,8.00,NULL,NULL,NULL,NULL,NULL,NULL,1,1,'2021-09-16 06:01:43','2021-09-16 06:01:43'),(57,1,'2021-09-17','2021-09-17 07:00:00','2021-09-17 16:00:00',1.00,8.00,NULL,NULL,NULL,NULL,NULL,NULL,1,1,'2021-09-16 23:19:09','2021-09-16 23:19:09'),(58,2,'2021-09-17','2021-09-17 07:00:00','2021-09-17 16:00:00',1.00,8.00,NULL,NULL,NULL,NULL,NULL,NULL,1,1,'2021-09-16 23:19:09','2021-09-16 23:19:09'),(59,3,'2021-09-17','2021-09-17 07:00:00','2021-09-17 16:00:00',1.00,8.00,NULL,NULL,NULL,NULL,NULL,NULL,1,1,'2021-09-16 23:19:09','2021-09-16 23:19:09'),(60,4,'2021-09-17','2021-09-17 06:00:00','2021-09-17 17:00:00',1.00,10.00,NULL,NULL,NULL,NULL,NULL,NULL,1,1,'2021-09-16 23:19:09','2021-09-16 23:19:09'),(61,5,'2021-09-17','2021-09-17 07:00:00','2021-09-17 16:00:00',1.00,8.00,NULL,NULL,NULL,NULL,NULL,NULL,1,1,'2021-09-16 23:19:09','2021-09-16 23:19:09'),(62,6,'2021-09-17','2021-09-17 07:00:00','2021-09-17 16:00:00',1.00,8.00,NULL,NULL,NULL,NULL,NULL,NULL,1,1,'2021-09-16 23:19:09','2021-09-16 23:19:09'),(63,7,'2021-09-17','2021-09-17 07:00:00','2021-09-17 16:00:00',1.00,8.00,NULL,NULL,NULL,NULL,NULL,NULL,1,1,'2021-09-16 23:19:09','2021-09-16 23:19:09'),(64,8,'2021-09-17','2021-09-17 07:00:00','2021-09-17 16:00:00',1.00,8.00,NULL,NULL,NULL,NULL,NULL,NULL,1,1,'2021-09-16 23:19:09','2021-09-16 23:19:09'),(65,9,'2021-09-17','2021-09-17 07:00:00','2021-09-17 16:00:00',1.00,8.00,NULL,NULL,NULL,NULL,NULL,NULL,1,1,'2021-09-16 23:19:09','2021-09-16 23:19:09'),(66,19,'2021-09-17','2021-09-17 07:00:00','2021-09-17 16:00:00',1.00,8.00,NULL,NULL,NULL,NULL,NULL,NULL,1,1,'2021-09-16 23:19:09','2021-09-16 23:19:09'),(67,20,'2021-09-17','2021-09-17 06:00:00','2021-09-17 17:00:00',1.00,10.00,NULL,NULL,NULL,NULL,NULL,NULL,1,1,'2021-09-16 23:19:09','2021-09-16 23:19:09'),(68,21,'2021-09-17','2021-09-17 07:00:00','2021-09-17 16:00:00',1.00,8.00,NULL,NULL,NULL,NULL,NULL,NULL,1,1,'2021-09-16 23:19:09','2021-09-16 23:19:09'),(69,22,'2021-09-17','2021-09-17 07:00:00','2021-09-17 16:00:00',1.00,8.00,NULL,NULL,NULL,NULL,NULL,NULL,1,1,'2021-09-16 23:19:09','2021-09-16 23:19:09'),(70,23,'2021-09-17','2021-09-17 07:00:00','2021-09-17 16:00:00',1.00,8.00,NULL,NULL,NULL,NULL,NULL,NULL,1,1,'2021-09-16 23:19:09','2021-09-16 23:19:09'),(71,1,'2021-09-20','2021-09-20 07:00:00','2021-09-20 16:00:00',1.00,8.00,NULL,NULL,NULL,NULL,NULL,NULL,0,0,'2021-09-19 23:24:37','2021-09-19 23:24:37'),(72,2,'2021-09-20','2021-09-20 07:00:00','2021-09-20 16:00:00',1.00,8.00,NULL,NULL,NULL,NULL,NULL,NULL,0,0,'2021-09-19 23:24:37','2021-09-19 23:24:37'),(73,3,'2021-09-20','2021-09-20 07:00:00','2021-09-20 16:00:00',1.00,8.00,NULL,NULL,NULL,NULL,NULL,NULL,0,0,'2021-09-19 23:24:37','2021-09-19 23:24:37'),(74,4,'2021-09-20','2021-09-20 06:00:00','2021-09-20 17:00:00',1.00,10.00,NULL,NULL,NULL,NULL,NULL,NULL,0,0,'2021-09-19 23:24:37','2021-09-19 23:24:37'),(75,5,'2021-09-20','2021-09-20 07:00:00','2021-09-20 16:00:00',1.00,8.00,NULL,NULL,NULL,NULL,NULL,NULL,0,0,'2021-09-19 23:24:37','2021-09-19 23:24:37'),(76,6,'2021-09-20','2021-09-20 07:00:00','2021-09-20 16:00:00',1.00,8.00,NULL,NULL,NULL,NULL,NULL,NULL,0,0,'2021-09-19 23:24:37','2021-09-19 23:24:37'),(77,7,'2021-09-20','2021-09-20 07:00:00','2021-09-20 16:00:00',1.00,8.00,NULL,NULL,NULL,NULL,NULL,NULL,0,0,'2021-09-19 23:24:37','2021-09-19 23:24:37'),(78,8,'2021-09-20','2021-09-20 07:00:00','2021-09-20 16:00:00',1.00,8.00,NULL,NULL,NULL,NULL,NULL,NULL,0,0,'2021-09-19 23:24:37','2021-09-19 23:24:37'),(79,9,'2021-09-20','2021-09-20 07:00:00','2021-09-20 16:00:00',1.00,8.00,NULL,NULL,NULL,NULL,NULL,NULL,0,0,'2021-09-19 23:24:37','2021-09-19 23:24:37'),(80,19,'2021-09-20','2021-09-20 07:00:00','2021-09-20 16:00:00',1.00,8.00,NULL,NULL,NULL,NULL,NULL,NULL,0,0,'2021-09-19 23:24:37','2021-09-19 23:24:37'),(81,20,'2021-09-20','2021-09-20 06:00:00','2021-09-20 17:00:00',1.00,10.00,NULL,NULL,NULL,NULL,NULL,NULL,0,0,'2021-09-19 23:24:37','2021-09-19 23:24:37'),(82,21,'2021-09-20','2021-09-20 07:00:00','2021-09-20 16:00:00',1.00,8.00,NULL,NULL,NULL,NULL,NULL,NULL,0,0,'2021-09-19 23:24:37','2021-09-19 23:24:37'),(83,22,'2021-09-20','2021-09-20 07:00:00','2021-09-20 16:00:00',1.00,8.00,NULL,NULL,NULL,NULL,NULL,NULL,0,0,'2021-09-19 23:24:37','2021-09-19 23:24:37'),(84,23,'2021-09-20','2021-09-20 07:00:00','2021-09-20 16:00:00',1.00,8.00,NULL,NULL,NULL,NULL,NULL,NULL,0,0,'2021-09-19 23:24:37','2021-09-19 23:24:37'),(85,1,'2021-09-22','2021-09-22 08:00:00','2021-09-22 16:00:00',1.00,7.00,NULL,NULL,NULL,NULL,NULL,NULL,1,1,'2021-09-22 11:35:38','2021-09-22 11:35:38'),(86,2,'2021-09-22','2021-09-22 08:00:00','2021-09-22 16:00:00',1.00,7.00,NULL,NULL,NULL,NULL,NULL,NULL,1,1,'2021-09-22 11:35:38','2021-09-22 11:35:38'),(87,3,'2021-09-22','2021-09-22 08:00:00','2021-09-22 16:00:00',1.00,7.00,NULL,NULL,NULL,NULL,NULL,NULL,1,1,'2021-09-22 11:35:38','2021-09-22 11:35:38'),(88,4,'2021-09-22','2021-09-22 00:00:00','2021-09-22 00:00:00',0.00,0.00,NULL,NULL,NULL,NULL,NULL,NULL,1,1,'2021-09-22 11:35:38','2021-09-22 11:35:38'),(89,5,'2021-09-22','2021-09-22 08:00:00','2021-09-22 16:00:00',1.00,7.00,NULL,NULL,NULL,NULL,NULL,NULL,1,1,'2021-09-22 11:35:38','2021-09-22 11:35:38'),(90,6,'2021-09-22','2021-09-22 08:00:00','2021-09-22 16:00:00',1.00,7.00,NULL,NULL,NULL,NULL,NULL,NULL,1,1,'2021-09-22 11:35:38','2021-09-22 11:35:38'),(91,7,'2021-09-22','2021-09-22 08:00:00','2021-09-22 16:00:00',1.00,7.00,NULL,NULL,NULL,NULL,NULL,NULL,1,1,'2021-09-22 11:35:38','2021-09-22 11:35:38'),(92,8,'2021-09-22','2021-09-22 08:00:00','2021-09-22 16:00:00',1.00,7.00,NULL,NULL,NULL,NULL,NULL,NULL,1,1,'2021-09-22 11:35:38','2021-09-22 11:35:38'),(93,9,'2021-09-22','2021-09-22 08:00:00','2021-09-22 16:00:00',1.00,7.00,NULL,NULL,NULL,NULL,NULL,NULL,1,1,'2021-09-22 11:35:38','2021-09-22 11:35:38'),(94,19,'2021-09-22','2021-09-22 08:00:00','2021-09-22 16:00:00',1.00,7.00,NULL,NULL,NULL,NULL,NULL,NULL,1,1,'2021-09-22 11:35:38','2021-09-22 11:35:38'),(95,20,'2021-09-22','2021-09-22 00:00:00','2021-09-22 00:00:00',0.00,0.00,NULL,NULL,NULL,NULL,NULL,NULL,1,1,'2021-09-22 11:35:38','2021-09-22 11:35:38'),(96,21,'2021-09-22','2021-09-22 08:00:00','2021-09-22 16:00:00',1.00,7.00,NULL,NULL,NULL,NULL,NULL,NULL,1,1,'2021-09-22 11:35:38','2021-09-22 11:35:38'),(97,22,'2021-09-22','2021-09-22 08:00:00','2021-09-22 16:00:00',1.00,7.00,NULL,NULL,NULL,NULL,NULL,NULL,1,1,'2021-09-22 11:35:38','2021-09-22 11:35:38'),(98,23,'2021-09-22','2021-09-22 08:00:00','2021-09-22 16:00:00',1.00,7.00,NULL,NULL,NULL,NULL,NULL,NULL,1,1,'2021-09-22 11:35:38','2021-09-22 11:35:38');
+INSERT INTO `hris_employee_attendance_tbl` VALUES (1,1,'2021-09-10','2021-09-10 07:00:00','2021-09-10 16:00:00',1.00,8.00,'2021-09-10 14:12:52',NULL,0.00,NULL,NULL,NULL,4,4,'2021-09-10 06:09:40','2021-09-10 06:12:57'),(2,2,'2021-09-10','2021-09-10 07:00:00','2021-09-10 16:00:00',1.00,8.00,'2021-09-10 14:12:50',NULL,0.00,NULL,NULL,NULL,4,4,'2021-09-10 06:09:40','2021-09-10 06:12:57'),(3,3,'2021-09-10','2021-09-10 07:00:00','2021-09-10 16:00:00',1.00,8.00,NULL,NULL,NULL,NULL,NULL,NULL,4,4,'2021-09-10 06:09:40','2021-09-10 06:09:40'),(4,4,'2021-09-10','2021-09-10 06:00:00','2021-09-10 17:00:00',1.00,10.00,NULL,NULL,NULL,NULL,NULL,NULL,4,4,'2021-09-10 06:09:40','2021-09-10 06:09:40'),(5,5,'2021-09-10','2021-09-10 07:00:00','2021-09-10 16:00:00',1.00,8.00,NULL,NULL,NULL,NULL,NULL,NULL,4,4,'2021-09-10 06:09:40','2021-09-10 06:09:40'),(6,6,'2021-09-10','2021-09-10 07:00:00','2021-09-10 16:00:00',1.00,8.00,NULL,NULL,NULL,NULL,NULL,NULL,4,4,'2021-09-10 06:09:40','2021-09-10 06:09:40'),(7,7,'2021-09-10','2021-09-10 07:00:00','2021-09-10 16:00:00',1.00,8.00,NULL,NULL,NULL,NULL,NULL,NULL,4,4,'2021-09-10 06:09:40','2021-09-10 06:09:40'),(8,8,'2021-09-10','2021-09-10 07:00:00','2021-09-10 16:00:00',1.00,8.00,NULL,NULL,NULL,NULL,NULL,NULL,4,4,'2021-09-10 06:09:40','2021-09-10 06:09:40'),(9,9,'2021-09-10','2021-09-10 07:00:00','2021-09-10 16:00:00',1.00,8.00,'2021-09-10 14:43:43',NULL,0.00,NULL,NULL,NULL,4,4,'2021-09-10 06:09:40','2021-09-10 06:43:58'),(10,19,'2021-09-10','2021-09-10 07:00:00','2021-09-10 16:00:00',1.00,8.00,NULL,NULL,NULL,NULL,NULL,NULL,4,4,'2021-09-10 06:09:40','2021-09-10 06:09:40'),(11,20,'2021-09-10','2021-09-10 06:00:00','2021-09-10 17:00:00',1.00,10.00,'2021-09-10 14:21:39','2021-09-10 16:34:16',2.21,NULL,NULL,NULL,4,4,'2021-09-10 06:09:40','2021-09-13 07:18:20'),(12,21,'2021-09-10','2021-09-10 07:00:00','2021-09-10 16:00:00',1.00,8.00,'2021-09-10 14:24:18',NULL,0.00,NULL,NULL,NULL,4,4,'2021-09-10 06:09:40','2021-09-10 06:43:58'),(13,22,'2021-09-10','2021-09-10 07:00:00','2021-09-10 16:00:00',1.00,8.00,NULL,NULL,NULL,NULL,NULL,NULL,4,4,'2021-09-10 06:09:40','2021-09-10 06:09:40'),(14,23,'2021-09-10','2021-09-10 07:00:00','2021-09-10 16:00:00',1.00,8.00,NULL,NULL,NULL,NULL,NULL,NULL,4,4,'2021-09-10 06:09:40','2021-09-10 06:09:40'),(15,1,'2021-09-13','2021-09-13 07:00:00','2021-09-13 16:00:00',1.00,8.00,NULL,NULL,NULL,NULL,NULL,NULL,0,0,'2021-09-13 00:42:28','2021-09-13 00:42:28'),(16,2,'2021-09-13','2021-09-13 07:00:00','2021-09-13 16:00:00',1.00,8.00,NULL,NULL,NULL,NULL,NULL,NULL,0,0,'2021-09-13 00:42:28','2021-09-13 00:42:28'),(17,3,'2021-09-13','2021-09-13 07:00:00','2021-09-13 16:00:00',1.00,8.00,NULL,NULL,NULL,NULL,NULL,NULL,0,0,'2021-09-13 00:42:28','2021-09-13 00:42:28'),(18,4,'2021-09-13','2021-09-13 06:00:00','2021-09-13 17:00:00',1.00,10.00,NULL,NULL,NULL,NULL,NULL,NULL,0,0,'2021-09-13 00:42:28','2021-09-13 00:42:28'),(19,5,'2021-09-13','2021-09-13 07:00:00','2021-09-13 16:00:00',1.00,8.00,NULL,NULL,NULL,NULL,NULL,NULL,0,0,'2021-09-13 00:42:28','2021-09-13 00:42:28'),(20,6,'2021-09-13','2021-09-13 07:00:00','2021-09-13 16:00:00',1.00,8.00,NULL,NULL,NULL,NULL,NULL,NULL,0,0,'2021-09-13 00:42:28','2021-09-13 00:42:28'),(21,7,'2021-09-13','2021-09-13 07:00:00','2021-09-13 16:00:00',1.00,8.00,NULL,NULL,NULL,NULL,NULL,NULL,0,0,'2021-09-13 00:42:28','2021-09-13 00:42:28'),(22,8,'2021-09-13','2021-09-13 07:00:00','2021-09-13 16:00:00',1.00,8.00,NULL,NULL,NULL,NULL,NULL,NULL,0,0,'2021-09-13 00:42:28','2021-09-13 00:42:28'),(23,9,'2021-09-13','2021-09-13 07:00:00','2021-09-13 16:00:00',1.00,8.00,NULL,NULL,NULL,NULL,NULL,NULL,0,0,'2021-09-13 00:42:28','2021-09-13 00:42:28'),(24,19,'2021-09-13','2021-09-13 07:00:00','2021-09-13 16:00:00',1.00,8.00,NULL,NULL,NULL,NULL,NULL,NULL,0,0,'2021-09-13 00:42:28','2021-09-13 00:42:28'),(25,20,'2021-09-13','2021-09-13 06:00:00','2021-09-13 17:00:00',1.00,10.00,'2021-09-13 15:18:46','2021-09-13 16:21:01',1.04,NULL,NULL,NULL,0,0,'2021-09-13 00:42:28','2021-09-13 23:58:59'),(26,21,'2021-09-13','2021-09-13 07:00:00','2021-09-13 16:00:00',1.00,8.00,NULL,NULL,NULL,NULL,NULL,NULL,0,0,'2021-09-13 00:42:28','2021-09-13 00:42:28'),(27,22,'2021-09-13','2021-09-13 07:00:00','2021-09-13 16:00:00',1.00,8.00,NULL,NULL,NULL,NULL,NULL,NULL,0,0,'2021-09-13 00:42:28','2021-09-13 00:42:28'),(28,23,'2021-09-13','2021-09-13 07:00:00','2021-09-13 16:00:00',1.00,8.00,NULL,NULL,NULL,NULL,NULL,NULL,0,0,'2021-09-13 00:42:28','2021-09-13 00:42:28'),(29,1,'2021-09-14','2021-09-14 07:00:00','2021-09-14 16:00:00',1.00,8.00,NULL,NULL,NULL,NULL,NULL,NULL,0,0,'2021-09-13 23:37:36','2021-09-13 23:37:36'),(30,2,'2021-09-14','2021-09-14 07:00:00','2021-09-14 16:00:00',1.00,8.00,NULL,NULL,NULL,NULL,NULL,NULL,0,0,'2021-09-13 23:37:36','2021-09-13 23:37:36'),(31,3,'2021-09-14','2021-09-14 07:00:00','2021-09-14 16:00:00',1.00,8.00,NULL,NULL,NULL,NULL,NULL,NULL,0,0,'2021-09-13 23:37:36','2021-09-13 23:37:36'),(32,4,'2021-09-14','2021-09-14 06:00:00','2021-09-14 17:00:00',1.00,10.00,NULL,NULL,NULL,NULL,NULL,NULL,0,0,'2021-09-13 23:37:36','2021-09-13 23:37:36'),(33,5,'2021-09-14','2021-09-14 07:00:00','2021-09-14 16:00:00',1.00,8.00,NULL,NULL,NULL,NULL,NULL,NULL,0,0,'2021-09-13 23:37:36','2021-09-13 23:37:36'),(34,6,'2021-09-14','2021-09-14 07:00:00','2021-09-14 16:00:00',1.00,8.00,NULL,NULL,NULL,NULL,NULL,NULL,0,0,'2021-09-13 23:37:36','2021-09-13 23:37:36'),(35,7,'2021-09-14','2021-09-14 07:00:00','2021-09-14 16:00:00',1.00,8.00,NULL,NULL,NULL,NULL,NULL,NULL,0,0,'2021-09-13 23:37:36','2021-09-13 23:37:36'),(36,8,'2021-09-14','2021-09-14 07:00:00','2021-09-14 16:00:00',1.00,8.00,NULL,NULL,NULL,NULL,NULL,NULL,0,0,'2021-09-13 23:37:36','2021-09-13 23:37:36'),(37,9,'2021-09-14','2021-09-14 07:00:00','2021-09-14 16:00:00',1.00,8.00,NULL,NULL,NULL,NULL,NULL,NULL,0,0,'2021-09-13 23:37:36','2021-09-13 23:37:36'),(38,19,'2021-09-14','2021-09-14 07:00:00','2021-09-14 16:00:00',1.00,8.00,NULL,NULL,NULL,NULL,NULL,NULL,0,0,'2021-09-13 23:37:36','2021-09-13 23:37:36'),(39,20,'2021-09-14','2021-09-14 06:00:00','2021-09-14 17:00:00',1.00,10.00,'2021-09-14 07:57:53','2021-09-14 12:07:00',4.15,NULL,NULL,NULL,0,0,'2021-09-13 23:37:36','2021-09-14 05:05:42'),(40,21,'2021-09-14','2021-09-14 07:00:00','2021-09-14 16:00:00',1.00,8.00,NULL,NULL,NULL,NULL,NULL,NULL,0,0,'2021-09-13 23:37:36','2021-09-13 23:37:36'),(41,22,'2021-09-14','2021-09-14 07:00:00','2021-09-14 16:00:00',1.00,8.00,NULL,NULL,NULL,NULL,NULL,NULL,0,0,'2021-09-13 23:37:36','2021-09-13 23:37:36'),(42,23,'2021-09-14','2021-09-14 07:00:00','2021-09-14 16:00:00',1.00,8.00,NULL,NULL,NULL,NULL,NULL,NULL,0,0,'2021-09-13 23:37:36','2021-09-13 23:37:36'),(43,1,'2021-09-16','2021-09-16 07:00:00','2021-09-16 16:00:00',1.00,8.00,NULL,NULL,NULL,NULL,NULL,NULL,1,1,'2021-09-16 06:01:43','2021-09-16 06:01:43'),(44,2,'2021-09-16','2021-09-16 07:00:00','2021-09-16 16:00:00',1.00,8.00,NULL,NULL,NULL,NULL,NULL,NULL,1,1,'2021-09-16 06:01:43','2021-09-16 06:01:43'),(45,3,'2021-09-16','2021-09-16 07:00:00','2021-09-16 16:00:00',1.00,8.00,NULL,NULL,NULL,NULL,NULL,NULL,1,1,'2021-09-16 06:01:43','2021-09-16 06:01:43'),(46,4,'2021-09-16','2021-09-16 00:00:00','2021-09-16 00:00:00',0.00,0.00,NULL,NULL,NULL,NULL,NULL,NULL,1,1,'2021-09-16 06:01:43','2021-09-16 06:01:43'),(47,5,'2021-09-16','2021-09-16 07:00:00','2021-09-16 16:00:00',1.00,8.00,NULL,NULL,NULL,NULL,NULL,NULL,1,1,'2021-09-16 06:01:43','2021-09-16 06:01:43'),(48,6,'2021-09-16','2021-09-16 07:00:00','2021-09-16 16:00:00',1.00,8.00,NULL,NULL,NULL,NULL,NULL,NULL,1,1,'2021-09-16 06:01:43','2021-09-16 06:01:43'),(49,7,'2021-09-16','2021-09-16 07:00:00','2021-09-16 16:00:00',1.00,8.00,NULL,NULL,NULL,NULL,NULL,NULL,1,1,'2021-09-16 06:01:43','2021-09-16 06:01:43'),(50,8,'2021-09-16','2021-09-16 07:00:00','2021-09-16 16:00:00',1.00,8.00,NULL,NULL,NULL,NULL,NULL,NULL,1,1,'2021-09-16 06:01:43','2021-09-16 06:01:43'),(51,9,'2021-09-16','2021-09-16 07:00:00','2021-09-16 16:00:00',1.00,8.00,NULL,NULL,NULL,NULL,NULL,NULL,1,1,'2021-09-16 06:01:43','2021-09-16 06:01:43'),(52,19,'2021-09-16','2021-09-16 07:00:00','2021-09-16 16:00:00',1.00,8.00,NULL,NULL,NULL,NULL,NULL,NULL,1,1,'2021-09-16 06:01:43','2021-09-16 06:01:43'),(53,20,'2021-09-16','2021-09-16 00:00:00','2021-09-16 00:00:00',0.00,0.00,NULL,NULL,NULL,NULL,NULL,NULL,1,1,'2021-09-16 06:01:43','2021-09-16 06:01:43'),(54,21,'2021-09-16','2021-09-16 07:00:00','2021-09-16 16:00:00',1.00,8.00,NULL,NULL,NULL,NULL,NULL,NULL,1,1,'2021-09-16 06:01:43','2021-09-16 06:01:43'),(55,22,'2021-09-16','2021-09-16 07:00:00','2021-09-16 16:00:00',1.00,8.00,NULL,NULL,NULL,NULL,NULL,NULL,1,1,'2021-09-16 06:01:43','2021-09-16 06:01:43'),(56,23,'2021-09-16','2021-09-16 07:00:00','2021-09-16 16:00:00',1.00,8.00,NULL,NULL,NULL,NULL,NULL,NULL,1,1,'2021-09-16 06:01:43','2021-09-16 06:01:43'),(57,1,'2021-09-17','2021-09-17 07:00:00','2021-09-17 16:00:00',1.00,8.00,NULL,NULL,NULL,NULL,NULL,NULL,1,1,'2021-09-16 23:19:09','2021-09-16 23:19:09'),(58,2,'2021-09-17','2021-09-17 07:00:00','2021-09-17 16:00:00',1.00,8.00,NULL,NULL,NULL,NULL,NULL,NULL,1,1,'2021-09-16 23:19:09','2021-09-16 23:19:09'),(59,3,'2021-09-17','2021-09-17 07:00:00','2021-09-17 16:00:00',1.00,8.00,NULL,NULL,NULL,NULL,NULL,NULL,1,1,'2021-09-16 23:19:09','2021-09-16 23:19:09'),(60,4,'2021-09-17','2021-09-17 06:00:00','2021-09-17 17:00:00',1.00,10.00,NULL,NULL,NULL,NULL,NULL,NULL,1,1,'2021-09-16 23:19:09','2021-09-16 23:19:09'),(61,5,'2021-09-17','2021-09-17 07:00:00','2021-09-17 16:00:00',1.00,8.00,NULL,NULL,NULL,NULL,NULL,NULL,1,1,'2021-09-16 23:19:09','2021-09-16 23:19:09'),(62,6,'2021-09-17','2021-09-17 07:00:00','2021-09-17 16:00:00',1.00,8.00,NULL,NULL,NULL,NULL,NULL,NULL,1,1,'2021-09-16 23:19:09','2021-09-16 23:19:09'),(63,7,'2021-09-17','2021-09-17 07:00:00','2021-09-17 16:00:00',1.00,8.00,NULL,NULL,NULL,NULL,NULL,NULL,1,1,'2021-09-16 23:19:09','2021-09-16 23:19:09'),(64,8,'2021-09-17','2021-09-17 07:00:00','2021-09-17 16:00:00',1.00,8.00,NULL,NULL,NULL,NULL,NULL,NULL,1,1,'2021-09-16 23:19:09','2021-09-16 23:19:09'),(65,9,'2021-09-17','2021-09-17 07:00:00','2021-09-17 16:00:00',1.00,8.00,NULL,NULL,NULL,NULL,NULL,NULL,1,1,'2021-09-16 23:19:09','2021-09-16 23:19:09'),(66,19,'2021-09-17','2021-09-17 07:00:00','2021-09-17 16:00:00',1.00,8.00,NULL,NULL,NULL,NULL,NULL,NULL,1,1,'2021-09-16 23:19:09','2021-09-16 23:19:09'),(67,20,'2021-09-17','2021-09-17 06:00:00','2021-09-17 17:00:00',1.00,10.00,NULL,NULL,NULL,NULL,NULL,NULL,1,1,'2021-09-16 23:19:09','2021-09-16 23:19:09'),(68,21,'2021-09-17','2021-09-17 07:00:00','2021-09-17 16:00:00',1.00,8.00,NULL,NULL,NULL,NULL,NULL,NULL,1,1,'2021-09-16 23:19:09','2021-09-16 23:19:09'),(69,22,'2021-09-17','2021-09-17 07:00:00','2021-09-17 16:00:00',1.00,8.00,NULL,NULL,NULL,NULL,NULL,NULL,1,1,'2021-09-16 23:19:09','2021-09-16 23:19:09'),(70,23,'2021-09-17','2021-09-17 07:00:00','2021-09-17 16:00:00',1.00,8.00,NULL,NULL,NULL,NULL,NULL,NULL,1,1,'2021-09-16 23:19:09','2021-09-16 23:19:09'),(71,1,'2021-09-20','2021-09-20 07:00:00','2021-09-20 16:00:00',1.00,8.00,NULL,NULL,NULL,NULL,NULL,NULL,0,0,'2021-09-19 23:24:37','2021-09-19 23:24:37'),(72,2,'2021-09-20','2021-09-20 07:00:00','2021-09-20 16:00:00',1.00,8.00,NULL,NULL,NULL,NULL,NULL,NULL,0,0,'2021-09-19 23:24:37','2021-09-19 23:24:37'),(73,3,'2021-09-20','2021-09-20 07:00:00','2021-09-20 16:00:00',1.00,8.00,NULL,NULL,NULL,NULL,NULL,NULL,0,0,'2021-09-19 23:24:37','2021-09-19 23:24:37'),(74,4,'2021-09-20','2021-09-20 06:00:00','2021-09-20 17:00:00',1.00,10.00,NULL,NULL,NULL,NULL,NULL,NULL,0,0,'2021-09-19 23:24:37','2021-09-19 23:24:37'),(75,5,'2021-09-20','2021-09-20 07:00:00','2021-09-20 16:00:00',1.00,8.00,NULL,NULL,NULL,NULL,NULL,NULL,0,0,'2021-09-19 23:24:37','2021-09-19 23:24:37'),(76,6,'2021-09-20','2021-09-20 07:00:00','2021-09-20 16:00:00',1.00,8.00,NULL,NULL,NULL,NULL,NULL,NULL,0,0,'2021-09-19 23:24:37','2021-09-19 23:24:37'),(77,7,'2021-09-20','2021-09-20 07:00:00','2021-09-20 16:00:00',1.00,8.00,NULL,NULL,NULL,NULL,NULL,NULL,0,0,'2021-09-19 23:24:37','2021-09-19 23:24:37'),(78,8,'2021-09-20','2021-09-20 07:00:00','2021-09-20 16:00:00',1.00,8.00,NULL,NULL,NULL,NULL,NULL,NULL,0,0,'2021-09-19 23:24:37','2021-09-19 23:24:37'),(79,9,'2021-09-20','2021-09-20 07:00:00','2021-09-20 16:00:00',1.00,8.00,NULL,NULL,NULL,NULL,NULL,NULL,0,0,'2021-09-19 23:24:37','2021-09-19 23:24:37'),(80,19,'2021-09-20','2021-09-20 07:00:00','2021-09-20 16:00:00',1.00,8.00,NULL,NULL,NULL,NULL,NULL,NULL,0,0,'2021-09-19 23:24:37','2021-09-19 23:24:37'),(81,20,'2021-09-20','2021-09-20 06:00:00','2021-09-20 17:00:00',1.00,10.00,NULL,NULL,NULL,NULL,NULL,NULL,0,0,'2021-09-19 23:24:37','2021-09-19 23:24:37'),(82,21,'2021-09-20','2021-09-20 07:00:00','2021-09-20 16:00:00',1.00,8.00,NULL,NULL,NULL,NULL,NULL,NULL,0,0,'2021-09-19 23:24:37','2021-09-19 23:24:37'),(83,22,'2021-09-20','2021-09-20 07:00:00','2021-09-20 16:00:00',1.00,8.00,NULL,NULL,NULL,NULL,NULL,NULL,0,0,'2021-09-19 23:24:37','2021-09-19 23:24:37'),(84,23,'2021-09-20','2021-09-20 07:00:00','2021-09-20 16:00:00',1.00,8.00,NULL,NULL,NULL,NULL,NULL,NULL,0,0,'2021-09-19 23:24:37','2021-09-19 23:24:37'),(85,1,'2021-09-22','2021-09-22 08:00:00','2021-09-22 16:00:00',1.00,7.00,NULL,NULL,NULL,NULL,NULL,NULL,1,1,'2021-09-22 11:35:38','2021-09-22 11:35:38'),(86,2,'2021-09-22','2021-09-22 08:00:00','2021-09-22 16:00:00',1.00,7.00,NULL,NULL,NULL,NULL,NULL,NULL,1,1,'2021-09-22 11:35:38','2021-09-22 11:35:38'),(87,3,'2021-09-22','2021-09-22 08:00:00','2021-09-22 16:00:00',1.00,7.00,NULL,NULL,NULL,NULL,NULL,NULL,1,1,'2021-09-22 11:35:38','2021-09-22 11:35:38'),(88,4,'2021-09-22','2021-09-22 00:00:00','2021-09-22 00:00:00',0.00,0.00,NULL,NULL,NULL,NULL,NULL,NULL,1,1,'2021-09-22 11:35:38','2021-09-22 11:35:38'),(89,5,'2021-09-22','2021-09-22 08:00:00','2021-09-22 16:00:00',1.00,7.00,NULL,NULL,NULL,NULL,NULL,NULL,1,1,'2021-09-22 11:35:38','2021-09-22 11:35:38'),(90,6,'2021-09-22','2021-09-22 08:00:00','2021-09-22 16:00:00',1.00,7.00,NULL,NULL,NULL,NULL,NULL,NULL,1,1,'2021-09-22 11:35:38','2021-09-22 11:35:38'),(91,7,'2021-09-22','2021-09-22 08:00:00','2021-09-22 16:00:00',1.00,7.00,NULL,NULL,NULL,NULL,NULL,NULL,1,1,'2021-09-22 11:35:38','2021-09-22 11:35:38'),(92,8,'2021-09-22','2021-09-22 08:00:00','2021-09-22 16:00:00',1.00,7.00,NULL,NULL,NULL,NULL,NULL,NULL,1,1,'2021-09-22 11:35:38','2021-09-22 11:35:38'),(93,9,'2021-09-22','2021-09-22 08:00:00','2021-09-22 16:00:00',1.00,7.00,NULL,NULL,NULL,NULL,NULL,NULL,1,1,'2021-09-22 11:35:38','2021-09-22 11:35:38'),(94,19,'2021-09-22','2021-09-22 08:00:00','2021-09-22 16:00:00',1.00,7.00,NULL,NULL,NULL,NULL,NULL,NULL,1,1,'2021-09-22 11:35:38','2021-09-22 11:35:38'),(95,20,'2021-09-22','2021-09-22 00:00:00','2021-09-22 00:00:00',0.00,0.00,NULL,NULL,NULL,NULL,NULL,NULL,1,1,'2021-09-22 11:35:38','2021-09-22 11:35:38'),(96,21,'2021-09-22','2021-09-22 08:00:00','2021-09-22 16:00:00',1.00,7.00,NULL,NULL,NULL,NULL,NULL,NULL,1,1,'2021-09-22 11:35:38','2021-09-22 11:35:38'),(97,22,'2021-09-22','2021-09-22 08:00:00','2021-09-22 16:00:00',1.00,7.00,NULL,NULL,NULL,NULL,NULL,NULL,1,1,'2021-09-22 11:35:38','2021-09-22 11:35:38'),(98,23,'2021-09-22','2021-09-22 08:00:00','2021-09-22 16:00:00',1.00,7.00,NULL,NULL,NULL,NULL,NULL,NULL,1,1,'2021-09-22 11:35:38','2021-09-22 11:35:38'),(99,1,'2021-09-28','2021-09-28 07:00:00','2021-09-28 16:00:00',1.00,8.00,NULL,NULL,NULL,NULL,NULL,NULL,0,0,'2021-09-28 01:40:57','2021-09-28 01:40:57'),(100,2,'2021-09-28','2021-09-28 07:00:00','2021-09-28 16:00:00',1.00,8.00,NULL,NULL,NULL,NULL,NULL,NULL,0,0,'2021-09-28 01:40:57','2021-09-28 01:40:57'),(101,3,'2021-09-28','2021-09-28 07:00:00','2021-09-28 16:00:00',1.00,8.00,NULL,NULL,NULL,NULL,NULL,NULL,0,0,'2021-09-28 01:40:57','2021-09-28 01:40:57'),(102,4,'2021-09-28','2021-09-28 06:00:00','2021-09-28 17:00:00',1.00,10.00,NULL,NULL,NULL,NULL,NULL,NULL,0,0,'2021-09-28 01:40:57','2021-09-28 01:40:57'),(103,5,'2021-09-28','2021-09-28 07:00:00','2021-09-28 16:00:00',1.00,8.00,NULL,NULL,NULL,NULL,NULL,NULL,0,0,'2021-09-28 01:40:57','2021-09-28 01:40:57'),(104,6,'2021-09-28','2021-09-28 07:00:00','2021-09-28 16:00:00',1.00,8.00,NULL,NULL,NULL,NULL,NULL,NULL,0,0,'2021-09-28 01:40:57','2021-09-28 01:40:57'),(105,7,'2021-09-28','2021-09-28 07:00:00','2021-09-28 16:00:00',1.00,8.00,NULL,NULL,NULL,NULL,NULL,NULL,0,0,'2021-09-28 01:40:57','2021-09-28 01:40:57'),(106,8,'2021-09-28','2021-09-28 07:00:00','2021-09-28 16:00:00',1.00,8.00,NULL,NULL,NULL,NULL,NULL,NULL,0,0,'2021-09-28 01:40:57','2021-09-28 01:40:57'),(107,9,'2021-09-28','2021-09-28 07:00:00','2021-09-28 16:00:00',1.00,8.00,NULL,NULL,NULL,NULL,NULL,NULL,0,0,'2021-09-28 01:40:57','2021-09-28 01:40:57'),(108,19,'2021-09-28','2021-09-28 07:00:00','2021-09-28 16:00:00',1.00,8.00,NULL,NULL,NULL,NULL,NULL,NULL,0,0,'2021-09-28 01:40:57','2021-09-28 01:40:57'),(109,20,'2021-09-28','2021-09-28 06:00:00','2021-09-28 17:00:00',1.00,10.00,NULL,NULL,NULL,NULL,NULL,NULL,0,0,'2021-09-28 01:40:57','2021-09-28 01:40:57'),(110,21,'2021-09-28','2021-09-28 07:00:00','2021-09-28 16:00:00',1.00,8.00,NULL,NULL,NULL,NULL,NULL,NULL,0,0,'2021-09-28 01:40:57','2021-09-28 01:40:57'),(111,22,'2021-09-28','2021-09-28 07:00:00','2021-09-28 16:00:00',1.00,8.00,NULL,NULL,NULL,NULL,NULL,NULL,0,0,'2021-09-28 01:40:57','2021-09-28 01:40:57'),(112,23,'2021-09-28','2021-09-28 07:00:00','2021-09-28 16:00:00',1.00,8.00,NULL,NULL,NULL,NULL,NULL,NULL,0,0,'2021-09-28 01:40:57','2021-09-28 01:40:57');
 /*!40000 ALTER TABLE `hris_employee_attendance_tbl` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -2623,6 +2623,73 @@ LOCK TABLES `ims_borrowing_tbl` WRITE;
 UNLOCK TABLES;
 
 --
+-- Table structure for table `ims_change_request_tbl`
+--
+
+DROP TABLE IF EXISTS `ims_change_request_tbl`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `ims_change_request_tbl` (
+  `changeRequestID` bigint(21) NOT NULL AUTO_INCREMENT,
+  `changeRequestCode` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `reviseChangeRequestID` bigint(21) DEFAULT NULL,
+  `reviseChangeRequestCode` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `costEstimateID` bigint(21) DEFAULT NULL,
+  `costEstimateCode` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `billMaterialID` bigint(21) DEFAULT NULL,
+  `billMaterialCode` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `materialRequestID` bigint(21) DEFAULT NULL,
+  `materialRequestCode` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `inventoryValidationID` bigint(21) DEFAULT NULL,
+  `inventoryValidationCode` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `bidRecapID` bigint(21) DEFAULT NULL,
+  `bidRecapCode` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `purchaseRequestID` bigint(21) DEFAULT NULL,
+  `purchaseRequestCode` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `purchaseOrderID` bigint(21) DEFAULT NULL,
+  `purchaseOrderCode` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `timelineBuilderID` bigint(21) DEFAULT NULL,
+  `projectCode` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `projectName` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `projectCategory` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `clientCode` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `clientName` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `clientAddress` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `employeeID` bigint(21) DEFAULT NULL,
+  `inventoryVendorID` bigint(21) DEFAULT NULL,
+  `vendorCode` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `vendorName` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `vendorContactPerson` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `vendorContactDetails` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `vendorAddress` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `changeRequestClassification` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `purchaseOrderReason` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `changeRequestReason` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `approversID` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `approversDate` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `approversStatus` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `dateNeeded` date DEFAULT NULL,
+  `changeRequestStatus` int(11) DEFAULT NULL,
+  `changeRequestRemarks` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `submittedAt` timestamp NULL DEFAULT NULL,
+  `createdBy` bigint(21) DEFAULT NULL,
+  `updatedBy` bigint(21) DEFAULT NULL,
+  `createdAt` timestamp NULL DEFAULT current_timestamp(),
+  `updatedAt` timestamp NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`changeRequestID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `ims_change_request_tbl`
+--
+
+LOCK TABLES `ims_change_request_tbl` WRITE;
+/*!40000 ALTER TABLE `ims_change_request_tbl` DISABLE KEYS */;
+/*!40000 ALTER TABLE `ims_change_request_tbl` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `ims_final_quote_tbl`
 --
 
@@ -3058,27 +3125,27 @@ DROP TABLE IF EXISTS `ims_inventory_receiving_tbl`;
 CREATE TABLE `ims_inventory_receiving_tbl` (
   `inventoryReceivingID` bigint(20) NOT NULL AUTO_INCREMENT,
   `reviseInventoryReceivingID` bigint(20) DEFAULT NULL,
-  `inventoryReceivingCode` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `inventoryReceivingCode` varchar(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT NULL,
   `employeeID` bigint(20) NOT NULL,
   `purchaseOrderID` bigint(20) DEFAULT NULL,
-  `purchaseOrderCode` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `recordID` bigint(255) DEFAULT NULL,
+  `purchaseOrderCode` varchar(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT NULL,
+  `recordID` bigint(255) NOT NULL,
   `timelineBuilderID` bigint(20) DEFAULT NULL,
-  `projectCode` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `projectName` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `projectCategory` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `clientCode` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `clientName` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `clientAddress` text COLLATE utf8mb4_unicode_ci NOT NULL,
-  `receiptNo` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `projectCode` text CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
+  `projectName` text CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
+  `projectCategory` varchar(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
+  `clientCode` varchar(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
+  `clientName` text CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
+  `clientAddress` text CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
+  `receiptNo` varchar(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
   `dateReceived` date NOT NULL,
-  `approversID` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `approversStatus` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `approversDate` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `approversID` text CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT NULL,
+  `approversStatus` text CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT NULL,
+  `approversDate` text CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT NULL,
   `inventoryReceivingStatus` int(11) NOT NULL,
-  `inventoryReceivingReason` longtext COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `inventoryReceivingRemarks` longtext COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `submittedAt` timestamp NULL DEFAULT current_timestamp(),
+  `inventoryReceivingReason` longtext CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT NULL,
+  `inventoryReceivingRemarks` longtext CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT NULL,
+  `submittedAt` timestamp NULL DEFAULT NULL,
   `createdBy` bigint(20) NOT NULL,
   `updatedBy` bigint(20) NOT NULL,
   `createdAt` timestamp NOT NULL DEFAULT current_timestamp(),
@@ -3436,13 +3503,13 @@ CREATE TABLE `ims_material_usage_tbl` (
   `StockOutID` bigint(20) NOT NULL,
   `referenceNo` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
   `employeeID` bigint(20) NOT NULL,
-  `projectID` bigint(20) DEFAULT NULL,
-  `projectCode` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `projectID` bigint(20) NOT NULL,
+  `projectCode` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
   `projectName` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `projectCategory` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `projectCategory` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
   `clientID` bigint(255) NOT NULL,
-  `clientCode` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `clientName` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `clientCode` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '''',
+  `clientName` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
   `clientAddress` text COLLATE utf8mb4_unicode_ci NOT NULL,
   `approversID` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `approversStatus` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
@@ -3718,6 +3785,16 @@ DROP TABLE IF EXISTS `ims_purchase_order_tbl`;
 CREATE TABLE `ims_purchase_order_tbl` (
   `purchaseOrderID` bigint(21) NOT NULL AUTO_INCREMENT,
   `purchaseOrderCode` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `costEstimateID` bigint(21) DEFAULT NULL,
+  `costEstimateCode` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `billMaterialID` bigint(21) DEFAULT NULL,
+  `billMaterialCode` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `materialRequestID` bigint(21) DEFAULT NULL,
+  `materialRequestCode` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `inventoryValidationID` bigint(21) DEFAULT NULL,
+  `inventoryValidationCode` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `bidRecapID` bigint(21) DEFAULT NULL,
+  `bidRecapCode` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `purchaseRequestID` bigint(21) DEFAULT NULL,
   `purchaseRequestCode` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `timelineBuilderID` bigint(21) DEFAULT NULL,
@@ -3727,8 +3804,6 @@ CREATE TABLE `ims_purchase_order_tbl` (
   `clientCode` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `clientName` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `clientAddress` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `bidRecapID` bigint(21) DEFAULT NULL,
-  `bidRecapCode` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `employeeID` bigint(21) DEFAULT NULL,
   `inventoryVendorID` bigint(21) DEFAULT NULL,
   `vendorCode` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
@@ -3751,6 +3826,7 @@ CREATE TABLE `ims_purchase_order_tbl` (
   `lessEwt` decimal(15,2) DEFAULT NULL,
   `grandTotalAmount` decimal(15,2) DEFAULT NULL,
   `purchaseOrderSignedPO` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `dateNeeded` date DEFAULT NULL,
   `purchaseOrderStatus` int(11) DEFAULT NULL,
   `purchaseOrderRemarks` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `printCount` int(11) DEFAULT 0,
@@ -3825,6 +3901,7 @@ CREATE TABLE `ims_purchase_request_tbl` (
   `approversID` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `approversDate` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `approversStatus` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `dateNeeded` date DEFAULT NULL,
   `purchaseRequestStatus` int(11) DEFAULT NULL,
   `purchaseRequestRemarks` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `submittedAt` timestamp NULL DEFAULT NULL,
@@ -3924,7 +4001,7 @@ CREATE TABLE `ims_request_assets_tbl` (
   `dateNeeded` date DEFAULT NULL,
   `dateReturn` date DEFAULT NULL,
   `actualDateReturn` date DEFAULT NULL,
-  `hourlyRate` bigint(20) DEFAULT NULL,
+  `hourlyRate` decimal(12,2) DEFAULT NULL,
   `unitCost` decimal(15,2) DEFAULT NULL,
   `totalCost` bigint(20) DEFAULT NULL,
   `finalQuoteRemarks` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
@@ -4097,8 +4174,9 @@ CREATE TABLE `ims_return_item_tbl` (
   `projectName` varchar(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
   `clientID` bigint(255) NOT NULL,
   `clientCode` varchar(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT NULL,
-  `clientName` varchar(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT NULL,
+  `clientName` varchar(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
   `clientAddress` text CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
+  `dateNeeded` date NOT NULL,
   `approversID` text CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT NULL,
   `approversStatus` text CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT NULL,
   `approversDate` text CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT NULL,
@@ -4340,19 +4418,21 @@ CREATE TABLE `ims_stock_in_assets_tbl` (
   `materialUsageID` bigint(255) DEFAULT NULL,
   `inventoryReceivingID` bigint(255) DEFAULT NULL,
   `stockOutID` bigint(255) NOT NULL,
-  `inventoryCode` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `inventoryCode` varchar(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
   `inventoryStorageID` int(255) NOT NULL,
-  `inventoryStorageCode` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `inventoryStorageOfficeName` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `itemID` int(255) DEFAULT NULL,
-  `itemName` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `brand` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `classificationName` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `categoryName` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `serialNumber` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `inventoryStorageCode` varchar(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
+  `inventoryStorageOfficeName` varchar(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
+  `assetID` int(255) DEFAULT NULL,
+  `itemCode` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `itemName` varchar(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT NULL,
+  `brand` varchar(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT NULL,
+  `classificationName` varchar(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
+  `categoryName` varchar(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
+  `uom` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `serialNumber` varchar(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
   `ExpirationDate` date NOT NULL,
   `ManufactureDate` date NOT NULL,
-  `barcode` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `barcode` varchar(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
   `quantity` decimal(15,2) NOT NULL,
   `createAt` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   `updateAt` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
@@ -4384,27 +4464,28 @@ CREATE TABLE `ims_stock_in_item_tbl` (
   `materialUsageID` bigint(255) DEFAULT NULL,
   `inventoryReceivingID` bigint(255) DEFAULT NULL,
   `stockOutID` bigint(255) NOT NULL,
-  `inventoryCode` varchar(255) NOT NULL,
+  `inventoryCode` varchar(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
   `inventoryStorageID` int(255) NOT NULL,
-  `inventoryStorageCode` varchar(255) NOT NULL,
-  `inventoryStorageOfficeName` varchar(255) NOT NULL,
+  `inventoryStorageCode` varchar(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
+  `inventoryStorageOfficeName` varchar(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
   `itemID` int(255) DEFAULT NULL,
-  `itemCode` varchar(255) NOT NULL,
-  `itemName` varchar(255) DEFAULT NULL,
-  `brand` varchar(255) DEFAULT NULL,
-  `classificationName` varchar(255) NOT NULL,
-  `categoryName` varchar(255) NOT NULL,
-  `serialNumber` varchar(255) NOT NULL,
+  `itemCode` varchar(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
+  `itemName` varchar(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT NULL,
+  `brand` varchar(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT NULL,
+  `classificationName` varchar(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
+  `categoryName` varchar(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
+  `uom` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `serialNumber` varchar(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
   `ExpirationDate` date NOT NULL,
   `ManufactureDate` date NOT NULL,
-  `barcode` varchar(255) NOT NULL,
+  `barcode` varchar(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
   `quantity` decimal(15,2) NOT NULL,
   `createAt` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   `updateAt` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   `stockInDate` date NOT NULL,
   `stockOutDate` date NOT NULL,
   PRIMARY KEY (`stockInItemID`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -4474,6 +4555,61 @@ CREATE TABLE `ims_stock_in_total_tbl` (
 LOCK TABLES `ims_stock_in_total_tbl` WRITE;
 /*!40000 ALTER TABLE `ims_stock_in_total_tbl` DISABLE KEYS */;
 /*!40000 ALTER TABLE `ims_stock_in_total_tbl` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `ims_stock_out_tbl`
+--
+
+DROP TABLE IF EXISTS `ims_stock_out_tbl`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `ims_stock_out_tbl` (
+  `stockOutID` bigint(20) NOT NULL AUTO_INCREMENT,
+  `stockOutCode` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `materialWithdrawalID` bigint(20) DEFAULT NULL,
+  `materialWithdrawalCode` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `inventoryValidationID` bigint(20) DEFAULT NULL,
+  `inventoryValidationCode` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `materialRequestID` bigint(20) DEFAULT NULL,
+  `materialRequestCode` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `costEstimateID` bigint(20) DEFAULT NULL,
+  `costEstimateCode` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `billMaterialID` bigint(20) DEFAULT NULL,
+  `billMaterialCode` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `employeeID` bigint(20) DEFAULT NULL,
+  `timelineBuilderID` bigint(20) DEFAULT NULL,
+  `projectCode` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `projectName` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `projectCategory` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `clientCode` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `clientName` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `clientAddress` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `approversID` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `approversStatus` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `approversDate` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `inventoryItemStatus` int(50) DEFAULT NULL,
+  `inventoryAssetStatus` int(50) DEFAULT NULL,
+  `stockOutStatus` int(50) DEFAULT NULL,
+  `stockOutReason` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `stockOutRemarks` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `dateNeeded` date DEFAULT NULL,
+  `submittedAt` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `createdBy` bigint(20) DEFAULT NULL,
+  `updatedBy` bigint(20) DEFAULT NULL,
+  `createdAt` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updatedAt` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`stockOutID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `ims_stock_out_tbl`
+--
+
+LOCK TABLES `ims_stock_out_tbl` WRITE;
+/*!40000 ALTER TABLE `ims_stock_out_tbl` DISABLE KEYS */;
+/*!40000 ALTER TABLE `ims_stock_out_tbl` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -4562,24 +4698,29 @@ CREATE TABLE `ims_travel_request_tbl` (
   `travelRequestID` bigint(20) NOT NULL AUTO_INCREMENT,
   `costEstimateID` bigint(20) DEFAULT NULL,
   `billMaterialID` bigint(20) DEFAULT NULL,
-  `travelType` text NOT NULL,
+  `costEstimateCode` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `billMaterialCode` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `travelType` text COLLATE utf8mb4_unicode_ci NOT NULL,
   `vehicleID` bigint(20) DEFAULT NULL,
-  `vehicleCode` text DEFAULT NULL,
-  `vehicleName` text DEFAULT NULL,
-  `vehiclePlateNumber` text DEFAULT NULL,
-  `vehicleGasType` text DEFAULT NULL,
+  `vehicleCode` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `vehicleName` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `vehiclePlateNumber` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `vehicleFuelType` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `vehicleDistance` decimal(20,2) DEFAULT NULL,
   `vehicleFuelConsumption` decimal(20,2) DEFAULT NULL,
-  `travelTypeDescription` text DEFAULT NULL,
+  `vehicleManHours` decimal(10,2) DEFAULT NULL,
+  `vehicleStartDate` date DEFAULT NULL,
+  `vehicleEndDate` date DEFAULT NULL,
+  `travelTypeDescription` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `vehicleLiters` decimal(20,2) DEFAULT NULL,
-  `unitCost` decimal(10,2) NOT NULL,
-  `totalCost` decimal(10,2) NOT NULL,
-  `createdBy` bigint(20) NOT NULL,
-  `updatedBy` bigint(20) NOT NULL,
+  `unitCost` decimal(10,2) DEFAULT NULL,
+  `totalCost` decimal(10,2) DEFAULT NULL,
+  `createdBy` bigint(20) DEFAULT NULL,
+  `updatedBy` bigint(20) DEFAULT NULL,
   `createdAt` timestamp NOT NULL DEFAULT current_timestamp(),
   `updatedAt` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   PRIMARY KEY (`travelRequestID`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -4623,6 +4764,35 @@ INSERT INTO `ims_uom_tbl` VALUES (1,'UOM-21-00001','pieces',1,'2021-05-25 23:50:
 UNLOCK TABLES;
 
 --
+-- Table structure for table `ims_withdrawal_stockout_serial_number_tbl`
+--
+
+DROP TABLE IF EXISTS `ims_withdrawal_stockout_serial_number_tbl`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `ims_withdrawal_stockout_serial_number_tbl` (
+  `serialItemID` bigint(20) NOT NULL AUTO_INCREMENT,
+  `materialWithdrawalID` bigint(20) DEFAULT NULL,
+  `materialRequestID` bigint(20) DEFAULT NULL,
+  `withdrawalItemID` bigint(20) DEFAULT NULL,
+  `itemID` bigint(20) DEFAULT NULL,
+  `serialItemNumber` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `createdBy` bigint(20) DEFAULT NULL,
+  `createdAt` timestamp NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`serialItemID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `ims_withdrawal_stockout_serial_number_tbl`
+--
+
+LOCK TABLES `ims_withdrawal_stockout_serial_number_tbl` WRITE;
+/*!40000 ALTER TABLE `ims_withdrawal_stockout_serial_number_tbl` DISABLE KEYS */;
+/*!40000 ALTER TABLE `ims_withdrawal_stockout_serial_number_tbl` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `pms_bill_material_tbl`
 --
 
@@ -4631,14 +4801,16 @@ DROP TABLE IF EXISTS `pms_bill_material_tbl`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `pms_bill_material_tbl` (
   `billMaterialID` bigint(20) NOT NULL AUTO_INCREMENT,
-  `reviseBillMaterialID` bigint(20) DEFAULT NULL,
-  `employeeID` bigint(20) NOT NULL,
+  `billMaterialCode` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `costEstimateID` bigint(20) DEFAULT NULL,
   `costEstimateCode` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `employeeID` bigint(20) NOT NULL,
   `timelineBuilderID` bigint(20) DEFAULT NULL,
+  `timelineDesign` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `projectCode` varchar(200) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `projectName` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `projectCategory` varchar(200) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `clientCode` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `clientName` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `clientAddress` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `approversID` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
@@ -4647,9 +4819,10 @@ CREATE TABLE `pms_bill_material_tbl` (
   `billMaterialStatus` int(11) NOT NULL,
   `billMaterialReason` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `billMaterialRemarks` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `dateNeeded` date DEFAULT NULL,
   `submittedAt` timestamp NULL DEFAULT current_timestamp(),
   `createdBy` bigint(20) NOT NULL,
-  `updatedBy` bigint(20) NOT NULL,
+  `updatedBy` bigint(20) DEFAULT NULL,
   `createdAt` timestamp NOT NULL DEFAULT current_timestamp(),
   `updatedAt` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   PRIMARY KEY (`billMaterialID`)
@@ -4757,28 +4930,32 @@ DROP TABLE IF EXISTS `pms_cost_estimate_tbl`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `pms_cost_estimate_tbl` (
   `costEstimateID` bigint(20) NOT NULL AUTO_INCREMENT,
+  `costEstimateCode` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `reviseCostEstimateID` bigint(20) DEFAULT NULL,
+  `reviseCostEstimateCode` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `employeeID` bigint(20) NOT NULL,
-  `referenceCode` text DEFAULT NULL,
   `timelineBuilderID` bigint(20) DEFAULT NULL,
-  `projectCode` varchar(200) DEFAULT NULL,
-  `projectName` text DEFAULT NULL,
-  `projectCategory` varchar(200) DEFAULT NULL,
-  `clientName` text DEFAULT NULL,
-  `clientAddress` text DEFAULT NULL,
-  `approversID` text DEFAULT NULL,
-  `approversStatus` text DEFAULT NULL,
-  `approversDate` text DEFAULT NULL,
+  `timelineDesign` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `projectCode` varchar(200) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `projectName` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `projectCategory` varchar(200) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `clientCode` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `clientName` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `clientAddress` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `approversID` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `approversStatus` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `approversDate` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `costEstimateStatus` int(11) NOT NULL,
-  `costEstimateReason` text DEFAULT NULL,
-  `costEstimateRemarks` text DEFAULT NULL,
+  `costEstimateReason` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `costEstimateRemarks` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `dateNeeded` date DEFAULT NULL,
   `submittedAt` timestamp NULL DEFAULT current_timestamp(),
   `createdBy` bigint(20) NOT NULL,
   `updatedBy` bigint(20) NOT NULL,
   `createdAt` timestamp NOT NULL DEFAULT current_timestamp(),
   `updatedAt` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   PRIMARY KEY (`costEstimateID`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -5600,4 +5777,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2021-09-27 13:54:32
+-- Dump completed on 2021-09-29 10:00:05

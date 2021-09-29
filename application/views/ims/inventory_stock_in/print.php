@@ -27,7 +27,7 @@ span { font-size: 13px;}
         <?php
 
         foreach($barcodes as $index => $co) { 
-            for($i=1;$i<=$co["stockInQuantity"];$i++){
+            for($i=1;$i<=$co["quantity"];$i++){
             echo "<p class='inline'>".bar128(stripcslashes($co["barcode"]))."</p>&nbsp&nbsp&nbsp&nbsp";
             }  
         }  

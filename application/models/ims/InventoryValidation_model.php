@@ -65,6 +65,25 @@ class InventoryValidation_model extends CI_Model {
       
         $query = $this->db->insert("ims_material_withdrawal_tbl", $data);
         if ($query) {
+            $insertID = $this->db->insert_id();
+            return "true|Successfully submitted|$insertID|";
+        }
+        return "false|System error: Please contact the system administrator for assistance!";
+    }
+
+    public function saveStockOutDocument($data){
+      
+        $query = $this->db->insert("ims_stock_out_tbl", $data);
+        if ($query) {
+            return "true|Successfully submitted";
+        }
+        return "false|System error: Please contact the system administrator for assistance!";
+    }
+
+    public function saveEquipmentBorrowingDocument($data){
+      
+        $query = $this->db->insert("ims_equipment_borrowing_tbl", $data);
+        if ($query) {
             return "true|Successfully submitted";
         }
         return "false|System error: Please contact the system administrator for assistance!";

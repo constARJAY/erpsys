@@ -37,6 +37,13 @@ class CostEstimate_model extends CI_Model {
         $this->saveCostEstimateData("insert", $costEstimateData);
     
     }
+
+    public function getCostEstimateData($costEstimateID = null){
+        $sql = "SELECT * FROM pms_cost_estimate_tbl WHERE costEstimateID = '$costEstimateID'";
+        $query  =   $this->db->query($sql);
+        return $query ? $query->row() : [];
+    }
+
     public function saveCostEstimateData($action, $data, $id = null) 
     {
         if ($action == "insert") {
@@ -57,6 +64,12 @@ class CostEstimate_model extends CI_Model {
         return "false|System error: Please contact the system administrator for assistance!";
     }
 
+    public function getVehicleDetails($id){
+        $sql    = "SELECT *, IF(vehicleGasType = 0, 'Diesel', 'Gasoline') vehicleFuelType FROM ims_inventory_vehicle_tbl WHERE vehicleID = '$id'";
+        $query  = $this->db->query($sql);
+        return $query ? $query->row() : false;
+    }
+
     public function getTableRowDetails($param, $id){
         $column = $param == "item" ? "itemID, itemCode, itemName, itemDescription, itemImage," : "assetID, assetCode, assetName, assetDescription, assetImage,";
         $table  = $param == "item" ? "ims_inventory_item_tbl" : "ims_inventory_asset_tbl";
@@ -69,10 +82,65 @@ class CostEstimate_model extends CI_Model {
         $query = $this->db->query($sql);
         return $query ? $query->row() : false;
     }
+    
+    public function deleteCostEstimateDetails($table,$param,$costEstimateID){
+        switch ($param) {
+            case 'item':
+                $whereParam = [
+                    "costEstimateID"         => $costEstimateID,
+                    "billMaterialID"         => NULL,
+                    "materialRequestID"      => NULL,
+                    "purchaseOrderID "       => NULL,
+                    "inventoryValidationID " => NULL,
+                    "bidRecapID "            => NULL
+                ]; 
+                break;
+            case 'asset':
+                $whereParam = [
+                    "costEstimateID"         => $costEstimateID,
+                    "billMaterialID"         => NULL,
+                    "materialRequestID"      => NULL,
+                    "purchaseOrderID "       => NULL,
+                    "inventoryValidationID " => NULL,
+                    "bidRecapID "            => NULL
+                ]; 
+                break;
+            case 'vehicle':
+                $whereParam = [
+                    "costEstimateID"         => $costEstimateID,
+                    "billMaterialID"         => NULL,
+                    "travelType"            => "Vehicle",
+                ]; 
+                break;
+            default:
+                $whereParam = [
+                    "costEstimateID"         => $costEstimateID,
+                    "billMaterialID"         => NULL,
+                    "vehicleCode"            => NULL,
+                ]; 
+                break;
+        }
+        $query = $this->db->delete($table, $whereParam);
+        return $query ? true : false;
+    }
 
-    public function saveInventoryRequest($param, $data, $costEstimateID = null, $billMaterialID = null){
-        // $deleteCostEstimateItems = $this->deleteCostEstimateItems($costEstimateID, $billMaterialID);
+    public function saveTravelRequest($param, $data, $costEstimateID){
+      if($costEstimateID){
+        $this->deleteCostEstimateDetails("ims_travel_request_tbl",$param,$costEstimateID);
+      }
+      $query = $this->db->insert_batch("ims_travel_request_tbl", $data);
+      if ($query) {
+          return "true|Successfully submitted";
+      }
+      return "false";  
+    }
+
+    public function saveInventoryRequest($param, $data, $costEstimateID = null){
+        
         $table = $param == "item" ? "ims_request_items_tbl" : "ims_request_assets_tbl ";
+        if($costEstimateID){
+            $this->deleteCostEstimateDetails($table,$param,$costEstimateID);
+        }
         $query = $this->db->insert_batch($table, $data);
         if ($query) {
             return "true|Successfully submitted";
@@ -80,48 +148,17 @@ class CostEstimate_model extends CI_Model {
         return "false";
     }
 
-
-    public function getInventoryRequest($param = "item", $costEstimateID = null, $billMaterialID = null){
-        $column     = $param == "item" ? "SUM(requestQuantity) AS sumRequestQuantity" : "SUM(requestQuantity) AS sumRequestQuantity, SUM(requestManHours) AS sumRequestManHours" ;
-        $table      = $param == "item" ? "ims_request_items_tbl" : "ims_request_assets_tbl";
-        $groupBy    = $param == "item" ? "itemID" : "assetID"; 
-        $whereBOM   = $billMaterialID ? "AND billMaterialID = '$billMaterialID'" : "";
-        $sql        = "SELECT $table.* , $column FROM $table WHERE costEstimateID = '$costEstimateID' $whereBOM GROUP BY $groupBy";
-        $query      = $this->db->query($sql);
-        return $query ? $query->result_array() : [];
-    }
-
-
-    public function getInventoryRequestData($costEstimateID = null, $billMaterialID = null){
-        $result = [
-            "project"   => $this->getInventoryRequest("item", $costEstimateID, $billMaterialID),
-            "assets"    => $this->getInventoryRequest("asset", $costEstimateID, $billMaterialID),
-            "travel"    => [] 
-        ];
-        return $result;
-    }
-
-    // public function getTaskListData($timelineBuilderID = null){
-    //     $sql    = "SELECT * FROM pms_timeline_task_list_tbl WHERE timelineBuilderID = '$timelineBuilderID' ";
-    //     $query  = $this->db->query($sql);
-    //     return $query ? $query->result_array() : [];
-    // }
-
-    // public function getTimelineManagement($timelineBuilderID = null, $taskID = null){
-    //     $sql    = "SELECT  * FROM pms_timeline_management_tbl WHERE timelineBuilderID = '$timelineBuilderID' AND taskID = '$taskID'";
-    //     $query  = $this->db->query($sql);
-    //     return $query ? $query->result_array() : [];
-    // }
-
-    
-    public function getPhaseAndMilestoneData($timelineBuilderID){
+    public function getPhaseAndMilestoneData($timelineBuilderID, $costEstimateID = null){
         $data   =  [
-            "phase" => $this->projectData($timelineBuilderID),
+            "phase"     => $this->projectData($timelineBuilderID, $costEstimateID),
+            "asset"     => $this->getInventoryRequestData("asset",  $costEstimateID),
+            "vehicle"   => $this->getTravelRequestData("vehicle",   $costEstimateID),
+            "other"     => $this->getTravelRequestData("other", $costEstimateID)
         ];
         return $data;
     }
 
-    public function projectData($timelineBuilderID = null){
+    public function projectData($timelineBuilderID = null, $costEstimateID = null){
         $phaseData  = $this->getPhasedata($timelineBuilderID);
         $result     =  [];
         foreach ($phaseData as $phase) {
@@ -129,13 +166,14 @@ class CostEstimate_model extends CI_Model {
             $temp = [
                 "phaseID"          => $phase["milestoneBuilderID"],
                 "phaseDescription" => $phase["phaseDescription"],
-                "milestone"        => $this->getMilestoneData($milestoneBuilderID)
+                "milestone"        => $this->getMilestoneData($milestoneBuilderID, $timelineBuilderID, $costEstimateID)
             ];
             array_push($result,$temp);
         }
         return $result;
     }
 
+    // GET PHASE FROM TIMELINE BUILDER
     public function getPhaseData($timelineBuilderID){
         $sql = "SELECT milestoneBuilderID, pmbt.phaseDescription AS phaseDescription
                 FROM pms_timeline_task_list_tbl AS pttl 
@@ -146,25 +184,124 @@ class CostEstimate_model extends CI_Model {
         return $query ? $query->result_array() : [];
     }
 
-    public function getMilestoneData($milestoneBuilderID = null){
-        $sql        = " SELECT * FROM pms_milestone_list_tbl WHERE milestoneBuilderID = '$milestoneBuilderID' ";
+    // GET MILESTONE FROM TIMELINE BUILDER
+    public function getMilestoneData($milestoneBuilderID = null, $timelineBuilderID = null, $costEstimateID = null){
+        $sql        = "SELECT * FROM pms_milestone_list_tbl WHERE milestoneBuilderID = '$milestoneBuilderID' ";
         $query      = $this->db->query($sql);
         $returnData = [];
         foreach ($query->result_array() as $data) {
             $temp = [
-                "milestoneListID"       => $data["milestoneListID"],
+                // "milestoneListID"       => $data["milestoneListID"],
+                "milestoneListID"       => $data["projectMilestoneID"],
                 "milestoneBuilderID"    => $data["milestoneBuilderID"],
-                "projectMilestoneName"  => $data["projectMilestoneName"]
+                "projectMilestoneName"  => $data["projectMilestoneName"],
+                "items"                 => $this->getInventoryRequestData("item", $costEstimateID ,$milestoneBuilderID , $data["projectMilestoneID"]),
+                "personnel"             => $this->getRequestPersonnel($timelineBuilderID, $milestoneBuilderID, $data["projectMilestoneID"])
             ];
             array_push($returnData,$temp);
         }
         return $returnData;
     }
 
+    public function getRequestItems($timelineBuilderID = null, $phaseID = null, $milestoneListID = null){
 
 
+    }
 
 
+    public function getRequestPersonnel($timelineBuilderID = null, $phaseID = null, $milestoneListID = null){
+        $returnData = [];
+        $sql = "SELECT 
+                    ptmt.manHours as manhour, assignedManhours, assignedDesignation
+                FROM pms_timeline_task_list_tbl as pttlt LEFT JOIN pms_timeline_management_tbl as ptmt USING(taskID)
+                WHERE 
+                    ptmt.projectMilestoneID = '$milestoneListID'
+                AND
+                    pttlt.milestoneBuilderID = '$phaseID'
+                AND 
+                    ptmt.timelineBuilderID = '$timelineBuilderID'";
+        $query = $this->db->query($sql);
+        $designationData = [];
+        $designationIDArr = [];
+        
+        foreach ($query->result_array() as $designation){ // START FOR EACH LOOP -
+            
+            $designationArr = explode("|", $designation["assignedDesignation"]);
+            $manhourArr     = explode("|", $designation["assignedManhours"]);
+            
+            for ($x=0; $x < count($designationArr); $x++) {  // START FOR LOOP = 
+                // PUSHING VALUE IN $designationIDArr
+                    if(count($designationIDArr) < 0){
+                        array_push($designationIDArr,  $designationArr[$x]);
+                    }else{
+                        if(!in_array($designationArr[$x], $designationIDArr)){
+                            array_push($designationIDArr,  $designationArr[$x]);
+                        }
+                    }
+                // END PUSHING VALUE IN $designationIDArr
+                $designationResult = $this->getDesignation($designationArr[$x]);
+                    $temp = [
+                        "designationID"         => $designationResult->designationID,
+                        "designationCode"       => $designationResult->designationCode,
+                        "designationName"       => $designationResult->designationName,
+                        "designationHourlyRate" => $designationResult->designationHourlyRate,
+                        "projectManhour"        => $manhourArr[$x]
+                    ];
+                    array_push($designationData,  $temp);
+            } // END FOR LOOP =
+        } // END FOR EACH LOOP -
+        // print_r($designationIDArr);
+        for ($x=0; $x < count($designationIDArr) ; $x++) {
+            $designationID          = $designationIDArr[$x]; 
+            $designationResult      = $this->getDesignation($designationID);
+            $designationQty         = 0;
+            $projectTotalManhour    = 0;
+            
+            for ($y =0; $y < count($designationData) ; $y++) { 
+                $thisObj = $designationData[$y];
+                if($thisObj["designationID"] == $designationID){
+                    $projectTotalManhour += floatval($thisObj["projectManhour"]);
+                    $designationQty ++;
+                }
+            }
+            $totalCost = (floatval($projectTotalManhour) * floatval($designationResult->designationHourlyRate) ) * $designationQty;
+            $temp = [
+                "designationID"              => $designationID,
+                "designationCode"            => $designationResult->designationCode,
+                "designationName"            => $designationResult->designationName,
+                "designationQuantity"        => $designationQty,
+                "designationTotalManHours"   => $projectTotalManhour,
+                "unitCost"                   => $designationResult->designationHourlyRate,
+                "totalCost"                  => $totalCost
+            ];
+            array_push($returnData, $temp);
+        }
+
+        return $returnData;
+    }
+    
+    // GET DESIGNATION 
+    public function getDesignation($designationID){
+        $sql    = "SELECT * FROM hris_designation_tbl WHERE designationID = '$designationID'";
+        $query  = $this->db->query($sql);
+        return $query ? $query->row() : [];
+    }
+
+    public function getInventoryRequestData($param = "item", $costEstimateID = null, $phaseID = null, $milestoneID = null ){
+        $table      = $param == "item" ? "ims_request_items_tbl" : "ims_request_assets_tbl";
+        $wherePhase = $phaseID ? "AND milestoneBuilderID = '$phaseID' AND milestoneListID = '$milestoneID'" : "";
+        $sql        = "SELECT $table.* FROM $table WHERE costEstimateID = '$costEstimateID' $wherePhase ";
+        $query      = $this->db->query($sql);
+        return $query ? $query->result_array() : [];
+    }
+
+    public function getTravelRequestData($param = "vehicle", $costEstimateID = null){
+        $whereCategory  = $param == "vehicle"  ? "vehicleID IS NOT NULL" : "vehicleID IS NULL";
+        $sql            = "SELECT ims_travel_request_tbl.* FROM ims_travel_request_tbl WHERE costEstimateID = '$costEstimateID' AND $whereCategory AND billMaterialID IS NULL";
+        $query          = $this->db->query($sql);
+        return $query ? $query->result_array() : [];
+    }
+    
 
 }
 ?>
