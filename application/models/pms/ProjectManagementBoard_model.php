@@ -70,7 +70,15 @@ class ProjectManagementBoard_model extends CI_Model {
     public function getTimelineBoard($timelineBuilderID = 0, $taskID = 0)
     {
         $output = [];
-        $sql    = "SELECT * FROM pms_timeline_management_tbl WHERE timelineBuilderID = $timelineBuilderID AND taskID = $taskID";
+        $sql    = "
+        SELECT 
+            ptmt.*,
+            pttlt.taskStartDate,
+            pttlt.taskEndDate 
+        FROM pms_timeline_management_tbl AS ptmt 
+            LEFT JOIN pms_timeline_task_list_tbl AS pttlt USING(taskID)
+        WHERE ptmt.timelineBuilderID = $timelineBuilderID 
+            AND ptmt.taskID = $taskID";
         $query  = $this->db->query($sql);
         $milestones = $query ? $query->result_array() : [];
         foreach ($milestones as $milestone) {
@@ -78,6 +86,8 @@ class ProjectManagementBoard_model extends CI_Model {
                 "timelineManagementID"  => $milestone["timelineManagementID"],
                 "milestoneID"           => $milestone["projectMilestoneID"],
                 "manHours"              => $milestone["manHours"],
+                "taskStartDate"         => $milestone["taskStartDate"],
+                "taskEndDate"           => $milestone["taskEndDate"],
                 "assignedDesignation"   => $milestone["assignedDesignation"],
                 "assignedManHours"      => $milestone["assignedManHours"],
                 "assignedEmployee"      => $milestone["assignedEmployee"],

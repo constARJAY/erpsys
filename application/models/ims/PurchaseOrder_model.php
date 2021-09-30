@@ -45,7 +45,7 @@ class PurchaseOrder_model extends CI_Model {
         if ($classification && $purchaseOrderID)
         {
             $table = $classification == "Items" ? "ims_request_items_tbl" : "ims_request_assets_tbl";
-            $sql = "SELECT * FROM $table WHERE purchaseOrderID = $purchaseOrderID AND changeRequestID IS NULL AND inventoryReceivingID IS NULL";
+            $sql = "SELECT * FROM $table WHERE purchaseOrderID = $purchaseOrderID AND inventoryReceivingID IS NULL";
             $query = $this->db->query($sql);
             return $query ? $query->result_array() : [];
         }
@@ -244,6 +244,20 @@ class PurchaseOrder_model extends CI_Model {
 
 
     // ----- ***** PURCHASE ORDER EXCEL DATA ***** -----
+    public function updatePrintCountPurchaseOrder($purchaseOrderID = 0)
+    {
+        $sql = "SELECT printCount FROM ims_purchase_order_tbl WHERE purchaseOrderID = $purchaseOrderID";
+        $query = $this->db->query($sql);
+        $result = $query ? $query->row() : null;
+        if ($result)
+        {
+            $printCount = $result->printCount ?? 0;
+            $data = ["printCount" => ($printCount + 1)];
+            $this->db->update("ims_purchase_order_tbl", $data, ["purchaseOrderID" => $purchaseOrderID]);
+        }
+        return true;
+    }
+
     public function getEmployeeData($employeeID = 0)
     {
         $sql = "
@@ -261,6 +275,8 @@ class PurchaseOrder_model extends CI_Model {
         $data = [];
         if ($purchaseOrderID)
         {
+            $updatePurchaseOrder = $this->updatePrintCountPurchaseOrder($purchaseOrderID);
+
             $purchaseOrderData = $this->getPurchaseOrderData($purchaseOrderID);
             if ($purchaseOrderData)
             {

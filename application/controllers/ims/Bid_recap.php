@@ -201,16 +201,16 @@ class Bid_recap extends CI_Controller {
                         }
                     }
                 }
-
-                // ----- INSERT PURCHASE REQUEST -----
-                if ($bidRecapStatus == "2")
-                {
-                    $insertPurchaseRequestData = $this->bidrecap->insertPurchaseRequestData($bidRecapID);
-                }
-                // ----- END INSERT PURCHASE REQUEST -----
-
             } 
         }
+
+        // ----- INSERT PURCHASE REQUEST -----
+        if ($bidRecapStatus == "2" || $bidRecapStatus == 2)
+        {
+            $insertPurchaseRequestData = $this->bidrecap->insertPurchaseRequestData($bidRecapID);
+        }
+        // ----- END INSERT PURCHASE REQUEST -----
+
         echo json_encode($saveBidRecapData);
     }
 

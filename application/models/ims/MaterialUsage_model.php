@@ -58,19 +58,26 @@ class MaterialUsage_model extends CI_Model {
     public function saveServices($service = null, $scopes = null, $id = null,$itemID=null)
     {
         $sessionID = $this->session->has_userdata("adminSessionID") ? $this->session->userdata("adminSessionID") : 0;
-        if ($service && $scopes) {
+        if ($service) {
             $query = $this->db->insert("ims_inventory_request_details_tbl", $service);
-            if ($query) {
+        }
+        return false;
+    }
+
+    public function saveSerial( $scopes = null, $materialUsageID)
+    {
+        $sessionID = $this->session->has_userdata("adminSessionID") ? $this->session->userdata("adminSessionID") : 0;
+        if ($scopes) {
+         
                 $insertID  = $this->db->insert_id();
                 $scopeData = [];
                 foreach ($scopes as $scope) {
 
                     // if($itemID == $scope["itemID"]){
                         $temp = [
-                            "materialUsageID  " => $id,
-                            "inventoryRequestID"    => $insertID,
+                            "materialUsageID  " => $materialUsageID,
                             "serialNumber"          => $scope["serialNumber"],
-                            "itemID"                => $scope["itemID"],
+                            "itemID"                => $scope["serialitemID"] != "null" ? $scope["serialitemID"] : null,
                             "createdBy"            => $sessionID,
                             "updatedBy"            => $sessionID,
                         ];
@@ -84,10 +91,10 @@ class MaterialUsage_model extends CI_Model {
                 if ($saveScopes) {
                     return true;
                 }
-            }
         }
         return false;
     }
+
 
     // public function updateOrderedPending($materialUsageID   = null)
     // {

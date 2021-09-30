@@ -272,6 +272,8 @@ class StockOut_model extends CI_Model {
     public function insertBidRecapItems($itemID = 0,$insertID =0)
     {
         $requestItems = $this->getInventoryStockInItems($itemID);
+
+       
       
         if ($requestItems && count($requestItems) > 0)
         {
@@ -281,11 +283,6 @@ class StockOut_model extends CI_Model {
             // foreach($requestItems as $item)
             // {
                 $data = array(
-                    'stockInItemID'          => $requestItems[0]['stockInItemID'],
-                    'returnItemID'          => $requestItems[0]['returnItemID'],
-                    'materialUsageID'       => $requestItems[0]['materialUsageID'],
-                    'inventoryReceivingID'   => $requestItems[0]['inventoryReceivingID'],
-                    'stockOutID'            => $requestItems[0]['stockOutID'],
                     'inventoryCode'       => $requestItems[0]['inventoryCode'],
                     'inventoryStorageID'         => $requestItems[0]['inventoryStorageID'],
                     'inventoryStorageCode'         => $requestItems[0]['inventoryStorageCode'],
@@ -298,15 +295,15 @@ class StockOut_model extends CI_Model {
                     'categoryName'     => $requestItems[0]['categoryName'],
                     'serialNumber'     => $requestItems[0]['serialNumber'],
                     'ExpirationDate'      => $requestItems[0]['ExpirationDate'],
-                    'ManufactureDate'        => $requestItems[0]['ManufactureDate'],
-                    'barcode'         => $requestItems[0]['barcode'],
-                    'quantity'      => $requestItems[0]['quantity'],
-                    'createAt'    => $sessionID,
+                    'ManufactureDate'        => $requestItems[0]['ManufactureDate']
                 );
             // }
 
             $this->db->where('stockInItemID', $insertID);
-            $this->db->update('ims_stock_in_item_tbl', $data);
+            $query = $this->db->update('ims_stock_in_item_tbl', $data);
+
+   
+
             return $query ? true : false;
         }
         return false;
@@ -324,42 +321,98 @@ class StockOut_model extends CI_Model {
                
                     
                 if($query){
-                //     $withdrawalItemID = $this->db->insert_id();
-                //     $item_ID = $dataItem['itemID'];
-                //     $getAvailableStocks = $this->db->query("SELECT CASE
-                //         WHEN IFNULL(SUM(itmStock.quantity),0)-IFNULL(reOrderLevel,0) <0 THEN 0
-                //         ELSE IFNULL(SUM(itmStock.quantity),0)-IFNULL(reOrderLevel,0)
-                //         END AS availableStocks
+                    $withdrawalItemID = $this->db->insert_id();
+                    $item_ID = $dataItem['itemID'];
+                    $requestStocks =  $dataItem["stockOut"];
 
-                //         FROM 
+                        // Update the stock in records in imd_stock_in_item_tbl//
+                        $getSpecificAvailableStocks = $this->db->query("SELECT stockInItemID,quantity,expirationDate
+                        FROM 
+                        ims_stock_in_item_tbl 
+                        WHERE
+                        stockOutDate IS NUll 
+                        AND stockInDate IS NOT NULL 
+                        AND ( returnItemID IS NOT NULL OR inventoryReceivingID IS NOT NULL )
+                        AND itemID = '$item_ID' 
+                        ORDER BY expirationDate asc");
 
-                //         ims_stock_in_item_tbl AS itmStock 
-                //         JOIN ims_inventory_item_tbl AS itm ON itm.itemID = itmStock.itemID
+                        $stockInStocksResult =  $getSpecificAvailableStocks->result_array();
 
-                //         WHERE
-                //         itmStock.stockOutDate IS NUll 
-                //         AND itmStock.stockInDate IS NOT NULL 
-                //         AND itmStock.itemID = $item_ID  ");
+                            $tmpRequestStocks = $requestStocks;
+                            // $tmpRequestStocks = 5;
+                            for($loop=0;$loop<count($stockInStocksResult);$loop++){
 
-                //         $stockInResult =  $getAvailableStocks->result_array();
+                                $oldQuantity =  $stockInStocksResult[$loop]['quantity'];
 
-                //     $deductionStocks =  $stockInResult[0]["availableStocks"] - $dataItem["stockOut"];
-                //     echo $stockInResult[0]["availableStocks"]; 
-                //     $data = array(
-                //         'stockOutID' => $stockOutID,
-                //         'quantity' => $deductionStocks,
-                //         'stockOutDate' => date("Y-m-d")
-                // );
+                                $computeDiff = $oldQuantity - $tmpRequestStocks ;
 
+                                
+                                if($computeDiff <0){
+                                    $tmpRequestStocks = abs($computeDiff);
+                                    $newQuantity =  0;
+
+                                }
+                                
+                                if($tmpRequestStocks != 0){
+
+                                    if($computeDiff >0){
+                                        $tmpRequestStocks = 0;
+                                        $newQuantity =$computeDiff;
+                                        }
+
+                                } else{
+                                    $tmpRequestStocks = 0;
+                                    $newQuantity =$oldQuantity;
+                                }
+
+                                if($computeDiff == 0){
+                                    $tmpRequestStocks = 0;
+                                    $newQuantity =  0;
+
+                                }
+
+
+                                $data = array(
+                                    'quantity'       => $newQuantity,
+                                );
+
+                                $this->db->where('stockInItemID', $stockInStocksResult[$loop]['stockInItemID']);
+                                $this->db->update('ims_stock_in_item_tbl', $data);
+                            }
+
+
+                        // End update the stock in records in imd_stock_in_item_tbl//
+                       
+
+                        // Stock Out Quantity Data in ims_stock_in_item_tbl//
+                        $getAvailableStocks = $this->db->query("SELECT returnItemID, stockOutID, quantity as availableStocks
+                        FROM 
+                        ims_stock_in_item_tbl 
+                        WHERE
+                        stockOutDate IS NUll 
+                        AND stockInDate IS NOT NULL 
+                        AND itemID = $item_ID  ");
+
+                        $stockInResult =  $getAvailableStocks->result_array();
+
+                        $deductionStocks =  $stockInResult[0]["availableStocks"] - $requestStocks;
+
+                        $data = array(
+                            'stockOutID' => $stockOutID,
+                            'barcode' => $dataItem["barcode"],
+                            'quantity' => $dataItem["stockOut"],
+                            'stockOutDate' => date("Y-m-d")
+                        );
+
+                        $this->db->insert('ims_stock_in_item_tbl', $data);
+
+                        $insertID = $this->db->insert_id();
+
+                        $insertBidRecapItems  = $this->insertBidRecapItems($item_ID,$insertID);
+                        // Stock Out Quantity Data in ims_stock_in_item_tbl//
+                       
                 
-                // $this->db->insert('ims_stock_in_item_tbl', $data);
-                
-                $insertID = $this->db->insert_id();
 
-                // $insertBidRecapItems  = $this->insertBidRecapItems($item_ID,$insertID);
-
-
-            
                             if(!empty($serialData)){
                                 $serials = $serialData;
             
@@ -379,34 +432,24 @@ class StockOut_model extends CI_Model {
                                 if(!empty($serialDataRecords)){
                               
                                     $saveScopes = $this->db->insert_batch("ims_withdrawal_stockout_serial_number_tbl", $serialDataRecords);
-                    
-                                    // if ($saveScopes) {
-                                    //     return true;
-                                    // }
-                                    // return false;
-                                    
+
                                 }
             
                             }
-                        
-            
-                        
-                        
-                        // if ($inventoryReceivingData["inventoryReceivingStatus"] == "2") {
-                        //     $this->inventoryreceiving->updateOrderedPending($inventoryReceivingID);
-                        // }
                     }    
         }
      
         if($dataItem && count($dataItem) > 0){
 
-            return $query ? "true|Successfully updated|$materialWithdrawalID|".date("Y-m-d") : "false|System error: Please contact the system administrator for assistance!";
 
              // START UPDATE THE MATERIAL WITHDRAWAL DOCUMENT STATUS AND EMPLOYEE ID//
              $query = $this->db->query("UPDATE  ims_stock_out_tbl
              SET employeeID = IF(employeeID = '', $sessionID, (SELECT employeeID FROM ims_stock_out_tbl WHERE stockOutID = $stockOutID ))
              WHERE stockOutID = $stockOutID");
              // END UPDATE THE MATERIAL WITHDRAWAL DOCUMENT STATUS AND EMPLOYEE ID//
+
+            return $query ? "true|Successfully updated|$stockOutID|".date("Y-m-d") : "false|System error: Please contact the system administrator for assistance!";
+
         }
         return "false|System error: Please contact the system administrator for assistance!";
     }
@@ -448,12 +491,6 @@ class StockOut_model extends CI_Model {
 
                 }
             }
-
-            
-            
-            // if ($inventoryReceivingData["inventoryReceivingStatus"] == "2") {
-            //     $this->inventoryreceiving->updateOrderedPending($inventoryReceivingID);
-            // }
         }        
     }
 

@@ -28,12 +28,13 @@ class Bill_material extends CI_Controller {
     {
         parent::__construct();
         $this->load->model("pms/BillMaterial_model", "billmaterial");
-        isAllowed(39);
+        $this->load->model("ims/MaterialRequest_model", "materialrequest");
+        // isAllowed(39);
     }
 
     public function index()
     {
-        $data["title"] = "Bill Material";
+        $data["title"] = "Bill of Material";
         $this->load->view("template/header",$data);
         $this->load->view("pms/bill_material/index");
         $this->load->view("template/footer");
@@ -117,27 +118,28 @@ class Bill_material extends CI_Controller {
         }
 
         $saveBillMaterialData = $this->billmaterial->saveBillMaterialData($action, $billMaterialData, $billMaterialID);
-            // if($billMaterialStatus == "2"){
-            //     $billMaterialResultData = $this->billmaterial->getBillMaterialData($billMaterialID);
-            //     $insertBOMData = [
-            //         "costEstimateID"            => $billMaterialResultData->costEstimateID,
-            //         "costEstimateCode"          => $billMaterialResultData->costEstimateCode,
-            //         "employeeID"                => "0",
-            //         "timelineBuilderID"         => $billMaterialResultData->timelineBuilderID,
-            //         "timelineDesign"            => $billMaterialResultData->timelineDesign,
-            //         "projectCode"               => $billMaterialResultData->projectCode,
-            //         "projectName"               => $billMaterialResultData->projectName,
-            //         "projectCategory"           => $billMaterialResultData->projectCategory,
-            //         "clientCode"                => $billMaterialResultData->clientCode,
-            //         "clientName"                => $billMaterialResultData->clientName,
-            //         "clientAddress"             => $billMaterialResultData->clientAddress,
-            //         "billMaterialStatus"        => "0",
-            //         "billMaterialReason"        => $billMaterialResultData->billMaterialReason,
-            //         "dateNeeded"                => $billMaterialResultData->dateNeeded,
-            //         "createdBy"                 => $billMaterialResultData->createdBy,
-            //     ];
-            //     $this->billmaterial->saveBillMaterialData("insert", $insertBOMData);
-            // }
+            if($billMaterialStatus == "2"){
+                $billMaterialResultData = $this->billmaterial->getBillMaterialData($billMaterialID);
+                    $materialRequestData = [
+                        "employeeID"                => $billMaterialResultData->createdBy,
+                        "costEstimateID" 		    => $billMaterialResultData->costEstimateID,
+                        "costEstimateCode" 			=> $billMaterialResultData->costEstimateCode,
+                        "billMaterialID" 			=> $billMaterialResultData->billMaterialID,
+                        "billMaterialCode"			=> $billMaterialResultData->billMaterialCode,
+                        "timelineBuilderID" 		=> $billMaterialResultData->timelineBuilderID,
+                        "projectCode"   			=> $billMaterialResultData->projectCode,
+                        "projectName"   			=> $billMaterialResultData->projectName,
+                        "projectCategory" 			=> $billMaterialResultData->projectCategory,
+                        "clientName"    		    => $billMaterialResultData->clientName,
+                        "clientAddress" 		    => $billMaterialResultData->clientAddress,
+                        "dateNeeded" 				=> $billMaterialResultData->dateNeeded,
+                        "materialRequestReason"     => $billMaterialResultData->materialRequestReason,
+                        "submittedAt"               => $billMaterialResultData->submittedAt,
+                        "createdBy"                 => $billMaterialResultData->createdBy,
+                        "updatedBy"                 => $billMaterialResultData->createdBy
+                    ];
+                $this->materialrequest->saveMaterialRequestData("insert", $materialRequestData);
+            }
         if($saveBillMaterialData){
             $error      = 0;
             $errorMsg   = "false|System error: Please contact the system administrator for assistance!";

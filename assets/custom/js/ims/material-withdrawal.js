@@ -1517,6 +1517,11 @@ $(document).ready(function() {
         let swalText, swalImg;
 
         switch (method) {
+            case "update":
+                swalTitle = `UPDATE ${title.toUpperCase()}`;
+                swalText  = "Are you sure to update this document?";
+                swalImg   = `${base_url}assets/modal/draft.svg`;
+                break;
             case "save":
                 swalTitle = `SAVE ${title.toUpperCase()}`;
                 swalText  = "Are you sure to save this document?";
@@ -1622,6 +1627,8 @@ $(document).ready(function() {
                                 swalTitle = `${getFormCode("MWF", dateCreated, insertedID)} denied successfully!`;
                             } else if (method == "drop") {
                                 swalTitle = `${getFormCode("MWF", dateCreated, insertedID)} dropped successfully!`;
+                            }else if (method == "update") {
+                                swalTitle = `${getFormCode("MWF", dateCreated, insertedID)} updated successfully!`;
                             }
             
                             if (isSuccess == "true") {

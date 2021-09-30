@@ -210,7 +210,7 @@ class InventoryStockIn_model extends CI_Model {
                 WHERE inventoryCode ='".$referenceCode."' AND itemID = ".$itemID."
                 UNION ALL 
                 SELECT quantity ,barcode FROM ims_stock_in_assets_tbl
-                WHERE inventoryCode = '".$referenceCode."' AND itemID = ".$itemID."";
+                WHERE inventoryCode = '".$referenceCode."' AND assetID = ".$itemID."";
         $query = $this->db->query($sql);
         //return $query->result($query);
         return $query->result_array();

@@ -95,7 +95,7 @@ class Purchase_request extends CI_Controller {
         ];
 
         $bidRecapID = "";
-        $prID = $revisePurchaseRequestID || $purchaseRequestID;
+        $prID = $revisePurchaseRequestID ?? $purchaseRequestID;
         if ($prID) {
             $purchaseRequest = $this->purchaserequest->getPurchaseRequestData($prID);
             if ($purchaseRequest) {

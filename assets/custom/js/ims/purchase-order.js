@@ -720,6 +720,7 @@ $(document).ready(function() {
 		readOnly = isRevise ? false : readOnly;
 		let {
 			purchaseOrderID,
+			bidRecapID,
 			purchaseOrderCode,
 			purchaseRequestCode,
 			employeeID,
@@ -756,7 +757,7 @@ $(document).ready(function() {
 
 		readOnly ? preventRefresh(false) : preventRefresh(true);
 
-        const buttonChangeRequest = purchaseOrderStatus == "0" ? `
+        const buttonChangeRequest = bidRecapID && bidRecapID != "null" && purchaseOrderStatus == "0" ? `
             <button type="button" 
                 class="btn btn-cancel btnCancel px-5 p-2"
 				purchaseOrderID="${encryptString(purchaseOrderID)}"

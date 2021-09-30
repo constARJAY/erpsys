@@ -31,7 +31,7 @@ class Inventory_receiving extends CI_Controller {
         $clientCode                 = $this->input->post("clientCode") ?? null;
         $timelineBuilderID          = $this->input->post("timelineBuilderID") ?? null;
         $clientAddress              = $this->input->post("clientAddress") ?? null;
-        $recordID                   = $this->input->post("recordID") ?? null;
+        $recordID                   = $this->input->post("recordID");
         $inventoryReceivingID       = $this->input->post("inventoryReceivingID") ?? null;
         $reviseInventoryReceivingID = $this->input->post("reviseInventoryReceivingID") ?? null;
         $employeeID                 = $this->input->post("employeeID");
@@ -47,11 +47,9 @@ class Inventory_receiving extends CI_Controller {
         $updatedBy                  = $this->input->post("updatedBy");
         $createdAt                  = $this->input->post("createdAt");
         $items                      = $this->input->post("items") ?? null;
+
        
-        // echo "<pre>";
-        // print_r($items);
-        // echo json_encode($items);
-        // exit;
+       
 
         $lastApproveCondition       = $this->input->post("lastApproveCondition");
         $inventoryReceivingData = [
@@ -118,6 +116,7 @@ class Inventory_receiving extends CI_Controller {
             $result = explode("|", $saveInventoryReceivingData);
 
             if ($result[0] == "true") {
+                //$scopes =[];
                 $inventoryReceivingID = $result[2];
                 if($_FILES){
                     $fileType                   = substr($_FILES["file"]["type"], strpos($_FILES["file"]["type"], "/") + 1);
@@ -130,7 +129,7 @@ class Inventory_receiving extends CI_Controller {
                         $this->inventoryreceiving->updateInventoryReceiving("ims_inventory_receiving_tbl", $updateReceiptData, "inventoryReceivingID = ".$inventoryReceivingID);
                     }
                 }
-
+                $scopes ='';
                 if ($items) {
                     foreach($items as $index => $item) {
                         $service = [
@@ -140,20 +139,22 @@ class Inventory_receiving extends CI_Controller {
                             "inventoryCode"        => getFormCode("INR", $item["created"], $inventoryReceivingID),
                             "itemID"               => $item["itemID"] != "null" ? $item["itemID"] : null,
                             "itemName"             => $item["itemName"],
-                            "Brand"                 => $item["Brand"],
+                            "Brand"                => $item["Brand"],
                             "classificationName"   => $item["classificationName"],
-                            "categoryName"          => $item["categoryName"],
-                            "quantity"              => $item["quantity"],
-                            "receivedQuantity"      => $item["receivedQuantity"],
-                            "remainingQuantity"     => $item["remainings"],
-                            "remarks"               => $item["remarks"],
-                            "createdBy"             => $updatedBy,
-                            "updatedBy"             => $updatedBy,
+                            "categoryName"         => $item["categoryName"],
+                            "quantity"             => $item["quantity"],
+                            "receivedQuantity"     => $item["receivedQuantity"],
+                            "remainingQuantity"    => $item["remainings"],
+                            "remarks"              => $item["remarks"],
+                            "createdBy"            => $updatedBy,
+                            "updatedBy"            => $updatedBy,
                         ];
+                        
+                        if(!empty($item["scopes"])){
+                            $scopes = $item["scopes"];
 
-                        $scopes = $item["scopes"];
-
-                      
+                            $saveServices = $this->inventoryreceiving->saveSerial($scopes, $inventoryReceivingID); 
+                            }    
                         
                         $saveServices = $this->inventoryreceiving->saveServices($service, $scopes, $inventoryReceivingID,$item["itemID"]);
                     }

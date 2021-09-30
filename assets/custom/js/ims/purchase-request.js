@@ -882,6 +882,7 @@ $(document).ready(function() {
 				inventoryVendorBarangay,
 				inventoryVendorUnit,
 				inventoryVendorBuilding,
+				inventoryVendorStreet,
 				inventoryVendorCountry,
 				inventoryVendorZipCode,
 				inventoryVendorPerson,
@@ -889,8 +890,8 @@ $(document).ready(function() {
 				inventoryVendorTelephone,
 			} = vendor;
 
-			let address        = `${inventoryVendorUnit && titleCase(inventoryVendorUnit)+", "}${inventoryVendorBuilding && inventoryVendorBuilding +", "}${inventoryVendorBarangay && titleCase(inventoryVendorBarangay)+", "}${inventoryVendorCity && titleCase(inventoryVendorCity)+", "}${inventoryVendorProvince && titleCase(inventoryVendorProvince)+", "}${inventoryVendorCountry && titleCase(inventoryVendorCountry)+", "}${inventoryVendorZipCode && titleCase(inventoryVendorZipCode)}`;
-			let contactDetails = `${inventoryVendorMobile} / ${inventoryVendorTelephone}`;
+			let address        = `${inventoryVendorUnit && titleCase(inventoryVendorUnit)+", "}${inventoryVendorBuilding && inventoryVendorBuilding +", "}${inventoryVendorStreet && inventoryVendorStreet +", "}${inventoryVendorBarangay && titleCase(inventoryVendorBarangay)+", "}${inventoryVendorCity && titleCase(inventoryVendorCity)+", "}${inventoryVendorProvince && titleCase(inventoryVendorProvince)+", "}${inventoryVendorCountry && titleCase(inventoryVendorCountry)+", "}${inventoryVendorZipCode && titleCase(inventoryVendorZipCode)}`;
+			let contactDetails = `${inventoryVendorMobile}${inventoryVendorTelephone ? " / "+inventoryVendorTelephone : ""}`;
 
             return `
             <option 

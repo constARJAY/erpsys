@@ -43,7 +43,7 @@ class Material_withdrawal extends CI_Controller {
                 $status = "0";
                 $getReceived = $item["received"];
                 $getRemaining = $item["remainingItem"];
-                if($getRemaining == 0 && $getReceived !=0   ){
+                if($getRemaining <= 0 && $getReceived !=0   ){
                     $status = "1";
                 }
                 $temp = [
@@ -87,6 +87,12 @@ class Material_withdrawal extends CI_Controller {
         // echo "<pre>";
         // print_r($dataItem);
         // print_r($dataAsset);
+        // exit;
+
+         
+        // echo "<pre>";
+        // print_r($dataItem);
+        // print_r($this->materialWithdrawal->saveProjectBoard($materialWithdrawalID, $dataItem,$dataAsset,$sessionID));
         // exit;
         echo json_encode( $this->materialWithdrawal->saveProjectBoard($materialWithdrawalID, $dataItem,$dataAsset,$sessionID));
     }

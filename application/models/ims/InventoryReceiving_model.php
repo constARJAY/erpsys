@@ -61,38 +61,40 @@ class InventoryReceiving_model extends CI_Model {
     public function saveServices($service = null, $scopes = null, $id = null,$itemID=null)
     {
         $sessionID = $this->session->has_userdata("adminSessionID") ? $this->session->userdata("adminSessionID") : 0;
-        if ($service && $scopes) {
+        if ($service) {
             $query = $this->db->insert("ims_inventory_request_details_tbl", $service);
-            if ($query) {
-                $insertID  = $this->db->insert_id();
-                $scopeData = [];
-                foreach ($scopes as $scope) {
-
-                    // if($itemID == $scope["itemID"]){
-                        $temp = [
-                            "inventoryReceivingID" => $id,
-                            "serialNumber"          => $scope["serialNumber"],
-                            "itemID"             => $scope["itemID"],
-                            "createdBy"            => $sessionID,
-                            "updatedBy"            => $sessionID,
-                        ];
-                        array_push($scopeData, $temp);
-                    // }
-
-                        //  echo "<pre>";
-                        //     print_r($$scopes);
-                }
-                $saveScopes = $this->saveScopes($scopeData);
-                if ($saveScopes) {
-                    return true;
-                }
-            }
         }
         return false;
     }
     public function updateInventoryReceiving($tableName,$data, $reference){
         $query =  $this->db->update($tableName, $data, $reference);  //"id = 4"
         return $query;
+    }
+
+    public function saveSerial( $scopes = null, $inventoryReceivingID)
+    {
+        $sessionID = $this->session->has_userdata("adminSessionID") ? $this->session->userdata("adminSessionID") : 0;
+        if ($scopes) {
+                $insertID  = $this->db->insert_id();
+                $scopeData = [];
+                foreach ($scopes as $scope) {
+
+                    // if($itemID == $scope["itemID"]){
+                        $temp = [
+                            "inventoryReceivingID"  => $inventoryReceivingID,
+                            "serialNumber"          => $scope["serialNumber"],
+                            "itemID"                => $scope["serialitemID"] != "null" ? $scope["serialitemID"] : null,
+                            "createdBy"             => $sessionID,
+                            "updatedBy"             => $sessionID,
+                        ];
+                        array_push($scopeData, $temp);
+                }
+                $saveScopes = $this->saveScopes($scopeData);
+                if ($saveScopes) {
+                    return true;
+                }
+        }
+        return false;
     }
 
 

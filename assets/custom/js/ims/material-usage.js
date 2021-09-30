@@ -873,7 +873,7 @@ function getItemsRow(readOnly = false,materialUsageID) {
 					<div class="used">${used || ""}</div>
 					</td>	
 					<td class="text-center">
-						<div class="unused ">${unused || ""}</div>
+						<div class="unused">${unused || ""}</div>
 					</td>
 					<td class="table-data-serial-number">
 						${itemSerialNumbers}	
@@ -906,6 +906,7 @@ function getItemsRow(readOnly = false,materialUsageID) {
 								min="0"
 								number="${index}"
 								id="used${index}"
+								itemID="${itemID}"
 								quantity="${quantity}" 
 								value="${inventoryRequestID ? used : ""}" 
 								name="used" 
@@ -916,7 +917,7 @@ function getItemsRow(readOnly = false,materialUsageID) {
 					</div>
 					</td>
 					<td class="text-center">
-						<div class="unused" id="unused${index}">${unused || ""}</div>
+						<div class="unused" id="unused${index}" name="unused" itemID="${itemID}">${unused || ""}</div>
 					</td>
 					<td class="table-data-serial-number">
 						${itemSerialNumbers}
@@ -986,6 +987,7 @@ $(document).on("click", ".btnAddSerial", function() {
 
 				if(thisCheck){
 					let thisReceived	= thisTR.find(".input-quantity").val();
+					let itemID	= thisTR.find(".input-quantity").attr("itemID");
 					let arrayCount		= thisReceived ? parseInt(thisReceived) : 0;
 					let subTable  		= thisTableData.find("table");
 					if(arrayCount == 0){
@@ -1462,6 +1464,7 @@ function getMaterialUsageData(action = "insert", method = "submit", status = "1"
 			const used   = $("td [name=used]", this).val()?.trim();	
 			const unused   = $("td [name=unused]", this).text();	
 			const remarks   = $("td [name=remarks]", this).val()?.trim();	
+			
 		
 		   
 
@@ -1478,10 +1481,14 @@ function getMaterialUsageData(action = "insert", method = "submit", status = "1"
 				quantity,
 				used,
 				unused,
-				remarks, 
+				remarks,
 				scopes: []
 
+
+				
+
 			};
+
 			formData.append(`items[${i}][inventoryRequestID]`, inventoryRequestID);
 			formData.append(`items[${i}][assetoritem]`, assetoritem);
 			formData.append(`items[${i}][itemID]`, itemID);
@@ -1497,15 +1504,24 @@ function getMaterialUsageData(action = "insert", method = "submit", status = "1"
 			formData.append(`items[${i}][remarks]`, remarks);
 			
 			$(`td .serial-number-table tbody > tr`, this).each(function(index,obj) {
-				const serialNumber = $('[name="serialNumber"]', this).val()?.trim();
+				const serialNumber = $('[name="serialNumber"]', this).val();
+				const serialitemID = $('[name="serialNumber"]', this).attr("itemID");
+				// alert(itemSerial);
+				
 				let scope = {
 					serialNumber,
-					itemID:       itemID
+					serialitemID:       serialitemID
 				};
 				temp["scopes"].push(scope);
+				//console.log(scope);
+				// let scope = {
+				// 	serialNumber,
+				// 	itemID:       itemID
+				// };
+				// temp["scopes"].push(scope);
 
 				formData.append(`items[${i}][scopes][${index}][serialNumber]`, serialNumber);
-				formData.append(`items[${i}][scopes][${index}][itemID]`, itemID);
+				formData.append(`items[${i}][scopes][${index}][serialitemID]`, serialitemID);
 			})
 			
 		
@@ -1683,6 +1699,7 @@ function checkSerialReceivedQuantity() {
 		$(`.itemTableRow`).each(function() {
 
 			const receivedQuantity = parseFloat($(`[name="used"]`, this).val()) || 0;
+			const itemID = $(`[name="used"]`, this).attr("itemID");
 		
 			if ($(`td .serial-number-table tbody > tr`, this).length >= 1) {
 				let countSerial = $(`td .serial-number-table tbody > tr`, this).length;
@@ -1692,6 +1709,7 @@ function checkSerialReceivedQuantity() {
 						var conSerail = $(this).find("[name=serialNumber]").val() || "";
 						if(conSerail !=""){
 							tmpSerialStorage[counter++] = $(this).find("[name=serialNumber]").val();
+							tmpSerialStorage[counter++] = $(this).find("[name=serialNumber]").attr("itemID",itemID);
 						}	
 					})
 
@@ -1700,9 +1718,7 @@ function checkSerialReceivedQuantity() {
 								if($(`.servicescope .invalid-feedback`, this).text() !="Data already exist!"){
 									$(`.servicescope [name="serialNumber"]`, this).removeClass("is-invalid");
 									$(`.servicescope .invalid-feedback`, this).text("");
-								}
-							
-								
+								}	
 						})
 							flag[0] = true;
 						}

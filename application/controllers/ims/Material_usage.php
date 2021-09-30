@@ -59,6 +59,8 @@ class Material_usage extends CI_Controller {
         // echo json_encode($items);
         // exit;
 
+     
+
         $lastApproveCondition       = $this->input->post("lastApproveCondition");
 
            
@@ -154,13 +156,15 @@ class Material_usage extends CI_Controller {
                             "createdBy"             => $updatedBy,
                             "updatedBy"             => $updatedBy,
                         ];
-
-                        $scopes = $item["scopes"];
-
-                      
-                        
-                        $saveServices = $this->materialusage->saveServices($service, $scopes, $materialUsageID ,$item["itemID"]);
+                        if(!empty($item["scopes"])){
+                            $scopes = $item["scopes"];
+                            
+                            $saveServices = $this->materialusage->saveSerial($scopes, $materialUsageID); 
+                            }    
+                        $saveServices = $this->materialusage->saveServices($service,  $materialUsageID ,$item["itemID"]);
                     }
+                    
+                                      
                     
                     // if ($materialUsageData["materialUsageStatus"] == "2") {
                     //     $this->materialusage->updateOrderedPending($materialUsageID );

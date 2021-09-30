@@ -285,6 +285,15 @@ class MaterialWithdrawal_model extends CI_Model {
             WHERE materialWithdrawalID = $materialWithdrawalID");
             // END UPDATE THE MATERIAL WITHDRAWAL DOCUMENT STATUS AND EMPLOYEE ID//
 
+            // START UPDATE THE STOCK OUT DOCUMENT STATUS//
+            $query = $this->db->query("UPDATE  ims_stock_out_tbl
+            SET inventoryItemStatus = IF((SELECT inventoryItemStatus FROM ims_material_withdrawal_tbl WHERE materialWithdrawalID = $materialWithdrawalID ) = 8, 8,0 ),
+            stockOutStatus = IF((SELECT inventoryItemStatus FROM ims_material_withdrawal_tbl WHERE materialWithdrawalID = $materialWithdrawalID ) = 8, 8,0 )
+            WHERE materialWithdrawalID = $materialWithdrawalID");
+            // END UPDATE THE STOCK OUT DOCUMENT STATUS//
+
+            // $this->db->query("CALL proc_get_material_withdrawal_approve($materialWithdrawalID)"); // Created By: Sir Wilson September 29,2021 11:02AM
+
             // echo $query;
             // exit;
             return $query ? "true|Successfully updated|$materialWithdrawalID|".date("Y-m-d") : "false|System error: Please contact the system administrator for assistance!";

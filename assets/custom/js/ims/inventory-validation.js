@@ -1717,6 +1717,7 @@ $(document).ready(function() {
 					formData.append("approversID", sessionID);
 					formData.append("approversStatus", 2);
 					formData.append("approversDate", dateToday());
+					formData.delete("inventoryValidationStatus");
 					formData.append("inventoryValidationStatus", 2);
 				}
 			}

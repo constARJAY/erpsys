@@ -382,7 +382,7 @@ class BidRecap_model extends CI_Model {
                         ''))
                 ) AS vendorAddress,
                 CONCAT(
-                    IF(inventoryVendorMobile, inventoryVendorMobile, '-'), ' / ', IF(inventoryVendorTelephone, inventoryVendorTelephone, '-')) AS vendorContactDetails,
+                    IF(inventoryVendorMobile, inventoryVendorMobile, '-'), IF(inventoryVendorTelephone, (CONCAT(' / ',(inventoryVendorTelephone))), '')) AS vendorContactDetails,
                 inventoryVendorPerson AS vendorContactPerson
             FROM 
                 $table AS tbl 

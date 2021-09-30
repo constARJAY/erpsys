@@ -583,15 +583,17 @@ $(document).ready(function() {
                                             <td>
                                                 <div class="barcode">
                                                     <input class="form-control text-center validate"
-                                                value=""
+                                                id="barcodeItem0"
                                                 name="barcodeItem"
-                                                minlength="64"
+                                                min="46"
+                                                max="64"
+                                                minlength="46"
                                                 maxlength="64"
                                                 index="0"
                                                 itemID="${itemID}"
                                                 withdrawalItemID="0"
                                                 materialRequestID="${materialRequestID}"
-                                                required
+                                                
                                                 >
                                                     <div class="invalid-feedback d-block" id="invalid-barcodeItem0"></div>
                                                 </div>
@@ -604,9 +606,9 @@ $(document).ready(function() {
                                                 <div class="stockout">
                                                     <input class="form-control input-quantity text-center"
                                                 value="0.00"
-                                                id="StockOut"
+                                                id="StockOut0"
                                                 name="StockOut"
-                                                min="1.00"
+                                                min="0.00"
                                                 max="9999999999"
                                                 minlength="1"
                                                 maxlength="10"
@@ -790,10 +792,12 @@ $(document).ready(function() {
                                 ${itemContent[0]}
                             </tbody>
                         </table>
-                            <div class="w-100 text-left my-2">
+                        ${withdrawalItemStatus == 1? '' :
+                            `<div class="w-100 text-left my-2">
                                     <button class="btn btn-primary btnAddRow"  type="button" id="btnAddRow" index="${index}" itemID="${itemID}" materialRequestID="${materialRequestID}"><i class="fas fa-plus-circle"></i> Add Row</button>
                                     <button class="btn btn-danger btnDeleteRow"  type="button" id="btnDeleteRow" index="${index}" itemID="${itemID}" materialRequestID="${materialRequestID}" disabled><i class="fas fa-minus-circle"></i> Delete Row/s</button>
                             </div>
+                        `}
 					</div>
 				</td>
 			
@@ -854,13 +858,9 @@ $(document).ready(function() {
 
     // ----- UPDATE SERIAL NUMBER -----
     function updateSerialNumber() {
-        $(`[name="serialNumber"]`).each(function(i) {
-            $(this).attr("id", `serialNumber${i}`);
-            $(this).parent().find(".invalid-feedback").attr("id", `invalid-serialNumber${i}`);
-        })
-        $(`[name="received"]`).each(function(i) {
-            $(this).attr("id", `received${i}`);
-            $(this).parent().find(".invalid-feedback").attr("id", `invalid-received${i}`);
+        $(`[name="serialItemNumber"]`).each(function(i) {
+            $(this).attr("id", `serialItemNumber${i}`);
+            $(this).parent().find(".invalid-feedback").attr("id", `invalid-serialItemNumber${i}`);
         })
     }
     // ----- END UPDATE SERIAL NUMBER -----
@@ -1004,7 +1004,7 @@ $(document).ready(function() {
         const withdrawalItemID    = $(this).attr("withdrawalItemID");
         const value = $(this).val();
 
-        if(value.length>=64){
+        if(value.length>=46){
 
             const validatebarcode = getTableData(`ims_stock_in_item_tbl`,
             `barcode`,
@@ -1023,6 +1023,7 @@ $(document).ready(function() {
             $(this).removeClass("is-invalid").addClass("validate")
                 $("#invalid-barcodeItem"+index).text("")
         }
+
         // const getRemainingItem = +$(`[name="remainingItem"][itemID="${itemID}"]`).attr("remainingValueItem").replaceAll(",","");
         // var computeRemainingItem =0;
         // computeRemainingItem = getRemainingItem - value;
@@ -1042,6 +1043,47 @@ $(document).ready(function() {
     });
 
     // ----- END KEYUP BARCODE -----  
+
+    // CHECK SERIAL DUPLICATES//
+
+    $(document).on("change","[name=serialItemNumber]",function(){
+		const serialval   = $(this).val(); 
+		const addressID = $(this).attr("id");
+		var $parent = $(this);
+		var flag = ["true"];
+
+		if(serialval.length ==17){
+			$(`[name="serialItemNumber"]`).each(function(i) {
+				var tmp_Checkserial = $(this).val();
+				var tmp_addressID = $(this).attr("id");
+					if(addressID !=  tmp_addressID){
+						if(tmp_Checkserial == serialval){
+							$parent.removeClass("is-valid").addClass("is-invalid");
+							$parent.closest("tr").find(".invalid-feedback").text('Data already exist!');
+							flag[0]= false;
+						}
+					}
+			})
+	
+			if(flag[0] == "true"){
+	
+			$(`[name="serialItemNumber"]`).each(function(i) {
+				var tmp_Checkserial = $(this).val();
+				var tmp_addressID = $(this).attr("id");
+				// console.log(addressID +" != "+  tmp_addressID)
+					if(addressID !=  tmp_addressID){
+						if(tmp_Checkserial == serialval){
+							$parent.removeClass("is-valid").addClass("is-invalid");
+							$parent.closest("tr").find(".invalid-feedback").text('Data already exist!');
+						
+						}
+					}
+				
+			})
+			}
+		}
+	});
+    //END CHECK SERIAL DULICATES //
 
 
     // ----- KEYUP QUANTITY -----
@@ -1370,6 +1412,24 @@ $(document).ready(function() {
         }, 50);
     }
     // ----- END FORM CONTENT -----
+
+    // CHECK IF THERE IS EXIST DATA //
+    function checkData(){
+
+        var flag = ['false']; 
+        $(`[name="barcodeItem"]`).each(function(){
+            let checkValue =  $(this).val();
+            if(checkValue != ""){
+                flag[0] =  true;
+            }
+            else{
+                flag[0] = false;
+            }
+        })
+        return flag[0];
+    }
+    // END CHECK IF THERE IS EXIST DATA //
+
     
 
     // ----- PAGE CONTENT -----
@@ -1455,24 +1515,30 @@ $(document).ready(function() {
 		const id = decryptString($(this).attr("materialWithdrawalID"));
 		const materialRequestID = decryptString($(this).attr("materialRequestID"));
 		const stockOutID = decryptString($(this).attr("stockOutID"));
+        const checkValidateData = checkData();
 
-        const validateBarcode = $("[name=barcodeItem]").hasClass("is-invalid");
+            if(checkValidateData){
 
-        if( !validateBarcode){
-            const validate     = validateForm("pcrDetails");
-            if(validate){
-                formButtonHTML(this);
+                const validateBarcode = $("[name=barcodeItem]").hasClass("is-invalid");
+                let serialNumberCondition = $("[name=serialItemNumber]").hasClass("is-invalid");
+                if( !validateBarcode && !serialNumberCondition){
+                    const validate     = validateForm("pcrDetails");
+                    if(validate){
+                        formButtonHTML(this);
 
-            setTimeout(() => {
-                // validateInputs().then(res => {
-                //     if (res) {
-                        saveProjectBoard("update", id, pageContent,materialRequestID,stockOutID);
-                    // }
-                    formButtonHTML(this, false);
-                // });
-            }, 500);
+                    setTimeout(() => {
+                        // validateInputs().then(res => {
+                        //     if (res) {
+                                saveProjectBoard("update", id, pageContent,materialRequestID,stockOutID);
+                            // }
+                            formButtonHTML(this, false);
+                        // });
+                    }, 500);
+                    }
+                }
+            }else{
+                showNotification("danger", "You must have at least one or more row input data.");
             }
-        }
 	});
 	// ----- END CLICK BUTTON SUBMIT -----
 
@@ -1507,105 +1573,109 @@ $(document).ready(function() {
                 stockOutDate = "";
             }
 
-            let requestItemData			= getTableData("ims_request_items_tbl", "", `materialRequestID = '${getmaterialRequestID}' AND itemID = '${itemID}'`,`inventoryValidationID IS NOT NULL AND bidRecapID IS NULL`);
-            let tableData 				= requestItemData[0];
-            // if(requestItemData.length !=0){
-            let requestItemID  = tableData.requestItemID ;
-            let costEstimateID = tableData.costEstimateID;
-            let billMaterialID = tableData.billMaterialID;
-            let materialRequestID = tableData.materialRequestID;
-            let inventoryValidationID = tableData.inventoryValidationID;
-            let bidRecapID = tableData.bidRecapID;
-            let purchaseRequestID = tableData.purchaseRequestID;
-            let purchaseOrderID = tableData.purchaseOrderID;
-            let changeRequestID = tableData.changeRequestID;
-            let inventoryReceivingID = tableData.inventoryReceivingID;
-            let inventoryVendorID = tableData.inventoryVendorID;
-            let inventoryVendorCode = tableData.inventoryVendorCode;
-            let inventoryVendorName = tableData.inventoryVendorName;
-            let finalQuoteRemarks = tableData.finalQuoteRemarks;
-            let milestoneBuilderID = tableData.milestoneBuilderID;
-            let phaseDescription = tableData.phaseDescription;
-            let milestoneListID = tableData.milestoneListID;
-            let projectMilestoneID = tableData.projectMilestoneID;
-            let projectMilestoneName = tableData.projectMilestoneName;
-            let itemCode = tableData.itemCode;
-            let itemBrandName = tableData.itemBrandName;
-            let itemName = tableData.itemName;
-            let itemClassification = tableData.itemClassification;
-            let itemCategory = tableData.itemCategory;
-            let itemUom = tableData.itemUom;
-            let itemDescription = tableData.itemDescription;
-            let files = tableData.files;
-            let remarks = tableData.remarks;
-            let requestQuantity = tableData.requestQuantity;
-
+            if(barcode !=""){
+                let requestItemData			= getTableData("ims_request_items_tbl", "", `materialRequestID = '${getmaterialRequestID}' AND itemID = '${itemID}'`,`inventoryValidationID IS NOT NULL AND bidRecapID IS NULL`);
+                let tableData 				= requestItemData[0];
+                // if(requestItemData.length !=0){
+                let requestItemID  = tableData.requestItemID ;
+                let costEstimateID = tableData.costEstimateID;
+                let billMaterialID = tableData.billMaterialID;
+                let materialRequestID = tableData.materialRequestID;
+                let inventoryValidationID = tableData.inventoryValidationID;
+                let bidRecapID = tableData.bidRecapID;
+                let purchaseRequestID = tableData.purchaseRequestID;
+                let purchaseOrderID = tableData.purchaseOrderID;
+                let changeRequestID = tableData.changeRequestID;
+                let inventoryReceivingID = tableData.inventoryReceivingID;
+                let inventoryVendorID = tableData.inventoryVendorID;
+                let inventoryVendorCode = tableData.inventoryVendorCode;
+                let inventoryVendorName = tableData.inventoryVendorName;
+                let finalQuoteRemarks = tableData.finalQuoteRemarks;
+                let milestoneBuilderID = tableData.milestoneBuilderID;
+                let phaseDescription = tableData.phaseDescription;
+                let milestoneListID = tableData.milestoneListID;
+                let projectMilestoneID = tableData.projectMilestoneID;
+                let projectMilestoneName = tableData.projectMilestoneName;
+                let itemCode = tableData.itemCode;
+                let itemBrandName = tableData.itemBrandName;
+                let itemName = tableData.itemName;
+                let itemClassification = tableData.itemClassification;
+                let itemCategory = tableData.itemCategory;
+                let itemUom = tableData.itemUom;
+                let itemDescription = tableData.itemDescription;
+                let files = tableData.files;
+                let remarks = tableData.remarks;
+                let requestQuantity = tableData.requestQuantity;
     
-            let reservedItem    = tableData.reservedItem;
-            let forPurchase 	=tableData.forPurchase;				
-
-
-            // }
-
-            const temp = {
-                materialWithdrawalID,
-                stockOut,
-                remainingItem,
-                stockOutDate,
-                requestItemID,
-                costEstimateID,
-                billMaterialID,
-                materialRequestID,
-                inventoryValidationID,
-                bidRecapID,
-                purchaseRequestID,
-                purchaseOrderID,
-                changeRequestID,
-                inventoryReceivingID,
-                inventoryVendorID,
-                inventoryVendorCode,
-                inventoryVendorName,
-                finalQuoteRemarks,
-                milestoneBuilderID,
-                phaseDescription,
-                milestoneListID,
-                projectMilestoneID,
-                projectMilestoneName,
-                itemID,
-                itemCode,
-                itemBrandName,
-                itemName,
-                itemClassification,
-                itemCategory,
-                itemUom,
-                itemDescription,
-                files,
-                remarks,
-                requestQuantity,
-                reservedItem,
-                forPurchase,
-                barcode,
-                availableStocks,
-                serials:[]
-            };
-
-            $(`td .serial-number-table tbody > tr`, $parent).each(function(i) {
-               let serialItemNumber = $(this).find(`[name="serialItemNumber"]`,this).val()?.trim();
-
-              
-                let serial = {
-                    stockOutID :stockOutID,
-                    materialWithdrawalID : materialWithdrawalID,
-                    materialRequestID : getmaterialRequestID,
-                    itemID:       itemID,
-                    serialItemNumber
+        
+                let reservedItem    = tableData.reservedItem;
+                let forPurchase 	=tableData.forPurchase;				
+    
+    
+                // }
+    
+                const temp = {
+                    materialWithdrawalID,
+                    stockOut,
+                    remainingItem,
+                    stockOutDate,
+                    requestItemID,
+                    costEstimateID,
+                    billMaterialID,
+                    materialRequestID,
+                    inventoryValidationID,
+                    bidRecapID,
+                    purchaseRequestID,
+                    purchaseOrderID,
+                    changeRequestID,
+                    inventoryReceivingID,
+                    inventoryVendorID,
+                    inventoryVendorCode,
+                    inventoryVendorName,
+                    finalQuoteRemarks,
+                    milestoneBuilderID,
+                    phaseDescription,
+                    milestoneListID,
+                    projectMilestoneID,
+                    projectMilestoneName,
+                    itemID,
+                    itemCode,
+                    itemBrandName,
+                    itemName,
+                    itemClassification,
+                    itemCategory,
+                    itemUom,
+                    itemDescription,
+                    files,
+                    remarks,
+                    requestQuantity,
+                    reservedItem,
+                    forPurchase,
+                    barcode,
+                    availableStocks,
+                    serials:[]
                 };
+    
+                $(`td .serial-number-table tbody > tr`, $parent).each(function(i) {
+                   let serialItemNumber = $(this).find(`[name="serialItemNumber"]`,this).val()?.trim();
+    
+                  
+                    let serial = {
+                        stockOutID :stockOutID,
+                        materialWithdrawalID : materialWithdrawalID,
+                        materialRequestID : getmaterialRequestID,
+                        itemID:       itemID,
+                        serialItemNumber
+                    };
+    
+                temp.serials.push(serial);
+    
+                })
+              
+                data.items.push(temp);
+            }
 
-            temp.serials.push(serial);
-
-            })
-          
-            data.items.push(temp);
+       
         })
 
         // console.log(data)
@@ -1617,10 +1687,15 @@ $(document).ready(function() {
 
     // ----- DATABASE RELATION -----
     const getConfirmation = method => {
-        const title = "Material Withdrawal";
+        const title = "Stock Out";
         let swalText, swalImg;
 
         switch (method) {
+            case "update":
+                swalTitle = `UPDATE ${title.toUpperCase()}`;
+                swalText  = "Are you sure to update this document?";
+                swalImg   = `${base_url}assets/modal/draft.svg`;
+                break;
             case "save":
                 swalTitle = `SAVE ${title.toUpperCase()}`;
                 swalText  = "Are you sure to save this document?";
@@ -1715,17 +1790,19 @@ $(document).ready(function() {
     
                             let swalTitle;
                             if (method == "submit") {
-                                swalTitle = `Material Withdrawal Form submitted successfully!`;
+                                swalTitle = `Stock Out Form submitted successfully!`;
                             } else if (method == "save") {
-                                swalTitle = `Material Withdrawal Form saved successfully!`;
+                                swalTitle = `Stock Out Form saved successfully!`;
                             } else if (method == "cancelform") {
-                                swalTitle = `${getFormCode("MWF", dateCreated, insertedID)} cancelled successfully!`;
+                                swalTitle = `${getFormCode("STO", dateCreated, insertedID)} cancelled successfully!`;
                             } else if (method == "approve") {
-                                swalTitle = `${getFormCode("MWF", dateCreated, insertedID)} approved successfully!`;
+                                swalTitle = `${getFormCode("STO", dateCreated, insertedID)} approved successfully!`;
                             } else if (method == "deny") {
-                                swalTitle = `${getFormCode("MWF", dateCreated, insertedID)} denied successfully!`;
+                                swalTitle = `${getFormCode("STO", dateCreated, insertedID)} denied successfully!`;
                             } else if (method == "drop") {
-                                swalTitle = `${getFormCode("MWF", dateCreated, insertedID)} dropped successfully!`;
+                                swalTitle = `${getFormCode("STO", dateCreated, insertedID)} dropped successfully!`;
+                            } else if (method == "update") {
+                                swalTitle = `${getFormCode("STO", dateCreated, insertedID)} updated successfully!`;
                             }
             
                             if (isSuccess == "true") {

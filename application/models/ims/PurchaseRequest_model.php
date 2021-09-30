@@ -18,25 +18,25 @@ class PurchaseRequest_model extends CI_Model {
         }
 
         if ($query) {
-            $insertID = $action == "insert" ? $this->db->insert_id() : $id;
+            $purchaseRequestID = $action == "insert" ? $this->db->insert_id() : $id;
 
             // ----- INSERT PURCHASE ORDER IF APPROVE -----
-            $purchaseRequestStatus = $data["purchaseRequestStatus"];
+            // $purchaseRequestStatus = $data["purchaseRequestStatus"];
             // if ($purchaseRequestStatus == "2")
             // {
-            //     $insertPurchaseOrderData = $this->insertPurchaseOrderData($insertID);
+            //     $insertPurchaseOrderData = $this->insertPurchaseOrderData($purchaseRequestID);
             // }
             // ----- END INSERT PURCHASE ORDER IF APPROVE -----
             
             $purchaseRequestCode = "";
             if ($action == "insert") {
-                $purchaseRequestCode = getFormCode("PR", date("Y-m-d"), $insertID);
+                $purchaseRequestCode = getFormCode("PR", date("Y-m-d"), $purchaseRequestID);
                 $this->db->update(
                     "ims_purchase_request_tbl", 
                     ["purchaseRequestCode" => $purchaseRequestCode], 
-                    ["purchaseRequestID" => $insertID]);
+                    ["purchaseRequestID" => $purchaseRequestID]);
             }
-            return "true|$purchaseRequestCode|$insertID|".date("Y-m-d");
+            return "true|$purchaseRequestCode|$purchaseRequestID|".date("Y-m-d");
         }
         return "false|System error: Please contact the system administrator for assistance!";
     }

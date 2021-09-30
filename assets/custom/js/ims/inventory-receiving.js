@@ -869,10 +869,12 @@ function getItemsRow(readOnly = false,inventoryReceivingID) {
 					<div class="itemCode" name="itemCode" requestitem="${itemID}" createAt="${createAt}" >${itemCode || ""}</div>
 					</td>
 					<td>
-						<div class="namebrand" itemName="${itemName}" Brand="${Brand}">${name_brand|| "-"}</div>
+						<div class="namebrand" itemName="${itemName}" Brand="${Brand}">${itemName|| "-"}</div>
+						<small style="color:#848482;">${Brand || ""}</small>
 					</td>
-					<td class="text-center">
-						<div class="classificationcategory" classificationName="${classificationName}"categoryName="${categoryName}">${classification_Category || ""}</div>
+					<td class="">
+						<div class="classificationcategory" classificationName="${classificationName}"categoryName="${categoryName}">${classificationName || ""}</div>
+						<small style="color:#848482;">${categoryName || ""}</small>
 					</td>
 					<td class="table-data-serial-number">
 						${itemSerialNumbers}	
@@ -900,10 +902,13 @@ function getItemsRow(readOnly = false,inventoryReceivingID) {
 						<div class="itemCode" name="itemCode" requestitem="${itemID}"createAt="${createAt}">${itemCode || ""}</div>
 					</td>
 					<td>
-						<div class="namebrand"name="namebrand" itemName="${itemName}"Brand="${Brand}" recordID="${recordID}">${name_brand || ""}</div>
+						<div class="namebrand"name="namebrand" itemName="${itemName}"Brand="${Brand}" recordID="${recordID}">${itemName || ""}</div>
+						<small style="color:#848482;">${Brand || ""}</small>
+
 					</td>
 					<td>
-						<div class="classificationcategory"name="classificationcategory" classificationName="${classificationName}"categoryName="${categoryName}">${classification_Category || ""}</div>
+						<div class="classificationcategory"name="classificationcategory" classificationName="${classificationName}"categoryName="${categoryName}">${classificationName || ""}</div>
+						<small style="color:#848482;">${categoryName || ""}</small>
 					</td>
 					<td class="table-data-serial-number">
 						${itemSerialNumbers}
@@ -921,6 +926,7 @@ function getItemsRow(readOnly = false,inventoryReceivingID) {
 								min="0"
 								number="${index}"
 								quantity="${quantity}"
+								itemID="${itemID}"
 								id="receivedQuantity${index}" 
 								value="${inventoryRequestID ? receivedquantity : ""}" 
 								name="receivedQuantity" 
@@ -1054,6 +1060,7 @@ $(document).on("click", ".btnAddSerial", function() {
 
 				if(thisCheck){
 					let thisReceived	= thisTR.find(".input-quantity").val();
+					let itemID	= thisTR.find(".input-quantity").attr("itemID");
 					let arrayCount		= thisReceived ? parseInt(thisReceived) : 0;
 					let subTable  		= thisTableData.find("table");
 					if(arrayCount == 0){
@@ -1343,14 +1350,22 @@ function formContent(data = false, readOnly = false, isRevise = false, isFromCan
 		<div class="col-sm-12">
 			<div class="w-100">
 				<hr class="pb-1">
-				<div class="text-primary font-weight-bold" style="font-size: 1.5rem;">${service} (Inventory Receiving) </div>
+				<div class="card mt-2">
+				<div class="card-header bg-primary text-white">
+					<div class="row">
+						<div class="col-md-6 col-sm-12 text-left align-self-center">
+							<h5 style="font-weight: bold;
+								letter-spacing: 0.05rem;">${service} (Inventory Receiving)</h5>
+						</div>
+					</div>
+				</div>
 				<table class="table table-striped" id="${tableInventoryReceived}">
 					<thead>
 						<tr style="white-space: nowrap">
 							<th>${service} Code</th>
-							<th>Item Name/Brand</th>
-							<th>Classification/Category</th>
-                            <th>Serial No. ${!disabled ? "<code>*</code>" : ""}</th>
+							<th>Item Name</th>
+							<th>Classification</th>
+                            <th>Serial No.</th>
 							<th>Quantity</th>
 							<th>Receiving ${!disabled ? "<code>*</code>" : ""}</th>
 							<th>Remaining</th>
@@ -1363,7 +1378,7 @@ function formContent(data = false, readOnly = false, isRevise = false, isFromCan
 					</tbody>
 				</table>
 				
-				
+			</div>
 			</div>
 		</div>
 		<div class="col-md-12 text-right mt-3">
@@ -1519,6 +1534,7 @@ function getInventoryReceivingData(action = "insert", method = "submit", status 
 		data["file"] 						= files;
 		data["recordID"] 					= $("[name=recordID]").attr("assetoritem");
 		
+		
 
 		// let fileID   = $("td [name=receiptNo]", this).attr("id") || "";
 		// let file     = fileID ? $(`#${fileID}`)?.[0]?.files?.[0] : "";
@@ -1534,7 +1550,7 @@ function getInventoryReceivingData(action = "insert", method = "submit", status 
 		formData.append("clientCode", $("[name=clientCode]").val());
 		formData.append("timelineBuilderID", $("[name=clientCode]").attr("timelineBuilderID"));
 		formData.append("clientAddress", $("[name=clientAddress]").val());
-		//formData.append("recordID", $("[name=recordID]").attr("assetoritem"));
+		formData.append("recordID", $("[name=recordID]").attr("assetoritem"));
 		formData.append("file", files);
 		//formData.append("receiptNo", $("[name=receiptNo]").val());
 		formData.append("inventoryReceivingReason", $("[name=inventoryReceivingReason]").val()?.trim());
@@ -1619,15 +1635,16 @@ function getInventoryReceivingData(action = "insert", method = "submit", status 
 			formData.append(`items[${i}][remarks]`, remarks);
 			
 			$(`td .serial-number-table tbody > tr`, this).each(function(index,obj) {
-				const serialNumber = $('[name="serialNumber"]', this).val()?.trim();
+				const serialNumber = $('[name="serialNumber"]', this).val();
+				const serialitemID = $('[name="serialNumber"]', this).attr("itemID");
 				let scope = {
 					serialNumber,
-					itemID:       itemID
+					serialitemID:       serialitemID
 				};
 				temp["scopes"].push(scope);
 
 				formData.append(`items[${i}][scopes][${index}][serialNumber]`, serialNumber);
-				formData.append(`items[${i}][scopes][${index}][itemID]`, itemID);
+				formData.append(`items[${i}][scopes][${index}][serialitemID]`, serialitemID);
 			})
 			
 			data["items"].push(temp);
@@ -1802,6 +1819,7 @@ function checkSerialReceivedQuantity() {
 		$(`.itemTableRow`).each(function() {
 
 			const receivedQuantity = parseFloat($(`[name="receivedQuantity"]`, this).val()) || 0;
+			const itemID = $(`[name="receivedQuantity"]`, this).attr("itemID");
 		
 			if ($(`td .serial-number-table tbody > tr`, this).length >= 1) {
 				let countSerial = $(`td .serial-number-table tbody > tr`, this).length;
@@ -1811,6 +1829,7 @@ function checkSerialReceivedQuantity() {
 						var conSerail = $(this).find("[name=serialNumber]").val() || "";
 						if(conSerail !=""){
 							tmpSerialStorage[counter++] = $(this).find("[name=serialNumber]").val();
+							tmpSerialStorage[counter++] = $(this).find("[name=serialNumber]").attr("itemID",itemID);
 						}	
 					})
 

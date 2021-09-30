@@ -256,7 +256,7 @@ $(document).ready(function() {
 		} else {
 			html = `
             <button type="button" 
-				class="btn btn-default btn-light" 
+				class="btn btn-default btn-light btnBack" 
 				id="btnBack" 
 				revise="${isRevise}" 
 				cancel="${isFromCancelledDocument}">
@@ -1288,7 +1288,7 @@ $(document).ready(function() {
 						$(this).attr("disabled", true);
 					}
 				})
-				$('#btnBack').attr("status", "2");
+				$('.btnBack').attr("status", "2");
 				$(`#btnSubmit, #btnRevise, #btnCancel, #btnCancelForm, .btnAddRow, .btnDeleteRow`).hide();
 			}
 			// ----- END NOT ALLOWED FOR UPDATE -----
@@ -1408,8 +1408,8 @@ $(document).ready(function() {
     // ----- VIEW DOCUMENT -----
 	$(document).on("click", ".btnView", function () {
 		$("#page_content").html(preloader);
+		const id = decryptString($(this).attr("id"));
 		setTimeout(function() {
-			const id = decryptString($(this).attr("id"));
 			viewDocument(id, true);
 		}, 10)
 	});
@@ -1419,8 +1419,8 @@ $(document).ready(function() {
     // ----- OPEN EDIT FORM -----
 	$(document).on("click", ".btnEdit", function () {
 		$("#page_content").html(preloader);
+		const id = decryptString($(this).attr("id"));
 		setTimeout(function() {
-			const id = decryptString($(this).attr("id"));
 			viewDocument(id);
 		}, 10)
 	});
@@ -1437,7 +1437,7 @@ $(document).ready(function() {
 
 
     // ----- SAVE CLOSE FORM -----
-	$(document).on("click", "#btnBack", function () {
+	$(document).on("click", ".btnBack", function () {
 		const id         = decryptString($(this).attr("changeRequestID"));
 		const code       = $(this).attr("changeRequestCode");
 		const isFromCancelledDocument = $(this).attr("cancel") == "true";
