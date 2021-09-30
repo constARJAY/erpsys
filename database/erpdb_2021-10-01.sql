@@ -2690,6 +2690,60 @@ LOCK TABLES `ims_change_request_tbl` WRITE;
 UNLOCK TABLES;
 
 --
+-- Table structure for table `ims_equipment_borrowing_tbl`
+--
+
+DROP TABLE IF EXISTS `ims_equipment_borrowing_tbl`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `ims_equipment_borrowing_tbl` (
+  `equipmentBorrowingID` bigint(20) NOT NULL AUTO_INCREMENT,
+  `equipmentBorrowingCode` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `materialWithdrawalID` bigint(20) DEFAULT NULL,
+  `materialWithdrawalCode` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `inventoryValidationID` bigint(20) DEFAULT NULL,
+  `inventoryValidationCode` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `materialRequestID` bigint(20) DEFAULT NULL,
+  `materialRequestCode` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `costEstimateID` bigint(20) DEFAULT NULL,
+  `costEstimateCode` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `billMaterialID` bigint(20) DEFAULT NULL,
+  `billMaterialCode` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `employeeID` bigint(20) DEFAULT NULL,
+  `timelineBuilderID` bigint(20) DEFAULT NULL,
+  `projectCode` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `projectName` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `projectCategory` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `clientCode` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `clientName` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `clientAddress` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `approversID` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `approversStatus` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `approversDate` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `inventoryAssetStatus` int(50) DEFAULT NULL,
+  `equipmentBorrowingStatus` int(50) DEFAULT NULL,
+  `equipmentBorrowingReason` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `equipmentBorrowingRemarks` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `dateNeeded` date DEFAULT NULL,
+  `submittedAt` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `createdBy` bigint(20) DEFAULT NULL,
+  `updatedBy` bigint(20) DEFAULT NULL,
+  `createdAt` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updatedAt` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`equipmentBorrowingID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `ims_equipment_borrowing_tbl`
+--
+
+LOCK TABLES `ims_equipment_borrowing_tbl` WRITE;
+/*!40000 ALTER TABLE `ims_equipment_borrowing_tbl` DISABLE KEYS */;
+/*!40000 ALTER TABLE `ims_equipment_borrowing_tbl` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `ims_final_quote_tbl`
 --
 
@@ -3508,6 +3562,7 @@ CREATE TABLE `ims_material_usage_tbl` (
   `projectName` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
   `projectCategory` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
   `clientID` bigint(255) NOT NULL,
+  `recordID` int(11) NOT NULL,
   `clientCode` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '''',
   `clientName` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
   `clientAddress` text COLLATE utf8mb4_unicode_ci NOT NULL,
@@ -4417,12 +4472,13 @@ CREATE TABLE `ims_stock_in_assets_tbl` (
   `returnItemID` bigint(255) NOT NULL,
   `materialUsageID` bigint(255) DEFAULT NULL,
   `inventoryReceivingID` bigint(255) DEFAULT NULL,
-  `stockOutID` bigint(255) NOT NULL,
+  `equipmentBorrowingID` bigint(255) NOT NULL,
   `inventoryCode` varchar(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
   `inventoryStorageID` int(255) NOT NULL,
   `inventoryStorageCode` varchar(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
   `inventoryStorageOfficeName` varchar(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
   `assetID` int(255) DEFAULT NULL,
+  `assetCode` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `itemCode` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `itemName` varchar(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT NULL,
   `brand` varchar(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT NULL,
@@ -4761,6 +4817,35 @@ LOCK TABLES `ims_uom_tbl` WRITE;
 /*!40000 ALTER TABLE `ims_uom_tbl` DISABLE KEYS */;
 INSERT INTO `ims_uom_tbl` VALUES (1,'UOM-21-00001','pieces',1,'2021-05-25 23:50:02',1,1,'2021-05-25 23:50:02','2021-05-25 23:51:33'),(2,'UOM-21-00002','kilo',1,'2021-05-26 03:10:53',1,1,'2021-05-26 03:10:53','2021-05-26 03:10:53'),(3,'UOM-21-00003','pounds',1,'2021-05-26 03:11:04',1,1,'2021-05-26 03:11:04','2021-05-28 06:17:57'),(4,'UOM-21-00004','grams',1,'2021-05-27 07:27:06',1,1,'2021-05-27 07:27:06','2021-05-27 07:27:19'),(5,'UOM-21-00005','ream',1,'2021-06-01 00:44:45',1,1,'2021-06-01 00:44:45','2021-06-01 00:44:55'),(6,'UOM-21-00006','Liters',1,'2021-06-24 05:30:10',1,1,'2021-06-24 05:30:10','2021-06-24 05:30:10');
 /*!40000 ALTER TABLE `ims_uom_tbl` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `ims_withdrawal_equipment_borrowing_serial_number_tbl`
+--
+
+DROP TABLE IF EXISTS `ims_withdrawal_equipment_borrowing_serial_number_tbl`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `ims_withdrawal_equipment_borrowing_serial_number_tbl` (
+  `serialAssetID` bigint(20) NOT NULL AUTO_INCREMENT,
+  `materialWithdrawalID` bigint(20) DEFAULT NULL,
+  `materialRequestID` bigint(20) DEFAULT NULL,
+  `withdrawalAssetID` bigint(20) DEFAULT NULL,
+  `assetID` bigint(20) DEFAULT NULL,
+  `serialAssetNumber` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `createdBy` bigint(20) DEFAULT NULL,
+  `createdAt` timestamp NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`serialAssetID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `ims_withdrawal_equipment_borrowing_serial_number_tbl`
+--
+
+LOCK TABLES `ims_withdrawal_equipment_borrowing_serial_number_tbl` WRITE;
+/*!40000 ALTER TABLE `ims_withdrawal_equipment_borrowing_serial_number_tbl` DISABLE KEYS */;
+/*!40000 ALTER TABLE `ims_withdrawal_equipment_borrowing_serial_number_tbl` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -5632,30 +5717,30 @@ DELIMITER ;;
 CREATE DEFINER=`root`@`localhost` PROCEDURE `proc_get_material_withdrawal_approve`(IN id BIGINT(255))
 BEGIN
 DECLARE materialUsageID  INT DEFAULT NULL;
--- execute data into inventory receiving --
-INSERT INTO  ims_material_usage_tbl(employeeID, materialWithdrawalID,	materialWithdrawalCode, inventoryValidationID, inventoryValidationCode, materialRequestID, materialRequestCode, projectCode, projectName, projectCategory,clientCode, clientName, clientAddress, materialUsageStatus) 
+
+INSERT INTO  ims_material_usage_tbl(employeeID, materialWithdrawalID,	materialWithdrawalCode, inventoryValidationID, inventoryValidationCode, materialRequestID, materialRequestCode, projectCode, projectName, projectCategory,clientCode, clientName, clientAddress, materialUsageStatus, recordID) 
 SELECT 
 		employeeID, 				materialWithdrawalID, 		materialWithdrawalCode, inventoryValidationID,
         inventoryValidationCode,	materialRequestID, 			materialRequestCode, 	projectCode, 			
         projectName,				projectCategory, 			clientCode, 			clientName, 			
-        clientAddress,				materialUsageStatus
+        clientAddress,				materialUsageStatus,		'0' AS recordID
 FROM	
 (
 SELECT 
 		employeeID, 				materialWithdrawalID, 	materialWithdrawalCode,		inventoryValidationID, 
 		inventoryValidationCode,	materialRequestID, 	 	materialRequestCode,		projectCode,
 		projectName, 				projectCategory,		clientCode,					clientName,
-        clientAddress,	 'O' AS materialUsageStatus
+        clientAddress,	 'O' AS materialUsageStatus		
 FROM ims_material_withdrawal_tbl 
-WHERE materialWithdrawalID =id AND inventoryItemStatus = 1
+WHERE materialWithdrawalID =id AND inventoryItemStatus = 8 
 )w;
--- get inventory receiving ID--
+
  SET materialUsageID  = LAST_INSERT_ID();
- -- end of inventory receiving ID - 
--- end of execute --
--- execute data into request details --
-INSERT INTO ims_inventory_request_details_tbl(materialUsageID, recordID, itemID, itemCode, Brand, itemName, classificationName, quantity)	
-SELECT materialUsageID , recordID, itemID, itemCode, Brand, itemName, classificationName, quantity
+ 
+
+
+INSERT INTO ims_inventory_request_details_tbl(materialUsageID, recordID, itemID, itemCode, Brand, itemName, classificationName, categoryName, quantity, uom)	
+SELECT materialUsageID , recordID, itemID, itemCode, Brand, itemName, classificationName, categoryName, quantity, uom
 FROM 
 (
 	SELECT '0' AS recordID, 				itemID,
@@ -5665,7 +5750,7 @@ FROM
             remaining AS quantity
 	FROM ims_material_withdrawal_item_tbl AS ri
 	LEFT JOIN ims_material_withdrawal_tbl AS po ON ri.materialWithdrawalID = po.materialWithdrawalID
-	WHERE po.materialWithdrawalID = id AND po.inventoryItemStatus = 1
+	WHERE po.materialWithdrawalID = id AND ri.withdrawalItemStatus = 1
 )a; 
 
 END ;;
@@ -5687,29 +5772,33 @@ DELIMITER ;;
 CREATE DEFINER=`root`@`localhost` PROCEDURE `proc_get_purchase_order_approve`(IN id BIGINT(255))
 BEGIN
 DECLARE inventoryReceivingID INT DEFAULT NULL;
--- execute data into inventory receiving --
-INSERT INTO  ims_inventory_receiving_tbl(employeeID, purchaseOrderID,purchaseOrderCode, timelineBuilderID, projectCode, projectName, projectCategory, clientCode,clientName, clientAddress,inventoryReceivingStatus) 
+
+INSERT INTO  ims_inventory_receiving_tbl(employeeID, purchaseOrderID,purchaseOrderCode, timelineBuilderID, projectCode, projectName, projectCategory, clientCode,clientName, clientAddress,inventoryReceivingStatus, recordID) 
 SELECT 
-		employeeID, 		purchaseOrderID, purchaseOrderCode,
-		timelineBuilderID, 	projectCode,	 projectName,
-		projectCategory, 	clientCode, 	clientName, 
-		clientAddress,		inventoryReceivingStatus
+		employeeID, 		purchaseOrderID, 			purchaseOrderCode,
+		timelineBuilderID, 	projectCode,	 			projectName,
+		projectCategory, 	clientCode, 				clientName, 
+		clientAddress,		inventoryReceivingStatus,   recordID
 FROM
 (
 SELECT 
-		employeeID, 		purchaseOrderID, purchaseOrderCode,	timelineBuilderID, 
+		employeeID, 		po.purchaseOrderID, purchaseOrderCode,	timelineBuilderID, 
 		projectCode,		projectName, 	 projectCategory,	clientCode,
-		clientName, 		clientAddress,	 'O' AS inventoryReceivingStatus
-FROM ims_purchase_order_tbl 
-WHERE purchaseOrderID =id AND purchaseOrderStatus = 2
-)w;
--- get inventory receiving ID--
+		clientName, 		clientAddress,	 'O' AS inventoryReceivingStatus,
+		CASE  WHEN iri.purchaseOrderID  IS NOT NULL THEN 0
+        ELSE 1 END  recordID
+FROM ims_purchase_order_tbl AS po
+LEFT JOIN ims_request_items_tbl AS  iri ON po.purchaseOrderID = iri.purchaseOrderID
+LEFT JOIN ims_request_assets_tbl AS ira ON po.purchaseOrderID = ira.purchaseOrderID
+WHERE po.purchaseOrderID =id AND purchaseOrderStatus = 2
+)w GROUP BY purchaseOrderID;
+
  SET inventoryReceivingID = LAST_INSERT_ID();
- -- end of inventory receiving ID - 
--- end of execute --
--- execute data into request details --
-INSERT INTO ims_inventory_request_details_tbl(inventoryReceivingID, recordID, itemID, itemCode, Brand, itemName, classificationName, quantity)	
-SELECT inventoryReceivingID, recordID, itemID, itemCode, Brand, itemName, classificationName, quantity
+ 
+
+
+INSERT INTO ims_inventory_request_details_tbl(inventoryReceivingID, recordID, itemID, itemCode, Brand, itemName, classificationName, quantity, uom)	
+SELECT inventoryReceivingID, recordID, itemID, itemCode, Brand, itemName, classificationName, quantity, uom
 FROM 
 (
 	SELECT '0' AS recordID, 				itemID,
@@ -5777,4 +5866,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2021-09-29 10:10:29
+-- Dump completed on 2021-10-01  7:55:34

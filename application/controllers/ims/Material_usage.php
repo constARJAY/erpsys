@@ -146,6 +146,7 @@ class Material_usage extends CI_Controller {
                             "itemID"               => $item["itemID"],
                             "itemCode"             => $item["itemCode"],
                             "itemName"              => $item["itemName"],
+                            "uom"                   => $item["uom"],
                             "Brand"                 => $item["brand"],
                             "classificationName"    => $item["classificationName"],
                             "categoryName"          => $item["categoryName"],

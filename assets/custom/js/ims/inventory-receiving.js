@@ -918,7 +918,7 @@ function getItemsRow(readOnly = false,inventoryReceivingID) {
 						<div class="quantity" id="quantity${index}" name="quantity">${quantity || ""}</div>
 					</td>
 					<td>
-					<div class="receivedQuantity text-center">
+					<div class="text-center">
 						<input 
 								type="text" 
 								class="form-control input-quantity text-center receivedQuantity"
@@ -927,19 +927,19 @@ function getItemsRow(readOnly = false,inventoryReceivingID) {
 								number="${index}"
 								quantity="${quantity}"
 								itemID="${itemID}"
-								id="receivedQuantity${index}" 
+								id="receivedQuantity${index}"
+								name="receivedQuantity"  
 								value="${inventoryRequestID ? receivedquantity : ""}" 
-								name="receivedQuantity" 
 								minlength="1" 
 								maxlength="9">
-							<div class="invalid-feedback d-block" id="invalid-receivedQuantity${index}"></div>
+							<div class="invalid-feedback d-block invalid-receivedQuantity" id="invalid-receivedQuantity${index}"></div>
 					</div>
 					</td>
 					<td class="text-center">
 						<div class="remaining" id="remaining${index}"name="remainings">${remaining || ""}</div>
 					</td>
 					<td class="text-center">
-						<div class="uom" id="uom">${uom || ""}</div>
+						<div class="uom" id="uom" name="uom">${uom || ""}</div>
 					</td>
 					<td>
 					<div class="remarks">
@@ -968,28 +968,36 @@ function getItemsRow(readOnly = false,inventoryReceivingID) {
 	
 }
 // get remaining value
-$(document).on("keyup", ".receivedQuantity", function() {
-	var quantity = $(this).attr("quantity");
-	var totalQuantity = parseFloat(quantity);
+$(document).on("change", ".receivedQuantity", function() {
 	var count = $(this).attr("number");
+	//var quantity = $(this).attr("quantity");
+	
+	var quantity  = $(`#quantity${count}`).text();
+	var totalQuantity = parseInt(quantity);
 	var val = $(this).val() | 0;
-	var totalReceived = parseFloat(val);
+	var totalReceived = parseInt(val);
 	var totalremaining = parseFloat(quantity) - parseFloat(val);
 	$(`#remaining${count}`).text(totalremaining);
-	if(totalQuantity < totalReceived || totalQuantity == totalReceived){
-		$(`#receivedQuantity${count}`).removeClass("is-valid").addClass("is-invalid");
-		$(this).closest("tr").find(`#invalid-returnItemQuantity${count}`).addClass("is-invalid");
-		$(`#invalid-receivedQuantity${count}`).html("Execeed for request quantity");
+	var flag = ["true"];
+	if(totalQuantity < totalReceived){
+			$(`#receivedQuantity${count}`).removeClass("is-valid").addClass("is-invalid");
+			$(this).closest("tr").find(`#invalid-receivedQuantity${count}`).addClass("is-invalid");
+			$(`#invalid-receivedQuantity${count}`).html("Not less that or equal order quantity");
+		flag[0]= false;
 		removeIsValid("#tableInventoryReceived");
-		
 	}else{
+		$(`#receivedQuantity${count}`).removeClass("is-invalid").addClass("is-valid");
 		$(this).closest("tr").find(`#invalid-receivedQuantity${count}`).removeClass("is-invalid");
 		$(this).closest("tr").find(`#invalid-receivedQuantity${count}`).text('');
 		removeIsValid("#tableInventoryReceived");
-		
+		flag[0]= true;
 	}
+	return flag;
+	
+
 
 });
+
 // get remaing value	
 
 
@@ -1617,6 +1625,7 @@ function getInventoryReceivingData(action = "insert", method = "submit", status 
 				remainings,
 				remarks, 
 				created,
+				uom,
 				scopes: []
 
 			};
@@ -1631,6 +1640,7 @@ function getInventoryReceivingData(action = "insert", method = "submit", status 
 			formData.append(`items[${i}][quantity]`, quantity);
 			formData.append(`items[${i}][receivedQuantity]`, receivedQuantity);
 			formData.append(`items[${i}][remainings]`, remainings);
+			formData.append(`items[${i}][uom]`, uom);
 			formData.append(`items[${i}][created]`, created);
 			formData.append(`items[${i}][remarks]`, remarks);
 			
@@ -1895,13 +1905,15 @@ function checkSerialReceivedQuantity() {
 $(document).on("click", "#btnSubmit", function () {
 
 	const validateDuplicateSerial  = $("[name=serialNumber]").hasClass("is-invalid") ;
+	const receivedQuantity  = $("[name=receivedQuantity]").hasClass("is-invalid") ;
 	const validateSerialMessage  = $(".invalid-feedback").text() ;
 	//let condition = $("[name=receivedQuantity]").hasClass("is-invalid");
 	// console.log("validateDuplicateSerial: "+ validateDuplicateSerial)
 	// if(!validateDuplicateSerial || validateSerialMessage != "Data already exist!"){
+		if(!receivedQuantity){
+			removeIsValid("#tableInventoryReceived");
 		if(!validateDuplicateSerial){
 		const validateSerial = checkSerialReceivedQuantity();
-		
 		if (validateSerial != "false") {
 			const validate       = validateForm("form_return_item");
 			// console.log("validate: "+ validate)
@@ -1946,7 +1958,6 @@ $(document).on("click", "#btnSubmit", function () {
 	
 				saveInventoryReceiving(data, "submit", notificationData, pageContent);
 			}
-			
 		}
 		else{
 			
@@ -1954,6 +1965,7 @@ $(document).on("click", "#btnSubmit", function () {
 
 		}
 	}
+}
 
 		
 	else{

@@ -1,7 +1,7 @@
 $(document).ready(function() {
 
     // ----- REUSABLE VARIABLE/FUNCTIONS -----
-    const allowedUpdate = isUpdateAllowed(42);
+    const allowedUpdate = isUpdateAllowed(139);
 
 
     
@@ -115,7 +115,7 @@ $(document).ready(function() {
                     let id = decryptString(arr[1]);
                         id && isFinite(id) && loadData(id);
                 } else {
-                    const isAllowed = isCreateAllowed(42);
+                    const isAllowed = isCreateAllowed(139);
                     pageContent(isAllowed);
                 }
             }
@@ -244,7 +244,7 @@ $(document).ready(function() {
 	function headerButton(isAdd = true, text = "Add") {
 		let html;
 		if (isAdd) {
-			if (isCreateAllowed(42)) {
+			if (isCreateAllowed(139)) {
 				html = ``;
 			}
 		} else {
@@ -305,12 +305,12 @@ $(document).ready(function() {
             html += `
             <tr class="btnView" id="${encryptString(materialWithdrawalID)}">
                 <td>
-                    <div>${stockOutCode}</div>
+                    <div>${stockOutCode || "-"}</div>
                     <!-- <small style="color:#848482;">put description here</small> -->
                 </td>
-                <td>${preparedBy}</td>
-                <td>${projectCode}</td>
-                <td>${projectName}</td>
+                <td>${preparedBy || "-"}</td>
+                <td>${projectCode || "-"}</td>
+                <td>${projectName || "-" }</td>
                 <td>${itemStatusDisplay}</td>
             </tr>`
         });
@@ -1209,7 +1209,7 @@ $(document).ready(function() {
                     <div class="body">
                         <small class="text-small text-muted font-weight-bold">Document No.</small>
                         <h6 class="mt-0 text-danger font-weight-bold">
-							${stockOutCode}
+							${stockOutCode || "-"}
 						</h6>      
                     </div>
                 </div>
@@ -1414,23 +1414,69 @@ $(document).ready(function() {
     // ----- END FORM CONTENT -----
 
     // CHECK IF THERE IS EXIST DATA //
-    function checkData(){
+      function checkData(){
 
         var flag = ['false']; 
-        $(`[name="barcodeItem"]`).each(function(){
+        var getData =[];
+        $(`[name="barcodeItem"]`).each(function(i){
             let checkValue =  $(this).val();
-            if(checkValue != ""){
-                flag[0] =  true;
+            let quantity =  +$(this).closest("tr").find(`.input-quantity[name="StockOut"]`).val();
+           
+            if(checkValue != "" && quantity != 0 ){
+                getData[i] = checkValue;
             }
-            else{
-                flag[0] = false;
-            }
-        })
+
+        });
+
+        if(getData.length >0){
+              flag[0]= true;
+        }else{
+        	flag[0] = false;
+        }
         return flag[0];
     }
     // END CHECK IF THERE IS EXIST DATA //
 
+    // KEYUP CHECK COMPLETE DATA EACH ROW //
+
+    $(document).on("keyup",`[name="barcodeItem"],[name="StockOut"]`,function(){
+    	var getBarcode = $(this).closest("tr").find(`[name="barcodeItem"]`).val();
+    	var getQuantity = +$(this).closest("tr").find(`[name="StockOut"]`).val();
+
+        if(getBarcode == "" && getQuantity != 0){
+        	$(this).closest("tr").find(`[name="barcodeItem"]`).addClass("is-invalid");
+        	$(this).closest("tr").find(`td [name="barcodeItem"]`).closest("div").find(".invalid-feedback").text("Please input barcode.");
+
+        	$(this).closest("tr").find(`[name="StockOut"]`).removeClass("is-invalid").removeClass("is-valid");
+        	$(this).closest("tr").find(`td [name="StockOut"]`).closest("div").find(".invalid-feedback").text("");
+        }
+
+        if(getBarcode != "" && getQuantity == 0){
+        	$(this).closest("tr").find(`[name="StockOut"]`).addClass("is-invalid");
+        	$(this).closest("tr").find(`td [name="StockOut"]`).closest("div").find(".invalid-feedback").text("Please input quantity.");
+
+        	$(this).closest("tr").find(`[name="barcodeItem"]`).removeClass("is-invalid").removeClass("is-valid");
+        	$(this).closest("tr").find(`td [name="barcodeItem"]`).closest("div").find(".invalid-feedback").text("");
+        }
+
+        if(getBarcode != "" && getQuantity != 0 ){
+            $(this).closest("tr").find(`[name="barcodeItem"]`).removeClass("is-invalid").removeClass("is-valid");
+        	$(this).closest("tr").find(`td [name="barcodeItem"]`).closest("div").find(".invalid-feedback").text("");
+
+        	$(this).closest("tr").find(`[name="StockOut"]`).removeClass("is-invalid").removeClass("is-valid");
+        	$(this).closest("tr").find(`td [name="StockOut"]`).closest("div").find(".invalid-feedback").text("");
+        }else{
+        	 if(getBarcode == "" && getQuantity == 0 ){
+				$(this).closest("tr").find(`[name="barcodeItem"]`).removeClass("is-invalid").removeClass("is-valid");
+				$(this).closest("tr").find(`td [name="barcodeItem"]`).closest("div").find(".invalid-feedback").text("");
+
+				$(this).closest("tr").find(`[name="StockOut"]`).removeClass("is-invalid").removeClass("is-valid");
+				$(this).closest("tr").find(`td [name="StockOut"]`).closest("div").find(".invalid-feedback").text("");
+			}
+        }    
+    })
     
+    // END KEYUP CHECK COMPLETE DATA EACH ROW //
 
     // ----- PAGE CONTENT -----
     function pageContent(isForm = false, data = false, readOnly = false) {
@@ -1521,7 +1567,8 @@ $(document).ready(function() {
 
                 const validateBarcode = $("[name=barcodeItem]").hasClass("is-invalid");
                 let serialNumberCondition = $("[name=serialItemNumber]").hasClass("is-invalid");
-                if( !validateBarcode && !serialNumberCondition){
+                let validateQuantity = $("[name=stockOutID]").hasClass("is-invalid");
+                if( !validateBarcode && !serialNumberCondition && !validateQuantity){
                     const validate     = validateForm("pcrDetails");
                     if(validate){
                         formButtonHTML(this);

@@ -75,11 +75,11 @@ class MaterialWithdrawal_model extends CI_Model {
                 "materialRequestID"             => $astRecord["materialRequestID"],
                 "assetID"  => $astRecord["assetID"],
                 "requestQuantity"     => $astRecord["requestQuantity"],
-                "stockOut"     => $astRecord["stockOut"],
+                "borrowed"     => $astRecord["borrowed"],
                 "received"     => $astRecord["received"],
                 "dateReceived"     => $astRecord["dateReceived"],
                 "remaining"     => $astRecord["remaining"],
-                "stockOutDate"     => $astRecord["stockOutDate"],
+                "borrowedDate"     => $astRecord["borrowedDate"],
                 "remarks"     => $astRecord["remarks"],
             ];
             array_push($output, $temp);
@@ -292,7 +292,7 @@ class MaterialWithdrawal_model extends CI_Model {
             WHERE materialWithdrawalID = $materialWithdrawalID");
             // END UPDATE THE STOCK OUT DOCUMENT STATUS//
 
-            // $this->db->query("CALL proc_get_material_withdrawal_approve($materialWithdrawalID)"); // Created By: Sir Wilson September 29,2021 11:02AM
+            $this->db->query("CALL proc_get_material_withdrawal_approve($materialWithdrawalID)"); // Created By: Sir Wilson September 29,2021 11:02AM
 
             // echo $query;
             // exit;

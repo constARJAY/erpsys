@@ -7,7 +7,7 @@ class Stock_out extends CI_Controller {
     {
         parent::__construct();
         $this->load->model("ims/StockOut_model", "stockOut");
-        isAllowed(92);
+        isAllowed(139);
     }
 
     public function index()

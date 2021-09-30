@@ -323,12 +323,12 @@ $(document).ready(function() {
             html += `
             <tr class="btnView" id="${encryptString(materialWithdrawalID)}">
                 <td>
-                    <div>${materialWithdrawalCode}</div>
+                    <div>${materialWithdrawalCode !="null" ? materialWithdrawalCode : "-"}</div>
                     <!-- <small style="color:#848482;">put description here</small> -->
                 </td>
-                <td>${preparedBy}</td>
-                <td>${projectCode}</td>
-                <td>${projectName}</td>
+                <td>${preparedBy || "-"}</td>
+                <td>${projectCode || "-"}</td>
+                <td>${projectName || "-"}</td>
                 <td>${itemStatusDisplay}</td>
                 <td>${assetStatusDisplay}</td>
             </tr>`
@@ -727,7 +727,7 @@ $(document).ready(function() {
             let stockOutContent     = ""; 
             let receivedContent = ""; 
             let remainingContent = "";
-			let stockOutDateContent  ="";
+			let borrowedDateContent  ="";
             let remarksContent = "";
             let receivedDateContent ="";
 
@@ -743,7 +743,7 @@ $(document).ready(function() {
 					received,
 					dateReceived ,
 					remaining,
-					stockOutDate,
+					borrowedDate,
 					remarks} = milestone;
                 // const { manHours, assignedEmployee, assignedManHours } = taskData(milestoneID);
             let disabled  = (received ==0 || received ==null)  ? "" : "disabled";
@@ -787,13 +787,13 @@ $(document).ready(function() {
                         >${formatAmount(remaining)} </span>
                 </div>`;
 
-				stockOutDateContent += `
+				borrowedDateContent += `
                 <div class="form-group my-1 text-center">
                     <span class=""
                     index="${index}"
                         assetID="${assetID}"
                         withdrawalAssetID="${withdrawalAssetID}"
-                        >${ stockOutDate  ? moment(stockOutDate).format("MMMM DD, YYYY") : "-"} </span>
+                        >${ borrowedDate  ? moment(borrowedDate).format("MMMM DD, YYYY") : "-"} </span>
                 </div>`;
 
                 receivedDateContent += `
@@ -824,7 +824,7 @@ $(document).ready(function() {
                 </div>`;
             })
 
-            return [stockOutContent, receivedContent, remainingContent,stockOutDateContent,receivedDateContent,remarksContent];
+            return [stockOutContent, receivedContent, remainingContent,borrowedDateContent,receivedDateContent,remarksContent];
         }
         
         let taskHTML = "";
@@ -1122,7 +1122,6 @@ $(document).ready(function() {
 
     // ----- FORM CONTENT -----
     function formContent(data = false, readOnly = false) {
-        console.log(data)
         $("#page_content").html(preloader);
         // readOnly ? preventRefresh(false) : preventRefresh(true);
 
@@ -1182,7 +1181,7 @@ $(document).ready(function() {
                     <div class="body">
                         <small class="text-small text-muted font-weight-bold">Document No.</small>
                         <h6 class="mt-0 text-danger font-weight-bold">
-							${materialWithdrawalCode}
+							${materialWithdrawalCode || "-" }
 						</h6>      
                     </div>
                 </div>
@@ -1252,7 +1251,7 @@ $(document).ready(function() {
 						class="form-control" 
 						name="projectCode" 
 						disabled 
-						value="${projectCode || "-"}">
+						value="${projectCode  || "-" }">
                 </div>
             </div>
             <div class="col-md-4 col-sm-12">
@@ -1478,11 +1477,13 @@ $(document).ready(function() {
                 receivedDateItem = "";
             }
             const itemRemarks = $(`[name="itemRemarks"][index="${index}"]`).val().trim() || "";
-
-            const temp = {
-                materialWithdrawalID,withdrawalItemID ,received, remainingItem, receivedDateItem, itemRemarks
-            };
-            data.items.push(temp);
+            if(received != 0){
+                const temp = {
+                    materialWithdrawalID,withdrawalItemID ,received, remainingItem, receivedDateItem, itemRemarks
+                };
+                data.items.push(temp);    
+            }
+            
         })
 
         $(`[name="withdrawalAssetID"]`).each(function(i) {
@@ -1498,11 +1499,12 @@ $(document).ready(function() {
                 receivedDateItem = "";
             }
             const assetRemarks = $(`[name="assetRemarks"][index="${index}"]`).val().trim() || "";
-
-            const temp = {
-                materialWithdrawalID,withdrawalAssetID ,received, remainingAsset, receivedDateAsset, assetRemarks
-            };
-            data.assets.push(temp);
+            if(received != 0){
+                const temp = {
+                    materialWithdrawalID,withdrawalAssetID ,received, remainingAsset, receivedDateAsset, assetRemarks
+                };
+                data.assets.push(temp);
+            }
         })
         // console.log(data)
         // return false;

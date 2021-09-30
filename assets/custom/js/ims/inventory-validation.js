@@ -1717,7 +1717,6 @@ $(document).ready(function() {
 					formData.append("approversID", sessionID);
 					formData.append("approversStatus", 2);
 					formData.append("approversDate", dateToday());
-					formData.delete("inventoryValidationStatus");
 					formData.append("inventoryValidationStatus", 2);
 				}
 			}
@@ -1911,7 +1910,7 @@ $(document).ready(function() {
 			let createdBy       = tableData[0].createdBy;
 
 			let materialWithdrawalCode = generateCode("MWF", false, "ims_material_withdrawal_tbl", "materialWithdrawalCode");
-			let stockOutCode = generateCode("STO", false, "ims_stock_out_tbl", "stockOutCode");
+			let stockOutCode =  generateCode("STO", false, "ims_stock_out_tbl", "stockOutCode");
 			let equipmentBorrowingCode = generateCode("EBF", false, "ims_equipment_borrowing_tbl", "materialWithdrawalCode");
 			let inventoryValidationID = tableData[0].inventoryValidationID;
 			let inventoryValidationCode = tableData[0].inventoryValidationCode;

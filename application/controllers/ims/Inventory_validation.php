@@ -42,8 +42,30 @@ class Inventory_validation extends CI_Controller {
         $items                          = $this->input->post("items") ?? null;
         $assets                          = $this->input->post("assets") ?? null;
 
+        $materialWithdrawalCode  = $this->input->post("materialWithdrawalCode") == "null" ? NULL : $this->input->post("materialWithdrawalCode") ; 
+        $stockOutCode  = $this->input->post("stockOutCode") == "null" ? NULL : $this->input->post("stockOutCode"); 
+        $equipmentBorrowingCode  = $this->input->post("equipmentBorrowingCode") == "null" ? NULL : $this->input->post("equipmentBorrowingCode"); 
+        $inventoryValidationID  = $this->input->post("inventoryValidationID") == "null" ? NULL : $this->input->post("inventoryValidationID"); 
+        $inventoryValidationCode  = $this->input->post("inventoryValidationCode") == "null" ? NULL : $this->input->post("inventoryValidationCode"); 
+        $materialRequestID  = $this->input->post("materialRequestID") == "null" ? NULL : $this->input->post("materialRequestID"); 
+        $materialRequestCode  = $this->input->post("materialRequestCode") == "null" ? NULL : $this->input->post("materialRequestCode"); 
+        $costEstimateID  = $this->input->post("costEstimateID") == "null" ? NULL : $this->input->post("costEstimateID"); 
+        $costEstimateCode  = $this->input->post("costEstimateCode") == "null" ? NULL : $this->input->post("costEstimateCode"); 
+        $billMaterialID  = $this->input->post("billMaterialID") == "null" ? NULL : $this->input->post("billMaterialID"); 
+        $billMaterialCode  = $this->input->post("billMaterialCode") == "null" ? NULL : $this->input->post("billMaterialCode"); 
+        $timelineBuilderID  = $this->input->post("timelineBuilderID") == "null" ? NULL : $this->input->post("timelineBuilderID"); 
+        $projectCode  = $this->input->post("projectCode") == "null" ? NULL : $this->input->post("projectCode"); 
+        $projectName  = $this->input->post("projectName") == "null" ? NULL : $this->input->post("projectName"); 
+        $projectCategory  = $this->input->post("projectCategory") == "null" ? NULL : $this->input->post("projectCategory"); 
+        $clientCode  = $this->input->post("clientCode") == "null" ? NULL : $this->input->post("clientCode") == "null"; 
+        $clientName  = $this->input->post("clientName") == "null" ? NULL : $this->input->post("clientName"); 
+        $clientAddress  = $this->input->post("clientAddress") == "null" ? NULL : $this->input->post("clientAddress"); 
+        $dateNeeded  = $this->input->post("dateNeeded") == "null" ? NULL : $this->input->post("dateNeeded");  
+        $createdBy  = $this->input->post("createdBy") == "null" ? NULL : $this->input->post("createdBy"); 
+
         // echo "<pre>";
         // print_r($_POST);
+        // echo
         // exit;
 
 
@@ -116,31 +138,31 @@ class Inventory_validation extends CI_Controller {
                     $changeRequestID  = $item["changeRequestID"]  == "null" ? NULL : $item["changeRequestID"]; 
                     $inventoryReceivingID  = $item["inventoryReceivingID"]  == "null" ? NULL : $item["inventoryReceivingID"]; 
                     $inventoryVendorID  = $item["inventoryVendorID"]  == "null" ? NULL : $item["inventoryVendorID"];  
-                    $inventoryVendorCode  = $item["inventoryVendorCode"] ?? NULL;
-                    $inventoryVendorName  = $item["inventoryVendorName"] ?? NULL;  
-                    $finalQuoteRemarks  = $item["finalQuoteRemarks"] ?? NULL;
+                    $inventoryVendorCode  = $item["inventoryVendorCode"]  == "null" ? NULL : $item["inventoryVendorCode"];
+                    $inventoryVendorName  = $item["inventoryVendorName"]  == "null" ? NULL : $item["inventoryVendorName"];  
+                    $finalQuoteRemarks  = $item["finalQuoteRemarks"]  == "null" ? NULL : $item["finalQuoteRemarks"];
                     $milestoneBuilderID  = $item["milestoneBuilderID"]  == "null" ? NULL : $item["milestoneBuilderID"];  
-                    $phaseDescription  = $item["phaseDescription"]  ?? NULL;
+                    $phaseDescription  = $item["phaseDescription"]   == "null" ? NULL : $item["phaseDescription"];
                     $milestoneListID  = $item["milestoneListID"]  == "null" ? NULL : $item["milestoneListID"];
                     $projectMilestoneID  = $item["projectMilestoneID"]  == "null" ? NULL : $item["projectMilestoneID"];
-                    $projectMilestoneName  = $item["projectMilestoneName"] ?? NULL;
+                    $projectMilestoneName  = $item["projectMilestoneName"]  == "null" ? NULL :  $item["projectMilestoneName"];
                     $itemID  = $item["itemID"]  == "null" ? NULL : $item["itemID"];
-                    $itemCode  = $item["itemCode"]  ?? NULL;
-                    $itemBrandName  = $item["itemBrandName"]  ?? NULL;
-                    $itemName  = $item["itemName"]  ?? NULL; 
-                    $itemClassification  = $item["itemClassification"]  ?? NULL; 
-                    $itemCategory  = $item["itemCategory"] ?? NULL;
-                    $itemUom  = $item["itemUom"] ?? NULL;
-                    $itemDescription  = $item["itemDescription"] ?? NULL;
-                    $files  = $item["files"]  ?? NULL;
-                    $remarks  = $item["remarks"]  ?? NULL;
-                    $availableStocks  = $item["availableStocks"]  ?? NULL;
-                    $requestQuantity  = $item["requestQuantity"]  ?? NULL; 
-                    $reservedItem  = $item["reservedItem"]  ?? NULL;
-                    $forPurchase  = $item["forPurchase"]  ?? NULL;
-                    $availableStocks  = $item["availableStocks"]  ?? NULL; 
-                    $unitCost  = $item["unitCost"]  ?? NULL;
-                    $totalCost  = $item["totalCost"]  ?? NULL;
+                    $itemCode  = $item["itemCode"]   == "null" ? NULL : $item["itemCode"];
+                    $itemBrandName  = $item["itemBrandName"]   == "null" ? NULL : $item["itemBrandName"];
+                    $itemName  = $item["itemName"]   == "null" ? NULL : $item["itemName"]; 
+                    $itemClassification  = $item["itemClassification"]   == "null" ? NULL : $item["itemClassification"]; 
+                    $itemCategory  = $item["itemCategory"]  == "null" ? NULL : $item["itemCategory"];
+                    $itemUom  = $item["itemUom"]  == "null" ? NULL : $item["itemUom"];
+                    $itemDescription  = $item["itemDescription"]  == "null" ? NULL : $item["itemDescription"];
+                    $files  = $item["files"]   == "null" ? NULL : $item["files"];
+                    $remarks  = $item["remarks"]   == "null" ? NULL : $item["remarks"];
+                    $availableStocks  = $item["availableStocks"]   == "null" ? NULL : $item["availableStocks"];
+                    $requestQuantity  = $item["requestQuantity"]   == "null" ? NULL : $item["requestQuantity"]; 
+                    $reservedItem  = $item["reservedItem"]   == "null" ? NULL : $item["reservedItem"];
+                    $forPurchase  = $item["forPurchase"]   == "null" ? NULL : $item["forPurchase"];
+                    $availableStocks  = $item["availableStocks"]   == "null" ? NULL : $item["availableStocks"]; 
+                    $unitCost  = $item["unitCost"]   == "null" ? NULL : $item["unitCost"];
+                    $totalCost  = $item["totalCost"]   == "null" ? NULL : $item["totalCost"];
 
                   
 
@@ -291,29 +313,9 @@ class Inventory_validation extends CI_Controller {
                 
                 $saveInventoryValidationAssets = $this->inventoryvalidation->saveInventoryValidationAssets($inventoryValidationAssets,$materialRequestID);
     
+            }
 
-         
-
-                $materialWithdrawalCode  = $this->input->post("materialWithdrawalCode") ?? null; 
-                $stockOutCode  = $this->input->post("stockOutCode") ?? null; 
-                $equipmentBorrowingCode  = $this->input->post("equipmentBorrowingCode") ?? null; 
-                $inventoryValidationID  = $this->input->post("inventoryValidationID") ?? null; 
-                $inventoryValidationCode  = $this->input->post("inventoryValidationCode") ?? null; 
-                $materialRequestID  = $this->input->post("materialRequestID") ?? null; 
-                $materialRequestCode  = $this->input->post("materialRequestCode") ?? null; 
-                $costEstimateID  = $this->input->post("costEstimateID") ?? null; 
-                $costEstimateCode  = $this->input->post("costEstimateCode") ?? null; 
-                $billMaterialID  = $this->input->post("billMaterialID") ?? null; 
-                $billMaterialCode  = $this->input->post("billMaterialCode") ?? null; 
-                $timelineBuilderID  = $this->input->post("timelineBuilderID") ?? null; 
-                $projectCode  = $this->input->post("projectCode") ?? null; 
-                $projectName  = $this->input->post("projectName") ?? null; 
-                $projectCategory  = $this->input->post("projectCategory") ?? null; 
-                $clientCode  = $this->input->post("clientCode") ?? null; 
-                $clientName  = $this->input->post("clientName") ?? null; 
-                $clientAddress  = $this->input->post("clientAddress") ?? null; 
-                $dateNeeded  = $this->input->post("dateNeeded") ?? null;  
-                $createdBy  = $this->input->post("createdBy") ?? null; 
+            if(!empty($items) || !empty($assets)){
 
                 $dataMaterialWithdrawalDocument =array(
                     'materialWithdrawalCode' => $materialWithdrawalCode,
@@ -325,7 +327,7 @@ class Inventory_validation extends CI_Controller {
                     'costEstimateCode' => $costEstimateCode,
                     'billMaterialID' => $billMaterialID,
                     'billMaterialCode' => $billMaterialCode,
-                    'employeeID' => $employeeID,
+                    'employeeID' => 0,
                     'timelineBuilderID' => $timelineBuilderID,
                     'projectCode' => $projectCode,
                     'projectName' => $projectName,
@@ -341,7 +343,7 @@ class Inventory_validation extends CI_Controller {
                 );
                
                 $saveMaterialWithdrawalDocument = $this->inventoryvalidation->saveMaterialWithdrawalDocument($dataMaterialWithdrawalDocument);
-
+               
                 if($saveMaterialWithdrawalDocument){
                     $result = explode("|", $saveMaterialWithdrawalDocument);
 
@@ -349,70 +351,68 @@ class Inventory_validation extends CI_Controller {
         
                         $materialWithdrawalID  = $result[2];
 
-                        $dataStockOutDocument =array(
-                            'stockOutCode' => $stockOutCode,
-                            'materialWithdrawalID' => $materialWithdrawalID,
-                            'materialWithdrawalCode' => $stockOutCode,
-                            'inventoryValidationID' => $inventoryValidationID,
-                            'inventoryValidationCode' => $inventoryValidationCode,
-                            'materialRequestID' => $materialRequestID,
-                            'materialRequestCode' => $materialRequestCode,
-                            'costEstimateID' => $costEstimateID,
-                            'costEstimateCode' => $costEstimateCode,
-                            'billMaterialID' => $billMaterialID,
-                            'billMaterialCode' => $billMaterialCode,
-                            'employeeID' => $employeeID,
-                            'timelineBuilderID' => $timelineBuilderID,
-                            'projectCode' => $projectCode,
-                            'projectName' => $projectName,
-                            'projectCategory' => $projectCategory,
-                            'clientCode' => $clientCode,
-                            'clientName' => $clientName,
-                            'clientAddress' => $clientAddress,
-                            'dateNeeded' => $dateNeeded,
-                            'inventoryItemStatus' => 0,
-                            'stockOutStatus' =>0,
-                            'createdBy' => $createdBy, 
-                        );
+                        if(!empty($items)){
+                            $dataStockOutDocument =array(
+                                'stockOutCode' => $stockOutCode,
+                                'materialWithdrawalID' => $materialWithdrawalID,
+                                'materialWithdrawalCode' => $materialWithdrawalCode,
+                                'inventoryValidationID' => $inventoryValidationID,
+                                'inventoryValidationCode' => $inventoryValidationCode,
+                                'materialRequestID' => $materialRequestID,
+                                'materialRequestCode' => $materialRequestCode,
+                                'costEstimateID' => $costEstimateID,
+                                'costEstimateCode' => $costEstimateCode,
+                                'billMaterialID' => $billMaterialID,
+                                'billMaterialCode' => $billMaterialCode,
+                                'employeeID' => 0,
+                                'timelineBuilderID' => $timelineBuilderID,
+                                'projectCode' => $projectCode,
+                                'projectName' => $projectName,
+                                'projectCategory' => $projectCategory,
+                                'clientCode' => $clientCode,
+                                'clientName' => $clientName,
+                                'clientAddress' => $clientAddress,
+                                'dateNeeded' => $dateNeeded,
+                                'inventoryItemStatus' => 0,
+                                'stockOutStatus' =>0,
+                                'createdBy' => $createdBy, 
+                            );
+    
+                            $saveStockOutDocument = $this->inventoryvalidation->saveStockOutDocument($dataStockOutDocument);
+                        }
 
-                        $saveStockOutDocument = $this->inventoryvalidation->saveStockOutDocument($dataStockOutDocument);
-
-                        $dataEquipmentBorrowingDocument =array(
-                            'equipmentBorrowingCode' => $equipmentBorrowingCode,
-                            'materialWithdrawalID' => $materialWithdrawalID,
-                            'materialWithdrawalCode' => $stockOutCode,
-                            'inventoryValidationID' => $inventoryValidationID,
-                            'inventoryValidationCode' => $inventoryValidationCode,
-                            'materialRequestID' => $materialRequestID,
-                            'materialRequestCode' => $materialRequestCode,
-                            'costEstimateID' => $costEstimateID,
-                            'costEstimateCode' => $costEstimateCode,
-                            'billMaterialID' => $billMaterialID,
-                            'billMaterialCode' => $billMaterialCode,
-                            'employeeID' => $employeeID,
-                            'timelineBuilderID' => $timelineBuilderID,
-                            'projectCode' => $projectCode,
-                            'projectName' => $projectName,
-                            'projectCategory' => $projectCategory,
-                            'clientCode' => $clientCode,
-                            'clientName' => $clientName,
-                            'clientAddress' => $clientAddress,
-                            'dateNeeded' => $dateNeeded,
-                            'inventoryAssetStatus' => 0,
-                            'equipmentBorrowingStatus' =>0,
-                            'createdBy' => $createdBy, 
-                        );
-
-                        $saveEquipmentBorrowingDocument = $this->inventoryvalidation->saveEquipmentBorrowingDocument($dataEquipmentBorrowingDocument);
-
+                        if(!empty($assets)){
+                            $dataEquipmentBorrowingDocument =array(
+                                'equipmentBorrowingCode' => $equipmentBorrowingCode,
+                                'materialWithdrawalID' => $materialWithdrawalID,
+                                'materialWithdrawalCode' => $materialWithdrawalCode,
+                                'inventoryValidationID' => $inventoryValidationID,
+                                'inventoryValidationCode' => $inventoryValidationCode,
+                                'materialRequestID' => $materialRequestID,
+                                'materialRequestCode' => $materialRequestCode,
+                                'costEstimateID' => $costEstimateID,
+                                'costEstimateCode' => $costEstimateCode,
+                                'billMaterialID' => $billMaterialID,
+                                'billMaterialCode' => $billMaterialCode,
+                                'employeeID' => 0,
+                                'timelineBuilderID' => $timelineBuilderID,
+                                'projectCode' => $projectCode,
+                                'projectName' => $projectName,
+                                'projectCategory' => $projectCategory,
+                                'clientCode' => $clientCode,
+                                'clientName' => $clientName,
+                                'clientAddress' => $clientAddress,
+                                'dateNeeded' => $dateNeeded,
+                                'inventoryAssetStatus' => 0,
+                                'equipmentBorrowingStatus' =>0,
+                                'createdBy' => $createdBy, 
+                            );
+    
+                            $saveEquipmentBorrowingDocument = $this->inventoryvalidation->saveEquipmentBorrowingDocument($dataEquipmentBorrowingDocument);
+                        }
                     }
-                   
                 }
-
-            
-              
             }
-          
         }
         // echo "<pre>";
         // print_r($dataMaterialWithdrawalDocument);

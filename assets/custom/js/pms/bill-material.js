@@ -2239,9 +2239,8 @@ $(document).ready(function() {
 	// ----- GET REQUEST VEHICLE CONTENT -----
 	function requestOtherContent(data = false, costEstimateID = null, billMaterialID = null, readOnly = false){
 
-		let tableBodyData = readOnly ? `` :  requestOthersRow(data, readOnly);
-
-		if(readOnly){	
+		let tableBodyData = requestOthersRow(data, readOnly); 
+	
 			if(data){
 				if(data.length > 0){
 					tableBodyData = "";
@@ -2250,7 +2249,7 @@ $(document).ready(function() {
 					});
 				}
 			}
-		}
+		
 		// TABLE ROW
 
 		let html = `

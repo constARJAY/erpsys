@@ -2,11 +2,11 @@
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Equipment_borrowing extends CI_Controller {
-
+   
     public function __construct()
     {
         parent::__construct();
-        $this->load->model("ims/equipmentBorrowing_model", "equipmentborrowing");
+        $this->load->model("ims/EquipmentBorrowing_model", "borrowing");
         isAllowed(43);
     }
 
@@ -18,111 +18,91 @@ class Equipment_borrowing extends CI_Controller {
         $this->load->view("ims/equipment_borrowing/index");
         $this->load->view("template/footer");
     }
-    public function saveEquipmentBorrowing()
+
+    public function getTimelineContent()
     {
-        $action                  = $this->input->post("action");
-        $method                  = $this->input->post("method");
-        $borrowingID                = $this->input->post("borrowingID") ?? null;
-        $reviseBorrowingID      = $this->input->post("reviseBorrowingID") ?? null;
-        $employeeID              = $this->input->post("employeeID");
-        $projectID              = $this->input->post("projectID") ?? null;
-        $approversID             = $this->input->post("approversID") ?? null;
-        $approversStatus         = $this->input->post("approversStatus") ?? null;
-        $approversDate           = $this->input->post("approversDate") ?? null;
-        $borrowingStatus          = $this->input->post("borrowingStatus");
-        $borrowingReason        = $this->input->post("borrowingReason") ?? null;
-        $borrowingRemarks      = $this->input->post("borrowingRemarks") ?? null;
-        $submittedAt             = $this->input->post("submittedAt") ?? null;
-        $createdBy               = $this->input->post("createdBy");
-        $updatedBy               = $this->input->post("updatedBy");
-        $createdAt               = $this->input->post("createdAt");
-        $items                   = $this->input->post("items") ?? null;
+        $timelineBuilderID = $this->input->post("timelineBuilderID");
+        echo json_encode($this->borrowing->getTimelineContent($timelineBuilderID));
+        // echo json_encode($this->materialWithdrawal->getTimelineContent(1));
+    }
 
-        $borrowingData = [
-            "reviseBorrowingID"      => $reviseBorrowingID,
-            "employeeID"              => $employeeID,
-            "projectID "                => $projectID ,
-            "approversID"             => $approversID,
-            "approversStatus"         => $approversStatus,
-            "approversDate"           => $approversDate,
-            "borrowingStatus"         => $borrowingStatus,
-            "borrowingReason"         => $borrowingReason,
-            // "projectTotalAmount"      => $projectTotalAmount,
-            // "companyTotalAmount"      => $companyTotalAmount,
-            "submittedAt"             => $submittedAt,
-            "createdBy"               => $createdBy,
-            "updatedBy"               => $updatedBy,
-            "createdAt"               => $createdAt
-        ];
-        if ($action == "update") {
-            // unset($purchaseRequestData["revisePurchaseRequestID"]);
-            unset($borrowingData["reviseBorrowingID"]);
-            unset($borrowingData["createdBy"]);
-            unset($borrowingData["createdAt"]);
+    public function saveProjectBoard()
+    {
+        $sessionID = $this->session->has_userdata("adminSessionID") ? $this->session->userdata("adminSessionID") : 1;
 
-            if ($method == "cancelform") {
-                $borrowingData = [
-                    "borrowingStatus" => 4,
-                    "updatedBy"             => $updatedBy,
-                ];
-            } else if ($method == "approve") {
-                $borrowingData = [
-                    "approversStatus"       => $approversStatus,
-                    "approversDate"         => $approversDate,
-                    "borrowingStatus"      => $borrowingStatus,
-                    "updatedBy"             => $updatedBy,
-                ];
-            } else if ($method == "deny") {
-                $borrowingData = [
-                    "approversStatus"        => $approversStatus,
-                    "approversDate"          => $approversDate,
-                    "borrowingStatus"        =>3,
-                    "borrowingRemarks"      =>$borrowingRemarks,
-                    "updatedBy"              =>$updatedBy,
-                ];
-            } else if ($method == "drop") {
-                $borrowingData = [
-                    "reviseBorrowingID"        => $reviseBorrowingID,
-                    "borrowingStatus"          => 5,
-                    "updatedBy"               => $updatedBy,
-                ]; 
-            }
-        }     
+        $materialWithdrawalID        = $this->input->post("materialWithdrawalID");
+        $equipmentBorrowingID         = $this->input->post("equipmentBorrowingID");
+        $materialRequestID        = $this->input->post("materialRequestID");
+        $assets = $this->input->post("assets");
+        // $assets = $this->input->post("assets");
 
-                $saveEquipmentBorrowingData = $this->equipmentborrowing->saveBorrowingData($action, $borrowingData, $borrowingID);
-                if ($saveEquipmentBorrowingData) {
-                    $result = explode("|", $saveEquipmentBorrowingData);
-        
-                    if ($result[0] == "true") {
-                        $borrowingID = $result[2];
-        
-                        if ($items) {
-                            $borrowingItems = [];
-                            foreach($items as $index => $item) {
-                                $temp = [
-                                    "borrowingID"                       => $borrowingID,
-                                    "barcode"                           => $item["barcode"],
-                                    "itemID"                            => $item["itemID"] != "null" ? $item["itemID"] : null,
-                                    "itemName"                          => $item["itemName"],
-                                    "inventoryStorageID"                => $item["inventoryStorageID"],
-                                    "serialnumber"                      => $item["serialnumber"],
-                                    "dateBorrowed"                      => $item["dateBorrowed"],
-                                    "quantity"                          => $item["quantity"],
-                                    "unitOfMeasurement"                 => $item["unitofmeasurement"],
-                                    "createdBy"                         => $item["createdBy"],
-                                    "updatedBy"                         => $item["updatedBy"],
-                                ];
-                                array_push($borrowingItems, $temp);
-                            }
-                            $savePurchTransferstItems = $this->equipmentborrowing->saveBorrowingItems($borrowingItems, $borrowingID);
-                        }
-        
-                    }
-                    
+        // $dataAsset = [];
+        $dataAsset = [];
+
+        // echo "<pre>";
+        // print_r($_POST);
+        // exit;
+
+        if($assets){
+            foreach ($assets as $asset) {
+                $serialData =[];
+                $temp = [
+
+                    "costEstimateID"  => $asset["costEstimateID"],
+                    "billMaterialID"  => $asset["billMaterialID"],  
+                    "materialRequestID"  => $asset["materialRequestID"],
+                    "inventoryValidationID"  => $asset["inventoryValidationID"],
+                    "bidRecapID"  => $asset["bidRecapID"],
+                    "purchaseRequestID"  => $asset["purchaseRequestID"],
+                    "purchaseOrderID"  => $asset["purchaseOrderID"], 
+                    "changeRequestID"  => $asset["changeRequestID"],
+                    "inventoryReceivingID"  => $asset["inventoryReceivingID"],
+                    "inventoryVendorID"  => $asset["inventoryVendorID"],
+                    "inventoryVendorCode"  => $asset["inventoryVendorCode"],
+                    "inventoryVendorName"  => $asset["inventoryVendorName"],  
+                    "finalQuoteRemarks"  => $asset["finalQuoteRemarks"],
+                    "milestoneBuilderID"  => $asset["milestoneBuilderID"],
+                    "phaseDescription"  => $asset["phaseDescription"],
+                    "milestoneListID"  => $asset["milestoneListID"],
+                    "projectMilestoneID"  => $asset["projectMilestoneID"],
+                    "projectMilestoneName"  => $asset["projectMilestoneName"],
+                    "assetID"  => $asset["assetID"],
+                    "assetCode"  => $asset["assetCode"],
+                    "assetBrandName"  => $asset["assetBrandName"],
+                    "assetName"  => $asset["assetName"],
+                    "assetClassification"  => $asset["assetClassification"],
+                    "assetCategory"  => $asset["assetCategory"],
+                    "assetUom"  => $asset["assetUom"],
+                    "assetDescription"  => $asset["assetDescription"],
+                    "files"  => $asset["files"] ,
+                    "remarks"  => $asset["remarks"] ,
+                    "requestQuantity"  => $asset["requestQuantity"] , 
+                    "reservedAsset"  => $asset["reservedAsset"] ,
+                    "forPurchase"  => $asset["forPurchase"] ,
+
+                    "materialWithdrawalID"              => $asset["materialWithdrawalID"],
+                    "borrowed"            => $asset["borrowed"],
+                    "availableStocks"            => $asset["availableStocks"],
+                    "remaining"    => $asset["remainingAsset"],
+                    "borrowedDate" => $asset["borrowedDate"],
+                    "withdrawalAssetStatus" => 0,
+                    "barcode" => $asset["barcode"],
+                    "createdBy"           => $sessionID,
+                    "updatedBy"           => $sessionID
+                ];
+                // array_push($dataAsset, $temp);
+
+                if(!empty($asset["serials"])){
+                    $serialData = $asset["serials"];
                 }
-                echo json_encode($saveEquipmentBorrowingData); 
-                
-            }    
 
-}    
-?>
+            $saveEquipmentBorrowingData = $this->borrowing->saveProjectBoard($materialWithdrawalID, $temp,$materialRequestID,$serialData,$equipmentBorrowingID);
+
+            }
+        }
+
+
+        echo json_encode($saveEquipmentBorrowingData);
+    }
+
+}

@@ -204,7 +204,7 @@ function initDataTables() {
 			],
 		});
 
-	var table = $("#tableReturnItem")
+	var table = $("#tableMaterialUsage")
 		.css({ "min-width": "100%" })
 		.removeAttr("width")
 		.DataTable({
@@ -223,14 +223,15 @@ function initDataTables() {
                 { targets: 2,  width: 220 },
                 { targets: 3,  width: 250 },
                 { targets: 4,  width: 80  },
-                { targets: 5,  width: 80  },
-                { targets: 6,  width: 80  },
-                { targets: 7,  width: 50  },
-                { targets: 8,  width: 300 },
+				{ targets: 5,  width: 80  },
+                { targets: 6,  width: 120  },
+                { targets: 7,  width: 80  },
+                { targets: 8,  width: 50  },
+                { targets: 9,  width: 300 },
             ],
         });
 
-		var table = $("#tableReturnItem0")
+		var table = $("#tableMaterialUsage0")
 		.css({ "min-width": "100%" })
 		.removeAttr("width")
 		.DataTable({
@@ -241,15 +242,16 @@ function initDataTables() {
             scrollX: true,
             scrollCollapse: true,
             columnDefs: [
-                { targets: 0,  width: 120 },
+				{ targets: 0,  width: 120 },
                 { targets: 1,  width: 150 },
                 { targets: 2,  width: 220 },
                 { targets: 3,  width: 250 },
                 { targets: 4,  width: 80  },
-                { targets: 5,  width: 80  },
-                { targets: 6,  width: 50  },
-                { targets: 7,  width: 50  },
-                { targets: 8,  width: 300 },
+				{ targets: 5,  width: 80  },
+                { targets: 6,  width: 120  },
+                { targets: 7,  width: 80  },
+                { targets: 8,  width: 50  },
+                { targets: 9,  width: 300 },
             ],
         });
 
@@ -774,11 +776,12 @@ function getItemsRow(readOnly = false,materialUsageID) {
 				itemCode							= "",
 				itemID                    			= "",
 				itemName							= "",
+				uom									= "",
 				itemName_brand                   	= "",
-				brandName							="",
+				Brand								="",
 				quantity                 			= "",
-				used								= "",
 				unused								= "",
+				used								= "",
 				classificationName                  = "",
 				categoryName						= "",
 				remarks                   			= "",
@@ -861,19 +864,24 @@ function getItemsRow(readOnly = false,materialUsageID) {
 					<div class="assetCode" name="assetCode" requestitem="${itemID}" createAt="${createAt}">${itemCode || ""}</div>
 					</td>
 					<td>
-						<div class="itemID">${itemName_brand|| "-"}</div>
+						<div class="itemID">${itemName|| "-"}</div>
+						<small style="color:#848482;">${Brand || ""}</small>
 					</td>
 					<td class="">
-						<div class="classificationID">${classificationandCategory || ""}</div>
+						<div class="classificationID">${classificationName || ""}</div>
+						<small style="color:#848482;">${categoryName || ""}</small>
+					</td>
+					<td class="">	
+					<div class="uom">${uom || ""}</div>
 					</td>
 					<td class="text-center">	
 					<div class="quantity">${quantity || ""}</div>
 					</td>
 					<td class="text-center">
-					<div class="used">${used || ""}</div>
+					<div class="unused">${unused || ""}</div>
 					</td>	
 					<td class="text-center">
-						<div class="unused">${unused || ""}</div>
+						<div class="used ">${used || ""}</div>
 					</td>
 					<td class="table-data-serial-number">
 						${itemSerialNumbers}	
@@ -886,38 +894,43 @@ function getItemsRow(readOnly = false,materialUsageID) {
 				html += `
 				<tr class="itemTableRow"inventoryRequestID="${inventoryRequestID}">
 					<td>
-						<div class="assetCode" name="assetCode" itemCode="${itemCode}">${assetCode || ""}</div>
+						<div class="assetCode" name="assetCode" itemCode="${itemCode}">${itemCode || ""}</div>
 					</td>
 					<td>
-						<div class="itemID"name="itemID"id="itemID" itemName="${itemName}" brand="${brandName}" itemID="${itemID}" recordID="${recordID}">${itemName_brand || ""}</div>
+						<div class="itemID"name="itemID"id="itemID" itemName="${itemName}" brand="${Brand}" itemID="${itemID}" recordID="${recordID}">${itemName || ""}</div>
+						<small style="color:#848482;">${Brand || ""}</small>
 					</td>
 					<td>
 						<div class="classificationID"name="classificationID" id="${classificationID}" classificationName="${classificationName}" categoryName="${categoryName}">${classificationandCategory || ""}</div>
+						<small style="color:#848482;">${categoryName || ""}</small>
+					</td>
+					<td class="">	
+					<div class="uom" name="uom" id="uom">${uom || ""}</div>
 					</td>
 					<td class="text-center">
 						<div class="quantity"name="quantity" id="quantity${index}">${quantity || ""}</div>
 					</td>
 					<td>
-					<div class="used text-center">
+					<div class="text-center">
 						<input 
 								type="text" 
-								class="form-control input-quantity text-center used"
+								class="form-control input-quantity text-center unused"
 								data-allowcharacters="[0-9]" 
 								min="0"
 								number="${index}"
-								id="used${index}"
+								id="unused${index}"
 								itemID="${itemID}"
 								quantity="${quantity}" 
-								value="${inventoryRequestID ? used : ""}" 
-								name="used" 
+								value="${inventoryRequestID ? unused : ""}" 
+								name="unused" 
 								minlength="1" 
 								maxlength="9" 
 								>
-							<div class="invalid-feedback d-block" id="invalid-used"></div>
+							<div class="invalid-feedback d-block" id="invalid-unused${index}"></div>
 					</div>
 					</td>
 					<td class="text-center">
-						<div class="unused" id="unused${index}" name="unused" itemID="${itemID}">${unused || ""}</div>
+						<div class="used" id="used${index}">${used || ""}</div>
 					</td>
 					<td class="table-data-serial-number">
 						${itemSerialNumbers}
@@ -950,17 +963,30 @@ function getItemsRow(readOnly = false,materialUsageID) {
 	
 }
 
-$(document).on("keyup", ".used", function() {
-	var quantity = $(this).attr("quantity");
+$(document).on("change", ".unused", function() {
 	var count = $(this).attr("number");
-	var totalQuantity = parseFloat(quantity);
+	var quantity  = $(`#quantity${count}`).text();
+	var totalQuantity = parseInt(quantity);
 	var val = $(this).val() | 0;
-	var totalReceived = parseFloat(val);
-	var unused = parseFloat(quantity) - parseFloat(val);
-	$(`#unused${count}`).text(unused);
-	//quantityValidation(totalQuantity, totalReceived, count);
-
-
+	var totalReceived = parseInt(val);
+	var used = parseInt(quantity) - parseInt(val);
+	$(`#used${count}`).text(used);
+	var flag = ["true"];
+	if(totalQuantity < totalReceived){
+			$(`#unused${count}`).removeClass("is-valid").addClass("is-invalid");
+			$(this).closest("tr").find(`#invalid-unused${count}`).addClass("is-invalid");
+			$(`#invalid-unused${count}`).html("Not less that or equal order quantity");
+		flag[0]= false;
+		
+		removeIsValid("#tableMaterialUsage");
+	}else{
+		$(`#unused${count}`).removeClass("is-invalid").addClass("is-valid");
+		$(this).closest("tr").find(`#invalid-unused${count}`).removeClass("is-invalid");
+		$(this).closest("tr").find(`#invalid-unused${count}`).text('');
+		removeIsValid("#tableMaterialUsage");
+		flag[0]= true;
+	}
+	return flag;
 });	
 // function quantityValidation(totalQuantity, totalReceived, count){
 // 	alert(totalQuantity);
@@ -1091,7 +1117,7 @@ function formContent(data = false, readOnly = false, isRevise = false, isFromCan
 	let disabled = readOnly ? "disabled" : "";
 	//let disabledReference = purchaseOrderID && purchaseOrderID != "0" ? "disabled" : disabled;
 
-	let tableReturnItem = !disabled ? "tableReturnItem" : "tableReturnItem0";
+	let tableMaterialUsage = !disabled ? "tableMaterialUsage" : "tableMaterialUsage0";
 
 	let button = formButtons(data, isRevise, isFromCancelledDocument);
 	let reviseDocumentNo    = isRevise ? materialUsageID  : reviseMaterialUsageID ;
@@ -1258,15 +1284,16 @@ function formContent(data = false, readOnly = false, isRevise = false, isFromCan
 			<div class="w-100">
 				<hr class="pb-1">
 				<div class="text-primary font-weight-bold" style="font-size: 1.5rem;">Material Usage: </div>
-				<table class="table table-striped" id="${tableReturnItem}">
+				<table class="table table-striped" id="${tableMaterialUsage}">
 					<thead>
 						<tr style="white-space: nowrap">
 							<th>Item Code</th>
-							<th>Item Name / Brand</th>
-							<th>Classification / Category</th>
+							<th>Item Name</th>
+							<th>Classification</th>
+							<th>Uom</th>
 							<th>Quantity</th>
-							<th>Used ${!disabled ? "<code>*</code>" : ""}</th>
 							<th>Unused</th>
+							<th>Used</th>
 							<th>Serial No.</th>
 							<th>Remarks</th>
 						</tr>
@@ -1460,9 +1487,10 @@ function getMaterialUsageData(action = "insert", method = "submit", status = "1"
 			const classificationName = $("td [name=classificationID]", this).attr("classificationName");
 			const categoryName  = $("td [name=classificationID]", this).attr("categoryName");		
 			const createatforCode  = dateToday();
+			const uom    	  = $("td [name=uom]", this).text();
 			const quantity    	  = $("td [name=quantity]", this).text();	
-			const used   = $("td [name=used]", this).val()?.trim();	
-			const unused   = $("td [name=unused]", this).text();	
+			const unused   = $("td [name=unused]", this).val()?.trim();	
+			const used   = $("td [name=used]", this).text();	
 			const remarks   = $("td [name=remarks]", this).val()?.trim();	
 			
 		
@@ -1478,9 +1506,10 @@ function getMaterialUsageData(action = "insert", method = "submit", status = "1"
 				classificationName,
 				categoryName,
 				createatforCode, 
+				uom,
 				quantity,
-				used,
 				unused,
+				used,
 				remarks,
 				scopes: []
 
@@ -1498,9 +1527,10 @@ function getMaterialUsageData(action = "insert", method = "submit", status = "1"
 			formData.append(`items[${i}][classificationName]`, classificationName);
 			formData.append(`items[${i}][categoryName]`, categoryName);
 			formData.append(`items[${i}][createatforCode]`, createatforCode);
+			formData.append(`items[${i}][uom]`, uom);
 			formData.append(`items[${i}][quantity]`, quantity);
-			formData.append(`items[${i}][used]`, used);
 			formData.append(`items[${i}][unused]`, unused);
+			formData.append(`items[${i}][used]`, used);
 			formData.append(`items[${i}][remarks]`, remarks);
 			
 			$(`td .serial-number-table tbody > tr`, this).each(function(index,obj) {
@@ -1676,7 +1706,7 @@ $(document).on("click", "#btnSave, #btnCancel", function () {
 
 		saveMaterialUsage(data, "save", null, pageContent);
 	}else{
-		$("[name=used]").focus();
+		$("[name=unused]").focus();
 		$("[name=serialNumber]").focus();
 	}
 	
@@ -1698,8 +1728,8 @@ function checkSerialReceivedQuantity() {
 	if ($(`.returnItemsBody tr.itemTableRow`).length > 0) {
 		$(`.itemTableRow`).each(function() {
 
-			const receivedQuantity = parseFloat($(`[name="used"]`, this).val()) || 0;
-			const itemID = $(`[name="used"]`, this).attr("itemID");
+			const receivedQuantity = parseFloat($(`[name="unused"]`, this).val()) || 0;
+			const itemID = $(`[name="unused"]`, this).attr("itemID");
 		
 			if ($(`td .serial-number-table tbody > tr`, this).length >= 1) {
 				let countSerial = $(`td .serial-number-table tbody > tr`, this).length;
@@ -1718,7 +1748,9 @@ function checkSerialReceivedQuantity() {
 								if($(`.servicescope .invalid-feedback`, this).text() !="Data already exist!"){
 									$(`.servicescope [name="serialNumber"]`, this).removeClass("is-invalid");
 									$(`.servicescope .invalid-feedback`, this).text("");
-								}	
+								}
+							
+								
 						})
 							flag[0] = true;
 						}
@@ -1733,8 +1765,8 @@ function checkSerialReceivedQuantity() {
 							flag[0] = true;
 						}
 						if(tmpSerialStorage.length !=0  && countSerial != receivedQuantity || receivedQuantity ==0 ){ // exisitng all value
-							$(`.used [name="used"]`, this).removeClass("is-valid, no-error").addClass("is-invalid");
-							$(`.used .invalid-feedback`, this).text("Serial number is not equal on quantity items!");
+							$(`.unused [name="unused"]`, this).removeClass("is-valid, no-error").addClass("is-invalid");
+							$(`.unused .invalid-feedback`, this).text("Serial number is not equal on quantity items!");
 
 							$(`td .serial-number-table tbody > tr`, this).each(function() {
 
@@ -1745,8 +1777,8 @@ function checkSerialReceivedQuantity() {
 							
 							flag[0] = false;
 						}else{
-							$(`.used [name="used"]`, this).removeClass("is-invalid");
-							$(`.used .invalid-feedback`, this).text("");
+							$(`.unused [name="unused"]`, this).removeClass("is-invalid");
+							$(`.unused .invalid-feedback`, this).text("");
 
 							$(`td .serial-number-table tbody > tr`, this).each(function() {
 								if($(`.servicescope .invalid-feedback`, this).text() !="Data already exist!"){
@@ -1773,18 +1805,20 @@ function checkSerialReceivedQuantity() {
 $(document).on("click", "#btnSubmit", function () {
 
 	const validateDuplicateSerial  = $("[name=serialNumber]").hasClass("is-invalid") ;
+	const receivedQuantity  = $("[name=unused]").hasClass("is-invalid") ;
 	const validateSerialMessage  = $(".invalid-feedback").text() ;
 	//const checkQuantity = quantityValidation();
 	// console.log("validateDuplicateSerial: "+ validateDuplicateSerial)
 	// if(!validateDuplicateSerial || validateSerialMessage != "Data already exist!"){
 	//if(!checkQuantity){
+		if(!receivedQuantity){
 		if(!validateDuplicateSerial){
 		const validateSerial = checkSerialReceivedQuantity();
 		
 		if (validateSerial != "false") {
 			const validate       = validateForm("form_material_usage");
 			// console.log("validate: "+ validate)
-			removeIsValid("#tableReturnItem");
+			removeIsValid("#tableMaterialUsage");
 			if(validate){
 				const id             = decryptString($(this).attr("materialUsageID"));
 				const revise         = $(this).attr("revise") == "true";
@@ -1833,7 +1867,7 @@ $(document).on("click", "#btnSubmit", function () {
 
 		}
 	}
-//}
+}
 
 		
 	else{

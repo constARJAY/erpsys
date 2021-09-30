@@ -339,56 +339,56 @@ $(document).ready(function () {
 													SELECT module,ID,referenceCode,purchaseID, fullname, SUM(quantity) AS  quantity, daterequest, inventoryStatus,IFNULL(SUM(RECORD),0) AS stockQuantity
 													FROM (
 													SELECT 
-														'1' AS module, 
-														iri.returnItemID as ID,
-														'' AS purchaseID, 
-														returnItemCode as referenceCode, 
-														CONCAT(empl.employeeFirstname,' ',empl.employeeLastname) AS fullname,
-														ird.quantity AS quantity,
-														DATE_FORMAT(iri.createdAt,'%M% %d%, %Y') AS daterequest,
-														returnItemStatus AS inventoryStatus,
-														CASE WHEN sii.quantity IS NOT NULL  THEN SUM(sii.quantity)
-														ELSE SUM(sia.quantity) END RECORD
+													'1' AS module, 
+													iri.returnItemID as ID,
+													'' AS purchaseID, 
+													returnItemCode as referenceCode, 
+													CONCAT(empl.employeeFirstname,' ',empl.employeeLastname) AS fullname,
+													ird.quantity AS quantity,
+													DATE_FORMAT(iri.createdAt,'%M% %d%, %Y') AS daterequest,
+													returnItemStatus AS inventoryStatus,
+													CASE WHEN sii.quantity IS NOT NULL  THEN SUM(sii.quantity)
+													ELSE SUM(sia.quantity) END RECORD
 													FROM ims_return_item_tbl AS iri
 													LEFT JOIN ims_inventory_request_details_tbl AS ird ON iri.returnItemID = ird.returnItemID
 													LEFT JOIN hris_employee_list_tbl AS empl ON iri.employeeID = empl.employeeID
 													LEFT JOIN ims_stock_in_item_tbl AS sii ON iri.returnItemID = sii.returnItemID AND ird.itemid = sii.itemID
 													LEFT JOIN ims_stock_in_assets_tbl AS sia ON iri.returnItemID = sia.returnItemID AND ird.itemID = sia.assetID
-													WHERE returnItemStatus = 2  GROUP BY ird.itemID, sii.itemID,sia.assetID
+													WHERE returnItemStatus = 2  GROUP BY iri.returnItemID,sii.returnItemID,sia.returnItemID
 													UNION ALL
 													SELECT '2' AS module,
-														muf.materialUsageID AS ID,
-														'' AS purchaseID,
-														materialUsageCode as referenceCode,
-														CONCAT(empl.employeeFirstname,' ',empl.employeeLastname) AS fullname,
-														unused AS quantity,
-														DATE_FORMAT(muf.createdAt,'%M% %d%, %Y') AS daterequest,
-														materialUsageStatus as inventoryStatus,
-														CASE WHEN sii.quantity IS NOT NULL THEN SUM(sii.quantity)
-														ELSE SUM(sia.quantity) END RECORD  
+													muf.materialUsageID AS ID,
+													'' AS purchaseID,
+													materialUsageCode as referenceCode,
+													CONCAT(empl.employeeFirstname,' ',empl.employeeLastname) AS fullname,
+													unused AS quantity,
+													DATE_FORMAT(muf.createdAt,'%M% %d%, %Y') AS daterequest,
+													materialUsageStatus as inventoryStatus,
+													CASE WHEN sii.quantity IS NOT NULL THEN SUM(sii.quantity)
+													ELSE SUM(sia.quantity) END RECORD  
 													FROM ims_material_usage_tbl AS muf
 													LEFT JOIN ims_inventory_request_details_tbl AS ird ON ird.materialUsageID = muf.materialUsageID
 													LEFT JOIN hris_employee_list_tbl AS empl ON muf.employeeID = empl.employeeID
 													LEFT JOIN ims_stock_in_item_tbl AS sii ON muf.materialUsageID = sii.materialUsageID AND ird.itemID = sii.itemID
 													LEFT JOIN ims_stock_in_assets_tbl AS sia ON muf.materialUsageID = sia.materialUsageID AND ird.itemID = sia.assetID
-													WHERE materialUsageStatus = 2 GROUP BY ird.itemID, sii.itemID,sia.assetID
+													WHERE materialUsageStatus = 2 GROUP BY muf.materialUsageID,sii.materialUsageID, sia.materialUsageID
 													UNION ALL
 													SELECT '3' AS module,
-														iir.inventoryReceivingID AS ID,
-														purchaseOrderCode AS purchaseID,
-														inventoryReceivingCode as referenceCode, 
-														CONCAT(empl.employeeFirstname,' ',empl.employeeLastname) AS fullname,
-														receivedQuantity AS quantity,
-														DATE_FORMAT(iir.createdAt,'%M% %d%, %Y') AS daterequest,
-														inventoryReceivingStatus as inventoryStatus,
-														CASE WHEN sii.quantity IS NOT NULL  THEN SUM(sii.quantity)
-														ELSE SUM(sia.quantity) END RECORD    
+													iir.inventoryReceivingID AS ID,
+													purchaseOrderCode AS purchaseID,
+													inventoryReceivingCode as referenceCode, 
+													CONCAT(empl.employeeFirstname,' ',empl.employeeLastname) AS fullname,
+													receivedQuantity AS quantity,
+													DATE_FORMAT(iir.createdAt,'%M% %d%, %Y') AS daterequest,
+													inventoryReceivingStatus as inventoryStatus,
+													CASE WHEN sii.quantity IS NOT NULL  THEN SUM(sii.quantity)
+													ELSE SUM(sia.quantity) END RECORD    
 													FROM ims_inventory_receiving_tbl AS iir
 													LEFT JOIN ims_inventory_request_details_tbl AS ird ON iir.inventoryReceivingID = ird.inventoryReceivingID
 													LEFT JOIN hris_employee_list_tbl AS empl ON iir.employeeID = empl.employeeID
 													LEFT JOIN ims_stock_in_item_tbl AS sii ON iir.inventoryReceivingID = sii.inventoryReceivingID AND ird.itemID = sii.itemID
 													LEFT JOIN ims_stock_in_assets_tbl AS sia ON iir.inventoryReceivingID = sia.inventoryReceivingID AND ird.itemID = sia.assetID
-													WHERE inventoryReceivingStatus = 2 GROUP BY ird.itemID, sii.itemID,sia.assetID
+													WHERE inventoryReceivingStatus = 2 GROUP BY iir.inventoryReceivingID,sia.inventoryReceivingID,sii.inventoryReceivingID
 													)a GROUP BY referenceCode`);
 		let html = `
         <table class="table table-bordered table-striped table-hover" id="tableMyForms">
@@ -807,8 +807,8 @@ $(document).ready(function () {
 											) a GROUP BY referenceCode,itemID`);	
 
 		ItemData.map((item) => {	
-					var totalremaining = parseFloat(item.quanity) - parseFloat(item.remaining);
-					var totalQuantity = parseFloat(item.quanity);
+					var totalremaining = parseFloat(item.quantity) - parseFloat(item.remaining);
+					var totalQuantity = parseFloat(item.quantity);
 					var totalremaining = parseFloat(item.remaining);
 					
 			html += `<tr>
@@ -829,14 +829,14 @@ $(document).ready(function () {
 						<td>${item.quantity}</td>
 						<td>${item.remaining}</td>
 						<td>`;
-						if(totalQuantity = totalremaining){
-							html += `<a class="btn btn-primary btn-barcode btn-sm btn-block" 
+						html += `<a class="btn btn-primary btn-barcode btn-sm btn-block" 
 									href="javascript:void(0);" 
 									number="" 
 									referenceCode="${item.referenceCode}" 
 									itemID="${item.itemID}">
 									<i class="fas fa-barcode"></i> Barcode
 									</a>`;
+						if(totalQuantity == totalremaining){
 							//html += `<span class="badge badge-success w-100">Completed</span>`;
 						}else{
 							html += `<a class="btn btn-secondary btnRecord btn-sm btn-block mt-1" 
@@ -894,7 +894,7 @@ $(document).ready(function () {
 		$("#modal_product_record_content").html(preloader);
 		
 		const tableData = getUnionTableData(`
-											SELECT moduleReturnItemID, moduleMaterialUsageID,moduleInventoryReceivingID,recordID, itemID, serialNumber, itemName, Brand, classificationName, categoryName   FROM
+											SELECT moduleReturnItemID, moduleMaterialUsageID,moduleInventoryReceivingID,recordID, itemID, IFNULL(serialNumber,'') AS serialNumber, itemName, Brand, classificationName, categoryName   FROM
 											(
 												SELECT 
 													iri.returnItemID AS moduleReturnItemID,
@@ -1193,12 +1193,12 @@ $(document).ready(function () {
 									<tbody class="tableRowItems">`;
 					data.map((item, index) => {
 									html +=`<tr>`;
-								if(serialNumber==""){
+								if(item.serialNumber==""){
 									html +=`
 										<td>
 											<input type="text"
 													class="form-control quantity text-center input-quantity"
-													id="quantity${index}
+													id="quantity${index}"
 													name="quantity"
 													min="0.01"
 													data-allowcharacters="[0-9]" 
