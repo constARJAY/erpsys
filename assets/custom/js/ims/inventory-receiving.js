@@ -377,7 +377,7 @@ function forApprovalContent() {
 				</td>
 				<td>${getDocumentDates(dateCreated, dateSubmitted, dateApproved)}</td>
 				<td class="text-center">
-					${getStatusStyle(inventoryReceivingStatus)}
+					${getStatusStyle(inventoryReceivingStatus, true)}
 				</td>
 				<td>${remarks}</td>
 			</tr>`;
@@ -471,7 +471,7 @@ function myFormsContent() {
 			</td>
 			<td>${getDocumentDates(dateCreated, dateSubmitted, dateApproved)}</td>
 			<td class="text-center">
-				${getStatusStyle(inventoryReceivingStatus)}
+				${getStatusStyle(inventoryReceivingStatus, true)}
 			</td>
 			<td>${remarks}</td>
 		</tr>`;
@@ -649,8 +649,8 @@ function getSerialNumber(scope = {}, readOnly = false) {
 							name="serialNumber"
 							id="serialNumber"
 							data-allowcharacters="[A-Z][a-z][0-9][-]"
-							minlength="17"
-							maxlength="17"
+							minlength="5"
+							maxlength="18"
 							value="${serialNumber}"
 							autocomplete="off"
 							required>
@@ -883,10 +883,10 @@ function getItemsRow(readOnly = false,inventoryReceivingID) {
 					<div class="quantity"name="quantity">${quantity || ""}</div>
 					</td>
 					<td class="text-center">
-					<div class="receivedquantity">${receivedquantity || ""}</div>
+					<div class="receivedquantity text-center">${receivedquantity || ""}</div>
 					</td>	
 					<td class="text-center">
-						<div class="remaining"id="remaining"name="remaining">${remaining || ""}</div>
+						<div class="remaining text-center"id="remaining"name="remaining">${remaining || ""}</div>
 					</td>
 					<td>
 					<div class="uom">${uom || "-"}</div>
@@ -923,15 +923,16 @@ function getItemsRow(readOnly = false,inventoryReceivingID) {
 								type="text" 
 								class="form-control input-quantity text-center receivedQuantity"
 								data-allowcharacters="[0-9]" 
-								min="0"
+								min="0.01"
 								number="${index}"
 								quantity="${quantity}"
 								itemID="${itemID}"
 								id="receivedQuantity${index}"
 								name="receivedQuantity"  
 								value="${inventoryRequestID ? receivedquantity : ""}" 
-								minlength="1" 
-								maxlength="9">
+								minlength="2" 
+								maxlength="9"
+								required>
 							<div class="invalid-feedback d-block invalid-receivedQuantity" id="invalid-receivedQuantity${index}"></div>
 					</div>
 					</td>
@@ -948,8 +949,8 @@ function getItemsRow(readOnly = false,inventoryReceivingID) {
                                 style="resize: none" 
                                 class="form-control validate" 
                                 data-allowcharacters="[0-9][a-z][A-Z][ ][.][,][?][!][/][;][:][_]['][''][*][&][%][()][-]"
-                                minlength="1"
-                                maxlength="100"
+                                minlength="2"
+                                maxlength="250"
                                 name="remarks" 
                                 id="remarks">${inventoryRequestID  ? remarks : "" }</textarea>
                         </div>
@@ -1119,6 +1120,7 @@ function formContent(data = false, readOnly = false, isRevise = false, isFromCan
 	$("#page_content").html(preloader);
 	readOnly = isRevise ? false : readOnly;
     var service = '';
+	var serviceHeader = '';
 
 	let {
 		inventoryReceivingID        		= "",
@@ -1144,8 +1146,10 @@ function formContent(data = false, readOnly = false, isRevise = false, isFromCan
 		createdAt               	        = false,
 	} = data && data[0];
     if(recordID == 1){
-        service = 'Assets'; 
+        service = 'Asset'; 
+		serviceHeader = 'Asset/s';
     }else{
+		serviceHeader = 'Items/s';
         service = 'Item';
     }
 
@@ -1209,7 +1213,7 @@ function formContent(data = false, readOnly = false, isRevise = false, isFromCan
 				<div class="body">
 					<small class="text-small text-muted font-weight-bold">Status</small>
 					<h6 class="mt-0 font-weight-bold">
-						${inventoryReceivingStatus && !isRevise ? getStatusStyle(inventoryReceivingStatus) : "---"}
+						${inventoryReceivingStatus && !isRevise ? getStatusStyle(inventoryReceivingStatus, true) : "---"}
 					</h6>      
 				</div>
 			</div>
@@ -1363,7 +1367,7 @@ function formContent(data = false, readOnly = false, isRevise = false, isFromCan
 					<div class="row">
 						<div class="col-md-6 col-sm-12 text-left align-self-center">
 							<h5 style="font-weight: bold;
-								letter-spacing: 0.05rem;">${service} (Inventory Receiving)</h5>
+								letter-spacing: 0.05rem;">Inventory Receiving ${serviceHeader}</h5>
 						</div>
 					</div>
 				</div>
@@ -1371,8 +1375,8 @@ function formContent(data = false, readOnly = false, isRevise = false, isFromCan
 					<thead>
 						<tr style="white-space: nowrap">
 							<th>${service} Code</th>
-							<th>Item Name</th>
-							<th>Classification</th>
+							<th>${service} Name</th>
+							<th>${service} Classification</th>
                             <th>Serial No.</th>
 							<th>Quantity</th>
 							<th>Receiving ${!disabled ? "<code>*</code>" : ""}</th>

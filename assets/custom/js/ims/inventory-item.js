@@ -114,7 +114,6 @@ $(document).ready(function(){
                         </td>
                         <td>${item.classificationName}</td>
                         <td>${item.categoryName}</td>
-                        <td>${item.itemSize}</td>
                         <td>${unitOfMeasurementValue.charAt(0).toUpperCase() + unitOfMeasurementValue.slice(1)}</td>
                         <td style="white-space: normal;">${item.itemDescription}</td>
                         <td>${item.reOrderLevel}</td>

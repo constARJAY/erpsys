@@ -1617,7 +1617,7 @@ $(document).ready(function() {
                     <div class="body">
                         <small class="text-small text-muted font-weight-bold">Status</small>
                         <h6 class="mt-0 font-weight-bold">
-							${costEstimateStatus && !isRevise ? getStatusStyle(costEstimateStatus) : "---"}
+							${costEstimateStatus && !isRevise ? getStatusStyle(costEstimateStatus, true) : "---"}
 						</h6>      
                     </div>
                 </div>
@@ -1978,7 +1978,7 @@ $(document).ready(function() {
 												<input type="checkbox" class="checkboxall"  invcategory="${invCategory.toLowerCase()}">
 											</th>`: ``;
 
-			let actionButton 	= !readOnly ? `<div class="d-flex flex-column justify-content-start text-left">
+			let actionButton 	= !readOnly ? `<div class="d-flex flex-column justify-content-start text-left mt-2">
 													<div>
 														<button type="button" class="btn btn-primary btnAddRow" id="btnAddRow" invcategory="${invCategory.toLowerCase()}"><i class="fas fa-plus-circle"></i> Add Row</button>
 														<button type="button" class="btn btn-danger btnDeleteRow btnDeleteRow-${invCategory.toLowerCase()}" id="btnDeleteRow" invcategory="${invCategory.toLowerCase()}"  disabled><i class="fas fa-minus-circle"></i> Delete Row/s</button>
@@ -2139,7 +2139,7 @@ $(document).ready(function() {
 										${tableBodyData}
 									</tbody>
 								</table>
-								<div class="d-flex flex-column justify-content-start text-left">
+								<div class="d-flex flex-column justify-content-start text-left mt-2">
 									<div></div>
 								</div>
 							</div>
@@ -2227,7 +2227,7 @@ $(document).ready(function() {
 		let checkboxHeader 	= !readOnly ? `	<th class="text-center">
 												<input type="checkbox" class="checkboxall" invcategory="asset">
 											</th>` : ``;
-		let actionButton  	= !readOnly ? `	<div class="d-flex flex-column justify-content-start text-left">
+		let actionButton  	= !readOnly ? `	<div class="d-flex flex-column justify-content-start text-left mt-2">
 												<div>
 													<button type="button" class="btn btn-primary btnAddRow" id="btnAddRow" invcategory="asset"><i class="fas fa-plus-circle"></i> Add Row</button>
 													<button type="button" class="btn btn-danger btnDeleteRow btnDeleteRow-asset" id="btnDeleteRow" invcategory="asset"  disabled><i class="fas fa-minus-circle"></i> Delete Row/s</button>
@@ -2300,7 +2300,7 @@ $(document).ready(function() {
 		let checkboxHeader 	= !readOnly ? `	<th class="text-center">
 												<input type="checkbox" class="checkboxall" invcategory="vehicle">
 											</th>` : ``;
-		let actionButton  	= !readOnly ? `	<div class="d-flex flex-column justify-content-start text-left">
+		let actionButton  	= !readOnly ? `	<div class="d-flex flex-column justify-content-start text-left mt-2">
 												<div>
 													<button type="button" class="btn btn-primary btnAddRow" id="btnAddRow" invcategory="vehicle"><i class="fas fa-plus-circle"></i> Add Row</button>
 													<button type="button" class="btn btn-danger btnDeleteRow btnDeleteRow-vehicle" id="btnDeleteRow" invcategory="vehicle"  disabled><i class="fas fa-minus-circle"></i> Delete Row/s</button>
@@ -2373,7 +2373,7 @@ $(document).ready(function() {
 		let checkboxHeader 	= !readOnly ? `	<th class="text-center">
 												<input type="checkbox" class="checkboxall" invcategory="other">
 											</th>` : ``;
-		let actionButton  	= !readOnly ? `	<div class="d-flex flex-column justify-content-start text-left">
+		let actionButton  	= !readOnly ? `	<div class="d-flex flex-column justify-content-start text-left mt-2">
 												<div>
 													<button type="button" class="btn btn-primary btnAddRow" id="btnAddRow" invcategory="other"><i class="fas fa-plus-circle"></i> Add Row</button>
 													<button type="button" class="btn btn-danger btnDeleteRow btnDeleteRow-other" id="btnDeleteRow" invcategory="other"  disabled><i class="fas fa-minus-circle"></i> Delete Row/s</button>

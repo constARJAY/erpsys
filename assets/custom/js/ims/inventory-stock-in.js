@@ -79,7 +79,7 @@ $(document).ready(function () {
 							SUM(receivedQuantity) AS quantity,
 							0 AS received,
 							createAt,
-							ird.recordID
+							innr.recordID
 						FROM ims_inventory_receiving_tbl AS innr
 						LEFT JOIN ims_inventory_request_details_tbl AS ird ON innr.inventoryReceivingID = ird.inventoryReceivingID
 						WHERE innr.inventoryReceivingCode ='${id}'
@@ -347,14 +347,14 @@ $(document).ready(function () {
 													ird.quantity AS quantity,
 													DATE_FORMAT(iri.createdAt,'%M% %d%, %Y') AS daterequest,
 													returnItemStatus AS inventoryStatus,
-													CASE WHEN sii.quantity IS NOT NULL  THEN SUM(sii.quantity)
-													ELSE SUM(sia.quantity) END RECORD
+													CASE WHEN sii.quantity IS NOT NULL  THEN IFNULL(SUM(sii.quantity),0)
+													ELSE IFNULL(SUM(sia.quantity),0) END RECORD
 													FROM ims_return_item_tbl AS iri
 													LEFT JOIN ims_inventory_request_details_tbl AS ird ON iri.returnItemID = ird.returnItemID
 													LEFT JOIN hris_employee_list_tbl AS empl ON iri.employeeID = empl.employeeID
 													LEFT JOIN ims_stock_in_item_tbl AS sii ON iri.returnItemID = sii.returnItemID AND ird.itemid = sii.itemID
 													LEFT JOIN ims_stock_in_assets_tbl AS sia ON iri.returnItemID = sia.returnItemID AND ird.itemID = sia.assetID
-													WHERE returnItemStatus = 2  GROUP BY iri.returnItemID,sii.returnItemID,sia.returnItemID
+													WHERE returnItemStatus = 2  GROUP BY iri.returnItemID,sii.returnItemID,sia.returnItemID,ird.itemID,sii.itemID,sia.assetID
 													UNION ALL
 													SELECT '2' AS module,
 													muf.materialUsageID AS ID,
@@ -364,14 +364,14 @@ $(document).ready(function () {
 													unused AS quantity,
 													DATE_FORMAT(muf.createdAt,'%M% %d%, %Y') AS daterequest,
 													materialUsageStatus as inventoryStatus,
-													CASE WHEN sii.quantity IS NOT NULL THEN SUM(sii.quantity)
-													ELSE SUM(sia.quantity) END RECORD  
+													CASE WHEN sii.quantity IS NOT NULL THEN IFNULL(SUM(sii.quantity),0)
+													ELSE IFNULL(SUM(sia.quantity),0) END RECORD  
 													FROM ims_material_usage_tbl AS muf
 													LEFT JOIN ims_inventory_request_details_tbl AS ird ON ird.materialUsageID = muf.materialUsageID
 													LEFT JOIN hris_employee_list_tbl AS empl ON muf.employeeID = empl.employeeID
 													LEFT JOIN ims_stock_in_item_tbl AS sii ON muf.materialUsageID = sii.materialUsageID AND ird.itemID = sii.itemID
 													LEFT JOIN ims_stock_in_assets_tbl AS sia ON muf.materialUsageID = sia.materialUsageID AND ird.itemID = sia.assetID
-													WHERE materialUsageStatus = 2 GROUP BY muf.materialUsageID,sii.materialUsageID, sia.materialUsageID
+													WHERE materialUsageStatus = 2 GROUP BY muf.materialUsageID,sii.materialUsageID, sia.materialUsageID,ird.itemID,sii.itemID,sia.assetID
 													UNION ALL
 													SELECT '3' AS module,
 													iir.inventoryReceivingID AS ID,
@@ -382,13 +382,13 @@ $(document).ready(function () {
 													DATE_FORMAT(iir.createdAt,'%M% %d%, %Y') AS daterequest,
 													inventoryReceivingStatus as inventoryStatus,
 													CASE WHEN sii.quantity IS NOT NULL  THEN SUM(sii.quantity)
-													ELSE SUM(sia.quantity) END RECORD    
+													ELSE IFNULL(SUM(sia.quantity),0) END RECORD    
 													FROM ims_inventory_receiving_tbl AS iir
 													LEFT JOIN ims_inventory_request_details_tbl AS ird ON iir.inventoryReceivingID = ird.inventoryReceivingID
 													LEFT JOIN hris_employee_list_tbl AS empl ON iir.employeeID = empl.employeeID
 													LEFT JOIN ims_stock_in_item_tbl AS sii ON iir.inventoryReceivingID = sii.inventoryReceivingID AND ird.itemID = sii.itemID
 													LEFT JOIN ims_stock_in_assets_tbl AS sia ON iir.inventoryReceivingID = sia.inventoryReceivingID AND ird.itemID = sia.assetID
-													WHERE inventoryReceivingStatus = 2 GROUP BY iir.inventoryReceivingID,sia.inventoryReceivingID,sii.inventoryReceivingID
+													WHERE inventoryReceivingStatus = 2 GROUP BY iir.inventoryReceivingID,sia.inventoryReceivingID,sii.inventoryReceivingID,ird.itemID,sii.itemID,sia.assetID
 													)a GROUP BY referenceCode`);
 		let html = `
         <table class="table table-bordered table-striped table-hover" id="tableMyForms">
@@ -581,9 +581,9 @@ $(document).ready(function () {
 		var services = '';
 		formatquantity = parseFloat(quantity) || 0;
 		if(recordID =='0'){
-			services = 'Items';
+			services = 'Item';
 		}else{
-			services = 'Assets';
+			services = 'Asset';
 		}
 		//alert(formatquantity);
 		//var formatquantity = parseFloat(quantity);
@@ -750,7 +750,7 @@ $(document).ready(function () {
 												ird.classificationName,
 												ird.categoryName,
 												inr.inventoryReceivingCode AS recordCode,
-												ird.recordID,
+												inr.recordID,
 												inr.employeeID,
 												CONCAT(empl.employeeFirstname,' ',empl.employeeLastname) AS requestName,
 												itemID,
@@ -807,9 +807,12 @@ $(document).ready(function () {
 											) a GROUP BY referenceCode,itemID`);	
 
 		ItemData.map((item) => {	
-					var totalremaining = parseFloat(item.quantity) - parseFloat(item.remaining);
+					var totalremaining = (parseFloat(item.quantity)) - (parseFloat(item.remaining));
+					//alert(totalremaining);
 					var totalQuantity = parseFloat(item.quantity);
 					var totalremaining = parseFloat(item.remaining);
+					var totalRemainingwithdecimal = totalremaining.toFixed(2);
+					//alert(totalRemainingwithdecimal);
 					
 			html += `<tr>
 						<td>${item.itemCode}</td>
@@ -827,7 +830,7 @@ $(document).ready(function () {
 						</td>
 						<td>${item.requestName}</td>
 						<td>${item.quantity}</td>
-						<td>${item.remaining}</td>
+						<td>${(parseFloat(item.quantity) - parseFloat(item.remaining)).toFixed(2)}</td>
 						<td>`;
 						html += `<a class="btn btn-primary btn-barcode btn-sm btn-block" 
 									href="javascript:void(0);" 
@@ -848,7 +851,7 @@ $(document).ready(function () {
 										itemNameBrand="${item.name_Brand}"
 										classificationCategory="${item.classification_category}"
 										quantityRequest="${item.quantity}"
-										remaining="${totalremaining}"
+										remaining="${(parseFloat(item.quantity)) - (parseFloat(item.remaining)).toFixed(2)}"
 										UOM="pack">
 										<i class="fas fa-pencil-alt"></i>Record
 									</a>`; 
@@ -917,7 +920,7 @@ $(document).ready(function () {
 													'' AS moduleReturnItemID,
 													muf.materialUsageID AS moduleMaterialUsageID,
 													'' AS moduleInventoryReceivingID,
-													recordID,
+													muf.recordID,
 													ird.itemID,
 													serialNumber,
 													itemName,
@@ -934,7 +937,7 @@ $(document).ready(function () {
 												'' AS moduleReturnItemID,
 												'' AS moduleMaterialUsageID,
 												inr.inventoryReceivingID AS moduleInventoryReceivingID,
-												ird.recordID,
+												inr.recordID,
 												ird.itemID,
 												serialNumber,
 												itemName,
@@ -1521,6 +1524,7 @@ $(document).ready(function () {
 			var quantity = [];
 			//var itemCode = $("#itemCode").val();
 			var recordID = $("[name=barcode]").attr("recordID");
+			var uom		=  $("#uom").val();
 			// $("[name=barcode]").each(function () {
 			// 	recordID.push($(this).attr("recordID"));
 			// });
@@ -1616,7 +1620,7 @@ $(document).ready(function () {
 							inventoryStorageCode: 	inventoryStorageCode,	inventoryStorageOfficeName: inventoryStorageOfficeName, manufactureDate:		manufactureDate,
 							expirationdate:			expirationdate, 		MaterialUsageID:			MaterialUsageID,			InventoryReceivingID: 	InventoryReceivingID,
 							ReturnItemID:			ReturnItemID,			recordID:					recordID,					quantity: 				quantity,
-							inventoryCode:			inventoryCode,			itemCode:					itemCode,
+							inventoryCode:			inventoryCode,			itemCode:					itemCode,					uom:					uom,
 						},
 						async: true,
 						dataType: "json",

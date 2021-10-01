@@ -30,7 +30,7 @@ class InventoryStockIn_model extends CI_Model {
 
     }
 
-    public function savestockin($itemID, $itemName,$brand, $classificationName, $categoryName,$barcode,$recievedQuantity,$serialnumber,$inventoryStorageID, $inventoryStorageCode, $inventoryStorageOfficeName, $manufactureDate, $expirationdate, $ReturnItemID, $MaterialUsageID,  $InventoryReceivingID, $recordID, $quantity, $inventoryCode, $itemCode)
+    public function savestockin($itemID, $itemName,$brand, $classificationName, $categoryName,$barcode,$recievedQuantity,$serialnumber,$inventoryStorageID, $inventoryStorageCode, $inventoryStorageOfficeName, $manufactureDate, $expirationdate, $ReturnItemID, $MaterialUsageID,  $InventoryReceivingID, $recordID, $quantity, $inventoryCode, $itemCode, $uom)
     {
 
        // $recordID       = implode(",", $recordID);
@@ -54,6 +54,7 @@ class InventoryStockIn_model extends CI_Model {
                             'brand'                     =>$brand[$count],
                             'inventoryStorageID'        =>$inventoryStorageID[$count],
                             'classificationName'        =>$classificationName[$count],
+                            'uom'                       =>$uom,
                             'categoryName'              =>$categoryName[$count],
                             'inventoryStorageCode'      =>$inventoryStorageCode[$count],
                             'inventoryStorageOfficeName'=>$inventoryStorageOfficeName[$count],
@@ -91,6 +92,7 @@ class InventoryStockIn_model extends CI_Model {
                             'brand'                     =>$brand[$count],
                             'inventoryStorageID'        =>$inventoryStorageID[$count],
                             'classificationName'        =>$classificationName[$count],
+                            'uom'                       =>$uom,
                             'categoryName'              =>$categoryName[$count],
                             'inventoryStorageCode'      =>$inventoryStorageCode[$count],
                             'inventoryStorageOfficeName'=>$inventoryStorageOfficeName[$count],

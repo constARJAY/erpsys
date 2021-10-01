@@ -292,7 +292,7 @@ $(document).ready(function() {
 				{ targets: 3,  width: 350 },
 				{ targets: 4,  width: 260 },
 				{ targets: 5,  width: 150 },
-				{ targets: 6,  width: 250 },
+				{ targets: 6,  width: 280 },
 				{ targets: 7,  width: 80  },
 				{ targets: 8,  width: 250 },
 			],
@@ -1249,6 +1249,26 @@ $(document).ready(function() {
 			</div>
 		</div>` : "";
 
+		let dateNeededArray = !readOnly ? {
+											singleDatePicker: true,
+											showDropdowns: true,
+											autoApply: true,
+											minDate: moment().add("days", 7),
+											startDate: moment().add("days", 7),
+											locale: {
+												format: 'MMMM DD, YYYY'
+											}
+										} : 
+											{
+												singleDatePicker: true,
+												showDropdowns: true,
+												autoApply: true,
+												startDate: moment().add("days", 7),
+												locale: {
+													format: 'MMMM DD, YYYY'
+												}
+											}
+
 		let html = `
         <div class="row px-2">
 			${documentReviseNo}
@@ -1267,7 +1287,7 @@ $(document).ready(function() {
                     <div class="body">
                         <small class="text-small text-muted font-weight-bold">Status</small>
                         <h6 class="mt-0 font-weight-bold">
-							${materialRequestStatus && !isRevise ? getStatusStyle(materialRequestStatus) : "---"}
+							${materialRequestStatus && !isRevise ? getStatusStyle(materialRequestStatus, true) : "---"}
 						</h6>      
                     </div>
                 </div>
@@ -1470,6 +1490,7 @@ $(document).ready(function() {
 			initDataTables();
 			updateTableItems();
 			initAll();
+			$(`#dateNeeded`).daterangepicker(dateNeededArray);
 			// ----- NOT ALLOWED FOR UPDATE -----
 			if (!allowedUpdate) {
 				$("#page_content").find(`input, select, textarea`).each(function() {
@@ -1491,22 +1512,20 @@ $(document).ready(function() {
 	function requestItemsContent(data = false, materialRequestID = null, billMaterialID = null, readOnly = false){
 
 		let tableBodyData = readOnly ? `` :  requestItemsRow(data, readOnly);
-
-		if(readOnly){	
-			if(data){
-				if(data.length > 0){
-					tableBodyData = "";
-					data.map(items=>{
-						tableBodyData +=  requestItemsRow(items, readOnly);
-					});
-				}
+		
+		if(data){
+			if(data.length > 0){
+				tableBodyData = "";
+				data.map(items=>{
+					tableBodyData +=  requestItemsRow(items, readOnly);
+				});
 			}
 		}
 		let checkboxHeader	= !readOnly ? `<th class="text-center">
 											<input type="checkbox" class="checkboxall"  invcategory="item">
 										</th>`: ``;
 
-		let actionButton 	= !readOnly ? `<div class="d-flex flex-column justify-content-start text-left">
+		let actionButton 	= !readOnly ? `<div class="d-flex flex-column justify-content-start text-left mt-2">
 												<div>
 													<button type="button" class="btn btn-primary btnAddRow" id="btnAddRow" invcategory="item"><i class="fas fa-plus-circle"></i> Add Row</button>
 													<button type="button" class="btn btn-danger btnDeleteRow btnDeleteRow-item" id="btnDeleteRow" invcategory="item"  disabled><i class="fas fa-minus-circle"></i> Delete Row/s</button>
@@ -1518,7 +1537,7 @@ $(document).ready(function() {
 							<div class="row">
 								<div class="col-md-6 col-sm-12 text-left">
 									<h5 style="font-weight: bold;
-										letter-spacing: 0.05rem;">ITEM/S</h5>
+										letter-spacing: 0.05rem;">ITEM/S (FOR REQUEST)</h5>
 								</div>
 								<div class="col-md-6 col-sm-12 text-right"></div>
 							</div>
@@ -1564,21 +1583,19 @@ $(document).ready(function() {
 
 		let tableBodyData = readOnly ? `` :  requestAssetsRow(data, readOnly);
 
-		if(readOnly){	
-			if(data){
-				if(data.length > 0){
-					tableBodyData = "";
-					data.map(asset=>{
-						tableBodyData +=  requestAssetsRow(asset, readOnly);
-					});
-				}
+		if(data){
+			if(data.length > 0){
+				tableBodyData = "";
+				data.map(asset=>{
+					tableBodyData +=  requestAssetsRow(asset, readOnly);
+				});
 			}
 		}
 
 		let checkboxHeader 	= !readOnly ? `	<th class="text-center">
 												<input type="checkbox" class="checkboxall" invcategory="asset">
 											</th>` : ``;
-		let actionButton  	= !readOnly ? `	<div class="d-flex flex-column justify-content-start text-left">
+		let actionButton  	= !readOnly ? `	<div class="d-flex flex-column justify-content-start text-left mt-2">
 												<div>
 													<button type="button" class="btn btn-primary btnAddRow" id="btnAddRow" invcategory="asset"><i class="fas fa-plus-circle"></i> Add Row</button>
 													<button type="button" class="btn btn-danger btnDeleteRow btnDeleteRow-asset" id="btnDeleteRow" invcategory="asset"  disabled><i class="fas fa-minus-circle"></i> Delete Row/s</button>
@@ -1590,7 +1607,7 @@ $(document).ready(function() {
 							<div class="row">
 								<div class="col-md-6 col-sm-12 text-left">
 									<h5 style="font-weight: bold;
-										letter-spacing: 0.05rem;">ASSET/S</h5>
+										letter-spacing: 0.05rem;">ASSET/S (FOR REQUEST)</h5>
 								</div>
 								<div class="col-md-6 col-sm-12 text-right"></div>
 							</div>
@@ -1721,7 +1738,7 @@ $(document).ready(function() {
 							</div>
 						</td>
 						<td>
-							<div class="form-group mb-0 text-right">
+							<div class="form-group mb-0">
 								${!readOnly ? `<textarea 
 								rows="2" 
 								style="resize: none" 
@@ -1825,7 +1842,7 @@ $(document).ready(function() {
 							</div>
 						</td>
 						<td>
-							<div class="asset-manhours text-center">
+							<div class="asset-manhours text-center" ${readOnly ? `style="font-size:95%;"`: ""}>
 								${!readOnly ? `<input 
 								type="text" 
 								class="form-control input-quantity input-asset-manhours text-center"
@@ -1839,7 +1856,7 @@ $(document).ready(function() {
 							</div>
 						</td>
 						<td>
-							<div class="form-group mb-0 text-right asset-remarks">
+							<div class="form-group mb-0 asset-remarks">
 								${!readOnly ? `<textarea 
 								rows="2" 
 								style="resize: none" 

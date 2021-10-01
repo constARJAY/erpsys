@@ -113,8 +113,8 @@ class ProjectManagementBoard_model extends CI_Model {
                 "taskID"        => $task["taskID"],
                 "taskName"      => $task["taskName"],
                 "manHours"      => $task["allottedHours"],
-                "taskStartDate" => date("M d, Y", strtotime($task["taskStartDate"])),
-                "taskEndDate"   => date("M d, Y", strtotime($task["taskEndDate"])),
+                "taskStartDate" => $task["taskStartDate"],
+                "taskEndDate"   => $task["taskEndDate"],
                 "milestoneTask" => $this->getTimelineBoard($timelineBuilderID, $task["taskID"])
             ];
             array_push($output, $temp);

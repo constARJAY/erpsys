@@ -180,11 +180,9 @@ $(document).ready(function() {
 					{ targets: 6,  width: 100 },
 					{ targets: 7,  width: 350 }, // Description
 					{ targets: 8,  width: 100  },
-					{ targets: 9,  width: 150  },
+					{ targets: 9,  width: 290  },
 					{ targets: 10,  width: 150  },
-					{ targets: 11,  width: 150  },
-					{ targets: 12,  width: 100  },
-					{ targets: 13,  width: 350  }
+					{ targets: 11,  width: 350  }
 				],
 			});
 
@@ -207,11 +205,9 @@ $(document).ready(function() {
 					{ targets: 6,  width: 100 },
 					{ targets: 7,  width: 350 }, // Description
 					{ targets: 8,  width: 100  },
-					{ targets: 9,  width: 150  },
+					{ targets: 9,  width: 290  },
 					{ targets: 10,  width: 150  },
-					{ targets: 11,  width: 150  },
-					{ targets: 12,  width: 100  },
-					{ targets: 13,  width: 350  }
+					{ targets: 11,  width: 350  }
 				],
 			});
 
@@ -322,9 +318,7 @@ $(document).ready(function() {
 					<th>Budget Status</th>
 					<th>Description</th>
 					<th>Current Approver</th>
-					<th>Date Created</th>
-					<th>Date Submitted</th>
-					<th>Date Approved</th>
+					<th>Date</th>
 					<th>Status</th>
 					<th>Remarks</th>
                 </tr>
@@ -396,9 +390,18 @@ $(document).ready(function() {
 					<td>
 						${employeeFullname(getCurrentApprover(approversID, approversDate, timelineBuilderStatus, true))}
 					</td>
-					<td>${dateCreated}</td>
-					<td>${dateSubmitted}</td>
-					<td>${dateApproved}</td>
+					<td>
+						${dateCreated ? `<div style="color:#dc3450; display: block; font-size: 14px; padding: 2px">
+											<b>Created: </b><span style="color:#000;">${dateCreated}</span>
+										</div>` : ``}
+						${dateSubmitted ? `<div style="color:#dc3450; display: block; font-size: 14px; padding: 2px">
+											<b>Submitted: </b><span style="color:#000;">${dateSubmitted}</span>
+										</div>` : ``}
+						${dateApproved ? `<div style="color:#dc3450; display: block; font-size: 14px; padding: 2px">
+											<b>Approved: </b><span style="color:#000;">${dateApproved}</span>
+										</div>` : ``}
+						
+					</td>
 					<td class="text-center">
 						${getStatusStyle(timelineBuilderStatus)}
 					</td>
@@ -442,9 +445,7 @@ $(document).ready(function() {
 					<th>Budget Status</th>
 					<th>Description</th>
 					<th>Current Approver</th>
-					<th>Date Created</th>
-					<th>Date Submitted</th>
-					<th>Date Approved</th>
+					<th>Date</th>
 					<th>Status</th>
 					<th>Remarks</th>
                 </tr>
@@ -494,9 +495,20 @@ $(document).ready(function() {
 			if(timelineBuilderStatus != 6 && timelineBuilderStatus != 1 && timelineBuilderStatus != 2){
 				 budgetStatus = `-`;
 			}else{
-				 budgetStatus = timelineBudgetStatus == 0 ? 
-                `<span class="badge badge-outline-info w-100">For Proposal</span>` :
-                `<span class="badge badge-outline-success w-100" style="width: 100% !important">Allocated</span>`;
+					if (timelineBudgetStatus == 0) {
+						
+					}else{
+						let budgetCondition = parseFloat(timelineProposedBudget) > parseFloat(timelineAllocatedBudget);
+						if(budgetCondition){
+							budgetStatus =
+							`<span class="badge badge-outline-danger w-100" style="width: 100% !important">Over the Budget</span>`;
+						}else{
+							budgetStatus = 
+							`<span class="badge badge-outline-success w-100" style="width: 100% !important">Within the Budget</span>`;
+						}
+					}
+
+				 
 			}
 			
 			html += `
@@ -517,9 +529,17 @@ $(document).ready(function() {
 				<td>
 					${employeeFullname(getCurrentApprover(approversID, approversDate, timelineBuilderStatus, true))}
 				</td>
-				<td>${dateCreated}</td>
-				<td>${dateSubmitted}</td>
-				<td>${dateApproved}</td>
+				<td>
+					${dateCreated ? `<div style="color:#dc3450; display: block; font-size: 14px; padding: 2px">
+											<b>Created: </b><span style="color:#000;">${dateCreated}</span>
+										</div>` : ``}
+						${dateSubmitted ? `<div style="color:#dc3450; display: block; font-size: 14px; padding: 2px">
+											<b>Submitted: </b><span style="color:#000;">${dateSubmitted}</span>
+										</div>` : ``}
+						${dateApproved ? `<div style="color:#dc3450; display: block; font-size: 14px; padding: 2px">
+											<b>Approved: </b><span style="color:#000;">${dateApproved}</span>
+										</div>` : ``}
+				</td>
 				<td class="text-center">
 					${getStatusStyle(timelineBuilderStatus)}
 				</td>
@@ -820,6 +840,25 @@ $(document).ready(function() {
 	}
 	// ----- END UPDATE MILESTONE SELECT -----
 
+	function updateSelect(){
+
+		let projectID  	= $("#projectID").val();
+		let phaseIDArr 	= [];
+		let elementID	= [];
+		$(`[name=phaseDescription]`).each(function(i,obj){
+			if($(this).val()){
+				phaseIDArr.push($(this).val());
+			}
+			$(this).trigger("change");
+		});
+
+		
+		
+
+
+
+
+	}
 
 
 	// ----- SELECT FILE -----
@@ -948,6 +987,7 @@ $(document).ready(function() {
 		$(this).closest(`tr`).find("[name=allottedHours]").removeClass("is-invalid");
 		$(this).closest(`tr`).find("[name=allottedHours]").next().text("");
 		$(this).closest(`tr`).find("[name=allottedHours]").prop("max", maxValue);
+		$(this).closest(`tr`).find("[name=allottedHours]").prop("min", "1");
 	});
 
 	$(document).on("change","[name=taskStartDate]", function(){

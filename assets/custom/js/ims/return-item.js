@@ -176,9 +176,10 @@ function initDataTables() {
 				{ targets: 3,  width: 250 },
 				{ targets: 4,  width: 150 },
 				{ targets: 5,  width: 150 },
-				{ targets: 6,  width: 300 },
-				{ targets: 7,  width: 80  },
-				{ targets: 8,  width: 250 },
+				{ targets: 6,  width: 350 },
+				{ targets: 7,  width: 190 },
+				{ targets: 8,  width: 80  },
+				{ targets: 9,  width: 250 },
 			],
 		});
 
@@ -198,9 +199,10 @@ function initDataTables() {
 				{ targets: 3,  width: 250 },
 				{ targets: 4,  width: 150 },
 				{ targets: 5,  width: 150 },
-				{ targets: 6,  width: 300 },
-				{ targets: 7,  width: 80  },
-				{ targets: 8,  width: 250 },
+				{ targets: 6,  width: 350 },
+				{ targets: 7,  width: 190 },
+				{ targets: 8,  width: 80  },
+				{ targets: 9,  width: 250 },
 			],
 		});
 
@@ -737,9 +739,9 @@ function updateSerialNumber() {
 		$(this).attr("id", `serialNumber${i}`);
 		$(this).parent().find(".invalid-feedback").attr("id", `invalid-serialNumber${i}`);
 	})
-	$(`[name="quantity"]`).each(function(i) {
-		$(this).attr("id", `quantity${i}`);
-		$(this).parent().find(".invalid-feedback").attr("id", `invalid-quantity${i}`);
+	$(`[name="receivedQuantity"]`).each(function(i) {
+		$(this).attr("id", `receivedQuantity${i}`);
+		$(this).parent().find(".invalid-feedback").attr("id", `invalid-receivedQuantity${i}`);
 	})
 }
 // ----- END UPDATE SERIAL NUMBER -----
@@ -751,31 +753,31 @@ function getItemsRow(readOnly = false,returnItemID) {
 	//let requestItemsData;	
 	let requestItemsData;	
 			requestItemsData = getTableData(
-				`ims_inventory_request_details_tbl AS ird
-				LEFT JOIN ims_inventory_item_tbl AS iii ON ird.itemID = iii.itemID
-				LEFT JOIN ims_inventory_classification_tbl AS iic ON ird.classificationID = iic.classificationID`,
-				`ird.*,iic.classificationName,CONCAT(iii.itemName,' | ',iii.brandName) AS itemName,iii.brandName`,
+				`ims_inventory_request_details_tbl AS ird`,
+				``,
 				`ird.returnItemID = ${returnItemID}`
-			)
+			);
 	if (requestItemsData.length > 0) {
-		requestItemsData.map(item => {
+		requestItemsData.map((item, index) => {
 	   
 			let {
 				returnItemID               	= "",
 				classificationID					="",
-				assetCode							="",
+				itemCode							="",
 				itemID                    			= "",
 				itemName                   			= "",
-				brandName							="",
+				Brand								="",
 				quantity                 			= "",
 				borrowedQuantity					= "",
 				classificationName                  = "",
+				categoryName						= "",
 				manHours                     		= "",
 				uom                     			= "",
+				borrowedDate						= "",
 				remarks                   			= "",
 				createdAt                   		= "",
-				inventoryRequestID 					="",
-				borrowedQuanity						="",
+				inventoryRequestID 					= "",
+				receivedQuantity					= "",
 				createAt							="",
 			} = item;
 
@@ -860,28 +862,33 @@ function getItemsRow(readOnly = false,returnItemID) {
 				html += `
 				<tr class="itemTableRow" inventoryRequestID="${inventoryRequestID}">
 					<td>
-					<div class="assetCode" name="assetCode" requestitem="${itemID}" createat="${createAt}">${assetCode || ""}</div>
+					<div class="assetCode" name="assetCode" requestitem="${itemID}" createat="${createAt}">${itemCode || ""}</div>
 					</td>
 					<td>
-						<div class="itemID">${itemName|| "-"}</div>
+						<div class="itemID" name="itemName" id="itemName">${itemName|| "-"}</div>
+						<small style="color:#848482;"name="Brand" id="Brand">${Brand || ""}</small>
 					</td>
 					<td class="text-center">
 						<div class="classificationID">${classificationName || ""}</div>
+						<small style="color:#848482;"name="categoryName" id="categoryName">${categoryName || ""}</small>
 					</td>
 					<td class="table-data-serial-number">
 						${itemSerialNumbers}	
 					</td>
-					<td class="">
-						<div class="manHours">${manHours || ""}</div>
+					<td>	
+					<div class="uom" name="uom" id="uom">${uom || ""}</div>
 					</td>
-					<td class="text-center">	
-					<div class="uom">${uom || ""}</div>
-					</td>
-					<td>
-					<div class="borrowedQuantity">${borrowedQuantity || ""}</div>
+					<td class="text-center">
+					<div class="quantity" name="quantity" id="quantity">${quantity || ""}</div>
 					</td>	
+					<td class=""text=center>
+						<div class="borrowedQuantity" name="borrowedQuantity" id="borrowedQuantity">${borrowedQuantity || ""}</div>
+					</td>
 					<td>
-						<div class="quantity">${quantity || ""}</div>
+						<div class="borrowedDate" name="borrowedDate">${moment(borrowedDate).format("MMMM DD, YYYY") || ""}</div>
+					</td>
+					<td class="text-center">
+						<div class="receivedQuantity">${receivedQuantity || ""}</div>
 					</td>
 					<td>
 						<div class="remarks">${remarks || "-"}</div>
@@ -891,41 +898,49 @@ function getItemsRow(readOnly = false,returnItemID) {
 				html += `
 				<tr class="itemTableRow"inventoryRequestID="${inventoryRequestID}">
 					<td>
-						<div class="assetCode" name="assetCode" requestitem="${itemID}" createat="${createAt}">${assetCode || ""}</div>
+						<div class="assetCode" name="assetCode" requestitem="${itemID}" createat="${createAt}">${itemCode || ""}</div>
 					</td>
 					<td>
-						<div class="itemID">${itemName || ""}</div>
+						<div class="itemName" name="itemName" id="itemName">${itemName || ""}</div>
+						<small style="color:#848482;"name="Brand" id="Brand">${Brand || ""}</small>
+
 					</td>
 					<td>
-						<div class="classificationID"ID="${classificationID}">${classificationName || ""}</div>
+						<div class="classificationID" id="${classificationID}" name="classificationID" classificationName="${classificationName}">${classificationName || ""}</div>
+						<small style="color:#848482;"name="categoryName" id="categoryName">${categoryName || ""}</small>
 					</td>
 					<td class="table-data-serial-number">
 						${itemSerialNumbers}
 						${buttonAddRow}
 					</td>
-					<td class="text-center">
-						<div class="manHours">${manHours || ""}</div>
-					</td>
 					<td>
-						<div class="uom">${uom || ""}</div>
+						<div class="uom" name="uom" id="uom">${uom || ""}</div>
 					</td>
 					<td class="text-center">
-						<div class="borrowedQuanity">${borrowedQuanity || ""}</div>
+						<div class="quantity" name="quantity" id="quantity">${quantity || ""}</div>
+					</td>
+					<td class="text-center">
+						<div class="borrowedQuantity" name="borrowedQuantity" id="borrowedQuantity${index}">${borrowedQuantity || ""}</div>
 					</td>
 					<td>
-					<div class="quantity">
+						<div class="borrowedDate" name="borrowedDate"id="borrowedDate" borrowedDate="${borrowedDate}">${moment(borrowedDate).format("MMMM DD, YYYY") || ""}</div>
+					</td>
+					<td>
+					<div class="">
 						<input 
 								type="text" 
-								class="form-control input-quantity text-center"
+								class="form-control input-quantity text-center receivedQuantity"
 								data-allowcharacters="[0-9]" 
 								min="0"
-								id="quantity" 
-								value="${inventoryRequestID ? quantity : ""}" 
-								name="quantity" 
+								number="${index}"
+								id="receivedQuantity${index}"
+								borrowedQuantity="${borrowedQuantity}"
+								value="${inventoryRequestID ? receivedQuantity : ""}" 
+								name="receivedQuantity" 
 								minlength="1" 
 								maxlength="20" 
 								>
-							<div class="invalid-feedback d-block" id="invalid-quantity"></div>
+							<div class="invalid-feedback d-block" id="invalid-receivedQuantity${index}"></div>
 					</div>
 					</td>
 					<td>
@@ -954,6 +969,35 @@ function getItemsRow(readOnly = false,returnItemID) {
 	return html;
 	
 }
+// get remaining value
+$(document).on("change", ".receivedQuantity", function() {
+	var count = $(this).attr("number");
+	//var quantity = $(this).attr("quantity");
+	
+	var quantity  = $(`#borrowedQuantity${count}`).text();
+	var totalQuantity = parseInt(quantity);
+	var val = $(this).val() | 0;
+	var totalReceived = parseInt(val);
+	var totalremaining = parseFloat(quantity) - parseFloat(val);
+	var flag = ["true"];
+	if(totalQuantity < totalReceived){
+			$(`#receivedQuantity${count}`).removeClass("is-valid").addClass("is-invalid");
+			$(this).closest("tr").find(`#invalid-receivedQuantity${count}`).addClass("is-invalid");
+			$(`#invalid-receivedQuantity${count}`).html("Not more than borrowed quantity");
+		flag[0]= false;
+		removeIsValid("#tableInventoryReceived");
+	}else{
+		$(`#receivedQuantity${count}`).removeClass("is-invalid").addClass("is-valid");
+		$(this).closest("tr").find(`#invalid-receivedQuantity${count}`).removeClass("is-invalid");
+		$(this).closest("tr").find(`#invalid-receivedQuantity${count}`).text('');
+		removeIsValid("#tableInventoryReceived");
+		flag[0]= true;
+	}
+	return flag;
+	
+
+
+});
 
 // ----- END GET SERVICE ROW -----
 
@@ -1320,12 +1364,13 @@ function formContent(data = false, readOnly = false, isRevise = false, isFromCan
 					<thead>
 						<tr style="white-space: nowrap">
 							<th>Asset Code</th>
-							<th>Asset Name | Brand</th>
+							<th>Asset Name</th>
 							<th>Asset Classification</th>
 							<th>Serial No.</th>
-							<th>Man Hours</th>
 							<th>UOM</th>
-							<th>No. of Borrowed</th>
+							<th>Quantity</th>
+							<th>No. of Borrowed Quantity</th>
+							<th>Borrowed Date</th>
 							<th>Quantity Return ${!disabled ? "<code>*</code>" : ""}</th>
 							<th>Remarks</th>
 						</tr>
@@ -1510,26 +1555,52 @@ function getReturnItemData(action = "insert", method = "submit", status = "1", i
 		}
 
 		$(".itemTableRow").each(function(i, obj) {
-			const inventoryRequestID = $(this).attr("inventoryRequestID");
-			const itemID    		 = $("td [name=assetCode]", this).attr("requestitem");	
-			const createatforCode    = $("td [name=assetCode]", this).attr("createat");
-			//const received  = $("td [name=received]", this).val().replaceAll(",","");	
-			const quantity   = $("td [name=quantity]", this).val()?.trim();	
-			const remarks   = $("td [name=remarks]", this).val()?.trim();	
+			const inventoryRequestID 	= $(this).attr("inventoryRequestID");
+			const itemID    		 	= $("td [name=assetCode]", this).attr("requestitem");	
+			const itemCode    		 	= $("td [name=assetCode]", this).text();
+			const itemName    		 	= $("td [name=itemName]", this).text();
+			const Brand    		 	 	= $("td [name=Brand]", this).text();	
+			const classificationName 	= $("td [name=classificationID]", this).text();
+			const categoryName 			= $("td [name=categoryName]", this).text();
+			const uom   				= $("td [name=uom]", this).text();		
+			const quantity   			= $("td [name=quantity]", this).text();
+			const borrowedQuantity   	= $("td [name=borrowedQuantity]", this).text();	
+			const borrowedDate   		= $("td [name=borrowedDate]", this).attr("borrowedDate");
+			const receivedQuantity   	= $("td [name=receivedQuantity]", this).val();		
+			const remarks   			= $("td [name=remarks]", this).val()?.trim();
+			const created 				= dateToday();	
 		   
 			let temp = {
 				inventoryRequestID,
-				quantity, 
 				itemID,
-				createatforCode,
+				itemCode,
+				itemName,
+				Brand,
+				classificationName,
+				categoryName,
+				uom,
+				quantity, 
+				borrowedQuantity,
+				borrowedDate,
+				receivedQuantity,
 				remarks, 
+				created,
 				scopes: []
 
 			};
 			formData.append(`items[${i}][inventoryRequestID]`, inventoryRequestID);
 			formData.append(`items[${i}][itemID]`, itemID);
-			formData.append(`items[${i}][createatforCode]`, createatforCode);
+			formData.append(`items[${i}][itemCode]`, itemCode);
+			formData.append(`items[${i}][itemName]`, itemName);
+			formData.append(`items[${i}][Brand]`, Brand);
+			formData.append(`items[${i}][classificationName]`, classificationName);
+			formData.append(`items[${i}][categoryName]`, categoryName);
+			formData.append(`items[${i}][uom]`, uom);
 			formData.append(`items[${i}][quantity]`, quantity);
+			formData.append(`items[${i}][borrowedQuantity]`, borrowedQuantity);
+			formData.append(`items[${i}][borrowedDate]`, borrowedDate);
+			formData.append(`items[${i}][receivedQuantity]`, receivedQuantity);
+			formData.append(`items[${i}][created]`, created);
 			formData.append(`items[${i}][remarks]`, remarks);
 			
 			$(`td .serial-number-table tbody > tr`, this).each(function(index,obj) {
@@ -1717,7 +1788,7 @@ function checkSerialReceivedQuantity() {
 	if ($(`.returnItemsBody tr.itemTableRow`).length > 0) {
 		$(`.itemTableRow`).each(function() {
 
-			const receivedQuantity = parseFloat($(`[name="quantity"]`, this).val()) || 0;
+			const receivedQuantity = parseFloat($(`[name="receivedQuantity"]`, this).val()) || 0;
 		
 			if ($(`td .serial-number-table tbody > tr`, this).length >= 1) {
 				let countSerial = $(`td .serial-number-table tbody > tr`, this).length;
@@ -1752,8 +1823,8 @@ function checkSerialReceivedQuantity() {
 							flag[0] = true;
 						}
 						if(tmpSerialStorage.length !=0  && countSerial != receivedQuantity || receivedQuantity ==0 ){ // exisitng all value
-							$(`.quantity [name="quantity"]`, this).removeClass("is-valid, no-error").addClass("is-invalid");
-							$(`.quantity .invalid-feedback`, this).text("Serial number is not equal on quantity items!");
+							$(`.receivedQuantity [name="quantity"]`, this).removeClass("is-valid, no-error").addClass("is-invalid");
+							$(`.receivedQuantity .invalid-feedback`, this).text("Serial number is not equal on quantity items!");
 
 							$(`td .serial-number-table tbody > tr`, this).each(function() {
 
@@ -1764,8 +1835,8 @@ function checkSerialReceivedQuantity() {
 							
 							flag[0] = false;
 						}else{
-							$(`.quantity [name="quantity"]`, this).removeClass("is-invalid");
-							$(`.quantity .invalid-feedback`, this).text("");
+							$(`.receivedQuantity [name="receivedQuantity"]`, this).removeClass("is-invalid");
+							$(`.receivedQuantity .invalid-feedback`, this).text("");
 
 							$(`td .serial-number-table tbody > tr`, this).each(function() {
 								if($(`.servicescope .invalid-feedback`, this).text() !="Data already exist!"){
@@ -1790,11 +1861,12 @@ function checkSerialReceivedQuantity() {
 
 // ----- SUBMIT DOCUMENT -----
 $(document).on("click", "#btnSubmit", function () {
-
-	const validateDuplicateSerial  = $("[name=serialNumber]").hasClass("is-invalid") ;
+	let receivedQuantityCondition = $("[name=receivedQuantity]").hasClass("is-invalid");
+	const validateDuplicateSerial  = $("[name=serialNumber]").hasClass("is-invalid");
 	const validateSerialMessage  = $(".invalid-feedback").text() ;
 	// console.log("validateDuplicateSerial: "+ validateDuplicateSerial)
 	// if(!validateDuplicateSerial || validateSerialMessage != "Data already exist!"){
+		if(!receivedQuantityCondition){
 		if(!validateDuplicateSerial){
 		const validateSerial = checkSerialReceivedQuantity();
 		
@@ -1849,6 +1921,7 @@ $(document).on("click", "#btnSubmit", function () {
 			$(".is-invalid").focus();
 
 		}
+	}
 	}
 
 		
