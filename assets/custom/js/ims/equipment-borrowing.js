@@ -302,7 +302,7 @@ $(document).ready(function() {
                 `<span class="badge badge-warning w-100">Pending</span>` : `<span class="badge badge-outline-success w-100" style="width: 100% !important">Completed</span>`;
 
             html += `
-            <tr class="btnView" id="${encryptString(materialWithdrawalID)}">
+            <tr class="btnView" id="${encryptString(equipmentBorrowingID)}">
                 <td>
                     <div>${equipmentBorrowingCode || "-"}</div>
                     <!-- <small style="color:#848482;">put description here</small> -->
@@ -478,7 +478,7 @@ $(document).ready(function() {
 
      
         if(milestoneTask.length >0){
-            console.log(milestoneTask)
+            // console.log(milestoneTask)
             milestoneTask.map((milestone,index) => {
                 const { withdrawalAssetID,
                     requestAssetID,
@@ -656,7 +656,7 @@ $(document).ready(function() {
         const {
             assets       = []
         } = phase;
-        console.log(phase)
+        // console.log(phase)
         
         let taskHTML = "";
         
@@ -1117,8 +1117,8 @@ $(document).ready(function() {
                 equipmentBorrowingID      = "",
                 materialRequestID           ="",
             } = data && data[0];
-            console.log("button")
-           console.log(data)
+            // console.log("button")
+        //    console.log(data)
             button = `
             <button 
                 class="btn btn-submit px-5 p-2"  
@@ -1186,7 +1186,7 @@ $(document).ready(function() {
         let button = disabled ? "" :  formButtons(data);
 
         let assetHTML = "";
-
+        console.log(withdrawalDetails)
         withdrawalDetails.map((phase, index) => {
             assetHTML += displayAssets( phase, index, disabled);
         })
@@ -1495,10 +1495,10 @@ $(document).ready(function() {
     // ----- CLICK TIMELINE ROW -----
     $(document).on("click", ".btnView", function() {
         $("#page_content").html(preloader);
-        const materialWithdrawalID = decryptString($(this).attr("id"));
+        const equipmentBorrowingID = decryptString($(this).attr("id"));
         setTimeout(() => {
-            console.log(materialWithdrawalID)
-            viewDocument(materialWithdrawalID);
+            // console.log(equipmentBorrowingID)
+            viewDocument(equipmentBorrowingID);
         }, 50);
     })
     // ----- END CLICK TIMELINE ROW -----
