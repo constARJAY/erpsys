@@ -1639,7 +1639,7 @@ $(document).ready(function() {
                 <div class="form-group">
                     <label>Description ${!disabled ? "<code>*</code>" : ""}</label>
                     <textarea class="form-control validate"
-                        data-allowcharacters="[a-z][A-Z][0-9][ ][.][,][-][()]['][/][&]"
+                        data-allowcharacters="[a-z][A-Z][0-9][.][,][?][!][/][;][:]['][''][-][_][()][%][&][*][ ]"
                         minlength="1"
                         maxlength="200"
                         id="billMaterialReason"
@@ -2173,16 +2173,14 @@ $(document).ready(function() {
 	// ----- GET REQUEST VEHICLE CONTENT -----
 	function requestVehicleContent(data = false, costEstimateID = null, billMaterialID = null, readOnly = false){
 
-		let tableBodyData = readOnly ? `` :  requestVehiclesRow(data, readOnly);
+		let tableBodyData = data.length < 1 ? `` : requestVehiclesRow(data, readOnly);
 
-		if(readOnly){	
-			if(data){
-				if(data.length > 0){
-					tableBodyData = "";
-					data.map(asset=>{
-						tableBodyData +=  requestVehiclesRow(asset, readOnly);
-					});
-				}
+		if(data){
+			if(data.length > 0){
+				tableBodyData = "";
+				data.map(asset=>{
+					tableBodyData +=  requestVehiclesRow(asset, readOnly);
+				});
 			}
 		}
 
@@ -2239,16 +2237,15 @@ $(document).ready(function() {
 	// ----- GET REQUEST VEHICLE CONTENT -----
 	function requestOtherContent(data = false, costEstimateID = null, billMaterialID = null, readOnly = false){
 
-		let tableBodyData = requestOthersRow(data, readOnly); 
-	
-			if(data){
-				if(data.length > 0){
-					tableBodyData = "";
-					data.map(asset=>{
-						tableBodyData +=  requestOthersRow(asset, readOnly);
-					});
-				}
+		let tableBodyData = data.length < 1 ? `` : requestOthersRow(data, readOnly); 
+		if(data){
+			if(data.length > 0){
+				tableBodyData = "";
+				data.map(asset=>{
+					tableBodyData +=  requestOthersRow(asset, readOnly);
+				});
 			}
+		}
 		
 		// TABLE ROW
 

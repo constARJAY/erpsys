@@ -1,4 +1,4 @@
-$(document).ready(function() {
+ $(document).ready(function() {
 
     // ----- REUSABLE VARIABLE/FUNCTIONS -----
     const allowedUpdate = isUpdateAllowed(42);
@@ -1440,17 +1440,25 @@ $(document).ready(function() {
 
     // ----- CLICK BUTTON SUBMIT -----
 	$(document).on("click", "#btnSubmit", function () {
-        formButtonHTML(this);
 		const id = decryptString($(this).attr("materialWithdrawalID"));
+        const getItemLength = $(`[name="withdrawalItemID"]`).length;
+        const getAssetLength = $(`[name="withdrawalAssetID"]`).length;
 
-        setTimeout(() => {
-            // validateInputs().then(res => {
-            //     if (res) {
-                    saveProjectBoard("update", id, pageContent);
-                // }
-                formButtonHTML(this, false);
-            // });
-        }, 500);
+        if(getItemLength >0 || getAssetLength > 0 ){
+            formButtonHTML(this);
+            setTimeout(() => {
+                // validateInputs().then(res => {
+                //     if (res) {
+                        saveProjectBoard("update", id, pageContent);
+                    // }
+                    formButtonHTML(this, false);
+                // });
+            }, 500);
+        }else{
+            showNotification("danger", "No records needed to update.");
+        }
+
+
 	});
 	// ----- END CLICK BUTTON SUBMIT -----
 
@@ -1468,6 +1476,7 @@ $(document).ready(function() {
             const index = $(this).attr("index");
 
             const withdrawalItemID = $(this).attr("withdrawalItemID");
+            const itemID = $(this).attr("itemid");
             const received = $(`[name="receivedItems"][index="${index}"]`).val().replaceAll(",","");
             const remainingItem = $(`[name="remainingItem"][index="${index}"]`).text().trim().replaceAll(",","");
             var receivedDateItem = $(`[name="receivedDateItem"][index="${index}"]`).text() || "";
@@ -1479,7 +1488,7 @@ $(document).ready(function() {
             const itemRemarks = $(`[name="itemRemarks"][index="${index}"]`).val().trim() || "";
             if(received != 0){
                 const temp = {
-                    materialWithdrawalID,withdrawalItemID ,received, remainingItem, receivedDateItem, itemRemarks
+                    materialWithdrawalID,withdrawalItemID,itemID,received, remainingItem, receivedDateItem, itemRemarks
                 };
                 data.items.push(temp);    
             }
@@ -1490,6 +1499,7 @@ $(document).ready(function() {
             const index = $(this).attr("index");
 
             const withdrawalAssetID = $(this).attr("withdrawalAssetID");
+            const assetID = $(this).attr("assetid");
             const received = $(`[name="receivedAssets"][index="${index}"]`).val().replaceAll(",","");
             const remainingAsset = $(`[name="remainingAsset"][index="${index}"]`).text().trim().replaceAll(",","");
             var receivedDateAsset = $(`[name="receivedDateAsset"][index="${index}"]`).text() || "";
@@ -1501,7 +1511,7 @@ $(document).ready(function() {
             const assetRemarks = $(`[name="assetRemarks"][index="${index}"]`).val().trim() || "";
             if(received != 0){
                 const temp = {
-                    materialWithdrawalID,withdrawalAssetID ,received, remainingAsset, receivedDateAsset, assetRemarks
+                    materialWithdrawalID,withdrawalAssetID,assetID,received, remainingAsset, receivedDateAsset, assetRemarks
                 };
                 data.assets.push(temp);
             }

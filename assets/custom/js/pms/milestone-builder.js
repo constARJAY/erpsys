@@ -54,7 +54,11 @@ $(document).ready(function () {
             let condition = validateForm("milestonebuilder_form");
             if(condition == true){
                 let data = getMilestoneBuilder();
-                saveMilestoneBuilder(data, pageContent); 
+
+                setTimeout(() => {
+                    saveMilestoneBuilder(data, pageContent); 
+                }, 850);
+                
             }
             preventRefresh(true);
         });
@@ -476,28 +480,33 @@ $(document).ready(function () {
         var categoryID            = $("#projectCategory").val();
         var phaseTableData        = projectCatergotyData.filter(items => items.categoryID == categoryID)
         var categoryShortcut      = phaseTableData[0].categoryShortcut;
-        var categoryLength        = phaseTableData.length > 0 ? parseFloat(phaseTableData.length) + 1 : 1;
-        var phaseCode             = getPhaseCode(categoryShortcut,categoryLength);
-        data["categoryID"]        = categoryID;
-        data["phaseDescription"]  = $("#phaseDescription").val();
-        data["createdBy"]         = sessionID;
-		data["updatedBy"]         = sessionID;
-        data["phaseCode"]         = phaseCode;
-			$(".milestone-list-row").each(function(i, obj) {
-                var thisTaskName = $(this).find("[name=tasksName]");
-				var temp = {
-                    projectMilestoneID:     thisTaskName.val(),
-					projectMilestoneName:	$('option:selected', thisTaskName).attr("projectMilestoneName"),
-                    milestoneNotes:			$(this).find("[name=notes]").val()
-				};
-				data[`list`].push(temp);
-			});
-		
-		return data;
+        var getLastCategory       = milestoneBuilderData.filter(items => items.categoryID == categoryID);
+
+        setTimeout(() => {
+            var categoryLength        = getLastCategory.length > 0 ? parseFloat(getLastCategory.length) + 1 : 1;
+            var phaseCode             = getPhaseCode(categoryShortcut,categoryLength);
+            data["categoryID"]        = categoryID;
+            data["phaseDescription"]  = $("#phaseDescription").val();
+            data["createdBy"]         = sessionID;
+            data["updatedBy"]         = sessionID;
+            data["phaseCode"]         = phaseCode;
+                $(".milestone-list-row").each(function(i, obj) {
+                    var thisTaskName = $(this).find("[name=tasksName]");
+                    var temp = {
+                        projectMilestoneID:     thisTaskName.val(),
+                        projectMilestoneName:	$('option:selected', thisTaskName).attr("projectMilestoneName"),
+                        milestoneNotes:			$(this).find("[name=notes]").val()
+                    };
+                    data[`list`].push(temp);
+                });
+                
+            
+        }, 800);
+        return data;
     }
 
     function getConfirmation(method = "save") {
-        const title = "Milestone Builder";
+        const title = "Milestone";
         let swalText, swalImg;
     
         $("#modal_cost_estimate").text().length > 0 && $("#modal_cost_estimate").modal("hide");

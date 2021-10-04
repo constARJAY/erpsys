@@ -1784,7 +1784,7 @@ $(document).ready(function() {
                 <div class="form-group">
                     <label>Description ${!disabled ? "<code>*</code>" : ""}</label>
                     <textarea class="form-control validate"
-                        data-allowcharacters="[a-z][A-Z][0-9][ ][.][,][-][()]['][/][&]"
+                        data-allowcharacters="[a-z][A-Z][0-9][.][,][?][!][/][;][:]['][''][-][_][()][%][&][*][ ]"
                         minlength="1"
                         maxlength="200"
                         id="costEstimateReason"
@@ -2902,7 +2902,7 @@ $(document).ready(function() {
 								<td>
 									<div class="form-group other-description">
 										${!readOnly ? `<textarea class="form-control validate"
-										data-allowcharacters="[a-z][A-Z][0-9][ ][.][,][-][()]['][/][&]"
+										data-allowcharacters="[a-z][A-Z][0-9][.][,][?][!][/][;][:]['][''][-][_][()][%][&][*][ ]"
 										minlength="1"
 										maxlength="200"
 										id="otherDescription0"

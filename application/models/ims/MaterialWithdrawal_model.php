@@ -92,7 +92,7 @@ class MaterialWithdrawal_model extends CI_Model {
         $output = [];
         $sql    = "
         SELECT 
-            * ,(SELECT withdrawalItemStatus  FROM ims_material_withdrawal_item_tbl WHERE  materialRequestID = ims_request_items_tbl.materialRequestID AND itemID = ims_request_items_tbl.itemID AND withdrawalItemStatus = 1 ) AS withdrawalItemStatus
+            * ,(SELECT IF(EXISTS(SELECT * FROM ims_material_withdrawal_item_tbl WHERE withdrawalItemStatus =0),0,1)  FROM ims_material_withdrawal_item_tbl WHERE  materialRequestID = ims_request_items_tbl.materialRequestID AND itemID = ims_request_items_tbl.itemID AND withdrawalItemStatus = 1 ) AS withdrawalItemStatus
         FROM 
         ims_request_items_tbl 
         WHERE 
@@ -137,7 +137,7 @@ class MaterialWithdrawal_model extends CI_Model {
         $output = [];
         $sql    = "
         SELECT 
-            * ,(SELECT withdrawalAssetStatus  FROM ims_material_withdrawal_asset_tbl WHERE  materialRequestID = ims_request_assets_tbl.materialRequestID AND assetID = ims_request_assets_tbl.assetID AND withdrawalAssetStatus = 1 ) AS withdrawalAssetStatus
+            * ,(SELECT IF(EXISTS(SELECT * FROM ims_material_withdrawal_asset_tbl WHERE withdrawalAssetStatus =0),0,1)  FROM ims_material_withdrawal_asset_tbl WHERE  materialRequestID = ims_request_assets_tbl.materialRequestID AND assetID = ims_request_assets_tbl.assetID AND withdrawalAssetStatus = 1 ) AS withdrawalAssetStatus
         FROM 
         ims_request_assets_tbl 
         WHERE 
@@ -247,7 +247,7 @@ class MaterialWithdrawal_model extends CI_Model {
         return $query ? true : false;
     }
 
-    public function saveProjectBoard($materialWithdrawalID = 0, $dataItem =[] ,$dataAsset = [],$sessionID)
+    public function saveProjectBoard($materialWithdrawalID = 0, $dataItem =[] ,$dataAsset = [],$sessionID,$statusItemFlag = false,$statusAssetFlag = false,$getItemID = 0,$getAssetID = 0)
     {
         // $delete = $this->deleteProjectBoard($timelineBuilderID);
         // $update = $this->updateProjectBuilder($timelineBuilderID, $timelineManagementStatus);
@@ -258,23 +258,29 @@ class MaterialWithdrawal_model extends CI_Model {
             $query = $this->db->update_batch('ims_material_withdrawal_asset_tbl', $dataAsset, 'withdrawalAssetID');
         }
         if(($dataItem && count($dataItem) > 0) || $dataAsset && count($dataAsset) > 0){
+
+            if($statusItemFlag == true){
+                  // START UPDATE THE STOCK OUT AL ITEM STATUS//
+                    $query = $this->db->query("UPDATE  ims_material_withdrawal_item_tbl
+                    SET withdrawalItemStatus = 1
+                    WHERE materialWithdrawalID = $materialWithdrawalID AND itemID = $getItemID");
+                    // END UPDATE THE STOCK OUT ALL ITEM STATUS//
+            }
+
+            if($statusAssetFlag == true){
+                // START UPDATE THE STOCK OUT AL ASSET STATUS//
+                  $query = $this->db->query("UPDATE  ims_material_withdrawal_asset_tbl
+                  SET withdrawalAssetStatus = 1
+                  WHERE materialWithdrawalID = $materialWithdrawalID AND assetID = $getAssetID");
+                  // END UPDATE THE STOCK OUT ALL ASSET STATUS//
+           }
             
            
 
             // START UPDATE THE STATUS OF ITEM AND ASSET IN HEADER OF MATERIAL WITHDRAWAL FORMS//
              $this->db->query("UPDATE  ims_material_withdrawal_tbl
-             SET inventoryItemStatus = (SELECT 
-             CASE 
-                 WHEN (remaining = 0 AND received !=0) AND (remaining is not null AND received is not  null)  THEN IF(SUM(remaining) >0 ,0,8)
-                 WHEN (received = 0 AND remaining = 0) OR (received is null  OR remaining is null) THEN 0
-             END as itemStatus FROM ims_material_withdrawal_item_tbl WHERE materialWithdrawalID =ims_material_withdrawal_tbl.materialWithdrawalID),
-             
-             inventoryAssetStatus =(SELECT 
-             CASE 
-                 WHEN (remaining = 0 AND received !=0) AND (remaining is not null AND received is not  null)  THEN IF(SUM(remaining) >0 ,0,8)
-                 WHEN (received = 0 AND remaining = 0) OR (received is null  OR remaining is null) THEN 0
-             END as itemStatus FROM ims_material_withdrawal_asset_tbl WHERE materialWithdrawalID =ims_material_withdrawal_tbl.materialWithdrawalID)
-             
+             SET inventoryItemStatus = (SELECT  IF(EXISTS(SELECT * FROM ims_material_withdrawal_item_tbl WHERE withdrawalItemStatus =0),0,8) as itemStatus FROM ims_material_withdrawal_item_tbl WHERE  materialWithdrawalID = $materialWithdrawalID),
+                 inventoryAssetStatus =(SELECT  IF(EXISTS(SELECT * FROM ims_material_withdrawal_asset_tbl WHERE withdrawalAssetStatus =0),0,8) as assetStatus FROM ims_material_withdrawal_asset_tbl WHERE  materialWithdrawalID = $materialWithdrawalID)
              WHERE materialWithdrawalID = $materialWithdrawalID");
             // START UPDATE THE STATUS OF ITEM AND ASSET IN HEADER OF MATERIAL WITHDRAWAL FORMS//
 
@@ -292,7 +298,14 @@ class MaterialWithdrawal_model extends CI_Model {
             WHERE materialWithdrawalID = $materialWithdrawalID");
             // END UPDATE THE STOCK OUT DOCUMENT STATUS//
 
-            $this->db->query("CALL proc_get_material_withdrawal_approve($materialWithdrawalID)"); // Created By: Sir Wilson September 29,2021 11:02AM
+             // START UPDATE THE EQUIPMENT BORROWING DOCUMENT STATUS//
+             $query = $this->db->query("UPDATE  	ims_equipment_borrowing_tbl
+             SET inventoryAssetStatus = IF((SELECT inventoryAssetStatus FROM ims_material_withdrawal_tbl WHERE materialWithdrawalID = $materialWithdrawalID ) = 8, 8,0 ),
+             equipmentBorrowingID  = IF((SELECT inventoryAssetStatus FROM ims_material_withdrawal_tbl WHERE materialWithdrawalID = $materialWithdrawalID ) = 8, 8,0 )
+             WHERE materialWithdrawalID = $materialWithdrawalID");
+             // END UPDATE THE EQUIPMENT BORROWING DOCUMENT STATUS//
+
+            // $this->db->query("CALL proc_get_material_withdrawal_approve($materialWithdrawalID)"); // Created By: Sir Wilson September 29,2021 11:02AM
 
             // echo $query;
             // exit;

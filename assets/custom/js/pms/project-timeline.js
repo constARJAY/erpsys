@@ -490,24 +490,35 @@ $(document).ready(function() {
                 code="${getFormCode("PBT", createdAt, timelineBuilderID )}"><i class="fas fa-edit"></i> Edit</button>`;
 				
 			let projectCategory = projectID && projectList.filter(items=> items.projectListID == projectID).map(items=>{return items.projectCategory});
-			let budgetStatus = ``;
+			let budgetStatus = `-`;
 
 			if(timelineBuilderStatus != 6 && timelineBuilderStatus != 1 && timelineBuilderStatus != 2){
 				 budgetStatus = `-`;
-			}else{
-					if (timelineBudgetStatus == 0) {
-						
+				 let budgetCondition = parseFloat(timelineProposedBudget) > parseFloat(timelineAllocatedBudget);
+					if(budgetCondition){
+						budgetStatus =
+						`<span class="badge badge-outline-danger w-100" style="width: 100% !important">Over the Budget</span>`;
 					}else{
-						let budgetCondition = parseFloat(timelineProposedBudget) > parseFloat(timelineAllocatedBudget);
-						if(budgetCondition){
-							budgetStatus =
-							`<span class="badge badge-outline-danger w-100" style="width: 100% !important">Over the Budget</span>`;
-						}else{
-							budgetStatus = 
-							`<span class="badge badge-outline-success w-100" style="width: 100% !important">Within the Budget</span>`;
-						}
+						budgetStatus = 
+						`<span class="badge badge-outline-success w-100" style="width: 100% !important">Within the Budget</span>`;
 					}
 
+					if(timelineBuilderStatus == "0"){
+						budgetStatus = `-`;
+					}
+					
+			}else{
+				
+				let budgetCondition = parseFloat(timelineProposedBudget) > parseFloat(timelineAllocatedBudget);
+				if(budgetCondition){
+					budgetStatus =
+					`<span class="badge badge-outline-danger w-100" style="width: 100% !important">Over the Budget</span>`;
+				}else{
+					budgetStatus = 
+					`<span class="badge badge-outline-success w-100" style="width: 100% !important">Within the Budget</span>`;
+				}
+
+				
 				 
 			}
 			
@@ -705,7 +716,7 @@ $(document).ready(function() {
 
     // ----- GET PROJECT LIST -----
 	function getProjectList(id = null) {
-		let html = `<option disabled ${!id?"selected":''}>Please select a project</option>`;
+		let html = `<option disabled ${!id || id == "0" ?"selected":''}>Please select a project</option>`;
 
         html += projectList.map(project => {
             return `
@@ -724,10 +735,10 @@ $(document).ready(function() {
 
 	// ----- GET CLIENT LIST -----
     function getClientList(id = null) {
-		let html = `<option disabled ${!id?"selected":''}>Please select a client</option>`;
+		let html = `<option disabled ${!id || id == "0"?"selected":''}>Please select a client</option>`;
 
         html += clientList.map(items => {
-			let address = `${items.clientUnitNumber && titleCase(items.clientUnitNumber)+" "}${items.clientHouseNumber && items.clientHouseNumber +" "}${items.clientBarangay && titleCase(items.clientBarangay)+", "}${items.clientCity && titleCase(items.clientCity)+", "}${items.clientProvince && titleCase(items.clientProvince)+", "}${items.clientCountry && titleCase(items.clientCountry)+", "}${items.clientPostalCode && titleCase(items.clientPostalCode)}`;
+			let address = `${items.clientUnitNumber && titleCase(items.clientUnitNumber)+" "}${items.clientHouseNumber && items.clientHouseNumber +" "}${items.clientStreetName && titleCase(items.clientStreetName)+", "}${items.clientSubdivisionName && titleCase(items.clientSubdivisionName)+", "}${items.clientBarangay && titleCase(items.clientBarangay)+", "}${items.clientCity && titleCase(items.clientCity)+", "}${items.clientProvince && titleCase(items.clientProvince)+", "}${items.clientCountry && titleCase(items.clientCountry)+", "}${items.clientPostalCode && titleCase(items.clientPostalCode)}`;
             return `
             <option 
                 value       = "${items.clientID}" 
@@ -754,7 +765,7 @@ $(document).ready(function() {
 		let teamLeader 		= $("[name=timelineTeamLeader]").val();
 
 		switch(typeEmployee) {
-			case "PM":	html += `<option disabled ${!id?"selected":''}>Please select a project manager</option>`;
+			case "PM":	html += `<option disabled ${!id || id == "0"?"selected":''}>Please select a project manager</option>`;
 				employeeList.filter(emp => emp.employeeRanking == "Managerial").map((emp,index) =>{
 					html += `			
 						<option 
@@ -765,7 +776,7 @@ $(document).ready(function() {
 						`;
 				});
 				break;
-			case "TL": html += `<option disabled ${!id?"selected":''}>Please select a team leader</option>`;
+			case "TL": html += `<option disabled ${!id || id == "0"?"selected":''}>Please select a team leader</option>`;
 				employeeList.filter(emp => emp.employeeRanking == "Officer" || emp.employeeRanking == "Managerial").map((emp,index) =>{
 					html += `			
 						<option 
@@ -777,7 +788,7 @@ $(document).ready(function() {
 				});
 				break;
 			case "ORG": 
-			// html += `<option disabled ${!id?"selected":''}>Please select a team </option>`;
+			// html += `<option disabled ${!id || id == "0"?"selected":''}>Please select a team </option>`;
 				var employeeIDs = id.split("|");
 				
 				employeeList.filter(emp => emp.employeeRanking).map((emp,index) =>{
@@ -1086,7 +1097,7 @@ $(document).ready(function() {
 		let timelineDate = !timelineStartDate ? "-" : moment(timelineStartDate).format("MMMM DD, YYYY")+" - "+moment(timelineEndDate).format("MMMM DD, YYYY");
 
 		let clientAddress = clientID && clientList.filter(items=> items.clientID == clientID).map((items, index)=>{
-			return `${items.clientUnitNumber && titleCase(items.clientUnitNumber)+" "}${items.clientHouseNumber && items.clientHouseNumber +" "}${items.clientBarangay && titleCase(items.clientBarangay)+", "}${items.clientCity && titleCase(items.clientCity)+", "}${items.clientProvince && titleCase(items.clientProvince)+", "}${items.clientCountry && titleCase(items.clientCountry)+", "}${items.clientPostalCode && titleCase(items.clientPostalCode)}`
+			return `${items.clientUnitNumber && titleCase(items.clientUnitNumber)+" "}${items.clientHouseNumber && items.clientHouseNumber +" "}${items.clientBarangay && titleCase(items.clientBarangay)+", "} ${items.clientStreetName && titleCase(items.clientStreetName)+", "}${items.clientSubdivisionName && titleCase(items.clientSubdivisionName)+", "}${items.clientCity && titleCase(items.clientCity)+", "}${items.clientProvince && titleCase(items.clientProvince)+", "}${items.clientCountry && titleCase(items.clientCountry)+", "}${items.clientPostalCode && titleCase(items.clientPostalCode)}`
 		});	
 
 		let projectCategory = projectID && projectList.filter(items=> items.projectListID == projectID).map(items=>{return items.projectCategory});
@@ -1442,6 +1453,7 @@ $(document).ready(function() {
 			// ----- END NOT ALLOWED FOR UPDATE -----
 			updateTableRows();
 			updateTableTaskList();
+			readOnly ? $("[name=taskStartDate]").change() : "";
 			return html;
 		}, 200);
 	}
@@ -1720,7 +1732,7 @@ $(document).ready(function() {
 	function updateTableTaskList(){
 		$(".task-list-row").each(function(i){
             // CHECKBOX
-			var rowID 	=	$("td .action .main_checkboxrow", this).attr("id").replaceAll("main_checkboxrow","");
+			var rowID 	=	$("td .action .main_checkboxrow", this).attr("id") ? $("td .action .main_checkboxrow", this).attr("id").replaceAll("main_checkboxrow","") : i;
 				$(".task-list-sub-row").each(function(x){
 					var newID 	= rowID+"_"+x;
 					// CHECKBOX
@@ -1893,6 +1905,7 @@ $(document).ready(function() {
 			var timelineDate 					= $("[name=timelineDate]").val().split(" - ");
 			var files 							= document.getElementById("timelineDesign").files[0];
 			var timelineBudgetStatus 			= $("[name=timelineProposedBudget]").attr("timelineBudgetStatus");
+			var timelineAllocatedBudget 		= $("[name=timelineAllocatedBudget]").val().replaceAll(",","") || $("[name=timelineAllocatedBudget]").val() ;
 			var timelineTeamMember 				= [];
 			var timelineTeamMemberOrganic 		= $("#timelineTeamMemberOrganic").val() ?? null;
 			var timelineTeamMemberNonOrganic 	= $("#timelineTeamMemberNonOrganic").val() ?? null;
@@ -1920,7 +1933,7 @@ $(document).ready(function() {
 			data["timelineProposedBudget"] 		= $("[name=timelineProposedBudget]").val().replaceAll(",","") ?? null;
 			data["file"] 						= files;
 			data["timelineBudgetStatus"] 		= timelineBudgetStatus;
-
+			data["timelineAllocatedBudget"] 		= timelineAllocatedBudget;
 
 
 
@@ -1939,6 +1952,7 @@ $(document).ready(function() {
 			formData.append("timelineProposedBudget", $("[name=timelineProposedBudget]").val().replaceAll(",","") ?? null);
 			formData.append("file", files);
 			formData.append("timelineBudgetStatus", timelineBudgetStatus);
+			formData.append("timelineAllocatedBudget", timelineAllocatedBudget);
 
 			if (action == "insert") {
 				data["createdBy"]   = sessionID;
@@ -2048,16 +2062,15 @@ $(document).ready(function() {
 	});
 	// ----- END VIEW DOCUMENT -----
 
-
+	$("#timelineAllocatedBudget").val() ? $(this).attr("revise") == "true" : $(this).attr("revise") == "false" ;
 	// ----- SAVE CLOSE FORM -----
 	$(document).on("click", "#btnBack", function () {
 		const id         				= decryptString($(this).attr("timelineBuilderID"));
 		const isFromCancelledDocument 	= $(this).attr("cancel") == "true";
-		const revise     				= $(this).attr("revise") == "true";
 		const employeeID 				= $(this).attr("employeeID");
 		const feedback   				= $(this).attr("code") || getFormCode("PBT", dateToday(), id);
 		const status     				= $(this).attr("status");
-
+		const revise     				= status != 0 ? $(this).attr("revise") == "true" : ( $("#timelineAllocatedBudget").val() != "0.00" ? $(this).attr("revise") == "false" : $(this).attr("revise") == "true")
 		if (status != "false" && status != 0) {
 			
 			if (revise) {

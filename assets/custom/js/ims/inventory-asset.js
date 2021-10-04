@@ -374,7 +374,7 @@ $(document).ready(function(){
                                 class="form-control validate" 
                                 name="brandName" 
                                 id="input_brandName" 
-                                data-allowcharacters="[A-Z][a-z][0-9][ ]['][-]" 
+                                data-allowcharacters="[A-Z][a-z][0-9][.][,][?][!][/][;][:]['][''][-][_][(][)][%][&][*][ ]" 
                                 minlength="2" 
                                 maxlength="325" 
                                 required 
@@ -393,7 +393,7 @@ $(document).ready(function(){
                                 class="form-control validate" 
                                 name="assetName" 
                                 id="input_assetName" 
-                                data-allowcharacters="[A-Z][a-z][0-9][ ]['][-]" 
+                                data-allowcharacters="[A-Z][a-z][0-9][.][,][?][!][/][;][:]['][''][-][_][(][)][%][&][*][ ]" 
                                 minlength="2" 
                                 maxlength="325" 
                                 required 
@@ -469,9 +469,9 @@ $(document).ready(function(){
 
                     <div class="col-md-12 col-sm-12">
                         <div class="form-group">
-                            <label>Item Description <span class="text-danger font-weight-bold">*</span></label>
+                            <label>Asset Description <span class="text-danger font-weight-bold">*</span></label>
                             <textarea style="resize:none; white-space:wrap;" row="3" class="form-control validate" name="assetDescription" id="assetescription" 
-                                    data-allowcharacters="[a-z][A-Z][0-9][.][,][-][()]['][/][?][*][!][#][%][&][ ]" minlength="2" maxlength="250" required >${assetDescription}</textarea>
+                                    data-allowcharacters="[A-Z][a-z][0-9][.][,][?][!][/][;][:]['][''][-][_][(][)][%][&][*][ ]" minlength="2" maxlength="250" required >${assetDescription}</textarea>
                             <div class="invalid-feedback d-block" id="invalid-inputAssetDescription"></div>
                         </div>
                     </div>
@@ -481,7 +481,7 @@ $(document).ready(function(){
                             <label for="">Acquisition Date <strong class="text-danger">*</strong></label>
                             <input 
                                 type="button" 
-                                class="form-control daterange validate text-left" 
+                                class="form-control validate text-left" 
                                 name="acquisitionDate" 
                                 id="inputacquisitionDate" 
                                 data-allowcharacters="[A-Z][ ][,][a-z][0-9]" 
@@ -495,7 +495,7 @@ $(document).ready(function(){
                     </div>
 
                     <div class="col-md-6 col-sm-12">
-                        <label>3rd Provider Fee <span class="text-danger font-weight-bold">*</span></label>
+                        <label>3rd Party Provider Fee <span class="text-danger font-weight-bold">*</span></label>
                         <div class="input-group">
                             <div class="input-group-prepend">
                                 <span class="input-group-text">₱</span>
@@ -504,11 +504,11 @@ $(document).ready(function(){
                             class="form-control amount text-right"  
                             min="1" max="9999999"
                             minlength="1" 
-                            maxlength="20" 
+                            maxlength="11" 
                             name="assetProviderFee" 
                             id="input_assetProviderFee" 
                             value="${assetProviderFee}" 
-                            required>
+                            >
                             <div class="invalid-feedback d-block" id="invalid-input_assetProviderFee"></div>
                         </div>
                     </div>
@@ -523,7 +523,7 @@ $(document).ready(function(){
                             class="form-control amount text-right"  
                             min="0.01" max="9999999"
                             minlength="1" 
-                            maxlength="20" 
+                            maxlength="11" 
                             name="assetCost" 
                             id="input_assetCost" 
                             value="${assetCost}" 
@@ -542,7 +542,7 @@ $(document).ready(function(){
                             class="form-control amount text-right"  
                             min="0.01" max="9999999"
                             minlength="1" 
-                            maxlength="20" 
+                            maxlength="11" 
                             name="assetSalvageValue" 
                             id="input_assetSalvageValue" 
                             value="${assetSalvageValue}" 
@@ -561,7 +561,7 @@ $(document).ready(function(){
                                 id="input_assetUsefulLife" 
                                 data-allowcharacters="[0-9]" 
                                 minlength="1" 
-                                maxlength="20" 
+                                maxlength="3" 
                                 required 
                                 value="${assetUsefulLife}"
                                 autocomplete="off">
@@ -652,7 +652,23 @@ $(document).ready(function(){
         
     } 
     // ----- END MODAL CONTENT -----
+    
 
+    // DATE PICKER //
+
+    function datepicker(id = null, setdate = new Date()){
+        $(`#${id}`).daterangepicker({
+            singleDatePicker: true,
+            showDropdowns: true,
+            autoApply: false,
+            startDate: setdate,
+            maxDate: new Date,
+            locale: {
+                format: 'MMMM DD, YYYY'
+            },
+        })
+    }
+    // DATE PICKER //
 
     //  FUNCTION FOR CHECK SALVAGE VALUE//
     function validateSalvageValue(){
@@ -661,12 +677,12 @@ $(document).ready(function(){
         
         if(getCost < getSalvageValue ){
             $("#input_assetSalvageValue").removeClass("validated").removeClass("is-valid").addClass("is-invalid");
-            $("#invalid-input_assetSalvageValue").text("greater value on salvage value than cost");
+            $("#invalid-input_assetSalvageValue").text("Input a salvage value less than the cost.");
             $("#input_assetSalvageValue").focus();
             return false;
         }else{
             $("#input_assetSalvageValue").removeClass("validated").removeClass("is-invalid").addClass("is-valid");
-            $("#invalid-input_assetSalvageValue").text("greater value on salvage value than cost");
+            $("#invalid-input_assetSalvageValue").text("");
             return true;
         }
     }
@@ -690,6 +706,7 @@ $(document).ready(function(){
         initAmount();
         initSelect2();
         initDateRangePicker();
+        datepicker("inputacquisitionDate");
     });
     // ----- END OPEN ADD MODAL -----
 
@@ -770,7 +787,8 @@ $(document).ready(function(){
                 $("#btnSaveConfirmationEdit").attr("accountid", id);
                 $("#btnSaveConfirmationEdit").attr("feedback", feedback);
                 initAll();
-
+                console.log(tableData[0].acquisitionDate)
+                datepicker("inputacquisitionDate",new Date(tableData[0].acquisitionDate));
             }, 500);
         }
     });

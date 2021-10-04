@@ -9,7 +9,7 @@
                         <li class="breadcrumb-item active">Asset Price List</li>
                     </ul>
                     <h1 class="mt-3">List of Asset Price List</h1>
-                    <span>This module is used to manage the inventory item price list details.</span>
+                    <span>This module is used to manage the inventory asset price list details.</span>
                 </div>
                 <div class="col-sm-12 col-md-4 d-flex justify-content-end align-items-start" id="select2Classification">
                     <!-- <button class="btn btn-default btn-add d-flex justify-content-center align-items-center ml-2 addClassification"><i class="icon-plus px-2"></i><span class="d-none d-sm-none d-md-block d-lg-block d-xl-block">Add&nbsp;</span> Classification</button> -->

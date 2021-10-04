@@ -585,9 +585,9 @@ $(document).ready(function() {
                                                     <input class="form-control text-center validate"
                                                 id="barcodeItem0"
                                                 name="barcodeItem"
-                                                min="46"
+                                                min="36"
                                                 max="64"
-                                                minlength="46"
+                                                minlength="36"
                                                 maxlength="64"
                                                 index="0"
                                                 itemID="${itemID}"
@@ -1001,10 +1001,12 @@ $(document).ready(function() {
      $(document).on("change", `[name="barcodeItem"]`, function() {
         const itemID    = $(this).attr("itemID");
         const index    = $(this).attr("index");
+        const id    = $(this).attr("id");
         const withdrawalItemID    = $(this).attr("withdrawalItemID");
-        const value = $(this).val();
+        const value = $(this).val().length +1;
+        const characterLength = 37;
 
-        if(value.length>=46){
+        if(value >= characterLength){
 
             const validatebarcode = getTableData(`ims_stock_in_item_tbl`,
             `barcode`,
@@ -1012,17 +1014,18 @@ $(document).ready(function() {
             AND stockInDate IS NOT NULL 
             AND itemID = ${itemID} AND barcode = '${value}'`);
             if(validatebarcode.length<=0){
-               $(this).addClass("is-invalid").removeClass("validate")
+               $("#"+id).addClass("is-invalid").removeClass("validate")
                $("#invalid-barcodeItem"+index).text("Barcode not exist!")
             }else{
-                $(this).removeClass("is-invalid").addClass("validate")
+                $("#"+id).removeClass("is-invalid").addClass("validate")
                 $("#invalid-barcodeItem"+index).text("")
             }
             
-        }else{
-            $(this).removeClass("is-invalid").addClass("validate")
-                $("#invalid-barcodeItem"+index).text("")
         }
+        // else{
+        //     $("#"+id).addClass("is-invalid").removeClass("validate")
+        //     $("#invalid-barcodeItem"+index).text("Please enter at least "+characterLength+" characters.")
+        // }
 
         // const getRemainingItem = +$(`[name="remainingItem"][itemID="${itemID}"]`).attr("remainingValueItem").replaceAll(",","");
         // var computeRemainingItem =0;

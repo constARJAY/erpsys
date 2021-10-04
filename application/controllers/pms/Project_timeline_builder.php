@@ -19,7 +19,7 @@ class Project_timeline_builder extends CI_Controller {
         $this->load->view("template/footer");
     }
 
-
+    
     public function savetimelineBuilder(){
         $action                     = $this->input->post("action");
         $method                     = $this->input->post("method");
@@ -37,6 +37,7 @@ class Project_timeline_builder extends CI_Controller {
         $timelineTeamMember         = $this->input->post("timelineTeamMember") ?? null;
         $timelineBuilderReason      = $this->input->post("timelineBuilderReason") ?? null;
         $timelineProposedBudget     = $this->input->post("timelineProposedBudget") ?? null;
+        $timelineAllocatedBudget    = $this->input->post("timelineAllocatedBudget") ?? null;
         $approversID                = $this->input->post("approversID") ?? null;
         $approversStatus            = $this->input->post("approversStatus") ?? null;
         $approversDate              = $this->input->post("approversDate") ?? null;
@@ -49,8 +50,8 @@ class Project_timeline_builder extends CI_Controller {
         $createdAt                  = $this->input->post("createdAt");
         $tasks                      = $this->input->post("tasks") ?? null;
 
-        $projectCode             = $this->projecttimeline->getClientCount($clientID);
-
+        $projectCode                = $projectID ? $this->projecttimeline->getClientCount($clientID) : "-";
+        
         $timelineBuilderData = [
             "reviseTimelineBuilderID" => $reviseTimelineBuilderID,
             "employeeID"              => $employeeID,
@@ -70,6 +71,7 @@ class Project_timeline_builder extends CI_Controller {
             "timelineBuilderStatus"   => $timelineBuilderStatus,
             "timelineBuilderReason"   => $timelineBuilderReason,
             "timelineProposedBudget"  => $timelineProposedBudget,
+            "timelineAllocatedBudget" => $timelineAllocatedBudget,
             "submittedAt"             => $submittedAt,
             "createdBy"               => $createdBy,
             "updatedBy"               => $updatedBy,

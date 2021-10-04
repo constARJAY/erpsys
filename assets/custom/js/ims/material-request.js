@@ -1453,7 +1453,7 @@ $(document).ready(function() {
                 <div class="form-group">
                     <label>Description ${!disabled ? "<code>*</code>" : ""}</label>
                     <textarea class="form-control validate"
-                        data-allowcharacters="[a-z][A-Z][0-9][ ][.][,][-][()]['][/][&]"
+                        data-allowcharacters="[a-z][A-Z][0-9][.][,][?][!][/][;][:]['][''][-][_][()][%][&][*][ ]" 
                         minlength="1"
                         maxlength="200"
                         id="materialRequestReason"
@@ -1743,7 +1743,7 @@ $(document).ready(function() {
 								rows="2" 
 								style="resize: none" 
 								class="form-control validate" 
-								data-allowcharacters="[0-9][a-z][A-Z][ ][.][,][_]['][()][?][-][/]"
+								data-allowcharacters="[0-9][a-z][A-Z][.][,][?][!][/][;][:]['][''][-][_][()][%][&][*][ ]"
 								minlength="1"
 								maxlength="100"
 								${disabled}
@@ -1862,7 +1862,7 @@ $(document).ready(function() {
 								style="resize: none" 
 								class="form-control validate"
 								name="assetRemarks"
-								data-allowcharacters="[0-9][a-z][A-Z][ ][.][,][_]['][()][?][-][/]"
+								data-allowcharacters="[0-9][a-z][A-Z][.][,][?][!][/][;][:]['][''][-][_][()][%][&][*][ ]"
 								minlength="1" ${disabled}
 								maxlength="100" >${remarks}</textarea>` : remarks}
 								<div class="d-block invalid-feedback"></div>
@@ -2347,7 +2347,7 @@ $(document).ready(function() {
 			<div class="form-group">
 				<label>Remarks <code>*</code></label>
 				<textarea class="form-control validate"
-					data-allowcharacters="[0-9][a-z][A-Z][ ][.][,][_]['][()][?][-][/]"
+					data-allowcharacters="[0-9][a-z][A-Z][.][,][?][!][/][;][:]['][''][-][_][()][%][&][*][ ]"
 					minlength="2"
 					maxlength="250"
 					id="materialRequestRemarks"

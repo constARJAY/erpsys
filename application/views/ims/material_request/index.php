@@ -24,9 +24,24 @@
         </div>
 	</div>
 
+    
 
     
 </div>
+<div id="modal_material_request" class="modal custom-modal fade" data-backdrop="static" data-keyboard="false" role="dialog">
+        <div class="modal-dialog modal-dialog-centered modal-md" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-light">
+                    <h6 class="page-title font-weight-bold">ADD MATERIAL REQUEST</h6>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span class="text-light" aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+
+                <div id="modal_material_request_content"></div>
+            </div>
+        </div>
+    </div>
 
 
 

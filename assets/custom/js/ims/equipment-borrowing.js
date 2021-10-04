@@ -478,7 +478,7 @@ $(document).ready(function() {
 
      
         if(milestoneTask.length >0){
-            // console.log(milestoneTask)
+            console.log(milestoneTask)
             milestoneTask.map((milestone,index) => {
                 const { withdrawalAssetID,
                     requestAssetID,
@@ -579,9 +579,9 @@ $(document).ready(function() {
                                                     <input class="form-control text-center validate"
                                                 id="barcodeAsset0"
                                                 name="barcodeAsset"
-                                                min="46"
+                                                min="36"
                                                 max="64"
-                                                minlength="46"
+                                                minlength="36"
                                                 maxlength="64"
                                                 index="0"
                                                 assetID="${assetID}"
@@ -656,7 +656,7 @@ $(document).ready(function() {
         const {
             assets       = []
         } = phase;
-        // console.log(phase)
+        console.log(phase)
         
         let taskHTML = "";
         
@@ -995,10 +995,12 @@ $(document).ready(function() {
      $(document).on("change", `[name="barcodeAsset"]`, function() {
         const assetID    = $(this).attr("assetID");
         const index    = $(this).attr("index");
+        const id    = $(this).attr("id");
         const withdrawalAssetID    = $(this).attr("withdrawalAssetID");
-        const value = $(this).val();
+        const value = $(this).val().length+1;
+        const characterLength = 37;
 
-        if(value.length>=46){
+        if(value >= characterLength){
 
             const validatebarcode = getTableData(`ims_stock_in_assets_tbl`,
             `barcode`,
@@ -1006,17 +1008,18 @@ $(document).ready(function() {
             AND stockInDate IS NOT NULL 
             AND assetID = ${assetID} AND barcode = '${value}'`);
             if(validatebarcode.length<=0){
-               $(this).addClass("is-invalid").removeClass("validate")
+               $("#"+id).addClass("is-invalid").removeClass("validate")
                $("#invalid-barcodeAsset"+index).text("Barcode not exist!")
             }else{
-                $(this).removeClass("is-invalid").addClass("validate")
+                $("#"+id).removeClass("is-invalid").addClass("validate")
                 $("#invalid-barcodeAsset"+index).text("")
             }
             
-        }else{
-            $(this).removeClass("is-invalid").addClass("validate")
-                $("#invalid-barcodeAsset"+index).text("")
         }
+        // else{
+        //     $("#"+id).addClass("is-invalid").removeClass("validate")
+        //     $("#invalid-barcodeAsset"+index).text("Please enter at least "+characterLength+" characters.")
+        // }
 
         // const getRemainingItem = +$(`[name="remainingAsset"][assetID="${assetID}"]`).attr("remainingValueItem").replaceAll(",","");
         // var computeRemainingItem =0;
@@ -1117,8 +1120,8 @@ $(document).ready(function() {
                 equipmentBorrowingID      = "",
                 materialRequestID           ="",
             } = data && data[0];
-            // console.log("button")
-        //    console.log(data)
+            console.log("button")
+           console.log(data)
             button = `
             <button 
                 class="btn btn-submit px-5 p-2"  
@@ -1186,7 +1189,7 @@ $(document).ready(function() {
         let button = disabled ? "" :  formButtons(data);
 
         let assetHTML = "";
-        console.log(withdrawalDetails)
+
         withdrawalDetails.map((phase, index) => {
             assetHTML += displayAssets( phase, index, disabled);
         })
@@ -1497,7 +1500,7 @@ $(document).ready(function() {
         $("#page_content").html(preloader);
         const equipmentBorrowingID = decryptString($(this).attr("id"));
         setTimeout(() => {
-            // console.log(equipmentBorrowingID)
+            console.log(equipmentBorrowingID)
             viewDocument(equipmentBorrowingID);
         }, 50);
     })

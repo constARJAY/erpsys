@@ -28,7 +28,8 @@ function initDataTables() {
             { targets: 1, width: 150 },
             { targets: 2, width: 250 },
             { targets: 3, width: 150 },
-            { targets: 4, width: 80 },
+            { targets: 4, width: 150 },
+            { targets: 5, width: 80 },
            
         ],
     });
@@ -54,6 +55,7 @@ function tableContent() {
                     vehicleGasType,
                     vehicleFuelConsumption,
                     vehicleStatus,
+                    vehicleHourRate,
                     createdAt
                     `,
                     tableWhere: "vehicleStatus=1"},
@@ -71,6 +73,7 @@ function tableContent() {
                         <th>Vehicle</th>
                         <th>Plate Number/Conduction Number</th>
                         <th>Fuel Type</th>
+                        <th>Hourly Rate</th>
                         <th>Status</th>
                     </tr>
                 </thead>
@@ -114,7 +117,8 @@ function tableContent() {
 					</div>
 					<small style="color:#848482;">${gasType}</small>
 				</td>
-                    <td class="text-center">${status}</td>
+                <td class="text-right">${formatAmount(item.vehicleHourRate,true)}</td>
+                <td class="text-center">${status}</td>
                 </tr>`;
             })
             html += `</tbody>
@@ -208,6 +212,22 @@ tableContent();
     })
     // ----- END SELECT IMAGE -----
 
+      // DATE PICKER //
+
+      function datepicker(id = null, setdate = new Date()){
+        $(`#${id}`).daterangepicker({
+            singleDatePicker: true,
+            showDropdowns: true,
+            autoApply: false,
+            startDate: setdate,
+            maxDate: new Date,
+            locale: {
+                format: 'MMMM DD, YYYY'
+            },
+        })
+    }
+    // DATE PICKER //
+
     // -- START COMPUTE MONTHLY DEPRECIATION AND HOURLY RATE --//
     $(document).on('keyup','#input_vehicleCost,#input_vehicleSalvageValue,#input_vehicleUsefulLife',function(){
         var getAssetCost = +parseFloat($("#input_vehicleCost").val().replaceAll(",",""));
@@ -225,6 +245,28 @@ tableContent();
 
     })    
     // -- END COMPUTE MONTHLY DEPRECIATION AND HOURLY RATE --//
+
+     //  FUNCTION FOR CHECK SALVAGE VALUE//
+     function validateSalvageValue(){
+        var getCost = +$("#input_vehicleCost").val().replaceAll(",","");
+        var getSalvageValue = +$("#input_vehicleSalvageValue").val().replaceAll(",","");
+        
+        if(getCost < getSalvageValue ){
+            $("#input_vehicleSalvageValue").removeClass("validated").removeClass("is-valid").addClass("is-invalid");
+            $("#invalid-input_vehicleSalvageValue").text("Input a salvage value less than the cost.");
+            $("#input_vehicleSalvageValue").focus();
+            return false;
+        }else{
+            $("#input_vehicleSalvageValue").removeClass("validated").removeClass("is-invalid").addClass("is-valid");
+            $("#invalid-input_vehicleSalvageValue").text("");
+            return true;
+        }
+    }
+
+    //  VALIDATE THE SALVAGE VALUE AND COST
+    $(document).on("change","#input_vehicleSalvageValue", function(){
+        validateSalvageValue();
+    });
 
 
  // ----- MODAL CONTENT -----
@@ -334,7 +376,7 @@ tableContent();
                         name="vehicleGasType"
                         autocomplete="off"
                         required>
-                        <option value="" selected>No Selected</option>
+                        <option value="" selected>Select Fuel Type</option>
                         <option value="1" ${data && vehicleGasType == "1" && "selected"}>Gasoline</option>
                         <option value="2" ${data && vehicleGasType == "2" && "selected"}>Diesel</option>
 
@@ -348,7 +390,7 @@ tableContent();
                     <label for="">Acquisition Date <strong class="text-danger">*</strong></label>
                     <input 
                         type="button" 
-                        class="form-control daterange validate text-left" 
+                        class="form-control validate text-left" 
                         name="acquisitionDate" 
                         id="inputacquisitionDate" 
                         data-allowcharacters="[A-Z][ ][,][a-z][0-9]" 
@@ -371,7 +413,7 @@ tableContent();
                     class="form-control amount text-right"  
                     min="0.01" max="9999999"
                     minlength="1" 
-                    maxlength="20" 
+                    maxlength="11" 
                     name="vehicleCost" 
                     id="input_vehicleCost" 
                     value="${vehicleCost}" 
@@ -390,7 +432,7 @@ tableContent();
                     class="form-control amount text-right"  
                     min="0.01" max="9999999"
                     minlength="1" 
-                    maxlength="20" 
+                    maxlength="11" 
                     name="vehicleSalvageValue" 
                     id="input_vehicleSalvageValue" 
                     value="${vehicleSalvageValue}" 
@@ -409,7 +451,7 @@ tableContent();
                         id="input_vehicleUsefulLife" 
                         data-allowcharacters="[0-9]" 
                         minlength="1" 
-                        maxlength="20" 
+                        maxlength="2" 
                         required 
                         value="${vehicleUsefulLife}"
                         autocomplete="off">
@@ -532,34 +574,39 @@ $(document).on("click", "#btnAdd", function() {
     $("#modal_vehicle_content").html(preloader);
     const content = modalContent();
     $("#modal_vehicle_content").html(content);
- 
     initAll();
+    datepicker("inputacquisitionDate");
 });
 // ----- END OPEN ADD MODAL -----
 
 
 // ----- SAVE MODAL -----
 $(document).on("click", "#btnSave", function() {
-const validate = validateForm("modal_vehicle");
-if (validate) {
 
-    let data = getFormData("modal_vehicle");
-    // data["tableData[createdBy]"] = sessionID;
-    // data["tableData[updatedBy]"] = sessionID;
-    // data["tableName"]            = "ims_inventory_vehicle_tbl";
-    // data["feedback"]             = $("[name=vehicleName]").val();
+    var getValidateSalvageValue = validateSalvageValue();
+    if(getValidateSalvageValue){
 
-    data.append("tableData[vehicleCost]", +$("#input_vehicleCost").val().replaceAll(",",""));
-    data.append("tableData[vehicleSalvageValue]", +$("#input_vehicleSalvageValue").val().replaceAll(",",""));
-    data.append("tableData[vehicleHourRate]", +$("#input_vehicleHourRate").val().replaceAll(",",""));
-    data.append("tableData[vehicleDepreciation]", +$("#input_vehicleDepreciation").val().replaceAll(",",""));
+        const validate = validateForm("modal_vehicle");
+        if (validate) {
 
-    data.append("tableData[createdBy]", sessionID);
-    data.append("tableData[updatedBy]", sessionID);
-    data.append("tableName", "ims_inventory_vehicle_tbl");
-    data.append("feedback", $("[name=vehicleName]").val()?.trim());
+        let data = getFormData("modal_vehicle");
+        // data["tableData[createdBy]"] = sessionID;
+        // data["tableData[updatedBy]"] = sessionID;
+        // data["tableName"]            = "ims_inventory_vehicle_tbl";
+        // data["feedback"]             = $("[name=vehicleName]").val();
 
-    sweetAlertConfirmation("add", "Vehicle", "modal_vehicle", null, data, false, tableContent); 
+        data.append("tableData[vehicleCost]", +$("#input_vehicleCost").val().replaceAll(",",""));
+        data.append("tableData[vehicleSalvageValue]", +$("#input_vehicleSalvageValue").val().replaceAll(",",""));
+        data.append("tableData[vehicleHourRate]", +$("#input_vehicleHourRate").val().replaceAll(",",""));
+        data.append("tableData[vehicleDepreciation]", +$("#input_vehicleDepreciation").val().replaceAll(",",""));
+
+        data.append("tableData[createdBy]", sessionID);
+        data.append("tableData[updatedBy]", sessionID);
+        data.append("tableName", "ims_inventory_vehicle_tbl");
+        data.append("feedback", $("[name=vehicleName]").val()?.trim());
+
+        sweetAlertConfirmation("add", "Vehicle", "modal_vehicle", null, data, false, tableContent); 
+        }
     }
 });
 // ----- END SAVE MODAL -----
@@ -581,6 +628,7 @@ $(document).on("click", ".btnEdit", function() {
             $("#modal_vehicle_content").html(content);
             $("#btnSaveConfirmationEdit").attr("accountid", id);
             $("#btnSaveConfirmationEdit").attr("feedback", feedback);
+            datepicker("inputacquisitionDate",new Date(tableData[0].acquisitionDate));
             initAll();
         }, 500);
     }
@@ -589,37 +637,41 @@ $(document).on("click", ".btnEdit", function() {
 
 // ----- UPDATE MODAL -----
 $(document).on("click", "#btnUpdate", function() {
-    const rowID = $(this).attr("rowID");
-    const validate = validateForm("modal_vehicle");
-    if (validate) {
+    var getValidateSalvageValue = validateSalvageValue();
+            
+    if(getValidateSalvageValue){
+        const rowID = $(this).attr("rowID");
+        const validate = validateForm("modal_vehicle");
+        if (validate) {
 
-        let data = getFormData("modal_vehicle");
-        // data["tableData[updatedBy]"] = sessionID;
-        // data["tableName"]            = "ims_inventory_vehicle_tbl";
-        // data["whereFilter"]          = "vehicleID=" + rowID;
-        // data["feedback"]             = $("[name=vehicleName]").val();
+            let data = getFormData("modal_vehicle");
+            // data["tableData[updatedBy]"] = sessionID;
+            // data["tableName"]            = "ims_inventory_vehicle_tbl";
+            // data["whereFilter"]          = "vehicleID=" + rowID;
+            // data["feedback"]             = $("[name=vehicleName]").val();
 
-        data.append("tableData[vehicleCost]", +$("#input_vehicleCost").val().replaceAll(",",""));
-        data.append("tableData[vehicleSalvageValue]", +$("#input_vehicleSalvageValue").val().replaceAll(",",""));
-        data.append("tableData[vehicleHourRate]", +$("#input_vehicleHourRate").val().replaceAll(",",""));
-        data.append("tableData[vehicleDepreciation]", +$("#input_vehicleDepreciation").val().replaceAll(",",""));
+            data.append("tableData[vehicleCost]", +$("#input_vehicleCost").val().replaceAll(",",""));
+            data.append("tableData[vehicleSalvageValue]", +$("#input_vehicleSalvageValue").val().replaceAll(",",""));
+            data.append("tableData[vehicleHourRate]", +$("#input_vehicleHourRate").val().replaceAll(",",""));
+            data.append("tableData[vehicleDepreciation]", +$("#input_vehicleDepreciation").val().replaceAll(",",""));
 
-        data.append("tableData[updatedBy]", sessionID);
-        data.append("tableName", "ims_inventory_vehicle_tbl");
-        data.append("whereFilter", `vehicleID = ${rowID}`);
-        data.append("feedback", $("[name=vehicleName]").val()?.trim());
+            data.append("tableData[updatedBy]", sessionID);
+            data.append("tableName", "ims_inventory_vehicle_tbl");
+            data.append("whereFilter", `vehicleID = ${rowID}`);
+            data.append("feedback", $("[name=vehicleName]").val()?.trim());
 
-        sweetAlertConfirmation(
-            "update",
-            "Vehicle",
-            "modal_vehicle",
-            "",
-            data,
-            false,
-            tableContent
-        );
-    
+            sweetAlertConfirmation(
+                "update",
+                "Vehicle",
+                "modal_vehicle",
+                "",
+                data,
+                false,
+                tableContent
+            );
+        
         }
+    }
     });
     // ----- END UPDATE MODAL -----
 
