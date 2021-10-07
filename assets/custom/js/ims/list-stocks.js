@@ -24,14 +24,14 @@ $(document).ready(function(){
           
 	    paging: true,
             columnDefs: [
-                { targets: 0, width: 150},
+                { targets: 0, width: 170},
                 { targets: 1, width: 250},
                 { targets: 2, width: 250},
                 { targets: 3, width: 120},
                 { targets: 4, width: 200},
-                { targets: 5, width: 100},
+                { targets: 5, width: 150},
                 { targets: 6, width: 200},
-                { targets: 7, width: 100},
+                { targets: 7, width: 150},
                 { targets: 8, width: 200},
                 { targets: 9, width: 200},
                 { targets: 10, width: 150},
@@ -51,7 +51,7 @@ $(document).ready(function(){
            
          paging: true,
              columnDefs: [
-                 { targets: 0, width: 150},
+                 { targets: 0, width: 170},
                  { targets: 1, width: 250},
                  { targets: 2, width: 250},
                  { targets: 3, width: 120},
@@ -135,7 +135,10 @@ $(document).ready(function(){
                
 
                 let item =`
-                <div class="card">
+                <div class="col-sm-12">
+                <div class="w-100">
+                <hr class="pb-1">
+                <div class="card mt-2 shadow-sm bg-white rounded">
                 <div class="card-header bg-primary text-white">
                     <div class="row">
                         <div class="col-md-6 col-sm-12 text-left align-self-center">
@@ -144,6 +147,9 @@ $(document).ready(function(){
                         </div>
                     </div>
                 </div>
+                <div class="card-body">
+				<div class="w-100">
+					<div class="text-left"></div>
                 <table class="table table-bordered table-striped table-hover" id="tableListStocksItem">
                 <thead>
                 <tr>
@@ -156,9 +162,9 @@ $(document).ready(function(){
                     <th>Unused</th>
                     <th>Disposed</th>
                     <th>Reserved</th>
+                    <th>Re-order</th>
                     <th>Available</th>
                     <th>Total Quantity</th>
-                    <th>Re-order</th>
                 </tr>
                </thead>
                <tbody>`;
@@ -166,7 +172,10 @@ $(document).ready(function(){
               
 
                            let assets =`
-                           <div class="card mt-2">
+                           <div class="col-sm-12">
+                            <div class="w-100">
+                            <hr class="pb-1">
+                           <div class="card mt-2 bg-white rounded shadow-sm">
                             <div class="card-header bg-primary text-white">
                                 <div class="row">
                                     <div class="col-md-6 col-sm-12 text-left align-self-center">
@@ -175,6 +184,9 @@ $(document).ready(function(){
                                     </div>
                                 </div>
                             </div>
+                            <div class="card-body">
+                            <div class="w-100">
+                                <div class="text-left"></div>
                              <table class="table table-bordered table-striped table-hover" id="tableListStocksAsset">
                              <thead>
                              <tr>
@@ -188,9 +200,9 @@ $(document).ready(function(){
                                 <th>Transferred</th>
                                 <th>Disposed</th>
                                 <th>Reserved</th>
+                                <th>Re-order</th>
                                 <th>Available</th>
                                 <th>Total Quantity</th>
-                                <th>Re-order</th>
                              </tr>
                             </thead>
                             <tbody>`;
@@ -217,9 +229,9 @@ $(document).ready(function(){
                                     <td class="text-center">${data["assets"][i].transferquantity}</td>
                                     <td class="text-center">${data["assets"][i].disposed}</td> 
                                     <td class="text-center">${data["assets"][i].reservedItem}</td> 
+                                    <td class="text-center">${data["assets"][i].reOrderLevel}</td>
                                     <td class="text-center">${data["assets"][i].Available}</td>
                                     <td class="text-center">${data["assets"][i].Total_Quantity}</td>
-                                    <td class="text-center">${data["assets"][i].reOrderLevel}</td>
                                 </tr>`;
                             };    
                            for(var i=0; i<data["item"].length; i++){
@@ -247,9 +259,9 @@ $(document).ready(function(){
                                 <td class="text-center">${data["item"][i].Unused}</td>
                                 <td class="text-center">${data["item"][i].disposed}</td>
                                 <td class="text-center">${data["item"][i].reservedItem}</td> 
+                                <td class="text-center">${data["item"][i].reOrderLevel}</td>
                                 <td class="text-center">${data["item"][i].Available}</td>
                                 <td class="text-center">${data["item"][i].Total_Quantity}</td>
-                                <td class="text-center">${data["item"][i].reOrderLevel}</td>
                            </tr>`;
                             };
                           

@@ -617,7 +617,7 @@ $(document).ready(function() {
                                             </td>
                                              <td>
                                                     <div class="availablestocks">
-                                                        <span  name="availableStocks" itemID="${itemID}" index="0">${formatAmount(getAvailableStocks[0].availableStocks)}</span>
+                                                        <span  name="availableStocks" itemID="${itemID}" index="0">${getAvailableStocks > 0 ? formatAmount(getAvailableStocks[0].availableStocks) : "0.00"}</span>
                                                     </div>
                                             </td>
                                             <td>
@@ -627,7 +627,7 @@ $(document).ready(function() {
                                             </td>
                                             <td>
                                                     <div class="remaining">
-                                                        <span  name="remaining" itemID="${itemID}" index="0">${withdrawalItemRemaining[0].remainingValue}</span>
+                                                        <span  name="remaining" itemID="${itemID}" index="0">${withdrawalItemRemaining.length > 0 ? formatAmount(withdrawalItemRemaining[0].remainingValue) : "0.00"}</span>
                                                     </div>
                                             </td>
                                             <td>

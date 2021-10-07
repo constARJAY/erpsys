@@ -9,7 +9,7 @@
                         <li class="breadcrumb-item active">Stock Out</li>
                     </ul>
                     <h1 class="mt-3">Stock Out</h1>
-                    <span>This module is used to manage the sstock out.</span>
+                    <span>This module is used to manage the stock out.</span>
 				</div>
 				<div class="col-lg-6 col-md-12 text-md-right" id="headerButton">
 				</div>

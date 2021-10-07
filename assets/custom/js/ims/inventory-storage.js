@@ -306,7 +306,7 @@ $(document).ready(function () {
                                 <th>Storage Code</th>
                                 <th>Storage Name</th>
                                 <th>Storage Address</th>
-                                <th>Room</th>
+                                <th>Room, Floor, Bay, Level, Shelf</th>
                                 <th>Status</th>
                             </tr>
                         </thead>
@@ -641,7 +641,7 @@ $(document).ready(function () {
 								name="inventoryStorageShelves" 
 								id="inventoryStorageShelves"
 								minlength="1" 
-								maxlength="7"
+								maxlength="6"
 								data-allowcharacters="[0-9]"
 								value="${Shelves}">  
 							<div class="invalid-feedback d-block" id="invalid-input_shelves"></div>

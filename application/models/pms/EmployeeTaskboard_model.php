@@ -37,8 +37,9 @@ class EmployeeTaskboard_model extends CI_Model {
             ptbt.timelineTeamMember AS teamMember,
             ptbt.timelineBuilderStatus,
             ptbt.timelineManagementStatus,
-            pplt.projectListCode AS projectCode,
-            pplt.projectListName AS projectName
+            ptbt.projectCode,
+            pplt.projectListName AS projectName,
+            (SELECT categoryName FROM pms_category_tbl WHERE categoryID = pplt.categoryID) as projectCategory
         FROM 
             pms_timeline_builder_tbl AS ptbt
             LEFT JOIN pms_project_list_tbl AS pplt ON ptbt.projectID = pplt.projectListID
@@ -297,6 +298,7 @@ class EmployeeTaskboard_model extends CI_Model {
             $output["teamMember"]        = $projectDetails->teamMember;
             $output["projectName"]       = $projectDetails->projectName;
             $output["projectCode"]       = $projectDetails->projectCode;
+            $output["projectCategory"]       = $projectDetails->projectCategory;
             $output["timelineManagementStatus"] = $projectDetails->timelineManagementStatus;
 
             $output["phases"] = $this->getTimelinePhases($timelineBuilderID,$phaseCode,$projectMilestoneName);

@@ -58,7 +58,7 @@ $(document).ready(function() {
 				if (employeeID != sessionID) {
 					isReadOnly = true;
 					if (inventoryValidationStatus == 0 || inventoryValidationStatus == 4) {
-						isAllowed = false;
+						isAllowed = true; // default nito is false;
 					}
 				} else if (employeeID == sessionID) {
 					if (inventoryValidationStatus == 0) {
@@ -1171,10 +1171,10 @@ $(document).ready(function() {
 											THEN (IFNULL(SUM(astStock.quantity),0)-IFNULL(reOrderLevel,0) - (SELECT IFNULL(SUM(reservedAsset),0) FROM ims_request_assets_tbl WHERE assetID = reqAsset.assetID))
 										END as availableStocks
 									FROM ims_stock_in_assets_tbl AS astStock 
-									LEFT JOIN ims_inventory_asset_tbl AS ast ON ast.assetID = astStock.stockInAssetID
+									LEFT JOIN ims_inventory_asset_tbl AS ast ON ast.assetID = astStock.assetID
 									WHERE astStock.stockOutDate IS NUll 
 									AND astStock.stockInDate IS NOT NULL 
-									AND astStock.stockInAssetID = reqAsset.assetID) as availableStocks,
+									AND astStock.assetID = reqAsset.assetID) as availableStocks,
 
 									(SELECT 
 										CASE 
@@ -1188,10 +1188,10 @@ $(document).ready(function() {
 										END as forPurchase
 																
 									FROM ims_stock_in_assets_tbl  AS astStock 
-									LEFT JOIN ims_inventory_asset_tbl AS ast ON ast.assetID = astStock.stockInAssetID
+									LEFT JOIN ims_inventory_asset_tbl AS ast ON ast.assetID = astStock.assetID
 									WHERE astStock.stockOutDate IS NUll 
 									AND astStock.stockInDate IS NOT NULL 
-									AND astStock.stockInAssetID = reqAsset.assetID) as forPurchase
+									AND astStock.assetID = reqAsset.assetID) as forPurchase
 							`, 
 							`materialRequestID = ${materialRequestID} AND inventoryValidationID IS NULL AND bidRecapID IS NULL`);
 					}else{

@@ -1,4 +1,4 @@
-<?php if($this->session->has_userdata('adminSessionID')) redirect(base_url("dashboard")); ?>
+<?php if($this->session->has_userdata('adminSessionID')) redirect(base_url("hris/employee_dashboard")); ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>

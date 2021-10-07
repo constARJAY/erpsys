@@ -495,16 +495,16 @@ $(document).ready(function(){
                     </div>
 
                     <div class="col-md-6 col-sm-12">
-                        <label>3rd Party Provider Fee <span class="text-danger font-weight-bold">*</span></label>
+                        <label>3rd Party Provider Fee</label>
                         <div class="input-group">
                             <div class="input-group-prepend">
                                 <span class="input-group-text">₱</span>
                             </div>
                             <input type="text" 
                             class="form-control amount text-right"  
-                            min="0" max="9999999"
-                            minlength="0" 
-                            maxlength="13" 
+                            min="0" max="999999999"
+                            minlength="1" 
+                            maxlength="14"  
                             name="assetProviderFee" 
                             id="input_assetProviderFee" 
                             value="${assetProviderFee}" 
@@ -521,9 +521,9 @@ $(document).ready(function(){
                             </div>
                             <input type="text" 
                             class="form-control amount text-right"  
-                            min="0.01" max="9999999"
+                            min="0.01" max="999999999"
                             minlength="1" 
-                            maxlength="13" 
+                            maxlength="14" 
                             name="assetCost" 
                             id="input_assetCost" 
                             value="${assetCost}" 
@@ -540,9 +540,9 @@ $(document).ready(function(){
                             </div>
                             <input type="text" 
                             class="form-control amount text-right"  
-                            min="0.01" max="9999999"
+                            min="0.01" max="999999999"
                             minlength="1" 
-                            maxlength="11" 
+                            maxlength="14" 
                             name="assetSalvageValue" 
                             id="input_assetSalvageValue" 
                             value="${assetSalvageValue}" 

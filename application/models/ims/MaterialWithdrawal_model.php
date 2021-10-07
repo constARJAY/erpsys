@@ -263,6 +263,7 @@ class MaterialWithdrawal_model extends CI_Model {
 
     public function saveProjectBoard($materialWithdrawalID = 0, $dataItem =[] ,$dataAsset = [],$sessionID,$statusItemFlag = false,$statusAssetFlag = false,$getItemID = 0,$getAssetID = 0)
     {
+      
         // $delete = $this->deleteProjectBoard($timelineBuilderID);
         // $update = $this->updateProjectBuilder($timelineBuilderID, $timelineManagementStatus);
         if ($dataItem && count($dataItem) > 0) {
@@ -294,14 +295,38 @@ class MaterialWithdrawal_model extends CI_Model {
                   
                   // END UPDATE THE STOCK OUT ALL ASSET STATUS//
            }
-            
-           
 
             // START UPDATE THE STATUS OF ITEM AND ASSET IN HEADER OF MATERIAL WITHDRAWAL FORMS//
-             $this->db->query("UPDATE  ims_material_withdrawal_tbl
-             SET inventoryItemStatus = (SELECT  IF(EXISTS(SELECT * FROM ims_material_withdrawal_item_tbl WHERE withdrawalItemStatus =0),0,9) as itemStatus FROM ims_material_withdrawal_item_tbl WHERE  materialWithdrawalID = $materialWithdrawalID),
-                 inventoryAssetStatus =(SELECT  IF(EXISTS(SELECT * FROM ims_material_withdrawal_asset_tbl WHERE withdrawalAssetStatus =0),0,9) as assetStatus FROM ims_material_withdrawal_asset_tbl WHERE  materialWithdrawalID = $materialWithdrawalID)
-             WHERE materialWithdrawalID = $materialWithdrawalID");
+            $sqlItems = $this->db->query("SELECT CASE WHEN withdrawalItemStatus =0 THEN  0 ELSE 9  END  withdrawalItemStatus
+            FROM ims_material_withdrawal_item_tbl WHERE materialWithdrawalID =$materialWithdrawalID AND  withdrawalItemStatus = 0
+            GROUP BY withdrawalItemID");
+
+            if($sqlItems->num_rows() ==0){
+
+                //$this->db->where('inventoryItemStatus', 9);
+                $this->db->set('inventoryItemStatus', '9');
+                $this->db->where('materialWithdrawalID', $materialWithdrawalID);
+                $this->db->update('ims_material_withdrawal_tbl'); 
+            }
+
+            $sqlAssets = $this->db->query("SELECT CASE WHEN withdrawalAssetStatus =0 THEN  0 ELSE 9  END  withdrawalAssetStatus
+            FROM ims_material_withdrawal_asset_tbl WHERE materialWithdrawalID =$materialWithdrawalID AND  withdrawalAssetStatus = 0
+            GROUP BY withdrawalAssetID");
+
+            if($sqlAssets->num_rows() ==0){
+
+                //$this->db->where('inventoryItemStatus', 9);
+                $this->db->set('inventoryAssetStatus', '9');
+                $this->db->where('materialWithdrawalID', $materialWithdrawalID);
+                $this->db->update('ims_material_withdrawal_tbl'); 
+            }
+
+            
+            //  $this->db->query("UPDATE  ims_material_withdrawal_tbl
+            //  SET inventoryItemStatus = (SELECT  IF(EXISTS(SELECT * FROM ims_material_withdrawal_item_tbl WHERE withdrawalItemStatus =0),0,9) as itemStatus FROM ims_material_withdrawal_item_tbl WHERE  materialWithdrawalID = $materialWithdrawalID),
+            //      inventoryAssetStatus =(SELECT  IF(EXISTS(SELECT * FROM ims_material_withdrawal_asset_tbl WHERE withdrawalAssetStatus =0),0,9) as assetStatus FROM ims_material_withdrawal_asset_tbl WHERE  materialWithdrawalID = $materialWithdrawalID)
+            //  WHERE materialWithdrawalID = $materialWithdrawalID");
+
             // START UPDATE THE STATUS OF ITEM AND ASSET IN HEADER OF MATERIAL WITHDRAWAL FORMS//
 
             // START UPDATE THE MATERIAL WITHDRAWAL DOCUMENT STATUS AND EMPLOYEE ID//
@@ -325,7 +350,9 @@ class MaterialWithdrawal_model extends CI_Model {
              WHERE materialWithdrawalID = $materialWithdrawalID");
              // END UPDATE THE EQUIPMENT BORROWING DOCUMENT STATUS//
 
-            $this->db->query("CALL proc_get_material_withdrawal_approve($materialWithdrawalID)"); // Created By: Sir Wilson September 29,2021 11:02AM
+            $this->db->query("CALL proc_get_material_withdrawal_approve($materialWithdrawalID)");
+            $this->db->query("CALL proc_get_equipment_borrowing_approve($materialWithdrawalID)");
+            // Created By: Sir Wilson September 29,2021 11:02AM
 
             // echo $query;
             // exit;

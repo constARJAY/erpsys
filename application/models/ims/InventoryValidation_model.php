@@ -39,7 +39,10 @@ class InventoryValidation_model extends CI_Model {
             $inventoryValidationStatus = $data["inventoryValidationStatus"];
             if ($inventoryValidationStatus == "2")
             {
-                $insertBidRecapData = $this->insertBidRecapData($insertID);
+                $hasForPurchase = $this->isHasForPurchase($insertID);
+                if ($hasForPurchase) {
+                    $insertBidRecapData = $this->insertBidRecapData($insertID);
+                }
             }
             // ---- END INSERT BID RECAP IF APPROVE -----
 
@@ -290,6 +293,15 @@ class InventoryValidation_model extends CI_Model {
 
 
     // ----- ***** BID RECAP ***** -----
+    public function isHasForPurchase($inventoryValidationID = 0)
+    {
+        $requestItems  = $this->getInventoryValidationRequestItems($inventoryValidationID, true);
+        $requestAssets = $this->getInventoryValidationAssets($inventoryValidationID, true);
+
+        $count = count($requestItems) + count($requestAssets);
+        return $count > 0 ? true : false;
+    }
+
     public function getInventoryValidationData($inventoryValidationID = 0)
     {
         $sql = "SELECT * FROM ims_inventory_validation_tbl WHERE inventoryValidationID = $inventoryValidationID";
@@ -297,16 +309,18 @@ class InventoryValidation_model extends CI_Model {
         return $query ? $query->row() : null;
     }
 
-    public function getInventoryValidationRequestItems($inventoryValidationID = 0)
+    public function getInventoryValidationRequestItems($inventoryValidationID = 0, $forPurchase = false)
     {
-        $sql = "SELECT * FROM ims_request_items_tbl WHERE inventoryValidationID = $inventoryValidationID AND bidRecapID IS NULL";
+        $otherWhere = $forPurchase ? "AND forPurchase IS NOT NULL AND forPurchase > 0" : "";
+        $sql = "SELECT * FROM ims_request_items_tbl WHERE inventoryValidationID = $inventoryValidationID AND bidRecapID IS NULL $otherWhere";
         $query = $this->db->query($sql);
         return $query ? $query->result_array() : [];
     }
 
-    public function getInventoryValidationAssets($inventoryValidationID = 0)
+    public function getInventoryValidationAssets($inventoryValidationID = 0, $forPurchase = false)
     {
-        $sql = "SELECT * FROM ims_request_assets_tbl WHERE inventoryValidationID = $inventoryValidationID AND bidRecapID IS NULL";
+        $otherWhere = $forPurchase ? "AND forPurchase IS NOT NULL AND forPurchase > 0" : "";
+        $sql = "SELECT * FROM ims_request_assets_tbl WHERE inventoryValidationID = $inventoryValidationID AND bidRecapID IS NULL $otherWhere";
         $query = $this->db->query($sql);
         return $query ? $query->result_array() : [];
     }

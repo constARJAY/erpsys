@@ -411,9 +411,9 @@ tableContent();
                     </div>
                     <input type="text" 
                     class="form-control amount text-right"  
-                    min="0.01" max="9999999"
+                    min="0.01" max="999999999"
                     minlength="1" 
-                    maxlength="13" 
+                    maxlength="14" 
                     name="vehicleCost" 
                     id="input_vehicleCost" 
                     value="${vehicleCost}" 
@@ -430,9 +430,9 @@ tableContent();
                     </div>
                     <input type="text" 
                     class="form-control amount text-right"  
-                    min="0.01" max="9999999"
+                    min="0.01" max="999999999"
                     minlength="1" 
-                    maxlength="13" 
+                    maxlength="14" 
                     name="vehicleSalvageValue" 
                     id="input_vehicleSalvageValue" 
                     value="${vehicleSalvageValue}" 
@@ -443,7 +443,7 @@ tableContent();
 
             <div class="col-md-6 col-sm-12">
                 <div class="form-group">
-                    <label>Estimated Useful Life (No. of Month) <span class="text-danger font-weight-bold">*</span></label>
+                    <label>Estimated Useful Life (No. of Years) <span class="text-danger font-weight-bold">*</span></label>
                     <input 
                         type="text" 
                         class="form-control validate" 

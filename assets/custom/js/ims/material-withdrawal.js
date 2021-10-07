@@ -322,8 +322,8 @@
                 <td>${preparedBy || "-"}</td>
                 <td>${projectCode || "-"}</td>
                 <td>${projectName || "-"}</td>
-                <td>${getStatusStyle(inventoryAssetStatus,true)}</td>
                 <td>${getStatusStyle(inventoryItemStatus,true)}</td>
+                <td>${getStatusStyle(inventoryAssetStatus,true)}</td>
             </tr>`
         });
 
@@ -412,11 +412,11 @@
 					remarks} = milestone;
                 // const { manHours, assignedEmployee, assignedManHours } = taskData(milestoneID);
             let disabled  = (received ==0 || received ==null)  ? "" : "disabled";
-               
+            let tagName  = (received ==0 || received ==null)  ? `name="withdrawalItemID"` : "disabled";
                 stockOutContent += `
                 <div class="form-group my-1 text-center">
                     <span class=""
-                        name="withdrawalItemID"
+                       ${tagName}
                         index="${index}"
                         itemID="${itemID}"
                         withdrawalItemID="${withdrawalItemID}"
@@ -1458,7 +1458,7 @@
                 // });
             }, 500);
         }else{
-            showNotification("danger", "No records needed to update.");
+            showNotification("danger", "You must have at least one or more row input data.");
         }
 
 
@@ -1474,51 +1474,62 @@
             items: [],
             assets: []
         };
-
-        $(`[name="withdrawalItemID"]`).each(function(i) {
-            const index = $(this).attr("index");
-
-            const withdrawalItemID = $(this).attr("withdrawalItemID");
-            const itemID = $(this).attr("itemid");
-            const received = $(`[name="receivedItems"][index="${index}"]`).val().replaceAll(",","");
-            const remainingItem = $(`[name="remainingItem"][index="${index}"]`).text().trim().replaceAll(",","");
-            var receivedDateItem = $(`[name="receivedDateItem"][index="${index}"]`).text() || "";
-            if(receivedDateItem != "-"){
-                receivedDateItem = moment($(`[name="receivedDateItem"][index="${index}"]`).text()).format("YYYY-MM-DD");
-            }else{
-                receivedDateItem = "";
+        if($(`[name="withdrawalItemID"]`).length >0 || $(`[name="withdrawalAssetID"]`).length >0){
+            if($(`[name="withdrawalItemID"]`).length >0){
+                $(`[name="withdrawalItemID"]`).each(function(i) {
+                    const index = $(this).attr("index");
+        
+                    const withdrawalItemID = $(this).attr("withdrawalItemID");
+                    const itemID = $(this).attr("itemid");
+                    const received = $(`[name="receivedItems"][index="${index}"]`).val().replaceAll(",","");
+                    const remainingItem = $(`[name="remainingItem"][index="${index}"]`).text().trim().replaceAll(",","");
+                    var receivedDateItem = $(`[name="receivedDateItem"][index="${index}"]`).text() || "";
+                    if(receivedDateItem != "-"){
+                        receivedDateItem = moment($(`[name="receivedDateItem"][index="${index}"]`).text()).format("YYYY-MM-DD");
+                    }else{
+                        receivedDateItem = "";
+                    }
+                    const itemRemarks = $(`[name="itemRemarks"][index="${index}"]`).val().trim() || "";
+                    if(received != 0){
+                        const temp = {
+                            materialWithdrawalID,withdrawalItemID,itemID,received, remainingItem, receivedDateItem, itemRemarks
+                        };
+                        data.items.push(temp);    
+                    }
+                    
+                })
             }
-            const itemRemarks = $(`[name="itemRemarks"][index="${index}"]`).val().trim() || "";
-            if(received != 0){
-                const temp = {
-                    materialWithdrawalID,withdrawalItemID,itemID,received, remainingItem, receivedDateItem, itemRemarks
-                };
-                data.items.push(temp);    
-            }
-            
-        })
 
-        $(`[name="withdrawalAssetID"]`).each(function(i) {
-            const index = $(this).attr("index");
+            if($(`[name="withdrawalAssetID"]`).length >0){
+                $(`[name="withdrawalAssetID"]`).each(function(i) {
+                    const index = $(this).attr("index");
+        
+                    const withdrawalAssetID = $(this).attr("withdrawalAssetID");
+                    const assetID = $(this).attr("assetid");
+                    const received = $(`[name="receivedAssets"][index="${index}"]`).val().replaceAll(",","");
+                    const remainingAsset = $(`[name="remainingAsset"][index="${index}"]`).text().trim().replaceAll(",","");
+                    var receivedDateAsset = $(`[name="receivedDateAsset"][index="${index}"]`).text() || "";
+                    if(receivedDateAsset != "-"){
+                        receivedDateAsset = moment($(`[name="receivedDateAsset"][index="${index}"]`).text()).format("YYYY-MM-DD");
+                    }else{
+                        receivedDateItem = "";
+                    }
+                    const assetRemarks = $(`[name="assetRemarks"][index="${index}"]`).val().trim() || "";
+                    if(received != 0){
+                        const temp = {
+                            materialWithdrawalID,withdrawalAssetID,assetID,received, remainingAsset, receivedDateAsset, assetRemarks
+                        };
+                        data.assets.push(temp);
+                    }
+                })
+            }
 
-            const withdrawalAssetID = $(this).attr("withdrawalAssetID");
-            const assetID = $(this).attr("assetid");
-            const received = $(`[name="receivedAssets"][index="${index}"]`).val().replaceAll(",","");
-            const remainingAsset = $(`[name="remainingAsset"][index="${index}"]`).text().trim().replaceAll(",","");
-            var receivedDateAsset = $(`[name="receivedDateAsset"][index="${index}"]`).text() || "";
-            if(receivedDateAsset != "-"){
-                receivedDateAsset = moment($(`[name="receivedDateAsset"][index="${index}"]`).text()).format("YYYY-MM-DD");
-            }else{
-                receivedDateItem = "";
-            }
-            const assetRemarks = $(`[name="assetRemarks"][index="${index}"]`).val().trim() || "";
-            if(received != 0){
-                const temp = {
-                    materialWithdrawalID,withdrawalAssetID,assetID,received, remainingAsset, receivedDateAsset, assetRemarks
-                };
-                data.assets.push(temp);
-            }
-        })
+        }else{
+            showNotification("danger", "You must have at least one or more row input data.");
+        }
+        
+
+        
         // console.log(data)
         // return false;
         return data;
