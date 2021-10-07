@@ -161,7 +161,7 @@ class Material_usage extends CI_Controller {
                             $scopes = $item["scopes"];
                             
                             $saveServices = $this->materialusage->saveSerial($scopes, $materialUsageID); 
-                            }    
+                        }    
                         $saveServices = $this->materialusage->saveServices($service,  $materialUsageID ,$item["itemID"]);
                     }
                     

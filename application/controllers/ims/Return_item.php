@@ -27,8 +27,8 @@ class Return_item extends CI_Controller {
         $returnItemID               = $this->input->post("returnItemID") ?? null;
         $reviseReturnItemID         = $this->input->post("reviseReturnItemID") ?? null;
         $itemID                     = $this->input->post("itemID") ?? null;
-        $borrowingID                = $this->input->post("borrowingID") ?? null;
-        $borrowingCode              = $this->input->post("borrowingCode") ?? null;
+        $equipmentBorrowingID       = $this->input->post("equipmentBorrowingID") ?? null;
+        $equipmentBorrowingCode     = $this->input->post("equipmentBorrowingCode") ?? null;
         $projectID                  = $this->input->post("projectID") ?? null;
         $projectCode                = $this->input->post("projectCode") ?? null;
         $projectName                = $this->input->post("projectName") ?? null;
@@ -66,8 +66,8 @@ class Return_item extends CI_Controller {
 
         $returnitemData = [
             "reviseReturnItemID"        => $reviseReturnItemID,
-            "borrowingID"               => $borrowingID,
-            "borrowingCode"             => $borrowingCode,
+            "equipmentBorrowingID"      => $equipmentBorrowingID,
+            "equipmentBorrowingCode"    => $equipmentBorrowingCode,
             "projectID"                 => $projectID,
             "projectCode"               => $projectCode,
             "projectName"               => $projectName,
@@ -136,19 +136,33 @@ class Return_item extends CI_Controller {
                     foreach($items as $index => $item) {
                         $service = [
                             "returnItemID "         => $returnItemID,
-                            "inventoryCode"         => getFormCode("RI", $item["createatforCode"], $returnItemID),
+                            "inventoryCode"         => getFormCode("RI", $item["created"], $returnItemID),
                             "itemID"                => $item["itemID"],
-                            "quantity"             => $item["quantity"],
-                            "remarks"              => $item["remarks"],
-                            "createdBy"            => $updatedBy,
-                            "updatedBy"            => $updatedBy,
+                            "itemCode"              => $item["itemCode"],
+                            "itemName"              => $item["itemName"],
+                            "Brand"                 => $item["Brand"],
+                            "borrowedQuantity"      => $item["borrowedQuantity"],
+                            "quantity"              => $item["quantity"],
+                            "receivedQuantity"      => $item["receivedQuantity"],
+                            "borrowedDate"          => $item["borrowedDate"],
+                            "remarks"               => $item["remarks"],
+                            "classificationName"    => $item["classificationName"],
+                            "categoryName"          => $item["categoryName"],
+                            "uom"                   => $item["uom"],
+                            "createdBy"             => $updatedBy,
+                            "updatedBy"             => $updatedBy,
                         ];
 
+                       // $scopes = $item["scopes"];
+                       if(!empty($item["scopes"])){
                         $scopes = $item["scopes"];
+                        
+                        $saveServices = $this->returnitem->saveSerial($scopes, $returnItemID); 
+                    }  
 
                       
                         
-                        $saveServices = $this->returnitem->saveServices($service, $scopes, $returnItemID ,$item["itemID"]);
+                        $saveServices = $this->returnitem->saveServices($service, $returnItemID ,$item["itemID"]);
                     }
                     
                     if ($returnitemData["returnItemStatus"] == "2") {

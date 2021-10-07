@@ -81,6 +81,7 @@ class Equipment_borrowing extends CI_Controller {
                     "forPurchase"  => $asset["forPurchase"] ,
 
                     "materialWithdrawalID"              => $asset["materialWithdrawalID"],
+                    "equipmentBorrowingID"              => $equipmentBorrowingID,
                     "borrowed"            => $asset["borrowed"],
                     "availableStocks"            => $asset["availableStocks"],
                     "remaining"    => $asset["remainingAsset"],

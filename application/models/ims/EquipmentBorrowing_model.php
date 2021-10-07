@@ -64,14 +64,20 @@ class equipmentBorrowing_model extends CI_Model {
     public function getAssetList($inventoryValidationID = 0)
     {
         $output = [];
-        $sql    = "
-        SELECT 
-            * ,(SELECT IF(EXISTS(SELECT * FROM ims_material_withdrawal_asset_tbl WHERE withdrawalAssetStatus =0),0,1)  FROM ims_material_withdrawal_asset_tbl WHERE  materialRequestID = ims_request_assets_tbl.materialRequestID AND assetID = ims_request_assets_tbl.assetID AND withdrawalAssetStatus = 1 ) AS withdrawalAssetStatus
-        FROM 
-        ims_request_assets_tbl 
-        WHERE 
-        inventoryValidationID = $inventoryValidationID AND
-        bidRecapID IS NULL
+        $sql    = "SELECT
+        ims_request_assets_tbl.*,
+            (SELECT withdrawalAssetStatus
+            FROM ims_material_withdrawal_asset_tbl 
+            WHERE materialRequestID = ims_request_assets_tbl.materialRequestID AND assetID = ims_request_assets_tbl.assetID AND withdrawalAssetStatus = 1  ) AS withdrawalAssetStatus 
+        FROM ims_request_assets_tbl 
+        WHERE inventoryValidationID = $inventoryValidationID AND bidRecapID IS NULL
+        -- SELECT 
+        --     * ,(SELECT DISTINCT(materialRequestID), IF(EXISTS(SELECT * FROM ims_material_withdrawal_asset_tbl WHERE withdrawalAssetStatus =0),0,1)  FROM ims_material_withdrawal_asset_tbl WHERE  materialRequestID = ims_request_assets_tbl.materialRequestID AND assetID = ims_request_assets_tbl.assetID AND withdrawalAssetStatus = 1 ) AS withdrawalAssetStatus
+        -- FROM 
+        -- ims_request_assets_tbl 
+        -- WHERE 
+        -- inventoryValidationID = $inventoryValidationID AND
+        -- bidRecapID IS NULL
            ";
         $query  = $this->db->query($sql);
         $assets  = $query ? $query->result_array() : [];

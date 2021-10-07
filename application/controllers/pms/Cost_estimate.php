@@ -10,7 +10,7 @@ class Cost_estimate extends CI_Controller {
         
         $this->load->model("pms/CostEstimate_model", "costestimate");
         $this->load->model("pms/BillMaterial_model", "billmaterial");
-        isAllowed(39);
+        isAllowed(38);
     }
 
     public function index()

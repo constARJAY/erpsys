@@ -21,7 +21,7 @@ class ReturnItem_model extends CI_Model {
 
         if ($query) {
             $insertID = $action == "insert" ? $this->db->insert_id() : $id;
-            $sql = "SELECT * FROM ims_return_item_tbl WHERE returnItemID   = $id";
+            $sql = "SELECT * FROM ims_return_item_tbl WHERE returnItemID   = $insertID";
             $query = $this->db->query($sql);
             $result = $query ? $query->result_array() : [];
             foreach ($result as $res) {
@@ -53,22 +53,28 @@ class ReturnItem_model extends CI_Model {
         return $query ? true : false;
     }
 
-    public function saveServices($service = null, $scopes = null, $id = null,$itemID=null)
+    public function saveServices($service = null, $id = null,$itemID=null)
     {
         $sessionID = $this->session->has_userdata("adminSessionID") ? $this->session->userdata("adminSessionID") : 0;
-        if ($service && $scopes) {
+        if ($service) {
             $query = $this->db->insert("ims_inventory_request_details_tbl", $service);
-            if ($query) {
+        }
+        return false;
+    }
+    public function saveSerial( $scopes = null, $returnItemID)
+    {
+        $sessionID = $this->session->has_userdata("adminSessionID") ? $this->session->userdata("adminSessionID") : 0;
+        if ($scopes) {
+         
                 $insertID  = $this->db->insert_id();
                 $scopeData = [];
                 foreach ($scopes as $scope) {
 
                     // if($itemID == $scope["itemID"]){
                         $temp = [
-                            "returnItemID " => $id,
-                            "inventoryRequestID"    => $insertID,
+                            "returnItemID"          => $returnItemID,
                             "serialNumber"          => $scope["serialNumber"],
-                            "itemID"                => $scope["itemID"],
+                            "itemID"                => $scope["serialitemID"] != "null" ? $scope["serialitemID"] : null,
                             "createdBy"            => $sessionID,
                             "updatedBy"            => $sessionID,
                         ];
@@ -82,10 +88,10 @@ class ReturnItem_model extends CI_Model {
                 if ($saveScopes) {
                     return true;
                 }
-            }
         }
         return false;
     }
+
 
     // public function updateOrderedPending($returnItemID  = null)
     // {

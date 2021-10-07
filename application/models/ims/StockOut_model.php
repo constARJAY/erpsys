@@ -94,15 +94,21 @@ class StockOut_model extends CI_Model {
     public function getItemList($inventoryValidationID = 0)
     {
         $output = [];
-        $sql    = "
-            SELECT 
-                * ,
-                (SELECT IF(EXISTS(SELECT * FROM ims_material_withdrawal_item_tbl WHERE withdrawalItemStatus =0),0,1)  FROM ims_material_withdrawal_item_tbl WHERE  materialRequestID = ims_request_items_tbl.materialRequestID AND itemID = ims_request_items_tbl.itemID AND withdrawalItemStatus = 1 ) AS withdrawalItemStatus
-            FROM 
-            ims_request_items_tbl 
-            WHERE 
-            inventoryValidationID = $inventoryValidationID AND
-            bidRecapID IS NULL
+        $sql    = "SELECT
+        ims_request_items_tbl.*,
+            (SELECT withdrawalItemStatus
+            FROM ims_material_withdrawal_item_tbl 
+            WHERE materialRequestID = ims_request_items_tbl.materialRequestID AND itemID = ims_request_items_tbl.itemID AND withdrawalItemStatus = 1  ) AS withdrawalItemStatus 
+        FROM ims_request_items_tbl 
+        WHERE inventoryValidationID = $inventoryValidationID  AND bidRecapID IS NULL
+            -- SELECT 
+            --     * ,
+            --     (SELECT DISTINCT(materialRequestID), IF(EXISTS(SELECT * FROM ims_material_withdrawal_item_tbl WHERE withdrawalItemStatus =0),0,1)  FROM ims_material_withdrawal_item_tbl WHERE  materialRequestID = ims_request_items_tbl.materialRequestID AND itemID = ims_request_items_tbl.itemID AND withdrawalItemStatus = 1 ) AS withdrawalItemStatus
+            -- FROM 
+            -- ims_request_items_tbl 
+            -- WHERE 
+            -- inventoryValidationID = $inventoryValidationID AND
+            -- bidRecapID IS NULL
            ";
         $query  = $this->db->query($sql);
         $items  = $query ? $query->result_array() : [];

@@ -223,7 +223,7 @@ $(document).ready(function() {
 				{ targets: 3,  width: 350 },
 				{ targets: 4,  width: 260 },
 				{ targets: 5,  width: 150 },
-				{ targets: 6,  width: 250 },
+				{ targets: 6,  width: 280 },
 				{ targets: 7,  width: 80  },
 				{ targets: 8,  width: 250 },
 			],
@@ -1150,8 +1150,8 @@ $(document).ready(function() {
 
 			requestItemTR.each(function(){
 				let itemTotalCost 	= getNonFormattedAmount($(this).find(".item-total-cost").text());
-				thisFooterTotal 	+= parseFloat(itemTotalCost);
-				materialTotal		+= parseFloat(itemTotalCost);
+				thisFooterTotal 	+= parseFloat(itemTotalCost || 0);
+				materialTotal		+= parseFloat(itemTotalCost || 0);
 			});
 
 			requestPersonnelTR.each(function(){
@@ -1195,8 +1195,8 @@ $(document).ready(function() {
 		let cardOtherFooterValue	= 0;
 		$(`.table-row-request-other`).each(function(i,obj){
 			let otherTotalCost 		= $(this).find("[name=otherTotalCost]").val();
-			cardOtherFooterValue 	+= parseFloat(getNonFormattedAmount(otherTotalCost));
-			travelTotal 			+= parseFloat(getNonFormattedAmount(otherTotalCost));
+			cardOtherFooterValue 	+= parseFloat(getNonFormattedAmount(otherTotalCost) || 0);
+			travelTotal 			+= parseFloat(getNonFormattedAmount(otherTotalCost) || 0);
 		});
 		cardOtherFooter.text(formatAmount(cardOtherFooterValue||0, true));
 		
@@ -1873,14 +1873,12 @@ $(document).ready(function() {
 			let invCategory 	=  generatePhaseMilestoneID(paramAttr);
 			let tableBodyData 	= readOnly ? `` :  requestItemsRow(data, readOnly, invCategory.toLowerCase());
 
-			if(readOnly){	
-				if(data){
-					if(data.length > 0){
-						tableBodyData = "";
-						data.map(items=>{
-							tableBodyData +=  requestItemsRow(items, readOnly, invCategory.toLowerCase());
-						});
-					}
+			if(data){
+				if(data.length > 0){
+					tableBodyData = "";
+					data.map(items=>{
+						tableBodyData +=  requestItemsRow(items, readOnly, invCategory.toLowerCase());
+					});
 				}
 			}
 			let html = `
@@ -1993,7 +1991,7 @@ $(document).ready(function() {
 							</td>
 							<td>
 								<div class="form-group mb-0 text-right">
-									<div class="item-total-cost">${formatAmount(totalCost || parseFloat(requestQuantity) * parseFloat(unitCost), true)}</div>
+									<div class="item-total-cost">${formatAmount((totalCost || parseFloat(requestQuantity) * parseFloat(unitCost)) || 0, true)}</div>
 									<div class="d-block invalid-feedback" id="invalid-remarksItemID"></div>
 								</div>
 							</td>
@@ -2108,15 +2106,13 @@ $(document).ready(function() {
 	function requestAssetContent(data = false, costEstimateID = null, billMaterialID = null, readOnly = false){
 
 		let tableBodyData = readOnly ? `` :  requestAssetsRow(data, readOnly);
-
-		if(readOnly){	
-			if(data){
-				if(data.length > 0){
-					tableBodyData = "";
-					data.map(asset=>{
-						tableBodyData +=  requestAssetsRow(asset, readOnly);
-					});
-				}
+	
+		if(data){
+			if(data.length > 0){
+				tableBodyData = "";
+				data.map(asset=>{
+					tableBodyData +=  requestAssetsRow(asset, readOnly);
+				});
 			}
 		}
 
@@ -2126,7 +2122,7 @@ $(document).ready(function() {
 							<div class="row">
 								<div class="col-md-6 col-sm-12 text-left">
 									<h5 style="font-weight: bold;
-										letter-spacing: 0.05rem;">ASSETS</h5>
+										letter-spacing: 0.05rem;">ASSET AND EQUIPMENT</h5>
 								</div>
 								<div class="col-md-6 col-sm-12 text-right"></div>
 							</div>
@@ -2583,6 +2579,7 @@ $(document).ready(function() {
 										name="fuelRate" 
 										id="fuelRate${travelRequestID}"
 										autocomplete="off"
+										required
 										value="${vehicleLiters || "0.00"}" ${!readOnly ? "" : "disabled"}>
 										<div class="invalid-feedback d-block" id="invalid-fuelRate${travelRequestID}"></div>
 									</div>
@@ -2657,6 +2654,7 @@ $(document).ready(function() {
 												data-allowcharacters="[0-9]" 
 												max="999999999"
 												name="otherTotalCost" 
+												required
 												id="otherTotalCost${travelRequestID}"
 												autocomplete="off" ${!readOnly ? "" : "disabled"}
 												value="${totalCost || "0.00"}">
@@ -2763,6 +2761,7 @@ $(document).ready(function() {
 			const clientCode					= $(`[name="clientName"]`).attr("clientcode");
 			const clientName    				= $(`[name="clientName"]`).val();
 			const clientAddress 				= $(`[name="clientAddress"]`).val();
+			const billMaterialGrandTotal 		= getNonFormattedAmount($("#grandTotalAmount").text() || 0);
 			const dateNeeded 					= $(`[name="dateNeeded"]`).val();
 			const billMaterialReason 			= $(`[name="billMaterialReason"]`).val();
 
@@ -2781,6 +2780,7 @@ $(document).ready(function() {
 			formData.append("clientCode", 				clientCode 	=="-"?  null : clientCode);
 			formData.append("clientName", 				clientName 	=="-"?  null : clientName);
 			formData.append("clientAddress", 			clientAddress 	=="-"?  null : clientAddress);
+			formData.append("billMaterialGrandTotal", 	billMaterialGrandTotal == "0"?  null : billMaterialGrandTotal);
 			formData.append("dateNeeded", 				moment(dateNeeded).format("YYYY-MM-DD"));
 			formData.append("billMaterialReason", 		billMaterialReason);			
 

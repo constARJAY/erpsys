@@ -346,7 +346,7 @@ function forApprovalContent() {
 			materialUsageReason,
 			submittedAt,
 			createdAt,
-			referenceNo,
+			materialWithdrawalCode,
 			projectName,
 			clientName,
 		} = item;
@@ -373,7 +373,7 @@ function forApprovalContent() {
 			<tr class="${btnClass}" id="${encryptString(materialUsageID)}">
 				<td>${getFormCode("MUF", createdAt, materialUsageID)}</td>
 				<td>${fullname}</td>
-				<td>${referenceNo}</td>
+				<td>${materialWithdrawalCode}</td>
 				<td>${projectName}</td>
 				<td>${clientName}</td>
 				<td>
@@ -381,7 +381,7 @@ function forApprovalContent() {
 				</td>
 				<td>${getDocumentDates(dateCreated, dateSubmitted, dateApproved)}</td>
 				<td class="text-center">
-					${getStatusStyle(materialUsageStatus)}
+					${getStatusStyle(materialUsageStatus, true)}
 				</td>
 				<td>${remarks}</td>
 			</tr>`;
@@ -444,7 +444,7 @@ function myFormsContent() {
 			materialUsageReason,
 			submittedAt,
 			createdAt,
-			referenceNo,
+			materialWithdrawalCode,
 		} = item;
 
 		let remarks       = materialUsageRemarks ? materialUsageRemarks : "-";
@@ -468,7 +468,7 @@ function myFormsContent() {
 		<tr class="${btnClass}" id="${encryptString(materialUsageID)}">
 			<td>${getFormCode("MUF", dateCreated, materialUsageID)}</td>
 			<td>${fullname}</td>
-			<td>${referenceNo}</td>
+			<td>${materialWithdrawalCode}</td>
 			<td>${projectName}</td>
 			<td>${clientName}</td>
 			<td>
@@ -476,7 +476,7 @@ function myFormsContent() {
 			</td>
 			<td>${getDocumentDates(dateCreated, dateSubmitted, dateApproved)}</td>
 			<td class="text-center">
-				${getStatusStyle(materialUsageStatus)}
+				${getStatusStyle(materialUsageStatus, true)}
 			</td>
 			<td>${remarks}</td>
 		</tr>`;
@@ -930,7 +930,7 @@ function getItemsRow(readOnly = false,materialUsageID) {
 					</div>
 					</td>
 					<td class="text-center">
-						<div class="used" id="used${index}">${used || ""}</div>
+						<div class="used" id="used${index}" name="used">${used || ""}</div>
 					</td>
 					<td class="table-data-serial-number">
 						${itemSerialNumbers}
@@ -1153,7 +1153,7 @@ function formContent(data = false, readOnly = false, isRevise = false, isFromCan
 				<div class="body">
 					<small class="text-small text-muted font-weight-bold">Status</small>
 					<h6 class="mt-0 font-weight-bold">
-						${materialUsageStatus && !isRevise ? getStatusStyle(materialUsageStatus) : "---"}
+						${materialUsageStatus && !isRevise ? getStatusStyle(materialUsageStatus, true) : "---"}
 					</h6>      
 				</div>
 			</div>
@@ -1281,15 +1281,26 @@ function formContent(data = false, readOnly = false, isRevise = false, isFromCan
 			</div>
 		</div>
 		<div class="col-sm-12">
-			<div class="w-100">
-				<hr class="pb-1">
-				<div class="text-primary font-weight-bold" style="font-size: 1.5rem;">Material Usage: </div>
+		<div class="w-100">
+		<hr class="pb-1">
+		<div class="card mt-2">
+		<div class="card-header bg-primary text-white">
+			<div class="row">
+				<div class="col-md-6 col-sm-12 text-left align-self-center">
+					<h5 style="font-weight: bold;
+						letter-spacing: 0.05rem;">Material Usage </h5>
+				</div>
+			</div>
+		</div>
+		<div class="card-body">
+				<div class="w-100">
+					<div class="text-left"></div>
 				<table class="table table-striped" id="${tableMaterialUsage}">
 					<thead>
 						<tr style="white-space: nowrap">
 							<th>Item Code</th>
 							<th>Item Name</th>
-							<th>Classification</th>
+							<th>Item Classification</th>
 							<th>Uom</th>
 							<th>Quantity</th>
 							<th>Unused</th>
@@ -1302,9 +1313,11 @@ function formContent(data = false, readOnly = false, isRevise = false, isFromCan
 						${returnItems}
 					</tbody>
 				</table>
-				
+				</div>
+			</div>
 				
 			</div>
+		</div>
 		</div>
 		<div class="col-md-12 text-right mt-3">
 			${button}

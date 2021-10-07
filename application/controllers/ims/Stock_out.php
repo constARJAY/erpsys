@@ -81,6 +81,7 @@ class Stock_out extends CI_Controller {
                     "forPurchase"  => $item["forPurchase"] ,
 
                     "materialWithdrawalID"              => $item["materialWithdrawalID"],
+                    "stockOutID"              => $stockOutID,
                     "stockOut"            => $item["stockOut"],
                     "availableStocks"            => $item["availableStocks"],
                     "remaining"    => $item["remainingItem"],

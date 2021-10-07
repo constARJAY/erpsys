@@ -157,15 +157,81 @@ $(document).ready(function() {
 											`itemID, itemCode, itemName, itemDescription, brandName, categoryName, classificationName, itemImage ,unitOfMeasurementID, ims_inventory_item_tbl.createdAt`,
 											"itemStatus = 1");
 
-	
-	function getInventoryItemList(itemID = null){
-		let itemIDArr 	= [];
-		let option 		= `<option ${!itemID && "selected"} disabled>Select Item Name</option>`;
+	function updateSelect(){
+		// FOR ITEMS
+		let categoryArray = [];
 		$(`[name=itemID]`).each(function(i,obj){
-			if($(this).val()){
-				itemIDArr.push($(this).val());
+			let attrCategory = $(this).attr("invcategory");
+			if(categoryArray.length < 1){
+				categoryArray.push(attrCategory);
+			}else{
+				!categoryArray.includes(attrCategory) ? categoryArray.push(attrCategory) : ``;
 			}
 		});
+
+		categoryArray.map((category, categoryIndex) =>{
+			let itemValueArr 	= [];
+			let itemElementID 	= [];
+
+			$(`.${category}`).each(function(i,obj){
+				itemValueArr.push($(this).val());
+				itemElementID.push(this.id);
+			});
+
+			itemElementID.map((items, index)=>{
+				$(`#${items}`).html("");
+				let html = getInventoryItemList(itemValueArr[index],category, itemValueArr);
+				$(`#${items}`).html(html);
+			});
+		});
+		// END FOR ITEMS
+
+		// FOR ASSETS
+		let assetValueArr 	= [];
+		let assetElementID 	= [];
+
+		$(`[name=assetID]`).each(function(i, obj){
+			assetValueArr.push($(this).val());
+			assetElementID.push(this.id);
+		});
+
+		assetElementID.map((asset, assetIndex)=>{
+			$(`#${asset}`).html("");
+			let html = getInventoryAssetList(assetValueArr[assetIndex], assetValueArr);
+			$(`#${asset}`).html(html);
+		});
+		// END FOR ASSETS	
+
+
+		// FOR VEHICLE
+		let vehicleValueArr		= [];
+		let vehicleElementID	= [];
+		$(`[name=vehicleID]`).each(function(i,obj){
+			vehicleValueArr.push($(this).val());
+			vehicleElementID.push(this.id);
+		});
+		
+		vehicleElementID.map((vehicle, vehicleIndex)=>{
+			$(`#${vehicle}`).html("");
+			let html = getVehicleList(vehicleValueArr[vehicleIndex], vehicleValueArr);
+			$(`#${vehicle}`).html(html);
+		});
+
+		// END FOR VEHICLE
+	}
+	function getInventoryItemList(itemID = null, attrCategory = false, arrayData = false){
+		let itemIDArr;
+		let option 		= `<option ${!itemID && "selected"} disabled>Select Item Name</option>`;
+		if(!arrayData){
+			itemIDArr = [];
+			$(`.${attrCategory}`).each(function(i,obj){
+				if($(this).val()){
+					itemIDArr.push($(this).val());
+				}
+			});
+		}else{
+			itemIDArr = arrayData;
+		}
 		
 			option += inventoryItemList.filter(item => !itemIDArr.includes(item.itemID) || item.itemID == itemID).map(item=>{
 					return  `
@@ -210,6 +276,7 @@ $(document).ready(function() {
 		$(this).closest(`.table-row-request-${invCategory}`).find("[name=itemQuantity]").prop("min", "0.01");
 		$(this).closest(`.table-row-request-${invCategory}`).find("[name=itemQuantity]").prop("minlength", "1");
 		$(this).closest(`.table-row-request-${invCategory}`).find("[name=itemQuantity]").prop("maxlength", "20");
+		updateSelect();
 
 	});
 
@@ -220,15 +287,19 @@ $(document).ready(function() {
 												`assetStatus = 1`);
 				
 
-	function getInventoryAssetList(assetID = null){
-		let assetIDArr 	= [];
+	function getInventoryAssetList(assetID = null, arrayData = false){
+		let assetIDArr;
 		let option 		= `<option ${!assetID && "selected"} disabled>Select Asset Name</option>`;
-
-		$(`[name=assetID]`).each(function(i, obj){
-			if($(this).val()){
-				assetIDArr.push($(this).val());
-			}
-		});
+		if(!arrayData){
+			assetIDArr 	= [];
+			$(`[name=assetID]`).each(function(i, obj){
+				if($(this).val()){
+					assetIDArr.push($(this).val());
+				}
+			});
+		}else{
+			assetIDArr = arrayData;
+		}
 		
 		option += inventoryAssetList.filter(asset => !assetIDArr.includes(asset.assetID) || asset.assetID == assetID).map(asset=>{
 			return  `
@@ -279,19 +350,25 @@ $(document).ready(function() {
 		$(this).closest(`.table-row-request-asset`).find("[name=assetManhours]").prop("min", "0.01");
 		$(this).closest(`.table-row-request-asset`).find("[name=assetManhours]").prop("minlength", "1");
 		$(this).closest(`.table-row-request-asset`).find("[name=assetManhours]").prop("maxlength", "20");
+		updateSelect();
 
 	});
 	// SELECT *, IF(vehicleGasType = 0, "Diesel", "Gasoline") as vehicleGas FROM `ims_inventory_vehicle_tbl`
 	const vehicleList = getTableData("ims_inventory_vehicle_tbl",`*, IF(vehicleGasType = 0, "Diesel", "Gasoline") vehicleFuelType`, "vehicleStatus=1" );
 	
-	function getVehicleList(vehicleID = null){
-		let vehicleIDArr 	= [];
+	function getVehicleList(vehicleID = null, arrayData = false){
+		let vehicleIDArr;
 		let option 		= `<option ${!vehicleID && "selected"} disabled>Select Vehicle Name</option>`;
-		$(`[name=vehicleID]`).each(function(i,obj){
-			if($(this).val()){
-				vehicleIDArr.push($(this).val());
-			}
-		});
+		if(!arrayData){
+			vehicleIDArr 	= [];
+			$(`[name=vehicleID]`).each(function(i,obj){
+				if($(this).val()){
+					vehicleIDArr.push($(this).val());
+				}
+			});
+		}else{
+			vehicleIDArr = arrayData;
+		}
 		
 			option += vehicleList.filter(vehicle => !vehicleIDArr.includes(vehicle.vehicleID) || vehicle.vehicleID == vehicleID).map(vehicle=>{
 					return  `
@@ -337,9 +414,24 @@ $(document).ready(function() {
 		$(this).closest(`.table-row-request-vehicle`).find("[name=vehicleManhours]").prop("maxlength", "20");
 
 		$(this).closest(`.table-row-request-vehicle`).find("[name=vehicleDateToUse]").prop("required", true);
+		updateSelect();
 	});
 
-
+	$(document).on("change", "[name=vehicleDateToUse]", function(){
+		let thisTR  		= $(this).closest("tr");
+		let vehicleManhours = thisTR.find("[name=vehicleManhours]");
+		
+		let date 		= $(this).val().split(" - ");
+		let startDate 	= new Date(moment(date[0]).format("YYYY-MM-DD"));
+		let endDate		= new Date(moment(date[1]).format("YYYY-MM-DD"));
+		let plusOne 	= date[0] == date[1] ? 0 : 1;
+		let oneDay 		= 24 * 60 * 60 * 1000; // hours*minutes*seconds*milliseconds
+		let diffDays 	= (Math.round(Math.abs((startDate - endDate) / oneDay)) || 1) + plusOne;
+		let maxValue 	= diffDays * 24;
+		
+		vehicleManhours.prop("min", "0.01");
+		vehicleManhours.prop("max", maxValue);
+	});
 
 
 
@@ -445,7 +537,7 @@ $(document).ready(function() {
 				{ targets: 3,  width: 350 },
 				{ targets: 4,  width: 260 },
 				{ targets: 5,  width: 150 },
-				{ targets: 6,  width: 250 },
+				{ targets: 6,  width: 280 },
 				{ targets: 7,  width: 80  },
 				{ targets: 8,  width: 250 },
 			],
@@ -1417,8 +1509,8 @@ $(document).ready(function() {
 							tableRow.fadeOut(500, function (){
 								$(this).closest("tr").remove();
 								updateTableAttr();
-								
 								updateDeleteButton(invCategory);
+								updateSelect();
 							});
 						})
 					}
@@ -1439,9 +1531,6 @@ $(document).ready(function() {
 	
 		switch(category) {
 			case "other":
-				tableBody	=	"project";
-				tableClass	=	"inventory-request-project";
-				html 		=	requestProjectsRow();
 				tableBody	=	"other";
 				tableClass	=	"inventory-request-other";
 				html 		=	requestOthersRow();
@@ -1465,23 +1554,10 @@ $(document).ready(function() {
 		setTimeout(() => {
 			updateTableAttr();
 			initAll();
+			updateSelect();
 		}, 50);
 	});
 	// ----- END ADD NEW ROW OF INVENTORY REQUEST -----
-
-	// ----- ADD NEW ROW OF ITEMS -----
-	$(document).on("click",".btnSubAddRow", function(){
-		let thisTable 		= $(this).closest("table");
-		let thisTableBody	= thisTable.find("tbody");
-		let html			= requestProjectItemRow();
-		thisTableBody.append(html);
-
-		setTimeout(() => {
-			updateTableAttr();
-			initAll();
-		}, 50);
-	});
-	// ----- END ADD NEW ROW OF ITEMS -----
 
 	// ----- DELETE ROW OF ITEMS -----
 	$(document).on("click", ".btnSubDeleteRow", function(){
@@ -1599,6 +1675,26 @@ $(document).ready(function() {
 			</div>
 		</div>` : "";
 
+		let dateNeededArray = !readOnly ? {
+			singleDatePicker: true,
+			showDropdowns: true,
+			autoApply: true,
+			minDate: moment().add("days", 7),
+			startDate: moment().add("days", 7),
+			locale: {
+				format: 'MMMM DD, YYYY'
+			}
+		} : 
+			{
+				singleDatePicker: true,
+				showDropdowns: true,
+				autoApply: true,
+				startDate: moment().add("days", 7),
+				locale: {
+					format: 'MMMM DD, YYYY'
+				}
+			}
+			
 		let html = `
         <div class="row px-2">
 			${documentReviseNo}
@@ -1849,6 +1945,8 @@ $(document).ready(function() {
 				$('#btnBack').attr("status", "2");
 				$(`#btnSubmit, #btnRevise, #btnCancel, #btnCancelForm, .btnAddRow, .btnDeleteRow`).hide();
 			}
+			$(`#dateNeeded`).daterangepicker(dateNeededArray);
+			// $("[name=vehicleDateToUse]").change();
 			// ----- END NOT ALLOWED FOR UPDATE -----
 
 			return html;
@@ -2069,9 +2167,9 @@ $(document).ready(function() {
 
 							<td>
 								<div class="form-group mb-0">
-									${!readOnly ? `<select class="form-control validate select2 w-100" invcategory="${invCategory.toLowerCase()}"
+									${!readOnly ? `<select class="form-control validate select2 w-100 ${invCategory.toLowerCase()}" invcategory="${invCategory.toLowerCase()}"
 														name="itemID">
-														${getInventoryItemList(itemID)}
+														${getInventoryItemList(itemID, paramAttr)}
 													</select>` : itemName}
 								</div>	
 								<small class="item-brandName" style="color:#848482;">${itemBrandName || "-" }</small>
@@ -2105,7 +2203,7 @@ $(document).ready(function() {
 									rows="2" 
 									style="resize: none" 
 									class="form-control validate" 
-									data-allowcharacters="[0-9][a-z][A-Z][ ][.][,][_]['][()][?][-][/]"
+									data-allowcharacters="[0-9][a-z][A-Z][.][,][?][!][/][;][:]['][''][-][_][()][%][&][*][ ]"
 									minlength="1"
 									maxlength="100"
 									${disabled}
@@ -2239,7 +2337,7 @@ $(document).ready(function() {
 							<div class="row">
 								<div class="col-md-6 col-sm-12 text-left">
 									<h5 style="font-weight: bold;
-										letter-spacing: 0.05rem;">ASSETS</h5>
+										letter-spacing: 0.05rem;">ASSET AND EQUIPMENT</h5>
 								</div>
 								<div class="col-md-6 col-sm-12 text-right"></div>
 							</div>
@@ -2422,217 +2520,6 @@ $(document).ready(function() {
 	}
 	// ----- GET REQUEST VEHICLE CONTENT -----
 
-
-
-
-
-
-
-
-	// ----- GET PROJECT TABLE ROW -----
-	function requestProjectsRow(data = {}, readOnly = false){
-		let {
-			phaseID 				=	"",
-			phaseDescription 		=	"",
-
-			costEstimateID			=	"",
-            billMaterialID			=	"",
-            materialRequestID		=   "",
-            inventoryValidationID	=	"",
-            bidRecapID				=   "",
-            purchaseOrderID			=	"",
-            changeRequestID			=	"",
-            inventoryReceivingID	= 	"",
-            inventoryVendorID		=	"",
-            inventoryVendorCode		= 	"",
-            inventoryVendorName		=  	"",
-            finalQuoteRemarks		=	"",
-            milestoneBuilderID		=	"",
-
-			requestItemID  			=	"",
-            milestoneListID			=	"",
-            projectMilestoneID		=	"",
-            projectMilestoneName	= 	"",
-            itemID					=   "",
-            itemCode				=   "",
-            itemBrandName			=	"",
-            itemName				=   "",
-            itemClassification		=	"",
-            itemCategory			= 	"",
-            itemUom					=   "",
-            itemDescription			=	"",
-            files					=   "",
-            remarks					=   "",
-            requestQuantity			=	"",
-            reservedItem			= 	"",
-            forPurchase				=  	"",
-            unitCost				=   "",
-            totalCost				=   "",
-            createdBy				=   "",
-            updatedBy				=   "",
-            createdAt				=   "",
-            updatedAt				=   "",
-			sumRequestQuantity 		=	""
-		}  = data;
-		
-		let disabled 	 	= readOnly ? "disabled" : "";
-		let requiredAttr 	= !readOnly && costEstimateID ? `required min="0.01" minlength="1" maxlength="20"` : ``;
-		let checkboxRow		= !readOnly ? `	<td class="text-center">
-												<input type="checkbox" class="checkboxrow checkboxrow-project" invcategory="project">
-											</td>` : ``;		
-
-		let  html = `	<tr class="table-row-project">
-								${checkboxRow}
-								<td>
-									${!readOnly ? `	<select class="form-control validate select2 w-100" ${disabled}
-														name="phaseID">
-														${getProjectPhase(phaseID)}
-													</select>` : phaseDescription}	
-								</td>
-								<td>
-									<select class="form-control validate select2 w-100" ${disabled}
-										name="milesstoneID">
-									</select>
-								</td>
-								<td>
-									<table class="table table-hover table-project-milestone"  isReadOnly="${readOnly}">
-											<thead>
-												<tr>
-													<th style="width:50px !important">-</th>
-													<th style="width:200px !important">Item Code</th>
-													<th style="width:300px !important">Item Name</th>
-													<th style="width:200px !important">Item Classification</th>
-													<th style="width:100px !important">UOM</th>
-													<th style="width:100px !important">Quantity</th>
-													<th style="width:150px !important">Remarks</th>
-												</tr>
-											</thead>
-											<tbody class="table-body-inventory-request-item">
-												${requestProjectItemRow()}
-											</tbody>
-											<tfoot>
-												<tr>
-													<th>
-														<button class="btn btn-primary btnSubAddRow" type="button" id="btnSubAddRow"><i class="fas fa-plus"></i></button>
-													</th>
-													<th colspan="5"></th>
-												</tr>
-											</tfoot>
-									</table>
-								</td>
-						</tr>`;
-
-		return html;
-	}
-
-	function requestProjectItemRow(data = {} , readOnly = false){
-
-		let {
-			phaseID 				=	"",
-			phaseDescription 		=	"",
-
-			costEstimateID			=	"",
-            billMaterialID			=	"",
-            materialRequestID		=   "",
-            inventoryValidationID	=	"",
-            bidRecapID				=   "",
-            purchaseOrderID			=	"",
-            changeRequestID			=	"",
-            inventoryReceivingID	= 	"",
-            inventoryVendorID		=	"",
-            inventoryVendorCode		= 	"",
-            inventoryVendorName		=  	"",
-            finalQuoteRemarks		=	"",
-            milestoneBuilderID		=	"",
-
-			requestItemID  			=	"",
-            milestoneListID			=	"",
-            projectMilestoneID		=	"",
-            projectMilestoneName	= 	"",
-            itemID					=   "",
-            itemCode				=   "",
-            itemBrandName			=	"",
-            itemName				=   "",
-            itemClassification		=	"",
-            itemCategory			= 	"",
-            itemUom					=   "",
-            itemDescription			=	"",
-            files					=   "",
-            remarks					=   "",
-            requestQuantity			=	"",
-            reservedItem			= 	"",
-            forPurchase				=  	"",
-            unitCost				=   "",
-            totalCost				=   "",
-            createdBy				=   "",
-            updatedBy				=   "",
-            createdAt				=   "",
-            updatedAt				=   "",
-			sumRequestQuantity 		=	""
-		}  = data;
-
-		let disabled 	 = readOnly ? "disabled" : "";
-		let requiredAttr = !readOnly && costEstimateID ? `required min="0.01" minlength="1" maxlength="20"` : ``;
-			let html = `<tr class="table-row-request-item">
-							<td>
-								<button class="btn btn-danger btnSubDeleteRow" type="button" id="btnSubDeleteRow"><i class="fas fa-minus"></i></button>
-							</td>
-							<td>
-								<div class="item-code" requestitemid="${requestItemID}">${itemCode || "-" }</div>
-							</td>
-
-							<td>
-								<div class="form-group mb-0">
-									${!readOnly ? `<select class="form-control validate select2" style="width:300px !important"
-														name="itemID">
-														${getInventoryItemList(itemID)}
-													</select>` : itemName}
-								</div>	
-								<small class="item-brandName" style="color:#848482;">${itemBrandName || "-" }</small>
-							</td>
-
-							<td>
-								<div class="item-classification">${itemClassification || "-"}</div>
-								<small class="item-category" style="color:#848482;">${itemCategory || "-"}</small>
-							</td>
-
-							<td><div class="item-uom">${itemUom || "-"}</div></td>
-
-							<td>
-								<div class="text-center item-quantity">
-									${!readOnly ? `<input 
-									type="text" 
-									class="form-control input-quantity input-item-quantity text-center"
-									data-allowcharacters="[0-9]" 
-									max="999999999"
-									name="itemQuantity" 
-									autocomplete="off"
-									${disabled}
-									${requiredAttr}
-									value="${sumRequestQuantity || "0.00"}">` : sumRequestQuantity}
-									<div class="text-left invalid-feedback d-block" id="invalid-quantityItemID"></div>
-								</div>
-							</td>
-							<td>
-								<div class="form-group mb-0 text-right">
-									${!readOnly ? `<textarea 
-									rows="2" 
-									style="resize: none" 
-									class="form-control validate" 
-									data-allowcharacters="[0-9][a-z][A-Z][ ][.][,][_]['][()][?][-][/]"
-									minlength="1"
-									maxlength="100"
-									${disabled}
-									name="itemRemarks">${remarks || ""}</textarea>` : remarks}
-									<div class="d-block invalid-feedback" id="invalid-remarksItemID"></div>
-								</div>
-							</td>
-						</tr>`;
-			return html;
-
-	}
-	// ----- END GET PROJECT TABLE ROW -----
-
 	// ----- GET ASSET TABLE ROW -----
 	function requestAssetsRow(data = false, readOnly = false){
 		let html = "";
@@ -2739,7 +2626,7 @@ $(document).ready(function() {
 								style="resize: none" 
 								class="form-control validate"
 								name="assetRemarks"
-								data-allowcharacters="[0-9][a-z][A-Z][ ][.][,][_]['][()][?][-][/]"
+								data-allowcharacters="[0-9][a-z][A-Z][.][,][?][!][/][;][:]['][''][-][_][()][%][&][*][ ]"
 								minlength="1" ${disabled}
 								maxlength="100" >${remarks}</textarea>` : remarks}
 								<div class="d-block invalid-feedback"></div>
@@ -2826,6 +2713,7 @@ $(document).ready(function() {
 										data-allowcharacters="[0-9]" 
 										name="vehicleManhours"
 										autocomplete="off"
+										max="24"
 										${disabled}
 										${requiredAttr}
 										value="0.00">` : vehicleManHours}
@@ -3450,7 +3338,7 @@ $(document).ready(function() {
 			<div class="form-group">
 				<label>Remarks <code>*</code></label>
 				<textarea class="form-control validate"
-					data-allowcharacters="[0-9][a-z][A-Z][ ][.][,][_]['][()][?][-][/]"
+					data-allowcharacters="[0-9][a-z][A-Z][.][,][?][!][/][;][:]['][''][-][_][()][%][&][*][ ]"
 					minlength="2"
 					maxlength="250"
 					id="costEstimateRemarks"

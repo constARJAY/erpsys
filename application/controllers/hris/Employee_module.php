@@ -6,8 +6,12 @@ class Employee_module extends CI_Controller {
     {
         parent::__construct();
         $this->load->model("hris/EmployeeModule_model", "employeemodule");
-        isAllowed(114);
-        isReadAllowed(114);
+
+        $sessionID = $this->session->has_userdata("adminSessionID") ? $this->session->userdata("adminSessionID") : false;
+        if ($sessionID && $sessionID != 1) {
+            isAllowed(114);
+            isReadAllowed(114);
+        }
     }
 
     public function index()
@@ -421,6 +425,12 @@ class Employee_module extends CI_Controller {
             echo json_encode($saveEmployeeData);
         }
 
+    }
+
+
+    public function generateEmployeeCode()
+    {
+        echo json_encode($this->employeemodule->generateEmployeeCode());
     }
 
 }

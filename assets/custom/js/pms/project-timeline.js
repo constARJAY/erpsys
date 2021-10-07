@@ -518,8 +518,9 @@ $(document).ready(function() {
 					`<span class="badge badge-outline-success w-100" style="width: 100% !important">Within the Budget</span>`;
 				}
 
-				
-				 
+				if(timelineBuilderStatus == "6"){
+					budgetStatus = `-`;
+				}
 			}
 			
 			html += `
@@ -820,22 +821,24 @@ $(document).ready(function() {
 	// ----- END GET EMPLOYEE LIST -----
 
 	// ----- UPDATE MILESTONE SELECT -----
-	function milestoneSelect(projectID  = null, milestoneBuilderID = null){
+	function milestoneSelect(projectID  = null, milestoneBuilderID = null, arrayData = false){
 		
 		let html = `<option disabled ${!milestoneBuilderID ? "selected":''}>Please select a phase</option>`;
-		
-		
 
 		if(projectID){
 			let categoryID 	= projectList.filter(project =>  project.projectListID == projectID ).map(project=>{ return project.categoryID });
 			let tableData 	= getTableData("pms_milestone_builder_tbl",`*`,`categoryID = '${categoryID}'`);
-			
-			let phaseIDArr = [];
-			$(`[name=phaseDescription]`).each(function(i,obj){
-				if($(this).val()){
-					phaseIDArr.push($(this).val());
+			let phaseIDArr;
+				if(!arrayData){
+					phaseIDArr = [];
+					$(`[name=phaseDescription]`).each(function(i,obj){
+						if($(this).val()){
+							phaseIDArr.push($(this).val());
+						}
+					});
+				}else{
+					phaseIDArr = arrayData;
 				}
-			});
 
 			tableData.filter(phase => !phaseIDArr.includes(phase.milestoneBuilderID) || phase.milestoneBuilderID == milestoneBuilderID).map((phase,index) =>{
 				html += `			
@@ -852,22 +855,19 @@ $(document).ready(function() {
 	// ----- END UPDATE MILESTONE SELECT -----
 
 	function updateSelect(){
-
-		let projectID  	= $("#projectID").val();
-		let phaseIDArr 	= [];
+		let projectID 	= $("#projectID").val();
+		let valueArr 	= [];
 		let elementID	= [];
 		$(`[name=phaseDescription]`).each(function(i,obj){
-			if($(this).val()){
-				phaseIDArr.push($(this).val());
-			}
-			$(this).trigger("change");
+			valueArr.push($(this).val());
+			elementID.push(this.id);
 		});
 
-		
-		
-
-
-
+		elementID.map((x, index)=>{
+			$(`#${x}`).html("");
+			let html = milestoneSelect(projectID, valueArr[index], valueArr);
+			$(`#${x}`).html(html);
+		});
 
 	}
 
@@ -933,7 +933,9 @@ $(document).ready(function() {
 		}
 		setTimeout(() => {
 			thisParent.find(".milestone-list").html(html);
+			updateSelect();
 		}, 120);
+		
 	});
 
 	$(document).on("click", "#btnAddRow", function(){
@@ -946,6 +948,7 @@ $(document).ready(function() {
 		updateTableTaskList()
 		initHours();
 		updateDeleteButton();
+		updateSelect();
 	});
 
 	$(document).on("click", "#btnSubAddRow", function(){
@@ -974,6 +977,7 @@ $(document).ready(function() {
 
 	$(document).on("click", ".btnDeleteRow", function(){
 		deleteTableRow();
+		
 	});
 
 	$(document).on("click", ".btnSubDeleteRow", function(){
@@ -1204,7 +1208,7 @@ $(document).ready(function() {
 				<div class="form-group">
 					<label>Description</label>
 					<div class="remarks">
-						<textarea rows="4" style="resize: none" class="form-control validate" data-allowcharacters="[a-z][A-Z][0-9][.][,][?][!][/]['][''][;][:][-][_][()][%][&][*][ ]" name="timelineBuilderReason" id="remarks" ${disabled} >${timelineBuilderReason}</textarea>
+						<textarea rows="4" style="resize: none" class="form-control validate" data-allowcharacters="[a-z][A-Z][0-9][.][,][?][!][/]['][''][;][:][-][_][()][%][&][*][ ]" name="timelineBuilderReason" required id="remarks" ${disabled} >${timelineBuilderReason}</textarea>
 					</div>
 				</div>
 			</div>
@@ -1396,10 +1400,6 @@ $(document).ready(function() {
                                 value="${timelineProposedBudget|| 0.00}" ${disabled}>
                         </div>
                         <div class="invalid-feedback d-block" id="invalid-proposedBudget"></div>
-						<div class="note-feedback text-warning">
-							${proposedBudgetNote}
-						</div>
-
                     </div>
                 </div>
                 <div class="col-md-6 col-sm-12">
@@ -1812,6 +1812,7 @@ $(document).ready(function() {
 							updateTableRows();
 							updateTableTaskList();
 							updateDeleteButton();
+							updateSelect();
 						});
 					})
 				}
@@ -2073,7 +2074,7 @@ $(document).ready(function() {
 		const revise     				= status != 0 ? $(this).attr("revise") == "true" : ( $("#timelineAllocatedBudget").val() != "0.00" ? $(this).attr("revise") == "false" : $(this).attr("revise") == "true")
 		if (status != "false" && status != 0) {
 			
-			if (revise) {
+			if (revise && status != "7") {
 				const action = revise && !isFromCancelledDocument && "insert" || (id && feedback ? "update" : "insert");
 				const data   = gettimelineBuilderData(action, "save", "0", id);
 				data.append("timelineBuilderStatus", 0);
@@ -2115,6 +2116,7 @@ $(document).ready(function() {
 		const feedback 					= $(this).attr("code") || getFormCode("PBT", dateToday(), id);
 		const action   					= revise && !isFromCancelledDocument && "insert" || (id && feedback ? "update" : "insert");
 		const data     					= gettimelineBuilderData(action, "save", "0", id);
+
 		data.append("timelineBuilderStatus", 0);
 
 		if (revise) {
@@ -2126,10 +2128,17 @@ $(document).ready(function() {
 				data.delete("action");
 				data.append("action", "update");
 			}
-			
-		}
+		} 
 
-		savetimelineBuilder(data, "save", null, pageContent);
+		let btnBackCondition = $("#btnBack").attr("status");
+
+		if(btnBackCondition != "7"){
+			savetimelineBuilder(data, "save", null, pageContent);
+		}else{
+			$("#page_content").html(preloader);
+			pageContent();
+		}
+		
 	});
 	// ----- END SAVE DOCUMENT -----
 

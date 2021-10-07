@@ -166,7 +166,9 @@ $(document).ready(function() {
 				{ targets: 3,  width: 350 },
 				{ targets: 4,  width: 260 },
 				{ targets: 5,  width: 150 },
-				{ targets: 6,  width: 250 },
+				{ targets: 6,  width: 280 },
+				{ targets: 7,  width: 80 },
+				{ targets: 8,  width: 280 },
 
 			],
 		};
@@ -412,7 +414,7 @@ $(document).ready(function() {
 			`ims_inventory_validation_tbl AS imrt 
 				LEFT JOIN hris_employee_list_tbl AS helt USING(employeeID) `,
 			"imrt.*, CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname, imrt.createdAt AS dateCreated, imrt.materialRequestCode",
-			`IF(imrt.employeeID = 0 ,imrt.createdBy = ${sessionID},imrt.employeeID = ${sessionID})`,
+			``,
 			`FIELD(inventoryValidationStatus, 0, 1, 3, 2, 4, 5), COALESCE(imrt.submittedAt, imrt.createdAt)`
 		);
 
@@ -712,19 +714,19 @@ $(document).ready(function() {
 							<div class="itemuom">${itemUom || "-"}</div>
 						</td>
 						
-						<td class="text-right">
+						<td class="text-center">
 							<div class="requestquantity">
 								${formatAmount(requestQuantity)}
 							</div>
 						</td>
 
-						<td class="text-right">
+						<td class="text-center">
 							<div class="availablestocks">
 								${formatAmount(availableStocks)}
 							</div>
 						</td>
 
-						<td class="text-right">
+						<td class="text-center">
 							<div class="forpurchase">
 								${formatAmount(forPurchase)}
 							</div>
@@ -836,19 +838,19 @@ $(document).ready(function() {
 					<div class="assetuom">${assetUom || "-"}</div>
 				</td>
 				
-				<td class="text-right">
+				<td class="text-center">
 					<div class="requestquantity">
 						${formatAmount(requestQuantity)}
 					</div>
 				</td>
 
-				<td class="text-right">
+				<td class="text-center">
 					<div class="availablestocks">
 						${formatAmount(availableStocks)}
 					</div>
 				</td>
 
-				<td class="text-right">
+				<td class="text-center">
 					<div class="forpurchase">
 						${formatAmount(forPurchase)}
 					</div>
@@ -1052,7 +1054,7 @@ $(document).ready(function() {
 							<div class="row">
 								<div class="col-md-6 col-sm-12 text-left">
 									<h5 style="font-weight: bold;
-										letter-spacing: 0.05rem;">Item/s Request</h5>
+										letter-spacing: 0.05rem;">ITEMS (REQUEST)</h5>
 								</div>
 								<div class="col-md-6 col-sm-12 text-right"></div>
 							</div>
@@ -1063,8 +1065,8 @@ $(document).ready(function() {
 									<thead>
 										<tr>
 										<th>Item Code</th>
-										<th>Item Name/Brand</th>
-										<th>Item Classification/Category</th>
+										<th>Item Name</th>
+										<th>Item Classification</th>
 										<th>UOM</th>
 										<th>Request Quantity</th>
 										<th>Available Stocks</th>
@@ -1264,7 +1266,7 @@ $(document).ready(function() {
 							<div class="row">
 								<div class="col-md-6 col-sm-12 text-left">
 									<h5 style="font-weight: bold;
-										letter-spacing: 0.05rem;">Asset Request</h5>
+										letter-spacing: 0.05rem;">ASSET (REQUEST)</h5>
 								</div>
 								<div class="col-md-6 col-sm-12 text-right"></div>
 							</div>
@@ -1275,8 +1277,8 @@ $(document).ready(function() {
 									<thead>
 										<tr>
 										<th>Asset Code</th>
-										<th>Asset Name/Brand</th>
-										<th>Asset Classification/Category</th>
+										<th>Asset Name</th>
+										<th>Asset Classification</th>
 										<th>UOM</th>
 										<th>Requested Quantity</th>
 										<th>Available Stocks</th>
@@ -1353,6 +1355,7 @@ $(document).ready(function() {
 			reviseInventoryValidationID = "",
 			employeeID              = "",
 			materialRequestID          = "",
+			materialRequestCode ="",
 			projectCode             = "",
 			projectName             = "",
 			projectCategory         = "",
@@ -1370,7 +1373,7 @@ $(document).ready(function() {
 			createdBy 				= ""
 		} = data && data[0];
 
-	
+	console.log(data)
 		// ----- GET EMPLOYEE DATA -----
 		let {
 			fullname:    employeeFullname    = "",
@@ -1475,7 +1478,18 @@ $(document).ready(function() {
 
         <div class="row" id="form_inventory_validation">
 
-            <div class="col-md-4 col-sm-12">
+		 	<div class="col-md-2 col-sm-12">
+                <div class="form-group">
+                    <label>Reference No</label>
+                    <input type="text" 
+						class="form-control" 
+						
+						disabled 
+						value="${materialRequestCode || "-"}">
+                </div>
+            </div>
+
+            <div class="col-md-2 col-sm-12">
                 <div class="form-group">
                     <label>Project Code</label>
                     <input type="text" 
@@ -2456,7 +2470,7 @@ function saveInventoryValidation(data = null, method = "submit", notificationDat
 
 						let swalTitle;
 						if (method == "submit") {
-							swalTitle = `${getFormCode("", dateCreated, insertedID)} submitted successfully!`;
+							swalTitle = `${getFormCode("IVR", dateCreated, insertedID)} submitted successfully!`;
 						} else if (method == "save") {
 							swalTitle = `${getFormCode("IVR", dateCreated, insertedID)} saved successfully!`;
 						} else if (method == "cancelform") {

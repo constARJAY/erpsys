@@ -466,6 +466,8 @@ function getStatusStyle(status = 1, isInventory = false) {
 			return `<span class="badge badge-outline-info w-100">Reassessment</span>`;
 		case "8":
 			return `<span class="badge badge-outline-success w-100" style="width: 100% !important">Assessed</span>`;
+		case "9":
+			return `<span class="badge badge-outline-success w-100" style="width: 100% !important">Completed</span>`;
 		case "0":
 		default:
 			let text = isInventory ? "Pending" : "Draft";

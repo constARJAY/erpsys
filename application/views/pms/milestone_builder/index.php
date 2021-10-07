@@ -8,7 +8,7 @@
 						<li class="breadcrumb-item"><i class="fas fa-folder-open"></i>&nbsp;Project Modules</li>
                         <li class="breadcrumb-item active">Project Milestone Builder</li>
                     </ul>
-                    <h1 class="mt-3">Milestone Builder</h1>
+                    <h1 class="mt-3">Project Milestone Builder</h1>
                     <span>This module is used to create and manage milestone per project category.</span>
                 </div>
                 <div class="col-lg-6 col-md-6 text-right" id="headerButton">

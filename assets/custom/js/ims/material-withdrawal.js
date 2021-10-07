@@ -199,7 +199,7 @@
                     info:           false,
                     scrollCollapse: true,
                     columnDefs: [
-                        { targets: 0, width: 150 },
+                        { targets: 0, width: 180 },
                         { targets: 1, width: 150  },
                         { targets: 2, width: 150 },
 						{ targets: 3, width: 50 },
@@ -236,7 +236,7 @@
                     info:           false,
                     scrollCollapse: true,
                     columnDefs: [
-                        { targets: 0, width: 150 },
+                        { targets: 0, width: 180 },
                         { targets: 1, width: 150  },
                         { targets: 2, width: 150 },
 						{ targets: 3, width: 50 },
@@ -313,13 +313,6 @@
                 inventoryItemStatus       = 0,
             } = timeline;
 
-            const itemStatusDisplay = inventoryItemStatus == 0 ?
-                `<span class="badge badge-warning w-100">Pending</span>` : `<span class="badge badge-outline-success w-100" style="width: 100% !important">Completed</span>`;
-
-			const assetStatusDisplay = inventoryAssetStatus == 0 ?
-                `<span class="badge badge-warning w-100">Pending</span>` : `<span class="badge badge-outline-success w-100" style="width: 100% !important">Completed</span>`;
-
-
             html += `
             <tr class="btnView" id="${encryptString(materialWithdrawalID)}">
                 <td>
@@ -329,8 +322,8 @@
                 <td>${preparedBy || "-"}</td>
                 <td>${projectCode || "-"}</td>
                 <td>${projectName || "-"}</td>
-                <td>${itemStatusDisplay}</td>
-                <td>${assetStatusDisplay}</td>
+                <td>${getStatusStyle(inventoryAssetStatus,true)}</td>
+                <td>${getStatusStyle(inventoryItemStatus,true)}</td>
             </tr>`
         });
 
@@ -739,7 +732,7 @@
 					materialRequestID,
 					assetID,
 					requestQuantity,
-					stockOut,
+					borrowed,
 					received,
 					dateReceived ,
 					remaining,
@@ -755,7 +748,7 @@
                         index="${index}"
                         assetID="${assetID}"
                         withdrawalAssetID="${withdrawalAssetID}"
-                        >${formatAmount(stockOut)} </span>
+                        >${formatAmount(borrowed)} </span>
                 </div>`;
 
 				
@@ -1133,6 +1126,7 @@
             inventoryAssetStatus,
             materialWithdrawalStatus,
             materialRequestID,
+            materialRequestCode,
             inventoryValidationID,
             projectCode,
             projectName,
@@ -1191,7 +1185,7 @@
                     <div class="body">
                         <small class="text-small text-muted font-weight-bold">Status</small>
                         <h6 class="mt-0 font-weight-bold">
-							${getStatusStyle(materialWithdrawalStatus)}
+							${getStatusStyle(materialWithdrawalStatus,true)}
 						</h6>      
                     </div>
                 </div>
@@ -1243,8 +1237,17 @@
         </div>
 
         <div class="row" id="form_inventory_validation">
-
-            <div class="col-md-4 col-sm-12">
+            <div class="col-md-2 col-sm-12">
+                <div class="form-group">
+                    <label>Reference No</label>
+                    <input type="text" 
+						class="form-control" 
+					 
+						disabled 
+						value="${materialRequestCode  || "-" }">
+                </div>
+            </div>
+            <div class="col-md-2 col-sm-12">
                 <div class="form-group">
                     <label>Project Code</label>
                     <input type="text" 

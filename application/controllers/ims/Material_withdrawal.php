@@ -39,18 +39,18 @@ class Material_withdrawal extends CI_Controller {
         $dataItem = [];
         $statusItemFlag = false;
         $statusAssetFlag = false;
-        $getItemID = "";
-        $getAssetID = "";
+        $getItemID = [];
+        $getAssetID = [];
 
         if($items){
-            foreach ($items as $item) {
+            foreach ($items as $key=> $item) {
                 $status = "0";
                 $getReceived = $item["received"];
                 $getRemaining = $item["remainingItem"];
                 if($getRemaining <= 0 && $getReceived !=0   ){
                     $status = "1";
                     $statusItemFlag = true;
-                    $getItemID = $item["itemID"];
+                    $getItemID[$key] = $item["itemID"];
 
                 }
                 $temp = [
@@ -69,14 +69,14 @@ class Material_withdrawal extends CI_Controller {
         }
 
         if($assets){
-            foreach ($assets as $asset) {
+            foreach ($assets as $key=>$asset) {
                 $status = "0";
                 $getReceived = $asset["received"];
                 $getRemaining = $asset["remainingAsset"];
                 if($getRemaining == 0 && $getReceived !=0   ){
                     $status = "1";
                     $statusAssetFlag = false;
-                    $getAssetID =  $asset["assetID"];
+                    $getAssetID[$key] =  $asset["assetID"];
 
                 }
                 $temp = [
@@ -101,7 +101,7 @@ class Material_withdrawal extends CI_Controller {
 
          
         // echo "<pre>";
-        // print_r($dataItem);
+        // print_r($getItemID[0]);
         // print_r($this->materialWithdrawal->saveProjectBoard($materialWithdrawalID, $dataItem,$dataAsset,$sessionID));
         // exit;
         echo json_encode( $this->materialWithdrawal->saveProjectBoard($materialWithdrawalID, $dataItem,$dataAsset,$sessionID,$statusItemFlag,$statusAssetFlag,$getItemID,$getAssetID));

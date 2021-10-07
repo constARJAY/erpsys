@@ -8,8 +8,7 @@ class MaterialRequest_model extends CI_Model {
         parent::__construct();
     }
     
-    public function saveMaterialRequestData($action, $data, $id = null) 
-    {
+    public function saveMaterialRequestData($action, $data, $id = null) {
         if ($action == "insert") {
             $query = $this->db->insert("ims_material_request_tbl", $data);
         } else {
@@ -56,17 +55,27 @@ class MaterialRequest_model extends CI_Model {
         $column     = $param == "item" ? "SUM(requestQuantity) AS sumRequestQuantity" : "SUM(requestQuantity) AS sumRequestQuantity, SUM(requestManHours) AS sumRequestManHours" ;
         $table      = $param == "item" ? "ims_request_items_tbl" : "ims_request_assets_tbl";
         $groupBy    = $param == "item" ? "itemID" : "assetID"; 
-        $whereBOM   = $billMaterialID ? "AND billMaterialID = '$billMaterialID'" : "";
-        $sql        = "SELECT $table.* , $column FROM $table WHERE materialRequestID = '$materialRequestID' $whereBOM GROUP BY $groupBy";
+        $whereBOM   = $billMaterialID ? "materialRequestID IS NULL AND billMaterialID = '$billMaterialID'" : "materialRequestID = '$materialRequestID' ";
+        $sql        = "SELECT $table.* , $column FROM $table WHERE 
+                                $whereBOM  AND  
+                                inventoryValidationID IS NULL AND 
+                                bidRecapID              IS NULL AND  
+                                purchaseRequestID       IS NULL AND
+                                purchaseOrderID         IS NULL AND 
+                                changeRequestID         IS NULL AND
+                                inventoryReceivingID    IS NULL
+                    GROUP BY $groupBy";
         $query      = $this->db->query($sql);
         return $query ? $query->result_array() : [];
     }
 
 
     public function getInventoryRequestData($materialRequestID = null, $billMaterialID = null){
+        $materialRequestCondition   = $billMaterialID ? null : $materialRequestID;
+        $billMaterialCondition      = $billMaterialID ? $billMaterialID : null;
         $result = [
-            "items"     => $this->getInventoryRequest("item", $materialRequestID, $billMaterialID),
-            "assets"    => $this->getInventoryRequest("asset", $materialRequestID, $billMaterialID) 
+            "items"     => $this->getInventoryRequest("item", $materialRequestCondition, $billMaterialCondition),
+            "assets"    => $this->getInventoryRequest("asset", $materialRequestCondition, $billMaterialCondition) 
         ];
         return $result;
     }
@@ -99,34 +108,15 @@ class MaterialRequest_model extends CI_Model {
     }
 
 
-
-
-    public function deleteMaterialRequestItems($materialRequestID, $billMaterialID) {
-        // $whereBOM = $billMaterialID ?? NULL;
-        // $query = $this->db->delete(
-        //     "ims_request_items_tbl", 
-        //     [
-        //         "billMaterialID"         => $whereBOM,
-        //         "materialRequestID"      => $materialRequestID,
-        //         "purchaseOrderID "       => NULL,
-        //         "inventoryValidationID " => NULL,
-        //         "bidRecapID "            => NULL
-        //     ]);
-        // return $query ? true : false;
-    }
-
-
-
-    // public function saveMaterialRequestItems($data, $materialRequestID = null, $billMaterialID = null)
-    // {
-    //     // $deleteMaterialRequestItems = $this->deleteMaterialRequestItems($materialRequestID, $billMaterialID);
-
-    //     $query = $this->db->insert_batch("ims_request_items_tbl", $data);
-    //     if ($query) {
-    //         return "true|Successfully submitted";
-    //     }
-    //     return "false|System error: Please contact the system administrator for assistance!";
+    // public function getInventoryRequestdata($materialRequestID = null, $billMaterialID = null){
+    //     $data   =   [
+    //         "items"     => getInventoryRequest("item", null, $billMaterialID),
+    //         "assets"    => getInventoryRequest("asset", null, $billMaterialID)
+    //     ];
+    //     return $data;
     // }
+
+
 
 
 }

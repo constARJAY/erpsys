@@ -226,7 +226,7 @@ $(document).ready(function() {
                     info:           false,
                     scrollCollapse: true,
                     columnDefs: [
-                        { targets: 0, width: 150 },
+                        { targets: 0, width: 180 },
                         { targets: 1, width: 150  },
                         { targets: 2, width: 150 },
                         { targets: 3, width: 150 },
@@ -298,9 +298,6 @@ $(document).ready(function() {
                 inventoryAssetStatus       = 0,
             } = timeline;
 
-            const assetStatusDisplay = inventoryAssetStatus == 0 ?
-                `<span class="badge badge-warning w-100">Pending</span>` : `<span class="badge badge-outline-success w-100" style="width: 100% !important">Completed</span>`;
-
             html += `
             <tr class="btnView" id="${encryptString(equipmentBorrowingID)}">
                 <td>
@@ -310,7 +307,7 @@ $(document).ready(function() {
                 <td>${preparedBy || "-"}</td>
                 <td>${projectCode  || "-"}</td>
                 <td>${projectName || "-"}</td>
-                <td>${assetStatusDisplay}</td>
+                <td>${getStatusStyle(inventoryAssetStatus,true)}</td>
             </tr>`
         });
 
@@ -997,10 +994,11 @@ $(document).ready(function() {
         const index    = $(this).attr("index");
         const id    = $(this).attr("id");
         const withdrawalAssetID    = $(this).attr("withdrawalAssetID");
-        const value = $(this).val().length+1;
+        const valueLength = $(this).val().length+1;
+        const value = $(this).val();
         const characterLength = 37;
 
-        if(value >= characterLength){
+        if(valueLength >= characterLength){
 
             const validatebarcode = getTableData(`ims_stock_in_assets_tbl`,
             `barcode`,
@@ -1215,7 +1213,7 @@ $(document).ready(function() {
                     <div class="body">
                         <small class="text-small text-muted font-weight-bold">Status</small>
                         <h6 class="mt-0 font-weight-bold">
-							${getStatusStyle(equipmentBorrowingStatus)}
+							${getStatusStyle(equipmentBorrowingStatus,true)}
 						</h6>      
                     </div>
                 </div>
@@ -1267,8 +1265,16 @@ $(document).ready(function() {
         </div>
 
         <div class="row" id="form_inventory_validation">
-
-            <div class="col-md-4 col-sm-12">
+            <div class="col-md-2 col-sm-12">
+                <div class="form-group">
+                    <label>Reference No</label>
+                    <input type="text" 
+						class="form-control" 
+						disabled 
+						value="${materialWithdrawalCode  || "-"}">
+                </div>
+            </div>
+            <div class="col-md-2 col-sm-12">
                 <div class="form-group">
                     <label>Project Code</label>
                     <input type="text" 
@@ -1589,7 +1595,7 @@ $(document).ready(function() {
     // ----- GET PROJECT BOARD DATA -----
     const getProjectBoardData = (materialWithdrawalID = 0, method = "save",materialRequestID =0,equipmentBorrowingID  =0) => {
         let data = {
-            equipmentBorrowingID ,
+            equipmentBorrowingID,
             materialWithdrawalID,
             timelineManagementStatus: method == "save" ? 0 : (method == "submit" ? 2 : 1),
             materialRequestID : materialRequestID,

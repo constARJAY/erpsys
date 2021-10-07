@@ -19,7 +19,7 @@ class CostEstimate_model extends CI_Model {
                 ";
         $query  = $this->db->query($sql);
         $result = $query->row();
-        $clientAddress = $result->clientUnitNumber." ".$result->clientHouseNumber.", ".$result->clientStreetName.", ".$result->clientSubdivisionName.", ".$result->clientBarangay.", ".$result->clientCity.", ".$result->clientCountry.", ".$result->clientRegion.", ".$result->clientProvince.", ".$result->clientPostalCode." ";
+        $clientAddress = $result->clientUnitNumber." ".ucwords($result->clientHouseNumber).", ".ucwords($result->clientStreetName).", ".ucwords($result->clientSubdivisionName).", ".ucwords($result->clientBarangay).", ".ucwords($result->clientCity).", ".ucwords($result->clientCountry).", ".ucwords($result->clientRegion).", ".ucwords($result->clientProvince).", ".$result->clientPostalCode." ";
         $costEstimateData = [
             "timelineBuilderID" 		=> $timelineBuilderID,
             "timelineDesign"            => $result->timelineDesign,
@@ -290,7 +290,17 @@ class CostEstimate_model extends CI_Model {
     public function getInventoryRequestData($param = "item", $costEstimateID = null, $phaseID = null, $milestoneID = null ){
         $table      = $param == "item" ? "ims_request_items_tbl" : "ims_request_assets_tbl";
         $wherePhase = $phaseID ? "AND milestoneBuilderID = '$phaseID' AND milestoneListID = '$milestoneID'" : "";
-        $sql        = "SELECT $table.* FROM $table WHERE costEstimateID = '$costEstimateID' $wherePhase ";
+        $sql        = "SELECT $table.* FROM $table 
+                        WHERE 
+                        costEstimateID          = '$costEstimateID' $wherePhase AND
+                        billMaterialID          IS NULL AND
+                        inventoryValidationID   IS NULL AND 
+                        bidRecapID              IS NULL AND  
+                        purchaseRequestID       IS NULL AND
+                        purchaseOrderID         IS NULL AND 
+                        changeRequestID         IS NULL AND
+                        inventoryReceivingID    IS NULL
+                      ";
         $query      = $this->db->query($sql);
         return $query ? $query->result_array() : [];
     }

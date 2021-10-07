@@ -57,7 +57,7 @@ $(document).ready(function () {
 
                 setTimeout(() => {
                     saveMilestoneBuilder(data, pageContent); 
-                }, 850);
+                }, 1850);
                 
             }
             preventRefresh(true);
@@ -501,7 +501,7 @@ $(document).ready(function () {
                 });
                 
             
-        }, 800);
+        }, 1850);
         return data;
     }
 

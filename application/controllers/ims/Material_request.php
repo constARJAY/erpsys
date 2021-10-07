@@ -53,6 +53,8 @@ class Material_request extends CI_Controller {
         $createdAt                  = $this->input->post("createdAt")   ?? null;
         $items                      = $this->input->post("items")       ?? null;
         $assets                     = $this->input->post("assets")      ?? null;
+        $sessionID                  = $this->session->has_userdata("adminSessionID") ? $this->session->userdata("adminSessionID") : 1;
+
         $materialRequestData = [
             "reviseMaterialRequestID"   => $reviseMaterialRequestID,
             "reviseMaterialRequestCode" => $reviseMaterialRequestCode,
@@ -60,8 +62,6 @@ class Material_request extends CI_Controller {
             "materialRequestID"         => $materialRequestID,
             "costEstimateID" 		    => $costEstimateID,
             "costEstimateCode" 			=> $costEstimateCode,
-
-            
             "billMaterialID" 			=> $billMaterialID,
             "billMaterialCode"			=> $billMaterialCode,
             "timelineBuilderID" 		=> $timelineBuilderID,
@@ -77,7 +77,7 @@ class Material_request extends CI_Controller {
             "materialRequestStatus"     => $materialRequestStatus,
             "materialRequestReason"     => $materialRequestReason,
             "submittedAt"               => $submittedAt,
-            "createdBy"                 => $createdBy,
+            "createdBy"                 => $sessionID,
             "updatedBy"                 => $updatedBy,
             "createdAt"                 => $createdAt
         ];
@@ -149,7 +149,7 @@ class Material_request extends CI_Controller {
                                 "files"                     =>  $itemInfo->itemImage,
                                 "remarks"                   =>  $item["itemRemarks"],
                                 "requestQuantity"           =>  $item["itemQuantity"],
-                                "createdBy"                 =>  $createdBy,
+                                "createdBy"                 =>  $sessionID,
                                 "updatedBy"                 =>  $updatedBy,
                                 "createdAt"                 =>  $createdAt,
                                 "updatedAt"                 =>  $createdAt
@@ -181,7 +181,7 @@ class Material_request extends CI_Controller {
                                 "remarks"                   =>  $asset["assetRemarks"],
                                 "requestQuantity"           =>  $asset["assetQuantity"],
                                 "requestManHours"           =>  $asset["assetManhours"],
-                                "createdBy"                 =>  $createdBy,
+                                "createdBy"                 =>  $sessionID,
                                 "updatedBy"                 =>  $updatedBy,
                                 "createdAt"                 =>  $createdAt,
                                 "updatedAt"                 =>  $createdAt

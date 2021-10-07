@@ -639,9 +639,9 @@ $(document).ready(function () {
 								type="text" 
 								class="form-control validate" 
 								name="inventoryStorageShelves" 
-								id="input_level"
+								id="inventoryStorageShelves"
 								minlength="1" 
-								maxlength="6"
+								maxlength="7"
 								data-allowcharacters="[0-9]"
 								value="${Shelves}">  
 							<div class="invalid-feedback d-block" id="invalid-input_shelves"></div>
@@ -682,7 +682,27 @@ $(document).ready(function () {
                 </div>`;
 		return html;
 	}
+	$(document).on("keyup", "#inventoryStorageShelves", function (event) {
+		// skip for arrow keys
+		if(event.which >= 37 && event.which <= 40){
+			event.preventDefault();
+		}
+		var $this = $(this);
+		var num = $this.val().replace(/,/gi, "").split("").reverse().join("");
+		var num2 = RemoveRougeChar(num.replace(/(.{3})/g,"$1,").split("").reverse().join(""));
+		console.log(num2);
+		// the following line has been simplified. Revision history contains original.
+		$this.val(num2);
+	});
 
+  
+  function RemoveRougeChar(convertString){
+	  if(convertString.substring(0,1) == ","){
+		  return convertString.substring(1, convertString.length)              
+	  }
+	  return convertString;
+  }
+	
 	$(document).on("click", "#btnAdd", function () {
 		$("#inventory_storage_modalheader").text("ADD INVENTORY STORAGE");
 		$("#modal_inventory_storage").modal("show");

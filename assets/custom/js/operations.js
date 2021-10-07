@@ -156,7 +156,8 @@ const getTableLastCode = (
 			if (lastID && lastID.length > 0) {
 				const columnValue = lastID[0][columnName];
 				const arrValue = columnValue.split("-");
-				result = +arrValue[2];
+				result = arrValue[2] ?? arrValue[0];
+				result = +result;
 			} else {
 				result = 0;
 			}
@@ -174,13 +175,15 @@ const generateCode = (
 	lastID = false,
 	tableName = false,
 	columnName = false,
-	whereFilter = ""
+	whereFilter = "",
+	minus = false
 ) => {
 	let id;
+	let value = minus ? 0 : 1;
 	if (!lastID && tableName && columnName) {
-		id = getTableLastCode(tableName, columnName, whereFilter) + 1;
+		id = getTableLastCode(tableName, columnName, whereFilter) + value;
 	} else {
-		id = lastID ? lastID + 1 : 1;
+		id = lastID ? lastID + value : 1;
 	}
 
 	id = id.toString();

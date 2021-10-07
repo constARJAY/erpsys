@@ -50,7 +50,7 @@ $(document).ready(function () {
 							iri.returnItemID AS id,
 							returnItemCode AS consolidateCode,
 							employeeID,
-							SUM(quantity) AS quantity,
+							SUM(receivedQuantity) AS quantity,
 							0 AS received,
 							createAt,
 							'1' AS recordID
@@ -344,7 +344,7 @@ $(document).ready(function () {
 													'' AS purchaseID, 
 													returnItemCode as referenceCode, 
 													CONCAT(empl.employeeFirstname,' ',empl.employeeLastname) AS fullname,
-													ird.quantity AS quantity,
+													ird.receivedQuantity AS quantity,
 													DATE_FORMAT(iri.createdAt,'%M% %d%, %Y') AS daterequest,
 													returnItemStatus AS inventoryStatus,
 													CASE WHEN sii.quantity IS NOT NULL  THEN IFNULL(SUM(sii.quantity),0)
@@ -394,7 +394,7 @@ $(document).ready(function () {
         <table class="table table-bordered table-striped table-hover" id="tableMyForms">
             <thead>
                 <tr style="white-space: nowrap">
-                    <th>Document No.</th>
+                    <th>Reference No.</th>
 					<th>Purchase Order No.</th>
                     <th>Preparer Name</th>
                     <th>Date Submitted</th>
@@ -713,7 +713,7 @@ $(document).ready(function () {
 												itemCode, 
 												CONCAT(itemName,' / ',brand) AS name_Brand,
 												CONCAT(classificationName,' / ',categoryName) AS classification_category,
-												sum(quantity) AS quantity,
+												sum(receivedQuantity) AS quantity,
 												0 AS remaining
 											FROM ims_return_item_tbl AS ri
 											LEFT JOIN ims_inventory_request_details_tbl AS ird ON ri.returnItemID = ird.returnItemID
@@ -903,7 +903,7 @@ $(document).ready(function () {
 													iri.returnItemID AS moduleReturnItemID,
 													'' AS moduleMaterialUsageID,
 													'' AS moduleInventoryReceivingID,
-													recordID,
+													iri.recordID,
 													ird.itemID,
 													serialNumber,
 													itemName,
@@ -1046,7 +1046,7 @@ $(document).ready(function () {
 	}
 
 	// ----- MODAL CONTENT -----
-	function modalContent(data = false, readOnly = false) {
+	function modalContent(data = true, readOnly = false) {
 		console.log(data);
 		initQuantity();
 		var today = new Date();
@@ -1113,7 +1113,7 @@ $(document).ready(function () {
 						</div>
 						<div class="col-md-4 col-sm-12">
 							<div class="form-group">
-								<label>Item Description</label>
+								<label>Item Name</label>
 								<input 
 									type="text" 
 									class="form-control" 
@@ -1200,7 +1200,7 @@ $(document).ready(function () {
 									html +=`
 										<td>
 											<input type="text"
-													class="form-control quantity text-center input-quantity"
+													class="form-control quantity text-center recievedQuantity1 input-quantity"
 													id="quantity${index}"
 													name="quantity"
 													min="0.01"
@@ -1209,6 +1209,7 @@ $(document).ready(function () {
 													minlength="1" 
 													maxlength="20" 
 													autocomplete="off">
+											<div class="invalid-feedback d-block" id="invalid-input_recievedQuantity"></div>
 										</td>`;
 								}else{
 								var quantityReceived = 1;
@@ -1355,7 +1356,7 @@ $(document).ready(function () {
 			// END OF MANUFACTURE DATE //
 
 			const itemcodeSplit = $("#itemCode").val().split("-");
-			const myItemcode = itemcodeSplit[2];
+			const myItemcode = itemcodeSplit[3];
 			var getlastthreedigititemcode = myItemcode.slice(-5);
 			const barcode = `${warehouse}-${myManufactureDate}-${myExpDate}-${mytodayDate}-${getlastthreedigititemcode}`;
 			$("#barcode" + number).val(barcode);
@@ -1410,7 +1411,7 @@ $(document).ready(function () {
 			// END DATE TODAY SPLIT //
 
 			const itemcodeSplit = $("#itemCode").val().split("-");
-			const myItemcode = itemcodeSplit[2];
+			const myItemcode = itemcodeSplit[3];
 			var getlastthreedigititemcode = myItemcode.slice(-5);
 			
 		//const barcode = `${warehouse}-${myExpDate}-${getlastthreedigititemcode}`;
@@ -1421,16 +1422,18 @@ $(document).ready(function () {
 	$(document).on("change", ".recievedQuantity1", function () {
 		const val = $(this).val();
 		var totalval = parseInt(val);
-		const orderQuantity = $("#orderQuantity").val();
-		const receivedQuantity = $("#receivedQuantitytotal").val();
+		const orderQuantity = $("#quantity").val();
+		const receivedQuantity = $("#remaining").val();
 		const serialnumber = $(".serialnumber").val();
 		var formatvaluereceived = receivedQuantity ? receivedQuantity : 0;
-		const received = $("#received").val();
-		const receivedtotal = parseInt(received)
-		var totalreceived = parseInt(totalval) + parseInt(formatvaluereceived);
+		// const received = $("#received").val();
+		// const receivedtotal = parseInt(received)
+		var totalOrderQuantity = parseInt(totalval);
+		var totalreceived = parseInt(formatvaluereceived);
 		var totalquantity = parseInt(val) + parseInt(formatvaluereceived);
+		
 		if (serialnumber == "") {
-			if (receivedtotal < totalreceived) {
+			if (totalreceived < totalOrderQuantity) {
 				$(this).removeClass("is-valid").addClass("is-invalid");
 				$("#invalid-input_recievedQuantity").html("Not Equal Order Quantity");
 				document.getElementById("btnSave").disabled = true;
@@ -1488,7 +1491,7 @@ $(document).ready(function () {
 		// 	inventoryStorageCode = item.inventoryStorageCode;
 		// }); 
 		const itemcodeSplit = $("#itemCode").val().split("-");
-		const myItemcode = itemcodeSplit[2];
+		const myItemcode = itemcodeSplit[3];
 		var getlastthreedigititemcode = myItemcode.slice(-5);
 		// const inventoryStorageCodeSplit = inventoryStorageCode.split("-");
 		// const myInventorycode = inventoryStorageCodeSplit[2];

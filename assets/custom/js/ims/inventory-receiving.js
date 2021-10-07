@@ -218,7 +218,7 @@ function initDataTables() {
             info: false,
             scrollCollapse: true,
             columnDefs: [
-                { targets: 0,  width: 120 },
+                { targets: 0,  width: 150 },
                 { targets: 1,  width: 150 },
                 { targets: 2,  width: 220 },
                 { targets: 3,  width: 250 },
@@ -241,7 +241,7 @@ function initDataTables() {
             scrollX: true,
             scrollCollapse: true,
             columnDefs: [
-                { targets: 0,  width: 120 },
+                { targets: 0,  width: 150 },
                 { targets: 1,  width: 150 },
                 { targets: 2,  width: 220 },
                 { targets: 3,  width: 250 },
@@ -555,15 +555,15 @@ function formButtons(data = false, isRevise = false, isFromCancelledDocument = f
 				}
 			} else if (inventoryReceivingStatus == 2) {
 				// DROP
-				button = `
-				<button type="button" 
-					class="btn btn-cancel px-5 p-2"
-					id="btnDrop" 
-					inventoryReceivingID="${encryptString(inventoryReceivingID)}"
-					code="${getFormCode("INR", createdAt, inventoryReceivingID)}"
-					status="${inventoryReceivingStatus}"><i class="fas fa-ban"></i> 
-					Drop
-				</button>`;
+				// button = `
+				// <button type="button" 
+				// 	class="btn btn-cancel px-5 p-2"
+				// 	id="btnDrop" 
+				// 	inventoryReceivingID="${encryptString(inventoryReceivingID)}"
+				// 	code="${getFormCode("INR", createdAt, inventoryReceivingID)}"
+				// 	status="${inventoryReceivingStatus}"><i class="fas fa-ban"></i> 
+				// 	Drop
+				// </button>`;
 				
 			} else if (inventoryReceivingStatus == 3) {
 				// DENIED - FOR REVISE
@@ -1367,29 +1367,33 @@ function formContent(data = false, readOnly = false, isRevise = false, isFromCan
 					<div class="row">
 						<div class="col-md-6 col-sm-12 text-left align-self-center">
 							<h5 style="font-weight: bold;
-								letter-spacing: 0.05rem;">Inventory Receiving ${serviceHeader}</h5>
+								letter-spacing: 0.05rem;">Inventory Received ${serviceHeader}</h5>
 						</div>
 					</div>
 				</div>
-				<table class="table table-striped" id="${tableInventoryReceived}">
-					<thead>
-						<tr style="white-space: nowrap">
-							<th>${service} Code</th>
-							<th>${service} Name</th>
-							<th>${service} Classification</th>
-                            <th>Serial No.</th>
-							<th>Quantity</th>
-							<th>Receiving ${!disabled ? "<code>*</code>" : ""}</th>
-							<th>Remaining</th>
-							<th>UOM</th>
-							<th>Remarks</th>
-						</tr>
-					</thead>
-					<tbody class="returnItemsBody">
-						${returnItems}
-					</tbody>
-				</table>
-				
+				<div class="card-body">
+						<div class="w-100">
+							<div class="text-left"></div>
+							<table class="table table-striped" id="${tableInventoryReceived}">
+								<thead>
+									<tr style="white-space: nowrap">
+										<th>${service} Code</th>
+										<th>${service} Name</th>
+										<th>${service} Classification</th>
+										<th>Serial No.</th>
+										<th>Quantity</th>
+										<th>Received ${!disabled ? "<code>*</code>" : ""}</th>
+										<th>Remaining</th>
+										<th>UOM</th>
+										<th>Remarks</th>
+									</tr>
+								</thead>
+								<tbody class="returnItemsBody">
+									${returnItems}
+								</tbody>
+							</table>
+				</div>
+				</div>
 			</div>
 			</div>
 		</div>
@@ -2142,12 +2146,6 @@ $(document).on("click", "#btnDrop", function() {
 	data.append("action", "update");
 	data.append("method", "drop");
 	data.append("updatedBy", sessionID);
-
-	// let data = {};
-	// data["inventoryReceivingID"] = id;
-	// data["action"]               = "update";
-	// data["method"]               = "drop";
-	// data["updatedBy"]            = sessionID;
 
 	saveInventoryReceiving(data, "drop", null, pageContent);
 })

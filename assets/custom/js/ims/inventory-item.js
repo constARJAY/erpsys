@@ -322,7 +322,7 @@ $(document).ready(function(){
                                 class="form-control validate" 
                                 name="brandName" 
                                 id="input_brandName" 
-                                data-allowcharacters="[.][,][?][!][/][;][:]['][''][-][_][(][)][%][&][*][ ]" 
+                                data-allowcharacters="[A-Z][a-z][0-9][.][,][?][!][/][;][:]['][''][-][_][(][)][%][&][*][ ]" 
                                 minlength="2" 
                                 maxlength="100" 
                                 required 
@@ -340,7 +340,7 @@ $(document).ready(function(){
                                 class="form-control validate" 
                                 name="itemName" 
                                 id="input_itemName" 
-                                data-allowcharacters="[.][,][?][!][/][;][:]['][''][-][_][(][)][%][&][*][ ]" 
+                                data-allowcharacters="[A-Z][a-z][0-9][.][,][?][!][/][;][:]['][''][-][_][(][)][%][&][*][ ]" 
                                 minlength="2" 
                                 maxlength="100" 
                                 required 

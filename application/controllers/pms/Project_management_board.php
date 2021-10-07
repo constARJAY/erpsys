@@ -23,8 +23,8 @@ class Project_management_board extends CI_Controller {
     public function getTimelineContent()
     {
         $timelineBuilderID = $this->input->post("timelineBuilderID");
-        echo json_encode($this->projectmanagementboard->getTimelineContent($timelineBuilderID));
-        // echo json_encode($this->projectmanagementboard->getTimelineContent(1));
+        // echo json_encode($this->projectmanagementboard->getTimelineContent($timelineBuilderID));
+        echo json_encode($this->projectmanagementboard->getTimelineContent(1));
     }
 
     public function saveProjectBoard()
@@ -42,14 +42,13 @@ class Project_management_board extends CI_Controller {
                 "taskID"                => $task["taskID"],
                 "projectMilestoneID"    => $task["projectMilestoneID"],
                 "manHours"              => $task["manHours"],
-                "assignedEmployee"      => $task["assignEmployee"],
-                "assignedDesignation"   => $task["assignDesignation"],
-                "assignedManHours"      => $task["assignManHours"],
-                "assignedStartDate"     => $task["assignStartDate"],
-                "assignedEndDate"       => $task["assignEndDate"],
-                "assignedDays"          => $task["assignDays"],
-                "assignedRegularHours"  => $task["assingRegularHours"],
-                "assignedOvertimeHours" => $task["assingOvertimeHours"],
+                "assignedEmployee"      => $task["assignedEmployee"],
+                "assignedDesignation"   => $task["assignedDesignation"],
+                "assignedManHours"      => $task["assignedManHours"],
+                "assignedStartDate"     => $task["assignedStartDate"],
+                "assignedEndDate"       => $task["assignedEndDate"],
+                "assignedRegularHours"  => $task["assignedRegularHours"],
+                "assignedOvertimeHours" => $task["assignedOvertimeHours"],
                 "createdBy"             => $sessionID,
                 "updatedBy"             => $sessionID
             ];
@@ -59,7 +58,7 @@ class Project_management_board extends CI_Controller {
 
         $result         =   $this->projectmanagementboard->saveProjectBoard($timelineBuilderID, $timelineManagementStatus, $data);
         $explodeResult  =   explode("|",$result);
-            if($explodeResult[0] == "true"){
+            if($explodeResult[0] == "true" && $timelineManagementStatus == 2){
                 $saveCEResult = $this->costestimate->saveCE($timelineBuilderID);
                 $CEResult = explode("|", $saveCEResult);
                 if($CEResult[0] == "false"){

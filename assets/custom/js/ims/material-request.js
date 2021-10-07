@@ -142,14 +142,52 @@ $(document).ready(function() {
 											LEFT JOIN ims_inventory_classification_tbl ON (ims_inventory_item_tbl.classificationID = ims_inventory_classification_tbl.classificationID)`, 
 											`itemID, itemCode, itemName, itemDescription, brandName, categoryName, classificationName, itemImage ,unitOfMeasurementID, ims_inventory_item_tbl.createdAt`,
 											"itemStatus = 1");
-	function getInventoryItemList(itemID = null){
+
+	// UPDATING SELECT FOR THE ASSETS AND ITEMS
+	function updateSelect(){
+		let itemValueArr 	= [];
+		let itemElementID 	= [];
+		
+		$(`[name=itemID]`).each(function(i,obj){
+			itemValueArr.push($(this).val());
+			itemElementID.push(this.id);
+		});
+
+		itemElementID.map((item, index)=>{
+			$(`#${item}`).html("");
+			let html = getInventoryItemList(itemValueArr[index], itemValueArr);
+			$(`#${item}`).html(html);
+		});
+
+		let assetValueArr	= [];
+		let assetElementID	= [];
+
+		$(`[name=assetID]`).each(function(i, obj){
+			assetValueArr.push($(this).val());
+			assetElementID.push(this.id);
+		});
+
+		assetElementID.map((asset,index)=>{
+			$(`#${asset}`).html("");
+			let html = getInventoryAssetList(assetValueArr[index], assetValueArr);
+			$(`#${asset}`).html(html);
+		});
+	}
+	// END UPDATING SELECT FOR THE ASSETS AND ITEMS
+	
+	function getInventoryItemList(itemID = null, arrayData = false){
 		let itemIDArr 	= [];
 		let option 		= `<option ${!itemID && "selected"} disabled>Select Item Name</option>`;
-		$(`[name=itemID]`).each(function(i,obj){
-			if($(this).val()){
-				itemIDArr.push($(this).val());
-			}
-		});
+		if(!arrayData){
+			itemIDArr 	= [];
+			$(`[name=itemID]`).each(function(i,obj){
+				if($(this).val()){
+					itemIDArr.push($(this).val());
+				}
+			});
+		}else{
+			itemIDArr = arrayData;
+		}
 		
 			option += inventoryItemList.filter(item => !itemIDArr.includes(item.itemID) || item.itemID == itemID).map(item=>{
 					return  `
@@ -193,7 +231,7 @@ $(document).ready(function() {
 		$(this).closest(`.table-row-request-item`).find("[name=itemQuantity]").prop("min", "0.01");
 		$(this).closest(`.table-row-request-item`).find("[name=itemQuantity]").prop("minlength", "1");
 		$(this).closest(`.table-row-request-item`).find("[name=itemQuantity]").prop("maxlength", "20");
-
+		updateSelect();
 	});
 
 	const inventoryAssetList = getTableData(`ims_inventory_asset_tbl 
@@ -202,15 +240,20 @@ $(document).ready(function() {
 												`assetID, assetCode, assetName, assetDescription, brandName, categoryName, classificationName, assetImage, unitOfMeasurementID, assetImage ,ims_inventory_asset_tbl.createdAt`,
 												`assetStatus = 1`);
 				
-	function getInventoryAssetList(assetID = null){
+	function getInventoryAssetList(assetID = null, arrayData = false){
 		let assetIDArr 	= [];
 		let option 		= `<option ${!assetID && "selected"} disabled>Select Asset Name</option>`;
 
-		$(`[name=assetID]`).each(function(i, obj){
-			if($(this).val()){
-				assetIDArr.push($(this).val());
-			}
-		});
+		if(!arrayData){
+			assetIDArr 	= [];
+			$(`[name=assetID]`).each(function(i, obj){
+				if($(this).val()){
+					assetIDArr.push($(this).val());
+				}
+			});
+		}else{
+			assetIDArr 	= arrayData;
+		}
 		
 		option += inventoryAssetList.filter(asset => !assetIDArr.includes(asset.assetID) || asset.assetID == assetID).map(asset=>{
 			return  `
@@ -261,7 +304,7 @@ $(document).ready(function() {
 		$(this).closest(`.table-row-request-asset`).find("[name=assetManhours]").prop("min", "0.01");
 		$(this).closest(`.table-row-request-asset`).find("[name=assetManhours]").prop("minlength", "1");
 		$(this).closest(`.table-row-request-asset`).find("[name=assetManhours]").prop("maxlength", "20");
-
+		updateSelect();
 	});
 	// ----- END GLOBAL VARIABLE - REUSABLE ----- 
 
@@ -1122,8 +1165,8 @@ $(document).ready(function() {
 							tableRow.fadeOut(500, function (){
 								$(this).closest("tr").remove();
 								updateTableItems();
-								
 								updateDeleteButton(invCategory);
+								updateSelect();
 							});
 						})
 					}
@@ -1146,6 +1189,7 @@ $(document).ready(function() {
 		setTimeout(() => {
 			updateTableItems();
 			initAll();
+			updateSelect();
 		}, 50);
 	});
 	// ----- END ADD NEW ROW OF INVENTORY REQUEST -----
@@ -1353,7 +1397,7 @@ $(document).ready(function() {
 						billMaterialID 				= "${billMaterialID || "-"}"
 						billMaterialCode 			= "${billMaterialCode || "-"}"
 						disabled 
-						value="-">
+						value="${costEstimateCode || "-"}">
                 </div>
             </div>
             <div class="col-md-3 col-sm-12">
@@ -1445,7 +1489,9 @@ $(document).ready(function() {
 						name = "dateNeeded"
 						id="dateNeeded"  
 						value = "${moment().format("MMMM DD, YYYY")}"
-						${readOnly ? "disabled" : ``} required>
+						${readOnly ? "disabled" : ``} 
+						${billMaterialID ? "disabled" : ``} 
+						required>
 					<div class="invalid-feedback d-block" id="invalid-dateNeeded"></div>
 				</div>
             </div>
@@ -1461,7 +1507,9 @@ $(document).ready(function() {
                         required
                         rows="4"
                         style="resize:none;"
-						${disabled}>${materialRequestReason ?? ""}</textarea>
+						${disabled}
+						${billMaterialID ? "disabled" : ``} 
+						>${materialRequestReason ?? ""}</textarea>
                     <div class="d-block invalid-feedback" id="invalid-materialRequestReason"></div>
                 </div>
             </div>
@@ -1511,18 +1559,19 @@ $(document).ready(function() {
 	// ----- GET REQUEST ITEMS CONTENT -----
 	function requestItemsContent(data = false, materialRequestID = null, billMaterialID = null, readOnly = false){
 
-		let tableBodyData = readOnly ? `` :  requestItemsRow(data, readOnly);
+		let tableBodyData = readOnly ? `` :  requestItemsRow(data, readOnly, billMaterialID);
 		
 		if(data){
 			if(data.length > 0){
 				tableBodyData = "";
 				data.map(items=>{
-					tableBodyData +=  requestItemsRow(items, readOnly);
+					tableBodyData +=  requestItemsRow(items, readOnly, billMaterialID);
 				});
 			}
 		}
+		let disabled 		= billMaterialID ? "disabled" : "";
 		let checkboxHeader	= !readOnly ? `<th class="text-center">
-											<input type="checkbox" class="checkboxall"  invcategory="item">
+											<input type="checkbox" class="checkboxall"  invcategory="item" ${disabled}>
 										</th>`: ``;
 
 		let actionButton 	= !readOnly ? `<div class="d-flex flex-column justify-content-start text-left mt-2">
@@ -1560,7 +1609,7 @@ $(document).ready(function() {
 										${tableBodyData}
 									</tbody>
 								</table>
-								${actionButton}
+								${ billMaterialID ? `` : actionButton}
 							</div>
 						</div>
 						<div class="card-footer">
@@ -1581,19 +1630,19 @@ $(document).ready(function() {
 	// ----- GET REQUEST ASSETS CONTENT -----
 	function requestAssetsContent(data = false, materialRequestID = null, billMaterialID = null, readOnly = false){
 
-		let tableBodyData = readOnly ? `` :  requestAssetsRow(data, readOnly);
+		let tableBodyData = readOnly ? `` :  requestAssetsRow(data, readOnly, billMaterialID);
 
 		if(data){
 			if(data.length > 0){
 				tableBodyData = "";
 				data.map(asset=>{
-					tableBodyData +=  requestAssetsRow(asset, readOnly);
+					tableBodyData +=  requestAssetsRow(asset, readOnly, billMaterialID);
 				});
 			}
 		}
-
+		let disabled		= billMaterialID ? "disabled" : "";
 		let checkboxHeader 	= !readOnly ? `	<th class="text-center">
-												<input type="checkbox" class="checkboxall" invcategory="asset">
+												<input type="checkbox" class="checkboxall" invcategory="asset" ${disabled}>
 											</th>` : ``;
 		let actionButton  	= !readOnly ? `	<div class="d-flex flex-column justify-content-start text-left mt-2">
 												<div>
@@ -1631,7 +1680,7 @@ $(document).ready(function() {
 										${tableBodyData}
 									</tbody>
 								</table>
-								${actionButton}
+								${billMaterialID ? "" : actionButton}
 							</div>
 						</div>
 						<div class="card-footer">
@@ -1649,13 +1698,12 @@ $(document).ready(function() {
 	}
 	// ----- GET REQUEST ASSETS CONTENT -----
 
-	function requestItemsRow(data = {}, readOnly = false){
+	function requestItemsRow(data = {}, readOnly = false, billMaterialID = null){
 		let html = "";
 
 		let {
 			requestItemID			=	"",
             costEstimateID			=	"",
-            billMaterialID			=	"",
             materialRequestID		=   "",
             inventoryValidationID	=	"",
             bidRecapID				=   "",
@@ -1696,7 +1744,7 @@ $(document).ready(function() {
 		let disabled 	 	= readOnly ? "disabled" : "";
 		let requiredAttr 	= !readOnly && materialRequestID ? `required min="0.01" minlength="1" maxlength="20"` : ``;
 		let checkboxRow		= !readOnly ? `<td class="text-center">
-												<input type="checkbox" class="checkboxrow checkboxrow-item" invcategory="item">
+												<input type="checkbox" class="checkboxrow checkboxrow-item" invcategory="item" ${billMaterialID ? "disabled" : ""}>
 											</td>` : ``;		
 
 		html = `	<tr class="table-row-request-item">
@@ -1707,7 +1755,7 @@ $(document).ready(function() {
 
 						<td>
 							<div class="form-group mb-0">
-								${!readOnly ? `<select class="form-control validate select2 w-100"
+								${!readOnly ? `<select class="form-control validate select2 w-100" ${billMaterialID ? "disabled" : ""}
 													name="itemID">
 													${getInventoryItemList(itemID)}
 												</select>` : itemName}
@@ -1731,7 +1779,7 @@ $(document).ready(function() {
 								max="999999999"
 								name="itemQuantity" 
 								autocomplete="off"
-								${disabled}
+								${billMaterialID ? "disabled" : ""}
 								${requiredAttr}
 								value="${sumRequestQuantity || "0.00"}">` : sumRequestQuantity}
 								<div class="text-left invalid-feedback d-block" id="invalid-quantityItemID"></div>
@@ -1746,7 +1794,7 @@ $(document).ready(function() {
 								data-allowcharacters="[0-9][a-z][A-Z][.][,][?][!][/][;][:]['][''][-][_][()][%][&][*][ ]"
 								minlength="1"
 								maxlength="100"
-								${disabled}
+								${billMaterialID ? "disabled" : ""}
 								name="itemRemarks">${remarks || ""}</textarea>` : remarks}
 								<div class="d-block invalid-feedback" id="invalid-remarksItemID"></div>
 							</div>
@@ -1756,13 +1804,12 @@ $(document).ready(function() {
 		return html;
 	}
 
-	function requestAssetsRow(data = {}, readOnly = false){
+	function requestAssetsRow(data = {}, readOnly = false, billMaterialID = null){
 		let html = "";
 
 		let {
 			requestAssetID				=	"",
 			costEstimateID				=	"",
-			billMaterialID				=	"",
 			materialRequestID			=	"",
 			inventoryValidationID		=	"",
 			bidRecapID					=	"",
@@ -1807,14 +1854,14 @@ $(document).ready(function() {
 		let disabled 	 = readOnly ? "disabled" : "";
 		let requiredAttr = !readOnly && materialRequestID ? `required min="0.01" minlength="1" maxlength="20"` : ``;
 		let checkboxRow 	=	!readOnly ? `<td class="text-center">
-												<input type="checkbox" class="checkboxrow checkboxrow-asset" invcategory="asset">
+												<input type="checkbox" class="checkboxrow checkboxrow-asset" invcategory="asset" ${billMaterialID ? "disabled" : ""}>
 											</td>` : ``;
 		html = `	<tr class="table-row-request-asset">
 						${checkboxRow}
 						<td><div class="asset-code" requestassetid="${requestAssetID}">${assetCode || "-"}</div></td>
 						<td>
 							<div class="form-group mb-0">
-								${!readOnly ? `	<select class="form-control validate select2 w-100" ${disabled}
+								${!readOnly ? `	<select class="form-control validate select2 w-100" ${billMaterialID ? "disabled" : ""}
 													name="assetID">
 													${getInventoryAssetList(assetID)}
 												</select>` : assetName}
@@ -1835,7 +1882,7 @@ $(document).ready(function() {
 								data-allowcharacters="[0-9]" 
 								name="assetQuantity"
 								autocomplete="off"
-								${disabled}
+								${billMaterialID ? "disabled" : ""}
 								${requiredAttr}
 								value="${sumRequestQuantity || "0.00"}">` : sumRequestQuantity}
 								<div class="invalid-feedback d-block" id="invalid"></div>
@@ -1849,7 +1896,7 @@ $(document).ready(function() {
 								data-allowcharacters="[0-9]" 
 								name="assetManhours"
 								autocomplete="off"
-								${disabled}
+								${billMaterialID ? "disabled" : ""}
 								${requiredAttr}
 								value="${sumRequestQuantity || "0.00"}">` : sumRequestManHours}
 								<div class="invalid-feedback d-block" id="invalid"></div>
@@ -1863,7 +1910,7 @@ $(document).ready(function() {
 								class="form-control validate"
 								name="assetRemarks"
 								data-allowcharacters="[0-9][a-z][A-Z][.][,][?][!][/][;][:]['][''][-][_][()][%][&][*][ ]"
-								minlength="1" ${disabled}
+								minlength="1"  ${billMaterialID ? "disabled" : ""}
 								maxlength="100" >${remarks}</textarea>` : remarks}
 								<div class="d-block invalid-feedback"></div>
 							</div>
@@ -1892,7 +1939,7 @@ $(document).ready(function() {
             </div>`;
 			$("#page_content").html(html);
 
-			headerButton(true, "Add Material Request");
+			headerButton(true, "Add Inventory Request");
 			headerTabContent();
 			myFormsContent();
 			updateURL();
@@ -1908,7 +1955,7 @@ $(document).ready(function() {
 	// ----- END PAGE CONTENT -----
 
 
-	// ----- GET PURCHASE REQUEST DATA -----
+	// ----- GET INVENTORY REQUEST DATA -----
 	function getMaterialRequestData(action = "insert", method = "submit", status = "1", id = null, currentStatus = "0", isObject = false) {
 
 		/**
@@ -2033,7 +2080,7 @@ $(document).ready(function() {
 
 		return isObject ? data : formData;
 	}
-	// ----- END GET PURCHASE REQUEST DATA -----
+	// ----- END GET INVENTORY REQUEST DATA -----
 
 
     // ----- OPEN ADD FORM -----
@@ -2233,7 +2280,7 @@ $(document).ready(function() {
 				if (employeeID != sessionID) {
 					notificationData = {
 						moduleID:                137,
-						notificationTitle:       "Material Request",
+						notificationTitle:       "Inventory Requisition",
 						notificationDescription: `${employeeFullname(sessionID)} asked for your approval.`,
 						notificationType:        2,
 						employeeID,
@@ -2309,7 +2356,7 @@ $(document).ready(function() {
 				notificationData = {
 					moduleID:                137,
 					tableID:                 id,
-					notificationTitle:       "Material Request",
+					notificationTitle:       "Inventory Requisition",
 					notificationDescription: `${feedback}: Your request has been approved.`,
 					notificationType:        7,
 					employeeID,
@@ -2319,7 +2366,7 @@ $(document).ready(function() {
 				notificationData = {
 					moduleID:                137,
 					tableID:                 id,
-					notificationTitle:       "Material Request",
+					notificationTitle:       "Inventory Requisition",
 					notificationDescription: `${employeeFullname(employeeID)} asked for your approval.`,
 					notificationType:         2,
 					employeeID:               getNotificationEmployeeID(approversID, dateApproved),
@@ -2340,7 +2387,7 @@ $(document).ready(function() {
 		const feedback = $(this).attr("code") || getFormCode("MRF", dateToday(), id);
 
 		$("#modal_material_request_content").html(preloader);
-		$("#modal_material_request .page-title").text("DENY PURCHASE REQUEST");
+		$("#modal_material_request .page-title").text("DENY INVENTORY REQUESITION");
 		$("#modal_material_request").modal("show");
 		let html = `
 		<div class="modal-body">
@@ -2391,7 +2438,7 @@ $(document).ready(function() {
 				let notificationData = {
 					moduleID:                137,
 					tableID: 				 id,
-					notificationTitle:       "Material Request",
+					notificationTitle:       "Inventory Requisition",
 					notificationDescription: `${feedback}: Your request has been denied.`,
 					notificationType:        1,
 					employeeID,
@@ -2474,7 +2521,7 @@ $(document).ready(function() {
 
 // --------------- DATABASE RELATION ---------------
 function getConfirmation(method = "submit") {
-	const title = "Material Request";
+	const title = "INVENTORY REQUESITION";
 	let swalText, swalImg;
 
 	$("#modal_material_request").text().length > 0 && $("#modal_material_request").modal("hide");

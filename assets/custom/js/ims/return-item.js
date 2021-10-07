@@ -332,11 +332,12 @@ function forApprovalContent() {
 		let {
 			fullname,
 			returnItemID,
-			borrowingID,
+			equipmentBorrowingID,
 			dateCreatedRI,
 			borrowingCreateAt,
 			approversID,
 			approversDate,
+			equipmentBorrowingCode,
 			returnItemStatus,
 			returnItemRemarks,
 			returnItemReason,
@@ -368,7 +369,7 @@ function forApprovalContent() {
 			<tr class="${btnClass}" id="${encryptString(returnItemID)}">
 				<td>${getFormCode("RI", createdAt, returnItemID)}</td>
 				<td>${fullname}</td>
-				<td>${getFormCode("EBF", borrowingCreateAt, borrowingID)}</td>
+				<td>${equipmentBorrowingCode}</td>
 				<td>${projectName}</td>
 				<td>${clientName}</td>
 				<td>
@@ -376,7 +377,7 @@ function forApprovalContent() {
 				</td>
 				<td>${getDocumentDates(dateCreated, dateSubmitted, dateApproved)}</td>
 				<td class="text-center">
-					${getStatusStyle(returnItemStatus)}
+					${getStatusStyle(returnItemStatus, true)}
 				</td>
 				<td>${remarks}</td>
 			</tr>`;
@@ -427,13 +428,14 @@ function myFormsContent() {
 		let {
 			fullname,
 			returnItemID,
-			borrowingID,
+			equipmentBorrowingID,
 			dateCreatedRI,
 			borrowingCreateAt,
 			approversID,
 			approversDate,
 			returnItemStatus,
 			returnItemRemarks,
+			equipmentBorrowingCode,
 			returnItemReason,
 			submittedAt,
 			createdAt,
@@ -462,7 +464,7 @@ function myFormsContent() {
 		<tr class="${btnClass}" id="${encryptString(returnItemID)}">
 			<td>${getFormCode("RI", dateCreated, returnItemID)}</td>
 			<td>${fullname}</td>
-			<td>${getFormCode("EBF", dateCreatedRI, borrowingID)}</td>
+			<td>${equipmentBorrowingCode}</td>
 			<td>${projectName}</td>
 			<td>${clientName}</td>
 			<td>
@@ -470,7 +472,7 @@ function myFormsContent() {
 			</td>
 			<td>${getDocumentDates(dateCreated, dateSubmitted, dateApproved)}</td>
 			<td class="text-center">
-				${getStatusStyle(returnItemStatus)}
+				${getStatusStyle(returnItemStatus, true)}
 			</td>
 			<td>${remarks}</td>
 		</tr>`;
@@ -552,15 +554,15 @@ function formButtons(data = false, isRevise = false, isFromCancelledDocument = f
 				}
 			} else if (returnItemStatus == 2) {
 				// DROP
-				button = `
-				<button type="button" 
-					class="btn btn-cancel px-5 p-2"
-					id="btnDrop" 
-					returnItemID="${encryptString(returnItemID)}"
-					code="${getFormCode("RI", createdAt, returnItemID)}"
-					status="${returnItemStatus}"><i class="fas fa-ban"></i> 
-					Drop
-				</button>`;
+				// button = `
+				// <button type="button" 
+				// 	class="btn btn-cancel px-5 p-2"
+				// 	id="btnDrop" 
+				// 	returnItemID="${encryptString(returnItemID)}"
+				// 	code="${getFormCode("RI", createdAt, returnItemID)}"
+				// 	status="${returnItemStatus}"><i class="fas fa-ban"></i> 
+				// 	Drop
+				// </button>`;
 				
 			} else if (returnItemStatus == 3) {
 				// DENIED - FOR REVISE
@@ -881,7 +883,7 @@ function getItemsRow(readOnly = false,returnItemID) {
 					<td class="text-center">
 					<div class="quantity" name="quantity" id="quantity">${quantity || ""}</div>
 					</td>	
-					<td class=""text=center>
+					<td class="text-center">
 						<div class="borrowedQuantity" name="borrowedQuantity" id="borrowedQuantity">${borrowedQuantity || ""}</div>
 					</td>
 					<td>
@@ -906,7 +908,7 @@ function getItemsRow(readOnly = false,returnItemID) {
 
 					</td>
 					<td>
-						<div class="classificationID" id="${classificationID}" name="classificationID" classificationName="${classificationName}">${classificationName || ""}</div>
+						<div class="classificationID" id="classificationID" name="classificationID" classificationName="${classificationName}">${classificationName || ""}</div>
 						<small style="color:#848482;"name="categoryName" id="categoryName">${categoryName || ""}</small>
 					</td>
 					<td class="table-data-serial-number">
@@ -923,7 +925,7 @@ function getItemsRow(readOnly = false,returnItemID) {
 						<div class="borrowedQuantity" name="borrowedQuantity" id="borrowedQuantity${index}">${borrowedQuantity || ""}</div>
 					</td>
 					<td>
-						<div class="borrowedDate" name="borrowedDate"id="borrowedDate" borrowedDate="${borrowedDate}">${moment(borrowedDate).format("MMMM DD, YYYY") || ""}</div>
+						<div class="borrowedDate" name="borrowedDate" id="borrowedDate" borrowedDate="${borrowedDate}">${moment(borrowedDate).format("MMMM DD, YYYY") || ""}</div>
 					</td>
 					<td>
 					<div class="">
@@ -934,6 +936,7 @@ function getItemsRow(readOnly = false,returnItemID) {
 								min="0"
 								number="${index}"
 								id="receivedQuantity${index}"
+								itemID="${itemID}"
 								borrowedQuantity="${borrowedQuantity}"
 								value="${inventoryRequestID ? receivedQuantity : ""}" 
 								name="receivedQuantity" 
@@ -1066,6 +1069,7 @@ $(document).on("click", ".btnAddSerial", function() {
 
 				if(thisCheck){
 					let thisReceived	= thisTR.find(".input-quantity").val();
+					let itemID			= thisTR.find(".input-quantity").attr("itemID");
 					let arrayCount		= thisReceived ? parseInt(thisReceived) : 0;
 					let subTable  		= thisTableData.find("table");
 					if(arrayCount == 0){
@@ -1120,8 +1124,8 @@ function formContent(data = false, readOnly = false, isRevise = false, isFromCan
 		returnItemID        		= "",
 		reviseReturnItemID  		= "",
 		timelineBuilderID 			= "",
-		borrowingID					= "",
-		borrowingCode				= "",
+		equipmentBorrowingID		= "",
+		equipmentBorrowingCode		= "",
 		projectID					= "",
 		projectCode					= "",
 		projectName					= "",
@@ -1202,7 +1206,7 @@ function formContent(data = false, readOnly = false, isRevise = false, isFromCan
 				<div class="body">
 					<small class="text-small text-muted font-weight-bold">Status</small>
 					<h6 class="mt-0 font-weight-bold">
-						${returnItemStatus && !isRevise ? getStatusStyle(returnItemStatus) : "---"}
+						${returnItemStatus && !isRevise ? getStatusStyle(returnItemStatus, true) : "---"}
 					</h6>      
 				</div>
 			</div>
@@ -1258,12 +1262,12 @@ function formContent(data = false, readOnly = false, isRevise = false, isFromCan
 				<label>Reference No. </label>
 				<input type="text" 
 					class="form-control validate text-left"
-					id="borrowingCode"
-					name="borrowingCode"
-					borrowingID="${borrowingID}"
+					id="equipmentBorrowingCode"
+					name="equipmentBorrowingCode"
+					equipmentBorrowingID="${equipmentBorrowingID}"
 					disabled
-					value="${borrowingCode || "-" }">
-				<div class="d-block invalid-feedback" id="invalid-borrowingCode"></div>
+					value="${equipmentBorrowingCode || "-" }">
+				<div class="d-block invalid-feedback" id="invalid-equipmentBorrowingCode"></div>
 			</div>
 		</div>
 		<div class="col-md-4 col-sm-12">
@@ -1358,8 +1362,19 @@ function formContent(data = false, readOnly = false, isRevise = false, isFromCan
 		</div>
 		<div class="col-sm-12">
 			<div class="w-100">
-				<hr class="pb-1">
-				<div class="text-primary font-weight-bold" style="font-size: 1.5rem;">Return Item/s: </div>
+			<hr class="pb-1">
+			<div class="card mt-2">
+			<div class="card-header bg-primary text-white">
+				<div class="row">
+					<div class="col-md-6 col-sm-12 text-left align-self-center">
+						<h5 style="font-weight: bold;
+							letter-spacing: 0.05rem;">Material Usage </h5>
+					</div>
+				</div>
+			</div>
+		<div class="card-body">
+				<div class="w-100">
+					<div class="text-left"></div>
 				<table class="table table-striped" id="${tableReturnItem}">
 					<thead>
 						<tr style="white-space: nowrap">
@@ -1379,8 +1394,9 @@ function formContent(data = false, readOnly = false, isRevise = false, isFromCan
 						${returnItems}
 					</tbody>
 				</table>
-				
-				
+				</div>
+			</div>	
+			</div>	
 			</div>
 		</div>
 		<div class="col-md-12 text-right mt-3">
@@ -1492,8 +1508,8 @@ function getReturnItemData(action = "insert", method = "submit", status = "1", i
 	if (currentStatus == "0" && method != "approve") {
 		//var file = document.getElementById("receiptNo").files[0];
 		data["employeeID"] 				 	= sessionID;
-		data["borrowingID"]   				= $(`[name="borrowingCode"]`).attr("borrowingID");
-		data["borrowingCode"] 				= $(`[name="borrowingCode"]`).val();
+		data["equipmentBorrowingID"]   		= $(`[name="equipmentBorrowingCode"]`).attr("equipmentBorrowingID");
+		data["equipmentBorrowingCode"] 		= $(`[name="equipmentBorrowingCode"]`).val();
 		data["projectCode"] 				= $(`[name="projectCode"]`).val();
 		data["timelinebuilderid"]   		= $(`[name="projectCode"]`).attr("timelinebuilderid");
 		data["projectID"]					= $(`[name="projectName"]`).attr("projectID");
@@ -1507,8 +1523,8 @@ function getReturnItemData(action = "insert", method = "submit", status = "1", i
 		// const clientName   					= $(`[name="clientName"]`).val();
 
 		formData.append("employeeID", sessionID);
-		formData.append("borrowingID", $("[name=borrowingCode]").attr("borrowingID"));
-		formData.append("borrowingCode", $("[name=borrowingCode]").val());
+		formData.append("equipmentBorrowingID", $("[name=equipmentBorrowingCode]").attr("equipmentBorrowingID"));
+		formData.append("equipmentBorrowingCode", $("[name=equipmentBorrowingCode]").val());
 		formData.append("projectCode", $("[name=projectCode]").val());
 		formData.append("timelinebuilderid", $("[name=projectCode]").attr("timelinebuilderid"));
 		formData.append("projectID", $("[name=projectName]").attr("projectID"));
@@ -1605,14 +1621,15 @@ function getReturnItemData(action = "insert", method = "submit", status = "1", i
 			
 			$(`td .serial-number-table tbody > tr`, this).each(function(index,obj) {
 				const serialNumber = $('[name="serialNumber"]', this).val()?.trim();
+				const serialitemID = $('[name="serialNumber"]', this).attr("itemID");
 				let scope = {
 					serialNumber,
-					itemID:       itemID
+					serialitemID:       serialitemID
 				};
 				temp["scopes"].push(scope);
 
 				formData.append(`items[${i}][scopes][${index}][serialNumber]`, serialNumber);
-				formData.append(`items[${i}][scopes][${index}][itemID]`, itemID);
+				formData.append(`items[${i}][scopes][${index}][serialitemID]`, serialitemID);
 			})
 			
 		
@@ -1656,6 +1673,7 @@ $(document).on("click", ".btnView", function () {
 // ----- VIEW DOCUMENT -----
 $(document).on("click", "#btnRevise", function () {
 	const id = $(this).attr("returnItemID");
+
 	viewDocument(id, false, true);
 });
 // ----- END VIEW DOCUMENT -----
@@ -1789,6 +1807,7 @@ function checkSerialReceivedQuantity() {
 		$(`.itemTableRow`).each(function() {
 
 			const receivedQuantity = parseFloat($(`[name="receivedQuantity"]`, this).val()) || 0;
+			const itemID = $(`[name="receivedQuantity"]`, this).attr("itemID");
 		
 			if ($(`td .serial-number-table tbody > tr`, this).length >= 1) {
 				let countSerial = $(`td .serial-number-table tbody > tr`, this).length;
@@ -1798,6 +1817,7 @@ function checkSerialReceivedQuantity() {
 						var conSerail = $(this).find("[name=serialNumber]").val() || "";
 						if(conSerail !=""){
 							tmpSerialStorage[counter++] = $(this).find("[name=serialNumber]").val();
+							tmpSerialStorage[counter++] = $(this).find("[name=serialNumber]").attr("itemID",itemID);
 						}	
 					})
 
@@ -1894,8 +1914,8 @@ $(document).on("click", "#btnSubmit", function () {
 					if (i[0] == "approversDate") approversDate = i[1];
 				}
 
-					approversID   = data["approversID"]; 
-					approversDate = data["approversDate"];
+					// approversID   = data["approversID"]; 
+					// approversDate = data["approversDate"];
 
 	
 				const employeeID = getNotificationEmployeeID(approversID, approversDate, true);

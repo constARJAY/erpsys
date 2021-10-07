@@ -215,20 +215,22 @@ $(document).ready(function() {
         let html = "";
         const noticePersonnels = getPersonnelNotInBiometrics();
         noticePersonnels.map(emp => {
-            const { employeeFirstname = "", employeeLastname = "" } = emp;
-            const fullname = `${employeeFirstname} ${employeeLastname}`;
-            html += `
-            <div class="alert alert-warning alert-dismissible fade show w-100 mb-1" role="alert">
-                <div class="d-flex justify-content-start align-items-center">
-                    <div class="font-weight-bold text-danger pr-2"><i class="fas fa-exclamation"></i> NOTICE:</div>
-                    <div>
-                        <span class="font-weight-bold">${fullname}</span> is not yet synced on the biometrics.
+            const { employeeID = 0, employeeFirstname = "", employeeLastname = "" } = emp;
+            if (employeeID != 1) {
+                const fullname = `${employeeFirstname} ${employeeLastname}`;
+                html += `
+                <div class="alert alert-warning alert-dismissible fade show w-100 mb-1" role="alert">
+                    <div class="d-flex justify-content-start align-items-center">
+                        <div class="font-weight-bold text-danger pr-2"><i class="fas fa-exclamation"></i> NOTICE:</div>
+                        <div>
+                            <span class="font-weight-bold">${fullname}</span> is not yet synced on the biometrics.
+                        </div>
                     </div>
-                </div>
-                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>`;
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>`;
+            }
         });
 
         setTimeout(() => {
@@ -252,6 +254,7 @@ $(document).ready(function() {
                 LEFT JOIN hris_department_tbl USING(departmentID)
                 LEFT JOIN hris_designation_tbl USING(designationID)`,
             `employeeID, 
+            employeeCode,
             employeeProfile,
             employeeUsername,
             employeeEmail,
@@ -265,7 +268,7 @@ $(document).ready(function() {
             employeeHourlyRate,
             employeeStatus,
             hris_employee_list_tbl.createdAt AS createdAt`,
-            `scheduleID <> 0`
+            `scheduleID <> 0 AND employeeID <> 1`
         );
 
 		let html = `
@@ -289,6 +292,7 @@ $(document).ready(function() {
 
             let {
                 employeeID,
+                employeeCode,
                 fullname,
                 employeeUnit,
                 employeeBuilding,
@@ -330,7 +334,7 @@ $(document).ready(function() {
 
             html += `
             <tr class="btnEdit" id="${encryptString(employeeID)}">
-                <td>${getFormCode("EMP", createdAt, employeeID)}</td>
+                <td>${employeeCode}</td>
                 <td>${profileImg} <span class="ml-2">${fullname}<span></td>
                 <td>
                     <div>
@@ -373,6 +377,7 @@ $(document).ready(function() {
                 LEFT JOIN hris_department_tbl USING(departmentID)
                 LEFT JOIN hris_designation_tbl USING(designationID)`,
             `employeeID, 
+            employeeCode,
             employeeProfile,
             employeeFirstname,
             employeeMiddlename,
@@ -381,7 +386,7 @@ $(document).ready(function() {
             designationName,
             employeeStatus,
             hris_employee_list_tbl.createdAt AS createdAt`,
-            `scheduleID = 0`
+            `scheduleID = 0 AND employeeID <> 0`
         );
 
 		let html = `
@@ -400,6 +405,7 @@ $(document).ready(function() {
 
             let {
                 employeeID,
+                employeeCode,
                 employeeFirstname,
                 employeeMiddlename,
                 employeeLastname,
@@ -429,7 +435,7 @@ $(document).ready(function() {
 
             html += `
             <tr class="btnEdit" id="${encryptString(employeeID)}">
-                <td>${getFormCode("EMP", createdAt, employeeID)}</td>
+                <td>${employeeCode}</td>
                 <td>${profileImg} <span class="ml-2">${fullname}<span></td>
                 <td>
                     <div>
@@ -688,7 +694,7 @@ $(document).ready(function() {
 
 
     // ----- DEPARTMENT OPTIONS -----
-    const departmentList = getTableData("hris_department_tbl", "departmentID, departmentName", "departmentStatus = 1");
+    const departmentList = getTableData("hris_department_tbl", "departmentID, departmentName", "departmentStatus = 1 AND departmentID <> 1");
 
     function departmentOptions(id = null) {
         let html = departmentList.map(department => {
@@ -711,7 +717,7 @@ $(document).ready(function() {
 
 
     // ----- DESIGNATION OPTIONS -----
-    const designationList = getTableData("hris_designation_tbl", "designationID, designationName, departmentID", "designationStatus = 1");
+    const designationList = getTableData("hris_designation_tbl", "designationID, designationName, departmentID", "designationStatus = 1 AND designationID <> 1");
 
     function designationOptions(id = null, departmentID = null, display = false) {
         let html = `<option value="" selected disabled>Select Designation</option>`;
@@ -2851,6 +2857,7 @@ $(document).ready(function() {
             if (validate) {
                 let data = getFormData("modal_employee_module", true);
                 data[`tableData[employeeProfile]`] = "default.jpg";
+                data[`tableData[createdAt]`] = moment().format("YYYY-MM-DD HH:mm:ss");
                 data[`tableData[createdBy]`] = sessionID;
                 data[`tableData[updatedBy]`] = sessionID;
                 data[`tableName`] = "hris_employee_list_tbl";

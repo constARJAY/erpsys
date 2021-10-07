@@ -24,8 +24,8 @@ $(document).ready(function(){
           
 	    paging: true,
             columnDefs: [
-                { targets: 0, width: 100},
-                { targets: 1, width: 200},
+                { targets: 0, width: 150},
+                { targets: 1, width: 250},
                 { targets: 2, width: 250},
                 { targets: 3, width: 120},
                 { targets: 4, width: 200},
@@ -51,8 +51,8 @@ $(document).ready(function(){
            
          paging: true,
              columnDefs: [
-                 { targets: 0, width: 100},
-                 { targets: 1, width: 200},
+                 { targets: 0, width: 150},
+                 { targets: 1, width: 250},
                  { targets: 2, width: 250},
                  { targets: 3, width: 120},
                  { targets: 4, width: 200},
@@ -180,7 +180,7 @@ $(document).ready(function(){
                              <tr>
                                 <th>Asset Code</th>
                                 <th>Asset Name</th>
-                                <th>Item Classification</th>
+                                <th>Asset Classification</th>
                                 <th>UOM</th>
                                 <th>Stock In</th>
                                 <th>Borrowed</th>
@@ -197,10 +197,10 @@ $(document).ready(function(){
                             for(var i=0; i<data["assets"].length; i++){
                                 assets +=`  
                                 <tr> 
-                                    <td>${data["assets"][i].itemCode} </td> 
+                                    <td>${data["assets"][i].assetCode} </td> 
                                     <td>
                                         <div>
-                                        ${data["assets"][i].itemName}
+                                        ${data["assets"][i].assetName}
                                         </div>
                                         <small style="color:#848482;">${data["assets"][i].brand}</small>
                                     </td>
@@ -210,21 +210,16 @@ $(document).ready(function(){
                                         </div>
                                         <small style="color:#848482;">${data["assets"][i].categoryName}</small>
                                     </td>
-                                    <td>
-                                        ${data["assets"][i].uom}
-                                    </td>
-                                    <td>
-                                    ${data["assets"][i].stockIN}
-                                    </td> 
-                                    <td>
-                                    </td>
-                                    <td>0</td>
-                                    <td>0</td>
-                                    <td>0</td> 
-                                    <td>0</td>
-                                    <td>0</td>
-                                    <td>0</td>
-                                    <td>0</td>
+                                    <td>${data["assets"][i].uom}</td>
+                                    <td class="text-center">${data["assets"][i].stockIN}</td> 
+                                    <td class="text-center">${data["assets"][i].borrowedQuantity}</td>
+                                    <td class="text-center">${data["assets"][i].returned}</td>
+                                    <td class="text-center">${data["assets"][i].transferquantity}</td>
+                                    <td class="text-center">${data["assets"][i].disposed}</td> 
+                                    <td class="text-center">${data["assets"][i].reservedItem}</td> 
+                                    <td class="text-center">${data["assets"][i].Available}</td>
+                                    <td class="text-center">${data["assets"][i].Total_Quantity}</td>
+                                    <td class="text-center">${data["assets"][i].reOrderLevel}</td>
                                 </tr>`;
                             };    
                            for(var i=0; i<data["item"].length; i++){
@@ -244,29 +239,17 @@ $(document).ready(function(){
                                     <div>
                                     ${data["item"][i].classificationName}
                                     </div>
-                                <small style="color:#848482;">${data["item"][i].categoryName}</small>
+                                    <small style="color:#848482;">${data["item"][i].categoryName}</small>
                                 </td>
-                                <td>
-                                ${data["item"][i].uom}
-                                </td>
-                                <td>
-                                ${data["item"][i].stockIN}
-                                </td> 
-                                <td>
-                                ${data["item"][i].stockOut}
-                                </td>
-                                <td>
-                                ${data["item"][i].unused}
-                                </td>
-                                <td>
-                                ${data["item"][i].disposed}
-                                </td>
-                                <td>
-                                ${data["item"][i].reservedItem}
-                                </td> 
-                                <td>0</td>
-                                <td>0</td>
-                                <td>0</td>
+                                <td class="text-center">${data["item"][i].uom}</td>
+                                <td class="text-center">${data["item"][i].stockIN}</td> 
+                                <td class="text-center">${data["item"][i].stockOut}</td>
+                                <td class="text-center">${data["item"][i].Unused}</td>
+                                <td class="text-center">${data["item"][i].disposed}</td>
+                                <td class="text-center">${data["item"][i].reservedItem}</td> 
+                                <td class="text-center">${data["item"][i].Available}</td>
+                                <td class="text-center">${data["item"][i].Total_Quantity}</td>
+                                <td class="text-center">${data["item"][i].reOrderLevel}</td>
                            </tr>`;
                             };
                           

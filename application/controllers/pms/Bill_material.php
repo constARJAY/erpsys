@@ -1,27 +1,5 @@
 
 <?php
-defined('BASEPATH') OR exit('No direct script access allowed');
-use PhpOffice\PhpSpreadsheet\Spreadsheet;
-use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
-
-use PhpOffice\PhpSpreadsheet\Helper\Sample;
-use PhpOffice\PhpSpreadsheet\IOFactory;
-use PhpOffice\PhpSpreadsheet\RichText\RichText;
-use PhpOffice\PhpSpreadsheet\Shared\Date;
-use PhpOffice\PhpSpreadsheet\Style\Alignment;
-use PhpOffice\PhpSpreadsheet\Style\Border;
-use PhpOffice\PhpSpreadsheet\Style\Color;
-use PhpOffice\PhpSpreadsheet\Style\Fill;
-use PhpOffice\PhpSpreadsheet\Style\Font;
-use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
-use PhpOffice\PhpSpreadsheet\Style\Protection;
-use PhpOffice\PhpSpreadsheet\Worksheet\Drawing;
-use PhpOffice\PhpSpreadsheet\Worksheet\PageSetup;
-use PhpOffice\PhpSpreadsheet\Worksheet\ColumnDimension;
-use PhpOffice\PhpSpreadsheet\Worksheet\HeaderFooterDrawing;
-use PhpOffice\PhpSpreadsheet\Worksheet;
-
-
 class Bill_material extends CI_Controller {
 
     public function __construct()
@@ -29,12 +7,12 @@ class Bill_material extends CI_Controller {
         parent::__construct();
         $this->load->model("pms/BillMaterial_model", "billmaterial");
         $this->load->model("ims/MaterialRequest_model", "materialrequest");
-        // isAllowed(39);
+        isAllowed(39);
     }
 
     public function index()
     {
-        $data["title"] = "Bill of Material";
+        $data["title"] = "Bill Material";
         $this->load->view("template/header",$data);
         $this->load->view("pms/bill_material/index");
         $this->load->view("template/footer");
@@ -47,6 +25,7 @@ class Bill_material extends CI_Controller {
         $billMaterialID             = $this->input->post("billMaterialID");
         $reviseBillMaterialID 	    = $this->input->post("reviseBillMaterialID")        == "null" ?  NULL : $this->input->post("reviseBillMaterialID");
         $reviseBillMaterialCode 	= $this->input->post("reviseBillMaterialCode")      == "null" ?  NULL : $this->input->post("reviseBillMaterialCode");
+        $billMaterialGrandTotal 	= $this->input->post("billMaterialGrandTotal")      == "null" ?  NULL : $this->input->post("billMaterialGrandTotal");
 
         $approversID                = $this->input->post("approversID")     ?? null;
         $approversStatus            = $this->input->post("approversStatus") ?? null;
@@ -75,6 +54,7 @@ class Bill_material extends CI_Controller {
             "approversDate"             => $approversDate,
             "billMaterialStatus"        => $billMaterialStatus,
             "billMaterialReason"        => $billMaterialReason,
+            "billMaterialGrandTotal"    => $billMaterialGrandTotal,
             "submittedAt"               => $submittedAt,
             "createdBy"                 => $createdBy,
             "updatedBy"                 => $updatedBy,
@@ -130,10 +110,11 @@ class Bill_material extends CI_Controller {
                         "projectCode"   			=> $billMaterialResultData->projectCode,
                         "projectName"   			=> $billMaterialResultData->projectName,
                         "projectCategory" 			=> $billMaterialResultData->projectCategory,
+                        "clientCode"    		    => $billMaterialResultData->clientCode,
                         "clientName"    		    => $billMaterialResultData->clientName,
                         "clientAddress" 		    => $billMaterialResultData->clientAddress,
                         "dateNeeded" 				=> $billMaterialResultData->dateNeeded,
-                        "materialRequestReason"     => $billMaterialResultData->materialRequestReason,
+                        "materialRequestReason"     => $billMaterialResultData->billMaterialReason,
                         "submittedAt"               => $billMaterialResultData->submittedAt,
                         "createdBy"                 => $billMaterialResultData->createdBy,
                         "updatedBy"                 => $billMaterialResultData->createdBy

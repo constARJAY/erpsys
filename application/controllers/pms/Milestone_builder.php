@@ -12,7 +12,7 @@ class Milestone_builder extends CI_Controller {
 
     public function index()
     {
-        $data["title"] = "Project Milestone Masterfile";
+        $data["title"] = "Project Milestone Builder";
 
         $this->load->view("template/header",$data);
         $this->load->view("pms/milestone_builder/index");

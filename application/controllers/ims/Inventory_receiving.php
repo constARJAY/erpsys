@@ -145,6 +145,7 @@ class Inventory_receiving extends CI_Controller {
                             "quantity"             => $item["quantity"],
                             "receivedQuantity"     => $item["receivedQuantity"],
                             "remainingQuantity"    => $item["remainings"],
+                            "uom"                  => $item["uom"],
                             "remarks"              => $item["remarks"],
                             "createdBy"            => $updatedBy,
                             "updatedBy"            => $updatedBy,
