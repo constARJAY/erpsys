@@ -4467,6 +4467,7 @@ CREATE TABLE `ims_stock_in_assets_tbl` (
   `ManufactureDate` date NOT NULL,
   `barcode` varchar(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
   `quantity` decimal(15,2) NOT NULL,
+  `quantityForStockin` decimal(15,2) NOT NULL,
   `createAt` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   `updateAt` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   `stockInDate` date NOT NULL,
@@ -4513,6 +4514,7 @@ CREATE TABLE `ims_stock_in_item_tbl` (
   `ManufactureDate` date NOT NULL,
   `barcode` varchar(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
   `quantity` decimal(15,2) NOT NULL,
+  `quantityForStockin` decimal(15,2) NOT NULL,
   `createAt` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   `updateAt` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   `stockInDate` date NOT NULL,
@@ -5899,4 +5901,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2021-10-07 17:30:21
+-- Dump completed on 2021-10-08  8:01:48

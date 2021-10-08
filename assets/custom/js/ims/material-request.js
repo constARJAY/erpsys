@@ -721,7 +721,7 @@ $(document).ready(function() {
 
 			let remarks       = materialRequestRemarks ? materialRequestRemarks : "-";
 			let dateCreated   = moment(createdAt).format("MMMM DD, YYYY hh:mm:ss A");
-			let dateSubmitted = submittedAt ? moment(submittedAt).format("MMMM DD, YYYY hh:mm:ss A") : "-";
+			let dateSubmitted = materialRequestStatus != "0" ? (submittedAt ? moment(submittedAt).format("MMMM DD, YYYY hh:mm:ss A") : "-") : "-";
 			let dateApproved  = materialRequestStatus == 2 || materialRequestStatus == 5 ? approversDate.split("|") : "-";
 			if (dateApproved !== "-") {
 				dateApproved = moment(dateApproved[dateApproved.length - 1]).format("MMMM DD, YYYY hh:mm:ss A");

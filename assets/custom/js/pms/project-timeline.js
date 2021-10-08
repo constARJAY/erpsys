@@ -302,7 +302,7 @@ $(document).ready(function() {
 			"pms_timeline_builder_tbl AS pptb LEFT JOIN hris_employee_list_tbl AS helt USING(employeeID) LEFT JOIN pms_project_list_tbl AS pplt ON pplt.projectListID = pptb.projectID",
 			"pptb.*, CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname, pptb.createdAt AS dateCreated, projectListCode, projectListName",
 			`pptb.employeeID != ${sessionID} AND timelineBuilderStatus != 0 AND timelineBuilderStatus != 4`,
-			`FIELD(timelineBuilderStatus, 0, 1, 3, 2, 4, 5, 6, 7), COALESCE(pptb.submittedAt, pptb.createdAt)`
+			`FIELD(timelineBuilderStatus, 0, 6, 1, 2, 3, 4, 5, 7), COALESCE(pptb.submittedAt, pptb.createdAt)`
 		);
 
 		let html = `
@@ -430,7 +430,7 @@ $(document).ready(function() {
 			"pms_timeline_builder_tbl AS pptb LEFT JOIN hris_employee_list_tbl AS helt USING(employeeID) LEFT JOIN pms_project_list_tbl AS pplt ON pplt.projectListID = pptb.projectID",
 			"pptb.*, CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname, pptb.createdAt AS dateCreated, projectListCode, projectListName",
 			`pptb.employeeID = ${sessionID}`,
-			`FIELD(timelineBuilderStatus, 0, 1, 3, 2, 4, 5, 6, 7), COALESCE(pptb.submittedAt, pptb.createdAt)`
+			`FIELD(timelineBuilderStatus, 0, 6, 1, 2, 3, 4, 5, 7), COALESCE(pptb.submittedAt, pptb.createdAt)`
 		);
 		let html = `
         <table class="table table-bordered table-striped table-hover" id="tableMyForms">
@@ -1206,7 +1206,7 @@ $(document).ready(function() {
 
 			<div class="col-md-12 col-sm-12">
 				<div class="form-group">
-					<label>Description</label>
+					<label>Description ${!disabled ? "<code>*</code>" : ""}</label>
 					<div class="remarks">
 						<textarea rows="4" style="resize: none" class="form-control validate" data-allowcharacters="[a-z][A-Z][0-9][.][,][?][!][/]['][''][;][:][-][_][()][%][&][*][ ]" name="timelineBuilderReason" required id="remarks" ${disabled} >${timelineBuilderReason}</textarea>
 					</div>
@@ -1623,7 +1623,7 @@ $(document).ready(function() {
 								class = "form-control daterange text-center"
 								name = "taskStartDate"
 								id="taskStartDate${index}" 
-								value = "${ items.taskStartDate ? moment(items.taskStartDate).format("MMMM DD, YYYY") : moment().format("MMMM DD, YYYY")} - ${moment(items.taskEndtDate).format("MMMM DD, YYYY")}"
+								value = "${ moment(items.taskStartDate || new Date() ).format("MMMM DD, YYYY")} - ${moment(items.taskEndtDate || new Date() ).format("MMMM DD, YYYY")}"
 								${readOnly ? "disabled" : ``} required>
 							<div class="invalid-feedback d-block" id="invalid-taskStartDate${index}"></div>
 						</td>

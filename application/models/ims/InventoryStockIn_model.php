@@ -63,8 +63,6 @@ class InventoryStockIn_model extends CI_Model {
                             "quantity"                  =>$quantity[$count],
                             "serialNumber"              =>$serialnumber[$count],
                             "inventoryCode"             =>$inventoryCode
-
-
                         
                 );
                 } 
@@ -200,8 +198,6 @@ class InventoryStockIn_model extends CI_Model {
         // }
     }
   
-   
- 
     //     }
        
     // }

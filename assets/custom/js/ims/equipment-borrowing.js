@@ -612,7 +612,7 @@ $(document).ready(function() {
                                             </td>
                                              <td>
                                                     <div class="availablestocks">
-                                                        <span  name="availableStocks" assetID="${assetID}" index="0">${getAvailableStocks > 0 ?formatAmount(getAvailableStocks[0].availableStocks): "0.00"}</span>
+                                                        <span  name="availableStocks" assetID="${assetID}" index="0">${getAvailableStocks.length > 0 ?formatAmount(getAvailableStocks[0].availableStocks): "0.00"}</span>
                                                     </div>
                                             </td>
                                             <td>
@@ -1361,16 +1361,6 @@ $(document).ready(function() {
 						class="form-control" 
 						disabled 
 						value="${employeeDesignation}">
-                </div>
-            </div>
-            <div class="col-md-12 col-sm-12">
-                <div class="form-group">
-                    <label>Description ${!disabled ? "<code>*</code>" : ""}</label>
-                    <textarea class="form-control"
-                        rows="4"
-                        style="resize:none;"
-						disabled>${equipmentBorrowingReason ?? ""}</textarea>
-                   
                 </div>
             </div>
 

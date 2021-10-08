@@ -1301,7 +1301,7 @@ function formContent(data = false, readOnly = false, isRevise = false, isFromCan
 							<th>Item Code</th>
 							<th>Item Name</th>
 							<th>Item Classification</th>
-							<th>Uom</th>
+							<th>UOM</th>
 							<th>Quantity</th>
 							<th>Unused</th>
 							<th>Used</th>

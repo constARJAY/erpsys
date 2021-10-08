@@ -9,6 +9,8 @@ $(document).ready(function() {
 
 
     // ----- GLOBAL VARIABLES/FUNCTIONS -----
+	let inventorVendorPriceList = [];
+
     const allEmployeeData = getAllEmployeeData();
 	const employeeData = (id) => {
 		if (id) {
@@ -44,7 +46,8 @@ $(document).ready(function() {
                 `ims_inventory_vendor_tbl.inventoryVendorID,
                 inventoryVendorCode,
                 ims_inventory_vendor_tbl.inventoryVendorName,
-                vendorCurrentPrice AS vendorPrice`,
+                vendorCurrentPrice AS vendorPrice,
+				preferred`,
                 `itemID = ${itemAssetID}
                 AND assetID IS NULL
                 AND inventoryVendorStatus = 1`
@@ -56,7 +59,8 @@ $(document).ready(function() {
                 `ims_inventory_vendor_tbl.inventoryVendorID,
                 inventoryVendorCode,
                 ims_inventory_vendor_tbl.inventoryVendorName,
-                vendorCurrentPrice AS vendorPrice`,
+                vendorCurrentPrice AS vendorPrice,
+				preferred`,
                 `itemID IS NULL
                 AND assetID = ${itemAssetID}
                 AND inventoryVendorStatus = 1`
@@ -742,20 +746,33 @@ $(document).ready(function() {
     function getInventoryVendorOptions(classification = "", itemAssetID = 0, vendorID = 0, readOnly = false) {
         let html = "";
 		if (!readOnly) {
+
+			if (!inventorVendorPriceList.some(data => data.classification == classification && data.itemAssetID == itemAssetID)) {
+				let temp = {
+					classification, itemAssetID, priceList: [...getItemPriceList(classification, itemAssetID)]
+				}
+				inventorVendorPriceList.push(temp);
+			}
+
+
 			let itemPriceList = [...getItemPriceList(classification, itemAssetID)];
 			itemPriceList.map(vendor => {
 				let {
 					inventoryVendorID,
 					inventoryVendorCode,
 					inventoryVendorName,
-					vendorPrice
+					vendorPrice,
+					preferred
 				} = vendor;
+
+				let otherOption = preferred == 1 ? "selected" : "";
+
 				html += `
 				<option value="${inventoryVendorID}"
 					vendorCode="${inventoryVendorCode}"
 					vendorName="${inventoryVendorName}"
 					vendorPrice="${vendorPrice}"
-					${inventoryVendorID == vendorID ? "selected" : ""}>
+					${inventoryVendorID == vendorID ? "selected" : otherOption}>
 					${inventoryVendorName}
 				</option>`;
 			})
@@ -1774,24 +1791,6 @@ $(document).ready(function() {
 			updateInvetoryVendorDisplay(readOnly);
 			updateButtonGenerateFinalQuote();
 			noDataAvailableDisplay();
-			// updateInventoryItemOptions();
-
-			// initAmount("#discount");
-			// initAmount("#lessEwt");
-			// initAmount("#vat");
-
-			// const disablePreviousDateOptions = {
-			// 	autoUpdateInput: false,
-			// 	singleDatePicker: true,
-			// 	showDropdowns: true,
-			// 	autoApply: true,
-			// 	locale: {
-			// 		format: "MMMM DD, YYYY",
-			// 	},
-			// 	minDate: moment(new Date).format("MMMM DD, YYYY"),
-			// 	startDate: moment(shippingDate || new Date),
-			// }
-			// initDateRangePicker("#shippingDate", disablePreviousDateOptions);
 
 			// ----- NOT ALLOWED FOR UPDATE -----
 			if (!allowedUpdate) {
@@ -1856,7 +1855,10 @@ $(document).ready(function() {
 			}
 		}) 
 
-		let vendorList = [...getItemPriceList(classification, itemAssetID)];
+		// let vendorList = [...getItemPriceList(classification, itemAssetID)];
+		let vendorList = inventorVendorPriceList.filter(data => data.classification == classification && data.itemAssetID == itemAssetID);
+			vendorList = vendorList?.[0]?.priceList ?? [];
+			
 		elementID.map((element, index) => {
 			let html = `<option selected disabled>Select Vendor Name</option>`;
 
@@ -2162,7 +2164,7 @@ $(document).ready(function() {
 				hasVendor && temp++;
 			})
 		
-			if (temp == count) {
+			if (temp > 0 && temp == count) {
 				$(`.btnGenerateFinalQuote[classification="${clss}"]`).removeAttr("disabled");
 			} else {
 				$(`.btnGenerateFinalQuote[classification="${clss}"]`).attr("disabled", true);

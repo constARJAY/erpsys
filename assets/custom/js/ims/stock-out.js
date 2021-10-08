@@ -617,7 +617,7 @@ $(document).ready(function() {
                                             </td>
                                              <td>
                                                     <div class="availablestocks">
-                                                        <span  name="availableStocks" itemID="${itemID}" index="0">${getAvailableStocks > 0 ? formatAmount(getAvailableStocks[0].availableStocks) : "0.00"}</span>
+                                                        <span  name="availableStocks" itemID="${itemID}" index="0">${getAvailableStocks.length > 0 ? formatAmount(getAvailableStocks[0].availableStocks) : "0.00"}</span>
                                                     </div>
                                             </td>
                                             <td>
@@ -1370,16 +1370,7 @@ $(document).ready(function() {
 						value="${employeeDesignation}">
                 </div>
             </div>
-            <div class="col-md-12 col-sm-12">
-                <div class="form-group">
-                    <label>Description ${!disabled ? "<code>*</code>" : ""}</label>
-                    <textarea class="form-control"
-                        rows="4"
-                        style="resize:none;"
-						disabled>${materialWithdrawalReason ?? ""}</textarea>
-                   
-                </div>
-            </div>
+           
 
             <div  class="col-sm-12">
                 ${itemHTML}

@@ -468,21 +468,28 @@ $(document).ready(function() {
             html +=`<span class="avatar">`;
             employees.map((employee, index) => {
                 const { id, fullname, image } = employee;
+
+                var lastIndex  = image.substring(image.lastIndexOf("/") + 1, image.length);
+                if(lastIndex.toLowerCase() == "null"){
+                    var split =  image.lastIndexOf('/');
+                     image = split.substring(0,split)+'/default.png';
+                }
+
                 if (index <= 5) {
                     html += `
                     <span class="avatar"><img src="${image}" 
                     width="45" height="45"
                     title="${fullname}"></span>`;
                 }
-                if (index == 6) {
-                    html += `
-                    <span class="font-weight-bolder"
-                    style="position: absolute;
-                        top: 0;
-                        margin-left: 7px;
-                        margin-top: 25px;
-                        font-size: 1.5rem;">+${members.length - 6}<span>`;
-                }
+                // if (index == 6) {
+                //     html += `
+                //     <span class="font-weight-bolder"
+                //     style="position: absolute;
+                //         top: 0;
+                //         margin-left: 7px;
+                //         margin-top: 25px;
+                //         font-size: 1.5rem;">+${members.length - 6}<span>`;
+                // }
             })
             html +=`</span>`;
         } else {
@@ -802,7 +809,7 @@ $(document).ready(function() {
 
 
 // ----- DISPLAY PHASE -----
-function displayPhase(teamMembers = {}, phase = {}, index = 0,  ) {
+function displayPhase(teamMembers = {}, phase = {}, index = 0 ) {
     const {
         phaseDescription,
         phaseCode,
@@ -833,9 +840,15 @@ function displayPhase(teamMembers = {}, phase = {}, index = 0,  ) {
                 const {taskBoardID,subTaskAssignee } = subTaskData(subtaskboardID);
                
 
-    
+    console.log(teamMembers)
                 const teamMemberOptions = teamMembers.map(member => {
                     const { id, fullname, image } = member;
+
+                    var lastIndex  = image.substring(image.lastIndexOf("/") + 1, image.length);
+                    if(lastIndex.toLowerCase() == "null"){
+                        var split = image.split("/");
+                        image = split.substring(0,split)+'/default.png';
+                    }
                     
                     return `
                     <option 
@@ -1125,7 +1138,9 @@ function displayPhase(teamMembers = {}, phase = {}, index = 0,  ) {
 
             // console.log(employees)
 
-            attachedUniqueID = milestoneBuilderID+''+milestoneName.replaceAll(' ','')+''+index;
+            let changemilestoneName = milestoneName.replaceAll("/","slash").replaceAll(' ','');
+
+            attachedUniqueID = milestoneBuilderID+''+changemilestoneName+''+index;
             const subTaskList = getSubTaskList(subTask,attachedUniqueID,taskBoardID,teamMembers);
 
 
@@ -1190,6 +1205,12 @@ function displayPhase(teamMembers = {}, phase = {}, index = 0,  ) {
                                
                                 employees.map((employee, index) => {
                                     const { id, fullname, image } = employee;
+
+                                    var lastIndex  = image.substring(image.lastIndexOf("/") + 1, image.length);
+                                    if(lastIndex.toLowerCase() == "null"){
+                                        var split = image.split("/");
+                                        image = split.substring(0,split)+'/default.png';
+                                    }
                                    
                                     if (index <= 5) {
                                         taskNameContent += `
@@ -1197,15 +1218,15 @@ function displayPhase(teamMembers = {}, phase = {}, index = 0,  ) {
                                             width="45" height="45"
                                             title="${fullname}"></span>`;
                                     }
-                                    if (index == 6) {
-                                        taskNameContent += `
-                                        <span class="font-weight-bolder"
-                                            style="position: absolute;
-                                                top: 0;
-                                                margin-left: 7px;
-                                                margin-top: 25px;
-                                                font-size: 1.5rem;">+${members.length - 6}<span>`;
-                                    }
+                                    // if (index == 6) {
+                                    //     taskNameContent += `
+                                    //     <span class="font-weight-bolder"
+                                    //         style="position: absolute;
+                                    //             top: 0;
+                                    //             margin-left: 7px;
+                                    //             margin-top: 25px;
+                                    //             font-size: 1.5rem;">+${members.length - 6}<span>`;
+                                    // }
                                   
                                 })
 
@@ -1502,9 +1523,8 @@ function displayPhase(teamMembers = {}, phase = {}, index = 0,  ) {
         <div class="card-body">
             <div class="mb-2">
                 <div class="text-primary font-weight-bold" style="font-size: 1.2rem;">
-                    ${phaseDescription}
                 </div>
-                <small><b>${phaseCode}</b></small>
+               
             </div>
 
             <div class="w-100">
@@ -1624,6 +1644,7 @@ function displayPhase(teamMembers = {}, phase = {}, index = 0,  ) {
 				timelineBuilderID,
 				projectName,
 				projectCode,
+                projectCategory,
 				teamMember,
 				employeeID,
 				projectCreatedAt,
@@ -1632,7 +1653,7 @@ function displayPhase(teamMembers = {}, phase = {}, index = 0,  ) {
 				phases
 			} = data && data[0];
 
-            // console.log(data)
+            console.log(data)
 	
 			let membersID = teamMember ? teamMember.replaceAll("|", ",") : "0";
 			const teamMembers = getTableData(
@@ -1652,6 +1673,7 @@ function displayPhase(teamMembers = {}, phase = {}, index = 0,  ) {
 					image:    `${base_url}/assets/upload-files/profile-images/${employeeProfile}`
 				}
 			});
+            
 	
 			$("#btnBack").attr("timelineBuilderID", encryptString(timelineBuilderID));
 			$("#btnBack").attr("status", timelineManagementStatus);
@@ -1670,7 +1692,10 @@ function displayPhase(teamMembers = {}, phase = {}, index = 0,  ) {
 			html += `
 			<div class="">
 				<div class="text-primary font-weight-bold mb-2" style="font-size: 1.5rem;">
-					<span>${projectName}</span>
+					<span>${projectName}
+                    <br>
+                    <small>${projectCategory}</small>
+                    </span>
 					<span class="text-danger font-weight-bold mb-1 float-right" style="font-size: 1.5rem;">${projectCode}</span>
 				</div>
 				<div>
@@ -1680,10 +1705,21 @@ function displayPhase(teamMembers = {}, phase = {}, index = 0,  ) {
 			</div>`;
 
 		}else{
-			html += `<div class="row text-center mt-4 p-4">
-			 			<div class="col"><h2 class="font-weight-bold">Please Select Project...</h2>
-			 			</div>
-			 			</div>`;
+            html = `
+			<div class="w-100 text-center mb-5 mt-4">
+				<img src="${base_url}assets/modal/please-select.gif"
+					style="max-width: 300px;
+					width: auto;
+					min-width: 100px;
+					height: auto;"
+					alt="No Asset Records Found.">
+				<div class="h4">Please Select Project.</div>
+			</div>`
+
+			// html += `<div class="row text-center mt-4 p-4">
+			//  			<div class="col"><h2 class="font-weight-bold">Please Select Project...</h2>
+			//  			</div>
+			//  			</div>`;
 		}
 
         
@@ -1710,7 +1746,8 @@ function displayPhase(teamMembers = {}, phase = {}, index = 0,  ) {
 
             $(".subTaskEndDates, .TaskEndDates").each(function() {
                 var id = $(this).attr("id");
-                var dateVal = $(this).attr("id");
+                // var dateVal = $(this).attr("id");
+                var dateVal = $(this).val();
                 subTaskDateFormat(id,moment(dateVal).format("YYYY-MM-DD"));
             })
             $(`[name=TaskEndDates]`).addClass("btnSubmit");
@@ -1801,6 +1838,12 @@ function displayPhase(teamMembers = {}, phase = {}, index = 0,  ) {
                                     modalTeamMembers.map((employee,index) => {
  
                                         const { id, fullname, image } = employee;
+
+                                        var lastIndex  = image.substring(image.lastIndexOf("/") + 1, image.length);
+                                        if(lastIndex.toLowerCase() == "null"){
+                                            var split = image.split("/");
+                                            image = split.substring(0,split)+'/default.png';
+                                        }
                                        
                                         if(id == subtaskAssignee[loop] ){
                                             if (index <= 5) {
@@ -1809,15 +1852,15 @@ function displayPhase(teamMembers = {}, phase = {}, index = 0,  ) {
                                                 width="45" height="45"
                                                 title="${fullname}"></span>`;
                                             }
-                                            if (index == 6) {
-                                                html += `
-                                                <span class="font-weight-bolder"
-                                                style="position: absolute;
-                                                    top: 0;
-                                                    margin-left: 15px;
-                                                    margin-top: 25px;
-                                                    font-size: 1.5rem;">+${members.length - 6}<span>`;
-                                            }
+                                            // if (index == 6) {
+                                            //     html += `
+                                            //     <span class="font-weight-bolder"
+                                            //     style="position: absolute;
+                                            //         top: 0;
+                                            //         margin-left: 15px;
+                                            //         margin-top: 25px;
+                                            //         font-size: 1.5rem;">+${members.length - 6}<span>`;
+                                            // }
                                             loop++;
                                         }
         
@@ -1832,6 +1875,13 @@ function displayPhase(teamMembers = {}, phase = {}, index = 0,  ) {
 
                                 taskAssignee.map((employee, index) => {
                                     const { id, fullname, image } = employee;
+
+                                    var lastIndex  = image.substring(image.lastIndexOf("/") + 1, image.length);
+                                    if(lastIndex.toLowerCase() == "null"){
+                                        var split = image.split("/");
+                                        image = split.substring(0,split)+'/default.png';
+                                    }
+
                                     if (index <= 5) {
                                         html += `
                                         <span class="avatar"><img src="${image}" 

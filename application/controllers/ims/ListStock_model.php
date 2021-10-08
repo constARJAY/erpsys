@@ -22,7 +22,7 @@ class ListStock_model extends CI_Model {
         }
         $sqlItem = $this->db->query("SELECT itemID, itemCode, brand, classificationName , categoryName, uom,itemName,
                                     stockIN,  Unused, reservedItem,disposed, ROUND(reOrderLevel,2) AS reOrderLevel,
-                                     (stockOut - notreturnUnused) AS stockOut,recordUnused AS Unused,disposed, reservedItem ,   
+                                    stockIN, (stockOut - notreturnUnused) AS stockOut,recordUnused AS Unused,disposed, reservedItem ,   
                                     ROUND(stockIN - stockOut - reOrderLevel - reservedItem + Unused,2) AS Available,
                                     ROUND(stockIN - stockOut - Unused - disposed,2) AS Total_Quantity
                                     FROM

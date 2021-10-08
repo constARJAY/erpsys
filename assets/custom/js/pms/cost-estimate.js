@@ -451,7 +451,7 @@ $(document).ready(function() {
 				async:   false,
 				dataType:    "json",
 				beforeSend: function() {
-					$("#loader").show();
+					// $("#loader").show();
 				},
 				success: function(data) {
 					data["phase"].map(x=>{
@@ -861,7 +861,7 @@ $(document).ready(function() {
 
     // ----- FOR APPROVAL CONTENT -----
 	function forApprovalContent() {
-		$("#tableForApprovalParent").html(preloader);
+		// $("#tableForApprovalParent").html(preloader);
 		let costEstimateData = getTableData(
 			`pms_cost_estimate_tbl AS pcet 
 				LEFT JOIN hris_employee_list_tbl AS helt USING(employeeID)`,
@@ -940,7 +940,7 @@ $(document).ready(function() {
 				<tr class="${btnClass}" id="${encryptString(costEstimateID)}">
 					<td>${getFormCode("CEF", createdAt, costEstimateID )}</td>
 					<td>${fullname}</td>
-					<td>${costEstimateCode || '-'}</td>
+					<td>${timelineBuilderID ? getFormCode("PTB",createdAt, timelineBuilderID) : "-"}}</td>
 					<td>
 						${projectDescription}
 					</td>
@@ -1051,7 +1051,7 @@ $(document).ready(function() {
             <tr class="${btnClass}" id="${encryptString(costEstimateID )}">
                 	<td>${getFormCode("CEF", createdAt, costEstimateID )}</td>
 					<td>${fullname || "-"}</td>
-					<td>${costEstimateCode || '-'}</td>
+					<td>${timelineBuilderID ? getFormCode("PTB",createdAt, timelineBuilderID) : "-"}}</td>
 					<td>
 						${projectDescription}
 					</td>
@@ -1586,14 +1586,14 @@ $(document).ready(function() {
 			async:   false,
 			dataType:    "json",
 			beforeSend: function() {
-				$("#loader").show();
+				// $("#loader").show();
 			},
 			success: function(data) {
 				result = data;
 			},
 			error: function() {
 				setTimeout(() => {
-					$("#loader").hide();
+					// $("#loader").hide();
 					showNotification("danger", "System error: Please contact the system administrator for assistance!");
 				}, 500);
 			}
@@ -2291,7 +2291,7 @@ $(document).ready(function() {
 							</td>
 							<td>
 								<div class="form-group mb-0 text-right designation-total-manhours">
-									${designationTotalManHours || "-"}
+									${formatAmount(designationTotalManHours || "0.00")}
 								</div>
 							</td>
 						</tr>`;
