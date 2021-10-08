@@ -170,7 +170,7 @@ $(document).ready(function() {
 				async:   false,
 				dataType:    "json",
 				beforeSend: function() {
-					$("#loader").show();
+					// $("#loader").show();
 				},
 				success: function(data) {
 					data["phase"].map(x=>{
@@ -188,7 +188,7 @@ $(document).ready(function() {
 				},
 				error: function() {
 					setTimeout(() => {
-						$("#loader").hide();
+						// $("#loader").hide();
 						showNotification("danger", "System error: Please contact the system administrator for assistance!");
 					}, 500);
 				}
@@ -1731,7 +1731,7 @@ $(document).ready(function() {
 
 		setTimeout(() => {
 			$("#page_content").html(html);
-			$("#loader").hide();
+			// $("#loader").hide();
 			initDataTables();
 			updateTableAttr();
 			initAll();

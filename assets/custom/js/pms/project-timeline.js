@@ -1397,7 +1397,9 @@ $(document).ready(function() {
 								name="timelineProposedBudget"
 								id="timelineProposedBudget"
                                 min="1" timelineBudgetStatus="${timelineBudgetStatus}"
-                                value="${timelineProposedBudget|| 0.00}" ${disabled}>
+                                value="${timelineProposedBudget|| 0.00}" ${disabled}
+								${timelineAllocatedBudget ? `max="${timelineAllocatedBudget}"` : ``}
+								>
                         </div>
                         <div class="invalid-feedback d-block" id="invalid-proposedBudget"></div>
                     </div>
@@ -1623,7 +1625,7 @@ $(document).ready(function() {
 								class = "form-control daterange text-center"
 								name = "taskStartDate"
 								id="taskStartDate${index}" 
-								value = "${ moment(items.taskStartDate || new Date() ).format("MMMM DD, YYYY")} - ${moment(items.taskEndtDate || new Date() ).format("MMMM DD, YYYY")}"
+								value = "${ moment(items.taskStartDate || new Date() ).format("MMMM DD, YYYY")} - ${moment(items.taskEndDate || new Date() ).format("MMMM DD, YYYY")}"
 								${readOnly ? "disabled" : ``} required>
 							<div class="invalid-feedback d-block" id="invalid-taskStartDate${index}"></div>
 						</td>
@@ -2197,7 +2199,7 @@ $(document).ready(function() {
 				}
 			}
 		}else{
-			$("#timelineProposedBudget").removeClass("is-valid").addClass("is-invalid");
+			$("#timelineProposedBudget").removeClass("is-valid").addClass("validated").addClass("is-invalid");
 			$("#timelineProposedBudget").prop("max", timelineAllocatedBudget.replaceAll(",","") || timelineAllocatedBudget);
 		}
 		

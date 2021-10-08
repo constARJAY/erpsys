@@ -54,11 +54,7 @@ $(document).ready(function () {
             let condition = validateForm("milestonebuilder_form");
             if(condition == true){
                 let data = getMilestoneBuilder();
-
-                setTimeout(() => {
-                    saveMilestoneBuilder(data, pageContent); 
-                }, 1850);
-                
+                saveMilestoneBuilder(data, pageContent); 
             }
             preventRefresh(true);
         });
@@ -480,9 +476,10 @@ $(document).ready(function () {
         var categoryID            = $("#projectCategory").val();
         var phaseTableData        = projectCatergotyData.filter(items => items.categoryID == categoryID)
         var categoryShortcut      = phaseTableData[0].categoryShortcut;
-        var getLastCategory       = milestoneBuilderData.filter(items => items.categoryID == categoryID);
-
-        setTimeout(() => {
+        // var getLastCategory       = milestoneBuilderData.filter(items => items.categoryID == categoryID);
+        var getLastCategory       = getTableData(   "pms_milestone_builder_tbl JOIN pms_category_tbl USING(categoryID)",
+                                                    "pms_milestone_builder_tbl.*, pms_category_tbl.categoryName AS categoryName, pms_category_tbl.categoryShortcut AS categoryShortcut",
+                                                    `categoryID = '${categoryID}'` );
             var categoryLength        = getLastCategory.length > 0 ? parseFloat(getLastCategory.length) + 1 : 1;
             var phaseCode             = getPhaseCode(categoryShortcut,categoryLength);
             data["categoryID"]        = categoryID;
@@ -499,10 +496,7 @@ $(document).ready(function () {
                     };
                     data[`list`].push(temp);
                 });
-                
-            
-        }, 1850);
-        return data;
+        return data; 
     }
 
     function getConfirmation(method = "save") {
