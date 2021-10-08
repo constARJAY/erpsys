@@ -743,7 +743,7 @@ $(document).ready(function() {
 
 
     // ----- GET INVENTORY VENDOR OPTIONS -----
-    function getInventoryVendorOptions(classification = "", itemAssetID = 0, vendorID = 0, readOnly = false) {
+    function getInventoryVendorOptions(classification = "", itemAssetID = 0, vendorID = 0, vendorIndex = 0, readOnly = false) {
         let html = "";
 		if (!readOnly) {
 
@@ -754,18 +754,22 @@ $(document).ready(function() {
 				inventorVendorPriceList.push(temp);
 			}
 
+			let vendorList = inventorVendorPriceList.filter(data => data.classification == classification && data.itemAssetID == itemAssetID);
+				vendorList = vendorList?.[0]?.priceList ?? [];
 
-			let itemPriceList = [...getItemPriceList(classification, itemAssetID)];
-			itemPriceList.map(vendor => {
+			let preferredVendorList = vendorList.filter(vendor => vendor.preferred == 1);
+			let preferredVendorID   = preferredVendorList?.[vendorIndex]?.inventoryVendorID ?? 0;
+
+			vendorList.map((vendor, index) => {
 				let {
 					inventoryVendorID,
 					inventoryVendorCode,
 					inventoryVendorName,
 					vendorPrice,
-					preferred
+					preferred = 0
 				} = vendor;
 
-				let otherOption = preferred == 1 ? "selected" : "";
+				let otherOption = inventoryVendorID == preferredVendorID ? "selected" : "";
 
 				html += `
 				<option value="${inventoryVendorID}"
@@ -847,7 +851,7 @@ $(document).ready(function() {
 						classification="${classification}"
 						required>
 						<option selected disabled>Select Vendor Name</option>
-						${getInventoryVendorOptions(classification, itemAssetID, vendorID1, readOnly)}    
+						${getInventoryVendorOptions(classification, itemAssetID, vendorID1, 0, readOnly)}    
 					</select>
 					<div class="d-block invalid-feedback"></div>
 				</div>`;
@@ -860,7 +864,7 @@ $(document).ready(function() {
 						classification="${classification}"
 						required>
 						<option selected disabled>Select Vendor Name</option>
-						${getInventoryVendorOptions(classification, itemAssetID, vendorID2, readOnly)}    
+						${getInventoryVendorOptions(classification, itemAssetID, vendorID2, 1, readOnly)}    
 					</select>
 					<div class="d-block invalid-feedback"></div>
 				</div>`;
@@ -873,7 +877,7 @@ $(document).ready(function() {
 						classification="${classification}"
 						required>
 						<option selected disabled>Select Vendor Name</option>
-						${getInventoryVendorOptions(classification, itemAssetID, vendorID3, readOnly)}    
+						${getInventoryVendorOptions(classification, itemAssetID, vendorID3, 2, readOnly)}    
 					</select>
 					<div class="d-block invalid-feedback"></div>
 				</div>`;
@@ -1330,7 +1334,9 @@ $(document).ready(function() {
 			if (data && data.length > 0) {
 				if (classification == "Items") {
 					html += `
-					<div class="card">
+					<div class="card finalQuoteVendors"
+						classification="Items"
+						inventoryVendorID="${inventoryVendorID}">
 						<div class="card-header bg-primary text-white">
 							<div class="row align-items-center">
 								<div class="col-md-6 col-sm-12 text-left">
@@ -1392,7 +1398,9 @@ $(document).ready(function() {
 					</div>`;
 				} else if (classification == "Assets") {
 					html += `
-					<div class="card">
+					<div class="card finalQuoteVendors" 
+						classification="Assets"
+						inventoryVendorID="${inventoryVendorID}">
 						<div class="card-header bg-primary text-white">
 							<div class="row align-items-center">
 								<div class="col-md-6 col-sm-12 text-left">
@@ -1544,7 +1552,7 @@ $(document).ready(function() {
 
 		let finalQuoteTitle = itemFinalQuoteStatus == "0" || assetFinalQuoteStatus == "1" ? `
 			<div class="pb-4">
-				<h3 class="font-weight-bold">FINAL QUOTE: </h3>
+				<h3 class="font-weight-bold">FINAL QUOTE </h3>
 				<h5><b class="font-weight-bold text-warning">NOTE: </b><span>All final quote are based on the selected vendors in each and every items.</span></h5>
 			</div>` : "";
 
@@ -1855,10 +1863,9 @@ $(document).ready(function() {
 			}
 		}) 
 
-		// let vendorList = [...getItemPriceList(classification, itemAssetID)];
 		let vendorList = inventorVendorPriceList.filter(data => data.classification == classification && data.itemAssetID == itemAssetID);
 			vendorList = vendorList?.[0]?.priceList ?? [];
-			
+
 		elementID.map((element, index) => {
 			let html = `<option selected disabled>Select Vendor Name</option>`;
 
@@ -1870,8 +1877,10 @@ $(document).ready(function() {
                     inventoryVendorID,
                     inventoryVendorCode,
                     inventoryVendorName,
-                    vendorPrice
+                    vendorPrice,
+					preferred = 0
                 } = vendor;
+
                 html += `
                 <option value="${inventoryVendorID}"
                     vendorCode="${inventoryVendorCode}"
@@ -2180,6 +2189,62 @@ $(document).ready(function() {
 	// ----- END UPDATE BUTTON GENERATE FINAL QUOTE -----
 
 
+	// ----- CHECK FINAL QUOTE VENDORS -----
+	function checkFinalQuoteVendors() {
+		let selectedItemVendorID = [], selectedAssetVendorID = [];
+		let uniqueItemVendorID = [], uniqueAssetVendorID = [];
+
+		let finalQuoteItemVendorID = [], finalQuoteAssetVendorID = [];
+		let uniqueFinalQuoteItemVendorID = [], uniqueFinalQuoteAssetVendorID = [];
+
+		$(`[name="selectedVendor"][classification="Items"]:checked`).each(function() {
+			const inventoryVendorID = $(this).attr("inventoryVendorID");
+			inventoryVendorID && selectedItemVendorID.push(inventoryVendorID);
+		})
+		uniqueItemVendorID = [...new Set(selectedItemVendorID)];
+
+		$(`[name="selectedVendor"][classification="Assets"]:checked`).each(function() {
+			const inventoryVendorID = $(this).attr("inventoryVendorID");
+			inventoryVendorID && selectedAssetVendorID.push(inventoryVendorID);
+		})
+		uniqueAssetVendorID = [...new Set(selectedAssetVendorID)];
+
+		$(`.finalQuoteVendors[classification="Items"]`).each(function() {
+			const inventoryVendorID = $(this).attr("inventoryVendorID");
+			inventoryVendorID && finalQuoteItemVendorID.push(inventoryVendorID);
+		})
+		uniqueFinalQuoteItemVendorID = [...new Set(finalQuoteItemVendorID)];
+
+		$(`.finalQuoteVendors[classification="Assets"]`).each(function() {
+			const inventoryVendorID = $(this).attr("inventoryVendorID");
+			inventoryVendorID && finalQuoteAssetVendorID.push(inventoryVendorID);
+		})
+		uniqueFinalQuoteAssetVendorID = [...new Set(finalQuoteAssetVendorID)];
+
+		let itemFlag = true, assetFlag = true;
+		uniqueItemVendorID.map(vendorID => {
+			if (!uniqueFinalQuoteItemVendorID.includes(vendorID)) {
+				itemFlag = false;
+			}
+		})
+		uniqueAssetVendorID.map(vendorID => {
+			if (!uniqueFinalQuoteAssetVendorID.includes(vendorID)) {
+				assetFlag = false;
+			}
+		})
+
+		if (!itemFlag) {
+			showNotification("danger", "Final quote for items doesn't match on selected vendors.<br> Please try to generate again.");
+		}
+		if (!assetFlag) {
+			showNotification("danger", "Final quote for assets doesn't match on selected vendors.<br> Please try to generate again.");
+		}
+
+		return itemFlag && assetFlag;
+	}
+	// ----- END CHECK FINAL QUOTE VENDORS -----
+
+
     // ----- SELECT PREFERRED VENDOR -----
     $(document).on("change", `[name="selectedVendor"]`, function(e) {
 		const classification    = $(this).attr("classification");
@@ -2197,13 +2262,15 @@ $(document).ready(function() {
 
     // ----- SELECT VENDOR NAME -----
     $(document).on("change", `[name="inventoryVendorID"]`, function() {
-        const classification = $(this).attr("classification");
-        const itemAssetID    = $(this).attr("itemAssetID");
+		const inventoryVendorID = $(this).val();
+        const classification    = $(this).attr("classification");
+        const itemAssetID       = $(this).attr("itemAssetID");
         updateInventoryVendorOptions(classification, itemAssetID, true);
 
         const vendorPrice = $(`option:selected`, this).attr("vendorPrice");
         $parent = $(this).closest("tr");
         $parent.find(".vendorPrice").text(formatAmount(vendorPrice, true));
+		$parent.find(`[name="selectedVendor"]`).attr("inventoryVendorID", inventoryVendorID);
     })
     // ----- EMD SELECT VENDOR NAME -----
 
@@ -2268,30 +2335,32 @@ $(document).ready(function() {
 		if (checkForm) {
             if (checkTable) {
 				if (checkFinalQuote) {
-					const action = revise && !isFromCancelledDocument && "insert" || (id ? "update" : "insert");
-					const data = getBidRecapData(action, "submit", "1", id);
-		
-					if (revise) {
-						if (!isFromCancelledDocument) {
-							data.revisePurchaseRequestID   = id;
-							data.reviseBidRecapCode = code;
-							delete data["bidRecapID"];
+					if (checkFinalQuoteVendors()) {
+						const action = revise && !isFromCancelledDocument && "insert" || (id ? "update" : "insert");
+						const data = getBidRecapData(action, "submit", "1", id);
+			
+						if (revise) {
+							if (!isFromCancelledDocument) {
+								data.revisePurchaseRequestID   = id;
+								data.reviseBidRecapCode = code;
+								delete data["bidRecapID"];
+							}
 						}
+			
+						const employeeID = getNotificationEmployeeID(data["approversID"], data["approversDate"], true);
+						let notificationData = false;
+						if (employeeID != sessionID) {
+							notificationData = {
+								moduleID:                40,
+								notificationTitle:       "Bid Recap",
+								notificationDescription: `${employeeFullname(sessionID)} asked for your approval.`,
+								notificationType:        2,
+								employeeID,
+							};
+						}
+			
+						saveBidRecap(data, "submit", notificationData, pageContent, code);
 					}
-		
-					const employeeID = getNotificationEmployeeID(data["approversID"], data["approversDate"], true);
-					let notificationData = false;
-					if (employeeID != sessionID) {
-						notificationData = {
-							moduleID:                40,
-							notificationTitle:       "Bid Recap",
-							notificationDescription: `${employeeFullname(sessionID)} asked for your approval.`,
-							notificationType:        2,
-							employeeID,
-						};
-					}
-		
-					saveBidRecap(data, "submit", notificationData, pageContent, code);
 				} else {
 					showNotification("danger", "Invalid final quote!");
 				}

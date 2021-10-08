@@ -56,7 +56,8 @@ class Purchase_request extends CI_Controller {
         $submittedAt               = $this->input->post("submittedAt") ?? null;
         $createdBy                 = $this->input->post("createdBy");
         $updatedBy                 = $this->input->post("updatedBy");
-        $createdAt                 = $this->input->post("createdAt");
+        $createdAt                 = $this->input->post("createdAt") ?? date("Y-m-d H:i:s");
+        $updatedAt                 = $this->input->post("updatedAt") ?? date("Y-m-d H:i:s");
         $items                     = $this->input->post("items") ?? null;
 
         $purchaseRequestData = [
@@ -92,6 +93,7 @@ class Purchase_request extends CI_Controller {
             "createdBy"                     => $createdBy,
             "updatedBy"                     => $updatedBy,
             "createdAt"                     => $createdAt,
+            "updatedAt"                     => $updatedAt,
         ];
 
         $bidRecapID = "";

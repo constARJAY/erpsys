@@ -1,5 +1,6 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
+date_default_timezone_set('Asia/Manila');
 
 class BidRecap_model extends CI_Model {
 
@@ -723,6 +724,8 @@ class BidRecap_model extends CI_Model {
                     'purchaseRequestStatus'   => 0,
                     'createdBy'               => $quote['employeeID'],
                     'updatedBy'               => $quote['updatedBy'],
+                    'createdAt'               => date('Y-m-d H:i:s'),
+                    'updatedAt'               => date('Y-m-d H:i:s'),
                 ];
                 $savePurchaseRequest = $this->db->insert("ims_purchase_request_tbl", $data);
                 if ($savePurchaseRequest) 

@@ -219,6 +219,8 @@ class PurchaseOrder_model extends CI_Model {
                 'changeRequestRemarks'    => $purchaseOrderData->purchaseOrderRemarks,
                 'createdBy'               => $purchaseOrderData->employeeID,
                 'updatedBy'               => $purchaseOrderData->updatedBy,
+                'createdAt'               => date('Y-m-d H:i:s'),
+                'updatedAt'               => date('Y-m-d H:i:s'),
             ];
             $query = $this->db->insert("ims_change_request_tbl", $data);
             $changeRequestCode = "";

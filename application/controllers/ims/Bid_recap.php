@@ -36,7 +36,7 @@ class Bid_recap extends CI_Controller {
         $submittedAt                = $this->input->post("submittedAt") ?? null;
         $createdBy                  = $this->input->post("createdBy") ?? $sessionID;
         $updatedBy                  = $this->input->post("updatedBy") ?? $sessionID;
-        $createdAt                  = $this->input->post("createdAt");
+        $createdAt                  = $this->input->post("createdAt") ?? date("Y-m-d H:i:s");
         $items                      = $this->input->post("items") ?? [];
         $assets                     = $this->input->post("assets") ?? [];
         $finalquote                 = $this->input->post("finalquote") ?? [];

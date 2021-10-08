@@ -46,7 +46,7 @@ $(document).on("change","[name=inventoryVendorID]",function(){
     $(this).closest("tr").find(".vendorcode").text(vendorcode);
     $(this).closest("tr").find(".dateupdated").text(datetoday);
     $(this).closest("tr").find("[name=vendorCurrentPrice").val("");
-    $(this).closest("tr").find("[name=preffered]").prop("checked", false);
+    $(this).closest("tr").find("[name=preferred]").prop("checked", false);
    getVendorOptions(); 
 });
 
@@ -56,18 +56,17 @@ $(document).on("keyup","[name=vendorCurrentPrice]",function(){
     let datetoday   = moment(new Date()).format("MMMM DD, YYYY hh:mm:ss A");
     $(this).closest("tr").find(".vendorcode").text(vendorcode);
     $(this).closest("tr").find(".dateupdated").text(datetoday);
-    // $(this).closest("tr").find("[name=vendorCurrentPrice").val("");
-    $(this).closest("tr").find("[name=preffered]").prop("checked", false);
-//    getVendorOptions(); 
+    $(this).closest("tr").find("[name=preferred]").prop("checked", false);
 });
 
 
 
 
-$(document).on("click","[name=preferred]", function(){
-    let thisID = $(this).attr("id");
-    $("[name=preferred]").prop("checked", false);
-    $("#"+thisID).prop("checked", true);
+$(document).on("change","[name=preferred]", function(){
+    let count = $(`[name="preferred"]:checked`).length;
+    if (count > 3) {
+        $(this).prop("checked", false);
+    }
 });
 
 // THIS IS FOR THE CHECKBOX DELETING ROWS
@@ -112,7 +111,7 @@ $(document).on("click","[name=preferred]", function(){
                     }
                 });
             }else{
-                showNotification("danger", "You must have atleast one or more assets.");
+                showNotification("danger", "You must have atleast one or more vendors.");
             }
         });
 
@@ -188,7 +187,9 @@ $(document).on("click",".priceListRow-show-more",function(e){
               let text          = priceListData.length > 0 ? `update the price list`:`add a new price list`;
               let subTitle      = priceListData.length > 0 ? `Update price list`:`Add new price list`;
             let validation  = validateForm("modal_price_list_form");
-            if(validation){
+            let checkPreferredVendor = validatePreferredVendor();
+            removeIsValid("#modal_price_list_form");
+            if(validation && checkPreferredVendor){
                     var arrData = {id:assetID,assets:[]};
                     $("#modal_price_list_form")
                         .find("select[required]")
@@ -196,19 +197,20 @@ $(document).on("click",".priceListRow-show-more",function(e){
                             var vendorID    = this.value;
                             var vendorName  = $('option:selected',this).attr("vendorname");
                             var currentPrice  = $(this).closest("tr").find("input[name=vendorCurrentPrice]").val();
-                            var preffered     = $(this).closest("tr").find("input[name=preferred]").prop("checked");
+                            var preferred     = $(this).closest("tr").find("input[name=preferred]").prop("checked");
                             var dateUpdated   = $(this).closest("tr").find(".dateupdated").text();
                                 arrData[`assets[${i}][assetID]`]              = assetID;
                                 arrData[`assets[${i}][inventoryVendorID]`]   = vendorID;
                                 arrData[`assets[${i}][inventoryVendorName]`] = vendorName;
                                 arrData[`assets[${i}][vendorCurrentPrice]`]  = currentPrice.replaceAll(",","");
-                                arrData[`assets[${i}][preferred]`]           = preffered ? "1" : "0";
+                                arrData[`assets[${i}][preferred]`]           = preferred ? "1" : "0";
                                 arrData[`assets[${i}][updatedAt]`]           = moment(dateUpdated).format("YYYY-MM-DD hh:mm:ss");;
                                 arrData[`assets[${i}][createdBy]`]           = sessionID;
                                 arrData[`assets[${i}][updatedBy]`]           = sessionID;
                     });
 
                  if(preferredArr.length > 0){
+                    $("#modal_price_list").modal("hide");
                     Swal.fire({
                         title:  title, 
                         text:   `Are you sure that you want to  ${text} to the system?`,
@@ -221,7 +223,6 @@ $(document).on("click",".priceListRow-show-more",function(e){
                         cancelButtonColor: '#1a1a1a',
                         cancelButtonText: 'No',
                         confirmButtonText: 'Yes',
-                        allowOutsideClick: false
                     }).then((result) => {
                         if (result.isConfirmed) {
                             $.ajax({
@@ -235,9 +236,9 @@ $(document).on("click",".priceListRow-show-more",function(e){
                                     if(condition[0]){
                                         Swal.fire({
                                             icon:  'success',
-                                            title: `${subTitle} successfully saved!`,
+                                            title: `ASSET PRICE LIST SUCCESSFULLY SAVED!`,
                                             showConfirmButton: false,
-                                            timer: 3500
+                                            timer: 2000
                                         }).then(reInit(assetID));
                                     }else{
                                         showNotification("danger", condition[1]);
@@ -450,7 +451,6 @@ function getVendorOptions(){
     $(".select2[name=inventoryVendorID]").each(function(){
         vendorListArr.push($(this).val());
         vendorElementID.push(`#${this.id}[name=inventoryVendorID]`);
-        // $(this).val() && $(this).trigger("change");
     });
     
     vendorElementID.map((element,index)=>{
@@ -589,3 +589,24 @@ function getFormCode(str = null, date = null, id = 0) {
 	return null;
 }
 // ----- END GET FORM CODE -----
+
+
+
+// ----- VALIDATE PREFERRED VENDOR -----
+function validatePreferredVendor() {
+    let count = $(`[name="preferred"]:checked`).length;
+    if (count != 3) {
+        showNotification("danger", "You must select three preferred vendor for this asset.");
+        return false;
+    }
+    return true;
+}
+// ----- END VALIDATE PREFERRED VENDOR -----
+
+
+// ----- REMOVE IS-VALID IN TABLE -----
+function removeIsValid(element = "table") {
+    $(element).find(".validated, .is-valid, .no-error").removeClass("validated")
+    .removeClass("is-valid").removeClass("no-error");
+}
+// ----- END REMOVE IS-VALID IN TABLE -----

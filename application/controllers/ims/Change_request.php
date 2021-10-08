@@ -37,7 +37,7 @@ class Change_request extends CI_Controller {
         $submittedAt             = $this->input->post("submittedAt") ?? null;
         $createdBy               = $this->input->post("createdBy");
         $updatedBy               = $this->input->post("updatedBy");
-        $createdAt               = $this->input->post("createdAt");
+        $createdAt               = $this->input->post("createdAt") ?? date("Y-m-d H:i:s");
 
         $changeRequestData = [
             "changeRequestReason"  => $changeRequestReason,

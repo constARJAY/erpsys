@@ -761,10 +761,11 @@ $(document).ready(function() {
 		}) 
 
 		elementID.map((element, index) => {
-			let html = `<option selected disabled>Select Item Name</option>`;
+			let html = ``;
 			let itemList = [...GLOBAL_REQUEST_ITEM_LIST];
 		
 			if (GLOBAL_CLASSIFICATION_TYPE == "Items") {
+				html = `<option selected disabled>Select Item Name</option>`;
 				itemList.filter(item => !itemIDArr.includes(item.itemID) || item.itemID == itemIDArr[index]).map(item => {
 					html += `
 					<option 
@@ -782,6 +783,7 @@ $(document).ready(function() {
 					</option>`;
 				});
 			} else if (GLOBAL_CLASSIFICATION_TYPE == "Assets") {
+				html = `<option selected disabled>Select Asset Name</option>`;
 				itemList.filter(item => !itemIDArr.includes(item.assetID) || item.assetID == itemIDArr[index]).map(item => {
 					html += `
 					<option 
@@ -1515,7 +1517,7 @@ $(document).ready(function() {
 				remarks,
 			} = item;
 
-			let assetNameDisplay = readOnly ? (assetName ? (assetName != 'Select Item Name' ? assetName : "-") : "-") : `
+			let assetNameDisplay = readOnly ? (assetName ? (assetName != 'Select Asset Name' ? assetName : "-") : "-") : `
 				<select class="form-control validate select2 w-100"
 					name="inventoryItemID"         
 					required>

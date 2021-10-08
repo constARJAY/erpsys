@@ -1,5 +1,6 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
+date_default_timezone_set('Asia/Manila');
 
 class PurchaseRequest_model extends CI_Model {
 
@@ -19,14 +20,6 @@ class PurchaseRequest_model extends CI_Model {
 
         if ($query) {
             $purchaseRequestID = $action == "insert" ? $this->db->insert_id() : $id;
-
-            // ----- INSERT PURCHASE ORDER IF APPROVE -----
-            // $purchaseRequestStatus = $data["purchaseRequestStatus"];
-            // if ($purchaseRequestStatus == "2")
-            // {
-            //     $insertPurchaseOrderData = $this->insertPurchaseOrderData($purchaseRequestID);
-            // }
-            // ----- END INSERT PURCHASE ORDER IF APPROVE -----
             
             $purchaseRequestCode = "";
             if ($action == "insert") {
@@ -393,6 +386,8 @@ class PurchaseRequest_model extends CI_Model {
                 'purchaseOrderStatus'     => 0,
                 'createdBy'               => $employeeID,
                 'updatedBy'               => $sessionID,
+                'createdAt'               => date('Y-m-d H:i:s'),
+                'updatedAt'               => date('Y-m-d H:i:s'),
             ];
 
             $query = $this->db->insert("ims_purchase_order_tbl", $data);

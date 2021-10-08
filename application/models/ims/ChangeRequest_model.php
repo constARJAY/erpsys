@@ -21,14 +21,6 @@ class ChangeRequest_model extends CI_Model {
         if ($query) {
             $changeRequestID = $action == "insert" ? $this->db->insert_id() : $id;
 
-            // ----- INSERT BID RECAP IF APPROVE -----
-            // $changeRequestStatus = $data["changeRequestStatus"];
-            // if ($changeRequestStatus == "2")
-            // {
-            //     $insertBidRecapData = $this->insertBidRecapData($changeRequestID);
-            // }
-            // ----- END INSERT BID RECAP IF APPROVE -----
-
             $changeRequestCode = "";
             if ($action == "insert") {
                 $changeRequestCode = getFormCode("CRF", date("Y-m-d"), $changeRequestID);
@@ -245,6 +237,8 @@ class ChangeRequest_model extends CI_Model {
                 'bidRecapStatus'          => 0,
                 'createdBy'               => $changeRequestData->employeeID,
                 'updatedBy'               => $changeRequestData->updatedBy,
+                'createdAt'               => date('Y-m-d H:i:s'),
+                'updatedAt'               => date('Y-m-d H:i:s'),
             ];
 
             $query = $this->db->insert("ims_bid_recap_tbl", $data);
