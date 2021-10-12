@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Oct 12, 2021 at 02:04 AM
+-- Generation Time: Oct 12, 2021 at 06:41 AM
 -- Server version: 10.4.14-MariaDB
 -- PHP Version: 7.4.10
 
@@ -10607,6 +10607,7 @@ CREATE TABLE `ims_inventory_vehicle_tbl` (
   `vehicleImage` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `vehicleDepreciation` decimal(10,2) NOT NULL,
   `vehicleHourRate` decimal(10,2) NOT NULL,
+  `vehicleProviderFee` decimal(12,2) DEFAULT NULL,
   `vehicleStatus` int(50) NOT NULL,
   `createdBy` bigint(20) NOT NULL,
   `updatedBy` bigint(20) NOT NULL,

@@ -555,17 +555,18 @@ $(document).ready(function() {
 							cancel="${isFromCancelledDocument}"><i class="fas fa-ban"></i> 
 							Cancel
 						</button>`;
-					} else {
-						button += `
-						<button type="button" 
-							class="btn btn-cancel px-5 p-2"
-							id="btnCancelForm" 
-							inventoryValidationID="${encryptString(inventoryValidationID)}"
-							code="${getFormCode("IVR", createdAt, inventoryValidationID)}"
-							revise=${isRevise}><i class="fas fa-ban"></i> 
-							Cancel
-						</button>`;
 					}
+					//  else {
+					// 	button += `
+					// 	<button type="button" 
+					// 		class="btn btn-cancel px-5 p-2"
+					// 		id="btnCancelForm" 
+					// 		inventoryValidationID="${encryptString(inventoryValidationID)}"
+					// 		code="${getFormCode("IVR", createdAt, inventoryValidationID)}"
+					// 		revise=${isRevise}><i class="fas fa-ban"></i> 
+					// 		Cancel
+					// 	</button>`;
+					// }
 
 					
 				} else if (inventoryValidationStatus == 1) {
@@ -1851,21 +1852,7 @@ $(document).ready(function() {
 
 
 	function getFooterData(data){
-		// let data = new FormData;
-		// $(".itemTableRow").each(function(i, obj){
-				// 	let requestItemID 			= $(this).attr("requestitemid");
-				// 	let inventoryValidationID 	= $(this).attr("inventoryValidationID");
-
-				// 	let forPurchase 			= $(this).find(".forpurchase").text().replaceAll(",","") || $(this).find(".forpurchase").text();
-				// 	let availableStocks 		= $(this).find(".availablestocks").text().replaceAll(",","") || $(this).find(".availablestocks").text();
-
-				// 	data.append(`items[${i}][requestItemID]`, requestItemID);
-				// 	data.append(`items[${i}][inventoryValidationID]`, inventoryValidationID);
-				// 	data.append(`items[${i}][forPurchase]`, forPurchase);
-				// 	data.append(`items[${i}][availableStocks]`, availableStocks);
-					
-					
-				// });
+	
 
 				$(".itemTableRow").each(function(i, obj){
 					let requestItemID 			= $(this).attr("requestitemid");
@@ -1967,21 +1954,7 @@ $(document).ready(function() {
 				});
 
 
-				// $(".assetTableRow").each(function(i, obj){
-				// 	let requestAssetID 			= $(this).attr("requestassetid");
-				// 	let inventoryValidationID 	= $(this).attr("inventoryValidationID");
-
-				// 	let forPurchase 			= $(this).find(".forpurchase").text().replaceAll(",","") || $(this).find(".forpurchase").text();
-				// 	let availableStocks 		= $(this).find(".availablestocks").text().replaceAll(",","") || $(this).find(".availablestocks").text();
-
-				// 	data.append(`assets[${i}][requestAssetID]`, requestAssetID);
-				// 	data.append(`assets[${i}][inventoryValidationID]`, inventoryValidationID);
-				// 	data.append(`assets[${i}][forPurchase]`, forPurchase);
-				// 	data.append(`assets[${i}][availableStocks]`, availableStocks);
-					
-					
-				// });
-
+			
 				$(".assetTableRow").each(function(i, obj){
 					let requestAseetID 			= $(this).attr("requestassetid");
 					let inventoryValidationID 	= $(this).attr("inventoryValidationID");

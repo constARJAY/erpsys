@@ -29,13 +29,14 @@ class Inventory_receiving extends CI_Controller {
         $projectName                = $this->input->post("projectName") ?? null;
         $projectCategory            = $this->input->post("projectCategory") ?? null;
         $clientCode                 = $this->input->post("clientCode") ?? null;
+        $clientName                 = $this->input->post("clientName") ?? null;
         $timelineBuilderID          = $this->input->post("timelineBuilderID") ?? null;
         $clientAddress              = $this->input->post("clientAddress") ?? null;
         $recordID                   = $this->input->post("recordID");
         $inventoryReceivingID       = $this->input->post("inventoryReceivingID") ?? null;
         $reviseInventoryReceivingID = $this->input->post("reviseInventoryReceivingID") ?? null;
         $employeeID                 = $this->input->post("employeeID");
-        $receiptNo                 = $this->input->post("receiptNo");
+        $receiptNo                 = $this->input->post("file");
         $approversID                = $this->input->post("approversID") ?? null;
         $approversStatus            = $this->input->post("approversStatus") ?? null;
         $approversDate              = $this->input->post("approversDate") ?? null;
@@ -60,6 +61,7 @@ class Inventory_receiving extends CI_Controller {
             "projectName"                   => $projectName,
             "projectCategory"               => $projectCategory,
             "clientCode"                    => $clientCode,
+            "clientName"                    => $clientName,
             "timelineBuilderID"             => $timelineBuilderID,
             "clientAddress"                 => $clientAddress,
             "recordID"                      => $recordID,
@@ -119,7 +121,8 @@ class Inventory_receiving extends CI_Controller {
                 //$scopes =[];
                 $inventoryReceivingID = $result[2];
                 if($_FILES){
-                    $fileType                   = substr($_FILES["file"]["type"], strpos($_FILES["file"]["type"], "/") + 1);
+                    $fileType                   = strpos($_FILES($receiptNo), ".") + 1;
+                     
                     $receiptNo             = "INR-".date("y")."-".str_pad($inventoryReceivingID, 5, '0', STR_PAD_LEFT).".".$fileType;
                     $updateReceiptData  = ["receiptNo" => $receiptNo];
                     if(file_exists("assets/upload-files/inventory-receiving/".$receiptNo)){

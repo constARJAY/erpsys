@@ -170,7 +170,7 @@ function initDataTables() {
 			sorting: [],
 			scrollCollapse: true,
 			columnDefs: [
-				{ targets: 0,  width: 100 },
+				{ targets: 0,  width: 180 },
 				{ targets: 1,  width: 150 },
 				{ targets: 2,  width: 150 },
 				{ targets: 3,  width: 250 },
@@ -192,7 +192,7 @@ function initDataTables() {
 			sorting: [],
 			scrollCollapse: true,
 			columnDefs: [
-				{ targets: 0,  width: 100 },
+				{ targets: 0,  width: 180 },
 				{ targets: 1,  width: 150 },
 				{ targets: 2,  width: 100 },
 				{ targets: 3,  width: 250 },
@@ -1275,19 +1275,35 @@ function formContent(data = false, readOnly = false, isRevise = false, isFromCan
 				<div class="form-group">
 					<div class="d-flex justify-content-between align-items-center">
 							<label>Upload Invoice ${!disabled ? "<code>*</code>" : ""}</label>
-							<label>${!disabled ? (receiptNo ? `<a href="${base_url+"assets/upload-files/inventory-receiving/"+receiptNo}" target="_blank">${receiptNo}</a>` : ``) : ``}</label>
-					</div>
+							<label>${!disabled ? (receiptNo ? `<a class="displayfile" href="${base_url+"assets/upload-files/inventory-receiving/"+receiptNo}" target="_blank">${receiptNo}</a>` : ``) : ``}</label>
+					</div>`;
+					if(receiptNo==""){
+						html +=`${ disabled ? (receiptNo ? `<a class="displayfile" href="${base_url+"assets/upload-files/inventory-receiving/"+receiptNo}" target="_blank">${receiptNo}</a>` : `-` )
+						: `<input  type="file" 
+									class="form-control" 
+									name="receiptNo" 
+									id="receiptNo"
+									files="${receiptNo}"
+									required
+									multiple
+									accept="image/*, .pdf, .doc, .docx" ${disabled}>`}
+						<div class="d-block invalid-feedback" id="invalid-receiptNo"></div>`;
+					}else{
+						html +=`${ disabled ? (receiptNo ? `<a class="displayfile" href="${base_url+"assets/upload-files/inventory-receiving/"+receiptNo}" target="_blank">${receiptNo}</a>` : `-` )
+						: `<input  type="file" 
+									class="form-control" 
+									name="receiptNo" 
+									id="receiptNo"
+									files="${receiptNo}"
+
+									multiple
+									accept="image/*, .pdf, .doc, .docx" ${disabled}>`}
+						<div class="d-block invalid-feedback" id="invalid-receiptNo"></div>`;
+
+					}
 					
 					
-					${ disabled ? (receiptNo ? `<a href="${base_url+"assets/upload-files/inventory-receiving/"+receiptNo}" target="_blank">${receiptNo}</a>` : `-` )
-					: `<input  type="file" 
-								class="form-control" 
-								name="receiptNo" 
-								id="receiptNo"
-								multiple
-								accept="image/*, .pdf, .doc, .docx" ${disabled}>`}
-					<div class="d-block invalid-feedback" id="invalid-receiptNo"></div>
-				</div>
+				html +=`</div>
 			</div>
 		<div class="col-md-4 col-sm-12">
 			<div class="form-group">
@@ -1313,7 +1329,13 @@ function formContent(data = false, readOnly = false, isRevise = false, isFromCan
 				<input type="text" name="clientCode" id="clientCode" value="${clientCode}" class="form-control" disabled>
 			</div>
 		</div>
-		<div class="col-md-8 col-sm-12">
+		<div class="col-md-4 col-sm-12">
+			<div class="form-group">
+				<label>Client Name</label>
+				<input type="text" name="clientName" id="clientName" value="${clientName}" class="form-control" disabled>
+			</div>
+		</div>
+		<div class="col-md-4 col-sm-12">
 			<div class="form-group">
 				<label>Client Address</label>
 				<input type="text" name="clientAddress" id="clientAddress" value="${clientAddress}" class="form-control" disabled>
@@ -1434,6 +1456,7 @@ $(document).on("change", "[name=receiptNo]", function(e) {
 				<span class="filename">${filename}</span>
 				<span class="btnRemoveFile" style="cursor: pointer"><i class="fas fa-close"></i></span>
 			</div>`;
+			$("[name=receiptNo]").attr("files", filename);
 			$(this).parent().find(".displayfile").first().html(html);
 		}
 
@@ -1534,10 +1557,12 @@ function getInventoryReceivingData(action = "insert", method = "submit", status 
 	formData.append("updatedBy", sessionID);
 
 	if (currentStatus == "0" && method != "approve") {
-		//var file = document.getElementById("receiptNo").files[0];
+		//var file = document.getElementById("receiptNo").files[0];files
 		data["employeeID"] 				 	= sessionID;
-		var timelineDate 					= $("[name=receiptNo]").val().split(" - ");
-			var files 						= document.getElementById("receiptNo").files[0];
+		var files 							= $("[name=receiptNo]").attr("files");
+		///var files1 						= document.getElementById("receiptNo").files[0];
+		
+		//var files 						= document.getElementById("receiptNo").files[0];
 		data["inventoryReceivingReason"] 	= $("[name=inventoryReceivingReason]").val()?.trim();
 		data["purchaseOrderCode"] 			= $("[name=inventoryReceivingCode]").val()?.trim();
 		data["purchaseOrderID"] 			= $("[name=inventoryReceivingCode]").attr("purchaseOrderID");
@@ -1546,6 +1571,7 @@ function getInventoryReceivingData(action = "insert", method = "submit", status 
 		data["projectName"] 				= $("[name=projectName]").val();
 		data["projectCategory"] 			= $("[name=projectCategory]").val();
 		data["clientCode"] 					= $("[name=clientCode]").val();
+		data["clientName"] 					= $("[name=clientName]").val();
 		data["clientAddress"] 				= $("[name=clientAddress]").val();
 		data["file"] 						= files;
 		data["recordID"] 					= $("[name=recordID]").attr("assetoritem");
@@ -1564,6 +1590,7 @@ function getInventoryReceivingData(action = "insert", method = "submit", status 
 		formData.append("projectName", $("[name=projectName]").val());
 		formData.append("projectCategory", $("[name=projectCategory]").val());
 		formData.append("clientCode", $("[name=clientCode]").val());
+		formData.append("clientName", $("[name=clientName]").val());
 		formData.append("timelineBuilderID", $("[name=clientCode]").attr("timelineBuilderID"));
 		formData.append("clientAddress", $("[name=clientAddress]").val());
 		formData.append("recordID", $("[name=recordID]").attr("assetoritem"));
@@ -2061,7 +2088,7 @@ $(document).on("click", "#btnReject", function () {
 	const feedback = $(this).attr("code") || getFormCode("INR", dateToday(), id);
 
 	$("#modal_inventory_receiving_content").html(preloader);
-	$("#modal_inventory_receiving .page-title").text("DENY Inventory Receiving");
+	$("#modal_inventory_receiving .page-title").text("DENY INVENTORY RECEIVING");
 	$("#modal_inventory_receiving").modal("show");
 	let html = `
 	<div class="modal-body">
