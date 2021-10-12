@@ -559,7 +559,7 @@ $(document).ready(function() {
             })
         }else{
             const itemSerialContent = displayItemSerialNumber();
-            const withdrawalItemRemaining = getTableData(`ims_material_withdrawal_item_tbl`,` ((SELECT requestQuantity FROM ims_request_items_tbl WHERE itemID = ${itemID} AND materialRequestID = ${materialRequestID} AND inventoryValidationID IS NOT NULL AND bidRecapID IS NULL) - IFNULL(SUM(received),0)) as remainingValue`,` itemID = ${itemID} AND materialRequestID = ${materialRequestID}`);
+            const withdrawalItemRemaining = getTableData(`ims_material_withdrawal_item_tbl`,` ((SELECT DISTINCT(requestQuantity) FROM ims_request_items_tbl WHERE itemID = ${itemID} AND materialRequestID = ${materialRequestID} AND inventoryValidationID IS NOT NULL AND bidRecapID IS NULL) - IFNULL(SUM(received),0)) as remainingValue`,` itemID = ${itemID} AND materialRequestID = ${materialRequestID}`);
             const getAvailableStocks = getTableData(`ims_stock_in_item_tbl AS itmStock 
 			JOIN ims_inventory_item_tbl AS itm ON itm.itemID = itmStock.itemID
 			`,
@@ -632,7 +632,7 @@ $(document).ready(function() {
                                             </td>
                                             <td>
                                                     <div class="stockoutdate" >
-                                                        <span name="stockOutDate" index="0">-</span>
+                                                        <span name="stockOutDate" itemID="${itemID}" index="0">-</span>
                                                     </div>
                                             </td>
                                             <td>
@@ -831,8 +831,8 @@ $(document).ready(function() {
                         <thead style="line-height:8px; white-space:nowrap;">
                             <tr class="bg-dark">
                                 <th class="text-white">Item Code</th>
-                                <th class="text-white">Item Name/Brand Name</th>
-                                <th class="text-white">Item Classification/Item Category</th>
+                                <th class="text-white">Item Name</th>
+                                <th class="text-white">Item Classification</th>
                                 <th class="text-white">UOM</th>
                                 <th class="text-white">Quantity</th>
                                 <th class="text-white"></th>
@@ -1612,10 +1612,10 @@ $(document).ready(function() {
             const stockOut = $(`.input-quantity[name="StockOut"][itemID="${itemID}"][index="${index}"]`).val().replaceAll(",","");
             const availableStocks = $(`[name="availableStocks"][itemID="${itemID}"][index="${index}"]`).val().replaceAll(",","");
             const remainingItem = $(`[name="remaining"][itemID="${itemID}"][index="${index}"]`).text().replaceAll(",","");;
-            var stockOutDate = $(`[name="stockOutDate"][index="${index}"]`).text() || "";
+            var stockOutDate = $(`[name="stockOutDate"][itemID="${itemID}"][index="${index}"]`).text() || "";
 
             if(stockOutDate != "-"){
-                stockOutDate = moment($(`[name="stockOutDate"][index="${index}"]`).text()).format("YYYY-MM-DD");
+                stockOutDate = moment($(`[name="stockOutDate"][itemID="${itemID}"][index="${index}"]`).text()).format("YYYY-MM-DD");
             }else{
                 stockOutDate = "";
             }

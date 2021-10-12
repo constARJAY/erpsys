@@ -471,8 +471,7 @@ $(document).ready(function() {
 
                 var lastIndex  = image.substring(image.lastIndexOf("/") + 1, image.length);
                 if(lastIndex.toLowerCase() == "null"){
-                    var split =  image.lastIndexOf('/');
-                     image = split.substring(0,split)+'/default.png';
+                    image = image.substring(image.lastIndexOf("/") + 1, image.length).replace("null","default.png");
                 }
 
                 if (index <= 5) {
@@ -846,8 +845,7 @@ function displayPhase(teamMembers = {}, phase = {}, index = 0 ) {
 
                     var lastIndex  = image.substring(image.lastIndexOf("/") + 1, image.length);
                     if(lastIndex.toLowerCase() == "null"){
-                        var split = image.split("/");
-                        image = split.substring(0,split)+'/default.png';
+                        image = image.substring(image.lastIndexOf("/") + 1, image.length).replace("null","default.png");
                     }
                     
                     return `
@@ -1208,8 +1206,7 @@ function displayPhase(teamMembers = {}, phase = {}, index = 0 ) {
 
                                     var lastIndex  = image.substring(image.lastIndexOf("/") + 1, image.length);
                                     if(lastIndex.toLowerCase() == "null"){
-                                        var split = image.split("/");
-                                        image = split.substring(0,split)+'/default.png';
+                                        image = image.substring(image.lastIndexOf("/") + 1, image.length).replace("null","default.png");
                                     }
                                    
                                     if (index <= 5) {
@@ -1841,8 +1838,7 @@ function displayPhase(teamMembers = {}, phase = {}, index = 0 ) {
 
                                         var lastIndex  = image.substring(image.lastIndexOf("/") + 1, image.length);
                                         if(lastIndex.toLowerCase() == "null"){
-                                            var split = image.split("/");
-                                            image = split.substring(0,split)+'/default.png';
+                                            image = image.substring(image.lastIndexOf("/") + 1, image.length).replace("null","default.png");
                                         }
                                        
                                         if(id == subtaskAssignee[loop] ){
@@ -1878,8 +1874,7 @@ function displayPhase(teamMembers = {}, phase = {}, index = 0 ) {
 
                                     var lastIndex  = image.substring(image.lastIndexOf("/") + 1, image.length);
                                     if(lastIndex.toLowerCase() == "null"){
-                                        var split = image.split("/");
-                                        image = split.substring(0,split)+'/default.png';
+                                        image = image.substring(image.lastIndexOf("/") + 1, image.length).replace("null","default.png");
                                     }
 
                                     if (index <= 5) {

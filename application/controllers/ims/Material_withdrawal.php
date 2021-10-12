@@ -31,6 +31,7 @@ class Material_withdrawal extends CI_Controller {
         $sessionID = $this->session->has_userdata("adminSessionID") ? $this->session->userdata("adminSessionID") : 1;
 
         $materialWithdrawalID        = $this->input->post("materialWithdrawalID");
+        $inventoryValidationID        = $this->input->post("inventoryValidationID");
         // $timelineManagementStatus = $this->input->post("timelineManagementStatus");
         $items = $this->input->post("items");
         $assets = $this->input->post("assets");
@@ -41,6 +42,7 @@ class Material_withdrawal extends CI_Controller {
         $statusAssetFlag = false;
         $getItemID = [];
         $getAssetID = [];
+
 
         if($items){
             foreach ($items as $key=> $item) {
@@ -56,6 +58,7 @@ class Material_withdrawal extends CI_Controller {
                 $temp = [
                     "materialWithdrawalID"              => $item["materialWithdrawalID"],
                     "withdrawalItemID"  => $item["withdrawalItemID"],
+                    "itemID"  => $item["itemID"],
                     "received"            => $item["received"],
                     "remaining"    => $item["remainingItem"],
                     "dateReceived" => $item["receivedDateItem"],
@@ -82,6 +85,7 @@ class Material_withdrawal extends CI_Controller {
                 $temp = [
                     "materialWithdrawalID"              => $asset["materialWithdrawalID"],
                     "withdrawalAssetID"  => $asset["withdrawalAssetID"],
+                    "assetID"  => $asset["assetID"],
                     "received"            => $asset["received"],
                     "remaining"    => $asset["remainingAsset"],
                     "dateReceived" => $asset["receivedDateAsset"],
@@ -98,13 +102,12 @@ class Material_withdrawal extends CI_Controller {
         // print_r($dataItem);
         // print_r($dataAsset);
         // exit;
-
          
         // echo "<pre>";
         // print_r($getItemID[0]);
         // print_r($this->materialWithdrawal->saveProjectBoard($materialWithdrawalID, $dataItem,$dataAsset,$sessionID));
         // exit;
-        echo json_encode( $this->materialWithdrawal->saveProjectBoard($materialWithdrawalID, $dataItem,$dataAsset,$sessionID,$statusItemFlag,$statusAssetFlag,$getItemID,$getAssetID));
+        echo json_encode( $this->materialWithdrawal->saveProjectBoard($materialWithdrawalID, $dataItem,$dataAsset,$sessionID,$statusItemFlag,$statusAssetFlag,$getItemID,$getAssetID,$inventoryValidationID));
     }
 
 }

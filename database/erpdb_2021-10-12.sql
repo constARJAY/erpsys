@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Oct 08, 2021 at 08:20 AM
+-- Generation Time: Oct 12, 2021 at 02:04 AM
 -- Server version: 10.4.14-MariaDB
 -- PHP Version: 7.4.10
 
@@ -10558,6 +10558,7 @@ INSERT INTO `ims_inventory_storage_tbl` (`inventoryStorageID`, `inventoryStorage
 
 CREATE TABLE `ims_inventory_validation_tbl` (
   `inventoryValidationID` bigint(20) NOT NULL,
+  `reviseInventoryValidationID` bigint(20) DEFAULT NULL,
   `inventoryValidationCode` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `materialRequestID` bigint(20) NOT NULL,
   `materialRequestCode` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
@@ -11127,6 +11128,7 @@ CREATE TABLE `ims_request_assets_tbl` (
   `assetDescription` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `files` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `remarks` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `assetRemarks` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `availableStocks` decimal(15,2) DEFAULT NULL,
   `requestQuantity` decimal(10,2) DEFAULT NULL,
   `reservedAsset` decimal(10,2) DEFAULT NULL,
@@ -11185,6 +11187,7 @@ CREATE TABLE `ims_request_items_tbl` (
   `itemDescription` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `files` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `remarks` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `itemRemarks` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `availableStocks` decimal(10,2) DEFAULT NULL,
   `requestQuantity` decimal(10,2) DEFAULT NULL,
   `reservedItem` decimal(10,2) DEFAULT NULL,

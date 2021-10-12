@@ -332,8 +332,8 @@ $(document).ready(function() {
                     <th>Document No.</th>
                     <th>Prepared By</th>
 					<th>Reference No.</th>
-                    <th>Project Code</th>
-                    <th>Project Name</th>
+                    <th>Project </th>
+                    <th>Client</th>
                     <th>Current Approver</th>
                     <th>Date</th>
                     <th>Status</th>
@@ -349,6 +349,8 @@ $(document).ready(function() {
 				timelineBuilderID,
 				projectCode,
 				projectName,
+				clientCode,
+				clientName,
 				materialRequestCode,
 				approversID,
 				approversDate,
@@ -381,7 +383,12 @@ $(document).ready(function() {
 						</div>
 						<small style="color:#848482;">${projectName || '-'}</small>
 					</td>
-					<td>${projectName || '-'}</td>
+					<td>
+						<div>
+							${clientCode || '-'}
+						</div>
+						<small style="color:#848482;">${ClientName || '-'}</small>
+					</td>
 					<td>
 						${employeeFullname(getCurrentApprover(approversID, approversDate, inventoryValidationStatus, true))}
 					</td>
@@ -414,7 +421,7 @@ $(document).ready(function() {
 			`ims_inventory_validation_tbl AS imrt 
 				LEFT JOIN hris_employee_list_tbl AS helt USING(employeeID) `,
 			"imrt.*, CONCAT(employeeFirstname, ' ', employeeLastname) AS fullname, imrt.createdAt AS dateCreated, imrt.materialRequestCode",
-			``,
+			`IF(imrt.employeeID != ${sessionID},FIELD(inventoryValidationStatus, 0, 3, 2, 4, 5),FIELD(inventoryValidationStatus, 0, 1, 3, 2, 4, 5))`,
 			`FIELD(inventoryValidationStatus, 0, 1, 3, 2, 4, 5), COALESCE(imrt.submittedAt, imrt.createdAt)`
 		);
 
@@ -425,8 +432,8 @@ $(document).ready(function() {
                     <th>Document No.</th>
                     <th>Prepared By</th>
 					<th>Reference No.</th>
-                    <th>Project Code</th>
-                    <th>Project Name</th>
+                    <th>Project</th>
+                    <th>Client</th>
                     <th>Current Approver</th>
                     <th>Date</th>
                     <th>Status</th>
@@ -443,6 +450,8 @@ $(document).ready(function() {
 				materialRequestCode,
                 projectCode,
                 projectName,
+				clientCode,
+				clientName,
 				approversID,
 				approversDate,
 				inventoryValidationStatus,
@@ -474,7 +483,12 @@ $(document).ready(function() {
 					</div>
 					<small style="color:#848482;">${projectName || '-'}</small>
 				</td>
-				<td>${projectName || '-'}</td>
+				<td>
+					<div>
+						${clientCode || '-'}
+					</div>
+					<small style="color:#848482;">${clientName || '-'}</small>
+				</td>
                 <td>
                     ${employeeFullname(getCurrentApprover(approversID, approversDate, inventoryValidationStatus, true))}
                 </td>
@@ -950,10 +964,10 @@ $(document).ready(function() {
 								reqItems.requestQuantity,
 									( SELECT 
 										CASE 
-										WHEN ((IFNULL(SUM(itmStock.quantity),0)-IFNULL(reOrderLevel,0)) - (SELECT IFNULL(SUM(reservedItem),0) FROM ims_request_items_tbl WHERE itemID = reqItems.itemID)) < 0 
+										WHEN ((IFNULL(SUM(itmStock.quantity),0)-IFNULL(reOrderLevel,0)) - (SELECT IFNULL(SUM(reservedItem),0) FROM ims_request_items_tbl WHERE itemID = reqItems.itemID AND bidRecapID IS NULL)) < 0 
 											THEN  0
-										WHEN  ((IFNULL(SUM(itmStock.quantity),0)-IFNULL(reOrderLevel,0)) - (SELECT IFNULL(SUM(reservedItem),0) FROM ims_request_items_tbl WHERE itemID = reqItems.itemID)) > 0 
-											THEN (IFNULL(SUM(itmStock.quantity),0)-IFNULL(reOrderLevel,0) - (SELECT IFNULL(SUM(reservedItem),0) FROM ims_request_items_tbl WHERE itemID = reqItems.itemID))
+										WHEN  ((IFNULL(SUM(itmStock.quantity),0)-IFNULL(reOrderLevel,0)) - (SELECT IFNULL(SUM(reservedItem),0) FROM ims_request_items_tbl WHERE itemID = reqItems.itemID AND bidRecapID IS NULL)) > 0 
+											THEN (IFNULL(SUM(itmStock.quantity),0)-IFNULL(reOrderLevel,0) - (SELECT IFNULL(SUM(reservedItem),0) FROM ims_request_items_tbl WHERE itemID = reqItems.itemID AND bidRecapID IS NULL))
 										END as availableStocks
 									FROM ims_stock_in_item_tbl AS itmStock 
 									LEFT JOIN ims_inventory_item_tbl AS itm ON itm.itemID = itmStock.itemID
@@ -963,12 +977,12 @@ $(document).ready(function() {
 	
 									(SELECT 
 										CASE 
-										WHEN ((IFNULL(SUM(itmStock.quantity),0)-IFNULL(reOrderLevel,0)) - (SELECT IFNULL(SUM(reservedItem),0) FROM ims_request_items_tbl WHERE itemID = reqItems.itemID)) < reqItems.requestQuantity
-										THEN IF( ( (IFNULL(SUM(itmStock.quantity),0)-IFNULL(reOrderLevel,0)) - (SELECT IFNULL(SUM(reservedItem),0) FROM ims_request_items_tbl WHERE itemID = reqItems.itemID) ) <0, 
+										WHEN ((IFNULL(SUM(itmStock.quantity),0)-IFNULL(reOrderLevel,0)) - (SELECT IFNULL(SUM(reservedItem),0) FROM ims_request_items_tbl WHERE itemID = reqItems.itemID AND bidRecapID IS NULL)) < reqItems.requestQuantity
+										THEN IF( ( (IFNULL(SUM(itmStock.quantity),0)-IFNULL(reOrderLevel,0)) - (SELECT IFNULL(SUM(reservedItem),0) FROM ims_request_items_tbl WHERE itemID = reqItems.itemID AND bidRecapID IS NULL) ) <0, 
 												reqItems.requestQuantity ,
-												reqItems.requestQuantity  - ((IFNULL(SUM(itmStock.quantity),0)-IFNULL(reOrderLevel,0)) - (SELECT IFNULL(SUM(reservedItem),0) FROM ims_request_items_tbl WHERE itemID = reqItems.itemID)))
+												reqItems.requestQuantity  - ((IFNULL(SUM(itmStock.quantity),0)-IFNULL(reOrderLevel,0)) - (SELECT IFNULL(SUM(reservedItem),0) FROM ims_request_items_tbl WHERE itemID = reqItems.itemID AND bidRecapID IS NULL)))
 											
-										WHEN  ((IFNULL(SUM(itmStock.quantity),0)-IFNULL(reOrderLevel,0)) - (SELECT IFNULL(SUM(reservedItem),0) FROM ims_request_items_tbl WHERE itemID = reqItems.itemID) ) >  reqItems.requestQuantity
+										WHEN  ((IFNULL(SUM(itmStock.quantity),0)-IFNULL(reOrderLevel,0)) - (SELECT IFNULL(SUM(reservedItem),0) FROM ims_request_items_tbl WHERE itemID = reqItems.itemID AND bidRecapID IS NULL) ) >  reqItems.requestQuantity
 											THEN 0
 										END as forPurchase
 																	
@@ -1165,10 +1179,10 @@ $(document).ready(function() {
 	
 									( SELECT 
 										CASE 
-										WHEN ((IFNULL(SUM(astStock.quantity),0)-IFNULL(reOrderLevel,0)) - (SELECT IFNULL(SUM(reservedAsset),0) FROM ims_request_assets_tbl WHERE assetID = reqAsset.assetID)) < 0 
+										WHEN ((IFNULL(SUM(astStock.quantity),0)-IFNULL(reOrderLevel,0)) - (SELECT IFNULL(SUM(reservedAsset),0) FROM ims_request_assets_tbl WHERE assetID = reqAsset.assetID AND bidRecapID IS NULL)) < 0 
 											THEN  0
-										WHEN  ((IFNULL(SUM(astStock.quantity),0)-IFNULL(reOrderLevel,0)) - (SELECT IFNULL(SUM(reservedAsset),0) FROM ims_request_assets_tbl WHERE assetID = reqAsset.assetID)) > 0 
-											THEN (IFNULL(SUM(astStock.quantity),0)-IFNULL(reOrderLevel,0) - (SELECT IFNULL(SUM(reservedAsset),0) FROM ims_request_assets_tbl WHERE assetID = reqAsset.assetID))
+										WHEN  ((IFNULL(SUM(astStock.quantity),0)-IFNULL(reOrderLevel,0)) - (SELECT IFNULL(SUM(reservedAsset),0) FROM ims_request_assets_tbl WHERE assetID = reqAsset.assetID AND bidRecapID IS NULL)) > 0 
+											THEN (IFNULL(SUM(astStock.quantity),0)-IFNULL(reOrderLevel,0) - (SELECT IFNULL(SUM(reservedAsset),0) FROM ims_request_assets_tbl WHERE assetID = reqAsset.assetID AND bidRecapID IS NULL))
 										END as availableStocks
 									FROM ims_stock_in_assets_tbl AS astStock 
 									LEFT JOIN ims_inventory_asset_tbl AS ast ON ast.assetID = astStock.assetID
@@ -1178,12 +1192,12 @@ $(document).ready(function() {
 
 									(SELECT 
 										CASE 
-										WHEN ((IFNULL(SUM(astStock.quantity),0)-IFNULL(reOrderLevel,0)) - (SELECT IFNULL(SUM(reservedAsset),0) FROM ims_request_assets_tbl WHERE assetID = reqAsset.assetID)) < reqAsset.requestQuantity
-										THEN IF( ( (IFNULL(SUM(astStock.quantity),0)-IFNULL(reOrderLevel,0)) - (SELECT IFNULL(SUM(reservedAsset),0) FROM ims_request_assets_tbl WHERE assetID = reqAsset.assetID) ) <0, 
+										WHEN ((IFNULL(SUM(astStock.quantity),0)-IFNULL(reOrderLevel,0)) - (SELECT IFNULL(SUM(reservedAsset),0) FROM ims_request_assets_tbl WHERE assetID = reqAsset.assetID AND bidRecapID IS NULL)) < reqAsset.requestQuantity
+										THEN IF( ( (IFNULL(SUM(astStock.quantity),0)-IFNULL(reOrderLevel,0)) - (SELECT IFNULL(SUM(reservedAsset),0) FROM ims_request_assets_tbl WHERE assetID = reqAsset.assetID AND bidRecapID IS NULL) ) <0, 
 												reqAsset.requestQuantity ,
-												reqAsset.requestQuantity  - ((IFNULL(SUM(astStock.quantity),0)-IFNULL(reOrderLevel,0)) - (SELECT IFNULL(SUM(reservedAsset),0) FROM ims_request_assets_tbl WHERE assetID = reqAsset.assetID)))
+												reqAsset.requestQuantity  - ((IFNULL(SUM(astStock.quantity),0)-IFNULL(reOrderLevel,0)) - (SELECT IFNULL(SUM(reservedAsset),0) FROM ims_request_assets_tbl WHERE assetID = reqAsset.assetID AND bidRecapID IS NULL)))
 											
-										WHEN  ((IFNULL(SUM(astStock.quantity),0)-IFNULL(reOrderLevel,0)) - (SELECT IFNULL(SUM(reservedAsset),0) FROM ims_request_assets_tbl WHERE assetID = reqAsset.assetID) ) >  reqAsset.requestQuantity
+										WHEN  ((IFNULL(SUM(astStock.quantity),0)-IFNULL(reOrderLevel,0)) - (SELECT IFNULL(SUM(reservedAsset),0) FROM ims_request_assets_tbl WHERE assetID = reqAsset.assetID AND bidRecapID IS NULL) ) >  reqAsset.requestQuantity
 											THEN 0
 										END as forPurchase
 																
@@ -1580,7 +1594,7 @@ $(document).ready(function() {
             </div>
             <div class="col-md-12 col-sm-12">
                 <div class="form-group">
-                    <label>Description ${!disabled ? "<code>*</code>" : ""}</label>
+                    <label>Description</label>
                     <textarea class="form-control validate"
                         data-allowcharacters="[a-z][A-Z][0-9][ ][.][,][-][()]['][/][&]"
                         minlength="1"
@@ -1942,6 +1956,7 @@ $(document).ready(function() {
 			let clientName = tableData[0].clientName;
 			let clientAddress = tableData[0].clientAddress;
 			let dateNeeded = tableData[0].dateNeeded;
+			let inventoryValidationReason = tableData[0].inventoryValidationReason;
 			
 			let inventoryItemStatus = 0;
 			let inventoryAssetStatus = 0;
@@ -1969,6 +1984,7 @@ $(document).ready(function() {
 				data.append(`equipmentBorrowingCode`, equipmentBorrowingCode);
 				data.append(`inventoryValidationID`, inventoryValidationID);
 				data.append(`inventoryValidationCode`, inventoryValidationCode);
+				data.append(`inventoryValidationReason`, inventoryValidationReason);
 				data.append(`materialRequestID`, materialRequestID);
 				data.append(`materialRequestCode`, materialRequestCode);
 				data.append(`costEstimateID`, costEstimateID);

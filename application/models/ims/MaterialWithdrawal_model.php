@@ -268,9 +268,43 @@ class MaterialWithdrawal_model extends CI_Model {
         // $update = $this->updateProjectBuilder($timelineBuilderID, $timelineManagementStatus);
         if ($dataItem && count($dataItem) > 0) {
             $query = $this->db->update_batch('ims_material_withdrawal_item_tbl', $dataItem, 'withdrawalItemID');
+            
+            for($itemLoop =0; $itemLoop < count($dataItem); $itemLoop++){
+                $itemID = $dataItem[$itemLoop]['itemID'];
+               
+                $getReservedItem = $this->db->query("SELECT IFNULL(reservedItem,0) as reservedItem FROM ims_request_items_tbl WHERE inventoryValidationID = '$inventoryValidationID' AND itemID =  $itemID");
+                $result = ($getReservedItem->row()->reservedItem) - ($dataItem[$itemLoop]['received']);
+
+                if($result < 0){
+                    $result = 0;
+                }
+
+                // START UPDATE THE INVENTORY VALIDATION RESERVED ITEMS//
+                $query = $this->db->query("UPDATE  	ims_request_items_tbl
+                SET reservedItem = $result
+                WHERE inventoryValidationID = '$inventoryValidationID' AND itemID =  $itemID");
+                // END UPDATE THE INVENTORY VALIDATION RESERVED ITEMS//
+            }
         }
         if($dataAsset && count($dataAsset) > 0){
             $query = $this->db->update_batch('ims_material_withdrawal_asset_tbl', $dataAsset, 'withdrawalAssetID');
+
+            for($assetLoop =0; $assetLoop < count($dataAsset); $assetLoop++){
+                $assetID = $dataAsset[$assetLoop]['assetID'];
+               
+                $getReservedAsset = $this->db->query("SELECT IFNULL(reservedAsset,0)  as reservedAsset FROM ims_request_assets_tbl WHERE inventoryValidationID = '$inventoryValidationID' AND assetID =  $assetID");
+                $result = ($getReservedAsset->row()->reservedAsset) - ($dataAsset[$assetLoop]['received']);
+
+                if($result < 0){
+                    $result = 0;
+                }
+
+                // START UPDATE THE INVENTORY VALIDATION RESERVED ASSETS//
+                $query = $this->db->query("UPDATE  	ims_request_assets_tbl
+                SET reservedAsset = $result
+                WHERE inventoryValidationID = '$inventoryValidationID' AND assetID =  $assetID");
+                // END UPDATE THE INVENTORY VALIDATION RESERVED ASSETS//
+            }
         }
         if(($dataItem && count($dataItem) > 0) || $dataAsset && count($dataAsset) > 0){
 
@@ -298,7 +332,7 @@ class MaterialWithdrawal_model extends CI_Model {
 
             // START UPDATE THE STATUS OF ITEM AND ASSET IN HEADER OF MATERIAL WITHDRAWAL FORMS//
             $sqlCountItems = $this->db->query("SELECT COUNT(requestItemID) as totalValidationItems 
-            FROM ims_request_items_tbl WHERE inventoryValidationID =$inventoryValidationID AND bidRecapID IS NULL");
+            FROM ims_request_items_tbl WHERE inventoryValidationID = $inventoryValidationID AND bidRecapID IS NULL");
             
             $sqlItems = $this->db->query("SELECT  COUNT(withdrawalItemStatus) as totalCompletedItems
             FROM ims_material_withdrawal_item_tbl  WHERE materialWithdrawalID = $materialWithdrawalID AND withdrawalItemStatus =1");
@@ -307,17 +341,12 @@ class MaterialWithdrawal_model extends CI_Model {
 
                 $this->db->set('inventoryItemStatus', '9');
                 $this->db->where('materialWithdrawalID', $materialWithdrawalID);
-                $this->db->update('ims_material_withdrawal_tbl'); 
-
-
-                // UPDATE TO REMOVE RESERVE ITEMS IN INVENTORY VALIDATION//
-                $this->db->set('reservedItem', 0);
-                $this->db->where('inventoryValidationID', $inventoryValidationID);
-                $this->db->update('ims_request_items_tbl');
-                // UPDATE TO REMOVE RESERVE ITEMS IN INVENTORY VALIDATION//
+                $this->db->update('ims_material_withdrawal_tbl');
+            
             }
+
             $sqlCountAssets = $this->db->query("SELECT COUNT(requestAssetID) as totalValidationAssets 
-            FROM ims_request_assets_tbl WHERE inventoryValidationID =$inventoryValidationID AND bidRecapID IS NULL");
+            FROM ims_request_assets_tbl WHERE inventoryValidationID = $inventoryValidationID AND bidRecapID IS NULL");
 
             $sqlAssets = $this->db->query("SELECT COUNT(withdrawalAssetStatus) totalCompletedAssets
             FROM ims_material_withdrawal_asset_tbl WHERE materialWithdrawalID =$materialWithdrawalID ");
@@ -329,11 +358,6 @@ class MaterialWithdrawal_model extends CI_Model {
                 $this->db->where('materialWithdrawalID', $materialWithdrawalID);
                 $this->db->update('ims_material_withdrawal_tbl'); 
 
-                 // UPDATE TO REMOVE RESERVE ITEMS IN INVENTORY VALIDATION//
-                 $this->db->set('reservedAsset', 0);
-                 $this->db->where('inventoryValidationID', $inventoryValidationID);
-                 $this->db->update('ims_request_assets_tbl');
-                 // UPDATE TO REMOVE RESERVE ITEMS IN INVENTORY VALIDATION//
             }
 
             
@@ -359,9 +383,9 @@ class MaterialWithdrawal_model extends CI_Model {
             // END UPDATE THE STOCK OUT DOCUMENT STATUS//
 
              // START UPDATE THE EQUIPMENT BORROWING DOCUMENT STATUS//
-             $query = $this->db->query("UPDATE  	ims_equipment_borrowing_tbl
+             $query = $this->db->query("UPDATE ims_equipment_borrowing_tbl
              SET inventoryAssetStatus = (SELECT inventoryAssetStatus FROM ims_material_withdrawal_tbl WHERE materialWithdrawalID = $materialWithdrawalID),
-             equipmentBorrowingID  =(SELECT inventoryAssetStatus FROM ims_material_withdrawal_tbl WHERE materialWithdrawalID = $materialWithdrawalID) 
+             equipmentBorrowingStatus  =(SELECT inventoryAssetStatus FROM ims_material_withdrawal_tbl WHERE materialWithdrawalID = $materialWithdrawalID) 
              WHERE materialWithdrawalID = $materialWithdrawalID");
              // END UPDATE THE EQUIPMENT BORROWING DOCUMENT STATUS//
 

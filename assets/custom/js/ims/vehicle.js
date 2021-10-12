@@ -29,7 +29,8 @@ function initDataTables() {
             { targets: 2, width: 250 },
             { targets: 3, width: 150 },
             { targets: 4, width: 150 },
-            { targets: 5, width: 80 },
+            { targets: 5, width: 150 },
+            { targets: 6, width: 80 },
            
         ],
     });
@@ -56,6 +57,7 @@ function tableContent() {
                     vehicleFuelConsumption,
                     vehicleStatus,
                     vehicleHourRate,
+                    vehicleProviderFee,
                     createdAt
                     `,
                     tableWhere: "vehicleStatus=1"},
@@ -74,6 +76,7 @@ function tableContent() {
                         <th>Plate Number/Conduction Number</th>
                         <th>Fuel Type</th>
                         <th>Hourly Rate</th>
+                        <th>Rental Fee</th>
                         <th>Status</th>
                     </tr>
                 </thead>
@@ -118,6 +121,7 @@ function tableContent() {
 					<small style="color:#848482;">${gasType}</small>
 				</td>
                 <td class="text-right">${formatAmount(item.vehicleHourRate,true)}</td>
+                <td class="text-right">${formatAmount(item.vehicleProviderFee,true)}</td>
                 <td class="text-center">${status}</td>
                 </tr>`;
             })
@@ -272,19 +276,20 @@ tableContent();
  // ----- MODAL CONTENT -----
  function modalContent(data = false) {
     let {
-    vehicleID              = "",
-    vehicleName  = "",
-    vehiclePlateNumber    = "",
-    vehicleFuelConsumption          = "",
-    vehicleStatus            = "",
-    vehicleGasType             = "",
-    acquisitionDate = new Date(),
-    vehicleCost   = "",
-    vehicleSalvageValue   = "",
-    vehicleUsefulLife   = "",
-    vehicleImage   = "",
-    vehicleDepreciation   = "",
-    vehicleHourRate   = ""
+    vehicleID               = "",
+    vehicleName             = "",
+    vehiclePlateNumber      = "",
+    vehicleFuelConsumption  = "",
+    vehicleStatus           = "",
+    vehicleGasType          = "",
+    acquisitionDate         = new Date(),
+    vehicleCost             = "",
+    vehicleSalvageValue     = "",
+    vehicleUsefulLife       = "",
+    vehicleImage            = "",
+    vehicleDepreciation     = "",
+    vehicleHourRate         = "",
+    vehicleProviderFee      = ""
     }= data && data[0];     
     // classificationContent(data);
     let button = vehicleID ? `
@@ -422,7 +427,7 @@ tableContent();
                 </div>
             </div>
 
-            <div class="col-md-6 col-sm-12">
+            <div class="col-md-4 col-sm-12">
                 <label>Salvage Value <span class="text-danger font-weight-bold">*</span></label>
                 <div class="input-group">
                     <div class="input-group-prepend">
@@ -441,9 +446,9 @@ tableContent();
                 </div>
             </div>
 
-            <div class="col-md-6 col-sm-12">
+            <div class="col-md-4 col-sm-12">
                 <div class="form-group">
-                    <label>Estimated Useful Life (No. of Years) <span class="text-danger font-weight-bold">*</span></label>
+                    <label style="font-size:90%;">Estimated Useful Life (No. of Years) <span class="text-danger font-weight-bold">*</span></label>
                     <input 
                         type="text" 
                         class="form-control validate" 
@@ -456,6 +461,25 @@ tableContent();
                         value="${vehicleUsefulLife}"
                         autocomplete="off">
                     <div class="invalid-feedback d-block" id="invalid-input_vehicleUsefulLife"></div>
+                </div>
+            </div>
+
+            <div class="col-md-4 col-sm-12">
+                <label>Rental Fee <span class="text-danger font-weight-bold">*</span></label>
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text">₱</span>
+                    </div>
+                    <input type="text" 
+                    class="form-control amount text-right"  
+                    min="0.01" max="999999999"
+                    minlength="1" 
+                    maxlength="17" 
+                    name="vehicleProviderFee" 
+                    id="input_vehicleProviderFee" 
+                    value="${vehicleProviderFee}" 
+                    required>
+                    <div class="invalid-feedback d-block" id="invalid-input_vehicleProviderFee"></div>
                 </div>
             </div>
 
@@ -595,10 +619,11 @@ $(document).on("click", "#btnSave", function() {
         // data["tableName"]            = "ims_inventory_vehicle_tbl";
         // data["feedback"]             = $("[name=vehicleName]").val();
 
-        data.append("tableData[vehicleCost]", +$("#input_vehicleCost").val().replaceAll(",",""));
-        data.append("tableData[vehicleSalvageValue]", +$("#input_vehicleSalvageValue").val().replaceAll(",",""));
-        data.append("tableData[vehicleHourRate]", +$("#input_vehicleHourRate").val().replaceAll(",",""));
-        data.append("tableData[vehicleDepreciation]", +$("#input_vehicleDepreciation").val().replaceAll(",",""));
+        data.append("tableData[vehicleCost]",           +$("#input_vehicleCost").val().replaceAll(",",""));
+        data.append("tableData[vehicleSalvageValue]",   +$("#input_vehicleSalvageValue").val().replaceAll(",",""));
+        data.append("tableData[vehicleHourRate]",       +$("#input_vehicleHourRate").val().replaceAll(",",""));
+        data.append("tableData[vehicleDepreciation]",   +$("#input_vehicleDepreciation").val().replaceAll(",",""));
+        data.append("tableData[vehicleProviderFee]",    +$("#input_vehicleProviderFee").val().replaceAll(",",""));
 
         data.append("tableData[createdBy]", sessionID);
         data.append("tableData[updatedBy]", sessionID);
@@ -656,9 +681,9 @@ $(document).on("click", "#btnUpdate", function() {
             data.append("tableData[vehicleDepreciation]", +$("#input_vehicleDepreciation").val().replaceAll(",",""));
 
             data.append("tableData[updatedBy]", sessionID);
-            data.append("tableName", "ims_inventory_vehicle_tbl");
-            data.append("whereFilter", `vehicleID = ${rowID}`);
-            data.append("feedback", $("[name=vehicleName]").val()?.trim());
+            data.append("tableName",            "ims_inventory_vehicle_tbl");
+            data.append("whereFilter",          `vehicleID = ${rowID}`);
+            data.append("feedback",             $("[name=vehicleName]").val()?.trim());
 
             sweetAlertConfirmation(
                 "update",

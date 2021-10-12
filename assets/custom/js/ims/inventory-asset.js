@@ -495,7 +495,7 @@ $(document).ready(function(){
                     </div>
 
                     <div class="col-md-6 col-sm-12">
-                        <label>3rd Party Provider Fee</label>
+                        <label>Rental Fee <span class="text-danger font-weight-bold">*</span></label>
                         <div class="input-group">
                             <div class="input-group-prepend">
                                 <span class="input-group-text">₱</span>
@@ -507,6 +507,7 @@ $(document).ready(function(){
                             maxlength="14"  
                             name="assetProviderFee" 
                             id="input_assetProviderFee" 
+                            required
                             value="${assetProviderFee}" 
                             >
                             <div class="invalid-feedback d-block" id="invalid-input_assetProviderFee"></div>

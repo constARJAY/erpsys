@@ -554,7 +554,7 @@ $(document).ready(function() {
             })
         }else{
             const assetSerialContent = displayAssetSerialNumber();
-            const withdrawalAssetRemaining = getTableData(`ims_material_withdrawal_asset_tbl`,` ((SELECT requestQuantity FROM ims_request_assets_tbl WHERE assetID = ${assetID} AND materialRequestID = ${materialRequestID} AND inventoryValidationID IS NOT NULL AND bidRecapID IS NULL) - IFNULL(SUM(received),0)) as remainingValue`,` assetID = ${assetID} AND materialRequestID = ${materialRequestID}`);
+            const withdrawalAssetRemaining = getTableData(`ims_material_withdrawal_asset_tbl`,` ((SELECT DISTINCT(requestQuantity) FROM ims_request_assets_tbl WHERE assetID = ${assetID} AND materialRequestID = ${materialRequestID} AND inventoryValidationID IS NOT NULL AND bidRecapID IS NULL) - IFNULL(SUM(received),0)) as remainingValue`,` assetID = ${assetID} AND materialRequestID = ${materialRequestID}`);
             const getAvailableStocks = getTableData(`ims_stock_in_assets_tbl AS astStock 
 			JOIN ims_inventory_asset_tbl AS ast ON ast.assetID = astStock.assetID
 			`,
@@ -627,7 +627,7 @@ $(document).ready(function() {
                                             </td>
                                             <td>
                                                     <div class="borroweddate" >
-                                                        <span name="borrowedDate" index="0">-</span>
+                                                        <span name="borrowedDate" assetID="${assetID}" index="0">-</span>
                                                     </div>
                                             </td>
                                             <td>
@@ -826,8 +826,8 @@ $(document).ready(function() {
                         <thead style="line-height:8px; white-space:nowrap;">
                             <tr class="bg-dark">
                                 <th class="text-white">Asset Code</th>
-                                <th class="text-white">Asset Name/Brand Name</th>
-                                <th class="text-white">Asset Classification/Asset Category</th>
+                                <th class="text-white">Asset Name </th>
+                                <th class="text-white">Asset Classification</th>
                                 <th class="text-white">UOM</th>
                                 <th class="text-white">Quantity</th>
                                 <th class="text-white"></th>
@@ -1604,10 +1604,10 @@ $(document).ready(function() {
             const borrowed = $(`.input-quantity[name="borrowed"][assetID="${assetID}"][index="${index}"]`).val().replaceAll(",","");
             const availableStocks = $(`[name="availableStocks"][assetID="${assetID}"][index="${index}"]`).val().replaceAll(",","");
             const remainingAsset = $(`[name="remaining"][assetID="${assetID}"][index="${index}"]`).text().replaceAll(",","");;
-            var borrowedDate = $(`[name="borrowedDate"][index="${index}"]`).text() || "";
+            var borrowedDate = $(`[name="borrowedDate"][assetID="${assetID}"][index="${index}"]`).text() || "";
 
             if(borrowedDate != "-"){
-                borrowedDate = moment($(`[name="borrowedDate"][index="${index}"]`).text()).format("YYYY-MM-DD");
+                borrowedDate = moment($(`[name="borrowedDate"][assetID="${assetID}"][index="${index}"]`).text()).format("YYYY-MM-DD");
             }else{
                 borrowedDate = "";
             }

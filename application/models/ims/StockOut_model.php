@@ -399,7 +399,7 @@ class StockOut_model extends CI_Model {
 
                         $stockInResult =  $getAvailableStocks->result_array();
 
-                        $deductionStocks =  $stockInResult[0]["availableStocks"] - $requestStocks;
+                        // $deductionStocks =  $stockInResult[0]["availableStocks"] - $requestStocks;
 
                         $data = array(
                             'stockOutID' => $stockOutID,

@@ -1093,6 +1093,7 @@
             const {
                 materialWithdrawalID     = "",
                 materialWithdrawalCode     = "",
+                inventoryValidationID = "",
             } = data && data[0];
 
         //    console.log(data)
@@ -1101,6 +1102,7 @@
                 class="btn btn-submit px-5 p-2"  
                 id="btnSubmit"
                 materialWithdrawalID="${encryptString(materialWithdrawalID)}"
+                inventoryValidationID="${encryptString(inventoryValidationID)}"
                 code="${materialWithdrawalCode}">
                 <i class="fas fa-paper-plane"></i> Update
             </button>`;
@@ -1444,6 +1446,7 @@
     // ----- CLICK BUTTON SUBMIT -----
 	$(document).on("click", "#btnSubmit", function () {
 		const id = decryptString($(this).attr("materialWithdrawalID"));
+		const inventoryValidationID = decryptString($(this).attr("inventoryValidationID"));
         const getItemLength = $(`[name="withdrawalItemID"]`).length;
         const getAssetLength = $(`[name="withdrawalAssetID"]`).length;
 
@@ -1452,7 +1455,7 @@
             setTimeout(() => {
                 // validateInputs().then(res => {
                 //     if (res) {
-                        saveProjectBoard("update", id, pageContent);
+                        saveProjectBoard("update", id, pageContent,inventoryValidationID);
                     // }
                     formButtonHTML(this, false);
                 // });
@@ -1467,8 +1470,9 @@
 
 
     // ----- GET PROJECT BOARD DATA -----
-    const getProjectBoardData = (materialWithdrawalID = 0, method = "save") => {
+    const getProjectBoardData = (materialWithdrawalID = 0, method = "save", inventoryValidationID = 0) => {
         let data = {
+            inventoryValidationID,
             materialWithdrawalID,
             timelineManagementStatus: method == "save" ? 0 : (method == "submit" ? 2 : 1),
             items: [],
@@ -1481,15 +1485,15 @@
         
                     const withdrawalItemID = $(this).attr("withdrawalItemID");
                     const itemID = $(this).attr("itemid");
-                    const received = $(`[name="receivedItems"][index="${index}"]`).val().replaceAll(",","");
-                    const remainingItem = $(`[name="remainingItem"][index="${index}"]`).text().trim().replaceAll(",","");
-                    var receivedDateItem = $(`[name="receivedDateItem"][index="${index}"]`).text() || "";
+                    const received = $(`[name="receivedItems"][itemID="${itemID}"][index="${index}"]`).val().replaceAll(",","");
+                    const remainingItem = $(`[name="remainingItem"][itemID="${itemID}"][index="${index}"]`).text().trim().replaceAll(",","");
+                    var receivedDateItem = $(`[name="receivedDateItem"][itemID="${itemID}"][index="${index}"]`).text() || "";
                     if(receivedDateItem != "-"){
-                        receivedDateItem = moment($(`[name="receivedDateItem"][index="${index}"]`).text()).format("YYYY-MM-DD");
+                        receivedDateItem = moment($(`[name="receivedDateItem"][itemID="${itemID}"][index="${index}"]`).text()).format("YYYY-MM-DD");
                     }else{
                         receivedDateItem = "";
                     }
-                    const itemRemarks = $(`[name="itemRemarks"][index="${index}"]`).val().trim() || "";
+                    const itemRemarks = $(`[name="itemRemarks"][itemID="${itemID}"][index="${index}"]`).val().trim() || "";
                     if(received != 0){
                         const temp = {
                             materialWithdrawalID,withdrawalItemID,itemID,received, remainingItem, receivedDateItem, itemRemarks
@@ -1506,15 +1510,15 @@
         
                     const withdrawalAssetID = $(this).attr("withdrawalAssetID");
                     const assetID = $(this).attr("assetid");
-                    const received = $(`[name="receivedAssets"][index="${index}"]`).val().replaceAll(",","");
-                    const remainingAsset = $(`[name="remainingAsset"][index="${index}"]`).text().trim().replaceAll(",","");
-                    var receivedDateAsset = $(`[name="receivedDateAsset"][index="${index}"]`).text() || "";
+                    const received = $(`[name="receivedAssets"][assetID="${assetID}"][index="${index}"]`).val().replaceAll(",","");
+                    const remainingAsset = $(`[name="remainingAsset"][assetID="${assetID}"][index="${index}"]`).text().trim().replaceAll(",","");
+                    var receivedDateAsset = $(`[name="receivedDateAsset"][assetID="${assetID}"][index="${index}"]`).text() || "";
                     if(receivedDateAsset != "-"){
-                        receivedDateAsset = moment($(`[name="receivedDateAsset"][index="${index}"]`).text()).format("YYYY-MM-DD");
+                        receivedDateAsset = moment($(`[name="receivedDateAsset"][assetID="${assetID}"][index="${index}"]`).text()).format("YYYY-MM-DD");
                     }else{
                         receivedDateItem = "";
                     }
-                    const assetRemarks = $(`[name="assetRemarks"][index="${index}"]`).val().trim() || "";
+                    const assetRemarks = $(`[name="assetRemarks"][assetID="${assetID}"][index="${index}"]`).val().trim() || "";
                     if(received != 0){
                         const temp = {
                             materialWithdrawalID,withdrawalAssetID,assetID,received, remainingAsset, receivedDateAsset, assetRemarks
@@ -1604,7 +1608,7 @@
         })
     }
 
-    function saveProjectBoard(method = "update", id = 0, callback = null) {
+    function saveProjectBoard(method = "update", id = 0, callback = null, inventoryValidationID = null) {
         const confirmation = getConfirmation(method);
         confirmation.then(res => {
             if (res.isConfirmed) {
@@ -1619,7 +1623,7 @@
                     });
                 } else {
 
-                    const data = getProjectBoardData(id, method);
+                    const data = getProjectBoardData(id, method, inventoryValidationID);
                     // console.log(data)
                     // return false;
                     $.ajax({
