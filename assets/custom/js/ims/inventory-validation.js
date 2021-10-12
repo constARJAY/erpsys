@@ -387,7 +387,7 @@ $(document).ready(function() {
 						<div>
 							${clientCode || '-'}
 						</div>
-						<small style="color:#848482;">${ClientName || '-'}</small>
+						<small style="color:#848482;">${clientName || '-'}</small>
 					</td>
 					<td>
 						${employeeFullname(getCurrentApprover(approversID, approversDate, inventoryValidationStatus, true))}
@@ -526,7 +526,7 @@ $(document).ready(function() {
 				createdAt             = new Date,
 				createdBy=""
 			} = data && data[0];
-
+			
 			employeeID = employeeID == "0" ? createdBy : employeeID;
 
 			let isOngoing = approversDate ? approversDate.split("|").length > 0 ? true : false : false;
@@ -607,14 +607,15 @@ $(document).ready(function() {
 							Revise
 						</button>`;
 					}
-				} else if (inventoryValidationStatus == 4) {
+				}
+				 else if (inventoryValidationStatus == 4) {
 					// CANCELLED - FOR REVISE
-					const data = getTableData(
-						`ims_inventory_validation_tbl`,
-						`inventoryValidationID`,
-						`inventoryValidationID = ${inventoryValidationID}`,
-					);
-					const { inventoryValidationID } = data && data[0];
+					// const data = getTableData(
+					// 	`ims_inventory_validation_tbl`,
+					// 	`inventoryValidationID`,
+					// 	`inventoryValidationID = ${inventoryValidationID}`,
+					// );
+					// const { inventoryValidationID } = data && data[0];
 					const isAllowedForRevise = getTableDataLength(
 						`ims_inventory_validation_tbl`,
 						`inventoryValidationID`,
@@ -698,7 +699,10 @@ $(document).ready(function() {
 			requestQuantity     = 0,
 			availableStocks 	= 0,
 			forPurchase          = 0,
+			itemRemarks          = ""
 		} = item;
+
+		let disabled = readOnly ? "disabled":"";
 
 		if (readOnly) {
 
@@ -743,6 +747,12 @@ $(document).ready(function() {
 						<td class="text-center">
 							<div class="forpurchase">
 								${formatAmount(forPurchase)}
+							</div>
+						</td>
+						
+						<td class="text-left">
+							<div class="itemRemarks">
+								${itemRemarks}
 							</div>
 						</td>
 					
@@ -797,6 +807,22 @@ $(document).ready(function() {
 							${formatAmount(forPurchase)}
 						</div>
 					</td>
+
+					<td class="text-left">
+						<div class="itemRemarks">
+								<textarea class="form-control validate" 
+									data-allowcharacters="[a-z][A-Z][0-9][.][,][?][!][/][;][:]['][''][-][_][(][)][%][&][*][ ]" 
+									minlength="0" 
+									maxlength="325" 
+									itemID = "${itemID}"
+									id="itemRemarks" 
+									name="itemRemarks" 
+									rows="2" 
+									style="resize:none;"
+									${disabled}>${itemRemarks || ""}</textarea>
+						</div>
+						
+					</td>
 				
 				</tr>`;
 			}
@@ -823,7 +849,10 @@ $(document).ready(function() {
 			requestQuantity     = 0,
 			availableStocks 	= 0,
 			forPurchase          = 0,
+			assetRemarks          = ""
 		} = asset;
+
+		let disabled = readOnly ? "disabled" : "";
 
 		if (readOnly) {
 			if(assetID !=0){
@@ -867,6 +896,12 @@ $(document).ready(function() {
 				<td class="text-center">
 					<div class="forpurchase">
 						${formatAmount(forPurchase)}
+					</div>
+				</td>
+
+				<td class="text-left">
+					<div class="assetRemarks">
+						${assetRemarks}
 					</div>
 				</td>
 			
@@ -918,8 +953,36 @@ $(document).ready(function() {
 	
 					<td class="text-right">
 						<div class="forpurchase">
-							${formatAmount(forPurchase)}
+								<input class="form-control input-quantity  text-center"
+									value="${formatAmount(forPurchase)}"
+									assetID = "${assetID}"
+									name="forPurchase"
+									min="0.00"
+									max="9999999999"
+									minlength="1"
+									maxlength="10"
+									${disabled}>
+							
 						</div>
+						
+					</td>
+
+					<td class="text-left">
+						<div class="assetRemarks">
+							
+								<textarea class="form-control validate" 
+									data-allowcharacters="[a-z][A-Z][0-9][.][,][?][!][/][;][:]['][''][-][_][(][)][%][&][*][ ]" 
+									minlength="0" 
+									maxlength="325" 
+									assetID = "${assetID}"
+									id="assetRemarks" 
+									name="assetRemarks" 
+									rows="2" 
+									style="resize:none;"
+									${disabled}>${assetRemarks || ""}</textarea>
+							
+						</div>
+						
 					</td>
 				
 				</tr>`;
@@ -934,7 +997,7 @@ $(document).ready(function() {
 
 	// ----- GET REQUEST ITEMS CONTENT -----
 	function requestItemsContent(data = false, readOnly = false){
-
+		
 		let html = "";
 		if (data) {
 
@@ -949,6 +1012,15 @@ $(document).ready(function() {
 				if (inventoryValidationID) {
 
 					if(inventoryValidationStatus == 0 || inventoryValidationStatus == 1 ){
+						
+						let checkExistItems = getTableData("ims_request_items_tbl","",`inventoryValidationID = ${inventoryValidationID}`);
+						let queryCondition ="";
+						if(checkExistItems.length <=0){
+							 queryCondition = readOnly ? "AND inventoryValidationID IS NOT NULL" : "AND inventoryValidationID IS  NULL";
+						}else{
+							 queryCondition = "AND inventoryValidationID IS NOT NULL";
+						}
+
 						
 						requestItemsData = getTableData(
 							`ims_request_items_tbl as reqItems`, 
@@ -990,10 +1062,11 @@ $(document).ready(function() {
 									LEFT JOIN ims_inventory_item_tbl AS itm ON itm.itemID = itmStock.itemID
 									WHERE itmStock.stockOutDate IS NUll 
 									AND itmStock.stockInDate IS NOT NULL 
-									AND itmStock.itemID = reqItems.itemID) as forPurchase
+									AND itmStock.itemID = reqItems.itemID) as forPurchase,
+									reqItems.itemRemarks
 																	
 							`, 
-							`materialRequestID = ${materialRequestID} AND inventoryValidationID IS NULL AND bidRecapID IS NULL`);
+							`materialRequestID = ${materialRequestID}  ${queryCondition} AND bidRecapID IS NULL`);
 					}else{
 						
 						requestItemsData = getTableData(
@@ -1009,7 +1082,8 @@ $(document).ready(function() {
 								reqItems.itemUom,
 								reqItems.requestQuantity,
 								reqItems.availableStocks,
-								reqItems.forPurchase
+								reqItems.forPurchase,
+								reqItems.itemRemarks
 							`, 
 							`inventoryValidationID = ${inventoryValidationID}
 							AND bidRecapID IS NULL`);
@@ -1053,7 +1127,6 @@ $(document).ready(function() {
 
 				// }
 
-				console.log(requestItemsData)
 
 				if (requestItemsData.length > 0) {
 					requestItemsData.map(item => {
@@ -1085,6 +1158,7 @@ $(document).ready(function() {
 										<th>Request Quantity</th>
 										<th>Available Stocks</th>
 										<th>For Purchase</th>
+										<th>Remarks</th>
 										</tr>
 									</thead>
 									<tbody class="itemTableBody">
@@ -1162,6 +1236,32 @@ $(document).ready(function() {
 				if (inventoryValidationID) {
 
 					if(inventoryValidationStatus == 0 || inventoryValidationStatus == 1 ){
+
+						let checkExistAssets = getTableData("ims_request_assets_tbl","",`inventoryValidationID = ${inventoryValidationID}`);
+						let queryCondition ="";
+						if(checkExistAssets.length <=0){
+							 queryCondition = readOnly ? "AND inventoryValidationID IS NOT NULL" : "AND inventoryValidationID IS  NULL";
+						}else{
+							 queryCondition = "AND inventoryValidationID IS NOT NULL";
+						}
+					
+
+						let forPuchaseCondition = readOnly ? `reqAsset.forPurchase`:`(SELECT 
+							CASE 
+							WHEN ((IFNULL(SUM(astStock.quantity),0)-IFNULL(reOrderLevel,0)) - (SELECT IFNULL(SUM(reservedAsset),0) FROM ims_request_assets_tbl WHERE assetID = reqAsset.assetID AND bidRecapID IS NULL)) < reqAsset.requestQuantity
+							THEN IF( ( (IFNULL(SUM(astStock.quantity),0)-IFNULL(reOrderLevel,0)) - (SELECT IFNULL(SUM(reservedAsset),0) FROM ims_request_assets_tbl WHERE assetID = reqAsset.assetID AND bidRecapID IS NULL) ) <0, 
+									reqAsset.requestQuantity ,
+									reqAsset.requestQuantity  - ((IFNULL(SUM(astStock.quantity),0)-IFNULL(reOrderLevel,0)) - (SELECT IFNULL(SUM(reservedAsset),0) FROM ims_request_assets_tbl WHERE assetID = reqAsset.assetID AND bidRecapID IS NULL)))
+								
+							WHEN  ((IFNULL(SUM(astStock.quantity),0)-IFNULL(reOrderLevel,0)) - (SELECT IFNULL(SUM(reservedAsset),0) FROM ims_request_assets_tbl WHERE assetID = reqAsset.assetID AND bidRecapID IS NULL) ) >  reqAsset.requestQuantity
+								THEN 0
+							END as forPurchase
+													
+						FROM ims_stock_in_assets_tbl  AS astStock 
+						LEFT JOIN ims_inventory_asset_tbl AS ast ON ast.assetID = astStock.assetID
+						WHERE astStock.stockOutDate IS NUll 
+						AND astStock.stockInDate IS NOT NULL 
+						AND astStock.assetID = reqAsset.assetID) as forPurchase`;
 						
 						requestAssetData = getTableData(
 							`ims_request_assets_tbl as reqAsset`, 
@@ -1189,25 +1289,10 @@ $(document).ready(function() {
 									WHERE astStock.stockOutDate IS NUll 
 									AND astStock.stockInDate IS NOT NULL 
 									AND astStock.assetID = reqAsset.assetID) as availableStocks,
-
-									(SELECT 
-										CASE 
-										WHEN ((IFNULL(SUM(astStock.quantity),0)-IFNULL(reOrderLevel,0)) - (SELECT IFNULL(SUM(reservedAsset),0) FROM ims_request_assets_tbl WHERE assetID = reqAsset.assetID AND bidRecapID IS NULL)) < reqAsset.requestQuantity
-										THEN IF( ( (IFNULL(SUM(astStock.quantity),0)-IFNULL(reOrderLevel,0)) - (SELECT IFNULL(SUM(reservedAsset),0) FROM ims_request_assets_tbl WHERE assetID = reqAsset.assetID AND bidRecapID IS NULL) ) <0, 
-												reqAsset.requestQuantity ,
-												reqAsset.requestQuantity  - ((IFNULL(SUM(astStock.quantity),0)-IFNULL(reOrderLevel,0)) - (SELECT IFNULL(SUM(reservedAsset),0) FROM ims_request_assets_tbl WHERE assetID = reqAsset.assetID AND bidRecapID IS NULL)))
-											
-										WHEN  ((IFNULL(SUM(astStock.quantity),0)-IFNULL(reOrderLevel,0)) - (SELECT IFNULL(SUM(reservedAsset),0) FROM ims_request_assets_tbl WHERE assetID = reqAsset.assetID AND bidRecapID IS NULL) ) >  reqAsset.requestQuantity
-											THEN 0
-										END as forPurchase
-																
-									FROM ims_stock_in_assets_tbl  AS astStock 
-									LEFT JOIN ims_inventory_asset_tbl AS ast ON ast.assetID = astStock.assetID
-									WHERE astStock.stockOutDate IS NUll 
-									AND astStock.stockInDate IS NOT NULL 
-									AND astStock.assetID = reqAsset.assetID) as forPurchase
+									${forPuchaseCondition},
+									reqAsset.assetRemarks
 							`, 
-							`materialRequestID = ${materialRequestID} AND inventoryValidationID IS NULL AND bidRecapID IS NULL`);
+							`materialRequestID = ${materialRequestID}  ${queryCondition} AND bidRecapID IS NULL`);
 					}else{
 						
 						requestAssetData = getTableData(
@@ -1223,7 +1308,8 @@ $(document).ready(function() {
 								reqAsset.assetUom,
 								reqAsset.requestQuantity,
 								reqAsset.availableStocks,
-								reqAsset.forPurchase
+								reqAsset.forPurchase,
+								reqAsset.assetRemarks
 							`, 
 							`inventoryValidationID = ${inventoryValidationID}
 							 AND bidRecapID IS NULL`);
@@ -1297,6 +1383,7 @@ $(document).ready(function() {
 										<th>Requested Quantity</th>
 										<th>Available Stocks</th>
 										<th>For Purchase</th>
+										<th>Remarks</th>
 										</tr>
 									</thead>
 									<tbody class="assetTableBody">
@@ -1387,7 +1474,7 @@ $(document).ready(function() {
 			createdBy 				= ""
 		} = data && data[0];
 
-	console.log(data)
+	// console.log(data)
 		// ----- GET EMPLOYEE DATA -----
 		let {
 			fullname:    employeeFullname    = "",
@@ -1631,7 +1718,7 @@ $(document).ready(function() {
 			$("#page_content").html(html);
 			initDataTables();
 			initAll();
-		
+			initQuantity();
 
 			// ----- NOT ALLOWED FOR UPDATE -----
 			if (!allowedUpdate) {
@@ -1741,11 +1828,14 @@ $(document).ready(function() {
 				if (approversID) {
 					formData.append("approversID", approversID);
 					formData.append("inventoryValidationStatus", 1);
+					formData = getFooterData(formData);
 				} else {  // AUTO APPROVED - IF NO APPROVERS
 					formData.append("approversID", sessionID);
 					formData.append("approversStatus", 2);
 					formData.append("approversDate", dateToday());
 					formData.append("inventoryValidationStatus", 2);
+					formData = getFooterData(formData);
+
 				}
 			}
 
@@ -1758,6 +1848,248 @@ $(document).ready(function() {
 		return isObject ? data : formData;
 	}
 	// ----- END GET PURCHASE REQUEST DATA -----
+
+
+	function getFooterData(data){
+		// let data = new FormData;
+		// $(".itemTableRow").each(function(i, obj){
+				// 	let requestItemID 			= $(this).attr("requestitemid");
+				// 	let inventoryValidationID 	= $(this).attr("inventoryValidationID");
+
+				// 	let forPurchase 			= $(this).find(".forpurchase").text().replaceAll(",","") || $(this).find(".forpurchase").text();
+				// 	let availableStocks 		= $(this).find(".availablestocks").text().replaceAll(",","") || $(this).find(".availablestocks").text();
+
+				// 	data.append(`items[${i}][requestItemID]`, requestItemID);
+				// 	data.append(`items[${i}][inventoryValidationID]`, inventoryValidationID);
+				// 	data.append(`items[${i}][forPurchase]`, forPurchase);
+				// 	data.append(`items[${i}][availableStocks]`, availableStocks);
+					
+					
+				// });
+
+				$(".itemTableRow").each(function(i, obj){
+					let requestItemID 			= $(this).attr("requestitemid");
+					let inventoryValidationID 	= $(this).attr("inventoryValidationID");
+					let requestItemData			= getTableData("ims_request_items_tbl", "", `requestItemID = '${requestItemID}'`);
+					let tableData 				= requestItemData[0];
+					let getForPurchase = +$(this).find(".forpurchase").text()?.trim().replaceAll(",","") || $(this).find(".forpurchase").text()?.trim();
+					let getAvailableStocks = +$(this).find(".availablestocks").text()?.trim().replaceAll(",","") || $(this).find(".availablestocks").text()?.trim();
+					let getItemRemarks = $(this).find('.itemRemarks > textarea').val()?.trim() || $(this).find('.itemRemarks').text()?.trim();
+					if(requestItemData.length !=0){
+						let costEstimateID = tableData.costEstimateID;
+					let billMaterialID = tableData.billMaterialID;
+					let materialRequestID = tableData.materialRequestID;
+					let bidRecapID = tableData.bidRecapID;
+					let purchaseRequestID = tableData.purchaseRequestID;
+					let purchaseOrderID = tableData.purchaseOrderID;
+					let changeRequestID = tableData.changeRequestID;
+					let inventoryReceivingID = tableData.inventoryReceivingID;
+					let inventoryVendorID = tableData.inventoryVendorID;
+					let inventoryVendorCode = tableData.inventoryVendorCode;
+					let inventoryVendorName = tableData.inventoryVendorName;
+					let finalQuoteRemarks = tableData.finalQuoteRemarks;
+					let milestoneBuilderID = tableData.milestoneBuilderID;
+					let phaseDescription = tableData.phaseDescription;
+					let milestoneListID = tableData.milestoneListID;
+					let projectMilestoneID = tableData.projectMilestoneID;
+					let projectMilestoneName = tableData.projectMilestoneName;
+					let itemID = tableData.itemID;
+					let itemCode = tableData.itemCode;
+					let itemBrandName = tableData.itemBrandName;
+					let itemName = tableData.itemName;
+					let itemClassification = tableData.itemClassification;
+					let itemCategory = tableData.itemCategory;
+					let itemUom = tableData.itemUom;
+					let itemDescription = tableData.itemDescription;
+					let files = tableData.files;
+					let remarks = tableData.remarks;
+					let requestQuantity = tableData.requestQuantity;
+
+					let computeReservedItem  = "";
+					
+					if(getForPurchase == 0 ){
+						if( getAvailableStocks ==0){
+							computeReservedItem = 0;
+
+						}else{
+							computeReservedItem =  requestQuantity;
+
+						}
+					}else{
+						 computeReservedItem = Math.abs(getForPurchase - requestQuantity);
+
+					}
+					let reservedItem =  computeReservedItem || tableData.reservedItem;
+					let forPurchase 	= getForPurchase;				
+					let availableStocks = getAvailableStocks;				
+					let unitCost = tableData.unitCost;
+					let totalCost = tableData.totalCost;
+
+
+					data.append(`items[${i}][costEstimateID]` , costEstimateID);
+					data.append(`items[${i}][billMaterialID]` , billMaterialID);
+					data.append(`items[${i}][materialRequestID]` , materialRequestID);
+					data.append(`items[${i}][inventoryValidationID]` , inventoryValidationID);
+					data.append(`items[${i}][bidRecapID]` , bidRecapID);
+					data.append(`items[${i}][purchaseRequestID]` , purchaseRequestID);
+					data.append(`items[${i}][purchaseOrderID]` , purchaseOrderID);
+					data.append(`items[${i}][changeRequestID]` , changeRequestID);
+					data.append(`items[${i}][inventoryReceivingID]` , inventoryReceivingID);
+					data.append(`items[${i}][inventoryVendorID]` , inventoryVendorID);
+					data.append(`items[${i}][inventoryVendorCode]` , inventoryVendorCode);
+					data.append(`items[${i}][inventoryVendorName]` , inventoryVendorName);
+					data.append(`items[${i}][finalQuoteRemarks]` , finalQuoteRemarks);
+					data.append(`items[${i}][milestoneBuilderID]` , milestoneBuilderID);
+					data.append(`items[${i}][phaseDescription]` , phaseDescription);
+					data.append(`items[${i}][milestoneListID]` , milestoneListID);
+					data.append(`items[${i}][projectMilestoneID]` , projectMilestoneID);
+					data.append(`items[${i}][projectMilestoneName]` , projectMilestoneName);
+					data.append(`items[${i}][itemID]` , itemID);
+					data.append(`items[${i}][itemCode]` , itemCode);
+					data.append(`items[${i}][itemBrandName]` , itemBrandName);
+					data.append(`items[${i}][itemName]` , itemName);
+					data.append(`items[${i}][itemClassification]` , itemClassification);
+					data.append(`items[${i}][itemCategory]` , itemCategory);
+					data.append(`items[${i}][itemUom]` , itemUom);
+					data.append(`items[${i}][itemDescription]` , itemDescription);
+					data.append(`items[${i}][files]` , files);
+					data.append(`items[${i}][remarks]`  , remarks);
+					data.append(`items[${i}][requestQuantity]` , requestQuantity);
+					data.append(`items[${i}][reservedItem]` , reservedItem);
+					data.append(`items[${i}][forPurchase]` , forPurchase);
+					data.append(`items[${i}][availableStocks]` , availableStocks );
+					data.append(`items[${i}][unitCost]` , unitCost);
+					data.append(`items[${i}][totalCost]` , totalCost);
+					data.append(`items[${i}][itemRemarks]` , getItemRemarks);
+					}
+
+					
+				});
+
+
+				// $(".assetTableRow").each(function(i, obj){
+				// 	let requestAssetID 			= $(this).attr("requestassetid");
+				// 	let inventoryValidationID 	= $(this).attr("inventoryValidationID");
+
+				// 	let forPurchase 			= $(this).find(".forpurchase").text().replaceAll(",","") || $(this).find(".forpurchase").text();
+				// 	let availableStocks 		= $(this).find(".availablestocks").text().replaceAll(",","") || $(this).find(".availablestocks").text();
+
+				// 	data.append(`assets[${i}][requestAssetID]`, requestAssetID);
+				// 	data.append(`assets[${i}][inventoryValidationID]`, inventoryValidationID);
+				// 	data.append(`assets[${i}][forPurchase]`, forPurchase);
+				// 	data.append(`assets[${i}][availableStocks]`, availableStocks);
+					
+					
+				// });
+
+				$(".assetTableRow").each(function(i, obj){
+					let requestAseetID 			= $(this).attr("requestassetid");
+					let inventoryValidationID 	= $(this).attr("inventoryValidationID");
+					let requestAssetData			= getTableData("ims_request_assets_tbl", "", `requestAssetID = '${requestAseetID}'`);
+					let tableData 				= requestAssetData[0];
+					let getForPurchase = $(this).find(".forpurchase").text()?.trim() ==""  ? +$(this).find(".forpurchase  [name='forPurchase']").val().replaceAll(",","") : +$(this).find(".forpurchase").text()?.trim();
+					let getAvailableStocks = +$(this).find(".availablestocks").text()?.trim().replaceAll(",","") || $(this).find(".availablestocks").text()?.trim();
+					let getAssetRemarks = $(this).find('.assetRemarks > textarea').val()?.trim() || $(this).find('.assetRemarks').text()?.trim();
+					if(requestAssetData.length !=0){
+						let costEstimateID = tableData.costEstimateID;
+						let billMaterialID = tableData.billMaterialID;
+						let materialRequestID = tableData.materialRequestID;
+						let bidRecapID = tableData.bidRecapID;
+						let purchaseRequestID = tableData.purchaseRequestID;
+						let purchaseOrderID = tableData.purchaseOrderID;
+						let changeRequestID = tableData.changeRequestID;
+						let inventoryReceivingID = tableData.inventoryReceivingID;
+						let inventoryVendorID = tableData.inventoryVendorID;
+						let inventoryVendorCode = tableData.inventoryVendorCode;
+						let inventoryVendorName = tableData.inventoryVendorName;
+						let finalQuoteRemarks = tableData.finalQuoteRemarks;
+						let milestoneBuilderID = tableData.milestoneBuilderID;
+						let phaseDescription = tableData.phaseDescription;
+						let milestoneListID = tableData.milestoneListID;
+						let projectMilestoneID = tableData.projectMilestoneID;
+						let projectMilestoneName = tableData.projectMilestoneName;
+						let assetID = tableData.assetID;
+						let assetCode = tableData.assetCode;
+						let assetBrandName = tableData.assetBrandName;
+						let assetName = tableData.assetName;
+						let assetClassification = tableData.assetClassification;
+						let assetCategory = tableData.assetCategory;
+						let assetUom = tableData.assetUom;
+						let assetDescription = tableData.assetDescription;
+						let files = tableData.files;
+						let remarks = tableData.remarks;
+						let requestQuantity = tableData.requestQuantity;
+	
+						let computeReservedAsset  = "";
+	
+						if(getForPurchase == 0 ){
+							if( getAvailableStocks ==0){
+								computeReservedAsset = 0;
+	
+							}else{
+								computeReservedAsset =  requestQuantity;
+	
+							}
+						}else{
+							 computeReservedAsset = Math.abs(getForPurchase - requestQuantity);
+	
+						}
+						
+						let reservedAsset = computeReservedAsset || tableData.reservedAsset;
+						let	requestManHours = tableData.requestManHours;
+						let	dateNeeded = tableData.dateNeeded;
+						let	dateReturn = tableData.dateReturn;
+						let	actualDateReturn = tableData.actualDateReturn;
+						let forPurchase 			= getForPurchase;
+						let availableStocks 		= getAvailableStocks;
+						let totalCost = tableData.totalCost;
+	
+	
+						data.append(`assets[${i}][costEstimateID]` , costEstimateID);
+						data.append(`assets[${i}][billMaterialID]` , billMaterialID);
+						data.append(`assets[${i}][materialRequestID]` , materialRequestID);
+						data.append(`assets[${i}][inventoryValidationID]` , inventoryValidationID);
+						data.append(`assets[${i}][bidRecapID]` , bidRecapID);
+						data.append(`assets[${i}][purchaseRequestID]` , purchaseRequestID);
+						data.append(`assets[${i}][purchaseOrderID]` , purchaseOrderID);
+						data.append(`assets[${i}][changeRequestID]` , changeRequestID);
+						data.append(`assets[${i}][inventoryReceivingID]` , inventoryReceivingID);
+						data.append(`assets[${i}][inventoryVendorID]` , inventoryVendorID);
+						data.append(`assets[${i}][inventoryVendorCode]` , inventoryVendorCode);
+						data.append(`assets[${i}][inventoryVendorName]` , inventoryVendorName);
+						data.append(`assets[${i}][finalQuoteRemarks]` , finalQuoteRemarks);
+						data.append(`assets[${i}][milestoneBuilderID]` , milestoneBuilderID);
+						data.append(`assets[${i}][phaseDescription]` , phaseDescription);
+						data.append(`assets[${i}][milestoneListID]` , milestoneListID);
+						data.append(`assets[${i}][projectMilestoneID]` , projectMilestoneID);
+						data.append(`assets[${i}][projectMilestoneName]` , projectMilestoneName);
+						data.append(`assets[${i}][assetID]` , assetID);
+						data.append(`assets[${i}][assetCode]` ,assetCode);
+						data.append(`assets[${i}][assetBrandName]` , assetBrandName);
+						data.append(`assets[${i}][assetName]` , assetName);
+						data.append(`assets[${i}][assetClassification]` , assetClassification);
+						data.append(`assets[${i}][assetCategory]` , assetCategory);
+						data.append(`assets[${i}][assetUom]` , assetUom);
+						data.append(`assets[${i}][assetDescription]` , assetDescription);
+						data.append(`assets[${i}][files]` , files);
+						data.append(`assets[${i}][remarks]`  , remarks);
+						data.append(`assets[${i}][requestQuantity]` , requestQuantity);
+						data.append(`assets[${i}][reservedAsset]` , reservedAsset);
+						data.append(`assets[${i}][forPurchase]` , forPurchase);
+						data.append(`assets[${i}][availableStocks]` , availableStocks );
+						data.append(`assets[${i}][requestManHours]` , requestManHours );
+						data.append(`assets[${i}][dateNeeded]` , dateNeeded );
+						data.append(`assets[${i}][dateReturn]` , dateReturn );
+						data.append(`assets[${i}][actualDateReturn]` , actualDateReturn );
+						data.append(`assets[${i}][totalCost]` , totalCost);
+						data.append(`assets[${i}][assetRemarks]` , getAssetRemarks);
+					}
+
+				
+				});
+
+		return data;
+	}
 
 
 
@@ -1878,6 +2210,7 @@ $(document).ready(function() {
 
 		
 			const action = revise && !isFromCancelledDocument && "insert" || (id ? "update" : "insert");
+			// const action = "submit";
 			const data   = getInventoryValidationData(action, "submit", "1", id);
 
 			if (revise) {
@@ -2006,242 +2339,11 @@ $(document).ready(function() {
 				data.append(`inventoryAssetStatus`, inventoryAssetStatus);
 				data.append(`materialWithdrawalStatus`, materialWithdrawalStatus);
 
-
-				$(".itemTableRow").each(function(i, obj){
-					let requestItemID 			= $(this).attr("requestitemid");
-					let inventoryValidationID 	= $(this).attr("inventoryValidationID");
-
-					let forPurchase 			= $(this).find(".forpurchase").text().replaceAll(",","") || $(this).find(".forpurchase").text();
-					let availableStocks 		= $(this).find(".availablestocks").text().replaceAll(",","") || $(this).find(".availablestocks").text();
-
-					data.append(`items[${i}][requestItemID]`, requestItemID);
-					data.append(`items[${i}][inventoryValidationID]`, inventoryValidationID);
-					data.append(`items[${i}][forPurchase]`, forPurchase);
-					data.append(`items[${i}][availableStocks]`, availableStocks);
-					
-					
-				});
-
-				$(".itemTableRow").each(function(i, obj){
-					let requestItemID 			= $(this).attr("requestitemid");
-					let inventoryValidationID 	= $(this).attr("inventoryValidationID");
-					let requestItemData			= getTableData("ims_request_items_tbl", "", `requestItemID = '${requestItemID}'`);
-					let tableData 				= requestItemData[0];
-					let getForPurchase = +$(this).find(".forpurchase").text().replaceAll(",","") || $(this).find(".forpurchase").text();
-					let getAvailableStocks = +$(this).find(".availablestocks").text().replaceAll(",","") || $(this).find(".availablestocks").text();
-
-					if(requestItemData.length !=0){
-						let costEstimateID = tableData.costEstimateID;
-					let billMaterialID = tableData.billMaterialID;
-					let materialRequestID = tableData.materialRequestID;
-					let bidRecapID = tableData.bidRecapID;
-					let purchaseRequestID = tableData.purchaseRequestID;
-					let purchaseOrderID = tableData.purchaseOrderID;
-					let changeRequestID = tableData.changeRequestID;
-					let inventoryReceivingID = tableData.inventoryReceivingID;
-					let inventoryVendorID = tableData.inventoryVendorID;
-					let inventoryVendorCode = tableData.inventoryVendorCode;
-					let inventoryVendorName = tableData.inventoryVendorName;
-					let finalQuoteRemarks = tableData.finalQuoteRemarks;
-					let milestoneBuilderID = tableData.milestoneBuilderID;
-					let phaseDescription = tableData.phaseDescription;
-					let milestoneListID = tableData.milestoneListID;
-					let projectMilestoneID = tableData.projectMilestoneID;
-					let projectMilestoneName = tableData.projectMilestoneName;
-					let itemID = tableData.itemID;
-					let itemCode = tableData.itemCode;
-					let itemBrandName = tableData.itemBrandName;
-					let itemName = tableData.itemName;
-					let itemClassification = tableData.itemClassification;
-					let itemCategory = tableData.itemCategory;
-					let itemUom = tableData.itemUom;
-					let itemDescription = tableData.itemDescription;
-					let files = tableData.files;
-					let remarks = tableData.remarks;
-					let requestQuantity = tableData.requestQuantity;
-
-					let computeReservedItem  = "";
-					
-					if(getForPurchase == 0 ){
-						if( getAvailableStocks ==0){
-							computeReservedItem = 0;
-
-						}else{
-							computeReservedItem =  requestQuantity;
-
-						}
-					}else{
-						 computeReservedItem = Math.abs(getForPurchase - requestQuantity);
-
-					}
-					let reservedItem =  computeReservedItem || tableData.reservedItem;
-					let forPurchase 	= getForPurchase;				
-					let availableStocks = getAvailableStocks;				
-					let unitCost = tableData.unitCost;
-					let totalCost = tableData.totalCost;
-
-
-					data.append(`items[${i}][costEstimateID]` , costEstimateID);
-					data.append(`items[${i}][billMaterialID]` , billMaterialID);
-					data.append(`items[${i}][materialRequestID]` , materialRequestID);
-					data.append(`items[${i}][inventoryValidationID]` , inventoryValidationID);
-					data.append(`items[${i}][bidRecapID]` , bidRecapID);
-					data.append(`items[${i}][purchaseRequestID]` , purchaseRequestID);
-					data.append(`items[${i}][purchaseOrderID]` , purchaseOrderID);
-					data.append(`items[${i}][changeRequestID]` , changeRequestID);
-					data.append(`items[${i}][inventoryReceivingID]` , inventoryReceivingID);
-					data.append(`items[${i}][inventoryVendorID]` , inventoryVendorID);
-					data.append(`items[${i}][inventoryVendorCode]` , inventoryVendorCode);
-					data.append(`items[${i}][inventoryVendorName]` , inventoryVendorName);
-					data.append(`items[${i}][finalQuoteRemarks]` , finalQuoteRemarks);
-					data.append(`items[${i}][milestoneBuilderID]` , milestoneBuilderID);
-					data.append(`items[${i}][phaseDescription]` , phaseDescription);
-					data.append(`items[${i}][milestoneListID]` , milestoneListID);
-					data.append(`items[${i}][projectMilestoneID]` , projectMilestoneID);
-					data.append(`items[${i}][projectMilestoneName]` , projectMilestoneName);
-					data.append(`items[${i}][itemID]` , itemID);
-					data.append(`items[${i}][itemCode]` , itemCode);
-					data.append(`items[${i}][itemBrandName]` , itemBrandName);
-					data.append(`items[${i}][itemName]` , itemName);
-					data.append(`items[${i}][itemClassification]` , itemClassification);
-					data.append(`items[${i}][itemCategory]` , itemCategory);
-					data.append(`items[${i}][itemUom]` , itemUom);
-					data.append(`items[${i}][itemDescription]` , itemDescription);
-					data.append(`items[${i}][files]` , files);
-					data.append(`items[${i}][remarks]`  , remarks);
-					data.append(`items[${i}][requestQuantity]` , requestQuantity);
-					data.append(`items[${i}][reservedItem]` , reservedItem);
-					data.append(`items[${i}][forPurchase]` , forPurchase);
-					data.append(`items[${i}][availableStocks]` , availableStocks );
-					data.append(`items[${i}][unitCost]` , unitCost);
-					data.append(`items[${i}][totalCost]` , totalCost);
-					}
-
-					
-				});
-
-
-				$(".assetTableRow").each(function(i, obj){
-					let requestAssetID 			= $(this).attr("requestassetid");
-					let inventoryValidationID 	= $(this).attr("inventoryValidationID");
-
-					let forPurchase 			= $(this).find(".forpurchase").text().replaceAll(",","") || $(this).find(".forpurchase").text();
-					let availableStocks 		= $(this).find(".availablestocks").text().replaceAll(",","") || $(this).find(".availablestocks").text();
-
-					data.append(`assets[${i}][requestAssetID]`, requestAssetID);
-					data.append(`assets[${i}][inventoryValidationID]`, inventoryValidationID);
-					data.append(`assets[${i}][forPurchase]`, forPurchase);
-					data.append(`assets[${i}][availableStocks]`, availableStocks);
-					
-					
-				});
-
-				$(".assetTableRow").each(function(i, obj){
-					let requestAseetID 			= $(this).attr("requestassetid");
-					let inventoryValidationID 	= $(this).attr("inventoryValidationID");
-					let requestAssetData			= getTableData("ims_request_assets_tbl", "", `requestAssetID = '${requestAseetID}'`);
-					let tableData 				= requestAssetData[0];
-					let getForPurchase = +$(this).find(".forpurchase").text().replaceAll(",","") || $(this).find(".forpurchase").text();
-					let getAvailableStocks = +$(this).find(".availablestocks").text().replaceAll(",","") || $(this).find(".availablestocks").text();
-
-					if(requestAssetData.length !=0){
-						let costEstimateID = tableData.costEstimateID;
-						let billMaterialID = tableData.billMaterialID;
-						let materialRequestID = tableData.materialRequestID;
-						let bidRecapID = tableData.bidRecapID;
-						let purchaseRequestID = tableData.purchaseRequestID;
-						let purchaseOrderID = tableData.purchaseOrderID;
-						let changeRequestID = tableData.changeRequestID;
-						let inventoryReceivingID = tableData.inventoryReceivingID;
-						let inventoryVendorID = tableData.inventoryVendorID;
-						let inventoryVendorCode = tableData.inventoryVendorCode;
-						let inventoryVendorName = tableData.inventoryVendorName;
-						let finalQuoteRemarks = tableData.finalQuoteRemarks;
-						let milestoneBuilderID = tableData.milestoneBuilderID;
-						let phaseDescription = tableData.phaseDescription;
-						let milestoneListID = tableData.milestoneListID;
-						let projectMilestoneID = tableData.projectMilestoneID;
-						let projectMilestoneName = tableData.projectMilestoneName;
-						let assetID = tableData.assetID;
-						let assetCode = tableData.assetCode;
-						let assetBrandName = tableData.assetBrandName;
-						let assetName = tableData.assetName;
-						let assetClassification = tableData.assetClassification;
-						let assetCategory = tableData.assetCategory;
-						let assetUom = tableData.assetUom;
-						let assetDescription = tableData.assetDescription;
-						let files = tableData.files;
-						let remarks = tableData.remarks;
-						let requestQuantity = tableData.requestQuantity;
-	
-						let computeReservedAsset  = "";
-	
-						if(getForPurchase == 0 ){
-							if( getAvailableStocks ==0){
-								computeReservedAsset = 0;
-	
-							}else{
-								computeReservedAsset =  requestQuantity;
-	
-							}
-						}else{
-							 computeReservedAsset = Math.abs(getForPurchase - requestQuantity);
-	
-						}
-						
-						let reservedAsset = computeReservedAsset || tableData.reservedAsset;
-						let	requestManHours = tableData.requestManHours;
-						let	dateNeeded = tableData.dateNeeded;
-						let	dateReturn = tableData.dateReturn;
-						let	actualDateReturn = tableData.actualDateReturn;
-						let forPurchase 			= getForPurchase;
-						let availableStocks 		= getAvailableStocks;
-						let totalCost = tableData.totalCost;
-	
-	
-						data.append(`assets[${i}][costEstimateID]` , costEstimateID);
-						data.append(`assets[${i}][billMaterialID]` , billMaterialID);
-						data.append(`assets[${i}][materialRequestID]` , materialRequestID);
-						data.append(`assets[${i}][inventoryValidationID]` , inventoryValidationID);
-						data.append(`assets[${i}][bidRecapID]` , bidRecapID);
-						data.append(`assets[${i}][purchaseRequestID]` , purchaseRequestID);
-						data.append(`assets[${i}][purchaseOrderID]` , purchaseOrderID);
-						data.append(`assets[${i}][changeRequestID]` , changeRequestID);
-						data.append(`assets[${i}][inventoryReceivingID]` , inventoryReceivingID);
-						data.append(`assets[${i}][inventoryVendorID]` , inventoryVendorID);
-						data.append(`assets[${i}][inventoryVendorCode]` , inventoryVendorCode);
-						data.append(`assets[${i}][inventoryVendorName]` , inventoryVendorName);
-						data.append(`assets[${i}][finalQuoteRemarks]` , finalQuoteRemarks);
-						data.append(`assets[${i}][milestoneBuilderID]` , milestoneBuilderID);
-						data.append(`assets[${i}][phaseDescription]` , phaseDescription);
-						data.append(`assets[${i}][milestoneListID]` , milestoneListID);
-						data.append(`assets[${i}][projectMilestoneID]` , projectMilestoneID);
-						data.append(`assets[${i}][projectMilestoneName]` , projectMilestoneName);
-						data.append(`assets[${i}][assetID]` , assetID);
-						data.append(`assets[${i}][assetCode]` ,assetCode);
-						data.append(`assets[${i}][assetBrandName]` , assetBrandName);
-						data.append(`assets[${i}][assetName]` , assetName);
-						data.append(`assets[${i}][assetClassification]` , assetClassification);
-						data.append(`assets[${i}][assetCategory]` , assetCategory);
-						data.append(`assets[${i}][assetUom]` , assetUom);
-						data.append(`assets[${i}][assetDescription]` , assetDescription);
-						data.append(`assets[${i}][files]` , files);
-						data.append(`assets[${i}][remarks]`  , remarks);
-						data.append(`assets[${i}][requestQuantity]` , requestQuantity);
-						data.append(`assets[${i}][reservedAsset]` , reservedAsset);
-						data.append(`assets[${i}][forPurchase]` , forPurchase);
-						data.append(`assets[${i}][availableStocks]` , availableStocks );
-						data.append(`assets[${i}][requestManHours]` , requestManHours );
-						data.append(`assets[${i}][dateNeeded]` , dateNeeded );
-						data.append(`assets[${i}][dateReturn]` , dateReturn );
-						data.append(`assets[${i}][actualDateReturn]` , actualDateReturn );
-						data.append(`assets[${i}][totalCost]` , totalCost);
-					}
-
+				data = getFooterData(data);
 				
-				});
 
 			} else {
+				
 				status = 1;
 				notificationData = {
 					moduleID:                126,

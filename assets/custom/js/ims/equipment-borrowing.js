@@ -288,7 +288,7 @@ $(document).ready(function() {
         timelineData.map(timeline => {
 
             const { 
-                equipmentBorrowingID ,
+                equipmentBorrowingID =0,
                 equipmentBorrowingCode,
                 materialWithdrawalCode     = 0,
                 materialWithdrawalID     = 0,
