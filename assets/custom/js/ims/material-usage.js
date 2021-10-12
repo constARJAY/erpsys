@@ -637,13 +637,16 @@ function formButtons(data = false, isRevise = false, isFromCancelledDocument = f
 // ----- END FORM BUTTONS -----
 
 // ----- GET SERIAL NUMBER -----
-function getSerialNumber(scope = {}, readOnly = false) {
+function getSerialNumber(scope = {}, readOnly = false,  checkbox) {
 	let {
 		serialNumber = "",
 	} = scope;
 
 	let html = "";
 	if (!readOnly) {
+		if(checkbox =='0'){
+			html = ``;
+		}else{
 		html = `
 		<tr>
 			<td>
@@ -664,6 +667,7 @@ function getSerialNumber(scope = {}, readOnly = false) {
 				</div>
 			</td>
 		</tr>`;
+		}
 	} else {
 		html = `
 		<tr>
@@ -821,7 +825,7 @@ function getItemsRow(readOnly = false,materialUsageID) {
 							return getSerialNumber(scope, readOnly);
 						}).join("");
 					} else {
-						itemSerialNumbers += getSerialNumber({}, readOnly);
+						itemSerialNumbers += getSerialNumber({}, readOnly, checkbox = 0);
 					}
 				
 			itemSerialNumbers += `
@@ -842,7 +846,7 @@ function getItemsRow(readOnly = false,materialUsageID) {
 									return getSerialNumber(scope, readOnly);
 								}).join("");
 							} else {
-								itemSerialNumbers += getSerialNumber({}, readOnly);
+								itemSerialNumbers += getSerialNumber({}, readOnly, checkbox = 0);
 							}
 						itemSerialNumbers += `
 							</tbody>
@@ -970,12 +974,13 @@ $(document).on("change", ".unused", function() {
 	var val = $(this).val() | 0;
 	var totalReceived = parseInt(val);
 	var used = parseInt(quantity) - parseInt(val);
-	$(`#used${count}`).text(used);
+	var formatdecimalused = parseFloat(used).toFixed(2);
+	$(`#used${count}`).text(formatdecimalused);
 	var flag = ["true"];
 	if(totalQuantity < totalReceived){
 			$(`#unused${count}`).removeClass("is-valid").addClass("is-invalid");
 			$(this).closest("tr").find(`#invalid-unused${count}`).addClass("is-invalid");
-			$(`#invalid-unused${count}`).html("Not less that or equal order quantity");
+			$(`#invalid-unused${count}`).html("The inserted used quantity should not be greater than the received quantity.");
 		flag[0]= false;
 		
 		removeIsValid("#tableMaterialUsage");
@@ -1070,6 +1075,7 @@ function formContent(data = false, readOnly = false, isRevise = false, isFromCan
 		timelineBuilderID 			= "",
 		projectCode					= "",
 		projectName					= "",
+		projectCategory				= "",
 		clientName					= "",
 		employeeID              	= "",
 		receiptNo               	= "",
@@ -1204,13 +1210,13 @@ function formContent(data = false, readOnly = false, isRevise = false, isFromCan
 		</div>
 	</div>
 	<div class="row" id="form_material_usage">
-	<div class="col-md-4 col-sm-12">
+	<div class="col-md-2 col-sm-12">
 			<div class="form-group">
 				<label>Reference No.</label>
 				<input type="text" name="materialWithdrawalCode" id="materialWithdrawalCode" class="form-control" materialWithdrawalCode="${materialWithdrawalCode}" materialWithdrawalID="${materialWithdrawalID}" disabled value="${materialWithdrawalCode || "-"}">
 			</div>
 		</div>
-		<div class="col-md-4 col-sm-12">
+		<div class="col-md-2 col-sm-12">
 			<div class="form-group">
 				<label>Project Code</label>
 				<input type="text" name="projectCode" id="projectCode" class="form-control" inventoryValidationID="${inventoryValidationID}"inventoryValidationCode="${inventoryValidationCode}"materialRequestID="${materialRequestID}" materialRequestCode="${materialRequestCode}"stockOutID="${stockOutID}" disabled value="${projectCode || "-"}">
@@ -1224,20 +1230,20 @@ function formContent(data = false, readOnly = false, isRevise = false, isFromCan
 		</div>
 		<div class="col-md-4 col-sm-12">
 			<div class="form-group">
+				<label>Project Category</label>
+				<input type="text" name="projectCategory" id="projectCategory" class="form-control" disabled value="${projectCategory || "-"}">
+			</div>
+		</div>
+		<div class="col-md-2 col-sm-12">
+			<div class="form-group">
 				<label>Client Code</label>
 				<input type="text" name="clientCode" id="clientCode" class="form-control" disabled value="${clientCode || "-"}">
 			</div>
 		</div>
-		<div class="col-md-4 col-sm-12">
+		<div class="col-md-2 col-sm-12">
 			<div class="form-group">
 				<label>Client Name</label>
 				<input type="text" name="clientName" id="clientName" class="form-control" disabled value="${clientName || "-"}"> 
-			</div>
-		</div>
-		<div class="col-md-4 col-sm-12">
-			<div class="form-group">
-				<label>Date Needed</label>
-				<input type="text" name="materialUsageDate" id="materialUsageDate" class="form-control" disabled ="${materialUsageDate || "-"}">
 			</div>
 		</div>
 		<div class="col-md-4 col-sm-12">
@@ -1248,7 +1254,13 @@ function formContent(data = false, readOnly = false, isRevise = false, isFromCan
 		</div>
 		<div class="col-md-4 col-sm-12">
 			<div class="form-group">
-				<label>Requestor Name</label>
+				<label>Date Needed</label>
+				<input type="text" name="materialUsageDate" id="materialUsageDate" class="form-control" disabled ="${materialUsageDate || "-"}">
+			</div>
+		</div>
+		<div class="col-md-4 col-sm-12">
+			<div class="form-group">
+				<label>Prepared By</label>
 				<input type="text" class="form-control" disabled value="${employeeFullname}">
 			</div>
 		</div>
@@ -1264,7 +1276,7 @@ function formContent(data = false, readOnly = false, isRevise = false, isFromCan
 				<input type="text" class="form-control" disabled value="${employeeDesignation}">
 			</div>
 		</div>
-		<div class="col-md-8 col-sm-12">
+		<div class="col-md-12 col-sm-12">
 			<div class="form-group">
 				<label>Description ${!disabled ? "<code>*</code>" : ""}</label>
 				<textarea class="form-control validate"
@@ -1303,7 +1315,7 @@ function formContent(data = false, readOnly = false, isRevise = false, isFromCan
 							<th>Item Classification</th>
 							<th>UOM</th>
 							<th>Quantity</th>
-							<th>Unused</th>
+							<th>Unused ${!disabled ? "<code>*</code>" : ""}</th>
 							<th>Used</th>
 							<th>Serial No.</th>
 							<th>Remarks</th>
@@ -1430,8 +1442,9 @@ function getMaterialUsageData(action = "insert", method = "submit", status = "1"
 		data["inventoryValidationCode"]			 	= $("[name=projectCode]").attr("inventoryValidationCode");
 		data["materialRequestID"]			 		= $("[name=projectCode]").attr("materialRequestID");
 		data["materialRequestCode"]			 		= $("[name=projectCode]").attr("materialRequestCode");
-		data["stockOutID"]			 	= $("[name=projectCode]").attr("stockOutID");
-		data["projectName"]			 	= $("[name=projectName]").val();
+		data["stockOutID"]			 				= $("[name=projectCode]").attr("stockOutID");
+		data["projectName"]			 				= $("[name=projectName]").val();
+		data["projectCategory"]			 			= $("[name=projectCategory]").val();
 		data["clientCode"]			 	= $("[name=clientCode]").val();
 		data["clientName"]			 	= $("[name=clientName]").val();
 		data["clientAddress"]	 	 	= $("[name=clientAddress]").val();
@@ -1443,6 +1456,7 @@ function getMaterialUsageData(action = "insert", method = "submit", status = "1"
 		formData.append("employeeID", sessionID);
 		formData.append("projectCode", $("[name=projectCode]").val()?.trim());
 		formData.append("projectName", $("[name=projectName]").val()?.trim());
+		formData.append("projectCategory", $("[name=projectCategory]").val()?.trim());
 		formData.append("clientCode", $("[name=clientCode]").val()?.trim());
 		formData.append("clientName", $("[name=clientName]").val()?.trim());
 		formData.append("clientAddress", $("[name=clientAddress]").val()?.trim());
@@ -1968,7 +1982,7 @@ $(document).on("click", "#btnReject", function () {
 	const feedback = $(this).attr("code") || getFormCode("MUF", dateToday(), id);
 
 	$("#modal_inventory_receiving_content").html(preloader);
-	$("#modal_inventory_receiving .page-title").text("DENY Material Usage");
+	$("#modal_inventory_receiving .page-title").text("DENY MATERIAL USAGE");
 	$("#modal_inventory_receiving").modal("show");
 	let html = `
 	<div class="modal-body">

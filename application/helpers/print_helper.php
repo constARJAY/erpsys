@@ -2695,11 +2695,11 @@
             }
             else if (strtolower($type) == "bill of materials")
             {
-                billMaterialExcel();
+                billMaterialExcel($data);
             }
             else if (strtolower($type) == "cost estimate")
             {
-                costEstimateExcel();
+                costEstimateExcel($data);
             }
         }
     }

@@ -218,7 +218,7 @@ function initDataTables() {
             info: false,
             scrollCollapse: true,
             columnDefs: [
-                { targets: 0,  width: 150 },
+                { targets: 0,  width: 200 },
                 { targets: 1,  width: 150 },
                 { targets: 2,  width: 220 },
                 { targets: 3,  width: 250 },
@@ -241,7 +241,7 @@ function initDataTables() {
             scrollX: true,
             scrollCollapse: true,
             columnDefs: [
-                { targets: 0,  width: 150 },
+                { targets: 0,  width: 200 },
                 { targets: 1,  width: 150 },
                 { targets: 2,  width: 220 },
                 { targets: 3,  width: 250 },
@@ -632,13 +632,18 @@ function formButtons(data = false, isRevise = false, isFromCancelledDocument = f
 // ----- END FORM BUTTONS -----
 
 // ----- GET SERIAL NUMBER -----
-function getSerialNumber(scope = {}, readOnly = false) {
+function getSerialNumber(scope = {}, readOnly = false, checkbox) {
 	let {
 		serialNumber = "",
 	} = scope;
 
+	//alert(scope);
+
 	let html = "";
 	if (!readOnly) {
+		if(checkbox =='0'){
+			html = ``;
+		}else{
 		html = `
 		<tr>
 			<td>
@@ -659,6 +664,7 @@ function getSerialNumber(scope = {}, readOnly = false) {
 				</div>
 			</td>
 		</tr>`;
+		}
 	} else {
 		html = `
 		<tr>
@@ -753,6 +759,7 @@ function updateSerialNumber() {
 // ----- GET SERVICE ROW -----
 function getItemsRow(readOnly = false,inventoryReceivingID) {
 	let html = "";
+	
 	//let requestItemsData;	
 	let requestItemsData;	
 			requestItemsData = getTableData(
@@ -822,11 +829,13 @@ function getItemsRow(readOnly = false,inventoryReceivingID) {
 					`;
 				
 					if (scopeData.length > 0 && inventoryReceivingID != "" && serialNumberDataLength > 0) {
+						
 						itemSerialNumbers += scopeData.map(scope => {
 							return getSerialNumber(scope, readOnly);
 						}).join("");
 					} else {
-						itemSerialNumbers += getSerialNumber({}, readOnly);
+						
+						itemSerialNumbers += getSerialNumber({}, readOnly, checkbox = 0);
 					}
 				
 			itemSerialNumbers += `
@@ -843,11 +852,13 @@ function getItemsRow(readOnly = false,inventoryReceivingID) {
 							`;
 						
 							if (scopeData.length > 0 && inventoryReceivingID != "") {
+							
 								itemSerialNumbers += scopeData.map(scope => {
 									return getSerialNumber(scope, readOnly);
 								}).join("");
 							} else {
-								itemSerialNumbers += getSerialNumber({}, readOnly);
+								
+								itemSerialNumbers += getSerialNumber({}, readOnly, checkbox = 0);
 							}
 						itemSerialNumbers += `
 							</tbody>
@@ -896,6 +907,7 @@ function getItemsRow(readOnly = false,inventoryReceivingID) {
 					</td>
 				</tr>`;
 			} else {
+				
 				html += `
 				<tr class="itemTableRow"inventoryRequestID="${inventoryRequestID}" name="${inventoryRequestID}"id="${inventoryRequestID}">
 					<td>
@@ -921,7 +933,7 @@ function getItemsRow(readOnly = false,inventoryReceivingID) {
 					<div class="text-center">
 						<input 
 								type="text" 
-								class="form-control input-quantity text-center receivedQuantity"
+								class="form-control input-quantity text-center receivedQuantity validate"
 								data-allowcharacters="[0-9]" 
 								min="0.01"
 								number="${index}"
@@ -978,14 +990,15 @@ $(document).on("change", ".receivedQuantity", function() {
 	var val = $(this).val() | 0;
 	var totalReceived = parseInt(val);
 	var totalremaining = parseFloat(quantity) - parseFloat(val);
-	$(`#remaining${count}`).text(totalremaining);
+	var formatdecimalremaining = parseFloat(totalremaining).toFixed(2);
+	$(`#remaining${count}`).text(formatdecimalremaining);
 	var flag = ["true"];
 	if(totalQuantity < totalReceived){
 			$(`#receivedQuantity${count}`).removeClass("is-valid").addClass("is-invalid");
 			$(this).closest("tr").find(`#invalid-receivedQuantity${count}`).addClass("is-invalid");
 			$(`#invalid-receivedQuantity${count}`).html("Not less that or equal order quantity");
 		flag[0]= false;
-		removeIsValid("#tableInventoryReceived");
+		
 	}else{
 		$(`#receivedQuantity${count}`).removeClass("is-invalid").addClass("is-valid");
 		$(this).closest("tr").find(`#invalid-receivedQuantity${count}`).removeClass("is-invalid");
@@ -1061,14 +1074,19 @@ $(document).on("change", ".receivedQuantity", function() {
 // ----- ADD SERIAL -----
 $(document).on("click", ".btnAddSerial", function() {
 	let thisEvent 		= $(this);
+	
 	let thisCheck 		= thisEvent[0].checked;
+
+	//alert(thisCheck);
 	let thisTR 	  		= thisEvent.closest(".itemTableRow");
 	let thisTableData	= thisEvent.closest(".table-data-serial-number");
 	
 	thisTableData.find("table").html(`<tbody><tr><td>${preloader}</td></tr></tbody>`);
 
 				if(thisCheck){
+				
 					let thisReceived	= thisTR.find(".input-quantity").val();
+					
 					let itemID	= thisTR.find(".input-quantity").attr("itemID");
 					let arrayCount		= thisReceived ? parseInt(thisReceived) : 0;
 					let subTable  		= thisTableData.find("table");
@@ -1084,15 +1102,9 @@ $(document).on("click", ".btnAddSerial", function() {
 						}
 					}
 				}else{
+					
 					thisTableData.find("table").html(``);
 				}
-	// let newSerial = getSerialNumber();
-	// $(this).parent().find("table tbody").append(newSerial);
-	// $(this).parent().find("[name=serialNumber]").last().focus();
-	// updateSerialNumber();
-
-	// const parentTable = $(this).closest("tr.itemTableRow");
-	// checkSerialRowReceived(parentTable);
 })
 // ----- END ADD SERIAL -----
 
@@ -1946,7 +1958,7 @@ $(document).on("click", "#btnSubmit", function () {
 	// console.log("validateDuplicateSerial: "+ validateDuplicateSerial)
 	// if(!validateDuplicateSerial || validateSerialMessage != "Data already exist!"){
 		if(!receivedQuantity){
-			removeIsValid("#tableInventoryReceived");
+			//removeIsValid("#tableInventoryReceived");
 		if(!validateDuplicateSerial){
 		const validateSerial = checkSerialReceivedQuantity();
 		if (validateSerial != "false") {

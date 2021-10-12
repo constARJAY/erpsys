@@ -29,6 +29,7 @@ class Material_usage extends CI_Controller {
         $employeeID                 = $this->input->post("employeeID");
         $projectCode                 = $this->input->post("projectCode");
         $projectName                 = $this->input->post("projectName");
+        $projectCategory             = $this->input->post("projectCategory");
         $clientCode                 = $this->input->post("clientCode");
         $clientName                 = $this->input->post("clientName");
         $clientAddress              = $this->input->post("clientAddress");
@@ -71,6 +72,7 @@ class Material_usage extends CI_Controller {
             "employeeID"                 => $employeeID,
             "projectCode"                 => $projectCode,
             "projectName"                 => $projectName,
+            "projectCategory"             => $projectCategory,
             "clientCode"                 => $clientCode,
             "clientName"                 => $clientName,
             "clientAddress"              => $clientAddress,
