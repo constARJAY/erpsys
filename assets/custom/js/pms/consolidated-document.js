@@ -248,17 +248,22 @@ $(document).ready(function(){
         let datacount       = 0;
         let urlExtension    = "";
         $(".document-row").each(function(index){
-            let timelineBuilderID   = decryptString($(this).attr("timelinebuilderid"));
-            let costEstimateID      = decryptString($(this).attr("costestimateid"));
-            let billMaterialID      = decryptString($(this).attr("billmaterialid"));
-            urlExtension            += `&bomid${index}=${billMaterialID}&ceid${index}=${costEstimateID}&ptbid${index}=${timelineBuilderID}`;
+            let checkbox            = $(this).find(".document_checkbox").prop("checked");
+            if(checkbox){
+                let timelineBuilderID   = decryptString($(this).attr("timelinebuilderid"));
+                let costEstimateID      = decryptString($(this).attr("costestimateid"));
+                let billMaterialID      = decryptString($(this).attr("billmaterialid"));
+                urlExtension            += `&bomid${index}=${billMaterialID}&ceid${index}=${costEstimateID}&ptbid${index}=${timelineBuilderID}`;
+                datacount++;
+            }
             
-            let tempData = {timelineBuilderID, costEstimateID, billMaterialID};
-            documentsID.push(tempData);
-            datacount++;
         });
-        const url = `${base_url}pms/consolidated_document/getConsolidateArray?datacount=${datacount}&exeltype=${exelType}${urlExtension}`;
-		window.open(url, "_blank");
+        if(datacount > 0){
+            const url = `${base_url}pms/consolidated_document/getConsolidateArray?datacount=${datacount}&exeltype=${exelType}${urlExtension}`;
+		    window.open(url, "_blank");
+        }else{
+            showNotification("warning2", "System error: Please contact the system administrator for assistance!");
+        }
         // $.ajax({
         //     method:      "POST",
         //     url:         `Consolidated_document/getConsolidateArray`,

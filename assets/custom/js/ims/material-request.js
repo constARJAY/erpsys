@@ -331,7 +331,7 @@ $(document).ready(function() {
 			columnDefs: [
 				{ targets: 0,  width: 100 },
 				{ targets: 1,  width: 150 },
-				{ targets: 2,  width: 100 },
+				{ targets: 2,  width: 350 },
 				{ targets: 3,  width: 350 },
 				{ targets: 4,  width: 260 },
 				{ targets: 5,  width: 150 },
@@ -628,7 +628,12 @@ $(document).ready(function() {
 				<tr class="${btnClass}" id="${encryptString(materialRequestID)}">
 					<td>${getFormCode("IRF", createdAt, materialRequestID )}</td>
 					<td>${fullname}</td>
-					<td>${costEstimateCode || '-'}</td>
+					<td>
+						<div>
+							${costEstimateCode || '-'}
+						</div>
+						<small style="color:#848482;">${materialRequestReason || '-'}</small>
+					</td>
 					<td>
 						${projectDescription}
 					</td>
@@ -741,7 +746,12 @@ $(document).ready(function() {
             <tr class="${btnClass}" id="${encryptString(materialRequestID )}">
                 	<td>${getFormCode("IRF", createdAt, materialRequestID )}</td>
 					<td>${fullname}</td>
-					<td>${costEstimateCode || '-'}</td>
+					<td>
+						<div>
+							${costEstimateCode || '-'}
+						</div>
+						<small style="color:#848482;">${materialRequestReason || '-'}</small>
+					</td>
 					<td>
 						${projectDescription}
 					</td>

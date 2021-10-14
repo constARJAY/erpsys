@@ -1522,7 +1522,7 @@ $(document).ready(function() {
 							</table>
 							<div class="w-100 text-left my-2" id="taskListButtons">
 							${!readOnly ? 
-								`<button class="btn btn-primary btnSubAddRow" type="button" id="btnSubAddRow"><i class="fas fa-plus"></i></button>` : ``}
+								`<button class="btn btn-primary btnSubAddRow" type="button" style="margin-left: 30px;" id="btnSubAddRow"><i class="fas fa-plus"></i></button>` : ``}
 							</div>
 						</td>
 					</tr>`;

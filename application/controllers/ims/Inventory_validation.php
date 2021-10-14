@@ -61,12 +61,12 @@ class Inventory_validation extends CI_Controller {
         $clientCode  = $this->input->post("clientCode") == "null" ? NULL : $this->input->post("clientCode") == "null"; 
         $clientName  = $this->input->post("clientName") == "null" ? NULL : $this->input->post("clientName"); 
         $clientAddress  = $this->input->post("clientAddress") == "null" ? NULL : $this->input->post("clientAddress"); 
-        $dateNeeded  = $this->input->post("dateNeeded") == "null" ? NULL : $this->input->post("dateNeeded");  
+        $dateNeededHeader  = $this->input->post("dateNeeded") == "null" ? NULL : $this->input->post("dateNeeded");  
         $createdBy  = $this->input->post("createdBy") == "null" ? NULL : $this->input->post("createdBy"); 
         $inventoryValidationReason  = $this->input->post("inventoryValidationReason") == "null" ? NULL : $this->input->post("inventoryValidationReason"); 
 
         // echo "<pre>";
-        // print_r($_POST);
+        // print_r($dateNeeded);
         // echo
         // exit;
 
@@ -522,7 +522,8 @@ class Inventory_validation extends CI_Controller {
             }
 
             if(!empty($items) || !empty($assets)){
-
+                $dateNeededHeader  = $this->input->post("dateNeeded") == "null" ? NULL : $this->input->post("dateNeeded");  
+                $createdBy  = $this->input->post("createdBy") == "null" ? NULL : $this->input->post("createdBy"); 
                 $dataMaterialWithdrawalDocument =[
                     'inventoryValidationID' => $inventoryValidationID,
                     'inventoryValidationCode' => $inventoryValidationCode,
@@ -540,7 +541,7 @@ class Inventory_validation extends CI_Controller {
                     'clientCode' => $clientCode,
                     'clientName' => $clientName,
                     'clientAddress' => $clientAddress,
-                    'dateNeeded' => $dateNeeded,
+                    'dateNeeded' => $dateNeededHeader,
                     'inventoryItemStatus' => 0,
                     'inventoryAssetStatus' => 0,
                     'materialWithdrawalStatus' => 0,
@@ -561,7 +562,8 @@ class Inventory_validation extends CI_Controller {
 
 
                         if(!empty($items)){
-                            
+                            $dateNeededHeader  = $this->input->post("dateNeeded") == "null" ? NULL : $this->input->post("dateNeeded");  
+                            $createdBy  = $this->input->post("createdBy") == "null" ? NULL : $this->input->post("createdBy"); 
                             $dataStockOutDocument =[
                                 'materialWithdrawalID' => $materialWithdrawalID,
                                 'materialWithdrawalCode' => $materialWithdrawalData->materialWithdrawalCode,
@@ -581,7 +583,7 @@ class Inventory_validation extends CI_Controller {
                                 'clientCode' => $clientCode,
                                 'clientName' => $clientName,
                                 'clientAddress' => $clientAddress,
-                                'dateNeeded' => $dateNeeded,
+                                'dateNeeded' => $dateNeededHeader,
                                 'inventoryItemStatus' => 0,
                                 'stockOutStatus' =>0,
                                 'createdBy' => $createdBy, 
@@ -594,7 +596,8 @@ class Inventory_validation extends CI_Controller {
                         }
 
                         if(!empty($assets)){
-
+                            $dateNeededHeader  = $this->input->post("dateNeeded") == "null" ? NULL : $this->input->post("dateNeeded");  
+                            $createdBy  = $this->input->post("createdBy") == "null" ? NULL : $this->input->post("createdBy"); 
                             $dataEquipmentBorrowingDocument =[
                                 'materialWithdrawalID' => $materialWithdrawalID,
                                 'materialWithdrawalCode' => $materialWithdrawalData->materialWithdrawalCode,
@@ -614,7 +617,7 @@ class Inventory_validation extends CI_Controller {
                                 'clientCode' => $clientCode,
                                 'clientName' => $clientName,
                                 'clientAddress' => $clientAddress,
-                                'dateNeeded' => $dateNeeded,
+                                'dateNeeded' => $dateNeededHeader,
                                 'inventoryAssetStatus' => 0,
                                 'equipmentBorrowingStatus' =>0,
                                 'createdBy' => $createdBy, 

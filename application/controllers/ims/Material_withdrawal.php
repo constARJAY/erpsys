@@ -43,7 +43,9 @@ class Material_withdrawal extends CI_Controller {
         $getItemID = [];
         $getAssetID = [];
 
-
+        // echo "<pre>";
+        // print_r($_POST);
+        // exit;
         if($items){
             foreach ($items as $key=> $item) {
                 $status = "0";

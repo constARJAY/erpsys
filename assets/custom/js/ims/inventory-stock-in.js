@@ -1528,7 +1528,7 @@ $(document).ready(function () {
 			var MaterialUsageID = [];
 			var InventoryReceivingID = [];
 			var quantity = [];
-			var ForStockin = [];
+			//var ForStockin = [];
 			//var itemCode = $("#itemCode").val();
 			var recordID = $("[name=barcode]").attr("recordID");
 			var uom		=  $("#uom").val();
@@ -1572,10 +1572,10 @@ $(document).ready(function () {
 			$(".quantity").each(function () {
 				quantity.push($(this).val());
 			});
-			$(".quantity").each(function () {
-				ForStockin.push($(this).val());
-			});
-			console.log(ForStockin);
+			// $(".quantity").each(function () {
+			// 	ForStockin.push($(this).val());
+			// });
+			// console.log(ForStockin);
 			$(".inventoryStorageID").each(function () {
 				inventoryStorageID.push($(this).val());
 			});
@@ -1632,7 +1632,7 @@ $(document).ready(function () {
 							expirationdate:			expirationdate, 		MaterialUsageID:			MaterialUsageID,			InventoryReceivingID: 	InventoryReceivingID,
 							ReturnItemID:			ReturnItemID,			recordID:					recordID,					quantity: 				quantity,
 							inventoryCode:			inventoryCode,			itemCode:					itemCode,					uom:					uom,
-							ForStockin:				ForStockin,
+							// ForStockin:				ForStockin,
 						},
 						async: true,
 						dataType: "json",
