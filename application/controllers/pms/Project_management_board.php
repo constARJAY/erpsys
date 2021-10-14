@@ -22,50 +22,104 @@ class Project_management_board extends CI_Controller {
 
     public function getTimelineContent()
     {
-        $timelineBuilderID = $this->input->post("timelineBuilderID");
-        // echo json_encode($this->projectmanagementboard->getTimelineContent($timelineBuilderID));
-        echo json_encode($this->projectmanagementboard->getTimelineContent(1));
+        $managementBoardID = $this->input->post("managementBoardID");
+        echo json_encode($this->projectmanagementboard->getTimelineContent($managementBoardID));
     }
 
     public function saveProjectBoard()
     {
-        $sessionID = $this->session->has_userdata("adminSessionID") ? $this->session->userdata("adminSessionID") : 1;
+        $sessionID = $this->session->has_userdata("adminSessionID") ? $this->session->userdata("adminSessionID") : 0;
 
-        $timelineBuilderID          = $this->input->post("timelineBuilderID");
-        $timelineManagementStatus   = $this->input->post("timelineManagementStatus");
-        $tasks                      = $this->input->post("tasks");
+        $method                 = $this->input->post("method");
+        $isRevise               = $this->input->post("isRevise") ? $this->input->post("isRevise") == "true" : false;
+        $managementBoardID      = $this->input->post("managementBoardID");
+        $managementBoardCode    = $this->input->post("managementBoardCode");
+        $timelineBuilderID      = $this->input->post("timelineBuilderID");
+        $employeeID             = $this->input->post("employeeID") ?? null;
+        $submittedAt            = $this->input->post("submittedAt") ?? null;
+        $approversID            = $this->input->post("approversID") ?? null;
+        $approversDate          = $this->input->post("approversDate") ?? null;
+        $approversStatus        = $this->input->post("approversStatus") ?? null;
+        $managementBoardReason  = $this->input->post("managementBoardReason") ?? null;
+        $managementBoardRemarks = $this->input->post("managementBoardRemarks") ?? null;
+        $managementBoardStatus  = $this->input->post("managementBoardStatus") ?? null;
+        $tasks                  = $this->input->post("tasks");
 
-        $data = [];
-        foreach ($tasks as $task) {
-            $temp = [
-                "timelineBuilderID"     => $timelineBuilderID,
-                "taskID"                => $task["taskID"],
-                "projectMilestoneID"    => $task["projectMilestoneID"],
-                "manHours"              => $task["manHours"],
-                "assignedEmployee"      => $task["assignedEmployee"],
-                "assignedDesignation"   => $task["assignedDesignation"],
-                "assignedManHours"      => $task["assignedManHours"],
-                "assignedStartDate"     => $task["assignedStartDate"],
-                "assignedEndDate"       => $task["assignedEndDate"],
-                "assignedRegularHours"  => $task["assignedRegularHours"],
-                "assignedOvertimeHours" => $task["assignedOvertimeHours"],
-                "createdBy"             => $sessionID,
-                "updatedBy"             => $sessionID
+        $managementBoardData = [
+            "timelineBuilderID"     => $timelineBuilderID,
+            "employeeID"            => $employeeID,
+            "managementBoardReason" => $managementBoardReason,
+            "managementBoardStatus" => $managementBoardStatus,
+        ];
+
+        if ($method == "cancelform") {
+            $managementBoardData = [
+                "managementBoardStatus" => 4,
             ];
-            array_push($data, $temp);
+        } else if ($method == "deny") {
+            $managementBoardData = [
+                "approversDate"          => $approversDate,
+                "approversStatus"        => $approversStatus,
+                "managementBoardStatus"  => 3,
+                "managementBoardRemarks" => $managementBoardRemarks,
+            ];
+        } else if ($method == "approve") {
+            $managementBoardData = [
+                "approversDate"         => $approversDate,
+                "approversStatus"       => $approversStatus,
+                "managementBoardStatus" => $managementBoardStatus,
+            ];
+        } else if ($method == "submit") {
+            $managementBoardData = [
+                "timelineBuilderID"     => $timelineBuilderID,
+                "employeeID"            => $employeeID,
+                "submittedAt"           => $submittedAt,
+                "managementBoardReason" => $managementBoardReason,
+                "approversID"           => $approversID,
+                "approversDate"         => $approversDate,
+                "approversStatus"       => $approversStatus,
+                "managementBoardStatus" => $managementBoardStatus,
+            ];
         }
+        
+        $saveProjectBoard = $this->projectmanagementboard->saveProjectBoard($isRevise, $managementBoardID, $managementBoardCode, $managementBoardData);
+        $result = explode("|", $saveProjectBoard);
+        if ($result[0] == "true") {
+            $managementBoardID = $result[2];
 
+            $taskData = [];
+            if ($tasks && count($tasks) > 0) {
+                foreach ($tasks as $task) {
+                    $temp = [
+                        "timelineBuilderID"     => $timelineBuilderID,
+                        "managementBoardID"     => $managementBoardID,
+                        "taskID"                => $task["taskID"],
+                        "projectMilestoneID"    => $task["projectMilestoneID"],
+                        "manHours"              => $task["manHours"],
+                        "assignedEmployee"      => $task["assignedEmployee"],
+                        "assignedDesignation"   => $task["assignedDesignation"],
+                        "assignedManHours"      => $task["assignedManHours"],
+                        "assignedStartDate"     => $task["assignedStartDate"],
+                        "assignedEndDate"       => $task["assignedEndDate"],
+                        "assignedRegularHours"  => $task["assignedRegularHours"],
+                        "assignedOvertimeHours" => $task["assignedOvertimeHours"],
+                        "createdBy"             => $sessionID,
+                        "updatedBy"             => $sessionID
+                    ];
+                    array_push($taskData, $temp);
+                }
+                $insertTimelineManagementData = $this->projectmanagementboard->insertTimelineManagementData($managementBoardID, $taskData);
+            }
 
-        $result         =   $this->projectmanagementboard->saveProjectBoard($timelineBuilderID, $timelineManagementStatus, $data);
-        $explodeResult  =   explode("|",$result);
-            if($explodeResult[0] == "true" && $timelineManagementStatus == 2){
+            if ($managementBoardStatus == 2) {
                 $saveCEResult = $this->costestimate->saveCE($timelineBuilderID);
-                $CEResult = explode("|", $saveCEResult);
+                $CEResult     = explode("|", $saveCEResult);
                 if($CEResult[0] == "false"){
                     $result = $CEResult;
                 }
             }
-        echo json_encode($result);
+        }
+        echo json_encode($saveProjectBoard);
     }
 
 }

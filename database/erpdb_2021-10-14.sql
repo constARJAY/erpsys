@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Oct 12, 2021 at 06:41 AM
+-- Generation Time: Oct 14, 2021 at 09:43 AM
 -- Server version: 10.4.14-MariaDB
 -- PHP Version: 7.4.10
 
@@ -6838,7 +6838,21 @@ INSERT INTO `hris_employee_attendance_tbl` (`attendanceID`, `employeeID`, `sched
 (123, 20, '2021-10-06', '2021-10-06 00:00:00', '2021-10-06 00:00:00', '0.00', '0.00', NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, '2021-10-06 02:55:16', '2021-10-06 02:55:16'),
 (124, 21, '2021-10-06', '2021-10-06 08:00:00', '2021-10-06 16:00:00', '1.00', '7.00', NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, '2021-10-06 02:55:16', '2021-10-06 02:55:16'),
 (125, 22, '2021-10-06', '2021-10-06 08:00:00', '2021-10-06 16:00:00', '1.00', '7.00', NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, '2021-10-06 02:55:16', '2021-10-06 02:55:16'),
-(126, 23, '2021-10-06', '2021-10-06 08:00:00', '2021-10-06 16:00:00', '1.00', '7.00', NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, '2021-10-06 02:55:16', '2021-10-06 02:55:16');
+(126, 23, '2021-10-06', '2021-10-06 08:00:00', '2021-10-06 16:00:00', '1.00', '7.00', NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, '2021-10-06 02:55:16', '2021-10-06 02:55:16'),
+(127, 1, '2021-10-14', '2021-10-14 07:00:00', '2021-10-14 16:00:00', '1.00', '8.00', NULL, NULL, NULL, NULL, NULL, NULL, 1, 1, '2021-10-14 07:37:28', '2021-10-14 07:37:28'),
+(128, 2, '2021-10-14', '2021-10-14 07:00:00', '2021-10-14 16:00:00', '1.00', '8.00', NULL, NULL, NULL, NULL, NULL, NULL, 1, 1, '2021-10-14 07:37:28', '2021-10-14 07:37:28'),
+(129, 3, '2021-10-14', '2021-10-14 07:00:00', '2021-10-14 16:00:00', '1.00', '8.00', NULL, NULL, NULL, NULL, NULL, NULL, 1, 1, '2021-10-14 07:37:28', '2021-10-14 07:37:28'),
+(130, 4, '2021-10-14', '2021-10-14 00:00:00', '2021-10-14 00:00:00', '0.00', '0.00', NULL, NULL, NULL, NULL, NULL, NULL, 1, 1, '2021-10-14 07:37:28', '2021-10-14 07:37:28'),
+(131, 5, '2021-10-14', '2021-10-14 07:00:00', '2021-10-14 16:00:00', '1.00', '8.00', NULL, NULL, NULL, NULL, NULL, NULL, 1, 1, '2021-10-14 07:37:28', '2021-10-14 07:37:28'),
+(132, 6, '2021-10-14', '2021-10-14 07:00:00', '2021-10-14 16:00:00', '1.00', '8.00', NULL, NULL, NULL, NULL, NULL, NULL, 1, 1, '2021-10-14 07:37:28', '2021-10-14 07:37:28'),
+(133, 7, '2021-10-14', '2021-10-14 07:00:00', '2021-10-14 16:00:00', '1.00', '8.00', NULL, NULL, NULL, NULL, NULL, NULL, 1, 1, '2021-10-14 07:37:28', '2021-10-14 07:37:28'),
+(134, 8, '2021-10-14', '2021-10-14 07:00:00', '2021-10-14 16:00:00', '1.00', '8.00', NULL, NULL, NULL, NULL, NULL, NULL, 1, 1, '2021-10-14 07:37:28', '2021-10-14 07:37:28'),
+(135, 9, '2021-10-14', '2021-10-14 07:00:00', '2021-10-14 16:00:00', '1.00', '8.00', NULL, NULL, NULL, NULL, NULL, NULL, 1, 1, '2021-10-14 07:37:28', '2021-10-14 07:37:28'),
+(136, 19, '2021-10-14', '2021-10-14 07:00:00', '2021-10-14 16:00:00', '1.00', '8.00', NULL, NULL, NULL, NULL, NULL, NULL, 1, 1, '2021-10-14 07:37:28', '2021-10-14 07:37:28'),
+(137, 20, '2021-10-14', '2021-10-14 00:00:00', '2021-10-14 00:00:00', '0.00', '0.00', NULL, NULL, NULL, NULL, NULL, NULL, 1, 1, '2021-10-14 07:37:28', '2021-10-14 07:37:28'),
+(138, 21, '2021-10-14', '2021-10-14 07:00:00', '2021-10-14 16:00:00', '1.00', '8.00', NULL, NULL, NULL, NULL, NULL, NULL, 1, 1, '2021-10-14 07:37:28', '2021-10-14 07:37:28'),
+(139, 22, '2021-10-14', '2021-10-14 07:00:00', '2021-10-14 16:00:00', '1.00', '8.00', NULL, NULL, NULL, NULL, NULL, NULL, 1, 1, '2021-10-14 07:37:28', '2021-10-14 07:37:28'),
+(140, 23, '2021-10-14', '2021-10-14 07:00:00', '2021-10-14 16:00:00', '1.00', '8.00', NULL, NULL, NULL, NULL, NULL, NULL, 1, 1, '2021-10-14 07:37:28', '2021-10-14 07:37:28');
 
 -- --------------------------------------------------------
 
@@ -11439,7 +11453,7 @@ CREATE TABLE `ims_stock_in_assets_tbl` (
   `quantityForStockin` decimal(15,2) NOT NULL,
   `createAt` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   `updateAt` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
-  `stockInDate` date NOT NULL,
+  `stockInDate` timestamp NOT NULL DEFAULT current_timestamp(),
   `stockOutDate` date NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -11474,7 +11488,7 @@ CREATE TABLE `ims_stock_in_item_tbl` (
   `quantityForStockin` decimal(15,2) NOT NULL,
   `createAt` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   `updateAt` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
-  `stockInDate` date NOT NULL,
+  `stockInDate` timestamp NOT NULL DEFAULT current_timestamp(),
   `stockOutDate` date NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -11958,6 +11972,32 @@ CREATE TABLE `pms_image_taskboard_tbl` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `pms_management_board_tbl`
+--
+
+CREATE TABLE `pms_management_board_tbl` (
+  `managementBoardID` bigint(21) NOT NULL,
+  `managementBoardCode` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `reviseManagementBoardID` bigint(21) DEFAULT NULL,
+  `reviseManagementBoardCode` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `timelineBuilderID` bigint(21) DEFAULT NULL,
+  `employeeID` bigint(21) DEFAULT NULL,
+  `managementBoardReason` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `approversID` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `approversDate` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `approversStatus` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `managementBoardStatus` int(11) DEFAULT NULL,
+  `managementBoardRemarks` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `submittedAt` timestamp NULL DEFAULT NULL,
+  `createdBy` bigint(21) NOT NULL,
+  `updatedBy` bigint(21) NOT NULL,
+  `createdAt` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updatedAt` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `pms_milestone_builder_tbl`
 --
 
@@ -12191,6 +12231,19 @@ CREATE TABLE `pms_timeline_builder_tbl` (
   `updatedAt` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+--
+-- Triggers `pms_timeline_builder_tbl`
+--
+DELIMITER $$
+CREATE TRIGGER `pms_timeline_builder_tbl_AFTER_UPDATE` AFTER UPDATE ON `pms_timeline_builder_tbl` FOR EACH ROW BEGIN
+	IF NEW.timelineBuilderStatus = 2 AND NEW.timelineManagementBy IS NULL THEN
+		INSERT INTO pms_management_board_tbl 
+        (timelineBuilderID, employeeID, managementBoardStatus, createdBy, updatedBy) VALUES (OLD.timelineBuilderID, OLD.employeeID, 0, OLD.updatedBy, OLD.updatedBy);
+    END IF;
+END
+$$
+DELIMITER ;
+
 -- --------------------------------------------------------
 
 --
@@ -12200,6 +12253,7 @@ CREATE TABLE `pms_timeline_builder_tbl` (
 CREATE TABLE `pms_timeline_management_tbl` (
   `timelineManagementID` bigint(21) NOT NULL,
   `timelineBuilderID` bigint(21) NOT NULL,
+  `managementBoardID` bigint(21) DEFAULT NULL,
   `taskID` bigint(21) NOT NULL,
   `projectMilestoneID` bigint(21) NOT NULL,
   `manHours` decimal(15,2) NOT NULL DEFAULT 0.00,
@@ -13121,6 +13175,12 @@ ALTER TABLE `pms_image_taskboard_tbl`
   ADD PRIMARY KEY (`imageID`);
 
 --
+-- Indexes for table `pms_management_board_tbl`
+--
+ALTER TABLE `pms_management_board_tbl`
+  ADD PRIMARY KEY (`managementBoardID`);
+
+--
 -- Indexes for table `pms_milestone_builder_tbl`
 --
 ALTER TABLE `pms_milestone_builder_tbl`
@@ -13422,7 +13482,7 @@ ALTER TABLE `hris_designation_tbl`
 -- AUTO_INCREMENT for table `hris_employee_attendance_tbl`
 --
 ALTER TABLE `hris_employee_attendance_tbl`
-  MODIFY `attendanceID` bigint(21) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=127;
+  MODIFY `attendanceID` bigint(21) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=141;
 
 --
 -- AUTO_INCREMENT for table `hris_employee_documents_tbl`
@@ -13993,6 +14053,12 @@ ALTER TABLE `pms_employeetaskoard_tbl`
 --
 ALTER TABLE `pms_image_taskboard_tbl`
   MODIFY `imageID` bigint(20) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `pms_management_board_tbl`
+--
+ALTER TABLE `pms_management_board_tbl`
+  MODIFY `managementBoardID` bigint(21) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `pms_milestone_builder_tbl`

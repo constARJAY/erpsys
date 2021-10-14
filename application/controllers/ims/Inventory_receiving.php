@@ -163,9 +163,9 @@ class Inventory_receiving extends CI_Controller {
                         $saveServices = $this->inventoryreceiving->saveServices($service, $scopes, $inventoryReceivingID,$item["itemID"]);
                     }
                     
-                    if ($inventoryReceivingData["inventoryReceivingStatus"] == "2") {
-                        $this->inventoryreceiving->updateOrderedPending($inventoryReceivingID);
-                    }
+                    // if ($inventoryReceivingData["inventoryReceivingStatus"] == "2") {
+                    //     $this->inventoryreceiving->updateOrderedPending($inventoryReceivingID);
+                    // }
                 }
 
             }

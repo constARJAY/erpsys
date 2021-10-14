@@ -7,12 +7,12 @@ class Material_request extends CI_Controller {
     {
         parent::__construct();
         $this->load->model("ims/MaterialRequest_model", "materialrequest");
-        isAllowed(137);
+        // isAllowed(137);
     }
 
     public function index()
     {
-        $data["title"] = "Material Request";
+        $data["title"] = "Inventory Requisition Form";
         $this->load->view("template/header",$data);
         $this->load->view("ims/material_request/index");
         $this->load->view("template/footer");

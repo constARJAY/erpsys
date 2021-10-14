@@ -67,7 +67,7 @@ class ProjectManagementBoard_model extends CI_Model {
         return $output;
     }
 
-    public function getTimelineBoard($timelineBuilderID = 0, $taskID = 0)
+    public function getTimelineBoard($managementBoardID = 0, $timelineBuilderID = 0, $taskID = 0)
     {
         $output = [];
         $sql    = "
@@ -78,6 +78,7 @@ class ProjectManagementBoard_model extends CI_Model {
         FROM pms_timeline_management_tbl AS ptmt 
             LEFT JOIN pms_timeline_task_list_tbl AS pttlt USING(taskID)
         WHERE ptmt.timelineBuilderID = $timelineBuilderID 
+            AND ptmt.managementBoardID = $managementBoardID
             AND ptmt.taskID = $taskID";
         $query  = $this->db->query($sql);
         $milestones = $query ? $query->result_array() : [];
@@ -102,7 +103,7 @@ class ProjectManagementBoard_model extends CI_Model {
         return $output;
     }
 
-    public function getTaskList($timelineBuilderID = 0, $milestoneBuilderID = 0)
+    public function getTaskList($managementBoardID = 0, $timelineBuilderID = 0, $milestoneBuilderID = 0)
     {
         $output = [];
         $sql    = "SELECT * FROM pms_timeline_task_list_tbl WHERE timelineBuilderID = $timelineBuilderID AND milestoneBuilderID = $milestoneBuilderID";
@@ -115,14 +116,14 @@ class ProjectManagementBoard_model extends CI_Model {
                 "manHours"      => $task["allottedHours"],
                 "taskStartDate" => $task["taskStartDate"],
                 "taskEndDate"   => $task["taskEndDate"],
-                "milestoneTask" => $this->getTimelineBoard($timelineBuilderID, $task["taskID"])
+                "milestoneTask" => $this->getTimelineBoard($managementBoardID, $timelineBuilderID, $task["taskID"])
             ];
             array_push($output, $temp);
         }
         return $output;
     }
 
-    public function getTimelinePhases($timelineBuilderID = 0)
+    public function getTimelinePhases($managementBoardID = 0, $timelineBuilderID = 0)
     {
         $output = [];
         $sql    = "
@@ -146,62 +147,126 @@ class ProjectManagementBoard_model extends CI_Model {
                 "phaseCode"          => $phase["phaseCode"],
                 "phaseDescription"   => $phase["phaseDescription"],
                 "milestones"         => $this->getMilestoneList($milestoneBuilderID),
-                "tasks"              => $this->getTaskList($timelineBuilderID, $milestoneBuilderID),
+                "tasks"              => $this->getTaskList($managementBoardID, $timelineBuilderID, $milestoneBuilderID),
             ];
             array_push($output, $temp);
         }
         return $output;
     }
 
-    public function getTimelineContent($timelineBuilderID = 1)
+    public function getManagementBoardData($managementBoardID = 0)
+    {
+        $sql = "SELECT * FROM pms_management_board_tbl WHERE managementBoardID = $managementBoardID";
+        $query = $this->db->query($sql);
+        return $query ? $query->row() : null;
+    }
+
+    public function getTimelineContent($managementBoardID = 1)
     {
         $output = [];
-        $projectDetails = $this->getProjectDetails($timelineBuilderID);
-        if ($projectDetails) {
-            $output["timelineBuilderID"]    = $projectDetails->timelineBuilderID;
-            $output["employeeID"]           = $projectDetails->employeeID;
-            $output["timelineManagementBy"] = $projectDetails->timelineManagementBy;
-            $output["teamMember"]           = $projectDetails->teamMember;
-            $output["projectName"]          = $projectDetails->projectName;
-            $output["projectCode"]          = $projectDetails->projectCode;
-            $output["timelineManagementStatus"] = $projectDetails->timelineManagementStatus;
+        $managementBoardData = $this->getManagementBoardData($managementBoardID);
+        if ($managementBoardData) {
+            $output["managementBoardID"]         = $managementBoardID;
+            $output["managementBoardCode"]       = $managementBoardData->managementBoardCode;
+            $output["reviseManagementBoardID"]   = $managementBoardData->reviseManagementBoardID;
+            $output["reviseManagementBoardCode"] = $managementBoardData->reviseManagementBoardCode;
+            $output["employeeID"]                = $managementBoardData->employeeID;
+            $output["approversID"]               = $managementBoardData->approversID;
+            $output["approversDate"]             = $managementBoardData->approversDate;
+            $output["approversStatus"]           = $managementBoardData->approversStatus;
+            $output["managementBoardStatus"]     = $managementBoardData->managementBoardStatus;
+            $output["createdAt"]                 = $managementBoardData->createdAt;
+            $output["submittedAt"]               = $managementBoardData->submittedAt;
+            $output["managementBoardReason"]     = $managementBoardData->managementBoardReason;
+            $output["managementBoardRemarks"]    = $managementBoardData->managementBoardRemarks;
+            $output["reviseManagementBoardID"]   = $managementBoardData->reviseManagementBoardID;
 
-            $output["phases"] = $this->getTimelinePhases($timelineBuilderID);
+            $timelineBuilderID = $managementBoardData->timelineBuilderID;
+            $projectDetails = $this->getProjectDetails($timelineBuilderID);
+            if ($projectDetails) {
+                $output["timelineBuilderID"]        = $projectDetails->timelineBuilderID;
+                $output["teamMember"]               = $projectDetails->teamMember;
+                $output["projectName"]              = $projectDetails->projectName;
+                $output["projectCode"]              = $projectDetails->projectCode;
+                $output["timelineManagementStatus"] = $projectDetails->timelineManagementStatus;
+    
+                $output["phases"] = $this->getTimelinePhases($managementBoardID, $timelineBuilderID);
+            }
         }
         return $output;
     }
     // ----- END GET TIMELINE CONTENT -----
 
 
-    public function deleteProjectBoard($timelineBuilderID = 0)
+    public function updateProjectBuilder($timelineBuilderID = 0, $timelineBuilderData = [])
     {
-        $query = $this->db->delete("pms_timeline_management_tbl", ["timelineBuilderID" => $timelineBuilderID]);
-        return $query ? true : false;
-    }
-
-    public function updateProjectBuilder($timelineBuilderID, $timelineManagementStatus)
-    {
-        $sessionID = $this->session->has_userdata("adminSessionID") ? $this->session->userdata("adminSessionID") : 1;
-
         $query = $this->db->update(
             "pms_timeline_builder_tbl", 
-            [
-                "timelineManagementBy"     => $sessionID,
-                "timelineManagementStatus" => $timelineManagementStatus
-            ], 
+            $timelineBuilderData,
             ["timelineBuilderID" => $timelineBuilderID]);
         return $query ? true : false;
     }
 
-    public function saveProjectBoard($timelineBuilderID = 0, $timelineManagementStatus = 0, $data = [])
+    public function deleteTimelineManagementData($managementBoardID = 0)
     {
-        $delete = $this->deleteProjectBoard($timelineBuilderID);
-        $update = $this->updateProjectBuilder($timelineBuilderID, $timelineManagementStatus);
-        if ($data && count($data) > 0) {
-            $query = $this->db->insert_batch("pms_timeline_management_tbl", $data);
-            return $query ? "true|Successfully submitted|$timelineBuilderID|".date("Y-m-d") : "false|System error: Please contact the system administrator for assistance!";
+        $query = $this->db->delete("pms_timeline_management_tbl", [ "managementBoardID" => $managementBoardID]);
+        return $query ? true : false;
+    }
+
+    public function insertTimelineManagementData($managementBoardID = 0, $taskData = [])
+    {
+        if ($taskData && count($taskData) > 0)
+        {
+            $deleteTimelineManagementData = $this->deleteTimelineManagementData($managementBoardID);
+            $query = $this->db->insert_batch("pms_timeline_management_tbl", $taskData);
+            return $query ? true : false;
+        }
+        return true;
+    }
+
+    public function saveProjectBoard($isRevise = false, $managementBoardID = 0, $managementBoardCode = "", $managementBoardData = [])
+    {
+        if ($isRevise) {
+            $managementBoardData["reviseManagementBoardID"]   = $managementBoardID;
+            $managementBoardData["reviseManagementBoardCode"] = $managementBoardCode;
+            $query = $this->db->insert("pms_management_board_tbl", $managementBoardData);
+            $managementBoardID = $this->db->insert_id();
+        } else {
+            $query = $this->db->update("pms_management_board_tbl", $managementBoardData, ["managementBoardID" => $managementBoardID]);
+        }
+        
+        if ($query) {
+            $data = $this->getManagementBoardData($managementBoardID);
+            if ($data) {
+                $createdAt = $data->createdAt ?? date("Y-m-d");
+                $managementBoardCode   = $data->managementBoardCode ?? "";
+                $managementBoardStatus = $data->managementBoardStatus ?? 0;
+                $timelineBuilderID     = $data->timelineBuilderID ?? 0;
+                $employeeID            = $data->employeeID ?? 0;
+
+                if (!$managementBoardCode) {
+                    $managementBoardCode = getFormCode("PMB", $createdAt, $managementBoardID);
+                    $this->db->update("pms_management_board_tbl", ["managementBoardCode" => $managementBoardCode], ["managementBoardID" => $managementBoardID]);
+                } 
+
+                if ($managementBoardStatus == 2) {
+                    $timelineBuilderData = [
+                        "timelineManagementBy"     => $employeeID,
+                        "timelineManagementStatus" => 2
+                    ];
+                    $this->updateProjectBuilder($timelineBuilderID, $timelineBuilderData);
+                } else {
+                    $timelineBuilderData = [
+                        "timelineManagementBy"     => $employeeID,
+                        "timelineManagementStatus" => 1
+                    ];
+                    $this->updateProjectBuilder($timelineBuilderID, $timelineBuilderData);
+                }
+            }
+            return "true|$managementBoardCode|$managementBoardID|".date("Y-m-d");
         }
         return "false|System error: Please contact the system administrator for assistance!";
+
     }
 
 }

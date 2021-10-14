@@ -90,7 +90,7 @@ $(document).ready(function () {
 							'' AS consolidateCode,
 							'' AS employeeID,
 							0 AS quantity,
-							SUM(quantity) AS received,
+							SUM(quantityForStockin) AS received,
 							'' AS createAt,
 							'' AS recordID
 						FROM ims_stock_in_item_tbl 
@@ -102,7 +102,7 @@ $(document).ready(function () {
 							'' AS consolidateCode,
 							'' AS employeeID,
 							0 AS quantity,
-							SUM(quantity) AS received,
+							SUM(quantityForStockin) AS received,
 							'' AS createAt,
 							'' AS recordID
 						FROM ims_stock_in_assets_tbl 
@@ -200,7 +200,7 @@ $(document).ready(function () {
 				scrollCollapse: true,
 				columnDefs: [{
 						targets: 0,
-						width: 100
+						width: 200
 					},
 					{
 						targets: 1,
@@ -234,7 +234,7 @@ $(document).ready(function () {
 				scrollCollapse: true,
 				columnDefs: [{
 						targets: 0,
-						width: 100
+						width: 200
 					},
 					{
 						targets: 1,
@@ -287,7 +287,7 @@ $(document).ready(function () {
 				scrollCollapse: true,
 				columnDefs: [{
 						targets: 0,
-						width: 100
+						width: 200
 					},
 					{
 						targets: 1,
@@ -347,8 +347,8 @@ $(document).ready(function () {
 													ird.receivedQuantity AS quantity,
 													DATE_FORMAT(iri.createdAt,'%M% %d%, %Y') AS daterequest,
 													returnItemStatus AS inventoryStatus,
-													CASE WHEN sii.quantity IS NOT NULL  THEN IFNULL(SUM(sii.quantity),0)
-													ELSE IFNULL(SUM(sia.quantity),0) END RECORD
+													CASE WHEN sii.quantityForStockin IS NOT NULL  THEN IFNULL(SUM(sii.quantityForStockin),0)
+													ELSE IFNULL(SUM(sia.quantityForStockin),0) END RECORD
 													FROM ims_return_item_tbl AS iri
 													LEFT JOIN ims_inventory_request_details_tbl AS ird ON iri.returnItemID = ird.returnItemID
 													LEFT JOIN hris_employee_list_tbl AS empl ON iri.employeeID = empl.employeeID
@@ -364,8 +364,8 @@ $(document).ready(function () {
 													unused AS quantity,
 													DATE_FORMAT(muf.createdAt,'%M% %d%, %Y') AS daterequest,
 													materialUsageStatus as inventoryStatus,
-													CASE WHEN sii.quantity IS NOT NULL THEN IFNULL(SUM(sii.quantity),0)
-													ELSE IFNULL(SUM(sia.quantity),0) END RECORD  
+													CASE WHEN sii.quantityForStockin IS NOT NULL THEN IFNULL(SUM(sii.quantityForStockin),0)
+													ELSE IFNULL(SUM(sia.quantityForStockin),0) END RECORD  
 													FROM ims_material_usage_tbl AS muf
 													LEFT JOIN ims_inventory_request_details_tbl AS ird ON ird.materialUsageID = muf.materialUsageID
 													LEFT JOIN hris_employee_list_tbl AS empl ON muf.employeeID = empl.employeeID
@@ -381,8 +381,8 @@ $(document).ready(function () {
 													receivedQuantity AS quantity,
 													DATE_FORMAT(iir.createdAt,'%M% %d%, %Y') AS daterequest,
 													inventoryReceivingStatus as inventoryStatus,
-													CASE WHEN sii.quantity IS NOT NULL  THEN SUM(sii.quantity)
-													ELSE IFNULL(SUM(sia.quantity),0) END RECORD    
+													CASE WHEN sii.quantityForStockin IS NOT NULL  THEN SUM(sii.quantityForStockin)
+													ELSE IFNULL(SUM(sia.quantityForStockin),0) END RECORD    
 													FROM ims_inventory_receiving_tbl AS iir
 													LEFT JOIN ims_inventory_request_details_tbl AS ird ON iir.inventoryReceivingID = ird.inventoryReceivingID
 													LEFT JOIN hris_employee_list_tbl AS empl ON iir.employeeID = empl.employeeID
@@ -780,7 +780,7 @@ $(document).ready(function () {
 												NULL AS name_Brand,
 												NULL AS classification_category,
 												0 AS quantity,
-												sum(quantity) AS remaining
+												sum(quantityForStockin) AS remaining
 											FROM ims_stock_in_item_tbl 
 											WHERE inventoryCode = '${consolidateCode}'
 											GROUP BY itemID
@@ -800,7 +800,7 @@ $(document).ready(function () {
 												NULL AS name_Brand,
 												NULL AS classification_category,
 												0 AS quantity,
-												sum(quantity) AS remaining
+												sum(quantityForStockin) AS remaining
 											FROM ims_stock_in_assets_tbl 
 											WHERE inventoryCode = '${consolidateCode}'
 											GROUP BY itemID
@@ -829,8 +829,8 @@ $(document).ready(function () {
 							<small style="color:#848482;">${item.categoryName}</small>
 						</td>
 						<td>${item.requestName}</td>
-						<td>${item.quantity}</td>
-						<td>${(parseFloat(item.quantity) - parseFloat(item.remaining)).toFixed(2)}</td>
+						<td class="text-center">${item.quantity}</td>
+						<td class="text-center">${(parseFloat(item.quantity) - parseFloat(item.remaining)).toFixed(2)}</td>
 						<td>`;
 						html += `<a class="btn btn-primary btn-barcode btn-sm btn-block" 
 									href="javascript:void(0);" 
@@ -851,12 +851,15 @@ $(document).ready(function () {
 										itemNameBrand="${item.name_Brand}"
 										classificationCategory="${item.classification_category}"
 										quantityRequest="${item.quantity}"
-										remaining="${(parseFloat(item.quantity)) - (parseFloat(item.remaining)).toFixed(2)}"
+										remaining="${parseFloat((item.quantity) - (item.remaining)).toFixed(2)}"
 										UOM="pack">
 										<i class="fas fa-pencil-alt"></i>Record
 									</a>`; 
 						}
 						html += `</td>
+
+
+						
 					</tr>`;	
 
 		})
@@ -1142,7 +1145,7 @@ $(document).ready(function () {
 								<label>Quantity</label>
 								<input 
 									type="text" 
-									class="form-control" 
+									class="form-control text-center" 
 									name="quantity" 
 									id="quantity"
 									value=""
@@ -1155,7 +1158,7 @@ $(document).ready(function () {
 								<label>Remaining</label>
 								<input 
 									type="text" 
-									class="form-control" 
+									class="form-control text-center" 
 									name="remaining" 
 									id="remaining"
 									value=""
@@ -1189,7 +1192,7 @@ $(document).ready(function () {
 											<th>Storage Name <code>*</code></th>
 											<th>Storage Details</th>
 											<th>Manufactured Date</th>
-											<th>Expiration Date <code>*</code></th>
+											<th>Expiration Date</th>
 										</tr>
 									</thead>
 									
@@ -1210,11 +1213,11 @@ $(document).ready(function () {
 													maxlength="20" 
 													autocomplete="off">
 											<div class="invalid-feedback d-block" id="invalid-input_recievedQuantity"></div>
-										</td>`;
+										`;
 								}else{
 								var quantityReceived = 1;
 									html +=`
-										<td>
+										
 											<input type="text"
 													class="form-control quantity text-center input-quantity"
 													id="quantity${index}"
@@ -1227,9 +1230,10 @@ $(document).ready(function () {
 													maxlength="20" 
 													autocomplete="off"
 													disabled>
-										</td>`;
+										`;
 								}
 									html +=`
+									</td>
 										<td>
 											<input 
 												type="text"
@@ -1287,7 +1291,6 @@ $(document).ready(function () {
 												number="${index}"
 												max="2040-04-30"
 												name="expirationdate"
-												required 
 												value="${today}"
 												id="expirationdate${index}">
 										</td>
@@ -1435,7 +1438,7 @@ $(document).ready(function () {
 		if (serialnumber == "") {
 			if (totalreceived < totalOrderQuantity) {
 				$(this).removeClass("is-valid").addClass("is-invalid");
-				$("#invalid-input_recievedQuantity").html("Not Equal Order Quantity");
+				$("#invalid-input_recievedQuantity").html("Incorrect quantity inserted");
 				document.getElementById("btnSave").disabled = true;
 			} else {
 				$(this).removeClass("is-invalid").addClass("is-valid");
@@ -1525,6 +1528,7 @@ $(document).ready(function () {
 			var MaterialUsageID = [];
 			var InventoryReceivingID = [];
 			var quantity = [];
+			var ForStockin = [];
 			//var itemCode = $("#itemCode").val();
 			var recordID = $("[name=barcode]").attr("recordID");
 			var uom		=  $("#uom").val();
@@ -1568,6 +1572,10 @@ $(document).ready(function () {
 			$(".quantity").each(function () {
 				quantity.push($(this).val());
 			});
+			$(".quantity").each(function () {
+				ForStockin.push($(this).val());
+			});
+			console.log(ForStockin);
 			$(".inventoryStorageID").each(function () {
 				inventoryStorageID.push($(this).val());
 			});
@@ -1624,6 +1632,7 @@ $(document).ready(function () {
 							expirationdate:			expirationdate, 		MaterialUsageID:			MaterialUsageID,			InventoryReceivingID: 	InventoryReceivingID,
 							ReturnItemID:			ReturnItemID,			recordID:					recordID,					quantity: 				quantity,
 							inventoryCode:			inventoryCode,			itemCode:					itemCode,					uom:					uom,
+							ForStockin:				ForStockin,
 						},
 						async: true,
 						dataType: "json",

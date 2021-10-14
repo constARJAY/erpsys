@@ -8,7 +8,7 @@
                         <li class="breadcrumb-item"><i class="fas fa-boxes-alt"></i> &nbsp;Inventory Modules</li>
                         <li class="breadcrumb-item active">Item Price List</li>
                     </ul>
-                    <h1 class="mt-3">List of Item Price List</h1>
+                    <h1 class="mt-3">List of Item Price</h1>
                     <span>This module is used to manage the inventory item price list details.</span>
                 </div>
                 <div class="col-sm-12 col-md-4 d-flex justify-content-end align-items-start" id="select2Classification">

@@ -92,17 +92,27 @@ class InventoryValidation_model extends CI_Model {
         return "false|System error: Please contact the system administrator for assistance!";
     }
 
-    public function saveInventoryValidationItems($data, $inventoryValidationID = null, $purchaseRequestID = null,$method = "update"){
+    public function saveInventoryValidationItems($data, $inventoryValidationID = null, $purchaseRequestID = null,$method = "approve"){
         // $deleteInventoryValidationItems = $this->deleteInventoryValidationItems($inventoryValidationID, $purchaseRequestID);
+      
+     
+        // if($method == 'approve'){
+        //     echo "pasok";
+        //     for($loopItem = 0; $loopItem < count($data); $loopItem++ ){
+        //         $itemID = $data[$loopItem]["itemID"];
 
-        // if($method == 'update'){
-           
-        //     if($inventoryValidationID != 0 || $inventoryValidationID !=null){
-        //         $this->db->where('inventoryValidationID', $inventoryValidationID);
-        //         $this->db->delete('ims_request_items_tbl');
+
         //     }
-        //     $query = $this->db->insert_batch("ims_request_items_tbl", $data);
-        // }else{
+        //     exit;
+           
+        //     // if($inventoryValidationID != 0 || $inventoryValidationID !=null){
+        //     //     $this->db->where('inventoryValidationID', $inventoryValidationID);
+        //     //     $this->db->delete('ims_request_items_tbl');
+        //     // }
+        //     // $query = $this->db->insert_batch("ims_request_items_tbl", $data);
+        // }
+        
+        // if($method == "submit"){
             if($inventoryValidationID != 0 || $inventoryValidationID !=null){
                 $this->db->where('inventoryValidationID', $inventoryValidationID);
                 $this->db->delete('ims_request_items_tbl');
@@ -116,7 +126,7 @@ class InventoryValidation_model extends CI_Model {
         return "false|System error: Please contact the system administrator for assistance!";
     }
 
-    public function saveInventoryValidationAssets($data, $inventoryValidationID = null, $purchaseRequestID = null, $method = "update"){
+    public function saveInventoryValidationAssets($data, $inventoryValidationID = null, $purchaseRequestID = null, $method = "approve"){
         // $deleteInventoryValidationItems = $this->deleteInventoryValidationItems($inventoryValidationID, $purchaseRequestID);
         // if($method == "update"){
         //     if($inventoryValidationID != 0 || $inventoryValidationID !=null){

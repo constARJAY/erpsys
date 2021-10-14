@@ -1054,7 +1054,14 @@
 
         }else{
             $(`[name="receivedDateItem"][withdrawalItemID="${withdrawalItemID}"][itemID="${itemID}"]`).text(moment().format("MMMM DD, YYYY"));
-            $(`[name="remainingItem"][withdrawalItemID="${withdrawalItemID}"][itemID="${itemID}"]`).text(formatAmount(computeRemainingItem));
+            
+            if(computeRemainingItem <0){
+                $(`[name="remainingItem"][withdrawalItemID="${withdrawalItemID}"][itemID="${itemID}"]`).text(formatAmount(0));
+
+            }else{
+                $(`[name="remainingItem"][withdrawalItemID="${withdrawalItemID}"][itemID="${itemID}"]`).text(formatAmount(computeRemainingItem));
+
+            }
 
         }
 
@@ -1078,7 +1085,15 @@
         }else{
 
             $(`[name="receivedDateAsset"][withdrawalAssetID="${withdrawalAssetID}"][assetID="${assetID}"]`).text(moment().format("MMMM DD, YYYY"));
-            $(`[name="remainingAsset"][withdrawalAssetID="${withdrawalAssetID}"][assetID="${assetID}"]`).text(formatAmount(computeRemainingAsset));
+
+            if(computeRemainingAsset <0){
+                $(`[name="remainingAsset"][withdrawalAssetID="${withdrawalAssetID}"][assetID="${assetID}"]`).text(formatAmount(0));
+
+            }else{
+                $(`[name="remainingAsset"][withdrawalAssetID="${withdrawalAssetID}"][assetID="${assetID}"]`).text(formatAmount(computeRemainingAsset));
+
+            }
+
 
         }
 

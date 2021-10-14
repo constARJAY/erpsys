@@ -7,6 +7,9 @@ class Inventory_validation extends CI_Controller {
     {
         parent::__construct();
         $this->load->model("ims/InventoryValidation_model", "inventoryvalidation");
+        $this->load->model("ims/MaterialWithdrawal_model", "materialwithdrawal");
+        $this->load->model("ims/StockOut_model", "stockout");
+        $this->load->model("ims/equipmentBorrowing_model", "equipmentborrowing");
         isAllowed(126);
     }
 
@@ -42,9 +45,7 @@ class Inventory_validation extends CI_Controller {
         $items                          = $this->input->post("items") ?? null;
         $assets                          = $this->input->post("assets") ?? null;
 
-        $materialWithdrawalCode  = $this->input->post("materialWithdrawalCode") == "null" ? NULL : $this->input->post("materialWithdrawalCode") ; 
-        $stockOutCode  = $this->input->post("stockOutCode") == "null" ? NULL : $this->input->post("stockOutCode"); 
-        $equipmentBorrowingCode  = $this->input->post("equipmentBorrowingCode") == "null" ? NULL : $this->input->post("equipmentBorrowingCode"); 
+    
         $inventoryValidationID  = $this->input->post("inventoryValidationID") == "null" ? NULL : $this->input->post("inventoryValidationID"); 
         $inventoryValidationCode  = $this->input->post("inventoryValidationCode") == "null" ? NULL : $this->input->post("inventoryValidationCode"); 
         $materialRequestID  = $this->input->post("materialRequestID") == "null" ? NULL : $this->input->post("materialRequestID"); 
@@ -216,7 +217,7 @@ class Inventory_validation extends CI_Controller {
                 }
                
                 
-                $saveInventoryValidationItems = $this->inventoryvalidation->saveInventoryValidationItems($inventoryValidationItems,$materialRequestID,$method);
+                $saveInventoryValidationItems = $this->inventoryvalidation->saveInventoryValidationItems($inventoryValidationItems,$inventoryValidationID,'',$method);
             }
 
             if (!empty($assets)) {
@@ -316,13 +317,14 @@ class Inventory_validation extends CI_Controller {
                 }
                
                 
-                $saveInventoryValidationAssets = $this->inventoryvalidation->saveInventoryValidationAssets($inventoryValidationAssets,$materialRequestID,$method);
+                $saveInventoryValidationAssets = $this->inventoryvalidation->saveInventoryValidationAssets($inventoryValidationAssets,$inventoryValidationID,'',$method);
     
             }
         }
-        if ($inventoryValidationStatus == 2) {
-    
+        if ($inventoryValidationStatus == 2 ) {  //  && $method == "approve"
+         
             if (!empty($items)) {
+              
                 $inventoryValidationItems =[];
                 foreach($items as $index => $item) {
 
@@ -413,8 +415,10 @@ class Inventory_validation extends CI_Controller {
                 }
                
                 
-                $saveInventoryValidationItems = $this->inventoryvalidation->saveInventoryValidationItems($inventoryValidationItems,$materialRequestID,$method);
+                $saveInventoryValidationItems = $this->inventoryvalidation->saveInventoryValidationItems($inventoryValidationItems,$inventoryValidationID,'',$method);
             }
+
+
 
             if (!empty($assets)) {
                 $inventoryValidationAssets =[];
@@ -513,14 +517,13 @@ class Inventory_validation extends CI_Controller {
                 }
                
                 
-                $saveInventoryValidationAssets = $this->inventoryvalidation->saveInventoryValidationAssets($inventoryValidationAssets,$materialRequestID,$method);
+                $saveInventoryValidationAssets = $this->inventoryvalidation->saveInventoryValidationAssets($inventoryValidationAssets,$inventoryValidationID,'',$method);
     
             }
 
             if(!empty($items) || !empty($assets)){
 
-                $dataMaterialWithdrawalDocument =array(
-                    'materialWithdrawalCode' => $materialWithdrawalCode,
+                $dataMaterialWithdrawalDocument =[
                     'inventoryValidationID' => $inventoryValidationID,
                     'inventoryValidationCode' => $inventoryValidationCode,
                     'materialRequestID' => $materialRequestID,
@@ -543,9 +546,10 @@ class Inventory_validation extends CI_Controller {
                     'materialWithdrawalStatus' => 0,
                     'materialWithdrawalReason	' => $inventoryValidationReason,
                     'createdBy' => $createdBy, 
-                );
+                ];
                
-                $saveMaterialWithdrawalDocument = $this->inventoryvalidation->saveMaterialWithdrawalDocument($dataMaterialWithdrawalDocument);
+                $saveMaterialWithdrawalDocument = $this->materialwithdrawal->saveMaterialWithdrawalData("insert", $dataMaterialWithdrawalDocument);
+                // $saveMaterialWithdrawalDocument = $this->inventoryvalidation->saveMaterialWithdrawalDocument($dataMaterialWithdrawalDocument);
                
                 if($saveMaterialWithdrawalDocument){
                     $result = explode("|", $saveMaterialWithdrawalDocument);
@@ -553,12 +557,14 @@ class Inventory_validation extends CI_Controller {
                     if ($result[0] == "true") {
         
                         $materialWithdrawalID  = $result[2];
+                        $materialWithdrawalData = $this->materialwithdrawal->getMaterialWithdrawalData($materialWithdrawalID);
+
 
                         if(!empty($items)){
-                            $dataStockOutDocument =array(
-                                'stockOutCode' => $stockOutCode,
+                            
+                            $dataStockOutDocument =[
                                 'materialWithdrawalID' => $materialWithdrawalID,
-                                'materialWithdrawalCode' => $materialWithdrawalCode,
+                                'materialWithdrawalCode' => $materialWithdrawalData->materialWithdrawalCode,
                                 'inventoryValidationID' => $inventoryValidationID,
                                 'inventoryValidationCode' => $inventoryValidationCode,
                                 'materialRequestID' => $materialRequestID,
@@ -579,16 +585,19 @@ class Inventory_validation extends CI_Controller {
                                 'inventoryItemStatus' => 0,
                                 'stockOutStatus' =>0,
                                 'createdBy' => $createdBy, 
-                            );
+                            ];
+                            
+
+                            $this->stockout->saveStockOutData("insert",$dataStockOutDocument);
     
-                            $saveStockOutDocument = $this->inventoryvalidation->saveStockOutDocument($dataStockOutDocument);
+                        //     $saveStockOutDocument = $this->inventoryvalidation->saveStockOutDocument($dataStockOutDocument);
                         }
 
                         if(!empty($assets)){
-                            $dataEquipmentBorrowingDocument =array(
-                                'equipmentBorrowingCode' => $equipmentBorrowingCode,
+
+                            $dataEquipmentBorrowingDocument =[
                                 'materialWithdrawalID' => $materialWithdrawalID,
-                                'materialWithdrawalCode' => $materialWithdrawalCode,
+                                'materialWithdrawalCode' => $materialWithdrawalData->materialWithdrawalCode,
                                 'inventoryValidationID' => $inventoryValidationID,
                                 'inventoryValidationCode' => $inventoryValidationCode,
                                 'materialRequestID' => $materialRequestID,
@@ -609,9 +618,9 @@ class Inventory_validation extends CI_Controller {
                                 'inventoryAssetStatus' => 0,
                                 'equipmentBorrowingStatus' =>0,
                                 'createdBy' => $createdBy, 
-                            );
-    
-                            $saveEquipmentBorrowingDocument = $this->inventoryvalidation->saveEquipmentBorrowingDocument($dataEquipmentBorrowingDocument);
+                            ];
+                            $this->equipmentborrowing->saveEquipmentBorrowingData("insert",$dataEquipmentBorrowingDocument);
+                            // $saveEquipmentBorrowingDocument = $this->inventoryvalidation->saveEquipmentBorrowingDocument($dataEquipmentBorrowingDocument);
                         }
                     }
                 }
@@ -621,7 +630,6 @@ class Inventory_validation extends CI_Controller {
         // print_r($dataMaterialWithdrawalDocument);
         // exit;
         // ----- END ADD REQUEST ITEMS -----
-
         $saveInventoryValidationData = $this->inventoryvalidation->saveInventoryValidationData($action, $inventoryValidationData, $inventoryValidationID);
 
 

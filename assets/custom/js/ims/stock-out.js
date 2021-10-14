@@ -567,8 +567,8 @@ $(document).ready(function() {
             WHEN IFNULL(SUM(itmStock.quantity),0)-IFNULL(reOrderLevel,0) <0 THEN 0
             ELSE IFNULL(SUM(itmStock.quantity),0)-IFNULL(reOrderLevel,0)
             END AS availableStocks`,
-            ` itmStock.stockOutDate IS NUll 
-			AND itmStock.stockInDate IS NOT NULL 
+            ` (itmStock.stockOutDate IS NUll OR  itmStock.stockOutDate = '0000-00-00') 
+			AND (itmStock.stockInDate IS NOT NULL OR itmStock.stockInDate != '0000-00-00') 
 			AND itmStock.itemID = ${itemID}`);
                tableStockContent +=  `<tr class="itemRecords-list-row" id="tableRow0" modulelistid itemID="${itemID}">
                                             <td class="text-center">

@@ -5,6 +5,12 @@
 .no-error {
     border-color: #09a561 !important;
 }
+#tableListStocksAsset_info{
+    color:#7e8183;
+}
+#tableListStocksItem_info{
+    color:#7e8183;
+}
 </style>
 
 <div class="body_area after_bg">
@@ -69,7 +75,7 @@
                             </div>         
                             <div class="col-12">
                                 <div class="border">
-                                    
+                                    <div class="imageboarder"></div>
                                     <div class="card-body">
                                         <div class="table-responsive" id="table_content"></div>
                                     </div>

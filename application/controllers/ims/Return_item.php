@@ -165,9 +165,9 @@ class Return_item extends CI_Controller {
                         $saveServices = $this->returnitem->saveServices($service, $returnItemID ,$item["itemID"]);
                     }
                     
-                    if ($returnitemData["returnItemStatus"] == "2") {
-                        $this->returnitem->updateOrderedPending($returnItemID );
-                    }
+                    // if ($returnitemData["returnItemStatus"] == "2") {
+                    //     $this->returnitem->updateOrderedPending($returnItemID );
+                    // }
                 }
 
             }

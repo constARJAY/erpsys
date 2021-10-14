@@ -170,7 +170,7 @@ function initDataTables() {
 			sorting: [],
 			scrollCollapse: true,
 			columnDefs: [
-				{ targets: 0,  width: 100 },
+				{ targets: 0,  width: 190 },
 				{ targets: 1,  width: 150 },
 				{ targets: 2,  width: 100 },
 				{ targets: 3,  width: 250 },
@@ -179,7 +179,6 @@ function initDataTables() {
 				{ targets: 6,  width: 350 },
 				{ targets: 7,  width: 190 },
 				{ targets: 8,  width: 80  },
-				{ targets: 9,  width: 250 },
 			],
 		});
 
@@ -193,7 +192,7 @@ function initDataTables() {
 			sorting: [],
 			scrollCollapse: true,
 			columnDefs: [
-				{ targets: 0,  width: 100 },
+				{ targets: 0,  width: 190 },
 				{ targets: 1,  width: 150 },
 				{ targets: 2,  width: 100 },
 				{ targets: 3,  width: 250 },
@@ -202,7 +201,6 @@ function initDataTables() {
 				{ targets: 6,  width: 350 },
 				{ targets: 7,  width: 190 },
 				{ targets: 8,  width: 80  },
-				{ targets: 9,  width: 250 },
 			],
 		});
 
@@ -220,7 +218,7 @@ function initDataTables() {
             info: false,
             scrollCollapse: true,
             columnDefs: [
-                { targets: 0,  width: 120 },
+                { targets: 0,  width: 200 },
                 { targets: 1,  width: 150 },
                 { targets: 2,  width: 200 },
                 { targets: 3,  width: 250 },
@@ -229,6 +227,7 @@ function initDataTables() {
                 { targets: 6,  width: 80  },
                 { targets: 7,  width: 50  },
                 { targets: 8,  width: 300 },
+				
             ],
         });
 
@@ -243,7 +242,7 @@ function initDataTables() {
             scrollX: true,
             scrollCollapse: true,
             columnDefs: [
-                { targets: 0,  width: 120 },
+                { targets: 0,  width: 200 },
                 { targets: 1,  width: 150 },
                 { targets: 2,  width: 200 },
                 { targets: 3,  width: 250 },
@@ -252,6 +251,7 @@ function initDataTables() {
                 { targets: 6,  width: 50  },
                 { targets: 7,  width: 50  },
                 { targets: 8,  width: 300 },
+			
             ],
         });
 
@@ -343,7 +343,9 @@ function forApprovalContent() {
 			returnItemReason,
 			submittedAt,
 			createdAt,
+			projectCode,
 			projectName,
+			clientCode,
 			clientName,
 		} = item;
 
@@ -370,8 +372,18 @@ function forApprovalContent() {
 				<td>${getFormCode("RI", createdAt, returnItemID)}</td>
 				<td>${fullname}</td>
 				<td>${equipmentBorrowingCode}</td>
-				<td>${projectName}</td>
-				<td>${clientName}</td>
+				<td>
+					<div>
+						${projectCode || '-'}
+					</div>
+					<small style="color:#848482;">${projectName || ''}</small>
+				</td>
+				<td>
+					<div>
+						${clientCode || '-'}
+					</div>
+					<small style="color:#848482;">${clientName || ''}</small>
+				</td>
 				<td>
 					${employeeFullname(getCurrentApprover(approversID, approversDate, returnItemStatus, true))}
 				</td>
@@ -439,7 +451,9 @@ function myFormsContent() {
 			returnItemReason,
 			submittedAt,
 			createdAt,
+			projectCode,
 			projectName,
+			clientCode,
 			clientName,
 		} = item;
 
@@ -465,8 +479,18 @@ function myFormsContent() {
 			<td>${getFormCode("RI", dateCreated, returnItemID)}</td>
 			<td>${fullname}</td>
 			<td>${equipmentBorrowingCode}</td>
-			<td>${projectName}</td>
-			<td>${clientName}</td>
+			<td>
+				<div>
+					${projectCode || '-'}
+				</div>
+				<small style="color:#848482;">${projectName || ''}</small>
+			</td>
+			<td>
+				<div>
+					${clientCode || '-'}
+				</div>
+				<small style="color:#848482;">${clientName || ''}</small>
+			</td>
 			<td>
 				${employeeFullname(getCurrentApprover(approversID, approversDate, returnItemStatus, true))}
 			</td>
@@ -631,13 +655,16 @@ function formButtons(data = false, isRevise = false, isFromCancelledDocument = f
 // ----- END FORM BUTTONS -----
 
 // ----- GET SERIAL NUMBER -----
-function getSerialNumber(scope = {}, readOnly = false) {
+function getSerialNumber(scope = {}, readOnly = false,  checkbox ) {
 	let {
 		serialNumber = "",
 	} = scope;
 
 	let html = "";
 	if (!readOnly) {
+		if(checkbox =='0'){
+			html = ``;
+		}else{
 		html = `
 		<tr>
 			<td>
@@ -658,6 +685,7 @@ function getSerialNumber(scope = {}, readOnly = false) {
 				</div>
 			</td>
 		</tr>`;
+		}
 	} else {
 		html = `
 		<tr>
@@ -823,7 +851,7 @@ function getItemsRow(readOnly = false,returnItemID) {
 							return getSerialNumber(scope, readOnly);
 						}).join("");
 					} else {
-						itemSerialNumbers += getSerialNumber({}, readOnly);
+						itemSerialNumbers += getSerialNumber({}, readOnly, checkbox = 0);
 					}
 				
 			itemSerialNumbers += `
@@ -844,7 +872,7 @@ function getItemsRow(readOnly = false,returnItemID) {
 									return getSerialNumber(scope, readOnly);
 								}).join("");
 							} else {
-								itemSerialNumbers += getSerialNumber({}, readOnly);
+								itemSerialNumbers += getSerialNumber({}, readOnly, checkbox = 0);
 							}
 						
 						itemSerialNumbers += `
@@ -1368,7 +1396,7 @@ function formContent(data = false, readOnly = false, isRevise = false, isFromCan
 				<div class="row">
 					<div class="col-md-6 col-sm-12 text-left align-self-center">
 						<h5 style="font-weight: bold;
-							letter-spacing: 0.05rem;">Material Usage </h5>
+							letter-spacing: 0.05rem;">Retuned Items </h5>
 					</div>
 				</div>
 			</div>
@@ -1384,9 +1412,9 @@ function formContent(data = false, readOnly = false, isRevise = false, isFromCan
 							<th>Serial No.</th>
 							<th>UOM</th>
 							<th>Quantity</th>
-							<th>No. of Borrowed Quantity</th>
+							<th>Borrowed Quantity</th>
 							<th>Borrowed Date</th>
-							<th>Quantity Return ${!disabled ? "<code>*</code>" : ""}</th>
+							<th>Returned Quantity ${!disabled ? "<code>*</code>" : ""}</th>
 							<th>Remarks</th>
 						</tr>
 					</thead>
@@ -2029,7 +2057,7 @@ $(document).on("click", "#btnReject", function () {
 	const feedback = $(this).attr("code") || getFormCode("RI", dateToday(), id);
 
 	$("#modal_inventory_receiving_content").html(preloader);
-	$("#modal_inventory_receiving .page-title").text("DENY Return Item");
+	$("#modal_inventory_receiving .page-title").text("DENY RETURN ITEM");
 	$("#modal_inventory_receiving").modal("show");
 	let html = `
 	<div class="modal-body">

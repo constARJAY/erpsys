@@ -626,7 +626,7 @@ $(document).ready(function() {
 			if (isImCurrentApprover(approversID, approversDate, materialRequestStatus) || isAlreadyApproved(approversID, approversDate)) {
 				html += `
 				<tr class="${btnClass}" id="${encryptString(materialRequestID)}">
-					<td>${getFormCode("MRF", createdAt, materialRequestID )}</td>
+					<td>${getFormCode("IRF", createdAt, materialRequestID )}</td>
 					<td>${fullname}</td>
 					<td>${costEstimateCode || '-'}</td>
 					<td>
@@ -721,7 +721,7 @@ $(document).ready(function() {
 
 			let remarks       = materialRequestRemarks ? materialRequestRemarks : "-";
 			let dateCreated   = moment(createdAt).format("MMMM DD, YYYY hh:mm:ss A");
-			let dateSubmitted = materialRequestStatus != "0" ? (submittedAt ? moment(submittedAt).format("MMMM DD, YYYY hh:mm:ss A") : "-") : "-";
+			let dateSubmitted = materialRequestStatus != "0" ? (submittedAt ? moment(submittedAt).format("MMMM DD, YYYY hh:mm:ss A") : "") : "";
 			let dateApproved  = materialRequestStatus == 2 || materialRequestStatus == 5 ? approversDate.split("|") : "-";
 			if (dateApproved !== "-") {
 				dateApproved = moment(dateApproved[dateApproved.length - 1]).format("MMMM DD, YYYY hh:mm:ss A");
@@ -739,7 +739,7 @@ $(document).ready(function() {
 			let btnClass = materialRequestStatus != 0 ? "btnView" : "btnEdit";
 			html += `
             <tr class="${btnClass}" id="${encryptString(materialRequestID )}">
-                	<td>${getFormCode("MRF", createdAt, materialRequestID )}</td>
+                	<td>${getFormCode("IRF", createdAt, materialRequestID )}</td>
 					<td>${fullname}</td>
 					<td>${costEstimateCode || '-'}</td>
 					<td>
@@ -794,7 +794,7 @@ $(document).ready(function() {
 						class="btn btn-submit px-5 p-2"  
 						id="btnSubmit" 
 						materialRequestID="${encryptString(materialRequestID)}"
-						code="${getFormCode("MRF", createdAt, materialRequestID)}"
+						code="${getFormCode("IRF", createdAt, materialRequestID)}"
 						revise="${isRevise}"
 						cancel="${isFromCancelledDocument}"><i class="fas fa-paper-plane"></i>
 						Submit
@@ -806,7 +806,7 @@ $(document).ready(function() {
 							class="btn btn-cancel btnCancel px-5 p-2" 
 							id="btnCancel"
 							materialRequestID="${encryptString(materialRequestID)}"
-							code="${getFormCode("MRF", createdAt, materialRequestID)}"
+							code="${getFormCode("IRF", createdAt, materialRequestID)}"
 							revise="${isRevise}"
 							cancel="${isFromCancelledDocument}"><i class="fas fa-ban"></i> 
 							Cancel
@@ -817,7 +817,7 @@ $(document).ready(function() {
 							class="btn btn-cancel px-5 p-2"
 							id="btnCancelForm" 
 							materialRequestID="${encryptString(materialRequestID)}"
-							code="${getFormCode("MRF", createdAt, materialRequestID)}"
+							code="${getFormCode("IRF", createdAt, materialRequestID)}"
 							revise=${isRevise}><i class="fas fa-ban"></i> 
 							Cancel
 						</button>`;
@@ -832,7 +832,7 @@ $(document).ready(function() {
 							class="btn btn-cancel  px-5 p-2"
 							id="btnCancelForm" 
 							materialRequestID="${encryptString(materialRequestID)}"
-							code="${getFormCode("MRF", createdAt, materialRequestID)}"
+							code="${getFormCode("IRF", createdAt, materialRequestID)}"
 							status="${materialRequestStatus}"><i class="fas fa-ban"></i> 
 							Cancel
 						</button>`;
@@ -844,7 +844,7 @@ $(document).ready(function() {
 						class="btn btn-cancel px-5 p-2"
 						id="btnDrop" 
 						materialRequestID="${encryptString(materialRequestID)}"
-						code="${getFormCode("MRF", createdAt, materialRequestID)}"
+						code="${getFormCode("IRF", createdAt, materialRequestID)}"
 						status="${materialRequestStatus}"><i class="fas fa-ban"></i> 
 						Drop
 					</button>`;
@@ -856,7 +856,7 @@ $(document).ready(function() {
 							class="btn btn-cancel px-5 p-2"
 							id="btnRevise" 
 							materialRequestID="${encryptString(materialRequestID)}"
-							code="${getFormCode("MRF", createdAt, materialRequestID)}"
+							code="${getFormCode("IRF", createdAt, materialRequestID)}"
 							status="${materialRequestStatus}"><i class="fas fa-clone"></i>
 							Revise
 						</button>`;
@@ -881,7 +881,7 @@ $(document).ready(function() {
 							class="btn btn-cancel px-5 p-2"
 							id="btnRevise" 
 							materialRequestID="${encryptString(materialRequestID)}"
-							code="${getFormCode("MRF", createdAt, materialRequestID)}"
+							code="${getFormCode("IRF", createdAt, materialRequestID)}"
 							status="${materialRequestStatus}"
 							cancel="true"><i class="fas fa-clone"></i>
 							Revise
@@ -896,14 +896,14 @@ $(document).ready(function() {
 							class="btn btn-submit px-5 p-2"  
 							id="btnApprove" 
 							materialRequestID="${encryptString(materialRequestID)}"
-							code="${getFormCode("MRF", createdAt, materialRequestID)}"><i class="fas fa-paper-plane"></i>
+							code="${getFormCode("IRF", createdAt, materialRequestID)}"><i class="fas fa-paper-plane"></i>
 							Approve
 						</button>
 						<button type="button" 
 							class="btn btn-cancel  px-5 p-2"
 							id="btnReject" 
 							materialRequestID="${encryptString(materialRequestID)}"
-							code="${getFormCode("MRF", createdAt, materialRequestID)}"><i class="fas fa-ban"></i> 
+							code="${getFormCode("IRF", createdAt, materialRequestID)}"><i class="fas fa-ban"></i> 
 							Deny
 						</button>`;
 					}
@@ -1287,7 +1287,7 @@ $(document).ready(function() {
 				<div class="body">
 					<small class="text-small text-muted font-weight-bold">Revised Document No.</small>
 					<h6 class="mt-0 text-danger font-weight-bold">
-						${getFormCode("MRF", createdAt, reviseDocumentNo)}
+						${getFormCode("IRF", createdAt, reviseDocumentNo)}
 					</h6>      
 				</div>
 			</div>
@@ -1321,7 +1321,7 @@ $(document).ready(function() {
                     <div class="body">
                         <small class="text-small text-muted font-weight-bold">Document No.</small>
                         <h6 class="mt-0 text-danger font-weight-bold">
-							${materialRequestID && !isRevise ? getFormCode("MRF", createdAt, materialRequestID) : "---"}
+							${materialRequestID && !isRevise ? getFormCode("IRF", createdAt, materialRequestID) : "---"}
 						</h6>      
                     </div>
                 </div>
@@ -2122,7 +2122,7 @@ $(document).ready(function() {
 		const isFromCancelledDocument 	= $(this).attr("cancel") == "true";
 		const revise     				= $(this).attr("revise") == "true";
 		const employeeID 				= $(this).attr("employeeID");
-		const feedback   				= $(this).attr("code") || getFormCode("MRF", dateToday(), id);
+		const feedback   				= $(this).attr("code") || getFormCode("IRF", dateToday(), id);
 		const status     				= $(this).attr("status");
 
 		if (status != "false" && status != 0 && id) {
@@ -2164,7 +2164,7 @@ $(document).ready(function() {
 		const id       = decryptString($(this).attr("materialRequestID"));
 		const isFromCancelledDocument = $(this).attr("cancel") == "true";
 		const revise   = $(this).attr("revise") == "true";
-		const feedback = $(this).attr("code") || getFormCode("MRF", dateToday(), id);
+		const feedback = $(this).attr("code") || getFormCode("IRF", dateToday(), id);
 		const action   = revise && !isFromCancelledDocument && "insert" || (id ? "update" : "insert");
 		const data     = getMaterialRequestData(action, "save", "0", id);
 		data.append("materialRequestStatus", 0);
@@ -2335,7 +2335,7 @@ $(document).ready(function() {
     // ----- APPROVE DOCUMENT -----
 	$(document).on("click", "#btnApprove", function () {
 		const id       = decryptString($(this).attr("materialRequestID"));
-		const feedback = $(this).attr("code") || getFormCode("MRF", dateToday(), id);
+		const feedback = $(this).attr("code") || getFormCode("IRF", dateToday(), id);
 		let tableData  = getTableData("ims_material_request_tbl", "", "materialRequestID = " + id);
 
 		if (tableData) {
@@ -2384,10 +2384,10 @@ $(document).ready(function() {
     // ----- REJECT DOCUMENT -----
 	$(document).on("click", "#btnReject", function () {
 		const id       = decryptString($(this).attr("materialRequestID"));
-		const feedback = $(this).attr("code") || getFormCode("MRF", dateToday(), id);
+		const feedback = $(this).attr("code") || getFormCode("IRF", dateToday(), id);
 
 		$("#modal_material_request_content").html(preloader);
-		$("#modal_material_request .page-title").text("DENY INVENTORY REQUESITION");
+		$("#modal_material_request .page-title").text("DENY INVENTORY REQUISITION");
 		$("#modal_material_request").modal("show");
 		let html = `
 		<div class="modal-body">
@@ -2416,7 +2416,7 @@ $(document).ready(function() {
 
 	$(document).on("click", "#btnRejectConfirmation", function () {
 		const id       = decryptString($(this).attr("materialRequestID"));
-		const feedback = $(this).attr("code") || getFormCode("MRF", dateToday(), id);
+		const feedback = $(this).attr("code") || getFormCode("IRF", dateToday(), id);
 
 		const validate = validateForm("modal_material_request");
 		if (validate) {
@@ -2521,7 +2521,7 @@ $(document).ready(function() {
 
 // --------------- DATABASE RELATION ---------------
 function getConfirmation(method = "submit") {
-	const title = "INVENTORY REQUESITION";
+	const title = "INVENTORY REQUISITION";
 	let swalText, swalImg;
 
 	$("#modal_material_request").text().length > 0 && $("#modal_material_request").modal("hide");
@@ -2606,17 +2606,17 @@ function saveMaterialRequest(data = null, method = "submit", notificationData = 
 
 						let swalTitle;
 						if (method == "submit") {
-							swalTitle = `${getFormCode("MRF", dateCreated, insertedID)} submitted successfully!`;
+							swalTitle = `${getFormCode("IRF", dateCreated, insertedID)} submitted successfully!`;
 						} else if (method == "save") {
-							swalTitle = `${getFormCode("MRF", dateCreated, insertedID)} saved successfully!`;
+							swalTitle = `${getFormCode("IRF", dateCreated, insertedID)} saved successfully!`;
 						} else if (method == "cancelform") {
-							swalTitle = `${getFormCode("MRF", dateCreated, insertedID)} cancelled successfully!`;
+							swalTitle = `${getFormCode("IRF", dateCreated, insertedID)} cancelled successfully!`;
 						} else if (method == "approve") {
-							swalTitle = `${getFormCode("MRF", dateCreated, insertedID)} approved successfully!`;
+							swalTitle = `${getFormCode("IRF", dateCreated, insertedID)} approved successfully!`;
 						} else if (method == "deny") {
-							swalTitle = `${getFormCode("MRF", dateCreated, insertedID)} denied successfully!`;
+							swalTitle = `${getFormCode("IRF", dateCreated, insertedID)} denied successfully!`;
 						} else if (method == "drop") {
-							swalTitle = `${getFormCode("MRF", dateCreated, insertedID)} dropped successfully!`;
+							swalTitle = `${getFormCode("IRF", dateCreated, insertedID)} dropped successfully!`;
 						}	
 		
 						if (isSuccess == "true") {

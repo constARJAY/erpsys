@@ -8,6 +8,31 @@ class equipmentBorrowing_model extends CI_Model {
         parent::__construct();
     }
 
+    public function getEquipmentBorrowingData($equipmentBorrowingID = null){
+        $sql    = "SELECT * FROM ims_equipment_borrowing_tbl WHERE equipmentBorrowingID = '$equipmentBorrowingID'";
+        $query  = $this->db->query($sql);
+        return $query ? $query->row() : [];
+    }
+
+    public function saveEquipmentBorrowingData($action, $data, $id = null){
+        if ($action == "insert") {
+            $query = $this->db->insert("ims_equipment_borrowing_tbl", $data);
+        } else {
+            $where = ["equipmentBorrowingID" => $id];
+            $query = $this->db->update("ims_equipment_borrowing_tbl", $data, $where);
+        }
+
+        if ($query) {
+            $insertID           = $action == "insert" ? $this->db->insert_id() : $id;
+            $equipmentBorrowingData   = $this->getEquipmentBorrowingData($insertID);
+            $equipmentBorrowingCode   = "EBF-".date_format(date_create($equipmentBorrowingData->createdAt),"y")."-".str_pad($insertID, 5, "0", STR_PAD_LEFT);
+            $updateArr          = ["equipmentBorrowingCode"=> $equipmentBorrowingCode ];
+            $this->db->update("ims_equipment_borrowing_tbl", $updateArr, ["equipmentBorrowingID" => $insertID]);
+            return "true|Successfully submitted|$insertID|".date("Y-m-d");
+        }
+        return "false|System error: Please contact the system administrator for assistance!";
+    }
+
 
     // ----- GET TIMELINE CONTENT -----
     public function getMaterialWithdrawalDetails($equipmentBorrowingID  = 0)
@@ -66,7 +91,7 @@ class equipmentBorrowing_model extends CI_Model {
         $output = [];
         $sql    = "SELECT
         ims_request_assets_tbl.*,
-            (SELECT withdrawalAssetStatus
+            (SELECT DISTINCT(withdrawalAssetStatus)
             FROM ims_material_withdrawal_asset_tbl 
             WHERE materialRequestID = ims_request_assets_tbl.materialRequestID AND assetID = ims_request_assets_tbl.assetID AND withdrawalAssetStatus = 1  ) AS withdrawalAssetStatus 
         FROM ims_request_assets_tbl 

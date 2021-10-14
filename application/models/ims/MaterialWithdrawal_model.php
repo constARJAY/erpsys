@@ -8,6 +8,32 @@ class MaterialWithdrawal_model extends CI_Model {
         parent::__construct();
     }
 
+    public function getMaterialWithdrawalData($materialWithdrawalID = null){
+        $sql    = "SELECT * FROM ims_material_withdrawal_tbl WHERE materialWithdrawalID = '$materialWithdrawalID'";
+        $query  = $this->db->query($sql);
+        return $query ? $query->row() : [];
+    }
+
+    public function saveMaterialWithdrawalData($action, $data, $id = null){
+        if ($action == "insert") {
+            $query = $this->db->insert("ims_material_withdrawal_tbl", $data);
+        } else {
+            $where = ["materialWithdrawalID" => $id];
+            $query = $this->db->update("ims_material_withdrawal_tbl", $data, $where);
+        }
+
+        if ($query) {
+            $insertID           = $action == "insert" ? $this->db->insert_id() : $id;
+            $materialWithdrawalData   = $this->getMaterialWithdrawalData($insertID);
+            $materialWithdrawalCode   = "MWF-".date_format(date_create($materialWithdrawalData->createdAt),"y")."-".str_pad($insertID, 5, "0", STR_PAD_LEFT);
+            $updateArr          = ["materialWithdrawalCode"=> $materialWithdrawalCode ];
+            $this->db->update("ims_material_withdrawal_tbl", $updateArr, ["materialWithdrawalID" => $insertID]);
+            return "true|Successfully submitted|$insertID|".date("Y-m-d");
+        }
+        return "false|System error: Please contact the system administrator for assistance!";
+    }
+
+
 
     // ----- GET TIMELINE CONTENT -----
     public function getMaterialWithdrawalDetails($materialWithdrawalID = 0)
@@ -92,7 +118,7 @@ class MaterialWithdrawal_model extends CI_Model {
         $output = [];
         $sql    = "SELECT
         ims_request_items_tbl.*,
-            (SELECT withdrawalItemStatus
+            (SELECT DISTINCT(withdrawalItemStatus)
             FROM ims_material_withdrawal_item_tbl 
             WHERE materialRequestID = ims_request_items_tbl.materialRequestID AND itemID = ims_request_items_tbl.itemID AND withdrawalItemStatus = 1  ) AS withdrawalItemStatus 
         FROM ims_request_items_tbl 
@@ -144,7 +170,7 @@ class MaterialWithdrawal_model extends CI_Model {
         $output = [];
         $sql    = "SELECT
         ims_request_assets_tbl.*,
-            (SELECT withdrawalAssetStatus
+            (SELECT DISTINCT(withdrawalAssetStatus)
             FROM ims_material_withdrawal_asset_tbl 
             WHERE materialRequestID = ims_request_assets_tbl.materialRequestID AND assetID = ims_request_assets_tbl.assetID AND withdrawalAssetStatus = 1  ) AS withdrawalAssetStatus 
         FROM ims_request_assets_tbl 
@@ -280,12 +306,13 @@ class MaterialWithdrawal_model extends CI_Model {
                 }
 
                 // START UPDATE THE INVENTORY VALIDATION RESERVED ITEMS//
-                $query = $this->db->query("UPDATE  	ims_request_items_tbl
+                $query = $this->db->query("UPDATE ims_request_items_tbl
                 SET reservedItem = $result
                 WHERE inventoryValidationID = '$inventoryValidationID' AND itemID =  $itemID");
                 // END UPDATE THE INVENTORY VALIDATION RESERVED ITEMS//
             }
         }
+
         if($dataAsset && count($dataAsset) > 0){
             $query = $this->db->update_batch('ims_material_withdrawal_asset_tbl', $dataAsset, 'withdrawalAssetID');
 
@@ -306,6 +333,7 @@ class MaterialWithdrawal_model extends CI_Model {
                 // END UPDATE THE INVENTORY VALIDATION RESERVED ASSETS//
             }
         }
+
         if(($dataItem && count($dataItem) > 0) || $dataAsset && count($dataAsset) > 0){
 
             if($statusItemFlag == true){
@@ -334,10 +362,11 @@ class MaterialWithdrawal_model extends CI_Model {
             $sqlCountItems = $this->db->query("SELECT COUNT(requestItemID) as totalValidationItems 
             FROM ims_request_items_tbl WHERE inventoryValidationID = $inventoryValidationID AND bidRecapID IS NULL");
             
-            $sqlItems = $this->db->query("SELECT  COUNT(withdrawalItemStatus) as totalCompletedItems
+            $sqlItems = $this->db->query("SELECT  COUNT(DISTINCT(itemID)) as totalCompletedItems
             FROM ims_material_withdrawal_item_tbl  WHERE materialWithdrawalID = $materialWithdrawalID AND withdrawalItemStatus =1");
+            
 
-            if($sqlCountItems->row()->totalValidationItems == $sqlItems->row()->totalCompletedItems ){
+            if(floatVal($sqlCountItems->row()->totalValidationItems) == floatVal($sqlItems->row()->totalCompletedItems)){
 
                 $this->db->set('inventoryItemStatus', '9');
                 $this->db->where('materialWithdrawalID', $materialWithdrawalID);
@@ -348,10 +377,10 @@ class MaterialWithdrawal_model extends CI_Model {
             $sqlCountAssets = $this->db->query("SELECT COUNT(requestAssetID) as totalValidationAssets 
             FROM ims_request_assets_tbl WHERE inventoryValidationID = $inventoryValidationID AND bidRecapID IS NULL");
 
-            $sqlAssets = $this->db->query("SELECT COUNT(withdrawalAssetStatus) totalCompletedAssets
+            $sqlAssets = $this->db->query("SELECT COUNT(DISTINCT(assetID)) totalCompletedAssets
             FROM ims_material_withdrawal_asset_tbl WHERE materialWithdrawalID =$materialWithdrawalID ");
 
-            if($sqlCountAssets->row()->totalValidationAssets == $sqlAssets->row()->totalCompletedAssets){
+            if(floatVal($sqlCountAssets->row()->totalValidationAssets) == floatVal($sqlAssets->row()->totalCompletedAssets)){
 
                 //$this->db->where('inventoryItemStatus', 9);
                 $this->db->set('inventoryAssetStatus', '9');
@@ -360,11 +389,7 @@ class MaterialWithdrawal_model extends CI_Model {
 
             }
 
-            
-            //  $this->db->query("UPDATE  ims_material_withdrawal_tbl
-            //  SET inventoryItemStatus = (SELECT  IF(EXISTS(SELECT * FROM ims_material_withdrawal_item_tbl WHERE withdrawalItemStatus =0),0,9) as itemStatus FROM ims_material_withdrawal_item_tbl WHERE  materialWithdrawalID = $materialWithdrawalID),
-            //      inventoryAssetStatus =(SELECT  IF(EXISTS(SELECT * FROM ims_material_withdrawal_asset_tbl WHERE withdrawalAssetStatus =0),0,9) as assetStatus FROM ims_material_withdrawal_asset_tbl WHERE  materialWithdrawalID = $materialWithdrawalID)
-            //  WHERE materialWithdrawalID = $materialWithdrawalID");
+    
 
             // START UPDATE THE STATUS OF ITEM AND ASSET IN HEADER OF MATERIAL WITHDRAWAL FORMS//
 

@@ -8,6 +8,12 @@
 	.select2-container--bootstrap.select2-container--disabled .select2-selection {
 		padding: 0 3.5px;
 	}
+	.badge.badge-outline-violet {
+		color: rgb(112 103 182);
+		border: 1px solid rgb(112 103 182);
+		background-color: rgb(255 255 255);
+		height: 25px;
+	}
 </style>
 
 <div class="body_area after_bg ">

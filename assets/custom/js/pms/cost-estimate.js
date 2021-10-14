@@ -141,7 +141,8 @@ $(document).ready(function() {
 		if(data){
 			let replaceData = data;
 			// [.] [,] [?] [!] [/] [;] [:] ['] [-] [_] [(] [)] [%] [&] [*] [SPACE]
-			let specialCharArr = [".", ",","?","!","/",";",":","'","-","_","(",")","%","&","*"," ","0","1","2","3","4","5","6","7","8","9"];
+			// let specialCharArr = [".", ",","?","!","/",";",":","'","-","_","(",")","%","&","*"," ","0","1","2","3","4","5","6","7","8","9"];
+			let specialCharArr = [".", ",","?","!","/",";",":","'","-","_","(",")","%","&","*"," "];
 			for (let index = 0; index < specialCharArr.length; index++) {
 				let tempStr = "";
 				tempStr 	= replaceData.replaceAll(specialCharArr[index], "-") || replaceData;
@@ -768,7 +769,8 @@ $(document).ready(function() {
 											{ targets: 0,  width: 180 },
 											{ targets: 1,  width: 200 },
 											{ targets: 2,  width: 180 },
-											{ targets: 3,  width: 180 }
+											{ targets: 3,  width: 180 },
+											{ targets: 4,  width: 180 }
 										];
 			option["columnDefs"] = column;
 			return option;
@@ -917,7 +919,7 @@ $(document).ready(function() {
 
 			let remarks       = costEstimateRemarks ? costEstimateRemarks : "-";
 			let dateCreated   = moment(createdAt).format("MMMM DD, YYYY hh:mm:ss A");
-			let dateSubmitted = submittedAt ? moment(submittedAt).format("MMMM DD, YYYY hh:mm:ss A") : "-";
+			let dateSubmitted = submittedAt ? moment(submittedAt).format("MMMM DD, YYYY hh:mm:ss A") : "";
 			let dateApproved  = costEstimateStatus == 2 || costEstimateStatus == 5 ? approversDate.split("|") : "-";
 			if (dateApproved !== "-") {
 				dateApproved = moment(dateApproved[dateApproved.length - 1]).format("MMMM DD, YYYY hh:mm:ss A");
@@ -940,7 +942,7 @@ $(document).ready(function() {
 				<tr class="${btnClass}" id="${encryptString(costEstimateID)}">
 					<td>${getFormCode("CEF", createdAt, costEstimateID )}</td>
 					<td>${fullname}</td>
-					<td>${timelineBuilderID ? getFormCode("PTB",createdAt, timelineBuilderID) : "-"}}</td>
+					<td>${timelineBuilderID ? getFormCode("PTB",createdAt, timelineBuilderID) : "-"}</td>
 					<td>
 						${projectDescription}
 					</td>
@@ -1031,7 +1033,7 @@ $(document).ready(function() {
 
 			let remarks       = costEstimateRemarks ? costEstimateRemarks : "-";
 			let dateCreated   = moment(createdAt).format("MMMM DD, YYYY hh:mm:ss A");
-			let dateSubmitted = submittedAt ? moment(submittedAt).format("MMMM DD, YYYY hh:mm:ss A") : "-";
+			let dateSubmitted = costEstimateStatus != "0" ? moment(submittedAt).format("MMMM DD, YYYY hh:mm:ss A") : "-";
 			let dateApproved  = costEstimateStatus == 2 || costEstimateStatus == 5 ? approversDate.split("|") : "-";
 			if (dateApproved !== "-") {
 				dateApproved = moment(dateApproved[dateApproved.length - 1]).format("MMMM DD, YYYY hh:mm:ss A");
@@ -1051,7 +1053,7 @@ $(document).ready(function() {
             <tr class="${btnClass}" id="${encryptString(costEstimateID )}">
                 	<td>${getFormCode("CEF", createdAt, costEstimateID )}</td>
 					<td>${fullname || "-"}</td>
-					<td>${timelineBuilderID ? getFormCode("PTB",createdAt, timelineBuilderID) : "-"}}</td>
+					<td>${timelineBuilderID ? getFormCode("PTB",createdAt, timelineBuilderID) : "-"}</td>
 					<td>
 						${projectDescription}
 					</td>
@@ -1950,7 +1952,7 @@ $(document).ready(function() {
 			// ----- END NOT ALLOWED FOR UPDATE -----
 
 			return html;
-		}, 500);
+		}, 800);
 	}
 	// ----- END FORM CONTENT -----
 
@@ -2231,6 +2233,7 @@ $(document).ready(function() {
 											<th>Designation Name</th>
 											<th>Quantity</th>
 											<th>Total Manhours</th>
+											<th>Total Overtime Hour</th>
 										</tr>
 									</thead>
 									<tbody class="table-body-personnel-request-${invCategory.toLowerCase()}">
@@ -2270,6 +2273,7 @@ $(document).ready(function() {
 					designationCategory 		=	"",
 					designationQuantity 		=	"",
 					designationTotalManHours 	=	"",
+					designationTotalOvertime 	= 	"",
 					unitCost 					=	"",
 					totalCost 					=	"",
 					createdBy					=	"",
@@ -2292,6 +2296,11 @@ $(document).ready(function() {
 							<td>
 								<div class="form-group mb-0 text-right designation-total-manhours">
 									${formatAmount(designationTotalManHours || "0.00")}
+								</div>
+							</td>
+							<td>
+								<div class="form-group mb-0 text-right designation-total-overtime">
+									${formatAmount(designationTotalOvertime || "0.00")}
 								</div>
 							</td>
 						</tr>`;

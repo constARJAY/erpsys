@@ -343,6 +343,7 @@ function forApprovalContent() {
 			createdAt,
 			inventoryReceivingCode,
             purchaseOrderCode,
+			projectCode,
 			projectName,
 			clientName,
 		} = item;
@@ -370,7 +371,12 @@ function forApprovalContent() {
 				<td>${getFormCode("INR", createdAt, inventoryReceivingID)}</td>
 				<td>${fullname}</td>
 				<td>${purchaseOrderCode}</td>
-				<td>${projectName}</td>
+				<td>
+					<div>
+						${projectCode || '-'}
+					</div>
+					<small style="color:#848482;">${projectName || ''}</small>
+				</td>
 				<td>${clientName}</td>
 				<td>
 					${employeeFullname(getCurrentApprover(approversID, approversDate, inventoryReceivingStatus, true))}
@@ -433,6 +439,7 @@ function myFormsContent() {
 			clientName,
 			approversID,
 			approversDate,
+			projectCode,
 			inventoryReceivingStatus,
 			inventoryReceivingRemarks,
 			inventoryReceivingReason,
@@ -464,7 +471,12 @@ function myFormsContent() {
 			<td>${getFormCode("INR", dateCreated, inventoryReceivingID)}</td>
 			<td>${fullname}</td>
 			<td>${purchaseOrderCode}</td>
-			<td>${projectName}</td>
+			<td>
+				<div>
+					${projectCode || '-'}
+				</div>
+				<small style="color:#848482;">${projectName || ''}</small>
+			</td>
 			<td>${clientName}</td>
 			<td>
 				${employeeFullname(getCurrentApprover(approversID, approversDate, inventoryReceivingStatus, true))}
@@ -894,7 +906,7 @@ function getItemsRow(readOnly = false,inventoryReceivingID) {
 					<div class="quantity"name="quantity">${quantity || ""}</div>
 					</td>
 					<td class="text-center">
-					<div class="receivedquantity text-center">${receivedquantity || ""}</div>
+					<div class=" text-center receivedQuantity">${receivedquantity || ""}</div>
 					</td>	
 					<td class="text-center">
 						<div class="remaining text-center"id="remaining"name="remaining">${remaining || ""}</div>
@@ -930,10 +942,10 @@ function getItemsRow(readOnly = false,inventoryReceivingID) {
 						<div class="quantity" id="quantity${index}" name="quantity">${quantity || ""}</div>
 					</td>
 					<td>
-					<div class="text-center">
+					<div>
 						<input 
 								type="text" 
-								class="form-control input-quantity text-center receivedQuantity validate"
+								class="form-control input-quantity receivedQuantity  record1111 text-center validate"
 								data-allowcharacters="[0-9]" 
 								min="0.01"
 								number="${index}"
@@ -949,7 +961,7 @@ function getItemsRow(readOnly = false,inventoryReceivingID) {
 					</div>
 					</td>
 					<td class="text-center">
-						<div class="remaining" id="remaining${index}"name="remainings">${remaining || ""}</div>
+						<div class="remaining" id="remaining${index}"name="remaining">${remaining || ""}</div>
 					</td>
 					<td class="text-center">
 						<div class="uom" id="uom" name="uom">${uom || ""}</div>
@@ -965,6 +977,7 @@ function getItemsRow(readOnly = false,inventoryReceivingID) {
                                 maxlength="250"
                                 name="remarks" 
                                 id="remarks">${inventoryRequestID  ? remarks : "" }</textarea>
+								<div class="invalid-feedback d-block invalid-remarks" id="invalid-remarks"></div>
                         </div>
 					</td>
 				</tr>`;
@@ -981,36 +994,7 @@ function getItemsRow(readOnly = false,inventoryReceivingID) {
 	
 }
 // get remaining value
-$(document).on("change", ".receivedQuantity", function() {
-	var count = $(this).attr("number");
-	//var quantity = $(this).attr("quantity");
-	
-	var quantity  = $(`#quantity${count}`).text();
-	var totalQuantity = parseInt(quantity);
-	var val = $(this).val() | 0;
-	var totalReceived = parseInt(val);
-	var totalremaining = parseFloat(quantity) - parseFloat(val);
-	var formatdecimalremaining = parseFloat(totalremaining).toFixed(2);
-	$(`#remaining${count}`).text(formatdecimalremaining);
-	var flag = ["true"];
-	if(totalQuantity < totalReceived){
-			$(`#receivedQuantity${count}`).removeClass("is-valid").addClass("is-invalid");
-			$(this).closest("tr").find(`#invalid-receivedQuantity${count}`).addClass("is-invalid");
-			$(`#invalid-receivedQuantity${count}`).html("Not less that or equal order quantity");
-		flag[0]= false;
-		
-	}else{
-		$(`#receivedQuantity${count}`).removeClass("is-invalid").addClass("is-valid");
-		$(this).closest("tr").find(`#invalid-receivedQuantity${count}`).removeClass("is-invalid");
-		$(this).closest("tr").find(`#invalid-receivedQuantity${count}`).text('');
-		removeIsValid("#tableInventoryReceived");
-		flag[0]= true;
-	}
-	return flag;
-	
 
-
-});
 
 // get remaing value	
 
@@ -1106,6 +1090,8 @@ $(document).on("click", ".btnAddSerial", function() {
 					thisTableData.find("table").html(``);
 				}
 })
+
+
 // ----- END ADD SERIAL -----
 
 
@@ -2241,6 +2227,38 @@ function getApproversStatus(approversID, approversStatus, approversDate) {
 	return html;
 }
 // ----- END APPROVER STATUS --
+$(document).on("keyup", ".record1111", function() {
+	var count = $(this).attr("number");
+	//var quantity = $(this).attr("quantity");
+	
+	var quantity  = $(`#quantity${count}`).text();
+	var totalQuantity = parseInt(quantity);
+	var val = $(this).val() | 0;
+	var totalReceived = parseInt(val);
+	var totalremaining = parseFloat(quantity) - parseFloat(val);
+	var formatdecimalremaining = parseFloat(totalremaining).toFixed(2);
+	
+	$(`#remaining${count}`).text(formatdecimalremaining);
+	var flag = ["true"];
+	if(totalQuantity < totalReceived){
+			$(`#receivedQuantity${count}`).removeClass("is-valid").addClass("is-invalid");
+			$(this).closest("tr").find(`#invalid-receivedQuantity${count}`).addClass("is-invalid");
+			$(`#invalid-receivedQuantity${count}`).html("Not less that or equal order quantity");
+		flag[0]= false;
+		
+	}else{
+		$(`#receivedQuantity${count}`).removeClass("is-invalid").addClass("is-valid");
+		$(this).closest("tr").find(`#invalid-receivedQuantity${count}`).removeClass("is-invalid");
+		$(this).closest("tr").find(`#invalid-receivedQuantity${count}`).text('');
+		
+		flag[0]= true;
+		removeIsValid("#tableInventoryReceived");
+	}
+	return flag;
+	
+
+
+});
 })
 
 
@@ -2418,5 +2436,6 @@ if (data) {
 }
 return false;
 }
+
 
 // --------------- END DATABASE RELATION ---------------

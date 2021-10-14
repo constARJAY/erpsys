@@ -9,6 +9,33 @@ class StockOut_model extends CI_Model {
     }
 
 
+    public function getStockOutData($stockOutID = null){
+        $sql    = "SELECT * FROM ims_stock_out_tbl WHERE stockOutID = '$stockOutID'";
+        $query  = $this->db->query($sql);
+        return $query ? $query->row() : [];
+    }
+
+    public function saveStockOutData($action, $data, $id = null){
+        if ($action == "insert") {
+            $query = $this->db->insert("ims_stock_out_tbl", $data);
+        } else {
+            $where = ["stockOutID" => $id];
+            $query = $this->db->update("ims_stock_out_tbl", $data, $where);
+        }
+
+        if ($query) {
+            $insertID           = $action == "insert" ? $this->db->insert_id() : $id;
+            $stockOutData   = $this->getStockOutData($insertID);
+            $stockOutCode   = "STO-".date_format(date_create($stockOutData->createdAt),"y")."-".str_pad($insertID, 5, "0", STR_PAD_LEFT);
+            $updateArr          = ["stockOutCode"=> $stockOutCode ];
+            $this->db->update("ims_stock_out_tbl", $updateArr, ["stockOutID" => $insertID]);
+            return "true|Successfully submitted|$insertID|".date("Y-m-d");
+        }
+        return "false|System error: Please contact the system administrator for assistance!";
+    }
+
+
+
     // ----- GET TIMELINE CONTENT -----
     public function getMaterialWithdrawalDetails($stockOutID = 0)
     {
@@ -96,7 +123,7 @@ class StockOut_model extends CI_Model {
         $output = [];
         $sql    = "SELECT
         ims_request_items_tbl.*,
-            (SELECT withdrawalItemStatus
+            (SELECT DISTINCT(withdrawalItemStatus)
             FROM ims_material_withdrawal_item_tbl 
             WHERE materialRequestID = ims_request_items_tbl.materialRequestID AND itemID = ims_request_items_tbl.itemID AND withdrawalItemStatus = 1  ) AS withdrawalItemStatus 
         FROM ims_request_items_tbl 

@@ -129,12 +129,13 @@ $(document).ready(function() {
             LEFT JOIN hris_employee_list_tbl AS helt ON ptbt.employeeID = helt.employeeID
             LEFT JOIN hris_department_tbl AS hdt ON helt.departmentID = hdt.departmentID
             LEFT JOIN hris_designation_tbl AS hdt2 ON helt.designationID = hdt2.designationID`,
+
             `ptbt.timelineBuilderID,
             ptbt.createdAt,
             CONCAT(helt.employeeFirstname, ' ', helt.employeeLastname) AS preparedBy,
             pplt.projectListName AS projectName,
             ptbt.projectCode AS projectCode,
-            pct.categoryName AS projectCategory,
+            pct.categoryName AS projectCategory,    
             ptbt.timelineProposedBudget AS proposedBudget,
             ptbt.timelineAllocatedBudget AS allocatedBudget,
             hdt.departmentName,
@@ -144,7 +145,11 @@ $(document).ready(function() {
             ptbt.timelineTeamLeader AS timelineTeamLeader,
             ptbt.timelineDesign AS timelineDesign,
             ptbt.timelineBudgetStatus AS budgetStatus`,
-            `ptbt.timelineBuilderStatus <> 0 AND ptbt.timelineBuilderStatus <> 4`);
+
+            `ptbt.timelineBuilderStatus <> 0 AND ptbt.timelineBuilderStatus <> 4`,
+
+            `FIELD(ptbt.timelineBuilderStatus, 0, 6, 1, 2, 3, 4, 5, 7), COALESCE(ptbt.submittedAt, ptbt.createdAt)`
+            );
         return data;
     }
     // ----- END TIMELINE DATA -----

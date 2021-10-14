@@ -147,7 +147,8 @@ $(document).ready(function() {
 		if(data){
 			let replaceData = data;
 			// [.] [,] [?] [!] [/] [;] [:] ['] [-] [_] [(] [)] [%] [&] [*] [SPACE]
-			let specialCharArr = [".", ",","?","!","/",";",":","'","-","_","(",")","%","&","*"," ","0","1","2","3","4","5","6","7","8","9"];
+			// let specialCharArr = [".", ",","?","!","/",";",":","'","-","_","(",")","%","&","*"," ","0","1","2","3","4","5","6","7","8","9"];
+			let specialCharArr = [".", ",","?","!","/",";",":","'","-","_","(",")","%","&","*"," "];
 			for (let index = 0; index < specialCharArr.length; index++) {
 				let tempStr = "";
 				tempStr 	= replaceData.replaceAll(specialCharArr[index], "-") || replaceData;
@@ -417,16 +418,19 @@ $(document).ready(function() {
 
 			let column = !isPersonnel ? [
 											{ targets: 0,  width: 200 },
-											{ targets: 1,  width: 200 }
+											{ targets: 1,  width: 230 }
 										]
 											:
 										[
 											{ targets: 0,  width: 120 },
 											{ targets: 1,  width: 120 },
 											{ targets: 2,  width: 80 },
-											{ targets: 3,  width: 90 },
-											{ targets: 4,  width: 90 },
-											{ targets: 5,  width: 90 }
+											{ targets: 3,  width: 100 },
+											{ targets: 4,  width: 100 },
+											{ targets: 5,  width: 100 },
+											{ targets: 6,  width: 100 },
+											{ targets: 7,  width: 150 },
+											{ targets: 8,  width: 150 }
 										];
 			option["columnDefs"] = column;
 			return option;
@@ -690,7 +694,7 @@ $(document).ready(function() {
 
 			let remarks       = billMaterialRemarks ? billMaterialRemarks : "-";
 			let dateCreated   = moment(createdAt).format("MMMM DD, YYYY hh:mm:ss A");
-			let dateSubmitted = submittedAt ? moment(submittedAt).format("MMMM DD, YYYY hh:mm:ss A") : "-";
+			let dateSubmitted = billMaterialStatus != "0" ? moment(submittedAt).format("MMMM DD, YYYY hh:mm:ss A") : "-";
 			let dateApproved  = billMaterialStatus == 2 || billMaterialStatus == 5 ? approversDate.split("|") : "-";
 			if (dateApproved !== "-") {
 				dateApproved = moment(dateApproved[dateApproved.length - 1]).format("MMMM DD, YYYY hh:mm:ss A");
@@ -1135,6 +1139,7 @@ $(document).ready(function() {
 	$(document).on("keyup", "[name=otherTotalCost]", function(){
 		updateCostSummary();
 	})
+
 	// ----- UPDATE TABLE ITEMS -----
 	function updateCostSummary(){
 		let materialTotal = 0, laborTotal = 0, equipmentTotal = 0, travelTotal = 0;
@@ -1156,9 +1161,9 @@ $(document).ready(function() {
 
 			requestPersonnelTR.each(function(){
 				$(this).find(".designation-total-manhours").text();
-				let personnelTotalCost = getNonFormattedAmount($(this).find(".designation-total-cost").text());
-				thisFooterTotal += parseFloat(personnelTotalCost || 0);
-				laborTotal += parseFloat(personnelTotalCost || 0);
+				let personnelTotalCost 	= getNonFormattedAmount($(this).find(".designation-total-cost").text());
+				thisFooterTotal 		+= parseFloat(personnelTotalCost || 0);
+				laborTotal 				+= parseFloat(personnelTotalCost || 0);
 			});
 
 			thisCardFooter.text(formatAmount(thisFooterTotal,true));
@@ -1447,8 +1452,8 @@ $(document).ready(function() {
 		let generateCostSheet = "";
 		if (isLastApprover(approversID) || employeeID == sessionID) {
 			generateCostSheet = billMaterialStatus == "2" ? `<div class="w-100 text-right pb-4">
-																<button class="btn btn-info px-5 py-2" pbrid="${encryptString(billMaterialID)}" id="btnExcel">
-																	<i class="fas fa-file-excel"></i> Generate Cost Sheet
+																<button class="btn btn-info px-4 py-2" pbrid="${encryptString(billMaterialID)}" ceid="${encryptString(costEstimateID)}" ptbid="${encryptString(timelineBuilderID)}"  id="btnExcel">
+																	<i class="fas fa-file-excel"></i>  Download Excel
 																</button>
 															</div>` :``;
 		}
@@ -2014,8 +2019,11 @@ $(document).ready(function() {
 											<th>Designation Code</th>
 											<th>Designation Name</th>
 											<th>Quantity</th>
-											<th>Total Manhours</th>
 											<th>Hourly Rate</th>
+											<th>Total Regular Hour</th>
+											<th>Total Overtime Hour</th>
+											<th>Total Regular Rate</th>
+											<th>Total Overtime Rate</th>
 											<th>Total Cost</th>
 										</tr>
 									</thead>
@@ -2055,7 +2063,10 @@ $(document).ready(function() {
 					designationName 			=	"",
 					designationCategory 		=	"",
 					designationQuantity 		=	"",
-					designationTotalManHours 	=	"",
+					designationTotalManHours	= 	"",
+					designationTotalOvertime	= 	"",
+					overtimeRate				= 	"",
+					regularRate					= 	"",
 					unitCost 					=	"",
 					totalCost 					=	"",
 					createdBy					=	"",
@@ -2076,15 +2087,33 @@ $(document).ready(function() {
 								</div>
 							</td>
 							<td>
+								<div class="text-right designation-hourly-rate">
+										${formatAmount(unitCost,true) || "-"}
+								</div>
+							</td>
+							<td>
 								<div class="form-group mb-0 text-right designation-total-manhours">
 									${formatAmount(designationTotalManHours) || "-"}
 								</div>
 							</td>
 							<td>
-								<div class="form-group mb-0 text-right designation-unit-cost">
-									${formatAmount(unitCost || "0.00", true)}
+								<div class="form-group mb-0 text-right designation-total-overtime">
+									${formatAmount(designationTotalOvertime || "0.00")}
 								</div>
 							</td>
+
+							<td>
+								<div class="form-group mb-0 text-right designation-total-manhours-rate">
+									${formatAmount(regularRate || "0.00", true)}
+								</div>
+							</td>
+
+							<td>
+								<div class="form-group mb-0 text-right designation-total-overtime-rate">
+									${formatAmount(overtimeRate || "0.00", true)}
+								</div>
+							</td>
+
 							<td>
 								<div class="form-group mb-0 text-right designation-total-cost">
 									${formatAmount(totalCost || "0.00", true)}
@@ -2493,7 +2522,7 @@ $(document).ready(function() {
 						</td>
 						<td>
 							<div class="form-group mb-0 text-right asset-remarks">
-								<div class="asset-total-cost">${formatAmount((parseFloat(requestManHours) * parseFloat(hourlyRate)) * parseFloat(requestQuantity) ,true)}</div>
+								<div class="asset-total-cost">${formatAmount( ((parseFloat(requestManHours) * parseFloat(hourlyRate)) * parseFloat(requestQuantity)) || "0.00"  ,true)}</div>
 								<div class="d-block invalid-feedback"></div>
 							</div>
 						</td>
@@ -2870,9 +2899,11 @@ $(document).ready(function() {
 
 	// ----- GENERATE COST SHEET -----
 	$(document).on("click", "#btnExcel", function(){
-		let billMaterialID = decryptString($(this).attr("pbrid"));
-		const url = `${base_url}pms/bill_material/downloadExcel?id=${billMaterialID}`;
-		window.location.replace(url);
+		let billMaterialID 		= decryptString($(this).attr("pbrid"));
+		let costEstimateID 		= decryptString($(this).attr("ceid"));
+		let timelineBuilderID 	= decryptString($(this).attr("ptbid"));
+		const url = `${base_url}pms/bill_material/downloadExcel?bomid=${billMaterialID}&ceid=${costEstimateID}&ptbid=${timelineBuilderID}`;
+		window.open(url, "_blank");
 	});
 	// ----- END GENERATE COST SHEET -----
 	

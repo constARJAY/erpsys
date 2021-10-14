@@ -6,10 +6,10 @@
                     <ul class="breadcrumb pl-0 pb-0 ">
                         <li class="breadcrumb-item"><a href="#"><i class="zmdi zmdi-home"></i> Dashboard</a></li>
 						<li class="breadcrumb-item"><i class="fad fa-boxes-alt"></i> &nbsp;Inventory Modules</li>
-                        <li class="breadcrumb-item active">Material Request</li>
+                        <li class="breadcrumb-item active">Inventory Requisition</li>
                     </ul>
-                    <h1 class="mt-3">Material Request</h1>
-                    <span>This module is used to manage the submission and approval of material request.</span>
+                    <h1 class="mt-3">Inventory Requisition</h1>
+                    <span>This module is used to manage the submission and approval of inventory requisition.</span>
                 </div>
                 <div class="col-lg-6 col-md-6 text-right" id="headerButton"></div>
             </div>
@@ -32,7 +32,7 @@
         <div class="modal-dialog modal-dialog-centered modal-md" role="document">
             <div class="modal-content">
                 <div class="modal-header bg-primary text-light">
-                    <h6 class="page-title font-weight-bold">ADD MATERIAL REQUEST</h6>
+                    <h6 class="page-title font-weight-bold">ADD Inventory Requisition</h6>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span class="text-light" aria-hidden="true">&times;</span>
                     </button>

@@ -203,16 +203,11 @@ class CostEstimate_model extends CI_Model {
         return $returnData;
     }
 
-    public function getRequestItems($timelineBuilderID = null, $phaseID = null, $milestoneListID = null){
-
-
-    }
-
 
     public function getRequestPersonnel($timelineBuilderID = null, $phaseID = null, $milestoneListID = null){
         $returnData = [];
         $sql = "SELECT 
-                    ptmt.manHours as manhour, assignedManhours, assignedDesignation
+                    ptmt.manHours as manhour, assignedManhours, assignedDesignation, assignedRegularHours, assignedOvertimeHours, assignedStartDate 
                 FROM pms_timeline_task_list_tbl as pttlt LEFT JOIN pms_timeline_management_tbl as ptmt USING(taskID)
                 WHERE 
                     ptmt.projectMilestoneID = '$milestoneListID'
@@ -220,14 +215,16 @@ class CostEstimate_model extends CI_Model {
                     pttlt.milestoneBuilderID = '$phaseID'
                 AND 
                     ptmt.timelineBuilderID = '$timelineBuilderID'";
-        $query = $this->db->query($sql);
-        $designationData = [];
-        $designationIDArr = [];
+        $query              = $this->db->query($sql);
+        $designationData    = [];
+        $designationIDArr   = [];
         
         foreach ($query->result_array() as $designation){ // START FOR EACH LOOP -
             
             $designationArr = explode("|", $designation["assignedDesignation"]);
-            $manhourArr     = explode("|", $designation["assignedManhours"]);
+            $manhourArr     = explode("|", $designation["assignedRegularHours"]);
+            $overtimeArr    = explode("|", $designation["assignedOvertimeHours"]);
+            $assignDate     = explode("|", $designation["assignedStartDate"]);
             
             for ($x=0; $x < count($designationArr); $x++) {  // START FOR LOOP = 
                 // PUSHING VALUE IN $designationIDArr
@@ -240,37 +237,57 @@ class CostEstimate_model extends CI_Model {
                     }
                 // END PUSHING VALUE IN $designationIDArr
                 $designationResult = $this->getDesignation($designationArr[$x]);
+                $projectManhourData    = explode("|", $this->getManhoursData($manhourArr[$x], $designationResult->designationHourlyRate, $assignDate[$x]));
+                $projectOvertimeData   = explode("|", $this->getManhoursData($overtimeArr[$x], $designationResult->designationHourlyRate, $assignDate[$x], "overtime") );
+                
+                
+
                     $temp = [
                         "designationID"         => $designationResult->designationID,
                         "designationCode"       => $designationResult->designationCode,
                         "designationName"       => $designationResult->designationName,
-                        "designationHourlyRate" => $designationResult->designationHourlyRate,
-                        "projectManhour"        => $manhourArr[$x]
+                        "designationHourlyRate" => ( floatval($projectManhourData[1]) + floatval($projectOvertimeData[1]) ),
+                        "regularRate"           => floatval($projectManhourData[1]),
+                        "overtimeRate"          => floatval($projectOvertimeData[1]),
+                        "projectManhour"        => $projectManhourData[0],
+                        "projectOvertime"       => $projectOvertimeData[0]
                     ];
                     array_push($designationData,  $temp);
             } // END FOR LOOP =
         } // END FOR EACH LOOP -
-        // print_r($designationIDArr);
+
         for ($x=0; $x < count($designationIDArr) ; $x++) {
-            $designationID          = $designationIDArr[$x]; 
-            $designationResult      = $this->getDesignation($designationID);
-            $designationQty         = 0;
-            $projectTotalManhour    = 0;
-            
+            $designationID              = $designationIDArr[$x]; 
+            $designationResult          = $this->getDesignation($designationID);
+            $designationQty             = 0;
+            $projectTotalManhour        = 0;
+            $projectTotalOvertime       = 0;
+            $projectTotalManhourRate    = 0;
+            $projectTotalOvertimeRate   = 0;
+            $totalCost                  = 0;
             for ($y =0; $y < count($designationData) ; $y++) { 
                 $thisObj = $designationData[$y];
                 if($thisObj["designationID"] == $designationID){
-                    $projectTotalManhour += floatval($thisObj["projectManhour"]);
+                    $projectTotalManhour        += floatval($thisObj["projectManhour"]);
+                    $projectTotalOvertime       += floatval($thisObj["projectOvertime"]);
+                    $projectTotalManhourRate    += floatval($thisObj["regularRate"]);
+                    $projectTotalOvertimeRate   += floatval($thisObj["overtimeRate"]);
+                    $totalCost                  += floatval($thisObj["designationHourlyRate"]);
                     $designationQty ++;
                 }
             }
-            $totalCost = (floatval($projectTotalManhour) * floatval($designationResult->designationHourlyRate) ) * $designationQty;
+
+            // $totalCost = (floatval($projectTotalManhour) * floatval($designationResult->designationHourlyRate) ) * $designationQty;
+
             $temp = [
                 "designationID"              => $designationID,
                 "designationCode"            => $designationResult->designationCode,
                 "designationName"            => $designationResult->designationName,
                 "designationQuantity"        => $designationQty,
                 "designationTotalManHours"   => $projectTotalManhour,
+                "designationTotalOvertime"   => $projectTotalOvertime,
+                "regularRate"                => $projectTotalManhourRate,
+                "overtimeRate"               => $projectTotalOvertimeRate,
                 "unitCost"                   => $designationResult->designationHourlyRate,
                 "totalCost"                  => $totalCost
             ];
@@ -279,7 +296,56 @@ class CostEstimate_model extends CI_Model {
 
         return $returnData;
     }
-    
+
+    // GET MAN HOURS
+    public function getManhoursData($data = false, $hourlyRate = 0, $assignDate = false , $param = "regular"){
+        /**
+         * ----- REFERENCE -----
+         * Ordinary Day                -> Od   | 100% - 1.0
+         * Sunday or Rest Day          -> Rd   | 130% - 1.3
+         * Special Day or   
+         * Special Working/Non-Working -> Sd   | 130% - 1.3
+         * Regular Holiday             -> Rh   | 200% - 2.0
+         * Double Holiday              -> Dh   | 300% - 3.0
+         * Night Shift                 -> Ns   | 110% - 1.1
+         * Overtime                    -> Ot   | 125% - 1.25
+         * SD falling on RD            -> SdRd | 150% - 1.50
+         * RH falling on RD            -> RhRd | 260% - 2.60
+         * DH falling on RD            -> DhRd | 390% - 3.90
+         * ----- END REFERENCE -----
+         */
+
+        // Regular Holiday
+        // Special Working Holiday
+        // Special Non-Working Holiday
+        $date       = explode("~", $assignDate);
+        $hours      = explode("~", $data);
+        $isOvertime = $param != "regular" ? 1.25 : 1.0;
+        $totalHours = 0;
+        $totalRate  = 0;
+        
+        for ($x =  0; $x < count($date) ; $x++) { 
+            $isHoliday  = $this->getHolidayRate($date[$x]);
+            $percentage = $isOvertime;
+            if($isHoliday){
+                $percentage = $isHoliday->holidayType == "Regular Holiday" ? 2.0 : 1.3;
+            }
+
+            $totalHours         += floatval($hours[$x]);
+            $totalHourlyRate    =  (floatval($isOvertime) * floatval($hourlyRate)) * floatval($hours[$x]);
+            $totalRate          += floatval($totalHourlyRate) * floatval($percentage);
+        }
+        
+        return $totalHours."|".$totalRate;
+    }
+
+    // GET HOLIDAY RATE
+    public function getHolidayRate($date = false){
+        $sql    = "SELECT holidayType FROM hris_holiday_tbl WHERE holidayDate = '$date'";
+        $query  = $this->db->query($sql);
+        return $query ? $query->row() : [];
+    }
+
     // GET DESIGNATION 
     public function getDesignation($designationID){
         $sql    = "SELECT * FROM hris_designation_tbl WHERE designationID = '$designationID'";

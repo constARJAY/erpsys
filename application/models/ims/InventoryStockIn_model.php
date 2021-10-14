@@ -30,7 +30,7 @@ class InventoryStockIn_model extends CI_Model {
 
     }
 
-    public function savestockin($itemID, $itemName,$brand, $classificationName, $categoryName,$barcode,$recievedQuantity,$serialnumber,$inventoryStorageID, $inventoryStorageCode, $inventoryStorageOfficeName, $manufactureDate, $expirationdate, $ReturnItemID, $MaterialUsageID,  $InventoryReceivingID, $recordID, $quantity, $inventoryCode, $itemCode, $uom)
+    public function savestockin($itemID, $itemName,$brand, $classificationName, $categoryName,$barcode,$recievedQuantity,$serialnumber,$inventoryStorageID, $inventoryStorageCode, $inventoryStorageOfficeName, $manufactureDate, $expirationdate, $ReturnItemID, $MaterialUsageID,  $InventoryReceivingID, $recordID, $quantity, $inventoryCode, $itemCode, $uom, $quantityForStockin)
     {
 
        // $recordID       = implode(",", $recordID);
@@ -61,6 +61,7 @@ class InventoryStockIn_model extends CI_Model {
                             "manufactureDate"           =>$manufactureDate[$count],
                             "expirationdate"            =>$expirationdate[$count],
                             "quantity"                  =>$quantity[$count],
+                            "quantityForStockin"        =>$quantityForStockin[$count],
                             "serialNumber"              =>$serialnumber[$count],
                             "inventoryCode"             =>$inventoryCode
                         
@@ -97,6 +98,7 @@ class InventoryStockIn_model extends CI_Model {
                             "manufactureDate"           =>$manufactureDate[$count],
                             "expirationdate"            =>$expirationdate[$count],
                             "quantity"                  =>$quantity[$count],
+                            "quantityForStockin"        =>$quantityForStockin[$count],
                             "serialNumber"              =>$serialnumber[$count],
                             "inventoryCode"             =>$inventoryCode
 

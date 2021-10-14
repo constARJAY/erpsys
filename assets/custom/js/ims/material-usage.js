@@ -347,7 +347,9 @@ function forApprovalContent() {
 			submittedAt,
 			createdAt,
 			materialWithdrawalCode,
+			projectCode,
 			projectName,
+			clientCode,
 			clientName,
 		} = item;
 
@@ -374,8 +376,18 @@ function forApprovalContent() {
 				<td>${getFormCode("MUF", createdAt, materialUsageID)}</td>
 				<td>${fullname}</td>
 				<td>${materialWithdrawalCode}</td>
-				<td>${projectName}</td>
-				<td>${clientName}</td>
+				<td>
+					<div>
+						${projectCode || '-'}
+					</div>
+					<small style="color:#848482;">${projectName || ''}</small>
+				</td>
+				<td>
+					<div>
+						${clientCode || '-'}
+					</div>
+					<small style="color:#848482;">${clientName || ''}</small>
+				</td>
 				<td>
 					${employeeFullname(getCurrentApprover(approversID, approversDate, materialUsageStatus, true))}
 				</td>
@@ -529,7 +541,8 @@ function formButtons(data = false, isRevise = false, isFromCancelledDocument = f
 						id="btnCancel"
 						materialUsageID="${encryptString(materialUsageID)}"
 						code="${getFormCode("MUF", createdAt, materialUsageID)}"
-						revise="${isRevise}" cancel="${isFromCancelledDocument}"><i class="fas fa-ban"></i> 
+						revise="${isRevise}" 
+						cancel="${isFromCancelledDocument}"><i class="fas fa-ban"></i> 
 						Cancel
 					</button>`;
 				} else {
@@ -1344,6 +1357,16 @@ function formContent(data = false, readOnly = false, isRevise = false, isFromCan
 		//initDataTables();
 		initAll();
 		updateSerialNumber();
+
+		if (!allowedUpdate) {
+			$("#page_content").find(`input, select, textarea`).each(function() {
+				if (this.type != "search") {
+					$(this).attr("disabled", true);
+				}
+			})
+			$('#btnBack').attr("status", "2");
+			$(`#btnSubmit, #btnRevise, #btnCancel, #btnCancelForm, .btnAddRow, .btnDeleteRow`).hide();
+		}
 		return html;
 	}, 300);
 }
@@ -1622,8 +1645,8 @@ $(document).on("click", ".btnView", function () {
 // ----- VIEW DOCUMENT -----
 $(document).on("click", "#btnRevise", function () {
 	const id = $(this).attr("materialUsageID");
-	// const fromCancelledDocument = $(this).attr("cancel") == "true";
-	viewDocument(id, false, true);
+	const fromCancelledDocument = $(this).attr("cancel") == "true";
+	viewDocument(id, false, true, fromCancelledDocument);
 });
 // ----- END VIEW DOCUMENT -----
 

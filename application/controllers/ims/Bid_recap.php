@@ -92,11 +92,11 @@ class Bid_recap extends CI_Controller {
         $saveBidRecapData =$this->bidrecap->saveBidRecapData($action, $bidRecapData, $bidRecapID);
         if ($saveBidRecapData) {
             $result = explode("|", $saveBidRecapData);
-            $bidRecapID = $result[2];
+            $bidRecapID = $result[2] ?? $bidRecapID;
 
             if ($result[0] == "true") {
                 
-                if ($bidRecapStatus == "0" || $bidRecapStatus == "1") {
+                if ($bidRecapStatus == "0" || $bidRecapStatus == "1" || ($bidRecapStatus == "2" && $finalquote && count($finalquote) > 0)) {
                     if ($items && count($items) > 0) {
                         $itemsData = [];
                         foreach($items as $item) {
@@ -201,15 +201,18 @@ class Bid_recap extends CI_Controller {
                         }
                     }
                 }
+
+
+                // ----- INSERT PURCHASE REQUEST -----
+                if ($bidRecapStatus == "2" || $bidRecapStatus == 2)
+                {
+                    $insertPurchaseRequestData = $this->bidrecap->insertPurchaseRequestData($bidRecapID);
+                }
+                // ----- END INSERT PURCHASE REQUEST -----
             } 
         }
 
-        // ----- INSERT PURCHASE REQUEST -----
-        if ($bidRecapStatus == "2" || $bidRecapStatus == 2)
-        {
-            $insertPurchaseRequestData = $this->bidrecap->insertPurchaseRequestData($bidRecapID);
-        }
-        // ----- END INSERT PURCHASE REQUEST -----
+        
 
         echo json_encode($saveBidRecapData);
     }

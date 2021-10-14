@@ -4,7 +4,7 @@
     function insertNotificationData($employeeID, $moduleID, $tableID, $notificationTitle, $notificationDescription, $notificationType)
     {
         $CI =& get_instance();
-        $sessionID = $CI->session->has_userdata('adminSessionID') ? $CI->session->userdata('adminSessionID') : 1;
+        $sessionID = $CI->session->has_userdata('adminSessionID') ? $CI->session->userdata('adminSessionID') : 0;
 
         if ($employeeID && $moduleID && $tableID && $notificationTitle && $notificationDescription && $notificationType) {
             $data = [
@@ -15,6 +15,8 @@
                 "notificationDescription" => $notificationDescription,
                 "notificationType"        => $notificationType,
                 "createdBy"               => $sessionID,
+                "createdAt"               => date("Y-m-d H:i:s"),
+                "updatedAt"               => date("Y-m-d H:i:s"),
             ];
             /**
              * ----- DATA -----

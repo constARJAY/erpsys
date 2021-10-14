@@ -1,6 +1,19 @@
 $(document).ready(function(){
 
 
+   let html = `
+            <div class="text-center">
+				<div class="row">
+				<div class="col-4"></div>
+				<div class="col-4"><img class="img-fluid" src="${base_url}assets/modal/no-data.gif" alt=""> <h6 class="text-primary text-center font-weight-bold">No data available</h6>
+				</div>
+				<div class="col-4"></div>
+			</div>
+            </div>`;
+
+    $(".imageboarder").html(html);
+
+
         
 
 
@@ -8,21 +21,26 @@ $(document).ready(function(){
     // ----- DATATABLES -----
     function initDataTables(data) {
        // data
-        if ($.fn.DataTable.isDataTable('#tableListStocks')){
-            $('#tableListStocks').DataTable().destroy();
+        if ($.fn.DataTable.isDataTable('#tableListStocksItem')){
+            $('#tableListStocksItem').DataTable().destroy();
+            
+        }
+        if ($.fn.DataTable.isDataTable('#tableListStocksAsset')){
+            $('#tableListStocksAsset').DataTable().destroy();
             
         }
         
         var table = $("#tableListStocksItem").css({"min-width": "100%"}).removeAttr('width').DataTable({
             
            data,
-            proccessing:    true,
+            proccessing:    false,
             serverSide:     false,
             scrollX:        true,
             scrollCollapse: true,
+            sorting: [],
 	        searching: true,
-          
-	    paging: true,
+            info: true,
+	        paging: true,
             columnDefs: [
                 { targets: 0, width: 170},
                 { targets: 1, width: 250},
@@ -42,14 +60,15 @@ $(document).ready(function(){
 
         var table = $("#tableListStocksAsset").css({"min-width": "100%"}).removeAttr('width').DataTable({
             
-            data,
-             proccessing:    true,
+            
+             proccessing:    false,
              serverSide:     false,
              scrollX:        true,
              scrollCollapse: true,
+             sorting: [],
              searching: true,
-           
-         paging: true,
+             info: true,
+            paging: true,
              columnDefs: [
                  { targets: 0, width: 170},
                  { targets: 1, width: 250},
@@ -129,47 +148,9 @@ $(document).ready(function(){
             dataType: "json",
             beforeSend: function() {
             
-            $("#table_content").html(preloader);
+            $(".imageboarder").html(preloader);
             },
             success: function(data) {
-               
-
-                let item =`
-                <div class="col-sm-12">
-                <div class="w-100">
-                <hr class="pb-1">
-                <div class="card mt-2 shadow-sm bg-white rounded">
-                <div class="card-header bg-primary text-white">
-                    <div class="row">
-                        <div class="col-md-6 col-sm-12 text-left align-self-center">
-                            <h5 style="font-weight: bold;
-                                letter-spacing: 0.05rem;">List of Stocks (ITEM)</h5>
-                        </div>
-                    </div>
-                </div>
-                <div class="card-body">
-				<div class="w-100">
-					<div class="text-left"></div>
-                <table class="table table-bordered table-striped table-hover" id="tableListStocksItem">
-                <thead>
-                <tr>
-                    <th>Item Code</th>
-                    <th>Item Name/Brand</th>
-                    <th>Item Classification</th>
-                    <th>UOM</th>
-                    <th>Stock In</th>
-                    <th>Stock Out</th>
-                    <th>Unused</th>
-                    <th>Disposed</th>
-                    <th>Reserved</th>
-                    <th>Re-order</th>
-                    <th>Available</th>
-                    <th>Total Quantity</th>
-                </tr>
-               </thead>
-               <tbody>`;
-               
-              
 
                            let assets =`
                            <div class="col-sm-12">
@@ -224,16 +205,54 @@ $(document).ready(function(){
                                     </td>
                                     <td>${data["assets"][i].uom}</td>
                                     <td class="text-center">${data["assets"][i].stockIN}</td> 
-                                    <td class="text-center">${data["assets"][i].borrowedQuantity}</td>
-                                    <td class="text-center">${data["assets"][i].returned}</td>
+                                    <td class="text-center">${data["assets"][i].stockOut}</td>
+                                    <td class="text-center">${data["assets"][i].returnQuantity}</td>
                                     <td class="text-center">${data["assets"][i].transferquantity}</td>
                                     <td class="text-center">${data["assets"][i].disposed}</td> 
-                                    <td class="text-center">${data["assets"][i].reservedItem}</td> 
+                                    <td class="text-center">${data["assets"][i].reservedAsset}</td> 
                                     <td class="text-center">${data["assets"][i].reOrderLevel}</td>
-                                    <td class="text-center">${data["assets"][i].Available}</td>
+                                    <td class="text-center">${data["assets"][i].available}</td>
                                     <td class="text-center">${data["assets"][i].Total_Quantity}</td>
                                 </tr>`;
-                            };    
+                            }
+                            assets +=`</tbody>
+                            </table>`;
+
+                            let item =`
+                            <div class="col-sm-12">
+                            <div class="w-100">
+                            <hr class="pb-1">
+                            <div class="card mt-2 shadow-sm bg-white rounded">
+                            <div class="card-header bg-primary text-white">
+                                <div class="row">
+                                    <div class="col-md-6 col-sm-12 text-left align-self-center">
+                                        <h5 style="font-weight: bold;
+                                            letter-spacing: 0.05rem;">List of Stocks (ITEM)</h5>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                            <div class="w-100">
+                                <div class="text-left"></div>
+                            <table class="table table-bordered table-striped table-hover" id="tableListStocksItem">
+                            <thead>
+                            <tr>
+                                <th>Item Code</th>
+                                <th>Item Name/Brand</th>
+                                <th>Item Classification</th>
+                                <th>UOM</th>
+                                <th>Stock In</th>
+                                <th>Stock Out</th>
+                                <th>Unused</th>
+                                <th>Disposed</th>
+                                <th>Reserved</th>
+                                <th>Re-order</th>
+                                <th>Available</th>
+                                <th>Total Quantity</th>
+                            </tr>
+                           </thead>
+                           <tbody>`;
+                               
                            for(var i=0; i<data["item"].length; i++){
                  
                             item +=`
@@ -263,10 +282,18 @@ $(document).ready(function(){
                                 <td class="text-center">${data["item"][i].Available}</td>
                                 <td class="text-center">${data["item"][i].Total_Quantity}</td>
                            </tr>`;
-                            };
+                            }
+                            item +=`</tbody>
+                            </table>`;
+        
+                                 
                           
+
                                   initDataTables();
+                                  
                                     setTimeout(() => {
+                                        
+                                        $('.imageboarder').hide();
                                         $("#table_content").html(item);
                                        $("#table_content1").html(assets);
                                      
@@ -274,6 +301,7 @@ $(document).ready(function(){
                                     }, 500);   
                     
                             },
+                            
                             error: function() {
                                 let html = `
                                     <div class="w-100 h5 text-center text-danger>
@@ -281,9 +309,10 @@ $(document).ready(function(){
                                     </div>`;
                                 $("#table_content1").html(assets);
                                 $("#table_content").html(item);
-                                
+            
+        }
 
-         } 
+        
     
         }); 
     }

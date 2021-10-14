@@ -140,7 +140,7 @@ $(document).ready(function() {
 											CASE employeeLastname WHEN "" THEN employeeFirstname
 											ELSE CONCAT(employeeLastname,', ',employeeFirstname,' ',employeeMiddlename) 
 											END  "employeeFullname" `,
-										`employeeStatus != 0 AND employeeStatus != 3 AND employeeStatus != 4 AND employeeStatus != 5 AND employeeStatus != 6`);
+										`employeeID != "1" AND employeeStatus != 0 AND employeeStatus != 3 AND employeeStatus != 4 AND employeeStatus != 5 AND employeeStatus != 6`);
 		
 	const projectList = getTableData("pms_project_list_tbl JOIN pms_category_tbl USING(categoryID) JOIN pms_milestone_builder_tbl USING(categoryID)", 
 							"pms_project_list_tbl.*, pms_category_tbl.categoryName AS projectCategory ",
@@ -503,7 +503,7 @@ $(document).ready(function() {
 						`<span class="badge badge-outline-success w-100" style="width: 100% !important">Within the Budget</span>`;
 					}
 
-					if(timelineBuilderStatus == "0"){
+					if(timelineBuilderStatus == "0" || timelineBuilderStatus == "4"){
 						budgetStatus = `-`;
 					}
 					
@@ -518,7 +518,7 @@ $(document).ready(function() {
 					`<span class="badge badge-outline-success w-100" style="width: 100% !important">Within the Budget</span>`;
 				}
 
-				if(timelineBuilderStatus == "6"){
+				if(timelineBuilderStatus == "6" || timelineBuilderStatus == "4"){
 					budgetStatus = `-`;
 				}
 			}
@@ -823,7 +823,7 @@ $(document).ready(function() {
 	// ----- UPDATE MILESTONE SELECT -----
 	function milestoneSelect(projectID  = null, milestoneBuilderID = null, arrayData = false){
 		
-		let html = `<option disabled ${!milestoneBuilderID ? "selected":''}>Please select a phase</option>`;
+		let html = `<option disabled ${!milestoneBuilderID || milestoneBuilderID == "0" ? "selected":''}>Please select a phase</option>`;
 
 		if(projectID){
 			let categoryID 	= projectList.filter(project =>  project.projectListID == projectID ).map(project=>{ return project.categoryID });
@@ -1003,9 +1003,8 @@ $(document).ready(function() {
 		$(this).closest(`tr`).find("[name=allottedHours]").next().text("");
 		$(this).closest(`tr`).find("[name=allottedHours]").prop("max", maxValue);
 		$(this).closest(`tr`).find("[name=allottedHours]").prop("min", "1");
-	});
 
-	$(document).on("change","[name=taskStartDate]", function(){
+
 		var dates = [];
 		$(".task-list-sub-row").each(function(){
 			var dateSplit 		= $(this).find("[name=taskStartDate]").val().split(" - ");
@@ -1015,10 +1014,12 @@ $(document).ready(function() {
 			endDateValue ? dates.push(endDateValue) : ``; 
 		});	
 		var dateSortOf = dates.sort(function(a,b){ return new Date(a) - new Date(b) });
-		console.log("123")
-		console.log(dateSortOf);
 		$("[name=timelineDate]").val(dateSortOf[0]+" - "+dateSortOf.pop());
+
+
 	});
+
+
 	
 	$(document).on("change","[name=clientID]", function(){
 		var clientAddress 		= $('option:selected', this).attr("address");
@@ -1438,6 +1439,9 @@ $(document).ready(function() {
 			initAll();
 			initHours();
 			$("#awardSignatories").select2({ placeholder: "Please select a team members", theme: "bootstrap" });
+			$("#timelineProposedBudget").prop("min", timelineBuilderStatus == "0" ? "1" : "1");
+			$("#timelineProposedBudget").prop("max", timelineBuilderStatus == "0" ? "" : ( $("#timelineAllocatedBudget").val().replaceAll(",","") || $("#timelineAllocatedBudget").val() ) );
+			
 			// projectID && projectID != 0 && $("[name=projectID]").trigger("change");
 			// if(isRevise){
 			// 	changingOptions();
@@ -1455,7 +1459,7 @@ $(document).ready(function() {
 			// ----- END NOT ALLOWED FOR UPDATE -----
 			updateTableRows();
 			updateTableTaskList();
-			readOnly ? $("[name=taskStartDate]").change() : "";
+			readOnly || timelineBuilderStatus == 0 ? $("[name=taskStartDate]").change() : "";
 			return html;
 		}, 200);
 	}
