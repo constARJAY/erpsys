@@ -18,7 +18,7 @@ class MaterialRequest_model extends CI_Model {
 
         if ($query) {
             $insertID = $action == "insert" ? $this->db->insert_id() : $id;
-            $materialRequestCode = "MRF-".date("y")."-".str_pad($insertID, 5, "0", STR_PAD_LEFT);
+            $materialRequestCode = "IRF-".date("y")."-".str_pad($insertID, 5, "0", STR_PAD_LEFT);
             $updateArr = ["materialRequestCode"=> $materialRequestCode ];
             $this->db->update("ims_material_request_tbl", $updateArr, ["materialRequestID" => $insertID]);
 

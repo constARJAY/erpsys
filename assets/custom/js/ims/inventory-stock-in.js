@@ -1218,11 +1218,11 @@ $(document).ready(function () {
 													maxlength="20" 
 													autocomplete="off">
 											<div class="invalid-feedback d-block" id="invalid-input_recievedQuantity"></div>
-										`;
+										</td>`;
 								}else{
 								var quantityReceived = 1;
 									html +=`
-										
+										<td>
 											<input type="text"
 													class="form-control quantity text-center input-quantity"
 													id="quantity${index}"
@@ -1235,7 +1235,7 @@ $(document).ready(function () {
 													maxlength="20" 
 													autocomplete="off"
 													disabled>
-										`;
+										</td>`;
 								}
 									html +=`
 									</td>

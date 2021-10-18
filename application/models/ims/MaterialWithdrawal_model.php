@@ -291,6 +291,10 @@ class MaterialWithdrawal_model extends CI_Model {
 
     public function saveProjectBoard($materialWithdrawalID = 0, $dataItem =[] ,$dataAsset = [],$sessionID,$statusItemFlag = false,$statusAssetFlag = false,$getItemID = 0,$getAssetID = 0,$inventoryValidationID = 0)
     {
+        echo "inventoryValidationID". $inventoryValidationID;
+        echo"<br>";
+        echo "materialWithdrawalID". $materialWithdrawalID;
+        exit;
 
     
         // $delete = $this->deleteProjectBoard($timelineBuilderID);
@@ -338,7 +342,6 @@ class MaterialWithdrawal_model extends CI_Model {
         }
 
         if(($dataItem && count($dataItem) > 0) || $dataAsset && count($dataAsset) > 0){
-        $updateHeaderStatus = false;
         $updateFooterStatus = false;
 
 
@@ -374,7 +377,7 @@ class MaterialWithdrawal_model extends CI_Model {
                 $sqlItems = $this->db->query("SELECT  COUNT(DISTINCT(itemID)) as totalCompletedItems
                 FROM ims_material_withdrawal_item_tbl  WHERE materialWithdrawalID = $materialWithdrawalID AND withdrawalItemStatus =1");
 
-                if(floatVal($sqlCountItems->row()->totalValidationItems) === floatVal($sqlItems->row()->totalCompletedItems)){
+                if(floatVal($sqlCountItems->row()->totalValidationItems) == floatVal($sqlItems->row()->totalCompletedItems)){
                                     
                     $this->db->set('inventoryItemStatus', '9');
                     $this->db->where('materialWithdrawalID', $materialWithdrawalID);
@@ -390,7 +393,7 @@ class MaterialWithdrawal_model extends CI_Model {
                 $sqlAssets = $this->db->query("SELECT COUNT(DISTINCT(assetID)) as totalCompletedAssets
                 FROM ims_material_withdrawal_asset_tbl WHERE materialWithdrawalID =$materialWithdrawalID  AND withdrawalAssetStatus =1");
     
-                if(floatVal($sqlCountAssets->row()->totalValidationAssets) === floatVal($sqlAssets->row()->totalCompletedAssets)){
+                if(floatVal($sqlCountAssets->row()->totalValidationAssets) == floatVal($sqlAssets->row()->totalCompletedAssets)){
     
                     //$this->db->where('inventoryItemStatus', 9);
                     $this->db->set('inventoryAssetStatus', '9');
