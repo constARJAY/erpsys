@@ -53,7 +53,8 @@ $(document).ready(function(){
                 { targets: 8, width: 200},
                 { targets: 9, width: 200},
                 { targets: 10, width: 150},
-                { targets: 11, width: 200},    
+                { targets: 11, width: 200},  
+                { targets: 12, width: 200},   
             ],
           
         });
@@ -205,14 +206,14 @@ $(document).ready(function(){
                                     </td>
                                     <td>${data["assets"][i].uom}</td>
                                     <td class="text-center">${data["assets"][i].stockIN}</td> 
-                                    <td class="text-center">${data["assets"][i].stockOut}</td>
+                                    <td class="text-center">${data["assets"][i].totalequipmentBorrowing}</td>
                                     <td class="text-center">${data["assets"][i].returnQuantity}</td>
-                                    <td class="text-center">${data["assets"][i].transferquantity}</td>
+                                    <td class="text-center">${data["assets"][i].Transferred}</td>
                                     <td class="text-center">${data["assets"][i].disposed}</td> 
                                     <td class="text-center">${data["assets"][i].reservedAsset}</td> 
                                     <td class="text-center">${data["assets"][i].reOrderLevel}</td>
                                     <td class="text-center">${data["assets"][i].available}</td>
-                                    <td class="text-center">${data["assets"][i].Total_Quantity}</td>
+                                    <td class="text-center">${data["assets"][i].totalQuantity}</td>
                                 </tr>`;
                             }
                             assets +=`</tbody>
@@ -243,6 +244,7 @@ $(document).ready(function(){
                                 <th>UOM</th>
                                 <th>Stock In</th>
                                 <th>Stock Out</th>
+                                <th>Withdrawn</th>
                                 <th>Unused</th>
                                 <th>Disposed</th>
                                 <th>Reserved</th>
@@ -274,13 +276,14 @@ $(document).ready(function(){
                                 </td>
                                 <td class="text-center">${data["item"][i].uom}</td>
                                 <td class="text-center">${data["item"][i].stockIN}</td> 
-                                <td class="text-center">${data["item"][i].stockOut}</td>
+                                <td class="text-center">${data["item"][i].totalStockOut}</td>
+                                <td class="text-center">${data["item"][i].materiaWithdrawalQuantity}</td>
                                 <td class="text-center">${data["item"][i].Unused}</td>
                                 <td class="text-center">${data["item"][i].disposed}</td>
                                 <td class="text-center">${data["item"][i].reservedItem}</td> 
                                 <td class="text-center">${data["item"][i].reOrderLevel}</td>
-                                <td class="text-center">${data["item"][i].Available}</td>
-                                <td class="text-center">${data["item"][i].Total_Quantity}</td>
+                                <td class="text-center">${data["item"][i].available}</td>
+                                <td class="text-center">${data["item"][i].totalQuantity}</td>
                            </tr>`;
                             }
                             item +=`</tbody>

@@ -1452,7 +1452,7 @@ $(document).ready(function() {
 
         // KEYUP CHECK COMPLETE DATA EACH ROW //
 
-        $(document).on("keyup",`[name="barcodeAsset"],[name="borrowed"]`,function(){
+        $(document).on("change",`[name="barcodeAsset"],[name="borrowed"]`,function(){
             var getBarcode = $(this).closest("tr").find(`[name="barcodeAsset"]`).val();
             var getQuantity = +$(this).closest("tr").find(`[name="borrowed"]`).val();
     

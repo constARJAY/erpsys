@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Oct 14, 2021 at 09:43 AM
+-- Generation Time: Oct 18, 2021 at 03:11 AM
 -- Server version: 10.4.14-MariaDB
 -- PHP Version: 7.4.10
 
@@ -11925,6 +11925,7 @@ CREATE TABLE `pms_employeetaskoard_details_tbl` (
   `subTaskStatus` int(50) DEFAULT NULL,
   `subTaskNotes` longtext DEFAULT NULL,
   `extension` date DEFAULT NULL,
+  `createdBy` bigint(20) DEFAULT NULL,
   `createdAt` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -11953,6 +11954,25 @@ CREATE TABLE `pms_employeetaskoard_tbl` (
   `extension` date DEFAULT NULL,
   `createdAt` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `pms_employee_taskboard_status_tbl`
+--
+
+CREATE TABLE `pms_employee_taskboard_status_tbl` (
+  `taskboardEmpID` bigint(20) NOT NULL,
+  `employeeID` bigint(20) DEFAULT NULL,
+  `taskboardID` bigint(20) DEFAULT NULL,
+  `subtaskboardID` bigint(20) DEFAULT NULL,
+  `timelineBuilderID` bigint(20) DEFAULT NULL,
+  `projectMilestoneID` bigint(20) DEFAULT NULL,
+  `taskID` bigint(20) DEFAULT NULL,
+  `employeeTaskStatus` int(50) DEFAULT NULL,
+  `createdBy` bigint(20) DEFAULT NULL,
+  `createdAt` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -13169,6 +13189,12 @@ ALTER TABLE `pms_employeetaskoard_tbl`
   ADD PRIMARY KEY (`taskboardID`);
 
 --
+-- Indexes for table `pms_employee_taskboard_status_tbl`
+--
+ALTER TABLE `pms_employee_taskboard_status_tbl`
+  ADD PRIMARY KEY (`taskboardEmpID`);
+
+--
 -- Indexes for table `pms_image_taskboard_tbl`
 --
 ALTER TABLE `pms_image_taskboard_tbl`
@@ -14047,6 +14073,12 @@ ALTER TABLE `pms_employeetaskoard_details_tbl`
 --
 ALTER TABLE `pms_employeetaskoard_tbl`
   MODIFY `taskboardID` bigint(20) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `pms_employee_taskboard_status_tbl`
+--
+ALTER TABLE `pms_employee_taskboard_status_tbl`
+  MODIFY `taskboardEmpID` bigint(20) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `pms_image_taskboard_tbl`

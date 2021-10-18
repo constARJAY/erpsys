@@ -23,9 +23,9 @@ $(document).ready(function() {
 		return +amount.replaceAll(",", "").replace("₱", "")?.trim();
 	}
 
-    const dateToday = () => {
-		return moment(new Date).format("YYYY-MM-DD HH:mm:ss");
-	};
+    // const dateToday = () => {
+	// 	return moment(new Date).format("YYYY-MM-DD HH:mm:ss");
+	// };
     // ----- END REUSABLE VARIABLE/FUNCTIONS -----
 
 
@@ -216,27 +216,27 @@ $(document).ready(function() {
 
 
     // ----- TIMELINE DATA -----
-    const getTimelineData = () => {
-        const data = getTableData(
-            `pms_timeline_builder_tbl AS ptbt
-            LEFT JOIN pms_project_list_tbl AS pplt ON ptbt.projectID = pplt.projectListID
-            LEFT JOIN pms_category_tbl AS pct ON pplt.categoryID = pct.categoryID
-            LEFT JOIN hris_employee_list_tbl AS helt ON ptbt.timelineProjectManager = helt.employeeID
-            LEFT JOIN hris_department_tbl AS hdt ON helt.departmentID = hdt.departmentID
-            LEFT JOIN hris_designation_tbl AS hdt2 ON helt.designationID = hdt2.designationID`,
-            `ptbt.timelineBuilderID,
-            pplt.projectListName AS projectName,
-            pplt.projectListCode AS projectCode,
-            pct.categoryName AS projectCategory,
-            CONCAT(helt.employeeFirstname, ' ', helt.employeeLastname) AS projectManager,
-            hdt.departmentName,
-            hdt2.designationName,
-            ptbt.timelineBudgetStatus AS budgetStatus,
-            ptbt.timelineManagementStatus,
-            ptbt.timelineBuilderStatus`,
-            `ptbt.timelineBuilderStatus = 2`);
-        return data;
-    }
+    // const getTimelineData = () => {
+    //     const data = getTableData(
+    //         `pms_timeline_builder_tbl AS ptbt
+    //         LEFT JOIN pms_project_list_tbl AS pplt ON ptbt.projectID = pplt.projectListID
+    //         LEFT JOIN pms_category_tbl AS pct ON pplt.categoryID = pct.categoryID
+    //         LEFT JOIN hris_employee_list_tbl AS helt ON ptbt.timelineProjectManager = helt.employeeID
+    //         LEFT JOIN hris_department_tbl AS hdt ON helt.departmentID = hdt.departmentID
+    //         LEFT JOIN hris_designation_tbl AS hdt2 ON helt.designationID = hdt2.designationID`,
+    //         `ptbt.timelineBuilderID,
+    //         pplt.projectListName AS projectName,
+    //         pplt.projectListCode AS projectCode,
+    //         pct.categoryName AS projectCategory,
+    //         CONCAT(helt.employeeFirstname, ' ', helt.employeeLastname) AS projectManager,
+    //         hdt.departmentName,
+    //         hdt2.designationName,
+    //         ptbt.timelineBudgetStatus AS budgetStatus,
+    //         ptbt.timelineManagementStatus,
+    //         ptbt.timelineBuilderStatus`,
+    //         `ptbt.timelineBuilderStatus = 2`);
+    //     return data;
+    // }
 
 	
     // ----- END TIMELINE DATA -----
@@ -339,20 +339,20 @@ $(document).ready(function() {
 
 
     // ----- HEADER BUTTON -----
-	function headerButton(isAdd = true, text = "Add") {
-		let html;
-		if (isAdd) {
-			if (isCreateAllowed(92)) {
-				html = ``;
-			}
-		} else {
-			html = `
-            <button type="button" 
-				class="btn btn-default btn-light" 
-				id="btnBack"><i class="fas fa-arrow-left"></i>&nbsp;Back</button>`;
-		}
-		$("#headerButton").html(html);
-	}
+	// function headerButton(isAdd = true, text = "Add") {
+	// 	let html;
+	// 	if (isAdd) {
+	// 		if (isCreateAllowed(92)) {
+	// 			html = ``;
+	// 		}
+	// 	} else {
+	// 		html = `
+    //         <button type="button" 
+	// 			class="btn btn-default btn-light" 
+	// 			id="btnBack"><i class="fas fa-arrow-left"></i>&nbsp;Back</button>`;
+	// 	}
+	// 	$("#headerButton").html(html);
+	// }
 	// ----- END HEADER BUTTON -----
 
     // ----- THIS IS FOR THE MILESTONE CONTENT -----
@@ -471,7 +471,7 @@ $(document).ready(function() {
 
                 var lastIndex  = image.substring(image.lastIndexOf("/") + 1, image.length);
                 if(lastIndex.toLowerCase() == "null"){
-                    image = image.substring(image.lastIndexOf("/") + 1, image.length).replace("null","default.png");
+                    image = image.replace("null","default.png");
                 }
 
                 if (index <= 5) {
@@ -558,7 +558,7 @@ $(document).ready(function() {
                 if (assignedEmployee && assignedEmployee.length > 0) {
                     assignedEmployee.map((employee,index)=>{
                         teamMembers.filter(tempID => tempID["id"] == employee.assignedEmployee).map(tempID=>{
-                            let temp = { id: tempID, fullname:tempID.fullname, image:tempID.image };
+                            let temp = { id:tempID.id, fullname:tempID.fullname, image:tempID.image,employeeCode:tempID.employeeCode,designationName:tempID.designationName,departmentName:tempID.departmentName };
                                 employees.push(temp);
                               
                         })
@@ -673,7 +673,7 @@ $(document).ready(function() {
         }
     })
 
-    $(document).on("change", `.statusBadge,.modalStatusBadge`, function() {
+    $(document).on("change", `.statusBadge,.modalStatusBadge,.assignedEmployeeStatusBadge`, function() {
         var value = $(this).val();
         
         if(value ==""){
@@ -839,13 +839,13 @@ function displayPhase(teamMembers = {}, phase = {}, index = 0 ) {
                 const {taskBoardID,subTaskAssignee } = subTaskData(subtaskboardID);
                
 
-    console.log(teamMembers)
+ 
                 const teamMemberOptions = teamMembers.map(member => {
-                    const { id, fullname, image } = member;
+                    const { id, fullname, image ,designationName, departmentName, employeeCode } = member;
 
                     var lastIndex  = image.substring(image.lastIndexOf("/") + 1, image.length);
                     if(lastIndex.toLowerCase() == "null"){
-                        image = image.substring(image.lastIndexOf("/") + 1, image.length).replace("null","default.png");
+                        image = image.replace("null","default.png");
                     }
                     
                     return `
@@ -1166,7 +1166,7 @@ function displayPhase(teamMembers = {}, phase = {}, index = 0 ) {
                         padding: 1rem;
                         top: 0">
                     <i class=" btnTask fad fa-caret-down mr-3" taskCaret="true"></i><span
-                     class="btnModal"
+                     class="btnModal milestonePerTask"
                         taskID="${taskID}"
                         taskName = "${taskName}"
                         timelineBuilderID="${timelineBuilderID}"
@@ -1181,8 +1181,10 @@ function displayPhase(teamMembers = {}, phase = {}, index = 0 ) {
 
                 <td style="position: relative;">
                 <div class="d-flex align-items-center justify-content-start" 
-                taskID="${taskID}"
+                    name="assignEmployeeTask"
+                    taskID="${taskID}"
                     taskName = "${taskName}"
+                    milestoneID = "${milestoneID}"
                     style="
                         min-height: 70px;
                         height: auto;
@@ -1202,18 +1204,35 @@ function displayPhase(teamMembers = {}, phase = {}, index = 0 ) {
                                 taskNameContent +=`<span class="avatar">`;
                                
                                 employees.map((employee, index) => {
-                                    const { id, fullname, image } = employee;
+                                    const { id, fullname, image ,designationName, departmentName, employeeCode } = employee;
 
                                     var lastIndex  = image.substring(image.lastIndexOf("/") + 1, image.length);
                                     if(lastIndex.toLowerCase() == "null"){
-                                        image = image.substring(image.lastIndexOf("/") + 1, image.length).replace("null","default.png");
+                                        image = image.replace("null","default.png");
                                     }
                                    
                                     if (index <= 5) {
                                         taskNameContent += `
-                                        <span class="avatar"><img src="${image}" 
-                                            width="45" height="45"
-                                            title="${fullname}"></span>`;
+                                        <span class="avatar">
+                                        <img 
+                                        class="employeeProfile"
+                                        src="${image}" 
+                                        width="45" 
+                                        height="45"
+                                        style="cursor: pointer;"
+                                        taskBoardID="${taskBoardID}"
+                                        phase             = "${phaseCode}"
+                                        taskID            = "${taskID}"
+                                        taskName = "${taskName}"
+                                        timelineBuilderID="${timelineBuilderID}"
+                                        projectMilestoneID="${projectMilestoneID}"
+                                        milestoneID = "${milestoneID}"
+                                        milestoneName = "${milestoneName}"
+                                        employeeID        = "${id}"
+                                        departmentName    = "${departmentName}"
+                                        designationName   = "${designationName}"
+                                        employeeCode      = "${employeeCode}"
+                                        title="${fullname}"></span>`;
                                     }
                                     // if (index == 6) {
                                     //     taskNameContent += `
@@ -1528,7 +1547,7 @@ function displayPhase(teamMembers = {}, phase = {}, index = 0 ) {
                 <table class="table projectTimeline" id="projectTimeline${index}">
                     <thead>
                         <tr class="bg-dark">
-                            <th class="text-white">Milestones</th>
+                            <th class="text-white">Milestone</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -1567,6 +1586,382 @@ function displayPhase(teamMembers = {}, phase = {}, index = 0 ) {
         })
     }
     // ----- END UPDATE TABLE -----
+
+
+        // ----- ASSIGN EMPLOYEE STATUS ----//
+        function assignEmployeeStatus(taskBoardID,employeeID,timelineBuilderID,projectMilestoneID,taskID){
+            let html ='';
+            let taskStatus  =1;
+
+                getStatus = getTableData("pms_employee_taskboard_status_tbl",
+                `employeeTaskStatus`,
+                `taskBoardID=${taskBoardID} AND employeeID=${employeeID} AND timelineBuilderID =${timelineBuilderID} AND projectMilestoneID=${projectMilestoneID} AND taskID =${taskID}`);
+
+            if(getStatus.length >0){
+                html =` <option value="">---</option>
+                <option class="badge badge-primary" value="1" ${getStatus[0].employeeTaskStatus == 1 ? "selected" : ""}>ON HOLD DEVELOPMENT</option>
+                <option class="badge badge-info" value="2" ${getStatus[0].employeeTaskStatus == 2 ? "selected" : ""}>ON DEVELOPMENT</option>
+                <option class="badge badge-warning" value="3" ${getStatus[0].employeeTaskStatus == 3 ? "selected" : ""}>FOR TESTING</option>
+                <option class="badge badge-outline-secondary" value="4" ${getStatus[0].employeeTaskStatus == 4 ? "selected" : ""}>ON HOLD TESTING</option>
+                <option class="badge badge-outline-warning" value="5" ${getStatus[0].employeeTaskStatus == 5 ? "selected" : ""}>ON TESTING</option>
+                <option class="badge badge badge-danger" value="6" ${getStatus[0].employeeTaskStatus == 6 ? "selected" : ""}>FAILED</option>
+                <option class="badge badge-success" value="7" ${getStatus[0].employeeTaskStatus == 7 ? "selected" : ""}>PASSED</option>
+                <option class="badge badge-outline-primary" value="8" ${getStatus[0].employeeTaskStatus == 8 ? "selected" : ""}>TODO</option>
+                <option class="badge badge-outline-info" value="9" ${getStatus[0].employeeTaskStatus == 9 ? "selected" : ""}>PENDING</option>`;
+            }else{
+                html =`  
+                <option value="">---</option>
+                <option class="badge badge-primary" value="1">ON HOLD DEVELOPMENT</option>
+                <option class="badge badge-info" value="2">ON DEVELOPMENT</option>
+                <option class="badge badge-warning" value="3">FOR TESTING</option>
+                <option class="badge badge-outline-secondary" value="4">ON HOLD TESTING</option>
+                <option class="badge badge-outline-warning" value="5">ON TESTING</option>
+                <option class="badge badge badge-danger" value="6">FAILED</option>
+                <option class="badge badge-success" value="7">PASSED</option>
+                <option class="badge badge-outline-primary" value="8">TODO</option>
+                <option class="badge badge-outline-info" value="9">PENDING</option>`;
+            }
+            
+
+            return html;
+        }
+        // ----- END ASSIGN EMPLOYEE STATUS ----//
+
+        // ----- GET TABLE DATE ROW -----
+        function getTableDateRow(data = false, isReadOnly = false) {
+
+            let startDate          = ""; 
+            let endDate          = ""; 
+            let manHours      = ""; 
+            let regularHours  = ""; 
+            let overtimeHours = "";
+            if (data) {
+                employeeID          = data.employeeID ?? "";
+                startDate          = data.startDate ?? "";
+                endDate          = data.endDate ?? "";
+                manHours      = data.manHours ?? "";
+                regularHours  = data.regularHours ?? "";
+                overtimeHours = data.overtimeHours ?? "";
+                taskBoardID = data.taskBoardID ?? "";
+                timelineBuilderID = data.timelineBuilderID ?? "";
+                projectMilestoneID = data.projectMilestoneID ?? "";
+                taskID = data.taskID ?? "";
+            }
+            
+    
+            let html = "";
+            if (isReadOnly) {
+                html = `
+                <tr class="dates">
+                <td>
+                    <div style="color:#dc3450; display: block; font-size: 14px; padding: 2px">
+                        <b>Start Date: </b><span style="color:#000;">${moment(startDate || new Date).format("MMMM DD, YYYY")}</span>
+                    </div>
+
+                    <div style="color:#dc3450; display: block; font-size: 14px; padding: 2px">
+                        <b>End Date: </b><span style="color:#000;">${moment(endDate || new Date).format("MMMM DD, YYYY")}</span>
+                    </div>
+                
+                </td>
+              
+                    <td class="text-center">
+                        ${formatAmount(manHours || 0)}
+                    </td>
+                    <td class="text-center">
+                        ${formatAmount(regularHours || 0)}
+                    </td>
+                    <td class="text-center">
+                        ${formatAmount(overtimeHours || 0)}
+                    </td>
+                    <td class="text-center">
+                    <div class="row clearfix">
+                    <div class="form-group my-1 ml-1" style="width:100%;">
+                    <select class="badge  assignedEmployeeStatusBadge form-control" 
+                    name="employeeTaskStatus" 
+                    label="status" 
+                    style=" width: fit-content;" 
+                    taskBoardID ="${taskBoardID}"
+                    timelineBuilderID ="${timelineBuilderID}"
+                    projectMilestoneID = "${projectMilestoneID}"
+                    taskID = "${taskID}"
+                    employeeID = "${employeeID}"
+                    >
+                       ${assignEmployeeStatus(taskBoardID,employeeID,timelineBuilderID,projectMilestoneID,taskID)}
+                    </select>
+                    </div>
+                </div>
+                    </td>
+                </tr>`;
+            } else {
+                html = `
+                <tr class="dates">
+                    <td colspan="5" class="text-center"> 
+                    <h6> No Records Found.</h6>
+                    </td>
+                </tr>`;
+            }
+            
+            return html;
+        }
+        // ----- END GET TABLE DATE ROW -----
+
+        // ----- EMPLOYEE MODAL CONTENT -----
+        function employeeModalContent(taskBoardID ="",timelineBuilderID = "",projectMilestoneID ="", phase = "", taskID = "", taskName ="", milestoneName ="", employeeData = false, taskData = [], isReadOnly = false) {
+
+            let html = "";
+            if (employeeData && taskData && taskData.length > 0) {
+
+                const {
+                    employeeID, fullname, image, employeeCode, departmentName, designationName
+                } = employeeData;
+    
+                let tbodyHTML = "";
+                taskData.map(task => {
+    
+                    const { employeeID, timelineBuilderID, taskID, milestoneID } = task;
+                let employeeTimelineManagement = "";
+                employeeTimelineManagement = getTableData("pms_timeline_management_tbl",
+                    "",
+                    `timelineBuilderID = ${timelineBuilderID} AND 
+                    projectMilestoneID = ${projectMilestoneID} AND 
+                    taskID = ${taskID} `);
+    
+                    let data = [];
+                    employeeTimelineManagement.map((empTime, index) => {
+                        const { timelineManagementID, timelineBuilderID, taskID,projectMilestoneID,assignedEmployee,assignedManHours,assignedStartDate,assignedRegularHours,assignedOvertimeHours } = empTime;
+
+                        if (assignedEmployee.includes(employeeID)) {
+                            const getAssignEmployee = assignedEmployee.split("|");
+                            const employeeIndex  = getAssignEmployee.indexOf(employeeID);
+    
+                            const datesArr         = assignedStartDate?.split("|") || [];
+                            const manHoursArr      = assignedManHours?.split("|") || [];
+                            const regularHoursArr  = assignedRegularHours?.split("|") || [];
+                            const overtimeHoursArr = assignedOvertimeHours?.split("|") || [];
+    
+                            const datesArr2         = datesArr[employeeIndex] ?? "";
+                            const manHoursArr2      = manHoursArr[employeeIndex] ?? "";
+                            const regularHoursArr2  = regularHoursArr[employeeIndex] ?? "";
+                            const overtimeHoursArr2 = overtimeHoursArr[employeeIndex] ?? "";
+    
+                            const datesArr3         = datesArr2?.split("~") ?? [];
+                            const manHoursArr3      = manHoursArr2?.split("~") ?? [];
+                            const regularHoursArr3  = regularHoursArr2?.split("~") ?? [];
+                            const overtimeHoursArr3 = overtimeHoursArr2?.split("~") ?? [];
+
+                            let employeeTotalManHours = 0;
+                            let employeeTotalRegularHours = 0;
+                            let employeeTotalOvertimeHours = 0;
+                            datesArr3.map((arr, index) => {
+                                const date          = datesArr3[index] ?? "";
+                                const manHours      = manHoursArr3[index] ?? "";
+                                const regularHours  = regularHoursArr3[index] ?? "";
+                                const overtimeHours = overtimeHoursArr3[index] ?? "";
+    
+                                employeeTotalManHours += ((+manHours) || 0);
+                                employeeTotalRegularHours += ((+regularHours) || 0);
+                                employeeTotalOvertimeHours += ((+overtimeHours) || 0);
+
+                                
+    
+                                
+                            })
+                            // console.log(datesArr3)
+                            const max = moment.max(datesArr3.map(d => moment(d)))
+                            const min = moment.min(datesArr3.map(d => moment(d)))
+                            const startDate = min.format('MMMM DD, YYYY')
+                            const endDate = max.format('MMMM DD, YYYY')
+                        
+
+
+                            let temp = {
+                                employeeID,
+                               startDate,
+                               endDate, 
+                               manHours:employeeTotalManHours, 
+                               regularHours:employeeTotalRegularHours, 
+                               overtimeHours:employeeTotalOvertimeHours,
+                               taskBoardID,
+                               timelineBuilderID,
+                               projectMilestoneID,
+                               taskID
+                            };
+                            data.push(temp);
+    
+                        }
+                    })
+    
+                    let tableDateRow = "";
+                    if (data && data.length > 0) {
+                        data.map(item => {
+                            tableDateRow += getTableDateRow(item, true);
+                        })
+                    } else {
+                        tableDateRow += getTableDateRow(null, false);
+                    }
+    
+                    
+    
+                  
+    
+                    tbodyHTML += `
+                    <tr phase       = "${phase}"
+                        taskID      = "${taskID}"
+                        milestone   = "true"
+                        milestoneID = "${milestoneID}">
+                        <td>
+                            <div>    
+                            ${milestoneName}
+                            </div>
+                            <small style="color:#848482;">${taskName}</small>
+                        </td>
+                        <td>
+                            <table class="table table-bordered tableDate">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 30%">Date</th>
+                                        <th style="width: 15%">Man Hours</th>
+                                        <th style="width: 15%">Regular Hours</th>
+                                        <th style="width: 15%">Overtime Hours</th>
+                                        <th style="width: 25%">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                   ${tableDateRow}
+                                </tbody>
+                            </table>
+                     
+                        </td>
+                    </tr>`;
+                })
+    
+                // let totalRemainingManHours = (+remaining) + (+employeeTotalManHours);
+    
+                html = `
+                <div class="row p-3">
+                    <div class="col-12">
+                        <div class="d-flex justify-content-between align-items-center mb-3 px-2">
+                            <div class="d-flex justify-content-start align-items-center">
+                                <img src="${image}"
+                                    class="rounded-circle"
+                                    style="width: 50px; height: 50px;"
+                                    alt="${fullname}">
+                                <div class="font-weight-bold ml-2">
+                                    <h5>${fullname}</h5>
+                                    <small>${employeeCode}</small>
+                                </div>
+                            </div>
+                            <div class="d-flex justify-content-end align-items-end flex-column">
+                                <h5>${designationName}</h5>
+                                <small>${departmentName}</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <table class="table table-striped" id="tableManHours">
+                            <thead>
+                                <tr>
+                                    <th>Milestones</th>
+                                    <th>&nbsp;</th>
+                                </tr>
+                            </thead>
+                            <tbody id="remainingManHours"> 
+                                ${tbodyHTML}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>`;
+    
+                // html += !isReadOnly ? `
+                // <div class="modal-footer">
+                //     <div class="w-100 text-right">
+                //         <button class="btn btn-save px-5 py-2" 
+                //             id         = "btnSaveManHours"
+                //             employeeID = "${employeeID}"
+                //             phase      = "${phase}"
+                //             taskID     = "${taskID}">
+                //             <i class="fas fa-save"></i> Save
+                //         </button>
+                //         <button class="btn btn-cancel px-5 py-2 btnDismissModal">
+                //             <i class="fas fa-ban"></i> Cancel
+                //         </button>
+                //     </div>
+                // </div>` : "";
+            }
+            return html;
+        }
+        // ----- END EMPLOYEE MODAL CONTENT -----
+
+    // ----- CLICK EMPLOYEE PROFILE -----
+    $(document).on("click", `.employeeProfile`, function() {
+        const isReadOnly        = $(this).attr("isReadOnly") == "true";
+        const taskBoardID = $(this).attr("taskBoardID");
+        const timelineBuilderID = $(this).attr("timelineBuilderID");
+        const projectMilestoneID = $(this).attr("projectMilestoneID");
+        const milestoneID = $(this).attr("milestoneID");
+        const milestoneName = $(this).attr("milestoneName");
+        const phase             = $(this).attr("phase");
+        const taskID            = $(this).attr("taskID");
+        const taskName            = $(this).attr("taskName");
+        const employeeID        = $(this).attr("employeeID");
+        const fullname          = $(this).attr("title");
+        const image             = $(this).attr("src");
+        const employeeCode      = $(this).attr("employeeCode");
+        const departmentName    = $(this).attr("departmentName");
+        const designationName   = $(this).attr("designationName");
+        let title =  "ASSIGNED MAN HOURS";
+        
+        $parent = $(this).closest("tr");
+        const taskStartDate = $parent.find(`[phase="${phase}"][taskID="${taskID}"][basis="true"]`).attr("taskStartDate");
+        const taskEndDate   = $parent.find(`[phase="${phase}"][taskID="${taskID}"][basis="true"]`).attr("taskEndDate");
+        $parent.find(`[name="manHours"][phase="${phase}"][taskID="${taskID}"]`).removeClass("is-invalid").removeClass("is-valid");
+        $parent.find(`.invalid-feedback`).text("");
+
+        let employeeData = {
+            employeeID, fullname, image, employeeCode, departmentName, designationName
+        };
+
+        let taskData = [];
+        $(`[name="assignEmployeeTask"][taskID="${taskID}"][taskName="${taskName}"][milestoneID="${milestoneID}"]`).each(function() {
+            const milestoneID = $(this).attr("milestoneID");
+            const employeeArr = $(this).val();
+            // if (employeeArr.includes(employeeID)) {
+                taskData.push({
+                    employeeID, timelineBuilderID, taskID, milestoneID
+                })
+            // }
+        })
+
+        $(`#modal_project_management_board .page-title`).text(title);
+        $(`#modal_project_management_board_content`).html(preloader);
+        $(`#modal_project_management_board`).modal("show");
+        setTimeout(() => {
+            let content = employeeModalContent(taskBoardID,timelineBuilderID, projectMilestoneID, phase, taskID, taskName , milestoneName, employeeData, taskData, isReadOnly);
+            $(`#modal_project_management_board_content`).html(content);
+
+            initHours();
+            // initDatatables();
+            // updateTables();
+            // updateTableDateItems();
+
+            $(".assignedEmployeeStatusBadge").each(function() {
+                $(this).trigger("change");
+            })
+
+            $(`[name="employeeDate"]`).each(function() {
+                const elementID = "#"+this.id;
+                const dateValue = $(this).attr("dateValue") || taskStartDate;
+                initDatePicker(elementID, taskStartDate, taskEndDate, dateValue);
+                manipulateDatePicker(elementID, dateValue);
+            });
+
+        }, 500);
+    })
+
+    $(document).on('shown.bs.modal', '#modal_project_management_board', function () {
+        $("#tableManHours").DataTable().columns.adjust().draw();
+    });
+    // ----- END CLICK EMPLOYEE PROFILE -----
 
 
     // ----- KEYUP MAN HOURS -----
@@ -1650,22 +2045,30 @@ function displayPhase(teamMembers = {}, phase = {}, index = 0 ) {
 				phases
 			} = data && data[0];
 
-            console.log(data)
+            // console.log(data)
 	
 			let membersID = teamMember ? teamMember.replaceAll("|", ",") : "0";
 			const teamMembers = getTableData(
-				`hris_employee_list_tbl`,
-				`employeeID, employeeFirstname, employeeLastname, employeeProfile`,
+				`hris_employee_list_tbl 
+                LEFT JOIN hris_department_tbl USING(departmentID)
+                LEFT JOIN hris_designation_tbl USING(designationID)`,
+				`employeeID, employeeFirstname, employeeLastname,employeeCode, employeeProfile,designationName,departmentName`,
 				`FIND_IN_SET(employeeID, "${membersID}")`
 			).map(member => {
 				const { 
 					employeeID, 
+                    employeeCode,
 					employeeFirstname, 
 					employeeLastname, 
-					employeeProfile = "default.jpg"
+					employeeProfile = "default.jpg",
+                    designationName,
+                    departmentName
 				} = member;
 				return {
-					id:       employeeID,
+					id: employeeID,
+                    employeeCode: `${employeeCode}`,
+                    designationName: `${designationName}`,
+                    departmentName: `${departmentName}`,
 					fullname: `${employeeFirstname} ${employeeLastname}`,
 					image:    `${base_url}/assets/upload-files/profile-images/${employeeProfile}`
 				}
@@ -1765,6 +2168,8 @@ function displayPhase(teamMembers = {}, phase = {}, index = 0 ) {
                 const assignedEmployeeArr = $assignedEmployee?.split("|");
                 $assignedEmployee && $(this).val(assignedEmployeeArr).trigger("change");
             })
+
+            generateProjectData();
         }, 200);
       
     }
@@ -1838,7 +2243,7 @@ function displayPhase(teamMembers = {}, phase = {}, index = 0 ) {
 
                                         var lastIndex  = image.substring(image.lastIndexOf("/") + 1, image.length);
                                         if(lastIndex.toLowerCase() == "null"){
-                                            image = image.substring(image.lastIndexOf("/") + 1, image.length).replace("null","default.png");
+                                            image = image.replace("null","default.png");
                                         }
                                        
                                         if(id == subtaskAssignee[loop] ){
@@ -1874,7 +2279,7 @@ function displayPhase(teamMembers = {}, phase = {}, index = 0 ) {
 
                                     var lastIndex  = image.substring(image.lastIndexOf("/") + 1, image.length);
                                     if(lastIndex.toLowerCase() == "null"){
-                                        image = image.substring(image.lastIndexOf("/") + 1, image.length).replace("null","default.png");
+                                        image = image.replace("null","default.png");
                                     }
 
                                     if (index <= 5) {
@@ -2218,7 +2623,7 @@ function displayPhase(teamMembers = {}, phase = {}, index = 0 ) {
 				sidebarhtml += `<div class="row">
 									<div class="col-md-12">
 										<div id="MainMenu">
-											<div class="list-group panel mb-2">
+											<div class="list-group panel mb-2 ">
 												<a class="list-group-item list-group-item-danger " style="cursor:pointer;"  
 													><i type="button" href="#project${counter1}" data-toggle="collapse" data-parent="#MainMenu" class="fa fa-caret-down"></i>
 													&nbsp; <small class="btnSelectedProject" timelineBuilderID="${encryptString(timelineBuilderID)}">${projectName}</small></a>`;
@@ -2313,7 +2718,7 @@ function displayPhase(teamMembers = {}, phase = {}, index = 0 ) {
         	
         }
         // subtaskboardID = parseFloat(getLastSubtask[0].subtaskboardID) +1;
-        console.log(subtaskboardID)
+        // console.log(subtaskboardID)
         const getAssigneeList = (subtaskboardID = null, subTask=[],teamMembers = {} ) => { 
             let taskAssigneeContent = "";
           
@@ -2689,6 +3094,51 @@ function displayPhase(teamMembers = {}, phase = {}, index = 0 ) {
         }
     })
      // ------------------END SUBTASK ASSIGNEE-------------//
+
+
+    //  ------------------- ASSIGNEE EMPLOYEE STATUS ----------------------//
+    $(document).on("change", "[name='employeeTaskStatus']", function() {
+        var taskBoardID = $(this).attr("taskBoardID");
+        var timelineBuilderID = $(this).attr("timelineBuilderID");
+        var projectMilestoneID = $(this).attr("projectMilestoneID");
+        var taskID = $(this).attr("taskID");
+        var employeeID = $(this).attr("employeeID");
+        var employeeTaskStatus = +$(this).val();
+
+
+            var data = new FormData();
+
+            data.append('taskBoardID', taskBoardID);
+            data.append('timelineBuilderID', timelineBuilderID);
+            data.append('projectMilestoneID', projectMilestoneID);
+            data.append('taskID', taskID);
+            data.append('employeeID', employeeID);
+            data.append('employeeTaskStatus', employeeTaskStatus);
+            data.append('sessionID', sessionID);
+
+            $.ajax({
+                url           :"Employee_taskboard/updateEmployeeTaskStatus",
+                method        : "POST",
+                dataType      : 'text', // what to expect back from the server
+                cache         : false,
+                contentType   : false,
+                processData   : false,
+                data          : data,
+                async         : true,
+                dataType      : 'json',
+                success       : function(data){
+
+                },
+                error: function() {
+                    setTimeout(() => {
+                        // $("#loader").hide();
+                        showNotification("danger", "System error: Please contact the system administrator for assistance!");
+                    }, 500);
+                }
+                
+            });
+    })
+    //  ----------------- END ASSIGNEE EMPLOYEE STATUS --------------------//
 
     // ------------------COMPUTE DIFFERENCE OF HOURS-------------//
 
@@ -3121,20 +3571,20 @@ function displayPhase(teamMembers = {}, phase = {}, index = 0 ) {
 
 
     // ----- CLICK BUTTON BACK -----
-	$(document).on("click", "#btnBack", function () {
-        const id     = decryptString($(this).attr("timelineBuilderID"));
-		const status = $(this).attr("status");
+	// $(document).on("click", "#btnBack", function () {
+    //     const id     = decryptString($(this).attr("timelineBuilderID"));
+	// 	const status = $(this).attr("status");
 
-		if (status != "false" && status != 0 && status != 1) {
-            $("#page_content").html(preloader);
-            setTimeout(() => {
-                pageContent();
-            }, 50);
+	// 	if (status != "false" && status != 0 && status != 1) {
+    //         $("#page_content").html(preloader);
+    //         setTimeout(() => {
+    //             pageContent();
+    //         }, 50);
 
-		} else {
-            saveProjectBoard("save", id, pageContent);
-		}
-	});
+	// 	} else {
+    //         saveProjectBoard("save", id, pageContent);
+	// 	}
+	// });
 	// ----- END CLICK BUTTON BACK -----
 
 
@@ -3213,6 +3663,124 @@ function displayPhase(teamMembers = {}, phase = {}, index = 0 ) {
     }
     // ----- VALIDATE ASSIGNEE -----
 
+    // ========= AUTO SAVED PROJECT ==================//
+    function generateProjectData(){
+
+        $parent = $(this).closest("tr");
+
+       
+        let data = { task: [] }, formData = new FormData;
+
+        // var label = $(this).attr("label");
+        // formData.append(`label`,label);
+        formData.append(`generateProejctData`,'save');
+        var checkData = [];
+        var getIndexofmilestonePerTask =[];
+        var counter=0;
+        $('.milestonePerTask').closest("tr").each(function(i, obj) {
+            const taskID  = $("td [name=taskName]", this).attr("taskID");
+            const projectMilestoneID  = $("td [name=taskName]", this).attr("projectMilestoneID");
+            const timelineBuilderID  = $("td [name=taskName]", this).attr("timelineBuilderID");
+            const milestoneBuilderID  = $("td [name=taskName]", this).attr("milestoneBuilderID");
+            const taskName  = $("td [name=taskName]", this).attr("taskName");
+            const taskUsedHours  = $("td [name=TaskUsedHours]", this).val();
+            const taskStartDates = moment($("[name=TaskStartDates]", this).val()?.trim()).format("YYYY-MM-DD");
+            const taskEndDates = moment($("[name=TaskEndDates]", this).val()?.trim()).format("YYYY-MM-DD");
+            const taskPriority  = $("td [name=taskPriority]", this).val();
+            const taskSeverity  = $("td [name=taskSeverity]", this).val();
+            const taskTimeLeft  = $("td [name=TaskTimeLeft]", this).val();
+            const taskStatus  = $("td [name=taskStatus]", this).val();
+            const taskNotes  = $("td [name=taskNotes]", this).val()?.trim();
+            const taskDescription  = $("td [name=TaskDescription]", this).val()?.trim();
+            
+            const checkUnsavedData = getTableData(`pms_employeetaskoard_tbl`,
+            `taskboardID`,
+            `timelineBuilderID = ${timelineBuilderID} AND
+            projectMilestoneID = ${projectMilestoneID} AND
+            milestoneBuilderID = ${milestoneBuilderID} AND 
+            taskID = ${taskID}`);
+            
+            if(checkUnsavedData.length == 0){
+                let temp = {
+                    taskID,
+                    projectMilestoneID,
+                    timelineBuilderID,
+                    milestoneBuilderID,
+                    taskName,
+                    taskUsedHours,
+                    taskStartDates,
+                    taskEndDates,
+                    taskPriority,
+                    taskSeverity,
+                    taskTimeLeft,
+                    taskStatus,
+                    taskNotes,
+                    taskDescription
+                    };
+    
+                    formData.append(`task[${i}][taskID]`,           taskID);
+                    formData.append(`task[${i}][projectMilestoneID]`,           projectMilestoneID);
+                    formData.append(`task[${i}][timelineBuilderID]`,           timelineBuilderID);
+                    formData.append(`task[${i}][milestoneBuilderID]`,           milestoneBuilderID);
+                    formData.append(`task[${i}][taskName]`,         taskName);
+                    formData.append(`task[${i}][taskUsedHours]`,    taskUsedHours);
+                    formData.append(`task[${i}][taskStartDates]`,   taskStartDates);
+                    formData.append(`task[${i}][taskEndDates]`,     taskEndDates);
+                    formData.append(`task[${i}][taskPriority]`,     taskPriority);
+                    formData.append(`task[${i}][taskSeverity]`,     taskSeverity);
+                    formData.append(`task[${i}][taskTimeLeft]`,     taskTimeLeft);
+                    formData.append(`task[${i}][taskStatus]`,       taskStatus);
+                    formData.append(`task[${i}][taskNotes]`,        taskNotes);
+                    formData.append(`task[${i}][taskDescription]`,        taskDescription);
+    
+                    data["task"].push(temp);
+
+                    checkData[i] = checkUnsavedData.length;
+                    getIndexofmilestonePerTask[counter] = i;
+                    counter ++;
+            }    
+        });
+
+        if(checkData.length > 0){
+            $.ajax({
+                method:      "POST",
+                url:         `Employee_taskboard/autoSavedHeader`,
+                data: formData,
+                processData: false,
+                contentType: false,
+                global:      false,
+                cache:       false,
+                async:       false,
+                dataType:    "json",
+                beforeSend: function() {
+                    // $("#loader").show();
+                },
+                success: function(data) {
+
+                    setTimeout(() => {
+                             counter = 0;
+                            $('.milestonePerTask').closest("tr").each(function(i, obj) {
+
+                                if(i == getIndexofmilestonePerTask[counter]){
+                                    $("td [name=taskName]", this).attr("taskBoardID", data[counter]);
+                                    $(".milestonePerTask", this).attr("taskBoardID", data[counter]);
+                                    $(".milestonePerTask", this).attr("taskHeaderID", data[counter]);
+                                    counter++;
+                                }
+                            });
+                        // $("#loader").hide();
+                    }, 500);
+                },
+                error: function() {
+                    setTimeout(() => {
+                        $("#loader").hide();
+                        showNotification("danger", "System error: Please contact the system administrator for assistance!");
+                    }, 500);
+                }
+            })
+        }
+	}
+    // ========= END AUTO SAVED PROJECT ==================//
 
     // ----- CLICK BUTTON SUBMIT -----
 	$(document).on("change", ".btnSubmit", function () {
@@ -3420,34 +3988,34 @@ function displayPhase(teamMembers = {}, phase = {}, index = 0 ) {
     
 
     // ----- CLICK BUTTON CANCEL -----
-    $(document).on("click", "#btnCancel", function() {
-        saveProjectBoard("cancel", null, pageContent);
-    })
+    // $(document).on("click", "#btnCancel", function() {
+    //     saveProjectBoard("cancel", null, pageContent);
+    // })
     // ----- END CLICK BUTTON CANCEL -----
 
 
     // ----- GET PROJECT BOARD DATA -----
-    const getProjectBoardData = (timelineBuilderID = 0, method = "save") => {
-        let data = {
-            timelineBuilderID,
-            timelineManagementStatus: method == "save" ? 0 : (method == "submit" ? 2 : 1),
-            tasks: []
-        };
+    // const getProjectBoardData = (timelineBuilderID = 0, method = "save") => {
+    //     let data = {
+    //         timelineBuilderID,
+    //         timelineManagementStatus: method == "save" ? 0 : (method == "submit" ? 2 : 1),
+    //         tasks: []
+    //     };
 
-        $(`[name="milestoneName"]`).each(function(i) {
-            const index = $(this).attr("index");
+    //     $(`[name="milestoneName"]`).each(function(i) {
+    //         const index = $(this).attr("index");
 
-            const taskID = $(`[name="milestoneName"][index="${index}"]`).attr("taskID");
-            const projectMilestoneID = $(`[name="milestoneName"][index="${index}"]`).attr("projectMilestoneID");
-            const manHours       = $(`[name="manHours"][index="${index}"]`).val();
-            const assignEmployee = $(`[name="assignEmployee"][index="${index}"]`).val()?.join("|");
-            const temp = {
-                taskID, projectMilestoneID, manHours, assignEmployee
-            };
-            data.tasks.push(temp);
-        })
-        return data;
-    }
+    //         const taskID = $(`[name="milestoneName"][index="${index}"]`).attr("taskID");
+    //         const projectMilestoneID = $(`[name="milestoneName"][index="${index}"]`).attr("projectMilestoneID");
+    //         const manHours       = $(`[name="manHours"][index="${index}"]`).val();
+    //         const assignEmployee = $(`[name="assignEmployee"][index="${index}"]`).val()?.join("|");
+    //         const temp = {
+    //             taskID, projectMilestoneID, manHours, assignEmployee
+    //         };
+    //         data.tasks.push(temp);
+    //     })
+    //     return data;
+    // }
     // ----- END GET PROJECT BOARD DATA -----
 
 
@@ -3513,108 +4081,108 @@ function displayPhase(teamMembers = {}, phase = {}, index = 0 ) {
         })
     }
 
-    function saveProjectBoard(method = "submit", id = 0, callback = null) {
-        const confirmation = getConfirmation(method);
-        confirmation.then(res => {
-            if (res.isConfirmed) {
+    // function saveProjectBoard(method = "submit", id = 0, callback = null) {
+    //     const confirmation = getConfirmation(method);
+    //     confirmation.then(res => {
+    //         if (res.isConfirmed) {
 
-                if (method == "cancel") {
-                    callback && callback();
-                    Swal.fire({
-                        icon:              'success',
-                        title:             "Process successfully discarded!",
-                        showConfirmButton: false,
-                        timer:             2000
-                    });
-                } else {
+    //             if (method == "cancel") {
+    //                 callback && callback();
+    //                 Swal.fire({
+    //                     icon:              'success',
+    //                     title:             "Process successfully discarded!",
+    //                     showConfirmButton: false,
+    //                     timer:             2000
+    //                 });
+    //             } else {
 
-                    const data = getProjectBoardData(id, method);
-                    $.ajax({
-                        method:      "POST",
-                        url:         `project_management_board/saveProjectBoard`,
-                        data,
-                        cache:       false,
-                        async:       false,
-                        dataType:    "json",
-                        beforeSend: function() {
-                            $("#loader").show();
-                        },
-                        success: function(data) {
-                            let result = data.split("|");
+    //                 const data = getProjectBoardData(id, method);
+    //                 $.ajax({
+    //                     method:      "POST",
+    //                     url:         `project_management_board/saveProjectBoard`,
+    //                     data,
+    //                     cache:       false,
+    //                     async:       false,
+    //                     dataType:    "json",
+    //                     beforeSend: function() {
+    //                         $("#loader").show();
+    //                     },
+    //                     success: function(data) {
+    //                         let result = data.split("|");
             
-                            let isSuccess   = result[0];
-                            let message     = result[1];
-                            let insertedID  = result[2];
-                            let dateCreated = result[3];
+    //                         let isSuccess   = result[0];
+    //                         let message     = result[1];
+    //                         let insertedID  = result[2];
+    //                         let dateCreated = result[3];
     
-                            let swalTitle;
-                            if (method == "submit") {
-                                swalTitle = `Project Board submitted successfully!`;
-                            } else if (method == "save") {
-                                swalTitle = `Project Board saved successfully!`;
-                            } else if (method == "cancelform") {
-                                swalTitle = `${getFormCode("PO", dateCreated, insertedID)} cancelled successfully!`;
-                            } else if (method == "approve") {
-                                swalTitle = `${getFormCode("PO", dateCreated, insertedID)} approved successfully!`;
-                            } else if (method == "deny") {
-                                swalTitle = `${getFormCode("PO", dateCreated, insertedID)} denied successfully!`;
-                            } else if (method == "drop") {
-                                swalTitle = `${getFormCode("PO", dateCreated, insertedID)} dropped successfully!`;
-                            }
+    //                         let swalTitle;
+    //                         if (method == "submit") {
+    //                             swalTitle = `Project Board submitted successfully!`;
+    //                         } else if (method == "save") {
+    //                             swalTitle = `Project Board saved successfully!`;
+    //                         } else if (method == "cancelform") {
+    //                             swalTitle = `${getFormCode("PO", dateCreated, insertedID)} cancelled successfully!`;
+    //                         } else if (method == "approve") {
+    //                             swalTitle = `${getFormCode("PO", dateCreated, insertedID)} approved successfully!`;
+    //                         } else if (method == "deny") {
+    //                             swalTitle = `${getFormCode("PO", dateCreated, insertedID)} denied successfully!`;
+    //                         } else if (method == "drop") {
+    //                             swalTitle = `${getFormCode("PO", dateCreated, insertedID)} dropped successfully!`;
+    //                         }
             
-                            if (isSuccess == "true") {
-                                setTimeout(() => {
-                                    $("#loader").hide();
-                                    closeModals();
-                                    callback && callback();
-                                    Swal.fire({
-                                        icon:              "success",
-                                        title:             swalTitle,
-                                        showConfirmButton: false,
-                                        timer:             2000,
-                                    });
-                                }, 500);
-                            } else {
-                                setTimeout(() => {
-                                    $("#loader").hide();
-                                    Swal.fire({
-                                        icon:              "danger",
-                                        title:             message,
-                                        showConfirmButton: false,
-                                        timer:             2000,
-                                    });
-                                }, 500);
-                            }
-                        },
-                        error: function() {
-                            setTimeout(() => {
-                                $("#loader").hide();
-                                showNotification("danger", "System error: Please contact the system administrator for assistance!");
-                            }, 500);
-                        }
-                    }).done(function() {
-                        setTimeout(() => {
-                            $("#loader").hide();
-                        }, 500);
-                    })
-                }
-            } else {
-                if (res.dismiss == "cancel" && method != "submit") {
-                    if (method != "deny") {
-                        if (method != "cancelform") {
-                            callback && callback();
-                        }
-                    } else {
+    //                         if (isSuccess == "true") {
+    //                             setTimeout(() => {
+    //                                 $("#loader").hide();
+    //                                 closeModals();
+    //                                 callback && callback();
+    //                                 Swal.fire({
+    //                                     icon:              "success",
+    //                                     title:             swalTitle,
+    //                                     showConfirmButton: false,
+    //                                     timer:             2000,
+    //                                 });
+    //                             }, 500);
+    //                         } else {
+    //                             setTimeout(() => {
+    //                                 $("#loader").hide();
+    //                                 Swal.fire({
+    //                                     icon:              "danger",
+    //                                     title:             message,
+    //                                     showConfirmButton: false,
+    //                                     timer:             2000,
+    //                                 });
+    //                             }, 500);
+    //                         }
+    //                     },
+    //                     error: function() {
+    //                         setTimeout(() => {
+    //                             $("#loader").hide();
+    //                             showNotification("danger", "System error: Please contact the system administrator for assistance!");
+    //                         }, 500);
+    //                     }
+    //                 }).done(function() {
+    //                     setTimeout(() => {
+    //                         $("#loader").hide();
+    //                     }, 500);
+    //                 })
+    //             }
+    //         } else {
+    //             if (res.dismiss == "cancel" && method != "submit") {
+    //                 if (method != "deny") {
+    //                     if (method != "cancelform") {
+    //                         callback && callback();
+    //                     }
+    //                 } else {
                         
-                    }
-                } else if (res.isDismissed) {
-                    if (method == "deny") {
+    //                 }
+    //             } else if (res.isDismissed) {
+    //                 if (method == "deny") {
                         
-                    }
-                }
-            }
-        });
-    }
+    //                 }
+    //             }
+    //         }
+    //     });
+    // }
     // ----- END DATABASE RELATION -----
 
 	$(document).on("click",".btnSelectedProject",function(){

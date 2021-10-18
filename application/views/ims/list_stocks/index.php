@@ -11,6 +11,18 @@
 #tableListStocksItem_info{
     color:#7e8183;
 }
+#tableListStocksItem_filter{
+    color:#7e8183;
+}
+#tableListStocksAsset_filter{
+    color:#7e8183;
+}
+#tableListStocksItem_length{
+    color:#7e8183;
+}
+#tableListStocksAsset_length{
+    color:#7e8183;
+}
 </style>
 
 <div class="body_area after_bg">

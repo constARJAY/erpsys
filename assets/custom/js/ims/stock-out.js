@@ -153,7 +153,9 @@ $(document).ready(function() {
              stockout.stockOutCode,
              stockout.materialWithdrawalCode,
              stockout.materialWithdrawalID,
-             stockout.materialRequestID`,
+             stockout.materialRequestID,
+             stockout.clientCode,
+             stockout.clientName`,
             `IF(stockout.employeeID = 0 ,stockout.createdBy = ${sessionID},stockout.employeeID = ${sessionID})`);
         return data;
     }
@@ -278,8 +280,8 @@ $(document).ready(function() {
                     <tr>
                         <th>Document No.</th>
                         <th>Prepared By</th>
-                        <th>Project Code</th>
-                        <th>Project Name</th>
+                        <th>Project</th>
+                        <th>Client</th>
                         <th>Item Request Status</th>
                     </tr>
                 </thead>
@@ -296,6 +298,8 @@ $(document).ready(function() {
                 projectName           = "",
                 projectCode           = "",
                 inventoryItemStatus       = 0,
+                clientCode       = "",
+                clientName       = "",
             } = timeline;
 
             html += `
@@ -305,8 +309,18 @@ $(document).ready(function() {
                     <!-- <small style="color:#848482;">put description here</small> -->
                 </td>
                 <td>${preparedBy || "-"}</td>
-                <td>${projectCode || "-"}</td>
-                <td>${projectName || "-" }</td>
+                <td>
+                    <div>
+                        ${projectCode || '-'}
+                    </div>
+                    <small style="color:#848482;">${projectName || '-'}</small>
+                </td>
+                <td>
+                    <div>
+                        ${clientCode || '-'}
+                    </div>
+                    <small style="color:#848482;">${clientName || '-'}</small>
+                </td>
                 <td>${getStatusStyle(inventoryItemStatus,true)}</td>
             </tr>`
         });
@@ -611,6 +625,7 @@ $(document).ready(function() {
                                                 index="0"
                                                 itemID="${itemID}"
                                                 withdrawalItemID="0"
+                                                availableStocksValue="${getAvailableStocks.length > 0 ? formatAmount(getAvailableStocks[0].availableStocks) : "0.00"}"
                                                 >
                                                     <div class="invalid-feedback d-block" id="invalid-StockOut0"></div>
                                                 </div>
@@ -1092,9 +1107,15 @@ $(document).ready(function() {
         const index    = $(this).attr("index");
         const withdrawalItemID    = $(this).attr("withdrawalItemID");
         const value = +$(this).val();
+        var availableStocksValue = +$(this).attr("availableStocksValue");
         // const getRemainingItem = +$(`[name="remainingItem"][itemID="${itemID}"]`).attr("remainingValueItem").replaceAll(",","");
         // var computeRemainingItem =0;
         // computeRemainingItem = getRemainingItem - value;
+
+        if(value > availableStocksValue){
+            $(this).val(0);
+            showNotification("danger", "Incorrect Quantity Inserted!");
+        }
         
         
         if(value == 0){

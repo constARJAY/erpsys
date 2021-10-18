@@ -296,14 +296,15 @@ class BillMaterial_model extends CI_Model {
         
         for ($x =  0; $x < count($date) ; $x++) { 
             $isHoliday  = $this->getHolidayRate($date[$x]);
-            $percentage = $isOvertime;
+            $holidayPercentage = 1;
             if($isHoliday){
-                $percentage = $isHoliday->holidayType == "Regular Holiday" ? 2.0 : 1.3;
+                $holidayPercentage = $isHoliday->holidayType == "Regular Holiday" ? 2.0 : 1.3;
             }
 
             $totalHours         += floatval($hours[$x]);
-            $totalHourlyRate    =  (floatval($isOvertime) * floatval($hourlyRate)) * floatval($hours[$x]);
-            $totalRate          += floatval($totalHourlyRate) * floatval($percentage);
+            // $totalHourlyRate    =  (floatval($isOvertime) * floatval($hourlyRate)) * floatval($hours[$x]);
+            $totalHourlyRate    =  (floatval($hourlyRate) * floatval($isOvertime)) * floatval($holidayPercentage);
+            $totalRate          += floatval($totalHourlyRate) * floatval($hours[$x]);
         }
         
         return $totalHours."|".$totalRate;

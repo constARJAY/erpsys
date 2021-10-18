@@ -146,7 +146,7 @@
              LEFT JOIN hris_employee_list_tbl AS helt ON helt.employeeID = imw.createdBy
              `,
             `CONCAT(helt.employeeFirstname, ' ', helt.employeeLastname) AS preparedBy,
-             imw.materialWithdrawalID,imw.materialWithdrawalCode,imw.projectCode,imw.projectName,imw.inventoryItemStatus,inventoryAssetStatus,imw.materialRequestID`,
+             imw.materialWithdrawalID,imw.materialWithdrawalCode,imw.projectCode,imw.projectName,imw.inventoryItemStatus,inventoryAssetStatus,imw.materialRequestID,imw.clientCode,imw.clientName`,
             `IF(imw.employeeID = 0 ,imw.createdBy = ${sessionID},imw.employeeID = ${sessionID})`);
         return data;
     }
@@ -293,8 +293,8 @@
                     <tr>
                         <th>Document No.</th>
                         <th>Prepared By</th>
-                        <th>Project Code</th>
-                        <th>Project Name</th>
+                        <th>Project</th>
+                        <th>Client</th>
                         <th>Item Request Status</th>
                         <th>Asset Request status</th>
                     </tr>
@@ -311,6 +311,8 @@
                 projectCode           = "",
                 inventoryAssetStatus       = 0,
                 inventoryItemStatus       = 0,
+                clientCode       = "",
+                clientName       = "",
             } = timeline;
 
             html += `
@@ -320,8 +322,18 @@
                     <!-- <small style="color:#848482;">put description here</small> -->
                 </td>
                 <td>${preparedBy || "-"}</td>
-                <td>${projectCode || "-"}</td>
-                <td>${projectName || "-"}</td>
+                <td>
+                    <div>
+                        ${projectCode || '-'}
+                    </div>
+                    <small style="color:#848482;">${projectName || '-'}</small>
+                </td>
+                <td>
+                    <div>
+                        ${clientCode || '-'}
+                    </div>
+                    <small style="color:#848482;">${clientName || '-'}</small>
+                </td>
                 <td>${getStatusStyle(inventoryItemStatus,true)}</td>
                 <td>${getStatusStyle(inventoryAssetStatus,true)}</td>
             </tr>`
@@ -429,6 +441,7 @@
                 <div class="form-group my-1 text-center">
                     <input class="form-control input-quantity text-center"
                         value="${formatAmount(received)}"
+                        stockOutValue="${formatAmount(stockOut)}"
                         name="receivedItems"
                         min="0.00"
                         max="9999999999"
@@ -757,6 +770,7 @@
                 <div class="form-group my-1 text-center">
                     <input class="form-control input-quantity text-center"
                         value="${formatAmount(received)}"
+                        boorowedValue="${formatAmount(borrowed)}"
                         name="receivedAssets"
                         min="0.00"
                         max="9999999999"
@@ -1043,9 +1057,16 @@
         const itemID    = $(this).attr("itemID");
         const withdrawalItemID    = $(this).attr("withdrawalItemID");
         const value = +$(this).val();
+        var stockOutValue = +$(this).attr("stockOutValue");
         const getRemainingItem = +$(`[name="remainingItem"][withdrawalItemID="${withdrawalItemID}"][itemID="${itemID}"]`).attr("remainingValueItem").replaceAll(",","");
         var computeRemainingItem =0;
         computeRemainingItem = getRemainingItem - value;
+
+        if(value > stockOutValue){
+            $(this).val(0);
+            showNotification("danger", "Incorrect Quantity Inserted!");
+            
+        }
 
         if(value == 0){
             $(`[name="receivedDateItem"][withdrawalItemID="${withdrawalItemID}"][itemID="${itemID}"]`).text("-");
@@ -1070,10 +1091,16 @@
     $(document).on("keyup", `[name="receivedAssets"]`, function() {
         const assetID    = $(this).attr("assetID");
         const withdrawalAssetID    = $(this).attr("withdrawalAssetID");
+        var borrowedValue = $(this).attr("borrowedValue");
         const value = +$(this).val();
         const getRemainingAsset = +$(`[name="remainingAsset"][withdrawalAssetID="${withdrawalAssetID}"][assetID="${assetID}"]`).attr("remainingValueAsset").replaceAll(",","");
         var computeRemainingAsset =0;
         computeRemainingAsset = getRemainingAsset - value;
+
+        if(value > borrowedValue){
+            $(this).val(0);
+            showNotification("danger", "Incorrect Quantity Inserted!");
+        }
      
 
         if(value == 0){

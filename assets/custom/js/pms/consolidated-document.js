@@ -94,7 +94,7 @@ $(document).ready(function(){
 
         let projectList  = clientList().map(x=>{
                                     return getProjectList(x);
-                            }).join();
+                            }).join("");
         if(projectList){
             html = "";
         }
@@ -137,7 +137,7 @@ $(document).ready(function(){
                             <small>${project}</small>
                         </a>
                     </div>`;
-        });
+        }).join();
         return html;
     }
 

@@ -1,7 +1,7 @@
 $(document).ready(function() {
 
     // ----- REUSABLE VARIABLE/FUNCTIONS -----
-    const allowedUpdate = isUpdateAllowed(43);
+    const allowedUpdate = isUpdateAllowed(139);
 
 
     
@@ -29,7 +29,7 @@ $(document).ready(function() {
         let result = false;
         $.ajax({
             method:   "POST",
-            url:      "Equipment_borrowing/getTimelineContent",
+            url:      "Stock_out/getTimelineContent",
             data:     { timelineBuilderID },
             async:    false,
             dataType: "json",
@@ -51,7 +51,7 @@ $(document).ready(function() {
                     if (tableData.length > 0) {
                         let {
                             employeeID,
-                            equipmentBorrowingStatus,
+                            stockOutStatus,
                             createdBy
                         } = tableData[0];
         
@@ -61,11 +61,11 @@ $(document).ready(function() {
                         if (employeeID != sessionID) {
                             isReadOnly = true;
                             // isAllowed = timelineManagementBy || timelineManagementBy == null ? true : false
-                            if (equipmentBorrowingStatus == 0 || equipmentBorrowingStatus == 1) {
+                            if (stockOutStatus == 0 || stockOutStatus == 1) {
                                 isReadOnly = false;
                             }
                         } else if (employeeID == sessionID) {
-                            if ( equipmentBorrowingStatus == 0) {
+                            if ( stockOutStatus == 0) {
                                 isReadOnly = false;
                             } else {
                                 isReadOnly = true;
@@ -115,7 +115,7 @@ $(document).ready(function() {
                     let id = decryptString(arr[1]);
                         id && isFinite(id) && loadData(id);
                 } else {
-                    const isAllowed = isCreateAllowed(43);
+                    const isAllowed = isCreateAllowed(139);
                     pageContent(isAllowed);
                 }
             }
@@ -125,15 +125,15 @@ $(document).ready(function() {
 
     function updateURL(view_id = 0, isAdd = false) { 
         if (view_id && !isAdd) {
-            window.history.pushState("", "", `${base_url}ims/equipment_borrowing?view_id=${view_id}`);
+            window.history.pushState("", "", `${base_url}ims/stock_out?view_id=${view_id}`);
         } else if (isAdd) {
             if (view_id) {
-                window.history.pushState("", "", `${base_url}ims/equipment_borrowing?view_id=${view_id}`);
+                window.history.pushState("", "", `${base_url}ims/stock_out?view_id=${view_id}`);
             } else {
-                // window.history.pushState("", "", `${base_url}ims/equipment_borrowing?add`);
+                // window.history.pushState("", "", `${base_url}ims/stock_out?add`);
             }
         } else {
-            window.history.pushState("", "", `${base_url}ims/equipment_borrowing`);
+            window.history.pushState("", "", `${base_url}ims/stock_out`);
         }
     }
     // ----- END VIEW DOCUMENT -----
@@ -142,41 +142,41 @@ $(document).ready(function() {
     const getTimelineData = () => {
 
 		const data  = getTableData(
-            `ims_equipment_borrowing_tbl AS borrowing
-             LEFT JOIN hris_employee_list_tbl AS helt ON helt.employeeID = borrowing.createdBy
+            `ims_stock_out_tbl AS stockout
+             LEFT JOIN hris_employee_list_tbl AS helt ON helt.employeeID = stockout.createdBy
              `,
             `CONCAT(helt.employeeFirstname, ' ', helt.employeeLastname) AS preparedBy,
-             borrowing.projectCode,
-             borrowing.projectName,
-             borrowing.inventoryAssetStatus,
-             borrowing.equipmentBorrowingID ,
-             borrowing.equipmentBorrowingCode,
-             borrowing.materialWithdrawalCode,
-             borrowing.materialWithdrawalID,
-             borrowing.materialRequestID,
-             borrowing.clientCode,
-             borrowing.clientName`,
-            `IF(borrowing.employeeID = 0 ,borrowing.createdBy = ${sessionID},borrowing.employeeID = ${sessionID})`);
+             stockout.projectCode,
+             stockout.projectName,
+             stockout.inventoryItemStatus,
+             stockout.stockOutID,
+             stockout.stockOutCode,
+             stockout.materialWithdrawalCode,
+             stockout.materialWithdrawalID,
+             stockout.materialRequestID,
+             stockout.clientCode,
+             stockout.clientName`,
+            `IF(stockout.employeeID = 0 ,stockout.createdBy = ${sessionID},stockout.employeeID = ${sessionID})`);
         return data;
     }
     // ----- END TIMELINE DATA -----
 
         // ----- CHECK ALL -----
         $(document).on("change", ".checkboxall", function() {
-            let parentTable  =   $(this).closest(".assetTableRow");
-            let checkBoxCount = parentTable.find(".checkboxassetrow").length;
-            let getAssetID = $(this).attr("assetID");
+            let parentTable  =   $(this).closest(".itemTableRow");
+            let checkBoxCount = parentTable.find(".checkboxitemrow").length;
+            let getItemID = $(this).attr("itemID");
             const getIndex = $(this).attr("index");
             const isChecked = $(this).prop("checked");
            
-            $(".assetProjectTableBody"+getIndex+""+getAssetID+"  .checkboxassetrow").each(function(i, obj) {
+            $(".itemProjectTableBody"+getIndex+""+getItemID+"  .checkboxitemrow").each(function(i, obj) {
                 $(this).prop("checked", isChecked);
             });
             updateDeleteButton(parentTable);
         });
         
         $(document).on("click", "[type=checkbox]", function() {
-            let parentTable  =   $(this).closest(".assetTableRow");
+            let parentTable  =   $(this).closest(".itemTableRow");
             updateDeleteButton(parentTable);
         });
     /** END OF CHECKBOX */
@@ -207,14 +207,14 @@ $(document).ready(function() {
 				],
 			});
 
-        const assetTableLength = $(`table.assetTable`).length;
-        for(var i=0; i<assetTableLength; i++) {
+        const itemTableLength = $(`table.itemTable`).length;
+        for(var i=0; i<itemTableLength; i++) {
 
-            if ($.fn.DataTable.isDataTable(`#assetTable${i}`)) {
-                $(`#assetTable${i}`).DataTable().destroy();
+            if ($.fn.DataTable.isDataTable(`#itemTable${i}`)) {
+                $(`#itemTable${i}`).DataTable().destroy();
             }
 
-            var table = $(`#assetTable${i}`)
+            var table = $(`#itemTable${i}`)
                 .css({ "min-width": "100%" })
                 .removeAttr("width")
                 .DataTable({
@@ -246,7 +246,7 @@ $(document).ready(function() {
 	function headerButton(isAdd = true, text = "Add") {
 		let html;
 		if (isAdd) {
-			if (isCreateAllowed(43)) {
+			if (isCreateAllowed(139)) {
 				html = ``;
 			}
 		} else {
@@ -282,7 +282,7 @@ $(document).ready(function() {
                         <th>Prepared By</th>
                         <th>Project</th>
                         <th>Client</th>
-                        <th>Asset Request Status</th>
+                        <th>Item Request Status</th>
                     </tr>
                 </thead>
                 <tbody>`;
@@ -290,22 +290,22 @@ $(document).ready(function() {
         timelineData.map(timeline => {
 
             const { 
-                equipmentBorrowingID =0,
-                equipmentBorrowingCode,
+                stockOutID,
+                stockOutCode,
                 materialWithdrawalCode     = 0,
                 materialWithdrawalID     = 0,
                 preparedBy     = "",
                 projectName           = "",
                 projectCode           = "",
-                inventoryAssetStatus       = 0,
+                inventoryItemStatus       = 0,
                 clientCode       = "",
                 clientName       = "",
             } = timeline;
 
             html += `
-            <tr class="btnView" id="${encryptString(equipmentBorrowingID)}">
+            <tr class="btnView" id="${encryptString(stockOutID)}">
                 <td>
-                    <div>${equipmentBorrowingCode || "-"}</div>
+                    <div>${stockOutCode || "-"}</div>
                     <!-- <small style="color:#848482;">put description here</small> -->
                 </td>
                 <td>${preparedBy || "-"}</td>
@@ -321,7 +321,7 @@ $(document).ready(function() {
                     </div>
                     <small style="color:#848482;">${clientName || '-'}</small>
                 </td>
-                <td>${getStatusStyle(inventoryAssetStatus,true)}</td>
+                <td>${getStatusStyle(inventoryItemStatus,true)}</td>
             </tr>`
         });
 
@@ -342,29 +342,29 @@ $(document).ready(function() {
 
 
     // ----- CLICK SHOW CONTENT RECORDS -----
-    $(document).on("click", ".btnShowAssetContent", function() {
+    $(document).on("click", ".btnShowItemContent", function() {
         $parent  = $(this).closest("tr");
-        const assetID   = $(this).attr("assetID");
-        const assetCode    = $(this).attr("assetCode");
+        const itemID   = $(this).attr("itemID");
+        const itemCode    = $(this).attr("itemCode");
         const display  = $(this).attr("display") == "true";
         const myCaret  = display => !display ? "fa-caret-up" : "fa-caret-down";
         $(this).attr("display", !display);
         if (display) {
-            $parent.find(`.assetContent[assetID="${assetID}"][assetCode="${assetCode}"]`).slideUp(500, function() {
+            $parent.find(`.itemContent[itemID="${itemID}"][itemCode="${itemCode}"]`).slideUp(500, function() {
                 $(this).addClass("d-none");
             });
         } else {
-            $parent.find(`.assetContent[assetID="${assetID}"][assetCode="${assetCode}"]`).hide().removeClass("d-none").slideDown(500);
+            $parent.find(`.itemContent[itemID="${itemID}"][itemCode="${itemCode}"]`).hide().removeClass("d-none").slideDown(500);
         }
-        $parent.find(`i[assetcaret="true"]`).removeClass(myCaret(!display)).addClass(myCaret(display));
+        $parent.find(`i[itemcaret="true"]`).removeClass(myCaret(!display)).addClass(myCaret(display));
     })
 
     // ----- END CLICK SHOW  CONTENT RECORDS -----
 
     // ----- GET ITEMS SERIAL NUMBER -----
-	function getAssetSerialNumber(scope = {}, readOnly = false) {
+	function getItemSerialNumber(scope = {}, readOnly = false) {
 		let {
-			serialAssetNumber = "",
+			serialItemNumber = "",
 		} = scope;
 
 		let html = "";
@@ -376,15 +376,15 @@ $(document).ready(function() {
 						<div class="input-group mb-0">
 							<input type="text"
 								class="form-control validate"
-								name="serialAssetNumber"
-								id="serialAssetNumber"
+								name="serialItemNumber"
+								id="serialItemNumber"
 								data-allowcharacters="[A-Z][a-z][0-9][-]"
 								minlength="17"
 								maxlength="17"
-								value="${serialAssetNumber}"
+								value="${serialItemNumber}"
 								autocomplete="off"
 								required>
-							<div class="d-block invalid-feedback mt-0 mb-1" id="invalid-serialAssetNumber"></div>
+							<div class="d-block invalid-feedback mt-0 mb-1" id="invalid-serialItemNumber"></div>
 						</div>
 					</div>
 				</td>
@@ -394,7 +394,7 @@ $(document).ready(function() {
 			<tr>
 				<td>
 					<div class="servicescope">
-						${serialAssetNumber || "-"}
+						${serialItemNumber || "-"}
 					</div>
 				</td>
 			</tr>`;
@@ -406,65 +406,65 @@ $(document).ready(function() {
 	// ----- END GET ITEMS SERIAL NUMBER -----
 
     // DISPLAY ITEM SERIAL NUMBER //
-        function displayAssetSerialNumber(withdrawalAssetID = 0,materialRequestID =0,assetID = 0,readOnly = false){
+        function displayItemSerialNumber(withdrawalItemID = 0,materialRequestID =0,itemID = 0,readOnly = false){
             
-            let assetSerialNumbersContent ='';
+            let itemSerialNumbersContent ='';
             let buttonAddSerialRow = '';
             // INFORMATION FOR SERIAL//
                 const scopeData = getTableData(
-                    `ims_withdrawal_equipment_borrowing_serial_number_tbl`,
+                    `ims_withdrawal_stockout_serial_number_tbl`,
                     ``,
-                    `materialRequestID = ${materialRequestID} AND  assetID = ${assetID} AND  withdrawalAssetID = ${withdrawalAssetID}`
+                    `materialRequestID = ${materialRequestID} AND  itemID = ${itemID} AND  withdrawalItemID = ${withdrawalItemID}`
                 );
                 
                 
                 let serialNumberData  		= 	scopeData.filter(x => x.serialNumber == "" || !x.serialNumber);
                 let serialNumberDataLength 	= 	serialNumberData.length;
 
-                // assetSerialNumbersContent += `
+                // itemSerialNumbersContent += `
                 // <div class="table-responsive">
                 //     <table class="table table-bordered">
                     
-                //         <tbody class="tableSerialAssetBody">
+                //         <tbody class="tableSerialItemBody">
                 //         `;
                     
-                //         if (scopeData.length > 0 && withdrawalAssetID != "" && serialNumberDataLength > 0) {
-                //             assetSerialNumbersContent += scopeData.map(scope => {
-                //                 return getAssetSerialNumber(scope, readOnly);
+                //         if (scopeData.length > 0 && withdrawalItemID != "" && serialNumberDataLength > 0) {
+                //             itemSerialNumbersContent += scopeData.map(scope => {
+                //                 return getItemSerialNumber(scope, readOnly);
                 //             }).join("");
                 //         } else {
-                //             assetSerialNumbersContent += getAssetSerialNumber({}, readOnly);
+                //             itemSerialNumbersContent += getItemSerialNumber({}, readOnly);
                 //         }
                     
-                // assetSerialNumbersContent += `
+                // itemSerialNumbersContent += `
                 //         </tbody>
                 //     </table>
                     
                 // </div>`;
                 
-                if(withdrawalAssetID){
-                    assetSerialNumbersContent = `
+                if(withdrawalItemID){
+                    itemSerialNumbersContent = `
                         <div class="table-responsive">
                             <table class="table table-bordered serial-number-table">
                             
-                                <tbody class="tableSerialAssetBody">
+                                <tbody class="tableSerialItemBody">
                                 `;
                             
-                                if (scopeData.length > 0 && withdrawalAssetID != "") {
-                                    assetSerialNumbersContent += scopeData.map(scope => {
-                                        return getAssetSerialNumber(scope, true);
+                                if (scopeData.length > 0 && withdrawalItemID != "") {
+                                    itemSerialNumbersContent += scopeData.map(scope => {
+                                        return getItemSerialNumber(scope, true);
                                     }).join("");
                                 } else {
-                                    assetSerialNumbersContent += getAssetSerialNumber({}, true);
+                                    itemSerialNumbersContent += getItemSerialNumber({}, true);
                                 }
                             
-                            assetSerialNumbersContent += `
+                            itemSerialNumbersContent += `
                                 </tbody>
                             </table>
                             
                         </div>`;
                 }else{
-                    assetSerialNumbersContent = `
+                    itemSerialNumbersContent = `
                 <div class="table-responsive">
                     <table class="table table-bordered serial-number-table">
 
@@ -479,28 +479,33 @@ $(document).ready(function() {
 					</div>
 				` : "";
 
-                return [assetSerialNumbersContent,buttonAddSerialRow]; 
+                return [itemSerialNumbersContent,buttonAddSerialRow]; 
         }
     // END DISPLAY ITEM SERIAL NUMBER//
 
     //  ITEM RECORDS LIST //
-    const getAssetContent = (milestoneTask = [],assetID = null, materialRequestID =null) => {
+    const getItemContent = (milestoneTask = [],itemID = null, materialRequestID =null) => {
+        let stockOutContent     = ""; 
+        let receivedContent = ""; 
+        let remainingContent = "";
+        let stockOutDateContent  ="";
+        let remarksContent = "";
+        let receivedDateContent ="";
         let tableStockContent ="";
 
      
         if(milestoneTask.length >0){
-            console.log(milestoneTask)
             milestoneTask.map((milestone,index) => {
-                const { withdrawalAssetID,
-                    requestAssetID,
+                const { withdrawalItemID,
+                    requestItemID,
                     materialRequestID,
-                    assetID,
+                    itemID,
                     requestQuantity,
-                    borrowed,
+                    stockOut,
                     received,
                     dateReceived ,
                     remaining,
-                    borrowedDate,
+                    stockOutDate,
                     barcode,
                     availableStocks,
                     remarks} = milestone;   
@@ -508,10 +513,10 @@ $(document).ready(function() {
             let readOnly  = (received ==0 || received ==null)  ? "" : "disabled";
             let disabled  = (received ==0 || received ==null)  ? "" : "disabled";
 
-            const assetSerialContent = displayAssetSerialNumber(withdrawalAssetID,materialRequestID,assetID,readOnly);
+            const itemSerialContent = displayItemSerialNumber(withdrawalItemID,materialRequestID,itemID,readOnly);
            
 
-            tableStockContent += `<tr class="assetRecords-list-row" id="tableRow${index}" modulelistid assetID="${assetID}">
+            tableStockContent += `<tr class="itemRecords-list-row" id="tableRow${index}" modulelistid itemID="${itemID}">
                                         <td class="text-center">
                                            
                                         </td>
@@ -520,19 +525,19 @@ $(document).ready(function() {
                                                 <input class="form-control text-center"
                                             value="${barcode || "-"}"
                                             index="${index}"
-                                            assetID="${assetID}"
-                                            withdrawalAssetID="${withdrawalAssetID}"
+                                            itemID="${itemID}"
+                                            withdrawalItemID="${withdrawalItemID}"
                                             disabled
                                             >
                                                 <div class="invalid-feedback d-block" id="invalid-notes0"></div>
                                             </div>
                                         </td>
                                         <td class="table-data-serial-number" index="${index}">
-                                            ${assetSerialContent[0]}
+                                            ${itemSerialContent[0]}
                                         </td>
                                          <td>
-                                                <div class="borrowed" >
-                                                    <span>${ borrowed || "-"}</span>
+                                                <div class="stockout" >
+                                                    <span>${ stockOut || "-"}</span>
                                                 </div>
                                         </td>
                                         <td>
@@ -551,8 +556,8 @@ $(document).ready(function() {
                                                 </div>
                                         </td>
                                         <td>
-                                                <div class="borroweddate" >
-                                                    <span>${ borrowedDate  ? moment(borrowedDate).format("MMMM DD, YYYY") : "-"} </span>
+                                                <div class="stockoutdate" >
+                                                    <span>${ stockOutDate  ? moment(stockOutDate).format("MMMM DD, YYYY") : "-"} </span>
                                                 </div>
                                         </td>
                                         <td>
@@ -567,67 +572,67 @@ $(document).ready(function() {
    
             })
         }else{
-            const assetSerialContent = displayAssetSerialNumber();
-            const withdrawalAssetRemaining = getTableData(`ims_material_withdrawal_asset_tbl`,` ((SELECT DISTINCT(requestQuantity) FROM ims_request_assets_tbl WHERE assetID = ${assetID} AND materialRequestID = ${materialRequestID} AND inventoryValidationID IS NOT NULL AND bidRecapID IS NULL) - IFNULL(SUM(received),0)) as remainingValue`,` assetID = ${assetID} AND materialRequestID = ${materialRequestID}`);
-            const getAvailableStocks = getTableData(`ims_stock_in_assets_tbl AS astStock 
-			JOIN ims_inventory_asset_tbl AS ast ON ast.assetID = astStock.assetID
+            const itemSerialContent = displayItemSerialNumber();
+            const withdrawalItemRemaining = getTableData(`ims_material_withdrawal_item_tbl`,` ((SELECT DISTINCT(requestQuantity) FROM ims_request_items_tbl WHERE itemID = ${itemID} AND materialRequestID = ${materialRequestID} AND inventoryValidationID IS NOT NULL AND bidRecapID IS NULL) - IFNULL(SUM(received),0)) as remainingValue`,` itemID = ${itemID} AND materialRequestID = ${materialRequestID}`);
+            const getAvailableStocks = getTableData(`ims_stock_in_item_tbl AS itmStock 
+			JOIN ims_inventory_item_tbl AS itm ON itm.itemID = itmStock.itemID
 			`,
             `CASE
-            WHEN IFNULL(SUM(astStock.quantity),0)-IFNULL(reOrderLevel,0) <0 THEN 0
-            ELSE IFNULL(SUM(astStock.quantity),0)-IFNULL(reOrderLevel,0)
+            WHEN IFNULL(SUM(itmStock.quantity),0)-IFNULL(reOrderLevel,0) <0 THEN 0
+            ELSE IFNULL(SUM(itmStock.quantity),0)-IFNULL(reOrderLevel,0)
             END AS availableStocks`,
-            ` (astStock.stockOutDate IS NUll  OR astStock.stockOutDate  = '0000-00-00')
-			AND (astStock.stockInDate IS NOT NULL OR astStock.stockInDate != '0000-00-00')
-			AND astStock.assetID = ${assetID}`);
-               tableStockContent +=  `<tr class="assetRecords-list-row" id="tableRow0" modulelistid assetID="${assetID}">
+            ` (itmStock.stockOutDate IS NUll OR  itmStock.stockOutDate = '0000-00-00') 
+			AND (itmStock.stockInDate IS NOT NULL OR itmStock.stockInDate != '0000-00-00') 
+			AND itmStock.itemID = ${itemID}`);
+               tableStockContent +=  `<tr class="itemRecords-list-row" id="tableRow0" modulelistid itemID="${itemID}">
                                             <td class="text-center">
                                                 <div class="action">
-                                                    <input type="checkbox" class="checkboxassetrow" id="checkboxassetrow0" index ="0" assetID = "${assetID}">
+                                                    <input type="checkbox" class="checkboxitemrow" id="checkboxitemrow0" index ="0" itemID = "${itemID}">
                                                 </div>
                                             </td>
                                             <td>
                                                 <div class="barcode">
                                                     <input class="form-control text-center validate"
-                                                id="barcodeAsset0"
-                                                name="barcodeAsset"
+                                                id="barcodeItem0"
+                                                name="barcodeItem"
                                                 min="36"
                                                 max="64"
                                                 minlength="36"
                                                 maxlength="64"
                                                 index="0"
-                                                assetID="${assetID}"
-                                                withdrawalAssetID="0"
+                                                itemID="${itemID}"
+                                                withdrawalItemID="0"
                                                 materialRequestID="${materialRequestID}"
                                                 
                                                 >
-                                                    <div class="invalid-feedback d-block" id="invalid-barcodeAsset0"></div>
+                                                    <div class="invalid-feedback d-block" id="invalid-barcodeItem0"></div>
                                                 </div>
                                             </td>
                                             <td class="table-data-serial-number" index="0">
-                                                    ${assetSerialContent[0]}
-                                                    ${assetSerialContent[1]}
+                                                    ${itemSerialContent[0]}
+                                                    ${itemSerialContent[1]}
                                                 </td>
                                             <td>
-                                                <div class="borrowed">
+                                                <div class="stockout">
                                                     <input class="form-control input-quantity text-center"
                                                 value="0.00"
-                                                id="borrowed0"
-                                                name="borrowed"
+                                                id="StockOut0"
+                                                name="StockOut"
                                                 min="0.00"
                                                 max="9999999999"
                                                 minlength="1"
                                                 maxlength="10"
                                                 index="0"
-                                                assetID="${assetID}"
-                                                withdrawalAssetID="0"
-                                                availableStocksValue="${getAvailableStocks.length > 0 ?formatAmount(getAvailableStocks[0].availableStocks): "0.00"}"
+                                                itemID="${itemID}"
+                                                withdrawalItemID="0"
+                                                availableStocksValue="${getAvailableStocks.length > 0 ? formatAmount(getAvailableStocks[0].availableStocks) : "0.00"}"
                                                 >
-                                                    <div class="invalid-feedback d-block" id="invalid-borrowed0"></div>
+                                                    <div class="invalid-feedback d-block" id="invalid-StockOut0"></div>
                                                 </div>
                                             </td>
                                              <td>
                                                     <div class="availablestocks">
-                                                        <span  name="availableStocks" assetID="${assetID}" index="0">${getAvailableStocks.length > 0 ?formatAmount(getAvailableStocks[0].availableStocks): "0.00"}</span>
+                                                        <span  name="availableStocks" itemID="${itemID}" index="0">${getAvailableStocks.length > 0 ? formatAmount(getAvailableStocks[0].availableStocks) : "0.00"}</span>
                                                     </div>
                                             </td>
                                             <td>
@@ -637,12 +642,12 @@ $(document).ready(function() {
                                             </td>
                                             <td>
                                                     <div class="remaining">
-                                                        <span  name="remaining" assetID="${assetID}" index="0">${withdrawalAssetRemaining.length > 0 ? formatAmount(withdrawalAssetRemaining[0].remainingValue) : "0.00"}</span>
+                                                        <span  name="remaining" itemID="${itemID}" index="0">${withdrawalItemRemaining.length > 0 ? formatAmount(withdrawalItemRemaining[0].remainingValue) : "0.00"}</span>
                                                     </div>
                                             </td>
                                             <td>
-                                                    <div class="borroweddate" >
-                                                        <span name="borrowedDate" assetID="${assetID}" index="0">-</span>
+                                                    <div class="stockoutdate" >
+                                                        <span name="stockOutDate" itemID="${itemID}" index="0">-</span>
                                                     </div>
                                             </td>
                                             <td>
@@ -664,114 +669,114 @@ $(document).ready(function() {
     // END ITEM REDCORD LIST //
 
     // ----- DISPLAY ITEMS -----
-    function displayAssets( phase = {}, index = 0, disabled) {
+    function displayItems( phase = {}, index = 0, disabled) {
         const {
-            assets       = []
+            items       = []
         } = phase;
-        console.log(phase)
+        // console.log(phase)
         
         let taskHTML = "";
         
-        assets.map((task,index) => {
+        items.map((task,index) => {
             // console.log(task.milestoneTask)
 			
-            const {assetID,assetCode,assetName,assetBrandName, assetClassification,assetCategory,assetUom,requestQuantity,materialRequestID,withdrawalAssetStatus = 0, milestoneTask = [] } = task;
-            const assetContent = getAssetContent(milestoneTask,assetID,materialRequestID);
-            const assetStatusRecord = (withdrawalAssetStatus ==  null || withdrawalAssetStatus ==  0 )   ? `<span class="badge badge-warning w-100">Pending</span>` : `<span class="badge badge-success w-100">Completed</span>` ;
+            const {itemID,itemCode,itemName,itemBrandName, itemClassification,itemCategory,itemUom,requestQuantity,materialRequestID,withdrawalItemStatus = 0, milestoneTask = [] } = task;
+            const itemContent = getItemContent(milestoneTask,itemID,materialRequestID);
+            const itemStatusRecord = (withdrawalItemStatus ==  null || withdrawalItemStatus ==  0 )   ? `<span class="badge badge-warning w-100">Pending</span>` : `<span class="badge badge-success w-100">Completed</span>` ;
 
             taskHTML += `
-            <tr class="assetTableRow" assetID="${assetID}">   
+            <tr class="itemTableRow" itemID="${itemID}">   
 				<td style="position: relative;">    
-					<div class="d-flex align-items-center justify-content-between btnShowAssetContent" 
-						assetCode    = "${assetCode}"
-						assetID      ="${assetID}"
+					<div class="d-flex align-items-center justify-content-between btnShowItemContent" 
+						itemCode    = "${itemCode}"
+						itemID      ="${itemID}"
 						display     ="false"
 						style       ="cursor: pointer;
 							        width: 100%;
 							        top: 0">
-						<span>${assetCode}</span>
-						&nbsp;&nbsp;<i class="fad fa-caret-down mr-3" assetcaret="true"></i>
+						<span>${itemCode}</span>
+						&nbsp;&nbsp;<i class="fad fa-caret-down mr-3" itemcaret="true"></i>
 					</div>
-					<div class="d-none assetContent" 
-						assetCode    = "${assetCode}"
-						assetID      ="${assetID}"
+					<div class="d-none itemContent" 
+						itemCode    = "${itemCode}"
+						itemID      ="${itemID}"
 						style       = "margin-top: 70px;">
 					
 					</div>
 				</td>
 				<td style="position: relative;">    
 					<div class="" 
-						assetCode    = "${assetCode}"
-						assetID      ="${assetID}"
+						itemCode    = "${itemCode}"
+						itemID      ="${itemID}"
 						display     ="false"
 						style       ="cursor: pointer;	
                                     top: 0">
-							<span>${assetName}</span><br>
-                            <small style="color:#848482;">${assetBrandName}</small>
+							<span>${itemName}</span><br>
+                            <small style="color:#848482;">${itemBrandName}</small>
 					</div>
-					<div class="d-none assetContent" 
-						assetCode    = "${assetCode}"
-						assetID      ="${assetID}"
+					<div class="d-none itemContent" 
+						itemCode    = "${itemCode}"
+						itemID      ="${itemID}"
 						style       = "margin-top: 70px;">
 					
 					</div>
 				</td>
 				<td style="position: relative;">    
 					<div class="" 
-						assetCode    = "${assetCode}"
-						assetID      ="${assetID}"
+						itemCode    = "${itemCode}"
+						itemID      ="${itemID}"
 						display     ="false"
 						style       ="cursor: pointer;
 							    	top: 0">
-							<span>${assetClassification}</span><br>
-							<small style="color:#848482;">${assetCategory}</small>
+							<span>${itemClassification}</span><br>
+							<small style="color:#848482;">${itemCategory}</small>
 					</div>
-					<div class="d-none assetContent" 
-						assetCode    = "${assetCode}"
-						assetID      ="${assetID}"
+					<div class="d-none itemContent" 
+						itemCode    = "${itemCode}"
+						itemID      ="${itemID}"
 						style       = "margin-top: 70px;">
 					
 					</div>
 				</td>
 				<td style="position: relative;">    
 					<div class="" 
-						assetCode    = "${assetCode}"
-						assetID      ="${assetID}"
+						itemCode    = "${itemCode}"
+						itemID      ="${itemID}"
 						display     ="false"
 						style       ="cursor: pointer;	
 						        	top: 0">
-                        <span>${assetUom}</span><br>
+                        <span>${itemUom}</span><br>
 							
 					</div>
-					<div class="d-none assetContent" 
-						assetCode    = "${assetCode}"
-						assetID      ="${assetID}"
+					<div class="d-none itemContent" 
+						itemCode    = "${itemCode}"
+						itemID      ="${itemID}"
 						style       = "margin-top: 70px;">
 						
 					</div>
 				</td>
 				<td style="position: relative;">    
 					<div class="" 
-						assetCode    = "${assetCode}"
-						assetID      ="${assetID}"
+						itemCode    = "${itemCode}"
+						itemID      ="${itemID}"
 						display     ="false"
 						style       ="cursor: pointer;
 							        top: 0">
 							<span>${requestQuantity}</span><br>
 							
 					</div>
-					<div class="d-none assetContent" 
-						assetCode    = "${assetCode}"
-						assetID      ="${assetID}"
+					<div class="d-none itemContent" 
+						itemCode    = "${itemCode}"
+						itemID      ="${itemID}"
 						style       = "margin-top: 70px;">
 						
 					</div>
 				</td>
                 <td style="position: relative;">
 					
-					<div class="d-none assetContent" 
-						assetCode    = "${assetCode}"
-						assetID      ="${assetID}"
+					<div class="d-none itemContent" 
+						itemCode    = "${itemCode}"
+						itemID      ="${itemID}"
 						style       = "margin-top: 70px;">
                         
                         <table class="table" id="pcrDetails">
@@ -779,29 +784,29 @@ $(document).ready(function() {
                                 <tr class="bg-dark">
                                     <th class="text-center" style="width:50px">
                                         <div class="action">
-                                            <input type="checkbox" class="checkboxall" index ="${index}" assetID = "${assetID}" >
+                                            <input type="checkbox" class="checkboxall" index ="${index}" itemID = "${itemID}" >
                                         </div>
                                     </th>
                                     <th class="text-white">Barcode</th>
                                     <th class="text-white">Serial No.</th>
-                                    <th class="text-white">Borrowed Quantity</th>
+                                    <th class="text-white">Stock Out</th>
                                     <th class="text-white">Available Stocks</th>
                                     <th class="text-white">Received</th>
                                     <th class="text-white">Remaining</th>
-                                    <th class="text-white">Borrowed Date</th>
+                                    <th class="text-white">Stock Out Date</th>
                                     <th class="text-white">Received Date</th>
                                     <th class="text-white">Remarks</th>
                                 </tr>
                             </thead>
                             
-                            <tbody class="assetProjectTableBody${index+""+assetID}" >
-                                ${assetContent[0]}
+                            <tbody class="itemProjectTableBody${index+""+itemID}" >
+                                ${itemContent[0]}
                             </tbody>
                         </table>
-                        ${withdrawalAssetStatus == 1? '' :
+                        ${withdrawalItemStatus == 1? '' :
                             `<div class="w-100 text-left my-2">
-                                    <button class="btn btn-primary btnAddRow"  type="button" id="btnAddRow" index="${index}" assetID="${assetID}" materialRequestID="${materialRequestID}"><i class="fas fa-plus-circle"></i> Add Row</button>
-                                    <button class="btn btn-danger btnDeleteRow"  type="button" id="btnDeleteRow" index="${index}" assetID="${assetID}" materialRequestID="${materialRequestID}" disabled><i class="fas fa-minus-circle"></i> Delete Row/s</button>
+                                    <button class="btn btn-primary btnAddRow"  type="button" id="btnAddRow" index="${index}" itemID="${itemID}" materialRequestID="${materialRequestID}"><i class="fas fa-plus-circle"></i> Add Row</button>
+                                    <button class="btn btn-danger btnDeleteRow"  type="button" id="btnDeleteRow" index="${index}" itemID="${itemID}" materialRequestID="${materialRequestID}" disabled><i class="fas fa-minus-circle"></i> Delete Row/s</button>
                             </div>
                         `}
 					</div>
@@ -809,16 +814,16 @@ $(document).ready(function() {
 			
 				<td style="position: relative;">    
 					<div class="" 
-						assetCode    = "${assetCode}"
-						assetID      ="${assetID}"
+						itemCode    = "${itemCode}"
+						itemID      ="${itemID}"
 						display     ="false"
 						style       ="cursor: pointer;
 							        top: 0">
-                        ${assetStatusRecord}	
+                        ${itemStatusRecord}	
 					</div>
-					<div class="d-none assetContent" 
-						assetCode    = "${assetCode}"
-						assetID      ="${assetID}"
+					<div class="d-none itemContent" 
+						itemCode    = "${itemCode}"
+						itemID      ="${itemID}"
 						style       = "margin-top: 70px;">
 					
 					</div>
@@ -832,17 +837,17 @@ $(document).ready(function() {
             <div class="card-body">
                 <div class="mb-2">
                     <div class="text-primary font-weight-bold" style="font-size: 1.2rem;">
-                       Asset/s Request
+                       Item/s Request
                     </div>
                 </div>
 
                 <div class="w-100">
-                    <table class="table assetTable" id="assetTable${index}">
+                    <table class="table itemTable" id="itemTable${index}">
                         <thead style="line-height:8px; white-space:nowrap;">
                             <tr class="bg-dark">
-                                <th class="text-white">Asset Code</th>
-                                <th class="text-white">Asset Name </th>
-                                <th class="text-white">Asset Classification</th>
+                                <th class="text-white">Item Code</th>
+                                <th class="text-white">Item Name</th>
+                                <th class="text-white">Item Classification</th>
                                 <th class="text-white">UOM</th>
                                 <th class="text-white">Quantity</th>
                                 <th class="text-white"></th>
@@ -864,9 +869,9 @@ $(document).ready(function() {
 
     // ----- UPDATE SERIAL NUMBER -----
     function updateSerialNumber() {
-        $(`[name="serialAssetNumber"]`).each(function(i) {
-            $(this).attr("id", `serialAssetNumber${i}`);
-            $(this).parent().find(".invalid-feedback").attr("id", `invalid-serialAssetNumber${i}`);
+        $(`[name="serialItemNumber"]`).each(function(i) {
+            $(this).attr("id", `serialItemNumber${i}`);
+            $(this).parent().find(".invalid-feedback").attr("id", `invalid-serialItemNumber${i}`);
         })
     }
     // ----- END UPDATE SERIAL NUMBER -----
@@ -875,8 +880,8 @@ $(document).ready(function() {
     $(document).on("click", ".btnAddSerial", function() {
         let thisEvent 		= $(this);
         let thisCheck 		= thisEvent[0].checked;
-        let thisTR 	  		= thisEvent.closest(`.assetRecords-list-row`);
-        let thisTableData	= thisEvent.closest(`.assetRecords-list-row >.table-data-serial-number`);
+        let thisTR 	  		= thisEvent.closest(`.itemRecords-list-row`);
+        let thisTableData	= thisEvent.closest(`.itemRecords-list-row >.table-data-serial-number`);
         thisTableData.find("table").html(`<tbody><tr><td>${preloader}</td></tr></tbody>`);
 
                     if(thisCheck){
@@ -888,7 +893,7 @@ $(document).ready(function() {
                         }else{
                             thisTableData.find("table").html(`<tbody></tbody>`);
                             for (let index = 0; index < arrayCount; index++) {
-                                let newSerial = getAssetSerialNumber();
+                                let newSerial = getItemSerialNumber();
                                 subTable.find("tbody").append(newSerial);
                                 updateSerialNumber();
                                 // checkSerialRowReceived(thisTR);
@@ -902,39 +907,39 @@ $(document).ready(function() {
         // $(this).parent().find("[name=serialNumber]").last().focus();
         // updateSerialNumber();
 
-        // const parentTable = $(this).closest("tr.assetTableRow");
+        // const parentTable = $(this).closest("tr.itemTableRow");
         // checkSerialRowReceived(parentTable);
     })
     // ----- END ADD SERIAL -----
 
     function updateTableRows(){
-        $(".assetRecords-list-row").each(function(i){
+        $(".itemRecords-list-row").each(function(i){
             // CHECKBOX
-			$("td .action .checkboxassetrow", this).attr("id", `checkboxassetrow${i}`);
+			$("td .action .checkboxitemrow", this).attr("id", `checkboxitemrow${i}`);
 
             // INPUTS ID's
 
-            $("td [name=barcodeAsset]", this).attr("id", `barcodeAsset${i}`);
-			$("td [name=barcodeAsset]", this).attr("index", i);
+            $("td [name=barcodeItem]", this).attr("id", `barcodeItem${i}`);
+			$("td [name=barcodeItem]", this).attr("index", i);
 
-			$("td [name=borrowed]", this).attr("id", `borrowed${i}`);
-			$("td [name=borrowed]", this).attr("index", i);
+			$("td [name=StockOut]", this).attr("id", `StockOut${i}`);
+			$("td [name=StockOut]", this).attr("index", i);
 
             $("td [name=availableStocks]", this).attr("id", `availableStocks${i}`);
 			$("td [name=availableStocks]", this).attr("index", i);
 
-            $("td [name=borrowedDate]", this).attr("id", `borrowedDate${i}`);
-			$("td [name=borrowedDate]", this).attr("index", i);
+            $("td [name=stockOutDate]", this).attr("id", `stockOutDatet${i}`);
+			$("td [name=stockOutDate]", this).attr("index", i);
 
             $("td [name=remaining]", this).attr("id", `remainingt${i}`);
 			$("td [name=remaining]", this).attr("index", i);
             // $("td [name=notes]", this).attr("id", `notes${i}`);
 
             // INPUTS ID's INVALID FEEDBACK
-            $("td [name=borrowed]", this).next().attr("id", `invalid-borrowed${i}`);
-            $("td [name=borrowedDate]", this).next().attr("id", `invalid-borrowedDate${i}`);
-            $("td [name=barcodeAsset]", this).next().attr("id", `invalid-barcodeAsset${i}`);
-            $("td [name=barcodeAsset]", this).next().attr("id", `invalid-barcodeAsset${i}`);
+            $("td [name=StockOut]", this).next().attr("id", `invalid-StockOut${i}`);
+            $("td [name=stockOutDate]", this).next().attr("id", `invalid-stockOutDate${i}`);
+            $("td [name=barcodeItem]", this).next().attr("id", `invalid-barcodeItem${i}`);
+            $("td [name=barcodeItem]", this).next().attr("id", `invalid-barcodeItem${i}`);
             // $("td [name=notes]", this).next().attr("id", `invalid-notes${i}`);
 
          
@@ -953,24 +958,24 @@ $(document).ready(function() {
     }   
 
     function updateDeleteButton(parentTable){
-        // let parentTable  =   $(this).closest(".assetTableRow");
-        let getBtnDeleteAttribute  =  parentTable.attr("assetID");
-        let checkBoxCount = parentTable.find(".checkboxassetrow").length;
+        // let parentTable  =   $(this).closest(".itemTableRow");
+        let getBtnDeleteAttribute  =  parentTable.attr("itemID");
+        let checkBoxCount = parentTable.find(".checkboxitemrow").length;
         let count = 0;
         
-        $(".checkboxassetrow").each(function() {
+        $(".checkboxitemrow").each(function() {
             $(this).prop("checked") && count++;
         });
         
-        $(`.btnDeleteRow[assetID=${getBtnDeleteAttribute}]`).attr("disabled", count == 0);
+        $(`.btnDeleteRow[itemID=${getBtnDeleteAttribute}]`).attr("disabled", count == 0);
     }
 
     function deleteTableRow(parentTable){  
-        // console.log($(`.checkboxassetrow:checked`).length +"!="+ $(`.checkboxassetrow`).length )
-        if (parentTable.find(".checkboxassetrow:checked").length != parentTable.find(`.checkboxassetrow`).length) {
+        // console.log($(`.checkboxitemrow:checked`).length +"!="+ $(`.checkboxitemrow`).length )
+        if (parentTable.find(".checkboxitemrow:checked").length != parentTable.find(`.checkboxitemrow`).length) {
 			Swal.fire({
-				title:              "DELETE ASSET RECORD/S",
-				text:               "Are you sure to delete the asset record/s?",
+				title:              "DELETE ITEM RECORD/S",
+				text:               "Are you sure to delete the item record/s?",
 				imageUrl:           `${base_url}assets/modal/delete.svg`,
 				imageWidth:         200,
 				imageHeight:        200,
@@ -982,7 +987,7 @@ $(document).ready(function() {
 				confirmButtonText:  "Yes"
 			}).then((result) => {
 				if (result.isConfirmed) {
-					$(`.checkboxassetrow:checked`).each(function(i, obj) {
+					$(`.checkboxitemrow:checked`).each(function(i, obj) {
 						var tableRow = $(this).closest('tr');
 						tableRow.fadeOut(500, function (){
 							$(this).closest("tr").remove();
@@ -1004,49 +1009,49 @@ $(document).ready(function() {
 
 
      // ----- KEYUP BARCODE -----
-     $(document).on("change", `[name="barcodeAsset"]`, function() {
-        const assetID    = $(this).attr("assetID");
+     $(document).on("change", `[name="barcodeItem"]`, function() {
+        const itemID    = $(this).attr("itemID");
         const index    = $(this).attr("index");
         const id    = $(this).attr("id");
-        const withdrawalAssetID    = $(this).attr("withdrawalAssetID");
-        const valueLength = $(this).val().length+1;
+        const withdrawalItemID    = $(this).attr("withdrawalItemID");
+        const valueLength = $(this).val().length +1;
         const value = $(this).val();
         const characterLength = 37;
 
         if(valueLength >= characterLength){
 
-            const validatebarcode = getTableData(`ims_stock_in_assets_tbl`,
+            const validatebarcode = getTableData(`ims_stock_in_item_tbl`,
             `barcode`,
             `stockOutDate IS NUll 
             AND stockInDate IS NOT NULL 
-            AND assetID = ${assetID} AND barcode = '${value}'`);
+            AND itemID = ${itemID} AND barcode = '${value}'`);
             if(validatebarcode.length<=0){
                $("#"+id).addClass("is-invalid").removeClass("validate")
-               $("#invalid-barcodeAsset"+index).text("Barcode not exist!")
+               $("#invalid-barcodeItem"+index).text("Barcode not exist!")
             }else{
                 $("#"+id).removeClass("is-invalid").addClass("validate")
-                $("#invalid-barcodeAsset"+index).text("")
+                $("#invalid-barcodeItem"+index).text("")
             }
             
         }
         // else{
         //     $("#"+id).addClass("is-invalid").removeClass("validate")
-        //     $("#invalid-barcodeAsset"+index).text("Please enter at least "+characterLength+" characters.")
+        //     $("#invalid-barcodeItem"+index).text("Please enter at least "+characterLength+" characters.")
         // }
 
-        // const getRemainingItem = +$(`[name="remainingAsset"][assetID="${assetID}"]`).attr("remainingValueItem").replaceAll(",","");
+        // const getRemainingItem = +$(`[name="remainingItem"][itemID="${itemID}"]`).attr("remainingValueItem").replaceAll(",","");
         // var computeRemainingItem =0;
         // computeRemainingItem = getRemainingItem - value;
         
         
         if(value == 0){
             $(this).closest("tr").find("span").eq(3).text("-");
-            // $(`[name="remainingAsset"][withdrawalAssetID="${withdrawalAssetID}"][assetID="${assetID}"]`).text(formatAmount(getRemainingItem));
+            // $(`[name="remainingItem"][withdrawalItemID="${withdrawalItemID}"][itemID="${itemID}"]`).text(formatAmount(getRemainingItem));
 
 
         }else{
             $(this).closest("tr").find("span").eq(3).text(moment().format("MMMM DD, YYYY"));
-            // $(`[name="remainingAsset"][withdrawalAssetID="${withdrawalAssetID}"][assetID="${assetID}"]`).text(formatAmount(computeRemainingItem));
+            // $(`[name="remainingItem"][withdrawalItemID="${withdrawalItemID}"][itemID="${itemID}"]`).text(formatAmount(computeRemainingItem));
 
         }
 
@@ -1056,14 +1061,14 @@ $(document).ready(function() {
 
     // CHECK SERIAL DUPLICATES//
 
-    $(document).on("change","[name=serialAssetNumber]",function(){
+    $(document).on("change","[name=serialItemNumber]",function(){
 		const serialval   = $(this).val(); 
 		const addressID = $(this).attr("id");
 		var $parent = $(this);
 		var flag = ["true"];
 
 		if(serialval.length ==17){
-			$(`[name="serialAssetNumber"]`).each(function(i) {
+			$(`[name="serialItemNumber"]`).each(function(i) {
 				var tmp_Checkserial = $(this).val();
 				var tmp_addressID = $(this).attr("id");
 					if(addressID !=  tmp_addressID){
@@ -1077,7 +1082,7 @@ $(document).ready(function() {
 	
 			if(flag[0] == "true"){
 	
-			$(`[name="serialAssetNumber"]`).each(function(i) {
+			$(`[name="serialItemNumber"]`).each(function(i) {
 				var tmp_Checkserial = $(this).val();
 				var tmp_addressID = $(this).attr("id");
 				// console.log(addressID +" != "+  tmp_addressID)
@@ -1097,30 +1102,30 @@ $(document).ready(function() {
 
 
     // ----- KEYUP QUANTITY -----
-    $(document).on("keyup", `[name="borrowed"]`, function() {
-        const assetID    = $(this).attr("assetID");
+    $(document).on("keyup", `[name="StockOut"]`, function() {
+        const itemID    = $(this).attr("itemID");
         const index    = $(this).attr("index");
-        const withdrawalAssetID    = $(this).attr("withdrawalAssetID");
+        const withdrawalItemID    = $(this).attr("withdrawalItemID");
         const value = +$(this).val();
         var availableStocksValue = +$(this).attr("availableStocksValue");
-
-        // const getRemainingItem = +$(`[name="remainingAsset"][assetID="${assetID}"]`).attr("remainingValueItem").replaceAll(",","");
+        // const getRemainingItem = +$(`[name="remainingItem"][itemID="${itemID}"]`).attr("remainingValueItem").replaceAll(",","");
         // var computeRemainingItem =0;
         // computeRemainingItem = getRemainingItem - value;
-        
+
         if(value > availableStocksValue){
             $(this).val(0);
             showNotification("danger", "Incorrect Quantity Inserted!");
         }
         
+        
         if(value == 0){
             $(this).closest("tr").find("span").eq(3).text("-");
-            // $(`[name="remainingAsset"][withdrawalAssetID="${withdrawalAssetID}"][assetID="${assetID}"]`).text(formatAmount(getRemainingItem));
+            // $(`[name="remainingItem"][withdrawalItemID="${withdrawalItemID}"][itemID="${itemID}"]`).text(formatAmount(getRemainingItem));
 
 
         }else{
             $(this).closest("tr").find("span").eq(3).text(moment().format("MMMM DD, YYYY"));
-            // $(`[name="remainingAsset"][withdrawalAssetID="${withdrawalAssetID}"][assetID="${assetID}"]`).text(formatAmount(computeRemainingItem));
+            // $(`[name="remainingItem"][withdrawalItemID="${withdrawalItemID}"][itemID="${itemID}"]`).text(formatAmount(computeRemainingItem));
 
         }
 
@@ -1136,18 +1141,18 @@ $(document).ready(function() {
             const {
                 materialWithdrawalID     = "",
                 materialWithdrawalCode     = "",
-                equipmentBorrowingID      = "",
+                stockOutID     = "",
                 materialRequestID           ="",
             } = data && data[0];
-            console.log("button")
-           console.log(data)
+            // console.log("button")
+        //    console.log(data)
             button = `
             <button 
                 class="btn btn-submit px-5 p-2"  
                 id="btnSubmit"
                 materialWithdrawalID="${encryptString(materialWithdrawalID)}"
                 materialRequestID="${encryptString(materialRequestID)}"
-                equipmentBorrowingID ="${encryptString(equipmentBorrowingID)}"
+                stockOutID="${encryptString(stockOutID)}"
                 code="${materialWithdrawalCode}">
                 <i class="fas fa-paper-plane"></i> Update
             </button>`;
@@ -1166,12 +1171,13 @@ $(document).ready(function() {
         // readOnly ? preventRefresh(false) : preventRefresh(true);
 
         const {
-            equipmentBorrowingCode,
+            stockOutCode,
             materialWithdrawalID,
             materialWithdrawalCode,
             employeeID,
+            inventoryItemStatus,
             inventoryAssetStatus,
-            equipmentBorrowingStatus,
+            stockOutStatus,
             materialRequestID,
             inventoryValidationID,
             projectCode,
@@ -1182,14 +1188,14 @@ $(document).ready(function() {
             clientAddress,
             dateNeeded,
             submittedAt,
-            equipmentBorrowingReason,
-            equipmentBorrowingRemarks,
+            materialWithdrawalReason,
+            stockOutRemarks,
             createdAt,
             withdrawalDetails ,
             createdBy
         } = data && data[0];
 
-        console.log(data)
+        // console.log(data)
 		
         // ----- GET EMPLOYEE DATA -----
 		let {
@@ -1200,17 +1206,17 @@ $(document).ready(function() {
 		// ----- END GET EMPLOYEE DATA -----
 
         $("#btnBack").attr("materialWithdrawalID", encryptString(materialWithdrawalID));
-		$("#btnBack").attr("status", equipmentBorrowingStatus);
+		$("#btnBack").attr("status", stockOutStatus);
 
         const disabled = readOnly ? "disabled" : "";
 
 
         let button = disabled ? "" :  formButtons(data);
 
-        let assetHTML = "";
+        let itemHTML = "";
 
         withdrawalDetails.map((phase, index) => {
-            assetHTML += displayAssets( phase, index, disabled);
+            itemHTML += displayItems( phase, index, disabled);
         })
     
        
@@ -1224,7 +1230,7 @@ $(document).ready(function() {
                     <div class="body">
                         <small class="text-small text-muted font-weight-bold">Document No.</small>
                         <h6 class="mt-0 text-danger font-weight-bold">
-							${equipmentBorrowingCode || "-"}
+							${stockOutCode || "-"}
 						</h6>      
                     </div>
                 </div>
@@ -1234,7 +1240,7 @@ $(document).ready(function() {
                     <div class="body">
                         <small class="text-small text-muted font-weight-bold">Status</small>
                         <h6 class="mt-0 font-weight-bold">
-							${getStatusStyle(equipmentBorrowingStatus,true)}
+							${getStatusStyle(stockOutStatus,true)}
 						</h6>      
                     </div>
                 </div>
@@ -1278,7 +1284,7 @@ $(document).ready(function() {
                     <div class="body">
                         <small class="text-small text-muted font-weight-bold">Remarks</small>
                         <h6 class="mt-0 font-weight-bold">
-                        ${equipmentBorrowingRemarks || "----"}
+                        ${stockOutRemarks || "----"}
 						</h6>      
                     </div>
                 </div>
@@ -1286,13 +1292,14 @@ $(document).ready(function() {
         </div>
 
         <div class="row" id="form_inventory_validation">
+
             <div class="col-md-2 col-sm-12">
                 <div class="form-group">
                     <label>Reference No</label>
                     <input type="text" 
 						class="form-control" 
 						disabled 
-						value="${materialWithdrawalCode  || "-"}">
+						value="${materialWithdrawalCode || "-"}">
                 </div>
             </div>
             <div class="col-md-2 col-sm-12">
@@ -1302,7 +1309,7 @@ $(document).ready(function() {
 						class="form-control" 
 						name="projectCode" 
 						disabled 
-						value="${projectCode  || "-"}">
+						value="${projectCode || "-"}">
                 </div>
             </div>
             <div class="col-md-4 col-sm-12">
@@ -1323,7 +1330,7 @@ $(document).ready(function() {
 						class="form-control" 
 						name="projectCategory" 
 						disabled 
-						value="${projectCategory  || "-"}">
+						value="${projectCategory || "-"}">
                     <div class="d-block invalid-feedback" id="invalid-projectCategory"></div>
                 </div>
             </div>
@@ -1384,9 +1391,10 @@ $(document).ready(function() {
 						value="${employeeDesignation}">
                 </div>
             </div>
+           
 
             <div  class="col-sm-12">
-                ${assetHTML}
+                ${itemHTML}
             </div>
 
             <div class="col-md-12 text-right mt-3">
@@ -1426,14 +1434,14 @@ $(document).ready(function() {
     }
     // ----- END FORM CONTENT -----
 
-     // CHECK IF THERE IS EXIST DATA //
-     function checkData(){
+    // CHECK IF THERE IS EXIST DATA //
+      function checkData(){
 
         var flag = ['false']; 
         var getData =[];
-        $(`[name="barcodeAsset"]`).each(function(i){
+        $(`[name="barcodeItem"]`).each(function(i){
             let checkValue =  $(this).val();
-            let quantity =  +$(this).closest("tr").find(`.input-quantity[name="borrowed"]`).val();
+            let quantity =  +$(this).closest("tr").find(`.input-quantity[name="StockOut"]`).val();
            
             if(checkValue != "" && quantity != 0 ){
                 getData[i] = checkValue;
@@ -1450,47 +1458,46 @@ $(document).ready(function() {
     }
     // END CHECK IF THERE IS EXIST DATA //
 
-        // KEYUP CHECK COMPLETE DATA EACH ROW //
+    // KEYUP CHECK COMPLETE DATA EACH ROW //
 
-        $(document).on("keyup",`[name="barcodeAsset"],[name="borrowed"]`,function(){
-            var getBarcode = $(this).closest("tr").find(`[name="barcodeAsset"]`).val();
-            var getQuantity = +$(this).closest("tr").find(`[name="borrowed"]`).val();
+    $(document).on("change",`[name="barcodeItem"],[name="StockOut"]`,function(){
+    	var getBarcode = $(this).closest("tr").find(`[name="barcodeItem"]`).val();
+    	var getQuantity = +$(this).closest("tr").find(`[name="StockOut"]`).val();
+
+        if(getBarcode == "" && getQuantity != 0){
+        	$(this).closest("tr").find(`[name="barcodeItem"]`).addClass("is-invalid");
+        	$(this).closest("tr").find(`td [name="barcodeItem"]`).closest("div").find(".invalid-feedback").text("Please input barcode.");
+
+        	$(this).closest("tr").find(`[name="StockOut"]`).removeClass("is-invalid").removeClass("is-valid");
+        	$(this).closest("tr").find(`td [name="StockOut"]`).closest("div").find(".invalid-feedback").text("");
+        }
+
+        if(getBarcode != "" && getQuantity == 0){
+        	$(this).closest("tr").find(`[name="StockOut"]`).addClass("is-invalid");
+        	$(this).closest("tr").find(`td [name="StockOut"]`).closest("div").find(".invalid-feedback").text("Please input quantity.");
+
+        	$(this).closest("tr").find(`[name="barcodeItem"]`).removeClass("is-invalid").removeClass("is-valid");
+        	$(this).closest("tr").find(`td [name="barcodeItem"]`).closest("div").find(".invalid-feedback").text("");
+        }
+
+        if(getBarcode != "" && getQuantity != 0 ){
+            $(this).closest("tr").find(`[name="barcodeItem"]`).removeClass("is-invalid").removeClass("is-valid");
+        	$(this).closest("tr").find(`td [name="barcodeItem"]`).closest("div").find(".invalid-feedback").text("");
+
+        	$(this).closest("tr").find(`[name="StockOut"]`).removeClass("is-invalid").removeClass("is-valid");
+        	$(this).closest("tr").find(`td [name="StockOut"]`).closest("div").find(".invalid-feedback").text("");
+        }else{
+        	 if(getBarcode == "" && getQuantity == 0 ){
+				$(this).closest("tr").find(`[name="barcodeItem"]`).removeClass("is-invalid").removeClass("is-valid");
+				$(this).closest("tr").find(`td [name="barcodeItem"]`).closest("div").find(".invalid-feedback").text("");
+
+				$(this).closest("tr").find(`[name="StockOut"]`).removeClass("is-invalid").removeClass("is-valid");
+				$(this).closest("tr").find(`td [name="StockOut"]`).closest("div").find(".invalid-feedback").text("");
+			}
+        }    
+    })
     
-            if(getBarcode == "" && getQuantity != 0){
-                $(this).closest("tr").find(`[name="barcodeAsset"]`).addClass("is-invalid");
-                $(this).closest("tr").find(`td [name="barcodeAsset"]`).closest("div").find(".invalid-feedback").text("Please input barcode.");
-    
-                $(this).closest("tr").find(`[name="borrowed"]`).removeClass("is-invalid").removeClass("is-valid");
-                $(this).closest("tr").find(`td [name="borrowed"]`).closest("div").find(".invalid-feedback").text("");
-            }
-    
-            if(getBarcode != "" && getQuantity == 0){
-                $(this).closest("tr").find(`[name="borrowed"]`).addClass("is-invalid");
-                $(this).closest("tr").find(`td [name="borrowed"]`).closest("div").find(".invalid-feedback").text("Please input quantity.");
-    
-                $(this).closest("tr").find(`[name="barcodeAsset"]`).removeClass("is-invalid").removeClass("is-valid");
-                $(this).closest("tr").find(`td [name="barcodeAsset"]`).closest("div").find(".invalid-feedback").text("");
-            }
-    
-            if(getBarcode != "" && getQuantity != 0 ){
-                $(this).closest("tr").find(`[name="barcodeAsset"]`).removeClass("is-invalid").removeClass("is-valid");
-                $(this).closest("tr").find(`td [name="barcodeAsset"]`).closest("div").find(".invalid-feedback").text("");
-    
-                $(this).closest("tr").find(`[name="borrowed"]`).removeClass("is-invalid").removeClass("is-valid");
-                $(this).closest("tr").find(`td [name="borrowed"]`).closest("div").find(".invalid-feedback").text("");
-            }else{
-                 if(getBarcode == "" && getQuantity == 0 ){
-                    $(this).closest("tr").find(`[name="barcodeAsset"]`).removeClass("is-invalid").removeClass("is-valid");
-                    $(this).closest("tr").find(`td [name="barcodeAsset"]`).closest("div").find(".invalid-feedback").text("");
-    
-                    $(this).closest("tr").find(`[name="borrowed"]`).removeClass("is-invalid").removeClass("is-valid");
-                    $(this).closest("tr").find(`td [name="borrowed"]`).closest("div").find(".invalid-feedback").text("");
-                }
-            }    
-        })
-        
-        // END KEYUP CHECK COMPLETE DATA EACH ROW //
-    
+    // END KEYUP CHECK COMPLETE DATA EACH ROW //
 
     // ----- PAGE CONTENT -----
     function pageContent(isForm = false, data = false, readOnly = false) {
@@ -1515,10 +1522,10 @@ $(document).ready(function() {
     // ----- CLICK TIMELINE ROW -----
     $(document).on("click", ".btnView", function() {
         $("#page_content").html(preloader);
-        const equipmentBorrowingID = decryptString($(this).attr("id"));
+        const stockOutID = decryptString($(this).attr("id"));
         setTimeout(() => {
-            console.log(equipmentBorrowingID)
-            viewDocument(equipmentBorrowingID);
+            // console.log(stockOutID)
+            viewDocument(stockOutID);
         }, 50);
     })
     // ----- END CLICK TIMELINE ROW -----
@@ -1543,11 +1550,11 @@ $(document).ready(function() {
 
     $(document).on("click", "#btnAddRow", function(){
         
-        let getAssetID = $(this).attr("assetID");
+        let getItemID = $(this).attr("itemID");
         let getmaterialRequestID = $(this).attr("materialRequestID");
         const getIndex = $(this).attr("index");
-        let row = getAssetContent(0,getAssetID,getmaterialRequestID);
-        $(".assetProjectTableBody"+getIndex+""+getAssetID).append(row);  
+        let row = getItemContent(0,getItemID,getmaterialRequestID);
+        $(".itemProjectTableBody"+getIndex+""+getItemID).append(row);  
         updateTableRows();
         initQuantity();
 
@@ -1555,7 +1562,7 @@ $(document).ready(function() {
     });
 
     $(document).on("click", ".btnDeleteRow", function(){
-        let parentTable  =   $(this).closest(".assetTableRow");
+        let parentTable  =   $(this).closest(".itemTableRow");
         deleteTableRow(parentTable);
     });
 
@@ -1574,166 +1581,169 @@ $(document).ready(function() {
 	$(document).on("click", "#btnSubmit", function () {
 		const id = decryptString($(this).attr("materialWithdrawalID"));
 		const materialRequestID = decryptString($(this).attr("materialRequestID"));
-		const equipmentBorrowingID  = decryptString($(this).attr("equipmentBorrowingID"));
+		const stockOutID = decryptString($(this).attr("stockOutID"));
         const checkValidateData = checkData();
 
-        if(checkValidateData){
-            const validateBarcode = $("[name=barcodeAsset]").hasClass("is-invalid");
-            let serialNumberCondition = $("[name=serialAssetNumber]").hasClass("is-invalid");
-            let validateQuantity = $("[name=borrowed]").hasClass("is-invalid");
-            if( !validateBarcode && !serialNumberCondition && !validateQuantity){
-                const validate     = validateForm("pcrDetails");
-                if(validate){
-                    formButtonHTML(this);
+            if(checkValidateData){
 
-                setTimeout(() => {
-                    // validateInputs().then(res => {
-                    //     if (res) {
-                            saveProjectBoard("update", id, pageContent,materialRequestID,equipmentBorrowingID );
-                        // }
-                        formButtonHTML(this, false);
-                    // });
-                }, 500);
+                const validateBarcode = $("[name=barcodeItem]").hasClass("is-invalid");
+                let serialNumberCondition = $("[name=serialItemNumber]").hasClass("is-invalid");
+                let validateQuantity = $("[name=stockOutID]").hasClass("is-invalid");
+                if( !validateBarcode && !serialNumberCondition && !validateQuantity){
+                    const validate     = validateForm("pcrDetails");
+                    if(validate){
+                        formButtonHTML(this);
+
+                    setTimeout(() => {
+                        // validateInputs().then(res => {
+                        //     if (res) {
+                                saveProjectBoard("update", id, pageContent,materialRequestID,stockOutID);
+                            // }
+                            formButtonHTML(this, false);
+                        // });
+                    }, 500);
+                    }
                 }
+            }else{
+                showNotification("danger", "You must have at least one or more row input data.");
             }
-        }else{
-            showNotification("danger", "You must have at least one or more row input data.");
-        }
 	});
 	// ----- END CLICK BUTTON SUBMIT -----
 
 
     // ----- GET PROJECT BOARD DATA -----
-    const getProjectBoardData = (materialWithdrawalID = 0, method = "save",materialRequestID =0,equipmentBorrowingID  =0) => {
+    const getProjectBoardData = (materialWithdrawalID = 0, method = "save",materialRequestID =0,stockOutID =0) => {
         let data = {
-            equipmentBorrowingID,
+            stockOutID,
             materialWithdrawalID,
             timelineManagementStatus: method == "save" ? 0 : (method == "submit" ? 2 : 1),
             materialRequestID : materialRequestID,
-            assets: []
+            items: []
         };
 
        
 
-        $(`[name="barcodeAsset"]`).each(function(i) {
+        $(`[name="barcodeItem"]`).each(function(i) {
             $parent = $(this).closest("tr");
             const index = $(this).attr("index");
-            const assetID = $(this).attr("assetID");
+            const itemID = $(this).attr("itemID");
             const getmaterialRequestID = $(this).attr("materialRequestID");
 
-            const barcode = $(`[name="barcodeAsset"][assetID="${assetID}"][index="${index}"]`).val().replaceAll(",","");
-            const borrowed = $(`.input-quantity[name="borrowed"][assetID="${assetID}"][index="${index}"]`).val().replaceAll(",","");
-            const availableStocks = $(`[name="availableStocks"][assetID="${assetID}"][index="${index}"]`).val().replaceAll(",","");
-            const remainingAsset = $(`[name="remaining"][assetID="${assetID}"][index="${index}"]`).text().replaceAll(",","");;
-            var borrowedDate = $(`[name="borrowedDate"][assetID="${assetID}"][index="${index}"]`).text() || "";
+            const barcode = $(`[name="barcodeItem"][itemID="${itemID}"][index="${index}"]`).val().replaceAll(",","");
+            const stockOut = $(`.input-quantity[name="StockOut"][itemID="${itemID}"][index="${index}"]`).val().replaceAll(",","");
+            const availableStocks = $(`[name="availableStocks"][itemID="${itemID}"][index="${index}"]`).val().replaceAll(",","");
+            const remainingItem = $(`[name="remaining"][itemID="${itemID}"][index="${index}"]`).text().replaceAll(",","");;
+            var stockOutDate = $(`[name="stockOutDate"][itemID="${itemID}"][index="${index}"]`).text() || "";
 
-            if(borrowedDate != "-"){
-                borrowedDate = moment($(`[name="borrowedDate"][assetID="${assetID}"][index="${index}"]`).text()).format("YYYY-MM-DD");
+            if(stockOutDate != "-"){
+                stockOutDate = moment($(`[name="stockOutDate"][itemID="${itemID}"][index="${index}"]`).text()).format("YYYY-MM-DD");
             }else{
-                borrowedDate = "";
+                stockOutDate = "";
             }
 
             if(barcode !=""){
-            let requestAssetData			= getTableData("ims_request_assets_tbl", "", `materialRequestID = '${getmaterialRequestID}' AND assetID = '${assetID}'`,`inventoryValidationID IS NOT NULL AND bidRecapID IS NULL`);
-            let tableData 				= requestAssetData[0];
-            // if(requestAssetData.length !=0){
-            let requestAssetID  = tableData.requestAssetID ;
-            let costEstimateID = tableData.costEstimateID;
-            let billMaterialID = tableData.billMaterialID;
-            let materialRequestID = tableData.materialRequestID;
-            let inventoryValidationID = tableData.inventoryValidationID;
-            let bidRecapID = tableData.bidRecapID;
-            let purchaseRequestID = tableData.purchaseRequestID;
-            let purchaseOrderID = tableData.purchaseOrderID;
-            let changeRequestID = tableData.changeRequestID;
-            let inventoryReceivingID = tableData.inventoryReceivingID;
-            let inventoryVendorID = tableData.inventoryVendorID;
-            let inventoryVendorCode = tableData.inventoryVendorCode;
-            let inventoryVendorName = tableData.inventoryVendorName;
-            let finalQuoteRemarks = tableData.finalQuoteRemarks;
-            let milestoneBuilderID = tableData.milestoneBuilderID;
-            let phaseDescription = tableData.phaseDescription;
-            let milestoneListID = tableData.milestoneListID;
-            let projectMilestoneID = tableData.projectMilestoneID;
-            let projectMilestoneName = tableData.projectMilestoneName;
-            let assetCode = tableData.assetCode;
-            let assetBrandName = tableData.assetBrandName;
-            let assetName = tableData.assetName;
-            let assetClassification = tableData.assetClassification;
-            let assetCategory = tableData.assetCategory;
-            let assetUom = tableData.assetUom;
-            let assetDescription = tableData.assetDescription;
-            let files = tableData.files;
-            let remarks = tableData.remarks;
-            let requestQuantity = tableData.requestQuantity;
-
+                let requestItemData			= getTableData("ims_request_items_tbl", "", `materialRequestID = '${getmaterialRequestID}' AND itemID = '${itemID}'`,`inventoryValidationID IS NOT NULL AND bidRecapID IS NULL`);
+                let tableData 				= requestItemData[0];
+                // if(requestItemData.length !=0){
+                let requestItemID  = tableData.requestItemID ;
+                let costEstimateID = tableData.costEstimateID;
+                let billMaterialID = tableData.billMaterialID;
+                let materialRequestID = tableData.materialRequestID;
+                let inventoryValidationID = tableData.inventoryValidationID;
+                let bidRecapID = tableData.bidRecapID;
+                let purchaseRequestID = tableData.purchaseRequestID;
+                let purchaseOrderID = tableData.purchaseOrderID;
+                let changeRequestID = tableData.changeRequestID;
+                let inventoryReceivingID = tableData.inventoryReceivingID;
+                let inventoryVendorID = tableData.inventoryVendorID;
+                let inventoryVendorCode = tableData.inventoryVendorCode;
+                let inventoryVendorName = tableData.inventoryVendorName;
+                let finalQuoteRemarks = tableData.finalQuoteRemarks;
+                let milestoneBuilderID = tableData.milestoneBuilderID;
+                let phaseDescription = tableData.phaseDescription;
+                let milestoneListID = tableData.milestoneListID;
+                let projectMilestoneID = tableData.projectMilestoneID;
+                let projectMilestoneName = tableData.projectMilestoneName;
+                let itemCode = tableData.itemCode;
+                let itemBrandName = tableData.itemBrandName;
+                let itemName = tableData.itemName;
+                let itemClassification = tableData.itemClassification;
+                let itemCategory = tableData.itemCategory;
+                let itemUom = tableData.itemUom;
+                let itemDescription = tableData.itemDescription;
+                let files = tableData.files;
+                let remarks = tableData.remarks;
+                let requestQuantity = tableData.requestQuantity;
     
-            let reservedAsset    = tableData.reservedAsset;
-            let forPurchase 	=tableData.forPurchase;				
-
-
-            // }
-
-            const temp = {
-                materialWithdrawalID,
-                borrowed,
-                remainingAsset,
-                borrowedDate,
-                requestAssetID,
-                costEstimateID,
-                billMaterialID,
-                materialRequestID,
-                inventoryValidationID,
-                bidRecapID,
-                purchaseRequestID,
-                purchaseOrderID,
-                changeRequestID,
-                inventoryReceivingID,
-                inventoryVendorID,
-                inventoryVendorCode,
-                inventoryVendorName,
-                finalQuoteRemarks,
-                milestoneBuilderID,
-                phaseDescription,
-                milestoneListID,
-                projectMilestoneID,
-                projectMilestoneName,
-                assetID,
-                assetCode,
-                assetBrandName,
-                assetName,
-                assetClassification,
-                assetCategory,
-                assetUom,
-                assetDescription,
-                files,
-                remarks,
-                requestQuantity,
-                reservedAsset,
-                forPurchase,
-                barcode,
-                availableStocks,
-                serials:[]
-            };
-
-            $(`td .serial-number-table tbody > tr`, $parent).each(function(i) {
-               let serialAssetNumber = $(this).find(`[name="serialAssetNumber"]`,this).val()?.trim();
-
-              
-                let serial = {
-                    equipmentBorrowingID  :equipmentBorrowingID ,
-                    materialWithdrawalID : materialWithdrawalID,
-                    materialRequestID : getmaterialRequestID,
-                    assetID:       assetID,
-                    serialAssetNumber
+        
+                let reservedItem    = tableData.reservedItem;
+                let forPurchase 	=tableData.forPurchase;				
+    
+    
+                // }
+    
+                const temp = {
+                    materialWithdrawalID,
+                    stockOut,
+                    remainingItem,
+                    stockOutDate,
+                    requestItemID,
+                    costEstimateID,
+                    billMaterialID,
+                    materialRequestID,
+                    inventoryValidationID,
+                    bidRecapID,
+                    purchaseRequestID,
+                    purchaseOrderID,
+                    changeRequestID,
+                    inventoryReceivingID,
+                    inventoryVendorID,
+                    inventoryVendorCode,
+                    inventoryVendorName,
+                    finalQuoteRemarks,
+                    milestoneBuilderID,
+                    phaseDescription,
+                    milestoneListID,
+                    projectMilestoneID,
+                    projectMilestoneName,
+                    itemID,
+                    itemCode,
+                    itemBrandName,
+                    itemName,
+                    itemClassification,
+                    itemCategory,
+                    itemUom,
+                    itemDescription,
+                    files,
+                    remarks,
+                    requestQuantity,
+                    reservedItem,
+                    forPurchase,
+                    barcode,
+                    availableStocks,
+                    serials:[]
                 };
+    
+                $(`td .serial-number-table tbody > tr`, $parent).each(function(i) {
+                   let serialItemNumber = $(this).find(`[name="serialItemNumber"]`,this).val()?.trim();
+    
+                  
+                    let serial = {
+                        stockOutID :stockOutID,
+                        materialWithdrawalID : materialWithdrawalID,
+                        materialRequestID : getmaterialRequestID,
+                        itemID:       itemID,
+                        serialItemNumber
+                    };
+    
+                temp.serials.push(serial);
+    
+                })
+              
+                data.items.push(temp);
+            }
 
-            temp.serials.push(serial);
-
-            })
-          
-            data.assets.push(temp);
-        }
+       
         })
 
         // console.log(data)
@@ -1745,7 +1755,7 @@ $(document).ready(function() {
 
     // ----- DATABASE RELATION -----
     const getConfirmation = method => {
-        const title = "Equipment Borrowing";
+        const title = "Stock Out";
         let swalText, swalImg;
 
         switch (method) {
@@ -1810,7 +1820,7 @@ $(document).ready(function() {
         })
     }
 
-    function saveProjectBoard(method = "update", id = 0, callback = null,materialRequestID =0,equipmentBorrowingID =0) {
+    function saveProjectBoard(method = "update", id = 0, callback = null,materialRequestID =0,stockOutID=0) {
         const confirmation = getConfirmation(method);
         confirmation.then(res => {
             if (res.isConfirmed) {
@@ -1825,12 +1835,12 @@ $(document).ready(function() {
                     });
                 } else {
 
-                    const data = getProjectBoardData(id, method,materialRequestID,equipmentBorrowingID );
+                    const data = getProjectBoardData(id, method,materialRequestID,stockOutID);
                     // console.log(data)
                     // return false;
                     $.ajax({
                         method:      "POST",
-                        url:         `Equipment_borrowing/saveProjectBoard`,
+                        url:         `Stock_out/saveProjectBoard`,
                         data,
                         cache:       false,
                         async:       false,
@@ -1848,19 +1858,19 @@ $(document).ready(function() {
     
                             let swalTitle;
                             if (method == "submit") {
-                                swalTitle = `Equipment Borrowing Form submitted successfully!`;
+                                swalTitle = `Stock Out Form submitted successfully!`;
                             } else if (method == "save") {
-                                swalTitle = `Equipment Borrowing Form saved successfully!`;
+                                swalTitle = `Stock Out Form saved successfully!`;
                             } else if (method == "cancelform") {
-                                swalTitle = `${getFormCode("EBF", dateCreated, insertedID)} cancelled successfully!`;
+                                swalTitle = `${getFormCode("STO", dateCreated, insertedID)} cancelled successfully!`;
                             } else if (method == "approve") {
-                                swalTitle = `${getFormCode("EBF", dateCreated, insertedID)} approved successfully!`;
+                                swalTitle = `${getFormCode("STO", dateCreated, insertedID)} approved successfully!`;
                             } else if (method == "deny") {
-                                swalTitle = `${getFormCode("EBF", dateCreated, insertedID)} denied successfully!`;
+                                swalTitle = `${getFormCode("STO", dateCreated, insertedID)} denied successfully!`;
                             } else if (method == "drop") {
-                                swalTitle = `${getFormCode("EBF", dateCreated, insertedID)} dropped successfully!`;
+                                swalTitle = `${getFormCode("STO", dateCreated, insertedID)} dropped successfully!`;
                             } else if (method == "update") {
-                                swalTitle = `${getFormCode("EBF", dateCreated, insertedID)} updated successfully!`;
+                                swalTitle = `${getFormCode("STO", dateCreated, insertedID)} updated successfully!`;
                             }
             
                             if (isSuccess == "true") {

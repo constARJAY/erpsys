@@ -54,14 +54,18 @@ class Employee_taskboard extends CI_Controller {
     }
     public function autoSavedHeader(){
 
-   
+      // echo "<pre>";
+      // print_r($this->input->post("task"));
+      // exit;
+
        $array_task = $this->input->post("task");
        $label = $this->input->post("label");
+       $generateProejctData = $this->input->post("generateProejctData");
        $data = [];
        $taskBoardID ="";
-       foreach($array_task as $value){
+      foreach($array_task as $value){
         $taskID = $value["taskID"];
-        $taskBoardID = $value["taskBoardID"];
+        if($generateProejctData != "save"){$taskBoardID = $value["taskBoardID"];}
         $projectMilestoneID = $value["projectMilestoneID"];
         $timelineBuilderID = $value["timelineBuilderID"];
         $milestoneBuilderID = $value["milestoneBuilderID"];
@@ -76,8 +80,8 @@ class Employee_taskboard extends CI_Controller {
         $taskNotes = $value["taskNotes"];
         $taskDescription = $value["taskDescription"];
 
-           
-        $data = array(
+        if($generateProejctData == "save"){
+          $temp = [
             "taskID"        => $taskID,
             "projectMilestoneID"        => $projectMilestoneID,
             "timelineBuilderID"        => $timelineBuilderID,
@@ -92,18 +96,33 @@ class Employee_taskboard extends CI_Controller {
             "taskStatus"                => $taskStatus,
             "taskNotes"                => $taskNotes,
             "taskDescription"                => $taskDescription
-        );
-          
+          ];
+
+          array_push($data, $temp);
+        }else{
+          $data = array(
+            "taskID"        => $taskID,
+            "projectMilestoneID"        => $projectMilestoneID,
+            "timelineBuilderID"        => $timelineBuilderID,
+            "milestoneBuilderID"        => $milestoneBuilderID,
+            "taskName"                   => $taskName,
+            "taskUsedHours"       => $taskUsedHours,
+            "taskStartDates"                 => $taskStartDates,
+            "taskEndDates"         => $taskEndDates,
+            "taskPriority"                => $taskPriority,
+            "taskSeverity"                => $taskSeverity,
+            "taskTimeLeft"                => $taskTimeLeft,
+            "taskStatus"                => $taskStatus,
+            "taskNotes"                => $taskNotes,
+            "taskDescription"                => $taskDescription
+          );
+        }
       
-         
-       }
-       
+      }
         
-        
-       $data = $this->employee_taskboard->autoSavedHeader($data,$taskBoardID,$label);
+      $data = $this->employee_taskboard->autoSavedHeader($data,$taskBoardID,$label, $generateProejctData);
       
-  //  print_r($data);
-         echo json_encode($data);
+      echo json_encode($data);
     }
 
     public function autoSavedSubtask(){
@@ -290,6 +309,35 @@ class Employee_taskboard extends CI_Controller {
     $data = $this->employee_taskboard->updateAssignee($subtaskboardID,$sendData,$label);
 
       echo json_encode($data);
+}
+
+public function updateEmployeeTaskStatus(){
+
+  //  echo "<pre>";
+  //  print_r($_POST);
+  //  exit;
+  $taskBoardID          =  $this->input->post('taskBoardID');
+  $timelineBuilderID          =  $this->input->post('timelineBuilderID');
+  $projectMilestoneID          =  $this->input->post('projectMilestoneID');
+  $taskID          =  $this->input->post('taskID');
+  $employeeID          =  $this->input->post('employeeID');
+  $employeeTaskStatus          =  $this->input->post('employeeTaskStatus');
+  $sessionID          =  $this->input->post('sessionID');
+
+
+  $data = array(
+    "taskboardID" => $taskBoardID,
+    "timelineBuilderID" => $timelineBuilderID,
+    "projectMilestoneID" => $projectMilestoneID,
+    "taskID" =>$taskID,
+    "employeeID" =>$employeeID,
+    "employeeTaskStatus" =>$employeeTaskStatus,
+    "createdBy" =>$sessionID,
+  );
+
+  $data = $this->employee_taskboard->updateEmployeeTaskStatus($data,$taskBoardID,$employeeID);
+
+    echo json_encode($data);
 }
 
 }

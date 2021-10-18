@@ -40,7 +40,7 @@ const employeeFullname = (id) => {
 // ----- IS DOCUMENT REVISED -----
 function isDocumentRevised(id = null) {
 	if (id) {
-		const revisedDocumentsID = getTableData("ims_inventory_receiving_tbl", "reviseInventoryReceivingID", "reviseInventoryReceivingID IS NOT NULL");
+		const revisedDocumentsID = getTableData("ims_inventory_receiving_tbl", "reviseInventoryReceivingID", "reviseInventoryReceivingID IS NOT NULL AND inventoryReceivingStatus !=4");
 		return revisedDocumentsID.map(item => item.reviseInventoryReceivingID).includes(id);
 	}
 	return false;
@@ -345,6 +345,7 @@ function forApprovalContent() {
             purchaseOrderCode,
 			projectCode,
 			projectName,
+			clientCode,
 			clientName,
 		} = item;
 
@@ -377,7 +378,12 @@ function forApprovalContent() {
 					</div>
 					<small style="color:#848482;">${projectName || ''}</small>
 				</td>
-				<td>${clientName}</td>
+				<td>
+					<div>
+						${clientCode || '-'}
+					</div>
+					<small style="color:#848482;">${clientName || ''}</small>
+				</td>
 				<td>
 					${employeeFullname(getCurrentApprover(approversID, approversDate, inventoryReceivingStatus, true))}
 				</td>
@@ -435,11 +441,12 @@ function myFormsContent() {
 			fullname,
 			inventoryReceivingID,
 			dateCreatedRI,
+			projectCode,
 			projectName,
+			clientCode,
 			clientName,
 			approversID,
 			approversDate,
-			projectCode,
 			inventoryReceivingStatus,
 			inventoryReceivingRemarks,
 			inventoryReceivingReason,
@@ -477,7 +484,12 @@ function myFormsContent() {
 				</div>
 				<small style="color:#848482;">${projectName || ''}</small>
 			</td>
-			<td>${clientName}</td>
+			<td>
+				<div>
+					${clientCode || '-'}
+				</div>
+				<small style="color:#848482;">${clientName || ''}</small>
+			</td>
 			<td>
 				${employeeFullname(getCurrentApprover(approversID, approversDate, inventoryReceivingStatus, true))}
 			</td>
@@ -525,7 +537,8 @@ function formButtons(data = false, isRevise = false, isFromCancelledDocument = f
 					id="btnSubmit" 
 					inventoryReceivingID="${encryptString(inventoryReceivingID)}"
 					code="${getFormCode("INR", createdAt, inventoryReceivingID)}"
-					revise="${isRevise}" cancel="${isFromCancelledDocument}"><i class="fas fa-paper-plane"></i>
+					revise="${isRevise}" 
+					cancel="${isFromCancelledDocument}"><i class="fas fa-paper-plane"></i>
 					Submit
 				</button>`;
 
@@ -536,7 +549,8 @@ function formButtons(data = false, isRevise = false, isFromCancelledDocument = f
 						id="btnCancel"
 						inventoryReceivingID="${encryptString(inventoryReceivingID)}"
 						code="${getFormCode("INR", createdAt, inventoryReceivingID)}"
-						revise="${isRevise}" cancel="${isFromCancelledDocument}"><i class="fas fa-ban"></i> 
+						revise="${isRevise}" 
+						cancel="${isFromCancelledDocument}"><i class="fas fa-ban"></i> 
 						Cancel
 					</button>`;
 				} else {
@@ -945,12 +959,13 @@ function getItemsRow(readOnly = false,inventoryReceivingID) {
 					<div>
 						<input 
 								type="text" 
-								class="form-control input-quantity receivedQuantity  record1111 text-center validate"
+								class="form-control input-quantity receivedQuantity  record1111 text-center validate  mb-0"
 								data-allowcharacters="[0-9]" 
 								min="0.01"
 								number="${index}"
 								quantity="${quantity}"
 								itemID="${itemID}"
+								data-allowcharacters="[0-9]"
 								id="receivedQuantity${index}"
 								name="receivedQuantity"  
 								value="${inventoryRequestID ? receivedquantity : ""}" 
@@ -1430,6 +1445,16 @@ function formContent(data = false, readOnly = false, isRevise = false, isFromCan
 		//initDataTables();
 		initAll();
 		updateSerialNumber();
+		// ----- NOT ALLOWED FOR UPDATE -----
+		if (!allowedUpdate) {
+			$("#page_content").find(`input, select, textarea`).each(function() {
+				if (this.type != "search") {
+					$(this).attr("disabled", true);
+				}
+			})
+			$('#btnBack').attr("status", "2");
+			$(`#btnSubmit, #btnRevise, #btnCancel, #btnCancelForm, .btnAddRow, .btnDeleteRow`).hide();
+		}
 		return html;
 	}, 300);
 }
@@ -1729,7 +1754,8 @@ $(document).on("click", ".btnView", function () {
 // ----- VIEW DOCUMENT -----
 $(document).on("click", "#btnRevise", function () {
 	const id = $(this).attr("inventoryReceivingID");
-	viewDocument(id, false, true);
+	const fromCancelledDocument = $(this).attr("cancel") == "true";
+	viewDocument(id, false, true, fromCancelledDocument);
 });
 // ----- END VIEW DOCUMENT -----
 
@@ -1809,28 +1835,17 @@ $(document).on("click", "#btnSave, #btnCancel", function () {
 		const isFromCancelledDocument = $(this).attr("cancel") == "true";
 		const revise   = $(this).attr("revise") == "true";
 		const feedback = $(this).attr("code") || getFormCode("INR", dateToday(), id);
-		const action   = revise && "insert" || (id && feedback ? "update" : "insert");
+		const action   = revise && !isFromCancelledDocument && "insert" || (id ? "update" : "insert");
+		//const action   = revise && "insert" || (id && feedback ? "update" : "insert");
 		const data     = getInventoryReceivingData(action, "save", "0", id);
-		data["inventoryReceivingStatus"] = 0;
+		// data["inventoryReceivingStatus"] = 0;
 		data.append("inventoryReceivingStatus", 0);
 		
 		if (revise) {
-			// data["reviseInventoryReceivingID"] = id;
-			// delete data["inventoryReceivingID"];
-
 			if (!isFromCancelledDocument) {
-				data["reviseInventoryReceivingID"] = id;
-				delete data["inventoryReceivingID"];
-
 				data.append("reviseInventoryReceivingID", id);
 				data.delete("inventoryReceivingID");
 			} else {
-				// delete data["inventoryReceivingID"];
-
-				data["inventoryReceivingID"] = id;
-				delete data["action"];
-				data["action"] = update;
-
 				data.append("inventoryReceivingID", id);
 				data.delete("action");
 				data.append("action", "update");
@@ -1940,6 +1955,7 @@ $(document).on("click", "#btnSubmit", function () {
 	const validateDuplicateSerial  = $("[name=serialNumber]").hasClass("is-invalid") ;
 	const receivedQuantity  = $("[name=receivedQuantity]").hasClass("is-invalid") ;
 	const validateSerialMessage  = $(".invalid-feedback").text() ;
+	//const revise        = $(this).attr("revise") == "true";
 	//let condition = $("[name=receivedQuantity]").hasClass("is-invalid");
 	// console.log("validateDuplicateSerial: "+ validateDuplicateSerial)
 	// if(!validateDuplicateSerial || validateSerialMessage != "Data already exist!"){
@@ -1953,16 +1969,16 @@ $(document).on("click", "#btnSubmit", function () {
 			removeIsValid("#tableInventoryReceived");
 			if(validate){
 				const id             = decryptString($(this).attr("inventoryReceivingID"));
+				const isFromCancelledDocument = $(this).attr("cancel") == "true";
 				const revise         = $(this).attr("revise") == "true";
-				const action = revise && "insert" || (id ? "update" : "insert");
+				const action = revise && !isFromCancelledDocument && "insert" || (id ? "update" : "insert");
 				const data   = getInventoryReceivingData(action, "submit", "1", id);
-				// console.log(data["approversID"])
 				if (revise) {
-					data["reviseInventoryReceivingID"] = id;
-					delete data["inventoryReceivingID"];
+					if (!isFromCancelledDocument) {
 
-					data.append("reviseInventoryReceivingID", id);
-					data.delete("inventoryReceivingID");
+						data.append("reviseInventoryReceivingID", id);
+						data.delete("inventoryReceivingID");
+					}
 				}
 	
 				let approversID = "", approversDate = "";
@@ -2106,7 +2122,7 @@ $(document).on("click", "#btnReject", function () {
 	</div>
 	<div class="modal-footer text-right">
 		<button class="btn btn-danger px-5 p-2" id="btnRejectConfirmation"
-		inventoryReceivingID="${id}"
+		inventoryReceivingID="${encryptString(id)}"
 		code="${feedback}"><i class="far fa-times-circle"></i> Deny</button>
 		<button class="btn btn-cancel btnCancel px-5 p-2" data-dismiss="modal"><i class="fas fa-ban"></i> Cancel</button>
 	</div>`;
@@ -2162,12 +2178,12 @@ $(document).on("click", "#btnRejectConfirmation", function () {
 
 // ----- DROP DOCUMENT -----
 $(document).on("click", "#btnDrop", function() {
-	const inventoryReceivingID = decryptString($(this).attr("inventoryReceivingID"));
+	//const inventoryReceivingID = decryptString($(this).attr("inventoryReceivingID"));
 	const feedback          = $(this).attr("code") || getFormCode("TR", dateToday(), id);
 
 	const id = decryptString($(this).attr("inventoryReceivingID"));
 	let data = new FormData;
-	data.append("inventoryReceivingID", inventoryReceivingID);
+	data.append("inventoryReceivingID", id);
 	data.append("action", "update");
 	data.append("method", "drop");
 	data.append("updatedBy", sessionID);

@@ -696,7 +696,7 @@ $(document).ready(function () {
                         <tbody class="">`;
 
 		let ItemData	= getUnionTableData(`
-											SELECT id, itemCode,recordCode AS referenceCode, recordID, employeeID, requestName, itemID, itemCode, name_Brand, IFNULL(classification_category,'') AS classification_category, quantity, SUM(remaining) AS remaining, Brand, itemName, classificationName, categoryName
+											SELECT id, itemCode,recordCode AS referenceCode, recordID, employeeID, requestName, itemID, itemCode, name_Brand, IFNULL(classification_category,'') AS classification_category, quantity, SUM(remaining) AS remaining, Brand, itemName, classificationName, categoryName,uom
 											FROM
 											(
 											SELECT
@@ -714,7 +714,8 @@ $(document).ready(function () {
 												CONCAT(itemName,' / ',brand) AS name_Brand,
 												CONCAT(classificationName,' / ',categoryName) AS classification_category,
 												sum(receivedQuantity) AS quantity,
-												0 AS remaining
+												0 AS remaining,
+												uom
 											FROM ims_return_item_tbl AS ri
 											LEFT JOIN ims_inventory_request_details_tbl AS ird ON ri.returnItemID = ird.returnItemID
 											LEFT JOIN hris_employee_list_tbl AS empl ON ri.employeeID = empl.employeeID
@@ -736,7 +737,8 @@ $(document).ready(function () {
 												CONCAT(itemName,' / ',brand) AS name_Brand,
 												CONCAT(classificationName,' / ',categoryName) AS classification_category,
 												sum(unused) AS quantity,
-												0 AS remaining
+												0 AS remaining,
+												uom
 											FROM ims_material_usage_tbl AS muf
 											LEFT JOIN ims_inventory_request_details_tbl AS ird ON muf.materialUsageID = ird.materialUsageID
 											LEFT JOIN hris_employee_list_tbl AS empl ON muf.employeeID = empl.employeeID
@@ -758,7 +760,8 @@ $(document).ready(function () {
 												CONCAT(itemName,' / ',brand) AS name_Brand,
 												CONCAT(classificationName,' / ',categoryName) AS classification_category,
 												sum(receivedQuantity) AS quantity,
-												0 AS remaining
+												0 AS remaining,
+												uom
 												FROM ims_inventory_receiving_tbl AS inr
 												LEFT JOIN ims_inventory_request_details_tbl AS ird ON inr.inventoryReceivingID = ird.inventoryReceivingID
 												LEFT JOIN hris_employee_list_tbl AS empl ON inr.employeeID = empl.employeeID
@@ -780,7 +783,8 @@ $(document).ready(function () {
 												NULL AS name_Brand,
 												NULL AS classification_category,
 												0 AS quantity,
-												sum(quantityForStockin) AS remaining
+												sum(quantityForStockin) AS remaining,
+												NULL AS uom
 											FROM ims_stock_in_item_tbl 
 											WHERE inventoryCode = '${consolidateCode}'
 											GROUP BY itemID
@@ -800,7 +804,8 @@ $(document).ready(function () {
 												NULL AS name_Brand,
 												NULL AS classification_category,
 												0 AS quantity,
-												sum(quantityForStockin) AS remaining
+												sum(quantityForStockin) AS remaining,
+												NULL AS uom
 											FROM ims_stock_in_assets_tbl 
 											WHERE inventoryCode = '${consolidateCode}'
 											GROUP BY itemID
@@ -852,7 +857,7 @@ $(document).ready(function () {
 										classificationCategory="${item.classification_category}"
 										quantityRequest="${item.quantity}"
 										remaining="${parseFloat((item.quantity) - (item.remaining)).toFixed(2)}"
-										UOM="pack">
+										UOM="${item.uom}">
 										<i class="fas fa-pencil-alt"></i>Record
 									</a>`; 
 						}
@@ -1575,7 +1580,7 @@ $(document).ready(function () {
 			// $(".quantity").each(function () {
 			// 	ForStockin.push($(this).val());
 			// });
-			// console.log(ForStockin);
+			//console.log(ForStockin);
 			$(".inventoryStorageID").each(function () {
 				inventoryStorageID.push($(this).val());
 			});

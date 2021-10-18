@@ -522,8 +522,11 @@ class Inventory_validation extends CI_Controller {
             }
 
             if(!empty($items) || !empty($assets)){
+                $clientName  = $this->input->post("clientName") == "null" ? NULL : $this->input->post("clientName"); 
+                $clientCode  = $this->input->post("clientCode") == "null" ? NULL : $this->input->post("clientCode") == "null"; 
                 $dateNeededHeader  = $this->input->post("dateNeeded") == "null" ? NULL : $this->input->post("dateNeeded");  
                 $createdBy  = $this->input->post("createdBy") == "null" ? NULL : $this->input->post("createdBy"); 
+                
                 $dataMaterialWithdrawalDocument =[
                     'inventoryValidationID' => $inventoryValidationID,
                     'inventoryValidationCode' => $inventoryValidationCode,
@@ -562,6 +565,8 @@ class Inventory_validation extends CI_Controller {
 
 
                         if(!empty($items)){
+                            $clientName  = $this->input->post("clientName") == "null" ? NULL : $this->input->post("clientName"); 
+                            $clientCode  = $this->input->post("clientCode") == "null" ? NULL : $this->input->post("clientCode") == "null"; 
                             $dateNeededHeader  = $this->input->post("dateNeeded") == "null" ? NULL : $this->input->post("dateNeeded");  
                             $createdBy  = $this->input->post("createdBy") == "null" ? NULL : $this->input->post("createdBy"); 
                             $dataStockOutDocument =[
@@ -596,6 +601,8 @@ class Inventory_validation extends CI_Controller {
                         }
 
                         if(!empty($assets)){
+                            $clientName  = $this->input->post("clientName") == "null" ? NULL : $this->input->post("clientName"); 
+                            $clientCode  = $this->input->post("clientCode") == "null" ? NULL : $this->input->post("clientCode") == "null"; 
                             $dateNeededHeader  = $this->input->post("dateNeeded") == "null" ? NULL : $this->input->post("dateNeeded");  
                             $createdBy  = $this->input->post("createdBy") == "null" ? NULL : $this->input->post("createdBy"); 
                             $dataEquipmentBorrowingDocument =[

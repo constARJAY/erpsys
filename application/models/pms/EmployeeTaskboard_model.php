@@ -353,28 +353,40 @@ class EmployeeTaskboard_model extends CI_Model {
       
     }
 
-    public function autoSavedHeader($data,$taskBoardID,$label=null){
+    public function autoSavedHeader($data,$taskBoardID,$label=null,$generateProejctData = ""){
     //    echo($taskBoardID);
+        $get_insertID = [];
+        if($generateProejctData == "save"){
 
-        if ($data && count($data) > 0) {
-          
-            if($taskBoardID){
-                $this->logHistory($label,$data, $taskBoardID,"");
-                // $query = $this->db->update('pms_employeetaskoard_tbl', $data, array('taskBoardID' => $taskBoardID));
-                $this->db->where('taskBoardID', $taskBoardID);
-                $query = $this->db->update('pms_employeetaskoard_tbl', $data);
-                $insertID = $taskBoardID;
-            }else{
-                $query = $this->db->insert("pms_employeetaskoard_tbl", $data);
+            for($loop = 0; $loop<count($data); $loop++){
+
+                $query = $this->db->insert("pms_employeetaskoard_tbl", $data[$loop]);
                 $insertID = $this->db->insert_id();
-                $this->logHistory($label,$data, $insertID,"");
-            } 
-
-                
-
-            return $query ? $insertID : "false|System error: Please contact the system administrator for assistance!";
-
+               
+               $get_insertID[$loop]= $insertID;
+            //    $temp = [$loop];
+            //    array_push($get_insertID ,$temp);
+            }
+            return $get_insertID;
+        }else{
+            if ($data && count($data) > 0) {
+            
+                if($taskBoardID){
+                    $this->logHistory($label,$data, $taskBoardID,"");
+                    // $query = $this->db->update('pms_employeetaskoard_tbl', $data, array('taskBoardID' => $taskBoardID));
+                    $this->db->where('taskBoardID', $taskBoardID);
+                    $query = $this->db->update('pms_employeetaskoard_tbl', $data);
+                    $insertID = $taskBoardID;
+                }else{
+                    $query = $this->db->insert("pms_employeetaskoard_tbl", $data);
+                    $insertID = $this->db->insert_id();
+                    $this->logHistory($label,$data, $insertID,"");
+                } 
+                return $query ? $insertID : "false|System error: Please contact the system administrator for assistance!";
+            }
         }
+
+        
     }
 
     public function autoSavedSubtask($data,$subtaskboardID,$label=null) {
@@ -490,6 +502,20 @@ class EmployeeTaskboard_model extends CI_Model {
 
             return $query ? true : "false|System error: Please contact the system administrator for assistance!";
 
+        }
+    }
+
+    public function updateEmployeeTaskStatus($data,$taskBoardID,$employeeID) {
+
+        $this->db->query("DELETE FROM pms_employee_taskboard_status_tbl WHERE taskboardID = $taskBoardID AND employeeID = $employeeID ");
+
+        if (count($data) > 0) {
+          
+                $query = $this->db->insert('pms_employee_taskboard_status_tbl', $data);
+                // $insertID = $subtaskboardID;
+                // $this->logHistory($label,$passListAssignee,"",$subtaskboardID);
+
+            return $query ? true : "false|System error: Please contact the system administrator for assistance!";
         }
     }
 

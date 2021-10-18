@@ -254,6 +254,7 @@ class MaterialWithdrawal_model extends CI_Model {
             $output["submittedAt"] = $details->submittedAt;
             $output["createdAt"] = $details->createdAt;
             $output["createdBy"] = $details->createdBy;
+            $output["dateNeeded"] = $details->dateNeeded;
             $output["materialWithdrawalReason"] = $details->materialWithdrawalReason;
             $output["materialWithdrawalRemarks"] = $details->materialWithdrawalRemarks;
 
@@ -287,13 +288,11 @@ class MaterialWithdrawal_model extends CI_Model {
         return $query ? true : false;
     }
 
+
     public function saveProjectBoard($materialWithdrawalID = 0, $dataItem =[] ,$dataAsset = [],$sessionID,$statusItemFlag = false,$statusAssetFlag = false,$getItemID = 0,$getAssetID = 0,$inventoryValidationID = 0)
     {
 
-       
-
-     
-      
+    
         // $delete = $this->deleteProjectBoard($timelineBuilderID);
         // $update = $this->updateProjectBuilder($timelineBuilderID, $timelineManagementStatus);
         if ($dataItem && count($dataItem) > 0) {
@@ -339,6 +338,9 @@ class MaterialWithdrawal_model extends CI_Model {
         }
 
         if(($dataItem && count($dataItem) > 0) || $dataAsset && count($dataAsset) > 0){
+        $updateHeaderStatus = false;
+        $updateFooterStatus = false;
+
 
             if($statusItemFlag == true){
                   // START UPDATE THE STOCK OUT AL ITEM STATUS//
@@ -347,24 +349,8 @@ class MaterialWithdrawal_model extends CI_Model {
                     SET withdrawalItemStatus = 1
                     WHERE materialWithdrawalID = $materialWithdrawalID AND itemID = $getItemID[$loop1]");
                     }
-                    
                     // END UPDATE THE STOCK OUT ALL ITEM STATUS//
-
-                    // START UPDATE THE STATUS OF ITEM AND ASSET IN HEADER OF MATERIAL WITHDRAWAL FORMS//
-                    $sqlCountItems = $this->db->query("SELECT COUNT(requestItemID) as totalValidationItems 
-                    FROM ims_request_items_tbl WHERE inventoryValidationID = $inventoryValidationID AND bidRecapID IS NULL");
-                    
-                    $sqlItems = $this->db->query("SELECT  COUNT(DISTINCT(itemID)) as totalCompletedItems
-                    FROM ims_material_withdrawal_item_tbl  WHERE materialWithdrawalID = $materialWithdrawalID AND withdrawalItemStatus =1");
-                    
-
-                    if(floatVal($sqlCountItems->row()->totalValidationItems) === floatVal($sqlItems->row()->totalCompletedItems)){
-                    
-                        $this->db->set('inventoryItemStatus', '9');
-                        $this->db->where('materialWithdrawalID', $materialWithdrawalID);
-                        $this->db->update('ims_material_withdrawal_tbl');
-                    
-                    }
+                    $updateFooterStatus = true;
             }
 
             if($statusAssetFlag == true){
@@ -374,14 +360,35 @@ class MaterialWithdrawal_model extends CI_Model {
                     SET withdrawalAssetStatus = 1
                     WHERE materialWithdrawalID = $materialWithdrawalID AND assetID = $getAssetID[$loop2]");
                 }
-                  
-                  // END UPDATE THE STOCK OUT ALL ASSET STATUS//
+                // END UPDATE THE STOCK OUT ALL ASSET STATUS//
+                $updateFooterStatus = true;
+
+           }
+
+            // CHECK THE ALL ITEM STATUS IS COMPLETE ITEMS/ASSETS//
+            if($updateFooterStatus){
                 
+                $sqlCountItems = $this->db->query("SELECT COUNT(requestItemID) as totalValidationItems 
+                FROM ims_request_items_tbl WHERE inventoryValidationID = $inventoryValidationID AND bidRecapID IS NULL");
+                
+                $sqlItems = $this->db->query("SELECT  COUNT(DISTINCT(itemID)) as totalCompletedItems
+                FROM ims_material_withdrawal_item_tbl  WHERE materialWithdrawalID = $materialWithdrawalID AND withdrawalItemStatus =1");
+
+                if(floatVal($sqlCountItems->row()->totalValidationItems) === floatVal($sqlItems->row()->totalCompletedItems)){
+                                    
+                    $this->db->set('inventoryItemStatus', '9');
+                    $this->db->where('materialWithdrawalID', $materialWithdrawalID);
+                    $this->db->update('ims_material_withdrawal_tbl');
+
+                }
+
+
+
                 $sqlCountAssets = $this->db->query("SELECT COUNT(requestAssetID) as totalValidationAssets 
                 FROM ims_request_assets_tbl WHERE inventoryValidationID = $inventoryValidationID AND bidRecapID IS NULL");
     
-                $sqlAssets = $this->db->query("SELECT COUNT(DISTINCT(assetID)) totalCompletedAssets
-                FROM ims_material_withdrawal_asset_tbl WHERE materialWithdrawalID =$materialWithdrawalID ");
+                $sqlAssets = $this->db->query("SELECT COUNT(DISTINCT(assetID)) as totalCompletedAssets
+                FROM ims_material_withdrawal_asset_tbl WHERE materialWithdrawalID =$materialWithdrawalID  AND withdrawalAssetStatus =1");
     
                 if(floatVal($sqlCountAssets->row()->totalValidationAssets) === floatVal($sqlAssets->row()->totalCompletedAssets)){
     
@@ -391,13 +398,8 @@ class MaterialWithdrawal_model extends CI_Model {
                     $this->db->update('ims_material_withdrawal_tbl'); 
     
                 }
-           }
-
-           
-
-           
-
-            
+            }
+            // END CHECK THE ALL ITEM STATUS IS COMPLET ITEMS/ASSETS//            
 
     
 
